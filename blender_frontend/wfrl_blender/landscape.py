@@ -65,7 +65,13 @@ def terrain_shader(material):
         node.inputs['Roughness'].default_value = .72
         links.new(coord.outputs['Object'], node.inputs['Vector'])
         return node
-    broad = noise_node(.003, 2)
+    broad = noise_node(.0018, 2)
+    middle = noise_node(.012, 2)
+    habitat = nodes.new('ShaderNodeMixRGB')
+    habitat.name = 'WFRL.Terrain.Habitat'
+    habitat.inputs[0].default_value = .28
+    links.new(broad.outputs['Fac'], habitat.inputs[1])
+    links.new(middle.outputs['Fac'], habitat.inputs[2])
     ramp = nodes.new('ShaderNodeValToRGB')
     stops = [(.22, (.035,.12,.012,1)), (.42,(.12,.32,.025,1)),
              (.49,(.32,.38,.10,1)), (.56,(.72,.49,.21,1)),
@@ -75,7 +81,8 @@ def terrain_shader(material):
     for i,(position,color) in enumerate(stops):
         elem = ramp.color_ramp.elements[i] if i < 2 else ramp.color_ramp.elements.new(position)
         elem.position, elem.color = position,color
-    links.new(broad.outputs['Fac'], ramp.inputs[0])
+    ramp.color_ramp.interpolation = 'EASE'
+    links.new(habitat.outputs[0], ramp.inputs[0])
     fine = noise_node(.7, 3)
     mix = nodes.new('ShaderNodeMixRGB'); mix.blend_type = 'MULTIPLY'; mix.inputs[0].default_value=.30
     links.new(ramp.outputs['Color'], mix.inputs[1]); links.new(fine.outputs['Fac'], mix.inputs[2])
@@ -98,10 +105,12 @@ def terrain_shader(material):
     links.new(diffuse.outputs['Color'],tint.inputs[1]); links.new(ramp.outputs['Color'],tint.inputs[2])
     camera = nodes.new('ShaderNodeCameraData')
     depth = nodes.new('ShaderNodeMapRange')
-    depth.inputs['From Min'].default_value=1000; depth.inputs['From Max'].default_value=6500
-    depth.inputs['To Min'].default_value=0; depth.inputs['To Max'].default_value=.35
+    depth.name = 'WFRL.Terrain.DistanceHaze'
+    depth.interpolation_type = 'SMOOTHSTEP'
+    depth.inputs['From Min'].default_value=1400; depth.inputs['From Max'].default_value=9500
+    depth.inputs['To Min'].default_value=0; depth.inputs['To Max'].default_value=.50
     links.new(camera.outputs['View Distance'],depth.inputs['Value'])
-    haze=nodes.new('ShaderNodeMixRGB'); haze.inputs[2].default_value=(.14,.19,.23,1)
+    haze=nodes.new('ShaderNodeMixRGB'); haze.inputs[2].default_value=(.16,.21,.24,1)
     links.new(depth.outputs[0],haze.inputs[0]); links.new(tint.outputs[0],haze.inputs[1])
     links.new(haze.outputs[0],bsdf.inputs['Base Color'])
     rough=image_node('rough',True); links.new(rough.outputs[0],bsdf.inputs['Roughness'])
@@ -449,15 +458,11 @@ def build_landscape(collection):
     mesh('WFRL.Landscape.FarGround',
          [(-40000,-40000,-35),(40000,-40000,-35),(40000,40000,-35),(-40000,40000,-35)],
          [(0,1,2,3)],get_material('terrain'))
-    # Three broad overlapping ridges, with progressively muted detail/color.
-    for layer,(distance,base_height,color) in enumerate((
-            (3700,180,(.015,.025,.02)),
-            (5200,340,(.025,.035,.04)),
-            (7000,530,(.04,.055,.07))),start=1):
-        mat=material(f'WFRL.Landscape.RidgeMaterial{layer}',color)
-        shader=mat.node_tree.nodes.get('Principled BSDF')
-        shader.inputs['Emission Color'].default_value=(*color,1)
-        shader.inputs['Emission Strength'].default_value=.1
+    # One continuous terrain palette and camera-distance haze across foothills
+    # and ridges avoids the previous three solid-color silhouette bands.
+    mat = terrain.data.materials[0]
+    for layer,(distance,base_height) in enumerate((
+            (3700,180), (5200,340), (7000,530)),start=1):
         v=[];f=[]
         nx,ncross=1000,32
         for j in range(ncross+1):

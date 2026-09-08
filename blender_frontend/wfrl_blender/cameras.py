@@ -12,6 +12,11 @@ class CameraView:
     focus: str
 
 
+WORLD_LOCATION = (-330, -780, 245)
+WORLD_TARGET = (540, 0, 105)
+WORLD_LENS_MM = 28.5
+
+
 CAMERA_VIEWS = (
     CameraView('WFRL.Camera.World', 'World', 41.0, 'farm'),
     CameraView('WFRL.Camera.Top', 'Top', 41.0, 'farm'),
@@ -72,10 +77,10 @@ def build_cameras(scene):
             data.ortho_scale = 2 * max(max(abs(p.x) for p in local), max(abs(p.y) for p in local) * aspect) * 1.15
         cameras[name] = camera
         return camera
-    # Side-on world view keeps a row layout visibly level while retaining a
-    # shallow downward angle for the terrain and wake presentation.
-    world = create('WFRL.Camera.World', Vector((-380, -680, 220)), Vector((570, 0, 95)))
-    world.data.lens = 28
+    # A slightly more lateral overview balances the three turbines while
+    # retaining terrain depth and the full downstream wake corridor.
+    world = create('WFRL.Camera.World', Vector(WORLD_LOCATION), Vector(WORLD_TARGET))
+    world.data.lens = WORLD_LENS_MM
     create('WFRL.Camera.Top', center + Vector((0, 0, 1500)), center, points)
     create('WFRL.Camera.Side', center + Vector((0, -1500, 160)), center, points)
     first = scene.turbines[0]

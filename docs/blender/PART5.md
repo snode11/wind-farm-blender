@@ -136,3 +136,17 @@ Part 5 artifacts are retained. The review script explicitly preserves the
 existing line-only wake render convention after UI frame synchronization.
 The added vegetation geometry has not been benchmarked for sustained realtime
 frame rate; linked prototypes and one batched grass mesh limit object overhead.
+
+## Environment and overview revision — 2026-09-08
+
+The ground palette now combines broad and medium-scale noise with eased color
+transitions. Distant ridges share the ground material rather than three separate
+solid colors; smooth camera-distance haze provides continuous aerial perspective.
+The world camera moves slightly laterally with a 28.5 mm lens to balance the row.
+Wake appearance, vegetation counts, terrain geometry and backend physics are unchanged.
+
+`scripts/blender/preview_environment.py` reapplies the current environment material
+and world camera to the existing Part 5 detail scene for a lightweight review.
+It renders `evidence/environment_revision/overview.png` at 960×540, 12 Cycles
+samples and four CPU threads, without replacing the previous saved scene.
+Rebuild through the normal Demo scene loader to use these defaults in the app.

@@ -72,5 +72,22 @@ class ChartTests(unittest.TestCase):
         self.assertIsNone(history.points('T1', 'power')[-1].value)
 
 
+class PlotReadabilityTests(unittest.TestCase):
+    def test_constant_and_single_sample_axes_have_room(self):
+        from wfrl_blender.charts import axis_ticks
+        for value in (0., -2., 1.7e9):
+            ticks = axis_ticks([value], count=3)
+            self.assertLess(ticks[0], value)
+            self.assertGreater(ticks[-1], value)
+            self.assertEqual(len(ticks), 3)
+
+    def test_ticks_cover_negative_and_positive_values(self):
+        from wfrl_blender.charts import axis_ticks
+        ticks = axis_ticks([-12., 5.], count=5)
+        self.assertLessEqual(ticks[0], -12.)
+        self.assertGreaterEqual(ticks[-1], 5.)
+        self.assertTrue(all(a < b for a, b in zip(ticks, ticks[1:])))
+
+
 if __name__ == '__main__':
     unittest.main()

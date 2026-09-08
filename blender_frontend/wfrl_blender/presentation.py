@@ -18,7 +18,7 @@ def _draw():
     from .state import sample_demo, time_for_frame
     from . import runtime
     context = bpy.context
-    if context.workspace.name != 'WFRL Workspace' or not context.scene.get('wfrl_fidelity'):
+    if context.workspace.name != 'WFRL Workspace':
         return
     region = context.region
     if region is None or region.type != 'WINDOW':
@@ -26,17 +26,18 @@ def _draw():
     width, height = region.width, region.height
     height -= 32 * context.preferences.system.pixel_size
     if runtime.get_state().connection != "LOCAL DEMO":
-        from .overlays import scene_overlay
+        from .overlays import live_overlay
         wake = None
         if runtime.latest_wake is not None:
             wake = {"source": runtime.latest_wake.source_label,
                     "fidelity": runtime.latest_wake.fidelity}
-        lines = scene_overlay(context.scene, wake=wake)
+        lines = live_overlay(runtime.get_state(), runtime.kinematics, wake=wake)
         scale = max(1.0, context.preferences.system.ui_scale)
         blf.size(0, 14 * scale)
         blf.color(0, .76, .86, 1.0, 1.0)
+        toolbar_width = max((r.width for r in context.area.regions if r.type == 'TOOLS'), default=0) if context.space_data.show_region_toolbar else 0
         for index, line in enumerate(lines):
-            blf.position(0, 20, height - (28 + index * 20) * scale, 0)
+            blf.position(0, toolbar_width + 20, height - (28 + index * 20) * scale, 0)
             blf.draw(0, line)
         return
     if context.space_data.use_local_camera:

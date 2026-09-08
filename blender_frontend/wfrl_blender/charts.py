@@ -174,6 +174,15 @@ def record_demo(sample, turbine_ids=('T1', 'T2', 'T3'), *, manual=False):
 _handle = None
 
 
+def axis_ticks(values, count=5):
+    """Readable bounds even for a constant signal or a single timestamp."""
+    low, high = min(values), max(values)
+    if low == high:
+        pad = max(abs(low) * 1e-6, .5)
+        low, high = low - pad, high + pad
+    return tuple(low + (high - low) * i / (count - 1) for i in range(count))
+
+
 def draw_plot():
     import bpy
     import blf
@@ -181,7 +190,14 @@ def draw_plot():
     from gpu_extras.batch import batch_for_shader
     context = bpy.context
     scene = context.scene
-    if not getattr(scene, 'wfrl_chart_visible', False) or context.region.width < 400:
+    if not getattr(scene, 'wfrl_chart_visible', False) or context.region.type != 'WINDOW':
+        return
+    scale = max(1., context.preferences.system.ui_scale)
+    region_width = context.region.width
+    if context.preferences.system.use_region_overlap and context.space_data.show_region_ui:
+        region_width -= max((r.width for r in context.area.regions if r.type == 'UI'), default=0)
+    panel_width = min(660 * scale, region_width - 24 * scale)
+    if panel_width < 280 * scale or context.region.height < 300 * scale:
         return
     channel = scene.wfrl_chart_channel
     selected = getattr(scene, 'wfrl_selected_turbine', 'ALL')
@@ -190,32 +206,80 @@ def draw_plot():
         ids = (FARM,)
     series = [(tid, history.points(tid, channel)) for tid in ids]
     available = [point for _, points in series for point in points if point.value is not None]
-    def label(x, y, text):
-        blf.position(0, x, y, 0); blf.size(0, 12); blf.color(0, 0.95, 0.97, 1, 1); blf.draw(0, text)
-    left, bottom, width, height = 40, 90, min(560, context.region.width - 80), 140
-    units = {p.unit for p in available}
-    title = {**LABELS, **STAT_LABELS}[channel] + ' / ' + ', '.join(sorted(units))
-    label(left, bottom + height + 44, title + ' / last 600 samples')
-    if not available:
-        label(left, bottom + height + 22, 'Unavailable / no valid scalar samples (never zero-filled)')
-        return
-    if len(units) != 1:
-        label(left, bottom + height + 22, 'Mixed units: plot unavailable')
-        return
-    xmin, xmax = min(p.time for p in available), max(p.time for p in available)
-    ymin, ymax = min(p.value for p in available), max(p.value for p in available)
-    dx, dy = max(xmax - xmin, 1e-9), max(ymax - ymin, 1e-9)
     shader = gpu.shader.from_builtin('UNIFORM_COLOR')
-    colors = ((0.25, 0.85, 1, 1), (1, 0.7, 0.2, 1), (0.5, 1, 0.55, 1))
-    for index, (tid, points) in enumerate(series):
-        for segment in segments(points):
-            coords = [(left + (x-xmin)/dx*width, bottom + (y-ymin)/dy*height) for x, y in segment]
-            batch = batch_for_shader(shader, 'LINE_STRIP' if len(coords) > 1 else 'POINTS', {'pos': coords})
-            shader.bind(); shader.uniform_float('color', colors[index % len(colors)]); batch.draw(shader)
-        sources = '/'.join(sorted({p.fidelity for p in points if p.value is not None})) or 'UNKNOWN'
-        label(left + index * 180, bottom + height + 22, f'{tid}: {sources}')
-    timebase = 'unix_seconds' if channel in STAT_LABELS else (history.identity[1] if history.identity else 'simulation_seconds')
-    label(left, bottom - 20, f'{xmin:.3g}–{xmax:.3g} {timebase}   range {ymin:.5g}–{ymax:.5g}')
+    colors = ((.25, .85, 1, 1), (1, .7, .2, 1), (.5, 1, .55, 1), (.85, .6, 1, 1))
+    muted = (.6, .68, .76, 1)
+    def label(x, y, text, color=(.95, .97, 1, 1), size=11):
+        blf.position(0, x, y, 0); blf.size(0, size * scale); blf.color(0, *color); blf.draw(0, text)
+    def line(coords, color, thickness=1, kind='LINE_STRIP'):
+        gpu.state.line_width_set(thickness)
+        shader.bind(); shader.uniform_float('color', color)
+        batch_for_shader(shader, kind, {'pos': coords}).draw(shader)
+    x, y = 12 * scale, 12 * scale
+    left, bottom = x + 66 * scale, y + 54 * scale
+    width, height = panel_width - 92 * scale, 118 * scale
+    columns = max(1, int((panel_width - 24 * scale) // (175 * scale)))
+    # Keep the chart bounded for large farms; the existing turbine filter
+    # exposes each individual series without an overflowing legend.
+    shown = series[:columns * 2]
+    rows = max(1, math.ceil(len(shown) / columns))
+    top = bottom + height + (rows * 20 + 34) * scale
+    old_blend = gpu.state.blend_get()
+    old_width = gpu.state.line_width_get()
+    gpu.state.blend_set('ALPHA')
+    try:
+        line([(x,y),(x+panel_width,y),(x+panel_width,top),(x,y),(x+panel_width,top),(x,top)],
+             (.025,.041,.061,.96), kind='TRIS')
+        units = {p.unit for p in available}
+        title = {**LABELS, **STAT_LABELS}[channel] + ' / ' + (', '.join(sorted(units)) or '—')
+        label(x + 12 * scale, top - 20 * scale, title)
+        if not available or len(units) != 1:
+            label(x + 12 * scale, bottom + height / 2,
+                  'No valid samples' if not available else 'Mixed units / select one turbine', muted)
+            return
+        xticks = axis_ticks([p.time for p in available], 3 if width < 350 * scale else 5)
+        yticks = axis_ticks([p.value for p in available], 4)
+        xmin, xmax, ymin, ymax = xticks[0], xticks[-1], yticks[0], yticks[-1]
+        def px(value): return left + (value - xmin) / (xmax - xmin) * width
+        def py(value): return bottom + (value - ymin) / (ymax - ymin) * height
+        for value in yticks:
+            yy = py(value)
+            line([(left, yy), (left + width, yy)], (.2,.28,.36,.6))
+            label(x + 6 * scale, yy - 4 * scale, f'{value:.3g}', muted, 10)
+        timebase = 'unix_seconds' if channel in STAT_LABELS else (history.identity[1] if history.identity else 'simulation_seconds')
+        origin = xmin if timebase == 'unix_seconds' else 0.
+        for value in xticks:
+            xx = px(value)
+            line([(xx, bottom), (xx, bottom + height)], (.2,.28,.36,.4))
+            text = f'{value-origin:.4g}'
+            blf.size(0, 10 * scale)
+            label(xx - blf.dimensions(0, text)[0] / 2, bottom - 17 * scale, text, muted, 10)
+        axis_label = f's since {origin:.3f} Unix' if origin else timebase
+        label(left, y + 12 * scale, axis_label, muted, 10)
+        all_ids = history.turbine_ids()
+        for index, (tid, points) in enumerate(series):
+            color = colors[(all_ids.index(tid) if tid in all_ids else 0) % len(colors)]
+            for segment in segments(points):
+                coords = [(px(tx), py(v)) for tx, v in segment]
+                gpu.state.point_size_set(4 * scale)
+                line(coords, color, 2.5 if selected != 'ALL' else 1.5,
+                     'LINE_STRIP' if len(coords) > 1 else 'POINTS')
+            if index < len(shown):
+                sources = '/'.join(sorted({p.fidelity for p in points if p.value is not None})) or 'UNKNOWN'
+                name = 'Farm' if tid == FARM else tid
+                text = f'{name}: {sources}'
+                blf.size(0, 10 * scale)
+                limit = (panel_width - 24 * scale) / columns - 10 * scale
+                while len(text) > 3 and blf.dimensions(0, text)[0] > limit:
+                    text = text[:-4] + '...'
+                label(x + (12 + index % columns * 175) * scale,
+                      top - (40 + index // columns * 20) * scale, text, color, 10)
+        if len(series) > len(shown):
+            label(left, y + 28 * scale, f'+{len(series)-len(shown)} series / use turbine filter', muted, 10)
+    finally:
+        gpu.state.line_width_set(old_width)
+        gpu.state.point_size_set(1.)
+        gpu.state.blend_set(old_blend)
 
 
 def register():
