@@ -1,0 +1,16 @@
+simulators/fastfarm/bin/*
+wfcrl/simulators/fastfarm/inputs/5MW_Baseline/*
+wfcrl/simulators/fastfarm/inputs/FarmInputs/*
+wfcrl/simulators/fastfarm/inputs/servo_dll/*
+wfcrl/simulators/floris/inputs/case.yaml
+src/__pycache__/*
+src/cases/__pycache__/*
+*.sum
+*.ech
+*.out
+*.pyc
+*ipynb_checkpoints
+build/*
+WFCRL.egg-info/*
+kernel-wfcrl/*
+__simul__/*

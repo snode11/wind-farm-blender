@@ -1,0 +1,72 @@
+{
+  "status": "ACCEPTED",
+  "recorded_on": "2026-09-06",
+  "acceptance_thread": "01a07219-343d-7152-a302-250fe6077104",
+  "code_commit": "d5550b104c3a06ad940304524fe46e72fa402add",
+  "scope": "Part 2 offline SYNTH prototype; user visual acceptance and previously recorded macOS checks. Does not certify Windows or real backend integration.",
+  "git_note": "Refreshed assets and confirmed deletions remain uncommitted. This manifest marks their baseline independently of Part 3 implementation.",
+  "assets": [
+    {
+      "path": "evidence/part2/wfrl_part2_static.blend",
+      "bytes": 1009223,
+      "sha256": "0261a028063932bde7aad6cae45bf743885c6ae66e2229bc344969074807fc48"
+    },
+    {
+      "path": "evidence/part2/wfrl_part2_dual.blend",
+      "bytes": 1025000,
+      "sha256": "a50ca18a2ddb8206e6ff02f79343c130409265d4db6d9b2c2577c2a02aee0ab1"
+    },
+    {
+      "path": "evidence/part2/wfrl_part2_static.blend1",
+      "bytes": 1022371,
+      "sha256": "b9cb07f512ed15c1d79f28b76ec7a8ee04bc3eac63ec5914d80e003434b9e518"
+    },
+    {
+      "path": "evidence/part2/wfrl_part2_dual.blend1",
+      "bytes": 1006084,
+      "sha256": "cb639922fd2acf29e15e6b4fdd2221cb2f7e22d08a02a0ef44f8bf18adf655fb"
+    },
+    {
+      "path": "evidence/part2/workspace.png",
+      "bytes": 4058960,
+      "sha256": "a47ce285ccd4578a05be78c0f86c9936cde04f700e5a471ea7292fe4f4181138"
+    },
+    {
+      "path": "evidence/part2/workspace_dual.png",
+      "bytes": 4535390,
+      "sha256": "f8cfa586c6bb0cd7eeaa05f286851570a074c6882b15354e5a963575a6266949"
+    },
+    {
+      "path": "evidence/part2/world_view.png",
+      "bytes": 2193661,
+      "sha256": "841d74613e7ac10c1fe928dc39cf82202c020b9ef7e024f1de28c671f90ddd67"
+    },
+    {
+      "path": "evidence/part2/top_view.png",
+      "bytes": 2093096,
+      "sha256": "1134db05a90910d58de95ac53d4af899ecf8dec24c7be0cbce6978159268b157"
+    },
+    {
+      "path": "evidence/part2/nacelle_camera.png",
+      "bytes": 2055919,
+      "sha256": "9e9c476bfd835ac87bcc1487d56a965871895ae62ce7e2abc9730034d51ea9e6"
+    },
+    {
+      "path": "evidence/part2/turbine_closeup.png",
+      "bytes": 2193288,
+      "sha256": "248a15448ec9090739742df405c92ebb34571a96869c445cae180beffc51cfe5"
+    },
+    {
+      "path": "dist/wfrl_blender-0.1.0.zip",
+      "bytes": 38264,
+      "sha256": "2561f29aa8fa56d37ef08ec3f99386c3c664ca8f3add44ad9f9c3cfc937330e9"
+    }
+  ],
+  "confirmed_deleted_assets": [
+    "evidence/part2/nacelle_camera_before_visual_fix.png",
+    "evidence/part2/top_view_before_visual_fix.png",
+    "evidence/part2/world_view_before_visual_fix.png",
+    "evidence/part2/workspace_running.png",
+    "evidence/part2/workspace_stopped.png"
+  ]
+}

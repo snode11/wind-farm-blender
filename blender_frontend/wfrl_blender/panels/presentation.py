@@ -1,0 +1,232 @@
+"""Camera configuration and wall-clock screen capture for all runtime modes."""
+import json
+import time
+from pathlib import Path
+
+import bpy
+
+from ..cameras import CAMERA_VIEWS, cancel_view_layout, configure_camera, set_view_layout
+from ..presentation import recording_schedule, set_presentation_mode
+
+_ACTIVE = None
+
+
+class WFRL_OT_ConfigureCamera(bpy.types.Operator):
+    bl_idname = 'wfrl.configure_camera'
+    bl_label = 'Apply Camera'
+
+    def execute(self, context):
+        scene = context.scene
+        try:
+            configure_camera(scene, scene.wfrl_view_camera, scene.wfrl_view_fov,
+                             scene.wfrl_view_pitch, scene.wfrl_view_focus)
+        except ValueError as exc:
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        for area in context.screen.areas if context.screen else ():
+            if area.type == 'VIEW_3D':
+                area.spaces.active.use_local_camera = False
+                area.spaces.active.region_3d.view_perspective = 'CAMERA'
+        return {'FINISHED'}
+
+
+class WFRL_OT_ViewLayout(bpy.types.Operator):
+    bl_idname = 'wfrl.view_layout'
+    bl_label = 'Camera Layout'
+    layout: bpy.props.EnumProperty(items=[(v, v.title(), '') for v in ('SINGLE', 'DUAL', 'QUAD')])
+
+    def execute(self, context):
+        try:
+            set_view_layout(context, self.layout)
+        except ValueError as exc:
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        return {'FINISHED'}
+
+
+class WFRL_OT_PresentationMode(bpy.types.Operator):
+    bl_idname = 'wfrl.presentation_mode'
+    bl_label = 'Toggle Presentation / Development'
+
+    def execute(self, context):
+        set_presentation_mode(context, not context.workspace.get('presentation_mode', False))
+        return {'FINISHED'}
+
+
+def _directory(scene):
+    directory = Path(bpy.path.abspath(scene.wfrl_capture_directory)).expanduser()
+    directory.mkdir(parents=True, exist_ok=True)
+    return directory
+
+
+class WindowRequired:
+    @classmethod
+    def poll(cls, context):
+        return not bpy.app.background and context.window is not None
+
+
+class WFRL_OT_CaptureScreenshot(WindowRequired, bpy.types.Operator):
+    bl_idname = 'wfrl.capture_screenshot'
+    bl_label = 'Save Screenshot'
+    bl_description = 'Save the current Blender window at its screen resolution, including source labels'
+
+    def execute(self, context):
+        try:
+            path = _directory(context.scene) / f'wfrl-{time.time_ns()}.png'
+            result = bpy.ops.screen.screenshot(filepath=str(path))
+            if 'FINISHED' not in result:
+                raise RuntimeError('Blender cancelled the screenshot')
+            context.scene['wfrl_capture_status'] = str(path)
+            self.report({'INFO'}, f'Saved {path.name}')
+        except (OSError, RuntimeError) as exc:
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        return {'FINISHED'}
+
+
+class WFRL_OT_CaptureRecording(WindowRequired, bpy.types.Operator):
+    bl_idname = 'wfrl.capture_recording'
+    bl_label = 'Record PNG Sequence'
+    bl_description = 'Record the visible window on wall-clock time; never advances backend steps. Esc stops'
+
+    def execute(self, context):
+        global _ACTIVE
+        if _ACTIVE is not None:
+            self.report({'WARNING'}, 'A recording is already active')
+            return {'CANCELLED'}
+        scene = context.scene
+        try:
+            interval, self._total = recording_schedule(scene.wfrl_capture_fps, scene.wfrl_capture_duration)
+            self._directory = _directory(scene) / f'recording-{time.time_ns()}'
+            self._directory.mkdir()
+        except (ValueError, OSError) as exc:
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        self._scene = scene
+        self._index = 0
+        self._frames = []
+        self._started = time.monotonic()
+        self._duration = scene.wfrl_capture_duration
+        self._fps = scene.wfrl_capture_fps
+        self._interval = interval
+        self._next_capture = self._started + interval
+        self._manager = context.window_manager
+        self._timer = self._manager.event_timer_add(interval, window=context.window)
+        _ACTIVE = self
+        scene['wfrl_capture_status'] = 'RECORDING / Esc to stop'
+        try:
+            self._capture(0.0)
+            self._manager.modal_handler_add(self)
+        except (OSError, RuntimeError) as exc:
+            self._finish('FAILED')
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        return {'RUNNING_MODAL'}
+
+    def modal(self, context, event):
+        if event.type == 'ESC':
+            self._finish('CANCELLED')
+            return {'CANCELLED'}
+        # Blender Event does not expose its originating timer. Gate any TIMER
+        # event by our monotonic deadline so other operators cannot oversample.
+        if event.type != 'TIMER':
+            return {'PASS_THROUGH'}
+        now = time.monotonic()
+        elapsed = now - self._started
+        if elapsed >= self._duration or self._index >= self._total:
+            self._finish('COMPLETE')
+            return {'FINISHED'}
+        if now < self._next_capture:
+            return {'PASS_THROUGH'}
+        try:
+            self._capture(elapsed)
+            self._next_capture = now + self._interval
+        except (OSError, RuntimeError) as exc:
+            self._finish('FAILED')
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        return {'PASS_THROUGH'}
+
+    def _capture(self, elapsed):
+        path = self._directory / f'{self._index:06d}.png'
+        if 'FINISHED' not in bpy.ops.screen.screenshot(filepath=str(path)):
+            raise RuntimeError('Screenshot cancelled')
+        self._frames.append({'file': path.name, 'elapsed_s': elapsed,
+                             'display_frame': self._scene.frame_current})
+        self._index += 1
+        self._scene['wfrl_capture_status'] = f'RECORDING {elapsed:.1f}/{self._duration:.1f}s / {self._index} frames'
+
+    def _finish(self, status):
+        global _ACTIVE
+        self._manager.event_timer_remove(self._timer)
+        _ACTIVE = None
+        self._scene['wfrl_capture_status'] = f'{status} / {self._index} PNG frames / {self._directory}'
+        try:
+            (self._directory / 'manifest.json').write_text(json.dumps({
+                'status': status, 'requested_fps': self._fps, 'duration_s': self._duration,
+                'format': 'PNG window sequence', 'clock': 'wall-clock',
+                'note': 'Actual capture timestamps retained; slow captures drop samples, never control steps.',
+                'frames': self._frames}, indent=2), encoding='utf-8')
+        except OSError as exc:
+            self._scene['wfrl_capture_status'] = f'Manifest write failed: {exc}'
+
+    def cancel(self, context):
+        if _ACTIVE is self:
+            self._finish('CANCELLED')
+
+
+class WFRL_PT_Presentation(bpy.types.Panel):
+    bl_idname = 'WFRL_PT_presentation'
+    bl_label = 'WFRL / Views & Capture'
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'Item'
+
+    def draw(self, context):
+        scene, layout = context.scene, self.layout
+        layout.prop(scene, 'wfrl_show_wake', text='Illustrative wake (SYNTH)')
+        layout.label(text='Green lines: illustration, not FAST.Farm wind')
+        layout.prop(scene, 'wfrl_view_camera')
+        layout.prop(scene, 'wfrl_view_fov')
+        layout.prop(scene, 'wfrl_view_pitch')
+        layout.prop(scene, 'wfrl_view_focus')
+        layout.operator('wfrl.configure_camera')
+        row = layout.row(align=True)
+        for value in ('SINGLE', 'DUAL', 'QUAD'):
+            row.operator('wfrl.view_layout', text=value.title()).layout = value
+        layout.operator('wfrl.presentation_mode')
+        layout.label(text='Presentation' if context.workspace.get('presentation_mode') else 'Development')
+        layout.prop(scene, 'wfrl_capture_directory')
+        layout.operator('wfrl.capture_screenshot')
+        layout.prop(scene, 'wfrl_capture_fps')
+        layout.prop(scene, 'wfrl_capture_duration')
+        row = layout.row()
+        row.enabled = _ACTIVE is None
+        row.operator('wfrl.capture_recording')
+        layout.label(text='PNG window sequence / screen resolution')
+        layout.label(text=scene.get('wfrl_capture_status', 'Capture ready'))
+
+
+CLASSES = (WFRL_OT_ConfigureCamera, WFRL_OT_ViewLayout, WFRL_OT_PresentationMode,
+           WFRL_OT_CaptureScreenshot, WFRL_OT_CaptureRecording, WFRL_PT_Presentation)
+
+
+def register_properties():
+    scene = bpy.types.Scene
+    scene.wfrl_view_camera = bpy.props.EnumProperty(name='Camera', items=[(v.name, v.label, '') for v in CAMERA_VIEWS])
+    scene.wfrl_view_fov = bpy.props.FloatProperty(name='FOV (degrees)', default=41, min=1, max=179)
+    scene.wfrl_view_pitch = bpy.props.FloatProperty(name='Elevation (degrees)', default=-15, min=-89.9, max=89.9)
+    scene.wfrl_view_focus = bpy.props.StringProperty(name='Focus (farm / turbine ID)', default='farm')
+    scene.wfrl_capture_directory = bpy.props.StringProperty(name='Output folder', subtype='DIR_PATH', default='//wfrl-captures/')
+    scene.wfrl_capture_fps = bpy.props.IntProperty(name='Capture FPS', min=1, max=30, default=10)
+    scene.wfrl_capture_duration = bpy.props.FloatProperty(name='Duration (seconds)', min=.1, max=3600, default=10)
+
+
+def unregister_properties():
+    cancel_view_layout()
+    if _ACTIVE is not None:
+        _ACTIVE._finish('CANCELLED')
+    for name in ('wfrl_view_camera', 'wfrl_view_fov', 'wfrl_view_pitch', 'wfrl_view_focus',
+                 'wfrl_capture_directory', 'wfrl_capture_fps', 'wfrl_capture_duration'):
+        if hasattr(bpy.types.Scene, name):
+            delattr(bpy.types.Scene, name)

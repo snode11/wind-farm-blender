@@ -1,0 +1,2973 @@
+{
+  "port": 51450,
+  "mode": "demo",
+  "options": {
+    "scene": "scenes/turb3_floris.yaml",
+    "max_steps": 120,
+    "frame_interval": 0.02
+  },
+  "messages": [
+    {
+      "protocol_version": 1,
+      "type": "hello_ack",
+      "session_id": "12a42f8fe89449d488ad31acae4807b0",
+      "sequence": 1,
+      "payload": {
+        "selected_version": 1,
+        "capabilities": [
+          "pause",
+          "single_step",
+          "training_stats_v1"
+        ],
+        "run_status": "READY",
+        "mode": "demo",
+        "resumed": false,
+        "run_id": null
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "lifecycle",
+      "session_id": "12a42f8fe89449d488ad31acae4807b0",
+      "sequence": 2,
+      "payload": {
+        "run_status": "STARTING",
+        "reason": null,
+        "mode": "demo",
+        "run_id": "ce99eb4e73ff44f48b7002518dde25cd",
+        "capabilities": [
+          "pause",
+          "single_step",
+          "training_stats_v1"
+        ],
+        "scene": {
+          "name": "turb3_floris",
+          "backend": "floris",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw"
+          ],
+          "sensors": [],
+          "terrain": "mountains"
+        },
+        "channel_states": {},
+        "channel_table": []
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "lifecycle",
+      "session_id": "12a42f8fe89449d488ad31acae4807b0",
+      "sequence": 3,
+      "payload": {
+        "run_status": "RUNNING",
+        "reason": null,
+        "mode": "demo",
+        "run_id": "ce99eb4e73ff44f48b7002518dde25cd",
+        "capabilities": [
+          "pause",
+          "single_step",
+          "training_stats_v1"
+        ],
+        "scene": {
+          "name": "turb3_floris",
+          "backend": "floris",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw"
+          ],
+          "sensors": [],
+          "terrain": "mountains"
+        },
+        "channel_states": {},
+        "channel_table": []
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "snapshot",
+      "session_id": "12a42f8fe89449d488ad31acae4807b0",
+      "sequence": 4,
+      "payload": {
+        "mode": "demo",
+        "step": 1,
+        "iteration": 0,
+        "phase": "sampling",
+        "timestamp": {
+          "value": 60.0,
+          "timebase": "simulation_seconds"
+        },
+        "turbines": [
+          {
+            "turbine_id": "T1",
+            "channels": {
+              "yaw": {
+                "value": 0.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "yaw",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": null,
+                "unit": "rpm",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "rotor_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 1.6913266483808453,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "power",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "load",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "torque",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_command": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_command",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_measured": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_measured",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": 7.973632994592287,
+                "unit": "m/s",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": 270.26410649314425,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_direction",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "reward": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "reward",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_flap",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_edge",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          },
+          {
+            "turbine_id": "T2",
+            "channels": {
+              "yaw": {
+                "value": 0.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "yaw",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": null,
+                "unit": "rpm",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "rotor_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 0.3627339011381991,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "power",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "load",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "torque",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_command": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_command",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_measured": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_measured",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": 4.896107438268562,
+                "unit": "m/s",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": 270.5904376583105,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_direction",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "reward": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "reward",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_flap",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_edge",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          },
+          {
+            "turbine_id": "T3",
+            "channels": {
+              "yaw": {
+                "value": 0.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "yaw",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": null,
+                "unit": "rpm",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "rotor_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 0.32266166918940115,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "power",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "load",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "torque",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_command": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_command",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_measured": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_measured",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": 4.728997035154612,
+                "unit": "m/s",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": 270.7200314568065,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_direction",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "reward": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "reward",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_flap",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_edge",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          }
+        ],
+        "farm": {
+          "power": {
+            "value": 2.3767222187084456,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+              "channel": "power",
+              "model": "FLORIS steady-state model output, not field measurements"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "reward": {
+            "value": 0.0,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+              "channel": "reward",
+              "model": "FLORIS steady-state model output, not field measurements"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          }
+        },
+        "scene": {
+          "name": "turb3_floris",
+          "backend": "floris",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw"
+          ],
+          "sensors": [],
+          "terrain": "mountains"
+        },
+        "run_id": "ce99eb4e73ff44f48b7002518dde25cd",
+        "channel_table": []
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "snapshot",
+      "session_id": "12a42f8fe89449d488ad31acae4807b0",
+      "sequence": 5,
+      "payload": {
+        "mode": "demo",
+        "step": 2,
+        "iteration": 0,
+        "phase": "sampling",
+        "timestamp": {
+          "value": 120.0,
+          "timebase": "simulation_seconds"
+        },
+        "turbines": [
+          {
+            "turbine_id": "T1",
+            "channels": {
+              "yaw": {
+                "value": 0.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "yaw",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": null,
+                "unit": "rpm",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "rotor_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 1.6913266483808453,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "power",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "load",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "torque",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_command": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_command",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_measured": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_measured",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": 7.973632994592287,
+                "unit": "m/s",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": 270.26410649314425,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_direction",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "reward": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "reward",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_flap",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_edge",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          },
+          {
+            "turbine_id": "T2",
+            "channels": {
+              "yaw": {
+                "value": 0.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "yaw",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": null,
+                "unit": "rpm",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "rotor_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 0.3627339011381991,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "power",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "load",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "torque",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_command": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_command",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_measured": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_measured",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": 4.896107438268562,
+                "unit": "m/s",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": 270.5904376583105,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_direction",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "reward": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "reward",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_flap",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_edge",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          },
+          {
+            "turbine_id": "T3",
+            "channels": {
+              "yaw": {
+                "value": 0.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "yaw",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": null,
+                "unit": "rpm",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "rotor_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 0.32266166918940115,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "power",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "load",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "torque",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_command": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_command",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_measured": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_measured",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": 4.728997035154612,
+                "unit": "m/s",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": 270.7200314568065,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_direction",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "reward": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "reward",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_flap",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_edge",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          }
+        ],
+        "farm": {
+          "power": {
+            "value": 2.3767222187084456,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+              "channel": "power",
+              "model": "FLORIS steady-state model output, not field measurements"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "reward": {
+            "value": 0.0,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+              "channel": "reward",
+              "model": "FLORIS steady-state model output, not field measurements"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          }
+        },
+        "scene": {
+          "name": "turb3_floris",
+          "backend": "floris",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw"
+          ],
+          "sensors": [],
+          "terrain": "mountains"
+        },
+        "run_id": "ce99eb4e73ff44f48b7002518dde25cd",
+        "channel_table": []
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "lifecycle",
+      "session_id": "12a42f8fe89449d488ad31acae4807b0",
+      "sequence": 6,
+      "payload": {
+        "run_status": "PAUSED",
+        "reason": null,
+        "mode": "demo",
+        "run_id": "ce99eb4e73ff44f48b7002518dde25cd",
+        "capabilities": [
+          "pause",
+          "single_step",
+          "training_stats_v1"
+        ],
+        "scene": {
+          "name": "turb3_floris",
+          "backend": "floris",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw"
+          ],
+          "sensors": [],
+          "terrain": "mountains"
+        },
+        "channel_states": {},
+        "channel_table": []
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "snapshot",
+      "session_id": "12a42f8fe89449d488ad31acae4807b0",
+      "sequence": 7,
+      "payload": {
+        "mode": "demo",
+        "step": 3,
+        "iteration": 0,
+        "phase": "sampling",
+        "timestamp": {
+          "value": 180.0,
+          "timebase": "simulation_seconds"
+        },
+        "turbines": [
+          {
+            "turbine_id": "T1",
+            "channels": {
+              "yaw": {
+                "value": 0.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "yaw",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": null,
+                "unit": "rpm",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "rotor_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 1.6913266483808453,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "power",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "load",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "torque",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_command": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_command",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_measured": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_measured",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": 7.973632994592287,
+                "unit": "m/s",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": 270.26410649314425,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_direction",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "reward": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "reward",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_flap",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_edge",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          },
+          {
+            "turbine_id": "T2",
+            "channels": {
+              "yaw": {
+                "value": 0.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "yaw",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": null,
+                "unit": "rpm",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "rotor_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 0.3627339011381991,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "power",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "load",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "torque",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_command": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_command",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_measured": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_measured",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": 4.896107438268562,
+                "unit": "m/s",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": 270.5904376583105,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_direction",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "reward": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "reward",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_flap",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_edge",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          },
+          {
+            "turbine_id": "T3",
+            "channels": {
+              "yaw": {
+                "value": 0.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "yaw",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": null,
+                "unit": "rpm",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "rotor_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 0.32266166918940115,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "power",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "load",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "torque",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_command": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_command",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_measured": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_measured",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": 4.728997035154612,
+                "unit": "m/s",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": 270.7200314568065,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_direction",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "reward": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "reward",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_flap",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_edge",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          }
+        ],
+        "farm": {
+          "power": {
+            "value": 2.3767222187084456,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+              "channel": "power",
+              "model": "FLORIS steady-state model output, not field measurements"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "reward": {
+            "value": 0.0,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+              "channel": "reward",
+              "model": "FLORIS steady-state model output, not field measurements"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          }
+        },
+        "scene": {
+          "name": "turb3_floris",
+          "backend": "floris",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw"
+          ],
+          "sensors": [],
+          "terrain": "mountains"
+        },
+        "run_id": "ce99eb4e73ff44f48b7002518dde25cd",
+        "channel_table": []
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "lifecycle",
+      "session_id": "12a42f8fe89449d488ad31acae4807b0",
+      "sequence": 8,
+      "payload": {
+        "run_status": "PAUSED",
+        "reason": null,
+        "mode": "demo",
+        "run_id": "ce99eb4e73ff44f48b7002518dde25cd",
+        "capabilities": [
+          "pause",
+          "single_step",
+          "training_stats_v1"
+        ],
+        "scene": {
+          "name": "turb3_floris",
+          "backend": "floris",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw"
+          ],
+          "sensors": [],
+          "terrain": "mountains"
+        },
+        "channel_states": {},
+        "channel_table": []
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "snapshot",
+      "session_id": "12a42f8fe89449d488ad31acae4807b0",
+      "sequence": 9,
+      "payload": {
+        "mode": "demo",
+        "step": 4,
+        "iteration": 0,
+        "phase": "sampling",
+        "timestamp": {
+          "value": 240.0,
+          "timebase": "simulation_seconds"
+        },
+        "turbines": [
+          {
+            "turbine_id": "T1",
+            "channels": {
+              "yaw": {
+                "value": 0.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "yaw",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": null,
+                "unit": "rpm",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "rotor_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 1.6913266483808453,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "power",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "load",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "torque",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_command": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_command",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_measured": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_measured",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": 7.973632994592287,
+                "unit": "m/s",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": 270.26410649314425,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_direction",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "reward": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "reward",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_flap",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_edge",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          },
+          {
+            "turbine_id": "T2",
+            "channels": {
+              "yaw": {
+                "value": 0.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "yaw",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": null,
+                "unit": "rpm",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "rotor_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 0.3627339011381991,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "power",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "load",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "torque",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_command": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_command",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_measured": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_measured",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": 4.896107438268562,
+                "unit": "m/s",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": 270.5904376583105,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_direction",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "reward": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "reward",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_flap",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_edge",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          },
+          {
+            "turbine_id": "T3",
+            "channels": {
+              "yaw": {
+                "value": 0.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "yaw",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": null,
+                "unit": "rpm",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "rotor_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 0.32266166918940115,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "power",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "load",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "torque",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_command": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_command",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch_measured": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "pitch_measured",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": 4.728997035154612,
+                "unit": "m/s",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_speed",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": 270.7200314568065,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "wind_direction",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "reward": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "reward",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_flap",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+                  "channel": "m_edge",
+                  "model": "FLORIS steady-state model output, not field measurements"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          }
+        ],
+        "farm": {
+          "power": {
+            "value": 2.3767222187084456,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+              "channel": "power",
+              "model": "FLORIS steady-state model output, not field measurements"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "reward": {
+            "value": 0.0,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "12a42f8fe89449d488ad31acae4807b0",
+              "channel": "reward",
+              "model": "FLORIS steady-state model output, not field measurements"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          }
+        },
+        "scene": {
+          "name": "turb3_floris",
+          "backend": "floris",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw"
+          ],
+          "sensors": [],
+          "terrain": "mountains"
+        },
+        "run_id": "ce99eb4e73ff44f48b7002518dde25cd",
+        "channel_table": []
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "lifecycle",
+      "session_id": "12a42f8fe89449d488ad31acae4807b0",
+      "sequence": 10,
+      "payload": {
+        "run_status": "RUNNING",
+        "reason": null,
+        "mode": "demo",
+        "run_id": "ce99eb4e73ff44f48b7002518dde25cd",
+        "capabilities": [
+          "pause",
+          "single_step",
+          "training_stats_v1"
+        ],
+        "scene": {
+          "name": "turb3_floris",
+          "backend": "floris",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw"
+          ],
+          "sensors": [],
+          "terrain": "mountains"
+        },
+        "channel_states": {},
+        "channel_table": []
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "lifecycle",
+      "session_id": "12a42f8fe89449d488ad31acae4807b0",
+      "sequence": 11,
+      "payload": {
+        "run_status": "DRAINING",
+        "reason": null,
+        "mode": "demo",
+        "run_id": "ce99eb4e73ff44f48b7002518dde25cd",
+        "capabilities": [
+          "pause",
+          "single_step",
+          "training_stats_v1"
+        ],
+        "scene": {
+          "name": "turb3_floris",
+          "backend": "floris",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw"
+          ],
+          "sensors": [],
+          "terrain": "mountains"
+        },
+        "channel_states": {},
+        "channel_table": []
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "lifecycle",
+      "session_id": "12a42f8fe89449d488ad31acae4807b0",
+      "sequence": 12,
+      "payload": {
+        "run_status": "STOPPED",
+        "reason": null,
+        "mode": "demo",
+        "run_id": "ce99eb4e73ff44f48b7002518dde25cd",
+        "capabilities": [
+          "pause",
+          "single_step",
+          "training_stats_v1"
+        ],
+        "scene": {
+          "name": "turb3_floris",
+          "backend": "floris",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw"
+          ],
+          "sensors": [],
+          "terrain": "mountains"
+        },
+        "channel_states": {},
+        "channel_table": []
+      }
+    }
+  ],
+  "passed": true,
+  "boundary": "Real FLORIS backend and TCP transport lifecycle; no Blender GUI and no Windows execution.",
+  "server_thread_alive": false,
+  "backend_alive": false
+}

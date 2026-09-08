@@ -1,0 +1,3877 @@
+{
+  "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+  "session_id": "local-demo",
+  "capacity": 600,
+  "series": [
+    {
+      "key": [
+        "snapshot",
+        null,
+        null,
+        "power"
+      ],
+      "records": [
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 1,
+          "message_type": "snapshot",
+          "received_monotonic": 412396.114955708,
+          "turbine_id": null,
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 5.364240958006121,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 2,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.198288708,
+          "turbine_id": null,
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.28090795798925683,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 3,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.24405175,
+          "turbine_id": null,
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.23514491599053144,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 4,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.313871875,
+          "turbine_id": null,
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.1653247909853235,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 5,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.35110225,
+          "turbine_id": null,
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.12809441599529237,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 6,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.384388,
+          "turbine_id": null,
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.09480866597732529,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 7,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.418050375,
+          "turbine_id": null,
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.061146290972828865,
+          "validity_at_export": "valid"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 7,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 1,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        },
+        "last": {
+          "sequence": 7,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "snapshot",
+        null,
+        "T1",
+        "yaw"
+      ],
+      "records": [
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 1,
+          "message_type": "snapshot",
+          "received_monotonic": 412396.114955708,
+          "turbine_id": "T1",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 5.364240958006121,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 2,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.198288708,
+          "turbine_id": "T1",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.28090795798925683,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 3,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.24405175,
+          "turbine_id": "T1",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.23514491599053144,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 4,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.313871875,
+          "turbine_id": "T1",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.1653247909853235,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 5,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.35110225,
+          "turbine_id": "T1",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.12809441599529237,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 6,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.384388,
+          "turbine_id": "T1",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.09480866597732529,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 7,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.418050375,
+          "turbine_id": "T1",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.061146290972828865,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 8,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.451666583,
+          "turbine_id": "T1",
+          "channel": "yaw",
+          "data": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.02753008296713233,
+          "validity_at_export": "unsupported"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 9,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.478358041,
+          "turbine_id": "T1",
+          "channel": "yaw",
+          "data": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.0008386250119656324,
+          "validity_at_export": "unsupported"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 9,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 1,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        },
+        "last": {
+          "sequence": 9,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "snapshot",
+        null,
+        "T1",
+        "pitch"
+      ],
+      "records": [
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 1,
+          "message_type": "snapshot",
+          "received_monotonic": 412396.114955708,
+          "turbine_id": "T1",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 5.364240958006121,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 2,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.198288708,
+          "turbine_id": "T1",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.28090795798925683,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 3,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.24405175,
+          "turbine_id": "T1",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.23514491599053144,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 4,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.313871875,
+          "turbine_id": "T1",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.1653247909853235,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 5,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.35110225,
+          "turbine_id": "T1",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.12809441599529237,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 6,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.384388,
+          "turbine_id": "T1",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.09480866597732529,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 7,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.418050375,
+          "turbine_id": "T1",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.061146290972828865,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 8,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.451666583,
+          "turbine_id": "T1",
+          "channel": "pitch",
+          "data": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.02753008296713233,
+          "validity_at_export": "unsupported"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 9,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.478358041,
+          "turbine_id": "T1",
+          "channel": "pitch",
+          "data": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.0008386250119656324,
+          "validity_at_export": "unsupported"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 9,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 1,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        },
+        "last": {
+          "sequence": 9,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "snapshot",
+        null,
+        "T1",
+        "rotor_speed"
+      ],
+      "records": [
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 1,
+          "message_type": "snapshot",
+          "received_monotonic": 412396.114955708,
+          "turbine_id": "T1",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 5.364240958006121,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 2,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.198288708,
+          "turbine_id": "T1",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.28090795798925683,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 3,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.24405175,
+          "turbine_id": "T1",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.23514491599053144,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 4,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.313871875,
+          "turbine_id": "T1",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.1653247909853235,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 5,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.35110225,
+          "turbine_id": "T1",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.12809441599529237,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 6,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.384388,
+          "turbine_id": "T1",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.09480866597732529,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 7,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.418050375,
+          "turbine_id": "T1",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.061146290972828865,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 8,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.451666583,
+          "turbine_id": "T1",
+          "channel": "rotor_speed",
+          "data": {
+            "value": null,
+            "unit": "rpm",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.02753008296713233,
+          "validity_at_export": "unsupported"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 9,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.478358041,
+          "turbine_id": "T1",
+          "channel": "rotor_speed",
+          "data": {
+            "value": null,
+            "unit": "rpm",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.0008386250119656324,
+          "validity_at_export": "unsupported"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 9,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 1,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        },
+        "last": {
+          "sequence": 9,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "snapshot",
+        null,
+        "T1",
+        "power"
+      ],
+      "records": [
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 1,
+          "message_type": "snapshot",
+          "received_monotonic": 412396.114955708,
+          "turbine_id": "T1",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 5.364240958006121,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 2,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.198288708,
+          "turbine_id": "T1",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.28090795798925683,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 3,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.24405175,
+          "turbine_id": "T1",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.23514491599053144,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 4,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.313871875,
+          "turbine_id": "T1",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.1653247909853235,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 5,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.35110225,
+          "turbine_id": "T1",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.12809441599529237,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 6,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.384388,
+          "turbine_id": "T1",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.09480866597732529,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 7,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.418050375,
+          "turbine_id": "T1",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.061146290972828865,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 8,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.451666583,
+          "turbine_id": "T1",
+          "channel": "power",
+          "data": {
+            "value": null,
+            "unit": "MW",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.02753008296713233,
+          "validity_at_export": "unsupported"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 9,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.478358041,
+          "turbine_id": "T1",
+          "channel": "power",
+          "data": {
+            "value": null,
+            "unit": "MW",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.0008386250119656324,
+          "validity_at_export": "unsupported"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 9,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 1,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        },
+        "last": {
+          "sequence": 9,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "snapshot",
+        null,
+        "T2",
+        "yaw"
+      ],
+      "records": [
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 1,
+          "message_type": "snapshot",
+          "received_monotonic": 412396.114955708,
+          "turbine_id": "T2",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 5.364240958006121,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 2,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.198288708,
+          "turbine_id": "T2",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.28090795798925683,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 3,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.24405175,
+          "turbine_id": "T2",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.23514491599053144,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 4,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.313871875,
+          "turbine_id": "T2",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.1653247909853235,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 5,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.35110225,
+          "turbine_id": "T2",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.12809441599529237,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 6,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.384388,
+          "turbine_id": "T2",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.09480866597732529,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 7,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.418050375,
+          "turbine_id": "T2",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.061146290972828865,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 8,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.451666583,
+          "turbine_id": "T2",
+          "channel": "yaw",
+          "data": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.02753008296713233,
+          "validity_at_export": "unsupported"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 9,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.478358041,
+          "turbine_id": "T2",
+          "channel": "yaw",
+          "data": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.0008386250119656324,
+          "validity_at_export": "unsupported"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 9,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 1,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        },
+        "last": {
+          "sequence": 9,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "snapshot",
+        null,
+        "T2",
+        "pitch"
+      ],
+      "records": [
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 1,
+          "message_type": "snapshot",
+          "received_monotonic": 412396.114955708,
+          "turbine_id": "T2",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 5.364240958006121,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 2,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.198288708,
+          "turbine_id": "T2",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.28090795798925683,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 3,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.24405175,
+          "turbine_id": "T2",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.23514491599053144,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 4,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.313871875,
+          "turbine_id": "T2",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.1653247909853235,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 5,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.35110225,
+          "turbine_id": "T2",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.12809441599529237,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 6,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.384388,
+          "turbine_id": "T2",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.09480866597732529,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 7,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.418050375,
+          "turbine_id": "T2",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.061146290972828865,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 8,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.451666583,
+          "turbine_id": "T2",
+          "channel": "pitch",
+          "data": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.02753008296713233,
+          "validity_at_export": "unsupported"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 9,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.478358041,
+          "turbine_id": "T2",
+          "channel": "pitch",
+          "data": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.0008386250119656324,
+          "validity_at_export": "unsupported"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 9,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 1,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        },
+        "last": {
+          "sequence": 9,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "snapshot",
+        null,
+        "T2",
+        "rotor_speed"
+      ],
+      "records": [
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 1,
+          "message_type": "snapshot",
+          "received_monotonic": 412396.114955708,
+          "turbine_id": "T2",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 5.364240958006121,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 2,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.198288708,
+          "turbine_id": "T2",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.28090795798925683,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 3,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.24405175,
+          "turbine_id": "T2",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.23514491599053144,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 4,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.313871875,
+          "turbine_id": "T2",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.1653247909853235,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 5,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.35110225,
+          "turbine_id": "T2",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.12809441599529237,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 6,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.384388,
+          "turbine_id": "T2",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.09480866597732529,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 7,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.418050375,
+          "turbine_id": "T2",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.061146290972828865,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 8,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.451666583,
+          "turbine_id": "T2",
+          "channel": "rotor_speed",
+          "data": {
+            "value": null,
+            "unit": "rpm",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.02753008296713233,
+          "validity_at_export": "unsupported"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 9,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.478358041,
+          "turbine_id": "T2",
+          "channel": "rotor_speed",
+          "data": {
+            "value": null,
+            "unit": "rpm",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.0008386250119656324,
+          "validity_at_export": "unsupported"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 9,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 1,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        },
+        "last": {
+          "sequence": 9,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "snapshot",
+        null,
+        "T2",
+        "power"
+      ],
+      "records": [
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 1,
+          "message_type": "snapshot",
+          "received_monotonic": 412396.114955708,
+          "turbine_id": "T2",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 5.364240958006121,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 2,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.198288708,
+          "turbine_id": "T2",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.28090795798925683,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 3,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.24405175,
+          "turbine_id": "T2",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.23514491599053144,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 4,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.313871875,
+          "turbine_id": "T2",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.1653247909853235,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 5,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.35110225,
+          "turbine_id": "T2",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.12809441599529237,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 6,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.384388,
+          "turbine_id": "T2",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.09480866597732529,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 7,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.418050375,
+          "turbine_id": "T2",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.061146290972828865,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 8,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.451666583,
+          "turbine_id": "T2",
+          "channel": "power",
+          "data": {
+            "value": null,
+            "unit": "MW",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.02753008296713233,
+          "validity_at_export": "unsupported"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 9,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.478358041,
+          "turbine_id": "T2",
+          "channel": "power",
+          "data": {
+            "value": null,
+            "unit": "MW",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.0008386250119656324,
+          "validity_at_export": "unsupported"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 9,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 1,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        },
+        "last": {
+          "sequence": 9,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "snapshot",
+        null,
+        "T3",
+        "yaw"
+      ],
+      "records": [
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 1,
+          "message_type": "snapshot",
+          "received_monotonic": 412396.114955708,
+          "turbine_id": "T3",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 5.364240958006121,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 2,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.198288708,
+          "turbine_id": "T3",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.28090795798925683,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 3,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.24405175,
+          "turbine_id": "T3",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.23514491599053144,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 4,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.313871875,
+          "turbine_id": "T3",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.1653247909853235,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 5,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.35110225,
+          "turbine_id": "T3",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.12809441599529237,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 6,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.384388,
+          "turbine_id": "T3",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.09480866597732529,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 7,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.418050375,
+          "turbine_id": "T3",
+          "channel": "yaw",
+          "data": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.061146290972828865,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 8,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.451666583,
+          "turbine_id": "T3",
+          "channel": "yaw",
+          "data": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.02753008296713233,
+          "validity_at_export": "unsupported"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 9,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.478358041,
+          "turbine_id": "T3",
+          "channel": "yaw",
+          "data": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.0008386250119656324,
+          "validity_at_export": "unsupported"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 9,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 1,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        },
+        "last": {
+          "sequence": 9,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "snapshot",
+        null,
+        "T3",
+        "pitch"
+      ],
+      "records": [
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 1,
+          "message_type": "snapshot",
+          "received_monotonic": 412396.114955708,
+          "turbine_id": "T3",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 5.364240958006121,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 2,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.198288708,
+          "turbine_id": "T3",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.28090795798925683,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 3,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.24405175,
+          "turbine_id": "T3",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.23514491599053144,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 4,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.313871875,
+          "turbine_id": "T3",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.1653247909853235,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 5,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.35110225,
+          "turbine_id": "T3",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.12809441599529237,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 6,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.384388,
+          "turbine_id": "T3",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.09480866597732529,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 7,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.418050375,
+          "turbine_id": "T3",
+          "channel": "pitch",
+          "data": {
+            "value": 90.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.061146290972828865,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 8,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.451666583,
+          "turbine_id": "T3",
+          "channel": "pitch",
+          "data": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.02753008296713233,
+          "validity_at_export": "unsupported"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 9,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.478358041,
+          "turbine_id": "T3",
+          "channel": "pitch",
+          "data": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.0008386250119656324,
+          "validity_at_export": "unsupported"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 9,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 1,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        },
+        "last": {
+          "sequence": 9,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "snapshot",
+        null,
+        "T3",
+        "rotor_speed"
+      ],
+      "records": [
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 1,
+          "message_type": "snapshot",
+          "received_monotonic": 412396.114955708,
+          "turbine_id": "T3",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 5.364240958006121,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 2,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.198288708,
+          "turbine_id": "T3",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.28090795798925683,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 3,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.24405175,
+          "turbine_id": "T3",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.23514491599053144,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 4,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.313871875,
+          "turbine_id": "T3",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.1653247909853235,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 5,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.35110225,
+          "turbine_id": "T3",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.12809441599529237,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 6,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.384388,
+          "turbine_id": "T3",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.09480866597732529,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 7,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.418050375,
+          "turbine_id": "T3",
+          "channel": "rotor_speed",
+          "data": {
+            "value": 0.0,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.061146290972828865,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 8,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.451666583,
+          "turbine_id": "T3",
+          "channel": "rotor_speed",
+          "data": {
+            "value": null,
+            "unit": "rpm",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.02753008296713233,
+          "validity_at_export": "unsupported"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 9,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.478358041,
+          "turbine_id": "T3",
+          "channel": "rotor_speed",
+          "data": {
+            "value": null,
+            "unit": "rpm",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.0008386250119656324,
+          "validity_at_export": "unsupported"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 9,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 1,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        },
+        "last": {
+          "sequence": 9,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "snapshot",
+        null,
+        "T3",
+        "power"
+      ],
+      "records": [
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 1,
+          "message_type": "snapshot",
+          "received_monotonic": 412396.114955708,
+          "turbine_id": "T3",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 5.364240958006121,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 2,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.198288708,
+          "turbine_id": "T3",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.28090795798925683,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 3,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.24405175,
+          "turbine_id": "T3",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.23514491599053144,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 4,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.313871875,
+          "turbine_id": "T3",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.1653247909853235,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 5,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.35110225,
+          "turbine_id": "T3",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.12809441599529237,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 6,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.384388,
+          "turbine_id": "T3",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.09480866597732529,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 7,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.418050375,
+          "turbine_id": "T3",
+          "channel": "power",
+          "data": {
+            "value": 0.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.061146290972828865,
+          "validity_at_export": "valid"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 8,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.451666583,
+          "turbine_id": "T3",
+          "channel": "power",
+          "data": {
+            "value": null,
+            "unit": "MW",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.02753008296713233,
+          "validity_at_export": "unsupported"
+        },
+        {
+          "mode": "demo",
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          },
+          "run_id": "0cd48cd215fd46b5a4c479053ce04228",
+          "session_id": "local-demo",
+          "sequence": 9,
+          "message_type": "snapshot",
+          "received_monotonic": 412401.478358041,
+          "turbine_id": "T3",
+          "channel": "power",
+          "data": {
+            "value": null,
+            "unit": "MW",
+            "validity": "unsupported",
+            "error": "Display pose has no physical power model",
+            "fidelity": "SYNTH",
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0,
+            "provenance": {
+              "formula": "sample_demo; scripted preview"
+            }
+          },
+          "source_age_at_receive_seconds": 0.0,
+          "age_at_export_seconds": 0.0008386250119656324,
+          "validity_at_export": "unsupported"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 9,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 1,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        },
+        "last": {
+          "sequence": 9,
+          "step": 0,
+          "timestamp": {
+            "value": 0.0,
+            "timebase": "simulation_seconds"
+          }
+        }
+      }
+    }
+  ],
+  "schema_version": "wfrl.history.v1",
+  "exported_at_unix_seconds": 1788770777.626893,
+  "scope": "Current run bounded history window; not a complete training archive",
+  "truncated": false
+}

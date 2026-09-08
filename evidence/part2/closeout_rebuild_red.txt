@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/static_scene_smoke.py", line 68, in <module>
+    main()
+    ~~~~^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/static_scene_smoke.py", line 57, in main
+    assert owned_data() == first_data_count, "Scene rebuild leaked owned datablocks"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Scene rebuild leaked owned datablocks
+
+Error: script failed, file: 'blender_frontend/tests/blender/static_scene_smoke.py', exiting.
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

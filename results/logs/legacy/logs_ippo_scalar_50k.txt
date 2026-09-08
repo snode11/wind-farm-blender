@@ -1,0 +1,138 @@
+C:\Users\s1155\.conda\envs\wfcrl\Lib\site-packages\pettingzoo\utils\conversions.py:132: UserWarning: The base environment `AECLogWrapper<multiagent-windfarm>` does not have a `render_mode` defined.
+  warnings.warn(
+C:\Users\s1155\.conda\envs\wfcrl\Lib\site-packages\stable_baselines3\common\vec_env\base_vec_env.py:77: UserWarning: The `render_mode` attribute is not defined in your environment. It will be set to None.
+  warnings.warn("The `render_mode` attribute is not defined in your environment. It will be set to None.")
+Using cpu device
+[mappo] training 50000 steps, 7 agents бн
+Logging to logs/mappo\PPO_4
+D:\project\wind farm RL\train_mappo.py:91: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+  rews  = np.array([float(rew_dict.get(a, 0.0)) for a in self.agents],
+-----------------------------
+| time/              |      |
+|    fps             | 381  |
+|    iterations      | 1    |
+|    time_elapsed    | 18   |
+|    total_timesteps | 7168 |
+-----------------------------
+------------------------------------------
+| time/                   |              |
+|    fps                  | 367          |
+|    iterations           | 2            |
+|    time_elapsed         | 39           |
+|    total_timesteps      | 14336        |
+| train/                  |              |
+|    approx_kl            | 0.0049218694 |
+|    clip_fraction        | 0.0268       |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -1.4         |
+|    explained_variance   | -0.00482     |
+|    learning_rate        | 0.0003       |
+|    loss                 | 1.28         |
+|    n_updates            | 10           |
+|    policy_gradient_loss | -0.00146     |
+|    std                  | 0.973        |
+|    value_loss           | 0.58         |
+------------------------------------------
+------------------------------------------
+| time/                   |              |
+|    fps                  | 357          |
+|    iterations           | 3            |
+|    time_elapsed         | 60           |
+|    total_timesteps      | 21504        |
+| train/                  |              |
+|    approx_kl            | 0.0045498586 |
+|    clip_fraction        | 0.0361       |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -1.39        |
+|    explained_variance   | -0.0761      |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.0146       |
+|    n_updates            | 20           |
+|    policy_gradient_loss | -0.002       |
+|    std                  | 0.971        |
+|    value_loss           | 0.0477       |
+------------------------------------------
+-----------------------------------------
+| time/                   |             |
+|    fps                  | 351         |
+|    iterations           | 4           |
+|    time_elapsed         | 81          |
+|    total_timesteps      | 28672       |
+| train/                  |             |
+|    approx_kl            | 0.003128991 |
+|    clip_fraction        | 0.0205      |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -1.39       |
+|    explained_variance   | 0.244       |
+|    learning_rate        | 0.0003      |
+|    loss                 | 0.0388      |
+|    n_updates            | 30          |
+|    policy_gradient_loss | -0.00113    |
+|    std                  | 0.967       |
+|    value_loss           | 0.0608      |
+-----------------------------------------
+------------------------------------------
+| time/                   |              |
+|    fps                  | 304          |
+|    iterations           | 5            |
+|    time_elapsed         | 117          |
+|    total_timesteps      | 35840        |
+| train/                  |              |
+|    approx_kl            | 0.0033489377 |
+|    clip_fraction        | 0.0254       |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -1.38        |
+|    explained_variance   | 0.719        |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.00959      |
+|    n_updates            | 40           |
+|    policy_gradient_loss | -0.0016      |
+|    std                  | 0.962        |
+|    value_loss           | 0.0713       |
+------------------------------------------
+-----------------------------------------
+| time/                   |             |
+|    fps                  | 240         |
+|    iterations           | 6           |
+|    time_elapsed         | 178         |
+|    total_timesteps      | 43008       |
+| train/                  |             |
+|    approx_kl            | 0.004768324 |
+|    clip_fraction        | 0.0377      |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -1.39       |
+|    explained_variance   | 0.672       |
+|    learning_rate        | 0.0003      |
+|    loss                 | 0.0393      |
+|    n_updates            | 50          |
+|    policy_gradient_loss | -0.0019     |
+|    std                  | 0.97        |
+|    value_loss           | 0.108       |
+-----------------------------------------
+------------------------------------------
+| time/                   |              |
+|    fps                  | 207          |
+|    iterations           | 7            |
+|    time_elapsed         | 242          |
+|    total_timesteps      | 50176        |
+| train/                  |              |
+|    approx_kl            | 0.0037645218 |
+|    clip_fraction        | 0.0198       |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -1.39        |
+|    explained_variance   | 0.62         |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.0673       |
+|    n_updates            | 60           |
+|    policy_gradient_loss | -0.00113     |
+|    std                  | 0.97         |
+|    value_loss           | 0.108        |
+------------------------------------------
+ 100% ------------------------- 50,176/50,000  [ 0:04:00 < 0:00:00 , 136 it/s ]
+C:\Users\s1155\.conda\envs\wfcrl\Lib\site-packages\pettingzoo\utils\conversions.py:132: UserWarning: The base environment `AECLogWrapper<multiagent-windfarm>` does not have a `render_mode` defined.
+  warnings.warn(
+C:\Users\s1155\.conda\envs\wfcrl\Lib\site-packages\stable_baselines3\common\vec_env\base_vec_env.py:77: UserWarning: The `render_mode` attribute is not defined in your environment. It will be set to None.
+  warnings.warn("The `render_mode` attribute is not defined in your environment. It will be set to None.")
+[mappo] saved б· checkpoints\mappo_ablaincourt.zip
+[eval] ep 1: return = 282.3393
+[eval] ep 2: return = 642.1868

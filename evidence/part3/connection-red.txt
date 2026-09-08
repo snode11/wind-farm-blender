@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/blender_frontend/tests/blender/connection_smoke.py", line 57, in <module>
+    if __name__ == '__main__': main()
+                               ~~~~^^
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/blender_frontend/tests/blender/connection_smoke.py", line 27, in main
+    assert not runtime.configuration_editable(), 'Handshake must lock configuration'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Handshake must lock configuration
+
+Error: script failed, file: 'blender_frontend/tests/blender/connection_smoke.py', exiting.
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

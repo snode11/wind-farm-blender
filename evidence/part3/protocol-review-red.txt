@@ -1,0 +1,122 @@
+.........FFFFFFFFFFFFF...
+======================================================================
+FAIL: test_scalar_numeric_channels_and_curve_units (test_messages.CodecTests.test_scalar_numeric_channels_and_curve_units) (key='rotor_speed', value='not a number')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/tests/blender_bridge/test_messages.py", line 130, in test_scalar_numeric_channels_and_curve_units
+    with self.subTest(key=key, value=value), self.assertRaises(ProtocolError): encode_message(bad)
+                                             ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ProtocolError not raised
+
+======================================================================
+FAIL: test_scalar_numeric_channels_and_curve_units (test_messages.CodecTests.test_scalar_numeric_channels_and_curve_units) (key='rotor_speed', value=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/tests/blender_bridge/test_messages.py", line 130, in test_scalar_numeric_channels_and_curve_units
+    with self.subTest(key=key, value=value), self.assertRaises(ProtocolError): encode_message(bad)
+                                             ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ProtocolError not raised
+
+======================================================================
+FAIL: test_scalar_numeric_channels_and_curve_units (test_messages.CodecTests.test_scalar_numeric_channels_and_curve_units) (key='rotor_speed', value=[1, 2])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/tests/blender_bridge/test_messages.py", line 130, in test_scalar_numeric_channels_and_curve_units
+    with self.subTest(key=key, value=value), self.assertRaises(ProtocolError): encode_message(bad)
+                                             ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ProtocolError not raised
+
+======================================================================
+FAIL: test_scalar_numeric_channels_and_curve_units (test_messages.CodecTests.test_scalar_numeric_channels_and_curve_units) (key='power', value='not a number')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/tests/blender_bridge/test_messages.py", line 130, in test_scalar_numeric_channels_and_curve_units
+    with self.subTest(key=key, value=value), self.assertRaises(ProtocolError): encode_message(bad)
+                                             ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ProtocolError not raised
+
+======================================================================
+FAIL: test_scalar_numeric_channels_and_curve_units (test_messages.CodecTests.test_scalar_numeric_channels_and_curve_units) (key='power', value=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/tests/blender_bridge/test_messages.py", line 130, in test_scalar_numeric_channels_and_curve_units
+    with self.subTest(key=key, value=value), self.assertRaises(ProtocolError): encode_message(bad)
+                                             ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ProtocolError not raised
+
+======================================================================
+FAIL: test_scalar_numeric_channels_and_curve_units (test_messages.CodecTests.test_scalar_numeric_channels_and_curve_units) (key='power', value=[1, 2])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/tests/blender_bridge/test_messages.py", line 130, in test_scalar_numeric_channels_and_curve_units
+    with self.subTest(key=key, value=value), self.assertRaises(ProtocolError): encode_message(bad)
+                                             ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ProtocolError not raised
+
+======================================================================
+FAIL: test_scalar_numeric_channels_and_curve_units (test_messages.CodecTests.test_scalar_numeric_channels_and_curve_units) (key='yaw', value='not a number')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/tests/blender_bridge/test_messages.py", line 130, in test_scalar_numeric_channels_and_curve_units
+    with self.subTest(key=key, value=value), self.assertRaises(ProtocolError): encode_message(bad)
+                                             ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ProtocolError not raised
+
+======================================================================
+FAIL: test_scalar_numeric_channels_and_curve_units (test_messages.CodecTests.test_scalar_numeric_channels_and_curve_units) (key='yaw', value=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/tests/blender_bridge/test_messages.py", line 130, in test_scalar_numeric_channels_and_curve_units
+    with self.subTest(key=key, value=value), self.assertRaises(ProtocolError): encode_message(bad)
+                                             ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ProtocolError not raised
+
+======================================================================
+FAIL: test_scalar_numeric_channels_and_curve_units (test_messages.CodecTests.test_scalar_numeric_channels_and_curve_units) (key='yaw', value=[1, 2])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/tests/blender_bridge/test_messages.py", line 130, in test_scalar_numeric_channels_and_curve_units
+    with self.subTest(key=key, value=value), self.assertRaises(ProtocolError): encode_message(bad)
+                                             ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ProtocolError not raised
+
+======================================================================
+FAIL: test_scalar_numeric_channels_and_curve_units (test_messages.CodecTests.test_scalar_numeric_channels_and_curve_units) (key='pitch', value='not a number')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/tests/blender_bridge/test_messages.py", line 130, in test_scalar_numeric_channels_and_curve_units
+    with self.subTest(key=key, value=value), self.assertRaises(ProtocolError): encode_message(bad)
+                                             ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ProtocolError not raised
+
+======================================================================
+FAIL: test_scalar_numeric_channels_and_curve_units (test_messages.CodecTests.test_scalar_numeric_channels_and_curve_units) (key='pitch', value=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/tests/blender_bridge/test_messages.py", line 130, in test_scalar_numeric_channels_and_curve_units
+    with self.subTest(key=key, value=value), self.assertRaises(ProtocolError): encode_message(bad)
+                                             ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ProtocolError not raised
+
+======================================================================
+FAIL: test_scalar_numeric_channels_and_curve_units (test_messages.CodecTests.test_scalar_numeric_channels_and_curve_units) (key='pitch', value=[1, 2])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/tests/blender_bridge/test_messages.py", line 130, in test_scalar_numeric_channels_and_curve_units
+    with self.subTest(key=key, value=value), self.assertRaises(ProtocolError): encode_message(bad)
+                                             ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ProtocolError not raised
+
+======================================================================
+FAIL: test_scalar_numeric_channels_and_curve_units (test_messages.CodecTests.test_scalar_numeric_channels_and_curve_units)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/tests/blender_bridge/test_messages.py", line 132, in test_scalar_numeric_channels_and_curve_units
+    with self.assertRaises(ProtocolError):
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: ProtocolError not raised
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.004s
+
+FAILED (failures=13)

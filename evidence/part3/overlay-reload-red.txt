@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/blender_frontend/tests/blender/extension_lifecycle_smoke.py", line 56, in <module>
+    if __name__ == '__main__': main()
+                               ~~~~^^
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/blender_frontend/tests/blender/extension_lifecycle_smoke.py", line 30, in main
+    assert getattr(bpy, '_wfrl_overlay_handle', None) == presentation._HANDLE
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+Error: script failed, file: 'blender_frontend/tests/blender/extension_lifecycle_smoke.py', exiting.
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

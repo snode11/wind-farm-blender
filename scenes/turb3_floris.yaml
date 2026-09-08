@@ -1,0 +1,19 @@
+name: turb3_floris
+backend: floris
+turbine: nrel5mw
+dt: 3
+
+# Part 4 steady-state backend demo. The registered FLORIS environment uses
+# this exact three-turbine row layout; values are modeled, not field measured.
+layout:
+  - {id: T1, x: 0.0,    y: 0.0}
+  - {id: T2, x: 504.0,  y: 0.0}
+  - {id: T3, x: 1008.0, y: 0.0}
+
+inflow:
+  speed: 8.0
+  direction: 270.0
+  turbulence: null
+
+controls: [yaw]
+terrain: mountains

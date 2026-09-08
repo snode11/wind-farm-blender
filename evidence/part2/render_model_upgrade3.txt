@@ -1,0 +1,8 @@
+00:01.081  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/evidence/part2/world_view.png'
+00:01.610  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/evidence/part2/nacelle_camera.png'
+00:02.244  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/evidence/part2/top_view.png'
+信息: 已另存为 "wfrl_part2_static.blend"
+WFRL_PART2_RENDER=PASS
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

@@ -1,0 +1,20 @@
+E
+======================================================================
+ERROR: test_transport (unittest.loader._FailedTest.test_transport)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_transport
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/loader.py", line 426, in _find_test_path
+    module = self._get_module_from_name(name)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/loader.py", line 367, in _get_module_from_name
+    __import__(name)
+    ~~~~~~~~~~^^^^^^
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/blender_frontend/tests/test_transport.py", line 6, in <module>
+    from wfrl_blender.transport import TransportClient
+ModuleNotFoundError: No module named 'wfrl_blender.transport'
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)

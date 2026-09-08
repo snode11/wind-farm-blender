@@ -1,0 +1,1 @@
+/opt/homebrew/bin/mpif90  -ffree-line-length-none -fdefault-real-8 -C -DIMPLICIT_DLLEXPORT -O3 -dynamiclib -Wl,-headerpad_max_install_names -o DISCON.dll -install_name @rpath/DISCON.dll CMakeFiles/DISCON.dir/DISCON.F90.o

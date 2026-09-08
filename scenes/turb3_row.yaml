@@ -1,0 +1,28 @@
+name: turb3_row
+backend: fastfarm
+turbine: nrel5mw
+dt: 3
+
+# 三机一列，间距 4D = 504 m。与 WFCRL 的 Turb3_Row1 一致，用来对照旧结果。
+layout:
+  - {id: T1, x: 0.0,    y: 0.0}
+  - {id: T2, x: 504.0,  y: 0.0}
+  - {id: T3, x: 1008.0, y: 0.0}
+
+inflow:
+  speed: 8.0
+  direction: 270.0
+  turbulence: null        # 填 .bts 文件名（相对 FarmInputs/）即切到湍流来流
+
+controls: [yaw]
+
+# 地形：渲染装饰，不进流场。可选 mountains/gobi/flat/null
+terrain: mountains
+
+sensors:
+  - {type: power,      turbines: all}
+  - {type: actuator,   turbines: all}
+  - {type: bladeload,  turbines: all}
+  - {type: rotorspeed, turbines: all}
+  - {type: vibration,  turbines: all}
+  - {type: lidar,      turbines: "T1"}   # 只给最上游那台，前馈测的是自由来流

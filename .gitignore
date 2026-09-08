@@ -1,0 +1,42 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# 上游依赖与仿真器二进制（本地部署，见 docs/setup_local.md）
+wfcrl-env/
+simulators/
+_msmpi_installer/
+
+# FAST.Farm 每次 make() 都会新建一个算例目录，累积到 GB 级
+__simul__/
+
+# 跑出来的东西：权重、tensorboard、评估图都可重建，不进库；
+# results/runs/*.json 是实验记录本身（数字），要留。
+results/checkpoints/
+results/logs/
+results/eval_outputs/
+results/runs/*.png
+results/runs/*.log
+
+# LaTeX 编译产物
+*.aux
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+slides/*.pdf
+slides/*.log
+
+# 参考文献 PDF 与其文本抽取（体积大、非本仓库产物）
+refs/**/*.pdf
+refs/extracted_text/
+
+# 临时参考图（演示效果对标用，非仓库产物）
+example*.png

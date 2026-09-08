@@ -1,0 +1,38 @@
+name: turb3_ctrl3
+backend: fastfarm
+turbine: nrel5mw
+dt: 3
+
+# 三机一列，间距 4D = 504 m，与 turb3_row 同布局 —— 只把控制量从单 yaw 扩到
+# yaw+pitch+torque，用来演示三通道 action space 在 Studio 里真的都能动。
+# 物理语义（见 wfrl/safety.py）：
+#   torque  完全顶替基线 VS 控制器（DISCON.F90:440），是发电本身、维持最优叶尖
+#           速比 λ≈7.55；约束层把绝对转矩托到额定的 60% 以上，防止转子加速超速
+#   pitch   只是 PitchRef 的下界（DISCON.F90:523），region 2 里基线 PitComT≈0，
+#           一般停机/切换才起作用
+#   yaw     执行机构占空比是累计预算，dt=3 s 下可持续量仅 0.09°/步（见 duty-budget）
+layout:
+  - {id: T1, x: 0.0,    y: 0.0}
+  - {id: T2, x: 504.0,  y: 0.0}
+  - {id: T3, x: 1008.0, y: 0.0}
+
+inflow:
+  speed: 8.0
+  direction: 270.0
+  turbulence: null
+
+controls: [yaw, pitch, torque]
+
+# 地形：渲染装饰，不进流场（FAST.Farm 本算例平地）。可选 mountains/gobi/flat/null
+terrain: mountains
+
+sensors:
+  - {type: power,      turbines: all}
+  - {type: actuator,   turbines: all}
+  - {type: bladeload,  turbines: all}
+  - {type: rotorspeed, turbines: all}
+  - {type: vibration,  turbines: all}
+  - {type: lidar,      turbines: "T1"}
+  # 机舱下俯视相机：验证挂机方案能否拍到叶片/叶尖。fov 小=长焦看局部、
+  # 大=短焦看整叶；pitch 负=向下俯视。视野=单风机窗口切到本相机视角的实时视口。
+  - {type: camera,     turbines: "T1", params: {mount: nacelle_down, fov: 40, pitch: -30}}

@@ -1,0 +1,15 @@
+C:\Users\s1155\.conda\envs\wfcrl\Lib\site-packages\pettingzoo\utils\conversions.py:132: UserWarning: The base environment `AECLogWrapper<multiagent-windfarm>` does not have a `render_mode` defined.
+  warnings.warn(
+D:\project\wind farm RL\mappo_central.py:249: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\torch\csrc\autograd\generated\python_variable_methods.cpp:823.)
+  pg_log.append(float(pg)); v_log.append(float(vloss))
+[mappo-c] 6 iters ¡Á 1024 steps ¡Á 7 agents = 43008 agent-transitions
+[mappo-c] it 1/6  steps 7168  ep_rew(1step avg) 0.140  pg -0.0003  vloss 8.7298  ent 0.915  explained_var -0.002
+[mappo-c] it 2/6  steps 14336  ep_rew(1step avg) 0.034  pg -0.0013  vloss 0.0702  ent 0.909  explained_var 0.693
+[mappo-c] it 3/6  steps 21504  ep_rew(1step avg) 0.031  pg +0.0001  vloss 0.0449  ent 0.909  explained_var 0.605
+[mappo-c] it 4/6  steps 28672  ep_rew(1step avg) 0.037  pg -0.0011  vloss 0.0587  ent 0.909  explained_var 0.775
+[mappo-c] it 5/6  steps 35840  ep_rew(1step avg) 0.042  pg -0.0015  vloss 0.1474  ent 0.912  explained_var 0.559
+[mappo-c] it 6/6  steps 43008  ep_rew(1step avg) 0.030  pg -0.0009  vloss 0.0766  ent 0.915  explained_var 0.671
+[mappo-c] saved -> checkpoints\mappo_central_ablaincourt.pt
+[eval] ep 1: return = 248.7335
+[eval] ep 2: return = 534.6532

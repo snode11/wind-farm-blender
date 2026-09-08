@@ -1,0 +1,63 @@
+{
+  "archive": "dist/wfrl_blender-0.2.0.zip",
+  "archive_sha256": "8b228fa3f9a4ccf9f0c8674fd82043f683a00276fe3939faf96724cfd361d80a",
+  "assets": [
+    {
+      "path": "assets/nrel5mw_geometry.json",
+      "size": 61922
+    },
+    {
+      "path": "assets/landscape/SOURCES.md",
+      "size": 602
+    },
+    {
+      "path": "assets/landscape/kloofendal_48d_partly_cloudy_puresky_2k.hdr",
+      "size": 5451493
+    },
+    {
+      "path": "assets/landscape/rocky_terrain_02_diff_2k.jpg",
+      "size": 3232826
+    },
+    {
+      "path": "assets/landscape/rocky_terrain_02_nor_gl_2k.jpg",
+      "size": 4149208
+    },
+    {
+      "path": "assets/landscape/rocky_terrain_02_rough_2k.jpg",
+      "size": 1589303
+    }
+  ],
+  "blender_version": "5.2.1 LTS",
+  "capabilities": [
+    "demo",
+    "manual_pose",
+    "training_ui",
+    "history_export",
+    "screenshot_operator",
+    "recording_operator"
+  ],
+  "checksum_file": "dist/wfrl_blender-0.2.0.zip.sha256",
+  "fresh_profile": true,
+  "history_export": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/part7/package-history-export.json",
+  "installed_file_count": 83,
+  "installed_inventory_sha256": "929ac34e81482c4d7c5508a73c06be7a72d5ccc702bf5ae5755e5e0afcc60983",
+  "installed_module": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-part7-profile-ln6520sn/extensions/wfrl_blender/__init__.py",
+  "inventory_file": "dist/wfrl_blender-0.2.0.inventory.json",
+  "locks": {
+    "load_demo_during_pause": true,
+    "mode_change_during_pause": true
+  },
+  "module_name": "bl_ext.wfrl_part7.wfrl_blender",
+  "registered_types": [
+    "WFRL_PT_connection",
+    "WFRL_PT_WorkflowRun",
+    "WFRL_PT_WorkflowScene",
+    "WFRL_PT_WorkflowSafety",
+    "WFRL_PT_live_telemetry",
+    "WFRL_PT_Manual"
+  ],
+  "schema_version": "wfrl.part7-installed-smoke.v1",
+  "source_checkout": "/Users/eason/Desktop/wfcrl/wind farm RL",
+  "source_checkout_on_sys_path": false,
+  "status": "PASS"
+}

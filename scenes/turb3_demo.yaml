@@ -1,0 +1,27 @@
+name: turb3_demo
+backend: fastfarm
+turbine: nrel5mw
+dt: 1
+
+# 演示专用场景：三机水平成线 + 同时控制 yaw 和 pitch，用于 Studio 演示模式
+# （启停循环 pitch 90↔0° + 偏航 0→30°）。
+layout:
+  - {id: T1, x: 0.0,    y: 0.0}
+  - {id: T2, x: 504.0,  y: 0.0}
+  - {id: T3, x: 1008.0, y: 0.0}
+
+inflow:
+  speed: 8.0
+  direction: 270.0
+  turbulence: null
+
+# yaw + pitch 双控：pitch 用于启停演示（90° 顺桨停机 / 0° 运行）
+controls: [yaw, pitch]
+
+sensors:
+  - {type: power,     turbines: all}
+  - {type: actuator,  turbines: all}
+  - {type: bladeload, turbines: all}
+  - {type: lidar,     turbines: "T1"}
+  - {type: camera,    turbines: "T1",
+     params: {mount: nacelle_down, fov: 40.0, pitch: -30.0, range: 1.5}}

@@ -1,0 +1,1670 @@
+{
+  "port": 18874,
+  "mode": "demo",
+  "options": {
+    "scene": "scenes/turb3_row.yaml"
+  },
+  "messages": [
+    {
+      "protocol_version": 1,
+      "type": "hello_ack",
+      "session_id": "66588c1eeea940b6b4d6d4c08378d26b",
+      "sequence": 1,
+      "payload": {
+        "selected_version": 1,
+        "capabilities": [
+          "pause",
+          "single_step"
+        ],
+        "run_status": "READY",
+        "mode": "demo",
+        "resumed": false
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "lifecycle",
+      "session_id": "66588c1eeea940b6b4d6d4c08378d26b",
+      "sequence": 2,
+      "payload": {
+        "run_status": "STARTING",
+        "reason": null,
+        "mode": "demo",
+        "capabilities": [
+          "pause",
+          "single_step"
+        ]
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "lifecycle",
+      "session_id": "66588c1eeea940b6b4d6d4c08378d26b",
+      "sequence": 3,
+      "payload": {
+        "run_status": "RUNNING",
+        "reason": null,
+        "mode": "demo",
+        "capabilities": [
+          "pause",
+          "single_step"
+        ]
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "snapshot",
+      "session_id": "66588c1eeea940b6b4d6d4c08378d26b",
+      "sequence": 4,
+      "payload": {
+        "mode": "demo",
+        "step": 0,
+        "timestamp": {
+          "value": 0.0,
+          "timebase": "simulation_seconds"
+        },
+        "turbines": [
+          {
+            "turbine_id": "T1",
+            "channels": {
+              "yaw": {
+                "value": 0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "yaw"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": 2.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "pitch"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": 8.0,
+                "unit": "rpm",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "rotor_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 2.0,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "power"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "load"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "torque"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": null,
+                "unit": "m/s",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_direction"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_flap"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_edge"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          },
+          {
+            "turbine_id": "T2",
+            "channels": {
+              "yaw": {
+                "value": 0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "yaw"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": 2.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "pitch"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": 8.0,
+                "unit": "rpm",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "rotor_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 2.0,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "power"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "load"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "torque"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": null,
+                "unit": "m/s",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_direction"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_flap"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_edge"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          },
+          {
+            "turbine_id": "T3",
+            "channels": {
+              "yaw": {
+                "value": 0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "yaw"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": 2.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "pitch"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": 8.0,
+                "unit": "rpm",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "rotor_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 2.0,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "power"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "load"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "torque"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": null,
+                "unit": "m/s",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_direction"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_flap"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_edge"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          }
+        ],
+        "farm": {
+          "power": {
+            "value": 6.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "provenance": {
+              "formula": "Trainer._demo_sequence",
+              "channel": "power"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "reward": {
+            "value": 0.5,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "provenance": {
+              "formula": "Trainer._demo_sequence",
+              "channel": "reward"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          }
+        },
+        "scene": {
+          "name": "turb3_row",
+          "backend": "fastfarm",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw"
+          ],
+          "sensors": [
+            {
+              "type": "power",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "actuator",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "bladeload",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "rotorspeed",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "vibration",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "lidar",
+              "mount": "nacelle",
+              "turbines": "T1"
+            }
+          ],
+          "terrain": "mountains"
+        }
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "lifecycle",
+      "session_id": "66588c1eeea940b6b4d6d4c08378d26b",
+      "sequence": 5,
+      "payload": {
+        "run_status": "PAUSED",
+        "reason": null,
+        "mode": "demo",
+        "capabilities": [
+          "pause",
+          "single_step"
+        ]
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "snapshot",
+      "session_id": "66588c1eeea940b6b4d6d4c08378d26b",
+      "sequence": 6,
+      "payload": {
+        "mode": "demo",
+        "step": 1,
+        "timestamp": {
+          "value": 0.1,
+          "timebase": "simulation_seconds"
+        },
+        "turbines": [
+          {
+            "turbine_id": "T1",
+            "channels": {
+              "yaw": {
+                "value": 1,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "yaw"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": 2.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "pitch"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": 8.0,
+                "unit": "rpm",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "rotor_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 2.0,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "power"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "load"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "torque"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": null,
+                "unit": "m/s",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_direction"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_flap"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_edge"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          },
+          {
+            "turbine_id": "T2",
+            "channels": {
+              "yaw": {
+                "value": 1,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "yaw"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": 2.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "pitch"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": 8.0,
+                "unit": "rpm",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "rotor_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 2.0,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "power"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "load"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "torque"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": null,
+                "unit": "m/s",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_direction"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_flap"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_edge"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          },
+          {
+            "turbine_id": "T3",
+            "channels": {
+              "yaw": {
+                "value": 1,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "yaw"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": 2.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "pitch"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": 8.0,
+                "unit": "rpm",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "rotor_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 2.0,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "power"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "load"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "torque"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": null,
+                "unit": "m/s",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_direction"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_flap"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_edge"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          }
+        ],
+        "farm": {
+          "power": {
+            "value": 6.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "provenance": {
+              "formula": "Trainer._demo_sequence",
+              "channel": "power"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "reward": {
+            "value": 0.5,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "provenance": {
+              "formula": "Trainer._demo_sequence",
+              "channel": "reward"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          }
+        },
+        "scene": {
+          "name": "turb3_row",
+          "backend": "fastfarm",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw"
+          ],
+          "sensors": [
+            {
+              "type": "power",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "actuator",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "bladeload",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "rotorspeed",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "vibration",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "lidar",
+              "mount": "nacelle",
+              "turbines": "T1"
+            }
+          ],
+          "terrain": "mountains"
+        }
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "lifecycle",
+      "session_id": "66588c1eeea940b6b4d6d4c08378d26b",
+      "sequence": 7,
+      "payload": {
+        "run_status": "PAUSED",
+        "reason": null,
+        "mode": "demo",
+        "capabilities": [
+          "pause",
+          "single_step"
+        ]
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "snapshot",
+      "session_id": "66588c1eeea940b6b4d6d4c08378d26b",
+      "sequence": 8,
+      "payload": {
+        "mode": "demo",
+        "step": 2,
+        "timestamp": {
+          "value": 0.2,
+          "timebase": "simulation_seconds"
+        },
+        "turbines": [
+          {
+            "turbine_id": "T1",
+            "channels": {
+              "yaw": {
+                "value": 2,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "yaw"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": 2.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "pitch"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": 8.0,
+                "unit": "rpm",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "rotor_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 2.0,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "power"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "load"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "torque"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": null,
+                "unit": "m/s",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_direction"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_flap"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_edge"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          },
+          {
+            "turbine_id": "T2",
+            "channels": {
+              "yaw": {
+                "value": 2,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "yaw"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": 2.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "pitch"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": 8.0,
+                "unit": "rpm",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "rotor_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 2.0,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "power"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "load"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "torque"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": null,
+                "unit": "m/s",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_direction"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_flap"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_edge"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          },
+          {
+            "turbine_id": "T3",
+            "channels": {
+              "yaw": {
+                "value": 2,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "yaw"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "pitch": {
+                "value": 2.0,
+                "unit": "deg",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "pitch"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "rotor_speed": {
+                "value": 8.0,
+                "unit": "rpm",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "rotor_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "power": {
+                "value": 2.0,
+                "unit": "MW",
+                "validity": "valid",
+                "error": null,
+                "fidelity": "SYNTH",
+                "provenance": {
+                  "formula": "Trainer._demo_sequence",
+                  "channel": "power"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "load": {
+                "value": null,
+                "unit": "",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "load"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "torque": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "torque"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_speed": {
+                "value": null,
+                "unit": "m/s",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_speed"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "wind_direction": {
+                "value": null,
+                "unit": "deg",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "wind_direction"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_flap": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_flap"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              },
+              "m_edge": {
+                "value": null,
+                "unit": "N m",
+                "validity": "unsupported",
+                "error": "Source channel unavailable",
+                "fidelity": "DIRECT",
+                "provenance": {
+                  "backend_session": "66588c1eeea940b6b4d6d4c08378d26b",
+                  "channel": "m_edge"
+                },
+                "source_age_seconds": 0.0,
+                "stale_after_seconds": 2.0
+              }
+            }
+          }
+        ],
+        "farm": {
+          "power": {
+            "value": 6.0,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "provenance": {
+              "formula": "Trainer._demo_sequence",
+              "channel": "power"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "reward": {
+            "value": 0.5,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "provenance": {
+              "formula": "Trainer._demo_sequence",
+              "channel": "reward"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          }
+        },
+        "scene": {
+          "name": "turb3_row",
+          "backend": "fastfarm",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw"
+          ],
+          "sensors": [
+            {
+              "type": "power",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "actuator",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "bladeload",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "rotorspeed",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "vibration",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "lidar",
+              "mount": "nacelle",
+              "turbines": "T1"
+            }
+          ],
+          "terrain": "mountains"
+        }
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "lifecycle",
+      "session_id": "66588c1eeea940b6b4d6d4c08378d26b",
+      "sequence": 9,
+      "payload": {
+        "run_status": "RUNNING",
+        "reason": null,
+        "mode": "demo",
+        "capabilities": [
+          "pause",
+          "single_step"
+        ]
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "lifecycle",
+      "session_id": "66588c1eeea940b6b4d6d4c08378d26b",
+      "sequence": 10,
+      "payload": {
+        "run_status": "DRAINING",
+        "reason": null,
+        "mode": "demo",
+        "capabilities": [
+          "pause",
+          "single_step"
+        ]
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "lifecycle",
+      "session_id": "66588c1eeea940b6b4d6d4c08378d26b",
+      "sequence": 11,
+      "payload": {
+        "run_status": "STOPPED",
+        "reason": null,
+        "mode": "demo",
+        "capabilities": [
+          "pause",
+          "single_step"
+        ]
+      }
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,19 @@
+# Verified working set for the FLORIS backend on Windows + Python 3.11 (conda env `wfcrl`).
+# FAST.Farm deps (mpi4py, openfast_toolbox) are intentionally omitted — they require
+# MS-MPI + compiled FAST.Farm binaries. Install wfcrl itself with:  pip install -e . --no-deps
+FLORIS==3.5
+gymnasium==0.29.1
+pettingzoo==1.24.3
+numpy==1.26.4
+pandas==2.2.*
+PyYAML==6.0.1
+matplotlib>=3.7
+
+# Training (MAPPO/PPO) and Studio/RViz dependencies.
+torch>=2.2,<3
+stable-baselines3==2.3.2
+tensorboard>=2.14
+pyvista>=0.43
+pyvistaqt>=0.11
+qtpy>=2.4
+PySide6>=6.6

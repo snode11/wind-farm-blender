@@ -1,0 +1,16 @@
+
+==================================== ERRORS ====================================
+___________ ERROR collecting blender_frontend/tests/test_ui_state.py ___________
+ImportError while importing test module '/Users/eason/Desktop/wfcrl/part3-worktree/blender_frontend/tests/test_ui_state.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Cellar/python@3.14/3.14.6/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+blender_frontend/tests/test_ui_state.py:3: in <module>
+    from wfrl_blender.state import FrontendState, DemoState, RunStatus
+E   ImportError: cannot import name 'FrontendState' from 'wfrl_blender.state' (/Users/eason/Desktop/wfcrl/part3-worktree/blender_frontend/wfrl_blender/state.py)
+=========================== short test summary info ============================
+ERROR blender_frontend/tests/test_ui_state.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.04s

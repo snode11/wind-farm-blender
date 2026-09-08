@@ -1,0 +1,2 @@
+[console_scripts]
+wfcrl-simulator = wfcrl.scripts:install_simulator

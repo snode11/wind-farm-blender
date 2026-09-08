@@ -1,0 +1,2 @@
+Success parsing TOML in "dist/wfrl_blender-0.1.0.zip"
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)

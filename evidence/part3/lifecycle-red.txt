@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/blender_frontend/tests/blender/extension_lifecycle_smoke.py", line 50, in <module>
+    if __name__ == '__main__': main()
+                               ~~~~^^
+  File "/Users/eason/Desktop/wfcrl/part3-worktree/blender_frontend/tests/blender/extension_lifecycle_smoke.py", line 15, in main
+    assert hasattr(bpy.types, 'WFRL_PT_connection'), 'Part 3 connection panel missing'
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Part 3 connection panel missing
+
+Error: script failed, file: 'blender_frontend/tests/blender/extension_lifecycle_smoke.py', exiting.
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Historical failing fixture from the red phase of test-driven development; not a current regression. The corresponding green result is recorded in lifecycle-green.txt.

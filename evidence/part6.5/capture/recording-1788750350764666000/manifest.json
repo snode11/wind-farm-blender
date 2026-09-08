@@ -1,0 +1,15 @@
+{
+  "status": "COMPLETE",
+  "requested_fps": 1,
+  "duration_s": 0.10000000149011612,
+  "format": "PNG window sequence",
+  "clock": "wall-clock",
+  "note": "Actual capture timestamps retained; slow captures drop samples, never control steps.",
+  "frames": [
+    {
+      "file": "000000.png",
+      "elapsed_s": 0.0,
+      "display_frame": 1
+    }
+  ]
+}

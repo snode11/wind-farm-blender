@@ -1,0 +1,22 @@
+Metadata-Version: 2.4
+Name: wfrl
+Version: 0.3.0
+Summary: Multi-agent RL for wind farm wake-steering control on the WFCRL benchmark (FLORIS + FAST.Farm)
+Requires-Python: >=3.11
+Provides-Extra: train
+Requires-Dist: torch<3,>=2.2; extra == "train"
+Requires-Dist: stable-baselines3==2.3.2; extra == "train"
+Requires-Dist: tensorboard>=2.14; extra == "train"
+Provides-Extra: gui
+Requires-Dist: pyvista>=0.43; extra == "gui"
+Requires-Dist: pyvistaqt>=0.11; extra == "gui"
+Requires-Dist: qtpy>=2.4; extra == "gui"
+Requires-Dist: PySide6>=6.6; extra == "gui"
+Provides-Extra: all
+Requires-Dist: torch<3,>=2.2; extra == "all"
+Requires-Dist: stable-baselines3==2.3.2; extra == "all"
+Requires-Dist: tensorboard>=2.14; extra == "all"
+Requires-Dist: pyvista>=0.43; extra == "all"
+Requires-Dist: pyvistaqt>=0.11; extra == "all"
+Requires-Dist: qtpy>=2.4; extra == "all"
+Requires-Dist: PySide6>=6.6; extra == "all"

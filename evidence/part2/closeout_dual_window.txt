@@ -1,0 +1,11 @@
+00:00.554  blend            | Read blend: "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/part2/wfrl_part2_static.blend"
+WFRL_GUI_READY
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/review_dual_window.py", line 10, in <module>
+    for a in bpy.context.screen.areas:
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'areas'
+00:51.564  operator         | Saved "wfrl_part2_static.blend"
+00:51.578  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit

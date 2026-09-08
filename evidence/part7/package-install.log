@@ -1,0 +1,10 @@
+$ /Applications/Blender.app/Contents/MacOS/Blender --command extension repo-add wfrl_part7 --name WFRL Part 7 Fresh Install --directory /var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-part7-profile-ln6520sn/extensions --clear-all
+
+$ /Applications/Blender.app/Contents/MacOS/Blender --command extension install-file -r wfrl_part7 --enable /Users/eason/Desktop/wfcrl/wind farm RL/dist/wfrl_blender-0.2.0.zip
+STATUS Installed "wfrl_blender"
+
+$ /Applications/Blender.app/Contents/MacOS/Blender --background --python-exit-code 1 --python /Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/verify_part7_install.py -- --inside --output /Users/eason/Desktop/wfcrl/wind farm RL/evidence/part7/package-install.json --source-root /Users/eason/Desktop/wfcrl/wind farm RL
+WFRL_PART7_INSTALLED_SMOKE=PASS
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

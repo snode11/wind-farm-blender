@@ -1,0 +1,156 @@
+{
+  "speeds": [
+    6.0,
+    7.0,
+    8.0,
+    9.0
+  ],
+  "wind_direction": 270.0,
+  "yaw": "zero",
+  "rows": [
+    {
+      "backend": "floris",
+      "u_inf": 6.0,
+      "steps": 6,
+      "power_per_turbine": [
+        0.7005,
+        0.0839,
+        0.1126
+      ],
+      "power_total_MW": 0.8971,
+      "P_over_u3": 4.1532,
+      "rotor_ws": [
+        5.98,
+        3.407,
+        3.618
+      ],
+      "wall_s": 0.1
+    },
+    {
+      "backend": "floris",
+      "u_inf": 7.0,
+      "steps": 6,
+      "power_per_turbine": [
+        1.132,
+        0.2028,
+        0.1998
+      ],
+      "power_total_MW": 1.5346,
+      "P_over_u3": 4.4741,
+      "rotor_ws": [
+        6.977,
+        4.166,
+        4.151
+      ],
+      "wall_s": 0.1
+    },
+    {
+      "backend": "floris",
+      "u_inf": 8.0,
+      "steps": 6,
+      "power_per_turbine": [
+        1.6913,
+        0.3627,
+        0.3227
+      ],
+      "power_total_MW": 2.3767,
+      "P_over_u3": 4.642,
+      "rotor_ws": [
+        7.974,
+        4.896,
+        4.729
+      ],
+      "wall_s": 0.1
+    },
+    {
+      "backend": "floris",
+      "u_inf": 9.0,
+      "steps": 6,
+      "power_per_turbine": [
+        2.4078,
+        0.5386,
+        0.4921
+      ],
+      "power_total_MW": 3.4385,
+      "P_over_u3": 4.7168,
+      "rotor_ws": [
+        8.97,
+        5.513,
+        5.357
+      ],
+      "wall_s": 0.1
+    },
+    {
+      "backend": "fastfarm",
+      "u_inf": 6.0,
+      "steps": 100,
+      "power_per_turbine": [
+        0.7089,
+        0.182,
+        0.1998
+      ],
+      "power_total_MW": 1.0907,
+      "P_over_u3": 5.0498,
+      "rotor_ws": [
+        5.999,
+        3.479,
+        3.879
+      ],
+      "wall_s": 110.5
+    },
+    {
+      "backend": "fastfarm",
+      "u_inf": 7.0,
+      "steps": 100,
+      "power_per_turbine": [
+        1.1454,
+        0.3462,
+        0.3012
+      ],
+      "power_total_MW": 1.7928,
+      "P_over_u3": 5.227,
+      "rotor_ws": [
+        6.999,
+        4.162,
+        4.329
+      ],
+      "wall_s": 104.4
+    },
+    {
+      "backend": "fastfarm",
+      "u_inf": 8.0,
+      "steps": 100,
+      "power_per_turbine": [
+        1.707,
+        0.5645,
+        0.4774
+      ],
+      "power_total_MW": 2.7488,
+      "P_over_u3": 5.3688,
+      "rotor_ws": [
+        7.999,
+        4.841,
+        4.933
+      ],
+      "wall_s": 104.6
+    },
+    {
+      "backend": "fastfarm",
+      "u_inf": 9.0,
+      "steps": 100,
+      "power_per_turbine": [
+        2.4142,
+        0.8263,
+        0.7033
+      ],
+      "power_total_MW": 3.9438,
+      "P_over_u3": 5.4099,
+      "rotor_ws": [
+        8.999,
+        5.451,
+        5.553
+      ],
+      "wall_s": 104.9
+    }
+  ]
+}

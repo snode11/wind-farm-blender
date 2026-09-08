@@ -1,0 +1,390 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{geometry}
+\geometry{margin=2.4cm}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=teal,urlcolor=magenta}
+
+% ---- 定理类环境 ----
+\theoremstyle{definition}
+\newtheorem{definition}{定义}
+\newtheorem{assumption}{假设}
+\theoremstyle{plain}
+\newtheorem{theorem}{定理}
+\newtheorem{remark}{注}
+
+% ---- 记号 ----
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\calS}{\mathcal{S}}
+\newcommand{\calA}{\mathcal{A}}
+\newcommand{\calO}{\mathcal{O}}
+\newcommand{\calG}{\mathcal{G}}
+\newcommand{\bpi}{\bm{\pi}}
+\newcommand{\wind}{u_{\infty}}
+\newcommand{\dir}{\phi_{\infty}}
+\newcommand{\Qhat}{\hat{Q}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\title{\textbf{多智能体强化学习驱动的风电场协同控制}\\[6pt]
+\large ——理论模型、基准环境与静态/动态仿真实验研究进展}
+\author{项目组}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+本文系统介绍“多智能体强化学习(Multi-Agent Reinforcement Learning, MARL)驱动的风电场协同控制”研究的背景意义、底层理论模型、理论假设、设计思路、仿真实验思路与当前进展。风电场中上游机组的\textbf{尾流(wake)}会显著降低下游机组的发电功率(大型海上风场损失可达 $10\%\!-\!20\%$)并加剧其疲劳载荷($5\%\!-\!15\%$),而尾流场由三维 Navier--Stokes 方程支配、在线优化不可解,这正是用强化学习“以数据代替模型”的动机。我们的工作以 \textbf{WFCRL} 基准\cite{wfcrl}为实验载体:它把风电场协同控制形式化为\emph{协同的部分可观马尔可夫决策过程}(Dec-POMDP),提供从\textbf{稳态解析尾流模型 FLORIS}到\textbf{动态气弹仿真器 FAST.Farm}两种保真度的物理后端,并给出 IPPO / MAPPO / QMIX 等基线。理论层面,配套工作\cite{theory}将问题重构为\emph{转移独立的 Dec-POMDP}(TI-Dec-POMDP)并利用尾流的\emph{有向无环图}(DAG)结构,证明了\emph{多时间尺度 $Q$-学习}在折扣因子满足 $\beta\le 1-K$ 时收敛到均衡策略,填补了独立学习一般无收敛保证的空白。在此基础上,我们完成了真·集中式 critic 的 MAPPO 实现,并在同布局、同算法、同超参下\textbf{完成了静态(FLORIS)与动态(FAST.Farm)后端的正式对比实验},定量刻画了稳态模型对风场功率的系统性高估(约 $2.5\times$ 功率差),同时搭建了 RViz 风格的三维数字孪生可视化平台。本文最后给出面向\textbf{多模态视觉—语言大模型(VLM)+RL}控制器的下一步研究规划。
+\end{abstract}
+
+\tableofcontents
+
+% =====================================================================
+\section{项目背景与意义}
+% =====================================================================
+
+\subsection{风电场控制问题的由来}
+
+风力发电是全球可再生能源装机增长最快的门类之一。单台风电机组从风中提取动能的同时,会在其下游留下一条\textbf{尾流}——一个风速降低、湍流增强的区域。当多台机组以阵列形式密集布置成\emph{风电场}时,上游机组的尾流会“笼罩”下游机组,带来两方面的直接损失\cite{wfcrl}:
+
+\begin{itemize}[leftmargin=1.5em,itemsep=1pt]
+  \item \textbf{发电功率损失}:下游机组处于减速的来流中,可利用风功率随风速立方($\propto u^3$)锐减,大型海上风场的整场功率损失可达 $10\%\!-\!20\%$;
+  \item \textbf{疲劳载荷加剧}:尾流的高湍流强度使下游机组叶片、塔筒承受更剧烈的交变载荷,疲劳损伤上升 $5\%\!-\!15\%$,缩短机组寿命、抬高运维成本。
+\end{itemize}
+
+传统风电场采用“\emph{贪心}”控制:每台机组各自将偏航对准来流以最大化\emph{自身}功率。但这一局部最优在全场尺度上并非全局最优——如果上游机组\emph{主动偏航}(yaw)使自身少发一点电,却把尾流\emph{侧向偏转}离开下游机组,则整场总功率反而可能提升。这种“牺牲局部、成全整体”的协同策略称为\textbf{尾流偏转控制(wake steering)},是本研究的核心控制手段。
+
+\subsection{为什么必须用(多智能体)强化学习}
+
+尾流控制之所以困难,根本原因在于:从全场所有机组的偏航/桨距/转矩到三维风速场的映射,由 \textbf{Navier--Stokes 方程}支配\cite{theory},既高维又强非线性,在线优化不可解;高保真 CFD/LES 仿真一次要跑数小时乃至数天,无法直接嵌入实时闭环。这就迫使我们\emph{用数据驱动的策略去逼近最优控制},而不是求解显式物理模型——这正是强化学习(Reinforcement Learning, RL)的用武之地。
+
+进一步地,风电场天然是一个\textbf{多智能体}系统:每台机组是一个自主决策单元,只能观测到局部风况,却通过共享的尾流场彼此耦合、并共享“整场发电—疲劳”这一团队目标。把每台机组建模为一个智能体、用 MARL 求解协同策略,在物理直觉和工程可扩展性上都比“单一中央控制器统一决策所有机组”更自然:前者\emph{去中心化执行}、通信开销低、易随机组数扩展,后者的联合动作空间随机组数指数爆炸。
+
+\subsection{科学意义与工程价值}
+
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{科学层面}:风电场是研究“\emph{转移独立}但\emph{奖励耦合}”这一类协同 MARL 问题的理想载体。独立学习(每台机组各跑一个单体 RL)在一般 MARL 中因\emph{非平稳性}而没有收敛保证,但在风场上却经验上有效。厘清“为什么有效”并给出收敛条件,具有一般性的理论价值(见第 \ref{sec:theory} 节)。
+  \item \textbf{工程层面}:哪怕只把整场功率提升几个百分点,在 GW 级风场的全生命周期里也意味着可观的经济收益与碳减排;同时对疲劳载荷的协同抑制可延长机组寿命、降低运维支出。
+  \item \textbf{方法论层面}:本研究打通了“\emph{稳态低保真快速预训练 $\to$ 动态高保真微调 $\to$ 三维多模态数字孪生}”的完整链路,为后续引入\textbf{视觉—语言大模型}做感知增强与高层协调(第 \ref{sec:future} 节)奠定了可复现的实验基座。
+\end{enumerate}
+
+% =====================================================================
+\section{背景知识}
+% =====================================================================
+
+\subsection{三个控制手段与尾流物理}
+
+每台机组 $i$ 有三个可操控的“控制杆”\cite{wfcrl}:
+\begin{itemize}[leftmargin=1.5em,itemsep=1pt]
+  \item \textbf{偏航角 $y_i$(yaw)}:转子轴与来流方向的夹角。$y_i=0$ 时\emph{个体}功率最大;$y_i\neq0$ 会\emph{侧向偏转尾流},牺牲局部功率以抬升\emph{整场}功率——即尾流偏转控制。本项目当前实验以偏航为唯一控制量。
+  \item \textbf{桨距角 $p_i$(pitch)}:叶片攻角。增大桨距会减少捕获的风功率比例,从而降低下游湍流。
+  \item \textbf{发电转矩 $\tau_i$(torque)}:发电机反转矩,决定转子转速,与桨距类似地调制抽取的能量与尾流亏损。
+\end{itemize}
+
+关键的工程细节是:真实执行机构有\textbf{速率上限},偏航不能瞬间跳变。因此 WFCRL 把动作定义为\emph{增量} $\Delta y_i$(而非绝对设定值),并约束在有界连续区间内,例如尾流偏转基准中每步 $\Delta y_i\in[-5^\circ,+5^\circ]$。这既符合物理,又天然限定了探索步长。
+
+\subsection{强化学习与 MARL 基本范式}
+
+\textbf{单体 RL}:智能体在马尔可夫决策过程(MDP)中,通过与环境交互、以最大化累积折扣回报为目标学习策略 $\pi(a|s)$。\textbf{近端策略优化(PPO)}因训练稳定成为主流,其裁剪目标为
+\begin{equation}
+  L^{\text{PPO}}(\theta)=\E\!\Big[\min\big(r_t(\theta)\hat A_t,\ \mathrm{clip}(r_t(\theta),1-\epsilon,1+\epsilon)\hat A_t\big)\Big],
+  \quad r_t(\theta)=\frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)},
+\end{equation}
+其中 $\hat A_t$ 为优势估计(本项目用 GAE)。
+
+\textbf{MARL 的两条主线}:
+\begin{itemize}[leftmargin=1.5em,itemsep=1pt]
+  \item \textbf{IPPO(独立 PPO)}:每台机组各自跑一个 PPO,只用\emph{局部观测},互不通信。理论上非平稳,但工程上常常很强。
+  \item \textbf{MAPPO(多智能体 PPO)}:$M$ 个共享参数的\emph{局部 actor} $+$ 一个吃\emph{全局观测}的\textbf{集中式 critic}。这是\emph{集中训练、去中心化执行}(Centralized Training, Decentralized Execution, CTDE)范式:训练时 critic 看到全场信息以稳定价值估计,执行时每台机组只需局部观测。
+\end{itemize}
+经验上\cite{wfcrl}:小规模($3$ 机组)时 IPPO 常占优;随机组数增大($7$ 机组以上),MAPPO 的共享 critic 优势显现;来流分布越多样,信息共享越有价值。
+
+\subsection{两个仿真后端:静态 FLORIS 与动态 FAST.Farm}
+
+WFCRL 的一大价值是同时对接两种不同保真度的物理后端,二者构成本项目静/动对比的物理基础(表 \ref{tab:sim})。
+
+\begin{table}[h]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}p{0.24\linewidth} p{0.34\linewidth} p{0.34\linewidth}@{}}
+\toprule
+ & \textbf{FLORIS(静态)} & \textbf{FAST.Farm(动态,基于 OpenFAST)} \\
+\midrule
+物理保真度 & 稳态参数化尾流(高斯/Jensen 型) & 中保真:动态尾流蜿蜒、尾流合并、逐机组气弹 \\
+时间维度 & 无(瞬时稳态) & 有;动作到下游生效存在\emph{时延} \\
+载荷 & 无结构模型(仅湍流代理) & 有:叶片面内/面外弯矩,塔筒、传动链载荷 \\
+运动学 & 仅转子平面几何 & 有:方位角、桨距、偏航、叶片/塔筒挠曲时序 \\
+计算代价 & 瞬时(适合大规模 RL) & 慢(Fortran + MPI,训练需数小时至数天) \\
+\bottomrule
+\end{tabular}
+\caption{两个仿真后端的能力对比(据\cite{wfcrl}整理)。}
+\label{tab:sim}
+\end{table}
+
+直观地说:\textbf{FLORIS} 给出“如果风况与偏航长期不变、尾流充分发展后的稳态功率”,没有时间概念,一次计算即得,适合海量采样;\textbf{FAST.Farm} 则真实地模拟尾流从上游\emph{传播}到下游需要几十秒的\emph{时延}、机组的\emph{惯性}与时变亏损,更接近真实风场,但慢得多。这一“稳态 vs.\ 动态”的本质差异,是本项目实验设计与结论的核心(第 \ref{sec:exp}、\ref{sec:progress} 节)。
+
+% =====================================================================
+\section{底层理论模型}
+\label{sec:theory}
+% =====================================================================
+
+\subsection{协同 Dec-POMDP 形式化(基准视角)}
+
+$M$ 台机组的风电场被建模为\textbf{去中心化部分可观马尔可夫决策过程}(Dec-POMDP),即元组
+\begin{equation}
+  \big\{\,M,\ \calS,\ \calO,\ \calA,\ P,\ o^1,\dots,o^M,\ r\,\big\}.
+\end{equation}
+其中 $\calS$ 为全局状态空间;每台机组 $i$ 有局部观测空间 $\calO_i$、局部动作空间 $\calA_i$,全局 $\calO=\times_i\calO_i$、$\calA=\times_i\calA_i$;所有机组共享一个有界团队奖励 $r:\calS\times\calA\times\calS\to\R$;环境按核 $P(s,a,s')=\Prob(s_{k+1}=s'|s_k=s,a_k=a)$ 转移。机组 $i$ 依据历史 $h_i$ 执行随机局部策略 $\pi_i(a_i|h_i)$,全局策略为乘积 $\bpi(a|h)=\prod_i\pi_i(a_i|h_i)$。目标是最大化期望折扣回报
+\begin{equation}
+  \max_{\bpi}\ \E\Big[\sum_{k=0}^{T}\beta^k r_k\Big],\qquad 0<\beta<1.
+  \label{eq:obj}
+\end{equation}
+
+\textbf{使问题马尔可夫化的“真状态”是整个风场速度场,不可观。} 因此只能用\emph{局部测量}构造观测:
+\begin{equation}
+  o^i=(u_i,\ \phi_i,\ \theta_i),\qquad o_g=(o^1,\dots,o^M,\ \wind,\ \dir),
+\end{equation}
+其中 $u_i,\phi_i$ 为局部风速/风向,$\theta_i$ 为上一步下发的执行器目标(偏航/桨距/转矩),$o_g$ 为集中式 critic 用的全局观测,额外拼接了自由来流估计 $\wind,\dir$。
+
+\subsection{奖励设计:功率与疲劳}
+\label{sec:reward}
+
+\textbf{功率奖励}。第 $k$ 步的共享功率奖励是整场功率按自由来流风速立方归一化后对机组取平均:
+\begin{equation}
+  r^{P}_{k}=\frac{1}{M}\sum_{i=1}^{M}\frac{\hat P^{\,i}_{k}}{(\wind_{,k})^{3}},
+  \label{eq:rp}
+\end{equation}
+立方归一化消去了“风大风小”这一主导项,使学习信号真正反映\emph{控制质量}(尾流抑制),而非风况本身。
+
+\textbf{疲劳惩罚}。FLORIS 无结构模型,只能用湍流强度与转子平面速度方差作\emph{代理};FAST.Farm 则回传真实叶片弯矩:
+\begin{equation}
+  r^{L}_{k,D}=\frac{1}{M}\sum_{i=1}^{M}\Big(\sum_{j=1}^{3}|M^{\text{op}}_k[i,j]|+\sum_{j=1}^{3}|M^{\text{ip}}_k[i,j]|\Big),
+\end{equation}
+即三支叶片的面外($\text{op}$)与面内($\text{ip}$)弯矩之和。\emph{这些正是模拟应变片/振动传感器所需的物理通道},为后续多模态感知埋下接口。
+
+\textbf{合成奖励}。每台机组最大化式\eqref{eq:obj},其中
+\begin{equation}
+  r_k=r^{P}_k-\alpha\,r^{L}_k,\qquad \alpha\ge0,
+  \label{eq:rcomb}
+\end{equation}
+$\alpha$ 是功率与结构安全之间的\emph{帕累托权重}(默认 $\alpha=1$)。这是一个标量化多目标问题——而 $\alpha$ 恰是未来可由语言条件奖励模型设定的偏好。
+
+\subsection{转移独立重构与尾流 DAG(理论视角)}
+
+理论工作\cite{theory}回答了一个关键问题:\emph{为什么“并行地跑 $M$ 个单体 RL”这种独立学习在风场上能奏效,尽管一般 MARL 没有收敛保证?} 答案是一次结构性重构 $+$ 多时间尺度随机逼近论证。
+
+\textbf{关键一招——“牺牲状态可观性,换取转移独立性”}:每台机组的局部信息可分解为\emph{私有}分量 $y_i$(自己的偏航,只由自己控制与测量)与\emph{耦合}分量 $w_i$(局部风况统计,受他人偏航影响)。把随他人动作而变的 $w_i$ 替换为对\emph{外生来流的单一共享观测} $w_\infty$,则每个局部状态变为 $(y_i,w_\infty)$,\textbf{不再依赖其他机组的动作}。
+
+\begin{definition}[转移独立的 Dec-POMDP]
+若全局转移核可按机组分解
+\begin{equation}
+  P(s,a,s')=\prod_{i=1}^{M}P^i(s_i,a_i,s'_i),
+\end{equation}
+则称该 Dec-POMDP 是\emph{转移独立}的。此时机组\textbf{仅通过共享奖励}耦合,且最优解可由\emph{局部策略之积}达到。
+\end{definition}
+
+\textbf{尾流 DAG 结构}。在给定来流方向下,能量只向下游流动,故“机组 $i$ 的尾流影响机组 $j$”这一关系构成\emph{有向无环图}(DAG)$\calG=(V,E)$。据此可将共享奖励分解为局部分量之和
+\begin{equation}
+  r(s,a)=\sum_{i=1}^{M}r_i\big(s_i,a_i,\ s_{\mathcal U_i},\ a_{\mathcal U_i}\big),
+\end{equation}
+其中 $\mathcal U_i$ 是 $i$ 的上游邻居集。这就是\emph{网络化分布式 POMDP}(ND-POMDP)结构——每台机组只需邻域奖励即可更新,大幅降低学习所需的时间尺度数目。
+
+% =====================================================================
+\section{理论假设}
+% =====================================================================
+
+理论收敛结论\cite{theory}建立在以下几组假设之上(它们同时界定了理论的适用边界):
+
+\begin{assumption}[局部转移独立]
+存在局部核 $P^i$ 使 $P(s,a,s')=\prod_i P^i(s_i,a_i,s'_i)$。\emph{物理来源}:偏航动力学是各机组独立的确定性积分($s'_i=s_i+a_i$),机组间的耦合被移入共享奖励。
+\end{assumption}
+
+\begin{assumption}[遍历性]
+对任意非退化局部策略(所有动作有正概率),局部状态过程是不可约、非周期的马尔可夫链,从而存在唯一平稳分布。这保证了值估计里“沿轨迹的样本平均”可代表“平稳期望”。
+\end{assumption}
+
+\begin{assumption}[学习率的多尺度条件]
+各机组学习率 $\alpha^i_k$ 满足三条:\emph{(经典 Robbins--Monro)} $\alpha^i_k\to0$ 且 $\sum_k\alpha^i_k=\infty$;\emph{(缓变)} 步长随 $k$ 变化足够慢,以便马尔可夫噪声就地平衡;\emph{(尺度分离)} 当 $i<j$ 时 $\alpha^i_k/\alpha^j_k\to0$——较慢的迭代在较快者看来近似\emph{静止},较快的迭代在较慢者看来已\emph{达到均衡}。
+\end{assumption}
+
+\begin{assumption}[排序 / 奖励 Lipschitz 收缩]
+存在机组排序与常数 $K\in(0,1)$,使得某机组值函数的局部扰动,对均衡奖励场的影响\emph{严格更小}:
+\begin{equation}
+  \big\|R_{\bpi}(s)-R_{\bpi'}(s)\big\|_1\le K\,\big\|Q_i-Q'_i\big\|_\infty.
+  \label{eq:contract}
+\end{equation}
+\emph{物理含义}:沿下游方向,尾流耦合是一个\emph{收缩},上游对下游的影响不会被逐级放大。
+\end{assumption}
+
+\begin{theorem}[多时间尺度 $Q$-学习收敛]
+在上述假设下,若折扣因子满足
+\begin{equation}
+  \boxed{\ \beta\le 1-K\ }
+  \label{eq:beta}
+\end{equation}
+则各机组的 $Q$ 估计弱收敛到光滑最优响应值 $Q^{*i}$,其诱导策略 $\pi^{*i}$ 构成一个\emph{均衡}。这是单体 RL 中 Bellman 算子 $\gamma$-收缩的多智能体推广——通过时间尺度分离使收缩\emph{跨机组联合}成立。
+\end{theorem}
+
+\begin{remark}[对随机优化研究者的桥梁]
+该理论本质是一篇\emph{随机逼近}工作:$Q$-学习更新是 Robbins--Monro 迭代;多尺度是 Borkar 双时间尺度思想向 $M$ 尺度的推广;收敛证明是 Kushner--Yin 的 ODE 方法扩展到 $M$ 个耦合迭代 $+$ \emph{马尔可夫噪声}(而非零均值鞅噪声)。部分可观性带来的“逐步奖励偏差是一个未观测马尔可夫链的函数”,靠几何遍历性被平均掉——这正是分析 SGD 时有界方差假设的多智能体对应物。
+\end{remark}
+
+\begin{remark}[理论的适用边界(与我们工作的关系)]
+该保证假设\emph{直接观测}外生来流 $w_\infty$(转移独立)且状态/动作为\emph{有限表格}。一旦引入连续动作、深度函数逼近(深度网络、VLM)或含噪局部观测,两个前提都被打破——这正是我们采用 PPO/MAPPO 这类\emph{函数逼近}深度 MARL、并做\emph{静/动跨保真度}实验去经验性探查其行为的原因。将多尺度收敛推广到函数逼近情形,是作者与本项目都标注的开放问题。
+\end{remark}
+
+% =====================================================================
+\section{设计思路}
+% =====================================================================
+
+\subsection{总体路线:以基准为底座,静态预训练、动态检验}
+
+\textbf{我们目前进行的实验正是基于 WFCRL 这个基准展开的。} 总体设计遵循一条“从低保真到高保真”的路线:
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+  \item 用\textbf{FLORIS 稳态}后端做快速、大规模的策略学习与超参标定(采样便宜);
+  \item 用\textbf{FAST.Farm 动态气弹}后端做高保真检验,量化“稳态学到的策略/价值在真实动态下是否成立”;
+  \item 在同布局、同算法、同超参的严格对照下,把\emph{后端保真度}作为唯一变量,分离出“静态 vs.\ 动态”的差异本身(第 \ref{sec:exp} 节)。
+\end{enumerate}
+
+\subsection{算法设计:真·集中式 critic 的 MAPPO}
+
+我们实现了\textbf{真 MAPPO}(CTDE):$M$ 个\emph{参数共享}的局部 actor $\pi(a_i|o_i)$ $+$ 一个吃\emph{全局状态} $s=(o^1,\dots,o^M)$ 的集中式 critic $V(s)$。动作为连续\emph{偏航增量},裁剪到 $[-5^\circ,+5^\circ]$;优势用 GAE 估计;对观测与回报做 running-mean-std 归一化以稳定训练。与只用局部 critic $V(o_i)$ 的 IPPO 相比,集中式 critic 在训练期见到全场信息,理应在机组耦合强、来流多样时给出更稳的价值基线。
+
+\subsection{时序建模:面向动态后端的 GRU 时序 critic}
+
+FLORIS 稳态没有时间维度,而 FAST.Farm 有\textbf{尾流传播时延}——当前动作的效果要几十秒后才在下游显现。这正是“带记忆的集中式 critic 相对无记忆基线应当拉开差距”的场景。为此我们设计了可选的 \textbf{GRU 时序 critic}:用门控循环单元(Gated Recurrent Unit)沿整段轨迹前向,让价值估计 $V(s_t)$ 依赖历史隐状态,以捕捉“动作—下游响应”的时延结构。\emph{这是一个正在检验的假设,而非已成立的结论}(见第 \ref{sec:progress} 节对当前实现局限的诚实说明)。
+
+\subsection{面向未来的多模态感知接口}
+
+奖励与观测里已暴露的\emph{叶片弯矩}通道(第 \ref{sec:reward} 节),正是模拟\textbf{振动/应变传感器}的物理基础;FAST.Farm 输出的方位角、桨距、偏航、挠曲等\emph{运动学}又足以\emph{驱动一个三维渲染器}生成\textbf{相机图像}。据此我们把系统设计成“物理层不动、在其周围加装传感器合成与渲染”的数字孪生架构,为后续 VLM$+$RL 控制器(第 \ref{sec:future} 节)预留统一的多模态观测总线。
+
+% =====================================================================
+\section{仿真实验思路}
+\label{sec:exp}
+% =====================================================================
+
+\subsection{受控对照:把“后端保真度”作为唯一变量}
+
+核心实验是\textbf{静态 MAPPO(FLORIS)vs.\ 动态 MAPPO(FAST.Farm)}的严格对照:
+\begin{itemize}[leftmargin=1.5em,itemsep=1pt]
+  \item \textbf{同布局}:三机组一字排开的 \texttt{Turb3\_Row1}(机组沿来流方向 $x=0,504,1008$\,m 对齐,下游完全落在上游尾流中——尾流效应最显著的最坏布局);
+  \item \textbf{同算法、同超参}:同一套真 MAPPO 代码、同样的 $20$ 轮 $\times\ 64$ 步、同样的 $\gamma,\lambda,$ 裁剪、学习率、熵系数;
+  \item \textbf{唯一变量}:物理后端(稳态 FLORIS / 动态 FAST.Farm),从而把观测到的差异干净地归因于\emph{保真度}本身。
+\end{itemize}
+第三轮追加\textbf{动态 GRU-MAPPO},构成“静态 / 动态 / 动态+记忆”三方对比。
+
+\subsection{评价指标}
+
+每轮记录三条曲线:\emph{(1)} 整形后的单步奖励;\emph{(2)} 整场总功率(MW);\emph{(3)} critic 的\textbf{可解释方差}(explained variance)——衡量价值网络对回报的拟合优度,是“这个后端下价值到底好不好学”的直接读数。
+
+\subsection{分布迁移与泛化(基准内置)}
+
+WFCRL 的场景 II 每回合\emph{重采样}自由来流:风速 $\wind\sim\text{Weibull}(\bar u,\lambda)$、风向 $\dir\sim\calN(\bar\phi,\sigma_\phi)$;场景 III 回放真实实测时间序列。评价分数按真实风场三个月实测的二维(风速$\times$风向)直方图频率加权。这为策略的\emph{离分布泛化}与\emph{sim-to-real}提供了内置检验,也是“FLORIS 上训练、FAST.Farm 上部署”这一迁移任务的落点。
+
+\subsection{三维数字孪生可视化}
+
+为直观呈现协同策略,我们搭建了 \textbf{RViz 风格的三维桌面可视化平台}(PyVistaQt):3D 场景可轨道/缩放/平移,机组按真实偏航姿态动画,尾流水平切面随策略实时刷新,侧栏以“通道(等价 ROS topic)”方式订阅 yaw / power / vibration / wake 并实时刷新遥测表。对 FAST.Farm 后端,\emph{机组姿态、功率、载荷均取气弹真值},而三维尾流平面由“同布局 FLORIS-proxy”按实测风速$+$实测偏航渲染(因 FAST.Farm 不向上层暴露实时流场,只回传每台机组测量),兼顾了真实性与可视化的即时性。
+
+% =====================================================================
+\section{目前进展}
+\label{sec:progress}
+% =====================================================================
+
+\subsection{已完成的系统工程}
+
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+  \item \textbf{FAST.Farm 动态后端全流程打通}:完成 MS-MPI 运行时配置与官方 ABI 修正,以 \texttt{mpiexec} 正确 spawn FAST.Farm 子进程并驱动;封装了后端无关的统一驱动器,把 PettingZoo AEC 接口整理为“一次 step $=$ 推进一个控制步”的简洁 API,并妥善处理了回合预算排空以避免 MPI 孤儿进程。
+  \item \textbf{真 MAPPO 训练管线}:静态(FLORIS)与动态(FAST.Farm)两条后端均可端到端训练、存 checkpoint、出三联曲线,并落 JSON 供叠加对比;可选 GRU 时序 critic 路径已实现。
+  \item \textbf{三维数字孪生可视化}:RViz 风格应用可加载训练好的 MAPPO 策略驱动偏航,实时渲染尾流与遥测;FLORIS 后端支持拖拽重布局并即时重算尾流。
+\end{enumerate}
+
+\subsection{正式对比实验结果}
+
+在同布局 \texttt{Turb3\_Row1}、同算法同超参、$20$ 轮 $\times\ 64$ 步下,末 $5$ 轮均值如表 \ref{tab:result}。
+
+\begin{table}[h]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{实验} & \textbf{整场功率 (MW)} & \textbf{可解释方差} & \textbf{说明} \\
+\midrule
+静态 MAPPO(FLORIS)      & $\mathbf{5.69}$ & $0.362$ & 稳态,价值易学 \\
+动态 MAPPO(FAST.Farm)   & $\mathbf{2.34}$ & $0.191$ & 气弹,价值含噪 \\
+动态 GRU-MAPPO          & $1.87$          & $0.056$ & 仅 $18/20$ 轮,见下 \\
+\bottomrule
+\end{tabular}
+\caption{静态 vs.\ 动态正式对比(末 5 轮均值)。}
+\label{tab:result}
+\end{table}
+
+\textbf{头条结论(稳健):静态与动态之间存在约 $2.5\times$ 的功率差。} 在同一三机组对齐布局上,FLORIS 稳态给出 $\sim\!5.69$\,MW,而 FAST.Farm 气弹只有 $\sim\!2.34$\,MW。原因是:稳态模型假设尾流\emph{瞬间}充分发展且无时变亏损,\textbf{系统性高估}了风场功率;而在真实动态下,下游机组长期处于充分发展的真实尾流中,叠加传播时延与湍流亏损,实际功率低得多。可解释方差也从静态的 $0.362$ 降到动态的 $0.191$——\emph{动态后端的价值函数明显更难学},与其含时延、含噪声的本质一致。这一结果定量地印证了文献反复强调的“低保真模型上学到的策略/价值在高保真上会退化”的\emph{sim-to-real 鸿沟},凸显了动态检验的必要性。
+
+\subsection{对 GRU 一轮的诚实说明}
+
+动态 GRU-MAPPO 这一轮\textbf{没有赢}(可解释方差 $0.056$,更差),且该轮因外部原因在 $18/20$ 轮被中断、结果由日志抢救得到。\emph{但这是当前实现的缺陷,不能作为“记忆无用”的结论}:现有 recurrent 采样阶段每步以 $h_0=\text{None}$ 计算价值,GRU 隐状态没有\emph{跨步携带},GAE 的价值目标根本没吃到记忆,因而“时序 critic 的记忆优势”并未被公平行使。要公平检验“动态确实需要记忆”这一假设,需改为\emph{有状态 rollout(隐状态跨步携带并存储)$+$ 更新时按序列重建做时间反向传播(BPTT)}的正规 recurrent PPO。这是下一步明确的技术项。
+
+\subsection{阶段性小结}
+
+至此,项目已从“训练失败、MPI 配置”一路推进到“动态后端稳定运行、三维可视化可出图、静/动正式对比完成”。我们得到了一个稳健且有物理解释的核心发现(静/动 $\sim\!2.5\times$ 功率差),同时清晰地界定了当前实现的局限(recurrent 路径尚需正规化),为后续工作划定了明确边界。
+
+% =====================================================================
+\section{下一步规划:面向多模态 VLM$+$RL 的风机智能控制}
+\label{sec:future}
+% =====================================================================
+
+在已打通的“物理 $+$ MARL $+$ 数字孪生”基座上,下一阶段引入\textbf{视觉—语言大模型(VLM)},把控制问题升级为\emph{多模态感知—决策}问题。
+
+\subsection{数字孪生协同仿真架构}
+
+保持已验证的\textbf{物理层不动}(FLORIS 快速预训练 $+$ FAST.Farm/OpenFAST 动态核),在其周围加装:\emph{(i)} \textbf{SCADA 传感器合成}($u_i,\phi_i,P_i,y_i,p_i,\tau_i$,现成);\emph{(ii)} \textbf{振动/IMU 通道}(叶片弯矩、加速度,物理有据,是 FAST.Farm“免费”给的最强多模态通道);\emph{(iii)} \textbf{三维渲染器}(如 Isaac Sim / Blender,用运动学驱动 NREL 5\,MW 参考机组网格,生成 RGB/深度相机图像——这是唯一需要新增工程的模态)。所有模态汇入统一状态总线,交由 VLM 融合为观测,再驱动 MARL 策略回写控制增量。
+
+\subsection{VLM 的四个价值点}
+
+\begin{enumerate}[leftmargin=1.6em,itemsep=1pt]
+  \item \textbf{感知状态增强}:识别 SCADA 向量看不到的可视条件(尾流蜿蜒、叶片结冰/损伤、烟火),纳入观测;
+  \item \textbf{高层规划/协调器}:让 VLM 在风场“场景图”(即尾流 DAG)上推理,提出偏航意图,由底层 MARL 执行;
+  \item \textbf{语言条件奖励/偏好模型}:用自然语言运维目标设定式\eqref{eq:rcomb}中的功率—疲劳权重 $\alpha$(如“今天优先保护前排叶片寿命”);
+  \item \textbf{巡检智能体}:消费渲染相机$+$振动谱,标记待检修机组,闭合“控制—运维”回路。
+\end{enumerate}
+
+\subsection{与三层自进化架构的衔接}
+
+更长远地,该多模态智能体将嵌入一个\textbf{三层自我进化架构}:上下文学习(秒级、工作记忆)做瞬时纠偏,LoRA 微调(小时—天级、情景记忆)从重复误差中提炼规律,强化学习(天—周级、程序性记忆)优化编码\emph{不对称决策代价}的长期策略,三层经统一经验回放池协同。风电场协同控制正是该架构“安全约束下在线进化”理念的理想验证场景。
+
+% =====================================================================
+\section{结语}
+% =====================================================================
+
+本文以 WFCRL 基准为主线,梳理了风电场协同控制的物理背景、Dec-POMDP 与 TI-Dec-POMDP 理论模型、多时间尺度 $Q$-学习的收敛假设与条件($\beta\le1-K$),阐述了我们“静态预训练、动态检验”的设计思路与受控对照的仿真实验方案,并报告了核心进展:静/动后端约 $2.5\times$ 的功率差这一稳健发现,以及对 GRU 时序 critic 当前实现局限的诚实界定。这些工作为下一步引入多模态 VLM$+$RL 控制器、构建三维数字孪生智能运维系统,奠定了可复现的理论与实验基础。
+
+% =====================================================================
+\begin{thebibliography}{9}
+\bibitem{wfcrl} C.~Bizon Monroc, A.~Bu\v{s}i\'c, D.~Dubuc, J.~Zhu.
+  \emph{WFCRL: A Multi-Agent Reinforcement Learning Benchmark for Wind Farm Control.}
+  NeurIPS 2024, Track on Datasets and Benchmarks.
+\bibitem{theory} C.~Bizon Monroc, A.~Bu\v{s}i\'c, D.~Dubuc, J.~Zhu.
+  \emph{Wind farm control with cooperative multi-agent reinforcement learning.}
+  Workshop on Aligning RL Experimentalists and Theorists (ARLET), 2024.
+\bibitem{borkar} V.~S.~Borkar.
+  \emph{Stochastic approximation with two time scales.}
+  Systems \& Control Letters, 29(5):291--294, 1997.
+\bibitem{kushneryin} H.~J.~Kushner, G.~G.~Yin.
+  \emph{Stochastic Approximation and Recursive Algorithms and Applications.} Springer, 2003.
+\bibitem{ppo} J.~Schulman, F.~Wolski, P.~Dhariwal, A.~Radford, O.~Klimov.
+  \emph{Proximal Policy Optimization Algorithms.} arXiv:1707.06347, 2017.
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,3875 @@
+
+===== [PARTIAL] PAGE 1/47 =====
+HAL Id: hal-04560319
+https://hal.science/hal-04560319v2
+Preprint submitted on 19 Mar 2026
+HAL is a multi-disciplinary open access archive
+for the deposit and dissemination of scientific re-
+search documents, whether they are published or not.
+The documents may come from teaching and research
+institutions in France or abroad, or from public or pri-
+vate research centers.
+L’archive ouverte pluridisciplinaire HAL, est des-
+tinée au dépôt et à la diffusion de documents scien-
+tifiques de niveau recherche, publiés ou non, émanant
+des établissements d’enseignement et de recherche
+français ou étrangers, des laboratoires publics ou
+privés.
+Distributed under a Creative Commons CC BY-NC-ND 4.0 - Attribution - Non-commercial use - No
+Derivative Works - International License
+Multi-agent reinforcement learning for locally observable
+cooperative systems with acyclic dependence structure
+Claire Bizon Monroc, Ana Bušić, Donatien Dubuc, Jiamin Zhu
+To cite this version:
+Claire Bizon Monroc, Ana Bušić, Donatien Dubuc, Jiamin Zhu. Multi-agent reinforcement learning for locally
+observable cooperative systems with acyclic dependence structure. 2025. ⟨hal-04560319v2⟩
+===== [PARTIAL] PAGE 2/47 =====
+Multi-agent reinforcement learning for locally observable cooperative systems1
+with acyclic dependence structure2
+Claire Bizon Monroc ∗ , Ana Buˇ si´ c† , Donatien Dubuc ,andJiamin Zhu ‡3
+Abstract.Single-agent reinforcement learning algorithms can be directly applied to multi-agent systems in4
+an independent learning approach, but often lose their convergence properties as the environment5
+becomes non-stationary. We prove that in transition-independent Decentralized Markov Decision6
+Process (TI Dec-MDP) non-stationarity can be mitigated by a multi-scale approach when the inter-7
+dependence of agents’ dynamics can be represented by a directed acyclic graph (DAG). Although8
+TI Dec-MDPs are thought to be restrictive, we show that they can describe complex real world9
+problems through a careful design of local states. We propose a multi-scale Q-learning algorithm10
+(MQL) where agents update local Q-learning iterates at different timescales without communication11
+and still converge. To this purpose, we first show that we can model the loss of information on12
+the global state as a state-dependent Markovian noise. Then, we show that results from stochastic13
+approximation theory can be used to prove the convergence of MQL under local state observability.14
+We give practical solutions to exploit knowledge about agent interaction to assign learning rates15
+that ensure convergence, and propose a NetworkMQL algorithm that can achieve convergence in16
+Network-Distributed POMDP (ND-POMDP). We validate both MQL and NetworkMQL on a wind17
+farm control problem. 18
+Key words.Learning and adaptive systems in artificial intelligence, Online algorithms, Multi-agent systems,19
+Decentralized systems 20
+1. Introduction.Recent advances in reinforcement learning (RL) have seen a growing21
+interest in solving cooperative multi-agent problems, where several agents interact with the22
+same environment to optimize a common objective [44, 29]. Multi-agent reinforcement learning23
+(MARL) has encountered successes in fields as varied as games with multiple players [5],24
+vehicle routing problem for traffic regulation [43], or distributed optimal control of wind farms25
+[36, 9, 20]. In this article, we consider a family of fully cooperative, infinite horizon multi-26
+agent reinforcement problems, where state information is distributed among all agents and27
+they must collaborate to maximize a shared reward. Such problems are commonly formulated28
+as decentralized partially observable Markov decision processes (Dec-POMDPs) in the MARL29
+literature. It is known that solving Dec-POMDPs is very hard: finding a solution to a two-30
+player Dec-POMPD has been proven to be NEXP-hard, and is undecidable for the infinite-31
+horizon case [8]. Instead of general Dec-POMDP, we focus on the special case of thetransition-32
+independentDec-MDP, which is of NP-hard complexity [3]. In a transition-independent Dec-33
+MDP, each agent’s local observations only depend on local states and actions, so that agents34
+only interact through the shared reward. In general, blind cooperation problems in which35
+agents must learn to coordinate while being oblivious to each other’s existence will fit this36
+description. In the rover exploration problem introduced by [7] for example, several rovers37
+must coordinate to explore a planet. Rovers are assigned distinct sides of the planet to explore38
+∗Mines Paris, PSL Research University, Paris, France. E-mailclaire.bizon monroc@minesparis.psl.eu
+†Inria and DI ENS, ´Ecole Normale Sup´ erieure, PSL Research University, Paris, France.
+‡IFP Energies nouvelles
+Funding:Part of this work is carried out in the framework of the AI-NRGY project, ANR-22-PETA-0004,
+funded by France 2030.
+1
+===== [PARTIAL] PAGE 3/47 =====
+2 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+so that they do not directly interact, but the value of the information they can gather depends39
+on what is collected by other agents.40
+Transition-independent Dec-MDPs have been studied in the planning literature, and sev-41
+eral planning algorithms have been proposed to find optimal local policies [28, 7, 17, 14].42
+However, they exploit full knowledge of the transition matrix and the reward function, which43
+are rarely available in real-life problems. MARL algorithms, on the other hand, focus on learn-44
+ing solely from interactions with the environment. In a centralized training, a single learner45
+updates all local policies based on global observation. Multi-agent systems are, however, of-46
+ten under constraints that prevent instantaneous communication of all agents with a central47
+controller. Moreover, centralized approaches are vulnerable to the curse of dimensionality, as48
+the size of the search space increases exponentially with the number of agents.49
+In an online decentralized training approach, each agent updates its own local policy50
+only with the information it has collected. To compensate for the loss of information, online51
+learning algorithms for Dec-POMDP typically allow agents to keep past observations in their52
+memory, allow communication between agents during training, maintain beliefs about the53
+global state of the environment, or estimate the behaviors of other agents [28, 29]. Instead,54
+an interesting question is to see whether memory-less policies can still be learned without55
+additional estimates or communication. In particular, MARL has focused on extending the56
+success of single-agent reinforcement learning algorithms to the multi-agent case, such as the57
+classic Q-learning algorithm [41]. One naive way to adapt the single-agent Q-learning to58
+the multi-agent case is to simply let each agent run local Q-learning updates, with other59
+agents considered as a part of its environment. This approach was first introduced by [39]60
+asIndependent learning. Independent learning has been shown to produce good empirical61
+results in a number of problems [24], and is used as a baseline to develop current state-of-the-62
+art MARL algorithms [42]. As it avoids the exponential dependence of dimension of the search63
+space in the number of agents, independent learning is more scalable. However, agents learning64
+simultaneously make the state and reward processes appear non-stationary for each agent, an65
+issue that is commonly referred to as thenon-stationarityproblem. This leads to the loss of66
+convergence guarantee for single-agent RL algorithms. Moreover, the system may prevent full67
+observability of the environment to the agents, with each agent only collecting a function of68
+the global state. Solutions to mitigate the non-stationarity typically rely on a modification69
+of algorithm’s local rule. Examples have been turn-based control [32] or turn-based updates70
+[37], two stages algorithms requiring agent coordination during learning [34, 4], coordinated71
+exploration between agents, and consensus-based approaches or explicit modeling of other72
+agent’s behavior [44]. We propose a multi-scale approach that does not require coordination73
+between agents during learning, and converges to a best-response equilibrium in transition-74
+independent Dec-MDP.75
+Although transition-independent Dec-MDPs are thought to be restrictive, our first con-76
+tribution is to show that they can be imposedby designto describe complex real world prob-77
+lems, showing a trade-off between observability and complexity. In this article, we show that78
+transition-independent Dec-MDPs can be constructed from certain standard Dec-POMDPs,79
+and that such a reformulation can be useful to solve real industrial problems. In [25] for80
+example, a distributed wind farm optimization problem is considered, in which the local in-81
+formation of the Dec-POMDP can be factorized into two components. The first is a private82
+===== [PARTIAL] PAGE 4/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 3
+component, that is a local component independent of other agents. The second is a deter-83
+ministic function of the private components of other agents, and of an exogenous Markovian84
+process that is independent of any agent’s action. Whenever such an exogenous process can85
+be identified, constructing local states by replacing the second component with a direct obser-86
+vation of the exogenous process frees the local state from dependence on other agents’ action,87
+while maintaining the Markovian property of the global MDP. A detailed example will be88
+given in Section 4. This reformulation could explain the good empirical results of the inde-89
+pendent learning approaches applied to wind farm control problems observed in the literature90
+[25, 20] (see [2] for a thorough review).91
+We show that for independent learners in transition-independent Dec-MDP, the loss of92
+information due to partial observability can be seen as a Markovian noise. We then focus93
+on the case where agent dynamics can be described by a directed acyclic graph (DAG), and94
+show that in such a case the non stationarity issue can be addressed by a multi-timescale95
+learning approach: by allowing agents to learn at different time scale, we ensure that for any96
+”fast” agent, the ”slow” evolution of other policies will lead iterates to behave as though the97
+environment was stationary, and ultimately converge. Note that this approach belongs to98
+the independent learning family and thus is scalable to large number of agents. Moreover,99
+we show that our multi-scale Q-learning approach can further exploit information on inter-100
+actions between agents to accelerate convergence. For this purpose, we focus on the network101
+distributed POMDPs (ND-POMDPs), a class of transition independent Dec-POMDP intro-102
+duced in [26], where agent interactions can be represented by a sparse graph. [26] focuses on103
+the finite-horizon problem where the dynamics of the MDP are fully known, and proposes a104
+decentralized planning algorithm relying on communication between agents and costly best105
+response computations at each step. In our reinforcement learning framework, the environ-106
+ment dynamics are however unknown, the horizon is infinite and learning must be done online:107
+we show how our independent learners still converge to a best response equilibrium when the108
+graph is acyclic.109
+Our convergence analysis is based on stochastic approximation techniques. Stochastic110
+approximation and multi-timescale approaches have been used to analyze fully observable111
+learning algorithms. In [11], the convergence of the single-agent Q-learning has been proven112
+with a stochastic approximation approach. Two-timescale stochastic approximation was then113
+introduced in [10], showing that two interdependent stochastic processes can both converge114
+when they are updated at two different scales. These have been successfully used to build re-115
+inforcement learning algorithms maintaining different iterates. The learning of future rewards116
+and of the best response has for example been decoupled in various fictitious-play [6, 33, 23]117
+and Q-learning [31] inspired schemes for fully observable zero-sum and team games. Two-118
+timescale results have been extended to an arbitrary number of scales in [22], and used to119
+analyze a multi-scale learning algorithm in some classes of repeated games. In [27], a similar120
+multi-scale approach is further evaluated on several multi-agent reinforcement learning prob-121
+lems, but a convergence analysis is not provided. Unfortunately, convergence results of these122
+works have required the reward function to be stationary, meaning that for a given agent123
+observation-action pair, the collected reward is always sampled from the same distribution.124
+These results therefore cannot apply to the Dec-MDP case where global state information is125
+distributed among agents, and each can only observe a local state. We make the following126
+===== [PARTIAL] PAGE 5/47 =====
+4 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+contributions.127
+•We show that for independent learners in a transition-independent Dec-MDP, the loss128
+of information due to partial observability can be seen as a Markovian noise.129
+•We prove that in a class of Dec-MDP where agent dynamics can be described by a130
+DAG, independent Q-learners learning at different time scales can converge towards131
+a best-response equilibrium. To achieve this, we first formally extend the weak con-132
+vergence [Theorem 6.2, Chapter 8, [21]] for synchronous two-timescale iterates to syn-133
+chronous multi-timescale iterates, then further extend this result together with [Theo-134
+rem 5.1, Chapter 12, [21]] for single-timescale asynchronous updates to asynchronous135
+multi-timescale updates (see Theorem 5.1)136
+•We show that in ND-POMDPs, our multi-scale Q-learning approach can exploit a137
+DAG structure of interactions to accelerate convergence.138
+•We apply these results to the maximization of power output in the wind farm control139
+problem. We show that it can be rewritten as a transition-independent Dec-MDP, pro-140
+viding a first explanation for the success of independent learners on this task observed141
+in the literature.142
+•We show that our DAG structure can be used to design local rewards and accelerate143
+convergence in the wind farm control problem.144
+The paper is organized as follows. In Section 2 we formalize the problem of finding an145
+equilibrium in a transition-independent Dec-MDP. Then in Section 3, we propose a multi-scale146
+Q-learning algorithm: we lay out the assumption of acyclic dependence structure between147
+agent dynamics, and show how it allows us to apply our multi-scale algorithm to TI Dec-148
+MDPs. We then exploit the graph of interaction between agents in a networked problem to149
+derive faster algorithms. Our experiment in Section 4 evaluates the multi-scale approach on150
+the real industrial problem of wind farm control, and empirically validates its convergence.151
+The last section of this paper is then dedicated to proofs: in Section 5, we show that the152
+convergence of our multi-scale Q-learning can be derived from the weak convergence of multi-153
+scale iterates with Markovian noise. The formal extension of the two-timescale convergence154
+results introduced in [21] to an arbitrary number of scales with asynchronous updates is155
+detailed in the supplement.156
+2. Cooperative MARL with local learners.We start by formalizing the problem of157
+transition-independent Dec-MDP. We then explicit the assumptions on the transitions and158
+local policies that we will consider in the rest of this paper, before introducing our multi-scale159
+Q-learning algorithm.160
+2.1. Independent transition Dec-POMDP.We consider a decentralized partially ob-161
+servable Markov Decision Process (Dec-POMDP) reinforcement learning problem, whereM162
+agents interact with the same environment to maximize a common reward. Let us assume a163
+finite state spaceSand a finite action spaceA. The global action spaceAis factorized into164
+Mlocal action spacesA=A 1 × · · · ×AM . Any agentionly receives a partial observation165
+of the global stateo i, and samples an action according to a local policya i ∼π i mapping166
+observations to distributions overA i. This induces a global policyπ= (π 1, . . . , πM ). A global167
+rewardr:S×A→Ris shared by all agents. The reward is bounded inRby a constantR >0,168
+that is:∀(s, a)∈S×A,|r(s, a)| ≤R. We writeP:S×A×S→(0,1) a transition kernel,169
+===== [PARTIAL] PAGE 6/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 5
+denoting transition probabilities between states given chosen actions. For a discount factor170
+β∈(0,1), we wish to maximize the expectation of the sum of discounted reward or return171
+Eπ
+P∞
+k=0 βkr(sk, ak)
+
+. As we consider a transition-independent Dec-POMDP [7], we assume172
+that transitions between locally observed states only depend on local states and actions:173
+A 2.1.Sis factored into local state spacesS=S 1×· · ·×SM and there exists local transition
+kernels(P i)i=1...M such that∀s, a, s′ ∈S×A×S,s= (s 1, . . . , sM )with:
+P(s, a, s′) = ΠM
+i=1P i(si, ai, s′i)
+If the partial observationo i received by agentiis exactly its local states i, then the transition-174
+independent Dec-POMDP is fully locally observable and is also called a transition-independent175
+decentralized MDP (TI Dec-MDP).176
+This model can describe several problems in robotics or industrial applications. The collec-177
+tive rover exploration problem introduced in [7] for example considers rovers with independent178
+dynamics and a shared reward. Note that the model can be extended to a factorization of179
+the state space inM+ 1 componentsS=S e ×S 1 × · · · ×SM , whereS e is the state space180
+of an exogenous Markovian process. An exogenous process is not affected by any agent’s181
+actions. The transition of that exogenous process is then defined by a local kernelP(s e, s′e)182
+such thatP(s, a, s′) =P(s e, s′e)ΠM
+i=1P i(si, ai, s′i). Theith agent can receive the partial obser-183
+vation (se, si). In Section 4, we will consider the problem of the cooperative control of many184
+wind turbines in a wind farm, and show how it can be rewritten as a TI Dec-MDP with an185
+exogenous process.186
+It has been shown by [16] and [13] that in TI Dec-MDPs the return can be maximized by187
+decentralized Markovian policies: policies that only depend on the last observed local state.188
+Denoting for allsanda,π(a|s) the probability of actiona(the vector of individual actions189
+of all agents) in states, we haveπ(a|s) = Π M
+i πi(ai |s i).190
+For any stationary global policyπ, the global state processsis in fact a Markov chain
+with transition matrix
+Pπ(s, s′) =
+X
+a
+π(a|s)P(s, a, s′) =
+X
+a=(a1,...,aM )
+ΠM
+i=1πi(ai|si)P(s, a, s′)
+We now introduce an assumption on the transition function of the MDP191
+A 2.2.For any non-deterministic local policyπ i such that∀a i, si, πi(ai |s i)>0, the local192
+state process is an irreducible and aperiodic Markov chain.193
+This classical assumption for Q-learning [41, 40, 19] will ensure that all local state processes194
+admit an invariant distribution, and will converge to it under a fixed policy regardless of the195
+initial distribution. Note that following A 2.1 this implies that the global state process is also196
+irreducible and aperiodic.197
+Using vector notation, we defined π ∈(0,1) |S| the invariant distribution over the global198
+state spaceSsatisfyingd πPπ =d π. Similarly, for every agentiwe defined πi
+i , the invariant199
+distribution of the local state processs i. If we ensure that local policiesπ i have non-null200
+probabilities on all the local action space, then A 2.2 implies that the local state-action pro-201
+cess (s i,a i) is also irreducible: it is a Markov chain overS i ×A i, with transition matrix202
+===== [PARTIAL] PAGE 7/47 =====
+6 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+Pπi((si, ai),(s ′i, a′i)) =P(s i, ai, s′i)πi(a′i|s′i) given by A 2.1. We denote its invariant distribu-203
+tion asλ i.204
+In the rest of this paper, we consider the TI Dec-MDP that satisfies A 2.1 and A 2.2.205
+For simplicity of notations, in the following we ignore exogenous processes, but the analysis206
+is easily adapted to them.207
+2.2. Q-functions in a TI Dec-MDP.For an agentiand a global policyπ, we noteπ −i208
+the set of local policies inπexceptπ i. For any pair (s i, ai)∈S i ×A i and any global policyπ,209
+we define thei th q-functionQ π−i
+πi (si, ai) the value of taking actiona i in local states i, and then210
+following policyπ i, provided that any other agentjfollows its respective local policyπ j. As211
+the reward is a function of the global state, the value expectation must be taken with respect212
+to a distribution on the global state. Noting that we consider the infinite-horizon problem, we213
+chose the stationary distributiond π, to which the global state process asymptotically converges214
+underπ, under assumption A 2.2. A similar extension of the value function has been proposed215
+for the single-agent partially observable case (POMDP) [35]. We therefore have:216
+(2.1)Q π−i
+πi (si, ai) =E s0∼dπ,ak∼(πi,π−i),sk∼P
+" ∞X
+k=0
+βkr(sk, ak)|s i
+0 =s i, ai
+0 =a i
+#
+217
+These local q-functionsQ π−i
+πi can be written as tables of dimension|S i| × |Ai|, and admit a218
+recursive formula given in Lemma 2.1. Note that this recursive formula exists because the219
+value expectation is taken with regard to the stationary distribution on the global state.220
+Lemma 2.1.Any local q-function(2.1)satisfies the following recursive formula:221
+Qπ−i
+πi (si, ai)
+=
+X
+s
+dπ(s|s i)
+X
+a−i
+π−i(a−i|s)r(s, a) +β
+X
+s′i
+P i(si, ai, s
+′i)
+X
+a′i
+πi(a
+′i|s
+′i)Qπ−i
+πi (s′i, a′i)(2.2)222
+The proof of Lemma 2.1 is straightforward but tedious, we detail it in the Supplement (Sec-223
+tion 1). Like for the single-agent q-value function [38], the q-value is divided into two parts:224
+an immediate reward collected in the current state and a future gain, that is, the reward225
+expectation starting from the next state. We now introduce the definition of a best response,226
+as a local policyπ i that maximizes the return when other local policies are fixed.227
+Definition 2.2 (Best response).A local policyπ i
+br is said to be a best response to a set of
+local policiesπ −i if starting from any local state, it always maximizes the return as the other
+agents follow local policiesπ −i. That is, for any local policyπ i we have:
+Qπ−i
+πi
+br
+(si, ai)≥Q π−i
+πi (si, ai)∀s i ∈S i, ai ∈A i
+Best response policies will therefore maximize the expectation of this optimal q-value228
+at every states i. They can be written as the set of policiesπ i such thatπ i(· |s i)∈229
+arg max
+ρ∈Ω(si)
+h
+ρT Qπ−i
+πi (si,·)
+i
+, where Ω(s i)⊂[0,1] |Ai| is the simplex of dimension|A i|represent-230
+ing the set of local strategies mapping a given local state to a distribution over actions. Yet231
+===== [PARTIAL] PAGE 8/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 7
+in order to ensure that local policies always have non-null probabilities on the local action232
+space, we consider a regularized objective introduced in [22, 31]: for any given q-value table233
+Qi, let us define the mappingϕthat returns the following local policy:234
+(2.3)ϕ(Q i)(· |si) = arg max
+ρ∈Ω(si)
+
+ρT Qi(si,·) +τ νi
+si(ρ)
+
+∀si ∈S i235
+whereτ >0 is a temperature parameter representing the weight given the regularization, and236
+νi
+si is a smooth and strongly concave function which takes infinite values outside of Ω(s i).237
+Strong concavity ensures the uniqueness of the solutionϕ(Q i), and we call any local policy238
+π∗i such thatπ ∗i =ϕ(Q π−i
+π∗i ) a smoothed best response toπ −i. If all agents follow a smoothed239
+best-response, then the corresponding global policy is called an equilibrium.240
+Definition 2.3 (Equilibrium).A global policyπ ∗ is an equilibrium iff every local policyπ i241
+is a smoothed best response to other local policiesπ −i.242
+To shorten the notation, we writev ′(Qi, si, ai) the expectation of the future gain as esti-243
+mated by any tableQ i after taking actiona i ins i:244
+(2.4)v ′(Qi, si, ai) =
+X
+s′i
+P i(si, ai, s′i)[ϕ(Qi)(· |s′i)]T Qi(s′i,·)245
+Then writingQ π−i
+∗ =Q π−i
+π∗i , from Lemma 2.1 the equilibriumπ ∗ and its associated q-functions246
+Qπ∗−i
+∗ (si, ai) are solutions to the following equations: for alli∈ {1. . . M},si ∈S i,a i ∈A i,247
+Qπ∗−i
+∗ =
+X
+s
+dπ∗
+(s|s i)
+X
+a−i
+π∗−ir(s, ai, a−i) +βv ′(Qπ∗−i
+∗ , si, ai)248
+3. Weak-convergence of multi-scale Q-learning iterates.Let all agents maintain a local249
+estimate ˆQi of the q-function (2.1), and follow a local policyπ i =ϕ( ˆQi). The combined actions250
+of all agents sampleMlocal trajectories{(s i
+0, ai
+0, ri
+0),(s i
+1, ai
+1, ri
+1). . .}, i∈ {1. . . M}. Let now251
+all agents locally run a Q-learning update, so that each agent updates its local estimate ˆQi
+k252
+at each timestepk:253
+ˆQi
+k+1(si, ai) = ˆQi
+k(si, ai)
++α i
+k(si
+k, ai
+k)
+h
+rk +β[ϕ( ˆQk)(· |si
+k+1)]T ˆQk(si
+k+1,·)− ˆQi
+k(si
+k, ai
+k))
+i
+Ik,si,ai
+(3.1)254
+withI k,si,ai the indicator of the event that the local state-action pairs i, ai is visited at255
+timestepk, andα i
+k(si
+k, ai
+k) learning rate sequences maintained separately by each agent. At256
+this timestep, all other state-action pairs are not updated, and the iterates are therefore257
+asynchronous.258
+Note that in single-agent Q-learning, the collected rewardr(s, a) is exactly the expectation259
+of the reward for the observed state-action pair (s, a). Here however, no agent ever collects a260
+reward sampled according to the stationary distribution of the equilibrium policy as defined in261
+the q-value (2.1). In fact, no agent ever collects a reward sampled from any fixed distribution262
+at all, as the reward is a function of the changing actions of other agents. Instead, we show263
+that the collected reward depends on an unobserved Markovian global state process, and that264
+===== [PARTIAL] PAGE 9/47 =====
+8 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+the difference between the collected reward and the reward expected at equilibrium can be265
+seen as a state-dependent noise. To treat this state-dependent noise, we apply techniques from266
+the stochastic approximation theory. We reframe the convergence of our Q-learning iterates as267
+the problem of finding a specific ranking among agents, such that at equilibrium the change268
+in policy of an agent of higher rank creates only small perturbations among agents with a269
+lower rank. Then, we let agents of different ranks learn at different time scales by imposing270
+a hierarchy between their respective learning ratesα i
+k. We call the resulting algorithm the271
+multi-scale Q-learningalgorithm.272
+In the next section we detail further what we mean by agent ranking. To simplify the273
+exposition, in Subsection 3.1, we will assume that there is a total ordering of agents satisfying274
+A 3.1. Intuitively, we assume that there is a total ordering of agents such that for any agent275
+i, any small perturbation of the policyπ i, the best response dynamics of agents that are276
+greater thanileads to a small change in the overall objective function. However, a total277
+ordering will force us to have as many learning rates as agents. In Subsection 3.2, we will278
+relax this assumption to a more realistic partial ordering of agents, and illustrate how to assign279
+learning rates to different agents in a more concrete application. We will consider a networked280
+distributed POMDP (ND-POMDP), in which the shared reward is distributed among agents,281
+and the dependency graph between agents is acyclic and known. We show how the knowledge282
+about this graph can be exploited to reduce the number of different learning rates and build283
+a faster algorithm.284
+3.1. Interaction structure between agents for multi-scale Q-learning.Consider the case285
+where each agentiis updating a local q-value estimate ˆQi, and the agents are given learning286
+rates such that each agent is learning at a different timescale. We start by defining precisely287
+the total preorder needed on agents for iterates (3.1) to converge.288
+Consider any agentiwith a q-tableQ i, and write289
+(3.2)π= (π 1, . . . , πM ), π j =ϕ(Q j), Q= (Q 1, . . . , QM )290
+We also denoteQ >i = (Q i+1, . . . , QM ) andQ <i = (Q 1, . . . , Qi−1). Let us take a set of291
+q-tablesQwith its corresponding global policyπ=ϕ(Q). According to A 2.2, there exists a292
+corresponding stationary distribution over the global statesd π. We writer π the expectation293
+of the reward underd π, so thatr π = P
+s
+P
+a dπ(s)π(a|s)r(s, a). Now let us assume that:294
+•Forj≤i,Q j is any q-table in|S j| × |Aj|295
+•Forj > i,Q j is a q-table of the smoothed best response toπ −j defined in Subsec-296
+tion 2.2, and writtenQ j =Q π−j
+π∗j . We writeQ >i =Z ≥i+1(Q<i, Qi), whereZ ≥i+1297
+returns the set ofM−ibest-response q-values.298
+Any disturbance to a local q-tableQ ′i ̸=Q i causes a corresponding change toQ >i. If a299
+local perturbation produces a change in the reward expectation smaller than the perturbation,300
+then it will follow that the dynamics of the local iterates (3.1) can be approximated by an301
+ODE with a unique fixed point. We now formalize this condition.302
+A 3.1.LetQ ′i ∈[−D, D]|Si|×|Ai| be a local perturbation toQ i within the constraint set.
+WriteQ ′ = (Q<i, Q
+′i, Z≥i+1(Q<i, Q
+′i))andπ ′ =ϕ(Q ′). There existsK∈(0,1)such that for
+every agentiand its q-tableQ i, the reward function satisfies:
+|rπ −r π′| ≤K∥Qi −Q ′i∥∞
+===== [PARTIAL] PAGE 10/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 9
+This assumption defines a specific contractive behavior of the expected reward after best303
+response adaptation. It means that for every agenti, there exists a subset of other agents for304
+which a small perturbation ofitriggers a smaller deviation in the average reward. This will305
+allow us to show that an ODE approximating our iterates converges towards a fixed point.306
+Whenϕreturns the Boltzmann distribution, this contraction property can be understood as307
+restricting the variation of the reward over the state-action space. A 3.1 is then verified when308
+the maximum change in q-values for all local best-responses is not greater than the change309
+inQ i. To build intuition, we derive a bound over reward variation for a toy example in the310
+Supplement (Section 3), and then extend it to the general case. As A 3.1 moreover defines a311
+total order over all agents, we can let each agent learn at a different time-scale depending on312
+its rank.313
+The choice of theMlearning rate sequencesα i
+k will then play an important part in the314
+convergence of iterates (3.1). In particular we will require two sets of assumptions. First,315
+standard assumptions on the convergence of stochastic approximation iterates will require the316
+learning rate sequences to both converge towards 0 and evolve relatively slowly. Recall that317
+all state-action pairs are not updated at each iteration, and that the iterates are therefore318
+asynchronous: we will therefore constraint the evolution of the sequences so that at any time-319
+step learning rates for different local state-action pairs are not too different from each other.320
+A second set of assumptions will ensure that each agent learns at a different time scale. In321
+particular, for eachi < j, we will haveαi
+k
+αj
+k
+→0, ask→ ∞, wherei < jreflects the relationship322
+in the order imposed by A 3.1. For now, we refer to these assumptions as A 5.5 and will give323
+their formal introduction in Subsection 5.1. In Section 4, we construct a set of learning rate324
+sequences that approximately satisfies these assumptions and show that this will be sufficient325
+to lead to convergence in experiments inspired by a real-world problem. We now state our326
+convergence theorem for the multi-scale Q-learning algorithm.327
+Theorem 3.1.Let us considerMagents locally updating their q-value estimates according328
+to(3.1)with initial values ˆQi
+0 ∈[−D, D]forD >0such thatD > R
+1−β . Suppose that A3.1329
+is satisfied with the ordering of agents{1, . . . , M}, and the learning rates{α i}1...M follow330
+A5.5, whereα i is the learning rate sequence of thei th agent. If the discount factorβsatisfies331
+β≤1−K, then the q-value estimates will converge weakly towards the smoothed best-response332
+q-valuesQ ∗i. Moreover, the global policy defined byπ ∗i =ϕ(Q ∗i)for alliis an equilibrium.333
+The proof of this theorem will be detailed in Subsection 5.2. It requires every agent to334
+learn at a different time-scale. However, convergence can be preserved in other cases where335
+the dependency between agent dynamics is acyclic. This dependency can then be represented336
+by a directed acyclic graph (DAG). If this graph is known, it can be used to assign a ranking to337
+agents that allows different agents to have the same learning rate sequence. In the next section338
+we look at a class of Dec-POMDP with specific assumptions on agent interaction structure339
+and see how this allows us to reduce the number of ranks and derive a faster algorithm.340
+3.2. Reward decomposition for multi-scale Q-learning.We now consider the Networked341
+Distributed POMDPs (ND-POMDPs), a specific case of transition-independent Dec-POMDPs342
+introduced by [26] to model distributed optimization problems. We now assume the shared343
+reward can be written as a sum ofMcomponents{r i}1,...,M such that for all (s, a)∈S×A,344
+===== [PARTIAL] PAGE 11/47 =====
+10 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+r(s, a) =PM
+i=1 ri(si, ai, sU i
+, aU i
+), whereU i is a subset of agents, ands U i
+- resp.a U i
+- is a345
+vector concatenating local states - resp. local actions - of agents inU i. We say that agenti346
+influences agentjifi∈U j. Here, the total reward is not received by every agent, but rather347
+distributed in the network that connects all agents.348
+Let the relationships between agents be modeled by a directed acyclic graph (DAG)G=349
+(V,E) withVthe set of vertices andEthe set of edges, such that|V|=M, and (i− →j)∈ Eiff350
+agentiinfluences agentj. For every nodei, we writeN i
+in the set of nodes from which there351
+is an edge toiin the graph, andN i
+out the set of nodes to which there is an edge fromiin352
+the graph. The neighborhood of nodeiis then notedN i =N i
+in
+S N i
+out. We writeN A(i) the353
+ancestors ofi, that is the set of nodes for which there exists a path towardsi. Similarly, we354
+writeN D(i) the descendants ofi. Under A 5.5, every agent learned at a different scale, for a355
+total ofMdifferent scales. In ND-POMDPs, we can exploit the structure of the problem to356
+attribute a smaller set of ¯M≤Mscales to all agents.357
+We want to find a ranking functionrk:i→rk(i)∈ {1, . . . ,¯M}, such that the convergence358
+of Theorem 3.1 is preserved if every agentiis assigned the learning rate sequenceα rk(i)
+k . Let us359
+start by rewriting A 3.1 as a looser, local assumption A 3.2. In the general case, the dynamics360
+of all iterates were assumed to be dependent on all other iterates, and A 3.1 therefore imposed361
+a total order on the dynamics of all agents. Under our DAG structure however, if the parents362
+of agentiare fixed, then only a - possibly strict - subset of other agents need to adapt their363
+best responses to a change in its policy. We writeQ S the q-tables of any subset of agents364
+S⊂ V, so thatQ= (Q V\(i,N D(i)), Qi, QN D(i)), and similarly we write the set of best-response365
+functionsZ S. IfQ ′i is the local perturbation of the tableQ i, we look at the behavior ofQ ′366
+whenQ V\(i,N D(i))remains fixed. Indeed, agents inV\N D(i) either need not change their367
+policies because a change inidoes not change their best responses, or can appear ”fixed” at368
+i’s scale by learning at a slower scale thani. The possibility to gain in learning speed will369
+depend on the size of the first subset.370
+A 3.2.LetQ ′ =
+ 
+QV\(i,N D(i)), Q′i, ZN D(i)(Q′i, QV\(i,N D(i)))
+
+. For every agentiinGand371
+with the same notations as A3.1, there existsK∈(0,1)such that|r π −r π′| ≤K∥Qi −Q ′i∥∞372
+Then, any ranking that satisfies the following conditions preserves the convergence of373
+Theorem 3.1374
+(A) For any nodei, nodes inN A(i) have a strictly inferior rank, and nodes inN D(i)375
+have a strictly superior rank.376
+(B) For any nodei, there exists no two different nodes of the same rank inN A(i).377
+Rankings that satisfy (A) and (B) exist. For example, if we apply any topological sorting378
+algorithm to our DAG, it return ¯M=Mranks: the total order will satisfy (A) by construction,379
+and trivially satisfy (B) by giving a different rank to every node. As another example, ifGis a380
+tree, finding a learning rate attribution that satisfies (A) and (B) is immediate: we only need381
+to give to every node the size of the longest path from the root - a node without incoming382
+edge - to this node. This remains true if we add toGany edge going from a node to one of383
+its descendants. We give in the Supplement (Algorithm 4.1, Subsection 4.1) a straightforward384
+attribution procedure for any DAG that returns ¯M < Mranks whenever it is possible. An385
+example of the application of that procedure to a real example will be introduced in Section 4.386
+We now state the extension of Theorem 3.1.387
+===== [PARTIAL] PAGE 12/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 11
+Theorem 3.2.ConsiderMagents locally updating their q-values estimates according to388
+iterates389
+(3.3) ˆQi
+k+1,c = ˆQi
+k,c +α i
+k(si
+k, ai
+k)
+h
+¯ri
+k +β[ϕ( ˆQi
+k)(si
+k+1)]T ˆQi
+k(si
+k+1,·)− ˆQi
+k,c
+i
+390
+with¯ri
+k = P
+j∈{i,N i} rj(sj
+k, aj
+k, sU j
+k , aU j
+k ), in the ND-POMDP with DAG interaction networkG391
+satisfying A3.2. Let the learning rates{α k}be attributed by a ranking that satisfies (A) and392
+(B). If the discount factorβsatisfiesβ≤1−K, then the q-value estimates will converge393
+weakly towards the smoothed best-response q-valuesQ ∗i. Moreover, the global policy defined394
+byπ ∗i =ϕ(Q ∗i)for alliis an equilibrium.395
+Equation (3.3) means that for any learning rates attribution satisfying (A) and (B), conver-396
+gence to a best-response equilibrium is preserved when every agent only receives a local reward397
+gathered from its neighbors. The iterates (3.3) will be labeledNetworkMQL, and the proof is398
+in the Supplement (Subsection 4.1).399
+400
+Furthermore, convergence can also be ensured when the ranking only satisfies hypothesis401
+(A) but not (B), provided that a slightly stronger contraction assumption is true. Let us402
+consider such a ranking ˜rktaking values in{1, . . . ,˜M}.403
+A 3.3.LetQ ′ =
+ 
+QV\(i,N D(i)), Q′i, ZN D(i)(Q′i, QV\(i,N D(i)))
+
+and| ˜rk(i)|the number of404
+agents with rank ˜rk(i). With the same notations as A3.1, for every agentiinGthere405
+existsK∈(0,1)such that
+ri
+π −r i
+π′
+ ≤ K
+|rk(i)| ∥Qi −Q ′i∥∞.406
+Note that as for A 3.2, whenϕreturns a Boltzmann distribution, A 3.3 is verified when407
+the maximum change in q-values for all local best-responses inQ >i is not greater than the408
+change inQ i, and the reward is scaled by a corresponding factor. Then, convergence towards409
+a best-response equilibrium is preserved:410
+Theorem 3.3.ConsiderMagents locally updating their q-values estimates according to411
+iterates(3.3)in a ND-POMDP, with learning rates{α k}and DAG interaction network A3.3.412
+The learning rates are attributed by a ranking that satisfies (A). If the discount factorβ413
+satisfiesβ≤1−K, then the q-value estimates will converge weakly towards the smoothed414
+best-response q-valuesQ ∗i. Moreover, the global policy defined byπ ∗i =ϕ(Q ∗i)for alliis an415
+equilibrium.416
+The proof of this theorem is a straightforward application of Theorem 5.2. We can analyze the417
+behavior of ˜Miterates, where each iteratej∈1, . . . , ˜Mis updating the q-tables of all agents418
+of rankj. We provide a sketch of the proof in the Supplement (Subsection 4.2). Theorem 3.3419
+allows us to derive faster algorithms, as the number of ranks ˜Mneeded to satisfy (A) is420
+naturally lower than the number of ranks to satisfy both (A) and (B) ( ˜M≤ ¯M): it suffices421
+to give to every node the size of the longest path from any root to this node in the DAG.422
+4. Application to wind farm control.We now apply our multi-scale approach to an423
+industrial problem: wind farm control. Wind turbines are often grouped together on the424
+same field, in what are known as wind farms. Yet an operating wind turbine causes local425
+wind perturbations - called wake effects - that can reduce the production of its neighbors.426
+A solution is to misalign the rotor of a turbine with respect to the incoming wind: this can427
+===== [PARTIAL] PAGE 13/47 =====
+12 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+Figure 1: 16 interacting wind turbines on a graph. The levels used in the MQL algorithm are
+written in white, and the corresponding levels used in the NetworkMQL algorithm obtained
+with Algorithm 4.1 are written in black. The coordinates represent the location of each turbine
+in the farm.
+diminish the impact of its perturbations on its neighbors, but at the cost of decreasing its own428
+production. Finding a control strategy that can maximize output production can therefore429
+be described as a multi-agent cooperative optimization problem, where every turbine is an430
+agent. The application of multi-agent reinforcement learning strategies to this problem has431
+been a growing topic of interest in the literature [2, 20, 9]. In this section, we show how the432
+multi-scale Q-learning algorithm introduced in Section 3 can be used to solve this problem.433
+The first step is to show the problem can be reformulated as a TI Dec-MDP by a careful434
+design of the local observation spaces.435
+4.1. Modeling a TI Dec-MDP.We consider a farm of M wind turbines, where each436
+turbine is controlled by an agent. The angle between a turbine’s rotor and the direction437
+of the wind is called the yaw, and we writey= (y 1, . . . , yM ) the vector of yaws of theM438
+turbines. We set the local action spacesA i to be the choice of increasing or decreasing a439
+yaw by 1 ◦, or to let it unchanged, so thatA i ={−1,0,+1}. The finite global action space440
+is thenA= Π iAi. The individual production of theith turbine is given byP(w i, yi), where441
+Pis a function mapping local wind conditionsw i and yawy i to a power output. The total442
+production of the wind farm is thenP f arm= PM
+i P(w i, yi). This problem can be framed as443
+a MDP if the statesof the system contains bothyand a sufficient statistics of the evolution444
+of wind conditions in the farm, like the full wind field. The reward is then simply the total445
+===== [PARTIAL] PAGE 14/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 13
+production in a given state. Yet such a global state is not observed, as agents at best receive446
+local observations of the wind fieldw 1, . . . ,wM . We show that the problem can rather be447
+framed as a transition-independent Dec-MDP.448
+Let us assume that statistics on the wind infloww ∞ at the entrance of the farm can be449
+represented by an irreducible and aperiodic Markovian process taking values in a finite state450
+space with transition kernelP W .w ∞ is of course not controllable by the agents, it is an451
+exogenous process. Moreover, allw i can be written as a function ofw ∞ andy, since they are452
+the product of the perturbations caused by the turbines’ wakes to the wind field. We can write453
+this cooperative problem as a TI Dec-MDP, if we pick local states to bes i = (y i,w ∞)∈S i454
+and the finite global state spaceS= Π iSi. The rewardr(s, a) returns the total production of455
+the farm after agents have picked actionain states. The transition function isP=P yPW =456
+ΠM
+i=1P i
+yPW , whereP i
+y is the transition kernel on the local yaw. Note thatP i
+y is then entirely457
+deterministic as for anys i, ai, s′i ∈S i ×A i ×S i we haveP(s i, ai, s′i) =I{s ′i =s i +a i}.458
+It is easy to see that if all local policies are forced to maintain non-null probabilities on all459
+local actions, then the local state processes will be irreducible and aperiodic. Note that if460
+we had allowed agents to observe their local wind conditionsw i, the problem would not be461
+transition-independent: any action taken by an agent can change the wind conditions at other462
+agent’s locations. This redesign of the local state is therefore a crucial step to analyze our463
+problem. We now discuss how additional knowledge about interaction between turbines can464
+guide both reward design and learning rates attribution.465
+4.2. Learning rates attribution.A DAG modeling interactions between agents can be466
+built the following way: fromMnodes representing theMagents, we add an edge from467
+i→jif turbinejis in the wake of turbinei. We then rewrite the reward as a sum of local468
+componentsr(s, a) = PM
+i ri(si, ai, sU i
+, aU i
+), where eachr i returns the production of agent469
+i, andU i is the set of in-neighbors of turbinei. Then, A 3.2 essentially means that a small470
+change to the stationary distribution of turbinei’s yaw will not lead to a greater change in471
+average production, once the subset ofi’s descendants have adjusted. This is a reasonable472
+assumption as, first, small changes in turbine actuation do not lead to drastic changes in power473
+output, and second, best-response adaptations require less policy changes as distance toiin474
+the field increases. We use a topological sorting algorithm to attributeMdifferent ranks to475
+the agents (black circles on Figure 1), and our procedure (Algorithm 4.1 in Subsection 4.1) to476
+attribute ranks satisfying (A) and (B) on this DAG (white circles in Figure 1) .477
+We start by definingMlearning sequences: for each rank in{1, . . . , ¯M}, let 0< l ¯M <
+· · ·< l1 <1 and the corresponding learning rate sequences be
+αli
+k,c = g
+nk((si, ai)c)li
+withg >0 a gain andn k((si, ai)c) = # visits to thecth state-action pair (s i, ai)c up tok.
+These sequences are standard for Q-learning algorithms. For our multi-scale experiments, we
+modify the sequences by adding a term dependent on the time between visits, so that the final
+learning rate sequences are:
+α′li
+k,c =g
+ 
+1
+nk((si, ai)c) +
+log(T i
+k,c)−log(T i
+k−1,c)
+T i
+k,c −T i
+k−1,c
+!li
+===== [PARTIAL] PAGE 15/47 =====
+14 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+whereT i
+k,c is the real time of thekth update to componentc. This second term is motivated by478
+the theory of convergence of asynchronous iterates (see A 5.5 in Subsection 5.1): used alone,479
+it ensures that learning happens at the same time-scale for all components of a single q-table.480
+The first term used alone, orα li
+k,c, ensures on the other hand that different agents learn at481
+different time-scales. An example of the evolution of the resulting sequences of learning rates482
+for AlgorithmMQLcan be found on Figure 2c, and we can see empirically that they preserve483
+both properties. We use the same gaing= 2 for all agents in all algorithms.484
+0.0 0.5 1.0 1.5 2.0 2.5 3.0
+Timesteps
+1e5
+0.6
+0.8
+1.0
+1.2
+1.4
+1.6
+1.8
+2.0Production
+1e7
+LQL-
+LQL+
+MQL
+(a) Global reward
+ (b) Local Reward
+0.0 0.2 0.4 0.6 0.8 1.0
+Timesteps
+1e5
+0.00
+0.05
+0.10
+0.15
+0.20
+0.25
+0.30Learning Rates
+0
+3
+6
+9
+12
+15 (c) Evolution of learning rates
+Figure 2: Total power output of the simulated 16 turbines wind farm averaged on 1000 time-
+steps under global (Figure 2a) and local (Figure 2b) reward. The evolution of learning rates
+under MQL based on scales attributed in Figure 1 is reported on Figure 2c for the first 100k
+time-steps.
+4.3. Results.We run both AlgorithmMQL(3.1) and AlgorithmNetworkMQL(3.3) on485
+a simulation of a wind farm with 16 wind turbines on 10 different seeds. We report the486
+average production and standard deviation over the 10 seeds on Figure 2. Experiments are487
+ran for both the global reward (Figure 2a), and the local reward (Figure 2b) derived from488
+the interaction graph as described in Subsection 4.1.NetworkMQLis only run on the local489
+reward, as local decomposition is a requirement for its convergence. In both cases, we compare490
+these results with a naive local Q-learning approach denotedLQL, where a single-agent Q-491
+learning algorithm is run at every agent with the standard learning rates sequencesα li
+k,c. For492
+MQL, we simply assign a different rank to every agent following a topological sort and use the493
+Mmulti-scale learning rate sequencesα ′li
+k,c, where the{l i}i∈1...M are taken at equal interval494
+within [0.51,1]. ForNetworkMQL, we seek to assign ¯M≤Mranks to all agents in the495
+DAG satisfying hypotheses (A) and (B) in Subsection 3.2. We obtain ¯M= 9 different ranks496
+shown in Figure 1 and use the last 9 learning rate sequences in{l i}i∈1...M . We evaluate the497
+performance ofLQLwith bothl i = 1 (LQL-) andl i = 0.51 (LQL+), corresponding to the498
+slowest and fastest learning rate sequence considered in all experiments.499
+In the global reward case (Figure 2a),MQLtracks or outperformsLQLon the different500
+learning rate sequences. Note that finding the best performing learning rate sequence for501
+LQLcan require significant computing time, and that this approach provides no convergence502
+guarantee. Then, exploiting local interaction (Figure 2b),NetworkMQLfurther accelerates503
+===== [PARTIAL] PAGE 16/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 15
+convergence on both the naiveLQLandMQL.504
+5. Proofs: Convergence of multi-scale Q-learning iterates.To derive the convergence of505
+the multi-scale Q-learning iterates, we exploit weak convergence results for stochastic approx-506
+imation iterates with state-dependent noise [21]. Weak convergence results for synchronous507
+two-timescale updates are laid out in [Theorem 6.2, Chapter 8, [21]], and for single-timescale508
+asynchronous updates in [Theorem 5.1, Chapter 12, [21]]. We extend these results to asyn-509
+chronous multi-timescale updates in Subsection 5.1. The formal proof of this extension has510
+no technical difficulty but is tedious, and thus we detail it in the supplementary material:511
+we first extend the weak convergence results for synchronous two-timescale to synchronous512
+multi-timescale iterates, then use [Theorem 5.1, Chapter 12, [21]] to further extend this result513
+to asynchronous multi-timescale updates (see Theorem 5.1).514
+We then prove in Subsection 5.2 that our multi-scale Q-learning converges under carefully515
+chosen learning rates (Theorem 3.1). More precisely, we first show in Theorem 5.2 that our516
+multi-scale Q-learning algorithm can be framed as multi-scale stochastic approximation up-517
+dates with state-dependent noise, where the tracking error of the global state can be modeled518
+as a latent Markovian process and satisfies necessary assumptions for applying Theorem 5.1.519
+From Theorem 5.1 it follows that the multi-scale Q-learning updates can be approximated by520
+MODE: we give their expressions and analyze their convergence under Assumption A 3.1 in521
+Subsection 5.3.522
+5.1. Weak convergence of multi-scale iterates with Markovian noise.We consider the523
+constrained case: at each iteration, the iterates are projected on a defined admissible spaceH.524
+We assume thatHis a hyperrectangleH= [h 1, b1]×[h 2, b2]× · · · ×[hd, bd] with (h i, bi)∈R 2525
+fori∈ {1, . . . , d}andd >0 the dimension of the iterate. The operator ΠH is used to denote526
+this projection onH.527
+ConsiderMinterdependent stochastic approximation processesθ 1
+k, . . . , θM
+k updated ac-528
+cording to iterates:529
+(5.1)θ i
+k+1 = ΠH
+
+θi
+k +α i
+kY i
+k
+
+=θ i
+k +α i
+k(F i(θk, ξi
+k) +δU i
+k) +B i
+k530
+whereθ k = (θ1
+k,· · ·, θM
+k ),{ξ i
+k}are noise sequences,F i(·,·) are functions ofθandξ i,δU i
+k+1 =531
+Y i
+k −F i(θk, , ξi
+k) are martingale noise differences,α i
+k :=α i(k)>0 are learning rates for532
+timescaleiat iteratek, andB i
+k is a correction term to project the iterate onH, henceforth533
+referred as reflection terms.534
+We assume that the iterates are updated asynchronously: that is, not all elements of the535
+θi are updated at every iteration. We index elements in everyθ i byc∈ {1. . . C}. Let536
+αi
+k,c be the learning rate for elementcof iterateiat timestepk: all elements within a537
+single iterate are given the same sequences of learning rates, so that we use the notation538
+αi
+k =α i
+k,1 =α i
+k,2 =· · ·=αi
+k,C . TheMiterates in (5.1) can therefore be seen asM×C539
+iterates, with the updates to each component following:540
+(5.2)θ i
+k+1,c = ΠH
+
+θi
+k,c +α i
+k,cY i
+k,c
+
+541
+The time between thekth and (k+ 1)th updates of the element indexed bycin{θ i
+k}k is542
+given by the random variableτ i
+k,c. Because thekth update can happen at a different time for543
+===== [PARTIAL] PAGE 17/47 =====
+16 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+two components, we need another timeline to analyze the behavior of the iterates. We will544
+look at their behaviors in the ”real time”, so that thekth update at elementcin the{θ i
+k}k is545
+done at the real timeT i
+k,c = Pk−1
+n=0 τ i
+n,c.546
+Two sets of random variables therefore need to be considered at every iteration:Y i
+k,c and547
+τ i
+k+1,c. Following [21], we define two corresponding sequences of non-decreasingσ−algebras548
+generated by the two sequencesF i,τ
+k,c andF i,Y
+k,c : each measures all variables observed in the549
+”past” up to the relevant moment during updatek+1. The associated conditional expectations550
+are notedE i,τ
+k,c andE i,Y
+k,c .551
+We now lay down the assumptions needed to ensure convergence. We start by standard552
+assumptions for stochastic approximation algorithms: the sequences of observationsY i
+k,c are553
+uniformly integrable, and at each timestep their expectations are given by a continuous func-554
+tion of the iterateθ i
+k,c. The main idea is that an error termδU i
+k,c of null expectation will555
+be averaged out through the iterations, so that askgoes to infinity, the behavior of the556
+iterates can be described without the error terms. Let us writeξ i
+k = (ξ i
+k,1, . . . , ξi
+k,C ), and557
+δU i
+k = (δU i
+k,1, . . . , δUi
+k,C ). We make the following assumption fori= 1,· · ·, M, with any558
+statement on a sequenceX i
+k interpreted as holding for all component-wise sequencesX i
+k,c.559
+Let Ξ be a complete and separable metric space, andAbe an arbitrary compact set in Ξ.560
+A 5.1.The{Y i
+k }are uniformly integrable, and can be writtenY i
+k =F i(θk, ξi
+k) +δU i
+k with561
+{δU i
+k}k martingale noise differencesE Y
+k δU i
+k = 0andF i(·, ξi)functions continuous inθ, and562
+continuous inξ i ∈A.563
+Here,F i is still dependent on the error sequencesξ i
+k whose expectations are not null.564
+Yet, the Markovian property of these sequences, combined with a constraint on the rate of565
+evolution of the learning rates (see A 5.5), can be exploited to construct an approximation of566
+F i(·, ξi) that does not depend onξ i. We make the following assumptions on the Markovian567
+noise processes.568
+A 5.2.The noise processes{ξ i
+k}are bounded with values inΞ, and are Markovian: they569
+admit a transition functionP i(·,·|θ)such thatP i(·, A|θ)is measurable for each Borel set570
+A⊂Ξ, andP i(ξi
+k+1 ∈ ·|Fk) =P i(ξi
+k,·|θ k). This transition function is continuous and does571
+not depend onk. For any compactA∈Ξandµ∈(0,1), there exists a compactA ′ such that572
+P(ξ i
+k+1 ∈A ′ |ξ i
+k)≥1−µfor allξ i
+k ∈A.573
+We now define the fixed-θchain{ξ k(θ)}, the Markov chain on state space Ξ with the574
+fixed transition functionP(ξ,·,|θ). It is the noise process starting fromkifθstayed constant,575
+i.e.,{ξ k+j (θ), j≥0, ξk(θ) =ξ k}. The continuous function of the actual noise process can be576
+approximated by the continuous function of the fixed-θchain processF i(·, ξi
+k) (see the proof577
+of Theorem 8.4.3 [21], p.271-275) if the rate of change of the learning rates is slow enough.578
+If we can construct a function ˆF i(·) ofθthat does not depend on the processξ i, such that579
+ˆF i(θ) is a local average of theF i(·, ξi
+k). Then ˆF i(θk) is also an approximation ofF i(θk, ξi) as580
+k→ ∞. We detail these assumptions in??5.3??5.4.581
+A 5.3.The set{F i(θk, ξi
+k)}k is uniformly integrable. For anyj≥0withξ i
+j ∈Athe582
+set{F i(θ, ξi
+j+k (θ))}k≥0 is uniformly integrable, whereξ i
+j+k (θ)is the fixed-θchain with initial583
+conditionsξ i
+j and transition functionP i(ξ,·|θ j).584
+===== [PARTIAL] PAGE 18/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 17
+A 5.4 (Averaging condition).There exists a continuous function ¯F i(·)such that for each585
+θand on any compact setA∈Ξ586
+lim
+(k,m)→∞
+1
+m
+k+m−1X
+j=k
+EY
+k
+
+F i(θ, ξi(θ))− ¯F i(θ)
+
+Iξi
+k∈A = 0587
+We establish now a different timescale to correspond to each process. Fori, j∈ {1,· · ·, M},588
+lett j
+k = Pk−1
+l=0 αj
+l , andθ i,0
+c,αj (t) be the piecewise interpolation of the processθ i
+k on thej-th589
+timescale defined as590
+θi,0
+c,αj (t) =θ i
+0,c, t≤0, θ i,0
+c,αj (t) =θ i
+k,c, t∈[t j
+k, tj
+k+1]591
+Then, a shifted continuous time interpolationθ i,k
+αj (·) is simply an interpolation ”started” from592
+a specific time-stepk. Since all components do not reach a given timestep at the same time,593
+we rather define the shifted interpolates as starting at arbitrary real timesυ. For this purpose,594
+we introduce functionsp i
+c(υ), that return the time-step of the first update ofθ i
+c after a given595
+real timeυ. The shifted interpolates at thej-th timescale are then:596
+(5.3)θ i,υ
+c,αj (t) =θ i
+k+pic,c t∈[t ij,υ
+k,c , tij,υ
+k+1,c), t ij,υ
+k,c =
+k−1X
+n=pic(υ)
+αj
+n597
+and the shifted real-time interpolations ˆθi,υ
+c,αj (·) are defined similarly:598
+(5.4) ˆθi,υ
+c,αj (t) =θ i
+k,c t∈[Γ ij,υ
+k+pic,c,Γ ij,υ
+k+1,c) Γ ij,υ
+k,c =
+k−1X
+n=pic(υ)
+αj
+nτ i
+n,c599
+Similarly, we defineB i,υ
+c,αj (resp. ˆBi,υ
+αj ) the shifted continuous (resp. real time) interpolations600
+at thej-th timescale of the sequence of reflection termsB i
+c,k. We are interested in the behavior601
+ofθ i,υ
+αj (·) andB i,υ
+αj (·) ast j
+k → ∞whileαj
+k →0.602
+We now lay out in A 5.5 further constraints on the learning rate sequences. The first two603
+are standard for the stochastic approximating literature: intuitively they require the learning604
+rates to go towards zero, but not too quickly. The third assumption ensures that even though605
+the components of a single iterate are updated asynchronously, they still learn at the same606
+timescale. Finally, the last assumption makes the iterates multi-scale: it imposes a hierarchy607
+between theMsequences that ensures every iterate is learning at a different timescale.608
+A 5.5 (Assumption on learning rates).For eachi∈ {1,· · ·, M},609
+•(Classical rates)lim k αi
+k = 0and P∞
+k=0 αi
+k =∞withα i
+k ∈(0,1)for alli, k610
+•(Slow changes) there is a sequence of integersa i
+n → ∞such that611
+lim
+n
+sup
+0≤j≤ain
+
+αi
+n+j
+αin
+−1
+ = 0612
+===== [PARTIAL] PAGE 19/47 =====
+18 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+•(Asynchronous) Every component’s learning rateα i
+k,c can be written as a local average
+of positive real-valued functionsf i:
+αi
+k,c = 1
+τk,c
+Z T i
+k,c+τ i
+k,c
+T i
+k,c
+f i(s)dssuch that
+Z ∞
+0
+f i(s)ds=∞andlimf i(s)
+s→∞
+= 0
+•(Multi-scale) αi
+k
+αj
+k
+→0, ask→ ∞, whenever eachi < j.613
+Finally, all components of an iterate should be updated frequently enough. This is for-614
+malized below:615
+A 5.6.For alli, the sequence of intervals between updates{τ i
+k,c}k is uniformly integrable,616
+and there exists¯ui
+c ≥1such that theE i,τ
+k+1,c
+h
+τ i
+k,c
+i
+are in the bounded interval
+
+1,¯ui
+c
+
+uniformly617
+ink.618
+With the expectationsE Y
+k Y i
+k being approximated by ¯F i(θk) askgoes to∞, the interpola-619
+tions of the iteratesθ i,υ
+αj will be shown to admit limit processes following mean ODEs defined620
+by the ¯F i. The solution of the ODE can then be used to characterize the asymptotic prop-621
+erties of theθ i
+k,c fori= 1,· · ·, M. Thanks to the multi-scale assumption, at any timescalej622
+the interpolation for all iterates learning at a slower timescalei < jwill follow the null ODE.623
+Intuitively, they evolve so slowly that they can be considered constant at thej-th timescale.624
+Similarly, the interpolations for all iterates learning at a faster timescale can be considered to625
+have reached the limit of their respective mean ODE, if it exists. We consider the case where626
+the ODE for every limit process for any timescale has a unique asymptotically stable point.627
+Adopting like in Subsection 3.1 the notationsθ >i = (θi+1, . . . , θM ) andθ <i = (θ1, . . . , θi−1):628
+A 5.7.There exists a continuous functionζ i(θ<i)such that, for any set of initial conditions629
+θ, the solution to the following ODE has a unique asymptotically stable point(θ <i, ζi(θ<i))for630
+i≥2:631
+˙X j = 0 forj < i
+˙X i =
+¯F i(X <i+1, Z≥i+1(X <i+1))
+uic
++ ˆbi.
+632
+withu i
+c(t)taking values in[1,¯u i
+c], ˆbi the reflection term onH, and633
+(5.5)Z ≥i(θ<i
+k ) = (ζ i(θ<i
+k ), Z≥i+1(θ<i
+k , ζi(θ<i
+k ))), i= 2,· · ·, M−2634
+withZ ≥M−1 (θ<M−1
+k ) = (ζ M−1 (θ<M−1
+k ), ζM (θ<M−1
+k , ζM−1 (θ<M−1
+k ))).635
+When applying multi-scale iterates (5.2) to our Dec-POMDP problem, this assumption636
+imposes strong constraints on the dynamics of the multi-agent system. In Section 3, we637
+introduced specific DAG structures on agent interactions that can satisfy them, and a concrete638
+example was given in Section 4.639
+Note that the reflection termsb i of the projected ODE must live within a convex space640
+Υ(X i), defined the following way: on the interior ofH, Υ(X i) ={0}, the set only containing641
+===== [PARTIAL] PAGE 20/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 19
+the null vector, and on the boundary ofH, Υ(X i) is the infinite convex cone generated by642
+the outer normals atX i of the faces onHon whichX i lies.643
+Now we state the week convergence of the iterates (5.2) in the following theorem.644
+Theorem 5.1 (Weak convergence of asynchronous multi-scale iterates with Markovian noise).645
+Consider iterates(5.2), updated asynchronously following the time interval sequences{τ i
+k,c}k.646
+If Assumptions??5.1–5.7 hold, then for a sequence of real times{ν k}k such thatν k → ∞as647
+k→ ∞,ˆθ1,νk
+c,α1 admits a subsequence which converges towards a process ˆθ1
+c,α1(·)such that:648
+(5.6)
+˙ˆθ1
+c,α1(t) =
+¯F 1(θ1
+c,α1(t), Z≥2(θ1
+c,α1)(t))
+uic(t) + ˆb1
+c,α1(t)u i
+c(t)∈[1,¯u i
+c] ˆb1
+c,α1(t)∈ −Υ(ˆθ1
+c,α1(t))649
+where ˆb1
+c,α1 is the reflection, that is the minimum force needed to keep ˙ˆθc,α1 inH. Moreover,650
+for anyδ >0, the fraction of time spent by ˙ˆθ1
+c,α1(·)in anyδ−neighborhood around the set of651
+limit points of(5.6)on the interval[0, T]goes to one in probability asT→ ∞.652
+With the weak convergence of the multi-scale iterates established, we are now ready to653
+prove the weak convergence of our multi-scale Q-learning iterates (3.1).654
+5.2. Application to multi-scale Q-learning iterates.655
+Theorem 5.2.Consider the multi-scale Q-learning iterates(3.1). If??5.5??5.7 are true,656
+let all ˆQi
+0,c ∈[−D, D]forD >0such thatD > R
+1−β withRthe reward bound. The iterates657
+ˆQi
+k,c admit subsequences that converge towards the following mean ODEs askgoes to infinity:658
+d
+dt qi
+t(si
+c, ai
+c) = 1
+uic
+¯F i(q<i
+t , qi
+t, Z≥i+1(q<i+1
+t ))659
+where660
+•the{q j
+t }j<i are constant661
+• {qj
+t }j>i =Z >i+1(q<i+1
+t )662
+•π −i = (ϕ(q1
+t ), . . . , ϕ(qi−1
+t ), ϕ(qi+1
+t ), . . . , ϕ(qM
+t ))663
+• ¯F i
+c (Q) = P
+s dπk (s|s i) P
+a−i π−i
+k (a−i|s)r(s, ai, a−i) +βv ′i(Qi,(s i, ai)c)−Q i
+cF i
+c (Q, ξ)664
+The full proof of the theorem is given in the Supplement (Section 2). We first rewrite665
+iterates (3.1) as the multi-scale stochastic approximation iterates (5.2). To achieve this we666
+write the terms in bracketsr k +β[ϕ( ˆQk)(· |si
+k+1)]T ˆQk(si
+k+1,·)− ˆQi
+k(si
+k, ai
+k)) :=Y i
+k,c as the sum667
+of ¯F i
+c ( ˆQk) and two errors: (1)Y i
+k,c −E Y
+k,c[Y i
+k,c] and (2)E Y
+k,c[Y i
+k,c]− ¯F i
+c ( ˆQk). After noticing that668
+(1) is a martingale sequence, the core of the proof is the analysis of the evolution of (2) for a669
+fixed-Qchain. It is shown that its local averages converge in mean to zero, satisfying A 5.4.670
+This allows us to apply the results of Theorem 5.1 to the multi-scale Q-learning iterates (3.1).671
+5.3. Proof of Theorem 3.1: Convergence with acyclic dependence structure.Theo-672
+rem 5.2 shows that under proper initialization of our Q-table estimates, the iterates of inde-673
+pendent, multi-scale Q-learners can be approximated by an ODE defined by theMfunctions674
+¯F i. To prove Theorem 3.1, it remains to analyze the behavior of these ODE and show that675
+===== [PARTIAL] PAGE 21/47 =====
+20 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+A 5.7 is satisfied under Assumption A 3.1 on the acyclic dependence structure. Indeed, A 3.1676
+will guarantee the convergence of the approximating ODEs towards the desired equilibrium.677
+Proof.We recall the mean ODE followed by each agentias introduced in (2.3):678
+d
+dt qi
+t(si
+c, ai
+c) = 1
+uic
+¯F i(q<i
+t , qi
+t, Z≥i+1(q<i+1
+t ))679
+with ¯F i(q<i
+t , qi
+t, Z≥i+1(q<i+1
+t )) =r(s i
+c, ai
+c, q<i
+t , qi
+t, Z≥i+1(q<i+1
+t ))+β P
+s′ P(s i, ai, s
+′i)qi(s
+′i, ϕ(q)(s
+′i))680
+andr qi(si
+c, ai
+c, q<i
+t , qi
+t, Z≥i+1(q<i+1
+t )) = P
+s dπqi,Z>i+1(qi)(s) P
+a−i π−i
+qi,Z>i+1(qi)(a−i)r(s, ai, s−i).681
+According to A 3.1 and for each agentiand componentc, the mapping fromq i to682
+rqi(si
+c, ai
+c, qi) is aK- contraction mapping. ¯F i is therefore a (K+β) contraction map-683
+ping with regard to the infinite norm. It follows that for each agentithere is a unique fixed684
+pointQ ∗i such that ¯F i(Q<i, Q∗i, Z≥i+1(Q<i+1)) =Q ∗i and that this fixed point is the unique685
+globally asymptotically stable point of the ODE ˙X= ¯F i(Q<i+1, Z≥i+1(Q<i+1)). Recall that686
+the reflection terms are null. The multiplication by the factor 1/u i
+c has a time scaling effect on687
+the ODE but does not change its asymptotic behavior. It follows that A 5.7 on the asymptotic688
+behaviors of the mean ODEs is satisfied. A sequence of learning ratesα i
+k has been assigned to689
+each agentisuch that A 5.5 are satisfied. The weak convergence of the iterates ˆQk towards690
+a smoothed equilibrium then follows from Theorem 5.2.691
+6. Conclusions.By allowing all agents to run a single-agent reinforcement algorithm692
+in parallel, independent learning provides the simplest way to adapt these algorithms to693
+cooperative multi agent environments. Although this approach has encountered experimental694
+successes, it has no underlying theoretical guarantee. To provide a first step towards bridging695
+this gap, we have here focused on transition-independent Dec-PODMP, and shown that in696
+these problems the partial observability of the global state can be modeled as a Markovian697
+perturbation in a stochastic approximation iterates. We have shown that when there is an698
+acyclic dependence structure between agent dynamics in these cooperative systems, a careful699
+assignment of learning rate sequences following a multi-scale approach can be sufficient to700
+establish convergence. In particular, knowledge of the interaction graph between agents in701
+ND-POMDP can be exploited to assign learning rates to preserve convergence. We have then702
+applied these results to wind farm control, a real optimization problem from the industry.703
+Further work can extend these results to systems with noisy local observations or non-704
+independent transition functions. Furthermore, independent learning has often encountered705
+experimental success without the multiscale approach in multiagent reinforcement learning706
+settings ([42, 39]), and our acyclic dependence analysis could provide a basis to find a theo-707
+retical explanation of these results.708
+===== [PARTIAL] PAGE 22/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 21
+REFERENCES709
+[1]K. Abbas, J. Berkhout, and B. Heidergott,A critical account of perturbation analysis of markov710
+chains, Markov Processes and Related Fields, 22 (2016), pp. 227–266.711
+[2]M. Abkar, N. Zehtabiyan-Rezaie, and A. Iosifidis,Reinforcement learning for wind-farm flow712
+control: Current state and future actions, Theoretical and Applied Mechanics Letters, 13 (2023),713
+p. 100475. 714
+[3]M. Allen and S. Zilberstein,Complexity of decentralized control: Special cases, in Advances in Neural715
+Information Processing Systems, Y. Bengio, D. Schuurmans, J. Lafferty, C. Williams, and A. Culotta,716
+eds., vol. 22, Curran Associates, Inc., 2009. 717
+[4]G. Arslan and S. Y ¨uksel,Decentralized Q-learning for stochastic teams and games, IEEE Transactions718
+on Automatic Control, 62 (2016), pp. 1545–1558. 719
+[5]N. Bard, J. N. Foerster, A. P. S. Chandar, N. Burch, M. Lanctot, H. F. Song, E. Parisotto,720
+V. Dumoulin, S. Moitra, E. Hughes, I. Dunning, S. Mourad, H. Larochelle, M. G. Belle-721
+mare, and M. H. Bowling,The hanabi challenge: A new frontier for ai research, Artif. Intell., 280722
+(2019), p. 103216. 723
+[6]L. Baudin and R. Laraki,Fictitious play and best-response dynamics in identical interest and zero-sum724
+stochastic games, in International Conference on Machine Learning, PMLR, 2022, pp. 1664–1690.725
+[7]R. Becker, S. Zilberstein, V. R. Lesser, and C. V. Goldman,Solving transition independent726
+decentralized Markov decision processes, J. Artif. Intell. Res., 22 (2004), pp. 423–455.727
+[8]D. S. Bernstein, R. Givan, N. Immerman, and S. Zilberstein,The complexity of decentralized control728
+of markov decision processes, Mathematics of operations research, 27 (2002), pp. 819–840.729
+[9]C. Bizon Monroc, A. Bu ˇsi´c, D. Dubuc, and J. Zhu,Actor critic agents for wind farm control, in730
+2023 American Control Conference (ACC), IEEE, 2023, pp. 177–183.731
+[10]V. S. Borkar,Stochastic approximation with two time scales, Systems & Control Letters, 29 (1997),732
+pp. 291–294. 733
+[11]V. S. Borkar and S. P. Meyn,The o.d.e. method for convergence of stochastic approximation and734
+reinforcement learning, SIAM J. Control. Optim., 38 (2000), pp. 447–469.735
+[12]G. E. Cho and C. D. Meyer,Comparison of perturbation bounds for the stationary distribution of a736
+Markov chain, Linear Algebra and its Applications, 335 (2001), pp. 137–150.737
+[13]J. S. Dibangoye, C. Amato, and A. Doniec,Scaling up decentralized MDPs through heuristic search,738
+in Proceedings of the Twenty-Eighth Conference on Uncertainty in Artificial Intelligence, UAI’12,739
+Arlington, Virginia, USA, 2012, AUAI Press, p. 217–226. 740
+[14]J. S. Dibangoye, C. Amato, A. Doniec, and F. Charpillet,Producing efficient error-bounded741
+solutions for transition independent decentralized mdps, in Proceedings of the 2013 International742
+Conference on Autonomous Agents and Multi-Agent Systems, AAMAS ’13, Richland, SC, 2013,743
+International Foundation for Autonomous Agents and Multiagent Systems, p. 539–546.744
+[15]B. Gao and L. Pavel,On the properties of the softmax function with application in game theory and745
+reinforcement learning, arXiv preprint arXiv:1704.00805, (2017).746
+[16]C. V. Goldman and S. Zilberstein,Decentralized control of cooperative systems: Categorization and747
+complexity analysis, Journal of artificial intelligence research, 22 (2004), pp. 143–174.748
+[17]T. Gupta, A. Kumar, and P. Paruchuri,Planning and learning for decentralized MDPs with event749
+driven rewards, in AAAI Conference on Artificial Intelligence, 2018.750
+[18]I. C. F. Ipsen and T. M. Selee,Ergodicity coefficients defined by vector norms, SIAM Journal on751
+Matrix Analysis and Applications, 32 (2011), pp. 153–200.752
+[19]T. Jaakkola, M. Jordan, and S. Singh,On the convergence of stochastic iterative dynamic program-753
+ming algorithms, Neural Computation, 6 (1994), pp. 1185–1201.754
+[20]E. Kadoche, S. Gourv ´enec, M. Pallud, and T. Levent,Marlyc: Multi-agent reinforcement learning755
+yaw control, Renewable Energy, 217 (2023), p. 119129. 756
+[21]H. J. Kushner and G. G. Yin,Stochastic Approximation and Recursive Algorithms and Applications,757
+Stochastic modelling and applied probability, Springer New York, NY, 2003.758
+[22]D. S. Leslie and E. J. Collins,Convergent multiple-timescales reinforcement learning algorithms in759
+normal form games, The Annals of Applied Probability, 13 (2003), pp. 1231–1251.760
+[23]D. S. Leslie, S. Perkins, and Z. Xu,Best-response dynamics in zero-sum stochastic games, Journal of761
+===== [PARTIAL] PAGE 23/47 =====
+22 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+Economic Theory, 189 (2020), p. 105095. 762
+[24]L. Matignon, G. Laurent, and N. Fort-Piat,Independent reinforcement learners in cooperative763
+Markov games: A survey regarding coordination problems, The Knowledge Engineering Review, 27764
+(2012), pp. 1 – 31. 765
+[25]C. B. Monroc, E. Bouba, A. Bu ˇsi´c, D. Dubuc, and J. Zhu,Delay-aware decentralized Q-learning for766
+wind farm control, 2022 IEEE 61st Conference on Decision and Control (CDC), (2022), pp. 807–813.767
+[26]R. Nair, P. V arakantham, M. Tambe, and M. Yokoo,Networked distributed POMDPs: A synthesis768
+of distributed constraint optimization and pomdps, in AAAI, vol. 5, 2005, pp. 133–139.769
+[27]H. Nekoei, A. Badrinaaraayanan, A. Sinha, M. Amini, J. Rajendran, A. Mahajan, and S. Chan-770
+dar,Dealing with non-stationarity in decentralized cooperative multi-agent deep reinforcement learn-771
+ing via multi-timescale learning, in Conference on Lifelong Learning Agents, PMLR, 2023, pp. 376–772
+398. 773
+[28]S. Omidshafiei, A. akbar Agha-mohammadi, C. Amato, and J. P. How,Decentralized control774
+of partially observable Markov decision processes, 52nd IEEE Conference on Decision and Control,775
+(2015), pp. 2398–2405. 776
+[29]A. Oroojlooyjadid and D. Hajinezhad,A review of cooperative multi-agent deep reinforcement learn-777
+ing, Applied Intelligence, 53 (2019), pp. 13677 – 13722. 778
+[30]J. S. Rosenthal,Convergence rates for Markov chains, SIAM Review, 37 (1995), pp. 387–405.779
+[31]M. Sayin, K. Zhang, D. Leslie, T. Basar, and A. Ozdaglar,Decentralized Q-learning in zero-sum780
+Markov games, Advances in Neural Information Processing Systems, 34 (2021), pp. 18320–18334.781
+[32]M. O. Sayin,On the global convergence of stochastic fictitious play in stochastic games with turn-based782
+controllers, in 2022 IEEE 61st Conference on Decision and Control (CDC), 2022, pp. 2851–2856.783
+[33]M. O. Sayin, F. Parise, and A. Ozdaglar,Fictitious play in zero-sum stochastic games, SIAM Journal784
+on Control and Optimization, 60 (2022), pp. 2095–2114. 785
+[34]M. O. Sayin and O. Unlu,Efficient-q learning for stochastic games, arXiv preprint arXiv:2302.09806,786
+(2023). 787
+[35]S. P. Singh, T. Jaakkola, and M. I. Jordan,Learning without state-estimation in partially observable788
+Markovian decision processes, in Machine Learning Proceedings 1994, Elsevier, 1994, pp. 284–292.789
+[36]P. Stanfel, K. Johnson, C. J. Bay, and J. King,Proof-of-concept of a reinforcement learning frame-790
+work for wind farm energy capture maximization in time-varying wind, Journal of Renewable and791
+Sustainable Energy, 13 (2021). 792
+[37]K. Su, S. Zhou, J. Jiang, C. Gan, X. W ang, and Z. Lu,Ma2ql: A minimalist approach to fully793
+decentralized multi-agent reinforcement learning, 2023. 794
+[38]R. Sutton and A. Barto,Reinforcement Learning: An Introduction, The MIT Press, second ed., 2018.795
+[39]M. Tan,Multi-agent reinforcement learning: Independent versus cooperative agents, in International796
+Conference on Machine Learning, 1997. 797
+[40]J. N. Tsitsiklis,Asynchronous stochastic approximation and Q-learning, Mach. Learn., 16 (1994),798
+p. 185–202. 799
+[41]C. W atkins and P. Dayan,Technical note: Q-learning, Machine Learning, 8 (1992), pp. 279–292.800
+[42]C. S. D. Witt, T. Gupta, D. Makoviichuk, V. Makoviychuk, P. H. S. Torr, M. Sun, and801
+S. Whiteson,Is independent learning all you need in the starcraft multi-agent challenge?, ArXiv,802
+abs/2011.09533 (2020). 803
+[43]K. Zhang, F. He, Z. Zhang, X. Lin, and M. Li,Multi-vehicle routing problems with soft time win-804
+dows: A multi-agent reinforcement learning approach, Transportation Research Part C: Emerging805
+Technologies, 121 (2020), p. 102861. 806
+[44]K. Zhang, Z. Yang, and T. Bas ¸ar,Multi-agent reinforcement learning: A selective overview of theories807
+and algorithms, Handbook of reinforcement learning and control, (2021), pp. 321–384.808
+===== [PARTIAL] PAGE 24/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 23
+Supplementary Material.809
+1. Proof of Recursive form of local q-function.The expectation of the rewardr(s, a)810
+is taken with regard to a distribution over the global state and the global action. Because811
+the q-value is evaluating the responseπ i toπ −i, the global action must always be taken with812
+respect toπ. Then, per definition of the q-value (2.1), the initial state is sampled from the813
+stationary distributiond π. It then follows from the definition of the stationary distribution814
+that the distribution of the next global state will still bed π, and the local q-value taken at815
+the next step is the expectation of the future gain. This is formalized below.816
+Proof of Lemma2.1.We can rewrite (2.1) as817
+Qπ−i
+πi (si, ai) (1.1)818
+=
+X
+s
+dπ(s|s i)Ea0∼(πi,π−i)
+
+r(s0, a0)|s i
+0 =s i, ai
+0 =a i, s0 =s
+
+(1.2)819
++β
+X
+s
+dπ(s|s i)Eak∼(πi,π−i),sk∼P
+" ∞X
+k=1
+βk−1r(sk, ak)|s i
+0 =s i, ai
+0 =a i, s0 =s
+#
+(1.3)820
+While the term in (1.2) can be expressed as P
+s dπ(s|s i) P
+a−i π−i(a−i|s)r(s, ai, a−i), the821
+term in (1.3) can be developed in the following way822
+β
+X
+s
+dπ(s|s i)Es1,ai
+1
+"
+Eak∼π,sk∼P
+" ∞X
+k=1
+βk−1r(sk, ak)|s 0 =s, ai
+0 =a i, s1 =s ′, ai
+1 =a ′i
+# s0 =s, ai
+0 =a i
+#
+=β
+X
+s
+dπ(s|s i)
+X
+a−i
+π−i(a−i |s)
+X
+s′
+P(s, a, s′)
+X
+a′i
+πi(a′i |s ′(i))×
+Eak∼π,sk∼P
+" ∞X
+k=1
+βk−1r(sk, ak)|s 1 =s ′, ai
+1 =a ′i
+#
+=β
+X
+s′i
+P i(si, ai, s′i)
+X
+a′i
+πi(a′i |s ′(i))
+" X
+s
+dπ(s|s i)
+X
+a−i
+π−i(a−i |s)
+X
+s′
+P −i(s−i, a−i, s′−i)×
+Eak∼π,sk∼P
+" ∞X
+k=1
+βk−1r(sk, ak)|s i
+1 =s ′i, s−i
+1 =s ′−i, ai
+1 =a ′i
+# #
+=β
+X
+s′i
+P i(si, ai, s′i)
+X
+a′i
+πi(a′i |s ′(i))
+"
+Es1∼dπ,ak∼π,sk∼P
+" ∞X
+k=1
+βk−1r(sk, ak)|s i
+1 =s ′i, ai
+1 =a ′i
+# #
+=β
+X
+s′i
+P i(si, ai, s′i)
+X
+a′i
+πi(a′i |s ′(i))Qπ−i
+πi (s′i, a′i)
+823
+where the second line to the last is due to the definition of the stationary distribution.824
+2. Proof of the weak convergence of multi-scale Q-learning (Theorem 5.2).We present825
+below the detailed proof of Theorem 5.2, in which we apply the results of Theorem 5.1 on826
+the weak convergence of asynchronous multi-scale stochastic approximation iterates to our827
+Q-learning iterates (3.1). The first step is to rewrite (3.1) as the iterates of Theorem 5.1, and828
+===== [PARTIAL] PAGE 25/47 =====
+24 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+identify the corresponding martingale and Markovian noise. We then analyze the two error829
+terms separately.830
+Proof.Let us consider any local state action pairs i, ai of any iterateQ i. By assumption on831
+the transition kernel A 2.2 and the design of the mappingϕ, the sequence of times between two832
+visits are uniformly integrable. All return times must moreover be at least 1. TheE n+1,cτ i
+n,c833
+are therefore uniformly bounded with values in an interval [1,¯u i
+c] with ¯ui
+c ≥1, therefore834
+satisfying A 5.6.835
+In the following, we write{ ¯F i
+c (Q)}c real-valued continuous functions forc∈ {1. . . ,|Si||Ai|},836
+and recall that837
+(2.1)π k = (π1
+k, . . . , πM
+k )π j
+k =ϕ( ˆQj
+k) ˆQk = ( ˆQ1
+k, . . . ,ˆQM
+k ) ˆQi
+k ={ ˆQi
+k,c}c=1,...,C838
+We can rewrite the iterates (3.1) in real time in the following way:839
+ˆQi
+k+1,c = ˆQi
+k,c +α i
+k,cIk,c
+h
+¯F i
+c ( ˆQk) +δU i
+k,c +ξ i
+k,c
+i
+δU i
+k,c :=Y i
+k,c −E Y
+k,c[Y i
+k,c]
+ξi
+k,c :=E Y
+k,c[Y i
+k,c]− ¯F i
+c ( ˆQk)
+Y i
+k,c :=r k +β[ϕ( ˆQi
+k)(· |si
+k+1)]T ˆQi
+k(si
+k+1,·)− ˆQi
+k,c
+=F i
+c ( ˆQk, ξi
+k,c) +δU i
+k,c
+(2.2)840
+where841
+¯F i
+c (Q) =
+X
+s
+dπk (s|s i)
+X
+a−i
+π−i
+k (a−i|s)r(s, ai, a−i) +βv ′i(Qi,(s i, ai)c)−Q i
+c
+F i
+c (Q, ξ) =¯F i
+c (Q) +ξ
+842
+withv ′i(Q,(s i, ai)c) =v ′i(Q, si, ai) fors i, ai thecth component ofQ i and recall that
+v′(Qi, si, ai) =
+X
+s′i
+P i(si, ai, s′i)[ϕ(Qi)(· |s′i)]T Qi(s′i,·)
+We first show that the iterates (2.2) are in fact equivalent to their constrained version:843
+ˆQi
+k+1,c = Π[−D,D]
+
+ˆQi
+k,c +α i
+k,cIk,c
+ ¯F i
+c (Qi
+k,c) +δU i
+k,c +ξ i
+k,c
+
+844
+Recall that at any update of the local state-action pair corresponding to thecth compo-845
+nent, we have ˆQi
+k+1,c = (1−α i
+k,c) ˆQi
+k,c +α i
+k,c
+h
+rk +β[ϕ( ˆQk)(si
+k+1)]T ˆQk(si
+k+1,·)
+i
+for anyi, k, c,846
+withα i
+k,c ∈(0,1). Moreover, hereϕ( ˆQi
+k)(si
+k+1) defines a probability distribution and we have847
+discount factorβ∈(0,1). It follows that since ˆQi
+0,c ∈[−D, D] for allcandR+βD < D,848
+then we have supk || ˆQi
+k,c||< Dfor allc, kand the iterates will never leave the hyper-rectangle849
+defined by [−D, D]|Si||Ai|. This means that for constrained iterates with constraint space850
+[−D, D]|Si||Ai|, the induced reflection term will always equal zero.851
+===== [PARTIAL] PAGE 26/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 25
+We have therefore shown that the iterates (3.1) can be written as the multi-scale stochastic852
+approximation iterates (5.2). TheY i
+k,c are then uniformly bounded, and theF i
+c are moreover853
+continuous inξandQ. Per definition, for anyk, i, c,E Y
+k,c[δU i
+k,c] = 0 and{ Pk
+j=0 δU i
+k,c}k is a854
+martingale sequence, so that A 5.1 is satisfied.855
+If the noise sequences (ξ i
+k,c) satisfy??5.2–5.4, then according to Theorem 5.1 the iterates856
+follow theM×Cmean ODEs:857
+d
+dt qi
+t(si
+c, ai
+c) = 1
+uic
+¯F i(q<i
+t , qi
+t, Z≥i+1(q<i+1
+t ))(2.3)858
+whereπ −i = (ϕ(q 1
+t ), . . . , ϕ(qi−1
+t ), ϕ(qi+1
+t ), . . . , ϕ(qM
+t )), the{q j
+t }j<i are constant,{q j
+t }j>i =859
+Z>i+1(q<i+1
+t ). Then, assumption A 5.7 guarantees that (2.3) admits an asymptotically stable860
+point, and we conclude on the convergence of the iterates towards a smooth equilibrium as861
+defined in Definition 2.3.862
+We now need to prove that the noise sequencesξ i
+k,c with values in the space Ξ defined
+in (2.2) are Markovian state-dependent noise sequences, satisfying??5.2–5.4. We have
+F i
+c ( ˆQk, ξi
+k) =E Y
+k,c[Y i
+k,c]. Since theY i
+k,c are uniformly bounded, then so are theF i
+c ( ˆQk, ξi
+k).
+As the arguments for the boundedness of theY i
+k,c rely on the proper initialization of the ˆQi
+0
+and the boundedness of the reward, they naturally transfer to any fixed-Qchain sequence
+{F i
+c ( ˆQj, ξi
+j+k ( ˆQj)}k, so that A 5.3 is verified. Let us now derive an expression forE Y
+k [Y i
+k,c].
+First, ˆQi
+k,c is a function of ˆQi
+0,c and the previousY i
+j , τi
+j , j < k, so we only need to focus on
+si
+k+1 andr k. The next states i
+k+1 is sampled from the local transition kernel after the agent
+has visited component (s i, ai)c, so we have exactly:
+EY
+k,c
+h
+[ϕ( ˆQi
+k)(si
+k+1)]T ˆQk(si
+k+1,·)
+i
+=v ′( ˆQi
+k,(s i, ai)c)
+As for the rewardr k:E Y
+k,crk =E Y
+k,cr(sk, ak) =E Y
+k,cr((si, ai)c, s−i
+k , a−i
+k ). Neithers −i
+k nora −i
+k
+are observed by agenti. Ifs −i
+k was known however, then the expectation ofa −i
+k would just be
+taken from the respective policies of other agents at that time ¯π −i =ϕ( ˆQ−i
+k ):
+EY
+k,crk =E Y
+k,c
+
+EY
+k,c
+
+r((si, ai)c, s−i
+k , a−i
+k )|s −i
+k
+
+=E Y
+k,c
+h
+[ϕ( ˆQ−i
+k )(·, s−i
+k )]T r((si, ai)c, s−i
+k ,·)
+i
+It remains to handles −i
+k . It is easy to see that the state process{s −i
+k }k is in fact a Markovian
+process, whose transition kernel depends on the iterates ˆQk in real time. Recall thatPis the
+global transition matrix of dimension|S| × |Ai|. . .|AM | × |S|. By construction the mapping
+ϕreturns a policy assigning a non-zero probability to every action, so that there existsϵ ϕ >0
+such that for alla∈A i,π(a|s i)> ϵϕ. For an initial distributiond 0, we write{d k}k≥0 ∈(0,1) |S|
+the process tracking the distribution ofs −i:
+dk+1 =d k ·PΠ M
+j=1
+j̸=i
+ϕ( ˆQj
+k)
+{dk}k is a state-dependent Markovian process, that is:863
+(2.4)P(d k+1 ∈ ·|Fi,Y
+k,c , dk) =P(d k+1 ∈ ·|ˆQk, dk)864
+===== [PARTIAL] PAGE 27/47 =====
+26 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+With a small abuse of notation we writed πk (s−i) ford π−i
+k (s−i), so that we have{ξ i
+k,c}k865
+as:866
+(2.5)ξ i
+k,c =
+X
+s
+
+dk(s−i)−d πk (s−i)
+ 
+ϕ(Q−i
+k )(·, s−i
+k )]T r(si
+c, s−i
+k , ai
+c,·)
+
+867
+whered πk =d ϕ(Qk) is still the stationary distribution over global states under policyϕ(Q k).868
+Recall that under any fixed policies the local state processes follow independent dynamics, so869
+that the stationary distribution is factorizedd π =d πi
+dπ−i
+.870
+Since the reward is bounded in [−R, R], the{ξi
+k,c}k take values in the compact [−R|S||A|, R|S||A|].871
+The{ξ i
+k,c}k being an affine transformation of{d k}, it follows that it is also a state-dependent872
+Markovian process. Moreover, this state-dependent process is stationary, in the sense that873
+for eachQthere is a time-invariant (does not depend onkif we knowQ) measurable transi-874
+tion functionP ξ(·,·|Q) such thatP(ξ k+1,c ∈ ·|Fi,Y
+k,c , dk) =P ξ(ξk,c,·| ˆQk). Therefore, A 5.2 is875
+satisfied.876
+It remains to show that the noise{ξ i}k satisfies A 5.4: its ”rate of change” is small enough877
+that it can be locally averaged out, and the noisy observations can be approximated by the878
+mean ODE. In particular, we define the fixed-Qchain{ξ k,c(Q)}, the Markov chain on state879
+space Ξ with the fixed transition functionP(·,·|Q). It is the noise process starting fromn880
+if ˆQstayed constant forever:{ξ n+j,c( ˆQ), j≥0, ξn,c( ˆQ) =ξ n,c)}. To verify A 5.4, we need to881
+prove for any compact setA∈Ξ,882
+(2.6) lim
+n,m
+1
+m
+n+m−1X
+l=n
+EY
+n
+h
+ξl,c( ˆQ)I{ξl,c∈A}
+i
+= 0883
+We define the corresponding fixed-Qchain ˜dn+j(s−i, Q), for allj≥0, where we write884
+P M
+j=1
+j̸=i
+:=P Q:885
+(2.7) ˜dn =d n, ˜dk+1 = ˜dk ·PΠ M
+j=1
+j̸=i
+ϕ(Qj) = ˜dk ·P Q886
+Switching to vector notation, we writeR π the vector of size|S|of reward expectations
+under the global policyπfor the global states. So for alls∈S,
+Rπk (s) =
+
+ϕ(Q−i
+k )(·, s−i
+k )]T r((si, ai)cs−i
+k ,·)
+
+We also write ˜Dl(Q) andD(Q) the corresponding state distribution vectors for ˜dl(s−i, Q) the887
+fixedQ-chain starting innas defined in (2.7) andd ϕ(Q)(s−i) the stationary distribution under888
+policyϕ(Q).889
+===== [PARTIAL] PAGE 28/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 27
+Then for alln,m, and any ˆQputting (2.5) into (2.6) allows us to rewrite the latter as:890
+1
+m
+n+m−1X
+l=n
+EY
+n
+h
+ξl,c( ˆQ)I{ξn∈A}
+i
+= 1
+m
+n+m−1X
+l=n
+h
+˜Dl( ˆQ)−D( ˆQ)
+
+Rπl
+i
+I{ξl∈A}
+= 1
+m
+n+m−1X
+l=n
+h
+( ˜Dn( ˆQ)Πl−1
+j=nP
+ˆQ)−D( ˆQ)
+
+Rπl
+i
+I{ξl∈A}
+= 1
+m
+n+m−1X
+l=n
+
+dn
+
+P
+ˆQ
+l−n
+−D( ˆQ)
+
+Rπl
+
+I{ξl∈A}
+≤ R
+m
+m−1X
+l′=0
+
+
+dn
+
+P
+ˆQ
+l′
+−D( ˆQ)
+
+1
+I{ξl′+n∈A}
+(2.8)891
+From A 2.2, we know that the finite Markov chain representing the global state process is
+irreducible and aperiodic. Therefore,P ˆQ is the transition matrix associated with an irreducible
+global state process over the finite state-spaceS, and the stationary distribution defined by
+Dϕ( ˆQ) is its limiting state distribution. Moreover, the convergence rate is geometric [30], so
+that for any initial distributiond n there exists constants 0< b <1 andC >0 such that for
+alll: 
+
+dn
+
+P
+ˆQ
+l
+−D( ˆQ)
+
+1
+< C(1−b) l
+Therefore, together with (2.8) we have that:892
+lim
+m
+lim
+n
+1
+m
+n+m−1X
+l=n
+EY
+l
+h
+ξl,c( ˆQ)I{ξn∈A}
+i
+≤lim
+m
+R
+m
+m−1X
+l′=0
+C(1−b) l′
+= lim
+m
+CR
+mb = 0893
+3. Example of A 3.1 for the Boltzmann distribution.To give a better intuition of A 3.1,894
+we look at a toy problem and a set of parameters under which it is satisfied. We then895
+progressively extend the analysis to the general case.896
+Consider a single agent interacting in a game with 1 state and 2 actions and reward897
+functionr. We write898
+•a 0, a1 the 2 actions available to the agent899
+•their associated rewardsr 1 =r(a 1) andr 0 =r(a 0)900
+•for any q-tableQ, the associated policyπ=ϕ(Q) with its average awardr π =901 P
+a π(a)r(a)902
+Let the agent maintain a q-table estimateQ= [Q 1, Q2]∈[−D, D] 2, and follow the cor-
+responding policyπ=ϕ(Q) with average rewardr π. We introduce a perturbation to the
+q-tableQ ′ = [Q′
+1, Q′
+2]∈[−D, D] 2, and callπ ′ =ϕ(Q ′) the associated new policy with average
+rewardr π′. Recall that under A 3.1, we look for aK∈(0,1) such that
+|rπ −r π′| ≤K∥Q−Q ′∥∞
+We have:903
+===== [PARTIAL] PAGE 29/47 =====
+28 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+rπ =
+X
+a
+π(a)r(a) =π(a 0)r(a0) +π(a 1)r(a1)
+=π(a 0)r0 + (1−π(a 0))r1
+(3.1)904
+and therefore905
+|rπ −r π′|=|π(a 0)r0 + (1−π(a 0))r1 −π ′(a0)r0 −(1−π ′(a0))r1|
+=|
+ 
+π(a0)−π ′(a0)
+
+r0 −
+ 
+π(a0)−π ′(a0)
+
+r1|
+=|
+ 
+π(a0)−π ′(a0)
+
+(r0 −r 1)|
+≤
+π(a0)−π ′(a0)
+ |r0 −r 1|
+(3.2)906
+Let us chose forϕthe mapping returning a Boltzmann distribution, parameterized by907
+λ >0 an inverse temperature constant:908
+π=ϕ(Q)⇒ ∀i π(a i) = eλQi
+P
+j eλQj
+= 1P
+j eλ(Qj −Qi)
+ϕ(Q) is the solution to the regularized arg max objective introduced by Equation (2.3)
+in Section 2, withν i
+si defined on the simplex as the negative entropy P
+j Qj log(Qj) and
+τ= 1
+λ [15]. Moreover, note that for any [a, b]⊂R:
+
+1
+1 +e λb − 1
+1 +e λa
+ ≤max
+x∈[a,b]
+λ
+2 +e −λx +e λx |b−a| ≤ λ
+4 |b−a|
+where we have used the mean value theorem forf:x→ 1
+1+eλx and noted that|f ′(x)|is909
+maximized onRwithf ′(0) = λ
+4 .910
+We can then write:911
+π(a0)−π ′(a0)
+ =
+
+1
+1 +e λ(Q1−Q0) − 1
+1 +e λ(Q′
+1−Q′
+0)
+
+≤ λ
+4
+Q′
+1 −Q ′
+0 −Q 1 +Q 0
+
+≤ λ
+4
+ Q′
+1 −Q 1
+ +
+Q0 −Q ′
+0
+
+≤ λ
+4 2 max(|Q′
+1 −Q 1|,|Q 0 −Q ′
+0|)
+= λ
+2
+Q′ −Q
+
+∞
+(3.3)912
+Using (3.2) and (3.3), we have:913
+|rπ −r π′| ≤λ
+2
+Q′ −Q
+
+∞ |r0 −r 1|(3.4)914
+===== [PARTIAL] PAGE 30/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 29
+It follows that A 3.1 can be verified if there existsK∈(0,1) such that915
+|r0 −r 1| ≤2K
+λ
+916
+Note that Theorem 3.1 requires the discount factorβto satisfyβ≤1−K, so a sufficient917
+condition to apply the theorem is:918
+(3.5)|r 0 −r 1| ≤2(1−β)
+λ
+919
+Intuitively, A 3.1 bounds the variation of the reward function over the action space. Since we920
+know the reward to be bounded, (3.5) can be satisfied by scaling the reward appropriately921
+without changing the optimal policy.922
+This conclusion extends to the case of an arbitrary large finite action spaceA. Then,923
+|rπ −r π′|=
+
+X
+a
+ 
+π(a)−π ′(a)
+
+r(a)
+ ≤
+X
+a
+π(a)−π ′(a)
+ r(a)
+≤max
+u
+r(u)
+ϕ(Q)−ϕ(Q ′)
+
+1
+≤max
+u
+r(u)
+p
+|A|
+ϕ(Q)−ϕ(Q ′)
+
+2
+≤λ
+p
+|A|max
+u
+r(u)
+Q−Q ′
+2
+≤λmax
+u
+r(u)|A|
+3
+2
+Q−Q ′
+∞
+924
+where in the second to last line we have used the fact thatϕis Lipschitz with constantλ, with925
+respect to theL2 norm (see [15]). LettingAbe a global action spaceA=A 1×· · ·×AM , andπa926
+global policy that is the product ofMlocal policies, we then have for anya= (a 1, . . . , aM )∈A927
+π(a)−π ′(a) = ΠM
+1 πi(ai)−Π M
+1 π′i(ai)≤
+MX
+i=1
+ 
+πi(ai)−π ′i(ai)
+(3.6)928
+Finally, we reintroduce partial observability over a global action spaceSby writing:929
+|rπ −r π′|=
+
+X
+s
+X
+a
+
+dπ(s)π(a|s)−d π′
+(s)π′(a|s)
+
+r(s, a)
+930
+whered π(s)π(a|s) is the stationary distribution over the Markov chain Ψ(π) on state space931
+S×Ainduced by policyπ. It has transition functionP Ψ(π)((s, a),(s′, a′)) =P(s, a, s′)π(a′ |s ′).932
+Let us writeb π this stationary distribution. Then we have933
+|rπ −r π′| ≤max
+u∈S×A
+r(u)
+bπ −b π′
+
+1
+934
+Using classical results from the perturbation theory of Markov chains to bound the term on935
+the right [1]:936
+(3.7)|r π −r π′| ≤max
+u∈S×A
+r(u)κ
+P Ψ(π′) −P Ψ(π)
+
+∞
+937
+===== [PARTIAL] PAGE 31/47 =====
+30 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+whereκis a condition number of the Markov chain that we will define later.938
+Moreover, for all pairs (s, a),(s′, a′) inS×Awe have:939
+(3.8)P Ψ(π′)((s, a),(s′, a′))−P Ψ(π)((s, a),(s′, a′)) =P(s, a, s′)
+
+π′(a′ |s ′)−π(a ′ |s ′)
+
+940
+We writeA # =|A 1|=· · ·=|A M |assuming all local action spaces are homogeneous.941
+Plugging (3.8) in (3.7) and then using (3.6), we have:942
+|rπ −r π′| ≤κmax
+u∈S×A
+r(u) max
+s,a∈S×A
+X
+s′∈S
+X
+a′∈A
+P(s, a, s′)
+π′(a′ |s ′)−π(a ′ |s ′)
+
+≤κmax
+u∈S×A
+r(u) max
+s,a∈S×A
+X
+s′∈S
+P(s, a, s′)
+X
+a′∈A
+
+MX
+i=1
+ 
+πi(a′i |s i)−π ′i(a′i |s i)
+
+
+=κmax
+u∈S×A
+r(u) max
+s,a∈S×A
+X
+s′∈S
+P(s, a, s′)
+MX
+i=1
+X
+a′i∈Ai
+|A#|M−1 πi(a′i |s i)−π ′i(a′i |s i)
+
+≤κmax
+u∈S×A
+r(u)|A#|M−1 max
+s,a∈S×A
+X
+s′∈S
+P(s, a, s′)
+MX
+i=1
+λ|A#|
+3
+2
+Qi(s,·)−Q ′i(s,·)
+
+∞
+≤κλmax
+u∈S×A
+r(u)|A#|M+ 1
+2
+MX
+i=1
+Qi −Q ′i
+∞ max
+s,a∈S×A
+X
+s′∈S
+P(s, a, s′)
+=κλmax
+u∈S×A
+r(u)|A#|M+ 1
+2
+MX
+i=1
+Qi −Q ′i
+∞
+943
+Several condition numbers exist for finite, irreducible Markov chains [12].κcan be defined944
+as a function of the ergodic coefficientτ 1 [18]:945
+κ= 1
+1−τ 1(P Ψ(π)) τ(P) := sup
+∥v∥1=1
+vT e=0
+∥vT P∥ 1 = 1
+2 max
+i,j
+X
+k
+|Pik −P jk |946
+Note that 0≤τ 1(P Ψ(π))≤1 and thereforeκ≥1. We have:947
+τ1(P Ψ(π)) = 1
+2 max
+(s,a)i,(s,a)j
+X
+s′,a′
+|P((s, a)i, s′)π(a′ |s ′)−P((s, a) j, s′)π(a′ |s ′)|
+= 1
+2 max
+(s,a)i,(s,a)j
+X
+s′,a′
+π(a′ |s ′)
+P((s, a)i, s′)−P((s, a) j, s′)
+
+= 1
+2 max
+(s,a)i,(s,a)j
+X
+s′
+P((s, a)i, s′)−P((s, a) j, s′)
+ X
+a′
+π(a′ |s ′)
+= 1
+2 max
+(s,a)i,(s,a)j
+X
+s′
+P((s, a)i, s′)−P((s, a) j, s′)
+
+948
+We therefore defineκas:949
+(3.9)κ:= 1
+1− 1
+2 max(s,a)i,(s,a)j
+P
+s′ |P((s, a)i, s′)−P((s, a) j, s′)|
+950
+===== [PARTIAL] PAGE 32/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 31
+To conclude, whenϕis the Boltzmann distribution, Assumption A 3.1 can be verified if
+for any agentiandQ ′≤i a perturbation ofQ ≤i:
+∀j < i,
+Qj −Q ′j
+∞ = 0⇒ ∀j > i,∥Q j −Z ≥i+1(Q<i, Q′i)∥∞ ≤
+Qi −Q ′i
+∞
+Then, the necessary bound on the problem’s reward becomes951
+κλmax
+u∈S×A
+r(u)|A#|M+2 M
+Qi −Q ′i
+∞ ≤1−β
+⇒max
+u∈S×A
+r(u)≤ 1−β
+κλ|A#|M+ 1
+2 M
+952
+Again, this can always be satisfied by rescaling r, although of course as the right-hand953
+term decreases with the number of agents and available actions, rescaling will pose numerical954
+stability issue. In practice however, as we show in our experiments in Section 4, good empirical955
+results can be obtained without rescaling.956
+4. Proofs of Networked multi-scale Q-learning iterates.957
+4.1. Convergence of NetworkMQL.We detail the proof of Theorem 3.2. We recall here958
+the two conditions on the ranking of agents mentioned in Subsection 3.2:959
+•(A) For any nodei, nodes inN A(i) have a strictly inferior rank, and nodes inN D(i)960
+have a strictly superior rank.961
+•(B) For any nodei, there exists no two different nodes of the same rank inN A(i).962
+We first show that any set of learning rate sequences satisfying (A) and (B) preserves the963
+convergence of Theorem 5.2. We then discuss how learning rates belonging to that set can be964
+derived.965
+Proof.We note that for a nodei, a best responseπ∗ i to other policiesπ −i only depends966
+on policies in the neighborhood. Any change at a local policy outside of the neighborhood967
+does not lead to a change in best-response toπ −i if local policies in the neighborhood remain968
+the same.969
+That is, letibe a node in the direct acyclic graphG, andπ i the local policy followed
+by agenti. We remind thatN i is the set of the neighbors ofiand write the corresponding
+set of local policiesπ N i
+={π j, j∈ Ni}. Similarly, we write the set of the remaining nodes
+excludingi, ¯N i =V\N i and their local policiesπ
+¯N i
+. Let local policyπ ∗i be a best response
+toπ −i = (πN i
+, π
+¯N i
+). Then, for any other set of local policiesπ ′ ¯N i
+,π ∗i is also a best response
+toπ ′−i = (πN i
+, π′ ¯N i
+). This is immediate if we recall that forπ ∗i is a best response toπif for
+any local policyπ i we have for alls i ∈S i anda i ∈A i,Q π−i
+π∗i (si, ai)≥Q π−i
+πi (si, ai) , and that
+due to the structure of the reward as a sum of local components:
+Qπ−i
+πi (si, ai) =
+MX
+l=1
+Eπl,πU l )G(l, Ul)
+with
+E(πl,πU l )G(l, Ul) =E (sl
+0,sU l
+0 ,al
+k,aU l
+k ,sk)∼(dπl ,dπU l
+,πl,πU l ,P)
+" ∞X
+k=0
+βkrl(sl
+k, al
+k, sU l
+k , aU l
+k )|s i
+0 =s i, ai
+0 =a i
+#
+===== [PARTIAL] PAGE 33/47 =====
+32 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+and
+Qπ−i
+πi (si, ai) =
+X
+l∈(i,N i)
+E(πl,πU l )G(l, Ul) +
+X
+l∈ ¯N i
+E(πl,πU l )G(l, Ul)
+Now let local policyπ ∗i be a best response toπ N i
+only, and take any set of local policies970
+excludingi π−i = (πN i
+, π¯N i
+). Then P
+l∈(i,N i) Eπl,πU l )G(l, Ul)≥ P
+l∈(i,N i) Eπl,πU l )G(l, Ul) per971
+definition of the best response. The second sum is a constant with respect to the local policy972
+ofi, and we haveQ π−i
+π∗i (si, ai)≥Q π−i
+πi (si, ai).973
+It is easy to see that any ranking satisfying (A) and (B) also has the following property:974
+there exists no two paths from two different agents of the same level towards the same node975
+i. We show that from this property the convergence result will follow.976
+At eachi, iterates for agentsiwill follow an ODE whose mean field will be a continuous977
+function of both the parameters of agents inN i
+in, which by construction learn on a slower978
+scale, and the parameters of agents inN i
+out, which by construction learn on a faster scale. At979
+the scale ofi, the parameter ofN i
+in can be considered fixed. The parameters ofN i
+out will have980
+converged towards the parents ofN i
+out. If theGis a tree, then the set of parents ofN i
+out is981
+reduced toN i
+in, and convergence follows. IfGis any standard DAG, then the mean field of982
+any agentj∈ Ni
+out is∝ ¯F j(qU j
+). Any nodel∈U j is either slower thani, in which case it can983
+be considered constant, or faster thani, in which case it has converged towards a continuous984
+function of parametersq U l
+. Again, any nodekinU l is either slower thani, or has converged985
+towards a continuous function of parametersq U k
+. By repeating this procedure, we find that986
+¯F j(qU j
+) depends on all the ancestors ofj. Recall that the graph is acyclic, and we have just987
+assumed that there never exists two paths from two agents at the same level towards any988
+node. Therefore we can rewrite ¯F j(qU j
+) as a function of a finite number of agents, in which989
+any node that has the same level withimust beiitself. Therefore, at the timescalei,jwill990
+have converged towards a continuous function ofq i and a set of parameters slower thani.991
+Convergence of the iterates ofitowards the best response follows. This concludes the proof.992
+Learning rates attribution procedures.We now propose a simple algorithm that creates993
+learning rate sequences staisfying conditions (A) and (B). Let us callTopSortany topological994
+sorting algorithm. We callRBFSthe procedure that does reverse breadth first search on the995
+graph, starting from a single leaf up to all discovered roots, and returns the set of all visited996
+nodes.997
+The detail of this algorithm is quite straightforward. First, Line 3 a total order on all998
+nodes is extracted through a topological sort. As noted earlier this is already a valid ranking999
+for any DAG structure that will ensure convergence, and the rest of the algorithm is dedicated1000
+to reduce the number of ranks if possible.1001
+Lines 4 to 9 simply extract constraint sets from the DAG: two nodes belonging to the1002
+same set admit at least a path towards a same third node, and therefore cannot receive the1003
+same rank. This is done by returning, for every leaf, the set of all its ancestors through the1004
+reverse breadth first search.1005
+Then, lines 11 to 21 simply adjust the ranking by extracting node by topological order, and1006
+assigning them the slowest rank that does not conflict with other nodes in his constraint sets.1007
+The final ranking, by construction, ensures that all nodes have higher ranks than their parents1008
+(through the topological order) and different ranks from other nodes in their constraint sets.1009
+===== [PARTIAL] PAGE 34/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 33
+Algorithm 4.1Procedure: Attribute learning rates for any DAG structure
+Require:Network DAGG= (V,E) withMnodes
+1:InitΣ← {}, d←[∞, . . . ,∞]∈(N∪ ∞)M , HeapQ
+2:V R ←Leaves(G)
+3:Q←T opSort(G)
+4:## Retrieve constraint sets Σ
+5:forleaf inV R do
+6:A←RBF S(leaf)
+7:σ←A S{leaf}
+8:Σ.append(σ)
+9:end for
+10:## Assign levels based on Σ
+11:whileQnot emptydo
+12:v←Q.pop()
+13:ifP arents(v) emptythen
+14:d v ←0
+15:else
+16:d v ←max({d p :p∈P arents(v)) + 1
+17:end if
+18: ¯C← {dn :∃σ∈Σ, σ⊃ {n, p}}
+19:whiled v ∈ ¯Cdo
+20:d v ←d v + 1
+21:end while
+22:end whilereturnd
+4.2. Extension of NetworkMQL to a ranking only satisfying hypothesis (A).In the1010
+following, we give a sketch of the proof of Theorem 3.2, showing that convergence to the1011
+best-response equilibrium can be preserved for rankings that only satisfy hypothesis (A). We1012
+recall here this condition on the ranking of agents mentioned in Subsection 3.2:1013
+1014
+(A)For any nodei, nodes inN A(i) have a strictly inferior rank, and nodes inN D(i)1015
+have a strictly superior rank.1016
+1017
+Any set of learning rate sequences satisfying (A) can be shown to preserve the convergence1018
+of Theorem 3.1 under new contraction assumption A 3.3. Let ˜rk:i→ ˜rk(i)∈ {1, . . . ,¯˜M}be1019
+the ranking satisfying (A) by attributing ˜Mdifferent levels to theMagents. We write| ˜rk(i)|1020
+the number of agents at level ˜rk(i).1021
+The proof can be done in 4 steps:1022
+1. First, note that theMNetwork MQL iterates (3.3) under ranking ˜rkare equivalent to1023
+˜Mmulti-scale iterates of Theorem 5.1, where every iterate is updating all the agents at1024
+a same rank. Here, instead of selecting one component of the updated parameters, each1025
+iteratei∈ {1, . . . ,˜M}updates| ˜rk(i)|local state-action pairs at each real time-scales.1026
+2. Then, note that under our ranking, no two agents on the same level can be neighbors1027
+===== [PARTIAL] PAGE 35/47 =====
+34 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+in the interaction graph. The proof of this statement is exactly identical to the one1028
+done in the proof of Theorem 3.2 in Subsection 4.1, as it is a direct consequence of1029
+hypothesis (A) only. Just like in Subsection 4.1, this means that the associated ODE1030
+approximations for agents updated by the same iterate can be written exclusively as1031
+functions of agents learning at different levels.1032
+3. Finally, the associated contraction property for the ODE approximations must stand1033
+when the q-tables of all agents learning at the same level are perturbed together. This1034
+is the claim made by A 3.3.1035
+4. We conclude that by applying Theorem 5.1 under A 3.2, the convergence towards the1036
+best-response equilibrium is preserved.1037
+5. Conditions for the weak convergence of multi-scale iterates with Markovian noise.1038
+5.1. Conditions for the weak convergence of synchronous multi-scale iterates with1039
+Markovian noise testb.Weak convergence of stochastic approximation for two time-scales1040
+systems were proven in [21]. We formally extend these results to the multi-scale case. We1041
+consider the constrained case: at each iteration, the iterates are projected on a defined ad-1042
+missible spaceH. We assume thatHis a hyperrectangleH= [h 1, b1]×[h 2, b2]× · · · ×[hd, bd]1043
+with (hi, bi)∈R 2 fori∈ {1, . . . , d}andd >0 the dimension of the iterates. The operator ΠH1044
+is used to denote this projection onH.1045
+ConsiderMinterdependent stochastic approximation processesθ 1
+k, . . . , θM
+k updated ac-1046
+cording to iterates:1047
+(5.1)θ i
+k+1 = ΠH
+
+θi
+k +α i
+kY i
+k
+
+=θ i
+k +α i
+k(F i(θk, ξi
+k) +δU i
+k) +B i
+k1048
+whereθ k = (θ1
+k,· · ·, θM
+k ),{ξ i
+k}are noise sequences,F i(·,·) are functions ofθandξ i,δU i
+k+1 =1049
+Y i
+k −F i(θk, , ξi
+k) are martingale noise differences,α i
+k :=α i(k)>0 are learning rates for1050
+timescaleiat iteratek, andB i
+k is a correction term to project the iterate onH, henceforth1051
+referred as reflection terms.1052
+Let{F k}be a sequence of non-decreasingσ−algebra generated by{θ i
+j, Yi
+j−1, ξi
+j, j≤k, i≤
+M}, andE k refers to the associated conditional expectationE[·|F k], and we haveE kY i
+k =
+F i(θk, ξi
+k). To be concise, we will use the notations
+θ<i := (θ1, . . . , θi−1), θ ≥i := (θi, . . . , θM ).
+We now lay down the assumptions needed to ensure convergence. Let Ξ be a complete1053
+and separable metric space, andAbe an arbitrary compact set in Ξ. We start by standard1054
+assumptions for stochastic approximation algorithms: the sequences of observationsY i
+k are1055
+uniformly integrable, and at each timestep their expectations are given by a continuous func-1056
+tion of the iterateθ i
+k. The main idea is that an error termδU i
+k of null expectation will be1057
+averaged out through the iterations, so that askgoes to infinity, the behavior of the iterates1058
+can be described without the error terms. We make the following assumption fori= 1,· · ·, M.1059
+We first start with basic assumptions from stochastic approximation theory:1060
+A 5.1.The{Y i
+k }are uniformly integrable, and can be writtenY i
+k =F i(θk, ξi
+k) +δU i
+k with1061
+{δU i
+k}k martingale noise differencesE kδU i
+k = 0andF i(·, ξi)functions continuous inθ, and1062
+continuous inξ i ∈A.1063
+===== [PARTIAL] PAGE 36/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 35
+Here,F i is still dependent on the error sequencesξ i
+k whose expectations are not null.1064
+Yet, the Markovian property of these sequences, combined with a constraint on the rate of1065
+evolution of the learning rates (see A 5.5), can be exploited to construct an approximation1066
+ofF i(·, ξi) that does not depend onξ i. We detail some assumptions on the Markovian noise1067
+processes that can be considered.1068
+A 5.2.The noise processes{ξ i
+k}are bounded with values inΞ, and Markovian: they admit1069
+a transition functionP i(·,·|θ)such thatP i(·, A|θ)is measurable for each Borel setA⊂Ξ, and1070
+P i(ξi
+k+1 ∈ ·|Fk) =P i(ξi
+k,·|θ k). This transition function is continuous and does not depend1071
+onk. For any compactA∈Ξandµ∈(0,1)such that, there exists a compactA ′ such that1072
+P(ξ i
+k+1 ∈A ′ |ξ i
+k)≥1−µfor allξ i
+k ∈A.1073
+We now define the fixedθ−chain{ξ k(θ)}, the Markov chain on state space Ξ with the1074
+fixed transition functionP(ξ,·,|θ). It is the noise process starting fromkifθstayed constant,1075
+i.e.,{ξ k+j (θ), j≥0, ξk(θ) =ξ k)}. The continuous function of the actual noise process can be1076
+approximated by the continuous function of the fixed-chain processF i(·, ξi
+k) (see the proof of1077
+Theorem 8.4.3 [21], p.271-275) if the rate of change of the learning rates is slow enough. If we1078
+can construct a function ˆF i(·) ofθthat does not depend on the processξ i, such that ˆF i(θ) is1079
+a local average of theF i(·, ξi
+k), then ˆF i(θk) is also an approximation ofF i(θk, ξi) ask→ ∞.1080
+We detail these assumptions here:1081
+A 5.3.The set{F i(θk, ξi
+k)}k is uniformly integrable. For anyj≥0withξ i
+j ∈Athe1082
+set{F i(θ, ξi
+j+k (θ))}k≥0 is uniformly integrable, whereξ i
+j+k (θ)is the fixed-θchain with initial1083
+conditionsξ i
+j and transition functionP i(ξ,·|θ j).1084
+A 5.4 (Averaging condition).There exists a continuous function ¯F i(·)such that for each1085
+θand on any compact setA∈Ξ1086
+lim
+(k,m)→∞
+1
+m
+k+m−1X
+j=k
+Ek
+
+F i(θ, ξi(θ))− ¯F i(θ)
+
+Iξi
+k∈A = 01087
+We establish a different timescale to correspond to each process. Fori, j∈ {1,· · ·, M}, let1088
+tj
+k = Pk−1
+l=0 αj
+l , andθ i,0
+αj (t) be the piecewise interpolation of the processθ i
+k on thej-th timescale1089
+defined as1090
+θi,0
+αj (t) =θ i
+0, t≤0, θ i,0
+αj (t) =θ i
+k, t∈[t j
+k, tj
+k+1]1091
+Then, the shifted continuous time interpolationθ i,k
+αj (·) is simply the interpolation ”started”1092
+from a specific time-stepk:1093
+(5.2)θ i,k
+αj (t) =θ i,0
+αj (tj
+k +t)1094
+and we letm (j)(t) ={κ:t j
+κ ≤t≤t j
+κ+1}. Similarly, we defineB i,k
+αj the shifted continuous time1095
+interpolation at thej-th timescale of the sequence of reflection termsB i
+k. We are interested in1096
+the behavior ofθ i,k
+αj (·) andB i,k
+αj (·) ast j
+k → ∞whileαj
+k →0. We now lay out further constraints1097
+on the learning rate sequences. The first two are standard for the stochastic approximating1098
+===== [PARTIAL] PAGE 37/47 =====
+36 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+literature: intuitively they require the learning rates to go towards zero, but not too quickly.1099
+The third assumption is what makes the iterates multi-scale: it imposes a hierarchy between1100
+theMsequences that ensures every iterate is learning at a different timescale.1101
+A 5.5 (Assumption on learning rates).For eachi∈ {1,· · ·, M},1102
+•(Classical rates)lim k αi
+k = 0and P∞
+k=0 αi
+k =∞1103
+•(Slow changes) there is a sequence of integersa i
+n → ∞such that1104
+lim
+n
+sup
+0≤j≤ain
+
+αi
+n+j
+αin
+−1
+ = 01105
+•(Multi-scale) αi
+k
+αj
+k
+→0, ask→ ∞, whenever eachi < j.1106
+With the expectationsE kY i
+k being approximated by ¯F i(θk) askgoes to∞, the interpola-1107
+tions of the iteratesθ i,k
+αj will be shown to admit limit processes following mean ODEs defined1108
+by the ¯F i. The solution of the ODE can then be used to characterize the asymptotic prop-1109
+erties of theθ i
+k fori= 1,· · ·, M. Thanks to the multi-scale assumption, at any timescalej1110
+the interpolation for all iterates learning at a slower timescalei < jwill follow the null ODE.1111
+Intuitively, they evolve so slowly that they can be considered constant at thej-th timescale.1112
+Similarly, the interpolations for all iterates learning at a faster timescale can be considered to1113
+have reached the limit of their respective mean ODE, if it exists. We consider the case where1114
+the ODE for every limit process for any timescale has a unique asymptotically stable point.1115
+A 5.6.There exists a continuous functionζ i(θ<i)such that, for any set of initial conditions1116
+θ, the solution to the following ODE has a unique asymptotically stable point(θ <i, ζi(θ<i))for1117
+i≥2:1118
+˙X j = 0 forj < i
+˙X i = ¯F i(X <i+1, Z≥i+1(X <i+1)) +b i.
+1119
+whereb i is the reflection onH, and1120
+(5.3)Z ≥i(θ<i
+k ) = (ζ i(θ<i
+k ), Z≥i+1(θ<i
+k , ζi(θ<i
+k ))), i= 2,· · ·, M−21121
+withZ ≥M−1 (θ<M−1
+k ) = (ζ M−1 (θ<M−1
+k ), ζM (θ<M−1
+k , ζM−1 (θ<M−1
+k ))).1122
+Note that the reflection termsb i of the projected ODE must live within a convex space1123
+Υ(X i), defined the following way: on the interior ofH, Υ(X i) ={0}, the set only containing1124
+the null vector, and on the boundary ofH, Υ(X i) is the infinite convex cone generated by1125
+the outer normals atX i of the faces onHon whichX i lies.1126
+Now we state the week convergence of the iterates (5.1) in the following theorem.1127
+Theorem 5.1 (Weak convergence of multi-scale iterates with Markovian noise).Consider1128
+iterates(5.1). Let{θ i,k
+αj (·)}be the interpolation of the processθ i
+k on thej-th timescale, defined1129
+by(5.2). If??5.1–5.5 hold, then{θ 1,k
+α1 (·)}admits a subsequence which converges towards a1130
+processθ 1(·)such that:1131
+(5.4) ˙θ1 = ¯F 1(θ1, Z≥2(θ1)) +b 1, b 1(t)∈ −Υ(θ1(t))1132
+===== [PARTIAL] PAGE 38/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 37
+whereb 1 is the reflection, that is the minimum force needed to keepθ 1 inH. Moreover, for1133
+anyδ >0, the fraction of time spent byθ 1(·)in anyδ−neighborhood around the set of limit1134
+points of(5.4)on the interval[0, T]goes to one in probability asT→ ∞.1135
+Theorem 5.1 is a straightforward extension of the week convergence result established1136
+for two timescale iterates by [Theorem 8.6.1, [21], p.286] to the case ofMtime scales. An1137
+example of the extension procedure from two-scale to multi-scale can be found in [22]. The1138
+idea behind Kushner’s original proof in [21] for the two-timescale case is that the noise induced1139
+by the Markovian sequences{ξ i
+k}can be seen as perturbations to local averages defined by1140
+the functions ¯F i. This allows to approximate the iterates in continuous time by a projected1141
+ODE.1142
+5.2. Extension to asynchronous iterates.We will now consider the case where the it-1143
+erates are updated asynchronously: that is, not all elements of theθ i are updated at every1144
+iteration.1145
+We index all elements in everyθ i byc∈ {1. . . C}, and theCelements are updated in an1146
+asynchronous manner. Letα i
+k,c be the learning rate for elementcof iterateiat timestepk:1147
+all elements within a single iterate are given the same sequences of learning rates, so that we1148
+use the notationα i
+k =α i
+k,1 =α i
+k,2 =· · ·=αi
+k,C . TheMiterates in (5.1) can therefore be seen1149
+asM×Citerates, with the updates to each component following:1150
+(5.5)θ i
+k+1,c = ΠH
+
+θi
+k,c +α i
+k,cY i
+k,c
+
+1151
+The time between thekth and (k+ 1)th updates of the element indexed bycin{θ i
+k}k is1152
+given by the random variableτ i
+k,c. Because thekth update can happen at a different time for1153
+two components, we need another timeline to analyze the behavior of the iterates. We will1154
+look at their behaviors in the ”real time”, so that thekth update at elementcin the{θ i
+k}k is1155
+done at the real timeT i
+k,c = Pk−1
+n=0 τ i
+n,c. We note Γ i
+k,c = Pk−1
+n=0 αi
+nτ i
+n,c the corresponding scaled1156
+real time, and introduce the real-time interpolation ˆθi
+c: ˆθi
+c(t) =θ i
+k,c on [T i
+k,c, Ti
+k+1,c).1157
+Like in (5.2), we look at the shifted piecewise constant interpolationsθ i
+c,αj of the sequences
+{θi
+k,c}k at every timestepj={1, . . . , C}in the iterate time, that is the continuous interpo-
+lations whose origins are at any arbitrary timestepk. Here again, since all components do
+not reach a given timestep at the same time, we define the shifted interpolates as starting at
+arbitrary real timesυ. For this purpose, we introduce functionsp i
+c(υ), that return the index
+of the first update at an elementcof iterateiafter a given real timeυ:
+pi
+c(υ) = min
+(
+k:
+k−1X
+n=0
+τ i
+n,c ≥υ
+)
+,∀υ >0,
+The shifted interpolates are then1158
+(5.6)θ i,υ
+c,αj (t) =θ i
+k+pic,c, t∈[t ij,υ
+k,c , tij,υ
+k+1,c), t ij,υ
+k,c =
+k−1X
+n=pic(υ)
+αj
+n1159
+===== [PARTIAL] PAGE 39/47 =====
+38 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+and the shifted real-time interpolationsθ i,υ
+c,αj (·) are defined similarly:1160
+(5.7) ˆθi,υ
+c,αj (t) =θ i
+k,c, t∈[Γ ij,υ
+k+pic,c,Γ ij,υ
+k+1,c) Γ ij,υ
+k,c =
+k−1X
+n=pic(υ)
+αj
+nτ i
+n,c1161
+We now extend the definitions of theσ−algebra used in Subsection 5.1. Two sets of random1162
+variables need to be considered at every iteration: theY i
+k,c and theτ i
+k+1,c. The corresponding1163
+σ−algebras should measure all variables observed in the ”past” up to the relevant moment1164
+during updatek+ 1. Again reasoning in real time, note that updatek+ 1 is made after1165
+having observedY i
+k , but before entering the next waiting timeτ i
+k+1,c. This corresponds to two1166
+slightly different sequences ofσ−algebras:1167
+F i,τ
+k,c ={θ i
+0,c, Yi
+j−1,h, ξi
+j−1,h, τi
+j−1,h |T i
+j,h ≤T i
+k+1,c}
+F i,Y
+k,c ={θ i
+0,c, Yi
+j−1,h, ξi
+j−1,h |T i
+j,h < Ti
+k+1,c}
+[
+{τ i
+j−1,h |T i
+j,h ≤T i
+k+1,c}
+1168
+We write the associated conditional expectationsE i,τ
+k,c andE i,Y
+k,c .1169
+Let us denote the component-wise error sequencesξ i
+k,c δU i
+k,c,ξ i
+k = (ξ i
+k,1, . . . , ξi
+k,C ), and1170
+δU i
+k = (δU i
+k,1, . . . , δUi
+k,C ). We assume??5.1–5.5 hold, with any statement on a sequence1171
+X i
+k interpreted as holding for all component-wise sequencesX i
+k,c. We make the additional1172
+assumptions on the time intervals between updates:1173
+A 5.7.For alli, the sequence of intervals between updates{τ i
+k,c}k is uniformly integrable,1174
+and there exists¯ui
+c ≥1such that theE i,τ
+k+1,c
+h
+τ i
+k,c
+i
+are in the bounded interval
+
+1,¯ui
+c
+
+uniformly1175
+ink.1176
+A 5.8.Every component’s learning rateα i
+k,c can be written as a local average of positive
+real-valued functionsf i:
+αi
+k,c = 1
+τk,c
+Z T i
+k,c+τ i
+k,c
+T i
+k,c
+f i(s)dssuch that
+Z ∞
+0
+f i(s)ds=∞andlimf i(s)
+s→∞
+= 0
+A 5.9.There exists a continuous functionζ i(θ<i)such that, for any set of initial conditions1177
+θ, the solution to the following ODE has a unique asymptotically stable point (θ <i, ζi(θ<i))1178
+fori≥2:1179
+˙X j = 0 forj < i
+˙X i =
+¯F i(X <i+1, Z≥i+1(X <i+1))
+uic
++ ˆbi.
+1180
+withu i
+c(t)with values in[1,¯u i
+c], ˆbi the term of projection onH, theZ i have been defined in1181
+(5.3)1182
+Then, we can state the weak convergence result for the asynchronous multi-scale iterates.1183
+===== [PARTIAL] PAGE 40/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 39
+Theorem 5.2 (Weak convergence of asynchronous multi-scale iterates with Markovian noise).1184
+Consider iterates(5.5), updated asynchronously following the time interval sequences{τ i
+k,c}k.1185
+If Assumptions??5.1–5.5 hold, and Assumptions A5.7and??also hold, then the conclusion1186
+of Theorem5.1still holds with the limit process:1187
+(5.8) ˙ˆθ1
+c,α1(t) =
+¯F 1(θ1
+c,α1(t), Z≥2(θ1
+c,α1)(t))
+uic(t) + ˆb1
+c,α1(t)u i
+c(t)∈[1,¯u i
+c].1188
+The weak convergence of asynchronous updates for the single-agent case has been estab-1189
+lished in [Theorem 12.3.5 [21]], and this is an extension to the multi-scale case. As previously1190
+for Theorem 5.1, the extension is derived by writing the ODEs for the continuous approxima-1191
+tions at all iterate timescales. Unlike before, the ODEs are now dependent on the continuous1192
+approximation at the real timescale. A simple relation between the approximations at real1193
+and iterate timescales introduced by [21] can then be used to derive ODEs for the latter and1194
+conclude the proof.1195
+6. Proofs: Weak convergence of multi-scale iterates.In the following, we formally1196
+extend the proofs of the weak convergence of synchronous two-timescale updates [Theorem1197
+6.2, Chapter 8, [21]], and of single-timescale asynchronous updates [Theorem 5.1, Chapter1198
+12, [21]] to prove the weak convergence of asynchronous multi-scale iterates with Markovian1199
+noise (Theorem 5.2). We first prove Theorem 5.1 for synchronous multi-scale iterates with1200
+Markovian noise, and then extend these results to the asynchronous case in Theorem 5.2.1201
+6.1. Proof of Theorem 5.1: Weak convergence of multi-timescale iterates.Before1202
+proceeding to the proof of Theorem 5.1, we need the following lemmas. Lemma 6.1, shows1203
+that the continuity of the paths of any weak sense limit process will imply the existence of1204
+convergent subsequences with Lipschitz continuous paths. Then, Lemma 6.4 and Lemma 6.21205
+are used to show that a process is a martingale. This martingale will have Lipschitz continuous1206
+paths and hence will be proven to be a constant, leading to the mean projected ODEs. Finally,1207
+Lemma 6.3 will be used to characterize the reflection termb 1 of this ODE.1208
+The proofs of Lemma 6.1 and Lemma 6.3 can be found in [21] p.253 and p.109. The proof1209
+of Lemma 6.4 can be found in the proof of Theorem 8.4.3 [21], p.271-275.1210
+Lemma 6.1 ([21], p.233 - Theorem 7.3.5).Let us consider any continuous processX(·)in1211
+a path space{X(·)} t ∈O[−∞,∞), defined as the space of real-valued functions on the interval1212
+[0,∞)that are right continuous and have left-sided limits. IfXis of dimensionC >0, we1213
+writeO C(−∞,∞). Let there be a sequence of such processes{X k(t)}k. It is said to be tight if1214
+for eachµ >0there is a compact setA µ ∈O[0,∞)such thatinf
+k
+P(X k(·)∈A µ)>1−µand1215
+lim
+δ→0
+lim sup
+n
+sup
+|τ|≤T
+sup
+s≤δ
+min(|X k(τ+s)−X k(τ)|,1) = 0
+In particular, let{Y n
+k , n≥0, k≥0}be a sequence of real-valued random variables that
+is uniformly integrable, i.e.lim
+K→∞
+sup
+n
+E|Yn|I{|Yn|≥K} = 0, and letα i
+k be non-negative numbers
+that satisfy for alln
+∞X
+l=0
+αn
+l =∞,lim
+n
+sup
+k≥0
+αn
+k = 0.
+===== [PARTIAL] PAGE 41/47 =====
+40 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+Definet n
+k = Pk−1
+l=0 αn
+l and the processesX n(·)onO r[0,∞)by
+X n(t) =
+k−1X
+l=0
+αn
+l Y n
+l t∈[t n
+k , tn
+k+1]
+Then{X n(·)}is tight, and all weak sense limit processes have Lipschitz continuous paths with1216
+probability one.1217
+Lemma 6.2 ([21], p.234 - Theorem 7.4.1).LetU(·)be a random process whereU(t)is
+measurable on theσ−algebraF V
+t determined by{V(s), s≤t}for a given processV(·)and
+E|U(t)|<∞for eacht. Suppose that for each realt >0andτ≥0, and for any integerp
+and each set of real numberss i ≤t, i= 1. . . p, andha bounded and continuous real-valued
+continuous, we have:
+E[h(V(s i), i≤p) [U(t+τ)−U(t)]] = 0
+Then,U(·)is aF V
+t −martingale process.1218
+Lemma 6.3 ([21], p.109 - Theorem 4.3.1).LetHbe an hyperrectangle constraint space.1219
+Let there be continuous functions ¯F(·)bounded onH,x(·)Lipschitz, andB(·)such that for1220
+anyτ >0, x(t)∈H,B(0) = 0andx(t+τ) =x(0) +
+R t+τ
+t
+¯F(x(s))ds+B(t+τ)−B(t), and1221
+an upper semi-continuous set functionΥ. If the following conditions are true: ‘1222
+•B(t+τ)−B(t) = 0ifx(s)∈the interior ofHfor almost alls∈[t, t+τ]1223
+•B(t+τ)−B(t)belongs to the convex hull of allΥ(x(s))fors∈[t, t+τ]1224
+Then,B(·)is absolutely continuous, and there is a measurable functionb(·)such thatb(t)∈1225
+Υ(x(t))for almost all t andB(t+τ)−B(t) =
+R t+τ
+t b(s)ds1226
+Lemma 6.4.Consider iterates{θ i
+k},i∈ {1,· · · }, defined by(5.1). Assume that A5.1-1227
+A5.4and A5.5(slow changes) are true. Then fort >0andτ≥0, and for any integerpand1228
+each set of real numberss j ≤t, j= 1. . . p,1229
+lim
+k→∞
+Eh(θk
+αl(sj), j≤p)
+
+
+m(l)(tl
+k+t+τ)−1X
+n=m(l)(tl
+k+t)
+αl
+n
+
+F l(θn, ξl
+n)− ¯F l(θn)
+
+
+ = 0, l= 2,· · ·, M1230
+withhany bounded, continuous, and real-valued function of its arguments.1231
+For a fixed time scalel∈ {2,· · ·, M}, the stochastic approximation processes (5.1) can be1232
+rewritten in the form, for 2≤i≤l≤M1233
+θi
+k+1 =θ i
+k +α l
+k
+αi
+k
+αl
+k
+(F i
+k(θk, ξi
+k) +δU i
+k +B i
+k),1234
+Then, the shifted interpolations (5.2) on thel-th timescale can be rewritten in the following1235
+way1236
+(6.1)θ i,k+1
+αl (t) =θ i
+k + ¯Gi,k
+αl (t) +M i,k
+αl (t) +H i,k
+αl (t) +A i,k
+αl (t) +B i,k
+αl (t)1237
+===== [PARTIAL] PAGE 42/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 41
+where1238
+¯Gi,k
+αl (t) =
+m(l)(tl
+k+t)−1X
+n=k
+αl
+j
+αi
+n
+αln
+¯F i
+n(θn), M i,k
+αM (t) =
+m(l)(tl
+k+t)−1X
+n=k
+αl
+n
+αi
+n
+αln
+δU i
+n1239
+1240
+Bi,k
+αl (t) =
+m(l)(tl
+k+t)−1X
+n=k
+αl
+n
+αi
+n
+αln
+Bi
+n, H i,k
+αl (t) =
+m(l)(tl
+k+t)−1X
+n=k
+αl
+n
+αi
+n
+αln
+
+F i
+n(θn, ξi
+n)− ¯F i(θn)
+
+.1241
+andA i,k
+αl (t) = 0 ifi̸=l < Morl=M,1242
+Ai,k
+αl (t) =
+m(l)(tl
+k+t)−1X
+n=k
+αl
+n
+h
+¯F l(θn)− ¯F l(θ<l+1
+n , Zl(θ<l
+n ))
+i
+,ifi=l < M(6.2)1243
+Note that (6.2) is the tracking error at the timescalel.1244
+We can now define the processW i,k
+αj (·) by1245
+(6.3)W i,k
+αl (t) =θ i,k
+αl (t)−θ i
+k − ¯Gi,k
+αl (t)−B i,k
+αl (t)1246
+It follows from (6.1) thatW i,k
+αl (t) =M i,k
+αl (t) +H i,k
+αl (t) +A i,k
+αl (t).1247
+Lethbe a bounded, continuous, and real-valued function of its arguments. Fixt >0 and1248
+τ≥0, and for any integerpand each set of real numberss j ≤t, j= 1. . . p, we have1249
+0 =E
+h
+h(θk
+αl(sj), Bk
+αl(sj), j≤p)
+h
+W i,k
+αl (t+τ)−W i,k
+αl (t)
+ii
+(6.4)1250
+−E
+h
+h(θk
+αl(sj), Bk
+αl(sj), j≤p)
+h
+M i,k
+αl (t+τ)−M i,k
+αl (t)
+ii
+(6.5)1251
+−E
+h
+h(θk
+αl(sj), Bk
+αl(sj), j≤p)
+h
+H i,k
+αl (t+τ)−H i,k
+αl (t)
+ii
+(6.6)1252
+−E
+h
+h(θk
+αl(sj), Bk
+αl(sj), j≤p)
+h
+Al,k(t+τ)−A l,k(t)
+ii
+(6.7)1253
+It will be shown later that terms (6.5)-(6.7) go to zero ask→ ∞. Before that, let us1254
+suppose temporarily convergences to zero of these terms, which leads to convergence to zero1255
+ofE
+h
+h(θk
+αl(sj), Bi,k
+αl , j≤p)
+h
+W i,k
+αl (t+τ)−W i,k
+αl (t)
+ii
+.1256
+If A 5.3 and A 5.5 are true, then according to Lemma 6.1 we have the tightness of1257
+the interpolation processes{θ i,k
+αl , Bi,k
+αl }and Lipschitz continuity of paths of any weak sense1258
+limit process. It follows that from any subsequence of{θ i,k
+αl , Bi,k
+αl }we can extract a further1259
+subsequence indexed by (n i
+k) ask→ ∞and processes{θ i
+αl, Bi
+αl}with Lipschitz continuous1260
+paths such that (θ
+i,ni
+k
+αl (·), Bi,k
+αl (·))→(θ i
+αl(·), Bi
+αl(·)).1261
+Let us now characterizeW i
+αl(t), limits of the processesW
+i,ni
+k
+αl (t) ask→ ∞, with1262
+(6.8)W i
+αl(t) =θ i
+αl(t)−θ i
+αl(0)−
+Z t
+0
+¯gi
+αl(θαl(s))ds−B i
+αl(t)1263
+===== [PARTIAL] PAGE 43/47 =====
+42 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+where
+¯gi
+αl(θαl(s)) = lim
+j→∞
+αi
+nj
+αlnj
+¯F i(θnl
+j
+).
+Then, the assumed convergence of the terms (6.4)-(6.7) and the weak convergence of (θ
+i,ni
+k
+αl (·), Bi,k
+αl (·))
+imply that
+Eh(θk
+αl(sj), Bk
+αl(sj), j≤p)
+
+W i
+αl(t+τ)−W i
+αl(t)
+
+= 0
+SinceW i
+αl is a function of{θ αl(s), s≤t}andh,p,t,s i ≤t,τare arbitrarily chosen,
+Lemma 6.2 implies thatW i
+αl is a continuousF t−martingale process, and
+E
+h
+W i
+αl(t+τ)−W i
+αl(t)|θαl(s), Bk
+αl(sj)s≤t
+i
+= 0
+Sinceθ αl(·) has Lipschitz-continuous paths with probability one,W i
+αl(·) is a constant process.1264
+SinceW i
+αl(0) = 0,W i
+αl(t) = 0 for allt. Therefore, it follows from (6.8) that1265
+(6.9)θ i
+αl(t) =θ i
+αl(0) +
+Z t
+0
+¯gi
+αl(θi
+αl(s))ds+B i
+αl(t)1266
+It follows from A 5.4 (continuity of ¯F i) and A 5.5 (multi-scale learning rates) that
+¯gi
+αl(θαl(s)) =
+(
+0, i < l,
+¯F l(θαl(s))i=l
+It remains to characterizeB i
+αl with Lemma 6.3. Note that reflection termsB i
+k must live within1267
+a convex space Υ(θ i
+k), defined the following way: on the interior ofH, Υ(θ i) ={0}, the set1268
+only containing the null vector, and on the boundary ofH, Υ(θ i) is the infinite convex cone1269
+generated by the outer normals atθ i of the faces ofHon whichθ i lies. Therefore, on any1270
+interval [t, t+τ]B i,k
+αl (t+τ)−B i,k
+αl (t) belongs to the convex hull of all Υ(s), s∈[t, t+τ]. Now,1271
+starting our iterates in the constraint space will ensureB i
+αl(0) = 0, and we have just shown1272
+thatB i
+αl(·) has Lipschitz-continuous paths. We conclude that there exists a functionb i
+αl(·),1273
+withb i
+αl(t)∈Υ(θ i
+αl) such thatB i
+αl(t) =
+R t
+0 bi
+αl(s)ds. We hence have that the limit processes1274
+θi
+αl,i≤lfollows the mean ODE1275
+˙θi
+αl = 0, i < l
+˙θl
+αl = ¯F l(θαl) +b l
+αl(s)
+(6.10)1276
+Now we prove the convergences to zero of terms (6.5)-(6.7). Recall thatF tl
+k+t is the1277
+σ−algebra measuring all{θ k
+αl(s), s≤t}. Fixt >0 andτ≥0, and for any integerpand each1278
+set of real numberss j ≤t, j= 1. . . p, we have1279
+Eh(θk
+αl(sj), Bk
+αl(sj), j≤p)
+h
+M i,k
+αl (t+τ)−M i,k
+αl (t)
+i
+=Eh(θ k
+αl(sj), Bk
+αl(sj), j≤p)E Ftl
+k +t
+
+
+m(l)(tl
+k+t+τ)−1X
+n=m(l)(tl
+k+t)
+αl
+n
+αi
+n
+αln
+δU i
+n
+
+
+1280
+===== [PARTIAL] PAGE 44/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 43
+withhany bounded, continuous, and real-valued function of its arguments. It follows from1281
+A 5.1 (margingale difference) that the term (6.5) goes to zero ask→ ∞.1282
+For the term (6.6), we have by definition1283
+Eh(θk
+αl(sj), Bk
+αl(sj), j≤p)
+h
+H i,k
+αl (t+τ)−H i,k
+αl (t)
+i
+1284
+=Eh(θ k
+αl(sj), Bk
+αl(sj), j≤p)
+
+αl
+n
+m(l)(tl
+k+t+τ)−1X
+n=m(l)(tl
+k+t)
+ 
+F i(θn, ξi
+n)− ¯F i(θn)
+
+
+1285
+By Lemma 6.4 and A 5.1-A 5.5, convergence to zero of the term (6.6) follows.1286
+Finally, the convergence to zero of the term (6.7) follows from1287
+Eh(θk
+αl(sj), Bk
+αl(sj), j≤p)
+h
+Al,k(t+τ)−A l,k(t)
+i
+=Eh(θ k
+αl(sj), Bk
+αl(sj), j≤p)
+
+αl
+n
+m(l)(tl
+k+t+τ)−1X
+n=m(l)(tl
+k+t)
+
+¯F l(θn)− ¯F l(θ≤i+1
+n , Z≥i+1(θ≤i+1
+n )
+
+
+
+1288
+and A 5.4 (continuity of ¯F i).1289
+It remains to show (5.4). We start at looking at the fastest time scalel=M. We have1290
+that the iteratesθ i,k
+αM admit limit processesθ i
+αM defined by (6.10)1291
+˙θi
+αM = 0, i < M
+˙θM
+αM = ¯F M (θαM ) = ¯F M (θ1
+αM ,· · ·, θM
+αM ) +b M
+αM
+(6.11)1292
+By A 5.6 (ODE solutions), for anyθ<M , solutions of (6.11) converge to the point (θ<M , ζM (θ<M )).1293
+Then at (M−1)-th timescale, (6.10) becomes1294
+˙θi
+αM−1 = 0, i < M−1
+˙θM−1
+αM−1 = ¯F M−1 (θ<M
+αM−1 , ζM (θ<M
+αM−1 )) +b M−1
+αM−1
+(6.12)1295
+withθ <M
+αM−1 = (θ1
+αM−1 ,· · ·, θM−1
+αM−1 ). By A 5.6 (ODE solutions), the solutions of (6.12) converge1296
+to the point (θ <M−1 , ζM−1 (θ<M−1 )) for anyθ <M−1 . Repeating this procedure until 2-th1297
+timescale, we get1298
+(6.13) ˙θ1
+α2 = 0, ˙θ2
+α2 = ¯F 2(θ<3
+α2 , Z≥3(θ<3
+α2 )) +b 2
+α2.1299
+Recall that forr= 2,· · ·, M−1,Z ≥r(·) is defined by (5.3). By A 5.6 (ODE solutions), for1300
+anyθ <2, the solutions of (6.13) converge to the point (θ <2, ζ2(θ<2)). Finally on the slowest1301
+timescale, the limit process ofθ 1,k
+α1 follows1302
+˙θ1
+α1 = ¯F 1(θ1
+α1, Z≥2(θ1
+α1)) +b 1
+α1.1303
+===== [PARTIAL] PAGE 45/47 =====
+44 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+6.2. Proof of Theorem 5.2 Extension to the asynchronous case.Proof: Extension to1304
+the asynchronous case1305
+To switch from the iterate time sequencek= 0,1,2, . . .to the real time sequence, we1306
+introduce two sets of functions:1307
+•The Γ i,υ
+c,αj (·) functions are the piecewise shifted interpolations of the{Γ ij,υ
+k,c }sequences
+at thejtimescale. This means that for a given timetsinceυin iterate time, they
+return the amount of (scaled) real time elapsed up fromυto the last update.
+Γi,υ
+c,αj (t) = Γij,υ
+k,c , t∈[t ij,υ
+k,c , tij,υ
+k+1,c)
+•The functionsN i
+c,αj (·) take a given scaled real timet, and return the iterate time at
+thejtimescale of the last update ati, cbeforet. That is,
+N i,υ
+c,αj (t) =t j,υ
+k,c, t∈[Γ ij,υ
+k,c ,Γ ij,υ
+k+1,c)
+Per construction they are the inverse of the previousT i
+c (·) functions, in the sense that1308
+(6.14)N i,υ
+c,αj
+
+Γi,υ
+c,αj (t)
+
+=t ij,υ
+k,c on [tij,υ
+k,c , tij,υ
+k+1,c)1309
+There exists a straightforward relationship between the continuous interpolations at the1310
+real and theMdifferent iterate timescales, with just a time change:1311
+(6.15) ˆθi,υ
+c,αj (t) =θ i,υ
+c,αj (N i,υ
+c,αj (t)), θ i,υ
+c,αj (t) = ˆθi,υ
+c,αj (Γi,υ
+c,αj (t))1312
+Proof.Like in Theorem 5.1, we can look at the behavior of the shifted interpolates at1313
+every timescalel={2, . . . , M}, for any real timeυ >0:1314
+θi
+pic(υ)+k+1,c =θ i
+pic(υ)+k,c +α l
+k
+αi
+k
+αl
+k
+(F i(ˆθi,υ
+c,αj (Γil,υ
+k,c ), ξi
+k,c) +δU i
+k,c +B i
+k,c),1315
+Note that Γ il,υ
+k,c = Γ i,υ
+c,αj (tij,υ
+k,c )), and hereF i
+k must be written as a function of the real time1316
+interpolation, since not all elements inθare at theirkth update. Then, we can write the1317
+shifted continuous interpolations of (5.6) at theltimescale:1318
+(6.16)θ i,υ
+c,αl(t) =θ i
+pic(υ),c + ¯Gi,υ
+c,αl(t) +M i,υ
+c,αl(t) +H i,υ
+c,αl(t) +A i,υ
+c,αl(t) +B i,υ
+c,αl(t)1319
+wherem (i,l)(t) =
+n
+k|t il,υ
+k,c ≤t < til,υ
+k+1,c
+o
+and1320
+¯Gi,υ
+c,αl(t) =
+m(i,l)(t)−1X
+n=pic(υ)
+αl
+j
+αi
+n
+αln
+¯F i
+n(ˆθi(Γil,υ
+n,c )), M i,υ
+c,αl(t) =
+m(i,l)(t)−1X
+n=pic(υ)
+αl
+n
+αi
+n
+αln
+δU i
+n,c1321
+1322
+Bi,υ
+c,αl(t) =
+m(i,l)(t)−1X
+n=pic(υ)
+αl
+n
+αi
+n
+αln
+δB i
+n,c, H i,υ
+c,αl(t) =
+m(i,l)(t)−1X
+n=pic(υ)
+αl
+n
+αi
+n
+αln
+h
+F i
+n(ˆθi(Γil,υ
+n,c ), ξi
+n,c)− ¯F i(ˆθi(Γil,υ
+n,c ))
+i
+.1323
+===== [PARTIAL] PAGE 46/47 =====
+MARL FOR LOCALLY OBSERVABLE COOPERATIVE SYSTEMS WITH DAG STRUCTURE 45
+andA i,υ
+αl (t) = 0 ifi̸=l < Morl=M,1324
+Ai,υ
+c,αl(t) =
+m(i,l)(t)−1X
+n=pic(υ)
+αl
+n
+h
+¯F l(ˆθi
+c(Γil,υ
+n,c ))− ¯F l
+
+ˆθ<l+1
+c (Γil,υ
+n,c )), Zl(ˆθ<l
+c (Γil,υ
+n,c ))
+i
+(6.17)1325
+Γi,υ
+c,αl admits a similar decomposition:1326
+Γi,υ
+c,αl(t) = Γil,0
+pic(υ),c +
+m(i,l)(t)−1X
+n=pic(υ)
+αl
+n
+αi
+n
+αln
+τ i
+n,c
+= Γil,0
+pic(υ),c +
+m(i,l)(t)−1X
+n=pic(υ)
+αl
+n
+αi
+n
+αln
+Ei,τ
+k,c
+
+τ i
+n,c
+
+| {z }
+GΓi,υ
+c,αl
++
+m(i,l)(t)−1X
+n=pic(υ)
+αl
+n
+αi
+n
+αln
+
+τ i
+n,c −E i,τ
+k,c
+
+τ i
+n,c
+
+| {z }
+MΓ i,υ
+c,αl
+(6.18)1327
+for which we have introduced the two continuous functionsGΓ i,υ
+c,αl andMΓ i,υ
+c,αl. Note that1328
+MΓ i,υ
+c,αl, likeM i,υ
+c,αl, returns a sum of martingale differences.1329
+As in section??, we use the uniform integrability of theY i
+k,c (A 5.1) and apply Lemma 6.11330
+to the element-wise iteratesθi
+k,c to derive the tightness of the interpolation processes{θi,k
+c,αl, Bi,k
+c,αl},1331
+as well as the Lipschitz continuity of the paths of any of their weak sense limit processes. The1332
+same reasoning, applied to the uniform integrability of theτ i
+k,c (A 5.7), gives us the tightness1333
+of the Γ i,υ
+c,αl. Note that owing to A 5.7E i,τ
+k,c
+h
+τ i
+k,c
+i
+=u i
+c(ˆθi(T i
+k,c)) and the fact thatu i
+c is strictly1334
+positive, then sincet,N i,υ
+c,αl(Γi,υ
+c,αl(t)) =t((6.14)) withN i,υ
+c,αl,Γ i,υ
+c,αl continuous, we conclude1335
+thatN i,υ
+c,αj is also tight. Finally, from this latter fact and the tightness ofθ i,υ
+c,αl we conclude1336
+the tightness of ˆθi,υ
+c,αl(·) =θ i,υ
+c,αl(N i,υ
+c,αl(·)).1337
+Writing{υ k}k >0 a sequence of real times such thatυ k → ∞ask→ ∞, we extract
+a subsequence of{θ i,k
+αl , Bi,k
+αl ,Γ i,υk
+c,αl}, a further subsequence indexed by (n i
+k) ask→ ∞and
+processes{θ i
+αl, Bi
+αl,Γ i
+c,αl, Ni,υ
+c,αl, ,ˆθi
+αl}with Lipschitz continuous paths such that uniformly
+(θ
+i,υni
+k
+c,αl , B
+i,υni
+k
+c,αl ,Γ
+i,υni
+k
+c,αl , N
+i,υni
+k
+c,αl , ˆθ
+i,υni
+k
+c,αl )→(θ i
+c,αl, Bi
+c,αl,Γ i
+c,αl, Ni
+c,αl, ˆθi
+αl)
+First, passing respectively (6.15) and (6.14) to the weak limit, we have1338
+(6.19) ˆθi
+c,αl(t) =θ i
+c,αl(N i
+c,αl(t))N i
+c,αl(Γi
+c,αl(t)) =t1339
+The characterization of the limit processes Γ i
+c,αl and ˆθi
+c,αl can be done following the same1340
+reasoning as before for (6.4)-(6.7). First to characterize ˆθi
+c,αl, we recall that per A 5.1 the1341
+implicitly defined component-wiseδU i
+k,c are martingale differences, the noise processesξ i
+k,c1342
+satisfy A 5.2 and the averaging condition A 5.4. We conclude:1343
+===== [PARTIAL] PAGE 47/47 =====
+46 C. BIZON MONROC, A. BUSIC, D. DUBUC AND J. ZHU
+(6.20)θ i
+c,αl(t) =θ i
+c,αl(0) +
+Z t
+0
+¯gi
+αl(s)ds+B i
+αl(t)1344
+1345
+¯gi
+αl(·) = lim
+(n,υn)→∞
+αi
+n
+αln
+F i(ˆθi,υ
+c,αl(Γi,υ
+c,αl(·))) =
+(
+0, i < l,
+¯F i(ˆθi
+c,αl(Γi
+c,αl(·))), i=l(6.21)1346
+The same reasoning is applied to Γ i
+c,αl. Here we only need to handle the martingale error1347
+MΓ i,υ
+c,αl, so that the characterization of the limit process follows immediately:1348
+(6.22) Γ i
+c,αl(t) = Γi
+c,αl(0) +
+Z t
+0
+ui
+c(ˆθi
+αl(Γi
+c,αl(s)))ds1349
+From (6.20) and (6.19), it follows that fori=l:1350
+˙ˆθi
+c,αl(t) = ˙θi
+c,αl(N i
+c,αl(t)) ˙N i
+c,αl(t)
+=
+h
+¯F i(ˆθi
+c,αl(Γi
+c,αl(N i
+c,αl(t)))) +B i
+αl(t)
+i
+˙N i
+c,αl(t)
+1351
+It remains to characterize ˙N i
+c,αl(·). From (6.19)N i
+c,αl(Γi
+c,αl(t)) =t, we have1352
+˙N i
+c,αl(Γi
+c,αl(t)) = 1
+˙Γi
+c,αl(t)
+= 1
+uic(ˆθi
+αl(Γi
+c,αl(t)))1353
+We conclude that limit process ˆθi
+c,αl, for any componentc∈ {1, . . . , C}andi≤lfollow the1354
+mean ODE, with ˆBi
+αl(t) the reflection term:1355
+˙ˆθi
+c,αl = 0, i < l
+˙ˆθl
+c,αl =
+¯F l(ˆθi
+c,αl)
+uic(ˆθi
+c,αl)
++ ˆBi
+αl(t)
+(6.23)1356
+Then, as before, we use A 5.9 (ODE solutions) and proceed from the fastest scaleMup1357
+to the slowest timescale 1, at which the limit processes of ˆθ1
+c,α1 for anyc∈ {1, . . . , M}, finally1358
+follows1359
+˙ˆθ1
+c,α1 =
+¯F 1(θ1
+c,α1, Z≥2(θ1
+c,α1))
+uic(ˆθi
+c,αl)
++ ˆB1
+c,α1(t).1360

@@ -1,0 +1,22 @@
+......F                                                                  [100%]
+=================================== FAILURES ===================================
+____ test_versions_below_manifest_and_backend_requirements_are_unsupported _____
+
+tmp_path = PosixPath('/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-2/test_versions_below_manifest_a0')
+
+    def test_versions_below_manifest_and_backend_requirements_are_unsupported(tmp_path):
+        python = executable(tmp_path, 'print("Python 3.10.14")\n')
+        checker = HealthChecker()
+        checker.start(HealthConfig(backend_python=python), blender_version=(5, 1, 0))
+        results = collect(checker)
+>       assert results['blender'].status == 'UNSUPPORTED'
+E       AssertionError: assert 'READY' == 'UNSUPPORTED'
+E
+E         - UNSUPPORTED
+E         + READY
+
+blender_frontend/tests/test_health.py:101: AssertionError
+=========================== short test summary info ============================
+FAILED blender_frontend/tests/test_health.py::test_versions_below_manifest_and_backend_requirements_are_unsupported
+1 failed, 6 passed in 2.19s
+Historical failing fixture from the red phase of test-driven development; not a current regression. The corresponding green result is recorded in health-green.txt.

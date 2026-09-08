@@ -1,0 +1,95 @@
+Created FAST.Farm input file: __simul__/fastfarm/FastFarm__238s__3T_1788769199.5499399/FarmInputs/Case.fstf
+Spawning process /opt/anaconda3/envs/wfrl-mac/bin/FAST.Farm __simul__/fastfarm/FastFarm__238s__3T_1788769199.5499399/FarmInputs/Case.fstf
+
+ **************************************************************************************************
+ FAST.Farm
+
+ Copyright (C) 2024 National Renewable Energy Laboratory
+ Copyright (C) 2024 Envision Energy USA LTD
+
+ This program is licensed under Apache License Version 2.0 and comes with ABSOLUTELY NO WARRANTY.
+ See the "LICENSE" file distributed with this software for details.
+ **************************************************************************************************
+
+ FAST.Farm-v3.5.3-dirty
+ Compile Info:
+  - Compiler: GCC version 12.3.0
+  - Architecture: 64 bit
+  - Precision: single
+  - OpenMP: Yes, number of threads: 18/18
+  - Date: Apr 26 2024
+  - Time: 16:41:09
+ Execution Info:
+  - Date: 09/07/2026
+  - Time: 16:19:59+0800
+
+  Heading of the FAST.Farm input file:
+    FAST.Farm     input         - file
+ Running AWAE.
+ Running InflowWind.
+ Running Super Controller.
+ Running WakeDynamics.
+ Running FASTWrapper.
+ Running OpenFAST.
+ OpenFAST input file heading:
+     FAST          Certification - Test #26: NREL 5.0 MW Baseline Wind Turbine (Onshore)
+
+ Running ElastoDyn.
+ Nodal outputs section of ElastoDyn input file not found or improperly formatted.
+ Running AeroDyn.
+ Running InflowWind.
+ Running ServoDyn.
+ Running ServoDyn Interface for Bladed Controllers (using GNU Fortran for Linux).
+ Using legacy Bladed DLL interface.
+ Running OpenFAST.
+ OpenFAST input file heading:
+     FAST          Certification - Test #26: NREL 5.0 MW Baseline Wind Turbine (Onshore)
+
+ Running ElastoDyn.
+ Nodal outputs section of ElastoDyn input file not found or improperly formatted.
+ Running AeroDyn.
+ Running InflowWind.
+ Running ServoDyn.
+ Running ServoDyn Interface for Bladed Controllers (using GNU Fortran for Linux).
+ Using legacy Bladed DLL interface.
+ Running OpenFAST.
+ OpenFAST input file heading:
+     FAST          Certification - Test #26: NREL 5.0 MW Baseline Wind Turbine (Onshore)
+
+ Running ElastoDyn.
+ Nodal outputs section of ElastoDyn input file not found or improperly formatted.
+ Running AeroDyn.
+ Running InflowWind.
+ Running ServoDyn.
+ Running ServoDyn Interface for Bladed Controllers (using GNU Fortran for Linux).
+ Using legacy Bladed DLL interface.
+
+ Farm_Initialize:Farm_ValidateInput:OutFmt produces a column width of 10 instead of 20 characters.
+ Farm_Initialize:For efficiency, NumPlanes has been reduced to the number of time steps (47).
+
+  Time: 0 of 138 seconds.
+ Initialize MPI
+ Found parent process           3
+Interface: will receive 12 measures at every iteration
+ Will receive MPI interface control for           46  iterations
+                                                                                                   Time: 3 of 138 seconds.  Estimated final completion at 16:21:38.                                                                                                                                    Time: 6 of 138 seconds.  Estimated final completion at 16:21:37.                                                                                                                                    Time: 9 of 138 seconds.  Estimated final completion at 16:21:43.                                                                                                                                    Time: 12 of 138 seconds.  Estimated final completion at 16:21:41.                                                                                                                                   Time: 15 of 138 seconds.  Estimated final completion at 16:21:43.                                                                                                                                   Time: 18 of 138 seconds.  Estimated final completion at 16:21:43.                                                                                                                                   Time: 21 of 138 seconds.  Estimated final completion at 16:21:38.                                                                                                                                   Time: 24 of 138 seconds.  Estimated final completion at 16:21:38.                                                                                                                                   Time: 27 of 138 seconds.  Estimated final completion at 16:21:35.                                                                                                                                   Time: 30 of 138 seconds.  Estimated final completion at 16:21:48.                                                                                                                                   Time: 33 of 138 seconds.  Estimated final completion at 16:21:50.                                                                                                                                   Time: 36 of 138 seconds.  Estimated final completion at 16:21:56.                                                                                                                                   Time: 39 of 138 seconds.  Estimated final completion at 16:22:10.                                                                                                                                   Time: 42 of 138 seconds.  Estimated final completion at 16:22:05.                                                                                                                                   Time: 45 of 138 seconds.  Estimated final completion at 16:22:25.                                                                                                                                   Time: 48 of 138 seconds.  Estimated final completion at 16:21:58.                                                                                                                                   Time: 51 of 138 seconds.  Estimated final completion at 16:22:08.                                                                                                                                   Time: 54 of 138 seconds.  Estimated final completion at 16:22:20.                                                                                                                                   Time: 57 of 138 seconds.  Estimated final completion at 16:22:11.                                                                                                                                   Time: 60 of 138 seconds.  Estimated final completion at 16:22:06.                                                                                                                                   Time: 63 of 138 seconds.  Estimated final completion at 16:22:03.                                                                                                                                   Time: 66 of 138 seconds.  Estimated final completion at 16:21:56.                                                                                                                                   Time: 69 of 138 seconds.  Estimated final completion at 16:21:56.                                                                                                                                   Time: 72 of 138 seconds.  Estimated final completion at 16:21:57.                                                                                                                                   Time: 75 of 138 seconds.  Estimated final completion at 16:21:53.                                                                                                                                   Time: 78 of 138 seconds.  Estimated final completion at 16:21:56.                                                                                                                                   Time: 81 of 138 seconds.  Estimated final completion at 16:21:57.                                                                                                                                   Time: 84 of 138 seconds.  Estimated final completion at 16:21:57.                                                                                                                                   Time: 87 of 138 seconds.  Estimated final completion at 16:21:54.                                                                                                                                   Time: 90 of 138 seconds.  Estimated final completion at 16:21:49.                                                                                                                                   Time: 93 of 138 seconds.  Estimated final completion at 16:21:49.                                                                                                                                   Time: 96 of 138 seconds.  Estimated final completion at 16:21:49.                                                                                                                                   Time: 99 of 138 seconds.  Estimated final completion at 16:22:01.                                                                                                                                   Time: 102 of 138 seconds.  Estimated final completion at 16:21:58.                               [sampler] 回合 0 起：u_inf=8.000 m/s  warmup=0 步已丢弃  预算=12
+                                                                                                   Time: 105 of 138 seconds.  Estimated final completion at 16:21:49.                               [mappo_s0_level_E0_none_part7-acceptance] env=Dec_Turb3_Row1_Fastfarm  n=3  obs_dim=3  state_dim=9  1 iters x 4 steps (~4 control steps)
+[mappo_s0_level_E0_none_part7-acceptance] 回合=单长回合 步  warmup=0 步  来流调度=none  奖励=level  load_coef=1.0  策略=learn
+/Users/eason/Desktop/wfcrl/wind farm RL/scripts/train/train_fastfarm.py:457: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:823.)
+  pg_log.append(float(pg)); v_log.append(float(vloss))
+                                                                                                   Time: 108 of 138 seconds.  Estimated final completion at 16:21:49.                                                                                                                                  Time: 111 of 138 seconds.  Estimated final completion at 16:21:50.                                                                                                                                  Time: 114 of 138 seconds.  Estimated final completion at 16:21:50.                                                                                                                                  Time: 117 of 138 seconds.  Estimated final completion at 16:21:49.                               [mappo_s0_level_E0_none_part7-acceptance] it 1/1  steps 12  rew(1step) +21.9738  raw 1.526  farm_power 2.84MW  P/u^3 5.547  u 8.00  ep+0  pg -0.0943  vloss 1877.4526  ent 0.920  expl_var 0.001
+                                                                                                   Time: 120 of 138 seconds.  Estimated final completion at 16:21:49.                                                                                                                                  Time: 123 of 138 seconds.  Estimated final completion at 16:21:50.                                                                                                                                  Time: 126 of 138 seconds.  Estimated final completion at 16:21:49.                                                                                                                                  Time: 129 of 138 seconds.  Estimated final completion at 16:21:50.                                                                                                                                  Time: 132 of 138 seconds.  Estimated final completion at 16:21:50.                                                                                                                                  Time: 135 of 138 seconds.  Estimated final completion at 16:21:50.                                Finalizing MPI Communication...
+[mappo_s0_level_E0_none_part7-acceptance] saved -> /Users/eason/Desktop/wfcrl/wind farm RL/results/checkpoints/mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E0_none_part7-acceptance.pt
+[mappo_s0_level_E0_none_part7-acceptance] hist -> /Users/eason/Desktop/wfcrl/wind farm RL/results/runs/fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E0_none_part7-acceptance_hist.json
+                                                                                                   Time: 138 of 138 seconds.  Estimated final completion at 16:21:50.                                                                                                                                 
+  Total Real Time:       1.8342 minutes
+  Total CPU Time:        2.6025 minutes
+  Simulation CPU Time:   2.5969 minutes
+  Simulated Time:        2.3 minutes
+  Time Ratio (Sim/CPU):  0.88566
+
+  FAST.Farm terminated normally.
+
+[mappo_s0_level_E0_none_part7-acceptance] curve -> /Users/eason/Desktop/wfcrl/wind farm RL/results/runs/fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E0_none_part7-acceptance_curve.png
+{'boundary': 'Bounded actual formal-training JSONL -> Bridge event verification (not GUI).', 'passed': True, 'final_status': 'STOPPED', 'backend_alive': False, 'run_id': '5b296ee515444bfa9f4ac46392231af3'}

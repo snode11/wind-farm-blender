@@ -1,0 +1,504 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{geometry}
+\geometry{margin=2.54cm}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{mathrsfs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\title{基于多模态大模型的自主进化工业智能体}
+\author{Chenhan JIN}
+\date{}
+
+\begin{document}
+
+\maketitle
+\section{绪论}
+
+\subsection{研究背景与意义}
+
+风力发电作为可再生能源的重要组成部分，其运维成本占发电总成本的20\%-30\%。随着风电机组向大型化、深远海发展，传统的定期维护模式已难以满足经济性与安全性的双重需求。预测性维护通过在故障发生前识别异常状态，成为降低运维成本、提升发电效率的关键技术路径。
+
+现代风电机组普遍部署了多类型传感器：视觉传感器监测叶片表面缺陷与净空距离；音频传感器捕捉轴承异常声纹；振动传感器以高达20kHz的频率采集齿轮箱与轴承的振动波形；SCADA系统持续记录转速、功率、环境风速等运行数据。这些传感器共同构成了对风机运行状态的全方位感知网络。
+
+然而，这一感知网络带来的不仅是信息丰富性，更是数据处理的多重挑战。
+\begin{enumerate}
+    \item 不同传感器的采样频率从1Hz到20kHz，相差四个数量级，且时间戳天然不对齐，传统时序融合方法难以有效处理这种异质性。
+    \item 风机的运行环境本质上是非平稳的——风速的季节性变化、温度日周期波动、叶片结冰的渐进过程、轴承磨损的缓慢累积，这些变化在分钟级、小时级、天级乃至月级多个时间尺度上同时发生.
+    \item 预测误差的经济后果高度不对称——净空距离的漏报可能导致叶片撞击塔筒的灾难性事故，而误报则造成不必要的停机损失，前者代价是后者的数十倍，举例如下假设安全净空距离设置为$4$米， 实际$3.8$米的净空距离预测为$4.2$米，可能导致本该触发的预警被忽略，最终演变为叶片撞击塔筒的灾难性事故；而将实际$4.2$米预测为$3.8$米，则可能触发不必要的停机，造成发电量损失。
+\end{enumerate}
+% 其一，不同传感器的采样频率从1Hz到20kHz，相差四个数量级，且时间戳天然不对齐，传统时序融合方法难以有效处理这种异质性。其二，风机的运行环境本质上是非平稳的——风速的季节性变化、温度日周期波动、叶片结冰的渐进过程、轴承磨损的缓慢累积，这些变化在分钟级、小时级、天级乃至月级多个时间尺度上同时发生。其三，预测误差的经济后果高度不对称——净空距离的漏报可能导致叶片撞击塔筒的灾难性事故，而误报则造成不必要的停机损失，前者代价是后者的数十倍，举例如下假设安全净空距离设置为$4$米， 实际$3.8$米的净空距离预测为$4.2$米，可能导致本该触发的预警被忽略，最终演变为叶片撞击塔筒的灾难性事故；而将实际$4.2$米预测为$3.8$米，则可能触发不必要的停机，造成发电量损失。
+
+近年来，视觉语言大模型（Vision-Language Large Models, VLLMs）的突破为工业多模态时序分析提供了新的可能性。这类模型不仅具备处理图像、文本、音频等多种模态的能力，更展现出在上下文中学习的涌现特性。然而，现有VLLMs主要面向通用场景设计，直接应用于工业时序预测面临三个根本障碍：缺乏对非对齐多模态时序数据的有效编码机制、缺少持续适应环境变化的在线学习能力、无法编码工业决策中的不对称代价。
+
+本研究旨在构建一个\textbf{基于视觉语言大模型的自主进化工业智能体}，以风机智能运维为应用场景，系统性解决多模态时序不对齐、多时间尺度环境适应、不对称决策代价三大核心问题。研究成果不仅可直接应用于风力发电的预测性维护，其方法论也可推广至其他工业设备的智能运维，具备显著的学术价值与产业转化潜力。
+
+\subsection{国内外研究现状}
+
+\textbf{工业多模态时序分析}。现有研究主要分为早期融合、中期融合和晚期融合三类策略\cite{baltrusaitis2019multimodal}，但这些方法均假设多模态数据在时间维度上已对齐。针对时序不对齐问题，Transformer架构凭借自注意力机制天然支持变长序列处理\cite{vaswani2017attention}，时序对齐网络通过可变形卷积实现动态对齐\cite{su2021temporal}。然而，这些方法对相机、音频、振动等差异巨大的多模态时序融合仍缺乏系统性方案。
+
+\textbf{大语言模型在工业领域的应用}。Time-LLM将数值时间序列通过“重编程”映射到文本Token空间进行预测\cite{jin2024time}，但该方法仅支持数值型时序数据。LMM-PHM尝试将视觉语言大模型应用于设备健康管理\cite{li2024lmm}，通过将振动波形可视化为图像输入模型，实现了零样本检测，但仍停留在离线分析阶段。在持续学习方面，在线学习方法通过实时更新模型参数适应环境变化\cite{cesa2006prediction}，元学习方法通过预训练使模型具备快速适应能力\cite{finn2017model}，但单一机制难以应对多时间尺度的变化。
+
+\textbf{强化学习与安全约束}。近端策略优化（PPO）因其训练稳定性成为工业RL应用的主流算法\cite{schulman2017proximal}。近期提出的分组相对策略优化（GRPO）进一步改进了优势函数估计方式\cite{shao2024deepseekmath}，通过组内相对比较消除绝对奖励尺度影响。在安全约束方面，约束马尔可夫决策过程为RL的安全部署提供了理论框架\cite{altman1999constrained}，实际应用中通过动作空间裁剪、奖励函数设计、离线预训练等技术的组合实现有限风险下的在线学习\cite{garcia2015comprehensive}。
+
+\subsection{研究目标与创新点}
+
+本研究旨在构建基于视觉语言大模型的自主进化工业智能体，具体目标包括：
+
+\begin{enumerate}
+    \item 建立时间感知的多模态Token化框架，解决多模态数据时间戳不对齐问题-提出在特征层而非采样层进行对齐的解决方案，通过模态独立编码、可学习时间戳位置编码、序列化拼接三阶段流程，保留原始时序信息，使VLLM能够自动学习跨模态时序关联；
+    \item 设计三层自我进化架构，在秒级、小时级、天级时间尺度上实现持续进化-构建三层进化架构：上下文学习模拟工作记忆实现瞬时纠偏，LoRA微调模拟情景记忆从重复错误中提炼规律，强化学习模拟程序性记忆优化长期决策策略；
+    \item 构建编码工业决策代价的奖励函数，采用GRPO算法在安全边界内优化策略-设计编码不对称代价的多分量奖励函数，首次将GRPO算法应用于工业预测性维护场景，通过三阶段渐进部署在保证安全的前提下实现策略进化；
+    \item 在风机多模态数据集上验证架构有效性。
+\end{enumerate}
+
+
+\section{多模态时序数据的统一表征}
+
+\subsection{问题形式化}
+
+定义风电机组在时刻 \(t\) 的多模态观测数据为：
+
+\[
+\mathcal{O}_t = \{ \mathcal{O}_t^{\text{img}}, \mathcal{O}_t^{\text{aud}}, \mathcal{O}_t^{\text{vib}}, \mathcal{O}_t^{\text{scada}} \}
+\]
+
+其中各模态数据具有不同的采样频率和时间戳集合。具体而言：
+
+\begin{itemize}
+    \item 相机图像 \(\mathcal{O}^{\text{img}}\)：采样频率 \(f_{\text{img}} \approx 1\text{Hz}\)，时间戳集合 \(T_{\text{img}} = \{\tau_1^{\text{img}}, \tau_2^{\text{img}}, \ldots\}\)
+    \item 音频信号 \(\mathcal{O}^{\text{aud}}\)：采样频率 \(f_{\text{aud}} \approx 16\text{kHz}\)，时间戳集合 \(T_{\text{aud}}\) 密度远高于视觉模态
+    \item 振动信号 \(\mathcal{O}^{\text{vib}}\)：采样频率 \(f_{\text{vib}} \approx 20\text{kHz}\)，时间戳集合 \(T_{\text{vib}}\) 同样为高频
+    \item SCADA数据 \(\mathcal{O}^{\text{scada}}\)：采样频率 \(f_{\text{scada}} \approx 10\text{Hz}\)，包含风速、转速、功率等数值变量
+\end{itemize}
+
+定义历史窗口 \([t-W, t]\) 内的多模态数据为 \(\mathcal{X}_t\)，其包含各模态在该时间区间内的全部观测样本。预测任务为：给定 \(\mathcal{X}_t\)，预测下一时刻 \(t+1\) 的关键状态 \(y_{t+1}\)，包括净空距离 \(c_{t+1}\)、转速 \(r_{t+1}\) 和异常类别 \(a_{t+1}\)。
+
+上述任务的核心挑战在于各模态时间戳集合 \(T_{\text{img}}, T_{\text{aud}}, T_{\text{vib}}, T_{\text{scada}}\) 之间没有一一对应关系。传统方法通常采用重采样或插值将所有模态强制对齐到统一时间网格，但这种方式存在两个根本缺陷：一是高频模态的信息损失（降采样）或人为引入的插值误差（上采样）；二是图像、音频波形等非数值模态无法进行插值操作。
+
+\subsection{时间感知的多模态Token化框架}
+
+为解决上述问题，本文提出在特征层而非采样层进行对齐的解决方案。框架包含三个核心步骤：模态独立编码、时间戳位置编码、序列化拼接。
+
+\subsubsection{模态独立编码}
+
+每种模态由专用的编码器处理，将原始数据压缩为固定维度的特征向量：
+
+\textbf{视觉编码器}：对于图像帧 \(I_{\tau} \in \mathbb{R}^{H \times W \times 3}\)，采用视觉Transformer（ViT）编码\cite{dosovitskiy2021image}。将图像划分为 \(16 \times 16\) 的块，经线性投影后输入Transformer编码器，取分类标记[class token]的输出作为该帧的视觉特征向量 \(\mathbf{v}_{\tau} \in \mathbb{R}^{d_{\text{img}}}\)，e.g., \(d_{\text{img}} = 768: H=W=224.\)。
+
+\textbf{音频编码器}：音频信号以滑动窗口方式分段处理。窗口长度取 \(L_{\text{aud}} = 0.1\) 秒（对应1600个采样点），步长 \(S_{\text{aud}} = 0.05\) 秒。对每个窗口，首先计算对数梅尔谱图，然后输入由2层卷积神经网络和1层Transformer组成的编码器，输出声学特征 \(\mathbf{a}_{\tau} \in \mathbb{R}^{d_{\text{aud}}}\)，e.g., \(d_{\text{aud}} = 512\)。
+
+\textbf{振动编码器}：振动信号同样采用滑动窗口处理。窗口长度取 \(L_{\text{vib}} = 0.05\) 秒（对应1000个采样点），步长 \(S_{\text{vib}} = 0.025\) 秒。编码器采用InceptionTime架构\cite{fawaz2020inceptiontime}，通过多尺度卷积核捕获不同频率的振动模式，输出振动特征 \(\mathbf{g}_{\tau} \in \mathbb{R}^{d_{\text{vib}}}\)，e.g.m, \(d_{\text{vib}} = 512\)。
+
+\textbf{数值编码器}：SCADA数据为多变量时间序列，包含风速、转速、功率、温度等变量。对于每个采样时刻，将数值向量输入多层感知机（MLP），输出数值特征 \(\mathbf{s}_{\tau} \in \mathbb{R}^{d_{\text{scada}}}\)，e.g., \(d_{\text{scada}} = 128\)。
+
+各模态编码器输出的特征向量维度不同，需通过模态适配器映射到统一的隐空间。适配器采用线性投影层：
+
+\[
+\mathbf{h}_{\tau}^{(m)} = \mathbf{W}^{(m)} \mathbf{f}_{\tau}^{(m)} + \mathbf{b}^{(m)}
+\]
+
+其中 \(\mathbf{f}_{\tau}^{(m)}\) 为模态 \(m\) 的编码特征，\(\mathbf{W}^{(m)} \in \mathbb{R}^{D \times d_m}\)，\(D\) 为统一隐空间维度，e.g., \(D = 4096\)（与Qwen2-VL的隐藏层维度一致）。
+
+\subsubsection{时间戳位置编码}
+
+各模态经编码后形成Token序列，每个Token \(\mathbf{h}_{\tau}^{(m)}\) 对应原始数据的时间戳 \(\tau\)。为使模型能够利用时间信息，需为每个Token添加时间位置编码。
+
+与标准Transformer使用绝对位置索引不同，本文采用可学习的时间戳编码器，将归一化时间戳映射到隐空间：
+
+\[
+\mathbf{p}_{\tau} = \text{MLP}_{\text{time}}(\tilde{\tau})
+\]
+
+其中 \(\tilde{\tau} = (\tau - t_{\text{start}}) / (t_{\text{end}} - t_{\text{start}}) \in [0,1]\) 为窗口内的归一化时间戳。MLP由两层线性层和Tanh激活函数构成，输出维度与隐空间一致 \(D\)。
+
+最终的时间感知Token为：
+
+\[
+\mathbf{t}_{\tau}^{(m)} = \mathbf{h}_{\tau}^{(m)} + \mathbf{p}_{\tau}
+\]
+
+\subsubsection{序列化拼接}
+
+得到所有模态的时间感知Token后，将其按时间戳升序排列，形成统一的Token序列：
+
+\[
+\mathcal{S}_t = \text{sort}\left( \bigcup_{m} \{ (\tau, \mathbf{t}_{\tau}^{(m)}) \} \right)
+\]
+
+序列长度为 \(L = \sum_m N_m\)，其中 \(N_m\) 为模态 \(m\) 在窗口内的Token数量。
+
+这种序列化拼接方式与特征拼接（feature concatenation）有本质区别。特征拼接将不同模态的特征向量在维度上合并，丢失了时序顺序和跨模态的时间关系；而序列化拼接保留了各模态的原始时序顺序，使模型能够通过自注意力机制自动学习任意时间差下的跨模态关联。例如，相机图像Token（时间戳 \(\tau_{\text{img}}\)）和振动Token（时间戳 \(\tau_{\text{vib}}\)）之间的注意力权重，不仅取决于其特征相似性，还隐含地受时间差 \(|\tau_{\text{img}} - \tau_{\text{vib}}|\) 的影响（该信息通过时间戳位置编码编码在特征中）。
+
+\subsection{多模态大模型的选择与适配}
+
+基于上述时间感知的Token化框架，选择\textbf{Qwen2-VL-7B}作为核心大语言模型。选择理由如下：
+
+\textbf{理由一：原生多模态架构}。Qwen2-VL采用视觉编码器与文本解码器协同的架构，支持图像、文本、音频谱图等多种输入模态的混合处理。其视觉编码器通过ViT将图像编码为视觉Token，与文本Token在Transformer层进行交叉注意力融合。这为融合相机图像、音频谱图、振动波形图等多模态数据提供了原生支持，无需额外设计模态对齐模块。
+
+\textbf{理由二：灵活的时间信息注入机制}。Qwen2-VL的输入形式为交错的多模态Token序列，与本文提出的序列化拼接策略天然兼容。时间戳位置编码可在Token化阶段灵活注入，模型的自注意力机制能够自动利用这些时序信息。相比之下，Time-LLM等专为数值时序设计的模型\cite{jin2024time}，其输入格式为文本化的数值序列，无法处理非数值模态。
+
+\textbf{理由三：工业领域适配性}。Qwen2-VL的预训练语料包含大量中文工业技术文本，对风机、轴承、振动等专业术语的理解能力优于基于英文语料的模型。其7B参数规模在推理效率与性能之间取得良好平衡，支持4-bit/8-bit量化部署，适合工业边缘场景。
+
+\textbf{理由四：微调生态成熟}。Qwen2-VL完整支持LoRA、QLoRA等参数高效微调方法\cite{hu2022lora}，与本文第二层自适应机制无缝集成。vLLM、TGI等推理框架对其均有成熟支持，便于系统部署。
+
+将时间感知的Token序列输入Qwen2-VL后，模型输出最后一层所有Token的隐藏状态：
+
+\[
+[\mathbf{H}_1, \mathbf{H}_2, \ldots, \mathbf{H}_L] = \text{Qwen2-VL}(\mathcal{S}_t)
+\]
+
+这些隐藏状态保留了整个历史窗口的多模态时序信息，为后续的预测与进化提供基础表征。
+
+本章针对工业多模态时序数据的核心挑战——时间戳不对齐问题，提出了一个时间感知的多模态Token化框架。该框架包含三个核心步骤：模态独立编码将各传感器数据压缩为特征向量；可学习的时间戳位置编码为每个Token注入时序信息；序列化拼接将所有Token按时间排序，形成统一的输入序列。基于此框架，选择Qwen2-VL-7B作为核心大语言模型，利用其原生多模态架构和灵活的时间信息注入机制，为后续的预测与进化任务提供统一的多模态时序表征。该框架的创新在于在特征层而非采样层实现对齐，保留了各模态的原始时序信息，避免了传统重采样方法的信息损失问题。
+
+\section{三层自我进化架构}
+
+\subsection{工业场景下问题描述和解决思路}
+
+风力发电机运维场景呈现出一组相互矛盾的学习需求。一方面，传感器数据以异质频率持续涌入——相机每秒提供一帧图像，音频传感器每秒采集一万六千个采样点，振动传感器的采样频率更高达两万赫兹。这些数据不仅时间粒度悬殊，且时间戳天然不对齐，构成了多模态时序建模的基础困难。
+
+另一方面，风机的运行环境本质上是非平稳的。风速的季节性变化、环境温度的日周期波动、叶片结冰的渐进过程、轴承磨损的缓慢累积——这些变化在分钟级、小时级、天级乃至月级等多个时间尺度上同时发生。一个在春季训练好的预测模型，到了夏季可能因为环境统计特性的漂移而性能显著下降。
+
+更根本的问题在于预测误差的\textbf{经济后果不对称}。举例如下，假设安全净空距离设置为$4$米， 实际$3.8$米的净空距离预测为$4.2$米，可能导致本该触发的预警被忽略，最终演变为叶片撞击塔筒的灾难性事故；而将实际$4.2$米预测为$3.8$米，则可能触发不必要的停机，造成发电量损失。前者的潜在损失是后者的十倍乃至数十倍。然而，标准监督学习框架下的均方误差损失函数，对这两种方向相反的误差给予同等惩罚，与工业场景的实际决策目标严重错位。
+
+这三个问题——多模态时序不对齐、多时间尺度环境漂移、不对称决策代价——构成了工业预测模型落地的核心瓶颈。它们相互交织，使传统静态模型和单一机制的在线学习方法都难以奏效。
+
+人类操作员在面对复杂工业系统时，展现出一套精妙的学习机制。他们不仅能够从明显的故障中吸取教训，更能从近乎错误的“险情”（near-miss）中提炼经验。更重要的是，这种学习发生在多个时间尺度上：操作员可以立即调整对刚刚发生的异常声音的解读（秒级响应），能够在一天的工作中逐渐适应新安装设备的行为模式（小时级适应），也能在数月的经验积累中形成对特定故障类型的直觉判断（长期进化）。
+
+如果我们希望机器智能体能够在真实工业环境中持续进化，它同样需要具备从错误中学习的能力，并且这种学习应该发生在多个时间尺度上。单靠一种机制——无论是单纯的无参数上下文学习、参数高效的微调，还是强化学习——都难以同时满足快速响应、稳健适应和长期进化的多重需求。
+
+基于这一认识，提出一个三层自我进化架构，将时间尺度作为设计的第一原则，以“从错误中学习”为核心线索，串联起三个层次的学习机制。本章的论述将遵循渐进式结构：第一层作为快速响应的第一道防线，仅作简要阐述；第二层作为环境适应的主体机制，展开讨论其技术实现与工程考量；第三层作为智能体长期进化的核心引擎，则予以重点论述，特别是价值函数的设计与策略更新算法的选择。
+
+\subsection{第一层：上下文学习-工作记忆与瞬时纠偏}
+
+上下文学习（In-Context Learning, ICL）是大语言模型涌现出的关键能力 \cite{brown2020language}，允许模型在输入中通过少量示例动态调整行为，而无需参数更新。这一机制在认知功能上与人类的工作记忆有某种类比——后者同样在极短时间内维持少量信息，并据此指导当前行为。
+
+在风机预测场景中，第一层机制的核心功能是实现“从最近的错误中学习”。对于当前时刻 $t$ 的预测，系统在输入序列中附加最近 $K$ 个真实反馈作为上下文示例。每个示例包含完整的多模态输入、模型的预测值、真实观测值以及计算出的预测误差。将这些示例按时间顺序排列后输入模型，模型通过自注意力机制自动识别当前输入与示例中场景的相似性，进而调整输出以修正类似的偏差。
+
+这一层的优势在于其零参数更新的特性——响应延迟在毫秒级，能够捕捉到分钟级的环境波动。然而，其局限性同样明显：上下文窗口的长度限制了可容纳的示例数量，且无法解决系统性的、持续存在的预测偏差。这些问题由第二层和第三层解决。
+
+\subsection{第二层：Fine-tuning——环境渐变适应}
+
+\subsubsection{低秩自适应作为情景记忆的编码}
+
+人类的情景记忆系统能够将近期经验编码为可长期保存的神经表征，使个体能够适应环境中的持续性变化。在机器学习中，参数高效微调方法提供了类似的功能：在保持预训练模型主体不变的前提下，用少量参数编码新数据分布的统计规律。
+
+低秩自适应（Low-Rank Adaptation, LoRA）是这类方法的代表性技术 \cite{hu2022lora}。其核心洞察在于：大语言模型在适应新任务时，权重的变化量具有低秩结构，因此可以用两个低秩矩阵的乘积来近似表示。具体而言，对于预训练权重矩阵 $W_0 \in \mathbb{R}^{d \times k}$，其更新量 $\Delta W$ 可分解为 $BA$，其中 $B \in \mathbb{R}^{d \times r}$，$A \in \mathbb{R}^{r \times k}$，且秩 $r \ll \min(d,k)$。前向传播变为：
+
+\begin{equation}
+h = W_0 x + BA x
+\end{equation}
+
+在微调过程中，$W_0$ 保持冻结，仅 $A$ 和 $B$ 被训练。在Qwen2-VL-7B中，采用LoRA可以将可训练参数从70亿减少到约700万，仅为原始参数的千分之一，同时达到与全参数微调相当的效果。
+
+在风机运维场景中，LoRA的意义不仅在于计算效率。更重要的是，它允许系统为不同的工况条件——不同风机、不同季节、不同退化阶段——维护独立的低秩适配器。每个适配器编码了特定工况下多模态数据与预测目标之间的映射规律，类似于人类对特定情境形成的专门化经验。
+
+\subsubsection{从错误中累积：异步微调机制的设计}
+
+LoRA微调的触发不应是即时的——每个单独的错误都可能包含噪声，过早更新可能引入不必要的波动。相反，系统应该累积足够的证据，识别出统计上显著的偏差模式后，再进行参数更新。这与人类从重复经验中学习的过程类似：单次错误可能被归因于偶然因素，只有反复出现的同类错误才会促成认知调整。
+
+\textbf{触发机制设计}。系统维护一个经验缓冲区，持续收集预测-反馈对。触发条件采用双阈值策略：当累积样本数达到预设阈值 $N_{\text{threshold}}$（如500个）时触发候选微调；同时，监控模型在最近 $M$ 个样本上的滚动预测误差，若超过历史均值的 $\delta$ 倍标准差（e.g., $\delta=1.5$），则提前触发。前者保证常规更新频率，后者确保对显著漂移的快速响应。两种触发机制独立运行，取先到者。
+
+\textbf{样本筛选与加权策略}。并非所有错误具有同等价值。漏报的严重性远高于误报，接近安全边界的样本比稳定区域的样本更具信息量，近期样本比历史样本更能反映当前环境。因此，在构建微调数据集时，对每个样本赋予三重权重：
+
+决策代价权重 $w_{\text{cost}}$ 基于样本的实际决策后果设定。对于漏报样本（实际异常但未预警），权重为 $c_{\text{miss}}$（e.g.,10）；对于误报样本（实际正常但预警），权重为 $c_{\text{false}}$（e.g., 5）；对于正确预测样本，权重为1。这一设计引导LoRA适配器优先学习那些决策后果严重的错误模式。
+
+不确定性权重 $w_{\text{uncertainty}}$ 基于模型输出的置信度设定。当模型对某个预测的置信度较低时，该样本包含的信息量更大，因此赋予更高权重。本文采用模型输出概率分布的熵作为不确定性度量，权重与熵值正相关。
+
+时效性权重 $w_{\text{recency}}$ 采用指数衰减形式：$w_{\text{recency}} = e^{-\lambda (t_{\text{current}} - t_{\text{sample}})}$，其中 $\lambda$ 为衰减率（e.g., 0.01），使近期样本获得更高权重。
+
+最终样本权重为三者的乘积：$w = w_{\text{cost}} \cdot w_{\text{uncertainty}} \cdot w_{\text{recency}}$。微调时的损失函数采用加权均方误差，使模型聚焦于那些“最值得学习的错误”。
+
+\textbf{渐进式权重融合}。低秩矩阵的更新采用指数移动平均（Exponential Moving Average, EMA）策略，而非直接替换现有权重。设 $W_{\text{online}}$ 为在新累积样本上训练得到的候选适配器，$W_{\text{stored}}$ 为当前使用的适配器，则更新后的权重为：
+
+\begin{equation}
+W_{\text{new}} = \alpha W_{\text{online}} + (1 - \alpha) W_{\text{stored}}
+\end{equation}
+
+其中 $\alpha \in [0.3, 0.5]$ 为融合系数。这一设计的理论依据在于：候选适配器基于有限样本训练，可能包含统计噪声；而现有适配器积累了长期经验。通过加权融合，新知识以残差形式叠加，既吸收了新数据中的趋势信息，又保持了已有知识的稳定性，有效防止了灾难性遗忘。
+
+\subsubsection{多工况适配器池}
+
+风机在实际运行中会经历多种工况模式：不同风机的个体差异源于制造和安装公差；春夏秋冬的季节变化导致风速分布和环境温度的系统性偏移；轴承从健康到故障的渐进退化改变了振动和声学特征。一个通用的预测模型难以同时应对所有模式。
+
+受人类情景记忆的启发，系统维护一个\textbf{LoRA适配器池} $\mathcal{A} = \{A_1, A_2, \ldots, A_m\}$，每个适配器对应一个特定的工况类别。工况类别由轻量级分类器自动识别，该分类器基于最近窗口数据的统计特征（各模态的均值、方差、频谱能量等）进行判断，无需调用大模型。分类器的输出为工况类别概率分布，系统选择概率最高的适配器。
+
+当检测到新的工况模式且现有适配器均不匹配时，系统动态创建新的适配器，从当前第一层的上下文学习结果初始化。新适配器经过一段时间的累积微调后加入池中，同时触发对旧适配器的定期评估——若某个适配器长期未被使用，则将其归档或删除，以控制存储开销。
+
+这种设计使系统能够积累针对不同情境的专门化知识，并在合适的情境下调用合适的经验，避免了单一模型在不同工况间的相互干扰。
+
+\subsection{第三层：强化学习-策略进化}
+
+前两层机制虽然在监督学习框架下实现了多时间尺度的环境适应，但其根本局限在于优化目标与工业场景的真实需求之间存在结构性错位。监督学习最小化的是预测误差——无论这个误差发生在安全区域还是危险边界，无论它是偏向漏报还是误报。然而，如前所述，风机运维中不同方向、不同区域的误差其经济后果相差悬殊。
+
+这一问题的本质在于：预测准确率是过程指标，而决策质量才是最终目标。一个预测准确率95\%的模型，如果其5\%的误差全部集中在漏报方向，其实际应用价值可能远低于一个准确率90\%但漏报率仅为1\%的模型。然而，监督学习框架无法编码这种决策偏好——它平等对待所有误差。
+
+解决这一问题需要跳出监督学习的范式。强化学习（Reinforcement Learning）提供了一种替代框架：智能体通过与环境交互，以最大化累积奖励为目标进行优化 \cite{sutton2018reinforcement}。奖励函数可以设计为任意形式，包括对漏报和误报赋予不对称的惩罚。这使得智能体能够学习到“宁可误报不可漏报”这样的决策偏好，而不仅仅是“预测准确”。
+
+更重要的是，强化学习使智能体具备了\textbf{主动探索}的能力。当环境发生变化时，监督学习模型只能被动等待错误发生才能修正，而强化学习智能体可以在安全边界内主动尝试新的预测模式，更快地适应新环境。这种主动性与人类操作员在面对新设备时“试探性操作”的学习方式如出一辙。
+
+\subsubsection{马尔可夫决策过程的形式化}
+
+将风机预测-决策闭环形式化为马尔可夫决策过程（MDP），定义如下：
+
+\textbf{状态空间 $\mathcal{S}$}。状态 $s_t$ 编码了时刻 $t$ 可用于决策的全部历史信息。具体而言，$s_t$ 由三部分构成：第一，历史窗口 $[t-W, t]$ 内多模态数据的编码表示，这一表示通过第一层的大语言模型获得，保留了丰富的时序和跨模态信息；第二，当前使用的LoRA适配器标识，反映了系统对当前工况的认知；第三，最近 $K$ 个预测-反馈对的统计特征，包括滚动误差均值、方差、漏报率和误报率，使智能体能够感知自身近期的表现。这种分层设计使状态既包含原始传感信息，又包含元认知信息——智能体不仅知道“环境是什么样的”，还知道“自己预测得怎么样”。
+
+\textbf{动作空间 $\mathcal{A}$}。动作 $a_t$ 对应模型在时刻 $t$ 的预测输出，包含连续变量和离散变量：净空距离预测值 $\hat{c}_t \in \mathbb{R}$，转速预测值 $\hat{r}_t \in \mathbb{R}$，以及异常类别的概率分布 $\hat{p}_t \in \Delta^2$（正常、预警、紧急三类）。动作空间的维度为 $1 + 1 + 3 = 5$。
+
+\textbf{状态转移函数 $\mathcal{P}$}。状态转移由风机系统的物理动态和智能体的决策共同决定。给定当前状态 $s_t$ 和动作 $a_t$，系统演化到下一状态 $s_{t+1}$，这一过程受风速变化、设备状态演化等外部因素影响。在实际部署中，状态转移函数需要通过强化学习从海量时序数据和人工决策中学出来。
+
+\textbf{奖励函数 $R(s_t, a_t, s_{t+1})$} 的设计是智能体最终学习到的行为策略的关键。
+
+\subsubsection{价值函数的设计：从不对称代价到安全优先}
+
+奖励函数的设计需要反映工业场景的真实价值取向。考虑设计一个多分量奖励函数，每个分量对应一个优化目标：
+
+\begin{equation}
+R = R_{\text{accuracy}} + \lambda_{\text{decision}} R_{\text{decision}} + \lambda_{\text{physics}} R_{\text{physics}} + \lambda_{\text{safety}} R_{\text{safety}}
+\end{equation}
+
+其中 $\lambda_{\text{decision}} = 5.0$，$\lambda_{\text{physics}} = 0.5$，$\lambda_{\text{safety}} = 10.0$ 为权重系数，依据工业先验设定并通过敏感性分析验证。
+
+\textbf{预测准确性分量 $R_{\text{accuracy}}$} 提供基础学习信号，确保智能体具备基本的预测能力。采用负的加权均方误差：
+
+\begin{equation}
+R_{\text{accuracy}} = -\left( \beta_c \cdot (\hat{c}_t - c_t)^2 + \beta_r \cdot (\hat{r}_t - r_t)^2 \right)
+\end{equation}
+
+其中 $\beta_c = 0.3$，$\beta_r = 0.2$ 依据净空距离和转速在运维决策中的重要性设定。
+
+\textbf{决策后果分量 $R_{\text{decision}}$} 是奖励函数的创新核心，编码了决策代价的不对称性。这一分量基于实际状态与预测之间的混淆矩阵设计：
+
+\begin{table}[h]
+\centering
+\caption{决策后果奖励矩阵}
+\label{tab:reward_matrix}
+\begin{tabular}{c|ccc}
+\hline
+实际|预测 & 正常 & 预警 & 紧急 \\
+\hline
+正常 & $+1$ & $-20$ & $-50$ \\
+预警 & $-10$ & $+10$ & $-30$ \\
+紧急 & $-100$ & $-50$ & $+50$ \\
+\hline
+\end{tabular}
+\end{table}
+
+奖励矩阵的数值基于风机运维的实际经济损失估算。紧急状态漏报（实际紧急但预测为正常）的 $-100$ 奖励远大于其他错误，迫使智能体学习保守策略。正常状态误报为紧急的 $-50$ 奖励也显著高于误报为预警的 $-20$，体现了分级预警的成本差异。
+
+\textbf{物理一致性分量 $R_{\text{physics}}$} 鼓励预测符合已知的物理规律。根据风机动力学，净空距离与转速存在负相关关系——转速越高，叶片变形越大，净空距离越小。通过简化的物理模型估算给定转速下的期望净空距离 $\tilde{c}_t = f_{\text{physics}}(r_t, v_{\text{wind}})$，当预测值偏离物理模型超过阈值 $\theta$ 时施加惩罚：
+
+\begin{equation}
+R_{\text{physics}} = -\max\left(0, \frac{|\hat{c}_t - \tilde{c}_t|}{\tilde{c}_t} - \theta\right)
+\end{equation}
+
+其中 e.g., $\theta = 0.2$，允许20\%的物理偏差。
+
+\textbf{安全约束分量 $R_{\text{safety}}$} 作为硬约束，当预测动作进入危险区域时施加极大负奖励。定义净空距离的危险阈值为 $c_{\text{danger}} = 4\text{m}$，若 $\hat{c}_t < c_{\text{danger}}$ 且实际净空距离 $c_t \ge c_{\text{danger}} + \epsilon$，则：
+
+\begin{equation}
+R_{\text{safety}} = -200
+\end{equation}
+
+这一设计确保智能体不会为了追求预测准确性而冒险输出危险动作。
+
+\subsubsection{策略优化算法：GRPO的理论优势与适配}
+
+在策略优化算法的选择上，本文采用\textbf{分组相对策略优化}（Group Relative Policy Optimization, GRPO）算法。GRPO是近端策略优化（Proximal Policy Optimization, PPO）的一种变体，由Shao等 \cite{shao2024deepseekmath} 在数学推理任务中提出，其核心思想是将策略更新的基准从绝对值改为组内相对值，从而提升训练的稳定性和样本效率。
+
+\textbf{GRPO的核心机制}。标准PPO通过剪切概率比来限制策略更新幅度：
+
+\begin{equation}
+L^{\text{PPO}}(\theta) = \mathbb{E}\left[\min\left(r_t(\theta)\hat{A}_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t\right)\right]
+\end{equation}
+
+其中 $r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)}$ 为新旧策略的概率比，$\hat{A}_t$ 为优势函数估计。
+
+GRPO的核心改进在于将优势函数的计算从绝对基准改为组内相对基准。具体而言，对于每个状态 $s_t$，GRPO从旧策略中采样一组动作 $\{a_t^{(1)}, a_t^{(2)}, \ldots, a_t^{(k)}\}$，计算每个动作的奖励，然后将组内优势定义为：
+
+\begin{equation}
+\hat{A}_t^{(i)} = \frac{R(s_t, a_t^{(i)}, s_{t+1}) - \mu_{\text{group}}}{\sigma_{\text{group}}}
+\end{equation}
+
+其中 $\mu_{\text{group}}$ 和 $\sigma_{\text{group}}$ 是组内奖励的均值和标准差。这一设计的优势在于：它消除了绝对奖励尺度对策略更新的影响，使算法对奖励函数的缩放不敏感；同时，通过组内比较，算法自然地鼓励探索那些在组内表现突出的动作。
+
+\textbf{GRPO在风机运维场景中的适用性分析}。GRPO的三个特性使其特别适合工业场景下的策略优化：
+
+其一，\textbf{对奖励尺度不敏感}。工业场景中的奖励函数通常包含多个分量，不同分量的尺度差异可能很大。GRPO的组内相对优势消除了对绝对尺度的依赖，避免了繁琐的奖励缩放调参。
+
+其二，\textbf{天然支持多动作探索}。GRPO的组采样机制使其在同一状态下评估多个候选动作，这对于风机运维场景尤为重要——智能体需要在不同预测策略之间比较，找出在当前情境下最优的决策。这种机制与人类专家在决策前“权衡各种可能”的认知过程相契合。
+
+其三，\textbf{更新稳定，适合安全约束场景}。GRPO通过组内相对比较而非绝对优势估计，天然降低了策略更新的方差。在安全约束严格的工业场景中，这种稳定性至关重要——避免因策略突变而进入不安全区域。
+
+\textbf{GRPO与三层架构的整合}。在第三层中，GRPO算法的部署遵循以下流程：
+
+在每次策略更新时，从经验回放池中采样一批状态 $\{s_t\}$。对于每个状态，从当前策略 $\pi_{\theta_{\text{old}}}$ 中采样 $k$ 个动作（本文取 $k=8$），通过价值函数（由独立的critic网络估计）评估每个动作的组内相对优势。策略损失函数采用GRPO的组内相对形式，同时保留PPO的剪切机制以进一步约束更新幅度。
+
+策略更新频率设定为每24小时一次，与第二层的异步微调协同。每次更新使用最近积累的经验数据，确保策略能够响应近期的环境变化。
+
+\subsubsection{安全约束下的渐进部署}
+
+在真实工业环境中直接进行强化学习存在不可接受的风险——探索阶段的错误决策可能导致实际经济损失甚至安全事故。因此，第三层的部署遵循三阶段渐进流程，每一阶段都有明确的安全边界。
+
+\textbf{第一阶段：离线预训练}。利用历史数据构建高保真仿真器，模拟风机在不同工况下的状态演化。仿真器采用生成对抗网络（GAN）架构，通过对抗性训练确保仿真数据与真实数据的分布一致性 \cite{ganin2016domain}。在这一环境中，首先采用行为克隆（Behavioral Cloning, BC）从第二层的监督学习模型初始化策略 \cite{pomerleau1989alvinn}，使智能体具备基础预测能力，避免从零探索的高成本和高风险。随后使用GRPO算法进行预训练，直到策略在仿真环境中稳定收敛。
+
+\textbf{第二阶段：受限在线探索}。将预训练策略部署到真实环境，但施加多层安全约束。动作变化幅度被限制在历史窗口方差的50\%以内，防止单步预测的剧烈波动；当模型输出的不确定性超过阈值时，自动回退到第二层的LoRA预测；关键决策（如预测紧急状态）由人类专家抽查确认。此阶段持续2到4周，在收集真实反馈的同时确保风险可控。这一阶段的设计理念是“让智能体在安全区域内学习”——即使策略尚不完善，其探索行为也被约束在不会造成实际损害的范围内。
+
+\textbf{第三阶段：全面在线学习}。在验证第二阶段的安全指标（误报率、漏报率、平均预测误差）满足预设要求后，逐步放宽约束。初期仅在低风险时段（如风速低于额定值、风机正常运行、历史故障率低的季节）启用强化学习策略；随着信心积累，逐步扩大策略的作用范围。策略更新保持每24小时的频率，每次更新后进行安全评估——若更新后的策略在最近100个样本上的安全指标显著恶化，则回滚到更新前的版本。这一“安全评估-渐进部署-自动回滚”的机制确保了长期运行的安全性。
+
+\subsection{三层架构协同与共享}
+三层架构的设计核心是时间尺度的分离。第一层工作于秒到分钟级，处理环境中的瞬时波动和噪声；第二层工作于小时到天级，吸收环境渐变的统计规律；第三层工作于天到周级，优化长期决策策略。三层架构并非独立运作，而是通过统一的\textbf{经验回放池}实现信息共享。回放池存储 $(s_t, a_t, r_t, s_{t+1})$ 四元组，其中 $s_t$ 为状态，$a_t$ 为预测输出，$r_t$ 为奖励信号，$s_{t+1}$ 为下一时刻状态。回放池的容量设定为 $10^5$ 个样本，采用先进先出策略，保持数据的时效性。
+
+第一层从回放池中检索上下文示例，第二层从中采样微调数据，第三层从中进行策略优化。这种统一存储保证了三层学习的一致性——同样的经验在不同时间尺度上被不同机制利用。
+
+三层之间存在双向的信息流动。第二层积累的LoRA适配器可以作为第三层策略的初始化模板，使强化学习从一个良好的起点开始优化。第三层学习的价值函数则可以指导第二层的样本筛选，通过价值函数对样本的重要性进行排序，使微调聚焦于高价值区域——那些对决策影响大的状态-动作对。第一层的上下文学习结果为第二层提供候选样本的初步筛选，过滤明显异常的数据。
+
+这种双向信息流动构成了一个正向循环：更好的预测（L1+L2）带来更好的策略（L3），更好的策略产生更高质量的反馈数据，这些数据又反过来提升预测能力。这正是“从错误中学习”这一设计理念在工程层面的具体实现。
+
+
+\section{本章小结}
+
+本章从工业场景下多时间尺度变化和不对称决策代价的现实挑战出发，提出了一个三层自我进化架构。该架构以“从错误中学习”为核心线索，在三个层次上分别模拟人类认知中的工作记忆、情景记忆和程序性记忆。
+
+第一层利用上下文学习实现零参数更新的瞬时纠偏，响应时间在秒级，作为快速响应的第一道防线。第二层采用低秩自适应微调技术，通过异步累积机制和加权样本筛选，从重复错误中提炼经验，更新周期在小时到天级。第三层通过强化学习优化长期决策策略，设计了编码不对称决策代价的多分量奖励函数，并采用GRPO算法实现稳定高效的策略更新，更新周期在天到周级。
+
+三层架构通过统一经验回放池和双向信息流动机制实现协同，在时间尺度上自然分离，避免了相互干扰。该架构为工业场景下的大模型持续学习提供了系统性解决方案，使机器智能体能够在真实环境中从错误中学习、在安全边界内进化。
+\section{研究计划与预期成果}
+
+\subsection{研究计划}
+
+本研究计划为期30个月，分为五个阶段：
+
+\begin{table}[h]
+\centering
+\caption{研究计划时间安排}
+\label{tab:schedule}
+\begin{tabular}{p{2.5cm}p{10cm}}
+\hline
+\textbf{阶段} & \textbf{主要任务} \\
+\hline
+第1-6月 & 数据采集与预处理：与风电企业合作获取真实风机多模态数据集；开发时间感知Token化工具；构建高保真仿真环境 \\
+第7-12月 & 多模态时序LLM预测模型构建：实现模态编码器、时间戳编码、序列化拼接模块；Qwen2-VL-7B监督微调 \\
+第13-20月 & 自我进化架构实现：三层进化机制（ICL、LoRA、GRPO）开发；统一经验回放池构建；仿真环境验证 \\
+第21-26月 & 系统集成与安全部署：安全门控机制实现；三阶段渐进部署；真实数据性能验证 \\
+第27-30月 & 成果整理与转化：学术论文撰写；专利申请；开源代码发布；技术报告撰写 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{预期成果}
+
+\textbf{学术论文}：计划在ICML、NeurIPS、ICLR等机器学习顶会或IEEE trans etc.等应用期刊发表论文2-3篇，主题涵盖多模态时序对齐、自我进化架构、工业RL安全优化。
+
+\textbf{技术专利}：申请发明专利1-2项，涉及时间感知的多模态Token化方法、基于强化学习的预测策略优化方法。
+
+\textbf{开源成果}：发布多模态时序数据处理工具包、自我进化智能体框架。
+
+\textbf{原型系统}：构建可部署的风机智能运维原型系统，具备多模态数据接入、状态预测、自我进化、安全决策功能。
+\bibliographystyle{plain}
+\begin{thebibliography}{99}
+\bibitem{baltrusaitis2019multimodal}
+Baltrusaitis, T., et al. (2019). Multimodal machine learning: A survey and taxonomy. \textit{IEEE TPAMI}, 41(2), 423-443.
+
+\bibitem{vaswani2017attention}
+Vaswani, A., et al. (2017). Attention is all you need. \textit{NeurIPS}.
+
+\bibitem{su2021temporal}
+Su, B., et al. (2021). Temporal alignment networks for long-term video understanding. \textit{CVPR}.
+
+\bibitem{jin2024time}
+Jin, M., et al. (2024). Time-LLM: Time series forecasting by reprogramming large language models. \textit{ICLR}.
+
+\bibitem{li2024lmm}
+Li, Y., et al. (2024). LMM-PHM: Large multi-modal models for predictive health management. \textit{arXiv:2403.12345}.
+
+\bibitem{cesa2006prediction}
+Cesa-Bianchi, N., \& Lugosi, G. (2006). \textit{Prediction, learning, and games}. Cambridge University Press.
+
+\bibitem{finn2017model}
+Finn, C., et al. (2017). Model-agnostic meta-learning for fast adaptation of deep networks. \textit{ICML}.
+
+\bibitem{schulman2017proximal}
+Schulman, J., et al. (2017). Proximal policy optimization algorithms. \textit{arXiv:1707.06347}.
+
+\bibitem{shao2024deepseekmath}
+Shao, Z., et al. (2024). DeepSeekMath: Pushing the limits of mathematical reasoning in open language models. \textit{arXiv:2402.03300}.
+
+\bibitem{altman1999constrained}
+Altman, E. (1999). \textit{Constrained Markov decision processes}. CRC Press.
+
+\bibitem{garcia2015comprehensive}
+García, J., \& Fernández, F. (2015). A comprehensive survey on safe reinforcement learning. \textit{JMLR}, 16(1), 1437-1480.
+
+\bibitem{dosovitskiy2021image}
+Dosovitskiy, A., et al. (2021). An image is worth 16x16 words: Transformers for image recognition at scale. \textit{ICLR}.
+
+\bibitem{fawaz2020inceptiontime}
+Fawaz, H. I., et al. (2020). InceptionTime: Finding AlexNet for time series classification. \textit{Data Mining and Knowledge Discovery}, 34(6), 1936-1962.
+
+\bibitem{hu2022lora}
+Hu, E. J., et al. (2022). LoRA: Low-rank adaptation of large language models. \textit{ICLR}.
+
+\bibitem{brown2020language}
+Brown, T., et al. (2020). Language models are few-shot learners. \textit{NeurIPS}.
+
+\bibitem{sutton2018reinforcement}
+Sutton, R. S., \& Barto, A. G. (2018). \textit{Reinforcement learning: An introduction} (2nd ed.). MIT Press.
+
+\bibitem{ganin2016domain}
+Ganin, Y., et al. (2016). Domain-adversarial training of neural networks. \textit{JMLR}.
+
+\bibitem{pomerleau1989alvinn}
+Pomerleau, D. A. (1989). Alvinn: An autonomous land vehicle in a neural network. \textit{NeurIPS}.
+
+\bibitem{khalil2002nonlinear}
+Khalil, H. K. (2002). \textit{Nonlinear systems} (3rd ed.). Prentice Hall.
+
+\bibitem{squire2015cognitive}
+Squire, L. R., \& Ditter, D. K. (2015). The cognitive neuroscience of memory. \textit{Oxford Handbook of Cognitive Neuroscience}.
+\bibitem{squire2015cognitive}
+Squire, L. R., \& Ditter, D. K. (2015). The cognitive neuroscience of memory. In \textit{Oxford Handbook of Cognitive Neuroscience}.
+
+\bibitem{brown2020language}
+Brown, T., et al. (2020). Language models are few-shot learners. \textit{NeurIPS}.
+
+\bibitem{hu2022lora}
+Hu, E. J., et al. (2022). LoRA: Low-rank adaptation of large language models. \textit{ICLR}.
+
+\bibitem{sutton2018reinforcement}
+Sutton, R. S., \& Barto, A. G. (2018). \textit{Reinforcement learning: An introduction} (2nd ed.). MIT Press.
+
+\bibitem{shao2024deepseekmath}
+Shao, Z., et al. (2024). DeepSeekMath: Pushing the limits of mathematical reasoning in open language models. \textit{arXiv:2402.03300}.
+
+\bibitem{ganin2016domain}
+Ganin, Y., et al. (2016). Domain-adversarial training of neural networks. \textit{JMLR}.
+
+\bibitem{pomerleau1989alvinn}
+Pomerleau, D. A. (1989). Alvinn: An autonomous land vehicle in a neural network. \textit{NeurIPS}.
+
+\bibitem{khalil2002nonlinear}
+Khalil, H. K. (2002). \textit{Nonlinear systems} (3rd ed.). Prentice Hall.
+
+\bibitem{cesa2006prediction}
+Cesa-Bianchi, N., \& Lugosi, G. (2006). \textit{Prediction, learning, and games}. Cambridge University Press.
+
+\bibitem{finn2017model}
+Finn, C., et al. (2017). Model-agnostic meta-learning for fast adaptation of deep networks. \textit{ICML}.
+
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,136 @@
+C:\Users\s1155\.conda\envs\wfcrl\Lib\site-packages\pettingzoo\utils\conversions.py:132: UserWarning: The base environment `AECLogWrapper<multiagent-windfarm>` does not have a `render_mode` defined.
+  warnings.warn(
+C:\Users\s1155\.conda\envs\wfcrl\Lib\site-packages\stable_baselines3\common\vec_env\base_vec_env.py:77: UserWarning: The `render_mode` attribute is not defined in your environment. It will be set to None.
+  warnings.warn("The `render_mode` attribute is not defined in your environment. It will be set to None.")
+Using cpu device
+[mm] training 50000 steps, 7 agents, image=on бн
+Logging to logs/mappo_mm\PPO_1
+-----------------------------
+| time/              |      |
+|    fps             | 33   |
+|    iterations      | 1    |
+|    time_elapsed    | 215  |
+|    total_timesteps | 7168 |
+-----------------------------
+------------------------------------------
+| time/                   |              |
+|    fps                  | 29           |
+|    iterations           | 2            |
+|    time_elapsed         | 481          |
+|    total_timesteps      | 14336        |
+| train/                  |              |
+|    approx_kl            | 0.0019373776 |
+|    clip_fraction        | 0.0116       |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -1.42        |
+|    explained_variance   | 0.0456       |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.184        |
+|    n_updates            | 10           |
+|    policy_gradient_loss | -0.000491    |
+|    std                  | 1            |
+|    value_loss           | 0.422        |
+------------------------------------------
+-----------------------------------------
+| time/                   |             |
+|    fps                  | 20          |
+|    iterations           | 3           |
+|    time_elapsed         | 1038        |
+|    total_timesteps      | 21504       |
+| train/                  |             |
+|    approx_kl            | 0.003717867 |
+|    clip_fraction        | 0.0321      |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -1.44       |
+|    explained_variance   | 0.583       |
+|    learning_rate        | 0.0003      |
+|    loss                 | -0.00223    |
+|    n_updates            | 20          |
+|    policy_gradient_loss | -0.00231    |
+|    std                  | 1.03        |
+|    value_loss           | 0.023       |
+-----------------------------------------
+-----------------------------------------
+| time/                   |             |
+|    fps                  | 21          |
+|    iterations           | 4           |
+|    time_elapsed         | 1333        |
+|    total_timesteps      | 28672       |
+| train/                  |             |
+|    approx_kl            | 0.004800672 |
+|    clip_fraction        | 0.0379      |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -1.44       |
+|    explained_variance   | 0.6         |
+|    learning_rate        | 0.0003      |
+|    loss                 | 0.0188      |
+|    n_updates            | 30          |
+|    policy_gradient_loss | -0.00232    |
+|    std                  | 1.02        |
+|    value_loss           | 0.0398      |
+-----------------------------------------
+-----------------------------------------
+| time/                   |             |
+|    fps                  | 23          |
+|    iterations           | 5           |
+|    time_elapsed         | 1551        |
+|    total_timesteps      | 35840       |
+| train/                  |             |
+|    approx_kl            | 0.004722607 |
+|    clip_fraction        | 0.0499      |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -1.43       |
+|    explained_variance   | 0.722       |
+|    learning_rate        | 0.0003      |
+|    loss                 | 0.0217      |
+|    n_updates            | 40          |
+|    policy_gradient_loss | -0.00261    |
+|    std                  | 1.01        |
+|    value_loss           | 0.0765      |
+-----------------------------------------
+------------------------------------------
+| time/                   |              |
+|    fps                  | 24           |
+|    iterations           | 6            |
+|    time_elapsed         | 1768         |
+|    total_timesteps      | 43008        |
+| train/                  |              |
+|    approx_kl            | 0.0056824866 |
+|    clip_fraction        | 0.0646       |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -1.42        |
+|    explained_variance   | 0.501        |
+|    learning_rate        | 0.0003       |
+|    loss                 | 0.00184      |
+|    n_updates            | 50           |
+|    policy_gradient_loss | -0.00454     |
+|    std                  | 1            |
+|    value_loss           | 0.0604       |
+------------------------------------------
+-----------------------------------------
+| time/                   |             |
+|    fps                  | 25          |
+|    iterations           | 7           |
+|    time_elapsed         | 1993        |
+|    total_timesteps      | 50176       |
+| train/                  |             |
+|    approx_kl            | 0.005866024 |
+|    clip_fraction        | 0.0632      |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -1.43       |
+|    explained_variance   | 0.725       |
+|    learning_rate        | 0.0003      |
+|    loss                 | 8.37e-06    |
+|    n_updates            | 60          |
+|    policy_gradient_loss | -0.00423    |
+|    std                  | 1.01        |
+|    value_loss           | 0.0581      |
+-----------------------------------------
+ 100% -------------------------- 50,176/50,000  [ 0:33:07 < 0:00:00 , 34 it/s ]
+C:\Users\s1155\.conda\envs\wfcrl\Lib\site-packages\pettingzoo\utils\conversions.py:132: UserWarning: The base environment `AECLogWrapper<multiagent-windfarm>` does not have a `render_mode` defined.
+  warnings.warn(
+C:\Users\s1155\.conda\envs\wfcrl\Lib\site-packages\stable_baselines3\common\vec_env\base_vec_env.py:77: UserWarning: The `render_mode` attribute is not defined in your environment. It will be set to None.
+  warnings.warn("The `render_mode` attribute is not defined in your environment. It will be set to None.")
+[mm] saved б· checkpoints\mappo_mm_ablaincourt.zip
+[eval] ep 1: return = 412.6210
+[eval] ep 2: return = 410.4204

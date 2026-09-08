@@ -1,0 +1,5 @@
+00:00.973  blend            | Read blend: "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/part2/wfrl_part2_static.blend"
+CLEAN_INSTALL_REOPEN_PASS
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

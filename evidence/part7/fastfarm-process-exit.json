@@ -1,0 +1,8 @@
+{
+  "captured_at": "2026-09-07T08:16:50.660280+00:00",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "scope": "Part7 verify_part6_backend.py and native FAST.Farm executable processes after probe exit",
+  "matching_processes": [],
+  "passed": true,
+  "boundary": "Point-in-time process inspection plus backend_alive=false in fastfarm-control.json; does not cover Windows."
+}

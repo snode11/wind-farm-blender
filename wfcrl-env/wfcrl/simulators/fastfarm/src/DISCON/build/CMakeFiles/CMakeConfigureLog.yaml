@@ -1,0 +1,2366 @@
+
+---
+events:
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineSystem.cmake:12 (find_program)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "program"
+    variable: "CMAKE_UNAME"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "uname"
+    candidate_directories:
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+    searched_directories:
+      - "/opt/anaconda3/envs/wfrl-mac/bin/uname"
+      - "/Users/eason/.bun/bin/uname"
+      - "/opt/anaconda3/condabin/uname"
+      - "/Users/eason/Library/Android/sdk/platform-tools/uname"
+      - "/opt/homebrew/bin/uname"
+      - "/opt/homebrew/sbin/uname"
+      - "/usr/local/bin/uname"
+      - "/System/Cryptexes/App/usr/bin/uname"
+    found: "/usr/bin/uname"
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineSystem.cmake:218 (message)"
+      - "CMakeLists.txt:61 (project)"
+    message: |
+      The system is: Darwin - 25.6.0 - arm64
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeUnixFindMake.cmake:5 (find_program)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "program"
+    variable: "CMAKE_MAKE_PROGRAM"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "gmake"
+      - "make"
+      - "smake"
+    candidate_directories:
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+    searched_directories:
+      - "/opt/anaconda3/envs/wfrl-mac/bin/gmake"
+      - "/Users/eason/.bun/bin/gmake"
+      - "/opt/anaconda3/condabin/gmake"
+      - "/Users/eason/Library/Android/sdk/platform-tools/gmake"
+      - "/opt/homebrew/bin/gmake"
+      - "/opt/homebrew/sbin/gmake"
+      - "/usr/local/bin/gmake"
+      - "/System/Cryptexes/App/usr/bin/gmake"
+      - "/usr/bin/gmake"
+      - "/bin/gmake"
+      - "/usr/sbin/gmake"
+      - "/sbin/gmake"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/gmake"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/gmake"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/gmake"
+      - "/pkg/env/global/bin/gmake"
+    found: "/opt/anaconda3/envs/wfrl-mac/bin/make"
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompiler.cmake:73 (find_program)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCCompiler.cmake:64 (_cmake_find_compiler)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "program"
+    variable: "CMAKE_C_COMPILER"
+    description: "C compiler"
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "cc"
+      - "gcc"
+      - "cl"
+      - "bcc"
+      - "xlc"
+      - "icx"
+      - "clang"
+    candidate_directories:
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+    searched_directories:
+      - "/opt/anaconda3/envs/wfrl-mac/bin/cc"
+      - "/Users/eason/.bun/bin/cc"
+      - "/opt/anaconda3/condabin/cc"
+      - "/Users/eason/Library/Android/sdk/platform-tools/cc"
+      - "/opt/homebrew/bin/cc"
+      - "/opt/homebrew/sbin/cc"
+      - "/usr/local/bin/cc"
+      - "/System/Cryptexes/App/usr/bin/cc"
+    found: "/usr/bin/cc"
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:501 (find_file)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:538 (CMAKE_DETERMINE_COMPILER_ID_WRITE)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:8 (CMAKE_DETERMINE_COMPILER_ID_BUILD)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCCompiler.cmake:122 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "file"
+    variable: "src_in"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "CMakeCCompilerId.c.in"
+    candidate_directories:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/"
+    found: "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeCCompilerId.c.in"
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCCompiler.cmake:122 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:61 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler: /usr/bin/cc 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+      
+      The C compiler identification is AppleClang, found in:
+        /Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/4.4.3/CompilerIdC/a.out
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:323 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCCompiler.cmake:122 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:61 (project)"
+    message: |
+      Detecting C compiler apple sysroot: "/usr/bin/cc" "-E" "apple-sdk.c"
+        # 1 "apple-sdk.c"
+        # 1 "<built-in>" 1
+        # 1 "<built-in>" 3
+        # 482 "<built-in>" 3
+        # 1 "<command line>" 1
+        # 1 "<built-in>" 2
+        # 1 "apple-sdk.c" 2
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 1 3 4
+        # 89 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 3 4
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h" 1 3 4
+        # 90 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 2 3 4
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/TargetConditionals.h" 1 3 4
+        # 91 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 2 3 4
+        # 207 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 3 4
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 1 3 4
+        # 196 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h" 1 3 4
+        # 197 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 2 3 4
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 1 3 4
+        # 33 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 3 4
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h" 1 3 4
+        # 34 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 2 3 4
+        # 198 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 2 3 4
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternalLegacy.h" 1 3 4
+        # 34 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternalLegacy.h" 3 4
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 1 3 4
+        # 35 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternalLegacy.h" 2 3 4
+        # 199 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 2 3 4
+        # 208 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 2 3 4
+        # 2 "apple-sdk.c" 2
+        
+        
+      Found apple sysroot: /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFindBinUtils.cmake:247 (find_program)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "program"
+    variable: "CMAKE_AR"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "ar"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+    found: "/usr/bin/ar"
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFindBinUtils.cmake:247 (find_program)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "program"
+    variable: "CMAKE_RANLIB"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "ranlib"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+    found: "/usr/bin/ranlib"
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFindBinUtils.cmake:247 (find_program)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "program"
+    variable: "CMAKE_STRIP"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "strip"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+    found: "/usr/bin/strip"
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFindBinUtils.cmake:247 (find_program)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "program"
+    variable: "CMAKE_LINKER"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "ld"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+    found: "/usr/bin/ld"
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFindBinUtils.cmake:247 (find_program)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "program"
+    variable: "CMAKE_NM"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "nm"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+    found: "/usr/bin/nm"
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFindBinUtils.cmake:247 (find_program)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "program"
+    variable: "CMAKE_OBJDUMP"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "objdump"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+    found: "/usr/bin/objdump"
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFindBinUtils.cmake:247 (find_program)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "program"
+    variable: "CMAKE_OBJCOPY"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "objcopy"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+    searched_directories:
+      - "/usr/bin/objcopy"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/objcopy"
+      - "/Users/eason/.bun/bin/objcopy"
+      - "/opt/anaconda3/condabin/objcopy"
+      - "/Users/eason/Library/Android/sdk/platform-tools/objcopy"
+      - "/opt/homebrew/bin/objcopy"
+      - "/opt/homebrew/sbin/objcopy"
+      - "/usr/local/bin/objcopy"
+      - "/System/Cryptexes/App/usr/bin/objcopy"
+      - "/bin/objcopy"
+      - "/usr/sbin/objcopy"
+      - "/sbin/objcopy"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/objcopy"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/objcopy"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/objcopy"
+      - "/pkg/env/global/bin/objcopy"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFindBinUtils.cmake:247 (find_program)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "program"
+    variable: "CMAKE_READELF"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "readelf"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+    searched_directories:
+      - "/usr/bin/readelf"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/readelf"
+      - "/Users/eason/.bun/bin/readelf"
+      - "/opt/anaconda3/condabin/readelf"
+      - "/Users/eason/Library/Android/sdk/platform-tools/readelf"
+      - "/opt/homebrew/bin/readelf"
+      - "/opt/homebrew/sbin/readelf"
+      - "/usr/local/bin/readelf"
+      - "/System/Cryptexes/App/usr/bin/readelf"
+      - "/bin/readelf"
+      - "/usr/sbin/readelf"
+      - "/sbin/readelf"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/readelf"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/readelf"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/readelf"
+      - "/pkg/env/global/bin/readelf"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFindBinUtils.cmake:247 (find_program)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "program"
+    variable: "CMAKE_DLLTOOL"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "dlltool"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+    searched_directories:
+      - "/usr/bin/dlltool"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/dlltool"
+      - "/Users/eason/.bun/bin/dlltool"
+      - "/opt/anaconda3/condabin/dlltool"
+      - "/Users/eason/Library/Android/sdk/platform-tools/dlltool"
+      - "/opt/homebrew/bin/dlltool"
+      - "/opt/homebrew/sbin/dlltool"
+      - "/usr/local/bin/dlltool"
+      - "/System/Cryptexes/App/usr/bin/dlltool"
+      - "/bin/dlltool"
+      - "/usr/sbin/dlltool"
+      - "/sbin/dlltool"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/dlltool"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/dlltool"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/dlltool"
+      - "/pkg/env/global/bin/dlltool"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFindBinUtils.cmake:247 (find_program)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "program"
+    variable: "CMAKE_ADDR2LINE"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "addr2line"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+    searched_directories:
+      - "/usr/bin/addr2line"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/addr2line"
+      - "/Users/eason/.bun/bin/addr2line"
+      - "/opt/anaconda3/condabin/addr2line"
+      - "/Users/eason/Library/Android/sdk/platform-tools/addr2line"
+      - "/opt/homebrew/bin/addr2line"
+      - "/opt/homebrew/sbin/addr2line"
+      - "/usr/local/bin/addr2line"
+      - "/System/Cryptexes/App/usr/bin/addr2line"
+      - "/bin/addr2line"
+      - "/usr/sbin/addr2line"
+      - "/sbin/addr2line"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/addr2line"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/addr2line"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/addr2line"
+      - "/pkg/env/global/bin/addr2line"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFindBinUtils.cmake:247 (find_program)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "program"
+    variable: "CMAKE_TAPI"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "tapi"
+    candidate_directories:
+      - "/usr/bin/"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+    searched_directories:
+      - "/usr/bin/tapi"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/tapi"
+      - "/Users/eason/.bun/bin/tapi"
+      - "/opt/anaconda3/condabin/tapi"
+      - "/Users/eason/Library/Android/sdk/platform-tools/tapi"
+      - "/opt/homebrew/bin/tapi"
+      - "/opt/homebrew/sbin/tapi"
+      - "/usr/local/bin/tapi"
+      - "/System/Cryptexes/App/usr/bin/tapi"
+      - "/bin/tapi"
+      - "/usr/sbin/tapi"
+      - "/sbin/tapi"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/tapi"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/tapi"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/tapi"
+      - "/pkg/env/global/bin/tapi"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompiler.cmake:54 (find_program)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCXXCompiler.cmake:69 (_cmake_find_compiler)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "program"
+    variable: "CMAKE_CXX_COMPILER"
+    description: "CXX compiler"
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "c++"
+      - "g++"
+      - "cl"
+      - "bcc"
+      - "icpx"
+      - "icx"
+      - "clang++"
+    candidate_directories:
+      - "/usr/bin/"
+    found: "/usr/bin/c++"
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:501 (find_file)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:538 (CMAKE_DETERMINE_COMPILER_ID_WRITE)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:8 (CMAKE_DETERMINE_COMPILER_ID_BUILD)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCXXCompiler.cmake:125 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "file"
+    variable: "src_in"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "CMakeCXXCompilerId.cpp.in"
+    candidate_directories:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/"
+    found: "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeCXXCompilerId.cpp.in"
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCXXCompiler.cmake:125 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:61 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler: /usr/bin/c++ 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+      
+      The CXX compiler identification is AppleClang, found in:
+        /Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/4.4.3/CompilerIdCXX/a.out
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:323 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCXXCompiler.cmake:125 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:61 (project)"
+    message: |
+      Detecting CXX compiler apple sysroot: "/usr/bin/c++" "-E" "apple-sdk.cpp"
+        # 1 "apple-sdk.cpp"
+        # 1 "<built-in>" 1
+        # 1 "<built-in>" 3
+        # 531 "<built-in>" 3
+        # 1 "<command line>" 1
+        # 1 "<built-in>" 2
+        # 1 "apple-sdk.cpp" 2
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 1 3 4
+        # 89 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 3 4
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h" 1 3 4
+        # 90 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 2 3 4
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/TargetConditionals.h" 1 3 4
+        # 91 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 2 3 4
+        # 207 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 3 4
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 1 3 4
+        # 196 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 3 4
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h" 1 3 4
+        # 197 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 2 3 4
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 1 3 4
+        # 33 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 3 4
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityVersions.h" 1 3 4
+        # 34 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 2 3 4
+        # 198 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 2 3 4
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternalLegacy.h" 1 3 4
+        # 34 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternalLegacy.h" 3 4
+        # 1 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternal.h" 1 3 4
+        # 35 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityInternalLegacy.h" 2 3 4
+        # 199 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/Availability.h" 2 3 4
+        # 208 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/AvailabilityMacros.h" 2 3 4
+        # 2 "apple-sdk.cpp" 2
+        
+        
+      Found apple sysroot: /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/Platform/Darwin.cmake:66 (find_program)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeSystemSpecificInformation.cmake:32 (include)"
+      - "CMakeLists.txt:61 (project)"
+    mode: "program"
+    variable: "CMAKE_INSTALL_NAME_TOOL"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "install_name_tool"
+    candidate_directories:
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+    searched_directories:
+      - "/opt/anaconda3/envs/wfrl-mac/bin/install_name_tool"
+      - "/Users/eason/.bun/bin/install_name_tool"
+      - "/opt/anaconda3/condabin/install_name_tool"
+      - "/Users/eason/Library/Android/sdk/platform-tools/install_name_tool"
+      - "/opt/homebrew/bin/install_name_tool"
+      - "/opt/homebrew/sbin/install_name_tool"
+      - "/usr/local/bin/install_name_tool"
+      - "/System/Cryptexes/App/usr/bin/install_name_tool"
+    found: "/usr/bin/install_name_tool"
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake:123 (try_compile)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:61 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-j0vQzO"
+      binary: "/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-j0vQzO"
+    cmakeVariables:
+      CMAKE_CXX_STDLIB_MODULES_JSON: ""
+      CMAKE_C_FLAGS: ""
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_OSX_ARCHITECTURES: ""
+      CMAKE_OSX_DEPLOYMENT_TARGET: ""
+      CMAKE_OSX_SYSROOT: ""
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: false
+      stdout: |
+        Change Dir: '/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-j0vQzO'
+        
+        Run Build Command(s): /opt/anaconda3/envs/wfrl-mac/bin/cmake -E env VERBOSE=1 /opt/anaconda3/envs/wfrl-mac/bin/make -f Makefile cmTC_ee87b/fast
+        /opt/anaconda3/envs/wfrl-mac/bin/make  -f CMakeFiles/cmTC_ee87b.dir/build.make CMakeFiles/cmTC_ee87b.dir/build
+        make[1]: Entering directory '/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-j0vQzO'
+        Building C object CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o
+        /usr/bin/cc   -arch arm64   -v -Wl,-v -MD -MT CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o -MF CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o.d -o CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o -c /opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeCCompilerABI.c
+        Apple clang version 21.0.0 (clang-2100.1.1.101)
+        Target: arm64-apple-darwin25.6.0
+        Thread model: posix
+        InstalledDir: /Library/Developer/CommandLineTools/usr/bin
+        clang: warning: -Wl,-v: 'linker' input unused [-Wunused-command-line-argument]
+         "/Library/Developer/CommandLineTools/usr/bin/clang" -cc1 -triple arm64-apple-macosx26.0.0 -Wundef-prefix=TARGET_OS_ -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -Werror=implicit-function-declaration -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model pic -pic-level 2 -mframe-pointer=non-leaf -fno-strict-return -ffp-contract=on -fno-rounding-math -funwind-tables=1 -fobjc-msgsend-selector-stubs -fno-sized-deallocation -target-sdk-version=26.5 -fvisibility-inlines-hidden-static-local-var -fno-modulemap-allow-subdirectory-search -fdefine-target-os-macros -fno-assume-unique-vtables -fno-modulemap-allow-subdirectory-search -enable-tlsdesc -target-cpu apple-m1 -target-feature +v8.5a -target-feature +aes -target-feature +altnzcv -target-feature +ccdp -target-feature +ccpp -target-feature +complxnum -target-feature +crc -target-feature +dotprod -target-feature +flagm -target-feature +fp-armv8 -target-feature +fp16fml -target-feature +fptoint -target-feature +fullfp16 -target-feature +jsconv -target-feature +lse -target-feature +neon -target-feature +pauth -target-feature +perfmon -target-feature +predres -target-feature +ras -target-feature +rcpc -target-feature +rdm -target-feature +sb -target-feature +sha2 -target-feature +sha3 -target-feature +specrestrict -target-feature +ssbs -target-abi darwinpcs -debugger-tuning=lldb "-fdebug-compilation-dir=/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-j0vQzO" -target-linker-version 1267 -v "-fcoverage-compilation-dir=/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-j0vQzO" -resource-dir /Library/Developer/CommandLineTools/usr/lib/clang/21 -dependency-file CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o.d -skip-unused-modulemap-deps -MT CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o -sys-header-deps -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/usr/local/include -internal-isystem /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/local/include -internal-isystem /Library/Developer/CommandLineTools/usr/lib/clang/21/include -internal-externc-isystem /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -internal-externc-isystem /Library/Developer/CommandLineTools/usr/include -internal-iframework /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks -internal-iframework /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/SubFrameworks -internal-iframework /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/Library/Frameworks -Wno-elaborated-enum-base -ferror-limit 19 -stack-protector 1 -fstack-check -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fmax-type-align=16 -fcommon -clang-vendor-feature=+disableNonDependentMemberExprInCurrentInstantiation -fno-odr-hash-protocols -clang-vendor-feature=+enableAggressiveVLAFolding -clang-vendor-feature=+revert09abecef7bbf -clang-vendor-feature=+thisNoAlignAttr -clang-vendor-feature=+thisNoNullAttr -clang-vendor-feature=+disableAtImportPrivateFrameworkInImplementationError -Wno-error=allocator-wrappers -fdwarf2-cfi-asm -o CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o -x c /opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeCCompilerABI.c
+        clang -cc1 version 21.0.0 (clang-2100.1.1.101) default target arm64-apple-darwin25.6.0
+        ignoring nonexistent directory "/usr/local/include"
+        ignoring nonexistent directory "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/local/include"
+        ignoring nonexistent directory "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/Library/Frameworks"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /Library/Developer/CommandLineTools/usr/lib/clang/21/include
+         /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
+         /Library/Developer/CommandLineTools/usr/include
+         /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks (framework directory)
+         /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/SubFrameworks (framework directory)
+        End of search list.
+        Linking C executable cmTC_ee87b
+        /opt/anaconda3/envs/wfrl-mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ee87b.dir/link.txt --verbose=1
+        Apple clang version 21.0.0 (clang-2100.1.1.101)
+        Target: arm64-apple-darwin25.6.0
+        Thread model: posix
+        InstalledDir: /Library/Developer/CommandLineTools/usr/bin
+         "/Library/Developer/CommandLineTools/usr/bin/ld" -demangle -lto_library /Library/Developer/CommandLineTools/usr/lib/libLTO.dylib -dynamic -arch arm64 -platform_version macos 26.0.0 26.5 -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mllvm -enable-linkonceodr-outlining -o cmTC_ee87b -L/usr/local/lib -v CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o -lSystem /Library/Developer/CommandLineTools/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a
+        @(#)PROGRAM:ld PROJECT:ld-1267
+        BUILD 16:38:58 Jun  8 2026
+        configured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em armv8m.main armv8.1m.main
+        will use ld-classic for: armv6 armv7 armv7s i386 armv6m armv7k armv7m armv7em
+        LTO support using: LLVM version 21.0.0 (static support for 30, runtime is 30)
+        TAPI support using: Apple TAPI version 21.0.0 (tapi-2100.0.2.6)
+        Library search paths:
+        	/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+        	/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/swift
+        Framework search paths:
+        	/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks
+        /usr/bin/cc  -arch arm64  -v -Wl,-v CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o -o cmTC_ee87b
+        make[1]: Leaving directory '/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-j0vQzO'
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake:160 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:61 (project)"
+    message: |
+      Effective list of requested architectures (possibly empty)  : ""
+      Effective list of architectures found in the ABI info binary: "arm64"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake:255 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:61 (project)"
+    message: |
+      Parsed C implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/Library/Developer/CommandLineTools/usr/lib/clang/21/include]
+          add: [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include]
+          add: [/Library/Developer/CommandLineTools/usr/include]
+        end of search list found
+        collapse include dir [/Library/Developer/CommandLineTools/usr/lib/clang/21/include] ==> [/Library/Developer/CommandLineTools/usr/lib/clang/21/include]
+        collapse include dir [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include] ==> [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include]
+        collapse include dir [/Library/Developer/CommandLineTools/usr/include] ==> [/Library/Developer/CommandLineTools/usr/include]
+        implicit include dirs: [/Library/Developer/CommandLineTools/usr/lib/clang/21/include;/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include;/Library/Developer/CommandLineTools/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake:291 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:61 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|"|[0-9]+>[ 	-]*Build:[ 	0-9]+ ms[ 	]*)?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
+        ignore line: [Change Dir: '/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-j0vQzO']
+        ignore line: []
+        ignore line: [Run Build Command(s): /opt/anaconda3/envs/wfrl-mac/bin/cmake -E env VERBOSE=1 /opt/anaconda3/envs/wfrl-mac/bin/make -f Makefile cmTC_ee87b/fast]
+        ignore line: [/opt/anaconda3/envs/wfrl-mac/bin/make  -f CMakeFiles/cmTC_ee87b.dir/build.make CMakeFiles/cmTC_ee87b.dir/build]
+        ignore line: [make[1]: Entering directory '/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-j0vQzO']
+        ignore line: [Building C object CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o]
+        ignore line: [/usr/bin/cc   -arch arm64   -v -Wl -v -MD -MT CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o -MF CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o.d -o CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o -c /opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeCCompilerABI.c]
+        ignore line: [Apple clang version 21.0.0 (clang-2100.1.1.101)]
+        ignore line: [Target: arm64-apple-darwin25.6.0]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /Library/Developer/CommandLineTools/usr/bin]
+        ignore line: [clang: warning: -Wl -v: 'linker' input unused [-Wunused-command-line-argument]]
+        ignore line: [ "/Library/Developer/CommandLineTools/usr/bin/clang" -cc1 -triple arm64-apple-macosx26.0.0 -Wundef-prefix=TARGET_OS_ -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -Werror=implicit-function-declaration -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model pic -pic-level 2 -mframe-pointer=non-leaf -fno-strict-return -ffp-contract=on -fno-rounding-math -funwind-tables=1 -fobjc-msgsend-selector-stubs -fno-sized-deallocation -target-sdk-version=26.5 -fvisibility-inlines-hidden-static-local-var -fno-modulemap-allow-subdirectory-search -fdefine-target-os-macros -fno-assume-unique-vtables -fno-modulemap-allow-subdirectory-search -enable-tlsdesc -target-cpu apple-m1 -target-feature +v8.5a -target-feature +aes -target-feature +altnzcv -target-feature +ccdp -target-feature +ccpp -target-feature +complxnum -target-feature +crc -target-feature +dotprod -target-feature +flagm -target-feature +fp-armv8 -target-feature +fp16fml -target-feature +fptoint -target-feature +fullfp16 -target-feature +jsconv -target-feature +lse -target-feature +neon -target-feature +pauth -target-feature +perfmon -target-feature +predres -target-feature +ras -target-feature +rcpc -target-feature +rdm -target-feature +sb -target-feature +sha2 -target-feature +sha3 -target-feature +specrestrict -target-feature +ssbs -target-abi darwinpcs -debugger-tuning=lldb "-fdebug-compilation-dir=/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-j0vQzO" -target-linker-version 1267 -v "-fcoverage-compilation-dir=/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-j0vQzO" -resource-dir /Library/Developer/CommandLineTools/usr/lib/clang/21 -dependency-file CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o.d -skip-unused-modulemap-deps -MT CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o -sys-header-deps -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/usr/local/include -internal-isystem /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/local/include -internal-isystem /Library/Developer/CommandLineTools/usr/lib/clang/21/include -internal-externc-isystem /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -internal-externc-isystem /Library/Developer/CommandLineTools/usr/include -internal-iframework /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks -internal-iframework /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/SubFrameworks -internal-iframework /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/Library/Frameworks -Wno-elaborated-enum-base -ferror-limit 19 -stack-protector 1 -fstack-check -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fmax-type-align=16 -fcommon -clang-vendor-feature=+disableNonDependentMemberExprInCurrentInstantiation -fno-odr-hash-protocols -clang-vendor-feature=+enableAggressiveVLAFolding -clang-vendor-feature=+revert09abecef7bbf -clang-vendor-feature=+thisNoAlignAttr -clang-vendor-feature=+thisNoNullAttr -clang-vendor-feature=+disableAtImportPrivateFrameworkInImplementationError -Wno-error=allocator-wrappers -fdwarf2-cfi-asm -o CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o -x c /opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeCCompilerABI.c]
+        ignore line: [clang -cc1 version 21.0.0 (clang-2100.1.1.101) default target arm64-apple-darwin25.6.0]
+        ignore line: [ignoring nonexistent directory "/usr/local/include"]
+        ignore line: [ignoring nonexistent directory "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/local/include"]
+        ignore line: [ignoring nonexistent directory "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/Library/Frameworks"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /Library/Developer/CommandLineTools/usr/lib/clang/21/include]
+        ignore line: [ /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include]
+        ignore line: [ /Library/Developer/CommandLineTools/usr/include]
+        ignore line: [ /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks (framework directory)]
+        ignore line: [ /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/SubFrameworks (framework directory)]
+        ignore line: [End of search list.]
+        ignore line: [Linking C executable cmTC_ee87b]
+        ignore line: [/opt/anaconda3/envs/wfrl-mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ee87b.dir/link.txt --verbose=1]
+        ignore line: [Apple clang version 21.0.0 (clang-2100.1.1.101)]
+        ignore line: [Target: arm64-apple-darwin25.6.0]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /Library/Developer/CommandLineTools/usr/bin]
+        link line: [ "/Library/Developer/CommandLineTools/usr/bin/ld" -demangle -lto_library /Library/Developer/CommandLineTools/usr/lib/libLTO.dylib -dynamic -arch arm64 -platform_version macos 26.0.0 26.5 -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mllvm -enable-linkonceodr-outlining -o cmTC_ee87b -L/usr/local/lib -v CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o -lSystem /Library/Developer/CommandLineTools/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a] ==> linker [/Library/Developer/CommandLineTools/usr/bin/ld]
+        link line: [ "/Library/Developer/CommandLineTools/usr/bin/ld" -demangle -lto_library /Library/Developer/CommandLineTools/usr/lib/libLTO.dylib -dynamic -arch arm64 -platform_version macos 26.0.0 26.5 -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mllvm -enable-linkonceodr-outlining -o cmTC_ee87b -L/usr/local/lib -v CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o -lSystem /Library/Developer/CommandLineTools/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a]
+          arg [/Library/Developer/CommandLineTools/usr/bin/ld] ==> ignore
+          arg [-demangle] ==> ignore
+          arg [-lto_library] ==> ignore, skip following value
+          arg [/Library/Developer/CommandLineTools/usr/lib/libLTO.dylib] ==> skip value of -lto_library
+          arg [-dynamic] ==> ignore
+          arg [-arch] ==> ignore
+          arg [arm64] ==> ignore
+          arg [-platform_version] ==> ignore
+          arg [macos] ==> ignore
+          arg [26.0.0] ==> ignore
+          arg [26.5] ==> ignore
+          arg [-syslibroot] ==> ignore
+          arg [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk] ==> ignore
+          arg [-mllvm] ==> ignore
+          arg [-enable-linkonceodr-outlining] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_ee87b] ==> ignore
+          arg [-L/usr/local/lib] ==> dir [/usr/local/lib]
+          arg [-v] ==> ignore
+          arg [CMakeFiles/cmTC_ee87b.dir/CMakeCCompilerABI.c.o] ==> ignore
+          arg [-lSystem] ==> lib [System]
+          arg [/Library/Developer/CommandLineTools/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a] ==> lib [/Library/Developer/CommandLineTools/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a]
+        linker tool for 'C': /Library/Developer/CommandLineTools/usr/bin/ld 
+        Library search paths: [;/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib;/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/swift]
+        Framework search paths: [;/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks]
+        remove lib [System]
+        remove lib [/Library/Developer/CommandLineTools/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a]
+        collapse library dir [/usr/local/lib] ==> [/usr/local/lib]
+        collapse library dir [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib] ==> [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib]
+        collapse library dir [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/swift] ==> [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/swift]
+        collapse framework dir [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks] ==> [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks]
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: [/usr/local/lib;/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib;/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/swift]
+        implicit fwks: [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/Internal/CMakeDetermineLinkerId.cmake:41 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake:337 (cmake_determine_linker_id)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:61 (project)"
+    message: |
+      Running the C compiler's linker: "/Library/Developer/CommandLineTools/usr/bin/ld" "-v"
+      @(#)PROGRAM:ld PROJECT:ld-1267
+      BUILD 16:38:58 Jun  8 2026
+      configured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em armv8m.main armv8.1m.main
+      will use ld-classic for: armv6 armv7 armv7s i386 armv6m armv7k armv7m armv7em
+      LTO support using: LLVM version 21.0.0 (static support for 30, runtime is 30)
+      TAPI support using: Apple TAPI version 21.0.0 (tapi-2100.0.2.6)
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake:123 (try_compile)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:61 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-jdzWXy"
+      binary: "/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-jdzWXy"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+      CMAKE_CXX_STDLIB_MODULES_JSON: ""
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_OSX_ARCHITECTURES: ""
+      CMAKE_OSX_DEPLOYMENT_TARGET: ""
+      CMAKE_OSX_SYSROOT: ""
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: false
+      stdout: |
+        Change Dir: '/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-jdzWXy'
+        
+        Run Build Command(s): /opt/anaconda3/envs/wfrl-mac/bin/cmake -E env VERBOSE=1 /opt/anaconda3/envs/wfrl-mac/bin/make -f Makefile cmTC_a1037/fast
+        /opt/anaconda3/envs/wfrl-mac/bin/make  -f CMakeFiles/cmTC_a1037.dir/build.make CMakeFiles/cmTC_a1037.dir/build
+        make[1]: Entering directory '/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-jdzWXy'
+        Building CXX object CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o
+        /usr/bin/c++   -arch arm64   -v -Wl,-v -MD -MT CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o -c /opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeCXXCompilerABI.cpp
+        Apple clang version 21.0.0 (clang-2100.1.1.101)
+        Target: arm64-apple-darwin25.6.0
+        Thread model: posix
+        InstalledDir: /Library/Developer/CommandLineTools/usr/bin
+        clang++: warning: -Wl,-v: 'linker' input unused [-Wunused-command-line-argument]
+        ignoring nonexistent directory "/Library/Developer/CommandLineTools/usr/bin/../include/c++/v1"
+         "/Library/Developer/CommandLineTools/usr/bin/clang" -cc1 -triple arm64-apple-macosx26.0.0 -Wundef-prefix=TARGET_OS_ -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -Werror=implicit-function-declaration -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -mframe-pointer=non-leaf -fno-strict-return -ffp-contract=on -fno-rounding-math -funwind-tables=1 -fobjc-msgsend-selector-stubs -fno-sized-deallocation -target-sdk-version=26.5 -fvisibility-inlines-hidden-static-local-var -fno-modulemap-allow-subdirectory-search -fdefine-target-os-macros -fno-assume-unique-vtables -fno-modulemap-allow-subdirectory-search -enable-tlsdesc -target-cpu apple-m1 -target-feature +v8.5a -target-feature +aes -target-feature +altnzcv -target-feature +ccdp -target-feature +ccpp -target-feature +complxnum -target-feature +crc -target-feature +dotprod -target-feature +flagm -target-feature +fp-armv8 -target-feature +fp16fml -target-feature +fptoint -target-feature +fullfp16 -target-feature +jsconv -target-feature +lse -target-feature +neon -target-feature +pauth -target-feature +perfmon -target-feature +predres -target-feature +ras -target-feature +rcpc -target-feature +rdm -target-feature +sb -target-feature +sha2 -target-feature +sha3 -target-feature +specrestrict -target-feature +ssbs -target-abi darwinpcs -debugger-tuning=lldb "-fdebug-compilation-dir=/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-jdzWXy" -target-linker-version 1267 -v "-fcoverage-compilation-dir=/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-jdzWXy" -resource-dir /Library/Developer/CommandLineTools/usr/lib/clang/21 -dependency-file CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o.d -skip-unused-modulemap-deps -MT CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/usr/local/include -internal-isystem /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -internal-isystem /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/local/include -internal-isystem /Library/Developer/CommandLineTools/usr/lib/clang/21/include -internal-externc-isystem /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -internal-externc-isystem /Library/Developer/CommandLineTools/usr/include -internal-iframework /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks -internal-iframework /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/SubFrameworks -internal-iframework /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/Library/Frameworks -Wno-elaborated-enum-base -fdeprecated-macro -ferror-limit 19 -stack-protector 1 -fstack-check -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -fmax-type-align=16 -fcommon -clang-vendor-feature=+disableNonDependentMemberExprInCurrentInstantiation -fno-odr-hash-protocols -clang-vendor-feature=+enableAggressiveVLAFolding -clang-vendor-feature=+revert09abecef7bbf -clang-vendor-feature=+thisNoAlignAttr -clang-vendor-feature=+thisNoNullAttr -clang-vendor-feature=+disableAtImportPrivateFrameworkInImplementationError -Wno-error=allocator-wrappers -fdwarf2-cfi-asm -o CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o -x c++ /opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeCXXCompilerABI.cpp
+        clang -cc1 version 21.0.0 (clang-2100.1.1.101) default target arm64-apple-darwin25.6.0
+        ignoring nonexistent directory "/usr/local/include"
+        ignoring nonexistent directory "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/local/include"
+        ignoring nonexistent directory "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/Library/Frameworks"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1
+         /Library/Developer/CommandLineTools/usr/lib/clang/21/include
+         /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
+         /Library/Developer/CommandLineTools/usr/include
+         /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks (framework directory)
+         /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/SubFrameworks (framework directory)
+        End of search list.
+        Linking CXX executable cmTC_a1037
+        /opt/anaconda3/envs/wfrl-mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a1037.dir/link.txt --verbose=1
+        Apple clang version 21.0.0 (clang-2100.1.1.101)
+        Target: arm64-apple-darwin25.6.0
+        Thread model: posix
+        InstalledDir: /Library/Developer/CommandLineTools/usr/bin
+         "/Library/Developer/CommandLineTools/usr/bin/ld" -demangle -lto_library /Library/Developer/CommandLineTools/usr/lib/libLTO.dylib -dynamic -arch arm64 -platform_version macos 26.0.0 26.5 -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mllvm -enable-linkonceodr-outlining -o cmTC_a1037 -L/usr/local/lib -v CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o -lc++ -lSystem /Library/Developer/CommandLineTools/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a
+        @(#)PROGRAM:ld PROJECT:ld-1267
+        BUILD 16:38:58 Jun  8 2026
+        configured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em armv8m.main armv8.1m.main
+        will use ld-classic for: armv6 armv7 armv7s i386 armv6m armv7k armv7m armv7em
+        LTO support using: LLVM version 21.0.0 (static support for 30, runtime is 30)
+        TAPI support using: Apple TAPI version 21.0.0 (tapi-2100.0.2.6)
+        Library search paths:
+        	/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+        	/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/swift
+        Framework search paths:
+        	/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks
+        /usr/bin/c++  -arch arm64  -v -Wl,-v CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_a1037
+        make[1]: Leaving directory '/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-jdzWXy'
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake:160 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:61 (project)"
+    message: |
+      Effective list of requested architectures (possibly empty)  : ""
+      Effective list of architectures found in the ABI info binary: "arm64"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake:255 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:61 (project)"
+    message: |
+      Parsed CXX implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1]
+          add: [/Library/Developer/CommandLineTools/usr/lib/clang/21/include]
+          add: [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include]
+          add: [/Library/Developer/CommandLineTools/usr/include]
+        end of search list found
+        collapse include dir [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1] ==> [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1]
+        collapse include dir [/Library/Developer/CommandLineTools/usr/lib/clang/21/include] ==> [/Library/Developer/CommandLineTools/usr/lib/clang/21/include]
+        collapse include dir [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include] ==> [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include]
+        collapse include dir [/Library/Developer/CommandLineTools/usr/include] ==> [/Library/Developer/CommandLineTools/usr/include]
+        implicit include dirs: [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1;/Library/Developer/CommandLineTools/usr/lib/clang/21/include;/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include;/Library/Developer/CommandLineTools/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake:291 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:61 (project)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|"|[0-9]+>[ 	-]*Build:[ 	0-9]+ ms[ 	]*)?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
+        ignore line: [Change Dir: '/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-jdzWXy']
+        ignore line: []
+        ignore line: [Run Build Command(s): /opt/anaconda3/envs/wfrl-mac/bin/cmake -E env VERBOSE=1 /opt/anaconda3/envs/wfrl-mac/bin/make -f Makefile cmTC_a1037/fast]
+        ignore line: [/opt/anaconda3/envs/wfrl-mac/bin/make  -f CMakeFiles/cmTC_a1037.dir/build.make CMakeFiles/cmTC_a1037.dir/build]
+        ignore line: [make[1]: Entering directory '/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-jdzWXy']
+        ignore line: [Building CXX object CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o]
+        ignore line: [/usr/bin/c++   -arch arm64   -v -Wl -v -MD -MT CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o -c /opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [Apple clang version 21.0.0 (clang-2100.1.1.101)]
+        ignore line: [Target: arm64-apple-darwin25.6.0]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /Library/Developer/CommandLineTools/usr/bin]
+        ignore line: [clang++: warning: -Wl -v: 'linker' input unused [-Wunused-command-line-argument]]
+        ignore line: [ignoring nonexistent directory "/Library/Developer/CommandLineTools/usr/bin/../include/c++/v1"]
+        ignore line: [ "/Library/Developer/CommandLineTools/usr/bin/clang" -cc1 -triple arm64-apple-macosx26.0.0 -Wundef-prefix=TARGET_OS_ -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -Werror=implicit-function-declaration -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -mframe-pointer=non-leaf -fno-strict-return -ffp-contract=on -fno-rounding-math -funwind-tables=1 -fobjc-msgsend-selector-stubs -fno-sized-deallocation -target-sdk-version=26.5 -fvisibility-inlines-hidden-static-local-var -fno-modulemap-allow-subdirectory-search -fdefine-target-os-macros -fno-assume-unique-vtables -fno-modulemap-allow-subdirectory-search -enable-tlsdesc -target-cpu apple-m1 -target-feature +v8.5a -target-feature +aes -target-feature +altnzcv -target-feature +ccdp -target-feature +ccpp -target-feature +complxnum -target-feature +crc -target-feature +dotprod -target-feature +flagm -target-feature +fp-armv8 -target-feature +fp16fml -target-feature +fptoint -target-feature +fullfp16 -target-feature +jsconv -target-feature +lse -target-feature +neon -target-feature +pauth -target-feature +perfmon -target-feature +predres -target-feature +ras -target-feature +rcpc -target-feature +rdm -target-feature +sb -target-feature +sha2 -target-feature +sha3 -target-feature +specrestrict -target-feature +ssbs -target-abi darwinpcs -debugger-tuning=lldb "-fdebug-compilation-dir=/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-jdzWXy" -target-linker-version 1267 -v "-fcoverage-compilation-dir=/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-jdzWXy" -resource-dir /Library/Developer/CommandLineTools/usr/lib/clang/21 -dependency-file CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o.d -skip-unused-modulemap-deps -MT CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -I/usr/local/include -internal-isystem /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 -internal-isystem /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/local/include -internal-isystem /Library/Developer/CommandLineTools/usr/lib/clang/21/include -internal-externc-isystem /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -internal-externc-isystem /Library/Developer/CommandLineTools/usr/include -internal-iframework /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks -internal-iframework /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/SubFrameworks -internal-iframework /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/Library/Frameworks -Wno-elaborated-enum-base -fdeprecated-macro -ferror-limit 19 -stack-protector 1 -fstack-check -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -fmax-type-align=16 -fcommon -clang-vendor-feature=+disableNonDependentMemberExprInCurrentInstantiation -fno-odr-hash-protocols -clang-vendor-feature=+enableAggressiveVLAFolding -clang-vendor-feature=+revert09abecef7bbf -clang-vendor-feature=+thisNoAlignAttr -clang-vendor-feature=+thisNoNullAttr -clang-vendor-feature=+disableAtImportPrivateFrameworkInImplementationError -Wno-error=allocator-wrappers -fdwarf2-cfi-asm -o CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o -x c++ /opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [clang -cc1 version 21.0.0 (clang-2100.1.1.101) default target arm64-apple-darwin25.6.0]
+        ignore line: [ignoring nonexistent directory "/usr/local/include"]
+        ignore line: [ignoring nonexistent directory "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/local/include"]
+        ignore line: [ignoring nonexistent directory "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/Library/Frameworks"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1]
+        ignore line: [ /Library/Developer/CommandLineTools/usr/lib/clang/21/include]
+        ignore line: [ /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include]
+        ignore line: [ /Library/Developer/CommandLineTools/usr/include]
+        ignore line: [ /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks (framework directory)]
+        ignore line: [ /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/SubFrameworks (framework directory)]
+        ignore line: [End of search list.]
+        ignore line: [Linking CXX executable cmTC_a1037]
+        ignore line: [/opt/anaconda3/envs/wfrl-mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a1037.dir/link.txt --verbose=1]
+        ignore line: [Apple clang version 21.0.0 (clang-2100.1.1.101)]
+        ignore line: [Target: arm64-apple-darwin25.6.0]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /Library/Developer/CommandLineTools/usr/bin]
+        link line: [ "/Library/Developer/CommandLineTools/usr/bin/ld" -demangle -lto_library /Library/Developer/CommandLineTools/usr/lib/libLTO.dylib -dynamic -arch arm64 -platform_version macos 26.0.0 26.5 -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mllvm -enable-linkonceodr-outlining -o cmTC_a1037 -L/usr/local/lib -v CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o -lc++ -lSystem /Library/Developer/CommandLineTools/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a] ==> linker [/Library/Developer/CommandLineTools/usr/bin/ld]
+        link line: [ "/Library/Developer/CommandLineTools/usr/bin/ld" -demangle -lto_library /Library/Developer/CommandLineTools/usr/lib/libLTO.dylib -dynamic -arch arm64 -platform_version macos 26.0.0 26.5 -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mllvm -enable-linkonceodr-outlining -o cmTC_a1037 -L/usr/local/lib -v CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o -lc++ -lSystem /Library/Developer/CommandLineTools/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a]
+          arg [/Library/Developer/CommandLineTools/usr/bin/ld] ==> ignore
+          arg [-demangle] ==> ignore
+          arg [-lto_library] ==> ignore, skip following value
+          arg [/Library/Developer/CommandLineTools/usr/lib/libLTO.dylib] ==> skip value of -lto_library
+          arg [-dynamic] ==> ignore
+          arg [-arch] ==> ignore
+          arg [arm64] ==> ignore
+          arg [-platform_version] ==> ignore
+          arg [macos] ==> ignore
+          arg [26.0.0] ==> ignore
+          arg [26.5] ==> ignore
+          arg [-syslibroot] ==> ignore
+          arg [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk] ==> ignore
+          arg [-mllvm] ==> ignore
+          arg [-enable-linkonceodr-outlining] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_a1037] ==> ignore
+          arg [-L/usr/local/lib] ==> dir [/usr/local/lib]
+          arg [-v] ==> ignore
+          arg [CMakeFiles/cmTC_a1037.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+          arg [-lc++] ==> lib [c++]
+          arg [-lSystem] ==> lib [System]
+          arg [/Library/Developer/CommandLineTools/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a] ==> lib [/Library/Developer/CommandLineTools/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a]
+        linker tool for 'CXX': /Library/Developer/CommandLineTools/usr/bin/ld 
+        Library search paths: [;/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib;/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/swift]
+        Framework search paths: [;/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks]
+        remove lib [System]
+        remove lib [/Library/Developer/CommandLineTools/usr/lib/clang/21/lib/darwin/libclang_rt.osx.a]
+        collapse library dir [/usr/local/lib] ==> [/usr/local/lib]
+        collapse library dir [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib] ==> [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib]
+        collapse library dir [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/swift] ==> [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/swift]
+        collapse framework dir [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks] ==> [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks]
+        implicit libs: [c++]
+        implicit objs: []
+        implicit dirs: [/usr/local/lib;/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib;/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib/swift]
+        implicit fwks: [/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/Internal/CMakeDetermineLinkerId.cmake:41 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake:337 (cmake_determine_linker_id)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:61 (project)"
+    message: |
+      Running the CXX compiler's linker: "/Library/Developer/CommandLineTools/usr/bin/ld" "-v"
+      @(#)PROGRAM:ld PROJECT:ld-1267
+      BUILD 16:38:58 Jun  8 2026
+      configured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em armv8m.main armv8.1m.main
+      will use ld-classic for: armv6 armv7 armv7s i386 armv6m armv7k armv7m armv7em
+      LTO support using: LLVM version 21.0.0 (static support for 30, runtime is 30)
+      TAPI support using: Apple TAPI version 21.0.0 (tapi-2100.0.2.6)
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:501 (find_file)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:538 (CMAKE_DETERMINE_COMPILER_ID_WRITE)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:8 (CMAKE_DETERMINE_COMPILER_ID_BUILD)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineFortranCompiler.cmake:193 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:62 (enable_language)"
+    mode: "file"
+    variable: "src_in"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "CMakeFortranCompilerId.F.in"
+    candidate_directories:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/"
+    found: "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFortranCompilerId.F.in"
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr"
+        - "/opt/homebrew"
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/opt/anaconda3/envs/wfrl-mac"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+        - "/sw"
+        - "/opt/local"
+      CMAKE_SYSTEM_INCLUDE_PATH:
+        - "/usr/include/X11"
+      CMAKE_SYSTEM_FRAMEWORK_PATH:
+        - "~/Library/Frameworks"
+        - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/Library/Frameworks"
+        - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/Network/Library/Frameworks"
+        - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks"
+        - "/Library/Developer/CommandLineTools/Library/Frameworks"
+        - "/Library/Developer/CommandLineTools/Library/Frameworks"
+        - "/Library/Frameworks"
+        - "/Network/Library/Frameworks"
+        - "/System/Library/Frameworks"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineFortranCompiler.cmake:193 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:62 (enable_language)"
+    message: |
+      Compiling the Fortran compiler identification source file "CMakeFortranCompilerId.F" succeeded.
+      Compiler: /opt/homebrew/bin/mpif90 
+      Build flags: 
+      Id flags: -v 
+      
+      The output was:
+      0
+      Driving: /opt/homebrew/bin/gfortran -v CMakeFortranCompilerId.F -I/opt/homebrew/Cellar/open-mpi/5.0.9/include -Wl,-flat_namespace -I/opt/homebrew/Cellar/open-mpi/5.0.9/lib -L/opt/homebrew/Cellar/open-mpi/5.0.9/lib -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -mmacosx-version-min=26.0.0 -asm_macosx_version_min=26.0 -nodefaultexport -l gfortran
+      Using built-in specs.
+      COLLECT_GCC=/opt/homebrew/bin/gfortran
+      COLLECT_LTO_WRAPPER=/opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/aarch64-apple-darwin25/16/lto-wrapper
+      Target: aarch64-apple-darwin25
+      Configured with: ../configure --prefix=/opt/homebrew/opt/gcc --libdir=/opt/homebrew/opt/gcc/lib/gcc/current --disable-nls --enable-checking=release --with-gcc-major-version-only --enable-languages=c,c++,objc,obj-c++,fortran --program-suffix=-16 --with-gmp=/opt/homebrew/opt/gmp --with-mpfr=/opt/homebrew/opt/mpfr --with-mpc=/opt/homebrew/opt/libmpc --with-isl=/opt/homebrew/opt/isl --with-zstd=/opt/homebrew/opt/zstd --with-pkgversion='Homebrew GCC 16.1.0' --with-bugurl=https://github.com/Homebrew/homebrew-core/issues --with-system-zlib --build=aarch64-apple-darwin25 --with-sysroot=/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk
+      Thread model: posix
+      Supported LTO compression algorithms: zlib zstd
+      gcc version 16.1.0 (Homebrew GCC 16.1.0) 
+      COLLECT_GCC_OPTIONS='-v' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/include' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-L/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-mmacosx-version-min=26.0.0' '-asm_macosx_version_min=26.0' '-nodefaultexport' '-mcpu=apple-m1' '-mlittle-endian' '-mabi=lp64' '-dumpdir' 'a-'
+       /opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/aarch64-apple-darwin25/16/f951 CMakeFortranCompilerId.F -ffixed-form -cpp=/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T//ccpHY7Es.fi -quiet -v -I /opt/homebrew/Cellar/open-mpi/5.0.9/include -I /opt/homebrew/Cellar/open-mpi/5.0.9/lib -iprefix /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/ -D__DYNAMIC__ CMakeFortranCompilerId.F -fPIC -quiet -dumpdir a- -dumpbase CMakeFortranCompilerId.F -dumpbase-ext .F -mmacosx-version-min=26.0.0 -mcpu=apple-m1 -mlittle-endian -mabi=lp64 -version -fintrinsic-modules-path /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/finclude -o /var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T//ccK2Q3VC.s
+      GNU Fortran (Homebrew GCC 16.1.0) version 16.1.0 (aarch64-apple-darwin25)
+      	compiled by GNU C version 16.1.0, GMP version 6.3.0, MPFR version 4.2.2, MPC version 1.4.1, isl version isl-0.28-GMP
+      
+      GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+      ignoring nonexistent directory "/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../../../../../aarch64-apple-darwin25/include"
+      ignoring duplicate directory "/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/../../../../lib/gcc/current/gcc/aarch64-apple-darwin25/16/include"
+      ignoring nonexistent directory "/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/local/include"
+      ignoring duplicate directory "/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/../../../../lib/gcc/current/gcc/aarch64-apple-darwin25/16/include-fixed"
+      ignoring nonexistent directory "/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/../../../../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../../../../../aarch64-apple-darwin25/include"
+      #include "..." search starts here:
+      #include <...> search starts here:
+       /opt/homebrew/Cellar/open-mpi/5.0.9/include
+       /opt/homebrew/Cellar/open-mpi/5.0.9/lib
+       /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/finclude
+       /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/include
+       /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/include-fixed
+       /Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include
+      End of search list.
+      COLLECT_GCC_OPTIONS='-v' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/include' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-L/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-mmacosx-version-min=26.0.0'  '-nodefaultexport' '-mcpu=apple-m1' '-mlittle-endian' '-mabi=lp64' '-dumpdir' 'a-'
+       as -arch arm64 -v -I /opt/homebrew/Cellar/open-mpi/5.0.9/include -I /opt/homebrew/Cellar/open-mpi/5.0.9/lib -mmacosx-version-min=26.0 -o /var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T//ccQFQlXf.o /var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T//ccK2Q3VC.s
+      Apple clang version 21.0.0 (clang-2100.1.1.101)
+      Target: arm64-apple-darwin25.6.0
+      Thread model: posix
+      InstalledDir: /Library/Developer/CommandLineTools/usr/bin
+       "/Library/Developer/CommandLineTools/usr/bin/clang" -cc1as -triple arm64-apple-macosx26.0.0 -target-sdk-version=26.5 -filetype obj -main-file-name ccK2Q3VC.s -target-cpu apple-m1 -target-feature +v8.5a -target-feature +aes -target-feature +altnzcv -target-feature +ccdp -target-feature +ccpp -target-feature +complxnum -target-feature +crc -target-feature +dotprod -target-feature +flagm -target-feature +fp-armv8 -target-feature +fp16fml -target-feature +fptoint -target-feature +fullfp16 -target-feature +jsconv -target-feature +lse -target-feature +neon -target-feature +pauth -target-feature +perfmon -target-feature +predres -target-feature +ras -target-feature +rcpc -target-feature +rdm -target-feature +sb -target-feature +sha2 -target-feature +sha3 -target-feature +specrestrict -target-feature +ssbs -I /opt/homebrew/Cellar/open-mpi/5.0.9/include -I /opt/homebrew/Cellar/open-mpi/5.0.9/lib "-fdebug-compilation-dir=/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/4.4.3/CompilerIdFortran" -dwarf-debug-producer "Apple clang version 21.0.0 (clang-2100.1.1.101)" -I /opt/homebrew/Cellar/open-mpi/5.0.9/include -I /opt/homebrew/Cellar/open-mpi/5.0.9/lib -dwarf-version=5 -mrelocation-model pic -o /var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T//ccQFQlXf.o /var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T//ccK2Q3VC.s
+      Reading specs from /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../../libgfortran.spec
+      rename spec lib to liborig
+      COLLECT_GCC_OPTIONS='-v' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/include' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-L/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-mmacosx-version-min=26.0.0'  '-nodefaultexport' '-mcpu=apple-m1' '-mlittle-endian' '-mabi=lp64' '-dumpdir' 'a-'
+      COMPILER_PATH=/opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/aarch64-apple-darwin25/16/:/opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/
+      LIBRARY_PATH=/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/:/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/:/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../../
+      COLLECT_GCC_OPTIONS='-v' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/include' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-L/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-mmacosx-version-min=26.0.0'  '-nodefaultexport' '-mcpu=apple-m1' '-mlittle-endian' '-mabi=lp64' '-dumpdir' 'a.'
+       /opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/aarch64-apple-darwin25/16/collect2 -demangle -no_deduplicate -dynamic -arch arm64 -macos_version_min 26.0.0 -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/ -o a.out -L/opt/homebrew/Cellar/open-mpi/5.0.9/lib -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16 -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../.. -lemutls_w -lheapt_w /var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T//ccQFQlXf.o -flat_namespace -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -lgfortran -lgcc -lquadmath -lSystem -no_compact_unwind -rpath @loader_path -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16 -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current
+      
+      
+      Compilation of the Fortran compiler identification source "CMakeFortranCompilerId.F" produced "a.out"
+      
+      The Fortran compiler identification is GNU, found in:
+        /Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/4.4.3/CompilerIdFortran/a.out
+      
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/Compiler/GNU-FindBinUtils.cmake:18 (find_program)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineFortranCompiler.cmake:317 (include)"
+      - "CMakeLists.txt:62 (enable_language)"
+    mode: "program"
+    variable: "CMAKE_Fortran_COMPILER_AR"
+    description: "A wrapper around 'ar' adding the appropriate '--plugin' option for the GCC compiler"
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "gcc-ar-16.1"
+      - "gcc-ar-16"
+      - "gcc-ar16"
+      - "gcc-ar"
+    candidate_directories:
+      - "/opt/homebrew/bin/"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+      - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/bin/"
+      - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/sbin/"
+      - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/opt/homebrew/"
+      - "/usr/local/bin/"
+      - "/usr/local/sbin/"
+      - "/usr/local/"
+      - "/usr/bin/"
+      - "/usr/sbin/"
+      - "/usr/"
+      - "/bin/"
+      - "/sbin/"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/opt/anaconda3/envs/wfrl-mac/sbin/"
+      - "/opt/anaconda3/envs/wfrl-mac/"
+      - "/usr/X11R6/bin/"
+      - "/usr/X11R6/sbin/"
+      - "/usr/X11R6/"
+      - "/usr/pkg/bin/"
+      - "/usr/pkg/sbin/"
+      - "/usr/pkg/"
+      - "/opt/bin/"
+      - "/opt/sbin/"
+      - "/opt/"
+      - "/sw/bin/"
+      - "/sw/sbin/"
+      - "/sw/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/opt/local/"
+      - "/Users/eason/Applications/"
+      - "/Applications/"
+    searched_directories:
+      - "/opt/homebrew/bin/gcc-ar-16.1"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/gcc-ar-16.1"
+      - "/Users/eason/.bun/bin/gcc-ar-16.1"
+      - "/opt/anaconda3/condabin/gcc-ar-16.1"
+      - "/Users/eason/Library/Android/sdk/platform-tools/gcc-ar-16.1"
+      - "/opt/homebrew/sbin/gcc-ar-16.1"
+      - "/usr/local/bin/gcc-ar-16.1"
+      - "/System/Cryptexes/App/usr/bin/gcc-ar-16.1"
+      - "/usr/bin/gcc-ar-16.1"
+      - "/bin/gcc-ar-16.1"
+      - "/usr/sbin/gcc-ar-16.1"
+      - "/sbin/gcc-ar-16.1"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/gcc-ar-16.1"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/gcc-ar-16.1"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/gcc-ar-16.1"
+      - "/pkg/env/global/bin/gcc-ar-16.1"
+      - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/bin/gcc-ar-16.1"
+      - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/sbin/gcc-ar-16.1"
+      - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/gcc-ar-16.1"
+      - "/opt/homebrew/bin/gcc-ar-16.1"
+      - "/opt/homebrew/sbin/gcc-ar-16.1"
+      - "/opt/homebrew/gcc-ar-16.1"
+      - "/usr/local/bin/gcc-ar-16.1"
+      - "/usr/local/sbin/gcc-ar-16.1"
+      - "/usr/local/gcc-ar-16.1"
+      - "/usr/bin/gcc-ar-16.1"
+      - "/usr/sbin/gcc-ar-16.1"
+      - "/usr/gcc-ar-16.1"
+      - "/bin/gcc-ar-16.1"
+      - "/sbin/gcc-ar-16.1"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/gcc-ar-16.1"
+      - "/opt/anaconda3/envs/wfrl-mac/sbin/gcc-ar-16.1"
+      - "/opt/anaconda3/envs/wfrl-mac/gcc-ar-16.1"
+      - "/usr/X11R6/bin/gcc-ar-16.1"
+      - "/usr/X11R6/sbin/gcc-ar-16.1"
+      - "/usr/X11R6/gcc-ar-16.1"
+      - "/usr/pkg/bin/gcc-ar-16.1"
+      - "/usr/pkg/sbin/gcc-ar-16.1"
+      - "/usr/pkg/gcc-ar-16.1"
+      - "/opt/bin/gcc-ar-16.1"
+      - "/opt/sbin/gcc-ar-16.1"
+      - "/opt/gcc-ar-16.1"
+      - "/sw/bin/gcc-ar-16.1"
+      - "/sw/sbin/gcc-ar-16.1"
+      - "/sw/gcc-ar-16.1"
+      - "/opt/local/bin/gcc-ar-16.1"
+      - "/opt/local/sbin/gcc-ar-16.1"
+      - "/opt/local/gcc-ar-16.1"
+      - "/Users/eason/Applications/gcc-ar-16.1"
+      - "/Applications/gcc-ar-16.1"
+    found: "/opt/homebrew/bin/gcc-ar-16"
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr"
+        - "/opt/homebrew"
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/opt/anaconda3/envs/wfrl-mac"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+        - "/sw"
+        - "/opt/local"
+      CMAKE_SYSTEM_APPBUNDLE_PATH:
+        - "/Users/eason/Applications"
+        - "/Applications"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/Compiler/GNU-FindBinUtils.cmake:30 (find_program)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineFortranCompiler.cmake:317 (include)"
+      - "CMakeLists.txt:62 (enable_language)"
+    mode: "program"
+    variable: "CMAKE_Fortran_COMPILER_RANLIB"
+    description: "A wrapper around 'ranlib' adding the appropriate '--plugin' option for the GCC compiler"
+    settings:
+      SearchFramework: "FIRST"
+      SearchAppBundle: "FIRST"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "gcc-ranlib-16.1"
+      - "gcc-ranlib-16"
+      - "gcc-ranlib16"
+      - "gcc-ranlib"
+    candidate_directories:
+      - "/opt/homebrew/bin/"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/Users/eason/.bun/bin/"
+      - "/opt/anaconda3/condabin/"
+      - "/Users/eason/Library/Android/sdk/platform-tools/"
+      - "/opt/homebrew/sbin/"
+      - "/usr/local/bin/"
+      - "/System/Cryptexes/App/usr/bin/"
+      - "/usr/bin/"
+      - "/bin/"
+      - "/usr/sbin/"
+      - "/sbin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
+      - "/pkg/env/global/bin/"
+      - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/bin/"
+      - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/sbin/"
+      - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/"
+      - "/opt/homebrew/bin/"
+      - "/opt/homebrew/sbin/"
+      - "/opt/homebrew/"
+      - "/usr/local/bin/"
+      - "/usr/local/sbin/"
+      - "/usr/local/"
+      - "/usr/bin/"
+      - "/usr/sbin/"
+      - "/usr/"
+      - "/bin/"
+      - "/sbin/"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/"
+      - "/opt/anaconda3/envs/wfrl-mac/sbin/"
+      - "/opt/anaconda3/envs/wfrl-mac/"
+      - "/usr/X11R6/bin/"
+      - "/usr/X11R6/sbin/"
+      - "/usr/X11R6/"
+      - "/usr/pkg/bin/"
+      - "/usr/pkg/sbin/"
+      - "/usr/pkg/"
+      - "/opt/bin/"
+      - "/opt/sbin/"
+      - "/opt/"
+      - "/sw/bin/"
+      - "/sw/sbin/"
+      - "/sw/"
+      - "/opt/local/bin/"
+      - "/opt/local/sbin/"
+      - "/opt/local/"
+      - "/Users/eason/Applications/"
+      - "/Applications/"
+    searched_directories:
+      - "/opt/homebrew/bin/gcc-ranlib-16.1"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/gcc-ranlib-16.1"
+      - "/Users/eason/.bun/bin/gcc-ranlib-16.1"
+      - "/opt/anaconda3/condabin/gcc-ranlib-16.1"
+      - "/Users/eason/Library/Android/sdk/platform-tools/gcc-ranlib-16.1"
+      - "/opt/homebrew/sbin/gcc-ranlib-16.1"
+      - "/usr/local/bin/gcc-ranlib-16.1"
+      - "/System/Cryptexes/App/usr/bin/gcc-ranlib-16.1"
+      - "/usr/bin/gcc-ranlib-16.1"
+      - "/bin/gcc-ranlib-16.1"
+      - "/usr/sbin/gcc-ranlib-16.1"
+      - "/sbin/gcc-ranlib-16.1"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin/gcc-ranlib-16.1"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/gcc-ranlib-16.1"
+      - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/gcc-ranlib-16.1"
+      - "/pkg/env/global/bin/gcc-ranlib-16.1"
+      - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/bin/gcc-ranlib-16.1"
+      - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/sbin/gcc-ranlib-16.1"
+      - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/gcc-ranlib-16.1"
+      - "/opt/homebrew/bin/gcc-ranlib-16.1"
+      - "/opt/homebrew/sbin/gcc-ranlib-16.1"
+      - "/opt/homebrew/gcc-ranlib-16.1"
+      - "/usr/local/bin/gcc-ranlib-16.1"
+      - "/usr/local/sbin/gcc-ranlib-16.1"
+      - "/usr/local/gcc-ranlib-16.1"
+      - "/usr/bin/gcc-ranlib-16.1"
+      - "/usr/sbin/gcc-ranlib-16.1"
+      - "/usr/gcc-ranlib-16.1"
+      - "/bin/gcc-ranlib-16.1"
+      - "/sbin/gcc-ranlib-16.1"
+      - "/opt/anaconda3/envs/wfrl-mac/bin/gcc-ranlib-16.1"
+      - "/opt/anaconda3/envs/wfrl-mac/sbin/gcc-ranlib-16.1"
+      - "/opt/anaconda3/envs/wfrl-mac/gcc-ranlib-16.1"
+      - "/usr/X11R6/bin/gcc-ranlib-16.1"
+      - "/usr/X11R6/sbin/gcc-ranlib-16.1"
+      - "/usr/X11R6/gcc-ranlib-16.1"
+      - "/usr/pkg/bin/gcc-ranlib-16.1"
+      - "/usr/pkg/sbin/gcc-ranlib-16.1"
+      - "/usr/pkg/gcc-ranlib-16.1"
+      - "/opt/bin/gcc-ranlib-16.1"
+      - "/opt/sbin/gcc-ranlib-16.1"
+      - "/opt/gcc-ranlib-16.1"
+      - "/sw/bin/gcc-ranlib-16.1"
+      - "/sw/sbin/gcc-ranlib-16.1"
+      - "/sw/gcc-ranlib-16.1"
+      - "/opt/local/bin/gcc-ranlib-16.1"
+      - "/opt/local/sbin/gcc-ranlib-16.1"
+      - "/opt/local/gcc-ranlib-16.1"
+      - "/Users/eason/Applications/gcc-ranlib-16.1"
+      - "/Applications/gcc-ranlib-16.1"
+    found: "/opt/homebrew/bin/gcc-ranlib-16"
+    search_context:
+      ENV{PATH}:
+        - "/opt/anaconda3/envs/wfrl-mac/bin"
+        - "/Users/eason/.bun/bin"
+        - "/opt/anaconda3/condabin"
+        - "/Users/eason/Library/Android/sdk/platform-tools"
+        - "/opt/homebrew/bin"
+        - "/opt/homebrew/sbin"
+        - "/usr/local/bin"
+        - "/System/Cryptexes/App/usr/bin"
+        - "/usr/bin"
+        - "/bin"
+        - "/usr/sbin"
+        - "/sbin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
+        - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/pkg/env/global/bin"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr"
+        - "/opt/homebrew"
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/opt/anaconda3/envs/wfrl-mac"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+        - "/sw"
+        - "/opt/local"
+      CMAKE_SYSTEM_APPBUNDLE_PATH:
+        - "/Users/eason/Applications"
+        - "/Applications"
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake:123 (try_compile)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeTestFortranCompiler.cmake:20 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:62 (enable_language)"
+    checks:
+      - "Detecting Fortran compiler ABI info"
+    directories:
+      source: "/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-gVUYGu"
+      binary: "/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-gVUYGu"
+    cmakeVariables:
+      CMAKE_CXX_STDLIB_MODULES_JSON: ""
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_Fortran_FLAGS: ""
+      CMAKE_OSX_ARCHITECTURES: ""
+      CMAKE_OSX_DEPLOYMENT_TARGET: ""
+      CMAKE_OSX_SYSROOT: ""
+    buildResult:
+      variable: "CMAKE_Fortran_ABI_COMPILED"
+      cached: false
+      stdout: |
+        Change Dir: '/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-gVUYGu'
+        
+        Run Build Command(s): /opt/anaconda3/envs/wfrl-mac/bin/cmake -E env VERBOSE=1 /opt/anaconda3/envs/wfrl-mac/bin/make -f Makefile cmTC_33f8c/fast
+        /opt/anaconda3/envs/wfrl-mac/bin/make  -f CMakeFiles/cmTC_33f8c.dir/build.make CMakeFiles/cmTC_33f8c.dir/build
+        make[1]: Entering directory '/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-gVUYGu'
+        Building Fortran object CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o
+        /opt/homebrew/bin/mpif90   -v -Wl,-v -c /opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFortranCompilerABI.F90 -o CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o
+        Using built-in specs.
+        COLLECT_GCC=/opt/homebrew/bin/gfortran
+        Target: aarch64-apple-darwin25
+        Configured with: ../configure --prefix=/opt/homebrew/opt/gcc --libdir=/opt/homebrew/opt/gcc/lib/gcc/current --disable-nls --enable-checking=release --with-gcc-major-version-only --enable-languages=c,c++,objc,obj-c++,fortran --program-suffix=-16 --with-gmp=/opt/homebrew/opt/gmp --with-mpfr=/opt/homebrew/opt/mpfr --with-mpc=/opt/homebrew/opt/libmpc --with-isl=/opt/homebrew/opt/isl --with-zstd=/opt/homebrew/opt/zstd --with-pkgversion='Homebrew GCC 16.1.0' --with-bugurl=https://github.com/Homebrew/homebrew-core/issues --with-system-zlib --build=aarch64-apple-darwin25 --with-sysroot=/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 16.1.0 (Homebrew GCC 16.1.0) 
+        COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/include' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-mmacosx-version-min=26.0.0' '-asm_macosx_version_min=26.0' '-nodefaultexport' '-mcpu=apple-m1' '-mlittle-endian' '-mabi=lp64' '-dumpdir' 'CMakeFiles/cmTC_33f8c.dir/'
+         /opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/aarch64-apple-darwin25/16/f951 /opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFortranCompilerABI.F90 -cpp=/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T//cc7DrrSh.fii -quiet -v -I /opt/homebrew/Cellar/open-mpi/5.0.9/include -I /opt/homebrew/Cellar/open-mpi/5.0.9/lib -iprefix /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/ -D__DYNAMIC__ /opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFortranCompilerABI.F90 -fPIC -quiet -dumpdir CMakeFiles/cmTC_33f8c.dir/ -dumpbase CMakeFortranCompilerABI.F90.F90 -dumpbase-ext .F90 -mmacosx-version-min=26.0.0 -mcpu=apple-m1 -mlittle-endian -mabi=lp64 -version -fintrinsic-modules-path /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/finclude -o /var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T//ccXwmQbE.s
+        GNU Fortran (Homebrew GCC 16.1.0) version 16.1.0 (aarch64-apple-darwin25)
+        	compiled by GNU C version 16.1.0, GMP version 6.3.0, MPFR version 4.2.2, MPC version 1.4.1, isl version isl-0.28-GMP
+        
+        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+        ignoring nonexistent directory "/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../../../../../aarch64-apple-darwin25/include"
+        ignoring duplicate directory "/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/../../../../lib/gcc/current/gcc/aarch64-apple-darwin25/16/include"
+        ignoring nonexistent directory "/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/local/include"
+        ignoring duplicate directory "/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/../../../../lib/gcc/current/gcc/aarch64-apple-darwin25/16/include-fixed"
+        ignoring nonexistent directory "/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/../../../../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../../../../../aarch64-apple-darwin25/include"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /opt/homebrew/Cellar/open-mpi/5.0.9/include
+         /opt/homebrew/Cellar/open-mpi/5.0.9/lib
+         /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/finclude
+         /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/include
+         /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/include-fixed
+         /Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include
+        End of search list.
+        COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/include' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-mmacosx-version-min=26.0.0'  '-nodefaultexport' '-mcpu=apple-m1' '-mlittle-endian' '-mabi=lp64' '-dumpdir' 'CMakeFiles/cmTC_33f8c.dir/'
+         as -arch arm64 -v -I /opt/homebrew/Cellar/open-mpi/5.0.9/include -I /opt/homebrew/Cellar/open-mpi/5.0.9/lib -mmacosx-version-min=26.0 -o CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o /var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T//ccXwmQbE.s
+        Apple clang version 21.0.0 (clang-2100.1.1.101)
+        Target: arm64-apple-darwin25.6.0
+        Thread model: posix
+        InstalledDir: /Library/Developer/CommandLineTools/usr/bin
+         "/Library/Developer/CommandLineTools/usr/bin/clang" -cc1as -triple arm64-apple-macosx26.0.0 -target-sdk-version=26.5 -filetype obj -main-file-name ccXwmQbE.s -target-cpu apple-m1 -target-feature +v8.5a -target-feature +aes -target-feature +altnzcv -target-feature +ccdp -target-feature +ccpp -target-feature +complxnum -target-feature +crc -target-feature +dotprod -target-feature +flagm -target-feature +fp-armv8 -target-feature +fp16fml -target-feature +fptoint -target-feature +fullfp16 -target-feature +jsconv -target-feature +lse -target-feature +neon -target-feature +pauth -target-feature +perfmon -target-feature +predres -target-feature +ras -target-feature +rcpc -target-feature +rdm -target-feature +sb -target-feature +sha2 -target-feature +sha3 -target-feature +specrestrict -target-feature +ssbs -I /opt/homebrew/Cellar/open-mpi/5.0.9/include -I /opt/homebrew/Cellar/open-mpi/5.0.9/lib "-fdebug-compilation-dir=/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-gVUYGu" -dwarf-debug-producer "Apple clang version 21.0.0 (clang-2100.1.1.101)" -I /opt/homebrew/Cellar/open-mpi/5.0.9/include -I /opt/homebrew/Cellar/open-mpi/5.0.9/lib -dwarf-version=5 -mrelocation-model pic -o CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o /var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T//ccXwmQbE.s
+        COMPILER_PATH=/opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/aarch64-apple-darwin25/16/:/opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/
+        LIBRARY_PATH=/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/:/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/:/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../../
+        COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/include' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-mmacosx-version-min=26.0.0'  '-nodefaultexport' '-mcpu=apple-m1' '-mlittle-endian' '-mabi=lp64' '-dumpdir' 'CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.'
+        Linking Fortran executable cmTC_33f8c
+        /opt/anaconda3/envs/wfrl-mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_33f8c.dir/link.txt --verbose=1
+        Driving: /opt/homebrew/bin/gfortran -v -Wl,-v CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o -o cmTC_33f8c -I/opt/homebrew/Cellar/open-mpi/5.0.9/include -Wl,-flat_namespace -I/opt/homebrew/Cellar/open-mpi/5.0.9/lib -L/opt/homebrew/Cellar/open-mpi/5.0.9/lib -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -mmacosx-version-min=26.0.0 -asm_macosx_version_min=26.0 -nodefaultexport -l gfortran
+        Using built-in specs.
+        COLLECT_GCC=/opt/homebrew/bin/gfortran
+        COLLECT_LTO_WRAPPER=/opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/aarch64-apple-darwin25/16/lto-wrapper
+        Target: aarch64-apple-darwin25
+        Configured with: ../configure --prefix=/opt/homebrew/opt/gcc --libdir=/opt/homebrew/opt/gcc/lib/gcc/current --disable-nls --enable-checking=release --with-gcc-major-version-only --enable-languages=c,c++,objc,obj-c++,fortran --program-suffix=-16 --with-gmp=/opt/homebrew/opt/gmp --with-mpfr=/opt/homebrew/opt/mpfr --with-mpc=/opt/homebrew/opt/libmpc --with-isl=/opt/homebrew/opt/isl --with-zstd=/opt/homebrew/opt/zstd --with-pkgversion='Homebrew GCC 16.1.0' --with-bugurl=https://github.com/Homebrew/homebrew-core/issues --with-system-zlib --build=aarch64-apple-darwin25 --with-sysroot=/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 16.1.0 (Homebrew GCC 16.1.0) 
+        Reading specs from /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../../libgfortran.spec
+        rename spec lib to liborig
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_33f8c' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/include' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-L/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-mmacosx-version-min=26.0.0' '-asm_macosx_version_min=26.0' '-nodefaultexport' '-mcpu=apple-m1' '-mlittle-endian' '-mabi=lp64' '-dumpdir' 'cmTC_33f8c-'
+        COMPILER_PATH=/opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/aarch64-apple-darwin25/16/:/opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/
+        LIBRARY_PATH=/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/:/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/:/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../../
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_33f8c' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/include' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-L/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-mmacosx-version-min=26.0.0' '-asm_macosx_version_min=26.0' '-nodefaultexport' '-mcpu=apple-m1' '-mlittle-endian' '-mabi=lp64' '-dumpdir' 'cmTC_33f8c.'
+         /opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/aarch64-apple-darwin25/16/collect2 -demangle -dynamic -arch arm64 -macos_version_min 26.0.0 -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/ -o cmTC_33f8c -L/opt/homebrew/Cellar/open-mpi/5.0.9/lib -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16 -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../.. -lemutls_w -lheapt_w -v CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o -flat_namespace -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -lgfortran -lgcc -lquadmath -lSystem -no_compact_unwind -rpath @loader_path -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16 -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current
+        collect2 version 16.1.0
+        /usr/bin/ld -demangle -dynamic -arch arm64 -macos_version_min 26.0.0 -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/ -o cmTC_33f8c -L/opt/homebrew/Cellar/open-mpi/5.0.9/lib -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16 -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../.. -lemutls_w -lheapt_w -v CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o -flat_namespace -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -lgfortran -lgcc -lquadmath -lSystem -no_compact_unwind -rpath @loader_path -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16 -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current
+        @(#)PROGRAM:ld PROJECT:ld-1267
+        BUILD 16:38:58 Jun  8 2026
+        configured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em armv8m.main armv8.1m.main
+        will use ld-classic for: armv6 armv7 armv7s i386 armv6m armv7k armv7m armv7em
+        LTO support using: LLVM version 21.0.0 (static support for 30, runtime is 30)
+        TAPI support using: Apple TAPI version 21.0.0 (tapi-2100.0.2.6)
+        Library search paths:
+        	/opt/homebrew/Cellar/open-mpi/5.0.9/lib
+        	/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16
+        	/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc
+        	/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current
+        	/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/lib
+        	/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/lib/swift
+        Framework search paths:
+        	/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/System/Library/Frameworks
+        /opt/homebrew/bin/mpif90  -v -Wl,-v CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o -o cmTC_33f8c
+        make[1]: Leaving directory '/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-gVUYGu'
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake:160 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeTestFortranCompiler.cmake:20 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:62 (enable_language)"
+    message: |
+      Effective list of requested architectures (possibly empty)  : ""
+      Effective list of architectures found in the ABI info binary: "arm64"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake:255 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeTestFortranCompiler.cmake:20 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:62 (enable_language)"
+    message: |
+      Parsed Fortran implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/opt/homebrew/Cellar/open-mpi/5.0.9/include]
+          add: [/opt/homebrew/Cellar/open-mpi/5.0.9/lib]
+          add: [/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/finclude]
+          add: [/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/include]
+          add: [/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/include-fixed]
+          add: [/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include]
+        end of search list found
+        collapse include dir [/opt/homebrew/Cellar/open-mpi/5.0.9/include] ==> [/opt/homebrew/Cellar/open-mpi/5.0.9/include]
+        collapse include dir [/opt/homebrew/Cellar/open-mpi/5.0.9/lib] ==> [/opt/homebrew/Cellar/open-mpi/5.0.9/lib]
+        collapse include dir [/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/finclude] ==> [/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16/finclude]
+        collapse include dir [/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/include] ==> [/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16/include]
+        collapse include dir [/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/include-fixed] ==> [/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16/include-fixed]
+        collapse include dir [/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include] ==> [/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include]
+        implicit include dirs: [/opt/homebrew/Cellar/open-mpi/5.0.9/include;/opt/homebrew/Cellar/open-mpi/5.0.9/lib;/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16/finclude;/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16/include;/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16/include-fixed;/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake:291 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeTestFortranCompiler.cmake:20 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:62 (enable_language)"
+    message: |
+      Parsed Fortran implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|wild|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|"|[0-9]+>[ 	-]*Build:[ 	0-9]+ ms[ 	]*)?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|wild))("|,| |$)]
+        ignore line: [Change Dir: '/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-gVUYGu']
+        ignore line: []
+        ignore line: [Run Build Command(s): /opt/anaconda3/envs/wfrl-mac/bin/cmake -E env VERBOSE=1 /opt/anaconda3/envs/wfrl-mac/bin/make -f Makefile cmTC_33f8c/fast]
+        ignore line: [/opt/anaconda3/envs/wfrl-mac/bin/make  -f CMakeFiles/cmTC_33f8c.dir/build.make CMakeFiles/cmTC_33f8c.dir/build]
+        ignore line: [make[1]: Entering directory '/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-gVUYGu']
+        ignore line: [Building Fortran object CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o]
+        ignore line: [/opt/homebrew/bin/mpif90   -v -Wl -v -c /opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFortranCompilerABI.F90 -o CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/opt/homebrew/bin/gfortran]
+        ignore line: [Target: aarch64-apple-darwin25]
+        ignore line: [Configured with: ../configure --prefix=/opt/homebrew/opt/gcc --libdir=/opt/homebrew/opt/gcc/lib/gcc/current --disable-nls --enable-checking=release --with-gcc-major-version-only --enable-languages=c c++ objc obj-c++ fortran --program-suffix=-16 --with-gmp=/opt/homebrew/opt/gmp --with-mpfr=/opt/homebrew/opt/mpfr --with-mpc=/opt/homebrew/opt/libmpc --with-isl=/opt/homebrew/opt/isl --with-zstd=/opt/homebrew/opt/zstd --with-pkgversion='Homebrew GCC 16.1.0' --with-bugurl=https://github.com/Homebrew/homebrew-core/issues --with-system-zlib --build=aarch64-apple-darwin25 --with-sysroot=/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 16.1.0 (Homebrew GCC 16.1.0) ]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/include' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-mmacosx-version-min=26.0.0' '-asm_macosx_version_min=26.0' '-nodefaultexport' '-mcpu=apple-m1' '-mlittle-endian' '-mabi=lp64' '-dumpdir' 'CMakeFiles/cmTC_33f8c.dir/']
+        ignore line: [ /opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/aarch64-apple-darwin25/16/f951 /opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFortranCompilerABI.F90 -cpp=/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T//cc7DrrSh.fii -quiet -v -I /opt/homebrew/Cellar/open-mpi/5.0.9/include -I /opt/homebrew/Cellar/open-mpi/5.0.9/lib -iprefix /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/ -D__DYNAMIC__ /opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeFortranCompilerABI.F90 -fPIC -quiet -dumpdir CMakeFiles/cmTC_33f8c.dir/ -dumpbase CMakeFortranCompilerABI.F90.F90 -dumpbase-ext .F90 -mmacosx-version-min=26.0.0 -mcpu=apple-m1 -mlittle-endian -mabi=lp64 -version -fintrinsic-modules-path /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/finclude -o /var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T//ccXwmQbE.s]
+        ignore line: [GNU Fortran (Homebrew GCC 16.1.0) version 16.1.0 (aarch64-apple-darwin25)]
+        ignore line: [	compiled by GNU C version 16.1.0  GMP version 6.3.0  MPFR version 4.2.2  MPC version 1.4.1  isl version isl-0.28-GMP]
+        ignore line: []
+        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+        ignore line: [ignoring nonexistent directory "/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../../../../../aarch64-apple-darwin25/include"]
+        ignore line: [ignoring duplicate directory "/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/../../../../lib/gcc/current/gcc/aarch64-apple-darwin25/16/include"]
+        ignore line: [ignoring nonexistent directory "/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/local/include"]
+        ignore line: [ignoring duplicate directory "/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/../../../../lib/gcc/current/gcc/aarch64-apple-darwin25/16/include-fixed"]
+        ignore line: [ignoring nonexistent directory "/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/../../../../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../../../../../aarch64-apple-darwin25/include"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /opt/homebrew/Cellar/open-mpi/5.0.9/include]
+        ignore line: [ /opt/homebrew/Cellar/open-mpi/5.0.9/lib]
+        ignore line: [ /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/finclude]
+        ignore line: [ /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/include]
+        ignore line: [ /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/include-fixed]
+        ignore line: [ /Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/include]
+        ignore line: [End of search list.]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/include' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-mmacosx-version-min=26.0.0'  '-nodefaultexport' '-mcpu=apple-m1' '-mlittle-endian' '-mabi=lp64' '-dumpdir' 'CMakeFiles/cmTC_33f8c.dir/']
+        ignore line: [ as -arch arm64 -v -I /opt/homebrew/Cellar/open-mpi/5.0.9/include -I /opt/homebrew/Cellar/open-mpi/5.0.9/lib -mmacosx-version-min=26.0 -o CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o /var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T//ccXwmQbE.s]
+        ignore line: [Apple clang version 21.0.0 (clang-2100.1.1.101)]
+        ignore line: [Target: arm64-apple-darwin25.6.0]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /Library/Developer/CommandLineTools/usr/bin]
+        ignore line: [ "/Library/Developer/CommandLineTools/usr/bin/clang" -cc1as -triple arm64-apple-macosx26.0.0 -target-sdk-version=26.5 -filetype obj -main-file-name ccXwmQbE.s -target-cpu apple-m1 -target-feature +v8.5a -target-feature +aes -target-feature +altnzcv -target-feature +ccdp -target-feature +ccpp -target-feature +complxnum -target-feature +crc -target-feature +dotprod -target-feature +flagm -target-feature +fp-armv8 -target-feature +fp16fml -target-feature +fptoint -target-feature +fullfp16 -target-feature +jsconv -target-feature +lse -target-feature +neon -target-feature +pauth -target-feature +perfmon -target-feature +predres -target-feature +ras -target-feature +rcpc -target-feature +rdm -target-feature +sb -target-feature +sha2 -target-feature +sha3 -target-feature +specrestrict -target-feature +ssbs -I /opt/homebrew/Cellar/open-mpi/5.0.9/include -I /opt/homebrew/Cellar/open-mpi/5.0.9/lib "-fdebug-compilation-dir=/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/build/CMakeFiles/CMakeScratch/TryCompile-gVUYGu" -dwarf-debug-producer "Apple clang version 21.0.0 (clang-2100.1.1.101)" -I /opt/homebrew/Cellar/open-mpi/5.0.9/include -I /opt/homebrew/Cellar/open-mpi/5.0.9/lib -dwarf-version=5 -mrelocation-model pic -o CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o /var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T//ccXwmQbE.s]
+        ignore line: [COMPILER_PATH=/opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/aarch64-apple-darwin25/16/:/opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/]
+        ignore line: [LIBRARY_PATH=/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/:/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/:/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../../]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/include' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-mmacosx-version-min=26.0.0'  '-nodefaultexport' '-mcpu=apple-m1' '-mlittle-endian' '-mabi=lp64' '-dumpdir' 'CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.']
+        ignore line: [Linking Fortran executable cmTC_33f8c]
+        ignore line: [/opt/anaconda3/envs/wfrl-mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_33f8c.dir/link.txt --verbose=1]
+        ignore line: [Driving: /opt/homebrew/bin/gfortran -v -Wl -v CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o -o cmTC_33f8c -I/opt/homebrew/Cellar/open-mpi/5.0.9/include -Wl -flat_namespace -I/opt/homebrew/Cellar/open-mpi/5.0.9/lib -L/opt/homebrew/Cellar/open-mpi/5.0.9/lib -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -mmacosx-version-min=26.0.0 -asm_macosx_version_min=26.0 -nodefaultexport -l gfortran]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/opt/homebrew/bin/gfortran]
+        ignore line: [COLLECT_LTO_WRAPPER=/opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/aarch64-apple-darwin25/16/lto-wrapper]
+        ignore line: [Target: aarch64-apple-darwin25]
+        ignore line: [Configured with: ../configure --prefix=/opt/homebrew/opt/gcc --libdir=/opt/homebrew/opt/gcc/lib/gcc/current --disable-nls --enable-checking=release --with-gcc-major-version-only --enable-languages=c c++ objc obj-c++ fortran --program-suffix=-16 --with-gmp=/opt/homebrew/opt/gmp --with-mpfr=/opt/homebrew/opt/mpfr --with-mpc=/opt/homebrew/opt/libmpc --with-isl=/opt/homebrew/opt/isl --with-zstd=/opt/homebrew/opt/zstd --with-pkgversion='Homebrew GCC 16.1.0' --with-bugurl=https://github.com/Homebrew/homebrew-core/issues --with-system-zlib --build=aarch64-apple-darwin25 --with-sysroot=/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 16.1.0 (Homebrew GCC 16.1.0) ]
+        ignore line: [Reading specs from /opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../../libgfortran.spec]
+        ignore line: [rename spec lib to liborig]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_33f8c' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/include' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-L/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-mmacosx-version-min=26.0.0' '-asm_macosx_version_min=26.0' '-nodefaultexport' '-mcpu=apple-m1' '-mlittle-endian' '-mabi=lp64' '-dumpdir' 'cmTC_33f8c-']
+        ignore line: [COMPILER_PATH=/opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/aarch64-apple-darwin25/16/:/opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/]
+        ignore line: [LIBRARY_PATH=/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/:/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/:/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../../]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_33f8c' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/include' '-I' '/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-L/opt/homebrew/Cellar/open-mpi/5.0.9/lib' '-mmacosx-version-min=26.0.0' '-asm_macosx_version_min=26.0' '-nodefaultexport' '-mcpu=apple-m1' '-mlittle-endian' '-mabi=lp64' '-dumpdir' 'cmTC_33f8c.']
+        link line: [ /opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/aarch64-apple-darwin25/16/collect2 -demangle -dynamic -arch arm64 -macos_version_min 26.0.0 -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/ -o cmTC_33f8c -L/opt/homebrew/Cellar/open-mpi/5.0.9/lib -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16 -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../.. -lemutls_w -lheapt_w -v CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o -flat_namespace -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -lgfortran -lgcc -lquadmath -lSystem -no_compact_unwind -rpath @loader_path -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16 -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current]
+          arg [/opt/homebrew/Cellar/gcc/16.1.0/bin/../libexec/gcc/aarch64-apple-darwin25/16/collect2] ==> ignore
+          arg [-demangle] ==> ignore
+          arg [-dynamic] ==> ignore
+          arg [-arch] ==> ignore
+          arg [arm64] ==> ignore
+          arg [-macos_version_min] ==> ignore
+          arg [26.0.0] ==> ignore
+          arg [-syslibroot] ==> ignore
+          arg [/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_33f8c] ==> ignore
+          arg [-L/opt/homebrew/Cellar/open-mpi/5.0.9/lib] ==> dir [/opt/homebrew/Cellar/open-mpi/5.0.9/lib]
+          arg [-L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16] ==> dir [/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16]
+          arg [-L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc] ==> dir [/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc]
+          arg [-L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../..] ==> dir [/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../..]
+          arg [-lemutls_w] ==> lib [emutls_w]
+          arg [-lheapt_w] ==> lib [heapt_w]
+          arg [-v] ==> ignore
+          arg [CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o] ==> ignore
+          arg [-flat_namespace] ==> ignore
+          arg [-lmpi_usempif08] ==> lib [mpi_usempif08]
+          arg [-lmpi_usempi_ignore_tkr] ==> lib [mpi_usempi_ignore_tkr]
+          arg [-lmpi_mpifh] ==> lib [mpi_mpifh]
+          arg [-lmpi] ==> lib [mpi]
+          arg [-lgfortran] ==> lib [gfortran]
+          arg [-lgcc] ==> lib [gcc]
+          arg [-lquadmath] ==> lib [quadmath]
+          arg [-lSystem] ==> lib [System]
+          arg [-no_compact_unwind] ==> ignore
+          arg [-rpath] ==> ignore
+          arg [@loader_path] ==> ignore
+          arg [-rpath] ==> ignore
+          arg [/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16] ==> ignore
+          arg [-rpath] ==> ignore
+          arg [/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc] ==> ignore
+          arg [-rpath] ==> ignore
+          arg [/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current] ==> ignore
+        ignore line: [collect2 version 16.1.0]
+        link line: [/usr/bin/ld -demangle -dynamic -arch arm64 -macos_version_min 26.0.0 -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/ -o cmTC_33f8c -L/opt/homebrew/Cellar/open-mpi/5.0.9/lib -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16 -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../.. -lemutls_w -lheapt_w -v CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o -flat_namespace -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -lgfortran -lgcc -lquadmath -lSystem -no_compact_unwind -rpath @loader_path -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16 -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current] ==> linker [/usr/bin/ld]
+        ignore line: [/usr/bin/ld -demangle -dynamic -arch arm64 -macos_version_min 26.0.0 -syslibroot /Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/ -o cmTC_33f8c -L/opt/homebrew/Cellar/open-mpi/5.0.9/lib -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16 -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc -L/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../.. -lemutls_w -lheapt_w -v CMakeFiles/cmTC_33f8c.dir/CMakeFortranCompilerABI.F90.o -flat_namespace -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi -lgfortran -lgcc -lquadmath -lSystem -no_compact_unwind -rpath @loader_path -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16 -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc -rpath /opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current]
+        linker tool for 'Fortran': /usr/bin/ld 
+        Library search paths: [;/opt/homebrew/Cellar/open-mpi/5.0.9/lib;/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16;/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc;/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current;/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/lib;/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/lib/swift]
+        Framework search paths: [;/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/System/Library/Frameworks]
+        remove lib [System]
+        collapse library dir [/opt/homebrew/Cellar/open-mpi/5.0.9/lib] ==> [/opt/homebrew/Cellar/open-mpi/5.0.9/lib]
+        collapse library dir [/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16] ==> [/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16]
+        collapse library dir [/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc] ==> [/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc]
+        collapse library dir [/opt/homebrew/Cellar/gcc/16.1.0/bin/../lib/gcc/current/gcc/aarch64-apple-darwin25/16/../../..] ==> [/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current]
+        collapse library dir [/opt/homebrew/Cellar/open-mpi/5.0.9/lib] ==> [/opt/homebrew/Cellar/open-mpi/5.0.9/lib]
+        collapse library dir [/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16] ==> [/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16]
+        collapse library dir [/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc] ==> [/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc]
+        collapse library dir [/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current] ==> [/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current]
+        collapse library dir [/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/lib] ==> [/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/lib]
+        collapse library dir [/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/lib/swift] ==> [/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/lib/swift]
+        collapse framework dir [/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/System/Library/Frameworks] ==> [/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/System/Library/Frameworks]
+        implicit libs: [emutls_w;heapt_w;mpi_usempif08;mpi_usempi_ignore_tkr;mpi_mpifh;mpi;gfortran;gcc;quadmath]
+        implicit objs: []
+        implicit dirs: [/opt/homebrew/Cellar/open-mpi/5.0.9/lib;/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc/aarch64-apple-darwin25/16;/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current/gcc;/opt/homebrew/Cellar/gcc/16.1.0/lib/gcc/current;/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/lib;/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/usr/lib/swift]
+        implicit fwks: [/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk/System/Library/Frameworks]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/Internal/CMakeDetermineLinkerId.cmake:41 (message)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeDetermineCompilerABI.cmake:337 (cmake_determine_linker_id)"
+      - "/opt/anaconda3/envs/wfrl-mac/share/cmake-4.4/Modules/CMakeTestFortranCompiler.cmake:20 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:62 (enable_language)"
+    message: |
+      Running the Fortran compiler's linker: "/usr/bin/ld" "-v"
+      @(#)PROGRAM:ld PROJECT:ld-1267
+      BUILD 16:38:58 Jun  8 2026
+      configured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em armv8m.main armv8.1m.main
+      will use ld-classic for: armv6 armv7 armv7s i386 armv6m armv7k armv7m armv7em
+      LTO support using: LLVM version 21.0.0 (static support for 30, runtime is 30)
+      TAPI support using: Apple TAPI version 21.0.0 (tapi-2100.0.2.6)
+...

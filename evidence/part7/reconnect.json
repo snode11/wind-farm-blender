@@ -1,0 +1,43 @@
+{
+  "boundary": "Real TCP reconnect to idle Bridge; no GUI or running simulation",
+  "passed": true,
+  "messages": [
+    {
+      "protocol_version": 1,
+      "type": "hello_ack",
+      "session_id": "6521c2fdb6454a968779d7e832347a3d",
+      "sequence": 1,
+      "payload": {
+        "selected_version": 1,
+        "capabilities": [
+          "pause",
+          "single_step",
+          "training_stats_v1"
+        ],
+        "run_status": "READY",
+        "mode": "demo",
+        "resumed": false,
+        "run_id": null
+      }
+    },
+    {
+      "protocol_version": 1,
+      "type": "hello_ack",
+      "session_id": "6521c2fdb6454a968779d7e832347a3d",
+      "sequence": 2,
+      "payload": {
+        "selected_version": 1,
+        "capabilities": [
+          "pause",
+          "single_step",
+          "training_stats_v1"
+        ],
+        "run_status": "READY",
+        "mode": "demo",
+        "resumed": true,
+        "run_id": null
+      }
+    }
+  ],
+  "server_thread_alive": false
+}

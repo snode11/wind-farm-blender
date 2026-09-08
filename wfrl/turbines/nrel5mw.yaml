@@ -1,0 +1,63 @@
+# NREL 5MW 陆上基准机型定义
+#
+# 这份文件是**渲染 + 相机仿真**这一层的机型单一来源：外壳外形、挂机点位库、
+# 元数据。复杂的气弹几何（叶片 19 截面 / 翼型坐标 / 塔筒锥度 / 一阶振型）不在
+# 这里重复，而是由 geometry_source 指向 OpenFAST 模板、交给 wfrl/viz/geometry.py
+# 解析 —— 那份数据本就躺在 FAST.Farm 模板里，机型文件只补它没有的"外壳外形"和
+# "挂机点位"。
+#
+# 坐标约定（机舱系，真实尺度 m）：
+#   dx_down  沿下风向（+ = 从轮毂朝机舱尾/塔筒），转子/迎风在 −方向
+#   dy_lat   沿机舱横向（+ = 机舱右手侧）
+#   dz_vert  沿竖直（+ 向上）；相对**真实轮毂中心**
+#
+# 注意：本文件只进渲染与相机位姿，不进物理求解。物理侧的 hub_height/rotor_d
+# 仍由 scene/schema.py 的常量与 FAST.Farm 模板决定（平地假设、机型烧死在模板里）。
+
+name: nrel5mw
+description: NREL 5MW 陆上基准机组（OpenFAST/FAST.Farm 模板）
+
+# 气弹几何来源：从 FAST.Farm 模板解析（TipRad/HubRad/OverHang/ShftTilt/TowerHt
+# + 叶片截面 + 翼型 + 塔筒锥度 + 振型）。渲染与相机共用这套真实几何。
+geometry_source: fastfarm_template
+
+# 参考尺寸（信息性，来自模板 ElastoDyn；渲染实际从 geometry 解析取值）。
+reference:
+  hub_height: 88.04        # m，含轴倾抬升
+  rotor_diameter: 126.0    # m
+  tower_top: 87.6          # m
+
+# 外壳外形：机舱盒体 + 导流罩。缺省值精确对齐既有渲染的推算式
+#   nacelle.length = 1.6·|OverHang| = 8.03，width/height = 2.2·HubRad = 3.30，
+#   spinner_radius = 1.6·HubRad = 2.40，x_bias = 0.15（机舱盒相对轮毂的下风偏置）
+# —— 填了就用这里的绝对尺寸，不填则回退到推算式，保证零行为变化。
+shell:
+  nacelle:
+    length: 8.03           # m，沿转子轴（下风向）
+    width: 3.30            # m，横向
+    height: 3.30           # m，竖直
+  spinner_radius: 2.40     # m，导流罩球半径
+  nacelle_x_bias: 0.15     # 机舱盒中心相对轮毂沿悬伸方向的偏置系数
+
+# 挂机点位库：命名点位 → 机舱系三维偏移（相对真实轮毂中心）。
+# 相机传感器可用 mount: <名称> 直接引用；custom 则由 params.offset 覆盖。
+mounts:
+  # 净空相机默认位：机舱底面、轮毂↔塔筒之间偏轮毂，镜头近乎垂直向下。
+  # 对齐 sensors.py 里 nacelle_down 的语义：下风 0.3·|OverHang|、下移 0.03·TipRad。
+  clearance_cam:
+    dx_down: 1.506         # 0.3·5.019
+    dy_lat: 0.0
+    dz_vert: -1.89         # -0.03·63
+    note: 净空相机默认位（机舱底、偏轮毂、俯视）
+  # 转子平面正前下方（贴迎风面）。
+  rotor_front:
+    dx_down: -5.019        # -|OverHang|
+    dy_lat: 0.0
+    dz_vert: -1.89
+    note: 转子平面正下（前视挂点）
+  # 轮毂正下方。
+  hub_bottom:
+    dx_down: 0.0
+    dy_lat: 0.0
+    dz_vert: -1.89
+    note: 轮毂正下方

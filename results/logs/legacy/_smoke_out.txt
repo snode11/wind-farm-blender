@@ -1,0 +1,97 @@
+cwd: D:\project\wind farm RL
+mpi4py: Microsoft MPI 10.1.12498.18
+Created FAST.Farm input file: __simul__/fastfarm/FastFarm__64s__3T_1785728776.6363487/FarmInputs/Case.fstf
+built Dec_Turb3_Row1_Fastfarm in 0.1s; agents=['turbine_1', 'turbine_2', 'turbine_3']
+
+**************************************************************************************************
+FAST.Farm
+
+Copyright (C) 2023 National Renewable Energy Laboratory
+Copyright (C) 2023 Envision Energy USA LTD
+
+This program is licensed under Apache License Version 2.0 and comes with ABSOLUTELY NO WARRANTY.
+See the "LICENSE" file distributed with this software for details.
+**************************************************************************************************
+
+FAST.Farm-v3.5.1
+Compile Info:
+ - Compiler: Intel(R) Fortran Compiler 2021
+ - Architecture: 64 bit
+ - Precision: single
+ - OpenMP: Yes, number of threads: 16/16
+ - Date: Oct 21 2023
+ - Time: 09:22:40
+Execution Info:
+ - Date: 08/03/2026
+ - Time: 11:46:16+0800
+
+ Heading of the FAST.Farm input file:
+   FAST.Farm              input       - file
+Running AWAE.
+Running InflowWind.
+Running Super Controller.
+Running WakeDynamics.
+Running FASTWrapper.
+Running OpenFAST.
+OpenFAST input file heading:
+    FAST                   Certification - Test #26: NREL 5.0 MW Baseline Wind Turbine (Onshore)
+
+Running ElastoDyn.
+Nodal outputs section of ElastoDyn input file not found or improperly formatted.
+Running AeroDyn.
+Running InflowWind.
+Running ServoDyn.
+Running ServoDyn Interface for Bladed Controllers (using Intel Visual Fortran for Windows).
+Using legacy Bladed DLL interface.
+Running OpenFAST.
+OpenFAST input file heading:
+    FAST                   Certification - Test #26: NREL 5.0 MW Baseline Wind Turbine (Onshore)
+
+Running ElastoDyn.
+Nodal outputs section of ElastoDyn input file not found or improperly formatted.
+Running AeroDyn.
+Running InflowWind.
+Running ServoDyn.
+Running ServoDyn Interface for Bladed Controllers (using Intel Visual Fortran for Windows).
+Using legacy Bladed DLL interface.
+Running OpenFAST.
+OpenFAST input file heading:
+    FAST                   Certification - Test #26: NREL 5.0 MW Baseline Wind Turbine (Onshore)
+
+Running ElastoDyn.
+Nodal outputs section of ElastoDyn input file not found or improperly formatted.
+Running AeroDyn.
+Running InflowWind.
+Running ServoDyn.
+Running ServoDyn Interface for Bladed Controllers (using Intel Visual Fortran for Windows).
+Using legacy Bladed DLL interface.
+
+Farm_Initialize:Farm_ValidateInput:OutFmt produces a column width of 10 instead of 20 characters.
+Farm_Initialize:For efficiency, NumPlanes has been reduced to the number of time steps (14).
+
+ Time: 0 of 39 seconds. Initialize MPI
+ Found parent process -2080374784
+ Will receive MPI interface control for           13  iterations
+                                                                                                   Time: 3 of 39 seconds.  Estimated final completion at 11:46:29.                                                                                                   Time: 6 of 39 seconds.  Estimated final completion at 11:46:28.                                                                                                   Time: 9 of 39 seconds.  Estimated final completion at 11:46:28.                                                                                                   Time: 12 of 39 seconds.  Estimated final completion at 11:46:28.                                                                                                   Time: 15 of 39 seconds.  Estimated final completion at 11:46:28.                                                                                                   Time: 18 of 39 seconds.  Estimated final completion at 11:46:28.                                                                                                   Time: 21 of 39 seconds.  Estimated final completion at 11:46:28.                                                                                                   Time: 24 of 39 seconds.  Estimated final completion at 11:46:28.                                                                                                   Time: 27 of 39 seconds.  Estimated final completion at 11:46:28.
+Spawning process simulators/fastfarm/bin/FAST.Farm_x64_OMP_2023.exe __simul__\fastfarm\FastFarm__64s__3T_1785728776.6363487\FarmInputs\Case.fstf
+Interface: will receive 12 measures at every iteration
+reset OK in 9.3s
+  [T1 step 0] power=0.0  wind_speed=7.78  reward=0.000  t=9.3s
+                                                                                                   Time: 30 of 39 seconds.  Estimated final completion at 11:46:28.
+  [T1 step 1] power=1.6  wind_speed=7.78  reward=0.000  t=10.0s
+                                                                                                   Time: 33 of 39 seconds.  Estimated final completion at 11:46:28.
+  [T1 step 2] power=1.6  wind_speed=7.78  reward=-0.001  t=10.6s
+                                                                                                   Time: 36 of 39 seconds.  Estimated final completion at 11:46:28. Finalizing MPI Communication...
+
+EPISODE DONE. total_reward={'turbine_1': -0.005, 'turbine_2': -0.005, 'turbine_3': -0.005}
+SMOKE_OK
+                                                                                                   Time: 39 of 39 seconds.  Estimated final completion at 11:46:28.                                                                                                  
+
+ Total Real Time:       11.184 seconds
+ Total CPU Time:        26.969 seconds
+ Simulation CPU Time:   26.531 seconds
+ Simulated Time:        39 seconds
+ Time Ratio (Sim/CPU):  1.47
+
+ FAST.Farm terminated normally.
+

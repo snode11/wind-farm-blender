@@ -1,0 +1,569 @@
+{
+  "boundary": "Bounded actual formal-training JSONL -> Bridge event verification (not GUI).",
+  "events": [
+    [
+      "lifecycle",
+      {
+        "run_status": "STARTING",
+        "reason": null,
+        "mode": "formal_training",
+        "run_id": "5b296ee515444bfa9f4ac46392231af3",
+        "capabilities": [],
+        "scene": {
+          "name": "turb3_ctrl3",
+          "backend": "fastfarm",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw",
+            "pitch",
+            "torque"
+          ],
+          "sensors": [
+            {
+              "type": "power",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "actuator",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "bladeload",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "rotorspeed",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "vibration",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "lidar",
+              "mount": "nacelle",
+              "turbines": "T1"
+            },
+            {
+              "type": "camera",
+              "mount": "nacelle",
+              "turbines": "T1",
+              "params": {
+                "mount": "nacelle_down",
+                "fov": 40,
+                "pitch": -30
+              }
+            }
+          ],
+          "terrain": "mountains"
+        },
+        "channel_states": {},
+        "channel_table": []
+      }
+    ],
+    [
+      "lifecycle",
+      {
+        "run_status": "RUNNING",
+        "reason": null,
+        "mode": "formal_training",
+        "run_id": "5b296ee515444bfa9f4ac46392231af3",
+        "capabilities": [],
+        "scene": {
+          "name": "turb3_ctrl3",
+          "backend": "fastfarm",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw",
+            "pitch",
+            "torque"
+          ],
+          "sensors": [
+            {
+              "type": "power",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "actuator",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "bladeload",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "rotorspeed",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "vibration",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "lidar",
+              "mount": "nacelle",
+              "turbines": "T1"
+            },
+            {
+              "type": "camera",
+              "mount": "nacelle",
+              "turbines": "T1",
+              "params": {
+                "mount": "nacelle_down",
+                "fov": 40,
+                "pitch": -30
+              }
+            }
+          ],
+          "terrain": "mountains"
+        },
+        "channel_states": {},
+        "channel_table": []
+      }
+    ],
+    [
+      "training_stats",
+      {
+        "run_id": "5b296ee515444bfa9f4ac46392231af3",
+        "record_kind": "progress",
+        "mode": "formal_training",
+        "step": 0,
+        "agent_step": 0,
+        "iteration": 1,
+        "phase": "warmup",
+        "timestamp": {
+          "value": 1788769199.4355872,
+          "timebase": "unix_seconds"
+        },
+        "source_age_seconds": 0.01071476936340332,
+        "stale_after_seconds": 30.0,
+        "stats": {}
+      }
+    ],
+    [
+      "training_stats",
+      {
+        "run_id": "5b296ee515444bfa9f4ac46392231af3",
+        "record_kind": "progress",
+        "mode": "formal_training",
+        "step": 0,
+        "agent_step": 0,
+        "iteration": 1,
+        "phase": "sampling",
+        "timestamp": {
+          "value": 1788769287.885354,
+          "timebase": "unix_seconds"
+        },
+        "source_age_seconds": 0.07382607460021973,
+        "stale_after_seconds": 30.0,
+        "stats": {}
+      }
+    ],
+    [
+      "training_stats",
+      {
+        "run_id": "5b296ee515444bfa9f4ac46392231af3",
+        "record_kind": "progress",
+        "mode": "formal_training",
+        "step": 0,
+        "agent_step": 0,
+        "iteration": 1,
+        "phase": "sampling",
+        "timestamp": {
+          "value": 1788769288.425261,
+          "timebase": "unix_seconds"
+        },
+        "source_age_seconds": 0.07949399948120117,
+        "stale_after_seconds": 30.0,
+        "stats": {}
+      }
+    ],
+    [
+      "training_stats",
+      {
+        "run_id": "5b296ee515444bfa9f4ac46392231af3",
+        "record_kind": "progress",
+        "mode": "formal_training",
+        "step": 4,
+        "agent_step": 12,
+        "iteration": 1,
+        "phase": "updating",
+        "timestamp": {
+          "value": 1788769295.734012,
+          "timebase": "unix_seconds"
+        },
+        "source_age_seconds": 0.019616127014160156,
+        "stale_after_seconds": 30.0,
+        "stats": {}
+      }
+    ],
+    [
+      "training_stats",
+      {
+        "run_id": "5b296ee515444bfa9f4ac46392231af3",
+        "record_kind": "iteration_stats",
+        "mode": "formal_training",
+        "step": 4,
+        "agent_step": 12,
+        "iteration": 1,
+        "phase": "updating",
+        "timestamp": {
+          "value": 1788769295.77932,
+          "timebase": "unix_seconds"
+        },
+        "source_age_seconds": 0.029505014419555664,
+        "stale_after_seconds": 30.0,
+        "stats": {
+          "mean_power": {
+            "value": 2.8401787281036377,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-037z1b0t/progress.jsonl",
+              "channel": "mean_power",
+              "calculation": "B_power.mean(): mean farm total power per control step"
+            },
+            "source_age_seconds": 0.029505014419555664,
+            "stale_after_seconds": 30.0
+          },
+          "mean_reward": {
+            "value": 21.97378921508789,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-037z1b0t/progress.jsonl",
+              "channel": "mean_reward",
+              "calculation": "B_rew.mean(): normalized training reward"
+            },
+            "source_age_seconds": 0.029505014419555664,
+            "stale_after_seconds": 30.0
+          },
+          "value_loss": {
+            "value": 1877.4526123046876,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-037z1b0t/progress.jsonl",
+              "channel": "value_loss",
+              "calculation": "mean(v_log): actual optimization minibatches"
+            },
+            "source_age_seconds": 0.029505014419555664,
+            "stale_after_seconds": 30.0
+          },
+          "explained_variance": {
+            "value": 0.000876293156370056,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-037z1b0t/progress.jsonl",
+              "channel": "explained_variance",
+              "calculation": "ev: 1 - var(ret - B_val)/(var(ret) + 1e-8)"
+            },
+            "source_age_seconds": 0.029505014419555664,
+            "stale_after_seconds": 30.0
+          },
+          "episode_return": {
+            "value": null,
+            "unit": "",
+            "validity": "unsupported",
+            "error": "Not emitted by trainer",
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-037z1b0t/progress.jsonl",
+              "channel": "episode_return",
+              "calculation": "Not emitted by trainer"
+            },
+            "source_age_seconds": 0.029505014419555664,
+            "stale_after_seconds": 30.0
+          },
+          "learning_rate": {
+            "value": null,
+            "unit": "",
+            "validity": "unsupported",
+            "error": "Not emitted by trainer",
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-037z1b0t/progress.jsonl",
+              "channel": "learning_rate",
+              "calculation": "Not emitted by trainer"
+            },
+            "source_age_seconds": 0.029505014419555664,
+            "stale_after_seconds": 30.0
+          }
+        }
+      }
+    ],
+    [
+      "training_stats",
+      {
+        "run_id": "5b296ee515444bfa9f4ac46392231af3",
+        "record_kind": "progress",
+        "mode": "formal_training",
+        "step": 4,
+        "agent_step": 12,
+        "iteration": 1,
+        "phase": "done",
+        "timestamp": {
+          "value": 1788769309.752276,
+          "timebase": "unix_seconds"
+        },
+        "source_age_seconds": 0.058055877685546875,
+        "stale_after_seconds": 30.0,
+        "stats": {}
+      }
+    ],
+    [
+      "lifecycle",
+      {
+        "run_status": "DRAINING",
+        "reason": null,
+        "mode": "formal_training",
+        "run_id": "5b296ee515444bfa9f4ac46392231af3",
+        "capabilities": [],
+        "scene": {
+          "name": "turb3_ctrl3",
+          "backend": "fastfarm",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw",
+            "pitch",
+            "torque"
+          ],
+          "sensors": [
+            {
+              "type": "power",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "actuator",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "bladeload",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "rotorspeed",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "vibration",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "lidar",
+              "mount": "nacelle",
+              "turbines": "T1"
+            },
+            {
+              "type": "camera",
+              "mount": "nacelle",
+              "turbines": "T1",
+              "params": {
+                "mount": "nacelle_down",
+                "fov": 40,
+                "pitch": -30
+              }
+            }
+          ],
+          "terrain": "mountains"
+        },
+        "channel_states": {},
+        "channel_table": []
+      }
+    ],
+    [
+      "lifecycle",
+      {
+        "run_status": "STOPPED",
+        "reason": null,
+        "mode": "formal_training",
+        "run_id": "5b296ee515444bfa9f4ac46392231af3",
+        "capabilities": [],
+        "scene": {
+          "name": "turb3_ctrl3",
+          "backend": "fastfarm",
+          "turbine": "nrel5mw",
+          "dt": 3.0,
+          "layout": [
+            {
+              "id": "T1",
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "id": "T2",
+              "x": 504.0,
+              "y": 0.0
+            },
+            {
+              "id": "T3",
+              "x": 1008.0,
+              "y": 0.0
+            }
+          ],
+          "inflow": {
+            "speed": 8.0,
+            "direction": 270.0,
+            "turbulence": null
+          },
+          "controls": [
+            "yaw",
+            "pitch",
+            "torque"
+          ],
+          "sensors": [
+            {
+              "type": "power",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "actuator",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "bladeload",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "rotorspeed",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "vibration",
+              "mount": "nacelle",
+              "turbines": "all"
+            },
+            {
+              "type": "lidar",
+              "mount": "nacelle",
+              "turbines": "T1"
+            },
+            {
+              "type": "camera",
+              "mount": "nacelle",
+              "turbines": "T1",
+              "params": {
+                "mount": "nacelle_down",
+                "fov": 40,
+                "pitch": -30
+              }
+            }
+          ],
+          "terrain": "mountains"
+        },
+        "channel_states": {},
+        "channel_table": []
+      }
+    ]
+  ],
+  "passed": true,
+  "options": {
+    "scene": "/Users/eason/Desktop/wfcrl/wind farm RL/scenes/turb3_ctrl3.yaml",
+    "iters": 1,
+    "n_steps": 4,
+    "warmup_steps": 0,
+    "episode_steps": 0,
+    "seed": 0,
+    "tag": "part7-acceptance"
+  },
+  "final_status": "STOPPED",
+  "backend_alive": false,
+  "run_id": "5b296ee515444bfa9f4ac46392231af3"
+}

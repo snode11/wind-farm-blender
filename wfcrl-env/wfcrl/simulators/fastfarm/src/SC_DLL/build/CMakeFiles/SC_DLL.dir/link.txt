@@ -1,0 +1,1 @@
+/opt/homebrew/bin/mpif90  -fallow-argument-mismatch -ffree-line-length-none -fdefault-real-8 -C -DIMPLICIT_DLLEXPORT -O3 -dynamiclib -Wl,-headerpad_max_install_names -o SC_DLL.dll -install_name @rpath/SC_DLL.dll CMakeFiles/SC_DLL.dir/SC_DLL.F90.o

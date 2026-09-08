@@ -1,0 +1,30 @@
+name: turb3_stagger
+backend: fastfarm
+turbine: nrel5mw
+dt: 1
+
+# 错列三机（staggered）：4D 间距 + 每台下游横向累积偏移 0.5R（31.5 m），让下游机组
+# 落在上游尾流的**边缘（半遮挡）**而非正中。FLORIS 选型指南针（probe_layout_pick）
+# 显示此构型偏航增益最大（正对尾流正中时偏航没油水，半遮挡时偏一点就能把尾流推离）。
+# 上 FAST.Farm 用 probe_gain_ff 复核真实增益 —— FLORIS 只选型、不定绝对值。
+layout:
+  - {id: T1, x: 0.0,    y: 0.0}
+  - {id: T2, x: 504.0,  y: 31.5}
+  - {id: T3, x: 1008.0, y: 63.0}
+
+inflow:
+  speed: 8.0
+  direction: 270.0
+  turbulence: null
+
+controls: [yaw]
+
+sensors:
+  - {type: power,     turbines: all}
+  - {type: actuator,  turbines: all}
+  - {type: bladeload, turbines: all}
+  - {type: lidar,     turbines: "T1"}
+  # 机舱下相机（挂机方案预演用）：装 T1 机舱底、略偏转子侧，俯视拍自己的叶片。
+  # 纯几何、SYNTH 保真度，只出安装位姿与视野（视锥框），不出图像数据。
+  - {type: camera,    turbines: "T1",
+     params: {mount: nacelle_down, fov: 40.0, pitch: -30.0, range: 1.5}}
