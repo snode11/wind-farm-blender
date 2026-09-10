@@ -5,43 +5,9 @@ from pathlib import Path
 
 import bpy
 
-from ..cameras import CAMERA_VIEWS, cancel_view_layout, configure_camera, set_view_layout
 from ..presentation import recording_schedule, set_presentation_mode
 
 _ACTIVE = None
-
-
-class WFRL_OT_ConfigureCamera(bpy.types.Operator):
-    bl_idname = 'wfrl.configure_camera'
-    bl_label = 'Apply Camera'
-
-    def execute(self, context):
-        scene = context.scene
-        try:
-            configure_camera(scene, scene.wfrl_view_camera, scene.wfrl_view_fov,
-                             scene.wfrl_view_pitch, scene.wfrl_view_focus)
-        except ValueError as exc:
-            self.report({'ERROR'}, str(exc))
-            return {'CANCELLED'}
-        for area in context.screen.areas if context.screen else ():
-            if area.type == 'VIEW_3D':
-                area.spaces.active.use_local_camera = False
-                area.spaces.active.region_3d.view_perspective = 'CAMERA'
-        return {'FINISHED'}
-
-
-class WFRL_OT_ViewLayout(bpy.types.Operator):
-    bl_idname = 'wfrl.view_layout'
-    bl_label = 'Camera Layout'
-    layout: bpy.props.EnumProperty(items=[(v, v.title(), '') for v in ('SINGLE', 'DUAL', 'QUAD')])
-
-    def execute(self, context):
-        try:
-            set_view_layout(context, self.layout)
-        except ValueError as exc:
-            self.report({'ERROR'}, str(exc))
-            return {'CANCELLED'}
-        return {'FINISHED'}
 
 
 class WFRL_OT_PresentationMode(bpy.types.Operator):
@@ -184,16 +150,10 @@ class WFRL_PT_Presentation(bpy.types.Panel):
 
     def draw(self, context):
         scene, layout = context.scene, self.layout
-        layout.prop(scene, 'wfrl_show_wake', text='Illustrative wake (SYNTH)')
+        layout.prop(scene, 'wfrl_show_wake', text='Wake visible')
+        layout.prop(scene, 'wfrl_wake_display', text='Wake display')
+        layout.label(text='Cinematic: soft flow lines / Scientific: green tracers')
         layout.label(text='Green lines: illustration, not FAST.Farm wind')
-        layout.prop(scene, 'wfrl_view_camera')
-        layout.prop(scene, 'wfrl_view_fov')
-        layout.prop(scene, 'wfrl_view_pitch')
-        layout.prop(scene, 'wfrl_view_focus')
-        layout.operator('wfrl.configure_camera')
-        row = layout.row(align=True)
-        for value in ('SINGLE', 'DUAL', 'QUAD'):
-            row.operator('wfrl.view_layout', text=value.title()).layout = value
         layout.operator('wfrl.presentation_mode')
         layout.label(text='Presentation' if context.workspace.get('presentation_mode') else 'Development')
         layout.prop(scene, 'wfrl_capture_directory')
@@ -207,26 +167,20 @@ class WFRL_PT_Presentation(bpy.types.Panel):
         layout.label(text=scene.get('wfrl_capture_status', 'Capture ready'))
 
 
-CLASSES = (WFRL_OT_ConfigureCamera, WFRL_OT_ViewLayout, WFRL_OT_PresentationMode,
+CLASSES = (WFRL_OT_PresentationMode,
            WFRL_OT_CaptureScreenshot, WFRL_OT_CaptureRecording, WFRL_PT_Presentation)
 
 
 def register_properties():
     scene = bpy.types.Scene
-    scene.wfrl_view_camera = bpy.props.EnumProperty(name='Camera', items=[(v.name, v.label, '') for v in CAMERA_VIEWS])
-    scene.wfrl_view_fov = bpy.props.FloatProperty(name='FOV (degrees)', default=41, min=1, max=179)
-    scene.wfrl_view_pitch = bpy.props.FloatProperty(name='Elevation (degrees)', default=-15, min=-89.9, max=89.9)
-    scene.wfrl_view_focus = bpy.props.StringProperty(name='Focus (farm / turbine ID)', default='farm')
     scene.wfrl_capture_directory = bpy.props.StringProperty(name='Output folder', subtype='DIR_PATH', default='//wfrl-captures/')
     scene.wfrl_capture_fps = bpy.props.IntProperty(name='Capture FPS', min=1, max=30, default=10)
     scene.wfrl_capture_duration = bpy.props.FloatProperty(name='Duration (seconds)', min=.1, max=3600, default=10)
 
 
 def unregister_properties():
-    cancel_view_layout()
     if _ACTIVE is not None:
         _ACTIVE._finish('CANCELLED')
-    for name in ('wfrl_view_camera', 'wfrl_view_fov', 'wfrl_view_pitch', 'wfrl_view_focus',
-                 'wfrl_capture_directory', 'wfrl_capture_fps', 'wfrl_capture_duration'):
+    for name in ('wfrl_capture_directory', 'wfrl_capture_fps', 'wfrl_capture_duration'):
         if hasattr(bpy.types.Scene, name):
             delattr(bpy.types.Scene, name)

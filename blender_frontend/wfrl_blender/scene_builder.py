@@ -69,15 +69,18 @@ def _primitive(collection, kind: str, name: str, location, scale, material):
 
 def _rounded_nacelle_mesh(length: float, width: float, height: float):
     """Build a closed, elliptical-section nacelle shell with exact outer dimensions."""
-    sections = (
-        (-length * 0.5, 0.46),
-        (-length * 0.43, 0.78),
-        (-length * 0.31, 0.98),
-        (length * 0.28, 1.00),
-        (length * 0.43, 0.78),
-        (length * 0.5, 0.46),
-    )
-    count = 32
+    # Rounded end shoulders meet both the straight body and flat end plates
+    # tangentially. Preserve the configured external envelope.
+    sections = []
+    steps = 16
+    for k in range(steps, -1, -1):
+        angle = math.pi*k/(2*steps)
+        sections.append((-length*(.31+.19*math.sin(angle)), .46+.54*math.cos(angle)))
+    sections.append((length*.28, 1.0))
+    for k in range(1, steps+1):
+        angle = math.pi*k/(2*steps)
+        sections.append((length*(.28+.22*math.sin(angle)), .46+.54*math.cos(angle)))
+    count = 64
     vertices = []
     for x, factor in sections:
         for index in range(count):
@@ -131,13 +134,15 @@ def _make_blade(collection, parent, name: str, angle: float):
     pitch_root.parent = parent
     pitch_root.rotation_mode = "ZYX"
     pitch_root.rotation_euler = (angle, math.radians(geometry_data()["scalars"]["PreCone(1)"]), 0.0)
-    vertices, faces = blade_mesh()
+    # Higher presentation sampling keeps the aerofoil trailing edge and root
+    # transition smooth in close shots while preserving the source stations.
+    vertices, faces = blade_mesh(subdiv=12, ring_points=128)
     blade = _mesh_object(collection, name, vertices, faces, get_material("blade"))
     blade.parent = pitch_root
     blade.rotation_mode = "XYZ"
-    _finish(blade, smooth=True)
+    _finish(blade, bevel=0.012, smooth=True)
     blade["pitch_axis"] = "LOCAL_Z"
-    blade["geometry_source"] = "Packaged OpenFAST AeroDyn 19 stations / 8 measured airfoil outlines"
+    blade["geometry_source"] = "Packaged OpenFAST AeroDyn 19 stations / 8 airfoil outlines; smooth interpolation and illustrative tapered tip"
     root_fairing = _cone(
         collection,
         name + ".RootFairing",
@@ -172,14 +177,14 @@ def _make_turbine(collection, turbine):
         "cylinder",
         prefix + ".YawBearing",
         (0, 0, 0),
-        (2.04, 2.04, 0.12),
+        (1.98, 1.98, 0.10),
         get_material("hub"),
     )
     bearing.parent = root
     bearing.location = (0, 0, scalars["TowerHt"] - 1.55)
-    _finish(bearing, bevel=0.08, smooth=True)
+    _finish(bearing, bevel=0.025, smooth=True)
     bearing["geometry_source"] = "NREL 5MW tower-top yaw bearing presentation detail"
-    for z, radius in ((0.28, 3.06), (scalars["TowerHt"] - 1.78, 1.965)):
+    for z, radius in ((0.28, 3.06), (scalars["TowerHt"] - 1.78, 1.945)):
         collar = _primitive(collection, "cylinder", prefix + f".TowerCollar{int(z)}", (0, 0, 0), (radius, radius, 0.16), get_material("hub"))
         collar.parent = root
         collar.location = (0, 0, z)

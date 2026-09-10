@@ -2,6 +2,7 @@
 import bpy
 from .. import runtime
 from ..preferences import get_preferences
+from .diagnostics import CLASSES as DIAGNOSTIC_CLASSES, draw_diagnostic
 
 
 class WFRL_PT_connection(bpy.types.Panel):
@@ -32,7 +33,7 @@ class WFRL_PT_connection(bpy.types.Panel):
                 row.operator('wfrl.backend_run', text=action.title()).action = action
         if ui.error:
             box = layout.box(); box.alert = True
-            box.label(text=ui.error, icon='ERROR')
+            draw_diagnostic(box, 'Backend connection error', ui.error, component='connection', error=True)
         prefs = get_preferences(context)
         if prefs:
             col = layout.column(); col.enabled = runtime.configuration_editable()
@@ -41,12 +42,14 @@ class WFRL_PT_connection(bpy.types.Panel):
         else:
             layout.label(text='Install extension to save paths in Preferences')
         layout.operator('wfrl.check_environment')
-        for component in ('blender', 'python', 'mpi', 'fastfarm'):
+        for component in ('blender', 'python', 'mpi', 'fastfarm', 'environment'):
+            if component == 'environment' and component not in runtime.health_results:
+                continue
             result = runtime.health_results.get(component)
             layout.label(text=f'{component}: {result.status if result else "NOT CHECKED"}')
             if result:
-                layout.label(text=result.detail[:110])
+                draw_diagnostic(layout, f'{component}: {result.status}', result.detail, component=component, status=result.status, error=result.status in {'ERROR', 'INVALID', 'MISSING', 'TIMEOUT', 'UNSUPPORTED'})
         layout.label(text=f'Bridge: {ui.connection}')
 
 
-CLASSES = (WFRL_PT_connection,)
+CLASSES = DIAGNOSTIC_CLASSES + (WFRL_PT_connection,)

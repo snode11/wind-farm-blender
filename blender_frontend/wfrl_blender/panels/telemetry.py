@@ -1,6 +1,7 @@
 """Live records retain per-channel units, fidelity, validity and provenance."""
 import bpy
 from .. import runtime, charts
+from .diagnostics import draw_diagnostic
 
 
 class WFRL_PT_live_telemetry(bpy.types.Panel):
@@ -68,12 +69,11 @@ class WFRL_PT_live_telemetry(bpy.types.Panel):
                     rendered = f'{value:.5g}' if isinstance(value, (int, float)) else str(value) if value is not None else '—'
                     box.label(text=f"{charts.LABELS.get(name, name)}: {rendered} {unit}")
                     box.label(text=f"{record['fidelity']} / {validity}")
-                    if record['error']:
-                        box.label(text=str(record['error'])[:140])
-                    box.label(text=str(record['provenance'])[:140])
+                    draw_diagnostic(box, f'{label} / {name}', record['error'] or 'Channel source details',
+                                    provenance=record['provenance'], error=bool(record['error']))
         layout.label(text=f'Safety events retained: {len(runtime.safety_events)}')
         for event in list(runtime.safety_events)[-5:]:
-            layout.label(text=str(event['payload'])[:160])
+            draw_diagnostic(layout, 'Safety event', event['payload'])
 
 
 CLASSES = (WFRL_PT_live_telemetry,)

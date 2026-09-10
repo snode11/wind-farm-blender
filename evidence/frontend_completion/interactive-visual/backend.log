@@ -1,0 +1,95 @@
+WFRL Bridge listening on 127.0.0.1:8881
+Created FAST.Farm input file: __simul__/fastfarm/FastFarm__2626s__3T_1788918189.939133/FarmInputs/Case.fstf
+Spawning process /opt/anaconda3/envs/wfrl-mac/bin/FAST.Farm __simul__/fastfarm/FastFarm__2626s__3T_1788918189.939133/FarmInputs/Case.fstf
+
+ **************************************************************************************************
+ FAST.Farm
+
+ Copyright (C) 2024 National Renewable Energy Laboratory
+ Copyright (C) 2024 Envision Energy USA LTD
+
+ This program is licensed under Apache License Version 2.0 and comes with ABSOLUTELY NO WARRANTY.
+ See the "LICENSE" file distributed with this software for details.
+ **************************************************************************************************
+
+ FAST.Farm-v3.5.3-dirty
+ Compile Info:
+  - Compiler: GCC version 12.3.0
+  - Architecture: 64 bit
+  - Precision: single
+  - OpenMP: Yes, number of threads: 2/2
+  - Date: Apr 26 2024
+  - Time: 16:41:09
+ Execution Info:
+  - Date: 09/09/2026
+  - Time: 09:43:09+0800
+
+  Heading of the FAST.Farm input file:
+    FAST.Farm     input         - file
+ Running AWAE.
+ Running InflowWind.
+ Running Super Controller.
+ Running WakeDynamics.
+ Running FASTWrapper.
+ Running OpenFAST.
+ OpenFAST input file heading:
+     FAST          Certification - Test #26: NREL 5.0 MW Baseline Wind Turbine (Onshore)
+
+ Running ElastoDyn.
+ Nodal outputs section of ElastoDyn input file not found or improperly formatted.
+ Running AeroDyn.
+ Running InflowWind.
+ Running ServoDyn.
+ Running ServoDyn Interface for Bladed Controllers (using GNU Fortran for Linux).
+ Using legacy Bladed DLL interface.
+ Running OpenFAST.
+ OpenFAST input file heading:
+     FAST          Certification - Test #26: NREL 5.0 MW Baseline Wind Turbine (Onshore)
+
+ Running ElastoDyn.
+ Nodal outputs section of ElastoDyn input file not found or improperly formatted.
+ Running AeroDyn.
+ Running InflowWind.
+ Running ServoDyn.
+ Running ServoDyn Interface for Bladed Controllers (using GNU Fortran for Linux).
+ Using legacy Bladed DLL interface.
+ Running OpenFAST.
+ OpenFAST input file heading:
+     FAST          Certification - Test #26: NREL 5.0 MW Baseline Wind Turbine (Onshore)
+
+ Running ElastoDyn.
+ Nodal outputs section of ElastoDyn input file not found or improperly formatted.
+ Running AeroDyn.
+ Running InflowWind.
+ Running ServoDyn.
+ Running ServoDyn Interface for Bladed Controllers (using GNU Fortran for Linux).
+ Using legacy Bladed DLL interface.
+
+ Farm_Initialize:Farm_ValidateInput:OutFmt produces a column width of 10 instead of 20 characters.
+
+  Time: 0 of 2526 seconds.
+ Initialize MPI
+ Found parent process           3
+Interface: will receive 12 measures at every iteration
+ Will receive MPI interface control for          842  iterations
+                                                                                                   Time: 3 of 2526 seconds.  Estimated final completion at 09:56:04.                                                                                                                                   Time: 6 of 2526 seconds.  Estimated final completion at 09:56:30.                                                                                                                                   Time: 9 of 2526 seconds.  Estimated final completion at 09:57:03.                                                                                                                                   Time: 12 of 2526 seconds.  Estimated final completion at 09:57:36.                                                                                                                                  Time: 15 of 2526 seconds.  Estimated final completion at 09:55:45.                                                                                                                                  Time: 18 of 2526 seconds.  Estimated final completion at 09:55:35.                                                                                                                                  Time: 21 of 2526 seconds.  Estimated final completion at 09:55:28.                                                                                                                                  Time: 24 of 2526 seconds.  Estimated final completion at 09:56:43.                                                                                                                                  Time: 27 of 2526 seconds.  Estimated final completion at 09:56:21.                                                                                                                                  Time: 30 of 2526 seconds.  Estimated final completion at 09:56:47.                                                                                                                                  Time: 33 of 2526 seconds.  Estimated final completion at 09:55:42.                                                                                                                                  Time: 36 of 2526 seconds.  Estimated final completion at 09:56:11.                                                                                                                                  Time: 39 of 2526 seconds.  Estimated final completion at 09:55:42.                                                                                                                                  Time: 42 of 2526 seconds.  Estimated final completion at 09:56:34.                                                                                                                                  Time: 45 of 2526 seconds.  Estimated final completion at 09:56:08.                                                                                                                                  Time: 48 of 2526 seconds.  Estimated final completion at 09:56:17.                                                                                                                                  Time: 51 of 2526 seconds.  Estimated final completion at 09:56:30.                                                                                                                                  Time: 54 of 2526 seconds.  Estimated final completion at 09:56:14.                                                                                                                                  Time: 57 of 2526 seconds.  Estimated final completion at 09:56:04.                                                                                                                                  Time: 60 of 2526 seconds.  Estimated final completion at 09:57:22.                                                                                                                                  Time: 63 of 2526 seconds.  Estimated final completion at 09:56:30.                                                                                                                                  Time: 66 of 2526 seconds.  Estimated final completion at 09:56:49.                                                                                                                                  Time: 69 of 2526 seconds.  Estimated final completion at 09:57:41.                                                                                                                                  Time: 72 of 2526 seconds.  Estimated final completion at 09:57:12.                                                                                                                                  Time: 75 of 2526 seconds.  Estimated final completion at 09:57:28.                                                                                                                                  Time: 78 of 2526 seconds.  Estimated final completion at 09:57:47.                                                                                                                                  Time: 81 of 2526 seconds.  Estimated final completion at 09:58:41.                                                                                                                                  Time: 84 of 2526 seconds.  Estimated final completion at 09:57:28.                                                                                                                                  Time: 87 of 2526 seconds.  Estimated final completion at 09:57:12.                                                                                                                                  Time: 90 of 2526 seconds.  Estimated final completion at 09:58:51.                                                                                                                                  Time: 93 of 2526 seconds.  Estimated final completion at 10:00:23.                                                                                                                                  Time: 96 of 2526 seconds.  Estimated final completion at 10:01:32.                                                                                                                                  Time: 99 of 2526 seconds.  Estimated final completion at 10:00:07.                                                                                                                                  Time: 102 of 2526 seconds.  Estimated final completion at 10:00:35.                                                                                                                                 Time: 105 of 2526 seconds.  Estimated final completion at 09:59:45.                                                                                                                                 Time: 108 of 2526 seconds.  Estimated final completion at 10:01:16.                                                                                                                                 Time: 111 of 2526 seconds.  Estimated final completion at 10:00:54.                                                                                                                                 Time: 114 of 2526 seconds.  Estimated final completion at 10:02:06.                                                                                                                                 Time: 117 of 2526 seconds.  Estimated final completion at 09:59:58.                                                                                                                                 Time: 120 of 2526 seconds.  Estimated final completion at 10:01:35.                                                                                                                                 Time: 123 of 2526 seconds.  Estimated final completion at 10:00:23.                                                                                                                                 Time: 126 of 2526 seconds.  Estimated final completion at 10:02:25.                                                                                                                                 Time: 129 of 2526 seconds.  Estimated final completion at 10:01:57.                                                                                                                                 Time: 132 of 2526 seconds.  Estimated final completion at 10:01:19.                                                                                                                                 Time: 135 of 2526 seconds.  Estimated final completion at 10:01:44.                                                                                                                                 Time: 138 of 2526 seconds.  Estimated final completion at 10:01:54.                                                                                                                                 Time: 141 of 2526 seconds.  Estimated final completion at 10:03:08.                              
+ FARM_CalcOutput:AWAE_CalcOutput:LowResGridCalcOutput:The center of wake plane #49 for turbine #3
+ has passed the upper-most X boundary of the low-resolution domain.
+
+                                                                                                   Time: 144 of 2526 seconds.  Estimated final completion at 16:58:30.                              
+ FARM_CalcOutput:AWAE_CalcOutput:LowResGridCalcOutput:The center of wake plane #50 for turbine #3
+ has passed the upper-most X boundary of the low-resolution domain.
+
+                                                                                                   Time: 147 of 2526 seconds.  Estimated final completion at 10:10:57.                              
+ FARM_CalcOutput:AWAE_CalcOutput:LowResGridCalcOutput:The center of wake plane #51 for turbine #3
+ has passed the upper-most X boundary of the low-resolution domain.
+
+                                                                                                   Time: 150 of 2526 seconds.  Estimated final completion at 10:08:34.                              
+ FARM_CalcOutput:AWAE_CalcOutput:LowResGridCalcOutput:The center of wake plane #52 for turbine #3
+ has passed the upper-most X boundary of the low-resolution domain.
+
+                                                                                                   Time: 153 of 2526 seconds.  Estimated final completion at 10:07:05.                              
+ FARM_CalcOutput:AWAE_CalcOutput:LowResGridCalcOutput:The center of wake plane #53 for turbine #3
+ has passed the upper-most X boundary of the low-resolution domain.
+
+                                                                                                   Time: 156 of 2526 seconds.  Estimated final completion at 10:05:10.                              

@@ -305,3 +305,16 @@ def test_formal_launcher_exit_with_live_child_fails_and_cleans_group():
     finally:
         try: os.killpg(process.pid, signal.SIGKILL)
         except (ProcessLookupError, PermissionError): pass
+
+
+def test_completed_reader_does_not_hide_live_owned_descendants():
+    session = BackendSession(scene(), trainer_factory=FakeTrainer)
+    reader = threading.Thread(target=lambda: None)
+    reader.start(); reader.join()
+    trainer = NS(error=None, running=True)
+    trainer.stop = lambda timeout: setattr(trainer, 'running', False)
+    session._trainer, session._thread = trainer, reader
+    session.status = 'RUNNING'
+    session.poll()
+    assert session.status == 'FAILED', 'A completed reader is not proof that MPI children exited'
+    wait_for(lambda: not session.alive())

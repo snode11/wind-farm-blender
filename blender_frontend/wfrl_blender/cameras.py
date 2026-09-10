@@ -277,3 +277,43 @@ def cancel_view_layout():
             bpy.app.timers.unregister(_layout_timer)
     except (ImportError, RuntimeError):
         pass
+
+
+def ensure_gimbal(scene, turbine):
+    """Lazily add a camera to existing saved scenes without rebuilding geometry."""
+    import bpy
+    root = scene.objects.get(f'WFRL.Turbine.{turbine}.YawRoot')
+    if root is None:
+        raise ValueError(f'{turbine} is not present in this scene')
+    name = f'WFRL.Camera.{turbine}.Gimbal'
+    camera = scene.objects.get(name)
+    if camera is None:
+        camera = bpy.data.objects.new(name, bpy.data.cameras.new(name + '.Data'))
+        root.users_collection[0].objects.link(camera)
+        camera.parent = root
+        # Outside the nacelle shell, beside the rotor plane: clear downward sight.
+        # Keep the rotor, hub, and nacelle in frame instead of filling the
+        # view with the nearest blade at the default downward pitch.
+        camera.location = (-7, -4.2, -4.0)
+        camera.data.clip_start, camera.data.clip_end = .05, 30000
+        camera.data.display_size = .5
+        camera['mount'] = 'nacelle gimbal / SYNTH'
+        aim_gimbal(camera, 180, -90, 75)
+    return camera
+
+
+def aim_gimbal(camera, yaw, pitch, fov):
+    """Yaw about mount Z, then local pitch; exact poles retain stable roll."""
+    import math
+    from mathutils import Euler
+    yaw, pitch, fov = float(yaw), float(pitch), float(fov)
+    if not all(math.isfinite(v) for v in (yaw, pitch, fov)):
+        raise ValueError('Camera angles must be finite')
+    yaw, pitch, fov = yaw % 360, max(-90, min(90, pitch)), max(10, min(120, fov))
+    camera.rotation_euler = Euler((math.radians(90 + pitch), 0, math.radians(yaw - 90)), 'XYZ')
+    camera.data.type = 'PERSP'
+    camera.data.sensor_fit = 'HORIZONTAL'
+    camera.data.sensor_width = 36
+    camera.data.lens = 36 / (2 * math.tan(math.radians(fov) / 2))
+    camera['gimbal_yaw'], camera['gimbal_pitch'], camera['gimbal_fov'] = yaw, pitch, fov
+    return camera

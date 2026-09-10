@@ -1,0 +1,328 @@
+{
+  "background": true,
+  "total_seconds": 4.962662458070554,
+  "objects": 2647,
+  "scope": "synchronous scene construction; excludes first rendered frame and solver",
+  "functions": [
+    {
+      "file": "live_scene.py",
+      "line": 24,
+      "function": "build_live_scene",
+      "calls": 1,
+      "own_seconds": 0.008208131,
+      "cumulative_seconds": 4.962136959
+    },
+    {
+      "file": "scene_builder.py",
+      "line": 478,
+      "function": "build_scene",
+      "calls": 1,
+      "own_seconds": 0.002077486,
+      "cumulative_seconds": 4.897302166
+    },
+    {
+      "file": "scene_builder.py",
+      "line": 47,
+      "function": "_primitive",
+      "calls": 53,
+      "own_seconds": 2.3960371250000003,
+      "cumulative_seconds": 2.4021876690000004
+    },
+    {
+      "file": "scene_builder.py",
+      "line": 269,
+      "function": "_make_terrain_surface",
+      "calls": 1,
+      "own_seconds": 0.055719000000000005,
+      "cumulative_seconds": 2.2038363750000003
+    },
+    {
+      "file": "landscape.py",
+      "line": 139,
+      "function": "build_landscape",
+      "calls": 1,
+      "own_seconds": 0.287914045,
+      "cumulative_seconds": 2.147648542
+    },
+    {
+      "file": "scene_builder.py",
+      "line": 261,
+      "function": "_make_ground_grid",
+      "calls": 1,
+      "own_seconds": 6.0708e-05,
+      "cumulative_seconds": 1.315624708
+    },
+    {
+      "file": "landscape.py",
+      "line": 431,
+      "function": "add_tuft",
+      "calls": 21879,
+      "own_seconds": 0.48538603900000005,
+      "cumulative_seconds": 0.800113819
+    },
+    {
+      "file": "landscape.py",
+      "line": 143,
+      "function": "mesh",
+      "calls": 15,
+      "own_seconds": 0.179605335,
+      "cumulative_seconds": 0.501077083
+    },
+    {
+      "file": "scene_builder.py",
+      "line": 368,
+      "function": "_make_sensor_fixtures",
+      "calls": 1,
+      "own_seconds": 0.00037983300000000005,
+      "cumulative_seconds": 0.44273733400000004
+    },
+    {
+      "file": "scene_builder.py",
+      "line": 159,
+      "function": "_make_turbine",
+      "calls": 3,
+      "own_seconds": 0.000428293,
+      "cumulative_seconds": 0.26791975100000004
+    },
+    {
+      "file": "scene_builder.py",
+      "line": 290,
+      "function": "_make_wake",
+      "calls": 1,
+      "own_seconds": 0.010001102000000001,
+      "cumulative_seconds": 0.24905800000000003
+    },
+    {
+      "file": "scene_builder.py",
+      "line": 126,
+      "function": "_make_blade",
+      "calls": 9,
+      "own_seconds": 0.000365084,
+      "cumulative_seconds": 0.16716883200000002
+    },
+    {
+      "file": "landscape.py",
+      "line": 281,
+      "function": "patch_mesh",
+      "calls": 2,
+      "own_seconds": 0.067970133,
+      "cumulative_seconds": 0.139693999
+    },
+    {
+      "file": "landscape.py",
+      "line": 44,
+      "function": "height",
+      "calls": 108661,
+      "own_seconds": 0.08529017100000001,
+      "cumulative_seconds": 0.126771891
+    },
+    {
+      "file": "landscape.py",
+      "line": 123,
+      "function": "terrain_sampler",
+      "calls": 1,
+      "own_seconds": 0.071995847,
+      "cumulative_seconds": 0.08908716700000001
+    },
+    {
+      "file": "landscape.py",
+      "line": 38,
+      "function": "vegetation_factor",
+      "calls": 19968,
+      "own_seconds": 0.006921936,
+      "cumulative_seconds": 0.08601678900000001
+    },
+    {
+      "file": "landscape.py",
+      "line": 28,
+      "function": "road_clearance",
+      "calls": 26600,
+      "own_seconds": 0.018771193000000002,
+      "cumulative_seconds": 0.084562654
+    },
+    {
+      "file": "scene_builder.py",
+      "line": 23,
+      "function": "_finish",
+      "calls": 195,
+      "own_seconds": 0.057953419000000006,
+      "cumulative_seconds": 0.06315008100000001
+    },
+    {
+      "file": "scene_builder.py",
+      "line": 36,
+      "function": "_mesh_object",
+      "calls": 132,
+      "own_seconds": 0.0030892280000000003,
+      "cumulative_seconds": 0.062135171
+    },
+    {
+      "file": "scene_builder.py",
+      "line": 106,
+      "function": "_cone",
+      "calls": 15,
+      "own_seconds": 0.058961754000000005,
+      "cumulative_seconds": 0.059200416000000006
+    },
+    {
+      "file": "landscape.py",
+      "line": 30,
+      "function": "<genexpr>",
+      "calls": 106400,
+      "own_seconds": 0.011178200000000001,
+      "cumulative_seconds": 0.058522156000000006
+    },
+    {
+      "file": "landscape.py",
+      "line": 21,
+      "function": "_distance_to_pad",
+      "calls": 79800,
+      "own_seconds": 0.027401774,
+      "cumulative_seconds": 0.047343956
+    },
+    {
+      "file": "landscape.py",
+      "line": 133,
+      "function": "surface",
+      "calls": 78485,
+      "own_seconds": 0.018865247,
+      "cumulative_seconds": 0.041344955
+    },
+    {
+      "file": "cameras.py",
+      "line": 52,
+      "function": "build_cameras",
+      "calls": 1,
+      "own_seconds": 0.036622999,
+      "cumulative_seconds": 0.036830625000000006
+    },
+    {
+      "file": "materials.py",
+      "line": 23,
+      "function": "get_material",
+      "calls": 331,
+      "own_seconds": 0.006007159000000001,
+      "cumulative_seconds": 0.035203463000000004
+    },
+    {
+      "file": "mechanical_details.py",
+      "line": 8,
+      "function": "add_mechanical_details",
+      "calls": 3,
+      "own_seconds": 0.000512842,
+      "cumulative_seconds": 0.030296959000000002
+    },
+    {
+      "file": "turbine_geometry.py",
+      "line": 89,
+      "function": "blade_mesh",
+      "calls": 1,
+      "own_seconds": 0.011199666,
+      "cumulative_seconds": 0.028620917000000003
+    },
+    {
+      "file": "mechanical_details.py",
+      "line": 27,
+      "function": "ring",
+      "calls": 30,
+      "own_seconds": 0.007088265000000001,
+      "cumulative_seconds": 0.024977832000000002
+    },
+    {
+      "file": "materials.py",
+      "line": 95,
+      "function": "flow_material",
+      "calls": 150,
+      "own_seconds": 0.02150883,
+      "cumulative_seconds": 0.02150883
+    },
+    {
+      "file": "atmosphere.py",
+      "line": 38,
+      "function": "apply_preset",
+      "calls": 1,
+      "own_seconds": 0.019339290000000002,
+      "cumulative_seconds": 0.019418459000000002
+    },
+    {
+      "file": "landscape.py",
+      "line": 14,
+      "function": "_smoothstep",
+      "calls": 61955,
+      "own_seconds": 0.012307112,
+      "cumulative_seconds": 0.018727174000000003
+    },
+    {
+      "file": "landscape.py",
+      "line": 33,
+      "function": "lowland_factor",
+      "calls": 40558,
+      "own_seconds": 0.004976874,
+      "cumulative_seconds": 0.016775042
+    },
+    {
+      "file": "mechanical_details.py",
+      "line": 12,
+      "function": "part",
+      "calls": 117,
+      "own_seconds": 0.00017674000000000002,
+      "cumulative_seconds": 0.012151666
+    },
+    {
+      "file": "turbine_geometry.py",
+      "line": 84,
+      "function": "_hermite",
+      "calls": 30720,
+      "own_seconds": 0.0073513960000000005,
+      "cumulative_seconds": 0.0073513960000000005
+    },
+    {
+      "file": "landscape.py",
+      "line": 358,
+      "function": "instance_data",
+      "calls": 1,
+      "own_seconds": 0.007248542,
+      "cumulative_seconds": 0.007253750000000001
+    },
+    {
+      "file": "landscape.py",
+      "line": 54,
+      "function": "terrain_shader",
+      "calls": 2,
+      "own_seconds": 0.004689292,
+      "cumulative_seconds": 0.0071149590000000006
+    },
+    {
+      "file": "wake.py",
+      "line": 240,
+      "function": "flow_point",
+      "calls": 9000,
+      "own_seconds": 0.002136546,
+      "cumulative_seconds": 0.00616661
+    },
+    {
+      "file": "turbine_geometry.py",
+      "line": 29,
+      "function": "_resample_ring",
+      "calls": 19,
+      "own_seconds": 0.001006186,
+      "cumulative_seconds": 0.0056689190000000006
+    },
+    {
+      "file": "wake.py",
+      "line": 253,
+      "function": "proxy_ring_points_local",
+      "calls": 6402,
+      "own_seconds": 0.0007893360000000001,
+      "cumulative_seconds": 0.0049970610000000006
+    },
+    {
+      "file": "mechanical_details.py",
+      "line": 19,
+      "function": "box",
+      "calls": 87,
+      "own_seconds": 8.1579e-05,
+      "cumulative_seconds": 0.0047948700000000006
+    }
+  ]
+}

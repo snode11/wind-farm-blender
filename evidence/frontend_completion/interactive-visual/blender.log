@@ -1,0 +1,23 @@
+ACCEPT_STAGE running 0.51
+ACCEPT_PROGRESS running 15 CONNECTED RUNNING 0
+ACCEPT_PROGRESS running 30 CONNECTED RUNNING 0
+ACCEPT_PROGRESS running 45 CONNECTED RUNNING 4
+ACCEPT_STAGE pausing 53.61
+ACCEPT_STAGE paused_stale 55.37
+ACCEPT_PROGRESS paused_stale 60 CONNECTED PAUSED 12
+ACCEPT_PROGRESS paused_stale 75 CONNECTED PAUSED 12
+ACCEPT_STAGE single_step 87.45
+ACCEPT_STAGE step_stable 87.95
+ACCEPT_STAGE resumed 89.45
+ACCEPT_PROGRESS resumed 90 CONNECTED RUNNING 14
+ACCEPT_STAGE disconnected 91.54
+ACCEPT_STAGE reconnecting 93.58
+ACCEPT_STAGE stopping 94.01
+ACCEPT_STAGE export 96.43
+ACCEPT_STAGE export_failure 96.57
+ACCEPT_STAGE complete 96.88
+FRONTEND_ACCEPTANCE True
+01:37.377  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

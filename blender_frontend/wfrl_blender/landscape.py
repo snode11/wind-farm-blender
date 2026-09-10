@@ -120,6 +120,22 @@ def terrain_shader(material):
     links.new(bsdf.outputs[0],out.inputs['Surface'])
 
 
+def terrain_sampler(terrain):
+    """Snapshot the immutable terrain mesh once; avoid per-query depsgraph work."""
+    from mathutils import Vector
+    from mathutils.bvhtree import BVHTree
+    data = terrain.data
+    data.calc_loop_triangles()
+    tree = BVHTree.FromPolygons([vertex.co.copy() for vertex in data.vertices],
+                               [tuple(triangle.vertices) for triangle in data.loop_triangles],
+                               all_triangles=True)
+    down = Vector((0, 0, -1))
+    def surface(x, y):
+        point, _, _, _ = tree.ray_cast(Vector((x, y, 1500)), down)
+        return point.z if point is not None else height(x, y)
+    return surface
+
+
 def build_landscape(collection):
     import bpy
     from .materials import get_material
@@ -183,10 +199,7 @@ def build_landscape(collection):
     coord=nodes.new('ShaderNodeTexCoord');links.new(coord.outputs['Object'],tex.inputs['Vector'])
     bump=nodes.new('ShaderNodeBump');bump.inputs['Distance'].default_value=.12
     links.new(tex.outputs['Fac'],bump.inputs['Height']);links.new(bump.outputs[0],nodes.get('Principled BSDF').inputs['Normal'])
-    def surface(x,y):
-        from mathutils import Vector
-        hit, point, _, _ = terrain.ray_cast(Vector((x,y,1500)),Vector((0,0,-1)))
-        return point.z if hit else height(x,y)
+    surface = terrain_sampler(terrain)
     shoulder=material('WFRL.Landscape.RoadShoulder',(.14,.12,.075))
     track=material('WFRL.Landscape.CompactedGravel',(.22,.19,.14))
     # Gravel color varies in world metres; road edges are geometry, not a

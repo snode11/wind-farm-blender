@@ -66,9 +66,34 @@ def _ring_faces(rings, count):
     return faces
 
 
+def _smooth_slopes(xs, ys):
+    """Shape-preserving Hermite slopes on nonuniform source stations."""
+    widths = [b - a for a, b in zip(xs, xs[1:])]
+    slopes = [(b - a) / h for a, b, h in zip(ys, ys[1:], widths)]
+    result = [slopes[0]]
+    for i in range(1, len(ys) - 1):
+        left, right = slopes[i - 1], slopes[i]
+        if left * right <= 0:
+            result.append(0.0)
+        else:
+            w1, w2 = 2 * widths[i] + widths[i - 1], widths[i] + 2 * widths[i - 1]
+            result.append((w1 + w2) / (w1 / left + w2 / right))
+    return result + [slopes[-1]]
+
+
+def _hermite(a, b, da, db, width, t):
+    return ((2*t**3 - 3*t**2 + 1)*a + (t**3 - 2*t**2 + t)*width*da
+            + (-2*t**3 + 3*t**2)*b + (t**3 - t**2)*width*db)
+
+
 @lru_cache(maxsize=4)
-def blade_mesh(subdiv=4, ring_points=96):
-    """Return vertices/faces: 73 interpolated rings with curved airfoil contours."""
+def blade_mesh(subdiv=8, ring_points=96):
+    """Smooth source-station loft with a presentation-only tapered tip.
+
+    Original sections remain exact through the penultimate station. The last
+    1.3666 m closes smoothly to one vertex at the original radial extent;
+    this tip finish is illustrative, not a replacement aerodynamic dataset.
+    """
     if subdiv < 1 or ring_points < 12:
         raise ValueError("Blade loft needs positive subdivision and at least 12 outline points")
     data = geometry_data()
@@ -84,14 +109,34 @@ def blade_mesh(subdiv=4, ring_points=96):
             axial = -u * math.sin(beta) + v * math.cos(beta)
             ring.append((curve + axial, sweep + tangent, data["scalars"]["HubRad"] + span))
         sections.append(ring)
+    spans = [ring[0][2] for ring in sections]
+    slopes = [[_smooth_slopes(spans, [ring[j][axis] for ring in sections])
+               for axis in range(2)] for j in range(ring_points)]
     vertices = []
+    tip_center = tuple(sum(p[axis] for p in sections[-1]) / ring_points for axis in range(2))
     for i in range(len(sections) - 1):
-        for j in range(subdiv + (i == len(sections) - 2)):
-            t = j / subdiv
-            vertices.extend(tuple(a + (b - a) * t for a, b in zip(p, q))
-                            for p, q in zip(sections[i], sections[i + 1]))
+        width = spans[i + 1] - spans[i]
+        is_tip = i == len(sections) - 2
+        steps = max(24, subdiv) if is_tip else subdiv
+        for k in range(steps):
+            # Cluster rings at the rounded pole. sqrt(1-t^3) has zero first
+            # and second derivatives at the shoulder, and a rounded pole
+            # (radius squared proportional to distance from the tip).
+            t = math.sin(math.pi * k / (2 * steps)) if is_tip else k / steps
+            taper = math.sqrt(max(0.0, 1 - t**3)) if is_tip else 1.0
+            for j, (p, q) in enumerate(zip(sections[i], sections[i + 1])):
+                xy = [_hermite(p[axis], q[axis], slopes[j][axis][i],
+                               slopes[j][axis][i + 1], width, t) for axis in range(2)]
+                vertices.append((*[tip_center[axis] + (xy[axis] - tip_center[axis])*taper
+                                   for axis in range(2)], spans[i] + width*t))
+    rings = len(vertices) // ring_points
+    # Replace the old flat terminal polygon with a closed triangle fan.
+    faces = _ring_faces(rings, ring_points)[:-1]
+    tip = len(vertices)
+    vertices.append((*tip_center, spans[-1]))
+    last = (rings - 1)*ring_points
+    faces.extend((last + j, last + (j + 1) % ring_points, tip) for j in range(ring_points))
     # Swapping airfoil (chord, thickness) into (axial, tangent) reverses winding.
-    faces = _ring_faces(len(vertices) // ring_points, ring_points)
     return vertices, [tuple(reversed(face)) for face in faces]
 
 

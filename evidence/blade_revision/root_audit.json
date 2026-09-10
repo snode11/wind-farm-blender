@@ -1,0 +1,80 @@
+{
+  "scope": "Rigid Blade1, full 360-degree sweep at 5-degree intervals; other blades are phase shifts. Vertex-to-tower radial clearance, not certified surface clearance or elastic deflection analysis.",
+  "minimum_sampled_radial_clearance_m": 1.5049943409364337,
+  "at": {
+    "pitch": 2,
+    "azimuth": 180
+  },
+  "root_surface_intersections": [
+    {
+      "pitch": -5,
+      "surface_intersections": {
+        ".Blade1.RootFairing": 478,
+        ".Blade1.RootFlange": 320,
+        ".Blade1.PitchSeal": 320,
+        ".Hub": 42,
+        ".Spinner": 31
+      }
+    },
+    {
+      "pitch": 0,
+      "surface_intersections": {
+        ".Blade1.RootFairing": 480,
+        ".Blade1.RootFlange": 320,
+        ".Blade1.PitchSeal": 320,
+        ".Hub": 42,
+        ".Spinner": 31
+      }
+    },
+    {
+      "pitch": 2,
+      "surface_intersections": {
+        ".Blade1.RootFairing": 479,
+        ".Blade1.RootFlange": 320,
+        ".Blade1.PitchSeal": 320,
+        ".Hub": 41,
+        ".Spinner": 31
+      }
+    },
+    {
+      "pitch": 25,
+      "surface_intersections": {
+        ".Blade1.RootFairing": 473,
+        ".Blade1.RootFlange": 320,
+        ".Blade1.PitchSeal": 320,
+        ".Hub": 41,
+        ".Spinner": 31
+      }
+    },
+    {
+      "pitch": 45,
+      "surface_intersections": {
+        ".Blade1.RootFairing": 476,
+        ".Blade1.RootFlange": 320,
+        ".Blade1.PitchSeal": 320,
+        ".Hub": 42,
+        ".Spinner": 31
+      }
+    },
+    {
+      "pitch": 70,
+      "surface_intersections": {
+        ".Blade1.RootFairing": 478,
+        ".Blade1.RootFlange": 320,
+        ".Blade1.PitchSeal": 320,
+        ".Hub": 41,
+        ".Spinner": 31
+      }
+    },
+    {
+      "pitch": 90,
+      "surface_intersections": {
+        ".Blade1.RootFairing": 480,
+        ".Blade1.RootFlange": 320,
+        ".Blade1.PitchSeal": 320,
+        ".Hub": 42,
+        ".Spinner": 31
+      }
+    }
+  ]
+}

@@ -3,6 +3,7 @@ import bpy
 
 from .. import runtime
 from ..training import STAT_LABELS
+from .diagnostics import draw_diagnostic
 
 
 class WFRL_PT_TrainingDashboard(bpy.types.Panel):
@@ -38,10 +39,10 @@ class WFRL_PT_TrainingDashboard(bpy.types.Panel):
             box.label(text=str(record.get('validity', 'unsupported')).upper())
             if record.get('age') is not None:
                 box.label(text=f"Metric source age {record['age']:.1f} s")
-            if record.get('error'):
-                box.label(text=str(record['error'])[:140])
-            if record.get('provenance'):
-                box.label(text=str(record['provenance'])[:140])
+            if record.get('error') or record.get('provenance'):
+                draw_diagnostic(box, f'Training / {label}', record.get('error') or 'Metric source details',
+                                component='training', provenance=record.get('provenance'), error=bool(record.get('error')))
+
 
 
 CLASSES = (WFRL_PT_TrainingDashboard,)

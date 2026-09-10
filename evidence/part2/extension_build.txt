@@ -1,3 +1,0 @@
-building: wfrl_blender-0.1.0.zip
-complete
-created: "dist/wfrl_blender-0.1.0.zip", 10301

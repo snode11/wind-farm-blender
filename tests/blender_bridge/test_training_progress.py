@@ -140,3 +140,19 @@ w.progress('done');w.close()
     session.start('formal_training', dict(scene=str(path)))
     assert session.run_id != first_run
     session._process.wait(timeout=5);session.poll()
+
+
+def test_interactive_statistics_keep_actual_reward_semantics():
+    from types import SimpleNamespace
+    import wfrl.blender_bridge.training_progress as progress
+    assert hasattr(progress, 'interactive_progress'), 'Interactive dashboard needs actual Trainer statistics'
+    snapshot = SimpleNamespace(step=8, iters_done=1, phase='updating',
+        stats=dict(mean_power=5.5, mean_reward=.25, vloss=.3, explained_var=.8))
+    record = progress.interactive_progress(snapshot, 'run', 3)
+    assert record['step'] == 8 and record['agent_step'] == 24
+    assert record['stats']['mean_power']['value'] == 5.5
+    assert record['stats']['mean_raw_reward']['value'] == .25
+    assert record['stats']['mean_reward']['validity'] == 'unsupported'
+    assert record['stats']['value_loss']['value'] == .3
+    snapshot.phase = 'sampling'
+    assert progress.interactive_progress(snapshot, 'run', 3)['stats'] == {}

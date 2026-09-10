@@ -12,6 +12,7 @@ PALETTE = {
     "accent": (0.015, 0.55, 0.82, 1.0),
     "wake": (0.01, 0.48, 0.86, 1.0),
     "wake_line": (0.01, 1.0, 0.01, 1.0),
+    "cinematic_line": (0.42, 0.72, 0.82, 1.0),
     "terrain": (0.10, 0.30, 0.12, 1.0),
     "terrain_dirt": (0.25, 0.13, 0.055, 1.0),
     "terrain_stone": (0.28, 0.31, 0.29, 1.0),
@@ -26,8 +27,8 @@ def get_material(name: str):
     material = bpy.data.materials.get(f"WFRL.{name}") or bpy.data.materials.new(f"WFRL.{name}")
     material.diffuse_color = PALETTE.get(name, PALETTE["tower"])
     material.use_nodes = True
-    if name in {"wake_line", "wake_pulse"}:
-        return flow_material(material, pulse=name == "wake_pulse")
+    if name in {"wake_line", "wake_pulse", "cinematic_line"}:
+        return flow_material(material, pulse=name == "wake_pulse", cinematic=name == "cinematic_line")
     if name == "terrain":
         from .landscape import terrain_shader
         terrain_shader(material)
@@ -37,6 +38,20 @@ def get_material(name: str):
         node.inputs["Base Color"].default_value = PALETTE.get(name, PALETTE["tower"])
         node.inputs["Roughness"].default_value = 0.92 if name == "terrain" else (0.46 if name in {"tower", "blade"} else 0.66)
         node.inputs["Metallic"].default_value = 0.08 if name == "hub" else 0.0
+        # Clean painted composite/steel still needs micro-surface breakup at
+        # close range; keep it subtle so the engineering palette stays clean.
+        if name in {"tower", "blade", "nacelle", "hub", "foundation"}:
+            tex = material.node_tree.nodes.get("WFRL.MicroSurface") or material.node_tree.nodes.new("ShaderNodeTexNoise")
+            tex.name = "WFRL.MicroSurface"
+            tex.inputs["Scale"].default_value = 38.0
+            tex.inputs["Detail"].default_value = 2.0
+            tex.inputs["Roughness"].default_value = 0.65
+            bump = material.node_tree.nodes.get("WFRL.MicroBump") or material.node_tree.nodes.new("ShaderNodeBump")
+            bump.name = "WFRL.MicroBump"
+            bump.inputs["Strength"].default_value = 0.085 if name in {"blade", "tower"} else 0.05
+            bump.inputs["Distance"].default_value = 0.018
+            material.node_tree.links.new(tex.outputs["Fac"], bump.inputs["Height"])
+            material.node_tree.links.new(bump.outputs["Normal"], node.inputs["Normal"])
         if name in {"tower", "blade", "nacelle", "hub", "foundation"}:
             node.inputs["Emission Color"].default_value = PALETTE[name]
             node.inputs["Emission Strength"].default_value = 0.04
@@ -45,12 +60,6 @@ def get_material(name: str):
             node.inputs["Emission Color"].default_value = PALETTE["accent"]
             node.inputs["Emission Strength"].default_value = 0.16
             material.surface_render_method = "DITHERED"
-        elif name == "wake_line":
-            node.inputs["Alpha"].default_value = 1.0
-            material.surface_render_method = "DITHERED"
-            node.inputs["Emission Color"].default_value = PALETTE["wake_line"]
-            node.inputs["Emission Strength"].default_value = 0.65
-            node.inputs["Roughness"].default_value = 0.38
         elif name in {"accent", "grid"}:
             node.inputs["Emission Color"].default_value = PALETTE[name]
             node.inputs["Emission Strength"].default_value = 0.22
@@ -92,14 +101,14 @@ def wake_volume_material():
     return material
 
 
-def flow_material(material, *, pulse=False):
+def flow_material(material, *, pulse=False, cinematic=False):
     """Hub-local downstream alpha falloff, shared by rings, traces and pulses."""
     nodes, links = material.node_tree.nodes, material.node_tree.links
     nodes.clear()
     output = nodes.new('ShaderNodeOutputMaterial')
     emission = nodes.new('ShaderNodeEmission')
-    emission.inputs['Color'].default_value = (.22, 1.0, .045, 1) if pulse else (.025, .75, .006, 1)
-    emission.inputs['Strength'].default_value = 4.0 if pulse else 1.1
+    emission.inputs['Color'].default_value = PALETTE['cinematic_line'] if cinematic else ((.22, 1.0, .045, 1) if pulse else (.025, .75, .006, 1))
+    emission.inputs['Strength'].default_value = .28 if cinematic else (4.0 if pulse else 1.1)
     transparent = nodes.new('ShaderNodeBsdfTransparent')
     coord = nodes.new('ShaderNodeTexCoord')
     split = nodes.new('ShaderNodeSeparateXYZ')
@@ -109,7 +118,7 @@ def flow_material(material, *, pulse=False):
     fade.clamp = True
     fade.inputs['From Min'].default_value = 240
     fade.inputs['From Max'].default_value = 457
-    fade.inputs['To Min'].default_value = 1.0 if pulse else .55
+    fade.inputs['To Min'].default_value = .72 if cinematic else (1.0 if pulse else .55)
     fade.inputs['To Max'].default_value = 0
     links.new(split.outputs['X'],fade.inputs['Value'])
     inlet = nodes.new('ShaderNodeMapRange'); inlet.clamp=True

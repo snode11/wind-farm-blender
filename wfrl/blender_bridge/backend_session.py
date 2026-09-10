@@ -119,8 +119,8 @@ class BackendSession:
                     self._collect_progress(final=True)
                     error = getattr(self._trainer, 'error', None)
                     if self._process is not None and self._process.returncode: error = f'Formal process exited {self._process.returncode}'
-                    if self._process is not None and self.alive():
-                        error = error or 'Formal launcher exited while child processes remained'
+                    if self.alive():
+                        error = error or 'Backend controller exited while child processes remained'
                         self.lifecycle('FAILED', error)
                         self.stop(0)
                     else:
@@ -209,7 +209,8 @@ class BackendSession:
                             self._progress_events.put_nowait(('error', payload))
                     self._progress_reader = TrainingProgressReader(progress_path, self.run_id,
                         lambda record: self._progress_events.put_nowait(('training_stats', record)), observability_error)
-                    self._process = subprocess.Popen(argv, cwd=root, start_new_session=True)
+                    from .isolated_trainer import launcher_environment
+                    self._process = subprocess.Popen(argv, cwd=root, env=launcher_environment(), start_new_session=True)
                     self._progress_reader.start()
                 else:
                     factory = self.trainer_factory
@@ -219,8 +220,13 @@ class BackendSession:
                             from .floris_session import FlorisDemoSession
                             factory = FlorisDemoSession
                         else:
-                            from wfrl.studio.trainer import Trainer
-                            factory = Trainer
+                            if os.name == "posix" and mode in {"interactive_training", "replay"}:
+                                from functools import partial
+                                from .isolated_trainer import IsolatedTrainer
+                                factory = partial(IsolatedTrainer, session_id=self.session_id, mpi_launcher=self.mpi_launcher)
+                            else:
+                                from wfrl.studio.trainer import Trainer
+                                factory = Trainer
                     if set(options) & {'on_snapshot', 'demo', 'replay'}: raise ValueError('Reserved Trainer options')
                     adapter = SnapshotAdapter(self.scene, self.session_id, mode)
                     def snapshot_callback(snapshot):
@@ -231,12 +237,20 @@ class BackendSession:
                                 if runtime is not None:
                                     for topic, enabled in self._channel_states.items():
                                         runtime.set_enabled(topic, enabled)
-                                payload = adapter.encode(snapshot)
+                                payload = snapshot.payload if hasattr(snapshot, "wire_events") else adapter.encode(snapshot)
                                 payload['run_id'] = self.run_id
                                 payload['channel_table'] = self.channel_table()
                                 self.emit('snapshot', payload)
+                                if mode == 'interactive_training':
+                                    from .training_progress import interactive_progress
+                                    progress = (snapshot.training if hasattr(snapshot, 'wire_events') else
+                                                interactive_progress(snapshot, self.run_id, len(self.scene.turbines)))
+                                    if progress:
+                                        progress['run_id'] = self.run_id
+                                        self.emit('training_stats', progress)
                                 if self._paused and self.status == 'RUNNING': self.lifecycle('PAUSED')
-                                for event in adapter.safety_events(snapshot): self.emit('safety_event', event)
+                                events = snapshot.wire_events if hasattr(snapshot, "wire_events") else adapter.safety_events(snapshot)
+                                for event in events: self.emit('safety_event', event)
                                 while self._paused and not self._stopping and self._permits == 0:
                                     self._condition.wait()
                                 if self._permits: self._permits -= 1
@@ -294,6 +308,7 @@ class BackendSession:
             raise ValueError('Command not valid in current state')
 
     def alive(self):
+        if getattr(self._trainer, "running", False): return True
         if self._thread is not None and self._thread.is_alive(): return True
         if self._process is not None:
             self._process.poll()

@@ -23,7 +23,19 @@ def _update_layers(scene, context=None):
     for obj in scene.objects:
         visible = None
         if obj.name.startswith("WFRL.WakeProxy."):
+            mode = getattr(scene, "wfrl_wake_display", "SCIENTIFIC")
             visible = scene.wfrl_show_wake and not obj.name.endswith(".Volume")
+            if visible:
+                import bpy
+                from .materials import get_material
+                cinematic = mode == "CINEMATIC"
+                if obj.name.endswith(".Pulse" + obj.name.split(".Pulse")[-1]):
+                    visible = not cinematic
+                if hasattr(obj.data, "materials"):
+                    obj.data.materials.clear()
+                    obj.data.materials.append(get_material("cinematic_line" if cinematic else ("wake_pulse" if ".Pulse" in obj.name else "wake_line")))
+                if hasattr(obj.data, "bevel_depth"):
+                    obj.data.bevel_depth = (0.075 if cinematic and ".Line" in obj.name else 0.06 if cinematic else (0.48 if ".Pulse" in obj.name else 0.11))
         elif obj.name.startswith("WFRL.Fixture.T1.Lidar") or obj.name == "WFRL.Fixture.T1.SensorFrustum":
             visible = scene.wfrl_show_lidar
         elif obj.name == "WFRL.WakeDisXY":
@@ -125,10 +137,10 @@ def _classes():
     from .operators.history_export import CLASSES as HISTORY_EXPORT_CLASSES
     from .panels.telemetry import CLASSES as TELEMETRY_CLASSES
     from .operators.workflow import CLASSES as WORKFLOW_CLASSES
-    from .panels import scene, channels, run, safety, presentation, training
+    from .panels import scene, channels, run, safety, presentation, training, gimbal
     return (PREFERENCE_CLASSES + CLASSES + CONNECTION_CLASSES + RUN_CLASSES + STATUS_CLASSES + TELEMETRY_CLASSES
             + WORKFLOW_CLASSES + HISTORY_EXPORT_CLASSES + scene.CLASSES + channels.CLASSES + run.CLASSES
-            + safety.CLASSES + presentation.CLASSES + training.CLASSES)
+            + safety.CLASSES + presentation.CLASSES + training.CLASSES + gimbal.CLASSES)
 
 
 def register():
@@ -146,6 +158,7 @@ def register():
         "wfrl_selected_turbine": bpy.props.EnumProperty(items=(("T1", "T1", "Upstream turbine"), ("T2", "T2", "Middle turbine"), ("T3", "T3", "Downstream turbine")), default="T1", update=_update_selection),
         "wfrl_fixture_state": bpy.props.EnumProperty(items=(("NOMINAL", "Nominal", ""), ("WAITING", "Waiting", ""), ("CHANNEL_OFF", "Channel Off", ""), ("STALE", "Stale Data", ""), ("INCOMPATIBLE", "Bad Checkpoint", ""), ("FAILED", "Failed", "")), default="NOMINAL"),
         "wfrl_show_wake": bpy.props.BoolProperty(default=True, update=_update_layers),
+        "wfrl_wake_display": bpy.props.EnumProperty(items=(("SCIENTIFIC", "Scientific", "Green diagnostic tracers"), ("CINEMATIC", "Cinematic", "Soft visible flow lines")), default="SCIENTIFIC", update=_update_layers),
         "wfrl_show_lidar": bpy.props.BoolProperty(default=False, update=_update_layers),
         "wfrl_show_disxy": bpy.props.BoolProperty(default=True, update=_update_layers),
         "wfrl_show_atmosphere": bpy.props.BoolProperty(default=True, update=_update_atmosphere),
@@ -183,6 +196,8 @@ def register():
     from .panels import presentation as capture_panel
     workflow.register_properties()
     capture_panel.register_properties()
+    from .panels import gimbal
+    gimbal.register_properties()
     charts.register()
     runtime.register()
     registered_classes = _classes()
@@ -196,9 +211,11 @@ def register():
     workflow_cleanup = workflow.unregister_properties
     capture_cleanup = capture_panel.unregister_properties
     charts_cleanup = charts.unregister
+    gimbal_cleanup = gimbal.unregister_properties
     def cleanup():
         runtime_cleanup()
         history_export_cleanup()
+        gimbal_cleanup()
         capture_cleanup()
         charts_cleanup()
         workflow_cleanup()
@@ -234,7 +251,7 @@ def unregister():
     for cls in reversed(_classes()):
         if cls.is_registered:
             bpy.utils.unregister_class(cls)
-    for name in ("wfrl_selected_turbine", "wfrl_fixture_state", "wfrl_show_wake", "wfrl_show_lidar", "wfrl_show_disxy", "wfrl_show_atmosphere", "wfrl_atmosphere_preset", "wfrl_wake_quality", "wfrl_camera_view", "wfrl_channel_telemetry", "wfrl_manual_enabled", "wfrl_manual_yaw", "wfrl_manual_pitch"):
+    for name in ("wfrl_selected_turbine", "wfrl_fixture_state", "wfrl_show_wake", "wfrl_wake_display", "wfrl_show_lidar", "wfrl_show_disxy", "wfrl_show_atmosphere", "wfrl_atmosphere_preset", "wfrl_wake_quality", "wfrl_camera_view", "wfrl_channel_telemetry", "wfrl_manual_enabled", "wfrl_manual_yaw", "wfrl_manual_pitch"):
         if hasattr(bpy.types.Scene, name):
             delattr(bpy.types.Scene, name)
 

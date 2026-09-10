@@ -21,7 +21,7 @@ def main():
     assert len(data["airfoils"]) == 8
     assert len(data["source_sha256"]) == 19
     vertices, faces = blade_mesh()
-    assert len(vertices) == 73 * 96 and len(faces) == 72 * 96 + 2
+    assert len(vertices) == 160 * 96 + 1 and len(faces) == 160 * 96 + 1
     assert min(v[2] for v in vertices) == 1.5
     assert abs(max(v[2] for v in vertices) - 63.0) < 0.001  # source span rounds to 61.4999
     # Curved cross sections have many distinct thickness coordinates, unlike prisms.

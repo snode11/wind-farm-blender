@@ -54,6 +54,8 @@ class TrainingDashboard:
     def metric(self, key, *, negotiated=True):
         if not negotiated:
             return {'value': None, 'validity': 'unsupported', 'error': 'training_stats_v1 not negotiated'}
+        if key not in self.metrics and self.metrics:
+            return {'value': None, 'validity': 'unsupported', 'error': 'Not emitted by this trainer'}
         if key not in self.metrics:
             return {'value': None, 'validity': 'waiting', 'error': 'No iteration statistics produced yet'}
         record, received, context = self.metrics[key]

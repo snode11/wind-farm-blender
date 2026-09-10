@@ -19,13 +19,13 @@ def main():
                 bpy.ops.wfrl.load_configured_scene,
                 bpy.ops.wfrl.set_channel,
                 bpy.ops.wfrl.backend_run,
-                bpy.ops.wfrl.configure_camera,
-                bpy.ops.wfrl.view_layout,
+                bpy.ops.wfrl.gimbal_mode,
+                bpy.ops.wfrl.gimbal_preset,
                 bpy.ops.wfrl.presentation_mode,
                 bpy.ops.wfrl.capture_screenshot,
                 bpy.ops.wfrl.capture_recording,
                 bpy.ops.wfrl.export_history):
-            assert operator is not None
+            assert operator.get_rna_type() is not None
         from wfrl_blender.panels.training import WFRL_PT_TrainingDashboard
         assert WFRL_PT_TrainingDashboard.is_registered
 

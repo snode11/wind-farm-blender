@@ -179,3 +179,32 @@ class TrainingProgressReader:
             self._thread.join()
         else:
             self.read_available(final=True)
+
+
+def interactive_progress(snapshot, run_id, turbine_count):
+    """Expose existing Studio statistics without relabelling raw reward as normalized."""
+    source = getattr(snapshot, 'stats', None)
+    updating = snapshot.phase == 'updating' and bool(source)
+    stats = {}
+    if updating:
+        fields = {'mean_power': 'mean_power', 'mean_raw_reward': 'mean_reward',
+                  'value_loss': 'vloss', 'explained_variance': 'explained_var',
+                  'mean_reward': None, 'episode_return': None, 'learning_rate': None}
+        for key, original in fields.items():
+            value = source.get(original) if original else None
+            valid = value is not None and math.isfinite(float(value))
+            stats[key] = dict(value=float(value) if valid else None,
+                unit='MW' if key == 'mean_power' else '',
+                validity='valid' if valid else ('unsupported' if original is None else 'invalid'),
+                error=None if valid else ('Not emitted by Studio Trainer' if original is None else 'Nonfinite training statistic'),
+                fidelity='EXPORTED', provenance=dict(file='wfrl/studio/trainer.py', source='Trainer.history',
+                    channel=original or key,
+                    calculation='last optimization minibatch' if key == 'value_loss' else 'Trainer.history iteration statistic'),
+                source_age_seconds=0., stale_after_seconds=30.)
+    record = dict(run_id=run_id, record_kind='iteration_stats' if updating else 'progress',
+        mode='interactive_training', step=snapshot.step, agent_step=snapshot.step * turbine_count,
+        iteration=snapshot.iters_done, phase=snapshot.phase if snapshot.phase != 'idle' else 'waiting',
+        timestamp=dict(value=time.time(), timebase='unix_seconds'), source_age_seconds=0.,
+        stale_after_seconds=30., stats=stats)
+    validate_training_stats_payload(record)
+    return record

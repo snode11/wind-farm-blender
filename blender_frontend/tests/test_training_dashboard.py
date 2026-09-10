@@ -60,3 +60,13 @@ def test_unsupported_remains_unsupported_and_copy_is_independent():
     msg['payload']['stats']['mean_power']['value'] = 999
     assert dashboard.metric('mean_power')['value'] == 1.5
     assert dashboard.metric('episode_return')['validity'] == 'unsupported'
+
+
+def test_unemitted_optional_statistic_is_not_waiting_forever():
+    dashboard = TrainingDashboard()
+    dashboard.reset('run')
+    assert dashboard.metric('mean_raw_reward')['validity'] == 'waiting'
+    dashboard.ingest(message(), negotiated=True)
+    assert dashboard.metric('mean_raw_reward')['validity'] == 'unsupported'
+    dashboard.ingest(message('progress', 2), negotiated=True)
+    assert dashboard.metric('mean_raw_reward')['validity'] == 'unsupported'

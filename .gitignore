@@ -40,3 +40,6 @@ refs/extracted_text/
 
 # 临时参考图（演示效果对标用，非仓库产物）
 example*.png
+
+# macOS Finder folder metadata
+.DS_Store

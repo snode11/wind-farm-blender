@@ -1,5 +1,7 @@
 # WFRL Blender user guide
 
+For the current step-by-step Chinese manual, including macOS/Windows launch instructions and the Gimbal Camera panel, see [用户使用手册](用户使用手册.md).
+
 ## Source labels
 
 Treat every displayed value according to its label:
@@ -20,7 +22,7 @@ While paused, expand **Manual Pose / Paused Demo** to preview yaw and pitch on t
 
 ## Interactive Training
 
-1. Start the Bridge, select **Interactive**, and connect.
+1. Start the Bridge with a configured FAST.Farm environment, select **Interactive**, and connect. The current FLORIS adapter supports Backend Demo only, not Interactive Training or Replay.
 2. Choose a default scene in extension Preferences. Optionally enable **Override scene configuration** and set backend, requested inflow, decorative terrain, and control channels.
 3. Choose **Load & Validate Scene**. The effective configuration appears only after backend acknowledgement.
 4. Set iterations, rollout steps, warmup steps, and seed.
@@ -42,7 +44,7 @@ Select **Replay**, choose a compatible checkpoint, set replay steps, warmup step
 
 ## Views and fidelity-safe presentation
 
-Use **WFRL / Views & Capture** to select a camera, set FOV, elevation, and a focus of `farm` or a turbine ID, then choose **Apply Camera**. Single, Dual, and Quad layouts change the view arrangement only; they do not alter the run or its source labels. Presentation mode hides development chrome but does not change data fidelity.
+In Local Demo, use **WFRL / PRESENTATION > Views & Layers** for World, Top, Side, close-up, sensor, and World + Nacelle views. Use the sidebar **Camera** tab for the mounted Gimbal Camera controls. **Views & Capture** currently contains wake, presentation, and capture controls; it does not expose Apply Camera or Single/Dual/Quad buttons. See the Chinese manual for returning from the gimbal local camera to the World view. Presentation mode does not change data fidelity.
 
 Telemetry curves retain up to 600 samples per turbine and channel. Gaps, fidelity changes, and mixed units break or suppress a plot rather than joining incompatible data.
 

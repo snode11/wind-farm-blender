@@ -52,6 +52,7 @@ class Snapshot:
     farm_power: float = float("nan")
     reward: float = float("nan")
     events: List[Any] = field(default_factory=list)
+    stats: Optional[Dict[str, float]] = None
     phase: str = "idle"          # idle | warmup | sampling | updating | done
     demo_label: str = ""         # demo 模式：当前阶段中文提示（"变桨: 90°→0° 启动"等）
 
@@ -146,7 +147,8 @@ class Trainer:
         t = self._thread
         if t is not None and t.is_alive():
             t.join(timeout)
-        self._thread = None
+        if t is None or not t.is_alive():
+            self._thread = None
 
     # ---- 工作线程 -------------------------------------------------------
     def _publish(self, **kw):
@@ -688,7 +690,7 @@ class Trainer:
                           measure=m, ctx=self.runtime.last_ctx,
                           farm_power=float(frame["_meta"]["farm_power"]),
                           reward=float(rew_buf.mean()), events=[],
-                          phase="updating")
+                          phase="updating", stats=dict(stats))
 
         if self.ckpt_path:
             self._save(rms)

@@ -1,6 +1,0 @@
-00:00.992  blend            | Read blend: "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-reload-9emqu5_l/reopen.blend"
-Info: Saved as "reopen.blend"
-WFRL_PART2_DEMO_WORKFLOW_SMOKE=PASS
-Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
-
-Blender quit

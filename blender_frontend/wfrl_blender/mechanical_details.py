@@ -59,8 +59,8 @@ def add_mechanical_details(collection, root, yaw, rotor, prefix, scalars, shell)
         i=next(i for i in range(len(stations)-1) if stations[i][0]<=z<=stations[i+1][0])
         za,da=stations[i];zb,db=stations[i+1]
         ring(f'TowerWeld{int(z)}',.5*(da+(db-da)*(z-za)/(zb-za)),.018,z,root,'tower')
-    ring('YawSeal',1.98,.055,scalars['TowerHt']-1.42,root,'graphite')
-    ring('YawSkirt',2.06,.07,-1.59,yaw)
+    ring('YawSeal',1.965,.018,scalars['TowerHt']-1.425,root,'graphite')
+    ring('YawSkirt',1.96,.025,-1.38,yaw)
 
     # Roof cover perimeter and side louvres reveal shell thickness without
     # changing the nacelle envelope or adding speculative internal machinery.

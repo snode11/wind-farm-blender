@@ -293,7 +293,7 @@ dist/wfrl_blender-0.2.0.inventory.json
 
 在扩展中选择 Demo，点击 **Load Demo Scene → Start Demo**。此路径不要求启动 Bridge。
 
-仓库还保留 macOS 的 `Open WFRL.command`，它通过 `open_part2.py` 打开演示入口；正式后端连接流程使用下面的 Bridge 或平台启动器。
+正式后端连接流程使用下面的 Bridge 或平台启动器。
 
 ### 9.3 连接真实后端
 
@@ -368,6 +368,12 @@ Blender 专用烟测需要使用 Blender 执行，不能用普通 Python 测试�
 
 ## 11. 当前限制与下一步
 
+### 2026-09-09 验收更新
+
+本轮 macOS Blender 5.2.1 原生验收已覆盖 Interactive、Formal 看板、暂停、单步、活动任务重连、快速停止、历史 JSON 导出及导出失败提示。证据位于 `evidence/frontend_completion/`；报告显示 `passed: true`，Python 回归为 **202 passed**。地形查询改为一次 BVH 快照复用，场景构建由约 44 秒降至约 4 秒，Blender 地形采样烟测误差为 0。
+
+当前版本可以作为 macOS 前端演示交付。Windows 目标平台、Extension/App Template 品牌包装及真实执行器 API 仍不在本轮验收范围。
+
 1. **补齐训练看板端到端验收**：记录真实 Interactive / Formal 训练数据到 Blender 可见指标的过程，检查 run identity、来源、缺失字段和独立过期状态。
 2. **补齐导出用户路径**：通过原生可见窗口执行 JSON 导出，检查有界/截断信息、同一步不同阶段、来源和写入失败提示。
 3. **补齐手动姿态原生烟测**：证明只在暂停的 Local Demo 生效，Resume 后恢复脚本，不产生真实控制命令。
@@ -404,3 +410,17 @@ Blender 专用烟测需要使用 Blender 执行，不能用普通 Python 测试�
 - [Part 5 展示层记录](docs/blender/PART5.md)：尾流、环境、建模和渲染成果。
 - [故障排查](docs/blender/TROUBLESHOOTING.md)：运行问题与处理方式。
 - [环境资产来源](blender_frontend/wfrl_blender/assets/landscape/SOURCES.md)：第三方展示资产说明。
+
+### 机舱云台相机（T1 / T2 / T3）
+
+在 3D 视图按 **N**，打开右侧 **Camera** 竖排标签：
+
+- 选择 **T1 / T2 / T3**，再点击 **Camera Mode / 相机模式**。
+- 按住鼠标左键拖动画面可转向，滚轮调整视野大小，**Esc** 退出控制并保留当前画面。
+- 画面右上方的圆形摇杆：按住拖动，偏离中心越远转得越快，松手停止；侧栏可调转速。
+- **Down** 垂直向下观察叶片，**Front / Back** 朝机舱前方 / 后方看，**Reset** 恢复俯视及 75° 视野。
+- 控制期间仍可点击侧栏切换机组。每台机组独立记住方向和视野；相机固定挂载于机舱，跟随偏航，不自由平移。
+
+相机按需创建，因此既支持现有写实 `.blend`，也支持 FAST.Farm 连接后创建的实时场景。实时模式先点击 **Start**，收到场景快照后相机按钮才可用。双视图中的相机切换只影响操作所在的视图。
+
+正式启动继续使用 `scripts/blender/wfrl_launcher.py launch`；它加载的是 Blender 已安装扩展。修改源码后，需要重新运行 `scripts/blender/build_extension.py` 并更新已安装扩展。写实场景的源码预览入口为 `scripts/blender/open_gimbal.py`，加载 `evidence/part5_realistic.blend`。

@@ -1,7 +1,0 @@
-WFRL_GEOMETRY_SMOKE=PASS
-Source asset: 19 blade stations / 8 airfoils / 12 tower stations / 19 SHA256 hashes
-Blade: 7008 vertices; root 1.5 m / tip 63 m; tower top 87.6 m
-Hub center: (-5.00000080919228, 0.0, 88.03744338842476); independent pitch tested 0/2/25/90 degrees
-Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
-
-Blender quit

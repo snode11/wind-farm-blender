@@ -1,0 +1,877 @@
+{
+  "run_id": "3443cd7de3fe44d390a8563c892280a7",
+  "session_id": "d193be6a48024408ade06992c244b16f",
+  "capacity": 600,
+  "series": [
+    {
+      "key": [
+        "training_stats",
+        "progress",
+        null,
+        "__progress__"
+      ],
+      "records": [
+        {
+          "mode": "formal_training",
+          "step": 0,
+          "agent_step": 0,
+          "iteration": 1,
+          "phase": "warmup",
+          "timestamp": {
+            "value": 1788917859.572771,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "progress",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 4,
+          "message_type": "training_stats",
+          "received_monotonic": 528414.695414416,
+          "turbine_id": null,
+          "channel": "__progress__",
+          "data": {
+            "source_age_seconds": 0.005906495847739279,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.005906495847739279,
+          "age_at_export_seconds": 285.94256974582095,
+          "validity_at_export": null
+        },
+        {
+          "mode": "formal_training",
+          "step": 0,
+          "agent_step": 0,
+          "iteration": 1,
+          "phase": "sampling",
+          "timestamp": {
+            "value": 1788917903.061804,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "progress",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 5,
+          "message_type": "training_stats",
+          "received_monotonic": 528458.202046833,
+          "turbine_id": null,
+          "channel": "__progress__",
+          "data": {
+            "source_age_seconds": 0.024470753385685384,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.024470753385685384,
+          "age_at_export_seconds": 242.45450158638414,
+          "validity_at_export": null
+        },
+        {
+          "mode": "formal_training",
+          "step": 0,
+          "agent_step": 0,
+          "iteration": 1,
+          "phase": "sampling",
+          "timestamp": {
+            "value": 1788917903.761773,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "progress",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 6,
+          "message_type": "training_stats",
+          "received_monotonic": 528458.938780833,
+          "turbine_id": null,
+          "channel": "__progress__",
+          "data": {
+            "source_age_seconds": 0.037531832000240684,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.037531832000240684,
+          "age_at_export_seconds": 241.73082866496406,
+          "validity_at_export": null
+        },
+        {
+          "mode": "formal_training",
+          "step": 4,
+          "agent_step": 12,
+          "iteration": 1,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917908.3238652,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "progress",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 7,
+          "message_type": "training_stats",
+          "received_monotonic": 528463.443451291,
+          "turbine_id": null,
+          "channel": "__progress__",
+          "data": {
+            "source_age_seconds": 0.01562630257103592,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.01562630257103592,
+          "age_at_export_seconds": 237.2042526776204,
+          "validity_at_export": null
+        },
+        {
+          "mode": "formal_training",
+          "step": 4,
+          "agent_step": 12,
+          "iteration": 2,
+          "phase": "sampling",
+          "timestamp": {
+            "value": 1788917908.355287,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "progress",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 9,
+          "message_type": "training_stats",
+          "received_monotonic": 528463.506606666,
+          "turbine_id": null,
+          "channel": "__progress__",
+          "data": {
+            "source_age_seconds": 0.04459709522780031,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.04459709522780031,
+          "age_at_export_seconds": 237.17006809520535,
+          "validity_at_export": null
+        },
+        {
+          "mode": "formal_training",
+          "step": 8,
+          "agent_step": 24,
+          "iteration": 2,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917913.851501,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "progress",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 10,
+          "message_type": "training_stats",
+          "received_monotonic": 528469.022084958,
+          "turbine_id": null,
+          "channel": "__progress__",
+          "data": {
+            "source_age_seconds": 0.051135811605490744,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.051135811605490744,
+          "age_at_export_seconds": 231.6611285195686,
+          "validity_at_export": null
+        },
+        {
+          "mode": "formal_training",
+          "step": 8,
+          "agent_step": 24,
+          "iteration": 2,
+          "phase": "done",
+          "timestamp": {
+            "value": 1788918112.597141,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "progress",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 12,
+          "message_type": "training_stats",
+          "received_monotonic": 528667.758759333,
+          "turbine_id": null,
+          "channel": "__progress__",
+          "data": {
+            "source_age_seconds": 0.017778117093257606,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.017778117093257606,
+          "age_at_export_seconds": 32.891096450039186,
+          "validity_at_export": null
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 7,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 4,
+          "step": 0,
+          "iteration": 1,
+          "phase": "warmup",
+          "timestamp": {
+            "value": 1788917859.572771,
+            "timebase": "unix_seconds"
+          }
+        },
+        "last": {
+          "sequence": 12,
+          "step": 8,
+          "iteration": 2,
+          "phase": "done",
+          "timestamp": {
+            "value": 1788918112.597141,
+            "timebase": "unix_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "training_stats",
+        "iteration_stats",
+        null,
+        "mean_power"
+      ],
+      "records": [
+        {
+          "mode": "formal_training",
+          "step": 4,
+          "agent_step": 12,
+          "iteration": 1,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917908.3550231,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "iteration_stats",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 8,
+          "message_type": "training_stats",
+          "received_monotonic": 528463.506526125,
+          "turbine_id": null,
+          "channel": "mean_power",
+          "data": {
+            "value": 2.8401787281036377,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-rnlwc7o4/progress.jsonl",
+              "channel": "mean_power",
+              "calculation": "B_power.mean(): mean farm total power per control step"
+            },
+            "source_age_seconds": 0.03219880489632487,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.03219880489632487,
+          "age_at_export_seconds": 237.15775034588296,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "formal_training",
+          "step": 8,
+          "agent_step": 24,
+          "iteration": 2,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917913.860157,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "iteration_stats",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 11,
+          "message_type": "training_stats",
+          "received_monotonic": 528469.022302916,
+          "turbine_id": null,
+          "channel": "mean_power",
+          "data": {
+            "value": 2.839017868041992,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-rnlwc7o4/progress.jsonl",
+              "channel": "mean_power",
+              "calculation": "B_power.mean(): mean farm total power per control step"
+            },
+            "source_age_seconds": 0.05502154550049454,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.05502154550049454,
+          "age_at_export_seconds": 231.66479629545938,
+          "validity_at_export": "stale"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 2,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 8,
+          "step": 4,
+          "iteration": 1,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917908.3550231,
+            "timebase": "unix_seconds"
+          }
+        },
+        "last": {
+          "sequence": 11,
+          "step": 8,
+          "iteration": 2,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917913.860157,
+            "timebase": "unix_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "training_stats",
+        "iteration_stats",
+        null,
+        "mean_reward"
+      ],
+      "records": [
+        {
+          "mode": "formal_training",
+          "step": 4,
+          "agent_step": 12,
+          "iteration": 1,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917908.3550231,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "iteration_stats",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 8,
+          "message_type": "training_stats",
+          "received_monotonic": 528463.506526125,
+          "turbine_id": null,
+          "channel": "mean_reward",
+          "data": {
+            "value": 21.97378921508789,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-rnlwc7o4/progress.jsonl",
+              "channel": "mean_reward",
+              "calculation": "B_rew.mean(): normalized training reward"
+            },
+            "source_age_seconds": 0.03219880489632487,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.03219880489632487,
+          "age_at_export_seconds": 237.15775034588296,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "formal_training",
+          "step": 8,
+          "agent_step": 24,
+          "iteration": 2,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917913.860157,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "iteration_stats",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 11,
+          "message_type": "training_stats",
+          "received_monotonic": 528469.022302916,
+          "turbine_id": null,
+          "channel": "mean_reward",
+          "data": {
+            "value": 0.5766029953956604,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-rnlwc7o4/progress.jsonl",
+              "channel": "mean_reward",
+              "calculation": "B_rew.mean(): normalized training reward"
+            },
+            "source_age_seconds": 0.05502154550049454,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.05502154550049454,
+          "age_at_export_seconds": 231.66479629545938,
+          "validity_at_export": "stale"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 2,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 8,
+          "step": 4,
+          "iteration": 1,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917908.3550231,
+            "timebase": "unix_seconds"
+          }
+        },
+        "last": {
+          "sequence": 11,
+          "step": 8,
+          "iteration": 2,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917913.860157,
+            "timebase": "unix_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "training_stats",
+        "iteration_stats",
+        null,
+        "value_loss"
+      ],
+      "records": [
+        {
+          "mode": "formal_training",
+          "step": 4,
+          "agent_step": 12,
+          "iteration": 1,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917908.3550231,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "iteration_stats",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 8,
+          "message_type": "training_stats",
+          "received_monotonic": 528463.506526125,
+          "turbine_id": null,
+          "channel": "value_loss",
+          "data": {
+            "value": 1877.4526123046876,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-rnlwc7o4/progress.jsonl",
+              "channel": "value_loss",
+              "calculation": "mean(v_log): actual optimization minibatches"
+            },
+            "source_age_seconds": 0.03219880489632487,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.03219880489632487,
+          "age_at_export_seconds": 237.15775034588296,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "formal_training",
+          "step": 8,
+          "agent_step": 24,
+          "iteration": 2,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917913.860157,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "iteration_stats",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 11,
+          "message_type": "training_stats",
+          "received_monotonic": 528469.022302916,
+          "turbine_id": null,
+          "channel": "value_loss",
+          "data": {
+            "value": 1.3435849845409393,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-rnlwc7o4/progress.jsonl",
+              "channel": "value_loss",
+              "calculation": "mean(v_log): actual optimization minibatches"
+            },
+            "source_age_seconds": 0.05502154550049454,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.05502154550049454,
+          "age_at_export_seconds": 231.66479629545938,
+          "validity_at_export": "stale"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 2,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 8,
+          "step": 4,
+          "iteration": 1,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917908.3550231,
+            "timebase": "unix_seconds"
+          }
+        },
+        "last": {
+          "sequence": 11,
+          "step": 8,
+          "iteration": 2,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917913.860157,
+            "timebase": "unix_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "training_stats",
+        "iteration_stats",
+        null,
+        "explained_variance"
+      ],
+      "records": [
+        {
+          "mode": "formal_training",
+          "step": 4,
+          "agent_step": 12,
+          "iteration": 1,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917908.3550231,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "iteration_stats",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 8,
+          "message_type": "training_stats",
+          "received_monotonic": 528463.506526125,
+          "turbine_id": null,
+          "channel": "explained_variance",
+          "data": {
+            "value": 0.000876293156370056,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-rnlwc7o4/progress.jsonl",
+              "channel": "explained_variance",
+              "calculation": "ev: 1 - var(ret - B_val)/(var(ret) + 1e-8)"
+            },
+            "source_age_seconds": 0.03219880489632487,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.03219880489632487,
+          "age_at_export_seconds": 237.15775034588296,
+          "validity_at_export": "stale"
+        },
+        {
+          "mode": "formal_training",
+          "step": 8,
+          "agent_step": 24,
+          "iteration": 2,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917913.860157,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "iteration_stats",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 11,
+          "message_type": "training_stats",
+          "received_monotonic": 528469.022302916,
+          "turbine_id": null,
+          "channel": "explained_variance",
+          "data": {
+            "value": 0.13105851277441305,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-rnlwc7o4/progress.jsonl",
+              "channel": "explained_variance",
+              "calculation": "ev: 1 - var(ret - B_val)/(var(ret) + 1e-8)"
+            },
+            "source_age_seconds": 0.05502154550049454,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.05502154550049454,
+          "age_at_export_seconds": 231.66479629545938,
+          "validity_at_export": "stale"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 2,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 8,
+          "step": 4,
+          "iteration": 1,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917908.3550231,
+            "timebase": "unix_seconds"
+          }
+        },
+        "last": {
+          "sequence": 11,
+          "step": 8,
+          "iteration": 2,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917913.860157,
+            "timebase": "unix_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "training_stats",
+        "iteration_stats",
+        null,
+        "episode_return"
+      ],
+      "records": [
+        {
+          "mode": "formal_training",
+          "step": 4,
+          "agent_step": 12,
+          "iteration": 1,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917908.3550231,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "iteration_stats",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 8,
+          "message_type": "training_stats",
+          "received_monotonic": 528463.506526125,
+          "turbine_id": null,
+          "channel": "episode_return",
+          "data": {
+            "value": null,
+            "unit": "",
+            "validity": "unsupported",
+            "error": "Not emitted by trainer",
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-rnlwc7o4/progress.jsonl",
+              "channel": "episode_return",
+              "calculation": "Not emitted by trainer"
+            },
+            "source_age_seconds": 0.03219880489632487,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.03219880489632487,
+          "age_at_export_seconds": 237.15775034588296,
+          "validity_at_export": "unsupported"
+        },
+        {
+          "mode": "formal_training",
+          "step": 8,
+          "agent_step": 24,
+          "iteration": 2,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917913.860157,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "iteration_stats",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 11,
+          "message_type": "training_stats",
+          "received_monotonic": 528469.022302916,
+          "turbine_id": null,
+          "channel": "episode_return",
+          "data": {
+            "value": null,
+            "unit": "",
+            "validity": "unsupported",
+            "error": "Not emitted by trainer",
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-rnlwc7o4/progress.jsonl",
+              "channel": "episode_return",
+              "calculation": "Not emitted by trainer"
+            },
+            "source_age_seconds": 0.05502154550049454,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.05502154550049454,
+          "age_at_export_seconds": 231.66479629545938,
+          "validity_at_export": "unsupported"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 2,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 8,
+          "step": 4,
+          "iteration": 1,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917908.3550231,
+            "timebase": "unix_seconds"
+          }
+        },
+        "last": {
+          "sequence": 11,
+          "step": 8,
+          "iteration": 2,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917913.860157,
+            "timebase": "unix_seconds"
+          }
+        }
+      }
+    },
+    {
+      "key": [
+        "training_stats",
+        "iteration_stats",
+        null,
+        "learning_rate"
+      ],
+      "records": [
+        {
+          "mode": "formal_training",
+          "step": 4,
+          "agent_step": 12,
+          "iteration": 1,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917908.3550231,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "iteration_stats",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 8,
+          "message_type": "training_stats",
+          "received_monotonic": 528463.506526125,
+          "turbine_id": null,
+          "channel": "learning_rate",
+          "data": {
+            "value": null,
+            "unit": "",
+            "validity": "unsupported",
+            "error": "Not emitted by trainer",
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-rnlwc7o4/progress.jsonl",
+              "channel": "learning_rate",
+              "calculation": "Not emitted by trainer"
+            },
+            "source_age_seconds": 0.03219880489632487,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.03219880489632487,
+          "age_at_export_seconds": 237.15775034588296,
+          "validity_at_export": "unsupported"
+        },
+        {
+          "mode": "formal_training",
+          "step": 8,
+          "agent_step": 24,
+          "iteration": 2,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917913.860157,
+            "timebase": "unix_seconds"
+          },
+          "record_kind": "iteration_stats",
+          "run_id": "3443cd7de3fe44d390a8563c892280a7",
+          "session_id": "d193be6a48024408ade06992c244b16f",
+          "sequence": 11,
+          "message_type": "training_stats",
+          "received_monotonic": 528469.022302916,
+          "turbine_id": null,
+          "channel": "learning_rate",
+          "data": {
+            "value": null,
+            "unit": "",
+            "validity": "unsupported",
+            "error": "Not emitted by trainer",
+            "fidelity": "EXPORTED",
+            "provenance": {
+              "file": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-training-progress-rnlwc7o4/progress.jsonl",
+              "channel": "learning_rate",
+              "calculation": "Not emitted by trainer"
+            },
+            "source_age_seconds": 0.05502154550049454,
+            "stale_after_seconds": 30.0
+          },
+          "source_age_at_receive_seconds": 0.05502154550049454,
+          "age_at_export_seconds": 231.66479629545938,
+          "validity_at_export": "unsupported"
+        }
+      ],
+      "dropped_count": 0,
+      "truncated": false,
+      "retained_count": 2,
+      "capacity": 600,
+      "range": {
+        "first": {
+          "sequence": 8,
+          "step": 4,
+          "iteration": 1,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917908.3550231,
+            "timebase": "unix_seconds"
+          }
+        },
+        "last": {
+          "sequence": 11,
+          "step": 8,
+          "iteration": 2,
+          "phase": "updating",
+          "timestamp": {
+            "value": 1788917913.860157,
+            "timebase": "unix_seconds"
+          }
+        }
+      }
+    }
+  ],
+  "schema_version": "wfrl.history.v1",
+  "exported_at_unix_seconds": 1788918145.5404952,
+  "scope": "Current run bounded history window; not a complete training archive",
+  "truncated": false
+}

@@ -77,7 +77,7 @@ class HealthChecker:
                     break
                 self._results.put(self._probe(name, path))
         except Exception as exc:
-            self._results.put(HealthResult('environment', 'ERROR', str(exc)[:500]))
+            self._results.put(HealthResult('environment', 'ERROR', str(exc)))
 
     def _probe(self, component, path):
         if not path:
@@ -105,7 +105,10 @@ class HealthChecker:
                     if time.monotonic() >= deadline:
                         return HealthResult(component, 'TIMEOUT', 'Version probe timed out')
                 output.seek(0)
-                detail = output.read(2048).decode('utf-8', errors='replace').strip()
+                raw = output.read(65537)
+                detail = raw[:65536].decode('utf-8', errors='replace').strip()
+                if len(raw) > 65536:
+                    detail += '\n[Probe output exceeds 64 KiB; remaining output omitted.]'
                 if process.returncode != 0 or not detail:
                     return HealthResult(component, 'ERROR', f'Version probe exited {process.returncode}: {detail}')
                 if component == 'python':
@@ -114,7 +117,7 @@ class HealthChecker:
                         return HealthResult(component, 'UNSUPPORTED', detail + '; requires Python >=3.11')
                 return HealthResult(component, 'READY', detail)
         except OSError as exc:
-            return HealthResult(component, 'ERROR', str(exc)[:500])
+            return HealthResult(component, 'ERROR', str(exc))
         finally:
             if process is not None:
                 # Kill the whole probe process group, including children retaining
