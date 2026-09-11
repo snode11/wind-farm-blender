@@ -26,8 +26,15 @@ def build_live_scene(scene):
     from . import _cancel_playback
     from .scene_builder import build_scene
     from .cameras import build_cameras
+    display_scene = bpy.context.scene
+    selected = getattr(display_scene, "wfrl_selected_turbine", "")
     _cancel_playback()
     build_scene(scene)
+    ids = [t.turbine_id for t in scene.turbines]
+    if hasattr(display_scene, "wfrl_selected_turbine"):
+        display_scene.wfrl_selected_turbine = selected if selected in ids else ids[0]
+    if getattr(display_scene, "wfrl_cinematic_reference", "") not in ids:
+        display_scene.wfrl_cinematic_reference = ids[0]
     build_cameras(scene)
     from . import atmosphere
     display_scene = bpy.context.scene
@@ -67,6 +74,10 @@ def animate_illustrative_wake(scene, dt, *, running):
     if not getattr(scene, 'wfrl_show_wake', True):
         return
     from .wake import update_proxy_objects
+    from . import backend_inflow
+    if backend_inflow.active(scene):
+        # Snapshots, including paused single steps, already update the curves.
+        return
     # Geometry is sampled analytically, not numerically stepped. Dropping a
     # slow frame's elapsed time would make the preview cycle machine-dependent.
     phase = float(scene.get('wfrl_proxy_phase', 0.0)) + max(dt, 0.0) * 0.9

@@ -28,7 +28,7 @@ def main():
     importlib.reload(presentation)
     wfrl_blender.register()
     assert getattr(bpy, '_wfrl_overlay_handle', None) == presentation._HANDLE
-    assert presentation._HANDLE != previous_handle
+    assert presentation._HANDLE is None  # Presentation overlays were removed.
     old_tick = runtime.tick
     importlib.reload(wfrl_blender)
     wfrl_blender.register()

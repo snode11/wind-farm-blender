@@ -68,18 +68,18 @@ def _primitive(collection, kind: str, name: str, location, scale, material):
 
 
 def _rounded_nacelle_mesh(length: float, width: float, height: float):
-    """Build a closed, elliptical-section nacelle shell with exact outer dimensions."""
+    """Rounded rectangular service shell, preserving the configured envelope."""
     # Rounded end shoulders meet both the straight body and flat end plates
     # tangentially. Preserve the configured external envelope.
     sections = []
     steps = 16
     for k in range(steps, -1, -1):
         angle = math.pi*k/(2*steps)
-        sections.append((-length*(.31+.19*math.sin(angle)), .46+.54*math.cos(angle)))
-    sections.append((length*.28, 1.0))
+        sections.append((-length*(.40+.10*math.sin(angle)), .72+.28*math.cos(angle)))
+    sections.append((length*.38, 1.0))
     for k in range(1, steps+1):
         angle = math.pi*k/(2*steps)
-        sections.append((length*(.28+.22*math.sin(angle)), .46+.54*math.cos(angle)))
+        sections.append((length*(.38+.12*math.sin(angle)), .72+.28*math.cos(angle)))
     count = 64
     vertices = []
     for x, factor in sections:
@@ -87,8 +87,8 @@ def _rounded_nacelle_mesh(length: float, width: float, height: float):
             angle = 2.0 * math.pi * index / count
             vertices.append((
                 x,
-                0.5 * width * factor * math.cos(angle),
-                0.5 * height * factor * math.sin(angle),
+                0.5 * width * factor * math.copysign(abs(math.cos(angle))**.65, math.cos(angle)),
+                0.5 * height * factor * math.copysign(abs(math.sin(angle))**.65, math.sin(angle)),
             ))
     faces = []
     for section in range(len(sections) - 1):
@@ -136,8 +136,14 @@ def _make_blade(collection, parent, name: str, angle: float):
     pitch_root.rotation_euler = (angle, math.radians(geometry_data()["scalars"]["PreCone(1)"]), 0.0)
     # Higher presentation sampling keeps the aerofoil trailing edge and root
     # transition smooth in close shots while preserving the source stations.
-    vertices, faces = blade_mesh(subdiv=12, ring_points=128)
-    blade = _mesh_object(collection, name, vertices, faces, get_material("blade"))
+    shared = bpy.data.meshes.get("WFRL.SharedBlade.SourceLoft")
+    if shared is None:
+        vertices, faces = blade_mesh(subdiv=8, ring_points=96)
+        blade = _mesh_object(collection, name, vertices, faces, get_material("blade"))
+        blade.data.name = "WFRL.SharedBlade.SourceLoft"
+    else:
+        blade = bpy.data.objects.new(name, shared)
+        _link(collection, blade)
     blade.parent = pitch_root
     blade.rotation_mode = "XYZ"
     _finish(blade, bevel=0.012, smooth=True)
@@ -146,14 +152,14 @@ def _make_blade(collection, parent, name: str, angle: float):
     root_fairing = _cone(
         collection,
         name + ".RootFairing",
-        radius1=1.80,
-        radius2=1.79,
-        depth=1.5,
-        material=get_material("hub"),
+        radius1=1.79,
+        radius2=1.771,
+        depth=0.18,
+        material=get_material("blade"),
     )
     root_fairing.parent = pitch_root
-    root_fairing.location = (0, 0, 2.25)
-    _finish(root_fairing, bevel=0.08, smooth=True)
+    root_fairing.location = (0, 0, 1.62)
+    _finish(root_fairing, bevel=0.012, smooth=True)
     root_fairing["geometry_source"] = "NREL 5MW blade-root fairing presentation detail"
     return blade
 
@@ -209,10 +215,10 @@ def _make_turbine(collection, turbine):
     nacelle.parent = yaw
     nacelle.location = (shell["nacelle_x_bias"] * scalars["OverHang"], 0, 0.15)
     _finish(nacelle, smooth=True)
-    roof = _primitive(collection, "cube", prefix + ".NacelleRoof", (0, 0, 0), (1.2, 0.95, 0.13), get_material("hub"))
+    roof = _primitive(collection, "cube", prefix + ".NacelleRoof", (0, 0, 0), (1.2, 0.82, 0.045), get_material("nacelle"))
     roof.parent = yaw
-    roof.location = (0.65, 0, shell["height"] / 2 + 0.16)
-    _finish(roof, bevel=0.12)
+    roof.location = (0.65, 0, shell["height"] / 2 + 0.09)
+    _finish(roof, bevel=0.025)
     shaft = _primitive(collection, "cylinder", prefix + ".MainShaft", (0, 0, 0), (0.95, 0.95, 0.7), get_material("hub"))
     shaft.parent = yaw
     shaft.location = (hub_x + 0.7, 0, hub_z - scalars["TowerHt"] - 0.06)
@@ -236,18 +242,22 @@ def _make_turbine(collection, turbine):
     hub.parent = rotor
     hub.location = (-0.35, 0.0, 0.0)
     _finish(hub, smooth=True)
-    spinner = _cone(
-        collection,
-        prefix + ".Spinner",
-        radius1=2.15,
-        radius2=0.42,
-        depth=3.2,
-        material=get_material("hub"),
-    )
+    # Rounded spinner closes to one pole; the previous truncated cone had
+    # a visibly flat nose. Retain the same 3.2 m illustrative axial envelope.
+    verts=[];faces=[];segments=64;rings=24
+    for i in range(rings):
+        angle=math.pi*i/(2*rings)
+        x=.15-3.2*math.sin(angle);r=2.15*math.cos(angle)
+        verts.extend((x,r*math.cos(math.tau*j/segments),r*math.sin(math.tau*j/segments)) for j in range(segments))
+    for i in range(rings-1):
+        a=i*segments;b=a+segments
+        faces.extend((a+j,b+j,b+(j+1)%segments,a+(j+1)%segments) for j in range(segments))
+    faces.append(tuple(range(segments)))
+    pole=len(verts);verts.append((-3.05,0,0));a=(rings-1)*segments
+    faces.extend((a+j,pole,a+(j+1)%segments) for j in range(segments))
+    spinner = _mesh_object(collection,prefix + ".Spinner",verts,faces,get_material("hub"))
     spinner.parent = rotor
-    spinner.location = (-1.45, 0.0, 0.0)
-    spinner.rotation_euler[1] = math.radians(-90.0)
-    _finish(spinner, bevel=0.08, smooth=True)
+    _finish(spinner, smooth=True)
     spinner["geometry_source"] = "NREL 5MW rotor spinner presentation detail"
     for index in range(3):
         _make_blade(collection, rotor, prefix + f".Blade{index + 1}", math.radians(120.0 * index))

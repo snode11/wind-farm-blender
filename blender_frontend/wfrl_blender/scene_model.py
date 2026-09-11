@@ -24,6 +24,10 @@ class SceneDTO:
     wind_direction_deg: float
     terrain: str = "flat"
 
+    def geometry_key(self):
+        """Only parameters that change constructed geometry, not live inflow."""
+        return self.turbine_model.lower(), self.turbines, self.terrain
+
     @classmethod
     def from_mapping(cls, data: Mapping[str, Any]) -> "SceneDTO":
         layout = data.get("layout", ())

@@ -148,7 +148,17 @@ class WFRL_OT_SelectCamera(bpy.types.Operator):
     camera_name: bpy.props.StringProperty()
 
     def execute(self, context):
-        camera = bpy.data.objects.get(self.camera_name)
+        if self.camera_name.endswith('.Gimbal'):
+            from ..cameras import ensure_gimbal
+            turbine = self.camera_name.split('.')[-2]
+            try:
+                camera = ensure_gimbal(context.scene, turbine)
+            except ValueError as exc:
+                self.report({'WARNING'}, str(exc))
+                return {'CANCELLED'}
+            context.scene.wfrl_gimbal_turbine = turbine
+        else:
+            camera = context.scene.objects.get(self.camera_name)
         if camera is None:
             return {"CANCELLED"}
         context.scene.camera = camera
@@ -156,7 +166,15 @@ class WFRL_OT_SelectCamera(bpy.types.Operator):
         if context.screen:
             for area in context.screen.areas:
                 if area.type == "VIEW_3D":
-                    area.spaces.active.region_3d.view_perspective = "CAMERA"
+                    # Sensor/dual-view uses a local camera.  Clear that
+                    # override when choosing any toolbar camera, otherwise
+                    # the viewport remains locked to T1 after selecting World.
+                    space = area.spaces.active
+                    space.use_local_camera = False
+                    space.camera = camera
+                    space.region_3d.view_perspective = "CAMERA"
+                    from ..cameras import fill_camera_view
+                    fill_camera_view(area, context.scene)
         return {"FINISHED"}
 
 
@@ -274,8 +292,10 @@ class WFRL_PT_Views(WFRL_PT_Base, bpy.types.Panel):
         row = layout.row(align=True)
         for label in ("World", "Top", "Side"):
             row.operator("wfrl.select_camera", text=label).camera_name = "WFRL.Camera." + label
-        layout.operator("wfrl.select_camera", text="T1 Rotor Close-up", icon="CAMERA_DATA").camera_name = "WFRL.Camera.T1.Closeup"
-        layout.operator("wfrl.select_camera", text="T1 Nacelle Sensor", icon="CAMERA_DATA").camera_name = "WFRL.Camera.T1.Sensor"
+        layout.label(text="Gimbal camera")
+        row = layout.row(align=True)
+        for turbine in ("T1", "T2", "T3"):
+            row.operator("wfrl.select_camera", text=turbine, icon="CAMERA_DATA").camera_name = f"WFRL.Camera.{turbine}.Gimbal"
         layout.operator("wfrl.dual_view", icon="SPLITSCREEN")
         layout.prop(context.scene, "wfrl_show_wake", text="Wake proxy / SYNTH")
         layout.prop(context.scene, "wfrl_show_lidar", text="T1 Lidar rays / SYNTH")

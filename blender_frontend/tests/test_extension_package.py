@@ -36,7 +36,7 @@ class PackageTests(unittest.TestCase):
             inventory = json.loads(first.inventory.read_text(encoding="utf-8"))
             self.assertEqual(inventory["archive_sha256"], first.sha256)
             self.assertEqual(inventory["package_id"], "wfrl_blender")
-            self.assertEqual(inventory["version"], "0.2.0")
+            self.assertEqual(inventory["version"], "0.2.1")
             with zipfile.ZipFile(first.archive) as zipped:
                 names = zipped.namelist()
                 self.assertEqual(names, sorted(names))
@@ -56,7 +56,7 @@ class PackageTests(unittest.TestCase):
 
     def test_isolated_zip_import_uses_bundled_stdlib_codec(self):
         subprocess.run([sys.executable, str(BUILDER_PATH)], check=True, capture_output=True)
-        archive = ROOT / 'dist/wfrl_blender-0.2.0.zip'
+        archive = load_builder().build().archive
         with tempfile.TemporaryDirectory() as directory:
             package = Path(directory) / 'wfrl_blender'
             with zipfile.ZipFile(archive) as zipped:

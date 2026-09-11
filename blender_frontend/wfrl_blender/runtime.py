@@ -112,6 +112,11 @@ def connect(port):
             raise ValueError('Cannot change port while session state is unconfirmed')
         _client.close()
         _client = TransportClient(port=port)
+    import bpy
+    from . import backend_inflow
+    if bpy.context.scene is not None:
+        bpy.context.scene[backend_inflow.KEY] = "[]"
+        bpy.context.scene["wfrl_cinematic_inflow_valid"] = False
     _client.connect()
 
 
@@ -243,7 +248,8 @@ def tick():
                         if payload.get('scene'):
                             from .scene_model import SceneDTO
                             loaded_scene = SceneDTO.from_mapping(payload['scene'])
-                            build_live_scene(loaded_scene)
+                            if _live_scene is None or loaded_scene.geometry_key() != _live_scene.geometry_key():
+                                build_live_scene(loaded_scene)
                             _live_scene = loaded_scene
                     if 'channel_states' in payload:
                         channel_states.clear(); channel_states.update(payload['channel_states'] or {})
@@ -254,7 +260,6 @@ def tick():
                     _pending_lifecycle_sequence = None
                     if _state.session_id != message['session_id']:
                         kinematics = KinematicState()
-                        _live_scene = None
                         safety_events.clear()
                         from . import charts
                         charts.clear()
@@ -297,9 +302,9 @@ def tick():
             if latest_snapshot:
                 payload = latest_snapshot['payload']
                 scene = snapshot_scene(payload)
-                if scene != _live_scene:
+                if _live_scene is None or scene.geometry_key() != _live_scene.geometry_key():
                     build_live_scene(scene)
-                    _live_scene = scene
+                _live_scene = scene
                 kinematics.apply_snapshot(latest_snapshot)
                 _state.mode = payload['mode']
                 scene_obj = getattr(getattr(bpy, 'context', None), 'scene', None)
@@ -307,7 +312,9 @@ def tick():
                     scene_data = payload.get('scene') or {}
                     scene_obj['wfrl_backend'] = scene_data.get('backend', 'backend')
                     inflow = scene_data.get('inflow') or {}
-                    scene_obj['wfrl_wind_speed_mps'] = inflow.get('speed')
+                    from . import backend_inflow, cinematic
+                    backend_inflow.record(scene_obj, payload)
+                    cinematic.update(scene_obj, 0.0)
                     timestamp = payload.get('timestamp') or {}
                     scene_obj['wfrl_telemetry_time_s'] = timestamp.get('value')
                     power_values = []
