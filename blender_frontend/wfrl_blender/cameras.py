@@ -294,11 +294,13 @@ def ensure_gimbal(scene, turbine):
         # Outside the nacelle shell, beside the rotor plane: clear downward sight.
         # Keep the rotor, hub, and nacelle in frame instead of filling the
         # view with the nearest blade at the default downward pitch.
-        camera.location = (-7, -4.2, -4.0)
+        # Keep the rotor outside the lens: an oblique, medium-distance
+        # inspection view gives the full blade span room in frame.
+        camera.location = (-35, -28, 22)
         camera.data.clip_start, camera.data.clip_end = .05, 30000
         camera.data.display_size = .5
         camera['mount'] = 'nacelle gimbal / SYNTH'
-        aim_gimbal(camera, 180, -90, 75)
+        aim_gimbal(camera, 180, -35, 62)
     return camera
 
 

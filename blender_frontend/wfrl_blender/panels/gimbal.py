@@ -53,8 +53,11 @@ class WFRL_OT_GimbalPreset(GimbalAvailable, bpy.types.Operator):
 
     def execute(self, context):
         camera = show(context)
+        # Reset is a useful inspection framing: keep the rotor plane and
+        # nacelle in view.  The old reset duplicated DOWN (-90°), which aimed
+        # straight at the ground and produced the clipped view seen in the UI.
         yaw, pitch = {'DOWN': (180, -90), 'FRONT': (180, 0),
-                      'BACK': (0, 0), 'RESET': (180, -90)}[self.preset]
+                      'BACK': (0, 0), 'RESET': (180, -35)}[self.preset]
         aim_gimbal(camera, yaw, pitch, 75 if self.preset == 'RESET' else camera['gimbal_fov'])
         return {'FINISHED'}
 

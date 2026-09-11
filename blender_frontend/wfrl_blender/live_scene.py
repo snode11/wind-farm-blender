@@ -54,6 +54,10 @@ def build_live_scene(scene):
         if obj.name.startswith('WFRL.Fixture.'):
             obj.hide_render = True
             obj.hide_set(True)
+    # A snapshot can rebuild while paused, so the animation timer cannot be
+    # relied on to restore the selected layer on its next running tick.
+    from . import _update_layers
+    _update_layers(display_scene)
 
 
 def animate_illustrative_wake(scene, dt, *, running):
@@ -63,6 +67,8 @@ def animate_illustrative_wake(scene, dt, *, running):
     if not getattr(scene, 'wfrl_show_wake', True):
         return
     from .wake import update_proxy_objects
-    phase = float(scene.get('wfrl_proxy_phase', 0.0)) + min(max(dt, 0.0), 0.2) * 0.9
+    # Geometry is sampled analytically, not numerically stepped. Dropping a
+    # slow frame's elapsed time would make the preview cycle machine-dependent.
+    phase = float(scene.get('wfrl_proxy_phase', 0.0)) + max(dt, 0.0) * 0.9
     scene['wfrl_proxy_phase'] = phase
     update_proxy_objects(scene, phase=phase)

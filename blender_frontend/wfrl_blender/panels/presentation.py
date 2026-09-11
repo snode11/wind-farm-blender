@@ -152,7 +152,17 @@ class WFRL_PT_Presentation(bpy.types.Panel):
         scene, layout = context.scene, self.layout
         layout.prop(scene, 'wfrl_show_wake', text='Wake visible')
         layout.prop(scene, 'wfrl_wake_display', text='Wake display')
-        layout.label(text='Cinematic: soft flow lines / Scientific: green tracers')
+        layout.label(text='Cinematic: wind-tunnel filaments (SYNTH)')
+        if scene.wfrl_wake_display == 'CINEMATIC':
+            box = layout.box()
+            box.prop(scene, 'wfrl_cinematic_wind_mode')
+            if scene.wfrl_cinematic_wind_mode == 'FRONT':
+                box.prop(scene, 'wfrl_cinematic_reference')
+                box.prop(scene, 'wfrl_cinematic_offset', slider=True)
+            else:
+                box.prop(scene, 'wfrl_cinematic_seed')
+                box.prop(scene, 'wfrl_cinematic_interval')
+            box.label(text='Visual wind only / 不修改仿真来风')
         layout.label(text='Green lines: illustration, not FAST.Farm wind')
         layout.operator('wfrl.presentation_mode')
         layout.label(text='Presentation' if context.workspace.get('presentation_mode') else 'Development')

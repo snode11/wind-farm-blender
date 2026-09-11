@@ -486,6 +486,8 @@ def build_scene(scene: SceneDTO, collection_name: str = COLLECTION_NAME):
     bpy.context.scene.collection.children.link(collection)
     collection["wfrl_scene"] = scene.name
     collection["backend"] = scene.backend
+    collection["wind_direction_deg"] = scene.wind_direction_deg
+    collection["wind_speed_mps"] = scene.wind_speed_mps
     collection["fidelity"] = "SYNTH"
     for turbine in scene.turbines:
         _make_turbine(collection, turbine)

@@ -20,22 +20,20 @@ def _cancel_playback():
 
 
 def _update_layers(scene, context=None):
+    from . import cinematic
+    cinematic.set_visibility(scene)
+    cinematic.update(scene, float(scene.get("wfrl_proxy_phase", 0.0)) if scene.get("wfrl_scene_kind") == "live" else time_for_frame(scene.frame_current) * .9)
     for obj in scene.objects:
         visible = None
         if obj.name.startswith("WFRL.WakeProxy."):
-            mode = getattr(scene, "wfrl_wake_display", "SCIENTIFIC")
-            visible = scene.wfrl_show_wake and not obj.name.endswith(".Volume")
+            visible = scene.wfrl_show_wake and scene.wfrl_wake_display == "SCIENTIFIC" and not obj.name.endswith(".Volume")
             if visible:
-                import bpy
                 from .materials import get_material
-                cinematic = mode == "CINEMATIC"
-                if obj.name.endswith(".Pulse" + obj.name.split(".Pulse")[-1]):
-                    visible = not cinematic
                 if hasattr(obj.data, "materials"):
                     obj.data.materials.clear()
-                    obj.data.materials.append(get_material("cinematic_line" if cinematic else ("wake_pulse" if ".Pulse" in obj.name else "wake_line")))
+                    obj.data.materials.append(get_material("wake_pulse" if ".Pulse" in obj.name else "wake_line"))
                 if hasattr(obj.data, "bevel_depth"):
-                    obj.data.bevel_depth = (0.075 if cinematic and ".Line" in obj.name else 0.06 if cinematic else (0.48 if ".Pulse" in obj.name else 0.11))
+                    obj.data.bevel_depth = .48 if ".Pulse" in obj.name else .11
         elif obj.name.startswith("WFRL.Fixture.T1.Lidar") or obj.name == "WFRL.Fixture.T1.SensorFrustum":
             visible = scene.wfrl_show_lidar
         elif obj.name == "WFRL.WakeDisXY":
@@ -76,7 +74,13 @@ def _update_manual(scene, context=None):
 def _update_demo_status(scene, depsgraph=None):
     """Frame-aligned telemetry and pose; lifecycle stays paused during scrubbing."""
     from . import runtime
-    if runtime.get_state().connection != "LOCAL DEMO" or scene.get("wfrl_scene_kind") != "demo":
+    # Selecting Demo after loading a YAML scene must still drive the visible
+    # turbine pose. Older scenes do not carry wfrl_scene_kind=demo, although
+    # their turbine object names and transforms are fully compatible. Keep the
+    # explicit live-scene guard so a stale LOCAL DEMO state cannot overwrite a
+    # connected scene's transforms during reconnect/reload.
+    if (runtime.get_state().connection != "LOCAL DEMO"
+            or scene.get("wfrl_scene_kind") == "live"):
         return
     if not scene.objects.get("WFRL.Turbine.T1.Rotor"):
         return
@@ -158,7 +162,12 @@ def register():
         "wfrl_selected_turbine": bpy.props.EnumProperty(items=(("T1", "T1", "Upstream turbine"), ("T2", "T2", "Middle turbine"), ("T3", "T3", "Downstream turbine")), default="T1", update=_update_selection),
         "wfrl_fixture_state": bpy.props.EnumProperty(items=(("NOMINAL", "Nominal", ""), ("WAITING", "Waiting", ""), ("CHANNEL_OFF", "Channel Off", ""), ("STALE", "Stale Data", ""), ("INCOMPATIBLE", "Bad Checkpoint", ""), ("FAILED", "Failed", "")), default="NOMINAL"),
         "wfrl_show_wake": bpy.props.BoolProperty(default=True, update=_update_layers),
-        "wfrl_wake_display": bpy.props.EnumProperty(items=(("SCIENTIFIC", "Scientific", "Green diagnostic tracers"), ("CINEMATIC", "Cinematic", "Soft visible flow lines")), default="SCIENTIFIC", update=_update_layers),
+        "wfrl_wake_display": bpy.props.EnumProperty(items=(("SCIENTIFIC", "Scientific", "Green diagnostic tracers"), ("CINEMATIC", "Cinematic", "Animated incoming filaments and yaw-deflected wake (SYNTH)")), default="SCIENTIFIC", update=_update_layers),
+        "wfrl_cinematic_wind_mode": bpy.props.EnumProperty(name="Wind mode", items=(("FRONT", "Front / 迎风", "Shared wind follows the reference turbine's heading plus a manual offset"), ("RANDOM", "360° random / 随机", "Shared, repeatable wind headings with smooth transitions")), default="FRONT", update=_update_layers),
+        "wfrl_cinematic_reference": bpy.props.StringProperty(name="Reference turbine / 基准风机", default="T1", update=_update_layers),
+        "wfrl_cinematic_offset": bpy.props.FloatProperty(name="Offset / 来风偏角 (°)", default=0.0, min=-10.0, max=10.0, update=_update_layers),
+        "wfrl_cinematic_seed": bpy.props.IntProperty(name="Seed / 随机种子", default=42, min=0, max=1000000, update=_update_layers),
+        "wfrl_cinematic_interval": bpy.props.FloatProperty(name="Change every / 换向间隔 (s)", default=8.0, min=2.0, max=60.0, update=_update_layers),
         "wfrl_show_lidar": bpy.props.BoolProperty(default=False, update=_update_layers),
         "wfrl_show_disxy": bpy.props.BoolProperty(default=True, update=_update_layers),
         "wfrl_show_atmosphere": bpy.props.BoolProperty(default=True, update=_update_atmosphere),
