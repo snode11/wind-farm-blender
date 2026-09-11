@@ -1,11 +1,11 @@
 {
   "archive": "wfrl_blender-0.2.0.zip",
-  "archive_sha256": "ccf71a421e94d85ae3dc24c50fe01e7aba8941a2a84493440a61a0528a41a1a1",
+  "archive_sha256": "d75786056f3ef08223650b0e19bb738ab8c74cdd052b75d3b856dbdc193774e0",
   "files": [
     {
       "path": "__init__.py",
-      "sha256": "ab14fc2673dcc6af3867b6c19a146691be3eff1570bc2df3ab3a878cfd244875",
-      "size": 13736
+      "sha256": "10c7ab3b12e3130c14c9a58456651585a5ae63560046ab6ce39d4045993a3e72",
+      "size": 14953
     },
     {
       "path": "animation.py",
@@ -54,13 +54,18 @@
     },
     {
       "path": "cameras.py",
-      "sha256": "323c09d9e9b119adeb3c3709942b8ac2d36afdc9fa41853691ba561325957798",
-      "size": 13594
+      "sha256": "c2e23647ddf6d9bf3836ad6accb4160b46f9e768857de0503735b4322c47e3f3",
+      "size": 13730
     },
     {
       "path": "charts.py",
       "sha256": "da065fa2b0b9046299ac17ca598426adf0d127bc721ec66280c991047a2bcdf2",
       "size": 13735
+    },
+    {
+      "path": "cinematic.py",
+      "sha256": "5d2b499fae8546f6537bd43f46ad3c2f56f2a19d3129add3e310c4887454a0e1",
+      "size": 10095
     },
     {
       "path": "diagnostics.py",
@@ -84,8 +89,8 @@
     },
     {
       "path": "live_scene.py",
-      "sha256": "ec8b64755955e077585a63ab9349849bb8a5dd1deefac1685b3d687a8b6a7dd7",
-      "size": 3106
+      "sha256": "92951284058eacf3c893d038fb335221584ddd01eb458c0a52acde9a6ce56aaf",
+      "size": 3467
     },
     {
       "path": "materials.py",
@@ -149,13 +154,13 @@
     },
     {
       "path": "panels/gimbal.py",
-      "sha256": "e30fb3ad36418fc9f36c92715c8f3f1ed8446e2004ee51a7e16005670a3f7371",
-      "size": 11580
+      "sha256": "d97372ffddc8929ab28dc48af1d8cae69899d29cdf7d3896a07305eb02bdbb04",
+      "size": 11811
     },
     {
       "path": "panels/presentation.py",
-      "sha256": "d57703690e3d37a44cbad4d2faaa8f1357812010b82178e061294d128a22f5cb",
-      "size": 7637
+      "sha256": "03f807b13ee5e8f0f43a8ebaa71a6284769f9713a7e62608a0a7b0853902a6be",
+      "size": 8152
     },
     {
       "path": "panels/run.py",
@@ -204,13 +209,13 @@
     },
     {
       "path": "runtime.py",
-      "sha256": "a37678b794dbfb9410fd87980fabaa04bde6e47ea67869898c5fb1827ce3c873",
-      "size": 16468
+      "sha256": "533432035776dd5ccc157e2f040eac4a59730fb37c9d37260f2b8dc8635f8966",
+      "size": 18054
     },
     {
       "path": "scene_builder.py",
-      "sha256": "8f50e807d7c38f49c3305d11e87041cdbb9699aa0fa223f7265c665abc8c156d",
-      "size": 21971
+      "sha256": "3d59ccb772cc3198ac7a68beb19acdebe55d190f92de9910315c49b54d5a3ecb",
+      "size": 22091
     },
     {
       "path": "scene_model.py",
@@ -244,8 +249,8 @@
     },
     {
       "path": "wake.py",
-      "sha256": "912a35871f668d6554bafe30f00555a42e7353528aa4403034bfed526a400a59",
-      "size": 15199
+      "sha256": "c60a622ee5414cce4eba30ac17056baf52032531ee34cf5c767a1b7cb98bf688",
+      "size": 15262
     },
     {
       "path": "workspace.py",
