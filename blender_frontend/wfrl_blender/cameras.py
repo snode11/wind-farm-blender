@@ -349,3 +349,33 @@ def fill_camera_view(area, scene):
     scale = max(region.width / width, region.height / height) * 1.02
     space.region_3d.view_camera_zoom = min(600, (math.sqrt(4 * scale) - math.sqrt(2)) * 50)
     space.region_3d.view_camera_offset = (0, 0)
+
+
+def ensure_clearance_camera(scene, turbine_id):
+    """Repeatable side view of the hub-to-lower-blade measurement zone."""
+    import bpy
+    from mathutils import Vector
+    from .turbine_geometry import geometry_data
+    yaw = scene.objects.get(f'WFRL.Turbine.{turbine_id}.YawRoot')
+    if yaw is None:
+        raise ValueError('请先加载包含所选风机的场景')
+    name = f'WFRL.Camera.{turbine_id}.Clearance'
+    camera = scene.objects.get(name)
+    if camera is None:
+        camera = bpy.data.objects.new(name, bpy.data.cameras.new(name + '.Data'))
+        yaw.users_collection[0].objects.link(camera)
+    radius = geometry_data()['scalars']['TipRad']
+    # Parent only the explanatory camera, never the radar, to the yaw frame.
+    camera.parent = yaw
+    target = Vector((-5, 0, -radius * .42))
+    camera.location = target + Vector((0, -radius * 2.5, 0))
+    camera.rotation_mode = 'XYZ'
+    camera.rotation_euler = (target - camera.location).to_track_quat('-Z', 'Y').to_euler()
+    camera.data.type = 'ORTHO'
+    aspect = (scene.render.resolution_x * scene.render.pixel_aspect_x
+              / (scene.render.resolution_y * scene.render.pixel_aspect_y))
+    camera.data.ortho_scale = radius * 1.35 * max(1., aspect)
+    camera.data.clip_start, camera.data.clip_end = .1, 30000
+    camera.data.show_passepartout = False
+    camera['provenance'] = '测量区侧视；刚性模型不显示弹性变形或精确测距'
+    return camera

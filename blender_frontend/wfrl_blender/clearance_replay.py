@@ -24,6 +24,7 @@ def reader_for(scene):
 def clear(scene, reason='回放数据未就绪'):
     _READERS.pop(scene.as_pointer(), None)
     scene['wfrl_clearance_status'] = reason
+    scene.wfrl_clearance_show_config = True
 
 
 def sample(scene):
@@ -88,6 +89,7 @@ def load(scene, path, demo):
     scene['wfrl_clearance_turbine'] = tid
     scene['wfrl_clearance_demo'] = demo
     scene['wfrl_clearance_status'] = 'READY'
+    scene.wfrl_clearance_show_config = False
     scene.frame_start = 1
     scene.frame_end = max(2, 1 + math.ceil((reader.end_s-reader.start_s) * timebase))
     _READERS[scene.as_pointer()] = reader

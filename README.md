@@ -9,15 +9,17 @@
 
 ---
 
-## Blender 0.2.2 与激光净空雷达
+## Blender 0.2.3 与激光净空雷达
 
-当前安装包：[wfrl_blender-0.2.2.zip](dist/wfrl_blender-0.2.2.zip)；[交付清单与校验方法](dist/README-lidar.md)；[本版改动](CHANGELOG.md)。Blender 最低版本为 5.2。
+当前安装包：[wfrl_blender-0.2.3.zip](dist/wfrl_blender-0.2.3.zip)；[交付清单与校验方法](dist/README-lidar.md)；[本版改动](CHANGELOG.md)。Blender 最低版本为 5.2。
 
-**Mac 一键雷达演示：**下载完整仓库并解压，进入 `scripts/blender`，双击 `打开净空雷达演示.command`。也可先运行 `git clone https://github.com/snode11/wind-farm-blender.git`，再打开克隆目录中的同一入口。默认 Blender 位置为 `/Applications/Blender.app`。窗口打开后，在“净空与误差对比”中点击“正常测量”或“叶片靠近塔筒”，用“播放 / 暂停”控制回放。该入口直接使用源码、随仓库提供的场景和两个结果包，无需启动训练或在线求解器。
+**Mac 一键雷达演示：**下载完整仓库并解压，进入 `scripts/blender`，双击 `打开净空雷达演示.command`。也可先运行 `git clone https://github.com/snode11/wind-farm-blender.git`，再打开克隆目录中的同一入口。默认 Blender 位置为 `/Applications/Blender.app`。窗口打开后，在“净空与误差对比”中点击“正常测量”或“较小净空”，用“播放 / 暂停”控制回放。该入口直接使用源码、随仓库提供的场景和两个结果包，无需启动训练或在线求解器。
 
 首次使用请阅读 [WFRL 用户使用手册](docs/blender/用户使用手册.md)，雷达操作直接看[第 12 节](docs/blender/用户使用手册.md#12-激光净空雷达第一次照着操作)。安装扩展后的操作及 Windows 模板也在手册中；Windows 尚未实机验收。
 
 雷达数据是 FAST.Farm 预计算仿真结果；B2 估计、真值与误差的依据见[雷达说明](docs/blender/激光净空雷达使用说明.md)。画面仍为刚性运动示意，不是现场实测。仓库包含小型结果包，排除 `results/lidar/raw/` 的大体积原始表面和本地验收过程文件；播放不需要这些文件，重新求解或从原始几何重算时才需要另外准备，见[计算流程](scripts/lidar/README.md)。
+
+**前端完整技术说明：**[Blender 前端 README](blender_frontend/README.md)集中说明雷达架构与源码映射、三束理想首交测距、独立真值与简化估计公式、包格式、有效率和误差统计、同步时钟、物理重生成及验证边界。0.2.3 新增测量区侧视/风场总览入口、模式与来源提示，突出真值/估计/偏差和播放控制，详情与数据配置默认折叠。前端代码更新需要新扩展 ZIP；本版复用两个 v1.1 结果包，无需重跑物理计算。
 
 ## 1. 最终目标
 

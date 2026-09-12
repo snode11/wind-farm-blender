@@ -42,6 +42,7 @@ try:
     scene.wfrl_clearance_normal_path = str(ROOT / delivery['packages']['normal'])
     scene.wfrl_clearance_near_tower_path = str(ROOT / delivery['packages']['close'])
     clearance_replay.load(scene, scene.wfrl_clearance_normal_path, 'normal')
+    bpy.ops.wfrl.clearance_view(view='MEASUREMENT')
 except (OSError, ValueError, KeyError, TypeError) as exc:
     clearance_replay.clear(bpy.context.scene, '修订交付未就绪：' + str(exc))
     raise

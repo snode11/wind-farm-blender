@@ -39,12 +39,8 @@ scene.sync_mode = 'FRAME_DROP'
 scene.wfrl_clearance_normal_path = str(ROOT / DELIVERY['packages']['normal'])
 scene.wfrl_clearance_near_tower_path = str(ROOT / DELIVERY['packages']['close'])
 playback.load(scene, scene.wfrl_clearance_normal_path, 'normal')
-camera = scene.objects['WFRL.Camera.Side']
-camera.data.type = 'PERSP'
-camera.data.lens = 45
-camera.location = (5, -165, 72)
-camera.rotation_euler = (Vector((-2, 0, 68)) - camera.location).to_track_quat('-Z', 'Y').to_euler()
-scene.camera = camera
+bpy.ops.wfrl.clearance_view(view='MEASUREMENT')
+camera = scene.camera
 for area in bpy.context.screen.areas:
     if area.type == 'VIEW_3D':
         space = area.spaces.active
@@ -52,7 +48,6 @@ for area in bpy.context.screen.areas:
         space.camera = camera
         space.show_region_ui = True
         space.region_3d.view_perspective = 'CAMERA'
-        space.region_3d.view_camera_zoom = 0
         space.shading.type = 'MATERIAL'
         space.overlay.show_overlays = False
         area.tag_redraw()
@@ -168,13 +163,49 @@ def tick():
             transition('capture_waiting')
         elif phase == 'capture_waiting':
             capture('waiting-gray')
-            main = next(a for a in bpy.context.screen.areas if a.type == 'VIEW_3D')
-            region = next(r for r in main.regions if r.type == 'UI')
-            with bpy.context.temp_override(window=bpy.context.window, area=main, region=region):
-                assert bpy.ops.view2d.scroll_down(page=True) == {'FINISHED'}
+            scene.wfrl_clearance_show_details = True
+            scene.wfrl_clearance_show_config = True
             transition('capture_footer')
         elif phase == 'capture_footer':
             capture('footer-scientific-disclaimers')
+            scene.wfrl_clearance_show_details = False
+            scene.wfrl_clearance_show_config = False
+            frozen = playback.sample(scene)
+            from wfrl_blender.panels import gimbal
+            main = next(a for a in bpy.context.screen.areas if a.type == 'VIEW_3D')
+            region = next(r for r in main.regions if r.type == 'WINDOW')
+            with bpy.context.temp_override(window=bpy.context.window, area=main, region=region):
+                assert bpy.ops.wfrl.gimbal_mode('INVOKE_DEFAULT') == {'RUNNING_MODAL'}
+                assert gimbal._ACTIVE is not None
+            assert bpy.ops.wfrl.clearance_view(view='WORLD') == {'FINISHED'}
+            assert playback.sample(scene) == frozen and not bpy.context.screen.is_animation_playing
+            assert gimbal._ACTIVE is None
+            report['checks']['active_gimbal_exits_on_overview'] = True
+            report['checks']['overview_preserves_paused_replay'] = True
+            transition('capture_overview')
+        elif phase == 'capture_overview':
+            capture('overview-same-replay')
+            assert bpy.ops.wfrl.clearance_view(view='MEASUREMENT') == {'FINISHED'}
+            assert bpy.ops.wfrl.clearance_restart() == {'FINISHED'}
+            assert scene.frame_current == 1 and bpy.context.screen.is_animation_playing
+            report['checks']['restart_resets_and_plays'] = True
+            addon._cancel_playback()
+            from types import SimpleNamespace
+            from wfrl_blender.panels.clearance import WFRL_OT_ClearanceClip
+            scene.wfrl_clearance_normal_path = str(OUT / 'missing-package')
+            errors = []
+            op = SimpleNamespace(demo='normal', report=lambda level, msg: errors.append(msg))
+            assert WFRL_OT_ClearanceClip.execute(op, bpy.context) == {'CANCELLED'}
+            assert playback.sample(scene) is None and scene.wfrl_clearance_show_config
+            assert errors and not bpy.context.screen.is_animation_playing
+            transition('capture_error')
+        elif phase == 'capture_error':
+            capture('missing-package-recovery')
+            scene.wfrl_clearance_normal_path = str(ROOT / DELIVERY['packages']['normal'])
+            assert bpy.ops.wfrl.clearance_clip(demo='normal') == {'FINISHED'}
+            assert not scene.wfrl_clearance_show_config and scene.frame_current == 1
+            addon._cancel_playback()
+            report['checks']['missing_package_exposes_config_and_recovers'] = True
             report['passed'] = True
             persist()
             print('CLEARANCE_GUI_ACCEPTANCE_PASS', flush=True)

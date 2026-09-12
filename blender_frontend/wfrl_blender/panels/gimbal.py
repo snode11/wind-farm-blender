@@ -239,7 +239,7 @@ class WFRL_OT_GimbalMode(GimbalAvailable, bpy.types.Operator):
 
 
 class WFRL_PT_Gimbal(bpy.types.Panel):
-    bl_label = 'WFRL / Gimbal Camera 云台相机'
+    bl_label = 'WFRL / Camera 相机与演示'
     bl_idname = 'WFRL_PT_gimbal'
     bl_order = -200
     bl_space_type = 'VIEW_3D'
@@ -248,19 +248,22 @@ class WFRL_PT_Gimbal(bpy.types.Panel):
 
     def draw(self, context):
         scene, layout = context.scene, self.layout
-        row = layout.row(align=True)
-        for turbine in ('T1', 'T2', 'T3'):
-            cell = row.row(align=True)
-            cell.enabled = scene.objects.get(f'WFRL.Turbine.{turbine}.YawRoot') is not None
-            cell.prop_enum(scene, 'wfrl_gimbal_turbine', turbine)
-        layout = layout.column()
-        layout.enabled = scene.objects.get(f'WFRL.Turbine.{scene.wfrl_gimbal_turbine}.YawRoot') is not None
-        layout.operator('wfrl.gimbal_mode', text='Exit Camera Mode / 退出' if _ACTIVE else 'Camera Mode / 相机模式', icon='CAMERA_DATA')
-        layout.prop(scene, 'wfrl_gimbal_speed')
-        row = layout.row(align=True)
-        for value, label in (('DOWN', 'Down ↓'), ('FRONT', 'Front'), ('BACK', 'Back')):
-            row.operator('wfrl.gimbal_preset', text=label).preset = value
-        layout.operator('wfrl.gimbal_preset', text='Reset / 复位').preset = 'RESET'
+        from .clearance import draw_navigation, fold
+        draw_navigation(layout, scene)
+        if fold(layout, scene, 'wfrl_clearance_show_camera', '云台控制'):
+            row = layout.row(align=True)
+            for turbine in ('T1', 'T2', 'T3'):
+                cell = row.row(align=True)
+                cell.enabled = scene.objects.get(f'WFRL.Turbine.{turbine}.YawRoot') is not None
+                cell.prop_enum(scene, 'wfrl_gimbal_turbine', turbine)
+            layout = layout.column()
+            layout.enabled = scene.objects.get(f'WFRL.Turbine.{scene.wfrl_gimbal_turbine}.YawRoot') is not None
+            layout.operator('wfrl.gimbal_mode', text='Exit Camera Mode / 退出' if _ACTIVE else 'Camera Mode / 相机模式', icon='CAMERA_DATA')
+            layout.prop(scene, 'wfrl_gimbal_speed')
+            row = layout.row(align=True)
+            for value, label in (('DOWN', 'Down ↓'), ('FRONT', 'Front'), ('BACK', 'Back')):
+                row.operator('wfrl.gimbal_preset', text=label).preset = value
+            layout.operator('wfrl.gimbal_preset', text='Reset / 复位').preset = 'RESET'
         space = context.space_data
         camera = (space.camera if space and space.type == 'VIEW_3D' and space.use_local_camera else scene.camera)
         if camera:
@@ -273,8 +276,8 @@ class WFRL_PT_Gimbal(bpy.types.Panel):
             layout.label(text='Camera 仿真姿态：未选择相机')
         from .clearance import draw as draw_clearance
         draw_clearance(self.layout, scene)
-        layout.label(text='Joystick: drag & hold; release to stop')
-        layout.label(text='Mouse drag: look • Wheel: zoom • Esc: exit')
+        if scene.wfrl_clearance_show_camera:
+            layout.label(text='拖动转向 · 滚轮缩放 · Esc 退出')
 
 
 # Keep operators for existing scenes, without exposing the retired sidebar panel.
