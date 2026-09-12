@@ -18,7 +18,7 @@ def main():
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'history.json'
             operator = bpy.ops.wfrl.export_history
-            result = operator(filepath=str(path), confirm=True)
+            result = operator(filepath=str(path))
             assert result == {'FINISHED'}
             charts.export_job.thread.join(5)
             assert path.exists()

@@ -275,6 +275,8 @@ def update_proxy_objects(scene, *, phase: float, rotor_radius: float = 63.0) -> 
     import bpy
     from . import cinematic
     cinematic.update(scene, phase)
+    if not getattr(scene, "wfrl_show_wake", True) or getattr(scene, "wfrl_wake_display", "SCIENTIFIC") != "SCIENTIFIC":
+        return 0
     updated = 0
     for root in (obj for obj in scene.objects if obj.name.startswith("WFRL.WakeProxy.") and obj.name.endswith(".Volume")):
         turbine_id = root.name.split(".")[2]

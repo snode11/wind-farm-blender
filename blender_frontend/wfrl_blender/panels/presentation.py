@@ -150,19 +150,33 @@ class WFRL_PT_Presentation(bpy.types.Panel):
 
     def draw(self, context):
         scene, layout = context.scene, self.layout
+        row = layout.row(align=True)
+        for name in ('World', 'Top', 'Side'):
+            row.operator('wfrl.select_camera', text=name).camera_name = 'WFRL.Camera.' + name
+        row = layout.row(align=True)
+        for turbine in ('T1', 'T2', 'T3'):
+            row.operator('wfrl.select_camera', text=turbine + ' Gimbal').camera_name = f'WFRL.Camera.{turbine}.Gimbal'
         layout.prop(scene, 'wfrl_show_wake', text='Wake visible')
         layout.prop(scene, 'wfrl_wake_display', text='Wake display')
         layout.label(text='Cinematic: wind-tunnel filaments (SYNTH)')
         if scene.wfrl_wake_display == 'CINEMATIC':
             box = layout.box()
-            box.prop(scene, 'wfrl_cinematic_wind_mode')
+            if scene.get('wfrl_scene_kind') == 'live':
+                box.label(text='Backend inflow / 后端来流')
+                box.label(text='SYNTH trails / 尾迹形状为示意')
+                if not scene.get('wfrl_cinematic_inflow_valid', False):
+                    box.label(text='Waiting for valid inflow / 等待来流数据')
+            controls = box.column()
+            controls.enabled = scene.get('wfrl_scene_kind') != 'live'
+            controls.prop(scene, 'wfrl_cinematic_wind_mode')
             if scene.wfrl_cinematic_wind_mode == 'FRONT':
-                box.prop(scene, 'wfrl_cinematic_reference')
-                box.prop(scene, 'wfrl_cinematic_offset', slider=True)
+                controls.prop(scene, 'wfrl_cinematic_reference')
+                controls.prop(scene, 'wfrl_cinematic_offset', slider=True)
             else:
-                box.prop(scene, 'wfrl_cinematic_seed')
-                box.prop(scene, 'wfrl_cinematic_interval')
-            box.label(text='Visual wind only / 不修改仿真来风')
+                controls.prop(scene, 'wfrl_cinematic_seed')
+                controls.prop(scene, 'wfrl_cinematic_interval')
+            if scene.get('wfrl_scene_kind') != 'live':
+                box.label(text='Visual wind only / 不修改仿真来风')
         layout.label(text='Green lines: illustration, not FAST.Farm wind')
         layout.operator('wfrl.presentation_mode')
         layout.label(text='Presentation' if context.workspace.get('presentation_mode') else 'Development')

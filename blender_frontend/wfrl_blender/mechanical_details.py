@@ -64,7 +64,13 @@ def add_mechanical_details(collection, root, yaw, rotor, prefix, scalars, shell)
 
     # Roof cover perimeter and side louvres reveal shell thickness without
     # changing the nacelle envelope or adding speculative internal machinery.
-    box('RoofGasket',(.65,0,shell['height']/2+.045),(1.25,1.0,.027),yaw,'graphite',.035)
+    box('RoofGasket',(.65,0,shell['height']/2+.045),(1.22,.84,.012),yaw,'graphite',.035)
+    # Fine longitudinal shell join at the widest section. Dimensions are
+    # decorative only; the original engineering envelope stays unchanged.
+    shell_x=shell['nacelle_x_bias']*scalars['OverHang']
+    for side in (-1,1):
+        box(f'ShellJoin{side}',(shell_x,side*(shell['width']/2+.003),.15),
+            (shell['length']*.35,.006,.007),yaw,'graphite',.003)
     for side in (-1,1):
         box(f'Vent.Recess{side}',(.85,side*1.55,.90),(.82,.045,.29),yaw,'graphite',.04)
         for j in range(6):

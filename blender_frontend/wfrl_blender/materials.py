@@ -50,6 +50,12 @@ def get_material(name: str):
             bump.name = "WFRL.MicroBump"
             bump.inputs["Strength"].default_value = 0.085 if name in {"blade", "tower"} else 0.05
             bump.inputs["Distance"].default_value = 0.018
+            rough = material.node_tree.nodes.get("WFRL.PaintRoughness") or material.node_tree.nodes.new("ShaderNodeMapRange")
+            rough.name = "WFRL.PaintRoughness"
+            rough.inputs["To Min"].default_value = .34 if name != "foundation" else .78
+            rough.inputs["To Max"].default_value = .48 if name != "foundation" else .94
+            material.node_tree.links.new(tex.outputs["Fac"], rough.inputs["Value"])
+            material.node_tree.links.new(rough.outputs[0], node.inputs["Roughness"])
             material.node_tree.links.new(tex.outputs["Fac"], bump.inputs["Height"])
             material.node_tree.links.new(bump.outputs["Normal"], node.inputs["Normal"])
         if name in {"tower", "blade", "nacelle", "hub", "foundation"}:

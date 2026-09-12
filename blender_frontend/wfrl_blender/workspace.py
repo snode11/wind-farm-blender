@@ -45,7 +45,8 @@ def configure_presentation():
             space.clip_end = 10000
             space.region_3d.view_perspective = 'CAMERA'
             space.region_3d.view_camera_zoom = 10
-            space.region_3d.view_camera_offset = (0, -.08)
+            from .cameras import fill_camera_view
+            fill_camera_view(area, scene=bpy.context.scene)
         elif area.type == 'DOPESHEET_EDITOR':
             area.spaces.active.mode = 'TIMELINE'
     bpy.context.scene['wfrl_layout_ready'] = True

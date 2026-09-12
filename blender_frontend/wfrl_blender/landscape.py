@@ -432,23 +432,23 @@ def build_landscape(collection):
         nonlocal tuft_count
         tuft_count+=1
         angle=rng.random()*math.tau
-        # Five narrow bent ribbons, each with four tapering segments. The
-        # growth direction and tip lean vary while roots stay on the terrain.
-        for blade in range(5):
+        # Three bent ribbons, each with one broad base quad and a tapered
+        # tip triangle. No duplicated zero-width tip or invisible extra rings.
+        for blade in range(3):
             a=angle+blade*2.399;h=height_m*rng.uniform(.55,1.0)
-            lean=h*rng.uniform(.25,.6);w=width*rng.uniform(.22,.40)
+            lean=h*rng.uniform(.25,.6);w=width*rng.uniform(.28,.48)
             ox,oy=math.cos(a)*width*.5,math.sin(a)*width*.5
             k=len(grass_verts)
-            for j in range(5):
-                t=j/4;bend=lean*t*t;half=w*(1-t)*.5
+            for t in (0., .5):
+                bend=lean*t*t;half=w*(1-t)*.5
                 cx=x+ox+math.cos(a)*bend;cy=y+oy+math.sin(a)*bend
                 grass_verts.extend(((cx-math.sin(a)*half,cy+math.cos(a)*half,z+h*t),
                                     (cx+math.sin(a)*half,cy-math.cos(a)*half,z+h*t)))
-            for j in range(3):
-                q=k+2*j;grass_faces.append((q,q+1,q+3,q+2));grass_material_indices.append(material_index)
-            grass_faces.append((k+6,k+7,k+8));grass_material_indices.append(material_index)
+            grass_verts.append((x+ox+math.cos(a)*lean,y+oy+math.sin(a)*lean,z+h))
+            grass_faces.extend(((k,k+1,k+3,k+2),(k+2,k+3,k+4)))
+            grass_material_indices.extend((material_index,material_index))
     for patch_index,(cx,cy,cz,spread) in enumerate(lush_centers):
-        density=760 if lowland_factor(cz)>.65 else 520
+        density=380 if lowland_factor(cz)>.65 else 260
         for _ in range(density):
             x=rng.gauss(cx,spread*.72);y=rng.gauss(cy,spread*.72);z=surface(x,y)
             factor=vegetation_factor(x,y,z)
@@ -457,7 +457,7 @@ def build_landscape(collection):
             mat_index=0 if moisture>.72 and rng.random()<.56 else (1 if rng.random()<.72 else 2)
             add_tuft(x,y,z+.04,rng.uniform(.38,1.18)*(1+.22*moisture),rng.uniform(.07,.18),mat_index)
     for cx,cy,cz,spread in dry_centers:
-        for _ in range(340):
+        for _ in range(170):
             x=rng.gauss(cx,spread*.82);y=rng.gauss(cy,spread*.82);z=surface(x,y)
             if road_clearance(x,y)<15 or rng.random()>.74:continue
             add_tuft(x,y,z+.04,rng.uniform(.42,1.32),rng.uniform(.055,.14),3)
@@ -494,4 +494,42 @@ def build_landscape(collection):
                 k=j*(nx+1)+i;f.append((k,k+1,k+nx+2,k+nx+1))
         ridge=mesh(f'WFRL.Landscape.DistantRidge{layer}',v,f,mat)
         ridge['provenance']='Presentation-only distant ridge; excluded from simulation terrain'
+    optimize_shrubs(collection)
     return terrain
+
+
+def optimize_shrubs(collection):
+    """Shared reduced meshes outside turbine inspection zones; no per-frame work.
+
+    Nearby shrubs keep their full leaf geometry. Far shrubs retain placement,
+    materials and silhouette using one cached reduction per original mesh.
+    """
+    import bpy
+    shrubs = [o for o in collection.objects if o.type == 'MESH'
+              and o.name.startswith('WFRL.Landscape.Shrub')]
+    sources = {}
+    before = sum(len(o.data.vertices) for o in shrubs)
+    for obj in shrubs:
+        if obj.get('wfrl_shrub_optimized'):
+            continue
+        near = min(math.hypot(obj.location.x - x, obj.location.y) for x in TURBINE_X) < 180
+        if near:
+            continue
+        key = obj.data.as_pointer()
+        if key not in sources:
+            temp = bpy.data.objects.new('WFRL.ShrubReduction', obj.data.copy())
+            collection.objects.link(temp)
+            original = temp.data
+            modifier = temp.modifiers.new('Distant leaf reduction', 'DECIMATE')
+            modifier.ratio = .18
+            graph = bpy.context.evaluated_depsgraph_get()
+            reduced = bpy.data.meshes.new_from_object(temp.evaluated_get(graph), depsgraph=graph)
+            reduced.name = obj.data.name + '.Distant'
+            sources[key] = reduced
+            bpy.data.objects.remove(temp, do_unlink=True)
+            if original.users == 0:
+                bpy.data.meshes.remove(original)
+        obj.data = sources[key]
+        obj['wfrl_shrub_optimized'] = True
+    after = sum(len(o.data.vertices) for o in shrubs)
+    return {'before': before, 'after': after, 'objects': len(shrubs)}

@@ -61,6 +61,8 @@ def build_cameras(scene):
     cameras = {}
     def create(name, location, target, bounds=None):
         data = bpy.data.cameras.new(name + '.Data')
+        data.show_passepartout = False
+        data.passepartout_alpha = 0
         camera = bpy.data.objects.new(name, data)
         collection.objects.link(camera)
         camera.location = location
@@ -173,6 +175,7 @@ def _layout_finish(job):
         space.region_3d.view_perspective = 'CAMERA'
         space.region_3d.view_camera_zoom = 0
         space.region_3d.view_camera_offset = (0, 0)
+        fill_camera_view(area, scene)
     scene.camera = scene.objects.get(names[0])
     scene['wfrl_view_layout'] = layout
     return True
@@ -301,6 +304,8 @@ def ensure_gimbal(scene, turbine):
         camera.data.display_size = .5
         camera['mount'] = 'nacelle gimbal / SYNTH'
         aim_gimbal(camera, 180, -35, 62)
+    camera.data.show_passepartout = False
+    camera.data.passepartout_alpha = 0
     return camera
 
 
@@ -319,3 +324,25 @@ def aim_gimbal(camera, yaw, pitch, fov):
     camera.data.lens = 36 / (2 * math.tan(math.radians(fov) / 2))
     camera['gimbal_yaw'], camera['gimbal_pitch'], camera['gimbal_fov'] = yaw, pitch, fov
     return camera
+
+
+def fill_camera_view(area, scene):
+    """Fill the viewport with the camera image, hiding frame and passepartout.
+
+    This is viewport overscan only; exported camera framing stays unchanged.
+    """
+    import math
+    space = area.spaces.active
+    region = next((r for r in area.regions if r.type == 'WINDOW'), None)
+    if region is None or not region.width or not region.height:
+        return
+    camera = space.camera if space.use_local_camera else scene.camera
+    if camera:
+        camera.data.show_passepartout = False
+    aspect = (scene.render.resolution_x * scene.render.pixel_aspect_x /
+              (scene.render.resolution_y * scene.render.pixel_aspect_y))
+    base = max(region.width, region.height)
+    width, height = (base, base / aspect) if aspect >= 1 else (base * aspect, base)
+    scale = max(region.width / width, region.height / height) * 1.02
+    space.region_3d.view_camera_zoom = min(600, (math.sqrt(4 * scale) - math.sqrt(2)) * 50)
+    space.region_3d.view_camera_offset = (0, 0)

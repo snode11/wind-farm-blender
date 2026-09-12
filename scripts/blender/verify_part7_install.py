@@ -66,6 +66,21 @@ def _inside_blender(output: Path, source_root: Path) -> None:
     assert bpy.ops.wfrl.demo_start() == {"FINISHED"}
     assert bpy.ops.wfrl.demo_pause() == {"FINISHED"}
     scene = bpy.context.scene
+    # Verify the installed package, including lazy first-use gimbal creation.
+    assert all(not camera.show_passepartout for camera in bpy.data.cameras)
+    area = next(a for a in bpy.context.screen.areas if a.type == 'VIEW_3D')
+    with bpy.context.temp_override(area=area):
+        for turbine in ('T1', 'T2', 'T3'):
+            name = f'WFRL.Camera.{turbine}.Gimbal'
+            assert bpy.ops.wfrl.select_camera(camera_name=name) == {'FINISHED'}
+            assert area.spaces.active.camera.name == name
+            assert scene.wfrl_gimbal_turbine == turbine
+            assert not scene.camera.data.show_passepartout
+            for view in ('World', 'Top', 'Side'):
+                name = 'WFRL.Camera.' + view
+                assert bpy.ops.wfrl.select_camera(camera_name=name) == {'FINISHED'}
+                assert area.spaces.active.camera.name == name
+                assert not area.spaces.active.use_local_camera
     scene.wfrl_manual_enabled = True
     scene.wfrl_manual_yaw = 12.0
     assert scene["wfrl_run_status"] == "PAUSED"

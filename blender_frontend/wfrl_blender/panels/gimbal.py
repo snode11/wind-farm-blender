@@ -4,7 +4,7 @@ import time
 import bpy
 from bpy.props import EnumProperty, FloatProperty
 from bpy.app.handlers import persistent
-from ..cameras import ensure_gimbal, aim_gimbal
+from ..cameras import ensure_gimbal, aim_gimbal, fill_camera_view
 
 _ACTIVE = None
 
@@ -23,6 +23,7 @@ def show(context):
         space.region_3d.view_perspective = 'CAMERA'
         space.region_3d.view_camera_zoom = 0
         space.region_3d.view_camera_offset = (0, 0)
+        fill_camera_view(context.area, context.scene)
     return camera
 
 

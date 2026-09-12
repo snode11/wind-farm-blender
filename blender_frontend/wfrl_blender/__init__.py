@@ -22,7 +22,7 @@ def _cancel_playback():
 def _update_layers(scene, context=None):
     from . import cinematic
     cinematic.set_visibility(scene)
-    cinematic.update(scene, float(scene.get("wfrl_proxy_phase", 0.0)) if scene.get("wfrl_scene_kind") == "live" else time_for_frame(scene.frame_current) * .9)
+    wake.update_proxy_objects(scene, phase=float(scene.get("wfrl_proxy_phase", 0.0)) if scene.get("wfrl_scene_kind") == "live" else time_for_frame(scene.frame_current) * .9)
     for obj in scene.objects:
         visible = None
         if obj.name.startswith("WFRL.WakeProxy."):
@@ -54,6 +54,20 @@ def _update_camera_view(scene, context=None):
     name = scene.wfrl_camera_view
     if name and scene.objects.get(name) is not None:
         cameras.select_camera(scene, name)
+
+
+# Blender retains pointers to dynamic enum strings; retain the item list.
+_turbine_items_cache = {}
+
+
+def _turbine_items(scene, context):
+    ids = tuple(sorted(str(obj["wfrl_turbine_id"]) for obj in scene.objects
+                       if "wfrl_turbine_id" in obj)) if scene else ()
+    if not ids:
+        ids = ("T1", "T2", "T3")
+    if ids not in _turbine_items_cache:
+        _turbine_items_cache[ids] = [(tid, tid, "Select turbine " + tid) for tid in ids]
+    return _turbine_items_cache[ids]
 
 
 def _update_selection(scene, context):
@@ -94,7 +108,7 @@ def _update_demo_status(scene, depsgraph=None):
                 bpy.app.timers.register(_cancel_playback, first_interval=0.0)
     yaw, pitch, rpm = list(sample.yaw_deg), list(sample.pitch_deg), list(sample.rpm)
     manual = getattr(scene, "wfrl_manual_enabled", False) and scene.get("wfrl_run_status") == "PAUSED"
-    if manual:
+    if manual and scene.wfrl_selected_turbine in ("T1", "T2", "T3"):
         index = ("T1", "T2", "T3").index(scene.wfrl_selected_turbine)
         yaw[index], pitch[index], rpm[index] = scene.wfrl_manual_yaw, scene.wfrl_manual_pitch, 0.0
     apply_demo_state(yaw, pitch, rpm, sample.rotor_rad)
@@ -118,6 +132,9 @@ def _update_demo_status(scene, depsgraph=None):
 
 def _on_load(_unused):
     import bpy
+    for camera in bpy.data.cameras:
+        camera.show_passepartout = False
+        camera.passepartout_alpha = 0
     from . import runtime
     if any(scene.get("wfrl_scene_kind") == "live" for scene in bpy.data.scenes):
         runtime.disconnect(force=True)
@@ -159,7 +176,7 @@ def register():
         if not cls.is_registered:
             bpy.utils.register_class(cls)
     definitions = {
-        "wfrl_selected_turbine": bpy.props.EnumProperty(items=(("T1", "T1", "Upstream turbine"), ("T2", "T2", "Middle turbine"), ("T3", "T3", "Downstream turbine")), default="T1", update=_update_selection),
+        "wfrl_selected_turbine": bpy.props.EnumProperty(items=_turbine_items, update=_update_selection),
         "wfrl_fixture_state": bpy.props.EnumProperty(items=(("NOMINAL", "Nominal", ""), ("WAITING", "Waiting", ""), ("CHANNEL_OFF", "Channel Off", ""), ("STALE", "Stale Data", ""), ("INCOMPATIBLE", "Bad Checkpoint", ""), ("FAILED", "Failed", "")), default="NOMINAL"),
         "wfrl_show_wake": bpy.props.BoolProperty(default=True, update=_update_layers),
         "wfrl_wake_display": bpy.props.EnumProperty(items=(("SCIENTIFIC", "Scientific", "Green diagnostic tracers"), ("CINEMATIC", "Cinematic", "Animated incoming filaments and yaw-deflected wake (SYNTH)")), default="SCIENTIFIC", update=_update_layers),

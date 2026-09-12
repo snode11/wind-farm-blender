@@ -247,7 +247,7 @@ class LiveRuntimeTests(unittest.TestCase):
         import wfrl_blender
         scene = SimpleNamespace(get=lambda key: 'live' if key == 'wfrl_scene_kind' else None,
                                 objects={})
-        bpy = SimpleNamespace(data=SimpleNamespace(scenes=[scene]))
+        bpy = SimpleNamespace(data=SimpleNamespace(scenes=[scene], cameras=[]))
         with patch.dict(sys.modules, bpy=bpy), patch.object(runtime, 'disconnect') as disconnect:
             wfrl_blender._on_load(None)
             disconnect.assert_called_once_with(force=True)
