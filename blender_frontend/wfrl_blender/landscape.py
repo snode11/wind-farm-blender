@@ -358,6 +358,7 @@ def build_landscape(collection):
     def instance_data(mat):
         bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=1)
         source=bpy.context.object;data=source.data;data.materials.append(mat)
+        data.name = "WFRL.Landscape.Rock.Data"
         bpy.data.objects.remove(source,do_unlink=True)
         return data
     bark=material('WFRL.Landscape.Shrub.Stem',(.07,.045,.02))
@@ -495,6 +496,11 @@ def build_landscape(collection):
         ridge=mesh(f'WFRL.Landscape.DistantRidge{layer}',v,f,mat)
         ridge['provenance']='Presentation-only distant ridge; excluded from simulation terrain'
     optimize_shrubs(collection)
+    # Some prototypes lose every instance during distance reduction. Release
+    # only meshes created by this build; never sweep user orphan datablocks.
+    for prototype in (*shrub_data, rock_data):
+        if prototype.users == 0:
+            bpy.data.meshes.remove(prototype)
     return terrain
 
 

@@ -9,6 +9,32 @@ from ..cameras import ensure_gimbal, aim_gimbal, fill_camera_view
 _ACTIVE = None
 
 
+def camera_world_angles(camera, depsgraph):
+    """World heading/elevation and optical roll from the evaluated camera axes.
+
+    Pan is measured from world +X toward +Y; tilt is positive upward. Roll is
+    rotation about local camera +Z relative to world-up. At a vertical optical
+    axis heading and this roll reference are undefined, so do not invent them.
+    """
+    from mathutils import Vector
+    rotation = camera.evaluated_get(depsgraph).matrix_world.to_quaternion()
+    forward = rotation @ Vector((0, 0, -1))
+    up = rotation @ Vector((0, 1, 0))
+    tilt = math.degrees(math.asin(max(-1., min(1., forward.z))))
+    right = forward.cross(Vector((0, 0, 1)))
+    if right.length < 1e-6:
+        return None, tilt, None
+    right.normalize()
+    upright = right.cross(forward).normalized()
+    pan = math.degrees(math.atan2(forward.y, forward.x)) % 360
+    roll = math.degrees(math.atan2(-up.dot(right), up.dot(upright)))
+    return pan, tilt, roll
+
+
+def angle_label(value):
+    return '未定义（垂直视轴）' if value is None else f'{value:.1f}°'
+
+
 def current(scene):
     return ensure_gimbal(scene, scene.wfrl_gimbal_turbine)
 
@@ -215,9 +241,10 @@ class WFRL_OT_GimbalMode(GimbalAvailable, bpy.types.Operator):
 class WFRL_PT_Gimbal(bpy.types.Panel):
     bl_label = 'WFRL / Gimbal Camera 云台相机'
     bl_idname = 'WFRL_PT_gimbal'
+    bl_order = -200
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = 'Camera'
+    bl_category = 'Item'
 
     def draw(self, context):
         scene, layout = context.scene, self.layout
@@ -234,13 +261,23 @@ class WFRL_PT_Gimbal(bpy.types.Panel):
         for value, label in (('DOWN', 'Down ↓'), ('FRONT', 'Front'), ('BACK', 'Back')):
             row.operator('wfrl.gimbal_preset', text=label).preset = value
         layout.operator('wfrl.gimbal_preset', text='Reset / 复位').preset = 'RESET'
-        camera = scene.objects.get(f'WFRL.Camera.{scene.wfrl_gimbal_turbine}.Gimbal')
+        space = context.space_data
+        camera = (space.camera if space and space.type == 'VIEW_3D' and space.use_local_camera else scene.camera)
         if camera:
-            layout.label(text=f"Yaw {camera['gimbal_yaw']:.0f}°  Pitch {camera['gimbal_pitch']:.0f}°  FOV {camera['gimbal_fov']:.0f}°")
+            pan, tilt, roll = camera_world_angles(camera, context.evaluated_depsgraph_get())
+            layout.label(text='当前 Camera 仿真姿态 · 世界坐标')
+            layout.label(text=camera.name.removeprefix('WFRL.Camera.'))
+            layout.label(text=f'Pan {angle_label(pan)}  Tilt {angle_label(tilt)}')
+            layout.label(text=f'Roll {angle_label(roll)} · 无独立控制')
+        else:
+            layout.label(text='Camera 仿真姿态：未选择相机')
+        from .clearance import draw as draw_clearance
+        draw_clearance(self.layout, scene)
         layout.label(text='Joystick: drag & hold; release to stop')
         layout.label(text='Mouse drag: look • Wheel: zoom • Esc: exit')
 
 
+# Keep operators for existing scenes, without exposing the retired sidebar panel.
 CLASSES = (WFRL_OT_GimbalPreset, WFRL_OT_GimbalMode, WFRL_PT_Gimbal)
 
 

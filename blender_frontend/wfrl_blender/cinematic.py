@@ -58,7 +58,7 @@ def filament(index, time_s, yaw, speed=8.0, travel_m=None):
     radius = 66.0 * math.sqrt((index + .5) / STRANDS)
     # Some near-axis threads make the small nacelle bypass visible in closeups.
     if index < 12:
-        radius = 2.5 + index * .8
+        radius = 7.0 + index * 1.1
     travel = max(0.0, speed) * time_s if travel_m is None else travel_m
     # One quarter are persistent guides; varied moving streaks fill the bundle.
     moving = index % 4 != 0
@@ -134,6 +134,43 @@ class WindTransport:
         p[:, 0] = START * np.cos(angle) - y * np.sin(angle) + displacement[:, 0]
         p[:, 1] = START * np.sin(angle) + y * np.cos(angle) + displacement[:, 1]
         return p.ravel()
+
+
+def avoid_nacelle(coords, center, radius):
+    """Keep final polyline segments outside a conservative nacelle envelope.
+
+    Apply after historical transport. The sphere includes the curve bevel;
+    closest-segment corrections also protect long chords between samples.
+    This is geometric presentation clearance, not a fluid solver.
+    """
+    import numpy as np
+    p = np.asarray(coords).reshape((-1, 4)).copy()
+    xyz = p[:, :3]
+    center = np.asarray(center)
+    # Smoothly widen the local approach before enforcing chord clearance.
+    delta = xyz - center
+    distance = np.linalg.norm(delta, axis=1)
+    direction = delta / np.maximum(distance[:, None], 1e-9)
+    direction[distance < 1e-9] = (0, 0, 1)
+    target = np.maximum(distance, radius + 2.0)
+    weight = np.clip((radius + 10.0 - distance) / 8.0, 0, 1)
+    weight = weight * weight * (3 - 2 * weight)
+    xyz += direction * ((target - distance) * weight)[:, None]
+    for _ in range(12):
+        a = xyz[:-1] - center
+        segment = xyz[1:] - xyz[:-1]
+        fraction = np.clip(-np.sum(a * segment, axis=1) /
+                           np.maximum(np.sum(segment * segment, axis=1), 1e-12), 0, 1)
+        nearest = a + fraction[:, None] * segment
+        distances = np.linalg.norm(nearest, axis=1)
+        indices = np.flatnonzero(distances < radius)
+        if not len(indices):
+            break
+        for i in indices:
+            normal = nearest[i] / distances[i] if distances[i] > 1e-8 else np.array((0., 0., 1.))
+            correction = normal * (radius + .1 - distances[i])
+            xyz[i:i + 2] += correction
+    return p.ravel()
 
 
 def material():
@@ -228,7 +265,10 @@ def update(scene, phase):
             obj.hide_set(True)
             continue
         obj.location = root.matrix_world.translation
-        obj.location.z += hub_offset
+        # Saved meshes may predate the current asset or have a custom height.
+        # Follow the actual rig instead of moving only the flow to new defaults.
+        rotor = scene.objects.get('WFRL.Turbine.' + obj['turbine_id'] + '.Rotor')
+        obj.location.z = rotor.matrix_world.translation.z if rotor is not None else obj.location.z + hub_offset
         obj.rotation_euler.z = 0.0
         yaw = root.rotation_euler.z - wind_angle
         if speed not in transports:
@@ -238,9 +278,19 @@ def update(scene, phase):
                 (lambda at: backend_inflow.sample(rows, at)[0]) if rows else None)
         transport = transports[speed]
         travel_m = backend_inflow.history(scene)[-1][3] if backend_inflow.active(scene) else None
+        body = scene.objects.get('WFRL.Turbine.' + obj['turbine_id'] + '.Nacelle')
+        clearance = None
+        if body is not None:
+            from mathutils import Vector
+            corners = [body.matrix_world @ Vector(corner) for corner in body.bound_box]
+            center = sum(corners, Vector()) / 8
+            radius = max((corner - center).length for corner in corners) + .65
+            clearance = (tuple(center - obj.location), radius)
         for index, spline in enumerate(obj.data.splines):
             coords, widths = filament(index, phase / .9, yaw, speed, travel_m=travel_m)
             coords = transport.points(coords)
+            if clearance is not None:
+                coords = avoid_nacelle(coords, *clearance)
             spline.points.foreach_set('co', coords)
             spline.points.foreach_set('radius', widths)
         obj.hide_render = False

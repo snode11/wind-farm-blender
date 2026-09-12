@@ -13,6 +13,7 @@ _ACTIVE = None
 class WFRL_OT_PresentationMode(bpy.types.Operator):
     bl_idname = 'wfrl.presentation_mode'
     bl_label = 'Toggle Presentation / Development'
+    bl_description = '切换演示/开发界面：隐藏或显示工具栏、工具标题栏和操作手柄，不影响仿真或训练'
 
     def execute(self, context):
         set_presentation_mode(context, not context.workspace.get('presentation_mode', False))
@@ -151,11 +152,8 @@ class WFRL_PT_Presentation(bpy.types.Panel):
     def draw(self, context):
         scene, layout = context.scene, self.layout
         row = layout.row(align=True)
-        for name in ('World', 'Top', 'Side'):
+        for name in ('World', 'Top'):
             row.operator('wfrl.select_camera', text=name).camera_name = 'WFRL.Camera.' + name
-        row = layout.row(align=True)
-        for turbine in ('T1', 'T2', 'T3'):
-            row.operator('wfrl.select_camera', text=turbine + ' Gimbal').camera_name = f'WFRL.Camera.{turbine}.Gimbal'
         layout.prop(scene, 'wfrl_show_wake', text='Wake visible')
         layout.prop(scene, 'wfrl_wake_display', text='Wake display')
         layout.label(text='Cinematic: wind-tunnel filaments (SYNTH)')
@@ -178,8 +176,9 @@ class WFRL_PT_Presentation(bpy.types.Panel):
             if scene.get('wfrl_scene_kind') != 'live':
                 box.label(text='Visual wind only / 不修改仿真来风')
         layout.label(text='Green lines: illustration, not FAST.Farm wind')
-        layout.operator('wfrl.presentation_mode')
-        layout.label(text='Presentation' if context.workspace.get('presentation_mode') else 'Development')
+        presenting = context.workspace.get('presentation_mode', False)
+        layout.operator('wfrl.presentation_mode', text='显示编辑工具 / 开发模式' if presenting else '隐藏编辑工具 / 演示模式')
+        layout.label(text='当前：演示模式' if presenting else '当前：开发模式')
         layout.prop(scene, 'wfrl_capture_directory')
         layout.operator('wfrl.capture_screenshot')
         layout.prop(scene, 'wfrl_capture_fps')

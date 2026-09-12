@@ -1,9 +1,11 @@
 # WFRL 前端说明：当前进度与技术架构
 
-> 更新日期：2026-09-07  
+> 更新日期：2026-09-13（0.2.2 雷达及相关展示修订）
 > 对应项目：`wind farm RL`  
-> 前端扩展：WFRL Blender `0.2.0`  
+> 前端扩展：WFRL Blender `0.2.2`
 > 本文依据当前工作区源码、安装说明和验收记录整理。历史测试结果与当前源码实现分别说明，不将代码存在等同于完整产品验收。
+
+当前安装与雷达入口见[交付说明](dist/README-lidar.md)及[用户手册第 12 节](docs/blender/用户使用手册.md#12-激光净空雷达第一次照着操作)。以下早期阶段验收表保留历史边界；0.2.2 新增情况见雷达条目及[变更记录](CHANGELOG.md)，本地验收报告和截图并未全部随仓库发布。
 
 ## 1. 项目现在是什么形态
 
@@ -31,7 +33,8 @@ WFRL 的前端是一套面向风电场强化学习研究、仿真观察与演示
 
 | 模块 | 当前进度 | 验证范围与剩余事项 |
 | --- | --- | --- |
-| Extension 打包与安装 | 已验证 | 已有 0.2.0 扩展构建及 macOS Blender 5.2.1 安装、重载证据；Windows 未验证 |
+| Extension 打包与安装 | 当前交付 0.2.2 | 早期 0.2.0 有 macOS Blender 5.2.1 安装、重载记录；0.2.2 隔离 ZIP 与双结果包读取已检查，Windows 未验证 |
+| 激光净空离线回放 | 已实现并有专项验证 | 两个 FAST.Farm 修订结果包、播放/暂停/拖动与同步统计；仿真数值不代表现场精度，柔性形变未显示 |
 | Local Demo | 已验证 | 固定三台 NREL 5 MW 风机，66 秒确定性演示，支持播放、暂停、单步、停止和复位；数据属于 SYNTH |
 | 风机建模与动画 | 已实现并有专项测试 | yaw、独立叶片 pitch、RPM 积分、相机与对象层级已有覆盖；机械细节已进一步补充 |
 | 地形与环境展示 | 已实现 | 地表材质、HDR 天空、道路、基座、远山、植被、岩石及天气预设；属于展示层 |
@@ -79,7 +82,7 @@ flowchart TB
 
 Blender 使用自己的 Python 环境运行扩展；Bridge 使用项目后端 Python 环境。FLORIS、PyTorch、MPI 和 FAST.Farm 等依赖保留在后端环境中。
 
-Local Demo 可以在没有后端依赖的情况下运行。真实训练和回放通过本机 Bridge 调用现有后端，Blender 不直接计算强化学习奖励或执行物理求解。FAST.Farm 路径还涉及 MPI 和仿真子进程。
+Local Demo 和激光净空离线回放可以在没有在线后端的情况下运行。雷达通过 `clearance_replay.py` 读取包内运动与测量结果，`clearance_visual.py` 更新示意，`panels/clearance.py` 提供控制与读数；它不经过下面的 Bridge 链路。真实训练和策略回放通过本机 Bridge 调用现有后端，Blender 不直接计算强化学习奖励或执行物理求解。FAST.Farm 路径还涉及 MPI 和仿真子进程。
 
 这种拆分使界面渲染、扩展安装与训练环境相互隔离，避免把大型科学计算依赖安装进 Blender 内置 Python。
 
@@ -280,9 +283,9 @@ python scripts/blender/build_extension.py
 输出包括：
 
 ```text
-dist/wfrl_blender-0.2.0.zip
-dist/wfrl_blender-0.2.0.zip.sha256
-dist/wfrl_blender-0.2.0.inventory.json
+dist/wfrl_blender-0.2.2.zip
+dist/wfrl_blender-0.2.2.zip.sha256
+dist/wfrl_blender-0.2.2.inventory.json
 ```
 
 在 Blender 5.2 或更新版本中打开 **Edit → Preferences → Extensions → Install from Disk**，选择 ZIP 并启用 WFRL Blender。进入 3D View 后按 **N**，面板位于 **Item** 标签。
@@ -291,7 +294,7 @@ dist/wfrl_blender-0.2.0.inventory.json
 
 ### 9.2 仅运行演示
 
-在扩展中选择 Demo，点击 **Load Demo Scene → Start Demo**。此路径不要求启动 Bridge。
+三风机演示：在扩展中选择 Demo，点击 **Load Demo Scene → Start Demo**，无需 Bridge。雷达演示：在完整仓库中双击 `scripts/blender/打开净空雷达演示.command`，或按[用户手册](docs/blender/用户使用手册.md#12-激光净空雷达第一次照着操作)安装并选择两个修订结果包；不要用 Start Demo 代替雷达片段按钮。
 
 正式后端连接流程使用下面的 Bridge 或平台启动器。
 
@@ -401,6 +404,9 @@ Blender 专用烟测需要使用 Blender 执行，不能用普通 Python 测试�
 
 ## 13. 相关文档
 
+- [激光净空雷达说明](docs/blender/激光净空雷达使用说明.md)：离线操作、数据来源与验证边界。
+- [雷达交付说明](dist/README-lidar.md)：0.2.2 安装包、两个修订结果包及校验方法。
+
 - [项目总 README](README.md)：研究目标、双后端与算法进度。
 - [安装说明](docs/blender/INSTALL.md)：扩展安装、环境和平台启动器。
 - [用户指南](docs/blender/USER_GUIDE.md)：四种模式、视图、录制与导出。
@@ -413,7 +419,7 @@ Blender 专用烟测需要使用 Blender 执行，不能用普通 Python 测试�
 
 ### 机舱云台相机（T1 / T2 / T3）
 
-在 3D 视图按 **N**，打开右侧 **Camera** 竖排标签：
+在 3D 视图按 **N**，打开右侧 **Item** 标签中的 **Gimbal Camera 云台相机** 面板（旧版为 Camera；专用雷达入口使用演示文件当前标签）：
 
 - 选择 **T1 / T2 / T3**，再点击 **Camera Mode / 相机模式**。
 - 按住鼠标左键拖动画面可转向，滚轮调整视野大小，**Esc** 退出控制并保留当前画面。

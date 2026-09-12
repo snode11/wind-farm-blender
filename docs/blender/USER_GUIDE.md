@@ -20,6 +20,10 @@ Choose **Demo**, then **Load Demo Scene**. This builds a fixed three-turbine NRE
 
 While paused, expand **Manual Pose / Paused Demo** to preview yaw and pitch on the selected turbine. This changes display geometry only. RPM is held at zero for the override, power becomes unavailable, and Resume restores the scripted pose. It never sends yaw, pitch, or torque to a simulator.
 
+## Offline lidar clearance replay
+
+Version 0.2.2 adds two precomputed FAST.Farm clips. Follow [the Chinese step-by-step instructions](用户使用手册.md#12-激光净空雷达第一次照着操作) to launch the dedicated demo, switch clips, pause, seek, and read clearance and error. Keep the `normal-v1.1` and `close-v1.1` result directories with the checkout; raw solver surfaces are unnecessary for playback. The display is a rigid motion illustration, and the values are simulation results, not field measurements.
+
 ## Interactive Training
 
 1. Start the Bridge with a configured FAST.Farm environment, select **Interactive**, and connect. The current FLORIS adapter supports Backend Demo only, not Interactive Training or Replay.
@@ -44,7 +48,7 @@ Select **Replay**, choose a compatible checkpoint, set replay steps, warmup step
 
 ## Views and fidelity-safe presentation
 
-In Local Demo, use **WFRL / PRESENTATION > Views & Layers** for World, Top, Side, close-up, sensor, and World + Nacelle views. Use the sidebar **Camera** tab for the mounted Gimbal Camera controls. **Views & Capture** currently contains wake, presentation, and capture controls; it does not expose Apply Camera or Single/Dual/Quad buttons. See the Chinese manual for returning from the gimbal local camera to the World view. Presentation mode does not change data fidelity.
+In Local Demo, use **WFRL / PRESENTATION > Views & Layers** for World, Top, Side, close-up, sensor, and World + Nacelle views. Use the sidebar **Item** tab for the Gimbal Camera controls (older versions used **Camera**). **Views & Capture** currently contains wake, presentation, and capture controls; it does not expose Apply Camera or Single/Dual/Quad buttons. See the Chinese manual for returning from the gimbal local camera to the World view. Presentation mode does not change data fidelity.
 
 Telemetry curves retain up to 600 samples per turbine and channel. Gaps, fidelity changes, and mixed units break or suppress a plot rather than joining incompatible data.
 
@@ -58,3 +62,7 @@ Set an output folder in **WFRL / Views & Capture**.
 Slow capture may drop requested samples. Recording never advances or controls backend steps. The output is a PNG sequence, not a video; encode it separately if a video container is required.
 
 In **WFRL / Live Telemetry**, choose **Export Bounded History**, select a `.json` path, and wait for the status to become `COMPLETE`. The export is a bounded snapshot of the current run, includes schema/run/sequence and source metadata, and does not change simulation state. Serialization and file I/O run outside Blender's event loop; a write failure is shown as `FAILED`.
+
+## Appendix: turbine dimensions and assembly
+
+See [附录 A：风机模型尺寸与部件装配位置](用户使用手册.md#附录-a风机模型尺寸与部件装配位置) for tower, nacelle, hub and blade dimensions, relative placement, and source limitations.

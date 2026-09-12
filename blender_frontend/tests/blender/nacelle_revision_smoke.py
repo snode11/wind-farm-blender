@@ -27,7 +27,7 @@ for degrees in (0,45,90,180):
  assert all(abs(seal.matrix_world[i][j]-fixed[i][j])<1e-6 for i in range(4) for j in range(4))
  expected=yaw.matrix_world@local
  assert all(abs(skirt.matrix_world[i][j]-expected[i][j])<1e-6 for i in range(4) for j in range(4))
- origin=yaw.matrix_world@Vector((.85,-10,.855));direction=yaw.matrix_world.to_3x3()@Vector((0,1,0))
+ origin=yaw.matrix_world@Vector((.85,-10,.855+1.96256));direction=yaw.matrix_world.to_3x3()@Vector((0,1,0))
  hit,_,_,_,obj,_=bpy.context.scene.ray_cast(bpy.context.evaluated_depsgraph_get(),origin,direction)
  assert hit and '.Vent.Louvre' in obj.name,obj.name
 print('WFRL_NACELLE_REVISION_SMOKE=PASS')

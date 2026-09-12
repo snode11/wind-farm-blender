@@ -90,6 +90,8 @@ def build_cameras(scene):
     create('WFRL.Camera.T1.Closeup', t1 + Vector((-150, -205, 126)), t1 + Vector((-3, 0, 96)))
     sensor = create('WFRL.Camera.T1.Sensor', (-4, -2.4, -2.4), (-9, 0, -76))
     sensor.parent = bpy.data.objects[f'WFRL.Turbine.{first.turbine_id}.YawRoot']
+    from .turbine_geometry import geometry_data
+    sensor.location.z += geometry_data()['scalars']['Twr2Shft']
     sensor.data.lens = 27
     sensor['mount'] = 'nacelle_down / geometric clearance view'
     sensor.data.display_size = 1.2
@@ -299,7 +301,8 @@ def ensure_gimbal(scene, turbine):
         # view with the nearest blade at the default downward pitch.
         # Keep the rotor outside the lens: an oblique, medium-distance
         # inspection view gives the full blade span room in frame.
-        camera.location = (-35, -28, 22)
+        from .turbine_geometry import geometry_data
+        camera.location = (-35, -28, 22 + geometry_data()['scalars']['Twr2Shft'])
         camera.data.clip_start, camera.data.clip_end = .05, 30000
         camera.data.display_size = .5
         camera['mount'] = 'nacelle gimbal / SYNTH'

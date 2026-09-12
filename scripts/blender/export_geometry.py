@@ -80,7 +80,7 @@ def export(template, output):
         "shell_source_sha256": hashlib.sha256(shell_raw).hexdigest(),
         "units": {"length": "m", "angle": "deg"},
         "scalars": {key: scalar(ed, key) for key in
-                    ("TipRad", "HubRad", "PreCone(1)", "OverHang", "ShftTilt", "TowerHt")},
+                    ("TipRad", "HubRad", "PreCone(1)", "OverHang", "ShftTilt", "TowerHt", "Twr2Shft")},
         "blade_columns": ["span", "curve", "sweep", "curve_angle", "twist", "chord", "airfoil_id"],
         "blade_stations": table(blade, "BlSpn", 7, int(scalar(blade, "NumBlNds"))),
         "tower_columns": ["elevation", "diameter"],

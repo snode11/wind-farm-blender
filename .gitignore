@@ -43,3 +43,8 @@ example*.png
 
 # macOS Finder folder metadata
 .DS_Store
+
+# LiDAR solver surfaces are local archives; commit only compact replay packages.
+results/lidar/raw/
+*.blend1
+.pytest_cache/

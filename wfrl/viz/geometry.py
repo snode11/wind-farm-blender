@@ -225,12 +225,13 @@ class TurbineGeometry:
     # 因为根部固支要求 φ(0)=φ'(0)=0）
     mode_flap1: np.ndarray = None
     mode_edge1: np.ndarray = None
+    twr2shft: float = 0.0
 
     # ------------------------------------------------------------------
     @property
     def hub_height(self):
-        """轮毂中心高度。塔顶 + 轴倾造成的抬升（OverHang 为负=上风向）。"""
-        return self.tower_ht + abs(self.overhang) * np.sin(
+        """轮毂中心高度。塔顶 + 主轴高差 + 轴倾造成的抬升（OverHang 为负=上风向）。"""
+        return self.tower_ht + self.twr2shft + abs(self.overhang) * np.sin(
             np.deg2rad(abs(self.shft_tilt)))
 
     @property
@@ -337,7 +338,7 @@ class TurbineGeometry:
         没有影响，所以间隙与 yaw 无关）。azimuth=180° 时叶片指向正下方，
         也就是掠过塔筒的位置。
         """
-        top = np.array([0.0, 0.0, self.tower_ht])
+        top = np.array([0.0, 0.0, self.tower_ht + self.twr2shft])
         hub_flat = top + np.array([self.overhang, 0.0, 0.0])
         m_tilt = trans(top) @ rot_y(-self.shft_tilt) @ trans(-top)
         m_hub = m_tilt @ trans(hub_flat)
@@ -478,6 +479,7 @@ def load_turbine_geometry(template_dir=None):
         overhang=_scalar(ed, "OverHang"),
         shft_tilt=_scalar(ed, "ShftTilt"),
         tower_ht=_scalar(ed, "TowerHt"),
+        twr2shft=_scalar(ed, "Twr2Shft"),
         bl_spn=tab[:, 0], bl_crv_ac=tab[:, 1], bl_swp_ac=tab[:, 2],
         bl_twist=tab[:, 4], bl_chord=tab[:, 5], bl_afid=tab[:, 6],
         airfoils=airfoils,

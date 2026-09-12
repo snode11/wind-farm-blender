@@ -401,3 +401,12 @@ def register():
     bpy._wfrl_part3_cleanup = shutdown
     if not bpy.app.timers.is_registered(tick):
         bpy.app.timers.register(tick, first_interval=0.05, persistent=True)
+
+
+def enter_result_replay():
+    """Detach a stopped backend and reset transport without a synthetic demo clock."""
+    if not configuration_editable():
+        raise ValueError('Stop the active backend before loading results')
+    enter_local_demo()
+    _state.connection = 'OFFLINE RESULTS'
+    _state.run_status = 'READY'

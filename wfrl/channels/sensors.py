@@ -264,18 +264,17 @@ class NacelleCamera(Sensor):
     scalar_bar_title = None
 
     # NREL 5MW 真值（与 geometry/animate 同源），camera_pose 用真实尺度。
-    # 从 geometry 载入，避免和 animate 里画出来的机组对不上（之前写死 90，实际
-    # 轮毂 88.04 ⇒ 相机高度比机组高 2 m，俯视时叶片老在画面偏下）。
+    # 从 geometry 载入，包含 Twr2Shft，保证挂点与渲染中的 90 m 轮毂一致。
     try:
         from wfrl.viz.geometry import load_turbine_geometry as _ltg
         _GEO = _ltg()
-        HUB_H = float(_GEO.hub_height)          # ≈88.04
+        HUB_H = float(_GEO.hub_height)          # ≈90.0
         TIP_R = float(_GEO.tip_rad)             # 63
         HUB_R = float(_GEO.hub_rad)             # 1.5，叶根所在半径
         OVERHANG = float(abs(_GEO.overhang))    # ≈5.02，转子平面在塔前多远
         NAC_HALF = float(abs(_GEO.overhang))    # 机舱半长量级
     except Exception:                            # noqa: BLE001 —— 载入失败退回常数
-        HUB_H = 88.04
+        HUB_H = 90.0
         TIP_R = 63.0
         HUB_R = 1.5
         OVERHANG = 5.0

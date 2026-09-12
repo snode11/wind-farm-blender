@@ -13,6 +13,8 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE_SOURCE = ROOT / "blender_frontend" / "wfrl_blender"
 PROTOCOL_SOURCE = ROOT / "wfrl" / "blender_bridge" / "messages.py"
+LIDAR_REPLAY_SOURCE = ROOT / "wfrl" / "lidar" / "replay.py"
+LIDAR_EVIDENCE_SOURCE = ROOT / "wfrl" / "lidar" / "evidence.py"
 DIST = ROOT / "dist"
 ZIP_TIMESTAMP = (2020, 1, 1, 0, 0, 0)
 EXCLUDED_NAMES = {".DS_Store"}
@@ -38,6 +40,14 @@ def _payloads() -> list[tuple[str, bytes]]:
             continue
         payloads.append((relative.as_posix(), path.read_bytes()))
     payloads.append(("protocol.py", PROTOCOL_SOURCE.read_bytes()))
+    # The offline player must also work outside a source checkout. Bundle only
+    # the dependency-free reader, never the simulator or training dependencies.
+    payloads.extend([
+        ("_vendor/__init__.py", b""),
+        ("_vendor/lidar/__init__.py", b""),
+        ("_vendor/lidar/replay.py", LIDAR_REPLAY_SOURCE.read_bytes()),
+        ("_vendor/lidar/evidence.py", LIDAR_EVIDENCE_SOURCE.read_bytes()),
+    ])
     return sorted(payloads)
 
 

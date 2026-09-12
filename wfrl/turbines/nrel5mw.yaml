@@ -23,7 +23,7 @@ geometry_source: fastfarm_template
 
 # 参考尺寸（信息性，来自模板 ElastoDyn；渲染实际从 geometry 解析取值）。
 reference:
-  hub_height: 88.04        # m，含轴倾抬升
+  hub_height: 90.0        # m，含塔顶到主轴的距离和轴倾抬升
   rotor_diameter: 126.0    # m
   tower_top: 87.6          # m
 

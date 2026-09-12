@@ -94,7 +94,7 @@ def _update_demo_status(scene, depsgraph=None):
     # explicit live-scene guard so a stale LOCAL DEMO state cannot overwrite a
     # connected scene's transforms during reconnect/reload.
     if (runtime.get_state().connection != "LOCAL DEMO"
-            or scene.get("wfrl_scene_kind") == "live"):
+            or scene.get("wfrl_scene_kind") in {"live", "clearance_replay"}):
         return
     if not scene.objects.get("WFRL.Turbine.T1.Rotor"):
         return
@@ -158,10 +158,10 @@ def _classes():
     from .operators.history_export import CLASSES as HISTORY_EXPORT_CLASSES
     from .panels.telemetry import CLASSES as TELEMETRY_CLASSES
     from .operators.workflow import CLASSES as WORKFLOW_CLASSES
-    from .panels import scene, channels, run, safety, presentation, training, gimbal
+    from .panels import scene, channels, run, safety, presentation, training, gimbal, clearance
     return (PREFERENCE_CLASSES + CLASSES + CONNECTION_CLASSES + RUN_CLASSES + STATUS_CLASSES + TELEMETRY_CLASSES
             + WORKFLOW_CLASSES + HISTORY_EXPORT_CLASSES + scene.CLASSES + channels.CLASSES + run.CLASSES
-            + safety.CLASSES + presentation.CLASSES + training.CLASSES + gimbal.CLASSES)
+            + safety.CLASSES + presentation.CLASSES + training.CLASSES + gimbal.CLASSES + clearance.CLASSES)
 
 
 def register():
@@ -224,6 +224,10 @@ def register():
     capture_panel.register_properties()
     from .panels import gimbal
     gimbal.register_properties()
+    from .panels import clearance
+    from . import clearance_replay
+    clearance.register_properties()
+    clearance_replay.register()
     charts.register()
     runtime.register()
     registered_classes = _classes()
@@ -242,6 +246,8 @@ def register():
         runtime_cleanup()
         history_export_cleanup()
         gimbal_cleanup()
+        clearance.unregister_properties()
+        clearance_replay.unregister()
         capture_cleanup()
         charts_cleanup()
         workflow_cleanup()

@@ -53,9 +53,9 @@ def _build_real(pl, x, y, hub_h, scale, geo):
     """
     hub_z = hub_h * scale                       # 让轮毂落在调用方给的高度上
     tilt_rise = (geo.hub_height - geo.tower_ht) * scale
-    top_z = hub_z - tilt_rise                   # 塔顶（未倾斜前的轴心高度）
+    top_z = hub_z - tilt_rise                   # 塔顶，不含塔顶到主轴的距离
 
-    # 塔筒：真实锥度，z 拉伸到 top_z（真实 87.6 与 FLORIS 的 90 差 2.4 m）
+    # 塔筒：轮毂为标准 90 m 时，塔顶保持 87.6 m
     tower = geo.tower_surface()
     tp = tower.points.copy()
     tp[:, :2] *= scale
@@ -63,10 +63,10 @@ def _build_real(pl, x, y, hub_h, scale, geo):
     tp[:, 0] += x; tp[:, 1] += y
     tower.points = tp
 
-    tower_top = np.array([x, y, top_z])
+    tower_top = np.array([x, y, top_z + geo.twr2shft * scale])
     overhang = geo.overhang * scale             # 负 = 上风向
     hub_flat = tower_top + np.array([overhang, 0.0, 0.0])
-    # 轴倾绕塔顶的横轴转；ShftTilt<0 表示上风端上抬 ⇒ 取负号
+    # 轴倾绕塔顶上方 Twr2Shft 处的横轴转；上风端上抬
     M_tilt = (_trans(tower_top) @ _rot_y(-geo.shft_tilt)
               @ _trans(-tower_top))
     M_hub = M_tilt @ _trans(hub_flat)           # 叶片局部原点 → 轮毂中心

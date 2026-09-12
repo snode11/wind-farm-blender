@@ -187,10 +187,10 @@ def _make_turbine(collection, turbine):
         get_material("hub"),
     )
     bearing.parent = root
-    bearing.location = (0, 0, scalars["TowerHt"] - 1.55)
+    bearing.location = (0, 0, scalars["TowerHt"])
     _finish(bearing, bevel=0.025, smooth=True)
     bearing["geometry_source"] = "NREL 5MW tower-top yaw bearing presentation detail"
-    for z, radius in ((0.28, 3.06), (scalars["TowerHt"] - 1.78, 1.945)):
+    for z, radius in ((0.28, 3.06), (scalars["TowerHt"] - .08, 1.945)):
         collar = _primitive(collection, "cylinder", prefix + f".TowerCollar{int(z)}", (0, 0, 0), (radius, radius, 0.16), get_material("hub"))
         collar.parent = root
         collar.location = (0, 0, z)
@@ -263,10 +263,27 @@ def _make_turbine(collection, turbine):
         _make_blade(collection, rotor, prefix + f".Blade{index + 1}", math.radians(120.0 * index))
     from .mechanical_details import add_mechanical_details
     add_mechanical_details(collection, root, yaw, rotor, prefix, scalars, shell)
+    # Yaw pivot stays at tower top. Move only the shell-mounted assembly;
+    # rotor/shaft already use the full hub height, and tower fittings stay put.
+    for child in list(yaw.children):
+        if child not in (rotor, shaft) and not child.name.endswith('.YawSkirt'):
+            child.location.z += scalars['Twr2Shft']
+    # The lifted shell bottom sits 0.463 m above the tower. A short mounting
+    # pedestal bridges that gap with overlap; this exterior is illustrative.
+    bottom = scalars['Twr2Shft'] + .15 - shell['height'] / 2
+    pedestal = _primitive(collection, 'cylinder', prefix + '.YawPedestal',
+                          (0, 0, 0), (1.90, 1.90, (bottom + .10) / 2), get_material('hub'))
+    pedestal.parent = yaw
+    pedestal.location.z = (bottom + .10) / 2 - .05
+    _finish(pedestal, bevel=.025, smooth=True)
+    pedestal['geometry_source'] = 'Illustrative tower-to-nacelle mounting envelope'
+    root['wfrl_assembly_revision'] = 2
     root["wfrl_turbine_id"] = turbine.turbine_id
     root["geometry_source"] = data["source"]
     root["rotor_diameter_m"] = 2 * scalars["TipRad"]
     root["hub_height_m"] = hub_z
+    from .clearance_visual import ensure_radar
+    ensure_radar(bpy.context.scene, turbine.turbine_id)
     return root
 
 
@@ -383,20 +400,24 @@ def _make_sensor_fixtures(collection, scene):
     bpy = _bpy()
     material = get_material("accent")
     turbine = scene.turbines[0]
+    from .turbine_geometry import geometry_data
+    yaw = bpy.data.objects[f'WFRL.Turbine.{turbine.turbine_id}.YawRoot']
+    fixture_z = geometry_data()['scalars']['Twr2Shft'] + .15 + geometry_data()['shell']['height']/2 + .2
     for index, offset in enumerate((-7.0, 0.0, 7.0), start=1):
         ray = _primitive(
             collection,
             "cube",
             f"WFRL.Fixture.T1.LidarRay{index}",
-            (turbine.x_m + 72.0, turbine.y_m + offset, 88.0),
+            (-72.0, offset, fixture_z),
             (72.0, 0.18, 0.18),
             material,
         )
+        ray.parent = yaw
         ray["fidelity"] = "SYNTH"
         ray["provenance"] = "T1 lidar presentation fixture"
     # A line-only camera frustum makes the sensor view auditable without
     # pretending that Blender is rendering an optical measurement.
-    vertices = frustum_vertices((72.0, turbine.y_m, 88.0), (-1.0, 0.0, -0.18),
+    vertices = frustum_vertices((0.0, 0.0, fixture_z), (-1.0, 0.0, -0.18),
                                 (0.0, 0.0, 1.0), fov_deg=75.0, near_m=4.0, far_m=180.0)
     curve = bpy.data.curves.new("WFRL.Fixture.T1.SensorFrustum.Data", "CURVE")
     curve.dimensions = "3D"
@@ -411,6 +432,7 @@ def _make_sensor_fixtures(collection, scene):
     curve.materials.append(material)
     frustum = bpy.data.objects.new("WFRL.Fixture.T1.SensorFrustum", curve)
     collection.objects.link(frustum)
+    frustum.parent = yaw
     frustum["fidelity"] = "SYNTH"
     frustum["provenance"] = "Nacelle camera geometric field of view; no optical simulation"
     # DisXY is intentionally a muted, hidden placeholder until a real export exists.

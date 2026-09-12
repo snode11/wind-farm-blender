@@ -2,7 +2,7 @@
 
 ## Supported package
 
-The current extension package is `dist/wfrl_blender-0.2.0.zip`. Its manifest requires Blender 5.2.0 or newer. The same ZIP is intended for macOS and 64-bit Windows, but this checkout contains native installation evidence only for Blender 5.2.1 on macOS. Windows installation remains to be exercised on a Windows host.
+The current extension package is `dist/wfrl_blender-0.2.2.zip`. Its manifest requires Blender 5.2.0 or newer. The same ZIP is intended for macOS and 64-bit Windows, but this checkout contains native installation evidence only for Blender 5.2.1 on macOS. Windows installation remains to be exercised on a Windows host.
 
 Build a fresh ZIP from the repository root when source files have changed:
 
@@ -10,17 +10,19 @@ Build a fresh ZIP from the repository root when source files have changed:
 python scripts/blender/build_extension.py
 ```
 
-The build script copies the extension Python, bundled geometry and landscape assets, and the canonical Bridge protocol into `dist/wfrl_blender-0.2.0.zip`.
+The build script copies the extension Python, bundled geometry and landscape assets, canonical Bridge protocol, and offline lidar reader and evidence validation modules into `dist/wfrl_blender-0.2.2.zip`.
 
 ## Install the extension
 
 1. Open Blender 5.2 or newer.
 2. Open **Edit > Preferences > Extensions**.
 3. Use the Extensions menu and choose **Install from Disk**.
-4. Select `dist/wfrl_blender-0.2.0.zip` and enable **WFRL Blender**.
+4. Select `dist/wfrl_blender-0.2.2.zip` and enable **WFRL Blender**.
 5. Open a 3D View and press **N**. WFRL panels appear in the **Item** tab.
 
 Do not unzip the package into the project or add the project environment to Blender's Python. The extension deliberately uses Blender's Python only for UI and rendering; the WFRL Bridge runs in the project's existing Python environment.
+
+For the offline lidar demo, keep both result directories listed in [the delivery guide](../../dist/README-lidar.md). The ZIP contains the player and validators; it does not contain the replay data. See [the step-by-step lidar instructions](用户使用手册.md#12-激光净空雷达第一次照着操作) for the dedicated macOS launcher and installed-extension path. Neither route needs an online solver for playback.
 
 ## Configure backend workflows
 

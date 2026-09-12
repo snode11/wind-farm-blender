@@ -36,12 +36,14 @@ class PackageTests(unittest.TestCase):
             inventory = json.loads(first.inventory.read_text(encoding="utf-8"))
             self.assertEqual(inventory["archive_sha256"], first.sha256)
             self.assertEqual(inventory["package_id"], "wfrl_blender")
-            self.assertEqual(inventory["version"], "0.2.1")
+            self.assertEqual(inventory["version"], "0.2.2")
             with zipfile.ZipFile(first.archive) as zipped:
                 names = zipped.namelist()
                 self.assertEqual(names, sorted(names))
                 self.assertIn("blender_manifest.toml", names)
                 self.assertIn("protocol.py", names)
+                self.assertIn("_vendor/lidar/replay.py", names)
+                self.assertIn("_vendor/lidar/evidence.py", names)
                 self.assertIn("assets/nrel5mw_geometry.json", names)
                 self.assertIn("assets/landscape/rocky_terrain_02_diff_2k.jpg", names)
                 self.assertNotIn("__pycache__", "\n".join(names))
@@ -55,9 +57,8 @@ class PackageTests(unittest.TestCase):
                              f"{first.sha256}  {first.archive.name}\n")
 
     def test_isolated_zip_import_uses_bundled_stdlib_codec(self):
-        subprocess.run([sys.executable, str(BUILDER_PATH)], check=True, capture_output=True)
-        archive = load_builder().build().archive
         with tempfile.TemporaryDirectory() as directory:
+            archive = load_builder().build(Path(directory) / 'dist').archive
             package = Path(directory) / 'wfrl_blender'
             with zipfile.ZipFile(archive) as zipped:
                 zipped.extractall(package)
@@ -65,6 +66,7 @@ class PackageTests(unittest.TestCase):
             code = '''import sys
 from wfrl_blender.protocol import encode_message, FrameDecoder
 from wfrl_blender.transport import TransportClient
+from wfrl_blender._vendor.lidar.replay import ReplayPackage, ReplayReader
 m = dict(protocol_version=1,type='hello',session_id='',sequence=0,payload=dict(supported_versions=[1],capabilities=[],resume_session_id=None))
 assert FrameDecoder().feed(encode_message(m)) == [m]
 assert not ({'wfrl','bpy','torch','floris','mpi4py'} & sys.modules.keys())

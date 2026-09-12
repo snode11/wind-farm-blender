@@ -23,7 +23,7 @@ def hub_position():
     scalars = geometry_data()["scalars"]
     tilt = math.radians(-scalars["ShftTilt"])
     return (scalars["OverHang"] * math.cos(tilt), 0.0,
-            scalars["TowerHt"] - scalars["OverHang"] * math.sin(tilt))
+            scalars["TowerHt"] + scalars["Twr2Shft"] - scalars["OverHang"] * math.sin(tilt))
 
 
 def _resample_ring(points, count):
