@@ -1,8 +1,8 @@
 {
   "schema": "wfrl.lidar-delivery.v1",
-  "version": "0.2.3",
-  "archive": "dist/wfrl_blender-0.2.3.zip",
-  "archive_sha256": "2b2292c2178d660fe5c83dc3c91d4b37e12af3e1614cbe348fb0866bc1b373f1",
+  "version": "0.2.4",
+  "archive": "dist/wfrl_blender-0.2.4.zip",
+  "archive_sha256": "42e0080c4bf70c5d3acd83dab23f0616ef9b92303bee01e180450282841e2c11",
   "packages": {
     "normal": "results/lidar/packages/normal-v1.1",
     "close": "results/lidar/packages/close-v1.1"
@@ -11,5 +11,5 @@
     "normal": "658922c57ecf7b69028d55eae604119a4b44e60e66247817edbd145d9dc0fe2d",
     "close": "91895c64e0bc962c956d57fe8bb507fe9e26f0af6cf6aa2f59cef5a19a9cc30b"
   },
-  "historical": "0.2.1 and 0.2.2 archives are historical; 0.2.3 reuses the unchanged normal-v1.1 and close-v1.1 results."
+  "historical": "0.2.1, 0.2.2 and 0.2.3 archives are historical; 0.2.4 reuses the unchanged normal-v1.1 and close-v1.1 results."
 }

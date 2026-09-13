@@ -113,6 +113,40 @@ def fold(layout, scene, prop, title):
     return opened
 
 
+def draw_measurement(layout, scene, value):
+    """Keep sample age beside all three values, using the fixed replay clock."""
+    card = layout.box()
+    measurement = value['measurement'] or {}
+    if measurement:
+        age = value['measurement_age_s']
+        timebase = scene.get('wfrl_clearance_timebase_fps', scene.render.fps / scene.render.fps_base)
+        # A sample acquired within this timeline step is new in this frame.
+        # Pausing or changing playback FPS never reclassifies that same frame.
+        fresh = age <= 1.0 / timebase + 1e-9
+        card.label(text=('新测量' if fresh else '上次有效测量')
+                   + f" · 叶片 {measurement['blade_id']}", icon='TIME')
+        card.label(text=f'{age:.2f} 仿真秒前')
+        card.label(text=f"测量时刻：{measurement['time_s']:.2f} s")
+    else:
+        card.label(text='等待下一次有效测量', icon='RADIOBUT_OFF')
+        # Reserve the two sample metadata rows so playback buttons never jump
+        # between fresh, held and expired states during an animation.
+        card.label(text='')
+        card.label(text='')
+    numbers = card.column(align=True)
+    numbers.scale_y = 1.2
+    numbers.label(text='仿真真值：' + number(measurement.get('truth_m')) + ' m')
+    numbers.label(text='B2 估计：' + number(measurement.get('estimate_m')) + ' m')
+    numbers.label(text='偏差：' + number(measurement.get('error_m'), True) + ' m')
+    card.label(text='偏差 = 估计 − 真值')
+    if measurement:
+        status = value['status']
+        card.label(text={'above_threshold': '高于演示阈值', 'near_threshold': '接近演示阈值'}[status],
+                   icon={'above_threshold': 'KEYTYPE_JITTER_VEC', 'near_threshold': 'KEYTYPE_KEYFRAME_VEC'}[status])
+    else:
+        card.label(text='')
+
+
 def draw(layout, scene):
     box = layout.box()
     box.label(text='净空与误差对比')
@@ -129,15 +163,7 @@ def draw(layout, scene):
         box.label(text='后端含形变 · 画面为刚性示意')
         if scene.get('wfrl_clearance_demo') == 'near_tower':
             box.label(text='较小净空工况 · 以数值比较')
-        measurement = value['measurement'] or {}
-        numbers = box.column(align=True)
-        numbers.scale_y = 1.15
-        numbers.label(text='仿真真值：' + number(measurement.get('truth_m')) + ' m')
-        numbers.label(text='B2 估计：' + number(measurement.get('estimate_m')) + ' m')
-        numbers.label(text='偏差：' + number(measurement.get('error_m'), True) + ' m（估计 − 真值）')
-        status = value['status']
-        box.label(text={'waiting': '等待有效测量', 'above_threshold': '高于演示阈值', 'near_threshold': '接近演示阈值'}[status],
-                  icon={'waiting': 'RADIOBUT_OFF', 'above_threshold': 'KEYTYPE_JITTER_VEC', 'near_threshold': 'KEYTYPE_KEYFRAME_VEC'}[status])
+        draw_measurement(box, scene, value)
         row = box.row(align=True)
         row.operator('screen.animation_play', text='播放 / 暂停', icon='PLAY')
         row.operator('wfrl.clearance_restart', text='从头重播', icon='REW')
@@ -148,10 +174,6 @@ def draw(layout, scene):
     if fold(box, scene, 'wfrl_clearance_show_details', '测量详情与统计'):
         box.label(text='真实红外不可见；线端不代表命中点')
         if value is not None:
-            measurement = value['measurement'] or {}
-            if measurement:
-                box.label(text=f"测量时刻：{measurement['time_s']:.2f} s · 叶片 {measurement['blade_id']}")
-                box.label(text=f"读数保留：{value['measurement_age_s']:.1f} 仿真秒")
             stats = value['statistics']
             box.label(text='截至当前回放位置 · 正偏差为高估')
             box.label(text='平均绝对误差：' + number(stats.get('mae_m')) + ' m')

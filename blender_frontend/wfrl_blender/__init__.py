@@ -132,6 +132,9 @@ def _update_demo_status(scene, depsgraph=None):
 
 def _on_load(_unused):
     import bpy
+    from .scene_builder import refresh_saved_surface_style
+    for scene in bpy.data.scenes:
+        refresh_saved_surface_style(scene)
     for camera in bpy.data.cameras:
         camera.show_passepartout = False
         camera.passepartout_alpha = 0

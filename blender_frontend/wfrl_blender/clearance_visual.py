@@ -2,9 +2,32 @@
 import math
 
 
-def ensure_radar(scene, turbine_id, origin=None, directions=None):
+def _radar_primitive(collection, kind, name, material):
+    """Build in a private mesh, including during load_post in Edit Mode."""
     import bpy
-    from .scene_builder import _primitive
+    import bmesh
+    mesh = bpy.data.meshes.new(name + '.Mesh')
+    bm = bmesh.new()
+    try:
+        if kind == 'cube':
+            bmesh.ops.create_cube(bm, size=2.0)
+        elif kind == 'cylinder':
+            bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, segments=32,
+                                 radius1=1.0, radius2=1.0, depth=2.0)
+        else:
+            raise ValueError(kind)
+        bm.to_mesh(mesh)
+    finally:
+        bm.free()
+    mesh.materials.append(material)
+    obj = bpy.data.objects.new(name, mesh)
+    collection.objects.link(obj)
+    return obj
+
+
+def ensure_radar(scene, turbine_id, origin=None, directions=None):
+    """Refresh fittings without touching the active scene, selection or mode."""
+    import bpy
     from .materials import get_material
     yaw = scene.objects.get(f'WFRL.Turbine.{turbine_id}.YawRoot')
     if yaw is None:
@@ -15,21 +38,54 @@ def ensure_radar(scene, turbine_id, origin=None, directions=None):
     origin = origin if origin is not None else (-2, 0, 0)
     directions = directions or [(-math.sin(math.radians(a)), 0, -math.cos(math.radians(a)))
                                 for a in (6.45, 8.5, 10.54)]
-    body = scene.objects.get(prefix)
-    if body is None:
-        body = _primitive(collection, 'cube', prefix, (0, 0, 0), (.1, .08, .125), get_material('hub'))
-        body.parent = yaw
-        window = _primitive(collection, 'cube', prefix + '.Window', (0, 0, 0), (.06, .05, .005), get_material('graphite'))
-        window.parent = body
-        # Primitive parent scales are intentionally compensated.
-        window.location = (0, 0, -1.04)
-        window.scale = (.6, .625, .04)
-    body.location = (origin[0], origin[1], origin[2] + .125)
-    bracket = scene.objects.get(prefix + '.Bracket')
-    if bracket is None:
-        bracket = _primitive(collection, 'cube', prefix + '.Bracket', (0, 0, 0), (.025, .03, .13), get_material('hub'))
-        bracket.parent = yaw
-    bracket.location = (origin[0], origin[1], origin[2] + .37)
+    def part(suffix, offset, scale, material, kind='cube'):
+        name = prefix + suffix
+        obj = scene.objects.get(name)
+        if obj is None:
+            obj = _radar_primitive(collection, kind, name, get_material(material))
+        obj.parent = yaw
+        obj.matrix_parent_inverse.identity()
+        obj.location = tuple(origin[i] + offset[i] for i in range(3))
+        obj.scale = scale
+        obj.data.materials[0] = get_material(material)
+        if kind == 'cube':
+            bevel = obj.modifiers.get('WFRL.Radar.EdgeSoftening')
+            if bevel is None:
+                bevel = obj.modifiers.new('WFRL.Radar.EdgeSoftening', 'BEVEL')
+            bevel.width, bevel.segments = .06, 3
+        obj['geometry_source'] = 'Illustrative radar housing and service fitting; not vendor CAD'
+        return obj
+
+    body = part('', (0, 0, .125), (.1, .08, .125), 'radar_body')
+    part('.Bracket', (0, 0, .37), (.025, .03, .13), 'metal')
+    part('.MountPlate', (0, 0, .485), (.10, .075, .015), 'metal')
+    part('.MountPad', (0, 0, .507), (.105, .08, .008), 'rubber')
+    # The original housing envelope and optical origin are unchanged. The
+    # bezel surrounds the dark optical face; no simulated lens/echo is added.
+    part('.Bezel', (0, 0, .002), (.078, .063, .012), 'metal')
+    part('.Window', (0, 0, -.010), (.06, .047, .003), 'radar_window')
+    part('.CoverSeal', (0, -.081, .125), (.085, .003, .110), 'rubber')
+    part('.ServiceCover', (0, -.085, .125), (.081, .002, .105), 'radar_body')
+    for i, (x, z) in enumerate(((-.061, .044), (.061, .044), (-.061, .206), (.061, .206))):
+        bolt = part(f'.CoverScrew{i}', (x, -.090, z), (.007, .007, .003), 'metal', 'cylinder')
+        bolt.rotation_euler.x = math.pi / 2
+    gland = part('.CableGland', (-.106, 0, .205), (.014, .014, .020), 'rubber', 'cylinder')
+    gland.rotation_euler.y = math.pi / 2
+    name = prefix + '.Cable'
+    cable = scene.objects.get(name)
+    if cable is None:
+        data = bpy.data.curves.new(name, 'CURVE')
+        data.dimensions = '3D'; data.bevel_depth = .006; data.bevel_resolution = 2
+        data.resolution_u = 8
+        data.splines.new('BEZIER').bezier_points.add(4)
+        data.materials.append(get_material('rubber'))
+        cable = bpy.data.objects.new(name, data); collection.objects.link(cable)
+        cable.parent = yaw
+    for point, offset in zip(cable.data.splines[0].bezier_points,
+                             ((-.123,0,.205), (-.17,0,.235), (-.16,0,.35), (-.13,0,.45), (-.13,0,.53))):
+        point.co = tuple(origin[i] + offset[i] for i in range(3))
+        point.handle_left_type = point.handle_right_type = 'AUTO'
+    cable['geometry_source'] = 'Illustrative service cable; not a data connection'
     body['provenance'] = '测量光束示意；限定长度，不代表命中点或测距结果'
     material = bpy.data.materials.get('WFRL.ClearanceBeam') or bpy.data.materials.new('WFRL.ClearanceBeam')
     material.diffuse_color = (1, .28, .015, 1)

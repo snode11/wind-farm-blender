@@ -1,142 +1,150 @@
-# WFRL Blender 前端
+# WFRL Blender 前端实现
 
-当前扩展版本 **0.2.3**，要求 Blender 5.2+。前端包括风场展示、云台相机、后端遥测和离线激光净空雷达回放。本版整理雷达卡片、工况说明和视角入口；继续使用 `normal-v1.1` / `close-v1.1`，没有重新计算物理结果。
+本文面向接手 Blender 展示端的开发人员，说明场景、风机、雷达外观与相机界面如何实现。操作步骤见 [用户使用手册](../docs/blender/用户使用手册.md)；射线求交、净空估计、独立真值和结果包生产见 [雷达算法 README](../wfrl/lidar/README.md)。
 
-安装包与摘要见[交付说明](../dist/README-lidar.md)；第一次操作见[用户使用手册](../docs/blender/用户使用手册.md)。修改扩展 Python 代码后需重新构建 ZIP，安装后重启 Blender；源码专用入口直接读取仓库代码。
+当前发布版本为 **0.2.4**，要求 Blender **5.2+**。本页描述本版源码；安装包与校验信息见[交付说明](../dist/README-lidar.md)。
 
-## 1. 入口与界面
+## 1. 场景如何搭建
 
-Mac 下载完整仓库后，双击 `scripts/blender/打开净空雷达演示.command`。也可从仓库根目录执行：
+前端采用 Python 程序化建模。几何输入来自扩展内的 [nrel5mw_geometry.json](wfrl_blender/assets/nrel5mw_geometry.json)，场景布局由 [scene_model.py](wfrl_blender/scene_model.py) 中的 `SceneDTO` 和 `TurbineDTO` 表达，包含机组编号、平面位置、风速、风向等信息。
 
-```sh
-/Applications/Blender.app/Contents/MacOS/Blender --factory-startup --python scripts/blender/open_clearance_demo.py
-```
+[scene_builder.py](wfrl_blender/scene_builder.py) 的 `build_scene()` 创建 `WFRL_Scene` 集合，按机组生成塔筒和上部装配，再加入基础、编号、地形、来流箭头、尾流与传感器示意，最后配置环境和渲染。重新构建时会先清除该同名集合及符合条件的无用户引用资源；这是重建入口，不是普通切换镜头操作。
 
-入口读取 `dist/lidar-delivery.json`，打开随仓库提供的场景并加载正常工况，无需在线求解器。普通安装版在加载匹配风机场景后，通过 Camera 区“数据配置”指定两个包目录。
+几何计算集中在 [turbine_geometry.py](wfrl_blender/turbine_geometry.py)，它读取打包资源并返回顶点和面，不导入后端求解器。场景装配再使用 Blender 数据 API 创建网格、对象、父级关系和材质。日常打开已有 `.blend` 与重新构建场景是两条不同路径。
 
-Camera 区顶部显示当前模式与来源，便于区分本地演示、后端运行和雷达离线回放。“净空与误差对比”优先显示真值、B2 估计、有符号偏差，以及播放/暂停、从头重播和回放进度。“测量详情与统计”和“数据配置”默认折叠；数据未就绪时自动显示配置与错误，修正目录后重新点击工况加载。
+## 2. 风机如何建模与装配
 
-“正常测量”和“较小净空”切换结果包并自动进入测量区侧视；后者仍对应原 `close` 数据，不改变片段身份。常驻提示说明后端含叶片形变、画面为刚性示意。“测量区侧视”和“风场总览”只切相机，不改变数据模式或回放位置。回放进度是帧号；以卡片仿真秒数读取实际时刻。
+### 2.1 主要部件
 
-## 2. 总体架构和模块
-
-```mermaid
-flowchart TD
-  A[FAST.Farm 离线柔性叶片求解] --> B[运动输出与 AeroDyn VTP 原生表面]
-  B --> C[独立几何真值]
-  B --> D[三束理想射线首交斜距]
-  D --> E[固定标定简化净空估计]
-  C --> F[逐样本偏差和完整网格统计]
-  E --> F
-  F --> G[解析与独立空间/时间细化比较]
-  G --> H[带摘要和证据的版本化结果包]
-  H --> I[校验读取器与仿真时间采样]
-  I --> J[Blender 刚性姿态和净空卡片同步回放]
-```
-
-| 层 | 源码 | 职责 |
-| --- | --- | --- |
-| 离线运行 | [`run_physics.py`](../scripts/lidar/run_physics.py) | 复制原始算例、配置固定转速与风速、运行求解器、保存状态和日志 |
-| 几何与公式 | [`physics.py`](../wfrl/lidar/physics.py) | 原生表面读取、射线首交、独立真值、固定标定估计、离散碰撞排除 |
-| 后处理 | [`process_physics.py`](../scripts/lidar/process_physics.py) | 运动时间、掠塔网格、三束有效性与逐次测量 |
-| 数值比较 | [`validate_physics.py`](../scripts/lidar/validate_physics.py)、[`sampling.py`](../wfrl/lidar/sampling.py) | 解析检查、展向细化、时间细化及含漏测的完整网格比较 |
-| 正式发布 | [`publish_physics.py`](../scripts/lidar/publish_physics.py)、[`evidence.py`](../wfrl/lidar/evidence.py) | 验证运行链、证据合同与摘要，生成新包 |
-| 播放内核 | [`replay.py`](../wfrl/lidar/replay.py) | 严格加载、确定性时间采样、保留时限、累计统计与滞回 |
-| Blender 接入 | [`clearance_replay.py`](wfrl_blender/clearance_replay.py) | 场景和机型校验、时间轴映射、运动更新、加载/卸载恢复 |
-| 视觉与操作 | [`clearance_visual.py`](wfrl_blender/clearance_visual.py)、[`panels/clearance.py`](wfrl_blender/panels/clearance.py)、[`cameras.py`](wfrl_blender/cameras.py) | 雷达与光束示意、数据卡片、工况操作和观察相机 |
-| 打包 | [`build_extension.py`](../scripts/blender/build_extension.py) | 将标准库读取器与证据校验模块一起放入扩展 `_vendor/lidar` |
-
-前端不读取原始 VTP，也不在 Blender 内重新求解净空。计算端使用 Python 与 NumPy；安装包回放模块只依赖标准库，不要求安装 FAST.Farm。
-
-## 3. 测距、估计和独立真值
-
-### 3.1 物理输入与标定
-
-两个工况均为单机 NREL 5 MW、固定 9 rpm、0° 变桨、无策略 checkpoint；启用叶片柔性，塔筒和平台刚性。正常/较小净空分别为预先选定的 8/12 m/s 有剪切稳态风。运行 36 秒，剔除 0–18 秒启动段，完整保留 18–36 秒，不按误差挑片段。
-
-FAST 全局坐标为 x 下风、y 横风、z 向上。雷达原点 `O=(-2,0,87.6) m`；B1/B2/B3 从竖直向下朝负 x 偏转 `6.45°/8.5°/10.54°`，单位方向为 `d=(-sinθ,0,-cosθ)`。固定理想有效斜距范围为 5–100 m。
-
-### 3.2 测距与简化估计分支
-
-对求解器同一时刻的三片叶片原生三角面进行双面 Möller–Trumbore 射线求交，同时比较刚性圆锥塔筒和地面；取射线 `O+L·d` 的最近正向交点。仅当首交属于当前预期叶片且距离在标定范围内，才是有效测量。遮挡、无命中和超量程保留无效原因。
-
-每束采用同一公开简化公式：
-
-```text
-C_est = L · sin(θ) + Y_lidar − R_TIP
-Y_lidar = 2 m
-R_TIP = 2.67 m（名义叶尖高度 27.2 m 的固定塔半径标定）
-```
-
-`L` 是理想首交斜距，`θ` 是相对向下竖直的角度；角度在代码中转弧度后计算。`Y_lidar` 表示朝叶轮方向的主轴水平安装偏距。它不等同于全局 y 坐标；原手册图 2-5 与图 3-26 的 X/Y 命名不同，本实现按物理偏距映射。依据为 MolasCL V3.0 第 3.5.3 节、图 3-26 和图 2-5，原件核验记录见[雷达说明](../docs/blender/激光净空雷达使用说明.md)。
-
-估计器只接收斜距、有效标志和固定标定，不接收实时叶尖位置、形变或真值。三束均存档，但卡片与主统计只使用 B2；B2 无效时不切换其他光束，不用真值填补。
-
-### 3.3 独立真值分支与偏差
-
-最外端 AeroDyn 翼型截面周界坐标的算术均值为叶尖参考点 `P=(x,y,z)`。从原生变形表面独立提取该点，计算它到同高度刚性塔筒圆截面壁的有符号径向净空：
-
-```text
-r(z) = 3 + (1.935 − 3) · z / 87.6，0 ≤ z ≤ 87.6
-ρ = sqrt(x² + y²)
-C_true = ρ − r(z)
-Q = (x·r/ρ, y·r/ρ, z)（ρ > 0 时的塔壁参考点）
-e = C_est − C_true
-```
-
-这两条分支共享同一仿真时刻，计算方式独立。真值不经简化测距公式产生；它是指定叶尖参考点的同高度塔壁距离，不是整片叶片表面的全局最小距离。正偏差表示估计高于真值。B2 误差同时包含直叶片假设、命中截面与叶尖差异、标定和几何离散的影响，不能全部归因于弯曲。
-
-## 4. 包格式、有效性与回放时钟
-
-完整合同见 [`REPLAY_FORMAT.md`](../wfrl/lidar/REPLAY_FORMAT.md)。当前 schema 为 `1.0`，新发布证据合同为 `numerical-comparison-v2`。
-
-| 文件 | 内容 |
+| 部件 | 实现方法 |
 | --- | --- |
-| `manifest.json` | 来源、机型、坐标、标定、算法版本、时间窗口、原始档案引用、数值证据与五个载荷文件的 SHA-256 |
-| `motion.json` | 连续展开的方位角、偏航、三叶片变桨、RPM、机舱位置和朝向，覆盖完整片段 |
-| `measurements.json` | 预期样本、经过 ID、真值参考点和塔壁点、B1/B2/B3 的斜距、有效性、估计、误差、命中点和原因 |
-| `cumulative.json` | 每个测量位置可确定性读取的累计状态与统计 |
-| `statistics.json` | 全片段、逐束统计 |
-| `report.md` | 工况、几何定义、误差结果与数值比较边界 |
-| `validation.json` | 当前交付额外保留的完整数值比较记录；核心合同同时内嵌于 manifest |
+| 塔筒 | `tower_mesh()` 按高度—直径站点生成圆环并连接侧面，形成沿高度收缩的塔筒 |
+| 叶片 | `blade_mesh()` 重采样翼型轮廓，按弦长、扭角、曲线和扫掠偏移生成截面，再沿展向插值连接 |
+| 机舱 | `_rounded_nacelle_mesh()` 用纵向截面生成圆角外壳，保留配置中的长、宽、高包络 |
+| 主轴与轮毂 | 主轴使用圆柱体并按轴倾角旋转；轮毂用缩放球体构造，整流罩通过环形截面收束到端点 |
+| 机械细节 | [mechanical_details.py](wfrl_blender/mechanical_details.py) 补充叶根法兰、密封件、通风口、检修门与连接附件 |
 
-加载器检查摘要、版本、来源声明、有限数值、误差一致性，并重新核对累计状态。原始档案路径是溯源引用，播放无需挂载该路径；摘要用于检测损坏，不认证来源真实性。正式发布要求解析、空间/时间比较和离散碰撞证据齐全，缺少时拒绝 READY；`READY` 仅表示通过包合同，`NOT_ASSESSED_NO_TOLERANCE` 明确表示未约定收敛验收容差。
+叶片使用 19 个原始站点和配套翼型坐标；当前装配调用 `blade_mesh(subdiv=8, ring_points=96)`。普通截面之间采用保形 Hermite 插值，叶尖末段增加采样并收束到单点，以改善末端外观。这是展示用收尖，不能当作新的气动设计数据。
 
-预期测量区为叶片方位距离正下方不超过 3°，采用固定 80 Hz 网格。有效率分母包含所有预期样本及漏测。MAE 是有效误差绝对值的均值，最大绝对误差为 `max(|e|)`，P95 为精确 nearest rank `ceil(0.95·n)`，最大正偏差为 `max(0,max(e))`。空分母和空误差集用 null，不伪装为零；完全漏测经过按预先定义的经过 ID 计算。
+各叶片对象复用名为 `WFRL.SharedBlade.SourceLoft` 的网格，但保留独立的对象变换与装配父级。这样不必为每台机组的每片叶片复制同一份网格，也能分别表达转子相位和变桨。
 
-截至当前回放时刻的统计直接读取累计状态，后退和重播不重复计数。整组三项读数来自同一次 B2 有效测量，离开测量区可暂留；时限为 `min(max_hold_s, 20/abs(rpm)·passage_margin)`，停转仍使用有限 `max_hold_s`。交付配置为 5 秒上限、1.25 倍经过间隔。过期显示等待测量和 `--`，无效数据不会当成零净空。7 m 阈值与 0.1 m 滞回只用于演示。
+### 2.2 运动层级
 
-播放器按加载时固定的时间轴采样率把帧映射到仿真秒数；更改 Blender FPS 只改变目标墙钟播放速度，不重映射已有帧的仿真时刻。运动插值、卡片与统计使用同一时钟；实际墙钟速度取决于机器性能。
+下图省略部分附件；对象全名均带 `WFRL.Turbine.<机组编号>` 前缀：
 
-## 5. 已交付结果和验证边界
-
-下表直接来自现有包 `statistics.json`，不是本次界面修改的新测量。两段各 8 次经过、71 个预期样本，均没有整次完全漏测。
-
-| 工况 | B2 有效样本 | 有效率 | MAE | 最大绝对误差 |
-| --- | ---: | ---: | ---: | ---: |
-| 正常测量 | 25/71 | 35.21% | 0.327239 m | 0.410276 m |
-| 较小净空 | 33/71 | 46.48% | 0.105805 m | 0.148511 m |
-
-逐束结果与数值细化实数见[正常包报告](../results/lidar/packages/normal-v1.1/report.md)和[较小净空包报告](../results/lidar/packages/close-v1.1/report.md)。空间比较保持原时间步，把展向节点从 19 增至 37；时间比较保持 37 节点，将积分时间步由 0.00625 s 减半到 0.003125 s，输出由 80 Hz 增至 160 Hz。完整新网格包含漏测，不能只看匹配时刻的小差异推断全部误差收敛。
-
-碰撞排除覆盖每个保存的 80 Hz 状态下三片叶片的保守分离证书，不是连续时域无碰撞证明。有限两级数值差异不是严格误差上界。没有模拟硬件回波、噪声或厂家专有融合，也没有现场精度、保护功能或训练性能的验收结论。
-
-## 6. 重生成：区分扩展 ZIP 和物理结果
-
-**仅修改界面、相机、播放器：**重新构建扩展 ZIP 即可，复用两个数据包。从仓库根目录运行：
-
-```sh
-python3 scripts/blender/build_extension.py
+```text
+机组根节点                         布局中的 x、y 平移
+├── Tower                          固定塔筒
+├── YawBearing                     塔顶连接件
+└── YawRoot                        位于塔顶，绕局部 Z 轴偏航
+    ├── Nacelle / MainShaft         机舱和主轴
+    ├── ClearanceRadar...          雷达附件与光束
+    └── Rotor                      主轴倾角与转子方位
+        ├── Hub / Spinner          轮毂和整流罩
+        ├── Blade1.PitchRoot        初始相位与预锥角
+        │   └── Blade1             绕叶片局部 Z 轴变桨
+        ├── Blade2.PitchRoot
+        │   └── Blade2
+        └── Blade3.PitchRoot
+            └── Blade3
 ```
 
-构建按 `blender_manifest.toml` 的版本产生 `dist/wfrl_blender-<版本>.zip`，同时更新相应构建摘要文件；发行入口以交付清单为准。安装新 ZIP 后重启 Blender，并重新加载/校验场景。新 ZIP 不包含大体积原始求解数据，也不把结果包嵌入扩展。
+`PitchRoot` 分别设置三片叶片的 120° 相位间隔和预锥角，实际 `BladeN` 对象再承担局部变桨。不要把相机的 Pan / Tilt 与这些风机运动量混为一谈，也不要把所有旋转直接堆在叶片网格上。
 
-**修改物理参数或几何：**需要新物理运行与验证。仅修改标定或估计公式时，可在原始运动/表面输出兼容且完整的前提下复用原运行，重新后处理、验证并发布新结果包；重打 ZIP 本身不会改变结果。准备 Python 3.11+、NumPy、本机 FAST.Farm 和完整 NREL 5 MW 原始算例；仓库不包含原始算例及 `results/lidar/raw/`。完整可复制命令见[计算脚本 README](../scripts/lidar/README.md)，流程是：
+### 2.3 高度与坐标
 
-1. `run_physics.py` 生成基础、空间细化、时间细化三个独立运行，使用新名称保留旧运行。
-2. 基础运行用 `process_physics.py` 完整处理；细化对照可用 `--evaluation-only`，该模式不提供完整碰撞证书，不能直接发布客户包。
-3. `validate_physics.py` 检查解析与独立时空比较，保留完整网格和原始失败证据。
-4. `publish_physics.py` 校验运行配置、退出状态、日志与后处理摘要和证据，发布到新目录；不覆盖旧包。
-5. 验证新包可独立读取后，更新交付清单中的目录与摘要，再使用前端回放核对。
+长度单位为米。机组根节点位于塔筒地面中心，`YawRoot` 位于塔顶；机舱未偏航时，轮毂在负 X 方向，Z 轴向上。当前塔筒高 **87.6 m**，名义叶轮半径 **63 m**，机舱外壳长宽高为 **8.03 × 3.30 × 3.30 m**。
 
-宿主机回归、Blender 原生/GUI 操作和物理数值比较是不同验证层，分别记录；文档中的计算结果不能代替本版交互验收。
+`hub_position()` 同时使用塔高 `TowerHt`、塔顶到主轴偏移 `Twr2Shft`、悬伸量 `OverHang` 和轴倾角 `ShftTilt`。当前数据计算出的轮毂中心约为 `(-5.00, 0, 90.00) m`，不能直接把塔筒高度当作轮毂高度。
+
+装配时，机舱外壳和部分附件相对塔顶上移 `Twr2Shft`，主轴和转子使用完整的轮毂中心坐标，偏航轴仍保持在塔顶。尺寸和装配明细见 [用户手册附录 A](../docs/blender/用户使用手册.md#附录-a风机模型尺寸与部件装配位置)。机舱、轮毂和部分附件包含展示造型，不是完整工程 CAD。
+
+## 3. 材质与灯光如何实现
+
+[materials.py](wfrl_blender/materials.py) 用 `PALETTE` 定义基础色，`SURFACES` 定义粗糙度范围、凹凸强度、金属度和涂层参数。叶片涂层、机舱、塔筒、金属连接件、橡胶密封件、雷达壳体和镜窗分别使用不同配置。噪声纹理连接粗糙度映射与 Bump 节点，节点按名称复用，避免重复刷新不断堆积节点。
+
+`refresh_turbine_surfaces()` 按 WFRL 对象名称给主轴、轴承、法兰等绑定金属材质，给密封件绑定橡胶材质；雷达自己的材质槽由 `ensure_radar()` 维护。
+
+`_apply_surface_lighting()` 调整主光方向，将曝光设为 0.45，并启用 EEVEE 阴影和局部环境遮蔽。主体材质的自发光强度设为零，以保留机舱、轮毂与叶根之间的明暗层次。以上参数只影响展示，不进入雷达计算。
+
+## 4. 雷达外观如何建模
+
+### 4.1 安装坐标与零件
+
+入口为 [clearance_visual.py](wfrl_blender/clearance_visual.py) 的 `ensure_radar(scene, turbine_id, origin, directions)`。函数找到对应机组的 `YawRoot`，用固定名称查找或创建零件，并把它们挂在这个父节点下，使雷达随机舱偏航。
+
+`origin` 是雷达光束起点在装配局部坐标中的位置，未加载结果时预览默认值为 `(-2, 0, 0)`。每个零件的位置按“光束原点 + 零件偏移”设置。下表列的是代码中的展示几何，不是硬件规格：
+
+| 对象后缀 | 几何与定位方法 |
+| --- | --- |
+| `ClearanceRadar` 壳体 | 单位立方体缩放，未倒角包络为 0.20 × 0.16 × 0.25 m；中心相对光束起点上移 0.125 m |
+| `.Bracket / .MountPlate / .MountPad` | 立方体构造支架、安装板和橡胶垫，沿上方连接到机舱安装区域 |
+| `.Bezel / .Window` | 薄立方体构造镜窗边框与深色窗口，围绕光束起点附近布置 |
+| `.CoverSeal / .ServiceCover` | 壳体侧面的密封层和盖板 |
+| `.CoverScrew0…3 / .CableGland` | 32 边圆柱体，旋转到盖板法向或侧向，分别表示螺钉与线缆接头 |
+| `.Cable` | 5 个控制点的三维 Bézier 曲线，自动切线并设置圆形截面厚度 |
+| `.Beam1…3` | 每条由两个点组成的三维 POLY 曲线，表示三束方向 |
+
+立方体在局部网格中边长为 2，因此 `scale` 是半尺寸；圆柱体的原始半径为 1、深度为 2。修改零件尺寸时要按这一约定理解参数，不能把缩放值直接当作完整长宽高。方形零件使用命名的 Bevel 修改器柔化边缘，刷新时复用已有修改器。
+
+### 4.2 光束如何显示
+
+三束光线共用橙色带自发光材质，曲线起点为 `origin`，终点为：
+
+```text
+origin + 0.95 × TipRad × normalize(direction)
+```
+
+默认预览方向相对向下竖直朝负 X 偏转；加载结果时由包内标定提供原点和方向。上述长度只是视觉示意，既不是理想首交斜距，也不是测距量程；前端不把曲线终点当作真实命中点。
+
+雷达窗口、螺钉、线缆以及 Blender 叶片网格都不参与射线求交。真正的测距计算使用后端 AeroDyn 原生变形表面，具体算法放在 [独立雷达 README](../wfrl/lidar/README.md)。
+
+### 4.3 为什么使用独立 BMesh
+
+`_radar_primitive()` 在独立 BMesh 中生成立方体或圆柱，再写入新 Mesh 并通过数据 API 链接对象。它不调用 `bpy.ops.mesh.primitive_*_add`，因此不会把几何加入用户当前正在编辑的网格，也不需要修改活动对象、选择或编辑模式。
+
+旧场景样式更新由 `refresh_saved_surface_style()` 在加载时触发，以 `wfrl_surface_revision` 防止重复升级；旧三束曲线存在时，使用其原点和方向补建附件。维护这条路径时，应保留原网格、父级、变换、场景与选择状态。不是所有建模函数都适合直接在文件加载回调中调用。
+
+## 5. 相机、卡片与回放如何连接
+
+[cameras.py](wfrl_blender/cameras.py) 管理总体、侧视、云台等观察相机，[panels/gimbal.py](wfrl_blender/panels/gimbal.py) 提供云台交互。相机操作与 Pan / Tilt / Roll 姿态放在 **云台控制** 折叠区；同一 Camera 面板下的雷达卡片可独立查看，不需要加宽侧栏。
+
+[clearance_replay.py](wfrl_blender/clearance_replay.py) 校验外部结果包与匹配机组，按固定时间轴映射取得样本，再更新 `YawRoot`、`Rotor` 和 `BladeN`。它处理包路径、场景状态、暂停、寻址和重载；既不运行 FAST.Farm，也不在 Blender 中重新计算净空。
+
+[panels/clearance.py](wfrl_blender/panels/clearance.py) 将同一次测量的真值、B2 估计与偏差画在主卡片上，并显示测量时刻、叶片编号及读数年龄。三种状态为“新测量”“上次有效测量”“等待下一次有效测量”；等待时数值显示 `--`，保留固定行数以避免播放按钮移动。统计与数据配置放在折叠区。
+
+“正常测量／较小净空”切换数据片段并从起点播放；“测量区侧视／风场总览”只切镜头。当前前端播放的是刚性姿态示意，柔性形变仅体现在后端产生的数据中。数据合同和时间采样规则见 [雷达算法 README 第 4 节](../wfrl/lidar/README.md#4-包格式有效性与回放时钟)。
+
+### 5.1 加载、时钟与文件恢复
+
+`clearance_replay.load(scene, path, demo)` 先确认后端允许切换配置，停止当前播放并清除旧读取器，再加载结果包。它继续校验片段身份、目标机组转子、NREL 5 MW 机型和尺寸、标定向量及当前不支持的机舱 roll/pitch；成功后进入 `clearance_replay` 模式，创建读取器，并回到起始帧。操作器捕获加载错误后显示具体原因和配置字段，避免失败后仍显示旧读数。
+
+每个场景的读取器缓存在 `_READERS[scene.as_pointer()]`。固定时间基准保存在 `wfrl_clearance_timebase_fps`，时间映射为：
+
+```text
+t = segment.start_s
+    + (frame_current + frame_subframe - frame_start) / timebase_fps
+```
+
+随后把 `t` 限制在片段范围内。时间基准初次加载时取 Blender 的 `fps / fps_base`，后续回放和重载保留该基准。因此渲染 FPS 变化不会改写同一帧对应的样本。
+
+`frame_change_post` 调用 `update()`，把样本的 yaw 写到 `YawRoot`，转子方位写到 `Rotor`，各叶片桨距写到对应 `BladeN`。文件加载后，`on_load()` 清空旧指针缓存，根据场景保存的包路径重建读取器并恢复帧号；包内容仍在外部目录，保存 `.blend` 不等于把结果包嵌入文件。片段末尾通过定时回调停止播放，回调再次检查当前位置，避免旧回调停止刚重启的片段。
+
+目前坐标接入采用固定全局塔原点和刚性塔假设：通过减去机组根节点与 `YawRoot` 平移，将包内雷达原点映射到装配局部坐标。它不是任意父级旋转、缩放或浮式机组的通用变换。当前生产脚本要求零偏航；扩展到运动机舱或任意安装姿态时，应同步设计物理标定与前端坐标合同。
+
+## 6. 修改、安装与验证
+
+| 想修改的内容 | 优先入口 |
+| --- | --- |
+| 塔筒、叶片截面或装配位置 | `turbine_geometry.py`、`scene_builder.py` |
+| 机舱附件与表面效果 | `mechanical_details.py`、`materials.py` |
+| 雷达外壳、支架、线缆和光束示意 | `clearance_visual.py` |
+| 相机、云台与主卡片 | `cameras.py`、`panels/gimbal.py`、`panels/clearance.py` |
+| 离线包加载与 Blender 时钟 | `clearance_replay.py` |
+| 测距算法、真值或物理结果生产 | 仓库级 `wfrl/lidar/` 与 `scripts/lidar/`，见独立算法 README |
+
+源码专用入口为 `scripts/blender/open_clearance_demo.py`，需要准备好的演示场景与交付清单指定的结果包。安装版不会自动读取工作区改动；更新扩展代码后，从仓库根目录运行 `python3 scripts/blender/build_extension.py`，安装对应 ZIP 并重启 Blender。构建会输出同版本的 ZIP、摘要与 inventory；现有发行状态以 [交付清单](../dist/lidar-delivery.json) 为准，不要只按版本号判断源码和安装包是否一致。
+
+修改网格和装配后检查实际场景；修改雷达创建或旧场景更新时，运行 [编辑模式重载回归](tests/blender/clearance_edit_mode_regression.py)。该脚本需要独立 `WFRL_TEST_OUTPUT`，并支持用 `WFRL_TEST_PACKAGE_ROOT` 选择实际 ZIP 或安装版。卡片和交互检查见 [clearance_ux_regression.py](tests/blender/clearance_ux_regression.py)。
+
+仅修改展示外观无需重新求解物理结果。模型几何若要成为新物理计算的输入，则应同步核对计算端机型和坐标，而不是只改变画面。本文按源码整理，本轮文档工作没有重新进行 Blender 窗口或物理验收。

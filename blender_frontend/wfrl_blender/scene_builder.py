@@ -284,6 +284,8 @@ def _make_turbine(collection, turbine):
     root["hub_height_m"] = hub_z
     from .clearance_visual import ensure_radar
     ensure_radar(bpy.context.scene, turbine.turbine_id)
+    from .materials import refresh_turbine_surfaces
+    refresh_turbine_surfaces(collection.objects)
     return root
 
 
@@ -478,6 +480,48 @@ def _configure_environment(collection, scene=None):
     else:
         center = (500.0, 30.0, 68.0)
     # Natural world sky supplies the background; no camera-facing solid cloud props.
+    _apply_surface_lighting(bpy.context.scene)
+
+
+def _apply_surface_lighting(scene):
+    """Restrained side light and local occlusion for painted/metal fittings."""
+    from mathutils import Vector
+    key = scene.objects.get('WFRL.Light.Key')
+    if key is not None:
+        key.location = (-650, -850, 650)
+        key.rotation_euler = (Vector((300, 0, 65)) - key.location).to_track_quat('-Z', 'Y').to_euler()
+        key.data.color = (.98, .97, .95)
+        key.data.energy = 1.4
+        key.data.angle = math.radians(2)
+    scene.view_settings.exposure = .45
+    scene.eevee.use_shadows = True
+    scene.eevee.use_fast_gi = True
+    scene.eevee.fast_gi_method = 'AMBIENT_OCCLUSION_ONLY'
+    scene.eevee.fast_gi_distance = 2.5
+
+
+def refresh_saved_surface_style(scene):
+    """One-time visual upgrade of owned assets, preserving rig and calibration."""
+    if scene.get('wfrl_surface_revision', 0) >= 1:
+        return
+    roots = [o for o in scene.objects if o.name.startswith('WFRL.Turbine.')
+             and o.name.endswith('.YawRoot')]
+    if not roots:
+        return
+    from .materials import refresh_turbine_surfaces
+    from .clearance_visual import ensure_radar
+    refresh_turbine_surfaces(scene.objects)
+    for yaw in roots:
+        tid = yaw.name[len('WFRL.Turbine.'):-len('.YawRoot')]
+        beams = [scene.objects.get(f'WFRL.Turbine.{tid}.ClearanceRadar.Beam{i}') for i in (1,2,3)]
+        if all(beams):
+            # Saved direction lines hold the existing yaw-local calibration.
+            origin = tuple(beams[0].data.splines[0].points[0].co[:3])
+            directions = [tuple(b.data.splines[0].points[1].co[j] - b.data.splines[0].points[0].co[j]
+                                for j in range(3)) for b in beams]
+            ensure_radar(scene, tid, origin, directions)
+    _apply_surface_lighting(scene)
+    scene['wfrl_surface_revision'] = 1
 
 
 def _configure_render():
@@ -491,7 +535,8 @@ def _configure_render():
     scene.unit_settings.system = "METRIC"
     scene.unit_settings.scale_length = 1.0
     scene.view_settings.look = "AgX - Medium High Contrast"
-    scene.view_settings.exposure = 1.2
+    _apply_surface_lighting(scene)
+    scene['wfrl_surface_revision'] = 1
 
 
 def clear_scene(collection_name: str = COLLECTION_NAME):

@@ -9,9 +9,9 @@
 
 ---
 
-## Blender 0.2.3 与激光净空雷达
+## Blender 0.2.4 与激光净空雷达
 
-当前安装包：[wfrl_blender-0.2.3.zip](dist/wfrl_blender-0.2.3.zip)；[交付清单与校验方法](dist/README-lidar.md)；[本版改动](CHANGELOG.md)。Blender 最低版本为 5.2。
+当前安装包：[wfrl_blender-0.2.4.zip](dist/wfrl_blender-0.2.4.zip)；[交付清单与校验方法](dist/README-lidar.md)；[本版改动](CHANGELOG.md)。Blender 最低版本为 5.2。
 
 **Mac 一键雷达演示：**下载完整仓库并解压，进入 `scripts/blender`，双击 `打开净空雷达演示.command`。也可先运行 `git clone https://github.com/snode11/wind-farm-blender.git`，再打开克隆目录中的同一入口。默认 Blender 位置为 `/Applications/Blender.app`。窗口打开后，在“净空与误差对比”中点击“正常测量”或“较小净空”，用“播放 / 暂停”控制回放。该入口直接使用源码、随仓库提供的场景和两个结果包，无需启动训练或在线求解器。
 
@@ -19,7 +19,7 @@
 
 雷达数据是 FAST.Farm 预计算仿真结果；B2 估计、真值与误差的依据见[雷达说明](docs/blender/激光净空雷达使用说明.md)。画面仍为刚性运动示意，不是现场实测。仓库包含小型结果包，排除 `results/lidar/raw/` 的大体积原始表面和本地验收过程文件；播放不需要这些文件，重新求解或从原始几何重算时才需要另外准备，见[计算流程](scripts/lidar/README.md)。
 
-**前端完整技术说明：**[Blender 前端 README](blender_frontend/README.md)集中说明雷达架构与源码映射、三束理想首交测距、独立真值与简化估计公式、包格式、有效率和误差统计、同步时钟、物理重生成及验证边界。0.2.3 新增测量区侧视/风场总览入口、模式与来源提示，突出真值/估计/偏差和播放控制，详情与数据配置默认折叠。前端代码更新需要新扩展 ZIP；本版复用两个 v1.1 结果包，无需重跑物理计算。
+**技术说明：**[Blender 前端 README](blender_frontend/README.md)说明风机建模、材质与灯光、雷达外观、相机与卡片、旧场景恢复；[雷达算法 README](wfrl/lidar/README.md)说明理想测距、独立真值、B2 简化估计、包格式、统计与物理重生成。0.2.4 改善材质和雷达安装细节，主卡片显示测量时刻、叶片编号与读数年龄，相机姿态移入云台控制，并修复编辑模式旧文件加载时的网格损坏与崩溃。本版复用两个 v1.1 结果包，无需重跑物理计算。
 
 ## 1. 最终目标
 

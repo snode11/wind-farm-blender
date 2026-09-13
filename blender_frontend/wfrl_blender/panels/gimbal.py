@@ -264,20 +264,22 @@ class WFRL_PT_Gimbal(bpy.types.Panel):
             for value, label in (('DOWN', 'Down ↓'), ('FRONT', 'Front'), ('BACK', 'Back')):
                 row.operator('wfrl.gimbal_preset', text=label).preset = value
             layout.operator('wfrl.gimbal_preset', text='Reset / 复位').preset = 'RESET'
-        space = context.space_data
-        camera = (space.camera if space and space.type == 'VIEW_3D' and space.use_local_camera else scene.camera)
-        if camera:
-            pan, tilt, roll = camera_world_angles(camera, context.evaluated_depsgraph_get())
-            layout.label(text='当前 Camera 仿真姿态 · 世界坐标')
-            layout.label(text=camera.name.removeprefix('WFRL.Camera.'))
-            layout.label(text=f'Pan {angle_label(pan)}  Tilt {angle_label(tilt)}')
-            layout.label(text=f'Roll {angle_label(roll)} · 无独立控制')
-        else:
-            layout.label(text='Camera 仿真姿态：未选择相机')
+            # Pose is an observation, so keep it readable even if the selected
+            # turbine's joystick controls are unavailable.
+            pose = self.layout.column(align=True)
+            space = context.space_data
+            camera = (space.camera if space and space.type == 'VIEW_3D' and space.use_local_camera else scene.camera)
+            if camera:
+                pan, tilt, roll = camera_world_angles(camera, context.evaluated_depsgraph_get())
+                pose.label(text='当前 Camera 仿真姿态 · 世界坐标')
+                pose.label(text=camera.name.removeprefix('WFRL.Camera.'))
+                pose.label(text=f'Pan {angle_label(pan)}  Tilt {angle_label(tilt)}')
+                pose.label(text=f'Roll {angle_label(roll)} · 无独立控制')
+            else:
+                pose.label(text='Camera 仿真姿态：未选择相机')
+            pose.label(text='拖动转向 · 滚轮缩放 · Esc 退出')
         from .clearance import draw as draw_clearance
         draw_clearance(self.layout, scene)
-        if scene.wfrl_clearance_show_camera:
-            layout.label(text='拖动转向 · 滚轮缩放 · Esc 退出')
 
 
 # Keep operators for existing scenes, without exposing the retired sidebar panel.

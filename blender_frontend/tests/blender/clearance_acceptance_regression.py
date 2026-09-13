@@ -13,7 +13,6 @@ import sys
 import traceback
 
 ROOT = Path(__file__).resolve().parents[3]
-DELIVERY = json.loads((ROOT / 'dist/lidar-delivery.json').read_text())
 sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
 import bpy
 from mathutils import Euler, Matrix
@@ -36,11 +35,12 @@ def check(name, fn):
 addon.register()
 addon.load_demo_scene()
 scene = bpy.context.scene
-original = ROOT / DELIVERY['packages']['normal']
+delivery = json.loads((ROOT / 'dist/lidar-delivery.json').read_text())
+original = ROOT / delivery['packages']['normal']
 scene.render.fps = 25
 scene.render.fps_base = 1
 scene.wfrl_clearance_normal_path = str(original)
-scene.wfrl_clearance_near_tower_path = str(ROOT / DELIVERY['packages']['close'])
+scene.wfrl_clearance_near_tower_path = str(ROOT / delivery['packages']['close'])
 
 def error_recovery():
     mutations = {
@@ -118,6 +118,7 @@ class Layout:
     def prop_enum(self, *args, **kwargs): pass
 
 def camera_pose():
+    scene.wfrl_clearance_show_camera = True
     camera = scene.objects['WFRL.Camera.Side']
     # Construct a known heading/elevation with optical roll (about local camera Z).
     pan, tilt, roll = 135., -30., 25.

@@ -1,0 +1,304 @@
+{
+  "archive": "wfrl_blender-0.2.4.zip",
+  "archive_sha256": "42e0080c4bf70c5d3acd83dab23f0616ef9b92303bee01e180450282841e2c11",
+  "files": [
+    {
+      "path": "__init__.py",
+      "sha256": "338c86a6221c70e76606c62c9293e4ab71a54cc5c1080d750b040348b040c65d",
+      "size": 15942
+    },
+    {
+      "path": "_vendor/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "_vendor/lidar/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "_vendor/lidar/evidence.py",
+      "sha256": "c25d9f7f27b5cac9f016bddf2f3d6746aded73d2a7a43c66de39aa233ca86a8e",
+      "size": 7021
+    },
+    {
+      "path": "_vendor/lidar/replay.py",
+      "sha256": "061406414b8432200977a1186f6b71daae3d1fc9113a4afb4b1a6956b0b8acc4",
+      "size": 16528
+    },
+    {
+      "path": "animation.py",
+      "sha256": "9c855c6c758809a3cd49697bcc16a65656149effa9eee9b1f0733a34edfa5c64",
+      "size": 4956
+    },
+    {
+      "path": "assets/landscape/SOURCES.md",
+      "sha256": "8d0d5301234905058c633d76b7eebf085601b435dd600a01b4ff7d700c695362",
+      "size": 602
+    },
+    {
+      "path": "assets/landscape/kloofendal_48d_partly_cloudy_puresky_2k.hdr",
+      "sha256": "5244534e9cf5b606f2ff513aa00ddb161b0a4826ffd88a0d3bd03ac29247d198",
+      "size": 5451493
+    },
+    {
+      "path": "assets/landscape/rocky_terrain_02_diff_2k.jpg",
+      "sha256": "9b042fe0618ffbc3650592456d7d8d265ba9a1cb5ce802f5f1d86b7ee79508a1",
+      "size": 3232826
+    },
+    {
+      "path": "assets/landscape/rocky_terrain_02_nor_gl_2k.jpg",
+      "sha256": "556ed903180a9431b253fc1c334c769dc4615c5c0f4ef1cedf20533ae8409ce8",
+      "size": 4149208
+    },
+    {
+      "path": "assets/landscape/rocky_terrain_02_rough_2k.jpg",
+      "sha256": "89f3c7b9e467160a821cbac32a1fdfd75f13cb87c9deeb22099d16677a711126",
+      "size": 1589303
+    },
+    {
+      "path": "assets/nrel5mw_geometry.json",
+      "sha256": "28c0753a125a53400c45e4d59b7ba2af91fba2c296adf0ba7a5ad4923d0a26b5",
+      "size": 61941
+    },
+    {
+      "path": "atmosphere.py",
+      "sha256": "c2be89452a1779b80f7023176afa5a29151b3dfd91d45ba78c01824f878e06de",
+      "size": 9779
+    },
+    {
+      "path": "backend_inflow.py",
+      "sha256": "620429ff3a997a6a270648d66cdd079ef0552da72e3e1a8bc256e52cddd238b1",
+      "size": 1774
+    },
+    {
+      "path": "blender_manifest.toml",
+      "sha256": "7753d1525b2f7efbe43b1eede269a5a198b97c10cac6862003feaaca493bcc3a",
+      "size": 434
+    },
+    {
+      "path": "cameras.py",
+      "sha256": "cf1bdb0356764eae3ec3fc9a7ad5d77f7cf7ab18acd282662415144bbea75dcc",
+      "size": 16597
+    },
+    {
+      "path": "charts.py",
+      "sha256": "da065fa2b0b9046299ac17ca598426adf0d127bc721ec66280c991047a2bcdf2",
+      "size": 13735
+    },
+    {
+      "path": "cinematic.py",
+      "sha256": "e6d933c3c1039c3b82964531f60bf578252f2e31a69020792d373792cddd9b74",
+      "size": 13864
+    },
+    {
+      "path": "clearance_replay.py",
+      "sha256": "5054ff1b7b94490d057d5d5b0e6e107d310a3580f9c122406160fc48e933f735",
+      "size": 7047
+    },
+    {
+      "path": "clearance_visual.py",
+      "sha256": "24801ceb649df7e332c9cb313df52f3034f6b879dd0879f45506d03fc0b829df",
+      "size": 5719
+    },
+    {
+      "path": "diagnostics.py",
+      "sha256": "7675f89a3b0f05cf0933a571ffd765223438626e4b455b0fa0f0ea2279a0af3e",
+      "size": 2132
+    },
+    {
+      "path": "health.py",
+      "sha256": "186074e5b4aac120da66078fdd8fa1af0844e9bf276c70866bbcb7fe8441fe26",
+      "size": 5813
+    },
+    {
+      "path": "history.py",
+      "sha256": "eebf62ac53d1f1c9715c61797900b84890ee9e8dfe297e523e6f38d8eee30394",
+      "size": 6250
+    },
+    {
+      "path": "landscape.py",
+      "sha256": "7453b8e4c57cc599a7403b7a7298efbba5370013bf2e4fea87cb4a79db90491c",
+      "size": 29339
+    },
+    {
+      "path": "live_scene.py",
+      "sha256": "5b0ddd22b63f16098947d2cd43a68c88ecd96d0084fe57c1c74896b99437fb73",
+      "size": 4057
+    },
+    {
+      "path": "materials.py",
+      "sha256": "06aa8eb1c28b269bc5eca45496bffd5cd98a73ff22d77f829f7394fabf652f88",
+      "size": 9477
+    },
+    {
+      "path": "mechanical_details.py",
+      "sha256": "c34df37c386f9f23af0a1e587f64eb2c7e6c1310ce73dc11a02cb079db7935d4",
+      "size": 4406
+    },
+    {
+      "path": "operators/__init__.py",
+      "sha256": "5cc0aac0982c7fd21323e75cdd92630bcb3d6da86ecdc4645f3211805c58e848",
+      "size": 34
+    },
+    {
+      "path": "operators/connection.py",
+      "sha256": "0d0b12c4881ba45b2e9b3b2543d420f94d699e68a84a6b978bac6c08a6d327be",
+      "size": 1814
+    },
+    {
+      "path": "operators/history_export.py",
+      "sha256": "291378fd21c3f8cbe4c5d250fdb71e1d3281daafdc6e71701d25f3cc92086087",
+      "size": 2441
+    },
+    {
+      "path": "operators/run.py",
+      "sha256": "3c614e375639a9542825d679bb7d10aed0982ed72e92425bac2baa936b68a1c7",
+      "size": 862
+    },
+    {
+      "path": "operators/workflow.py",
+      "sha256": "905ba1ed7fcd9639ca9ef74e377d4f7b305a48347cf3ff0daa4a341af9b365dc",
+      "size": 4620
+    },
+    {
+      "path": "overlays.py",
+      "sha256": "87b06302014b07382fca82668181ae74362bf118258ed92fc68f962c0936072a",
+      "size": 4093
+    },
+    {
+      "path": "panels/__init__.py",
+      "sha256": "d1bb420d2b334154d781489c2a3819e2bb1c155b607ef9f7ba4dfdef7c5289d5",
+      "size": 27
+    },
+    {
+      "path": "panels/channels.py",
+      "sha256": "da783fa12ee42958f48405f393ae2e5178d900dc101860ef92ec622cbdc208ea",
+      "size": 1315
+    },
+    {
+      "path": "panels/clearance.py",
+      "sha256": "a5b892d810ee235c2185ef45f6011b37b0e9561c8d7009f568af450a9fa13100",
+      "size": 9792
+    },
+    {
+      "path": "panels/demo.py",
+      "sha256": "a7d34258885788777e398c13c6e655736d17aefb072fe491b44ba36d8d4b66e7",
+      "size": 16746
+    },
+    {
+      "path": "panels/diagnostics.py",
+      "sha256": "c574177031850c37500351f2c64e57958c0e0a1d7c67970a27917910fe2fd69e",
+      "size": 2216
+    },
+    {
+      "path": "panels/gimbal.py",
+      "sha256": "038f205367fbbaf894e1b3894e1c137d49eb8c6d00cd61ccc185588d53c612c7",
+      "size": 13924
+    },
+    {
+      "path": "panels/presentation.py",
+      "sha256": "401c71545e8a1eac6af6f321258490295e4b13bf4681f7b8d0c66a23a9a7b82d",
+      "size": 9148
+    },
+    {
+      "path": "panels/run.py",
+      "sha256": "ba7fab1b32dbb590a01833695d8127b75924f94e6c7470b97e9e5d73ba6a52df",
+      "size": 2076
+    },
+    {
+      "path": "panels/safety.py",
+      "sha256": "dda5d4cb536a96c1abe4b4f32974ab4e4528a3d723d89eeaf5a19873c3090f41",
+      "size": 1475
+    },
+    {
+      "path": "panels/scene.py",
+      "sha256": "8bdd22628208d5fd29df15f2ba7a4fee3ce73519c720b20dd98f3909f990d7f7",
+      "size": 1956
+    },
+    {
+      "path": "panels/status.py",
+      "sha256": "04e3be5db20d749f806ed7ac141ee114610d0775cd497f0b36756feb2abbaa77",
+      "size": 2978
+    },
+    {
+      "path": "panels/telemetry.py",
+      "sha256": "05ba447c3a91428ef934a387f8bc6c7c27a614904b328ac88b9485d4f50b0202",
+      "size": 3953
+    },
+    {
+      "path": "panels/training.py",
+      "sha256": "5529f2da77aa7d27dadcc2c461126078d59c2115e11e6e18ed284b635aed8199",
+      "size": 2174
+    },
+    {
+      "path": "preferences.py",
+      "sha256": "fb1cd27bce5c4b1f288efa54eabc96c844b52644981f64388a7605906b4a5fde",
+      "size": 1724
+    },
+    {
+      "path": "presentation.py",
+      "sha256": "f0f7500b2f797b8b869cf26921cd6a9de4006610d69b1ac778d1a8454f37f62f",
+      "size": 1754
+    },
+    {
+      "path": "protocol.py",
+      "sha256": "3285ba3c0ba9edb6e455cc810984ad08e3edca807c38235d334b1a35915e0a77",
+      "size": 16946
+    },
+    {
+      "path": "runtime.py",
+      "sha256": "d6a51e86fb35bb827e38ff6e336c6a97349e8ec6b918d2a2636e564b8c5afe8c",
+      "size": 18806
+    },
+    {
+      "path": "scene_builder.py",
+      "sha256": "469749bf6ee2c27cdfd8788cffb0dc7a2795ce35f798c95987724af48b635a75",
+      "size": 26298
+    },
+    {
+      "path": "scene_model.py",
+      "sha256": "4a6cdbe9d51293cd8bc9644d55c346cdc53e2c690b27c25db29593142e25d5b2",
+      "size": 1569
+    },
+    {
+      "path": "sensors.py",
+      "sha256": "a302908246f75e484daaa695ea6eb86d598581e616d03b9fa57d6cdd9ad9ad1f",
+      "size": 5382
+    },
+    {
+      "path": "state.py",
+      "sha256": "17238b0c677600c3b40e6e76758265f344fb0558055586bcfc862842f9cb9a8d",
+      "size": 9265
+    },
+    {
+      "path": "training.py",
+      "sha256": "6e66099a7ca55ffc2d932640c0a22acd6e7a736d9568ed5d046c2a015238b61f",
+      "size": 3561
+    },
+    {
+      "path": "transport.py",
+      "sha256": "c224e9480d414492d2a0600b65e8fc21d210d53ae611507f905e0c8e19a3aee0",
+      "size": 10646
+    },
+    {
+      "path": "turbine_geometry.py",
+      "sha256": "e6d3779f110134a2132c50862f3e37cb388407c5bd28d2291458edfc7b0251fa",
+      "size": 6617
+    },
+    {
+      "path": "wake.py",
+      "sha256": "2f5043bad3eb8d02be8a0d33789e5604e1fa653cb52be7c161034107f1bd8192",
+      "size": 15399
+    },
+    {
+      "path": "workspace.py",
+      "sha256": "2678a18e5c14ceb9f4bc69f57952d1237ba1bdecaa3e49461d57c6e57db9cea5",
+      "size": 2028
+    }
+  ],
+  "package_id": "wfrl_blender",
+  "schema_version": "wfrl.extension-package.v1",
+  "version": "0.2.4"
+}

@@ -245,7 +245,7 @@ class LiveRuntimeTests(unittest.TestCase):
 
     def test_saved_live_scene_load_stays_disconnected_and_unconfirmed(self):
         import wfrl_blender
-        scene = SimpleNamespace(get=lambda key: 'live' if key == 'wfrl_scene_kind' else None,
+        scene = SimpleNamespace(get={'wfrl_scene_kind': 'live'}.get,
                                 objects={})
         bpy = SimpleNamespace(data=SimpleNamespace(scenes=[scene], cameras=[]))
         with patch.dict(sys.modules, bpy=bpy), patch.object(runtime, 'disconnect') as disconnect:
