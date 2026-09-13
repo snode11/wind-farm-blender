@@ -1,15 +1,15 @@
 ---
 name: windfarm-blender-dev
-description: 开发和排查本仓库 Blender 原生前端的面板、相机、雷达光束、净空卡片、工况切换与回放控制，识别界面、回放、数据格式及物理算法的修改边界。用于相关开发方案和验收，不作为启动训练或重跑仿真的授权。
+description: 开发、排查和验收本仓库 Blender 原生前端的界面、相机与净空雷达回放。
 ---
 
 # Windfarm Blender 开发
 
-本文件的链接相对 skill 目录；命令从仓库根目录执行。先读根目录 [AGENTS.md](../../../AGENTS.md) 和改动路径下已有规则，检查 Git 状态及现有 skills，保留当前工作。
+本文件的链接相对 skill 目录；命令从 Git 仓库根目录执行。适用规则见 [AGENTS.md](../../../AGENTS.md)。
 
 ## 先分类并给出最小方案
 
-实施前说明：需求类别、涉及模块、最小修改方案、可观察的验收标准和验证层级。混合需求逐项分类；发现跨层影响时更新方案，不以界面需求默许物理重算。仅方案或文档任务到说明与静态校验为止。
+实施前简要说明需求类别、涉及模块、最小方案和可观察的验收标准；小改动用几句话即可，不要求另写计划或停等批准。混合需求逐项分类，跨层影响需要更新方案。正常开发应完成实现、相关验证和本次改动引入的问题修复；仅方案、基线或报告任务按其范围结束，原样报告失败。
 
 | 类别 | 判断与默认边界 |
 | --- | --- |
@@ -18,7 +18,7 @@ description: 开发和排查本仓库 Blender 原生前端的面板、相机、�
 | 数据格式 | schema、字段、摘要、校验与累计状态合同；先评估读取器、发布端、旧包兼容性及扩展内置副本。不得为了让旧包通过而削弱校验。 |
 | 物理算法 | 标定、估计公式、真值定义、几何、求解参数；明确是否需要后处理或新求解。仅在任务范围包含这些工作时执行，生成新版本包而非覆盖旧包。 |
 
-先读 [根 README](../../../README.md) 的 Blender 入口和 [前端 README](../../../blender_frontend/README.md)；技术公式、包结构和计算流程以现有文档为引用源，不复制整份说明。
+启动入口见 [根 README](../../../README.md)；架构、公式、包格式及物理重生成见 [前端 README](../../../blender_frontend/README.md)。仅阅读当前任务需要的章节，已有上下文足够时无需重复读取。
 
 ## 按需求定位
 
@@ -44,21 +44,22 @@ description: 开发和排查本仓库 Blender 原生前端的面板、相机、�
 
 ## 分层验证
 
-先检查测试输入、输出路径和运行前置条件，再执行与改动有关的最小集合；必要时增加能复现问题的针对性回归。不要为文档改动运行仿真或全量前端验收。
+按验收标准选择现有测试，先核对输入、输出和前置条件。必要时补充针对性回归；相关检查通过且没有新改动或未解决问题时即可结束，不为凑覆盖范围反复测试。文档改动只需相应静态校验。
 
-- 宿主机：查找 `blender_frontend/tests/test_*.py`；读取器、统计和包合同查找 `tests/lidar/`。使用已具备依赖的 Python，例如 `PYTHONPATH=blender_frontend:. python -m pytest blender_frontend/tests/test_extension_package.py -q`（仅适用于打包相关任务，测试在临时目录构建 ZIP）。根据实际模块选择测试，不把单一打包测试当成回放验收。
-- Blender 原生：本地环境可用且任务含实现验证时，执行匹配的最小运行检查。雷达可从 `blender_frontend/tests/blender/clearance_ux_regression.py`、`clearance_acceptance_regression.py`、`clearance_replay_smoke.py` 选择；相机查找 `camera_framing_smoke.py`、`gimbal_controls_smoke.py`。无窗口脚本可采用 `"<Blender 可执行文件>" --background --factory-startup --python-exit-code 1 --python <测试脚本>`，先确认脚本支持后台运行。
-- 实际窗口：有桌面截图能力时启动独立可见窗口，检查面板可读性、测量区构图、操作和错误提示；渲染图不能代替窗口验收。`clearance_gui_acceptance.py` 需要可见窗口及 `WFRL_TEST_OUTPUT`，使用独立 `BLENDER_USER_CONFIG`。部分旧测试硬编码 `normal/close` 或写入演示 `.blend`，先核对清单和输出，使用隔离副本/临时输出，不覆盖交付场景。
-- 按改动选取验收：两个工况加载；视角切换前后样本和暂停状态一致；暂停/寻址/重播统计一致；固定帧修改 FPS 后仿真时间一致；B2 无效及保留过期显示正确；缺包失败清空旧值且修复路径后可恢复。纯布局任务至少验证相关按钮和窗口显示，不机械运行全部场景。
+| 验证层 | 现有入口与边界 |
+| --- | --- |
+| 宿主机 | `blender_frontend/tests/test_*.py`；读取器与统计见 `tests/lidar/test_replay.py`。从根目录用 `PYTHONPATH=blender_frontend:. python -m pytest <选定测试> -q`，选择现有依赖环境。`test_extension_package.py` 会构建 ZIP，禁止打包的任务必须排除。 |
+| Blender 原生 | 本地 Blender 可用时，按改动选择 `blender_frontend/tests/blender/` 下的 `clearance_ux_regression.py`、`clearance_acceptance_regression.py`、`clearance_replay_smoke.py`，相机相关选择 `camera_framing_smoke.py` 或 `gimbal_controls_smoke.py`。先确认脚本支持后台运行，再使用 `--background --factory-startup --python-exit-code 1 --python <脚本>`。 |
+| 实际窗口 | 界面或视觉修改有桌面截图能力时，检查真实窗口的可读性、构图、操作和错误提示；渲染图不替代窗口。`clearance_gui_acceptance.py` 需要可见窗口、`WFRL_TEST_OUTPUT` 和独立 `BLENDER_USER_CONFIG`。部分旧脚本硬编码旧包路径或写演示 `.blend`，使用清单核对输入并隔离输出。 |
 
-已安装扩展不会读取仓库源码改动。验证安装版时重启 Blender 并重新加载/校验匹配场景；后端流程按现有 `Load & Validate Scene` 操作，离线雷达按专用入口或结果包加载流程。不要为刷新界面误启动在线求解。
+回放相关验收从下列行为选择：两工况加载、视角切换保持样本与暂停状态、暂停/寻址/重播统计一致、固定帧改 FPS 后仿真时间一致、B2 无效与过期显示、缺包清空和路径修复恢复。纯布局至少检查相关按钮与实际窗口。
 
-报告逐项标记“已运行通过”“仅静态检查”“尚未验证”，给出命令/环境、结果和证据位置；缺环境时说明缺项。历史 PASS、宿主机测试、源码入口、安装 ZIP、实际窗口及不同平台的结论分别记录。
+报告给出实际命令、环境和结果，区分“已运行通过”“仅静态检查”“尚未验证”。缺依赖则说明缺项；历史 PASS、宿主机、源码入口、安装 ZIP、窗口和不同平台的证据分别记录。
 
 ## 扩展与数据交付判断
 
-涉及扩展交付时检查 [构建脚本](../../../scripts/blender/build_extension.py) 的实际载荷：扩展 Python/资源、规范 Bridge 协议以及内置 `_vendor/lidar` 的读取器与证据校验模块。修改这些输入需要重建 ZIP；仅 AGENTS.md、skill 或外部说明改动不需要重建。不要手改构建生成的内置副本。
+仅在扩展交付任务中读取 [交付说明](../../../dist/README-lidar.md) 和 [构建脚本](../../../scripts/blender/build_extension.py)。扩展 Python/资源、规范 Bridge 协议或内置 lidar 读取器/证据模块变化需要新 ZIP；仅 AGENTS.md、skill 或外部说明变化无需重建。修改源文件，不手改生成的内置副本。
 
-在交付范围内按现有流程运行 `python3 scripts/blender/build_extension.py`，核对 manifest 版本、ZIP、`.zip.sha256`、`.inventory.json` 及交付清单是否一致；默认构建会写入同版本 dist 文件，验证构建可使用现有 `build(output_dir)` 的临时目录能力。需要发布时再按任务范围更新交付清单并验证实际安装包，重建本身不代表已发布。
+现有命令为 `python3 scripts/blender/build_extension.py`，会写入同版本 dist 文件；验证构建可调用现有 `build(output_dir)` 输出到临时目录。交付时核对 manifest 版本、ZIP、SHA-256、inventory 与清单一致，并验证安装版。安装版不读取仓库源码，需重启 Blender、重新加载匹配场景或结果包；后端流程使用 `Load & Validate Scene`，离线雷达无需启动求解器。
 
-ZIP 不包含正式结果包与原始 VTP。界面/播放器改动复用已有结果包；物理参数或几何变化可能需要新求解，标定/公式变化在原始输入完整兼容时可仅重新后处理、验证和发布新包。具体依据 [前端 README 第 6 节](../../../blender_frontend/README.md) 与计算流程判断，不把重打 ZIP 当成物理结果更新。
+ZIP 不含正式结果包与原始 VTP。界面/播放器修改复用结果包；标定/公式变化是否可复用原始输出、几何/物理变化是否需要新求解，按 [前端 README 第 6 节](../../../blender_frontend/README.md) 与计算流程判断。重建 ZIP 不等于更新物理结果或发布。
