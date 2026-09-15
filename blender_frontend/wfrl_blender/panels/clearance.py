@@ -37,7 +37,8 @@ class WFRL_OT_ClearanceView(bpy.types.Operator):
     bl_idname = 'wfrl.clearance_view'
     bl_label = '演示视角'
     bl_description = '只切换镜头；保留当前数据模式、回放进度和暂停状态'
-    view: bpy.props.EnumProperty(items=[('MEASUREMENT', '测量区侧视', ''), ('WORLD', '风场总览', '')])
+    view: bpy.props.EnumProperty(items=[('MEASUREMENT', '测量区侧视', ''), ('WORLD', '风场总览', ''),
+                                        ('RADAR', '雷达特写', '')])
 
     @classmethod
     def poll(cls, context):
@@ -49,13 +50,14 @@ class WFRL_OT_ClearanceView(bpy.types.Operator):
         from . import gimbal
         if gimbal._ACTIVE:
             gimbal._ACTIVE.finish(context)
-        if self.view == 'MEASUREMENT':
-            from ..cameras import ensure_clearance_camera
+        if self.view in {'MEASUREMENT', 'RADAR'}:
+            from ..cameras import ensure_clearance_camera, ensure_radar_closeup_camera
             scene = context.scene
             tid = (scene.get('wfrl_clearance_turbine', 'T1')
                    if clearance_replay.reader_for(scene) else scene.wfrl_gimbal_turbine)
             try:
-                camera = ensure_clearance_camera(scene, tid)
+                ensure_camera = ensure_radar_closeup_camera if self.view == 'RADAR' else ensure_clearance_camera
+                camera = ensure_camera(scene, tid)
             except ValueError as exc:
                 self.report({'ERROR'}, str(exc))
                 return {'CANCELLED'}
@@ -83,6 +85,43 @@ class WFRL_OT_ClearanceRestart(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class WFRL_OT_ClearancePlayback(bpy.types.Operator):
+    bl_idname = 'wfrl.clearance_playback'
+    bl_label = '播放雷达结果'
+    bl_description = '播放或暂停当前片段；片段结束后从头播放'
+
+    @classmethod
+    def poll(cls, context):
+        return clearance_replay.reader_for(context.scene) is not None and context.screen is not None
+
+    def execute(self, context):
+        if context.scene.frame_current >= context.scene.frame_end:
+            return bpy.ops.wfrl.clearance_restart()
+        return bpy.ops.screen.animation_play()
+
+
+def playback_control(scene, screen):
+    if scene.frame_current >= scene.frame_end:
+        return '重新播放', 'REW', '本段已结束'
+    if screen is not None and screen.is_animation_playing:
+        return '暂停', 'PAUSE', '正在播放'
+    return '播放', 'PLAY', '已暂停'
+
+
+def progress_get(scene):
+    span = scene.frame_end - scene.frame_start
+    if clearance_replay.reader_for(scene) is None or span <= 0:
+        return 0.0
+    return min(100.0, max(0.0, 100 * (scene.frame_current - scene.frame_start) / span))
+
+
+def progress_set(scene, value):
+    if clearance_replay.reader_for(scene) is None:
+        return
+    ratio = min(100.0, max(0.0, value)) / 100
+    scene.frame_set(scene.frame_start + round(ratio * (scene.frame_end - scene.frame_start)))
+
+
 def number(value, signed=False):
     return '--' if value is None else format(value, '+.2f' if signed else '.2f')
 
@@ -103,6 +142,7 @@ def draw_navigation(layout, scene):
     row = layout.row(align=True)
     row.operator('wfrl.clearance_view', text='风场总览', icon='HOME').view = 'WORLD'
     row.operator('wfrl.clearance_view', text='测量区侧视', icon='VIEW_CAMERA').view = 'MEASUREMENT'
+    layout.operator('wfrl.clearance_view', text='雷达特写', icon='ZOOM_IN').view = 'RADAR'
     if kind not in {'demo', 'live', 'clearance_replay'}:
         layout.operator('wfrl.load_demo', text='加载风场演示场景')
 
@@ -136,15 +176,9 @@ def draw_measurement(layout, scene, value):
     numbers = card.column(align=True)
     numbers.scale_y = 1.2
     numbers.label(text='仿真真值：' + number(measurement.get('truth_m')) + ' m')
-    numbers.label(text='B2 估计：' + number(measurement.get('estimate_m')) + ' m')
+    numbers.label(text='估计 B2：' + number(measurement.get('estimate_m')) + ' m')
     numbers.label(text='偏差：' + number(measurement.get('error_m'), True) + ' m')
     card.label(text='偏差 = 估计 − 真值')
-    if measurement:
-        status = value['status']
-        card.label(text={'above_threshold': '高于演示阈值', 'near_threshold': '接近演示阈值'}[status],
-                   icon={'above_threshold': 'KEYTYPE_JITTER_VEC', 'near_threshold': 'KEYTYPE_KEYFRAME_VEC'}[status])
-    else:
-        card.label(text='')
 
 
 def draw(layout, scene):
@@ -164,13 +198,25 @@ def draw(layout, scene):
         if scene.get('wfrl_clearance_demo') == 'near_tower':
             box.label(text='较小净空工况 · 以数值比较')
         draw_measurement(box, scene, value)
+        text, icon, state = playback_control(scene, bpy.context.screen)
         row = box.row(align=True)
-        row.operator('screen.animation_play', text='播放 / 暂停', icon='PLAY')
+        row.operator('wfrl.clearance_playback', text=text, icon=icon)
         row.operator('wfrl.clearance_restart', text='从头重播', icon='REW')
-        box.prop(scene, 'frame_current', text='回放进度')
+        box.prop(scene, 'wfrl_clearance_progress', text='回放进度', slider=True)
+        reader = clearance_replay.reader_for(scene)
+        elapsed = max(0.0, value['time_s'] - reader.start_s)
+        duration = reader.end_s - reader.start_s
+        box.label(text=f'{state} · {elapsed:.2f} / {duration:.2f} s')
         box.label(text=f"仿真时间：{value['time_s']:.2f} s")
+        if scene.frame_current >= scene.frame_end:
+            summary = box.box()
+            stats = value['statistics']
+            summary.label(text='本段统计')
+            summary.label(text=f"B2 有效样本：{stats['valid_samples']} / {stats['expected_samples']}")
+            summary.label(text=f"经过 {stats['passage_count']} 次 · 整次漏测 {stats['missed_passage_count']} 次")
+            summary.label(text='平均绝对误差：' + number(stats.get('mae_m')) + ' m')
     box.label(text='B2 手册简化估算 · 理想测距')
-    box.label(text='光束为示意 · 阈值不作安全判定')
+    box.label(text='光束为示意 · 不作安全判定')
     if fold(box, scene, 'wfrl_clearance_show_details', '测量详情与统计'):
         box.label(text='真实红外不可见；线端不代表命中点')
         if value is not None:
@@ -179,7 +225,15 @@ def draw(layout, scene):
             box.label(text='平均绝对误差：' + number(stats.get('mae_m')) + ' m')
             box.label(text='最大绝对误差：' + number(stats.get('max_abs_error_m')) + ' m')
             ratio = stats.get('valid_ratio')
-            box.label(text='有效测量比例：' + ('不适用' if ratio is None else f'{ratio:.1%}'))
+            box.label(text=f"B2 有效样本：{stats['valid_samples']} / {stats['expected_samples']}")
+            box.label(text='预期样本中有效：' + ('不适用' if ratio is None else f'{ratio:.1%}'))
+            box.label(text='分母：评估网格内预期样本')
+            box.label(text=f"经过测量区：{stats['passage_count']} 次")
+            # Cumulative counts may include a passage still in progress.
+            # Only the completed clip can call every unmeasured passage a miss.
+            box.label(text=('整次漏测：' + str(stats['missed_passage_count']) + ' 次'
+                            if scene.frame_current >= scene.frame_end else '整次漏测：片尾汇总'))
+            box.label(text=f'回放帧：{scene.frame_current} / {scene.frame_end}')
     if fold(box, scene, 'wfrl_clearance_show_config', '数据配置'):
         box.prop(scene, 'wfrl_clearance_normal_path')
         box.prop(scene, 'wfrl_clearance_near_tower_path')
@@ -189,10 +243,15 @@ def draw(layout, scene):
             box.label(text='当前为已加载数据；改路径后需重选工况')
 
 
-CLASSES = (WFRL_OT_ClearanceClip, WFRL_OT_ClearanceView, WFRL_OT_ClearanceRestart)
+CLASSES = (WFRL_OT_ClearanceClip, WFRL_OT_ClearanceView, WFRL_OT_ClearanceRestart,
+           WFRL_OT_ClearancePlayback)
 
 
 def register_properties():
+    bpy.types.Scene.wfrl_clearance_progress = bpy.props.FloatProperty(
+        name='回放进度', description='当前片段的播放百分比；仿真时间与读数同步更新',
+        subtype='PERCENTAGE', min=0.0, max=100.0, precision=1,
+        get=progress_get, set=progress_set, options={'SKIP_SAVE'})
     for demo, label in (('normal', '正常测量数据包'), ('near_tower', '较小净空数据包')):
         setattr(bpy.types.Scene, 'wfrl_clearance_' + demo + '_path', bpy.props.StringProperty(name=label, subtype='DIR_PATH'))
     for suffix in ('show_details', 'show_config', 'show_camera'):
@@ -200,7 +259,7 @@ def register_properties():
 
 
 def unregister_properties():
-    for suffix in ('normal_path', 'near_tower_path', 'show_details', 'show_config', 'show_camera'):
+    for suffix in ('normal_path', 'near_tower_path', 'show_details', 'show_config', 'show_camera', 'progress'):
         name = 'wfrl_clearance_' + suffix
         if hasattr(bpy.types.Scene, name):
             delattr(bpy.types.Scene, name)

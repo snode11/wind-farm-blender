@@ -7,7 +7,7 @@ START_LABELS = {'demo': 'Start Backend Demo', 'interactive_training': 'Start Tra
 
 
 class WFRL_PT_WorkflowRun(bpy.types.Panel):
-    bl_label = 'WFRL / RUN CONFIGURATION'
+    bl_label = 'WFRL / 后端运行'
     bl_idname = 'WFRL_PT_workflow_run'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -15,7 +15,7 @@ class WFRL_PT_WorkflowRun(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return runtime.get_state().connection != 'LOCAL DEMO'
+        return runtime.get_state().connection not in {'LOCAL DEMO', 'OFFLINE RESULTS'}
 
     def draw(self, context):
         layout, settings = self.layout, context.scene.wfrl_workflow

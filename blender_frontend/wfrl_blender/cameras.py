@@ -352,7 +352,8 @@ def fill_camera_view(area, scene):
 
 
 def ensure_clearance_camera(scene, turbine_id):
-    """Repeatable side view of the hub-to-lower-blade measurement zone."""
+    """Front-left 45-degree perspective of the lower-blade measurement zone."""
+    import math
     import bpy
     from mathutils import Vector
     from .turbine_geometry import geometry_data
@@ -368,14 +369,57 @@ def ensure_clearance_camera(scene, turbine_id):
     # Parent only the explanatory camera, never the radar, to the yaw frame.
     camera.parent = yaw
     target = Vector((-5, 0, -radius * .42))
-    camera.location = target + Vector((0, -radius * 2.5, 0))
-    camera.rotation_mode = 'XYZ'
-    camera.rotation_euler = (target - camera.location).to_track_quat('-Z', 'Y').to_euler()
-    camera.data.type = 'ORTHO'
+    # Rotor front is local -X. Looking toward +X with +Z up, screen-left
+    # is +Y; keep this azimuth relative to the turbine as its yaw changes.
+    direction = Vector((-1, 1, 0)).normalized()
     aspect = (scene.render.resolution_x * scene.render.pixel_aspect_x
               / (scene.render.resolution_y * scene.render.pixel_aspect_y))
-    camera.data.ortho_scale = radius * 1.35 * max(1., aspect)
+    camera.data.type = 'PERSP'
+    camera.data.sensor_fit = 'HORIZONTAL'
+    camera.data.sensor_width = 36
+    camera.data.lens = 50
+    frame_width = radius * 1.65 * max(1., aspect)
+    distance = frame_width / (2 * math.tan(camera.data.angle_x / 2))
+    camera.location = target + direction * distance
+    camera.rotation_mode = 'XYZ'
+    camera.rotation_euler = (target - camera.location).to_track_quat('-Z', 'Y').to_euler()
     camera.data.clip_start, camera.data.clip_end = .1, 30000
     camera.data.show_passepartout = False
-    camera['provenance'] = '测量区侧视；刚性模型不显示弹性变形或精确测距'
+    camera['provenance'] = '测量区左前方45°透视；刚性模型不显示弹性变形或精确测距'
+    return camera
+
+
+def ensure_radar_closeup_camera(scene, turbine_id):
+    """Inspect the housing, mount and optical face at the actual radar location."""
+    import math
+    import bpy
+    from mathutils import Vector
+    radar = scene.objects.get(f'WFRL.Turbine.{turbine_id}.ClearanceRadar')
+    if radar is None or radar.parent is None:
+        raise ValueError('请先加载包含雷达的风机场景')
+    name = f'WFRL.Camera.{turbine_id}.RadarCloseup'
+    camera = scene.objects.get(name)
+    if camera is None:
+        camera = bpy.data.objects.new(name, bpy.data.cameras.new(name + '.Data'))
+        radar.users_collection[0].objects.link(camera)
+    camera.parent = radar.parent
+    camera.matrix_parent_inverse.identity()
+    # Stay below and beside the mount so the nacelle does not hide the sensor.
+    # Follow its installed position; do not move or scale the radar itself.
+    target = radar.location + Vector((0, 0, .095))
+    direction = Vector((-1, 1, -.45)).normalized()
+    aspect = (scene.render.resolution_x * scene.render.pixel_aspect_x
+              / (scene.render.resolution_y * scene.render.pixel_aspect_y))
+    camera.data.type = 'PERSP'
+    camera.data.sensor_fit = 'HORIZONTAL'
+    camera.data.sensor_width = 36
+    camera.data.lens = 55
+    frame_width = max(1.25, .82 * aspect)
+    distance = frame_width / (2 * math.tan(camera.data.angle_x / 2))
+    camera.location = target + direction * distance
+    camera.rotation_mode = 'XYZ'
+    camera.rotation_euler = (target - camera.location).to_track_quat('-Z', 'Y').to_euler()
+    camera.data.clip_start, camera.data.clip_end = .01, 30000
+    camera.data.show_passepartout = False
+    camera['provenance'] = '雷达安装特写；外壳为示意，光束不代表命中点或测距结果'
     return camera
