@@ -36,7 +36,7 @@ class PackageTests(unittest.TestCase):
             inventory = json.loads(first.inventory.read_text(encoding="utf-8"))
             self.assertEqual(inventory["archive_sha256"], first.sha256)
             self.assertEqual(inventory["package_id"], "wfrl_blender")
-            self.assertEqual(inventory["version"], "0.2.4")
+            self.assertEqual(inventory["version"], "0.2.5")
             with zipfile.ZipFile(first.archive) as zipped:
                 names = zipped.namelist()
                 self.assertEqual(names, sorted(names))
