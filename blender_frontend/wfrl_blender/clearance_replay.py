@@ -100,6 +100,12 @@ def load(scene, path, demo):
 def update(scene, depsgraph=None):
     if scene.get('wfrl_scene_kind') != 'clearance_replay':
         return
+    if reader_for(scene) is not None:
+        frame = min(scene.frame_end, max(scene.frame_start, scene.frame_current))
+        if frame != scene.frame_current:
+            # Native timeline edits must obey the same bounds as the replay slider.
+            scene.frame_set(frame)
+            return
     value = sample(scene)
     if value is None:
         return
