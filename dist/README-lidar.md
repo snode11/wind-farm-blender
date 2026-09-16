@@ -1,35 +1,28 @@
-# 0.3.0 安装与交付
+# WFRL Blender 0.3.1 交付说明
 
-当前安装包：[wfrl_blender-0.3.0.zip](wfrl_blender-0.3.0.zip) · [GitHub Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.0)
+正式版本为 **0.3.1**，汇总本地 0.3.1–0.3.5 开发阶段。上一 GitHub 正式版为 0.3.0。
 
-在 Blender 5.2 或更新版本中选择“从磁盘安装”，安装上述 ZIP 后重启 Blender。GitHub 自动生成的 Source code ZIP 不是扩展安装包。N 侧栏 → MAPPO →“加载 MAPPO · 60 秒”可直接播放内置三机结果，无需后端环境。
+## 给 Windows 用户的文件
 
-SHA-256：`e1f5a5ccb67832eabc95302b2c1e551e35b2bf92f47b3b59cc11db6a68f3e441`
+只需下载 [wfrl_blender-0.3.1.zip](wfrl_blender-0.3.1.zip)，在 Blender 5.2+ 从磁盘安装并启用，重启后到 **N → MAPPO → 加载 MAPPO · 60 秒**。不要用 GitHub 的 Source code ZIP 安装扩展；不需要 Mac `.command`、Python、MPI 或 FAST.Farm。
 
-[逐文件清单](wfrl_blender-0.3.0.inventory.json) · [校验文件](wfrl_blender-0.3.0.zip.sha256) · [机器可读交付清单](lidar-delivery.json)
+[用户手册](../docs/blender/用户使用手册.md) · [快速演示](../docs/blender/MAPPO演示.md) · [正式发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.1)
 
-## 本版交付内容
+ZIP 内置最新三机柔性塔架 v2 数据、九片叶片形变、T1 挠度对照和同源遥测。默认资源包括 `geometry.npz`、`tower-motion.npz`、`deflection-t1.json`、`data.json`、`telemetry.json` 与来源清单；播放不依赖原始 VTP 或本机路径。
 
-- ZIP 内置三机 60 秒 MAPPO 形变、测量、运动及功率/载荷遥测数据，含九片独立形变、彩色叶尖轨迹、视角/云台、统一回放面板与 B2 测距。
-- 项目仓库包含原命令启动与 Bridge 暂停/单步/重连修复。只安装 ZIP 不会更新项目脚本；使用 `run_wfrl_macos.sh` 前需同步本版仓库并具备本机后端环境。
-- 原命令默认加载已安装扩展并暂停在 T1 侧前方首帧，Bridge 待用；主动连接后自动加载指定 YAML。操作见 [MAPPO 演示说明](../docs/blender/MAPPO演示.md)。
-- 独立雷达包继续使用 `results/lidar/packages/normal-v1.1` 和 `close-v1.1`。这些外部包与原始 VTP 不在扩展 ZIP 中；三机 MAPPO 数据则已内置。
-- 0.2.x 安装资源保留为历史版本。本次复用已保存物理结果，未重新求解或训练。
+## 版本与校验
 
-## 校验
+- 扩展/项目版本：0.3.1；数据 schema：`wfrl.farm-flex-review.v2`；状态：`REVIEW_ONLY`。
+- ZIP SHA-256：`4b947a3e9565374e2b1da46387176ccb7940e659f1836e9a073f83939c2f149c`。
+- [SHA-256 文件](wfrl_blender-0.3.1.zip.sha256) · [逐文件清单](wfrl_blender-0.3.1.inventory.json) · [机器可读交付清单](lidar-delivery.json)。
+- 内置物理包 manifest SHA-256：`b765b9791b95fcfd7a39079b949131554e905ba4e12af60979a85d254628ae5e`。
 
-下载 ZIP 与校验文件到同一目录后运行 `shasum -a 256 -c wfrl_blender-0.3.0.zip.sha256`。发布源码可通过 `scripts/blender/build_extension.py` 重建同一安装包。
+在 PowerShell 中执行 `Get-FileHash .\wfrl_blender-0.3.1.zip -Algorithm SHA256` 比对。旧正式包保留，本地中间版本不作为新的 GitHub 版本发布；从中间版迁移请先移除旧扩展后安装正式版。
 
-需要核对独立雷达包时，在项目根运行（输出文件需为新路径）：
+## 兼容与范围
 
-```sh
-python3 scripts/blender/verify_lidar_delivery.py dist/wfrl_blender-0.3.0.zip results/lidar/packages/normal-v1.1 results/lidar/packages/close-v1.1 --output /tmp/wfrl-delivery-030-check.json
-```
+读取器继续兼容旧三机 v1 包。两个历史独立雷达包 `normal-v1.1` / `close-v1.1` 仍需项目外部目录，仅在使用手册第 12 节流程中需要，默认三机演示无需它们。本轮不重复上传这些未变数据，不上传原始求解几何、截图序列、缓存和本机备份。
 
-此命令校验隔离 ZIP 读取，不代表 Blender GUI 或现场设备验收。
+实时后端需要完整项目和独立环境；只发扩展不能替代 Windows 的后端安装。当前 ZIP 以隔离解包运行验证；本机原已安装扩展和旧便携目录不会仅因生成 ZIP 自动升级。
 
-## 验证范围
-
-发送前已核对正式 ZIP、便携 ZIP 和本机安装文件一致，并完成九片回放、遥测、保存重开、缺包恢复、启动模式与真实后端短测。详见 [发送前检查](../docs/blender/0.3.0发送前检查.md) 和 [Demo 替换验证](../evidence/flex-mappo/demo-replacement-20260916/验证记录.md)。
-
-三机片段保持 REVIEW_ONLY；T1 雷达有效率、数值收敛、稳定 60 FPS、长期稳定性、控制收益、Windows 与现场设备尚未验收。旧记录中的“ZIP 不含三机数据”已由当前完整 MAPPO ZIP 替代；独立 normal/close 包仍为外部数据。
+本轮检查见 [0.3.1 发布核对](../docs/blender/0.3.1发布核对.md)。物理数据仍为 REVIEW_ONLY，固定 B2 估计未补偿塔架弯曲；Windows 实机、完整风场收敛、稳定 60 FPS 和现场精度尚未验收。

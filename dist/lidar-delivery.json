@@ -1,8 +1,8 @@
 {
   "schema": "wfrl.lidar-delivery.v1",
-  "version": "0.3.0",
-  "archive": "dist/wfrl_blender-0.3.0.zip",
-  "archive_sha256": "e1f5a5ccb67832eabc95302b2c1e551e35b2bf92f47b3b59cc11db6a68f3e441",
+  "version": "0.3.1",
+  "archive": "dist/wfrl_blender-0.3.1.zip",
+  "archive_sha256": "4b947a3e9565374e2b1da46387176ccb7940e659f1836e9a073f83939c2f149c",
   "packages": {
     "normal": "results/lidar/packages/normal-v1.1",
     "close": "results/lidar/packages/close-v1.1"
@@ -11,12 +11,14 @@
     "normal": "658922c57ecf7b69028d55eae604119a4b44e60e66247817edbd145d9dc0fe2d",
     "close": "91895c64e0bc962c956d57fe8bb507fe9e26f0af6cf6aa2f59cef5a19a9cc30b"
   },
-  "historical": "0.2.x archives are historical. Current 0.3.0 contains the complete MAPPO demo; normal-v1.1 and close-v1.1 remain unchanged independent radar packages.",
+  "historical": "Official 0.3.1 consolidates local development labels 0.3.1–0.3.5; previous GitHub release is 0.3.0.",
   "demo": {
     "kind": "MAPPO",
     "duration_s": 60,
     "bundled_data": "assets/mappo",
     "status": "REVIEW_ONLY",
-    "manifest_sha256": "76c8f72ceebdb5676b6c712044be9607d3b31d789aa7b42af00fc5aa5c3aa9dd"
+    "manifest_sha256": "b765b9791b95fcfd7a39079b949131554e905ba4e12af60979a85d254628ae5e",
+    "schema": "wfrl.farm-flex-review.v2",
+    "tower_model": "elastodyn-flexible"
   }
 }

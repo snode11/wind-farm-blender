@@ -42,3 +42,44 @@ def test_common_clock_and_azimuth_wrap(tmp_path):
 def test_reject_cross_file_pose_mismatch(tmp_path):
     with pytest.raises(ValueError,match='poses differ'):
         read_package(fixture(tmp_path,pose_error=True))
+
+
+def flexible_fixture(tmp_path):
+    path=fixture(tmp_path)
+    m=json.loads((path/'manifest.json').read_text())
+    m.update(schema='wfrl.farm-flex-review.v2',tower_model='elastodyn-flexible',layout_m=[[0,0,0],[504,0,0],[1008,0,0]])
+    times=np.array([0.,.025]);nacelle=np.zeros((2,3,3,4));nacelle[...,:3]=np.eye(3)
+    nacelle[1,:,0,3]=.1
+    tower=np.zeros((2,3,2,3,4));tower[...,:3]=np.eye(3);tower[1,:,1,0,3]=.1
+    np.savez_compressed(path/'tower-motion.npz',times=times,heights=[0.,87.6],transforms=tower,nacelle=nacelle)
+    data=json.loads((path/'data.json').read_text())
+    for k,tid in enumerate(m['turbine_ids']):
+        for i,row in enumerate(data[tid]['motion']):
+            row['nacelle_transform']=nacelle[i,k].tolist()
+            row['nacelle_position_m']=(np.array(m['layout_m'][k])+[i*.1,0,87.6]).tolist()
+    (path/'data.json').write_text(json.dumps(data))
+    for name in ('tower-motion.npz','data.json'):
+        m['files'][name]=hashlib.sha256((path/name).read_bytes()).hexdigest()
+    (path/'manifest.json').write_text(json.dumps(m))
+    return path,m
+
+
+def test_flexible_support_clock_and_corruption(tmp_path):
+    path,m=flexible_fixture(tmp_path)
+    read_package(path)
+    with np.load(path/'tower-motion.npz') as a: content=dict(a)
+    content['times']=np.array([0.,.05])
+    np.savez_compressed(path/'tower-motion.npz',**content)
+    m['files']['tower-motion.npz']=hashlib.sha256((path/'tower-motion.npz').read_bytes()).hexdigest()
+    (path/'manifest.json').write_text(json.dumps(m))
+    with pytest.raises(ValueError,match='tower motion'):read_package(path)
+
+
+def test_reject_flexible_reference_mismatch(tmp_path):
+    path,m=flexible_fixture(tmp_path)
+    data=json.loads((path/'data.json').read_text())
+    data['T2']['motion'][1]['nacelle_position_m'][0]+=.5
+    (path/'data.json').write_text(json.dumps(data))
+    m['files']['data.json']=hashlib.sha256((path/'data.json').read_bytes()).hexdigest()
+    (path/'manifest.json').write_text(json.dumps(m))
+    with pytest.raises(ValueError,match='Nacelle position'):read_package(path)

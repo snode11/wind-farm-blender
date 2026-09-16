@@ -4,11 +4,18 @@
 
 项目围绕风场三维展示、相机与云台交互、仿真后端连接，以及激光净空雷达离线回放持续开发。
 
-**当前已发布扩展：0.3.0** · Blender 5.2 或更新版本 · [下载安装包](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.0/wfrl_blender-0.3.0.zip) · [用户使用手册](docs/blender/用户使用手册.md)
+**当前已发布扩展：0.3.1** · Blender 5.2 或更新版本 · [下载安装包](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.1/wfrl_blender-0.3.1.zip) · [用户使用手册](docs/blender/用户使用手册.md)
 
 ## 更新记录
 
 以下按版本和日期整理；早期没有单独版本记录的改动按日期归档。同一天发布多个版本时，按版本倒序展示。条目依据本仓库已发布的提交与变更记录整理，验证结论沿用对应发布记录。
+
+### 2026-09-16 · 正式 0.3.1 · 挠度对照、柔性塔架与 Windows 离线交付
+
+- 汇总本地 0.3.1–0.3.5 开发内容为正式 0.3.1：T1 三叶片挠度参考/分量/数值对照，三机柔性塔架及机舱、叶轮、雷达随动，挠度/净空/工具三页操作。
+- 默认内置最新 v2 三机 60 秒数据；Windows 安装一个 ZIP 后即可离线播放，无需训练或求解器环境。Windows 实机尚未验收，数据仍为 REVIEW_ONLY。
+- 大幅更新前端 README 与用户操作手册，统一安装、按钮路径、读数口径及排障。本地中间版本统一归入本次正式发布。
+- [下载 0.3.1](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.1) · [前端总览](前端readme.md) · [用户手册](docs/blender/用户使用手册.md) · [发布核对](docs/blender/0.3.1发布核对.md)
 
 ### 2026-09-16 · v0.3.0 · 完整 MAPPO 回放与后端启动修复
 

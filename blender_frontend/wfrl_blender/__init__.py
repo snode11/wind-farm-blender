@@ -123,6 +123,7 @@ def register():
     import bpy
     from bpy.app.handlers import persistent
     from . import runtime
+    from .deflection import refresh as refresh_deflection
     # Preserve cleanup callbacks outside reloadable module globals.
     previous = getattr(bpy, '_wfrl_registered_cleanup', None)
     if previous:
@@ -131,6 +132,13 @@ def register():
         if not cls.is_registered:
             bpy.utils.register_class(cls)
     definitions = {
+        "wfrl_farm_panel_page": bpy.props.EnumProperty(
+            name="回放面板", items=(("DEFLECTION", "挠度", "T1 叶尖位置与挠度对照"),
+                                    ("RADAR", "净空", "当前机组的雷达与净空读数"),
+                                    ("TOOLS", "工具", "视角、遥测、截图录制与数据")),
+            default="DEFLECTION"),
+        "wfrl_deflection_visible": bpy.props.BoolProperty(default=True, update=refresh_deflection),
+        "wfrl_deflection_blade": bpy.props.EnumProperty(items=(("1", "叶片 1", "T1 第一片"), ("2", "叶片 2", "T1 第二片"), ("3", "叶片 3", "T1 第三片")), default="1", update=refresh_deflection),
         "wfrl_selected_turbine": bpy.props.EnumProperty(items=_turbine_items, update=_update_selection),
         "wfrl_show_wake": bpy.props.BoolProperty(default=True, update=_update_layers),
         "wfrl_wake_display": bpy.props.EnumProperty(items=(("SCIENTIFIC", "Scientific", "Green diagnostic tracers"), ("CINEMATIC", "Cinematic", "Animated incoming filaments and yaw-deflected wake (SYNTH)")), default="SCIENTIFIC", update=_update_layers),

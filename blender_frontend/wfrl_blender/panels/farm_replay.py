@@ -37,6 +37,9 @@ def draw_radar(layout, scene, value):
     details = section(card, 'wfrl_farm_measurement_details', '测量详情与统计')
     if details is not None:
         details.label(text='误差 = 估计 − 真值；正值为高估')
+        if farm_flex.is_active(scene) and farm_flex._ACTIVE.tower_motion is not None:
+            details.label(text='真值：同高度的变形塔筒截面距离')
+            details.label(text='固定标定估计未补偿塔架弯曲')
         if value:
             stats = value['statistics']
             details.label(text=f"仿真时间：{value['time_s']:.2f} s")
@@ -54,51 +57,51 @@ def draw_radar(layout, scene, value):
             details.label(text='暂无有效回放数据')
 
 
-def draw(layout, context):
+def draw_playback(layout, context, value, reader):
+    """One shared clock and three transport actions, above every task page."""
     scene = context.scene
-    value = clearance_replay.sample(scene)
-    reader = clearance_replay.reader_for(scene)
     duration = reader.end_s - reader.start_s if reader else 0
-    layout.label(text=f'FAST.Farm 离线结果 · {duration:.0f} 秒')
+    playback = layout.column(align=True)
+    text, icon, state = playback_control(scene, context.screen)
+    playback.label(text=(f"仿真 {value['time_s']:.3f} s · {state}" if value else '回放数据未就绪'))
+    row = playback.row(align=True)
+    row.scale_y = 1.25
+    row.operator('wfrl.clearance_playback', text=text, icon=icon)
+    row.operator('wfrl.farm_transport', text='单步', icon='NEXT_KEYFRAME').action = 'STEP'
+    row.operator('wfrl.farm_transport', text='复位', icon='LOOP_BACK').action = 'RESET'
+    elapsed = max(0, value['time_s'] - reader.start_s) if value and reader else 0
+    playback.prop(scene, 'wfrl_clearance_progress', text=f'{elapsed:.1f} / {duration:.0f} 秒', slider=True)
 
-    views = layout.column(align=True)
-    views.label(text='观察视角')
-    row = views.row(align=True)
+
+def draw_views(layout, context):
+    scene = context.scene
+    row = layout.row(align=True)
     for tid in ('T1', 'T2', 'T3'):
         row.operator('wfrl.farm_flex_view', text=tid + ' Down').turbine = tid
-    row = views.row(align=True)
+    row = layout.row(align=True)
     op = row.operator('wfrl.farm_flex_view', text='T1 侧前方')
     op.turbine = 'T1'; op.angle = 'FRONT'
     row.operator('wfrl.farm_flex_view', text='风场全景').turbine = 'all'
-    views.prop(scene, 'wfrl_flex_show_tip_trails', text='显示叶尖轨迹')
-    views.label(text='叶片 1 橙 · 2 蓝 · 3 红')
-    more = section(layout, 'wfrl_farm_more_views', '更多视角')
-    if more is not None:
-        row = more.row(align=True)
-        row.operator('wfrl.clearance_view', text='测量区侧视').view = 'MEASUREMENT'
-        row.operator('wfrl.clearance_view', text='雷达特写').view = 'RADAR'
-        gimbal = section(more, 'wfrl_farm_gimbal', '云台控制')
-        if gimbal is not None:
-            from .gimbal import draw_gimbal_controls
-            gimbal.label(text='当前机组：' + scene.get('wfrl_clearance_turbine', 'T1'))
-            draw_gimbal_controls(gimbal, context, allow_turbine_selection=False)
+    row = layout.row(align=True)
+    row.operator('wfrl.clearance_view', text='测量区侧视').view = 'MEASUREMENT'
+    row.operator('wfrl.clearance_view', text='雷达特写').view = 'RADAR'
+    row = layout.row(align=True)
+    for view in ('Top', 'Side'):
+        row.operator('wfrl.select_camera', text=view).camera_name = 'WFRL.Camera.' + view
+    layout.prop(scene, 'wfrl_flex_show_tip_trails', text='显示叶尖轨迹')
+    layout.label(text='叶片 1 橙 · 2 蓝 · 3 红')
+    gimbal = section(layout, 'wfrl_farm_gimbal', '云台控制')
+    if gimbal is not None:
+        from .gimbal import draw_gimbal_controls
+        gimbal.label(text='当前机组：' + scene.get('wfrl_clearance_turbine', 'T1'))
+        draw_gimbal_controls(gimbal, context, allow_turbine_selection=False)
 
-    playback = layout.column(align=True)
-    text, icon, state = playback_control(scene, context.screen)
-    row = playback.row(align=True)
-    row.operator('wfrl.clearance_playback', text=text, icon=icon)
-    row.operator('wfrl.clearance_restart', text='从头重播', icon='REW')
-    row = playback.row(align=True)
-    for action, title, icon in [('STEP','单步','NEXT_KEYFRAME'),('STOP','停止','PAUSE'),('RESET','复位','LOOP_BACK')]:
-        row.operator('wfrl.farm_transport', text=title, icon=icon).action = action
-    playback.prop(scene, 'wfrl_clearance_progress', text='进度', slider=True)
-    elapsed = max(0, value['time_s'] - reader.start_s) if value and reader else 0
-    playback.label(text=f'{state} · {elapsed:04.1f} / {duration:04.1f} 秒')
-    if value:
-        motion = value['motion']
-        playback.label(text=f"{scene['wfrl_clearance_turbine']} · {motion['rotor_speed_rpm']:.2f} rpm · 偏航 {motion['yaw_deg']:.2f}°")
-    else:
-        playback.label(text='机组运动数据未就绪')
+
+def draw_tools(layout, context):
+    scene = context.scene
+    views = section(layout, 'wfrl_farm_tools_views', '机组、视角与云台')
+    if views is not None:
+        draw_views(views, context)
 
     telemetry = section(layout, 'wfrl_farm_telemetry', '三机遥测、曲线与导出')
     if telemetry is not None:
@@ -121,18 +124,16 @@ def draw(layout, context):
         telemetry.prop(scene, 'wfrl_selected_turbine', text='曲线机组')
         telemetry.operator('wfrl.export_history', text='导出已采样历史', icon='EXPORT')
         telemetry.label(text=scene.get('wfrl_history_export_status', '每通道最多 600 点'))
-    presentation = section(layout, 'wfrl_farm_presentation', '视图、环境与截图录制')
+    presentation = section(layout, 'wfrl_farm_environment', '画面与环境')
     if presentation is not None:
-        row = presentation.row(align=True)
-        for view in ('Top', 'Side'):
-            row.operator('wfrl.select_camera', text=view).camera_name = 'WFRL.Camera.' + view
-        presentation.operator('wfrl.dual_view', text='风场 + 机舱双视图')
         presentation.prop(scene, 'wfrl_show_atmosphere', text='环境显示')
         presentation.prop(scene, 'wfrl_atmosphere_preset', text='环境')
         presentation.prop(scene, 'wfrl_wake_quality', text='画面质量')
         presentation.prop(scene, 'wfrl_show_wake', text='显示尾流示意（非物理解算）')
         presentation.prop(scene, 'wfrl_wake_display', text='尾流样式')
         presentation.operator('wfrl.presentation_mode', text='演示 / 编辑界面')
+    presentation = section(layout, 'wfrl_farm_capture', '截图、录制与渲染')
+    if presentation is not None:
         presentation.prop(scene, 'wfrl_capture_directory', text='截图录制目录')
         presentation.operator('wfrl.capture_screenshot', text='保存截图')
         presentation.prop(scene, 'wfrl_capture_fps', text='录制帧率')
@@ -142,9 +143,9 @@ def draw(layout, context):
         row = presentation.row(align=True)
         row.operator('wfrl.render_still', text='渲染静帧')
         row.operator('wfrl.render_animation', text='渲染动画')
-    draw_radar(layout, scene, value)
-    data = section(layout, 'wfrl_farm_data', '数据与说明')
+    data = section(layout, 'wfrl_farm_data', '数据来源与重新加载')
     if data is not None:
+        data.label(text='FAST.Farm · 离线结果 · REVIEW_ONLY')
         data.label(text='三机随机阵风 · 九片叶片独立形变')
         data.label(text='MAPPO 控制偏航；基线负责转矩、变桨')
         data.label(text='轨迹为形变网格叶尖位置，非相机测量')
@@ -152,12 +153,40 @@ def draw(layout, context):
         data.label(text='B2 手册简化估算 · 理想测距')
         data.label(text='光束为示意，不作安全判定')
         data.label(text='开发验收包 · 数值细化待验证')
+        data.operator('wfrl.load_demo', text='重新加载 MAPPO · 60 秒', icon='FILE_REFRESH')
+        data.operator('wfrl.clearance_restart', text='从头重播', icon='REW')
         path = data.column(); path.enabled = False
         path.prop(scene, '["wfrl_farm_flex_path"]', text='数据目录')
 
 
+def draw(layout, context):
+    scene = context.scene
+    value = clearance_replay.sample(scene)
+    reader = clearance_replay.reader_for(scene)
+    layout.use_property_decorate = False
+    draw_playback(layout, context, value, reader)
+    tabs = layout.row(align=True)
+    tabs.scale_y = 1.25
+    tabs.prop(scene, 'wfrl_farm_panel_page', expand=True)
+    if scene.wfrl_farm_panel_page == 'DEFLECTION':
+        from ..deflection import draw_panel
+        draw_panel(layout, scene)
+    elif scene.wfrl_farm_panel_page == 'RADAR':
+        views = layout.row(align=True)
+        for tid in ('T1', 'T2', 'T3'):
+            views.operator('wfrl.farm_flex_view', text=tid + ' Down').turbine = tid
+        draw_radar(layout, scene, value)
+    else:
+        draw_tools(layout, context)
+
+
 def build_review_cameras(scene):
     from mathutils import Vector
+    tip = bpy.data.objects.new('WFRL.Camera.T1.TipComparison', bpy.data.cameras.new('T1TipComparison'))
+    bpy.data.collections['WFRL_Scene'].objects.link(tip)
+    tip.data.type = 'ORTHO'; tip.data.ortho_scale = 28
+    tip.data.clip_start = .1; tip.data.clip_end = 3000
+    tip.data.show_passepartout = False
     camera=bpy.data.objects.new('WFRL.Camera.FarmFlexOverview',bpy.data.cameras.new('FarmFlexOverview'))
     bpy.data.collections['WFRL_Scene'].objects.link(camera)
     camera.location=(-450,-1250,520)
@@ -248,10 +277,10 @@ class WFRL_PT_FarmFlex(bpy.types.Panel):
         return True
 
     def draw(self,context):
-        self.layout.operator('wfrl.load_demo', icon='FILE_REFRESH')
         if farm_flex.is_active(context.scene):
             draw(self.layout,context)
         else:
+            self.layout.operator('wfrl.load_demo', icon='FILE_REFRESH')
             self.layout.label(text=context.scene.get('wfrl_clearance_status', '完整离线演示 · 无需后端'), icon='INFO')
 
 
@@ -278,4 +307,30 @@ class WFRL_OT_FarmTransport(bpy.types.Operator):
         return {'FINISHED'}
 
 
-CLASSES = (WFRL_OT_FarmFlexView, WFRL_OT_FarmTransport, WFRL_PT_FarmFlex)
+class WFRL_OT_DeflectionView(bpy.types.Operator):
+    bl_idname = 'wfrl.deflection_view'
+    bl_label = 'T1 叶尖对照特写'
+
+    @classmethod
+    def poll(cls, context):
+        return farm_flex.is_active(context.scene) and farm_flex._ACTIVE.comparison is not None
+
+    def execute(self, context):
+        from ..cameras import fill_camera_view
+        bpy.ops.wfrl.farm_flex_view(turbine='T1', angle='FRONT')
+        scene = context.scene
+        scene.camera = scene.objects['WFRL.Camera.T1.TipComparison']
+        scene['wfrl_camera'] = scene.camera.name
+        scene.wfrl_deflection_visible = True
+        farm_flex._ACTIVE.update(scene)
+        for screen in bpy.data.screens:
+            for area in screen.areas:
+                if area.type == 'VIEW_3D':
+                    area.spaces.active.use_local_camera = False
+                    area.spaces.active.camera = scene.camera
+                    area.spaces.active.region_3d.view_perspective = 'CAMERA'
+                    fill_camera_view(area, scene)
+        return {'FINISHED'}
+
+
+CLASSES = (WFRL_OT_FarmFlexView, WFRL_OT_FarmTransport, WFRL_OT_DeflectionView, WFRL_PT_FarmFlex)

@@ -99,43 +99,5 @@ class WFRL_OT_RenderAnimation(bpy.types.Operator):
         return {"FINISHED"}
 
 
-class WFRL_OT_DualView(DemoLoaded, bpy.types.Operator):
-    bl_idname = "wfrl.dual_view"
-    bl_label = "World + Nacelle View"
-    bl_description = "Split the WFRL workspace into world and geometric nacelle views"
-
-    def execute(self, context):
-        if bpy.app.background:
-            return {'CANCELLED'}
-        screen = context.screen
-        if screen.show_fullscreen:
-            bpy.ops.screen.screen_full_area(use_hide_panels=False)
-            screen = context.window.screen
-        existing = [a for a in screen.areas if a.type == 'VIEW_3D' and a.spaces.active.use_local_camera]
-        if existing and len([a for a in screen.areas if a.type == 'VIEW_3D']) >= 2:
-            return {'FINISHED'}
-        area = max((a for a in screen.areas if a.type == 'VIEW_3D'), key=lambda a:a.width*a.height)
-        before = {a.as_pointer() for a in screen.areas}
-        with context.temp_override(area=area):
-            bpy.ops.screen.area_split(direction='VERTICAL', factor=.62)
-        created = next(a for a in screen.areas if a.as_pointer() not in before)
-        views = sorted((area,created), key=lambda a:a.x)
-        left, right = views[0].spaces.active, views[1].spaces.active
-        from .. import farm_flex
-        if farm_flex.is_active(context.scene):
-            bpy.ops.wfrl.farm_flex_view(turbine='all')
-        context.scene.camera = bpy.data.objects.get('WFRL.Camera.FarmFlexOverview') or bpy.data.objects['WFRL.Camera.World']
-        left.use_local_camera = False
-        left.region_3d.view_perspective = 'CAMERA'
-        right.use_local_camera = True
-        right.camera = bpy.data.objects['WFRL.Camera.T1.Sensor']
-        right.show_region_ui = False
-        right.region_3d.view_perspective = 'CAMERA'
-        right.region_3d.view_camera_zoom = 0
-        right.region_3d.view_camera_offset = (0,0)
-        context.scene['wfrl_dual_layout'] = True
-        return {'FINISHED'}
-
-
 CLASSES = (WFRL_OT_LoadDemo, WFRL_OT_SelectCamera, WFRL_OT_RenderStill,
-           WFRL_OT_RenderAnimation, WFRL_OT_DualView)
+           WFRL_OT_RenderAnimation)

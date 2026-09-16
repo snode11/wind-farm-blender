@@ -51,12 +51,22 @@ def _payloads() -> list[tuple[str, bytes]]:
     return sorted(payloads)
 
 
-def build(output_dir: Path = DIST) -> BuildResult:
+def build(output_dir: Path = DIST, *, farm_package: Path | None = None) -> BuildResult:
     manifest = tomllib.loads((PACKAGE_SOURCE / "blender_manifest.toml").read_text(encoding="utf-8"))
     package_id, version = manifest["id"], manifest["version"]
     output_dir.mkdir(parents=True, exist_ok=True)
     archive = output_dir / f"{package_id}-{version}.zip"
     payloads = _payloads()
+    if farm_package is not None:
+        farm_package = Path(farm_package)
+        data_manifest = json.loads((farm_package/'manifest.json').read_text())
+        for name,digest in data_manifest['files'].items():
+            if hashlib.sha256((farm_package/name).read_bytes()).hexdigest()!=digest:
+                raise ValueError('Farm package integrity mismatch: '+name)
+        payloads = [(name,data) for name,data in payloads if not name.startswith('assets/mappo/')]
+        payloads += [('assets/mappo/'+name,(farm_package/name).read_bytes())
+                     for name in sorted(set(data_manifest['files']) | {'manifest.json'})]
+        payloads.sort()
     with ZipFile(archive, "w", ZIP_DEFLATED, compresslevel=9) as zipped:
         for name, data in payloads:
             info = ZipInfo(name, ZIP_TIMESTAMP)

@@ -1,8 +1,15 @@
-# WFRL Blender 前端 · 0.3.0
+# WFRL Blender 前端实现 · 0.3.1
 
-当前扩展版本为 **0.3.0**，要求 **Blender 5.2+**。默认 Demo 为内置完整数据的 **三机 MAPPO 60 秒离线回放**，入口为 **N 侧栏 → MAPPO → 三机 MAPPO 回放**。本文面向维护前端的开发人员；用户操作见 [用户使用手册](../docs/blender/用户使用手册.md)，短流程见 [MAPPO 演示说明](../docs/blender/MAPPO演示.md)。
+当前正式版本为 **0.3.1**，要求 **Blender 5.2+**。默认 Demo 是内置 v2 塔架柔性数据的三机 MAPPO 60 秒离线回放。Windows 与 macOS 共用同一个 [安装 ZIP](../dist/wfrl_blender-0.3.1.zip)。用户先看[前端总览](../前端readme.md)及[操作手册](../docs/blender/用户使用手册.md)；本文保留建模、数据合同与维护说明。
 
-当前 [安装 ZIP](../dist/wfrl_blender-0.3.0.zip)、便携运行时和本机安装扩展已做一致性检查。项目启动器与 Bridge 的后续修复位于仓库中，未改变该 ZIP；仅分发扩展 ZIP 不包含项目侧修复。安装资源见 [交付说明](../dist/README-lidar.md)，实际验证范围见 [0.3.0 发送前检查](../docs/blender/0.3.0发送前检查.md)。
+本地 0.3.2–0.3.5 是开发阶段标记，已汇总到正式 0.3.1。默认资源已切到同源柔性塔架包，旧 v1 读取兼容仍保留。当前发布检查见 [0.3.1 发布核对](../docs/blender/0.3.1发布核对.md)，不要将旧安装版、便携目录或历史检查视为当前 ZIP 的验证。
+
+## 0.3.1 的主要结构
+
+- `panels/farm_replay.py`：顶部共享播放、单步、复位、进度；下方“挠度 / 净空 / 工具”。切页不改时钟或相机，双视图入口已移除。
+- `deflection.py`：T1 三叶片独立参考、实际结构叶尖、分量投影及仿真输出比较。参考包含同刻塔顶刚体运动，轴向没有源输出时只展示坐标差。
+- `tower_motion.py`：读取并校验 v2 塔架截面与机舱变换，插值运动；`farm_flex.py` 同步塔筒网格、叶片、机舱及雷达挂载。
+- `assets/mappo/`：包含全部离线数据，无需求解器、Bridge 或项目路径。`build_extension.py` 支持传入指定物理包并校验摘要，默认打包当前内置 v2 资源。
 
 ## 启动与模式切换
 
@@ -143,10 +150,13 @@ origin + 0.95 × TipRad × normalize(direction)
 
 | 文件 | 作用 |
 | --- | --- |
-| `manifest.json` | `wfrl.farm-flex-review.v1`、REVIEW_ONLY、布局、片段范围及文件 SHA-256 |
+| `manifest.json` | `wfrl.farm-flex-review.v2`（兼容读取 v1）、REVIEW_ONLY、布局、片段范围及文件 SHA-256 |
 | `geometry.npz` | 时刻、三机姿态和九片叶片各 19 个站点的形变变换 |
 | `data.json` | 三台机组各自的运动记录、B2 测距、净空估计／真值与统计输入 |
 | `telemetry.json` | 同次 OpenFAST 保存输出中的功率、转矩、叶根载荷等通道，含单位、源通道与文件摘要 |
+| `tower-motion.npz` | 塔筒截面位置/朝向与机舱变换，共享时间轴；用于塔架及挂载运动 |
+| `deflection-t1.json` | 同源 T1 结构叶尖面外/面内输出、高精度姿态与塔顶参考变换 |
+| `source-run.json` | 本次运行来源、控制器和原始输出摘要 |
 | `source-surfaces.json` | 生成形变数据所用的原始表面证据索引 |
 
 `read_package()` 校验格式、机组列表、文件哈希、数组维度、有限值、时间轴和运动一致性；遥测还要与几何摘要及时间轴匹配。不能在校验失败时改用假数据。原始 VTP 不需要随播放器分发；生成新结果与日常播放是不同流程。
@@ -155,9 +165,17 @@ origin + 0.95 × TipRad × normalize(direction)
 
 [tip_tracking.py](wfrl_blender/tip_tracking.py) 从变形网格的叶尖位置记录轨迹，B1/B2/B3 分别为橙／蓝／红，最多 540 点。它不是相机测量；同机切镜头保留轨迹，换机、寻址、重播时重置。
 
+### 5.1.1 塔架、叶片参考与净空
+
+v2 包将三机塔筒前后/侧向两阶弯曲的同源结果接入播放；塔底保持固定，机舱、叶轮及雷达安装随塔顶平移和转动。展示保持真实尺度，未放大摇晃幅度。叶片刚性参考含同刻塔顶整体变换，实际结构叶尖从变形网格参考顶点取得，二者之差投影到面外/面内/轴向基。
+
+`deflection-t1.json` 的源输出不用于移动实际点或参考点，只用于对照。面外/面内显示仿真值、坐标差（m）及残差（mm）；轴向没有对应源输出。保存帧和插值帧分别标记；缺少 sidecar 显示不可核对，摘要或时间轴损坏拒绝加载。
+
+净空真值采用叶尖参考点到同高度变形塔筒截面的距离，遮挡检查使用移动塔架几何；B2 固定标定估计没有补偿塔架弯曲。塔筒尚无专用虚影或位移卡片。
+
 ### 5.2 统一侧栏与固定时间轴
 
-[panels/farm_replay.py](wfrl_blender/panels/farm_replay.py) 是 MAPPO 统一入口，包含 Down／侧前方／全景、播放控制、雷达卡片，以及折叠的云台、遥测、环境、截图录制和数据说明。该模式隐藏重复 Camera 面板；其他模式保留 [panels/gimbal.py](wfrl_blender/panels/gimbal.py) 与 [panels/clearance.py](wfrl_blender/panels/clearance.py)。
+[panels/farm_replay.py](wfrl_blender/panels/farm_replay.py) 是 MAPPO 统一入口，顶部共享播放控制；挠度页放 T1 叶片选择、叶尖/叶轮/Down、虚影/分量和数值表；净空页放机组 Down 与 B2 卡片；工具页放视角、云台、遥测、环境、截图录制和重新加载。该模式隐藏重复 Camera 面板；其他模式保留 [panels/gimbal.py](wfrl_blender/panels/gimbal.py) 与 [panels/clearance.py](wfrl_blender/panels/clearance.py)。
 
 时间读取复用 [clearance_replay.py](wfrl_blender/clearance_replay.py) 与结果包的 ReplayReader：
 
@@ -242,4 +260,4 @@ python3 scripts/blender/build_extension.py
 
 2026-09-16 已完成的发送前检查包括：151 项前端与数据宿主测试；隔离 ZIP 和便携回放回归；54 项后端相关测试及 27 个子检查；已安装扩展的真实 FAST.Farm 短测（暂停、单步、立即重连、继续、停止、复位）；原命令的实际窗口模式切换。ZIP／安装版的 68 个文件及便携 inventory 的 87 项均已核对。
 
-后端测试子集明确排除了依赖已清理原始 VTP 的旧单机测试文件；完整后台测试曾有 3 项因此失败，未计为通过。尚未验收 Windows、长时训练、稳定 60 FPS、全部录制／渲染输出、数值收敛或现场精度。完整日志与运行条件见 [发送前检查](../docs/blender/0.3.0发送前检查.md)。本轮为文档同步，未新增物理运行或重建发行包。
+后端测试子集明确排除了依赖已清理原始 VTP 的旧单机测试文件；完整后台测试曾有 3 项因此失败，未计为通过。尚未验收 Windows、长时训练、稳定 60 FPS、全部录制／渲染输出、数值收敛或现场精度。完整日志与运行条件见 [发送前检查](../docs/blender/0.3.0发送前检查.md)。以上为历史 0.3.0 验证范围。本次 0.3.1 使用新数据重建 ZIP，实际验证单列于 [0.3.1 发布核对](../docs/blender/0.3.1发布核对.md)。

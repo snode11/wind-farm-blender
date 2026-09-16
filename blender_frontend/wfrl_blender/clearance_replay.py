@@ -121,15 +121,17 @@ def update(scene, depsgraph=None):
     prefix = f'WFRL.Turbine.{tid}'
     yaw = scene.objects.get(prefix + '.YawRoot')
     rotor = scene.objects.get(prefix + '.Rotor')
-    if 'nacelle_position_m' in motion:
-        from mathutils import Vector
-        yaw.location = Vector(motion['nacelle_position_m']) - yaw.parent.location
-    yaw.rotation_euler.z = math.radians(motion['yaw_deg'])
-    rotor.rotation_euler.x = math.radians(motion['azimuth_deg'])
-    for index, pitch in enumerate(motion['pitch_deg'], 1):
-        blade = scene.objects.get(prefix + f'.Blade{index}')
-        if blade:
-            blade.rotation_euler.z = math.radians(pitch)
+    from . import farm_flex
+    if not farm_flex.is_active(scene):
+        if 'nacelle_position_m' in motion:
+            from mathutils import Vector
+            yaw.location = Vector(motion['nacelle_position_m']) - yaw.parent.location
+        yaw.rotation_euler.z = math.radians(motion['yaw_deg'])
+        rotor.rotation_euler.x = math.radians(motion['azimuth_deg'])
+        for index, pitch in enumerate(motion['pitch_deg'], 1):
+            blade = scene.objects.get(prefix + f'.Blade{index}')
+            if blade:
+                blade.rotation_euler.z = math.radians(pitch)
     scene['wfrl_clearance_time_s'] = value['time_s']
     if scene.frame_current >= scene.frame_end:
         import bpy

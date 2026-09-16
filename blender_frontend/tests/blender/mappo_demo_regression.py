@@ -69,16 +69,25 @@ class Layout:
         self.ops.append(name)
         return SimpleNamespace()
 layout=Layout()
-farm_replay.draw(layout,bpy.context)
+for page in ('DEFLECTION', 'RADAR', 'TOOLS'):
+    stamp = clearance_replay.sample(scene)['time_s']
+    camera = scene.camera
+    scene.wfrl_farm_panel_page = page
+    farm_replay.draw(layout,bpy.context)
+    assert clearance_replay.sample(scene)['time_s'] == stamp
+    assert scene.camera == camera
+scene.wfrl_farm_panel_page = 'DEFLECTION'
 assert 'wfrl.export_history' in layout.ops and 'wfrl.capture_recording' in layout.ops
 with tempfile.TemporaryDirectory() as directory:
     path=Path(directory)/'replay.blend'
     scene.frame_set(501)
+    scene.wfrl_farm_panel_page = 'RADAR'
     bpy.ops.wm.save_as_mainfile(filepath=str(path))
     bpy.ops.wm.open_mainfile(filepath=str(path))
     scene=bpy.context.scene
     assert farm_flex.is_active(scene)
     assert scene.frame_current == 501
+    assert scene.wfrl_farm_panel_page == 'RADAR'
     assert runtime.get_state().connection == 'OFFLINE RESULTS'
     assert bpy.ops.wfrl.farm_flex_view(turbine='T3') == {'FINISHED'}
     # Missing packages clear the old reader and recover via the bundled demo.

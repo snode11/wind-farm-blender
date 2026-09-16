@@ -1,5 +1,5 @@
 {
-  "schema": "wfrl.farm-flex-review.v1",
+  "schema": "wfrl.farm-flex-review.v2",
   "status": "REVIEW_ONLY",
   "source": "FAST.Farm",
   "segment": {
@@ -31,7 +31,7 @@
   "source_fps": 40,
   "reference_frame": 0,
   "includes_rigid_motion": true,
-  "max_surface_fit_error_m": 1.7150852529152437e-05,
+  "max_surface_fit_error_m": 1.6968027700580972e-05,
   "discrete_collision_certificates": 21609,
   "replay": {
     "threshold_m": 7.0,
@@ -94,7 +94,7 @@
         -0.983127443563683
       ]
     ],
-    "frame": "nacelle yaw-local; rigid tower; translated separately for each turbine"
+    "frame": "nacelle material frame at rest; transported by solver NacelleSurface rotation and translation"
   },
   "validation": "discrete surfaces only; no temporal/span refinement certification",
   "diagnostic_only": false,
@@ -102,64 +102,62 @@
     {
       "turbine_id": "T1",
       "rpm_range": [
-        10.5842409,
-        11.947526
+        10.5607738,
+        11.9743328
       ],
       "pitch_deg_range": [
-        2.48517799,
-        9.84589863
+        2.47576737,
+        9.89420986
       ],
-      "yaw_deg_range": [
-        -0.22656022,
-        2.48797274
-      ],
-      "pitch_tolerance_deg": 0.05,
+      "final_actual_yaw_deg": 2.49016595,
       "finite": true,
+      "pitch_tolerance_deg": 0.05,
       "passed": true
     },
     {
       "turbine_id": "T2",
       "rpm_range": [
-        10.2530022,
-        11.4231663
+        10.2626657,
+        11.4329519
       ],
       "pitch_deg_range": [
-        -0.013408402,
-        7.03887081
+        -3.86755419e-11,
+        7.07306528
       ],
-      "yaw_deg_range": [
-        -4.42561102,
-        0.452192277
-      ],
-      "pitch_tolerance_deg": 0.05,
+      "final_actual_yaw_deg": -4.41519117,
       "finite": true,
+      "pitch_tolerance_deg": 0.05,
       "passed": true
     },
     {
       "turbine_id": "T3",
       "rpm_range": [
-        8.52700901,
-        10.7645407
+        8.54428768,
+        10.8348141
       ],
       "pitch_deg_range": [
         0.0,
         0.0
       ],
-      "yaw_deg_range": [
-        -0.00501911482,
-        3.3269887
-      ],
-      "pitch_tolerance_deg": 0.05,
+      "final_actual_yaw_deg": 1.37632453,
       "finite": true,
+      "pitch_tolerance_deg": 0.05,
       "passed": true
     }
   ],
   "files": {
-    "geometry.npz": "c15893b511d35456d8afd671b828509b5e8b84ddae9e6649a9d8ebeb56b6c76c",
-    "data.json": "6ea15dde0bac9e53e5af4d581c668e832060d4003f7f68d376bbec3ceb8b4577",
-    "source-surfaces.json": "6bab7c22075490011de9daaf262dae2437c07afcb69711f1b4de03480f84e3aa",
-    "telemetry.json": "340f5fa818f726a30c6bad77e3addd0f1579f196afcc9ab54a1060f492a2e965"
+    "geometry.npz": "aecf00bf697eb205974816e7bd2ee4c4adc1083cce4fbcf26e03afde943880f0",
+    "data.json": "7e6e87f97be22013b57502bb4dbe6b6e9c857c085494dfac9aadcdc81f01e4d3",
+    "source-surfaces.json": "e98c04a58c0976abb2e40273bce082c2783da418e91db7298aec8e016885498b",
+    "tower-motion.npz": "e71fc532b943903a64bd7c3575d4b37d7b6e4ccd150e5a0e1a19a225d6a16b06",
+    "telemetry.json": "95d3bd495ffe55d31fc10e62c3f061c7fb640b47cfd9717bb72caad3e6e57f9e",
+    "deflection-t1.json": "426da9028d514b4ab49049df090be3b69d43be43e1696a98d3a2ac994cc493d8",
+    "source-run.json": "632b779d582381260c30a97b15ed18a13c704c8a4e44d6ab86689d28461b29e6"
   },
+  "tower_model": "elastodyn-flexible",
+  "max_support_fit_error_m": 1.4948111468327303e-05,
+  "clearance_definition": "Tip section centroid to same-global-height horizontal section of solver triangulated moving tower; not whole-blade minimum",
+  "estimator_boundary": "Fixed calibrated slant-range formula retained; tower bending is NOT compensated in the estimate; error is against moving-tower truth",
   "wind_profile": {
     "kind": "TurbSim_IECKAI_plus_seeded_gusts",
     "mean_wind_mps": 11.0,

@@ -11,6 +11,7 @@ import sys
 import tempfile
 import unittest
 import zipfile
+import tomllib
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILDER_PATH = ROOT / "scripts" / "blender" / "build_extension.py"
@@ -36,15 +37,17 @@ class PackageTests(unittest.TestCase):
             inventory = json.loads(first.inventory.read_text(encoding="utf-8"))
             self.assertEqual(inventory["archive_sha256"], first.sha256)
             self.assertEqual(inventory["package_id"], "wfrl_blender")
-            self.assertEqual(inventory["version"], "0.3.0")
+            self.assertEqual(inventory["version"], tomllib.loads((builder.PACKAGE_SOURCE / "blender_manifest.toml").read_text())["version"])
             with zipfile.ZipFile(first.archive) as zipped:
                 names = zipped.namelist()
                 self.assertEqual(names, sorted(names))
                 self.assertIn("blender_manifest.toml", names)
                 self.assertIn("protocol.py", names)
-                for name in ('manifest.json', 'data.json', 'geometry.npz', 'source-surfaces.json'):
+                for name in ('manifest.json', 'data.json', 'geometry.npz', 'source-surfaces.json', 'tower-motion.npz', 'deflection-t1.json', 'source-run.json'):
                     self.assertIn('assets/mappo/' + name, names)
                 manifest = json.loads(zipped.read('assets/mappo/manifest.json'))
+                self.assertEqual(manifest['schema'], 'wfrl.farm-flex-review.v2')
+                self.assertEqual(manifest['tower_model'], 'elastodyn-flexible')
                 self.assertEqual(manifest['segment']['end_s'] - manifest['segment']['start_s'], 60)
                 for name, digest in manifest['files'].items():
                     self.assertEqual(hashlib.sha256(zipped.read('assets/mappo/' + name)).hexdigest(), digest)
