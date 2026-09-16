@@ -1,10 +1,9 @@
-"""WFRL Blender: deterministic offline presentation, explicitly SYNTH."""
+"""WFRL Blender: recorded MAPPO demonstration and backend tools."""
 from __future__ import annotations
 
 from .cameras import build_cameras
 from .scene_builder import build_scene
 from .scene_model import SceneDTO
-from .state import END_FRAME, apply_demo_state, demo_keyframes, sample_demo, time_for_frame
 from .workspace import ensure_workspace
 from . import atmosphere, cameras, wake
 
@@ -22,7 +21,7 @@ def _cancel_playback():
 def _update_layers(scene, context=None):
     from . import cinematic
     cinematic.set_visibility(scene)
-    wake.update_proxy_objects(scene, phase=float(scene.get("wfrl_proxy_phase", 0.0)) if scene.get("wfrl_scene_kind") == "live" else time_for_frame(scene.frame_current) * .9)
+    wake.update_proxy_objects(scene, phase=float(scene.get("wfrl_proxy_phase", 0.0)) if scene.get("wfrl_scene_kind") == "live" else float(scene.get('wfrl_clearance_time_s', 0.0)) * .9)
     for obj in scene.objects:
         visible = None
         if obj.name.startswith("WFRL.WakeProxy."):
@@ -86,70 +85,23 @@ def _update_manual(scene, context=None):
 
 
 def _update_demo_status(scene, depsgraph=None):
-    """Frame-aligned telemetry and pose; lifecycle stays paused during scrubbing."""
-    from . import runtime
-    # Selecting Demo after loading a YAML scene must still drive the visible
-    # turbine pose. Older scenes do not carry wfrl_scene_kind=demo, although
-    # their turbine object names and transforms are fully compatible. Keep the
-    # explicit live-scene guard so a stale LOCAL DEMO state cannot overwrite a
-    # connected scene's transforms during reconnect/reload.
-    if (runtime.get_state().connection != "LOCAL DEMO"
-            or scene.get("wfrl_scene_kind") in {"live", "clearance_replay"}):
-        return
-    if not scene.objects.get("WFRL.Turbine.T1.Rotor"):
-        return
-    sample = sample_demo(time_for_frame(scene.frame_current))
-    status = scene.get("wfrl_run_status", "READY")
-    if status in {"STARTING", "RUNNING"}:
-        scene["wfrl_run_status"] = str(sample.status)
-        if scene.frame_current >= END_FRAME:
-            import bpy
-            if not bpy.app.background and not bpy.app.timers.is_registered(_cancel_playback):
-                bpy.app.timers.register(_cancel_playback, first_interval=0.0)
-    yaw, pitch, rpm = list(sample.yaw_deg), list(sample.pitch_deg), list(sample.rpm)
-    manual = getattr(scene, "wfrl_manual_enabled", False) and scene.get("wfrl_run_status") == "PAUSED"
-    if manual and scene.wfrl_selected_turbine in ("T1", "T2", "T3"):
-        index = ("T1", "T2", "T3").index(scene.wfrl_selected_turbine)
-        yaw[index], pitch[index], rpm[index] = scene.wfrl_manual_yaw, scene.wfrl_manual_pitch, 0.0
-    apply_demo_state(yaw, pitch, rpm, sample.rotor_rad)
-    wake.update_proxy_objects(scene, phase=sample.time_s * 0.9)
-    scene["wfrl_demo_time_s"] = sample.time_s
-    scene["wfrl_demo_phase"] = "Manual pose (paused)" if manual else sample.label
-    if getattr(scene, "wfrl_channel_telemetry", True):
-        scene["wfrl_yaw_deg"] = yaw
-        scene["wfrl_pitch_deg"] = pitch
-        scene["wfrl_rpm"] = rpm
-        # Manual pose is not a power model: power is unavailable in that mode.
-        scene["wfrl_power_mw"] = list(sample.power_mw)
-        scene["wfrl_power_available"] = not manual
-        scene["wfrl_telemetry_time_s"] = sample.time_s
-    from . import charts
-    charts.record_demo(sample, manual=manual)
-    scene["wfrl_fidelity"] = "SYNTH"
-    scene["wfrl_backend"] = "demo"
-    scene["wfrl_wind_speed_mps"] = 8.0
+    # Selection callbacks refresh charts without introducing a second clock.
+    from . import farm_flex
+    if farm_flex.is_active(scene):
+        farm_flex._ACTIVE.record_telemetry(scene)
 
 
 def _on_load(_unused):
     import bpy
     from .scene_builder import refresh_saved_surface_style
-    for scene in bpy.data.scenes:
-        refresh_saved_surface_style(scene)
-    for camera in bpy.data.cameras:
-        camera.show_passepartout = False
-        camera.passepartout_alpha = 0
     from . import runtime
-    if any(scene.get("wfrl_scene_kind") == "live" for scene in bpy.data.scenes):
+    for scene in bpy.data.scenes:
+        if scene.objects:
+            refresh_saved_surface_style(scene)
+    if any(scene.get('wfrl_scene_kind') == 'live' for scene in bpy.data.scenes):
         runtime.disconnect(force=True)
     else:
         runtime.enter_local_demo()
-    for scene in bpy.data.scenes:
-        if (scene.get("wfrl_scene_kind") in {None, "demo"}
-                and scene.objects.get("WFRL.Turbine.T1.Rotor")):
-            scene["wfrl_scene_kind"] = "demo"
-            scene["wfrl_run_status"] = "STOPPED" if scene.frame_current >= END_FRAME else ("READY" if scene.frame_current == 1 else "PAUSED")
-            _update_layers(scene)
-            _update_demo_status(scene)
 
 
 def _classes():
@@ -161,10 +113,10 @@ def _classes():
     from .operators.history_export import CLASSES as HISTORY_EXPORT_CLASSES
     from .panels.telemetry import CLASSES as TELEMETRY_CLASSES
     from .operators.workflow import CLASSES as WORKFLOW_CLASSES
-    from .panels import scene, channels, run, safety, presentation, training, gimbal, clearance
+    from .panels import scene, channels, run, safety, presentation, training, gimbal, clearance, farm_replay
     return (PREFERENCE_CLASSES + CLASSES + CONNECTION_CLASSES + RUN_CLASSES + STATUS_CLASSES + TELEMETRY_CLASSES
             + WORKFLOW_CLASSES + HISTORY_EXPORT_CLASSES + scene.CLASSES + channels.CLASSES + run.CLASSES
-            + safety.CLASSES + presentation.CLASSES + training.CLASSES + gimbal.CLASSES + clearance.CLASSES)
+            + safety.CLASSES + presentation.CLASSES + training.CLASSES + gimbal.CLASSES + clearance.CLASSES + farm_replay.CLASSES)
 
 
 def register():
@@ -180,7 +132,6 @@ def register():
             bpy.utils.register_class(cls)
     definitions = {
         "wfrl_selected_turbine": bpy.props.EnumProperty(items=_turbine_items, update=_update_selection),
-        "wfrl_fixture_state": bpy.props.EnumProperty(items=(("NOMINAL", "Nominal", ""), ("WAITING", "Waiting", ""), ("CHANNEL_OFF", "Channel Off", ""), ("STALE", "Stale Data", ""), ("INCOMPATIBLE", "Bad Checkpoint", ""), ("FAILED", "Failed", "")), default="NOMINAL"),
         "wfrl_show_wake": bpy.props.BoolProperty(default=True, update=_update_layers),
         "wfrl_wake_display": bpy.props.EnumProperty(items=(("SCIENTIFIC", "Scientific", "Green diagnostic tracers"), ("CINEMATIC", "Cinematic", "Animated incoming filaments and yaw-deflected wake (SYNTH)")), default="SCIENTIFIC", update=_update_layers),
         "wfrl_cinematic_wind_mode": bpy.props.EnumProperty(name="Wind mode", items=(("FRONT", "Front / 迎风", "Shared wind follows the reference turbine's heading plus a manual offset"), ("RANDOM", "360° random / 随机", "Shared, repeatable wind headings with smooth transitions")), default="FRONT", update=_update_layers),
@@ -204,14 +155,11 @@ def register():
             items=tuple((name, name.rsplit(".", 1)[-1], "WFRL camera") for name in cameras.camera_view_names()),
             default="WFRL.Camera.World", update=_update_camera_view),
         "wfrl_channel_telemetry": bpy.props.BoolProperty(default=True, update=_update_manual),
-        "wfrl_manual_enabled": bpy.props.BoolProperty(default=False, update=_update_manual),
-        "wfrl_manual_yaw": bpy.props.FloatProperty(default=0, min=-30, max=30, update=_update_manual),
-        "wfrl_manual_pitch": bpy.props.FloatProperty(default=2, min=0, max=90, update=_update_manual),
     }
     for name, prop in definitions.items():
         if not hasattr(bpy.types.Scene, name):
             setattr(bpy.types.Scene, name, prop)
-    for handlers, function in ((bpy.app.handlers.frame_change_post, _update_demo_status), (bpy.app.handlers.load_post, _on_load)):
+    for handlers, function in ((bpy.app.handlers.load_post, _on_load),):
         persistent(function)
         if function not in handlers:
             handlers.append(function)
@@ -234,8 +182,7 @@ def register():
     charts.register()
     runtime.register()
     registered_classes = _classes()
-    registered_handlers = ((bpy.app.handlers.frame_change_post, _update_demo_status),
-                           (bpy.app.handlers.load_post, _on_load))
+    registered_handlers = ((bpy.app.handlers.load_post, _on_load),)
     registered_properties = tuple(definitions)
     from .presentation import unregister_overlay
     from .operators.history_export import unregister_timer as history_export_cleanup
@@ -280,7 +227,7 @@ def unregister():
     _cancel_playback()
     if bpy.app.timers.is_registered(_cancel_playback):
         bpy.app.timers.unregister(_cancel_playback)
-    for handlers, function in ((bpy.app.handlers.frame_change_post, _update_demo_status), (bpy.app.handlers.load_post, _on_load)):
+    for handlers, function in ((bpy.app.handlers.load_post, _on_load),):
         if function in handlers:
             handlers.remove(function)
     for cls in reversed(_classes()):
@@ -291,28 +238,50 @@ def unregister():
             delattr(bpy.types.Scene, name)
 
 
-def load_demo_scene():
+def build_demo_geometry():
+    """Shared three-turbine geometry, without animation or fabricated telemetry."""
     import bpy
-    from . import runtime
-    if not runtime.configuration_editable():
-        raise ValueError("Stop the active session before rebuilding the Demo")
-    runtime.select_mode('demo')
-    _cancel_playback()
-    dto = SceneDTO.from_mapping({"name": "turb3_demo", "backend": "demo", "turbine": "nrel5mw", "dt": 1,
+    dto = SceneDTO.from_mapping({"name": "mappo_60s", "backend": "demo", "turbine": "nrel5mw", "dt": 1,
         "layout": [{"id": "T1", "x": 0.0, "y": 0.0}, {"id": "T2", "x": 504.0, "y": 0.0}, {"id": "T3", "x": 1008.0, "y": 0.0}],
         "inflow": {"speed": 8.0, "direction": 270.0}})
     collection = build_scene(dto)
     build_cameras(dto)
     scene = bpy.context.scene
-    scene["wfrl_scene_kind"] = "demo"
-    scene["wfrl_run_status"] = "READY"
-    atmosphere.apply_preset(scene, "clear", enabled=True, quality="realtime")
-    scene.wfrl_manual_enabled = False
-    demo_keyframes(collection)
+    scene['wfrl_scene_kind'] = 'clearance_replay'
+    scene['wfrl_run_status'] = 'READY'
+    atmosphere.apply_preset(scene, 'clear', enabled=True, quality='realtime')
+    scene.wfrl_show_wake = False
     _update_layers(scene)
-    _update_demo_status(scene)
     from .workspace import configure_presentation
     configure_presentation()
+    return collection
+
+
+def load_demo_scene(path=None):
+    import bpy
+    from . import runtime, farm_flex
+    if not runtime.configuration_editable():
+        raise ValueError('Stop the active backend before loading MAPPO')
+    _cancel_playback()
+    runtime.enter_result_replay()
+    collection = build_demo_geometry()
+    scene = bpy.context.scene
+    try:
+        farm_flex.attach(scene, path or farm_flex.default_package())
+        from .panels.farm_replay import build_review_cameras
+        build_review_cameras(scene)
+        scene.wfrl_flex_show_tip_trails = True
+        bpy.ops.wfrl.farm_flex_view(turbine='T1')
+        scene.frame_set(1)
+        for screen in bpy.data.screens:
+            for area in screen.areas:
+                if area.type == 'VIEW_3D':
+                    area.spaces.active.show_region_ui = True
+                    area.tag_redraw()
+    except Exception as exc:
+        from . import clearance_replay
+        clearance_replay.clear(scene, 'MAPPO 数据未就绪：' + str(exc))
+        raise
     return collection
 
 

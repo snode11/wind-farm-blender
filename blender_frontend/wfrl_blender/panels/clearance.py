@@ -79,6 +79,8 @@ class WFRL_OT_ClearanceRestart(bpy.types.Operator):
     def execute(self, context):
         from .. import _cancel_playback
         _cancel_playback()
+        from .. import tip_tracking
+        tip_tracking.reset(context.scene, 'restart')
         context.scene.frame_set(context.scene.frame_start)
         if not bpy.app.background and context.screen:
             bpy.ops.screen.animation_play()
@@ -119,6 +121,8 @@ def progress_set(scene, value):
     if clearance_replay.reader_for(scene) is None:
         return
     ratio = min(100.0, max(0.0, value)) / 100
+    from .. import tip_tracking
+    tip_tracking.reset(scene, 'progress_seek')
     scene.frame_set(scene.frame_start + round(ratio * (scene.frame_end - scene.frame_start)))
 
 
@@ -134,7 +138,7 @@ def draw_navigation(layout, scene):
     elif kind == 'live':
         label, source = '后端场景', '后端遥测 · ' + runtime.get_state().connection
     elif kind == 'demo':
-        label, source = '风场演示', 'SYNTH 合成演示'
+        label, source = '旧场景需重新加载', '请加载 MAPPO 60 秒演示'
     else:
         label, source = '尚未加载场景', '无数据'
     layout.label(text='当前模式：' + label)
@@ -175,27 +179,50 @@ def draw_measurement(layout, scene, value):
         card.label(text='')
     numbers = card.column(align=True)
     numbers.scale_y = 1.2
+    numbers.label(text='雷达 → 叶片（B2）：' + number(measurement.get('slant_range_m')) + ' m')
     numbers.label(text='仿真真值：' + number(measurement.get('truth_m')) + ' m')
     numbers.label(text='估计 B2：' + number(measurement.get('estimate_m')) + ' m')
     numbers.label(text='偏差：' + number(measurement.get('error_m'), True) + ' m')
     card.label(text='偏差 = 估计 − 真值')
 
 
+def draw_flex_trails(layout, scene):
+    """Expose the trajectory switch whenever a flexible preview is attached."""
+    from .. import tip_tracking
+    if tip_tracking.active(scene) is not None or scene.get('wfrl_flex_active', False):
+        row = layout.row(align=True)
+        row.prop(scene, 'wfrl_flex_show_tip_trails', text='显示叶尖轨迹', toggle=True)
+        layout.label(text=f"B1 橙 · B2 蓝 · B3 红；保留最近 {int(scene.get('wfrl_tip_trail_max_points', 240))} 点")
+        layout.label(text='形变网格叶尖位置 · 非相机测量')
+
+
 def draw(layout, scene):
+    import sys
+    farm = sys.modules.get(__package__.rsplit('.', 1)[0]+'.farm_flex')
+    farm_active = farm is not None and farm.is_active(scene)
     box = layout.box()
     box.label(text='净空与误差对比')
-    row = box.row(align=True)
-    for demo, title in (('normal', '正常测量'), ('near_tower', '较小净空')):
-        row.operator('wfrl.clearance_clip', text=title, depress=(
-            clearance_replay.reader_for(scene) is not None and scene.get('wfrl_clearance_demo') == demo)).demo = demo
+    if farm_active:
+        box.label(text=scene['wfrl_clearance_turbine']+' · 三机随机阵风 · MAPPO 偏航')
+    else:
+        row = box.row(align=True)
+        for demo, title in (('normal', '正常测量'), ('near_tower', '较小净空')):
+            row.operator('wfrl.clearance_clip', text=title, depress=(
+                clearance_replay.reader_for(scene) is not None and scene.get('wfrl_clearance_demo') == demo)).demo = demo
     value = clearance_replay.sample(scene)
     if value is None:
         box.label(text='未加载有效雷达结果', icon='INFO')
         if not runtime.configuration_editable():
             box.label(text='先停止后端，再加载雷达片段')
+        draw_flex_trails(box, scene)
     else:
-        box.label(text='后端含形变 · 画面为刚性示意')
-        if scene.get('wfrl_clearance_demo') == 'near_tower':
+        import sys
+        module = sys.modules.get(__package__.rsplit('.', 1)[0]+'.blade_flex_preview')
+        box.label(text=('仿真形变回放 · 实体叶片随数据弯曲'
+                        if farm_active or (module is not None and module.is_active(scene))
+                        else '后端含形变 · 画面为刚性示意'))
+        draw_flex_trails(box, scene)
+        if scene.get('wfrl_clearance_demo') == 'near_tower' and not farm_active:
             box.label(text='较小净空工况 · 以数值比较')
         draw_measurement(box, scene, value)
         text, icon, state = playback_control(scene, bpy.context.screen)
@@ -256,6 +283,17 @@ def register_properties():
         setattr(bpy.types.Scene, 'wfrl_clearance_' + demo + '_path', bpy.props.StringProperty(name=label, subtype='DIR_PATH'))
     for suffix in ('show_details', 'show_config', 'show_camera'):
         setattr(bpy.types.Scene, 'wfrl_clearance_' + suffix, bpy.props.BoolProperty(default=False))
+    def _update_tip_trails(scene, context):
+        from .. import tip_tracking
+        if scene.wfrl_flex_show_tip_trails:
+            turbine = scene.get('wfrl_clearance_turbine', 'T1')
+            tip_tracking.enable(scene, turbine_id=turbine,
+                                max_points=int(scene.get('wfrl_tip_trail_max_points', 240)))
+        else:
+            tip_tracking.disable(scene)
+    bpy.types.Scene.wfrl_flex_show_tip_trails = bpy.props.BoolProperty(
+        name='显示叶尖轨迹', description='随播放绘制形变后叶尖世界坐标，按当前片段限制缓存；拖动进度或重播时清空',
+        default=False, update=_update_tip_trails)
 
 
 def unregister_properties():
@@ -263,3 +301,5 @@ def unregister_properties():
         name = 'wfrl_clearance_' + suffix
         if hasattr(bpy.types.Scene, name):
             delattr(bpy.types.Scene, name)
+    if hasattr(bpy.types.Scene, 'wfrl_flex_show_tip_trails'):
+        delattr(bpy.types.Scene, 'wfrl_flex_show_tip_trails')

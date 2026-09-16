@@ -1,0 +1,29 @@
+module changed on disk: '/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py' reloading...
+CHECK_PASS real Bridge handshake
+CHECK_PASS scene.load acknowledged; three-turbine scene built
+CHECK_PASS FAST.Farm started, real snapshot arrived, pause acknowledged
+Traceback (most recent call last):
+  File "/tmp/wfrl-presend-review-20260916/real_backend_check.py", line 37, in <module>
+    wait_for(lambda:r._pending_command is None and r.kinematics.snapshot['step']>first,120)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/wfrl-presend-review-20260916/real_backend_check.py", line 20, in wait_for
+    raise AssertionError('Timeout '+str(r.get_state())+' pending='+str(r._pending_command))
+AssertionError: Timeout FrontendState(mode='replay', connection='CONNECTED', run_status='PAUSED', confirmed=True, session_id='0a57c28799f34768af465791bbc00536', run_id='b57d35f7e9124e94b283c598d1ebc85a', capabilities={'single_step', 'training_stats_v1', 'pause'}, error='') pending=step
+
+Traceback (most recent call last):
+  File "/tmp/wfrl-presend-review-20260916/real_backend_check.py", line 70, in <module>
+    if not report['passed']: raise AssertionError(report.get('error'))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Traceback (most recent call last):
+  File "/tmp/wfrl-presend-review-20260916/real_backend_check.py", line 37, in <module>
+    wait_for(lambda:r._pending_command is None and r.kinematics.snapshot['step']>first,120)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/wfrl-presend-review-20260916/real_backend_check.py", line 20, in wait_for
+    raise AssertionError('Timeout '+str(r.get_state())+' pending='+str(r._pending_command))
+AssertionError: Timeout FrontendState(mode='replay', connection='CONNECTED', run_status='PAUSED', confirmed=True, session_id='0a57c28799f34768af465791bbc00536', run_id='b57d35f7e9124e94b283c598d1ebc85a', capabilities={'single_step', 'training_stats_v1', 'pause'}, error='') pending=step
+
+
+Error: script failed, file: '/tmp/wfrl-presend-review-20260916/real_backend_check.py', exiting.
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

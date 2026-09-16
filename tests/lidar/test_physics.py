@@ -24,3 +24,15 @@ def test_background_occlusion_tower_and_ground():
     from wfrl.lidar.physics import background_first_hit
     hit=background_first_hit([-10,0,10],[1,0,0]);assert hit[2]=='tower'
     assert background_first_hit([-2,0,87.6],[-.1,0,-math.sqrt(.99)])[2]=='ground'
+
+
+def test_projected_surface_separation():
+    tri=np.array([[0,1,2]])
+    # Sideways surface is clear although its X coordinate enters the old
+    # upstream half-space. This occurs in spatially turbulent bending.
+    assert collision_excluded(np.array([[-1,10,20],[1,10,25],[0,12,30]]),tri)
+    # Vertices outside the tower are insufficient: an edge can cross it.
+    assert not collision_excluded(np.array([[-10,0,20],[10,0,25],[0,12,30]]),tri)
+    # The projected interior can contain the tower with every edge outside.
+    assert not collision_excluded(np.array([[-10,-10,20],[10,-10,25],[0,15,30]]),tri)
+    assert not collision_excluded(np.array([[float('nan'),10,20],[1,10,25],[0,12,30]]),tri)

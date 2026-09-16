@@ -1,0 +1,190 @@
+.................................FF.F........ [ 78%]
+............                                                             [100%]
+=================================== FAILURES ===================================
+_____________ test_recorded_geometry_matches_saved_truth_and_wire ______________
+
+reader = <wfrl.blender_bridge.tip_replay.FastFarmTipReplay object at 0x35f9fddd0>
+
+    def test_recorded_geometry_matches_saved_truth_and_wire(reader):
+        rows=reader.package.measurements
+        row=next(r for r in rows if r['time_s']>=reader.times[0])
+        index=round((row['time_s']-reader.times[0])*reader.fps)
+>       sample=reader.at_index(index)
+               ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/blender_bridge/test_tip_replay.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wfrl/blender_bridge/tip_replay.py:83: in at_index
+    data=path.read_bytes()
+         ^^^^^^^^^^^^^^^^^
+/opt/anaconda3/envs/wfrl-mac/lib/python3.11/pathlib.py:1050: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/eason/Desktop/wfcrl/wind farm RL/results/lidar/raw/normal-v1/FarmInputs/vtk/Case.T1.Blade1Surface.01507.vtp')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/eason/Desktop/wfcrl/wind farm RL/results/lidar/raw/normal-v1/FarmInputs/vtk/Case.T1.Blade1Surface.01507.vtp'
+
+/opt/anaconda3/envs/wfrl-mac/lib/python3.11/pathlib.py:1044: FileNotFoundError
+__________________________ test_bad_geometry_rejected __________________________
+
+reader = <wfrl.blender_bridge.tip_replay.FastFarmTipReplay object at 0x35fefc310>
+
+    def test_bad_geometry_rejected(reader):
+>       payload=reader.wire_payload(0)
+                ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/blender_bridge/test_tip_replay.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wfrl/blender_bridge/tip_replay.py:98: in wire_payload
+    sample=self.at_index(index)
+           ^^^^^^^^^^^^^^^^^^^^
+wfrl/blender_bridge/tip_replay.py:83: in at_index
+    data=path.read_bytes()
+         ^^^^^^^^^^^^^^^^^
+/opt/anaconda3/envs/wfrl-mac/lib/python3.11/pathlib.py:1050: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/eason/Desktop/wfcrl/wind farm RL/results/lidar/raw/normal-v1/FarmInputs/vtk/Case.T1.Blade1Surface.01440.vtp')
+mode = 'rb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/eason/Desktop/wfcrl/wind farm RL/results/lidar/raw/normal-v1/FarmInputs/vtk/Case.T1.Blade1Surface.01440.vtp'
+
+/opt/anaconda3/envs/wfrl-mac/lib/python3.11/pathlib.py:1044: FileNotFoundError
+_____________________ test_real_bridge_pause_step_and_stop _____________________
+
+reader = <wfrl.blender_bridge.tip_replay.FastFarmTipReplay object at 0x35ffa0950>
+
+    def test_real_bridge_pause_step_and_stop(reader):
+        from wfrl.blender_bridge.backend_session import BackendSession
+        from wfrl.blender_bridge.server import BridgeServer
+        from wfrl.blender_bridge.tip_client import TipBridgeClient
+        from wfrl.scene.schema import load_scene
+        session=BackendSession(load_scene(str(ROOT/'scenes/turb3_row.yaml')))
+        server=BridgeServer(port=0,session=session)
+        thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+        client=None
+        try:
+            client=TipBridgeClient(f'127.0.0.1:{server.port}',PACKAGE,timeout=5)
+>           a=client.next_sample();time.sleep(.08)
+              ^^^^^^^^^^^^^^^^^^^^
+
+tests/blender_bridge/test_tip_replay.py:63: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wfrl/blender_bridge/tip_client.py:65: in next_sample
+    message=self._receive()
+            ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <wfrl.blender_bridge.tip_client.TipBridgeClient object at 0x36476fe10>
+
+    def _receive(self):
+        deadline=time.monotonic()+self.timeout
+        while not self.messages:
+            self.socket.settimeout(max(.01,deadline-time.monotonic()))
+            data=self.socket.recv(65536)
+            if not data:raise ConnectionError('Bridge disconnected')
+            self.messages.extend(self.decoder.feed(data))
+            if len(self.messages)>128:raise ValueError('Bridge queue overflow')
+            if time.monotonic()>deadline:raise TimeoutError('Bridge response timed out')
+        message=self.messages.popleft()
+        if message['sequence']<=self.received:raise ValueError('Out-of-order Bridge sequence')
+        if self.session and message['session_id']!=self.session:raise ValueError('Bridge session changed')
+        self.received=message['sequence']
+        if message['type']=='error':raise RuntimeError(message['payload']['message'])
+        if message['type']=='lifecycle' and message['payload']['run_status']=='FAILED':
+>           raise RuntimeError(message['payload']['reason'])
+E           RuntimeError: [Errno 2] No such file or directory: '/Users/eason/Desktop/wfcrl/wind farm RL/results/lidar/raw/normal-v1/FarmInputs/vtk/Case.T1.Blade1Surface.01440.vtp'
+
+wfrl/blender_bridge/tip_client.py:58: RuntimeError
+
+During handling of the above exception, another exception occurred:
+
+reader = <wfrl.blender_bridge.tip_replay.FastFarmTipReplay object at 0x35ffa0950>
+
+    def test_real_bridge_pause_step_and_stop(reader):
+        from wfrl.blender_bridge.backend_session import BackendSession
+        from wfrl.blender_bridge.server import BridgeServer
+        from wfrl.blender_bridge.tip_client import TipBridgeClient
+        from wfrl.scene.schema import load_scene
+        session=BackendSession(load_scene(str(ROOT/'scenes/turb3_row.yaml')))
+        server=BridgeServer(port=0,session=session)
+        thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+        client=None
+        try:
+            client=TipBridgeClient(f'127.0.0.1:{server.port}',PACKAGE,timeout=5)
+            a=client.next_sample();time.sleep(.08)
+            assert session.status=='PAUSED'
+            b=client.next_sample()
+            assert b['time_s']==pytest.approx(a['time_s']+1/reader.fps)
+            assert np.linalg.norm(b['blades'][0]['P']-a['blades'][0]['P'])>0
+            client.close();client=None
+            assert session.status=='STOPPED' and not session.alive()
+        finally:
+>           if client is not None:client.close()
+                                  ^^^^^^^^^^^^^^
+
+tests/blender_bridge/test_tip_replay.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+wfrl/blender_bridge/tip_client.py:82: in close
+    message=self._receive()
+            ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <wfrl.blender_bridge.tip_client.TipBridgeClient object at 0x36476fe10>
+
+    def _receive(self):
+        deadline=time.monotonic()+self.timeout
+        while not self.messages:
+            self.socket.settimeout(max(.01,deadline-time.monotonic()))
+>           data=self.socket.recv(65536)
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+E           TimeoutError: timed out
+
+wfrl/blender_bridge/tip_client.py:47: TimeoutError
+=============================== warnings summary ===============================
+tests/blender_bridge/test_training_progress.py::test_actual_trainer_uses_buffers_without_physics[zero]
+tests/blender_bridge/test_training_progress.py::test_actual_trainer_uses_buffers_without_physics[learn]
+  /Users/eason/Desktop/wfcrl/wind farm RL/scripts/train/train_fastfarm.py:468: RuntimeWarning: Mean of empty slice
+    hist["raw_reward"].append(float(np.nanmean(B_raw)))
+
+tests/blender_bridge/test_training_progress.py::test_actual_trainer_uses_buffers_without_physics[zero]
+tests/blender_bridge/test_training_progress.py::test_actual_trainer_uses_buffers_without_physics[learn]
+  /Users/eason/Desktop/wfcrl/wind farm RL/scripts/train/train_fastfarm.py:479: RuntimeWarning: Mean of empty slice
+    f"rew(1step) {B_rew.mean():+.4f}  raw {np.nanmean(B_raw):.3f}  "
+
+tests/blender_bridge/test_training_progress.py::test_actual_trainer_uses_buffers_without_physics[learn]
+  /Users/eason/Desktop/wfcrl/wind farm RL/scripts/train/train_fastfarm.py:457: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+  Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:823.)
+    pg_log.append(float(pg)); v_log.append(float(vloss))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/blender_bridge/test_tip_replay.py::test_recorded_geometry_matches_saved_truth_and_wire
+FAILED tests/blender_bridge/test_tip_replay.py::test_bad_geometry_rejected - ...
+FAILED tests/blender_bridge/test_tip_replay.py::test_real_bridge_pause_step_and_stop
+3 failed, 54 passed, 5 warnings, 27 subtests passed in 10.23s

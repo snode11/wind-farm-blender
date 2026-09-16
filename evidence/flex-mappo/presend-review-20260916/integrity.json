@@ -1,0 +1,16 @@
+{
+  "inventory_files": 87,
+  "inventory_mismatches": [],
+  "zip_sha256": "e1f5a5ccb67832eabc95302b2c1e551e35b2bf92f47b3b59cc11db6a68f3e441",
+  "zip_hash_matches": true,
+  "zip_corrupt_entry": null,
+  "zip_files": 68,
+  "runtime_mismatches": [],
+  "source_mismatches": [
+    "protocol.py"
+  ],
+  "data_hash_mismatches": [],
+  "duplicated_data_mismatches": "inspect embedded path",
+  "canonical_protocol_matches": true,
+  "source_mismatches_note": "protocol.py is generated from wfrl/blender_bridge/messages.py by build_extension.py; the canonical source matches."
+}

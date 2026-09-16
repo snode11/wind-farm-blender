@@ -1,0 +1,11 @@
+module changed on disk: '/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py' reloading...
+[WFRL] MAPPO 60s loaded (OFFLINE RESULTS); Bridge ready at 127.0.0.1:8765
+[WFRL] Bridge handshake confirmed; loading /Users/eason/Desktop/wfcrl/wind farm RL/scenes/turb3_row.yaml
+[WFRL] CONNECTED / READY: configured scene loaded; no run started
+[WFRL] Bridge handshake confirmed; loading /Users/eason/Desktop/wfcrl/wind farm RL/scenes/turb3_row.yaml
+[WFRL] CONNECTED / READY: configured scene loaded; no run started
+LAUNCHER_MAPPO_BACKEND_MODE_PASS
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

@@ -1,0 +1,20 @@
+............................................. [ 83%]
+.........                                                                [100%]
+=============================== warnings summary ===============================
+tests/blender_bridge/test_training_progress.py::test_actual_trainer_uses_buffers_without_physics[zero]
+tests/blender_bridge/test_training_progress.py::test_actual_trainer_uses_buffers_without_physics[learn]
+  /Users/eason/Desktop/wfcrl/wind farm RL/scripts/train/train_fastfarm.py:468: RuntimeWarning: Mean of empty slice
+    hist["raw_reward"].append(float(np.nanmean(B_raw)))
+
+tests/blender_bridge/test_training_progress.py::test_actual_trainer_uses_buffers_without_physics[zero]
+tests/blender_bridge/test_training_progress.py::test_actual_trainer_uses_buffers_without_physics[learn]
+  /Users/eason/Desktop/wfcrl/wind farm RL/scripts/train/train_fastfarm.py:479: RuntimeWarning: Mean of empty slice
+    f"rew(1step) {B_rew.mean():+.4f}  raw {np.nanmean(B_raw):.3f}  "
+
+tests/blender_bridge/test_training_progress.py::test_actual_trainer_uses_buffers_without_physics[learn]
+  /Users/eason/Desktop/wfcrl/wind farm RL/scripts/train/train_fastfarm.py:457: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+  Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:823.)
+    pg_log.append(float(pg)); v_log.append(float(vloss))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+54 passed, 5 warnings, 27 subtests passed in 5.48s

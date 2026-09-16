@@ -144,6 +144,8 @@ def _make_blade(collection, parent, name: str, angle: float):
     else:
         blade = bpy.data.objects.new(name, shared)
         _link(collection, blade)
+    from .materials import ensure_blade_tip_markings
+    ensure_blade_tip_markings([blade])
     blade.parent = pitch_root
     blade.rotation_mode = "XYZ"
     _finish(blade, bevel=0.012, smooth=True)
@@ -502,6 +504,8 @@ def _apply_surface_lighting(scene):
 
 def refresh_saved_surface_style(scene):
     """One-time visual upgrade of owned assets, preserving rig and calibration."""
+    from .materials import ensure_blade_tip_markings
+    ensure_blade_tip_markings(scene.objects)
     if scene.get('wfrl_surface_revision', 0) >= 1:
         return
     roots = [o for o in scene.objects if o.name.startswith('WFRL.Turbine.')
@@ -544,6 +548,16 @@ def clear_scene(collection_name: str = COLLECTION_NAME):
     collection = bpy.data.collections.get(collection_name)
     if not collection:
         return
+    # Drop replay references while their mesh and trail objects still exist.
+    import sys
+    from . import tip_tracking, clearance_replay
+    farm = sys.modules.get(__package__ + '.farm_flex')
+    for owner in bpy.data.scenes:
+        if any(obj.name in owner.objects for obj in collection.objects):
+            if farm is not None:
+                farm.detach(owner)
+            tip_tracking.discard(owner)
+            clearance_replay.clear(owner, '场景已重建，请重新加载回放')
     for obj in list(collection.objects):
         data = obj.data
         action = obj.animation_data.action if obj.animation_data else None

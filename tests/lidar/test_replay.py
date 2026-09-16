@@ -49,6 +49,24 @@ class ReplayTests(unittest.TestCase):
         r=self.fixture(); initial=r.at(2)
         r.at(9); r.at(0)
         self.assertEqual(initial,r.at(2))
+    def test_slant_range_tracks_same_held_b2_sample(self):
+        package = self.fixture().package
+        for row in package.measurements:
+            row['beams']['B2']['slant_range_m'] = 40 + row['time_s']
+            row['beams']['B1'] = dict(valid=True, slant_range_m=999)
+        reader = ReplayReader(package)
+        self.assertIsNone(reader.at(0)['measurement'])
+        self.assertEqual(reader.at(3)['measurement']['slant_range_m'], 43)
+        # Invalid B2 at t=4 must retain the entire t=3 sample, not range 44.
+        held = reader.at(4)['measurement']
+        self.assertEqual((held['time_s'], held['slant_range_m']), (3, 43))
+        self.assertIsNone(reader.at(5.1)['measurement'])
+        self.assertEqual(reader.at(8)['measurement']['slant_range_m'], 48)
+        self.assertEqual(reader.at(3)['measurement']['slant_range_m'], 43)
+        self.assertNotIn('slant_range_m', package.cumulative[2]['measurement'])
+        del package.measurements[2]['beams']['B2']['slant_range_m']
+        self.assertIsNone(ReplayReader(package).at(3)['measurement']['slant_range_m'])
+
     def test_missing_package(self):
         with self.assertRaisesRegex(ValueError,'未就绪'):
             ReplayPackage.load('/this/path/does/not/exist')

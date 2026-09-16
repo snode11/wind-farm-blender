@@ -1,24 +1,35 @@
-# 当前激光净空回放交付
+# 0.3.0 安装与交付
 
-唯一当前安装包：[wfrl_blender-0.2.5.zip](wfrl_blender-0.2.5.zip)
+当前安装包：[wfrl_blender-0.3.0.zip](wfrl_blender-0.3.0.zip) · [GitHub Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.0)
 
-SHA256：`dd1f9e9dc65105ad2118b7ab61914dcf62c18d931992eb73e9a9c8f2018deeea`
+在 Blender 5.2 或更新版本中选择“从磁盘安装”，安装上述 ZIP 后重启 Blender。GitHub 自动生成的 Source code ZIP 不是扩展安装包。N 侧栏 → MAPPO →“加载 MAPPO · 60 秒”可直接播放内置三机结果，无需后端环境。
 
-结果目录（相对项目根）：
+SHA-256：`e1f5a5ccb67832eabc95302b2c1e551e35b2bf92f47b3b59cc11db6a68f3e441`
 
-- `results/lidar/packages/normal-v1.1`
-- `results/lidar/packages/close-v1.1`
+[逐文件清单](wfrl_blender-0.3.0.inventory.json) · [校验文件](wfrl_blender-0.3.0.zip.sha256) · [机器可读交付清单](lidar-delivery.json)
 
-两包采用完整数值比较证据合同；READY不表示现场精度或无容差的收敛达标。插件包含离线读取器与证据校验模块。原始仿真不需在线。
+## 本版交付内容
 
-旧 0.2.1 / 0.2.2 / 0.2.3 / 0.2.4 安装包保留为历史版本；旧 normal/close 数据仍保留在原工作区，没有随本次仓库更新重复上传。当前机器可读清单见 [lidar-delivery.json](lidar-delivery.json)。专用源码演示入口自动读取此清单；安装扩展后，将两个数据目录填入 Item → Camera 相机与演示 → 净空与误差对比 → 数据配置中的路径字段。
+- ZIP 内置三机 60 秒 MAPPO 形变、测量、运动及功率/载荷遥测数据，含九片独立形变、彩色叶尖轨迹、视角/云台、统一回放面板与 B2 测距。
+- 项目仓库包含原命令启动与 Bridge 暂停/单步/重连修复。只安装 ZIP 不会更新项目脚本；使用 `run_wfrl_macos.sh` 前需同步本版仓库并具备本机后端环境。
+- 原命令默认加载已安装扩展并暂停在 T1 侧前方首帧，Bridge 待用；主动连接后自动加载指定 YAML。操作见 [MAPPO 演示说明](../docs/blender/MAPPO演示.md)。
+- 独立雷达包继续使用 `results/lidar/packages/normal-v1.1` 和 `close-v1.1`。这些外部包与原始 VTP 不在扩展 ZIP 中；三机 MAPPO 数据则已内置。
+- 0.2.x 安装资源保留为历史版本。本次复用已保存物理结果，未重新求解或训练。
 
-Mac 可在完整仓库中双击 `scripts/blender/打开净空雷达演示.command`；完整操作见[用户手册第 12 节](../docs/blender/用户使用手册.md#12-激光净空雷达第一次照着操作)。原始 `results/lidar/raw/`、本地验收过程报告和截图不包含在本次发布中，前端回放不依赖这些内容。
+## 校验
 
-在项目根隔离校验实际ZIP与两个包：
+下载 ZIP 与校验文件到同一目录后运行 `shasum -a 256 -c wfrl_blender-0.3.0.zip.sha256`。发布源码可通过 `scripts/blender/build_extension.py` 重建同一安装包。
+
+需要核对独立雷达包时，在项目根运行（输出文件需为新路径）：
 
 ```sh
-python3 scripts/blender/verify_lidar_delivery.py dist/wfrl_blender-0.2.5.zip results/lidar/packages/normal-v1.1 results/lidar/packages/close-v1.1 --output /tmp/wfrl-delivery-new-check.json
+python3 scripts/blender/verify_lidar_delivery.py dist/wfrl_blender-0.3.0.zip results/lidar/packages/normal-v1.1 results/lidar/packages/close-v1.1 --output /tmp/wfrl-delivery-030-check.json
 ```
 
-输出路径须为新文件。此命令验证隔离ZIP读取，不代表Blender GUI或设备验收。
+此命令校验隔离 ZIP 读取，不代表 Blender GUI 或现场设备验收。
+
+## 验证范围
+
+发送前已核对正式 ZIP、便携 ZIP 和本机安装文件一致，并完成九片回放、遥测、保存重开、缺包恢复、启动模式与真实后端短测。详见 [发送前检查](../docs/blender/0.3.0发送前检查.md) 和 [Demo 替换验证](../evidence/flex-mappo/demo-replacement-20260916/验证记录.md)。
+
+三机片段保持 REVIEW_ONLY；T1 雷达有效率、数值收敛、稳定 60 FPS、长期稳定性、控制收益、Windows 与现场设备尚未验收。旧记录中的“ZIP 不含三机数据”已由当前完整 MAPPO ZIP 替代；独立 normal/close 包仍为外部数据。

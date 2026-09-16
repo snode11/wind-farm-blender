@@ -1,0 +1,29 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_immediate_reconnect_reaps_closed_owner_before_accepting_resume ______
+
+    def test_immediate_reconnect_reaps_closed_owner_before_accepting_resume():
+        server = BridgeServer(port=0, session=BackendSession(scene(), trainer_factory=FakeTrainer))
+        client = socket.create_connection(('127.0.0.1', server.port))
+        client.settimeout(.5)
+        hello = lambda sid: envelope('hello', dict(supported_versions=[1], resume_session_id=sid, capabilities=[]), '', 0)
+        try:
+            client.sendall(encode_message(hello(None)))
+            for _ in range(5):
+                server.poll()
+            sid = FrameDecoder().feed(client.recv(65536))[0]['session_id']
+            client.close()
+            # No server.poll between the old close and the new connection.
+            client = socket.create_connection(('127.0.0.1', server.port))
+            client.settimeout(.5)
+            client.sendall(encode_message(hello(sid)))
+            for _ in range(5):
+                server.poll()
+>           reply = FrameDecoder().feed(client.recv(65536))[0]
+                                        ^^^^^^^^^^^^^^^^^^
+E           ConnectionResetError: [Errno 54] Connection reset by peer
+
+tests/blender_bridge/test_part4_backend.py:198: ConnectionResetError
+=========================== short test summary info ============================
+FAILED tests/blender_bridge/test_part4_backend.py::test_immediate_reconnect_reaps_closed_owner_before_accepting_resume
+1 failed, 16 deselected in 0.16s

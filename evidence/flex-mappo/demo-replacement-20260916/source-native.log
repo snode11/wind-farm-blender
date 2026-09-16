@@ -1,0 +1,6 @@
+00:04.974  blend            | Read blend: "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/tmpfn9bxdsf/replay.blend"
+Info: Saved as "replay.blend"
+MAPPO_COMPLETE_DEMO_PASS {"duration_s": 60, "blades": 9, "telemetry": true, "saved_replay": true, "recovery": true}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

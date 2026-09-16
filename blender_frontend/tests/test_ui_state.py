@@ -1,6 +1,6 @@
 """Guard user-visible control availability and connection loss semantics."""
 import unittest
-from wfrl_blender.state import FrontendState, DemoState, RunStatus
+from wfrl_blender.state import FrontendState
 
 
 class UIStateTests(unittest.TestCase):
@@ -9,9 +9,6 @@ class UIStateTests(unittest.TestCase):
         self.assertTrue(ui.allows('start'))
         self.assertTrue(ui.allows('configure'))
         self.assertFalse(ui.allows('pause'))
-        demo = DemoState()
-        demo.start(); demo.pause(); demo.step(); demo.resume(); demo.stop()
-        self.assertEqual(demo.status, RunStatus.STOPPED)
 
     def test_active_backend_configuration_locked_for_all_modes_and_states(self):
         for mode in ('interactive_training', 'formal_training', 'replay'):

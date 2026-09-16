@@ -177,3 +177,45 @@ def flow_material(material, *, pulse=False, cinematic=False):
     links.new(mix.outputs[0],output.inputs['Surface'])
     material.surface_render_method='DITHERED'
     return material
+
+
+# Distances from the actual mesh tip, metres. Paint wraps both surfaces and
+# the leading/trailing edges; it never adds protruding geometry or changes
+# the aerodynamic/source mesh. White gaps and the white terminal cap remain.
+BLADE_TIP_BANDS = ((.25, 1.0), (1.7, 2.45), (3.15, 3.9))
+
+
+def ensure_blade_tip_markings(objects):
+    """Paint three tip bands on new and saved owned blade meshes, once per mesh."""
+    import bpy
+    material = bpy.data.materials.get('WFRL.BladeTipRed')
+    if material is None:
+        material = bpy.data.materials.new('WFRL.BladeTipRed')
+        material.use_nodes = True
+        material.diffuse_color = (.8, .006, .012, 1)
+        node = material.node_tree.nodes.get('Principled BSDF')
+        node.inputs['Base Color'].default_value = material.diffuse_color
+        node.inputs['Roughness'].default_value = .36
+        node.inputs['Emission Color'].default_value = (.8, .002, .004, 1)
+        node.inputs['Emission Strength'].default_value = .7
+        material['provenance'] = 'Illustrative night-visible tip paint; not a physical light specification'
+    for obj in objects:
+        if (obj.type != 'MESH' or not obj.name.startswith('WFRL.Turbine.')
+                or obj.name.rsplit('.', 1)[-1] not in {'Blade1', 'Blade2', 'Blade3'}):
+            continue
+        mesh = obj.data
+        if mesh.get('wfrl_tip_marking_revision', 0) >= 1:
+            continue
+        if not mesh.vertices:
+            continue
+        tip = max(v.co.z for v in mesh.vertices)
+        slot = mesh.materials.find(material.name)
+        if slot < 0:
+            mesh.materials.append(material)
+            slot = len(mesh.materials) - 1
+        for face in mesh.polygons:
+            distance = tip - sum(mesh.vertices[i].co.z for i in face.vertices) / len(face.vertices)
+            if any(lo <= distance <= hi for lo, hi in BLADE_TIP_BANDS):
+                face.material_index = slot
+        mesh['wfrl_tip_marking_revision'] = 1
+        mesh['wfrl_tip_marking_note'] = 'Three red bands on the original mesh; white cap; cosmetic only'

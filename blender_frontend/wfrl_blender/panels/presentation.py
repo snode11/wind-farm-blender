@@ -149,6 +149,11 @@ class WFRL_PT_Presentation(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_category = 'Item'
 
+    @classmethod
+    def poll(cls, context):
+        from .. import farm_flex
+        return not farm_flex.is_active(context.scene)
+
     def draw(self, context):
         scene, layout = context.scene, self.layout
         row = layout.row(align=True)

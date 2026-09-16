@@ -75,27 +75,19 @@ def select_mode(mode):
             if obj.name.startswith(('WFRL.WakeProxy.', 'WFRL.Fixture.')):
                 obj.hide_render = True
                 obj.hide_set(True)
-    elif mode == 'demo':
-        # A backend scene may already have built the same turbine hierarchy
-        # before the user switches to Demo. That scene is marked ``live``
-        # and has no demo keyframes, so merely changing FrontendState leaves
-        # Start Demo playing a timeline whose rotor pose never changes.
-        # Reclassify the existing geometry explicitly and configure the
-        # deterministic 66-second presentation timeline.
-        import bpy
-        scene = getattr(bpy.context, 'scene', None)
-        if scene is not None and scene.objects.get('WFRL.Turbine.T1.Rotor'):
-            from .state import END_FRAME
-            from . import _cancel_playback, _update_demo_status, _update_layers
-            _cancel_playback()
-            scene.frame_start = 1
-            scene.frame_end = END_FRAME
-            scene.use_preview_range = False
-            scene['wfrl_scene_kind'] = 'demo'
-            scene['wfrl_run_status'] = 'READY'
-            _update_layers(scene)
-            _update_demo_status(scene)
     _state = FrontendState(mode=mode, connection='LOCAL DEMO' if mode == 'demo' else 'DISCONNECTED')
+    if mode == 'demo':
+        from . import load_demo_scene
+        load_demo_scene()
+    else:
+        import bpy
+        from . import farm_flex, clearance_replay, tip_tracking
+        farm_flex.detach()
+        scene = getattr(bpy.context, 'scene', None)
+        if scene is not None:
+            tip_tracking.disable(scene, 'backend_mode')
+            clearance_replay.clear(scene)
+
 
 
 def connect(port):

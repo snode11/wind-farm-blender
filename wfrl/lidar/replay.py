@@ -255,6 +255,13 @@ class ReplayReader:
         self.end_s = package.manifest['segment']['end_s']
         self._motion_times = [r['time_s'] for r in package.motion]
         self._times = [r['time_s'] for r in package.cumulative]
+        # Resolve held B2 readings to their original sample without changing
+        # the serialized cumulative-state contract of existing packages.
+        self._b2_ranges = {
+            (r['time_s'], r['blade_id']): r['beams']['B2'].get('slant_range_m')
+            for r in package.measurements
+            if r.get('expected') and r['beams']['B2'].get('valid')
+        }
 
     def at(self, time_s):
         _require(_finite(time_s), 'invalid replay time')
@@ -276,5 +283,9 @@ class ReplayReader:
         measurement = row['measurement']
         age = t - measurement['time_s'] if measurement else None
         expired = measurement is None or t > measurement['expires_at_s']
-        return dict(time_s=t, motion=motion, measurement=None if expired else deepcopy(measurement),
+        displayed = None if expired else deepcopy(measurement)
+        if displayed is not None:
+            distance = self._b2_ranges.get((displayed['time_s'], displayed['blade_id']))
+            displayed['slant_range_m'] = distance if _finite(distance) and distance >= 0 else None
+        return dict(time_s=t, motion=motion, measurement=displayed,
                     measurement_age_s=age, status='waiting' if expired else row['status'], statistics=deepcopy(row['statistics']))

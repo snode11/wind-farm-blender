@@ -17,8 +17,8 @@ def ensure_workspace():
     scene = bpy.context.scene
     if 'wfrl_run_status' not in scene:
         scene['wfrl_run_status'] = 'READY'
-    scene['wfrl_fidelity'] = 'SYNTH'
-    scene['wfrl_data_note'] = 'Offline presentation; no backend connected'
+    scene['wfrl_fidelity'] = 'NO DATA'
+    scene['wfrl_data_note'] = 'Load MAPPO recorded results to begin'
     return workspace
 
 

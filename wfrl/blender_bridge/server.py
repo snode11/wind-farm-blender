@@ -119,6 +119,17 @@ class BridgeServer:
 
     def poll(self):
         if self.closed: return
+        # A client may close and reconnect before the next 10 ms poll. Reap
+        # its EOF before accepting, or the stale owner rejects the resume.
+        # MSG_PEEK leaves any live owner's queued commands untouched.
+        if self.client is not None:
+            try:
+                if self.client.recv(1, socket.MSG_PEEK) == b'':
+                    self._disconnect()
+            except BlockingIOError:
+                pass
+            except OSError:
+                self._disconnect()
         try:
             conn, _ = self.listener.accept()
             if self.client is not None: conn.close()

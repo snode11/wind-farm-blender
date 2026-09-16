@@ -295,32 +295,65 @@ def ensure_gimbal(scene, turbine):
     if camera is None:
         camera = bpy.data.objects.new(name, bpy.data.cameras.new(name + '.Data'))
         root.users_collection[0].objects.link(camera)
-        camera.parent = root
-        # Outside the nacelle shell, beside the rotor plane: clear downward sight.
-        # Keep the rotor, hub, and nacelle in frame instead of filling the
-        # view with the nearest blade at the default downward pitch.
-        # Keep the rotor outside the lens: an oblique, medium-distance
-        # inspection view gives the full blade span room in frame.
+    if camera.get('wfrl_gimbal_mount_revision', 0) < 1:
         from .turbine_geometry import geometry_data
-        camera.location = (-35, -28, 22 + geometry_data()['scalars']['Twr2Shft'])
+        radius = geometry_data()['scalars']['TipRad']
+        # Tower-side inspection station, lowered toward the passing blade tip.
+        # Looking from the hub along the entire span foreshortens the last
+        # metres into a few pixels and lets the near blade fill the image.
+        # A 1.2 m chordwise offset is only a slight deviation from front-on.
+        camera.parent = root
+        camera.matrix_parent_inverse.identity()
+        camera.location = (-3.5, 1.2, -radius * .60)
         camera.data.clip_start, camera.data.clip_end = .05, 30000
         camera.data.display_size = .5
-        camera['mount'] = 'nacelle gimbal / SYNTH'
-        aim_gimbal(camera, 180, -35, 62)
+        camera['mount'] = 'tower-side inner blade-tip observation / illustrative SYNTH position'
+        camera['wfrl_gimbal_mount_revision'] = 1
+        reset_gimbal(camera)
     camera.data.show_passepartout = False
     camera.data.passepartout_alpha = 0
     return camera
 
 
+
+def down_gimbal(camera):
+    """Tower-side inner-tip composition for the selected turbine."""
+    from .turbine_geometry import geometry_data
+    camera.location = (-3.5, 1.2, -geometry_data()['scalars']['TipRad'] * .60)
+    # Orient the downward image like the reference: tower above, passing
+    # blade below. This is an optical roll, not a change to rotor pose.
+    camera['gimbal_roll'] = 180.0
+    camera.data.shift_x = camera.data.shift_y = 0
+    return aim_gimbal(camera, 180, -67, 85)
+
+
+def reset_gimbal(camera):
+    """Return to an oblique overview of the selected turbine."""
+    from mathutils import Vector
+    from .turbine_geometry import geometry_data
+    import math
+    radius = geometry_data()['scalars']['TipRad']
+    camera.location = (-radius * 2.8, -radius * 2.8, radius * .30)
+    target = Vector((-5, 0, -radius * .30))
+    direction = target - camera.location
+    yaw = math.degrees(math.atan2(direction.y, direction.x))
+    pitch = math.degrees(math.atan2(direction.z, math.hypot(direction.x, direction.y)))
+    camera['gimbal_roll'] = 0.0
+    camera.data.shift_x = camera.data.shift_y = 0
+    return aim_gimbal(camera, yaw, pitch, 62)
+
+
 def aim_gimbal(camera, yaw, pitch, fov):
     """Yaw about mount Z, then local pitch; exact poles retain stable roll."""
     import math
-    from mathutils import Euler
+    from mathutils import Euler, Quaternion
     yaw, pitch, fov = float(yaw), float(pitch), float(fov)
     if not all(math.isfinite(v) for v in (yaw, pitch, fov)):
         raise ValueError('Camera angles must be finite')
     yaw, pitch, fov = yaw % 360, max(-90, min(90, pitch)), max(10, min(120, fov))
-    camera.rotation_euler = Euler((math.radians(90 + pitch), 0, math.radians(yaw - 90)), 'XYZ')
+    orientation = Euler((math.radians(90 + pitch), 0, math.radians(yaw - 90)), 'XYZ').to_quaternion()
+    roll = math.radians(float(camera.get('gimbal_roll', 0)))
+    camera.rotation_euler = (orientation @ Quaternion((0, 0, 1), roll)).to_euler('XYZ')
     camera.data.type = 'PERSP'
     camera.data.sensor_fit = 'HORIZONTAL'
     camera.data.sensor_width = 36

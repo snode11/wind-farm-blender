@@ -18,8 +18,8 @@ class WFRL_PT_connection(bpy.types.Panel):
         layout = self.layout
         offline_results = ui.connection == 'OFFLINE RESULTS'
         if offline_results:
-            layout.label(text='雷达离线回放 · 无需连接后端', icon='INFO')
-            layout.label(text='播放与暂停：Camera 相机与演示')
+            layout.label(text='离线结果回放 · 无需连接后端', icon='INFO')
+            layout.label(text='MAPPO：MAPPO → 三机 MAPPO 回放')
         else:
             layout.label(text=ui.connection, icon='LINKED' if ui.connection == 'CONNECTED' else 'UNLINKED')
             layout.label(text=f'Run: {ui.run_status}' + ('' if ui.confirmed else ' (unconfirmed)'))
@@ -36,7 +36,7 @@ class WFRL_PT_connection(bpy.types.Panel):
             controls = body
         else:
             controls = layout
-        for mode, title in [('demo', 'Demo'), ('interactive_training', 'Interactive'),
+        for mode, title in [('demo', 'MAPPO · 60 秒'), ('interactive_training', 'Interactive'),
                             ('formal_training', 'Formal Training'), ('replay', 'Replay')]:
             row = controls.row(); row.enabled = runtime.configuration_editable()
             row.operator('wfrl.connection_mode', text=title, depress=runtime.desired_mode() == mode).mode = mode

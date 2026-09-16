@@ -75,6 +75,45 @@ def test_session_pause_step_resume_stop():
     s.stop(.5)
 
 
+def test_pause_during_warmup_steps_past_duplicate_progress_snapshots():
+    release = threading.Event()
+
+    class ProgressTrainer(FakeTrainer):
+        def start(self):
+            def run():
+                release.wait(2)
+                for step, phase in [(0, 'warmup'), (0, 'warmup'),
+                                    (1, 'sampling'), (1, 'updating'),
+                                    (2, 'sampling'), (2, 'updating'), (3, 'sampling')]:
+                    if self.stop_event.is_set():
+                        break
+                    sample = snap(step)
+                    sample.phase = phase
+                    self.callback(sample)
+            self._thread = threading.Thread(target=run, daemon=True)
+            self._thread.start()
+
+    session = BackendSession(scene(), trainer_factory=ProgressTrainer)
+    try:
+        session.start('demo', {})
+        session.command(dict(command='run.pause'))
+        release.set()
+        wait_for(lambda: session.status == 'PAUSED')
+        first = [p for kind, p in session.poll() if kind == 'snapshot'][-1]
+        assert (first['step'], first['phase']) == (1, 'sampling')
+        session.command(dict(command='run.step'))
+        wait_for(lambda: session._latest is not None and session._latest[1]['step'] == 2)
+        second = [p for kind, p in session.poll() if kind == 'snapshot'][-1]
+        assert (second['step'], second['phase']) == (2, 'sampling')
+        time.sleep(.02)
+        assert session.status == 'PAUSED'
+        assert not [e for e in session.poll() if e[0] == 'snapshot']
+    finally:
+        release.set()
+        session.stop(1)
+        wait_for(lambda: not session.alive())
+
+
 def test_timeout_does_not_claim_stopped_or_allow_reset():
     class Stuck(FakeTrainer):
         def stop(self,timeout): pass
@@ -137,6 +176,31 @@ def test_loopback_handshake_command_disconnect_and_resume():
 
 def test_reject_non_loopback():
     with pytest.raises(ValueError): BridgeServer(host='0.0.0.0')
+
+
+def test_immediate_reconnect_reaps_closed_owner_before_accepting_resume():
+    server = BridgeServer(port=0, session=BackendSession(scene(), trainer_factory=FakeTrainer))
+    client = socket.create_connection(('127.0.0.1', server.port))
+    client.settimeout(.5)
+    hello = lambda sid: envelope('hello', dict(supported_versions=[1], resume_session_id=sid, capabilities=[]), '', 0)
+    try:
+        client.sendall(encode_message(hello(None)))
+        for _ in range(5):
+            server.poll()
+        sid = FrameDecoder().feed(client.recv(65536))[0]['session_id']
+        client.close()
+        # No server.poll between the old close and the new connection.
+        client = socket.create_connection(('127.0.0.1', server.port))
+        client.settimeout(.5)
+        client.sendall(encode_message(hello(sid)))
+        for _ in range(5):
+            server.poll()
+        reply = FrameDecoder().feed(client.recv(65536))[0]
+        assert reply['type'] == 'hello_ack'
+        assert reply['session_id'] == sid and reply['payload']['resumed']
+    finally:
+        client.close()
+        server.close()
 
 
 def test_server_coalesces_unsent_snapshots_and_prioritizes_lifecycle():

@@ -23,6 +23,12 @@ def configured_scene(scene, overrides):
 
 def validate_run_options(mode, options):
     """Reject invalid budgets/checkpoints before starting workers or processes."""
+    if 'tip_package' in options:
+        if mode != 'replay' or set(options) != {'tip_package'}:
+            raise ValueError('Recorded tip playback accepts only replay tip_package; no policy/training options')
+        if not (Path(options['tip_package']) / 'manifest.json').is_file():
+            raise ValueError('Recorded tip package manifest does not exist')
+        return
     for key in ('iters', 'n_steps', 'replay_steps', 'demo_cycles', 'max_steps'):
         if key in options and (type(options[key]) is not int or options[key] < 1):
             raise ValueError(f'{key} must be a positive integer')

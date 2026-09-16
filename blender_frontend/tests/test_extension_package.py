@@ -36,12 +36,19 @@ class PackageTests(unittest.TestCase):
             inventory = json.loads(first.inventory.read_text(encoding="utf-8"))
             self.assertEqual(inventory["archive_sha256"], first.sha256)
             self.assertEqual(inventory["package_id"], "wfrl_blender")
-            self.assertEqual(inventory["version"], "0.2.5")
+            self.assertEqual(inventory["version"], "0.3.0")
             with zipfile.ZipFile(first.archive) as zipped:
                 names = zipped.namelist()
                 self.assertEqual(names, sorted(names))
                 self.assertIn("blender_manifest.toml", names)
                 self.assertIn("protocol.py", names)
+                for name in ('manifest.json', 'data.json', 'geometry.npz', 'source-surfaces.json'):
+                    self.assertIn('assets/mappo/' + name, names)
+                manifest = json.loads(zipped.read('assets/mappo/manifest.json'))
+                self.assertEqual(manifest['segment']['end_s'] - manifest['segment']['start_s'], 60)
+                for name, digest in manifest['files'].items():
+                    self.assertEqual(hashlib.sha256(zipped.read('assets/mappo/' + name)).hexdigest(), digest)
+                self.assertNotIn('sample_demo', zipped.read('state.py').decode())
                 self.assertIn("_vendor/lidar/replay.py", names)
                 self.assertIn("_vendor/lidar/evidence.py", names)
                 self.assertIn("assets/nrel5mw_geometry.json", names)

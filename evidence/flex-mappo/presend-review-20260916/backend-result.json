@@ -1,0 +1,1476 @@
+{
+  "passed": true,
+  "checks": [
+    "real Bridge handshake",
+    "scene.load acknowledged; three-turbine scene built",
+    "FAST.Farm started, real snapshot arrived, pause acknowledged",
+    "single step advanced exactly one backend step",
+    "three turbines: finite DIRECT yaw/pitch/power/torque; rpm explicitly formula-derived",
+    "disconnect/reconnect resumed same paused session",
+    "resume produced another snapshot; stop confirmed STOPPED",
+    "reset returned READY"
+  ],
+  "runtime": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "backend": "FAST.Farm",
+  "scene": "scenes/turb3_row.yaml",
+  "first_snapshot": {
+    "mode": "replay",
+    "step": 1,
+    "iteration": 0,
+    "phase": "sampling",
+    "timestamp": {
+      "value": 3.0,
+      "timebase": "simulation_seconds"
+    },
+    "turbines": [
+      {
+        "turbine_id": "T1",
+        "channels": {
+          "yaw": {
+            "value": 0.47114503383636475,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "yaw"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "rotor_speed": {
+            "value": 9.043548367254857,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "provenance": {
+              "formula": "FastFarmDriver._rotor_speed: P/(efficiency*torque)/gear_ratio",
+              "channel": "rotor_speed"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "power": {
+            "value": 1.706947875,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "power"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "load": {
+            "value": 0.387830803125,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "load"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "torque": {
+            "value": 19683.8046875,
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "torque"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch_command": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Source channel unavailable",
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch_command"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch_measured": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch_measured"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "wind_speed": {
+            "value": 7.999026775360107,
+            "unit": "m/s",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "wind_speed"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "wind_direction": {
+            "value": 270.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "wind_direction"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "reward": {
+            "value": null,
+            "unit": "",
+            "validity": "invalid",
+            "error": "non-finite source value",
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "reward"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "m_flap": {
+            "value": [
+              5734133.5,
+              5093989.0,
+              5863987.5
+            ],
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "m_flap"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "m_edge": {
+            "value": [
+              4202785.0,
+              -1534152.0,
+              -840801.1875
+            ],
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "m_edge"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          }
+        }
+      },
+      {
+        "turbine_id": "T2",
+        "channels": {
+          "yaw": {
+            "value": 0.8200564384460449,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "yaw"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "rotor_speed": {
+            "value": 7.722803950473036,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "provenance": {
+              "formula": "FastFarmDriver._rotor_speed: P/(efficiency*torque)/gear_ratio",
+              "channel": "rotor_speed"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "power": {
+            "value": 0.5661109375,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "power"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "load": {
+            "value": 0.28387016666666665,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "load"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "torque": {
+            "value": 7644.58984375,
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "torque"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch_command": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Source channel unavailable",
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch_command"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch_measured": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch_measured"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "wind_speed": {
+            "value": 4.845281600952148,
+            "unit": "m/s",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "wind_speed"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "wind_direction": {
+            "value": 270.00692399421433,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "wind_direction"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "reward": {
+            "value": null,
+            "unit": "",
+            "validity": "invalid",
+            "error": "non-finite source value",
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "reward"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "m_flap": {
+            "value": [
+              3440214.75,
+              3269416.25,
+              3553326.25
+            ],
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "m_flap"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "m_edge": {
+            "value": [
+              -2150500.0,
+              -878268.75,
+              3740484.0
+            ],
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "m_edge"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          }
+        }
+      },
+      {
+        "turbine_id": "T3",
+        "channels": {
+          "yaw": {
+            "value": 0.8200428485870361,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "yaw"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "rotor_speed": {
+            "value": 7.722395816928181,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "provenance": {
+              "formula": "FastFarmDriver._rotor_speed: P/(efficiency*torque)/gear_ratio",
+              "channel": "rotor_speed"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "power": {
+            "value": 0.565795125,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "power"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "load": {
+            "value": 0.28387667083333334,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "load"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "torque": {
+            "value": 7640.72900390625,
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "torque"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch_command": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Source channel unavailable",
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch_command"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch_measured": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch_measured"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "wind_speed": {
+            "value": 4.844674110412598,
+            "unit": "m/s",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "wind_speed"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "wind_direction": {
+            "value": 270.0070507187361,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "wind_direction"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "reward": {
+            "value": null,
+            "unit": "",
+            "validity": "invalid",
+            "error": "non-finite source value",
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "reward"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "m_flap": {
+            "value": [
+              3438600.4999999995,
+              3269117.0000000005,
+              3552577.0
+            ],
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "m_flap"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "m_edge": {
+            "value": [
+              -2145851.5,
+              -884624.0,
+              3741830.25
+            ],
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "m_edge"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          }
+        }
+      }
+    ],
+    "farm": {
+      "power": {
+        "value": 2.8388539374999997,
+        "unit": "MW",
+        "validity": "valid",
+        "error": null,
+        "fidelity": "DIRECT",
+        "provenance": {
+          "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+          "channel": "power"
+        },
+        "source_age_seconds": 0.0,
+        "stale_after_seconds": 2.0
+      },
+      "reward": {
+        "value": 1.5303610049529563,
+        "unit": "",
+        "validity": "valid",
+        "error": null,
+        "fidelity": "DIRECT",
+        "provenance": {
+          "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+          "channel": "reward"
+        },
+        "source_age_seconds": 0.0,
+        "stale_after_seconds": 2.0
+      }
+    },
+    "scene": {
+      "name": "turb3_row",
+      "backend": "fastfarm",
+      "turbine": "nrel5mw",
+      "dt": 3.0,
+      "layout": [
+        {
+          "id": "T1",
+          "x": 0.0,
+          "y": 0.0
+        },
+        {
+          "id": "T2",
+          "x": 504.0,
+          "y": 0.0
+        },
+        {
+          "id": "T3",
+          "x": 1008.0,
+          "y": 0.0
+        }
+      ],
+      "inflow": {
+        "speed": 8.0,
+        "direction": 270.0,
+        "turbulence": null
+      },
+      "controls": [
+        "yaw"
+      ],
+      "sensors": [
+        {
+          "type": "power",
+          "mount": "nacelle",
+          "turbines": "all"
+        },
+        {
+          "type": "actuator",
+          "mount": "nacelle",
+          "turbines": "all"
+        },
+        {
+          "type": "bladeload",
+          "mount": "nacelle",
+          "turbines": "all"
+        },
+        {
+          "type": "rotorspeed",
+          "mount": "nacelle",
+          "turbines": "all"
+        },
+        {
+          "type": "vibration",
+          "mount": "nacelle",
+          "turbines": "all"
+        },
+        {
+          "type": "lidar",
+          "mount": "nacelle",
+          "turbines": "T1"
+        }
+      ],
+      "terrain": "mountains"
+    },
+    "run_id": "220ff34d25404e28b5f884c60edb6b9c",
+    "channel_table": [
+      [
+        "power",
+        "power",
+        "DIRECT",
+        true,
+        "FAST.Farm 发电机功率，经 mdp.py:284 除 1e6 为 MW"
+      ],
+      [
+        "yaw",
+        "actuator",
+        "DIRECT",
+        true,
+        "偏航/桨距/转矩。桨距分指令与实测两路：指令是外部累加的 PitchRef （DISCON.F90:523 是 MAX 下界语义），实测是 avrSWAP(4) 回读"
+      ],
+      [
+        "pitch",
+        "actuator",
+        "DIRECT",
+        true,
+        "偏航/桨距/转矩。桨距分指令与实测两路：指令是外部累加的 PitchRef （DISCON.F90:523 是 MAX 下界语义），实测是 avrSWAP(4) 回读"
+      ],
+      [
+        "pitch_meas",
+        "actuator",
+        "DIRECT",
+        true,
+        "偏航/桨距/转矩。桨距分指令与实测两路：指令是外部累加的 PitchRef （DISCON.F90:523 是 MAX 下界语义），实测是 avrSWAP(4) 回读"
+      ],
+      [
+        "torque",
+        "actuator",
+        "DIRECT",
+        true,
+        "偏航/桨距/转矩。桨距分指令与实测两路：指令是外部累加的 PitchRef （DISCON.F90:523 是 MAX 下界语义），实测是 avrSWAP(4) 回读"
+      ],
+      [
+        "m_flap",
+        "bladeload",
+        "DIRECT",
+        true,
+        "叶根挥舞/摆振弯矩，avrSWAP(30-32,69-71) 经 DISCON.F90:363-368 回传，mdp.py:283 除 1e7"
+      ],
+      [
+        "m_edge",
+        "bladeload",
+        "DIRECT",
+        true,
+        "叶根挥舞/摆振弯矩，avrSWAP(30-32,69-71) 经 DISCON.F90:363-368 回传，mdp.py:283 除 1e7"
+      ],
+      [
+        "rotorspeed",
+        "rotorspeed",
+        "EXPORTED",
+        true,
+        "由 ω=P/(η·T) 反解高速轴、再除齿轮箱速比 97 得转子转速；MPI 的 12 个通道里没有转速，不是仿真器直接回传"
+      ],
+      [
+        "vibration",
+        "vibration",
+        "EXPORTED",
+        true,
+        "由叶根弯矩序列取 1P/3P 谱线与 RMS；不是加速度计实测"
+      ],
+      [
+        "lidar",
+        "lidar",
+        "EXPORTED",
+        true,
+        "从 InflowWind 的 .bts 湍流盒沿视线插值；无湍流盒时退化为均匀来流"
+      ]
+    ]
+  },
+  "verified_snapshot": {
+    "mode": "replay",
+    "step": 2,
+    "iteration": 0,
+    "phase": "sampling",
+    "timestamp": {
+      "value": 6.0,
+      "timebase": "simulation_seconds"
+    },
+    "turbines": [
+      {
+        "turbine_id": "T1",
+        "channels": {
+          "yaw": {
+            "value": 0.47114503383636475,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "yaw"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "rotor_speed": {
+            "value": 9.0437894312033,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "provenance": {
+              "formula": "FastFarmDriver._rotor_speed: P/(efficiency*torque)/gear_ratio",
+              "channel": "rotor_speed"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "power": {
+            "value": 1.707118375,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "power"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "load": {
+            "value": 0.4044225229166667,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "load"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "torque": {
+            "value": 19685.24609375,
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "torque"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch_command": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Source channel unavailable",
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch_command"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch_measured": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch_measured"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "wind_speed": {
+            "value": 7.999026775360107,
+            "unit": "m/s",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "wind_speed"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "wind_direction": {
+            "value": 270.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "wind_direction"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "reward": {
+            "value": null,
+            "unit": "",
+            "validity": "invalid",
+            "error": "non-finite source value",
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "reward"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "m_flap": {
+            "value": [
+              5458286.0,
+              5921459.999999999,
+              5385381.0
+            ],
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "m_flap"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "m_edge": {
+            "value": [
+              -2828425.75,
+              1797177.625,
+              2874621.0
+            ],
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "m_edge"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          }
+        }
+      },
+      {
+        "turbine_id": "T2",
+        "channels": {
+          "yaw": {
+            "value": 0.8200564384460449,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "yaw"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "rotor_speed": {
+            "value": 7.7228963851975045,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "provenance": {
+              "formula": "FastFarmDriver._rotor_speed: P/(efficiency*torque)/gear_ratio",
+              "channel": "rotor_speed"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "power": {
+            "value": 0.5663578125,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "power"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "load": {
+            "value": 0.2747437020833333,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "load"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "torque": {
+            "value": 7647.83203125,
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "torque"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch_command": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Source channel unavailable",
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch_command"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch_measured": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch_measured"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "wind_speed": {
+            "value": 4.845807075500488,
+            "unit": "m/s",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "wind_speed"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "wind_direction": {
+            "value": 270.0083949428202,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "wind_direction"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "reward": {
+            "value": null,
+            "unit": "",
+            "validity": "invalid",
+            "error": "non-finite source value",
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "reward"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "m_flap": {
+            "value": [
+              3237220.2500000005,
+              3559606.2499999995,
+              3501191.0
+            ],
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "m_flap"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "m_edge": {
+            "value": [
+              317016.12499999994,
+              3145340.7500000005,
+              -2724247.75
+            ],
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "m_edge"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          }
+        }
+      },
+      {
+        "turbine_id": "T3",
+        "channels": {
+          "yaw": {
+            "value": 0.8200428485870361,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "yaw"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "rotor_speed": {
+            "value": 7.722478049171322,
+            "unit": "rpm",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "SYNTH",
+            "provenance": {
+              "formula": "FastFarmDriver._rotor_speed: P/(efficiency*torque)/gear_ratio",
+              "channel": "rotor_speed"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "power": {
+            "value": 0.5660401875,
+            "unit": "MW",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "power"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "load": {
+            "value": 0.2745945119791667,
+            "unit": "",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "load"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "torque": {
+            "value": 7643.95703125,
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "torque"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch_command": {
+            "value": null,
+            "unit": "deg",
+            "validity": "unsupported",
+            "error": "Source channel unavailable",
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch_command"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "pitch_measured": {
+            "value": 0.0,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "pitch_measured"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "wind_speed": {
+            "value": 4.8451714515686035,
+            "unit": "m/s",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "wind_speed"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "wind_direction": {
+            "value": 270.00829611852066,
+            "unit": "deg",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "wind_direction"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "reward": {
+            "value": null,
+            "unit": "",
+            "validity": "invalid",
+            "error": "non-finite source value",
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "reward"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "m_flap": {
+            "value": [
+              3237038.25,
+              3558368.25,
+              3500158.5
+            ],
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "m_flap"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          },
+          "m_edge": {
+            "value": [
+              310242.46875,
+              3148682.7499999995,
+              -2721180.5
+            ],
+            "unit": "N m",
+            "validity": "valid",
+            "error": null,
+            "fidelity": "DIRECT",
+            "provenance": {
+              "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+              "channel": "m_edge"
+            },
+            "source_age_seconds": 0.0,
+            "stale_after_seconds": 2.0
+          }
+        }
+      }
+    ],
+    "farm": {
+      "power": {
+        "value": 2.839516375,
+        "unit": "MW",
+        "validity": "valid",
+        "error": null,
+        "fidelity": "DIRECT",
+        "provenance": {
+          "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+          "channel": "power"
+        },
+        "source_age_seconds": 0.0,
+        "stale_after_seconds": 2.0
+      },
+      "reward": {
+        "value": 1.5313980713515156,
+        "unit": "",
+        "validity": "valid",
+        "error": null,
+        "fidelity": "DIRECT",
+        "provenance": {
+          "backend_session": "4e82139d0ee54ee8a69f473cf5315469",
+          "channel": "reward"
+        },
+        "source_age_seconds": 0.0,
+        "stale_after_seconds": 2.0
+      }
+    },
+    "scene": {
+      "name": "turb3_row",
+      "backend": "fastfarm",
+      "turbine": "nrel5mw",
+      "dt": 3.0,
+      "layout": [
+        {
+          "id": "T1",
+          "x": 0.0,
+          "y": 0.0
+        },
+        {
+          "id": "T2",
+          "x": 504.0,
+          "y": 0.0
+        },
+        {
+          "id": "T3",
+          "x": 1008.0,
+          "y": 0.0
+        }
+      ],
+      "inflow": {
+        "speed": 8.0,
+        "direction": 270.0,
+        "turbulence": null
+      },
+      "controls": [
+        "yaw"
+      ],
+      "sensors": [
+        {
+          "type": "power",
+          "mount": "nacelle",
+          "turbines": "all"
+        },
+        {
+          "type": "actuator",
+          "mount": "nacelle",
+          "turbines": "all"
+        },
+        {
+          "type": "bladeload",
+          "mount": "nacelle",
+          "turbines": "all"
+        },
+        {
+          "type": "rotorspeed",
+          "mount": "nacelle",
+          "turbines": "all"
+        },
+        {
+          "type": "vibration",
+          "mount": "nacelle",
+          "turbines": "all"
+        },
+        {
+          "type": "lidar",
+          "mount": "nacelle",
+          "turbines": "T1"
+        }
+      ],
+      "terrain": "mountains"
+    },
+    "run_id": "220ff34d25404e28b5f884c60edb6b9c",
+    "channel_table": [
+      [
+        "power",
+        "power",
+        "DIRECT",
+        true,
+        "FAST.Farm 发电机功率，经 mdp.py:284 除 1e6 为 MW"
+      ],
+      [
+        "yaw",
+        "actuator",
+        "DIRECT",
+        true,
+        "偏航/桨距/转矩。桨距分指令与实测两路：指令是外部累加的 PitchRef （DISCON.F90:523 是 MAX 下界语义），实测是 avrSWAP(4) 回读"
+      ],
+      [
+        "pitch",
+        "actuator",
+        "DIRECT",
+        true,
+        "偏航/桨距/转矩。桨距分指令与实测两路：指令是外部累加的 PitchRef （DISCON.F90:523 是 MAX 下界语义），实测是 avrSWAP(4) 回读"
+      ],
+      [
+        "pitch_meas",
+        "actuator",
+        "DIRECT",
+        true,
+        "偏航/桨距/转矩。桨距分指令与实测两路：指令是外部累加的 PitchRef （DISCON.F90:523 是 MAX 下界语义），实测是 avrSWAP(4) 回读"
+      ],
+      [
+        "torque",
+        "actuator",
+        "DIRECT",
+        true,
+        "偏航/桨距/转矩。桨距分指令与实测两路：指令是外部累加的 PitchRef （DISCON.F90:523 是 MAX 下界语义），实测是 avrSWAP(4) 回读"
+      ],
+      [
+        "m_flap",
+        "bladeload",
+        "DIRECT",
+        true,
+        "叶根挥舞/摆振弯矩，avrSWAP(30-32,69-71) 经 DISCON.F90:363-368 回传，mdp.py:283 除 1e7"
+      ],
+      [
+        "m_edge",
+        "bladeload",
+        "DIRECT",
+        true,
+        "叶根挥舞/摆振弯矩，avrSWAP(30-32,69-71) 经 DISCON.F90:363-368 回传，mdp.py:283 除 1e7"
+      ],
+      [
+        "rotorspeed",
+        "rotorspeed",
+        "EXPORTED",
+        true,
+        "由 ω=P/(η·T) 反解高速轴、再除齿轮箱速比 97 得转子转速；MPI 的 12 个通道里没有转速，不是仿真器直接回传"
+      ],
+      [
+        "vibration",
+        "vibration",
+        "EXPORTED",
+        true,
+        "由叶根弯矩序列取 1P/3P 谱线与 RMS；不是加速度计实测"
+      ],
+      [
+        "lidar",
+        "lidar",
+        "EXPORTED",
+        true,
+        "从 InflowWind 的 .bts 湍流盒沿视线插值；无湍流盒时退化为均匀来流"
+      ]
+    ]
+  },
+  "final_state": {
+    "mode": "replay",
+    "connection": "CONNECTED",
+    "run_status": "READY",
+    "confirmed": true,
+    "session_id": "4e82139d0ee54ee8a69f473cf5315469",
+    "run_id": null,
+    "capabilities": [
+      "training_stats_v1",
+      "single_step",
+      "pause"
+    ],
+    "error": ""
+  }
+}

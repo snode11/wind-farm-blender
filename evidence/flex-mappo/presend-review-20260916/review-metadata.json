@@ -1,0 +1,18 @@
+{
+  "extension_version": "0.3.0",
+  "source_sha256": {
+    "scripts/blender/wfrl_launcher.py": "a964bc5997dcebf3d06b4f0bf2a7c2cd9197e52a2637aba9e841cbdd7726e389",
+    "scripts/blender/wfrl_blender_bootstrap.py": "b64109dca3a34142db542a31cf96a56baf4768867a70265fad81dd78c84a8941",
+    "wfrl/blender_bridge/backend_session.py": "05bdc1c9bf56e3ddebc5d164677397a535edd93065c1c6f512b95cd7ec24ea95",
+    "wfrl/blender_bridge/server.py": "53b4117790af7a519f6ffd82a47eaefb2b5308dab15e56757da49b639165762a",
+    "tests/blender_bridge/test_part4_backend.py": "69a9002df6b5c7c54fd9c36df5d8c3a4ce7ed6da635d1033c14f4144b8132e34",
+    "blender_frontend/tests/blender/launcher_mode_regression.py": "51e7e84acb28d61a1508fa98bbdd5d41ec3cfa9386b8a08262cf1e4537d2e9ef"
+  },
+  "zip_sha256": "e1f5a5ccb67832eabc95302b2c1e551e35b2bf92f47b3b59cc11db6a68f3e441",
+  "backend_final_passed": true,
+  "gui_observed": [
+    "default MAPPO 60s, T1 front quarter",
+    "explicit Replay and Connect: CONNECTED / READY, three-turbine YAML scene",
+    "return to MAPPO, paused at first frame, T1 front quarter"
+  ]
+}

@@ -44,7 +44,7 @@ def draw(connection, opened=(), error=''):
 
 # A folded offline panel still reports errors; it cannot expose backend run actions.
 closed = draw('OFFLINE RESULTS', error='Transport lost')
-assert '雷达离线回放 · 无需连接后端' in closed.labels
+assert '离线结果回放 · 无需连接后端' in closed.labels
 assert not closed.operators and not closed.props
 opened = draw('OFFLINE RESULTS', ('wfrl_replay_backend_connection', 'wfrl_backend_environment'))
 assert 'wfrl.bridge_connect' in opened.operators

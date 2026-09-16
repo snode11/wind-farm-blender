@@ -4,7 +4,7 @@ import time
 import bpy
 from bpy.props import EnumProperty, FloatProperty
 from bpy.app.handlers import persistent
-from ..cameras import ensure_gimbal, aim_gimbal, fill_camera_view
+from ..cameras import ensure_gimbal, aim_gimbal, fill_camera_view, reset_gimbal, down_gimbal
 
 _ACTIVE = None
 
@@ -61,8 +61,11 @@ def switch(scene, context):
 
 
 def change(camera, dx=0, dy=0, zoom=0):
-    aim_gimbal(camera, camera['gimbal_yaw'] + dx,
-               camera['gimbal_pitch'] + dy, camera['gimbal_fov'] + zoom)
+    # The reference shot is rolled 180 degrees; keep drag/joystick directions
+    # aligned with the image rather than reversing them with the optical roll.
+    sign = -1 if camera.get('gimbal_roll', 0) % 360 == 180 else 1
+    aim_gimbal(camera, camera['gimbal_yaw'] + sign * dx,
+               camera['gimbal_pitch'] + sign * dy, camera['gimbal_fov'] + zoom)
 
 
 class GimbalAvailable:
@@ -80,12 +83,16 @@ class WFRL_OT_GimbalPreset(GimbalAvailable, bpy.types.Operator):
 
     def execute(self, context):
         camera = show(context)
-        # Reset is a useful inspection framing: keep the rotor plane and
-        # nacelle in view.  The old reset duplicated DOWN (-90°), which aimed
-        # straight at the ground and produced the clipped view seen in the UI.
-        yaw, pitch = {'DOWN': (180, -90), 'FRONT': (180, 0),
-                      'BACK': (0, 0), 'RESET': (180, -35)}[self.preset]
-        aim_gimbal(camera, yaw, pitch, 75 if self.preset == 'RESET' else camera['gimbal_fov'])
+        if self.preset == 'DOWN':
+            down_gimbal(camera)
+        elif self.preset == 'RESET':
+            reset_gimbal(camera)
+        else:
+            yaw, pitch = {'FRONT': (180, 0),
+                          'BACK': (0, 0)}[self.preset]
+            camera['gimbal_roll'] = 0.0
+            camera.data.shift_y = 0
+            aim_gimbal(camera, yaw, pitch, camera['gimbal_fov'])
         return {'FINISHED'}
 
 
@@ -238,6 +245,38 @@ class WFRL_OT_GimbalMode(GimbalAvailable, bpy.types.Operator):
             gpu.state.blend_set('NONE')
 
 
+def draw_gimbal_controls(layout, context, *, allow_turbine_selection=True):
+    """Shared camera controls; farm replay binds them to its selected turbine."""
+    scene = context.scene
+    if allow_turbine_selection:
+        row = layout.row(align=True)
+        for turbine in ('T1', 'T2', 'T3'):
+            cell = row.row(align=True)
+            cell.enabled = scene.objects.get(f'WFRL.Turbine.{turbine}.YawRoot') is not None
+            cell.prop_enum(scene, 'wfrl_gimbal_turbine', turbine)
+    layout = layout.column()
+    layout.enabled = scene.objects.get(f'WFRL.Turbine.{scene.wfrl_gimbal_turbine}.YawRoot') is not None
+    layout.operator('wfrl.gimbal_mode', text='Exit Camera Mode / 退出' if _ACTIVE else 'Camera Mode / 相机模式', icon='CAMERA_DATA')
+    layout.prop(scene, 'wfrl_gimbal_speed')
+    row = layout.row(align=True)
+    for value, label in (('DOWN', 'Down ↓'), ('BACK', 'Back')):
+        row.operator('wfrl.gimbal_preset', text=label).preset = value
+    # Pose is an observation, so keep it readable even if the selected
+    # turbine's joystick controls are unavailable.
+    pose = layout.column(align=True)
+    space = context.space_data
+    camera = (space.camera if space and space.type == 'VIEW_3D' and space.use_local_camera else scene.camera)
+    if camera:
+        pan, tilt, roll = camera_world_angles(camera, context.evaluated_depsgraph_get())
+        pose.label(text='当前 Camera 仿真姿态 · 世界坐标')
+        pose.label(text=camera.name.removeprefix('WFRL.Camera.'))
+        pose.label(text=f'Pan {angle_label(pan)}  Tilt {angle_label(tilt)}')
+        pose.label(text=f'Roll {angle_label(roll)} · 无独立控制')
+    else:
+        pose.label(text='Camera 仿真姿态：未选择相机')
+    pose.label(text='拖动转向 · 滚轮缩放 · Esc 退出')
+
+
 class WFRL_PT_Gimbal(bpy.types.Panel):
     bl_label = 'WFRL / Camera 相机与演示'
     bl_idname = 'WFRL_PT_gimbal'
@@ -246,38 +285,18 @@ class WFRL_PT_Gimbal(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_category = 'Item'
 
+    @classmethod
+    def poll(cls, context):
+        # Hide only while the dedicated farm panel is present and usable.
+        from .farm_replay import unified_panel_active
+        return not unified_panel_active(context.scene)
+
     def draw(self, context):
         scene, layout = context.scene, self.layout
         from .clearance import draw_navigation, fold
         draw_navigation(layout, scene)
         if fold(layout, scene, 'wfrl_clearance_show_camera', '云台控制'):
-            row = layout.row(align=True)
-            for turbine in ('T1', 'T2', 'T3'):
-                cell = row.row(align=True)
-                cell.enabled = scene.objects.get(f'WFRL.Turbine.{turbine}.YawRoot') is not None
-                cell.prop_enum(scene, 'wfrl_gimbal_turbine', turbine)
-            layout = layout.column()
-            layout.enabled = scene.objects.get(f'WFRL.Turbine.{scene.wfrl_gimbal_turbine}.YawRoot') is not None
-            layout.operator('wfrl.gimbal_mode', text='Exit Camera Mode / 退出' if _ACTIVE else 'Camera Mode / 相机模式', icon='CAMERA_DATA')
-            layout.prop(scene, 'wfrl_gimbal_speed')
-            row = layout.row(align=True)
-            for value, label in (('DOWN', 'Down ↓'), ('FRONT', 'Front'), ('BACK', 'Back')):
-                row.operator('wfrl.gimbal_preset', text=label).preset = value
-            layout.operator('wfrl.gimbal_preset', text='Reset / 复位').preset = 'RESET'
-            # Pose is an observation, so keep it readable even if the selected
-            # turbine's joystick controls are unavailable.
-            pose = self.layout.column(align=True)
-            space = context.space_data
-            camera = (space.camera if space and space.type == 'VIEW_3D' and space.use_local_camera else scene.camera)
-            if camera:
-                pan, tilt, roll = camera_world_angles(camera, context.evaluated_depsgraph_get())
-                pose.label(text='当前 Camera 仿真姿态 · 世界坐标')
-                pose.label(text=camera.name.removeprefix('WFRL.Camera.'))
-                pose.label(text=f'Pan {angle_label(pan)}  Tilt {angle_label(tilt)}')
-                pose.label(text=f'Roll {angle_label(roll)} · 无独立控制')
-            else:
-                pose.label(text='Camera 仿真姿态：未选择相机')
-            pose.label(text='拖动转向 · 滚轮缩放 · Esc 退出')
+            draw_gimbal_controls(layout, context)
         from .clearance import draw as draw_clearance
         draw_clearance(self.layout, scene)
 

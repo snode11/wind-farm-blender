@@ -23,10 +23,13 @@ def reader_for(scene):
 
 def clear(scene, reason='回放数据未就绪'):
     _READERS.pop(scene.as_pointer(), None)
+    try:
+        from . import tip_tracking
+        tip_tracking.reset(scene, 'replay_clear')
+    except ImportError:
+        pass
     scene['wfrl_clearance_status'] = reason
     scene.wfrl_clearance_show_config = True
-
-
 def sample(scene):
     reader = reader_for(scene)
     if reader is None:
@@ -79,6 +82,11 @@ def load(scene, path, demo):
     from mathutils import Vector
     local_origin = Vector(origin) - yaw_root.parent.location - yaw_root.location
     ensure_radar(scene, tid, local_origin, directions)
+    from . import farm_flex, tip_tracking
+    farm_flex.detach(scene)
+    tip_tracking.disable(scene, 'standalone_replay')
+    if 'wfrl_farm_flex_path' in scene:
+        del scene['wfrl_farm_flex_path']
     runtime.enter_result_replay()
     timebase = (scene.get('wfrl_clearance_timebase_fps')
                 if scene.get('wfrl_scene_kind') == 'clearance_replay' else None)
@@ -138,6 +146,14 @@ def on_load(_):
             frame = scene.frame_current
             path = getattr(scene, 'wfrl_clearance_' + demo + '_path', '')
             try:
+                if scene.get('wfrl_farm_flex_path'):
+                    from pathlib import Path
+                    from . import farm_flex, runtime
+                    runtime.enter_result_replay()
+                    saved = Path(scene['wfrl_farm_flex_path'])
+                    farm_flex.attach(scene, saved if saved.is_dir() else farm_flex.default_package())
+                    scene.frame_set(frame)
+                    continue
                 load(scene, bpy.path.abspath(path), demo)
                 scene.frame_set(frame)
             except (ValueError, OSError, ImportError, KeyError, TypeError) as exc:
@@ -151,10 +167,18 @@ def register():
         persistent(callback)
         if callback not in handlers:
             handlers.append(callback)
+    from . import tip_tracking
+    tip_tracking.register()
 
 
 def unregister():
     import bpy
+    import sys
+    farm = sys.modules.get(__package__ + '.farm_flex')
+    if farm is not None:
+        farm.detach()
+    from . import tip_tracking
+    tip_tracking.unregister()
     _READERS.clear()
     if bpy.app.timers.is_registered(_stop_finished_playback):
         bpy.app.timers.unregister(_stop_finished_playback)

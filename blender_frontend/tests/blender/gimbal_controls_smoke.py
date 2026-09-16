@@ -22,12 +22,14 @@ def run():
                 return SimpleNamespace(type=kind, value=value, mouse_x=region.x+x, mouse_y=region.y+y)
             camera = gimbal.current(scene)
             initial = camera.location.copy()
+            initial_yaw = camera['gimbal_yaw']
+            initial_fov = camera['gimbal_fov']
             assert op.modal(bpy.context, event('LEFTMOUSE')) == {'RUNNING_MODAL'}
             op.modal(bpy.context, event('MOUSEMOVE', x=190, y=200))
             op.modal(bpy.context, event('LEFTMOUSE', 'RELEASE', x=190, y=200))
-            assert camera['gimbal_yaw'] != 180 and camera['gimbal_pitch'] > -90
+            assert camera['gimbal_yaw'] != initial_yaw and camera['gimbal_pitch'] > -90
             op.modal(bpy.context, event('WHEELUPMOUSE'))
-            assert camera['gimbal_fov'] == 72
+            assert camera['gimbal_fov'] == initial_fov - 3
             scene.wfrl_gimbal_turbine = 'T2'
             assert area.spaces.active.camera.name == 'WFRL.Camera.T2.Gimbal'
             assert op.modal(bpy.context, event('MOUSEMOVE')) != {'FINISHED'}
@@ -44,6 +46,20 @@ def run():
             op.modal(bpy.context, event('TIMER'))
             assert camera2['gimbal_yaw'] == yaw, 'Joystick must stop on release'
             assert (camera.location-initial).length == 0
+            for turbine in ('T1', 'T2', 'T3'):
+                scene.wfrl_gimbal_turbine = turbine
+                assert bpy.ops.wfrl.gimbal_preset(preset='FRONT') == {'FINISHED'}
+                assert bpy.ops.wfrl.gimbal_preset(preset='DOWN') == {'FINISHED'}
+                down = gimbal.current(scene)
+                assert down.parent.name == f'WFRL.Turbine.{turbine}.YawRoot'
+                assert down['gimbal_yaw'] == 180 and down['gimbal_pitch'] == -67
+                assert down['gimbal_roll'] == 180 and down['gimbal_fov'] == 85
+                assert area.spaces.active.camera == down
+                inner_location = down.location.copy()
+                assert bpy.ops.wfrl.gimbal_preset(preset='RESET') == {'FINISHED'}
+                assert down['gimbal_roll'] == 0 and down['gimbal_fov'] == 62
+                assert 20 < down['gimbal_yaw'] < 70 and -30 < down['gimbal_pitch'] < 0
+                assert (down.location - inner_location).length > 100
             assert op.modal(bpy.context, event('ESC')) == {'FINISHED'}
             assert gimbal._ACTIVE is None and op._timer is None and op._handle is None
         wfrl_blender.unregister()

@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "wfrl_blender"
-version = "0.2.5"
+version = "0.3.0"
 name = "WFRL Blender"
 tagline = "Wind farm reinforcement-learning visualization workspace"
 maintainer = "WFRL"

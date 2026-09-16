@@ -1,0 +1,13 @@
+module changed on disk: '/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py' reloading...
+CHECK_PASS real Bridge handshake
+CHECK_PASS scene.load acknowledged; three-turbine scene built
+CHECK_PASS FAST.Farm started, real snapshot arrived, pause acknowledged
+CHECK_PASS single step advanced exactly one backend step
+CHECK_PASS three turbines: finite DIRECT yaw/pitch/power/torque; rpm explicitly formula-derived
+CHECK_PASS disconnect/reconnect resumed same paused session
+CHECK_PASS resume produced another snapshot; stop confirmed STOPPED
+CHECK_PASS reset returned READY
+REAL_BACKEND_END_TO_END_PASS
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

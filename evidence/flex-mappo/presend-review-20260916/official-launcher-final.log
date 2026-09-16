@@ -1,0 +1,6 @@
+[WFRL] Starting Bridge: /opt/homebrew/Cellar/open-mpi/5.0.9/bin/mpirun -n 1 /opt/anaconda3/envs/wfrl-mac/bin/python3.11 -m wfrl.blender_bridge --host 127.0.0.1 --port 8765 --scene /Users/eason/Desktop/wfcrl/wind farm RL/scenes/turb3_row.yaml
+WFRL Bridge listening on 127.0.0.1:8765
+[WFRL] Starting Blender with MAPPO replay; owned Bridge PID 16326 ready on port 8765
+[WFRL] MAPPO 60s loaded (OFFLINE RESULTS); Bridge ready at 127.0.0.1:8765
+[WFRL] Bridge handshake confirmed; loading /Users/eason/Desktop/wfcrl/wind farm RL/scenes/turb3_row.yaml
+[WFRL] CONNECTED / READY: configured scene loaded; no run started

@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "sha256": "e1f5a5ccb67832eabc95302b2c1e551e35b2bf92f47b3b59cc11db6a68f3e441",
+  "runtime_checks": [
+    {
+      "path": "/Users/eason/Desktop/wfcrl/三机叶片回放-20260916/blender_frontend/wfrl_blender",
+      "files_verified": 68,
+      "status": "PASS"
+    },
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+      "files_verified": 68,
+      "status": "PASS"
+    }
+  ],
+  "portable_archive_matches": true,
+  "embedded_duration_s": 60,
+  "old_synthetic_demo_removed": true
+}

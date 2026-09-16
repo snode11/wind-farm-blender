@@ -149,26 +149,35 @@ def record_curve(message):
                             record['unit'], record['fidelity'], record['validity'], deepcopy(record['provenance'])))
 
 
-def record_demo(sample, turbine_ids=('T1', 'T2', 'T3'), *, manual=False):
+def record_farm(time_s, poses, manifest, extra=None):
+    """Record only fields present in the physical result; preserve absent channels."""
     global _local_sequence
     _local_sequence += 1
+    provenance = {'source': 'FAST.Farm', 'status': manifest['status'],
+                  'policy_sha256': manifest['policy']['sha256'],
+                  'geometry_sha256': manifest['files']['geometry.npz'],
+                  'pitch': 'mean of three measured blade pitches'}
     def record(value, unit):
-        return dict(value=value, unit=unit, validity='valid', error=None, fidelity='SYNTH',
-                    source_age_seconds=0., stale_after_seconds=2.,
-                    provenance={'formula': 'sample_demo; scripted preview'})
+        return dict(value=float(value), unit=unit, validity='valid', error=None,
+                    fidelity='FAST.Farm', source_age_seconds=0., stale_after_seconds=2.,
+                    provenance=provenance)
     turbines = []
-    for index, tid in enumerate(turbine_ids):
-        channels = {name: record(values[index], unit) for name, values, unit in (
-            ('yaw', sample.yaw_deg, 'deg'), ('pitch', sample.pitch_deg, 'deg'),
-            ('rotor_speed', sample.rpm, 'rpm'), ('power', sample.power_mw, 'MW'))}
-        if manual:
-            for channel in channels.values():
-                channel.update(value=None, validity='unsupported', error='Display pose has no physical power model')
+    for tid, pose in zip(manifest['turbine_ids'], poses):
+        channels = {'yaw': record(pose[0], 'deg'),
+                    'pitch': record(sum(pose[3:]) / 3, 'deg'),
+                    'rotor_speed': record(pose[2], 'rpm')}
+        for name, value in (extra or {}).get(tid, {}).items():
+            channels[name] = record(value['value'], value['unit'])
+            channels[name]['provenance'] = dict(provenance, source_channel=value['source_channel'],
+                                                source_sha256=value['source_sha256'])
         turbines.append(dict(turbine_id=tid, channels=channels))
-    farm = {} if manual else {'power': record(sum(sample.power_mw), 'MW')}
-    return record_snapshot(dict(session_id='local-demo', sequence=_local_sequence, payload=dict(mode='demo', run_id=_local_run_id,
-        step=round(sample.time_s * 1000), timestamp=dict(value=sample.time_s, timebase='simulation_seconds'),
-        turbines=turbines, farm=farm)))
+    farm = {}
+    if all('power' in turbine['channels'] for turbine in turbines):
+        farm['power'] = record(sum(t['channels']['power']['value'] for t in turbines), 'MW')
+    return record_snapshot(dict(session_id='mappo-results', sequence=_local_sequence,
+        payload=dict(mode='replay', run_id=_local_run_id, step=round(time_s * 1000),
+                     timestamp=dict(value=time_s, timebase='simulation_seconds'),
+                     turbines=turbines, farm=farm)))
 
 
 _handle = None

@@ -14,7 +14,8 @@ class WFRL_PT_live_telemetry(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return True
+        from .. import farm_flex
+        return not farm_flex.is_active(context.scene)
 
     def draw(self, context):
         layout = self.layout
@@ -29,21 +30,6 @@ class WFRL_PT_live_telemetry(bpy.types.Panel):
         row.enabled = charts.export_job.poll() != 'WRITING'
         row.operator('wfrl.export_history', icon='EXPORT')
         layout.label(text=scene.get('wfrl_history_export_status', 'History export ready'))
-        if runtime.get_state().connection == 'LOCAL DEMO':
-            layout.label(text='SYNTH / scripted preview; reward unavailable')
-            selected = getattr(scene, 'wfrl_selected_turbine', 'ALL')
-            ids = charts.history.turbine_ids() if selected == 'ALL' else (selected,)
-            for tid in ids:
-                box = layout.box(); box.label(text=tid)
-                for name in charts.CHANNELS:
-                    points = charts.history.points(tid, name)
-                    if not points:
-                        continue
-                    point = points[-1]
-                    value = f'{point.value:.5g}' if point.value is not None else '—'
-                    box.label(text=f'{charts.LABELS[name]}: {value} {point.unit}')
-                    box.label(text=f'{point.fidelity} / {point.validity}')
-            return
         state = runtime.kinematics
         data = state.snapshot
         if not data:

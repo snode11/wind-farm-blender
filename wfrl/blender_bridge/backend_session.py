@@ -214,6 +214,9 @@ class BackendSession:
                     self._progress_reader.start()
                 else:
                     factory = self.trainer_factory
+                    if 'tip_package' in options:
+                        from .tip_replay import RecordedTipTrainer
+                        factory = RecordedTipTrainer
                     if factory is None:
                         if getattr(self.scene, 'backend', None) == 'floris':
                             if mode != 'demo': raise ValueError('FLORIS supports backend demo only; existing Trainer requires FAST.Farm')
@@ -229,7 +232,9 @@ class BackendSession:
                                 factory = Trainer
                     if set(options) & {'on_snapshot', 'demo', 'replay'}: raise ValueError('Reserved Trainer options')
                     adapter = SnapshotAdapter(self.scene, self.session_id, mode)
+                    last_control_step = -1
                     def snapshot_callback(snapshot):
+                        nonlocal last_control_step
                         try:
                             with self._condition:
                                 if self._stopping: return
@@ -248,12 +253,20 @@ class BackendSession:
                                     if progress:
                                         progress['run_id'] = self.run_id
                                         self.emit('training_stats', progress)
-                                if self._paused and self.status == 'RUNNING': self.lifecycle('PAUSED')
+                                # Preparation and optimizer updates can repeat step 0
+                                # or the preceding control step. Pause/step only at a
+                                # new control boundary, which the frontend can confirm.
+                                control_boundary = (payload.get('phase') != 'warmup'
+                                                    and payload['step'] > last_control_step)
+                                if control_boundary:
+                                    last_control_step = payload['step']
+                                if control_boundary and self._paused and self.status == 'RUNNING':
+                                    self.lifecycle('PAUSED')
                                 events = snapshot.wire_events if hasattr(snapshot, "wire_events") else adapter.safety_events(snapshot)
                                 for event in events: self.emit('safety_event', event)
-                                while self._paused and not self._stopping and self._permits == 0:
+                                while control_boundary and self._paused and not self._stopping and self._permits == 0:
                                     self._condition.wait()
-                                if self._permits: self._permits -= 1
+                                if control_boundary and self._permits: self._permits -= 1
                                 if runtime is not None:
                                     for topic, enabled in self._channel_states.items():
                                         runtime.set_enabled(topic, enabled)

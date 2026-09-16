@@ -78,15 +78,38 @@ def tip_reference(points, sections):
     return points[-len(points)//sections:].mean(axis=0)
 
 def collision_excluded(points,triangles):
-    """Conservative separating half-space test: each triangle above tower or upstream.
-    Linear triangle coordinates cannot cross a convex separating half-space.
-    Radius uses the largest cone radius over that triangle's overlapping z range.
-    False means unresolved, never a fabricated collision-free certificate.
+    """Conservatively separate every triangle from the rigid tapered tower.
+
+    Use the largest tower radius over each triangle's z range. The cheap
+    upstream half-space test handles most surfaces. For remaining triangles,
+    distance from the origin to the entire XY projection must exceed that
+    radius: the tower is enclosed by that cylinder, so separation is sufficient.
+    False still means unresolved, not proof of an actual collision.
     """
-    tri=points[triangles];low=tri[:,:,2].min(1);high=tri[:,:,2].max(1)
+    tri=np.asarray(points,dtype=float)[triangles]
+    if not np.isfinite(tri).all():
+        return False
+    low=tri[:,:,2].min(1);high=tri[:,:,2].max(1)
     overlap=(low<=87.6)&(high>=0)
+    tri=tri[overlap]
     radii=3.+(1.935-3.)*np.clip(low[overlap],0,87.6)/87.6
-    return bool(np.all(tri[overlap,:,0].max(1)<-radii))
+    pending=tri[:,:,0].max(1)>=-radii
+    if not pending.any():
+        return True
+    xy=tri[pending,:,:2];radii=radii[pending]
+    end=np.roll(xy,-1,axis=1);edge=end-xy
+    lengths=np.sum(edge*edge,axis=2)
+    alpha=np.divide(-np.sum(xy*edge,axis=2),lengths,
+                    out=np.zeros_like(lengths),where=lengths>0)
+    nearest=xy+np.clip(alpha,0,1)[:,:,None]*edge
+    d2=np.min(np.sum(nearest*nearest,axis=2),axis=1)
+    # A projected triangle enclosing the origin has distance zero even when
+    # all three edges are outside the cylinder. Degenerate projections are
+    # conservatively treated as enclosing when all cross products vanish.
+    cross=edge[:,:,0]*(-xy[:,:,1])-edge[:,:,1]*(-xy[:,:,0])
+    inside=np.all(cross>=0,axis=1)|np.all(cross<=0,axis=1)
+    d2[inside]=0
+    return bool(np.all(d2>(radii+1e-9)**2))
 
 def background_first_hit(origin,direction):
     """First intersection with rigid tapered tower or ground plane (ideal opaque)."""

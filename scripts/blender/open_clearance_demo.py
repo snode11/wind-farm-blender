@@ -25,9 +25,13 @@ for name in ('VIEW3D_PT_tools_object_options_transform', 'VIEW3D_PT_tools_object
     if panel is not None and panel.is_registered:
         bpy.utils.unregister_class(panel)
 path = ROOT / 'evidence/lidar-frontend/clearance-demo.blend'
-if not path.is_file():
-    raise FileNotFoundError('Prepared presentation is missing: ' + str(path))
-bpy.ops.wm.open_mainfile(filepath=str(path))
+if path.is_file():
+    bpy.ops.wm.open_mainfile(filepath=str(path))
+else:
+    # Source previews must also work after historical evidence is cleaned up.
+    # Rebuild the same project scene; physical packages are still validated below.
+    wfrl_blender.load_demo_scene()
+    bpy.context.scene.wfrl_show_wake = False
 # The source load handler strictly verifies and reloads the saved result package.
 # A bad or missing package stays visibly unavailable instead of using a fixture.
 wfrl_blender._cancel_playback()

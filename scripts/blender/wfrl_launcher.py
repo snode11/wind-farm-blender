@@ -207,7 +207,7 @@ def launch(args: argparse.Namespace) -> int:
         bridge = subprocess.Popen(command, cwd=report["project_dir"], env=env, creationflags=creationflags)
         wait_for_bridge(bridge, args.port, args.startup_timeout)
         blender_args = [str(report["blender"]), "--python-exit-code", "12", "--python", str(BOOTSTRAP)]
-        log(f"Starting Blender connected to owned Bridge PID {bridge.pid} on port {args.port}")
+        log(f"Starting Blender with MAPPO replay; owned Bridge PID {bridge.pid} ready on port {args.port}")
         result = subprocess.run(blender_args, cwd=report["project_dir"], env=env).returncode
     finally:
         session_id = session_file.read_text().strip() if session_file.exists() else ""
