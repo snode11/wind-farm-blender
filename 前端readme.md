@@ -1,5 +1,7 @@
 # WFRL 前端 · 0.3.1
 
+当前发布版本为 **0.3.3**：[下载](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.3)，含雷达反馈与塔顶密封圈/焊缝随动修复。详细验证见发布核对文档；以下早期版本说明保留作为历史。
+
 更新日期：2026-09-16。当前前端是运行在 **Blender 5.2+** 中的风场三维工作台。默认展示三台 NREL 5 MW 风机的 **60 秒 MAPPO 离线仿真记录**，包含九片叶片形变、三台塔架弯曲、T1 叶尖挠度对照、雷达净空和功率/载荷遥测。
 
 [下载 0.3.1](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.1) · [用户操作手册](docs/blender/用户使用手册.md) · [快速演示](docs/blender/MAPPO演示.md) · [实现与维护](blender_frontend/README.md)

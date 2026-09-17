@@ -23,6 +23,8 @@ def reader_for(scene):
 
 def clear(scene, reason='回放数据未就绪'):
     _READERS.pop(scene.as_pointer(), None)
+    from .clearance_visual import reset_beams
+    reset_beams(scene)
     try:
         from . import tip_tracking
         tip_tracking.reset(scene, 'replay_clear')
@@ -117,11 +119,17 @@ def update(scene, depsgraph=None):
     value = sample(scene)
     if value is None:
         return
+    from .clearance_visual import update_beams
+    from .radar_feedback import beam_activity
     tid = scene['wfrl_clearance_turbine']; motion = value['motion']
     prefix = f'WFRL.Turbine.{tid}'
     yaw = scene.objects.get(prefix + '.YawRoot')
     rotor = scene.objects.get(prefix + '.Rotor')
     from . import farm_flex
+    readers = (farm_flex._ACTIVE.readers if farm_flex.is_active(scene)
+               else {tid: reader_for(scene)})
+    for radar_tid, radar_reader in readers.items():
+        update_beams(scene, radar_tid, beam_activity(radar_reader, value['time_s']))
     if not farm_flex.is_active(scene):
         if 'nacelle_position_m' in motion:
             from mathutils import Vector
@@ -176,6 +184,8 @@ def register():
 def unregister():
     import bpy
     import sys
+    from . import radar_feedback
+    radar_feedback.unregister()
     farm = sys.modules.get(__package__ + '.farm_flex')
     if farm is not None:
         farm.detach()

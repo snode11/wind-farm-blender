@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wfrl"
-version = "0.3.1"
+version = "0.3.3"
 description = "Multi-agent RL for wind farm wake-steering control on the WFCRL benchmark (FLORIS + FAST.Farm)"
 requires-python = ">=3.11"
 

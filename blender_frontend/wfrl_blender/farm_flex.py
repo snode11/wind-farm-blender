@@ -154,12 +154,24 @@ class FarmFlex:
                 for polygon in mesh.polygons: polygon.use_smooth=True
                 obj.data=mesh
                 self.towers.append((obj,rest.copy(),index,weight,k))
-                for suffix,z in (('.YawBearing',87.6),('.TowerCollar87',87.52),('.TowerCollar0',.28)):
+                # Primitive collars store height in object.location; decorative
+                # rings store it in their vertices. Apply the same support
+                # transform without adding the baked height a second time.
+                for suffix,z,origin_z in (('.YawBearing',87.6,87.6),
+                                          ('.TowerCollar87',87.52,87.52),
+                                          ('.TowerCollar0',.28,.28),
+                                          ('.YawSeal',87.6,0.),
+                                          ('.TowerWeld28',28.,0.),
+                                          ('.TowerWeld56',56.,0.)):
                     fitting=scene.objects.get(prefix+suffix)
                     if fitting:
+                        if suffix == '.YawSeal':
+                            from .mechanical_details import recess_yaw_seal
+                            recess_yaw_seal(fitting, geometry_data()['scalars']['TowerHt'])
                         fitting.rotation_euler=(0,0,0)
-                        fitting.location=(0,0,z)
-                        self.fittings.append((fitting,k,z))
+                        rest_location=np.array([0.,0.,origin_z])
+                        fitting.location=rest_location
+                        self.fittings.append((fitting,k,z,rest_location))
         scene['wfrl_scene_kind']='clearance_replay'
         scene['wfrl_clearance_turbine']='T1'
         scene['wfrl_clearance_demo']='near_tower'
@@ -191,8 +203,8 @@ class FarmFlex:
             try:
                 obj.data.vertices.foreach_set('co',rest.ravel());obj.data.update()
             except ReferenceError: pass
-        for obj,k,z in self.fittings:
-            try: obj.location=(0,0,z);obj.rotation_euler=(0,0,0)
+        for obj,k,z,rest_location in self.fittings:
+            try: obj.location=rest_location;obj.rotation_euler=(0,0,0)
             except ReferenceError: pass
         if self.tower_motion is not None:
             for tid in self.readers:
@@ -293,11 +305,11 @@ class FarmFlex:
                 obj.data.vertices.foreach_set('co',((1-weight)*a+weight*b).astype(np.float32).ravel())
                 obj.data.update()
             heights=support['heights']
-            for obj,k,z in self.fittings:
+            for obj,k,z,rest_location in self.fittings:
                 j=int(np.clip(np.searchsorted(heights,z)-1,0,len(heights)-2))
                 f=float((z-heights[j])/(heights[j+1]-heights[j]))
                 tr=interpolate_transform(tower[k,j],tower[k,j+1],f)
-                obj.location=tr[:,:3]@np.array([0,0,z])+tr[:,3]
+                obj.location=tr[:,:3]@rest_location+tr[:,3]
                 obj.rotation_euler=Matrix(tr[:,:3].tolist()).to_euler()
         bpy.context.view_layer.update()
         inverses=[np.array(obj.matrix_world.inverted()) for obj,*_ in self.blades]

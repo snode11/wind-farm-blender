@@ -1,5 +1,7 @@
 # WFRL Blender 0.3.1 installation
 
+当前发布版本为 **0.3.3**：[下载](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.3)，含雷达反馈与塔顶密封圈/焊缝随动修复。详细验证见发布核对文档；以下早期版本说明保留作为历史。
+
 The same extension ZIP is intended for Windows and macOS. Blender 5.2+ is required. Native release checks run on macOS with Blender 5.2.1; Windows has not yet been tested on a Windows host.
 
 1. Download **wfrl_blender-0.3.1.zip** from the [release page](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.1). Do not use the automatically generated Source code archive.

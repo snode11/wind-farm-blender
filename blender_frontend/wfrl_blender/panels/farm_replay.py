@@ -16,7 +16,14 @@ def section(layout, key, title):
 
 def draw_radar(layout, scene, value):
     card = layout.box()
-    card.label(text=f"雷达与净空 · {scene.get('wfrl_clearance_turbine', 'T1')} · B2")
+    from ..radar_feedback import alarm_state, icon_id, LABELS, PULSE_SECONDS
+    state = alarm_state(value)
+    header = card.row(align=True)
+    header.label(text=f"雷达与净空 · {scene.get('wfrl_clearance_turbine', 'T1')} · B2")
+    lamp = header.row(align=True)
+    lamp.alignment = 'RIGHT'
+    lamp.label(text='', icon_value=icon_id(state))
+    card.label(text=LABELS[state], icon_value=icon_id(state))
     measurement = (value or {}).get('measurement') or {}
     status = card.column(align=True)
     if measurement:
@@ -34,8 +41,17 @@ def draw_radar(layout, scene, value):
     clearance.label(text='仿真真值：' + number(measurement.get('truth_m')) + ' m')
     clearance.label(text='B2 估计：' + number(measurement.get('estimate_m')) + ' m')
     clearance.label(text='估计误差：' + number(measurement.get('error_m'), True) + ' m')
+    reader = clearance_replay.reader_for(scene)
+    if reader is not None:
+        config = reader.package.manifest['replay']
+        card.label(text=f"演示报警 ≤ {config['threshold_m']:.2f} m · B2 估计")
+    card.label(text='浅蓝：光束方向 · 亮橙：有效测量')
     details = section(card, 'wfrl_farm_measurement_details', '测量详情与统计')
     if details is not None:
+        if reader is not None:
+            details.label(text=f"报警解除 ≥ {config['threshold_m'] + config['hysteresis_m']:.2f} m")
+        details.label(text='灯色随上次有效读数保留，过期转灰')
+        details.label(text=f'光束亮起保留 {PULSE_SECONDS:.1f} 仿真秒，仅为提示')
         details.label(text='误差 = 估计 − 真值；正值为高估')
         if farm_flex.is_active(scene) and farm_flex._ACTIVE.tower_motion is not None:
             details.label(text='真值：同高度的变形塔筒截面距离')

@@ -1,8 +1,8 @@
 {
   "schema": "wfrl.lidar-delivery.v1",
-  "version": "0.3.1",
-  "archive": "dist/wfrl_blender-0.3.1.zip",
-  "archive_sha256": "4b947a3e9565374e2b1da46387176ccb7940e659f1836e9a073f83939c2f149c",
+  "version": "0.3.3",
+  "archive": "dist/wfrl_blender-0.3.3.zip",
+  "archive_sha256": "eef7356b30afab4a0c7fac10d4d4567051005599316e49775ead3c31d15ece82",
   "packages": {
     "normal": "results/lidar/packages/normal-v1.1",
     "close": "results/lidar/packages/close-v1.1"
@@ -11,7 +11,7 @@
     "normal": "658922c57ecf7b69028d55eae604119a4b44e60e66247817edbd145d9dc0fe2d",
     "close": "91895c64e0bc962c956d57fe8bb507fe9e26f0af6cf6aa2f59cef5a19a9cc30b"
   },
-  "historical": "Official 0.3.1 consolidates local development labels 0.3.1–0.3.5; previous GitHub release is 0.3.0.",
+  "historical": "0.3.3 adds radar feedback and moving tower fitting fixes to official 0.3.1; physical data unchanged.",
   "demo": {
     "kind": "MAPPO",
     "duration_s": 60,

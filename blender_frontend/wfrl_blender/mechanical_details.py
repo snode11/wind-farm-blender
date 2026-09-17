@@ -5,6 +5,29 @@ These fittings are illustrative, not additional NREL engineering dimensions.
 import math
 
 
+def recess_yaw_seal(obj, tower_height):
+    """Keep the illustrative seal inside the 1.90 m pedestal envelope.
+
+    Also migrates saved scenes: the old 1.983 m outer radius intersected
+    the radar housing whose inner face is at x=-1.90 m.
+    """
+    if obj.get('wfrl_seal_geometry_revision', 0) >= 1:
+        return
+    n, m = 64, 8
+    if len(obj.data.vertices) != n * m:
+        raise ValueError('Unexpected yaw seal mesh: ' + obj.name)
+    for i in range(n):
+        a = math.tau * i / n
+        for j in range(m):
+            b = math.tau * j / m
+            radius = 1.89 + .008 * math.cos(b)
+            obj.data.vertices[i * m + j].co = (
+                radius * math.cos(a), radius * math.sin(a),
+                tower_height + .13 + .008 * math.sin(b))
+    obj.data.update()
+    obj['wfrl_seal_geometry_revision'] = 1
+
+
 def add_mechanical_details(collection, root, yaw, rotor, prefix, scalars, shell):
     from .scene_builder import _mesh_object, _finish
     from .materials import get_material
@@ -59,7 +82,8 @@ def add_mechanical_details(collection, root, yaw, rotor, prefix, scalars, shell)
         i=next(i for i in range(len(stations)-1) if stations[i][0]<=z<=stations[i+1][0])
         za,da=stations[i];zb,db=stations[i+1]
         ring(f'TowerWeld{int(z)}',.5*(da+(db-da)*(z-za)/(zb-za)),.018,z,root,'tower')
-    ring('YawSeal',1.965,.018,scalars['TowerHt']+.13,root,'graphite')
+    seal = ring('YawSeal',1.89,.008,scalars['TowerHt']+.13,root,'graphite')
+    recess_yaw_seal(seal, scalars['TowerHt'])
     ring('YawSkirt',1.90,.025,scalars['Twr2Shft']+.15-shell['height']/2,yaw)
 
     # Roof cover perimeter and side louvres reveal shell thickness without

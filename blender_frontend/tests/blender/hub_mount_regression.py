@@ -6,7 +6,7 @@ import bpy
 from mathutils import Vector
 from wfrl_blender.scene_builder import _make_turbine
 from wfrl_blender.scene_model import TurbineDTO
-from wfrl_blender.turbine_geometry import hub_position
+from wfrl_blender.turbine_geometry import hub_position, geometry_data
 c=bpy.data.collections.new('WFRL_Scene');bpy.context.scene.collection.children.link(c)
 _make_turbine(c,TurbineDTO('Check',123,456))
 bpy.context.view_layer.update()
@@ -41,7 +41,10 @@ _make_sensor_fixtures(c,dto);_make_wake(c,dto);build_cameras(dto)
 gimbal=ensure_gimbal(bpy.context.scene,'Check')
 sensor=bpy.data.objects['WFRL.Camera.T1.Sensor']
 assert abs(sensor.location.z-(-2.4+1.96256))<1e-5
-assert abs(gimbal.location.z-(22+1.96256))<1e-5
+# Gimbal is now a movable observation camera, not the old fixed roof mount.
+radius=geometry_data()['scalars']['TipRad']
+assert abs(gimbal.location.z-radius*.30)<1e-5
+assert gimbal['gimbal_fov']==62
 for suffix in ('LidarRay1','LidarRay2','LidarRay3','SensorFrustum'):
  fixture=bpy.data.objects['WFRL.Fixture.T1.'+suffix]
  assert fixture.parent==yaw

@@ -2,6 +2,44 @@
 import math
 
 
+def beam_material(active):
+    import bpy
+    name = 'WFRL.ClearanceBeam.' + ('Hit' if active else 'Idle')
+    material = bpy.data.materials.get(name)
+    if material is None:
+        material = bpy.data.materials.new(name)
+        color = (1., .22, .015, 1.) if active else (.18, .55, .72, 1.)
+        material.diffuse_color = color
+        material.use_nodes = True
+        shader = material.node_tree.nodes.get('Principled BSDF')
+        shader.inputs['Base Color'].default_value = color
+        shader.inputs['Emission Color'].default_value = color
+        shader.inputs['Emission Strength'].default_value = 3. if active else .7
+    return material
+
+
+def update_beams(scene, turbine_id, activity=(False, False, False)):
+    for index, active in enumerate(activity, 1):
+        beam = scene.objects.get(f'WFRL.Turbine.{turbine_id}.ClearanceRadar.Beam{index}')
+        if beam is not None and beam.get('wfrl_beam_active') != active:
+            material = beam_material(active)
+            if beam.data.materials:
+                beam.data.materials[0] = material
+            else:
+                beam.data.materials.append(material)
+            beam.data.bevel_depth = .030 if active else .018
+            beam['wfrl_beam_active'] = active
+
+
+def reset_beams(scene):
+    for beam in scene.objects:
+        if '.ClearanceRadar.Beam' in beam.name:
+            beam.data.materials.clear()
+            beam.data.materials.append(beam_material(False))
+            beam.data.bevel_depth = .018
+            beam['wfrl_beam_active'] = False
+
+
 def _radar_primitive(collection, kind, name, material):
     """Build in a private mesh, including during load_post in Edit Mode."""
     import bpy
@@ -86,14 +124,8 @@ def ensure_radar(scene, turbine_id, origin=None, directions=None):
         point.co = tuple(origin[i] + offset[i] for i in range(3))
         point.handle_left_type = point.handle_right_type = 'AUTO'
     cable['geometry_source'] = 'Illustrative service cable; not a data connection'
-    body['provenance'] = '测量光束示意；限定长度，不代表命中点或测距结果'
-    material = bpy.data.materials.get('WFRL.ClearanceBeam') or bpy.data.materials.new('WFRL.ClearanceBeam')
-    material.diffuse_color = (1, .28, .015, 1)
-    material.use_nodes = True
-    shader = material.node_tree.nodes.get('Principled BSDF')
-    shader.inputs['Base Color'].default_value = (1, .16, .005, 1)
-    shader.inputs['Emission Color'].default_value = (1, .12, .002, 1)
-    shader.inputs['Emission Strength'].default_value = 1
+    body['provenance'] = '浅蓝为光束方向；亮橙为有效测量提示；限定长度不代表命中点'
+    material = beam_material(False)
     from .turbine_geometry import geometry_data
     display_length = geometry_data()['scalars']['TipRad'] * .95
     for index, direction in enumerate(directions, 1):
@@ -108,4 +140,7 @@ def ensure_radar(scene, turbine_id, origin=None, directions=None):
         beam.data.splines[0].points[0].co = (*origin, 1)
         beam.data.splines[0].points[1].co = (*(origin[i] + display_length*direction[i]/norm for i in range(3)), 1)
         beam['provenance'] = body['provenance']
+        if 'wfrl_beam_active' in beam:
+            del beam['wfrl_beam_active']
+    update_beams(scene, turbine_id)
     return body
