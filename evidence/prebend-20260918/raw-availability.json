@@ -1,0 +1,2521 @@
+{
+  "T1": {
+    "expected": 118,
+    "candidate_hits": 7,
+    "passages": 33,
+    "passages_with_candidate_hit": 6,
+    "rows": [
+      {
+        "t": 117.725,
+        "blade": 1,
+        "angle": -2.644820999997137,
+        "passage": "0-21",
+        "hit": false
+      },
+      {
+        "t": 117.75,
+        "blade": 1,
+        "angle": -0.9937899999958972,
+        "passage": "0-21",
+        "hit": true
+      },
+      {
+        "t": 117.775,
+        "blade": 1,
+        "angle": 0.6580810000032216,
+        "passage": "0-21",
+        "hit": true
+      },
+      {
+        "t": 117.8,
+        "blade": 1,
+        "angle": 2.310760000003029,
+        "passage": "0-21",
+        "hit": false
+      },
+      {
+        "t": 119.5,
+        "blade": 3,
+        "angle": -2.60787999999593,
+        "passage": "2-22",
+        "hit": false
+      },
+      {
+        "t": 119.525,
+        "blade": 3,
+        "angle": -0.851104999996096,
+        "passage": "2-22",
+        "hit": true
+      },
+      {
+        "t": 119.55,
+        "blade": 3,
+        "angle": 0.9087520000039149,
+        "passage": "2-22",
+        "hit": false
+      },
+      {
+        "t": 119.575,
+        "blade": 3,
+        "angle": 2.671448000003693,
+        "passage": "2-22",
+        "hit": false
+      },
+      {
+        "t": 121.175,
+        "blade": 2,
+        "angle": -2.5394248999964475,
+        "passage": "1-22",
+        "hit": false
+      },
+      {
+        "t": 121.2,
+        "blade": 2,
+        "angle": -0.7483291999969879,
+        "passage": "1-22",
+        "hit": false
+      },
+      {
+        "t": 121.225,
+        "blade": 2,
+        "angle": 1.0421066000044448,
+        "passage": "1-22",
+        "hit": false
+      },
+      {
+        "t": 121.25,
+        "blade": 2,
+        "angle": 2.8319740000042657,
+        "passage": "1-22",
+        "hit": false
+      },
+      {
+        "t": 122.9,
+        "blade": 1,
+        "angle": -1.758880999997018,
+        "passage": "0-22",
+        "hit": false
+      },
+      {
+        "t": 122.925,
+        "blade": 1,
+        "angle": -0.05862399999568879,
+        "passage": "0-22",
+        "hit": false
+      },
+      {
+        "t": 122.95,
+        "blade": 1,
+        "angle": 1.6400910000038493,
+        "passage": "0-22",
+        "hit": false
+      },
+      {
+        "t": 124.7,
+        "blade": 3,
+        "angle": -2.346801999996387,
+        "passage": "2-23",
+        "hit": false
+      },
+      {
+        "t": 124.725,
+        "blade": 3,
+        "angle": -0.7256159999960801,
+        "passage": "2-23",
+        "hit": false
+      },
+      {
+        "t": 124.75,
+        "blade": 3,
+        "angle": 0.8950810000042111,
+        "passage": "2-23",
+        "hit": false
+      },
+      {
+        "t": 124.775,
+        "blade": 3,
+        "angle": 2.5153810000047088,
+        "passage": "2-23",
+        "hit": false
+      },
+      {
+        "t": 126.55,
+        "blade": 2,
+        "angle": -1.424026499995307,
+        "passage": "1-23",
+        "hit": false
+      },
+      {
+        "t": 126.575,
+        "blade": 2,
+        "angle": 0.23707580000336748,
+        "passage": "1-23",
+        "hit": false
+      },
+      {
+        "t": 126.6,
+        "blade": 2,
+        "angle": 1.8991318000043975,
+        "passage": "1-23",
+        "hit": false
+      },
+      {
+        "t": 128.35,
+        "blade": 1,
+        "angle": -2.2700499999955355,
+        "passage": "0-23",
+        "hit": false
+      },
+      {
+        "t": 128.375,
+        "blade": 1,
+        "angle": -0.638091999995595,
+        "passage": "0-23",
+        "hit": false
+      },
+      {
+        "t": 128.4,
+        "blade": 1,
+        "angle": 0.9933780000046681,
+        "passage": "0-23",
+        "hit": false
+      },
+      {
+        "t": 128.425,
+        "blade": 1,
+        "angle": 2.6242680000050314,
+        "passage": "0-23",
+        "hit": false
+      },
+      {
+        "t": 130.225,
+        "blade": 3,
+        "angle": -1.8067019999962213,
+        "passage": "2-24",
+        "hit": false
+      },
+      {
+        "t": 130.25,
+        "blade": 3,
+        "angle": -0.21591199999420496,
+        "passage": "2-24",
+        "hit": false
+      },
+      {
+        "t": 130.275,
+        "blade": 3,
+        "angle": 1.3757630000036443,
+        "passage": "2-24",
+        "hit": false
+      },
+      {
+        "t": 130.3,
+        "blade": 3,
+        "angle": 2.968475000005128,
+        "passage": "2-24",
+        "hit": false
+      },
+      {
+        "t": 132.075,
+        "blade": 2,
+        "angle": -2.660812399994029,
+        "passage": "1-24",
+        "hit": false
+      },
+      {
+        "t": 132.1,
+        "blade": 2,
+        "angle": -1.0417022999954497,
+        "passage": "1-24",
+        "hit": false
+      },
+      {
+        "t": 132.125,
+        "blade": 2,
+        "angle": 0.5777092000043922,
+        "passage": "1-24",
+        "hit": false
+      },
+      {
+        "t": 132.15,
+        "blade": 2,
+        "angle": 2.1974220000047353,
+        "passage": "1-24",
+        "hit": false
+      },
+      {
+        "t": 133.925,
+        "blade": 1,
+        "angle": -1.790618999995786,
+        "passage": "0-24",
+        "hit": false
+      },
+      {
+        "t": 133.95,
+        "blade": 1,
+        "angle": -0.1332239999956073,
+        "passage": "0-24",
+        "hit": false
+      },
+      {
+        "t": 133.975,
+        "blade": 1,
+        "angle": 1.5249790000052599,
+        "passage": "0-24",
+        "hit": false
+      },
+      {
+        "t": 135.725,
+        "blade": 3,
+        "angle": -1.7602229999938572,
+        "passage": "2-25",
+        "hit": false
+      },
+      {
+        "t": 135.75,
+        "blade": 3,
+        "angle": -0.0978999999952066,
+        "passage": "2-25",
+        "hit": false
+      },
+      {
+        "t": 135.775,
+        "blade": 3,
+        "angle": 1.5639950000040699,
+        "passage": "2-25",
+        "hit": false
+      },
+      {
+        "t": 137.55,
+        "blade": 2,
+        "angle": -1.4658278999959293,
+        "passage": "1-25",
+        "hit": false
+      },
+      {
+        "t": 137.575,
+        "blade": 2,
+        "angle": 0.17030330000488902,
+        "passage": "1-25",
+        "hit": false
+      },
+      {
+        "t": 137.6,
+        "blade": 2,
+        "angle": 1.8058052000051248,
+        "passage": "1-25",
+        "hit": false
+      },
+      {
+        "t": 139.375,
+        "blade": 1,
+        "angle": -2.4127039999948465,
+        "passage": "0-25",
+        "hit": false
+      },
+      {
+        "t": 139.4,
+        "blade": 1,
+        "angle": -0.7817989999948622,
+        "passage": "0-25",
+        "hit": false
+      },
+      {
+        "t": 139.425,
+        "blade": 1,
+        "angle": 0.8488620000043738,
+        "passage": "0-25",
+        "hit": false
+      },
+      {
+        "t": 139.45,
+        "blade": 1,
+        "angle": 2.4793700000063836,
+        "passage": "0-25",
+        "hit": false
+      },
+      {
+        "t": 141.2,
+        "blade": 3,
+        "angle": -1.6562809999941237,
+        "passage": "2-26",
+        "hit": false
+      },
+      {
+        "t": 141.225,
+        "blade": 3,
+        "angle": 0.0458370000069408,
+        "passage": "2-26",
+        "hit": false
+      },
+      {
+        "t": 141.25,
+        "blade": 3,
+        "angle": 1.749725000005128,
+        "passage": "2-26",
+        "hit": false
+      },
+      {
+        "t": 142.925,
+        "blade": 2,
+        "angle": -1.4408835999947769,
+        "passage": "1-26",
+        "hit": false
+      },
+      {
+        "t": 142.95,
+        "blade": 2,
+        "angle": 0.3046913000052882,
+        "passage": "1-26",
+        "hit": false
+      },
+      {
+        "t": 142.975,
+        "blade": 2,
+        "angle": 2.049285900004179,
+        "passage": "1-26",
+        "hit": false
+      },
+      {
+        "t": 144.675,
+        "blade": 1,
+        "angle": -1.9959869999947841,
+        "passage": "0-26",
+        "hit": false
+      },
+      {
+        "t": 144.7,
+        "blade": 1,
+        "angle": -0.34091199999420496,
+        "passage": "0-26",
+        "hit": false
+      },
+      {
+        "t": 144.725,
+        "blade": 1,
+        "angle": 1.312515000005078,
+        "passage": "0-26",
+        "hit": false
+      },
+      {
+        "t": 144.75,
+        "blade": 1,
+        "angle": 2.96449300000495,
+        "passage": "0-26",
+        "hit": false
+      },
+      {
+        "t": 146.525,
+        "blade": 3,
+        "angle": -2.063323999993372,
+        "passage": "2-27",
+        "hit": false
+      },
+      {
+        "t": 146.55,
+        "blade": 3,
+        "angle": -0.46752899999410147,
+        "passage": "2-27",
+        "hit": false
+      },
+      {
+        "t": 146.575,
+        "blade": 3,
+        "angle": 1.1279910000066593,
+        "passage": "2-27",
+        "hit": false
+      },
+      {
+        "t": 146.6,
+        "blade": 3,
+        "angle": 2.7234800000060204,
+        "passage": "2-27",
+        "hit": false
+      },
+      {
+        "t": 148.4,
+        "blade": 2,
+        "angle": -1.813102699994488,
+        "passage": "1-27",
+        "hit": false
+      },
+      {
+        "t": 148.425,
+        "blade": 2,
+        "angle": -0.20983889999479288,
+        "passage": "1-27",
+        "hit": false
+      },
+      {
+        "t": 148.45,
+        "blade": 2,
+        "angle": 1.393207600007372,
+        "passage": "1-27",
+        "hit": false
+      },
+      {
+        "t": 148.475,
+        "blade": 2,
+        "angle": 2.9960861000054138,
+        "passage": "1-27",
+        "hit": false
+      },
+      {
+        "t": 150.25,
+        "blade": 1,
+        "angle": -1.4478609999951004,
+        "passage": "0-27",
+        "hit": false
+      },
+      {
+        "t": 150.275,
+        "blade": 1,
+        "angle": 0.21981800000685325,
+        "passage": "0-27",
+        "hit": false
+      },
+      {
+        "t": 150.3,
+        "blade": 1,
+        "angle": 1.8884890000063024,
+        "passage": "0-27",
+        "hit": false
+      },
+      {
+        "t": 152.025,
+        "blade": 3,
+        "angle": -1.6348569999936444,
+        "passage": "2-28",
+        "hit": false
+      },
+      {
+        "t": 152.05,
+        "blade": 3,
+        "angle": 0.04531900000620226,
+        "passage": "2-28",
+        "hit": false
+      },
+      {
+        "t": 152.075,
+        "blade": 3,
+        "angle": 1.7242430000060267,
+        "passage": "2-28",
+        "hit": false
+      },
+      {
+        "t": 153.85,
+        "blade": 2,
+        "angle": -1.8225020999943808,
+        "passage": "1-28",
+        "hit": false
+      },
+      {
+        "t": 153.875,
+        "blade": 2,
+        "angle": -0.22768019999421085,
+        "passage": "1-28",
+        "hit": false
+      },
+      {
+        "t": 153.9,
+        "blade": 2,
+        "angle": 1.366485600006854,
+        "passage": "1-28",
+        "hit": false
+      },
+      {
+        "t": 153.925,
+        "blade": 2,
+        "angle": 2.960163100005957,
+        "passage": "1-28",
+        "hit": false
+      },
+      {
+        "t": 155.725,
+        "blade": 1,
+        "angle": -2.8078609999938635,
+        "passage": "0-28",
+        "hit": false
+      },
+      {
+        "t": 155.75,
+        "blade": 1,
+        "angle": -1.2209469999943394,
+        "passage": "0-28",
+        "hit": false
+      },
+      {
+        "t": 155.775,
+        "blade": 1,
+        "angle": 0.36660800000572635,
+        "passage": "0-28",
+        "hit": false
+      },
+      {
+        "t": 155.8,
+        "blade": 1,
+        "angle": 1.9548800000065967,
+        "passage": "0-28",
+        "hit": false
+      },
+      {
+        "t": 157.6,
+        "blade": 3,
+        "angle": -2.0867309999939607,
+        "passage": "2-29",
+        "hit": false
+      },
+      {
+        "t": 157.625,
+        "blade": 3,
+        "angle": -0.4394839999931719,
+        "passage": "2-29",
+        "hit": true
+      },
+      {
+        "t": 157.65,
+        "blade": 3,
+        "angle": 1.2099610000059329,
+        "passage": "2-29",
+        "hit": false
+      },
+      {
+        "t": 157.675,
+        "blade": 3,
+        "angle": 2.861633000005895,
+        "passage": "2-29",
+        "hit": false
+      },
+      {
+        "t": 159.375,
+        "blade": 2,
+        "angle": -2.8624915999935183,
+        "passage": "1-29",
+        "hit": false
+      },
+      {
+        "t": 159.4,
+        "blade": 2,
+        "angle": -1.1835784999930183,
+        "passage": "1-29",
+        "hit": false
+      },
+      {
+        "t": 159.425,
+        "blade": 2,
+        "angle": 0.49449160000767733,
+        "passage": "1-29",
+        "hit": false
+      },
+      {
+        "t": 159.45,
+        "blade": 2,
+        "angle": 2.1721497000071395,
+        "passage": "1-29",
+        "hit": false
+      },
+      {
+        "t": 161.225,
+        "blade": 1,
+        "angle": -1.509658999993917,
+        "passage": "0-29",
+        "hit": false
+      },
+      {
+        "t": 161.25,
+        "blade": 1,
+        "angle": 0.08905000000777363,
+        "passage": "0-29",
+        "hit": false
+      },
+      {
+        "t": 161.275,
+        "blade": 1,
+        "angle": 1.6874080000070535,
+        "passage": "0-29",
+        "hit": false
+      },
+      {
+        "t": 163.1,
+        "blade": 3,
+        "angle": -2.208617999993294,
+        "passage": "2-30",
+        "hit": false
+      },
+      {
+        "t": 163.125,
+        "blade": 3,
+        "angle": -0.6118469999928493,
+        "passage": "2-30",
+        "hit": false
+      },
+      {
+        "t": 163.15,
+        "blade": 3,
+        "angle": 0.985504000007495,
+        "passage": "2-30",
+        "hit": false
+      },
+      {
+        "t": 163.175,
+        "blade": 3,
+        "angle": 2.583496000006562,
+        "passage": "2-30",
+        "hit": false
+      },
+      {
+        "t": 164.975,
+        "blade": 2,
+        "angle": -1.807010699993043,
+        "passage": "1-30",
+        "hit": false
+      },
+      {
+        "t": 165.0,
+        "blade": 2,
+        "angle": -0.19115069999315892,
+        "passage": "1-30",
+        "hit": true
+      },
+      {
+        "t": 165.025,
+        "blade": 2,
+        "angle": 1.4257202000080724,
+        "passage": "1-30",
+        "hit": false
+      },
+      {
+        "t": 166.8,
+        "blade": 1,
+        "angle": -1.43014499999299,
+        "passage": "0-30",
+        "hit": false
+      },
+      {
+        "t": 166.825,
+        "blade": 1,
+        "angle": 0.2548830000068847,
+        "passage": "0-30",
+        "hit": true
+      },
+      {
+        "t": 166.85,
+        "blade": 1,
+        "angle": 1.9416960000071413,
+        "passage": "0-30",
+        "hit": false
+      },
+      {
+        "t": 168.55,
+        "blade": 3,
+        "angle": -1.8344119999928807,
+        "passage": "2-31",
+        "hit": false
+      },
+      {
+        "t": 168.575,
+        "blade": 3,
+        "angle": -0.13415499999246094,
+        "passage": "2-31",
+        "hit": false
+      },
+      {
+        "t": 168.6,
+        "blade": 3,
+        "angle": 1.5659790000063367,
+        "passage": "2-31",
+        "hit": false
+      },
+      {
+        "t": 170.35,
+        "blade": 2,
+        "angle": -1.7450751999931526,
+        "passage": "1-31",
+        "hit": false
+      },
+      {
+        "t": 170.375,
+        "blade": 2,
+        "angle": -0.11995319999186904,
+        "passage": "1-31",
+        "hit": false
+      },
+      {
+        "t": 170.4,
+        "blade": 2,
+        "angle": 1.5042381000075693,
+        "passage": "1-31",
+        "hit": false
+      },
+      {
+        "t": 172.2,
+        "blade": 1,
+        "angle": -2.6715239999921323,
+        "passage": "0-31",
+        "hit": false
+      },
+      {
+        "t": 172.225,
+        "blade": 1,
+        "angle": -1.0644679999932123,
+        "passage": "0-31",
+        "hit": false
+      },
+      {
+        "t": 172.25,
+        "blade": 1,
+        "angle": 0.5430300000061834,
+        "passage": "0-31",
+        "hit": false
+      },
+      {
+        "t": 172.275,
+        "blade": 1,
+        "angle": 2.1507260000071255,
+        "passage": "0-31",
+        "hit": false
+      },
+      {
+        "t": 174.05,
+        "blade": 3,
+        "angle": -2.804229999992458,
+        "passage": "2-32",
+        "hit": false
+      },
+      {
+        "t": 174.075,
+        "blade": 3,
+        "angle": -1.1538999999920634,
+        "passage": "2-32",
+        "hit": false
+      },
+      {
+        "t": 174.1,
+        "blade": 3,
+        "angle": 0.4981990000087535,
+        "passage": "2-32",
+        "hit": true
+      },
+      {
+        "t": 174.125,
+        "blade": 3,
+        "angle": 2.1518250000081025,
+        "passage": "2-32",
+        "hit": false
+      },
+      {
+        "t": 175.85,
+        "blade": 2,
+        "angle": -2.1099433999916073,
+        "passage": "1-32",
+        "hit": false
+      },
+      {
+        "t": 175.875,
+        "blade": 2,
+        "angle": -0.43818659999124066,
+        "passage": "1-32",
+        "hit": false
+      },
+      {
+        "t": 175.9,
+        "blade": 2,
+        "angle": 1.2330246000092302,
+        "passage": "1-32",
+        "hit": false
+      },
+      {
+        "t": 175.925,
+        "blade": 2,
+        "angle": 2.9035530000091967,
+        "passage": "1-32",
+        "hit": false
+      }
+    ],
+    "boundary": "Direct raw target-blade rays; upper bound until all-surface occlusion verification in full export"
+  },
+  "T2": {
+    "expected": 117,
+    "candidate_hits": 27,
+    "passages": 33,
+    "passages_with_candidate_hit": 24,
+    "rows": [
+      {
+        "t": 117.675,
+        "blade": 2,
+        "angle": -1.7020453999966776,
+        "passage": "1-20",
+        "hit": false
+      },
+      {
+        "t": 117.7,
+        "blade": 2,
+        "angle": -0.01987839999674179,
+        "passage": "1-20",
+        "hit": true
+      },
+      {
+        "t": 117.725,
+        "blade": 2,
+        "angle": 1.6622086000024865,
+        "passage": "1-20",
+        "hit": false
+      },
+      {
+        "t": 119.475,
+        "blade": 1,
+        "angle": -1.4517669999959253,
+        "passage": "0-20",
+        "hit": false
+      },
+      {
+        "t": 119.5,
+        "blade": 1,
+        "angle": 0.19122300000344694,
+        "passage": "0-20",
+        "hit": true
+      },
+      {
+        "t": 119.525,
+        "blade": 1,
+        "angle": 1.833160000002863,
+        "passage": "0-20",
+        "hit": false
+      },
+      {
+        "t": 121.325,
+        "blade": 3,
+        "angle": -1.541839999997137,
+        "passage": "2-21",
+        "hit": false
+      },
+      {
+        "t": 121.35,
+        "blade": 3,
+        "angle": 0.06250000000272848,
+        "passage": "2-21",
+        "hit": true
+      },
+      {
+        "t": 121.375,
+        "blade": 3,
+        "angle": 1.6673890000029132,
+        "passage": "2-21",
+        "hit": false
+      },
+      {
+        "t": 123.175,
+        "blade": 2,
+        "angle": -2.8543776999958936,
+        "passage": "1-21",
+        "hit": false
+      },
+      {
+        "t": 123.2,
+        "blade": 2,
+        "angle": -1.2484931999970286,
+        "passage": "1-21",
+        "hit": true
+      },
+      {
+        "t": 123.225,
+        "blade": 2,
+        "angle": 0.35734180000417837,
+        "passage": "1-21",
+        "hit": true
+      },
+      {
+        "t": 123.25,
+        "blade": 2,
+        "angle": 1.9630356000034226,
+        "passage": "1-21",
+        "hit": false
+      },
+      {
+        "t": 125.0,
+        "blade": 1,
+        "angle": -2.518981999995958,
+        "passage": "0-21",
+        "hit": false
+      },
+      {
+        "t": 125.025,
+        "blade": 1,
+        "angle": -0.8339229999955933,
+        "passage": "0-21",
+        "hit": true
+      },
+      {
+        "t": 125.05,
+        "blade": 1,
+        "angle": 0.8522030000031009,
+        "passage": "0-21",
+        "hit": true
+      },
+      {
+        "t": 125.075,
+        "blade": 1,
+        "angle": 2.539886000004117,
+        "passage": "0-21",
+        "hit": false
+      },
+      {
+        "t": 126.775,
+        "blade": 3,
+        "angle": -1.6805109999959313,
+        "passage": "2-22",
+        "hit": false
+      },
+      {
+        "t": 126.8,
+        "blade": 3,
+        "angle": 0.0231320000038977,
+        "passage": "2-22",
+        "hit": false
+      },
+      {
+        "t": 126.825,
+        "blade": 3,
+        "angle": 1.727020000003904,
+        "passage": "2-22",
+        "hit": false
+      },
+      {
+        "t": 128.55,
+        "blade": 2,
+        "angle": -1.6735496999963289,
+        "passage": "1-22",
+        "hit": false
+      },
+      {
+        "t": 128.575,
+        "blade": 2,
+        "angle": -0.002445199996145675,
+        "passage": "1-22",
+        "hit": true
+      },
+      {
+        "t": 128.6,
+        "blade": 2,
+        "angle": 1.66827010000452,
+        "passage": "1-22",
+        "hit": false
+      },
+      {
+        "t": 130.35,
+        "blade": 1,
+        "angle": -1.861907999997129,
+        "passage": "0-22",
+        "hit": false
+      },
+      {
+        "t": 130.375,
+        "blade": 1,
+        "angle": -0.20603899999696296,
+        "passage": "0-22",
+        "hit": true
+      },
+      {
+        "t": 130.4,
+        "blade": 1,
+        "angle": 1.4491270000035001,
+        "passage": "0-22",
+        "hit": false
+      },
+      {
+        "t": 132.15,
+        "blade": 3,
+        "angle": -2.1701969999958237,
+        "passage": "2-23",
+        "hit": false
+      },
+      {
+        "t": 132.175,
+        "blade": 3,
+        "angle": -0.4895319999959611,
+        "passage": "2-23",
+        "hit": true
+      },
+      {
+        "t": 132.2,
+        "blade": 3,
+        "angle": 1.1910400000033405,
+        "passage": "2-23",
+        "hit": false
+      },
+      {
+        "t": 132.225,
+        "blade": 3,
+        "angle": 2.8717040000046836,
+        "passage": "2-23",
+        "hit": false
+      },
+      {
+        "t": 133.925,
+        "blade": 2,
+        "angle": -1.6573752999956923,
+        "passage": "1-23",
+        "hit": false
+      },
+      {
+        "t": 133.95,
+        "blade": 2,
+        "angle": 0.04113010000401118,
+        "passage": "1-23",
+        "hit": false
+      },
+      {
+        "t": 133.975,
+        "blade": 2,
+        "angle": 1.7390862000047491,
+        "passage": "1-23",
+        "hit": false
+      },
+      {
+        "t": 135.7,
+        "blade": 1,
+        "angle": -2.123870999996143,
+        "passage": "0-23",
+        "hit": false
+      },
+      {
+        "t": 135.725,
+        "blade": 1,
+        "angle": -0.4592439999960334,
+        "passage": "0-23",
+        "hit": false
+      },
+      {
+        "t": 135.75,
+        "blade": 1,
+        "angle": 1.2044370000039635,
+        "passage": "0-23",
+        "hit": false
+      },
+      {
+        "t": 135.775,
+        "blade": 1,
+        "angle": 2.866806000003635,
+        "passage": "0-23",
+        "hit": false
+      },
+      {
+        "t": 137.525,
+        "blade": 3,
+        "angle": -2.2955929999952787,
+        "passage": "2-24",
+        "hit": false
+      },
+      {
+        "t": 137.55,
+        "blade": 3,
+        "angle": -0.6782839999959833,
+        "passage": "2-24",
+        "hit": false
+      },
+      {
+        "t": 137.575,
+        "blade": 3,
+        "angle": 0.9381710000034218,
+        "passage": "2-24",
+        "hit": false
+      },
+      {
+        "t": 137.6,
+        "blade": 3,
+        "angle": 2.5536190000038914,
+        "passage": "2-24",
+        "hit": false
+      },
+      {
+        "t": 139.4,
+        "blade": 2,
+        "angle": -1.8301238999938505,
+        "passage": "1-24",
+        "hit": false
+      },
+      {
+        "t": 139.425,
+        "blade": 2,
+        "angle": -0.20683289999578847,
+        "passage": "1-24",
+        "hit": true
+      },
+      {
+        "t": 139.45,
+        "blade": 2,
+        "angle": 1.417385100005049,
+        "passage": "1-24",
+        "hit": false
+      },
+      {
+        "t": 141.2,
+        "blade": 1,
+        "angle": -2.917541999995592,
+        "passage": "0-24",
+        "hit": false
+      },
+      {
+        "t": 141.225,
+        "blade": 1,
+        "angle": -1.2499239999942802,
+        "passage": "0-24",
+        "hit": false
+      },
+      {
+        "t": 141.25,
+        "blade": 1,
+        "angle": 0.41711400000531285,
+        "passage": "0-24",
+        "hit": false
+      },
+      {
+        "t": 141.275,
+        "blade": 1,
+        "angle": 2.0833740000052785,
+        "passage": "0-24",
+        "hit": false
+      },
+      {
+        "t": 143.05,
+        "blade": 3,
+        "angle": -1.3808899999949062,
+        "passage": "2-25",
+        "hit": false
+      },
+      {
+        "t": 143.075,
+        "blade": 3,
+        "angle": 0.23846400000547874,
+        "passage": "2-25",
+        "hit": false
+      },
+      {
+        "t": 143.1,
+        "blade": 3,
+        "angle": 1.856781000004048,
+        "passage": "2-25",
+        "hit": false
+      },
+      {
+        "t": 144.9,
+        "blade": 2,
+        "angle": -2.99060059999465,
+        "passage": "1-25",
+        "hit": false
+      },
+      {
+        "t": 144.925,
+        "blade": 2,
+        "angle": -1.3880996999942,
+        "passage": "1-25",
+        "hit": false
+      },
+      {
+        "t": 144.95,
+        "blade": 2,
+        "angle": 0.21469880000586272,
+        "passage": "1-25",
+        "hit": true
+      },
+      {
+        "t": 144.975,
+        "blade": 2,
+        "angle": 1.8179092000063974,
+        "passage": "1-25",
+        "hit": false
+      },
+      {
+        "t": 146.775,
+        "blade": 1,
+        "angle": -2.4043729999957577,
+        "passage": "0-25",
+        "hit": false
+      },
+      {
+        "t": 146.8,
+        "blade": 1,
+        "angle": -0.7931519999947341,
+        "passage": "0-25",
+        "hit": true
+      },
+      {
+        "t": 146.825,
+        "blade": 1,
+        "angle": 0.8180850000044302,
+        "passage": "0-25",
+        "hit": false
+      },
+      {
+        "t": 146.85,
+        "blade": 1,
+        "angle": 2.429306000005454,
+        "passage": "0-25",
+        "hit": false
+      },
+      {
+        "t": 148.65,
+        "blade": 3,
+        "angle": -1.7648319999934756,
+        "passage": "2-26",
+        "hit": false
+      },
+      {
+        "t": 148.675,
+        "blade": 3,
+        "angle": -0.14617899999575457,
+        "passage": "2-26",
+        "hit": true
+      },
+      {
+        "t": 148.7,
+        "blade": 3,
+        "angle": 1.472992000004524,
+        "passage": "2-26",
+        "hit": false
+      },
+      {
+        "t": 150.475,
+        "blade": 2,
+        "angle": -2.180648799994742,
+        "passage": "1-26",
+        "hit": false
+      },
+      {
+        "t": 150.5,
+        "blade": 2,
+        "angle": -0.522525799993673,
+        "passage": "1-26",
+        "hit": true
+      },
+      {
+        "t": 150.525,
+        "blade": 2,
+        "angle": 1.1357346000058897,
+        "passage": "1-26",
+        "hit": false
+      },
+      {
+        "t": 150.55,
+        "blade": 2,
+        "angle": 2.7942963000059535,
+        "passage": "1-26",
+        "hit": false
+      },
+      {
+        "t": 152.3,
+        "blade": 1,
+        "angle": -2.428786999993463,
+        "passage": "0-26",
+        "hit": false
+      },
+      {
+        "t": 152.325,
+        "blade": 1,
+        "angle": -0.8135679999941203,
+        "passage": "0-26",
+        "hit": true
+      },
+      {
+        "t": 152.35,
+        "blade": 1,
+        "angle": 0.8007970000053319,
+        "passage": "0-26",
+        "hit": false
+      },
+      {
+        "t": 152.375,
+        "blade": 1,
+        "angle": 2.414139000005889,
+        "passage": "0-26",
+        "hit": false
+      },
+      {
+        "t": 154.2,
+        "blade": 3,
+        "angle": -2.0059199999941484,
+        "passage": "2-27",
+        "hit": false
+      },
+      {
+        "t": 154.225,
+        "blade": 3,
+        "angle": -0.4392399999942427,
+        "passage": "2-27",
+        "hit": true
+      },
+      {
+        "t": 154.25,
+        "blade": 3,
+        "angle": 1.1272580000058952,
+        "passage": "2-27",
+        "hit": false
+      },
+      {
+        "t": 154.275,
+        "blade": 3,
+        "angle": 2.6936340000065684,
+        "passage": "2-27",
+        "hit": false
+      },
+      {
+        "t": 156.125,
+        "blade": 2,
+        "angle": -1.9514274999946792,
+        "passage": "1-27",
+        "hit": false
+      },
+      {
+        "t": 156.15,
+        "blade": 2,
+        "angle": -0.4009475999937422,
+        "passage": "1-27",
+        "hit": true
+      },
+      {
+        "t": 156.175,
+        "blade": 2,
+        "angle": 1.1496964000052685,
+        "passage": "1-27",
+        "hit": false
+      },
+      {
+        "t": 156.2,
+        "blade": 2,
+        "angle": 2.7004242000057275,
+        "passage": "1-27",
+        "hit": false
+      },
+      {
+        "t": 158.05,
+        "blade": 1,
+        "angle": -2.100966999994853,
+        "passage": "0-27",
+        "hit": false
+      },
+      {
+        "t": 158.075,
+        "blade": 1,
+        "angle": -0.542632999993657,
+        "passage": "0-27",
+        "hit": true
+      },
+      {
+        "t": 158.1,
+        "blade": 1,
+        "angle": 1.0156710000064777,
+        "passage": "0-27",
+        "hit": false
+      },
+      {
+        "t": 158.125,
+        "blade": 1,
+        "angle": 2.5739290000055917,
+        "passage": "0-27",
+        "hit": false
+      },
+      {
+        "t": 159.975,
+        "blade": 3,
+        "angle": -2.9805599999926926,
+        "passage": "2-28",
+        "hit": false
+      },
+      {
+        "t": 160.0,
+        "blade": 3,
+        "angle": -1.443450999995548,
+        "passage": "2-28",
+        "hit": false
+      },
+      {
+        "t": 160.025,
+        "blade": 3,
+        "angle": 0.0936580000052345,
+        "passage": "2-28",
+        "hit": true
+      },
+      {
+        "t": 160.05,
+        "blade": 3,
+        "angle": 1.6306150000054913,
+        "passage": "2-28",
+        "hit": false
+      },
+      {
+        "t": 161.95,
+        "blade": 2,
+        "angle": -1.670078299994202,
+        "passage": "1-28",
+        "hit": false
+      },
+      {
+        "t": 161.975,
+        "blade": 2,
+        "angle": -0.13033679999352898,
+        "passage": "1-28",
+        "hit": true
+      },
+      {
+        "t": 162.0,
+        "blade": 2,
+        "angle": 1.410064700005023,
+        "passage": "1-28",
+        "hit": false
+      },
+      {
+        "t": 162.025,
+        "blade": 2,
+        "angle": 2.9508171000070433,
+        "passage": "1-28",
+        "hit": false
+      },
+      {
+        "t": 163.875,
+        "blade": 1,
+        "angle": -1.7431639999940671,
+        "passage": "0-28",
+        "hit": false
+      },
+      {
+        "t": 163.9,
+        "blade": 1,
+        "angle": -0.13731399999414862,
+        "passage": "0-28",
+        "hit": true
+      },
+      {
+        "t": 163.925,
+        "blade": 1,
+        "angle": 1.4705510000057984,
+        "passage": "0-28",
+        "hit": false
+      },
+      {
+        "t": 165.7,
+        "blade": 3,
+        "angle": -1.836699999992561,
+        "passage": "2-29",
+        "hit": false
+      },
+      {
+        "t": 165.725,
+        "blade": 3,
+        "angle": -0.18371599999409227,
+        "passage": "2-29",
+        "hit": true
+      },
+      {
+        "t": 165.75,
+        "blade": 3,
+        "angle": 1.4690860000064276,
+        "passage": "2-29",
+        "hit": false
+      },
+      {
+        "t": 167.525,
+        "blade": 2,
+        "angle": -2.6309775999925478,
+        "passage": "1-29",
+        "hit": false
+      },
+      {
+        "t": 167.55,
+        "blade": 2,
+        "angle": -1.0201987999935227,
+        "passage": "1-29",
+        "hit": false
+      },
+      {
+        "t": 167.575,
+        "blade": 2,
+        "angle": 0.5897865000060847,
+        "passage": "1-29",
+        "hit": true
+      },
+      {
+        "t": 167.6,
+        "blade": 2,
+        "angle": 2.199005100006616,
+        "passage": "1-29",
+        "hit": false
+      },
+      {
+        "t": 169.4,
+        "blade": 1,
+        "angle": -2.5607449999934033,
+        "passage": "0-29",
+        "hit": false
+      },
+      {
+        "t": 169.425,
+        "blade": 1,
+        "angle": -0.9576259999939793,
+        "passage": "0-29",
+        "hit": true
+      },
+      {
+        "t": 169.45,
+        "blade": 1,
+        "angle": 0.645782000006875,
+        "passage": "0-29",
+        "hit": true
+      },
+      {
+        "t": 169.475,
+        "blade": 1,
+        "angle": 2.249619000007442,
+        "passage": "0-29",
+        "hit": false
+      },
+      {
+        "t": 171.25,
+        "blade": 3,
+        "angle": -1.7949829999924987,
+        "passage": "2-30",
+        "hit": false
+      },
+      {
+        "t": 171.275,
+        "blade": 3,
+        "angle": -0.1276549999929557,
+        "passage": "2-30",
+        "hit": true
+      },
+      {
+        "t": 171.3,
+        "blade": 3,
+        "angle": 1.5422970000072382,
+        "passage": "2-30",
+        "hit": false
+      },
+      {
+        "t": 173.025,
+        "blade": 2,
+        "angle": -1.3639220999921235,
+        "passage": "1-30",
+        "hit": false
+      },
+      {
+        "t": 173.05,
+        "blade": 2,
+        "angle": 0.3502350000071601,
+        "passage": "1-30",
+        "hit": false
+      },
+      {
+        "t": 173.075,
+        "blade": 2,
+        "angle": 2.0645599000072252,
+        "passage": "1-30",
+        "hit": false
+      },
+      {
+        "t": 174.775,
+        "blade": 1,
+        "angle": -1.9711909999932686,
+        "passage": "0-30",
+        "hit": false
+      },
+      {
+        "t": 174.8,
+        "blade": 1,
+        "angle": -0.2927249999920605,
+        "passage": "0-30",
+        "hit": false
+      },
+      {
+        "t": 174.825,
+        "blade": 1,
+        "angle": 1.3853000000071916,
+        "passage": "0-30",
+        "hit": false
+      },
+      {
+        "t": 176.575,
+        "blade": 3,
+        "angle": -2.6447749999933876,
+        "passage": "2-31",
+        "hit": false
+      },
+      {
+        "t": 176.6,
+        "blade": 3,
+        "angle": -1.01086399999258,
+        "passage": "2-31",
+        "hit": false
+      },
+      {
+        "t": 176.625,
+        "blade": 3,
+        "angle": 0.622681000008015,
+        "passage": "2-31",
+        "hit": false
+      },
+      {
+        "t": 176.65,
+        "blade": 3,
+        "angle": 2.255737000006775,
+        "passage": "2-31",
+        "hit": false
+      }
+    ],
+    "boundary": "Direct raw target-blade rays; upper bound until all-surface occlusion verification in full export"
+  },
+  "T3": {
+    "expected": 121,
+    "candidate_hits": 27,
+    "passages": 28,
+    "passages_with_candidate_hit": 23,
+    "rows": [
+      {
+        "t": 117.4,
+        "blade": 2,
+        "angle": -2.3475226999962615,
+        "passage": "1-20",
+        "hit": false
+      },
+      {
+        "t": 117.425,
+        "blade": 2,
+        "angle": -1.0157737999970777,
+        "passage": "1-20",
+        "hit": true
+      },
+      {
+        "t": 117.45,
+        "blade": 2,
+        "angle": 0.31564710000293417,
+        "passage": "1-20",
+        "hit": true
+      },
+      {
+        "t": 117.475,
+        "blade": 2,
+        "angle": 1.6466599000032147,
+        "passage": "1-20",
+        "hit": false
+      },
+      {
+        "t": 117.5,
+        "blade": 2,
+        "angle": 2.9773750000031214,
+        "passage": "1-20",
+        "hit": false
+      },
+      {
+        "t": 119.675,
+        "blade": 1,
+        "angle": -1.805449999996199,
+        "passage": "0-20",
+        "hit": false
+      },
+      {
+        "t": 119.7,
+        "blade": 1,
+        "angle": -0.4696659999963231,
+        "passage": "0-20",
+        "hit": true
+      },
+      {
+        "t": 119.725,
+        "blade": 1,
+        "angle": 0.8667450000039025,
+        "passage": "0-20",
+        "hit": true
+      },
+      {
+        "t": 119.75,
+        "blade": 1,
+        "angle": 2.203751000003649,
+        "passage": "0-20",
+        "hit": false
+      },
+      {
+        "t": 121.9,
+        "blade": 3,
+        "angle": -2.3226009999962116,
+        "passage": "2-21",
+        "hit": false
+      },
+      {
+        "t": 121.925,
+        "blade": 3,
+        "angle": -0.9877929999966,
+        "passage": "2-21",
+        "hit": false
+      },
+      {
+        "t": 121.95,
+        "blade": 3,
+        "angle": 0.346375000003718,
+        "passage": "2-21",
+        "hit": false
+      },
+      {
+        "t": 121.975,
+        "blade": 3,
+        "angle": 1.6798710000030042,
+        "passage": "2-21",
+        "hit": false
+      },
+      {
+        "t": 124.2,
+        "blade": 2,
+        "angle": -1.8145522999966488,
+        "passage": "1-21",
+        "hit": false
+      },
+      {
+        "t": 124.225,
+        "blade": 2,
+        "angle": -0.5183715999955893,
+        "passage": "1-21",
+        "hit": false
+      },
+      {
+        "t": 124.25,
+        "blade": 2,
+        "angle": 0.7776718000031906,
+        "passage": "1-21",
+        "hit": false
+      },
+      {
+        "t": 124.275,
+        "blade": 2,
+        "angle": 2.073604600002909,
+        "passage": "1-21",
+        "hit": false
+      },
+      {
+        "t": 126.5,
+        "blade": 1,
+        "angle": -2.9519809999956124,
+        "passage": "0-21",
+        "hit": false
+      },
+      {
+        "t": 126.525,
+        "blade": 1,
+        "angle": -1.6537629999975252,
+        "passage": "0-21",
+        "hit": false
+      },
+      {
+        "t": 126.55,
+        "blade": 1,
+        "angle": -0.3545529999964856,
+        "passage": "0-21",
+        "hit": true
+      },
+      {
+        "t": 126.575,
+        "blade": 1,
+        "angle": 0.9456480000035299,
+        "passage": "0-21",
+        "hit": false
+      },
+      {
+        "t": 126.6,
+        "blade": 1,
+        "angle": 2.24687200000335,
+        "passage": "0-21",
+        "hit": false
+      },
+      {
+        "t": 128.775,
+        "blade": 3,
+        "angle": -2.476928999996744,
+        "passage": "2-22",
+        "hit": false
+      },
+      {
+        "t": 128.8,
+        "blade": 3,
+        "angle": -1.1583249999966938,
+        "passage": "2-22",
+        "hit": false
+      },
+      {
+        "t": 128.825,
+        "blade": 3,
+        "angle": 0.16012600000340171,
+        "passage": "2-22",
+        "hit": false
+      },
+      {
+        "t": 128.85,
+        "blade": 3,
+        "angle": 1.478424000004452,
+        "passage": "2-22",
+        "hit": false
+      },
+      {
+        "t": 128.875,
+        "blade": 3,
+        "angle": 2.796539000003577,
+        "passage": "2-22",
+        "hit": false
+      },
+      {
+        "t": 131.075,
+        "blade": 2,
+        "angle": -2.5120505999966554,
+        "passage": "1-22",
+        "hit": false
+      },
+      {
+        "t": 131.1,
+        "blade": 2,
+        "angle": -1.2224807999964469,
+        "passage": "1-22",
+        "hit": false
+      },
+      {
+        "t": 131.125,
+        "blade": 2,
+        "angle": 0.06708530000469182,
+        "passage": "1-22",
+        "hit": false
+      },
+      {
+        "t": 131.15,
+        "blade": 2,
+        "angle": 1.3564606000036292,
+        "passage": "1-22",
+        "hit": false
+      },
+      {
+        "t": 131.175,
+        "blade": 2,
+        "angle": 2.645671800004493,
+        "passage": "1-22",
+        "hit": false
+      },
+      {
+        "t": 133.4,
+        "blade": 1,
+        "angle": -2.7990109999955166,
+        "passage": "0-22",
+        "hit": false
+      },
+      {
+        "t": 133.425,
+        "blade": 1,
+        "angle": -1.4982149999950707,
+        "passage": "0-22",
+        "hit": false
+      },
+      {
+        "t": 133.45,
+        "blade": 1,
+        "angle": -0.19650299999648269,
+        "passage": "0-22",
+        "hit": true
+      },
+      {
+        "t": 133.475,
+        "blade": 1,
+        "angle": 1.1061710000039966,
+        "passage": "0-22",
+        "hit": false
+      },
+      {
+        "t": 133.5,
+        "blade": 1,
+        "angle": 2.4098820000044725,
+        "passage": "0-22",
+        "hit": false
+      },
+      {
+        "t": 135.675,
+        "blade": 3,
+        "angle": -2.494323999995686,
+        "passage": "2-23",
+        "hit": false
+      },
+      {
+        "t": 135.7,
+        "blade": 3,
+        "angle": -1.1722719999961555,
+        "passage": "2-23",
+        "hit": false
+      },
+      {
+        "t": 135.725,
+        "blade": 3,
+        "angle": 0.14962800000466814,
+        "passage": "2-23",
+        "hit": true
+      },
+      {
+        "t": 135.75,
+        "blade": 3,
+        "angle": 1.4711910000041826,
+        "passage": "2-23",
+        "hit": false
+      },
+      {
+        "t": 135.775,
+        "blade": 3,
+        "angle": 2.792542000004687,
+        "passage": "2-23",
+        "hit": false
+      },
+      {
+        "t": 137.95,
+        "blade": 2,
+        "angle": -2.986144999995304,
+        "passage": "1-23",
+        "hit": false
+      },
+      {
+        "t": 137.975,
+        "blade": 2,
+        "angle": -1.6767730999945343,
+        "passage": "1-23",
+        "hit": false
+      },
+      {
+        "t": 138.0,
+        "blade": 2,
+        "angle": -0.3673438999958307,
+        "passage": "1-23",
+        "hit": true
+      },
+      {
+        "t": 138.025,
+        "blade": 2,
+        "angle": 0.9418945000034,
+        "passage": "1-23",
+        "hit": false
+      },
+      {
+        "t": 138.05,
+        "blade": 2,
+        "angle": 2.250640900003418,
+        "passage": "1-23",
+        "hit": false
+      },
+      {
+        "t": 140.25,
+        "blade": 1,
+        "angle": -1.7690889999958017,
+        "passage": "0-23",
+        "hit": false
+      },
+      {
+        "t": 140.275,
+        "blade": 1,
+        "angle": -0.44308499999533524,
+        "passage": "0-23",
+        "hit": true
+      },
+      {
+        "t": 140.3,
+        "blade": 1,
+        "angle": 0.8834990000032121,
+        "passage": "0-23",
+        "hit": false
+      },
+      {
+        "t": 140.325,
+        "blade": 1,
+        "angle": 2.210724000005939,
+        "passage": "0-23",
+        "hit": false
+      },
+      {
+        "t": 142.45,
+        "blade": 3,
+        "angle": -2.97360199999639,
+        "passage": "2-24",
+        "hit": false
+      },
+      {
+        "t": 142.475,
+        "blade": 3,
+        "angle": -1.5789489999951911,
+        "passage": "2-24",
+        "hit": false
+      },
+      {
+        "t": 142.5,
+        "blade": 3,
+        "angle": -0.1831969999948342,
+        "passage": "2-24",
+        "hit": true
+      },
+      {
+        "t": 142.525,
+        "blade": 3,
+        "angle": 1.2135620000044582,
+        "passage": "2-24",
+        "hit": false
+      },
+      {
+        "t": 142.55,
+        "blade": 3,
+        "angle": 2.6114200000047276,
+        "passage": "2-24",
+        "hit": false
+      },
+      {
+        "t": 144.575,
+        "blade": 2,
+        "angle": -2.1501578999941557,
+        "passage": "1-24",
+        "hit": false
+      },
+      {
+        "t": 144.6,
+        "blade": 2,
+        "angle": -0.7187690999944607,
+        "passage": "1-24",
+        "hit": true
+      },
+      {
+        "t": 144.625,
+        "blade": 2,
+        "angle": 0.7120171000060509,
+        "passage": "1-24",
+        "hit": true
+      },
+      {
+        "t": 144.65,
+        "blade": 2,
+        "angle": 2.1423149000056583,
+        "passage": "1-24",
+        "hit": false
+      },
+      {
+        "t": 146.675,
+        "blade": 1,
+        "angle": -2.8567499999953725,
+        "passage": "0-24",
+        "hit": false
+      },
+      {
+        "t": 146.7,
+        "blade": 1,
+        "angle": -1.4487609999960114,
+        "passage": "0-24",
+        "hit": false
+      },
+      {
+        "t": 146.725,
+        "blade": 1,
+        "angle": -0.04090899999573594,
+        "passage": "0-24",
+        "hit": true
+      },
+      {
+        "t": 146.75,
+        "blade": 1,
+        "angle": 1.367050000004383,
+        "passage": "0-24",
+        "hit": false
+      },
+      {
+        "t": 146.775,
+        "blade": 1,
+        "angle": 2.7751920000046084,
+        "passage": "0-24",
+        "hit": false
+      },
+      {
+        "t": 148.825,
+        "blade": 3,
+        "angle": -2.1377559999946243,
+        "passage": "2-25",
+        "hit": false
+      },
+      {
+        "t": 148.85,
+        "blade": 3,
+        "angle": -0.7463379999953759,
+        "passage": "2-25",
+        "hit": true
+      },
+      {
+        "t": 148.875,
+        "blade": 3,
+        "angle": 0.644562000004953,
+        "passage": "2-25",
+        "hit": false
+      },
+      {
+        "t": 148.9,
+        "blade": 3,
+        "angle": 2.034973000005266,
+        "passage": "2-25",
+        "hit": false
+      },
+      {
+        "t": 150.975,
+        "blade": 2,
+        "angle": -2.9550284999950236,
+        "passage": "1-25",
+        "hit": false
+      },
+      {
+        "t": 151.0,
+        "blade": 2,
+        "angle": -1.5669135999960417,
+        "passage": "1-25",
+        "hit": false
+      },
+      {
+        "t": 151.025,
+        "blade": 2,
+        "angle": -0.1786117999945418,
+        "passage": "1-25",
+        "hit": true
+      },
+      {
+        "t": 151.05,
+        "blade": 2,
+        "angle": 1.2100220000047557,
+        "passage": "1-25",
+        "hit": false
+      },
+      {
+        "t": 151.075,
+        "blade": 2,
+        "angle": 2.599201200006064,
+        "passage": "1-25",
+        "hit": false
+      },
+      {
+        "t": 153.1,
+        "blade": 1,
+        "angle": -2.173644999995304,
+        "passage": "0-25",
+        "hit": false
+      },
+      {
+        "t": 153.125,
+        "blade": 1,
+        "angle": -0.7143399999949906,
+        "passage": "0-25",
+        "hit": true
+      },
+      {
+        "t": 153.15,
+        "blade": 1,
+        "angle": 0.7456820000043081,
+        "passage": "0-25",
+        "hit": false
+      },
+      {
+        "t": 153.175,
+        "blade": 1,
+        "angle": 2.2063450000041485,
+        "passage": "0-25",
+        "hit": false
+      },
+      {
+        "t": 155.15,
+        "blade": 3,
+        "angle": -2.2013239999942016,
+        "passage": "2-26",
+        "hit": false
+      },
+      {
+        "t": 155.175,
+        "blade": 3,
+        "angle": -0.7435299999960989,
+        "passage": "2-26",
+        "hit": false
+      },
+      {
+        "t": 155.2,
+        "blade": 3,
+        "angle": 0.7141420000043581,
+        "passage": "2-26",
+        "hit": false
+      },
+      {
+        "t": 155.225,
+        "blade": 3,
+        "angle": 2.1714780000056635,
+        "passage": "2-26",
+        "hit": false
+      },
+      {
+        "t": 157.225,
+        "blade": 2,
+        "angle": -1.8837813999944046,
+        "passage": "1-26",
+        "hit": false
+      },
+      {
+        "t": 157.25,
+        "blade": 2,
+        "angle": -0.43731309999384393,
+        "passage": "1-26",
+        "hit": true
+      },
+      {
+        "t": 157.275,
+        "blade": 2,
+        "angle": 1.0091591000054905,
+        "passage": "1-26",
+        "hit": false
+      },
+      {
+        "t": 157.3,
+        "blade": 2,
+        "angle": 2.455574000006891,
+        "passage": "1-26",
+        "hit": false
+      },
+      {
+        "t": 159.3,
+        "blade": 1,
+        "angle": -1.7275849999950879,
+        "passage": "0-26",
+        "hit": false
+      },
+      {
+        "t": 159.325,
+        "blade": 1,
+        "angle": -0.27625999999509077,
+        "passage": "0-26",
+        "hit": true
+      },
+      {
+        "t": 159.35,
+        "blade": 1,
+        "angle": 1.175323000004937,
+        "passage": "0-26",
+        "hit": false
+      },
+      {
+        "t": 159.375,
+        "blade": 1,
+        "angle": 2.626785000005839,
+        "passage": "0-26",
+        "hit": false
+      },
+      {
+        "t": 161.325,
+        "blade": 3,
+        "angle": -1.7278749999950378,
+        "passage": "2-27",
+        "hit": false
+      },
+      {
+        "t": 161.35,
+        "blade": 3,
+        "angle": -0.20257599999422382,
+        "passage": "2-27",
+        "hit": true
+      },
+      {
+        "t": 161.375,
+        "blade": 3,
+        "angle": 1.3229980000051,
+        "passage": "2-27",
+        "hit": false
+      },
+      {
+        "t": 161.4,
+        "blade": 3,
+        "angle": 2.8490600000059203,
+        "passage": "2-27",
+        "hit": false
+      },
+      {
+        "t": 163.275,
+        "blade": 2,
+        "angle": -2.91691589999391,
+        "passage": "1-27",
+        "hit": false
+      },
+      {
+        "t": 163.3,
+        "blade": 2,
+        "angle": -1.4090575999925932,
+        "passage": "1-27",
+        "hit": false
+      },
+      {
+        "t": 163.325,
+        "blade": 2,
+        "angle": 0.09822850000637118,
+        "passage": "1-27",
+        "hit": true
+      },
+      {
+        "t": 163.35,
+        "blade": 2,
+        "angle": 1.60499570000502,
+        "passage": "1-27",
+        "hit": false
+      },
+      {
+        "t": 165.3,
+        "blade": 1,
+        "angle": -2.5186609999946086,
+        "passage": "0-27",
+        "hit": false
+      },
+      {
+        "t": 165.325,
+        "blade": 1,
+        "angle": -1.0525049999941984,
+        "passage": "0-27",
+        "hit": false
+      },
+      {
+        "t": 165.35,
+        "blade": 1,
+        "angle": 0.41301000000567,
+        "passage": "0-27",
+        "hit": true
+      },
+      {
+        "t": 165.375,
+        "blade": 1,
+        "angle": 1.8777160000063304,
+        "passage": "0-27",
+        "hit": false
+      },
+      {
+        "t": 167.375,
+        "blade": 3,
+        "angle": -1.621886999993876,
+        "passage": "2-28",
+        "hit": false
+      },
+      {
+        "t": 167.4,
+        "blade": 3,
+        "angle": -0.17907699999341276,
+        "passage": "2-28",
+        "hit": true
+      },
+      {
+        "t": 167.425,
+        "blade": 3,
+        "angle": 1.2632750000066153,
+        "passage": "2-28",
+        "hit": false
+      },
+      {
+        "t": 167.45,
+        "blade": 3,
+        "angle": 2.7052610000064305,
+        "passage": "2-28",
+        "hit": false
+      },
+      {
+        "t": 169.425,
+        "blade": 2,
+        "angle": -1.8581542999927478,
+        "passage": "1-28",
+        "hit": false
+      },
+      {
+        "t": 169.45,
+        "blade": 2,
+        "angle": -0.3664397999928042,
+        "passage": "1-28",
+        "hit": true
+      },
+      {
+        "t": 169.475,
+        "blade": 2,
+        "angle": 1.1259537000059936,
+        "passage": "1-28",
+        "hit": false
+      },
+      {
+        "t": 169.5,
+        "blade": 2,
+        "angle": 2.619197800006077,
+        "passage": "1-28",
+        "hit": false
+      },
+      {
+        "t": 171.4,
+        "blade": 1,
+        "angle": -2.696883999993588,
+        "passage": "0-28",
+        "hit": false
+      },
+      {
+        "t": 171.425,
+        "blade": 1,
+        "angle": -1.188094999994064,
+        "passage": "0-28",
+        "hit": false
+      },
+      {
+        "t": 171.45,
+        "blade": 1,
+        "angle": 0.32067900000583904,
+        "passage": "0-28",
+        "hit": true
+      },
+      {
+        "t": 171.475,
+        "blade": 1,
+        "angle": 1.829330000005939,
+        "passage": "0-28",
+        "hit": false
+      },
+      {
+        "t": 173.4,
+        "blade": 3,
+        "angle": -2.0032959999934974,
+        "passage": "2-29",
+        "hit": false
+      },
+      {
+        "t": 173.425,
+        "blade": 3,
+        "angle": -0.4943239999938669,
+        "passage": "2-29",
+        "hit": true
+      },
+      {
+        "t": 173.45,
+        "blade": 3,
+        "angle": 1.014740000005986,
+        "passage": "2-29",
+        "hit": true
+      },
+      {
+        "t": 173.475,
+        "blade": 3,
+        "angle": 2.523590000006152,
+        "passage": "2-29",
+        "hit": false
+      },
+      {
+        "t": 175.375,
+        "blade": 2,
+        "angle": -1.5521354999928008,
+        "passage": "1-29",
+        "hit": false
+      },
+      {
+        "t": 175.4,
+        "blade": 2,
+        "angle": -0.008705099993676413,
+        "passage": "1-29",
+        "hit": true
+      },
+      {
+        "t": 175.425,
+        "blade": 2,
+        "angle": 1.5354385000064212,
+        "passage": "1-29",
+        "hit": false
+      }
+    ],
+    "boundary": "Direct raw target-blade rays; upper bound until all-surface occlusion verification in full export"
+  }
+}

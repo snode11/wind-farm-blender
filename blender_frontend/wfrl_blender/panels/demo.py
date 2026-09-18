@@ -9,6 +9,7 @@ class DemoLoaded:
 
 class WFRL_OT_LoadDemo(bpy.types.Operator):
     bl_idname = 'wfrl.load_demo'
+    package_path: bpy.props.StringProperty(default='', options={'SKIP_SAVE'})
     bl_label = '加载 MAPPO · 60 秒'
     bl_description = '加载随扩展提供的三机 MAPPO 完整离线结果'
 
@@ -20,7 +21,7 @@ class WFRL_OT_LoadDemo(bpy.types.Operator):
     def execute(self, context):
         from .. import load_demo_scene
         try:
-            load_demo_scene()
+            load_demo_scene(self.package_path or None)
         except (ValueError, OSError, KeyError, TypeError, ImportError) as exc:
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}

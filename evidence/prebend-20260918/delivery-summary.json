@@ -1,0 +1,33 @@
+{
+  "status": "REVIEW_READY_WITH_FAILED_ACCEPTANCE",
+  "zip": "/Users/eason/Desktop/wfcrl/wind farm RL/dist/prebend-20260918/runtime-archive/wfrl_blender-0.3.4.zip",
+  "zip_sha256": "a6a202d54ad8531385e6ec50c7ea4f535a96ba6f5c716dacd3eb6c4a82707aba",
+  "zip_bytes": 41426769,
+  "old_baseline_preserved": true,
+  "data_hashes": 14,
+  "zip_native": {
+    "status": "PASS",
+    "turbines": [
+      "T1",
+      "T2",
+      "T3"
+    ],
+    "max_component_error_m": 0.0013780016838742803,
+    "interpolated_component_error_m": 0.001912713954324019,
+    "load_s": 4.942822084063664,
+    "frame_update_p95_ms": 81.70125004835427,
+    "blender": "5.2.1 LTS"
+  },
+  "measurement_acceptance": "FAILED_AVAILABILITY",
+  "final_visible_window": "PENDING_MAC_UNLOCK",
+  "artifact_integrity": "PASS",
+  "zip_radar": {
+    "status": "PASS",
+    "materials": true,
+    "independent_turbines": true,
+    "seek": true,
+    "clock": true,
+    "reload": true,
+    "clear": true
+  }
+}

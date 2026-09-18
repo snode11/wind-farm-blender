@@ -28,6 +28,7 @@ def main():
     p.add_argument('--turbulence', type=Path)
     p.add_argument('--warmup-steps', type=int, default=0)
     p.add_argument('--surfaces', action='store_true')
+    p.add_argument('--prebend', action='store_true', help='Use validated quadratic BeamDyn derivative and separate unloaded reference')
     p.add_argument('--flexible-tower', action='store_true', help='Enable both fore-aft and side-side tower modes')
     p.add_argument('--solver-dt', type=float, help='OpenFAST integration step for numerical sensitivity runs')
     p.add_argument('--tower-nodes', type=int, help='ElastoDyn tower integration nodes (same modal basis)')
@@ -91,6 +92,24 @@ def main():
                                 'YawBrRDxt', 'YawBrRDyt', 'YawBrRDzt', 'BlPitch2', 'BlPitch3']
                     lines[end:end] = ['"' + c + '"' for c in channels if '"' + c + '"' not in lines]
                     f.write_text('\n'.join(lines) + '\n')
+        if args.prebend:
+            if not args.flexible_tower:
+                raise ValueError('Prebend v3 requires the validated flexible-tower path')
+            source = ROOT/'results/prebend-20260918/C'
+            baseline = Path(driver.case_dir)/'5MW_Baseline'
+            for name in ('NRELOffshrBsline5MW_BeamDyn.dat', 'NRELOffshrBsline5MW_BeamDyn_Blade.dat',
+                         'NRELOffshrBsline5MW_AeroDyn_blade.dat'):
+                shutil.copyfile(source/'5MW_Baseline'/name, baseline/name)
+            for f in farm.glob('FFTest_WT*.fst'):
+                replace(f, dict(CompElast=2, **{f'BDBldFile({b})': '"../5MW_Baseline/NRELOffshrBsline5MW_BeamDyn.dat"' for b in (1,2,3)}))
+            for f in farm.glob('*ElastoDyn*.dat'):
+                if 'FlapDOF1' in f.read_text():
+                    replace(f, dict(FlapDOF1='False', FlapDOF2='False', EdgeDOF='False'))
+            report['blade_model'] = 'beamdyn-prebend'
+            report['blade_config'] = json.loads((source/'probe-config.json').read_text())
+            report['unloaded_reference'] = str((ROOT/'results/prebend-20260918/C-rest').resolve())
+            report['blade_input_hashes'] = {f.name:hashlib.sha256(f.read_bytes()).hexdigest()
+                for f in baseline.glob('*BeamDyn*')}
         report['tower'] = 'flexible' if args.flexible_tower else 'rigid'
         report['output_fps'] = 40
         report['numerical_settings'] = dict(solver_dt_s=args.solver_dt or .00625,
@@ -98,6 +117,8 @@ def main():
             surfaces=args.surfaces, aerodynamic_nodes=19, farm_dt_low_s=3., farm_dt_high_s=.05)
         report['input_hashes'] = {str(f.relative_to(farm)): hashlib.sha256(f.read_bytes()).hexdigest()
                                   for f in farm.glob('*.fst')}
+        # MPI abort can terminate Python before finally; preserve inputs first.
+        (args.output/'probe.json').write_text(json.dumps(report, indent=2, allow_nan=False))
         m = driver.reset(wind_speed=args.wind)
         for _ in range(args.warmup_steps):
             m = driver.step(np.zeros(3))

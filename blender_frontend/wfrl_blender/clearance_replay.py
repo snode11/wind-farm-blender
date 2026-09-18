@@ -161,7 +161,14 @@ def on_load(_):
                     from . import farm_flex, runtime
                     runtime.enter_result_replay()
                     saved = Path(scene['wfrl_farm_flex_path'])
-                    farm_flex.attach(scene, saved if saved.is_dir() else farm_flex.default_package())
+                    candidate = saved if saved.is_dir() else farm_flex.default_package()
+                    expected = scene.get('wfrl_farm_manifest_sha256')
+                    if expected:
+                        import hashlib
+                        actual = hashlib.sha256((candidate/'manifest.json').read_bytes()).hexdigest()
+                        if actual != expected:
+                            raise ValueError('保存场景与结果包不匹配，不能替换模型或数据')
+                    farm_flex.attach(scene, candidate)
                     scene.frame_set(frame)
                     continue
                 load(scene, bpy.path.abspath(path), demo)

@@ -1,0 +1,29 @@
+{
+  "time_s": 154.98333333333335,
+  "cable_endpoint_nearest": [
+    {
+      "object": "WFRL.Turbine.T1.ClearanceRadar.MountPad",
+      "distance_m": 0.029403842985630035
+    },
+    {
+      "object": "WFRL.Turbine.T1.ClearanceRadar.MountPlate",
+      "distance_m": 0.043068841099739075
+    },
+    {
+      "object": "WFRL.Turbine.T1.Nacelle",
+      "distance_m": 0.06743507087230682
+    },
+    {
+      "object": "WFRL.Turbine.T1.ClearanceRadar.Bracket",
+      "distance_m": 0.11021196842193604
+    },
+    {
+      "object": "WFRL.Turbine.T1.YawPedestal",
+      "distance_m": 0.2312982678413391
+    },
+    {
+      "object": "WFRL.Turbine.T1.NacelleRoof",
+      "distance_m": 3.505005359649658
+    }
+  ]
+}

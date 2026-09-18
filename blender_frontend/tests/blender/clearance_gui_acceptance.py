@@ -12,7 +12,6 @@ import time
 import traceback
 
 ROOT = Path(__file__).resolve().parents[3]
-DELIVERY = json.loads((ROOT / 'dist/lidar-delivery.json').read_text())
 sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
 import bpy
 from mathutils import Vector
@@ -36,8 +35,8 @@ scene.wfrl_show_wake = False
 scene.render.fps = 25
 scene.render.fps_base = 1
 scene.sync_mode = 'FRAME_DROP'
-scene.wfrl_clearance_normal_path = str(ROOT / DELIVERY['packages']['normal'])
-scene.wfrl_clearance_near_tower_path = str(ROOT / DELIVERY['packages']['close'])
+scene.wfrl_clearance_normal_path = str(ROOT / 'results/lidar/packages/normal')
+scene.wfrl_clearance_near_tower_path = str(ROOT / 'results/lidar/packages/close')
 playback.load(scene, scene.wfrl_clearance_normal_path, 'normal')
 bpy.ops.wfrl.clearance_view(view='MEASUREMENT')
 camera = scene.camera

@@ -1,8 +1,7 @@
-"""Reviewed offline packages; writes only to explicit WFRL_TEST_OUTPUT."""
+"""Real offline package integration; run after physics packages are published."""
 from pathlib import Path
-import sys,json,math,os
+import sys,json,math
 ROOT=Path(__file__).resolve().parents[3]
-DELIVERY = json.loads((ROOT / 'dist/lidar-delivery.json').read_text())
 sys.path[:0]=[str(ROOT/'blender_frontend'),str(ROOT)]
 import bpy
 import wfrl_blender as addon
@@ -11,8 +10,8 @@ from mathutils import Vector
 addon.register();addon.load_demo_scene()
 scene=bpy.context.scene
 scene.wfrl_show_wake=False
-scene.wfrl_clearance_normal_path=str(ROOT / DELIVERY['packages']['normal'])
-scene.wfrl_clearance_near_tower_path=str(ROOT / DELIVERY['packages']['close'])
+scene.wfrl_clearance_normal_path=str(ROOT/'results/lidar/packages/normal')
+scene.wfrl_clearance_near_tower_path=str(ROOT/'results/lidar/packages/close')
 results={}
 for demo,path in [('normal',scene.wfrl_clearance_normal_path),('near_tower',scene.wfrl_clearance_near_tower_path)]:
     playback.load(scene,path,demo)
@@ -40,8 +39,7 @@ for area in bpy.context.screen.areas:
     if area.type=='VIEW_3D':
         space=area.spaces.active;space.use_local_camera=False;space.camera=camera
         space.show_region_ui=True;space.region_3d.view_perspective='CAMERA';space.region_3d.view_camera_zoom=0
-output=Path(os.environ['WFRL_TEST_OUTPUT'])
-output.mkdir(parents=True, exist_ok=True)
+output=ROOT/'evidence/lidar-frontend'
 (output/'real-package-integration.json').write_text(json.dumps(results,indent=2))
 bpy.ops.wm.save_as_mainfile(filepath=str(output/'clearance-demo.blend'))
 bpy.ops.wm.open_mainfile(filepath=str(output/'clearance-demo.blend'))

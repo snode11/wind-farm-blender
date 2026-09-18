@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "base_max_error_m": 4.8467614016778965e-27,
+  "radar_mount_max_error_m": 2.0442864485483105e-05,
+  "sampled_tip_max_error_m": [
+    0.00026571048810497544,
+    6.913542667041916e-05
+  ],
+  "seeking": true,
+  "views": true,
+  "clock": true,
+  "reload": true
+}

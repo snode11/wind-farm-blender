@@ -1,26 +1,13 @@
-# WFRL Blender 0.3.1 installation
+# WFRL Blender 0.3.4 安装
 
-当前发布版本为 **0.3.3**：[下载](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.3)，含雷达反馈与塔顶密封圈/焊缝随动修复。详细验证见发布核对文档；以下早期版本说明保留作为历史。
+要求 Blender 5.2+，Windows/macOS 使用同一 ZIP。
 
-The same extension ZIP is intended for Windows and macOS. Blender 5.2+ is required. Native release checks run on macOS with Blender 5.2.1; Windows has not yet been tested on a Windows host.
+1. 从 [0.3.4 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.4) 下载 **wfrl_blender-0.3.4.zip**，不要下载自动生成的 Source code。
+2. Blender → Edit → Preferences → Get Extensions → Install from Disk，选择 ZIP 并启用。
+3. 重启 Blender，打开新场景，按 N → MAPPO → 加载 MAPPO · 60 秒。
 
-1. Download **wfrl_blender-0.3.1.zip** from the [release page](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.1). Do not use the automatically generated Source code archive.
-2. In Blender, open **Edit → Preferences → Get Extensions**, open the menu and choose **Install from Disk**.
-3. Select the ZIP without extracting it, enable **WFRL Blender**, then restart Blender.
-4. Start a new General scene. In the 3D View press **N → MAPPO → 三机 MAPPO 回放 → 加载 MAPPO · 60 秒**, then play.
+包内含完整预弯 v3 回放数据，无需仓库、外部 Python 或 FAST.Farm。可将 ZIP 的 SHA-256 与发布页 `.sha256` 文件比较。
 
-The ZIP includes the complete three-turbine 60-second recording, flexible towers, nine flexible blades, T1 tip comparison and telemetry. Offline playback needs no repository checkout, external Python, MPI, FAST.Farm, checkpoint or network. The `.command` portable launcher is for macOS; Windows users should install the ZIP.
+源码构建：`python scripts/blender/build_extension.py`。更新源码不会更新已安装扩展，需要重新安装 ZIP。
 
-If migrating from a local development build labelled 0.3.2–0.3.5, save any scenes first, remove that extension in Preferences, and install the official 0.3.1 ZIP. Those higher numbers were local development labels consolidated into this release.
-
-Optional PowerShell checksum check:
-
-```powershell
-Get-FileHash .\wfrl_blender-0.3.1.zip -Algorithm SHA256
-```
-
-Compare it to the release `.sha256` file. Updating source files does not update an installed extension. To rebuild from this repository, run `python scripts/blender/build_extension.py`, then install the new ZIP and restart Blender.
-
-Real backend Replay, Interactive and Formal Training require the repository and separate backend dependencies. Configure project, Python, MPI and FAST.Farm paths for the destination computer. See the [complete user manual](用户使用手册.md#6-需要时连接真实后端) for launch commands, connection and shutdown steps. The default offline recording does not require these steps.
-
-[Chinese quick start](MAPPO演示.md) · [Complete manual](用户使用手册.md) · [Release verification](0.3.1发布核对.md)
+固定三束覆盖率未通过，Windows 实机、稳定 60 FPS 和现场精度未验收。详见 [发布核对](0.3.4发布核对.md)。

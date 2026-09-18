@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "saved_tips": 123,
+  "max_error_m": [
+    4.4006070136326514e-05,
+    7.257934312421277e-05
+  ],
+  "tower_station_count": 22,
+  "statistics": {
+    "T1": {
+      "expected_samples": 4,
+      "valid_samples": 2,
+      "valid_ratio": 0.5,
+      "mae_m": 0.23955702611605467,
+      "max_abs_error_m": 0.3378293398972545,
+      "p95_abs_error_m": 0.3378293398972545,
+      "max_positive_bias_m": 0.0,
+      "passage_count": 1,
+      "missed_passage_count": 0
+    },
+    "T2": {
+      "expected_samples": 3,
+      "valid_samples": 1,
+      "valid_ratio": 0.3333333333333333,
+      "mae_m": 0.30570202446239847,
+      "max_abs_error_m": 0.30570202446239847,
+      "p95_abs_error_m": 0.30570202446239847,
+      "max_positive_bias_m": 0.0,
+      "passage_count": 1,
+      "missed_passage_count": 0
+    },
+    "T3": {
+      "expected_samples": 4,
+      "valid_samples": 2,
+      "valid_ratio": 0.5,
+      "mae_m": 0.200189987995548,
+      "max_abs_error_m": 0.2502659934395348,
+      "p95_abs_error_m": 0.2502659934395348,
+      "max_positive_bias_m": 0.0,
+      "passage_count": 1,
+      "missed_passage_count": 0
+    }
+  }
+}

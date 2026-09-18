@@ -1,0 +1,163 @@
+{
+  "A": {
+    "times": [
+      0.0,
+      6.0
+    ],
+    "samples": 241,
+    "channels": {
+      "OoPDefl1": {
+        "min": 1.19705475e-16,
+        "max": 3.39113212,
+        "rms": 3.0736984767761877
+      },
+      "IPDefl1": {
+        "min": -0.865046918,
+        "max": 0.200652003,
+        "rms": 0.4661881491814462
+      }
+    },
+    "inputs": {
+      "FarmInputs/InflowWind.dat": "b662cbb9da8bed3d860a620280cc778ecea9af7df0eb30fd33bcf99adc20751d",
+      "FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat": "72b36c6ce93a641c8830858e17cd4d61c7ca335a44d47eda3c0cdbdd15bd124d",
+      "FarmInputs/FFTest_WT1.fst": "2bdb6f10d8b75b0c412d73d9c92d1afd2b37f173aa4414adcc6a00981d93b027",
+      "5MW_Baseline/AD.dat": "05744e9ae621af471ac350b8f2c1d91a08066426fcdafe1ee4707885c3970738",
+      "5MW_Baseline/NRELOffshrBsline5MW_Blade.dat": "5bbcaa305218c95fdd4581a3d765346c55c0f845f7afe078336cc455fcb6d1e3",
+      "5MW_Baseline/NRELOffshrBsline5MW_AeroDyn_blade.dat": "e22829920eb2b6323f0bb3b666c7e2ed9b69b01c684d682363ba16e086fce758",
+      "5MW_Baseline/NRELOffshrBsline5MW_Onshore_ElastoDyn_Tower.dat": "82ca67bea8bfbc85892b5f78db5e921c9aa0e69f34af4ae657c0b7e63301dc8f",
+      "5MW_Baseline/Airfoils/DU35_A17.dat": "701cff83e01a187209ff788a3fc4bfb9b8592546462a5aec2f0df54701d05763",
+      "5MW_Baseline/Airfoils/DU25_A17.dat": "52fcce2a8fd1159f38cdd1a8bfd365f79e3060e66ea91d5ab8fbce1f16ec20a7",
+      "5MW_Baseline/Airfoils/Cylinder1_coords.txt": "3a3a40c1eee741786357bab6fb49ae37b925dcf47a16aec083e8712c5b3bb595",
+      "5MW_Baseline/Airfoils/Cylinder1.dat": "ebaabc1d2befd769cde8cb28a75be0d2b73585f2a27960a3dc34cfbd05f60a2c",
+      "5MW_Baseline/Airfoils/Cylinder2.dat": "4be751a2b80057410c15ba2bc3ed799642dcd5cf12b544345aa61bc6777a1f64",
+      "5MW_Baseline/Airfoils/DU21_A17_coords.txt": "b4d6350614b0fbbd6262ec340c78ee8eb0562ddfc8cf6bdf222228e739392ca4",
+      "5MW_Baseline/Airfoils/DU40_A17.dat": "002e2176cf03eda520b160d5a46ce0f5f42125f892c9d0e1fd3c40424d249324",
+      "5MW_Baseline/Airfoils/DU35_A17_coords.txt": "cdbb3d2d5735b0fd6be7a9c4b4439ba2ac6e78c3652657ef4090739c2dc0877a",
+      "5MW_Baseline/Airfoils/DU21_A17.dat": "2ad661a5f04e87285b8c7f79e9e0b67765ce0f876a9597f604935eb6c47fa2f6",
+      "5MW_Baseline/Airfoils/DU30_A17_coords.txt": "fb63e89e1c53c3278cd420a5ab36402a4d609850f1869f4013848a041e7a5c93",
+      "5MW_Baseline/Airfoils/DU25_A17_coords.txt": "08e7d345ef3e066f059f1fcf5f9b779e6a7e455ff2f6944931b227916d7730e7",
+      "5MW_Baseline/Airfoils/NACA64_A17_coords.txt": "c91942a4843516ab7f1b17a34162d21dbc400fbb4011b60f83a83acf08c8bdec",
+      "5MW_Baseline/Airfoils/DU40_A17_coords.txt": "5008c9aa91ada47cad7badd9330ba36c72010bdbf0450852cf5ed81c92cf6579",
+      "5MW_Baseline/Airfoils/Cylinder2_coords.txt": "57928cf1f02057e34f45b00c71fc2468d7fc4d63605047a62907e25dee4637e0",
+      "5MW_Baseline/Airfoils/DU30_A17.dat": "e9d0f18b62a5361c0d45e401d4d22fd5d02f34dc2243a96a7b0f5e2a4b24c163",
+      "5MW_Baseline/Airfoils/NACA64_A17.dat": "acfbf90a0aa479f560911d89b31ec20d02284496a74ecfc9b8ad0534c5d472b9"
+    }
+  },
+  "B": {
+    "times": [
+      0.0,
+      6.0
+    ],
+    "samples": 241,
+    "channels": {
+      "B1TipTDxr": {
+        "min": 0.228773937,
+        "max": 3.33148551,
+        "rms": 3.0745257024256945
+      },
+      "B1TipTDyr": {
+        "min": -0.813459098,
+        "max": 0.114955917,
+        "rms": 0.45656830423429445
+      },
+      "B1TipTDzr": {
+        "min": -0.150872052,
+        "max": 0.00479387725,
+        "rms": 0.13080086772059105
+      }
+    },
+    "inputs": {
+      "FarmInputs/InflowWind.dat": "b662cbb9da8bed3d860a620280cc778ecea9af7df0eb30fd33bcf99adc20751d",
+      "FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat": "05adc1d1f4e312e1cabd27774828e2db8e4a0065fa4fd23e51be2fff9ab17959",
+      "FarmInputs/FFTest_WT1.fst": "f1c9b0f6a8d79c5f230d76f57f6adf4afc33c31e47679343032e4d3cde1e0fd8",
+      "5MW_Baseline/AD.dat": "05744e9ae621af471ac350b8f2c1d91a08066426fcdafe1ee4707885c3970738",
+      "5MW_Baseline/NRELOffshrBsline5MW_Blade.dat": "5bbcaa305218c95fdd4581a3d765346c55c0f845f7afe078336cc455fcb6d1e3",
+      "5MW_Baseline/NRELOffshrBsline5MW_BeamDyn.dat": "b32e22fffdf2ef353a6accd538e0c02bb27959a589080fa0b599f6f197b24ec0",
+      "5MW_Baseline/NRELOffshrBsline5MW_AeroDyn_blade.dat": "e22829920eb2b6323f0bb3b666c7e2ed9b69b01c684d682363ba16e086fce758",
+      "5MW_Baseline/NRELOffshrBsline5MW_Onshore_ElastoDyn_Tower.dat": "82ca67bea8bfbc85892b5f78db5e921c9aa0e69f34af4ae657c0b7e63301dc8f",
+      "5MW_Baseline/NRELOffshrBsline5MW_BeamDyn_Blade.dat": "b6031e7e0ebc1b31d905454f0c1aa1af8edd01e2f7882c60047a19bdbdb44138",
+      "5MW_Baseline/Airfoils/DU35_A17.dat": "701cff83e01a187209ff788a3fc4bfb9b8592546462a5aec2f0df54701d05763",
+      "5MW_Baseline/Airfoils/DU25_A17.dat": "52fcce2a8fd1159f38cdd1a8bfd365f79e3060e66ea91d5ab8fbce1f16ec20a7",
+      "5MW_Baseline/Airfoils/Cylinder1_coords.txt": "3a3a40c1eee741786357bab6fb49ae37b925dcf47a16aec083e8712c5b3bb595",
+      "5MW_Baseline/Airfoils/Cylinder1.dat": "ebaabc1d2befd769cde8cb28a75be0d2b73585f2a27960a3dc34cfbd05f60a2c",
+      "5MW_Baseline/Airfoils/Cylinder2.dat": "4be751a2b80057410c15ba2bc3ed799642dcd5cf12b544345aa61bc6777a1f64",
+      "5MW_Baseline/Airfoils/DU21_A17_coords.txt": "b4d6350614b0fbbd6262ec340c78ee8eb0562ddfc8cf6bdf222228e739392ca4",
+      "5MW_Baseline/Airfoils/DU40_A17.dat": "002e2176cf03eda520b160d5a46ce0f5f42125f892c9d0e1fd3c40424d249324",
+      "5MW_Baseline/Airfoils/DU35_A17_coords.txt": "cdbb3d2d5735b0fd6be7a9c4b4439ba2ac6e78c3652657ef4090739c2dc0877a",
+      "5MW_Baseline/Airfoils/DU21_A17.dat": "2ad661a5f04e87285b8c7f79e9e0b67765ce0f876a9597f604935eb6c47fa2f6",
+      "5MW_Baseline/Airfoils/DU30_A17_coords.txt": "fb63e89e1c53c3278cd420a5ab36402a4d609850f1869f4013848a041e7a5c93",
+      "5MW_Baseline/Airfoils/DU25_A17_coords.txt": "08e7d345ef3e066f059f1fcf5f9b779e6a7e455ff2f6944931b227916d7730e7",
+      "5MW_Baseline/Airfoils/NACA64_A17_coords.txt": "c91942a4843516ab7f1b17a34162d21dbc400fbb4011b60f83a83acf08c8bdec",
+      "5MW_Baseline/Airfoils/DU40_A17_coords.txt": "5008c9aa91ada47cad7badd9330ba36c72010bdbf0450852cf5ed81c92cf6579",
+      "5MW_Baseline/Airfoils/Cylinder2_coords.txt": "57928cf1f02057e34f45b00c71fc2468d7fc4d63605047a62907e25dee4637e0",
+      "5MW_Baseline/Airfoils/DU30_A17.dat": "e9d0f18b62a5361c0d45e401d4d22fd5d02f34dc2243a96a7b0f5e2a4b24c163",
+      "5MW_Baseline/Airfoils/NACA64_A17.dat": "acfbf90a0aa479f560911d89b31ec20d02284496a74ecfc9b8ad0534c5d472b9"
+    }
+  },
+  "C": {
+    "times": [
+      0.0,
+      6.0
+    ],
+    "samples": 241,
+    "channels": {
+      "B1TipTDxr": {
+        "min": 0.293310881,
+        "max": 3.4385798,
+        "rms": 3.166073958813494
+      },
+      "B1TipTDyr": {
+        "min": -0.815324426,
+        "max": 0.104104199,
+        "rms": 0.46001142977680104
+      },
+      "B1TipTDzr": {
+        "min": -0.0786651075,
+        "max": 0.0160406306,
+        "rms": 0.06360297347602194
+      }
+    },
+    "inputs": {
+      "FarmInputs/InflowWind.dat": "b662cbb9da8bed3d860a620280cc778ecea9af7df0eb30fd33bcf99adc20751d",
+      "FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat": "05adc1d1f4e312e1cabd27774828e2db8e4a0065fa4fd23e51be2fff9ab17959",
+      "FarmInputs/FFTest_WT1.fst": "f1c9b0f6a8d79c5f230d76f57f6adf4afc33c31e47679343032e4d3cde1e0fd8",
+      "5MW_Baseline/AD.dat": "05744e9ae621af471ac350b8f2c1d91a08066426fcdafe1ee4707885c3970738",
+      "5MW_Baseline/NRELOffshrBsline5MW_Blade.dat": "5bbcaa305218c95fdd4581a3d765346c55c0f845f7afe078336cc455fcb6d1e3",
+      "5MW_Baseline/NRELOffshrBsline5MW_BeamDyn.dat": "8105760c5e7d7b7c030605352e3f5f1fa8cd713e7cac6a54eb6227f91104ce06",
+      "5MW_Baseline/NRELOffshrBsline5MW_AeroDyn_blade.dat": "ab66bb1966c7685b9c86d7e63257ba3fcff063cf59b4429159a398af4ca94568",
+      "5MW_Baseline/NRELOffshrBsline5MW_Onshore_ElastoDyn_Tower.dat": "82ca67bea8bfbc85892b5f78db5e921c9aa0e69f34af4ae657c0b7e63301dc8f",
+      "5MW_Baseline/NRELOffshrBsline5MW_BeamDyn_Blade.dat": "b6031e7e0ebc1b31d905454f0c1aa1af8edd01e2f7882c60047a19bdbdb44138",
+      "5MW_Baseline/Airfoils/DU35_A17.dat": "701cff83e01a187209ff788a3fc4bfb9b8592546462a5aec2f0df54701d05763",
+      "5MW_Baseline/Airfoils/DU25_A17.dat": "52fcce2a8fd1159f38cdd1a8bfd365f79e3060e66ea91d5ab8fbce1f16ec20a7",
+      "5MW_Baseline/Airfoils/Cylinder1_coords.txt": "3a3a40c1eee741786357bab6fb49ae37b925dcf47a16aec083e8712c5b3bb595",
+      "5MW_Baseline/Airfoils/Cylinder1.dat": "ebaabc1d2befd769cde8cb28a75be0d2b73585f2a27960a3dc34cfbd05f60a2c",
+      "5MW_Baseline/Airfoils/Cylinder2.dat": "4be751a2b80057410c15ba2bc3ed799642dcd5cf12b544345aa61bc6777a1f64",
+      "5MW_Baseline/Airfoils/DU21_A17_coords.txt": "b4d6350614b0fbbd6262ec340c78ee8eb0562ddfc8cf6bdf222228e739392ca4",
+      "5MW_Baseline/Airfoils/DU40_A17.dat": "002e2176cf03eda520b160d5a46ce0f5f42125f892c9d0e1fd3c40424d249324",
+      "5MW_Baseline/Airfoils/DU35_A17_coords.txt": "cdbb3d2d5735b0fd6be7a9c4b4439ba2ac6e78c3652657ef4090739c2dc0877a",
+      "5MW_Baseline/Airfoils/DU21_A17.dat": "2ad661a5f04e87285b8c7f79e9e0b67765ce0f876a9597f604935eb6c47fa2f6",
+      "5MW_Baseline/Airfoils/DU30_A17_coords.txt": "fb63e89e1c53c3278cd420a5ab36402a4d609850f1869f4013848a041e7a5c93",
+      "5MW_Baseline/Airfoils/DU25_A17_coords.txt": "08e7d345ef3e066f059f1fcf5f9b779e6a7e455ff2f6944931b227916d7730e7",
+      "5MW_Baseline/Airfoils/NACA64_A17_coords.txt": "c91942a4843516ab7f1b17a34162d21dbc400fbb4011b60f83a83acf08c8bdec",
+      "5MW_Baseline/Airfoils/DU40_A17_coords.txt": "5008c9aa91ada47cad7badd9330ba36c72010bdbf0450852cf5ed81c92cf6579",
+      "5MW_Baseline/Airfoils/Cylinder2_coords.txt": "57928cf1f02057e34f45b00c71fc2468d7fc4d63605047a62907e25dee4637e0",
+      "5MW_Baseline/Airfoils/DU30_A17.dat": "e9d0f18b62a5361c0d45e401d4d22fd5d02f34dc2243a96a7b0f5e2a4b24c163",
+      "5MW_Baseline/Airfoils/NACA64_A17.dat": "acfbf90a0aa479f560911d89b31ec20d02284496a74ecfc9b8ad0534c5d472b9"
+    }
+  },
+  "B_vs_C": {
+    "B1TipTDxr": {
+      "max_abs_difference_m": 0.11347771000000018,
+      "rms_difference_m": 0.09291111242156201
+    },
+    "B1TipTDyr": {
+      "max_abs_difference_m": 0.012936487600000005,
+      "rms_difference_m": 0.007151235920075381
+    },
+    "B1TipTDzr": {
+      "max_abs_difference_m": 0.07370296820000001,
+      "rms_difference_m": 0.06771054013790154
+    }
+  },
+  "boundary": "Matched 8 m/s, prescribed 9 rpm, initial conditions, 6 s startup. A/B isolates structural module; B/C isolates initial reference curvature. ElastoDyn unpitched vs BeamDyn pitched channels coincide here at zero pitch only. Not matched to old farm controller history."
+}

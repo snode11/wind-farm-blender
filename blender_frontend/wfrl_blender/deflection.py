@@ -40,7 +40,7 @@ def compare(actual, reference, axes, simulation):
     components = axes.T @ (np.asarray(actual) - reference)
     return dict(actual=np.asarray(actual), reference=reference, axes=axes,
                 components=components, simulation=np.asarray(simulation),
-                error=components[:2] - simulation,
+                error=components[:len(simulation)] - simulation,
                 distance=float(np.linalg.norm(np.asarray(actual) - reference)))
 
 
@@ -54,15 +54,18 @@ def read_comparison(path, manifest, times, poses):
     if hashlib.sha256(raw).hexdigest() != manifest['files'][name]:
         raise ValueError('T1 deflection integrity mismatch')
     data = json.loads(raw)
-    if (data['schema'] not in ('wfrl.tip-deflection.t1.v1', 'wfrl.tip-deflection.t1.v2')
+    beamdyn = data['schema'] == 'wfrl.tip-deflection.t1.v3'
+    reference = ('BeamDyn structural tip; independent unloaded prebend' if beamdyn else 'ElastoDyn structural tip; local (0,0,TipRad)')
+    frame = 'BeamDyn pitched root xyz' if beamdyn else 'ElastoDyn unpitched coned xc,yc,zc'
+    if (data['schema'] not in ('wfrl.tip-deflection.t1.v1', 'wfrl.tip-deflection.t1.v2', 'wfrl.tip-deflection.t1.v3')
             or data['geometry_sha256'] != manifest['files']['geometry.npz']
             or data['turbine_id'] != 'T1'
-            or data['reference'] != 'ElastoDyn structural tip; local (0,0,TipRad)'
-            or data['frame'] != 'ElastoDyn unpitched coned xc,yc,zc'
+            or data['reference'] != reference
+            or data['frame'] != frame
             or data['unit'] != 'm'
             or not np.array_equal(data['times'], times)):
         raise ValueError('T1 deflection and geometry do not match')
-    for key, shape in [('poses', (len(times), 6)), ('simulation', (len(times), 3, 2))]:
+    for key, shape in [('poses', (len(times), 6)), ('simulation', (len(times), 3, 3 if beamdyn else 2))]:
         data[key] = np.asarray(data[key], dtype=float)
         if data[key].shape != shape or not np.isfinite(data[key]).all():
             raise ValueError('Invalid T1 deflection samples: ' + key)
@@ -73,13 +76,21 @@ def read_comparison(path, manifest, times, poses):
         if not np.isclose(data['scalars'][key], geometry_data()['scalars'][key], atol=1e-8, rtol=0):
             raise ValueError('T1 deflection model mismatch: ' + key)
     flexible = manifest.get('tower_model') == 'elastodyn-flexible'
-    if flexible != (data['schema'] == 'wfrl.tip-deflection.t1.v2'):
+    if flexible != (data['schema'] in ('wfrl.tip-deflection.t1.v2','wfrl.tip-deflection.t1.v3')):
         raise ValueError('Deflection/tower reference mismatch')
     if flexible:
         from .tower_motion import read_tower
         if data.get('tower_motion_sha256') != manifest['files']['tower-motion.npz']:
             raise ValueError('Deflection tower source mismatch')
         data['nacelle'] = read_tower(path, manifest, times)['nacelle'][:, 0]
+    if beamdyn:
+        from .prebend import read_reference
+        ref = read_reference(path, manifest)
+        if ref is None or data.get('reference_sha256') != manifest['files']['blade-reference.json']:
+            raise ValueError('BeamDyn reference mismatch')
+        data['tip_local_m'] = np.asarray(ref['tip_local_m'])
+    elif manifest.get('schema') == 'wfrl.farm-flex-review.v3':
+        raise ValueError('BeamDyn package requires BeamDyn deflection channels')
     return data
 
 
@@ -133,7 +144,7 @@ class ComparisonView:
             self.objects.append(obj)
         for obj in self.objects:
             obj.hide_select = True
-            obj['provenance'] = 'T1 ElastoDyn structural tip comparison; true scale in metres'
+            obj['provenance'] = data['reference'] + '; true scale in metres'
         self.handle = bpy.types.SpaceView3D.draw_handler_add(self.draw_labels, (), 'WINDOW', 'POST_PIXEL')
 
     def visible(self, value):
@@ -155,7 +166,11 @@ class ComparisonView:
         for b in (1, 2, 3):
             obj = self.owner.blades[b - 1][0]
             hub, axes, pitched = rigid_frame(data['scalars'], pose, b, nacelle)
-            reference = hub + axes[:, 2] * data['scalars']['TipRad']
+            if 'tip_local_m' in data:
+                axes = pitched
+                reference = hub + pitched @ data['tip_local_m']
+            else:
+                reference = hub + axes[:, 2] * data['scalars']['TipRad']
             # -2 is the structural reference vertex, -1 remains the cosmetic apex.
             actual = obj.matrix_world @ obj.data.vertices[-2].co
             row = compare(actual, reference, axes, simulation[b - 1])
@@ -189,8 +204,8 @@ class ComparisonView:
         # Fixed pixel label offsets keep nearby tip markers legible at farm scale.
         self.labels = [(ref, 'Reference', 'Rigid reference', (12, 42)),
                        (actual, 'Actual', f"T1 Blade {row['blade']} actual tip", (12, -24)),
-                       (actual, 'OoP', f"OoP {c[0]:+.4f} m", (12, -44)),
-                       (actual, 'IP', f"IP {c[1]:+.4f} m", (12, -64)),
+                       (actual, 'OoP', f"{'Root x' if len(row['simulation']) == 3 else 'OoP'} {c[0]:+.4f} m", (12, -44)),
+                       (actual, 'IP', f"{'Root y' if len(row['simulation']) == 3 else 'IP'} {c[1]:+.4f} m", (12, -64)),
                        (actual, 'Total', f"Total {row['distance']:.4f} m", (12, -84))]
 
     def draw_labels(self):
@@ -269,8 +284,8 @@ def draw_panel(layout, scene):
         return
     box.label(text='挠度对照 · ' + ('插值帧' if row['interpolated'] else '保存帧'))
     grid = box.row(align=True)
-    for title, values in [('方向', ['面外', '面内']), ('仿真 / m', row['simulation']),
-                          ('坐标差 / m', row['components'][:2]), ('偏差 / mm', row['error'] * 1000)]:
+    for title, values in [('方向', (['根系 x', '根系 y', '根系 z'] if len(row['simulation']) == 3 else ['面外', '面内'])), ('仿真 / m', row['simulation']),
+                          ('坐标差 / m', row['components'][:len(row['simulation'])]), ('偏差 / mm', row['error'] * 1000)]:
         column = grid.column(align=True); column.label(text=title)
         for value in values:
             column.label(text=value if isinstance(value, str) else f'{value:+.4f}')
@@ -281,10 +296,10 @@ def draw_panel(layout, scene):
     header.label(text='图例与计算口径')
     if details is not None:
         details.label(text='灰：参考点 · 橙：实际点')
-        details.label(text='黄：总位移 · 青：面外')
-        details.label(text='粉：面内 · 绿：轴向')
+        details.label(text='黄：总位移 · 青：根系 x' if len(row['simulation']) == 3 else '黄：总位移 · 青：面外')
+        details.label(text='粉：根系 y · 绿：根系 z' if len(row['simulation']) == 3 else '粉：面内 · 绿：轴向')
         details.label(text=f"轴向坐标差  {row['components'][2]:+.4f} m")
-        details.label(text='轴向未保存仿真输出，不作数值对照')
+        details.label(text='BeamDyn：相对预弯参考，含变桨根系 xyz' if len(row['simulation']) == 3 else '轴向未保存仿真输出，不作数值对照')
         details.label(text='偏差 = 坐标差投影 − 仿真输出')
         details.label(text='参考点随塔顶平移、倾斜与叶轮姿态移动' if active.tower_motion is not None else '参考点按同刻刚性姿态独立计算')
         details.label(text='结构叶尖与彩色轨迹尖端定义不同')

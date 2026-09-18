@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "frame_p95_ratio": 1.0209911131995733,
+  "limit": 1.2,
+  "load_s": 4.918991999933496,
+  "load_limit_s": 10,
+  "rss_growth_mib": 7.25,
+  "rss_limit_mib": 64,
+  "resource_counts_stable": true
+}

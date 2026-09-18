@@ -1,8 +1,10 @@
 # MAPPO 60 秒演示 · 0.3.1
 
+当前交付版本为 **0.3.4**：[下载](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.4)。默认内置预弯 v3 数据，含独立参考、轨迹渐隐和 Down 视角修复。固定三束覆盖率失败，仍为 REVIEW_ONLY；详见发布核对。
+
 ## Windows / macOS 快速开始
 
-1. 安装 Blender 5.2+，从 [0.3.1 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.1)下载 **wfrl_blender-0.3.1.zip**，不要解压，不选 Source code。
+1. 安装 Blender 5.2+，从 [0.3.1 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.4)下载 **wfrl_blender-0.3.4.zip**，不要解压，不选 Source code。
 2. **Edit → Preferences → Get Extensions → 菜单 → Install from Disk**，安装并启用 WFRL Blender，然后重启。
 3. 新建 General 场景，三维视图按 **N → MAPPO → 三机 MAPPO 回放 → 加载 MAPPO · 60 秒**。
 4. 点击播放。ZIP 已带完整数据，离线演示不需要后端环境、网络或原始仿真文件。

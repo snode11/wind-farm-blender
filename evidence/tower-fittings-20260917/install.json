@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "installed": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "backup": "/Users/eason/Desktop/wfcrl/installation-backups/before-tower-fittings-20260917",
+  "archive": "/Users/eason/Desktop/wfcrl/wind farm RL/dist/tower-fittings-20260917/wfrl_blender-0.3.3.zip",
+  "sha256": "eef7356b30afab4a0c7fac10d4d4567051005599316e49775ead3c31d15ece82",
+  "verified_files": 77,
+  "unchanged_physical_files": [
+    "data.json",
+    "source-surfaces.json",
+    "telemetry.json",
+    "manifest.json",
+    "deflection-t1.json",
+    "geometry.npz",
+    "source-run.json",
+    "tower-motion.npz"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "T1": {
+    "expected": 61,
+    "valid": 61,
+    "valid_fraction": 1.0,
+    "passages": 17,
+    "missed_passages": 0,
+    "mae_m": 0.18863635137947685,
+    "p95_m": 0.4751698364817276,
+    "max_abs_m": 0.9419410305128988,
+    "max_overestimate_m": 0.1374133518598235,
+    "signed_min_m": -0.9419410305128988,
+    "signed_max_m": 0.1374133518598235
+  },
+  "T2": {
+    "expected": 59,
+    "valid": 59,
+    "valid_fraction": 1.0,
+    "passages": 17,
+    "missed_passages": 0,
+    "mae_m": 0.14730866604692952,
+    "p95_m": 0.3711109824909485,
+    "max_abs_m": 0.533126057403666,
+    "max_overestimate_m": 0.01777438449160762,
+    "signed_min_m": -0.533126057403666,
+    "signed_max_m": 0.01777438449160762
+  },
+  "T3": {
+    "expected": 65,
+    "valid": 65,
+    "valid_fraction": 1.0,
+    "passages": 14,
+    "missed_passages": 0,
+    "mae_m": 0.1601177268493694,
+    "p95_m": 0.4139817474655032,
+    "max_abs_m": 0.506704644610398,
+    "max_overestimate_m": 0.09956542806279423,
+    "signed_min_m": -0.506704644610398,
+    "signed_max_m": 0.09956542806279423
+  }
+}

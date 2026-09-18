@@ -6,24 +6,24 @@ import numpy as np
 
 def read_tower(path, manifest, times):
     name = 'tower-motion.npz'
-    if manifest.get('schema') == 'wfrl.farm-flex-review.v2' and manifest.get('tower_model') != 'elastodyn-flexible':
+    if manifest.get('schema') in ('wfrl.farm-flex-review.v2', 'wfrl.farm-flex-review.v3') and manifest.get('tower_model') != 'elastodyn-flexible':
         raise ValueError('V2 requires flexible tower metadata')
     if manifest.get('tower_model', 'rigid') == 'rigid':
         if name in manifest['files']: raise ValueError('Unexpected moving tower in rigid package')
         return None
-    if manifest.get('schema') != 'wfrl.farm-flex-review.v2' or manifest.get('tower_model') != 'elastodyn-flexible':
+    if manifest.get('schema') not in ('wfrl.farm-flex-review.v2', 'wfrl.farm-flex-review.v3') or manifest.get('tower_model') != 'elastodyn-flexible':
         raise ValueError('Unsupported tower model')
     raw = (Path(path) / name).read_bytes()
     if hashlib.sha256(raw).hexdigest() != manifest['files'].get(name):
         raise ValueError('Tower motion integrity mismatch')
     with np.load(Path(path) / name, allow_pickle=False) as archive:
         data = {key: archive[key].copy() for key in archive.files}
-    n = len(times); z = data['heights']
+    n = len(times); turbines = len(manifest['turbine_ids']); z = data['heights']
     if (z.ndim != 1 or len(z) < 2 or np.any(np.diff(z) <= 0)
             or not np.allclose(z[[0,-1]],[0,87.6],atol=1e-6,rtol=0)
             or not np.array_equal(data['times'], times)
-            or data['transforms'].shape != (n, 3, len(z), 3, 4)
-            or data['nacelle'].shape != (n, 3, 3, 4)
+            or data['transforms'].shape != (n, turbines, len(z), 3, 4)
+            or data['nacelle'].shape != (n, turbines, 3, 4)
             or any(not np.isfinite(v).all() for v in data.values())):
         raise ValueError('Invalid tower motion shape/time/values')
     for key in ('transforms', 'nacelle'):

@@ -1,0 +1,92 @@
+{
+  "schema": "wfrl.replay-performance.v1",
+  "package": "legacy built-in",
+  "load_s": 6.31372637511231,
+  "p95_frame_ms": 110.89251022785902,
+  "median_frame_ms": 103.98735362105072,
+  "rss_growth_mib": 0.0,
+  "loops": [
+    {
+      "resources": [
+        2721,
+        173,
+        141
+      ],
+      "peak_rss_mib": 665.578125
+    },
+    {
+      "resources": [
+        2721,
+        173,
+        141
+      ],
+      "peak_rss_mib": 665.578125
+    },
+    {
+      "resources": [
+        2721,
+        173,
+        141
+      ],
+      "peak_rss_mib": 665.578125
+    },
+    {
+      "resources": [
+        2721,
+        173,
+        141
+      ],
+      "peak_rss_mib": 665.578125
+    },
+    {
+      "resources": [
+        2721,
+        173,
+        141
+      ],
+      "peak_rss_mib": 665.578125
+    },
+    {
+      "resources": [
+        2721,
+        173,
+        141
+      ],
+      "peak_rss_mib": 665.578125
+    },
+    {
+      "resources": [
+        2721,
+        173,
+        141
+      ],
+      "peak_rss_mib": 665.578125
+    },
+    {
+      "resources": [
+        2721,
+        173,
+        141
+      ],
+      "peak_rss_mib": 665.578125
+    },
+    {
+      "resources": [
+        2721,
+        173,
+        141
+      ],
+      "peak_rss_mib": 665.578125
+    },
+    {
+      "resources": [
+        2721,
+        173,
+        141
+      ],
+      "peak_rss_mib": 665.578125
+    }
+  ],
+  "frames_per_loop": 121,
+  "scope": "Native background frame updates at 0.5 simulation-second spacing; skipped frames intentional; not viewport FPS; dense trail sampling tested separately"
+}

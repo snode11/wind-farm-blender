@@ -1,10 +1,12 @@
 # WFRL Blender 前端实现 · 0.3.1
 
-当前发布版本为 **0.3.3**：[下载](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.3)，含雷达反馈与塔顶密封圈/焊缝随动修复。详细验证见发布核对文档；以下早期版本说明保留作为历史。
+当前交付版本为 **0.3.4**：[下载](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.4)。默认内置预弯 v3 数据，含独立参考、轨迹渐隐和 Down 视角修复。固定三束覆盖率失败，仍为 REVIEW_ONLY；详见发布核对。
 
-当前正式版本为 **0.3.1**，要求 **Blender 5.2+**。默认 Demo 是内置 v2 塔架柔性数据的三机 MAPPO 60 秒离线回放。Windows 与 macOS 共用同一个 [安装 ZIP](../dist/wfrl_blender-0.3.1.zip)。用户先看[前端总览](../前端readme.md)及[操作手册](../docs/blender/用户使用手册.md)；本文保留建模、数据合同与维护说明。
+当前正式版本为 **0.3.4**，要求 **Blender 5.2+**。默认内置预弯 v3 三机 MAPPO 60 秒离线回放，Windows 与 macOS 共用 [安装 ZIP](../dist/wfrl_blender-0.3.4.zip)。
 
 本地 0.3.2–0.3.5 是开发阶段标记，已汇总到正式 0.3.1。默认资源已切到同源柔性塔架包，旧 v1 读取兼容仍保留。当前发布检查见 [0.3.1 发布核对](../docs/blender/0.3.1发布核对.md)，不要将旧安装版、便携目录或历史检查视为当前 ZIP 的验证。
+
+2026-09-17 本机已追加 **0.3.3**：密封圈及塔筒焊缝柔性随动修复、密封圈与雷达外壳避让；与上述历史开发编号不同，本次已发布 GitHub。[本地修复包](../dist/tower-fittings-20260917/wfrl_blender-0.3.3.zip) · [验证及剩余问题](../evidence/tower-fittings-20260917/验证记录.md)。
 
 ## 0.3.1 的主要结构
 

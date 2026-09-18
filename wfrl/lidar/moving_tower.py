@@ -3,6 +3,73 @@ import numpy as np
 from .physics import first_hit
 
 
+def tip_surface_clearance(points, tower_points, tower_triangles, sections=19):
+    """Minimum horizontal gap from the terminal contour to same-height tower.
+
+    Intersect each segment-minus-triangle convex prism with z=0, then find
+    its nearest point in xy. Interpolated witnesses remain on both surfaces;
+    no circle approximation or whole-blade collision claim is involved.
+    """
+    contour = np.asarray(points).reshape(sections, -1, 3)[-1]
+    tower = np.asarray(tower_points)[tower_triangles]
+    tower = tower[(tower[:,:,2].min(1) <= contour[:,2].max()) &
+                  (tower[:,:,2].max(1) >= contour[:,2].min())]
+    center=contour.mean(axis=0)
+    _,wall0=horizontal_clearance(center,tower_points,tower_triangles)
+    candidate=contour[np.argmin(np.linalg.norm(contour[:,:2]-np.asarray(wall0)[:2],axis=1))]
+    distance,wall=horizontal_clearance(candidate,tower_points,tower_triangles)
+    best=(abs(distance),candidate,np.asarray(wall))
+    pairs = np.array([(i,j) for i in range(6) for j in range(i+1,6)])
+    from scipy.spatial import ConvexHull, QhullError
+    ends=np.roll(contour,-1,axis=0)
+    low=np.minimum(contour,ends); high=np.maximum(contour,ends)
+    tl=tower.min(axis=1);th=tower.max(axis=1)
+    gap=np.maximum(0,np.maximum(low[:,None,:2]-th[None,:,:2],tl[None,:,:2]-high[:,None,:2]))
+    bound=np.linalg.norm(gap,axis=2)
+    valid=(bound<=best[0]+1e-12)&(low[:,None,2]<=th[None,:,2])&(high[:,None,2]>=tl[None,:,2])
+    candidates=np.argwhere(valid)
+    candidates=candidates[np.argsort(bound[valid])]
+    for segment,face in candidates:
+        if bound[segment,face]>best[0]+1e-12: continue
+        a,b=contour[segment],ends[segment];tri=tower[face]
+        if np.linalg.norm(a-b) < 1e-12: continue
+        tips=np.repeat([a,b],3,axis=0); walls=np.tile(tri,(2,1))
+        diff=tips-walls
+        if diff[:,2].min()>0 or diff[:,2].max()<0: continue
+        i,j=pairs.T; dz=diff[j,2]-diff[i,2]
+        valid=(np.abs(dz)>1e-14)&(diff[i,2]*diff[j,2]<=0)
+        i,j,dz=i[valid],j[valid],dz[valid]
+        ratio=-diff[i,2]/dz
+        tp=tips[i]+ratio[:,None]*(tips[j]-tips[i])
+        wp=walls[i]+ratio[:,None]*(walls[j]-walls[i])
+        flat=np.flatnonzero(np.abs(diff[:,2])<1e-12)
+        if len(flat):tp=np.concatenate([tp,tips[flat]]);wp=np.concatenate([wp,walls[flat]])
+        if not len(tp): continue
+        xy=(tp-wp)[:,:2]
+        try: ids=ConvexHull(xy).vertices if len(xy)>2 else np.arange(len(xy))
+        except QhullError:
+            axis=int(np.argmax(np.ptp(xy,axis=0)))
+            ids=np.array([np.argmin(xy[:,axis]),np.argmax(xy[:,axis])])
+        # If the surfaces intersect, the z=0 difference polygon contains zero.
+        for j in range(1,len(ids)-1):
+            pick=ids[[0,j,j+1]];matrix=np.vstack((xy[pick].T,np.ones(3)))
+            if abs(np.linalg.det(matrix))<1e-15:continue
+            weights=np.linalg.solve(matrix,[0,0,1])
+            if np.all(weights>=-1e-10):
+                tip=weights@tp[pick];wall=weights@wp[pick]
+                return 0.,tip.tolist(),wall.tolist()
+        for lo,hi in zip(ids,np.roll(ids,-1)):
+            edge=xy[hi]-xy[lo]; length=edge@edge
+            u=float(np.clip(-xy[lo]@edge/length,0,1)) if length>1e-20 else 0.
+            tip=tp[lo]+u*(tp[hi]-tp[lo]); wall=wp[lo]+u*(wp[hi]-wp[lo])
+            distance=float(np.linalg.norm(tip[:2]-wall[:2]))
+            if best is None or distance<best[0]:best=(distance,tip,wall)
+    if best is None: raise ValueError('Terminal contour does not overlap tower height')
+    # Preserve penetration sign using the independent polygon classifier.
+    signed,_=horizontal_clearance(best[1],tower_points,tower_triangles)
+    return (best[0] if signed>=0 else -best[0]),best[1].tolist(),best[2].tolist()
+
+
 def horizontal_clearance(tip, points, triangles):
     """Distance to the actual triangulated tower's horizontal section at tip z.
 

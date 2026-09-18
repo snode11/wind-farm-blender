@@ -1,8 +1,8 @@
 {
   "schema": "wfrl.lidar-delivery.v1",
-  "version": "0.3.3",
-  "archive": "dist/wfrl_blender-0.3.3.zip",
-  "archive_sha256": "eef7356b30afab4a0c7fac10d4d4567051005599316e49775ead3c31d15ece82",
+  "version": "0.3.4",
+  "archive": "dist/wfrl_blender-0.3.4.zip",
+  "archive_sha256": "3f2c718e3ae438a49786df4de2f92a1153fd405ea026521d8c19f3e22434a9b0",
   "packages": {
     "normal": "results/lidar/packages/normal-v1.1",
     "close": "results/lidar/packages/close-v1.1"
@@ -11,14 +11,14 @@
     "normal": "658922c57ecf7b69028d55eae604119a4b44e60e66247817edbd145d9dc0fe2d",
     "close": "91895c64e0bc962c956d57fe8bb507fe9e26f0af6cf6aa2f59cef5a19a9cc30b"
   },
-  "historical": "0.3.3 adds radar feedback and moving tower fitting fixes to official 0.3.1; physical data unchanged.",
+  "historical": "0.3.4 bundles BeamDyn prebend v3; fixed three-beam coverage failed; review only.",
   "demo": {
     "kind": "MAPPO",
     "duration_s": 60,
     "bundled_data": "assets/mappo",
     "status": "REVIEW_ONLY",
-    "manifest_sha256": "b765b9791b95fcfd7a39079b949131554e905ba4e12af60979a85d254628ae5e",
-    "schema": "wfrl.farm-flex-review.v2",
+    "manifest_sha256": "aeeecd7258d7f5ba2e85754c69b7bf8aa9c423cad558afc0dcdf99bbb6736124",
+    "schema": "wfrl.farm-flex-review.v3",
     "tower_model": "elastodyn-flexible"
   }
 }

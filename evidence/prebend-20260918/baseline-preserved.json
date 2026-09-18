@@ -1,0 +1,10 @@
+{
+  "data.json": true,
+  "source-surfaces.json": true,
+  "telemetry.json": true,
+  "manifest.json": true,
+  "deflection-t1.json": true,
+  "geometry.npz": true,
+  "source-run.json": true,
+  "tower-motion.npz": true
+}

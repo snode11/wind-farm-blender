@@ -1,0 +1,6 @@
+{
+  "short_raw_bytes": 802597761,
+  "estimated_183s_three_turbine_bytes": 73437695131.5,
+  "free_bytes": 504029958144,
+  "retention": "Preserve old baseline, all new inputs/output/logs/source hashes; separate packages; no cleanup during solve"
+}

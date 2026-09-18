@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "checks": 99,
+  "max_error_m": 2.7204749394829438e-05,
+  "seeks": true,
+  "repeat": true,
+  "save_reload": true,
+  "clear_restore": true,
+  "rebuild": true
+}

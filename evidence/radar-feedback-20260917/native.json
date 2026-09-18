@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "materials": true,
+  "independent_turbines": true,
+  "seek": true,
+  "clock": true,
+  "reload": true,
+  "clear": true
+}

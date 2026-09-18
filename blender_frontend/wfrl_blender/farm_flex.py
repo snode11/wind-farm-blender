@@ -23,21 +23,26 @@ def is_active(scene):
 def read_package(path):
     path=Path(path)
     manifest=json.loads((path/'manifest.json').read_text())
-    if (manifest.get('schema') not in ('wfrl.farm-flex-review.v1','wfrl.farm-flex-review.v2')
+    if (manifest.get('schema') not in ('wfrl.farm-flex-review.v1','wfrl.farm-flex-review.v2','wfrl.farm-flex-review.v3')
             or manifest.get('status')!='REVIEW_ONLY'
-            or manifest.get('turbine_ids')!=['T1','T2','T3']):
+            or manifest.get('turbine_ids') not in (['T1','T2','T3'], ['T1'])
+            or (manifest.get('turbine_ids') == ['T1'] and (manifest.get('schema') != 'wfrl.farm-flex-review.v3' or not manifest.get('interface_only')))):
         raise ValueError('Expected a complete three-turbine flexible review package')
     for name in set(manifest['files']) | {'geometry.npz','data.json','source-surfaces.json'}:
         if hashlib.sha256((path/name).read_bytes()).hexdigest()!=manifest['files'][name]:
             raise ValueError('Farm package integrity mismatch: '+name)
     with np.load(path/'geometry.npz',allow_pickle=False) as data:
         times=data['times'].copy();transforms=data['transforms'].copy();poses=data['poses'].copy()
-    n=len(times)
+    n=len(times); turbines=len(manifest['turbine_ids'])
     if (n<2 or times.ndim!=1 or not np.isfinite(times).all() or np.any(np.diff(times)<=0)
-            or transforms.shape!=(n,3,3,19,3,4) or poses.shape!=(n,3,6)
+            or transforms.shape!=(n,turbines,3,19,3,4) or poses.shape!=(n,turbines,6)
             or not np.isfinite(transforms).all() or not np.isfinite(poses).all()
             or times[0]!=manifest['segment']['start_s'] or times[-1]!=manifest['segment']['end_s']):
         raise ValueError('Incomplete farm geometry or time axis')
+    from .prebend import read_reference
+    reference = read_reference(path, manifest)
+    if reference is not None and 'deflection-t1.json' not in manifest['files']:
+        raise ValueError('BeamDyn package requires mapped deflection data')
     from .tower_motion import read_tower
     tower_data=read_tower(path,manifest,times)
     contents=json.loads((path/'data.json').read_text())
@@ -74,6 +79,8 @@ class FarmFlex:
         self.manifest,self.times,self.transforms,self.poses,self.readers=read_package(path)
         from .tower_motion import read_tower
         self.tower_motion = read_tower(path,self.manifest,self.times)
+        from .prebend import read_reference
+        self.reference = read_reference(path, self.manifest)
         self.towers = []
         self.fittings = []
         from .deflection import read_comparison, ComparisonView
@@ -94,7 +101,7 @@ class FarmFlex:
                     if values.shape != self.times.shape or not np.isfinite(values).all():
                         raise ValueError('Invalid telemetry samples')
         self.scene=scene;self.blades=[];self.groups={};self.cache={};self.enabled=True
-        self.visible_turbines={0,1,2}
+        self.visible_turbines=set(range(len(self.readers)))
         for tid in self.readers:
             scene.objects[f'WFRL.Turbine.{tid}.YawRoot'].rotation_euler=(0,0,0)
             scene.objects[f'WFRL.Turbine.{tid}.YawRoot'].location=(0,0,geometry_data()['scalars']['TowerHt'])
@@ -112,6 +119,9 @@ class FarmFlex:
             apex = len(vertices) - 1
             vertices.insert(apex, (0., 0., comparison_data['scalars']['TipRad']))
             faces = [tuple(v + 1 if v == apex else v for v in face) for face in faces]
+        if self.reference is not None:
+            from .prebend import bend_vertices
+            vertices = bend_vertices(vertices, self.reference).tolist()
         display_mesh=bpy.data.meshes.new('WFRL.FarmFlex.SourceLoft')
         display_mesh.from_pydata(vertices,[],faces)
         display_mesh.materials.append(get_material('blade'))
@@ -182,15 +192,18 @@ class FarmFlex:
         scene['wfrl_flex_provenance']='三机 FAST.Farm · MAPPO 偏航 · 保守转速目标/变桨 · 随机阵风'
         if self.tower_motion is not None:
             scene['wfrl_flex_provenance'] += ' · 真实塔架柔性'
+        if self.reference is not None:
+            scene['wfrl_flex_provenance'] = self.manifest['provenance_label']
         scene['wfrl_tip_reference_note']=scene['wfrl_flex_provenance']
         scene['wfrl_farm_flex_path']=str(Path(path).resolve())
+        scene['wfrl_farm_manifest_sha256']=hashlib.sha256((Path(path)/'manifest.json').read_bytes()).hexdigest()
         scene.render.fps=60;scene.render.fps_base=1
         scene.frame_start=1;scene.frame_end=1+round((self.times[-1]-self.times[0])*60)
         scene.sync_mode='FRAME_DROP'
         scene.use_preview_range=False
         self.last_telemetry_frame=None
         scene['wfrl_fidelity']='FAST.Farm / REVIEW_ONLY'
-        scene['wfrl_backend']='MAPPO recorded results'
+        scene['wfrl_backend']='OpenFAST interface probe' if self.manifest.get('interface_only') else 'MAPPO recorded results'
         for key in ('wfrl_power_mw', 'wfrl_demo_phase', 'wfrl_demo_time_s'):
             if key in scene: del scene[key]
         scene['wfrl_power_available']=False
@@ -222,7 +235,7 @@ class FarmFlex:
         t = value['time_s']
         if pose is None:
             pose = np.array([[np.interp(t, self.times, self.poses[:, k, j])
-                              for j in range(6)] for k in range(3)])
+                              for j in range(6)] for k in range(len(self.readers))])
         if self.last_telemetry_frame is not None and t < self.last_telemetry_frame:
             charts.clear()
         extra = {}
@@ -315,7 +328,19 @@ class FarmFlex:
         inverses=[np.array(obj.matrix_world.inverted()) for obj,*_ in self.blades]
         for (obj,rest,world,index,weight,k,b,offset),inverse,lo,hi in zip(self.blades,inverses,lower,upper):
             if lo is None:continue
-            deformed=lo*(1-alpha)+hi*alpha+offset
+            if self.reference is not None and 1e-8 < alpha < 1-1e-8:
+                # Interpolate deformation in the moving blade root frame.
+                # A world-space chord between rotating tips creates artificial
+                # axial shortening (about 7 mm at this 40 Hz source rate).
+                from .deflection import rigid_frame
+                scalars=self.comparison.data['scalars']
+                h0,_,a0=rigid_frame(scalars,self.poses[i,k],b+1,self.tower_motion['nacelle'][i,k])
+                h1,_,a1=rigid_frame(scalars,self.poses[i+1,k],b+1,self.tower_motion['nacelle'][i+1,k])
+                hub,_,axes=rigid_frame(scalars,pose[k],b+1,nacelle[k])
+                local_shape=((lo-h0)@a0)*(1-alpha)+((hi-h1)@a1)*alpha
+                deformed=local_shape@axes.T+hub+offset
+            else:
+                deformed=lo*(1-alpha)+hi*alpha+offset
             local=deformed@inverse[:3,:3].T+inverse[:3,3]
             obj.data.vertices.foreach_set('co',local.astype(np.float32).ravel());obj.data.update()
         if self.comparison is not None:

@@ -1,0 +1,74 @@
+{
+  "removed": [
+    {
+      "path": "runtime",
+      "bytes": 49740837
+    },
+    {
+      "path": "密封圈已修复-0.3.3.blend",
+      "bytes": 12126385
+    },
+    {
+      "path": "render_check.py",
+      "bytes": 1696
+    },
+    {
+      "path": "cable_audit.py",
+      "bytes": 1205
+    },
+    {
+      "path": "open_fixed_demo.py",
+      "bytes": 1074
+    },
+    {
+      "path": "gui.pid",
+      "bytes": 5
+    },
+    {
+      "path": "cable-audit.log",
+      "bytes": 707
+    },
+    {
+      "path": "render.log",
+      "bytes": 542
+    },
+    {
+      "path": "packaged-fittings.log",
+      "bytes": 484
+    },
+    {
+      "path": "baseline.log",
+      "bytes": 738
+    },
+    {
+      "path": "packaged-radar.log",
+      "bytes": 448
+    },
+    {
+      "path": "farm-native.log",
+      "bytes": 468
+    },
+    {
+      "path": "native.log",
+      "bytes": 484
+    },
+    {
+      "path": "unit.log",
+      "bytes": 178
+    },
+    {
+      "path": "hub-native.log",
+      "bytes": 135
+    },
+    {
+      "path": "tower-native.log",
+      "bytes": 595
+    },
+    {
+      "path": "gui-fixed.log",
+      "bytes": 379
+    }
+  ],
+  "bytes_freed": 61876360,
+  "retained": "verification report, JSON results, before/after images, release package and installation backup"
+}

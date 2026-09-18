@@ -1,0 +1,46 @@
+[
+  {
+    "name": "gray",
+    "frame": 1,
+    "time_s": 117.0,
+    "state": "waiting",
+    "activity": [
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "green",
+    "frame": 1507,
+    "time_s": 142.1,
+    "state": "above_threshold",
+    "activity": [
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "red",
+    "frame": 2992,
+    "time_s": 166.85,
+    "state": "near_threshold",
+    "activity": [
+      false,
+      true,
+      true
+    ]
+  },
+  {
+    "name": "held-red-no-pulse",
+    "frame": 3019,
+    "time_s": 167.3,
+    "state": "near_threshold",
+    "activity": [
+      false,
+      false,
+      false
+    ]
+  }
+]

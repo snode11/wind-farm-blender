@@ -38,6 +38,9 @@ def export(probe, destination, start=117., duration=60., diagnostic=False):
     farm = Path(report['case_dir'])/'FarmInputs'
     destination.mkdir(parents=True, exist_ok=False)
     flexible = report.get("tower") == "flexible"
+    beamdyn = report.get('blade_model') == 'beamdyn-prebend'
+    if beamdyn and not flexible: raise ValueError('BeamDyn v3 requires moving tower')
+    rest_farm = Path(report['unloaded_reference'])/'FarmInputs' if beamdyn else None
     fps=40
     times=np.arange(round(start*fps),round((start+duration)*fps)+1)/fps
     transforms=np.empty((len(times),3,3,19,3,4),np.float32)
@@ -59,6 +62,12 @@ def export(probe, destination, start=117., duration=60., diagnostic=False):
             points, triangles=read_surface(path)
             return points-np.array([x,0,0]),triangles
         reference=[surface(b,0)[0].reshape(19,-1,3) for b in (1,2,3)]
+        if beamdyn:
+            reference=[]
+            for b in (1,2,3):
+                path=next(p for p in (rest_farm/'vtk').glob(f'FFTest_WT1.Blade{b}Surface.*.vtp') if int(p.stem.rsplit('.',1)[1])==0)
+                hashes[str(path.resolve())]=hashlib.sha256(path.read_bytes()).hexdigest()
+                reference.append(read_surface(path)[0].reshape(19,-1,3))
         def support(kind, frame):
             path=farm/'vtk'/f'Case.{tid}.{kind}Surface.{frame:05d}.vtp'
             hashes[str(path.relative_to(farm))]=hashlib.sha256(path.read_bytes()).hexdigest()
@@ -116,10 +125,14 @@ def export(probe, destination, start=117., duration=60., diagnostic=False):
                     continue
                 tip=tip_reference(local[b-1][0],19)
                 truth,wall=horizontal_clearance(tip,tower_pts,tower_tri) if flexible else truth_clearance(tip)
+                center_truth=truth
+                if beamdyn:
+                    from wfrl.lidar.moving_tower import tip_surface_clearance
+                    truth,tip,wall=tip_surface_clearance(local[b-1][0],tower_pts,tower_tri)
                 to_world=lambda p: (np.asarray(p)+(np.array([x,0,0]))).tolist() if flexible else (np.asarray(p)@rotation.T+[x,0,0]).tolist()
                 row=dict(time_s=float(t),blade_id=b,expected=True,
                     passage_id=f'b{b}-p{round((az+(b-1)*120-180)/360)}',
-                    truth_m=truth,truth_tip_point_m=to_world(tip),
+                    truth_m=truth,center_truth_m=center_truth,truth_tip_point_m=to_world(tip),
                     truth_wall_point_m=to_world(wall),beams={})
                 for n,direction in enumerate(directions if flexible else calibration.directions(),1):
                     candidates=[]
@@ -169,6 +182,9 @@ def export(probe, destination, start=117., duration=60., diagnostic=False):
             estimator_boundary='Fixed calibrated slant-range formula retained; tower bending is NOT compensated in the estimate; error is against moving-tower truth')
         manifest['files']['tower-motion.npz']=hashlib.sha256((destination/'tower-motion.npz').read_bytes()).hexdigest()
         manifest['calibration']['frame']='nacelle material frame at rest; transported by solver NacelleSurface rotation and translation'
+    if beamdyn:
+        from scripts.lidar.export_prebend_sidecars import supplement
+        supplement(destination, report, manifest, times, poses, transforms)
     (destination/'manifest.json').write_text(json.dumps(manifest,indent=2))
     print('FARM_FLEX_EXPORTED',json.dumps(manifest),flush=True)
 

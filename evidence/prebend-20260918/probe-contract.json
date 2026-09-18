@@ -1,0 +1,9 @@
+{
+  "unchanged": "accepted",
+  "curve": "rejected: Unsupported or mismatched BeamDyn reference geometry",
+  "model": "rejected: Unsupported or mismatched BeamDyn reference geometry",
+  "deflection_axes": "rejected: T1 deflection and geometry do not match",
+  "missing_deflection": "rejected: BeamDyn package requires mapped deflection data",
+  "geometry_hash": "rejected: Farm package integrity mismatch: geometry.npz",
+  "unknown_schema": "rejected: Expected a complete three-turbine flexible review package"
+}

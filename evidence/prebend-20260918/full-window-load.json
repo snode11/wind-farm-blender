@@ -1,0 +1,10 @@
+{
+  "runtime": "/Users/eason/Desktop/wfcrl/wind farm RL/dist/prebend-window-fix-20260918/blender_frontend/wfrl_blender/__init__.py",
+  "package": "/Users/eason/Desktop/wfcrl/wind farm RL/dist/prebend-window-fix-20260918/blender_frontend/wfrl_blender/assets/mappo",
+  "turbines": [
+    "T1",
+    "T2",
+    "T3"
+  ],
+  "time_s": 117.75
+}

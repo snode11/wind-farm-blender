@@ -1,0 +1,170 @@
+{
+  "status": "REVIEW_ONLY",
+  "solver_real_minutes": 7.8098,
+  "simulation_seconds": 183,
+  "segment_seconds": 60,
+  "source_samples": 2401,
+  "blade_surface_certificates": 21609,
+  "raw_storage": {
+    "case": "__simul__/fastfarm/FastFarm__208s__3T_1789560533.018898",
+    "files": 131819,
+    "logical_bytes": 73201807527,
+    "allocated_bytes": 73559117824,
+    "allocated_GB": 73.559117824,
+    "allocated_GiB": 68.50726699829102,
+    "raw_outputs_retained": true
+  },
+  "package_bytes": 34150395,
+  "tower_checks": [
+    {
+      "turbine_id": "T1",
+      "displacement_min_m": [
+        0.0187869407,
+        -0.0824606717,
+        -0.0012835263
+      ],
+      "displacement_max_m": [
+        0.40640381,
+        -0.00188373309,
+        -2.03054769e-05
+      ],
+      "tower_top_max_displacement_m": 0.41236329694423884,
+      "rpm_range": [
+        10.5607738,
+        11.9743328
+      ]
+    },
+    {
+      "turbine_id": "T2",
+      "displacement_min_m": [
+        0.0831540078,
+        -0.108507007,
+        -0.00170770404
+      ],
+      "displacement_max_m": [
+        0.466014266,
+        -0.00243955245,
+        -8.73169411e-05
+      ],
+      "tower_top_max_displacement_m": 0.4726948155049887,
+      "rpm_range": [
+        10.2626657,
+        11.4329519
+      ]
+    },
+    {
+      "turbine_id": "T3",
+      "displacement_min_m": [
+        0.0470019281,
+        -0.0511141531,
+        -0.00101054157
+      ],
+      "displacement_max_m": [
+        0.365908235,
+        0.0201158132,
+        -1.70145522e-05
+      ],
+      "tower_top_max_displacement_m": 0.3661300423515812,
+      "rpm_range": [
+        8.54428768,
+        10.7191973
+      ]
+    }
+  ],
+  "full_tip_validation": {
+    "status": "PASS",
+    "saved_tips": 7203,
+    "max_error_m": [
+      6.377735308449317e-05,
+      0.00010151814979542095
+    ],
+    "tower_station_count": 22,
+    "statistics": {
+      "T1": {
+        "expected_samples": 122,
+        "valid_samples": 18,
+        "valid_ratio": 0.14754098360655737,
+        "mae_m": 0.3233426431131757,
+        "max_abs_error_m": 0.5604417838242499,
+        "p95_abs_error_m": 0.5604417838242499,
+        "max_positive_bias_m": 0.0,
+        "passage_count": 33,
+        "missed_passage_count": 22
+      },
+      "T2": {
+        "expected_samples": 119,
+        "valid_samples": 48,
+        "valid_ratio": 0.40336134453781514,
+        "mae_m": 0.27537009730216644,
+        "max_abs_error_m": 0.5740444604012227,
+        "p95_abs_error_m": 0.5005722514696984,
+        "max_positive_bias_m": 0.15952870778691342,
+        "passage_count": 33,
+        "missed_passage_count": 1
+      },
+      "T3": {
+        "expected_samples": 120,
+        "valid_samples": 48,
+        "valid_ratio": 0.4,
+        "mae_m": 0.25500486004676687,
+        "max_abs_error_m": 0.45306010018762244,
+        "p95_abs_error_m": 0.4159691250443682,
+        "max_positive_bias_m": 0.07237319281989496,
+        "passage_count": 28,
+        "missed_passage_count": 0
+      }
+    }
+  },
+  "native_validation": {
+    "missing_reader_clears": true,
+    "status": "PASS",
+    "base_max_error_m": 4.8467614016778965e-27,
+    "radar_mount_max_error_m": 2.1173451053808113e-05,
+    "sampled_tip_max_error_m": [
+      0.00027417596265388866,
+      0.00011152385909951601
+    ],
+    "seeking": true,
+    "views": true,
+    "clock": true,
+    "reload": true
+  },
+  "packaged_validation": {
+    "missing_reader_clears": true,
+    "status": "PASS",
+    "base_max_error_m": 4.8467614016778965e-27,
+    "radar_mount_max_error_m": 2.1173451053808113e-05,
+    "sampled_tip_max_error_m": [
+      0.00027417596265388866,
+      0.00011152385909951601
+    ],
+    "seeking": true,
+    "views": true,
+    "clock": true,
+    "reload": true
+  },
+  "bundle": "/Users/eason/Desktop/wfcrl/三机塔架柔性回放-20260916",
+  "inventory_verified": true,
+  "source_package_and_bundled_assets_identical": true,
+  "gui": {
+    "actual_window_checked": true,
+    "play_pause": true,
+    "seeking": true,
+    "tabs": true,
+    "frame": 46,
+    "time_s": 117.75,
+    "range_m": 49.79,
+    "truth_m": 6.83,
+    "estimate_m": 6.69,
+    "error_m": -0.14,
+    "current_state": "Exited normally after recorded validation"
+  },
+  "limitations": [
+    "No time-step/span refinement certification",
+    "No stable 60 FPS claim",
+    "Fixed calibrated estimate has no tower bending compensation",
+    "T1 low measurement availability retained honestly"
+  ],
+  "completion": "COMPLETE",
+  "confirmed_display_scope": "T1 blade ghost/components only; no tower ghost/components"
+}

@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "saved_tips": 7203,
+  "max_error_m": [
+    6.377735308449317e-05,
+    0.00010151814979542095
+  ],
+  "tower_station_count": 22,
+  "statistics": {
+    "T1": {
+      "expected_samples": 122,
+      "valid_samples": 18,
+      "valid_ratio": 0.14754098360655737,
+      "mae_m": 0.3233426431131757,
+      "max_abs_error_m": 0.5604417838242499,
+      "p95_abs_error_m": 0.5604417838242499,
+      "max_positive_bias_m": 0.0,
+      "passage_count": 33,
+      "missed_passage_count": 22
+    },
+    "T2": {
+      "expected_samples": 119,
+      "valid_samples": 48,
+      "valid_ratio": 0.40336134453781514,
+      "mae_m": 0.27537009730216644,
+      "max_abs_error_m": 0.5740444604012227,
+      "p95_abs_error_m": 0.5005722514696984,
+      "max_positive_bias_m": 0.15952870778691342,
+      "passage_count": 33,
+      "missed_passage_count": 1
+    },
+    "T3": {
+      "expected_samples": 120,
+      "valid_samples": 48,
+      "valid_ratio": 0.4,
+      "mae_m": 0.25500486004676687,
+      "max_abs_error_m": 0.45306010018762244,
+      "p95_abs_error_m": 0.4159691250443682,
+      "max_positive_bias_m": 0.07237319281989496,
+      "passage_count": 28,
+      "missed_passage_count": 0
+    }
+  }
+}

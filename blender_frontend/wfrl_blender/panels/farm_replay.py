@@ -44,7 +44,7 @@ def draw_radar(layout, scene, value):
     reader = clearance_replay.reader_for(scene)
     if reader is not None:
         config = reader.package.manifest['replay']
-        card.label(text=f"演示报警 ≤ {config['threshold_m']:.2f} m · B2 估计")
+        card.label(text=f"演示报警阈值 ≤ {config['threshold_m']:.2f} m · B2 估计")
     card.label(text='浅蓝：光束方向 · 亮橙：有效测量')
     details = section(card, 'wfrl_farm_measurement_details', '测量详情与统计')
     if details is not None:
@@ -54,7 +54,7 @@ def draw_radar(layout, scene, value):
         details.label(text=f'光束亮起保留 {PULSE_SECONDS:.1f} 仿真秒，仅为提示')
         details.label(text='误差 = 估计 − 真值；正值为高估')
         if farm_flex.is_active(scene) and farm_flex._ACTIVE.tower_motion is not None:
-            details.label(text='真值：同高度的变形塔筒截面距离')
+            details.label(text='真值：叶尖表面至同高度塔壁' if farm_flex._ACTIVE.reference is not None else '真值：同高度的变形塔筒截面距离')
             details.label(text='固定标定估计未补偿塔架弯曲')
         if value:
             stats = value['statistics']
@@ -92,12 +92,16 @@ def draw_playback(layout, context, value, reader):
 def draw_views(layout, context):
     scene = context.scene
     row = layout.row(align=True)
-    for tid in ('T1', 'T2', 'T3'):
-        row.operator('wfrl.farm_flex_view', text=tid + ' Down').turbine = tid
+    for tid in farm_flex._ACTIVE.readers:
+        # UI invocations reuse the operator's last unset properties. Bind the
+        # angle explicitly so a previous FRONT click cannot leak into Down.
+        op = row.operator('wfrl.farm_flex_view', text=tid + ' Down')
+        op.turbine = tid; op.angle = 'DOWN'
     row = layout.row(align=True)
     op = row.operator('wfrl.farm_flex_view', text='T1 侧前方')
     op.turbine = 'T1'; op.angle = 'FRONT'
-    row.operator('wfrl.farm_flex_view', text='风场全景').turbine = 'all'
+    op = row.operator('wfrl.farm_flex_view', text='风场全景')
+    op.turbine = 'all'; op.angle = 'DOWN'
     row = layout.row(align=True)
     row.operator('wfrl.clearance_view', text='测量区侧视').view = 'MEASUREMENT'
     row.operator('wfrl.clearance_view', text='雷达特写').view = 'RADAR'
@@ -123,7 +127,7 @@ def draw_tools(layout, context):
     if telemetry is not None:
         telemetry.prop(scene, 'wfrl_channel_telemetry', text='采样遥测与曲线')
         from .. import charts
-        for tid in ('T1', 'T2', 'T3'):
+        for tid in farm_flex._ACTIVE.readers:
             card = telemetry.box()
             card.label(text=tid)
             for key in ('yaw', 'pitch', 'rotor_speed', 'power', 'torque', 'load'):
@@ -161,15 +165,19 @@ def draw_tools(layout, context):
         row.operator('wfrl.render_animation', text='渲染动画')
     data = section(layout, 'wfrl_farm_data', '数据来源与重新加载')
     if data is not None:
-        data.label(text='FAST.Farm · 离线结果 · REVIEW_ONLY')
-        data.label(text='三机随机阵风 · 九片叶片独立形变')
-        data.label(text='MAPPO 控制偏航；基线负责转矩、变桨')
+        if farm_flex._ACTIVE.manifest.get('interface_only'):
+            data.label(text='OpenFAST · 单机接口验证 · REVIEW_ONLY')
+            data.label(text='8 m/s 恒定风 · 规定 9 rpm')
+        else:
+            data.label(text='FAST.Farm · 离线结果 · REVIEW_ONLY')
+            data.label(text='三机随机阵风 · 九片叶片独立形变')
+            data.label(text='MAPPO 控制偏航；基线负责转矩、变桨')
         data.label(text='轨迹为形变网格叶尖位置，非相机测量')
-        data.label(text=f"轨迹保留最近 {int(scene.get('wfrl_tip_trail_max_points', 540))} 点")
+        data.label(text=f"轨迹渐隐：最近 {scene.get('wfrl_tip_trail_lifetime_s', 1.5):g} 仿真秒")
         data.label(text='B2 手册简化估算 · 理想测距')
         data.label(text='光束为示意，不作安全判定')
         data.label(text='开发验收包 · 数值细化待验证')
-        data.operator('wfrl.load_demo', text='重新加载 MAPPO · 60 秒', icon='FILE_REFRESH')
+        data.operator('wfrl.load_demo', text='重新加载当前结果', icon='FILE_REFRESH').package_path = scene['wfrl_farm_flex_path']
         data.operator('wfrl.clearance_restart', text='从头重播', icon='REW')
         path = data.column(); path.enabled = False
         path.prop(scene, '["wfrl_farm_flex_path"]', text='数据目录')
@@ -180,6 +188,10 @@ def draw(layout, context):
     value = clearance_replay.sample(scene)
     reader = clearance_replay.reader_for(scene)
     layout.use_property_decorate = False
+    if farm_flex._ACTIVE.reference is not None:
+        layout.label(text='单机预弯接口验证' if farm_flex._ACTIVE.manifest.get('interface_only') else 'NREL 5MW 预弯改型 · BeamDyn')
+    if farm_flex._ACTIVE.manifest.get('acceptance_status', '').startswith('FAILED'):
+        layout.label(text='测量覆盖未达演示目标', icon='ERROR')
     draw_playback(layout, context, value, reader)
     tabs = layout.row(align=True)
     tabs.scale_y = 1.25
@@ -189,8 +201,10 @@ def draw(layout, context):
         draw_panel(layout, scene)
     elif scene.wfrl_farm_panel_page == 'RADAR':
         views = layout.row(align=True)
-        for tid in ('T1', 'T2', 'T3'):
-            views.operator('wfrl.farm_flex_view', text=tid + ' Down').turbine = tid
+        for tid in farm_flex._ACTIVE.readers:
+            op = views.operator('wfrl.farm_flex_view', text=tid + ' Down')
+            op.turbine = tid
+            op.angle = 'DOWN'
         draw_radar(layout, scene, value)
     else:
         draw_tools(layout, context)
@@ -241,7 +255,10 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
         from . import gimbal
         if gimbal._ACTIVE:
             gimbal._ACTIVE.finish(context)
-        preview.visible_turbines={0,1,2} if self.turbine=='all' else {int(self.turbine[1:])-1}
+        if self.turbine != 'all' and self.turbine not in preview.readers:
+            self.report({'WARNING'}, '该数据包未包含此机组')
+            return {'CANCELLED'}
+        preview.visible_turbines=set(range(len(preview.readers))) if self.turbine=='all' else {int(self.turbine[1:])-1}
         preview.cache.clear()
         # Hidden turbines need no mesh uploads. Switching to overview samples
         # all nine at the current time before revealing them.
@@ -273,7 +290,7 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
                     fill_camera_view(area,scene)
         preview.update(scene)
         if self.turbine != 'all' and scene.wfrl_flex_show_tip_trails:
-            tip_tracking.enable(scene,self.turbine,max_points=540)
+            tip_tracking.enable(scene,self.turbine)
         trail=tip_tracking.active(scene)
         if trail is not None:
             for obj in trail.objects.values():

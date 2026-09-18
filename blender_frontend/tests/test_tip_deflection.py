@@ -24,12 +24,16 @@ class DeflectionTests(unittest.TestCase):
         errors = []
         d, g = self.data, self.geometry
         for b in (1, 2, 3):
-            hub, axes, _ = rigid_frame(d['scalars'], [0] * 6, b)
-            rest = hub + axes[:, 2] * d['scalars']['TipRad']
+            hub, axes, pitched = rigid_frame(d['scalars'], [0] * 6, b)
+            rest = hub + pitched @ d['tip_local_m'] if 'tip_local_m' in d else hub + axes[:, 2] * d['scalars']['TipRad']
             for i, pose in enumerate(d['poses']):
                 support = d['nacelle'][i] if 'nacelle' in d else None
-                hub, axes, _ = rigid_frame(d['scalars'], pose, b, support)
-                reference = hub + axes[:, 2] * d['scalars']['TipRad']
+                hub, axes, pitched = rigid_frame(d['scalars'], pose, b, support)
+                if 'tip_local_m' in d:
+                    axes = pitched
+                    reference = hub + axes @ d['tip_local_m']
+                else:
+                    reference = hub + axes[:, 2] * d['scalars']['TipRad']
                 tr = g['transforms'][i, 0, b - 1, -1]
                 actual = tr[:, :3] @ rest + tr[:, 3]
                 row = compare(actual, reference, axes, d['simulation'][i, b - 1])
@@ -39,7 +43,7 @@ class DeflectionTests(unittest.TestCase):
                     np.testing.assert_allclose(row['components'][:2], [3.47831678, -.84240049], atol=.00001)
                     self.assertGreater(row['distance'], abs(row['components'][0]))
         maximum = np.max(np.abs(errors), axis=0)
-        np.testing.assert_array_less(maximum, [.0002, .0002] if 'nacelle' in d else [.00001, .00006])
+        np.testing.assert_array_less(maximum, [.005] * 3 if 'tip_local_m' in d else ([.0002, .0002] if 'nacelle' in d else [.00001, .00006]))
         print('ALL_7203_SAVED_TIPS_MAX_ERROR_M', maximum.tolist())
 
     def test_deflection_channels_cannot_move_either_point(self):
@@ -106,9 +110,11 @@ class DeflectionTests(unittest.TestCase):
                 raw = (farm / key).read_bytes()
                 self.assertEqual(hashlib.sha256(raw).hexdigest(), hashes[key])
                 return read_surface(farm / key)[0].reshape(19, -1, 3)
-            initial = surface(0)
-            hub, axes, _ = rigid_frame(self.data['scalars'], [0] * 6, b)
-            rest = hub + axes[:, 2] * self.data['scalars']['TipRad']
+            initial = (np.load(self.package / 'reference-surfaces.npz')['blades'][b - 1].reshape(19, -1, 3)
+                       if 'tip_local_m' in self.data else surface(0))
+            hub, axes, pitched = rigid_frame(self.data['scalars'], [0] * 6, b)
+            rest = (hub + pitched @ self.data['tip_local_m'] if 'tip_local_m' in self.data
+                    else hub + axes[:, 2] * self.data['scalars']['TipRad'])
             for i in (0, 1200, 2400):
                 r, t, error = fit_sections(initial, surface(round(self.geometry['times'][i] * 40)))
                 self.assertLess(error, .002)

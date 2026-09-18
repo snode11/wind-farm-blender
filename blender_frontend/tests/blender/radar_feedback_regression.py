@@ -14,7 +14,7 @@ import wfrl_blender
 from wfrl_blender import clearance_replay, farm_flex, radar_feedback
 
 wfrl_blender.register()
-wfrl_blender.load_demo_scene()
+wfrl_blender.load_demo_scene(os.environ.get('WFRL_FARM_FLEX_PACKAGE'))
 scene = bpy.context.scene
 scene.wfrl_farm_panel_page = 'RADAR'
 
@@ -37,32 +37,44 @@ def check(t):
 
 
 assert check(117) == 'waiting'
-assert check(142.1) == 'above_threshold'
-assert check(166.85) == 'near_threshold'
-state = check(166.85)
-scene.render.fps = 24
+if farm_flex._ACTIVE.manifest.get('schema') == 'wfrl.farm-flex-review.v3':
+    reader=farm_flex._ACTIVE.readers['T1']
+    event=next(r for r in reader.package.measurements if r['beams']['B2']['valid'])
+    stamp=event['time_s']
+    expected_state='near_threshold' if event['beams']['B2']['estimate_m']<=7 else 'above_threshold'
+    assert check(stamp)==expected_state
+    measurement=clearance_replay.sample(scene)['measurement']
+    assert measurement['time_s']==stamp
+    assert scene.objects['WFRL.Turbine.T1.ClearanceRadar.Beam2']['wfrl_beam_active']
+    # A later held card must not keep the beam orange past its event pulse.
+    assert check(stamp+.3)==expected_state
+    assert not scene.objects['WFRL.Turbine.T1.ClearanceRadar.Beam2']['wfrl_beam_active']
+else:
+    assert check(142.1) == 'above_threshold'
+    stamp=166.85;expected_state='near_threshold'
+    assert check(stamp)==expected_state
+state=check(stamp)
+scene.render.fps=24
 clearance_replay.update(scene)
-assert radar_feedback.alarm_state(clearance_replay.sample(scene)) == state
+assert radar_feedback.alarm_state(clearance_replay.sample(scene))==state
 for tid in ('T2','T3','all','T1'):
     bpy.ops.wfrl.farm_flex_view(turbine=tid)
-    assert abs(clearance_replay.sample(scene)['time_s']-166.85) < 1e-8
-assert check(117) == 'waiting'
-assert check(166.85) == 'near_threshold'
-assert check(118.) == 'near_threshold'
-assert not scene.objects['WFRL.Turbine.T1.ClearanceRadar.Beam2']['wfrl_beam_active']
+    assert abs(clearance_replay.sample(scene)['time_s']-stamp)<1e-8
+assert check(117)=='waiting'
+assert check(stamp)==expected_state
 if not bpy.app.background:
     assert all(radar_feedback.icon_id(name)>0 for name in radar_feedback.LABELS)
 with tempfile.TemporaryDirectory() as temporary:
     path = Path(temporary)/'feedback.blend'
-    seek(166.85)
+    seek(stamp)
     bpy.ops.wm.save_as_mainfile(filepath=str(path))
     bpy.ops.wm.open_mainfile(filepath=str(path))
     scene = bpy.context.scene
-    assert check(166.85) == 'near_threshold'
+    assert check(stamp) == expected_state
 clearance_replay.clear(scene,'test missing data')
 assert radar_feedback.alarm_state(clearance_replay.sample(scene)) == 'waiting'
 assert not any(obj.get('wfrl_beam_active', False) for obj in scene.objects)
-wfrl_blender.load_demo_scene()
+wfrl_blender.load_demo_scene(os.environ.get('WFRL_FARM_FLEX_PACKAGE'))
 scene = bpy.context.scene
 assert check(117) == 'waiting'
 result = dict(status='PASS', materials=True, independent_turbines=True, seek=True,

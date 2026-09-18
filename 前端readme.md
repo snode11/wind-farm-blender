@@ -1,15 +1,15 @@
 # WFRL 前端 · 0.3.1
 
-当前发布版本为 **0.3.3**：[下载](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.3)，含雷达反馈与塔顶密封圈/焊缝随动修复。详细验证见发布核对文档；以下早期版本说明保留作为历史。
+当前交付版本为 **0.3.4**：[下载](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.4)。默认内置预弯 v3 数据，含独立参考、轨迹渐隐和 Down 视角修复。固定三束覆盖率失败，仍为 REVIEW_ONLY；详见发布核对。
 
 更新日期：2026-09-16。当前前端是运行在 **Blender 5.2+** 中的风场三维工作台。默认展示三台 NREL 5 MW 风机的 **60 秒 MAPPO 离线仿真记录**，包含九片叶片形变、三台塔架弯曲、T1 叶尖挠度对照、雷达净空和功率/载荷遥测。
 
-[下载 0.3.1](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.1) · [用户操作手册](docs/blender/用户使用手册.md) · [快速演示](docs/blender/MAPPO演示.md) · [实现与维护](blender_frontend/README.md)
+[下载 0.3.1](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.4) · [用户操作手册](docs/blender/用户使用手册.md) · [快速演示](docs/blender/MAPPO演示.md) · [实现与维护](blender_frontend/README.md)
 
 ## Windows 上最快复用
 
 1. 安装 Blender 5.2 或更新版本。
-2. 从发布页下载 **wfrl_blender-0.3.1.zip**，保留 ZIP，不要选择 GitHub 自动生成的 Source code。
+2. 从发布页下载 **wfrl_blender-0.3.4.zip**，保留 ZIP，不要选择 GitHub 自动生成的 Source code。
 3. Blender → **Edit → Preferences → Get Extensions**，打开右上菜单，选择 **Install from Disk**，选中 ZIP 并启用 **WFRL Blender**。若已有旧版，安装更新后退出并重启 Blender。
 4. 打开新的 General 场景，鼠标放在三维视图中，按 **N**，进入 **MAPPO → 三机 MAPPO 回放**，点击 **加载 MAPPO · 60 秒**，再点播放。
 

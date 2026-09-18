@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "zip_sha256": "3f2c718e3ae438a49786df4de2f92a1153fd405ea026521d8c19f3e22434a9b0",
+  "inventory_files": 107,
+  "old_measurements_preserved": true,
+  "zip_runtime_identical": true,
+  "crc": true
+}

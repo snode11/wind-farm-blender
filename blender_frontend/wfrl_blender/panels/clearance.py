@@ -192,7 +192,7 @@ def draw_flex_trails(layout, scene):
     if tip_tracking.active(scene) is not None or scene.get('wfrl_flex_active', False):
         row = layout.row(align=True)
         row.prop(scene, 'wfrl_flex_show_tip_trails', text='显示叶尖轨迹', toggle=True)
-        layout.label(text=f"B1 橙 · B2 蓝 · B3 红；保留最近 {int(scene.get('wfrl_tip_trail_max_points', 240))} 点")
+        layout.label(text=f"B1 橙 · B2 蓝 · B3 红；保留最近 {int(scene.get('wfrl_tip_trail_max_points', tip_tracking.MAX_POINTS))} 点")
         layout.label(text='形变网格叶尖位置 · 非相机测量')
 
 
@@ -288,11 +288,11 @@ def register_properties():
         if scene.wfrl_flex_show_tip_trails:
             turbine = scene.get('wfrl_clearance_turbine', 'T1')
             tip_tracking.enable(scene, turbine_id=turbine,
-                                max_points=int(scene.get('wfrl_tip_trail_max_points', 240)))
+                                max_points=int(scene.get('wfrl_tip_trail_max_points', tip_tracking.MAX_POINTS)))
         else:
             tip_tracking.disable(scene)
     bpy.types.Scene.wfrl_flex_show_tip_trails = bpy.props.BoolProperty(
-        name='显示叶尖轨迹', description='随播放绘制形变后叶尖世界坐标，按当前片段限制缓存；拖动进度或重播时清空',
+        name='显示叶尖轨迹', description='按仿真时间渐隐的形变后叶尖轨迹；暂停不衰退，切视角保留，寻址或重播清空',
         default=False, update=_update_tip_trails)
 
 

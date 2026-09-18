@@ -9,7 +9,10 @@ from collections import deque
 import math
 
 
-MAX_POINTS = 240
+LIFETIME_S = 1.5
+SAMPLE_INTERVAL_S = 1.0 / 40.0
+FADE_LEVELS = 32
+MAX_POINTS = math.ceil(LIFETIME_S / SAMPLE_INTERVAL_S) + 2
 _ACTIVE = {}
 
 # High-contrast colours are deliberately stable by blade number (B1/B2/B3).
@@ -33,6 +36,25 @@ def _is_playing(scene):
                for window in bpy.context.window_manager.windows)
 
 
+def opacity(age_s, lifetime_s=LIFETIME_S):
+    """Smooth fade in simulation seconds, independent of render/playback FPS."""
+    x = max(0.0, min(1.0, 1.0 - age_s / lifetime_s))
+    return x * x * (3.0 - 2.0 * x)
+
+
+def _simulation_time(scene):
+    from . import clearance_replay
+    reader = clearance_replay.reader_for(scene)
+    if reader is not None:
+        timebase = scene['wfrl_clearance_timebase_fps']
+        elapsed = (scene.frame_current + scene.frame_subframe - scene.frame_start) / timebase
+        return min(reader.end_s, max(reader.start_s, reader.start_s + elapsed))
+    # Freeze the mapping for non-replay previews too. Render FPS may change.
+    if 'wfrl_tip_trail_timebase_fps' not in scene:
+        scene['wfrl_tip_trail_timebase_fps'] = scene.render.fps / scene.render.fps_base
+    return (scene.frame_current + scene.frame_subframe - scene.frame_start) / scene['wfrl_tip_trail_timebase_fps']
+
+
 def _material(name, color):
     import bpy
     material = bpy.data.materials.get(name) or bpy.data.materials.new(name)
@@ -47,6 +69,34 @@ def _material(name, color):
     return material
 
 
+def _fade_material(name, color, alpha):
+    import bpy
+    material = bpy.data.materials.get(name)
+    if material is not None:
+        return material
+    material = bpy.data.materials.new(name)
+    material.diffuse_color = (*color[:3], alpha)
+    material.use_nodes = True
+    if hasattr(material, 'surface_render_method'):
+        material.surface_render_method = 'DITHERED'
+    elif hasattr(material, 'blend_method'):
+        material.blend_method = 'HASHED'
+    nodes = material.node_tree.nodes
+    nodes.clear()
+    output = nodes.new('ShaderNodeOutputMaterial')
+    transparent = nodes.new('ShaderNodeBsdfTransparent')
+    emission = nodes.new('ShaderNodeEmission')
+    emission.inputs['Color'].default_value = color
+    emission.inputs['Strength'].default_value = 2.0
+    mix = nodes.new('ShaderNodeMixShader')
+    mix.inputs[0].default_value = alpha
+    links = material.node_tree.links
+    links.new(transparent.outputs[0], mix.inputs[1])
+    links.new(emission.outputs[0], mix.inputs[2])
+    links.new(mix.outputs[0], output.inputs['Surface'])
+    return material
+
+
 def _collection_for(scene, turbine_id):
     obj = scene.objects.get(f'WFRL.Turbine.{turbine_id}.YawRoot')
     if obj is None or not obj.users_collection:
@@ -57,7 +107,9 @@ def _collection_for(scene, turbine_id):
 def _ensure_curve(scene, turbine_id, blade_id):
     import bpy
     name = f'WFRL.Turbine.{turbine_id}.TipTrail.B{blade_id}'
-    material = _material('WFRL.TipTrail.B' + str(blade_id), TRAIL_COLORS[blade_id])
+    materials = [_fade_material(f'WFRL.TipTrail.B{blade_id}.Fade{i:02d}',
+                           TRAIL_COLORS[blade_id], i / (FADE_LEVELS - 1))
+                 for i in range(FADE_LEVELS)]
     obj = scene.objects.get(name)
     if obj is None:
         data = bpy.data.curves.new(name + '.Curve', 'CURVE')
@@ -67,13 +119,11 @@ def _ensure_curve(scene, turbine_id, blade_id):
         # legible against the blade and tower without obscuring the tip.
         data.bevel_depth = .08
         data.bevel_resolution = 2
-        data.materials.append(material)
         obj = bpy.data.objects.new(name, data)
         _collection_for(scene, turbine_id).objects.link(obj)
-    elif not obj.data.materials:
+    obj.data.materials.clear()
+    for material in materials:
         obj.data.materials.append(material)
-    else:
-        obj.data.materials[0] = material
     obj['provenance'] = '叶尖运动轨迹辅助线；取形变后叶片网格世界坐标；不代表测量或安全边界'
     obj['blade_id'] = blade_id
     obj.hide_render = True
@@ -94,11 +144,15 @@ class TipTrail:
     """One scene's three bounded tip curves and timeline bookkeeping."""
 
     def __init__(self, scene, turbine_id='T1', max_points=MAX_POINTS):
-        if type(max_points) is not int or max_points < 2:
-            raise ValueError('Tip trail buffer must contain at least two points')
+        if type(max_points) is not int or max_points < 3:
+            raise ValueError('Tip trail buffer must contain at least three points')
         self.scene = scene
         self.turbine_id = str(turbine_id)
         self.max_points = max_points
+        self.lifetime_s = LIFETIME_S
+        self.interval_s = max(SAMPLE_INTERVAL_S, self.lifetime_s / (max_points - 2))
+        self.times = {bid: deque(maxlen=max_points) for bid in (1, 2, 3)}
+        self.last_time = None
         self.points = {bid: deque(maxlen=max_points) for bid in (1, 2, 3)}
         self.objects = {bid: _ensure_curve(scene, self.turbine_id, bid) for bid in (1, 2, 3)}
         self.enabled = True
@@ -106,6 +160,8 @@ class TipTrail:
         self.scene['wfrl_tip_trail_enabled'] = True
         self.scene['wfrl_tip_trail_turbine'] = self.turbine_id
         self.scene['wfrl_tip_trail_max_points'] = max_points
+        self.scene['wfrl_tip_trail_lifetime_s'] = self.lifetime_s
+        self.scene['wfrl_tip_trail_sample_interval_s'] = self.interval_s
         self._set_visible(True)
 
     def _set_visible(self, visible):
@@ -119,8 +175,10 @@ class TipTrail:
     def clear(self, reason='manual'):
         for bid, obj in self.objects.items():
             self.points[bid].clear()
+            self.times[bid].clear()
             self._clear_curve(obj)
         self.last_frame = None
+        self.last_time = None
         self.scene['wfrl_tip_trail_clear_reason'] = str(reason)
 
     def disable(self, reason='disabled'):
@@ -137,38 +195,61 @@ class TipTrail:
         self.scene['wfrl_tip_trail_enabled'] = True
         self.last_frame = None  # next update starts exactly at current frame
 
-    def _redraw(self, bid):
+    def _redraw(self, bid, now):
         obj = self.objects[bid]
-        # Reuse one polyline per blade.  Replacing the spline keeps redraws
-        # bounded during 60 FPS playback instead of leaving one spline behind
-        # for every frame.
         obj.data.splines.clear()
-        spline = obj.data.splines.new('POLY') if self.points[bid] else None
-        if spline is None:
-            return
-        spline.points.add(len(self.points[bid]) - 1)
-        for point, xyz in zip(spline.points, self.points[bid]):
-            point.co = (*xyz, 1.0)
+        points, times = list(self.points[bid]), list(self.times[bid])
+        # Consecutive segments sharing opacity reuse a spline. The data and
+        # drawing geometry are both bounded; expired points leave both.
+        current = None
+        groups = []
+        for i in range(1, len(points)):
+            age = now - (times[i-1] + times[i]) * .5
+            level = round(opacity(age, self.lifetime_s) * (FADE_LEVELS - 1))
+            if level == 0:
+                current = None
+                continue
+            if current is None or current[0] != level:
+                current = (level, [points[i-1], points[i]])
+                groups.append(current)
+            else:
+                current[1].append(points[i])
+        for level, coordinates in groups:
+            spline = obj.data.splines.new('POLY')
+            spline.material_index = level
+            spline.points.add(len(coordinates) - 1)
+            spline.points.foreach_set('co', [v for xyz in coordinates for v in (*xyz, 1.0)])
 
     def update(self, scene, depsgraph=None):
         if scene != self.scene or not self.enabled:
             return
         frame = int(scene.frame_current)
-        if self.last_frame == frame:
-            return  # redraws and paused playback never duplicate samples
-        if self.last_frame is not None and (frame < self.last_frame or
+        now = _simulation_time(scene)
+        if self.last_time == now:
+            return  # paused redraws cannot age or brighten the trail
+        if self.last_time is not None and (now < self.last_time or
                 (frame > self.last_frame + 1 and not _is_playing(scene))):
-            # A slider seek, restart, or reverse step starts a fresh visible
-            # pass.  This prevents a misleading line across unrelated times.
             self.clear('timeline_seek')
         self.last_frame = frame
+        self.last_time = now
+        bucket = math.floor((now + 1e-9) / self.interval_s)
         for bid in (1, 2, 3):
+            points, times = self.points[bid], self.times[bid]
+            while times and now - times[0] >= self.lifetime_s - 1e-9:
+                times.popleft()
+                points.popleft()
             blade = scene.objects.get(f'WFRL.Turbine.{self.turbine_id}.Blade{bid}')
             point = _tip_world(blade, depsgraph) if blade is not None else None
-            if point is None or not all(math.isfinite(float(v)) for v in point):
-                continue
-            self.points[bid].append(tuple(float(v) for v in point))
-            self._redraw(bid)
+            if point is not None and all(math.isfinite(float(v)) for v in point):
+                xyz = tuple(float(v) for v in point)
+                if times and math.floor((times[-1] + 1e-9) / self.interval_s) == bucket:
+                    # Keep the current head on the mesh without growing the
+                    # history at high display rates or repeated subframes.
+                    times[-1], points[-1] = now, xyz
+                else:
+                    times.append(now)
+                    points.append(xyz)
+            self._redraw(bid, now)
 
 
 def active(scene):

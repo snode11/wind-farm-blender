@@ -48,3 +48,35 @@ def test_occlusion_and_separation_use_moving_surface():
 def test_fixed_estimator_remains_range_only():
     assert simplified_estimate(30,True,8.5,2,2.67)==pytest.approx(30*np.sin(np.radians(8.5))+2-2.67)
     assert simplified_estimate(None,False,8.5,2,2.67) is None
+
+
+def test_terminal_contour_minimum_has_surface_witnesses():
+    from wfrl.lidar.moving_tower import tip_surface_clearance
+    p,t=prism()
+    # Closest point lies inside a contour edge, not at its centre or vertices.
+    ring=np.array([[-4,-2,4],[-4,2,6],[-5,2,6],[-5,-2,4]],float)
+    distance,tip,wall=tip_surface_clearance(ring,p,t,sections=1)
+    assert distance==pytest.approx(3.,abs=1e-9)
+    assert tip[2]==pytest.approx(wall[2])
+    assert tip[0]==pytest.approx(-4)
+    assert wall[0]==pytest.approx(-1)
+    p[4:,0]+=2
+    distance,tip,wall=tip_surface_clearance(ring,p,t,sections=1)
+    # Dense independent pointwise oracle verifies the sloped-height optimization.
+    grid=np.linspace(0,1,1001)
+    dense=np.vstack([a+grid[:,None]*(b-a) for a,b in zip(ring,np.roll(ring,-1,axis=0))])
+    brute=min(horizontal_clearance(point,p,t)[0] for point in dense)
+    assert abs(distance-brute)<.002
+    np.testing.assert_allclose(np.linalg.norm(np.asarray(tip)[:2]-np.asarray(wall)[:2]),distance,atol=1e-9)
+    offset=np.array([40,-20,3])
+    moved,mt,mw=tip_surface_clearance(ring+offset,p+offset,t,sections=1)
+    assert moved==pytest.approx(distance)
+
+
+def test_terminal_surface_intersection_and_constant_x_edge():
+    from wfrl.lidar.moving_tower import tip_surface_clearance
+    p,t=prism()
+    ring=np.array([[-4,-3,5],[-4,3,5],[-5,3,5],[-5,-3,5]],float)
+    assert tip_surface_clearance(ring,p,t,1)[0]==pytest.approx(3)
+    crossing=np.array([[-2,-2,5],[0,0,5],[-2,2,5]],float)
+    assert tip_surface_clearance(crossing,p,t,1)[0]==pytest.approx(0,abs=1e-8)

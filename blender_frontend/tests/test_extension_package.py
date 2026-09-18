@@ -46,7 +46,7 @@ class PackageTests(unittest.TestCase):
                 for name in ('manifest.json', 'data.json', 'geometry.npz', 'source-surfaces.json', 'tower-motion.npz', 'deflection-t1.json', 'source-run.json'):
                     self.assertIn('assets/mappo/' + name, names)
                 manifest = json.loads(zipped.read('assets/mappo/manifest.json'))
-                self.assertEqual(manifest['schema'], 'wfrl.farm-flex-review.v2')
+                self.assertEqual(manifest['schema'], 'wfrl.farm-flex-review.v3')
                 self.assertEqual(manifest['tower_model'], 'elastodyn-flexible')
                 self.assertEqual(manifest['segment']['end_s'] - manifest['segment']['start_s'], 60)
                 for name, digest in manifest['files'].items():

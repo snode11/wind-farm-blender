@@ -153,8 +153,8 @@ def record_farm(time_s, poses, manifest, extra=None):
     """Record only fields present in the physical result; preserve absent channels."""
     global _local_sequence
     _local_sequence += 1
-    provenance = {'source': 'FAST.Farm', 'status': manifest['status'],
-                  'policy_sha256': manifest['policy']['sha256'],
+    provenance = {'source': manifest.get('source','FAST.Farm'), 'status': manifest['status'],
+                  'policy_sha256': manifest.get('policy', {}).get('sha256'),
                   'geometry_sha256': manifest['files']['geometry.npz'],
                   'pitch': 'mean of three measured blade pitches'}
     def record(value, unit):

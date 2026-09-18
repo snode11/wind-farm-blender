@@ -1,0 +1,12 @@
+{
+  "status": "COMPLETE",
+  "scope": "Flexible tower simulation and synchronized blade ghost/components; no tower ghost/components requested",
+  "runtime_matches_source": true,
+  "all_inventory_hashes_match": true,
+  "source_and_bundled_data_match": true,
+  "launcher_executable": true,
+  "old_demo_retained": true,
+  "previous_validation": "34 tests and 7 subtests; 7203 saved tips; native and packaged Blender regression; actual window playback/pause/seek verified",
+  "simulation_rerun_for_this_finalization": false,
+  "entry": "/Users/eason/Desktop/wfcrl/三机塔架柔性回放-20260916/打开三机叶片回放.command"
+}

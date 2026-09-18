@@ -1,0 +1,25 @@
+[
+  {
+    "name": "farm-run",
+    "dt_s": 0.00625,
+    "status": "FAILED",
+    "cause": "BeamDyn nonlinear iteration did not converge during initial coupled step",
+    "case": "__simul__/fastfarm/FastFarm__208s__3T_1789662983.12155",
+    "log": "farm-run.log"
+  },
+  {
+    "name": "farm-dt-quarter",
+    "dt_s": 0.0015625,
+    "status": "CONTROL_PROBE_COMPLETE",
+    "case": "__simul__/fastfarm/FastFarm__208s__3T_1789663025.003069",
+    "log": "farm-dt-quarter.log"
+  },
+  {
+    "name": "farm-omp3",
+    "dt_s": 0.0015625,
+    "status": "INTERRUPTED_BENCHMARK",
+    "cause": "Throughput comparison ended deliberately; not used as completed physics",
+    "case": "__simul__/fastfarm/FastFarm__208s__3T_1789663583.096885",
+    "log": "farm-omp3.log"
+  }
+]

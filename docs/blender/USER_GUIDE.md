@@ -1,5 +1,7 @@
 # WFRL Blender user guide · 0.3.1
 
+当前交付版本为 **0.3.4**：[下载](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.4)。默认内置预弯 v3 数据，含独立参考、轨迹渐隐和 Down 视角修复。固定三束覆盖率失败，仍为 REVIEW_ONLY；详见发布核对。
+
 See the [current complete Chinese manual](用户使用手册.md) for Windows/macOS installation, playback, deflection comparison, clearance readings, backend workflows and troubleshooting. A short presentation sequence is available in [MAPPO演示.md](MAPPO演示.md).
 
 The default demo is a recorded 60-second MAPPO segment with three flexible towers and nine flexible blades. It replaces the historical scripted 66-second Local Demo and manual pose workflow.

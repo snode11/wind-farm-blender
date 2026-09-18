@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "version": "0.3.4",
+  "enabled": true,
+  "installed_path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "zip_matches": true,
+  "turbines": [
+    "T1",
+    "T2",
+    "T3"
+  ],
+  "schema": "wfrl.farm-flex-review.v3",
+  "camera": "WFRL.Camera.T1.Gimbal",
+  "acceptance_status": "FAILED_AVAILABILITY"
+}
