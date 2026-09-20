@@ -1,8 +1,8 @@
 # WFRL Blender 前端实现 · 0.3.1
 
-当前交付版本为 **0.3.4**：[下载](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.4)。默认内置预弯 v3 数据，含独立参考、轨迹渐隐和 Down 视角修复。固定三束覆盖率失败，仍为 REVIEW_ONLY；详见发布核对。
+当前交付版本为 **0.3.5**：[下载](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.5)。默认内置预弯 v3 数据，新增机舱云台视角（默认 120°）及相邻两圈轨迹定格淡出，保留原 Down 视角。固定三束覆盖率失败，仍为 REVIEW_ONLY；详见发布核对。
 
-当前正式版本为 **0.3.4**，要求 **Blender 5.2+**。默认内置预弯 v3 三机 MAPPO 60 秒离线回放，Windows 与 macOS 共用 [安装 ZIP](../dist/wfrl_blender-0.3.4.zip)。
+当前正式版本为 **0.3.5**，要求 **Blender 5.2+**。默认内置预弯 v3 三机 MAPPO 60 秒离线回放，Windows 与 macOS 共用 [安装 ZIP](../dist/wfrl_blender-0.3.5.zip)。
 
 本地 0.3.2–0.3.5 是开发阶段标记，已汇总到正式 0.3.1。默认资源已切到同源柔性塔架包，旧 v1 读取兼容仍保留。当前发布检查见 [0.3.1 发布核对](../docs/blender/0.3.1发布核对.md)，不要将旧安装版、便携目录或历史检查视为当前 ZIP 的验证。
 

@@ -28,14 +28,14 @@ assert len(trail.objects) == 3
 assert all(obj.name == f"WFRL.Turbine.T1.TipTrail.B{i}" for i, obj in trail.objects.items())
 
 def point_count(obj):
-    return sum(len(spline.points) for spline in obj.data.splines)
+    return len(trail.points[int(obj["blade_id"])])
 
 def colors(obj):
     return tuple(round(float(v), 3) for v in obj.data.materials[0].diffuse_color[:3])
 
-expected_colors = ((1.0, 0.16, 0.04), (0.05, 0.72, 1.0), (0.95, 0.05, 0.08))
+expected_colors = ((1.0, 0.05, 0.04), (0.05, 1.0, 0.12), (0.05, 0.35, 1.0))
 assert tuple(colors(trail.objects[i]) for i in (1, 2, 3)) == expected_colors
-assert all(point_count(trail.objects[i]) >= 1 for i in (1, 2, 3))
+assert all(len(trail.points[i]) == 1 for i in (1, 2, 3))
 
 # Calling the frame handler twice for one paused frame is a redraw, not a new
 # sample.  The curves must remain byte-for-byte stable in point count.
@@ -80,7 +80,7 @@ assert all(not obj.hide_get() and not obj.hide_render for obj in trail.objects.v
 assert all(len(points) == 1 for points in trail.points.values())
 for frame in range(13, 260):
     scene.frame_set(frame)
-assert all(len(points) == tip_tracking.MAX_POINTS for points in trail.points.values())
+assert all(len(points) <= tip_tracking.MAX_POINTS for points in trail.points.values())
 from wfrl_blender.panels.clearance import progress_set
 with patch.object(tip_tracking, '_is_playing', return_value=True):
     progress_set(scene, 50)

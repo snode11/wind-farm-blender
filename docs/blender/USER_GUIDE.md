@@ -1,6 +1,6 @@
 # WFRL Blender user guide · 0.3.1
 
-当前交付版本为 **0.3.4**：[下载](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.4)。默认内置预弯 v3 数据，含独立参考、轨迹渐隐和 Down 视角修复。固定三束覆盖率失败，仍为 REVIEW_ONLY；详见发布核对。
+当前交付版本为 **0.3.5**：[下载](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.5)。默认内置预弯 v3 数据，新增机舱云台视角（默认 120°）及相邻两圈轨迹定格淡出，保留原 Down 视角。固定三束覆盖率失败，仍为 REVIEW_ONLY；详见发布核对。
 
 See the [current complete Chinese manual](用户使用手册.md) for Windows/macOS installation, playback, deflection comparison, clearance readings, backend workflows and troubleshooting. A short presentation sequence is available in [MAPPO演示.md](MAPPO演示.md).
 

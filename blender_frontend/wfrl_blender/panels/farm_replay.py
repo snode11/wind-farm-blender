@@ -91,12 +91,7 @@ def draw_playback(layout, context, value, reader):
 
 def draw_views(layout, context):
     scene = context.scene
-    row = layout.row(align=True)
-    for tid in farm_flex._ACTIVE.readers:
-        # UI invocations reuse the operator's last unset properties. Bind the
-        # angle explicitly so a previous FRONT click cannot leak into Down.
-        op = row.operator('wfrl.farm_flex_view', text=tid + ' Down')
-        op.turbine = tid; op.angle = 'DOWN'
+    draw_turbine_views(layout, scene)
     row = layout.row(align=True)
     op = row.operator('wfrl.farm_flex_view', text='T1 侧前方')
     op.turbine = 'T1'; op.angle = 'FRONT'
@@ -109,12 +104,31 @@ def draw_views(layout, context):
     for view in ('Top', 'Side'):
         row.operator('wfrl.select_camera', text=view).camera_name = 'WFRL.Camera.' + view
     layout.prop(scene, 'wfrl_flex_show_tip_trails', text='显示叶尖轨迹')
-    layout.label(text='叶片 1 橙 · 2 蓝 · 3 红')
+    layout.label(text='叶片 1 红 · 2 绿 · 3 蓝')
     gimbal = section(layout, 'wfrl_farm_gimbal', '云台控制')
     if gimbal is not None:
         from .gimbal import draw_gimbal_controls
         gimbal.label(text='当前机组：' + scene.get('wfrl_clearance_turbine', 'T1'))
         draw_gimbal_controls(gimbal, context, allow_turbine_selection=False)
+
+
+def draw_turbine_views(layout, scene):
+    """Keep the three Down buttons, plus one mounted-camera entry."""
+    row = layout.row(align=True)
+    for tid in farm_flex._ACTIVE.readers:
+        op = row.operator('wfrl.farm_flex_view', text=tid + ' Down')
+        op.turbine = tid
+        op.angle = 'DOWN'
+    row = layout.row(align=True)
+    op = row.operator('wfrl.farm_flex_view', text='机舱相机', icon='CAMERA_DATA')
+    op.turbine = scene.get('wfrl_clearance_turbine', 'T1')
+    op.angle = 'NACELLE'
+    row.label(text=op.turbine)
+    if scene.wfrl_gimbal_kind == 'NACELLE':
+        from . import gimbal
+        row = layout.row(align=True)
+        row.operator('wfrl.gimbal_mode', text='退出摇杆' if gimbal._ACTIVE else '云台摇杆', icon='ORIENTATION_GIMBAL')
+        row.operator('wfrl.gimbal_preset', text='相机复位').preset = 'RESET'
 
 
 def draw_tools(layout, context):
@@ -173,7 +187,8 @@ def draw_tools(layout, context):
             data.label(text='三机随机阵风 · 九片叶片独立形变')
             data.label(text='MAPPO 控制偏航；基线负责转矩、变桨')
         data.label(text='轨迹为形变网格叶尖位置，非相机测量')
-        data.label(text=f"轨迹渐隐：最近 {scene.get('wfrl_tip_trail_lifetime_s', 1.5):g} 仿真秒")
+        data.label(text="红 / 绿 / 蓝：叶片 1 / 2 / 3")
+        data.label(text="相邻两圈定格对比 2 秒后淡出")
         data.label(text='B2 手册简化估算 · 理想测距')
         data.label(text='光束为示意，不作安全判定')
         data.label(text='开发验收包 · 数值细化待验证')
@@ -200,17 +215,16 @@ def draw(layout, context):
         from ..deflection import draw_panel
         draw_panel(layout, scene)
     elif scene.wfrl_farm_panel_page == 'RADAR':
-        views = layout.row(align=True)
-        for tid in farm_flex._ACTIVE.readers:
-            op = views.operator('wfrl.farm_flex_view', text=tid + ' Down')
-            op.turbine = tid
-            op.angle = 'DOWN'
+        draw_turbine_views(layout, scene)
         draw_radar(layout, scene, value)
     else:
         draw_tools(layout, context)
 
 
 def build_review_cameras(scene):
+    from ..cameras import ensure_nacelle_gimbal
+    for tid in farm_flex._ACTIVE.readers:
+        ensure_nacelle_gimbal(scene, tid)
     from mathutils import Vector
     tip = bpy.data.objects.new('WFRL.Camera.T1.TipComparison', bpy.data.cameras.new('T1TipComparison'))
     bpy.data.collections['WFRL_Scene'].objects.link(tip)
@@ -241,7 +255,7 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
     bl_idname='wfrl.farm_flex_view'
     bl_label='查看机组'
     turbine:bpy.props.StringProperty(default='T1')
-    angle:bpy.props.EnumProperty(items=[('DOWN','Down',''),('FRONT','侧前方','')],default='DOWN')
+    angle:bpy.props.EnumProperty(items=[('DOWN','Down 演示视角',''),('NACELLE','机舱云台',''),('FRONT','侧前方','')],default='DOWN')
     @classmethod
     def poll(cls, context):
         return farm_flex.is_active(context.scene)
@@ -250,7 +264,7 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
         scene=context.scene
         preview=farm_flex._ACTIVE
         from .. import tip_tracking
-        from ..cameras import ensure_gimbal, down_gimbal, fill_camera_view
+        from ..cameras import ensure_gimbal, ensure_nacelle_gimbal, down_gimbal, fill_camera_view
         front_camera=scene.objects['WFRL.Camera.T1.FrontQuarter']
         from . import gimbal
         if gimbal._ACTIVE:
@@ -271,6 +285,7 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
             camera=scene.objects['WFRL.Camera.FarmFlexOverview']
         else:
             scene['wfrl_clearance_turbine']=self.turbine
+            scene.wfrl_gimbal_kind = 'NACELLE' if self.angle == 'NACELLE' else 'DEMO'
             scene.wfrl_gimbal_turbine=self.turbine
             clearance_replay._READERS[scene.as_pointer()]=preview.readers[self.turbine]
             trail=tip_tracking.active(scene)
@@ -278,6 +293,8 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
                 tip_tracking.disable(scene,'turbine_change')
             if self.turbine=='T1' and self.angle=='FRONT':
                 camera=front_camera
+            elif self.angle=='NACELLE':
+                camera=ensure_nacelle_gimbal(scene,self.turbine)
             else:
                 camera=ensure_gimbal(scene,self.turbine);down_gimbal(camera)
         scene.camera=camera;scene['wfrl_camera']=camera.name

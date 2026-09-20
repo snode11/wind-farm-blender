@@ -9,17 +9,18 @@ from collections import deque
 import math
 
 
-LIFETIME_S = 1.5
+HOLD_S = 2.0
+LIFETIME_S = 0.75  # whole-pair fade after the comparison hold
 SAMPLE_INTERVAL_S = 1.0 / 40.0
 FADE_LEVELS = 32
-MAX_POINTS = math.ceil(LIFETIME_S / SAMPLE_INTERVAL_S) + 2
+MAX_POINTS = 512  # per revolution; compact samples instead of losing the start
 _ACTIVE = {}
 
 # High-contrast colours are deliberately stable by blade number (B1/B2/B3).
 TRAIL_COLORS = {
-    1: (1.0, 0.16, 0.04, 1.0),
-    2: (0.05, 0.72, 1.0, 1.0),
-    3: (0.95, 0.05, 0.08, 1.0),
+    1: (1.0, 0.05, 0.04, 1.0),
+    2: (0.05, 1.0, 0.12, 1.0),
+    3: (0.05, 0.35, 1.0, 1.0),
 }
 
 
@@ -73,6 +74,10 @@ def _fade_material(name, color, alpha):
     import bpy
     material = bpy.data.materials.get(name)
     if material is not None:
+        material.diffuse_color = (*color[:3], alpha)
+        for node in material.node_tree.nodes:
+            if node.type == 'EMISSION':
+                node.inputs['Color'].default_value = color
         return material
     material = bpy.data.materials.new(name)
     material.diffuse_color = (*color[:3], alpha)
@@ -150,9 +155,13 @@ class TipTrail:
         self.turbine_id = str(turbine_id)
         self.max_points = max_points
         self.lifetime_s = LIFETIME_S
-        self.interval_s = max(SAMPLE_INTERVAL_S, self.lifetime_s / (max_points - 2))
+        self.interval_s = SAMPLE_INTERVAL_S
         self.times = {bid: deque(maxlen=max_points) for bid in (1, 2, 3)}
         self.last_time = None
+        self.completed = {bid: [] for bid in (1, 2, 3)}
+        self.last_angle = None
+        self.turn_angle = 0.0
+        self.compare_since = None
         self.points = {bid: deque(maxlen=max_points) for bid in (1, 2, 3)}
         self.objects = {bid: _ensure_curve(scene, self.turbine_id, bid) for bid in (1, 2, 3)}
         self.enabled = True
@@ -161,6 +170,7 @@ class TipTrail:
         self.scene['wfrl_tip_trail_turbine'] = self.turbine_id
         self.scene['wfrl_tip_trail_max_points'] = max_points
         self.scene['wfrl_tip_trail_lifetime_s'] = self.lifetime_s
+        self.scene['wfrl_tip_trail_hold_s'] = HOLD_S
         self.scene['wfrl_tip_trail_sample_interval_s'] = self.interval_s
         self._set_visible(True)
 
@@ -176,9 +186,13 @@ class TipTrail:
         for bid, obj in self.objects.items():
             self.points[bid].clear()
             self.times[bid].clear()
+            self.completed[bid].clear()
             self._clear_curve(obj)
         self.last_frame = None
         self.last_time = None
+        self.last_angle = None
+        self.turn_angle = 0.0
+        self.compare_since = None
         self.scene['wfrl_tip_trail_clear_reason'] = str(reason)
 
     def disable(self, reason='disabled'):
@@ -198,22 +212,12 @@ class TipTrail:
     def _redraw(self, bid, now):
         obj = self.objects[bid]
         obj.data.splines.clear()
-        points, times = list(self.points[bid]), list(self.times[bid])
-        # Consecutive segments sharing opacity reuse a spline. The data and
-        # drawing geometry are both bounded; expired points leave both.
-        current = None
-        groups = []
-        for i in range(1, len(points)):
-            age = now - (times[i-1] + times[i]) * .5
-            level = round(opacity(age, self.lifetime_s) * (FADE_LEVELS - 1))
-            if level == 0:
-                current = None
-                continue
-            if current is None or current[0] != level:
-                current = (level, [points[i-1], points[i]])
-                groups.append(current)
-            else:
-                current[1].append(points[i])
+        alpha = 1.0 if self.compare_since is None else opacity(
+            max(0.0, now - self.compare_since - HOLD_S))
+        level = round(alpha * (FADE_LEVELS - 1))
+        groups = [(level, coordinates) for coordinates in
+                  [*self.completed[bid], list(self.points[bid])]
+                  if len(coordinates) >= 2 and level > 0]
         for level, coordinates in groups:
             spline = obj.data.splines.new('POLY')
             spline.material_index = level
@@ -232,23 +236,61 @@ class TipTrail:
             self.clear('timeline_seek')
         self.last_frame = frame
         self.last_time = now
+        rotor = scene.objects.get(f'WFRL.Turbine.{self.turbine_id}.Rotor')
+        if rotor is None:
+            return
+        angle = float(rotor.rotation_euler.x)
+        if self.compare_since is not None:
+            if now - self.compare_since < HOLD_S + LIFETIME_S:
+                for bid in (1, 2, 3):
+                    self._redraw(bid, now)
+                return
+            self.clear('comparison_complete')
+            self.last_frame, self.last_time = frame, now
+        # Unwrap the actual rotor pose, including its 360 -> 0 degree seam.
+        delta = 0.0 if self.last_angle is None else abs(
+            (angle - self.last_angle + math.pi) % math.tau - math.pi)
+        previous_angle = self.turn_angle
+        self.turn_angle += delta
+        self.last_angle = angle
+        crossed = self.turn_angle >= math.tau - 1e-7
+        fraction = min(1.0, max(0.0, (math.tau - previous_angle) / delta)) if crossed and delta else 1.0
         bucket = math.floor((now + 1e-9) / self.interval_s)
         for bid in (1, 2, 3):
             points, times = self.points[bid], self.times[bid]
-            while times and now - times[0] >= self.lifetime_s - 1e-9:
-                times.popleft()
-                points.popleft()
             blade = scene.objects.get(f'WFRL.Turbine.{self.turbine_id}.Blade{bid}')
             point = _tip_world(blade, depsgraph) if blade is not None else None
-            if point is not None and all(math.isfinite(float(v)) for v in point):
-                xyz = tuple(float(v) for v in point)
-                if times and math.floor((times[-1] + 1e-9) / self.interval_s) == bucket:
-                    # Keep the current head on the mesh without growing the
-                    # history at high display rates or repeated subframes.
+            if point is None or not all(math.isfinite(float(v)) for v in point):
+                self.clear('tip_unavailable')
+                return
+            xyz = tuple(float(v) for v in point)
+            if crossed and points:
+                boundary = tuple(a + fraction * (b - a) for a, b in zip(points[-1], xyz))
+                self.completed[bid].append([*points, boundary])
+                points.clear()
+                times.clear()
+                if len(self.completed[bid]) < 2:
+                    points.append(boundary)
+                    times.append(now)
+            if len(self.completed[bid]) < 2:
+                if len(points) >= self.max_points - 1:
+                    # Preserve the entire revolution even at low rotor speed.
+                    kept = list(zip(times, points))[::2]
+                    times.clear()
+                    points.clear()
+                    for t, p in kept:
+                        times.append(t)
+                        points.append(p)
+                if not crossed and len(times) > 1 and math.floor((times[-1] + 1e-9) / self.interval_s) == bucket:
                     times[-1], points[-1] = now, xyz
                 else:
                     times.append(now)
                     points.append(xyz)
+        if crossed:
+            self.turn_angle = max(0.0, self.turn_angle - math.tau)
+            if len(self.completed[1]) == 2:
+                self.compare_since = now
+        for bid in (1, 2, 3):
             self._redraw(bid, now)
 
 

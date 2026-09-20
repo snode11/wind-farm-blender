@@ -4,7 +4,8 @@ import time
 import bpy
 from bpy.props import EnumProperty, FloatProperty
 from bpy.app.handlers import persistent
-from ..cameras import ensure_gimbal, aim_gimbal, fill_camera_view, reset_gimbal, down_gimbal
+from ..cameras import (ensure_gimbal, ensure_nacelle_gimbal, aim_gimbal,
+                       fill_camera_view, reset_gimbal, down_gimbal)
 
 _ACTIVE = None
 
@@ -36,7 +37,8 @@ def angle_label(value):
 
 
 def current(scene):
-    return ensure_gimbal(scene, scene.wfrl_gimbal_turbine)
+    factory = ensure_nacelle_gimbal if scene.wfrl_gimbal_kind == 'NACELLE' else ensure_gimbal
+    return factory(scene, scene.wfrl_gimbal_turbine)
 
 
 def show(context):
@@ -56,6 +58,12 @@ def show(context):
 def switch(scene, context):
     if context and context.area and context.area.type == 'VIEW_3D':
         if scene.objects.get(f'WFRL.Turbine.{scene.wfrl_gimbal_turbine}.YawRoot'):
+            from .. import farm_flex
+            if (farm_flex.is_active(scene)
+                    and scene.get('wfrl_clearance_turbine') != scene.wfrl_gimbal_turbine):
+                bpy.ops.wfrl.farm_flex_view(turbine=scene.wfrl_gimbal_turbine,
+                    angle='NACELLE' if scene.wfrl_gimbal_kind == 'NACELLE' else 'DOWN')
+                return
             show(context)
             context.area.tag_redraw()
 
@@ -79,14 +87,22 @@ class GimbalAvailable:
 class WFRL_OT_GimbalPreset(GimbalAvailable, bpy.types.Operator):
     bl_idname = 'wfrl.gimbal_preset'
     bl_label = 'Gimbal preset'
-    preset: EnumProperty(items=[(v, v.title(), '') for v in ('DOWN', 'FRONT', 'BACK', 'RESET')])
+    preset: EnumProperty(items=[(v, v.title(), '') for v in ('DOWN', 'NACELLE', 'FRONT', 'BACK', 'RESET')])
 
     def execute(self, context):
+        if self.preset in {'DOWN', 'NACELLE'}:
+            from .. import farm_flex
+            if farm_flex.is_active(context.scene):
+                return bpy.ops.wfrl.farm_flex_view(
+                    turbine=context.scene.wfrl_gimbal_turbine, angle=self.preset)
+            context.scene.wfrl_gimbal_kind = 'NACELLE' if self.preset == 'NACELLE' else 'DEMO'
         camera = show(context)
         if self.preset == 'DOWN':
             down_gimbal(camera)
         elif self.preset == 'RESET':
             reset_gimbal(camera)
+        elif self.preset == 'NACELLE':
+            pass  # Restore this camera's saved PTZ on selection; Reset is explicit.
         else:
             yaw, pitch = {'FRONT': (180, 0),
                           'BACK': (0, 0)}[self.preset]
@@ -166,7 +182,8 @@ class WFRL_OT_GimbalMode(GimbalAvailable, bpy.types.Operator):
             if event.type == 'ESC' and event.value == 'PRESS':
                 self.finish(context)
                 return {'FINISHED'}
-            camera = self._scene.objects.get(f'WFRL.Camera.{self._scene.wfrl_gimbal_turbine}.Gimbal')
+            suffix = 'NacelleGimbal' if self._scene.wfrl_gimbal_kind == 'NACELLE' else 'Gimbal'
+            camera = self._scene.objects.get(f'WFRL.Camera.{self._scene.wfrl_gimbal_turbine}.{suffix}')
             if camera is None or self._area.spaces.active.camera != camera:
                 self.finish(context)
                 return {'FINISHED'}
@@ -259,8 +276,12 @@ def draw_gimbal_controls(layout, context, *, allow_turbine_selection=True):
     layout.operator('wfrl.gimbal_mode', text='Exit Camera Mode / 退出' if _ACTIVE else 'Camera Mode / 相机模式', icon='CAMERA_DATA')
     layout.prop(scene, 'wfrl_gimbal_speed')
     row = layout.row(align=True)
-    for value, label in (('DOWN', 'Down ↓'), ('BACK', 'Back')):
+    for value, label in (('DOWN', 'Down 演示视角'), ('NACELLE', '机舱云台')):
         row.operator('wfrl.gimbal_preset', text=label).preset = value
+    row = layout.row(align=True)
+    row.operator('wfrl.gimbal_preset', text='Back').preset = 'BACK'
+    row.operator('wfrl.gimbal_preset', text='相机复位').preset = 'RESET'
+    layout.label(text='机舱固定安装点' if scene.wfrl_gimbal_kind == 'NACELLE' else 'Down / 外部演示相机')
     # Pose is an observation, so keep it readable even if the selected
     # turbine's joystick controls are unavailable.
     pose = layout.column(align=True)
@@ -315,6 +336,8 @@ def register_properties():
     if cancel_on_load not in bpy.app.handlers.load_pre:
         bpy.app.handlers.load_pre.append(cancel_on_load)
     bpy.types.Scene.wfrl_gimbal_turbine = EnumProperty(name='Camera turbine', items=[(t, t, '') for t in ('T1', 'T2', 'T3')], default='T1', update=switch)
+    bpy.types.Scene.wfrl_gimbal_kind = EnumProperty(name='Camera mount',
+        items=[('DEMO', 'Down 演示视角', ''), ('NACELLE', '机舱云台', '')], default='DEMO')
     bpy.types.Scene.wfrl_gimbal_speed = FloatProperty(name='Joystick speed °/s', default=45, min=1, max=180)
 
 
@@ -323,6 +346,6 @@ def unregister_properties():
         bpy.app.handlers.load_pre.remove(cancel_on_load)
     if _ACTIVE:
         _ACTIVE.finish()
-    for name in ('wfrl_gimbal_turbine', 'wfrl_gimbal_speed'):
+    for name in ('wfrl_gimbal_turbine', 'wfrl_gimbal_kind', 'wfrl_gimbal_speed'):
         if hasattr(bpy.types.Scene, name):
             delattr(bpy.types.Scene, name)

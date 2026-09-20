@@ -168,7 +168,14 @@ def on_load(_):
                         actual = hashlib.sha256((candidate/'manifest.json').read_bytes()).hexdigest()
                         if actual != expected:
                             raise ValueError('保存场景与结果包不匹配，不能替换模型或数据')
-                    farm_flex.attach(scene, candidate)
+                    # attach initializes the reader to T1. Restore the saved
+                    # observation turbine so a T2/T3 camera never shows T1's
+                    # cards after reopening the file.
+                    turbine = scene.get('wfrl_clearance_turbine', 'T1')
+                    preview = farm_flex.attach(scene, candidate)
+                    if turbine in preview.readers:
+                        scene['wfrl_clearance_turbine'] = turbine
+                        _READERS[scene.as_pointer()] = preview.readers[turbine]
                     scene.frame_set(frame)
                     continue
                 load(scene, bpy.path.abspath(path), demo)

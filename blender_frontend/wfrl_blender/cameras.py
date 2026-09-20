@@ -318,6 +318,8 @@ def ensure_gimbal(scene, turbine):
 
 def down_gimbal(camera):
     """Tower-side inner-tip composition for the selected turbine."""
+    if camera.get('wfrl_nacelle_camera'):
+        return reset_nacelle_gimbal(camera)
     from .turbine_geometry import geometry_data
     camera.location = (-3.5, 1.2, -geometry_data()['scalars']['TipRad'] * .60)
     # Orient the downward image like the reference: tower above, passing
@@ -329,6 +331,8 @@ def down_gimbal(camera):
 
 def reset_gimbal(camera):
     """Return to an oblique overview of the selected turbine."""
+    if camera.get('wfrl_nacelle_camera'):
+        return reset_nacelle_gimbal(camera)
     from mathutils import Vector
     from .turbine_geometry import geometry_data
     import math
@@ -341,6 +345,92 @@ def reset_gimbal(camera):
     camera['gimbal_roll'] = 0.0
     camera.data.shift_x = camera.data.shift_y = 0
     return aim_gimbal(camera, yaw, pitch, 62)
+
+
+# Metres relative to YawRoot, +X downwind and +Z up. These are optical
+# coordinates for the project's service shell, not NREL mounting-hole data.
+NACELLE_LOCATION = (-1.5, -2.3, 0.0)
+NACELLE_TARGET = (-13.2, -2.3, -60.6)
+# User-selected widest PTZ view, measured in the actual Blender window.
+NACELLE_FOV = 120.0
+
+
+def reset_nacelle_gimbal(camera):
+    """Restore the installed optical centre and fixed clearance composition."""
+    import math
+    from mathutils import Vector
+    camera.location = NACELLE_LOCATION
+    direction = Vector(NACELLE_TARGET) - camera.location
+    yaw = math.degrees(math.atan2(direction.y, direction.x))
+    pitch = math.degrees(math.atan2(direction.z, math.hypot(direction.x, direction.y)))
+    camera['gimbal_roll'] = 180.0
+    camera['wfrl_nacelle_view_revision'] = 2
+    camera.data.shift_x = camera.data.shift_y = 0
+    return aim_gimbal(camera, yaw, pitch, NACELLE_FOV)
+
+
+def ensure_nacelle_gimbal(scene, turbine):
+    """Independent, persistent PTZ camera, inheriting nacelle motion once.
+
+    The short support joins the actual shell surface to the gimbal pivot.
+    It documents a geometric mounting envelope, not a certified bracket.
+    """
+    import bpy
+    from mathutils import Vector
+    root = scene.objects.get(f'WFRL.Turbine.{turbine}.YawRoot')
+    shell = scene.objects.get(f'WFRL.Turbine.{turbine}.Nacelle')
+    if root is None or shell is None:
+        raise ValueError(f'{turbine} nacelle shell is not present in this scene')
+    name = f'WFRL.Camera.{turbine}.NacelleGimbal'
+    camera = scene.objects.get(name)
+    if camera is not None:
+        # Upgrade the former 35-degree default in existing scenes once.
+        # Other saved zoom values, manual aim and the mount remain intact.
+        if camera.get('wfrl_nacelle_view_revision', 1) < 2:
+            if abs(float(camera.get('gimbal_fov', 0)) - 35.0) < 1e-6:
+                aim_gimbal(camera, camera['gimbal_yaw'], camera['gimbal_pitch'], NACELLE_FOV)
+            camera['wfrl_nacelle_view_revision'] = 2
+        return camera  # Selecting/reloading must not overwrite manual PTZ.
+    camera = bpy.data.objects.new(name, bpy.data.cameras.new(name + '.Data'))
+    collection = root.users_collection[0]
+    collection.objects.link(camera)
+    camera.parent = root
+    camera.matrix_parent_inverse.identity()
+    camera['wfrl_nacelle_camera'] = True
+    camera['mount'] = 'nacelle front lower side / short bracket / geometric demonstration'
+    camera['mount_coordinate_frame'] = 'YawRoot; +X downwind; +Z up; metres'
+    camera['mount_location_m'] = NACELLE_LOCATION
+    camera.data.clip_start, camera.data.clip_end = .02, 30000
+    camera.data.display_size = .18
+    camera.data.show_passepartout = False
+    reset_nacelle_gimbal(camera)
+    # A vertical swivel stem ends above the optical centre. Find its shell
+    # attachment from the real mesh instead of an assumed bounding box.
+    pivot = Vector(NACELLE_LOCATION) + Vector((0, 0, .25))
+    found, point, normal, _ = shell.closest_point_on_mesh(shell.matrix_basis.inverted() @ pivot)
+    if not found:
+        bpy.data.objects.remove(camera, do_unlink=True)
+        raise ValueError('Cannot locate the nacelle bracket attachment')
+    anchor = shell.matrix_basis @ point
+    camera['bracket_anchor_m'] = anchor
+    camera['bracket_pivot_m'] = pivot
+    camera['bracket_length_m'] = (pivot - anchor).length
+    camera['mount_scope'] = 'model clearance only; no structural certification or visual ranging'
+    curve = bpy.data.curves.new(name + '.Bracket.Data', 'CURVE')
+    curve.dimensions = '3D'
+    curve.bevel_depth = .025
+    curve.bevel_resolution = 2
+    spline = curve.splines.new('POLY')
+    spline.points.add(2)
+    for item, xyz in zip(spline.points, (anchor, pivot, Vector(NACELLE_LOCATION) + Vector((0, 0, .12)))):
+        item.co = (*xyz, 1)
+    bracket = bpy.data.objects.new(f'WFRL.Turbine.{turbine}.NacelleCameraBracket', curve)
+    collection.objects.link(bracket)
+    bracket.parent = root
+    from .materials import get_material
+    curve.materials.append(get_material('hub'))
+    bracket['provenance'] = 'Camera support envelope; not radar hardware or certified mount'
+    return camera
 
 
 def aim_gimbal(camera, yaw, pitch, fov):
