@@ -2,11 +2,17 @@
 
 基于 Blender 的风场三维展示与离线仿真回放。
 
-当前版本 **0.3.4**，要求 **Blender 5.2+**。
+当前版本 **0.3.5**，要求 **Blender 5.2+**。
 
-[下载安装包](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.4/wfrl_blender-0.3.4.zip) · [安装说明](docs/blender/INSTALL.md) · [用户手册](docs/blender/用户使用手册.md)
+[下载安装包](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.5/wfrl_blender-0.3.5.zip) · [安装说明](docs/blender/INSTALL.md) · [用户手册](docs/blender/用户使用手册.md)
 
 ## 发布记录
+
+### [0.3.5](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.5) · 2026-09-20 · 机舱视角与轨迹淡化
+
+- 新增独立机舱相机，默认 120° 广角，支持云台摇杆、相机模式下滚轮变焦和复位；保留原 T1/T2/T3 Down 视角及按钮。
+- 叶尖轨迹用红、绿、蓝对应三片叶片；相邻两圈定格对比 2 个仿真秒后，用 0.75 秒淡出并重新记录。
+- 修复保存重开后 T2/T3 视角的数据归属；切换相机保持回放时刻、读数及轨迹。
 
 ### [0.3.4](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.4) · 2026-09-18 · 预弯回放与轨迹渐隐
 
@@ -51,4 +57,4 @@
 - [Blender 前端说明](blender_frontend/README.md)
 - [雷达算法说明](wfrl/lidar/README.md)
 
-当前物理数据为 REVIEW_ONLY，固定三束测量覆盖率未通过；回放不代表现场实测。详见 [0.3.4 发布核对](docs/blender/0.3.4发布核对.md)。
+当前物理数据为 REVIEW_ONLY，固定三束测量覆盖率未通过；回放不代表现场实测。详见 [0.3.5 发布核对](docs/blender/0.3.5发布核对.md)。
