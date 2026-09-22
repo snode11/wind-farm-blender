@@ -2,11 +2,21 @@
 
 基于 Blender 的风场三维展示与离线仿真回放。
 
-当前版本 **0.3.5**，要求 **Blender 5.2+**。
+当前版本 **0.3.7**，要求 **Blender 5.2+**。
 
-[下载安装包](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.5/wfrl_blender-0.3.5.zip) · [安装说明](docs/blender/INSTALL.md) · [用户手册](docs/blender/用户使用手册.md)
+[下载安装包](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.7/wfrl_blender-0.3.7.zip) · [安装说明](docs/blender/INSTALL.md) · [用户手册](docs/blender/用户使用手册.md)
 
 ## 发布记录
+
+### [0.3.7](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.7) · 2026-09-23 · 四相机观察与图像采集
+
+- 新增 T1 的 C1–C4 独立相机：安装位置、双视场、输出尺寸、草稿确认/取消、布局导入导出与相机专用撤销。
+- 新增原生单路/四路观察窗口，共享场景和回放时钟；保留材质与颜色，移除旧离屏四格自动刷新，退出释放临时观察相机。
+- 支持四路同刻原图和时间序列 PNG 导出，保存相机内外参、来源与仿真时间，取消或失败后恢复回放状态。
+- 提供同一片 B1 叶片四段固定相机试用布局 v2；新增 Blender 内现有 MP4 导出与 RTSP 循环推流。
+- 修复扩展注册时机、编辑与导入失败回滚、撤销及窗口退出清理问题。
+
+已知限制：四路仍会掉帧；固定布局不持续跟踪 B1，叶根有盲区、相邻取景有重叠。内置预弯 v3 数据仍为 REVIEW_ONLY，固定三束覆盖率未通过；Windows/Linux 与长期稳定性未验收。
 
 ### [0.3.5](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.5) · 2026-09-20 · 机舱视角与轨迹淡化
 
@@ -57,4 +67,4 @@
 - [Blender 前端说明](blender_frontend/README.md)
 - [雷达算法说明](wfrl/lidar/README.md)
 
-当前物理数据为 REVIEW_ONLY，固定三束测量覆盖率未通过；回放不代表现场实测。详见 [0.3.5 发布核对](docs/blender/0.3.5发布核对.md)。
+当前物理数据为 REVIEW_ONLY，固定三束测量覆盖率未通过；回放不代表现场实测。详见 [0.3.7 发布核对](docs/blender/0.3.7发布核对.md)。

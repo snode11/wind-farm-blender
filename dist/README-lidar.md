@@ -1,6 +1,6 @@
 # WFRL Blender 0.3.7 交付说明
 
-要求 Blender 5.2+。安装 [wfrl_blender-0.3.7.zip](wfrl_blender-0.3.7.zip)，启用后重启 Blender，加载 MAPPO · 60 秒。包内含现有预弯 v3 回放，离线播放无需后端 Python、MPI 或 FAST.Farm。
+已发布至 [GitHub Releases 0.3.7](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.7)。要求 Blender 5.2+。安装 [wfrl_blender-0.3.7.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.7/wfrl_blender-0.3.7.zip)，启用后重启 Blender，加载 MAPPO · 60 秒。包内含现有预弯 v3 回放，离线播放无需后端 Python、MPI 或 FAST.Farm。
 
 本版包含四相机安装与独立双 FOV、原生单路/四路观察、同刻原图与序列采集、布局导入导出和相机专用撤销，以及已有 MP4 导出与 RTSP 推流。
 

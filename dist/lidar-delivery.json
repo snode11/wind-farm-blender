@@ -21,6 +21,7 @@
     "schema": "wfrl.farm-flex-review.v3",
     "tower_model": "elastodyn-flexible"
   },
-  "delivery_status": "release candidate; isolated installed extension validation in progress",
-  "verification": "evidence/release-0.3.7/verification.json"
+  "delivery_status": "published to GitHub Releases; isolated installed extension checks passed",
+  "verification": "evidence/release-0.3.7/verification.json",
+  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.7"
 }
