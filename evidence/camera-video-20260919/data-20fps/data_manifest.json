@@ -1,0 +1,102 @@
+{
+  "schema": "wfrl.camera-frame-data.v1",
+  "dataset_id": "3da75d40880d46af9fe309b06815d928eab18ee1d1582ded4bbc87f197bc0cbe",
+  "source_status": "REVIEW_ONLY",
+  "source_acceptance_status": "FAILED_AVAILABILITY",
+  "source": "FAST.Farm simulation postprocessing",
+  "source_schema": "wfrl.farm-flex-review.v3",
+  "source_sha256": {
+    "manifest.json": "aeeecd7258d7f5ba2e85754c69b7bf8aa9c423cad558afc0dcdf99bbb6736124",
+    "geometry.npz": "289abea277d8a4954836b53bc06a1afcc41d8098a6fabe99f74c7f2ebe4ebac1",
+    "data.json": "11088f05a90a81bac2b4ab964d837b942ee20b07984147c79c688e6fae9c14cf",
+    "source-surfaces.json": "e6d0d7cca5ab490c8b54959e00e788f47e191837409e25fdc058bb83e39d4e60",
+    "tower-motion.npz": "a8450e914a052d1a79b50bc380023655bf97332c2776c3e8eceb37d2bcc80b86",
+    "blade-reference.json": "a3fb99709cdeb689917675d210defb434a37e3211838f047af23c69e3a292212",
+    "source-run.json": "72a318730cb5423ab7773712a775486e08e1caaeb0f72d27bdd07aab5117fbb5",
+    "reference-surfaces.npz": "bb765f868976fa193d2870a32638f2d4e18478fea9cf04da6b259406b33211f6",
+    "deflection-t1.json": "08f7950203164b9a726b35a4d234d8cdc551590ddc900092daafb6fe01d97f61",
+    "telemetry.json": "14bb1f2d074576fae9cfceaa20b2e8898fcf6c94d50c1501b719941af2a0da32",
+    "interface-audit.json": "6df8a95131b0660937551a3007f1582a2627a223fcc76e6b4908c4f4478b2e10",
+    "measurement-acceptance.json": "022ec985e3a95f5f25caf97fb6db437735c1f18483816dc7b30052044373e715",
+    "acceptance-report.md": "410aa63dae7f62c950627e2597ae366affd33ecf67561d83e6acd35b8cd7d52a",
+    "window-diagnostics.json": "837d13aeb577bf8aa9b4ce5cf39b63ab471129d15e8cb34083bf1bbce81fbab0",
+    "calibration-candidate-summary.json": "cb8ad0d5e26d8ebbce840957ec560abf422ea5ba9812bda76ae028c4baf07d88"
+  },
+  "turbine_id": "T1",
+  "time_contract": {
+    "fps": 20,
+    "frame_count": 1200,
+    "start_s": 117.0,
+    "end_s": 177.0,
+    "duration_s": 60.0,
+    "exposure_s": 0.025,
+    "video_time_base": {
+      "numerator": 1,
+      "denominator": 20
+    },
+    "video_pts": "frame_id",
+    "sim_time": "start_s + (frame_id + 0.5) / fps",
+    "endpoint_frame_included": false,
+    "label_time": "exposure center; image integrates exposure interval"
+  },
+  "interpolation": {
+    "blade": "linear deformation in moving pitched blade-root frame; linear unwrapped pose",
+    "tower": "linear source station affine transforms applied to reference vertices",
+    "nacelle": "linear translation; linear rotation projected to SO(3) by SVD",
+    "rpm": "linear source rotor_speed_rpm",
+    "clearance": "recompute horizontal triangulated-tower section distance after geometry reconstruction; never interpolate distances"
+  },
+  "clearance_definition_id": "tip-reference.same-global-height-moving-tower.signed-horizontal.v1",
+  "tip_reference_definition": "physics.tip_reference.v1: perimeter-coordinate centroid of outermost of 19 solver AeroDyn sections",
+  "reference_boundary": "Solver terminal perimeter centroid; not structural output point, display tapered tip, or contour minimum",
+  "coordinates": "FAST.Farm world Cartesian XYZ, z up, metres; layout offset applied once",
+  "missing_values": "CSV empty; JSON null; NPZ NaN with explicit field validity masks",
+  "camera_transform_reason": "valid",
+  "phase_check": {
+    "method": "interval unwrapped phase derivative compared with endpoint-mean source RPM",
+    "max_abs_residual_rpm": 0.014120233337349575,
+    "rms_residual_rpm": 0.004090318193706627,
+    "tolerance_rpm": 0.05,
+    "passed": true
+  },
+  "pose_continuity_check": {
+    "blade": {
+      "max_rotation_step_deg": 1.8406418183789048,
+      "rejection_threshold_deg": 90.0,
+      "passed": true
+    },
+    "tower": {
+      "max_rotation_step_deg": 0.020906907162753355,
+      "rejection_threshold_deg": 90.0,
+      "passed": true
+    },
+    "nacelle": {
+      "max_rotation_step_deg": 0.014366181358410092,
+      "rejection_threshold_deg": 90.0,
+      "passed": true
+    }
+  },
+  "source_geometry_fit_error_m": 1.7429151802811365e-05,
+  "source_support_fit_error_m": 1.561058366108594e-05,
+  "evidence_boundary": "Synthetic simulation data; source REVIEW_ONLY and acceptance status are preserved; export consistency is not engineering measurement acceptance",
+  "event_check": {
+    "reference": "center_truth_m only; event truth_m is a different definition",
+    "checked_events": 118,
+    "max_abs_error_m": 6.3492229021022695e-06,
+    "tolerance_m": 0.002,
+    "passed": true
+  },
+  "center_sample_counts": {
+    "source": 1200,
+    "interpolated": 0
+  },
+  "clearance_valid_counts": [
+    591,
+    587,
+    585
+  ],
+  "files": {
+    "frames.csv": "0e57fb6a05b5d9a8e51e418568065d8b2a21ef21dc155b8bdb0f868cf4e4e37d",
+    "frame_geometry.npz": "8349051c20bce92840cd632943895bbae65a8ea5118e124199b900740bbc47b7"
+  }
+}

@@ -1,0 +1,337 @@
+{
+  "mode": "single",
+  "seconds": 15.12497141608037,
+  "draws": {
+    "original": {
+      "frames": 150,
+      "fps": 9.917374114209892
+    },
+    "C1": {
+      "frames": 150,
+      "fps": 9.917374114209892
+    }
+  },
+  "rss_start_gib": 0.7061767578125,
+  "rss_end_gib": 0.7290802001953125,
+  "rss_max_observed_gib": 0.7290802001953125,
+  "process_peak_rss_gib": 1.06475830078125,
+  "offscreen_render_calls": 0,
+  "max_preview_renderers": 0,
+  "max_native_proxies": 1,
+  "timer_lateness_p95_s": 0.08005912508815527,
+  "timer_lateness_max_s": 0.09763895790092647,
+  "timer_note": "scheduled callback lateness; not mouse-input latency",
+  "samples": [
+    {
+      "t_s": 0.17193937511183321,
+      "rss_gib": 0.70635986328125,
+      "frame": 17,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 2,
+        "C1": 2
+      }
+    },
+    {
+      "t_s": 0.681609540944919,
+      "rss_gib": 0.7064666748046875,
+      "frame": 45,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 6,
+        "C1": 6
+      }
+    },
+    {
+      "t_s": 1.2359781248960644,
+      "rss_gib": 0.70672607421875,
+      "frame": 81,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 10,
+        "C1": 10
+      }
+    },
+    {
+      "t_s": 1.822326665977016,
+      "rss_gib": 0.705047607421875,
+      "frame": 116,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 16,
+        "C1": 16
+      }
+    },
+    {
+      "t_s": 2.380984375020489,
+      "rss_gib": 0.705291748046875,
+      "frame": 149,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 22,
+        "C1": 22
+      }
+    },
+    {
+      "t_s": 2.890418291091919,
+      "rss_gib": 0.70562744140625,
+      "frame": 178,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 27,
+        "C1": 27
+      }
+    },
+    {
+      "t_s": 3.4153000409714878,
+      "rss_gib": 0.70684814453125,
+      "frame": 211,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 34,
+        "C1": 34
+      }
+    },
+    {
+      "t_s": 3.977920375065878,
+      "rss_gib": 0.7075347900390625,
+      "frame": 245,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 40,
+        "C1": 40
+      }
+    },
+    {
+      "t_s": 4.516698457999155,
+      "rss_gib": 0.7082977294921875,
+      "frame": 276,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 45,
+        "C1": 45
+      }
+    },
+    {
+      "t_s": 5.060583790997043,
+      "rss_gib": 0.709442138671875,
+      "frame": 310,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 51,
+        "C1": 51
+      }
+    },
+    {
+      "t_s": 5.620980916079134,
+      "rss_gib": 0.71026611328125,
+      "frame": 344,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 55,
+        "C1": 55
+      }
+    },
+    {
+      "t_s": 6.201200624927878,
+      "rss_gib": 0.7111663818359375,
+      "frame": 377,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 59,
+        "C1": 59
+      }
+    },
+    {
+      "t_s": 6.775103125022724,
+      "rss_gib": 0.7154998779296875,
+      "frame": 413,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 64,
+        "C1": 64
+      }
+    },
+    {
+      "t_s": 7.313137833029032,
+      "rss_gib": 0.716644287109375,
+      "frame": 445,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 70,
+        "C1": 70
+      }
+    },
+    {
+      "t_s": 7.851647000061348,
+      "rss_gib": 0.7178192138671875,
+      "frame": 477,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 76,
+        "C1": 76
+      }
+    },
+    {
+      "t_s": 8.38047616602853,
+      "rss_gib": 0.7188568115234375,
+      "frame": 509,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 82,
+        "C1": 82
+      }
+    },
+    {
+      "t_s": 8.894124082988128,
+      "rss_gib": 0.7202911376953125,
+      "frame": 540,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 88,
+        "C1": 88
+      }
+    },
+    {
+      "t_s": 9.50252716592513,
+      "rss_gib": 0.7216644287109375,
+      "frame": 575,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 94,
+        "C1": 94
+      }
+    },
+    {
+      "t_s": 10.062699458096176,
+      "rss_gib": 0.7233428955078125,
+      "frame": 610,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 100,
+        "C1": 100
+      }
+    },
+    {
+      "t_s": 10.65034170798026,
+      "rss_gib": 0.724761962890625,
+      "frame": 645,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 106,
+        "C1": 106
+      }
+    },
+    {
+      "t_s": 11.238020250108093,
+      "rss_gib": 0.725341796875,
+      "frame": 681,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 110,
+        "C1": 110
+      }
+    },
+    {
+      "t_s": 11.820630666101351,
+      "rss_gib": 0.7257843017578125,
+      "frame": 714,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 114,
+        "C1": 114
+      }
+    },
+    {
+      "t_s": 12.321467832894996,
+      "rss_gib": 0.7262420654296875,
+      "frame": 746,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 119,
+        "C1": 119
+      }
+    },
+    {
+      "t_s": 12.892255540937185,
+      "rss_gib": 0.727020263671875,
+      "frame": 780,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 125,
+        "C1": 125
+      }
+    },
+    {
+      "t_s": 13.483638666104525,
+      "rss_gib": 0.727569580078125,
+      "frame": 813,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 131,
+        "C1": 131
+      }
+    },
+    {
+      "t_s": 14.051390582928434,
+      "rss_gib": 0.7281036376953125,
+      "frame": 848,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 138,
+        "C1": 138
+      }
+    },
+    {
+      "t_s": 14.618329416029155,
+      "rss_gib": 0.7286834716796875,
+      "frame": 883,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 145,
+        "C1": 145
+      }
+    },
+    {
+      "t_s": 15.12497141608037,
+      "rss_gib": 0.7290802001953125,
+      "frame": 912,
+      "preview_renderers": 0,
+      "native_proxy_count": 1,
+      "draw_counts": {
+        "original": 150,
+        "C1": 150
+      }
+    }
+  ],
+  "layout_unchanged": true,
+  "rss_after_close_gib": 0.7362213134765625,
+  "proxies_after_close": 0
+}

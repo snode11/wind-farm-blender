@@ -1,0 +1,21 @@
+2026/09/19 22:08:15 INF MediaMTX v1.21.0, darwin, arm64
+2026/09/19 22:08:15 INF configuration loaded from /Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-video-20260919/short-4k-rtsp/mediamtx.yml
+2026/09/19 22:08:15 INF [RTSP] started with listeners on 127.0.0.1:28554 (TCP/RTSP)
+2026/09/19 22:08:15 INF [RTSP] [conn 127.0.0.1:55951] opened
+2026/09/19 22:08:15 INF [RTSP] [conn 127.0.0.1:55951] closed: EOF
+2026/09/19 22:08:16 INF [RTSP] [conn 127.0.0.1:55970] opened
+2026/09/19 22:08:16 INF [RTSP] [session 26775cea] created by 127.0.0.1:55970
+2026/09/19 22:08:16 INF [path windfarm/camera1] stream is available and online, 1 track (H264)
+2026/09/19 22:08:16 INF [RTSP] [session 26775cea] is publishing to path 'windfarm/camera1'
+2026/09/19 22:08:16 INF [RTSP] [conn 127.0.0.1:55983] opened
+2026/09/19 22:08:16 INF [RTSP] [session 29efccd7] created by 127.0.0.1:55983
+2026/09/19 22:08:16 INF [RTSP] [session 29efccd7] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:08:20 INF [RTSP] [conn 127.0.0.1:55983] closed: EOF
+2026/09/19 22:08:20 INF [RTSP] [session 29efccd7] destroyed: not in use
+2026/09/19 22:08:22 INF [RTSP] [conn 127.0.0.1:56172] opened
+2026/09/19 22:08:22 INF [RTSP] [session 2ade9593] created by 127.0.0.1:56172
+2026/09/19 22:08:22 INF [RTSP] [session 2ade9593] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:08:25 INF [RTSP] [conn 127.0.0.1:56172] closed: EOF
+2026/09/19 22:08:25 INF [RTSP] [session 2ade9593] destroyed: not in use
+2026/09/19 22:08:27 INF [RTSP] [conn 127.0.0.1:55970] closed: EOF
+2026/09/19 22:08:27 INF [RTSP] [session 26775cea] destroyed: not in use

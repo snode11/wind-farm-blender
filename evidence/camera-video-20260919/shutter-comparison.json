@@ -1,0 +1,22 @@
+{
+  "comparison": "4K 1ms exposure 8 vs 16 midpoint subsamples; 32 Cycles spatial samples per exposure sample; display-referred RGB after AgX",
+  "mean_abs_rgb": 0.008346657268702984,
+  "rmse_rgb": 0.011810305528342724,
+  "p95_abs_rgb": 0.02563515305519104,
+  "p99_abs_rgb": 0.03703366219997406,
+  "blade_roi_xyxy": [
+    300,
+    750,
+    2600,
+    2160
+  ],
+  "blade_roi_mean_abs_rgb": 0.005963694304227829,
+  "blade_roi_p99_abs_rgb": 0.030197620391845703,
+  "limitation": "Single B1 crossing at 117.75s; includes independent spatial Monte Carlo noise. This is a finite sample comparison, not a bound for all frames or exposure durations.",
+  "default_candidate": "1 ms, 8 exposure samples; 25 ms / 8 shows visible multiple edges and is not accepted",
+  "visual_review": {
+    "reviewed": "1280-wide whole images and 650x450 native-resolution tip crops",
+    "1ms_8_vs_16": "No visible discrete multi-edge separation in the inspected B1 tip crop; residual spatial noise differs. Eight samples retained as first short-clip candidate, not a universal quality bound.",
+    "25ms_8": "Visible repeated blade/marking edges; not accepted as converged exposure."
+  }
+}

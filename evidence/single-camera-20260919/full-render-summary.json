@@ -1,0 +1,9 @@
+{
+  "frame_count": 1200,
+  "master_bytes": 52337012352,
+  "mean_frame_seconds": 2.766250374718996,
+  "summed_frame_seconds": 3319.5004496627953,
+  "minimum_frame_seconds": 2.5830999999307096,
+  "maximum_frame_seconds": 13.572541291126981,
+  "frame_time_p95_seconds": 2.954338415991515
+}

@@ -1,0 +1,213 @@
+{
+  "errors": {
+    "T1": {
+      "all": {
+        "expected": 122,
+        "valid": 18,
+        "valid_fraction": 0.14754098360655737,
+        "passages": 33,
+        "missed_passages": 22,
+        "mae_m": 0.3233426431131757,
+        "p95_m": 0.5465264885238469,
+        "max_abs_m": 0.5604417838242499,
+        "max_overestimate_m": 0.0,
+        "signed_min_m": -0.5604417838242499,
+        "signed_max_m": -0.0531814950128604
+      },
+      "by_blade": {
+        "1": {
+          "expected": 42,
+          "valid": 8,
+          "valid_fraction": 0.19047619047619047,
+          "passages": 11,
+          "missed_passages": 6,
+          "mae_m": 0.3088472355436752,
+          "p95_m": 0.5225932137952344,
+          "max_abs_m": 0.5604417838242499,
+          "max_overestimate_m": 0.0,
+          "signed_min_m": -0.5604417838242499,
+          "signed_max_m": -0.0531814950128604
+        },
+        "2": {
+          "expected": 40,
+          "valid": 2,
+          "valid_fraction": 0.05,
+          "passages": 11,
+          "missed_passages": 10,
+          "mae_m": 0.2433665515315262,
+          "p95_m": 0.38181300630304477,
+          "max_abs_m": 0.3971959457221024,
+          "max_overestimate_m": 0.0,
+          "signed_min_m": -0.3971959457221024,
+          "signed_max_m": -0.08953715734095002
+        },
+        "3": {
+          "expected": 40,
+          "valid": 8,
+          "valid_fraction": 0.2,
+          "passages": 11,
+          "missed_passages": 6,
+          "mae_m": 0.35783207357808855,
+          "p95_m": 0.5340973706923402,
+          "max_abs_m": 0.5440708481767169,
+          "max_overestimate_m": 0.0,
+          "signed_min_m": -0.5440708481767169,
+          "signed_max_m": -0.0937630985804434
+        }
+      }
+    },
+    "T2": {
+      "all": {
+        "expected": 119,
+        "valid": 48,
+        "valid_fraction": 0.40336134453781514,
+        "passages": 33,
+        "missed_passages": 1,
+        "mae_m": 0.2753700973021665,
+        "p95_m": 0.49980382186893607,
+        "max_abs_m": 0.5740444604012227,
+        "max_overestimate_m": 0.15952870778691342,
+        "signed_min_m": -0.5740444604012227,
+        "signed_max_m": 0.15952870778691342
+      },
+      "by_blade": {
+        "1": {
+          "expected": 40,
+          "valid": 15,
+          "valid_fraction": 0.375,
+          "passages": 11,
+          "missed_passages": 1,
+          "mae_m": 0.2656575685948927,
+          "p95_m": 0.4708210701401451,
+          "max_abs_m": 0.5005722514696984,
+          "max_overestimate_m": 0.15952870778691342,
+          "signed_min_m": -0.5005722514696984,
+          "signed_max_m": 0.15952870778691342
+        },
+        "2": {
+          "expected": 39,
+          "valid": 16,
+          "valid_fraction": 0.41025641025641024,
+          "passages": 11,
+          "missed_passages": 0,
+          "mae_m": 0.2866874095621994,
+          "p95_m": 0.4930866000567573,
+          "max_abs_m": 0.4983767383246631,
+          "max_overestimate_m": 0.04184685858393422,
+          "signed_min_m": -0.4983767383246631,
+          "signed_max_m": 0.04184685858393422
+        },
+        "3": {
+          "expected": 40,
+          "valid": 17,
+          "valid_fraction": 0.425,
+          "passages": 11,
+          "missed_passages": 0,
+          "mae_m": 0.27328838756384777,
+          "p95_m": 0.5290001889939618,
+          "max_abs_m": 0.5740444604012227,
+          "max_overestimate_m": 0.05369858841030073,
+          "signed_min_m": -0.5740444604012227,
+          "signed_max_m": 0.05369858841030073
+        }
+      }
+    },
+    "T3": {
+      "all": {
+        "expected": 120,
+        "valid": 48,
+        "valid_fraction": 0.4,
+        "passages": 28,
+        "missed_passages": 0,
+        "mae_m": 0.25500486004676687,
+        "p95_m": 0.4098413268089934,
+        "max_abs_m": 0.45306010018762244,
+        "max_overestimate_m": 0.07237319281989496,
+        "signed_min_m": -0.45306010018762244,
+        "signed_max_m": 0.07237319281989496
+      },
+      "by_blade": {
+        "1": {
+          "expected": 39,
+          "valid": 15,
+          "valid_fraction": 0.38461538461538464,
+          "passages": 9,
+          "missed_passages": 0,
+          "mae_m": 0.27558599375487436,
+          "p95_m": 0.3883051622453929,
+          "max_abs_m": 0.3938591980709756,
+          "max_overestimate_m": 0.0,
+          "signed_min_m": -0.3938591980709756,
+          "signed_max_m": -0.12831701867614598
+        },
+        "2": {
+          "expected": 43,
+          "valid": 16,
+          "valid_fraction": 0.37209302325581395,
+          "passages": 10,
+          "missed_passages": 0,
+          "mae_m": 0.24730788083623967,
+          "p95_m": 0.44780300966847286,
+          "max_abs_m": 0.45306010018762244,
+          "max_overestimate_m": 0.0,
+          "signed_min_m": -0.45306010018762244,
+          "signed_max_m": -0.05210073943938465
+        },
+        "3": {
+          "expected": 38,
+          "valid": 17,
+          "valid_fraction": 0.4473684210526316,
+          "passages": 9,
+          "missed_passages": 0,
+          "mae_m": 0.24408925191422703,
+          "p95_m": 0.40196272907779723,
+          "max_abs_m": 0.4159691250443682,
+          "max_overestimate_m": 0.07237319281989496,
+          "signed_min_m": -0.4159691250443682,
+          "signed_max_m": 0.07237319281989496
+        }
+      }
+    }
+  },
+  "tip_points": {
+    "count": 94,
+    "max_m": 0.18565188908717545,
+    "p95_m": 0.17893447686741054,
+    "threshold_changes": 8,
+    "lowest_center": {
+      "turbine_id": "T2",
+      "blade_id": 1,
+      "passage_id": "b1-p28",
+      "time_s": 163.925,
+      "center_m": 5.930111013542497,
+      "surface_vertex_m": 5.784167297227177,
+      "difference_m": 0.14594371631531988,
+      "threshold_class_changed": false,
+      "nearest_vertex": [
+        -8.385879999999986,
+        0.70664,
+        27.2876
+      ],
+      "contour_max_edge_m": 0.018316020310088995
+    },
+    "lowest_surface_vertex": {
+      "turbine_id": "T2",
+      "blade_id": 1,
+      "passage_id": "b1-p28",
+      "time_s": 163.925,
+      "center_m": 5.930111013542497,
+      "surface_vertex_m": 5.784167297227177,
+      "difference_m": 0.14594371631531988,
+      "threshold_class_changed": false,
+      "nearest_vertex": [
+        -8.385879999999986,
+        0.70664,
+        27.2876
+      ],
+      "contour_max_edge_m": 0.018316020310088995
+    }
+  },
+  "window": "Existing +/-3 degree samples only; extended diagnostic window still required",
+  "scope": "Discrete contour vertices at minimum recorded truth in each passage; edge-interior and cosmetic apex not yet included",
+  "acceptance": "Diagnostic only; no automatic equivalence or compensation decision"
+}

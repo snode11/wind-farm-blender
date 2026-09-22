@@ -1,0 +1,11 @@
+# From repository root. Numerical runs intentionally omit --surfaces.
+
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 WFCRL_FASTFARM_EXECUTABLE=/opt/anaconda3/envs/wfrl-mac/bin/FAST.Farm PYTHONUNBUFFERED=1 /opt/homebrew/bin/mpiexec -n 1 /opt/anaconda3/envs/wfrl-mac/bin/python -m scripts.lidar.probe_flex_policy --output evidence/tower-flex-20260916/self-audit/dt-half --steps 20 --warmup-steps 30 --wind 11 --controller evidence/flex-mappo/controller-v6/DISCON.dll --turbulence results/lidar/raw/flex-mappo-wind-gentle-v1/FarmInputs/random-gust.bts --flexible-tower --solver-dt .003125 > evidence/tower-flex-20260916/self-audit/dt-half.log 2>&1
+
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 WFCRL_FASTFARM_EXECUTABLE=/opt/anaconda3/envs/wfrl-mac/bin/FAST.Farm PYTHONUNBUFFERED=1 /opt/homebrew/bin/mpiexec -n 1 /opt/anaconda3/envs/wfrl-mac/bin/python -m scripts.lidar.probe_flex_policy --output evidence/tower-flex-20260916/self-audit/dt-quarter --steps 20 --warmup-steps 30 --wind 11 --controller evidence/flex-mappo/controller-v6/DISCON.dll --turbulence results/lidar/raw/flex-mappo-wind-gentle-v1/FarmInputs/random-gust.bts --flexible-tower --solver-dt .0015625 > evidence/tower-flex-20260916/self-audit/dt-quarter.log 2>&1
+
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 WFCRL_FASTFARM_EXECUTABLE=/opt/anaconda3/envs/wfrl-mac/bin/FAST.Farm PYTHONUNBUFFERED=1 /opt/homebrew/bin/mpiexec -n 1 /opt/anaconda3/envs/wfrl-mac/bin/python -m scripts.lidar.probe_flex_policy --output evidence/tower-flex-20260916/self-audit/tower-40 --steps 20 --warmup-steps 30 --wind 11 --controller evidence/flex-mappo/controller-v6/DISCON.dll --turbulence results/lidar/raw/flex-mappo-wind-gentle-v1/FarmInputs/random-gust.bts --flexible-tower --tower-nodes 40 > evidence/tower-flex-20260916/self-audit/tower-40.log 2>&1
+
+# Existing output directories are intentionally refused. Use new names for a repeat.
+
+/opt/anaconda3/envs/wfrl-mac/bin/python -m scripts.lidar.compare_tower_numerics evidence/tower-flex-20260916/run-v1/probe.json evidence/tower-flex-20260916/self-audit/dt-half/probe.json evidence/tower-flex-20260916/self-audit/dt-quarter/probe.json evidence/tower-flex-20260916/self-audit/tower-40/probe.json --output evidence/tower-flex-20260916/self-audit/numerics.json

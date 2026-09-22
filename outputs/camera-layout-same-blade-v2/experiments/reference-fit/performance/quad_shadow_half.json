@@ -1,0 +1,447 @@
+{
+  "mode": "quad_shadow_half",
+  "seconds": 15.25247179204598,
+  "draws": {
+    "original": {
+      "frames": 175,
+      "fps": 11.473550148852649
+    },
+    "C2": {
+      "frames": 175,
+      "fps": 11.473550148852649
+    },
+    "C1": {
+      "frames": 175,
+      "fps": 11.473550148852649
+    },
+    "C3": {
+      "frames": 175,
+      "fps": 11.473550148852649
+    },
+    "C4": {
+      "frames": 175,
+      "fps": 11.473550148852649
+    }
+  },
+  "rss_start_gib": 0.7395477294921875,
+  "rss_end_gib": 0.5760040283203125,
+  "rss_max_observed_gib": 0.7414398193359375,
+  "process_peak_rss_gib": 1.098876953125,
+  "offscreen_render_calls": 0,
+  "max_preview_renderers": 0,
+  "max_native_proxies": 4,
+  "timer_lateness_p95_s": 0.07536579086445272,
+  "timer_lateness_max_s": 0.08587533421814442,
+  "timer_note": "scheduled callback lateness; not mouse-input latency",
+  "samples": [
+    {
+      "t_s": 0.18300504214130342,
+      "rss_gib": 0.7414398193359375,
+      "frame": 16,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 2,
+        "C2": 2,
+        "C1": 2,
+        "C3": 2,
+        "C4": 2
+      }
+    },
+    {
+      "t_s": 0.7326172080356628,
+      "rss_gib": 0.71478271484375,
+      "frame": 47,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 8,
+        "C2": 8,
+        "C1": 8,
+        "C3": 8,
+        "C4": 8
+      }
+    },
+    {
+      "t_s": 1.2446895830798894,
+      "rss_gib": 0.6919097900390625,
+      "frame": 80,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 14,
+        "C2": 14,
+        "C1": 14,
+        "C3": 14,
+        "C4": 14
+      }
+    },
+    {
+      "t_s": 1.7874087921809405,
+      "rss_gib": 0.6923065185546875,
+      "frame": 112,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 21,
+        "C2": 21,
+        "C1": 21,
+        "C3": 21,
+        "C4": 21
+      }
+    },
+    {
+      "t_s": 2.3305697080213577,
+      "rss_gib": 0.69281005859375,
+      "frame": 145,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 28,
+        "C2": 28,
+        "C1": 28,
+        "C3": 28,
+        "C4": 28
+      }
+    },
+    {
+      "t_s": 2.8450427500065416,
+      "rss_gib": 0.6933135986328125,
+      "frame": 176,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 33,
+        "C2": 33,
+        "C1": 33,
+        "C3": 33,
+        "C4": 33
+      }
+    },
+    {
+      "t_s": 3.3460678751580417,
+      "rss_gib": 0.693359375,
+      "frame": 206,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 39,
+        "C2": 39,
+        "C1": 39,
+        "C3": 39,
+        "C4": 39
+      }
+    },
+    {
+      "t_s": 3.895486250054091,
+      "rss_gib": 0.69476318359375,
+      "frame": 239,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 46,
+        "C2": 46,
+        "C1": 46,
+        "C3": 46,
+        "C4": 46
+      }
+    },
+    {
+      "t_s": 4.402016542153433,
+      "rss_gib": 0.696258544921875,
+      "frame": 269,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 52,
+        "C2": 52,
+        "C1": 52,
+        "C3": 52,
+        "C4": 52
+      }
+    },
+    {
+      "t_s": 4.92581820813939,
+      "rss_gib": 0.6977081298828125,
+      "frame": 299,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 58,
+        "C2": 58,
+        "C1": 58,
+        "C3": 58,
+        "C4": 58
+      }
+    },
+    {
+      "t_s": 5.439764125039801,
+      "rss_gib": 0.6998443603515625,
+      "frame": 331,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 64,
+        "C2": 64,
+        "C1": 64,
+        "C3": 64,
+        "C4": 64
+      }
+    },
+    {
+      "t_s": 6.004081375198439,
+      "rss_gib": 0.7040252685546875,
+      "frame": 365,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 71,
+        "C2": 71,
+        "C1": 71,
+        "C3": 71,
+        "C4": 71
+      }
+    },
+    {
+      "t_s": 6.516178542049602,
+      "rss_gib": 0.7072906494140625,
+      "frame": 394,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 76,
+        "C2": 76,
+        "C1": 76,
+        "C3": 76,
+        "C4": 76
+      }
+    },
+    {
+      "t_s": 7.047469667159021,
+      "rss_gib": 0.705535888671875,
+      "frame": 428,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 81,
+        "C2": 81,
+        "C1": 81,
+        "C3": 81,
+        "C4": 81
+      }
+    },
+    {
+      "t_s": 7.5974904170725495,
+      "rss_gib": 0.6034698486328125,
+      "frame": 461,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 87,
+        "C2": 87,
+        "C1": 87,
+        "C3": 87,
+        "C4": 87
+      }
+    },
+    {
+      "t_s": 8.140979917021468,
+      "rss_gib": 0.6016845703125,
+      "frame": 493,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 93,
+        "C2": 93,
+        "C1": 93,
+        "C3": 93,
+        "C4": 93
+      }
+    },
+    {
+      "t_s": 8.669264542171732,
+      "rss_gib": 0.584442138671875,
+      "frame": 525,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 99,
+        "C2": 99,
+        "C1": 99,
+        "C3": 99,
+        "C4": 99
+      }
+    },
+    {
+      "t_s": 9.227135125081986,
+      "rss_gib": 0.586090087890625,
+      "frame": 559,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 106,
+        "C2": 106,
+        "C1": 106,
+        "C3": 106,
+        "C4": 106
+      }
+    },
+    {
+      "t_s": 9.825017917202786,
+      "rss_gib": 0.58746337890625,
+      "frame": 593,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 112,
+        "C2": 112,
+        "C1": 112,
+        "C3": 112,
+        "C4": 112
+      }
+    },
+    {
+      "t_s": 10.332434208132327,
+      "rss_gib": 0.5847320556640625,
+      "frame": 625,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 118,
+        "C2": 118,
+        "C1": 118,
+        "C3": 118,
+        "C4": 118
+      }
+    },
+    {
+      "t_s": 10.892839333042502,
+      "rss_gib": 0.5817413330078125,
+      "frame": 658,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 125,
+        "C2": 125,
+        "C1": 125,
+        "C3": 125,
+        "C4": 125
+      }
+    },
+    {
+      "t_s": 11.478555832989514,
+      "rss_gib": 0.584503173828125,
+      "frame": 694,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 132,
+        "C2": 132,
+        "C1": 132,
+        "C3": 132,
+        "C4": 132
+      }
+    },
+    {
+      "t_s": 12.06156750000082,
+      "rss_gib": 0.5847015380859375,
+      "frame": 727,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 138,
+        "C2": 138,
+        "C1": 138,
+        "C3": 138,
+        "C4": 138
+      }
+    },
+    {
+      "t_s": 12.60963000007905,
+      "rss_gib": 0.5855255126953125,
+      "frame": 761,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 145,
+        "C2": 145,
+        "C1": 145,
+        "C3": 145,
+        "C4": 145
+      }
+    },
+    {
+      "t_s": 13.165916042169556,
+      "rss_gib": 0.5819549560546875,
+      "frame": 795,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 152,
+        "C2": 152,
+        "C1": 152,
+        "C3": 152,
+        "C4": 152
+      }
+    },
+    {
+      "t_s": 13.681412208126858,
+      "rss_gib": 0.5809326171875,
+      "frame": 826,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 157,
+        "C2": 157,
+        "C1": 157,
+        "C3": 157,
+        "C4": 157
+      }
+    },
+    {
+      "t_s": 14.185959625057876,
+      "rss_gib": 0.58172607421875,
+      "frame": 856,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 163,
+        "C2": 163,
+        "C1": 163,
+        "C3": 163,
+        "C4": 163
+      }
+    },
+    {
+      "t_s": 14.695199917070568,
+      "rss_gib": 0.5822601318359375,
+      "frame": 887,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 169,
+        "C2": 169,
+        "C1": 169,
+        "C3": 169,
+        "C4": 169
+      }
+    },
+    {
+      "t_s": 15.25247179204598,
+      "rss_gib": 0.5760040283203125,
+      "frame": 918,
+      "preview_renderers": 0,
+      "native_proxy_count": 4,
+      "draw_counts": {
+        "original": 175,
+        "C2": 175,
+        "C1": 175,
+        "C3": 175,
+        "C4": 175
+      }
+    }
+  ],
+  "layout_unchanged": true,
+  "rss_after_close_gib": 0.614837646484375,
+  "proxies_after_close": 0
+}

@@ -1,0 +1,17 @@
+{
+  "files": [
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/native_camera_views.py",
+      "sha256": "374219442a543a580da0cfafa48a275905f61e500a897f6bf900cc5fca671617"
+    },
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/custom_cameras.py",
+      "sha256": "4f9b886258b4df7bf73f252bbfa769769ff1f143e7f5147bfc303b69ac12802f"
+    },
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/deflection.py",
+      "sha256": "5b34eb5f4cfca736ea9be34ba689ddff60d308c25c4e6821a43694888c263543"
+    }
+  ],
+  "package_mismatches": []
+}

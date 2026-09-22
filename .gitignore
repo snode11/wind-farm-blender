@@ -18,6 +18,7 @@ __simul__/
 results/checkpoints/
 results/logs/
 results/eval_outputs/
+results/camera-video/
 results/runs/*.png
 results/runs/*.log
 
@@ -44,7 +45,5 @@ example*.png
 # macOS Finder folder metadata
 .DS_Store
 
-# LiDAR solver surfaces are local archives; commit only compact replay packages.
-results/lidar/raw/
-*.blend1
+# Local verification caches
 .pytest_cache/

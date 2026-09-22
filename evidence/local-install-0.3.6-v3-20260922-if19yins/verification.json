@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "version": "0.3.6",
+  "archive_sha256": "92cdeb14e4350c39aef196cd62322c06bf507f35321acde6c15b170d67ce0de9",
+  "verified_installed_files": 96,
+  "installed_path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "saved_preference_enabled": true,
+  "automatic_startup_loaded": true,
+  "global_config_unchanged": true,
+  "registration_regression": {
+    "status": "PASS",
+    "blender": "5.2.1 LTS",
+    "runtime": "wfrl_blender",
+    "checks": {
+      "migration_after_registration": true,
+      "restricted_registration_and_reenable": true,
+      "pending_migration_and_watchdog_cleanup": true
+    }
+  },
+  "native_checks": 14,
+  "window_checks": 9,
+  "host_tests": "11 passed",
+  "source_zip_install_match": true,
+  "previous_dist_fingerprints": {
+    "wfrl_blender-0.3.6.zip": "c8254e153623a6e901d3fd4d2bf734f31d4a4577542e515b1d5938e8eeb03d70",
+    "wfrl_blender-0.3.6.inventory.json": "e157c5c6f6b12a26e67bf4c24ca29ad6a807ee309304f009a70fe97c28564cbe",
+    "wfrl_blender-0.3.6.zip.sha256": "3f265a42e75ec6f50cd27293229b25c6de1e821e402b12c87c0092c8eea452d8"
+  },
+  "published": false
+}

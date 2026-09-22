@@ -1,0 +1,23 @@
+Warning: 请先确认或取消当前调整
+FINAL_REVIEW_SUPPLEMENT_PASS
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/custom_camera_v3_window.py", line 185, in tick
+    assert time.perf_counter()-STATE['release_at']<5,op.preview.status()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 画面准备中
+
+Traceback (most recent call last):
+  File "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt/review_window.py", line 90, in extra
+    value=snapshot();encoded=json.dumps(value,ensure_ascii=False,sort_keys=True)
+  File "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt/review_window.py", line 23, in snapshot
+    return {'stage':op.stage if op else None,'history':len(h.HISTORY.entries),'protected':protected(),
+                                                                                          ~~~~~~~~~^^
+  File "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt/review_window.py", line 20, in protected
+    clearance_replay.sample(s)['statistics'],repr(charts.history.__dict__),farm_flex._ACTIVE.last_telemetry_frame]
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+
+00:26.508  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

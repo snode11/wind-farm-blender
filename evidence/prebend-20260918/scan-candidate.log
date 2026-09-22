@@ -1,0 +1,16 @@
+T1 0 of 118
+T1 40 of 118
+T1 80 of 118
+T1 {'design': {'expected': 61, 'valid': 61, 'valid_fraction': 1.0, 'passages': 17, 'missed_passages': 0, 'mae_m': 0.18863535114900706, 'p95_m': 0.4751701717874415, 'max_abs_m': 0.9419314589027188, 'max_overestimate_m': 0.13741420473501265, 'signed_min_m': -0.9419314589027188, 'signed_max_m': 0.13741420473501265, 'passed': True}, 'held_out': {'expected': 57, 'valid': 57, 'valid_fraction': 1.0, 'passages': 16, 'missed_passages': 0, 'mae_m': 0.1423211827822942, 'p95_m': 0.3759832423894102, 'max_abs_m': 0.3992896094146374, 'max_overestimate_m': 0.05663992654895367, 'signed_min_m': -0.3992896094146374, 'signed_max_m': 0.05663992654895367, 'passed': True}, 'full': {'expected': 118, 'valid': 118, 'valid_fraction': 1.0, 'passages': 33, 'missed_passages': 0, 'mae_m': 0.16626325287017119, 'p95_m': 0.39082758084239727, 'max_abs_m': 0.9419314589027188, 'max_overestimate_m': 0.13741420473501265, 'signed_min_m': -0.9419314589027188, 'signed_max_m': 0.13741420473501265, 'passed': True}}
+T2 0 of 117
+T2 40 of 117
+T2 80 of 117
+T2 {'design': {'expected': 59, 'valid': 59, 'valid_fraction': 1.0, 'passages': 17, 'missed_passages': 0, 'mae_m': 0.14730871904613252, 'p95_m': 0.37111048872987573, 'max_abs_m': 0.5331263144347362, 'max_overestimate_m': 0.017775233077097496, 'signed_min_m': -0.5331263144347362, 'signed_max_m': 0.017775233077097496, 'passed': True}, 'held_out': {'expected': 58, 'valid': 58, 'valid_fraction': 1.0, 'passages': 16, 'missed_passages': 0, 'mae_m': 0.1724475366370848, 'p95_m': 0.4393437750711197, 'max_abs_m': 0.5748620316193591, 'max_overestimate_m': 0.038898791566727375, 'signed_min_m': -0.5748620316193591, 'signed_max_m': 0.038898791566727375, 'passed': True}, 'full': {'expected': 117, 'valid': 117, 'valid_fraction': 1.0, 'passages': 33, 'missed_passages': 0, 'mae_m': 0.1597706969972029, 'p95_m': 0.4009881686835974, 'max_abs_m': 0.5748620316193591, 'max_overestimate_m': 0.038898791566727375, 'signed_min_m': -0.5748620316193591, 'signed_max_m': 0.038898791566727375, 'passed': True}}
+T3 0 of 121
+T3 40 of 121
+T3 80 of 121
+T3 120 of 121
+T3 {'design': {'expected': 65, 'valid': 65, 'valid_fraction': 1.0, 'passages': 14, 'missed_passages': 0, 'mae_m': 0.16011760384760965, 'p95_m': 0.4139818788534327, 'max_abs_m': 0.5067041596121662, 'max_overestimate_m': 0.0995653719885734, 'signed_min_m': -0.5067041596121662, 'signed_max_m': 0.0995653719885734, 'passed': True}, 'held_out': {'expected': 56, 'valid': 56, 'valid_fraction': 1.0, 'passages': 14, 'missed_passages': 0, 'mae_m': 0.15553000903685438, 'p95_m': 0.4485062464505556, 'max_abs_m': 0.5130871597040301, 'max_overestimate_m': 0.06825911781460547, 'signed_min_m': -0.5130871597040301, 'signed_max_m': 0.06825911781460547, 'passed': True}, 'full': {'expected': 121, 'valid': 121, 'valid_fraction': 1.0, 'passages': 28, 'missed_passages': 0, 'mae_m': 0.15799441947238405, 'p95_m': 0.43833735356576753, 'max_abs_m': 0.5130871597040301, 'max_overestimate_m': 0.0995653719885734, 'signed_min_m': -0.5130871597040301, 'signed_max_m': 0.0995653719885734, 'passed': True}}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

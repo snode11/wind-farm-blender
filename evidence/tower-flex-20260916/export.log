@@ -1,0 +1,15 @@
+T1 117.0 exported
+T1 127.0 exported
+T1 137.0 exported
+T1 147.0 exported
+T1 157.0 exported
+T1 167.0 exported
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/lidar/export_farm_flex.py", line 187, in <module>
+    a=p.parse_args();export(a.probe,a.destination,a.start,a.duration,a.diagnostic_only)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/lidar/export_farm_flex.py", line 118, in export
+    raise ValueError(f'Cannot exclude saved-surface intersection: {tid} {b} {t}')
+ValueError: Cannot exclude saved-surface intersection: T1 2 174.55

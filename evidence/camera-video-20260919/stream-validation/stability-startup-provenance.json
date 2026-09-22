@@ -1,0 +1,7 @@
+{
+  "media_source_sha256_at_encoding": "bd38a82a3c2a21aa7d1d8c87d13e47f58eb4b346acd7a28563ed5e79edbdc2c2",
+  "stream_source_sha256_at_process_start": null,
+  "limitation": "Stream source hash was not captured at startup; current source hash is not asserted for this already-running process. Later code changes added timing audit fields; the stream process retains the previously imported implementation. Color contract updates are covered by separate integration tests, not this transport stability test.",
+  "video_sha256": "02356d7b62f3358af9277641261af94dd0dc1a77a6614451ff12e182b530140d",
+  "test_harness_sha256": "647923b7362be20f7fb48cd10790951af1396844f50be5cc651109b6ff5b2220"
+}

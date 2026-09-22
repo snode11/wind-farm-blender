@@ -17,6 +17,11 @@ class WFRLPreferences(bpy.types.AddonPreferences):
     fastfarm_path: bpy.props.StringProperty(name='FAST.Farm executable', subtype='FILE_PATH', default='')
     default_scene: bpy.props.StringProperty(name='Default scene', subtype='FILE_PATH', default='')
     port: bpy.props.IntProperty(name='Bridge port', default=8765, min=1024, max=65535)
+    camera_video_file: bpy.props.StringProperty(name='相机视频', subtype='FILE_PATH', default='')
+    video_ffmpeg: bpy.props.StringProperty(name='FFmpeg', subtype='FILE_PATH', default='')
+    video_mediamtx: bpy.props.StringProperty(name='MediaMTX', subtype='FILE_PATH', default='')
+    video_rtsp_port: bpy.props.IntProperty(name='RTSP 端口', default=8554, min=1024, max=65535)
+    video_rtsp_lan: bpy.props.BoolProperty(name='允许局域网读取', default=False)
 
     def draw(self, context):
         layout = self.layout
@@ -31,6 +36,10 @@ class WFRLPreferences(bpy.types.AddonPreferences):
             layout.label(text='Configuration locked while a session is active or unconfirmed.', icon='LOCKED')
         layout.label(text='Local Demo works without a backend Python, MPI or FAST.Farm.')
         layout.label(text='Use absolute executable paths. Check environment in the WFRL status panel.')
+        video = layout.box()
+        video.label(text='相机视频输出')
+        for name in ('camera_video_file', 'video_ffmpeg', 'video_mediamtx', 'video_rtsp_port', 'video_rtsp_lan'):
+            video.prop(self, name)
 
 
 CLASSES = (WFRLPreferences,)

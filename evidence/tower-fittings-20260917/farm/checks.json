@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "blades": 9,
+  "root_connection_max_error_m": 0.0002704707424723197,
+  "mean_update_ms": 69.52572349691764,
+  "p95_update_ms": 88.07145450264214,
+  "scope": "background frame update; not actual viewport FPS",
+  "duration_s": 60.0
+}

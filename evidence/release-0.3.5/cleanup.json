@@ -1,0 +1,327 @@
+{
+  "removed_count": 80,
+  "removed_bytes": 3206429798,
+  "removed": [
+    {
+      "path": "/tmp/wfrl035-package",
+      "bytes": 49718281
+    },
+    {
+      "path": "/tmp/wfrl035-rebuild",
+      "bytes": 41442569
+    },
+    {
+      "path": "/tmp/wfrl035-native",
+      "bytes": 3096
+    },
+    {
+      "path": "/tmp/wfrl035-native-final",
+      "bytes": 3596
+    },
+    {
+      "path": "/tmp/wfrl035-open.py",
+      "bytes": 1365
+    },
+    {
+      "path": "/tmp/wfrl035-release-notes.md",
+      "bytes": 1102
+    },
+    {
+      "path": "/tmp/wfrl-release-035-status.txt",
+      "bytes": 89097
+    },
+    {
+      "path": "/tmp/wfrl_apply_nacelle_default.py",
+      "bytes": 1230
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/candidates.json",
+      "bytes": 6378
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe-wide.png",
+      "bytes": 614498
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe-corner.png",
+      "bytes": 613381
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/audit_candidates.py",
+      "bytes": 3211
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/front-regression.log",
+      "bytes": 704
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/candidates-finalists.json",
+      "bytes": 5265
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe-more.log",
+      "bytes": 861
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe-under-real.png",
+      "bytes": 606307
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/native",
+      "bytes": 3099
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe-lower.png",
+      "bytes": 589551
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe-corner-real.png",
+      "bytes": 632590
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe-finalists.log",
+      "bytes": 892
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe-inset.png",
+      "bytes": 618085
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe.log",
+      "bytes": 847
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/candidates-more.log",
+      "bytes": 5287
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/audit_finalists.py",
+      "bytes": 3417
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe-side.png",
+      "bytes": 616055
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe_finalists.py",
+      "bytes": 1591
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe-down.png",
+      "bytes": 591666
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe_more.py",
+      "bytes": 1577
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe-opposite-real.png",
+      "bytes": 618910
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/candidates.log",
+      "bytes": 5596
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe-front.png",
+      "bytes": 519345
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/native.log",
+      "bytes": 2439
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe.json",
+      "bytes": 13
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/probe.py",
+      "bytes": 1578
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/host-tests.log",
+      "bytes": 111
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/gui-events.jsonl",
+      "bytes": 179049
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/candidates-more.json",
+      "bytes": 5335
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/candidates-finalists.log",
+      "bytes": 5229
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/replay.log",
+      "bytes": 2118
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/replay",
+      "bytes": 31506705
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/launcher.log",
+      "bytes": 232
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/gui-reviewed.png",
+      "bytes": 755754
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/front-regression",
+      "bytes": 702
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/gui.py",
+      "bytes": 1432
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/对照画面.html",
+      "bytes": 3741
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-camera-20260919/audit_more.py",
+      "bytes": 3420
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/nacelle-default-20260920",
+      "bytes": 8026
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/启动机舱相机测试.command",
+      "bytes": 200
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/open_nacelle_camera.py",
+      "bytes": 397
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/.pytest_cache",
+      "bytes": 7450
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/__pycache__",
+      "bytes": 1022
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/radar-feedback-20260917/runtime/wfrl_blender/__pycache__",
+      "bytes": 458962
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/radar-feedback-20260917/runtime/wfrl_blender/operators/__pycache__",
+      "bytes": 19072
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/radar-feedback-20260917/runtime/wfrl_blender/_vendor/__pycache__",
+      "bytes": 210
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/radar-feedback-20260917/runtime/wfrl_blender/_vendor/lidar/__pycache__",
+      "bytes": 38149
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/radar-feedback-20260917/runtime/wfrl_blender/panels/__pycache__",
+      "bytes": 128612
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-video-20260919/__pycache__",
+      "bytes": 11068
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/tower-flex-20260916/runtime-smoke/wfrl_blender/__pycache__",
+      "bytes": 452806
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/tower-flex-20260916/runtime-smoke/wfrl_blender/operators/__pycache__",
+      "bytes": 19082
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/tower-flex-20260916/runtime-smoke/wfrl_blender/_vendor/__pycache__",
+      "bytes": 212
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/tower-flex-20260916/runtime-smoke/wfrl_blender/_vendor/lidar/__pycache__",
+      "bytes": 38155
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/tower-flex-20260916/runtime-smoke/wfrl_blender/panels/__pycache__",
+      "bytes": 127362
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/tests/__pycache__",
+      "bytes": 194812
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/tests/lidar/__pycache__",
+      "bytes": 18576
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/__pycache__",
+      "bytes": 225360
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/environments/__pycache__",
+      "bytes": 70301
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfcrl-env/wfcrl/scripts/__pycache__",
+      "bytes": 2183
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__",
+      "bytes": 787775
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/operators/__pycache__",
+      "bytes": 18952
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__",
+      "bytes": 219390
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/__pycache__",
+      "bytes": 12310
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/__pycache__",
+      "bytes": 34442
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/__pycache__",
+      "bytes": 11826
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/__pycache__",
+      "bytes": 11766
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/__pycache__",
+      "bytes": 75504
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/studio/__pycache__",
+      "bytes": 93640
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/lidar/__pycache__",
+      "bytes": 72797
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/viz/__pycache__",
+      "bytes": 75423
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/camera_video/__pycache__",
+      "bytes": 212275
+    },
+    {
+      "path": "/tmp/wfrl-release-035-publish",
+      "bytes": 3073194374
+    }
+  ],
+  "preserved": "Release ZIP/checksums, source/tests, simulation data, prior releases and compact release verification records."
+}

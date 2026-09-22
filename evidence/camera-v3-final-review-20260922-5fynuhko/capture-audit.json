@@ -1,0 +1,255 @@
+[
+  {
+    "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-v3-20260922/legacy-window-fixed/capture_20260922_182703_538fd59971",
+    "status": "complete",
+    "complete_groups": 1,
+    "records": 4,
+    "PNG_files": 4,
+    "orphan_PNG_unreferenced": [],
+    "times": [
+      129.56666666666666
+    ],
+    "error": null,
+    "PNG_sizes": [
+      [
+        586,
+        1920
+      ],
+      [
+        1920,
+        751
+      ],
+      [
+        1920,
+        1109
+      ],
+      [
+        1920,
+        1920
+      ]
+    ],
+    "audit": "PASS"
+  },
+  {
+    "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-v3-20260922/legacy-window-fixed/capture_20260922_182705_b5e84ab395",
+    "status": "complete",
+    "complete_groups": 1,
+    "records": 4,
+    "PNG_files": 4,
+    "orphan_PNG_unreferenced": [],
+    "times": [
+      129.56666666666666
+    ],
+    "error": null,
+    "PNG_sizes": [
+      [
+        586,
+        1920
+      ],
+      [
+        1920,
+        751
+      ],
+      [
+        1920,
+        930
+      ],
+      [
+        1920,
+        1920
+      ]
+    ],
+    "audit": "PASS"
+  },
+  {
+    "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-v3-20260922/legacy-window-fixed/capture_20260922_182707_8ea81fce09",
+    "status": "complete",
+    "complete_groups": 1,
+    "records": 4,
+    "PNG_files": 4,
+    "orphan_PNG_unreferenced": [],
+    "times": [
+      129.56666666666666
+    ],
+    "error": null,
+    "PNG_sizes": [
+      [
+        586,
+        1920
+      ],
+      [
+        1920,
+        751
+      ],
+      [
+        1920,
+        1920
+      ],
+      [
+        2560,
+        1240
+      ]
+    ],
+    "audit": "PASS"
+  },
+  {
+    "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-v3-20260922/legacy-window-fixed/capture_20260922_182709_f176fe8b16",
+    "status": "complete",
+    "complete_groups": 3,
+    "records": 12,
+    "PNG_files": 12,
+    "orphan_PNG_unreferenced": [],
+    "times": [
+      129.56666666666666,
+      129.61666666666667,
+      129.66666666666666
+    ],
+    "error": null,
+    "PNG_sizes": [
+      [
+        586,
+        1920
+      ],
+      [
+        1920,
+        751
+      ],
+      [
+        1920,
+        1109
+      ],
+      [
+        1920,
+        1920
+      ]
+    ],
+    "audit": "PASS"
+  },
+  {
+    "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-v3-20260922/legacy-window-fixed/capture_20260922_182714_d5cded41da",
+    "status": "incomplete",
+    "complete_groups": 1,
+    "records": 4,
+    "PNG_files": 4,
+    "orphan_PNG_unreferenced": [],
+    "times": [
+      129.56666666666666
+    ],
+    "error": "test cancellation",
+    "PNG_sizes": [
+      [
+        586,
+        1920
+      ],
+      [
+        1920,
+        751
+      ],
+      [
+        1920,
+        1109
+      ],
+      [
+        1920,
+        1920
+      ]
+    ],
+    "audit": "PASS"
+  },
+  {
+    "path": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt/window-final/capture_20260922_202015_379b231085",
+    "status": "incomplete",
+    "complete_groups": 1,
+    "records": 4,
+    "PNG_files": 4,
+    "orphan_PNG_unreferenced": [],
+    "times": [
+      129.64999389648438
+    ],
+    "error": "用户取消：已停止",
+    "PNG_sizes": [
+      [
+        640,
+        323
+      ],
+      [
+        640,
+        360
+      ]
+    ],
+    "audit": "PASS"
+  },
+  {
+    "path": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt/window-final/capture_20260922_202015_ada122a388",
+    "status": "incomplete",
+    "complete_groups": 1,
+    "records": 4,
+    "PNG_files": 4,
+    "orphan_PNG_unreferenced": [],
+    "times": [
+      129.64999389648438
+    ],
+    "error": "用户取消：已停止",
+    "PNG_sizes": [
+      [
+        640,
+        323
+      ],
+      [
+        640,
+        360
+      ]
+    ],
+    "audit": "PASS"
+  },
+  {
+    "path": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt/window-final/capture_20260922_202023_ca1210f4c6",
+    "status": "complete",
+    "complete_groups": 3,
+    "records": 12,
+    "PNG_files": 12,
+    "orphan_PNG_unreferenced": [],
+    "times": [
+      129.65,
+      129.75,
+      129.85
+    ],
+    "error": null,
+    "PNG_sizes": [
+      [
+        640,
+        323
+      ],
+      [
+        640,
+        360
+      ]
+    ],
+    "audit": "PASS"
+  },
+  {
+    "path": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt/window-final/capture_20260922_202025_0b8c1d2361",
+    "status": "incomplete",
+    "complete_groups": 1,
+    "records": 4,
+    "PNG_files": 5,
+    "orphan_PNG_unreferenced": [
+      "C1/frame_000001.png"
+    ],
+    "times": [
+      129.65
+    ],
+    "error": "final-review injected second PNG write failure",
+    "PNG_sizes": [
+      [
+        640,
+        323
+      ],
+      [
+        640,
+        360
+      ]
+    ],
+    "audit": "PASS"
+  }
+]

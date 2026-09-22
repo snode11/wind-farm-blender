@@ -1,0 +1,15 @@
+工作目录：/Users/eason/Desktop/wfcrl/wind farm RL
+
+仿真（新输出目录必须不存在；不覆盖本次成果）：
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 WFCRL_FASTFARM_EXECUTABLE=/opt/anaconda3/envs/wfrl-mac/bin/FAST.Farm PYTHONUNBUFFERED=1 /opt/homebrew/bin/mpiexec -n 1 /opt/anaconda3/envs/wfrl-mac/bin/python -m scripts.lidar.probe_flex_policy --output evidence/tower-flex-20260916/run-v1 --steps 20 --warmup-steps 30 --wind 11 --controller evidence/flex-mappo/controller-v6/DISCON.dll --turbulence results/lidar/raw/flex-mappo-wind-gentle-v1/FarmInputs/random-gust.bts --surfaces --flexible-tower
+
+审计：
+/opt/anaconda3/envs/wfrl-mac/bin/python -m scripts.lidar.audit_tower_run evidence/tower-flex-20260916/run-v1/probe.json evidence/tower-flex-20260916/solver.log evidence/tower-flex-20260916/validated-probe.json
+
+完整导出（第一次因过保守的横向几何分离检查停止；修正后的完整导出目录为 package-v2-r2）：
+OPENBLAS_NUM_THREADS=1 /opt/anaconda3/envs/wfrl-mac/bin/python -m scripts.lidar.export_farm_flex evidence/tower-flex-20260916/validated-probe.json evidence/tower-flex-20260916/package-v2-r2
+
+新增遥测/挠度与全保存帧验证：
+/opt/anaconda3/envs/wfrl-mac/bin/python -m scripts.blender.export_demo_telemetry evidence/tower-flex-20260916/package-v2-r2 __simul__/fastfarm/FastFarm__208s__3T_1789560533.018898
+/opt/anaconda3/envs/wfrl-mac/bin/python -m scripts.blender.export_tip_deflection evidence/tower-flex-20260916/package-v2-r2 __simul__/fastfarm/FastFarm__208s__3T_1789560533.018898 blender_frontend/wfrl_blender/assets/nrel5mw_geometry.json
+/opt/anaconda3/envs/wfrl-mac/bin/python -m scripts.lidar.validate_tower_package evidence/tower-flex-20260916/package-v2-r2 evidence/tower-flex-20260916/full-tip-validation.json

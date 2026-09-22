@@ -1,0 +1,72 @@
+Traceback (most recent call last):
+  File "/Applications/Blender.app/Contents/Resources/5.2/scripts/modules/addon_utils.py", line 544, in enable
+    mod.register()
+    ~~~~~~~~~~~~^^
+  File "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py", line 190, in register
+    custom_cameras.register_properties()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/custom_cameras.py", line 982, in register_properties
+    migrate_loaded()
+    ~~~~~~~~~~~~~~^^
+  File "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/custom_cameras.py", line 974, in migrate_loaded
+    for scene in bpy.data.scenes:
+                 ^^^^^^^^^^^^^^^
+AttributeError: '_RestrictData' object has no attribute 'scenes'
+Traceback (most recent call last):
+  File "/Applications/Blender.app/Contents/Resources/5.2/scripts/modules/addon_utils.py", line 544, in enable
+    mod.register()
+    ~~~~~~~~~~~~^^
+  File "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py", line 190, in register
+    custom_cameras.register_properties()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/custom_cameras.py", line 982, in register_properties
+    migrate_loaded()
+    ~~~~~~~~~~~~~~^^
+  File "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/custom_cameras.py", line 974, in migrate_loaded
+    for scene in bpy.data.scenes:
+                 ^^^^^^^^^^^^^^^
+AttributeError: '_RestrictData' object has no attribute 'scenes'
+Exception in module register(): /Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py
+Warning: addon-module bl_ext.user_default.wfrl_blender found module but without '__addon_enabled__' field, possible name collision from file: '/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py'
+module changed on disk: '/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py' reloading...
+Exception in module register(): /Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py
+Warning: addon-module bl_ext.user_default.wfrl_blender found module but without '__addon_enabled__' field, possible name collision from file: '/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py'
+Traceback (most recent call last):
+  File "/Applications/Blender.app/Contents/Resources/5.2/scripts/modules/addon_utils.py", line 544, in enable
+    mod.register()
+    ~~~~~~~~~~~~^^
+  File "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py", line 190, in register
+    custom_cameras.register_properties()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/custom_cameras.py", line 982, in register_properties
+    migrate_loaded()
+    ~~~~~~~~~~~~~~^^
+  File "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/custom_cameras.py", line 974, in migrate_loaded
+    for scene in bpy.data.scenes:
+                 ^^^^^^^^^^^^^^^
+AttributeError: '_RestrictData' object has no attribute 'scenes'
+module changed on disk: '/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py' reloading...
+Exception in module register(): /Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py
+Traceback (most recent call last):
+  File "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py", line 289, in load_demo_scene
+    scene.wfrl_flex_show_tip_trails = True
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Scene' object has no attribute 'wfrl_flex_show_tip_trails'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-install-v3-dl5f09l8/installed_custom_camera_v3_window.py", line 65, in tick
+    addon_utils.enable(MODULE,default_set=False);addon.load_demo_scene()
+                                                 ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py", line 299, in load_demo_scene
+    clearance_replay.clear(scene, 'MAPPO 数据未就绪：' + str(exc))
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/clearance_replay.py", line 34, in clear
+    scene.wfrl_clearance_show_config = True
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Scene' object has no attribute 'wfrl_clearance_show_config'
+
+00:06.772  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-install-v3-dl5f09l8/quit.blend"
+
+Blender quit

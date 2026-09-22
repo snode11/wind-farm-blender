@@ -1,0 +1,10 @@
+{
+  "status": "complete",
+  "expected_frames": 20,
+  "verified_frames": 20,
+  "rendered_this_run": 20,
+  "wall_seconds": 948.2766311659943,
+  "config_sha256": "2ea32e67fffab488b1d58b494cf26f3e340d872505be4135f849e77a2cb20926",
+  "source_status": "REVIEW_ONLY",
+  "output": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-video-20260919/t1-short-4k"
+}

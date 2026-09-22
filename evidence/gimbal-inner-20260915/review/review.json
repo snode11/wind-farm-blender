@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "camera_location": [
+    -3.5,
+    1.2000000476837158,
+    -37.79999923706055
+  ],
+  "paint_band_groups": 3,
+  "unchanged_vertices": 15361,
+  "frames": [
+    {
+      "frame": 297,
+      "time_s": 29.84,
+      "image": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/gimbal-inner-20260915/review/day--04.png"
+    },
+    {
+      "frame": 299,
+      "time_s": 29.92,
+      "image": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/gimbal-inner-20260915/review/day--02.png"
+    },
+    {
+      "frame": 301,
+      "time_s": 30.0,
+      "image": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/gimbal-inner-20260915/review/day-+00.png"
+    },
+    {
+      "frame": 303,
+      "time_s": 30.08,
+      "image": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/gimbal-inner-20260915/review/day-+02.png"
+    },
+    {
+      "frame": 305,
+      "time_s": 30.16,
+      "image": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/gimbal-inner-20260915/review/day-+04.png"
+    }
+  ],
+  "note": "Actual offline replay poses; illustrative camera mounting and low-light paint"
+}

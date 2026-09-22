@@ -1,0 +1,10 @@
+{
+  "status": "complete",
+  "expected_frames": 1,
+  "verified_frames": 1,
+  "rendered_this_run": 1,
+  "wall_seconds": 50.59127754205838,
+  "config_sha256": "96b858c9900a621aec2f008289429efee51ba901ce9c304ffacb6210c57907af",
+  "source_status": "REVIEW_ONLY",
+  "output": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-video-20260919/4k-shutter-1ms-8"
+}

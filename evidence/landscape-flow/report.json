@@ -1,0 +1,25 @@
+{
+  "render_before_s": 0.8711593330372125,
+  "shrubs": {
+    "before": 1498464,
+    "after": 720852,
+    "objects": 1892
+  },
+  "render_after_s": 0.43771245901007205,
+  "warm_before_s": [
+    0.4406740410486236,
+    0.44267950009088963,
+    0.4406425410415977
+  ],
+  "warm_after_s": [
+    0.43216512503568083,
+    0.42648358293808997,
+    0.43109645892400295
+  ],
+  "repeat": {
+    "before": 720852,
+    "after": 720852,
+    "objects": 1892
+  },
+  "backend": "PASS: heading, fixed snapshot time, step, calm, reset"
+}

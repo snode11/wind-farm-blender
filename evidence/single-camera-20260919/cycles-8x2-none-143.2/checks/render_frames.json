@@ -1,0 +1,18 @@
+{
+  "0": {
+    "sha256": "289e1563bec03c82a08195424b6f4913ebf834568afbfab3f5c2df19d6270c56",
+    "sim_time_s": 143.225,
+    "exposure_samples_s": [
+      143.22475,
+      143.22525
+    ],
+    "seconds": 5.372437209123746,
+    "timings": {
+      "geometry": 0.04640474985353649,
+      "render_write": 3.7409133319742978,
+      "read_accumulate": 0.15121954213827848,
+      "master_write": 1.112814584048465
+    },
+    "linear_rgb_mean": 0.09903079729180708
+  }
+}

@@ -1,0 +1,5 @@
+RELEASE_035_GUI_READY {'runtime': '/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py', 'version': '0.3.5', 'camera': 'WFRL.Camera.T1.NacelleGimbal', 'fov': 120, 'frame': 642, 'completed_pairs': 2}
+22:10.907  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

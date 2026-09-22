@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "archive_files": 17,
+  "all_inventory_hashes_match": true,
+  "windows_executables": "PE x86_64 checked; not executed on Windows",
+  "bat": "ASCII and CRLF checked; not executed on Windows",
+  "native_config_smoke": [
+    {
+      "codec_name": "h264",
+      "width": 3840,
+      "height": 2160,
+      "avg_frame_rate": "20/1",
+      "nb_read_frames": "80"
+    },
+    {
+      "codec_name": "h264",
+      "width": 3840,
+      "height": 2160,
+      "avg_frame_rate": "20/1",
+      "nb_read_frames": "20"
+    }
+  ],
+  "reconnect": true,
+  "owned_ffmpeg_stopped": true,
+  "source_video_sha256": "a7bc1f43f28656b97e1e09293c4183f4bc9f4dfa435fe7e53d301ab0e0a8796c",
+  "windows_runtime_verified": false,
+  "network": "Single-host test; Windows firewall and cross-machine LAN not verified"
+}

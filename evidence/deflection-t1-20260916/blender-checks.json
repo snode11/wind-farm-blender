@@ -1,0 +1,15 @@
+{
+  "saved_mesh_max_error_m": [
+    3.768165276474278e-06,
+    3.960793033175314e-05
+  ],
+  "interpolated_mesh_max_error_m": [
+    0.0002597854942751887,
+    9.748309614854289e-05
+  ],
+  "switching": true,
+  "seeking": true,
+  "hidden_t1": true,
+  "fixed_clock": true,
+  "reload": true
+}

@@ -1,0 +1,11 @@
+{
+  "status": "complete",
+  "expected_frames": 20,
+  "verified_frames": 20,
+  "rendered_this_run": 20,
+  "wall_seconds": 54.18401012499817,
+  "preparation_seconds": 5.631537624867633,
+  "config_sha256": "ef879bb21966cf02fd315cd65bee313fd8073df535806b99e6a09bd66d9b28f0",
+  "source_status": "REVIEW_ONLY",
+  "output": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/t1-short-4k"
+}

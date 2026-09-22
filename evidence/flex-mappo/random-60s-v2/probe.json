@@ -1,0 +1,37 @@
+{
+  "status": "FAILED",
+  "policy": {
+    "checkpoint": "mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt",
+    "sha256": "27c8c5855b2f6b2dca939258c8bf0ce3ac653359071727dabc6f08c0aeacaa61",
+    "environment": "Dec_Turb3_Row1_Fastfarm",
+    "turbine_order": [
+      "T1",
+      "T2",
+      "T3"
+    ],
+    "obs_keys": [
+      "yaw",
+      "wind_speed",
+      "wind_direction"
+    ],
+    "obs_mean": [
+      -1.0596270561218262,
+      5.895106792449951,
+      269.99871826171875
+    ],
+    "obs_var": [
+      0.48155131936073303,
+      2.213332176208496,
+      0.3037745952606201
+    ],
+    "controls": [
+      "yaw"
+    ],
+    "inference": "deterministic Normal.mean; stored normalization, no refit",
+    "action_unit": "yaw increment degrees per control step"
+  },
+  "records": [],
+  "wind_mps": 14,
+  "boundary": "steady-wind control probe; not random-gust acceptance",
+  "error": "ValueError: __simul__/fastfarm/FastFarm__208s__3T_1789488903.207443/FarmInputs/InflowWind.dat: FileName_BTS: 0 matches"
+}

@@ -1,0 +1,157 @@
+{
+  "dt-half": {
+    "status": "CONTROL_PROBE_COMPLETE",
+    "input_differences": {
+      "FarmInputs/FFTest_WT2.fst": [
+        "--- \n",
+        "+++ \n",
+        "@@ -7 +7 @@\n",
+        "-0.00625       DT            - Recommended module time step (s)",
+        "+0.003125    DT            - Recommended module time step (s)",
+        "@@ -68 +68 @@\n",
+        "-2    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}",
+        "+0    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}"
+      ],
+      "FarmInputs/NRELOffshrBsline5MW_Onshore_ServoDyn_WT1.dat": [
+        "--- \n",
+        "+++ \n",
+        "@@ -80 +80 @@\n",
+        "-\"default\"     DLL_DT        - Communication interval for dynamic library (s) (or \"default\") [used only with Bladed Interface]",
+        "+0.00625    DLL_DT        - Communication interval for dynamic library (s) (or \"default\") [used only with Bladed Interface]"
+      ],
+      "FarmInputs/FFTest_WT3.fst": [
+        "--- \n",
+        "+++ \n",
+        "@@ -7 +7 @@\n",
+        "-0.00625       DT            - Recommended module time step (s)",
+        "+0.003125    DT            - Recommended module time step (s)",
+        "@@ -68 +68 @@\n",
+        "-2    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}",
+        "+0    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}"
+      ],
+      "FarmInputs/FFTest_WT1.fst": [
+        "--- \n",
+        "+++ \n",
+        "@@ -7 +7 @@\n",
+        "-0.00625       DT            - Recommended module time step (s)",
+        "+0.003125    DT            - Recommended module time step (s)",
+        "@@ -68 +68 @@\n",
+        "-2    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}",
+        "+0    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}"
+      ],
+      "FarmInputs/NRELOffshrBsline5MW_Onshore_ServoDyn_WT3.dat": [
+        "--- \n",
+        "+++ \n",
+        "@@ -80 +80 @@\n",
+        "-\"default\"     DLL_DT        - Communication interval for dynamic library (s) (or \"default\") [used only with Bladed Interface]",
+        "+0.00625    DLL_DT        - Communication interval for dynamic library (s) (or \"default\") [used only with Bladed Interface]"
+      ],
+      "FarmInputs/NRELOffshrBsline5MW_Onshore_ServoDyn_WT2.dat": [
+        "--- \n",
+        "+++ \n",
+        "@@ -80 +80 @@\n",
+        "-\"default\"     DLL_DT        - Communication interval for dynamic library (s) (or \"default\") [used only with Bladed Interface]",
+        "+0.00625    DLL_DT        - Communication interval for dynamic library (s) (or \"default\") [used only with Bladed Interface]"
+      ]
+    }
+  },
+  "dt-quarter": {
+    "status": "CONTROL_PROBE_COMPLETE",
+    "input_differences": {
+      "FarmInputs/FFTest_WT2.fst": [
+        "--- \n",
+        "+++ \n",
+        "@@ -7 +7 @@\n",
+        "-0.00625       DT            - Recommended module time step (s)",
+        "+0.0015625    DT            - Recommended module time step (s)",
+        "@@ -68 +68 @@\n",
+        "-2    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}",
+        "+0    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}"
+      ],
+      "FarmInputs/NRELOffshrBsline5MW_Onshore_ServoDyn_WT1.dat": [
+        "--- \n",
+        "+++ \n",
+        "@@ -80 +80 @@\n",
+        "-\"default\"     DLL_DT        - Communication interval for dynamic library (s) (or \"default\") [used only with Bladed Interface]",
+        "+0.00625    DLL_DT        - Communication interval for dynamic library (s) (or \"default\") [used only with Bladed Interface]"
+      ],
+      "FarmInputs/FFTest_WT3.fst": [
+        "--- \n",
+        "+++ \n",
+        "@@ -7 +7 @@\n",
+        "-0.00625       DT            - Recommended module time step (s)",
+        "+0.0015625    DT            - Recommended module time step (s)",
+        "@@ -68 +68 @@\n",
+        "-2    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}",
+        "+0    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}"
+      ],
+      "FarmInputs/FFTest_WT1.fst": [
+        "--- \n",
+        "+++ \n",
+        "@@ -7 +7 @@\n",
+        "-0.00625       DT            - Recommended module time step (s)",
+        "+0.0015625    DT            - Recommended module time step (s)",
+        "@@ -68 +68 @@\n",
+        "-2    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}",
+        "+0    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}"
+      ],
+      "FarmInputs/NRELOffshrBsline5MW_Onshore_ServoDyn_WT3.dat": [
+        "--- \n",
+        "+++ \n",
+        "@@ -80 +80 @@\n",
+        "-\"default\"     DLL_DT        - Communication interval for dynamic library (s) (or \"default\") [used only with Bladed Interface]",
+        "+0.00625    DLL_DT        - Communication interval for dynamic library (s) (or \"default\") [used only with Bladed Interface]"
+      ],
+      "FarmInputs/NRELOffshrBsline5MW_Onshore_ServoDyn_WT2.dat": [
+        "--- \n",
+        "+++ \n",
+        "@@ -80 +80 @@\n",
+        "-\"default\"     DLL_DT        - Communication interval for dynamic library (s) (or \"default\") [used only with Bladed Interface]",
+        "+0.00625    DLL_DT        - Communication interval for dynamic library (s) (or \"default\") [used only with Bladed Interface]"
+      ]
+    }
+  },
+  "tower-40": {
+    "status": "CONTROL_PROBE_COMPLETE",
+    "input_differences": {
+      "FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat": [
+        "--- \n",
+        "+++ \n",
+        "@@ -107 +107 @@\n",
+        "-         20   TwrNodes    - Number of tower nodes used for analysis (-)",
+        "+40    TwrNodes    - Number of tower nodes used for analysis (-)"
+      ],
+      "FarmInputs/FFTest_WT2.fst": [
+        "--- \n",
+        "+++ \n",
+        "@@ -68 +68 @@\n",
+        "-2    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}",
+        "+0    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}"
+      ],
+      "FarmInputs/FFTest_WT3.fst": [
+        "--- \n",
+        "+++ \n",
+        "@@ -68 +68 @@\n",
+        "-2    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}",
+        "+0    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}"
+      ],
+      "FarmInputs/FFTest_WT1.fst": [
+        "--- \n",
+        "+++ \n",
+        "@@ -68 +68 @@\n",
+        "-2    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}",
+        "+0    WrVTK         - VTK visualization data output: (switch) {0=none; 1=initialization data only; 2=animation; 3=mode shapes}"
+      ]
+    }
+  },
+  "baseline_warning_turbines": [
+    "2",
+    "3"
+  ],
+  "low_domain_x_max_m": 2002.4279999999999,
+  "turbine_x_m": [
+    0,
+    504,
+    1008
+  ]
+}

@@ -1,0 +1,16 @@
+Working directory: /Users/eason/Desktop/wfcrl/wind farm RL
+Original independent output root: /var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt
+
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. /opt/anaconda3/bin/python -m pytest blender_frontend/tests/test_camera_projection.py blender_frontend/tests/test_custom_cameras.py blender_frontend/tests/test_custom_camera_capture.py blender_frontend/tests/test_custom_camera_preview.py blender_frontend/tests/test_custom_camera_v3.py -q -p no:cacheprovider
+
+WFRL_TEST_OUTPUT="/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt/native" BLENDER_USER_CONFIG="/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt/native-config" PYTHONDONTWRITEBYTECODE=1 /Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup --python-exit-code 1 --python blender_frontend/tests/blender/custom_camera_v3_regression.py
+
+WFRL_TEST_OUTPUT="/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt/window-final" BLENDER_USER_CONFIG="/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt/window-config-final" TMPDIR="/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt" PYTHONDONTWRITEBYTECODE=1 /Applications/Blender.app/Contents/MacOS/Blender --factory-startup --window-geometry 80 80 1280 900 --python-exit-code 1 --python "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt/review_window_corrected.py"
+The initial harness used window/, window-config/, review_window.py; its failure is preserved and excluded from product conclusions.
+
+WFRL_TEST_OUTPUT="/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt/exit-final" BLENDER_USER_CONFIG="/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt/exit-config" TMPDIR="/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-t1-final-review-tuzcf_rt" PYTHONDONTWRITEBYTECODE=1 /Applications/Blender.app/Contents/MacOS/Blender --factory-startup --window-geometry 80 80 1000 780 --python-exit-code 1 --python blender_frontend/tests/blender/custom_camera_exit_regression.py
+
+/opt/anaconda3/bin/python /tmp/wfrl-t1-capture-audit.py
+
+CUA real window actions are described in report.md and visible in this task's tool transcript. ui-states.jsonl is read-only state monitoring, not mouse/keyboard input injection.
+Reproduction: use a fresh unique output/config/TMPDIR and adjust the audit input pointer; never reuse the historical evidence output path.

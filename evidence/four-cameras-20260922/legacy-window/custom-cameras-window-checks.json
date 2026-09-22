@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "pid": 74144,
+  "environment": "separate visible Blender window",
+  "interaction": "scripted-window; drag, joystick and key events simulated",
+  "real_playback": "screen.animation_play across timer turns, no playback mocks",
+  "checks": {
+    "real_playback_paused": true,
+    "simulated_drag_roll37": true,
+    "simulated_joystick_timer": true,
+    "stages_preserve_draft": true,
+    "confirm_restores_real_playback": true,
+    "cancel_existing_restores_real_playback": true,
+    "new_cancel_keeps_empty_and_paused": true,
+    "two_slots_switch_without_seeking": true,
+    "simulated_native_navigation_blocked": true,
+    "paused_confirmation_stays_paused": true,
+    "single_viewport_and_output_unchanged": true,
+    "session_change_releases_timer_and_draw": true,
+    "scene_rebuild_releases_resources_and_slots": true,
+    "unregister_releases_resources_and_handlers": true,
+    "no_save_operation": true
+  },
+  "error": null
+}

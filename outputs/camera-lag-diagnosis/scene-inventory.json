@@ -1,0 +1,138 @@
+{
+  "meshes": 2363,
+  "prefix_counts": {
+    "Cube": 1,
+    "WFRL.Turbine": 95,
+    "WFRL.Terrain": 1,
+    "WFRL.Landscape": 2263,
+    "WFRL.Deflection": 3
+  },
+  "largest_meshes": [
+    [
+      "WFRL.Landscape.GrassTufts",
+      164325
+    ],
+    [
+      "WFRL.Terrain",
+      108661
+    ],
+    [
+      "WFRL.Landscape.GrassCoverPatches",
+      33836
+    ],
+    [
+      "WFRL.Landscape.DistantRidge1",
+      33033
+    ],
+    [
+      "WFRL.Landscape.DistantRidge2",
+      33033
+    ],
+    [
+      "WFRL.Landscape.DistantRidge3",
+      33033
+    ],
+    [
+      "WFRL.Landscape.BareSoilPatches",
+      11535
+    ],
+    [
+      "WFRL.Landscape.ServiceRoad",
+      6525
+    ],
+    [
+      "WFRL.Turbine.T1.Blade1",
+      4418
+    ],
+    [
+      "WFRL.Turbine.T1.Blade2",
+      4418
+    ],
+    [
+      "WFRL.Turbine.T1.Blade3",
+      4418
+    ],
+    [
+      "WFRL.Deflection.T1.Ghost",
+      4418
+    ],
+    [
+      "WFRL.Turbine.T1.Nacelle",
+      2176
+    ],
+    [
+      "WFRL.Turbine.T1.Spinner",
+      1537
+    ],
+    [
+      "WFRL.Turbine.T1.Tower",
+      768
+    ]
+  ],
+  "lights": [
+    [
+      "Light",
+      "POINT",
+      1000.0
+    ],
+    [
+      "WFRL.Light.Key",
+      "SUN",
+      1.399999976158142
+    ],
+    [
+      "WFRL.Light.Fill",
+      "SUN",
+      0.0
+    ],
+    [
+      "WFRL.Light.Rim",
+      "SUN",
+      0.0
+    ]
+  ],
+  "images": [
+    [
+      "kloofendal_48d_partly_cloudy_puresky_2k.hdr",
+      [
+        2048,
+        1024
+      ]
+    ],
+    [
+      "Render Result",
+      [
+        0,
+        0
+      ]
+    ],
+    [
+      "rocky_terrain_02_diff_2k.jpg",
+      [
+        2048,
+        2048
+      ]
+    ],
+    [
+      "rocky_terrain_02_nor_gl_2k.jpg",
+      [
+        2048,
+        2048
+      ]
+    ],
+    [
+      "rocky_terrain_02_rough_2k.jpg",
+      [
+        2048,
+        2048
+      ]
+    ],
+    [
+      "Viewer Node",
+      [
+        256,
+        256
+      ]
+    ]
+  ]
+}

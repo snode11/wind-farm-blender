@@ -1,0 +1,25 @@
+{
+  "actions": [
+    [
+      "drag_1",
+      1790075133535,
+      1790075134350
+    ],
+    [
+      "drag_2",
+      1790075153663,
+      1790075154217
+    ],
+    [
+      "drag_3",
+      1790075155350,
+      1790075155767
+    ]
+  ],
+  "t0_boundary": "CUA drag method entry; not OS event injection",
+  "time_base": "Unix milliseconds; plugin events include unix_s",
+  "limitations": [
+    "CUA delivered one handled direction update per drag; not a dense physical mouse event stream.",
+    "t4 is draw callback completion, not physical illumination."
+  ]
+}

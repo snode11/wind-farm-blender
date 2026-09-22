@@ -1,0 +1,11 @@
+{
+  "status": "complete",
+  "expected_frames": 2,
+  "verified_frames": 2,
+  "rendered_this_run": 0,
+  "wall_seconds": 0.023734458023682237,
+  "preparation_seconds": 6.157874959055334,
+  "config_sha256": "8111621327138ab0f5bfb441e1753287cc91d08c81db9ccdedfd54c39fe29b29",
+  "source_status": "REVIEW_ONLY",
+  "output": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/native-regression-fixed/masters"
+}

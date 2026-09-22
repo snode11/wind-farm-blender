@@ -1,0 +1,62 @@
+{
+  "status": "PASS",
+  "checks": {
+    "parameter_stale_failure_old_group": true,
+    "live_undo_refs_timeline": true,
+    "shared_settings_grid_summary": true,
+    "cancel_between_groups_no_extra_group_restore": true,
+    "cancel_during_group_complete_boundary": true,
+    "final_numeric_state_committed": true,
+    "scripted_continuous_direction_latest_state": true
+  },
+  "environment": {
+    "machine": "arm64",
+    "system": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "gpu": "Metal API",
+    "vendor": "Apple M5 Pro",
+    "blender": "5.2.1 LTS",
+    "window": [
+      1000,
+      780
+    ],
+    "ui_scale": 2.0,
+    "preview_long_edge": 640,
+    "source": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/mappo",
+    "model": "sha256:d491dc9bee9476f426b3",
+    "fingerprints": {
+      "blender_frontend/wfrl_blender/custom_camera_capture.py": "35fc580b0589988a507a76418ea7d797a5866b804c65b2d98d519dfdd33d0767",
+      "blender_frontend/wfrl_blender/custom_camera_history.py": "459c91a45c7100e2baeaacb179689669f7f5dfc528496f7e00f1a64943e34fe1",
+      "blender_frontend/wfrl_blender/custom_cameras.py": "41e59b522221479cdced815d23c604f21a34696570e9cb33bbe0bbdf20be91ea",
+      "blender_frontend/wfrl_blender/custom_camera_diagnostics.py": "d59fe6af7ac7129bf3bd4bf5653128b5d009c268ffbae0a9c3e31d5c25345d44",
+      "blender_frontend/wfrl_blender/custom_camera_preview.py": "0375ed9d4180f55370324d23c0c043ba9f9d28537a145b9de46945389f8ffa08"
+    }
+  },
+  "single_first_s": 0.16635249997489154,
+  "quad_first_s": 0.35573433386161923,
+  "cancel_call_to_accept_s": 1.5420373529195786e-06,
+  "cancel_accept_to_stop_s": 0.013621832942590117,
+  "continuous_direction": {
+    "input_events": 50,
+    "draws": 4,
+    "final_version": 15,
+    "final_parameters": {
+      "location": [
+        2.658367156982422e-05,
+        -1.7199571132659912,
+        1.4736875295639038
+      ],
+      "yaw": 166.4376474203746,
+      "pitch": -39.98402087505671,
+      "roll": 0.0,
+      "fov": 85.0,
+      "vfov": 46.6921272277832,
+      "focal_length_mm_record": null,
+      "output_long_edge_px": 640,
+      "clip_near_m": 0.004999999888241291,
+      "clip_far_m": 30000.0
+    },
+    "source": "scripted change calls; not OS mouse event latency",
+    "no_stale_catchup_after_stop": true
+  },
+  "measurement_boundary": "Scripted handler/GPU/callback probes; no external t0 in this phase"
+}

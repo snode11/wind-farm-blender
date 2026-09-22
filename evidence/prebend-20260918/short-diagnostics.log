@@ -1,0 +1,1 @@
+T1 {'expected': 13, 'valid': 3, 'valid_fraction': 0.23076923076923078, 'passages': 3, 'missed_passages': 0, 'mae_m': 0.14278570027534343, 'p95_m': 0.16968493216162078, 'max_abs_m': 0.17088551154513532, 'max_overestimate_m': 0.0, 'signed_min_m': -0.17088551154513532, 'signed_max_m': -0.0985918715709051} True False

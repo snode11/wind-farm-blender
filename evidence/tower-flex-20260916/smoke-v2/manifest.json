@@ -1,0 +1,160 @@
+{
+  "schema": "wfrl.farm-flex-review.v2",
+  "status": "REVIEW_ONLY",
+  "source": "FAST.Farm",
+  "segment": {
+    "start_s": 117.0,
+    "end_s": 118.0
+  },
+  "turbine_ids": [
+    "T1",
+    "T2",
+    "T3"
+  ],
+  "layout_m": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      504,
+      0,
+      0
+    ],
+    [
+      1008,
+      0,
+      0
+    ]
+  ],
+  "source_fps": 40,
+  "reference_frame": 0,
+  "includes_rigid_motion": true,
+  "max_surface_fit_error_m": 1.612517024337335e-05,
+  "discrete_collision_certificates": 369,
+  "replay": {
+    "threshold_m": 7.0,
+    "hysteresis_m": 0.1,
+    "max_hold_s": 5.0,
+    "passage_margin": 1.25
+  },
+  "policy": {
+    "checkpoint": "mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt",
+    "sha256": "27c8c5855b2f6b2dca939258c8bf0ce3ac653359071727dabc6f08c0aeacaa61",
+    "environment": "Dec_Turb3_Row1_Fastfarm",
+    "turbine_order": [
+      "T1",
+      "T2",
+      "T3"
+    ],
+    "obs_keys": [
+      "yaw",
+      "wind_speed",
+      "wind_direction"
+    ],
+    "obs_mean": [
+      -1.0596270561218262,
+      5.895106792449951,
+      269.99871826171875
+    ],
+    "obs_var": [
+      0.48155131936073303,
+      2.213332176208496,
+      0.3037745952606201
+    ],
+    "controls": [
+      "yaw"
+    ],
+    "inference": "deterministic Normal.mean; stored normalization, no refit",
+    "action_unit": "yaw increment degrees per control step"
+  },
+  "controller_sha256": "3a17b3aa8f0d21b25be2c1783c4fafdbe492def504b0c043015905786ebcc75a",
+  "wind_sha256": "59839da1edc54825468cb91428104fc6491c88d4ef969fc45b8ab87134cfc2f2",
+  "calibration": {
+    "origin_m": [
+      -2.0,
+      0.0,
+      87.6
+    ],
+    "beam_directions": [
+      [
+        -0.11233611576153554,
+        0.0,
+        -0.9936702657801585
+      ],
+      [
+        -0.14780941112961063,
+        0.0,
+        -0.9890158633619168
+      ],
+      [
+        -0.18292192244763159,
+        0.0,
+        -0.983127443563683
+      ]
+    ],
+    "frame": "nacelle material frame at rest; transported by solver NacelleSurface rotation and translation"
+  },
+  "validation": "discrete surfaces only; no temporal/span refinement certification",
+  "diagnostic_only": false,
+  "controller_validation": [
+    {
+      "turbine_id": "T1",
+      "rpm_range": [
+        10.5607738,
+        11.9743328
+      ],
+      "pitch_deg_range": [
+        2.47576737,
+        9.89420986
+      ],
+      "final_actual_yaw_deg": 2.49016595,
+      "finite": true,
+      "pitch_tolerance_deg": 0.05,
+      "passed": true
+    },
+    {
+      "turbine_id": "T2",
+      "rpm_range": [
+        10.2626657,
+        11.4329519
+      ],
+      "pitch_deg_range": [
+        -3.86755419e-11,
+        7.07306528
+      ],
+      "final_actual_yaw_deg": -4.41519117,
+      "finite": true,
+      "pitch_tolerance_deg": 0.05,
+      "passed": true
+    },
+    {
+      "turbine_id": "T3",
+      "rpm_range": [
+        8.54428768,
+        10.8348141
+      ],
+      "pitch_deg_range": [
+        0.0,
+        0.0
+      ],
+      "final_actual_yaw_deg": 1.37632453,
+      "finite": true,
+      "pitch_tolerance_deg": 0.05,
+      "passed": true
+    }
+  ],
+  "files": {
+    "geometry.npz": "34239cc077450cced5c6fe8ff5157a2f56f3b63500dcbc83fd26aab39f35bacc",
+    "data.json": "83026135f0cb2c7d4bf9409f45133e310d5eead6e7c36a92c76a637acb0446bc",
+    "source-surfaces.json": "fd70a7bfa0affa40f3cb255d6d2566d4b62648f2afe7d5597f5311348b16f9eb",
+    "tower-motion.npz": "6fe1feab6a076b4bdc807cc121ec5beef3d933cc563064c868eb6cc1b6f981bb",
+    "telemetry.json": "ce4a36e5c91b6d092842c0626966541b1ef81900a4087695cf2c177236690813",
+    "deflection-t1.json": "ddbdc49cd6104484cd6c3bbfc23472e14de14b59c01b1d503416741a1e16ab75"
+  },
+  "tower_model": "elastodyn-flexible",
+  "max_support_fit_error_m": 1.4929776132914203e-05,
+  "clearance_definition": "Tip section centroid to same-global-height horizontal section of solver triangulated moving tower; not whole-blade minimum",
+  "estimator_boundary": "Fixed calibrated slant-range formula retained; tower bending is NOT compensated in the estimate; error is against moving-tower truth"
+}

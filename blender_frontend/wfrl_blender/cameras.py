@@ -355,10 +355,42 @@ NACELLE_TARGET = (-13.2, -2.3, -60.6)
 NACELLE_FOV = 120.0
 
 
+def nacelle_side_view(camera):
+    """Turn the existing camera toward the lower outboard rotor sector."""
+    import math
+    from mathutils import Vector
+    key = 'wfrl_nacelle_before_side'
+    if key not in camera:
+        camera[key] = [float(camera['gimbal_yaw']), float(camera['gimbal_pitch']),
+                       float(camera['gimbal_fov']), float(camera.get('gimbal_roll', 0)),
+                       float(camera.data.shift_x), float(camera.data.shift_y)]
+    # In the rolled nacelle image, -Y is to the right. Aim into the sector
+    # between the downward blade and the lower-right rotor edge in the sketch.
+    direction = Vector((-13.2, -26.0, -55.0)) - camera.location
+    yaw = math.degrees(math.atan2(direction.y, direction.x))
+    pitch = math.degrees(math.atan2(direction.z, math.hypot(direction.x, direction.y)))
+    camera['gimbal_roll'] = 180.0
+    return aim_gimbal(camera, yaw, pitch, camera['gimbal_fov'])
+
+
+def restore_nacelle_view(camera):
+    """Return to the pre-shortcut view; ordinary selection preserves manual PTZ."""
+    key = 'wfrl_nacelle_before_side'
+    if key in camera:
+        yaw, pitch, fov, roll, shift_x, shift_y = camera[key]
+        del camera[key]
+        camera['gimbal_roll'] = roll
+        camera.data.shift_x, camera.data.shift_y = shift_x, shift_y
+        aim_gimbal(camera, yaw, pitch, fov)
+    return camera
+
+
 def reset_nacelle_gimbal(camera):
     """Restore the installed optical centre and fixed clearance composition."""
     import math
     from mathutils import Vector
+    if 'wfrl_nacelle_before_side' in camera:
+        del camera['wfrl_nacelle_before_side']
     camera.location = NACELLE_LOCATION
     direction = Vector(NACELLE_TARGET) - camera.location
     yaw = math.degrees(math.atan2(direction.y, direction.x))
@@ -546,3 +578,62 @@ def ensure_radar_closeup_camera(scene, turbine_id):
     camera.data.show_passepartout = False
     camera['provenance'] = '雷达安装特写；外壳为示意，光束不代表命中点或测距结果'
     return camera
+
+
+def fit_camera_view(area, scene, margin=16):
+    """Show the complete frame inside the unobscured part of one viewport.
+
+    Unlike fill_camera_view this is a contain fit. Side panels can overlap the
+    WINDOW region, so reserve their actual intersection before computing zoom.
+    Neither the optical camera nor the scene output dimensions are modified.
+    Returns False if Blender's hard minimum zoom prevents a full contain fit
+    (for example an extreme portrait frame or an almost entirely covered view).
+    """
+    import math
+    region = next((item for item in area.regions if item.type == 'WINDOW'), None)
+    if region is None or region.width <= 0 or region.height <= 0:
+        return
+    space = area.spaces.active
+    left, right = region.x, region.x + region.width
+    bottom, top = region.y, region.y + region.height
+    for panel in area.regions:
+        if panel.type not in {'UI', 'TOOLS'} or panel.width <= 1:
+            continue
+        if panel.type == 'UI' and not space.show_region_ui:
+            continue
+        if panel.type == 'TOOLS' and not space.show_region_toolbar:
+            continue
+        x0, x1 = max(left, panel.x), min(right, panel.x + panel.width)
+        if x1 <= x0:
+            continue
+        if panel.x + panel.width / 2 > region.x + region.width / 2:
+            right = min(right, panel.x)
+        else:
+            left = max(left, panel.x + panel.width)
+    width, height = max(1, right - left - 2 * margin), max(1, top - bottom - 2 * margin)
+    aspect = (scene.render.resolution_x * scene.render.pixel_aspect_x /
+              (scene.render.resolution_y * scene.render.pixel_aspect_y))
+    camera = space.camera if space.use_local_camera else scene.camera
+    sensor_fit = camera.data.sensor_fit if camera is not None else 'AUTO'
+    # Blender resolves explicit sensor fit independently of output aspect:
+    # horizontal uses WINDOW width even for portrait output. AUTO uses the
+    # larger viewport dimension, then the output's own aspect fit.
+    if sensor_fit == 'HORIZONTAL':
+        frame_width, frame_height = region.width, region.width / aspect
+    elif sensor_fit == 'VERTICAL':
+        frame_width, frame_height = region.height * aspect, region.height
+    else:
+        base = max(region.width, region.height)
+        frame_width, frame_height = (base, base / aspect) if aspect >= 1 else (base * aspect, base)
+    requested_scale = min(width / frame_width, height / frame_height)
+    zoom = max(-30, min(600, (math.sqrt(4 * requested_scale) - math.sqrt(2)) * 50))
+    space.region_3d.view_camera_zoom = zoom
+    # Use the actual (possibly hard-clamped) zoom when centering the frame.
+    scale = (math.sqrt(2) + zoom / 50) ** 2 / 4
+    # Blender's camera offset translates the frame by -offset * viewport-size
+    # * 2 * zoom-factor. Its sign is the inverse of image centre displacement.
+    center_dx = (left + right) / 2 - (region.x + region.width / 2)
+    center_dy = (bottom + top) / 2 - (region.y + region.height / 2)
+    space.region_3d.view_camera_offset = (-center_dx / (2 * scale * region.width),
+                                         -center_dy / (2 * scale * region.height))
+    return scale <= requested_scale + 1e-7

@@ -1,0 +1,1016 @@
+{
+  "schema": "wfrl.camera-video-render.v1",
+  "source_sha256": {
+    "acceptance-report.md": "410aa63dae7f62c950627e2597ae366affd33ecf67561d83e6acd35b8cd7d52a",
+    "blade-reference.json": "a3fb99709cdeb689917675d210defb434a37e3211838f047af23c69e3a292212",
+    "calibration-candidate-summary.json": "cb8ad0d5e26d8ebbce840957ec560abf422ea5ba9812bda76ae028c4baf07d88",
+    "data.json": "11088f05a90a81bac2b4ab964d837b942ee20b07984147c79c688e6fae9c14cf",
+    "deflection-t1.json": "08f7950203164b9a726b35a4d234d8cdc551590ddc900092daafb6fe01d97f61",
+    "geometry.npz": "289abea277d8a4954836b53bc06a1afcc41d8098a6fabe99f74c7f2ebe4ebac1",
+    "interface-audit.json": "6df8a95131b0660937551a3007f1582a2627a223fcc76e6b4908c4f4478b2e10",
+    "manifest.json": "aeeecd7258d7f5ba2e85754c69b7bf8aa9c423cad558afc0dcdf99bbb6736124",
+    "measurement-acceptance.json": "022ec985e3a95f5f25caf97fb6db437735c1f18483816dc7b30052044373e715",
+    "reference-surfaces.npz": "bb765f868976fa193d2870a32638f2d4e18478fea9cf04da6b259406b33211f6",
+    "source-run.json": "72a318730cb5423ab7773712a775486e08e1caaeb0f72d27bdd07aab5117fbb5",
+    "source-surfaces.json": "e6d0d7cca5ab490c8b54959e00e788f47e191837409e25fdc058bb83e39d4e60",
+    "telemetry.json": "14bb1f2d074576fae9cfceaa20b2e8898fcf6c94d50c1501b719941af2a0da32",
+    "tower-motion.npz": "a8450e914a052d1a79b50bc380023655bf97332c2776c3e8eceb37d2bcc80b86",
+    "window-diagnostics.json": "837d13aeb577bf8aa9b4ce5cf39b63ab471129d15e8cb34083bf1bbce81fbab0"
+  },
+  "source_status": "REVIEW_ONLY",
+  "blender_version": "5.2.1 LTS",
+  "camera": {
+    "schema": "wfrl.camera-video-camera.v1",
+    "camera_name": "WFRL.Camera.T1.NacelleGimbal",
+    "turbine_id": "T1",
+    "camera_mount": [
+      [
+        -1.6292068494294654e-07,
+        0.9818674921989441,
+        0.18956848978996277,
+        -1.5
+      ],
+      [
+        -1.0,
+        -1.630095454174807e-07,
+        -1.5123335472821964e-08,
+        -2.299999952316284
+      ],
+      [
+        1.6052361218044098e-08,
+        -0.18956848978996277,
+        0.9818674921989441,
+        87.5999984741211
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "camera_mount_definition": "world = turbine_layout @ nacelle_source_transform @ camera_mount",
+    "parent": "WFRL.Turbine.T1.YawRoot",
+    "parent_mount_matrix_local": [
+      [
+        -1.6292068494294654e-07,
+        0.9818674921989441,
+        0.18956848978996277,
+        -1.5
+      ],
+      [
+        -1.0,
+        -1.630095454174807e-07,
+        -1.5123335472821964e-08,
+        -2.299999952316284
+      ],
+      [
+        1.6052361218044098e-08,
+        -0.18956848978996277,
+        0.9818674921989441,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "lens_mm": 57.088706970214844,
+    "sensor_width_mm": 36.0,
+    "sensor_height_mm": 24.0,
+    "effective_sensor_width_mm": 36.0,
+    "effective_sensor_height_mm": 20.25,
+    "sensor_fit": "HORIZONTAL",
+    "shift_x": 0.0,
+    "shift_y": 0.0,
+    "pixel_aspect": [
+      1.0,
+      1.0
+    ],
+    "focus_distance_m": 60.0,
+    "aperture_fstop": 8.0,
+    "dof_enabled": false,
+    "clip_start_m": 0.019999999552965164,
+    "clip_end_m": 30000.0,
+    "exposure_s": 0.001,
+    "shutter": "ideal_global_uniform",
+    "camera_model": "ideal perspective; no distortion, sensor noise, autofocus or stabilization",
+    "resolution": [
+      3840,
+      2160
+    ],
+    "world": {
+      "name": "World",
+      "color": [
+        0.05087608844041824,
+        0.05087608844041824,
+        0.05087608844041824
+      ],
+      "nodes": {
+        "nodes": [
+          {
+            "name": "World Output",
+            "type": "ShaderNodeOutputWorld",
+            "inputs": {
+              "Surface": null,
+              "Volume": null
+            },
+            "properties": {}
+          },
+          {
+            "name": "Background",
+            "type": "ShaderNodeBackground",
+            "inputs": {
+              "Color": [
+                0.02199999988079071,
+                0.03400000184774399,
+                0.05000000074505806,
+                1.0
+              ],
+              "Strength": 0.5,
+              "Weight": 0.0
+            },
+            "properties": {}
+          },
+          {
+            "name": "WFRL.Atmosphere.Sky",
+            "type": "ShaderNodeTexSky",
+            "inputs": {
+              "Vector": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "properties": {
+              "sky_type": "MULTIPLE_SCATTERING",
+              "sun_elevation": 0.2617993950843811,
+              "sun_rotation": 0.0,
+              "sun_size": 0.009512044489383698,
+              "sun_intensity": 1.0,
+              "altitude": 100.0,
+              "air_density": 1.0,
+              "ozone_density": 1.0,
+              "turbidity": 2.200000047683716,
+              "ground_albedo": 0.30000001192092896
+            }
+          },
+          {
+            "name": "WFRL.Atmosphere.HDRI",
+            "type": "ShaderNodeTexEnvironment",
+            "inputs": {
+              "Vector": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "properties": {
+              "projection": "EQUIRECTANGULAR",
+              "image": {
+                "name": "kloofendal_48d_partly_cloudy_puresky_2k.hdr",
+                "filepath": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/landscape/kloofendal_48d_partly_cloudy_puresky_2k.hdr",
+                "sha256": "5244534e9cf5b606f2ff513aa00ddb161b0a4826ffd88a0d3bd03ac29247d198",
+                "packed": false
+              }
+            }
+          },
+          {
+            "name": "WFRL.Atmosphere.Volume",
+            "type": "ShaderNodeVolumePrincipled",
+            "inputs": {
+              "Color": [
+                0.550000011920929,
+                0.699999988079071,
+                0.8399999737739563,
+                1.0
+              ],
+              "Color Attribute": "",
+              "Density": 0.0,
+              "Density Attribute": "density",
+              "Anisotropy": 0.0,
+              "Absorption Color": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "Emission Strength": 0.0,
+              "Emission Color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "Blackbody Intensity": 0.0,
+              "Blackbody Tint": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "Temperature": 1000.0,
+              "Temperature Attribute": "temperature",
+              "Weight": 0.0
+            },
+            "properties": {}
+          }
+        ],
+        "links": [
+          [
+            "Background",
+            "Background",
+            "World Output",
+            "Surface"
+          ],
+          [
+            "WFRL.Atmosphere.HDRI",
+            "Color",
+            "Background",
+            "Color"
+          ]
+        ]
+      }
+    },
+    "lights": [
+      {
+        "name": "Light",
+        "type": "POINT",
+        "energy": 1000.0,
+        "color": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "matrix_world": [
+          [
+            -0.29086464643478394,
+            -0.7711008191108704,
+            0.5663931965827942,
+            4.076245307922363
+          ],
+          [
+            0.9551711678504944,
+            -0.1998833566904068,
+            0.21839119493961334,
+            1.0054539442062378
+          ],
+          [
+            -0.05518905818462372,
+            0.6045247316360474,
+            0.7946722507476807,
+            5.903861999511719
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "angle": null,
+        "nodes": {
+          "nodes": [
+            {
+              "name": "Light Output",
+              "type": "ShaderNodeOutputLight",
+              "inputs": {
+                "Surface": null
+              },
+              "properties": {}
+            },
+            {
+              "name": "Emission",
+              "type": "ShaderNodeEmission",
+              "inputs": {
+                "Color": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "Strength": 1.0,
+                "Weight": 0.0
+              },
+              "properties": {}
+            }
+          ],
+          "links": [
+            [
+              "Emission",
+              "Emission",
+              "Light Output",
+              "Surface"
+            ]
+          ]
+        }
+      },
+      {
+        "name": "WFRL.Light.Key",
+        "type": "SUN",
+        "energy": 1.399999976158142,
+        "color": [
+          0.9800000190734863,
+          0.9700000286102295,
+          0.949999988079071
+        ],
+        "matrix_world": [
+          [
+            0.666795015335083,
+            0.31083208322525024,
+            -0.6773240566253662,
+            -650.0
+          ],
+          [
+            -0.7452411651611328,
+            0.2781130373477936,
+            -0.6060269474983215,
+            -850.0
+          ],
+          [
+            2.990613268138986e-08,
+            0.9088655114173889,
+            0.4170892536640167,
+            650.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "angle": 0.03490658476948738,
+        "nodes": {
+          "nodes": [
+            {
+              "name": "Emission",
+              "type": "ShaderNodeEmission",
+              "inputs": {
+                "Color": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "Strength": 1.0,
+                "Weight": 0.0
+              },
+              "properties": {}
+            },
+            {
+              "name": "Light Output",
+              "type": "ShaderNodeOutputLight",
+              "inputs": {
+                "Surface": null
+              },
+              "properties": {}
+            }
+          ],
+          "links": [
+            [
+              "Emission",
+              "Emission",
+              "Light Output",
+              "Surface"
+            ]
+          ]
+        }
+      },
+      {
+        "name": "WFRL.Light.Fill",
+        "type": "SUN",
+        "energy": 0.0,
+        "color": [
+          0.5799999833106995,
+          0.7599999904632568,
+          1.0
+        ],
+        "matrix_world": [
+          [
+            -0.7615393400192261,
+            -0.32315507531166077,
+            0.5618083477020264,
+            900.0
+          ],
+          [
+            0.6481186747550964,
+            -0.3797071576118469,
+            0.6601247191429138,
+            500.0
+          ],
+          [
+            -1.5190538604770154e-08,
+            0.8668294548988342,
+            0.49860477447509766,
+            420.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "angle": 0.02617993950843811,
+        "nodes": {
+          "nodes": [
+            {
+              "name": "Emission",
+              "type": "ShaderNodeEmission",
+              "inputs": {
+                "Color": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "Strength": 1.0,
+                "Weight": 0.0
+              },
+              "properties": {}
+            },
+            {
+              "name": "Light Output",
+              "type": "ShaderNodeOutputLight",
+              "inputs": {
+                "Surface": null
+              },
+              "properties": {}
+            }
+          ],
+          "links": [
+            [
+              "Emission",
+              "Emission",
+              "Light Output",
+              "Surface"
+            ]
+          ]
+        }
+      },
+      {
+        "name": "WFRL.Light.Rim",
+        "type": "SUN",
+        "energy": 0.0,
+        "color": [
+          1.0,
+          0.8799999952316284,
+          0.699999988079071
+        ],
+        "matrix_world": [
+          [
+            0.05989215150475502,
+            0.8248680233955383,
+            -0.562143862247467,
+            0.0
+          ],
+          [
+            -0.9982048273086548,
+            0.0494920052587986,
+            -0.03372849524021149,
+            0.0
+          ],
+          [
+            7.009109737055041e-08,
+            0.5631548166275024,
+            0.8263514041900635,
+            800.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "angle": 0.02617993950843811,
+        "nodes": {
+          "nodes": [
+            {
+              "name": "Emission",
+              "type": "ShaderNodeEmission",
+              "inputs": {
+                "Color": [
+                  1.0,
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "Strength": 1.0,
+                "Weight": 0.0
+              },
+              "properties": {}
+            },
+            {
+              "name": "Light Output",
+              "type": "ShaderNodeOutputLight",
+              "inputs": {
+                "Surface": null
+              },
+              "properties": {}
+            }
+          ],
+          "links": [
+            [
+              "Emission",
+              "Emission",
+              "Light Output",
+              "Surface"
+            ]
+          ]
+        }
+      }
+    ],
+    "color_management": {
+      "display_device": "sRGB",
+      "view_transform": "AgX",
+      "look": "AgX - Medium High Contrast",
+      "exposure": 0.44999998807907104,
+      "gamma": 1.0
+    }
+  },
+  "scene_sha256": null,
+  "code_sha256": {
+    "__init__.py": "22a73de17d28a21f986d09c1e93b1b5af19783645c98514f311f347c8739ad89",
+    "animation.py": "9c855c6c758809a3cd49697bcc16a65656149effa9eee9b1f0733a34edfa5c64",
+    "atmosphere.py": "c2be89452a1779b80f7023176afa5a29151b3dfd91d45ba78c01824f878e06de",
+    "backend_inflow.py": "620429ff3a997a6a270648d66cdd079ef0552da72e3e1a8bc256e52cddd238b1",
+    "blade_flex_preview.py": "e58acea3de9a53ffd7c1795dc9c1d6a3ce448c083993bcd77cb42a28d2e849fe",
+    "camera_video.py": "a3f783185802b4763b678c777536d293451a321ab97376a62f12a9c75be4cb30",
+    "cameras.py": "e95068bca3d0d2184dbe82dd3526b8b138f1830bee277f001076f96165877f41",
+    "charts.py": "b3a01e89c35a073d3a05920e3ce7896c54b771ae4cceff97639fab42066423e6",
+    "cinematic.py": "e6d933c3c1039c3b82964531f60bf578252f2e31a69020792d373792cddd9b74",
+    "clearance_replay.py": "f6f12a87af74a3b279511e6c425bd28df8f004a100461ae817c5c57c7dcbd4bf",
+    "clearance_visual.py": "91f05b33d313730f2ca05179c1e42d2febdd8253fcfb118f6979b35c434aa78a",
+    "deflection.py": "09244fd2b0908dcb02bd3abba333c09d3ac214d6ed46938986ee2cd3c2b57d63",
+    "diagnostics.py": "7675f89a3b0f05cf0933a571ffd765223438626e4b455b0fa0f0ea2279a0af3e",
+    "farm_flex.py": "799d24c9c257b378de0dbcbf7c17ffab52d99d3c03eb843592e55ced52d5fcec",
+    "health.py": "186074e5b4aac120da66078fdd8fa1af0844e9bf276c70866bbcb7fe8441fe26",
+    "history.py": "eebf62ac53d1f1c9715c61797900b84890ee9e8dfe297e523e6f38d8eee30394",
+    "landscape.py": "7453b8e4c57cc599a7403b7a7298efbba5370013bf2e4fea87cb4a79db90491c",
+    "live_scene.py": "5b0ddd22b63f16098947d2cd43a68c88ecd96d0084fe57c1c74896b99437fb73",
+    "materials.py": "f7af043872d5b246cb686435f69e863b3198b1923ebb5e6adef3dbd48f708c6b",
+    "mechanical_details.py": "7e8abdd49ff7190f6d51b36aa2321948656ba29904e6445e5c5ededb8a9dc12b",
+    "operators/__init__.py": "5cc0aac0982c7fd21323e75cdd92630bcb3d6da86ecdc4645f3211805c58e848",
+    "operators/connection.py": "0d0b12c4881ba45b2e9b3b2543d420f94d699e68a84a6b978bac6c08a6d327be",
+    "operators/history_export.py": "291378fd21c3f8cbe4c5d250fdb71e1d3281daafdc6e71701d25f3cc92086087",
+    "operators/run.py": "3c614e375639a9542825d679bb7d10aed0982ed72e92425bac2baa936b68a1c7",
+    "operators/workflow.py": "905ba1ed7fcd9639ca9ef74e377d4f7b305a48347cf3ff0daa4a341af9b365dc",
+    "overlays.py": "87b06302014b07382fca82668181ae74362bf118258ed92fc68f962c0936072a",
+    "panels/__init__.py": "d1bb420d2b334154d781489c2a3819e2bb1c155b607ef9f7ba4dfdef7c5289d5",
+    "panels/channels.py": "da783fa12ee42958f48405f393ae2e5178d900dc101860ef92ec622cbdc208ea",
+    "panels/clearance.py": "c3f4bf24804edb4b14c22c27c6cf9d7cc1338ff404d2be5e171b1c72c028ab95",
+    "panels/demo.py": "e23d79b2f3e4a51174b9cd0bbc0917f33106e88f4cd350655437dc209421d03b",
+    "panels/diagnostics.py": "c574177031850c37500351f2c64e57958c0e0a1d7c67970a27917910fe2fd69e",
+    "panels/farm_replay.py": "5be8bd08af97f6eb65cce593c017f8c4f104e4aab5a75b005e2390320fe7d1cc",
+    "panels/gimbal.py": "a478eb1566e12f50a29072d3dfe26579f49446f4c74704c4fa0fb3f5980d9d6b",
+    "panels/presentation.py": "441aa3f16cdc0a06810d8b4fa0392be570da9daed48c6e706142192d9a284883",
+    "panels/run.py": "5d308df414aeac560dca56e71a23a15e421bc4a715a644414c9eff8fe70fcbeb",
+    "panels/safety.py": "dda5d4cb536a96c1abe4b4f32974ab4e4528a3d723d89eeaf5a19873c3090f41",
+    "panels/scene.py": "8bdd22628208d5fd29df15f2ba7a4fee3ce73519c720b20dd98f3909f990d7f7",
+    "panels/status.py": "3b27ef0128ff0e8c9cbc00209f3732ad8dcf92d738bbfa2fb50b82e6681a55cd",
+    "panels/telemetry.py": "d0b75eceaaa1fa87ad0da38c4fd53818bb53659863ea96ed5716f6455c48f95f",
+    "panels/training.py": "5529f2da77aa7d27dadcc2c461126078d59c2115e11e6e18ed284b635aed8199",
+    "prebend.py": "f3cda41633717f31df1f7aa8b41fd90a9698a2f2d2b6785da73b300da98c3246",
+    "preferences.py": "fb1cd27bce5c4b1f288efa54eabc96c844b52644981f64388a7605906b4a5fde",
+    "presentation.py": "f0f7500b2f797b8b869cf26921cd6a9de4006610d69b1ac778d1a8454f37f62f",
+    "protocol.py": "cf9e4bbfecd54f2e27ce04ea663345abc17da667d700fbfc0e478bb9b9e8e20c",
+    "radar_feedback.py": "613affe1cb7def59991500b20d125451bbadc5d04f453e3efa406029e73c21d4",
+    "runtime.py": "30ed909e1142aaf1a61065aa497d3c034380b5122d7f6e99686748bf13d701ec",
+    "scene_builder.py": "c8a29daef68f5db87c84b2baa17f5b61e1c6bea26e2e7b4720694cd415790b47",
+    "scene_model.py": "4a6cdbe9d51293cd8bc9644d55c346cdc53e2c690b27c25db29593142e25d5b2",
+    "sensors.py": "a302908246f75e484daaa695ea6eb86d598581e616d03b9fa57d6cdd9ad9ad1f",
+    "state.py": "12f2504deed4af9c8407ba17a28d92348f3359f3bb830096d1abc6b3ecdfdfe4",
+    "tip_tracking.py": "2bff30c30c31ae2f77f88f22f3581ae68191f20d0a4800eec390cfa1db06c4e5",
+    "tower_motion.py": "aa355b8af9491b842a59bc5fc469706c7de8a176a5255f50f8faf93b8b23c1b8",
+    "training.py": "6e66099a7ca55ffc2d932640c0a22acd6e7a736d9568ed5d046c2a015238b61f",
+    "transport.py": "c224e9480d414492d2a0600b65e8fc21d210d53ae611507f905e0c8e19a3aee0",
+    "turbine_geometry.py": "e6d3779f110134a2132c50862f3e37cb388407c5bd28d2291458edfc7b0251fa",
+    "wake.py": "2f5043bad3eb8d02be8a0d33789e5604e1fa653cb52be7c161034107f1bd8192",
+    "workspace.py": "69d5dab7181fdd237a3d9e2a3126bdd5c3427ce92b7a1224a84023ae1b08026e"
+  },
+  "render_assets_sha256": {
+    "landscape/SOURCES.md": "8d0d5301234905058c633d76b7eebf085601b435dd600a01b4ff7d700c695362",
+    "landscape/kloofendal_48d_partly_cloudy_puresky_2k.hdr": "5244534e9cf5b606f2ff513aa00ddb161b0a4826ffd88a0d3bd03ac29247d198",
+    "landscape/rocky_terrain_02_diff_2k.jpg": "9b042fe0618ffbc3650592456d7d8d265ba9a1cb5ce802f5f1d86b7ee79508a1",
+    "landscape/rocky_terrain_02_nor_gl_2k.jpg": "556ed903180a9431b253fc1c334c769dc4615c5c0f4ef1cedf20533ae8409ce8",
+    "landscape/rocky_terrain_02_rough_2k.jpg": "89f3c7b9e467160a821cbac32a1fdfd75f13cb87c9deeb22099d16677a711126",
+    "nrel5mw_geometry.json": "28c0753a125a53400c45e4d59b7ba2af91fba2c296adf0ba7a5ad4923d0a26b5",
+    "radar/above_threshold.png": "8efb22599fed0e0d8a929fdce72144513f7cca604536832f829c4cf99fd0fcd1",
+    "radar/near_threshold.png": "83461dabefe5a4f16cbbcbba08994d696c786c6aa95a150b68d2c50e2ef75402",
+    "radar/waiting.png": "98ae4b6cfc082bec2c44ee5c6cfdbc8187457896c7ffd6015a9f5911d3f86283"
+  },
+  "external_image_sha256": {
+    "kloofendal_48d_partly_cloudy_puresky_2k.hdr": "5244534e9cf5b606f2ff513aa00ddb161b0a4826ffd88a0d3bd03ac29247d198",
+    "rocky_terrain_02_diff_2k.jpg": "9b042fe0618ffbc3650592456d7d8d265ba9a1cb5ce802f5f1d86b7ee79508a1",
+    "rocky_terrain_02_nor_gl_2k.jpg": "556ed903180a9431b253fc1c334c769dc4615c5c0f4ef1cedf20533ae8409ce8",
+    "rocky_terrain_02_rough_2k.jpg": "89f3c7b9e467160a821cbac32a1fdfd75f13cb87c9deeb22099d16677a711126"
+  },
+  "fps": 20,
+  "start_s": 117.7,
+  "end_s": 117.75,
+  "frame_count": 1,
+  "width": 3840,
+  "height": 2160,
+  "exposure_s": 0.001,
+  "exposure_samples": 2,
+  "spatial_samples": 16,
+  "integration": "uniform midpoint shutter quadrature; scene-linear float EXR then one view transform",
+  "intermediate_exr_codec": "ZIP",
+  "output_color_management": "FOLLOW_SCENE",
+  "master": "16-bit PNG after fixed color transform",
+  "engine": "BLENDER_EEVEE",
+  "device": "gpu",
+  "denoising": false,
+  "scene_scope": "single",
+  "rendered_turbines": [
+    "T1"
+  ],
+  "removed_objects": [
+    "WFRL.Camera.T2.NacelleGimbal",
+    "WFRL.Camera.T3.NacelleGimbal",
+    "WFRL.Deflection.T1.Actual",
+    "WFRL.Deflection.T1.Axial",
+    "WFRL.Deflection.T1.Ghost",
+    "WFRL.Deflection.T1.IP",
+    "WFRL.Deflection.T1.OoP",
+    "WFRL.Deflection.T1.Reference",
+    "WFRL.Deflection.T1.Total",
+    "WFRL.Fixture.DisXY1",
+    "WFRL.Fixture.DisXY2",
+    "WFRL.Fixture.DisXY3",
+    "WFRL.Fixture.T1.LidarRay1",
+    "WFRL.Fixture.T1.LidarRay2",
+    "WFRL.Fixture.T1.LidarRay3",
+    "WFRL.Fixture.T1.SensorFrustum",
+    "WFRL.Grid.X-100",
+    "WFRL.Grid.X0",
+    "WFRL.Grid.X100",
+    "WFRL.Grid.X1000",
+    "WFRL.Grid.X1100",
+    "WFRL.Grid.X1200",
+    "WFRL.Grid.X200",
+    "WFRL.Grid.X300",
+    "WFRL.Grid.X400",
+    "WFRL.Grid.X500",
+    "WFRL.Grid.X600",
+    "WFRL.Grid.X700",
+    "WFRL.Grid.X800",
+    "WFRL.Grid.X900",
+    "WFRL.Grid.Y-100",
+    "WFRL.Grid.Y-200",
+    "WFRL.Grid.Y0",
+    "WFRL.Grid.Y100",
+    "WFRL.Grid.Y200",
+    "WFRL.Grid.Y300",
+    "WFRL.Inflow.Arrow1.Head",
+    "WFRL.Inflow.Arrow1.Shaft",
+    "WFRL.Inflow.Arrow2.Head",
+    "WFRL.Inflow.Arrow2.Shaft",
+    "WFRL.Inflow.Arrow3.Head",
+    "WFRL.Inflow.Arrow3.Shaft",
+    "WFRL.Label.T1",
+    "WFRL.Label.T2",
+    "WFRL.Label.T3",
+    "WFRL.Turbine.T1.ClearanceRadar.Beam1",
+    "WFRL.Turbine.T1.ClearanceRadar.Beam2",
+    "WFRL.Turbine.T1.ClearanceRadar.Beam3",
+    "WFRL.Turbine.T1.TipTrail.B1",
+    "WFRL.Turbine.T1.TipTrail.B2",
+    "WFRL.Turbine.T1.TipTrail.B3",
+    "WFRL.Turbine.T2",
+    "WFRL.Turbine.T2.AccessRail.Post-1.0",
+    "WFRL.Turbine.T2.AccessRail.Post-1.1",
+    "WFRL.Turbine.T2.AccessRail.Post1.0",
+    "WFRL.Turbine.T2.AccessRail.Post1.1",
+    "WFRL.Turbine.T2.AccessRail.Top-1",
+    "WFRL.Turbine.T2.AccessRail.Top1",
+    "WFRL.Turbine.T2.AccessStep0",
+    "WFRL.Turbine.T2.AccessStep1",
+    "WFRL.Turbine.T2.AccessStep2",
+    "WFRL.Turbine.T2.Blade1",
+    "WFRL.Turbine.T2.Blade1.PitchRoot",
+    "WFRL.Turbine.T2.Blade1.PitchSeal",
+    "WFRL.Turbine.T2.Blade1.RootFairing",
+    "WFRL.Turbine.T2.Blade1.RootFlange",
+    "WFRL.Turbine.T2.Blade2",
+    "WFRL.Turbine.T2.Blade2.PitchRoot",
+    "WFRL.Turbine.T2.Blade2.PitchSeal",
+    "WFRL.Turbine.T2.Blade2.RootFairing",
+    "WFRL.Turbine.T2.Blade2.RootFlange",
+    "WFRL.Turbine.T2.Blade3",
+    "WFRL.Turbine.T2.Blade3.PitchRoot",
+    "WFRL.Turbine.T2.Blade3.PitchSeal",
+    "WFRL.Turbine.T2.Blade3.RootFairing",
+    "WFRL.Turbine.T2.Blade3.RootFlange",
+    "WFRL.Turbine.T2.ClearanceRadar",
+    "WFRL.Turbine.T2.ClearanceRadar.Beam1",
+    "WFRL.Turbine.T2.ClearanceRadar.Beam2",
+    "WFRL.Turbine.T2.ClearanceRadar.Beam3",
+    "WFRL.Turbine.T2.ClearanceRadar.Bezel",
+    "WFRL.Turbine.T2.ClearanceRadar.Bracket",
+    "WFRL.Turbine.T2.ClearanceRadar.Cable",
+    "WFRL.Turbine.T2.ClearanceRadar.CableGland",
+    "WFRL.Turbine.T2.ClearanceRadar.CoverScrew0",
+    "WFRL.Turbine.T2.ClearanceRadar.CoverScrew1",
+    "WFRL.Turbine.T2.ClearanceRadar.CoverScrew2",
+    "WFRL.Turbine.T2.ClearanceRadar.CoverScrew3",
+    "WFRL.Turbine.T2.ClearanceRadar.CoverSeal",
+    "WFRL.Turbine.T2.ClearanceRadar.MountPad",
+    "WFRL.Turbine.T2.ClearanceRadar.MountPlate",
+    "WFRL.Turbine.T2.ClearanceRadar.ServiceCover",
+    "WFRL.Turbine.T2.ClearanceRadar.Window",
+    "WFRL.Turbine.T2.Foundation",
+    "WFRL.Turbine.T2.Hub",
+    "WFRL.Turbine.T2.MainShaft",
+    "WFRL.Turbine.T2.Nacelle",
+    "WFRL.Turbine.T2.NacelleCameraBracket",
+    "WFRL.Turbine.T2.NacelleRoof",
+    "WFRL.Turbine.T2.RoofGasket",
+    "WFRL.Turbine.T2.Rotor",
+    "WFRL.Turbine.T2.ServiceDoor.Handle",
+    "WFRL.Turbine.T2.ServiceDoor.Hinge0",
+    "WFRL.Turbine.T2.ServiceDoor.Hinge1",
+    "WFRL.Turbine.T2.ServiceDoor.Panel",
+    "WFRL.Turbine.T2.ServiceDoor.Reveal",
+    "WFRL.Turbine.T2.ShellJoin-1",
+    "WFRL.Turbine.T2.ShellJoin1",
+    "WFRL.Turbine.T2.Spinner",
+    "WFRL.Turbine.T2.Tower",
+    "WFRL.Turbine.T2.TowerCollar0",
+    "WFRL.Turbine.T2.TowerCollar87",
+    "WFRL.Turbine.T2.TowerWeld28",
+    "WFRL.Turbine.T2.TowerWeld56",
+    "WFRL.Turbine.T2.Vent.Louvre-1.0",
+    "WFRL.Turbine.T2.Vent.Louvre-1.1",
+    "WFRL.Turbine.T2.Vent.Louvre-1.2",
+    "WFRL.Turbine.T2.Vent.Louvre-1.3",
+    "WFRL.Turbine.T2.Vent.Louvre-1.4",
+    "WFRL.Turbine.T2.Vent.Louvre-1.5",
+    "WFRL.Turbine.T2.Vent.Louvre1.0",
+    "WFRL.Turbine.T2.Vent.Louvre1.1",
+    "WFRL.Turbine.T2.Vent.Louvre1.2",
+    "WFRL.Turbine.T2.Vent.Louvre1.3",
+    "WFRL.Turbine.T2.Vent.Louvre1.4",
+    "WFRL.Turbine.T2.Vent.Louvre1.5",
+    "WFRL.Turbine.T2.Vent.Recess-1",
+    "WFRL.Turbine.T2.Vent.Recess1",
+    "WFRL.Turbine.T2.YawBearing",
+    "WFRL.Turbine.T2.YawPedestal",
+    "WFRL.Turbine.T2.YawRoot",
+    "WFRL.Turbine.T2.YawSeal",
+    "WFRL.Turbine.T2.YawSkirt",
+    "WFRL.Turbine.T3",
+    "WFRL.Turbine.T3.AccessRail.Post-1.0",
+    "WFRL.Turbine.T3.AccessRail.Post-1.1",
+    "WFRL.Turbine.T3.AccessRail.Post1.0",
+    "WFRL.Turbine.T3.AccessRail.Post1.1",
+    "WFRL.Turbine.T3.AccessRail.Top-1",
+    "WFRL.Turbine.T3.AccessRail.Top1",
+    "WFRL.Turbine.T3.AccessStep0",
+    "WFRL.Turbine.T3.AccessStep1",
+    "WFRL.Turbine.T3.AccessStep2",
+    "WFRL.Turbine.T3.Blade1",
+    "WFRL.Turbine.T3.Blade1.PitchRoot",
+    "WFRL.Turbine.T3.Blade1.PitchSeal",
+    "WFRL.Turbine.T3.Blade1.RootFairing",
+    "WFRL.Turbine.T3.Blade1.RootFlange",
+    "WFRL.Turbine.T3.Blade2",
+    "WFRL.Turbine.T3.Blade2.PitchRoot",
+    "WFRL.Turbine.T3.Blade2.PitchSeal",
+    "WFRL.Turbine.T3.Blade2.RootFairing",
+    "WFRL.Turbine.T3.Blade2.RootFlange",
+    "WFRL.Turbine.T3.Blade3",
+    "WFRL.Turbine.T3.Blade3.PitchRoot",
+    "WFRL.Turbine.T3.Blade3.PitchSeal",
+    "WFRL.Turbine.T3.Blade3.RootFairing",
+    "WFRL.Turbine.T3.Blade3.RootFlange",
+    "WFRL.Turbine.T3.ClearanceRadar",
+    "WFRL.Turbine.T3.ClearanceRadar.Beam1",
+    "WFRL.Turbine.T3.ClearanceRadar.Beam2",
+    "WFRL.Turbine.T3.ClearanceRadar.Beam3",
+    "WFRL.Turbine.T3.ClearanceRadar.Bezel",
+    "WFRL.Turbine.T3.ClearanceRadar.Bracket",
+    "WFRL.Turbine.T3.ClearanceRadar.Cable",
+    "WFRL.Turbine.T3.ClearanceRadar.CableGland",
+    "WFRL.Turbine.T3.ClearanceRadar.CoverScrew0",
+    "WFRL.Turbine.T3.ClearanceRadar.CoverScrew1",
+    "WFRL.Turbine.T3.ClearanceRadar.CoverScrew2",
+    "WFRL.Turbine.T3.ClearanceRadar.CoverScrew3",
+    "WFRL.Turbine.T3.ClearanceRadar.CoverSeal",
+    "WFRL.Turbine.T3.ClearanceRadar.MountPad",
+    "WFRL.Turbine.T3.ClearanceRadar.MountPlate",
+    "WFRL.Turbine.T3.ClearanceRadar.ServiceCover",
+    "WFRL.Turbine.T3.ClearanceRadar.Window",
+    "WFRL.Turbine.T3.Foundation",
+    "WFRL.Turbine.T3.Hub",
+    "WFRL.Turbine.T3.MainShaft",
+    "WFRL.Turbine.T3.Nacelle",
+    "WFRL.Turbine.T3.NacelleCameraBracket",
+    "WFRL.Turbine.T3.NacelleRoof",
+    "WFRL.Turbine.T3.RoofGasket",
+    "WFRL.Turbine.T3.Rotor",
+    "WFRL.Turbine.T3.ServiceDoor.Handle",
+    "WFRL.Turbine.T3.ServiceDoor.Hinge0",
+    "WFRL.Turbine.T3.ServiceDoor.Hinge1",
+    "WFRL.Turbine.T3.ServiceDoor.Panel",
+    "WFRL.Turbine.T3.ServiceDoor.Reveal",
+    "WFRL.Turbine.T3.ShellJoin-1",
+    "WFRL.Turbine.T3.ShellJoin1",
+    "WFRL.Turbine.T3.Spinner",
+    "WFRL.Turbine.T3.Tower",
+    "WFRL.Turbine.T3.TowerCollar0",
+    "WFRL.Turbine.T3.TowerCollar87",
+    "WFRL.Turbine.T3.TowerWeld28",
+    "WFRL.Turbine.T3.TowerWeld56",
+    "WFRL.Turbine.T3.Vent.Louvre-1.0",
+    "WFRL.Turbine.T3.Vent.Louvre-1.1",
+    "WFRL.Turbine.T3.Vent.Louvre-1.2",
+    "WFRL.Turbine.T3.Vent.Louvre-1.3",
+    "WFRL.Turbine.T3.Vent.Louvre-1.4",
+    "WFRL.Turbine.T3.Vent.Louvre-1.5",
+    "WFRL.Turbine.T3.Vent.Louvre1.0",
+    "WFRL.Turbine.T3.Vent.Louvre1.1",
+    "WFRL.Turbine.T3.Vent.Louvre1.2",
+    "WFRL.Turbine.T3.Vent.Louvre1.3",
+    "WFRL.Turbine.T3.Vent.Louvre1.4",
+    "WFRL.Turbine.T3.Vent.Louvre1.5",
+    "WFRL.Turbine.T3.Vent.Recess-1",
+    "WFRL.Turbine.T3.Vent.Recess1",
+    "WFRL.Turbine.T3.YawBearing",
+    "WFRL.Turbine.T3.YawPedestal",
+    "WFRL.Turbine.T3.YawRoot",
+    "WFRL.Turbine.T3.YawSeal",
+    "WFRL.Turbine.T3.YawSkirt",
+    "WFRL.WakeProxy.T1.Line0",
+    "WFRL.WakeProxy.T1.Line1",
+    "WFRL.WakeProxy.T1.Line10",
+    "WFRL.WakeProxy.T1.Line11",
+    "WFRL.WakeProxy.T1.Line12",
+    "WFRL.WakeProxy.T1.Line13",
+    "WFRL.WakeProxy.T1.Line14",
+    "WFRL.WakeProxy.T1.Line15",
+    "WFRL.WakeProxy.T1.Line2",
+    "WFRL.WakeProxy.T1.Line3",
+    "WFRL.WakeProxy.T1.Line4",
+    "WFRL.WakeProxy.T1.Line5",
+    "WFRL.WakeProxy.T1.Line6",
+    "WFRL.WakeProxy.T1.Line7",
+    "WFRL.WakeProxy.T1.Line8",
+    "WFRL.WakeProxy.T1.Line9",
+    "WFRL.WakeProxy.T1.Pulse0",
+    "WFRL.WakeProxy.T1.Pulse1",
+    "WFRL.WakeProxy.T1.Pulse10",
+    "WFRL.WakeProxy.T1.Pulse11",
+    "WFRL.WakeProxy.T1.Pulse2",
+    "WFRL.WakeProxy.T1.Pulse3",
+    "WFRL.WakeProxy.T1.Pulse4",
+    "WFRL.WakeProxy.T1.Pulse5",
+    "WFRL.WakeProxy.T1.Pulse6",
+    "WFRL.WakeProxy.T1.Pulse7",
+    "WFRL.WakeProxy.T1.Pulse8",
+    "WFRL.WakeProxy.T1.Pulse9",
+    "WFRL.WakeProxy.T1.Ring0",
+    "WFRL.WakeProxy.T1.Ring1",
+    "WFRL.WakeProxy.T1.Ring10",
+    "WFRL.WakeProxy.T1.Ring11",
+    "WFRL.WakeProxy.T1.Ring12",
+    "WFRL.WakeProxy.T1.Ring13",
+    "WFRL.WakeProxy.T1.Ring14",
+    "WFRL.WakeProxy.T1.Ring15",
+    "WFRL.WakeProxy.T1.Ring16",
+    "WFRL.WakeProxy.T1.Ring17",
+    "WFRL.WakeProxy.T1.Ring18",
+    "WFRL.WakeProxy.T1.Ring19",
+    "WFRL.WakeProxy.T1.Ring2",
+    "WFRL.WakeProxy.T1.Ring20",
+    "WFRL.WakeProxy.T1.Ring21",
+    "WFRL.WakeProxy.T1.Ring3",
+    "WFRL.WakeProxy.T1.Ring4",
+    "WFRL.WakeProxy.T1.Ring5",
+    "WFRL.WakeProxy.T1.Ring6",
+    "WFRL.WakeProxy.T1.Ring7",
+    "WFRL.WakeProxy.T1.Ring8",
+    "WFRL.WakeProxy.T1.Ring9",
+    "WFRL.WakeProxy.T1.Volume",
+    "WFRL.WakeProxy.T2.Line0",
+    "WFRL.WakeProxy.T2.Line1",
+    "WFRL.WakeProxy.T2.Line10",
+    "WFRL.WakeProxy.T2.Line11",
+    "WFRL.WakeProxy.T2.Line12",
+    "WFRL.WakeProxy.T2.Line13",
+    "WFRL.WakeProxy.T2.Line14",
+    "WFRL.WakeProxy.T2.Line15",
+    "WFRL.WakeProxy.T2.Line2",
+    "WFRL.WakeProxy.T2.Line3",
+    "WFRL.WakeProxy.T2.Line4",
+    "WFRL.WakeProxy.T2.Line5",
+    "WFRL.WakeProxy.T2.Line6",
+    "WFRL.WakeProxy.T2.Line7",
+    "WFRL.WakeProxy.T2.Line8",
+    "WFRL.WakeProxy.T2.Line9",
+    "WFRL.WakeProxy.T2.Pulse0",
+    "WFRL.WakeProxy.T2.Pulse1",
+    "WFRL.WakeProxy.T2.Pulse10",
+    "WFRL.WakeProxy.T2.Pulse11",
+    "WFRL.WakeProxy.T2.Pulse2",
+    "WFRL.WakeProxy.T2.Pulse3",
+    "WFRL.WakeProxy.T2.Pulse4",
+    "WFRL.WakeProxy.T2.Pulse5",
+    "WFRL.WakeProxy.T2.Pulse6",
+    "WFRL.WakeProxy.T2.Pulse7",
+    "WFRL.WakeProxy.T2.Pulse8",
+    "WFRL.WakeProxy.T2.Pulse9",
+    "WFRL.WakeProxy.T2.Ring0",
+    "WFRL.WakeProxy.T2.Ring1",
+    "WFRL.WakeProxy.T2.Ring10",
+    "WFRL.WakeProxy.T2.Ring11",
+    "WFRL.WakeProxy.T2.Ring12",
+    "WFRL.WakeProxy.T2.Ring13",
+    "WFRL.WakeProxy.T2.Ring14",
+    "WFRL.WakeProxy.T2.Ring15",
+    "WFRL.WakeProxy.T2.Ring16",
+    "WFRL.WakeProxy.T2.Ring17",
+    "WFRL.WakeProxy.T2.Ring18",
+    "WFRL.WakeProxy.T2.Ring19",
+    "WFRL.WakeProxy.T2.Ring2",
+    "WFRL.WakeProxy.T2.Ring20",
+    "WFRL.WakeProxy.T2.Ring21",
+    "WFRL.WakeProxy.T2.Ring3",
+    "WFRL.WakeProxy.T2.Ring4",
+    "WFRL.WakeProxy.T2.Ring5",
+    "WFRL.WakeProxy.T2.Ring6",
+    "WFRL.WakeProxy.T2.Ring7",
+    "WFRL.WakeProxy.T2.Ring8",
+    "WFRL.WakeProxy.T2.Ring9",
+    "WFRL.WakeProxy.T2.Volume",
+    "WFRL.WakeProxy.T3.Line0",
+    "WFRL.WakeProxy.T3.Line1",
+    "WFRL.WakeProxy.T3.Line10",
+    "WFRL.WakeProxy.T3.Line11",
+    "WFRL.WakeProxy.T3.Line12",
+    "WFRL.WakeProxy.T3.Line13",
+    "WFRL.WakeProxy.T3.Line14",
+    "WFRL.WakeProxy.T3.Line15",
+    "WFRL.WakeProxy.T3.Line2",
+    "WFRL.WakeProxy.T3.Line3",
+    "WFRL.WakeProxy.T3.Line4",
+    "WFRL.WakeProxy.T3.Line5",
+    "WFRL.WakeProxy.T3.Line6",
+    "WFRL.WakeProxy.T3.Line7",
+    "WFRL.WakeProxy.T3.Line8",
+    "WFRL.WakeProxy.T3.Line9",
+    "WFRL.WakeProxy.T3.Pulse0",
+    "WFRL.WakeProxy.T3.Pulse1",
+    "WFRL.WakeProxy.T3.Pulse10",
+    "WFRL.WakeProxy.T3.Pulse11",
+    "WFRL.WakeProxy.T3.Pulse2",
+    "WFRL.WakeProxy.T3.Pulse3",
+    "WFRL.WakeProxy.T3.Pulse4",
+    "WFRL.WakeProxy.T3.Pulse5",
+    "WFRL.WakeProxy.T3.Pulse6",
+    "WFRL.WakeProxy.T3.Pulse7",
+    "WFRL.WakeProxy.T3.Pulse8",
+    "WFRL.WakeProxy.T3.Pulse9",
+    "WFRL.WakeProxy.T3.Ring0",
+    "WFRL.WakeProxy.T3.Ring1",
+    "WFRL.WakeProxy.T3.Ring10",
+    "WFRL.WakeProxy.T3.Ring11",
+    "WFRL.WakeProxy.T3.Ring12",
+    "WFRL.WakeProxy.T3.Ring13",
+    "WFRL.WakeProxy.T3.Ring14",
+    "WFRL.WakeProxy.T3.Ring15",
+    "WFRL.WakeProxy.T3.Ring16",
+    "WFRL.WakeProxy.T3.Ring17",
+    "WFRL.WakeProxy.T3.Ring18",
+    "WFRL.WakeProxy.T3.Ring19",
+    "WFRL.WakeProxy.T3.Ring2",
+    "WFRL.WakeProxy.T3.Ring20",
+    "WFRL.WakeProxy.T3.Ring21",
+    "WFRL.WakeProxy.T3.Ring3",
+    "WFRL.WakeProxy.T3.Ring4",
+    "WFRL.WakeProxy.T3.Ring5",
+    "WFRL.WakeProxy.T3.Ring6",
+    "WFRL.WakeProxy.T3.Ring7",
+    "WFRL.WakeProxy.T3.Ring8",
+    "WFRL.WakeProxy.T3.Ring9",
+    "WFRL.WakeProxy.T3.Volume"
+  ],
+  "source_turbines": [
+    "T1",
+    "T2",
+    "T3"
+  ],
+  "new_physics_solve": false,
+  "source_wake_influence_retained": true,
+  "seed": "exposure_sample_index; fixed across output frames",
+  "auxiliary_hidden": [],
+  "diagnostic_resolution": false,
+  "sampling_status": "finite quadrature; convergence must be checked for chosen production quality",
+  "config_sha256": "f3c0a3813bbeaa6134b387f3a05fdbc22bba481d9f21071d60ae7f52a3adac6e",
+  "status": "complete",
+  "complete": true
+}

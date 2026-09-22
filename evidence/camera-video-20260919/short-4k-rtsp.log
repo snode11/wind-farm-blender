@@ -1,0 +1,47 @@
+{
+  "status": "passed",
+  "package": {
+    "valid": true,
+    "dataset_id": "7b55c0a4dd58385db040ae4a22552a3848551d2974bfdba0d2106fe2b22bed99",
+    "frame_count": 20,
+    "fps": 20,
+    "width": 3840,
+    "height": 2160,
+    "status": "REVIEW_ONLY"
+  },
+  "scope": "one local 4K TCP client, short camera clip",
+  "mediamtx_sha256": "1dd97c44ed783cfc6d7fb28a8db327cbe5f37808d4e09dd4c78c4c6bc668fa11",
+  "mediamtx_version": "1.21.0",
+  "stream_source_sha256": "c7dd8c7e085279ac5506ecf2a53066993da9d087d2432c7a96dfcd62cc5f3cab",
+  "batches": [
+    {
+      "decoded_frames": 60,
+      "width": 3840,
+      "height": 2160,
+      "cycles": [
+        1,
+        2,
+        3
+      ],
+      "session_id": "388504ea-4cb5-43c6-92af-c39fda12c11c",
+      "every_label_matches_csv": true
+    },
+    {
+      "decoded_frames": 40,
+      "width": 3840,
+      "height": 2160,
+      "cycles": [
+        7,
+        8
+      ],
+      "session_id": "388504ea-4cb5-43c6-92af-c39fda12c11c",
+      "every_label_matches_csv": true
+    }
+  ],
+  "matched_decoded_frames": 100,
+  "reconnection": true,
+  "errors": [],
+  "session_logs": [
+    "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-video-20260919/t1-short-4k/stream/388504ea-4cb5-43c6-92af-c39fda12c11c.jsonl"
+  ]
+}

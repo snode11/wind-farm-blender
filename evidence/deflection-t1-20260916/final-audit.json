@@ -1,0 +1,33 @@
+{
+  "version": "0.3.1",
+  "archive_sha256": "0d0cbb67a3f46778b7300936c826b7a064162b6040e8216e0da0ae70b3ee3d20",
+  "source_install_portable_match": true,
+  "all_data_hashes_verified": true,
+  "original_data_files_unchanged": true,
+  "portable_inventory_files": 95,
+  "physics_tests": 5,
+  "package_tests": 2,
+  "blender_checks": {
+    "saved_mesh_max_error_m": [
+      3.768165276474278e-06,
+      3.960793033175314e-05
+    ],
+    "interpolated_mesh_max_error_m": [
+      0.0002597854942751887,
+      9.748309614854289e-05
+    ],
+    "switching": true,
+    "seeking": true,
+    "hidden_t1": true,
+    "fixed_clock": true,
+    "reload": true
+  },
+  "gui": {
+    "blade_switch": true,
+    "visibility": true,
+    "play_pause_reset": true,
+    "time_s": 117,
+    "blade": "T1 B1",
+    "screenshot": "t1-b1-117s-window.png"
+  }
+}

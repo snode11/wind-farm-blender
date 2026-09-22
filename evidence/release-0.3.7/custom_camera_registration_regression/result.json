@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "runtime": "bl_ext.release_test.wfrl_blender",
+  "checks": {
+    "migration_after_registration": true,
+    "restricted_registration_and_reenable": true,
+    "pending_migration_and_watchdog_cleanup": true
+  }
+}

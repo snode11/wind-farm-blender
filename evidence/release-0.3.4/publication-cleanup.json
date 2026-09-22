@@ -1,0 +1,112 @@
+{
+  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.4",
+  "commit": "bc36a096",
+  "download_sha256_verified": "3f2c718e3ae438a49786df4de2f92a1153fd405ea026521d8c19f3e22434a9b0",
+  "temporary_cleanup": [
+    {
+      "path": "/tmp/wfrl-release-034-20260918",
+      "bytes": 520029321
+    },
+    {
+      "path": "/tmp/wfrl-034-test-runtime",
+      "bytes": 50394784
+    },
+    {
+      "path": "/tmp/wfrl-034-test-env",
+      "bytes": 58266382
+    },
+    {
+      "path": "/tmp/wfrl-034-download-check",
+      "bytes": 41426777
+    },
+    {
+      "path": "/tmp/wfrl-034-pip.log",
+      "bytes": 1290
+    },
+    {
+      "path": "/tmp/wfrl-034-isolated-tests.log",
+      "bytes": 110
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__",
+      "bytes": 1247445
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/operators/__pycache__",
+      "bytes": 18952
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__",
+      "bytes": 169556
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/__pycache__",
+      "bytes": 128433
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/__pycache__",
+      "bytes": 136832
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/studio/__pycache__",
+      "bytes": 93640
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/lidar/__pycache__",
+      "bytes": 270210
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/blender_bridge/__pycache__",
+      "bytes": 440255
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/viz/__pycache__",
+      "bytes": 309520
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/scene/__pycache__",
+      "bytes": 60269
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/channels/__pycache__",
+      "bytes": 92474
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/experiments/__pycache__",
+      "bytes": 21686
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/lidar/__pycache__",
+      "bytes": 224831
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/train/__pycache__",
+      "bytes": 46953
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/__pycache__",
+      "bytes": 47577
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/tests/__pycache__",
+      "bytes": 55286
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/tests/lidar/__pycache__",
+      "bytes": 107190
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/tests/blender_bridge/__pycache__",
+      "bytes": 220990
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/tests/viz/__pycache__",
+      "bytes": 36845
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/.pytest_cache",
+      "bytes": 5516
+    }
+  ],
+  "removed_bytes": 673853124
+}

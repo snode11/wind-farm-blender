@@ -1,0 +1,10 @@
+{
+  "status": "complete",
+  "expected_frames": 2,
+  "verified_frames": 2,
+  "rendered_this_run": 0,
+  "wall_seconds": 0.146462291944772,
+  "config_sha256": "230f899e8bfe5260912ddb503e9b7e33d298107b7ac34cf51a836f8709e8071e",
+  "source_status": "REVIEW_ONLY",
+  "output": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-video-20260919/native-render-regression-final/masters"
+}

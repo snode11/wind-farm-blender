@@ -1,0 +1,9 @@
+{
+  "status": "SELF_AUDIT_COMPLETE",
+  "host_tests_passed": 36,
+  "host_subtests_passed": 7,
+  "numerical_reruns_completed": 3,
+  "numerical_sensitivity_screen_passed": true,
+  "full_farm_convergence_proven": false,
+  "existing_demo_unchanged": true
+}

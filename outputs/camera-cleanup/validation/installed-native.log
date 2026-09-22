@@ -1,0 +1,10 @@
+STATE <wfrl_blender.native_camera_views.NativeSession object at 0x321448c20> [(43788310816, 'Scene', [('PROPERTIES', 609, 1476), ('OUTLINER', 609, 331), ('DOPESHEET_EDITOR', 2832, 129), ('VIEW_3D', 2832, 1678)]), (43668339416, 'Scene', [('VIEW_3D', 1640, 860)])]
+STATE <wfrl_blender.native_camera_views.NativeSession object at 0x321448c20> [(43788310816, 'Scene', [('PROPERTIES', 609, 1476), ('OUTLINER', 609, 331), ('DOPESHEET_EDITOR', 2832, 129), ('VIEW_3D', 2832, 1678)]), (43668339416, 'Scene', [('VIEW_3D', 812, 422), ('VIEW_3D', 813, 422), ('VIEW_3D', 813, 423), ('VIEW_3D', 812, 423)])]
+AREAS [('VIEW_3D', 813, 422), ('VIEW_3D', 812, 422), ('VIEW_3D', 813, 423), ('VIEW_3D', 812, 423)]
+Warning: 1 × Draw window and swap: 271.9424 ms, average: 271.94237499 ms
+Warning: 1 × Draw window and swap: 11.6360 ms, average: 11.63595798 ms
+NATIVE_PASS
+00:17.248  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

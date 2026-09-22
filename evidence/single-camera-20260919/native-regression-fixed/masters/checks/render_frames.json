@@ -1,0 +1,34 @@
+{
+  "0": {
+    "sha256": "77a032fbcef370b9a2ff43c567ff7c48745366699c74de98ace6f2fb1e6865a1",
+    "sim_time_s": 117.72500000000001,
+    "exposure_samples_s": [
+      117.71875000000001,
+      117.73125
+    ],
+    "seconds": 0.498672166839242,
+    "timings": {
+      "geometry": 0.054579833056777716,
+      "render_write": 0.4090513330884278,
+      "read_accumulate": 0.003037292044609785,
+      "master_write": 0.031167957931756973
+    },
+    "linear_rgb_mean": 0.15545378200771492
+  },
+  "1": {
+    "sha256": "aa5a36ef2067cf483eb4b7ad62fbd6aab60c9843c1331838a76e41c75065ef57",
+    "sim_time_s": 117.775,
+    "exposure_samples_s": [
+      117.76875000000001,
+      117.78125
+    ],
+    "seconds": 0.40485775005072355,
+    "timings": {
+      "geometry": 0.05813791719265282,
+      "render_write": 0.3396165838930756,
+      "read_accumulate": 0.0031929160468280315,
+      "master_write": 0.0031415000557899475
+    },
+    "linear_rgb_mean": 0.1531399735567138
+  }
+}

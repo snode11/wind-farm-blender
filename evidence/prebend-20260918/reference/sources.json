@@ -1,0 +1,18 @@
+{
+  "NRELOffshrBsline5MW_BeamDyn.dat": {
+    "url": "https://raw.githubusercontent.com/OpenFAST/r-test/548bf2143633a7066f4582167fdf4180951fd7f6/glue-codes/openfast/5MW_Baseline/NRELOffshrBsline5MW_BeamDyn.dat",
+    "sha256": "ecc69eecb955afe435f4b993ca40d12335f0b99dcb833516107224660988147b"
+  },
+  "NRELOffshrBsline5MW_BeamDyn_Blade.dat": {
+    "url": "https://raw.githubusercontent.com/OpenFAST/r-test/548bf2143633a7066f4582167fdf4180951fd7f6/glue-codes/openfast/5MW_Baseline/NRELOffshrBsline5MW_BeamDyn_Blade.dat",
+    "sha256": "b6031e7e0ebc1b31d905454f0c1aa1af8edd01e2f7882c60047a19bdbdb44138"
+  },
+  "precurve-beamdyn.txt": {
+    "url": "https://forums.nlr.gov/uploads/short-url/hcFTh5WhUIV01MARfK0rFqr8V1r.txt",
+    "sha256": "2be18abb5a2860bdb9ffbf8524804ed1f04c3d52c0ae1f2d4523ec62ea7ab541"
+  },
+  "precurve-aerodyn.txt": {
+    "url": "https://forums.nlr.gov/uploads/short-url/fWfJelNOqr7VZXCoOZp5VPGMeDI.txt",
+    "sha256": "a061d11e70eb9db6fb8a48aa0ca2e0e72b654cb7280f53cb478f16181046d45d"
+  }
+}

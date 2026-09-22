@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "platform": "macOS/POSIX flock",
+  "concurrent_process_rejected": true,
+  "normal_release_reacquired": true,
+  "killed_process_releases_lock": true,
+  "windows_msvcrt": "implemented; not tested in this environment"
+}

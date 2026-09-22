@@ -1,0 +1,150 @@
+{
+  "schema": "wfrl.farm-flex-review.v1",
+  "status": "REVIEW_ONLY",
+  "source": "FAST.Farm",
+  "segment": {
+    "start_s": 117.0,
+    "end_s": 126.0
+  },
+  "turbine_ids": [
+    "T1",
+    "T2",
+    "T3"
+  ],
+  "layout_m": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      504,
+      0,
+      0
+    ],
+    [
+      1008,
+      0,
+      0
+    ]
+  ],
+  "source_fps": 40,
+  "reference_frame": 0,
+  "includes_rigid_motion": true,
+  "max_surface_fit_error_m": 1.6595597151604514e-05,
+  "discrete_collision_certificates": 3249,
+  "replay": {
+    "threshold_m": 7.0,
+    "hysteresis_m": 0.1,
+    "max_hold_s": 5.0,
+    "passage_margin": 1.25
+  },
+  "policy": {
+    "checkpoint": "mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt",
+    "sha256": "27c8c5855b2f6b2dca939258c8bf0ce3ac653359071727dabc6f08c0aeacaa61",
+    "environment": "Dec_Turb3_Row1_Fastfarm",
+    "turbine_order": [
+      "T1",
+      "T2",
+      "T3"
+    ],
+    "obs_keys": [
+      "yaw",
+      "wind_speed",
+      "wind_direction"
+    ],
+    "obs_mean": [
+      -1.0596270561218262,
+      5.895106792449951,
+      269.99871826171875
+    ],
+    "obs_var": [
+      0.48155131936073303,
+      2.213332176208496,
+      0.3037745952606201
+    ],
+    "controls": [
+      "yaw"
+    ],
+    "inference": "deterministic Normal.mean; stored normalization, no refit",
+    "action_unit": "yaw increment degrees per control step"
+  },
+  "controller_sha256": "60c9a48abb1692ade98ffe41e83beabce8c35e873c888e18d4d420abc6bf8aa2",
+  "wind_sha256": "3c9bd8102fbe768ce9cc1de48f9da678619dfbf4da7f0b2aa7c7c9cd21495106",
+  "calibration": {
+    "origin_m": [
+      -2.0,
+      0.0,
+      87.6
+    ],
+    "beam_directions": [
+      [
+        -0.11233611576153554,
+        0.0,
+        -0.9936702657801585
+      ],
+      [
+        -0.14780941112961063,
+        0.0,
+        -0.9890158633619168
+      ],
+      [
+        -0.18292192244763159,
+        0.0,
+        -0.983127443563683
+      ]
+    ],
+    "frame": "nacelle yaw-local; rigid tower; translated separately for each turbine"
+  },
+  "validation": "discrete surfaces only; no temporal/span refinement certification",
+  "diagnostic_only": true,
+  "controller_validation": [
+    {
+      "turbine_id": "T1",
+      "rpm_range": [
+        11.2118692,
+        14.0903091
+      ],
+      "pitch_deg_range": [
+        6.9721632,
+        16.0767021
+      ],
+      "final_actual_yaw_deg": 0.226925135,
+      "finite": true,
+      "passed": false
+    },
+    {
+      "turbine_id": "T2",
+      "rpm_range": [
+        10.992137,
+        14.0328617
+      ],
+      "pitch_deg_range": [
+        4.0415597,
+        15.1203966
+      ],
+      "final_actual_yaw_deg": -3.84581113,
+      "finite": true,
+      "passed": false
+    },
+    {
+      "turbine_id": "T3",
+      "rpm_range": [
+        11.0388298,
+        13.8661089
+      ],
+      "pitch_deg_range": [
+        0.0,
+        14.5442686
+      ],
+      "final_actual_yaw_deg": -5.85041332,
+      "finite": true,
+      "passed": false
+    }
+  ],
+  "files": {
+    "geometry.npz": "b11009bebf3e77ea5d1148a21a8269621b8c901d6200177c436e45dd3a6093e8",
+    "data.json": "5b9f01e32facd9ccc0e3fa522364f7d9b4d5c721f39bad48976ffeb1ae20ddd0",
+    "source-surfaces.json": "04e35a35c7f924e26cc514add04537551be517cbcfa844615a12964e84ff9a93"
+  }
+}

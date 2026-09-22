@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "checks": [
+    "visible_close_button_restores_view_and_cleans_resources",
+    "escape_closes_single_preview",
+    "single_preview_to_T1_DOWN",
+    "single_preview_to_T1_FRONT",
+    "single_preview_to_all_DOWN",
+    "single_preview_to_T1_NACELLE",
+    "single_preview_to_T1_NACELLE_SIDE",
+    "single_preview_to_Top",
+    "single_preview_to_Side",
+    "single_preview_to_World",
+    "single_preview_to_gimbal",
+    "invalid_target_keeps_single_preview",
+    "switch_cancels_draft_preserves_camera_restores_playback"
+  ]
+}

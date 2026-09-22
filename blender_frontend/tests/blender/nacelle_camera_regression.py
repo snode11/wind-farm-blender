@@ -70,6 +70,16 @@ for tid in ('T1','T2','T3'):
         saved=cam.location.copy()
         gimbal.change(cam,dx=8,dy=3,zoom=-4)
         custom=pose(cam)
+        camera_count=sum(ob.type=='CAMERA' for ob in s.objects)
+        bpy.ops.wfrl.farm_flex_view(turbine=tid,angle='NACELLE_SIDE')
+        side=pose(cam)
+        assert s.camera==cam and side['location']==custom['location']
+        assert side['rotation']!=custom['rotation'] and side['lens']==custom['lens']
+        assert sum(ob.type=='CAMERA' for ob in s.objects)==camera_count
+        bpy.ops.wfrl.farm_flex_view(turbine=tid,angle='NACELLE_SIDE')
+        assert pose(cam)==side  # Repeated clicks must not overwrite the return view.
+        bpy.ops.wfrl.farm_flex_view(turbine=tid,angle='NACELLE')
+        assert pose(cam)==custom
         bpy.ops.wfrl.farm_flex_view(turbine=tid,angle='DOWN')
         assert pose(down)==old[tid]
         bpy.ops.wfrl.farm_flex_view(turbine=tid,angle='NACELLE')
@@ -82,7 +92,7 @@ for tid in ('T1','T2','T3'):
         for frame in range(1,181):s.frame_set(frame)
         trail=tip_tracking.active(s);points={b:list(v) for b,v in trail.points.items()}
         value=clearance_replay.sample(s);alarm=alarm_state(value)
-        for angle in ('DOWN','NACELLE','DOWN','NACELLE'):
+        for angle in ('DOWN','NACELLE','NACELLE_SIDE','NACELLE','DOWN','NACELLE'):
             bpy.ops.wfrl.farm_flex_view(turbine=tid,angle=angle)
             assert s.frame_current==180 and clearance_replay.sample(s)==value
             assert alarm_state(clearance_replay.sample(s))==alarm
@@ -97,6 +107,7 @@ for tid in ('T1','T2','T3'):
             for other in ('T1','T2','T3'):
                 assert vars(layout.buttons['wfrl.farm_flex_view',other+' Down'])==dict(turbine=other,angle='DOWN')
             assert vars(layout.buttons['wfrl.farm_flex_view','机舱相机'])==dict(turbine=tid,angle='NACELLE')
+            assert vars(layout.buttons['wfrl.farm_flex_view','侧下视角'])==dict(turbine=tid,angle='NACELLE_SIDE')
 # Synthetic yaw/translation isolates the parent-motion contract from playback.
 root=s.camera.parent
 with bpy.context.temp_override(area=area,region=region):

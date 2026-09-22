@@ -1,0 +1,161 @@
+2026/09/19 21:44:50 INF MediaMTX v1.21.0, darwin, arm64
+2026/09/19 21:44:50 INF configuration loaded from /Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-video-20260919/stream-validation/mediamtx-local.yml
+2026/09/19 21:44:50 INF [RTSP] started with listeners on 127.0.0.1:18564 (TCP/RTSP)
+2026/09/19 21:44:50 INF [RTSP] [conn 127.0.0.1:58078] opened
+2026/09/19 21:44:50 INF [RTSP] [conn 127.0.0.1:58078] closed: EOF
+2026/09/19 21:44:50 INF [RTSP] [conn 127.0.0.1:58079] opened
+2026/09/19 21:44:50 INF [RTSP] [session 594303b7] created by 127.0.0.1:58079
+2026/09/19 21:44:50 INF [path windfarm/camera1] stream is available and online, 1 track (H264)
+2026/09/19 21:44:50 INF [RTSP] [session 594303b7] is publishing to path 'windfarm/camera1'
+2026/09/19 21:44:50 INF [RTSP] [conn 127.0.0.1:58080] opened
+2026/09/19 21:44:50 INF [RTSP] [session fb4d8e62] created by 127.0.0.1:58080
+2026/09/19 21:44:50 INF [RTSP] [session fb4d8e62] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 21:45:51 INF [RTSP] [conn 127.0.0.1:58080] closed: EOF
+2026/09/19 21:45:51 INF [RTSP] [session fb4d8e62] destroyed: not in use
+2026/09/19 21:45:51 INF [RTSP] [conn 127.0.0.1:59407] opened
+2026/09/19 21:45:51 INF [RTSP] [session 3e600194] created by 127.0.0.1:59407
+2026/09/19 21:45:51 INF [RTSP] [session 3e600194] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 21:46:52 INF [RTSP] [conn 127.0.0.1:59407] closed: EOF
+2026/09/19 21:46:52 INF [RTSP] [session 3e600194] destroyed: not in use
+2026/09/19 21:46:52 INF [RTSP] [conn 127.0.0.1:60869] opened
+2026/09/19 21:46:52 INF [RTSP] [session 4a2a52c2] created by 127.0.0.1:60869
+2026/09/19 21:46:52 INF [RTSP] [session 4a2a52c2] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 21:47:53 INF [RTSP] [conn 127.0.0.1:60869] closed: EOF
+2026/09/19 21:47:53 INF [RTSP] [session 4a2a52c2] destroyed: not in use
+2026/09/19 21:47:53 INF [RTSP] [conn 127.0.0.1:62291] opened
+2026/09/19 21:47:53 INF [RTSP] [session c63bd003] created by 127.0.0.1:62291
+2026/09/19 21:47:53 INF [RTSP] [session c63bd003] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 21:48:54 INF [RTSP] [conn 127.0.0.1:62291] closed: EOF
+2026/09/19 21:48:54 INF [RTSP] [session c63bd003] destroyed: not in use
+2026/09/19 21:48:54 INF [RTSP] [conn 127.0.0.1:63733] opened
+2026/09/19 21:48:54 INF [RTSP] [session 73a2ed5a] created by 127.0.0.1:63733
+2026/09/19 21:48:54 INF [RTSP] [session 73a2ed5a] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 21:49:55 INF [RTSP] [conn 127.0.0.1:63733] closed: EOF
+2026/09/19 21:49:55 INF [RTSP] [session 73a2ed5a] destroyed: not in use
+2026/09/19 21:49:55 INF [RTSP] [conn 127.0.0.1:65078] opened
+2026/09/19 21:49:55 INF [RTSP] [session ac3ea381] created by 127.0.0.1:65078
+2026/09/19 21:49:55 INF [RTSP] [session ac3ea381] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 21:50:56 INF [RTSP] [conn 127.0.0.1:65078] closed: EOF
+2026/09/19 21:50:56 INF [RTSP] [session ac3ea381] destroyed: not in use
+2026/09/19 21:50:56 INF [RTSP] [conn 127.0.0.1:50160] opened
+2026/09/19 21:50:56 INF [RTSP] [session ac5b03f0] created by 127.0.0.1:50160
+2026/09/19 21:50:56 INF [RTSP] [session ac5b03f0] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 21:51:57 INF [RTSP] [conn 127.0.0.1:50160] closed: EOF
+2026/09/19 21:51:57 INF [RTSP] [session ac5b03f0] destroyed: not in use
+2026/09/19 21:51:57 INF [RTSP] [conn 127.0.0.1:51537] opened
+2026/09/19 21:51:57 INF [RTSP] [session 2926e83b] created by 127.0.0.1:51537
+2026/09/19 21:51:57 INF [RTSP] [session 2926e83b] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 21:52:58 INF [RTSP] [conn 127.0.0.1:51537] closed: EOF
+2026/09/19 21:52:58 INF [RTSP] [session 2926e83b] destroyed: not in use
+2026/09/19 21:52:58 INF [RTSP] [conn 127.0.0.1:52800] opened
+2026/09/19 21:52:58 INF [RTSP] [session cf97a14b] created by 127.0.0.1:52800
+2026/09/19 21:52:58 INF [RTSP] [session cf97a14b] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 21:53:59 INF [RTSP] [conn 127.0.0.1:52800] closed: EOF
+2026/09/19 21:53:59 INF [RTSP] [session cf97a14b] destroyed: not in use
+2026/09/19 21:53:59 INF [RTSP] [conn 127.0.0.1:54106] opened
+2026/09/19 21:53:59 INF [RTSP] [session e1cd1d9b] created by 127.0.0.1:54106
+2026/09/19 21:53:59 INF [RTSP] [session e1cd1d9b] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 21:55:00 INF [RTSP] [conn 127.0.0.1:54106] closed: EOF
+2026/09/19 21:55:00 INF [RTSP] [session e1cd1d9b] destroyed: not in use
+2026/09/19 21:55:00 INF [RTSP] [conn 127.0.0.1:55406] opened
+2026/09/19 21:55:00 INF [RTSP] [session 91ce2325] created by 127.0.0.1:55406
+2026/09/19 21:55:00 INF [RTSP] [session 91ce2325] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 21:56:01 INF [RTSP] [conn 127.0.0.1:55406] closed: EOF
+2026/09/19 21:56:01 INF [RTSP] [session 91ce2325] destroyed: not in use
+2026/09/19 21:56:01 INF [RTSP] [conn 127.0.0.1:56666] opened
+2026/09/19 21:56:01 INF [RTSP] [session 8b4f67ed] created by 127.0.0.1:56666
+2026/09/19 21:56:01 INF [RTSP] [session 8b4f67ed] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 21:57:02 INF [RTSP] [conn 127.0.0.1:56666] closed: EOF
+2026/09/19 21:57:02 INF [RTSP] [session 8b4f67ed] destroyed: not in use
+2026/09/19 21:57:02 INF [RTSP] [conn 127.0.0.1:58021] opened
+2026/09/19 21:57:02 INF [RTSP] [session 333695c9] created by 127.0.0.1:58021
+2026/09/19 21:57:02 INF [RTSP] [session 333695c9] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 21:58:03 INF [RTSP] [conn 127.0.0.1:58021] closed: EOF
+2026/09/19 21:58:03 INF [RTSP] [session 333695c9] destroyed: not in use
+2026/09/19 21:58:03 INF [RTSP] [conn 127.0.0.1:59399] opened
+2026/09/19 21:58:03 INF [RTSP] [session 6d925fa4] created by 127.0.0.1:59399
+2026/09/19 21:58:03 INF [RTSP] [session 6d925fa4] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 21:59:04 INF [RTSP] [conn 127.0.0.1:59399] closed: EOF
+2026/09/19 21:59:04 INF [RTSP] [session 6d925fa4] destroyed: not in use
+2026/09/19 21:59:04 INF [RTSP] [conn 127.0.0.1:60723] opened
+2026/09/19 21:59:04 INF [RTSP] [session 2154f238] created by 127.0.0.1:60723
+2026/09/19 21:59:04 INF [RTSP] [session 2154f238] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:00:05 INF [RTSP] [conn 127.0.0.1:60723] closed: EOF
+2026/09/19 22:00:05 INF [RTSP] [session 2154f238] destroyed: not in use
+2026/09/19 22:00:05 INF [RTSP] [conn 127.0.0.1:61975] opened
+2026/09/19 22:00:05 INF [RTSP] [session 1ed0ac8f] created by 127.0.0.1:61975
+2026/09/19 22:00:05 INF [RTSP] [session 1ed0ac8f] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:01:06 INF [RTSP] [conn 127.0.0.1:61975] closed: EOF
+2026/09/19 22:01:06 INF [RTSP] [session 1ed0ac8f] destroyed: not in use
+2026/09/19 22:01:06 INF [RTSP] [conn 127.0.0.1:63269] opened
+2026/09/19 22:01:06 INF [RTSP] [session 447479cc] created by 127.0.0.1:63269
+2026/09/19 22:01:06 INF [RTSP] [session 447479cc] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:02:07 INF [RTSP] [conn 127.0.0.1:63269] closed: EOF
+2026/09/19 22:02:07 INF [RTSP] [session 447479cc] destroyed: not in use
+2026/09/19 22:02:07 INF [RTSP] [conn 127.0.0.1:64556] opened
+2026/09/19 22:02:07 INF [RTSP] [session 52ce4530] created by 127.0.0.1:64556
+2026/09/19 22:02:07 INF [RTSP] [session 52ce4530] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:03:08 INF [RTSP] [conn 127.0.0.1:64556] closed: EOF
+2026/09/19 22:03:08 INF [RTSP] [session 52ce4530] destroyed: not in use
+2026/09/19 22:03:08 INF [RTSP] [conn 127.0.0.1:49500] opened
+2026/09/19 22:03:08 INF [RTSP] [session 02b3386a] created by 127.0.0.1:49500
+2026/09/19 22:03:08 INF [RTSP] [session 02b3386a] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:04:09 INF [RTSP] [conn 127.0.0.1:49500] closed: EOF
+2026/09/19 22:04:09 INF [RTSP] [session 02b3386a] destroyed: not in use
+2026/09/19 22:04:09 INF [RTSP] [conn 127.0.0.1:50810] opened
+2026/09/19 22:04:09 INF [RTSP] [session 8b5331b5] created by 127.0.0.1:50810
+2026/09/19 22:04:09 INF [RTSP] [session 8b5331b5] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:05:10 INF [RTSP] [conn 127.0.0.1:50810] closed: EOF
+2026/09/19 22:05:10 INF [RTSP] [session 8b5331b5] destroyed: not in use
+2026/09/19 22:05:10 INF [RTSP] [conn 127.0.0.1:52065] opened
+2026/09/19 22:05:10 INF [RTSP] [session 83153b91] created by 127.0.0.1:52065
+2026/09/19 22:05:10 INF [RTSP] [session 83153b91] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:06:11 INF [RTSP] [conn 127.0.0.1:52065] closed: EOF
+2026/09/19 22:06:11 INF [RTSP] [session 83153b91] destroyed: not in use
+2026/09/19 22:06:11 INF [RTSP] [conn 127.0.0.1:53359] opened
+2026/09/19 22:06:11 INF [RTSP] [session 4ee992c0] created by 127.0.0.1:53359
+2026/09/19 22:06:11 INF [RTSP] [session 4ee992c0] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:07:12 INF [RTSP] [conn 127.0.0.1:53359] closed: EOF
+2026/09/19 22:07:12 INF [RTSP] [session 4ee992c0] destroyed: not in use
+2026/09/19 22:07:12 INF [RTSP] [conn 127.0.0.1:54653] opened
+2026/09/19 22:07:12 INF [RTSP] [session 0c314ae7] created by 127.0.0.1:54653
+2026/09/19 22:07:12 INF [RTSP] [session 0c314ae7] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:08:13 INF [RTSP] [conn 127.0.0.1:54653] closed: EOF
+2026/09/19 22:08:13 INF [RTSP] [session 0c314ae7] destroyed: not in use
+2026/09/19 22:08:13 INF [RTSP] [conn 127.0.0.1:55920] opened
+2026/09/19 22:08:13 INF [RTSP] [session 38fae848] created by 127.0.0.1:55920
+2026/09/19 22:08:13 INF [RTSP] [session 38fae848] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:09:14 INF [RTSP] [conn 127.0.0.1:55920] closed: EOF
+2026/09/19 22:09:14 INF [RTSP] [session 38fae848] destroyed: not in use
+2026/09/19 22:09:14 INF [RTSP] [conn 127.0.0.1:57289] opened
+2026/09/19 22:09:14 INF [RTSP] [session 9cd35ef3] created by 127.0.0.1:57289
+2026/09/19 22:09:14 INF [RTSP] [session 9cd35ef3] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:10:15 INF [RTSP] [conn 127.0.0.1:57289] closed: EOF
+2026/09/19 22:10:15 INF [RTSP] [session 9cd35ef3] destroyed: not in use
+2026/09/19 22:10:15 INF [RTSP] [conn 127.0.0.1:58571] opened
+2026/09/19 22:10:15 INF [RTSP] [session 22463334] created by 127.0.0.1:58571
+2026/09/19 22:10:15 INF [RTSP] [session 22463334] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:11:16 INF [RTSP] [conn 127.0.0.1:58571] closed: EOF
+2026/09/19 22:11:16 INF [RTSP] [session 22463334] destroyed: not in use
+2026/09/19 22:11:16 INF [RTSP] [conn 127.0.0.1:59855] opened
+2026/09/19 22:11:16 INF [RTSP] [session d1ca649c] created by 127.0.0.1:59855
+2026/09/19 22:11:16 INF [RTSP] [session d1ca649c] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:12:17 INF [RTSP] [conn 127.0.0.1:59855] closed: EOF
+2026/09/19 22:12:17 INF [RTSP] [session d1ca649c] destroyed: not in use
+2026/09/19 22:12:17 INF [RTSP] [conn 127.0.0.1:61113] opened
+2026/09/19 22:12:17 INF [RTSP] [session dd881b1e] created by 127.0.0.1:61113
+2026/09/19 22:12:17 INF [RTSP] [session dd881b1e] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:13:18 INF [RTSP] [conn 127.0.0.1:61113] closed: EOF
+2026/09/19 22:13:18 INF [RTSP] [session dd881b1e] destroyed: not in use
+2026/09/19 22:13:18 INF [RTSP] [conn 127.0.0.1:62381] opened
+2026/09/19 22:13:18 INF [RTSP] [session 07015716] created by 127.0.0.1:62381
+2026/09/19 22:13:18 INF [RTSP] [session 07015716] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:14:19 INF [RTSP] [conn 127.0.0.1:62381] closed: EOF
+2026/09/19 22:14:19 INF [RTSP] [session 07015716] destroyed: not in use
+2026/09/19 22:14:19 INF [RTSP] [conn 127.0.0.1:63771] opened
+2026/09/19 22:14:19 INF [RTSP] [session c169a55b] created by 127.0.0.1:63771
+2026/09/19 22:14:19 INF [RTSP] [session c169a55b] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 22:15:20 INF [RTSP] [conn 127.0.0.1:63771] closed: EOF
+2026/09/19 22:15:20 INF [RTSP] [session c169a55b] destroyed: not in use
+2026/09/19 22:15:20 INF [RTSP] [conn 127.0.0.1:58079] closed: EOF
+2026/09/19 22:15:20 INF [RTSP] [session 594303b7] destroyed: not in use

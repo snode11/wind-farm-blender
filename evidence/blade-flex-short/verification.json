@@ -1,0 +1,37 @@
+{
+  "records": [
+    {
+      "frame": 1,
+      "time_s": 18,
+      "section_error_m": 1.889878333332478e-05
+    },
+    {
+      "frame": 31,
+      "time_s": 18.5,
+      "section_error_m": 1.7697432243083313e-05
+    },
+    {
+      "frame": 301,
+      "time_s": 23.0,
+      "section_error_m": 2.22883654100594e-05
+    },
+    {
+      "frame": 601,
+      "time_s": 28.0,
+      "section_error_m": 1.902006778237747e-05
+    },
+    {
+      "frame": 1081,
+      "time_s": 36,
+      "section_error_m": 2.108382235554849e-05
+    },
+    {
+      "frame": 301,
+      "time_s": 23.0,
+      "section_error_m": 2.22883654100594e-05
+    }
+  ],
+  "mean_update_ms": 21.0055426878777,
+  "p95_update_ms": 21.961223322432488,
+  "note": "Background update timing excludes viewport drawing; not a measured 60 FPS claim."
+}

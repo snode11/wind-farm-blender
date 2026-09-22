@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "checks": {
+    "four_route_gpu_seconds": 1.0542847919277847,
+    "quad_window": true,
+    "default_wheel_locked_linked_zoom_drag_cancel_resume": true,
+    "current_group_1920_and_2560_export_layout_restore": true,
+    "sequence_same_times_statistics_cancel_restore": true,
+    "lifecycle_no_save_no_screen_or_output_changes": true
+  },
+  "display_scale": [
+    2.0,
+    2.0,
+    144
+  ],
+  "before_path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/four-cameras-20260922/verified/capture_20260922_163631_9faae142fc",
+  "after_path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/four-cameras-20260922/verified/capture_20260922_163633_15124849b4",
+  "sequence_path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/four-cameras-20260922/verified/capture_20260922_163636_99b633eb08",
+  "high_resolution_path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/four-cameras-20260922/verified/capture_20260922_163634_f782681e15"
+}

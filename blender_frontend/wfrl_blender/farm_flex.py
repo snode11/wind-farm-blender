@@ -272,7 +272,7 @@ class FarmFlex:
         while len(self.cache)>3:self.cache.pop(next(iter(self.cache)))
         return result
 
-    def update(self,scene):
+    def update(self,scene, *, sim_time_s=None, record_telemetry=True, update_comparison=True):
         import bpy
         from . import clearance_replay
         if scene!=self.scene or not self.enabled:return
@@ -286,17 +286,22 @@ class FarmFlex:
             if self.comparison is not None:
                 self.comparison.close()
             return
-        t=clearance_replay.sample(scene)['time_s']
+        t=clearance_replay.sample(scene)['time_s'] if sim_time_s is None else float(sim_time_s)
+        if not math.isfinite(t) or t < self.times[0] or t > self.times[-1]:
+            raise ValueError('Simulation time outside source geometry range')
         i=int(np.clip(np.searchsorted(self.times,t,side='right')-1,0,len(self.times)-2))
         alpha=float(np.clip((t-self.times[i])/(self.times[i+1]-self.times[i]),0,1))
         lower=self.deformed_at(i);upper=self.deformed_at(i+1)
         pose=self.poses[i]*(1-alpha)+self.poses[i+1]*alpha
-        self.record_telemetry(scene, pose)
+        if record_telemetry:
+            self.record_telemetry(scene, pose)
         scene['wfrl_clearance_time_s']=float(t)
         if scene.wfrl_show_wake:
             from . import wake
             wake.update_proxy_objects(scene, phase=float(t)*.9)
         for k,tid in enumerate(self.readers):
+            if getattr(self, 'export_turbines', None) is not None and k not in self.export_turbines:
+                continue
             scene.objects[f'WFRL.Turbine.{tid}.YawRoot'].rotation_euler.z=math.radians(float(pose[k,0]))
             scene.objects[f'WFRL.Turbine.{tid}.Rotor'].rotation_euler.x=math.radians(float(pose[k,1]))
             for b in (1,2,3):
@@ -308,6 +313,8 @@ class FarmFlex:
             tower = support['transforms'][i]*(1-alpha)+support['transforms'][i+1]*alpha
             nacelle = interpolate_transform(support['nacelle'][i],support['nacelle'][i+1],alpha)
             for k,tid in enumerate(self.readers):
+                if getattr(self, 'export_turbines', None) is not None and k not in self.export_turbines:
+                    continue
                 obj=scene.objects[f'WFRL.Turbine.{tid}.YawRoot']
                 obj.rotation_euler=Matrix(nacelle[k,:,:3].tolist()).to_euler()
                 obj.location=nacelle[k,:,:3]@np.array([0,0,87.6])+nacelle[k,:,3]
@@ -343,7 +350,7 @@ class FarmFlex:
                 deformed=lo*(1-alpha)+hi*alpha+offset
             local=deformed@inverse[:3,:3].T+inverse[:3,3]
             obj.data.vertices.foreach_set('co',local.astype(np.float32).ravel());obj.data.update()
-        if self.comparison is not None:
+        if update_comparison and self.comparison is not None and getattr(self, 'export_turbines', None) is None:
             self.comparison.update(scene, i, alpha, t)
 
 
@@ -357,6 +364,11 @@ def detach(scene=None, *, restore=True):
     global _ACTIVE
     if _ACTIVE is not None and scene is not None and _ACTIVE.scene != scene:
         return
+    # End camera drafts before invalidating their replay and parent references.
+    import sys
+    custom = sys.modules.get(__package__ + '.panels.custom_cameras')
+    if custom is not None:
+        custom.cancel_on_load()
     active, _ACTIVE = _ACTIVE, None
     if update in bpy.app.handlers.frame_change_post:
         bpy.app.handlers.frame_change_post.remove(update)

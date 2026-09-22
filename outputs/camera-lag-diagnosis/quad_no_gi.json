@@ -1,0 +1,62 @@
+{
+  "mode": "quad_no_gi",
+  "elapsed_s": 8.359780207974836,
+  "frame_advance": 500,
+  "draws": {
+    "original": {
+      "unique_frames": 19,
+      "draw_calls": 19,
+      "unique_fps": 2.272787026371207
+    },
+    "C2": {
+      "unique_frames": 19,
+      "draw_calls": 19,
+      "unique_fps": 2.272787026371207
+    },
+    "C1": {
+      "unique_frames": 19,
+      "draw_calls": 19,
+      "unique_fps": 2.272787026371207
+    },
+    "C3": {
+      "unique_frames": 19,
+      "draw_calls": 19,
+      "unique_fps": 2.272787026371207
+    },
+    "C4": {
+      "unique_frames": 19,
+      "draw_calls": 19,
+      "unique_fps": 2.272787026371207
+    }
+  },
+  "timings": {
+    "native_sync": {
+      "calls": 19,
+      "total_s": 0.02014295826666057,
+      "median_ms": 1.0375408455729485,
+      "max_ms": 1.4345408417284489
+    },
+    "deformed_at": {
+      "calls": 38,
+      "total_s": 0.035018790513277054,
+      "median_ms": 0.8912294870242476,
+      "max_ms": 1.0945829562842846
+    },
+    "comparison_update": {
+      "calls": 19,
+      "total_s": 0.01764983218163252,
+      "median_ms": 0.8942079730331898,
+      "max_ms": 1.114875078201294
+    },
+    "farm_update": {
+      "calls": 19,
+      "total_s": 0.6084585413336754,
+      "median_ms": 44.92487502284348,
+      "max_ms": 51.51245789602399
+    }
+  },
+  "peak_rss_gib": 1.1017303466796875,
+  "native_objects": 4,
+  "visible_meshes": 2363,
+  "vertices": 1179791
+}

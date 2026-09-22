@@ -1,0 +1,5 @@
+V3_WINDOW_AUTOMATED_PASS
+00:17.772  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-install-v3-fixed-yhd3_dau/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

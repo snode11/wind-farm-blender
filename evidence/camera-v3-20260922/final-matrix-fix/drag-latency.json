@@ -1,0 +1,84 @@
+{
+  "raw": [
+    {
+      "action": 1,
+      "input_wait_ms": 884.2930793762207,
+      "refresh_to_successful_draw_ms": 20.283207995817065,
+      "draw_ms": 128.0984589830041,
+      "callback_wait_ms": 16.40075002796948,
+      "t0_to_t4_ms": 1049.0741729736328,
+      "release_to_commit_ms": 148.09783408418298,
+      "received_updates": 1,
+      "failed_attempts": 0,
+      "version": 2,
+      "request": "1c1f39d887e8951c71179cd8b2f1542fd409d280a6cbbdbefdcb4aeda27d8b72",
+      "renderer": 13289526400
+    },
+    {
+      "action": 2,
+      "input_wait_ms": 1030.3268432617188,
+      "refresh_to_successful_draw_ms": 7.964374963194132,
+      "draw_ms": 138.13462480902672,
+      "callback_wait_ms": 20.7978340331465,
+      "t0_to_t4_ms": 1197.2217559814453,
+      "release_to_commit_ms": 145.8257499616593,
+      "received_updates": 1,
+      "failed_attempts": 0,
+      "version": 3,
+      "request": "fbef6400748b260020564997b0dd45cc2de75b0766a22b590c66ae4b0aa69b6b",
+      "renderer": 13289526400
+    },
+    {
+      "action": 3,
+      "input_wait_ms": 584.6970081329346,
+      "refresh_to_successful_draw_ms": 19.412291003391147,
+      "draw_ms": 115.9931670408696,
+      "callback_wait_ms": 17.462125048041344,
+      "t0_to_t4_ms": 737.5640869140625,
+      "release_to_commit_ms": 135.09129197336733,
+      "received_updates": 1,
+      "failed_attempts": 0,
+      "version": 4,
+      "request": "1a04284ca208e6c9d5cda6f932733289c7ae614bb18390b9f93a2ec1b1df9338",
+      "renderer": 13289526400
+    }
+  ],
+  "no_later_commits_for_drag_renderer": true,
+  "limitations": [
+    "CUA delivered one handled direction update per drag; not a dense physical mouse event stream.",
+    "t4 is draw callback completion, not physical illumination."
+  ],
+  "last_commit_parameters": {
+    "location": [
+      2.658367156982422e-05,
+      -1.7199570894241334,
+      1.4736875727772714
+    ],
+    "yaw": 135.27534224837515,
+    "pitch": -14.70629057259905,
+    "roll": 0.0,
+    "fov": 81.0,
+    "vfov": 46.69212571046592,
+    "focal_length_mm_record": null,
+    "output_long_edge_px": 640,
+    "clip_near_m": 0.005,
+    "clip_far_m": 30000.0
+  },
+  "after_drags": {
+    "location": [
+      2.658367156982422e-05,
+      -1.7199570894241334,
+      1.4736875727772714
+    ],
+    "yaw": 135.27534224837515,
+    "pitch": -14.70629057259905,
+    "roll": 0.0,
+    "fov": 81.0,
+    "vfov": 46.69212571046592,
+    "focal_length_mm_record": null,
+    "output_long_edge_px": 640,
+    "clip_near_m": 0.005,
+    "clip_far_m": 30000.0
+  },
+  "image_status": "已更新"
+}

@@ -113,10 +113,10 @@ def _classes():
     from .operators.history_export import CLASSES as HISTORY_EXPORT_CLASSES
     from .panels.telemetry import CLASSES as TELEMETRY_CLASSES
     from .operators.workflow import CLASSES as WORKFLOW_CLASSES
-    from .panels import scene, channels, run, safety, presentation, training, gimbal, clearance, farm_replay
+    from .panels import scene, channels, run, safety, presentation, training, gimbal, clearance, farm_replay, video_output, custom_cameras
     return (PREFERENCE_CLASSES + CLASSES + CONNECTION_CLASSES + RUN_CLASSES + STATUS_CLASSES + TELEMETRY_CLASSES
             + WORKFLOW_CLASSES + HISTORY_EXPORT_CLASSES + scene.CLASSES + channels.CLASSES + run.CLASSES
-            + safety.CLASSES + presentation.CLASSES + training.CLASSES + gimbal.CLASSES + clearance.CLASSES + farm_replay.CLASSES)
+            + safety.CLASSES + presentation.CLASSES + training.CLASSES + gimbal.CLASSES + clearance.CLASSES + farm_replay.CLASSES + video_output.CLASSES + custom_cameras.CLASSES)
 
 
 def register():
@@ -135,6 +135,7 @@ def register():
         "wfrl_farm_panel_page": bpy.props.EnumProperty(
             name="回放面板", items=(("DEFLECTION", "挠度", "T1 叶尖位置与挠度对照"),
                                     ("RADAR", "净空", "当前机组的雷达与净空读数"),
+                                    ("VIDEO", "视频输出", "导出离线 MP4 或启动 RTSP 视频流"),
                                     ("TOOLS", "工具", "视角、遥测、截图录制与数据")),
             default="DEFLECTION"),
         "wfrl_deflection_visible": bpy.props.BoolProperty(default=True, update=refresh_deflection),
@@ -181,8 +182,12 @@ def register():
     from .panels import presentation as capture_panel
     workflow.register_properties()
     capture_panel.register_properties()
+    from .panels import video_output
+    video_output.register()
     from .panels import gimbal
     gimbal.register_properties()
+    from .panels import custom_cameras
+    custom_cameras.register_properties()
     from .panels import clearance
     from . import clearance_replay
     clearance.register_properties()
@@ -200,8 +205,11 @@ def register():
     capture_cleanup = capture_panel.unregister_properties
     charts_cleanup = charts.unregister
     gimbal_cleanup = gimbal.unregister_properties
+    custom_cameras_cleanup = custom_cameras.unregister_properties
     def cleanup():
+        custom_cameras_cleanup()
         runtime_cleanup()
+        video_output.unregister()
         history_export_cleanup()
         gimbal_cleanup()
         clearance.unregister_properties()

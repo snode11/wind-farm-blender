@@ -1,0 +1,12 @@
+FARM_FLEX_READY
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/farm_front_view_regression.py", line 42, in <module>
+    assert props == {'turbine': tid, 'angle': angle}, (label, props)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('T1 Down', {'turbine': 'T1'})
+
+Error: script failed, file: 'blender_frontend/tests/blender/farm_front_view_regression.py', exiting.
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

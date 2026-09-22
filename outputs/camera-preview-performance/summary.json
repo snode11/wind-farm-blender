@@ -1,0 +1,23 @@
+{
+  "old": {
+    "samples": 12,
+    "median_warm_seconds": 0.5524561249185354,
+    "peak_rss_gib": 0.95489501953125
+  },
+  "new": {
+    "samples": 12,
+    "median_warm_seconds": 0.2874943329952657,
+    "peak_rss_gib": 1.1195220947265625
+  },
+  "playback": {
+    "samples": 12,
+    "median_warm_seconds": 0.059376958059147,
+    "peak_rss_gib": 1.049530029296875
+  },
+  "installed-playback": {
+    "samples": 12,
+    "median_warm_seconds": 0.058540458092466,
+    "peak_rss_gib": 1.06048583984375
+  },
+  "limits": "12 sampled states across 60 seconds; not sustained realtime FPS or long-duration leak test. RSS did not improve."
+}

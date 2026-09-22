@@ -1,0 +1,8 @@
+00:06.817  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-16x2-zip-143.2/.exposure_sample.exr'
+00:07.591  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-16x2-zip-143.2/.exposure_sample.exr'
+CAMERA_VIDEO_FRAME 1/1 /Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-16x2-zip-143.2/master_frames/000000.png
+CAMERA_VIDEO_RENDER {"status": "complete", "expected_frames": 1, "verified_frames": 1, "rendered_this_run": 1, "wall_seconds": 2.926052958937362, "preparation_seconds": 5.302909041987732, "config_sha256": "4ce8d7f9b15beb74cda029899b85f6d4f8d28e5d4326df1713f8f2319ec6912c", "source_status": "REVIEW_ONLY", "output": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-16x2-zip-143.2"}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

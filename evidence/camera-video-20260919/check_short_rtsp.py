@@ -1,0 +1,91 @@
+"""Actual 4K camera sample transport check, separate from synthetic soak tests."""
+import json
+from pathlib import Path
+import socket
+import subprocess
+import sys
+import threading
+import time
+import traceback
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from wfrl.camera_video.package import verify_package, write_json
+from wfrl.camera_video.media import sha256, read_frames
+from wfrl.camera_video.stream import publish, receive, mediamtx_config
+
+
+def main():
+    package = Path(__file__).parent / 't1-short-4k'
+    output = Path(__file__).parent / 'short-4k-rtsp'
+    output.mkdir(exist_ok=False)
+    verified = verify_package(package)
+    binary = Path('/tmp/wfrl-mediamtx-v1.21.0/mediamtx')
+    config = output / 'mediamtx.yml'
+    config.write_text(mediamtx_config(28554))
+    url = 'rtsp://127.0.0.1:28554/windfarm/camera1'
+    mapping = 'http://127.0.0.1:28555/'
+    log = (output / 'server.log').open('w')
+    server = subprocess.Popen([str(binary), str(config.resolve())], stdout=log, stderr=log)
+    stop = threading.Event()
+    errors = []
+    session_logs = []
+    report = {'status': 'running', 'package': verified, 'scope': 'one local 4K TCP client, short camera clip',
+              'mediamtx_sha256': sha256(binary), 'mediamtx_version': '1.21.0',
+              'stream_source_sha256': sha256(ROOT / 'wfrl/camera_video/stream.py')}
+
+    def work():
+        try:
+            session_logs.append(str(publish(package, url, mapping_port=28555, stop_event=stop)))
+        except BaseException:
+            errors.append(traceback.format_exc())
+
+    worker = threading.Thread(target=work)
+    try:
+        for _ in range(100):
+            try:
+                with socket.create_connection(('127.0.0.1', 28554), timeout=.1):
+                    break
+            except OSError:
+                time.sleep(.05)
+        worker.start()
+        time.sleep(1.5)  # Intentionally join an ongoing playback cycle.
+        batches = []
+        rows = read_frames(package / 'frames.csv')
+        for index, count in enumerate((60, 40)):
+            directory = output / f'receive-{index}'
+            records = receive(url, mapping, frame_count=count, output_dir=directory, timeout=30)
+            assert all(r['dataset_id'] == verified['dataset_id'] for r in records)
+            assert all(r['frame_data'] == rows[r['frame_id']] for r in records)
+            assert all(b['media_timestamp'] - a['media_timestamp'] == 4500 for a, b in zip(records, records[1:]))
+            subprocess.run(['ffmpeg', '-v', 'error', '-xerror', '-i', str(directory / 'received.h264'),
+                            '-f', 'null', '-'], check=True)
+            info = json.loads(subprocess.check_output(['ffprobe', '-v', 'error', '-count_frames',
+                '-show_entries', 'stream=width,height,nb_read_frames', '-of', 'json',
+                str(directory / 'received.h264')], text=True))['streams'][0]
+            assert (info['width'], info['height'], int(info['nb_read_frames'])) == (3840, 2160, count)
+            batches.append({'decoded_frames': count, 'width': info['width'], 'height': info['height'],
+                            'cycles': sorted({r['cycle_id'] for r in records}),
+                            'session_id': records[0]['session_id'], 'every_label_matches_csv': True})
+        assert batches[0]['session_id'] == batches[1]['session_id']
+        report.update(status='passed', batches=batches, matched_decoded_frames=100, reconnection=True)
+    except BaseException:
+        errors.append(traceback.format_exc())
+        report['status'] = 'failed'
+        raise
+    finally:
+        stop.set()
+        if worker.is_alive():
+            worker.join(10)
+        server.terminate()
+        server.wait(timeout=10)
+        log.close()
+        report.update(errors=errors, session_logs=session_logs)
+        if errors:
+            report['status'] = 'failed'
+        write_json(output / 'checks.json', report)
+        print(json.dumps(report, indent=2))
+
+
+if __name__ == '__main__':
+    main()

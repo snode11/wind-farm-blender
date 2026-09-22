@@ -1,0 +1,11 @@
+{
+  "status": "complete",
+  "expected_frames": 1,
+  "verified_frames": 1,
+  "rendered_this_run": 1,
+  "wall_seconds": 3.4643941670656204,
+  "preparation_seconds": 5.256109500071034,
+  "config_sha256": "3ae106add3e036d23ae06bd5d017a1ca2f3465cbdffe5e2562f8f324ce145eb4",
+  "source_status": "REVIEW_ONLY",
+  "output": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-probe"
+}

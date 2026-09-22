@@ -1,0 +1,9 @@
+{
+  "changed_runtime_files": [
+    "blender_manifest.toml",
+    "panels/demo.py",
+    "panels/farm_replay.py"
+  ],
+  "installed_native_regression": "PASS",
+  "window": "Verified: dual-view button absent; existing single-view controls present"
+}

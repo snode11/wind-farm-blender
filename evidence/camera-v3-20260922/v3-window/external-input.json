@@ -1,0 +1,59 @@
+{
+  "clock_mapping": {
+    "unix_s": 1790073147.369612,
+    "monotonic_s": 1467693.1843255
+  },
+  "input_boundary": "CUA method invoked; API return is not mouse release or display completion",
+  "actions": [
+    [
+      "direction_drag_1",
+      1790073159144,
+      1790073159980
+    ],
+    [
+      "direction_drag_2",
+      1790073184093,
+      1790073185279
+    ],
+    [
+      "direction_drag_3",
+      1790073186469,
+      1790073186899
+    ],
+    [
+      "numeric_1",
+      1790073247186,
+      1790073247228
+    ],
+    [
+      "numeric_2",
+      1790073257320,
+      1790073257348
+    ],
+    [
+      "numeric_3",
+      1790073258419,
+      1790073258456
+    ],
+    [
+      "capture_cancel_direct",
+      1790073665621,
+      1790073668001
+    ]
+  ],
+  "observations": {
+    "numeric_escape_keeps_draft": true,
+    "viewport_escape_cancels_draft": true,
+    "sidebar_scrolled_confirm_cancel_visible": true,
+    "sidebar_hidden_confirm_visible": true,
+    "toolbar_confirm_then_dedicated_undo_preserves_129_65s": true,
+    "file_selector_retains_start_end_step_3_samples_12_png": true,
+    "import_summary_before_commit_cancel_keeps_layout": true,
+    "import_tuple_list_false_diff_found_and_fixed_after_observation": true
+  },
+  "limitations": [
+    "First three drag traces fell out of the initial probe buffer: no reconstructed input-to-image metric for those drags.",
+    "Initial trace persisted by test harness once per second, up to 24 MB; timings include instrumentation I/O overhead.",
+    "Physical screen illumination was not measured."
+  ]
+}

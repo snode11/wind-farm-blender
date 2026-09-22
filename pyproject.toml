@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wfrl"
-version = "0.3.5"
+version = "0.3.7"
 description = "Multi-agent RL for wind farm wake-steering control on the WFCRL benchmark (FLORIS + FAST.Farm)"
 requires-python = ">=3.11"
 
@@ -12,6 +12,9 @@ requires-python = ">=3.11"
 dependencies = []
 
 [project.optional-dependencies]
+camera-video = [
+    "numpy>=1.26,<3",
+]
 tip-preview = [
     "numpy>=1.26,<3",
     "opencv-python>=4.10,<5",

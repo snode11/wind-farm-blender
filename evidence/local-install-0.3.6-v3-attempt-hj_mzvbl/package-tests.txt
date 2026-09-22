@@ -1,0 +1,1 @@
+blender_frontend/tests/test_extension_package.py: 2 passed in 3.44s

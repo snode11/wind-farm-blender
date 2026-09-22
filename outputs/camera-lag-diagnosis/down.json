@@ -1,0 +1,36 @@
+{
+  "mode": "down",
+  "elapsed_s": 8.003733291989192,
+  "frame_advance": 480,
+  "draws": {
+    "original": {
+      "unique_frames": 110,
+      "draw_calls": 110,
+      "unique_fps": 13.743586397374989
+    }
+  },
+  "timings": {
+    "deformed_at": {
+      "calls": 220,
+      "total_s": 0.18536903732456267,
+      "median_ms": 0.8333334699273109,
+      "max_ms": 1.153124962002039
+    },
+    "comparison_update": {
+      "calls": 110,
+      "total_s": 0.0881310433614999,
+      "median_ms": 0.7881454657763243,
+      "max_ms": 1.0127080604434013
+    },
+    "farm_update": {
+      "calls": 110,
+      "total_s": 2.1036012035328895,
+      "median_ms": 13.064853963442147,
+      "max_ms": 49.67370885424316
+    }
+  },
+  "peak_rss_gib": 0.9176025390625,
+  "native_objects": 0,
+  "visible_meshes": 2363,
+  "vertices": 1179791
+}

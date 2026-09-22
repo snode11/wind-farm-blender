@@ -1,0 +1,73 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "lifetime_s": 3.0,
+  "interval_s": 0.025,
+  "max_points": 122,
+  "fade_levels": 32,
+  "ten_loop_counts": [
+    [
+      72,
+      72,
+      72
+    ],
+    [
+      120,
+      120,
+      120
+    ],
+    [
+      121,
+      121,
+      121
+    ],
+    [
+      121,
+      121,
+      121
+    ],
+    [
+      45,
+      45,
+      45
+    ],
+    [
+      72,
+      72,
+      72
+    ],
+    [
+      120,
+      120,
+      120
+    ],
+    [
+      121,
+      121,
+      121
+    ],
+    [
+      121,
+      121,
+      121
+    ],
+    [
+      45,
+      45,
+      45
+    ]
+  ],
+  "resources_before": [
+    2729,
+    179,
+    141
+  ],
+  "resources_after": [
+    2729,
+    179,
+    141
+  ],
+  "sampler_p95_ms": 0.3077919944189489,
+  "load_s": 4.81346558406949,
+  "boundary": "Native background checks; timings isolate sampler; window FPS and RSS separate"
+}

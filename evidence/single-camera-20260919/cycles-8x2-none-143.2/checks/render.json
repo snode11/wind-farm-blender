@@ -1,0 +1,11 @@
+{
+  "status": "complete",
+  "expected_frames": 1,
+  "verified_frames": 1,
+  "rendered_this_run": 1,
+  "wall_seconds": 5.408812750130892,
+  "preparation_seconds": 5.012567332945764,
+  "config_sha256": "75b44f9e621695d980a34b3901a38db0c3cc397e39cb026129b90ed55f43892e",
+  "source_status": "REVIEW_ONLY",
+  "output": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/cycles-8x2-none-143.2"
+}

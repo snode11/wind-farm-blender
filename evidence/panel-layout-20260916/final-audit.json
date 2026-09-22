@@ -1,0 +1,22 @@
+{
+  "installed_archive_members_match": 70,
+  "portable_archive_members_match": 70,
+  "mappo_files_unchanged_from_031": [
+    "assets/mappo/data.json",
+    "assets/mappo/deflection-t1.json",
+    "assets/mappo/geometry.npz",
+    "assets/mappo/manifest.json",
+    "assets/mappo/source-surfaces.json",
+    "assets/mappo/telemetry.json"
+  ],
+  "portable_physical_data_unchanged": true,
+  "version": "0.3.2",
+  "archive_sha256": "b95b9460a862c0180002d048c94dbe64103067250b43f9a0fd29cb94eca0183c",
+  "window": {
+    "module": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+    "version": "0.3.2",
+    "page": "DEFLECTION",
+    "time_s": 117.0
+  },
+  "portable_inventory_files": 99
+}

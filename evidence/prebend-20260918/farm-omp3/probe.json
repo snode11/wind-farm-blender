@@ -1,0 +1,425 @@
+{
+  "status": "INTERRUPTED_BENCHMARK",
+  "policy": {
+    "checkpoint": "mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt",
+    "sha256": "27c8c5855b2f6b2dca939258c8bf0ce3ac653359071727dabc6f08c0aeacaa61",
+    "environment": "Dec_Turb3_Row1_Fastfarm",
+    "turbine_order": [
+      "T1",
+      "T2",
+      "T3"
+    ],
+    "obs_keys": [
+      "yaw",
+      "wind_speed",
+      "wind_direction"
+    ],
+    "obs_mean": [
+      -1.0596270561218262,
+      5.895106792449951,
+      269.99871826171875
+    ],
+    "obs_var": [
+      0.48155131936073303,
+      2.213332176208496,
+      0.3037745952606201
+    ],
+    "controls": [
+      "yaw"
+    ],
+    "inference": "deterministic Normal.mean; stored normalization, no refit",
+    "action_unit": "yaw increment degrees per control step"
+  },
+  "records": [],
+  "wind_mps": 11.0,
+  "boundary": "Short throughput probe only; stopped deliberately; not a completed farm result. Full single-thread solve remains running.",
+  "case_dir": "__simul__/fastfarm/FastFarm__208s__3T_1789663583.096885",
+  "control_period_s": 3.0,
+  "limits": {
+    "yaw_abs_deg": 10,
+    "yaw_rate_deg_s": 0.3,
+    "driver_sliding_duty_fraction": 0.3
+  },
+  "controller_sha256": "3a17b3aa8f0d21b25be2c1783c4fafdbe492def504b0c043015905786ebcc75a",
+  "blade_model": "beamdyn-prebend",
+  "blade_config": {
+    "variant": "C",
+    "unloaded": false,
+    "dt_s": 0.00625,
+    "duration_s": 6.0,
+    "model": "NREL 5MW upwind prebend derivative",
+    "structural_module": "BeamDyn",
+    "reference_curve": [
+      [
+        -0.0,
+        0.0,
+        0.0,
+        13.308
+      ],
+      [
+        -1.05625e-05,
+        0.0,
+        0.199875,
+        13.308
+      ],
+      [
+        -0.0003806401,
+        0.0,
+        1.199865,
+        13.308
+      ],
+      [
+        -0.0012794928999999998,
+        0.0,
+        2.199855,
+        13.308
+      ],
+      [
+        -0.0027071209,
+        0.0,
+        3.199845,
+        13.308
+      ],
+      [
+        -0.0046635241,
+        0.0,
+        4.199835,
+        13.308
+      ],
+      [
+        -0.0071487025000000004,
+        0.0,
+        5.199825,
+        13.308
+      ],
+      [
+        -0.010162656099999999,
+        0.0,
+        6.199815,
+        13.308
+      ],
+      [
+        -0.0137053849,
+        0.0,
+        7.199805,
+        13.308
+      ],
+      [
+        -0.0177822225,
+        0.0,
+        8.201025,
+        13.308
+      ],
+      [
+        -0.0223771681,
+        0.0,
+        9.199785,
+        13.308
+      ],
+      [
+        -0.027506222500000007,
+        0.0,
+        10.199775,
+        13.308
+      ],
+      [
+        -0.0331640521,
+        0.0,
+        11.199765,
+        13.181
+      ],
+      [
+        -0.039350656899999996,
+        0.0,
+        12.199755,
+        12.848
+      ],
+      [
+        -0.0460746225,
+        0.0,
+        13.200975,
+        12.192
+      ],
+      [
+        -0.05331019210000001,
+        0.0,
+        14.199735,
+        11.561
+      ],
+      [
+        -0.0610831225,
+        0.0,
+        15.199725,
+        11.072
+      ],
+      [
+        -0.06938482810000002,
+        0.0,
+        16.199715,
+        10.792
+      ],
+      [
+        -0.08758640250000002,
+        0.0,
+        18.200925,
+        10.232
+      ],
+      [
+        -0.10788597159999998,
+        0.0,
+        20.20029,
+        9.672
+      ],
+      [
+        -0.13030656040000002,
+        0.0,
+        22.20027,
+        9.11
+      ],
+      [
+        -0.15484225000000001,
+        0.0,
+        24.20025,
+        8.534
+      ],
+      [
+        -0.1814930404,
+        0.0,
+        26.20023,
+        7.932
+      ],
+      [
+        -0.21026810249999997,
+        0.0,
+        28.200825,
+        7.321
+      ],
+      [
+        -0.2411399236,
+        0.0,
+        30.20019,
+        6.711
+      ],
+      [
+        -0.27413601640000007,
+        0.0,
+        32.20017,
+        6.122
+      ],
+      [
+        -0.30924721000000005,
+        0.0,
+        34.20015,
+        5.546
+      ],
+      [
+        -0.3464735044,
+        0.0,
+        36.20013,
+        4.971
+      ],
+      [
+        -0.38582732249999996,
+        0.0,
+        38.200725,
+        4.401
+      ],
+      [
+        -0.42727139560000005,
+        0.0,
+        40.20009,
+        3.834
+      ],
+      [
+        -0.4708429923999999,
+        0.0,
+        42.20007,
+        3.332
+      ],
+      [
+        -0.51652969,
+        0.0,
+        44.20005,
+        2.89
+      ],
+      [
+        -0.5643314884,
+        0.0,
+        46.20003,
+        2.503
+      ],
+      [
+        -0.6142797376,
+        0.0,
+        48.20124,
+        2.116
+      ],
+      [
+        -0.6662803876,
+        0.0,
+        50.19999,
+        1.73
+      ],
+      [
+        -0.7204274883999999,
+        0.0,
+        52.19997,
+        1.342
+      ],
+      [
+        -0.77668969,
+        0.0,
+        54.19995,
+        0.954
+      ],
+      [
+        -0.8056139535999999,
+        0.0,
+        55.19994,
+        0.76
+      ],
+      [
+        -0.8350669924000002,
+        0.0,
+        56.19993,
+        0.574
+      ],
+      [
+        -0.8650488064,
+        0.0,
+        57.19992,
+        0.404
+      ],
+      [
+        -0.8802380041,
+        0.0,
+        57.699915,
+        0.319
+      ],
+      [
+        -0.8955972496000002,
+        0.0,
+        58.20114,
+        0.253
+      ],
+      [
+        -0.9110129809,
+        0.0,
+        58.699905,
+        0.216
+      ],
+      [
+        -0.9265987600000001,
+        0.0,
+        59.1999,
+        0.178
+      ],
+      [
+        -0.9423167329,
+        0.0,
+        59.699895,
+        0.14
+      ],
+      [
+        -0.9581668996000001,
+        0.0,
+        60.19989,
+        0.101
+      ],
+      [
+        -0.9741492601,
+        0.0,
+        60.699885,
+        0.062
+      ],
+      [
+        -0.9902638144,
+        0.0,
+        61.19988,
+        0.023
+      ],
+      [
+        -1.0,
+        0.0,
+        61.5,
+        0.0
+      ]
+    ],
+    "reference_columns": [
+      "x_m",
+      "y_m",
+      "z_m",
+      "twist_deg"
+    ],
+    "prebend_definition": "x=-(z/61.5)^2 m; upwind; added to existing AeroDyn AC offsets",
+    "precone_deg": -2.5,
+    "source_case": "/Users/eason/Desktop/wfcrl/wind farm RL/__simul__/fastfarm/FastFarm__208s__3T_1789560533.018898",
+    "inputs": {
+      "FarmInputs/InflowWind.dat": "b662cbb9da8bed3d860a620280cc778ecea9af7df0eb30fd33bcf99adc20751d",
+      "FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat": "05adc1d1f4e312e1cabd27774828e2db8e4a0065fa4fd23e51be2fff9ab17959",
+      "FarmInputs/FFTest_WT1.fst": "f1c9b0f6a8d79c5f230d76f57f6adf4afc33c31e47679343032e4d3cde1e0fd8",
+      "5MW_Baseline/AD.dat": "05744e9ae621af471ac350b8f2c1d91a08066426fcdafe1ee4707885c3970738",
+      "5MW_Baseline/NRELOffshrBsline5MW_Blade.dat": "5bbcaa305218c95fdd4581a3d765346c55c0f845f7afe078336cc455fcb6d1e3",
+      "5MW_Baseline/NRELOffshrBsline5MW_BeamDyn.dat": "8105760c5e7d7b7c030605352e3f5f1fa8cd713e7cac6a54eb6227f91104ce06",
+      "5MW_Baseline/NRELOffshrBsline5MW_AeroDyn_blade.dat": "ab66bb1966c7685b9c86d7e63257ba3fcff063cf59b4429159a398af4ca94568",
+      "5MW_Baseline/NRELOffshrBsline5MW_Onshore_ElastoDyn_Tower.dat": "82ca67bea8bfbc85892b5f78db5e921c9aa0e69f34af4ae657c0b7e63301dc8f",
+      "5MW_Baseline/NRELOffshrBsline5MW_BeamDyn_Blade.dat": "b6031e7e0ebc1b31d905454f0c1aa1af8edd01e2f7882c60047a19bdbdb44138",
+      "5MW_Baseline/Airfoils/DU35_A17.dat": "701cff83e01a187209ff788a3fc4bfb9b8592546462a5aec2f0df54701d05763",
+      "5MW_Baseline/Airfoils/DU25_A17.dat": "52fcce2a8fd1159f38cdd1a8bfd365f79e3060e66ea91d5ab8fbce1f16ec20a7",
+      "5MW_Baseline/Airfoils/Cylinder1_coords.txt": "3a3a40c1eee741786357bab6fb49ae37b925dcf47a16aec083e8712c5b3bb595",
+      "5MW_Baseline/Airfoils/Cylinder1.dat": "ebaabc1d2befd769cde8cb28a75be0d2b73585f2a27960a3dc34cfbd05f60a2c",
+      "5MW_Baseline/Airfoils/Cylinder2.dat": "4be751a2b80057410c15ba2bc3ed799642dcd5cf12b544345aa61bc6777a1f64",
+      "5MW_Baseline/Airfoils/DU21_A17_coords.txt": "b4d6350614b0fbbd6262ec340c78ee8eb0562ddfc8cf6bdf222228e739392ca4",
+      "5MW_Baseline/Airfoils/DU40_A17.dat": "002e2176cf03eda520b160d5a46ce0f5f42125f892c9d0e1fd3c40424d249324",
+      "5MW_Baseline/Airfoils/DU35_A17_coords.txt": "cdbb3d2d5735b0fd6be7a9c4b4439ba2ac6e78c3652657ef4090739c2dc0877a",
+      "5MW_Baseline/Airfoils/DU21_A17.dat": "2ad661a5f04e87285b8c7f79e9e0b67765ce0f876a9597f604935eb6c47fa2f6",
+      "5MW_Baseline/Airfoils/DU30_A17_coords.txt": "fb63e89e1c53c3278cd420a5ab36402a4d609850f1869f4013848a041e7a5c93",
+      "5MW_Baseline/Airfoils/DU25_A17_coords.txt": "08e7d345ef3e066f059f1fcf5f9b779e6a7e455ff2f6944931b227916d7730e7",
+      "5MW_Baseline/Airfoils/NACA64_A17_coords.txt": "c91942a4843516ab7f1b17a34162d21dbc400fbb4011b60f83a83acf08c8bdec",
+      "5MW_Baseline/Airfoils/DU40_A17_coords.txt": "5008c9aa91ada47cad7badd9330ba36c72010bdbf0450852cf5ed81c92cf6579",
+      "5MW_Baseline/Airfoils/Cylinder2_coords.txt": "57928cf1f02057e34f45b00c71fc2468d7fc4d63605047a62907e25dee4637e0",
+      "5MW_Baseline/Airfoils/DU30_A17.dat": "e9d0f18b62a5361c0d45e401d4d22fd5d02f34dc2243a96a7b0f5e2a4b24c163",
+      "5MW_Baseline/Airfoils/NACA64_A17.dat": "acfbf90a0aa479f560911d89b31ec20d02284496a74ecfc9b8ad0534c5d472b9"
+    },
+    "scope": "Single-turbine fixed rpm and steady wind interface test; not matched to MAPPO A segment",
+    "structural_source": {
+      "NRELOffshrBsline5MW_BeamDyn.dat": {
+        "url": "https://raw.githubusercontent.com/OpenFAST/r-test/548bf2143633a7066f4582167fdf4180951fd7f6/glue-codes/openfast/5MW_Baseline/NRELOffshrBsline5MW_BeamDyn.dat",
+        "sha256": "ecc69eecb955afe435f4b993ca40d12335f0b99dcb833516107224660988147b"
+      },
+      "NRELOffshrBsline5MW_BeamDyn_Blade.dat": {
+        "url": "https://raw.githubusercontent.com/OpenFAST/r-test/548bf2143633a7066f4582167fdf4180951fd7f6/glue-codes/openfast/5MW_Baseline/NRELOffshrBsline5MW_BeamDyn_Blade.dat",
+        "sha256": "b6031e7e0ebc1b31d905454f0c1aa1af8edd01e2f7882c60047a19bdbdb44138"
+      },
+      "precurve-beamdyn.txt": {
+        "url": "https://forums.nlr.gov/uploads/short-url/hcFTh5WhUIV01MARfK0rFqr8V1r.txt",
+        "sha256": "2be18abb5a2860bdb9ffbf8524804ed1f04c3d52c0ae1f2d4523ec62ea7ab541"
+      },
+      "precurve-aerodyn.txt": {
+        "url": "https://forums.nlr.gov/uploads/short-url/fWfJelNOqr7VZXCoOZp5VPGMeDI.txt",
+        "sha256": "a061d11e70eb9db6fb8a48aa0ca2e0e72b654cb7280f53cb478f16181046d45d"
+      }
+    }
+  },
+  "unloaded_reference": "/Users/eason/Desktop/wfcrl/wind farm RL/results/prebend-20260918/C-rest",
+  "blade_input_hashes": {
+    "NRELOffshrBsline5MW_BeamDyn.dat": "8105760c5e7d7b7c030605352e3f5f1fa8cd713e7cac6a54eb6227f91104ce06",
+    "NRELOffshrBsline5MW_BeamDyn_Blade.dat": "b6031e7e0ebc1b31d905454f0c1aa1af8edd01e2f7882c60047a19bdbdb44138"
+  },
+  "tower": "flexible",
+  "output_fps": 40,
+  "numerical_settings": {
+    "solver_dt_s": 0.0015625,
+    "controller_dt_s": 0.00625,
+    "tower_nodes": 20,
+    "surfaces": true,
+    "aerodynamic_nodes": 19,
+    "farm_dt_low_s": 3.0,
+    "farm_dt_high_s": 0.05
+  },
+  "input_hashes": {
+    "FFTest_WT2.fst": "1273cdd5d17406024bc8e3c86813a058f3978a53936788731917da598905d4e2",
+    "FFTest_WT3.fst": "897ef3f2f0b96d245b8bc19967b0cb86f92a4bb7f4b10f9d8db33baf1639c933",
+    "FFTest_WT1.fst": "b62c05384d3823b60b0e49d5e81cdb1ede868ba79743bd7380672288a6cc471b"
+  }
+}

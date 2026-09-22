@@ -1,0 +1,24 @@
+{
+  "command": [
+    "ffmpeg",
+    "-v",
+    "error",
+    "-nostdin",
+    "-n",
+    "-stream_loop",
+    "4",
+    "-i",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/.loop-short-check.building/source/video.mp4",
+    "-map",
+    "0:v:0",
+    "-an",
+    "-c:v",
+    "copy",
+    "-video_track_timescale",
+    "20",
+    "-movflags",
+    "+faststart",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/.loop-short-check.building/video.mp4"
+  ],
+  "source_package": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/t1-short-4k"
+}

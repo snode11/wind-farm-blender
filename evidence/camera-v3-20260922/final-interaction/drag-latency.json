@@ -1,0 +1,51 @@
+{
+  "raw": [
+    {
+      "action": 1,
+      "input_wait_ms": 825.5939483642578,
+      "refresh_to_successful_draw_ms": 19.83375009149313,
+      "draw_ms": 127.45649996213615,
+      "callback_wait_ms": 15.50720795057714,
+      "t0_to_t4_ms": 988.3899688720703,
+      "release_to_commit_ms": 147.04045793041587,
+      "received_updates": 1,
+      "failed_attempts": 0,
+      "version": 2,
+      "request": "9df088da0e3b56cf503013d53e9c2d2ea5a98e1398c30cbed41210fab934f940",
+      "renderer": 13282596272
+    },
+    {
+      "action": 2,
+      "input_wait_ms": 556.4060211181641,
+      "refresh_to_successful_draw_ms": 529.2536660563201,
+      "draw_ms": 119.11912495270371,
+      "callback_wait_ms": 26.032041991129518,
+      "t0_to_t4_ms": 1230.8058738708496,
+      "release_to_commit_ms": 648.0712909251451,
+      "received_updates": 1,
+      "failed_attempts": 1,
+      "version": 3,
+      "request": "d899c7a420f46ff8e6d0d8deec6d4e8760410bb2905d736d1aa336d52a9a1ed8",
+      "renderer": 13282596272
+    },
+    {
+      "action": 3,
+      "input_wait_ms": 419.4040298461914,
+      "refresh_to_successful_draw_ms": 524.4918339885771,
+      "draw_ms": 125.74279098771513,
+      "callback_wait_ms": 16.53804210945964,
+      "t0_to_t4_ms": 1086.1711502075195,
+      "release_to_commit_ms": 649.890000000596,
+      "received_updates": 1,
+      "failed_attempts": 1,
+      "version": 4,
+      "request": "f1d2ad174c6b5c9316a41106016f23ac19b44d8ec701078c83d68233fa445205",
+      "renderer": 13282596272
+    }
+  ],
+  "no_later_commits_for_drag_renderer": false,
+  "limitations": [
+    "CUA delivered one handled direction update per drag; not a dense physical mouse event stream.",
+    "t4 is draw callback completion, not physical illumination."
+  ]
+}

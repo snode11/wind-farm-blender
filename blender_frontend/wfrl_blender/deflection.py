@@ -215,7 +215,8 @@ class ComparisonView:
         from mathutils import Vector
         context = bpy.context
         if (not self.owner.enabled or context.scene != self.owner.scene
-                or not context.region_data or not self.labels):
+                or not context.region_data or not self.labels
+                or not context.space_data.overlay.show_overlays):
             return
         scale = max(1., context.preferences.system.ui_scale)
         blf.size(0, 13 * scale)

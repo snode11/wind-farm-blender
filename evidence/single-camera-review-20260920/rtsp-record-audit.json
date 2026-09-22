@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "scope": "independent re-audit of existing actual full-cycle RTP capture; no new RTSP run",
+  "batches": [
+    {
+      "frames": 6020,
+      "session": "902dd290-4e61-4c49-842e-99467ecee44a",
+      "outer_cycles": [
+        0,
+        1
+      ],
+      "source_cycles": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "max_rtp_packets_per_frame": 1297
+    },
+    {
+      "frames": 40,
+      "session": "902dd290-4e61-4c49-842e-99467ecee44a",
+      "outer_cycles": [
+        1
+      ],
+      "source_cycles": [
+        0
+      ],
+      "max_rtp_packets_per_frame": 1074
+    }
+  ],
+  "all_csv_labels_match": true,
+  "frame_and_timestamp_gaps": 0,
+  "server_warnings": 0,
+  "stream_source_unchanged": true
+}

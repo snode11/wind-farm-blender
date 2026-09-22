@@ -1,0 +1,14 @@
+{
+  "repeat_times_s": [
+    60,
+    120,
+    180,
+    240
+  ],
+  "sim_time_before_s": 176.975,
+  "sim_time_after_s": 117.025,
+  "camera_world_position_reset_m": 0.09012606588384907,
+  "camera_world_rotation_reset_deg": 2.4932078703483085,
+  "visual_review": "visible foundation/tower framing reset; repeated sequence is not seamless",
+  "scope": "expected source replay reset, not damaged video or loose camera mount"
+}

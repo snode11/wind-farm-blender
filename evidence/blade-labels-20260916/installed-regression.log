@@ -1,0 +1,7 @@
+00:09.012  blend            | Read blend: "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/tmp9lxydrva/deflection.blend"
+Info: Saved as "deflection.blend"
+TIP_DEFLECTION_PASS {"saved_mesh_max_error_m": [3.768165276474278e-06, 3.960793033175314e-05], "interpolated_mesh_max_error_m": [0.0002597854942751887, 9.748309614854289e-05], "switching": true, "seeking": true, "hidden_t1": true, "fixed_clock": true, "reload": true}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 700, total unfreed memory 0.051880 MB

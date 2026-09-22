@@ -1,0 +1,17 @@
+TIP_PASSAGE 0
+TIP_PASSAGE 1
+TIP_PASSAGE 2
+TIP_PASSAGE 3
+TIP_PASSAGE 4
+TIP_PASSAGE 5
+TIP_PASSAGE 6
+TIP_PASSAGE 7
+TIP_PASSAGE 8
+TIP_PASSAGE 9
+TIP_PASSAGE 10
+TIP_PASSAGE 11
+TIP_BEST {"shift": 1.0, "vfov": 4, "yaw": 253.52985822502205, "pitch": -40.0372644718505, "samples": [{"time_s": 117.0, "target_fraction": 0.43315508021390375, "purity": 0.5664335664335665}, {"time_s": 122.19561170212766, "target_fraction": 0.24598930481283424, "purity": 0.8518518518518519}, {"time_s": 127.61858766233766, "target_fraction": 0.2887700534759358, "purity": 0.8307692307692308}, {"time_s": 133.18851492537314, "target_fraction": 0.3689839572192513, "purity": 0.6216216216216216}, {"time_s": 138.64094517675255, "target_fraction": 0.36363636363636365, "purity": 0.6071428571428571}, {"time_s": 143.95550689259045, "target_fraction": 0.21390374331550802, "purity": 1.0}, {"time_s": 149.50963900539244, "target_fraction": 0.3689839572192513, "purity": 0.5897435897435898}, {"time_s": 154.97714879852126, "target_fraction": 0.32085561497326204, "purity": 0.7142857142857143}, {"time_s": 160.46883982035928, "target_fraction": 0.3315508021390374, "purity": 0.775}, {"time_s": 166.06716627288836, "target_fraction": 0.42780748663101603, "purity": 0.5555555555555556}, {"time_s": 171.45727009744215, "target_fraction": 0.34759358288770054, "purity": 0.6701030927835051}, {"time_s": 176.9303835900474, "target_fraction": 0.37967914438502676, "purity": 0.6454545454545455}], "min_fraction": 0.21390374331550802, "mean_purity": 0.70233013547017, "min_purity": 0.5555555555555556, "score": 0.911593355909861}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

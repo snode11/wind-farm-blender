@@ -1,0 +1,181 @@
+{
+  "schema_version": 2,
+  "coordinate_frame": "T1.YawRoot.local / v1",
+  "orientation_convention": "yaw +X toward +Y; pitch up; roll camera +Z; degrees",
+  "model_signature": "sha256:d491dc9bee9476f426b3",
+  "resolution_policy": "FOV_PRIORITY_LONG_EDGE",
+  "cameras": [
+    {
+      "slot_id": 1,
+      "installed": true,
+      "enabled": true,
+      "label": "上方叶片观察",
+      "parameters": {
+        "location": [
+          -3.0,
+          0.0021260658756614243,
+          3.9125448256731032
+        ],
+        "yaw": 180.0,
+        "pitch": 75.0,
+        "roll": 0.0,
+        "fov": 105.0,
+        "vfov": 105.0,
+        "focal_length_mm_record": null,
+        "output_long_edge_px": 2560,
+        "clip_near_m": 0.005,
+        "clip_far_m": 30000.0
+      },
+      "mount_mode": "SURFACE",
+      "mount_validation_status": "surface_validated",
+      "research_confirmed": false,
+      "nearest_distance_m": null,
+      "mount_warning": "",
+      "anchor": {
+        "point": [
+          -3.0,
+          4.7755292775786273e-11,
+          3.7625598907470703
+        ],
+        "normal": [
+          0.0,
+          0.014173772186040878,
+          0.9998995661735535
+        ],
+        "distance": 0.15,
+        "surface_name": "WFRL.Turbine.T1.Nacelle"
+      },
+      "image_width_px": 2560,
+      "image_height_px": 2560
+    },
+    {
+      "slot_id": 2,
+      "installed": true,
+      "enabled": true,
+      "label": "右侧叶片观察",
+      "parameters": {
+        "location": [
+          -3.0,
+          1.799984911084175,
+          2.1146861978340894
+        ],
+        "yaw": 105.0,
+        "pitch": 0.0,
+        "roll": 0.0,
+        "fov": 105.0,
+        "vfov": 105.0,
+        "focal_length_mm_record": null,
+        "output_long_edge_px": 2560,
+        "clip_near_m": 0.005,
+        "clip_far_m": 30000.0
+      },
+      "mount_mode": "SURFACE",
+      "mount_validation_status": "surface_validated",
+      "research_confirmed": false,
+      "nearest_distance_m": null,
+      "mount_warning": "",
+      "anchor": {
+        "point": [
+          -3.0,
+          1.649999976158142,
+          2.1125600337982178
+        ],
+        "normal": [
+          0.0,
+          0.9998995661735535,
+          0.014174426905810833
+        ],
+        "distance": 0.15,
+        "surface_name": "WFRL.Turbine.T1.Nacelle"
+      },
+      "image_width_px": 2560,
+      "image_height_px": 2560
+    },
+    {
+      "slot_id": 3,
+      "installed": true,
+      "enabled": true,
+      "label": "下方叶片观察",
+      "parameters": {
+        "location": [
+          -3.0,
+          0.002126163798640521,
+          0.31257512271404264
+        ],
+        "yaw": 180.0,
+        "pitch": -75.0,
+        "roll": 0.0,
+        "fov": 105.0,
+        "vfov": 105.0,
+        "focal_length_mm_record": null,
+        "output_long_edge_px": 2560,
+        "clip_near_m": 0.005,
+        "clip_far_m": 30000.0
+      },
+      "mount_mode": "SURFACE",
+      "mount_validation_status": "surface_validated",
+      "research_confirmed": false,
+      "nearest_distance_m": null,
+      "mount_warning": "",
+      "anchor": {
+        "point": [
+          -3.0,
+          -9.753271801304919e-11,
+          0.4625600576400757
+        ],
+        "normal": [
+          0.0,
+          0.014174425974488258,
+          -0.9998995661735535
+        ],
+        "distance": 0.15,
+        "surface_name": "WFRL.Turbine.T1.Nacelle"
+      },
+      "image_width_px": 2560,
+      "image_height_px": 2560
+    },
+    {
+      "slot_id": 4,
+      "installed": true,
+      "enabled": true,
+      "label": "左侧叶片观察",
+      "parameters": {
+        "location": [
+          -2.999999761581421,
+          -1.799984911084175,
+          2.1146861978340894
+        ],
+        "yaw": 255.0,
+        "pitch": 0.0,
+        "roll": 0.0,
+        "fov": 105.0,
+        "vfov": 105.0,
+        "focal_length_mm_record": null,
+        "output_long_edge_px": 2560,
+        "clip_near_m": 0.005,
+        "clip_far_m": 30000.0
+      },
+      "mount_mode": "SURFACE",
+      "mount_validation_status": "surface_validated",
+      "research_confirmed": false,
+      "nearest_distance_m": null,
+      "mount_warning": "",
+      "anchor": {
+        "point": [
+          -2.999999761581421,
+          -1.649999976158142,
+          2.1125600337982178
+        ],
+        "normal": [
+          0.0,
+          -0.9998995661735535,
+          0.014174426905810833
+        ],
+        "distance": 0.15,
+        "surface_name": "WFRL.Turbine.T1.Nacelle"
+      },
+      "image_width_px": 2560,
+      "image_height_px": 2560
+    }
+  ]
+}

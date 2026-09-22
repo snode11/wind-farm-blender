@@ -1,0 +1,5 @@
+{'status': 'PASS', 'version': '0.3.4', 'enabled': True, 'installed_path': '/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender', 'zip_matches': True, 'turbines': ['T1', 'T2', 'T3'], 'schema': 'wfrl.farm-flex-review.v3', 'camera': 'WFRL.Camera.T1.Gimbal', 'acceptance_status': 'FAILED_AVAILABILITY'}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 586, total unfreed memory 0.042572 MB

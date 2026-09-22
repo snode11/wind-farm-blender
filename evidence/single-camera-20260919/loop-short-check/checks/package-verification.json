@@ -1,0 +1,13 @@
+{
+  "valid": true,
+  "dataset_id": "0f1648750b7a20f7c473ee67ca2b8aeae77dafe4493d8f38838066cace26e852",
+  "frame_count": 100,
+  "fps": 20,
+  "duration_s": 5.0,
+  "source_repeat_count": 5,
+  "encoded_duration_s": 5.0,
+  "width": 3840,
+  "height": 2160,
+  "exact_encoded_repetition": true,
+  "status": "REVIEW_ONLY"
+}

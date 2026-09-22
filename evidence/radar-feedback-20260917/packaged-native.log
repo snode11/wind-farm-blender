@@ -1,0 +1,7 @@
+00:06.869  blend            | Read blend: "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/tmp9zemkiuq/feedback.blend"
+Info: Saved as "feedback.blend"
+RADAR_FEEDBACK_PASS {'status': 'PASS', 'materials': True, 'independent_turbines': True, 'seek': True, 'clock': True, 'reload': True, 'clear': True}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 700, total unfreed memory 0.051880 MB

@@ -1,0 +1,12 @@
+{
+  "schema": "wfrl.section-transforms.preview.v1",
+  "source": "FAST.Farm",
+  "run_id": "close-v1",
+  "turbine_id": "T1",
+  "package_manifest_sha256": "91895c64e0bc962c956d57fe8bb507fe9e26f0af6cf6aa2f59cef5a19a9cc30b",
+  "reference_frame": 0,
+  "includes_rigid_motion": true,
+  "source_fps": 80.0,
+  "max_surface_fit_error_m": 1.6721028521800727e-05,
+  "scope": "single turbine fixed yaw/pitch archive; no policy inference; true amplitude"
+}

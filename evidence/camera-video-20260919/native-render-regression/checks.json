@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "arbitrary_time": true,
+  "fixed_mount_max_matrix_error": 5.345473979900817e-06,
+  "helper_objects_hidden_from_all_render_rays": 208,
+  "shared_frame_schedule": true,
+  "exposure_subsamples": true,
+  "linear_color_transform_error": 5.800193144556154e-06,
+  "render_resume": true,
+  "config_mismatch_rejected": true,
+  "corruption_rejected": true,
+  "limitation": "small diagnostic renders; no production quality convergence claim"
+}

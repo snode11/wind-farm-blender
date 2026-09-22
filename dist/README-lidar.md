@@ -1,13 +1,13 @@
-# WFRL Blender 0.3.5 交付说明
+# WFRL Blender 0.3.7 交付说明
 
-要求 Blender 5.2+。从 [GitHub Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.5) 下载 `wfrl_blender-0.3.5.zip`，从磁盘安装并启用，重启后加载 MAPPO · 60 秒。Windows 与 macOS 共用此包，离线回放无需后端 Python、MPI 或 FAST.Farm。
+要求 Blender 5.2+。安装 [wfrl_blender-0.3.7.zip](wfrl_blender-0.3.7.zip)，启用后重启 Blender，加载 MAPPO · 60 秒。包内含现有预弯 v3 回放，离线播放无需后端 Python、MPI 或 FAST.Farm。
 
-新增独立机舱云台相机，默认 120° 广角，保留原 Down 视角；支持摇杆转向与相机模式下滚轮变焦。叶尖轨迹改为红绿蓝三叶片相邻两圈定格 2 秒，再用 0.75 秒淡出，按仿真时钟播放。
+本版包含四相机安装与独立双 FOV、原生单路/四路观察、同刻原图与序列采集、布局导入导出和相机专用撤销，以及已有 MP4 导出与 RTSP 推流。
 
-内置物理数据与 0.3.4 完全一致，固定三束覆盖率失败，仍为 REVIEW_ONLY。
+[安装说明](../docs/blender/INSTALL.md) · [四相机使用说明](../docs/blender/T1四相机研发使用说明.md) · [四段布局与使用方法](../outputs/camera-layout-same-blade-v2/README.md) · [视频输出](../docs/blender/Blender视频输出.md)
 
-SHA-256：`709aa8151263b97bd1c89fb74f61f72c3becb0432a11677fe35643a40763aaa9`。
+四路仍可能明显掉帧；四段布局不持续跟踪叶片，也不保证完整叶片表面无盲区。物理数据仍为 REVIEW_ONLY，固定三束覆盖率未通过。
 
-[校验文件](wfrl_blender-0.3.5.zip.sha256) · [逐文件清单](wfrl_blender-0.3.5.inventory.json) · [交付清单](lidar-delivery.json) · [发布核对](../docs/blender/0.3.5发布核对.md)。
+SHA-256：`c087776e1b5a9b0269523177b9c4d52bedd163e87813f0a6de1118204dfec74e`。
 
-验证环境为 macOS Blender 5.2.1 LTS。Windows 实机、稳定 60 FPS、长期稳定性和现场精度未验收。
+[校验文件](wfrl_blender-0.3.7.zip.sha256) · [逐文件清单](wfrl_blender-0.3.7.inventory.json) · [交付清单](lidar-delivery.json) · [发布核对](../docs/blender/0.3.7发布核对.md)。

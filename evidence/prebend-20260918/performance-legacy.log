@@ -1,0 +1,6 @@
+FARM_FLEX_READY
+PERFORMANCE {'schema': 'wfrl.replay-performance.v1', 'package': 'legacy built-in', 'load_s': 6.31372637511231, 'p95_frame_ms': 110.89251022785902, 'median_frame_ms': 103.98735362105072, 'rss_growth_mib': 0.0, 'loops': [{'resources': [2721, 173, 141], 'peak_rss_mib': 665.578125}, {'resources': [2721, 173, 141], 'peak_rss_mib': 665.578125}, {'resources': [2721, 173, 141], 'peak_rss_mib': 665.578125}, {'resources': [2721, 173, 141], 'peak_rss_mib': 665.578125}, {'resources': [2721, 173, 141], 'peak_rss_mib': 665.578125}, {'resources': [2721, 173, 141], 'peak_rss_mib': 665.578125}, {'resources': [2721, 173, 141], 'peak_rss_mib': 665.578125}, {'resources': [2721, 173, 141], 'peak_rss_mib': 665.578125}, {'resources': [2721, 173, 141], 'peak_rss_mib': 665.578125}, {'resources': [2721, 173, 141], 'peak_rss_mib': 665.578125}], 'frames_per_loop': 121, 'scope': 'Native background frame updates at 0.5 simulation-second spacing; skipped frames intentional; not viewport FPS; dense trail sampling tested separately'}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

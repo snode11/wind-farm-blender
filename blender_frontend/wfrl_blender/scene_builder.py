@@ -551,6 +551,9 @@ def clear_scene(collection_name: str = COLLECTION_NAME):
     # Drop replay references while their mesh and trail objects still exist.
     import sys
     from . import tip_tracking, clearance_replay
+    custom = sys.modules.get(__package__ + '.panels.custom_cameras')
+    if custom is not None:
+        custom.cancel_on_load()
     farm = sys.modules.get(__package__ + '.farm_flex')
     for owner in bpy.data.scenes:
         if any(obj.name in owner.objects for obj in collection.objects):

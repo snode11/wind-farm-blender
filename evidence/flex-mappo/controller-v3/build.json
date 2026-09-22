@@ -1,0 +1,20 @@
+{
+  "source": "wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/DISCON.F90",
+  "source_sha256": "08adf5d58d8af82c3083ccb00c9a7fba5c1772b2f7426458bff056f2a52e48e1",
+  "patched_sha256": "3d56047dedbb3efa35c47c61d288a97b1daaac0efc46e19246e7bb11be6dd99f",
+  "binary_sha256": "ae49fc7a17da2d1952d08e567e851aca1123a38615c98954adb8f790a95ac1d2",
+  "command": [
+    "gfortran",
+    "-dynamiclib",
+    "-ffree-line-length-none",
+    "-fdefault-real-8",
+    "-fcheck=all",
+    "-DIMPLICIT_DLLEXPORT",
+    "-O3",
+    "-fPIC",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/flex-mappo/controller-v3/DISCON.F90",
+    "-o",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/flex-mappo/controller-v3/DISCON.dll"
+  ],
+  "change": "Restore native pitch when external pitch is disabled"
+}

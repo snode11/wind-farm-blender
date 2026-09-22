@@ -1,0 +1,9 @@
+CHOSEN 1 {"hfov": 30, "vfov": 40, "angles": [214.00383625283226, -26.662139208390293, -56.304288274837944], "purity": 0.963076923076923, "target_fraction": 0.6638388123011665, "span_quantiles": [3.075012445449829, 5.80831241607666, 15.887499809265137], "score": -0.036161187698833475, "other": {"WFRL.Terrain": 194, "background": 98, "WFRL.Landscape.ServiceRoad": 1}}
+CHOSEN 2 {"hfov": 12, "vfov": 10, "angles": [243.44588511044992, -36.50704451629224, -65.802584668403], "purity": 0.9511228533685601, "target_fraction": 0.7635206786850477, "span_quantiles": [15.887499809265137, 19.987499237060547, 29.417501068115165], "score": -0.06352067868504774, "other": {"WFRL.Terrain": 186}}
+CHOSEN 3 {"hfov": 6, "vfov": 4, "angles": [252.4411248976565, -39.932699909539195, -74.67502994104359], "purity": 0.9690721649484536, "target_fraction": 0.6977730646871686, "span_quantiles": [32.287498474121094, 37.412498474121094, 46.63750076293945], "score": -0.0022269353128313574, "other": {"WFRL.Terrain": 264}}
+CHOSEN 4 {"hfov": 3.5, "vfov": 3, "angles": [254.79439631449384, -40.294594247054945, -75.49689529350277], "purity": 1.0, "target_fraction": 0.6023329798515377, "span_quantiles": [46.63750076293945, 51.677085876464844, 59.552475547790515], "score": -0.09766702014846229, "other": {"WFRL.Terrain": 375}}
+FINAL_DESIGN_PASS
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

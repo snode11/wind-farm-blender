@@ -1,0 +1,74 @@
+[
+  {
+    "slot": 3,
+    "before": {
+      "location": [
+        0.9999997615814209,
+        -1.9439826011657715,
+        2.499722719192505
+      ],
+      "yaw": 252.4411248976565,
+      "pitch": -39.932699909539195,
+      "roll": -74.67502994104359,
+      "fov": 6.0,
+      "vfov": 4.0,
+      "focal_length_mm_record": null,
+      "output_long_edge_px": 1920,
+      "clip_near_m": 0.005,
+      "clip_far_m": 30000.0
+    },
+    "after": {
+      "location": [
+        0.9999997615814209,
+        -1.9439826011657715,
+        2.499722719192505
+      ],
+      "yaw": 250.90153892764442,
+      "pitch": -39.59741189286552,
+      "roll": -74.67502994104359,
+      "fov": 7.5,
+      "vfov": 7.4,
+      "focal_length_mm_record": null,
+      "output_long_edge_px": 1920,
+      "clip_near_m": 0.005,
+      "clip_far_m": 30000.0
+    },
+    "reason": "same-azimuth passage geometry envelope over 12 observed revolutions"
+  },
+  {
+    "slot": 4,
+    "before": {
+      "location": [
+        2.3097891807556152,
+        -1.9438011646270752,
+        2.49969482421875
+      ],
+      "yaw": 254.79439631449384,
+      "pitch": -40.294594247054945,
+      "roll": -75.49689529350277,
+      "fov": 3.5,
+      "vfov": 3.0,
+      "focal_length_mm_record": null,
+      "output_long_edge_px": 1920,
+      "clip_near_m": 0.005,
+      "clip_far_m": 30000.0
+    },
+    "after": {
+      "location": [
+        2.3097891807556152,
+        -1.9438011646270752,
+        2.49969482421875
+      ],
+      "yaw": 253.22780845950308,
+      "pitch": -39.97346683804588,
+      "roll": -75.49689529350277,
+      "fov": 4.2,
+      "vfov": 5.8,
+      "focal_length_mm_record": null,
+      "output_long_edge_px": 1920,
+      "clip_near_m": 0.005,
+      "clip_far_m": 30000.0
+    },
+    "reason": "same-azimuth passage geometry envelope over 12 observed revolutions"
+  }
+]

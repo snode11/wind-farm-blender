@@ -1,0 +1,5 @@
+{
+  "status": "FAIL",
+  "stage": 2,
+  "error": "Traceback (most recent call last):\n  File \"/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/four_cameras_window_regression.py\", line 136, in tick\n    assert len(op.preview.images)==4,op.preview.error\n               ^^^^^^^^^^\n  File \"/Applications/Blender.app/Contents/Resources/5.2/scripts/modules/_bpy_types.py\", line 1099, in __getattribute__\n    properties = _StructRNA.path_resolve(self, \"properties\")\nReferenceError: StructRNA of type WFRL_OT_CustomCamera has been removed\n"
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "blade": 1,
+    "tip_deflection_min_m": 3.9019335663608925,
+    "tip_deflection_max_m": 4.838092383115667,
+    "component_peak_to_peak_m": [
+      0.83384433910981,
+      1.012392525564524,
+      0.14899504265484037
+    ]
+  },
+  {
+    "blade": 2,
+    "tip_deflection_min_m": 3.8968568275787905,
+    "tip_deflection_max_m": 4.860391834197642,
+    "component_peak_to_peak_m": [
+      0.8166292397222041,
+      0.5812412236961289,
+      0.9547908676812333
+    ]
+  },
+  {
+    "blade": 3,
+    "tip_deflection_min_m": 3.8969251059751175,
+    "tip_deflection_max_m": 4.839612816878168,
+    "component_peak_to_peak_m": [
+      0.9084478738526487,
+      0.49979076918823667,
+      0.9155144722832915
+    ]
+  }
+]

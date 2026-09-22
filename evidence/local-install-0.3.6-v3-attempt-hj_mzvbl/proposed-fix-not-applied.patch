@@ -1,0 +1,22 @@
+--- a/blender_frontend/wfrl_blender/panels/custom_cameras.py
++++ b/blender_frontend/wfrl_blender/panels/custom_cameras.py
+@@ -979,7 +979,9 @@
+ def register_properties():
+     if migrate_loaded not in bpy.app.handlers.load_post:
+         bpy.app.handlers.load_post.append(migrate_loaded)
+-    migrate_loaded()
++    # Extension registration runs inside Blender RestrictBlend; defer scene access.
++    if not bpy.app.timers.is_registered(migrate_loaded):
++        bpy.app.timers.register(migrate_loaded, first_interval=0.)
+     if cancel_on_load not in bpy.app.handlers.load_pre:
+         bpy.app.handlers.load_pre.insert(0,cancel_on_load)
+     bpy.types.WindowManager.wfrl_custom_slot=IntProperty(default=1,min=1,max=core.MAX_CUSTOM_CAMERAS,options={'SKIP_SAVE'})
+@@ -1006,6 +1008,8 @@
+ 
+ 
+ def unregister_properties():
++    if bpy.app.timers.is_registered(migrate_loaded):
++        bpy.app.timers.unregister(migrate_loaded)
+     if bpy.app.timers.is_registered(lifecycle_watchdog):
+         bpy.app.timers.unregister(lifecycle_watchdog)
+     if _ACTIVE:

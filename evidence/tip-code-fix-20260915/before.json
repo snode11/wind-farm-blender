@@ -1,0 +1,9 @@
+{
+  "tip_3d.py": "7954aedd3cd437a3091e74e2599b781aa443cf812deffb453bbbb41c997ffeb7",
+  "tip_3d_vis.py": "1816dea55af4b6b44e3c09d7cc665944207773bf880fc142605dfdc0a64db514",
+  "README.md": "3e7a691d313d238e7f307bc0b3ee018ca46a3eb4532c7b484870c1326cf4463f",
+  "pyproject.toml": "a839c7386200b59a0ffc05b5051bbb059891885c45af70306f228e9576e76c13",
+  "blender_frontend/wfrl_blender/cameras.py": "661f755d80c72b85fca52eea530a0a91cfe27cac99f7d2e5e8268fc84b71fbda",
+  "blender_frontend/wfrl_blender/panels/gimbal.py": "89860d6e831a02cc2bb82f49cddc67bcbc9e91fc93a35683343581b59c731c8a",
+  "blender_frontend/wfrl_blender/scene_builder.py": "826bf039c434cf7b874ddc330eea4fed2b6e15fac51c63abe99fc009b84e5079"
+}

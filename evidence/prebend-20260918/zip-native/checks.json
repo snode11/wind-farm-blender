@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "turbines": [
+    "T1",
+    "T2",
+    "T3"
+  ],
+  "max_component_error_m": 0.0013780016838742803,
+  "interpolated_component_error_m": 0.001912713954324019,
+  "load_s": 4.942822084063664,
+  "frame_update_p95_ms": 81.70125004835427,
+  "blender": "5.2.1 LTS"
+}

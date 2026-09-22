@@ -1,0 +1,56 @@
+Independent source/CSV/geometry checks passed
+decoded 1200
+decoded 2400
+decoded 3600
+decoded 4800
+decoded 6000
+{
+  "status": "passed",
+  "frame_count": 6000,
+  "independent_source_tip_max_error_m": 0.0,
+  "rpm_max_error": 0.0,
+  "fixed_camera_mount_max_matrix_error": 2.842170943040401e-14,
+  "clearance_distance_max_error_m": 0.0,
+  "missing_values_preserved": true,
+  "strict_native_4k_decode_errors": 0,
+  "decoded_rgb_repeats_exactly": true,
+  "diagnostic_rgb_resolution": [
+    640,
+    360
+  ],
+  "brightness_mean_range_8bit": [
+    79.09760271990741,
+    102.51234085648149
+  ],
+  "adjacent_frame_mean_absolute_rgb_difference_8bit": {
+    "median": 0.7761400462962963,
+    "p95": 14.056544560185182,
+    "max": 16.46673900462963
+  },
+  "repeat_boundary_rgb_difference_8bit": {
+    "60.0": 8.211947337962963,
+    "120.0": 8.211947337962963,
+    "180.0": 8.211947337962963,
+    "240.0": 8.211947337962963
+  },
+  "unique_adjacent_frame_hash_duplicates": 0,
+  "sampled_frames": [
+    0,
+    14,
+    120,
+    360,
+    600,
+    900,
+    1198,
+    1199,
+    1200,
+    1201,
+    2399,
+    2400,
+    3599,
+    3600,
+    4799,
+    4800,
+    5999
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "schema_version": 2,
+  "capture_id": "c2b76dc8fd254e6d8fc79a155c090de1",
+  "status": "complete",
+  "requested_times_s": [
+    129.56666666666666
+  ],
+  "completed_samples": 1,
+  "active_camera_ids": [
+    "C1",
+    "C2",
+    "C3",
+    "C4"
+  ],
+  "camera_layout_hash": "d3266656abc81fffeb16f6cbc7649115dd14a6bc10c20e255c8db3981dc7f3f0",
+  "render_profile": {
+    "shading": "MATERIAL",
+    "studio_light": "forest.exr",
+    "scene_lights": false,
+    "scene_world": false,
+    "studio_rotation": 0.0,
+    "studio_intensity": 1.0,
+    "studio_background_alpha": 1.0,
+    "studio_background_blur": 0.5,
+    "studio_view_rotation": false,
+    "color_management": {
+      "view_transform": "AgX",
+      "look": "AgX - Medium High Contrast",
+      "exposure": 0.44999998807907104,
+      "gamma": 1.0,
+      "use_curve_mapping": false
+    },
+    "display_device": "sRGB",
+    "curve_mapping": null,
+    "excluded_annotations": [
+      "WFRL.Label.*",
+      "WFRL.Grid.*",
+      "WFRL.Inflow.*",
+      "WFRL.Deflection.*",
+      "WFRL.Wake*",
+      "*.TipTrail.*",
+      "*.ClearanceRadar.Beam*",
+      "*.SensorFrustum",
+      "WFRL.Fixture.T1.LidarRay*"
+    ],
+    "image_encoding": "RGBA8 display-transformed once; top-left rows; PNG sRGB"
+  },
+  "source_package_id": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-037-e3oweiqo/extensions/release_test/wfrl_blender/assets/mappo",
+  "manifest_hash": "aeeecd7258d7f5ba2e85754c69b7bf8aa9c423cad558afc0dcdf99bbb6736124",
+  "geometry_signature": "sha256:d491dc9bee9476f426b3",
+  "source_status": "FAST.Farm / REVIEW_ONLY",
+  "replay_session_id": "45171643424:45093395976:13114743104:13102524000::near_tower:None",
+  "matrix_convention": "row-major; column vectors; metres; T_destination_from_source",
+  "pixel_convention": "top-left pixel centre (0,0); boundaries -.5 and W/H-.5",
+  "distortion": "ideal undistorted pinhole; not calibrated physical lens",
+  "error": null
+}

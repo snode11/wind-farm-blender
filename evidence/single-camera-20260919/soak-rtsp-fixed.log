@@ -1,0 +1,47 @@
+{
+  "status": "failed",
+  "package": {
+    "valid": true,
+    "dataset_id": "0f1648750b7a20f7c473ee67ca2b8aeae77dafe4493d8f38838066cace26e852",
+    "frame_count": 100,
+    "fps": 20,
+    "duration_s": 5.0,
+    "source_repeat_count": 5,
+    "encoded_duration_s": 5.0,
+    "width": 3840,
+    "height": 2160,
+    "exact_encoded_repetition": true,
+    "status": "REVIEW_ONLY"
+  },
+  "scope": "30-minute local 4K soak using five-second repeated camera sample; separate from final 300-second-file acceptance",
+  "mediamtx_sha256": "1dd97c44ed783cfc6d7fb28a8db327cbe5f37808d4e09dd4c78c4c6bc668fa11",
+  "mediamtx_version": "1.21.0",
+  "stream_source_sha256": "0fdddf5cb566451104a21cbd8850ab7a3b2ce234e741b1ebe4fc9211750c0ee5",
+  "errors": [
+    "Traceback (most recent call last):\n  File \"/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/soak_rtsp.py\", line 76, in main\n    info = json.loads(subprocess.check_output(['ffprobe', '-v', 'error', '-count_frames',\n                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        '-show_entries', 'stream=width,height,nb_read_frames', '-of', 'json',\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        str(directory / 'received.h264')], text=True))['streams'][0]\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/anaconda3/lib/python3.13/subprocess.py\", line 472, in check_output\n    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,\n           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n               **kwargs).stdout\n               ^^^^^^^^^\n  File \"/opt/anaconda3/lib/python3.13/subprocess.py\", line 577, in run\n    raise CalledProcessError(retcode, process.args,\n                             output=stdout, stderr=stderr)\nsubprocess.CalledProcessError: Command '['ffprobe', '-v', 'error', '-count_frames', '-show_entries', 'stream=width,height,nb_read_frames', '-of', 'json', '/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/soak-4k-rtsp-fixed/receive-0/received.h264']' died with <Signals.SIGTERM: 15>.\n"
+  ],
+  "session_logs": [
+    "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/loop-short-check/stream/aa4dec47-46a3-465f-be2b-77bb74a942cd.jsonl"
+  ],
+  "elapsed_seconds": 2043.5356990001164
+}
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/soak_rtsp.py", line 108, in <module>
+    main()
+    ~~~~^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/soak_rtsp.py", line 76, in main
+    info = json.loads(subprocess.check_output(['ffprobe', '-v', 'error', '-count_frames',
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        '-show_entries', 'stream=width,height,nb_read_frames', '-of', 'json',
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        str(directory / 'received.h264')], text=True))['streams'][0]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/anaconda3/lib/python3.13/subprocess.py", line 472, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               **kwargs).stdout
+               ^^^^^^^^^
+  File "/opt/anaconda3/lib/python3.13/subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['ffprobe', '-v', 'error', '-count_frames', '-show_entries', 'stream=width,height,nb_read_frames', '-of', 'json', '/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/soak-4k-rtsp-fixed/receive-0/received.h264']' died with <Signals.SIGTERM: 15>.

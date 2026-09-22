@@ -1,0 +1,76 @@
+{
+  "runs": {
+    "dt-half": {
+      "case_dir": "__simul__/fastfarm/FastFarm__208s__3T_1789562792.3849149",
+      "status": "CONTROL_PROBE_COMPLETE",
+      "solver_normal": true,
+      "files": 38,
+      "logical_bytes": 58930749,
+      "allocated_bytes": 61423616,
+      "numerical_settings": {
+        "solver_dt_s": 0.003125,
+        "controller_dt_s": 0.00625,
+        "tower_nodes": 20,
+        "surfaces": false,
+        "aerodynamic_nodes": 19,
+        "farm_dt_low_s": 3.0,
+        "farm_dt_high_s": 0.05
+      },
+      "log_sha256": "6b505b407dd4355be43fcb0630a847f5a53048db4199b73f598bfb1decd37c5e",
+      "probe_sha256": "8a351c2b2c29cdd0590a59fa690f87aa2a645f68507c3bb87d81fb4c5cd3d6b7",
+      "solver_wall_minutes": 1.7031,
+      "simulation_end_s": 183.0
+    },
+    "dt-quarter": {
+      "case_dir": "__simul__/fastfarm/FastFarm__208s__3T_1789562837.676645",
+      "status": "CONTROL_PROBE_COMPLETE",
+      "solver_normal": true,
+      "files": 38,
+      "logical_bytes": 58930752,
+      "allocated_bytes": 61419520,
+      "numerical_settings": {
+        "solver_dt_s": 0.0015625,
+        "controller_dt_s": 0.00625,
+        "tower_nodes": 20,
+        "surfaces": false,
+        "aerodynamic_nodes": 19,
+        "farm_dt_low_s": 3.0,
+        "farm_dt_high_s": 0.05
+      },
+      "log_sha256": "be045c2332d094b71dc1ddf8bf06c2183461cce2fd2eac7df81f27d705e4f2d1",
+      "probe_sha256": "93f10c61851fd932beaed3fb0706c7f08bb51365b99c3369add1bddbf5c26600",
+      "solver_wall_minutes": 3.2249,
+      "simulation_end_s": 183.0
+    },
+    "tower-40": {
+      "case_dir": "__simul__/fastfarm/FastFarm__208s__3T_1789562838.563775",
+      "status": "CONTROL_PROBE_COMPLETE",
+      "solver_normal": true,
+      "files": 38,
+      "logical_bytes": 58930756,
+      "allocated_bytes": 61431808,
+      "numerical_settings": {
+        "solver_dt_s": 0.00625,
+        "controller_dt_s": 0.00625,
+        "tower_nodes": 40,
+        "surfaces": false,
+        "aerodynamic_nodes": 19,
+        "farm_dt_low_s": 3.0,
+        "farm_dt_high_s": 0.05
+      },
+      "log_sha256": "6a7584cb82e31154efdbeab38c726d29beb4948fd85423e56bb2941a21aa73b0",
+      "probe_sha256": "138b93234e07001f675f33efe9048581a802bc164e48731ee871f047258bc8fe",
+      "solver_wall_minutes": 1.0352,
+      "simulation_end_s": 183.0
+    }
+  },
+  "solver_sha256": "bed9651e19daf8ee6402100ff22b90867b756d96b72495ef9ee90df677a88d3f",
+  "total_allocated_bytes": 184274944,
+  "no_vtk": true,
+  "reference_case": "__simul__/fastfarm/FastFarm__208s__3T_1789560533.018898",
+  "source_package_unchanged": true,
+  "audit_source_sha256": {
+    "scripts/lidar/probe_flex_policy.py": "6c40eaa24498aaac20403d210c32df9b044f8ce069934720d585f8ad6aa9d5d0",
+    "scripts/lidar/compare_tower_numerics.py": "9355ef828a9d22d8f6fc2bd13679b2465cdd6fc5520e2ce19b7a56229fabee04"
+  }
+}

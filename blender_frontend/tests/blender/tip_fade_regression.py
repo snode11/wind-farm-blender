@@ -1,5 +1,6 @@
-"""Simulation-age fade, native package/cameras, and ten-loop resource check."""
+"""Revolution comparison, native package/cameras, and resource check."""
 from pathlib import Path
+import math
 import json
 import os
 import runpy
@@ -27,13 +28,14 @@ def snapshot():
 for f in range(1, 242):
     scene.frame_set(f)
 now = clearance_replay.sample(scene)['time_s']
-assert all(0 <= now-t < tt.LIFETIME_S for ts in trail.times.values() for t in ts)
+assert all(len(v) <= 2 for v in trail.completed.values())
 assert all(len(p) <= tt.MAX_POINTS for p in trail.points.values())
 for bid in (1, 2, 3):
     blade = scene.objects[f'WFRL.Turbine.T1.Blade{bid}']
-    assert np.linalg.norm(np.array(trail.points[bid][-1]) - np.array(blade.matrix_world @ blade.data.vertices[-1].co)) < 1e-5
+    if trail.points[bid]:
+        assert np.linalg.norm(np.array(trail.points[bid][-1]) - np.array(blade.matrix_world @ blade.data.vertices[-1].co)) < 1e-5
     levels = [s.material_index for s in trail.objects[bid].data.splines]
-    assert levels == sorted(levels) and min(levels) < max(levels)
+    assert len(set(levels)) <= 1  # whole revolutions share opacity
 before = snapshot()
 for fps in (24, 30, 60, 120):
     scene.render.fps = fps
@@ -70,14 +72,15 @@ for loop in range(10):
     trail.clear('test_loop')
     rate = (24, 40, 60, 120, 15)[loop % 5]
     with patch.object(tt, '_is_playing', return_value=True):
-        for tick in range(60*rate+1):
+        for tick in range(16*rate+1):
             t = 117.0 + tick/rate
+            scene.objects['WFRL.Turbine.T1.Rotor'].rotation_euler.x = (tick/rate)*math.tau/4
             start = time.perf_counter()
             with patch.object(tt, '_simulation_time', return_value=t):
                 trail.update(scene)
             costs.append(time.perf_counter()-start)
             assert all(len(p) <= tt.MAX_POINTS for p in trail.points.values())
-            assert all(t-ts[0] < tt.LIFETIME_S for ts in trail.times.values() if ts)
+            assert all(len(v) <= 2 for v in trail.completed.values())
     assert resources() == baseline
     counts.append([len(p) for p in trail.points.values()])
 

@@ -1,0 +1,513 @@
+{
+  "schema": "wfrl.camera-video-camera.v1",
+  "camera_name": "WFRL.Camera.T1.NacelleGimbal",
+  "turbine_id": "T1",
+  "camera_mount": [
+    [
+      -1.6292068494294654e-07,
+      0.9818674921989441,
+      0.18956848978996277,
+      -1.5
+    ],
+    [
+      -1.0,
+      -1.630095454174807e-07,
+      -1.5123335472821964e-08,
+      -2.299999952316284
+    ],
+    [
+      1.6052361218044098e-08,
+      -0.18956848978996277,
+      0.9818674921989441,
+      87.5999984741211
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "camera_mount_definition": "world = turbine_layout @ nacelle_source_transform @ camera_mount",
+  "parent": "WFRL.Turbine.T1.YawRoot",
+  "parent_mount_matrix_local": [
+    [
+      -1.6292068494294654e-07,
+      0.9818674921989441,
+      0.18956848978996277,
+      -1.5
+    ],
+    [
+      -1.0,
+      -1.630095454174807e-07,
+      -1.5123335472821964e-08,
+      -2.299999952316284
+    ],
+    [
+      1.6052361218044098e-08,
+      -0.18956848978996277,
+      0.9818674921989441,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "lens_mm": 57.088706970214844,
+  "sensor_width_mm": 36.0,
+  "sensor_height_mm": 24.0,
+  "effective_sensor_width_mm": 36.0,
+  "effective_sensor_height_mm": 20.25,
+  "sensor_fit": "HORIZONTAL",
+  "shift_x": 0.0,
+  "shift_y": 0.0,
+  "pixel_aspect": [
+    1.0,
+    1.0
+  ],
+  "focus_distance_m": 60.0,
+  "aperture_fstop": 8.0,
+  "dof_enabled": false,
+  "clip_start_m": 0.019999999552965164,
+  "clip_end_m": 30000.0,
+  "exposure_s": 0.025,
+  "shutter": "ideal_global_uniform",
+  "camera_model": "ideal perspective; no distortion, sensor noise, autofocus or stabilization",
+  "resolution": [
+    160,
+    90
+  ],
+  "world": {
+    "name": "World",
+    "color": [
+      0.05087608844041824,
+      0.05087608844041824,
+      0.05087608844041824
+    ],
+    "nodes": {
+      "nodes": [
+        {
+          "name": "World Output",
+          "type": "ShaderNodeOutputWorld",
+          "inputs": {
+            "Surface": null,
+            "Volume": null
+          },
+          "properties": {}
+        },
+        {
+          "name": "Background",
+          "type": "ShaderNodeBackground",
+          "inputs": {
+            "Color": [
+              0.02199999988079071,
+              0.03400000184774399,
+              0.05000000074505806,
+              1.0
+            ],
+            "Strength": 0.5,
+            "Weight": 0.0
+          },
+          "properties": {}
+        },
+        {
+          "name": "WFRL.Atmosphere.Sky",
+          "type": "ShaderNodeTexSky",
+          "inputs": {
+            "Vector": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "properties": {
+            "sky_type": "MULTIPLE_SCATTERING",
+            "sun_elevation": 0.2617993950843811,
+            "sun_rotation": 0.0,
+            "sun_size": 0.009512044489383698,
+            "sun_intensity": 1.0,
+            "altitude": 100.0,
+            "air_density": 1.0,
+            "ozone_density": 1.0,
+            "turbidity": 2.200000047683716,
+            "ground_albedo": 0.30000001192092896
+          }
+        },
+        {
+          "name": "WFRL.Atmosphere.HDRI",
+          "type": "ShaderNodeTexEnvironment",
+          "inputs": {
+            "Vector": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "properties": {
+            "projection": "EQUIRECTANGULAR",
+            "image": {
+              "name": "kloofendal_48d_partly_cloudy_puresky_2k.hdr",
+              "filepath": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/landscape/kloofendal_48d_partly_cloudy_puresky_2k.hdr",
+              "sha256": "5244534e9cf5b606f2ff513aa00ddb161b0a4826ffd88a0d3bd03ac29247d198",
+              "packed": false
+            }
+          }
+        },
+        {
+          "name": "WFRL.Atmosphere.Volume",
+          "type": "ShaderNodeVolumePrincipled",
+          "inputs": {
+            "Color": [
+              0.550000011920929,
+              0.699999988079071,
+              0.8399999737739563,
+              1.0
+            ],
+            "Color Attribute": "",
+            "Density": 0.0,
+            "Density Attribute": "density",
+            "Anisotropy": 0.0,
+            "Absorption Color": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "Emission Strength": 0.0,
+            "Emission Color": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "Blackbody Intensity": 0.0,
+            "Blackbody Tint": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "Temperature": 1000.0,
+            "Temperature Attribute": "temperature",
+            "Weight": 0.0
+          },
+          "properties": {}
+        }
+      ],
+      "links": [
+        [
+          "Background",
+          "Background",
+          "World Output",
+          "Surface"
+        ],
+        [
+          "WFRL.Atmosphere.HDRI",
+          "Color",
+          "Background",
+          "Color"
+        ]
+      ]
+    }
+  },
+  "lights": [
+    {
+      "name": "Light",
+      "type": "POINT",
+      "energy": 1000.0,
+      "color": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "matrix_world": [
+        [
+          -0.29086464643478394,
+          -0.7711008191108704,
+          0.5663931965827942,
+          4.076245307922363
+        ],
+        [
+          0.9551711678504944,
+          -0.1998833566904068,
+          0.21839119493961334,
+          1.0054539442062378
+        ],
+        [
+          -0.05518905818462372,
+          0.6045247316360474,
+          0.7946722507476807,
+          5.903861999511719
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "angle": null,
+      "nodes": {
+        "nodes": [
+          {
+            "name": "Light Output",
+            "type": "ShaderNodeOutputLight",
+            "inputs": {
+              "Surface": null
+            },
+            "properties": {}
+          },
+          {
+            "name": "Emission",
+            "type": "ShaderNodeEmission",
+            "inputs": {
+              "Color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "Strength": 1.0,
+              "Weight": 0.0
+            },
+            "properties": {}
+          }
+        ],
+        "links": [
+          [
+            "Emission",
+            "Emission",
+            "Light Output",
+            "Surface"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "WFRL.Light.Key",
+      "type": "SUN",
+      "energy": 1.399999976158142,
+      "color": [
+        0.9800000190734863,
+        0.9700000286102295,
+        0.949999988079071
+      ],
+      "matrix_world": [
+        [
+          0.666795015335083,
+          0.31083208322525024,
+          -0.6773240566253662,
+          -650.0
+        ],
+        [
+          -0.7452411651611328,
+          0.2781130373477936,
+          -0.6060269474983215,
+          -850.0
+        ],
+        [
+          2.990613268138986e-08,
+          0.9088655114173889,
+          0.4170892536640167,
+          650.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "angle": 0.03490658476948738,
+      "nodes": {
+        "nodes": [
+          {
+            "name": "Emission",
+            "type": "ShaderNodeEmission",
+            "inputs": {
+              "Color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "Strength": 1.0,
+              "Weight": 0.0
+            },
+            "properties": {}
+          },
+          {
+            "name": "Light Output",
+            "type": "ShaderNodeOutputLight",
+            "inputs": {
+              "Surface": null
+            },
+            "properties": {}
+          }
+        ],
+        "links": [
+          [
+            "Emission",
+            "Emission",
+            "Light Output",
+            "Surface"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "WFRL.Light.Fill",
+      "type": "SUN",
+      "energy": 0.0,
+      "color": [
+        0.5799999833106995,
+        0.7599999904632568,
+        1.0
+      ],
+      "matrix_world": [
+        [
+          -0.7615393400192261,
+          -0.32315507531166077,
+          0.5618083477020264,
+          900.0
+        ],
+        [
+          0.6481186747550964,
+          -0.3797071576118469,
+          0.6601247191429138,
+          500.0
+        ],
+        [
+          -1.5190538604770154e-08,
+          0.8668294548988342,
+          0.49860477447509766,
+          420.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "angle": 0.02617993950843811,
+      "nodes": {
+        "nodes": [
+          {
+            "name": "Emission",
+            "type": "ShaderNodeEmission",
+            "inputs": {
+              "Color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "Strength": 1.0,
+              "Weight": 0.0
+            },
+            "properties": {}
+          },
+          {
+            "name": "Light Output",
+            "type": "ShaderNodeOutputLight",
+            "inputs": {
+              "Surface": null
+            },
+            "properties": {}
+          }
+        ],
+        "links": [
+          [
+            "Emission",
+            "Emission",
+            "Light Output",
+            "Surface"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "WFRL.Light.Rim",
+      "type": "SUN",
+      "energy": 0.0,
+      "color": [
+        1.0,
+        0.8799999952316284,
+        0.699999988079071
+      ],
+      "matrix_world": [
+        [
+          0.05989215150475502,
+          0.8248680233955383,
+          -0.562143862247467,
+          0.0
+        ],
+        [
+          -0.9982048273086548,
+          0.0494920052587986,
+          -0.03372849524021149,
+          0.0
+        ],
+        [
+          7.009109737055041e-08,
+          0.5631548166275024,
+          0.8263514041900635,
+          800.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "angle": 0.02617993950843811,
+      "nodes": {
+        "nodes": [
+          {
+            "name": "Emission",
+            "type": "ShaderNodeEmission",
+            "inputs": {
+              "Color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "Strength": 1.0,
+              "Weight": 0.0
+            },
+            "properties": {}
+          },
+          {
+            "name": "Light Output",
+            "type": "ShaderNodeOutputLight",
+            "inputs": {
+              "Surface": null
+            },
+            "properties": {}
+          }
+        ],
+        "links": [
+          [
+            "Emission",
+            "Emission",
+            "Light Output",
+            "Surface"
+          ]
+        ]
+      }
+    }
+  ],
+  "color_management": {
+    "display_device": "sRGB",
+    "view_transform": "AgX",
+    "look": "AgX - Medium High Contrast",
+    "exposure": 0.44999998807907104,
+    "gamma": 1.0
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "status": "FAIL",
+  "phase": 41,
+  "error": "Traceback (most recent call last):\n  File \"/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/custom_camera_v3_window.py\", line 185, in tick\n    assert time.perf_counter()-STATE['release_at']<5,op.preview.status()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: \u753b\u9762\u51c6\u5907\u4e2d\n"
+}

@@ -53,6 +53,8 @@ class WFRL_OT_SelectCamera(bpy.types.Operator):
             camera = context.scene.objects.get(self.camera_name)
         if camera is None:
             return {"CANCELLED"}
+        from .custom_cameras import dismiss_for_view_switch
+        dismiss_for_view_switch(context.scene)
         context.scene.camera = camera
         context.scene["wfrl_camera"] = self.camera_name
         if context.screen:

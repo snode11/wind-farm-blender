@@ -1,0 +1,35 @@
+{
+  "schema": "wfrl.ideal-snapshot-scan.v1",
+  "axial_deg": [
+    4.0,
+    12.0,
+    0.05
+  ],
+  "lateral_deg": [
+    -6.0,
+    6.0,
+    0.1
+  ],
+  "origin_m": [
+    -2.0,
+    0.0,
+    87.6
+  ],
+  "range_gate_m": [
+    50.0,
+    70.0
+  ],
+  "selection": "Farthest first return within fixed range gate; stable grid-order tie break",
+  "estimator": "range * -direction_x + 2.0 - 2.67, in calibrated nacelle frame",
+  "truth_input": false,
+  "blade_identity_input": false,
+  "design_interval_s": [
+    117.0,
+    147.0
+  ],
+  "held_out_interval_s": [
+    147.0,
+    177.0
+  ],
+  "boundary": "Instantaneous ideal 19481-ray angular grid per timestamp; no sequential scan motion, optical return strength or hardware capability certification"
+}

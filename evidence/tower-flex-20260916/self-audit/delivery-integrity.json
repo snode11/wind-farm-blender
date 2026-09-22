@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "inventory_files": 87,
+  "package_files": 7,
+  "runtime_matches_source": true,
+  "launcher_executable": true,
+  "old_demo_retained": true
+}

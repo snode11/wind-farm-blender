@@ -1,0 +1,37 @@
+{
+  "layout_sha256": "ee033ac02581fba40c7e0acf828a58dcde60b10910bc911c3f086a7cf9fa1f13",
+  "modes": {
+    "down": {
+      "status": "PASS",
+      "sample_count": 118,
+      "wrap_count": 1,
+      "all_sample_intervals_advance_all_views": true,
+      "layout_sha256": "ee033ac02581fba40c7e0acf828a58dcde60b10910bc911c3f086a7cf9fa1f13"
+    },
+    "single": {
+      "status": "PASS",
+      "sample_count": 112,
+      "wrap_count": 1,
+      "all_sample_intervals_advance_all_views": true,
+      "layout_sha256": "ee033ac02581fba40c7e0acf828a58dcde60b10910bc911c3f086a7cf9fa1f13"
+    },
+    "quad": {
+      "status": "PASS",
+      "sample_count": 109,
+      "wrap_count": 1,
+      "all_sample_intervals_advance_all_views": true,
+      "layout_sha256": "ee033ac02581fba40c7e0acf828a58dcde60b10910bc911c3f086a7cf9fa1f13"
+    },
+    "quad_shadow_half": {
+      "status": "PASS",
+      "sample_count": 115,
+      "wrap_count": 1,
+      "all_sample_intervals_advance_all_views": true,
+      "layout_sha256": "ee033ac02581fba40c7e0acf828a58dcde60b10910bc911c3f086a7cf9fa1f13"
+    }
+  },
+  "invalid_attempts_preserved": [
+    "single-attempt-1",
+    "shadow-half-attempt-1"
+  ]
+}

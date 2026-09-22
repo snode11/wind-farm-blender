@@ -1,0 +1,5 @@
+{
+  "only_new_evidence_files_in_git_status": true,
+  "new_files_before_this_verification": 106,
+  "source_manifest_hash_matches_all_new_captures": true
+}

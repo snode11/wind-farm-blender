@@ -1,0 +1,65 @@
+{
+  "status": "PASS",
+  "checks": {
+    "failed_clear_restores_watch_reference": true,
+    "parameter_stale_failure_old_group": true,
+    "live_undo_refs_timeline": true,
+    "shared_settings_grid_summary": true,
+    "cancel_between_groups_no_extra_group_restore": true,
+    "cancel_during_group_complete_boundary": true,
+    "pending_camera_matrix_first_attempt": true,
+    "final_numeric_state_committed": true,
+    "scripted_continuous_direction_latest_state": true
+  },
+  "environment": {
+    "machine": "arm64",
+    "system": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "gpu": "Metal API",
+    "vendor": "Apple M5 Pro",
+    "blender": "5.2.1 LTS",
+    "window": [
+      1000,
+      780
+    ],
+    "ui_scale": 2.0,
+    "preview_long_edge": 640,
+    "source": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/assets/mappo",
+    "model": "sha256:d491dc9bee9476f426b3",
+    "fingerprints": {
+      "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/custom_camera_capture.py": "cde9c57db3d714dfa4ae6e05c5a18af70a6697f96ae0417169e65bf183e5ca68",
+      "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/custom_camera_history.py": "459c91a45c7100e2baeaacb179689669f7f5dfc528496f7e00f1a64943e34fe1",
+      "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/custom_cameras.py": "a1232e60396fa34914c972db9dea384b22f723ca447f1c0b314037e249cd1496",
+      "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/custom_camera_diagnostics.py": "d59fe6af7ac7129bf3bd4bf5653128b5d009c268ffbae0a9c3e31d5c25345d44",
+      "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/custom_camera_preview.py": "ec824a53e04ccfcc902e803817e88c2c89da01324c0eb5535517fd581980bba0"
+    }
+  },
+  "single_first_s": 0.24475795798934996,
+  "quad_first_s": 0.6847262079827487,
+  "cancel_call_to_accept_s": 1.3329554349184036e-06,
+  "cancel_accept_to_stop_s": 0.01447262498550117,
+  "continuous_direction": {
+    "input_events": 50,
+    "final_parameters": {
+      "location": [
+        2.658367156982422e-05,
+        -1.7199571132659912,
+        1.4736875295639038
+      ],
+      "yaw": 164.77382132411282,
+      "pitch": -39.27003076020998,
+      "roll": 0.0,
+      "fov": 85.0,
+      "vfov": 46.6921272277832,
+      "focal_length_mm_record": null,
+      "output_long_edge_px": 640,
+      "clip_near_m": 0.004999999888241291,
+      "clip_far_m": 30000.0
+    },
+    "source": "scripted change calls; not OS mouse event latency",
+    "final_version": 16,
+    "draws": 4,
+    "release_to_final_commit_s": 0,
+    "no_stale_catchup_after_stop": true
+  },
+  "measurement_boundary": "Scripted handler/GPU/callback probes; no external t0 in this phase"
+}

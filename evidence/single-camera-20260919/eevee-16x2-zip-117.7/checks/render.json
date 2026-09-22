@@ -1,0 +1,11 @@
+{
+  "status": "complete",
+  "expected_frames": 1,
+  "verified_frames": 1,
+  "rendered_this_run": 1,
+  "wall_seconds": 2.9033252079971135,
+  "preparation_seconds": 4.998246333096176,
+  "config_sha256": "f3c0a3813bbeaa6134b387f3a05fdbc22bba481d9f21071d60ae7f52a3adac6e",
+  "source_status": "REVIEW_ONLY",
+  "output": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-16x2-zip-117.7"
+}

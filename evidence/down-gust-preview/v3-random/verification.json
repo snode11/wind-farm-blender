@@ -1,0 +1,8 @@
+{
+  "root_error_m": 5.328689412139729e-05,
+  "mean_update_ms": 25.319168786518276,
+  "p95_update_ms": 26.591543742688373,
+  "timing_scope": "background frame update only; viewport FPS not measured",
+  "source_fit_error_m": 1.686805829365535e-05,
+  "status": "REVIEW_ONLY"
+}

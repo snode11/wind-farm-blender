@@ -1,0 +1,9 @@
+T1_DEFLECTION_INSTALLED_WINDOW_READY
+2026-09-16 18:28:36.381 Blender[21158:22601809] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
+2026-09-16 18:28:55.741 Blender[21158:22601809] error messaging the mach port for IMKCFRunLoopWakeUpReliable
+12:33.935  operator         | Saved wfrl-1789554562020786000.png
+52:19.467  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+Info: Saved wfrl-1789555309895028000.png
+
+Blender quit
+Error: Not freed memory blocks: 586, total unfreed memory 0.042572 MB

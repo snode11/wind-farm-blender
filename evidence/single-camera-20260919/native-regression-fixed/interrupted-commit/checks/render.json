@@ -1,0 +1,11 @@
+{
+  "status": "complete",
+  "expected_frames": 1,
+  "verified_frames": 1,
+  "rendered_this_run": 1,
+  "wall_seconds": 0.4815285410732031,
+  "preparation_seconds": 6.920511041069403,
+  "config_sha256": "feb3d44cc59066d0951aa065bd9ddfdec0297e296c83666bbbd3538f782c8622",
+  "source_status": "REVIEW_ONLY",
+  "output": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/native-regression-fixed/interrupted-commit"
+}

@@ -1,0 +1,66 @@
+{
+  "package": {
+    "version": "0.3.6",
+    "archive_sha256": "c8254e153623a6e901d3fd4d2bf734f31d4a4577542e515b1d5938e8eeb03d70",
+    "installed_path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+    "verified_files": 90,
+    "custom_cameras": true,
+    "video_output": true
+  },
+  "native": {
+    "status": "PASS",
+    "blender": "5.2.1 LTS",
+    "two_slots": true,
+    "transformed_surface": true,
+    "attachment_rejected": true,
+    "outside_validation": true,
+    "parent_motion_once": true,
+    "draft_cancel": true,
+    "session_cancel": true,
+    "session_replacement_cleanup": true,
+    "failed_confirm_correctable": true,
+    "live_backend_guard": true,
+    "parameter_roundtrip": true,
+    "original_file_unchanged": true,
+    "reopening_starts_empty": true,
+    "default_camera_unchanged": true,
+    "output_camera_and_resolution_unchanged": true,
+    "runtime": "bl_ext.user_default.wfrl_blender"
+  },
+  "window": {
+    "status": "PASS",
+    "blender": "5.2.1 LTS",
+    "pid": 34265,
+    "environment": "separate visible Blender window",
+    "interaction": "scripted-window; drag, joystick and key events simulated",
+    "real_playback": "screen.animation_play across timer turns, no playback mocks",
+    "checks": {
+      "real_playback_paused": true,
+      "simulated_drag_roll37": true,
+      "simulated_joystick_timer": true,
+      "stages_preserve_draft": true,
+      "confirm_restores_real_playback": true,
+      "cancel_existing_restores_real_playback": true,
+      "new_cancel_keeps_empty_and_paused": true,
+      "two_slots_switch_without_seeking": true,
+      "simulated_native_navigation_blocked": true,
+      "paused_confirmation_stays_paused": true,
+      "single_viewport_and_output_unchanged": true,
+      "session_change_releases_timer_and_draw": true,
+      "scene_rebuild_releases_resources_and_slots": true,
+      "unregister_releases_resources_and_handlers": true,
+      "no_save_operation": true
+    },
+    "error": null,
+    "runtime": "bl_ext.user_default.wfrl_blender"
+  },
+  "package_tests": "2 passed",
+  "published": false,
+  "gui": {
+    "version": "0.3.6",
+    "module": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+    "enabled": true,
+    "panel": "View / 自定义相机 · T1",
+    "bundled_demo_loaded": true
+  }
+}

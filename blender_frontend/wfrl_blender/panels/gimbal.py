@@ -45,6 +45,8 @@ def show(context):
     camera = current(context.scene)
     space = context.space_data
     if space and space.type == 'VIEW_3D':
+        from .custom_cameras import dismiss_for_view_switch
+        dismiss_for_view_switch(context.scene)
         # Local camera leaves another World view alone in dual/quad layouts.
         space.use_local_camera = True
         space.camera = camera
@@ -102,7 +104,8 @@ class WFRL_OT_GimbalPreset(GimbalAvailable, bpy.types.Operator):
         elif self.preset == 'RESET':
             reset_gimbal(camera)
         elif self.preset == 'NACELLE':
-            pass  # Restore this camera's saved PTZ on selection; Reset is explicit.
+            from ..cameras import restore_nacelle_view
+            restore_nacelle_view(camera)
         else:
             yaw, pitch = {'FRONT': (180, 0),
                           'BACK': (0, 0)}[self.preset]

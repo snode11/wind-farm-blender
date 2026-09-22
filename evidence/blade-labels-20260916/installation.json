@@ -1,0 +1,18 @@
+{
+  "version": "0.3.4",
+  "backup": "/Users/eason/Desktop/wfcrl/installation-backups/before-blade-labels-1789559269661603000",
+  "changed": {
+    "installed": [
+      "__init__.py",
+      "blender_manifest.toml",
+      "deflection.py"
+    ],
+    "portable": [
+      "__init__.py",
+      "blender_manifest.toml",
+      "deflection.py"
+    ]
+  },
+  "archive_sha256": "61cfbc1563cb5cd9d1b1c0f2201be89f4bb94eec5a93de532cf936b00349b8da",
+  "all_archive_members_verified": true
+}

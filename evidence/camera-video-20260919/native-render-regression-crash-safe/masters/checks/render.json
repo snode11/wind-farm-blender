@@ -1,0 +1,10 @@
+{
+  "status": "complete",
+  "expected_frames": 2,
+  "verified_frames": 2,
+  "rendered_this_run": 0,
+  "wall_seconds": 0.13400187506340444,
+  "config_sha256": "895e505f8ad2c7d3d3ffa7d7b079f775c20efb9bbc546bce4df2ec75756f49cc",
+  "source_status": "REVIEW_ONLY",
+  "output": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-video-20260919/native-render-regression-crash-safe/masters"
+}

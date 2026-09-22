@@ -1,0 +1,29 @@
+2026/09/19 23:35:02 INF MediaMTX v1.21.0, darwin, arm64
+2026/09/19 23:35:02 INF configuration loaded from /Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/soak-4k-rtsp/mediamtx.yml
+2026/09/19 23:35:02 INF [RTSP] started with listeners on 127.0.0.1:29554 (TCP/RTSP)
+2026/09/19 23:35:02 INF [RTSP] [conn 127.0.0.1:55040] opened
+2026/09/19 23:35:02 INF [RTSP] [conn 127.0.0.1:55040] closed: EOF
+2026/09/19 23:35:04 INF [RTSP] [conn 127.0.0.1:55049] opened
+2026/09/19 23:35:04 INF [RTSP] [session bb1b3cdb] created by 127.0.0.1:55049
+2026/09/19 23:35:04 INF [path windfarm/camera1] stream is available and online, 1 track (H264)
+2026/09/19 23:35:04 INF [RTSP] [session bb1b3cdb] is publishing to path 'windfarm/camera1'
+2026/09/19 23:35:05 INF [RTSP] [conn 127.0.0.1:55051] opened
+2026/09/19 23:35:05 INF [RTSP] [session 48bbc198] created by 127.0.0.1:55051
+2026/09/19 23:35:05 INF [RTSP] [session 48bbc198] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/19 23:36:00 WAR [RTSP] [session 48bbc198] reader is too slow, discarding 73 frames
+2026/09/19 23:41:58 WAR [RTSP] [session 48bbc198] reader is too slow, discarding 8 frames
+2026/09/19 23:42:55 WAR [RTSP] [session 48bbc198] reader is too slow, discarding 72 frames
+2026/09/19 23:43:41 WAR [RTSP] [session 48bbc198] reader is too slow, discarding 73 frames
+2026/09/19 23:47:56 WAR [RTSP] [session 48bbc198] reader is too slow, discarding 71 frames
+2026/09/20 00:05:13 WAR [RTSP] [session 48bbc198] reader is too slow, discarding 73 frames
+2026/09/20 00:07:30 WAR [RTSP] [session 48bbc198] reader is too slow, discarding 73 frames
+2026/09/20 00:07:32 WAR [RTSP] [session 48bbc198] reader is too slow, discarding 73 frames
+2026/09/20 00:12:36 WAR [RTSP] [session 48bbc198] reader is too slow, discarding 73 frames
+2026/09/20 00:13:09 WAR [RTSP] [session 48bbc198] reader is too slow, discarding 73 frames
+2026/09/20 00:14:51 WAR [RTSP] [session 48bbc198] reader is too slow, discarding 73 frames
+2026/09/20 00:34:49 WAR [RTSP] [session 48bbc198] reader is too slow, discarding 64 frames
+2026/09/20 00:35:02 WAR [RTSP] [session 48bbc198] reader is too slow, discarding 72 frames
+2026/09/20 00:36:07 INF [RTSP] [conn 127.0.0.1:55051] closed: read tcp 127.0.0.1:29554->127.0.0.1:55051: read: connection reset by peer
+2026/09/20 00:36:07 INF [RTSP] [session 48bbc198] destroyed: not in use
+2026/09/20 00:36:07 INF [RTSP] [conn 127.0.0.1:55049] closed: EOF
+2026/09/20 00:36:07 INF [RTSP] [session bb1b3cdb] destroyed: not in use

@@ -1,0 +1,12 @@
+{
+  "clip_start_s": 18,
+  "clip_end_s": 40,
+  "hub_mean_mps": 17.050083368164547,
+  "hub_min_mps": 11.623244261163812,
+  "hub_max_mps": 25.57706086783009,
+  "hub_ti_including_gusts": 0.17118702834784602,
+  "collision_certificates": 5283,
+  "collision_excluded": true,
+  "unchanged_measurements_after_separation_refinement": true,
+  "physics_code_sha256": "8aab5d6b9488c06389f2a881fbfb117222d17cb6d50d7345fd094be443b04528"
+}

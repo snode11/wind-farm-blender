@@ -1,0 +1,66 @@
+{
+  "git_base": "e504ed66548c4b774664233341b70c87512561ef",
+  "dirty_workspace_at_start": true,
+  "files": [
+    {
+      "path": "blender_frontend/wfrl_blender/custom_camera_capture.py",
+      "sha256": "cde9c57db3d714dfa4ae6e05c5a18af70a6697f96ae0417169e65bf183e5ca68",
+      "start_snapshot_sha256": "e5c9e024b4e7fd46ebd8b55652173960d478520e1e2d5c8ea614b9c0a35ab77e"
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/custom_camera_diagnostics.py",
+      "sha256": "d59fe6af7ac7129bf3bd4bf5653128b5d009c268ffbae0a9c3e31d5c25345d44",
+      "start_snapshot_sha256": null
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/custom_camera_history.py",
+      "sha256": "459c91a45c7100e2baeaacb179689669f7f5dfc528496f7e00f1a64943e34fe1",
+      "start_snapshot_sha256": null
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/custom_camera_preview.py",
+      "sha256": "ec824a53e04ccfcc902e803817e88c2c89da01324c0eb5535517fd581980bba0",
+      "start_snapshot_sha256": "0802584e55611049d51962aba70537d0906a3838279dca8359be8cd89ea6ab8e"
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/custom_cameras.py",
+      "sha256": "a1232e60396fa34914c972db9dea384b22f723ca447f1c0b314037e249cd1496",
+      "start_snapshot_sha256": "fcb8c69c1a66b592c6a463a546d135e6ad8ee0ca10ff2e5738ccaab5aa1fb81c"
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/camera_projection.py",
+      "sha256": "8b74e83a51ce30f204b67435d7ba8a0d7ae1273ad1f1fff7899a8bcc3f93622a",
+      "start_snapshot_sha256": null
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/panels/custom_cameras.py",
+      "sha256": "f9f854300e4d22db494c4315ca39ae9e32f3cbd3e0212457188e4c4aeecbd964",
+      "start_snapshot_sha256": "fafd55aa531ed873748883c434f1284393fdcdb74f33608b6e95b0eeda923b11"
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/panels/custom_camera_output.py",
+      "sha256": "edbf8905f198ea43976c869b2b6436ed36551dc2befc4c54b2f35e5c8136c6b6",
+      "start_snapshot_sha256": "82e85ea840733c468e3af608b92f1a96cd5562095263512bb5e94d0ea24d3f97"
+    },
+    {
+      "path": "blender_frontend/tests/test_custom_camera_v3.py",
+      "sha256": "d883cba42f0d241b4413401edf2a908a9e5bd857017116c61cc0f592bf2a979e",
+      "start_snapshot_sha256": null
+    },
+    {
+      "path": "blender_frontend/tests/blender/custom_camera_v3_regression.py",
+      "sha256": "41574c18838ea7ac9fe47a3570512b6f563fac8c6a8dfea0f92a95190c714dbf",
+      "start_snapshot_sha256": null
+    },
+    {
+      "path": "blender_frontend/tests/blender/custom_camera_v3_window.py",
+      "sha256": "56cf4f311339cc8504dd49b11af521fbb236ca73d2a73df27bb5a7c18c016c34",
+      "start_snapshot_sha256": null
+    },
+    {
+      "path": "scripts/blender/summarize_custom_camera_latency.py",
+      "sha256": "3214d9e5adec1f31ffbd8179f0c8d1cfd7a6be0d4c851885a0944c0f6a569863",
+      "start_snapshot_sha256": null
+    }
+  ]
+}

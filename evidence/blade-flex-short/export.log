@@ -1,0 +1,14 @@
+Exported 0/1441 physical samples
+Exported 160/1441 physical samples
+Exported 320/1441 physical samples
+Exported 480/1441 physical samples
+Exported 640/1441 physical samples
+Exported 800/1441 physical samples
+Exported 960/1441 physical samples
+Exported 1120/1441 physical samples
+Exported 1280/1441 physical samples
+Exported 1440/1441 physical samples
+{"schema": "wfrl.section-transforms.preview.v1", "source": "FAST.Farm", "run_id": "close-v1", "turbine_id": "T1", "package_manifest_sha256": "91895c64e0bc962c956d57fe8bb507fe9e26f0af6cf6aa2f59cef5a19a9cc30b", "reference_frame": 0, "includes_rigid_motion": true, "source_fps": 80.0, "max_surface_fit_error_m": 1.6721028521800727e-05, "scope": "single turbine fixed yaw/pitch archive; no policy inference; true amplitude"}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

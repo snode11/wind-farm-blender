@@ -1,0 +1,6 @@
+00:00.528  blend            | Read blend: "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/lidar-frontend/clearance-demo.blend"
+BLADE_TIP_SIDEBAR_READY
+01:13:46.499  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 586, total unfreed memory 0.042572 MB

@@ -1,0 +1,6 @@
+FARM_FLEX_READY
+PREBEND_PASS {'status': 'PASS', 'turbines': ['T1'], 'max_component_error_m': 6.970519295616817e-05, 'load_s': 3.962726832833141, 'frame_update_p95_ms': 69.16158297099173, 'blender': '5.2.1 LTS'}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

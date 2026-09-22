@@ -1,0 +1,21 @@
+2026/09/20 01:14:35 INF MediaMTX v1.21.0, darwin, arm64
+2026/09/20 01:14:35 INF configuration loaded from /Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/five-minute-rtsp/mediamtx.yml
+2026/09/20 01:14:35 INF [RTSP] started with listeners on 127.0.0.1:28554 (TCP/RTSP)
+2026/09/20 01:14:35 INF [RTSP] [conn 127.0.0.1:65307] opened
+2026/09/20 01:14:35 INF [RTSP] [conn 127.0.0.1:65307] closed: EOF
+2026/09/20 01:15:02 INF [RTSP] [conn 127.0.0.1:65442] opened
+2026/09/20 01:15:02 INF [RTSP] [session 664165f5] created by 127.0.0.1:65442
+2026/09/20 01:15:02 INF [path windfarm/camera1] stream is available and online, 1 track (H264)
+2026/09/20 01:15:02 INF [RTSP] [session 664165f5] is publishing to path 'windfarm/camera1'
+2026/09/20 01:15:03 INF [RTSP] [conn 127.0.0.1:65444] opened
+2026/09/20 01:15:03 INF [RTSP] [session 2677df3c] created by 127.0.0.1:65444
+2026/09/20 01:15:03 INF [RTSP] [session 2677df3c] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/20 01:35:34 INF [RTSP] [conn 127.0.0.1:65444] closed: read tcp 127.0.0.1:28554->127.0.0.1:65444: read: connection reset by peer
+2026/09/20 01:35:34 INF [RTSP] [session 2677df3c] destroyed: write tcp 127.0.0.1:28554->127.0.0.1:65444: write: broken pipe
+2026/09/20 01:36:23 INF [RTSP] [conn 127.0.0.1:55441] opened
+2026/09/20 01:36:23 INF [RTSP] [session d75ccdbd] created by 127.0.0.1:55441
+2026/09/20 01:36:23 INF [RTSP] [session d75ccdbd] is reading from path 'windfarm/camera1', with TCP, 1 track (H264)
+2026/09/20 01:36:26 INF [RTSP] [conn 127.0.0.1:55441] closed: EOF
+2026/09/20 01:36:26 INF [RTSP] [session d75ccdbd] destroyed: not in use
+2026/09/20 01:36:27 INF [RTSP] [conn 127.0.0.1:65442] closed: EOF
+2026/09/20 01:36:27 INF [RTSP] [session 664165f5] destroyed: not in use

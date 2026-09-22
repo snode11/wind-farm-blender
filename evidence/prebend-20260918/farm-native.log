@@ -1,0 +1,8 @@
+FARM_FLEX_READY
+00:32.467  blend            | Read blend: "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/tmpl66m1f_q/prebend.blend"
+Info: Saved as "prebend.blend"
+PREBEND_PASS {'status': 'PASS', 'turbines': ['T1', 'T2', 'T3'], 'max_component_error_m': 0.0013780016838742803, 'interpolated_component_error_m': 0.007037890359007454, 'load_s': 5.757245833054185, 'frame_update_p95_ms': 83.94158282317221, 'blender': '5.2.1 LTS'}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

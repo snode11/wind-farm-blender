@@ -1,0 +1,46 @@
+
+ **************************************************************************************************
+ OpenFAST
+
+ Copyright (C) 2024 National Renewable Energy Laboratory
+ Copyright (C) 2024 Envision Energy USA LTD
+
+ This program is licensed under Apache License Version 2.0 and comes with ABSOLUTELY NO WARRANTY.
+ See the "LICENSE" file distributed with this software for details.
+ **************************************************************************************************
+
+ OpenFAST-v3.5.3-dirty
+ Compile Info:
+  - Compiler: GCC version 12.3.0
+  - Architecture: 64 bit
+  - Precision: single
+  - OpenMP: Yes, number of threads: 1/1
+  - Date: Apr 26 2024
+  - Time: 16:41:09
+ Execution Info:
+  - Date: 09/18/2026
+  - Time: 00:17:25+0800
+
+ OpenFAST input file heading:
+     FAST          Certification - Test #26: NREL 5.0 MW Baseline Wind Turbine (Onshore)
+
+ Running ElastoDyn.
+ Nodal outputs section of ElastoDyn input file not found or improperly formatted.
+ Running BeamDyn.
+ Nodal outputs section of BeamDyn input file not found or improperly formatted.
+ Running BeamDyn.
+ Nodal outputs section of BeamDyn input file not found or improperly formatted.
+ Running BeamDyn.
+ Nodal outputs section of BeamDyn input file not found or improperly formatted.
+ Running InflowWind.
+ Using generic blade surfaces for BeamDyn (rectangular airfoil, constant chord).
+  Time: 0 of 2.50000E-02 seconds.
+                                                                                                  
+  Total Real Time:       0.132 seconds
+  Total CPU Time:        0.11814 seconds
+  Simulation CPU Time:   6.61650E-02 seconds
+  Simulated Time:        2.50000E-02 seconds
+  Time Ratio (Sim/CPU):  0.37784
+
+  OpenFAST terminated normally.
+

@@ -1,0 +1,23 @@
+{
+  "tests": {
+    "passed": 51,
+    "subtests_passed": 27,
+    "xml": "tests.xml"
+  },
+  "preserved_existing_blender_files": {
+    "blender_frontend/wfrl_blender/cameras.py": true,
+    "blender_frontend/wfrl_blender/panels/gimbal.py": true,
+    "blender_frontend/wfrl_blender/scene_builder.py": true
+  },
+  "validation": [
+    "actual loopback TCP Bridge pause/step/stop",
+    "archived FAST.Farm section and tip consistency",
+    "OpenCV image/video generation",
+    "git diff --check"
+  ],
+  "not_validated": [
+    "interactive OpenCV window",
+    "Blender mesh deformation or GUI integration"
+  ],
+  "scope": "Fix and reorganize tip scripts; recorded FAST.Farm geometry Bridge branch. No new simulation or RL training."
+}

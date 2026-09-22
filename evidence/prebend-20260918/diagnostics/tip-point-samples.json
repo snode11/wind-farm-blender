@@ -1,0 +1,1506 @@
+[
+  {
+    "turbine_id": "T1",
+    "blade_id": 1,
+    "passage_id": "b1-p21",
+    "time_s": 117.75,
+    "center_m": 6.830770327837728,
+    "surface_vertex_m": 6.684131518021151,
+    "difference_m": 0.14663880981657673,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.2949,
+      -0.69103,
+      27.28926
+    ],
+    "contour_max_edge_m": 0.018315583528787694
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 1,
+    "passage_id": "b1-p22",
+    "time_s": 122.925,
+    "center_m": 9.816942462144091,
+    "surface_vertex_m": 9.63548560647001,
+    "difference_m": 0.18145685567408165,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -12.26575,
+      -0.32424,
+      27.45877
+    ],
+    "contour_max_edge_m": 0.018319405012172114
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 1,
+    "passage_id": "b1-p23",
+    "time_s": 128.325,
+    "center_m": 9.524294790810945,
+    "surface_vertex_m": 9.34524423388322,
+    "difference_m": 0.17905055692772542,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.99014,
+      -0.38025,
+      27.40154
+    ],
+    "contour_max_edge_m": 0.01832027565294799
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 1,
+    "passage_id": "b1-p24",
+    "time_s": 133.9,
+    "center_m": 8.402043571373891,
+    "surface_vertex_m": 8.246721595869461,
+    "difference_m": 0.15532197550442994,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.84894,
+      -0.9325,
+      27.35739
+    ],
+    "contour_max_edge_m": 0.018317578988501684
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 1,
+    "passage_id": "b1-p25",
+    "time_s": 139.4,
+    "center_m": 8.714997001361924,
+    "surface_vertex_m": 8.54865791956109,
+    "difference_m": 0.16633908180083345,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.17531,
+      -0.19683,
+      27.37191
+    ],
+    "contour_max_edge_m": 0.018320559489273174
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 1,
+    "passage_id": "b1-p26",
+    "time_s": 144.7,
+    "center_m": 10.302282073878605,
+    "surface_vertex_m": 10.116630184791429,
+    "difference_m": 0.18565188908717545,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -12.74498,
+      0.27041,
+      27.51669
+    ],
+    "contour_max_edge_m": 0.018319882641545562
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 1,
+    "passage_id": "b1-p27",
+    "time_s": 150.225,
+    "center_m": 7.64123142906887,
+    "surface_vertex_m": 7.4858775713040835,
+    "difference_m": 0.15535385776478616,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.08227,
+      -0.91205,
+      27.32601
+    ],
+    "contour_max_edge_m": 0.01832030021588058
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 1,
+    "passage_id": "b1-p28",
+    "time_s": 155.75,
+    "center_m": 8.74306807029162,
+    "surface_vertex_m": 8.578870831548038,
+    "difference_m": 0.16419723874358283,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.21368,
+      0.24453,
+      27.35628
+    ],
+    "contour_max_edge_m": 0.018317185919240083
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 1,
+    "passage_id": "b1-p29",
+    "time_s": 161.225,
+    "center_m": 8.155752796923393,
+    "surface_vertex_m": 8.004689515652156,
+    "difference_m": 0.15106328127123625,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.60606,
+      -0.98448,
+      27.33679
+    ],
+    "contour_max_edge_m": 0.01831667273278644
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 1,
+    "passage_id": "b1-p30",
+    "time_s": 166.8,
+    "center_m": 6.686993750923517,
+    "surface_vertex_m": 6.54009571243097,
+    "difference_m": 0.14689803849254712,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.12463,
+      -0.94673,
+      27.29634
+    ],
+    "contour_max_edge_m": 0.018315875627444047
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 1,
+    "passage_id": "b1-p31",
+    "time_s": 172.225,
+    "center_m": 8.002511333763795,
+    "surface_vertex_m": 7.854413399243949,
+    "difference_m": 0.14809793451984632,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.44858,
+      -1.08316,
+      27.32404
+    ],
+    "contour_max_edge_m": 0.01832114625235007
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 2,
+    "passage_id": "b2-p22",
+    "time_s": 121.225,
+    "center_m": 9.304128899079906,
+    "surface_vertex_m": 9.125183840689573,
+    "difference_m": 0.17894505839033314,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.75877,
+      0.27042,
+      27.40635
+    ],
+    "contour_max_edge_m": 0.018318870052489698
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 2,
+    "passage_id": "b2-p23",
+    "time_s": 126.5,
+    "center_m": 9.118481065435404,
+    "surface_vertex_m": 8.9626142059098,
+    "difference_m": 0.15586685952560408,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.53212,
+      -1.24532,
+      27.43562
+    ],
+    "contour_max_edge_m": 0.018322974649330172
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 2,
+    "passage_id": "b2-p24",
+    "time_s": 132.075,
+    "center_m": 8.648934611665592,
+    "surface_vertex_m": 8.477517192124758,
+    "difference_m": 0.171417419540834,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.10355,
+      0.28164,
+      27.36488
+    ],
+    "contour_max_edge_m": 0.018321632023375993
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 2,
+    "passage_id": "b2-p25",
+    "time_s": 137.55,
+    "center_m": 8.856968602196094,
+    "surface_vertex_m": 8.695192218428058,
+    "difference_m": 0.16177638376803571,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.31076,
+      -0.71204,
+      27.38914
+    ],
+    "contour_max_edge_m": 0.018323441270678344
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 2,
+    "passage_id": "b2-p26",
+    "time_s": 142.95,
+    "center_m": 10.359986872722546,
+    "surface_vertex_m": 10.174390881663866,
+    "difference_m": 0.18559599105867974,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -12.80582,
+      0.35742,
+      27.52084
+    ],
+    "contour_max_edge_m": 0.01831827775747481
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 2,
+    "passage_id": "b2-p27",
+    "time_s": 148.375,
+    "center_m": 8.94336163419596,
+    "surface_vertex_m": 8.786115663613215,
+    "difference_m": 0.15724597058274448,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.38958,
+      -0.92246,
+      27.40153
+    ],
+    "contour_max_edge_m": 0.018315113977259448
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 2,
+    "passage_id": "b2-p28",
+    "time_s": 153.85,
+    "center_m": 9.072659224975363,
+    "surface_vertex_m": 8.909361898103827,
+    "difference_m": 0.16329732687153609,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.52521,
+      -0.6657,
+      27.40901
+    ],
+    "contour_max_edge_m": 0.018318889158461464
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 2,
+    "passage_id": "b2-p29",
+    "time_s": 159.4,
+    "center_m": 8.707280192552043,
+    "surface_vertex_m": 8.54054088531415,
+    "difference_m": 0.16673930723789354,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.17156,
+      -0.437,
+      27.36165
+    ],
+    "contour_max_edge_m": 0.018320191047038838
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 2,
+    "passage_id": "b2-p30",
+    "time_s": 165.0,
+    "center_m": 7.06983948753082,
+    "surface_vertex_m": 6.905565286360815,
+    "difference_m": 0.1642742011700049,
+    "threshold_class_changed": true,
+    "nearest_vertex": [
+      -9.52652,
+      0.483,
+      27.29066
+    ],
+    "contour_max_edge_m": 0.018322338824506002
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 2,
+    "passage_id": "b2-p31",
+    "time_s": 170.375,
+    "center_m": 8.650247172297698,
+    "surface_vertex_m": 8.489004665983563,
+    "difference_m": 0.16124250631413517,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.10503,
+      -0.67539,
+      27.37292
+    ],
+    "contour_max_edge_m": 0.01831678465233477
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 2,
+    "passage_id": "b2-p32",
+    "time_s": 175.875,
+    "center_m": 8.457112222929041,
+    "surface_vertex_m": 8.303458630064217,
+    "difference_m": 0.15365359286482416,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.90473,
+      -1.0099,
+      27.35342
+    ],
+    "contour_max_edge_m": 0.018318362372221085
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 3,
+    "passage_id": "b3-p22",
+    "time_s": 119.525,
+    "center_m": 6.789773266621409,
+    "surface_vertex_m": 6.637319465411877,
+    "difference_m": 0.152453801209532,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.23761,
+      -0.70371,
+      27.30575
+    ],
+    "contour_max_edge_m": 0.01832107256685611
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 3,
+    "passage_id": "b3-p23",
+    "time_s": 124.7,
+    "center_m": 9.286191947673336,
+    "surface_vertex_m": 9.107263168549038,
+    "difference_m": 0.1789287791242984,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.74068,
+      -0.40821,
+      27.40231
+    ],
+    "contour_max_edge_m": 0.018321012526604473
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 3,
+    "passage_id": "b3-p24",
+    "time_s": 130.2,
+    "center_m": 9.03309540835676,
+    "surface_vertex_m": 8.86159329929249,
+    "difference_m": 0.171502109064269,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.48344,
+      0.05834,
+      27.40084
+    ],
+    "contour_max_edge_m": 0.018316235967032107
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 3,
+    "passage_id": "b3-p25",
+    "time_s": 135.725,
+    "center_m": 9.15766142783582,
+    "surface_vertex_m": 8.986262281122755,
+    "difference_m": 0.171399146713064,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.61264,
+      -0.28613,
+      27.40591
+    ],
+    "contour_max_edge_m": 0.018316386106434678
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 3,
+    "passage_id": "b3-p26",
+    "time_s": 141.2,
+    "center_m": 8.27643557696105,
+    "surface_vertex_m": 8.121521813793043,
+    "difference_m": 0.15491376316800753,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.70969,
+      -0.95965,
+      27.37407
+    ],
+    "contour_max_edge_m": 0.018323542233967927
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 3,
+    "passage_id": "b3-p27",
+    "time_s": 146.525,
+    "center_m": 9.73484605077127,
+    "surface_vertex_m": 9.558979699148,
+    "difference_m": 0.17586635162327013,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -12.19022,
+      0.14829,
+      27.44894
+    ],
+    "contour_max_edge_m": 0.018320649551803396
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 3,
+    "passage_id": "b3-p28",
+    "time_s": 152.025,
+    "center_m": 9.266911594084894,
+    "surface_vertex_m": 9.093762811734226,
+    "difference_m": 0.17314878235066722,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.72726,
+      -0.44156,
+      27.40182
+    ],
+    "contour_max_edge_m": 0.01831933404903128
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 3,
+    "passage_id": "b3-p29",
+    "time_s": 157.6,
+    "center_m": 7.546202899454439,
+    "surface_vertex_m": 7.387659990097328,
+    "difference_m": 0.15854290935711113,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.99829,
+      -0.5294,
+      27.32525
+    ],
+    "contour_max_edge_m": 0.018325179398848673
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 3,
+    "passage_id": "b3-p30",
+    "time_s": 163.125,
+    "center_m": 7.680633183844599,
+    "surface_vertex_m": 7.521545078423224,
+    "difference_m": 0.1590881054213753,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.15117,
+      0.02351,
+      27.30045
+    ],
+    "contour_max_edge_m": 0.018319593336097825
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 3,
+    "passage_id": "b3-p31",
+    "time_s": 168.575,
+    "center_m": 8.539549652616556,
+    "surface_vertex_m": 8.375800504565902,
+    "difference_m": 0.16374914805065366,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.00793,
+      -0.59171,
+      27.3394
+    ],
+    "contour_max_edge_m": 0.018321443720405877
+  },
+  {
+    "turbine_id": "T1",
+    "blade_id": 3,
+    "passage_id": "b3-p32",
+    "time_s": 174.075,
+    "center_m": 6.823739622159502,
+    "surface_vertex_m": 6.677167520496396,
+    "difference_m": 0.1465721016631063,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.25517,
+      -1.05383,
+      27.29841
+    ],
+    "contour_max_edge_m": 0.018324499993178662
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 1,
+    "passage_id": "b1-p20",
+    "time_s": 119.575,
+    "center_m": 7.414114378866284,
+    "surface_vertex_m": 7.263038751899984,
+    "difference_m": 0.15107562696629984,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.880499999999984,
+      0.21649,
+      27.31187
+    ],
+    "contour_max_edge_m": 0.018316386106442914
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 1,
+    "passage_id": "b1-p21",
+    "time_s": 125.1,
+    "center_m": 6.234454953281382,
+    "surface_vertex_m": 6.092623175378336,
+    "difference_m": 0.1418317779030458,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -8.673519999999996,
+      -0.85223,
+      27.30805
+    ],
+    "contour_max_edge_m": 0.018322330637768003
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 1,
+    "passage_id": "b1-p22",
+    "time_s": 130.45,
+    "center_m": 7.376022338623447,
+    "surface_vertex_m": 7.222623315288784,
+    "difference_m": 0.15339902333466338,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.845989999999972,
+      -0.54011,
+      27.29346
+    ],
+    "contour_max_edge_m": 0.01832235246904925
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 1,
+    "passage_id": "b1-p23",
+    "time_s": 135.775,
+    "center_m": 8.844286892106194,
+    "surface_vertex_m": 8.680918262819999,
+    "difference_m": 0.1633686292861949,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.307380000000023,
+      -0.0523,
+      27.38006
+    ],
+    "contour_max_edge_m": 0.01832127178992283
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 1,
+    "passage_id": "b1-p24",
+    "time_s": 141.275,
+    "center_m": 8.432126752685113,
+    "surface_vertex_m": 8.281330530372717,
+    "difference_m": 0.15079622231239576,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.896749999999997,
+      -0.59324,
+      27.37156
+    ],
+    "contour_max_edge_m": 0.018321697519600614
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 1,
+    "passage_id": "b1-p25",
+    "time_s": 146.875,
+    "center_m": 7.368227128350279,
+    "surface_vertex_m": 7.215548435557618,
+    "difference_m": 0.15267869279266133,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.810189999999977,
+      0.88302,
+      27.32092
+    ],
+    "contour_max_edge_m": 0.018321296351521774
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 1,
+    "passage_id": "b1-p26",
+    "time_s": 152.4,
+    "center_m": 7.089638776405608,
+    "surface_vertex_m": 6.939994634461057,
+    "difference_m": 0.14964414194455156,
+    "threshold_class_changed": true,
+    "nearest_vertex": [
+      -9.548540000000003,
+      0.89184,
+      27.28646
+    ],
+    "contour_max_edge_m": 0.018320987964635473
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 1,
+    "passage_id": "b1-p27",
+    "time_s": 158.125,
+    "center_m": 7.337595183216904,
+    "surface_vertex_m": 7.196321622967791,
+    "difference_m": 0.14127356024911286,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.824329999999975,
+      0.28843,
+      27.29546
+    ],
+    "contour_max_edge_m": 0.018319634275840675
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 1,
+    "passage_id": "b1-p28",
+    "time_s": 163.925,
+    "center_m": 5.930111013542497,
+    "surface_vertex_m": 5.784167297227177,
+    "difference_m": 0.14594371631531988,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -8.385879999999986,
+      0.70664,
+      27.2876
+    ],
+    "contour_max_edge_m": 0.018316020310088995
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 1,
+    "passage_id": "b1-p29",
+    "time_s": 169.45,
+    "center_m": 6.711279489633586,
+    "surface_vertex_m": 6.57006935566422,
+    "difference_m": 0.14121013396936632,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.18995000000001,
+      0.03242,
+      27.29566
+    ],
+    "contour_max_edge_m": 0.01831614042314005
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 1,
+    "passage_id": "b1-p30",
+    "time_s": 174.85,
+    "center_m": 8.059659502836023,
+    "surface_vertex_m": 7.887722452289122,
+    "difference_m": 0.17193705054690156,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.443390000000022,
+      1.32366,
+      27.34236
+    ],
+    "contour_max_edge_m": 0.018318744498462613
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 2,
+    "passage_id": "b2-p20",
+    "time_s": 117.775,
+    "center_m": 6.946582246533314,
+    "surface_vertex_m": 6.795398869119733,
+    "difference_m": 0.1511833774135809,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.419489999999996,
+      0.19458,
+      27.28718
+    ],
+    "contour_max_edge_m": 0.018322941903521014
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 2,
+    "passage_id": "b2-p21",
+    "time_s": 123.3,
+    "center_m": 6.098516856736991,
+    "surface_vertex_m": 5.947465596425293,
+    "difference_m": 0.15105126031169736,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -8.562419999999975,
+      0.49372,
+      27.27873
+    ],
+    "contour_max_edge_m": 0.018321511946346677
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 2,
+    "passage_id": "b2-p22",
+    "time_s": 128.65,
+    "center_m": 7.357332642309106,
+    "surface_vertex_m": 7.211139543592105,
+    "difference_m": 0.14619309871700104,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.80261999999999,
+      -0.90225,
+      27.31755
+    ],
+    "contour_max_edge_m": 0.018322090492080598
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 2,
+    "passage_id": "b2-p23",
+    "time_s": 134.0,
+    "center_m": 8.268374801140027,
+    "surface_vertex_m": 8.104932058778829,
+    "difference_m": 0.16344274236119816,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.733600000000024,
+      -0.13939,
+      27.33139
+    ],
+    "contour_max_edge_m": 0.018321206292161052
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 2,
+    "passage_id": "b2-p24",
+    "time_s": 139.45,
+    "center_m": 7.397072536562221,
+    "surface_vertex_m": 7.246564963021044,
+    "difference_m": 0.1505075735411774,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.866010000000017,
+      -0.54926,
+      27.30612
+    ],
+    "contour_max_edge_m": 0.018323408525708247
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 2,
+    "passage_id": "b2-p25",
+    "time_s": 145.0,
+    "center_m": 7.1189142279980375,
+    "surface_vertex_m": 6.973317937664158,
+    "difference_m": 0.14559629033387989,
+    "threshold_class_changed": true,
+    "nearest_vertex": [
+      -9.598869999999977,
+      0.02759,
+      27.29608
+    ],
+    "contour_max_edge_m": 0.01832051036408013
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 2,
+    "passage_id": "b2-p26",
+    "time_s": 150.575,
+    "center_m": 7.33583713151121,
+    "surface_vertex_m": 7.179636879609888,
+    "difference_m": 0.15620025190132125,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.738490000000013,
+      1.17974,
+      27.33256
+    ],
+    "contour_max_edge_m": 0.018318351454215894
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 2,
+    "passage_id": "b2-p27",
+    "time_s": 156.2,
+    "center_m": 6.9782309285826,
+    "surface_vertex_m": 6.836932580809556,
+    "difference_m": 0.14129834777304406,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.454150000000027,
+      0.09886,
+      27.29888
+    ],
+    "contour_max_edge_m": 0.018319445952323675
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 2,
+    "passage_id": "b2-p28",
+    "time_s": 162.0,
+    "center_m": 6.930494425154996,
+    "surface_vertex_m": 6.789255242376289,
+    "difference_m": 0.1412391827787074,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.412249999999972,
+      0.22246,
+      27.29047
+    ],
+    "contour_max_edge_m": 0.018319347695807522
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 2,
+    "passage_id": "b2-p29",
+    "time_s": 167.575,
+    "center_m": 7.035416090040315,
+    "surface_vertex_m": 6.894157308349911,
+    "difference_m": 0.1412587816904045,
+    "threshold_class_changed": true,
+    "nearest_vertex": [
+      -9.514149999999972,
+      -0.0896,
+      27.30652
+    ],
+    "contour_max_edge_m": 0.01831956604289818
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 2,
+    "passage_id": "b2-p30",
+    "time_s": 173.075,
+    "center_m": 7.3615419337744274,
+    "surface_vertex_m": 7.209547306327014,
+    "difference_m": 0.15199462744741332,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.825179999999989,
+      0.7491,
+      27.29815
+    ],
+    "contour_max_edge_m": 0.018317538044184383
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 3,
+    "passage_id": "b3-p21",
+    "time_s": 121.425,
+    "center_m": 6.506392826004486,
+    "surface_vertex_m": 6.359944896442807,
+    "difference_m": 0.1464479295616794,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -8.983990000000006,
+      -0.02437,
+      27.27725
+    ],
+    "contour_max_edge_m": 0.018320139191608163
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 3,
+    "passage_id": "b3-p22",
+    "time_s": 126.875,
+    "center_m": 7.534209433402827,
+    "surface_vertex_m": 7.38490852568772,
+    "difference_m": 0.14930090771510685,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.013680000000022,
+      -0.67267,
+      27.28563
+    ],
+    "contour_max_edge_m": 0.018322349740140815
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 3,
+    "passage_id": "b3-p23",
+    "time_s": 132.25,
+    "center_m": 7.643926519161153,
+    "surface_vertex_m": 7.483930478216083,
+    "difference_m": 0.15999604094507003,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.100540000000024,
+      0.24388,
+      27.31933
+    ],
+    "contour_max_edge_m": 0.018321323642147037
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 3,
+    "passage_id": "b3-p24",
+    "time_s": 137.6,
+    "center_m": 8.535110799361396,
+    "surface_vertex_m": 8.37315860756435,
+    "difference_m": 0.161952191797047,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -11.00193999999999,
+      0.34225,
+      27.35319
+    ],
+    "contour_max_edge_m": 0.018317407021735264
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 3,
+    "passage_id": "b3-p25",
+    "time_s": 143.125,
+    "center_m": 7.895992988466586,
+    "surface_vertex_m": 7.745652749145494,
+    "difference_m": 0.15034023932109175,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.373080000000016,
+      0.05745,
+      27.31948
+    ],
+    "contour_max_edge_m": 0.018325269438669904
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 3,
+    "passage_id": "b3-p26",
+    "time_s": 148.725,
+    "center_m": 6.766577253648343,
+    "surface_vertex_m": 6.624969726129562,
+    "difference_m": 0.14160752751878114,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.247029999999995,
+      -0.02062,
+      27.28986
+    ],
+    "contour_max_edge_m": 0.018319576960183975
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 3,
+    "passage_id": "b3-p27",
+    "time_s": 154.3,
+    "center_m": 7.494216907812716,
+    "surface_vertex_m": 7.338188886045609,
+    "difference_m": 0.15602802176710728,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.906470000000013,
+      1.25831,
+      27.31206
+    ],
+    "contour_max_edge_m": 0.018320551301751507
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 3,
+    "passage_id": "b3-p28",
+    "time_s": 160.05,
+    "center_m": 7.363476244630073,
+    "surface_vertex_m": 7.222191452631551,
+    "difference_m": 0.14128479199852162,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.838799999999992,
+      -0.1261,
+      27.31512
+    ],
+    "contour_max_edge_m": 0.018317669065691447
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 3,
+    "passage_id": "b3-p29",
+    "time_s": 165.75,
+    "center_m": 6.763984615064266,
+    "surface_vertex_m": 6.617027492445247,
+    "difference_m": 0.1469571226190194,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.213779999999986,
+      0.82177,
+      27.3039
+    ],
+    "contour_max_edge_m": 0.018326824602204358
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 3,
+    "passage_id": "b3-p30",
+    "time_s": 171.3,
+    "center_m": 6.184101960064407,
+    "surface_vertex_m": 6.039535480201167,
+    "difference_m": 0.14456647986324,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -8.635449999999992,
+      0.65284,
+      27.31179
+    ],
+    "contour_max_edge_m": 0.01832100979751275
+  },
+  {
+    "turbine_id": "T2",
+    "blade_id": 3,
+    "passage_id": "b3-p31",
+    "time_s": 176.65,
+    "center_m": 7.744368407519583,
+    "surface_vertex_m": 7.586490584019451,
+    "difference_m": 0.15787782350013213,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.189149999999984,
+      0.9517,
+      27.30756
+    ],
+    "contour_max_edge_m": 0.018320330237195277
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 1,
+    "passage_id": "b1-p20",
+    "time_s": 119.625,
+    "center_m": 6.726115512905689,
+    "surface_vertex_m": 6.579668112499583,
+    "difference_m": 0.14644740040610582,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.206080000000043,
+      0.14063,
+      27.27727
+    ],
+    "contour_max_edge_m": 0.018322614442272657
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 1,
+    "passage_id": "b1-p21",
+    "time_s": 126.475,
+    "center_m": 7.049670622423508,
+    "surface_vertex_m": 6.901475167477904,
+    "difference_m": 0.14819545494560415,
+    "threshold_class_changed": true,
+    "nearest_vertex": [
+      -9.529300000000035,
+      0.19994,
+      27.28421
+    ],
+    "contour_max_edge_m": 0.018315924765082602
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 1,
+    "passage_id": "b1-p22",
+    "time_s": 133.375,
+    "center_m": 6.849889839971854,
+    "surface_vertex_m": 6.698489941219184,
+    "difference_m": 0.15139989875267013,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.320460000000026,
+      -0.45928,
+      27.28465
+    ],
+    "contour_max_edge_m": 0.01831795567196176
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 1,
+    "passage_id": "b1-p23",
+    "time_s": 140.2,
+    "center_m": 7.368663710784227,
+    "surface_vertex_m": 7.225958063672701,
+    "difference_m": 0.14270564711152556,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.81492000000003,
+      -1.04168,
+      27.30745
+    ],
+    "contour_max_edge_m": 0.018321520133452316
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 1,
+    "passage_id": "b1-p24",
+    "time_s": 146.675,
+    "center_m": 7.292818317031486,
+    "surface_vertex_m": 7.1419879403603055,
+    "difference_m": 0.1508303766711805,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.76732000000004,
+      0.02139,
+      27.29375
+    ],
+    "contour_max_edge_m": 0.018320723239008494
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 1,
+    "passage_id": "b1-p25",
+    "time_s": 153.075,
+    "center_m": 7.209328180008879,
+    "surface_vertex_m": 7.065994926728094,
+    "difference_m": 0.14333325328078494,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.672950000000014,
+      -0.78542,
+      27.3098
+    ],
+    "contour_max_edge_m": 0.01832250255833403
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 1,
+    "passage_id": "b1-p26",
+    "time_s": 159.275,
+    "center_m": 7.309457166341438,
+    "surface_vertex_m": 7.165529429004323,
+    "difference_m": 0.14392773733711461,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.77625999999998,
+      -0.74626,
+      27.30366
+    ],
+    "contour_max_edge_m": 0.01831809487912341
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 1,
+    "passage_id": "b1-p27",
+    "time_s": 165.325,
+    "center_m": 7.285476075043226,
+    "surface_vertex_m": 7.136230394023958,
+    "difference_m": 0.14924568101926816,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.76197000000002,
+      0.21155,
+      27.29717
+    ],
+    "contour_max_edge_m": 0.018320395738071146
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 1,
+    "passage_id": "b1-p28",
+    "time_s": 171.425,
+    "center_m": 7.210878266759809,
+    "surface_vertex_m": 7.061626245912895,
+    "difference_m": 0.14925202084691414,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.694560000000024,
+      0.09409,
+      27.27826
+    ],
+    "contour_max_edge_m": 0.018320092794512147
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 2,
+    "passage_id": "b2-p20",
+    "time_s": 117.35,
+    "center_m": 7.070199128147248,
+    "surface_vertex_m": 6.927106994282444,
+    "difference_m": 0.1430921338648039,
+    "threshold_class_changed": true,
+    "nearest_vertex": [
+      -9.547720000000027,
+      -0.63842,
+      27.28916
+    ],
+    "contour_max_edge_m": 0.018316533514822472
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 2,
+    "passage_id": "b2-p21",
+    "time_s": 124.15,
+    "center_m": 7.911202109373394,
+    "surface_vertex_m": 7.764051762327842,
+    "difference_m": 0.1471503470455522,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.394199999999955,
+      -0.0518,
+      27.31608
+    ],
+    "contour_max_edge_m": 0.018323615909547536
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 2,
+    "passage_id": "b2-p22",
+    "time_s": 131.025,
+    "center_m": 8.025042484397405,
+    "surface_vertex_m": 7.884009648317817,
+    "difference_m": 0.14103283607958783,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.444989999999962,
+      -1.3627,
+      27.32878
+    ],
+    "contour_max_edge_m": 0.018319091134659314
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 2,
+    "passage_id": "b2-p23",
+    "time_s": 137.925,
+    "center_m": 7.503171515073244,
+    "surface_vertex_m": 7.359287581212661,
+    "difference_m": 0.1438839338605824,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.959449999999947,
+      -1.00052,
+      27.29962
+    ],
+    "contour_max_edge_m": 0.018319675215462846
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 2,
+    "passage_id": "b2-p24",
+    "time_s": 144.55,
+    "center_m": 7.010970823285987,
+    "surface_vertex_m": 6.8611282872149335,
+    "difference_m": 0.1498425360710538,
+    "threshold_class_changed": true,
+    "nearest_vertex": [
+      -9.497790000000009,
+      -0.47058,
+      27.26911
+    ],
+    "contour_max_edge_m": 0.018319525103026882
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 2,
+    "passage_id": "b2-p25",
+    "time_s": 150.975,
+    "center_m": 7.168689466076555,
+    "surface_vertex_m": 7.019394978396957,
+    "difference_m": 0.1492944876795974,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.646439999999984,
+      0.06114,
+      27.29192
+    ],
+    "contour_max_edge_m": 0.01831804301776472
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 2,
+    "passage_id": "b2-p26",
+    "time_s": 157.2,
+    "center_m": 7.370209287196946,
+    "surface_vertex_m": 7.226028278578434,
+    "difference_m": 0.1441810086185118,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.842740000000049,
+      -0.72601,
+      27.29832
+    ],
+    "contour_max_edge_m": 0.018324783764070735
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 2,
+    "passage_id": "b2-p27",
+    "time_s": 163.3,
+    "center_m": 7.359867142923332,
+    "surface_vertex_m": 7.210624677292078,
+    "difference_m": 0.14924246563125454,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.848709999999983,
+      0.18402,
+      27.27903
+    ],
+    "contour_max_edge_m": 0.01832264718866426
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 2,
+    "passage_id": "b2-p28",
+    "time_s": 169.425,
+    "center_m": 6.42056684273039,
+    "surface_vertex_m": 6.2721466163154,
+    "difference_m": 0.14842022641499053,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -8.893670000000043,
+      -0.43256,
+      27.27884
+    ],
+    "contour_max_edge_m": 0.01831784648914136
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 2,
+    "passage_id": "b2-p29",
+    "time_s": 175.375,
+    "center_m": 6.422356537726493,
+    "surface_vertex_m": 6.273113962150595,
+    "difference_m": 0.14924257557589815,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -8.892740000000003,
+      -0.24261,
+      27.27783
+    ],
+    "contour_max_edge_m": 0.018318261380375157
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 3,
+    "passage_id": "b3-p21",
+    "time_s": 121.85,
+    "center_m": 7.729082871377736,
+    "surface_vertex_m": 7.585391677925672,
+    "difference_m": 0.1436911934520646,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.222589999999968,
+      -0.60938,
+      27.29332
+    ],
+    "contour_max_edge_m": 0.018317254161025746
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 3,
+    "passage_id": "b3-p22",
+    "time_s": 128.75,
+    "center_m": 7.834200510429039,
+    "surface_vertex_m": 7.684515210745157,
+    "difference_m": 0.149685299683882,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.323920000000044,
+      0.25055,
+      27.2959
+    ],
+    "contour_max_edge_m": 0.018318266839430223
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 3,
+    "passage_id": "b3-p23",
+    "time_s": 135.65,
+    "center_m": 7.532732968207048,
+    "surface_vertex_m": 7.380456524518964,
+    "difference_m": 0.15227644368808413,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.018659999999954,
+      -0.48658,
+      27.27896
+    ],
+    "contour_max_edge_m": 0.018321389139469152
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 3,
+    "passage_id": "b3-p24",
+    "time_s": 142.425,
+    "center_m": 6.36655971542828,
+    "surface_vertex_m": 6.223879329161045,
+    "difference_m": 0.14268038626723456,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -8.817750000000046,
+      -0.90275,
+      27.28922
+    ],
+    "contour_max_edge_m": 0.01831817403563361
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 3,
+    "passage_id": "b3-p25",
+    "time_s": 148.8,
+    "center_m": 7.425552294039854,
+    "surface_vertex_m": 7.2798666696840355,
+    "difference_m": 0.1456856243558189,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.899059999999963,
+      -0.63357,
+      27.30397
+    ],
+    "contour_max_edge_m": 0.01832332666302839
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 3,
+    "passage_id": "b3-p26",
+    "time_s": 155.125,
+    "center_m": 7.600931217590942,
+    "surface_vertex_m": 7.458828198164211,
+    "difference_m": 0.14210301942673098,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -10.062900000000013,
+      -0.94519,
+      27.31031
+    ],
+    "contour_max_edge_m": 0.018313672488066462
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 3,
+    "passage_id": "b3-p27",
+    "time_s": 161.3,
+    "center_m": 6.714936431103175,
+    "surface_vertex_m": 6.573926738980125,
+    "difference_m": 0.14100969212304992,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.144130000000018,
+      -1.08044,
+      27.30854
+    ],
+    "contour_max_edge_m": 0.018320371175289066
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 3,
+    "passage_id": "b3-p28",
+    "time_s": 167.375,
+    "center_m": 7.05821275572373,
+    "surface_vertex_m": 6.9088935755933445,
+    "difference_m": 0.14931918013038548,
+    "threshold_class_changed": true,
+    "nearest_vertex": [
+      -9.530219999999986,
+      -0.33402,
+      27.29409
+    ],
+    "contour_max_edge_m": 0.018317278728013624
+  },
+  {
+    "turbine_id": "T3",
+    "blade_id": 3,
+    "passage_id": "b3-p29",
+    "time_s": 173.4,
+    "center_m": 6.730565423160341,
+    "surface_vertex_m": 6.585754562900691,
+    "difference_m": 0.14481086025964984,
+    "threshold_class_changed": false,
+    "nearest_vertex": [
+      -9.19335000000001,
+      -0.65098,
+      27.29099
+    ],
+    "contour_max_edge_m": 0.018320109169990297
+  }
+]

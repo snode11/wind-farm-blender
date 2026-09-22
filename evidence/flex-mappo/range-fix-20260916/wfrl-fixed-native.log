@@ -1,0 +1,7 @@
+FARM_FLEX_READY
+FARM_FLEX_REGRESSION_PASS {"status": "PASS", "blades": 9, "root_connection_max_error_m": 0.0002699066425436879, "mean_update_ms": 14.858033339260146, "p95_update_ms": 16.341047588502985, "scope": "background frame update; not actual viewport FPS", "duration_s": 60.0}
+FARM_FLEX_SWITCH_RANGE_LIFECYCLE_PASS
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

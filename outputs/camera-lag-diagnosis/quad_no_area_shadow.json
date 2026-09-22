@@ -1,0 +1,62 @@
+{
+  "mode": "quad_no_area_shadow",
+  "elapsed_s": 8.104836957994848,
+  "frame_advance": 488,
+  "draws": {
+    "original": {
+      "unique_frames": 20,
+      "draw_calls": 20,
+      "unique_fps": 2.467662224873187
+    },
+    "C2": {
+      "unique_frames": 20,
+      "draw_calls": 20,
+      "unique_fps": 2.467662224873187
+    },
+    "C1": {
+      "unique_frames": 20,
+      "draw_calls": 20,
+      "unique_fps": 2.467662224873187
+    },
+    "C3": {
+      "unique_frames": 20,
+      "draw_calls": 20,
+      "unique_fps": 2.467662224873187
+    },
+    "C4": {
+      "unique_frames": 20,
+      "draw_calls": 20,
+      "unique_fps": 2.467662224873187
+    }
+  },
+  "timings": {
+    "native_sync": {
+      "calls": 20,
+      "total_s": 0.020276584895327687,
+      "median_ms": 0.9743750561028719,
+      "max_ms": 1.3396251015365124
+    },
+    "deformed_at": {
+      "calls": 40,
+      "total_s": 0.0343071271199733,
+      "median_ms": 0.8447505533695221,
+      "max_ms": 1.0514580644667149
+    },
+    "comparison_update": {
+      "calls": 20,
+      "total_s": 0.015916000120341778,
+      "median_ms": 0.7883539656177163,
+      "max_ms": 0.875124940648675
+    },
+    "farm_update": {
+      "calls": 20,
+      "total_s": 0.5124224971514195,
+      "median_ms": 13.461687369272113,
+      "max_ms": 45.691957930102944
+    }
+  },
+  "peak_rss_gib": 1.1550445556640625,
+  "native_objects": 4,
+  "visible_meshes": 2363,
+  "vertices": 1179791
+}

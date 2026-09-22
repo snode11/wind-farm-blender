@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "command": "/tmp/wfrl-tip-preview-venv/bin/python -m pytest tests/test_camera_video_stream.py -k sender_report -q",
+  "result": "2 passed, 5 deselected",
+  "verified": [
+    "Sender report packet count matches successful RTP packet sends",
+    "Sender report octet count matches RTP payload bytes, excluding 12-byte headers",
+    "32-bit counters, RTP timestamp and NTP seconds wrap correctly",
+    "NTP fractional seconds retained",
+    "actual_send_elapsed_s and pacing_lag_s are diagnostic-only after actual packet transmission"
+  ],
+  "source_sha256": {
+    "wfrl/camera_video/stream.py": "c7dd8c7e085279ac5506ecf2a53066993da9d087d2432c7a96dfcd62cc5f3cab",
+    "tests/test_camera_video_stream.py": "a2880770ec1b8873898ab4499f510c8e54dd4b2baa42086a5a13dc4a05af2a2f"
+  },
+  "long_test": "Already-running stability process is unchanged and is a separate source-version boundary."
+}

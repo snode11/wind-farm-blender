@@ -1,0 +1,10 @@
+{
+  "status": "complete",
+  "expected_frames": 1,
+  "verified_frames": 1,
+  "rendered_this_run": 1,
+  "wall_seconds": 0.5610007499344647,
+  "config_sha256": "e87a9f9e3c91735b820f850d24ffa06b6bc653fe5c52ecdf0b4c8af8065281e5",
+  "source_status": "REVIEW_ONLY",
+  "output": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-video-20260919/native-render-regression-crash-safe/interrupted-commit"
+}

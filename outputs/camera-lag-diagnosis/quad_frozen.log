@@ -1,0 +1,5 @@
+LAG_DONE {"mode": "quad_frozen", "elapsed_s": 8.013378958916292, "frame_advance": 480, "draws": {"original": {"unique_frames": 145, "draw_calls": 145, "unique_fps": 18.09473890395038}, "C2": {"unique_frames": 145, "draw_calls": 145, "unique_fps": 18.09473890395038}, "C1": {"unique_frames": 145, "draw_calls": 145, "unique_fps": 18.09473890395038}, "C3": {"unique_frames": 145, "draw_calls": 145, "unique_fps": 18.09473890395038}, "C4": {"unique_frames": 145, "draw_calls": 145, "unique_fps": 18.09473890395038}}, "timings": {"native_sync": {"calls": 29, "total_s": 0.03102700086310506, "median_ms": 1.0493749286979437, "max_ms": 1.4229998923838139}}, "peak_rss_gib": 1.127838134765625, "native_objects": 4, "visible_meshes": 2363, "vertices": 1179791}
+00:19.451  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

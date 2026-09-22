@@ -1,0 +1,3 @@
+T1 {'expected': 118, 'candidate_hits': 7, 'passages': 33, 'passages_with_candidate_hit': 6, 'boundary': 'Direct raw target-blade rays; upper bound until all-surface occlusion verification in full export'}
+T2 {'expected': 117, 'candidate_hits': 27, 'passages': 33, 'passages_with_candidate_hit': 24, 'boundary': 'Direct raw target-blade rays; upper bound until all-surface occlusion verification in full export'}
+T3 {'expected': 121, 'candidate_hits': 27, 'passages': 28, 'passages_with_candidate_hit': 23, 'boundary': 'Direct raw target-blade rays; upper bound until all-surface occlusion verification in full export'}

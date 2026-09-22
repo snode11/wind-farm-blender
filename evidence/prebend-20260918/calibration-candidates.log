@@ -1,0 +1,3 @@
+T1 design passes [] validation passes []
+T2 design passes [] validation passes ['9.25']
+T3 design passes ['9.0', '9.25'] validation passes ['8.5', '8.75', '9.0', '9.25']

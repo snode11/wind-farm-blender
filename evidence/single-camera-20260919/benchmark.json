@@ -1,0 +1,320 @@
+[
+  {
+    "configuration": "eevee-16x2-none",
+    "start_s": 117.7,
+    "directory": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-16x2-none-117.7",
+    "process_seconds": 8.699860875029117,
+    "sha256": "5f4920b8e5efb6a5b5144f43d8434175e7ac98127087386d15a9a147aac19a3a",
+    "sim_time_s": 117.72500000000001,
+    "exposure_samples_s": [
+      117.72475000000001,
+      117.72525
+    ],
+    "seconds": 3.005242707906291,
+    "timings": {
+      "geometry": 0.051286166068166494,
+      "render_write": 1.6316609170753509,
+      "read_accumulate": 0.18173112394288182,
+      "master_write": 0.9074075829703361
+    },
+    "linear_rgb_mean": 0.14705568676308534
+  },
+  {
+    "configuration": "eevee-16x2-none",
+    "start_s": 143.2,
+    "directory": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-16x2-none-143.2",
+    "process_seconds": 8.782729583093897,
+    "sha256": "2e7223ef0a82a036f0eb7ea96b77babdbc9b652e7351d0681f978d6dc1d46fbb",
+    "sim_time_s": 143.225,
+    "exposure_samples_s": [
+      143.22475,
+      143.22525
+    ],
+    "seconds": 3.0431327091064304,
+    "timings": {
+      "geometry": 0.04550074995495379,
+      "render_write": 1.6494662498589605,
+      "read_accumulate": 0.15502954204566777,
+      "master_write": 0.9510812079533935
+    },
+    "linear_rgb_mean": 0.09818879844981089
+  },
+  {
+    "configuration": "eevee-16x2-none",
+    "start_s": 176.7,
+    "directory": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-16x2-none-176.7",
+    "process_seconds": 8.969006417086348,
+    "sha256": "c8d33156bcf4a27914040d9e69c07deaba2567d2674f0e4df5aac15eac913400",
+    "sim_time_s": 176.725,
+    "exposure_samples_s": [
+      176.72475,
+      176.72525
+    ],
+    "seconds": 3.156144500011578,
+    "timings": {
+      "geometry": 0.0552599998190999,
+      "render_write": 1.6441263749729842,
+      "read_accumulate": 0.19522345787845552,
+      "master_write": 1.0010865421500057
+    },
+    "linear_rgb_mean": 0.09885733749150248
+  },
+  {
+    "configuration": "eevee-32x8-none",
+    "start_s": 117.7,
+    "directory": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-32x8-none-117.7",
+    "process_seconds": 18.566345291910693,
+    "sha256": "8b5680a2cd8020f13e885ba491860cee84ebb5ce8a24d425f1793b33b132dafe",
+    "sim_time_s": 117.72500000000001,
+    "exposure_samples_s": [
+      117.7245625,
+      117.7246875,
+      117.72481250000001,
+      117.72493750000001,
+      117.7250625,
+      117.7251875,
+      117.72531250000002,
+      117.72543750000001
+    ],
+    "seconds": 12.071481124963611,
+    "timings": {
+      "geometry": 0.2945044587831944,
+      "render_write": 10.048601834103465,
+      "read_accumulate": 0.5055978763848543,
+      "master_write": 0.9739507499616593
+    },
+    "linear_rgb_mean": 0.14705498746762996
+  },
+  {
+    "configuration": "eevee-32x8-none",
+    "start_s": 143.2,
+    "directory": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-32x8-none-143.2",
+    "process_seconds": 18.453779333969578,
+    "sha256": "2e9a8e35d9025b2d6dcd0a17f068d075da4b1d0f83fda9eee11909aa31fc4723",
+    "sim_time_s": 143.225,
+    "exposure_samples_s": [
+      143.2245625,
+      143.2246875,
+      143.22481249999998,
+      143.22493749999998,
+      143.2250625,
+      143.2251875,
+      143.2253125,
+      143.2254375
+    ],
+    "seconds": 11.961395583115518,
+    "timings": {
+      "geometry": 0.2879066674504429,
+      "render_write": 9.9405827911105,
+      "read_accumulate": 0.4535702089779079,
+      "master_write": 1.0199792499188334
+    },
+    "linear_rgb_mean": 0.0981839855492437
+  },
+  {
+    "configuration": "eevee-32x8-none",
+    "start_s": 176.7,
+    "directory": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-32x8-none-176.7",
+    "process_seconds": 19.25063379202038,
+    "sha256": "bd3dd7e667c217ffe29b7069b9e59283ce06e28a51fcb36d4f79ecdef8515b63",
+    "sim_time_s": 176.725,
+    "exposure_samples_s": [
+      176.7245625,
+      176.7246875,
+      176.72481249999998,
+      176.72493749999998,
+      176.7250625,
+      176.7251875,
+      176.7253125,
+      176.7254375
+    ],
+    "seconds": 12.138242417015135,
+    "timings": {
+      "geometry": 0.2790070828050375,
+      "render_write": 10.078480041818693,
+      "read_accumulate": 0.5273609566502273,
+      "master_write": 0.9967921250499785
+    },
+    "linear_rgb_mean": 0.09885727117826909
+  },
+  {
+    "configuration": "cycles-8x2-none",
+    "start_s": 117.7,
+    "directory": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/cycles-8x2-none-117.7",
+    "process_seconds": 13.596606250153854,
+    "sha256": "2d26f0672ee083976aee182c458314804e7e755c5c1e88450faaee2b63cfbe7d",
+    "sim_time_s": 117.72500000000001,
+    "exposure_samples_s": [
+      117.72475000000001,
+      117.72525
+    ],
+    "seconds": 7.504408792126924,
+    "timings": {
+      "geometry": 0.0634595409501344,
+      "render_write": 5.826555457897484,
+      "read_accumulate": 0.1701392917893827,
+      "master_write": 1.1235032079275697
+    },
+    "linear_rgb_mean": 0.15466018476914353
+  },
+  {
+    "configuration": "cycles-8x2-none",
+    "start_s": 143.2,
+    "directory": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/cycles-8x2-none-143.2",
+    "process_seconds": 11.459591957973316,
+    "sha256": "289e1563bec03c82a08195424b6f4913ebf834568afbfab3f5c2df19d6270c56",
+    "sim_time_s": 143.225,
+    "exposure_samples_s": [
+      143.22475,
+      143.22525
+    ],
+    "seconds": 5.372437209123746,
+    "timings": {
+      "geometry": 0.04640474985353649,
+      "render_write": 3.7409133319742978,
+      "read_accumulate": 0.15121954213827848,
+      "master_write": 1.112814584048465
+    },
+    "linear_rgb_mean": 0.09903079729180708
+  },
+  {
+    "configuration": "cycles-8x2-none",
+    "start_s": 176.7,
+    "directory": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/cycles-8x2-none-176.7",
+    "process_seconds": 11.95017237495631,
+    "sha256": "976942351734d2e5ffc807c7997ffe875b19679d9c1c2b48130cf1fa19864b7d",
+    "sim_time_s": 176.725,
+    "exposure_samples_s": [
+      176.72475,
+      176.72525
+    ],
+    "seconds": 5.588500750018284,
+    "timings": {
+      "geometry": 0.06570154195651412,
+      "render_write": 3.884157001040876,
+      "read_accumulate": 0.13862350024282932,
+      "master_write": 1.1680594170466065
+    },
+    "linear_rgb_mean": 0.09938828177905547
+  },
+  {
+    "configuration": "eevee-16x2-zip",
+    "start_s": 117.7,
+    "directory": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-16x2-zip-117.7",
+    "process_seconds": 8.979881375096738,
+    "sha256": "5f4920b8e5efb6a5b5144f43d8434175e7ac98127087386d15a9a147aac19a3a",
+    "sim_time_s": 117.72500000000001,
+    "exposure_samples_s": [
+      117.72475000000001,
+      117.72525
+    ],
+    "seconds": 2.867786708055064,
+    "timings": {
+      "geometry": 0.04694787506014109,
+      "render_write": 1.52377491700463,
+      "read_accumulate": 0.0956428328063339,
+      "master_write": 0.957435708027333
+    },
+    "linear_rgb_mean": 0.14705568676308534
+  },
+  {
+    "configuration": "eevee-16x2-zip",
+    "start_s": 143.2,
+    "directory": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-16x2-zip-143.2",
+    "process_seconds": 9.154018459143117,
+    "sha256": "2e7223ef0a82a036f0eb7ea96b77babdbc9b652e7351d0681f978d6dc1d46fbb",
+    "sim_time_s": 143.225,
+    "exposure_samples_s": [
+      143.22475,
+      143.22525
+    ],
+    "seconds": 2.890183250186965,
+    "timings": {
+      "geometry": 0.0438123329076916,
+      "render_write": 1.5062672081403434,
+      "read_accumulate": 0.09623354184441268,
+      "master_write": 0.9891502920072526
+    },
+    "linear_rgb_mean": 0.09818879844981089
+  },
+  {
+    "configuration": "eevee-16x2-zip",
+    "start_s": 176.7,
+    "directory": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-16x2-zip-176.7",
+    "process_seconds": 8.930570208001882,
+    "sha256": "c8d33156bcf4a27914040d9e69c07deaba2567d2674f0e4df5aac15eac913400",
+    "sim_time_s": 176.725,
+    "exposure_samples_s": [
+      176.72475,
+      176.72525
+    ],
+    "seconds": 2.9244504999369383,
+    "timings": {
+      "geometry": 0.046696041943505406,
+      "render_write": 1.5213734570425004,
+      "read_accumulate": 0.09746045782230794,
+      "master_write": 1.002226541051641
+    },
+    "linear_rgb_mean": 0.09885733749150248
+  },
+  {
+    "configuration": "farm-eevee-16x2-none",
+    "start_s": 117.7,
+    "directory": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/farm-eevee-16x2-none-117.7",
+    "process_seconds": 8.962901582941413,
+    "sha256": "5f4920b8e5efb6a5b5144f43d8434175e7ac98127087386d15a9a147aac19a3a",
+    "sim_time_s": 117.72500000000001,
+    "exposure_samples_s": [
+      117.72475000000001,
+      117.72525
+    ],
+    "seconds": 3.0700045409612358,
+    "timings": {
+      "geometry": 0.12927808403037488,
+      "render_write": 1.6128328330814838,
+      "read_accumulate": 0.13647929183207452,
+      "master_write": 0.9487668748479337
+    },
+    "linear_rgb_mean": 0.14705568676308534
+  },
+  {
+    "configuration": "farm-eevee-16x2-none",
+    "start_s": 143.2,
+    "directory": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/farm-eevee-16x2-none-143.2",
+    "process_seconds": 9.041801541112363,
+    "sha256": "2e7223ef0a82a036f0eb7ea96b77babdbc9b652e7351d0681f978d6dc1d46fbb",
+    "sim_time_s": 143.225,
+    "exposure_samples_s": [
+      143.22475,
+      143.22525
+    ],
+    "seconds": 3.143553833011538,
+    "timings": {
+      "geometry": 0.13022279110737145,
+      "render_write": 1.6211037922184914,
+      "read_accumulate": 0.13644108292646706,
+      "master_write": 1.0010086249094456
+    },
+    "linear_rgb_mean": 0.09818879844981089
+  },
+  {
+    "configuration": "farm-eevee-16x2-none",
+    "start_s": 176.7,
+    "directory": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/farm-eevee-16x2-none-176.7",
+    "process_seconds": 9.631133875111118,
+    "sha256": "c8d33156bcf4a27914040d9e69c07deaba2567d2674f0e4df5aac15eac913400",
+    "sim_time_s": 176.725,
+    "exposure_samples_s": [
+      176.72475,
+      176.72525
+    ],
+    "seconds": 3.2103326250799,
+    "timings": {
+      "geometry": 0.15116470819339156,
+      "render_write": 1.6509613748639822,
+      "read_accumulate": 0.14778862497769296,
+      "master_write": 1.0000741248950362
+    },
+    "linear_rgb_mean": 0.09885733749150248
+  }
+]

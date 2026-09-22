@@ -1,0 +1,11 @@
+{
+  "status": "complete",
+  "expected_frames": 1,
+  "verified_frames": 1,
+  "rendered_this_run": 1,
+  "wall_seconds": 12.177016415866092,
+  "preparation_seconds": 6.008231833111495,
+  "config_sha256": "8d0badcaa3e187993385360f5f64571f3d86cc99f79ba7b6fe7b0a0e9e7cfe95",
+  "source_status": "REVIEW_ONLY",
+  "output": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-32x8-none-176.7"
+}

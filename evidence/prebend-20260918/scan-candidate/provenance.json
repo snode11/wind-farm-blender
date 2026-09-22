@@ -1,0 +1,33 @@
+{
+  "source_manifest_sha256": "aeeecd7258d7f5ba2e85754c69b7bf8aa9c423cad558afc0dcdf99bbb6736124",
+  "source_package": "/Users/eason/Desktop/wfcrl/wind farm RL/results/prebend-20260918/farm-C",
+  "budget": {
+    "status": "FROZEN_BEFORE_FULL_FARM_AND_ALGORITHM_COMPARISON",
+    "point_tolerance_m": 0.05,
+    "geometry_tolerance_m": 0.002,
+    "deflection_tolerance_m": 0.005,
+    "E95_m": 0.5,
+    "Emax_m": 1.0,
+    "Vmin_sample_fraction": 0.25,
+    "Vmin_passage_fraction": 0.9,
+    "target_host": "macOS arm64, Blender 5.2.1; Windows unverified",
+    "sampler_p95_budget_ms": 5,
+    "load_budget_s": 10,
+    "reason": {
+      "point": "5 cm is five displayed 0.01 m increments; classification changes always require handling",
+      "geometry": "Retain existing 2 mm surface-fit contract",
+      "deflection": "5 mm bounds reference/component mapping without treating it as field validation",
+      "error": "Internal demo: most valid observations within 0.5 m and none beyond 1 m; independent of threshold safety interpretation",
+      "validity": "At least 1 in 4 expected samples and 90% of passages; T1 baseline does not meet these and is not grandfathered",
+      "performance": "Sampler uses at most 5 ms of a 60 Hz frame budget; source scene load within 10 s",
+      "frame_p95": "Before full-package comparison: new playback P95 at most 20% above same-host legacy package with same runtime and sampling sequence. This is a regression bound, not a stable 60 FPS claim.",
+      "rss": "After warmup, peak RSS growth within 64 MiB across ten full-timeline traversals; no accumulating objects/curves/materials or trail points."
+    },
+    "baseline_status": "A fails sample/passage availability on T1 and exceeds E95 on T1; no compensation decision yet",
+    "frame_p95_relative_limit": 1.2,
+    "rss_growth_ten_loops_mib": 64
+  },
+  "contract_sha256": "f08caa1531e0692169919d0903c981c9e8135715944461a6d91a839c44b57c9c",
+  "status": "PASS_IDEAL_SCAN_ONLY",
+  "source_unchanged": true
+}

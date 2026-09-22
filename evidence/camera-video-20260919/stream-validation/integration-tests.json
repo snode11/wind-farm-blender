@@ -1,0 +1,47 @@
+{
+  "status": "passed",
+  "tests_passed": 13,
+  "command": "WFRL_MEDIAMTX=/tmp/wfrl-mediamtx-v1.21.0/mediamtx /tmp/wfrl-tip-preview-venv/bin/python -m pytest tests/test_camera_video_media.py tests/test_camera_video_stream.py -q",
+  "environment": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "mediamtx_version": "1.21.0",
+  "mediamtx_binary_sha256": "1dd97c44ed783cfc6d7fb28a8db327cbe5f37808d4e09dd4c78c4c6bc668fa11",
+  "mediamtx_archive_sha256": "159b8e8164022189e654b61ee8bb7edf2d3ff9354ff06cf4c315bb59f5cc9eca",
+  "mediamtx_download_url": "https://github.com/bluenviron/mediamtx/releases/download/v1.21.0/mediamtx_v1.21.0_darwin_arm64.tar.gz",
+  "ffmpeg_version": "ffmpeg version 8.1.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "ffprobe_version": "ffprobe version 8.1.2 Copyright (c) 2007-2026 the FFmpeg developers",
+  "verified": [
+    "exact decoded CFR PTS and GOP",
+    "unmodified AVCC packet extraction",
+    "PNG masters retained",
+    "recovery of matching interrupted encoding",
+    "unrelated or changed encoding parameters refused",
+    "RTP fragmentation, sequence/timestamp wrap and packet loss detection",
+    "mapping rejects wrong session",
+    "package checksum enforced before publication",
+    "real MediaMTX TCP midjoin and reconnect",
+    "actual independently decodable cycle boundaries",
+    "publication restart gives new session even with same RTP origin",
+    "actual FFmpeg decode and frame count on captured received access units",
+    "15, 20 and 25 FPS exact timestamps",
+    "explicit BT.709 limited-range YCbCr matrix with retained sRGB transfer and VUI tags",
+    "four solid sRGB color patches decoded within 4/255 per channel at CRF12"
+  ],
+  "limitations": [
+    "synthetic 128x72 fixture, not 4K camera image-quality proof",
+    "30-minute 60-second-cycle test still running separately",
+    "loopback-only single publisher, reference receiver required for exact pairing"
+  ],
+  "result": "13 passed in 11.60s",
+  "source_sha256": {
+    "wfrl/camera_video/media.py": "9358e56115aa7e78ace1415ec575f91c6ae5e359b7b49eb3131fc70f1b8846ff",
+    "wfrl/camera_video/stream.py": "e0a577ed3ad9b6c004725e00ec8935cb1c270fbe357509d4a9046eda93f0c65b",
+    "tests/test_camera_video_media.py": "f19766d7a4292e575d00180e680e019185790055f88b39e5dab53cc49090fee6",
+    "tests/test_camera_video_stream.py": "a7893770e7fe5c21a8b6ab8e37b3f1137f3b96868c64ac735f3857fb385985f6"
+  },
+  "official_references": [
+    "https://ffmpeg.org/ffmpeg-filters.html",
+    "https://www.rfc-editor.org/rfc/rfc6184",
+    "https://www.rfc-editor.org/rfc/rfc3550",
+    "https://mediamtx.org/docs/references/configuration-file"
+  ]
+}

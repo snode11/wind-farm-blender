@@ -1,0 +1,14 @@
+00:07.538  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-32x8-none-117.7/.exposure_sample.exr'
+00:08.979  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-32x8-none-117.7/.exposure_sample.exr'
+00:10.438  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-32x8-none-117.7/.exposure_sample.exr'
+00:11.733  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-32x8-none-117.7/.exposure_sample.exr'
+00:13.045  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-32x8-none-117.7/.exposure_sample.exr'
+00:14.343  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-32x8-none-117.7/.exposure_sample.exr'
+00:15.636  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-32x8-none-117.7/.exposure_sample.exr'
+00:16.937  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-32x8-none-117.7/.exposure_sample.exr'
+CAMERA_VIDEO_FRAME 1/1 /Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-32x8-none-117.7/master_frames/000000.png
+CAMERA_VIDEO_RENDER {"status": "complete", "expected_frames": 1, "verified_frames": 1, "rendered_this_run": 1, "wall_seconds": 12.113924332894385, "preparation_seconds": 5.407597665907815, "config_sha256": "3683bb51a194cc736b2fd03aa13123a3f94c39ba78c83c59cac80861bef2ef79", "source_status": "REVIEW_ONLY", "output": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/single-camera-20260919/eevee-32x8-none-117.7"}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

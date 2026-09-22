@@ -1,0 +1,5 @@
+V3_WINDOW_AUTOMATED_PASS
+00:16.809  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

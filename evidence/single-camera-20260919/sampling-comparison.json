@@ -1,0 +1,20 @@
+[
+  {
+    "start_s": "117.7",
+    "rgb_mae": 0.0002031190112361817,
+    "p99_channel_difference": 0.00392156862745098,
+    "pixels_any_channel_difference_over_10pct": 0.00016685956790123458
+  },
+  {
+    "start_s": "143.2",
+    "rgb_mae": 0.000159031938392641,
+    "p99_channel_difference": 0.00392156862745098,
+    "pixels_any_channel_difference_over_10pct": 0.0
+  },
+  {
+    "start_s": "176.7",
+    "rgb_mae": 0.00015212531771968048,
+    "p99_channel_difference": 0.00392156862745098,
+    "pixels_any_channel_difference_over_10pct": 0.0
+  }
+]

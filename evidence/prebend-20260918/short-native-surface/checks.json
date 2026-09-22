@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "turbines": [
+    "T1"
+  ],
+  "max_component_error_m": 6.970519295616817e-05,
+  "load_s": 6.400377582991496,
+  "frame_update_p95_ms": 111.327291931957,
+  "blender": "5.2.1 LTS"
+}

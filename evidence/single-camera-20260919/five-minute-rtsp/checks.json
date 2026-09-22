@@ -1,0 +1,60 @@
+{
+  "status": "passed",
+  "package": {
+    "valid": true,
+    "dataset_id": "ce637f1463686396d615c74479cf4c350ffa5d87015d987307eca8f72e39cf23",
+    "frame_count": 6000,
+    "fps": 20,
+    "duration_s": 300.0,
+    "source_repeat_count": 5,
+    "encoded_duration_s": 300.0,
+    "width": 3840,
+    "height": 2160,
+    "exact_encoded_repetition": true,
+    "status": "REVIEW_ONLY"
+  },
+  "scope": "one local 4K TCP client, actual single-turbine camera video",
+  "mediamtx_sha256": "1dd97c44ed783cfc6d7fb28a8db327cbe5f37808d4e09dd4c78c4c6bc668fa11",
+  "mediamtx_version": "1.21.0",
+  "stream_source_sha256": "0fdddf5cb566451104a21cbd8850ab7a3b2ce234e741b1ebe4fc9211750c0ee5",
+  "batches": [
+    {
+      "decoded_frames": 6020,
+      "width": 3840,
+      "height": 2160,
+      "cycles": [
+        0,
+        1
+      ],
+      "session_id": "902dd290-4e61-4c49-842e-99467ecee44a",
+      "every_label_matches_csv": true,
+      "source_cycles": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "decoded_frames": 40,
+      "width": 3840,
+      "height": 2160,
+      "cycles": [
+        1
+      ],
+      "session_id": "902dd290-4e61-4c49-842e-99467ecee44a",
+      "every_label_matches_csv": true,
+      "source_cycles": [
+        0
+      ]
+    }
+  ],
+  "matched_decoded_frames": 6060,
+  "reconnection": true,
+  "cycle_boundary": true,
+  "errors": [],
+  "session_logs": [
+    "/Users/eason/Desktop/wfcrl/wind farm RL/results/camera-video/t1-single-5min-4k-20fps-20260919/stream/902dd290-4e61-4c49-842e-99467ecee44a.jsonl"
+  ]
+}

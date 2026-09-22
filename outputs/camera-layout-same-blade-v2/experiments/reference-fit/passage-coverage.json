@@ -1,0 +1,766 @@
+{
+  "method": "21x13 first-hit scene rays at each same-azimuth passage; diagnostic sampling, not exhaustive surface coverage",
+  "results": [
+    {
+      "time_s": 117.0,
+      "revolution": 0,
+      "cameras": [
+        {
+          "slot": 1,
+          "target_pixel_fraction": 0.6410256410256411,
+          "blade_pixel_fraction": 0.673992673992674,
+          "desired_span_fraction_among_blade_hits": 0.9510869565217391,
+          "observed_span_quantiles": [
+            3.075012445449829,
+            5.80831241607666,
+            15.887499809265137
+          ],
+          "other": {
+            "WFRL.Terrain": 57,
+            "background": 31,
+            "WFRL.Landscape.ServiceRoad": 1
+          }
+        },
+        {
+          "slot": 2,
+          "target_pixel_fraction": 0.7252747252747253,
+          "blade_pixel_fraction": 0.7802197802197802,
+          "desired_span_fraction_among_blade_hits": 0.9295774647887324,
+          "observed_span_quantiles": [
+            14.862499237060547,
+            19.987499237060547,
+            30.237499237060547
+          ],
+          "other": {
+            "WFRL.Terrain": 60
+          }
+        },
+        {
+          "slot": 3,
+          "target_pixel_fraction": 0.6666666666666666,
+          "blade_pixel_fraction": 0.6959706959706959,
+          "desired_span_fraction_among_blade_hits": 0.9578947368421052,
+          "observed_span_quantiles": [
+            32.287498474121094,
+            37.412498474121094,
+            46.63750076293945
+          ],
+          "other": {
+            "WFRL.Terrain": 83
+          }
+        },
+        {
+          "slot": 4,
+          "target_pixel_fraction": 0.5824175824175825,
+          "blade_pixel_fraction": 0.5824175824175825,
+          "desired_span_fraction_among_blade_hits": 1.0,
+          "observed_span_quantiles": [
+            46.63750076293945,
+            51.677085876464844,
+            59.10831069946289
+          ],
+          "other": {
+            "WFRL.Terrain": 114
+          }
+        }
+      ]
+    },
+    {
+      "time_s": 122.19561170212766,
+      "revolution": 1,
+      "cameras": [
+        {
+          "slot": 1,
+          "target_pixel_fraction": 0.6373626373626373,
+          "blade_pixel_fraction": 0.6703296703296703,
+          "desired_span_fraction_among_blade_hits": 0.9508196721311475,
+          "observed_span_quantiles": [
+            3.075012445449829,
+            5.80831241607666,
+            15.887499809265137
+          ],
+          "other": {
+            "WFRL.Terrain": 60,
+            "background": 29,
+            "WFRL.Landscape.ServiceRoad": 1
+          }
+        },
+        {
+          "slot": 2,
+          "target_pixel_fraction": 0.7142857142857143,
+          "blade_pixel_fraction": 0.7802197802197802,
+          "desired_span_fraction_among_blade_hits": 0.9154929577464789,
+          "observed_span_quantiles": [
+            15.887499809265137,
+            19.987499237060547,
+            31.262500762939453
+          ],
+          "other": {
+            "WFRL.Terrain": 60
+          }
+        },
+        {
+          "slot": 3,
+          "target_pixel_fraction": 0.41025641025641024,
+          "blade_pixel_fraction": 0.5274725274725275,
+          "desired_span_fraction_among_blade_hits": 0.7777777777777778,
+          "observed_span_quantiles": [
+            34.33749771118164,
+            39.974998474121094,
+            54.2396125793457
+          ],
+          "other": {
+            "WFRL.Terrain": 129
+          }
+        },
+        {
+          "slot": 4,
+          "target_pixel_fraction": 0.054945054945054944,
+          "blade_pixel_fraction": 0.054945054945054944,
+          "desired_span_fraction_among_blade_hits": 1.0,
+          "observed_span_quantiles": [
+            56.37501525878906,
+            57.0583381652832,
+            59.960886764526364
+          ],
+          "other": {
+            "WFRL.Terrain": 258
+          }
+        }
+      ]
+    },
+    {
+      "time_s": 127.61858766233766,
+      "revolution": 2,
+      "cameras": [
+        {
+          "slot": 1,
+          "target_pixel_fraction": 0.6373626373626373,
+          "blade_pixel_fraction": 0.6666666666666666,
+          "desired_span_fraction_among_blade_hits": 0.9560439560439561,
+          "observed_span_quantiles": [
+            3.075012445449829,
+            5.80831241607666,
+            15.887499809265137
+          ],
+          "other": {
+            "WFRL.Terrain": 61,
+            "background": 29,
+            "WFRL.Landscape.ServiceRoad": 1
+          }
+        },
+        {
+          "slot": 2,
+          "target_pixel_fraction": 0.7142857142857143,
+          "blade_pixel_fraction": 0.7802197802197802,
+          "desired_span_fraction_among_blade_hits": 0.9154929577464789,
+          "observed_span_quantiles": [
+            15.887499809265137,
+            19.987499237060547,
+            31.262500762939453
+          ],
+          "other": {
+            "WFRL.Terrain": 60
+          }
+        },
+        {
+          "slot": 3,
+          "target_pixel_fraction": 0.41025641025641024,
+          "blade_pixel_fraction": 0.5384615384615384,
+          "desired_span_fraction_among_blade_hits": 0.7619047619047619,
+          "observed_span_quantiles": [
+            33.61999931335449,
+            40.48749923706055,
+            55.691688537597656
+          ],
+          "other": {
+            "WFRL.Terrain": 126
+          }
+        },
+        {
+          "slot": 4,
+          "target_pixel_fraction": 0.0989010989010989,
+          "blade_pixel_fraction": 0.0989010989010989,
+          "desired_span_fraction_among_blade_hits": 1.0,
+          "observed_span_quantiles": [
+            55.00836181640625,
+            57.0583381652832,
+            60.39057540893555
+          ],
+          "other": {
+            "WFRL.Terrain": 246
+          }
+        }
+      ]
+    },
+    {
+      "time_s": 133.18851492537314,
+      "revolution": 3,
+      "cameras": [
+        {
+          "slot": 1,
+          "target_pixel_fraction": 0.6483516483516484,
+          "blade_pixel_fraction": 0.6776556776556777,
+          "desired_span_fraction_among_blade_hits": 0.9567567567567568,
+          "observed_span_quantiles": [
+            3.075012445449829,
+            5.80831241607666,
+            15.887499809265137
+          ],
+          "other": {
+            "WFRL.Terrain": 57,
+            "background": 30,
+            "WFRL.Landscape.ServiceRoad": 1
+          }
+        },
+        {
+          "slot": 2,
+          "target_pixel_fraction": 0.7435897435897436,
+          "blade_pixel_fraction": 0.7875457875457875,
+          "desired_span_fraction_among_blade_hits": 0.9441860465116279,
+          "observed_span_quantiles": [
+            15.887499809265137,
+            19.987499237060547,
+            30.237499237060547
+          ],
+          "other": {
+            "WFRL.Terrain": 58
+          }
+        },
+        {
+          "slot": 3,
+          "target_pixel_fraction": 0.5787545787545788,
+          "blade_pixel_fraction": 0.6593406593406593,
+          "desired_span_fraction_among_blade_hits": 0.8777777777777778,
+          "observed_span_quantiles": [
+            32.287498474121094,
+            38.4375,
+            49.76374797821043
+          ],
+          "other": {
+            "WFRL.Terrain": 93
+          }
+        },
+        {
+          "slot": 4,
+          "target_pixel_fraction": 0.358974358974359,
+          "blade_pixel_fraction": 0.358974358974359,
+          "desired_span_fraction_among_blade_hits": 1.0,
+          "observed_span_quantiles": [
+            48.6875,
+            53.38543701171875,
+            59.79164123535156
+          ],
+          "other": {
+            "WFRL.Terrain": 175
+          }
+        }
+      ]
+    },
+    {
+      "time_s": 138.64094517675255,
+      "revolution": 4,
+      "cameras": [
+        {
+          "slot": 1,
+          "target_pixel_fraction": 0.6483516483516484,
+          "blade_pixel_fraction": 0.6776556776556777,
+          "desired_span_fraction_among_blade_hits": 0.9567567567567568,
+          "observed_span_quantiles": [
+            3.075012445449829,
+            5.80831241607666,
+            15.887499809265137
+          ],
+          "other": {
+            "WFRL.Terrain": 57,
+            "background": 30,
+            "WFRL.Landscape.ServiceRoad": 1
+          }
+        },
+        {
+          "slot": 2,
+          "target_pixel_fraction": 0.7472527472527473,
+          "blade_pixel_fraction": 0.7912087912087912,
+          "desired_span_fraction_among_blade_hits": 0.9444444444444444,
+          "observed_span_quantiles": [
+            15.887499809265137,
+            19.987499237060547,
+            30.237499237060547
+          ],
+          "other": {
+            "WFRL.Terrain": 57
+          }
+        },
+        {
+          "slot": 3,
+          "target_pixel_fraction": 0.5897435897435898,
+          "blade_pixel_fraction": 0.6666666666666666,
+          "desired_span_fraction_among_blade_hits": 0.8846153846153846,
+          "observed_span_quantiles": [
+            32.287498474121094,
+            38.4375,
+            49.661247825622546
+          ],
+          "other": {
+            "WFRL.Terrain": 91
+          }
+        },
+        {
+          "slot": 4,
+          "target_pixel_fraction": 0.3772893772893773,
+          "blade_pixel_fraction": 0.3772893772893773,
+          "desired_span_fraction_among_blade_hits": 1.0,
+          "observed_span_quantiles": [
+            48.6875,
+            52.5312614440918,
+            59.10831069946289
+          ],
+          "other": {
+            "WFRL.Terrain": 170
+          }
+        }
+      ]
+    },
+    {
+      "time_s": 143.95550689259045,
+      "revolution": 5,
+      "cameras": [
+        {
+          "slot": 1,
+          "target_pixel_fraction": 0.6373626373626373,
+          "blade_pixel_fraction": 0.6703296703296703,
+          "desired_span_fraction_among_blade_hits": 0.9508196721311475,
+          "observed_span_quantiles": [
+            3.075012445449829,
+            5.80831241607666,
+            15.887499809265137
+          ],
+          "other": {
+            "WFRL.Terrain": 60,
+            "background": 29,
+            "WFRL.Landscape.ServiceRoad": 1
+          }
+        },
+        {
+          "slot": 2,
+          "target_pixel_fraction": 0.706959706959707,
+          "blade_pixel_fraction": 0.7765567765567766,
+          "desired_span_fraction_among_blade_hits": 0.910377358490566,
+          "observed_span_quantiles": [
+            15.887499809265137,
+            19.987499237060547,
+            31.72374973297118
+          ],
+          "other": {
+            "WFRL.Terrain": 61
+          }
+        },
+        {
+          "slot": 3,
+          "target_pixel_fraction": 0.34798534798534797,
+          "blade_pixel_fraction": 0.4468864468864469,
+          "desired_span_fraction_among_blade_hits": 0.7786885245901639,
+          "observed_span_quantiles": [
+            34.33749771118164,
+            40.48749923706055,
+            54.2396125793457
+          ],
+          "other": {
+            "WFRL.Terrain": 151
+          }
+        },
+        {
+          "slot": 4,
+          "target_pixel_fraction": 0.0,
+          "blade_pixel_fraction": 0.0,
+          "desired_span_fraction_among_blade_hits": 0,
+          "observed_span_quantiles": [],
+          "other": {
+            "WFRL.Terrain": 273
+          }
+        }
+      ]
+    },
+    {
+      "time_s": 149.50963900539244,
+      "revolution": 6,
+      "cameras": [
+        {
+          "slot": 1,
+          "target_pixel_fraction": 0.6483516483516484,
+          "blade_pixel_fraction": 0.6776556776556777,
+          "desired_span_fraction_among_blade_hits": 0.9567567567567568,
+          "observed_span_quantiles": [
+            3.075012445449829,
+            5.80831241607666,
+            15.887499809265137
+          ],
+          "other": {
+            "WFRL.Terrain": 58,
+            "background": 29,
+            "WFRL.Landscape.ServiceRoad": 1
+          }
+        },
+        {
+          "slot": 2,
+          "target_pixel_fraction": 0.7472527472527473,
+          "blade_pixel_fraction": 0.7912087912087912,
+          "desired_span_fraction_among_blade_hits": 0.9444444444444444,
+          "observed_span_quantiles": [
+            15.887499809265137,
+            19.987499237060547,
+            30.237499237060547
+          ],
+          "other": {
+            "WFRL.Terrain": 57
+          }
+        },
+        {
+          "slot": 3,
+          "target_pixel_fraction": 0.6043956043956044,
+          "blade_pixel_fraction": 0.673992673992674,
+          "desired_span_fraction_among_blade_hits": 0.8967391304347826,
+          "observed_span_quantiles": [
+            32.287498474121094,
+            37.412498474121094,
+            49.55874805450439
+          ],
+          "other": {
+            "WFRL.Terrain": 89
+          }
+        },
+        {
+          "slot": 4,
+          "target_pixel_fraction": 0.4139194139194139,
+          "blade_pixel_fraction": 0.4139194139194139,
+          "desired_span_fraction_among_blade_hits": 1.0,
+          "observed_span_quantiles": [
+            48.6875,
+            52.5312614440918,
+            59.946180725097655
+          ],
+          "other": {
+            "WFRL.Terrain": 160
+          }
+        }
+      ]
+    },
+    {
+      "time_s": 154.97714879852126,
+      "revolution": 7,
+      "cameras": [
+        {
+          "slot": 1,
+          "target_pixel_fraction": 0.6483516483516484,
+          "blade_pixel_fraction": 0.6776556776556777,
+          "desired_span_fraction_among_blade_hits": 0.9567567567567568,
+          "observed_span_quantiles": [
+            3.075012445449829,
+            5.80831241607666,
+            15.887499809265137
+          ],
+          "other": {
+            "WFRL.Terrain": 57,
+            "background": 30,
+            "WFRL.Landscape.ServiceRoad": 1
+          }
+        },
+        {
+          "slot": 2,
+          "target_pixel_fraction": 0.7289377289377289,
+          "blade_pixel_fraction": 0.7838827838827839,
+          "desired_span_fraction_among_blade_hits": 0.9299065420560748,
+          "observed_span_quantiles": [
+            15.887499809265137,
+            19.987499237060547,
+            31.262500762939453
+          ],
+          "other": {
+            "WFRL.Terrain": 59
+          }
+        },
+        {
+          "slot": 3,
+          "target_pixel_fraction": 0.48717948717948717,
+          "blade_pixel_fraction": 0.6043956043956044,
+          "desired_span_fraction_among_blade_hits": 0.806060606060606,
+          "observed_span_quantiles": [
+            33.3125,
+            39.46249771118164,
+            52.5312614440918
+          ],
+          "other": {
+            "WFRL.Terrain": 108
+          }
+        },
+        {
+          "slot": 4,
+          "target_pixel_fraction": 0.21245421245421245,
+          "blade_pixel_fraction": 0.21245421245421245,
+          "desired_span_fraction_among_blade_hits": 1.0,
+          "observed_span_quantiles": [
+            51.677085876464844,
+            55.00836181640625,
+            59.79164123535156
+          ],
+          "other": {
+            "WFRL.Terrain": 215
+          }
+        }
+      ]
+    },
+    {
+      "time_s": 160.46883982035928,
+      "revolution": 8,
+      "cameras": [
+        {
+          "slot": 1,
+          "target_pixel_fraction": 0.6483516483516484,
+          "blade_pixel_fraction": 0.6776556776556777,
+          "desired_span_fraction_among_blade_hits": 0.9567567567567568,
+          "observed_span_quantiles": [
+            3.075012445449829,
+            5.80831241607666,
+            15.887499809265137
+          ],
+          "other": {
+            "WFRL.Terrain": 58,
+            "background": 29,
+            "WFRL.Landscape.ServiceRoad": 1
+          }
+        },
+        {
+          "slot": 2,
+          "target_pixel_fraction": 0.7216117216117216,
+          "blade_pixel_fraction": 0.7802197802197802,
+          "desired_span_fraction_among_blade_hits": 0.9248826291079812,
+          "observed_span_quantiles": [
+            15.887499809265137,
+            19.987499237060547,
+            31.262500762939453
+          ],
+          "other": {
+            "WFRL.Terrain": 60
+          }
+        },
+        {
+          "slot": 3,
+          "target_pixel_fraction": 0.4725274725274725,
+          "blade_pixel_fraction": 0.6007326007326007,
+          "desired_span_fraction_among_blade_hits": 0.7865853658536586,
+          "observed_span_quantiles": [
+            33.3125,
+            39.46249771118164,
+            53.257310676574704
+          ],
+          "other": {
+            "WFRL.Terrain": 109
+          }
+        },
+        {
+          "slot": 4,
+          "target_pixel_fraction": 0.18315018315018314,
+          "blade_pixel_fraction": 0.18315018315018314,
+          "desired_span_fraction_among_blade_hits": 1.0,
+          "observed_span_quantiles": [
+            52.5312614440918,
+            55.35002517700195,
+            60.576339149475096
+          ],
+          "other": {
+            "WFRL.Terrain": 223
+          }
+        }
+      ]
+    },
+    {
+      "time_s": 166.06716627288836,
+      "revolution": 9,
+      "cameras": [
+        {
+          "slot": 1,
+          "target_pixel_fraction": 0.6410256410256411,
+          "blade_pixel_fraction": 0.673992673992674,
+          "desired_span_fraction_among_blade_hits": 0.9510869565217391,
+          "observed_span_quantiles": [
+            3.075012445449829,
+            5.80831241607666,
+            15.887499809265137
+          ],
+          "other": {
+            "WFRL.Terrain": 58,
+            "background": 31
+          }
+        },
+        {
+          "slot": 2,
+          "target_pixel_fraction": 0.7362637362637363,
+          "blade_pixel_fraction": 0.7912087912087912,
+          "desired_span_fraction_among_blade_hits": 0.9305555555555556,
+          "observed_span_quantiles": [
+            14.862499237060547,
+            19.987499237060547,
+            30.237499237060547
+          ],
+          "other": {
+            "WFRL.Terrain": 57
+          }
+        },
+        {
+          "slot": 3,
+          "target_pixel_fraction": 0.6996336996336996,
+          "blade_pixel_fraction": 0.7142857142857143,
+          "desired_span_fraction_among_blade_hits": 0.9794871794871794,
+          "observed_span_quantiles": [
+            31.262500762939453,
+            37.412498474121094,
+            46.63750076293945
+          ],
+          "other": {
+            "WFRL.Terrain": 78
+          }
+        },
+        {
+          "slot": 4,
+          "target_pixel_fraction": 0.5860805860805861,
+          "blade_pixel_fraction": 0.6043956043956044,
+          "desired_span_fraction_among_blade_hits": 0.9696969696969697,
+          "observed_span_quantiles": [
+            46.63750076293945,
+            51.677085876464844,
+            59.10831069946289
+          ],
+          "other": {
+            "WFRL.Terrain": 108
+          }
+        }
+      ]
+    },
+    {
+      "time_s": 171.45727009744215,
+      "revolution": 10,
+      "cameras": [
+        {
+          "slot": 1,
+          "target_pixel_fraction": 0.6410256410256411,
+          "blade_pixel_fraction": 0.6703296703296703,
+          "desired_span_fraction_among_blade_hits": 0.9562841530054644,
+          "observed_span_quantiles": [
+            3.075012445449829,
+            5.80831241607666,
+            15.887499809265137
+          ],
+          "other": {
+            "WFRL.Terrain": 60,
+            "background": 30
+          }
+        },
+        {
+          "slot": 2,
+          "target_pixel_fraction": 0.7326007326007326,
+          "blade_pixel_fraction": 0.7765567765567766,
+          "desired_span_fraction_among_blade_hits": 0.9433962264150944,
+          "observed_span_quantiles": [
+            15.887499809265137,
+            19.987499237060547,
+            31.262500762939453
+          ],
+          "other": {
+            "WFRL.Terrain": 61
+          }
+        },
+        {
+          "slot": 3,
+          "target_pixel_fraction": 0.5384615384615384,
+          "blade_pixel_fraction": 0.6373626373626373,
+          "desired_span_fraction_among_blade_hits": 0.8448275862068966,
+          "observed_span_quantiles": [
+            32.95374946594238,
+            38.4375,
+            50.73750305175781
+          ],
+          "other": {
+            "WFRL.Terrain": 99
+          }
+        },
+        {
+          "slot": 4,
+          "target_pixel_fraction": 0.29304029304029305,
+          "blade_pixel_fraction": 0.29304029304029305,
+          "desired_span_fraction_among_blade_hits": 1.0,
+          "observed_span_quantiles": [
+            50.73750305175781,
+            53.81252479553223,
+            60.529788970947266
+          ],
+          "other": {
+            "WFRL.Terrain": 193
+          }
+        }
+      ]
+    },
+    {
+      "time_s": 176.9303835900474,
+      "revolution": 11,
+      "cameras": [
+        {
+          "slot": 1,
+          "target_pixel_fraction": 0.6410256410256411,
+          "blade_pixel_fraction": 0.6703296703296703,
+          "desired_span_fraction_among_blade_hits": 0.9562841530054644,
+          "observed_span_quantiles": [
+            3.075012445449829,
+            5.80831241607666,
+            15.887499809265137
+          ],
+          "other": {
+            "WFRL.Terrain": 60,
+            "background": 30
+          }
+        },
+        {
+          "slot": 2,
+          "target_pixel_fraction": 0.73992673992674,
+          "blade_pixel_fraction": 0.7875457875457875,
+          "desired_span_fraction_among_blade_hits": 0.9395348837209302,
+          "observed_span_quantiles": [
+            15.887499809265137,
+            19.987499237060547,
+            30.237499237060547
+          ],
+          "other": {
+            "WFRL.Terrain": 58
+          }
+        },
+        {
+          "slot": 3,
+          "target_pixel_fraction": 0.5677655677655677,
+          "blade_pixel_fraction": 0.652014652014652,
+          "desired_span_fraction_among_blade_hits": 0.8707865168539326,
+          "observed_span_quantiles": [
+            32.287498474121094,
+            38.4375,
+            49.86624851226807
+          ],
+          "other": {
+            "WFRL.Terrain": 95
+          }
+        },
+        {
+          "slot": 4,
+          "target_pixel_fraction": 0.3553113553113553,
+          "blade_pixel_fraction": 0.3553113553113553,
+          "desired_span_fraction_among_blade_hits": 1.0,
+          "observed_span_quantiles": [
+            49.71249771118164,
+            53.38543701171875,
+            60.28490371704101
+          ],
+          "other": {
+            "WFRL.Terrain": 176
+          }
+        }
+      ]
+    }
+  ]
+}

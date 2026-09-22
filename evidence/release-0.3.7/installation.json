@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.release_test.wfrl_blender",
+  "directory": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-037-e3oweiqo/extensions/release_test/wfrl_blender",
+  "version": "0.3.7",
+  "verified_files": 97,
+  "config": "isolated temporary preferences; user installation unchanged"
+}

@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wfrl"
+version = "0.3.0"
+description = "Multi-agent RL for wind farm wake-steering control on the WFCRL benchmark (FLORIS + FAST.Farm)"
+requires-python = ">=3.11"
+
+# 运行依赖按功能分组，避免在不需要训练或 GUI 的环境中强制安装大型组件。
+dependencies = []
+
+[project.optional-dependencies]
+train = [
+    "torch>=2.2,<3",
+    "psutil>=5.9,<8",
+    "stable-baselines3==2.3.2",
+    "tensorboard>=2.14",
+]
+gui = [
+    "pyvista>=0.43",
+    "pyvistaqt>=0.11",
+    "qtpy>=2.4",
+    "PySide6>=6.6",
+]
+all = [
+    "torch>=2.2,<3",
+    "psutil>=5.9,<8",
+    "stable-baselines3==2.3.2",
+    "tensorboard>=2.14",
+    "pyvista>=0.43",
+    "pyvistaqt>=0.11",
+    "qtpy>=2.4",
+    "PySide6>=6.6",
+]
+
+[tool.setuptools]
+packages = {find = {include = ["wfrl*"]}}

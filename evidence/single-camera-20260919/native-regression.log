@@ -1,0 +1,39 @@
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/camera_video_regression.py", line 101, in <module>
+    first = video.render_package(args)
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/camera_video.py", line 264, in render_package
+    return _render_package(args)
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/camera_video.py", line 281, in _render_package
+    scene, camera, active, hidden = prepare_scene(args)
+                                    ~~~~~~~~~~~~~^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/camera_video.py", line 136, in prepare_scene
+    wfrl_blender.register()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py", line 130, in register
+    previous()
+    ~~~~~~~~^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py", line 208, in cleanup
+    clearance_replay.unregister()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/clearance_replay.py", line 207, in unregister
+    tip_tracking.unregister()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/tip_tracking.py", line 376, in unregister
+    trail.disable('addon_unload')
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/tip_tracking.py", line 200, in disable
+    self.clear(reason)
+    ~~~~~~~~~~^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/tip_tracking.py", line 190, in clear
+    self._clear_curve(obj)
+    ~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/tip_tracking.py", line 183, in _clear_curve
+    obj.data.splines.clear()
+    ^^^^^^^^
+ReferenceError: StructRNA of type Object has been removed
+
+Error: script failed, file: 'blender_frontend/tests/blender/camera_video_regression.py', exiting.
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

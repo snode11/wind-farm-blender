@@ -1,0 +1,53 @@
+{
+  "status": "passed",
+  "scope": "128x72 synthetic 60s 20FPS local transport only",
+  "duration_s": 1830.5898242080584,
+  "matched_and_decoded_frames": 36000,
+  "reconnect_batches": 30,
+  "observed_cycles": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30
+  ],
+  "errors": [],
+  "server_rss_kib_min": 14816,
+  "server_rss_kib_max": 38384,
+  "server_rss_after_10min_range_kib": [
+    14816,
+    34064
+  ],
+  "client_peak_rss_bytes": 48955392,
+  "checkpoint_wall_vs_media_residual_s_range": [
+    -0.030529750045388937,
+    0.08671412500552833
+  ],
+  "timing_limitation": "Residual includes decoder/probe scheduling; not a packet-level jitter measurement. Reconnect gaps are intentional. No 4K/LAN/large-client-count claim."
+}

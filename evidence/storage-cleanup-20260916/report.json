@@ -1,0 +1,25 @@
+{
+  "time": "2026-09-16T13:26:39.259585+08:00",
+  "retained_source_count": 21618,
+  "retained_hashes_verified": true,
+  "source_manifest_sha256": "6bab7c22075490011de9daaf262dae2437c07afcb69711f1b4de03480f84e3aa",
+  "deleted": [
+    {
+      "path": "results/lidar/raw/normal-v1/FarmInputs/vtk",
+      "files": 17287,
+      "allocated_bytes": 9641074688
+    },
+    {
+      "path": "results/lidar/raw/close-v1/FarmInputs/vtk",
+      "files": 17287,
+      "allocated_bytes": 9641074688
+    },
+    {
+      "path": "__simul__/fastfarm/FastFarm__208s__3T_1789489620.102902/FarmInputs/vtk",
+      "selection": "files not referenced by source-surfaces.json",
+      "files": 110163,
+      "allocated_bytes": 50563940352
+    }
+  ],
+  "retained_allocated_bytes": 22933757952
+}

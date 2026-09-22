@@ -113,7 +113,7 @@ def draw_views(layout, context):
 
 
 def draw_turbine_views(layout, scene):
-    """Keep the three Down buttons, plus one mounted-camera entry."""
+    """Keep Down views and two directions on the same mounted camera."""
     row = layout.row(align=True)
     for tid in farm_flex._ACTIVE.readers:
         op = row.operator('wfrl.farm_flex_view', text=tid + ' Down')
@@ -123,7 +123,9 @@ def draw_turbine_views(layout, scene):
     op = row.operator('wfrl.farm_flex_view', text='机舱相机', icon='CAMERA_DATA')
     op.turbine = scene.get('wfrl_clearance_turbine', 'T1')
     op.angle = 'NACELLE'
-    row.label(text=op.turbine)
+    op = row.operator('wfrl.farm_flex_view', text='侧下视角', icon='VIEW_CAMERA')
+    op.turbine = scene.get('wfrl_clearance_turbine', 'T1')
+    op.angle = 'NACELLE_SIDE'
     if scene.wfrl_gimbal_kind == 'NACELLE':
         from . import gimbal
         row = layout.row(align=True)
@@ -217,6 +219,9 @@ def draw(layout, context):
     elif scene.wfrl_farm_panel_page == 'RADAR':
         draw_turbine_views(layout, scene)
         draw_radar(layout, scene, value)
+    elif scene.wfrl_farm_panel_page == 'VIDEO':
+        from . import video_output
+        video_output.draw(layout, context)
     else:
         draw_tools(layout, context)
 
@@ -255,7 +260,7 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
     bl_idname='wfrl.farm_flex_view'
     bl_label='查看机组'
     turbine:bpy.props.StringProperty(default='T1')
-    angle:bpy.props.EnumProperty(items=[('DOWN','Down 演示视角',''),('NACELLE','机舱云台',''),('FRONT','侧前方','')],default='DOWN')
+    angle:bpy.props.EnumProperty(items=[('DOWN','Down 演示视角',''),('NACELLE','机舱云台',''),('NACELLE_SIDE','侧下视角','原位转向叶轮侧下方，使用同一台机舱相机'),('FRONT','侧前方','')],default='DOWN')
     @classmethod
     def poll(cls, context):
         return farm_flex.is_active(context.scene)
@@ -265,6 +270,7 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
         preview=farm_flex._ACTIVE
         from .. import tip_tracking
         from ..cameras import ensure_gimbal, ensure_nacelle_gimbal, down_gimbal, fill_camera_view
+        from ..cameras import nacelle_side_view, restore_nacelle_view
         front_camera=scene.objects['WFRL.Camera.T1.FrontQuarter']
         from . import gimbal
         if gimbal._ACTIVE:
@@ -272,6 +278,8 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
         if self.turbine != 'all' and self.turbine not in preview.readers:
             self.report({'WARNING'}, '该数据包未包含此机组')
             return {'CANCELLED'}
+        from .custom_cameras import dismiss_for_view_switch
+        dismiss_for_view_switch(scene)
         preview.visible_turbines=set(range(len(preview.readers))) if self.turbine=='all' else {int(self.turbine[1:])-1}
         preview.cache.clear()
         # Hidden turbines need no mesh uploads. Switching to overview samples
@@ -285,7 +293,7 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
             camera=scene.objects['WFRL.Camera.FarmFlexOverview']
         else:
             scene['wfrl_clearance_turbine']=self.turbine
-            scene.wfrl_gimbal_kind = 'NACELLE' if self.angle == 'NACELLE' else 'DEMO'
+            scene.wfrl_gimbal_kind = 'NACELLE' if self.angle in {'NACELLE', 'NACELLE_SIDE'} else 'DEMO'
             scene.wfrl_gimbal_turbine=self.turbine
             clearance_replay._READERS[scene.as_pointer()]=preview.readers[self.turbine]
             trail=tip_tracking.active(scene)
@@ -293,8 +301,12 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
                 tip_tracking.disable(scene,'turbine_change')
             if self.turbine=='T1' and self.angle=='FRONT':
                 camera=front_camera
-            elif self.angle=='NACELLE':
+            elif self.angle in {'NACELLE', 'NACELLE_SIDE'}:
                 camera=ensure_nacelle_gimbal(scene,self.turbine)
+                if self.angle == 'NACELLE_SIDE':
+                    nacelle_side_view(camera)
+                else:
+                    restore_nacelle_view(camera)
             else:
                 camera=ensure_gimbal(scene,self.turbine);down_gimbal(camera)
         scene.camera=camera;scene['wfrl_camera']=camera.name

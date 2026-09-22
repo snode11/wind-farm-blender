@@ -1,0 +1,14 @@
+{
+  "launcher_pid": 6138,
+  "process_group_id": 6138,
+  "command": [
+    "/usr/bin/caffeinate",
+    "-i",
+    "/tmp/wfrl-tip-preview-venv/bin/python",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-video-20260919/full_render_job.py"
+  ],
+  "started_utc": "2026-09-19T14:12:01.920217+00:00",
+  "log": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-video-20260919/full-render.log",
+  "status_file": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/camera-video-20260919/full-render-status.json",
+  "keep_awake": "temporary idle-system-sleep assertion tied to the render process; no persistent setting change"
+}

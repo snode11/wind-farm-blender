@@ -1,0 +1,7 @@
+00:06.453  blend            | Read blend: "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/tmp15935jyi/tower.blend"
+Info: Saved as "tower.blend"
+TOWER_FLEX_PASS {"status": "PASS", "base_max_error_m": 4.8467614016778965e-27, "radar_mount_max_error_m": 2.0442864485483105e-05, "sampled_tip_max_error_m": [0.00026571048810497544, 6.913542667041916e-05], "seeking": true, "views": true, "clock": true, "reload": true}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 700, total unfreed memory 0.051880 MB

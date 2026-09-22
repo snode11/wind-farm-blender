@@ -1,0 +1,6 @@
+FARM_FLEX_READY
+TIP_FADE_PASS {"status": "PASS", "blender": "5.2.1 LTS", "lifetime_s": 1.5, "interval_s": 0.025, "max_points": 62, "fade_levels": 32, "ten_loop_counts": [[36, 36, 36], [60, 60, 60], [61, 61, 61], [61, 61, 61], [23, 23, 23], [36, 36, 36], [60, 60, 60], [61, 61, 61], [61, 61, 61], [23, 23, 23]], "resources_before": [2729, 179, 141], "resources_after": [2729, 179, 141], "sampler_p95_ms": 0.3374205785803496, "load_s": 6.105408750008792, "boundary": "Native background checks; timings isolate sampler; window FPS and RSS separate"}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

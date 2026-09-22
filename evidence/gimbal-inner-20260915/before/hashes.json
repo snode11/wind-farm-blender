@@ -1,0 +1,7 @@
+{
+  "blender_frontend/wfrl_blender/cameras.py": "916ea17775ee2e2a20403d32dd2466d561a8ab1d55002a9a3cf80b1885430315",
+  "blender_frontend/wfrl_blender/materials.py": "06aa8eb1c28b269bc5eca45496bffd5cd98a73ff22d77f829f7394fabf652f88",
+  "blender_frontend/wfrl_blender/scene_builder.py": "469749bf6ee2c27cdfd8788cffb0dc7a2795ce35f798c95987724af48b635a75",
+  "blender_frontend/wfrl_blender/panels/gimbal.py": "038f205367fbbaf894e1b3894e1c137d49eb8c6d00cd61ccc185588d53c612c7",
+  "README.md": "08e2891d2a27e62685c08efb0564f4f526817ba627f791504172a5449c81ffee"
+}

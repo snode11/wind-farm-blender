@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "installed_module": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "export_bytes_match": true,
+  "source_sha256": "a7bc1f43f28656b97e1e09293c4183f4bc9f4dfa435fe7e53d301ab0e0a8796c",
+  "actual_rtsp_recordings_decoded": [
+    40,
+    20
+  ],
+  "reconnect": true,
+  "stop_owned_processes": true,
+  "stop_on_file_load": true,
+  "camera_and_replay_unchanged": true,
+  "other_frontend_operators_registered": true,
+  "windows_runtime_verified": false,
+  "gui_rtsp_and_clipboard": true,
+  "gui_ffmpeg_decode_frames": 20,
+  "local_version": "0.3.6",
+  "published": false,
+  "installed_files_match_archive": 88,
+  "archive_sha256": "c599bd061db7b251f1663c45056facbc2158360eb7339d563d0938f2f850ea17"
+}

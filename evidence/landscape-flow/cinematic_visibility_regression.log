@@ -1,0 +1,6 @@
+CINEMATIC_VISIBILITY_REGRESSION=PASS
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/cinematic_visibility_regression.py:18: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  legacy.use_nodes = True

@@ -1,0 +1,6 @@
+FARM_FLEX_READY
+PERFORMANCE {'schema': 'wfrl.replay-performance.v1', 'package': '/Users/eason/Desktop/wfcrl/wind farm RL/results/prebend-20260918/farm-C', 'load_s': 4.918991999933496, 'p95_frame_ms': 82.40661296295002, 'median_frame_ms': 78.03808350581676, 'rss_growth_mib': 7.25, 'loops': [{'resources': [2721, 173, 141], 'peak_rss_mib': 666.90625}, {'resources': [2721, 173, 141], 'peak_rss_mib': 667.859375}, {'resources': [2721, 173, 141], 'peak_rss_mib': 668.59375}, {'resources': [2721, 173, 141], 'peak_rss_mib': 668.734375}, {'resources': [2721, 173, 141], 'peak_rss_mib': 669.296875}, {'resources': [2721, 173, 141], 'peak_rss_mib': 670.328125}, {'resources': [2721, 173, 141], 'peak_rss_mib': 670.953125}, {'resources': [2721, 173, 141], 'peak_rss_mib': 671.8125}, {'resources': [2721, 173, 141], 'peak_rss_mib': 672.640625}, {'resources': [2721, 173, 141], 'peak_rss_mib': 673.375}], 'frames_per_loop': 118, 'scope': 'Native background frame updates at 31/60 simulation-second spacing (both saved and interpolated frames); skipped frames intentional; not viewport FPS; dense trail sampling tested separately'}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

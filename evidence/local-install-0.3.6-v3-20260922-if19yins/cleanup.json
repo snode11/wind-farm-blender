@@ -1,0 +1,21 @@
+{
+  "failed_archive_sha256": "929e0fb8e1769e39bab1a6359d70261e39493a12f91417c6b8076bb3c294ef3f",
+  "removed_task_directories": [
+    "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-install-v3-dl5f09l8",
+    "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-install-v3-fixed-yhd3_dau"
+  ],
+  "includes": [
+    "failed ZIP and sidecars",
+    "failed extracted install",
+    "superseded old 0.3.6 installation backup",
+    "temporary build copies and test config/recovery files"
+  ],
+  "retained": [
+    "current dist 0.3.6 ZIP/checksum/inventory",
+    "active verified installation",
+    "source and regression tests",
+    "all archived evidence",
+    "historical 0.3.3–0.3.5 distribution artifacts"
+  ],
+  "verified_removed": true
+}

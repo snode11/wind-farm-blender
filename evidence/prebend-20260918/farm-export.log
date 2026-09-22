@@ -1,0 +1,22 @@
+T1 117.0 exported
+T1 127.0 exported
+T1 137.0 exported
+T1 147.0 exported
+T1 157.0 exported
+T1 167.0 exported
+T1 177.0 exported
+T2 117.0 exported
+T2 127.0 exported
+T2 137.0 exported
+T2 147.0 exported
+T2 157.0 exported
+T2 167.0 exported
+T2 177.0 exported
+T3 117.0 exported
+T3 127.0 exported
+T3 137.0 exported
+T3 147.0 exported
+T3 157.0 exported
+T3 167.0 exported
+T3 177.0 exported
+FARM_FLEX_EXPORTED {"schema": "wfrl.farm-flex-review.v3", "status": "REVIEW_ONLY", "source": "FAST.Farm", "segment": {"start_s": 117.0, "end_s": 177.0}, "turbine_ids": ["T1", "T2", "T3"], "layout_m": [[0, 0, 0], [504, 0, 0], [1008, 0, 0]], "source_fps": 40, "reference_frame": "independent zero-load stationary solve", "includes_rigid_motion": true, "max_surface_fit_error_m": 1.7429151802811365e-05, "discrete_collision_certificates": 21609, "replay": {"threshold_m": 7.0, "hysteresis_m": 0.1, "max_hold_s": 5.0, "passage_margin": 1.25}, "policy": {"checkpoint": "mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt", "sha256": "27c8c5855b2f6b2dca939258c8bf0ce3ac653359071727dabc6f08c0aeacaa61", "environment": "Dec_Turb3_Row1_Fastfarm", "turbine_order": ["T1", "T2", "T3"], "obs_keys": ["yaw", "wind_speed", "wind_direction"], "obs_mean": [-1.0596270561218262, 5.895106792449951, 269.99871826171875], "obs_var": [0.48155131936073303, 2.213332176208496, 0.3037745952606201], "controls": ["yaw"], "inference": "deterministic Normal.mean; stored normalization, no refit", "action_unit": "yaw increment degrees per control step"}, "controller_sha256": "3a17b3aa8f0d21b25be2c1783c4fafdbe492def504b0c043015905786ebcc75a", "wind_sha256": "59839da1edc54825468cb91428104fc6491c88d4ef969fc45b8ab87134cfc2f2", "calibration": {"origin_m": [-2.0, 0.0, 87.6], "beam_directions": [[-0.11233611576153554, 0.0, -0.9936702657801585], [-0.14780941112961063, 0.0, -0.9890158633619168], [-0.18292192244763159, 0.0, -0.983127443563683]], "frame": "nacelle material frame at rest; transported by solver NacelleSurface rotation and translation"}, "validation": "discrete surfaces only; no temporal/span refinement certification", "diagnostic_only": false, "controller_validation": [{"turbine_id": "T1", "rpm_range": [10.5592155, 12.0044966], "pitch_deg_range": [2.36326361, 9.70891762], "final_actual_yaw_deg": 2.49398446, "finite": true, "pitch_tolerance_deg": 0.05, "passed": true}, {"turbine_id": "T2", "rpm_range": [10.2223043, 11.4516554], "pitch_deg_range": [-8.54933051e-12, 6.46945906], "final_actual_yaw_deg": -4.40895271, "finite": true, "pitch_tolerance_deg": 0.05, "passed": true}, {"turbine_id": "T3", "rpm_range": [8.54828644, 10.8680611], "pitch_deg_range": [0.0, 0.0], "final_actual_yaw_deg": 1.37149441, "finite": true, "pitch_tolerance_deg": 0.05, "passed": true}], "files": {"geometry.npz": "289abea277d8a4954836b53bc06a1afcc41d8098a6fabe99f74c7f2ebe4ebac1", "data.json": "11088f05a90a81bac2b4ab964d837b942ee20b07984147c79c688e6fae9c14cf", "source-surfaces.json": "e6d0d7cca5ab490c8b54959e00e788f47e191837409e25fdc058bb83e39d4e60", "tower-motion.npz": "a8450e914a052d1a79b50bc380023655bf97332c2776c3e8eceb37d2bcc80b86", "blade-reference.json": "a3fb99709cdeb689917675d210defb434a37e3211838f047af23c69e3a292212", "source-run.json": "72a318730cb5423ab7773712a775486e08e1caaeb0f72d27bdd07aab5117fbb5", "reference-surfaces.npz": "bb765f868976fa193d2870a32638f2d4e18478fea9cf04da6b259406b33211f6", "deflection-t1.json": "08f7950203164b9a726b35a4d234d8cdc551590ddc900092daafb6fe01d97f61", "telemetry.json": "14bb1f2d074576fae9cfceaa20b2e8898fcf6c94d50c1501b719941af2a0da32", "interface-audit.json": "6df8a95131b0660937551a3007f1582a2627a223fcc76e6b4908c4f4478b2e10"}, "tower_model": "elastodyn-flexible", "max_support_fit_error_m": 1.561058366108594e-05, "clearance_definition": "Terminal contour surface minimum to same-global-height moving tower section; not whole-blade minimum", "estimator_boundary": "Fixed calibrated slant-range formula retained; tower bending is NOT compensated in the estimate; error is against moving-tower truth", "structural_module": "BeamDyn", "model": "NREL 5MW upwind prebend derivative", "provenance_label": "\u57fa\u4e8e NREL 5MW \u7684\u9884\u5f2f\u6539\u578b \u00b7 BeamDyn \u00b7 MAPPO \u504f\u822a \u00b7 \u968f\u673a\u9635\u98ce \u00b7 \u4eff\u771f\u56de\u653e", "max_component_error_m": 0.0023302667236249075, "measurement_window_deg": 3, "diagnostic_window_deg": 15}

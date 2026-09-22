@@ -1,0 +1,21 @@
+{
+  "source": "wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/DISCON.F90",
+  "source_sha256": "08adf5d58d8af82c3083ccb00c9a7fba5c1772b2f7426458bff056f2a52e48e1",
+  "patched_sha256": "3dd6a9c2c87d848dbfd75c13d9c5b6ed2ee02664ee6be0c7aaa7dced161d7e23",
+  "binary_sha256": "91ea022200de370b2827568cf268f87afc24dde47ddf305468b8e559e218a559",
+  "command": [
+    "gfortran",
+    "-dynamiclib",
+    "-ffree-line-length-none",
+    "-fdefault-real-8",
+    "-fcheck=all",
+    "-DIMPLICIT_DLLEXPORT",
+    "-O3",
+    "-fPIC",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/flex-mappo/controller-v5/DISCON.F90",
+    "-o",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/flex-mappo/controller-v5/DISCON.dll"
+  ],
+  "rotor_target_rpm": 10.8,
+  "change": "Restore native pitch; pitch command slew 8 deg/s; yaw command rate 0.3 deg/s; explicit rotor target"
+}

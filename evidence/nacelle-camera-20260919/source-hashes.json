@@ -1,0 +1,8 @@
+{
+  "blender_frontend/wfrl_blender/cameras.py": "e95068bca3d0d2184dbe82dd3526b8b138f1830bee277f001076f96165877f41",
+  "blender_frontend/wfrl_blender/panels/gimbal.py": "a478eb1566e12f50a29072d3dfe26579f49446f4c74704c4fa0fb3f5980d9d6b",
+  "blender_frontend/wfrl_blender/panels/farm_replay.py": "5be8bd08af97f6eb65cce593c017f8c4f104e4aab5a75b005e2390320fe7d1cc",
+  "blender_frontend/wfrl_blender/clearance_replay.py": "f6f12a87af74a3b279511e6c425bd28df8f004a100461ae817c5c57c7dcbd4bf",
+  "blender_frontend/wfrl_blender/assets/mappo/manifest.json": "aeeecd7258d7f5ba2e85754c69b7bf8aa9c423cad558afc0dcdf99bbb6736124",
+  "scripts/blender/open_nacelle_camera.py": "e35307ad27de92d50358e7cf307b1f15c3f0f15bce0e8719021f4f7c20761865"
+}

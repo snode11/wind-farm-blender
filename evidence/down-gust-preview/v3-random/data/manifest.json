@@ -1,0 +1,110 @@
+{
+  "schema": "wfrl.flex-review.v1",
+  "status": "REVIEW_ONLY",
+  "source": "FAST.Farm",
+  "run_id": "down-random-gust-v3",
+  "turbine_id": "T1",
+  "source_run": "/Users/eason/Desktop/wfcrl/wind farm RL/results/lidar/raw/down-random-gust-v3",
+  "segment": {
+    "start_s": 18,
+    "end_s": 40
+  },
+  "replay": {
+    "threshold_m": 7.0,
+    "hysteresis_m": 0.1,
+    "max_hold_s": 5.0,
+    "passage_margin": 1.25
+  },
+  "calibration": {
+    "origin_m": [
+      -2.0,
+      0.0,
+      87.6
+    ],
+    "beam_directions": [
+      [
+        -0.11233611576153554,
+        0.0,
+        -0.9936702657801585
+      ],
+      [
+        -0.14780941112961063,
+        0.0,
+        -0.9890158633619168
+      ],
+      [
+        -0.18292192244763159,
+        0.0,
+        -0.983127443563683
+      ]
+    ],
+    "angles_deg": [
+      6.45,
+      8.5,
+      10.54
+    ],
+    "y_lidar_m": 2.0,
+    "r_tip_m": 2.67,
+    "min_range_m": 5.0,
+    "max_range_m": 100.0
+  },
+  "wind_profile": {
+    "kind": "TurbSim_IECKAI_plus_seeded_gusts",
+    "mean_wind_mps": 14.0,
+    "target_ti": 0.18,
+    "seed": 20260915,
+    "gust_seed": 20260916,
+    "events": [
+      {
+        "start_s": 19.29640780420095,
+        "duration_s": 2.9959687092733294,
+        "increment_mps": 5.005307567924615
+      },
+      {
+        "start_s": 26.602255396998267,
+        "duration_s": 2.5061717725149277,
+        "increment_mps": 5.332446170696544
+      },
+      {
+        "start_s": 32.786668551093456,
+        "duration_s": 3.4570364840732717,
+        "increment_mps": 5.037324475486226
+      }
+    ],
+    "gust_increment_range_mps": [
+      4,
+      6
+    ],
+    "gust_peak_envelope_mps": [
+      18,
+      20
+    ],
+    "gust_duration_range_s": [
+      2,
+      5
+    ],
+    "background_hub_mean_mps": 13.9986840860919,
+    "background_hub_ti": 0.1800169204835255,
+    "background_scale_factor": 1.130339062711106,
+    "bts_quantization_max_mps": 0.0005321046731516788,
+    "bts_time_offset_at_x0_s": 7.678014206774868,
+    "full_field_speed_range_mps": [
+      -5.915364465944984,
+      28.95614002147969
+    ],
+    "grid_spacing_m": [
+      10,
+      10
+    ],
+    "evidence_boundary": "stochastic Kaimal background plus prescribed seeded coherent pulses; no IEC certification, field measurement or MAPPO; fixed rpm and pitch; gust envelope is not instantaneous cap"
+  },
+  "validation": "source completion and discrete collision checks only; no refinement comparison",
+  "raw_sources": {
+    "run_config.json": "e66741aee58bc7e54a2cd537056f5189502316ecd7f88d536630f8e97deb6265",
+    "processed.json": "0f1170950eb04a0052121e6b5ebb7b4500e3d678435c4584426f325c675210da",
+    "exit_status.json": "0e1fd841c2fedb9fa28a8519a51a2bb559d1e3fba8a8d71985993f04c617ff8a",
+    "solver.log": "e41b29f17d27159924b506ab532ff3737c496f6f838e64ce46d97eb1b5dbc043",
+    "surface_hashes.json": "570105d0f3a14134c1c216c8f5a68e84d5b82778f03b6ff89ff9085dac6d0e24"
+  },
+  "data_sha256": "4bca65adf339741761a66fc90ace0b87f76d2bf8a2eb6ac4dc82061acfefdffa"
+}

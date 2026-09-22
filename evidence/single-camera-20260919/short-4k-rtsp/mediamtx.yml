@@ -1,0 +1,14 @@
+logLevel: info
+rtspAddress: 127.0.0.1:28554
+rtspTransports: [tcp]
+rtmp: no
+hls: no
+webrtc: no
+srt: no
+moq: no
+api: no
+metrics: no
+pprof: no
+paths:
+  windfarm/camera1:
+    source: publisher

@@ -1,0 +1,12 @@
+{
+  "schema": "wfrl.section-transforms.preview.v1",
+  "source": "FAST.Farm",
+  "run_id": "down-random-gust-v3",
+  "turbine_id": "T1",
+  "package_manifest_sha256": "40c2b8aaa3676bcaaeafdd4ea56a689fd30365621b77d30cd9d7f7eb1ac4acb6",
+  "reference_frame": 0,
+  "includes_rigid_motion": true,
+  "source_fps": 80,
+  "max_surface_fit_error_m": 1.686805829365535e-05,
+  "scope": "single turbine fixed yaw/pitch archive; no policy inference; true amplitude"
+}

@@ -1,0 +1,37 @@
+{
+  "schema": "wfrl.camera-video-loop.v1",
+  "status": "REVIEW_ONLY",
+  "description": "基于仿真数据的单风机相机视频；原始片段重复播放",
+  "source_dataset_id": "0749d9bae79bedcab60f30bf70d4e4e4bb6e07b6a3b738a035917aeee92a9d96",
+  "source_repeat_count": 5,
+  "source_package_verified_at_creation": true,
+  "lossless_render_masters": "retained in original base package; no new rendering",
+  "frame_count": 100,
+  "fps": 20,
+  "time_base": "1/20",
+  "width": 3840,
+  "height": 2160,
+  "time_contract": {
+    "fps": 20,
+    "frame_count": 100,
+    "duration_s": 5.0,
+    "source_frame_count": 20,
+    "source_duration_s": 1.0,
+    "mapping": "source_frame_id = frame_id % source_frame_count; source_cycle_id = frame_id // source_frame_count",
+    "simulation_time": "repeats source segment; not continuous new physics"
+  },
+  "rtsp_cycle_semantics": "cycle_id counts the entire derived file; source_cycle_id is inside frame_data",
+  "encoding": "exact H.264 access-unit repetition, no transcoding",
+  "files": {
+    "video.mp4": "dc47b1da95cbc9e13100d1f697359e8c8f8c15a9773407a65940bdad877e1430",
+    "frames.csv": "d952b5869d5b023188760ece012b9346db68f567b6c97dbed9f7c6796aa71449",
+    "frame_geometry.npz": "1b41463e774e79bf941a397ae85043de71fe67f01d7d2ce5486db233976146d6",
+    "camera.json": "bf0a76f6054745750b3aa467275ff8ad83d3ff545aa3cfa0ab07c4f5dab30713",
+    "source/manifest.json": "1882441b21387d6ffa112166740636d8e6f17f1be426539993d5d9b9b9082222",
+    "source/video.mp4": "d353ffb36f939f4f996763f7bc9da65d6666e09b8bab64b5a94b33fb835a3036",
+    "source/frames.csv": "09b26279aa14ed911a864b41dacd45aa1a7366cd9f3dba80da67ac53f0debf49",
+    "source/frame_geometry.npz": "25939a38da809d8cb3a3d6e17276396d36c1de219ebef8b016b59b45211c6a1a",
+    "source/camera.json": "bf0a76f6054745750b3aa467275ff8ad83d3ff545aa3cfa0ab07c4f5dab30713"
+  },
+  "dataset_id": "0f1648750b7a20f7c473ee67ca2b8aeae77dafe4493d8f38838066cace26e852"
+}

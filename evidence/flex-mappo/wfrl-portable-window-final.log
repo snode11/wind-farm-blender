@@ -1,0 +1,7 @@
+FARM_FLEX_READY
+PORTABLE_WINDOW_CHECK True [{'view': 'Down', 'wall_seconds': 12.061146083055064, 'updates': 335, 'update_fps': 27.77513825743707, 'simulation_seconds_advanced': 11.9, 'scope': 'actual-window timeline updates; GPU presentation FPS not directly measured'}, {'view': 'Overview', 'wall_seconds': 12.074334708973765, 'updates': 377, 'update_fps': 31.223252385061834, 'simulation_seconds_advanced': 11.95, 'scope': 'actual-window timeline updates; GPU presentation FPS not directly measured'}]
+2026-09-16 00:52:43.006 Blender[95180:21266384] error messaging the mach port for IMKCFRunLoopWakeUpReliable
+01:33.739  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

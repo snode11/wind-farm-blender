@@ -1,0 +1,369 @@
+{
+  "deleted_count": 89,
+  "deleted_bytes": 13076778,
+  "deleted": [
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/custom-cameras-20260920/gimbal-controls.log",
+      "bytes": 157
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/custom-cameras-20260920/nacelle-compat.log",
+      "bytes": 2436
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/custom-cameras-20260920/camera-framing.log",
+      "bytes": 103
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/custom-cameras-20260920/custom-native.log",
+      "bytes": 763
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/custom-cameras-20260920/gui.log",
+      "bytes": 2478
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/custom-cameras-20260920/host-tests.log",
+      "bytes": 99
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/custom-cameras-20260920/custom-window.log",
+      "bytes": 1129
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/custom-cameras-20260920/fit-frame-fixture.py",
+      "bytes": 2229
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/evidence/custom-cameras-20260920/fit-frame-narrow-fixture.py",
+      "bytes": 2643
+    },
+    {
+      "path": "/private/tmp/wfrl_custom_fit_fixture.py",
+      "bytes": 2229
+    },
+    {
+      "path": "/private/tmp/wfrl_custom_fit_narrow_fixture.py",
+      "bytes": 2643
+    },
+    {
+      "path": "/private/tmp/wfrl-custom-fit-report.json",
+      "bytes": 1386
+    },
+    {
+      "path": "/private/tmp/wfrl-custom-fit-narrow-report.json",
+      "bytes": 1044
+    },
+    {
+      "path": "/private/tmp/wfrl-gimbal-control-result.txt",
+      "bytes": 4
+    },
+    {
+      "path": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend",
+      "bytes": 11886819
+    },
+    {
+      "path": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/blender.crash.txt",
+      "bytes": 1557
+    },
+    {
+      "path": "/Users/eason/Library/Logs/DiagnosticReports/Blender-2026-09-20-184250.ips",
+      "bytes": 61698
+    },
+    {
+      "path": "/Users/eason/Library/Logs/DiagnosticReports/Blender-2026-09-20-184415.ips",
+      "bytes": 62204
+    },
+    {
+      "path": "/Users/eason/Library/Logs/DiagnosticReports/Blender-2026-09-20-192038.ips",
+      "bytes": 62204
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/__pycache__/test_custom_cameras.cpython-313-pytest-8.4.2.pyc",
+      "bytes": 12700
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/__pycache__/test_part2_python.cpython-313-pytest-8.4.2.pyc",
+      "bytes": 2765
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/__pycache__/test_animation_math.cpython-313-pytest-8.4.2.pyc",
+      "bytes": 7531
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/__pycache__/test_extension_package.cpython-313-pytest-8.4.2.pyc",
+      "bytes": 9036
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/__pycache__/test_presentation_controls.cpython-313-pytest-8.4.2.pyc",
+      "bytes": 4779
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/video_output.cpython-313.pyc",
+      "bytes": 13692
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/clearance_replay.cpython-313.pyc",
+      "bytes": 15833
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/training.cpython-313.pyc",
+      "bytes": 4668
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/wake.cpython-313.pyc",
+      "bytes": 25228
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/cameras.cpython-314.pyc",
+      "bytes": 43797
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/diagnostics.cpython-313.pyc",
+      "bytes": 2635
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/materials.cpython-313.pyc",
+      "bytes": 18255
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/atmosphere.cpython-313.pyc",
+      "bytes": 14036
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/tip_tracking.cpython-313.pyc",
+      "bytes": 23912
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/farm_flex.cpython-313.pyc",
+      "bytes": 35439
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/backend_inflow.cpython-313.pyc",
+      "bytes": 3342
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/runtime.cpython-313.pyc",
+      "bytes": 22694
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/cameras.cpython-313.pyc",
+      "bytes": 41898
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/custom_cameras.cpython-314.pyc",
+      "bytes": 33279
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/prebend.cpython-313.pyc",
+      "bytes": 3311
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/clearance_visual.cpython-313.pyc",
+      "bytes": 11806
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/live_scene.cpython-313.pyc",
+      "bytes": 6189
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/radar_feedback.cpython-313.pyc",
+      "bytes": 3371
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/history.cpython-313.pyc",
+      "bytes": 9635
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/cinematic.cpython-313.pyc",
+      "bytes": 23208
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/scene_model.cpython-313.pyc",
+      "bytes": 3226
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/animation.cpython-313.pyc",
+      "bytes": 7338
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/presentation.cpython-313.pyc",
+      "bytes": 2848
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/custom_cameras.cpython-313.pyc",
+      "bytes": 31149
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/scene_builder.cpython-313.pyc",
+      "bytes": 39733
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/workspace.cpython-313.pyc",
+      "bytes": 3557
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/preferences.cpython-313.pyc",
+      "bytes": 3676
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/sensors.cpython-313.pyc",
+      "bytes": 11192
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/deflection.cpython-313.pyc",
+      "bytes": 25337
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/landscape.cpython-313.pyc",
+      "bytes": 50643
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/charts.cpython-313.pyc",
+      "bytes": 24405
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/state.cpython-313.pyc",
+      "bytes": 5496
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/tower_motion.cpython-313.pyc",
+      "bytes": 4214
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/mechanical_details.cpython-313.pyc",
+      "bytes": 8642
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/__init__.cpython-313.pyc",
+      "bytes": 21414
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__/turbine_geometry.cpython-313.pyc",
+      "bytes": 11994
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/gimbal.cpython-313.pyc",
+      "bytes": 26466
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/video_output.cpython-313.pyc",
+      "bytes": 13471
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/training.cpython-313.pyc",
+      "bytes": 3816
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/safety.cpython-313.pyc",
+      "bytes": 3253
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/diagnostics.cpython-313.pyc",
+      "bytes": 3961
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/channels.cpython-313.pyc",
+      "bytes": 2396
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/custom_cameras.cpython-314.pyc",
+      "bytes": 58567
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/presentation.cpython-313.pyc",
+      "bytes": 14824
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/custom_cameras.cpython-313.pyc",
+      "bytes": 56223
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/telemetry.cpython-313.pyc",
+      "bytes": 4942
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/status.cpython-313.pyc",
+      "bytes": 4933
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/scene.cpython-313.pyc",
+      "bytes": 3343
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/run.cpython-313.pyc",
+      "bytes": 3355
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/farm_replay.cpython-313.pyc",
+      "bytes": 31255
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/clearance.cpython-313.pyc",
+      "bytes": 23623
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/demo.cpython-313.pyc",
+      "bytes": 7186
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__/__init__.cpython-313.pyc",
+      "bytes": 220
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/operators/__pycache__/workflow.cpython-313.pyc",
+      "bytes": 8365
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/operators/__pycache__/history_export.cpython-313.pyc",
+      "bytes": 4501
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/operators/__pycache__/run.cpython-313.pyc",
+      "bytes": 1743
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/operators/__pycache__/connection.cpython-313.pyc",
+      "bytes": 4113
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/operators/__pycache__/__init__.cpython-313.pyc",
+      "bytes": 230
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/__pycache__/open_custom_cameras.cpython-313.pyc",
+      "bytes": 1836
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/__pycache__/build_extension.cpython-313.pyc",
+      "bytes": 6722
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/__pycache__/paths.cpython-313.pyc",
+      "bytes": 1586
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/__pycache__/__init__.cpython-313.pyc",
+      "bytes": 928
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/lidar/__pycache__/replay.cpython-313.pyc",
+      "bytes": 27685
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/lidar/__pycache__/evidence.cpython-313.pyc",
+      "bytes": 10134
+    },
+    {
+      "path": "/private/tmp/wfrl-036-install-validation",
+      "bytes": 5373
+    }
+  ],
+  "preserved": [
+    "dist/wfrl_blender-0.3.6.zip and checksum/inventory",
+    "source and regression tests",
+    "formal validation summaries",
+    "original simulation packages and blend files"
+  ],
+  "blender_handoff": "Installed 0.3.6 remains open with bundled demo, View panel; no saved scene"
+}

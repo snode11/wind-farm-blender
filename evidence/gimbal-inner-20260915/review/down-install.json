@@ -1,0 +1,13 @@
+{
+  "backup": "/Users/eason/Desktop/wfcrl/installation-backups/20260915-211331-down",
+  "changed": [
+    "cameras.py",
+    "materials.py",
+    "panels/gimbal.py",
+    "scene_builder.py"
+  ],
+  "archive": "evidence/gimbal-inner-20260915/review/down-extension-preview/wfrl_blender-0.2.5.zip",
+  "sha256": "87edd53c48bc36e5ba3937613ac9d7fde297d7dcfd179ff883bfa364c9443464",
+  "installed_inventory": "PASS",
+  "presets": "DOWN inner tip; RESET oblique overview"
+}

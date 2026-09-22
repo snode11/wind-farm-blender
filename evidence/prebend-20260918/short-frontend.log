@@ -1,0 +1,73 @@
+Error in bpy.app.handlers.frame_change_post[1]:
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/farm_flex.py", line 336, in update
+    if _ACTIVE is not None:_ACTIVE.update(scene)
+                           ~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/farm_flex.py", line 291, in update
+    self.record_telemetry(scene, pose)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/farm_flex.py", line 245, in record_telemetry
+    charts.record_farm(t, pose, self.manifest, extra)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/charts.py", line 157, in record_farm
+    'policy_sha256': manifest['policy']['sha256'],
+                     ~~~~~~~~^^^^^^^^^^
+KeyError: 'policy'
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/farm_replay.py", line 278, in execute
+    preview.update(scene)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/farm_flex.py", line 291, in update
+    self.record_telemetry(scene, pose)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/farm_flex.py", line 245, in record_telemetry
+    charts.record_farm(t, pose, self.manifest, extra)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/charts.py", line 157, in record_farm
+    'policy_sha256': manifest['policy']['sha256'],
+                     ~~~~~~~~^^^^^^^^^^
+KeyError: 'policy'
+00:04.194  bpy.rna          | ERROR Python script error in WFRL_OT_farm_flex_view.execute
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/open_farm_flex.py", line 12, in <module>
+    wfrl_blender.load_demo_scene(folder)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py", line 282, in load_demo_scene
+    bpy.ops.wfrl.farm_flex_view(turbine='T1')
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+RuntimeError: Error: Python: Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/farm_replay.py", line 278, in execute
+    preview.update(scene)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/farm_flex.py", line 291, in update
+    self.record_telemetry(scene, pose)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/farm_flex.py", line 245, in record_telemetry
+    charts.record_farm(t, pose, self.manifest, extra)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/charts.py", line 157, in record_farm
+    'policy_sha256': manifest['policy']['sha256'],
+                     ~~~~~~~~^^^^^^^^^^
+KeyError: 'policy'
+Location: /Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py:282
+
+Error: Python: Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/farm_replay.py", line 278, in execute
+    preview.update(scene)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/farm_flex.py", line 291, in update
+    self.record_telemetry(scene, pose)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/farm_flex.py", line 245, in record_telemetry
+    charts.record_farm(t, pose, self.manifest, extra)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/charts.py", line 157, in record_farm
+    'policy_sha256': manifest['policy']['sha256'],
+                     ~~~~~~~~^^^^^^^^^^
+KeyError: 'policy'
+Location: /Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py:282
+
+Error: script failed, file: 'scripts/blender/open_farm_flex.py', exiting.
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

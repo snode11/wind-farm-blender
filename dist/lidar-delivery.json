@@ -1,8 +1,8 @@
 {
   "schema": "wfrl.lidar-delivery.v1",
-  "version": "0.3.5",
-  "archive": "dist/wfrl_blender-0.3.5.zip",
-  "archive_sha256": "709aa8151263b97bd1c89fb74f61f72c3becb0432a11677fe35643a40763aaa9",
+  "version": "0.3.7",
+  "archive": "dist/wfrl_blender-0.3.7.zip",
+  "archive_sha256": "c087776e1b5a9b0269523177b9c4d52bedd163e87813f0a6de1118204dfec74e",
   "packages": {
     "normal": "results/lidar/packages/normal-v1.1",
     "close": "results/lidar/packages/close-v1.1"
@@ -11,7 +11,7 @@
     "normal": "658922c57ecf7b69028d55eae604119a4b44e60e66247817edbd145d9dc0fe2d",
     "close": "91895c64e0bc962c956d57fe8bb507fe9e26f0af6cf6aa2f59cef5a19a9cc30b"
   },
-  "historical": "0.3.5 adds nacelle PTZ and paired-revolution trail fading; reuses unchanged 0.3.4 BeamDyn prebend v3 data; review only.",
+  "historical": "0.3.7 release: four-camera configuration, native views, same-blade layout and video output; existing prebend v3 data reused.",
   "demo": {
     "kind": "MAPPO",
     "duration_s": 60,
@@ -20,5 +20,7 @@
     "manifest_sha256": "aeeecd7258d7f5ba2e85754c69b7bf8aa9c423cad558afc0dcdf99bbb6736124",
     "schema": "wfrl.farm-flex-review.v3",
     "tower_model": "elastodyn-flexible"
-  }
+  },
+  "delivery_status": "release candidate; isolated installed extension validation in progress",
+  "verification": "evidence/release-0.3.7/verification.json"
 }

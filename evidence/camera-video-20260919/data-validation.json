@@ -1,0 +1,81 @@
+{
+  "source_status": "REVIEW_ONLY",
+  "source_acceptance_status": "FAILED_AVAILABILITY",
+  "camera_configuration": "evidence/camera-video-20260919/4k-probe/camera.json",
+  "event_check": {
+    "reference": "center_truth_m only; event truth_m is a different definition",
+    "checked_events": 118,
+    "max_abs_error_m": 6.3492229021022695e-06,
+    "tolerance_m": 0.002,
+    "passed": true
+  },
+  "phase_check": {
+    "method": "interval unwrapped phase derivative compared with endpoint-mean source RPM",
+    "max_abs_residual_rpm": 0.014120233337349575,
+    "rms_residual_rpm": 0.004090318193706627,
+    "tolerance_rpm": 0.05,
+    "passed": true
+  },
+  "pose_continuity": {
+    "blade": {
+      "max_rotation_step_deg": 1.8406418183789048,
+      "rejection_threshold_deg": 90.0,
+      "passed": true
+    },
+    "tower": {
+      "max_rotation_step_deg": 0.020906907162753355,
+      "rejection_threshold_deg": 90.0,
+      "passed": true
+    },
+    "nacelle": {
+      "max_rotation_step_deg": 0.014366181358410092,
+      "rejection_threshold_deg": 90.0,
+      "passed": true
+    }
+  },
+  "exports": [
+    {
+      "fps": 15,
+      "frame_count": 900,
+      "sample_counts": {
+        "source": 300,
+        "interpolated": 600
+      },
+      "valid_counts": [
+        443,
+        441,
+        438
+      ],
+      "dataset_id": "d5386f82eb7df514bf3df6e22cdc9e152a713e6b5526ef58efce11c5e16d7748"
+    },
+    {
+      "fps": 20,
+      "frame_count": 1200,
+      "sample_counts": {
+        "source": 1200,
+        "interpolated": 0
+      },
+      "valid_counts": [
+        591,
+        587,
+        585
+      ],
+      "dataset_id": "3da75d40880d46af9fe309b06815d928eab18ee1d1582ded4bbc87f197bc0cbe"
+    },
+    {
+      "fps": 25,
+      "frame_count": 1500,
+      "sample_counts": {
+        "source": 300,
+        "interpolated": 1200
+      },
+      "valid_counts": [
+        740,
+        732,
+        729
+      ],
+      "dataset_id": "e693c07a2c2ca50e87a6207a9251d8a3af61ca53bd7bc5779d3271d8f092e15c"
+    }
+  ],
+  "evidence_boundary": "Source FAILED_AVAILABILITY is retained: these label consistency checks do not upgrade the simulation archive to accepted measurement performance or field evidence."
+}
