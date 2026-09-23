@@ -2,11 +2,20 @@
 
 基于 Blender 的风场三维展示与离线仿真回放。
 
-当前版本 **0.3.7**，要求 **Blender 5.2+**。
+当前版本 **0.3.8**，要求 **Blender 5.2+**。
 
-[下载安装包](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.7/wfrl_blender-0.3.7.zip) · [安装说明](docs/blender/INSTALL.md) · [用户手册](docs/blender/用户使用手册.md)
+[下载安装包](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.8/wfrl_blender-0.3.8.zip) · [安装说明](docs/blender/INSTALL.md) · [用户手册](docs/blender/用户使用手册.md)
 
 ## 发布记录
+
+### [0.3.8](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.8) · 2026-09-23 · 三相机堆叠与整盒安装
+
+- 三台上下堆叠的小相机共用盒体，替代四台独立相机；加载 MAPPO 时自动创建。
+- 先在机舱上安装整个盒体，再分别调整 C1–C3 俯仰角；支持整盒 XYZ / 水平朝向、三路观察和独立视场。
+- 保留同刻/序列原图、内外参、布局导入导出与撤销；盒体位置和相机参数共同保存及恢复。
+- 移除第四槽、四路入口和旧试用布局，修复重复加载残留及机身关联。
+
+已知限制：盒体及光学参数为仿真假设，不包含拼接算法；固定视野不保证全转动周期无盲区。原有 REVIEW_ONLY 数据不变；鼠标选点人工验收、Windows/Linux、实物标定与长期稳定性未完成。
 
 ### [0.3.7](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.7) · 2026-09-23 · 四相机观察与图像采集
 
@@ -67,4 +76,4 @@
 - [Blender 前端说明](blender_frontend/README.md)
 - [雷达算法说明](wfrl/lidar/README.md)
 
-当前物理数据为 REVIEW_ONLY，固定三束测量覆盖率未通过；回放不代表现场实测。详见 [0.3.7 发布核对](docs/blender/0.3.7发布核对.md)。
+当前物理数据为 REVIEW_ONLY，固定三束测量覆盖率未通过；回放不代表现场实测。详见 [0.3.8 发布核对](docs/blender/0.3.8发布核对.md)。
