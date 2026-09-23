@@ -1,0 +1,9 @@
+Info: Saved as "three-stacked-cameras.blend"
+Warning: 1 × Draw window and swap: 71.5545 ms, average: 71.55450000 ms
+Warning: 2 × Draw window and swap: 130.6987 ms, average: 65.34937500 ms
+Warning: 2 × Draw window and swap: 19.3965 ms, average: 9.69827050 ms
+STACKED_WINDOW_PASS
+00:15.322  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

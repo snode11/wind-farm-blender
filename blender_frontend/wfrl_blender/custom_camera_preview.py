@@ -475,7 +475,7 @@ class Preview:
             if image:
                 draw_image(image, body)
             else:
-                message = '画面准备中…' if cam else '已安装，未参与四路预览与采集' if installed else '尚未设置安装位置'
+                message = '画面准备中…' if cam else '已安装，未参与三路预览与采集' if installed else '尚未设置安装位置'
                 hint = '单路仍可检查；参与设置见 View 面板' if installed and not cam else '点击右上角「设置位置」' if not installed else ''
                 for line, value in enumerate((message, hint)):
                     blf.size(0, (13 if line == 0 else 11) * ui)
@@ -483,8 +483,8 @@ class Preview:
                     text(value, body[0]+(body[2]-tw)/2, body[1]+body[3]/2+(8-24*line)*ui,
                          tw+1, size=13 if line == 0 else 11, color=(.64,.71,.81,1))
             if installed:
-                footer = ('已安装 · 参与四路预览与采集' if installed.get('custom_enabled', True)
-                          else '已安装 · 未参与四路预览与采集')
+                footer = ('已安装 · 参与三路预览与采集' if installed.get('custom_enabled', True)
+                          else '已安装 · 未参与三路预览与采集')
                 if context.window_manager.wfrl_custom_engineering:
                     p = core.parameters(installed)
                     footer = f'XYZ {tuple(round(v, 2) for v in p.location)} · YPR {p.yaw:.1f}/{p.pitch:.1f}/{p.roll:.1f} · FOV {p.fov:.1f}/{p.vfov:.1f}'

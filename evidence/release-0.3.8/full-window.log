@@ -1,0 +1,7 @@
+LAYOUT_WINDOW_READY
+EXTERNAL_WINDOW_READY
+THREE_CAMERAS_WINDOW_PASS {"status": "PASS", "blender": "5.2.1 LTS", "checks": {"external_layout_three_independent_positions_cancel_clear": true, "three_route_gpu_seconds": 0.4995514589991217, "external_layout_has_no_offscreen_images": true, "default_wheel_locked_linked_zoom_drag_cancel_resume": true, "current_group_1920_and_2560_export_layout_restore": true, "sequence_same_times_statistics_cancel_restore": true, "lifecycle_no_save_no_screen_or_output_changes": true}, "display_scale": [2.0, 2.0, 144], "mount_positions": {"1": [2.658367156982422e-05, -1.7199570894241334, 1.4736875727772714], "2": [2.384185791015625e-07, 1.7199570894241334, 1.4736874535679818], "3": [2.384185791015625e-07, 0.0014173772663593808, 3.8625498473644257]}, "before_path": "<source-checkout>/outputs/three-camera-replacement/full-window/capture_20260923_172709_bde7f0d56f", "after_path": "<source-checkout>/outputs/three-camera-replacement/full-window/capture_20260923_172710_accf926444", "sequence_path": "<source-checkout>/outputs/three-camera-replacement/full-window/capture_20260923_172714_ae4d45ac18", "high_resolution_path": "<source-checkout>/outputs/three-camera-replacement/full-window/capture_20260923_172712_a072895db9"}
+00:20.648  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

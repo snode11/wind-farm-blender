@@ -16,22 +16,21 @@ def tick():
  try:
   if not state:
    addon.register();addon.load_demo_scene();scene=bpy.context.scene
-   core.import_layout(scene,json.loads(Path(os.environ.get('WFRL_TEST_LAYOUT',str(ROOT/'outputs/camera-layout-test-v1/T1-four-cameras-v1.json'))).read_text()),overwrite=True)
    area=next(a for a in bpy.context.screen.areas if a.type=='VIEW_3D')
    state.update(stage=1,original=bpy.context.workspace,camera=scene.camera,layout=core.layout_dict(scene),render=(scene.render.resolution_x,scene.render.resolution_y),start=time.monotonic())
-   with bpy.context.temp_override(area=area):assert bpy.ops.wfrl.native_camera_view(mode='QUAD')=={'FINISHED'}
+   with bpy.context.temp_override(area=area):assert bpy.ops.wfrl.native_camera_view(mode='TRIPLE')=={'FINISHED'}
    return 2
   s=bpy.context.scene
   if state['stage']==1:
    print('STATE',native._ACTIVE, [(w.as_pointer(),w.scene.name,[(a.type,a.width,a.height) for a in w.screen.areas]) for w in bpy.context.window_manager.windows],flush=True)
-   if native._ACTIVE and len(native._ACTIVE.entries)<4:return 1
-   assert native._ACTIVE and len(native._ACTIVE.entries)==4
+   if native._ACTIVE and len(native._ACTIVE.entries)<3:return 1
+   assert native._ACTIVE and len(native._ACTIVE.entries)==3
    assert all(e['area'].spaces.active.shading.type=='MATERIAL' for e in native._ACTIVE.entries)
    assert all(e['area'].spaces.active.shading.use_scene_world for e in native._ACTIVE.entries)
    print('AREAS',[(e['area'].type,e['area'].width,e['area'].height) for e in native._ACTIVE.entries],flush=True)
    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP',iterations=1)
    with bpy.context.temp_override(window=native._ACTIVE.window):
-    bpy.ops.screen.screenshot(filepath=str(OUT/'quad.png'))
+    bpy.ops.screen.screenshot(filepath=str(OUT/'triple.png'))
     bpy.ops.screen.animation_play()
    state.update(stage=2,start=time.monotonic(),start_frame=s.frame_current,draws={slot:set() for slot in core.SLOTS})
    state['handler']=bpy.types.SpaceView3D.draw_handler_add(count_draw,(), 'WINDOW','POST_PIXEL')

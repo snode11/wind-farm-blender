@@ -273,7 +273,7 @@ def build_demo_geometry():
     return collection
 
 
-def load_demo_scene(path=None):
+def load_demo_scene(path=None, *, camera_rig=True):
     import bpy
     from . import runtime, farm_flex
     if not runtime.configuration_editable():
@@ -289,6 +289,9 @@ def load_demo_scene(path=None):
         scene.wfrl_flex_show_tip_trails = True
         bpy.ops.wfrl.farm_flex_view(turbine='T1')
         scene.frame_set(1)
+        if camera_rig:
+            from . import stacked_camera_rig
+            stacked_camera_rig.build(scene)
         for screen in bpy.data.screens:
             for area in screen.areas:
                 if area.type == 'VIEW_3D':

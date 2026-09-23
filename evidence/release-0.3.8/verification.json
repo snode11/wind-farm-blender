@@ -1,0 +1,23 @@
+{
+  "version": "0.3.8",
+  "archive_sha256": "fa109829c598619aa647863a71d0fe0dddbc76a5394b7a1fd3be1a37d1acfe44",
+  "host_tests_passed": 168,
+  "blender": "5.2.1 LTS",
+  "platform": "macOS",
+  "checks": [
+    "installed files match 99-entry ZIP inventory",
+    "default three cameras; repeated load no duplicate housing",
+    "box translation; independent pitch; undo; failure rollback",
+    "native three-view window and synchronized capture",
+    "1920/2560 capture; sequence; cancel; statistics preservation"
+  ],
+  "unverified": [
+    "manual mouse placement acceptance",
+    "Windows/Linux",
+    "physical optical calibration",
+    "whole-rotation blade coverage",
+    "stitching algorithm"
+  ],
+  "release_checkout_tests_passed": 170,
+  "reproducible_build_sha256": "fa109829c598619aa647863a71d0fe0dddbc76a5394b7a1fd3be1a37d1acfe44"
+}

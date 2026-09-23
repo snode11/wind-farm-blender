@@ -1,9 +1,0 @@
-/Users/eason/Desktop/wfcrl/wind farm RL/outputs/camera-layout-same-blade-v2/render_final.py:25: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
-  mat=bpy.data.materials.new('LayoutDiagnostic.'+name);mat.use_nodes=True;mat.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].default_value=color;mat.diffuse_color=color;obj.data.materials.append(mat)
-Warning: 2 × Draw window and swap: 67.1622 ms, average: 33.58110401 ms
-Warning: 2 × Draw window and swap: 14.2851 ms, average: 7.14256254 ms
-FINAL_RENDER_PASS
-00:11.169  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
-
-Blender quit
-Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

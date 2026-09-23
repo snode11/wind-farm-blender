@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/camera-layout-same-blade-v2/benchmark.py", line 60, in tick
-    with bpy.context.temp_override(window=state['play_window']):bpy.ops.screen.animation_cancel(restore_frame=False)
-         ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TypeError: Window not found

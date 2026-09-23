@@ -1,1 +1,0 @@
-{"status": "PASS", "reference_frame": 1, "time_s": 117.0, "blade": "T1.Blade1", "normal_image": "quad-final.png", "diagnostic_image": "quad-segment-diagnostic.png", "diagnostic_only": "Temporary span colors in isolated process, not part of JSON or user scene"}

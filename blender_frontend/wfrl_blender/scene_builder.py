@@ -559,6 +559,11 @@ def clear_scene(collection_name: str = COLLECTION_NAME):
         if any(obj.name in owner.objects for obj in collection.objects):
             if farm is not None:
                 farm.detach(owner)
+            for key in ('wfrl_stacked_camera_rig', 'wfrl_stacked_reference_frame'):
+                if key in owner: del owner[key]
+            for legacy in list(owner.objects):
+                if legacy.get('stacked_rig_physical') and legacy.name not in collection.objects:
+                    bpy.data.objects.remove(legacy, do_unlink=True)
             tip_tracking.discard(owner)
             clearance_replay.clear(owner, '场景已重建，请重新加载回放')
     for obj in list(collection.objects):

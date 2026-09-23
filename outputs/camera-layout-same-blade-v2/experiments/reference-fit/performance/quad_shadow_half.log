@@ -1,5 +1,0 @@
-BENCH_PASS quad_shadow_half
-00:28.047  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
-
-Blender quit
-Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

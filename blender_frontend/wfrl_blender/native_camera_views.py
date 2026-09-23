@@ -60,8 +60,6 @@ class NativeSession:
                 bpy.ops.screen.area_split(direction=direction,factor=.5)
             return .1
         areas.sort(key=lambda a:-(a.y+a.height/2))
-        if len(self.slots)==4:
-            areas=sorted(areas[:2],key=lambda a:a.x)+sorted(areas[2:4],key=lambda a:a.x)
         for area, slot in zip(areas,self.slots):
             space = area.spaces.active
             space.show_region_ui = False
@@ -146,7 +144,7 @@ class NativeSession:
             rect(0,0,region.width,max(0,bottom));rect(0,top,region.width,region.height-top)
             rect(0,bottom,max(0,left),h);rect(right,bottom,region.width-right,h)
         else:rect(0,0,region.width,region.height)
-        label=f"C{entry['slot']} · 原生视口" if proxy else f"C{entry['slot']} · 未安装或未参与四路"
+        label=f"C{entry['slot']} · 原生视口" if proxy else f"C{entry['slot']} · 未安装或未参与"
         blf.size(0,15);blf.color(0,.8,.9,1,1);blf.position(0,14,region.height-78,0);blf.draw(0,label)
 
     def close(self):
@@ -199,7 +197,7 @@ def header(self,context):
 class WFRL_OT_NativeCamera(bpy.types.Operator):
     bl_idname='wfrl.native_camera_view'
     bl_label='原生相机观察'
-    mode:bpy.props.EnumProperty(items=[('WATCH','单路',''),('QUAD','四路','')])
+    mode:bpy.props.EnumProperty(items=[('WATCH','单路',''),('TRIPLE','三路','')])
     @classmethod
     def poll(cls,context):
         return bool(context.window and context.area and context.area.type=='VIEW_3D'
@@ -216,7 +214,8 @@ class WFRL_OT_NativeCamera(bpy.types.Operator):
         if self.mode=='WATCH' and not core.get_camera(context.scene,slot):return {'CANCELLED'}
         if panel._ACTIVE:panel._ACTIVE.finish()
         shutdown()
-        session=NativeSession(context,list(core.SLOTS) if self.mode=='QUAD' else [slot])
+        slots = list(core.SLOTS) if self.mode == 'TRIPLE' else [slot]
+        session=NativeSession(context, slots)
         try:
             session.start();_ACTIVE=session
             if not bpy.app.timers.is_registered(watch):bpy.app.timers.register(watch,first_interval=.25)

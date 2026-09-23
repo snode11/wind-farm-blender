@@ -99,11 +99,15 @@ class WFRL_OT_CustomLayoutConfirm(bpy.types.Operator):
     def draw(self,context):
         box=self.layout.box();box.alert=True
         box.label(text='这是完整布局替换；文件未列出的槽位会清空。')
+        pose = self.pending['payload'].get('rig_pose')
+        if pose:
+            box.label(text='盒体 XYZ (m)：' + ', '.join(f'{v:.3f}' for v in pose['center']))
+            box.label(text=f"盒体水平朝向：{pose['housing_yaw_deg']:.3f}°")
         for row in self.pending['summary']:
             box=self.layout.box()
             box.label(text=f'C{row["slot"]} {row["action"]}')
             if row['enabled'] is not None:
-                box.label(text='备注：'+row['label']+'；'+('参与' if row['enabled'] else '不参与')+'四路预览与采集')
+                box.label(text='备注：'+row['label']+'；'+('参与' if row['enabled'] else '不参与')+'三路预览与采集')
             for change in row['changes']:
                 for start in range(0,len(change),58):box.label(text=change[start:start+58])
         self.layout.label(text='确认仅提交当前场景；整套变化记为一步相机撤销。')
@@ -292,7 +296,7 @@ class WFRL_PT_CustomCapture(bpy.types.Panel):
         for slot in core.SLOTS:
             cam=core.get_camera(scene,slot)
             box=layout.box()
-            box.label(text=f'C{slot} · '+('未安装' if cam is None else '参与四路预览与采集' if cam.get('custom_enabled',True) else '已安装，未参与'))
+            box.label(text=f'C{slot} · '+('未安装' if cam is None else '参与三路预览与采集' if cam.get('custom_enabled',True) else '已安装，未参与'))
             if cam:
                 try:
                     p=core.parameters(cam);w,h=projection.resolution(p.fov,p.vfov,p.output_long_edge_px)

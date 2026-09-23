@@ -82,13 +82,13 @@ def test_history_limit_noop_and_external_divergence():
     assert not h.check('new session','b') and '会话' in h.notice
 
 
-def test_four_slot_import_summary():
+def test_three_slot_import_summary():
     def record(slot,label='original'):
         return dict(slot_id=slot,label=label,enabled=True,parameters={'fov':75})
     old={'cameras':[record(1),record(3)]}
     new={'cameras':[record(1,'new'),record(2)]}
     rows=core.layout_summary(old,new)
-    assert [r['action'] for r in rows]==['将替换','将创建','将清空','保持为空']
+    assert [r['action'] for r in rows]==['将替换','将创建','将清空']
     assert '备注名' in rows[0]['changes'][0]
     assert core.layout_summary(old,deepcopy(old))[0]['action']=='配置不变'
 

@@ -90,7 +90,7 @@ def preflight(context, times=None):
         errors.append('PNG 输出要求 sRGB 显示设备')
     cameras = core.enabled_cameras(scene)
     if not cameras:
-        errors.append('没有参与相机；请安装并勾选参与四路预览与采集')
+        errors.append('没有参与相机；请安装并勾选参与三路预览与采集')
     sizes = {}
     max_size = None
     try:

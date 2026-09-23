@@ -1,4 +1,4 @@
-"""Four user-owned T1 observation cameras, expressed in YawRoot local metres.
+"""Three user-owned T1 observation cameras, expressed in YawRoot local metres.
 
 No module import needs Blender. Camera construction and evaluated surface queries
 import bpy lazily. This module never saves files, preferences, or replay state.
@@ -18,7 +18,7 @@ MIN_DISTANCE = .02
 MAX_DISTANCE = .50
 DEFAULT_DISTANCE = .10
 DEFAULT_FOV = 75.0
-MAX_CUSTOM_CAMERAS = 4
+MAX_CUSTOM_CAMERAS = 3
 SLOTS = tuple(range(1, MAX_CUSTOM_CAMERAS + 1))
 SCHEMA_VERSION = 2
 _RETIRED = []
@@ -102,7 +102,7 @@ def screen_direction_delta(yaw, pitch, roll, dx, dy):
 
 def _slot(slot):
     if isinstance(slot, bool) or slot not in SLOTS:
-        raise ValueError('自定义相机仅提供 C1–C4')
+        raise ValueError('自定义相机仅提供 C1–C3')
     return int(slot)
 
 
@@ -285,6 +285,8 @@ def commit_draft(scene, slot, camera):
     if not camera.get('wfrl_custom_draft') or camera.get('wfrl_custom_slot') != slot or camera.parent != _root(scene):
         raise ValueError('当前草稿或 T1 安装参考已失效')
     validate_parameters(parameters(camera))
+    from . import stacked_camera_rig
+    stacked_camera_rig.validate_pose(scene, {}, [({'slot_id': slot}, parameters(camera), None)])
     if camera.get('custom_mount_mode') == 'RESEARCH':
         validate_research_position(scene, parameters(camera).location,
                                    confirmed=bool(camera.get('custom_research_confirmed')))
@@ -325,7 +327,7 @@ def set_enabled(scene, slot, enabled):
         raise ValueError('请先确认或取消当前相机调整')
     before = history.before_change(scene)
     camera['custom_enabled'] = bool(enabled)
-    history.committed(scene, before, f'C{slot} ' + ('参与' if enabled else '不参与') + '四路预览与采集')
+    history.committed(scene, before, f'C{slot} ' + ('参与' if enabled else '不参与') + '三路预览与采集')
     _refresh_references(scene)
 
 
@@ -578,7 +580,10 @@ def layout_dict(scene):
             'anchor': asdict(anchor(cam)) if anchor(cam) else None,
             'image_width_px': projection.resolution(p.fov, p.vfov, p.output_long_edge_px)[0],
             'image_height_px': projection.resolution(p.fov, p.vfov, p.output_long_edge_px)[1]})
-    return {'schema_version': SCHEMA_VERSION, 'coordinate_frame': COORDINATE_VERSION,
+    from . import stacked_camera_rig as rig
+    rig_pose = rig.pose(scene)
+    return {**({'rig_pose': rig_pose} if rig_pose is not None else {}),
+        'schema_version': SCHEMA_VERSION, 'coordinate_frame': COORDINATE_VERSION,
         'orientation_convention': 'yaw +X toward +Y; pitch up; roll camera +Z; degrees',
         'model_signature': model_signature(scene), 'resolution_policy': 'FOV_PRIORITY_LONG_EDGE',
         'cameras': cameras}
@@ -597,7 +602,7 @@ def validate_layout(scene, payload):
         raise ValueError('布局模型签名不匹配，未进行位置换算')
     records = payload.get('cameras')
     if not isinstance(records, list) or len(records) > MAX_CUSTOM_CAMERAS:
-        raise ValueError('布局最多包含四个槽位')
+        raise ValueError('布局最多包含三个槽位；旧四路布局已停用，请使用三相机布局')
     seen, validated = set(), []
     for record in records:
         slot = _slot(record['slot_id'])
@@ -632,6 +637,8 @@ def validate_layout(scene, payload):
         else:
             raise ValueError('未知安装模式')
         validated.append((record, params, surface))
+    from . import stacked_camera_rig
+    stacked_camera_rig.validate_pose(scene, payload, validated)
     return validated
 
 
@@ -691,7 +698,7 @@ def _summary_value(key, value):
 
 
 def layout_summary(current, incoming):
-    """Four fixed slots, full replacement; pure function shared by dialog/tests."""
+    """Three fixed slots, full replacement; pure function shared by dialog/tests."""
     old = {r['slot_id']: r for r in current['cameras']}
     new = {r['slot_id']: r for r in incoming['cameras']}
     rows = []
@@ -722,6 +729,9 @@ def _publication_checkpoint(stage, slot=None):
 
 
 def _refresh_references(scene):
+    if scene.get('wfrl_stacked_camera_rig'):
+        from . import stacked_camera_rig
+        stacked_camera_rig.sync_modules(scene)
     from . import custom_camera_preview as preview
     from .panels import custom_cameras as panel
     preview.shutdown()
@@ -829,6 +839,8 @@ def restore_layout(scene, payload):
     validated = validate_layout(scene, payload)
     if any(obj.get('wfrl_custom_draft') for obj in scene.objects):
         raise ValueError('请先结束当前草稿')
+    from . import stacked_camera_rig as rig
+    old_rig_pose = rig.pose(scene)
     staged = []
     try:
         for record, params, surface in validated:
@@ -850,8 +862,10 @@ def restore_layout(scene, payload):
                 cam['custom_mount_warning'] = record['mount_warning']
             _publication_checkpoint('stage', record['slot_id'])
         by_slot = {cam['wfrl_custom_slot']: cam for cam in staged}
+        rig.apply_pose(scene, payload.get('rig_pose'))
         _publish(scene, {slot: by_slot.get(slot) for slot in SLOTS})
     except Exception:
+        rig.apply_pose(scene, old_rig_pose)
         for cam in staged:
             _remove(cam)
         raise
@@ -867,5 +881,5 @@ def import_layout(scene, payload, overwrite=False):
     if config_equal(before[1], payload):
         return [get_camera(scene, slot) for slot in SLOTS if get_camera(scene, slot) is not None]
     result = restore_layout(scene, payload)
-    history.committed(scene, before, '导入完整四槽布局')
+    history.committed(scene, before, '导入完整三槽布局')
     return result

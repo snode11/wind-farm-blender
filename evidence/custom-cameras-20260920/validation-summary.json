@@ -1,7 +1,0 @@
-{
-  "source_host_tests": "52 passed",
-  "legacy_camera_framing": "PASS",
-  "legacy_gimbal_controls": "PASS",
-  "native_and_window": "See retained checks JSON",
-  "raw_logs_cleaned_at_user_request": true
-}
