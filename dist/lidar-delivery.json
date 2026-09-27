@@ -1,8 +1,8 @@
 {
   "schema": "wfrl.lidar-delivery.v1",
-  "version": "0.3.8",
-  "archive": "dist/wfrl_blender-0.3.8.zip",
-  "archive_sha256": "fa109829c598619aa647863a71d0fe0dddbc76a5394b7a1fd3be1a37d1acfe44",
+  "version": "0.3.9",
+  "archive": "dist/wfrl_blender-0.3.9.zip",
+  "archive_sha256": "0cabd8f1c95739d585b72ba638be3026db9488757a037b524b50fd8d362b5343",
   "packages": {
     "normal": "results/lidar/packages/normal-v1.1",
     "close": "results/lidar/packages/close-v1.1"
@@ -11,7 +11,7 @@
     "normal": "658922c57ecf7b69028d55eae604119a4b44e60e66247817edbd145d9dc0fe2d",
     "close": "91895c64e0bc962c956d57fe8bb507fe9e26f0af6cf6aa2f59cef5a19a9cc30b"
   },
-  "historical": "0.3.8: three stacked cameras with whole-box installation and independent pitch; existing prebend v3 data reused.",
+  "historical": "0.3.9: supported external housing, bundled continuous-overlap three-camera layout and native preview improvements; existing prebend v3 data reused.",
   "demo": {
     "kind": "MAPPO",
     "duration_s": 60,
@@ -21,7 +21,7 @@
     "schema": "wfrl.farm-flex-review.v3",
     "tower_model": "elastodyn-flexible"
   },
-  "delivery_status": "published to GitHub Releases; release asset SHA-256 matches verified installed extension",
-  "verification": "evidence/release-0.3.8/verification.json",
-  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.8"
+  "delivery_status": "Release ZIP and source are matched; verification record documents tested scope and known limits.",
+  "verification": "evidence/release-0.3.9/verification.json",
+  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.9"
 }

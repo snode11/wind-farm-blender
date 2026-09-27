@@ -2,13 +2,11 @@
 
 基于 Blender 的风场三维展示与离线仿真回放。
 
-当前文档与安装包版本：**0.3.9**，要求 **Blender 5.2+**。
+当前发布版本：**0.3.9**，要求 **Blender 5.2+**。
 
-[0.3.9 下载与发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.9) · [详细前端说明](前端readme.md) · [后续更新计划](前端更新计划.md)
+[下载 0.3.9 扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.9/wfrl_blender-0.3.9.zip) · [发布页与源码](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.9) · [详细前端说明](前端readme.md)
 
-> 2026-09-27 文档更新时，0.3.9 ZIP 由维护者准备上传；请在发布页确认存在 `wfrl_blender-0.3.9.zip` 后下载。本次文档提交不代表安装包已上传，也不代表后续计划已经实现。
-
-## 0.3.9 · 三相机默认取景与展示改进
+## [0.3.9](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.9) · 2026-09-27 · 三相机默认取景与展示改进
 
 - **三相机连续取景**：C1 叶根、C2 中段、C3 叶尖观察同一叶片的不同部分，相邻范围重叠，不要求三等分。推荐安装位置、盒体朝向与视场成为 MAPPO 默认配置。
 - **支架贴合与整盒调整**：支架安装端贴住机舱，盒体保持外伸；同一步完成选位置、调整方向、确认或取消，保留布局导入导出与相机撤销。
@@ -20,12 +18,12 @@
 
 ## 快速开始
 
-1. 从 0.3.9 发布页下载扩展 ZIP，保留压缩格式。
+1. 下载 [wfrl_blender-0.3.9.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.9/wfrl_blender-0.3.9.zip)，保留压缩格式。
 2. Blender → **Edit → Preferences → Get Extensions → Install from Disk**，选择 ZIP 并启用 WFRL Blender。更新扩展后重启 Blender。
 3. 新建 General 场景，鼠标置于三维视图，按 **N**，在 **MAPPO** 侧栏加载 **MAPPO · 60 秒**。
 4. 通过 **View → 三相机 → 三路对照** 查看默认取景。先暂停查看三路画面，再播放检查叶片经过。
 
-ZIP 内置离线回放数据与读取器；离线观看无需配置 Python 后端、MPI 或 FAST.Farm。源码开发与连接后端是另一条使用路径，详见[前端说明](前端readme.md)。
+ZIP 内置离线回放数据与读取器；离线观看无需配置 Python 后端、MPI 或 FAST.Farm。发布页的 **Source code** 对应 `v0.3.9` 标签，用于源码开发，不是扩展安装包。安装、校验与验证范围见[安装说明](docs/blender/INSTALL.md)和[0.3.9 发布核对](docs/blender/0.3.9发布核对.md)。
 
 ## 已发布历史
 

@@ -286,12 +286,13 @@ def load_demo_scene(path=None, *, camera_rig=True):
         farm_flex.attach(scene, path or farm_flex.default_package())
         from .panels.farm_replay import build_review_cameras
         build_review_cameras(scene)
-        scene.wfrl_flex_show_tip_trails = True
+        scene.wfrl_flex_show_tip_trails = False
         bpy.ops.wfrl.farm_flex_view(turbine='T1')
         scene.frame_set(1)
         if camera_rig:
             from . import stacked_camera_rig
-            stacked_camera_rig.build(scene)
+            stacked_camera_rig.build_default(scene)
+            scene.wfrl_deflection_visible = False
         for screen in bpy.data.screens:
             for area in screen.areas:
                 if area.type == 'VIEW_3D':

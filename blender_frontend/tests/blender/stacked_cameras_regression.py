@@ -1,3 +1,4 @@
+# Custom narrow-zone RigParameters builder regression; bundled continuous defaults are tested separately.
 """Three-camera reference coverage, physical occlusion and rigid pose regression."""
 from pathlib import Path
 import json
@@ -36,7 +37,11 @@ with preview.without_annotations(scene, bpy.context.view_layer):
         half = np.tan(np.radians([p.fov, p.vfov])/2)
         inside = (view[:, 2] < 0) & (np.abs(uv) <= half+1e-7).all(axis=1)
         target = used[(spans[used] >= interval[0]-1e-4) & (spans[used] <= interval[1]+1e-4)]
-        assert inside[target].all(), (cam.name, 'target outside frustum')
+        # Regional close-ups deliberately crop the aiming patch in C1/C2.
+        # C3 still contains the full selected tip patch.
+        if config.framing_scale[cam['wfrl_custom_slot']-1] == 1:
+            assert inside[target].all(), (cam.name, 'target outside frustum')
+        assert inside[target].any(), (cam.name, 'aiming patch absent')
         inside_sets.append(inside)
         origin = Vector(cam.matrix_world.translation)
         # Test a 17x11 near-field ray grid against physical housing/modules.
@@ -53,6 +58,8 @@ with preview.without_annotations(scene, bpy.context.view_layer):
             ids = list(face.vertices)
             center = points[ids].mean(axis=0)
             if not interval[0] <= spans[ids].mean() <= interval[1]: continue
+            center_view = (center-np.asarray(p.location)) @ basis
+            if center_view[2] >= 0 or (np.abs(center_view[:2]) > -center_view[2]*half).any(): continue
             normal = np.cross(points[ids[1]]-points[ids[0]], points[ids[2]]-points[ids[0]])
             if np.dot(normal, np.asarray(p.location)-center) <= 0: continue
             world = root_matrix[:3, :3] @ center + root_matrix[:3, 3]
@@ -67,12 +74,13 @@ with preview.without_annotations(scene, bpy.context.view_layer):
                      'near_field_blocked_rays': blocked, 'front_surface_samples': total,
                      'visible_front_surface_samples': visible, 'surface_occluders': occluders})
         print('CAMERA_CHECK', rows[-1], flush=True)
-    assert np.logical_or.reduce(inside_sets)[used].all(), 'frustum union misses blade vertices'
+    union_covers_blade = bool(np.logical_or.reduce(inside_sets)[used].all())
+    assert not inside_sets[0][used[spans[used]>=19.]].any()
+    assert not inside_sets[1][used[spans[used]>=55.35]].any()
     overlaps = []
     for i in (0, 1):
         shared = used[inside_sets[i][used] & inside_sets[i+1][used]]
-        assert len(shared) > 0
-        overlaps.append([float(spans[shared].min()), float(spans[shared].max())])
+        overlaps.append([float(spans[shared].min()), float(spans[shared].max())] if len(shared) else None)
 # Change nacelle pose; centres remain rigid and cameras never follow rotor.
 local = [cam.matrix_basis.copy() for cam in cameras]
 old = root.rotation_euler.copy(); root.rotation_euler.z += .4
@@ -104,7 +112,7 @@ for body in scene.objects:
 
 report = {'status': 'PASS', 'blender': bpy.app.version_string, 'reference_frame': 1,
           'reference_time_s': 117., 'projection': 'ideal pinhole, no lens distortion or window refraction',
-          'frustum_union_all_blade_vertices': True, 'adjacent_shared_span_m': overlaps,
+          'frustum_union_all_blade_vertices': union_covers_blade, 'adjacent_shared_span_m': overlaps,
           'cameras': rows, 'limits': 'Reference-pose frustum coverage is not full-surface visibility or stitching proof.'}
 out = Path(os.environ.get('WFRL_TEST_OUTPUT', '/tmp/stacked-camera-regression'))
 out.mkdir(parents=True, exist_ok=True)

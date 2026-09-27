@@ -43,6 +43,9 @@ def session_identity(scene):
 def installation_block_reason(scene):
     """Only the Blender timeline is paused here; never race a live producer."""
     from .. import runtime
+    from . import stacked_camera_rig as box_panel
+    if box_panel._ACTIVE:
+        return '请先确认或取消整个盒体的安装'
     state = runtime.get_state()
     if state.connection != 'LOCAL DEMO':
         if (getattr(runtime, '_pending_command', None) or not state.confirmed
@@ -694,13 +697,6 @@ class WFRL_OT_CustomAction(bpy.types.Operator):
         op = _ACTIVE
         wm,scene = context.window_manager,context.scene
         editing = op is not None and op.stage not in _VIEWING
-        stacked = bool(scene.get('wfrl_stacked_camera_rig'))
-        if stacked:
-            box = layout.box();box.enabled = not editing
-            box.label(text='1 · 安装整个盒体')
-            box.operator('wfrl.stacked_box_pick', text='在机舱上选择位置', icon='PIVOT_CURSOR')
-            box.operator('wfrl.stacked_box_position', text='整体 XYZ / 盒体朝向')
-            layout.label(text='2 · 选择相机，调整俯仰角')
         from .. import custom_camera_capture
         if custom_camera_capture.active():
             self.report({'WARNING'}, '图像采集中，请先取消或等待完成')
@@ -808,10 +804,39 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
         editing = op is not None and op.stage not in _VIEWING
         stacked = bool(scene.get('wfrl_stacked_camera_rig'))
         if stacked:
+            from . import stacked_camera_rig as box_panel
             box = layout.box();box.enabled = not editing
             box.label(text='1 · 安装整个盒体')
-            box.operator('wfrl.stacked_box_pick', text='在机舱上选择位置', icon='PIVOT_CURSOR')
-            box.operator('wfrl.stacked_box_position', text='整体 XYZ / 盒体朝向')
+            placement = box_panel._ACTIVE
+            if placement:
+                box.label(text='点击机舱表面，支架安装端贴合')
+                box.label(text='盒体位于支架外端，保留离舱间距')
+                box.label(text='可重复选点；中键转动观察视角')
+                box.prop(wm,'wfrl_box_spin',text='贴面旋转 (°)')
+                row=box.row(align=True)
+                row.operator('wfrl.stacked_box_action',text='↶ 15°').action='LEFT'
+                row.operator('wfrl.stacked_box_action',text='↷ 15°').action='RIGHT'
+                box.label(text='Shift + 滚轮也可旋转整个盒体')
+                box.prop(wm,'wfrl_box_aim',text='盒体转向 (°)')
+                box.label(text='支架保持贴合，盒体在外端水平转向')
+                row=box.row(align=True)
+                row.operator('wfrl.stacked_box_action',text='盒体 ↶ 15°').action='AIM_LEFT'
+                row.operator('wfrl.stacked_box_action',text='盒体 ↷ 15°').action='AIM_RIGHT'
+                row=box.row(align=True)
+                confirm=row.row();confirm.enabled=placement.transaction.ready and not placement.transaction.error
+                confirm.operator('wfrl.stacked_box_action',text='确认安装',icon='CHECKMARK').action='CONFIRM'
+                row.operator('wfrl.stacked_box_action',text='取消',icon='X').action='CANCEL'
+                if placement.transaction.error:
+                    for start in range(0,len(placement.transaction.error),22):
+                        box.label(text=placement.transaction.error[start:start+22],icon='ERROR' if start==0 else 'NONE')
+                return
+            box.operator('wfrl.stacked_box_pick', text='贴合安装 / 调整整个盒体', icon='PIVOT_CURSOR')
+            box.label(text='选位置、调方向、确认，在同一步完成')
+            header, body = box.panel('wfrl_box_advanced',default_closed=True)
+            header.label(text='高级设置 · 自由坐标')
+            if body:
+                body.label(text='自由调整会解除表面贴合')
+                body.operator('wfrl.stacked_box_position', text='整体 XYZ / 水平转向')
             layout.label(text='2 · 选择相机，调整俯仰角')
         row = layout.row(align=True); row.enabled = not editing
         for slot in core.SLOTS:
@@ -836,7 +861,7 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
             views.operator('wfrl.custom_camera',text='外部布局').mode='LAYOUT'
             views.operator('wfrl.native_camera_view',text='三路对照').mode='TRIPLE'
             if scene.get('wfrl_stacked_camera_rig'):
-                layout.label(text='共用盒体 · 下 C1 / 中 C2 / 上 C3')
+                layout.label(text='共用盒体 · C1 / C2 / C3 随盒体排列')
             if op:
                 layout.operator('wfrl.custom_camera_action',text='退出相机视图 · Esc',icon='X').action='EXIT'
         block_reason = installation_block_reason(scene)
@@ -940,6 +965,8 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
 
 @persistent
 def cancel_on_load(_unused=None):
+    from . import stacked_camera_rig as box_panel
+    box_panel.shutdown(restore=False)
     if _ACTIVE:
         _ACTIVE.finish(restore=False,resume=False)
     from .. import custom_camera_capture
@@ -952,6 +979,14 @@ def lifecycle_watchdog():
     # Window-close/area replacement can remove modal event delivery entirely.
     # Keep cleanup independent of the viewport event stream.
     from .. import custom_camera_capture
+    from . import stacked_camera_rig as box_panel
+    if box_panel._ACTIVE:
+        op=box_panel._ACTIVE
+        try:
+            valid=(op.window in list(op.wm.windows) and op.area in list(op.window.screen.areas)
+                   and op.area.type=='VIEW_3D' and op.window.scene==op.scene and op.transaction.same_session())
+        except (ReferenceError,RuntimeError):valid=False
+        if not valid:box_panel.shutdown()
     if custom_camera_capture.active() and not custom_camera_capture._ACTIVE.same_session():
         custom_camera_capture.shutdown(restore=False)
     if _ACTIVE:
@@ -965,7 +1000,7 @@ def lifecycle_watchdog():
             valid = False
         if not valid:
             _ACTIVE.finish(restore=False,resume=False)
-    if history.HISTORY.entries and getattr(bpy.context, 'scene', None) is not None:
+    if not box_panel._ACTIVE and history.HISTORY.entries and getattr(bpy.context, 'scene', None) is not None:
         history.status(bpy.context.scene)
     return .25
 
@@ -980,6 +1015,8 @@ def migrate_loaded(_unused=None):
 
 
 def register_properties():
+    from . import stacked_camera_rig as box_panel
+    box_panel.register_settings()
     from .. import native_camera_views
     native_camera_views.register()
     if migrate_loaded not in bpy.app.handlers.load_post:
@@ -1014,6 +1051,8 @@ def register_properties():
 
 
 def unregister_properties():
+    from . import stacked_camera_rig as box_panel
+    box_panel.unregister_settings()
     from .. import native_camera_views
     native_camera_views.unregister()
     if bpy.app.timers.is_registered(migrate_loaded):

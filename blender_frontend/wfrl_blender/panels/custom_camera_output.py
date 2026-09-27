@@ -103,6 +103,14 @@ class WFRL_OT_CustomLayoutConfirm(bpy.types.Operator):
         if pose:
             box.label(text='盒体 XYZ (m)：' + ', '.join(f'{v:.3f}' for v in pose['center']))
             box.label(text=f"盒体水平朝向：{pose['housing_yaw_deg']:.3f}°")
+            if pose.get('housing_rotation_deg'):
+                box.label(text='盒体整体方向 (°)：'+', '.join(f'{v:.3f}' for v in pose['housing_rotation_deg']))
+            if pose.get('surface_mount'):
+                mount=pose['surface_mount']
+                title='支架贴合，盒体外伸' if mount.get('type','BACK')=='SUPPORT' else '旧布局：盒体背面贴合'
+                box.label(text=f"{title}；贴面旋转 {mount['spin_deg']:.1f}°")
+                if mount.get('type','BACK') == 'SUPPORT':
+                    box.label(text=f"支架末端盒体转向：{mount.get('aim_deg',0.):.1f}°")
         for row in self.pending['summary']:
             box=self.layout.box()
             box.label(text=f'C{row["slot"]} {row["action"]}')

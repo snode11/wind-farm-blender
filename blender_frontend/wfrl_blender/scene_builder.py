@@ -495,7 +495,11 @@ def _apply_surface_lighting(scene):
         key.data.color = (.98, .97, .95)
         key.data.energy = 1.4
         key.data.angle = math.radians(2)
-    scene.view_settings.exposure = .45
+    fill = scene.objects.get('WFRL.Light.Fill')
+    if fill is not None:
+        fill.data.energy = .12
+        fill.data.use_shadow = False
+    scene.view_settings.exposure = .35
     scene.eevee.use_shadows = True
     scene.eevee.use_fast_gi = True
     scene.eevee.fast_gi_method = 'AMBIENT_OCCLUSION_ONLY'

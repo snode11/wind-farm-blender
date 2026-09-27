@@ -197,7 +197,11 @@ def render_group(context, cameras, long_edge=None, target=None, fast=False):
         context.view_layer.update()
         depsgraph = context.evaluated_depsgraph_get()
         state_hash = simulation_state_hash(scene, depsgraph)
-        with drawing_settings(context.space_data, fast), without_annotations(scene, context.view_layer):
+        from contextlib import nullcontext
+        import sys
+        native = sys.modules.get(__package__ + '.native_camera_views')
+        quality = native.capture_quality(scene) if native else nullcontext()
+        with quality, drawing_settings(context.space_data, fast), without_annotations(scene, context.view_layer):
             for camera in cameras:
                 params = core.parameters(camera)
                 image = CameraImage(camera, depsgraph, long_edge if long_edge is not None else params.output_long_edge_px)

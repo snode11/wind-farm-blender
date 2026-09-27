@@ -28,7 +28,7 @@ PALETTE = {
 # appearance only: these never feed geometry, calibration or measurement data.
 SURFACES = {
     "tower": (.48, .58, .055, .010, 0., .04),
-    "blade": (.28, .38, .035, .006, 0., .16),
+    "blade": (.36, .46, .025, .006, 0., .08),
     "nacelle": (.38, .48, .05, .010, 0., .08),
     "hub": (.34, .44, .04, .008, 0., .08),
     "metal": (.25, .37, .025, .004, .82, 0.),

@@ -1,0 +1,128 @@
+{
+  "rig_pose": {
+    "center": [
+      0.9520048499107361,
+      -2.0058634281158447,
+      2.205244541168213
+    ],
+    "housing_yaw_deg": -30.000000834826057,
+    "housing_rotation_deg": [
+      -0.8121619993937605,
+      -0.0,
+      -30.000000834826057
+    ],
+    "surface_mount": {
+      "point": [
+        1.0,
+        -1.6487607955932617,
+        2.200000047683716
+      ],
+      "normal": [
+        0.0,
+        -0.9998995661735535,
+        0.014174426905810833
+      ],
+      "surface_name": "WFRL.Turbine.T1.Nacelle",
+      "spin_deg": 0.0,
+      "aim_deg": -30.0,
+      "type": "SUPPORT"
+    }
+  },
+  "schema_version": 2,
+  "coordinate_frame": "T1.YawRoot.local / v1",
+  "orientation_convention": "yaw +X toward +Y; pitch up; roll camera +Z; degrees",
+  "model_signature": "sha256:d491dc9bee9476f426b3",
+  "resolution_policy": "FOV_PRIORITY_LONG_EDGE",
+  "cameras": [
+    {
+      "slot_id": 1,
+      "installed": true,
+      "enabled": true,
+      "label": "C1 · 叶根",
+      "parameters": {
+        "location": [
+          0.9514378905296326,
+          -2.006845474243164,
+          2.1252524852752686
+        ],
+        "yaw": 201.26373889942798,
+        "pitch": -25.41219506756278,
+        "roll": -150.71209493640782,
+        "fov": 75.01850604764957,
+        "vfov": 46.70606820408862,
+        "focal_length_mm_record": null,
+        "output_long_edge_px": 1920,
+        "clip_near_m": 0.005,
+        "clip_far_m": 30000.0
+      },
+      "mount_mode": "RESEARCH",
+      "mount_validation_status": "research_outside",
+      "research_confirmed": true,
+      "nearest_distance_m": 0.35698947310447693,
+      "mount_warning": "研发坐标：支架与安装未认证",
+      "anchor": null,
+      "image_width_px": 1920,
+      "image_height_px": 1080
+    },
+    {
+      "slot_id": 2,
+      "installed": true,
+      "enabled": true,
+      "label": "C2 · 中段",
+      "parameters": {
+        "location": [
+          0.9520048499107361,
+          -2.0058634281158447,
+          2.205244541168213
+        ],
+        "yaw": 241.00991638490532,
+        "pitch": -37.33743247283004,
+        "roll": -166.05588308120852,
+        "fov": 31.727083869688006,
+        "vfov": 18.163284287455227,
+        "focal_length_mm_record": null,
+        "output_long_edge_px": 1920,
+        "clip_near_m": 0.005,
+        "clip_far_m": 30000.0
+      },
+      "mount_mode": "RESEARCH",
+      "mount_validation_status": "research_outside",
+      "research_confirmed": true,
+      "nearest_distance_m": 0.3571414053440094,
+      "mount_warning": "研发坐标：支架与安装未认证",
+      "anchor": null,
+      "image_width_px": 1920,
+      "image_height_px": 1080
+    },
+    {
+      "slot_id": 3,
+      "installed": true,
+      "enabled": true,
+      "label": "C3 · 叶尖",
+      "parameters": {
+        "location": [
+          0.9525718092918396,
+          -2.0048813819885254,
+          2.285236358642578
+        ],
+        "yaw": 253.93283103050499,
+        "pitch": -39.754031721777736,
+        "roll": -173.57430988876632,
+        "fov": 10.889976365785442,
+        "vfov": 6.13824158673221,
+        "focal_length_mm_record": null,
+        "output_long_edge_px": 1920,
+        "clip_near_m": 0.005,
+        "clip_far_m": 30000.0
+      },
+      "mount_mode": "RESEARCH",
+      "mount_validation_status": "research_outside",
+      "research_confirmed": true,
+      "nearest_distance_m": 0.35729336738586426,
+      "mount_warning": "研发坐标：支架与安装未认证",
+      "anchor": null,
+      "image_width_px": 1920,
+      "image_height_px": 1080
+    }
+  ]
+}

@@ -4,6 +4,7 @@ Shared scene aspect is expanded to contain each calibrated rectangle. A mask
 shows only that rectangle. Proxy cameras follow originals without modifying them.
 """
 import math
+from contextlib import contextmanager
 import bpy
 from bpy.app.handlers import persistent
 from . import custom_cameras as core, camera_projection as projection
@@ -25,6 +26,9 @@ class NativeSession:
         self.entries = []
         self.handle = None
         self.slots = slots
+        self.source_shading = []
+        self.preview_quality = None
+        self.fast = True
         shader=context.space_data.shading
         self.material_settings={key:getattr(shader,key) for key in (
             'use_scene_lights','use_scene_world','studio_light','studiolight_rotate_z',
@@ -39,7 +43,31 @@ class NativeSession:
         self.window=next(w for w in bpy.context.window_manager.windows if w.as_pointer() not in before)
         self.owns_window=True
         self.workspace=self.window.workspace
+        # The source window stays available but need not run another Eevee view.
+        # Restore its exact shading when the camera window closes.
+        for area in bpy.context.window.screen.areas:
+            if area.type == 'VIEW_3D':
+                shading = area.spaces.active.shading
+                self.source_shading.append((bpy.context.window.as_pointer(), area.as_pointer(), shading.type))
+                shading.type = 'SOLID'
+        self.preview_quality = self.quality_settings()
+        self.apply_quality()
         bpy.app.timers.register(self.prepare, first_interval=.1)
+
+    def quality_settings(self):
+        return (self.scene.render.preview_pixel_size, self.scene.eevee.taa_samples,
+                self.scene.eevee.use_shadows, self.scene.eevee.use_fast_gi)
+
+    def set_quality(self, settings):
+        pixel_size, samples, shadows, gi = settings
+        self.scene.render.preview_pixel_size = pixel_size
+        self.scene.eevee.taa_samples = samples
+        self.scene.eevee.use_shadows = shadows
+        self.scene.eevee.use_fast_gi = gi
+
+    def apply_quality(self):
+        if self.preview_quality is not None:
+            self.set_quality(('2', 8, False, False) if self.fast else self.preview_quality)
 
     def prepare(self):
         try:
@@ -56,22 +84,36 @@ class NativeSession:
         if len(areas)<len(self.slots):
             area=max(areas,key=lambda a:a.width*a.height)
             with bpy.context.temp_override(window=self.window,area=area):
-                direction='VERTICAL' if area.width>area.height else 'HORIZONTAL'
-                bpy.ops.screen.area_split(direction=direction,factor=.5)
+                # Left-to-right equal columns, independent of window aspect.
+                factor = 1 / (len(self.slots) - len(areas) + 1)
+                bpy.ops.screen.area_split(direction='VERTICAL',factor=factor)
             return .1
-        areas.sort(key=lambda a:-(a.y+a.height/2))
+        areas.sort(key=lambda a:a.x)
         for area, slot in zip(areas,self.slots):
             space = area.spaces.active
             space.show_region_ui = False
+            space.show_region_toolbar = False
+            space.show_region_tool_header = False
+            area.show_menus = False
             space.overlay.show_overlays = False
             space.show_gizmo = False
             shader=space.shading
             shader.type='MATERIAL'
             for key,value in self.material_settings.items():setattr(shader,key,value)
             space.lock_camera = False
-            self.entries.append({'area':area,'slot':slot,'proxy':None,'key':None})
+            self.entries.append({'area':area,'slot':slot,'proxy':None,'key':None,'view_key':None})
         self.sync()
         self.handle = bpy.types.SpaceView3D.draw_handler_add(self.draw,(), 'WINDOW','POST_PIXEL')
+        bpy.app.timers.register(self.first_paint, first_interval=.5)
+
+    def first_paint(self):
+        # Ensure the paused first frame is swapped after all regions exist.
+        # On macOS, tagging inactive regions alone can leave partial titles
+        # until the first mouse event. This one-shot repaint is not a loop.
+        if _ACTIVE is self and any(w == self.window for w in bpy.context.window_manager.windows):
+            with bpy.context.temp_override(window=self.window):
+                bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+        return None
 
     def sync(self):
         render = self.scene.render
@@ -82,7 +124,9 @@ class NativeSession:
             space = area.spaces.active
             if space.type != 'VIEW_3D':continue
             camera = core.get_camera(self.scene,slot)
-            if len(self.slots)==4 and camera and not camera.get('custom_enabled',True):camera=None
+            # Participation controls grouped views; a disabled camera can still
+            # be inspected individually before the user enables it again.
+            if len(self.slots)>1 and camera and not camera.get('custom_enabled',True):camera=None
             key = (camera.as_pointer(),repr(core.parameters(camera)),aspect) if camera else None
             if key != entry['key'] or (camera and entry['proxy'] is None):
                 if entry['proxy']:
@@ -106,19 +150,28 @@ class NativeSession:
                     constraint=proxy.constraints.new('COPY_TRANSFORMS');constraint.target=camera
                     entry.update(proxy=proxy,fx=fx,fy=fy)
                 entry['key']=key
-            if entry['proxy']:
+            region=next((r for r in area.regions if r.type=='WINDOW'),None)
+            view_key=(key, region.width, region.height) if region else None
+            if entry['proxy'] and view_key != entry['view_key']:
                 space.use_local_camera=True;space.camera=entry['proxy']
                 space.region_3d.view_perspective='CAMERA'
                 region=next((r for r in area.regions if r.type=='WINDOW'),None)
                 if region:
                     outer_w=min(region.width,region.height*aspect)
                     outer_h=outer_w/aspect
+                    from .custom_camera_preview import available_rectangle
+                    _, bottom, _, height = available_rectangle(area, region)
+                    scale = bpy.context.preferences.system.ui_scale
+                    reserved = region.height-(bottom+height)+66*scale+16
+                    # The camera gate stays centred. Reserve its full image
+                    # below the title even when Blender overlays the header.
                     factor=min((region.width-32)/max(1,outer_w*entry['fx']),
-                               (region.height-120)/max(1,outer_h*entry['fy']))
+                               max(1,region.height-2*reserved)/max(1,outer_h*entry['fy']))
                     space.region_3d.view_camera_zoom=max(-30,min(300,(math.sqrt(max(.01,4*factor))-math.sqrt(2))*50))
                 space.region_3d.view_camera_offset=(0,0)
                 space.lock_camera=False
-            area.tag_redraw()
+                entry['view_key']=view_key
+                area.tag_redraw()
 
     def draw(self):
         if bpy.context.window != self.window or bpy.context.workspace != self.workspace:return
@@ -144,10 +197,24 @@ class NativeSession:
             rect(0,0,region.width,max(0,bottom));rect(0,top,region.width,region.height-top)
             rect(0,bottom,max(0,left),h);rect(right,bottom,region.width-right,h)
         else:rect(0,0,region.width,region.height)
-        label=f"C{entry['slot']} · 原生视口" if proxy else f"C{entry['slot']} · 未安装或未参与"
-        blf.size(0,15);blf.color(0,.8,.9,1,1);blf.position(0,14,region.height-78,0);blf.draw(0,label)
+        label=(f"C{entry['slot']} · " + ('叶根', '中段', '叶尖')[entry['slot']-1]) if proxy else f"C{entry['slot']} · 未安装或未参与"
+        scale=bpy.context.preferences.system.ui_scale
+        from .custom_camera_preview import available_rectangle
+        _, bottom, _, height = available_rectangle(bpy.context.area, region)
+        title_top=bottom+height
+        rect(0,title_top-66*scale,region.width,66*scale)
+        font=0
+        blf.size(font,20*scale);blf.color(font,.88,.94,1,1)
+        blf.position(font,16*scale,title_top-28*scale,0);blf.draw(font,label)
+        time_s=self.scene.get('wfrl_clearance_time_s')
+        clock=f'仿真时间 {time_s:.2f} s' if time_s is not None else f'帧 {self.scene.frame_current}'
+        blf.size(font,13*scale);blf.color(font,.65,.73,.81,1)
+        blf.position(font,16*scale,title_top-51*scale,0);blf.draw(font,clock)
 
     def close(self):
+        if self.preview_quality is not None:
+            self.set_quality(self.preview_quality)
+            self.preview_quality = None
         if self.handle:
             bpy.types.SpaceView3D.draw_handler_remove(self.handle,'WINDOW');self.handle=None
         # Closed-window Area RNA may point at freed C memory. Never dereference
@@ -161,8 +228,30 @@ class NativeSession:
             if proxy:
                 data=proxy.data;bpy.data.objects.remove(proxy,do_unlink=True);bpy.data.cameras.remove(data)
         self.entries.clear()
+        for window_id, area_id, shading_type in self.source_shading:
+            source = next((w for w in bpy.context.window_manager.windows if w.as_pointer() == window_id), None)
+            if source:
+                area = next((a for a in source.screen.areas if a.as_pointer() == area_id), None)
+                if area and area.type == 'VIEW_3D':
+                    area.spaces.active.shading.type = shading_type
+        self.source_shading.clear()
         if alive and self.owns_window:
             with bpy.context.temp_override(window=alive):bpy.ops.wm.window_close()
+
+
+@contextmanager
+def capture_quality(scene):
+    """Keep PNG sampling independent of the temporary live preview budget."""
+    session = _ACTIVE
+    if session is None or session.scene != scene or session.preview_quality is None:
+        yield
+        return
+    current = session.quality_settings()
+    try:
+        session.set_quality(session.preview_quality)
+        yield
+    finally:
+        session.set_quality(current)
 
 
 def shutdown():
@@ -191,6 +280,7 @@ def header(self,context):
         entry=next((e for e in _ACTIVE.entries if e['area']==context.area),None)
         if entry:row.label(text=f"C{entry['slot']}")
         row.operator('screen.animation_play',text='暂停' if context.screen.is_animation_playing else '播放',icon='PAUSE' if context.screen.is_animation_playing else 'PLAY')
+        row.operator('wfrl.native_camera_quality',text='流畅' if _ACTIVE.fast else '高清')
         row.operator('wfrl.native_camera_exit',text='退出',icon='X')
 
 
@@ -224,6 +314,17 @@ class WFRL_OT_NativeCamera(bpy.types.Operator):
             session.close();self.report({'ERROR'},str(exc));return {'CANCELLED'}
 
 
+class WFRL_OT_NativeQuality(bpy.types.Operator):
+    bl_idname='wfrl.native_camera_quality'
+    bl_label='切换预览画质'
+    bl_description='切换流畅材质预览与原始预览画质；原图采集保持原始画质'
+    def execute(self,context):
+        if _ACTIVE:
+            _ACTIVE.fast = not _ACTIVE.fast
+            _ACTIVE.apply_quality()
+        return {'FINISHED'}
+
+
 class WFRL_OT_NativeExit(bpy.types.Operator):
     bl_idname='wfrl.native_camera_exit'
     bl_label='退出原生相机观察'
@@ -247,4 +348,4 @@ def unregister():
     if on_load in bpy.app.handlers.load_pre:bpy.app.handlers.load_pre.remove(on_load)
 
 
-CLASSES=(WFRL_OT_NativeCamera,WFRL_OT_NativeExit)
+CLASSES=(WFRL_OT_NativeCamera,WFRL_OT_NativeQuality,WFRL_OT_NativeExit)

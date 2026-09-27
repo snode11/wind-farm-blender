@@ -73,9 +73,9 @@ def terrain_shader(material):
     links.new(broad.outputs['Fac'], habitat.inputs[1])
     links.new(middle.outputs['Fac'], habitat.inputs[2])
     ramp = nodes.new('ShaderNodeValToRGB')
-    stops = [(.22, (.035,.12,.012,1)), (.42,(.12,.32,.025,1)),
-             (.49,(.32,.38,.10,1)), (.56,(.72,.49,.21,1)),
-             (.65,(.32,.16,.065,1)), (.76,(.65,.64,.51,1))]
+    stops = [(.22, (.055,.11,.028,1)), (.42,(.15,.25,.070,1)),
+             (.49,(.30,.33,.13,1)), (.56,(.53,.40,.22,1)),
+             (.65,(.28,.18,.09,1)), (.76,(.52,.52,.43,1))]
     for elem in list(ramp.color_ramp.elements)[2:]:
         ramp.color_ramp.elements.remove(elem)
     for i,(position,color) in enumerate(stops):
@@ -115,7 +115,7 @@ def terrain_shader(material):
     links.new(haze.outputs[0],bsdf.inputs['Base Color'])
     rough=image_node('rough',True); links.new(rough.outputs[0],bsdf.inputs['Roughness'])
     normal=image_node('nor_gl',True)
-    norm=nodes.new('ShaderNodeBump'); norm.inputs['Distance'].default_value=.3; norm.inputs['Strength'].default_value=.5
+    norm=nodes.new('ShaderNodeBump'); norm.inputs['Distance'].default_value=.3; norm.inputs['Strength'].default_value=.32
     links.new(rough.outputs[0],norm.inputs['Height']); links.new(norm.outputs[0],bsdf.inputs['Normal'])
     links.new(bsdf.outputs[0],out.inputs['Surface'])
 
