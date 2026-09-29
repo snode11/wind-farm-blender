@@ -2,9 +2,34 @@
 
 基于 Blender 的风场三维展示与离线仿真回放。
 
-当前发布版本：**0.3.9**，要求 **Blender 5.2+**。
+当前发布版本：**0.3.12**，要求 **Blender 5.2+**。
 
-[下载 0.3.9 扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.9/wfrl_blender-0.3.9.zip) · [发布页与源码](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.9) · [详细前端说明](前端readme.md)
+[下载 0.3.12 扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.12/wfrl_blender-0.3.12.zip) · [发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.12) · [详细前端说明](前端readme.md)
+
+**安装包与源码版本分开：** 0.3.10–0.3.12 仅发布扩展 ZIP，GitHub 自动生成的 Source code 归档仍基于既有源码提交，不包含这些版本的全部实现。本次文档同步不会同步扩展源码；开发者不能按新版文档直接假定公开源码已升级。
+
+## [0.3.12](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.12) · 2026-09-29 · 单路轻量显示与双束回放
+
+- 独立单路及三路中的单路放大固定使用轻量实体视图，保留材质颜色；移除单路材质切换和“精确材质预览”按钮。
+- 保留相机参数、播放／暂停／单步与原图采集的独立质量设置，返回三路恢复原画质。
+- 集成可携带双束数据及读取器：S1／S2／S3 为 10°／12°／14°，S2/S3 按同时刻、同叶片配对，S1 有效命中独立报警；保留旧 B2 回放。
+
+已知限制：双束为研究估计，MAE 约 4.269 m，高精度柔性叶尖反演尚未完成。macOS Blender 5.2.1 的安装及短时窗口回归不代表完整片段帧率、Windows/Linux 或现场精度验收。数据仍为 REVIEW_ONLY。
+
+## [0.3.11](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.11) · 2026-09-28 · 三相机单步控制
+
+- 2×2 展示与三列对照的播放／暂停旁新增“单步”。
+- 点击后暂停并同步前进一帧，末帧保持停止；保留单路放大和静态安装示意。
+
+本版 ZIP 在 macOS Blender 5.2.1 验证了两种布局、暂停逐帧、播放中单步及末帧停止；不代表其他平台验证。
+
+## [0.3.10](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.10) · 2026-09-27 · 2×2 展示与单路放大
+
+- 新增默认 2×2 展示：三路相机加静态安装示意，保留三列对照。
+- 支持单路放大／返回、统一播放控制与时间显示，完善预览及采集质量恢复。
+- 播放验收区分完整完成、超时、中止、错误和缺少绘制，未完成不再提前输出 PASS；减少部分重复显隐写入和暂停时重绘。
+
+已知限制：第四格是静态安装示意，不是第四路相机。原停止异常未复现但根因未定位，切换仍有绘制空档；不承诺稳定 30／60 FPS、全周期无遮挡或拼接成功。
 
 ## [0.3.9](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.9) · 2026-09-27 · 三相机默认取景与展示改进
 
@@ -14,16 +39,17 @@
 - **干净的默认画面**：默认关闭叶尖轨迹与挠度辅助物，小幅调整光照和材质；需要分析时仍可主动打开辅助显示。
 - **沿用原启动方式**：已安装匹配的 0.3.9 扩展后，原 macOS 启动命令加载默认三相机，无需额外导入 JSON；离线演示不重新运行求解器或训练。
 
-当前仍为工程仿真可视化：根部与极尖端有局部遮挡，固定相机不保证全周期完整可见；三路播放仍有低帧率及待排查的切换异常。相机布局不等于拼接结果或实体标定。2×2 展示、单路放大与进一步性能优化属于[后续计划](前端更新计划.md)，未计入本版已完成项。
+0.3.9 发布时的限制：根部与极尖端有局部遮挡，固定相机不保证全周期完整可见；三路播放仍有低帧率及待排查的切换异常。相机布局不等于拼接结果或实体标定。2×2 展示、单路放大与进一步性能优化属于[后续计划](前端更新计划.md)，未计入本版已完成项。
 
 ## 快速开始
 
-1. 下载 [wfrl_blender-0.3.9.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.9/wfrl_blender-0.3.9.zip)，保留压缩格式。
+1. 下载 [wfrl_blender-0.3.12.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.12/wfrl_blender-0.3.12.zip)，保留压缩格式。
 2. Blender → **Edit → Preferences → Get Extensions → Install from Disk**，选择 ZIP 并启用 WFRL Blender。更新扩展后重启 Blender。
 3. 新建 General 场景，鼠标置于三维视图，按 **N**，在 **MAPPO** 侧栏加载 **MAPPO · 60 秒**。
-4. 通过 **View → 三相机 → 三路对照** 查看默认取景。先暂停查看三路画面，再播放检查叶片经过。
+4. 通过 **View → 三相机 → 三路对照** 打开默认 2×2 展示，也可切换三列、放大单路、播放／暂停或单步。第四格是静态安装示意。
+5. 查看双束时，在 **MAPPO → 净空** 选择 **双束净空 / S1**；旧 B2 回放仍可切换。
 
-ZIP 内置离线回放数据与读取器；离线观看无需配置 Python 后端、MPI 或 FAST.Farm。发布页的 **Source code** 对应 `v0.3.9` 标签，用于源码开发，不是扩展安装包。安装、校验与验证范围见[安装说明](docs/blender/INSTALL.md)和[0.3.9 发布核对](docs/blender/0.3.9发布核对.md)。
+ZIP 内置离线回放数据与读取器；离线观看无需配置 Python 后端、MPI 或 FAST.Farm。请安装 Release 附件 ZIP；自动生成的 **Source code** 不是新版扩展安装包。安装与验证范围见[安装说明](docs/blender/INSTALL.md)和[当前发布状态](docs/blender/发布状态与验证范围.md)。
 
 ## 已发布历史
 
@@ -93,7 +119,7 @@ ZIP 内置离线回放数据与读取器；离线观看无需配置 Python 后�
 - [详细变更记录](CHANGELOG.md)
 - [前端功能、安装与演示说明](前端readme.md)
 - [Blender 前端实现与维护](blender_frontend/README.md)
-- [基于 0.3.9 的后续更新计划](前端更新计划.md)
+- [0.3.10 更新计划与历史验证](前端更新计划.md)
 - [雷达算法说明](wfrl/lidar/README.md)
 
 当前物理数据为 **REVIEW_ONLY**，固定三束测量覆盖率未通过；回放不代表现场实测。源码测试、安装包验证、窗口显示、播放性能与实体实验分别判断，不因版本更新自动变为物理验收通过。

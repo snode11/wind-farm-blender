@@ -1,6 +1,18 @@
 # 离线激光净空数据生产
 
-当前修订交付是 `results/lidar/packages/normal-v1.1` 与 `close-v1.1` 的本地 FAST.Farm 结果包。两者来自 36 秒真实求解的 18–36 秒窗口。`report.md` 给出逐束误差、手册定义、求交与真值参考点，以及解析和独立时空细化的全部实数。
+## 当前双束数据与可携带包
+
+0.3.12 安装 ZIP 已包含双束回放。以下是匹配本地源码的生产入口；公开源码未随仅 ZIP 发布同步。日常观看直接用 MAPPO → 净空 → 双束净空 / S1，无需重新后处理或求解。
+
+- `postprocess_dual_beam.py --source <完整v3源包> --calibration <已确认标定JSON> --output <新目录>`：按全部保存网格处理 S1 命中及 S2/S3 同刻同叶片重建，不启动 FAST.Farm。必须显式选择已确认标定；脚本默认的 diagnostic 标定不是当前内侧安装的替代。
+- `package_dual_beam.py --package <双束结果目录> --output <新目录>`：生成可携带目录，包含全部源数据的 `source/`，并重新校验。两个输出都使用新目录，保留原始运行和既有结果。
+- `audit_dual_beam_accuracy.py`、`audit_measurement_window.py`：分别用于误差诊断和保存网格/测量窗审计；按脚本参数和匹配源数据使用，不把软件 PASS 当成精度通过。
+
+当前布局为 S1/S2/S3 = 10°/12°/14°；S1 报警独立于双束有效性，旧 B2 回放仍可使用。40 Hz 保存记录不能替代设备原始采样或现场延迟验证。双束 MAE 约 4.269 m，仍为 REVIEW_ONLY / PENDING_ACCEPTANCE。[格式合同](../../wfrl/lidar/REPLAY_FORMAT.md#dual-beam-review-v1)和[发布范围](../../docs/blender/发布状态与验证范围.md)分别说明数据与交付状态。
+
+## 历史 normal/close 生产流程
+
+以下修订交付是 `results/lidar/packages/normal-v1.1` 与 `close-v1.1` 的本地 FAST.Farm 结果包。两者来自 36 秒真实求解的 18–36 秒窗口。`report.md` 给出逐束误差、手册定义、求交与真值参考点，以及解析和独立时空细化的全部实数。
 
 使用 `/opt/anaconda3/envs/wfrl-mac/bin/python`；求解器位于同环境 `bin/FAST.Farm`，版本 3.5.3。后处理需要 NumPy；设置 `OPENBLAS_NUM_THREADS=1` 避免几何小矩阵调用启动大量线程。无需策略 checkpoint 或训练。规定转速 9 rpm、变桨 0°、无 ServoDyn；这是固定转速工况，不是运行策略的性能结论。
 

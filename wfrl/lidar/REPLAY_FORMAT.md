@@ -1,4 +1,20 @@
-# Lidar replay 1.0
+# Lidar replay formats
+
+The original replay 1.0 contract below describes the legacy B2 / normal-close path. It remains supported and is not the contract for the dual-beam overlay bundled in 0.3.12. The newer implementation is in the matching local source; the public source archive has not been synchronized with the ZIP-only releases.
+
+## Dual-beam review v1
+
+`wfrl.dual-beam-review.v1` is a review overlay on `wfrl.farm-flex-review.v3` geometry. The manifest uses `status: REVIEW_ONLY`, `sample_kind: source`, a source directory in `source_package`, complete `source_hashes`, a result `files` inventory, and the source segment and turbine IDs. `performance_status: PENDING_ACCEPTANCE` is separate from software package validation.
+
+`dual_beam_replay.resolve_package(path)` verifies source and result hashes, the complete source inventory including its manifest, required `results.json` and `calibration.json`, supported calibration/reconstruction method, and matching turbine IDs and segment. Rejected installations must not load. The supported research reconstruction method is `hub-axis.v1`; verification of a package is not accuracy acceptance.
+
+Samples contain `observations` for S1/S2/S3, a reconstruction, evaluation fields and independent S1 observation state. S2/S3 must pair at one saved time on the same blade. S1 valid blade hits drive their own alarm regardless of pair validity. Saved samples and precomputed prefix states drive replay; interpolation of displayed geometry cannot create a missing measurement. Seeking and replaying must not double-count history or reveal future event endpoints. Invalid/expired measurements remain missing, not zero or a declaration of safety.
+
+`dual_beam_package.portable_copy(package, output)` requires a new output directory, copies the verified source inventory into `source/`, copies result payloads and writes `source_package: source`, `portable: true`, then resolves the new package again. Transfer the entire directory, not only `manifest.json`. The self-contained source copy removes dependency on the developer's source location.
+
+The installed layout is 10°/12°/14°; 40 Hz saved data and ideal geometric hits do not establish hardware sampling performance, field accuracy or protection latency. See the [release and validation scope](../../docs/blender/发布状态与验证范围.md).
+
+## Legacy replay 1.0
 
 `replay.py` and its sibling `evidence.py` use only the standard library and must be vendored together. Public API:
 

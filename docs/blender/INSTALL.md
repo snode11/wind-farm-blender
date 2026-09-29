@@ -1,35 +1,30 @@
-# WFRL Blender 0.3.9 安装
+# WFRL Blender 0.3.12 安装
 
-要求 **Blender 5.2+**。Windows、macOS 和 Linux 使用同一扩展 ZIP；本次实际验证环境及范围见 [0.3.9 发布核对](0.3.9发布核对.md)。
+要求 **Blender 5.2+**。Windows、macOS 和 Linux 使用同一扩展 ZIP；已记录的安装和窗口验证为 macOS Blender 5.2.1，其他平台未完成本轮实机验收。
 
 ## 安装与升级
 
-1. 下载 [wfrl_blender-0.3.9.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.9/wfrl_blender-0.3.9.zip)，保留压缩格式。发布页自动生成的 **Source code** 是 `v0.3.9` 标签源码，不是可直接安装的 Blender 扩展包。
-2. 保存现有 Blender 工作。进入 **Edit → Preferences → Get Extensions → Install from Disk**，选择 ZIP 并启用 **WFRL Blender**。
-3. 升级旧版后退出并重启 Blender，让新的 Python 模块和打包资源生效；仅更新仓库或下载 ZIP 不会替换当前进程中的扩展。
-4. 新建 General 场景，鼠标置于三维视图，按 **N → MAPPO → 加载 MAPPO · 60 秒**。不要将旧 `.blend` 快照直接视为新版默认场景。
-5. 主视图先显示 T1 总览；进入 **View → 三相机 → 三路对照** 检查 C1/C2/C3 推荐取景。加载后先暂停，播放时观察叶片经过。
+1. 下载 [wfrl_blender-0.3.12.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.12/wfrl_blender-0.3.12.zip)，保留压缩格式。
+2. 保存现有 Blender 工作，进入 **Edit → Preferences → Get Extensions → Install from Disk**，选择 ZIP 并启用 **WFRL Blender**。
+3. 升级后退出并重启 Blender，让新模块和资源生效；下载 ZIP 或修改仓库不会替换当前进程中的扩展。
+4. 新建 General 场景，在三维视图按 **N → MAPPO → 加载 MAPPO · 60 秒**，不要把旧 `.blend` 当作新版默认场景。
+5. 主视图先显示 T1 总览。通过 **View → 三相机 → 三路对照** 打开默认 2×2：三路相机和一格静态安装示意；可切三列、放大单路、播放／暂停或单步。
+6. 在 **MAPPO → 净空 → 双束净空 / S1** 加载随包双束记录，也可切回原 B2 回放。双束是研究估计，缺失不表示距离为零或状态安全。
 
-发布文件的 SHA-256 及交付验证见[发布核对](0.3.9发布核对.md)。核对时使用下载后的实际文件；版本名相同不等于文件内容相同。
+## 离线使用
 
-## 离线使用与三相机
+ZIP 内置预弯 v3 三机 60 秒回放、双束数据与读取器、默认三相机配置。离线观看无需克隆仓库、配置 Python 后端、MPI 或 FAST.Farm，也不运行新的求解或训练。
 
-扩展 ZIP 内置预弯 v3 三机 MAPPO 60 秒回放数据、读取器和默认三相机配置。安装完成后，离线观看无需克隆仓库、配置外部 Python、MPI 或 FAST.Farm，也不运行新的求解或训练。
+加载 MAPPO 会生成共盒三相机及外伸支架，应用连续重叠的默认取景。固定光心随机舱运动，不持续追踪叶片；根部和极尖端仍可能遮挡。独立单路和单路放大固定使用轻量实体显示，三路保留流畅／高清，原图采集使用独立原始质量设置。
 
-加载 MAPPO 会创建共盒三相机及外伸支架，并应用连续重叠的默认取景，无需另行导入 JSON。C1/C2/C3 分别以叶根、中段和叶尖为重点；固定光心随机舱运动，不持续追踪 B1，不按叶长范围裁剪画面。根部、极尖端及部分表面仍可能被机舱、连接件或叶片自身遮挡。
+安装、布局和采集见[详细前端说明](../../前端readme.md)、[三相机说明](T1三相机使用说明.md)。更新后先检查界面和回放；新版完整片段性能、跨平台和现场精度仍需分别验证。
 
-安装调整、单路／三路观察、流畅／高清切换、布局导入导出和同刻／序列 PNG 采集见[详细前端说明](../../前端readme.md)及[三相机说明](T1三相机使用说明.md)。旧四路 JSON 不适用于当前三相机配置。
+## 源码与验证范围
 
-三路播放仍可能卡顿，并有待排查的切换后停止异常；当前不承诺稳定 30／60 FPS。物理数据保持 REVIEW_ONLY，固定三束测量覆盖率未通过，画面不代表实体相机标定、拼接成功或现场雷达精度验收。
+0.3.10–0.3.12 仅发布安装 ZIP。[发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.12)自动生成的 **Source code** 归档不包含这些版本的全部实现，不是安装包。本次文档更新也不会同步扩展源码。
 
-## 源码与后端
+只有拿到与目标版本匹配的完整源码和数据资源后，才可从仓库根目录使用 `python3 scripts/blender/build_extension.py` 构建。不能用公开旧源码构建后仅改版本号冒充新版。实现与维护见[前端实现说明](../../blender_frontend/README.md)，版本及验证边界见[当前发布状态](发布状态与验证范围.md)。
 
-对应源码由 [v0.3.9 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.9)和标签提供。从仓库根目录构建：
+## 现有 MP4 输出
 
-```bash
-python3 scripts/blender/build_extension.py
-```
-
-构建后安装生成的扩展 ZIP 并重启 Blender。修改源码不会自动更新已安装扩展；具体构建资源、验证入口及后端环境见[实现与维护](../../blender_frontend/README.md)。真实后端运行需另行配置项目环境，不能用离线安装成功代替后端验收。
-
-MAPPO → 视频输出提供现有 MP4 导出与 RTSP 循环推流；推流需配置 FFmpeg 和 MediaMTX，详见[视频输出说明](Blender视频输出.md)。
+**MAPPO → 视频输出**支持现有 MP4 导出和 RTSP 循环推流；推流需要 FFmpeg 与 MediaMTX。此入口播放已有视频，不是 Blender 视口直播，也不是三相机自动生成三路视频。详见[前端说明的视频输出段落](../../前端readme.md#视频输出)。
