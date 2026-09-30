@@ -22,9 +22,23 @@ from types import SimpleNamespace
 
 def launcher_environment():
     # A Bridge may itself have been launched by mpiexec. A fresh launcher must
-    # not inherit the enclosing MPI job identity.
-    return {key: value for key, value in os.environ.items()
-            if not key.startswith(('OMPI_', 'PMI_', 'PMIX_', 'OPAL_'))}
+    # not inherit the enclosing MPI job identity. Transport tuning is different:
+    # it must reach both the worker and the FAST.Farm process it spawns.
+    transport_keys = ('OMPI_MCA_btl', 'OMPI_MCA_pml')
+    env = {key: value for key, value in os.environ.items()
+           if not key.startswith(('OMPI_', 'PMI_', 'PMIX_', 'OPAL_', 'PRTE_'))
+           or any(key == prefix or key.startswith(prefix + '_')
+                  for prefix in transport_keys)}
+    if sys.platform == 'darwin':
+        # These Bridge jobs and their simulator ranks run on this Mac. Open MPI
+        # can select an unusable external/virtual interface for a spawned rank,
+        # leaving matching Send/Recv calls stuck after the initial handshake.
+        # Use loopback TCP by default; retain explicit caller transport choices.
+        env.setdefault('OMPI_MCA_btl', 'self,tcp')
+        if not any(key in env for key in ('OMPI_MCA_btl_tcp_if_include',
+                                          'OMPI_MCA_btl_tcp_if_exclude')):
+            env['OMPI_MCA_btl_tcp_if_include'] = 'lo0'
+    return env
 
 
 class IsolatedTrainer:

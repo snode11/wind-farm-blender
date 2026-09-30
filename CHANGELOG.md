@@ -1,8 +1,15 @@
 # 变更记录
 
-仅记录已在 GitHub Releases 发布的版本。
+仅记录已在 GitHub Releases 发布的版本。GW184 0.4 与 NREL/WFRL 0.3 为独立用途；NREL 扩展保持 0.3.12。完整前端与 GW184 实现以相应 ZIP 为准。
 
-0.3.10–0.3.12 均为仅安装 ZIP 发布；GitHub 自动生成的 Source code 归档不包含这些版本的全部实现。文档更新不代表公开扩展源码同步。
+## [0.4.0](https://github.com/snode11/wind-farm-blender/releases/tag/v0.4.0) · 2026-09-30 · GW184 三相机与叶片缺陷独立包
+
+- 新增 `gw184_three_camera_defects-0.4.0.zip` 独立运行包，完整解压后启动；内含模型参考数据、共享代码、固定三相机、六类合成缺陷编辑和配置保存恢复入口。
+- GW184 使用参考 DTU 分布与 FFA 翼型构建的 184 m 尺寸合成刚性模型，面向三相机成像与缺陷检查；不替换 NREL 5MW 柔性回放、MAPPO 或双束净空功能。
+- NREL 扩展继续使用原 `wfrl_blender-0.3.12.zip`，本次原样提供该附件，0.3 系列历史发布保持。
+- 同步 Bridge 后端 macOS/MPI 启动环境修复：移除继承的作业身份，保留显式传输配置，并在 macOS 上默认使用回环 TCP。该修复需更新后端仓库源码，不通过安装 NREL 扩展 ZIP 更新。
+
+已知限制：GW184 包为解压运行项目，不是 Blender 可安装扩展；合成缺陷不耦合结构或气动物理。第一阶段整体验收、现场真实性、完整视频、Windows/Linux 实机和长期性能未完成；NREL 双束仍为 REVIEW_ONLY / PENDING_ACCEPTANCE。
 
 ## [0.3.12](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.12) · 2026-09-29 · 单路轻量显示与双束回放
 

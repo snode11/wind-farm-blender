@@ -1,4 +1,6 @@
-# WFRL Blender 0.3.12 安装
+# NREL / WFRL Blender 0.3.12 安装
+
+本页仅适用于 NREL 5MW 前端。GW184 三相机与缺陷编辑器 0.4.0 是另一个解压运行包，见 [GW184 使用说明](GW184三相机与缺陷编辑器.md)，无需安装或替换 NREL 扩展。
 
 要求 **Blender 5.2+**。Windows、macOS 和 Linux 使用同一扩展 ZIP；已记录的安装和窗口验证为 macOS Blender 5.2.1，其他平台未完成本轮实机验收。
 
@@ -28,3 +30,9 @@ ZIP 内置预弯 v3 三机 60 秒回放、双束数据与读取器、默认三�
 ## 现有 MP4 输出
 
 **MAPPO → 视频输出**支持现有 MP4 导出和 RTSP 循环推流；推流需要 FFmpeg 与 MediaMTX。此入口播放已有视频，不是 Blender 视口直播，也不是三相机自动生成三路视频。详见[前端说明的视频输出段落](../../前端readme.md#视频输出)。
+
+## Bridge 后端更新
+
+本扩展包含连接、通信、协议与运行面板；不包含 Python Bridge 服务及启动器。仅安装 `wfrl_blender-0.3.12.zip` 不会更新后端源码。2026-09-30 随 0.4.0 发布同步的 macOS/MPI 启动环境修复位于仓库 `wfrl/blender_bridge/isolated_trainer.py`；使用已配置的后端时，同步仓库源码后重启 Bridge。已运行的训练或求解需先正常停止。
+
+GW184 独立运行包不依赖 Bridge。
