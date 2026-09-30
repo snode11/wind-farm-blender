@@ -1,10 +1,14 @@
-# WFRL Blender 前端实现 · 0.3.12
+# NREL 5MW / WFRL Blender 前端实现 · 0.3.12
 
-本文说明 **0.3.12 安装包行为与本地匹配源码**的实现和维护，要求 **Blender 5.2+**。用户操作、默认相机参数和演示建议见[详细前端说明](../前端readme.md)；待实施事项见[前端更新计划](../前端更新计划.md)。
+更新日期：2026-09-30。本文说明 **NREL 5MW 0.3.12 安装包行为与本地匹配源码**的实现和维护，要求 **Blender 5.2+**。用户操作、默认相机参数和演示建议见[详细前端说明](../前端readme.md)；待实施事项见[前端更新计划](../前端更新计划.md)。
 
-安装使用 [wfrl_blender-0.3.12.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.12/wfrl_blender-0.3.12.zip)。0.3.10–0.3.12 仅发布 ZIP，公开源码仍基于既有提交，自动 Source code 归档不包含这些版本的全部实现。下文新增模块指本地匹配源码；不能以公开旧源码复现全部新版行为。本次仅同步文档。版本和验证边界见[当前发布状态](../docs/blender/发布状态与验证范围.md)。
+安装使用 [wfrl_blender-0.3.12.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.4.0/wfrl_blender-0.3.12.zip)，也可从保留的 [0.3.12 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.12) 下载同一原包。NREL 扩展保持 0.3.12，内容没有因 GW184 发布而改变。
 
-默认内置预弯 v3 三机 MAPPO 60 秒离线记录。相机和材质由 Blender 即时绘制，运动与形变来自保存数据；三相机窗口没有重新运行 FAST.Farm。数据仍为 **REVIEW_ONLY**，固定三束覆盖率未通过。
+[0.4.0 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.4.0) 另提供 `gw184_three_camera_defects-0.4.0.zip`：基于 DTU 10MW 分布和 FFA 翼型的 GW184 尺寸合成刚性模型、固定三相机及六类缺陷编辑器，完整解压后运行；它不是本扩展的新版，也没有把缺陷编辑器加入 NREL 模型。操作和模型范围见 [GW184 说明](../docs/blender/GW184三相机与缺陷编辑器.md)，项目维护见 [项目 README](../projects/gw184-single/README.md) 与 [缺陷编辑器说明](../projects/gw184-single/DEFECT_EDITOR.md)。
+
+0.3.10–0.3.12 的完整扩展实现随安装 ZIP 提供，GW184 实现和参考资源随其独立 ZIP 提供。公开仓库已同步发布文档与 Bridge 后端修复，自动 Source code 归档仍不能复现两个 ZIP 的全部最新行为。下文扩展模块说明按 0.3.12 ZIP 与本地匹配源码阅读，公开文件链接只定位仓库中已有文件，不承诺该文件已同步至 ZIP 对应版本。版本和验证边界见[当前发布状态](../docs/blender/发布状态与验证范围.md)。
+
+默认内置预弯 v3 三机 MAPPO 60 秒离线记录。相机和材质由 Blender 即时绘制，运动与形变来自保存数据；三相机窗口没有重新运行 FAST.Farm。数据仍为 **REVIEW_ONLY**。当前 S2/S3 已验证完整过叶配对，不能与旧 normal/close 或 v3 B2 的固定三束覆盖率限制混为同一结论。
 
 ## 当前主要结构
 
@@ -176,7 +180,7 @@ origin + 0.95 × TipRad × normalize(direction)
 | `data.json` | 三台机组各自的运动记录、B2 测距、净空估计／真值与统计输入 |
 | `telemetry.json` | 同次 OpenFAST 保存输出中的功率、转矩、叶根载荷等通道，含单位、源通道与文件摘要 |
 | `tower-motion.npz` | 塔筒截面位置/朝向与机舱变换，共享时间轴；用于塔架及挂载运动 |
-| `deflection-t1.json` | 同源 T1 结构叶尖面外/面内输出、高精度姿态与塔顶参考变换 |
+| `deflection-t1.json` | 同源 T1 结构叶尖分量输出、高精度姿态与塔顶参考变换；当前 v3 按根系 xyz 解释 |
 | `source-run.json` | 本次运行来源、控制器和原始输出摘要 |
 | `source-surfaces.json` | 生成形变数据所用的原始表面证据索引 |
 | `blade-reference.json`、`reference-surfaces.npz` | v3 独立零载荷静止求解参考及对应表面，用于参考几何与实际形变对照 |
@@ -224,7 +228,17 @@ MAPPO 固定 `timebase_fps=60`，仿真片段为 117–177 s：40 Hz 源数据 2
 
 0.3.12 安装包内置双束数据及读取器。`farm_flex.py` 按 `measurement_mode=dual_beam` 接入，`panels/farm_replay.py` 提供双束与旧 B2 切换；读取及可携带打包由本地 `wfrl/lidar/dual_beam_replay.py`、`dual_beam_package.py` 负责。
 
-S2/S3 按同时刻、同叶片配对，S1 有效命中独立报警，不能用双束无效来抑制 S1。读数、报警和累计历史共用仿真时钟，寻址不重复累计；无效值保持缺失。可携带包包含自身 `source/` 并校验完整源数据及结果摘要，移走后不依赖开发机绝对路径。损坏或缺包须清空旧状态。
+S2/S3 按同一保存时刻、同一叶片的有效命中配对，S1 有效叶片命中独立报警，不能用双束无效来抑制 S1。读数、报警和累计历史共用仿真时钟，寻址不重复累计；无效值保持缺失。可携带包包含自身 `source/` 并校验完整源数据及结果摘要，移走后不依赖开发机绝对路径。损坏或缺包须清空旧状态。
+
+2026-09-30 直接核对原 0.3.12 ZIP 内置记录：
+
+| 机组 | 完整过叶次数 | 每次是否存在 S2/S3 配对 |
+| --- | --- | --- |
+| T1 | 33 | 全部存在 |
+| T2 | 33 | 全部存在 |
+| T3 | 28 | 全部存在 |
+
+合计 **94/94 次完整过叶、400 个有效配对采样点**；每次完整过叶至少有连续 3 个保存采样点配对。该口径基于 40 Hz 保存几何，不要求每帧命中，不包含片段边界的不完整过叶，也不要求 S1 在正常片段保持静默。原包实际安装的双束后台回归通过，覆盖标定、配对、独立 S1、寻址、FPS 映射、换机、保存重开、缺包清除和旧 B2 重载；不是现场或完整片段性能验收。
 
 10°/12°/14° 是当前仿真安装角，双束 MAE 约 4.269 m，仍为 REVIEW_ONLY / PENDING_ACCEPTANCE。软件回归不代表高精度或现场性能验收。
 
@@ -242,7 +256,9 @@ S2/S3 按同时刻、同叶片配对，S1 有效命中独立报警，不能用�
 
 扩展 [runtime.py](wfrl_blender/runtime.py) 和 [transport.py](wfrl_blender/transport.py) 维护连接、协议状态与回传。[panels/status.py](wfrl_blender/panels/status.py) 管连接与诊断，[panels/run.py](wfrl_blender/panels/run.py) 是唯一后端运行按钮入口。CONNECTED 表示握手；实际运行还需 READY 后显式 Start，并观察 RUNNING 与不断更新的真实快照。
 
-后端 [backend_session.py](../wfrl/blender_bridge/backend_session.py) 只在新的控制步边界处理暂停和单步，预热或重复第 0 步的进度通知不能重复消耗单步许可。[server.py](../wfrl/blender_bridge/server.py) 在接收新连接前回收已有连接的 EOF，允许断开后立即重连，同时保留活动客户端独占。
+0.3.12 原扩展保留前端连接、协议和运行状态修复；后端服务器、训练启动器和 MPI 环境不随扩展 ZIP 安装。后端 [backend_session.py](../wfrl/blender_bridge/backend_session.py) 只在新的控制步边界处理暂停和单步，预热或重复第 0 步的进度通知不能重复消耗单步许可。[server.py](../wfrl/blender_bridge/server.py) 在接收新连接前回收已有连接的 EOF，允许断开后立即重连，同时保留活动客户端独占。
+
+公开源码提交 [`1c2b334b`](https://github.com/snode11/wind-farm-blender/commit/1c2b334b583dfcd1219911c12804271fe0aa6a66) 更新 [isolated_trainer.py](../wfrl/blender_bridge/isolated_trainer.py) 的 `launcher_environment`：移除继承的 OMPI/PMI/PMIX/OPAL/PRTE 等 MPI 作业身份变量，保留显式 BTL/PML 传输配置；macOS 在没有显式接口配置时使用 `self,tcp` / `lo0` 默认值。9 项宿主回归通过。需要此修复时，更新后端项目源码到该提交或更新版本，并重新启动 Bridge；重新安装 NREL ZIP 不会更新服务器。该验证不包含真实 FAST.Farm 求解或训练。
 
 实时 `rotor_speed` 当前由功率／效率／转矩／齿轮比推算，保留 SYNTH 与 `FastFarmDriver._rotor_speed` 来源；yaw、pitch、power、torque 的 DIRECT 标签不能推广到所有通道。离线 MAPPO 使用保存的转速记录。真实后端场景与随包随机阵风记录属于不同运行。
 
@@ -291,11 +307,11 @@ python3 scripts/blender/build_extension.py
 
 按脚本说明设置独立的 `WFRL_TEST_OUTPUT`，以及所需结果包／扩展路径；不要覆盖既有验收证据。宿主测试通过不能代替 Blender 后台回归，后台回归也不能代替实际 GUI、性能和物理验收。
 
-历史安装包的测试数量和通过结论只适用于对应版本，可查[已发布记录](../CHANGELOG.md)和[当前发布状态](../docs/blender/发布状态与验证范围.md)。不能将历史后端短测或便携回归合并为 0.3.9 的完整验收；以下保留 0.3.9 的历史基线；新版验证范围见上方当前发布状态。
+本次文档补充引用已完成的发布检查，没有重新构建两个 ZIP、重跑求解器或执行新渲染。历史安装包的测试数量和通过结论只适用于对应版本，可查[已发布记录](../CHANGELOG.md)和[当前发布状态](../docs/blender/发布状态与验证范围.md)。不能将历史后端短测或便携回归合并为 0.3.9 的完整验收；以下保留 0.3.9 的历史基线；新版验证范围见上方当前发布状态。
 
 ### 6.3 0.3.9 历史验证与性能边界
 
-本次发布的源码、ZIP 校验值和安装验证见 [0.3.9 发布核对](../docs/blender/0.3.9发布核对.md)。以下为 2026-09-27 发布前的相机与播放检查记录，不扩展为全部平台或后端验收。
+0.3.9 当时发布的源码、ZIP 校验值和安装验证见 [0.3.9 发布核对](../docs/blender/0.3.9发布核对.md)。以下为 2026-09-27 发布前的相机与播放检查记录，不扩展为全部平台或后端验收。
 
 | 层级 | 记录与边界 |
 | --- | --- |

@@ -130,8 +130,11 @@ ZIP 内置离线回放数据与读取器；离线观看无需配置 Python 后�
 
 - [详细变更记录](CHANGELOG.md)
 - [前端功能、安装与演示说明](前端readme.md)
+- [完整用户手册](docs/blender/用户使用手册.md)
+- [功能总览、模型区别与后续规划](docs/blender/Blender前端功能总览与规划.md)
 - [Blender 前端实现与维护](blender_frontend/README.md)
 - [0.3.10 更新计划与历史验证](前端更新计划.md)
+- [GW184 项目与视频任务](projects/gw184-single/README.md) · [六类缺陷编辑说明](projects/gw184-single/DEFECT_EDITOR.md)
 - [雷达算法说明](wfrl/lidar/README.md)
 
-当前物理数据为 **REVIEW_ONLY**，固定三束测量覆盖率未通过；回放不代表现场实测。源码测试、安装包验证、窗口显示、播放性能与实体实验分别判断，不因版本更新自动变为物理验收通过。
+当前 NREL 双束记录中，94/94 次完整过叶均含 S2/S3 同刻同叶片配对，共 400 个有效样本；S1 有效叶片命中仍独立报警。这不是每帧命中或始终只触发两束的保证。旧三束覆盖率失败记录按原版本阅读；当前数据仍为 **REVIEW_ONLY / PENDING_ACCEPTANCE**，回放不代表现场实测。源码测试、安装包验证、窗口显示、播放性能与实体实验分别判断。
