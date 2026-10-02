@@ -1,5 +1,6 @@
 """Shared scene, camera and capture operators for the MAPPO demonstration."""
 import bpy
+from pathlib import Path
 
 class DemoLoaded:
     @classmethod
@@ -72,6 +73,54 @@ class WFRL_OT_SelectCamera(bpy.types.Operator):
         return {"FINISHED"}
 
 
+class WFRL_OT_LoadDualBeam(bpy.types.Operator):
+    bl_idname = 'wfrl.load_dual_beam'
+    bl_label = '加载双束净空与 S1 报警'
+    bl_description = '加载双束研究结果；保留精度、采样和实机验证限制'
+    filepath: bpy.props.StringProperty(subtype='FILE_PATH', options={'SKIP_SAVE'})
+    filter_glob: bpy.props.StringProperty(default='manifest.json', options={'HIDDEN'})
+    choose_file: bpy.props.BoolProperty(default=False, options={'SKIP_SAVE'})
+    builtin_method: bpy.props.EnumProperty(
+        items=(('AXIS', '原双束旧法', '轮毂轴线外推；保持原默认方法'),
+               ('TLS', 'TLS 候选', '轮毂约束 TLS；研究候选，性能待验收')),
+        default='AXIS', options={'SKIP_SAVE'})
+
+    def builtin_package(self):
+        from .. import farm_flex
+        return (farm_flex.default_dual_tls_package() if self.builtin_method == 'TLS'
+                else farm_flex.default_dual_package())
+
+    @classmethod
+    def poll(cls, context):
+        from .. import runtime
+        return runtime.configuration_editable()
+
+    def invoke(self, context, event):
+        if self.choose_file or not (self.builtin_package() / 'manifest.json').is_file():
+            context.window_manager.fileselect_add(self)
+            return {'RUNNING_MODAL'}
+        return self.execute(context)
+
+    def execute(self, context):
+        from .. import load_demo_scene, farm_flex, clearance_replay
+        path = Path(self.filepath).parent if self.filepath else self.builtin_package()
+        try:
+            _, overlay = farm_flex.dual_beam_api().resolve_package(path)
+            if overlay is None:
+                raise ValueError('请选择双束数据包的 manifest.json')
+            if not self.filepath:
+                expected = 'hub-tls.v1' if self.builtin_method == 'TLS' else 'hub-axis.v1'
+                if overlay['config'].get('reconstruction_method', 'hub-axis.v1') != expected:
+                    raise ValueError('内置双束数据包的方法与入口不一致：' + expected)
+            load_demo_scene(path)
+            context.scene.wfrl_farm_panel_page = 'RADAR'
+        except (ValueError, OSError, KeyError, TypeError, ImportError) as exc:
+            clearance_replay.clear(context.scene, '双束数据未就绪：' + str(exc))
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        return {'FINISHED'}
+
+
 class WFRL_OT_RenderStill(bpy.types.Operator):
     bl_idname = "wfrl.render_still"
     bl_label = "Render Still"
@@ -102,5 +151,5 @@ class WFRL_OT_RenderAnimation(bpy.types.Operator):
         return {"FINISHED"}
 
 
-CLASSES = (WFRL_OT_LoadDemo, WFRL_OT_SelectCamera, WFRL_OT_RenderStill,
+CLASSES = (WFRL_OT_LoadDemo, WFRL_OT_LoadDualBeam, WFRL_OT_SelectCamera, WFRL_OT_RenderStill,
            WFRL_OT_RenderAnimation)

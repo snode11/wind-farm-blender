@@ -6,6 +6,7 @@ from .live_scene import snapshot_scene, build_live_scene
 from .wake import WakeFrameBuffer, validate_wake_payload, apply_disxy_frame
 from collections import deque
 import time
+from . import performance
 
 # Blender reloads submodules too. Tear down the old timer before rebinding its
 # name, while retaining the last session identity and uncertainty for reconnect.
@@ -208,10 +209,12 @@ def send_workflow_command(name, arguments):
     _pending_command = name
 
 
+@performance.timed("runtime.tick")
 def tick():
     """Timer work is bounded by transport budgets; health polls only queued results."""
     global _pending_command, _pending_lifecycle_sequence, _last_tick, kinematics, _live_scene, _desired_mode, latest_wake
     import bpy
+    performance.count("runtime.timer_calls")
     now = time.monotonic()
     dt = 0.0 if _last_tick is None else max(0.0, now - _last_tick)
     _last_tick = now
@@ -352,13 +355,28 @@ def tick():
         animate_illustrative_wake(getattr(bpy.context, 'scene', None), dt,
                                  running=connected and _state.run_status == 'RUNNING')
     from . import charts
+    export_status = charts.export_job.status
     charts.export_job.poll()
+    health_changed = False
     if _health:
         for result in _health.poll():
             health_results[result.component] = result
+            health_changed = True
+    # A paused recorded scene with no new data need not redraw every viewport.
+    # Keep playing redraws (their removal showed no FPS benefit), backend
+    # validity aging, and async status changes observable.
+    if (_client is None and _state.connection in {'LOCAL DEMO', 'OFFLINE RESULTS'}
+            and not health_changed and charts.export_job.status == export_status
+            and not any(getattr(w.screen, 'is_animation_playing', False)
+                        for w in bpy.context.window_manager.windows)):
+        from . import farm_flex
+        if farm_flex.is_active(getattr(bpy.context, 'scene', None)):
+            performance.count('runtime.unchanged_redraw_skips')
+            return 0.05
     for window in bpy.context.window_manager.windows:
         for area in window.screen.areas:
             if area.type == 'VIEW_3D':
+                performance.count("runtime.redraw_requests")
                 area.tag_redraw()
     return 0.05
 

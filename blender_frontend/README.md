@@ -1,12 +1,12 @@
-# NREL 5MW / WFRL Blender 前端实现 · 0.3.12
+# NREL 5MW / WFRL Blender 前端实现 · 0.3.13
 
-更新日期：2026-09-30。本文说明 **NREL 5MW 0.3.12 安装包行为与本地匹配源码**的实现和维护，要求 **Blender 5.2+**。用户操作、默认相机参数和演示建议见[详细前端说明](../前端readme.md)；待实施事项见[前端更新计划](../前端更新计划.md)。
+更新日期：2026-10-02。本文说明 **NREL 5MW 0.3.13 安装包行为与公开匹配源码**的实现和维护，要求 **Blender 5.2+**。用户操作、默认相机参数和演示建议见[详细前端说明](../前端readme.md)；待实施事项见[前端更新计划](../前端更新计划.md)。
 
-安装使用 [wfrl_blender-0.3.12.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.4.0/wfrl_blender-0.3.12.zip)，也可从保留的 [0.3.12 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.12) 下载同一原包。NREL 扩展保持 0.3.12，内容没有因 GW184 发布而改变。
+安装使用 [wfrl_blender-0.3.13.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.13/wfrl_blender-0.3.13.zip)。0.3.13 增加显式 TLS 候选并同步 NREL 前端、雷达处理工具和测试源码；历史 0.3 系列 Release 保留。
 
 [0.4.0 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.4.0) 另提供 `gw184_three_camera_defects-0.4.0.zip`：基于 DTU 10MW 分布和 FFA 翼型的 GW184 尺寸合成刚性模型、固定三相机及六类缺陷编辑器，完整解压后运行；它不是本扩展的新版，也没有把缺陷编辑器加入 NREL 模型。操作和模型范围见 [GW184 说明](../docs/blender/GW184三相机与缺陷编辑器.md)，项目维护见 [项目 README](../projects/gw184-single/README.md) 与 [缺陷编辑器说明](../projects/gw184-single/DEFECT_EDITOR.md)。
 
-0.3.10–0.3.12 的完整扩展实现随安装 ZIP 提供，GW184 实现和参考资源随其独立 ZIP 提供。公开仓库已同步发布文档与 Bridge 后端修复，自动 Source code 归档仍不能复现两个 ZIP 的全部最新行为。下文扩展模块说明按 0.3.12 ZIP 与本地匹配源码阅读，公开文件链接只定位仓库中已有文件，不承诺该文件已同步至 ZIP 对应版本。版本和验证边界见[当前发布状态](../docs/blender/发布状态与验证范围.md)。
+`v0.3.13` 标签同步 NREL 扩展源码、默认回放资源、双束旧法与 TLS 候选结果、规范读取器、处理工具及相关测试，可从匹配标签构建自包含扩展。GitHub 自动 Source code 归档用于开发，不能直接安装为扩展。0.3.10–0.3.12 历史归档不追改；GW184 实现和参考资源继续随独立 ZIP 提供。版本和验证边界见[当前发布状态](../docs/blender/发布状态与验证范围.md)。
 
 默认内置预弯 v3 三机 MAPPO 60 秒离线记录。相机和材质由 Blender 即时绘制，运动与形变来自保存数据；三相机窗口没有重新运行 FAST.Farm。数据仍为 **REVIEW_ONLY**。当前 S2/S3 已验证完整过叶配对，不能与旧 normal/close 或 v3 B2 的固定三束覆盖率限制混为同一结论。
 
@@ -16,6 +16,7 @@
 - `deflection.py`：T1 三叶片独立未受载参考、实际结构叶尖及根系 xyz 分量。参考随同刻塔顶与转子运动；源通道对照按实际可用性显示。
 - `tower_motion.py`：读取并校验 v2 塔架截面与机舱变换，插值运动；`farm_flex.py` 同步塔筒网格、叶片、机舱及雷达挂载。
 - `assets/mappo/`：包含默认预弯 v3 离线记录，无需求解器、Bridge 或项目路径；数据格式代次与扩展版本号分开管理。
+- `assets/dual_beam/` 与 `assets/dual_beam_tls/`：两个结果层共享 `assets/mappo/` 的 40 Hz 源数据；默认 `hub-axis.v1`，显式选择 `hub-tls.v1`。
 - `stacked_camera_rig.py` 与 `panels/stacked_camera_rig.py`：共盒三相机、支架安装端贴合、盒体末端转向、确认/取消/撤销。
 - `custom_cameras.py`：槽位、相机参数、布局及兼容处理；`native_camera_views.py`：独立原生单路／三路观察窗口。
 - `custom_camera_capture.py`：同刻或时间序列原图采集；`custom_camera_preview.py`：保留预览计算与质量恢复支持，0.3.12 已移除侧栏“精确材质预览”入口，普通原生观察不依赖逐帧 PNG 采集。
@@ -49,7 +50,7 @@ scripts/blender/run_wfrl_macos.sh \
 
 启动器预检环境并启动自己拥有的 Bridge；Blender 加载**已安装扩展**，停在 MAPPO 的 T1 侧前方首帧。默认状态为 **OFFLINE RESULTS**，Bridge 在 `127.0.0.1:8765` 待用，不自动连接或开始运行。这条入口需要完整后端环境；只看离线演示时直接打开扩展并点击“加载 MAPPO · 60 秒”，或用便携入口，无需 Python 后端、MPI、FAST.Farm 和网络。
 
-匹配的 0.3.12 安装版会同时建立推荐三相机配置，默认关闭叶尖轨迹和挠度辅助物。主视图仍先显示 T1 总览，进入 **View → 三相机 → 三路对照** 查看。仅更新仓库 README 不会改变已运行的 Blender 扩展。
+匹配的 0.3.13 安装版会同时建立推荐三相机配置，默认关闭叶尖轨迹和挠度辅助物。主视图仍先显示 T1 总览，进入 **View → 三相机 → 三路对照** 查看。仅更新仓库 README 不会改变已运行的 Blender 扩展。
 
 需要后端时，进入 **Item → WFRL / CONNECTION → 后端连接（高级）**，选择 Replay 或 Interactive，再点 Connect / Reconnect。Item 不可见时先选中一片叶片。启动脚本在握手确认后发送 `scene.load`，自动加载命令指定的 YAML；确认 **CONNECTED / READY** 后，到 **WFRL / 后端运行** 设置参数并点击 Start Replay / Start Training。Replay 需兼容 checkpoint，例如项目中的 `results/checkpoints/mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt`。
 
@@ -58,7 +59,7 @@ scripts/blender/run_wfrl_macos.sh \
 | 路径 | 前端显示与数据 | 是否启动求解／训练 |
 | --- | --- | --- |
 | MAPPO · 60 秒 | 随包随机阵风记录，九片独立形变、遥测与 B2 卡片 | 否 |
-| 双束净空 / S1 | 随包双束覆盖层或外部可携带包，S2/S3 配对和独立 S1 状态 | 否 |
+| 双束净空 / S1、TLS 候选 | 随包旧法或 TLS 结果层、外部可携带包，S2/S3 配对和独立 S1 状态 | 否 |
 | 后端 Replay | 兼容权重推理与实时遥测；本机 YAML 为 8 m/s | FAST.Farm 推理，不做 PPO 更新 |
 | Interactive | 实时训练状态与遥测 | 是，包含训练更新 |
 | Formal Training | 正式训练流程、进度与指标 | 是，不提供逐步实时三维遥测 |
@@ -201,7 +202,7 @@ v3 净空真值定义为叶片末截面表面到同一全局高度移动塔筒�
 
 ### 5.2 统一侧栏与固定时间轴
 
-[panels/farm_replay.py](wfrl_blender/panels/farm_replay.py) 是 MAPPO 统一入口，顶部共享播放控制；挠度页放 T1 叶片选择、叶尖/叶轮/Down、虚影/分量和数值表；净空页提供双束 / S1 与旧 B2 模式切换、机组 Down 和对应卡片；工具页放视角、云台、遥测、环境、截图录制和重新加载。该模式隐藏重复 Camera 面板；其他模式保留 [panels/gimbal.py](wfrl_blender/panels/gimbal.py) 与 [panels/clearance.py](wfrl_blender/panels/clearance.py)。
+[panels/farm_replay.py](wfrl_blender/panels/farm_replay.py) 是 MAPPO 统一入口，顶部共享播放控制；挠度页放 T1 叶片选择、叶尖/叶轮/Down、虚影/分量和数值表；净空页提供默认双束 / S1、TLS 候选与旧 B2 模式切换、机组 Down 和对应卡片；工具页放视角、云台、遥测、环境、截图录制和重新加载。该模式隐藏重复 Camera 面板；其他模式保留 [panels/gimbal.py](wfrl_blender/panels/gimbal.py) 与 [panels/clearance.py](wfrl_blender/panels/clearance.py)。
 
 时间读取复用 [clearance_replay.py](wfrl_blender/clearance_replay.py) 与结果包的 ReplayReader：
 
@@ -226,7 +227,7 @@ MAPPO 固定 `timebase_fps=60`，仿真片段为 117–177 s：40 Hz 源数据 2
 
 ### 5.3.1 双束与独立 S1 数据合同
 
-0.3.12 安装包内置双束数据及读取器。`farm_flex.py` 按 `measurement_mode=dual_beam` 接入，`panels/farm_replay.py` 提供双束与旧 B2 切换；读取及可携带打包由本地 `wfrl/lidar/dual_beam_replay.py`、`dual_beam_package.py` 负责。
+0.3.13 安装包内置默认 `hub-axis.v1` 与显式可选 `hub-tls.v1` 两份双束结果层及读取器，共享原 `assets/mappo/` 40 Hz 源几何。`farm_flex.py` 按 `measurement_mode=dual_beam` 接入，`panels/farm_replay.py` 提供“双束净空 / S1”“TLS 候选 / S1”与旧 B2 切换；读取及可携带打包由规范源码 `wfrl/lidar/dual_beam_replay.py`、`dual_beam_package.py` 负责，构建时生成扩展内置副本。
 
 S2/S3 按同一保存时刻、同一叶片的有效命中配对，S1 有效叶片命中独立报警，不能用双束无效来抑制 S1。读数、报警和累计历史共用仿真时钟，寻址不重复累计；无效值保持缺失。可携带包包含自身 `source/` 并校验完整源数据及结果摘要，移走后不依赖开发机绝对路径。损坏或缺包须清空旧状态。
 
@@ -240,7 +241,7 @@ S2/S3 按同一保存时刻、同一叶片的有效命中配对，S1 有效叶�
 
 合计 **94/94 次完整过叶、400 个有效配对采样点**；每次完整过叶至少有连续 3 个保存采样点配对。该口径基于 40 Hz 保存几何，不要求每帧命中，不包含片段边界的不完整过叶，也不要求 S1 在正常片段保持静默。原包实际安装的双束后台回归通过，覆盖标定、配对、独立 S1、寻址、FPS 映射、换机、保存重开、缺包清除和旧 B2 重载；不是现场或完整片段性能验收。
 
-10°/12°/14° 是当前仿真安装角，双束 MAE 约 4.269 m，仍为 REVIEW_ONLY / PENDING_ACCEPTANCE。软件回归不代表高精度或现场性能验收。
+10°/12°/14° 是当前仿真安装角。TLS 是轮毂约束直线候选，只改变方向估计：在同一开发片段 400 对上，旧法与 TLS 的 MAE 分别为 4.268685 / 0.776096 m；独立单机固定 9 rpm 工况、40/80 Hz 网格的 TLS MAE 约为 0.943/0.970 m。两种方法仍为 REVIEW_ONLY / PENDING_ACCEPTANCE，不据此切换默认，也不构成现场性能验收。诊断、独立工况与评分口径见[候选总报告](../docs/lidar/双束TLS候选实施与验证总报告.md)，本版安装验证见[0.3.13 发布核对](../docs/blender/0.3.13发布核对.md)。
 
 ### 5.4 独立 normal／close 雷达包
 
@@ -256,7 +257,7 @@ S2/S3 按同一保存时刻、同一叶片的有效命中配对，S1 有效叶�
 
 扩展 [runtime.py](wfrl_blender/runtime.py) 和 [transport.py](wfrl_blender/transport.py) 维护连接、协议状态与回传。[panels/status.py](wfrl_blender/panels/status.py) 管连接与诊断，[panels/run.py](wfrl_blender/panels/run.py) 是唯一后端运行按钮入口。CONNECTED 表示握手；实际运行还需 READY 后显式 Start，并观察 RUNNING 与不断更新的真实快照。
 
-0.3.12 原扩展保留前端连接、协议和运行状态修复；后端服务器、训练启动器和 MPI 环境不随扩展 ZIP 安装。后端 [backend_session.py](../wfrl/blender_bridge/backend_session.py) 只在新的控制步边界处理暂停和单步，预热或重复第 0 步的进度通知不能重复消耗单步许可。[server.py](../wfrl/blender_bridge/server.py) 在接收新连接前回收已有连接的 EOF，允许断开后立即重连，同时保留活动客户端独占。
+0.3.13 扩展保留前端连接、协议和运行状态修复；后端服务器、训练启动器和 MPI 环境不随扩展 ZIP 安装。后端 [backend_session.py](../wfrl/blender_bridge/backend_session.py) 只在新的控制步边界处理暂停和单步，预热或重复第 0 步的进度通知不能重复消耗单步许可。[server.py](../wfrl/blender_bridge/server.py) 在接收新连接前回收已有连接的 EOF，允许断开后立即重连，同时保留活动客户端独占。
 
 公开源码提交 [`1c2b334b`](https://github.com/snode11/wind-farm-blender/commit/1c2b334b583dfcd1219911c12804271fe0aa6a66) 更新 [isolated_trainer.py](../wfrl/blender_bridge/isolated_trainer.py) 的 `launcher_environment`：移除继承的 OMPI/PMI/PMIX/OPAL/PRTE 等 MPI 作业身份变量，保留显式 BTL/PML 传输配置；macOS 在没有显式接口配置时使用 `self,tcp` / `lo0` 默认值。9 项宿主回归通过。需要此修复时，更新后端项目源码到该提交或更新版本，并重新启动 Bridge；重新安装 NREL ZIP 不会更新服务器。该验证不包含真实 FAST.Farm 求解或训练。
 
@@ -285,13 +286,13 @@ S2/S3 按同一保存时刻、同一叶片的有效命中配对，S1 有效叶�
 | 后端求解／控制边界 | 项目侧 `wfrl/blender_bridge/` |
 | 测距算法与物理结果生产 | `wfrl/lidar/`、`scripts/lidar/`，见 [算法说明](../wfrl/lidar/README.md) |
 
-源码三机预览入口为 [open_farm_flex.py](../scripts/blender/open_farm_flex.py)。正式原命令走已安装扩展，不自动读取工作区扩展修改。修改扩展代码或打包资源后，从项目根目录运行：
+源码三机预览入口为 [open_farm_flex.py](../scripts/blender/open_farm_flex.py)。正式原命令走已安装扩展，不自动读取工作区扩展修改。从 GitHub 下载 `v0.3.13` 的 Source code 并完整解压，或克隆仓库并检出该标签；保留 `blender_frontend/wfrl_blender/assets/` 和仓库级 `wfrl/`，不要只复制扩展 Python 文件。使用 Python 3.11+，从项目根目录运行：
 
 ```bash
 python3 scripts/blender/build_extension.py
 ```
 
-安装新生成的 ZIP 并重启 Blender，再核对 ZIP、已安装文件和便携运行时；不要只凭版本字符串判断一致。纯文档或项目侧 bootstrap／Bridge 修改无需重建 ZIP。纯显示修改复用现有结果包，不需要重跑 FAST.Farm；若修改要成为新的物理输入，需同步核对求解器机型与坐标合同。
+构建生成 `dist/wfrl_blender-0.3.13.zip`、SHA-256 文件与逐文件 inventory。ZIP 包含 MAPPO 源资源、旧法与 TLS 结果层，以及由仓库规范源码生成的读取器和协议副本，离线安装不依赖源码路径。安装新生成的 ZIP 并重启 Blender，再核对 ZIP、已安装文件和便携运行时；不要只凭版本字符串判断一致。纯文档或项目侧 bootstrap／Bridge 修改无需重建 ZIP。纯显示修改复用现有结果包，不需要重跑 FAST.Farm；若修改要成为新的物理输入，需同步核对求解器机型与坐标合同。
 
 ### 6.2 回归入口
 
@@ -307,7 +308,7 @@ python3 scripts/blender/build_extension.py
 
 按脚本说明设置独立的 `WFRL_TEST_OUTPUT`，以及所需结果包／扩展路径；不要覆盖既有验收证据。宿主测试通过不能代替 Blender 后台回归，后台回归也不能代替实际 GUI、性能和物理验收。
 
-本次文档补充引用已完成的发布检查，没有重新构建两个 ZIP、重跑求解器或执行新渲染。历史安装包的测试数量和通过结论只适用于对应版本，可查[已发布记录](../CHANGELOG.md)和[当前发布状态](../docs/blender/发布状态与验证范围.md)。不能将历史后端短测或便携回归合并为 0.3.9 的完整验收；以下保留 0.3.9 的历史基线；新版验证范围见上方当前发布状态。
+0.3.13 的实际测试、构建与安装检查单独记录于[发布核对](../docs/blender/0.3.13发布核对.md)。历史安装包的测试数量和通过结论只适用于对应版本，可查[已发布记录](../CHANGELOG.md)和[当前发布状态](../docs/blender/发布状态与验证范围.md)。不能将历史后端短测或便携回归合并为本版验收；以下保留 0.3.9 的历史基线。
 
 ### 6.3 0.3.9 历史验证与性能边界
 

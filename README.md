@@ -5,11 +5,20 @@
 | 产品 | 当前版本 | 用途 | 下载与使用 |
 | --- | --- | --- | --- |
 | GW184 三相机与叶片缺陷 | **0.4.0** | 参考 DTU 的 GW184 尺寸合成刚性模型、固定三相机、六类缺陷编辑 | [下载独立运行 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.4.0/gw184_three_camera_defects-0.4.0.zip)，完整解压后启动；[使用说明](docs/blender/GW184三相机与缺陷编辑器.md) |
-| NREL 5MW / WFRL 前端 | **0.3.12** | 三机柔性回放、MAPPO、三相机与双束净空 | [下载 Blender 扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.12/wfrl_blender-0.3.12.zip)，通过 Install from Disk 安装；[前端说明](前端readme.md) |
+| NREL 5MW / WFRL 前端 | **0.3.13** | 三机柔性回放、MAPPO、三相机、默认双束与 TLS 候选 | [下载 Blender 扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.13/wfrl_blender-0.3.13.zip)，通过 Install from Disk 安装；[前端说明](前端readme.md) |
 
 [0.4.0 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.4.0) 同时提供两个 ZIP。GW184 的版本号不表示 NREL 扩展已升级；原 0.3 系列发布继续保留。
 
-**安装包与仓库源码分开：** NREL 0.3.10–0.3.12 的完整实现以扩展 ZIP 为准；GW184 0.4.0 的源码和资源在独立运行 ZIP 内。本次仓库同步发布文档和 Bridge 后端修复，GitHub 自动生成的 Source code 归档不包含这两个包的全部最新实现。
+**NREL 0.3.13 已同步完整构建源码与内置回放资源：** 可从本版源码构建扩展；Blender 安装请使用 Release 附件 ZIP。NREL 0.3.10–0.3.12 的历史源码归档仍不包含当时仅 ZIP 发布的全部实现；GW184 0.4.0 的完整实现继续通过独立运行 ZIP 提供。
+
+## [0.3.13](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.13) · 2026-10-02 · NREL 双束 TLS 候选与完整源码同步
+
+- NREL 5MW / WFRL 扩展新增内置“TLS 候选 / S1”回放；原“双束净空 / S1”继续使用旧法默认，S1 独立报警与旧 B2 回放兼容保留。
+- 两种方法共享原 117–177 s、40 Hz 三机保存几何；TLS 在同一开发片段的 400 对公共有效样本中 MAE 由 4.268685 m 降至 0.776096 m，独立固定转速工况约 0.943/0.970 m，按数据集分别报告。
+- 同步当前 NREL 前端、雷达算法/读取器、相关工具、测试及内置源/旧法/TLS结果资源；克隆本版源码后可直接构建包含两种回放的扩展。0.3.10–0.3.12 的历史源码归档保持原样。
+- GW184 0.4.0 六类缺陷独立包继续保留；本次雷达更新仅进入 NREL 扩展。
+
+已知限制：两种方法仍为 **REVIEW_ONLY / PENDING_ACCEPTANCE**；TLS 是显式候选，未通过用途联合精度门槛或现场验证。软件/安装/窗口回归不代表全程帧率、连续时间漏测率、Windows/Linux 或设备精度验收。实际验证范围见 [0.3.13 发布核对](docs/blender/0.3.13发布核对.md)。
 
 ## [0.4.0](https://github.com/snode11/wind-farm-blender/releases/tag/v0.4.0) · 2026-09-30 · GW184 三相机与叶片缺陷独立包
 
@@ -55,13 +64,13 @@
 
 ## 快速开始
 
-1. 下载 [wfrl_blender-0.3.12.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.12/wfrl_blender-0.3.12.zip)，保留压缩格式。
+1. 下载 [wfrl_blender-0.3.13.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.13/wfrl_blender-0.3.13.zip)，保留压缩格式。
 2. Blender → **Edit → Preferences → Get Extensions → Install from Disk**，选择 ZIP 并启用 WFRL Blender。更新扩展后重启 Blender。
 3. 新建 General 场景，鼠标置于三维视图，按 **N**，在 **MAPPO** 侧栏加载 **MAPPO · 60 秒**。
 4. 通过 **View → 三相机 → 三路对照** 打开默认 2×2 展示，也可切换三列、放大单路、播放／暂停或单步。第四格是静态安装示意。
-5. 查看双束时，在 **MAPPO → 净空** 选择 **双束净空 / S1**；旧 B2 回放仍可切换。
+5. 查看双束时，在 **MAPPO → 净空** 选择 **双束净空 / S1**（旧法默认）或 **TLS 候选 / S1**；旧 B2 回放仍可切换。
 
-ZIP 内置离线回放数据与读取器；离线观看无需配置 Python 后端、MPI 或 FAST.Farm。请安装 Release 附件 ZIP；自动生成的 **Source code** 不是新版扩展安装包。安装与验证范围见[安装说明](docs/blender/INSTALL.md)和[当前发布状态](docs/blender/发布状态与验证范围.md)。
+ZIP 内置离线回放数据与读取器；离线观看无需配置 Python 后端、MPI 或 FAST.Farm。请安装 Release 附件 ZIP；自动生成的 **Source code** 含 0.3.13 构建源码，须先构建扩展后安装。安装与验证范围见[安装说明](docs/blender/INSTALL.md)和[当前发布状态](docs/blender/发布状态与验证范围.md)。
 
 ## 已发布历史
 

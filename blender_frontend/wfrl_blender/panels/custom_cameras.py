@@ -859,7 +859,10 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
         if not editing:
             views=layout.row(align=True)
             views.operator('wfrl.custom_camera',text='外部布局').mode='LAYOUT'
-            views.operator('wfrl.native_camera_view',text='三路对照').mode='TRIPLE'
+            native_button=views.operator('wfrl.native_camera_view',text='2×2 展示')
+            native_button.mode='TRIPLE';native_button.layout='GRID'
+            native_button=views.operator('wfrl.native_camera_view',text='三列对照')
+            native_button.mode='TRIPLE';native_button.layout='STRIP'
             if scene.get('wfrl_stacked_camera_rig'):
                 layout.label(text='共用盒体 · C1 / C2 / C3 随盒体排列')
             if op:
@@ -910,7 +913,6 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
                 layout.operator('wfrl.custom_camera',text='输入 XYZ 位置 / 参数',icon='DRIVER_DISTANCE').mode='INPUT'
             layout.operator('wfrl.custom_camera',text='调整俯仰角 / 方向与视场',icon='ORIENTATION_GIMBAL').mode='EDIT'
             layout.operator('wfrl.native_camera_view',text='查看单路画面',icon='VIEW_CAMERA').mode='WATCH'
-            layout.operator('wfrl.custom_camera',text='精确材质预览（暂停检查）').mode='WATCH'
             if not stacked:action(f'清除 C{wm.wfrl_custom_slot}', 'CLEAR')
         else:
             layout.label(text='各槽位分别选点、分别保存',icon='INFO')

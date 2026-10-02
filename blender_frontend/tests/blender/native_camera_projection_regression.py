@@ -1,10 +1,12 @@
 """Background algebra check of masked native gates against calibrated FOV."""
 from pathlib import Path
-import sys,math
+import sys,math,os,json,importlib
 import bpy
 ROOT=Path(__file__).resolve().parents[3]
-sys.path[:0]=[str(ROOT/'blender_frontend'),str(ROOT)]
-from wfrl_blender.native_camera_views import fit_gate
+sys.path[:0]=[os.environ.get('WFRL_ADDON_ROOT',str(ROOT/'blender_frontend')),str(ROOT)]
+MODULE=os.environ.get('WFRL_ADDON_MODULE','wfrl_blender')
+addon=importlib.import_module(MODULE)
+fit_gate=importlib.import_module(MODULE+'.native_camera_views').fit_gate
 from mathutils import Vector
 scene=bpy.context.scene
 cam=bpy.data.objects.new('NativeProjectionTest',bpy.data.cameras.new('NativeProjectionTest'))
@@ -22,4 +24,9 @@ for ratio in [1.,16/9,9/16,2.4]:
   corner=matrix@Vector((math.tan(math.radians(h/2)), math.tan(math.radians(v/2)),-1,1))
   assert abs(corner.x/corner.w-fx)<2e-5,(ratio,h,v,corner,fx)
   assert abs(corner.y/corner.w-fy)<2e-5,(ratio,h,v,corner,fy)
-print('NATIVE_PROJECTION_PASS: 24 aspect/FOV combinations')
+out=Path(os.environ.get('WFRL_TEST_OUTPUT','/tmp/wfrl-native-projection'))
+out.mkdir(parents=True,exist_ok=True)
+(out/'native-projection-validation.json').write_text(json.dumps({'status':'PASS','module':MODULE,
+ 'addon_path':addon.__file__,'blender':bpy.app.version_string,'background':bpy.app.background,
+ 'checks':['24 aspect/FOV combinations against Blender camera projection']},indent=2))
+print('NATIVE_PROJECTION_PASS: 24 aspect/FOV combinations',MODULE,addon.__file__,flush=True)

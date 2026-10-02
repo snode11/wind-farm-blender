@@ -165,19 +165,42 @@ def _layout_active_views(screen):
 
 def _layout_finish(job):
     screen, scene, count, layout = job['screen'], job['scene'], job['count'], job['layout']
-    names = ('WFRL.Camera.World', 'WFRL.Camera.T1.Sensor',
-             'WFRL.Camera.Top', 'WFRL.Camera.Side')
+    names = job.get('camera_names') or ('WFRL.Camera.World', 'WFRL.Camera.T1.Sensor',
+                                      'WFRL.Camera.Top', 'WFRL.Camera.Side')
     active = _layout_active_views(screen)
     if len(active) != count:
         return False
+    if job.get('camera_names') and not job.get('regions_ready'):
+        for index, area in enumerate(active):
+            area.spaces.active.show_region_ui = index == count - 1
+        job['regions_ready'] = True
+        _layout_schedule()
+        return False
     for index, area in enumerate(active):
         space = area.spaces.active
-        space.use_local_camera = count > 1 and index > 0
+        space.use_local_camera = count > 1 and (index > 0 or bool(job.get('camera_names')))
         space.camera = scene.objects.get(names[index % count])
         space.region_3d.view_perspective = 'CAMERA'
         space.region_3d.view_camera_zoom = 0
         space.region_3d.view_camera_offset = (0, 0)
+        if job.get('camera_names'):
+            space.show_region_ui = index == count - 1
+            if space.show_region_ui:
+                sidebar = next((r for r in area.regions if r.type == 'UI'), None)
+                if sidebar:
+                    sidebar.active_panel_category = 'MAPPO'
         fill_camera_view(area, scene)
+        if job.get('camera_names') and count > 1:
+            # Fit in the unobscured region. The front camera has generous
+            # horizontal margins for widescreen; crop only those margins.
+            from .native_camera_views import frame_gate
+            region = next((r for r in area.regions if r.type == 'WINDOW'), None)
+            if region:
+                fx = 1.
+                if space.camera.name == 'WFRL.Camera.T1.FrontQuarter':
+                    from .turbine_geometry import geometry_data
+                    fx = min(1., 2.4 * geometry_data()['scalars']['TipRad'] / space.camera.data.ortho_scale)
+                frame_gate(scene, {'area': area, 'proxy': space.camera, 'fx': fx, 'fy': 1.}, region, space)
     scene.camera = scene.objects.get(names[0])
     scene['wfrl_view_layout'] = layout
     return True
@@ -187,7 +210,14 @@ def _layout_timer():
     global _LAYOUT_JOB
     if _LAYOUT_JOB is None:
         return None
-    _layout_step()
+    try:
+        _layout_step()
+    except (ValueError, RuntimeError, ReferenceError) as exc:
+        job = _LAYOUT_JOB
+        _LAYOUT_JOB = None
+        if job is not None:
+            job['scene']['wfrl_view_layout_error'] = str(exc)
+        print('WFRL view layout failed:', exc)
     # Keep one timer alive across the redraws required by Blender's screen
     # operators. Returning an interval is important: a timer is considered
     # registered while its callback is running, so trying to register a new
@@ -208,9 +238,12 @@ def _layout_step():
     job = _LAYOUT_JOB
     if job is None:
         return
+    import time
+    if time.monotonic() > job['deadline']:
+        raise ValueError('分屏操作超时，请重试')
     screen, count = job['screen'], job['count']
     active = _layout_active_views(screen)
-    if len(active) > count:
+    if len(active) > count or (job.get('merge_first') and len(active) > 1):
         # Keep the largest existing view as source so shrinking does not leave
         # the user with a tiny strip after Blender applies the join.
         source = max(active, key=lambda area: (area.width * area.height, -area.x, -area.y))
@@ -231,6 +264,7 @@ def _layout_step():
             raise ValueError('Blender could not join this view')
         _layout_schedule()
         return
+    job['merge_first'] = False
     if len(active) < count:
         # A split creates a temporary zero-sized area. Wait for redraw before
         # issuing the next split; otherwise repeated calls can produce a bad
@@ -239,10 +273,15 @@ def _layout_step():
             _layout_schedule()
             return
         area = max(active, key=lambda item: item.width * item.height)
+        factor = .5
+        if job.get('camera_names') and count == 2:
+            sidebar = next((r for r in area.regions if r.type == 'UI'), None)
+            if sidebar:
+                factor = max(.3, .5 - sidebar.width / (2 * area.width))
         with bpy.context.temp_override(window=job['window'], screen=screen, area=area):
             result = bpy.ops.screen.area_split(
                 direction='VERTICAL' if len(_layout_views(screen)) == 1 else 'HORIZONTAL',
-                factor=.5)
+                factor=factor)
         if 'FINISHED' not in result:
             _LAYOUT_JOB = None
             raise ValueError('Blender could not split this area')
@@ -252,9 +291,10 @@ def _layout_step():
         _LAYOUT_JOB = None
 
 
-def set_view_layout(context, layout):
+def set_view_layout(context, layout, *, camera_names=None):
     """Set the number of WFRL 3D views, yielding between screen operations."""
     import bpy
+    import time
     global _LAYOUT_JOB
     if layout not in {'SINGLE', 'DUAL', 'QUAD'}:
         raise ValueError('Unknown view layout')
@@ -266,10 +306,26 @@ def set_view_layout(context, layout):
         raise ValueError('A view layout change is still in progress')
     if not _layout_active_views(context.screen):
         raise ValueError('Open a 3D View first')
+    count = {'SINGLE': 1, 'DUAL': 2, 'QUAD': 4}[layout]
+    if camera_names is not None:
+        if len(camera_names) != count or any(
+                context.scene.objects.get(name) is None or context.scene.objects[name].type != 'CAMERA'
+                for name in camera_names):
+            raise ValueError('所选分屏相机尚未就绪')
+    active = _layout_active_views(context.screen)
+    side_by_side = (len(active) == 2 and abs(active[0].y-active[1].y) <= 8
+                    and abs(active[0].height-active[1].height) <= 8)
+    context.scene['wfrl_view_layout_error'] = ''
     _LAYOUT_JOB = {'screen': context.screen, 'window': context.window,
-                   'scene': context.scene, 'count': {'SINGLE': 1, 'DUAL': 2, 'QUAD': 4}[layout],
-                   'layout': layout}
-    _layout_step()
+                   'scene': context.scene, 'count': count,
+                   'layout': layout, 'camera_names': camera_names,
+                   'merge_first': bool(camera_names and count == 2 and not side_by_side),
+                   'deadline': time.monotonic() + 10}
+    try:
+        _layout_step()
+    except Exception:
+        _LAYOUT_JOB = None
+        raise
 
 
 def cancel_view_layout():

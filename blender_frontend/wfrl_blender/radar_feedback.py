@@ -10,6 +10,8 @@ _icons = None
 
 def alarm_state(value):
     """Use the reader's aligned, expiring, hysteretic B2 state; never truth."""
+    if (value or {}).get('measurement_mode') == 'dual_beam':
+        return value['status']
     measurement = (value or {}).get('measurement')
     if not measurement:
         return 'waiting'
@@ -23,6 +25,8 @@ def alarm_state(value):
 
 def beam_activity(reader, time_s):
     """Recent per-beam valid observations; seeks cannot leak future events."""
+    if hasattr(reader, 'beam_activity'):
+        return reader.beam_activity(time_s, PULSE_SECONDS)
     times = getattr(reader, '_radar_feedback_times', None)
     if times is None:
         times = {name: sorted(r['time_s'] for r in reader.package.measurements

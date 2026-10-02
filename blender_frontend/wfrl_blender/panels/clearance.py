@@ -1,4 +1,5 @@
 """Result comparison and navigation within the shared Camera entry point."""
+import math
 import bpy
 from .. import clearance_replay, runtime
 
@@ -130,6 +131,31 @@ def number(value, signed=False):
     return '--' if value is None else format(value, '+.2f' if signed else '.2f')
 
 
+def selected_installation_label(config):
+    if config.get('installation', {}).get('region') == 'INNER_NACELLE':
+        return '机舱内侧仿真安装位'
+    return '仿真安装位已选定'
+
+
+def dual_method_label(value):
+    """Describe the verified reader identity, never the button used to open it."""
+    method = (value or {}).get('reconstruction_method')
+    labels = {'hub-axis.v1': '旧法 · 轮毂轴线外推',
+              'hub-tls.v1': 'TLS 候选 · 轮毂约束拟合'}
+    if method in labels:
+        return labels[method] + ' · ' + method
+    return '方法未标明' if method is None else '方法：' + str(method)
+
+
+def draw_dual_identity(layout, value):
+    layout.label(text=dual_method_label(value))
+    layout.label(text='算法版本：' + str((value or {}).get('algorithm_version', '未提供')))
+    layout.label(text='研究回放 · REVIEW_ONLY')
+    performance_status = (value or {}).get('performance_status', '未提供')
+    layout.label(text=('性能待验收 · PENDING_ACCEPTANCE' if performance_status == 'PENDING_ACCEPTANCE'
+                       else '性能状态：' + str(performance_status)), icon='INFO')
+
+
 def draw_navigation(layout, scene):
     kind = scene.get('wfrl_scene_kind')
     if kind == 'clearance_replay':
@@ -157,8 +183,61 @@ def fold(layout, scene, prop, title):
     return opened
 
 
+def draw_dual_measurement(layout, scene, value):
+    """S1 is visible even when the independent S2/S3 measurement is absent."""
+    card = layout.box()
+    draw_dual_identity(card, value)
+    alarm = value['alarm']
+    lamp = card.row()
+    lamp.alert = alarm['active']
+    label = '触发 / 显示保持' if alarm['active'] else '本次观测未触发'
+    if alarm['observation_state'] == 'unknown':
+        label = '通道状态未知' + (' · 历史报警保持' if alarm['active'] else '')
+    lamp.label(text='1号光束报警：' + label, icon='ERROR' if alarm['active'] else 'INFO')
+    last = alarm['last_hit_s']
+    card.label(text='最近报警：' + ('—' if last is None else f'{last:.3f} s'))
+    card.label(text=f"观测时刻：{value['observation_time_s']:.3f} s")
+    valid = value['measurement_status'] == 'valid'
+    card.label(text='净空测量：' + {'valid': '双束有效', 'invalid': '数据无效',
+                                       'waiting': '等待双束'}[value['measurement_status']])
+    measurement = value['measurement'] or {}
+    if measurement:
+        card.label(text=f"测量 {measurement['time_s']:.3f} s · 叶片 {measurement['blade_id']}")
+        card.label(text=f"{'当前读数' if valid else '历史整组读数'} · {value['measurement_age_s']:.3f} 仿真秒前")
+    else:
+        card.label(text='本次无有效净空')
+    card.label(text='双束估计净空：' + number(measurement.get('estimate_m')) + ' m')
+    warning = card.row()
+    warning.alert = True
+    warning.label(text='研究估计 · 柔性叶尖精度未验证', icon='ERROR')
+    card.label(text='同定义仿真参考：' + number(measurement.get('truth_m')) + ' m')
+    card.label(text='净空偏差：' + number(measurement.get('error_m'), True) + ' m')
+    card.label(text='S1 独立触发 · 无测量不表示安全')
+    card.label(text='结构叶尖 / 已知仿真变形塔筒')
+    if value['installation_status'] == 'SIMULATION_SELECTED':
+        reader = clearance_replay.reader_for(scene)
+        config = getattr(reader, 'config', {})
+        card.label(text=selected_installation_label(config), icon='INFO')
+        card.label(text='现场安装待核验')
+        installation = config.get('installation')
+        if installation:
+            origin = config['origins_m'][0]
+            projected_x = (-origin[0] + (origin[2] - installation['nominal_tip_height_m'])
+                           * math.tan(math.radians(config['angles_deg'][0])))
+            gap = math.hypot(projected_x, origin[1]) - installation['nominal_tower_radius_m']
+            card.label(text='S1 标称塔壁间距：' + number(gap) + ' m')
+            card.label(text='参考目标：约 ' + number(installation['target_gap_m']) + ' m')
+    elif value['installation_status'] != 'CONFIRMED':
+        card.label(text='诊断安装 · 约 4.5 m 目标待确认', icon='INFO')
+    card.label(text='40 Hz 理想几何样本 · 非设备 DP')
+    card.label(text='手册 ±0.2 m 为测距精度，非净空精度')
+
+
 def draw_measurement(layout, scene, value):
     """Keep sample age beside all three values, using the fixed replay clock."""
+    if value.get('measurement_mode') == 'dual_beam':
+        draw_dual_measurement(layout, scene, value)
+        return
     card = layout.box()
     measurement = value['measurement'] or {}
     if measurement:
@@ -210,6 +289,8 @@ def draw(layout, scene):
             row.operator('wfrl.clearance_clip', text=title, depress=(
                 clearance_replay.reader_for(scene) is not None and scene.get('wfrl_clearance_demo') == demo)).demo = demo
     value = clearance_replay.sample(scene)
+    dual = value is not None and value.get('measurement_mode') == 'dual_beam'
+    channel = 'S2/S3' if dual else 'B2'
     if value is None:
         box.label(text='未加载有效雷达结果', icon='INFO')
         if not runtime.configuration_editable():
@@ -239,10 +320,10 @@ def draw(layout, scene):
             summary = box.box()
             stats = value['statistics']
             summary.label(text='本段统计')
-            summary.label(text=f"B2 有效样本：{stats['valid_samples']} / {stats['expected_samples']}")
+            summary.label(text=f"{channel} 有效样本：{stats['valid_samples']} / {stats['expected_samples']}")
             summary.label(text=f"经过 {stats['passage_count']} 次 · 整次漏测 {stats['missed_passage_count']} 次")
             summary.label(text='平均绝对误差：' + number(stats.get('mae_m')) + ' m')
-    box.label(text='B2 手册简化估算 · 理想测距')
+    box.label(text='S2/S3 两点重建 · S1 独立报警' if dual else 'B2 手册简化估算 · 理想测距')
     box.label(text='光束为示意 · 不作安全判定')
     if fold(box, scene, 'wfrl_clearance_show_details', '测量详情与统计'):
         box.label(text='真实红外不可见；线端不代表命中点')
@@ -252,7 +333,7 @@ def draw(layout, scene):
             box.label(text='平均绝对误差：' + number(stats.get('mae_m')) + ' m')
             box.label(text='最大绝对误差：' + number(stats.get('max_abs_error_m')) + ' m')
             ratio = stats.get('valid_ratio')
-            box.label(text=f"B2 有效样本：{stats['valid_samples']} / {stats['expected_samples']}")
+            box.label(text=f"{channel} 有效样本：{stats['valid_samples']} / {stats['expected_samples']}")
             box.label(text='预期样本中有效：' + ('不适用' if ratio is None else f'{ratio:.1%}'))
             box.label(text='分母：评估网格内预期样本')
             box.label(text=f"经过测量区：{stats['passage_count']} 次")

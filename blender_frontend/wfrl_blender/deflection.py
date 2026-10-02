@@ -8,6 +8,7 @@ import hashlib
 import json
 from pathlib import Path
 import numpy as np
+from . import performance
 
 
 def rotation(axis, degrees):
@@ -147,15 +148,25 @@ class ComparisonView:
             obj['provenance'] = data['reference'] + '; true scale in metres'
         self.handle = bpy.types.SpaceView3D.draw_handler_add(self.draw_labels, (), 'WINDOW', 'POST_PIXEL')
 
+    @performance.timed("comparison.visibility")
     def visible(self, value):
         for obj in self.objects:
-            obj.hide_set(not value)
-            obj.hide_render = not value
+            # Rewriting unchanged RNA visibility tags the dependency graph.
+            # Read the current state so external visibility edits still recover.
+            hidden = not value
+            if obj.hide_get() != hidden:
+                obj.hide_set(hidden)
+                performance.count("comparison.visibility_writes")
+            if obj.hide_render != hidden:
+                obj.hide_render = hidden
+                performance.count("comparison.visibility_writes")
         if not value:
             self.labels = []
 
+    @performance.timed("comparison.update")
     def update(self, scene, i, alpha, time):
         from mathutils import Vector
+        phase_started = performance.begin()
         data = self.data
         pose = data['poses'][i] * (1 - alpha) + data['poses'][i + 1] * alpha
         simulation = data['simulation'][i] * (1 - alpha) + data['simulation'][i + 1] * alpha
@@ -177,6 +188,8 @@ class ComparisonView:
             row.update(time=float(time), blade=b, pitched=pitched, hub=hub,
                        interpolated=bool(1e-8 < alpha < 1 - 1e-8))
             self.rows[b] = row
+        performance.end('comparison.numerical', phase_started)
+        performance.count('comparison.blades', 3)
         row = self.rows[int(scene.wfrl_deflection_blade)]
         if scene.camera and scene.camera.name == 'WFRL.Camera.T1.TipComparison':
             center = (row['reference'] + row['actual']) * .5 - row['axes'][:, 2] * 4
@@ -188,6 +201,7 @@ class ComparisonView:
         show = scene.wfrl_deflection_visible and 0 in self.owner.visible_turbines
         self.visible(show)
         if not show:
+            performance.count("comparison.hidden_geometry_skips")
             return
         points = self.rest @ row['pitched'].T + row['hub']
         self.ghost.data.vertices.foreach_set('co', points.astype(np.float32).ravel())

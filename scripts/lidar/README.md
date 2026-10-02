@@ -2,17 +2,23 @@
 
 ## 当前双束数据与可携带包
 
-适用对象为 NREL / WFRL **0.3.12**；GW184 **0.4.0** 是三相机与合成缺陷的独立刚性场景，不运行本页雷达后处理。两个产品的下载和说明见[项目首页](../../README.md)。
+适用对象为 NREL / WFRL **0.3.13**；GW184 **0.4.0** 是三相机与合成缺陷的独立刚性场景，不运行本页雷达后处理。两个产品的下载和说明见[项目首页](../../README.md)。
 
-0.3.12 安装 ZIP 已包含双束回放。以下是匹配本地源码的生产入口；公开源码未随仅 ZIP 发布同步。日常观看直接用 MAPPO → 净空 → 双束净空 / S1，无需重新后处理或求解。
+0.3.13 安装 ZIP 包含默认旧法与显式可选 TLS 双束回放；公开 `v0.3.13` 源码同步前端、算法、工具、测试及构建资源。日常观看直接用 MAPPO → 净空 → 双束净空 / S1，或选择 TLS 候选 / S1，无需重新后处理或求解。两种结果共享原 40 Hz 源，默认仍为 `hub-axis.v1`。
 
 - `postprocess_dual_beam.py --source <完整v3源包> --calibration <已确认标定JSON> --output <新目录>`：按全部保存网格处理 S1 命中及 S2/S3 同刻同叶片重建，不启动 FAST.Farm。必须显式选择已确认标定；脚本默认的 diagnostic 标定不是当前内侧安装的替代。
 - `package_dual_beam.py --package <双束结果目录> --output <新目录>`：生成可携带目录，包含全部源数据的 `source/`，并重新校验。两个输出都使用新目录，保留原始运行和既有结果。
 - `audit_dual_beam_accuracy.py`、`audit_measurement_window.py`：分别用于误差诊断和保存网格/测量窗审计；按脚本参数和匹配源数据使用，不把软件 PASS 当成精度通过。
 
-当前布局为 S1/S2/S3 = 10°/12°/14°；S1 报警独立于双束有效性，旧 B2 回放仍可使用。40 Hz 保存记录不能替代设备原始采样或现场延迟验证。双束 MAE 约 4.269 m，仍为 REVIEW_ONLY / PENDING_ACCEPTANCE。[格式合同](../../wfrl/lidar/REPLAY_FORMAT.md#dual-beam-review-v1)和[发布范围](../../docs/blender/发布状态与验证范围.md)分别说明数据与交付状态。
+2026-10-02 的 TLS 第一阶段增加显式 `postprocess_dual_beam.py --method hub-tls.v1`；未覆盖方法时保留标定中声明的方法，历史标定缺省仍用 `hub-axis.v1`。每个新结果保存实际生效配置和独立版本；旧法继续作为默认。`compare_dual_beam_methods.py` 重算公共/自身有效集合、全固定窗口覆盖与经过最低净空；`verify_dual_beam_isolation.py` 检查全网格真值删除/污染和独立 eigh 求解；`stress_dual_beam_pointing.py` 在固定窗口内改变指向后重新射线求交。开发压力结果与名义回放单列，仍为 `PENDING_ACCEPTANCE`。实施结果、证据与复算命令见[总报告中的第一阶段记录](../../docs/lidar/双束TLS候选实施与验证总报告.md)。
 
-原 0.3.12 ZIP 的记录检查为：T1/T2/T3 的 33/33/28 次完整过叶均有 S2/S3 同刻同叶片有效配对，共 94/94 次、400 个有效采样，每次至少连续 3 个保存采样点。这是保存网格的窗口统计，不能理解为每帧持续触发或禁止 S1 命中。S1 有效叶片命中继续独立报警，数据无需为本次文档同步重算。
+第二阶段新增 `diagnose_dual_beam_tls_residuals.py --package <TLS包> --baseline <旧法包> --output <新目录>`，对全部有效对进行评分后的方向/长度反事实分解、真实首交拓扑及表面偏移诊断，真值仅限诊断。`audit_dual_beam_observability.py --source <v3源包> --calibration <标定> --output <新目录>` 仅读取独立零载参考和固定标量，执行预声明解析 TEST 形状的首交/Jacobian/零空间探针，未验证形状先验时认证输出为 UNKNOWN。`verify_dual_beam_source_provenance.py --source <v3源包> --output <新目录>` 检查保存原始文件哈希、原始输出与侧车的一致性，缺失动态 VTP 单列证据缺口；可用 `--provenance-root <原路径结构的原始证据根目录>` 移机复核。三者均不启动求解器、不据此切换默认；见[总报告中的第二阶段记录](../../docs/lidar/双束TLS候选实施与验证总报告.md)。
+
+第三阶段的 `run_dual_beam_validation.py --output <新目录> --reference <独立零载参考>` **启动独立单机 OpenFAST 求解**，复制完整输入并保留所有动态 VTP 的无损 XZ、原字节哈希、退出状态和共享数据预算；只能在物理求解任务内使用。`export_dual_beam_validation_source.py <run> <reference> <新源目录> --start <s> --end <s>` 核对完整原始时钟和零载参考，将真实 40/80 Hz VTP 导出为源几何，保持原 2 mm / 5 mm 接口容差。它不生成旧 B2 测量，也不启动求解器。`compare_dual_beam_time_refinement.py` 严格核对两运行仅 DT/DT_Out/VTK_fps 不同，分开保留共同保存时刻、全部细网格新增时刻、未知与经过最低值；两级敏感性不等于数值收敛或性能验收。已执行的 12 m/s / 9 rpm 工程工况、留存来源和复算入口见[总报告中的第三阶段记录](../../docs/lidar/双束TLS候选实施与验证总报告.md)。独立验证工况属于研究证据；0.3.13 安装包内置的是原开发片段的旧法和 TLS 结果，软件交付核对另见[0.3.13 发布核对](../../docs/blender/0.3.13发布核对.md)。
+
+当前布局为 S1/S2/S3 = 10°/12°/14°；S1 报警独立于双束有效性，旧 B2 回放仍可使用。40 Hz 保存记录不能替代设备原始采样或现场延迟验证。同一开发片段 400 对的旧法 / TLS MAE 分别为 4.268685 / 0.776096 m，两种方法仍为 REVIEW_ONLY / PENDING_ACCEPTANCE。[格式合同](../../wfrl/lidar/REPLAY_FORMAT.md#dual-beam-review-v1)和[发布范围](../../docs/blender/发布状态与验证范围.md)分别说明数据与交付状态。
+
+原 0.3.12 ZIP 的记录检查为：T1/T2/T3 的 33/33/28 次完整过叶均有 S2/S3 同刻同叶片有效配对，共 94/94 次、400 个有效采样，每次至少连续 3 个保存采样点。这是保存网格的窗口统计，不能理解为每帧持续触发或禁止 S1 命中。S1 有效叶片命中继续独立报警，0.3.13 沿用该源数据及旧法结果，不因源码同步重跑 FAST.Farm。
 
 ## 历史 normal/close 生产流程
 
@@ -59,7 +65,7 @@ export OPENBLAS_NUM_THREADS=1
 
 新生成结果采用 `numerical-comparison-v2` 证据合同：包内保存数值比较证据，发布前检查解析结果、空间/时间运行链、物理配置、退出状态及完整采样网格，缺少内容不能标记 READY。`READY` 表示包完成且通过该合同检查；精度状态仍是未约定容差，不能解释为现场精度或数值收敛达标。旧版包保留供追溯和兼容读取。
 
-发布窗口及采样率来自运行配置，时长必须大于18秒启动剔除段。`dist/lidar-delivery.json`、`dist/README-lidar.md` 保留旧 normal/close 的交付入口与摘要，不是当前 0.3.12 或 GW184 0.4.0 的完整清单。当前下载以[发布状态](../../docs/blender/发布状态与验证范围.md)为准。无需重跑 FAST.Farm 即可用完整既有数值证据重新封装这两个历史工况；修订不得改变原始逐样本测量。
+发布窗口及采样率来自运行配置，时长必须大于18秒启动剔除段。`dist/lidar-delivery.json`、`dist/README-lidar.md` 保留旧 normal/close 的交付入口与摘要，不是当前 0.3.13 或 GW184 0.4.0 的完整清单。当前下载以[发布状态](../../docs/blender/发布状态与验证范围.md)为准。无需重跑 FAST.Farm 即可用完整既有数值证据重新封装这两个历史工况；修订不得改变原始逐样本测量。
 
 
 原手册核验已补齐：用户提供的《MolasCL 激光净空监测雷达使用手册 V3.0》SHA256 为 `1a126ba6420f47136b17986064908215d6b0d7e0d574ff56247c1255b07a0363`。PDF第9页图2-5与第34页图3-26已逐图核对；两图X/Y命名存在坐标切换，本项目按向叶轮的主轴物理偏距映射。公式、相对光束角和名义塔半径含义一致，不代表真实设备精度验收。

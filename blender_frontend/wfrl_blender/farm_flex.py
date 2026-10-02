@@ -5,12 +5,45 @@ import math
 from pathlib import Path
 from types import SimpleNamespace
 import numpy as np
+from . import performance
 
 _ACTIVE=None
 
 
+def dual_beam_api():
+    try:
+        from ._vendor.lidar import dual_beam_replay
+    except ImportError:
+        from wfrl.lidar import dual_beam_replay
+    return dual_beam_replay
+
+
 def default_package():
     return Path(__file__).resolve().parent / 'assets' / 'mappo'
+
+
+def default_dual_package():
+    return Path(__file__).resolve().parent / 'assets' / 'dual_beam'
+
+
+def default_dual_tls_package():
+    """The optional TLS candidate shares the original package's saved geometry."""
+    return Path(__file__).resolve().parent / 'assets' / 'dual_beam_tls'
+
+
+def saved_package(scene):
+    """Relocate an installed built-in only when its saved manifest is identical."""
+    saved = Path(scene['wfrl_farm_flex_path'])
+    if saved.is_dir():
+        return saved
+    expected = scene.get('wfrl_farm_manifest_sha256')
+    if expected:
+        for candidate in (default_package(), default_dual_package(), default_dual_tls_package()):
+            manifest = candidate / 'manifest.json'
+            if manifest.is_file() and hashlib.sha256(manifest.read_bytes()).hexdigest() == expected:
+                return candidate
+    # The caller retains its normal missing/integrity error and clears old data.
+    return saved
 
 
 
@@ -21,7 +54,7 @@ def is_active(scene):
 
 
 def read_package(path):
-    path=Path(path)
+    path, overlay = dual_beam_api().resolve_package(path)
     manifest=json.loads((path/'manifest.json').read_text())
     if (manifest.get('schema') not in ('wfrl.farm-flex-review.v1','wfrl.farm-flex-review.v2','wfrl.farm-flex-review.v3')
             or manifest.get('status')!='REVIEW_ONLY'
@@ -67,6 +100,12 @@ def read_package(path):
             if not np.allclose(top,[r['nacelle_position_m'] for r in payload['motion']],atol=1e-8,rtol=0):
                 raise ValueError('Nacelle position and geometry differ: '+tid)
         readers[tid]=ReplayReader(SimpleNamespace(manifest={**manifest,'turbine_id':tid},**payload))
+        if overlay is not None:
+            readers[tid] = dual_beam_api().DualBeamReader(readers[tid], overlay, tid)
+    if overlay is not None:
+        manifest = {**manifest, 'measurement_mode': 'dual_beam',
+                    'dual_beam_calibration': overlay['config'],
+                    'dual_beam': overlay['manifest']}
     return manifest,times,transforms,poses,readers
 
 
@@ -77,6 +116,8 @@ class FarmFlex:
         from .materials import get_material,ensure_blade_tip_markings
         from . import clearance_replay
         self.manifest,self.times,self.transforms,self.poses,self.readers=read_package(path)
+        result_path = Path(path).resolve()
+        path, overlay = dual_beam_api().resolve_package(path)
         from .tower_motion import read_tower
         self.tower_motion = read_tower(path,self.manifest,self.times)
         from .prebend import read_reference
@@ -107,7 +148,9 @@ class FarmFlex:
             scene.objects[f'WFRL.Turbine.{tid}.YawRoot'].location=(0,0,geometry_data()['scalars']['TowerHt'])
             scene.objects[f'WFRL.Turbine.{tid}.Rotor'].rotation_euler.x=0
             for b in (1,2,3):scene.objects[f'WFRL.Turbine.{tid}.Blade{b}'].rotation_euler.z=0
+        phase_started = performance.begin()
         bpy.context.view_layer.update()
+        performance.end("flex.depsgraph_update", phase_started)
         spans=np.array([s[0]+geometry_data()['scalars']['HubRad'] for s in geometry_data()['blade_stations']])
         # Retain the same 19-station loft, with fewer presentation samples.
         # Physical transforms, amplitude and the stable tip apex are unchanged.
@@ -195,8 +238,23 @@ class FarmFlex:
         if self.reference is not None:
             scene['wfrl_flex_provenance'] = self.manifest['provenance_label']
         scene['wfrl_tip_reference_note']=scene['wfrl_flex_provenance']
-        scene['wfrl_farm_flex_path']=str(Path(path).resolve())
-        scene['wfrl_farm_manifest_sha256']=hashlib.sha256((Path(path)/'manifest.json').read_bytes()).hexdigest()
+        scene['wfrl_farm_flex_path']=str(result_path)
+        scene['wfrl_farm_manifest_sha256']=hashlib.sha256((result_path/'manifest.json').read_bytes()).hexdigest()
+        from .clearance_visual import ensure_radar
+        if overlay is not None:
+            config = overlay['config']
+            directions = [(-math.sin(math.radians(a)), 0., -math.cos(math.radians(a)))
+                          for a in config['angles_deg']]
+            origins = [[o[0], o[1], o[2]-geometry_data()['scalars']['TowerHt']]
+                       for o in config['origins_m']]
+            for tid in self.readers:
+                ensure_radar(scene, tid, origins[0], directions, beam_origins=origins)
+        else:
+            calibration = self.manifest['calibration']
+            origin = list(calibration['origin_m'])
+            origin[2] -= geometry_data()['scalars']['TowerHt']
+            for tid in self.readers:
+                ensure_radar(scene, tid, origin, calibration['beam_directions'])
         scene.render.fps=60;scene.render.fps_base=1
         scene.frame_start=1;scene.frame_end=1+round((self.times[-1]-self.times[0])*60)
         scene.sync_mode='FRAME_DROP'
@@ -252,8 +310,12 @@ class FarmFlex:
         scene['wfrl_telemetry_time_s'] = t
         self.last_telemetry_frame = t
 
+    @performance.timed("flex.deformation_cache")
     def deformed_at(self,frame):
-        if frame in self.cache:return self.cache[frame]
+        if frame in self.cache:
+            performance.count("flex.cache_hit")
+            return self.cache[frame]
+        performance.count("flex.cache_miss")
         transforms=self.transforms[frame]
         result=[]
         for obj,rest,world,index,weight,k,b,offset in self.blades:
@@ -272,6 +334,7 @@ class FarmFlex:
         while len(self.cache)>3:self.cache.pop(next(iter(self.cache)))
         return result
 
+    @performance.timed("flex.update")
     def update(self,scene, *, sim_time_s=None, record_telemetry=True, update_comparison=True):
         import bpy
         from . import clearance_replay
@@ -291,6 +354,8 @@ class FarmFlex:
             raise ValueError('Simulation time outside source geometry range')
         i=int(np.clip(np.searchsorted(self.times,t,side='right')-1,0,len(self.times)-2))
         alpha=float(np.clip((t-self.times[i])/(self.times[i+1]-self.times[i]),0,1))
+        performance.count("flex.scene_updates")
+        performance.count("flex.participating_turbines", len(self.visible_turbines))
         lower=self.deformed_at(i);upper=self.deformed_at(i+1)
         pose=self.poses[i]*(1-alpha)+self.poses[i+1]*alpha
         if record_telemetry:
@@ -319,11 +384,14 @@ class FarmFlex:
                 obj.rotation_euler=Matrix(nacelle[k,:,:3].tolist()).to_euler()
                 obj.location=nacelle[k,:,:3]@np.array([0,0,87.6])+nacelle[k,:,3]
             for obj,rest,index,weight,k in self.towers:
+                phase_started = performance.begin()
                 lo,hi=tower[k,index],tower[k,index+1]
                 a=np.einsum('nij,nj->ni',lo[:,:,:3],rest)+lo[:,:,3]
                 b=np.einsum('nij,nj->ni',hi[:,:,:3],rest)+hi[:,:,3]
                 obj.data.vertices.foreach_set('co',((1-weight)*a+weight*b).astype(np.float32).ravel())
                 obj.data.update()
+                performance.end("flex.tower_interpolate_write", phase_started)
+                performance.count("flex.tower_vertices_written", len(rest))
             heights=support['heights']
             for obj,k,z,rest_location in self.fittings:
                 j=int(np.clip(np.searchsorted(heights,z)-1,0,len(heights)-2))
@@ -331,10 +399,13 @@ class FarmFlex:
                 tr=interpolate_transform(tower[k,j],tower[k,j+1],f)
                 obj.location=tr[:,:3]@rest_location+tr[:,3]
                 obj.rotation_euler=Matrix(tr[:,:3].tolist()).to_euler()
+        phase_started = performance.begin()
         bpy.context.view_layer.update()
+        performance.end("flex.depsgraph_update", phase_started)
         inverses=[np.array(obj.matrix_world.inverted()) for obj,*_ in self.blades]
         for (obj,rest,world,index,weight,k,b,offset),inverse,lo,hi in zip(self.blades,inverses,lower,upper):
             if lo is None:continue
+            phase_started = performance.begin()
             if self.reference is not None and 1e-8 < alpha < 1-1e-8:
                 # Interpolate deformation in the moving blade root frame.
                 # A world-space chord between rotating tips creates artificial
@@ -349,7 +420,12 @@ class FarmFlex:
             else:
                 deformed=lo*(1-alpha)+hi*alpha+offset
             local=deformed@inverse[:3,:3].T+inverse[:3,3]
+            performance.end('flex.interpolation', phase_started)
+            phase_started = performance.begin()
             obj.data.vertices.foreach_set('co',local.astype(np.float32).ravel());obj.data.update()
+            performance.end('flex.mesh_write_update', phase_started)
+            performance.count('flex.blade_updates')
+            performance.count('flex.vertices_written', len(local))
         if update_comparison and self.comparison is not None and getattr(self, 'export_turbines', None) is None:
             self.comparison.update(scene, i, alpha, t)
 

@@ -18,7 +18,7 @@ def tick():
                          camera=scene.camera,layout=core.layout_dict(scene),
                          quality=(scene.render.preview_pixel_size,scene.eevee.taa_samples,scene.eevee.use_shadows,scene.eevee.use_fast_gi))
             with bpy.context.temp_override(window=main,area=area):
-                assert bpy.ops.wfrl.native_camera_view(mode='TRIPLE')=={'FINISHED'}
+                assert bpy.ops.wfrl.native_camera_view(mode='TRIPLE',layout='STRIP')=={'FINISHED'}
             return 2.
         scene=state['scene'];session=native._ACTIVE
         if state['stage']=='ready':

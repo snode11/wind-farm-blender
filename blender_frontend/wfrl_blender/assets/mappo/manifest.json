@@ -157,7 +157,7 @@
     "telemetry.json": "14bb1f2d074576fae9cfceaa20b2e8898fcf6c94d50c1501b719941af2a0da32",
     "interface-audit.json": "6df8a95131b0660937551a3007f1582a2627a223fcc76e6b4908c4f4478b2e10",
     "measurement-acceptance.json": "022ec985e3a95f5f25caf97fb6db437735c1f18483816dc7b30052044373e715",
-    "acceptance-report.md": "410aa63dae7f62c950627e2597ae366affd33ecf67561d83e6acd35b8cd7d52a",
+    "legacy-acceptance-report.json": "2d9c3b02266a749548a7e6221022c2dd7c6844ae653f02f93b04266f0368f2b6",
     "window-diagnostics.json": "837d13aeb577bf8aa9b4ce5cf39b63ab471129d15e8cb34083bf1bbce81fbab0",
     "calibration-candidate-summary.json": "cb8ad0d5e26d8ebbce840957ec560abf422ea5ba9812bda76ae028c4baf07d88"
   },

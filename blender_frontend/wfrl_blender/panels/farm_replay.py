@@ -1,7 +1,7 @@
 """One sidebar entry for the dedicated three-turbine recorded-result player."""
 import bpy
 from .. import clearance_replay, farm_flex
-from .clearance import number, playback_control
+from .clearance import number, playback_control, selected_installation_label, dual_method_label
 
 
 def unified_panel_active(scene):
@@ -15,6 +15,28 @@ def section(layout, key, title):
 
 
 def draw_radar(layout, scene, value):
+    modes = layout.row(align=True)
+    modes.operator('wfrl.load_dual_beam', text='双束净空 / S1')
+    modes.operator('wfrl.load_demo', text='原 B2 回放')
+    layout.operator('wfrl.load_dual_beam', text='TLS 候选 / S1').builtin_method = 'TLS'
+    if (value or {}).get('measurement_mode') == 'dual_beam':
+        from .clearance import draw_dual_measurement
+        draw_dual_measurement(layout, scene, value)
+        stats = value['statistics']
+        details = section(layout, 'wfrl_dual_beam_details', '双束统计与报警记录')
+        if details is not None:
+            details.label(text='累计统计截至当前仿真时刻')
+            details.label(text=f"预期区双束有效：{stats['valid_samples']} / {stats['expected_samples']}")
+            details.label(text=f"全部双束有效：{stats['all_valid_samples']}")
+            details.label(text='平均绝对误差：' + number(stats['mae_m']) + ' m')
+            details.label(text='绝对误差 P95：' + number(stats['p95_abs_error_m']) + ' m')
+            details.label(text=f"S1 累计事件：{value['alarm']['event_count']}")
+            reader = clearance_replay.reader_for(scene)
+            details.label(text=f"报警显示保持 {reader.config['alarm_hold_s']:.1f} 仿真秒")
+            details.label(text='保持时间不代表保护延迟')
+            details.label(text='40 Hz 仿真采样；设备 DP 为 50 Hz')
+            details.label(text='浅蓝为方向；亮橙为命中显示提示')
+        return
     card = layout.box()
     from ..radar_feedback import alarm_state, icon_id, LABELS, PULSE_SECONDS
     state = alarm_state(value)
@@ -112,6 +134,17 @@ def draw_views(layout, context):
         draw_gimbal_controls(gimbal, context, allow_turbine_selection=False)
 
 
+def draw_split_views(layout, context):
+    layout.label(text='左右分屏 · T1', icon='CAMERA_DATA')
+    row = layout.row(align=True)
+    row.operator('wfrl.farm_split_view', text='Down + 侧前方').mode = 'DOWN'
+    row.operator('wfrl.farm_split_view', text='机舱 + 侧前方').mode = 'NACELLE'
+    layout.operator('wfrl.farm_split_view', text='恢复单屏', icon='FULLSCREEN_ENTER').mode = 'SINGLE'
+    error = context.scene.get('wfrl_view_layout_error')
+    if error:
+        layout.label(text=error, icon='ERROR')
+
+
 def draw_turbine_views(layout, scene):
     """Keep Down views and two directions on the same mounted camera."""
     row = layout.row(align=True)
@@ -191,10 +224,15 @@ def draw_tools(layout, context):
         data.label(text='轨迹为形变网格叶尖位置，非相机测量')
         data.label(text="红 / 绿 / 蓝：叶片 1 / 2 / 3")
         data.label(text="相邻两圈定格对比 2 秒后淡出")
-        data.label(text='B2 手册简化估算 · 理想测距')
+        if farm_flex._ACTIVE.manifest.get('measurement_mode') == 'dual_beam':
+            data.label(text=dual_method_label(clearance_replay.sample(scene)))
+            data.label(text='S2/S3 同刻同叶片配对 · S1 独立报警')
+        else:
+            data.label(text='B2 手册简化估算 · 理想测距')
         data.label(text='光束为示意，不作安全判定')
         data.label(text='开发验收包 · 数值细化待验证')
         data.operator('wfrl.load_demo', text='重新加载当前结果', icon='FILE_REFRESH').package_path = scene['wfrl_farm_flex_path']
+        data.operator('wfrl.load_dual_beam', text='打开外部双束数据包', icon='FILE_FOLDER').choose_file = True
         data.operator('wfrl.clearance_restart', text='从头重播', icon='REW')
         path = data.column(); path.enabled = False
         path.prop(scene, '["wfrl_farm_flex_path"]', text='数据目录')
@@ -207,9 +245,16 @@ def draw(layout, context):
     layout.use_property_decorate = False
     if farm_flex._ACTIVE.reference is not None:
         layout.label(text='单机预弯接口验证' if farm_flex._ACTIVE.manifest.get('interface_only') else 'NREL 5MW 预弯改型 · BeamDyn')
-    if farm_flex._ACTIVE.manifest.get('acceptance_status', '').startswith('FAILED'):
+    if farm_flex._ACTIVE.manifest.get('measurement_mode') == 'dual_beam':
+        layout.label(text=dual_method_label(value), icon='INFO')
+        installation_status = (value or {}).get('installation_status')
+        layout.label(text=('双束重建 · ' + selected_installation_label(getattr(reader, 'config', {}))
+                           if installation_status == 'SIMULATION_SELECTED'
+                           else '双束诊断 · 安装与性能待验收'), icon='INFO')
+    elif farm_flex._ACTIVE.manifest.get('acceptance_status', '').startswith('FAILED'):
         layout.label(text='测量覆盖未达演示目标', icon='ERROR')
     draw_playback(layout, context, value, reader)
+    draw_split_views(layout, context)
     tabs = layout.row(align=True)
     tabs.scale_y = 1.25
     tabs.prop(scene, 'wfrl_farm_panel_page', expand=True)
@@ -329,6 +374,38 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class WFRL_OT_FarmSplitView(bpy.types.Operator):
+    bl_idname = 'wfrl.farm_split_view'
+    bl_label = 'T1 左右分屏'
+    bl_description = '左侧 Down 或机舱，右侧 T1 侧前方；两侧同步播放，保留当前进度'
+    mode: bpy.props.EnumProperty(items=[('DOWN', 'Down + 侧前方', ''),
+                                      ('NACELLE', '机舱 + 侧前方', ''),
+                                      ('SINGLE', '恢复单屏', '')], default='DOWN')
+
+    @classmethod
+    def poll(cls, context):
+        from .. import cameras
+        return (not bpy.app.background and context.window is not None
+                and farm_flex.is_active(context.scene) and cameras._LAYOUT_JOB is None)
+
+    def execute(self, context):
+        from .. import cameras
+        scene = context.scene
+        try:
+            if self.mode == 'SINGLE':
+                cameras.set_view_layout(context, 'SINGLE', camera_names=(scene.camera.name,))
+            else:
+                result = bpy.ops.wfrl.farm_flex_view(turbine='T1', angle=self.mode)
+                if result != {'FINISHED'}:
+                    return {'CANCELLED'}
+                cameras.set_view_layout(context, 'DUAL', camera_names=(
+                    scene.camera.name, 'WFRL.Camera.T1.FrontQuarter'))
+        except (ValueError, RuntimeError) as exc:
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        return {'FINISHED'}
+
+
 class WFRL_PT_FarmFlex(bpy.types.Panel):
     bl_label='三机 MAPPO 回放'
     bl_idname='WFRL_PT_FarmFlex'
@@ -343,6 +420,8 @@ class WFRL_PT_FarmFlex(bpy.types.Panel):
             draw(self.layout,context)
         else:
             self.layout.operator('wfrl.load_demo', icon='FILE_REFRESH')
+            self.layout.operator('wfrl.load_dual_beam', icon='IMPORT')
+            self.layout.operator('wfrl.load_dual_beam', text='加载 TLS 候选 / S1', icon='IMPORT').builtin_method = 'TLS'
             self.layout.label(text=context.scene.get('wfrl_clearance_status', '完整离线演示 · 无需后端'), icon='INFO')
 
 
@@ -395,4 +474,4 @@ class WFRL_OT_DeflectionView(bpy.types.Operator):
         return {'FINISHED'}
 
 
-CLASSES = (WFRL_OT_FarmFlexView, WFRL_OT_FarmTransport, WFRL_OT_DeflectionView, WFRL_PT_FarmFlex)
+CLASSES = (WFRL_OT_FarmFlexView, WFRL_OT_FarmSplitView, WFRL_OT_FarmTransport, WFRL_OT_DeflectionView, WFRL_PT_FarmFlex)

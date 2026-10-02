@@ -234,6 +234,8 @@ def register():
 
 def unregister():
     import bpy
+    from .cameras import cancel_view_layout
+    cancel_view_layout()
     previous = getattr(bpy, '_wfrl_registered_cleanup', None)
     if previous:
         previous()

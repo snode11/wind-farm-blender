@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import hashlib
+import argparse
+import importlib.util
 import json
 from pathlib import Path
 import tomllib
@@ -47,11 +49,51 @@ def _payloads() -> list[tuple[str, bytes]]:
         ("_vendor/lidar/__init__.py", b""),
         ("_vendor/lidar/replay.py", LIDAR_REPLAY_SOURCE.read_bytes()),
         ("_vendor/lidar/evidence.py", LIDAR_EVIDENCE_SOURCE.read_bytes()),
+        ("_vendor/lidar/dual_beam_replay.py", (LIDAR_REPLAY_SOURCE.parent / 'dual_beam_replay.py').read_bytes()),
+        ("_vendor/lidar/molas_cl.py", (LIDAR_REPLAY_SOURCE.parent / 'molas_cl.py').read_bytes()),
     ])
     return sorted(payloads)
 
 
-def build(output_dir: Path = DIST, *, farm_package: Path | None = None) -> BuildResult:
+def _dual_reader():
+    # Load the stdlib-only canonical reader without simulator dependencies.
+    spec = importlib.util.spec_from_file_location('dual_bundle_reader', LIDAR_REPLAY_SOURCE.parent / 'dual_beam_replay.py')
+    reader = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(reader)
+    return reader
+
+
+def _validate_farm_payloads(payloads):
+    bundled = dict(payloads)
+    manifest = json.loads(bundled['assets/mappo/manifest.json'])
+    for name, expected in manifest['files'].items():
+        if (Path(name).name != name
+                or hashlib.sha256(bundled.get('assets/mappo/' + name, b'')).hexdigest() != expected):
+            raise ValueError('Farm package integrity mismatch: ' + name)
+
+
+def _bundle_dual(payloads, package, asset_dir, expected_method):
+    package = Path(package)
+    _, overlay = _dual_reader().resolve_package(package)
+    if overlay is None:
+        raise ValueError('Expected dual-beam package: ' + asset_dir)
+    method = overlay['config'].get('reconstruction_method', 'hub-axis.v1')
+    if method != expected_method:
+        raise ValueError('Bundled dual-beam method differs from entry point: ' + asset_dir)
+    bundled = dict(payloads)
+    for name, expected in overlay['manifest']['source_hashes'].items():
+        if hashlib.sha256(bundled.get('assets/mappo/' + name, b'')).hexdigest() != expected:
+            raise ValueError('Dual-beam data differs from bundled geometry: ' + asset_dir + '/' + name)
+    prefix = 'assets/' + asset_dir + '/'
+    payloads = [(name, data) for name, data in payloads if not name.startswith(prefix)]
+    manifest = dict(overlay['manifest'], source_package='../mappo', portable=True)
+    payloads += [(prefix + name, (package / name).read_bytes()) for name in sorted(manifest['files'])]
+    payloads.append((prefix + 'manifest.json', (json.dumps(manifest, ensure_ascii=False, sort_keys=True) + '\n').encode()))
+    return payloads
+
+
+def build(output_dir: Path = DIST, *, farm_package: Path | None = None,
+          dual_package: Path | None = None, dual_tls_package: Path | None = None) -> BuildResult:
     manifest = tomllib.loads((PACKAGE_SOURCE / "blender_manifest.toml").read_text(encoding="utf-8"))
     package_id, version = manifest["id"], manifest["version"]
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -67,6 +109,17 @@ def build(output_dir: Path = DIST, *, farm_package: Path | None = None) -> Build
         payloads += [('assets/mappo/'+name,(farm_package/name).read_bytes())
                      for name in sorted(set(data_manifest['files']) | {'manifest.json'})]
         payloads.sort()
+    _validate_farm_payloads(payloads)
+    for package, asset_dir, method in ((dual_package, 'dual_beam', 'hub-axis.v1'),
+                                      (dual_tls_package, 'dual_beam_tls', 'hub-tls.v1')):
+        # A custom geometry-only delivery cannot inherit sidecars for another
+        # source. The normal release always bundles both verified methods.
+        if package is None and farm_package is not None:
+            payloads = [(name, data) for name, data in payloads if not name.startswith('assets/' + asset_dir + '/')]
+            continue
+        package = package or PACKAGE_SOURCE / 'assets' / asset_dir
+        payloads = _bundle_dual(payloads, package, asset_dir, method)
+    payloads.sort()
     with ZipFile(archive, "w", ZIP_DEFLATED, compresslevel=9) as zipped:
         for name, data in payloads:
             info = ZipInfo(name, ZIP_TIMESTAMP)
@@ -92,7 +145,12 @@ def build(output_dir: Path = DIST, *, farm_package: Path | None = None) -> Build
 
 
 def main() -> None:
-    result = build()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', type=Path, default=DIST)
+    parser.add_argument('--dual-package', type=Path)
+    parser.add_argument('--dual-tls-package', type=Path)
+    args = parser.parse_args()
+    result = build(args.output, dual_package=args.dual_package, dual_tls_package=args.dual_tls_package)
     print(result.archive)
     print(result.checksum)
     print(result.inventory)

@@ -63,7 +63,7 @@ def _radar_primitive(collection, kind, name, material):
     return obj
 
 
-def ensure_radar(scene, turbine_id, origin=None, directions=None):
+def ensure_radar(scene, turbine_id, origin=None, directions=None, *, beam_origins=None):
     """Refresh fittings without touching the active scene, selection or mode."""
     import bpy
     from .materials import get_material
@@ -129,6 +129,7 @@ def ensure_radar(scene, turbine_id, origin=None, directions=None):
     from .turbine_geometry import geometry_data
     display_length = geometry_data()['scalars']['TipRad'] * .95
     for index, direction in enumerate(directions, 1):
+        beam_origin = beam_origins[index-1] if beam_origins is not None else origin
         name = prefix + f'.Beam{index}'
         beam = scene.objects.get(name)
         if beam is None:
@@ -137,8 +138,8 @@ def ensure_radar(scene, turbine_id, origin=None, directions=None):
             curve.materials.append(material)
             beam = bpy.data.objects.new(name, curve); collection.objects.link(beam); beam.parent = yaw
         norm = math.sqrt(sum(v*v for v in direction))
-        beam.data.splines[0].points[0].co = (*origin, 1)
-        beam.data.splines[0].points[1].co = (*(origin[i] + display_length*direction[i]/norm for i in range(3)), 1)
+        beam.data.splines[0].points[0].co = (*beam_origin, 1)
+        beam.data.splines[0].points[1].co = (*(beam_origin[i] + display_length*direction[i]/norm for i in range(3)), 1)
         beam['provenance'] = body['provenance']
         if 'wfrl_beam_active' in beam:
             del beam['wfrl_beam_active']

@@ -229,7 +229,12 @@ class Capture:
     def _play(self, playing):
         import bpy
         if bool(self.window.screen.is_animation_playing) != playing:
-            with bpy.context.temp_override(window=self.window,screen=self.window.screen):
+            from . import native_camera_views
+            session=native_camera_views._ACTIVE
+            override=(session.playback_context() if session and session.window==self.window
+                      and session.scene==self.scene else None)
+            override=override or {'window':self.window,'screen':self.window.screen}
+            with bpy.context.temp_override(**override):
                 if playing:bpy.ops.screen.animation_play()
                 else:bpy.ops.screen.animation_cancel(restore_frame=False)
 

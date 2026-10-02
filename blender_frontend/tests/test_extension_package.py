@@ -51,6 +51,17 @@ class PackageTests(unittest.TestCase):
                 self.assertEqual(manifest['segment']['end_s'] - manifest['segment']['start_s'], 60)
                 for name, digest in manifest['files'].items():
                     self.assertEqual(hashlib.sha256(zipped.read('assets/mappo/' + name)).hexdigest(), digest)
+                for directory, method in (('dual_beam', 'hub-axis.v1'), ('dual_beam_tls', 'hub-tls.v1')):
+                    prefix = 'assets/' + directory + '/'
+                    sidecar = json.loads(zipped.read(prefix + 'manifest.json'))
+                    self.assertEqual(sidecar['reconstruction_method'], method)
+                    self.assertEqual(sidecar['performance_status'], 'PENDING_ACCEPTANCE')
+                    self.assertEqual(sidecar['source_package'], '../mappo')
+                    self.assertTrue(sidecar['portable'])
+                    for name, digest in sidecar['files'].items():
+                        self.assertEqual(hashlib.sha256(zipped.read(prefix + name)).hexdigest(), digest)
+                    for name, digest in sidecar['source_hashes'].items():
+                        self.assertEqual(hashlib.sha256(zipped.read('assets/mappo/' + name)).hexdigest(), digest)
                 self.assertNotIn('sample_demo', zipped.read('state.py').decode())
                 self.assertIn("_vendor/lidar/replay.py", names)
                 self.assertIn("_vendor/lidar/evidence.py", names)

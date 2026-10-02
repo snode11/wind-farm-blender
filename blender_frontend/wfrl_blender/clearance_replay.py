@@ -157,11 +157,9 @@ def on_load(_):
             path = getattr(scene, 'wfrl_clearance_' + demo + '_path', '')
             try:
                 if scene.get('wfrl_farm_flex_path'):
-                    from pathlib import Path
                     from . import farm_flex, runtime
                     runtime.enter_result_replay()
-                    saved = Path(scene['wfrl_farm_flex_path'])
-                    candidate = saved if saved.is_dir() else farm_flex.default_package()
+                    candidate = farm_flex.saved_package(scene)
                     expected = scene.get('wfrl_farm_manifest_sha256')
                     if expected:
                         import hashlib
