@@ -1,6 +1,6 @@
 # GW184 叶片缺陷编辑器 · 0.4.0
 
-更新日期：2026-09-30。按照 v1.1 开发规格实现的独立刚性场景，已随 [GW184 0.4.0 运行 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.4.0/gw184_three_camera_defects-0.4.0.zip)发布。v1.1 是规格版本，0.4.0 是运行包版本。它不安装或修改主前端扩展，不接入 NREL 柔性回放、雷达或 FAST.Farm；NREL 安装包继续为 0.3.12。
+更新日期：2026-10-02（更新 NREL 关联入口）。按照 v1.1 开发规格实现的独立刚性场景，已随 [GW184 0.4.0 运行 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.4.0/gw184_three_camera_defects-0.4.0.zip)发布。v1.1 是规格版本，0.4.0 是运行包版本。它不安装或修改主前端扩展，不接入 NREL 柔性回放、雷达或 FAST.Farm；NREL 安装包已另行更新为 [0.3.13](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.13)，GW184 包保持不变。
 
 当前提供 G 几何检查及 A 图像生成入口。**2026-09-30 获准的 18 张静态检查图已完成并作有限外观审核；第一阶段仍不能宣称整体验收通过。** 开发规格、原始检查图及验收记录保存在匹配工作区的 `docs/proposal/叶片缺陷编辑与固定相机成像验证开发规格.md`、`outputs/blade-defects/completion-20260930/检查图.html` 和 `outputs/blade-defects/completion-20260930/验收记录.md`，不随公开仓库文档或运行 ZIP 提供。
 

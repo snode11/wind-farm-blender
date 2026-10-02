@@ -1,6 +1,6 @@
 # GW184 单机启停三相机与缺陷编辑器 · 0.4.0
 
-更新日期：2026-09-30。独立的 Blender 合成场景，包含固定三相机、六类叶片缺陷编辑器，以及原三路原始 MP4 管线；复用前端网格与针孔投影辅助函数。
+更新日期：2026-10-02（更新 NREL 关联入口）。独立的 Blender 合成场景，包含固定三相机、六类叶片缺陷编辑器，以及原三路原始 MP4 管线；复用前端网格与针孔投影辅助函数。
 
 **GW184 0.4.0 已作为独立运行 ZIP 发布；完整 320 秒三路视频仍未生成。** 给朋友的视频任务最终仅交付 `C1.mp4`、`C2.mp4`、`C3.mp4`，这项视频交付约束与供用户启动编辑器的运行 ZIP 分别处理。2026-09-30 的 18 张授权静态图已完成有限外观审核；它们不代替完整视频、拼接算法或第一阶段整体验收。
 
@@ -12,7 +12,7 @@
 - Windows：双击根目录的 `Open-GW184.bat`；可用 `BLENDER_BIN` 指定 `blender.exe`。目前只有脚本静态检查，没有 Windows 实机验证。
 - 任意平台：在解压后的运行包根目录执行 `blender --factory-startup --python scripts/blender/gw184_defects.py -- --mode edit --all-presets`。
 
-这是解压后运行的项目，**不要通过 Blender 的 Install from Disk 安装**；不依赖 NREL 扩展、Python 后端、OpenFAST、FAST.Farm 或 Bridge。NREL 5MW 柔性回放和双束净空仍使用独立的 `wfrl_blender-0.3.12.zip`，旧版本保留。安装和操作详见 [GW184 使用说明](../../docs/blender/GW184三相机与缺陷编辑器.md)。
+这是解压后运行的项目，**不要通过 Blender 的 Install from Disk 安装**；不依赖 NREL 扩展、Python 后端、OpenFAST、FAST.Farm 或 Bridge。NREL 5MW 柔性回放和双束净空当前使用另一套 [0.3.13 扩展](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.13)，旧版本保留，雷达更新只进入 NREL。安装和操作详见 [GW184 使用说明](../../docs/blender/GW184三相机与缺陷编辑器.md)。
 
 模型为 184 m 参考直径、90 m 叶片、3 m 静态预弯的合成刚性几何：借用 DTU 10MW 的弦长、厚度、扭角分布和固定 FFA 翼型，不是制造商 CAD，也不是放大后的 NREL 柔性模型。六类缺陷不耦合结构或气动求解。
 
