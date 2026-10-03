@@ -1,0 +1,14 @@
+{
+  "span_bounds_m": [
+    0,
+    61.5
+  ],
+  "section_positions_m": [
+    9.225,
+    30.75,
+    52.275
+  ],
+  "sample_count": 8192,
+  "regional_sample_count": 2048,
+  "seed": 20261002
+}

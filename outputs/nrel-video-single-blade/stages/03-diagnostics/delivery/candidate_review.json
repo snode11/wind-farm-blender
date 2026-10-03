@@ -1,0 +1,82 @@
+{
+  "method": "Codex visual screening of all 300 decoded RGB thumbnails; direction angle from permitted rigid pose and frozen v2 root ring centre. Not independent geometry truth.",
+  "candidates": [
+    {
+      "camera_id": "C1",
+      "frame_id": 40,
+      "sim_time_s": 122.025,
+      "angle_from_frame43_deg": 1.5110598078653368,
+      "status": "RGB_REVIEW_CANDIDATE_NOT_ANNOTATED_NOT_FIT"
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 41,
+      "sim_time_s": 122.075,
+      "angle_from_frame43_deg": 0.9840812492368579,
+      "status": "RGB_REVIEW_CANDIDATE_NOT_ANNOTATED_NOT_FIT"
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 46,
+      "sim_time_s": 122.325,
+      "angle_from_frame43_deg": 1.2922267197898414,
+      "status": "RGB_REVIEW_CANDIDATE_NOT_ANNOTATED_NOT_FIT"
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 47,
+      "sim_time_s": 122.375,
+      "angle_from_frame43_deg": 1.675562296828046,
+      "status": "RGB_REVIEW_CANDIDATE_NOT_ANNOTATED_NOT_FIT"
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 50,
+      "sim_time_s": 122.525,
+      "angle_from_frame43_deg": 2.6997467375485713,
+      "status": "RGB_REVIEW_CANDIDATE_NOT_ANNOTATED_NOT_FIT"
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 52,
+      "sim_time_s": 122.625,
+      "angle_from_frame43_deg": 3.288547613905588,
+      "status": "RGB_REVIEW_CANDIDATE_NOT_ANNOTATED_NOT_FIT"
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 40,
+      "sim_time_s": 122.025,
+      "angle_from_frame43_deg": 1.4778768533128483,
+      "status": "RGB_REVIEW_CANDIDATE_NOT_ANNOTATED_NOT_FIT"
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 41,
+      "sim_time_s": 122.075,
+      "angle_from_frame43_deg": 0.9615857426946268,
+      "status": "RGB_REVIEW_CANDIDATE_NOT_ANNOTATED_NOT_FIT"
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 46,
+      "sim_time_s": 122.325,
+      "angle_from_frame43_deg": 1.258530891154788,
+      "status": "RGB_REVIEW_CANDIDATE_NOT_ANNOTATED_NOT_FIT"
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 47,
+      "sim_time_s": 122.375,
+      "angle_from_frame43_deg": 1.6315060377331982,
+      "status": "RGB_REVIEW_CANDIDATE_NOT_ANNOTATED_NOT_FIT"
+    }
+  ],
+  "C3": "No additional visible B1-passage thumbnail beyond 42-45 identified; other visible passages are not admitted as B1.",
+  "limits": [
+    "Candidates are not certified better observations. Full-resolution contour and identity review required before use.",
+    "C1 ring can enter frame in 41/46/47 but existing exclusion boxes may still remove boundary.",
+    "Same five-second clip does not add a new condition; static shape validity away from t_ref is unverified.",
+    "No new masks or training frame list created."
+  ]
+}

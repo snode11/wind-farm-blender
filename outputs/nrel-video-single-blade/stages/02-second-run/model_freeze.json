@@ -1,0 +1,33 @@
+{
+  "utc": "2026-10-02T14:46:50.190474+00:00",
+  "status": "MODELS_FROZEN_BEFORE_SECOND_ITERATION_HELDOUT_AND_TRUTH_REVIEW",
+  "final_model": "reconstruction/T1_B1.ply",
+  "sha256": {
+    "smooth-ablation/initial_template.ply": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81",
+    "smooth-ablation/initial_template.json": "b4c6f2d968e50efae56f0d986de8825a769b2b04d20200eac5852e92a475f144",
+    "smooth-ablation/prior_only.ply": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81",
+    "smooth-ablation/prior_only.json": "81418f2a740d9110c1eeb007f81e60db8413a180a5932b9dab8a5197dec414a9",
+    "smooth-ablation/T1_B1.ply": "65b7774fd5885acf88c32518aa54a17e2d554e5b989368efcf7445b6a107019a",
+    "smooth-ablation/T1_B1.json": "c0f4043c2c572b2a17598319f779661a09450f19a6943d852c93fa596a4573ac",
+    "smooth-ablation/optimization.json": "82fb188ee6596fab1c7e05d06f406a16abd0d1d082805bd319d335554892f1c5",
+    "smooth-ablation/frozen_config.json": "769bc1ecfeb533811cf20b8522676d744ceaf934bcf5d405f6e41a838d351953",
+    "contour-ablation/initial_template.ply": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81",
+    "contour-ablation/initial_template.json": "b4c6f2d968e50efae56f0d986de8825a769b2b04d20200eac5852e92a475f144",
+    "contour-ablation/prior_only.ply": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81",
+    "contour-ablation/prior_only.json": "81418f2a740d9110c1eeb007f81e60db8413a180a5932b9dab8a5197dec414a9",
+    "contour-ablation/T1_B1.ply": "176ee00f19a1768d189ce615f681fcbbff51ea71d89cd07e4f8b17fed2ad26ef",
+    "contour-ablation/T1_B1.json": "8196a03e87f2480c0707a32e8ad442bfcedfe060af461a1546d5091e18ae1e4d",
+    "contour-ablation/optimization.json": "dd1db472a8c3ba35468d81ff60a19e6d10522022b5ffbf0fa1bb00aca4f7fa71",
+    "contour-ablation/frozen_config.json": "2b4c45fe259dae808901eea370310d250247810feb02acfaed7138ee6f18ff8f",
+    "reconstruction/initial_template.ply": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81",
+    "reconstruction/initial_template.json": "b4c6f2d968e50efae56f0d986de8825a769b2b04d20200eac5852e92a475f144",
+    "reconstruction/prior_only.ply": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81",
+    "reconstruction/prior_only.json": "81418f2a740d9110c1eeb007f81e60db8413a180a5932b9dab8a5197dec414a9",
+    "reconstruction/T1_B1.ply": "89cee4964b9d943b3965f2014f57795a9277d3a1c9dfec919c3f677005634c7a",
+    "reconstruction/T1_B1.json": "855850cfc0c74c01a6f8fa1097017513d8ac7be5f76ad8e6f16c3a9030ab50bc",
+    "reconstruction/optimization.json": "7343cb32806e2b3658a3d6a88d357b609fc9973877aa67fa512adff0ca948786",
+    "reconstruction/frozen_config.json": "69c95db4cbfd3fd613e29a4d0cc1a6a24b3e38cdfdf0d1923ef4c4568cd23fed"
+  },
+  "further_parameter_tuning": false,
+  "initial_identity_verified": true
+}

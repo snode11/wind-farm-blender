@@ -1,0 +1,33 @@
+{
+  "version": "second",
+  "old_run": "20261002-first",
+  "data_reused": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input",
+  "predeclared_ablations": [
+    "same initial template, objective and budget; only linear to bspline parameter interpolation",
+    "same smooth shape with RGB contour objective to remove interior-triangle occupancy preference"
+  ],
+  "fit_frames": [
+    42,
+    43
+  ],
+  "heldout_frames": [
+    44,
+    45
+  ],
+  "heldout_is_blind": false,
+  "heldout_note": "Seen in first iteration; remain outside gradients, are temporal checks not a new blind benchmark",
+  "truth_tuning": false,
+  "truth_score_after_model_freeze": true,
+  "final_fit_decision": {
+    "basis": "fit-only contour ablation history decreases but oscillates in last stage; no second-iteration heldout or truth scores inspected",
+    "predeclared_budget": "100 iterations from same independent initial template; same-budget ablations retained",
+    "learning_rate": 0.012,
+    "schedule": [
+      40,
+      40,
+      20
+    ],
+    "utc": "2026-10-02T14:44:59.796691+00:00",
+    "further_tuning_after_this_run": false
+  }
+}

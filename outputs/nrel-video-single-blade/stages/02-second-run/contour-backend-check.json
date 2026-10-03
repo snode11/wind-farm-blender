@@ -1,0 +1,13 @@
+{
+  "backend": "torch_cpu_visible_projected_contour_point_segment",
+  "torch_version": "2.13.0",
+  "actual_backward": true,
+  "finite_difference_epsilon": 1e-05,
+  "analytic_gradient": 0.28510499595204275,
+  "finite_difference_gradient": 0.285104995946181,
+  "relative_error": 2.0559988806376097e-11,
+  "candidate_count": 68,
+  "candidate_segment_count": 4,
+  "passed": true,
+  "scope": "synthetic closed convex cube; away from topology/visibility/sampling case changes"
+}

@@ -1,0 +1,16 @@
+{
+  "status": "PASSED",
+  "test_command": "/opt/anaconda3/envs/wfrl-mac/bin/python -m pytest -q tests/test_nrel_area_audit.py",
+  "test_result": "8 passed in 0.25s",
+  "audit_command": "/opt/anaconda3/envs/wfrl-mac/bin/python -m wfrl.nrel_reconstruction.area_audit --comparison outputs/nrel-video-single-blade/20261002-second/evaluation-only/geometry_comparison.json --output outputs/nrel-video-single-blade/20261003-diagnostics/area/final",
+  "working_directory": "/Users/eason/Desktop/wfcrl/wind farm RL",
+  "audit_exit_code": 0,
+  "recorded_input_hashes_rechecked": true,
+  "output_signatures": {
+    "README.md": "434f4c748487238667d0f769adceed897af8a243380827e4a80a102c550ce0ed",
+    "area_audit.json": "9fee4000299da697c78cd2cba69878822817ba95c452f042c07d7a2c7d771dbd",
+    "outside_span_pieces.json": "732fbd6accd95806d2d7d8632ae49a5822fcf0055307c1a0c89fd937db287465",
+    "per_triangle_area_accounting.csv": "60e4cf2985fb32e0b7cf2f046411ec147f045d48ada2fd566295d8b05c82f596"
+  },
+  "initial_run_policy": "Initial diagnostic artifacts in area/ are retained. The final audited version is area/final/. Run the command only with a new empty output directory."
+}

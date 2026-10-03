@@ -1,0 +1,1130 @@
+{
+  "schema": "nrel-single-blade-scores-v1",
+  "units": "m",
+  "registration": "NONE",
+  "scale_adjustment": "NONE",
+  "metadata": {
+    "model": {
+      "t_ref_sim_time_s": 122.175,
+      "frame_id": 43,
+      "selection_basis": "Actual MP4 RGB: B1 body visible in C1/C2 and painted tip contour clear in C3; identity checked with declared ideal B1 rigid pose. No truth geometry used.",
+      "fit_frame_ids": [
+        42,
+        43
+      ],
+      "heldout_frame_ids": [
+        44,
+        45
+      ],
+      "target": "T1/B1",
+      "coordinate_frame": "blade_root_local",
+      "units": "m",
+      "surface_scope": "entire_evaluated_blade_surface",
+      "reference_shape": "static_near_t_ref",
+      "deformation_assistance": "none",
+      "models": {
+        "initial_template": {
+          "template_kind": "independent_coarse_rounded_section_prior",
+          "source": "https://www.nrel.gov/docs/fy09osti/38060.pdf",
+          "source_scope": "public span and coarse Table 3-1 chord/twist dimensions",
+          "excluded_sources": [
+            "scene_reference_mesh",
+            "SourceLoft",
+            "exact_airfoil_coordinates",
+            "replay_deformation"
+          ],
+          "coordinate_frame": "blade_root_local",
+          "units": "m",
+          "axes": {
+            "x": "downstream/thickness",
+            "y": "chordwise",
+            "z": "radial/span"
+          },
+          "span_m": 61.5,
+          "control_z_m": [
+            0.0,
+            5.125,
+            15.375,
+            30.75,
+            46.125,
+            56.375,
+            61.5
+          ],
+          "center_offsets_m": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "control_chord_log_scale": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fixed_priors": [
+            "section_thickness",
+            "section_twist",
+            "hidden_surface",
+            "61.5_m_span"
+          ],
+          "approximation": "rounded elliptical sections; 0.8 m tip endpoint prior; no exact NREL airfoil surface",
+          "span_samples": 25,
+          "ring_samples": 12,
+          "interpolation": "bspline",
+          "interpolation_degree": 3,
+          "basis_knots_m": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            15.375,
+            30.75,
+            46.125,
+            61.5,
+            61.5,
+            61.5,
+            61.5
+          ],
+          "control_parameter_role": "B-spline control-polygon coefficients; control_z reports Greville abscissae",
+          "interpolation_scope": "optimized centreline offsets and chord log-ratios; fixed template dimensions unchanged",
+          "field_continuity": "C2 at simple interior knots",
+          "initial_template_policy": "identical public coarse initial template; smooth only optimized offsets and chord log-ratios",
+          "regularization_policy": "unchanged v1 control-polygon relative-change and second-difference penalties"
+        },
+        "prior_only": {
+          "template_kind": "independent_coarse_rounded_section_prior",
+          "source": "https://www.nrel.gov/docs/fy09osti/38060.pdf",
+          "source_scope": "public span and coarse Table 3-1 chord/twist dimensions",
+          "excluded_sources": [
+            "scene_reference_mesh",
+            "SourceLoft",
+            "exact_airfoil_coordinates",
+            "replay_deformation"
+          ],
+          "coordinate_frame": "blade_root_local",
+          "units": "m",
+          "axes": {
+            "x": "downstream/thickness",
+            "y": "chordwise",
+            "z": "radial/span"
+          },
+          "span_m": 61.5,
+          "control_z_m": [
+            0.0,
+            5.125,
+            15.375,
+            30.75,
+            46.125,
+            56.375,
+            61.5
+          ],
+          "center_offsets_m": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "control_chord_log_scale": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fixed_priors": [
+            "section_thickness",
+            "section_twist",
+            "hidden_surface",
+            "61.5_m_span"
+          ],
+          "approximation": "rounded elliptical sections; 0.8 m tip endpoint prior; no exact NREL airfoil surface",
+          "span_samples": 25,
+          "ring_samples": 12,
+          "interpolation": "bspline",
+          "interpolation_degree": 3,
+          "basis_knots_m": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            15.375,
+            30.75,
+            46.125,
+            61.5,
+            61.5,
+            61.5,
+            61.5
+          ],
+          "control_parameter_role": "B-spline control-polygon coefficients; control_z reports Greville abscissae",
+          "interpolation_scope": "optimized centreline offsets and chord log-ratios; fixed template dimensions unchanged",
+          "field_continuity": "C2 at simple interior knots",
+          "initial_template_policy": "identical public coarse initial template; smooth only optimized offsets and chord log-ratios",
+          "regularization_policy": "unchanged v1 control-polygon relative-change and second-difference penalties"
+        },
+        "T1_B1": {
+          "template_kind": "independent_coarse_rounded_section_prior",
+          "source": "https://www.nrel.gov/docs/fy09osti/38060.pdf",
+          "source_scope": "public span and coarse Table 3-1 chord/twist dimensions",
+          "excluded_sources": [
+            "scene_reference_mesh",
+            "SourceLoft",
+            "exact_airfoil_coordinates",
+            "replay_deformation"
+          ],
+          "coordinate_frame": "blade_root_local",
+          "units": "m",
+          "axes": {
+            "x": "downstream/thickness",
+            "y": "chordwise",
+            "z": "radial/span"
+          },
+          "span_m": 61.5,
+          "control_z_m": [
+            0.0,
+            5.125,
+            15.375,
+            30.75,
+            46.125,
+            56.375,
+            61.5
+          ],
+          "center_offsets_m": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              -0.08560030907392502,
+              -1.8058195114135742
+            ],
+            [
+              -0.44915154576301575,
+              -0.30341649055480957
+            ],
+            [
+              0.07647950947284698,
+              -0.6764044761657715
+            ],
+            [
+              -0.06264504045248032,
+              -0.3986755609512329
+            ],
+            [
+              0.09707659482955933,
+              -0.6255987882614136
+            ],
+            [
+              -0.184214249253273,
+              -0.4712386131286621
+            ]
+          ],
+          "control_chord_log_scale": [
+            0.18968312442302704,
+            0.04117051512002945,
+            0.040441036224365234,
+            -0.039982158690690994,
+            -0.0667344331741333,
+            -0.03887617215514183,
+            -0.06145823001861572
+          ],
+          "fixed_priors": [
+            "section_thickness",
+            "section_twist",
+            "hidden_surface",
+            "61.5_m_span"
+          ],
+          "approximation": "rounded elliptical sections; 0.8 m tip endpoint prior; no exact NREL airfoil surface",
+          "span_samples": 25,
+          "ring_samples": 12,
+          "interpolation": "bspline",
+          "interpolation_degree": 3,
+          "basis_knots_m": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            15.375,
+            30.75,
+            46.125,
+            61.5,
+            61.5,
+            61.5,
+            61.5
+          ],
+          "control_parameter_role": "B-spline control-polygon coefficients; control_z reports Greville abscissae",
+          "interpolation_scope": "optimized centreline offsets and chord log-ratios; fixed template dimensions unchanged",
+          "field_continuity": "C2 at simple interior knots",
+          "initial_template_policy": "identical public coarse initial template; smooth only optimized offsets and chord log-ratios",
+          "regularization_policy": "unchanged v1 control-polygon relative-change and second-difference penalties"
+        }
+      }
+    },
+    "truth": {
+      "schema": "wfrl.evaluation-surface.v1",
+      "target": "T1/B1",
+      "t_ref_sim_time_s": 122.175,
+      "coordinate_frame": "blade_root_local",
+      "units": "m",
+      "span_axis": "z",
+      "span_bounds_m": [
+        0.0,
+        61.5
+      ],
+      "coordinates": "x axial/thickness, y chordwise, z radial/span; origin hub-local z=1.5m",
+      "T_world_from_blade_root": [
+        [
+          0.9674860239028931,
+          0.23306715488433838,
+          -0.09823743253946304,
+          -5.070126533508301
+        ],
+        [
+          0.06927108019590378,
+          -0.6177264451980591,
+          -0.7833362817764282,
+          -1.2479958534240723
+        ],
+        [
+          -0.24325378239154816,
+          0.7510616779327393,
+          -0.6137865781784058,
+          89.08633422851562
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "mesh_source": "actual evaluated mesh of video scene",
+      "vertices": 4417,
+      "triangles": 8830,
+      "surface_scope": "entire_evaluated_blade_surface",
+      "includes": "full SourceLoft surface excluding loose diagnostic vertex",
+      "source_package": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/mappo",
+      "source_manifest_sha256": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde",
+      "module_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+      "module_sources": {
+        "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py": "bde07ea92d0b1ffb75b78c021d9be240f4cce09087aeb0c1f76d8fff2d2e601a",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/custom_camera_capture.py": "bd4aa555329cc528a3a28cc53ccd48d492cace52c7343830cbf07efb073d1bfa",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/custom_cameras.py": "60a57935c205ea81c3f85c585446b67e6c80c1a1dc10c536f5e708bbfca1bbaa",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/camera_projection.py": "8b74e83a51ce30f204b67435d7ba8a0d7ae1273ad1f1fff7899a8bcc3f93622a",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/farm_flex.py": "ebf11bf71b2a8306b812e1b5ac7408c97c31f7cdb84ff7c6b0de0eff48ce5519"
+      },
+      "blender": "5.2.1 LTS",
+      "camera_layout_hash": "538c874543ff19932e3f228a59a7a311e6363d57cc0569b0da238384e8a5a7cf",
+      "render_profile": {
+        "shading": "MATERIAL",
+        "studio_light": "forest.exr",
+        "scene_lights": false,
+        "scene_world": false,
+        "studio_rotation": 0.0,
+        "studio_intensity": 1.0,
+        "studio_background_alpha": 1.0,
+        "studio_background_blur": 0.5,
+        "studio_view_rotation": false,
+        "color_management": {
+          "view_transform": "AgX",
+          "look": "AgX - Medium High Contrast",
+          "exposure": 0.3499999940395355,
+          "gamma": 1.0,
+          "use_curve_mapping": false
+        },
+        "display_device": "sRGB",
+        "curve_mapping": null,
+        "excluded_annotations": [
+          "WFRL.Label.*",
+          "WFRL.Grid.*",
+          "WFRL.Inflow.*",
+          "WFRL.Deflection.*",
+          "WFRL.Wake*",
+          "*.TipTrail.*",
+          "*.ClearanceRadar.Beam*",
+          "*.SensorFrustum",
+          "WFRL.Fixture.T1.LidarRay*"
+        ],
+        "image_encoding": "RGBA8 display-transformed once; top-left rows; PNG sRGB"
+      },
+      "simulation_state_hash": "26f6d59891a12f1b0ad4bd31dfddc8890a5184f1a320f79306dd8216db0e406a",
+      "reference_capture": "outputs/nrel-video-single-blade/20261002-first/internal-capture-formal/capture_20261002_213817_baf6978517",
+      "reference_capture_state_verified": true,
+      "algorithm_input": false,
+      "file_sha256": "c91a4be2e478d107ffd67935831efc99714a549e1e18a4634992c76b7e22fa37"
+    }
+  },
+  "scoring_config": {
+    "span_bounds_m": [
+      0,
+      61.5
+    ],
+    "section_positions_m": [
+      9.225,
+      30.75,
+      52.275
+    ],
+    "sample_count": 8192,
+    "regional_sample_count": 2048,
+    "seed": 20261002
+  },
+  "section_convention": "xy minimum-area enclosing rectangle long side estimates chord and short side estimates body thickness; z fixed before scoring. A shape-only section cannot prove pressure/suction-side orientation.",
+  "truth_policy": "Evaluation only; no truth-based fitting-window, parameter or initialization choice.",
+  "metadata_errors": [],
+  "models": {
+    "initial": {
+      "global": {
+        "reconstruction_to_truth": {
+          "mean_m": 0.3494425968978986,
+          "p95_m": 0.8548740646999143,
+          "standard_error_mean_m": 0.0028530414755978967,
+          "source_area_m2": 498.86874200820773,
+          "sample_count": 8192,
+          "null_reason": null
+        },
+        "truth_to_reconstruction": {
+          "mean_m": 0.34832206813237415,
+          "p95_m": 0.8831197047787213,
+          "standard_error_mean_m": 0.002903297945113879,
+          "source_area_m2": 501.2066016293269,
+          "sample_count": 8192,
+          "null_reason": null
+        }
+      },
+      "regions": {
+        "root": {
+          "span_bounds_m": [
+            0.0,
+            20.5
+          ],
+          "reconstruction_to_truth": {
+            "mean_m": 0.47997315866138185,
+            "p95_m": 0.9532880662687574,
+            "standard_error_mean_m": 0.006416527431494091,
+            "source_area_m2": 233.74562318923256,
+            "sample_count": 2048,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.4859256141053281,
+            "p95_m": 0.9631399925044469,
+            "standard_error_mean_m": 0.006348363638275542,
+            "source_area_m2": 234.70833043421067,
+            "sample_count": 2048,
+            "null_reason": null
+          }
+        },
+        "middle": {
+          "span_bounds_m": [
+            20.5,
+            41.0
+          ],
+          "reconstruction_to_truth": {
+            "mean_m": 0.2739060000375809,
+            "p95_m": 0.5645253432377894,
+            "standard_error_mean_m": 0.0037005649816461415,
+            "source_area_m2": 163.93279374797785,
+            "sample_count": 2048,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.262614428769533,
+            "p95_m": 0.5693125947810621,
+            "standard_error_mean_m": 0.003590225301440643,
+            "source_area_m2": 162.69714571127693,
+            "sample_count": 2048,
+            "null_reason": null
+          }
+        },
+        "tip": {
+          "span_bounds_m": [
+            41.0,
+            61.5
+          ],
+          "reconstruction_to_truth": {
+            "mean_m": 0.18135017659120964,
+            "p95_m": 0.5026201600386457,
+            "standard_error_mean_m": 0.003260502257218276,
+            "source_area_m2": 101.19032507099723,
+            "sample_count": 2048,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.1877200341705985,
+            "p95_m": 0.5629880929639653,
+            "standard_error_mean_m": 0.003615279443593355,
+            "source_area_m2": 102.74094490356582,
+            "sample_count": 2048,
+            "null_reason": null
+          }
+        }
+      },
+      "sections": [
+        {
+          "reconstruction": {
+            "z_m": 9.225,
+            "chord_length_m": 4.388597207956717,
+            "body_thickness_m": 2.514155005924023,
+            "chord_angle_from_y_deg": -22.03499085936508,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 24,
+            "null_reason": null
+          },
+          "truth": {
+            "z_m": 9.225,
+            "chord_length_m": 4.305514423544228,
+            "body_thickness_m": 2.4074229844597133,
+            "chord_angle_from_y_deg": 3.4022385665705066,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 96,
+            "null_reason": null
+          }
+        },
+        {
+          "reconstruction": {
+            "z_m": 30.75,
+            "chord_length_m": 3.739281324284539,
+            "body_thickness_m": 0.9535167396620758,
+            "chord_angle_from_y_deg": -2.6352253344461243,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 12,
+            "null_reason": null
+          },
+          "truth": {
+            "z_m": 30.75,
+            "chord_length_m": 3.7423174054507182,
+            "body_thickness_m": 0.9340372212360846,
+            "chord_angle_from_y_deg": -2.8054647081381274,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 98,
+            "null_reason": null
+          }
+        },
+        {
+          "reconstruction": {
+            "z_m": 52.275,
+            "chord_length_m": 2.4532242329097964,
+            "body_thickness_m": 0.4718128706924569,
+            "chord_angle_from_y_deg": 1.616276715146265,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 24,
+            "null_reason": null
+          },
+          "truth": {
+            "z_m": 52.275,
+            "chord_length_m": 2.455647689396998,
+            "body_thickness_m": 0.44169411186829044,
+            "chord_angle_from_y_deg": 3.5483432333559612,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 96,
+            "null_reason": null
+          }
+        }
+      ],
+      "surface": {
+        "reconstruction_vertices": 300,
+        "reconstruction_faces": 596,
+        "truth_vertices": 4417,
+        "truth_faces": 8830
+      },
+      "sampling": {
+        "method": "triangle_area_probability_sqrt_barycentric",
+        "seed": 20261002,
+        "distance_target": "continuous_triangle_surface",
+        "statistics": "Monte Carlo source-area-weighted estimates",
+        "p95_method": "linear_sample_quantile",
+        "units": "m"
+      }
+    },
+    "prior_only": {
+      "global": {
+        "reconstruction_to_truth": {
+          "mean_m": 0.3494425968978986,
+          "p95_m": 0.8548740646999143,
+          "standard_error_mean_m": 0.0028530414755978967,
+          "source_area_m2": 498.86874200820773,
+          "sample_count": 8192,
+          "null_reason": null
+        },
+        "truth_to_reconstruction": {
+          "mean_m": 0.34832206813237415,
+          "p95_m": 0.8831197047787213,
+          "standard_error_mean_m": 0.002903297945113879,
+          "source_area_m2": 501.2066016293269,
+          "sample_count": 8192,
+          "null_reason": null
+        }
+      },
+      "regions": {
+        "root": {
+          "span_bounds_m": [
+            0.0,
+            20.5
+          ],
+          "reconstruction_to_truth": {
+            "mean_m": 0.47997315866138185,
+            "p95_m": 0.9532880662687574,
+            "standard_error_mean_m": 0.006416527431494091,
+            "source_area_m2": 233.74562318923256,
+            "sample_count": 2048,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.4859256141053281,
+            "p95_m": 0.9631399925044469,
+            "standard_error_mean_m": 0.006348363638275542,
+            "source_area_m2": 234.70833043421067,
+            "sample_count": 2048,
+            "null_reason": null
+          }
+        },
+        "middle": {
+          "span_bounds_m": [
+            20.5,
+            41.0
+          ],
+          "reconstruction_to_truth": {
+            "mean_m": 0.2739060000375809,
+            "p95_m": 0.5645253432377894,
+            "standard_error_mean_m": 0.0037005649816461415,
+            "source_area_m2": 163.93279374797785,
+            "sample_count": 2048,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.262614428769533,
+            "p95_m": 0.5693125947810621,
+            "standard_error_mean_m": 0.003590225301440643,
+            "source_area_m2": 162.69714571127693,
+            "sample_count": 2048,
+            "null_reason": null
+          }
+        },
+        "tip": {
+          "span_bounds_m": [
+            41.0,
+            61.5
+          ],
+          "reconstruction_to_truth": {
+            "mean_m": 0.18135017659120964,
+            "p95_m": 0.5026201600386457,
+            "standard_error_mean_m": 0.003260502257218276,
+            "source_area_m2": 101.19032507099723,
+            "sample_count": 2048,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.1877200341705985,
+            "p95_m": 0.5629880929639653,
+            "standard_error_mean_m": 0.003615279443593355,
+            "source_area_m2": 102.74094490356582,
+            "sample_count": 2048,
+            "null_reason": null
+          }
+        }
+      },
+      "sections": [
+        {
+          "reconstruction": {
+            "z_m": 9.225,
+            "chord_length_m": 4.388597207956717,
+            "body_thickness_m": 2.514155005924023,
+            "chord_angle_from_y_deg": -22.03499085936508,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 24,
+            "null_reason": null
+          },
+          "truth": {
+            "z_m": 9.225,
+            "chord_length_m": 4.305514423544228,
+            "body_thickness_m": 2.4074229844597133,
+            "chord_angle_from_y_deg": 3.4022385665705066,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 96,
+            "null_reason": null
+          }
+        },
+        {
+          "reconstruction": {
+            "z_m": 30.75,
+            "chord_length_m": 3.739281324284539,
+            "body_thickness_m": 0.9535167396620758,
+            "chord_angle_from_y_deg": -2.6352253344461243,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 12,
+            "null_reason": null
+          },
+          "truth": {
+            "z_m": 30.75,
+            "chord_length_m": 3.7423174054507182,
+            "body_thickness_m": 0.9340372212360846,
+            "chord_angle_from_y_deg": -2.8054647081381274,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 98,
+            "null_reason": null
+          }
+        },
+        {
+          "reconstruction": {
+            "z_m": 52.275,
+            "chord_length_m": 2.4532242329097964,
+            "body_thickness_m": 0.4718128706924569,
+            "chord_angle_from_y_deg": 1.616276715146265,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 24,
+            "null_reason": null
+          },
+          "truth": {
+            "z_m": 52.275,
+            "chord_length_m": 2.455647689396998,
+            "body_thickness_m": 0.44169411186829044,
+            "chord_angle_from_y_deg": 3.5483432333559612,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 96,
+            "null_reason": null
+          }
+        }
+      ],
+      "surface": {
+        "reconstruction_vertices": 300,
+        "reconstruction_faces": 596,
+        "truth_vertices": 4417,
+        "truth_faces": 8830
+      },
+      "sampling": {
+        "method": "triangle_area_probability_sqrt_barycentric",
+        "seed": 20261002,
+        "distance_target": "continuous_triangle_surface",
+        "statistics": "Monte Carlo source-area-weighted estimates",
+        "p95_method": "linear_sample_quantile",
+        "units": "m"
+      }
+    },
+    "final": {
+      "global": {
+        "reconstruction_to_truth": {
+          "mean_m": 0.1839927612803811,
+          "p95_m": 0.6077903453414697,
+          "standard_error_mean_m": 0.002189108958324101,
+          "source_area_m2": 509.9328454846309,
+          "sample_count": 8192,
+          "null_reason": null
+        },
+        "truth_to_reconstruction": {
+          "mean_m": 0.16261727004931575,
+          "p95_m": 0.5114341864467321,
+          "standard_error_mean_m": 0.0016822647353863563,
+          "source_area_m2": 501.2066016293269,
+          "sample_count": 8192,
+          "null_reason": null
+        }
+      },
+      "regions": {
+        "root": {
+          "span_bounds_m": [
+            0.0,
+            20.5
+          ],
+          "reconstruction_to_truth": {
+            "mean_m": 0.26661952157139196,
+            "p95_m": 0.7337397644425553,
+            "standard_error_mean_m": 0.00552060562200262,
+            "source_area_m2": 254.0927763248971,
+            "sample_count": 2048,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.22621796613974382,
+            "p95_m": 0.621037652374805,
+            "standard_error_mean_m": 0.00429022063359545,
+            "source_area_m2": 234.70833043421067,
+            "sample_count": 2048,
+            "null_reason": null
+          }
+        },
+        "middle": {
+          "span_bounds_m": [
+            20.5,
+            41.0
+          ],
+          "reconstruction_to_truth": {
+            "mean_m": 0.13080868190805212,
+            "p95_m": 0.36332492668447947,
+            "standard_error_mean_m": 0.002272058018963078,
+            "source_area_m2": 159.86020885749053,
+            "sample_count": 2048,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.1233217682084781,
+            "p95_m": 0.3051233188101514,
+            "standard_error_mean_m": 0.0020055802320936788,
+            "source_area_m2": 162.69714571127693,
+            "sample_count": 2048,
+            "null_reason": null
+          }
+        },
+        "tip": {
+          "span_bounds_m": [
+            41.0,
+            61.5
+          ],
+          "reconstruction_to_truth": {
+            "mean_m": 0.0848480599635637,
+            "p95_m": 0.17491480894717149,
+            "standard_error_mean_m": 0.001146348078694132,
+            "source_area_m2": 95.9798603022432,
+            "sample_count": 2048,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.08651842047059738,
+            "p95_m": 0.18568187109930495,
+            "standard_error_mean_m": 0.0012526846875138718,
+            "source_area_m2": 102.74094490356582,
+            "sample_count": 2048,
+            "null_reason": null
+          }
+        }
+      },
+      "sections": [
+        {
+          "reconstruction": {
+            "z_m": 9.225,
+            "chord_length_m": 4.605694960413086,
+            "body_thickness_m": 2.646130037632399,
+            "chord_angle_from_y_deg": -22.059752237605107,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 24,
+            "null_reason": null
+          },
+          "truth": {
+            "z_m": 9.225,
+            "chord_length_m": 4.305514423544228,
+            "body_thickness_m": 2.4074229844597133,
+            "chord_angle_from_y_deg": 3.4022385665705066,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 96,
+            "null_reason": null
+          }
+        },
+        {
+          "reconstruction": {
+            "z_m": 30.75,
+            "chord_length_m": 3.625007766621761,
+            "body_thickness_m": 0.9243769662460748,
+            "chord_angle_from_y_deg": -2.6352268983677143,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 12,
+            "null_reason": null
+          },
+          "truth": {
+            "z_m": 30.75,
+            "chord_length_m": 3.7423174054507182,
+            "body_thickness_m": 0.9340372212360846,
+            "chord_angle_from_y_deg": -2.8054647081381274,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 98,
+            "null_reason": null
+          }
+        },
+        {
+          "reconstruction": {
+            "z_m": 52.275,
+            "chord_length_m": 2.3333901762807274,
+            "body_thickness_m": 0.44876254754014017,
+            "chord_angle_from_y_deg": 1.6164654742576146,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 24,
+            "null_reason": null
+          },
+          "truth": {
+            "z_m": 52.275,
+            "chord_length_m": 2.455647689396998,
+            "body_thickness_m": 0.44169411186829044,
+            "chord_angle_from_y_deg": 3.5483432333559612,
+            "section_closed": true,
+            "self_intersections": 0,
+            "segment_count": 96,
+            "null_reason": null
+          }
+        }
+      ],
+      "surface": {
+        "reconstruction_vertices": 300,
+        "reconstruction_faces": 596,
+        "truth_vertices": 4417,
+        "truth_faces": 8830
+      },
+      "sampling": {
+        "method": "triangle_area_probability_sqrt_barycentric",
+        "seed": 20261002,
+        "distance_target": "continuous_triangle_surface",
+        "statistics": "Monte Carlo source-area-weighted estimates",
+        "p95_method": "linear_sample_quantile",
+        "units": "m"
+      }
+    }
+  },
+  "surface_evidence": {
+    "source": "reconstruction/surface_evidence.json",
+    "regions": [
+      {
+        "name": "root",
+        "span_bounds_m": [
+          0,
+          20.5
+        ],
+        "status": "prior_only"
+      },
+      {
+        "name": "middle",
+        "span_bounds_m": [
+          20.5,
+          41
+        ],
+        "status": "prior_only"
+      },
+      {
+        "name": "tip",
+        "span_bounds_m": [
+          41,
+          61.5
+        ],
+        "status": "prior_only"
+      }
+    ],
+    "closed_mesh_is_not_observation_evidence": true,
+    "missing_truth_area_m2": null,
+    "missing_area_reason": "Evidence does not label evaluation truth; nearest-boundary distances do not establish recovered missing area.",
+    "output_surface_area_by_evidence_m2": null,
+    "area_reason": "No per-face evidence labels; regional descriptions are retained without inventing area coverage.",
+    "missing_regions": [],
+    "coverage_conclusion": "PARTIAL_OR_PRIOR_DEPENDENT"
+  },
+  "comparison": {
+    "relative_to_initial": {
+      "reconstruction_to_truth": {
+        "delta_mean_m": -0.16544983561751747,
+        "delta_p95_m": -0.24708371935844464
+      },
+      "truth_to_reconstruction": {
+        "delta_mean_m": -0.1857047980830584,
+        "delta_p95_m": -0.37168551833198915
+      }
+    },
+    "relative_to_prior_only": {
+      "reconstruction_to_truth": {
+        "delta_mean_m": -0.16544983561751747,
+        "delta_p95_m": -0.24708371935844464
+      },
+      "truth_to_reconstruction": {
+        "delta_mean_m": -0.1857047980830584,
+        "delta_p95_m": -0.37168551833198915
+      }
+    },
+    "regional_changes": [
+      {
+        "baseline": "initial",
+        "region": "root",
+        "delta_reconstruction_to_truth_mean_m": -0.2133536370899899,
+        "delta_truth_to_reconstruction_mean_m": -0.25970764796558427
+      },
+      {
+        "baseline": "initial",
+        "region": "middle",
+        "delta_reconstruction_to_truth_mean_m": -0.1430973181295288,
+        "delta_truth_to_reconstruction_mean_m": -0.1392926605610549
+      },
+      {
+        "baseline": "initial",
+        "region": "tip",
+        "delta_reconstruction_to_truth_mean_m": -0.09650211662764593,
+        "delta_truth_to_reconstruction_mean_m": -0.10120161370000111
+      },
+      {
+        "baseline": "prior_only",
+        "region": "root",
+        "delta_reconstruction_to_truth_mean_m": -0.2133536370899899,
+        "delta_truth_to_reconstruction_mean_m": -0.25970764796558427
+      },
+      {
+        "baseline": "prior_only",
+        "region": "middle",
+        "delta_reconstruction_to_truth_mean_m": -0.1430973181295288,
+        "delta_truth_to_reconstruction_mean_m": -0.1392926605610549
+      },
+      {
+        "baseline": "prior_only",
+        "region": "tip",
+        "delta_reconstruction_to_truth_mean_m": -0.09650211662764593,
+        "delta_truth_to_reconstruction_mean_m": -0.10120161370000111
+      }
+    ],
+    "section_changes": [
+      {
+        "baseline": "initial",
+        "z_m": 9.225,
+        "delta_abs_error_chord_length_m": 0.2170977524563691,
+        "delta_abs_error_body_thickness_m": 0.13197503170837566
+      },
+      {
+        "baseline": "initial",
+        "z_m": 30.75,
+        "delta_abs_error_chord_length_m": 0.11427355766277802,
+        "delta_abs_error_body_thickness_m": -0.009819263435981496
+      },
+      {
+        "baseline": "initial",
+        "z_m": 52.275,
+        "delta_abs_error_chord_length_m": 0.11983405662906899,
+        "delta_abs_error_body_thickness_m": -0.023050323152316754
+      },
+      {
+        "baseline": "prior_only",
+        "z_m": 9.225,
+        "delta_abs_error_chord_length_m": 0.2170977524563691,
+        "delta_abs_error_body_thickness_m": 0.13197503170837566
+      },
+      {
+        "baseline": "prior_only",
+        "z_m": 30.75,
+        "delta_abs_error_chord_length_m": 0.11427355766277802,
+        "delta_abs_error_body_thickness_m": -0.009819263435981496
+      },
+      {
+        "baseline": "prior_only",
+        "z_m": 52.275,
+        "delta_abs_error_chord_length_m": 0.11983405662906899,
+        "delta_abs_error_body_thickness_m": -0.023050323152316754
+      }
+    ],
+    "image_contribution": "NOT_YET_ESTABLISHED",
+    "criterion": "Both source directions' mean/P95 improve over initial and same-configuration prior-only, with no fixed-section size-error degradation or detected section crossing. Sample estimates do not establish an engineering tolerance.",
+    "conclusion_zh": "视频的额外几何贡献尚未证实；请查看无图像对照、双向距离、固定截面及分区变化。"
+  },
+  "comparison_provenance": {
+    "status": "DECLARED_SAME_CONFIGURATION",
+    "declaration": {
+      "observation_version": "original_raw",
+      "coordinate_branch": "original_raw",
+      "optimizer_implementation": "wfrl.nrel_reconstruction.optimize._fit",
+      "only_between_arm_change": {
+        "camera_id": "C1",
+        "frame_id": 42,
+        "fields": [
+          "contour_points_path",
+          "contour_valid_path"
+        ]
+      },
+      "same_zero_initial_parameters": true,
+      "same_model_loss_weights_optimizer_budget": true,
+      "shared_prior_only": true,
+      "shared_prior_computed_with": "original_raw; image_weight=0; no image gradients",
+      "same_initial_parameters": true,
+      "same_optimizer": true,
+      "same_stage_schedule": true,
+      "same_regularization": true,
+      "same_budget": true,
+      "only_image_weights_differ": true,
+      "provenance_scope": "Within this arm video versus shared prior only; between image arms only C1#42 contour/domain paths differ.",
+      "prior_only_image_weight": 0.0,
+      "final_image_weight": 1.0
+    },
+    "errors": [],
+    "basis": "Frozen optimization audit declaration; evaluation does not tune either model."
+  },
+  "status": "SCORED",
+  "file_signatures": {
+    "initial": {
+      "file": "initial_template.ply",
+      "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+    },
+    "prior_only": {
+      "file": "prior_only.ply",
+      "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+    },
+    "final": {
+      "file": "T1_B1.ply",
+      "sha256": "89cee4964b9d943b3965f2014f57795a9277d3a1c9dfec919c3f677005634c7a"
+    },
+    "truth": {
+      "file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/evaluation-only/truth-at-tref/T1_B1_truth.ply",
+      "sha256": "c91a4be2e478d107ffd67935831efc99714a549e1e18a4634992c76b7e22fa37"
+    }
+  },
+  "comparison_plot": {
+    "status": "WRITTEN",
+    "path": "comparison.png"
+  }
+}

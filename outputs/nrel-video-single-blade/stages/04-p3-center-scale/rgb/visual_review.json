@@ -1,0 +1,56 @@
+{
+  "status": "MANUAL_RGB_REVIEW_CANDIDATES_ONLY",
+  "original_masks_modified": false,
+  "new_contour_points_created": false,
+  "truth_used": false,
+  "viewed_evidence": [
+    "C1_000042_native_overlay.png",
+    "C1_000043_native_rgb.png",
+    "C1_000043_native_overlay.png",
+    "C1_000044_native_overlay.png",
+    "C1_000045_native_overlay.png",
+    "C2_000042_native_overlay.png",
+    "C2_000043_native_rgb.png",
+    "C2_000043_native_overlay.png",
+    "C2_000043_crop_projection.jpg",
+    "C2_000044_native_overlay.png",
+    "C2_000045_native_overlay.png",
+    "C1_000042_root_lower_boundary_crop.png"
+  ],
+  "findings": [
+    {
+      "camera": "C2",
+      "frame": 43,
+      "claim": "All seven frozen-model root-band silhouette edges lie outside the image before masks/probe visibility; partial root surface remains in frame.",
+      "evidence": "native_root_edges.csv",
+      "upper_root_band_endpoint_uv_px": [
+        318.44967326632224,
+        -3.274683506978441
+      ],
+      "upper_edge_image_entry_z_m": 12.355418987781588,
+      "scope": "formal_v2 + declared ideal calibration/rigid pose + z band6.15-12.30, not model-independent physical coverage"
+    },
+    {
+      "camera": "C1",
+      "frame": 42,
+      "claim": "Visually clear white-blade/dark-background boundary exists within conservative lower exclusion; worthy of separate RGB review, not an accepted new annotation.",
+      "native_crop_xyxy": [
+        1050,
+        650,
+        1700,
+        1000
+      ],
+      "projected_model_visible_excluded_length_px": 450.8772059943673,
+      "candidate_window_note": "Roughly x1200-1600, lower edge. 451px is model-line length, not measured usable RGB boundary length."
+    },
+    {
+      "camera": "C1",
+      "frame": 43,
+      "claim": "Visible interior-side boundary candidates occur in excluded regions, but the frozen-model6.15-12.30 root-band visible silhouette has no domain-excluded samples. Do not conflate span ranges."
+    },
+    {
+      "claim": "All15436 saved outline points lie in generic FBU U and independent contour-valid=True; the existing contour loss retains them."
+    }
+  ],
+  "recommended_next_step": "Center-fixed scale forward comparison first; if additional evidence remains necessary, separately review only C1#42 local lower-boundary candidate and preserve original masks; no direct fitting/mask change in this audit."
+}

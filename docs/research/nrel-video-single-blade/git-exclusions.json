@@ -1,0 +1,2159 @@
+{
+  "schema": "nrel-git-exclusions.v1",
+  "complete_archive": "nrel-video-single-blade-20261003-full.tar.gz",
+  "archive_extract_from": "repository root",
+  "excluded_from_git": [
+    {
+      "path": ".DS_Store",
+      "reason": "host cache"
+    },
+    {
+      "path": "review/20261003-p5-observation-review.zip",
+      "reason": "historical review archive in full Release archive"
+    },
+    {
+      "path": "review/review-for-webgpt-20261002.zip",
+      "reason": "historical review archive in full Release archive"
+    },
+    {
+      "path": "review/20261003-p3-center-scale-review.zip",
+      "reason": "historical review archive in full Release archive"
+    },
+    {
+      "path": "review/20261003-diagnostics-review.zip",
+      "reason": "historical review archive in full Release archive"
+    },
+    {
+      "path": "review/20261003-p4-greville-review.zip",
+      "reason": "historical review archive in full Release archive"
+    },
+    {
+      "path": "stages/02-second-run/.DS_Store",
+      "reason": "host cache"
+    },
+    {
+      "path": "stages/03-diagnostics/.DS_Store",
+      "reason": "host cache"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_pointer.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/rgb_scout_contact.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_result.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_pointer.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/storage_measurement.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_result.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/rigid_motion_validation.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_pointer.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/rgb_scout_contact.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_result.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_pointer.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/trial_rgb_passage.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/storage_measurement.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_result.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/motion_internal.jsonl",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/frames.jsonl",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/layout.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/manifest.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/runtime_identity.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000028.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000000.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000014.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000015.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000001.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000029.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000017.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000003.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000002.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000016.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000012.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000006.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000007.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000013.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000005.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000011.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000039.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000038.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000010.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000004.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000009.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000021.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000035.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000034.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000020.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000008.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000036.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000022.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000023.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000037.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000033.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000027.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000026.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000032.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000024.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000030.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000018.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000019.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000031.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C1/frame_000025.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000028.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000000.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000014.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000015.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000001.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000029.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000017.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000003.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000002.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000016.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000012.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000006.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000007.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000013.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000005.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000011.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000039.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000038.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000010.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000004.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000009.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000021.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000035.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000034.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000020.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000008.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000036.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000022.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000023.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000037.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000033.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000027.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000026.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000032.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000024.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000030.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000018.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000019.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000031.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C3/frame_000025.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000028.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000000.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000014.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000015.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000001.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000029.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000017.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000003.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000002.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000016.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000012.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000006.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000007.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000013.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000005.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000011.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000039.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000038.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000010.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000004.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000009.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000021.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000035.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000034.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000020.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000008.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000036.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000022.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000023.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000037.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000033.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000027.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000026.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000032.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000024.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000030.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000018.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000019.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000031.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture/capture_20261002_213522_5d6e3ad3af/C2/frame_000025.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_212941_cdffaf5158/layout.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_212941_cdffaf5158/manifest.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/motion_internal.jsonl",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/frames.jsonl",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/layout.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/manifest.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/runtime_identity.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C1/frame_000000.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C1/frame_000001.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C1/frame_000003.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C1/frame_000002.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C1/frame_000006.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C1/frame_000007.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C1/frame_000005.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C1/frame_000004.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C1/frame_000008.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C3/frame_000000.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C3/frame_000001.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C3/frame_000003.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C3/frame_000002.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C3/frame_000006.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C3/frame_000007.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C3/frame_000005.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C3/frame_000004.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C3/frame_000008.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C2/frame_000000.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C2/frame_000001.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C2/frame_000003.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C2/frame_000002.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C2/frame_000006.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C2/frame_000007.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C2/frame_000005.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C2/frame_000004.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout/capture_20261002_213032_45a2336dfd/C2/frame_000008.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/motion_internal.jsonl",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/frames.jsonl",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/layout.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/manifest.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/runtime_identity.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000088.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000063.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000077.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000076.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000062.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000089.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000048.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000074.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000060.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000061.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000075.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000049.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000071.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000065.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000059.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000058.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000064.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000070.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000099.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000066.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000072.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000073.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000067.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000098.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000028.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000000.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000014.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000015.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000001.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000029.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000017.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000003.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000002.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000016.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000012.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000006.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000007.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000013.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000005.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000011.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000039.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000038.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000010.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000004.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000009.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000021.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000035.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000034.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000020.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000008.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000036.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000022.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000023.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000037.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000033.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000027.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000026.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000032.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000024.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000030.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000018.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000019.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000031.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000025.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000081.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000095.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000042.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000056.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000057.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000043.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000094.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000080.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000096.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000082.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000069.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000055.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000041.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000040.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000054.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000068.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000083.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000097.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000093.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000087.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000050.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000044.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000078.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000079.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000045.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000051.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000086.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000092.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000084.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000090.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000047.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000053.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000052.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000046.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000091.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C1/frame_000085.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000088.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000063.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000077.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000076.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000062.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000089.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000048.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000074.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000060.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000061.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000075.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000049.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000071.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000065.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000059.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000058.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000064.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000070.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000099.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000066.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000072.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000073.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000067.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000098.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000028.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000000.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000014.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000015.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000001.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000029.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000017.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000003.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000002.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000016.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000012.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000006.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000007.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000013.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000005.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000011.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000039.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000038.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000010.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000004.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000009.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000021.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000035.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000034.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000020.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000008.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000036.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000022.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000023.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000037.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000033.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000027.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000026.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000032.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000024.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000030.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000018.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000019.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000031.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000025.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000081.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000095.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000042.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000056.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000057.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000043.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000094.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000080.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000096.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000082.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000069.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000055.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000041.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000040.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000054.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000068.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000083.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000097.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000093.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000087.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000050.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000044.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000078.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000079.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000045.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000051.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000086.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000092.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000084.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000090.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000047.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000053.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000052.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000046.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000091.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C3/frame_000085.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000088.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000063.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000077.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000076.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000062.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000089.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000048.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000074.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000060.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000061.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000075.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000049.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000071.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000065.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000059.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000058.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000064.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000070.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000099.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000066.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000072.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000073.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000067.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000098.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000028.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000000.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000014.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000015.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000001.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000029.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000017.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000003.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000002.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000016.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000012.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000006.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000007.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000013.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000005.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000011.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000039.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000038.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000010.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000004.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000009.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000021.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000035.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000034.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000020.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000008.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000036.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000022.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000023.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000037.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000033.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000027.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000026.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000032.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000024.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000030.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000018.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000019.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000031.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000025.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000081.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000095.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000042.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000056.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000057.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000043.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000094.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000080.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000096.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000082.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000069.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000055.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000041.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000040.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000054.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000068.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000083.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000097.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000093.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000087.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000050.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000044.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000078.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000079.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000045.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000051.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000086.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000092.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000084.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000090.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000047.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000053.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000052.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000046.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000091.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/internal-capture-formal/capture_20261002_213817_baf6978517/C2/frame_000085.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/trial/encoding-adapter/C1/frames.csv",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/trial/encoding-adapter/C1/master_frames",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/trial/encoding-adapter/C3/frames.csv",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/trial/encoding-adapter/C3/master_frames",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/trial/encoding-adapter/C2/frames.csv",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/trial/encoding-adapter/C2/master_frames",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/trial/encoding-adapter/C2/checks/encoding.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/trial/encoding-adapter/C3/checks/encoding.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/trial/encoding-adapter/C1/checks/encoding.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/formal/encoding-adapter/C1/frames.csv",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/formal/encoding-adapter/C1/master_frames",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/formal/encoding-adapter/C3/frames.csv",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/formal/encoding-adapter/C3/master_frames",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/formal/encoding-adapter/C2/frames.csv",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/formal/encoding-adapter/C2/master_frames",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/formal/encoding-adapter/C2/checks/encoding.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/formal/encoding-adapter/C3/checks/encoding.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/formal/encoding-adapter/C1/checks/encoding.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/motion_internal.jsonl",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/frames.jsonl",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/layout.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/manifest.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/runtime_identity.json",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C1/frame_000000.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C1/frame_000001.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C1/frame_000003.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C1/frame_000002.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C1/frame_000006.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C1/frame_000007.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C1/frame_000005.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C1/frame_000004.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C1/frame_000008.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C3/frame_000000.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C3/frame_000001.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C3/frame_000003.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C3/frame_000002.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C3/frame_000006.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C3/frame_000007.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C3/frame_000005.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C3/frame_000004.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C3/frame_000008.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C2/frame_000000.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C2/frame_000001.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C2/frame_000003.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C2/frame_000002.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C2/frame_000006.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C2/frame_000007.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C2/frame_000005.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C2/frame_000004.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/01-first-run/rgb-scout-next-b1/capture_20261002_213331_0ebcb48a8d/C2/frame_000008.png",
+      "reason": "full Release archive only"
+    },
+    {
+      "path": "stages/06-p5-observation/evaluation-only/__pycache__/evaluate_p5.cpython-311.pyc",
+      "reason": "host cache"
+    },
+    {
+      "path": "stages/06-p5-observation/annotation/__pycache__/build_annotation.cpython-311.pyc",
+      "reason": "host cache"
+    }
+  ]
+}

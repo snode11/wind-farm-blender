@@ -1,0 +1,249 @@
+{
+  "t_ref_sim_time_s": 122.175,
+  "frame_id": 43,
+  "selection_basis": "Actual MP4 RGB: B1 body visible in C1/C2 and painted tip contour clear in C3; identity checked with declared ideal B1 rigid pose. No truth geometry used.",
+  "fit_frame_ids": [
+    42,
+    43
+  ],
+  "heldout_frame_ids": [
+    44,
+    45
+  ],
+  "target": "T1/B1",
+  "coordinate_frame": "blade_root_local",
+  "units": "m",
+  "surface_scope": "entire_evaluated_blade_surface",
+  "reference_shape": "static_near_t_ref",
+  "deformation_assistance": "none",
+  "models": {
+    "initial_template": {
+      "template_kind": "independent_coarse_rounded_section_prior",
+      "source": "https://www.nrel.gov/docs/fy09osti/38060.pdf",
+      "source_scope": "public span and coarse Table 3-1 chord/twist dimensions",
+      "excluded_sources": [
+        "scene_reference_mesh",
+        "SourceLoft",
+        "exact_airfoil_coordinates",
+        "replay_deformation"
+      ],
+      "coordinate_frame": "blade_root_local",
+      "units": "m",
+      "axes": {
+        "x": "downstream/thickness",
+        "y": "chordwise",
+        "z": "radial/span"
+      },
+      "span_m": 61.5,
+      "control_z_m": [
+        0.0,
+        10.25,
+        20.5,
+        30.75,
+        41.0,
+        51.25,
+        61.5
+      ],
+      "center_offsets_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "control_chord_log_scale": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fixed_priors": [
+        "section_thickness",
+        "section_twist",
+        "hidden_surface",
+        "61.5_m_span"
+      ],
+      "approximation": "rounded elliptical sections; 0.8 m tip endpoint prior; no exact NREL airfoil surface",
+      "span_samples": 25,
+      "ring_samples": 12
+    },
+    "prior_only": {
+      "template_kind": "independent_coarse_rounded_section_prior",
+      "source": "https://www.nrel.gov/docs/fy09osti/38060.pdf",
+      "source_scope": "public span and coarse Table 3-1 chord/twist dimensions",
+      "excluded_sources": [
+        "scene_reference_mesh",
+        "SourceLoft",
+        "exact_airfoil_coordinates",
+        "replay_deformation"
+      ],
+      "coordinate_frame": "blade_root_local",
+      "units": "m",
+      "axes": {
+        "x": "downstream/thickness",
+        "y": "chordwise",
+        "z": "radial/span"
+      },
+      "span_m": 61.5,
+      "control_z_m": [
+        0.0,
+        10.25,
+        20.5,
+        30.75,
+        41.0,
+        51.25,
+        61.5
+      ],
+      "center_offsets_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "control_chord_log_scale": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fixed_priors": [
+        "section_thickness",
+        "section_twist",
+        "hidden_surface",
+        "61.5_m_span"
+      ],
+      "approximation": "rounded elliptical sections; 0.8 m tip endpoint prior; no exact NREL airfoil surface",
+      "span_samples": 25,
+      "ring_samples": 12
+    },
+    "T1_B1": {
+      "template_kind": "independent_coarse_rounded_section_prior",
+      "source": "https://www.nrel.gov/docs/fy09osti/38060.pdf",
+      "source_scope": "public span and coarse Table 3-1 chord/twist dimensions",
+      "excluded_sources": [
+        "scene_reference_mesh",
+        "SourceLoft",
+        "exact_airfoil_coordinates",
+        "replay_deformation"
+      ],
+      "coordinate_frame": "blade_root_local",
+      "units": "m",
+      "axes": {
+        "x": "downstream/thickness",
+        "y": "chordwise",
+        "z": "radial/span"
+      },
+      "span_m": 61.5,
+      "control_z_m": [
+        0.0,
+        10.25,
+        20.5,
+        30.75,
+        41.0,
+        51.25,
+        61.5
+      ],
+      "center_offsets_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          -0.6392022371292114,
+          -1.5576391220092773
+        ],
+        [
+          -0.3959996998310089,
+          -0.4907703101634979
+        ],
+        [
+          0.688981294631958,
+          -0.37666767835617065
+        ],
+        [
+          -0.6038331985473633,
+          0.04192391782999039
+        ],
+        [
+          0.07662598788738251,
+          -0.74614417552948
+        ],
+        [
+          -0.07360327243804932,
+          -1.0437967777252197
+        ]
+      ],
+      "control_chord_log_scale": [
+        0.1772385537624359,
+        -0.055076561868190765,
+        -0.097734235227108,
+        -0.020350564271211624,
+        -0.03512163460254669,
+        -0.05336492881178856,
+        -0.03511468693614006
+      ],
+      "fixed_priors": [
+        "section_thickness",
+        "section_twist",
+        "hidden_surface",
+        "61.5_m_span"
+      ],
+      "approximation": "rounded elliptical sections; 0.8 m tip endpoint prior; no exact NREL airfoil surface",
+      "span_samples": 25,
+      "ring_samples": 12
+    }
+  }
+}

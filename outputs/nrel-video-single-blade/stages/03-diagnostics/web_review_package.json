@@ -1,0 +1,1127 @@
+{
+  "archive": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics-review.zip",
+  "archive_bytes": 25027373,
+  "archive_sha256": "4ee2aa7368f22c4a245e556a29b20d6e1ac59e06a1ecec1e9640cad7baebf5be",
+  "file_count": 187,
+  "source_entries": 186,
+  "source_bytes": 44196425,
+  "zip_crc_and_all_entry_hashes_verified": true,
+  "records": [
+    {
+      "package_file": "diagnostics/README.md",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/README.md",
+      "bytes": 11669,
+      "sha256": "6f2b657e639d32a76f6552e3422e98b8f255129a8e7e11cd2f5086c3dfba6189"
+    },
+    {
+      "package_file": "diagnostics/diagnostic_summary.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/diagnostic_summary.png",
+      "bytes": 146300,
+      "sha256": "45ff026d422aaf9a6fa9db393a0dfd3878baf441e2be64121cc31e3a218a4c3a"
+    },
+    {
+      "package_file": "diagnostics/build_summary.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/build_summary.py",
+      "bytes": 3450,
+      "sha256": "31ebb6111851c0e4a3b16d11241c060adae430a6ee98f595c3b5e187c059fb2a"
+    },
+    {
+      "package_file": "diagnostics/validation.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/validation.json",
+      "bytes": 2031,
+      "sha256": "609dddac50cb016b76c0257eaa9555b52ac53292a0eb46040f9edae043d7248e"
+    },
+    {
+      "package_file": "diagnostics/tests.txt",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/tests.txt",
+      "bytes": 259,
+      "sha256": "04de2c75f9884738868ccd07bea59a408109d65f1dbfefc614b8e3d2c546b9b8"
+    },
+    {
+      "package_file": "00_给网页版GPT的补充提问.md",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/给网页版GPT的补充提问.md",
+      "bytes": 2724,
+      "sha256": "7fb04735eda4f2ebf63fc61364b4d338c38583db2dfed81eecfa1de466cfb321"
+    },
+    {
+      "package_file": "diagnostics/delivery/C1_all100.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/delivery/C1_all100.jpg",
+      "bytes": 631677,
+      "sha256": "ff5e7ca6fd29aa1c60f845a1802fc75db055e583fddbdc5130e7a18c0c147cc5"
+    },
+    {
+      "package_file": "diagnostics/delivery/C2_all100.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/delivery/C2_all100.jpg",
+      "bytes": 482803,
+      "sha256": "05477937a879472994bf7ab7249dc4113995b363743f2d2f05ea311d9e586905"
+    },
+    {
+      "package_file": "diagnostics/delivery/C3_all100.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/delivery/C3_all100.jpg",
+      "bytes": 603926,
+      "sha256": "150a63abe1900ebef5c69598d4c01b7d1bcaab82d207566240509d9ede82064f"
+    },
+    {
+      "package_file": "diagnostics/delivery/all_frame_screen.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/delivery/all_frame_screen.json",
+      "bytes": 130509,
+      "sha256": "4a84fe368a40b0fab780888821eadca9afef1894fa7418a416e696877da8df2d"
+    },
+    {
+      "package_file": "diagnostics/delivery/baseline_before.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/delivery/baseline_before.json",
+      "bytes": 62844,
+      "sha256": "739f7b10fbec80e2424f963a9b1123f9113134b14c504ab4b70cf44fdbc7a397"
+    },
+    {
+      "package_file": "diagnostics/delivery/candidate_review.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/delivery/candidate_review.json",
+      "bytes": 2750,
+      "sha256": "121287696f97c145c3a27e7bca5f7443f734055229ceb3f1cdd0ef2bdaf2a375"
+    },
+    {
+      "package_file": "diagnostics/delivery/delivery_audit.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/delivery/delivery_audit.json",
+      "bytes": 19454,
+      "sha256": "878e28af39e6b7f5fcfe56aae40acc87ee6c0db2ae2a39062779c01a40f2b5d0"
+    },
+    {
+      "package_file": "diagnostics/delivery/final_source_reconciliation.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/delivery/final_source_reconciliation.json",
+      "bytes": 6752,
+      "sha256": "544ce8db62f83e37ccd4e5e88043c1adbb67584584814a6add798dba2512bb29"
+    },
+    {
+      "package_file": "diagnostics/delivery/root_view_angles.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/delivery/root_view_angles.json",
+      "bytes": 2715,
+      "sha256": "7756adecc34bd05e17c071a663e30a290e070e9c1434473a2b34984d69574210"
+    },
+    {
+      "package_file": "diagnostics/delivery/signature_mismatches.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/delivery/signature_mismatches.json",
+      "bytes": 273,
+      "sha256": "7b3238061dd42a250b4dffc675acaec8f2053a279306bc248cdac40ccbf69b49"
+    },
+    {
+      "package_file": "diagnostics/area/final/README.md",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/area/final/README.md",
+      "bytes": 1742,
+      "sha256": "434f4c748487238667d0f769adceed897af8a243380827e4a80a102c550ce0ed"
+    },
+    {
+      "package_file": "diagnostics/area/final/area_audit.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/area/final/area_audit.json",
+      "bytes": 163378,
+      "sha256": "9fee4000299da697c78cd2cba69878822817ba95c452f042c07d7a2c7d771dbd"
+    },
+    {
+      "package_file": "diagnostics/area/final/outside_span_pieces.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/area/final/outside_span_pieces.json",
+      "bytes": 210080,
+      "sha256": "732fbd6accd95806d2d7d8632ae49a5822fcf0055307c1a0c89fd937db287465"
+    },
+    {
+      "package_file": "diagnostics/area/final/per_triangle_area_accounting.csv",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/area/final/per_triangle_area_accounting.csv",
+      "bytes": 698893,
+      "sha256": "60e4cf2985fb32e0b7cf2f046411ec147f045d48ada2fd566295d8b05c82f596"
+    },
+    {
+      "package_file": "diagnostics/area/final/validation.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/area/final/validation.json",
+      "bytes": 1166,
+      "sha256": "7a5b9108d7ddcbd1b1a13ea6dec8127cd21f2580eeb40027aef60faa28bef2fa"
+    },
+    {
+      "package_file": "diagnostics/surface/final/README.md",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/surface/final/README.md",
+      "bytes": 5277,
+      "sha256": "6de983a03ed27b5e4885d5d039ccaaa764cc9891976b6de80f556b36ccf8ce86"
+    },
+    {
+      "package_file": "diagnostics/surface/final/contour_edge_samples.csv.gz",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/surface/final/contour_edge_samples.csv.gz",
+      "bytes": 3981751,
+      "sha256": "2d657dcb4d788dde238b964e47ecb081f8aee1d4be28cb3a8ebee7d068569118"
+    },
+    {
+      "package_file": "diagnostics/surface/final/model_disagreement.csv.gz",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/surface/final/model_disagreement.csv.gz",
+      "bytes": 169531,
+      "sha256": "406e1f7ebea9f59a495db24e133eb9111fa9046367366f18644d21aef2b05bd2"
+    },
+    {
+      "package_file": "diagnostics/surface/final/section_samples.csv.gz",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/surface/final/section_samples.csv.gz",
+      "bytes": 263733,
+      "sha256": "5b448a04c53664e118aabce91c32efbeab48b4f0f4869679bf232963ce0977f0"
+    },
+    {
+      "package_file": "diagnostics/surface/final/surface_audit.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/surface/final/surface_audit.json",
+      "bytes": 165372,
+      "sha256": "ea1b461e0b658d817087b734bbd42b67a179b968da3eaf97f322d5559ffc757a"
+    },
+    {
+      "package_file": "diagnostics/surface/final/surface_samples.csv.gz",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/surface/final/surface_samples.csv.gz",
+      "bytes": 2897303,
+      "sha256": "8c7a33bbca734752d1425e7cdfd83c20a2c027dba4c86eeb2c47f6f1a2be4412"
+    },
+    {
+      "package_file": "diagnostics/surface/final/validation.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/surface/final/validation.json",
+      "bytes": 1084,
+      "sha256": "c354e6d78eb551002f40caf1b84a157e7b3ebfbd5e842c29f4fa074591879956"
+    },
+    {
+      "package_file": "diagnostics/parameters/README.md",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/parameters/README.md",
+      "bytes": 8580,
+      "sha256": "b35d7c7ab1c74996d8f6de81f6ab8261d425f1bee60c6bea10850389508e0bf7"
+    },
+    {
+      "package_file": "diagnostics/parameters/combination_audit.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/parameters/combination_audit.json",
+      "bytes": 168814,
+      "sha256": "bcab6e2150481ca32f3c31c97e6e45b0f10b4a029996b79fdbf46877f124daa7"
+    },
+    {
+      "package_file": "diagnostics/parameters/combination_per_observation.csv",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/parameters/combination_per_observation.csv",
+      "bytes": 48846,
+      "sha256": "e32384963b37533429582642b87c6bbca6a53197a2f1d02a6f63401ab37dd36f"
+    },
+    {
+      "package_file": "diagnostics/parameters/combination_response_vectors.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/parameters/combination_response_vectors.json",
+      "bytes": 528153,
+      "sha256": "56e36ae697be26110ef7f47e070afca6aad62ab5d08e2cf3fd6230e28f460bb2"
+    },
+    {
+      "package_file": "diagnostics/parameters/observed_response_vectors.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/parameters/observed_response_vectors.json",
+      "bytes": 13903566,
+      "sha256": "f4e6142a0b506f23fab86f758b54713bb69ec53a5f5e07bb3493714db8b195a8"
+    },
+    {
+      "package_file": "diagnostics/parameters/parameter_audit.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/parameters/parameter_audit.json",
+      "bytes": 7501047,
+      "sha256": "4e06d87ea85becf30bd1393237057b08338272f309f7e67fc3678579e23ae68d"
+    },
+    {
+      "package_file": "diagnostics/parameters/parameter_semantics.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/parameters/parameter_semantics.json",
+      "bytes": 703,
+      "sha256": "6da3de19b5bc69a64a1b1f8a4a06887394d57f1187db9d3897543c48c03f8e62"
+    },
+    {
+      "package_file": "diagnostics/parameters/per_observation.csv",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/parameters/per_observation.csv",
+      "bytes": 332914,
+      "sha256": "f1065fe225cf464135089a60487d2c987b54657dbaec7b7ce0551b7642ff72da"
+    },
+    {
+      "package_file": "diagnostics/parameters/validation.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-diagnostics/parameters/validation.json",
+      "bytes": 2327,
+      "sha256": "c2c21db6e6d2b06b189bca765fe4bb6cc8fb715b68069affc9ef199dde12df35"
+    },
+    {
+      "package_file": "evidence/algorithm-input/C1.mp4",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/C1.mp4",
+      "bytes": 2566261,
+      "sha256": "5d1590090289938f1597d441eac04bacfe263ab09a1e0de5f4142e4d717133ad"
+    },
+    {
+      "package_file": "evidence/algorithm-input/C2.mp4",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/C2.mp4",
+      "bytes": 2819999,
+      "sha256": "f567b2400bb0d91091dcb346bdafc7cd30e071101961d337cabf01e10ba30f5c"
+    },
+    {
+      "package_file": "evidence/algorithm-input/C3.mp4",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/C3.mp4",
+      "bytes": 2679521,
+      "sha256": "4976c0c445e01233e4046b0fa92cbe64cc5e73daf0fd67dabceaaf84e9d576d4"
+    },
+    {
+      "package_file": "evidence/algorithm-input/camera_calibration.jsonl",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/camera_calibration.jsonl",
+      "bytes": 174062,
+      "sha256": "641f610d8ee58dfd79158800dcfd9abe52c16bece58f3dc549a90d5c115ae489"
+    },
+    {
+      "package_file": "evidence/algorithm-input/dataset.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/dataset.json",
+      "bytes": 2230,
+      "sha256": "8379786db91c8ac2cabb41ba15f59dc94325fa8f3ebafd75ff76b7c417b2e6b3"
+    },
+    {
+      "package_file": "evidence/algorithm-input/frame_map.csv",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/frame_map.csv",
+      "bytes": 6469,
+      "sha256": "d079ce0a9e2f3313b1bf296ae466365fa0f22fc5bd1bf0f61939356fc0bd2629"
+    },
+    {
+      "package_file": "evidence/algorithm-input/motion_observations.csv",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/motion_observations.csv",
+      "bytes": 35190,
+      "sha256": "313074d9388eadd34abe31f5e84dd6b310ea5e8799b80e735e258940bf64c550"
+    },
+    {
+      "package_file": "evidence/observations/C1_000042_FBU.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_FBU.png",
+      "bytes": 5711,
+      "sha256": "288d5a52564942a764bc319a07c4aad7523cc89d6e157bd1e483081c72256174"
+    },
+    {
+      "package_file": "evidence/observations/C1_000042_contour.npy",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_contour.npy",
+      "bytes": 8960,
+      "sha256": "38cdd10296fea00fb47b67cac725778138acf41897cc7e151f66a6540908e3d4"
+    },
+    {
+      "package_file": "evidence/observations/C1_000042_contour_valid.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_contour_valid.png",
+      "bytes": 3382,
+      "sha256": "22710a073bf30239b5aa1d460039b453c98034861ed4ab9d41452683dcaddce2"
+    },
+    {
+      "package_file": "evidence/observations/C1_000042_overlay.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_overlay.jpg",
+      "bytes": 17958,
+      "sha256": "cddaf3d346f40515272cf4552a1703a97f3934160c58a806046dd7d784162975"
+    },
+    {
+      "package_file": "evidence/observations/C1_000042_rgb.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_rgb.jpg",
+      "bytes": 18988,
+      "sha256": "76e7866f94a864d4ae45573eedbc23218fc5150d284d3176be61f3bc662bb773"
+    },
+    {
+      "package_file": "evidence/observations/C1_000043_FBU.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000043_FBU.png",
+      "bytes": 5872,
+      "sha256": "3857c63017c0179014562cbf0997a1c80a634db3e72a488d762e370dd3696c8b"
+    },
+    {
+      "package_file": "evidence/observations/C1_000043_contour.npy",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000043_contour.npy",
+      "bytes": 15416,
+      "sha256": "1d47a0b0ecd777f32ef45cd9602f187ceec9ac395fbfb10c667b8ec78d233fdc"
+    },
+    {
+      "package_file": "evidence/observations/C1_000043_contour_valid.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000043_contour_valid.png",
+      "bytes": 3382,
+      "sha256": "22710a073bf30239b5aa1d460039b453c98034861ed4ab9d41452683dcaddce2"
+    },
+    {
+      "package_file": "evidence/observations/C1_000043_overlay.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000043_overlay.jpg",
+      "bytes": 17912,
+      "sha256": "0ff6c28aaa3e54f59e324a4ae77b1164b757972fe8ca33b1e03cf7e9c088ce05"
+    },
+    {
+      "package_file": "evidence/observations/C1_000043_rgb.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000043_rgb.jpg",
+      "bytes": 18641,
+      "sha256": "9f648081340d4a17b9fc94e026b011b86d99d089c27f6b29190bd3323cfdff7a"
+    },
+    {
+      "package_file": "evidence/observations/C1_000044_FBU.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000044_FBU.png",
+      "bytes": 5839,
+      "sha256": "25142a78498b685ee7d6b498b81b3f05a83b04315c81d749093a153b034f001f"
+    },
+    {
+      "package_file": "evidence/observations/C1_000044_contour.npy",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000044_contour.npy",
+      "bytes": 15528,
+      "sha256": "6e2882f017b1dfbc61ad0edb124332df16508ea106788887559ad374a7561bba"
+    },
+    {
+      "package_file": "evidence/observations/C1_000044_contour_valid.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000044_contour_valid.png",
+      "bytes": 3382,
+      "sha256": "22710a073bf30239b5aa1d460039b453c98034861ed4ab9d41452683dcaddce2"
+    },
+    {
+      "package_file": "evidence/observations/C1_000044_overlay.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000044_overlay.jpg",
+      "bytes": 17736,
+      "sha256": "0ae7be5908f272804d3228c6432fc55d4335a95a3d0fd10a4a9ee2610e6fdbfe"
+    },
+    {
+      "package_file": "evidence/observations/C1_000044_rgb.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000044_rgb.jpg",
+      "bytes": 18390,
+      "sha256": "c26c8415ab60fb50b9b38f2721df377d5c8ca81f5a163f45508b669bbfd2d270"
+    },
+    {
+      "package_file": "evidence/observations/C1_000045_FBU.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000045_FBU.png",
+      "bytes": 5626,
+      "sha256": "14e3b4c8e2271c1f2f8170c1e5b4182b436a4837bad55e1f6504f09da1aab662"
+    },
+    {
+      "package_file": "evidence/observations/C1_000045_contour.npy",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000045_contour.npy",
+      "bytes": 12688,
+      "sha256": "44fc2ef3a21b695f9e7a99b73d9386989d0009b1c87ebc2574e7af274a393ad5"
+    },
+    {
+      "package_file": "evidence/observations/C1_000045_contour_valid.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000045_contour_valid.png",
+      "bytes": 3382,
+      "sha256": "22710a073bf30239b5aa1d460039b453c98034861ed4ab9d41452683dcaddce2"
+    },
+    {
+      "package_file": "evidence/observations/C1_000045_overlay.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000045_overlay.jpg",
+      "bytes": 17340,
+      "sha256": "6c9b656e98dd92d689cfc9bc2e54b429def5815eca5d0f179bddcb0ef4157fd2"
+    },
+    {
+      "package_file": "evidence/observations/C1_000045_rgb.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000045_rgb.jpg",
+      "bytes": 18162,
+      "sha256": "850e4ef74708452e222d514df60e06c42876a79475a915a329f4100d7319fe39"
+    },
+    {
+      "package_file": "evidence/observations/C2_000042_FBU.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000042_FBU.png",
+      "bytes": 8502,
+      "sha256": "cfedf938d7a291f620d06a970572f2fba9d33185103d066532b109b341d30984"
+    },
+    {
+      "package_file": "evidence/observations/C2_000042_contour.npy",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000042_contour.npy",
+      "bytes": 16952,
+      "sha256": "5bd7e4fc5be873fb197369884f7032736a243af04de8b4215938bb000143e87e"
+    },
+    {
+      "package_file": "evidence/observations/C2_000042_contour_valid.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000042_contour_valid.png",
+      "bytes": 4247,
+      "sha256": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f"
+    },
+    {
+      "package_file": "evidence/observations/C2_000042_overlay.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000042_overlay.jpg",
+      "bytes": 18753,
+      "sha256": "940e9c2cccdffb2ff79b46562dd9370c6eda90b0a52b28a304eee625dd9a167a"
+    },
+    {
+      "package_file": "evidence/observations/C2_000042_rgb.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000042_rgb.jpg",
+      "bytes": 18572,
+      "sha256": "294a88ee91d69781a6f9c6fbd48dfd98dc0864b8123541fc140f544c3f4c5f09"
+    },
+    {
+      "package_file": "evidence/observations/C2_000043_FBU.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000043_FBU.png",
+      "bytes": 8184,
+      "sha256": "d860932286b68c7f729bc475bb2268f616ffc2a167df9d636b53476d9222de62"
+    },
+    {
+      "package_file": "evidence/observations/C2_000043_contour.npy",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000043_contour.npy",
+      "bytes": 18112,
+      "sha256": "9b77383968363dd580343ff59732fb535c702fa7a1dbd759d772787e3b4b22c8"
+    },
+    {
+      "package_file": "evidence/observations/C2_000043_contour_valid.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000043_contour_valid.png",
+      "bytes": 4247,
+      "sha256": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f"
+    },
+    {
+      "package_file": "evidence/observations/C2_000043_overlay.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000043_overlay.jpg",
+      "bytes": 18294,
+      "sha256": "fe57c8ec3d9f564b3c3b3da17cd9af0a7751f8e8e4f57046bbd187e8ccd3e2fb"
+    },
+    {
+      "package_file": "evidence/observations/C2_000043_rgb.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000043_rgb.jpg",
+      "bytes": 17750,
+      "sha256": "38eee6b918024d0be32c0ebfdaad69e91541c6f1e21606387a84061eddd05df1"
+    },
+    {
+      "package_file": "evidence/observations/C2_000044_FBU.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000044_FBU.png",
+      "bytes": 7817,
+      "sha256": "ebf2bef045aa40b2558d0c2bb5b8aef3be79706fad3f5826c4cd4cd4fb206695"
+    },
+    {
+      "package_file": "evidence/observations/C2_000044_contour.npy",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000044_contour.npy",
+      "bytes": 20712,
+      "sha256": "5a49729b74a7106930ba9a6999181986364def7e31702fc3d80c2b37cd897be6"
+    },
+    {
+      "package_file": "evidence/observations/C2_000044_contour_valid.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000044_contour_valid.png",
+      "bytes": 4247,
+      "sha256": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f"
+    },
+    {
+      "package_file": "evidence/observations/C2_000044_overlay.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000044_overlay.jpg",
+      "bytes": 18447,
+      "sha256": "3ceed232747fb5db1ab29c56472a272e9df5a4db0b780b10fd92c5c2ae697963"
+    },
+    {
+      "package_file": "evidence/observations/C2_000044_rgb.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000044_rgb.jpg",
+      "bytes": 17825,
+      "sha256": "ee4099854cd8a9d870af7bd0bbb9cfed0a58dceedaae54208f21c14df9bdfe31"
+    },
+    {
+      "package_file": "evidence/observations/C2_000045_FBU.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000045_FBU.png",
+      "bytes": 6996,
+      "sha256": "05c79571400bd553def9da832b6ab54a5c61679d84607f05ce61ad214d1a4e48"
+    },
+    {
+      "package_file": "evidence/observations/C2_000045_contour.npy",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000045_contour.npy",
+      "bytes": 16144,
+      "sha256": "5bb8b17cb0d39d707e96f369e0ed1bcd63973ca72e4e6162bf3dc60a5f50b01b"
+    },
+    {
+      "package_file": "evidence/observations/C2_000045_contour_valid.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000045_contour_valid.png",
+      "bytes": 4247,
+      "sha256": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f"
+    },
+    {
+      "package_file": "evidence/observations/C2_000045_overlay.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000045_overlay.jpg",
+      "bytes": 18260,
+      "sha256": "5b9fcc590e061fafc7bf232c428cc3d3d0142e45f2120193f0b2b54656a7a02c"
+    },
+    {
+      "package_file": "evidence/observations/C2_000045_rgb.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000045_rgb.jpg",
+      "bytes": 18190,
+      "sha256": "79f8d32b6a98645aea02515b5551dccb34222114ca8601c2171ea3e5a7ed9871"
+    },
+    {
+      "package_file": "evidence/observations/C3_000042_FBU.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000042_FBU.png",
+      "bytes": 5498,
+      "sha256": "a100c87c632c7a5486ec7f9a4999c4e89b5a8d786465e42d3da2406c113659d7"
+    },
+    {
+      "package_file": "evidence/observations/C3_000042_contour.npy",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000042_contour.npy",
+      "bytes": 5104,
+      "sha256": "2786ca07c57b697aa57e4f5ac2c339bf88a464d811667f862f4d2430ec08158d"
+    },
+    {
+      "package_file": "evidence/observations/C3_000042_contour_valid.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000042_contour_valid.png",
+      "bytes": 4247,
+      "sha256": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f"
+    },
+    {
+      "package_file": "evidence/observations/C3_000042_overlay.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000042_overlay.jpg",
+      "bytes": 24654,
+      "sha256": "7b270fadc2cd101d8d40bde67cd707aebbc3da722fb6550849da0c1ffc23064a"
+    },
+    {
+      "package_file": "evidence/observations/C3_000042_rgb.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000042_rgb.jpg",
+      "bytes": 28240,
+      "sha256": "df4d62547dcce0c588c4058b1f59a83b0eb7b7cf93c517204bc825d8315c34fe"
+    },
+    {
+      "package_file": "evidence/observations/C3_000043_FBU.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000043_FBU.png",
+      "bytes": 7087,
+      "sha256": "660b21c6fe911e06f3a86b015c14883bf0c905fc9d08dee0468e1cb3e9f635d7"
+    },
+    {
+      "package_file": "evidence/observations/C3_000043_contour.npy",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000043_contour.npy",
+      "bytes": 12192,
+      "sha256": "f9b2fd0245939293436e43602b8d931b56f77c23fd6deae78564594a507f1c2c"
+    },
+    {
+      "package_file": "evidence/observations/C3_000043_contour_valid.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000043_contour_valid.png",
+      "bytes": 4247,
+      "sha256": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f"
+    },
+    {
+      "package_file": "evidence/observations/C3_000043_overlay.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000043_overlay.jpg",
+      "bytes": 22562,
+      "sha256": "6b922a84088b4eff548c32b0fb9bf997bdad44a62676ef91da5f9876ed75ebd0"
+    },
+    {
+      "package_file": "evidence/observations/C3_000043_rgb.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000043_rgb.jpg",
+      "bytes": 24399,
+      "sha256": "f29df6ae8367ab228fac5959d6ace29b65443810483ec0738f55f748e8b9ab9e"
+    },
+    {
+      "package_file": "evidence/observations/C3_000044_FBU.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000044_FBU.png",
+      "bytes": 6678,
+      "sha256": "18ad3559a4153f19128bba6deba8962994252f1d86c613f44bb3b33604e655cf"
+    },
+    {
+      "package_file": "evidence/observations/C3_000044_contour.npy",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000044_contour.npy",
+      "bytes": 11824,
+      "sha256": "c2d413fbaab4010fefc66186b1cb0cbedc869cf57bf759dcaab0cd1509346387"
+    },
+    {
+      "package_file": "evidence/observations/C3_000044_contour_valid.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000044_contour_valid.png",
+      "bytes": 4247,
+      "sha256": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f"
+    },
+    {
+      "package_file": "evidence/observations/C3_000044_overlay.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000044_overlay.jpg",
+      "bytes": 22339,
+      "sha256": "89c3c3a30e9c9e08dad86479911466b3b869d44479787c79ca3ead56adaabf7b"
+    },
+    {
+      "package_file": "evidence/observations/C3_000044_rgb.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000044_rgb.jpg",
+      "bytes": 23768,
+      "sha256": "ecc70c733143dc39d02812457ecc738795278d769e14cd648ffa7382ed175d58"
+    },
+    {
+      "package_file": "evidence/observations/C3_000045_FBU.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000045_FBU.png",
+      "bytes": 5093,
+      "sha256": "ab282447a927d8f9c9921d6de0dd7111efade23e44c8e39a239645b5d9c70222"
+    },
+    {
+      "package_file": "evidence/observations/C3_000045_contour.npy",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000045_contour.npy",
+      "bytes": 4184,
+      "sha256": "88e660f8c3011e0cf81d3d2c45aa946665cb65dd3371ded228842ebc1109577e"
+    },
+    {
+      "package_file": "evidence/observations/C3_000045_contour_valid.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000045_contour_valid.png",
+      "bytes": 4247,
+      "sha256": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f"
+    },
+    {
+      "package_file": "evidence/observations/C3_000045_overlay.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000045_overlay.jpg",
+      "bytes": 24634,
+      "sha256": "09801b57a418ac1f1d47beca1e6eafd9bed43063fd77e0521be9008ee1c72ef3"
+    },
+    {
+      "package_file": "evidence/observations/C3_000045_rgb.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000045_rgb.jpg",
+      "bytes": 28072,
+      "sha256": "ebf4bc43228d830c51126c5f3674fe934f125e51889cfa11153704ed6a9fc076"
+    },
+    {
+      "package_file": "evidence/observations/FBU_review.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/FBU_review.jpg",
+      "bytes": 262848,
+      "sha256": "2a2792dbfb292d0f4d36925fed5d32fa6e093da94b7b4a7e1f3ebf10114b6c60"
+    },
+    {
+      "package_file": "evidence/observations/annotations.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/annotations.json",
+      "bytes": 17024,
+      "sha256": "553253d6c19e1e59db7c0fded2bc87c956e07613e86502f5e2db41b7a897e281"
+    },
+    {
+      "package_file": "evidence/observations/observations.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/observations.json",
+      "bytes": 21615,
+      "sha256": "fdcb8d4845b99adcf3f2ddb6a998c9f3c26dfcaa89bd8951d6f8284efa3c0310"
+    },
+    {
+      "package_file": "evidence/models/first/T1_B1.ply",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/T1_B1.ply",
+      "bytes": 17198,
+      "sha256": "d8d060bcdcf6eed4d15f98ae30c7a0a9c7051da2e4aa91f22a028c873ec38679"
+    },
+    {
+      "package_file": "evidence/models/first/T1_B1.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/T1_B1.json",
+      "bytes": 2024,
+      "sha256": "605ea9e7359fdb090e8be294458e790b80457cdd220774d2a26137bebdbf3f43"
+    },
+    {
+      "package_file": "evidence/models/first/initial_template.ply",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/initial_template.ply",
+      "bytes": 17162,
+      "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+    },
+    {
+      "package_file": "evidence/models/first/prior_only.ply",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/prior_only.ply",
+      "bytes": 17162,
+      "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+    },
+    {
+      "package_file": "evidence/models/first/optimization.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/optimization.json",
+      "bytes": 43503,
+      "sha256": "4b202928cb52f1a7442c4535ff397d7a8c979685077eecdef179a7493cfb229a"
+    },
+    {
+      "package_file": "evidence/models/first/model_state.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/model_state.json",
+      "bytes": 5492,
+      "sha256": "803cb59d266f5df8356fe5baec5ec457aab43c7bad9a702635e8403a12502aff"
+    },
+    {
+      "package_file": "evidence/models/first/frozen_config.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/frozen_config.json",
+      "bytes": 244,
+      "sha256": "638143aeedd0fe7f66995c6542745ff0276956be5e44e7403075eaa975f32080"
+    },
+    {
+      "package_file": "evidence/models/first/fit_decode_verification.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/fit_decode_verification.json",
+      "bytes": 493,
+      "sha256": "7a78c0b06675a9f768439ded08148fcf5555b872ae153b868dba3e829741c352"
+    },
+    {
+      "package_file": "evidence/models/first/fit.log",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/reconstruction/fit.log",
+      "bytes": 1478,
+      "sha256": "6f25eafed16e3e160bb5f9b813fd53849d44805dd233e872506145a69c5dc1bc"
+    },
+    {
+      "package_file": "evidence/models/second/T1_B1.ply",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/T1_B1.ply",
+      "bytes": 17196,
+      "sha256": "89cee4964b9d943b3965f2014f57795a9277d3a1c9dfec919c3f677005634c7a"
+    },
+    {
+      "package_file": "evidence/models/second/T1_B1.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/T1_B1.json",
+      "bytes": 2736,
+      "sha256": "855850cfc0c74c01a6f8fa1097017513d8ac7be5f76ad8e6f16c3a9030ab50bc"
+    },
+    {
+      "package_file": "evidence/models/second/initial_template.ply",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/initial_template.ply",
+      "bytes": 17162,
+      "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+    },
+    {
+      "package_file": "evidence/models/second/prior_only.ply",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/prior_only.ply",
+      "bytes": 17162,
+      "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+    },
+    {
+      "package_file": "evidence/models/second/optimization.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/optimization.json",
+      "bytes": 118378,
+      "sha256": "7343cb32806e2b3658a3d6a88d357b609fc9973877aa67fa512adff0ca948786"
+    },
+    {
+      "package_file": "evidence/models/second/model_state.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/model_state.json",
+      "bytes": 7858,
+      "sha256": "777f37387c6cfa098b1af3aec3e4e0de5a892f491a7716daeea20141c1f4d8d5"
+    },
+    {
+      "package_file": "evidence/models/second/frozen_config.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/frozen_config.json",
+      "bytes": 364,
+      "sha256": "69c95db4cbfd3fd613e29a4d0cc1a6a24b3e38cdfdf0d1923ef4c4568cd23fed"
+    },
+    {
+      "package_file": "evidence/models/second/fit_decode_verification.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/fit_decode_verification.json",
+      "bytes": 493,
+      "sha256": "7a78c0b06675a9f768439ded08148fcf5555b872ae153b868dba3e829741c352"
+    },
+    {
+      "package_file": "evidence/models/second/implementation_at_launch.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/implementation_at_launch.json",
+      "bytes": 1633,
+      "sha256": "1a7c54871f2f752d19586564be545180aa9281bbc9f90f2cecaa1d6bc6d46418"
+    },
+    {
+      "package_file": "evidence/models/second/fit.log",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/fit.log",
+      "bytes": 1682,
+      "sha256": "dbc162475671686c7c0d4aeec194045079f9ea6ee16ac92d513886f78b754034"
+    },
+    {
+      "package_file": "evidence/models/contour-26/T1_B1.ply",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/contour-ablation/T1_B1.ply",
+      "bytes": 17186,
+      "sha256": "176ee00f19a1768d189ce615f681fcbbff51ea71d89cd07e4f8b17fed2ad26ef"
+    },
+    {
+      "package_file": "evidence/models/contour-26/T1_B1.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/contour-ablation/T1_B1.json",
+      "bytes": 2736,
+      "sha256": "8196a03e87f2480c0707a32e8ad442bfcedfe060af461a1546d5091e18ae1e4d"
+    },
+    {
+      "package_file": "evidence/models/contour-26/initial_template.ply",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/contour-ablation/initial_template.ply",
+      "bytes": 17162,
+      "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+    },
+    {
+      "package_file": "evidence/models/contour-26/prior_only.ply",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/contour-ablation/prior_only.ply",
+      "bytes": 17162,
+      "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+    },
+    {
+      "package_file": "evidence/models/contour-26/optimization.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/contour-ablation/optimization.json",
+      "bytes": 80102,
+      "sha256": "dd1db472a8c3ba35468d81ff60a19e6d10522022b5ffbf0fa1bb00aca4f7fa71"
+    },
+    {
+      "package_file": "evidence/models/contour-26/model_state.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/contour-ablation/model_state.json",
+      "bytes": 7858,
+      "sha256": "be9f532c300c0c6c76ff7aa6df7cef2f9ebd40fb1a885fb3126ddde278ad04d8"
+    },
+    {
+      "package_file": "evidence/models/contour-26/frozen_config.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/contour-ablation/frozen_config.json",
+      "bytes": 321,
+      "sha256": "2b4c45fe259dae808901eea370310d250247810feb02acfaed7138ee6f18ff8f"
+    },
+    {
+      "package_file": "evidence/models/contour-26/fit_decode_verification.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/contour-ablation/fit_decode_verification.json",
+      "bytes": 493,
+      "sha256": "7a78c0b06675a9f768439ded08148fcf5555b872ae153b868dba3e829741c352"
+    },
+    {
+      "package_file": "evidence/models/contour-26/implementation_at_launch.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/contour-ablation/implementation_at_launch.json",
+      "bytes": 1633,
+      "sha256": "5ced17154a24f5e7a1c1c63fec8770a56f3dbc010c63c7576658fb8dd6b877d9"
+    },
+    {
+      "package_file": "evidence/models/contour-26/fit.log",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/contour-ablation/fit.log",
+      "bytes": 1684,
+      "sha256": "17ba95d0139e997eaf872475d0f41b7409fa8e7c4faf7644b1000e1fe66ba00b"
+    },
+    {
+      "package_file": "evidence/models/smooth-26/T1_B1.ply",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/smooth-ablation/T1_B1.ply",
+      "bytes": 17189,
+      "sha256": "65b7774fd5885acf88c32518aa54a17e2d554e5b989368efcf7445b6a107019a"
+    },
+    {
+      "package_file": "evidence/models/smooth-26/T1_B1.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/smooth-ablation/T1_B1.json",
+      "bytes": 2730,
+      "sha256": "c0f4043c2c572b2a17598319f779661a09450f19a6943d852c93fa596a4573ac"
+    },
+    {
+      "package_file": "evidence/models/smooth-26/initial_template.ply",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/smooth-ablation/initial_template.ply",
+      "bytes": 17162,
+      "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+    },
+    {
+      "package_file": "evidence/models/smooth-26/prior_only.ply",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/smooth-ablation/prior_only.ply",
+      "bytes": 17162,
+      "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+    },
+    {
+      "package_file": "evidence/models/smooth-26/optimization.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/smooth-ablation/optimization.json",
+      "bytes": 43535,
+      "sha256": "82fb188ee6596fab1c7e05d06f406a16abd0d1d082805bd319d335554892f1c5"
+    },
+    {
+      "package_file": "evidence/models/smooth-26/model_state.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/smooth-ablation/model_state.json",
+      "bytes": 7852,
+      "sha256": "7c1556cf3b03eef7cce1794c040899b49ee78d6841b5698a29a9bbd4c9a23430"
+    },
+    {
+      "package_file": "evidence/models/smooth-26/frozen_config.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/smooth-ablation/frozen_config.json",
+      "bytes": 279,
+      "sha256": "769bc1ecfeb533811cf20b8522676d744ceaf934bcf5d405f6e41a838d351953"
+    },
+    {
+      "package_file": "evidence/models/smooth-26/fit_decode_verification.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/smooth-ablation/fit_decode_verification.json",
+      "bytes": 493,
+      "sha256": "7a78c0b06675a9f768439ded08148fcf5555b872ae153b868dba3e829741c352"
+    },
+    {
+      "package_file": "evidence/models/smooth-26/fit.log",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/smooth-ablation/fit.log",
+      "bytes": 1474,
+      "sha256": "7a113563c27355544070add764253d1f5af7b6084448428ab4cf1bcb1e5f0fcd"
+    },
+    {
+      "package_file": "evaluation-only/truth-at-tref/T1_B1_truth.ply",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/evaluation-only/truth-at-tref/T1_B1_truth.ply",
+      "bytes": 301395,
+      "sha256": "c91a4be2e478d107ffd67935831efc99714a549e1e18a4634992c76b7e22fa37"
+    },
+    {
+      "package_file": "evaluation-only/truth-at-tref/truth_manifest.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/evaluation-only/truth-at-tref/truth_manifest.json",
+      "bytes": 3533,
+      "sha256": "349bb95e8ce48a59047cd0d02861132a0c3713c9ff3f12fd8773960aaacb51f5"
+    },
+    {
+      "package_file": "evaluation-only/first_scores.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/evaluation-only/scores.json",
+      "bytes": 35747,
+      "sha256": "f7a9c5ddb62af83c102c198e0505826afc4dbb5c71fafb474bad36d2a70423c4"
+    },
+    {
+      "package_file": "evaluation-only/geometry_comparison.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/evaluation-only/geometry_comparison.json",
+      "bytes": 85524,
+      "sha256": "01fbd0fe15550ea06972bbc3f8f885bad6419c03f2b5fe26192b9e79b907adea"
+    },
+    {
+      "package_file": "evaluation-only/reconstruction_scores.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/evaluation-only/reconstruction/scores.json",
+      "bytes": 38375,
+      "sha256": "735f5cf8fb789c4a7d265a0124c62b12c308025d4abb2e9b3ee4b7a34ec9e1ef"
+    },
+    {
+      "package_file": "evaluation-only/contour-ablation_scores.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/evaluation-only/contour-ablation/scores.json",
+      "bytes": 38385,
+      "sha256": "d2b0bc593271eef84d09dfde57ff18a9abdf0368184ef6774134eb7cfda53ba9"
+    },
+    {
+      "package_file": "evaluation-only/smooth-ablation_scores.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/evaluation-only/smooth-ablation/scores.json",
+      "bytes": 38368,
+      "sha256": "7f26c5ed7e0aa78343849c96a129b617be1171182e8ce963c5ad0bda4f43d9a8"
+    },
+    {
+      "package_file": "historical/first_report.md",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/README.md",
+      "bytes": 9639,
+      "sha256": "14175010c9b4ac10477568ca85e81f2f3dea2123dab54a8dd0a60562ffc39513"
+    },
+    {
+      "package_file": "historical/second_report.md",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/README.md",
+      "bytes": 8196,
+      "sha256": "3874be3b11ad955966732886285c5bcb974b280a67d77fa05b0a24e9074195a5"
+    },
+    {
+      "package_file": "historical/manifest.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/manifest.json",
+      "bytes": 4121,
+      "sha256": "3cd466fa519d22a5fd03a4db5049367ef9e2fab39a4a31f7d5874bb30fe3b3f7"
+    },
+    {
+      "package_file": "historical/model_freeze.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/model_freeze.json",
+      "bytes": 2842,
+      "sha256": "50edebaec4822a312f965e99f55ad33759f31e4f5b185e08a2bd3c28560f66e7"
+    },
+    {
+      "package_file": "historical/experiment_policy.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/experiment_policy.json",
+      "bytes": 1175,
+      "sha256": "97589627d769002cc7cb1cb359ac1413e1828d35725f64dbd88071f59d168b44"
+    },
+    {
+      "package_file": "historical/isolation_probe.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/isolation_probe.json",
+      "bytes": 347,
+      "sha256": "6aa9adf93dd50754831294f031ebaef9a961d299c56d0f87d2c58ebc38945ea2"
+    },
+    {
+      "package_file": "historical/isolation.sb",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/isolation.sb",
+      "bytes": 1248,
+      "sha256": "5f14dcd9a274bdd87d48f3b3914ffabb45821204c27304a39b2ba13acb420173"
+    },
+    {
+      "package_file": "historical/renderer-audit.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/renderer-audit.json",
+      "bytes": 7943,
+      "sha256": "6499eb6d51c59ea4b85b359eaf8a1c5e2f90fd97cfe3f176583c63ebd650da37"
+    },
+    {
+      "package_file": "historical/scoring_config.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/scoring_config.json",
+      "bytes": 187,
+      "sha256": "fceb4a1ac3af23006d8cb3296864c69b17b17c83da0de2bdc9c3321014586510"
+    },
+    {
+      "package_file": "historical/rgb_comparison.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/rgb-comparison/rgb_comparison.json",
+      "bytes": 211905,
+      "sha256": "c859193bddf10d2c96596e70fd293a4cddf6fddc546a7b91c8c8af26d4006055"
+    },
+    {
+      "package_file": "source/wfrl/nrel_reconstruction/pack.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/pack.py",
+      "bytes": 8627,
+      "sha256": "d0f13a95ebe1b7050e96a644ae6207137ec0cd75219c514b6ac40c2e6ebdaaa1"
+    },
+    {
+      "package_file": "source/wfrl/nrel_reconstruction/optimize.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/optimize.py",
+      "bytes": 21182,
+      "sha256": "ea601be6e8fd6c7bba90d8befd5a1135e603fde76b7dba01cb1b0d114199bd58"
+    },
+    {
+      "package_file": "source/wfrl/nrel_reconstruction/preview.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/preview.py",
+      "bytes": 14516,
+      "sha256": "9604b6cf45e8087037a0a02eceb5972f5af1acab7f78370583007a34074fff19"
+    },
+    {
+      "package_file": "source/wfrl/nrel_reconstruction/surface_audit.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/surface_audit.py",
+      "bytes": 32795,
+      "sha256": "67e227620cdaf876a5fc527a9e956fc81b93f7b086ebee5f1c5d182ffe7d257a"
+    },
+    {
+      "package_file": "source/wfrl/nrel_reconstruction/parameter_audit.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/parameter_audit.py",
+      "bytes": 32921,
+      "sha256": "3b2970e4c40833cbaa5bc030fa244cabeab5b828c963893abfd33138239906b1"
+    },
+    {
+      "package_file": "source/wfrl/nrel_reconstruction/compare_rgb.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/compare_rgb.py",
+      "bytes": 13368,
+      "sha256": "066de556c0ac6559eb893440abb52a461cdd9f74d8149fe3cf5c8491ae3996e4"
+    },
+    {
+      "package_file": "source/wfrl/nrel_reconstruction/renderer.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/renderer.py",
+      "bytes": 7061,
+      "sha256": "d6b73643c08a71a895e0a2f78cb163ff117b6c9c24983835ae2e7279f4133e44"
+    },
+    {
+      "package_file": "source/wfrl/nrel_reconstruction/diagnostics.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/diagnostics.py",
+      "bytes": 11037,
+      "sha256": "1d7b36e13709458dd6e9fb3c36c6afaf4d95f04167ef5c3fcee33072964e8789"
+    },
+    {
+      "package_file": "source/wfrl/nrel_reconstruction/observations.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/observations.py",
+      "bytes": 7979,
+      "sha256": "79259788568cd6346428305e22cf136a52ce503e341f05bb94cd72e26718cd69"
+    },
+    {
+      "package_file": "source/wfrl/nrel_reconstruction/__init__.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/__init__.py",
+      "bytes": 224,
+      "sha256": "83c282017ec14cf9db2f8d4fa48ecbad1cce427e1c1a958ea3ee91552028c5ef"
+    },
+    {
+      "package_file": "source/wfrl/nrel_reconstruction/model.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/model.py",
+      "bytes": 12048,
+      "sha256": "47165adb7a8f8d75f4d23a4632c1afd690370edf9d665736782fba4ac7f632ad"
+    },
+    {
+      "package_file": "source/wfrl/nrel_reconstruction/dataset.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/dataset.py",
+      "bytes": 13292,
+      "sha256": "eee0806230801b9cffe49ba153f00ea1f4f79897eca91b107f9f67e4554f66fe"
+    },
+    {
+      "package_file": "source/wfrl/nrel_reconstruction/area_audit.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/area_audit.py",
+      "bytes": 22191,
+      "sha256": "03865d040121824de12143395fcaf9e1bb6f6320e1e594f35ec7e3aaa04c265b"
+    },
+    {
+      "package_file": "source/wfrl/nrel_reconstruction/evaluate.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/evaluate.py",
+      "bytes": 37881,
+      "sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70"
+    },
+    {
+      "package_file": "source/wfrl/nrel_reconstruction/contour.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/contour.py",
+      "bytes": 15348,
+      "sha256": "275ea6e78e3d185d081d79e341d8293bc9ea2ce3583d48d1c27810455ddfbb80"
+    },
+    {
+      "package_file": "source/wfrl/nrel_reconstruction/boundary_metrics.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/boundary_metrics.py",
+      "bytes": 8162,
+      "sha256": "3461135548db8a0619ea08df7b3fa7412788fca3aabcf409a2199054c35a2d1e"
+    },
+    {
+      "package_file": "source/scripts/nrel_existing_video_audit.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/nrel_existing_video_audit.py",
+      "bytes": 12026,
+      "sha256": "05af35645509a485152a8b8e7c15b1aedf70acd9f953043188d7447961062d9a"
+    },
+    {
+      "package_file": "source/scripts/nrel_single_blade.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/nrel_single_blade.py",
+      "bytes": 10319,
+      "sha256": "863b8fda6541e63b24da945d840c43ebbe848ccf0a6edef7aa69449b0c87c4ed"
+    },
+    {
+      "package_file": "source/tests/test_nrel_area_audit.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/tests/test_nrel_area_audit.py",
+      "bytes": 4724,
+      "sha256": "5c35cf2c6158d25bd6d0ed1e12f0bd8aa54cf83e4dc545aecadb841aa734489d"
+    },
+    {
+      "package_file": "source/tests/test_nrel_renderer_audit.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/tests/test_nrel_renderer_audit.py",
+      "bytes": 6179,
+      "sha256": "a698e74ae780f5b44a3676bf113faed8a0cc85c7416378ff7e915deff7f679e2"
+    },
+    {
+      "package_file": "source/tests/test_nrel_surface_audit.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/tests/test_nrel_surface_audit.py",
+      "bytes": 5198,
+      "sha256": "82f090b43e552c0b648190410ecfd3437efdba94dc2f6a2b4f945100da1deae4"
+    },
+    {
+      "package_file": "source/tests/test_nrel_parameter_audit.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/tests/test_nrel_parameter_audit.py",
+      "bytes": 6633,
+      "sha256": "6dc90eb454b5065d1c4810fe7b0b8035a99831a67c233136b1b5d7b31ba2c720"
+    },
+    {
+      "package_file": "plans/NREL5MW_现有视频表面证据补齐与根部约束诊断_v1.0.md",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/docs/proposal/NREL5MW_现有视频表面证据补齐与根部约束诊断_v1.0.md",
+      "bytes": 5936,
+      "sha256": "dde713469570c1f1f89f050fd2ff276514f8db88fc6b2210978b42545fc76f3e"
+    },
+    {
+      "package_file": "plans/NREL5MW_三摄离线视频与单叶片三维重建验证方案_v1.0.md",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/docs/proposal/NREL5MW_三摄离线视频与单叶片三维重建验证方案_v1.0.md",
+      "bytes": 30491,
+      "sha256": "0200d79ca1122124e05cb7670074c6dab6bdfa42594a3f0fba448b1f00e3a4d0"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "model_freeze_signatures_unchanged": true,
+  "same_independent_initial": true,
+  "initial_equals_no_image_control": true,
+  "final_differs_from_initial": true,
+  "isolation_probe_passed": true,
+  "tests": {
+    "passed": 105,
+    "failed": 0,
+    "raw_log": "tests.txt"
+  },
+  "score_after_freeze": true,
+  "further_tuning_after_truth_review": false,
+  "pipeline_status": "PIPELINE_COMPLETE_PARTIAL_GEOMETRY",
+  "full_surface_recovery": false,
+  "image_contribution_criterion": "NOT_YET_ESTABLISHED"
+}

@@ -1,0 +1,13 @@
+{
+  "t_ref_sim_time_s": 122.175,
+  "frame_id": 43,
+  "selection_basis": "Actual MP4 RGB: B1 body visible in C1/C2 and painted tip contour clear in C3; identity checked with declared ideal B1 rigid pose. No truth geometry used.",
+  "fit_frame_ids": [
+    42,
+    43
+  ],
+  "heldout_frame_ids": [
+    44,
+    45
+  ]
+}

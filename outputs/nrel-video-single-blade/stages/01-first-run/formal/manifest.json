@@ -1,0 +1,44 @@
+{
+  "schema": "nrel-video-single-blade-run.v1",
+  "status": "PIPELINE_COMPLETE_PARTIAL_GEOMETRY",
+  "source_capture": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/internal-capture-formal/capture_20261002_213817_baf6978517",
+  "target": "T1/B1",
+  "dataset_sha256": "8379786db91c8ac2cabb41ba15f59dc94325fa8f3ebafd75ff76b7c417b2e6b3",
+  "source_png_copied": false,
+  "geometry_validation": "NOT_YET_ESTABLISHED",
+  "reference_state": {
+    "t_ref_sim_time_s": 122.175,
+    "frame_id": 43,
+    "selection_basis": "Actual MP4 RGB: B1 body visible in C1/C2 and painted tip contour clear in C3; identity checked with declared ideal B1 rigid pose. No truth geometry used.",
+    "fit_frame_ids": [
+      42,
+      43
+    ],
+    "heldout_frame_ids": [
+      44,
+      45
+    ]
+  },
+  "artifacts_sha256": {
+    "algorithm-input/C1.mp4": "5d1590090289938f1597d441eac04bacfe263ab09a1e0de5f4142e4d717133ad",
+    "algorithm-input/C2.mp4": "f567b2400bb0d91091dcb346bdafc7cd30e071101961d337cabf01e10ba30f5c",
+    "algorithm-input/C3.mp4": "4976c0c445e01233e4046b0fa92cbe64cc5e73daf0fd67dabceaaf84e9d576d4",
+    "algorithm-input/dataset.json": "8379786db91c8ac2cabb41ba15f59dc94325fa8f3ebafd75ff76b7c417b2e6b3",
+    "reconstruction/T1_B1.ply": "d8d060bcdcf6eed4d15f98ae30c7a0a9c7051da2e4aa91f22a028c873ec38679",
+    "reconstruction/initial_template.ply": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81",
+    "reconstruction/prior_only.ply": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81",
+    "reconstruction/model_preview.html": "b0d2bb1a8f9b9fd04ab531d8010e091710744cd13a0ea32c4cd6a906dce9ad35",
+    "reconstruction/model_state.json": "803cb59d266f5df8356fe5baec5ec457aab43c7bad9a702635e8403a12502aff",
+    "reconstruction/optimization.json": "4b202928cb52f1a7442c4535ff397d7a8c979685077eecdef179a7493cfb229a",
+    "reconstruction/fit_decode_verification.json": "7a78c0b06675a9f768439ded08148fcf5555b872ae153b868dba3e829741c352",
+    "evaluation-only/scores.json": "f7a9c5ddb62af83c102c198e0505826afc4dbb5c71fafb474bad36d2a70423c4",
+    "evaluation-only/truth-at-tref/T1_B1_truth.ply": "c91a4be2e478d107ffd67935831efc99714a549e1e18a4634992c76b7e22fa37"
+  },
+  "limitations": [
+    "backside/thickness/twist remain prior-dependent",
+    "section and middle-region degradation",
+    "coverage area not independently measured",
+    "silhouette-only first baseline"
+  ],
+  "evaluation_uses_registration": false
+}

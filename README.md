@@ -11,6 +11,14 @@
 
 **NREL 0.3.13 已同步完整构建源码与内置回放资源：** 可从本版源码构建扩展；Blender 安装请使用 Release 附件 ZIP。NREL 0.3.10–0.3.12 的历史源码归档仍不包含当时仅 ZIP 发布的全部实现；GW184 0.4.0 的完整实现继续通过独立运行 ZIP 提供。
 
+## [NREL 5MW 单叶片视频重建实验](https://github.com/snode11/wind-farm-blender/releases/tag/nrel-video-single-blade-20261003) · 2026-10-03 · NREL Single-Blade Video Reconstruction
+
+- 发布已经跑通的三摄视频 → 单叶片模型 → 独立评分研究链路，包含两轮结果、P0–P5 诊断、源码、配置、评分数据、模型与关键图表。
+- 独立分支为 [`experiments/nrel-video-single-blade`](https://github.com/snode11/wind-farm-blender/tree/experiments/nrel-video-single-blade)，固定标签为 `nrel-video-single-blade-20261003`；完整原始材料见 [Release 附件](https://github.com/snode11/wind-farm-blender/releases/tag/nrel-video-single-blade-20261003)，恢复及检查方法见 [实验发布说明](docs/research/nrel-video-single-blade/README.md)。
+- 正式结果保留第二轮 v2，P4/P5 候选未采用；本次发布前 209 项 NREL 相关测试通过，附件内容与归档源文件签名核验通过。
+
+已知限制：状态仍为 **PIPELINE_COMPLETE_PARTIAL_GEOMETRY**，完整几何与工程用途验收尚未建立；当前工作属于 B 的单叶片几何重建验证，纹理、缺陷地图、损伤计量与现场验证未完成。本研究归档不改变上方两个 Blender 包的版本和下载入口。
+
 ## [0.3.13](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.13) · 2026-10-02 · NREL 双束 TLS 候选与完整源码同步
 
 - NREL 5MW / WFRL 扩展新增内置“TLS 候选 / S1”回放；原“双束净空 / S1”继续使用旧法默认，S1 独立报警与旧 B2 回放兼容保留。

@@ -1,0 +1,204 @@
+{
+  "scope": "synthetic planar square only; no evaluation-only, replay, source geometry or truth read",
+  "renderer_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/renderer.py",
+  "renderer_sha256": "d6b73643c08a71a895e0a2f78cb163ff117b6c9c24983835ae2e7279f4133e44",
+  "torch_version": "2.13.0",
+  "resolution": [
+    64,
+    64
+  ],
+  "sigma_px": 0.65,
+  "same_external_silhouette_different_tessellation": [
+    {
+      "subdivisions_per_side": 1,
+      "faces": 2,
+      "hard_masked_iou": 1.0,
+      "soft_threshold_masked_iou": 1.0,
+      "soft_loss": 0.03790865227375982,
+      "foreground_loss": 0.03599698493476056,
+      "background_loss": 0.0019116673389992563,
+      "centre_occupancy": 0.75,
+      "one_pixel_outside_occupancy": 0.1767590407725431,
+      "interior_occupancy_min": 0.75,
+      "interior_mean_missing_occupancy": 0.041225628921459145,
+      "covered_foreground_distance_attraction": 0.0,
+      "interior_distance_zero_fraction": 0.047619047619047616,
+      "outside_distance_rmse_against_euclidean": 2.601349784021959
+    },
+    {
+      "subdivisions_per_side": 2,
+      "faces": 8,
+      "hard_masked_iou": 1.0,
+      "soft_threshold_masked_iou": 1.0,
+      "soft_loss": 0.04383104563088951,
+      "foreground_loss": 0.0407712980828531,
+      "background_loss": 0.003059747548036418,
+      "centre_occupancy": 0.9843750008622798,
+      "one_pixel_outside_occupancy": 0.4930761795041479,
+      "interior_occupancy_min": 0.7500002220278588,
+      "interior_mean_missing_occupancy": 0.10209091803951025,
+      "covered_foreground_distance_attraction": 0.0,
+      "interior_distance_zero_fraction": 0.16099773242630386,
+      "outside_distance_rmse_against_euclidean": 3.2059737134274373
+    },
+    {
+      "subdivisions_per_side": 4,
+      "faces": 32,
+      "hard_masked_iou": 1.0,
+      "soft_threshold_masked_iou": 1.0,
+      "soft_loss": 0.0470020432229656,
+      "foreground_loss": 0.041611556723070105,
+      "background_loss": 0.005390486499895492,
+      "centre_occupancy": 0.984391552651193,
+      "one_pixel_outside_occupancy": 0.4933938105085472,
+      "interior_occupancy_min": 0.755495481454752,
+      "interior_mean_missing_occupancy": 0.1302394755071826,
+      "covered_foreground_distance_attraction": 0.0,
+      "interior_distance_zero_fraction": 0.3741496598639456,
+      "outside_distance_rmse_against_euclidean": 3.939323484607071
+    },
+    {
+      "subdivisions_per_side": 8,
+      "faces": 128,
+      "hard_masked_iou": 1.0,
+      "soft_threshold_masked_iou": 0.9784366576819407,
+      "soft_loss": 0.03173200179203042,
+      "foreground_loss": 0.02036773008144569,
+      "background_loss": 0.01136427171058473,
+      "centre_occupancy": 0.9861027829864893,
+      "one_pixel_outside_occupancy": 0.5217370316711473,
+      "interior_occupancy_min": 0.8527356781931567,
+      "interior_mean_missing_occupancy": 0.08738133572198818,
+      "covered_foreground_distance_attraction": 0.0,
+      "interior_distance_zero_fraction": 0.6145124716553289,
+      "outside_distance_rmse_against_euclidean": 4.488207245471552
+    }
+  ],
+  "same_external_silhouette_face_multiplicity": [
+    {
+      "face_copy_count": 1,
+      "faces": 2,
+      "hard_masked_iou": 1.0,
+      "soft_threshold_masked_iou": 1.0,
+      "soft_loss": 0.03790865227375982,
+      "foreground_loss": 0.03599698493476056,
+      "background_loss": 0.0019116673389992563,
+      "centre_occupancy": 0.75,
+      "one_pixel_outside_occupancy": 0.1767590407725431,
+      "interior_occupancy_min": 0.75,
+      "interior_mean_missing_occupancy": 0.041225628921459145,
+      "covered_foreground_distance_attraction": 0.0,
+      "interior_distance_zero_fraction": 0.047619047619047616,
+      "outside_distance_rmse_against_euclidean": 2.601349784021959
+    },
+    {
+      "face_copy_count": 2,
+      "faces": 4,
+      "hard_masked_iou": 1.0,
+      "soft_threshold_masked_iou": 0.9945205479452055,
+      "soft_loss": 0.013437993096939,
+      "foreground_loss": 0.007236018379494573,
+      "background_loss": 0.0062019747174444275,
+      "centre_occupancy": 0.9375,
+      "one_pixel_outside_occupancy": 0.3222743230502566,
+      "interior_occupancy_min": 0.9375,
+      "interior_mean_missing_occupancy": 0.0070381135369963314,
+      "covered_foreground_distance_attraction": 0.0,
+      "interior_distance_zero_fraction": 0.047619047619047616,
+      "outside_distance_rmse_against_euclidean": 2.601349784021959
+    },
+    {
+      "face_copy_count": 4,
+      "faces": 8,
+      "hard_masked_iou": 1.0,
+      "soft_threshold_masked_iou": 0.8860862489829129,
+      "soft_loss": 0.017507486386326543,
+      "foreground_loss": 0.00042552918710657216,
+      "background_loss": 0.017081957199219972,
+      "centre_occupancy": 0.99609375,
+      "one_pixel_outside_occupancy": 0.540687906803012,
+      "interior_occupancy_min": 0.99609375,
+      "interior_mean_missing_occupancy": 0.00030673171172807483,
+      "covered_foreground_distance_attraction": 0.0,
+      "interior_distance_zero_fraction": 0.047619047619047616,
+      "outside_distance_rmse_against_euclidean": 2.601349784021959
+    },
+    {
+      "face_copy_count": 8,
+      "faces": 16,
+      "hard_masked_iou": 1.0,
+      "soft_threshold_masked_iou": 0.8789346246973365,
+      "soft_loss": 0.03696849085016591,
+      "foreground_loss": 1.6225568961092807e-06,
+      "background_loss": 0.0369668682932698,
+      "centre_occupancy": 0.9999847412109375,
+      "one_pixel_outside_occupancy": 0.7890324010430014,
+      "interior_occupancy_min": 0.9999847412109375,
+      "interior_mean_missing_occupancy": 8.716588317098183e-07,
+      "covered_foreground_distance_attraction": 0.0,
+      "interior_distance_zero_fraction": 0.047619047619047616,
+      "outside_distance_rmse_against_euclidean": 2.601349784021959
+    }
+  ],
+  "interior_vertex_motion_external_boundary_fixed": [
+    {
+      "interior_vertex_xy": [
+        32.0,
+        32.0
+      ],
+      "loss": 0.04070983156998277,
+      "interior_vertex_loss_gradient": [
+        3.9677679544714017e-13,
+        3.967759280854022e-13
+      ],
+      "hard_masked_iou": 1.0,
+      "foreground_distance_attraction": 0.0
+    },
+    {
+      "interior_vertex_xy": [
+        28.0,
+        37.0
+      ],
+      "loss": 0.04072137521073993,
+      "interior_vertex_loss_gradient": [
+        2.6407475590043902e-05,
+        -3.1262196605164006e-05
+      ],
+      "hard_masked_iou": 1.0,
+      "foreground_distance_attraction": 0.0
+    },
+    {
+      "interior_vertex_xy": [
+        27.0,
+        37.0
+      ],
+      "loss": 0.04071756415982468,
+      "interior_vertex_loss_gradient": [
+        2.267238691726261e-05,
+        -2.7328168367564323e-05
+      ],
+      "hard_masked_iou": 1.0,
+      "foreground_distance_attraction": 0.0
+    },
+    {
+      "interior_vertex_xy": [
+        29.0,
+        37.0
+      ],
+      "loss": 0.04072126795039231,
+      "interior_vertex_loss_gradient": [
+        2.6471916252958187e-05,
+        -2.8774527891997333e-05
+      ],
+      "hard_masked_iou": 1.0,
+      "foreground_distance_attraction": 0.0
+    }
+  ],
+  "findings": [
+    "Probabilistic triangle union depends on subdivision, face multiplicity and internal edges even when the hard union silhouette is identical.",
+    "max(min signed edge distances) is zero on shared internal edges; relu(-distance) is zero for covered foreground, so this is not an inside-edge attraction penalty.",
+    "Triangle half-plane distance outside corners is not Euclidean distance to the union boundary.",
+    "These tests establish nonphysical optimization pressure from rasterization; they do not by themselves attribute a real centreline wiggle to this backend."
+  ],
+  "minimal_correction": "Use projected exterior/visible silhouette edges with bidirectional robust RGB contour distance; detach topology and visibility choices. Keep the old renderer available as a recorded baseline. Replacing union by max(sigmoid) alone does not remove internal-edge seams."
+}

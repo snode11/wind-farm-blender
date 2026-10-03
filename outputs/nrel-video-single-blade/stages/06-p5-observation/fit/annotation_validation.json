@@ -1,0 +1,22 @@
+{
+  "schema": "nrel-observation-boundary-review.v1",
+  "annotation_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/annotation/annotation.json",
+  "annotation_sha256": "938f2174fc424420322af3d5ad1e6fd45e91c301cf3804d1ce147b2d34c3ec9f",
+  "override": {
+    "camera_id": "C1",
+    "frame_id": 42,
+    "fields": [
+      "contour_points_path",
+      "contour_valid_path"
+    ]
+  },
+  "original_contour_points": 1104,
+  "revised_contour_points": 1814,
+  "new_dense_rgb_points": 710,
+  "dense_samples_are_independent_information": false,
+  "max_observed_unchanged": 600,
+  "sampling_share_note": "Appending points changes the fixed linspace max600 sample allocation and spatial weighting.",
+  "added_candidate_domain_pixels": 11360,
+  "FBU_unchanged": true,
+  "uncertainty_native_px_unchanged": 3.0
+}

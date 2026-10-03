@@ -1,0 +1,4 @@
+{"gate": "PASSED", "protected_files": 162, "metadata_contracts": "8/8 PASS", "truth_access": "after gate"}
+{"branch": "original_raw", "status": "SCORED", "image_contribution": "NOT_YET_ESTABLISHED", "seconds": 37.02225191600155}
+{"branch": "revised_boundary", "status": "SCORED", "image_contribution": "NOT_YET_ESTABLISHED", "seconds": 37.03250383399427}
+{"status": "COMPLETE_SIGNATURES_UNCHANGED", "summary": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation/evaluation-only/cross_branch_summary.json"}

@@ -1,0 +1,12 @@
+{
+  "schema": "nrel-p5-archive-validation.v1",
+  "status": "PASS",
+  "archive": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p5-observation-review.zip",
+  "bytes": 1657799,
+  "MiB": 1.5810003280639648,
+  "sha256": "3445d40cd3c6eba72a4929a7efa25aa00273a9ae9ec16a63474e44081f83678d",
+  "members": 121,
+  "manifest_entries_verified": 120,
+  "CRC_passed": true,
+  "truth_or_video_duplicates": false
+}

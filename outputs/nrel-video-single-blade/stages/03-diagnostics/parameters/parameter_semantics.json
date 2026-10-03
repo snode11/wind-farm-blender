@@ -1,0 +1,17 @@
+{
+  "parameter_order": [
+    "center_x",
+    "center_y",
+    "chord_halfwidth"
+  ],
+  "center_parameter_scope": "B-spline reference-axis offset, not geometric section centroid",
+  "section_formula": "y=chord*(0.25-0.5*cos(theta)); x=0.5*chord*(t/c)*sin(theta); then frozen twist",
+  "geometric_centroid_delta_for_chord_halfwidth_h": "h/2 * [-sin(twist), cos(twist)] in blade-root xy; center offsets held fixed",
+  "thickness_scope": "fixed t/c, so absolute thickness scales with chord",
+  "coupling_warning": "Local compensation mixes model parameterization and image projection; do not assign it wholly to missing camera constraints",
+  "target_z_m": 9.225,
+  "root_band_m": [
+    6.15,
+    12.3
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "schema": "nrel-video-single-blade-run.v1",
+  "status": "TRIAL_COMPLETE_AND_DEVELOPMENT_FIT_COMPLETE",
+  "source_capture": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/internal-capture/capture_20261002_213522_5d6e3ad3af",
+  "target": "T1/B1",
+  "dataset_sha256": "e08d85101ce102f2cff76e555115cae9c17ea70d4eb9f1811ffebfb28cb310f9",
+  "source_png_copied": false
+}

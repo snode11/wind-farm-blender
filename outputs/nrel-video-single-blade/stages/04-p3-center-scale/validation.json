@@ -1,0 +1,52 @@
+{
+  "schema": "nrel-p3-delivery-validation.v1",
+  "completed_utc": "2026-10-02T17:01:34.157769+00:00",
+  "status": "P3_CONTROLLED_DIAGNOSTICS_COMPLETE_GEOMETRY_ACCEPTANCE_PENDING",
+  "protocol_sha256": "67b66d8495cff54d201ded592eff2c8153f0f1ee3e51644a5e42a93d64a802db",
+  "preserved_input_count": 365,
+  "preserved_input_mismatch_count": 0,
+  "tests": {
+    "command": [
+      "/opt/anaconda3/envs/wfrl-mac/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_nrel_center_scale_audit.py",
+      "tests/test_nrel_center_scale_family_audit.py",
+      "tests/test_nrel_root_rgb_audit.py",
+      "tests/test_nrel_parameter_audit.py",
+      "tests/test_nrel_contour.py",
+      "tests/test_nrel_model_v2.py"
+    ],
+    "exit_code": 0,
+    "summary": "52 passed in 1.22s"
+  },
+  "new_source_and_test_sha256_before_tests": {
+    "wfrl/nrel_reconstruction/center_scale_audit.py": "b950cb08450f6f3c07ca6cdd1131216d21c18ebbfffb01c785fcdfc30ecf7fd8",
+    "wfrl/nrel_reconstruction/center_scale_family_audit.py": "2d4ce49c1bee1333fd7ec27a061e1488b6bbb3cbc8a710b6559fe711dcaf1d3b",
+    "wfrl/nrel_reconstruction/root_rgb_audit.py": "251873e08cc4d11c831818c7add311d00f048a21bd099b2e52092b083e0536b2",
+    "tests/test_nrel_center_scale_audit.py": "a6119f6fbb73dcd38a3205943dc9e426f868097fcb74dc0e85347a0e228e32b1",
+    "tests/test_nrel_center_scale_family_audit.py": "eebdd19bbf8205bc857bfc982dc758f98e24646243792fbce38df757a80279f0",
+    "tests/test_nrel_root_rgb_audit.py": "012882bd6495416060c8d0a57230fc0fb7617656eddd3c7e668ae325ff872b97"
+  },
+  "new_source_and_test_sha256_after_tests": {
+    "wfrl/nrel_reconstruction/center_scale_audit.py": "b950cb08450f6f3c07ca6cdd1131216d21c18ebbfffb01c785fcdfc30ecf7fd8",
+    "wfrl/nrel_reconstruction/center_scale_family_audit.py": "2d4ce49c1bee1333fd7ec27a061e1488b6bbb3cbc8a710b6559fe711dcaf1d3b",
+    "wfrl/nrel_reconstruction/root_rgb_audit.py": "251873e08cc4d11c831818c7add311d00f048a21bd099b2e52092b083e0536b2",
+    "tests/test_nrel_center_scale_audit.py": "a6119f6fbb73dcd38a3205943dc9e426f868097fcb74dc0e85347a0e228e32b1",
+    "tests/test_nrel_center_scale_family_audit.py": "eebdd19bbf8205bc857bfc982dc758f98e24646243792fbce38df757a80279f0",
+    "tests/test_nrel_root_rgb_audit.py": "012882bd6495416060c8d0a57230fc0fb7617656eddd3c7e668ae325ff872b97"
+  },
+  "source_and_frozen_protocol_checks_passed": true,
+  "geometry_actual_configurations": 984,
+  "geometry_production_baseline_checks": 24,
+  "family_cases": 8,
+  "rgb_frames_matching_annotation": 8,
+  "historical_backend_crosschecks": 32,
+  "new_fit_executed": false,
+  "new_capture_or_encoding_executed": false,
+  "scoring_truth_read_by_P3_algorithms": false,
+  "baseline_model_or_masks_changed": false,
+  "figure_and_rgb_visual_review": "Root reviewed summary figure and selected native crop/overlay; RGB agent reviewed all selected frame evidence.",
+  "independent_review_record": "independent_review.md"
+}

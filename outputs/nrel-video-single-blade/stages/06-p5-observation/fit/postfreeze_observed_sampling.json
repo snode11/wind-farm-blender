@@ -1,0 +1,546 @@
+{
+  "geometry_status": "FROZEN_BEFORE_THIS_DIAGNOSTIC",
+  "rows": [
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C1",
+      "frame_id": 42,
+      "resolution": [
+        160,
+        90
+      ],
+      "source_point_count": 1104,
+      "in_frame_point_count": 1104,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C1",
+      "frame_id": 43,
+      "resolution": [
+        160,
+        90
+      ],
+      "source_point_count": 1911,
+      "in_frame_point_count": 1911,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C2",
+      "frame_id": 42,
+      "resolution": [
+        160,
+        90
+      ],
+      "source_point_count": 2103,
+      "in_frame_point_count": 2103,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C2",
+      "frame_id": 43,
+      "resolution": [
+        160,
+        90
+      ],
+      "source_point_count": 2248,
+      "in_frame_point_count": 2248,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C3",
+      "frame_id": 42,
+      "resolution": [
+        160,
+        90
+      ],
+      "source_point_count": 622,
+      "in_frame_point_count": 622,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C3",
+      "frame_id": 43,
+      "resolution": [
+        160,
+        90
+      ],
+      "source_point_count": 1508,
+      "in_frame_point_count": 1508,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C1",
+      "frame_id": 42,
+      "resolution": [
+        320,
+        180
+      ],
+      "source_point_count": 1104,
+      "in_frame_point_count": 1104,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C1",
+      "frame_id": 43,
+      "resolution": [
+        320,
+        180
+      ],
+      "source_point_count": 1911,
+      "in_frame_point_count": 1911,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C2",
+      "frame_id": 42,
+      "resolution": [
+        320,
+        180
+      ],
+      "source_point_count": 2103,
+      "in_frame_point_count": 2103,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C2",
+      "frame_id": 43,
+      "resolution": [
+        320,
+        180
+      ],
+      "source_point_count": 2248,
+      "in_frame_point_count": 2248,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C3",
+      "frame_id": 42,
+      "resolution": [
+        320,
+        180
+      ],
+      "source_point_count": 622,
+      "in_frame_point_count": 622,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C3",
+      "frame_id": 43,
+      "resolution": [
+        320,
+        180
+      ],
+      "source_point_count": 1508,
+      "in_frame_point_count": 1508,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C1",
+      "frame_id": 42,
+      "resolution": [
+        640,
+        360
+      ],
+      "source_point_count": 1104,
+      "in_frame_point_count": 1104,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C1",
+      "frame_id": 43,
+      "resolution": [
+        640,
+        360
+      ],
+      "source_point_count": 1911,
+      "in_frame_point_count": 1911,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C2",
+      "frame_id": 42,
+      "resolution": [
+        640,
+        360
+      ],
+      "source_point_count": 2103,
+      "in_frame_point_count": 2103,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C2",
+      "frame_id": 43,
+      "resolution": [
+        640,
+        360
+      ],
+      "source_point_count": 2248,
+      "in_frame_point_count": 2248,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C3",
+      "frame_id": 42,
+      "resolution": [
+        640,
+        360
+      ],
+      "source_point_count": 622,
+      "in_frame_point_count": 622,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "original_raw",
+      "camera_id": "C3",
+      "frame_id": 43,
+      "resolution": [
+        640,
+        360
+      ],
+      "source_point_count": 1508,
+      "in_frame_point_count": 1508,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C1",
+      "frame_id": 42,
+      "resolution": [
+        160,
+        90
+      ],
+      "source_point_count": 1814,
+      "in_frame_point_count": 1814,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 235
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C1",
+      "frame_id": 43,
+      "resolution": [
+        160,
+        90
+      ],
+      "source_point_count": 1911,
+      "in_frame_point_count": 1911,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C2",
+      "frame_id": 42,
+      "resolution": [
+        160,
+        90
+      ],
+      "source_point_count": 2103,
+      "in_frame_point_count": 2103,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C2",
+      "frame_id": 43,
+      "resolution": [
+        160,
+        90
+      ],
+      "source_point_count": 2248,
+      "in_frame_point_count": 2248,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C3",
+      "frame_id": 42,
+      "resolution": [
+        160,
+        90
+      ],
+      "source_point_count": 622,
+      "in_frame_point_count": 622,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C3",
+      "frame_id": 43,
+      "resolution": [
+        160,
+        90
+      ],
+      "source_point_count": 1508,
+      "in_frame_point_count": 1508,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C1",
+      "frame_id": 42,
+      "resolution": [
+        320,
+        180
+      ],
+      "source_point_count": 1814,
+      "in_frame_point_count": 1814,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 235
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C1",
+      "frame_id": 43,
+      "resolution": [
+        320,
+        180
+      ],
+      "source_point_count": 1911,
+      "in_frame_point_count": 1911,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C2",
+      "frame_id": 42,
+      "resolution": [
+        320,
+        180
+      ],
+      "source_point_count": 2103,
+      "in_frame_point_count": 2103,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C2",
+      "frame_id": 43,
+      "resolution": [
+        320,
+        180
+      ],
+      "source_point_count": 2248,
+      "in_frame_point_count": 2248,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C3",
+      "frame_id": 42,
+      "resolution": [
+        320,
+        180
+      ],
+      "source_point_count": 622,
+      "in_frame_point_count": 622,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C3",
+      "frame_id": 43,
+      "resolution": [
+        320,
+        180
+      ],
+      "source_point_count": 1508,
+      "in_frame_point_count": 1508,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C1",
+      "frame_id": 42,
+      "resolution": [
+        640,
+        360
+      ],
+      "source_point_count": 1814,
+      "in_frame_point_count": 1814,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 235
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C1",
+      "frame_id": 43,
+      "resolution": [
+        640,
+        360
+      ],
+      "source_point_count": 1911,
+      "in_frame_point_count": 1911,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C2",
+      "frame_id": 42,
+      "resolution": [
+        640,
+        360
+      ],
+      "source_point_count": 2103,
+      "in_frame_point_count": 2103,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C2",
+      "frame_id": 43,
+      "resolution": [
+        640,
+        360
+      ],
+      "source_point_count": 2248,
+      "in_frame_point_count": 2248,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C3",
+      "frame_id": 42,
+      "resolution": [
+        640,
+        360
+      ],
+      "source_point_count": 622,
+      "in_frame_point_count": 622,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    },
+    {
+      "observation_version": "revised_boundary",
+      "camera_id": "C3",
+      "frame_id": 43,
+      "resolution": [
+        640,
+        360
+      ],
+      "source_point_count": 1508,
+      "in_frame_point_count": 1508,
+      "max_observed": 600,
+      "observed_count": 600,
+      "observed_sampling_truncated": true,
+      "sampled_new_rgb_point_count": 0
+    }
+  ],
+  "meaning": "Deterministic samples change spatial weighting; dense RGB points are not independent 3D information."
+}

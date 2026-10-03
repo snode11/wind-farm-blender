@@ -1,0 +1,34 @@
+{
+  "png": {
+    "C1": {
+      "count": 100,
+      "bytes": 197650850,
+      "mean_bytes_per_frame": 1976508.5
+    },
+    "C2": {
+      "count": 100,
+      "bytes": 246065868,
+      "mean_bytes_per_frame": 2460658.68
+    },
+    "C3": {
+      "count": 100,
+      "bytes": 269298042,
+      "mean_bytes_per_frame": 2692980.42
+    }
+  },
+  "png_total_bytes": 713014760,
+  "mp4": {
+    "C2.mp4": 2819999,
+    "C3.mp4": 2679521,
+    "C1.mp4": 2566261
+  },
+  "mp4_total_bytes": 8065781,
+  "unique_regular_file_bytes_in_run": 8359735,
+  "temporary_bytes": 0,
+  "mean_png_bytes": 2376715.8666666667,
+  "estimate_5s_png_bytes_at_same_fps": 713014760.0,
+  "estimate_10s_png_bytes_at_same_fps": 1426029520.0,
+  "estimate_status": "conditional extrapolation from current clip, not measured formal capture",
+  "source_png_policy": "one immutable set; master_frames directory is a symlink, no copying",
+  "cache_policy": "only selected decoded thumbnails/masks; no full float video or feature cache"
+}

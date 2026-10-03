@@ -1,0 +1,37 @@
+{
+  "model_interpolation": "bspline",
+  "image_objective": "projected_contour",
+  "resolutions": [
+    [
+      160,
+      90
+    ],
+    [
+      320,
+      180
+    ],
+    [
+      640,
+      360
+    ]
+  ],
+  "iterations_per_stage": [
+    40,
+    40,
+    20
+  ],
+  "learning_rate": 0.012,
+  "image_weight": 1.0,
+  "foreground_distance_weight": 0.15,
+  "relative_change_weight": 0.03,
+  "smoothness_weight": 0.1,
+  "sigma_px": 0.65,
+  "span_samples": 25,
+  "ring_samples": 12,
+  "control_stations": 7,
+  "face_chunk": 48,
+  "batch_size": 1,
+  "device": "cpu",
+  "seed": 20261002,
+  "threads": 4
+}

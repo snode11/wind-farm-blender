@@ -1,0 +1,26 @@
+{
+  "scope": "second iteration incremental research artifacts; shared first-run PNG/videos excluded",
+  "new_source_png_count": 0,
+  "new_mp4_count": 0,
+  "new_environment_or_weight_downloads": 0,
+  "excludes": [
+    "preexisting project data",
+    "software environments",
+    "shared first-run source assets"
+  ],
+  "measurement": "sum of regular file st_size; decimal MB/GB; includes retained baseline source snapshot, reports and small checkpoints",
+  "final_measurement_pending_scoring_artifacts": false,
+  "directory_bytes": {
+    "smooth-ablation": 908065,
+    "baseline-code": 173399,
+    "evaluation-only": 632821,
+    "contour-ablation": 942845,
+    "reconstruction": 1994481,
+    "observations": 1075596,
+    "rgb-comparison": 211905
+  },
+  "file_count": 181,
+  "total_bytes": 7137498,
+  "total_decimal_MB": 7.137498,
+  "total_decimal_GB": 0.007137498
+}

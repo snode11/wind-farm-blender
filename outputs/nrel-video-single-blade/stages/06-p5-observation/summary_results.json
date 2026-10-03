@@ -1,0 +1,265 @@
+{
+  "branches": {
+    "original_raw": {
+      "global": {
+        "reconstruction_to_truth": {
+          "mean_m": 0.1839927612803811,
+          "p95_m": 0.6077903453414697,
+          "standard_error_mean_m": 0.002189108958324101,
+          "source_area_m2": 509.9328454846309,
+          "sample_count": 8192,
+          "null_reason": null
+        },
+        "truth_to_reconstruction": {
+          "mean_m": 0.16261727004931575,
+          "p95_m": 0.5114341864467321,
+          "standard_error_mean_m": 0.0016822647353863563,
+          "source_area_m2": 501.2066016293269,
+          "sample_count": 8192,
+          "null_reason": null
+        }
+      },
+      "regions": {
+        "root": {
+          "span_bounds_m": [
+            0.0,
+            20.5
+          ],
+          "reconstruction_to_truth": {
+            "mean_m": 0.26661952157139196,
+            "p95_m": 0.7337397644425553,
+            "standard_error_mean_m": 0.00552060562200262,
+            "source_area_m2": 254.0927763248971,
+            "sample_count": 2048,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.22621796613974382,
+            "p95_m": 0.621037652374805,
+            "standard_error_mean_m": 0.00429022063359545,
+            "source_area_m2": 234.70833043421067,
+            "sample_count": 2048,
+            "null_reason": null
+          }
+        },
+        "middle": {
+          "span_bounds_m": [
+            20.5,
+            41.0
+          ],
+          "reconstruction_to_truth": {
+            "mean_m": 0.13080868190805212,
+            "p95_m": 0.36332492668447947,
+            "standard_error_mean_m": 0.002272058018963078,
+            "source_area_m2": 159.86020885749053,
+            "sample_count": 2048,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.1233217682084781,
+            "p95_m": 0.3051233188101514,
+            "standard_error_mean_m": 0.0020055802320936788,
+            "source_area_m2": 162.69714571127693,
+            "sample_count": 2048,
+            "null_reason": null
+          }
+        },
+        "tip": {
+          "span_bounds_m": [
+            41.0,
+            61.5
+          ],
+          "reconstruction_to_truth": {
+            "mean_m": 0.0848480599635637,
+            "p95_m": 0.17491480894717149,
+            "standard_error_mean_m": 0.001146348078694132,
+            "source_area_m2": 95.9798603022432,
+            "sample_count": 2048,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.08651842047059738,
+            "p95_m": 0.18568187109930495,
+            "standard_error_mean_m": 0.0012526846875138718,
+            "source_area_m2": 102.74094490356582,
+            "sample_count": 2048,
+            "null_reason": null
+          }
+        }
+      },
+      "sections": [
+        {
+          "z_m": 9.225,
+          "long_side_abs_error_m": 0.30018053686885793,
+          "short_side_abs_error_m": 0.2387070531726856
+        },
+        {
+          "z_m": 30.75,
+          "long_side_abs_error_m": 0.1173096388289574,
+          "short_side_abs_error_m": 0.009660254990009776
+        },
+        {
+          "z_m": 52.275,
+          "long_side_abs_error_m": 0.12225751311627064,
+          "short_side_abs_error_m": 0.0070684356718497265
+        }
+      ],
+      "image_contribution": "NOT_YET_ESTABLISHED",
+      "training_objective": {
+        "image_loss_mean": 0.2856580821486811,
+        "regularization": 0.008115739561617374,
+        "total_objective": 0.2937738217102985
+      }
+    },
+    "revised_boundary": {
+      "global": {
+        "reconstruction_to_truth": {
+          "mean_m": 0.22401855563579226,
+          "p95_m": 0.7108257613654678,
+          "standard_error_mean_m": 0.0025282373473400344,
+          "source_area_m2": 517.4620757517102,
+          "sample_count": 8192,
+          "null_reason": null
+        },
+        "truth_to_reconstruction": {
+          "mean_m": 0.18959119865804747,
+          "p95_m": 0.5923005307084632,
+          "standard_error_mean_m": 0.0020125984818877085,
+          "source_area_m2": 501.2066016293269,
+          "sample_count": 8192,
+          "null_reason": null
+        }
+      },
+      "regions": {
+        "root": {
+          "span_bounds_m": [
+            0.0,
+            20.5
+          ],
+          "reconstruction_to_truth": {
+            "mean_m": 0.3439592590511086,
+            "p95_m": 0.8503284041061651,
+            "standard_error_mean_m": 0.0058803834724632555,
+            "source_area_m2": 259.153706236805,
+            "sample_count": 2048,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.2889249840646881,
+            "p95_m": 0.7109837742583336,
+            "standard_error_mean_m": 0.004850189259852775,
+            "source_area_m2": 234.70833043421067,
+            "sample_count": 2048,
+            "null_reason": null
+          }
+        },
+        "middle": {
+          "span_bounds_m": [
+            20.5,
+            41.0
+          ],
+          "reconstruction_to_truth": {
+            "mean_m": 0.130990073419563,
+            "p95_m": 0.4378754308790772,
+            "standard_error_mean_m": 0.0028198122224839376,
+            "source_area_m2": 162.30162547846047,
+            "sample_count": 2048,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.11667627597537288,
+            "p95_m": 0.3410323071943264,
+            "standard_error_mean_m": 0.002330020483214129,
+            "source_area_m2": 162.69714571127693,
+            "sample_count": 2048,
+            "null_reason": null
+          }
+        },
+        "tip": {
+          "span_bounds_m": [
+            41.0,
+            61.5
+          ],
+          "reconstruction_to_truth": {
+            "mean_m": 0.08286808505669072,
+            "p95_m": 0.1724556321900872,
+            "standard_error_mean_m": 0.0011304126835285965,
+            "source_area_m2": 96.00674403644473,
+            "sample_count": 2048,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.08485589177680036,
+            "p95_m": 0.18393261895579693,
+            "standard_error_mean_m": 0.0012395450041159206,
+            "source_area_m2": 102.74094490356582,
+            "sample_count": 2048,
+            "null_reason": null
+          }
+        }
+      },
+      "sections": [
+        {
+          "z_m": 9.225,
+          "long_side_abs_error_m": 0.43597080663904464,
+          "short_side_abs_error_m": 0.3149563917397393
+        },
+        {
+          "z_m": 30.75,
+          "long_side_abs_error_m": 0.06708558846585966,
+          "short_side_abs_error_m": 0.00314694575157215
+        },
+        {
+          "z_m": 52.275,
+          "long_side_abs_error_m": 0.12534209679176467,
+          "short_side_abs_error_m": 0.006476156101203889
+        }
+      ],
+      "image_contribution": "NOT_YET_ESTABLISHED",
+      "training_objective": {
+        "image_loss_mean": 0.3016775579502185,
+        "regularization": 0.00870573054999113,
+        "total_objective": 0.31038328850020963
+      }
+    }
+  },
+  "image_residuals_on_same_target": {
+    "original_raw": {
+      "original_raw": 0.2856580821486811,
+      "revised_boundary": 0.2653920979549487
+    },
+    "revised_boundary": {
+      "original_raw": 0.34686416465168196,
+      "revised_boundary": 0.3016775579502185
+    }
+  },
+  "image_loss_warning": "Compare models within a named observation target only; pixel objective is not a metric geometry score.",
+  "nonblind_image_mean": {
+    "original_raw": 0.575219084819158,
+    "revised_boundary": 0.4855724448959033
+  },
+  "scoring_config": {
+    "span_bounds_m": [
+      0,
+      61.5
+    ],
+    "section_positions_m": [
+      9.225,
+      30.75,
+      52.275
+    ],
+    "sample_count": 8192,
+    "regional_sample_count": 2048,
+    "seed": 20261002
+  },
+  "geometry_delta_revised_minus_original_m": {
+    "reconstruction_to_truth": {
+      "mean_m": 0.04002579435541115,
+      "p95_m": 0.10303541602399813
+    },
+    "truth_to_reconstruction": {
+      "mean_m": 0.026973928608731712,
+      "p95_m": 0.08086634426173112
+    }
+  }
+}

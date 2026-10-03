@@ -1,0 +1,10 @@
+{
+  "started_at_utc": "2026-10-02T16:49:02.147067+00:00",
+  "source_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/center_scale_family_audit.py",
+  "source_sha256": "2d4ce49c1bee1333fd7ec27a061e1488b6bbb3cbc8a710b6559fe711dcaf1d3b",
+  "protocol_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p3-center-scale/family/protocol.json",
+  "protocol_sha256": "d9af4d684108bf17b08001afd6650996f8b4db355a215e419c01e0ea3050a96c",
+  "output_dir": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p3-center-scale/family/verified",
+  "addendum_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p3-center-scale/family/protocol_addendum.json",
+  "addendum_sha256": "08ff958101f99d81526e10830abf2f30547a0e55bbc1d9a3377c2a383596b0dc"
+}

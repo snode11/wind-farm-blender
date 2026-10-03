@@ -1,0 +1,272 @@
+{
+  "date": "2026-10-02",
+  "purpose": "read-only review handoff; no experiments executed",
+  "records": [
+    {
+      "package_file": "01_执行方案_v1.0.md",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/docs/proposal/NREL5MW_三摄离线视频与单叶片三维重建验证方案_v1.0.md",
+      "bytes": 30491,
+      "sha256": "0200d79ca1122124e05cb7670074c6dab6bdfa42594a3f0fba448b1f00e3a4d0"
+    },
+    {
+      "package_file": "02_首轮实施报告.md",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/README.md",
+      "bytes": 9639,
+      "sha256": "14175010c9b4ac10477568ca85e81f2f3dea2123dab54a8dd0a60562ffc39513"
+    },
+    {
+      "package_file": "03_第二轮实施报告.md",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/README.md",
+      "bytes": 8196,
+      "sha256": "3874be3b11ad955966732886285c5bcb974b280a67d77fa05b0a24e9074195a5"
+    },
+    {
+      "package_file": "04_全局分区截面比较.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/evaluation-only/geometry_comparison.json",
+      "bytes": 85524,
+      "sha256": "01fbd0fe15550ea06972bbc3f8f885bad6419c03f2b5fe26192b9e79b907adea"
+    },
+    {
+      "package_file": "05_实验政策与非盲验证声明.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/experiment_policy.json",
+      "bytes": 1175,
+      "sha256": "97589627d769002cc7cb1cb359ac1413e1828d35725f64dbd88071f59d168b44"
+    },
+    {
+      "package_file": "06_正式模型参数与固定先验.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/T1_B1.json",
+      "bytes": 2736,
+      "sha256": "855850cfc0c74c01a6f8fa1097017513d8ac7be5f76ad8e6f16c3a9030ab50bc"
+    },
+    {
+      "package_file": "07_逐摄逐帧RGB指标.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/rgb-comparison/rgb_comparison.json",
+      "bytes": 211905,
+      "sha256": "c859193bddf10d2c96596e70fd293a4cddf6fddc546a7b91c8c8af26d4006055"
+    },
+    {
+      "package_file": "08_最终状态.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/validation.json",
+      "bytes": 505,
+      "sha256": "b093f9e7c90bbed2a9d420bf72f63bc673948d397880f38b03aeea73b2818848"
+    },
+    {
+      "package_file": "09_表面证据与覆盖缺口.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/surface_evidence.json",
+      "bytes": 2433,
+      "sha256": "870408e51469391013eb87e9cc9773f0ed51f70f0e4f487cb1fdeb0eb212c0a0"
+    },
+    {
+      "package_file": "10_几何误差与截面对比.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/evaluation-only/geometry_comparison.png",
+      "bytes": 167835,
+      "sha256": "a74f7a1b34c355b5cf911911dbf6cb48e4bbd5b2849dc216c870b8ffc818c7de"
+    },
+    {
+      "package_file": "11_RGB与初始及视频模型投影对照.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/projection-checks/projection_checks.jpg",
+      "bytes": 799190,
+      "sha256": "b4d8abd564074d85bd39584ae36ece67dfb124741bee18e02184361309094ff5"
+    },
+    {
+      "package_file": "12_模型三组静态预览.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/model_preview.png",
+      "bytes": 139591,
+      "sha256": "63c36fd4d82bea29087459aafa2cd8140c077cf2ef355496a19ec0a34ae47aa2"
+    },
+    {
+      "package_file": "13_正式拟合冻结配置.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/frozen_config.json",
+      "bytes": 364,
+      "sha256": "69c95db4cbfd3fd613e29a4d0cc1a6a24b3e38cdfdf0d1923ef4c4568cd23fed"
+    },
+    {
+      "package_file": "14_实际MP4解码核验.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/fit_decode_verification.json",
+      "bytes": 493,
+      "sha256": "7a78c0b06675a9f768439ded08148fcf5555b872ae153b868dba3e829741c352"
+    },
+    {
+      "package_file": "15_模型冻结签名.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/model_freeze.json",
+      "bytes": 2842,
+      "sha256": "50edebaec4822a312f965e99f55ad33759f31e4f5b185e08a2bd3c28560f66e7"
+    },
+    {
+      "package_file": "optional/原研究方案_v1.1.md",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/docs/proposal/NREL5MW_固定三摄叶片三维重建与表面缺陷首轮诊断方案_v1.1.md",
+      "bytes": 62887,
+      "sha256": "667a3acf01b7790db179678e854a1d42442d88b4a99bf8c8b958678d3dcab6f0"
+    },
+    {
+      "package_file": "optional/算法输入_dataset.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/dataset.json",
+      "bytes": 2230,
+      "sha256": "8379786db91c8ac2cabb41ba15f59dc94325fa8f3ebafd75ff76b7c417b2e6b3"
+    },
+    {
+      "package_file": "optional/算法输入_frame_map.csv",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/frame_map.csv",
+      "bytes": 6469,
+      "sha256": "d079ce0a9e2f3313b1bf296ae466365fa0f22fc5bd1bf0f61939356fc0bd2629"
+    },
+    {
+      "package_file": "optional/算法输入_camera_calibration.jsonl",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/camera_calibration.jsonl",
+      "bytes": 174062,
+      "sha256": "641f610d8ee58dfd79158800dcfd9abe52c16bece58f3dc549a90d5c115ae489"
+    },
+    {
+      "package_file": "optional/算法输入_motion_observations.csv",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/formal/algorithm-input/motion_observations.csv",
+      "bytes": 35190,
+      "sha256": "313074d9388eadd34abe31f5e84dd6b310ea5e8799b80e735e258940bf64c550"
+    },
+    {
+      "package_file": "optional/正式评分完整记录.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/evaluation-only/reconstruction/scores.json",
+      "bytes": 38375,
+      "sha256": "735f5cf8fb789c4a7d265a0124c62b12c308025d4abb2e9b3ee4b7a34ec9e1ef"
+    },
+    {
+      "package_file": "optional/形状参数变化.png",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/shape_comparison.png",
+      "bytes": 344570,
+      "sha256": "0fec0d4c2df39187f8ad9610b70799f4198fcfce3c3382577a9c67d6f0d6d438"
+    },
+    {
+      "package_file": "optional/FBU观测复核.jpg",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/FBU_review.jpg",
+      "bytes": 262848,
+      "sha256": "2a2792dbfb292d0f4d36925fed5d32fa6e093da94b7b4a7e1f3ebf10114b6c60"
+    },
+    {
+      "package_file": "optional/评分参数.json",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/scoring_config.json",
+      "bytes": 187,
+      "sha256": "fceb4a1ac3af23006d8cb3296864c69b17b17c83da0de2bdc9c3321014586510"
+    },
+    {
+      "package_file": "optional/正式视频模型.ply",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/T1_B1.ply",
+      "bytes": 17196,
+      "sha256": "89cee4964b9d943b3965f2014f57795a9277d3a1c9dfec919c3f677005634c7a"
+    },
+    {
+      "package_file": "optional/初始模板.ply",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/initial_template.ply",
+      "bytes": 17162,
+      "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+    },
+    {
+      "package_file": "optional/无图像对照.ply",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/prior_only.ply",
+      "bytes": 17162,
+      "sha256": "27811c1a3f4c2f0195b3413787a7759ad03015175b41b1a2345633132c3edd81"
+    },
+    {
+      "package_file": "optional_code/wfrl/nrel_reconstruction/__init__.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/__init__.py",
+      "bytes": 224,
+      "sha256": "83c282017ec14cf9db2f8d4fa48ecbad1cce427e1c1a958ea3ee91552028c5ef"
+    },
+    {
+      "package_file": "optional_code/wfrl/nrel_reconstruction/boundary_metrics.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/boundary_metrics.py",
+      "bytes": 8162,
+      "sha256": "3461135548db8a0619ea08df7b3fa7412788fca3aabcf409a2199054c35a2d1e"
+    },
+    {
+      "package_file": "optional_code/wfrl/nrel_reconstruction/compare_rgb.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/compare_rgb.py",
+      "bytes": 13368,
+      "sha256": "066de556c0ac6559eb893440abb52a461cdd9f74d8149fe3cf5c8491ae3996e4"
+    },
+    {
+      "package_file": "optional_code/wfrl/nrel_reconstruction/contour.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/contour.py",
+      "bytes": 15348,
+      "sha256": "275ea6e78e3d185d081d79e341d8293bc9ea2ce3583d48d1c27810455ddfbb80"
+    },
+    {
+      "package_file": "optional_code/wfrl/nrel_reconstruction/dataset.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/dataset.py",
+      "bytes": 13292,
+      "sha256": "eee0806230801b9cffe49ba153f00ea1f4f79897eca91b107f9f67e4554f66fe"
+    },
+    {
+      "package_file": "optional_code/wfrl/nrel_reconstruction/diagnostics.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/diagnostics.py",
+      "bytes": 11037,
+      "sha256": "1d7b36e13709458dd6e9fb3c36c6afaf4d95f04167ef5c3fcee33072964e8789"
+    },
+    {
+      "package_file": "optional_code/wfrl/nrel_reconstruction/evaluate.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/evaluate.py",
+      "bytes": 37881,
+      "sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70"
+    },
+    {
+      "package_file": "optional_code/wfrl/nrel_reconstruction/model.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/model.py",
+      "bytes": 12048,
+      "sha256": "47165adb7a8f8d75f4d23a4632c1afd690370edf9d665736782fba4ac7f632ad"
+    },
+    {
+      "package_file": "optional_code/wfrl/nrel_reconstruction/observations.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/observations.py",
+      "bytes": 7979,
+      "sha256": "79259788568cd6346428305e22cf136a52ce503e341f05bb94cd72e26718cd69"
+    },
+    {
+      "package_file": "optional_code/wfrl/nrel_reconstruction/optimize.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/optimize.py",
+      "bytes": 21182,
+      "sha256": "ea601be6e8fd6c7bba90d8befd5a1135e603fde76b7dba01cb1b0d114199bd58"
+    },
+    {
+      "package_file": "optional_code/wfrl/nrel_reconstruction/pack.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/pack.py",
+      "bytes": 8627,
+      "sha256": "d0f13a95ebe1b7050e96a644ae6207137ec0cd75219c514b6ac40c2e6ebdaaa1"
+    },
+    {
+      "package_file": "optional_code/wfrl/nrel_reconstruction/preview.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/preview.py",
+      "bytes": 14516,
+      "sha256": "9604b6cf45e8087037a0a02eceb5972f5af1acab7f78370583007a34074fff19"
+    },
+    {
+      "package_file": "optional_code/wfrl/nrel_reconstruction/renderer.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/renderer.py",
+      "bytes": 7061,
+      "sha256": "d6b73643c08a71a895e0a2f78cb163ff117b6c9c24983835ae2e7279f4133e44"
+    },
+    {
+      "package_file": "optional_code/wfrl/nrel_reconstruction/README.md",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/README.md",
+      "bytes": 6340,
+      "sha256": "3f272f97b5e4c53ddcb1b058231b10267beab2a83a965e0ba47ca88c6733a728"
+    },
+    {
+      "package_file": "optional_code/scripts/nrel_single_blade.py",
+      "source_file": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/nrel_single_blade.py",
+      "bytes": 10319,
+      "sha256": "863b8fda6541e63b24da945d840c43ebbe848ccf0a6edef7aa69449b0c87c4ed"
+    },
+    {
+      "package_file": "00_给网页版GPT的提问.md",
+      "source_file": null,
+      "source_note": "generated review prompt or selected read_thread excerpts; not raw experimental result",
+      "bytes": 7953,
+      "sha256": "67913afec6222dd21edd4d96160dee94b05ec89e7392344c4dea2bd6632a7543"
+    },
+    {
+      "package_file": "16_参考聊天交付摘录.md",
+      "source_file": null,
+      "source_note": "generated review prompt or selected read_thread excerpts; not raw experimental result",
+      "bytes": 2395,
+      "sha256": "f66d321cc2293651e896b16d81db742a27729b2ddabce37d7ad978bae99db4d1"
+    }
+  ]
+}

@@ -1,0 +1,1710 @@
+{
+  "status": "FROZEN_BEFORE_ANY_REAL_IMAGE_EVALUATION",
+  "created_utc": "2026-10-02T16:46:55.699056+00:00",
+  "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second",
+  "input_and_source_sha256": {
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/model_state.json": "777f37387c6cfa098b1af3aec3e4e0de5a892f491a7716daeea20141c1f4d8d5",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/T1_B1.ply": "89cee4964b9d943b3965f2014f57795a9277d3a1c9dfec919c3f677005634c7a",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/frozen_config.json": "69c95db4cbfd3fd613e29a4d0cc1a6a24b3e38cdfdf0d1923ef4c4568cd23fed",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/observations.json": "fdcb8d4845b99adcf3f2ddb6a998c9f3c26dfcaa89bd8951d6f8284efa3c0310",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/model_freeze.json": "50edebaec4822a312f965e99f55ad33759f31e4f5b185e08a2bd3c28560f66e7",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_FBU.png": "288d5a52564942a764bc319a07c4aad7523cc89d6e157bd1e483081c72256174",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_contour.npy": "38cdd10296fea00fb47b67cac725778138acf41897cc7e151f66a6540908e3d4",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000042_contour_valid.png": "22710a073bf30239b5aa1d460039b453c98034861ed4ab9d41452683dcaddce2",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000043_FBU.png": "3857c63017c0179014562cbf0997a1c80a634db3e72a488d762e370dd3696c8b",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000043_contour.npy": "1d47a0b0ecd777f32ef45cd9602f187ceec9ac395fbfb10c667b8ec78d233fdc",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000043_contour_valid.png": "22710a073bf30239b5aa1d460039b453c98034861ed4ab9d41452683dcaddce2",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000044_FBU.png": "25142a78498b685ee7d6b498b81b3f05a83b04315c81d749093a153b034f001f",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000044_contour.npy": "6e2882f017b1dfbc61ad0edb124332df16508ea106788887559ad374a7561bba",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000044_contour_valid.png": "22710a073bf30239b5aa1d460039b453c98034861ed4ab9d41452683dcaddce2",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000045_FBU.png": "14e3b4c8e2271c1f2f8170c1e5b4182b436a4837bad55e1f6504f09da1aab662",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000045_contour.npy": "44fc2ef3a21b695f9e7a99b73d9386989d0009b1c87ebc2574e7af274a393ad5",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C1_000045_contour_valid.png": "22710a073bf30239b5aa1d460039b453c98034861ed4ab9d41452683dcaddce2",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000042_FBU.png": "cfedf938d7a291f620d06a970572f2fba9d33185103d066532b109b341d30984",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000042_contour.npy": "5bd7e4fc5be873fb197369884f7032736a243af04de8b4215938bb000143e87e",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000042_contour_valid.png": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000043_FBU.png": "d860932286b68c7f729bc475bb2268f616ffc2a167df9d636b53476d9222de62",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000043_contour.npy": "9b77383968363dd580343ff59732fb535c702fa7a1dbd759d772787e3b4b22c8",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000043_contour_valid.png": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000044_FBU.png": "ebf2bef045aa40b2558d0c2bb5b8aef3be79706fad3f5826c4cd4cd4fb206695",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000044_contour.npy": "5a49729b74a7106930ba9a6999181986364def7e31702fc3d80c2b37cd897be6",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000044_contour_valid.png": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000045_FBU.png": "05c79571400bd553def9da832b6ab54a5c61679d84607f05ce61ad214d1a4e48",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000045_contour.npy": "5bb8b17cb0d39d707e96f369e0ed1bcd63973ca72e4e6162bf3dc60a5f50b01b",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C2_000045_contour_valid.png": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000042_FBU.png": "a100c87c632c7a5486ec7f9a4999c4e89b5a8d786465e42d3da2406c113659d7",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000042_contour.npy": "2786ca07c57b697aa57e4f5ac2c339bf88a464d811667f862f4d2430ec08158d",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000042_contour_valid.png": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000043_FBU.png": "660b21c6fe911e06f3a86b015c14883bf0c905fc9d08dee0468e1cb3e9f635d7",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000043_contour.npy": "f9b2fd0245939293436e43602b8d931b56f77c23fd6deae78564594a507f1c2c",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000043_contour_valid.png": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000044_FBU.png": "18ad3559a4153f19128bba6deba8962994252f1d86c613f44bb3b33604e655cf",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000044_contour.npy": "c2d413fbaab4010fefc66186b1cb0cbedc869cf57bf759dcaab0cd1509346387",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000044_contour_valid.png": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000045_FBU.png": "ab282447a927d8f9c9921d6de0dd7111efade23e44c8e39a239645b5d9c70222",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000045_contour.npy": "88e660f8c3011e0cf81d3d2c45aa946665cb65dd3371ded228842ebc1109577e",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/observations/C3_000045_contour_valid.png": "3fab42400ff74d58368b086008270e61a9b2c85d22ad32efbc2ba5efd35acc5f",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/center_scale_audit.py": "b950cb08450f6f3c07ca6cdd1131216d21c18ebbfffb01c785fcdfc30ecf7fd8",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/parameter_audit.py": "3b2970e4c40833cbaa5bc030fa244cabeab5b828c963893abfd33138239906b1",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/model.py": "47165adb7a8f8d75f4d23a4632c1afd690370edf9d665736782fba4ac7f632ad",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/contour.py": "275ea6e78e3d185d081d79e341d8293bc9ea2ce3583d48d1c27810455ddfbb80",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/optimize.py": "ea601be6e8fd6c7bba90d8befd5a1135e603fde76b7dba01cb1b0d114199bd58",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/renderer.py": "d6b73643c08a71a895e0a2f78cb163ff117b6c9c24983835ae2e7279f4133e44",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/diagnostics.py": "1d7b36e13709458dd6e9fb3c36c6afaf4d95f04167ef5c3fcee33072964e8789"
+  },
+  "formal_mesh_max_coordinate_error_m": 4.949340715043604e-09,
+  "normalization": {
+    "target_z_m": 9.225,
+    "control_index": 1,
+    "control_greville_z_m": 5.125,
+    "basis_at_target": 0.5579999999999999,
+    "ring_interpolated_template_chord_at_target_m": 4.44000129699707,
+    "continuous_field_chord_at_target_m": 4.656010719089665
+  },
+  "root_band_m": [
+    6.15,
+    12.3
+  ],
+  "amplitudes_m": [
+    0.005,
+    0.01,
+    0.02,
+    0.05
+  ],
+  "modes": {
+    "X": "reference-axis center_x",
+    "Y": "reference-axis center_y",
+    "A": "original chord_halfwidth perturbation; includes quarter-chord geometric-center shift",
+    "B": "A vertices minus analytic delta_chord/4 times rotated chord axis at every ring; fixed geometric center",
+    "C": "baseline vertices plus the same analytic ring translation; fixed section shape/size"
+  },
+  "mode_family_limit": "B/C mesh interventions are not certified members of the original seven-control model family",
+  "widths_in_execution_order": [
+    640,
+    320
+  ],
+  "primary_width": 640,
+  "verification_width": 320,
+  "sampling": {
+    "candidate_limit": 300,
+    "observed_limit": 600,
+    "working_spacing_px": 1.0,
+    "per_edge_limit": 512
+  },
+  "observation_split": "42/43 fit; previously viewed 44/45 nonblind_diagnostic; never tune on either",
+  "expected_image_configurations": 984,
+  "geometry_float32_tolerance_m": 2e-06,
+  "target_halfwidth_normalization": "continuous field at 9.225m, not an inserted vertex; control_index=1",
+  "observed_z_policy": "assign once per width/camera/frame from baseline nearest edge, then retain same indices and z for all modes",
+  "metrics": [
+    "fixed-observed unsigned O2C native-pixel response",
+    "pointwise true deadband+robust O2C",
+    "production bidirectional robust contour loss, equal observation average",
+    "[X,Y,A] versus [X,Y,B] SVD and column cosine",
+    "adjacent amplitude derivative stability",
+    "A-B-C image derivative nonadditivity",
+    "branch count, silhouette edge, nearest original edge and O2C deadband activity changes"
+  ],
+  "forbidden": [
+    "optimizer",
+    "ground-truth scoring read",
+    "new acquisition or rendering",
+    "best-mode selection",
+    "acceptance or default change"
+  ],
+  "geometry_checks": [
+    {
+      "vertex_A_minus_base_equals_B_plus_C_minus_2base_max_error_m": 2.9802322387695312e-08,
+      "B_geometric_ring_center_max_error_m": 7.202227910417525e-08,
+      "C_centered_ring_vertices_max_error_m": 8.940696716308594e-08,
+      "C_pairwise_ring_distance_max_error_m": 1.298861116438843e-07,
+      "B_isotropic_centered_ring_scale_max_error_m": 3.7808281705409286e-07,
+      "A_ring_center_vs_analytic_shift_max_error_m": 5.005858838558197e-08,
+      "root_vertices_max_error_m": 0.0,
+      "tip_vertices_max_error_m": 0.0,
+      "outside_control_support_max_error_m": 0.0,
+      "z_coordinates_max_error_m": 0.0,
+      "amplitude_m": -0.005,
+      "geometry_tolerance_m": 2e-06,
+      "faces_exact": true,
+      "fixed_thickness_to_chord": true,
+      "fixed_twist": true,
+      "ring_z_m": [
+        0.0,
+        2.5625,
+        5.125,
+        7.6875,
+        10.25,
+        12.8125,
+        15.375,
+        17.9375,
+        20.5,
+        23.0625,
+        25.625,
+        28.1875,
+        30.75,
+        33.3125,
+        35.875,
+        38.4375,
+        41.0,
+        43.5625,
+        46.125,
+        48.6875,
+        51.25,
+        53.8125,
+        56.375,
+        58.9375,
+        61.5
+      ],
+      "ring_delta_chord_m": [
+        0.0,
+        -0.006161212921142578,
+        -0.009396553039550781,
+        -0.010325431823730469,
+        -0.00948953628540039,
+        -0.0071277618408203125,
+        -0.004553318023681641,
+        -0.0025434494018554688,
+        -0.0012536048889160156,
+        -0.0005078315734863281,
+        -0.0001430511474609375,
+        -1.6927719116210938e-05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ring_center_translation_m": [
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.00035455566830933094,
+          -0.0014989410992711782,
+          0.0
+        ],
+        [
+          0.000540737877599895,
+          -0.002286056289449334,
+          0.0
+        ],
+        [
+          0.0005941914860159159,
+          -0.0025120400823652744,
+          0.0
+        ],
+        [
+          0.0005460887332446873,
+          -0.0023086778819561005,
+          0.0
+        ],
+        [
+          0.0003755193902179599,
+          -0.0017419233918190002,
+          0.0
+        ],
+        [
+          0.00022054478176869452,
+          -0.001116760540753603,
+          0.0
+        ],
+        [
+          0.00011478328087832779,
+          -0.0006254164618439972,
+          0.0
+        ],
+        [
+          5.241787948762067e-05,
+          -0.00030898654949851334,
+          0.0
+        ],
+        [
+          1.9547154806787148e-05,
+          -0.00012544407218229026,
+          0.0
+        ],
+        [
+          5.030291958973976e-06,
+          -3.54072471964173e-05,
+          0.0
+        ],
+        [
+          5.388228032643383e-07,
+          -4.197487214696594e-06,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "max_analytic_ring_center_translation_m": 0.002581357955932617
+    },
+    {
+      "vertex_A_minus_base_equals_B_plus_C_minus_2base_max_error_m": 2.3283064365386963e-10,
+      "B_geometric_ring_center_max_error_m": 7.698933279787212e-08,
+      "C_centered_ring_vertices_max_error_m": 8.940696716308594e-08,
+      "C_pairwise_ring_distance_max_error_m": 1.330014791633971e-07,
+      "B_isotropic_centered_ring_scale_max_error_m": 6.064576303366209e-07,
+      "A_ring_center_vs_analytic_shift_max_error_m": 7.244913524662167e-08,
+      "root_vertices_max_error_m": 0.0,
+      "tip_vertices_max_error_m": 0.0,
+      "outside_control_support_max_error_m": 0.0,
+      "z_coordinates_max_error_m": 0.0,
+      "amplitude_m": 0.005,
+      "geometry_tolerance_m": 2e-06,
+      "faces_exact": true,
+      "fixed_thickness_to_chord": true,
+      "fixed_twist": true,
+      "ring_z_m": [
+        0.0,
+        2.5625,
+        5.125,
+        7.6875,
+        10.25,
+        12.8125,
+        15.375,
+        17.9375,
+        20.5,
+        23.0625,
+        25.625,
+        28.1875,
+        30.75,
+        33.3125,
+        35.875,
+        38.4375,
+        41.0,
+        43.5625,
+        46.125,
+        48.6875,
+        51.25,
+        53.8125,
+        56.375,
+        58.9375,
+        61.5
+      ],
+      "ring_delta_chord_m": [
+        0.0,
+        0.006157398223876953,
+        0.009396076202392578,
+        0.010327816009521484,
+        0.009488105773925781,
+        0.007122516632080078,
+        0.004547119140625,
+        0.0025391578674316406,
+        0.0012521743774414062,
+        0.0005064010620117188,
+        0.0001430511474609375,
+        1.6927719116210938e-05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ring_center_translation_m": [
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0003543361381161958,
+          0.001498013036325574,
+          0.0
+        ],
+        [
+          -0.0005407104035839438,
+          0.002285940106958151,
+          0.0
+        ],
+        [
+          -0.0005943286814726889,
+          0.0025126200634986162,
+          0.0
+        ],
+        [
+          -0.0005460063694044948,
+          0.002308329800143838,
+          0.0
+        ],
+        [
+          -0.0003752430493477732,
+          0.0017406415427103639,
+          0.0
+        ],
+        [
+          -0.00022024453210178763,
+          0.0011152401566505432,
+          0.0
+        ],
+        [
+          -0.00011458960943855345,
+          0.000624361215159297,
+          0.0
+        ],
+        [
+          -5.2358063840074465e-05,
+          0.00030863395659253,
+          0.0
+        ],
+        [
+          -1.949209217855241e-05,
+          0.00012509070802479982,
+          0.0
+        ],
+        [
+          -5.030291958973976e-06,
+          3.54072471964173e-05,
+          0.0
+        ],
+        [
+          -5.388228032643383e-07,
+          4.197487214696594e-06,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "max_analytic_ring_center_translation_m": 0.002581954002380371
+    },
+    {
+      "vertex_A_minus_base_equals_B_plus_C_minus_2base_max_error_m": 2.9802322387695312e-08,
+      "B_geometric_ring_center_max_error_m": 7.947285973752827e-08,
+      "C_centered_ring_vertices_max_error_m": 9.56157846232486e-08,
+      "C_pairwise_ring_distance_max_error_m": 1.3327634551529854e-07,
+      "B_isotropic_centered_ring_scale_max_error_m": 3.842416891330913e-07,
+      "A_ring_center_vs_analytic_shift_max_error_m": 8.006463758647442e-08,
+      "root_vertices_max_error_m": 0.0,
+      "tip_vertices_max_error_m": 0.0,
+      "outside_control_support_max_error_m": 0.0,
+      "z_coordinates_max_error_m": 0.0,
+      "amplitude_m": -0.01,
+      "geometry_tolerance_m": 2e-06,
+      "faces_exact": true,
+      "fixed_thickness_to_chord": true,
+      "fixed_twist": true,
+      "ring_z_m": [
+        0.0,
+        2.5625,
+        5.125,
+        7.6875,
+        10.25,
+        12.8125,
+        15.375,
+        17.9375,
+        20.5,
+        23.0625,
+        25.625,
+        28.1875,
+        30.75,
+        33.3125,
+        35.875,
+        38.4375,
+        41.0,
+        43.5625,
+        46.125,
+        48.6875,
+        51.25,
+        53.8125,
+        56.375,
+        58.9375,
+        61.5
+      ],
+      "ring_delta_chord_m": [
+        0.0,
+        -0.012326717376708984,
+        -0.018793106079101562,
+        -0.02064990997314453,
+        -0.018979549407958984,
+        -0.014260292053222656,
+        -0.009111404418945312,
+        -0.0050907135009765625,
+        -0.00251007080078125,
+        -0.0010166168212890625,
+        -0.00028705596923828125,
+        -3.4332275390625e-05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ring_center_translation_m": [
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0007093583117239177,
+          -0.0029989262111485004,
+          0.0
+        ],
+        [
+          0.00108147575519979,
+          -0.004572112578898668,
+          0.0
+        ],
+        [
+          0.0011883281404152513,
+          -0.00502384826540947,
+          0.0
+        ],
+        [
+          0.001092204824090004,
+          -0.0046174717135727406,
+          0.0
+        ],
+        [
+          0.0007512900047004223,
+          -0.003485012101009488,
+          0.0
+        ],
+        [
+          0.0004413205315358937,
+          -0.0022346905898302794,
+          0.0
+        ],
+        [
+          0.00022973872546572238,
+          -0.001251770881935954,
+          0.0
+        ],
+        [
+          0.00010495539027033374,
+          -0.0006186782848089933,
+          0.0
+        ],
+        [
+          3.913101681973785e-05,
+          -0.0002511237107682973,
+          0.0
+        ],
+        [
+          1.0094118806591723e-05,
+          -7.105054100975394e-05,
+          0.0
+        ],
+        [
+          1.092823708859214e-06,
+          -8.513213288097177e-06,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "max_analytic_ring_center_translation_m": 0.005162477493286133
+    },
+    {
+      "vertex_A_minus_base_equals_B_plus_C_minus_2base_max_error_m": 4.656612873077393e-10,
+      "B_geometric_ring_center_max_error_m": 7.698933279787212e-08,
+      "C_centered_ring_vertices_max_error_m": 8.940696716308594e-08,
+      "C_pairwise_ring_distance_max_error_m": 1.327468037715107e-07,
+      "B_isotropic_centered_ring_scale_max_error_m": 4.238030282266436e-07,
+      "A_ring_center_vs_analytic_shift_max_error_m": 5.44338641939035e-08,
+      "root_vertices_max_error_m": 0.0,
+      "tip_vertices_max_error_m": 0.0,
+      "outside_control_support_max_error_m": 0.0,
+      "z_coordinates_max_error_m": 0.0,
+      "amplitude_m": 0.01,
+      "geometry_tolerance_m": 2e-06,
+      "faces_exact": true,
+      "fixed_thickness_to_chord": true,
+      "fixed_twist": true,
+      "ring_z_m": [
+        0.0,
+        2.5625,
+        5.125,
+        7.6875,
+        10.25,
+        12.8125,
+        15.375,
+        17.9375,
+        20.5,
+        23.0625,
+        25.625,
+        28.1875,
+        30.75,
+        33.3125,
+        35.875,
+        38.4375,
+        41.0,
+        43.5625,
+        46.125,
+        48.6875,
+        51.25,
+        53.8125,
+        56.375,
+        58.9375,
+        61.5
+      ],
+      "ring_delta_chord_m": [
+        0.0,
+        0.012310504913330078,
+        0.018793106079101562,
+        0.020656108856201172,
+        0.01897430419921875,
+        0.014241218566894531,
+        0.009089469909667969,
+        0.005074501037597656,
+        0.0025010108947753906,
+        0.0010123252868652344,
+        0.0002856254577636719,
+        3.3855438232421875e-05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ring_center_translation_m": [
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0007084253011271358,
+          0.0029949818272143602,
+          0.0
+        ],
+        [
+          -0.00108147575519979,
+          0.004572112578898668,
+          0.0
+        ],
+        [
+          -0.001188684836961329,
+          0.005025356076657772,
+          0.0
+        ],
+        [
+          -0.0010919030755758286,
+          0.00461619533598423,
+          0.0
+        ],
+        [
+          -0.0007502851076424122,
+          0.0034803508315235376,
+          0.0
+        ],
+        [
+          -0.00044025812530890107,
+          0.002229310804978013,
+          0.0
+        ],
+        [
+          -0.00022900706971995533,
+          0.0012477843556553125,
+          0.0
+        ],
+        [
+          -0.00010457656026119366,
+          0.0006164452061057091,
+          0.0
+        ],
+        [
+          -3.8965830754023045e-05,
+          0.00025006363284774125,
+          0.0
+        ],
+        [
+          -1.0043816473626066e-05,
+          7.069647108437493e-05,
+          0.0
+        ],
+        [
+          -1.0776456065286766e-06,
+          8.394974429393187e-06,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "max_analytic_ring_center_translation_m": 0.005164027214050293
+    },
+    {
+      "vertex_A_minus_base_equals_B_plus_C_minus_2base_max_error_m": 2.9802322387695312e-08,
+      "B_geometric_ring_center_max_error_m": 8.443991343642931e-08,
+      "C_centered_ring_vertices_max_error_m": 9.809931134086014e-08,
+      "C_pairwise_ring_distance_max_error_m": 1.3321837410984472e-07,
+      "B_isotropic_centered_ring_scale_max_error_m": 4.1434742481527564e-07,
+      "A_ring_center_vs_analytic_shift_max_error_m": 4.842877388000488e-08,
+      "root_vertices_max_error_m": 0.0,
+      "tip_vertices_max_error_m": 0.0,
+      "outside_control_support_max_error_m": 0.0,
+      "z_coordinates_max_error_m": 0.0,
+      "amplitude_m": -0.02,
+      "geometry_tolerance_m": 2e-06,
+      "faces_exact": true,
+      "fixed_thickness_to_chord": true,
+      "fixed_twist": true,
+      "ring_z_m": [
+        0.0,
+        2.5625,
+        5.125,
+        7.6875,
+        10.25,
+        12.8125,
+        15.375,
+        17.9375,
+        20.5,
+        23.0625,
+        25.625,
+        28.1875,
+        30.75,
+        33.3125,
+        35.875,
+        38.4375,
+        41.0,
+        43.5625,
+        46.125,
+        48.6875,
+        51.25,
+        53.8125,
+        56.375,
+        58.9375,
+        61.5
+      ],
+      "ring_delta_chord_m": [
+        0.0,
+        -0.024670124053955078,
+        -0.03758430480957031,
+        -0.041294097900390625,
+        -0.03796529769897461,
+        -0.02853870391845703,
+        -0.018244266510009766,
+        -0.010197639465332031,
+        -0.005029201507568359,
+        -0.00203704833984375,
+        -0.0005750656127929688,
+        -6.842613220214844e-05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ring_center_translation_m": [
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0014196770498529077,
+          -0.006001912523061037,
+          0.0
+        ],
+        [
+          0.0021628416143357754,
+          -0.009143760427832603,
+          0.0
+        ],
+        [
+          0.002376327058300376,
+          -0.010046304203569889,
+          0.0
+        ],
+        [
+          0.0021847665775567293,
+          -0.009236451238393784,
+          0.0
+        ],
+        [
+          0.0015035346150398254,
+          -0.006974452640861273,
+          0.0
+        ],
+        [
+          0.0008836804190650582,
+          -0.004474644083529711,
+          0.0
+        ],
+        [
+          0.0004602090921252966,
+          -0.0025075282901525497,
+          0.0
+        ],
+        [
+          0.00021028961054980755,
+          -0.001239589648321271,
+          0.0
+        ],
+        [
+          7.840886974008754e-05,
+          -0.0005031897453591228,
+          0.0
+        ],
+        [
+          2.022177432081662e-05,
+          -0.00014233712863642722,
+          0.0
+        ],
+        [
+          2.1780583665531594e-06,
+          -1.696730760158971e-05,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "max_analytic_ring_center_translation_m": 0.010323524475097656
+    },
+    {
+      "vertex_A_minus_base_equals_B_plus_C_minus_2base_max_error_m": 2.9802322387695312e-08,
+      "B_geometric_ring_center_max_error_m": 8.475035429000854e-08,
+      "C_centered_ring_vertices_max_error_m": 9.561578417915939e-08,
+      "C_pairwise_ring_distance_max_error_m": 1.3321837410984472e-07,
+      "B_isotropic_centered_ring_scale_max_error_m": 3.1000864808561346e-07,
+      "A_ring_center_vs_analytic_shift_max_error_m": 7.295360167358655e-08,
+      "root_vertices_max_error_m": 0.0,
+      "tip_vertices_max_error_m": 0.0,
+      "outside_control_support_max_error_m": 0.0,
+      "z_coordinates_max_error_m": 0.0,
+      "amplitude_m": 0.02,
+      "geometry_tolerance_m": 2e-06,
+      "faces_exact": true,
+      "fixed_thickness_to_chord": true,
+      "fixed_twist": true,
+      "ring_z_m": [
+        0.0,
+        2.5625,
+        5.125,
+        7.6875,
+        10.25,
+        12.8125,
+        15.375,
+        17.9375,
+        20.5,
+        23.0625,
+        25.625,
+        28.1875,
+        30.75,
+        33.3125,
+        35.875,
+        38.4375,
+        41.0,
+        43.5625,
+        46.125,
+        48.6875,
+        51.25,
+        53.8125,
+        56.375,
+        58.9375,
+        61.5
+      ],
+      "ring_delta_chord_m": [
+        0.0,
+        0.024604320526123047,
+        0.037587642669677734,
+        0.04131746292114258,
+        0.03794288635253906,
+        0.02846384048461914,
+        0.018157482147216797,
+        0.010132312774658203,
+        0.004992485046386719,
+        0.0020198822021484375,
+        0.0005702972412109375,
+        6.771087646484375e-05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ring_center_translation_m": [
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0014158902922645211,
+          0.005985903553664684,
+          0.0
+        ],
+        [
+          -0.00216303369961679,
+          0.009144572541117668,
+          0.0
+        ],
+        [
+          -0.0023776714224368334,
+          0.010051988996565342,
+          0.0
+        ],
+        [
+          -0.002183476695790887,
+          0.009230999276041985,
+          0.0
+        ],
+        [
+          -0.0014995904639363289,
+          0.006956156808882952,
+          0.0
+        ],
+        [
+          -0.0008794768946245313,
+          0.004453359171748161,
+          0.0
+        ],
+        [
+          -0.00045726096141152084,
+          0.002491464838385582,
+          0.0
+        ],
+        [
+          -0.0002087543543893844,
+          0.0012305398704484105,
+          0.0
+        ],
+        [
+          -7.77481182012707e-05,
+          0.0004989493754692376,
+          0.0
+        ],
+        [
+          -2.0054096239618957e-05,
+          0.0001411568809999153,
+          0.0
+        ],
+        [
+          -2.155291213057353e-06,
+          1.6789948858786374e-05,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "max_analytic_ring_center_translation_m": 0.01032936666160822
+    },
+    {
+      "vertex_A_minus_base_equals_B_plus_C_minus_2base_max_error_m": 1.1920928955078125e-07,
+      "B_geometric_ring_center_max_error_m": 5.4637591034856214e-08,
+      "C_centered_ring_vertices_max_error_m": 8.940696716308594e-08,
+      "C_pairwise_ring_distance_max_error_m": 1.3321837410984472e-07,
+      "B_isotropic_centered_ring_scale_max_error_m": 2.8579777389126093e-07,
+      "A_ring_center_vs_analytic_shift_max_error_m": 6.332993507385254e-08,
+      "root_vertices_max_error_m": 0.0,
+      "tip_vertices_max_error_m": 0.0,
+      "outside_control_support_max_error_m": 0.0,
+      "z_coordinates_max_error_m": 0.0,
+      "amplitude_m": -0.05,
+      "geometry_tolerance_m": 2e-06,
+      "faces_exact": true,
+      "fixed_thickness_to_chord": true,
+      "fixed_twist": true,
+      "ring_z_m": [
+        0.0,
+        2.5625,
+        5.125,
+        7.6875,
+        10.25,
+        12.8125,
+        15.375,
+        17.9375,
+        20.5,
+        23.0625,
+        25.625,
+        28.1875,
+        30.75,
+        33.3125,
+        35.875,
+        38.4375,
+        41.0,
+        43.5625,
+        46.125,
+        48.6875,
+        51.25,
+        53.8125,
+        56.375,
+        58.9375,
+        61.5
+      ],
+      "ring_delta_chord_m": [
+        0.0,
+        -0.06180143356323242,
+        -0.09395265579223633,
+        -0.10319185256958008,
+        -0.09495782852172852,
+        -0.07148885726928711,
+        -0.04577445983886719,
+        -0.025617122650146484,
+        -0.012644767761230469,
+        -0.005123615264892578,
+        -0.0014467239379882812,
+        -0.00017213821411132812,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ring_center_translation_m": [
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0035564503632485867,
+          -0.01503546629101038,
+          0.0
+        ],
+        [
+          0.0054066376760602,
+          -0.022857429459691048,
+          0.0
+        ],
+        [
+          0.00593832042068243,
+          -0.025105204433202744,
+          0.0
+        ],
+        [
+          0.00546448165550828,
+          -0.02310197614133358,
+          0.0
+        ],
+        [
+          0.0037663227412849665,
+          -0.01747085712850094,
+          0.0
+        ],
+        [
+          0.0022171344608068466,
+          -0.011226782575249672,
+          0.0
+        ],
+        [
+          0.0011560746934264898,
+          -0.006299071479588747,
+          0.0
+        ],
+        [
+          0.0005287247477099299,
+          -0.0031166623812168837,
+          0.0
+        ],
+        [
+          0.00019721519493032247,
+          -0.001265630591660738,
+          0.0
+        ],
+        [
+          5.0873019063146785e-05,
+          -0.00035808529355563223,
+          0.0
+        ],
+        [
+          5.479296760313446e-06,
+          -4.2684307118179277e-05,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "max_analytic_ring_center_translation_m": 0.02579796314239502
+    },
+    {
+      "vertex_A_minus_base_equals_B_plus_C_minus_2base_max_error_m": 2.9802322387695312e-08,
+      "B_geometric_ring_center_max_error_m": 5.960464477539063e-08,
+      "C_centered_ring_vertices_max_error_m": 7.450580596923828e-08,
+      "C_pairwise_ring_distance_max_error_m": 1.3321837410984472e-07,
+      "B_isotropic_centered_ring_scale_max_error_m": 4.377632740748538e-07,
+      "A_ring_center_vs_analytic_shift_max_error_m": 5.4393846482536645e-08,
+      "root_vertices_max_error_m": 0.0,
+      "tip_vertices_max_error_m": 0.0,
+      "outside_control_support_max_error_m": 0.0,
+      "z_coordinates_max_error_m": 0.0,
+      "amplitude_m": 0.05,
+      "geometry_tolerance_m": 2e-06,
+      "faces_exact": true,
+      "fixed_thickness_to_chord": true,
+      "fixed_twist": true,
+      "ring_z_m": [
+        0.0,
+        2.5625,
+        5.125,
+        7.6875,
+        10.25,
+        12.8125,
+        15.375,
+        17.9375,
+        20.5,
+        23.0625,
+        25.625,
+        28.1875,
+        30.75,
+        33.3125,
+        35.875,
+        38.4375,
+        41.0,
+        43.5625,
+        46.125,
+        48.6875,
+        51.25,
+        53.8125,
+        56.375,
+        58.9375,
+        61.5
+      ],
+      "ring_delta_chord_m": [
+        0.0,
+        0.06138753890991211,
+        0.09397649765014648,
+        0.10333490371704102,
+        0.09481382369995117,
+        0.07102155685424805,
+        0.04523420333862305,
+        0.025212764739990234,
+        0.012412071228027344,
+        0.005020618438720703,
+        0.0014166831970214844,
+        0.0001685619354248047,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "ring_center_translation_m": [
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.003532632254064083,
+          0.01493477076292038,
+          0.0
+        ],
+        [
+          -0.005408009979873896,
+          0.022863229736685753,
+          0.0
+        ],
+        [
+          -0.0059465523809194565,
+          0.025140006095170975,
+          0.0
+        ],
+        [
+          -0.005456194747239351,
+          0.023066941648721695,
+          0.0
+        ],
+        [
+          -0.00374170346185565,
+          0.01735665649175644,
+          0.0
+        ],
+        [
+          -0.002190966624766588,
+          0.01109427772462368,
+          0.0
+        ],
+        [
+          -0.001137826475314796,
+          0.006199642550200224,
+          0.0
+        ],
+        [
+          -0.0005189948133192956,
+          0.003059307811781764,
+          0.0
+        ],
+        [
+          -0.00019325070024933666,
+          0.0012401883723214269,
+          0.0
+        ],
+        [
+          -4.9816659156931564e-05,
+          0.00035064975963905454,
+          0.0
+        ],
+        [
+          -5.36546122020809e-06,
+          4.17975134041626e-05,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "max_analytic_ring_center_translation_m": 0.025833725929260254
+    }
+  ],
+  "predeclared_interpretation": "Persistent weak response after removing center drift means the parameter convention alone is insufficient; it does not identify the unique cause or establish confidence intervals."
+}

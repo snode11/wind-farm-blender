@@ -1,0 +1,18 @@
+{
+  "videos": {
+    "C1": {
+      "frames_decoded": 100,
+      "video_sha256": "5d1590090289938f1597d441eac04bacfe263ab09a1e0de5f4142e4d717133ad"
+    },
+    "C2": {
+      "frames_decoded": 100,
+      "video_sha256": "f567b2400bb0d91091dcb346bdafc7cd30e071101961d337cabf01e10ba30f5c"
+    },
+    "C3": {
+      "frames_decoded": 100,
+      "video_sha256": "4976c0c445e01233e4046b0fa92cbe64cc5e73daf0fd67dabceaaf84e9d576d4"
+    }
+  },
+  "selected_rgb_hashes_verified": true,
+  "streaming": true
+}

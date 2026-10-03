@@ -1,0 +1,446 @@
+{
+  "annotations": [
+    {
+      "camera_id": "C1",
+      "frame_id": 42,
+      "sim_time_s": 122.125,
+      "rgb_sha256": "65a6724bdce4a56da579b2f51e752c81f478e1ef427bfec8e5602d3667e2ad8f",
+      "source_video_sha256": "5d1590090289938f1597d441eac04bacfe263ab09a1e0de5f4142e4d717133ad",
+      "method": "RGB contrast + largest connected component in reviewed B1 passage",
+      "white_threshold": {
+        "min_channel_gt": 105,
+        "max_minus_min_lt": 65
+      },
+      "red_threshold": {
+        "r_gt": 120,
+        "r_over_g_gt": 1.5,
+        "r_over_b_gt": 1.3
+      },
+      "excluded_boxes_normalized": [
+        [
+          0,
+          0,
+          0.25,
+          1
+        ],
+        [
+          0,
+          0,
+          1,
+          0.23
+        ],
+        [
+          0,
+          0.83,
+          1,
+          1
+        ]
+      ],
+      "edge_uncertainty_px": 3,
+      "foreground_centroid_px": [
+        1122.349264084675,
+        611.7900987110679
+      ],
+      "foreground_pixels": 775293,
+      "background_pixels": 145023,
+      "uncertain_pixels": 1153284,
+      "truth_segmentation_used": false,
+      "human_user_prompts": 0,
+      "reviewer": "Codex visual review of actual MP4 RGB; semi-automatic validation"
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 43,
+      "sim_time_s": 122.175,
+      "rgb_sha256": "327140cd93a149ce1d205941b9788e93d146ede46b021957b195a1da5da9dd71",
+      "source_video_sha256": "5d1590090289938f1597d441eac04bacfe263ab09a1e0de5f4142e4d717133ad",
+      "method": "RGB contrast + largest connected component in reviewed B1 passage",
+      "white_threshold": {
+        "min_channel_gt": 105,
+        "max_minus_min_lt": 65
+      },
+      "red_threshold": {
+        "r_gt": 120,
+        "r_over_g_gt": 1.5,
+        "r_over_b_gt": 1.3
+      },
+      "excluded_boxes_normalized": [
+        [
+          0,
+          0,
+          0.25,
+          1
+        ],
+        [
+          0,
+          0,
+          1,
+          0.23
+        ],
+        [
+          0,
+          0.83,
+          1,
+          1
+        ]
+      ],
+      "edge_uncertainty_px": 3,
+      "foreground_centroid_px": [
+        1123.1331965374518,
+        572.1098619167808
+      ],
+      "foreground_pixels": 769029,
+      "background_pixels": 148876,
+      "uncertain_pixels": 1155695,
+      "truth_segmentation_used": false,
+      "human_user_prompts": 0,
+      "reviewer": "Codex visual review of actual MP4 RGB; semi-automatic validation"
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 44,
+      "sim_time_s": 122.225,
+      "rgb_sha256": "9ee00014362bf0179b7f71100ed6dac6bab076f811f7bb60dd1d4e2075eb73cf",
+      "source_video_sha256": "5d1590090289938f1597d441eac04bacfe263ab09a1e0de5f4142e4d717133ad",
+      "method": "RGB contrast + largest connected component in reviewed B1 passage",
+      "white_threshold": {
+        "min_channel_gt": 105,
+        "max_minus_min_lt": 65
+      },
+      "red_threshold": {
+        "r_gt": 120,
+        "r_over_g_gt": 1.5,
+        "r_over_b_gt": 1.3
+      },
+      "excluded_boxes_normalized": [
+        [
+          0,
+          0,
+          0.25,
+          1
+        ],
+        [
+          0,
+          0,
+          1,
+          0.23
+        ],
+        [
+          0,
+          0.83,
+          1,
+          1
+        ]
+      ],
+      "edge_uncertainty_px": 3,
+      "foreground_centroid_px": [
+        1125.6166330635328,
+        526.8460646712861
+      ],
+      "foreground_pixels": 717691,
+      "background_pixels": 200274,
+      "uncertain_pixels": 1155635,
+      "truth_segmentation_used": false,
+      "human_user_prompts": 0,
+      "reviewer": "Codex visual review of actual MP4 RGB; semi-automatic validation"
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 45,
+      "sim_time_s": 122.275,
+      "rgb_sha256": "5f902477e50f8996099285486ff386df38453dae2e130a19e2424975a55475e7",
+      "source_video_sha256": "5d1590090289938f1597d441eac04bacfe263ab09a1e0de5f4142e4d717133ad",
+      "method": "RGB contrast + largest connected component in reviewed B1 passage",
+      "white_threshold": {
+        "min_channel_gt": 105,
+        "max_minus_min_lt": 65
+      },
+      "red_threshold": {
+        "r_gt": 120,
+        "r_over_g_gt": 1.5,
+        "r_over_b_gt": 1.3
+      },
+      "excluded_boxes_normalized": [
+        [
+          0,
+          0,
+          0.25,
+          1
+        ],
+        [
+          0,
+          0,
+          1,
+          0.23
+        ],
+        [
+          0,
+          0.83,
+          1,
+          1
+        ]
+      ],
+      "edge_uncertainty_px": 3,
+      "foreground_centroid_px": [
+        1126.4581768658127,
+        484.8203934757847
+      ],
+      "foreground_pixels": 650561,
+      "background_pixels": 268467,
+      "uncertain_pixels": 1154572,
+      "truth_segmentation_used": false,
+      "human_user_prompts": 0,
+      "reviewer": "Codex visual review of actual MP4 RGB; semi-automatic validation"
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 42,
+      "sim_time_s": 122.125,
+      "rgb_sha256": "6f67ccdb583cac7ff86ac3f7bb44a4076c3d69ac920ec1861ff67b6c8790b5c7",
+      "source_video_sha256": "f567b2400bb0d91091dcb346bdafc7cd30e071101961d337cabf01e10ba30f5c",
+      "method": "RGB contrast + largest connected component in reviewed B1 passage",
+      "white_threshold": {
+        "min_channel_gt": 105,
+        "max_minus_min_lt": 65
+      },
+      "red_threshold": {
+        "r_gt": 120,
+        "r_over_g_gt": 1.5,
+        "r_over_b_gt": 1.3
+      },
+      "excluded_boxes_normalized": [],
+      "edge_uncertainty_px": 3,
+      "foreground_centroid_px": [
+        642.9930166692715,
+        700.0227777798955
+      ],
+      "foreground_pixels": 1049356,
+      "background_pixels": 993325,
+      "uncertain_pixels": 30919,
+      "truth_segmentation_used": false,
+      "human_user_prompts": 0,
+      "reviewer": "Codex visual review of actual MP4 RGB; semi-automatic validation"
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 43,
+      "sim_time_s": 122.175,
+      "rgb_sha256": "70b535ac0c7360a3b81269a6097b652238be80d5c359396801e10a20f7b89a30",
+      "source_video_sha256": "f567b2400bb0d91091dcb346bdafc7cd30e071101961d337cabf01e10ba30f5c",
+      "method": "RGB contrast + largest connected component in reviewed B1 passage",
+      "white_threshold": {
+        "min_channel_gt": 105,
+        "max_minus_min_lt": 65
+      },
+      "red_threshold": {
+        "r_gt": 120,
+        "r_over_g_gt": 1.5,
+        "r_over_b_gt": 1.3
+      },
+      "excluded_boxes_normalized": [],
+      "edge_uncertainty_px": 3,
+      "foreground_centroid_px": [
+        625.1407455949353,
+        594.7070618330494
+      ],
+      "foreground_pixels": 1187213,
+      "background_pixels": 854939,
+      "uncertain_pixels": 31448,
+      "truth_segmentation_used": false,
+      "human_user_prompts": 0,
+      "reviewer": "Codex visual review of actual MP4 RGB; semi-automatic validation"
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 44,
+      "sim_time_s": 122.225,
+      "rgb_sha256": "af1ed9c5e10d6fa8bbf6df4d6ae4d71eb4c50b60109923c4ce35c265f62e1f5a",
+      "source_video_sha256": "f567b2400bb0d91091dcb346bdafc7cd30e071101961d337cabf01e10ba30f5c",
+      "method": "RGB contrast + largest connected component in reviewed B1 passage",
+      "white_threshold": {
+        "min_channel_gt": 105,
+        "max_minus_min_lt": 65
+      },
+      "red_threshold": {
+        "r_gt": 120,
+        "r_over_g_gt": 1.5,
+        "r_over_b_gt": 1.3
+      },
+      "excluded_boxes_normalized": [],
+      "edge_uncertainty_px": 3,
+      "foreground_centroid_px": [
+        624.7911534279596,
+        462.56274697774734
+      ],
+      "foreground_pixels": 1119281,
+      "background_pixels": 921714,
+      "uncertain_pixels": 32605,
+      "truth_segmentation_used": false,
+      "human_user_prompts": 0,
+      "reviewer": "Codex visual review of actual MP4 RGB; semi-automatic validation"
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 45,
+      "sim_time_s": 122.275,
+      "rgb_sha256": "ac5c33ab0853d18fe4c010c8b73e43f03edbebb6044514140861e1359c9fbda4",
+      "source_video_sha256": "f567b2400bb0d91091dcb346bdafc7cd30e071101961d337cabf01e10ba30f5c",
+      "method": "RGB contrast + largest connected component in reviewed B1 passage",
+      "white_threshold": {
+        "min_channel_gt": 105,
+        "max_minus_min_lt": 65
+      },
+      "red_threshold": {
+        "r_gt": 120,
+        "r_over_g_gt": 1.5,
+        "r_over_b_gt": 1.3
+      },
+      "excluded_boxes_normalized": [],
+      "edge_uncertainty_px": 3,
+      "foreground_centroid_px": [
+        637.4040059472107,
+        332.2214017602326
+      ],
+      "foreground_pixels": 902608,
+      "background_pixels": 1140943,
+      "uncertain_pixels": 30049,
+      "truth_segmentation_used": false,
+      "human_user_prompts": 0,
+      "reviewer": "Codex visual review of actual MP4 RGB; semi-automatic validation"
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 42,
+      "sim_time_s": 122.125,
+      "rgb_sha256": "52a78dd2cec623b1b64b1aad289bcdc508aa86f166964792ac23b5c82e33e5d0",
+      "source_video_sha256": "4976c0c445e01233e4046b0fa92cbe64cc5e73daf0fd67dabceaaf84e9d576d4",
+      "method": "RGB contrast + largest connected component in reviewed B1 passage",
+      "white_threshold": {
+        "min_channel_gt": 105,
+        "max_minus_min_lt": 65
+      },
+      "red_threshold": {
+        "r_gt": 120,
+        "r_over_g_gt": 1.5,
+        "r_over_b_gt": 1.3
+      },
+      "excluded_boxes_normalized": [],
+      "edge_uncertainty_px": 3,
+      "foreground_centroid_px": [
+        213.98371747485785,
+        989.5202917592741
+      ],
+      "foreground_pixels": 81437,
+      "background_pixels": 1970100,
+      "uncertain_pixels": 22063,
+      "truth_segmentation_used": false,
+      "human_user_prompts": 0,
+      "reviewer": "Codex visual review of actual MP4 RGB; semi-automatic validation"
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 43,
+      "sim_time_s": 122.175,
+      "rgb_sha256": "c8dec1fe00050693f3873baf9e2f9201fa25a0931a6ed6b2b3aa8e90318042b5",
+      "source_video_sha256": "4976c0c445e01233e4046b0fa92cbe64cc5e73daf0fd67dabceaaf84e9d576d4",
+      "method": "RGB contrast + largest connected component in reviewed B1 passage",
+      "white_threshold": {
+        "min_channel_gt": 105,
+        "max_minus_min_lt": 65
+      },
+      "red_threshold": {
+        "r_gt": 120,
+        "r_over_g_gt": 1.5,
+        "r_over_b_gt": 1.3
+      },
+      "excluded_boxes_normalized": [],
+      "edge_uncertainty_px": 3,
+      "foreground_centroid_px": [
+        490.6117388703851,
+        753.5378028686025
+      ],
+      "foreground_pixels": 682144,
+      "background_pixels": 1364059,
+      "uncertain_pixels": 27397,
+      "truth_segmentation_used": false,
+      "human_user_prompts": 0,
+      "reviewer": "Codex visual review of actual MP4 RGB; semi-automatic validation"
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 44,
+      "sim_time_s": 122.225,
+      "rgb_sha256": "eae378bece36e1be56df280a6457875524188f20a5c4812a8f276dfcdc5d2a9d",
+      "source_video_sha256": "4976c0c445e01233e4046b0fa92cbe64cc5e73daf0fd67dabceaaf84e9d576d4",
+      "method": "RGB contrast + largest connected component in reviewed B1 passage",
+      "white_threshold": {
+        "min_channel_gt": 105,
+        "max_minus_min_lt": 65
+      },
+      "red_threshold": {
+        "r_gt": 120,
+        "r_over_g_gt": 1.5,
+        "r_over_b_gt": 1.3
+      },
+      "excluded_boxes_normalized": [],
+      "edge_uncertainty_px": 3,
+      "foreground_centroid_px": [
+        446.81377026220844,
+        350.2584982185336
+      ],
+      "foreground_pixels": 665463,
+      "background_pixels": 1381033,
+      "uncertain_pixels": 27104,
+      "truth_segmentation_used": false,
+      "human_user_prompts": 0,
+      "reviewer": "Codex visual review of actual MP4 RGB; semi-automatic validation"
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 45,
+      "sim_time_s": 122.275,
+      "rgb_sha256": "3199e0676a8a7cb920cdc99702f28be7c47c6a40355bc7578c25c4d1d4dbc779",
+      "source_video_sha256": "4976c0c445e01233e4046b0fa92cbe64cc5e73daf0fd67dabceaaf84e9d576d4",
+      "method": "RGB contrast + largest connected component in reviewed B1 passage",
+      "white_threshold": {
+        "min_channel_gt": 105,
+        "max_minus_min_lt": 65
+      },
+      "red_threshold": {
+        "r_gt": 120,
+        "r_over_g_gt": 1.5,
+        "r_over_b_gt": 1.3
+      },
+      "excluded_boxes_normalized": [],
+      "edge_uncertainty_px": 3,
+      "foreground_centroid_px": [
+        176.24574227811013,
+        87.79671285557319
+      ],
+      "foreground_pixels": 65528,
+      "background_pixels": 1986716,
+      "uncertain_pixels": 21356,
+      "truth_segmentation_used": false,
+      "human_user_prompts": 0,
+      "reviewer": "Codex visual review of actual MP4 RGB; semi-automatic validation"
+    }
+  ],
+  "reference_state": {
+    "t_ref_sim_time_s": 122.175,
+    "frame_id": 43,
+    "selection_basis": "Actual MP4 RGB: B1 body visible in C1/C2 and painted tip contour clear in C3; identity checked with declared ideal B1 rigid pose. No truth geometry used.",
+    "fit_frame_ids": [
+      42,
+      43
+    ],
+    "heldout_frame_ids": [
+      44,
+      45
+    ]
+  },
+  "correspondence_tracks": {
+    "reliable_matches": 0,
+    "reason": "first silhouette baseline; no point tracker deployed"
+  },
+  "identity_association": "One contiguous B1 passage selected by RGB and declared root pose; other passages excluded"
+}

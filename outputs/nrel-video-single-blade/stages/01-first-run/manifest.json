@@ -1,0 +1,16 @@
+{
+  "status": "PIPELINE_COMPLETE_PARTIAL_GEOMETRY",
+  "target": "T1/B1",
+  "formal_manifest": "formal/manifest.json",
+  "report": "README.md",
+  "geometry_validation": "NOT_YET_ESTABLISHED",
+  "new_physics_run": false,
+  "formal_input": "signed MP4 RGB + ideal calibration + rigid root observations",
+  "formal_frame_count_per_camera": 100,
+  "formal_duration_s": 5,
+  "reference_time_s": 122.175,
+  "tests": {
+    "passed": 44,
+    "failed": 0
+  }
+}

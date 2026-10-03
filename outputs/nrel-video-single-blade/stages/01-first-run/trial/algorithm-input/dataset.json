@@ -1,0 +1,60 @@
+{
+  "schema": "nrel-single-blade-video.v1",
+  "target": "T1/B1",
+  "model": "NREL 5MW",
+  "units": {
+    "length": "m",
+    "time": "s",
+    "image": "px"
+  },
+  "videos": {
+    "C1": "C1.mp4",
+    "C2": "C2.mp4",
+    "C3": "C3.mp4"
+  },
+  "files": {
+    "C1.mp4": "075bca48e4ea035b417c6c35e205cafaf70a97eb7ebbae5ad248c009cafc88d7",
+    "C2.mp4": "40fa3c8f8aeb223c66e51506d14b138ff86c6e50420416f7ec5cfa3dde60918c",
+    "C3.mp4": "18cb7cea57fd5d2488fa4eb01166b23216b0baad42bb9c4646d266de7d86ced4",
+    "frame_map.csv": "1052040045bcdbacc7dba048be73ba053886f36b837f2535c9898885da989e42",
+    "camera_calibration.jsonl": "fdd3f7bb290968ab0450c61027749348e0acfc9b146dcde2628219c64e431671",
+    "motion_observations.csv": "ef72f4a2cbd389e2704c3882720825216063795ef3473605f37fb615754e72b9"
+  },
+  "sampling": {
+    "start_s": 121.25,
+    "end_s_exclusive": 123.25,
+    "fps": 20,
+    "frame_count_per_camera": 40,
+    "simulation_time": "start+(n+.5)/fps",
+    "pts": "n/fps"
+  },
+  "input_policy": {
+    "calibration": "simulation ideal pinhole",
+    "rigid_motion": "simulation ideal B1 blade-root rigid pose",
+    "exact_flexible_deformation": false,
+    "truth_surface": false,
+    "truth_masks_or_correspondences": false,
+    "decoded_rgb": "delivered MP4 only"
+  },
+  "reference_state": null,
+  "imaging": {
+    "shading": "MATERIAL",
+    "studio_light": "forest.exr",
+    "scene_lights": false,
+    "scene_world": false,
+    "studio_rotation": 0.0,
+    "studio_intensity": 1.0,
+    "studio_background_alpha": 1.0,
+    "studio_background_blur": 0.5,
+    "studio_view_rotation": false,
+    "color_management": {
+      "view_transform": "AgX",
+      "look": "AgX - Medium High Contrast",
+      "exposure": 0.3499999940395355,
+      "gamma": 1.0,
+      "use_curve_mapping": false
+    },
+    "display_device": "sRGB",
+    "image_encoding": "RGBA8 display-transformed once; top-left rows; PNG sRGB"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "archive": "outputs/nrel-video-single-blade/20261003-p3-center-scale-review.zip",
+  "bytes": 23941232,
+  "sha256": "19ec2ce5f747882ae825bba9b5d205b5caf703a9e48ba43132202304c182b7bd",
+  "members": 91,
+  "content_files_verified": 89,
+  "crc_passed": true,
+  "manifest_hashes_and_byte_lengths_verified": true,
+  "prior_archive": {
+    "name": "20261003-diagnostics-review.zip",
+    "bytes": 25027373,
+    "sha256": "4ee2aa7368f22c4a245e556a29b20d6e1ac59e06a1ecec1e9640cad7baebf5be"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "video_fit_wall_s": 26.162339458009228,
+  "shared_prior_only_wall_s": 0.3541897920658812,
+  "shared_prior_computed_once": true,
+  "peak_process_rss_bytes": 456146944,
+  "device": "cpu",
+  "threads": 4,
+  "seed": 20261002,
+  "torch_version": "2.13.0",
+  "numpy_version": "1.26.4",
+  "fitting_images": 6,
+  "cache_policy": "selected FBU labels, candidate domains and trusted contours; streaming RGB decode preflight"
+}
