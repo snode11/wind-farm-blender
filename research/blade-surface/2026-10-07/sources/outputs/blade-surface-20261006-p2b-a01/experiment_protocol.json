@@ -1,0 +1,210 @@
+{
+  "status": "COMPLETED_P2B0_NUMERICAL_INCONCLUSIVE_P2B_NOT_RUN",
+  "name": "P2b_distributed_material_observations",
+  "purpose": "Disentangle material-observation spatial distribution, point count, and geometry/q localization; no application accuracy claim.",
+  "current_result_status": "REVIEW_ONLY",
+  "capture": {
+    "target_blades": 1,
+    "regions": 3,
+    "material_points_per_region": 4,
+    "input_camera": "WideInput",
+    "evaluation_camera": "WideEval",
+    "raw_resolution": [
+      3840,
+      2160
+    ],
+    "frames_per_clip": 8,
+    "capture_hz": 10,
+    "development_clips": 1,
+    "nonoverlapping_test_clips": 3,
+    "frame_lists": null,
+    "frame_lists_note": "Resolve from available replay, exclude prior development windows, freeze before test; same replay clips are not assumed statistically independent.",
+    "proposed_total_rgb_upper_bound": 64,
+    "proposed_input_observation_upper_bound": 384,
+    "target_blade_id": null,
+    "declared_surface_side": null,
+    "target_blade_id_note": "Source capture/evaluation identity and mapping unresolved; estimated target index is designed as blade0. Do not transmit source identity/binding to solver or reselect using test scores."
+  },
+  "groups": {
+    "A1_new": {
+      "tracks": 0
+    },
+    "A3_C4": {
+      "tracks": 4,
+      "layout": "middle region",
+      "point_ids": null
+    },
+    "A3_D4": {
+      "tracks": 4,
+      "layout": "inner 1, middle 2, outer 1; IDs frozen",
+      "point_ids": null
+    },
+    "A3_D12": {
+      "tracks": 12,
+      "layout": "4 per region",
+      "point_ids": null
+    }
+  },
+  "fairness": {
+    "common_initialization": "fresh A0",
+    "active_state_names": [
+      "psi",
+      "pitch0",
+      "flap0",
+      "edge0"
+    ],
+    "other_states": "same per-frame A0",
+    "template": "same frozen healthy approximation",
+    "q": "one shared 2D coordinate per track; RGB/estimated-template initialization only",
+    "loss_normalization": "fixed total track-block convention, audit actual implementation; no test-time tuning",
+    "solver_budget": "freeze after input-only/development numerical audit, same across groups",
+    "state_initialization_sha256": null,
+    "solver_budget_frozen": false,
+    "q_domain": null,
+    "parameter_characteristic_scales": null,
+    "localization_sigma_raw_px": null,
+    "track_block_normalization_frozen": false,
+    "target_model_blade_index": 0
+  },
+  "primary_metric": "q-independent, area-weighted symmetric point-to-triangle distance on predeclared target surface region; fixed MODEL units, no per-group ICP",
+  "development_sensitivity": {
+    "paired_perturbation_repeats": 20,
+    "noise_model": "estimated from input localization, include shared track bias and frame components",
+    "interval_interpretation": "empirical sensitivity, NOT confidence interval",
+    "delta_dev_m": null,
+    "pixel_stability_band_px": null,
+    "delta_dev_definition": "Delta=E_A1-E_A3; delta_perturb=empirical P95(abs(Delta_perturbed-Delta_unperturbed)) across 20 paired development perturbations; delta_dev=max(delta_perturb, paired-gain absolute changes in numerical-method and sampling-density comparisons). Sensitivity only, not confidence interval."
+  },
+  "proposed_research_gate": {
+    "relative_reduction_min": 0.1,
+    "absolute_reduction_m": "max(0.005, 2*delta_dev)",
+    "required_test_clip_passes": 2,
+    "test_clips": 3,
+    "equal_clip_weighting": true,
+    "max_clip_regression": "max(0.05*E_A1_clip, delta_min)",
+    "heldout_projection_guard_px": "max(0.25, frozen development sensitivity band)",
+    "application_accuracy_accepted": false,
+    "frozen": false,
+    "delta_min_m": null,
+    "successful_result_status": "CONTROLLED_GEOMETRIC_GAIN_ONLY / REVIEW_ONLY",
+    "spatial_distribution_support": "D4 vs C4 same-direction in at least 2/3 clips and average difference beyond development sensitivity; D12 alone insufficient",
+    "no_leakage_scope": "solver and texture must not read prohibited inputs; source truth may be read only by separated capture/evaluation"
+  },
+  "required_outcome_states": [
+    "BLOCKED_MISSING_EVIDENCE",
+    "NUMERICAL_INCONCLUSIVE",
+    "OBSERVATION_GATE_FAILED",
+    "NO_INCREMENTAL_CONSTRAINT",
+    "MODEL_MISMATCH_SUSPECTED",
+    "INCONCLUSIVE_NEAR_BASELINE",
+    "CONTROLLED_GEOMETRIC_GAIN_ONLY"
+  ],
+  "revision": {
+    "version": 3,
+    "date": "2026-10-06",
+    "scope": "plan documents only",
+    "execution_authorized": false,
+    "prior_attempt02": "COMPLETED_REVIEW_ONLY"
+  },
+  "metrics_contract": {
+    "status": "DRAFT_UNFROZEN",
+    "region_definition": null,
+    "surface_mapping": null,
+    "sampling_seed": null,
+    "sampling_density": null,
+    "proposed_direction_weighting": "area normalized within each direction, equal 0.5 weights between directions",
+    "proposed_mean_aggregation": "equal 8 times per clip and equal 3 test clips; spatial area weighting retained",
+    "proposed_p95": "quantile of equally mixed area-weighted directional distributions, not mean of directional p95",
+    "q_eval_protocol": null,
+    "q_eval_geometry_update": false,
+    "q_eval_sources": "first WideInput image pixels and each frozen estimated template only",
+    "near_zero_baseline_rule": "INCONCLUSIVE_NEAR_BASELINE; no fabricated relative gain",
+    "invalid_or_missing_rule": null,
+    "per_group_ICP_allowed": false,
+    "material_reference_frame_groups": [
+      "frame_zero",
+      "subsequent_7_frames"
+    ]
+  },
+  "old_result_diagnostics": {
+    "status": "COMPLETED_DIAGNOSTIC_REVIEW_ONLY",
+    "geometry_q_combinations": [
+      "X(x1,q2)",
+      "X(x3,q3)",
+      "X(x3,q2)",
+      "X(x1,q3)"
+    ],
+    "cross_combinations_are_causal_decomposition": false,
+    "incremental_information": "same reference state, noise whitening and fixed state-column scales; Js, Jtx, Jtq; feasible tangent/profile when constraints active",
+    "numerical_comparison": "one predeclared scale-consistent dense/exact vs sparse/LSMR development comparison",
+    "unwrapped_angle_shift_diagnostic": "same geometry with uniform psi+360k degrees; no framewise modulo",
+    "stop_if_numerical_difference": "greater than one third of proposed minimum gain; diagnose before test",
+    "baseline_decision": "NUMERICAL_INCONCLUSIVE",
+    "baseline_numerical_threshold_m": 0.0016666666666666668,
+    "single_additional_correction": {
+      "authorized": true,
+      "scope": "one finite six-run matrix: all active state/q as zero-centered scaled increments; fixed absolute difference 1e-4*original scales; same objective/bounds/support/prior/budget/termination",
+      "rationale": "uniform +360 geometry leaves different actual relative FD and coordinate-norm xtol; these are numerical risks to test, not yet a proven unique cause",
+      "source_code_policy": "task-local adapter only; no old results or product modules overwritten",
+      "further_sweeps_authorized": false,
+      "result": "FAILED_DEGENERATE_NEAR_A0"
+    },
+    "decision": "NUMERICAL_INCONCLUSIVE"
+  },
+  "source_audit_note": "Uploaded screenshot byte mismatch is external review evidence only; original manifests and failures preserved; no transfer cause inferred.",
+  "proposed_observation_gate": {
+    "frozen": false,
+    "structure_width_raw_px_min_suggestion": 8,
+    "visible_tracks_per_clip_suggestion": 12,
+    "visible_frames_per_track_suggestion": 8,
+    "development_identity_drift_p95_raw_px_max_suggestion": 1,
+    "not_accuracy_claim": true,
+    "annotation_source": "RGB candidates and explicit review/detection; never label Codex review as user human annotation",
+    "selection_sources": "WideInput RGB only; never use WideEval or source geometry to select formal queries",
+    "failed_planned_clips_retained_in_denominator": true
+  },
+  "historical_draft_identity": {
+    "path": "/Users/eason/Desktop/wfcrl/wind farm RL/docs/proposal/叶片表面重建_2026-10-06/叶片表面重建_方案v3修订资料_2026-10-06/P2b_experiment_protocol_DRAFT_v3.json",
+    "sha256": "ef99d490664d0edb3141b25c3c745a60c1fc2bcaad894eb01c9bb95ff134d846",
+    "status": "PROPOSED_NOT_EXECUTED_DOCUMENT_UPDATE_ONLY",
+    "execution_authorized": false
+  },
+  "current_authorization": {
+    "source_thread_id": "01a10c5d-7867-7a11-95d0-ba134c655af7",
+    "date_local": "2026-10-06",
+    "authorized": true,
+    "scope": "P2b-0 diagnostic then conditional controlled P2b experiment; necessary incremental source/driver/capture/evaluation/tests/display allowed",
+    "prohibited": [
+      "FAST.Farm/MAPPO rerun",
+      "model download/training",
+      "source blend writes",
+      "installed extension changes",
+      "additional camera or unknown extrinsics",
+      "new local defect geometry",
+      "push/release"
+    ]
+  },
+  "do_not_run_automatically_historical": [
+    "new captures",
+    "new optimization",
+    "model downloads",
+    "environment changes",
+    "source scene writes",
+    "repository writes or release"
+  ],
+  "actual_execution": {
+    "geometry_q_combinations": 4,
+    "original_finite_optimizations": 6,
+    "single_corrective_finite_optimizations": 6,
+    "new_rgb_captures": 0,
+    "p2b_input_observations": 0,
+    "p2b_development_perturbation_optimizations": 0,
+    "p2b_test_reconstructions": 0
+  },
+  "p2b_gate": {
+    "numerical": "FAILED",
+    "observation": "NOT_RUN",
+    "formal_freeze": "NOT_REACHED",
+    "reason": "decision.json; no main data generated"
+  }
+}

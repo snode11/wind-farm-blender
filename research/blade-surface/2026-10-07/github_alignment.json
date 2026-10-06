@@ -1,0 +1,22 @@
+{
+  "checked_on": "2026-10-07",
+  "timezone": "Asia/Shanghai",
+  "method": "authenticated gh API metadata and recursive tree; no asset download",
+  "project_repository": "https://github.com/snode11/wind-farm-blender",
+  "repository": "snode11/wind-farm-blender",
+  "visibility": "public",
+  "default_branch": "main",
+  "main_sha": "1caafb9edb7593a96813b8edfddf5d70d040717f",
+  "main_manifest_version": "0.3.13",
+  "pushed_at": "2026-10-05T11:50:09Z",
+  "recursive_tree_truncated": false,
+  "missing_main_directories": [
+    "blade_recon/",
+    "wfrl/nrel_reconstruction/",
+    "docs/proposal/叶片表面重建_2026-10-06/"
+  ],
+  "experimental_archive_tag": "blade-surface-experiments-20261006",
+  "experimental_archive_release_http_status": 404,
+  "experimental_archive_tag_http_status": 404,
+  "scope": "local documentation and discussion snapshot alignment; historical receipts remain original"
+}

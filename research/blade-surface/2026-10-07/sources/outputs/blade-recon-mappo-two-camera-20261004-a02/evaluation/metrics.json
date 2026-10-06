@@ -1,0 +1,685 @@
+{
+  "status": "EVALUATED",
+  "reconstruction_run_status": "COMPLETED",
+  "full_capture_coverage": true,
+  "evaluated_frames": 601,
+  "expected_calibration_frames": 601,
+  "relative_time_range_s": [
+    0.0,
+    60.0
+  ],
+  "camera_names": [
+    "T1Down",
+    "NacelleT1"
+  ],
+  "fit_scale": 1.0,
+  "original_resolution_by_camera": {
+    "T1Down": [
+      960,
+      540
+    ],
+    "NacelleT1": [
+      960,
+      540
+    ]
+  },
+  "solver_resolution_by_camera": {
+    "T1Down": [
+      960,
+      540
+    ],
+    "NacelleT1": [
+      960,
+      540
+    ]
+  },
+  "observed_section_tolerance_fit_px": 3,
+  "id_check_radius_original_px": 3,
+  "input_hashes": {
+    "reconstruction": "f2c34be44607e520c8e26c4331120aa6ff354870ab40192d31321129fe7beca0",
+    "calibration": "cccafecfe906fdd1680e9192c89b3c110202b60d4cdcbef6daa5fed10637b0d8",
+    "evaluation_tips": "56cac888a9a153a29489cd6b73e165c3c1e69ed483c14a669b986937c714d84d",
+    "evaluation_meshes": "516507af840adf116769422170429e60da1dae2f82a170d6b60aa3328f5fc5db",
+    "evaluation_script": "1671734b70eed3a6f3cc8dc4434efa4790c61807b8c64c816c62ef3e6a9f1b76"
+  },
+  "tip_reference": {
+    "definition": "source: captured Blade.data.vertices[-2] structural tip; reconstruction: Rotor.forward axis A[:,-1]. Different reference definitions and blade model families can contribute to distance; this is not a same-surface measurement accuracy.",
+    "no_alignment": "Only the supplied nacelle coordinate frame is used; no fitted rigid transform or per-frame pose alignment.",
+    "identity_rule": "One fixed global 120-degree cyclic permutation minimizes all-frame reference-tip RMSE AFTER solving; labels never feed solver.",
+    "cyclic_candidates": [
+      {
+        "cyclic_shift": 0,
+        "reconstructed_to_source_blade": [
+          1,
+          2,
+          3
+        ],
+        "reference_tip_distance_m": {
+          "n": 1803,
+          "mean": 109.07026772773506,
+          "median": 109.03860514332615,
+          "rmse": 109.07188937295624,
+          "p95": 110.07166377482552,
+          "maximum": 111.68534097614126
+        }
+      },
+      {
+        "cyclic_shift": 1,
+        "reconstructed_to_source_blade": [
+          2,
+          3,
+          1
+        ],
+        "reference_tip_distance_m": {
+          "n": 1803,
+          "mean": 108.96871596140524,
+          "median": 108.93625313006542,
+          "rmse": 108.96998279962928,
+          "p95": 109.86209859450389,
+          "maximum": 110.77298692695086
+        }
+      },
+      {
+        "cyclic_shift": 2,
+        "reconstructed_to_source_blade": [
+          3,
+          1,
+          2
+        ],
+        "reference_tip_distance_m": {
+          "n": 1803,
+          "mean": 2.837953099290173,
+          "median": 2.7602599314563494,
+          "rmse": 3.491423538355481,
+          "p95": 6.302632047946366,
+          "maximum": 8.987698645103873
+        }
+      }
+    ],
+    "best_global_cyclic_shift": 2,
+    "reconstructed_to_source_blade": [
+      3,
+      1,
+      2
+    ],
+    "distance_m": {
+      "n": 1803,
+      "mean": 2.837953099290173,
+      "median": 2.7602599314563494,
+      "rmse": 3.491423538355481,
+      "p95": 6.302632047946366,
+      "maximum": 8.987698645103873
+    },
+    "per_reconstructed_blade_m": [
+      {
+        "n": 601,
+        "mean": 2.6037870429513927,
+        "median": 2.4939210847424373,
+        "rmse": 3.192296486181251,
+        "p95": 5.665636054936492,
+        "maximum": 7.1177610535854186
+      },
+      {
+        "n": 601,
+        "mean": 2.8201478289871535,
+        "median": 2.7170809741323874,
+        "rmse": 3.4992913623332926,
+        "p95": 6.549335834873906,
+        "maximum": 8.393341353625681
+      },
+      {
+        "n": 601,
+        "mean": 3.089924425931973,
+        "median": 3.130364785255347,
+        "rmse": 3.7595635489192847,
+        "p95": 6.851737231306532,
+        "maximum": 8.987698645103873
+      }
+    ],
+    "perframe_best_shift_histogram": {
+      "0": 0,
+      "1": 0,
+      "2": 601
+    },
+    "frames_preferring_different_shift": 0
+  },
+  "segmentation_reference": "Visible, occlusion-preserving independent ID render; nonblack max RGB channel >32 includes antialiased edges. Only representative frames are checked; ID renders are never segmentation inputs.",
+  "segmentation": {
+    "T1Down": {
+      "rgb_only_external": {
+        "frames": 7,
+        "tp": 29942,
+        "fp": 0,
+        "fn": 591,
+        "reference_empty_frames": 6,
+        "prediction_empty_frames": 6,
+        "true_negative_empty_frames": 6,
+        "false_positive_empty_reference_frames": 0,
+        "precision": 1.0,
+        "recall": 0.9806438934922871,
+        "iou": 0.9806438934922871
+      },
+      "original_auto_dark": {
+        "frames": 7,
+        "tp": 553,
+        "fp": 210169,
+        "fn": 29980,
+        "reference_empty_frames": 6,
+        "prediction_empty_frames": 6,
+        "true_negative_empty_frames": 6,
+        "false_positive_empty_reference_frames": 0,
+        "precision": 0.0026243107032013742,
+        "recall": 0.01811155143615105,
+        "iou": 0.0022974466352585353
+      },
+      "original_auto_bright": {
+        "frames": 7,
+        "tp": 28569,
+        "fp": 0,
+        "fn": 1964,
+        "reference_empty_frames": 6,
+        "prediction_empty_frames": 6,
+        "true_negative_empty_frames": 6,
+        "false_positive_empty_reference_frames": 0,
+        "precision": 1.0,
+        "recall": 0.9356761536697998,
+        "iou": 0.9356761536697998
+      }
+    },
+    "NacelleT1": {
+      "rgb_only_external": {
+        "frames": 7,
+        "tp": 341106,
+        "fp": 696,
+        "fn": 11106,
+        "reference_empty_frames": 0,
+        "prediction_empty_frames": 0,
+        "true_negative_empty_frames": 0,
+        "false_positive_empty_reference_frames": 0,
+        "precision": 0.9979637333895062,
+        "recall": 0.9684678545875779,
+        "iou": 0.9665578564385052
+      },
+      "original_auto_dark": {
+        "frames": 7,
+        "tp": 166767,
+        "fp": 1447030,
+        "fn": 185445,
+        "reference_empty_frames": 0,
+        "prediction_empty_frames": 0,
+        "true_negative_empty_frames": 0,
+        "false_positive_empty_reference_frames": 0,
+        "precision": 0.10333827612766662,
+        "recall": 0.4734847194303431,
+        "iou": 0.09268736501259975
+      },
+      "original_auto_bright": {
+        "frames": 7,
+        "tp": 201441,
+        "fp": 1876493,
+        "fn": 150771,
+        "reference_empty_frames": 0,
+        "prediction_empty_frames": 0,
+        "true_negative_empty_frames": 0,
+        "false_positive_empty_reference_frames": 0,
+        "precision": 0.09694292503996758,
+        "recall": 0.5719311096725835,
+        "iou": 0.09038477501508724
+      }
+    }
+  },
+  "projected_contour": {
+    "definition": "Unsigned pixel raster distances of delivered section-envelope plus end-ring lines, at original resolution. Model contours are not visibility-rendered; model→mask uses all inframe line pixels, mask→model excludes a 3-pixel border. These are image-fit diagnostics, not calibrated depth or 3D accuracy.",
+    "summary": {
+      "T1Down": {
+        "model_to_mask_px_mean": {
+          "n": 183,
+          "mean": 6.623243808973098,
+          "median": 3.4817826780554366,
+          "rmse": 10.677327272529297,
+          "p95": 25.430561621953192,
+          "maximum": 47.70196374306087
+        },
+        "mask_interior_to_model_px_mean": {
+          "n": 183,
+          "mean": 36.331572863264256,
+          "median": 8.417640559929461,
+          "rmse": 67.23043694262077,
+          "p95": 181.7936060267438,
+          "maximum": 253.26139729719682
+        },
+        "model_to_mask_px_p95": {
+          "n": 183,
+          "mean": 13.462832041255762,
+          "median": 8.1968994140625,
+          "rmse": 19.68141163487375,
+          "p95": 40.52036743164063,
+          "maximum": 99.50388183593748
+        },
+        "mask_interior_to_model_px_p95": {
+          "n": 183,
+          "mean": 92.0682463348889,
+          "median": 19.59991455078125,
+          "rmse": 164.73328294347874,
+          "p95": 417.55088806152355,
+          "maximum": 485.3447540283203
+        }
+      },
+      "NacelleT1": {
+        "model_to_mask_px_mean": {
+          "n": 601,
+          "mean": 5.716822569252277,
+          "median": 4.229883612390936,
+          "rmse": 6.842420200270701,
+          "p95": 14.35587813488545,
+          "maximum": 24.835470967478567
+        },
+        "mask_interior_to_model_px_mean": {
+          "n": 601,
+          "mean": 17.43487467284406,
+          "median": 14.641072364149224,
+          "rmse": 22.409156823422077,
+          "p95": 48.30929627394313,
+          "maximum": 107.05000687943024
+        },
+        "model_to_mask_px_p95": {
+          "n": 601,
+          "mean": 18.0005866077696,
+          "median": 12.19129638671875,
+          "rmse": 21.731492848973623,
+          "p95": 42.48309631347653,
+          "maximum": 65.64263916015625
+        },
+        "mask_interior_to_model_px_p95": {
+          "n": 601,
+          "mean": 56.61337697160819,
+          "median": 41.396728515625,
+          "rmse": 97.21630285554497,
+          "p95": 135.41085815429688,
+          "maximum": 828.6925048828125
+        }
+      }
+    }
+  },
+  "green": {
+    "stored_green_sections_total": 13100,
+    "denominator_all_sections": 72120,
+    "diagnostics": {
+      "green_not_direct_any_camera": {
+        "total": 970,
+        "fraction_of_green": 0.07404580152671755,
+        "frame_count": 461
+      },
+      "green_not_both_inframe_any_camera": {
+        "total": 49,
+        "fraction_of_green": 0.0037404580152671754,
+        "frame_count": 49
+      },
+      "green_border_dependent": {
+        "total": 10,
+        "fraction_of_green": 0.0007633587786259542,
+        "frame_count": 9
+      },
+      "green_recomputed_mismatch": {
+        "total": 0,
+        "fraction_of_green": 0.0,
+        "frame_count": 0
+      }
+    },
+    "stored_frequency_by_section": [
+      [
+        0,
+        0,
+        0,
+        0,
+        4,
+        64,
+        34,
+        71,
+        62,
+        36,
+        38,
+        37,
+        35,
+        40,
+        50,
+        63,
+        96,
+        115,
+        124,
+        146,
+        153,
+        161,
+        160,
+        164,
+        166,
+        165,
+        167,
+        168,
+        169,
+        168,
+        168,
+        170,
+        168,
+        167,
+        171,
+        174,
+        174,
+        173,
+        175,
+        175
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        6,
+        64,
+        41,
+        76,
+        64,
+        40,
+        38,
+        31,
+        28,
+        41,
+        48,
+        62,
+        89,
+        116,
+        129,
+        144,
+        151,
+        157,
+        166,
+        167,
+        168,
+        170,
+        171,
+        172,
+        170,
+        170,
+        169,
+        169,
+        170,
+        173,
+        172,
+        171,
+        173,
+        173,
+        176,
+        175
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        7,
+        73,
+        38,
+        62,
+        70,
+        41,
+        38,
+        31,
+        27,
+        39,
+        56,
+        68,
+        98,
+        120,
+        134,
+        145,
+        153,
+        159,
+        160,
+        160,
+        163,
+        162,
+        164,
+        164,
+        167,
+        166,
+        164,
+        164,
+        164,
+        164,
+        167,
+        169,
+        169,
+        169,
+        168,
+        166
+      ]
+    ],
+    "exact_two_side_support_frequency_by_section": [
+      [
+        0,
+        0,
+        0,
+        0,
+        4,
+        52,
+        7,
+        25,
+        5,
+        4,
+        38,
+        27,
+        25,
+        34,
+        40,
+        56,
+        75,
+        107,
+        117,
+        131,
+        151,
+        159,
+        159,
+        162,
+        165,
+        163,
+        166,
+        167,
+        168,
+        168,
+        168,
+        165,
+        165,
+        164,
+        167,
+        173,
+        173,
+        172,
+        172,
+        175
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        6,
+        49,
+        10,
+        17,
+        3,
+        6,
+        38,
+        19,
+        20,
+        33,
+        45,
+        54,
+        74,
+        104,
+        121,
+        139,
+        147,
+        151,
+        163,
+        164,
+        164,
+        167,
+        170,
+        172,
+        169,
+        169,
+        167,
+        167,
+        168,
+        170,
+        169,
+        171,
+        171,
+        170,
+        173,
+        174
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        7,
+        53,
+        6,
+        25,
+        4,
+        6,
+        33,
+        24,
+        24,
+        32,
+        47,
+        59,
+        77,
+        109,
+        124,
+        137,
+        150,
+        153,
+        159,
+        158,
+        160,
+        158,
+        160,
+        162,
+        165,
+        164,
+        160,
+        162,
+        162,
+        161,
+        163,
+        164,
+        167,
+        165,
+        163,
+        164
+      ]
+    ],
+    "rule": "Original algorithm: both sides <3 solver pixels at any dense point inside a section half-cell, in at least one camera. Exact-section support, border-excluded support and correct visible blade identity are audited separately.",
+    "circumference_warning": "Frontend expands one flag to all ring vertices; a flag never certifies the full circumference or hidden surface.",
+    "representative_visible_id_audit": {
+      "T1Down": {
+        "green_exact_both_correct_id_radius3": {
+          "total": 12,
+          "fraction_of_green": 0.10714285714285714
+        },
+        "green_expanded_both_correct_id_radius3": {
+          "total": 12,
+          "fraction_of_green": 0.10714285714285714
+        },
+        "green_exact_not_both_correct_id": {
+          "total": 100,
+          "fraction_of_green": 0.8928571428571429
+        },
+        "green_expanded_not_both_correct_id": {
+          "total": 100,
+          "fraction_of_green": 0.8928571428571429
+        },
+        "representative_green_sections": 112
+      },
+      "NacelleT1": {
+        "green_exact_both_correct_id_radius3": {
+          "total": 107,
+          "fraction_of_green": 0.9553571428571429
+        },
+        "green_expanded_both_correct_id_radius3": {
+          "total": 111,
+          "fraction_of_green": 0.9910714285714286
+        },
+        "green_exact_not_both_correct_id": {
+          "total": 5,
+          "fraction_of_green": 0.044642857142857144
+        },
+        "green_expanded_not_both_correct_id": {
+          "total": 1,
+          "fraction_of_green": 0.008928571428571428
+        },
+        "representative_green_sections": 112
+      },
+      "ANY_CAMERA": {
+        "green_exact_both_correct_id_radius3": {
+          "total": 107,
+          "fraction_of_green": 0.9553571428571429
+        },
+        "green_expanded_both_correct_id_radius3": {
+          "total": 111,
+          "fraction_of_green": 0.9910714285714286
+        },
+        "green_exact_not_both_correct_id": {
+          "total": 5,
+          "fraction_of_green": 0.044642857142857144
+        },
+        "green_expanded_not_both_correct_id": {
+          "total": 1,
+          "fraction_of_green": 0.008928571428571428
+        },
+        "representative_green_sections": 112
+      }
+    }
+  },
+  "mesh_vertex_distances": {
+    "definition": "Bidirectional nearest mesh VERTEX distances, with fixed global blade permutation and supplied coordinates. Different meshes, discretization, airfoil geometry and tip caps contribute; not exact triangle-surface distance.",
+    "representative_frames": [
+      0,
+      17,
+      50,
+      150,
+      300,
+      450,
+      600
+    ],
+    "source_face_count": null,
+    "recon_to_source_frame_blade_mean_m": {
+      "n": 21,
+      "mean": 0.9026245227155846,
+      "median": 0.6755833343450112,
+      "rmse": 1.0632858331266022,
+      "p95": 1.7891508511958842,
+      "maximum": 2.3157979413470025
+    },
+    "source_to_recon_frame_blade_mean_m": {
+      "n": 21,
+      "mean": 1.3478401446477075,
+      "median": 1.0630252687651653,
+      "rmse": 1.5748147697192099,
+      "p95": 2.5430547618430803,
+      "maximum": 3.4224945381371894
+    }
+  },
+  "montages": {
+    "T1Down": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-mappo-two-camera-20261004-a02/evaluation/overview_T1Down.png",
+    "NacelleT1": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-mappo-two-camera-20261004-a02/evaluation/overview_NacelleT1.png"
+  },
+  "plots": {
+    "status": "UNAVAILABLE",
+    "reason": "matplotlib not installed; CSV and montages remain available"
+  },
+  "elapsed_s": 9.881846189498901
+}

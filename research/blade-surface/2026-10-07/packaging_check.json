@@ -1,0 +1,23 @@
+{
+  "status": "SNAPSHOT_BYTES_VERIFIED",
+  "source_files": 71,
+  "source_bytes": 724914,
+  "core_source_lines": 4147,
+  "zip_bytes": 409330,
+  "zip_sha256": "777167545860a0c9aec5689b167a516360c2d0b7ccd361a77176d490fb226332",
+  "project_repository": "https://github.com/snode11/wind-farm-blender",
+  "included_experiment_runs": [
+    "outputs/blade-surface-20261005-manual-a01",
+    "outputs/blade-surface-20261006-p2b-a01",
+    "outputs/blade-surface-20261006-exec-a01"
+  ],
+  "handoff_documents": [
+    "README.md",
+    "00_发给网页版GPT的提问.md",
+    "01_项目背景与GitHub本地差异.md",
+    "02_本地关键源码.md",
+    "03_实验进展与下一轮讨论依据.md",
+    "snapshot_manifest.json",
+    "github_alignment.json"
+  ]
+}

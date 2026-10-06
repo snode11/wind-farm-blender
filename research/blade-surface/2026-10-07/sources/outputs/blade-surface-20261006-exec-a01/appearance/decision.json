@@ -1,0 +1,23 @@
+{
+  "status": "COMPLETED_SOFTWARE_APPEARANCE_AND_DISPLAY",
+  "acceptance": "REVIEW_ONLY",
+  "geometry_preservation": "PASS_BYTE_IDENTICAL",
+  "rgb_and_mask_evidence": "PASS",
+  "fixed_q_uv": "PASS",
+  "native_timer_mesh_all_8": "PASS_WITH_EXPLICIT_UNKNOWN_ADAPTER",
+  "save_reopen_packed": "PASS_WITH_EXPLICIT_UNKNOWN_ADAPTER",
+  "corrupt_sidecar_preallocation_reject": "PASS",
+  "independent_static_visible_ui": "PASS_VISIBLE_FULL_FRAME_V2_REVIEW_ONLY",
+  "direct_legacy_reader_new_recon": "FAILED_SCHEMA_OBSERVED_SECTIONS_MISSING; retained and not claimed fixed in product",
+  "source_private_wideeval_access": "OS_DENIED",
+  "python_audited_prohibited_reads": 0,
+  "geometry_accuracy": "NOT_EVALUATED_BY_APPEARANCE_AGENT",
+  "complete_surface_observation": "NOT_ESTABLISHED",
+  "field_health": "NOT_ESTABLISHED",
+  "daily_installation": "UNCHANGED",
+  "final_comparison": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-surface-20261006-exec-a01/validation/display/comparison/comparison_full_frame_v2.blend",
+  "original_camera_static_ui": "PASS_READABLE_LOCAL_ONLY; bottom blade cropped",
+  "full_frame_v2_mesh_uv_texture": "PASS_6_LOCAL_MESH_CHECKS; frozen assets hashes unchanged",
+  "root_independent_full_frame_review": "PASS",
+  "root_reviewed_v2_screenshot_sha256": "c96b163ff9d4d7dbb8a18996280fd7d43c7e7b32e6ee2410978bc60d712ee691"
+}

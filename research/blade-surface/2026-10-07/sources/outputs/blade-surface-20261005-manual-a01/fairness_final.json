@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "checks": {
+    "A1_A3_same_config": true,
+    "A1_inactive_equals_fresh_A0": true,
+    "A3_inactive_equals_fresh_A0": true,
+    "A2_fixed_states_equals_A1": true,
+    "A2_recon_byte_equals_A1": true,
+    "A3_surface_recon_byte_equals_A3": true,
+    "A3_tracks_kept32": true,
+    "A3_no_visibility_dropping": true
+  },
+  "formal_run": "attempt02",
+  "source_template_sha256": "9253fdfb7bb1e76790129511a24b98311c08c7c14a2a54b0c012d260842b888c"
+}

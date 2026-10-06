@@ -1,0 +1,50 @@
+{
+ "status": "COMPLETED",
+ "algorithm_root": "/Users/eason/Desktop/wfcrl/blade_recon",
+ "algorithm_sources": {
+  "recon.py": {
+   "path": "/Users/eason/Desktop/wfcrl/blade_recon/recon.py",
+   "sha256": "e5aeeb8b5cfe9f69507a07e925e7a85ca763a3204757bb1bb57de5dc07e6bf88"
+  },
+  "model.py": {
+   "path": "/Users/eason/Desktop/wfcrl/blade_recon/model.py",
+   "sha256": "9253fdfb7bb1e76790129511a24b98311c08c7c14a2a54b0c012d260842b888c"
+  },
+  "camera.py": {
+   "path": "/Users/eason/Desktop/wfcrl/blade_recon/camera.py",
+   "sha256": "3c18384c5bb549a80945a766412c5c0ae14cd890f4900b5b94e6022cc123d644"
+  }
+ },
+ "wrapper": {
+  "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-mappo-two-camera-20261004-a02/scripts/solve.py",
+  "sha256": "899a845803491e55df50217c03cd810f519781431412a5fa7cdf5b382490f0f1"
+ },
+ "input": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-mappo-two-camera-20261004-a02/input",
+ "calibration_sha256": "cccafecfe906fdd1680e9192c89b3c110202b60d4cdcbef6daa5fed10637b0d8",
+ "expected_frames": 601,
+ "fit_scale": 1.0,
+ "input_camera_count": 2,
+ "camera_names": [
+  "T1Down",
+  "NacelleT1"
+ ],
+ "original_solver_parameters": {
+  "rpm_max": 20.0,
+  "first_max_nfev": 150,
+  "second_max_nfev": 150,
+  "later_max_nfev": 60,
+  "w_prior_first": 0.0,
+  "w_prior_second": 0.2,
+  "w_prior_later": 0.5
+ },
+ "adaptations": [
+  "Required external PNG masks; no automatic segmentation fallback",
+  "Camera instantiated from each frame calibration; transform already maps MODEL to CV",
+  "dt from successive relative timestamps; first-frame dt is 1/fps",
+  "Original optimizer, initialization, PhysPrior, last_obs and observability gating retained",
+  "Additional solver diagnostics and incremental progress output"
+ ],
+ "forbidden_input_sources": "No evaluation artifacts, MAPPO geometry or MAPPO states read",
+ "completed_frames": 601,
+ "elapsed_s": 123.38469505310059
+}

@@ -1,0 +1,15 @@
+schema_version = "1.0.0"
+id = "wfrl_blender"
+version = "0.3.16"
+name = "WFRL Blender"
+tagline = "Wind farm reinforcement-learning visualization workspace"
+maintainer = "WFRL"
+type = "add-on"
+blender_version_min = "5.2.0"
+license = ["SPDX:MIT"]
+tags = ["3D View", "Animation", "Scene"]
+
+
+[permissions]
+network = "Connect to WFRL Bridge and serve the selected camera video over RTSP"
+files = "Read simulation and video files, export MP4 and run configured video tools"

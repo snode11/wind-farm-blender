@@ -1,0 +1,382 @@
+{
+  "purpose": "Discussion-only text snapshot; not a runnable or installable project",
+  "captured_at": "2026-10-07T00:18:23+08:00",
+  "source_root": "/Users/eason/Desktop/wfcrl/wind farm RL",
+  "local_head": "e504ed66548c4b774664233341b70c87512561ef",
+  "public_repository": "https://github.com/snode11/wind-farm-blender",
+  "github_checked_on": "2026-10-07",
+  "github_alignment_record": "github_alignment.json",
+  "public_main_sha_verified_live": "1caafb9edb7593a96813b8edfddf5d70d040717f",
+  "public_manifest_version_verified_live": "0.3.13",
+  "experimental_archive_release_http_status": 404,
+  "experimental_archive_tag_http_status": 404,
+  "remote_asset_downloaded": false,
+  "included_experiment_runs": [
+    "outputs/blade-surface-20261005-manual-a01",
+    "outputs/blade-surface-20261006-p2b-a01",
+    "outputs/blade-surface-20261006-exec-a01"
+  ],
+  "limitations": [
+    "No complete runtime dependencies, source image sequence, large arrays, or Blender scenes",
+    "Current document paths are used; historical reports retain original text and state labels",
+    "No new image capture, reconstruction, rendering, or accuracy validation",
+    "Snapshot is current disk content, not just committed HEAD"
+  ],
+  "files": [
+    {
+      "path": "blade_recon/recon.py",
+      "bytes": 24984,
+      "sha256": "e5aeeb8b5cfe9f69507a07e925e7a85ca763a3204757bb1bb57de5dc07e6bf88"
+    },
+    {
+      "path": "blade_recon/model.py",
+      "bytes": 10311,
+      "sha256": "9253fdfb7bb1e76790129511a24b98311c08c7c14a2a54b0c012d260842b888c"
+    },
+    {
+      "path": "blade_recon/camera.py",
+      "bytes": 3894,
+      "sha256": "3c18384c5bb549a80945a766412c5c0ae14cd890f4900b5b94e6022cc123d644"
+    },
+    {
+      "path": "blade_recon/input_bundle.py",
+      "bytes": 7809,
+      "sha256": "f0f40a0a5417b8844ca1fa3f5cb40de6cbe735d5e6443e5d341dbeb214555f41"
+    },
+    {
+      "path": "blade_recon/surface_geometry.py",
+      "bytes": 6702,
+      "sha256": "bcc1fb4a51663ee1368547df04e286dee45f1434a159d9e8870edefb68ef0902"
+    },
+    {
+      "path": "blade_recon/window_surface_fit.py",
+      "bytes": 27268,
+      "sha256": "0201934504993bd38cef21cc220f5f9592c938817a306965e32f787ca8d7372c"
+    },
+    {
+      "path": "blade_recon/surface_texture.py",
+      "bytes": 17639,
+      "sha256": "7356eca240a5c0a145ec64d3d18ec82685167ae790b9700ab67058ba7b5d5275"
+    },
+    {
+      "path": "blade_recon/surface_io.py",
+      "bytes": 17823,
+      "sha256": "43137c9b8eb494a2d8a6381397fc7196ce64e2237edf4df80adb11f32c6cb1b7"
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/blade_recon_surface.py",
+      "bytes": 12098,
+      "sha256": "937586fcc36ad060b0d6a217367312bdf45b56b4ff7a8764836c04631bdf9987"
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/blade_recon_data.py",
+      "bytes": 15084,
+      "sha256": "7b88f27107a652236410318f25deb32d069afe320e0c64feaf8739a868d59359"
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/blade_recon_review.py",
+      "bytes": 19318,
+      "sha256": "cdcc0820ea00b9020dcf5ff6158b8755f01b45283c62088b0b159808e7e6374e"
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/panels/blade_recon.py",
+      "bytes": 6914,
+      "sha256": "27431adbd2777262da89048b5741254a8cb2a14ad6bde9e41a13c037e26965a5"
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/repair_marks.py",
+      "bytes": 14863,
+      "sha256": "bf31e29951c64ae884d15d2a92319938dfb96ed2f64e2cd59a25b9246c8388eb"
+    },
+    {
+      "path": "outputs/blade-recon-mappo-two-camera-20261004-a02/scripts/prepare_masks.py",
+      "bytes": 2806,
+      "sha256": "18a2f1a4a0052a4b471be758f938f57969b198518e03009e948c36ebe1547f42"
+    },
+    {
+      "path": "outputs/blade-recon-mappo-two-camera-20261004-a02/scripts/solve.py",
+      "bytes": 15685,
+      "sha256": "899a845803491e55df50217c03cd810f519781431412a5fa7cdf5b382490f0f1"
+    },
+    {
+      "path": "outputs/blade-recon-mappo-two-camera-20261004-a02/scripts/capture.py",
+      "bytes": 7436,
+      "sha256": "c603b255104ef8cfcf7eb7b7a439255a7c79e8d9f04110583b1ace1b51899339"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 2140,
+      "sha256": "4bccbe611b29c3075f8556c52d52cdd78856784973025708580f82cce526b594"
+    },
+    {
+      "path": "README.md",
+      "bytes": 17430,
+      "sha256": "5a10796c987bf7c7b9f1b1fc5b83f8ac8192c73b4c95e7e3698cd76a4089f5a0"
+    },
+    {
+      "path": "blender_frontend/README.md",
+      "bytes": 42189,
+      "sha256": "6836c1def510143e0c8a6f3c985b04066266f2592da41b78d387c34191da6e00"
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/blender_manifest.toml",
+      "bytes": 467,
+      "sha256": "aeb73c39240cf50d70a3dc4a8c1ffb1300c0a338811ba6fc9cbb5a0e5c040066"
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/split_reconstruction.py",
+      "bytes": 30426,
+      "sha256": "84df37d00e9eb4d99804c71054619fb6098e8ed36c373a0e551427bb92218bc3"
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/split_reconstruction_timing.py",
+      "bytes": 4620,
+      "sha256": "292eb9d75ca91a65ce45509293c42912ca6b7004a89f9defb14ee6b0406541cf"
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/split_reconstruction_ui.py",
+      "bytes": 13412,
+      "sha256": "042ffab057305cd6080769d43eebf9471615c4b773fd5b9ba0275f7908a793e3"
+    },
+    {
+      "path": "blade_recon/README.md",
+      "bytes": 8089,
+      "sha256": "207829b135ed277bc95ffcb09f3520b688dba7f5bee01ddbcb23f53e9cb1f844"
+    },
+    {
+      "path": "blade_recon/evaluate.py",
+      "bytes": 3526,
+      "sha256": "02b70c14077f609ec60d16b18d49fcea3061c71843d8d4f3e0f74dc6f40ef8f2"
+    },
+    {
+      "path": "blade_recon/docs/算法说明_三摄视频叶片三维重建_v0.1.md",
+      "bytes": 34424,
+      "sha256": "bde5349859786ea531a10faf3fa150d442ce097a68c524a8cd7045a829574197"
+    },
+    {
+      "path": "docs/blender/BladeRecon可视化使用说明.md",
+      "bytes": 7555,
+      "sha256": "4263dd88a17cccac9a425578f6be9369307c118924456688fbf1bdbb93515fc9"
+    },
+    {
+      "path": "docs/blender/releases/0.3.15发布核对.md",
+      "bytes": 7015,
+      "sha256": "2998e3fb9b0bd522c6f5a7352fbe790324bf0f98ad3efc082e3a224458a7f826"
+    },
+    {
+      "path": "docs/blender/releases/0.3.16发布核对.md",
+      "bytes": 7293,
+      "sha256": "9f31c1693c78edfc92470e4488456ce9e78604e243a73f130c0dfa76585985f4"
+    },
+    {
+      "path": "docs/blender/NREL缺陷编辑器.md",
+      "bytes": 3689,
+      "sha256": "b359710911d5211438f1314524a8b046adbf312c164c7a05764104e15360732b"
+    },
+    {
+      "path": "docs/proposal/reconstruction/NREL5MW_固定三摄叶片三维重建与表面缺陷首轮诊断方案_v1.1.md",
+      "bytes": 64258,
+      "sha256": "2cb24b15fd272607c0dae764679e8a65431833f944ca4b33e61b5179ec613ec8"
+    },
+    {
+      "path": "docs/README.md",
+      "bytes": 5628,
+      "sha256": "5315215f3060e14561611b548569d875adf07a2230c8d19fbeb077739926cc47"
+    },
+    {
+      "path": "docs/proposal/README.md",
+      "bytes": 3890,
+      "sha256": "e8f118ad244d634c98c2cb53372230dbab5985171c3dd6f7d35d42095305b8c6"
+    },
+    {
+      "path": "docs/proposal/叶片表面重建_2026-10-06/README.md",
+      "bytes": 6767,
+      "sha256": "8d796ea03cbd0cf7e9dcf2ab96e2b0183c3dc2f69dcee3f1ba2b67b793a4a399"
+    },
+    {
+      "path": "outputs/nrel-b1-repair-default-20261005/README.md",
+      "bytes": 4533,
+      "sha256": "6b47b6ca13c79d491e4d01b3d0e9197643330412987815e1793a051d78117a8c"
+    },
+    {
+      "path": "outputs/blade-recon-mappo-two-camera-20261004-a02/REPORT.md",
+      "bytes": 30322,
+      "sha256": "aedbaf10cc6937581b36e8cd80d2e35b06c3ca4f62b346d70507e4bda71cf5eb"
+    },
+    {
+      "path": "outputs/blade-recon-mappo-two-camera-20261004-a02/input/cameras.json",
+      "bytes": 3456,
+      "sha256": "f6866ad8224e5fca7b3dd56c759c2bc61c08b7d819bed05f24f3ca7ec45dea8b"
+    },
+    {
+      "path": "outputs/blade-recon-mappo-two-camera-20261004-a02/reconstruction/solver_manifest.json",
+      "bytes": 1906,
+      "sha256": "1dcc1c7d7a8ea4955af82b81e924e1dae89151d404693f6756fe2dfe7192979b"
+    },
+    {
+      "path": "outputs/blade-recon-mappo-two-camera-20261004-a02/evaluation/metrics.json",
+      "bytes": 16717,
+      "sha256": "0b06bf899cf0b271e4bbea9d2b6b5cde52556ad4ce7df71bbe16da3957ffb83c"
+    },
+    {
+      "path": "outputs/blade-recon-mappo-two-camera-20261004-a02/split-playback/bake_reconstruction.py",
+      "bytes": 10237,
+      "sha256": "857c0e12316cc413a3c8ba2a3690c7a04aa02fd003d8f576f9b328e904f5dcd4"
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/nrel_defects/defect_schema.py",
+      "bytes": 13370,
+      "sha256": "b25eeae56e9fc63311016327515dfab1e4e5b38eeb0c93e8b325b3de5b9f5509"
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/nrel_defects/reference_surface.py",
+      "bytes": 19964,
+      "sha256": "e8d04aa0085a7c855fa60dedf463a4611d90e960a03217e2d04bcf61099824ba"
+    },
+    {
+      "path": "outputs/blade-surface-20261005-manual-a01/REPORT.md",
+      "bytes": 16090,
+      "sha256": "0bd8ac067cd87c0481307cbd39d71e6562e847db1ba44c80141f658858538984"
+    },
+    {
+      "path": "outputs/blade-surface-20261005-manual-a01/REPRODUCE.md",
+      "bytes": 4821,
+      "sha256": "fa66368860b25de8548480341655c3b7e8a8e24d08edbb03c45ae5166ce849fc"
+    },
+    {
+      "path": "outputs/blade-surface-20261005-manual-a01/LOCAL_STORAGE_STATUS_20261006.md",
+      "bytes": 1474,
+      "sha256": "e1cfad15654243fffcc66ce49c00fcc33bb85f751e0e9a9ec65a983a9b24b618"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-p2b-a01/REPORT.md",
+      "bytes": 8799,
+      "sha256": "d0d89ef53a99da9fcc4d44f968d997a6cd677e5c6634fde82c3c95455fa9f0c4"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-p2b-a01/REPRODUCE.md",
+      "bytes": 5496,
+      "sha256": "d111444b901887636434ffbbfe80aff8518cac35c5a31d267c153b7918bd34b8"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-p2b-a01/LOCAL_STORAGE_STATUS_20261006.md",
+      "bytes": 1474,
+      "sha256": "e1cfad15654243fffcc66ce49c00fcc33bb85f751e0e9a9ec65a983a9b24b618"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/REPORT.md",
+      "bytes": 11612,
+      "sha256": "1ab0581665d56d67acb722f925da3ea89299c817cabb271c83c49ececb0854aa"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/REPRODUCE.md",
+      "bytes": 7570,
+      "sha256": "ba5c2e9593cf7499ca79b60efe47bb28db1b2429c9934e143c304df38734dd84"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/LOCAL_STORAGE_STATUS_20261006.md",
+      "bytes": 1474,
+      "sha256": "e1cfad15654243fffcc66ce49c00fcc33bb85f751e0e9a9ec65a983a9b24b618"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-p2b-a01/decision.json",
+      "bytes": 6952,
+      "sha256": "13614be0ad8ef4836cf2d695e3710393a9b99e86a98d2dcd231af32c9229850c"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-p2b-a01/experiment_protocol.json",
+      "bytes": 9361,
+      "sha256": "7be152f4a4ffda21815316e559900adb75116573baa268a5f491a76bf7b0f108"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/decision.json",
+      "bytes": 3272,
+      "sha256": "fc44520cc3bb0e4c8f5e2a74775e23c710dd8723a870e17314e89e2fbffbc70e"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/experiment_protocol.json",
+      "bytes": 6569,
+      "sha256": "b295e6437e9abfd89ffcc938eb1931ebedd6c18857f1292c45283358f7e84926"
+    },
+    {
+      "path": "outputs/blade-surface-20261005-manual-a01/input_contract_final.json",
+      "bytes": 2554,
+      "sha256": "03131d13493bc2c92ebebd349b3f8f8e609bdc024272a6f0c2ed127987dcab0c"
+    },
+    {
+      "path": "outputs/blade-surface-20261005-manual-a01/fairness_final.json",
+      "bytes": 468,
+      "sha256": "6cacd817509c0d956002d8545e41723f35fcfc33f8ca1e004a6dd36a2a43a42e"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/evaluation/blind_test_decision/decision.json",
+      "bytes": 11119,
+      "sha256": "dfe123ecbabb5a74bca6503a0eceb2998daa475216591004d1272ada029134c9"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/evaluation/automatic8_comparison/decision.json",
+      "bytes": 1955,
+      "sha256": "13102c915c8924264c99db172c3481555519b05ccaa6185862b881411af663d0"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/evaluation/long32_comparison/decision.json",
+      "bytes": 7347,
+      "sha256": "1c9178e2f17c1c11ac0f1b9db66fe5b8922fc7a5d8c5d1c6be22b51331a93281"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/tracking/decision.json",
+      "bytes": 1641,
+      "sha256": "783e74ae54de9b3269e94982e23a42bc683f3c5992643edf31182cd2574f38b4"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/local_defect/decision.json",
+      "bytes": 1091,
+      "sha256": "3e0f1ddcc118d90abf2314d8ca494f27d54053a05f383a56de1741b2c7f92aad"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/appearance/decision.json",
+      "bytes": 1352,
+      "sha256": "60b2ee4dfbebde59046cec05aebf604cfb38db814e5e895b896e5279901d3a74"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/numerics/REPORT.md",
+      "bytes": 6414,
+      "sha256": "6b2e5ba8097745760278a218e2969ad0cc81b90c9c86f9ec2053e5586d42a2e6"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/p2b/development/REPORT.md",
+      "bytes": 4932,
+      "sha256": "30174e543c8b9f80e3009ba65428cdbcb18a614453d33c800bc4b9222cf7074c"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/tracking/REPORT.md",
+      "bytes": 11680,
+      "sha256": "69c5adb414d273f98d33695b9bb498f7b71d73d293a0d0a12ca02ddac02b1602"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/evaluation/automatic8_comparison/REPORT.md",
+      "bytes": 943,
+      "sha256": "65eef6fa8adc349a69ee503c5a2403da84bb91d442fd3e7d79a51e0de1b94c7e"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/evaluation/long32_comparison/REPORT.md",
+      "bytes": 834,
+      "sha256": "b1c8fa1c2ef8dd10dcf6921a02da331ecf9d456424854a8b40d1fe04f21f2fba"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/local_defect/REPORT.md",
+      "bytes": 3105,
+      "sha256": "c4870e0c55a1b5c5133be1b4c6a6b6dbdd2dc2b68c6049a61f2f8b10ff4dacdf"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/appearance/REPORT.md",
+      "bytes": 7774,
+      "sha256": "4ddc7f8bed37640aa636e6c758706a5ddd95693b496bd5b4e5389b8b5231de9c"
+    },
+    {
+      "path": "outputs/blade-surface-20261006-exec-a01/validation/display/REPORT.md",
+      "bytes": 2784,
+      "sha256": "7b8154201f68a16a9c6ed1ddb8fcf2adf98e2145c5db99c121886fc96c361420"
+    }
+  ]
+}

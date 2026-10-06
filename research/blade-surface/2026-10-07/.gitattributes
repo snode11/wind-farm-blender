@@ -1,0 +1,5 @@
+# Preserve original bytes and historical formatting in research evidence.
+sources/** -text -whitespace
+# This generated view includes numbered original source lines and blank lines.
+02_本地关键源码.md -whitespace
+*.zip -text

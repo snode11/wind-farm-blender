@@ -1,0 +1,72 @@
+{
+  "schema": "surface-experiment-contract.v1",
+  "target_mode": "rotor",
+  "input_mode": "video",
+  "source_kind": "saved MAPPO synthetic appearance experiment, not field data",
+  "time_window_s": [
+    132.0,
+    132.7
+  ],
+  "frames": 8,
+  "raw_resolution_px": [
+    3840,
+    2160
+  ],
+  "fit_resolution_px": [
+    960,
+    540
+  ],
+  "formal_input": "WideInput only",
+  "holdout": "WideEval only; unread before A1/A3 freeze",
+  "render": "Workbench FLAT/MATERIAL/Standard; Ghost teaching overlay hidden; near10m/far1000m; physical occluders kept",
+  "calibration": "dynamic MODEL\u2192CV direct; no extra T_world_from_model multiply",
+  "crop": "none",
+  "raw_to_fit_affine": [
+    [
+      0.25,
+      0,
+      -0.375
+    ],
+    [
+      0,
+      0.25,
+      -0.375
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ],
+  "RGB": "cv2 BGR converted to RGB exactly once; texture nearest raw pixels",
+  "allowed": [
+    "selected RGB, RGB-derived blade masks and reviewed 2D corner/region annotations",
+    "declared healthy 13-state NREL approximation with1m designed prebend",
+    "timestamps and per-frame calibrated known camera"
+  ],
+  "forbidden_solver": [
+    "source patch position/size/UV/bindings",
+    "source dynamic mesh/state, object ID",
+    "WideEval RGB/calibration/labels",
+    "old a02 reconstruction/truth"
+  ],
+  "material_annotations": "4 visually reviewed rounded patch corner turns; 32 original-pixel observations; sigma2px; uniform patch identity is a hypothesis checked by independent source material motion only after freeze",
+  "active_states": [
+    "psi",
+    "pitch0",
+    "flap0",
+    "edge0"
+  ],
+  "inactive_states": "all other state values held at same fresh A0 image solution; no full-state claim",
+  "main_A1_A3": "identical A0 initial states, activity/bounds/priors/stopping budget60; A3 adds shared q and2D point constraints",
+  "A2": "copy A1 recon bytes; q-only max30 locates material without moving geometry",
+  "acceptance": "REVIEW_ONLY; no user-approved physical-use threshold",
+  "kernel_isolation": "solver_read_policy.sb denies evaluation/source assets/old result/source .blend; probe passed",
+  "formal_input_bundle": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-surface-20261005-manual-a01/input/solver_bundle_clean",
+  "connected_area_gte": 10000,
+  "azimuth_unbounded": true,
+  "finite_difference_relative_step": 0.001,
+  "formal_groups": "groups/attempt02",
+  "freeze": "groups/attempt02/primary_results_frozen.json",
+  "attempt01": "retained numerical failure, excluded from main comparison"
+}
