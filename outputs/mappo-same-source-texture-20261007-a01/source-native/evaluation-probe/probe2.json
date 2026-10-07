@@ -1,0 +1,380 @@
+[
+  {
+    "frame": 1,
+    "index": 0,
+    "blade": 1,
+    "new_error_m": 7.615851018272224e-06,
+    "old_error_m": 7.615851018272224e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 0.0,
+    "old_eval_time": 0.0,
+    "new_key_frame": 0.0,
+    "old_key_frame": 0.0,
+    "maximum_coordinate": [
+      779,
+      2
+    ],
+    "actual": 130.90380859375,
+    "expected": 130.90381620960102
+  },
+  {
+    "frame": 1,
+    "index": 0,
+    "blade": 2,
+    "new_error_m": 3.8145972922620786e-06,
+    "old_error_m": 3.8145972922620786e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 0.0,
+    "old_eval_time": 0.0,
+    "new_key_frame": 0.0,
+    "old_key_frame": 0.0,
+    "maximum_coordinate": [
+      67,
+      2
+    ],
+    "actual": 89.39602661132812,
+    "expected": 89.39602279673083
+  },
+  {
+    "frame": 1,
+    "index": 0,
+    "blade": 3,
+    "new_error_m": 3.8146516914139283e-06,
+    "old_error_m": 3.8146516914139283e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 0.0,
+    "old_eval_time": 0.0,
+    "new_key_frame": 0.0,
+    "old_key_frame": 0.0,
+    "maximum_coordinate": [
+      873,
+      2
+    ],
+    "actual": 73.69216918945312,
+    "expected": 73.69217300410482
+  },
+  {
+    "frame": 901,
+    "index": 150,
+    "blade": 1,
+    "new_error_m": 3.812133257952155e-06,
+    "old_error_m": 3.812133257952155e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 1500.0020751953125,
+    "old_eval_time": 1500.0020751953125,
+    "new_key_frame": 1500.0020751953125,
+    "old_key_frame": 1500.0020751953125,
+    "maximum_coordinate": [
+      1070,
+      2
+    ],
+    "actual": 112.61930084228516,
+    "expected": 112.61930465441841
+  },
+  {
+    "frame": 901,
+    "index": 150,
+    "blade": 2,
+    "new_error_m": 3.8139219782351574e-06,
+    "old_error_m": 3.8139219782351574e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 1500.0020751953125,
+    "old_eval_time": 1500.0020751953125,
+    "new_key_frame": 1500.0020751953125,
+    "old_key_frame": 1500.0020751953125,
+    "maximum_coordinate": [
+      208,
+      2
+    ],
+    "actual": 92.84410095214844,
+    "expected": 92.84410476607042
+  },
+  {
+    "frame": 901,
+    "index": 150,
+    "blade": 3,
+    "new_error_m": 3.810081793176323e-06,
+    "old_error_m": 3.810081793176323e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 1500.0020751953125,
+    "old_eval_time": 1500.0020751953125,
+    "new_key_frame": 1500.0020751953125,
+    "old_key_frame": 1500.0020751953125,
+    "maximum_coordinate": [
+      159,
+      2
+    ],
+    "actual": 85.19446563720703,
+    "expected": 85.19446182712524
+  },
+  {
+    "frame": 1801,
+    "index": 300,
+    "blade": 1,
+    "new_error_m": 3.810426534300859e-06,
+    "old_error_m": 3.810426534300859e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 3000.0078125,
+    "old_eval_time": 3000.0078125,
+    "new_key_frame": 3000.0078125,
+    "old_key_frame": 3000.0078125,
+    "maximum_coordinate": [
+      398,
+      2
+    ],
+    "actual": 75.93576049804688,
+    "expected": 75.93576430847341
+  },
+  {
+    "frame": 1801,
+    "index": 300,
+    "blade": 2,
+    "new_error_m": 7.622382668159844e-06,
+    "old_error_m": 7.622382668159844e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 3000.0078125,
+    "old_eval_time": 3000.0078125,
+    "new_key_frame": 3000.0078125,
+    "old_key_frame": 3000.0078125,
+    "maximum_coordinate": [
+      899,
+      2
+    ],
+    "actual": 131.35684204101562,
+    "expected": 131.35683441863296
+  },
+  {
+    "frame": 1801,
+    "index": 300,
+    "blade": 3,
+    "new_error_m": 3.814207559571514e-06,
+    "old_error_m": 3.814207559571514e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 3000.0078125,
+    "old_eval_time": 3000.0078125,
+    "new_key_frame": 3000.0078125,
+    "old_key_frame": 3000.0078125,
+    "maximum_coordinate": [
+      308,
+      2
+    ],
+    "actual": 89.21134948730469,
+    "expected": 89.21135330151225
+  },
+  {
+    "frame": 2701,
+    "index": 450,
+    "blade": 1,
+    "new_error_m": 0.00030804536135065064,
+    "old_error_m": 0.00030804536135065064,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 4499.98876953125,
+    "old_eval_time": 4499.98876953125,
+    "new_key_frame": 4499.98876953125,
+    "old_key_frame": 4499.98876953125,
+    "maximum_coordinate": [
+      1270,
+      2
+    ],
+    "actual": 70.53450012207031,
+    "expected": 70.53480816743166
+  },
+  {
+    "frame": 2701,
+    "index": 450,
+    "blade": 2,
+    "new_error_m": 0.00026878231228977256,
+    "old_error_m": 0.00026878231228977256,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 4499.98876953125,
+    "old_eval_time": 4499.98876953125,
+    "new_key_frame": 4499.98876953125,
+    "old_key_frame": 4499.98876953125,
+    "maximum_coordinate": [
+      1261,
+      2
+    ],
+    "actual": 47.83965301513672,
+    "expected": 47.83938423282443
+  },
+  {
+    "frame": 2701,
+    "index": 450,
+    "blade": 3,
+    "new_error_m": 0.0003209101056000918,
+    "old_error_m": 0.0003209101056000918,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 4499.98876953125,
+    "old_eval_time": 4499.98876953125,
+    "new_key_frame": 4499.98876953125,
+    "old_key_frame": 4499.98876953125,
+    "maximum_coordinate": [
+      1253,
+      1
+    ],
+    "actual": -14.614437103271484,
+    "expected": -14.614758013377084
+  },
+  {
+    "frame": 3598,
+    "index": 599,
+    "blade": 1,
+    "new_error_m": 7.617640221724287e-06,
+    "old_error_m": 7.617640221724287e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 5989.9658203125,
+    "old_eval_time": 5989.9658203125,
+    "new_key_frame": 5989.9658203125,
+    "old_key_frame": 5989.9658203125,
+    "maximum_coordinate": [
+      890,
+      2
+    ],
+    "actual": 137.3370361328125,
+    "expected": 137.33704375045272
+  },
+  {
+    "frame": 3598,
+    "index": 599,
+    "blade": 2,
+    "new_error_m": 3.8145075791362615e-06,
+    "old_error_m": 3.8145075791362615e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 5989.9658203125,
+    "old_eval_time": 5989.9658203125,
+    "new_key_frame": 5989.9658203125,
+    "old_key_frame": 5989.9658203125,
+    "maximum_coordinate": [
+      284,
+      2
+    ],
+    "actual": 85.17151641845703,
+    "expected": 85.17152023296461
+  },
+  {
+    "frame": 3598,
+    "index": 599,
+    "blade": 3,
+    "new_error_m": 3.8119801359925987e-06,
+    "old_error_m": 3.8119801359925987e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 5989.9658203125,
+    "old_eval_time": 5989.9658203125,
+    "new_key_frame": 5989.9658203125,
+    "old_key_frame": 5989.9658203125,
+    "maximum_coordinate": [
+      1265,
+      2
+    ],
+    "actual": 65.61082458496094,
+    "expected": 65.61082839694107
+  },
+  {
+    "frame": 3601,
+    "index": 600,
+    "blade": 1,
+    "new_error_m": 7.598093276328655e-06,
+    "old_error_m": 7.598093276328655e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 5999.9658203125,
+    "old_eval_time": 5999.9658203125,
+    "new_key_frame": 5999.9658203125,
+    "old_key_frame": 5999.9658203125,
+    "maximum_coordinate": [
+      1147,
+      2
+    ],
+    "actual": 148.28857421875,
+    "expected": 148.28858181684328
+  },
+  {
+    "frame": 3601,
+    "index": 600,
+    "blade": 2,
+    "new_error_m": 3.8111231503989984e-06,
+    "old_error_m": 3.8111231503989984e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 5999.9658203125,
+    "old_eval_time": 5999.9658203125,
+    "new_key_frame": 5999.9658203125,
+    "old_key_frame": 5999.9658203125,
+    "maximum_coordinate": [
+      38,
+      2
+    ],
+    "actual": 89.30176544189453,
+    "expected": 89.30176163077138
+  },
+  {
+    "frame": 3601,
+    "index": 600,
+    "blade": 3,
+    "new_error_m": 3.8143915759292213e-06,
+    "old_error_m": 3.8143915759292213e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 5999.9658203125,
+    "old_eval_time": 5999.9658203125,
+    "new_key_frame": 5999.9658203125,
+    "old_key_frame": 5999.9658203125,
+    "maximum_coordinate": [
+      1251,
+      2
+    ],
+    "actual": 72.0166015625,
+    "expected": 72.01659774810842
+  },
+  {
+    "frame": 52,
+    "index": 8,
+    "blade": 1,
+    "new_error_m": 3.8098922203744223e-06,
+    "old_error_m": 3.8098922203744223e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 80.00000762939453,
+    "old_eval_time": 80.00000762939453,
+    "new_key_frame": 80.00000762939453,
+    "old_key_frame": 80.00000762939453,
+    "maximum_coordinate": [
+      1051,
+      2
+    ],
+    "actual": 114.61861419677734,
+    "expected": 114.61861038688512
+  },
+  {
+    "frame": 52,
+    "index": 8,
+    "blade": 2,
+    "new_error_m": 3.812899237232159e-06,
+    "old_error_m": 3.812899237232159e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 80.00000762939453,
+    "old_eval_time": 80.00000762939453,
+    "new_key_frame": 80.00000762939453,
+    "old_key_frame": 80.00000762939453,
+    "maximum_coordinate": [
+      186,
+      2
+    ],
+    "actual": 83.66144561767578,
+    "expected": 83.66144943057502
+  },
+  {
+    "frame": 52,
+    "index": 8,
+    "blade": 3,
+    "new_error_m": 3.812135560110619e-06,
+    "old_error_m": 3.812135560110619e-06,
+    "new_old_error_m": 0.0,
+    "new_eval_time": 80.00000762939453,
+    "old_eval_time": 80.00000762939453,
+    "new_key_frame": 80.00000762939453,
+    "old_key_frame": 80.00000762939453,
+    "maximum_coordinate": [
+      1113,
+      2
+    ],
+    "actual": 123.01080322265625,
+    "expected": 123.01080703479181
+  }
+]

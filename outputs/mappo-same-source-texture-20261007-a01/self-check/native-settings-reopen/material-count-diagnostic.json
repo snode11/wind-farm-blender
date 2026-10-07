@@ -1,0 +1,12 @@
+{
+  "before_count": 173,
+  "after_count": 172,
+  "missing_materials": [
+    {
+      "name": "WFRL.ClearanceBeam.Hit",
+      "users": 0,
+      "fake_user": false
+    }
+  ],
+  "unexpected_new_materials": []
+}

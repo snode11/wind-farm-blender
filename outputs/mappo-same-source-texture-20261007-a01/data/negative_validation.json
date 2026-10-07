@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "checks": {
+    "reject_name": "reconstruction/input camera identity mismatch at frame 0",
+    "reject_matrix": "reconstruction/input per-frame calibration mismatch at frame 0",
+    "reject_rgb_hash": "reconstruction/input file hash mismatch: T1Down/000000.png",
+    "reject_time": "reconstruction/input timestamp mismatch for frame 0"
+  }
+}

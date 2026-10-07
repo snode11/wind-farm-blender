@@ -1,0 +1,49 @@
+[
+  {
+    "case": "baseline",
+    "runtime": "ACCEPTED_TO_ALLOCATION",
+    "message": "validation accepted; texture material allocation reached"
+  },
+  {
+    "case": "wrong_model_hash",
+    "runtime": "REJECTED",
+    "error": "ValueError",
+    "message": "同源纹理来源前向模型身份缺失或不匹配"
+  },
+  {
+    "case": "missing_model_hash",
+    "runtime": "REJECTED",
+    "error": "ValueError",
+    "message": "同源纹理来源前向模型身份缺失或不匹配"
+  },
+  {
+    "case": "wrong_simulation_t",
+    "runtime": "REJECTED",
+    "error": "ValueError",
+    "message": "同源纹理保存样本的 sim_t 或 blender_frame 时间映射缺失或不匹配"
+  },
+  {
+    "case": "wrong_blender_frame",
+    "runtime": "REJECTED",
+    "error": "ValueError",
+    "message": "同源纹理保存样本的 sim_t 或 blender_frame 时间映射缺失或不匹配"
+  },
+  {
+    "case": "wrong_reconstruction_fps",
+    "runtime": "REJECTED",
+    "error": "ValueError",
+    "message": "同源纹理必须使用601个10Hz实际保存样本及40×32前向模型"
+  },
+  {
+    "case": "wrong_declared_clock",
+    "runtime": "REJECTED",
+    "error": "ValueError",
+    "message": "同源纹理来源时间映射缺失或不匹配"
+  },
+  {
+    "case": "wrong_asset_bytes",
+    "runtime": "REJECTED",
+    "error": "ValueError",
+    "message": "同源纹理来源文件校验失败：texture/blade1_tex.png"
+  }
+]

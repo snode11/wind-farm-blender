@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "source_files_rehashed_and_unchanged": 5,
+  "source_RGB_and_masks_rehashed_and_unchanged": 2404,
+  "preserved_601_states_uncertainty_coverage_and_clock": true,
+  "preserved_1202_dynamic_camera_values": true,
+  "frontend_ReconSequence_and_TexturePackage_reading": "PASS",
+  "resource_manifest_files_checked": 9,
+  "diagnostic_repeat_byte_identity": {
+    "blade1_tex.png": true,
+    "blade2_tex.png": true,
+    "blade3_tex.png": true,
+    "texture_data.npz": true
+  },
+  "asset_manifest_sha256": "6e542f6bddc9aa57dd8643a6463e8e20054cbe4a5abdec23b319e1e034718ffb",
+  "negative_validation": {
+    "status": "PASS",
+    "checks": {
+      "reject_name": "reconstruction/input camera identity mismatch at frame 0",
+      "reject_matrix": "reconstruction/input per-frame calibration mismatch at frame 0",
+      "reject_rgb_hash": "reconstruction/input file hash mismatch: T1Down/000000.png",
+      "reject_time": "reconstruction/input timestamp mismatch for frame 0"
+    }
+  },
+  "scope": "host-data validation; actual Blender window validation belongs to frontend delivery"
+}

@@ -1,0 +1,23 @@
+{
+  "changed": [
+    "panels/farm_replay.py",
+    "split_reconstruction.py",
+    "split_reconstruction_ui.py",
+    "split_surface_texture.py"
+  ],
+  "added": [
+    "assets/blade_recon_mappo_tex/manifest.json",
+    "assets/blade_recon_mappo_tex/model_compatibility.json",
+    "assets/blade_recon_mappo_tex/recon.json",
+    "assets/blade_recon_mappo_tex/reference/atlas.py",
+    "assets/blade_recon_mappo_tex/reference/model.py",
+    "assets/blade_recon_mappo_tex/texture/blade1_tex.png",
+    "assets/blade_recon_mappo_tex/texture/blade2_tex.png",
+    "assets/blade_recon_mappo_tex/texture/blade3_tex.png",
+    "assets/blade_recon_mappo_tex/texture/texture.json",
+    "assets/blade_recon_mappo_tex/texture_quality.json",
+    "split_mappo_texture.py"
+  ],
+  "removed": [],
+  "unchanged_count": 153
+}

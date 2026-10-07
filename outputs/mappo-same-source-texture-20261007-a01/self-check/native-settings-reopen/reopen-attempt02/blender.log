@@ -1,0 +1,6 @@
+00:00.632  blend            | Read blend: "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-settings-reopen/prepare-attempt01/distinct-source-settings.blend"
+NATIVE_SOURCE_SETTINGS_FRESH_REOPEN_PASS
+00:33.524  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 219, total unfreed memory 0.044930 MB

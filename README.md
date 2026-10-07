@@ -5,13 +5,19 @@
 | 产品 | 当前版本 | 用途 | 下载与使用 |
 | --- | --- | --- | --- |
 | GW184 三相机与叶片缺陷 | **0.4.0** | 参考 DTU 的 GW184 尺寸合成刚性模型、固定三相机、六类缺陷编辑 | [下载独立运行 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.4.0/gw184_three_camera_defects-0.4.0.zip)，完整解压后启动；[使用说明](docs/blender/GW184三相机与缺陷编辑器.md) |
-| NREL 5MW / WFRL 前端 | **0.3.17** | 三机柔性回放、六类叶片缺陷、三相机、双束与 TLS 候选、Blade Recon 0.2 纹理与重建对照 | [下载 Blender 扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.17/wfrl_blender-0.3.17.zip)，通过 Install from Disk 安装；[前端说明](前端readme.md) |
+| NREL 5MW / WFRL 前端 | **0.3.17.1** | 三机柔性回放、六类叶片缺陷、三相机、双束与 TLS 候选、MAPPO 同源纹理同步对照 | [下载 Blender 扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.17.1/wfrl_blender-0.3.17.1.zip)，通过 Install from Disk 安装并重启；[前端说明](前端readme.md) |
 
-[0.3.17 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.17)提供当前 NREL 扩展 ZIP。[0.4.0 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.4.0) 保留 GW184 独立包及当时的 NREL 0.3.12 ZIP；GW184 的版本号不表示 NREL 扩展已升级。
+[0.3.17.1 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.17.1)提供当前 NREL 扩展 ZIP。包内兼容版本为 `0.3.17+1`，build metadata 不用于自动升级排序，请手动安装。[0.4.0 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.4.0) 保留 GW184 独立包及当时的 NREL 0.3.12 ZIP；GW184 的版本号不表示 NREL 扩展已升级。
 
-**NREL 0.3.17 发布仅更新安装 ZIP：** 本次未提交或推送 0.3.17 新版实现源码，`v0.3.17` 指向发布时远端 `main` 的 `beb92fcfaac9e972dc61b7a560546f11a7a5127a`。GitHub 自动生成的 Source code 归档不能当作 0.3.17 安装包。0.3.13 已同步完整构建源码与内置回放资源；0.3.10–0.3.12 与 0.3.15 的历史源码归档仍按各版本原有范围阅读。
+**NREL 0.3.17.1 发布时仅更新安装 ZIP：** 新版扩展实现源码未提交或推送，后续另行同步文档和验证记录。`v0.3.17.1` 指向发布时远端 `main` 的 `9d7b5596a781b8ea5040d18b2f009268313a8821`。GitHub 自动生成的 Source code 归档不能当作当前安装包。0.3.13 已同步完整构建源码与内置回放资源；历史源码归档仍按各版本原有范围阅读。
 
-本次仅同步发布与使用文档；公开扩展实现与构建资源仍对应 **0.3.13**。`v0.3.17` 保持上述发布时提交，不随文档同步移动。
+## [0.3.17.1](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.17.1) · 2026-10-08 · MAPPO 同源纹理同步对照与状态修复
+
+- 新增同一 MAPPO 两相机实验的 601 保存样本与固定灰度图集同步对照，共用时间轴，保留原几何示例和 120 样本独立合成入口。
+- 两个纹理来源分别保留显示方式、叶片与观察位置等 9 项设置；修复失败切换的状态副作用和布局忙时取消完整取景仍关闭近景追踪的问题。
+- 构建与运行时补齐来源、模型身份及全部 601 样本的严格时钟校验；样本步进首尾钳制，连续播放两侧共同循环。
+
+已知限制：最终 169 文件 ZIP 的隔离安装、三相机／投影及独立后台嵌入恢复通过；同功能修订的窗口往返与保存重开证据分别记录，未重复新版全功能窗口或 FPS 验收。几何与纹理准确性仍为 **NOT_ACCEPTED**，图集有模糊、条带、接缝及叶尖错贴，人工观察点不代表真实缺陷检测。Windows/Linux、现场效果及雷达 **REVIEW_ONLY / PENDING_ACCEPTANCE** 状态保留。仅发布 ZIP，证据见 [0.3.17.1 发布核对](docs/blender/releases/0.3.17.1发布核对.md)。
 
 ## [0.3.17](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.17) · 2026-10-07 · Blade Recon 0.2 表面纹理与重建对照
 
@@ -20,7 +26,7 @@
 - MAPPO 的 **进入重建对照** 使用内置独立合成纹理样例，支持样本步进、完整取景、布局恢复及退出；修复分屏侧栏绘制时写入材质导致的显示问题。
 - 保留便携 MAPPO＋重建示例、NREL 缺陷编辑器、三相机及雷达回放。
 
-已知限制：最终 157 文件 ZIP 的 macOS Blender 5.2.1 LTS 隔离安装、三相机／投影后台回归、纹理导入与新进程保存恢复通过；本次未重测可见窗口操作或 FPS。右侧为 **SYNTHETIC** 独立来源与时钟的 120 个 10 Hz 保存样本（0–11.9 s），增强仅改变显示，人工近景不代表自动缺陷检测、几何精度或现场验收。外部 Blade Recon 0.2 求解研究代码不随扩展打包；既有精度与稳定性问题、Windows/Linux 未实测及雷达 **REVIEW_ONLY / PENDING_ACCEPTANCE** 状态保留。仅上传 `wfrl_blender-0.3.17.zip`，未提交或推送实现源码；证据与边界见 [0.3.17 发布核对](docs/blender/releases/0.3.17发布核对.md)。
+已知限制：最终 157 文件 ZIP 的 macOS Blender 5.2.1 LTS 隔离安装、三相机／投影后台回归、纹理导入与新进程保存恢复通过；本次未重测可见窗口操作或 FPS。右侧为 **SYNTHETIC** 独立来源与时钟的 120 个 10 Hz 保存样本（0–11.9 s），增强仅改变显示，人工近景不代表自动缺陷检测、几何精度或现场验收。外部 Blade Recon 0.2 求解研究代码不随扩展打包；既有精度与稳定性问题、Windows/Linux 未实测及雷达 **REVIEW_ONLY / PENDING_ACCEPTANCE** 状态保留。仅上传 `wfrl_blender-0.3.17.zip`，未提交或推送源码；证据与边界见 [0.3.17 发布核对](docs/blender/releases/0.3.17发布核对.md)。
 
 ## [0.3.16](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.16) · 2026-10-05 · NREL 六类叶片缺陷编辑器
 
@@ -46,7 +52,7 @@
 - 同步当前 NREL 前端、雷达算法/读取器、相关工具、测试及内置源/旧法/TLS结果资源；克隆本版源码后可直接构建包含两种回放的扩展。0.3.10–0.3.12 的历史源码归档保持原样。
 - GW184 0.4.0 六类缺陷独立包继续保留；本次雷达更新仅进入 NREL 扩展。
 
-已知限制：两种方法仍为 **REVIEW_ONLY / PENDING_ACCEPTANCE**；TLS 是显式候选，未通过用途联合精度门槛或现场验证。软件/安装/窗口回归不代表全程帧率、连续时间漏测率、Windows/Linux 或设备精度验收。实际验证范围见 [0.3.13 发布核对](docs/blender/0.3.13发布核对.md)。
+已知限制：两种方法仍为 **REVIEW_ONLY / PENDING_ACCEPTANCE**；TLS 是显式候选，未通过用途联合精度门槛或现场验证。软件/安装/窗口回归不代表全程帧率、连续时间漏测率、Windows/Linux 或设备精度验收。实际验证范围见 [0.3.13 发布核对](docs/blender/releases/0.3.13发布核对.md)。
 
 ## [0.4.0](https://github.com/snode11/wind-farm-blender/releases/tag/v0.4.0) · 2026-09-30 · GW184 三相机与叶片缺陷独立包
 
@@ -92,15 +98,15 @@
 
 ## 快速开始
 
-1. 下载 [wfrl_blender-0.3.17.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.17/wfrl_blender-0.3.17.zip)，保留压缩格式。
+1. 下载 [wfrl_blender-0.3.17.1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.17.1/wfrl_blender-0.3.17.1.zip)，保留压缩格式。
 2. Blender → **Edit → Preferences → Get Extensions → Install from Disk**，选择 ZIP 并启用 WFRL Blender。更新扩展后重启 Blender。
 3. 新建 General 场景，鼠标置于三维视图，按 **N**，在 **MAPPO** 侧栏点击 **加载 MAPPO · 60 秒**。
-4. 在 **进入重建对照** 查看右侧独立合成纹理样例，使用原始／增强切换、亮斑／横细线／纵细线近景、样本步进、完整取景及退出。右侧 120 个保存样本与左侧 MAPPO 使用独立来源和时钟；操作见 [Blade Recon 使用说明](docs/blender/BladeRecon可视化使用说明.md)。
-5. 点击 **退出对照** 返回原三机回放；原 **MAPPO＋重建示例** 仍可打开便携几何示例。**View → 三相机 → 三路对照** 提供 2×2、三列与单路观察，**MAPPO → 净空** 保留默认 **双束净空 / S1**、显式 **TLS 候选 / S1** 和旧 B2 回放。
+4. 在 **同源纹理同步对照** 查看右侧 601 样本与灰度图集，使用中段／叶尖观察点、原始／对比增强、样本步进及完整取景。**独立合成纹理样例**保留 120 样本独立游标；操作见[前端说明](前端readme.md)。
+5. 点击 **退出对照** 返回原三机回放；**打开几何重建示例…** 仍可打开便携几何示例。**View → 三相机 → 三路对照** 提供 2×2、三列与单路观察，**MAPPO → 净空** 保留默认 **双束净空 / S1**、显式 **TLS 候选 / S1** 和旧 B2 回放。
 
 加载普通 MAPPO 后，可在 **MAPPO → NREL 5MW · 叶片缺陷** 点击 **启动缺陷编辑器**；六形态操作和三相机分析见 [NREL 缺陷编辑器](docs/blender/NREL缺陷编辑器.md)。
 
-ZIP 内置离线回放数据、读取器、缺陷编辑器和便携示例；离线观看无需配置 Python 后端、MPI 或 FAST.Farm。请安装 0.3.17 Release 附件 ZIP，自动生成的 **Source code** 不包含本次未提交的完整新版实现。安装与验证范围见[安装说明](docs/blender/INSTALL.md)和[当前发布状态](docs/blender/发布状态与验证范围.md)。
+ZIP 内置离线回放数据、读取器、缺陷编辑器和便携示例；离线观看无需配置 Python 后端、MPI 或 FAST.Farm。请安装 0.3.17.1 Release 附件 ZIP，自动生成的 **Source code** 不包含本次未提交的完整新版实现。安装与验证范围见[安装说明](docs/blender/INSTALL.md)和[当前发布状态](docs/blender/发布状态与验证范围.md)。
 
 ## 已发布历史
 

@@ -1,0 +1,34 @@
+{
+  "status": "PUBLISHED",
+  "tag": "v0.3.17.1",
+  "target_commit": "9d7b5596a781b8ea5040d18b2f009268313a8821",
+  "latest": true,
+  "assets": [
+    "wfrl_blender-0.3.17.1.zip"
+  ],
+  "source_committed": false,
+  "source_pushed": false,
+  "archive_sha256_before_upload": "cfaa108646d77845bfe2b07ff3f052fbaf0529231836ee09b7423f0e00345df3",
+  "command": [
+    "gh",
+    "release",
+    "create",
+    "v0.3.17.1",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/package/wfrl_blender-0.3.17.1.zip",
+    "--repo",
+    "snode11/wind-farm-blender",
+    "--target",
+    "9d7b5596a781b8ea5040d18b2f009268313a8821",
+    "--title",
+    "NREL / WFRL 0.3.17.1 · MAPPO 同源纹理同步对照与状态修复",
+    "--notes-file",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/release-notes.md",
+    "--latest"
+  ],
+  "post_upload_download_or_comparison": "NOT_RUN",
+  "exit_code": 0,
+  "stdout": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.17.1\n",
+  "stderr": "",
+  "url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.17.1",
+  "published_at_utc": "2026-10-07T16:16:16.344611+00:00"
+}

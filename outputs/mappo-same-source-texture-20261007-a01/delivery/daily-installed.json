@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "package_path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "verified_files": 168,
+  "mismatches": [],
+  "unexpected_files": [],
+  "ignored": [
+    "__pycache__",
+    "*.pyc"
+  ],
+  "command": [
+    "/Applications/Blender.app/Contents/MacOS/Blender",
+    "--command",
+    "extension",
+    "install-file",
+    "-r",
+    "user_default",
+    "--enable",
+    "--no-prefs",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-package/attempt01/package/wfrl_blender-0.3.17.zip"
+  ],
+  "install_returncode": 0,
+  "prefs_before_sha256": "4f3760f9ccff9ebe67696dc1d617c20a8a0d269026ae20d34d0667cdefb8e8ab",
+  "prefs_after_sha256": "4f3760f9ccff9ebe67696dc1d617c20a8a0d269026ae20d34d0667cdefb8e8ab",
+  "archive_sha256": "45a12c02b22a12be322d107ccad13754641eb676bdbca2b4deb22a6a06b7cdf6",
+  "installation_marker": "STATUS Reinstalled \"wfrl_blender\"",
+  "verification_note": "Initial wrapper expected Installed marker and stopped after successful Reinstalled command; no second install was needed."
+}

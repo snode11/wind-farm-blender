@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "release_version": "0.3.17.1",
+  "manifest_version": "0.3.17+1",
+  "archive": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/package/wfrl_blender-0.3.17.1.zip",
+  "sha256": "cfaa108646d77845bfe2b07ff3f052fbaf0529231836ee09b7423f0e00345df3",
+  "size_bytes": 98992149,
+  "file_count": 169,
+  "changed_files_from_verified_revision": [
+    "blender_manifest.toml"
+  ],
+  "exact_version_only_delta": true,
+  "unchanged_files_from_verified_revision": 168,
+  "renamed_copy_bytes_equal": true,
+  "archive_inventory": "PASS",
+  "isolated_package_validation": "PASS",
+  "user_preferences_preserved": true,
+  "daily_install_changed": false,
+  "source_push": false,
+  "old_verified_zip": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-package/attempt02/package/wfrl_blender-0.3.17.zip",
+  "old_verified_zip_sha256": "36fc6c837c23da9d99c6e29609775fb8bdb776ae86250758353b9b9b407502d0",
+  "post_upload_comparison": "NOT_PLANNED"
+}

@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "baseline_files_unchanged": {
+    "blender_frontend/wfrl_blender/assets/examples/mappo_reconstruction_split.blend": true,
+    "blender_frontend/wfrl_blender/assets/mappo/manifest.json": true,
+    "outputs/blade-recon-mappo-two-camera-20261004-a02/reconstruction/recon.json": true,
+    "outputs/blade-recon-mappo-two-camera-20261004-a02/input/calibration.json": true,
+    "README.md": true,
+    "CHANGELOG.md": true
+  },
+  "historical_source_files_checked": 5,
+  "historical_rgb_and_mask_files_checked": 2404,
+  "historical_source_mismatches": [],
+  "zip_sha256": "45a12c02b22a12be322d107ccad13754641eb676bdbca2b4deb22a6a06b7cdf6",
+  "daily_install_verified_files": 168,
+  "daily_install_mismatches": [],
+  "daily_install_unexpected_files": [],
+  "source_to_zip_mismatches": [],
+  "preferences_unchanged": true,
+  "git_status_before_entries": 37181,
+  "git_status_after_entries": 40116,
+  "preexisting_status_entries_removed": [],
+  "git_commit_push_or_release_performed": false,
+  "scope": "Read-only bytes and status inventory; preexisting modifications were retained."
+}

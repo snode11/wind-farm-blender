@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "method": "cua_repl actual native app clicks and screenshots",
+  "date": "2026-10-07",
+  "window": "same-source-saved.blend - Blender 5.2.1 LTS",
+  "file": "daily-window/attempt01/same-source-saved.blend",
+  "observations": [
+    {"action": "initial visible daily installed window", "frame": 52, "playback_sim_s": 117.850, "reconstruction_sim_s": 117.800, "sample_one_based": 9, "held_age_ms": 50, "right_detail_visible": true},
+    {"action": "clicked 下一样本", "frame": 55, "playback_sim_s": 117.900, "reconstruction_sim_s": 117.900, "sample_one_based": 10, "held_age_ms": 0},
+    {"action": "clicked 播放", "frame": 321, "playback_sim_s": 122.333, "reconstruction_sim_s": 122.300, "sample_one_based": 54, "held_age_ms": 33.3, "left_rotor_and_right_saved_geometry_advanced": true},
+    {"action": "clicked 暂停", "frame": 987, "playback_sim_s": 133.433, "reconstruction_sim_s": 133.400, "sample_one_based": 165, "held_age_ms": 33.3, "paused_visible": true},
+    {"action": "clicked 完整取景", "all_three_reconstruction_blades_in_frame": true, "green_and_orange_constraint_colors_visible": true},
+    {"action": "clicked 跟随选中表面近景", "returned_to_textured_surface_patch": true, "right_sidebar_hidden": true, "fixed_gray_atlas_and_mosaic_artifacts_visible": true}
+  ],
+  "final_window_left_open": true,
+  "final_state": "paused at frame 987 with right surface detail",
+  "test_copy_has_unsaved_ui_changes": true,
+  "canonical_or_user_file_saved": false,
+  "scope": "Actual clickable controls and visible presentation; no reconstruction accuracy or performance acceptance."
+}

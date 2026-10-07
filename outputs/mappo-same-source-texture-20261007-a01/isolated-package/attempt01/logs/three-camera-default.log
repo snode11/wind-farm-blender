@@ -1,0 +1,5 @@
+THREE_CAMERA_DEFAULT_PASS [27, 27] /Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-package/attempt01/profile/extensions/wfrl_blender/__init__.py
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

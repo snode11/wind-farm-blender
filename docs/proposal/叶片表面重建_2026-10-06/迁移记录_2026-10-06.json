@@ -1,0 +1,81 @@
+{
+  "date": "2026-10-06",
+  "completed_utc": "2026-10-05T17:51:27.454124+00:00",
+  "status": "COMPLETED_DOCUMENT_MOVE_ONLY",
+  "destination": "/Users/eason/Desktop/wfcrl/wind farm RL/docs/proposal/叶片表面重建_2026-10-06",
+  "moved_files": 7,
+  "old_sources_absent": true,
+  "previous_backups_and_draft_byte_unchanged": true,
+  "protected_source_report_release_docs_unchanged": true,
+  "files": [
+    {
+      "old_path": "/Users/eason/Downloads/叶片表面重建_Codex交接_2026-10-05.md",
+      "new_path": "/Users/eason/Desktop/wfcrl/wind farm RL/docs/proposal/叶片表面重建_2026-10-06/叶片表面重建_Codex交接_2026-10-05.md",
+      "before_bytes": 80546,
+      "before_sha256": "aa939d83a920c18974cd82385181a42d71e4701f9822dbaa284235d05a190368",
+      "after_bytes": 80967,
+      "after_sha256": "56fa95effffe6ab536e52236f07c6720c6c636fadf211f93f7582447a7b8421c",
+      "content_changed_for_links": true
+    },
+    {
+      "old_path": "/Users/eason/Downloads/先发给Codex_执行说明.md",
+      "new_path": "/Users/eason/Desktop/wfcrl/wind farm RL/docs/proposal/叶片表面重建_2026-10-06/先发给Codex_执行说明.md",
+      "before_bytes": 1872,
+      "before_sha256": "755920ba44e3cdf1da8dfcfec7373a0444dcf0e22961a992ce2f5f8045726267",
+      "after_bytes": 2051,
+      "after_sha256": "3459090d77c376bbcc8cbf6a2e7bd54509f5d420f37ee9af33006bdeb0b156c3",
+      "content_changed_for_links": true
+    },
+    {
+      "old_path": "/Users/eason/Downloads/叶片表面重建_方案v3修订资料_2026-10-06/P2b_experiment_protocol_DRAFT_v3.json",
+      "new_path": "/Users/eason/Desktop/wfcrl/wind farm RL/docs/proposal/叶片表面重建_2026-10-06/叶片表面重建_方案v3修订资料_2026-10-06/P2b_experiment_protocol_DRAFT_v3.json",
+      "before_bytes": 7102,
+      "before_sha256": "ef99d490664d0edb3141b25c3c745a60c1fc2bcaad894eb01c9bb95ff134d846",
+      "after_bytes": 7102,
+      "after_sha256": "ef99d490664d0edb3141b25c3c745a60c1fc2bcaad894eb01c9bb95ff134d846",
+      "content_changed_for_links": false
+    },
+    {
+      "old_path": "/Users/eason/Downloads/叶片表面重建_方案v3修订资料_2026-10-06/README_清理后.md",
+      "new_path": "/Users/eason/Desktop/wfcrl/wind farm RL/docs/proposal/叶片表面重建_2026-10-06/叶片表面重建_方案v3修订资料_2026-10-06/README_清理后.md",
+      "before_bytes": 455,
+      "before_sha256": "e239cdfa22c9dd3a9e58cf1329040d71dc71026583f75818e25072e01975446b",
+      "after_bytes": 715,
+      "after_sha256": "95688530d30152d06e5de5c7611ac20ddff9d3409ec8226263996502cf6812d4",
+      "content_changed_for_links": true
+    },
+    {
+      "old_path": "/Users/eason/Downloads/叶片表面重建_方案v3修订资料_2026-10-06/修订文件清单.json",
+      "new_path": "/Users/eason/Desktop/wfcrl/wind farm RL/docs/proposal/叶片表面重建_2026-10-06/叶片表面重建_方案v3修订资料_2026-10-06/修订文件清单.json",
+      "before_bytes": 2730,
+      "before_sha256": "148720abcab5b6efe885cad596745e050c2a2c9f5d280c8e4ef943dc7f601fd9",
+      "after_bytes": 2730,
+      "after_sha256": "148720abcab5b6efe885cad596745e050c2a2c9f5d280c8e4ef943dc7f601fd9",
+      "content_changed_for_links": false
+    },
+    {
+      "old_path": "/Users/eason/Downloads/叶片表面重建_方案v3修订资料_2026-10-06/原执行说明_v2_未改动.md",
+      "new_path": "/Users/eason/Desktop/wfcrl/wind farm RL/docs/proposal/叶片表面重建_2026-10-06/叶片表面重建_方案v3修订资料_2026-10-06/原执行说明_v2_未改动.md",
+      "before_bytes": 3603,
+      "before_sha256": "76b31fe22dadbc511eda02c7b0c7df96f34d03943bbb5bdef07b576515517b89",
+      "after_bytes": 3603,
+      "after_sha256": "76b31fe22dadbc511eda02c7b0c7df96f34d03943bbb5bdef07b576515517b89",
+      "content_changed_for_links": false
+    },
+    {
+      "old_path": "/Users/eason/Downloads/叶片表面重建_方案v3修订资料_2026-10-06/原方案_v2_未改动.md",
+      "new_path": "/Users/eason/Desktop/wfcrl/wind farm RL/docs/proposal/叶片表面重建_2026-10-06/叶片表面重建_方案v3修订资料_2026-10-06/原方案_v2_未改动.md",
+      "before_bytes": 52865,
+      "before_sha256": "e7b1571659b6a1f5a3b4e67dd02cb6489deec73ffdc5df51e43a7ca36aa2c950",
+      "after_bytes": 52865,
+      "after_sha256": "e7b1571659b6a1f5a3b4e67dd02cb6489deec73ffdc5df51e43a7ca36aa2c950",
+      "content_changed_for_links": false
+    }
+  ],
+  "planning_index_update": {
+    "path": "/Users/eason/Desktop/wfcrl/wind farm RL/前端更新计划.md",
+    "before_sha256": "d15bf57eb7fffc1dd7f47a7df05d20f89322d7ab4b163ef1348f05835e14debb",
+    "after_sha256": "4412a41693eb3559eb31f8d433cfdb77015360e3050864cf9276c4ba25f7b5f4",
+    "change": "added a short dated link; pre-existing content preserved"
+  }
+}

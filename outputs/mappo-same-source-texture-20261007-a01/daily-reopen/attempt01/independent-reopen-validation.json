@@ -1,0 +1,438 @@
+{
+  "status": "PASS",
+  "scope": "INSTALLED_BACKGROUND_INDEPENDENT_PROCESS_EMBEDDED_PACKED_REOPEN",
+  "visible_window_evidence": false,
+  "solver_started": false,
+  "scene_saved": false,
+  "addon_module": "bl_ext.user_default.wfrl_blender",
+  "addon_file": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "actual_module_root": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "blender": "5.2.1 LTS",
+  "opened_blend": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt01/same-source-saved.blend",
+  "opened_blend_sha256": "1e4031419c3296291c675b4db7ce6f159f08eae743e13db301f2d4779b5000fe",
+  "baseline_window_report": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt01/window-validation.json",
+  "baseline_module_root": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "native_startup_source_binding": true,
+  "embedded_and_packed_identity": {
+    "blades": [
+      {
+        "name": "SplitMappoTexture.B1",
+        "object_pointer": 522948458016,
+        "mesh_pointer": 523100348448,
+        "key_pointer": 523127737504,
+        "action_pointer": 523142275872,
+        "shape_coordinates_sha256": "04a827cae544d2d6a7f49ca30d483ae6c330a38391f6ef53c0b803a4cb191969",
+        "keys": 601
+      },
+      {
+        "name": "SplitMappoTexture.B2",
+        "object_pointer": 522948788256,
+        "mesh_pointer": 523100350496,
+        "key_pointer": 523127738144,
+        "action_pointer": 523142276512,
+        "shape_coordinates_sha256": "8311cb16c7a8e60a828b8f2a01c366a214d96794de576a1d6e501334b0903864",
+        "keys": 601
+      },
+      {
+        "name": "SplitMappoTexture.B3",
+        "object_pointer": 522948789792,
+        "mesh_pointer": 523100352544,
+        "key_pointer": 523127738784,
+        "action_pointer": 523142277152,
+        "shape_coordinates_sha256": "02a7870ed9ad5ae0e0f10625debd9747528d4ce95942bb18229733f7cf7f5fbb",
+        "keys": 601
+      }
+    ],
+    "camera_pointer": 522948791328,
+    "camera_data_pointer": 522938586144,
+    "embedded": {
+      "recon": {
+        "name": "SplitMappoTexture.MAPPO Demo 与三维重建 · 同步分屏.recon",
+        "pointer": 523142272032,
+        "sha256": "bc24f9de2b1aa6a6ec0b00da4fa43af644d0157f1a096da9f405ed80d2017db4"
+      },
+      "texture": {
+        "name": "SplitMappoTexture.MAPPO Demo 与三维重建 · 同步分屏.texture",
+        "pointer": 523142272672,
+        "sha256": "06fd9798467d12db2b0fca36b2d38c695ba563c588988bff5389d2fc83639cec"
+      },
+      "texture_source": {
+        "name": "SplitMappoTexture.MAPPO Demo 与三维重建 · 同步分屏.texture_source",
+        "pointer": 523142273312,
+        "sha256": "e0608578e0e7a4c387b7888d69d456a15d44450a0bd121ec3ebf285ad999af9d"
+      },
+      "provenance": {
+        "name": "SplitMappoTexture.MAPPO Demo 与三维重建 · 同步分屏.provenance",
+        "pointer": 523142271392,
+        "sha256": "6e542f6bddc9aa57dd8643a6463e8e20054cbe4a5abdec23b319e1e034718ffb"
+      }
+    },
+    "texture": [
+      {
+        "object": "SplitMappoTexture.B1",
+        "vertices_sha256": "83b02482f04d86573d9302f175d37ea3a2960dca3d7d065a6ae12498f68e73c1",
+        "uv_sha256": "be4b61adb2421169265c3b52edf6874fbe1d65ea77361553f9aea10690d56f19",
+        "packed_texture_sha256": "0abb578ad9a5da49cb887322309043fbb84519c767114d91f5c4c32d922e90bd",
+        "image_size": [
+          384,
+          1230
+        ]
+      },
+      {
+        "object": "SplitMappoTexture.B2",
+        "vertices_sha256": "cfc48448d00a714010595aed61cf1e0191236b47e778f55afdb1c5224f93fd5c",
+        "uv_sha256": "be4b61adb2421169265c3b52edf6874fbe1d65ea77361553f9aea10690d56f19",
+        "packed_texture_sha256": "b96646e83fb4977b6f264da9730984c46800d2500c764f0c85332ce719aaabb5",
+        "image_size": [
+          384,
+          1230
+        ]
+      },
+      {
+        "object": "SplitMappoTexture.B3",
+        "vertices_sha256": "4c8ad9d97340e6b0fb56cb1a5deadfc3cec9782e172f9aa085897b7c7759e8dd",
+        "uv_sha256": "be4b61adb2421169265c3b52edf6874fbe1d65ea77361553f9aea10690d56f19",
+        "packed_texture_sha256": "3574070cedfcad6eb0477ba7b7587c07ab7d9f330819a55bd655b08de68b776e",
+        "image_size": [
+          384,
+          1230
+        ]
+      }
+    ]
+  },
+  "entire_datablock_inventory_preserved": true,
+  "external_texture_package_reload_forbidden": true,
+  "restored_from_empty_runtime_cache": true,
+  "reconstruction_restored_from_embedded_json": true,
+  "saved_geometry": {
+    "samples": 601,
+    "blades": 3,
+    "original_and_new_native_keys_bit_identical": true,
+    "original_and_current_model_float32_geometry_bit_identical": true,
+    "max_geometry_difference_m": 0.0
+  },
+  "provenance": {
+    "samples": 601,
+    "cameras": [
+      "T1Down",
+      "NacelleT1"
+    ],
+    "dynamic_calibrations": 1202,
+    "original_states_times_observations_preserved": true,
+    "source_model_coordinates_preserved": true,
+    "relative_interval_s": [
+      0,
+      60
+    ],
+    "simulation_interval_s": [
+      117,
+      177
+    ],
+    "source_fps": 10,
+    "timeline_fps": 60
+  },
+  "frames": [
+    {
+      "frame": 52,
+      "index": 8,
+      "relative_time_s": 0.8,
+      "timeline_time_s": 117.85,
+      "held_sample_time_s": 117.8,
+      "age_ms": 50.0,
+      "original_and_texture_evaluated_geometry_bit_identical": true,
+      "max_saved_model_to_native_evaluation_difference_m": 3.812899237232159e-06,
+      "native_evaluation": [
+        {
+          "blade": 1,
+          "same_source_eval_time": 80.00000762939453,
+          "original_eval_time": 80.00000762939453,
+          "same_source_key_time": 80.00000762939453,
+          "original_key_time": 80.00000762939453,
+          "model_to_original_native_difference_m": 3.8098922203744223e-06
+        },
+        {
+          "blade": 2,
+          "same_source_eval_time": 80.00000762939453,
+          "original_eval_time": 80.00000762939453,
+          "same_source_key_time": 80.00000762939453,
+          "original_key_time": 80.00000762939453,
+          "model_to_original_native_difference_m": 3.812899237232159e-06
+        },
+        {
+          "blade": 3,
+          "same_source_eval_time": 80.00000762939453,
+          "original_eval_time": 80.00000762939453,
+          "same_source_key_time": 80.00000762939453,
+          "original_key_time": 80.00000762939453,
+          "model_to_original_native_difference_m": 3.812135560110619e-06
+        }
+      ],
+      "max_left_bound_package_error_m": 9.03266305130046e-06
+    },
+    {
+      "frame": 55,
+      "index": 9,
+      "relative_time_s": 0.9,
+      "timeline_time_s": 117.9,
+      "held_sample_time_s": 117.9,
+      "age_ms": 0.0,
+      "original_and_texture_evaluated_geometry_bit_identical": true,
+      "max_saved_model_to_native_evaluation_difference_m": 7.545790168705935e-06,
+      "native_evaluation": [
+        {
+          "blade": 1,
+          "same_source_eval_time": 90.00000762939453,
+          "original_eval_time": 90.00000762939453,
+          "same_source_key_time": 90.00000762939453,
+          "original_key_time": 90.00000762939453,
+          "model_to_original_native_difference_m": 3.810503443446578e-06
+        },
+        {
+          "blade": 2,
+          "same_source_eval_time": 90.00000762939453,
+          "original_eval_time": 90.00000762939453,
+          "same_source_key_time": 90.00000762939453,
+          "original_key_time": 90.00000762939453,
+          "model_to_original_native_difference_m": 3.805694106517876e-06
+        },
+        {
+          "blade": 3,
+          "same_source_eval_time": 90.00000762939453,
+          "original_eval_time": 90.00000762939453,
+          "same_source_key_time": 90.00000762939453,
+          "original_key_time": 90.00000762939453,
+          "model_to_original_native_difference_m": 7.545790168705935e-06
+        }
+      ],
+      "max_left_bound_package_error_m": 1.5107715164219826e-05
+    },
+    {
+      "frame": 1,
+      "index": 0,
+      "relative_time_s": 0.0,
+      "timeline_time_s": 117.0,
+      "held_sample_time_s": 117.0,
+      "age_ms": 0.0,
+      "original_and_texture_evaluated_geometry_bit_identical": true,
+      "max_saved_model_to_native_evaluation_difference_m": 7.615851018272224e-06,
+      "native_evaluation": [
+        {
+          "blade": 1,
+          "same_source_eval_time": 0.0,
+          "original_eval_time": 0.0,
+          "same_source_key_time": 0.0,
+          "original_key_time": 0.0,
+          "model_to_original_native_difference_m": 7.615851018272224e-06
+        },
+        {
+          "blade": 2,
+          "same_source_eval_time": 0.0,
+          "original_eval_time": 0.0,
+          "same_source_key_time": 0.0,
+          "original_key_time": 0.0,
+          "model_to_original_native_difference_m": 3.8145972922620786e-06
+        },
+        {
+          "blade": 3,
+          "same_source_eval_time": 0.0,
+          "original_eval_time": 0.0,
+          "same_source_key_time": 0.0,
+          "original_key_time": 0.0,
+          "model_to_original_native_difference_m": 3.8146516914139283e-06
+        }
+      ],
+      "max_left_bound_package_error_m": 1.1365219734216225e-05
+    },
+    {
+      "frame": 901,
+      "index": 150,
+      "relative_time_s": 15.0,
+      "timeline_time_s": 132.0,
+      "held_sample_time_s": 132.0,
+      "age_ms": 0.0,
+      "original_and_texture_evaluated_geometry_bit_identical": true,
+      "max_saved_model_to_native_evaluation_difference_m": 3.8139219782351574e-06,
+      "native_evaluation": [
+        {
+          "blade": 1,
+          "same_source_eval_time": 1500.0020751953125,
+          "original_eval_time": 1500.0020751953125,
+          "same_source_key_time": 1500.0020751953125,
+          "original_key_time": 1500.0020751953125,
+          "model_to_original_native_difference_m": 3.812133257952155e-06
+        },
+        {
+          "blade": 2,
+          "same_source_eval_time": 1500.0020751953125,
+          "original_eval_time": 1500.0020751953125,
+          "same_source_key_time": 1500.0020751953125,
+          "original_key_time": 1500.0020751953125,
+          "model_to_original_native_difference_m": 3.8139219782351574e-06
+        },
+        {
+          "blade": 3,
+          "same_source_eval_time": 1500.0020751953125,
+          "original_eval_time": 1500.0020751953125,
+          "same_source_key_time": 1500.0020751953125,
+          "original_key_time": 1500.0020751953125,
+          "model_to_original_native_difference_m": 3.810081793176323e-06
+        }
+      ],
+      "max_left_bound_package_error_m": 6.126360119651508e-06
+    },
+    {
+      "frame": 1801,
+      "index": 300,
+      "relative_time_s": 30.0,
+      "timeline_time_s": 147.0,
+      "held_sample_time_s": 147.0,
+      "age_ms": 0.0,
+      "original_and_texture_evaluated_geometry_bit_identical": true,
+      "max_saved_model_to_native_evaluation_difference_m": 7.622382668159844e-06,
+      "native_evaluation": [
+        {
+          "blade": 1,
+          "same_source_eval_time": 3000.0078125,
+          "original_eval_time": 3000.0078125,
+          "same_source_key_time": 3000.0078125,
+          "original_key_time": 3000.0078125,
+          "model_to_original_native_difference_m": 3.810426534300859e-06
+        },
+        {
+          "blade": 2,
+          "same_source_eval_time": 3000.0078125,
+          "original_eval_time": 3000.0078125,
+          "same_source_key_time": 3000.0078125,
+          "original_key_time": 3000.0078125,
+          "model_to_original_native_difference_m": 7.622382668159844e-06
+        },
+        {
+          "blade": 3,
+          "same_source_eval_time": 3000.0078125,
+          "original_eval_time": 3000.0078125,
+          "same_source_key_time": 3000.0078125,
+          "original_key_time": 3000.0078125,
+          "model_to_original_native_difference_m": 3.814207559571514e-06
+        }
+      ],
+      "max_left_bound_package_error_m": 8.815967078135145e-06
+    },
+    {
+      "frame": 2701,
+      "index": 450,
+      "relative_time_s": 45.0,
+      "timeline_time_s": 162.0,
+      "held_sample_time_s": 162.0,
+      "age_ms": 0.0,
+      "original_and_texture_evaluated_geometry_bit_identical": true,
+      "max_saved_model_to_native_evaluation_difference_m": 0.0003209101056000918,
+      "native_evaluation": [
+        {
+          "blade": 1,
+          "same_source_eval_time": 4499.98876953125,
+          "original_eval_time": 4499.98876953125,
+          "same_source_key_time": 4499.98876953125,
+          "original_key_time": 4499.98876953125,
+          "model_to_original_native_difference_m": 0.00030804536135065064
+        },
+        {
+          "blade": 2,
+          "same_source_eval_time": 4499.98876953125,
+          "original_eval_time": 4499.98876953125,
+          "same_source_key_time": 4499.98876953125,
+          "original_key_time": 4499.98876953125,
+          "model_to_original_native_difference_m": 0.00026878231228977256
+        },
+        {
+          "blade": 3,
+          "same_source_eval_time": 4499.98876953125,
+          "original_eval_time": 4499.98876953125,
+          "same_source_key_time": 4499.98876953125,
+          "original_key_time": 4499.98876953125,
+          "model_to_original_native_difference_m": 0.0003209101056000918
+        }
+      ],
+      "max_left_bound_package_error_m": 7.382789007692736e-06
+    },
+    {
+      "frame": 3601,
+      "index": 600,
+      "relative_time_s": 60.0,
+      "timeline_time_s": 177.0,
+      "held_sample_time_s": 177.0,
+      "age_ms": 0.0,
+      "original_and_texture_evaluated_geometry_bit_identical": true,
+      "max_saved_model_to_native_evaluation_difference_m": 7.598093276328655e-06,
+      "native_evaluation": [
+        {
+          "blade": 1,
+          "same_source_eval_time": 5999.9658203125,
+          "original_eval_time": 5999.9658203125,
+          "same_source_key_time": 5999.9658203125,
+          "original_key_time": 5999.9658203125,
+          "model_to_original_native_difference_m": 7.598093276328655e-06
+        },
+        {
+          "blade": 2,
+          "same_source_eval_time": 5999.9658203125,
+          "original_eval_time": 5999.9658203125,
+          "same_source_key_time": 5999.9658203125,
+          "original_key_time": 5999.9658203125,
+          "model_to_original_native_difference_m": 3.8111231503989984e-06
+        },
+        {
+          "blade": 3,
+          "same_source_eval_time": 5999.9658203125,
+          "original_eval_time": 5999.9658203125,
+          "same_source_key_time": 5999.9658203125,
+          "original_key_time": 5999.9658203125,
+          "model_to_original_native_difference_m": 3.8143915759292213e-06
+        }
+      ],
+      "max_left_bound_package_error_m": 9.191551578524582e-06
+    },
+    {
+      "frame": 52,
+      "index": 8,
+      "relative_time_s": 0.8,
+      "timeline_time_s": 117.85,
+      "held_sample_time_s": 117.8,
+      "age_ms": 50.0,
+      "original_and_texture_evaluated_geometry_bit_identical": true,
+      "max_saved_model_to_native_evaluation_difference_m": 3.812899237232159e-06,
+      "native_evaluation": [
+        {
+          "blade": 1,
+          "same_source_eval_time": 80.00000762939453,
+          "original_eval_time": 80.00000762939453,
+          "same_source_key_time": 80.00000762939453,
+          "original_key_time": 80.00000762939453,
+          "model_to_original_native_difference_m": 3.8098922203744223e-06
+        },
+        {
+          "blade": 2,
+          "same_source_eval_time": 80.00000762939453,
+          "original_eval_time": 80.00000762939453,
+          "same_source_key_time": 80.00000762939453,
+          "original_key_time": 80.00000762939453,
+          "model_to_original_native_difference_m": 3.812899237232159e-06
+        },
+        {
+          "blade": 3,
+          "same_source_eval_time": 80.00000762939453,
+          "original_eval_time": 80.00000762939453,
+          "same_source_key_time": 80.00000762939453,
+          "original_key_time": 80.00000762939453,
+          "model_to_original_native_difference_m": 3.812135560110619e-06
+        }
+      ],
+      "max_left_bound_package_error_m": 9.03266305130046e-06
+    }
+  ],
+  "frame_and_source_mapping_preserved": true,
+  "saved_file_bytes_preserved": true,
+  "original_keys_not_recreated": true,
+  "original_and_new_evaluated_geometry_bit_identical": true,
+  "software_sync_acceptance_only": true,
+  "reconstruction_accuracy_accepted": false
+}

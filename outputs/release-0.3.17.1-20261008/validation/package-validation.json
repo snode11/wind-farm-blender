@@ -1,0 +1,320 @@
+{
+  "schema_version": "wfrl.frontend-isolated-package.v1",
+  "status": "PASS",
+  "output": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation",
+  "module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "commands": [
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--command",
+        "extension",
+        "repo-add",
+        "wfrl_frontend",
+        "--name",
+        "WFRL Frontend Isolated Validation",
+        "--directory",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions",
+        "--clear-all"
+      ],
+      "returncode": 0,
+      "log": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/logs/repo-add.log",
+      "required_markers": [],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 1.0773845000658184,
+      "status": "EXIT_ZERO_REQUIRES_PROBE"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/validate_frontend_package.py",
+        "--",
+        "--inside-probe",
+        "repo",
+        "--repository",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions",
+        "--output",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/repo-probe.json"
+      ],
+      "returncode": 0,
+      "log": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/logs/repo-probe.log",
+      "required_markers": [
+        "FRONTEND_REPOSITORY_PROBE_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.507872625021264,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--command",
+        "extension",
+        "install-file",
+        "-r",
+        "wfrl_frontend",
+        "--enable",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/package/wfrl_blender-0.3.17+1.zip"
+      ],
+      "returncode": 0,
+      "log": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/logs/install-file.log",
+      "required_markers": [
+        "Installed \"wfrl_blender\""
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 1.110083500156179,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/validate_frontend_package.py",
+        "--",
+        "--inside-probe",
+        "module",
+        "--repository",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions",
+        "--output",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/module-probe.json"
+      ],
+      "returncode": 0,
+      "log": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/logs/module-probe.log",
+      "required_markers": [
+        "FRONTEND_INSTALLED_MODULE_PROBE_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.5385299171321094,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/three_camera_default_regression.py"
+      ],
+      "returncode": 0,
+      "log": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/logs/three-camera-default.log",
+      "required_markers": [
+        "THREE_CAMERA_DEFAULT_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [
+        {
+          "kind": "blender_exit_memory_diagnostic",
+          "message": "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB",
+          "blocks": 350,
+          "reported_mb": 0.02594,
+          "bytes": 27200,
+          "bytes_note": "Reported MB converted by 1024^2 and rounded; limited by log precision"
+        }
+      ],
+      "elapsed_s": 30.56930458289571,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/native_camera_projection_regression.py"
+      ],
+      "returncode": 0,
+      "log": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/logs/native-projection.log",
+      "required_markers": [
+        "NATIVE_PROJECTION_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.5785924170631915,
+      "status": "PASS"
+    }
+  ],
+  "checks": {
+    "archive_inventory": "PASS",
+    "repository_probe": {
+      "status": "PASS",
+      "repository": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions",
+      "repo_module": "wfrl_frontend",
+      "blender": "5.2.1 LTS",
+      "background": true
+    },
+    "installed_inventory": {
+      "status": "PASS",
+      "package_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender",
+      "verified_files": 169,
+      "mismatches": [],
+      "unexpected_files": [],
+      "ignored": [
+        "__pycache__",
+        "*.pyc"
+      ]
+    },
+    "module_probe": {
+      "status": "PASS",
+      "repository": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions",
+      "repo_module": "wfrl_frontend",
+      "blender": "5.2.1 LTS",
+      "background": true,
+      "module": "bl_ext.wfrl_frontend.wfrl_blender",
+      "addon_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/__init__.py",
+      "imported_modules": {
+        "bl_ext.wfrl_frontend.wfrl_blender.cameras": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/cameras.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.materials": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/materials.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.scene_model": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/scene_model.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.scene_builder": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/scene_builder.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.workspace": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/workspace.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.atmosphere": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/atmosphere.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.wake": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/wake.py",
+        "bl_ext.wfrl_frontend.wfrl_blender": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.state": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/state.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.animation": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/animation.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.training": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/training.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.live_scene": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/live_scene.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.performance": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/performance.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.runtime": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/runtime.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.deflection": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/deflection.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.demo": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/demo.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.preferences": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/preferences.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.diagnostics": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/diagnostics.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.diagnostics": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/diagnostics.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.status": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/status.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/operators/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators.connection": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/operators/connection.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators.run": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/operators/run.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.history": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/history.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.charts": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/charts.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators.history_export": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/operators/history_export.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.telemetry": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/telemetry.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators.workflow": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/operators/workflow.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.scene": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/scene.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.channels": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/channels.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.run": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/run.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.safety": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/safety.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.presentation": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/presentation.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.presentation": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/presentation.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.training": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/training.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.gimbal": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/gimbal.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.clearance_replay": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/clearance_replay.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.clearance": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/clearance.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.farm_flex": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/farm_flex.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.farm_replay": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/farm_replay.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.video_output": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/video_output.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.video_output": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/video_output.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.camera_projection": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/camera_projection.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_cameras": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/custom_cameras.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_history": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/custom_camera_history.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_diagnostics": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/custom_camera_diagnostics.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_preview": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/custom_camera_preview.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_capture": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/custom_camera_capture.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.custom_camera_output": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/custom_camera_output.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.installation_schematic": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/installation_schematic.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.native_camera_views": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/native_camera_views.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.stacked_camera_rig": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/stacked_camera_rig.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.stacked_camera_rig": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/stacked_camera_rig.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.custom_cameras": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/custom_cameras.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/_vendor/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor.blade_recon": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/_vendor/blade_recon/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor.blade_recon.model": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/_vendor/blade_recon/model.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.blade_recon_data": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/blade_recon_data.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.blade_recon_review": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/blade_recon_review.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.blade_recon": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/panels/blade_recon.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/nrel_defects/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.defect_shapes": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/nrel_defects/defect_shapes.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.reference_surface": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/nrel_defects/reference_surface.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.defect_schema": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/nrel_defects/defect_schema.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.defect_store": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/nrel_defects/defect_store.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.defect_geometry": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/nrel_defects/defect_geometry.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.editor": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/nrel_defects/editor.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.tip_tracking": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/tip_tracking.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.split_reconstruction": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/split_reconstruction.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.split_reconstruction_timing": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/split_reconstruction_timing.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.split_reconstruction_ui": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/split_reconstruction_ui.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.split_mappo_texture": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/split_mappo_texture.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.repair_marks": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/repair_marks.py"
+      },
+      "installed_operator_registered": true
+    },
+    "three-camera-default": {
+      "status": "PASS",
+      "module": "bl_ext.wfrl_frontend.wfrl_blender",
+      "addon_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/__init__.py",
+      "blender": "5.2.1 LTS",
+      "preset_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/assets/cameras/t1-three-camera-default.json",
+      "checks": [
+        "ordinary load and reload use bundled supported pose and exact optics",
+        "geometry-only load has no rig",
+        "initial history empty",
+        "legacy C4 rejected",
+        "tilted housing rigid move",
+        "per-camera edit persists over frames",
+        "undo restores supported default",
+        "invalid move unchanged",
+        "atomic publish rollback",
+        "explicit reload resets user edits to bundled default",
+        "tip trails and deflection aids disabled"
+      ]
+    },
+    "native-projection": {
+      "status": "PASS",
+      "module": "bl_ext.wfrl_frontend.wfrl_blender",
+      "addon_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/__init__.py",
+      "blender": "5.2.1 LTS",
+      "background": true,
+      "checks": [
+        "24 aspect/FOV combinations against Blender camera projection"
+      ]
+    },
+    "installed_inventory_after_regressions": {
+      "status": "PASS",
+      "package_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender",
+      "verified_files": 169,
+      "mismatches": [],
+      "unexpected_files": [],
+      "ignored": [
+        "__pycache__",
+        "*.pyc"
+      ]
+    }
+  },
+  "build_only": false,
+  "scope": "isolated ZIP integrity and background regression; visible UI and presentation unverified",
+  "package": {
+    "archive": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/package/wfrl_blender-0.3.17+1.zip",
+    "sha256": "cfaa108646d77845bfe2b07ff3f052fbaf0529231836ee09b7423f0e00345df3",
+    "checksum": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/package/wfrl_blender-0.3.17+1.zip.sha256",
+    "inventory": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/package/wfrl_blender-0.3.17+1.inventory.json",
+    "package_id": "wfrl_blender",
+    "version": "0.3.17+1",
+    "file_count": 169
+  },
+  "environment": {
+    "BLENDER_USER_CONFIG": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/config",
+    "BLENDER_USER_SCRIPTS": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/scripts",
+    "BLENDER_USER_DATAFILES": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/datafiles",
+    "WFRL_ADDON_MODULE": "bl_ext.wfrl_frontend.wfrl_blender"
+  },
+  "repository": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions",
+  "addon_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/__init__.py",
+  "installation": "PASS",
+  "background_regressions": "PASS",
+  "visible_ui": "NOT_RUN",
+  "actual_presentation": "NOT_RUN"
+}

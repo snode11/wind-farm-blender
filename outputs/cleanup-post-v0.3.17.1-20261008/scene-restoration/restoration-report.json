@@ -1,0 +1,257 @@
+{
+  "status": "PASS",
+  "scope": "ONLY_TASK_SCENE_FRAME_55_TO_52_REPAIR",
+  "canonical_saved": false,
+  "prefs_saved": false,
+  "old_reports_modified": false,
+  "original_reference_sha256": "abcf9a4951bc406c91577791154a85ff049483c89e271f705e4d8db8ea85995c",
+  "original_reference_byte_identity_recoverable": false,
+  "before_sha256": "a15811cffa7a70acb44c092a4f0b9fe16ba70cf94325815d273e135418149ed4",
+  "addon_module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "actual_module_root": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender",
+  "manifest_version": "0.3.17+1",
+  "before_frame": 55,
+  "original_geometry": {
+    "SplitRecon.B1": {
+      "keys": 601,
+      "vertices": 1280,
+      "shape_coordinates_sha256": "04a827cae544d2d6a7f49ca30d483ae6c330a38391f6ef53c0b803a4cb191969",
+      "source_sha256": "f2c34be44607e520c8e26c4331120aa6ff354870ab40192d31321129fe7beca0"
+    },
+    "SplitRecon.B2": {
+      "keys": 601,
+      "vertices": 1280,
+      "shape_coordinates_sha256": "8311cb16c7a8e60a828b8f2a01c366a214d96794de576a1d6e501334b0903864",
+      "source_sha256": "f2c34be44607e520c8e26c4331120aa6ff354870ab40192d31321129fe7beca0"
+    },
+    "SplitRecon.B3": {
+      "keys": 601,
+      "vertices": 1280,
+      "shape_coordinates_sha256": "02a7870ed9ad5ae0e0f10625debd9747528d4ce95942bb18229733f7cf7f5fbb",
+      "source_sha256": "f2c34be44607e520c8e26c4331120aa6ff354870ab40192d31321129fe7beca0"
+    }
+  },
+  "saved_geometry": {
+    "samples": 601,
+    "blades": 3,
+    "original_and_new_native_keys_bit_identical": true,
+    "original_and_current_model_float32_geometry_bit_identical": true,
+    "max_geometry_difference_m": 0.0
+  },
+  "immutable_texture": [
+    {
+      "object": "SplitMappoTexture.B1",
+      "vertices_sha256": "83b02482f04d86573d9302f175d37ea3a2960dca3d7d065a6ae12498f68e73c1",
+      "uv_sha256": "be4b61adb2421169265c3b52edf6874fbe1d65ea77361553f9aea10690d56f19",
+      "packed_texture_sha256": "0abb578ad9a5da49cb887322309043fbb84519c767114d91f5c4c32d922e90bd",
+      "image_size": [
+        384,
+        1230
+      ]
+    },
+    {
+      "object": "SplitMappoTexture.B2",
+      "vertices_sha256": "cfc48448d00a714010595aed61cf1e0191236b47e778f55afdb1c5224f93fd5c",
+      "uv_sha256": "be4b61adb2421169265c3b52edf6874fbe1d65ea77361553f9aea10690d56f19",
+      "packed_texture_sha256": "b96646e83fb4977b6f264da9730984c46800d2500c764f0c85332ce719aaabb5",
+      "image_size": [
+        384,
+        1230
+      ]
+    },
+    {
+      "object": "SplitMappoTexture.B3",
+      "vertices_sha256": "4c8ad9d97340e6b0fb56cb1a5deadfc3cec9782e172f9aa085897b7c7759e8dd",
+      "uv_sha256": "be4b61adb2421169265c3b52edf6874fbe1d65ea77361553f9aea10690d56f19",
+      "packed_texture_sha256": "3574070cedfcad6eb0477ba7b7587c07ab7d9f330819a55bd655b08de68b776e",
+      "image_size": [
+        384,
+        1230
+      ]
+    }
+  ],
+  "display_before": {
+    "properties": {
+      "wfrl_recon_texture_mode": "ORIGINAL",
+      "wfrl_recon_texture_gain": 6.0,
+      "wfrl_recon_texture_threshold": 0.05999999865889549,
+      "wfrl_recon_show_texture": true,
+      "wfrl_recon_inspect_blade": "2",
+      "wfrl_recon_inspect_radius": 47.224998474121094,
+      "wfrl_recon_inspect_tau": 0.8216145634651184,
+      "wfrl_recon_inspect_size": 2.0,
+      "wfrl_recon_inspect_box": true
+    },
+    "shader": [
+      {
+        "Contrast": 0.0,
+        "FalseColor": 0.0,
+        "Gain": 6.0,
+        "CenterU": 0.8216145634651184,
+        "CenterV": 0.256504088640213,
+        "HalfU": 0.1691087782382965,
+        "HalfV": 0.016260161995887756,
+        "ShowBox": 0.0,
+        "Lower": 0.24111221730709076,
+        "Upper": 0.3777771294116974
+      },
+      {
+        "Contrast": 0.0,
+        "FalseColor": 0.0,
+        "Gain": 6.0,
+        "CenterU": 0.8216145634651184,
+        "CenterV": 0.256504088640213,
+        "HalfU": 0.1691087782382965,
+        "HalfV": 0.016260161995887756,
+        "ShowBox": 1.0,
+        "Lower": 0.24111221730709076,
+        "Upper": 0.3777771294116974
+      },
+      {
+        "Contrast": 0.0,
+        "FalseColor": 0.0,
+        "Gain": 6.0,
+        "CenterU": 0.8216145634651184,
+        "CenterV": 0.256504088640213,
+        "HalfU": 0.1691087782382965,
+        "HalfV": 0.016260161995887756,
+        "ShowBox": 0.0,
+        "Lower": 0.24111221730709076,
+        "Upper": 0.3777771294116974
+      }
+    ]
+  },
+  "frame55_validation": {
+    "frame": 55,
+    "index": 9,
+    "relative_time_s": 0.9,
+    "timeline_time_s": 117.9,
+    "held_sample_time_s": 117.9,
+    "age_ms": 0.0,
+    "original_and_texture_evaluated_geometry_bit_identical": true,
+    "max_saved_model_to_native_evaluation_difference_m": 7.545790168705935e-06,
+    "native_evaluation": [
+      {
+        "blade": 1,
+        "same_source_eval_time": 90.00000762939453,
+        "original_eval_time": 90.00000762939453,
+        "same_source_key_time": 90.00000762939453,
+        "original_key_time": 90.00000762939453,
+        "model_to_original_native_difference_m": 3.810503443446578e-06
+      },
+      {
+        "blade": 2,
+        "same_source_eval_time": 90.00000762939453,
+        "original_eval_time": 90.00000762939453,
+        "same_source_key_time": 90.00000762939453,
+        "original_key_time": 90.00000762939453,
+        "model_to_original_native_difference_m": 3.805694106517876e-06
+      },
+      {
+        "blade": 3,
+        "same_source_eval_time": 90.00000762939453,
+        "original_eval_time": 90.00000762939453,
+        "same_source_key_time": 90.00000762939453,
+        "original_key_time": 90.00000762939453,
+        "model_to_original_native_difference_m": 7.545790168705935e-06
+      }
+    ],
+    "max_left_bound_package_error_m": 1.5107715164219826e-05
+  },
+  "frame52_validation": {
+    "frame": 52,
+    "index": 8,
+    "relative_time_s": 0.8,
+    "timeline_time_s": 117.85,
+    "held_sample_time_s": 117.8,
+    "age_ms": 50.0,
+    "original_and_texture_evaluated_geometry_bit_identical": true,
+    "max_saved_model_to_native_evaluation_difference_m": 3.812899237232159e-06,
+    "native_evaluation": [
+      {
+        "blade": 1,
+        "same_source_eval_time": 80.00000762939453,
+        "original_eval_time": 80.00000762939453,
+        "same_source_key_time": 80.00000762939453,
+        "original_key_time": 80.00000762939453,
+        "model_to_original_native_difference_m": 3.8098922203744223e-06
+      },
+      {
+        "blade": 2,
+        "same_source_eval_time": 80.00000762939453,
+        "original_eval_time": 80.00000762939453,
+        "same_source_key_time": 80.00000762939453,
+        "original_key_time": 80.00000762939453,
+        "model_to_original_native_difference_m": 3.812899237232159e-06
+      },
+      {
+        "blade": 3,
+        "same_source_eval_time": 80.00000762939453,
+        "original_eval_time": 80.00000762939453,
+        "same_source_key_time": 80.00000762939453,
+        "original_key_time": 80.00000762939453,
+        "model_to_original_native_difference_m": 3.812135560110619e-06
+      }
+    ],
+    "max_left_bound_package_error_m": 9.03266305130046e-06
+  },
+  "display_after": {
+    "properties": {
+      "wfrl_recon_texture_mode": "ORIGINAL",
+      "wfrl_recon_texture_gain": 6.0,
+      "wfrl_recon_texture_threshold": 0.05999999865889549,
+      "wfrl_recon_show_texture": true,
+      "wfrl_recon_inspect_blade": "2",
+      "wfrl_recon_inspect_radius": 47.224998474121094,
+      "wfrl_recon_inspect_tau": 0.8216145634651184,
+      "wfrl_recon_inspect_size": 2.0,
+      "wfrl_recon_inspect_box": true
+    },
+    "shader": [
+      {
+        "Contrast": 0.0,
+        "FalseColor": 0.0,
+        "Gain": 6.0,
+        "CenterU": 0.8216145634651184,
+        "CenterV": 0.256504088640213,
+        "HalfU": 0.1691087782382965,
+        "HalfV": 0.016260161995887756,
+        "ShowBox": 0.0,
+        "Lower": 0.24111221730709076,
+        "Upper": 0.3777771294116974
+      },
+      {
+        "Contrast": 0.0,
+        "FalseColor": 0.0,
+        "Gain": 6.0,
+        "CenterU": 0.8216145634651184,
+        "CenterV": 0.256504088640213,
+        "HalfU": 0.1691087782382965,
+        "HalfV": 0.016260161995887756,
+        "ShowBox": 1.0,
+        "Lower": 0.24111221730709076,
+        "Upper": 0.3777771294116974
+      },
+      {
+        "Contrast": 0.0,
+        "FalseColor": 0.0,
+        "Gain": 6.0,
+        "CenterU": 0.8216145634651184,
+        "CenterV": 0.256504088640213,
+        "HalfU": 0.1691087782382965,
+        "HalfV": 0.016260161995887756,
+        "ShowBox": 0.0,
+        "Lower": 0.24111221730709076,
+        "Upper": 0.3777771294116974
+      }
+    ]
+  },
+  "temporary_save_version_before": 1,
+  "after_frame": 52,
+  "after_sha256": "93a4c5ca78f1578f8c884efb9736f69a3ab892ef435fe155961b9c22c6576218",
+  "datablock_identities_preserved": true,
+  "display_settings_and_shader_preserved": true,
+  "geometry_uv_packed_textures_preserved": true,
+  "scene_saved_only_at_task_path": true,
+  "current_bytes_equal_original_reference": false
+}

@@ -1,0 +1,92 @@
+{
+  "stage": 0,
+  "cycle": 0,
+  "observations": [
+    {
+      "cycle": 0,
+      "source": "SYNTHETIC",
+      "display": {
+        "properties": {
+          "wfrl_recon_texture_mode": "FALSE_COLOR",
+          "wfrl_recon_texture_gain": 9.25,
+          "wfrl_recon_texture_threshold": 0.07999999821186066,
+          "wfrl_recon_show_texture": true,
+          "wfrl_recon_inspect_blade": "1",
+          "wfrl_recon_inspect_radius": 57.0,
+          "wfrl_recon_inspect_tau": 0.6399999856948853,
+          "wfrl_recon_inspect_size": 1.7000000476837158,
+          "wfrl_recon_inspect_box": false
+        },
+        "shader": [
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          },
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          },
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          }
+        ]
+      },
+      "clock": {
+        "index": 93,
+        "samples": 120,
+        "time_s": 9.3,
+        "fps": 10.0,
+        "source_label": "SYNTHETIC · synth_tex · 120 samples at 10 Hz · independent surface texture example",
+        "source_frame": 93
+      }
+    }
+  ],
+  "counts": {
+    "objects": 2744,
+    "meshes": 298,
+    "shape_keys": 6,
+    "actions": 111,
+    "materials": 172,
+    "images": 12,
+    "cameras": 17,
+    "texts": 7,
+    "node_groups": 2
+  },
+  "status": "FAIL",
+  "error": "Traceback (most recent call last):\n  File \"/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-settings-reopen/reopen.py\", line 65, in tick\n    assert state['counts'] == baseline['counts']\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n",
+  "addon_module": "bl_ext.user_default.wfrl_blender",
+  "addon_file": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "actual_module_root": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "blender": "5.2.1 LTS",
+  "saved": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-settings-reopen/prepare-attempt01/distinct-source-settings.blend",
+  "baseline": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-settings-reopen/prepare-attempt01/prepare-report.json",
+  "scope": "FRESH_VISIBLE_PROCESS_TWO_SOURCE_SAVED_PROFILE_SWITCHES_AND_CLOCKS",
+  "prefs_saved": false,
+  "scene_saved": false,
+  "reconstruction_accuracy_accepted": false
+}

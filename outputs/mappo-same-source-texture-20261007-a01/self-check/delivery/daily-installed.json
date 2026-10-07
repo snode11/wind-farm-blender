@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "command": [
+    "/Applications/Blender.app/Contents/MacOS/Blender",
+    "--command",
+    "extension",
+    "install-file",
+    "-r",
+    "user_default",
+    "--enable",
+    "--no-prefs",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-package/attempt02/package/wfrl_blender-0.3.17.zip"
+  ],
+  "returncode": 0,
+  "zip_sha256": "36fc6c837c23da9d99c6e29609775fb8bdb776ae86250758353b9b9b407502d0",
+  "addon_root": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "verified_files": 169,
+  "mismatches": [],
+  "unexpected_files": [],
+  "changed_files": [
+    "split_mappo_texture.py",
+    "split_reconstruction.py",
+    "split_surface_texture.py"
+  ],
+  "added_files": [
+    "split_texture_settings.py"
+  ],
+  "removed_files": [],
+  "prefs_before_sha256": "4f3760f9ccff9ebe67696dc1d617c20a8a0d269026ae20d34d0667cdefb8e8ab",
+  "prefs_after_sha256": "4f3760f9ccff9ebe67696dc1d617c20a8a0d269026ae20d34d0667cdefb8e8ab",
+  "preferences_unchanged": true
+}

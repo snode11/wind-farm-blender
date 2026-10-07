@@ -1,0 +1,46 @@
+[
+  {
+    "case": "baseline",
+    "build_validation": "ACCEPTED"
+  },
+  {
+    "case": "missing_model_hash",
+    "build_validation": "REJECTED",
+    "error": "ValueError",
+    "message": "MAPPO texture display model identity mismatch"
+  },
+  {
+    "case": "wrong_asset_bytes",
+    "build_validation": "REJECTED",
+    "error": "ValueError",
+    "message": "MAPPO texture package integrity mismatch: texture/blade1_tex.png"
+  },
+  {
+    "case": "wrong_blender_frame",
+    "build_validation": "REJECTED",
+    "error": "ValueError",
+    "message": "MAPPO texture must retain all 601 original 10 Hz states"
+  },
+  {
+    "case": "wrong_declared_clock",
+    "build_validation": "ACCEPTED"
+  },
+  {
+    "case": "wrong_model_hash",
+    "build_validation": "REJECTED",
+    "error": "ValueError",
+    "message": "MAPPO texture display model identity mismatch"
+  },
+  {
+    "case": "wrong_reconstruction_fps",
+    "build_validation": "REJECTED",
+    "error": "ValueError",
+    "message": "MAPPO texture must retain all 601 original 10 Hz states"
+  },
+  {
+    "case": "wrong_simulation_t",
+    "build_validation": "REJECTED",
+    "error": "ValueError",
+    "message": "MAPPO texture must retain all 601 original 10 Hz states"
+  }
+]

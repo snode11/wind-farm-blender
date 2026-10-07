@@ -1,17 +1,22 @@
 # 双束 TLS 候选实施与验证总报告
 
+> **2026-10-08 当前入口：** 本文是 TLS 三阶段研究的实施与验证总报告；日期、数值、哈希和测试数量对应原实际运行，没有在本次文档对齐中复算。NREL 当前公开版本为[0.3.17.1 ZIP](../blender/releases/0.3.17.1发布核对.md)，继续提供旧法及显式 TLS 结果；默认 `hub-axis.v1`、候选 `hub-tls.v1` 和 `REVIEW_ONLY / PENDING_ACCEPTANCE` 均未改变。原始研究数据入口为三阶段档案（本地路径：`outputs/dual-beam-tls-20261002/README.md`）。下文“未安装/发布”只描述研究完成当轮；0.3.13/0.3.15 的发布补充按各自历史版本阅读，不能据其推定当前0.3.17.1扩展实现源码已推送或几何精度已验收。
+
 日期：2026-10-02。状态：**三个阶段的候选工程接入、诊断及独立固定转速工况验证已完成；REVIEW_ONLY / PENDING_ACCEPTANCE**。
 
 默认方法仍为 `hub-axis.v1`，算法版本 `two-point-hub-extrapolation.v1`；显式候选为 `hub-tls.v1`，算法版本 `hub-constrained-tls.v1`。没有切换默认、安装 Blender 扩展或发布扩展包。最终仓库 lidar 回归为 **333 passed、7 subtests passed**，第三阶段三个新工具的隔离测试为 **56 passed**。这些软件与数值证据不等于正式性能验收或现场验证。
 
 本报告合并第一阶段候选接入、第二阶段误差与来源诊断、第三阶段独立工况与真实时间加密的执行记录。2026-10-01 的接入方案仅作为方法和冻结条件的背景；其中“尚未实施”的编制时状态已由本报告的实际执行结果取代。**唯一 Markdown 报告阅读入口为本报告**，最终三个阶段数据和实现代码保留，重复研究包、失败记录及缓存按清理记录处理。源包绑定的原始验收元数据归档为 JSON，不作为另一份 TLS 报告；历史冻结记录仍保留原命名的来源事实。
 
+2026-10-03 整理导航：三阶段目录已实际搬入 `outputs/dual-beam-tls-20261002/stages/`，三份历史 JSON 集中到 `review/history/`。当前入口见 统一目录导航（本地路径：`outputs/dual-beam-tls-20261002/README.md`），迁移关系、核验记录及原报告和交付清单备份见 整理记录（本地路径：`outputs/dual-beam-tls-20261002/review/layout-migration-20261003/README.md`）。本次整理未重跑求解或复算，以下历史数字、哈希和结论保留。
 
-清理完成：已将 **72 个明确目标、203 个文件、161,601,192 bytes（约 154.11 MiB）**移入 macOS 废纸篓，包含两份重复研究 ZIP、首次/失败执行、复算载荷副本、旧 Markdown 和缓存。三个阶段的最终源几何、数值结果、第三阶段全部 18,734 个无损 VTP、匹配实现及成功核验证据保留。明细见清理记录（本地档案 `../../outputs/dual-beam-tls-20261002-cleanup.json`）。清理后三个阶段文件库存及全部 11 个活跃结果包严格读取通过；原几何与数值结果未变，已有 Git 跟踪文件状态保持一致。移入废纸篓可恢复；磁盘空间会在清空废纸篓后释放。
+清理完成：已将 **72 个明确目标、203 个文件、161,601,192 bytes（约 154.11 MiB）**移入 macOS 废纸篓，包含两份重复研究 ZIP、首次/失败执行、复算载荷副本、旧 Markdown 和缓存。三个阶段的最终源几何、数值结果、第三阶段全部 18,734 个无损 VTP、匹配实现及成功核验证据保留。明细见 清理记录（本地路径：`outputs/dual-beam-tls-20261002/review/history/dual-beam-tls-20261002-cleanup.json`）。清理后三个阶段文件库存及全部 11 个活跃结果包严格读取通过；原几何与数值结果未变，已有 Git 跟踪文件状态保持一致。移入废纸篓可恢复；磁盘空间会在清空废纸篓后释放。
 
 报告直接保存关键数字、证据口径和哈希，无需旧报告即可独立阅读；少量保留的最终 JSON 与复算脚本入口列于第 8 节。哈希能够识别当时的文件，不能恢复文件；若今后清理原始数据，本报告也不能代替原数据执行完整复算。
 
-发布补充：NREL/WFRL 0.3.13 作为显式可选回放交付该候选，默认仍为 `hub-axis.v1`。本报告中的“未安装/发布”描述三阶段研究完成时的状态；0.3.13 的安装与发布验证另见 [0.3.13 发布核对](../blender/0.3.13发布核对.md)。公开源码含匹配实现及内置名义源/旧法/TLS结果；下文 `outputs/` 路径标识本地研究档案，原始求解文件与阶段诊断档案未随源码发布。
+历史发布补充：NREL/WFRL 0.3.13 作为显式可选回放交付该候选，默认仍为 `hub-axis.v1`。本报告中的“未安装/发布”描述三阶段研究完成时的状态；0.3.13 的安装与发布验证另见 [0.3.13 发布核对](../blender/releases/0.3.13发布核对.md)。公开源码含匹配实现及内置名义源/旧法/TLS结果；下文 `outputs/` 路径标识本地研究档案，原始求解文件与阶段诊断档案未随源码发布。
+
+2026-10-05 当前入口补充：0.3.15继续随ZIP提供相同旧法/TLS结果层，增加便携MAPPO＋重建示例，未重求解或改变本报告精度状态。仅ZIP发布，源码未推送；现行软件验证见[0.3.15发布核对](../blender/releases/0.3.15发布核对.md)，上述源码同步结论仅指0.3.13。
 
 ## 1. 方法、评分与输入边界
 
@@ -297,11 +302,11 @@ v3 源几何包的 `data.json` 只提供真实 motion，旧 B2 `measurements`/`c
 
 |阶段|最终 JSON 证据|复算入口|
 |---|---|---|
-|第一阶段|完整方法对照（本地档案 `../../outputs/dual-beam-tls-20261002-stage1/comparison/comparison.json`）、重复一致性（本地档案 `../../outputs/dual-beam-tls-20261002-stage1/repeatability.json`）|reproduce.sh（本地档案 `../../outputs/dual-beam-tls-20261002-stage1/reproduce.sh`）|
-|第二阶段|残差（本地档案 `../../outputs/dual-beam-tls-20261002-stage2/residuals/diagnostics.json`）、说明性可观测性（本地档案 `../../outputs/dual-beam-tls-20261002-stage2/observability/results.json`）、来源（本地档案 `../../outputs/dual-beam-tls-20261002-stage2/provenance/provenance.json`）|reproduce.py（本地档案 `../../outputs/dual-beam-tls-20261002-stage2/reproduce.py`）|
-|第三阶段|40 Hz 对照（本地档案 `../../outputs/dual-beam-tls-20261002-stage3/comparison/coarse/comparison.json`）、80 Hz 对照（本地档案 `../../outputs/dual-beam-tls-20261002-stage3/comparison/fine/comparison.json`）、时间比较（本地档案 `../../outputs/dual-beam-tls-20261002-stage3/temporal/comparison.json`）、最终交付核验（本地档案 `../../outputs/dual-beam-tls-20261002-stage3/delivery-verification.json`）|reproduce.py（本地档案 `../../outputs/dual-beam-tls-20261002-stage3/reproduce.py`）|
+|第一阶段|完整方法对照（本地路径：`outputs/dual-beam-tls-20261002/stages/01-saved-replay/comparison/comparison.json`）、重复一致性（本地路径：`outputs/dual-beam-tls-20261002/stages/01-saved-replay/repeatability.json`）|reproduce.sh（本地路径：`outputs/dual-beam-tls-20261002/stages/01-saved-replay/reproduce.sh`）|
+|第二阶段|残差（本地路径：`outputs/dual-beam-tls-20261002/stages/02-diagnostics/residuals/diagnostics.json`）、说明性可观测性（本地路径：`outputs/dual-beam-tls-20261002/stages/02-diagnostics/observability/results.json`）、来源（本地路径：`outputs/dual-beam-tls-20261002/stages/02-diagnostics/provenance/provenance.json`）|reproduce.py（本地路径：`outputs/dual-beam-tls-20261002/stages/02-diagnostics/reproduce.py`）|
+|第三阶段|40 Hz 对照（本地路径：`outputs/dual-beam-tls-20261002/stages/03-independent-openfast/comparison/coarse/comparison.json`）、80 Hz 对照（本地路径：`outputs/dual-beam-tls-20261002/stages/03-independent-openfast/comparison/fine/comparison.json`）、时间比较（本地路径：`outputs/dual-beam-tls-20261002/stages/03-independent-openfast/temporal/comparison.json`）、最终交付核验（本地路径：`outputs/dual-beam-tls-20261002/stages/03-independent-openfast/delivery-verification.json`）|reproduce.py（本地路径：`outputs/dual-beam-tls-20261002/stages/03-independent-openfast/reproduce.py`）|
 
-源包原验收说明完整转存 `legacy-acceptance-report.json` 并更新当前源/结果 manifest 哈希链；两份原文 UTF-8 字节一致，当前 7 个结果包的严格读者检查通过，原始几何、`results.json` 数值和估计方法不变。迁移前后哈希见包装迁移记录（本地档案 `../../outputs/dual-beam-tls-20261002-metadata-migration.json`）。历史冻结记录中的旧文件名和旧哈希用于追溯当时的输入，不解释为当前目录还存在旧 Markdown 副本。
+源包原验收说明完整转存 `legacy-acceptance-report.json` 并更新当前源/结果 manifest 哈希链；两份原文 UTF-8 字节一致，当前 7 个结果包的严格读者检查通过，原始几何、`results.json` 数值和估计方法不变。迁移前后哈希见 包装迁移记录（本地路径：`outputs/dual-beam-tls-20261002/review/history/dual-beam-tls-20261002-metadata-migration.json`）。历史冻结记录中的旧文件名和旧哈希用于追溯当时的输入，不解释为当前目录还存在旧 Markdown 副本。
 
 以下 SHA-256 是本轮核验时的文件指纹，直接记载以避免依赖研究目录路径。不是数字签名，也不能恢复已清理的文件。
 

@@ -1,0 +1,182 @@
+{
+  "stage": 4,
+  "original_geometry": {
+    "SplitRecon.B1": {
+      "keys": 601,
+      "vertices": 1280,
+      "shape_coordinates_sha256": "04a827cae544d2d6a7f49ca30d483ae6c330a38391f6ef53c0b803a4cb191969",
+      "source_sha256": "f2c34be44607e520c8e26c4331120aa6ff354870ab40192d31321129fe7beca0"
+    },
+    "SplitRecon.B2": {
+      "keys": 601,
+      "vertices": 1280,
+      "shape_coordinates_sha256": "8311cb16c7a8e60a828b8f2a01c366a214d96794de576a1d6e501334b0903864",
+      "source_sha256": "f2c34be44607e520c8e26c4331120aa6ff354870ab40192d31321129fe7beca0"
+    },
+    "SplitRecon.B3": {
+      "keys": 601,
+      "vertices": 1280,
+      "shape_coordinates_sha256": "02a7870ed9ad5ae0e0f10625debd9747528d4ce95942bb18229733f7cf7f5fbb",
+      "source_sha256": "f2c34be44607e520c8e26c4331120aa6ff354870ab40192d31321129fe7beca0"
+    }
+  },
+  "expected_mappo": {
+    "properties": {
+      "wfrl_recon_texture_mode": "CONTRAST",
+      "wfrl_recon_texture_gain": 4.25,
+      "wfrl_recon_texture_threshold": 0.03999999910593033,
+      "wfrl_recon_show_texture": true,
+      "wfrl_recon_inspect_blade": "2",
+      "wfrl_recon_inspect_radius": 47.224998474121094,
+      "wfrl_recon_inspect_tau": 0.8216145634651184,
+      "wfrl_recon_inspect_size": 2.4000000953674316,
+      "wfrl_recon_inspect_box": true
+    },
+    "shader": [
+      {
+        "Contrast": 1.0,
+        "FalseColor": 0.0,
+        "Gain": 4.25,
+        "CenterU": 0.8216145634651184,
+        "CenterV": 0.256504088640213,
+        "HalfU": 0.2029305398464203,
+        "HalfV": 0.019512195140123367,
+        "ShowBox": 0.0,
+        "Lower": 0.2614341378211975,
+        "Upper": 0.3525029718875885
+      },
+      {
+        "Contrast": 1.0,
+        "FalseColor": 0.0,
+        "Gain": 4.25,
+        "CenterU": 0.8216145634651184,
+        "CenterV": 0.256504088640213,
+        "HalfU": 0.2029305398464203,
+        "HalfV": 0.019512195140123367,
+        "ShowBox": 1.0,
+        "Lower": 0.2614341378211975,
+        "Upper": 0.3525029718875885
+      },
+      {
+        "Contrast": 1.0,
+        "FalseColor": 0.0,
+        "Gain": 4.25,
+        "CenterU": 0.8216145634651184,
+        "CenterV": 0.256504088640213,
+        "HalfU": 0.2029305398464203,
+        "HalfV": 0.019512195140123367,
+        "ShowBox": 0.0,
+        "Lower": 0.2614341378211975,
+        "Upper": 0.3525029718875885
+      }
+    ]
+  },
+  "expected_synthetic": {
+    "properties": {
+      "wfrl_recon_texture_mode": "FALSE_COLOR",
+      "wfrl_recon_texture_gain": 9.25,
+      "wfrl_recon_texture_threshold": 0.07999999821186066,
+      "wfrl_recon_show_texture": true,
+      "wfrl_recon_inspect_blade": "1",
+      "wfrl_recon_inspect_radius": 57.0,
+      "wfrl_recon_inspect_tau": 0.6399999856948853,
+      "wfrl_recon_inspect_size": 1.7000000476837158,
+      "wfrl_recon_inspect_box": false
+    },
+    "shader": [
+      {
+        "Contrast": 0.0,
+        "FalseColor": 1.0,
+        "Gain": 9.25,
+        "CenterU": 0.6399999856948853,
+        "CenterV": 0.09756097197532654,
+        "HalfU": 0.18260638415813446,
+        "HalfV": 0.013821139000356197,
+        "ShowBox": 0.0,
+        "Lower": 0.2217429280281067,
+        "Upper": 0.40407794713974
+      },
+      {
+        "Contrast": 0.0,
+        "FalseColor": 1.0,
+        "Gain": 9.25,
+        "CenterU": 0.6399999856948853,
+        "CenterV": 0.09756097197532654,
+        "HalfU": 0.18260638415813446,
+        "HalfV": 0.013821139000356197,
+        "ShowBox": 0.0,
+        "Lower": 0.2217429280281067,
+        "Upper": 0.40407794713974
+      },
+      {
+        "Contrast": 0.0,
+        "FalseColor": 1.0,
+        "Gain": 9.25,
+        "CenterU": 0.6399999856948853,
+        "CenterV": 0.09756097197532654,
+        "HalfU": 0.18260638415813446,
+        "HalfV": 0.013821139000356197,
+        "ShowBox": 0.0,
+        "Lower": 0.2217429280281067,
+        "Upper": 0.40407794713974
+      }
+    ]
+  },
+  "saved_frame": 1333,
+  "saved_synthetic_index": 93,
+  "counts": {
+    "objects": 2744,
+    "meshes": 298,
+    "shape_keys": 6,
+    "actions": 111,
+    "materials": 173,
+    "images": 12,
+    "cameras": 17,
+    "texts": 7,
+    "node_groups": 2
+  },
+  "mappo_payload": [
+    {
+      "name": "SplitMappoTexture.B1",
+      "uv_sha256": "be4b61adb2421169265c3b52edf6874fbe1d65ea77361553f9aea10690d56f19",
+      "packed_sha256": "0abb578ad9a5da49cb887322309043fbb84519c767114d91f5c4c32d922e90bd"
+    },
+    {
+      "name": "SplitMappoTexture.B2",
+      "uv_sha256": "be4b61adb2421169265c3b52edf6874fbe1d65ea77361553f9aea10690d56f19",
+      "packed_sha256": "b96646e83fb4977b6f264da9730984c46800d2500c764f0c85332ce719aaabb5"
+    },
+    {
+      "name": "SplitMappoTexture.B3",
+      "uv_sha256": "be4b61adb2421169265c3b52edf6874fbe1d65ea77361553f9aea10690d56f19",
+      "packed_sha256": "3574070cedfcad6eb0477ba7b7587c07ab7d9f330819a55bd655b08de68b776e"
+    }
+  ],
+  "synthetic_payload": [
+    {
+      "name": "SplitTexture.B1",
+      "uv_sha256": "be4b61adb2421169265c3b52edf6874fbe1d65ea77361553f9aea10690d56f19",
+      "packed_sha256": "1684cac08ce687a16c362f3e836a6966fdde9eb4d853cb40424ec3a901c0a0d1"
+    },
+    {
+      "name": "SplitTexture.B2",
+      "uv_sha256": "be4b61adb2421169265c3b52edf6874fbe1d65ea77361553f9aea10690d56f19",
+      "packed_sha256": "d10872cc0e14a11a75902c22adb99e75fc5980fa7897c86630e2bece82144960"
+    },
+    {
+      "name": "SplitTexture.B3",
+      "uv_sha256": "be4b61adb2421169265c3b52edf6874fbe1d65ea77361553f9aea10690d56f19",
+      "packed_sha256": "72a30dd7b4f8bc690f347098bf481f7502059a6eafee9c7dfc5e2d3cd9347d8f"
+    }
+  ],
+  "saved": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-settings-reopen/prepare-attempt01/distinct-source-settings.blend",
+  "saved_sha256": "941d5abedfd66d7f23cc5a5e3f12026ee0cf1ac4fd24b0e1161ee666328b4ec0",
+  "status": "PASS",
+  "error": null,
+  "addon_module": "bl_ext.user_default.wfrl_blender",
+  "addon_file": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "actual_module_root": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "blender": "5.2.1 LTS",
+  "scope": "DAILY_INSTALLED_TWO_SOURCE_DISPLAY_PROFILES_SAVED_TEST_COPY",
+  "prefs_saved": false
+}

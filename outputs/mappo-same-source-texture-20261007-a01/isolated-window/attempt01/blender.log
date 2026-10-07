@@ -1,0 +1,15 @@
+00:00.699  blend            | Read blend: "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt01/input-geometry.blend"
+MAPPO_SAME_SOURCE_WINDOW_READY same-source-detail
+MAPPO_SAME_SOURCE_WINDOW_READY paused-after-real-play
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/mappo_same_source_texture_window.py", line 280, in tick
+    assert right_view() == state['right_before_source_camera']
+           ~~~~~~~~~~^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/mappo_same_source_texture_window.py", line 157, in right_view
+    space = pair()[1].spaces.active
+            ~~~~^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/mappo_same_source_texture_window.py", line 59, in pair
+    assert validation.split.enabled(scene) and scene.get('split_review_status') == 'READY'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+

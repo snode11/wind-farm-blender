@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "date": "2026-10-08",
+  "recoverable": true,
+  "trash": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008",
+  "entries": 69,
+  "files": 3649,
+  "logical_size_bytes": 2768834670,
+  "retained_files_checked": 3165,
+  "retained_mismatches": [],
+  "final_viewable_scene_preserved": true,
+  "scene_sha256": "93a4c5ca78f1578f8c884efb9736f69a3ab892ef435fe155961b9c22c6576218",
+  "scene_acceptance_report": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/cleanup-post-v0.3.17.1-20261008/scene-restoration/native-reopen/independent-reopen-validation.json",
+  "final_release_package_preserved": true,
+  "published_zip_read_or_compared": false,
+  "current_daily_install_changed": false,
+  "trash_emptied": false,
+  "disk_space_released": false,
+  "source_rgb_mask_originals_preserved": true,
+  "hardlinked_derived_png_bytes": 534602725,
+  "scope": "This release and same-source QA intermediates plus regenerable repository caches",
+  "completed_at_utc": "2026-10-07T16:44:48.830857+00:00"
+}

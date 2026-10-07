@@ -1,0 +1,11 @@
+00:00.861  blend            | Read blend: "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-edge/attempt02/input-geometry.blend"
+Error: 请等待当前布局调整完成
+Error: 请等待当前布局调整完成
+Error: 请等待当前布局调整完成
+Error: 请等待当前布局调整完成
+Error: 请等待当前布局调整完成
+NATIVE_EDGE_CHECK_COMPLETE 0
+01:18.639  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 292, total unfreed memory 0.059792 MB

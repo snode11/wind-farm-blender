@@ -1,0 +1,10 @@
+00:00.627  blend            | Read blend: "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-settings-reopen/prepare-attempt01/distinct-source-settings.blend"
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-settings-reopen/reopen.py", line 65, in tick
+    assert state['counts'] == baseline['counts']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+00:05.428  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit

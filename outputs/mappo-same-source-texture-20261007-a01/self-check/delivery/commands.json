@@ -1,0 +1,4 @@
+{
+  "host_tests": "PYTHONPATH=blender_frontend:. /opt/anaconda3/envs/wfrl-mac/bin/python -m pytest blender_frontend/tests/test_split_reconstruction.py blender_frontend/tests/test_split_reconstruction_timing.py blender_frontend/tests/test_split_mappo_texture.py blender_frontend/tests/test_split_texture_settings.py blender_frontend/tests/test_blade_recon_data.py blender_frontend/tests/test_blade_recon_texture_data.py blender_frontend/tests/test_blade_recon_detail_data.py blender_frontend/tests/test_mappo_texture_package.py blender_frontend/tests/test_extension_package.py -q",
+  "package_validation": "/opt/anaconda3/envs/wfrl-mac/bin/python scripts/blender/validate_frontend_package.py --output outputs/mappo-same-source-texture-20261007-a01/isolated-package/attempt02 --blender /Applications/Blender.app/Contents/MacOS/Blender"
+}

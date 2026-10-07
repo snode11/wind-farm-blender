@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "scope": "ACTUAL_CUA_MOUSE_AND_KEYBOARD_OPERATIONS_ON_TASK_OWNED_DAILY_COPY",
+  "blender": "5.2.1 LTS",
+  "pid": 70112,
+  "file": "daily-window/attempt02/same-source-saved.blend",
+  "canonical_saved": false,
+  "preferences_saved": false,
+  "controls": [
+    {
+      "action": "activate left viewport; Right",
+      "result": "frame 52 to 53, right sample9/601 held66.7ms"
+    },
+    {
+      "action": "next sample",
+      "result": "frame53 to55; playback117.900s/right117.900s, sample10/601"
+    },
+    {
+      "action": "independent synthetic button",
+      "result": "left frame55 preserved; right1.600s, sample17/120, FALSE_COLOR cyan/magenta, independent sample"
+    },
+    {
+      "action": "same source button",
+      "result": "left frame55 preserved; right117.900s/sample10/601; ORIGINAL gray and B2/radius47.22/tau0.822/size2.00 restored"
+    }
+  ],
+  "initial_nonresponsive_clicks": "While multiple validation processes were active, some CUA clicks only moved the cursor. After tests exited and left viewport keyboard activation, buttons responded. No production defect concluded from those observations.",
+  "evidence": "CUA tool screenshots in this conversation; native exact-field and shader corroboration in self-check/native-edge/attempt02/report.json",
+  "final_visible_unsaved_frame": 55,
+  "disk_saved_frame": 52
+}

@@ -1,0 +1,29 @@
+{
+  "failure_retained": "reopen-attempt01/settings-reopen-report.json",
+  "original_assertion": "fresh process total counts == pre-save in-memory total counts",
+  "observed_difference": {
+    "before_count": 173,
+    "after_count": 172,
+    "missing_materials": [
+      {
+        "name": "WFRL.ClearanceBeam.Hit",
+        "users": 0,
+        "fake_user": false
+      }
+    ],
+    "unexpected_new_materials": []
+  },
+  "canonical_at_load_hit_material_users": 4,
+  "pre_save_frame": 1333,
+  "pre_save_hit_material_users": 0,
+  "pre_save_hit_material_fake_user": false,
+  "reason": "Timeline clearance updates leave the Hit material unreferenced at frame 1333; Blender omits that unreferenced material from the saved/reopened data.",
+  "corrected_assertions": [
+    "Fresh loaded inventory equals independent background saved-file name/count inventory whose saved-file SHA matches prepare result",
+    "Only the precisely identified WFRL.ClearanceBeam.Hit users=0 fake_user=False item is removed from pre-save counts",
+    "Both source required materials and all original/new native keys, UV and packed images remain checked",
+    "Fresh-process warm pointers and counts stay exactly fixed through 3 mode/exit/CURRENT cycles"
+  ],
+  "unknown_missing_datablocks_allowed": false,
+  "production_source_changed": false
+}

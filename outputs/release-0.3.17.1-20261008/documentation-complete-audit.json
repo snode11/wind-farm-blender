@@ -1,0 +1,504 @@
+{
+  "status": "PASS",
+  "date": "2026-10-08",
+  "scope": "当前使用文档及当前阅读定位；历史正文、资产内说明和冻结研究资料不改",
+  "public_version": "0.3.17.1",
+  "blender_manifest_version": "0.3.17+1",
+  "release_source_boundary": "ZIP_ONLY_IMPLEMENTATION; docs-only GitHub synchronization handled by root separately",
+  "scan": {
+    "method": "rg 文件发现和全内容版本/入口/计划状态筛查；对命中当前文档及其操作/恢复章节逐项审阅",
+    "roots": [
+      ".agents",
+      "docs",
+      "blender_frontend",
+      "wfrl",
+      "scripts",
+      "root Markdown"
+    ],
+    "excluded_full_scan": [
+      "outputs历史实验",
+      "research冻结sources",
+      "blade_recon及blade_recon0.2算法研究",
+      "projects独立GW184",
+      "vendor/node_modules/.git"
+    ],
+    "files_found_and_scanned": [
+      ".agents/skills/windfarm-blender-dev/SKILL.md",
+      "AGENTS.md",
+      "CHANGELOG.md",
+      "README.md",
+      "blender_frontend/README.md",
+      "blender_frontend/tests/blender/frontend_layout_regression.md",
+      "blender_frontend/wfrl_blender/assets/blade_recon_synth_tex/README.md",
+      "blender_frontend/wfrl_blender/assets/landscape/SOURCES.md",
+      "docs/README.md",
+      "docs/blender/BladeRecon可视化使用说明.md",
+      "docs/blender/Blender前端功能总览与规划.md",
+      "docs/blender/GW184三相机与缺陷编辑器.md",
+      "docs/blender/INSTALL.md",
+      "docs/blender/NREL缺陷编辑器.md",
+      "docs/blender/README.md",
+      "docs/blender/T1三相机使用说明.md",
+      "docs/blender/releases/0.3.13发布核对.md",
+      "docs/blender/releases/0.3.15发布核对.md",
+      "docs/blender/releases/0.3.16发布核对.md",
+      "docs/blender/releases/0.3.17.1发布核对.md",
+      "docs/blender/releases/0.3.17发布核对.md",
+      "docs/blender/releases/0.3.9发布核对.md",
+      "docs/blender/validation/NREL缺陷编辑器移植验证.md",
+      "docs/blender/validation/三相机候选取景.md",
+      "docs/blender/validation/前端更新验证记录.md",
+      "docs/blender/validation/双束内侧安装位与验证.md",
+      "docs/blender/validation/双束安装位选定与验证.md",
+      "docs/blender/validation/双束精度与报警集成验证.md",
+      "docs/blender/validation/双束重建实施与诊断.md",
+      "docs/blender/发布状态与验证范围.md",
+      "docs/blender/用户使用手册.md",
+      "docs/demos/演示指令单.md",
+      "docs/development/叶尖代码与后端接入.md",
+      "docs/development/叶片晃动方案.md",
+      "docs/lidar/双束TLS候选实施与验证总报告.md",
+      "docs/maintenance/blade-recon-cleanup-20261007/清理记录.md",
+      "docs/maintenance/post-v0.3.17-cleanup-20261007/清理记录.md",
+      "docs/maintenance/整理记录_2026-10-06.md",
+      "docs/overview/风场物理仿真平台_功能列表与终极目标.md",
+      "docs/proposal/README.md",
+      "docs/proposal/cameras/GW184单机启停三相机视频方案.md",
+      "docs/proposal/defects/叶片缺陷编辑与固定相机成像验证开发规格.md",
+      "docs/proposal/lidar/双束重建净空与一号光束报警方案.md",
+      "docs/proposal/lidar/激光净空雷达演示方案.md",
+      "docs/proposal/platform/工业AGI_4D世界模型_可实现性审计与Prototype计划.md",
+      "docs/proposal/reconstruction/NREL5MW_固定三摄叶片三维重建与表面缺陷首轮诊断方案_v1.1.md",
+      "docs/proposal/reconstruction/NREL5MW_现有视频表面证据补齐与根部约束诊断_v1.0.md",
+      "docs/proposal/reconstruction/NREL_视频动态叶片与叶尖面外读数验证方案_v0.1.md",
+      "docs/proposal/reconstruction/固定三摄叶片三维重建与表面缺陷首轮诊断方案.md",
+      "docs/proposal/reconstruction/固定三摄叶片重建_首轮执行清单与阶段A实现准备.md",
+      "docs/proposal/叶片表面重建_2026-10-06/README.md",
+      "docs/proposal/叶片表面重建_2026-10-06/先发给Codex_执行说明.md",
+      "docs/proposal/叶片表面重建_2026-10-06/叶片表面重建_Codex交接_2026-10-05.md",
+      "docs/proposal/叶片表面重建_2026-10-06/叶片表面重建_方案v3修订资料_2026-10-06/README_清理后.md",
+      "docs/proposal/叶片表面重建_2026-10-06/叶片表面重建_方案v3修订资料_2026-10-06/原执行说明_v2_未改动.md",
+      "docs/proposal/叶片表面重建_2026-10-06/叶片表面重建_方案v3修订资料_2026-10-06/原方案_v2_未改动.md",
+      "docs/setup/setup_local.md",
+      "docs/training/IPPO_TRAINING_EXPLAINED.md",
+      "docs/training/MAPPO_SETUP.md",
+      "docs/training/PPO_算法执行细节.md",
+      "docs/training/WAKE_STEERING_BREAKTHROUGH.md",
+      "scripts/demo/REPLAY_GUIDE.md",
+      "scripts/lidar/README.md",
+      "wfrl/lidar/README.md",
+      "wfrl/lidar/REPLAY_FORMAT.md",
+      "wfrl/nrel_reconstruction/README.md",
+      "前端readme.md",
+      "前端更新计划.md"
+    ],
+    "files_count": 68,
+    "focused_current_documentation": [
+      ".agents/skills/windfarm-blender-dev/SKILL.md",
+      "AGENTS.md",
+      "CHANGELOG.md",
+      "README.md",
+      "blender_frontend/README.md",
+      "blender_frontend/tests/blender/frontend_layout_regression.md",
+      "docs/README.md",
+      "docs/blender/BladeRecon可视化使用说明.md",
+      "docs/blender/Blender前端功能总览与规划.md",
+      "docs/blender/GW184三相机与缺陷编辑器.md",
+      "docs/blender/INSTALL.md",
+      "docs/blender/NREL缺陷编辑器.md",
+      "docs/blender/README.md",
+      "docs/blender/T1三相机使用说明.md",
+      "docs/blender/发布状态与验证范围.md",
+      "docs/blender/用户使用手册.md",
+      "docs/demos/演示指令单.md",
+      "docs/development/叶尖代码与后端接入.md",
+      "docs/development/叶片晃动方案.md",
+      "docs/lidar/双束TLS候选实施与验证总报告.md",
+      "docs/overview/风场物理仿真平台_功能列表与终极目标.md",
+      "docs/proposal/README.md",
+      "docs/proposal/cameras/GW184单机启停三相机视频方案.md",
+      "docs/proposal/defects/叶片缺陷编辑与固定相机成像验证开发规格.md",
+      "docs/proposal/lidar/双束重建净空与一号光束报警方案.md",
+      "docs/proposal/lidar/激光净空雷达演示方案.md",
+      "docs/proposal/platform/工业AGI_4D世界模型_可实现性审计与Prototype计划.md",
+      "docs/proposal/reconstruction/NREL5MW_固定三摄叶片三维重建与表面缺陷首轮诊断方案_v1.1.md",
+      "docs/proposal/reconstruction/NREL5MW_现有视频表面证据补齐与根部约束诊断_v1.0.md",
+      "docs/proposal/reconstruction/NREL_视频动态叶片与叶尖面外读数验证方案_v0.1.md",
+      "docs/proposal/reconstruction/固定三摄叶片三维重建与表面缺陷首轮诊断方案.md",
+      "docs/proposal/reconstruction/固定三摄叶片重建_首轮执行清单与阶段A实现准备.md",
+      "docs/proposal/叶片表面重建_2026-10-06/README.md",
+      "docs/proposal/叶片表面重建_2026-10-06/先发给Codex_执行说明.md",
+      "docs/proposal/叶片表面重建_2026-10-06/叶片表面重建_Codex交接_2026-10-05.md",
+      "docs/proposal/叶片表面重建_2026-10-06/叶片表面重建_方案v3修订资料_2026-10-06/README_清理后.md",
+      "docs/setup/setup_local.md",
+      "docs/training/IPPO_TRAINING_EXPLAINED.md",
+      "docs/training/MAPPO_SETUP.md",
+      "docs/training/PPO_算法执行细节.md",
+      "docs/training/WAKE_STEERING_BREAKTHROUGH.md",
+      "scripts/demo/REPLAY_GUIDE.md",
+      "scripts/lidar/README.md",
+      "wfrl/lidar/README.md",
+      "wfrl/lidar/REPLAY_FORMAT.md",
+      "wfrl/nrel_reconstruction/README.md",
+      "前端readme.md",
+      "前端更新计划.md"
+    ]
+  },
+  "changed_in_complete_audit": [
+    "docs/README.md",
+    "docs/blender/README.md",
+    ".agents/skills/windfarm-blender-dev/SKILL.md",
+    "前端更新计划.md",
+    "docs/blender/用户使用手册.md",
+    "docs/blender/BladeRecon可视化使用说明.md",
+    "docs/blender/T1三相机使用说明.md",
+    "docs/blender/NREL缺陷编辑器.md",
+    "docs/demos/演示指令单.md",
+    "docs/setup/setup_local.md",
+    "docs/overview/风场物理仿真平台_功能列表与终极目标.md",
+    "wfrl/lidar/README.md",
+    "docs/blender/Blender前端功能总览与规划.md",
+    "blender_frontend/README.md",
+    "docs/blender/releases/0.3.17.1发布核对.md",
+    "前端readme.md",
+    "scripts/lidar/README.md",
+    "docs/training/MAPPO_SETUP.md",
+    "docs/development/叶尖代码与后端接入.md",
+    "docs/development/叶片晃动方案.md",
+    "docs/proposal/platform/工业AGI_4D世界模型_可实现性审计与Prototype计划.md",
+    "docs/lidar/双束TLS候选实施与验证总报告.md",
+    "docs/proposal/lidar/激光净空雷达演示方案.md",
+    "docs/proposal/reconstruction/NREL5MW_固定三摄叶片三维重建与表面缺陷首轮诊断方案_v1.1.md",
+    "docs/proposal/reconstruction/固定三摄叶片三维重建与表面缺陷首轮诊断方案.md",
+    "docs/proposal/README.md",
+    "docs/blender/GW184三相机与缺陷编辑器.md",
+    "docs/proposal/cameras/GW184单机启停三相机视频方案.md",
+    "docs/proposal/defects/叶片缺陷编辑与固定相机成像验证开发规格.md",
+    "docs/proposal/lidar/双束重建净空与一号光束报警方案.md",
+    "docs/proposal/叶片表面重建_2026-10-06/README.md",
+    "docs/training/WAKE_STEERING_BREAKTHROUGH.md"
+  ],
+  "github_docs_allowlist": [
+    "README.md",
+    "CHANGELOG.md",
+    "blender_frontend/README.md",
+    "前端readme.md",
+    "docs/blender/INSTALL.md",
+    "docs/blender/发布状态与验证范围.md",
+    "docs/blender/releases/0.3.17.1发布核对.md",
+    "outputs/release-0.3.17.1-20261008/release-notes.md",
+    "docs/README.md",
+    "docs/blender/README.md",
+    ".agents/skills/windfarm-blender-dev/SKILL.md",
+    "前端更新计划.md",
+    "docs/blender/用户使用手册.md",
+    "docs/blender/BladeRecon可视化使用说明.md",
+    "docs/blender/T1三相机使用说明.md",
+    "docs/blender/NREL缺陷编辑器.md",
+    "docs/demos/演示指令单.md",
+    "docs/setup/setup_local.md",
+    "docs/overview/风场物理仿真平台_功能列表与终极目标.md",
+    "wfrl/lidar/README.md",
+    "docs/blender/Blender前端功能总览与规划.md",
+    "scripts/lidar/README.md",
+    "docs/training/MAPPO_SETUP.md",
+    "docs/development/叶尖代码与后端接入.md",
+    "docs/development/叶片晃动方案.md",
+    "docs/proposal/platform/工业AGI_4D世界模型_可实现性审计与Prototype计划.md",
+    "docs/lidar/双束TLS候选实施与验证总报告.md",
+    "docs/proposal/lidar/激光净空雷达演示方案.md",
+    "docs/proposal/reconstruction/NREL5MW_固定三摄叶片三维重建与表面缺陷首轮诊断方案_v1.1.md",
+    "docs/proposal/reconstruction/固定三摄叶片三维重建与表面缺陷首轮诊断方案.md",
+    "docs/proposal/README.md",
+    "docs/blender/GW184三相机与缺陷编辑器.md",
+    "docs/proposal/cameras/GW184单机启停三相机视频方案.md",
+    "docs/proposal/defects/叶片缺陷编辑与固定相机成像验证开发规格.md",
+    "docs/proposal/lidar/双束重建净空与一号光束报警方案.md",
+    "docs/proposal/叶片表面重建_2026-10-06/README.md",
+    "docs/training/WAKE_STEERING_BREAKTHROUGH.md"
+  ],
+  "classification": {
+    "current_errors_corrected": [
+      "用户手册安装/展示顺序仍0.3.16",
+      "BladeRecon当前版本仍0.3.17且缺同源入口",
+      "总索引和功能规划当前声明仍0.3.16",
+      "skill当前基线仍10月5日0.3.16",
+      "前端计划未反映已实施同源601样本与QA",
+      "连续原生播放被写成片尾自动停，现改共同循环、手动步进端点钳制",
+      "开发/训练/研究阅读定位中的当前产品指针陈旧",
+      "实现说明仍以0.3.17包作当前安装/核对",
+      "新代码/启动器不在公开源码的链接改为明确本地路径"
+    ],
+    "historical_preserved": [
+      "blender_frontend/wfrl_blender/assets/blade_recon_synth_tex/README.md",
+      "blender_frontend/wfrl_blender/assets/landscape/SOURCES.md",
+      "docs/blender/releases/0.3.13发布核对.md",
+      "docs/blender/releases/0.3.15发布核对.md",
+      "docs/blender/releases/0.3.16发布核对.md",
+      "docs/blender/releases/0.3.17.1发布核对.md",
+      "docs/blender/releases/0.3.17发布核对.md",
+      "docs/blender/releases/0.3.9发布核对.md",
+      "docs/blender/validation/NREL缺陷编辑器移植验证.md",
+      "docs/blender/validation/三相机候选取景.md",
+      "docs/blender/validation/前端更新验证记录.md",
+      "docs/blender/validation/双束内侧安装位与验证.md",
+      "docs/blender/validation/双束安装位选定与验证.md",
+      "docs/blender/validation/双束精度与报警集成验证.md",
+      "docs/blender/validation/双束重建实施与诊断.md",
+      "docs/maintenance/blade-recon-cleanup-20261007/清理记录.md",
+      "docs/maintenance/post-v0.3.17-cleanup-20261007/清理记录.md",
+      "docs/maintenance/整理记录_2026-10-06.md",
+      "docs/proposal/叶片表面重建_2026-10-06/叶片表面重建_方案v3修订资料_2026-10-06/原执行说明_v2_未改动.md",
+      "docs/proposal/叶片表面重建_2026-10-06/叶片表面重建_方案v3修订资料_2026-10-06/原方案_v2_未改动.md"
+    ],
+    "historical_in_current_documents": "0.3.13公开源码、0.3.15便携原几何、0.3.16编辑器、0.3.17原157文件独立合成、dated前端计划与研究编制状态保留，并加当前入口或历史限定",
+    "independent_versions_preserved": [
+      "GW1840.4.0独立运行包",
+      "训练算法/IPPO/MAPPO后端schema",
+      "雷达schema1.0及hub-axis/hub-tls算法版本",
+      "研究方案v1.0/v1.1/v3及NOT_ACCEPTED/FAILED_GATE/NOT_RUN"
+    ]
+  },
+  "static_checks": {
+    "documents_checked": 37,
+    "relative_links_checked": 621,
+    "broken_local_links": [],
+    "unbalanced_code_fences": [],
+    "network_or_remote_download": false,
+    "build_or_runtime_retest": false,
+    "pending_root_cleanup_record": []
+  },
+  "remaining_old_version_matches_reviewed": [
+    {
+      "path": "README.md",
+      "line": 12,
+      "text": "**NREL 0.3.17.1 仅更新安装 ZIP：** 本次未提交或推送新版源码，`v0.3.17.1` 指向远端 `main` 的 `9d7b5596a781b8ea5040d18b2f009268313a8821`。GitHub 自动生成的 Source code 归档不能当作当前安装包。0.3.13 已同步完整构建源码与内置回放资源；历史源码归档仍按各版本原有范围阅读。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/blender/BladeRecon可视化使用说明.md",
+      "line": 24,
+      "text": "历史0.3.17 ZIP 的隔离安装及保存重开见 [0.3.17 发布核对](releases/0.3.17发布核对.md)；此前本机窗口证据见[修复验证记录](../../outputs/blade-texture-split-fix-20261007-b01/实施与验证.md)，该次最终包未重测可见窗口或FPS；当前0.3.17.1证据见本页开头。下述原几何示例保留，原0.3.16验证按历史版本阅读。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/blender/Blender前端功能总览与规划.md",
+      "line": 42,
+      "text": "GW184 三相机与六类叶片缺陷编辑器已作为 **0.4.0 独立运行 ZIP** 发布，完整解压后启动，不通过 Install from Disk 安装。NREL 当前为 0.3.17.1，使用自己绑定 NREL 健康参考几何的缺陷编辑器，雷达功能仍仅在 NREL 扩展中提供；GW184 保持 0.4.0，两套配置不能直接互用。[0.4.0 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.4.0) 保留当时的 GW184 0.4.0 与原 NREL 0.3.12 ZIP；当前 NREL 下载见 [0.3.17.1 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.17.1)，使用入口见[GW184 指南](GW184三相机与缺陷编辑器.md)和[前端使用说明](../../前端readme.md)。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/blender/Blender前端功能总览与规划.md",
+      "line": 283,
+      "text": "便携场景保存非空 `wfrl_farm_flex_path=__WFRL_BUNDLED_MAPPO__` 与 manifest SHA-256 `d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde`，由现有读取器匹配当前安装的 `assets/mappo/`；不要清空路径或改为不支持的 `//` 相对路径。规范 `.blend` 位于 `blender_frontend/wfrl_blender/assets/examples/`，应保留。实现与维护见[前端 README](../../blender_frontend/README.md)，示例交付依据见[0.3.15 历史核对](releases/0.3.15发布核对.md)，当前包范围见[0.3.17.1 发布核对](releases/0.3.17.1发布核对.md)。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/blender/Blender前端功能总览与规划.md",
+      "line": 419,
+      "text": "**边界：** 普通 `.blend` 不一定嵌入外部数据，动态回放应保留兼容扩展与数据并通过加载入口恢复；当前 ZIP 延续 0.3.15 便携示例，配齐 MAPPO 源、场景和 packed 纹理，仍须整体安装扩展。GW184 烘焙时间线是独立机制。Windows 等平台有入口和配置支持，但本机 macOS 证据不能代替其他平台的完整验证。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/blender/Blender前端功能总览与规划.md",
+      "line": 488,
+      "text": "**当前状态：默认旧法、显式 TLS 候选在 0.3.13 发布并同步源码，0.3.17.1 ZIP 延续这两种研究结果；历史软件与安装窗口验证通过，高精度柔性反演和现场性能仍待验收。**",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/blender/Blender前端功能总览与规划.md",
+      "line": 609,
+      "text": "**当前状态：缺陷编辑器在0.3.16首次进入ZIP，当前0.3.17.1保留。编辑器后台保存重开与源码窗口记录按历史版本读取；新版没有重跑整套编辑器窗口验收。**",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/blender/Blender前端功能总览与规划.md",
+      "line": 719,
+      "text": "- [0.3.17.1 发布核对](releases/0.3.17.1发布核对.md)：当前169文件ZIP、同源与QA边界、安装／独立后台重开；历史[0.3.16](releases/0.3.16发布核对.md)保留编辑器首次交付证据。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/blender/Blender前端功能总览与规划.md",
+      "line": 723,
+      "text": "- [前端更新计划](../../前端更新计划.md)：当前交付与待验收事项，以及 0.3.10 等历史计划和限制。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/blender/Blender前端功能总览与规划.md",
+      "line": 760,
+      "text": "本表包含0.3.13历史公开实现与本地后续实现；当前0.3.17.1扩展实现仅随ZIP交付，不据本地路径推定公开标签含新版源码。GW184实现继续随独立0.4.0ZIP交付，未公开日志和截图为工作区索引。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/blender/INSTALL.md",
+      "line": 56,
+      "text": "0.3.10–0.3.12 的历史源码归档仍对应原提交，不追改。GW184 0.4.0 的实现继续随独立运行 ZIP 提供。实现与维护见[前端实现说明](../../blender_frontend/README.md)，0.3.13 历史检查见[对应发布核对](releases/0.3.13发布核对.md)，当前检查见[0.3.17.1 发布核对](releases/0.3.17.1发布核对.md)。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/blender/NREL缺陷编辑器.md",
+      "line": 7,
+      "text": "该功能已随 [0.3.16 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.16) 的扩展 ZIP 发布，当前 0.3.17.1 保留此功能，按[安装说明](INSTALL.md)手动更新并重启。此处 0.3.16 是功能首次交付与编辑器历史验证版本，不代表新版重跑了编辑器整套窗口验收。macOS 也可以双击`scripts/blender/打开NREL缺陷编辑器.command`，直接打开使用工作区源码的独立 Blender 窗口。从仓库根目录也可运行以下命令，复用内置 MAPPO 结果：",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/blender/用户使用手册.md",
+      "line": 349,
+      "text": "旧引用 `docs/blender/0.3.1发布核对.md` 与 `docs/blender/0.3.5发布核对.md` 是历史路径，目前本地文件缺失，不能直接复核。此前塔架开发版的 7203 个 T1 保存叶尖核对、随动、保存重开、缺包恢复及有限敏感性筛查不等于当前版本新增检查，也不证明完整风场数值收敛。0.3.10 的三路完整片段性能记录不能外推到后续0.3.12、0.3.13、0.3.15、0.3.16或当前0.3.17.1。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/blender/用户使用手册.md",
+      "line": 450,
+      "text": "本附录记录 NREL 0.3.12 已采用、后续0.3.13、0.3.15、0.3.16及当前0.3.17.1沿用的 NREL 5 MW 基础展示模型与装配，不适用于 GW184 0.4.0；本次文档更新没有重新测量这些尺寸。MAPPO 运行时还会加载已记录的独立叶片形变；下表不是其逐帧变形包围盒。长度单位为米（m），角度单位为度（°）；尺寸由打包的几何数据和建模代码共同确定。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/blender/用户使用手册.md",
+      "line": 488,
+      "text": "以上源码链接用于理解基础几何；NREL 0.3.13 当时已公开匹配源码和构建资源，可结合 [历史发布核对](releases/0.3.13发布核对.md) 追溯对应 ZIP；当前 0.3.17.1 仅发布 ZIP，源码范围见 [本版发布核对](releases/0.3.17.1发布核对.md)。GW184 的参考来源和 90 m 叶片参数见 [独立包说明](GW184三相机与缺陷编辑器.md)。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/lidar/双束TLS候选实施与验证总报告.md",
+      "line": 3,
+      "text": "> **2026-10-08 当前入口：** 本文是 TLS 三阶段研究的实施与验证总报告；日期、数值、哈希和测试数量对应原实际运行，没有在本次文档对齐中复算。NREL 当前公开版本为[0.3.17.1 ZIP](../blender/releases/0.3.17.1发布核对.md)，继续提供旧法及显式 TLS 结果；默认 `hub-axis.v1`、候选 `hub-tls.v1` 和 `REVIEW_ONLY / PENDING_ACCEPTANCE` 均未改变。原始研究数据入口为[三阶段档案](../../outputs/dual-beam-tls-20261002/README.md)。下文“未安装/发布”只描述研究完成当轮；0.3.13/0.3.15 的发布补充按各自历史版本阅读，不能据其推定当前0.3.17.1扩展实现源码已推送或几何精度已验收。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/lidar/双束TLS候选实施与验证总报告.md",
+      "line": 19,
+      "text": "2026-10-05 当前入口补充：0.3.15继续随ZIP提供相同旧法/TLS结果层，增加便携MAPPO＋重建示例，未重求解或改变本报告精度状态。仅ZIP发布，源码未推送；现行软件验证见[0.3.15发布核对](../blender/releases/0.3.15发布核对.md)，上述源码同步结论仅指0.3.13。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "docs/proposal/defects/叶片缺陷编辑与固定相机成像验证开发规格.md",
+      "line": 40,
+      "text": "编制当时的对外表述：**独立 GW184 项目中已有实体缺陷基础，主前端尚未形成通用缺陷编辑入口。** 此句保留历史前提；NREL自0.3.16起已提供编辑入口，当前0.3.17.1保留，不再使用该句描述当前产品。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "wfrl/lidar/README.md",
+      "line": 7,
+      "text": "## 当前双束链路（0.3.17.1 安装包；0.3.13 完整公开源码历史基线）",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "前端readme.md",
+      "line": 37,
+      "text": "0.3.17.1 增加同源 MAPPO 601 样本纹理同步对照及状态修复；0.3.17 的保存结果／RGBA 导入、增强和独立合成样例继续保留。当前包含 2×2 展示、静态安装示意、三列对照、单路放大／返回和单步控制。0.3.16 加入六类缺陷编辑器和默认修补痕迹，并延续轻量单路、S2/S3 双束净空、独立 S1 报警、显式 TLS 候选及便携分屏示例；默认三相机仍使用连续重叠布局。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "前端readme.md",
+      "line": 199,
+      "text": "| 0.3.10 三路完整片段 | 据项目记录，在当前 Mac、820×473 逻辑窗口中完成 60 秒仿真片段，每路约 23.67 FPS，三路绘制帧序列一致；不能外推到新版、全屏或其他机器 |",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "前端更新计划.md",
+      "line": 31,
+      "text": "GW184 六类合成缺陷操作已接入 NREL 5MW MAPPO 工作区源码，包含 T1/T2/T3 九片叶片、预览确认取消、撤销重做、健康对照、参考几何绑定的 JSON、保存重开与三相机几何分析/扫描。显示网格与辅助轮廓沿既有柔性结果变形；没有生成新的 FAST.Farm 结果或修改雷达测量来源。当前入口与验证范围见 [NREL 缺陷编辑器](docs/blender/NREL缺陷编辑器.md)。开发阶段曾使用沿用 0.3.15 版本号的本地 package04；随后只更新 manifest 版本生成 0.3.16，当时已作为最新 Release 交付 ZIP。日常安装未随本次发布自动更新；根 README/CHANGELOG 已同步 0.3.16 发布范围。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "前端更新计划.md",
+      "line": 62,
+      "text": "0.3.10–0.3.12 最新扩展实现仍由 ZIP 提供；GW184 实现和参考资源随独立 ZIP 提供。仓库已同步发布文档及 Bridge 后端修复，自动 Source code 归档不能替代两个 ZIP。GW184 使用与维护见 [使用说明](docs/blender/GW184三相机与缺陷编辑器.md)、[项目 README](projects/gw184-single/README.md) 和 [缺陷编辑器说明](projects/gw184-single/DEFECT_EDITOR.md)。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "前端更新计划.md",
+      "line": 77,
+      "text": "以下各节中的“本轮”“当前”及测试数量均指 **2026-09-27 的 0.3.10 实施轮次**；当时未发布的记录原样保留，不用于否定后续已发布版本或扩展其验证范围。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "前端更新计划.md",
+      "line": 79,
+      "text": "历史更新日期：2026-09-27。状态：**本轮实现与当前 Mac 安装验证完成；0.3.10 在本轮结束时已本地安装、当时未发布。已知限制保留如下。**",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    },
+    {
+      "path": "前端更新计划.md",
+      "line": 83,
+      "text": "原计划基线为 **0.3.9**。本轮已生成并在当前 Mac 的正常 `user_default` 扩展目录安装 **0.3.10**，沿用用户确认的 820×473 逻辑窗口；旧安装与偏好设置已备份。本地包、独立 Git 交付分支和验收不代表 GitHub 上传或 Release 发布。有关数据、覆盖率和实物验证的限制保持不变。",
+      "classification": "historical_feature_or_dated_record_retained; current pointer independently updated"
+    }
+  ],
+  "public_source_link_conversions": [
+    {
+      "document": "docs/blender/BladeRecon可视化使用说明.md",
+      "workspace_path": "scripts/blender/打开纹理细节检查.command"
+    },
+    {
+      "document": "docs/blender/NREL缺陷编辑器.md",
+      "workspace_path": "scripts/blender/打开NREL缺陷编辑器.command"
+    },
+    {
+      "document": "docs/blender/NREL缺陷编辑器.md",
+      "workspace_path": "scripts/blender/nrel_defects.py"
+    },
+    {
+      "document": "docs/blender/Blender前端功能总览与规划.md",
+      "workspace_path": "blender_frontend/wfrl_blender/assets/examples/mappo_reconstruction_split.blend"
+    },
+    {
+      "document": "docs/blender/Blender前端功能总览与规划.md",
+      "workspace_path": "blender_frontend/wfrl_blender/split_reconstruction.py"
+    },
+    {
+      "document": "docs/blender/Blender前端功能总览与规划.md",
+      "workspace_path": "blender_frontend/wfrl_blender/split_reconstruction_timing.py"
+    },
+    {
+      "document": "docs/blender/Blender前端功能总览与规划.md",
+      "workspace_path": "blender_frontend/wfrl_blender/split_reconstruction_ui.py"
+    },
+    {
+      "document": "docs/blender/Blender前端功能总览与规划.md",
+      "workspace_path": "blender_frontend/wfrl_blender/nrel_defects"
+    },
+    {
+      "document": "docs/blender/Blender前端功能总览与规划.md",
+      "workspace_path": "blender_frontend/wfrl_blender/repair_marks.py"
+    },
+    {
+      "document": "blender_frontend/README.md",
+      "workspace_path": "blender_frontend/wfrl_blender/repair_marks.py"
+    },
+    {
+      "document": "前端readme.md",
+      "workspace_path": "scripts/blender/打开NREL缺陷编辑器.command"
+    }
+  ],
+  "github_dependency_plan": "文档 allowlist 已输出，root/data agent处理必要轻量Markdown/JSON/log/截图及递归链接依赖。新扩展源码、资产、ZIP和完整冻结研究资料不为文档推送。缺公开新源码链接已改路径文字；公开ZIP使用ReleaseURL。",
+  "cleanup": {
+    "handled_by": "root",
+    "entries_moved": 69,
+    "files_moved": 3649,
+    "logical_bytes": 2768834670,
+    "trash": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008",
+    "preserved_stat_inode_mtime_count": 3165,
+    "release_note_added": "docs/blender/releases/0.3.17.1发布核对.md",
+    "canonical_inputs_source_final_zip_daily_preferences_preserved": true,
+    "saved_task_scene_note": "daily-window/attempt02 saved scene restored frame52 and native PASS; historical hashes/reports not rewritten"
+  },
+  "historical_absolute_link_normalization": [
+    "blender_frontend/tests/test_camera_projection.py",
+    "blender_frontend/tests/blender/camera_gpu_calibration.py",
+    "blender_frontend/tests/blender/camera_pinhole_projection_regression.py",
+    "docs/blender/发布状态与验证范围.md",
+    "blender_frontend/wfrl_blender/blender_manifest.toml",
+    "docs/blender/Blender前端功能总览与规划.md",
+    "blender_frontend/wfrl_blender/assets/nrel5mw_geometry.json",
+    "blender_frontend/wfrl_blender/assets/mappo/manifest.json",
+    "blender_frontend/wfrl_blender/assets/mappo/geometry.npz",
+    "blender_frontend/wfrl_blender/assets/cameras/t1-three-camera-default.json",
+    "blender_frontend/wfrl_blender/custom_cameras.py",
+    "blender_frontend/wfrl_blender/farm_flex.py",
+    "blender_frontend/wfrl_blender/custom_camera_capture.py",
+    "blender_frontend/wfrl_blender/camera_projection.py",
+    "docs/proposal/reconstruction/固定三摄叶片三维重建与表面缺陷首轮诊断方案.md"
+  ]
+}

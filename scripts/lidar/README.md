@@ -14,7 +14,7 @@
 
 第二阶段新增 `diagnose_dual_beam_tls_residuals.py --package <TLS包> --baseline <旧法包> --output <新目录>`，对全部有效对进行评分后的方向/长度反事实分解、真实首交拓扑及表面偏移诊断，真值仅限诊断。`audit_dual_beam_observability.py --source <v3源包> --calibration <标定> --output <新目录>` 仅读取独立零载参考和固定标量，执行预声明解析 TEST 形状的首交/Jacobian/零空间探针，未验证形状先验时认证输出为 UNKNOWN。`verify_dual_beam_source_provenance.py --source <v3源包> --output <新目录>` 检查保存原始文件哈希、原始输出与侧车的一致性，缺失动态 VTP 单列证据缺口；可用 `--provenance-root <原路径结构的原始证据根目录>` 移机复核。三者均不启动求解器、不据此切换默认；见[总报告中的第二阶段记录](../../docs/lidar/双束TLS候选实施与验证总报告.md)。
 
-第三阶段的 `run_dual_beam_validation.py --output <新目录> --reference <独立零载参考>` **启动独立单机 OpenFAST 求解**，复制完整输入并保留所有动态 VTP 的无损 XZ、原字节哈希、退出状态和共享数据预算；只能在物理求解任务内使用。`export_dual_beam_validation_source.py <run> <reference> <新源目录> --start <s> --end <s>` 核对完整原始时钟和零载参考，将真实 40/80 Hz VTP 导出为源几何，保持原 2 mm / 5 mm 接口容差。它不生成旧 B2 测量，也不启动求解器。`compare_dual_beam_time_refinement.py` 严格核对两运行仅 DT/DT_Out/VTK_fps 不同，分开保留共同保存时刻、全部细网格新增时刻、未知与经过最低值；两级敏感性不等于数值收敛或性能验收。已执行的 12 m/s / 9 rpm 工程工况、留存来源和复算入口见[总报告中的第三阶段记录](../../docs/lidar/双束TLS候选实施与验证总报告.md)。独立验证工况属于研究证据；0.3.13 安装包内置的是原开发片段的旧法和 TLS 结果，软件交付核对另见[0.3.13 发布核对](../../docs/blender/0.3.13发布核对.md)。
+第三阶段的 `run_dual_beam_validation.py --output <新目录> --reference <独立零载参考>` **启动独立单机 OpenFAST 求解**，复制完整输入并保留所有动态 VTP 的无损 XZ、原字节哈希、退出状态和共享数据预算；只能在物理求解任务内使用。`export_dual_beam_validation_source.py <run> <reference> <新源目录> --start <s> --end <s>` 核对完整原始时钟和零载参考，将真实 40/80 Hz VTP 导出为源几何，保持原 2 mm / 5 mm 接口容差。它不生成旧 B2 测量，也不启动求解器。`compare_dual_beam_time_refinement.py` 严格核对两运行仅 DT/DT_Out/VTK_fps 不同，分开保留共同保存时刻、全部细网格新增时刻、未知与经过最低值；两级敏感性不等于数值收敛或性能验收。已执行的 12 m/s / 9 rpm 工程工况、留存来源和复算入口见[总报告中的第三阶段记录](../../docs/lidar/双束TLS候选实施与验证总报告.md)。独立验证工况属于研究证据；0.3.13 安装包内置的是原开发片段的旧法和 TLS 结果，软件交付核对另见[0.3.13 发布核对](../../docs/blender/releases/0.3.13发布核对.md)。
 
 当前布局为 S1/S2/S3 = 10°/12°/14°；S1 报警独立于双束有效性，旧 B2 回放仍可使用。40 Hz 保存记录不能替代设备原始采样或现场延迟验证。同一开发片段 400 对的旧法 / TLS MAE 分别为 4.268685 / 0.776096 m，两种方法仍为 REVIEW_ONLY / PENDING_ACCEPTANCE。[格式合同](../../wfrl/lidar/REPLAY_FORMAT.md#dual-beam-review-v1)和[发布范围](../../docs/blender/发布状态与验证范围.md)分别说明数据与交付状态。
 
@@ -65,7 +65,7 @@ export OPENBLAS_NUM_THREADS=1
 
 新生成结果采用 `numerical-comparison-v2` 证据合同：包内保存数值比较证据，发布前检查解析结果、空间/时间运行链、物理配置、退出状态及完整采样网格，缺少内容不能标记 READY。`READY` 表示包完成且通过该合同检查；精度状态仍是未约定容差，不能解释为现场精度或数值收敛达标。旧版包保留供追溯和兼容读取。
 
-发布窗口及采样率来自运行配置，时长必须大于18秒启动剔除段。`dist/lidar-delivery.json`、`dist/README-lidar.md` 保留旧 normal/close 的交付入口与摘要，不是当前 0.3.13 或 GW184 0.4.0 的完整清单。当前下载以[发布状态](../../docs/blender/发布状态与验证范围.md)为准。无需重跑 FAST.Farm 即可用完整既有数值证据重新封装这两个历史工况；修订不得改变原始逐样本测量。
+发布窗口及采样率来自运行配置，时长必须大于18秒启动剔除段。`dist/lidar-delivery.json`、`dist/README-lidar.md` 保留旧 normal/close 的交付入口与摘要，不是当前 NREL 0.3.17.1 或 GW184 0.4.0 的完整清单。当前下载以[发布状态](../../docs/blender/发布状态与验证范围.md)为准。无需重跑 FAST.Farm 即可用完整既有数值证据重新封装这两个历史工况；修订不得改变原始逐样本测量。
 
 
 原手册核验已补齐：用户提供的《MolasCL 激光净空监测雷达使用手册 V3.0》SHA256 为 `1a126ba6420f47136b17986064908215d6b0d7e0d574ff56247c1255b07a0363`。PDF第9页图2-5与第34页图3-26已逐图核对；两图X/Y命名存在坐标切换，本项目按向叶轮的主轴物理偏距映射。公式、相对光束角和名义塔半径含义一致，不代表真实设备精度验收。

@@ -1,18 +1,16 @@
 # NREL 叶片缺陷编辑器
 
-本页“本地归档”仅用于标识原验证或开发材料，未随本次文档同步公开；安装请使用对应 Release ZIP。
-
-更新日期：2026-10-06。当前扩展为 NREL / WFRL 0.3.16，要求 Blender 5.2+。
+更新日期：2026-10-08。当前扩展为 NREL / WFRL 0.3.17.1（包内 `0.3.17+1`），要求 Blender 5.2+。
 
 该编辑器把 GW184 的六类合成缺陷操作接入 NREL 5MW / MAPPO 柔性回放。先打开主前端的 **MAPPO · 60 秒**，在 **MAPPO** 侧栏的 **NREL 5MW · 叶片缺陷** 面板点击 **启动缺陷编辑器**；目标可以选择 T1、T2、T3 的任一叶片。缺陷尺寸、位置与形态是用户定义的合成参数，不代表现场实测损伤。
 
-该功能已随 [0.3.16 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.16) 的扩展 ZIP 发布，安装后重启 Blender 即可使用；本次未更新本机日常安装。macOS 也可以双击打开 NREL 缺陷编辑器（本地开发归档：`scripts/blender/打开NREL缺陷编辑器.command`），直接打开使用工作区源码的独立 Blender 窗口。从仓库根目录也可运行以下命令，复用内置 MAPPO 结果：
+该功能已随 [0.3.16 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.16) 的扩展 ZIP 发布，当前 0.3.17.1 保留此功能，按[安装说明](INSTALL.md)手动更新并重启。此处 0.3.16 是功能首次交付与编辑器历史验证版本，不代表新版重跑了编辑器整套窗口验收。macOS 也可以双击`scripts/blender/打开NREL缺陷编辑器.command`，直接打开使用工作区源码的独立 Blender 窗口。从仓库根目录也可运行以下命令，复用内置 MAPPO 结果：
 
 ```sh
 blender --factory-startup --python scripts/blender/open_nrel_defect_editor.py
 ```
 
-命令行入口（本地开发归档：`scripts/blender/nrel_defects.py`）还提供 `edit`、`prepare`、`analyze`、`scan`、`images` 模式；证据模式要求明确的输出目录，`images` 按显式请求采集图片。启动与编辑不会运行求解器。
+`scripts/blender/nrel_defects.py`还提供 `edit`、`prepare`、`analyze`、`scan`、`images` 模式；证据模式要求明确的输出目录，`images` 按显式请求采集图片。启动与编辑不会运行求解器。
 
 支持材质细裂纹、几何开口裂缝、凹坑、局部表面侵蚀、涂层剥落和雷击损伤。细裂纹与涂层剥落只有材质外观；开口裂缝、凹坑和侵蚀改变显示网格；雷击损伤组合烧蚀区域与凹坑，不模拟放电或内部损伤。
 

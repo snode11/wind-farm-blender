@@ -1,0 +1,22 @@
+{
+  "status": "PASS_STATE_RESTORED_BYTE_IDENTITY_NOT_RESTORED",
+  "task_scene": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt02/same-source-saved.blend",
+  "frame": 52,
+  "original_reference_sha256": "abcf9a4951bc406c91577791154a85ff049483c89e271f705e4d8db8ea85995c",
+  "accidentally_saved_frame55_sha256": "a15811cffa7a70acb44c092a4f0b9fe16ba70cf94325815d273e135418149ed4",
+  "repaired_current_sha256": "93a4c5ca78f1578f8c884efb9736f69a3ab892ef435fe155961b9c22c6576218",
+  "original_reference_byte_identity_restored": false,
+  "old_report_hashes_modified": false,
+  "pre_repair_recovery_copy": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/cleanup-post-v0.3.17.1-20261008/recovery/same-source-saved-at55.blend",
+  "restoration_report": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/cleanup-post-v0.3.17.1-20261008/scene-restoration/restoration-report.json",
+  "independent_reopen_report": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/cleanup-post-v0.3.17.1-20261008/scene-restoration/native-reopen/independent-reopen-validation.json",
+  "restoration_preserved_display_and_shader": true,
+  "reopen_checked_original_601_keys_uv_packed_and_8_frames": true,
+  "reconstruction_accuracy_accepted": false,
+  "prefs_and_canonical_bytes_preserved": true,
+  "actual_module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "actual_module_root": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender",
+  "manifest_version": "0.3.17+1",
+  "test_scene_only_saved": true,
+  "blender_background_processes_completed": true
+}

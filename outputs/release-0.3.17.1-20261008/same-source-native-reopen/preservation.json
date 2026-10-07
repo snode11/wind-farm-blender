@@ -1,0 +1,54 @@
+{
+  "status": "PASS",
+  "exit_code": 0,
+  "manifest_version": "0.3.17+1",
+  "factory_startup_used": false,
+  "new_background_process": true,
+  "isolated_profile_startup_enablement_preserved": true,
+  "actual_module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "actual_module_root": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender",
+  "files": {
+    "input": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt02/same-source-saved.blend",
+      "sha256": "abcf9a4951bc406c91577791154a85ff049483c89e271f705e4d8db8ea85995c",
+      "after_sha256": "abcf9a4951bc406c91577791154a85ff049483c89e271f705e4d8db8ea85995c",
+      "bytes_preserved": true
+    },
+    "isolated_prefs": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/config/userpref.blend",
+      "sha256": "b5c1b094bfbeda509a235b9925560484962efe1e7cd67c7da1b41d6adf52d3e3",
+      "after_sha256": "b5c1b094bfbeda509a235b9925560484962efe1e7cd67c7da1b41d6adf52d3e3",
+      "bytes_preserved": true
+    },
+    "daily_prefs": {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/userpref.blend",
+      "sha256": "4f3760f9ccff9ebe67696dc1d617c20a8a0d269026ae20d34d0667cdefb8e8ab",
+      "after_sha256": "4f3760f9ccff9ebe67696dc1d617c20a8a0d269026ae20d34d0667cdefb8e8ab",
+      "bytes_preserved": true
+    },
+    "installed_manifest": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/blender_manifest.toml",
+      "sha256": "94ed70359b06ce03abeef7bda3ad0d6337a71bb1ea51eca1509cdaded7e18e0a",
+      "after_sha256": "94ed70359b06ce03abeef7bda3ad0d6337a71bb1ea51eca1509cdaded7e18e0a",
+      "bytes_preserved": true
+    },
+    "isolated_canonical": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+      "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
+      "after_sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
+      "bytes_preserved": true
+    },
+    "daily_canonical": {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+      "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
+      "after_sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
+      "bytes_preserved": true
+    },
+    "standard_script": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/mappo_same_source_texture_reopen.py",
+      "sha256": "24d97ea5b27d8af1f20688c8b405e179052682d7e97c44ad1ece5d3a2e44aa53",
+      "after_sha256": "24d97ea5b27d8af1f20688c8b405e179052682d7e97c44ad1ece5d3a2e44aa53",
+      "bytes_preserved": true
+    }
+  }
+}

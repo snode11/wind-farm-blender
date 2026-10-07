@@ -1,0 +1,489 @@
+{
+  "status": "COMPLETE",
+  "trash": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008",
+  "entries": [
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/.pytest_cache",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/.pytest_cache",
+      "reason": "Regenerable pytest cache",
+      "file_count": 5,
+      "size_bytes": 11843
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/wfrl/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 7,
+      "size_bytes": 72990
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/blender_frontend/tests/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 15,
+      "size_bytes": 364786
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/blender_frontend/wfrl_blender/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 79,
+      "size_bytes": 1806649
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/before",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/release-0.3.17.1-20261008/before",
+      "reason": "Pre-release copies of manifest and documentation; final published documentation and before SHA/status records remain outside this backup tree.",
+      "file_count": 5,
+      "size_bytes": 56425
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/scripts/blender/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 3,
+      "size_bytes": 78776
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/lidar/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/wfrl/lidar/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 4,
+      "size_bytes": 85583
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/studio/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/wfrl/studio/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 3,
+      "size_bytes": 93640
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/viz/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/wfrl/viz/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 4,
+      "size_bytes": 75423
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/blender_frontend/tests/blender/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 5,
+      "size_bytes": 143655
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/nrel_defects/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/blender_frontend/wfrl_blender/nrel_defects/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 7,
+      "size_bytes": 207575
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/operators/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/blender_frontend/wfrl_blender/operators/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 5,
+      "size_bytes": 18952
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/blender_frontend/wfrl_blender/panels/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 20,
+      "size_bytes": 365398
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/cleanup-post-v0.3.17.1-20261008/recovery/same-source-saved-at55.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/cleanup-post-v0.3.17.1-20261008/recovery/same-source-saved-at55.blend",
+      "reason": "Recovery copy of accidentally saved test frame 55; restored frame-52 scene and incident records remain",
+      "file_count": 1,
+      "size_bytes": 82167841
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/delivery/daily-install-backup",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/delivery/daily-install-backup",
+      "reason": "Superseded 157-file extension backup from before completed daily update; final source/ZIP and install inventory/preservation evidence remain.",
+      "file_count": 157,
+      "size_bytes": 145111138
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/delivery/userpref-before.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/delivery/userpref-before.blend",
+      "reason": "Completed preference-preservation check backup; exact before/after SHA evidence remains in retained JSON. Current daily userpref.blend is outside the reviewed output roots.",
+      "file_count": 1,
+      "size_bytes": 182218
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/release-0.3.17.1-20261008/validation/profile",
+      "reason": "Completed isolated test process/configuration and copied installed extension; retained reports/logs/environment permit reconstruction from final ZIP.",
+      "file_count": 261,
+      "size_bytes": 153235352
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/version-probe/probe-0.3.17.1.zip",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/release-0.3.17.1-20261008/version-probe/probe-0.3.17.1.zip",
+      "reason": "Small throwaway manifest-version probe package; retain version-probe results/logs/README and repro scripts.",
+      "file_count": 1,
+      "size_bytes": 440
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/version-probe/probe-0.3.17.zip",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/release-0.3.17.1-20261008/version-probe/probe-0.3.17.zip",
+      "reason": "Small throwaway manifest-version probe package; retain version-probe results/logs/README and repro scripts.",
+      "file_count": 1,
+      "size_bytes": 441
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/version-probe/probe-0.3.17_plus_1.zip",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/release-0.3.17.1-20261008/version-probe/probe-0.3.17_plus_1.zip",
+      "reason": "Small throwaway manifest-version probe package; retain version-probe results/logs/README and repro scripts.",
+      "file_count": 1,
+      "size_bytes": 441
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/version-probe/probe-0.3.17_plus_build.1.zip",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/release-0.3.17.1-20261008/version-probe/probe-0.3.17_plus_build.1.zip",
+      "reason": "Small throwaway manifest-version probe package; retain version-probe results/logs/README and repro scripts.",
+      "file_count": 1,
+      "size_bytes": 445
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/version-probe/profile-plus-1",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/release-0.3.17.1-20261008/version-probe/profile-plus-1",
+      "reason": "Completed isolated test process/configuration and copied installed extension; retained reports/logs/environment permit reconstruction from final ZIP.",
+      "file_count": 4,
+      "size_bytes": 176381
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/_vendor/blade_recon/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/blender_frontend/wfrl_blender/_vendor/blade_recon/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 6,
+      "size_bytes": 51205
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt01/input-geometry.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt01/input-geometry.blend",
+      "reason": "Byte-copy input for native/window/lifecycle tests; canonical source and final packaged canonical example are retained. Test report/hash/command/log/screenshots remain.",
+      "file_count": 1,
+      "size_bytes": 50567220
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt01/same-source-saved.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt01/same-source-saved.blend",
+      "reason": "Intermediate saved test scene from native/synthetic/settings validation; final daily-window/attempt02/same-source-saved.blend is retained, and all JSON/log/hash/repro evidence stays.",
+      "file_count": 1,
+      "size_bytes": 79590920
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt02/input-geometry.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt02/input-geometry.blend",
+      "reason": "Byte-copy input for native/window/lifecycle tests; canonical source and final packaged canonical example are retained. Test report/hash/command/log/screenshots remain.",
+      "file_count": 1,
+      "size_bytes": 50567220
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/data/input/NacelleT1",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/data/input/NacelleT1",
+      "reason": "本次纹理适配为读取器准备的派生 RGB/mask 路径；每个 PNG 与正式历史实验对应 PNG 为相同 device/inode/size，可移走派生目录而保持原实验。",
+      "file_count": 601,
+      "size_bytes": 262468359
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/data/input/T1Down",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/data/input/T1Down",
+      "reason": "本次纹理适配为读取器准备的派生 RGB/mask 路径；每个 PNG 与正式历史实验对应 PNG 为相同 device/inode/size，可移走派生目录而保持原实验。",
+      "file_count": 601,
+      "size_bytes": 269137242
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/data/input/masks",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/data/input/masks",
+      "reason": "本次纹理适配为读取器准备的派生 RGB/mask 路径；每个 PNG 与正式历史实验对应 PNG 为相同 device/inode/size，可移走派生目录而保持原实验。",
+      "file_count": 1202,
+      "size_bytes": 2997124
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/data/texture-diagnostic-repeat/texture_data.npz",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/data/texture-diagnostic-repeat/texture_data.npz",
+      "reason": "仪器复测产生的重复融合数组；data_validation.json 已记录与首遍 texture_data.npz 字节相同，首遍数组继续保留。本次仅按既有证据与 stat 分类，未重新读取或哈希 NPZ。",
+      "file_count": 1,
+      "size_bytes": 3661656
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-package/attempt01/profile",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/isolated-package/attempt01/profile",
+      "reason": "Completed isolated test process/configuration and copied installed extension; retained reports/logs/environment permit reconstruction from final ZIP.",
+      "file_count": 261,
+      "size_bytes": 153222901
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-package/attempt02/profile",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/isolated-package/attempt02/profile",
+      "reason": "Completed isolated test process/configuration and copied installed extension; retained reports/logs/environment permit reconstruction from final ZIP.",
+      "file_count": 263,
+      "size_bytes": 153238162
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt01/input-geometry.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt01/input-geometry.blend",
+      "reason": "Byte-copy input for native/window/lifecycle tests; canonical source and final packaged canonical example are retained. Test report/hash/command/log/screenshots remain.",
+      "file_count": 1,
+      "size_bytes": 50567220
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt02/input-geometry.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt02/input-geometry.blend",
+      "reason": "Byte-copy input for native/window/lifecycle tests; canonical source and final packaged canonical example are retained. Test report/hash/command/log/screenshots remain.",
+      "file_count": 1,
+      "size_bytes": 50567220
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt03/input-geometry.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt03/input-geometry.blend",
+      "reason": "Byte-copy input for native/window/lifecycle tests; canonical source and final packaged canonical example are retained. Test report/hash/command/log/screenshots remain.",
+      "file_count": 1,
+      "size_bytes": 50567220
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt03/same-source-saved.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt03/same-source-saved.blend",
+      "reason": "Intermediate saved test scene from native/synthetic/settings validation; final daily-window/attempt02/same-source-saved.blend is retained, and all JSON/log/hash/repro evidence stays.",
+      "file_count": 1,
+      "size_bytes": 79589629
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt04/input-geometry.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt04/input-geometry.blend",
+      "reason": "Byte-copy input for native/window/lifecycle tests; canonical source and final packaged canonical example are retained. Test report/hash/command/log/screenshots remain.",
+      "file_count": 1,
+      "size_bytes": 50567220
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt04/same-source-saved.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt04/same-source-saved.blend",
+      "reason": "Intermediate saved test scene from native/synthetic/settings validation; final daily-window/attempt02/same-source-saved.blend is retained, and all JSON/log/hash/repro evidence stays.",
+      "file_count": 1,
+      "size_bytes": 79591163
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-window/camera-isolation-probe01/input-geometry.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/isolated-window/camera-isolation-probe01/input-geometry.blend",
+      "reason": "Byte-copy input for native/window/lifecycle tests; canonical source and final packaged canonical example are retained. Test report/hash/command/log/screenshots remain.",
+      "file_count": 1,
+      "size_bytes": 50567220
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-window/camera-isolation-probe02/input-geometry.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/isolated-window/camera-isolation-probe02/input-geometry.blend",
+      "reason": "Byte-copy input for native/window/lifecycle tests; canonical source and final packaged canonical example are retained. Test report/hash/command/log/screenshots remain.",
+      "file_count": 1,
+      "size_bytes": 50567220
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-window/camera-isolation-probe03/input-geometry.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/isolated-window/camera-isolation-probe03/input-geometry.blend",
+      "reason": "Byte-copy input for native/window/lifecycle tests; canonical source and final packaged canonical example are retained. Test report/hash/command/log/screenshots remain.",
+      "file_count": 1,
+      "size_bytes": 50567220
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-window/camera-isolation-probe04/input-geometry.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/isolated-window/camera-isolation-probe04/input-geometry.blend",
+      "reason": "Byte-copy input for native/window/lifecycle tests; canonical source and final packaged canonical example are retained. Test report/hash/command/log/screenshots remain.",
+      "file_count": 1,
+      "size_bytes": 50567220
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-window/camera-isolation-probe05/input-geometry.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/isolated-window/camera-isolation-probe05/input-geometry.blend",
+      "reason": "Byte-copy input for native/window/lifecycle tests; canonical source and final packaged canonical example are retained. Test report/hash/command/log/screenshots remain.",
+      "file_count": 1,
+      "size_bytes": 50567220
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/frontend-review/source-settings-validated.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/self-check/frontend-review/source-settings-validated.blend",
+      "reason": "Intermediate saved test scene from native/synthetic/settings validation; final daily-window/attempt02/same-source-saved.blend is retained, and all JSON/log/hash/repro evidence stays.",
+      "file_count": 1,
+      "size_bytes": 82118623
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-settings-reopen/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/self-check/native-settings-reopen/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 5,
+      "size_bytes": 44715
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/source-native/attempt01/profile",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/source-native/attempt01/profile",
+      "reason": "Completed isolated test process/configuration and copied installed extension; retained reports/logs/environment permit reconstruction from final ZIP.",
+      "file_count": 0,
+      "size_bytes": 0
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/source-native/attempt02/profile",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/source-native/attempt02/profile",
+      "reason": "Completed isolated test process/configuration and copied installed extension; retained reports/logs/environment permit reconstruction from final ZIP.",
+      "file_count": 0,
+      "size_bytes": 0
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/source-native/attempt03/profile",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/source-native/attempt03/profile",
+      "reason": "Completed isolated test process/configuration and copied installed extension; retained reports/logs/environment permit reconstruction from final ZIP.",
+      "file_count": 0,
+      "size_bytes": 0
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/source-native/attempt03/same-source-saved.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/source-native/attempt03/same-source-saved.blend",
+      "reason": "Intermediate saved test scene from native/synthetic/settings validation; final daily-window/attempt02/same-source-saved.blend is retained, and all JSON/log/hash/repro evidence stays.",
+      "file_count": 1,
+      "size_bytes": 82086436
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/package/wfrl_blender-0.3.17+1.zip",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/release-0.3.17.1-20261008/validation/package/wfrl_blender-0.3.17+1.zip",
+      "reason": "Exact SHA-identical copy of retained published final ZIP; keep its neighboring inventory/SHA/report evidence.",
+      "file_count": 1,
+      "size_bytes": 98992149
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/blade_recon_synth_tex/reference/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/blender_frontend/wfrl_blender/assets/blade_recon_synth_tex/reference/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 2,
+      "size_bytes": 40784
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/data/engine/blade_recon/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/data/engine/blade_recon/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 3,
+      "size_bytes": 36199
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/data/engine/blade_recon0.2/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/data/engine/blade_recon0.2/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 9,
+      "size_bytes": 248229
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-package/attempt01/package/wfrl_blender-0.3.17.zip",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/isolated-package/attempt01/package/wfrl_blender-0.3.17.zip",
+      "reason": "Earlier isolated test build retained only for construction/validation; superseded by final published 169-file payload. Preserve its inventory/SHA and PASS/FAIL reports.",
+      "file_count": 1,
+      "size_bytes": 98989853
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-package/attempt02/package/wfrl_blender-0.3.17.zip",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/isolated-package/attempt02/package/wfrl_blender-0.3.17.zip",
+      "reason": "Earlier isolated test build retained only for construction/validation; superseded by final published 169-file payload. Preserve its inventory/SHA and PASS/FAIL reports.",
+      "file_count": 1,
+      "size_bytes": 98992148
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/data-review/fixtures/baseline",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/self-check/data-review/fixtures/baseline",
+      "reason": "负向验证脚本从当前正式 asset 复制并做指定单点变异的临时包；不是生产资源，也不是历史 before/after 结果。review_negative.py 明确每次 copytree 并生成这些夹具，保留脚本即可重建。",
+      "file_count": 10,
+      "size_bytes": 6163455
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/data-review/fixtures/missing_model_hash",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/self-check/data-review/fixtures/missing_model_hash",
+      "reason": "负向验证脚本从当前正式 asset 复制并做指定单点变异的临时包；不是生产资源，也不是历史 before/after 结果。review_negative.py 明确每次 copytree 并生成这些夹具，保留脚本即可重建。",
+      "file_count": 10,
+      "size_bytes": 6163201
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/data-review/fixtures/wrong_asset_bytes",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/self-check/data-review/fixtures/wrong_asset_bytes",
+      "reason": "负向验证脚本从当前正式 asset 复制并做指定单点变异的临时包；不是生产资源，也不是历史 before/after 结果。review_negative.py 明确每次 copytree 并生成这些夹具，保留脚本即可重建。",
+      "file_count": 10,
+      "size_bytes": 6163455
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/data-review/fixtures/wrong_blender_frame",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/self-check/data-review/fixtures/wrong_blender_frame",
+      "reason": "负向验证脚本从当前正式 asset 复制并做指定单点变异的临时包；不是生产资源，也不是历史 before/after 结果。review_negative.py 明确每次 copytree 并生成这些夹具，保留脚本即可重建。",
+      "file_count": 10,
+      "size_bytes": 6163455
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/data-review/fixtures/wrong_declared_clock",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/self-check/data-review/fixtures/wrong_declared_clock",
+      "reason": "负向验证脚本从当前正式 asset 复制并做指定单点变异的临时包；不是生产资源，也不是历史 before/after 结果。review_negative.py 明确每次 copytree 并生成这些夹具，保留脚本即可重建。",
+      "file_count": 10,
+      "size_bytes": 6163451
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/data-review/fixtures/wrong_model_hash",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/self-check/data-review/fixtures/wrong_model_hash",
+      "reason": "负向验证脚本从当前正式 asset 复制并做指定单点变异的临时包；不是生产资源，也不是历史 before/after 结果。review_negative.py 明确每次 copytree 并生成这些夹具，保留脚本即可重建。",
+      "file_count": 10,
+      "size_bytes": 6163455
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/data-review/fixtures/wrong_reconstruction_fps",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/self-check/data-review/fixtures/wrong_reconstruction_fps",
+      "reason": "负向验证脚本从当前正式 asset 复制并做指定单点变异的临时包；不是生产资源，也不是历史 before/after 结果。review_negative.py 明确每次 copytree 并生成这些夹具，保留脚本即可重建。",
+      "file_count": 10,
+      "size_bytes": 6163454
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/data-review/fixtures/wrong_simulation_t",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/self-check/data-review/fixtures/wrong_simulation_t",
+      "reason": "负向验证脚本从当前正式 asset 复制并做指定单点变异的临时包；不是生产资源，也不是历史 before/after 结果。review_negative.py 明确每次 copytree 并生成这些夹具，保留脚本即可重建。",
+      "file_count": 10,
+      "size_bytes": 6163455
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-edge/attempt01/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/self-check/native-edge/attempt01/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 1,
+      "size_bytes": 25554
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-edge/attempt01/input-geometry.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/self-check/native-edge/attempt01/input-geometry.blend",
+      "reason": "Byte-copy input for native/window/lifecycle tests; canonical source and final packaged canonical example are retained. Test report/hash/command/log/screenshots remain.",
+      "file_count": 1,
+      "size_bytes": 50567220
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-edge/attempt02/__pycache__",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/self-check/native-edge/attempt02/__pycache__",
+      "reason": "Regenerable Python or pytest cache",
+      "file_count": 1,
+      "size_bytes": 28111
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-edge/attempt02/input-geometry.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/self-check/native-edge/attempt02/input-geometry.blend",
+      "reason": "Byte-copy input for native/window/lifecycle tests; canonical source and final packaged canonical example are retained. Test report/hash/command/log/screenshots remain.",
+      "file_count": 1,
+      "size_bytes": 50567220
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-settings-reopen/prepare-attempt01/distinct-source-settings.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/self-check/native-settings-reopen/prepare-attempt01/distinct-source-settings.blend",
+      "reason": "Intermediate saved test scene from native/synthetic/settings validation; final daily-window/attempt02/same-source-saved.blend is retained, and all JSON/log/hash/repro evidence stays.",
+      "file_count": 1,
+      "size_bytes": 82178655
+    },
+    {
+      "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-settings-reopen/prepare-attempt01/input-geometry.blend",
+      "destination": "/Users/eason/.Trash/wfrl-post-v0.3.17.1-intermediates-20261008/outputs/mappo-same-source-texture-20261007-a01/self-check/native-settings-reopen/prepare-attempt01/input-geometry.blend",
+      "reason": "Byte-copy input for native/window/lifecycle tests; canonical source and final packaged canonical example are retained. Test report/hash/command/log/screenshots remain.",
+      "file_count": 1,
+      "size_bytes": 50567220
+    }
+  ]
+}

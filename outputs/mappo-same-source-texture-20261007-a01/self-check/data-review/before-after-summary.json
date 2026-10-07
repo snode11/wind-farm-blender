@@ -1,0 +1,71 @@
+{
+  "status": "PASS",
+  "historical_results_preserved": {
+    "runtime-negatives.json": "06faf3fd46b478d447ae2db4a55aba2711b288ff0e5afd1f4c92fb037edb7939",
+    "build-negatives.json": "4a944c68ac104ac767d3bc111ed5fcd7ae731d3b6ee5572b6f1796410caa0a58"
+  },
+  "checked_sources": {
+    "scripts/blender/build_extension.py": "03a7f0bc509017f8aadc4908a68ae43aea2548ce87df132dcdf38bf3307d8e55",
+    "blender_frontend/wfrl_blender/split_mappo_texture.py": "bd497ff9c81085996869bc2bc8d18a32152c98d3c5293fcbe1ff2076a63ac8e6",
+    "blender_frontend/wfrl_blender/assets/blade_recon_mappo_tex/manifest.json": "6e542f6bddc9aa57dd8643a6463e8e20054cbe4a5abdec23b319e1e034718ffb"
+  },
+  "cases": [
+    {
+      "case": "baseline",
+      "runtime_before": "ACCEPTED_TO_ALLOCATION",
+      "runtime_after": "ACCEPTED_TO_ALLOCATION",
+      "build_before": "ACCEPTED",
+      "build_after": "ACCEPTED"
+    },
+    {
+      "case": "missing_model_hash",
+      "runtime_before": "ACCEPTED_TO_ALLOCATION",
+      "runtime_after": "REJECTED",
+      "build_before": "REJECTED",
+      "build_after": "REJECTED"
+    },
+    {
+      "case": "wrong_asset_bytes",
+      "runtime_before": "REJECTED",
+      "runtime_after": "REJECTED",
+      "build_before": "REJECTED",
+      "build_after": "REJECTED"
+    },
+    {
+      "case": "wrong_blender_frame",
+      "runtime_before": "ACCEPTED_TO_ALLOCATION",
+      "runtime_after": "REJECTED",
+      "build_before": "REJECTED",
+      "build_after": "REJECTED"
+    },
+    {
+      "case": "wrong_declared_clock",
+      "runtime_before": "REJECTED",
+      "runtime_after": "REJECTED",
+      "build_before": "ACCEPTED",
+      "build_after": "REJECTED"
+    },
+    {
+      "case": "wrong_model_hash",
+      "runtime_before": "REJECTED",
+      "runtime_after": "REJECTED",
+      "build_before": "REJECTED",
+      "build_after": "REJECTED"
+    },
+    {
+      "case": "wrong_reconstruction_fps",
+      "runtime_before": "REJECTED",
+      "runtime_after": "REJECTED",
+      "build_before": "REJECTED",
+      "build_after": "REJECTED"
+    },
+    {
+      "case": "wrong_simulation_t",
+      "runtime_before": "ACCEPTED_TO_ALLOCATION",
+      "runtime_after": "REJECTED",
+      "build_before": "REJECTED",
+      "build_after": "REJECTED"
+    }
+  ],
+  "scope": "host runtime validation stopped before Blender allocations; build validation only, no ZIP or installation"
+}

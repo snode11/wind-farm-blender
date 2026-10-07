@@ -1,0 +1,48 @@
+{
+  "exit_code": 0,
+  "phase": "restore",
+  "files": {
+    "input": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt02/same-source-saved.blend",
+      "sha256": "a15811cffa7a70acb44c092a4f0b9fe16ba70cf94325815d273e135418149ed4",
+      "after_sha256": "93a4c5ca78f1578f8c884efb9736f69a3ab892ef435fe155961b9c22c6576218",
+      "bytes_preserved": false
+    },
+    "isolated_prefs": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/config/userpref.blend",
+      "sha256": "b5c1b094bfbeda509a235b9925560484962efe1e7cd67c7da1b41d6adf52d3e3",
+      "after_sha256": "b5c1b094bfbeda509a235b9925560484962efe1e7cd67c7da1b41d6adf52d3e3",
+      "bytes_preserved": true
+    },
+    "daily_prefs": {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/userpref.blend",
+      "sha256": "4f3760f9ccff9ebe67696dc1d617c20a8a0d269026ae20d34d0667cdefb8e8ab",
+      "after_sha256": "4f3760f9ccff9ebe67696dc1d617c20a8a0d269026ae20d34d0667cdefb8e8ab",
+      "bytes_preserved": true
+    },
+    "source_canonical": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+      "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
+      "after_sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
+      "bytes_preserved": true
+    },
+    "installed_canonical": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17.1-20261008/validation/profile/extensions/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+      "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
+      "after_sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
+      "bytes_preserved": true
+    },
+    "daily_canonical": {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+      "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
+      "after_sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
+      "bytes_preserved": true
+    },
+    "old_window_report": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt02/window-validation.json",
+      "sha256": "c988ce7e8787535ecb528b86ca1d4ae36ad70ad709a4318d57d8821cd51134da",
+      "after_sha256": "c988ce7e8787535ecb528b86ca1d4ae36ad70ad709a4318d57d8821cd51134da",
+      "bytes_preserved": true
+    }
+  }
+}

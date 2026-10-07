@@ -1,0 +1,766 @@
+{
+  "stage": 4,
+  "cycle": 2,
+  "observations": [
+    {
+      "cycle": 0,
+      "source": "SYNTHETIC",
+      "display": {
+        "properties": {
+          "wfrl_recon_texture_mode": "FALSE_COLOR",
+          "wfrl_recon_texture_gain": 9.25,
+          "wfrl_recon_texture_threshold": 0.07999999821186066,
+          "wfrl_recon_show_texture": true,
+          "wfrl_recon_inspect_blade": "1",
+          "wfrl_recon_inspect_radius": 57.0,
+          "wfrl_recon_inspect_tau": 0.6399999856948853,
+          "wfrl_recon_inspect_size": 1.7000000476837158,
+          "wfrl_recon_inspect_box": false
+        },
+        "shader": [
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          },
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          },
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          }
+        ]
+      },
+      "clock": {
+        "index": 93,
+        "samples": 120,
+        "time_s": 9.3,
+        "fps": 10.0,
+        "source_label": "SYNTHETIC · synth_tex · 120 samples at 10 Hz · independent surface texture example",
+        "source_frame": 93
+      }
+    },
+    {
+      "cycle": 0,
+      "source": "MAPPO",
+      "display": {
+        "properties": {
+          "wfrl_recon_texture_mode": "CONTRAST",
+          "wfrl_recon_texture_gain": 4.25,
+          "wfrl_recon_texture_threshold": 0.03999999910593033,
+          "wfrl_recon_show_texture": true,
+          "wfrl_recon_inspect_blade": "2",
+          "wfrl_recon_inspect_radius": 47.224998474121094,
+          "wfrl_recon_inspect_tau": 0.8216145634651184,
+          "wfrl_recon_inspect_size": 2.4000000953674316,
+          "wfrl_recon_inspect_box": true
+        },
+        "shader": [
+          {
+            "Contrast": 1.0,
+            "FalseColor": 0.0,
+            "Gain": 4.25,
+            "CenterU": 0.8216145634651184,
+            "CenterV": 0.256504088640213,
+            "HalfU": 0.2029305398464203,
+            "HalfV": 0.019512195140123367,
+            "ShowBox": 0.0,
+            "Lower": 0.2614341378211975,
+            "Upper": 0.3525029718875885
+          },
+          {
+            "Contrast": 1.0,
+            "FalseColor": 0.0,
+            "Gain": 4.25,
+            "CenterU": 0.8216145634651184,
+            "CenterV": 0.256504088640213,
+            "HalfU": 0.2029305398464203,
+            "HalfV": 0.019512195140123367,
+            "ShowBox": 1.0,
+            "Lower": 0.2614341378211975,
+            "Upper": 0.3525029718875885
+          },
+          {
+            "Contrast": 1.0,
+            "FalseColor": 0.0,
+            "Gain": 4.25,
+            "CenterU": 0.8216145634651184,
+            "CenterV": 0.256504088640213,
+            "HalfU": 0.2029305398464203,
+            "HalfV": 0.019512195140123367,
+            "ShowBox": 0.0,
+            "Lower": 0.2614341378211975,
+            "Upper": 0.3525029718875885
+          }
+        ]
+      },
+      "clock": {
+        "frame": 1333,
+        "index": 222,
+        "relative_time_s": 22.2,
+        "timeline_time_s": 139.2,
+        "held_sample_time_s": 139.2,
+        "age_ms": 0.0,
+        "original_and_texture_evaluated_geometry_bit_identical": true,
+        "max_saved_model_to_native_evaluation_difference_m": 7.624615562917825e-06,
+        "native_evaluation": [
+          {
+            "blade": 1,
+            "same_source_eval_time": 2220.0048828125,
+            "original_eval_time": 2220.0048828125,
+            "same_source_key_time": 2220.0048828125,
+            "original_key_time": 2220.0048828125,
+            "model_to_original_native_difference_m": 7.624615562917825e-06
+          },
+          {
+            "blade": 2,
+            "same_source_eval_time": 2220.0048828125,
+            "original_eval_time": 2220.0048828125,
+            "same_source_key_time": 2220.0048828125,
+            "original_key_time": 2220.0048828125,
+            "model_to_original_native_difference_m": 3.8041082746076427e-06
+          },
+          {
+            "blade": 3,
+            "same_source_eval_time": 2220.0048828125,
+            "original_eval_time": 2220.0048828125,
+            "same_source_key_time": 2220.0048828125,
+            "original_key_time": 2220.0048828125,
+            "model_to_original_native_difference_m": 3.8101417487723666e-06
+          }
+        ],
+        "max_left_bound_package_error_m": 9.819738906458042e-06
+      }
+    },
+    {
+      "cycle": 0,
+      "source": "SYNTHETIC",
+      "display": {
+        "properties": {
+          "wfrl_recon_texture_mode": "FALSE_COLOR",
+          "wfrl_recon_texture_gain": 9.25,
+          "wfrl_recon_texture_threshold": 0.07999999821186066,
+          "wfrl_recon_show_texture": true,
+          "wfrl_recon_inspect_blade": "1",
+          "wfrl_recon_inspect_radius": 57.0,
+          "wfrl_recon_inspect_tau": 0.6399999856948853,
+          "wfrl_recon_inspect_size": 1.7000000476837158,
+          "wfrl_recon_inspect_box": false
+        },
+        "shader": [
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          },
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          },
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          }
+        ]
+      },
+      "clock": {
+        "index": 93,
+        "samples": 120,
+        "time_s": 9.3,
+        "fps": 10.0,
+        "source_label": "SYNTHETIC · synth_tex · 120 samples at 10 Hz · independent surface texture example",
+        "source_frame": 93
+      }
+    },
+    {
+      "cycle": 0,
+      "source": "SYNTHETIC",
+      "display": {
+        "properties": {
+          "wfrl_recon_texture_mode": "FALSE_COLOR",
+          "wfrl_recon_texture_gain": 9.25,
+          "wfrl_recon_texture_threshold": 0.07999999821186066,
+          "wfrl_recon_show_texture": true,
+          "wfrl_recon_inspect_blade": "1",
+          "wfrl_recon_inspect_radius": 57.0,
+          "wfrl_recon_inspect_tau": 0.6399999856948853,
+          "wfrl_recon_inspect_size": 1.7000000476837158,
+          "wfrl_recon_inspect_box": false
+        },
+        "shader": [
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          },
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          },
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          }
+        ]
+      },
+      "clock": {
+        "index": 93,
+        "samples": 120,
+        "time_s": 9.3,
+        "fps": 10.0,
+        "source_label": "SYNTHETIC · synth_tex · 120 samples at 10 Hz · independent surface texture example",
+        "source_frame": 93
+      }
+    },
+    {
+      "cycle": 1,
+      "source": "MAPPO",
+      "display": {
+        "properties": {
+          "wfrl_recon_texture_mode": "CONTRAST",
+          "wfrl_recon_texture_gain": 4.25,
+          "wfrl_recon_texture_threshold": 0.03999999910593033,
+          "wfrl_recon_show_texture": true,
+          "wfrl_recon_inspect_blade": "2",
+          "wfrl_recon_inspect_radius": 47.224998474121094,
+          "wfrl_recon_inspect_tau": 0.8216145634651184,
+          "wfrl_recon_inspect_size": 2.4000000953674316,
+          "wfrl_recon_inspect_box": true
+        },
+        "shader": [
+          {
+            "Contrast": 1.0,
+            "FalseColor": 0.0,
+            "Gain": 4.25,
+            "CenterU": 0.8216145634651184,
+            "CenterV": 0.256504088640213,
+            "HalfU": 0.2029305398464203,
+            "HalfV": 0.019512195140123367,
+            "ShowBox": 0.0,
+            "Lower": 0.2614341378211975,
+            "Upper": 0.3525029718875885
+          },
+          {
+            "Contrast": 1.0,
+            "FalseColor": 0.0,
+            "Gain": 4.25,
+            "CenterU": 0.8216145634651184,
+            "CenterV": 0.256504088640213,
+            "HalfU": 0.2029305398464203,
+            "HalfV": 0.019512195140123367,
+            "ShowBox": 1.0,
+            "Lower": 0.2614341378211975,
+            "Upper": 0.3525029718875885
+          },
+          {
+            "Contrast": 1.0,
+            "FalseColor": 0.0,
+            "Gain": 4.25,
+            "CenterU": 0.8216145634651184,
+            "CenterV": 0.256504088640213,
+            "HalfU": 0.2029305398464203,
+            "HalfV": 0.019512195140123367,
+            "ShowBox": 0.0,
+            "Lower": 0.2614341378211975,
+            "Upper": 0.3525029718875885
+          }
+        ]
+      },
+      "clock": {
+        "frame": 1333,
+        "index": 222,
+        "relative_time_s": 22.2,
+        "timeline_time_s": 139.2,
+        "held_sample_time_s": 139.2,
+        "age_ms": 0.0,
+        "original_and_texture_evaluated_geometry_bit_identical": true,
+        "max_saved_model_to_native_evaluation_difference_m": 7.624615562917825e-06,
+        "native_evaluation": [
+          {
+            "blade": 1,
+            "same_source_eval_time": 2220.0048828125,
+            "original_eval_time": 2220.0048828125,
+            "same_source_key_time": 2220.0048828125,
+            "original_key_time": 2220.0048828125,
+            "model_to_original_native_difference_m": 7.624615562917825e-06
+          },
+          {
+            "blade": 2,
+            "same_source_eval_time": 2220.0048828125,
+            "original_eval_time": 2220.0048828125,
+            "same_source_key_time": 2220.0048828125,
+            "original_key_time": 2220.0048828125,
+            "model_to_original_native_difference_m": 3.8041082746076427e-06
+          },
+          {
+            "blade": 3,
+            "same_source_eval_time": 2220.0048828125,
+            "original_eval_time": 2220.0048828125,
+            "same_source_key_time": 2220.0048828125,
+            "original_key_time": 2220.0048828125,
+            "model_to_original_native_difference_m": 3.8101417487723666e-06
+          }
+        ],
+        "max_left_bound_package_error_m": 9.819738906458042e-06
+      }
+    },
+    {
+      "cycle": 1,
+      "source": "SYNTHETIC",
+      "display": {
+        "properties": {
+          "wfrl_recon_texture_mode": "FALSE_COLOR",
+          "wfrl_recon_texture_gain": 9.25,
+          "wfrl_recon_texture_threshold": 0.07999999821186066,
+          "wfrl_recon_show_texture": true,
+          "wfrl_recon_inspect_blade": "1",
+          "wfrl_recon_inspect_radius": 57.0,
+          "wfrl_recon_inspect_tau": 0.6399999856948853,
+          "wfrl_recon_inspect_size": 1.7000000476837158,
+          "wfrl_recon_inspect_box": false
+        },
+        "shader": [
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          },
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          },
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          }
+        ]
+      },
+      "clock": {
+        "index": 93,
+        "samples": 120,
+        "time_s": 9.3,
+        "fps": 10.0,
+        "source_label": "SYNTHETIC · synth_tex · 120 samples at 10 Hz · independent surface texture example",
+        "source_frame": 93
+      }
+    },
+    {
+      "cycle": 1,
+      "source": "SYNTHETIC",
+      "display": {
+        "properties": {
+          "wfrl_recon_texture_mode": "FALSE_COLOR",
+          "wfrl_recon_texture_gain": 9.25,
+          "wfrl_recon_texture_threshold": 0.07999999821186066,
+          "wfrl_recon_show_texture": true,
+          "wfrl_recon_inspect_blade": "1",
+          "wfrl_recon_inspect_radius": 57.0,
+          "wfrl_recon_inspect_tau": 0.6399999856948853,
+          "wfrl_recon_inspect_size": 1.7000000476837158,
+          "wfrl_recon_inspect_box": false
+        },
+        "shader": [
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          },
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          },
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          }
+        ]
+      },
+      "clock": {
+        "index": 93,
+        "samples": 120,
+        "time_s": 9.3,
+        "fps": 10.0,
+        "source_label": "SYNTHETIC · synth_tex · 120 samples at 10 Hz · independent surface texture example",
+        "source_frame": 93
+      }
+    },
+    {
+      "cycle": 2,
+      "source": "MAPPO",
+      "display": {
+        "properties": {
+          "wfrl_recon_texture_mode": "CONTRAST",
+          "wfrl_recon_texture_gain": 4.25,
+          "wfrl_recon_texture_threshold": 0.03999999910593033,
+          "wfrl_recon_show_texture": true,
+          "wfrl_recon_inspect_blade": "2",
+          "wfrl_recon_inspect_radius": 47.224998474121094,
+          "wfrl_recon_inspect_tau": 0.8216145634651184,
+          "wfrl_recon_inspect_size": 2.4000000953674316,
+          "wfrl_recon_inspect_box": true
+        },
+        "shader": [
+          {
+            "Contrast": 1.0,
+            "FalseColor": 0.0,
+            "Gain": 4.25,
+            "CenterU": 0.8216145634651184,
+            "CenterV": 0.256504088640213,
+            "HalfU": 0.2029305398464203,
+            "HalfV": 0.019512195140123367,
+            "ShowBox": 0.0,
+            "Lower": 0.2614341378211975,
+            "Upper": 0.3525029718875885
+          },
+          {
+            "Contrast": 1.0,
+            "FalseColor": 0.0,
+            "Gain": 4.25,
+            "CenterU": 0.8216145634651184,
+            "CenterV": 0.256504088640213,
+            "HalfU": 0.2029305398464203,
+            "HalfV": 0.019512195140123367,
+            "ShowBox": 1.0,
+            "Lower": 0.2614341378211975,
+            "Upper": 0.3525029718875885
+          },
+          {
+            "Contrast": 1.0,
+            "FalseColor": 0.0,
+            "Gain": 4.25,
+            "CenterU": 0.8216145634651184,
+            "CenterV": 0.256504088640213,
+            "HalfU": 0.2029305398464203,
+            "HalfV": 0.019512195140123367,
+            "ShowBox": 0.0,
+            "Lower": 0.2614341378211975,
+            "Upper": 0.3525029718875885
+          }
+        ]
+      },
+      "clock": {
+        "frame": 1333,
+        "index": 222,
+        "relative_time_s": 22.2,
+        "timeline_time_s": 139.2,
+        "held_sample_time_s": 139.2,
+        "age_ms": 0.0,
+        "original_and_texture_evaluated_geometry_bit_identical": true,
+        "max_saved_model_to_native_evaluation_difference_m": 7.624615562917825e-06,
+        "native_evaluation": [
+          {
+            "blade": 1,
+            "same_source_eval_time": 2220.0048828125,
+            "original_eval_time": 2220.0048828125,
+            "same_source_key_time": 2220.0048828125,
+            "original_key_time": 2220.0048828125,
+            "model_to_original_native_difference_m": 7.624615562917825e-06
+          },
+          {
+            "blade": 2,
+            "same_source_eval_time": 2220.0048828125,
+            "original_eval_time": 2220.0048828125,
+            "same_source_key_time": 2220.0048828125,
+            "original_key_time": 2220.0048828125,
+            "model_to_original_native_difference_m": 3.8041082746076427e-06
+          },
+          {
+            "blade": 3,
+            "same_source_eval_time": 2220.0048828125,
+            "original_eval_time": 2220.0048828125,
+            "same_source_key_time": 2220.0048828125,
+            "original_key_time": 2220.0048828125,
+            "model_to_original_native_difference_m": 3.8101417487723666e-06
+          }
+        ],
+        "max_left_bound_package_error_m": 9.819738906458042e-06
+      }
+    },
+    {
+      "cycle": 2,
+      "source": "SYNTHETIC",
+      "display": {
+        "properties": {
+          "wfrl_recon_texture_mode": "FALSE_COLOR",
+          "wfrl_recon_texture_gain": 9.25,
+          "wfrl_recon_texture_threshold": 0.07999999821186066,
+          "wfrl_recon_show_texture": true,
+          "wfrl_recon_inspect_blade": "1",
+          "wfrl_recon_inspect_radius": 57.0,
+          "wfrl_recon_inspect_tau": 0.6399999856948853,
+          "wfrl_recon_inspect_size": 1.7000000476837158,
+          "wfrl_recon_inspect_box": false
+        },
+        "shader": [
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          },
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          },
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          }
+        ]
+      },
+      "clock": {
+        "index": 93,
+        "samples": 120,
+        "time_s": 9.3,
+        "fps": 10.0,
+        "source_label": "SYNTHETIC · synth_tex · 120 samples at 10 Hz · independent surface texture example",
+        "source_frame": 93
+      }
+    },
+    {
+      "cycle": 2,
+      "source": "SYNTHETIC",
+      "display": {
+        "properties": {
+          "wfrl_recon_texture_mode": "FALSE_COLOR",
+          "wfrl_recon_texture_gain": 9.25,
+          "wfrl_recon_texture_threshold": 0.07999999821186066,
+          "wfrl_recon_show_texture": true,
+          "wfrl_recon_inspect_blade": "1",
+          "wfrl_recon_inspect_radius": 57.0,
+          "wfrl_recon_inspect_tau": 0.6399999856948853,
+          "wfrl_recon_inspect_size": 1.7000000476837158,
+          "wfrl_recon_inspect_box": false
+        },
+        "shader": [
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          },
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          },
+          {
+            "Contrast": 0.0,
+            "FalseColor": 1.0,
+            "Gain": 9.25,
+            "CenterU": 0.6399999856948853,
+            "CenterV": 0.09756097197532654,
+            "HalfU": 0.18260638415813446,
+            "HalfV": 0.013821139000356197,
+            "ShowBox": 0.0,
+            "Lower": 0.2217429280281067,
+            "Upper": 0.40407794713974
+          }
+        ]
+      },
+      "clock": {
+        "index": 93,
+        "samples": 120,
+        "time_s": 9.3,
+        "fps": 10.0,
+        "source_label": "SYNTHETIC · synth_tex · 120 samples at 10 Hz · independent surface texture example",
+        "source_frame": 93
+      }
+    }
+  ],
+  "counts": {
+    "objects": 2744,
+    "meshes": 298,
+    "shape_keys": 6,
+    "actions": 111,
+    "materials": 172,
+    "images": 12,
+    "cameras": 17,
+    "texts": 7,
+    "node_groups": 2
+  },
+  "saved_inventory_verified": true,
+  "native_unused_material_pruned_on_save": [
+    {
+      "name": "WFRL.ClearanceBeam.Hit",
+      "users": 0,
+      "fake_user": false
+    }
+  ],
+  "new_native_geometry": {
+    "samples": 601,
+    "blades": 3,
+    "original_and_new_native_keys_bit_identical": true,
+    "original_and_current_model_float32_geometry_bit_identical": true,
+    "max_geometry_difference_m": 0.0
+  },
+  "per_source_display_and_shader_persistent": true,
+  "final_active_profile_last_edits_persistent": true,
+  "per_source_clock_and_cursor_preserved": true,
+  "datablock_identities_and_counts_preserved": true,
+  "saved_file_bytes_preserved": true,
+  "status": "PASS",
+  "error": null,
+  "addon_module": "bl_ext.user_default.wfrl_blender",
+  "addon_file": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "actual_module_root": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "blender": "5.2.1 LTS",
+  "saved": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-settings-reopen/prepare-attempt01/distinct-source-settings.blend",
+  "baseline": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/self-check/native-settings-reopen/prepare-attempt01/prepare-report.json",
+  "scope": "FRESH_VISIBLE_PROCESS_TWO_SOURCE_SAVED_PROFILE_SWITCHES_AND_CLOCKS",
+  "prefs_saved": false,
+  "scene_saved": false,
+  "reconstruction_accuracy_accepted": false
+}

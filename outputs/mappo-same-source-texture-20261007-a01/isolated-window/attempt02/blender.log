@@ -1,0 +1,9 @@
+00:00.813  blend            | Read blend: "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt02/input-geometry.blend"
+MAPPO_SAME_SOURCE_WINDOW_READY same-source-detail
+MAPPO_SAME_SOURCE_WINDOW_READY paused-after-real-play
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/mappo_same_source_texture_window.py", line 281, in tick
+    assert right_view() == state['right_before_source_camera']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+

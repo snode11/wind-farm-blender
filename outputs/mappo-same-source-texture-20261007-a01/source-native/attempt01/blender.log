@@ -1,0 +1,16 @@
+00:01.143  blend            | Read blend: "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/examples/mappo_reconstruction_split.blend"
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/mappo_same_source_texture_regression.py", line 349, in <module>
+    main()
+    ~~~~^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/mappo_same_source_texture_regression.py", line 294, in main
+    validation = Validation(restore_farm=True)
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/mappo_same_source_texture_regression.py", line 86, in __init__
+    assert self.farm.is_active(self.scene), self.scene.get('wfrl_clearance_status')
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: 回放数据未就绪：No module named 'wfrl'
+
+Error: script failed, file: 'blender_frontend/tests/blender/mappo_same_source_texture_regression.py', exiting.
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
