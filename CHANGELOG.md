@@ -1,6 +1,33 @@
 # 变更记录
 
-仅记录已在 GitHub Releases 发布的版本。GW184 0.4 与 NREL/WFRL 0.3 为独立用途；NREL 扩展当前为 0.3.13，源码及内置回放资源已同步；GW184 完整实现继续以独立运行 ZIP 为准。
+仅记录已在 GitHub Releases 发布的版本。GW184 0.4 与 NREL/WFRL 0.3 为独立用途；NREL 扩展当前为 0.3.17，发布时仅更新安装 ZIP，未提交或推送新版实现源码。本次仅同步文档，公开扩展实现与构建资源仍对应 0.3.13；v0.3.17 标签不移动；GW184 完整实现继续以独立运行 ZIP 为准。
+
+## [0.3.17](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.17) · 2026-10-07 · Blade Recon 0.2 表面纹理与重建对照
+
+- 支持导入保存的 Blade Recon 0.2 重建结果与三片 RGBA 图集，纹理随 `.blend` 打包并在新进程恢复。
+- 提供原始纹理、增强灰度与青／洋红增强显示，以及亮斑、横细线、纵细线的人工选定近景。
+- MAPPO 的 **进入重建对照** 使用内置独立合成纹理样例，支持样本步进、完整取景、布局恢复及退出；修复分屏侧栏绘制时写入材质导致的显示问题。
+- 保留便携 MAPPO＋重建示例、NREL 缺陷编辑器、三相机及雷达回放。
+
+已知限制：最终 157 文件 ZIP 的 macOS Blender 5.2.1 LTS 隔离安装、三相机／投影后台回归、纹理导入与新进程保存恢复通过；本次未重测可见窗口操作或 FPS。右侧为 **SYNTHETIC** 独立来源与时钟的 120 个 10 Hz 保存样本（0–11.9 s），增强仅改变显示，人工近景不代表自动缺陷检测、几何精度或现场验收。外部 Blade Recon 0.2 求解研究代码不随扩展打包；既有精度与稳定性问题、Windows/Linux 未实测及雷达 **REVIEW_ONLY / PENDING_ACCEPTANCE** 状态保留。仅上传 `wfrl_blender-0.3.17.zip`，未提交或推送实现源码；证据与边界见 [0.3.17 发布核对](docs/blender/releases/0.3.17发布核对.md)。
+
+## [0.3.16](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.16) · 2026-10-05 · NREL 六类叶片缺陷编辑器
+
+- 新增 NREL 5MW 六类合成缺陷编辑器，覆盖 T1/T2/T3 九片叶片，随已有 MAPPO 柔性回放运动。
+- 支持新建与修改、预览确认／取消、撤销重做、健康对照、严格参考几何绑定的 JSON 读写及原生保存重开。
+- 提供三相机几何分析与逐帧扫描；包含 T1/B1 默认修补痕迹，延续便携 MAPPO＋重建示例、三相机和原雷达回放。
+
+已知限制：本版 macOS Blender 5.2.1 LTS 的 ZIP 清单、隔离安装、三相机／投影与安装版编辑器保存重开通过。此前源码窗口功能检查通过后，切换 Python 控制台曾触发 Blender 原生 SIGSEGV，原因未定，整体窗口稳定性未计为通过；既有叶尖挠度 0.2 mm 阈值回归仍失败，最大方向误差约 0.895 mm。合成外观不耦合结构或气动物理，几何可见不证明图片可辨识。Windows/Linux、稳定 FPS、长期性能和现场精度未验收，物理数据仍为 **REVIEW_ONLY / PENDING_ACCEPTANCE**。只上传 `wfrl_blender-0.3.16.zip`，源码未提交或推送；完整证据与原有问题见 [0.3.16 发布核对](docs/blender/releases/0.3.16发布核对.md)。
+
+## [0.3.15](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.15) · 2026-10-05 · 便携重建分屏示例
+
+- 新增随 ZIP 提供的 **MAPPO＋重建示例**：场景、MAPPO 源数据和四张 packed 天空／地表纹理均在包内，无需作者本机文件或在线后端。
+- 改进同步分屏布局、完整取景、窗口缩放恢复与原生保存重开；左侧相机切换保留右侧独立重建视图。
+- 区分播放时间、实际保存样本时间和保持时长；样本前后步进先暂停，并钳制在片段端点。
+- 修复重复注册、卸载后再次注册；保留右侧三片叶片各 601 个绝对 shape keys、CONSTANT 样本保持和无 drivers 的原生动画。
+- 发布页仅手动上传 `wfrl_blender-0.3.15.zip`。本次未提交或推送源码，标签指向远端 `main` 的 `1caafb9edb7593a96813b8edfddf5d70d040717f`；GitHub 自动 Source code 归档不能作为本版安装包。
+
+已知限制：macOS Blender 5.2.1 LTS 的全新 ZIP 安装、便携数据恢复、实际窗口播放／步进／视图切换及保存重开已验证；Windows/Linux 未实测。40 Hz MAPPO 数据、10 Hz 重建保存采样与 60 Hz 时间轴分别报告，未验收稳定 60 FPS 或重建精度。雷达状态仍为 **REVIEW_ONLY / PENDING_ACCEPTANCE**。证据及附件范围见 [0.3.15 发布核对](docs/blender/releases/0.3.15发布核对.md)。
 
 ## [0.3.13](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.13) · 2026-10-02 · NREL 双束 TLS 候选与完整源码同步
 
