@@ -1,12 +1,16 @@
-  Step-by-Step 本地复现
+# 历史 Windows 本地复现记录
+
+> 本页保留早期 Windows / Git-Bash 环境与旧训练脚本操作，不作为当前部署指南；固定路径、依赖组合与旧入口须按实际环境重新核对。当前环境分流见[本地环境配置](setup/setup_local.md)，Blender 公开安装见[安装指南](blender/INSTALL.md)及[发布状态](blender/发布状态与验证范围.md)。公开 NREL 为 0.3.18，ZIP 与对应扩展源码已发布，详见[发布核对](blender/releases/0.3.18发布核对.md)。
+
+  Step-by-Step 本地复现（历史）
 
   假设从零开始。所有命令在 Git-Bash 里执行。
 
   0. 前置
 
   - 已装 Anaconda，仓库在 D:\project\wind farm RL\wfcrl-env
-  - 运行时会看到 Exception in thread Thread-7 ... UnicodeDecodeError 'gbk' —— 这是 conda/bash
-  包装器的编码噪音，不是真错误，忽略即可
+  - 历史运行曾出现 Exception in thread Thread-7 ... UnicodeDecodeError 'gbk'，当时记录为 conda/bash
+  包装器编码问题。此判断只适用于该历史排障记录；新的编码异常须结合退出码、进程状态和实际输出检查，不能普遍忽略。
 
   1. 建环境 + 装依赖
 
@@ -339,4 +343,3 @@ Stable-Baselines3（SB3）是一个完全独立的第三方库，跟 Gym 和 WFC
   不对,动态的局部风况不是随机的。它主要是确定性的尾流传播演化(T1 改偏航后,尾流需要真实时间才飘到 T2,风速按物理规律渐变)
   ,只叠加了小幅湍流噪声才带一点随机性。稳态与动态的本质差别是"有没有尾流传播的时间过程"(确定性的延迟),而不是"随机 vs
   不随机"。来流风况的幕间随机采样则是两者共有的、独立的另一回事。
-

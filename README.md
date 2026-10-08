@@ -5,11 +5,20 @@
 | 产品 | 当前版本 | 用途 | 下载与使用 |
 | --- | --- | --- | --- |
 | GW184 三相机与叶片缺陷 | **0.4.0** | 参考 DTU 的 GW184 尺寸合成刚性模型、固定三相机、六类缺陷编辑 | [下载独立运行 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.4.0/gw184_three_camera_defects-0.4.0.zip)，完整解压后启动；[使用说明](docs/blender/GW184三相机与缺陷编辑器.md) |
-| NREL 5MW / WFRL 前端 | **0.3.17.1** | 三机柔性回放、六类叶片缺陷、三相机、双束与 TLS 候选、MAPPO 同源纹理同步对照 | [下载 Blender 扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.17.1/wfrl_blender-0.3.17.1.zip)，通过 Install from Disk 安装并重启；[前端说明](前端readme.md) |
+| NREL 5MW / WFRL 前端 | **0.3.18** | 三机柔性回放、六类叶片缺陷、三相机、双束与 TLS 候选、MAPPO 同源纹理同步对照 | [下载 Blender 扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.18/wfrl_blender-0.3.18.zip)，通过 Install from Disk 安装并重启；[前端说明](前端readme.md) |
 
-[0.3.17.1 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.17.1)提供当前 NREL 扩展 ZIP。包内兼容版本为 `0.3.17+1`，build metadata 不用于自动升级排序，请手动安装。[0.4.0 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.4.0) 保留 GW184 独立包及当时的 NREL 0.3.12 ZIP；GW184 的版本号不表示 NREL 扩展已升级。
+[0.3.18 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.18)提供当前 NREL 扩展 ZIP，安装后完全重启 Blender。[0.4.0 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.4.0) 保留 GW184 独立包及当时的 NREL 0.3.12 ZIP；GW184 的版本号不表示 NREL 扩展已升级。
 
-**NREL 0.3.17.1 发布时仅更新安装 ZIP：** 新版扩展实现源码未提交或推送，后续另行同步文档和验证记录。`v0.3.17.1` 指向发布时远端 `main` 的 `9d7b5596a781b8ea5040d18b2f009268313a8821`。GitHub 自动生成的 Source code 归档不能当作当前安装包。0.3.13 已同步完整构建源码与内置回放资源；历史源码归档仍按各版本原有范围阅读。
+**NREL 0.3.18 同时发布 ZIP 与对应扩展源码：** `v0.3.18` 指向 [6dfa0eef](https://github.com/snode11/wind-farm-blender/commit/6dfa0eefe410ef3e38d3cbd9ee7d017aafa2fc02)，包含对应扩展、必要随包资源、构建规则和相关回归；从标签复建的 ZIP 与已验证最终包字节一致。GitHub Source code 提供对应仓库源码，安装仍选择专用扩展 ZIP。0.3.17.1 当次仅发布 ZIP，旧标签及 0.3.13 源码同步范围保持历史身份。
+
+## [0.3.18](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.18) · 2026-10-08 · 场景、播放与相机一致性修复
+
+- 按场景隔离回放恢复，拒绝共享网格的第二个时钟；原生播放回调识别 owner scene，避免单步、复位和停止误停另一场景，明确拒绝播放冲突。
+- 保留 C1/C2/C3 槽位身份；采集核对实际原生及评估相机状态，失败恢复事务并保留用户修改。
+- 采集事务按输出尺寸复用 GPU target；新增默认关闭的版本、来源和短时视口播放诊断；修正 float64 姿态读取。
+- 同步对应扩展源码与必要资源，172 文件 ZIP 的隔离源码复建与已验证最终包字节一致；保留原几何、同源 601 样本纹理与独立合成 120 样本入口。
+
+已知限制：原 **0.2 mm 叶尖门槛仍为 FAILED_GATE**，安装版抽样真实网格最大分量误差约 1.0613 mm，不能称精度提高。GPU 分配／释放 9/9 → 3/3 不证明 FPS 提高或整套无泄漏；同进程仍只有一个全局原生播放器。几何／纹理 NOT_ACCEPTED、雷达 REVIEW_ONLY / PENDING_ACCEPTANCE、跨平台与现场限制保留。源码回归与原安装／窗口验证分别记录，见 [0.3.18 发布核对](docs/blender/releases/0.3.18发布核对.md)。
 
 ## [0.3.17.1](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.17.1) · 2026-10-08 · MAPPO 同源纹理同步对照与状态修复
 

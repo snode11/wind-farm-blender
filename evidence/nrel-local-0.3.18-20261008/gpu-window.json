@@ -1,0 +1,76 @@
+{
+  "status": "PASS",
+  "module": "<ISOLATED_ADDON>/__init__.py",
+  "blender": "5.2.1 LTS",
+  "gpu": "Metal API",
+  "checks": {
+    "three_sizes_three_samples_9_to_3_allocations_same_png_bytes": true,
+    "cancel_releases_and_restores_frame_statistics_quality": true,
+    "gpu_failure_releases_and_restores_frame_statistics_quality": true,
+    "native_edit_aborts_without_overwriting_edit": true
+  },
+  "fresh": {
+    "path": "<LOCAL_EVIDENCE>/validation/installed-final/gpu-window/capture_20261008_202925_e6c4f7e01e",
+    "elapsed_s": 1.3289374171290547,
+    "usage": {
+      "allocations": 9,
+      "releases": 9,
+      "active_targets": 0
+    },
+    "png_hashes": [
+      "10843b5e725a9eb8f02e7889072f084c153cbd4bbd4a994471930883c6241c8f",
+      "d8a69113e3e159bb655ed29c51eeaf14f09f8109870cdc8a8005744aae61d38b",
+      "b5aaf639a902f1ed57e6483a0a6103b6517e18a9db364ce4ce8491db9b5427e9",
+      "2c17cbba05fb15b83897cae0f92942125c22f5d9c1de84f9e2b4f16482f8da98",
+      "147692500e11277d3bcd57981048da3605a179239f039a2f03c312758ce9185e",
+      "9199189a367acc77029276a4cfbec053e4dbd5e2808f2af6306400cb88b4cd12",
+      "acd98104dde661e1ba5e4f451476bddedbb488522bdc09429b1acf65ef9519a4",
+      "f86bd39af126a997c22411286e9d47095c88513c7e98c0366cd371b76db6382a",
+      "6025fee22b0f15d5e98e653faa6117e4721b42bf2be2713684749870b6f8cac1"
+    ],
+    "state_hashes": [
+      "684879a2e587ed6ebf8a1a504c8dcddd28decf7c0b2b7b219922d011d1894869",
+      "684879a2e587ed6ebf8a1a504c8dcddd28decf7c0b2b7b219922d011d1894869",
+      "684879a2e587ed6ebf8a1a504c8dcddd28decf7c0b2b7b219922d011d1894869",
+      "1f5cc19dace63ee772dad98780759bfd6d662ca342f2e2d6ac7e80c6b100a81a",
+      "1f5cc19dace63ee772dad98780759bfd6d662ca342f2e2d6ac7e80c6b100a81a",
+      "1f5cc19dace63ee772dad98780759bfd6d662ca342f2e2d6ac7e80c6b100a81a",
+      "ced7e6d9b01e2b445a71a840ac4aec7642f87386fee0e37f628268b636f75567",
+      "ced7e6d9b01e2b445a71a840ac4aec7642f87386fee0e37f628268b636f75567",
+      "ced7e6d9b01e2b445a71a840ac4aec7642f87386fee0e37f628268b636f75567"
+    ]
+  },
+  "pooled": {
+    "path": "<LOCAL_EVIDENCE>/validation/installed-final/gpu-window/capture_20261008_202926_f2ad4b63dd",
+    "elapsed_s": 1.2319668328855187,
+    "usage": {
+      "allocations": 3,
+      "releases": 3,
+      "active_targets": 0,
+      "policy": "transaction / output size"
+    },
+    "png_hashes": [
+      "10843b5e725a9eb8f02e7889072f084c153cbd4bbd4a994471930883c6241c8f",
+      "d8a69113e3e159bb655ed29c51eeaf14f09f8109870cdc8a8005744aae61d38b",
+      "b5aaf639a902f1ed57e6483a0a6103b6517e18a9db364ce4ce8491db9b5427e9",
+      "2c17cbba05fb15b83897cae0f92942125c22f5d9c1de84f9e2b4f16482f8da98",
+      "147692500e11277d3bcd57981048da3605a179239f039a2f03c312758ce9185e",
+      "9199189a367acc77029276a4cfbec053e4dbd5e2808f2af6306400cb88b4cd12",
+      "acd98104dde661e1ba5e4f451476bddedbb488522bdc09429b1acf65ef9519a4",
+      "f86bd39af126a997c22411286e9d47095c88513c7e98c0366cd371b76db6382a",
+      "6025fee22b0f15d5e98e653faa6117e4721b42bf2be2713684749870b6f8cac1"
+    ],
+    "state_hashes": [
+      "684879a2e587ed6ebf8a1a504c8dcddd28decf7c0b2b7b219922d011d1894869",
+      "684879a2e587ed6ebf8a1a504c8dcddd28decf7c0b2b7b219922d011d1894869",
+      "684879a2e587ed6ebf8a1a504c8dcddd28decf7c0b2b7b219922d011d1894869",
+      "1f5cc19dace63ee772dad98780759bfd6d662ca342f2e2d6ac7e80c6b100a81a",
+      "1f5cc19dace63ee772dad98780759bfd6d662ca342f2e2d6ac7e80c6b100a81a",
+      "1f5cc19dace63ee772dad98780759bfd6d662ca342f2e2d6ac7e80c6b100a81a",
+      "ced7e6d9b01e2b445a71a840ac4aec7642f87386fee0e37f628268b636f75567",
+      "ced7e6d9b01e2b445a71a840ac4aec7642f87386fee0e37f628268b636f75567",
+      "ced7e6d9b01e2b445a71a840ac4aec7642f87386fee0e37f628268b636f75567"
+    ]
+  },
+  "measurement_boundary": "isolated scripted GPU window at 320 px; elapsed times are observations"
+}

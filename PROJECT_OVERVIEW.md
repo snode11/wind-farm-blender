@@ -9,17 +9,19 @@
 
 ---
 
-## Blender 0.2.4 与激光净空雷达
+## Blender 当前公开版本与激光净空雷达
 
-当前安装包：[wfrl_blender-0.2.4.zip](dist/wfrl_blender-0.2.4.zip)；[交付清单与校验方法](dist/README-lidar.md)；[本版改动](CHANGELOG.md)。Blender 最低版本为 5.2。
+当前 NREL / WFRL 公开安装包为 [0.3.18 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.18) 的 `wfrl_blender-0.3.18.zip`，172 文件，要求 Blender 5.2+。对应扩展源码、必要资源、构建规则与相关测试已发布，标签指向提交 [`6dfa0eef`](https://github.com/snode11/wind-farm-blender/commit/6dfa0eefe410ef3e38d3cbd9ee7d017aafa2fc02)。安装与当前入口见[安装指南](docs/blender/INSTALL.md)和[前端使用说明](前端readme.md)，发布范围见[0.3.18 发布核对](docs/blender/releases/0.3.18发布核对.md)。自动 Source code 仍不能代替扩展安装包；此次精选源码不包含完整开发工作区或所有研究脚本。
 
-**Mac 一键雷达演示：**下载完整仓库并解压，进入 `scripts/blender`，双击 `打开净空雷达演示.command`。也可先运行 `git clone https://github.com/snode11/wind-farm-blender.git`，再打开克隆目录中的同一入口。默认 Blender 位置为 `/Applications/Blender.app`。窗口打开后，在“净空与误差对比”中点击“正常测量”或“较小净空”，用“播放 / 暂停”控制回放。该入口直接使用源码、随仓库提供的场景和两个结果包，无需启动训练或在线求解器。
+**当前离线演示：**安装扩展并重启后，在 **N → MAPPO** 加载“MAPPO · 60 秒”，观看三机九片柔性叶片与塔架回放；同源纹理、原几何示例和独立合成纹理按各自入口使用。无需启动训练或在线求解器，保存数据仍为 `REVIEW_ONLY`，几何／纹理 `NOT_ACCEPTED` 和双束／TLS 验收边界保留。
 
-首次使用请阅读 [WFRL 用户使用手册](docs/blender/用户使用手册.md)，雷达操作直接看[第 12 节](docs/blender/用户使用手册.md#12-激光净空雷达第一次照着操作)。安装扩展后的操作及 Windows 模板也在手册中；Windows 尚未实机验收。
+**历史独立 normal/close 雷达演示：**完整仓库的 `scripts/blender/打开净空雷达演示.command` 使用源码、旧场景与两个独立结果包，默认 Blender 位置为 `/Applications/Blender.app`。窗口中的“正常测量”“较小净空”与播放按钮属于该旧入口，不能代替当前 MAPPO 柔性回放。历史交付清单见[dist/README-lidar.md](dist/README-lidar.md)。
 
-雷达数据是 FAST.Farm 预计算仿真结果；B2 估计、真值与误差的依据见[雷达说明](docs/blender/激光净空雷达使用说明.md)。画面仍为刚性运动示意，不是现场实测。仓库包含小型结果包，排除 `results/lidar/raw/` 的大体积原始表面和本地验收过程文件；播放不需要这些文件，重新求解或从原始几何重算时才需要另外准备，见[计算流程](scripts/lidar/README.md)。
+首次使用请阅读 [WFRL 用户使用手册](docs/blender/用户使用手册.md)，旧独立雷达操作直接看[第 12 节](docs/blender/用户使用手册.md#12-独立激光净空雷达正常较小净空片段)。安装扩展后的操作及 Windows 模板也在手册中；Windows 尚未实机验收。
 
-**技术说明：**[Blender 前端 README](blender_frontend/README.md)说明风机建模、材质与灯光、雷达外观、相机与卡片、旧场景恢复；[雷达算法 README](wfrl/lidar/README.md)说明理想测距、独立真值、B2 简化估计、包格式、统计与物理重生成。0.2.4 改善材质和雷达安装细节，主卡片显示测量时刻、叶片编号与读数年龄，相机姿态移入云台控制，并修复编辑模式旧文件加载时的网格损坏与崩溃。本版复用两个 v1.1 结果包，无需重跑物理计算。
+旧独立雷达数据是 FAST.Farm 预计算仿真结果，其 B2 估计、参考定义与误差口径见[用户手册第 12 节](docs/blender/用户使用手册.md#12-独立激光净空雷达正常较小净空片段)及[雷达算法说明](wfrl/lidar/README.md)。仅该 normal/close 路径为刚性姿态示意，不是现场实测。仓库包含小型结果包，排除 `results/lidar/raw/` 的大体积原始表面和本地验收过程文件；播放不需要这些文件，重新求解或从原始几何重算时才需要另外准备，见[计算流程](scripts/lidar/README.md)。
+
+**技术说明：**[Blender 前端 README](blender_frontend/README.md)说明实现与维护；[雷达算法 README](wfrl/lidar/README.md)说明理想测距、独立参考、B2 简化估计、包格式、统计与物理重生成。历史 0.2.4 的材质、雷达安装、卡片、云台及旧场景修复见[CHANGELOG](CHANGELOG.md)，该轮复用两个 v1.1 结果包。0.3.18 的软件、安装与窗口证据见[修复与验证](docs/blender/validation/NREL本地0.3.18修复与验证.md)；源码隔离复建与已验证 ZIP 字节一致，发布源码 CPU 检查为 215 passed、2 skipped、233 subtests passed。原 0.2 mm 叶尖门槛仍为 `FAILED_GATE`，不据软件／窗口通过称精度接受。
 
 ## 1. 最终目标
 
@@ -67,7 +69,7 @@ results/                    跑出来的东西
 
 slides/                     汇报材料：introduction_slides.tex + figs/
                             整个目录可直接打包上传 Overleaf（编译器选 XeLaTeX）
-docs/                       setup_local.md（本地部署 step-by-step）、算法笔记、reports/ 日报
+docs/                       setup/setup_local.md（当前环境分流）、算法笔记、reports/ 日报
 refs/                       论文 PDF 与技术要求
 
 wfcrl-env/                  上游基准（editable 安装指向此处，含本地补丁）
@@ -82,7 +84,7 @@ __simul__/                  FAST.Farm 运行时工作目录（每次 make() 新�
 
 ## 3. 快速开始
 
-环境搭建（conda 环境、FLORIS 依赖、FAST.Farm + MS-MPI）见 **`docs/setup_local.md`**。
+环境搭建（conda 环境、FLORIS 依赖、FAST.Farm / MPI）见[本地环境配置](docs/setup/setup_local.md)；`docs/setup_local.md` 保留早期 Windows 历史记录。
 之后在仓库根：
 
 ```bash

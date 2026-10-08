@@ -1,0 +1,114 @@
+{
+  "status": "SOFTWARE_FIXES_VALIDATED_PRECISION_GATE_FAILED",
+  "version": "0.3.18",
+  "publication": "LOCAL_ONLY_UNPUBLISHED",
+  "host": {
+    "passed": 117,
+    "skipped": 1,
+    "subtests_passed": 6
+  },
+  "package": {
+    "archive": "<LOCAL_EVIDENCE>/validation/installed-final/package/wfrl_blender-0.3.18.zip",
+    "sha256": "f5fb69e6e8cdc58edf1d1f76fd4eacc1e108b688768635cc3a5a05c04bdfc400",
+    "checksum": "<LOCAL_EVIDENCE>/validation/installed-final/package/wfrl_blender-0.3.18.zip.sha256",
+    "inventory": "<LOCAL_EVIDENCE>/validation/installed-final/package/wfrl_blender-0.3.18.inventory.json",
+    "package_id": "wfrl_blender",
+    "version": "0.3.18",
+    "file_count": 172
+  },
+  "daily_installation": {
+    "status": "PASS",
+    "package_path": "<DAILY_ADDON>",
+    "verified_files": 172,
+    "mismatches": [],
+    "unexpected_files": [],
+    "ignored": [
+      "__pycache__",
+      "*.pyc"
+    ],
+    "version": "0.3.18",
+    "archive": "<LOCAL_EVIDENCE>/validation/installed-final/package/wfrl_blender-0.3.18.zip",
+    "archive_sha256": "f5fb69e6e8cdc58edf1d1f76fd4eacc1e108b688768635cc3a5a05c04bdfc400",
+    "userpref_unchanged": true,
+    "publication": "LOCAL_ONLY_UNPUBLISHED"
+  },
+  "scientific_precision": {
+    "addon_module": "bl_ext.wfrl_frontend.wfrl_blender",
+    "addon_file": "<ISOLATED_ADDON>/__init__.py",
+    "verification_layer": "INSTALLED_EXTENSION",
+    "saved_mesh_max_error_m": [
+      0.00020351976514199066,
+      0.0010612851396875622,
+      2.9086288567223284e-05
+    ],
+    "interpolated_mesh_max_error_m": [
+      2.8258155350791014e-05,
+      0.00013565605585430518,
+      2.298421120006111e-05
+    ],
+    "independent_source_max_error_m": [
+      0.00020506496892203074,
+      0.0010665028159974055,
+      1.7677585993764594e-05
+    ],
+    "mesh_transport_max_error_m": [
+      4.7508910094862244e-06,
+      1.720011175621039e-05,
+      2.8986271729536384e-05
+    ],
+    "saved_gate_threshold_m": 0.0002,
+    "interpolated_gate_threshold_m": 0.005,
+    "physical_gate": "FAILED_GATE",
+    "software_checks": "PASS",
+    "switching": true,
+    "seeking": true,
+    "hidden_t1": true,
+    "fixed_clock": true,
+    "reload": true
+  },
+  "gpu_reuse": {
+    "fresh": {
+      "allocations": 9,
+      "releases": 9,
+      "active_targets": 0
+    },
+    "pooled": {
+      "allocations": 3,
+      "releases": 3,
+      "active_targets": 0,
+      "policy": "transaction / output size"
+    },
+    "png_bytes_equal": true,
+    "state_hashes_equal": true
+  },
+  "daily_native_window": {
+    "status": "PASS",
+    "module_file": "<DAILY_ADDON>/__init__.py",
+    "unrelated_window_continued": true,
+    "step_reset_stop_scene_scoped": true,
+    "paused_fps_unavailable": true,
+    "diagnostics": {
+      "version": "0.3.18",
+      "build": "e98f64dcd090ba33f93e52bc1e0a26adeff82fb1828bc0239f49babc618a60b0",
+      "packaged": true,
+      "module": "bl_ext.user_default.wfrl_blender",
+      "addon_root": "<DAILY_ADDON>",
+      "source_path": "<DAILY_ADDON>/assets/mappo",
+      "source_hz": 40,
+      "timeline_hz": 60.0,
+      "simulation_time_s": 120.1,
+      "viewport_fps": 20.088811864635957,
+      "fps_scope": "Distinct scene frames observed in this viewport POST_PIXEL over the last 2 seconds; not display scanout",
+      "sampling": true,
+      "playing": true
+    },
+    "boundary": "Actual native windows and short draw sample; not a full-clip FPS acceptance"
+  },
+  "assets_preservation": {
+    "status": "PASS",
+    "formal_assets_unchanged": true,
+    "changed": [],
+    "checked_files": 65
+  },
+  "user_preferences_after_native_test": "UNCHANGED"
+}

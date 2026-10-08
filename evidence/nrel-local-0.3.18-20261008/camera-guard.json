@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "module": "<ISOLATED_ADDON>/__init__.py",
+  "checks": {
+    "canonical_pose_accepted": true,
+    "native_position_rotation_delta_scale_parent_inverse_lens_sensor_shift_clip_rejected": true,
+    "evaluated_constraint_pose_rejected": true,
+    "evaluated_lens_driver_rejected": true,
+    "nan_delta_lens_clip_parent_pose_rejected_before_geometry_and_hashing": true,
+    "common_parent_motion_accepted": true,
+    "transaction_guard_detects_native_edit_with_unchanged_saved_layout": true
+  }
+}

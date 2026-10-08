@@ -1,10 +1,12 @@
 # WFRL Blender 演示流程
 
+> **历史 Part 1 / Part 2 演示规划。** 本页的 A1 合成 Demo、功能 ID 与验收清单保留原阶段身份，不作为当前安装版操作或已完成验收证明。当前公开 NREL 0.3.18 的 MAPPO 保存结果演示见[前端使用说明](../../前端readme.md#8-给观众展示时的建议顺序)和[当前演示指令单](../demos/演示指令单.md)；ZIP 与对应扩展源码范围见[0.3.18 发布核对](releases/0.3.18发布核对.md)。
+
 > Part 1 · Deliverable 2 / 3 · 演示脚本与操作手册
 >
 > 状态：可用于 Part 2 静态原型和后续真实联调
 >
-> 依据：[feature-parity.md](./feature-parity.md) 与仓库根目录 `demo_studio.ps1`
+> 历史依据：当时的 `feature-parity.md` 与仓库根目录 `demo_studio.ps1`；`feature-parity.md` 当前未提供，不作为可打开或已核验的现行依据。
 
 ## 1. 目标与边界
 
@@ -50,7 +52,7 @@
 - 进入 `view.world`，开启演示布局，隐藏与叙事无关的 Blender 区域。
 - 预置俯视、侧视、等距三种相机位；默认从等距全场景开始。
 - 面板顺序固定为 Scene、Run、Telemetry、Safety / Demo Events；Manual 折叠。
-- 颜色、字号、曲线样式和镜头构图以 [visual-direction.md](./visual-direction.md) 为准。
+- 历史颜色、字号、曲线样式和镜头构图曾以 `visual-direction.md` 为依据；该文件当前未提供。现行展示按[前端使用说明](../../前端readme.md#8-给观众展示时的建议顺序)核对。
 
 ### 3.2 数据准备
 

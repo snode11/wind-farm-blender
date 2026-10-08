@@ -1,0 +1,313 @@
+{
+  "schema_version": "wfrl.frontend-isolated-package.v1",
+  "status": "PASS",
+  "module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "commands": [
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--command",
+        "extension",
+        "repo-add",
+        "wfrl_frontend",
+        "--name",
+        "WFRL Frontend Isolated Validation",
+        "--directory",
+        "<LOCAL_EVIDENCE>/validation/installed-final/profile/extensions",
+        "--clear-all"
+      ],
+      "returncode": 0,
+      "log": "<LOCAL_EVIDENCE>/validation/installed-final/logs/repo-add.log",
+      "required_markers": [],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.5215967921540141,
+      "status": "EXIT_ZERO_REQUIRES_PROBE"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "<LOCAL_REPO>/scripts/blender/validate_frontend_package.py",
+        "--",
+        "--inside-probe",
+        "repo",
+        "--repository",
+        "<LOCAL_EVIDENCE>/validation/installed-final/profile/extensions",
+        "--output",
+        "<LOCAL_EVIDENCE>/validation/installed-final/repo-probe.json"
+      ],
+      "returncode": 0,
+      "log": "<LOCAL_EVIDENCE>/validation/installed-final/logs/repo-probe.log",
+      "required_markers": [
+        "FRONTEND_REPOSITORY_PROBE_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.514817374991253,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--command",
+        "extension",
+        "install-file",
+        "-r",
+        "wfrl_frontend",
+        "--enable",
+        "<LOCAL_EVIDENCE>/validation/installed-final/package/wfrl_blender-0.3.18.zip"
+      ],
+      "returncode": 0,
+      "log": "<LOCAL_EVIDENCE>/validation/installed-final/logs/install-file.log",
+      "required_markers": [
+        "Installed \"wfrl_blender\""
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 1.0240766250062734,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "<LOCAL_REPO>/scripts/blender/validate_frontend_package.py",
+        "--",
+        "--inside-probe",
+        "module",
+        "--repository",
+        "<LOCAL_EVIDENCE>/validation/installed-final/profile/extensions",
+        "--output",
+        "<LOCAL_EVIDENCE>/validation/installed-final/module-probe.json"
+      ],
+      "returncode": 0,
+      "log": "<LOCAL_EVIDENCE>/validation/installed-final/logs/module-probe.log",
+      "required_markers": [
+        "FRONTEND_INSTALLED_MODULE_PROBE_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.5685444169212133,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "<LOCAL_REPO>/blender_frontend/tests/blender/three_camera_default_regression.py"
+      ],
+      "returncode": 0,
+      "log": "<LOCAL_EVIDENCE>/validation/installed-final/logs/three-camera-default.log",
+      "required_markers": [
+        "THREE_CAMERA_DEFAULT_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [
+        {
+          "kind": "blender_exit_memory_diagnostic",
+          "message": "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB",
+          "blocks": 350,
+          "reported_mb": 0.02594,
+          "bytes": 27200,
+          "bytes_note": "Reported MB converted by 1024^2 and rounded; limited by log precision"
+        }
+      ],
+      "elapsed_s": 31.83681174996309,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "<LOCAL_REPO>/blender_frontend/tests/blender/native_camera_projection_regression.py"
+      ],
+      "returncode": 0,
+      "log": "<LOCAL_EVIDENCE>/validation/installed-final/logs/native-projection.log",
+      "required_markers": [
+        "NATIVE_PROJECTION_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.6069098750595003,
+      "status": "PASS"
+    }
+  ],
+  "checks": {
+    "archive_inventory": "PASS",
+    "repository_probe": {
+      "status": "PASS",
+      "repository": "<LOCAL_EVIDENCE>/validation/installed-final/profile/extensions",
+      "repo_module": "wfrl_frontend",
+      "blender": "5.2.1 LTS",
+      "background": true
+    },
+    "installed_inventory": {
+      "status": "PASS",
+      "package_path": "<ISOLATED_ADDON>",
+      "verified_files": 172,
+      "mismatches": [],
+      "unexpected_files": [],
+      "ignored": [
+        "__pycache__",
+        "*.pyc"
+      ]
+    },
+    "module_probe": {
+      "status": "PASS",
+      "repository": "<LOCAL_EVIDENCE>/validation/installed-final/profile/extensions",
+      "repo_module": "wfrl_frontend",
+      "blender": "5.2.1 LTS",
+      "background": true,
+      "module": "bl_ext.wfrl_frontend.wfrl_blender",
+      "addon_path": "<ISOLATED_ADDON>/__init__.py",
+      "imported_modules": {
+        "bl_ext.wfrl_frontend.wfrl_blender.cameras": "<ISOLATED_ADDON>/cameras.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.materials": "<ISOLATED_ADDON>/materials.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.scene_model": "<ISOLATED_ADDON>/scene_model.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.scene_builder": "<ISOLATED_ADDON>/scene_builder.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.workspace": "<ISOLATED_ADDON>/workspace.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.atmosphere": "<ISOLATED_ADDON>/atmosphere.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.wake": "<ISOLATED_ADDON>/wake.py",
+        "bl_ext.wfrl_frontend.wfrl_blender": "<ISOLATED_ADDON>/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.state": "<ISOLATED_ADDON>/state.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.animation": "<ISOLATED_ADDON>/animation.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.training": "<ISOLATED_ADDON>/training.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.live_scene": "<ISOLATED_ADDON>/live_scene.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.performance": "<ISOLATED_ADDON>/performance.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.runtime": "<ISOLATED_ADDON>/runtime.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.deflection": "<ISOLATED_ADDON>/deflection.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels": "<ISOLATED_ADDON>/panels/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.demo": "<ISOLATED_ADDON>/panels/demo.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.preferences": "<ISOLATED_ADDON>/preferences.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.diagnostics": "<ISOLATED_ADDON>/diagnostics.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.diagnostics": "<ISOLATED_ADDON>/panels/diagnostics.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.status": "<ISOLATED_ADDON>/panels/status.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators": "<ISOLATED_ADDON>/operators/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators.connection": "<ISOLATED_ADDON>/operators/connection.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators.run": "<ISOLATED_ADDON>/operators/run.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.history": "<ISOLATED_ADDON>/history.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.charts": "<ISOLATED_ADDON>/charts.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators.history_export": "<ISOLATED_ADDON>/operators/history_export.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.telemetry": "<ISOLATED_ADDON>/panels/telemetry.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators.workflow": "<ISOLATED_ADDON>/operators/workflow.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.scene": "<ISOLATED_ADDON>/panels/scene.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.channels": "<ISOLATED_ADDON>/panels/channels.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.run": "<ISOLATED_ADDON>/panels/run.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.safety": "<ISOLATED_ADDON>/panels/safety.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.presentation": "<ISOLATED_ADDON>/presentation.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.presentation": "<ISOLATED_ADDON>/panels/presentation.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.training": "<ISOLATED_ADDON>/panels/training.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.gimbal": "<ISOLATED_ADDON>/panels/gimbal.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.clearance_replay": "<ISOLATED_ADDON>/clearance_replay.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.clearance": "<ISOLATED_ADDON>/panels/clearance.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.farm_flex": "<ISOLATED_ADDON>/farm_flex.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.farm_replay": "<ISOLATED_ADDON>/panels/farm_replay.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.video_output": "<ISOLATED_ADDON>/video_output.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.video_output": "<ISOLATED_ADDON>/panels/video_output.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.camera_projection": "<ISOLATED_ADDON>/camera_projection.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_cameras": "<ISOLATED_ADDON>/custom_cameras.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_history": "<ISOLATED_ADDON>/custom_camera_history.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_diagnostics": "<ISOLATED_ADDON>/custom_camera_diagnostics.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_preview": "<ISOLATED_ADDON>/custom_camera_preview.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_capture": "<ISOLATED_ADDON>/custom_camera_capture.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.custom_camera_output": "<ISOLATED_ADDON>/panels/custom_camera_output.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.installation_schematic": "<ISOLATED_ADDON>/installation_schematic.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.native_camera_views": "<ISOLATED_ADDON>/native_camera_views.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.stacked_camera_rig": "<ISOLATED_ADDON>/stacked_camera_rig.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.stacked_camera_rig": "<ISOLATED_ADDON>/panels/stacked_camera_rig.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.custom_cameras": "<ISOLATED_ADDON>/panels/custom_cameras.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor": "<ISOLATED_ADDON>/_vendor/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor.blade_recon": "<ISOLATED_ADDON>/_vendor/blade_recon/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor.blade_recon.model": "<ISOLATED_ADDON>/_vendor/blade_recon/model.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.blade_recon_data": "<ISOLATED_ADDON>/blade_recon_data.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.blade_recon_review": "<ISOLATED_ADDON>/blade_recon_review.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.blade_recon": "<ISOLATED_ADDON>/panels/blade_recon.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects": "<ISOLATED_ADDON>/nrel_defects/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.defect_shapes": "<ISOLATED_ADDON>/nrel_defects/defect_shapes.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.reference_surface": "<ISOLATED_ADDON>/nrel_defects/reference_surface.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.defect_schema": "<ISOLATED_ADDON>/nrel_defects/defect_schema.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.defect_store": "<ISOLATED_ADDON>/nrel_defects/defect_store.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.defect_geometry": "<ISOLATED_ADDON>/nrel_defects/defect_geometry.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.editor": "<ISOLATED_ADDON>/nrel_defects/editor.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.playback": "<ISOLATED_ADDON>/playback.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.tip_tracking": "<ISOLATED_ADDON>/tip_tracking.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.split_reconstruction": "<ISOLATED_ADDON>/split_reconstruction.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.split_reconstruction_timing": "<ISOLATED_ADDON>/split_reconstruction_timing.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.split_reconstruction_ui": "<ISOLATED_ADDON>/split_reconstruction_ui.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.split_mappo_texture": "<ISOLATED_ADDON>/split_mappo_texture.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.frontend_diagnostics": "<ISOLATED_ADDON>/frontend_diagnostics.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.repair_marks": "<ISOLATED_ADDON>/repair_marks.py"
+      },
+      "installed_operator_registered": true
+    },
+    "three-camera-default": {
+      "status": "PASS",
+      "module": "bl_ext.wfrl_frontend.wfrl_blender",
+      "addon_path": "<ISOLATED_ADDON>/__init__.py",
+      "blender": "5.2.1 LTS",
+      "preset_path": "<ISOLATED_ADDON>/assets/cameras/t1-three-camera-default.json",
+      "checks": [
+        "ordinary load and reload use bundled supported pose and exact optics",
+        "geometry-only load has no rig",
+        "initial history empty",
+        "legacy C4 rejected",
+        "tilted housing rigid move",
+        "per-camera edit persists over frames",
+        "undo restores supported default",
+        "invalid move unchanged",
+        "atomic publish rollback",
+        "explicit reload resets user edits to bundled default",
+        "tip trails and deflection aids disabled"
+      ]
+    },
+    "native-projection": {
+      "status": "PASS",
+      "module": "bl_ext.wfrl_frontend.wfrl_blender",
+      "addon_path": "<ISOLATED_ADDON>/__init__.py",
+      "blender": "5.2.1 LTS",
+      "background": true,
+      "checks": [
+        "24 aspect/FOV combinations against Blender camera projection"
+      ]
+    },
+    "installed_inventory_after_regressions": {
+      "status": "PASS",
+      "package_path": "<ISOLATED_ADDON>",
+      "verified_files": 172,
+      "mismatches": [],
+      "unexpected_files": [],
+      "ignored": [
+        "__pycache__",
+        "*.pyc"
+      ]
+    }
+  },
+  "build_only": false,
+  "scope": "isolated ZIP integrity and background regression; visible UI and presentation unverified",
+  "package": {
+    "archive": "<LOCAL_EVIDENCE>/validation/installed-final/package/wfrl_blender-0.3.18.zip",
+    "sha256": "f5fb69e6e8cdc58edf1d1f76fd4eacc1e108b688768635cc3a5a05c04bdfc400",
+    "checksum": "<LOCAL_EVIDENCE>/validation/installed-final/package/wfrl_blender-0.3.18.zip.sha256",
+    "inventory": "<LOCAL_EVIDENCE>/validation/installed-final/package/wfrl_blender-0.3.18.inventory.json",
+    "package_id": "wfrl_blender",
+    "version": "0.3.18",
+    "file_count": 172
+  },
+  "installation": "PASS",
+  "background_regressions": "PASS",
+  "visible_ui": "NOT_RUN",
+  "actual_presentation": "NOT_RUN"
+}

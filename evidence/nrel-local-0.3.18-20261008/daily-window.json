@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "module_file": "<DAILY_ADDON>/__init__.py",
+  "unrelated_window_continued": true,
+  "step_reset_stop_scene_scoped": true,
+  "paused_fps_unavailable": true,
+  "diagnostics": {
+    "version": "0.3.18",
+    "build": "e98f64dcd090ba33f93e52bc1e0a26adeff82fb1828bc0239f49babc618a60b0",
+    "packaged": true,
+    "module": "bl_ext.user_default.wfrl_blender",
+    "addon_root": "<DAILY_ADDON>",
+    "source_path": "<DAILY_ADDON>/assets/mappo",
+    "source_hz": 40,
+    "timeline_hz": 60.0,
+    "simulation_time_s": 120.1,
+    "viewport_fps": 20.088811864635957,
+    "fps_scope": "Distinct scene frames observed in this viewport POST_PIXEL over the last 2 seconds; not display scanout",
+    "sampling": true,
+    "playing": true
+  },
+  "boundary": "Actual native windows and short draw sample; not a full-clip FPS acceptance"
+}

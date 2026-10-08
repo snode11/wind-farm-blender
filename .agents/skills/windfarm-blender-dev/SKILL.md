@@ -7,9 +7,11 @@ description: 开发、排查和验收本仓库 Blender 原生前端的 MAPPO 柔
 
 本文件的链接相对 skill 目录；命令从 Git 仓库根目录执行。适用规则见 [AGENTS.md](../../../AGENTS.md)。
 
-本次维护基线为 **2026-10-08 / 公开 0.3.17.1、包内 0.3.17+1**，要求 Blender 5.2+；以实际安装包 manifest 与[发布状态与验证范围](../../../docs/blender/发布状态与验证范围.md)核对；公开[源码 manifest](../../../blender_frontend/wfrl_blender/blender_manifest.toml)仍按其历史版本读取。当前 ZIP 发布包含同源 MAPPO 601 样本纹理同步对照、各来源显示设置隔离及来源／时钟校验修复，并保留独立合成 120 样本与原始几何示例。发布时只更新 ZIP，目标提交 `9d7b5596a781b8ea5040d18b2f009268313a8821` 不含新版实现；文档同步不表示扩展实现源码已提交或推送。自动 Source code 不能代替安装包，须手动 Install from Disk 并重启；build metadata 不用于自动升级排序。当前验证见 [0.3.17.1 发布核对](../../../docs/blender/releases/0.3.17.1发布核对.md)，历史示例合同见 [0.3.15 发布核对](../../../docs/blender/releases/0.3.15发布核对.md)。规范示例源为 `blender_frontend/wfrl_blender/assets/examples/mappo_reconstruction_split.blend`，必须保留。
+本次维护基线为 **2026-10-08 / 公开 0.3.18**，要求 Blender 5.2+；[源码 manifest](../../../blender_frontend/wfrl_blender/blender_manifest.toml)、172 文件 ZIP 与[发布状态与验证范围](../../../docs/blender/发布状态与验证范围.md)对齐。扩展源码提交 [`6dfa0eefe410ef3e38d3cbd9ee7d017aafa2fc02`](https://github.com/snode11/wind-farm-blender/commit/6dfa0eefe410ef3e38d3cbd9ee7d017aafa2fc02) 已推送 main，v0.3.18 指向该提交；同步 164 项扩展直接来源、构建脚本与相关测试。公开源码复建与最终已验证 ZIP 全包字节一致。安装见[0.3.18 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.18)，自动 Source code 是开发归档，Blender 安装使用扩展 ZIP 并重启。当前发布核对见[0.3.18](../../../docs/blender/releases/0.3.18发布核对.md)，历史几何示例合同见 [0.3.15](../../../docs/blender/releases/0.3.15发布核对.md)；规范 `assets/examples/mappo_reconstruction_split.blend` 必须保留。
 
-0.3.13 曾同步完整 NREL 前端、雷达、工具、测试及构建资源，历史对应源码构建与 ZIP 安装证据见 [0.3.13 发布核对](../../../docs/blender/releases/0.3.13发布核对.md)。历史 0.3.10–0.3.12 为 ZIP 单独发布，不推定旧标签已补齐。GW184 0.4.0 保持独立运行包。
+0.3.18 已交付场景恢复与原生播放控制隔离、固定 C2 槽位、实际相机状态校验、GPU 事务／输出尺寸复用、默认关闭的 Tools 诊断及 `data.json` float64 姿态。发布源码 CPU 为 215 passed、2 skipped、233 subtests passed；发布前宿主为 117 passed、1 skipped、6 subtests passed，最终 ZIP、GPU／多窗口和日常安装证据继续按各层读取，没有重新执行全部原生检查。日常模块为 `bl_ext.user_default.wfrl_blender`，172 文件安装匹配，65 个正式资产摘要不变。原 0.2 mm 叶尖门槛仍 **FAILED_GATE**，见[发布前修复与验证](../../../docs/blender/validation/NREL本地0.3.18修复与验证.md)。新增缺陷编辑器和纹理检查 CLI 仍是本地未公开工具，不能以扩展源码发布推定完整本地工作区已经同步。
+
+历史 0.3.17.1（包内 0.3.17+1）仅发布 ZIP，同源纹理和 QA 修复的当版范围见[历史发布核对](../../../docs/blender/releases/0.3.17.1发布核对.md)，旧标签不追改。0.3.13 曾同步完整 NREL 前端、雷达、工具、测试及构建资源，对应构建与 ZIP 安装证据见[0.3.13 发布核对](../../../docs/blender/releases/0.3.13发布核对.md)。历史 0.3.10–0.3.12 也是 ZIP 单独发布；GW184 0.4.0 保持独立运行包。
 
 
 ## 先分类并给出最小方案
@@ -33,7 +35,7 @@ description: 开发、排查和验收本仓库 Blender 原生前端的 MAPPO 柔
 
 | 需求 | 实现入口 | 补充资料 |
 | --- | --- | --- |
-| NREL 九片叶片缺陷编辑、健康对照、JSON 与 G 分析 | `nrel_defects/`、`farm_flex.py`；仓库级 `scripts/blender/nrel_defects.py` | [NREL 缺陷编辑器](../../../docs/blender/NREL缺陷编辑器.md)、[移植验证](../../../docs/blender/validation/NREL缺陷编辑器移植验证.md)及 [0.3.16 发布核对](../../../docs/blender/releases/0.3.16发布核对.md) |
+| NREL 九片叶片缺陷编辑、健康对照、JSON 与 G 分析 | `nrel_defects/`、`farm_flex.py`；本地未公开工具 `scripts/blender/nrel_defects.py` | [NREL 缺陷编辑器](../../../docs/blender/NREL缺陷编辑器.md)、[移植验证](../../../docs/blender/validation/NREL缺陷编辑器移植验证.md)及 [0.3.16 发布核对](../../../docs/blender/releases/0.3.16发布核对.md) |
 | MAPPO＋重建分屏、同源纹理、独立合成及显示设置隔离 | `split_mappo_texture.py`、`split_surface_texture.py`、`split_texture_settings.py`、`split_reconstruction.py`、`split_reconstruction_timing.py`、`split_reconstruction_ui.py`、`panels/farm_replay.py`、`cameras.py`、`assets/examples/` | [0.3.15 发布核对](../../../docs/blender/releases/0.3.15发布核对.md)；前端实现说明和前端使用说明的分屏章节 |
 | Blade Recon 独立结果导入、模型回放与场景切换 | `blade_recon_data.py`、`blade_recon_review.py`、`panels/blade_recon.py`、`__init__.py` | [Blade Recon 使用说明](../../../docs/blender/BladeRecon可视化使用说明.md)；前端实现说明「Blade Recon 叶片三维重建开发入口」 |
 | NREL 视频动态研究查看器 | 仓库级 `scripts/blender/open_nrel_dynamic_review.py`、`wfrl/nrel_reconstruction/dynamic_review.py` | 合并研究入口与状态（本地路径：`outputs/nrel-video-dynamic/runs/20261004-integrated/README.md`）；独立冻结原型，按下方说明分流 |
@@ -51,9 +53,9 @@ description: 开发、排查和验收本仓库 Blender 原生前端的 MAPPO 柔
 
 NREL 动态研究使用合并目录的本地统一启动器 `outputs/nrel-video-dynamic/runs/20261004-integrated/打开研究查看器.command`，载入该目录 `viewer/frozen-source/` 的冻结源码及 `estimation/attempt01/result/review-package/` 的研究包，在独立窗口运行，无需安装扩展；工作区脚本改动不会自动更新冻结查看器。该原型仍为 `REVIEW_ONLY / DY1 NOT PASSED`，保存估计只覆盖四个时刻，其余帧为 `UNAVAILABLE; no interpolation`。它与 0.3.15 的 601 样本便携分屏示例分别判定，播放同步检查通过不代表动态计量通过。
 
-[dist/README-lidar.md](../../../dist/README-lidar.md) 与 [lidar-delivery.json](../../../dist/lidar-delivery.json) 记录的是 **0.3.9 历史交付**，其中 normal/close 路径仍供独立雷达入口使用；不能将它们当成当前 0.3.17.1 的完整交付清单。该旧入口见 `scripts/blender/open_clearance_demo.py`、`verify_lidar_delivery.py`。其余历史说明与验收记录同样按版本限定。
+[dist/README-lidar.md](../../../dist/README-lidar.md) 与 [lidar-delivery.json](../../../dist/lidar-delivery.json) 记录的是 **0.3.9 历史交付**，其中 normal/close 路径仍供独立雷达入口使用；不能将它们当成当前 0.3.18 的完整交付清单。该旧入口见 `scripts/blender/open_clearance_demo.py`、`verify_lidar_delivery.py`。其余历史说明与验收记录同样按版本限定。
 
-NREL 缺陷以已有保存运动驱动展示网格、辅助轮廓及支持区域，不重写 FAST.Farm / BeamDyn 或雷达结果。几何 G 的 VISIBLE/PARTIAL 不证明图片可辨识。0.3.16 安装版保存重开通过；既有叶尖挠度 0.2 mm 阈值回归仍失败，最大方向误差约 0.895 mm；源码窗口检查后控制台切换原生 SIGSEGV 原因未定，不能写整体窗口稳定性通过。日常安装不会随 ZIP 发布自动更新。
+NREL 缺陷以已有保存运动驱动展示网格、辅助轮廓及支持区域，不重写 FAST.Farm / BeamDyn 或雷达结果。几何 G 的 VISIBLE/PARTIAL 不证明图片可辨识。0.3.16 安装版保存重开通过；当轮叶尖挠度 0.2 mm 阈值回归最大方向误差约 0.895 mm，仍失败；源码窗口检查后控制台切换原生 SIGSEGV 原因未定，不能写整体窗口稳定性通过。0.3.18 修复 float64 姿态读取后的安装版同样本真实网格最大分量误差约 1.0613 mm，独立源运输约 1.0665 mm，网格与源差约 0.0290 mm，仍为 FAILED_GATE；消除量化抵消后不能称精度提升。原始源文件缺失，未重导出或重跑 FAST.Farm，也未改正式数据或阈值。日常安装不会随文档或 ZIP 发布自动更新。
 
 ## 必须保留的行为
 
@@ -62,6 +64,8 @@ NREL 缺陷以已有保存运动驱动展示网格、辅助轮廓及支持区域
 - 默认旧法与显式 TLS 候选分别核对方法身份、算法版本及来源摘要，界面按实际读取器显示。保存重开时，失效旧安装路径只能按保存的 manifest 哈希定位匹配内置包；不匹配时清空并报错，不能替换方法或重新绑定不同数据。TLS 软件交付不等于精度验收，研究数值及独立工况见 [TLS 总报告](../../../docs/lidar/双束TLS候选实施与验证总报告.md)。
 - 无效、缺失、过期和空统计不转为零净空或零误差；维持现有整组读数有限保留与过期规则。缺包、损坏、机型或版本不匹配时清除旧读数并显示可排查的未就绪原因。
 - 姿态、卡片、S1 报警和累计统计共用仿真时钟；固定帧映射到固定仿真时刻。修改 Blender FPS 只改变目标墙钟播放速度；暂停、后退、寻址与重播不重复累计统计或暴露未来事件。显示几何插值不能生成缺失测量。
+- 0.3.18 的场景恢复实例按场景绑定；FULL_COPY 缺少对象时保持未就绪，共用网格的 linked scene 拒绝第二个时钟。Blender 同进程是单一全局原生 player，按开始／结束回调 owner scene 判断播放冲突和取消归属，不能靠各窗口的播放标志宣称多个原生 player 并行。
+- 0.3.18 的 C1/C2/C3 按实际槽位路由，缺失明确报错；采集核对原生与评估相机状态，非有限值或采集中途原生修改明确中断，恢复事务状态并保留用户修改。GPU 9/9 → 3/3 只证明本轮事务复用，PNG/state 一致不证明 FPS 提升或整套无泄漏。
 - MAPPO 的 40 Hz 源数据映射到固定 60 Hz 时间轴；暂停单步前进一帧，播放中单步先暂停再前进，末帧钳制。源采样率、显示时间轴与实际绘制帧率分别报告。
 - **原几何示例**右侧三片叶片各有 601 个绝对 shape keys，`CONSTANT` 保持、无 drivers；10 Hz 重建样本、40 Hz MAPPO 源与60 Hz固定时间轴分开报告。样本步进先暂停并在首尾钳制，播放时间与样本时间/保持时长分别显示。左侧相机切换保留右侧独立视图；恢复布局、完整取景及保存重开复用原生管理。
 - **同源纹理同步对照**严格绑定实际 MAPPO manifest、模型与包文件摘要，核对全部 601 样本绝对时钟；10 Hz 样本每 6 个显示帧保持，绿橙均为算法估计。原生连续播放两侧共同循环；样本首尾／步进钳制。独立合成纹理的 120 样本游标与 MAPPO 时间分开，不能冒充同步。来源各自保存模式、增益、检查位置和开关；CURRENT 与退出返回保留用户选择，失败不得污染当前来源。保存后依靠 embedded 数据及 packed 图片恢复。纹理／几何／缺陷未验收，实际图集条带、接缝与拖影须如实保留。
@@ -102,4 +106,4 @@ NREL 缺陷以已有保存运动驱动展示网格、辅助轮廓及支持区域
 
 0.3.13 交付的离线资源包括 `assets/mappo/`、`assets/dual_beam/` 与 `assets/dual_beam_tls/`；两种结果层通过 `../mappo` 共享同一源，默认仍为旧法。外部 normal/close 包和原始 VTP 不随扩展提供。外部可携带双束包则包含自身 `source/`，须整体移动并校验源与结果摘要。界面/播放器修改复用结果包；标定/公式变化是否可复用原始输出、几何/物理变化是否需要新求解，按雷达算法说明「物理结果生产与重新发布」和计算流程判断。重建 ZIP 不等于更新物理结果、物理验收通过或发布。
 
-0.3.16 延续 0.3.15 的 `assets/examples/mappo_reconstruction_split.blend`，由 MAPPO → **MAPPO＋重建示例** 打开；场景、MAPPO 数据和四张 packed 纹理均在 ZIP 内，无需原作者本机或在线后端。新规范源码仍在本地未提交工作区，不能按0.3.13公开源码同步事实推定0.3.15或0.3.16已同步。
+0.3.18 保留 0.3.15 首次交付的 `assets/examples/mappo_reconstruction_split.blend`，由 MAPPO → **打开几何重建示例…** 打开；场景、MAPPO 数据和四张 packed 纹理均在 ZIP 内。0.3.18 已同步匹配扩展源码；0.3.15／0.3.16 当时仅发布 ZIP，不能追溯改写为当时已同步。

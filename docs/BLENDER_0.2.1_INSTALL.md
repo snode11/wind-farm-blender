@@ -1,10 +1,12 @@
 # WFRL Blender 0.2.1 安装与使用
 
+> **历史 0.2.1 指南。** 下文保留该版安装和 Local Demo／SYNTH 操作，不能用于判断当前功能或验证状态。当前公开 NREL / WFRL 安装为 0.3.18，ZIP 与对应扩展源码已发布，请从[安装指南](blender/INSTALL.md)与[用户手册](blender/用户使用手册.md)开始；版本与源码范围见[0.3.18 发布核对](blender/releases/0.3.18发布核对.md)。
+
 只看风场演示：下载前端扩展 ZIP，安装到 **Blender 5.2.0 或更新版本**即可。真实仿真与训练还需要单独配置项目后端环境。
 
 ## 下载安装
 
-1. 下载本仓库的 [`dist/wfrl_blender-0.2.1.zip`](../dist/wfrl_blender-0.2.1.zip)。在 GitHub 文件页面选择 **Download raw file**；不要把整个仓库的 **Download ZIP** 当作扩展安装包。
+1. 当时使用 `dist/wfrl_blender-0.2.1.zip`，该历史文件当前仓库未提供；以下安装步骤只说明 0.2.1 的操作。当时在 GitHub 文件页面选择 **Download raw file**；不要把整个仓库的 **Download ZIP** 当作扩展安装包。当前安装请使用上方[安装指南](blender/INSTALL.md)。
 2. 打开 Blender，进入 **Edit → Preferences → Extensions → Install from Disk**，选择这个 ZIP，不要解压。
 3. 安装仓库选择 **User Default（user_default）**，启用 **WFRL Blender**。启动脚本使用这个安装位置。
 4. 若已安装旧版，更新同一个扩展，确认显示版本 **0.2.1**；保存当前工作，完全关闭并重新启动 Blender，让新代码生效。
