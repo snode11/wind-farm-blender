@@ -28,7 +28,7 @@ def build_live_scene(scene):
     from .cameras import build_cameras
     display_scene = bpy.context.scene
     selected = getattr(display_scene, "wfrl_selected_turbine", "")
-    _cancel_playback()
+    _cancel_playback(display_scene)
     build_scene(scene)
     ids = [t.turbine_id for t in scene.turbines]
     if hasattr(display_scene, "wfrl_selected_turbine"):

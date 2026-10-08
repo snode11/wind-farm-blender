@@ -59,8 +59,11 @@ class WFRL_OT_SelectCamera(bpy.types.Operator):
         context.scene.camera = camera
         context.scene["wfrl_camera"] = self.camera_name
         if context.screen:
+            from .. import split_reconstruction
             for area in context.screen.areas:
                 if area.type == "VIEW_3D":
+                    if split_reconstruction.is_reconstruction_view(context.scene, area.spaces.active):
+                        continue
                     # Sensor/dual-view uses a local camera.  Clear that
                     # override when choosing any toolbar camera, otherwise
                     # the viewport remains locked to T1 after selecting World.

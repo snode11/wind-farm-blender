@@ -119,6 +119,8 @@ def _root(scene):
     if not is_available(scene):
         raise ValueError('请先加载包含 T1 的演示场景')
     root = scene.objects[ROOT_NAME]
+    if not _finite(tuple(v for row in root.matrix_world for v in row)):
+        raise ValueError('T1.YawRoot 姿态含非有限数值，无法使用米制相机参考')
     matrix = root.matrix_world.to_3x3()
     columns = list(matrix.col)
     if (any(abs(v.length - 1) > 1e-4 for v in columns)
@@ -670,8 +672,69 @@ def live_layout_hash(scene, layout=None):
         if cam is not None:
             actual.append((slot, tuple(round(v, 7) for row in cam.matrix_basis for v in row),
                 cam.parent.name if cam.parent else None, tuple(round(v, 7) for row in cam.matrix_parent_inverse for v in row), cam.data.type,
-                round(cam.data.lens, 7), round(cam.data.clip_start, 7), round(cam.data.clip_end, 7)))
+                round(cam.data.lens, 7), round(cam.data.clip_start, 7), round(cam.data.clip_end, 7),
+                cam.data.sensor_fit, round(cam.data.sensor_width, 7),
+                round(cam.data.shift_x, 7), round(cam.data.shift_y, 7)))
     return layout_hash({'layout': layout, 'actual': actual})
+
+
+def validate_native_state(scene, cameras=None, depsgraph=None):
+    """Reject native edits whose rendered pose disagrees with saved local XYZ.
+
+    Cameras are fixed in YawRoot coordinates. Comparing the evaluated local
+    transform excludes the root's legitimate replay motion, but includes camera
+    constraints, drivers, delta transforms and native edits. Never repair a pose
+    here: capture must not silently overwrite an externally edited camera.
+    """
+    import bpy
+    from mathutils import Matrix
+    root = _root(scene)
+    depsgraph = depsgraph or bpy.context.evaluated_depsgraph_get()
+    if not _finite(tuple(v for row in root.evaluated_get(depsgraph).matrix_world for v in row)):
+        raise ValueError('T1.YawRoot 实际姿态含非有限数值，无法使用米制相机参考')
+    cameras = cameras if cameras is not None else [get_camera(scene, slot) for slot in SLOTS]
+    for cam in cameras:
+        if cam is None:
+            continue
+        slot = int(cam['wfrl_custom_slot'])
+        message = f'C{slot} 原生相机状态与保存配置不一致；请撤销原生修改，或清除该相机后通过编辑器重新安装再采集'
+        if cam.parent != root or cam.parent_type != 'OBJECT':
+            raise ValueError(message + '（安装参考已变化）')
+        p = validate_parameters(parameters(cam))
+        expected = Matrix(projection.rotation(p.yaw, p.pitch, p.roll)).to_4x4()
+        expected.translation = p.location
+        evaluated = cam.evaluated_get(depsgraph)
+        # For the canonical object parent, evaluated basis retains local metre
+        # precision even when the world/root has a large translated coordinate.
+        local = evaluated.matrix_parent_inverse @ evaluated.matrix_basis
+        if not _finite(tuple(v for matrix in (local, evaluated.matrix_world, cam.matrix_parent_inverse)
+                             for row in matrix for v in row)):
+            raise ValueError(message + '（实际姿态含非有限数值）')
+        if (any(abs(local[i][j] - expected[i][j]) > 5e-5 for i in range(4) for j in range(4))
+                or any(abs(cam.matrix_parent_inverse[i][j] - (1 if i == j else 0)) > 1e-6
+                       for i in range(4) for j in range(4))):
+            raise ValueError(message + '（局部姿态已变化）')
+        # Constraints do not modify matrix_basis; check their actual evaluated
+        # result in root coordinates as well. Avoid unnecessary world subtraction
+        # on the normal, unconstrained replay path.
+        if any(not constraint.mute and constraint.influence != 0 for constraint in cam.constraints):
+            relative = root.evaluated_get(depsgraph).matrix_world.inverted() @ evaluated.matrix_world
+            if not _finite(tuple(v for row in relative for v in row)):
+                raise ValueError(message + '（约束产生了非有限姿态）')
+            if any(abs(relative[i][j] - expected[i][j]) > 5e-5 for i in range(4) for j in range(4)):
+                raise ValueError(message + '（约束改变了实际姿态）')
+        lens = 36 / (2 * math.tan(math.radians(p.fov / 2)))
+        data = evaluated.data
+        if not _finite((data.sensor_width, data.lens, data.shift_x, data.shift_y,
+                        data.clip_start, data.clip_end)):
+            raise ValueError(message + '（镜头或裁剪设置含非有限数值）')
+        if (data.type != 'PERSP' or data.sensor_fit != 'HORIZONTAL'
+                or abs(data.sensor_width - 36) > 1e-5 or abs(data.lens - lens) > max(1e-5, abs(lens) * 1e-6)
+                or abs(data.shift_x) > 1e-6 or abs(data.shift_y) > 1e-6
+                or abs(data.clip_start - p.clip_near_m) > max(1e-7, p.clip_near_m * 1e-6)
+                or abs(data.clip_end - p.clip_far_m) > max(1e-5, p.clip_far_m * 1e-6)):
+            raise ValueError(message + '（镜头或裁剪设置已变化）')
+    return True
 
 
 def config_equal(a, b):

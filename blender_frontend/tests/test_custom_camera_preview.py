@@ -53,6 +53,50 @@ def test_render_target_reuses_engine_and_releases_on_resize_and_window_change(mo
     assert third.freed and target.offscreen is None
 
 
+def test_capture_pool_keeps_each_size_and_releases_once_on_close(monkeypatch):
+    created = []
+    class Offscreen:
+        def __init__(self, width, height, **_):
+            self.size, self.free_calls = (width, height), 0
+            created.append(self)
+        def free(self):
+            self.free_calls += 1
+    monkeypatch.setitem(sys.modules, 'gpu', NS(types=NS(GPUOffScreen=Offscreen)))
+    context = NS(window=NS(as_pointer=lambda: 1))
+    pool = preview.RenderTargetPool()
+    sizes = [(640, 640), (640, 320), (320, 640)]
+    for _sample in range(4):
+        for size in sizes:
+            pool.get(context, *size)
+    assert len(created) == 3
+    assert pool.usage() == {'allocations': 3, 'releases': 0, 'active_targets': 3,
+                            'policy': 'transaction / output size'}
+    pool.free()
+    pool.free()
+    assert all(target.free_calls == 1 for target in created)
+    assert pool.usage()['releases'] == 3 and pool.usage()['active_targets'] == 0
+
+
+def test_capture_pool_does_not_reuse_a_different_window_context(monkeypatch):
+    created = []
+    class Offscreen:
+        def __init__(self, *_args, **_kwargs):
+            self.freed = False
+            created.append(self)
+        def free(self):
+            self.freed = True
+    monkeypatch.setitem(sys.modules, 'gpu', NS(types=NS(GPUOffScreen=Offscreen)))
+    context = NS(window=NS(as_pointer=lambda: 1))
+    pool = preview.RenderTargetPool()
+    pool.get(context, 640, 320)
+    pool.get(context, 320, 640)
+    context.window = NS(as_pointer=lambda: 2)
+    pool.get(context, 640, 320)
+    assert [target.freed for target in created] == [True, True, False]
+    assert pool.usage()['allocations'] == 3 and pool.usage()['releases'] == 2
+    pool.free()
+
+
 def test_playback_profile_is_explicit_and_does_not_change_export_default():
     scene = NS(view_settings=NS(view_transform='Standard', look='None', exposure=0,
         gamma=1, use_curve_mapping=False), display_settings=NS(display_device='sRGB'))

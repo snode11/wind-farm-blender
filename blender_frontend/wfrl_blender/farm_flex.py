@@ -8,6 +8,9 @@ import numpy as np
 from . import performance
 
 _ACTIVE=None
+# Each scene owns its deformation runtime. _ACTIVE remains the last explicitly
+# selected instance for existing panel integrations; callbacks use active_for.
+_ACTIVES={}
 
 
 def dual_beam_api():
@@ -47,10 +50,25 @@ def saved_package(scene):
 
 
 
+def active_for(scene):
+    """Return the runtime bound to this scene, never another window's scene."""
+    if scene is None:
+        return None
+    active = _ACTIVES.get(scene.as_pointer())
+    if active is not None and active.enabled and active.scene == scene:
+        return active
+    return None
+
+
 def is_active(scene):
     from . import clearance_replay
-    return (_ACTIVE is not None and _ACTIVE.enabled and _ACTIVE.scene==scene
-            and clearance_replay.reader_for(scene) in _ACTIVE.readers.values())
+    global _ACTIVE
+    active = active_for(scene)
+    ready = (active is not None
+             and clearance_replay.reader_for(scene) in active.readers.values())
+    if ready:
+        _ACTIVE = active
+    return ready
 
 
 def read_package(path):
@@ -83,7 +101,7 @@ def read_package(path):
         from ._vendor.lidar.replay import ReplayReader
     except ImportError:
         from wfrl.lidar.replay import ReplayReader
-    readers={}
+    readers={}; motion_poses=[]
     for index,tid in enumerate(manifest['turbine_ids']):
         payload=contents[tid]
         if not np.array_equal([r['time_s'] for r in payload['motion']],times):
@@ -92,6 +110,9 @@ def read_package(path):
                            for r in payload['motion']])
         if not np.allclose(expected,poses[:,index],atol=.001,rtol=0):
             raise ValueError('Motion and geometry poses differ: '+tid)
+        # Keep the source motion precision. Unwrapped azimuth reaches thousands
+        # of degrees; the float32 NPZ poses lose sub-millidegree rigid phase.
+        motion_poses.append(expected)
         if tower_data is not None:
             actual=np.asarray([r['nacelle_transform'] for r in payload['motion']])
             if not np.allclose(actual,tower_data['nacelle'][:,index],atol=1e-8,rtol=0):
@@ -106,7 +127,7 @@ def read_package(path):
         manifest = {**manifest, 'measurement_mode': 'dual_beam',
                     'dual_beam_calibration': overlay['config'],
                     'dual_beam': overlay['manifest']}
-    return manifest,times,transforms,poses,readers
+    return manifest,times,transforms,np.stack(motion_poses,axis=1),readers
 
 
 class FarmFlex:
@@ -125,7 +146,8 @@ class FarmFlex:
         self.towers = []
         self.fittings = []
         from .deflection import read_comparison, ComparisonView
-        comparison_data = read_comparison(path, self.manifest, self.times, self.poses)
+        comparison_data = read_comparison(path, self.manifest, self.times, self.poses,
+                                          rigid_poses=self.poses)
         self.comparison = None
         telemetry_path = Path(path) / 'telemetry.json'
         self.telemetry = json.loads(telemetry_path.read_text()) if 'telemetry.json' in self.manifest['files'] else None
@@ -142,6 +164,7 @@ class FarmFlex:
                     if values.shape != self.times.shape or not np.isfinite(values).all():
                         raise ValueError('Invalid telemetry samples')
         self.scene=scene;self.blades=[];self.groups={};self.cache={};self.enabled=True
+        self.reference_matrices = {}
         self.visible_turbines=set(range(len(self.readers)))
         for tid in self.readers:
             scene.objects[f'WFRL.Turbine.{tid}.YawRoot'].rotation_euler=(0,0,0)
@@ -185,11 +208,17 @@ class FarmFlex:
                 rest=np.empty(len(obj.data.vertices)*3,np.float32)
                 obj.data.vertices.foreach_get('co',rest);rest=rest.reshape(-1,3)
                 matrix=np.array(obj.matrix_world)
+                self.reference_matrices[obj.name] = matrix.copy()
                 world=(rest@matrix[:3,:3].T+matrix[:3,3]-offset).astype(np.float32)
                 index=np.clip(np.searchsorted(spans,rest[:,2],side='right')-1,0,len(spans)-2)
                 weight=np.clip((rest[:,2]-spans[index])/(spans[index+1]-spans[index]),0,1)[:,None]
                 self.blades.append((obj,rest,world,index,weight.astype(np.float32),turbine,b-1,offset))
                 self.groups[obj.name]=[(s,np.flatnonzero(index==s)) for s in np.unique(index)]
+        # Bind cosmetic surface attachments to the new reference loft before
+        # any playback frame writes deform it. Saved anchor indices from the
+        # rigid presentation mesh must never be reused on this replacement.
+        from . import repair_marks
+        repair_marks.ensure(scene, force=True)
         if self.tower_motion is not None:
             from .turbine_geometry import tower_mesh
             tower_vertices, tower_faces = tower_mesh()
@@ -311,6 +340,70 @@ class FarmFlex:
         self.last_telemetry_frame = t
 
     @performance.timed("flex.deformation_cache")
+    def rebind_blade(self, obj, coordinates):
+        """Bind an edited rest mesh without using its currently posed vertices."""
+        from .turbine_geometry import geometry_data
+        rest = np.asarray(coordinates, dtype=np.float32).reshape(-1, 3).copy()
+        if len(rest) != len(obj.data.vertices) or not np.isfinite(rest).all():
+            raise ValueError('Edited blade reference does not match its mesh')
+        position = next(i for i, row in enumerate(self.blades) if row[0] == obj)
+        _, _, _, _, _, k, b, offset = self.blades[position]
+        matrix = self.reference_matrices[obj.name]
+        spans = np.array([s[0]+geometry_data()['scalars']['HubRad']
+                          for s in geometry_data()['blade_stations']])
+        world = (rest@matrix[:3,:3].T+matrix[:3,3]-offset).astype(np.float32)
+        index = np.clip(np.searchsorted(spans,rest[:,2],side='right')-1,0,len(spans)-2)
+        weight = np.clip((rest[:,2]-spans[index])/(spans[index+1]-spans[index]),0,1)[:,None].astype(np.float32)
+        self.blades[position] = (obj,rest,world,index,weight,k,b,offset)
+        self.groups[obj.name] = [(s,np.flatnonzero(index==s)) for s in np.unique(index)]
+        self.cache.clear()
+
+    def deform_points(self, obj, coordinates, time_s, *, world=False, high_precision=False):
+        """Map immutable rest points through the same saved blade motion as replay."""
+        from .turbine_geometry import geometry_data
+        # Mesh/helper coordinates follow Blender's float32 rest representation.
+        # Analytic support slivers need double precision at z~50 m so their
+        # sub-millimetre triangles do not collapse during geometry analysis.
+        points = np.asarray(coordinates, dtype=np.float64 if high_precision else np.float32).reshape(-1,3)
+        if not len(points):
+            return points.copy()
+        t = float(time_s)
+        if not math.isfinite(t) or not self.times[0] <= t <= self.times[-1]:
+            raise ValueError('Simulation time outside source geometry range')
+        _, _, _, _, _, k, b, offset = next(row for row in self.blades if row[0] == obj)
+        matrix = self.reference_matrices[obj.name]
+        original = points@matrix[:3,:3].T+matrix[:3,3]-offset
+        spans = np.array([s[0]+geometry_data()['scalars']['HubRad']
+                          for s in geometry_data()['blade_stations']])
+        index = np.clip(np.searchsorted(spans,points[:,2],side='right')-1,0,len(spans)-2)
+        weight = np.clip((points[:,2]-spans[index])/(spans[index+1]-spans[index]),0,1)[:,None]
+        i = int(np.clip(np.searchsorted(self.times,t,side='right')-1,0,len(self.times)-2))
+        alpha = float(np.clip((t-self.times[i])/(self.times[i+1]-self.times[i]),0,1))
+        def endpoint(frame):
+            tr = self.transforms[frame,k,b]
+            low, high = tr[index], tr[index+1]
+            a = np.einsum('nij,nj->ni',low[:,:,:3],original)+low[:,:,3]
+            z = np.einsum('nij,nj->ni',high[:,:,:3],original)+high[:,:,3]
+            return a*(1-weight)+z*weight
+        lo, hi = endpoint(i), endpoint(i+1)
+        if self.reference is not None and 1e-8 < alpha < 1-1e-8:
+            from .deflection import rigid_frame
+            from .tower_motion import interpolate_transform
+            pose = self.poses[i]*(1-alpha)+self.poses[i+1]*alpha
+            nacelle = interpolate_transform(self.tower_motion['nacelle'][i],self.tower_motion['nacelle'][i+1],alpha)
+            scalars = self.comparison.data['scalars']
+            h0,_,a0 = rigid_frame(scalars,self.poses[i,k],b+1,self.tower_motion['nacelle'][i,k])
+            h1,_,a1 = rigid_frame(scalars,self.poses[i+1,k],b+1,self.tower_motion['nacelle'][i+1,k])
+            hub,_,axes = rigid_frame(scalars,pose[k],b+1,nacelle[k])
+            local_shape = ((lo-h0)@a0)*(1-alpha)+((hi-h1)@a1)*alpha
+            result = local_shape@axes.T+hub+offset
+        else:
+            result = lo*(1-alpha)+hi*alpha+offset
+        if world:
+            return result
+        inverse = np.array(obj.matrix_world.inverted())
+        return result@inverse[:3,:3].T+inverse[:3,3]
+
     def deformed_at(self,frame):
         if frame in self.cache:
             performance.count("flex.cache_hit")
@@ -428,29 +521,37 @@ class FarmFlex:
             performance.count('flex.vertices_written', len(local))
         if update_comparison and self.comparison is not None and getattr(self, 'export_turbines', None) is None:
             self.comparison.update(scene, i, alpha, t)
+        from .nrel_defects import editor
+        editor.after_update(scene, t)
 
 
 def update(scene,depsgraph=None):
-    if _ACTIVE is not None:_ACTIVE.update(scene)
+    global _ACTIVE
+    active = active_for(scene)
+    if active is not None:
+        _ACTIVE = active
+        active.update(scene)
 
 
 def detach(scene=None, *, restore=True):
     """Release handlers and mesh references before scene destruction or unload."""
     import bpy
     global _ACTIVE
-    if _ACTIVE is not None and scene is not None and _ACTIVE.scene != scene:
-        return
+    if scene is None:
+        actives = list(_ACTIVES.values())
+    else:
+        active = _ACTIVES.get(scene.as_pointer())
+        actives = [active] if active is not None else []
+    from .nrel_defects import editor
+    editor.detach(scene, restore=restore)
     # End camera drafts before invalidating their replay and parent references.
     import sys
     custom = sys.modules.get(__package__ + '.panels.custom_cameras')
-    if custom is not None:
+    if custom is not None and (scene is None or
+            getattr(getattr(custom, '_ACTIVE', None), 'scene', None) == scene):
         custom.cancel_on_load()
-    active, _ACTIVE = _ACTIVE, None
-    if update in bpy.app.handlers.frame_change_post:
-        bpy.app.handlers.frame_change_post.remove(update)
-    if on_load_pre in bpy.app.handlers.load_pre:
-        bpy.app.handlers.load_pre.remove(on_load_pre)
-    if active is not None:
+    for active in actives:
+        _ACTIVES.pop(active.scene.as_pointer(), None)
         active.enabled = False
         if active.comparison is not None:
             active.comparison.close()
@@ -468,6 +569,13 @@ def detach(scene=None, *, restore=True):
         if restore:
             active.restore_support()
         active.cache.clear()
+    if _ACTIVE in actives:
+        _ACTIVE = next(iter(_ACTIVES.values()), None)
+    if not _ACTIVES:
+        if update in bpy.app.handlers.frame_change_post:
+            bpy.app.handlers.frame_change_post.remove(update)
+        if on_load_pre in bpy.app.handlers.load_pre:
+            bpy.app.handlers.load_pre.remove(on_load_pre)
 
 
 def on_load_pre(_unused):
@@ -482,22 +590,47 @@ def attach(scene,path):
     import bpy
     from . import tip_tracking
     global _ACTIVE
-    detach()
     try:
-        _ACTIVE=FarmFlex(scene,path)
+        # Validate before releasing the old scene runtime. In particular a
+        # FULL_COPY scene contains renamed objects and must not detach an
+        # already-restored scene when those required bindings are absent.
+        manifest, *_ = read_package(path)
+        required = [f'WFRL.Turbine.{tid}.{suffix}'
+                    for tid in manifest['turbine_ids']
+                    for suffix in ('YawRoot', 'Rotor', 'Tower', 'Blade1', 'Blade2', 'Blade3')]
+        missing = [name for name in required if scene.objects.get(name) is None]
+        if missing:
+            raise ValueError('Scene lacks required FarmFlex objects: ' + ', '.join(missing))
+        # Linked scenes share the same object transforms/meshes; two separate
+        # timeline clocks cannot safely drive them. Keep the first owner ready.
+        for other in _ACTIVES.values():
+            if other.scene != scene and any(obj in scene.objects.values() for obj, *_ in other.blades):
+                raise ValueError('FarmFlex objects are already driven by scene: ' + other.scene.name)
+        detach(scene)
+        active=FarmFlex(scene,path)
+        _ACTIVES[scene.as_pointer()] = active
+        _ACTIVE = active
     except Exception:
         from . import clearance_replay
-        _ACTIVE=None
+        detach(scene)
+        scene['wfrl_flex_active'] = False
         clearance_replay.clear(scene,'三机形变包未就绪：加载失败')
         raise
     # Tip sampling must follow mesh deformation at the same simulation time.
     if update in bpy.app.handlers.frame_change_post:bpy.app.handlers.frame_change_post.remove(update)
-    tip_tracking.unregister()
+    if tip_tracking.update in bpy.app.handlers.frame_change_post:
+        bpy.app.handlers.frame_change_post.remove(tip_tracking.update)
     bpy.app.handlers.frame_change_post.append(update)
     from bpy.app.handlers import persistent
     persistent(on_load_pre)
     if on_load_pre not in bpy.app.handlers.load_pre:
         bpy.app.handlers.load_pre.append(on_load_pre)
     tip_tracking.register()
+    from .nrel_defects import editor
+    editor.restore_saved(scene)
+    # Freeze editor drafts after the replay handler has sampled the new frame.
+    if editor.frame_changed in bpy.app.handlers.frame_change_post:
+        bpy.app.handlers.frame_change_post.remove(editor.frame_changed)
+    bpy.app.handlers.frame_change_post.append(editor.frame_changed)
     scene.frame_set(1)
-    return _ACTIVE
+    return active

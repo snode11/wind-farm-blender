@@ -570,6 +570,8 @@ def clear_scene(collection_name: str = COLLECTION_NAME):
                     bpy.data.objects.remove(legacy, do_unlink=True)
             tip_tracking.discard(owner)
             clearance_replay.clear(owner, '场景已重建，请重新加载回放')
+            from . import repair_marks
+            repair_marks.remove(owner)
     for obj in list(collection.objects):
         data = obj.data
         action = obj.animation_data.action if obj.animation_data else None
@@ -613,4 +615,6 @@ def build_scene(scene: SceneDTO, collection_name: str = COLLECTION_NAME):
             obj.hide_set(True)
     _configure_environment(collection, scene)
     _configure_render()
+    from . import repair_marks
+    repair_marks.ensure(bpy.context.scene)
     return collection

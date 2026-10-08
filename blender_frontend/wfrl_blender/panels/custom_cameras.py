@@ -35,7 +35,7 @@ def session_identity(scene):
     parent = scene.objects.get('WFRL.Turbine.T1.YawRoot')
     state = getattr(runtime, '_state', None)
     return (scene.as_pointer(), parent.as_pointer() if parent else None,
-            id(clearance_replay.reader_for(scene)), id(farm_flex._ACTIVE),
+            id(clearance_replay.reader_for(scene)), id(farm_flex.active_for(scene)),
             getattr(state, 'session_id', None), scene.get('wfrl_clearance_demo'),
             scene.get('wfrl_farm_demo'))
 

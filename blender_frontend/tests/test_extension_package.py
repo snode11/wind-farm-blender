@@ -43,6 +43,13 @@ class PackageTests(unittest.TestCase):
                 self.assertEqual(names, sorted(names))
                 self.assertIn("blender_manifest.toml", names)
                 self.assertIn("protocol.py", names)
+                identity = json.loads(zipped.read('build-info.json'))
+                content = [{"path": name, "sha256": hashlib.sha256(zipped.read(name)).hexdigest()}
+                           for name in names if name != 'build-info.json']
+                self.assertEqual(identity['payload_sha256'], hashlib.sha256(
+                    json.dumps(content, sort_keys=True, separators=(',', ':')).encode()).hexdigest())
+                self.assertEqual(identity['payload_files'], len(content))
+                self.assertEqual(identity['version'], inventory['version'])
                 for name in ('manifest.json', 'data.json', 'geometry.npz', 'source-surfaces.json', 'tower-motion.npz', 'deflection-t1.json', 'source-run.json'):
                     self.assertIn('assets/mappo/' + name, names)
                 manifest = json.loads(zipped.read('assets/mappo/manifest.json'))

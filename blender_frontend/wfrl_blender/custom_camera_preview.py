@@ -99,6 +99,8 @@ class RenderTarget:
     def __init__(self):
         self.offscreen = None
         self.key = None
+        self.allocations = 0
+        self.releases = 0
 
     def get(self, context, width, height):
         import gpu
@@ -107,6 +109,7 @@ class RenderTarget:
             self.free()
             self.offscreen = gpu.types.GPUOffScreen(width, height, format='RGBA8')
             self.key = key
+            self.allocations += 1
         return self.offscreen
 
     def free(self):
@@ -115,7 +118,44 @@ class RenderTarget:
                 self.offscreen.free()
             except (ReferenceError, RuntimeError):
                 pass
+            self.releases += 1
         self.offscreen, self.key = None, None
+
+
+class RenderTargetPool:
+    """Capture-owned targets, reused per output size until transaction close.
+
+    Preview keeps its single-target resize behavior. A capture has at most three
+    fixed camera sizes; its pool avoids resize/reallocation on every sample.
+    """
+    def __init__(self):
+        self.targets = {}
+        self.window = None
+        self.allocations = 0
+        self.releases = 0
+
+    def get(self, context, width, height):
+        window = context.window.as_pointer()
+        if self.window is not None and self.window != window:
+            self.free()
+        self.window = window
+        target = self.targets.setdefault((width, height), RenderTarget())
+        previous = target.allocations
+        offscreen = target.get(context, width, height)
+        self.allocations += target.allocations - previous
+        return offscreen
+
+    def free(self):
+        for target in self.targets.values():
+            previous = target.releases
+            target.free()
+            self.releases += target.releases - previous
+        self.targets.clear()
+        self.window = None
+
+    def usage(self):
+        return {'allocations': self.allocations, 'releases': self.releases,
+                'active_targets': len(self.targets), 'policy': 'transaction / output size'}
 
 
 class CameraImage:

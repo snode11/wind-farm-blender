@@ -12,7 +12,9 @@ from . import performance
 
 
 def rotation(axis, degrees):
-    a = np.radians(degrees)
+    # Scalar np.float32 inputs otherwise evaluate trigonometry in float32 on
+    # recent NumPy versions. Keep computation independent of storage dtype.
+    a = np.radians(float(degrees))
     c, s = np.cos(a), np.sin(a)
     return (np.array(((1, 0, 0), (0, c, -s), (0, s, c))),
             np.array(((c, 0, s), (0, 1, 0), (-s, 0, c))),
@@ -45,7 +47,7 @@ def compare(actual, reference, axes, simulation):
                 distance=float(np.linalg.norm(np.asarray(actual) - reference)))
 
 
-def read_comparison(path, manifest, times, poses):
+def read_comparison(path, manifest, times, poses, *, rigid_poses=None):
     """Optional sidecar: absent means unavailable; malformed must fail closed."""
     name = 'deflection-t1.json'
     if name not in manifest['files']:
@@ -72,6 +74,27 @@ def read_comparison(path, manifest, times, poses):
             raise ValueError('Invalid T1 deflection samples: ' + key)
     if not np.allclose(data['poses'], poses[:, 0], atol=.002, rtol=0):
         raise ValueError('T1 deflection rigid poses differ')
+    if rigid_poses is None:
+        # The NPZ and early v3 sidecars quantized unwrapped azimuth to float32.
+        # data.json retains the original rigid motion. The pose fields read here
+        # contain no tip displacement.
+        # Use that independent, hashed source for the rigid reference; do not
+        # compensate the transported mesh with the simulation channels.
+        motion_raw = (path / 'data.json').read_bytes()
+        if hashlib.sha256(motion_raw).hexdigest() != manifest['files']['data.json']:
+            raise ValueError('T1 rigid motion integrity mismatch')
+        motion = json.loads(motion_raw)['T1']['motion']
+        if not np.array_equal([r['time_s'] for r in motion], times):
+            raise ValueError('T1 rigid motion time axis differs')
+        source_poses = np.asarray([[r['yaw_deg'], r['azimuth_deg'], r['rotor_speed_rpm'],
+                                    *r['pitch_deg']] for r in motion], dtype=np.float64)
+    else:
+        # FarmFlex has already verified the package and motion time axes.
+        source_poses = np.asarray(rigid_poses, dtype=np.float64)[:, 0]
+    if (source_poses.shape != data['poses'].shape or not np.isfinite(source_poses).all()
+            or not np.allclose(source_poses, data['poses'], atol=.002, rtol=0)):
+        raise ValueError('T1 rigid motion and deflection poses differ')
+    data['poses'] = source_poses.copy()
     from .turbine_geometry import geometry_data
     for key in ('TipRad', 'HubRad', 'OverHang', 'TowerHt', 'Twr2Shft', 'ShftTilt', 'PreCone(1)'):
         if not np.isclose(data['scalars'][key], geometry_data()['scalars'][key], atol=1e-8, rtol=0):
@@ -272,12 +295,12 @@ class ComparisonView:
 def refresh(scene, context):
     from . import farm_flex
     if farm_flex.is_active(scene):
-        farm_flex._ACTIVE.update(scene)
+        farm_flex.active_for(scene).update(scene)
 
 
 def draw_panel(layout, scene):
     from . import farm_flex
-    active = farm_flex._ACTIVE
+    active = farm_flex.active_for(scene)
     view = getattr(active, 'comparison', None)
     box = layout.box()
     box.label(text='T1 · 叶尖挠度核对', icon='DRIVER_DISTANCE')

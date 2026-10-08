@@ -30,6 +30,22 @@ def camera_view_names():
     return tuple(view.name for view in CAMERA_VIEWS)
 
 
+def demo_view_areas(scene):
+    """Visible demo views for this scene, excluding the independent reconstruction."""
+    import bpy
+    from . import split_reconstruction
+    seen = set()
+    for window in bpy.context.window_manager.windows:
+        if window.scene != scene:
+            continue
+        for area in window.screen.areas:
+            if area.type != 'VIEW_3D' or area.as_pointer() in seen:
+                continue
+            seen.add(area.as_pointer())
+            if not split_reconstruction.is_reconstruction_view(scene, area.spaces.active):
+                yield area
+
+
 def select_camera(scene, name: str, *, fov_deg: float | None = None, focus: str | None = None):
     """Select a named camera and update optional FOV/focus metadata."""
     camera = scene.objects.get(name)
@@ -242,6 +258,9 @@ def _layout_step():
     if time.monotonic() > job['deadline']:
         raise ValueError('分屏操作超时，请重试')
     screen, count = job['screen'], job['count']
+    if job['window'].screen != screen or job['window'].scene != job['scene']:
+        _LAYOUT_JOB = None
+        return
     active = _layout_active_views(screen)
     if len(active) > count or (job.get('merge_first') and len(active) > 1):
         # Keep the largest existing view as source so shrinking does not leave
@@ -274,7 +293,9 @@ def _layout_step():
             return
         area = max(active, key=lambda item: item.width * item.height)
         factor = .5
-        if job.get('camera_names') and count == 2:
+        if job.get('split_factor') is not None and count == 2:
+            factor = job['split_factor']
+        elif job.get('camera_names') and count == 2:
             sidebar = next((r for r in area.regions if r.type == 'UI'), None)
             if sidebar:
                 factor = max(.3, .5 - sidebar.width / (2 * area.width))
@@ -291,13 +312,15 @@ def _layout_step():
         _LAYOUT_JOB = None
 
 
-def set_view_layout(context, layout, *, camera_names=None):
+def set_view_layout(context, layout, *, camera_names=None, split_factor=None, rebuild=False):
     """Set the number of WFRL 3D views, yielding between screen operations."""
     import bpy
     import time
     global _LAYOUT_JOB
     if layout not in {'SINGLE', 'DUAL', 'QUAD'}:
         raise ValueError('Unknown view layout')
+    if split_factor is not None and not .2 <= float(split_factor) <= .8:
+        raise ValueError('Split fraction must be between 0.2 and 0.8')
     if bpy.app.background or context.screen is None or context.window is None:
         raise ValueError('View layouts require an interactive Blender window')
     if _LAYOUT_JOB is not None:
@@ -319,7 +342,8 @@ def set_view_layout(context, layout, *, camera_names=None):
     _LAYOUT_JOB = {'screen': context.screen, 'window': context.window,
                    'scene': context.scene, 'count': count,
                    'layout': layout, 'camera_names': camera_names,
-                   'merge_first': bool(camera_names and count == 2 and not side_by_side),
+                   'split_factor': float(split_factor) if split_factor is not None else None,
+                   'merge_first': bool(camera_names and count == 2 and (rebuild or not side_by_side)),
                    'deadline': time.monotonic() + 10}
     try:
         _layout_step()

@@ -6,13 +6,11 @@ _READERS = {}
 
 def _stop_finished_playback():
     """A queued end callback must not stop a newly selected/restarted clip."""
-    import bpy
-    for window in bpy.context.window_manager.windows:
-        scene = window.scene
-        if (reader_for(scene) is not None and scene.frame_current >= scene.frame_end
-                and window.screen.is_animation_playing):
-            with bpy.context.temp_override(window=window, screen=window.screen):
-                bpy.ops.screen.animation_cancel(restore_frame=False)
+    from . import playback, _cancel_playback
+    scene = playback.owner_scene()
+    if (scene is not None and reader_for(scene) is not None
+            and scene.frame_current >= scene.frame_end and playback.is_playing(scene)):
+        _cancel_playback(scene)
 
 
 def reader_for(scene):
@@ -23,6 +21,7 @@ def reader_for(scene):
 
 def clear(scene, reason='回放数据未就绪'):
     _READERS.pop(scene.as_pointer(), None)
+    scene['wfrl_flex_active'] = False
     from .clearance_visual import reset_beams
     reset_beams(scene)
     try:
@@ -47,7 +46,7 @@ def load(scene, path, demo):
     from . import runtime, _cancel_playback
     if not runtime.configuration_editable():
         raise ValueError('Stop the active backend before loading results')
-    _cancel_playback()
+    _cancel_playback(scene)
     clear(scene)
     try:
         from ._vendor.lidar.replay import ReplayPackage, ReplayReader
@@ -126,7 +125,7 @@ def update(scene, depsgraph=None):
     yaw = scene.objects.get(prefix + '.YawRoot')
     rotor = scene.objects.get(prefix + '.Rotor')
     from . import farm_flex
-    readers = (farm_flex._ACTIVE.readers if farm_flex.is_active(scene)
+    readers = (farm_flex.active_for(scene).readers if farm_flex.is_active(scene)
                else {tid: reader_for(scene)})
     for radar_tid, radar_reader in readers.items():
         update_beams(scene, radar_tid, beam_activity(radar_reader, value['time_s']))

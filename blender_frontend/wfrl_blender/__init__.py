@@ -8,14 +8,24 @@ from .workspace import ensure_workspace
 from . import atmosphere, cameras, wake
 
 
-def _cancel_playback():
+def _cancel_playback(scene=None, *, all_scenes=False):
+    """Cancel the native player only when the target scene actually owns it."""
     import bpy
     if bpy.app.background:
         return
-    for window in bpy.context.window_manager.windows:
-        if window.screen.is_animation_playing:
-            with bpy.context.temp_override(window=window, screen=window.screen):
-                bpy.ops.screen.animation_cancel(restore_frame=False)
+    from . import playback
+    if scene is None and not all_scenes:
+        scene = bpy.context.scene
+    if not playback.any_playing() or (not all_scenes and not playback.is_playing(scene)):
+        return
+    # Blender has one global native playback timer. A single cancel pauses all
+    # views of its owner scene; repeating it per window cannot identify ownership.
+    window = playback.owner_window()
+    if window is None:
+        window = next(iter(bpy.context.window_manager.windows), None)
+    if window is not None:
+        with bpy.context.temp_override(window=window, screen=window.screen):
+            bpy.ops.screen.animation_cancel(restore_frame=False)
 
 
 def _update_layers(scene, context=None):
@@ -94,10 +104,11 @@ def _update_demo_status(scene, depsgraph=None):
 def _on_load(_unused):
     import bpy
     from .scene_builder import refresh_saved_surface_style
-    from . import runtime
+    from . import runtime, repair_marks
     for scene in bpy.data.scenes:
         if scene.objects:
             refresh_saved_surface_style(scene)
+            repair_marks.ensure_on_load(scene)
     if any(scene.get('wfrl_scene_kind') == 'live' for scene in bpy.data.scenes):
         runtime.disconnect(force=True)
     else:
@@ -113,10 +124,11 @@ def _classes():
     from .operators.history_export import CLASSES as HISTORY_EXPORT_CLASSES
     from .panels.telemetry import CLASSES as TELEMETRY_CLASSES
     from .operators.workflow import CLASSES as WORKFLOW_CLASSES
-    from .panels import scene, channels, run, safety, presentation, training, gimbal, clearance, farm_replay, video_output, custom_cameras
+    from .panels import scene, channels, run, safety, presentation, training, gimbal, clearance, farm_replay, video_output, custom_cameras, blade_recon
+    from .nrel_defects.editor import CLASSES as DEFECT_CLASSES
     return (PREFERENCE_CLASSES + CLASSES + CONNECTION_CLASSES + RUN_CLASSES + STATUS_CLASSES + TELEMETRY_CLASSES
             + WORKFLOW_CLASSES + HISTORY_EXPORT_CLASSES + scene.CLASSES + channels.CLASSES + run.CLASSES
-            + safety.CLASSES + presentation.CLASSES + training.CLASSES + gimbal.CLASSES + clearance.CLASSES + farm_replay.CLASSES + video_output.CLASSES + custom_cameras.CLASSES)
+            + safety.CLASSES + presentation.CLASSES + training.CLASSES + gimbal.CLASSES + clearance.CLASSES + farm_replay.CLASSES + video_output.CLASSES + custom_cameras.CLASSES + blade_recon.CLASSES + DEFECT_CLASSES)
 
 
 def register():
@@ -132,6 +144,7 @@ def register():
         if not cls.is_registered:
             bpy.utils.register_class(cls)
     definitions = {
+        "wfrl_diagnostics_sampling": bpy.props.BoolProperty(name="视口播放帧率", default=False),
         "wfrl_farm_panel_page": bpy.props.EnumProperty(
             name="回放面板", items=(("DEFLECTION", "挠度", "T1 叶尖位置与挠度对照"),
                                     ("RADAR", "净空", "当前机组的雷达与净空读数"),
@@ -190,10 +203,21 @@ def register():
     custom_cameras.register_properties()
     from .panels import clearance
     from . import clearance_replay
+    from . import playback
+    playback.register()
     clearance.register_properties()
     clearance_replay.register()
     charts.register()
     runtime.register()
+    from . import blade_recon_review
+    blade_recon_review.register()
+    from . import split_reconstruction, split_reconstruction_ui
+    split_reconstruction.register()
+    split_reconstruction_ui.register()
+    from .nrel_defects import editor as defect_editor
+    defect_editor.register_properties()
+    from . import frontend_diagnostics
+    frontend_diagnostics.register()
     registered_classes = _classes()
     registered_handlers = ((bpy.app.handlers.load_post, _on_load),)
     registered_properties = tuple(definitions)
@@ -206,7 +230,17 @@ def register():
     charts_cleanup = charts.unregister
     gimbal_cleanup = gimbal.unregister_properties
     custom_cameras_cleanup = custom_cameras.unregister_properties
+    blade_recon_cleanup = blade_recon_review.unregister
+    split_cleanup = split_reconstruction.unregister
+    split_ui_cleanup = split_reconstruction_ui.unregister
+    diagnostics_cleanup = frontend_diagnostics.unregister
+    playback_cleanup = playback.unregister
     def cleanup():
+        diagnostics_cleanup()
+        defect_editor.unregister_properties()
+        split_ui_cleanup()
+        split_cleanup()
+        blade_recon_cleanup()
         custom_cameras_cleanup()
         runtime_cleanup()
         video_output.unregister()
@@ -218,6 +252,7 @@ def register():
         charts_cleanup()
         workflow_cleanup()
         unregister_overlay()
+        playback_cleanup()
         if bpy.app.timers.is_registered(timer_cancel):
             bpy.app.timers.unregister(timer_cancel)
         for handlers, function in registered_handlers:
@@ -240,9 +275,18 @@ def unregister():
     if previous:
         previous()
         del bpy._wfrl_registered_cleanup
+    else:
+        from . import playback
+        playback.unregister()
+        from . import frontend_diagnostics
+        frontend_diagnostics.unregister()
+        from . import blade_recon_review, split_reconstruction, split_reconstruction_ui
+        split_reconstruction_ui.unregister()
+        split_reconstruction.unregister()
+        blade_recon_review.unregister()
     from .presentation import unregister_overlay
     unregister_overlay()
-    _cancel_playback()
+    _cancel_playback(all_scenes=True)
     if bpy.app.timers.is_registered(_cancel_playback):
         bpy.app.timers.unregister(_cancel_playback)
     for handlers, function in ((bpy.app.handlers.load_post, _on_load),):
@@ -280,7 +324,7 @@ def load_demo_scene(path=None, *, camera_rig=True):
     from . import runtime, farm_flex
     if not runtime.configuration_editable():
         raise ValueError('Stop the active backend before loading MAPPO')
-    _cancel_playback()
+    _cancel_playback(bpy.context.scene)
     runtime.enter_result_replay()
     collection = build_demo_geometry()
     scene = bpy.context.scene

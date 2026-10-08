@@ -135,6 +135,11 @@ def draw_views(layout, context):
 
 
 def draw_split_views(layout, context):
+    from .. import split_reconstruction, split_reconstruction_ui
+    if split_reconstruction.available(context.scene):
+        split_reconstruction_ui.draw_controls(layout, context)
+        if split_reconstruction.enabled(context.scene):
+            return
     layout.label(text='左右分屏 · T1', icon='CAMERA_DATA')
     row = layout.row(align=True)
     row.operator('wfrl.farm_split_view', text='Down + 侧前方').mode = 'DOWN'
@@ -236,6 +241,10 @@ def draw_tools(layout, context):
         data.operator('wfrl.clearance_restart', text='从头重播', icon='REW')
         path = data.column(); path.enabled = False
         path.prop(scene, '["wfrl_farm_flex_path"]', text='数据目录')
+    diagnostics = section(layout, 'wfrl_farm_diagnostics', '版本、来源与播放诊断')
+    if diagnostics is not None:
+        from .. import frontend_diagnostics
+        frontend_diagnostics.draw_panel(diagnostics, context)
 
 
 def draw(layout, context):
@@ -355,13 +364,12 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
             else:
                 camera=ensure_gimbal(scene,self.turbine);down_gimbal(camera)
         scene.camera=camera;scene['wfrl_camera']=camera.name
-        for screen in bpy.data.screens:
-            for area in screen.areas:
-                if area.type=='VIEW_3D':
-                    area.spaces.active.use_local_camera=False
-                    area.spaces.active.camera=camera
-                    area.spaces.active.region_3d.view_perspective='CAMERA'
-                    fill_camera_view(area,scene)
+        from ..cameras import demo_view_areas
+        for area in demo_view_areas(scene):
+            area.spaces.active.use_local_camera=False
+            area.spaces.active.camera=camera
+            area.spaces.active.region_3d.view_perspective='CAMERA'
+            fill_camera_view(area,scene)
         preview.update(scene)
         if self.turbine != 'all' and scene.wfrl_flex_show_tip_trails:
             tip_tracking.enable(scene,self.turbine)
@@ -384,9 +392,10 @@ class WFRL_OT_FarmSplitView(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        from .. import cameras
+        from .. import cameras, split_reconstruction
         return (not bpy.app.background and context.window is not None
-                and farm_flex.is_active(context.scene) and cameras._LAYOUT_JOB is None)
+                and farm_flex.is_active(context.scene) and cameras._LAYOUT_JOB is None
+                and not split_reconstruction.enabled(context.scene))
 
     def execute(self, context):
         from .. import cameras
@@ -416,6 +425,8 @@ class WFRL_PT_FarmFlex(bpy.types.Panel):
         return True
 
     def draw(self,context):
+        self.layout.operator('wfrl.split_recon_open_example', text='打开几何重建示例…', icon='FILE_BLEND')
+        self.layout.operator('wfrl.split_recon_same_source', text='同源纹理同步对照', icon='SHADING_TEXTURE')
         if farm_flex.is_active(context.scene):
             draw(self.layout,context)
         else:
@@ -437,8 +448,8 @@ class WFRL_OT_FarmTransport(bpy.types.Operator):
 
     def execute(self, context):
         from .. import _cancel_playback, tip_tracking
-        _cancel_playback()
         scene = context.scene
+        _cancel_playback(scene)
         if self.action == 'STEP':
             scene.frame_set(min(scene.frame_end, scene.frame_current + 1))
         elif self.action == 'RESET':
@@ -464,14 +475,26 @@ class WFRL_OT_DeflectionView(bpy.types.Operator):
         scene['wfrl_camera'] = scene.camera.name
         scene.wfrl_deflection_visible = True
         farm_flex._ACTIVE.update(scene)
-        for screen in bpy.data.screens:
-            for area in screen.areas:
-                if area.type == 'VIEW_3D':
-                    area.spaces.active.use_local_camera = False
-                    area.spaces.active.camera = scene.camera
-                    area.spaces.active.region_3d.view_perspective = 'CAMERA'
-                    fill_camera_view(area, scene)
+        from ..cameras import demo_view_areas
+        for area in demo_view_areas(scene):
+            area.spaces.active.use_local_camera = False
+            area.spaces.active.camera = scene.camera
+            area.spaces.active.region_3d.view_perspective = 'CAMERA'
+            fill_camera_view(area, scene)
         return {'FINISHED'}
 
 
-CLASSES = (WFRL_OT_FarmFlexView, WFRL_OT_FarmSplitView, WFRL_OT_FarmTransport, WFRL_OT_DeflectionView, WFRL_PT_FarmFlex)
+class WFRL_OT_CopyFrontendDiagnostics(bpy.types.Operator):
+    bl_idname = 'wfrl.copy_frontend_diagnostics'
+    bl_label = '复制完整诊断信息'
+
+    def execute(self, context):
+        import json
+        from .. import frontend_diagnostics
+        context.window_manager.clipboard = json.dumps(frontend_diagnostics.snapshot(context),
+            indent=2, ensure_ascii=False)
+        self.report({'INFO'}, '诊断信息已复制')
+        return {'FINISHED'}
+
+
+CLASSES = (WFRL_OT_FarmFlexView, WFRL_OT_FarmSplitView, WFRL_OT_FarmTransport, WFRL_OT_DeflectionView, WFRL_PT_FarmFlex, WFRL_OT_CopyFrontendDiagnostics)

@@ -1,0 +1,144 @@
+{
+  "schema": "wfrl.blade-recon-provenance.v1",
+  "source_classification": "SYNTHETIC",
+  "source_label": "SYNTHETIC · synth_tex · 120 samples at 10 Hz · independent surface texture example",
+  "description": "Byte-preserved saved v0.2 synthetic texture output, with manually selected appearance inspection points. This is a separate dataset from the MAPPO playback and is not a synchronized reconstruction of that farm.",
+  "source_project": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2",
+  "source_run": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/out/synth_tex",
+  "files": {
+    "recon.json": {
+      "source_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/out/synth_tex/recon.json",
+      "sha256": "e403041496e9e29fa3729e51485830e67c1901e10c5dae0facb2c37e7cb46e9d",
+      "size_bytes": 224056
+    },
+    "texture/texture.json": {
+      "source_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/out/synth_tex/texture/texture.json",
+      "sha256": "d96448ade99ca8c4107269f66d79933ee86cffe5fa521f12c30fecee3bce3ce5",
+      "size_bytes": 8061
+    },
+    "texture/blade1_tex.png": {
+      "source_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/out/synth_tex/texture/blade1_tex.png",
+      "sha256": "1684cac08ce687a16c362f3e836a6966fdde9eb4d853cb40424ec3a901c0a0d1",
+      "size_bytes": 1275137
+    },
+    "texture/blade2_tex.png": {
+      "source_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/out/synth_tex/texture/blade2_tex.png",
+      "sha256": "d10872cc0e14a11a75902c22adb99e75fc5980fa7897c86630e2bece82144960",
+      "size_bytes": 1279009
+    },
+    "texture/blade3_tex.png": {
+      "source_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/out/synth_tex/texture/blade3_tex.png",
+      "sha256": "72a30dd7b4f8bc690f347098bf481f7502059a6eafee9c7dfc5e2d3cd9347d8f",
+      "size_bytes": 1274900
+    },
+    "reference/model.py": {
+      "source_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/model.py",
+      "sha256": "427e6073d21b8c68f8ceaea44f7177ce3a761bbe5faa3fa9c65ad4643b74967c",
+      "size_bytes": 15287
+    },
+    "reference/atlas.py": {
+      "source_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/atlas.py",
+      "sha256": "3c5a944fe26ea56b7a02d358baf642119655883fc77f0b62cf1724eb15568b63",
+      "size_bytes": 8090
+    }
+  },
+  "model": {
+    "bundled_path": "../../_vendor/blade_recon/model.py",
+    "sha256": "9253fdfb7bb1e76790129511a24b98311c08c7c14a2a54b0c012d260842b888c",
+    "policy": "unchanged legacy analytic forward model, verified exactly compatible with this saved run"
+  },
+  "reference_model": {
+    "bundled_path": "reference/model.py",
+    "sha256": "427e6073d21b8c68f8ceaea44f7177ce3a761bbe5faa3fa9c65ad4643b74967c",
+    "policy": "byte-preserved current v0.2 source snapshot used for compatibility verification; the historical output did not declare a source-model hash"
+  },
+  "model_compatibility": {
+    "configuration": "legacy analytic turbine; no healthy_template declared",
+    "samples_checked": 120,
+    "vertices_bit_identical": true,
+    "axes_bit_identical": true,
+    "faces_bit_identical": true,
+    "radii_bit_identical": true,
+    "foil_coordinates_bit_identical": true,
+    "maximum_vertex_difference_m": 0.0,
+    "maximum_axis_difference_m": 0.0,
+    "uv_float32_bit_identical": true
+  },
+  "clock": {
+    "fps": 10.0,
+    "samples": 120,
+    "source_frame_start": 0,
+    "source_frame_end": 119,
+    "time_start_s": 0.0,
+    "time_end_s": 11.9,
+    "relationship_to_mappo": "independent source and clock; not synchronized measurements"
+  },
+  "texture_policy": "Original normalized appearance atlas blade*_tex.png copied byte-identically, with 150 baseline and alpha=0 for unseen texels; display enhancement changes shader color only.",
+  "source_evidence": {
+    "data/synth_tex/truth.json": {
+      "source_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/data/synth_tex/truth.json",
+      "sha256": "bbfa34e912d84edf39bc6f9d374331eeeb040382367df29d1651ffafb596e152",
+      "size_bytes": 42616
+    },
+    "data/synth_tex/cameras.json": {
+      "source_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/data/synth_tex/cameras.json",
+      "sha256": "fb5ec4d613e1362e2e2dc0f62db5578870a4966df02b72d8ae7596be65bc97b1",
+      "size_bytes": 2281
+    },
+    "data/synth_tex/truth_texture.npz": {
+      "source_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/data/synth_tex/truth_texture.npz",
+      "sha256": "10b65445fcca04047408237b8e3d4c361c4b773d76436837ef9ea1a92fa2555c",
+      "size_bytes": 5904833
+    },
+    "out/synth_tex/texture/eval_texture.json": {
+      "source_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/out/synth_tex/texture/eval_texture.json",
+      "sha256": "6b77571077ed8da48d125287cce653720ccfc359c7576faba303e360ce0c3fb0",
+      "size_bytes": 1448
+    },
+    "README.md": {
+      "source_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/README.md",
+      "sha256": "10a936d57eadad631156296e38edb319d789496c7377176aaa8b6371b2b9542a",
+      "size_bytes": 12658
+    },
+    "synth.py": {
+      "source_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/synth.py",
+      "sha256": "83d2f506a3022abd7efcdffda0371310954d430ddf86f589b4b571bc05cf5f9c",
+      "size_bytes": 13669
+    },
+    "atlas.py": {
+      "source_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/atlas.py",
+      "sha256": "3c5a944fe26ea56b7a02d358baf642119655883fc77f0b62cf1724eb15568b63",
+      "size_bytes": 8090
+    },
+    "docs/算法说明_三摄视频叶片三维重建_v0.2.md": {
+      "source_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/docs/算法说明_三摄视频叶片三维重建_v0.2.md",
+      "sha256": "7b2e9616b1e476c3fb378ed85c812e26a32029a1318bbbf4474c5e405c02232b",
+      "size_bytes": 49076
+    }
+  },
+  "geometry_policy": "Saved states only -> unchanged legacy model.Rotor.forward; preserve observed_sections separately from atlas alpha",
+  "inspection_point_source": "Manual visual selection in saved synthetic atlas; not detected or measured defects",
+  "inspection_points": [
+    {
+      "label": "亮斑",
+      "blade": 1,
+      "radius_m": 59.3,
+      "tau": 0.6,
+      "size_m": 1.6
+    },
+    {
+      "label": "横细线",
+      "blade": 1,
+      "radius_m": 57.0,
+      "tau": 0.65,
+      "size_m": 1.6
+    },
+    {
+      "label": "纵细线",
+      "blade": 1,
+      "radius_m": 51.3,
+      "tau": 0.645,
+      "size_m": 1.6
+    }
+  ]
+}

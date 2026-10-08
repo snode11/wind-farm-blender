@@ -102,14 +102,17 @@ def preflight(context, times=None):
         pass  # Allocation and capability checks remain mandatory at draw time.
     try:
         core._root(scene)
-        # Recheck installation constraints, including stale mount geometry.
+        context.view_layer.update()
+        core.validate_native_state(scene, depsgraph=context.evaluated_depsgraph_get())
+        # Recheck installation constraints after ruling out invalid native
+        # matrices, so geometry queries never operate on NaN poses.
         core.validate_layout(scene, core.layout_dict(scene))
         for cam in cameras:
             p = core.validate_parameters(core.parameters(cam))
             sizes[int(cam['wfrl_custom_slot'])] = projection.resolution(p.fov, p.vfov, p.output_long_edge_px, max_size)
     except (ValueError, RuntimeError, KeyError, TypeError) as exc:
         errors.append(str(exc))
-    farm = farm_flex._ACTIVE if farm_flex.is_active(scene) else None
+    farm = farm_flex.active_for(scene) if farm_flex.is_active(scene) else None
     bounds = (float(farm.times[0]), float(farm.times[-1])) if farm else None
     if times is not None:
         if not times or len(times) > projection.MAX_SAMPLES:
@@ -180,12 +183,14 @@ class Capture:
             core._root(self.scene)
         self.layout = core.layout_dict(self.scene)
         self.layout_hash = core.layout_hash(self.layout)
+        self.live_layout_hash = core.live_layout_hash(self.scene, self.layout)
         self.frame, self.subframe = self.scene.frame_current, self.scene.frame_subframe
         self.time = current_time(self.scene)
-        self.farm = farm_flex._ACTIVE if farm_flex.is_active(self.scene) else None
+        self.farm = farm_flex.active_for(self.scene) if farm_flex.is_active(self.scene) else None
         self.reader = self.farm.readers['T1'] if self.farm else clearance_replay.reader_for(self.scene)
         self.times = [self.time] if times is None else list(times)
         self.sequence = times is not None
+        self.render_target = preview.RenderTargetPool() if self.sequence else None
         if not self.times:
             raise ValueError('时间清单为空')
         if self.sequence:
@@ -256,8 +261,14 @@ class Capture:
         if reason:raise RuntimeError(reason)
         if self.window.screen.is_animation_playing or (self.scene.frame_current,self.scene.frame_subframe) != self.expected_frame:
             raise RuntimeError('采集时刻被外部操作改变，采集未完成')
+        try:
+            core.validate_native_state(self.scene)
+        except ValueError as exc:
+            raise RuntimeError(f'采集期间{exc}，采集未完成') from exc
         if core.layout_hash(core.layout_dict(self.scene)) != self.layout_hash:
             raise RuntimeError('采集期间相机布局已变化，采集未完成')
+        if core.live_layout_hash(self.scene) != self.live_layout_hash:
+            raise RuntimeError('采集期间原生相机姿态或镜头已变化，采集未完成')
         if preview.render_profile(self.scene) != self.profile:
             raise RuntimeError('采集期间颜色设置已变化，采集未完成')
 
@@ -289,6 +300,9 @@ class Capture:
         self.in_group = True
         try:
             return self._step_group(context)
+        except Exception as exc:
+            self.finish(error=str(exc))
+            raise
         finally:
             self.in_group = False
             if self.cancel_requested and not self.closed:
@@ -302,7 +316,7 @@ class Capture:
             mapped=self.scene.frame_start+(at-self.reader.start_s)*timebase
             self.evaluate(math.floor(mapped),mapped-math.floor(mapped),at)
         self.guard()
-        images=preview.render_group(context,self.cameras)
+        images=preview.render_group(context,self.cameras,target=self.render_target)
         try:
             self.guard()
             records=[]
@@ -367,6 +381,9 @@ class Capture:
         except Exception as exc:
             success=False;error=f'{error} 恢复失败：{exc}'
         finally:
+            if self.render_target is not None:
+                self.render_target.free()
+                self.manifest['gpu_target_usage'] = self.render_target.usage()
             self.closed=True
             if self.cancel_requested:
                 self.cancel_stopped_at = time.perf_counter()

@@ -23,7 +23,7 @@ class WFRL_OT_ClearanceClip(bpy.types.Operator):
             clearance_replay.load(scene, bpy.path.abspath(path), self.demo)
         except (ValueError, OSError, ImportError, KeyError, TypeError) as exc:
             from .. import _cancel_playback
-            _cancel_playback()
+            _cancel_playback(scene)
             clearance_replay.clear(scene, '回放数据未就绪：' + str(exc))
             scene.wfrl_clearance_show_config = True
             self.report({'ERROR'}, str(exc))
@@ -78,8 +78,11 @@ class WFRL_OT_ClearanceRestart(bpy.types.Operator):
         return clearance_replay.reader_for(context.scene) is not None
 
     def execute(self, context):
-        from .. import _cancel_playback
-        _cancel_playback()
+        from .. import _cancel_playback, playback
+        if playback.any_playing() and not playback.is_playing(context.scene):
+            self.report({'WARNING'}, '另一场景正在使用 Blender 播放器，请先暂停该场景')
+            return {'CANCELLED'}
+        _cancel_playback(context.scene)
         from .. import tip_tracking
         tip_tracking.reset(context.scene, 'restart')
         context.scene.frame_set(context.scene.frame_start)
@@ -98,6 +101,10 @@ class WFRL_OT_ClearancePlayback(bpy.types.Operator):
         return clearance_replay.reader_for(context.scene) is not None and context.screen is not None
 
     def execute(self, context):
+        from .. import playback
+        if playback.any_playing() and not playback.is_playing(context.scene):
+            self.report({'WARNING'}, '另一场景正在使用 Blender 播放器，请先暂停该场景')
+            return {'CANCELLED'}
         if context.scene.frame_current >= context.scene.frame_end:
             return bpy.ops.wfrl.clearance_restart()
         return bpy.ops.screen.animation_play()

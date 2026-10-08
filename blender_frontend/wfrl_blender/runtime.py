@@ -69,7 +69,7 @@ def select_mode(mode):
     if mode != 'demo':
         import bpy
         from . import _cancel_playback
-        _cancel_playback()
+        _cancel_playback(bpy.context.scene)
         for obj in bpy.data.objects:
             if obj.name.startswith('WFRL.Turbine.'):
                 obj.animation_data_clear()

@@ -42,6 +42,9 @@ def current(scene):
 
 
 def show(context):
+    from .. import split_reconstruction
+    if split_reconstruction.is_reconstruction_view(context.scene, context.space_data):
+        raise ValueError('请在左侧 demo 视口控制云台')
     camera = current(context.scene)
     space = context.space_data
     if space and space.type == 'VIEW_3D':
@@ -58,6 +61,9 @@ def show(context):
 
 
 def switch(scene, context):
+    from .. import split_reconstruction
+    if context and split_reconstruction.is_reconstruction_view(scene, context.space_data):
+        return
     if context and context.area and context.area.type == 'VIEW_3D':
         if scene.objects.get(f'WFRL.Turbine.{scene.wfrl_gimbal_turbine}.YawRoot'):
             from .. import farm_flex
@@ -81,7 +87,9 @@ def change(camera, dx=0, dy=0, zoom=0):
 class GimbalAvailable:
     @classmethod
     def poll(cls, context):
+        from .. import split_reconstruction
         return (context.area is not None and context.area.type == 'VIEW_3D'
+                and not split_reconstruction.is_reconstruction_view(context.scene, context.space_data)
                 and context.scene.objects.get(
                     f'WFRL.Turbine.{context.scene.wfrl_gimbal_turbine}.YawRoot') is not None)
 

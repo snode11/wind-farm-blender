@@ -9,7 +9,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
-from wfrl_blender.deflection import rigid_frame, compare, read_comparison
+from wfrl_blender.deflection import rigid_frame, compare, read_comparison, rotation
 
 
 class DeflectionTests(unittest.TestCase):
@@ -19,6 +19,32 @@ class DeflectionTests(unittest.TestCase):
         cls.geometry = dict(np.load(cls.package / 'geometry.npz'))
         cls.manifest = json.loads((cls.package / 'manifest.json').read_text())
         cls.data = read_comparison(cls.package, cls.manifest, cls.geometry['times'], cls.geometry['poses'])
+
+    def test_rigid_motion_retains_original_precision(self):
+        from wfrl_blender.farm_flex import read_package
+        motion = json.loads((self.package / 'data.json').read_text())['T1']['motion']
+        expected = np.asarray([[r['yaw_deg'], r['azimuth_deg'], r['rotor_speed_rpm'],
+                                *r['pitch_deg']] for r in motion])
+        _, _, _, poses, _ = read_package(self.package)
+        self.assertEqual(poses.dtype, np.float64)
+        np.testing.assert_array_equal(poses[:, 0], expected)
+        np.testing.assert_array_equal(self.data['poses'], expected)
+        # Exercise the real bundled case, whose original phase is unavailable
+        # once its > 7,000 degree unwrapped azimuth is quantized to float32.
+        self.assertGreater(np.max(abs(expected[:, 1] - self.geometry['poses'][:, 0, 1])), .0004)
+
+    def test_rigid_trigonometry_is_independent_of_scalar_storage(self):
+        from scipy.spatial.transform import Rotation
+        degrees = np.float32(7892.915)
+        expected = Rotation.from_rotvec([np.deg2rad(float(degrees)), 0, 0]).as_matrix()
+        np.testing.assert_allclose(rotation(0, degrees), expected, rtol=0, atol=1e-14)
+
+    def test_motion_reference_requires_its_own_integrity(self):
+        with tempfile.TemporaryDirectory() as temp:
+            (Path(temp) / 'deflection-t1.json').write_bytes((self.package / 'deflection-t1.json').read_bytes())
+            (Path(temp) / 'data.json').write_text('{}')
+            with self.assertRaisesRegex(ValueError, 'rigid motion integrity'):
+                read_comparison(temp, self.manifest, self.geometry['times'], self.geometry['poses'])
 
     def test_all_saved_frames_and_blades(self):
         errors = []
