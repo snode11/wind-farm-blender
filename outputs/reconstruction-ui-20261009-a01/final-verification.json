@@ -1,0 +1,55 @@
+{
+  "status": "PASS",
+  "scope": "LOCAL_UNPUBLISHED_UI_WORKFLOW_AND_DAILY_INSTALLATION",
+  "archive_sha256": "780fdbac191abfc9b4b8489fd6492e9b0b3bf698c0377227ead645fabeed1b3a",
+  "installed_root": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "installed_files_checked": 172,
+  "asset_files_unchanged_from_pre_install": 65,
+  "changed_implementation_source_matches_archive": [
+    "split_reconstruction.py",
+    "split_mappo_texture.py",
+    "split_reconstruction_ui.py",
+    "split_texture_settings.py",
+    "panels/farm_replay.py"
+  ],
+  "canonical_asset_sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
+  "native_window": {
+    "status": "PASS",
+    "stage": 32,
+    "blender": "5.2.1 LTS",
+    "record": "window-a02/reconstruction-workflow-window-validation.json"
+  },
+  "real_mouse_wheel": {
+    "status": "PASS",
+    "frame_start": 1132,
+    "frame_end": 1155,
+    "view_preserved_exactly": true,
+    "record": "manual-wheel-a02/validation.json"
+  },
+  "unit_tests": {
+    "status": "PASS",
+    "passed": 62,
+    "subtests_passed": 104,
+    "record": "unit-test-result.json"
+  },
+  "source_regenerated": false,
+  "solver_started": false,
+  "github_published": false,
+  "reconstruction_accuracy_status": "NOT_ACCEPTED",
+  "existing_physical_accuracy_gate": "FAILED_GATE",
+  "texture_or_defect_accuracy_accepted": false,
+  "retained_failed_attempts": [
+    "window-a01/reconstruction-workflow-window-validation.json",
+    "manual-wheel/validation.json",
+    "core-review-initial-check.json"
+  ],
+  "git_status_comparison": {
+    "options": "--short --untracked-files=all",
+    "tracked_status_unchanged": true,
+    "added_line_count": 1191,
+    "removed_line_count": 0,
+    "detail_record": "git-status-delta.json",
+    "note": "Status comparison records paths and status, not an all-workspace content hash."
+  },
+  "issues": []
+}

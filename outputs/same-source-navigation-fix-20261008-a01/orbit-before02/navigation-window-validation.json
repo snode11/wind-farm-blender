@@ -1,0 +1,246 @@
+{
+  "stage": 14,
+  "checks": [
+    "Explicit same-source entry shows all three blades with DETAIL false"
+  ],
+  "input": {
+    "copy": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/same-source-navigation-fix-20261008-a01/geometry-input.blend",
+    "canonical": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+    "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b"
+  },
+  "entry_clock": {
+    "frame": 52,
+    "index": 8,
+    "relative_time_s": 0.8,
+    "timeline_time_s": 117.85,
+    "held_sample_time_s": 117.8,
+    "age_ms": 50.0,
+    "original_and_texture_evaluated_geometry_bit_identical": true,
+    "max_saved_model_to_native_evaluation_difference_m": 3.812899237232159e-06,
+    "native_evaluation": [
+      {
+        "blade": 1,
+        "same_source_eval_time": 80.00000762939453,
+        "original_eval_time": 80.00000762939453,
+        "same_source_key_time": 80.00000762939453,
+        "original_key_time": 80.00000762939453,
+        "model_to_original_native_difference_m": 3.8098922203744223e-06
+      },
+      {
+        "blade": 2,
+        "same_source_eval_time": 80.00000762939453,
+        "original_eval_time": 80.00000762939453,
+        "same_source_key_time": 80.00000762939453,
+        "original_key_time": 80.00000762939453,
+        "model_to_original_native_difference_m": 3.812899237232159e-06
+      },
+      {
+        "blade": 3,
+        "same_source_eval_time": 80.00000762939453,
+        "original_eval_time": 80.00000762939453,
+        "same_source_key_time": 80.00000762939453,
+        "original_key_time": 80.00000762939453,
+        "model_to_original_native_difference_m": 3.812135560110619e-06
+      }
+    ],
+    "max_left_bound_package_error_m": 1.0912993211320554e-05
+  },
+  "entry-full-rotor": {
+    "frame": 52,
+    "index": 8,
+    "detail": false,
+    "right_view": {
+      "location": [
+        3.7466163635253906,
+        -59.96809387207031,
+        96.12889862060547
+      ],
+      "rotation": [
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "distance": 313.2398376464844,
+      "perspective": "CAMERA",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 45.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/same-source-navigation-fix-20261008-a01/orbit-before02/entry-full-rotor.png",
+    "full_rotor_pixels": {
+      "region_size": [
+        1074,
+        1854
+      ],
+      "blades": [
+        {
+          "object": "SplitMappoTexture.B1",
+          "pixels": [
+            541.32763671875,
+            989.0568237304688,
+            828.2152709960938,
+            1048.09326171875
+          ]
+        },
+        {
+          "object": "SplitMappoTexture.B2",
+          "pixels": [
+            509.8063049316406,
+            555.9247436523438,
+            340.9615478515625,
+            825.6456909179688
+          ]
+        },
+        {
+          "object": "SplitMappoTexture.B3",
+          "pixels": [
+            128.64532470703125,
+            534.8269653320312,
+            830.2804565429688,
+            1124.0792236328125
+          ]
+        }
+      ]
+    }
+  },
+  "entry_view": {
+    "location": [
+      3.7466163635253906,
+      -59.96809387207031,
+      96.12889862060547
+    ],
+    "rotation": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+    ],
+    "distance": 313.2398376464844,
+    "perspective": "CAMERA",
+    "camera_zoom": 8.706119537353516,
+    "camera_offset": [
+      1.7831000150181353e-05,
+      0.0391840897500515
+    ],
+    "lens": 45.0,
+    "camera": "SplitMappoTexture.Camera",
+    "lock_object": null,
+    "lock_cursor": false,
+    "lock_camera": false
+  },
+  "default_native_orbit": {
+    "operator": "view3d.view_orbit",
+    "type": "ORBITRIGHT",
+    "angle_degrees": 15.0,
+    "target_center_m": [
+      10005.0,
+      0.0,
+      90.0
+    ],
+    "steps": []
+  },
+  "default_camera_exit": {
+    "operator": "view3d.view_camera",
+    "before": {
+      "location": [
+        3.7466163635253906,
+        -59.96809387207031,
+        96.12889862060547
+      ],
+      "rotation": [
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "distance": 313.2398376464844,
+      "perspective": "CAMERA",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 45.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "after": {
+      "location": [
+        3.7466163635253906,
+        -59.96809387207031,
+        96.12889862060547
+      ],
+      "rotation": [
+        0.7157952785491943,
+        0.4389207363128662,
+        0.29061833024024963,
+        0.45883187651634216
+      ],
+      "distance": 313.2398376464844,
+      "perspective": "PERSP",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 45.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "center_error_m": 10001.43478385775
+  },
+  "native-camera-exit-free-view": {
+    "frame": 52,
+    "index": 8,
+    "detail": false,
+    "right_view": {
+      "location": [
+        3.7466163635253906,
+        -59.96809387207031,
+        96.12889862060547
+      ],
+      "rotation": [
+        0.7157952785491943,
+        0.4389207363128662,
+        0.29061833024024963,
+        0.45883187651634216
+      ],
+      "distance": 313.2398376464844,
+      "perspective": "PERSP",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 45.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/same-source-navigation-fix-20261008-a01/orbit-before02/native-camera-exit-free-view.png"
+  },
+  "status": "FAIL",
+  "error": "Traceback (most recent call last):\n  File \"/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/mappo_same_source_navigation_window.py\", line 269, in tick\n    assert center_error <= 5., ('Native camera exit inherited the wrong rotor pivot', center_error, actual)\n           ^^^^^^^^^^^^^^^^^^\nAssertionError: ('Native camera exit inherited the wrong rotor pivot', 10001.43478385775, {'location': [3.7466163635253906, -59.96809387207031, 96.12889862060547], 'rotation': [0.7157952785491943, 0.4389207363128662, 0.29061833024024963, 0.45883187651634216], 'distance': 313.2398376464844, 'perspective': 'PERSP', 'camera_zoom': 8.706119537353516, 'camera_offset': [1.7831000150181353e-05, 0.0391840897500515], 'lens': 45.0, 'camera': 'SplitMappoTexture.Camera', 'lock_object': None, 'lock_cursor': False, 'lock_camera': False})\n",
+  "blender": "5.2.1 LTS",
+  "addon_module": "bl_ext.user_default.wfrl_blender",
+  "addon_file": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "actual_module_root": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "blend": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/same-source-navigation-fix-20261008-a01/geometry-input.blend",
+  "verification": "INSTALLED_VISIBLE_WINDOW_NATIVE_ORBIT_PLAY_NAVIGATION_SEEK_STEP_CURRENT_SAVE_REOPEN",
+  "software_sync_and_navigation_only": true,
+  "reconstruction_accuracy_accepted": false,
+  "visible_window_left_open": false
+}

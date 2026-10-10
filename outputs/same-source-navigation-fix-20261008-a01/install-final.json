@@ -1,0 +1,11 @@
+{
+  "installed_root": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "files": {
+    "split_mappo_texture.py": "0625cde61471bec2b5c17f770fcdd29faaf306da694b3f6174e99a60494d4702",
+    "split_reconstruction.py": "bb3c17e148ffbdd3214dfd372d28452208d760b3cca093a763148c4e1efb1a1d",
+    "split_reconstruction_ui.py": "f69eb6de4787fc5867bbd029222bc4ff702397eeebe52231860c2fd57c8692be"
+  },
+  "geometry_asset_sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
+  "native_validation": "orbit-after02/navigation-window-validation.json",
+  "host_validation": "50 passed, 104 subtests passed"
+}

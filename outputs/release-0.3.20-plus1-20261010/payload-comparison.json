@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "files": 173,
+  "identical_payload_files": 171,
+  "changed_files": [
+    "blender_manifest.toml",
+    "build-info.json"
+  ],
+  "old_package": {
+    "path": "/tmp/wfrl-camera-reset-package-20261010/wfrl_blender-0.3.20.zip",
+    "version": "0.3.20",
+    "role": "Local repair validation package; not the published 0.3.20 asset",
+    "bytes": 99010031,
+    "sha256": "5116934fee3010ed6e554c78b2aafdc19329446a81bfab8e198456de089d8285"
+  },
+  "final_package": {
+    "path": "/Users/eason/Desktop/wfcrl/wind farm RL/dist/wfrl_blender-0.3.20+1.zip",
+    "version": "0.3.20+1",
+    "bytes": 99010020,
+    "sha256": "e6e279f5f88c730f3c96158bfca525a9d04f1a09915ad3a997d1d29b00a9f5ba"
+  },
+  "crc": "PASS",
+  "metadata_changes": {
+    "blender_manifest.toml": {
+      "prior_local": "schema_version = \"1.0.0\"\nid = \"wfrl_blender\"\nversion = \"0.3.20\"\nname = \"WFRL Blender\"\ntagline = \"Wind farm reinforcement-learning visualization workspace\"\nmaintainer = \"WFRL\"\ntype = \"add-on\"\nblender_version_min = \"5.2.0\"\nlicense = [\"SPDX:MIT\"]\ntags = [\"3D View\", \"Animation\", \"Scene\"]\n\n\n[permissions]\nnetwork = \"Connect to WFRL Bridge and serve the selected camera video over RTSP\"\nfiles = \"Read simulation and video files, export MP4 and run configured video tools\"\n",
+      "final": "schema_version = \"1.0.0\"\nid = \"wfrl_blender\"\nversion = \"0.3.20+1\"\nname = \"WFRL Blender\"\ntagline = \"Wind farm reinforcement-learning visualization workspace\"\nmaintainer = \"WFRL\"\ntype = \"add-on\"\nblender_version_min = \"5.2.0\"\nlicense = [\"SPDX:MIT\"]\ntags = [\"3D View\", \"Animation\", \"Scene\"]\n\n\n[permissions]\nnetwork = \"Connect to WFRL Bridge and serve camera video over RTSP\"\nfiles = \"Read simulation/video files, export MP4 and run video tools\"\n"
+    },
+    "build-info.json": {
+      "prior_local": "{\n  \"payload_files\": 172,\n  \"payload_sha256\": \"4c923da72b692d5538d8a265bb18729074d925277ff1250107d277b7b59ded30\",\n  \"schema\": \"wfrl.extension-build.v1\",\n  \"version\": \"0.3.20\"\n}\n",
+      "final": "{\n  \"payload_files\": 172,\n  \"payload_sha256\": \"00bee6387b497fa598a2aa99c389302d68f5945f0568f9eee4962b7f6dae0e60\",\n  \"schema\": \"wfrl.extension-build.v1\",\n  \"version\": \"0.3.20+1\"\n}\n"
+    }
+  }
+}

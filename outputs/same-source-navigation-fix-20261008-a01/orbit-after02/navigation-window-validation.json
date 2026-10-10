@@ -1,0 +1,2172 @@
+{
+  "stage": 13,
+  "checks": [
+    "Explicit same-source entry shows all three blades with DETAIL false",
+    "Native camera exit retains the right rotor hub pivot and all three visible blades",
+    "Twelve native 15 degree orbit steps reach the back with all three blades visible and the pivot near the right rotor hub",
+    "Native user playback changes both geometries on the shared clock and retains the native-orbited back view",
+    "One native orbit from explicit detail keeps its surface target visible and releases automatic tracking",
+    "Pause, detail focus, manual orbit/zoom, and user resume release tracking and preserve all right navigation",
+    "Native seek and actual-sample step retain the manual right view and shared clock",
+    "CURRENT layout restore preserves the manual free view",
+    "Additive native save/reopen preserves all manual navigation and both replay sources"
+  ],
+  "input": {
+    "copy": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/same-source-navigation-fix-20261008-a01/geometry-input.blend",
+    "canonical": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+    "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b"
+  },
+  "entry_clock": {
+    "frame": 52,
+    "index": 8,
+    "relative_time_s": 0.8,
+    "timeline_time_s": 117.85,
+    "held_sample_time_s": 117.8,
+    "age_ms": 50.0,
+    "original_and_texture_evaluated_geometry_bit_identical": true,
+    "max_saved_model_to_native_evaluation_difference_m": 3.812899237232159e-06,
+    "native_evaluation": [
+      {
+        "blade": 1,
+        "same_source_eval_time": 80.00000762939453,
+        "original_eval_time": 80.00000762939453,
+        "same_source_key_time": 80.00000762939453,
+        "original_key_time": 80.00000762939453,
+        "model_to_original_native_difference_m": 3.8098922203744223e-06
+      },
+      {
+        "blade": 2,
+        "same_source_eval_time": 80.00000762939453,
+        "original_eval_time": 80.00000762939453,
+        "same_source_key_time": 80.00000762939453,
+        "original_key_time": 80.00000762939453,
+        "model_to_original_native_difference_m": 3.812899237232159e-06
+      },
+      {
+        "blade": 3,
+        "same_source_eval_time": 80.00000762939453,
+        "original_eval_time": 80.00000762939453,
+        "same_source_key_time": 80.00000762939453,
+        "original_key_time": 80.00000762939453,
+        "model_to_original_native_difference_m": 3.812135560110619e-06
+      }
+    ],
+    "max_left_bound_package_error_m": 1.0912993211320554e-05
+  },
+  "entry-full-rotor": {
+    "frame": 52,
+    "index": 8,
+    "detail": false,
+    "right_view": {
+      "location": [
+        10005.0,
+        0.0,
+        90.0
+      ],
+      "rotation": [
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "distance": 300.0,
+      "perspective": "CAMERA",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 45.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/same-source-navigation-fix-20261008-a01/orbit-after02/entry-full-rotor.png",
+    "full_rotor_pixels": {
+      "region_size": [
+        1074,
+        1854
+      ],
+      "blades": [
+        {
+          "object": "SplitMappoTexture.B1",
+          "pixels": [
+            541.32763671875,
+            989.0568237304688,
+            828.2152709960938,
+            1048.09326171875
+          ]
+        },
+        {
+          "object": "SplitMappoTexture.B2",
+          "pixels": [
+            509.8063049316406,
+            555.9247436523438,
+            340.9615478515625,
+            825.6456909179688
+          ]
+        },
+        {
+          "object": "SplitMappoTexture.B3",
+          "pixels": [
+            128.64532470703125,
+            534.8269653320312,
+            830.2804565429688,
+            1124.0792236328125
+          ]
+        }
+      ]
+    }
+  },
+  "entry_view": {
+    "location": [
+      10005.0,
+      0.0,
+      90.0
+    ],
+    "rotation": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+    ],
+    "distance": 300.0,
+    "perspective": "CAMERA",
+    "camera_zoom": 8.706119537353516,
+    "camera_offset": [
+      1.7831000150181353e-05,
+      0.0391840897500515
+    ],
+    "lens": 45.0,
+    "camera": "SplitMappoTexture.Camera",
+    "lock_object": null,
+    "lock_cursor": false,
+    "lock_camera": false
+  },
+  "default_native_orbit": {
+    "operator": "view3d.view_orbit",
+    "type": "ORBITRIGHT",
+    "angle_degrees": 15.0,
+    "target_center_m": [
+      10005.0,
+      0.0,
+      90.0
+    ],
+    "steps": [
+      {
+        "angle_degrees": 15,
+        "right_view": {
+          "location": [
+            10005.0,
+            0.0,
+            90.0
+          ],
+          "rotation": [
+            0.43045929074287415,
+            0.43045929074287415,
+            0.5609855055809021,
+            0.5609855055809021
+          ],
+          "distance": 300.0,
+          "perspective": "PERSP",
+          "camera_zoom": 8.706119537353516,
+          "camera_offset": [
+            1.7831000150181353e-05,
+            0.0391840897500515
+          ],
+          "lens": 45.0,
+          "camera": "SplitMappoTexture.Camera",
+          "lock_object": null,
+          "lock_cursor": false,
+          "lock_camera": false
+        },
+        "center_error_m": 0.0,
+        "full_rotor_pixels": {
+          "region_size": [
+            1074,
+            1854
+          ],
+          "blades": [
+            {
+              "object": "SplitMappoTexture.B1",
+              "pixels": [
+                538.5407104492188,
+                761.72705078125,
+                923.49658203125,
+                1036.2813720703125
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B2",
+              "pixels": [
+                518.9046020507812,
+                545.1156616210938,
+                681.7676391601562,
+                922.22314453125
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B3",
+              "pixels": [
+                353.73095703125,
+                536.4154052734375,
+                924.518798828125,
+                1061.8048095703125
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "angle_degrees": 30,
+        "right_view": {
+          "location": [
+            10005.0,
+            0.0,
+            90.0
+          ],
+          "rotation": [
+            0.3535533845424652,
+            0.3535533845424652,
+            0.6123724579811096,
+            0.6123724579811096
+          ],
+          "distance": 300.0,
+          "perspective": "PERSP",
+          "camera_zoom": 8.706119537353516,
+          "camera_offset": [
+            1.7831000150181353e-05,
+            0.0391840897500515
+          ],
+          "lens": 45.0,
+          "camera": "SplitMappoTexture.Camera",
+          "lock_object": null,
+          "lock_cursor": false,
+          "lock_camera": false
+        },
+        "center_error_m": 0.0,
+        "full_rotor_pixels": {
+          "region_size": [
+            1074,
+            1854
+          ],
+          "blades": [
+            {
+              "object": "SplitMappoTexture.B1",
+              "pixels": [
+                537.1228637695312,
+                749.0848388671875,
+                923.49072265625,
+                1041.8092041015625
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B2",
+              "pixels": [
+                515.5620727539062,
+                543.3764038085938,
+                682.6801147460938,
+                922.2288818359375
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B3",
+              "pixels": [
+                379.775146484375,
+                537.5765380859375,
+                924.5233154296875,
+                1056.740966796875
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "angle_degrees": 45,
+        "right_view": {
+          "location": [
+            10005.0,
+            0.0,
+            90.0
+          ],
+          "rotation": [
+            0.27059799432754517,
+            0.27059799432754517,
+            0.6532814502716064,
+            0.6532814502716064
+          ],
+          "distance": 300.0,
+          "perspective": "PERSP",
+          "camera_zoom": 8.706119537353516,
+          "camera_offset": [
+            1.7831000150181353e-05,
+            0.0391840897500515
+          ],
+          "lens": 45.0,
+          "camera": "SplitMappoTexture.Camera",
+          "lock_object": null,
+          "lock_cursor": false,
+          "lock_camera": false
+        },
+        "center_error_m": 0.0,
+        "full_rotor_pixels": {
+          "region_size": [
+            1074,
+            1854
+          ],
+          "blades": [
+            {
+              "object": "SplitMappoTexture.B1",
+              "pixels": [
+                535.3259887695312,
+                718.520263671875,
+                923.48583984375,
+                1047.0343017578125
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B2",
+              "pixels": [
+                513.7032470703125,
+                542.9933471679688,
+                683.7579956054688,
+                922.2359619140625
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B3",
+              "pixels": [
+                413.58050537109375,
+                539.1348266601562,
+                924.5272827148438,
+                1052.7135009765625
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "angle_degrees": 60,
+        "right_view": {
+          "location": [
+            10005.0,
+            0.0,
+            90.0
+          ],
+          "rotation": [
+            0.1830126792192459,
+            0.1830126792192459,
+            0.6830126643180847,
+            0.6830126643180847
+          ],
+          "distance": 300.0,
+          "perspective": "PERSP",
+          "camera_zoom": 8.706119537353516,
+          "camera_offset": [
+            1.7831000150181353e-05,
+            0.0391840897500515
+          ],
+          "lens": 45.0,
+          "camera": "SplitMappoTexture.Camera",
+          "lock_object": null,
+          "lock_cursor": false,
+          "lock_camera": false
+        },
+        "center_error_m": 0.0,
+        "full_rotor_pixels": {
+          "region_size": [
+            1074,
+            1854
+          ],
+          "blades": [
+            {
+              "object": "SplitMappoTexture.B1",
+              "pixels": [
+                533.4190063476562,
+                670.60205078125,
+                923.4822387695312,
+                1051.3909912109375
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B2",
+              "pixels": [
+                513.3907470703125,
+                542.9359741210938,
+                684.9267578125,
+                922.2438354492188
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B3",
+              "pixels": [
+                452.87274169921875,
+                540.8162231445312,
+                924.5303344726562,
+                1049.8184814453125
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "angle_degrees": 75,
+        "right_view": {
+          "location": [
+            10005.0,
+            0.0,
+            90.0
+          ],
+          "rotation": [
+            0.09229593724012375,
+            0.09229593724012375,
+            0.7010573744773865,
+            0.7010573744773865
+          ],
+          "distance": 300.0,
+          "perspective": "PERSP",
+          "camera_zoom": 8.706119537353516,
+          "camera_offset": [
+            1.7831000150181353e-05,
+            0.0391840897500515
+          ],
+          "lens": 45.0,
+          "camera": "SplitMappoTexture.Camera",
+          "lock_object": null,
+          "lock_cursor": false,
+          "lock_camera": false
+        },
+        "center_error_m": 0.0,
+        "full_rotor_pixels": {
+          "region_size": [
+            1074,
+            1854
+          ],
+          "blades": [
+            {
+              "object": "SplitMappoTexture.B1",
+              "pixels": [
+                531.6275024414062,
+                608.6404418945312,
+                923.480224609375,
+                1054.3143310546875
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B2",
+              "pixels": [
+                514.5689697265625,
+                542.9224243164062,
+                686.1038818359375,
+                922.251953125
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B3",
+              "pixels": [
+                495.6191101074219,
+                542.434814453125,
+                924.5323486328125,
+                1048.1036376953125
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "angle_degrees": 90,
+        "right_view": {
+          "location": [
+            10005.0,
+            0.0,
+            90.0
+          ],
+          "rotation": [
+            -2.2351736461700966e-08,
+            -2.2351736461700966e-08,
+            0.7071067690849304,
+            0.7071067690849304
+          ],
+          "distance": 300.0,
+          "perspective": "PERSP",
+          "camera_zoom": 8.706119537353516,
+          "camera_offset": [
+            1.7831000150181353e-05,
+            0.0391840897500515
+          ],
+          "lens": 45.0,
+          "camera": "SplitMappoTexture.Camera",
+          "lock_object": null,
+          "lock_cursor": false,
+          "lock_camera": false
+        },
+        "center_error_m": 0.0,
+        "full_rotor_pixels": {
+          "region_size": [
+            1074,
+            1854
+          ],
+          "blades": [
+            {
+              "object": "SplitMappoTexture.B1",
+              "pixels": [
+                528.8551635742188,
+                544.8244018554688,
+                923.4798583984375,
+                1055.37353515625
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B2",
+              "pixels": [
+                516.8727416992188,
+                543.0211181640625,
+                687.2100830078125,
+                922.2598266601562
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B3",
+              "pixels": [
+                529.4343872070312,
+                544.7715454101562,
+                924.533203125,
+                1047.58935546875
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "angle_degrees": 105,
+        "right_view": {
+          "location": [
+            10005.0,
+            0.0,
+            90.0
+          ],
+          "rotation": [
+            -0.09229598194360733,
+            -0.09229598194360733,
+            0.7010573744773865,
+            0.7010573744773865
+          ],
+          "distance": 300.0,
+          "perspective": "PERSP",
+          "camera_zoom": 8.706119537353516,
+          "camera_offset": [
+            1.7831000150181353e-05,
+            0.0391840897500515
+          ],
+          "lens": 45.0,
+          "camera": "SplitMappoTexture.Camera",
+          "lock_object": null,
+          "lock_cursor": false,
+          "lock_camera": false
+        },
+        "center_error_m": 0.0,
+        "full_rotor_pixels": {
+          "region_size": [
+            1074,
+            1854
+          ],
+          "blades": [
+            {
+              "object": "SplitMappoTexture.B1",
+              "pixels": [
+                467.9319763183594,
+                542.310546875,
+                923.4812622070312,
+                1054.402099609375
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B2",
+              "pixels": [
+                519.3017578125,
+                543.1520385742188,
+                688.1727905273438,
+                922.266845703125
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B3",
+              "pixels": [
+                531.6566772460938,
+                584.4039306640625,
+                924.5327758789062,
+                1048.2803955078125
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "angle_degrees": 120,
+        "right_view": {
+          "location": [
+            10005.0,
+            0.0,
+            90.0
+          ],
+          "rotation": [
+            -0.1830127239227295,
+            -0.1830127239227295,
+            0.6830126643180847,
+            0.6830126643180847
+          ],
+          "distance": 300.0,
+          "perspective": "PERSP",
+          "camera_zoom": 8.706119537353516,
+          "camera_offset": [
+            1.7831000150181353e-05,
+            0.0391840897500515
+          ],
+          "lens": 45.0,
+          "camera": "SplitMappoTexture.Camera",
+          "lock_object": null,
+          "lock_cursor": false,
+          "lock_camera": false
+        },
+        "center_error_m": 0.0,
+        "full_rotor_pixels": {
+          "region_size": [
+            1074,
+            1854
+          ],
+          "blades": [
+            {
+              "object": "SplitMappoTexture.B1",
+              "pixels": [
+                405.5337219238281,
+                540.506591796875,
+                923.4842529296875,
+                1051.552978515625
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B2",
+              "pixels": [
+                521.641845703125,
+                543.3119506835938,
+                688.930419921875,
+                922.2726440429688
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B3",
+              "pixels": [
+                533.2620849609375,
+                626.6414794921875,
+                924.5311279296875,
+                1050.1700439453125
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "angle_degrees": 135,
+        "right_view": {
+          "location": [
+            10005.0,
+            0.0,
+            90.0
+          ],
+          "rotation": [
+            -0.27059805393218994,
+            -0.27059805393218994,
+            0.6532814502716064,
+            0.6532814502716064
+          ],
+          "distance": 300.0,
+          "perspective": "PERSP",
+          "camera_zoom": 8.706119537353516,
+          "camera_offset": [
+            1.7831000150181353e-05,
+            0.0391840897500515
+          ],
+          "lens": 45.0,
+          "camera": "SplitMappoTexture.Camera",
+          "lock_object": null,
+          "lock_cursor": false,
+          "lock_camera": false
+        },
+        "center_error_m": 0.0,
+        "full_rotor_pixels": {
+          "region_size": [
+            1074,
+            1854
+          ],
+          "blades": [
+            {
+              "object": "SplitMappoTexture.B1",
+              "pixels": [
+                356.9967956542969,
+                538.5966186523438,
+                923.4886474609375,
+                1047.2476806640625
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B2",
+              "pixels": [
+                524.3930053710938,
+                543.5409545898438,
+                689.4354248046875,
+                922.2767333984375
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B3",
+              "pixels": [
+                534.9429931640625,
+                665.3182373046875,
+                924.5284423828125,
+                1053.235107421875
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "angle_degrees": 150,
+        "right_view": {
+          "location": [
+            10005.0,
+            0.0,
+            90.0
+          ],
+          "rotation": [
+            -0.3535534143447876,
+            -0.3535534143447876,
+            0.6123723983764648,
+            0.6123723983764648
+          ],
+          "distance": 300.0,
+          "perspective": "PERSP",
+          "camera_zoom": 8.706119537353516,
+          "camera_offset": [
+            1.7831000150181353e-05,
+            0.0391840897500515
+          ],
+          "lens": 45.0,
+          "camera": "SplitMappoTexture.Camera",
+          "lock_object": null,
+          "lock_cursor": false,
+          "lock_camera": false
+        },
+        "center_error_m": 0.0,
+        "full_rotor_pixels": {
+          "region_size": [
+            1074,
+            1854
+          ],
+          "blades": [
+            {
+              "object": "SplitMappoTexture.B1",
+              "pixels": [
+                325.74322509765625,
+                536.808349609375,
+                923.494140625,
+                1042.048583984375
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B2",
+              "pixels": [
+                526.4585571289062,
+                544.431884765625,
+                689.6572875976562,
+                922.2789306640625
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B3",
+              "pixels": [
+                536.4913940429688,
+                698.2183227539062,
+                924.5247802734375,
+                1057.422119140625
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "angle_degrees": 165,
+        "right_view": {
+          "location": [
+            10005.0,
+            0.0,
+            90.0
+          ],
+          "rotation": [
+            -0.43045932054519653,
+            -0.43045932054519653,
+            0.5609855055809021,
+            0.5609855055809021
+          ],
+          "distance": 300.0,
+          "perspective": "PERSP",
+          "camera_zoom": 8.706119537353516,
+          "camera_offset": [
+            1.7831000150181353e-05,
+            0.0391840897500515
+          ],
+          "lens": 45.0,
+          "camera": "SplitMappoTexture.Camera",
+          "lock_object": null,
+          "lock_cursor": false,
+          "lock_camera": false
+        },
+        "center_error_m": 0.0,
+        "full_rotor_pixels": {
+          "region_size": [
+            1074,
+            1854
+          ],
+          "blades": [
+            {
+              "object": "SplitMappoTexture.B1",
+              "pixels": [
+                312.4379577636719,
+                535.416259765625,
+                923.5003051757812,
+                1036.5233154296875
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B2",
+              "pixels": [
+                526.9793090820312,
+                545.47021484375,
+                689.5813598632812,
+                922.279052734375
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B3",
+              "pixels": [
+                537.6322021484375,
+                723.0372314453125,
+                924.5204467773438,
+                1062.6259765625
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "angle_degrees": 180,
+        "right_view": {
+          "location": [
+            10005.0,
+            0.0,
+            90.0
+          ],
+          "rotation": [
+            -0.5,
+            -0.5,
+            0.5,
+            0.5
+          ],
+          "distance": 300.0,
+          "perspective": "PERSP",
+          "camera_zoom": 8.706119537353516,
+          "camera_offset": [
+            1.7831000150181353e-05,
+            0.0391840897500515
+          ],
+          "lens": 45.0,
+          "camera": "SplitMappoTexture.Camera",
+          "lock_object": null,
+          "lock_cursor": false,
+          "lock_camera": false
+        },
+        "center_error_m": 0.0,
+        "full_rotor_pixels": {
+          "region_size": [
+            1074,
+            1854
+          ],
+          "blades": [
+            {
+              "object": "SplitMappoTexture.B1",
+              "pixels": [
+                315.7032165527344,
+                534.8732299804688,
+                923.5068359375,
+                1031.146728515625
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B2",
+              "pixels": [
+                527.76025390625,
+                550.0681762695312,
+                689.2129516601562,
+                922.2770385742188
+              ]
+            },
+            {
+              "object": "SplitMappoTexture.B3",
+              "pixels": [
+                538.0513305664062,
+                737.2947998046875,
+                924.5156860351562,
+                1068.658447265625
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "front_back_direction_dot": -1.0
+  },
+  "default_camera_exit": {
+    "operator": "view3d.view_camera",
+    "before": {
+      "location": [
+        10005.0,
+        0.0,
+        90.0
+      ],
+      "rotation": [
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "distance": 300.0,
+      "perspective": "CAMERA",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 45.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "after": {
+      "location": [
+        10005.0,
+        0.0,
+        90.0
+      ],
+      "rotation": [
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "distance": 300.0,
+      "perspective": "PERSP",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 45.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "center_error_m": 0.0,
+    "full_rotor_pixels": {
+      "region_size": [
+        1074,
+        1854
+      ],
+      "blades": [
+        {
+          "object": "SplitMappoTexture.B1",
+          "pixels": [
+            539.1278686523438,
+            757.8760986328125,
+            923.5029296875,
+            1030.9205322265625
+          ]
+        },
+        {
+          "object": "SplitMappoTexture.B2",
+          "pixels": [
+            523.4867553710938,
+            546.2937622070312,
+            681.0888671875,
+            922.2191772460938
+          ]
+        },
+        {
+          "object": "SplitMappoTexture.B3",
+          "pixels": [
+            337.9129943847656,
+            535.949462890625,
+            924.5140380859375,
+            1067.7318115234375
+          ]
+        }
+      ]
+    }
+  },
+  "native-camera-exit-free-view": {
+    "frame": 52,
+    "index": 8,
+    "detail": false,
+    "right_view": {
+      "location": [
+        10005.0,
+        0.0,
+        90.0
+      ],
+      "rotation": [
+        0.5,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "distance": 300.0,
+      "perspective": "PERSP",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 45.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/same-source-navigation-fix-20261008-a01/orbit-after02/native-camera-exit-free-view.png"
+  },
+  "orbit_view": {
+    "location": [
+      10005.0,
+      0.0,
+      90.0
+    ],
+    "rotation": [
+      -0.5,
+      -0.5,
+      0.5,
+      0.5
+    ],
+    "distance": 300.0,
+    "perspective": "PERSP",
+    "camera_zoom": 8.706119537353516,
+    "camera_offset": [
+      1.7831000150181353e-05,
+      0.0391840897500515
+    ],
+    "lens": 45.0,
+    "camera": "SplitMappoTexture.Camera",
+    "lock_object": null,
+    "lock_cursor": false,
+    "lock_camera": false
+  },
+  "native-orbit-back-full-rotor": {
+    "frame": 52,
+    "index": 8,
+    "detail": false,
+    "right_view": {
+      "location": [
+        10005.0,
+        0.0,
+        90.0
+      ],
+      "rotation": [
+        -0.5,
+        -0.5,
+        0.5,
+        0.5
+      ],
+      "distance": 300.0,
+      "perspective": "PERSP",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 45.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/same-source-navigation-fix-20261008-a01/orbit-after02/native-orbit-back-full-rotor.png",
+    "full_rotor_pixels": {
+      "region_size": [
+        1074,
+        1854
+      ],
+      "blades": [
+        {
+          "object": "SplitMappoTexture.B1",
+          "pixels": [
+            315.7032165527344,
+            534.8732299804688,
+            923.5068359375,
+            1031.146728515625
+          ]
+        },
+        {
+          "object": "SplitMappoTexture.B2",
+          "pixels": [
+            527.76025390625,
+            550.0681762695312,
+            689.2129516601562,
+            922.2770385742188
+          ]
+        },
+        {
+          "object": "SplitMappoTexture.B3",
+          "pixels": [
+            538.0513305664062,
+            737.2947998046875,
+            924.5156860351562,
+            1068.658447265625
+          ]
+        }
+      ]
+    }
+  },
+  "default_play": {
+    "start": {
+      "left": [
+        "6452fb5b705d51c5c6dbc6b4c1c9ed6bb14e5e8603405a14fbdaac8a89353050",
+        "569a687a0557246158d4c88906dc1bd07f612a3db55928d731341241af5fcc2e",
+        "6e3d320641e3f1b4f2a0560002b269f96df5dd3a5b20a182a3239c5e3d24e551"
+      ],
+      "right": [
+        "d2d9ad6eb0c48b97c2a8359a50c37d0cf09df4f8e81749593324955ea846e044",
+        "1cecb01fda5620338e52e92c012100436f562b104a1a9ccca298571f24111256",
+        "bdee1d087c7f40fd2cf53b91dbe07d3e5193ece2f2817be5a14a91da0aa13b02"
+      ],
+      "frame": 52,
+      "index": 8
+    },
+    "observed": [
+      {
+        "motion": {
+          "left": [
+            "fb8c62e8f4b27adca51131d9c7af993f5695d1eee4491f68917d6428470c2d88",
+            "ad46fb390b0ed1a18760743061a074cb3c8a131f37eca1dbc5ffa699a8ed8eef",
+            "452e474111baecf992a6e0d193436767174b3972c439a9782fdf98690135eed5"
+          ],
+          "right": [
+            "338d457c88bdaed7f27e9c9f1c1cf22ed62a2115bc5d4fc29d7b743daf52932e",
+            "c4bc4bb8adcd17ce5d382c5e93ab2cf2f9345f6cac9aa2dc16c9e03c5069daf4",
+            "74954b0257c389d07a2ddc1d54891d1e00f3e76bdcee93e2c37108a250b77718"
+          ],
+          "frame": 70,
+          "index": 11
+        },
+        "clock": {
+          "frame": 70,
+          "index": 11,
+          "relative_time_s": 1.1,
+          "timeline_time_s": 118.15,
+          "held_sample_time_s": 118.1,
+          "age_ms": 50.0,
+          "original_and_texture_evaluated_geometry_bit_identical": true,
+          "max_saved_model_to_native_evaluation_difference_m": 7.598956585752603e-06,
+          "native_evaluation": [
+            {
+              "blade": 1,
+              "same_source_eval_time": 110.00001525878906,
+              "original_eval_time": 110.00001525878906,
+              "same_source_key_time": 110.00001525878906,
+              "original_key_time": 110.00001525878906,
+              "model_to_original_native_difference_m": 3.812081914134069e-06
+            },
+            {
+              "blade": 2,
+              "same_source_eval_time": 110.00001525878906,
+              "original_eval_time": 110.00001525878906,
+              "same_source_key_time": 110.00001525878906,
+              "original_key_time": 110.00001525878906,
+              "model_to_original_native_difference_m": 3.81065103738365e-06
+            },
+            {
+              "blade": 3,
+              "same_source_eval_time": 110.00001525878906,
+              "original_eval_time": 110.00001525878906,
+              "same_source_key_time": 110.00001525878906,
+              "original_key_time": 110.00001525878906,
+              "model_to_original_native_difference_m": 7.598956585752603e-06
+            }
+          ],
+          "max_left_bound_package_error_m": 8.58697538319575e-06
+        },
+        "right_view": {
+          "location": [
+            10005.0,
+            0.0,
+            90.0
+          ],
+          "rotation": [
+            -0.5,
+            -0.5,
+            0.5,
+            0.5
+          ],
+          "distance": 300.0,
+          "perspective": "PERSP",
+          "camera_zoom": 8.706119537353516,
+          "camera_offset": [
+            1.7831000150181353e-05,
+            0.0391840897500515
+          ],
+          "lens": 45.0,
+          "camera": "SplitMappoTexture.Camera",
+          "lock_object": null,
+          "lock_cursor": false,
+          "lock_camera": false
+        }
+      },
+      {
+        "motion": {
+          "left": [
+            "987c1cef0f7c3e9d6b9efcccb1f5f1f1652d2ddc1fda017d4e3c66f22c4f4d5a",
+            "53dd0c679eade47cb734d75876498f3da719cfab99e95af1fd08f332803580a7",
+            "0d1a6d2436bdd8ae244571f84eafe7379e6db25861e898bd96a21dd8d2090f7a"
+          ],
+          "right": [
+            "4b0f1329e84818c043407e9fecd2cf3de21e74dc38188f5425d13762adfe6e7e",
+            "e6af591f7b4d31cfbd69355a62bc3f8bb66e0693236c1670ec0e59ec91c8af4e",
+            "8c0c5ea150830efa90f49715047bd721244c99436970cfe70b8a92762cafb970"
+          ],
+          "frame": 83,
+          "index": 13
+        },
+        "clock": {
+          "frame": 83,
+          "index": 13,
+          "relative_time_s": 1.3,
+          "timeline_time_s": 118.36666666666666,
+          "held_sample_time_s": 118.3,
+          "age_ms": 66.66666666666667,
+          "original_and_texture_evaluated_geometry_bit_identical": true,
+          "max_saved_model_to_native_evaluation_difference_m": 7.62035750767609e-06,
+          "native_evaluation": [
+            {
+              "blade": 1,
+              "same_source_eval_time": 130.00001525878906,
+              "original_eval_time": 130.00001525878906,
+              "same_source_key_time": 130.00001525878906,
+              "original_key_time": 130.00001525878906,
+              "model_to_original_native_difference_m": 3.8134578232984495e-06
+            },
+            {
+              "blade": 2,
+              "same_source_eval_time": 130.00001525878906,
+              "original_eval_time": 130.00001525878906,
+              "same_source_key_time": 130.00001525878906,
+              "original_key_time": 130.00001525878906,
+              "model_to_original_native_difference_m": 3.8096565333489707e-06
+            },
+            {
+              "blade": 3,
+              "same_source_eval_time": 130.00001525878906,
+              "original_eval_time": 130.00001525878906,
+              "same_source_key_time": 130.00001525878906,
+              "original_key_time": 130.00001525878906,
+              "model_to_original_native_difference_m": 7.62035750767609e-06
+            }
+          ],
+          "max_left_bound_package_error_m": 1.0358587616110526e-05
+        },
+        "right_view": {
+          "location": [
+            10005.0,
+            0.0,
+            90.0
+          ],
+          "rotation": [
+            -0.5,
+            -0.5,
+            0.5,
+            0.5
+          ],
+          "distance": 300.0,
+          "perspective": "PERSP",
+          "camera_zoom": 8.706119537353516,
+          "camera_offset": [
+            1.7831000150181353e-05,
+            0.0391840897500515
+          ],
+          "lens": 45.0,
+          "camera": "SplitMappoTexture.Camera",
+          "lock_object": null,
+          "lock_cursor": false,
+          "lock_camera": false
+        }
+      }
+    ],
+    "operator": "wfrl.clearance_playback",
+    "pause": {
+      "left": [
+        "987c1cef0f7c3e9d6b9efcccb1f5f1f1652d2ddc1fda017d4e3c66f22c4f4d5a",
+        "53dd0c679eade47cb734d75876498f3da719cfab99e95af1fd08f332803580a7",
+        "0d1a6d2436bdd8ae244571f84eafe7379e6db25861e898bd96a21dd8d2090f7a"
+      ],
+      "right": [
+        "4b0f1329e84818c043407e9fecd2cf3de21e74dc38188f5425d13762adfe6e7e",
+        "e6af591f7b4d31cfbd69355a62bc3f8bb66e0693236c1670ec0e59ec91c8af4e",
+        "8c0c5ea150830efa90f49715047bd721244c99436970cfe70b8a92762cafb970"
+      ],
+      "frame": 83,
+      "index": 13
+    }
+  },
+  "default-paused-back-full-rotor": {
+    "frame": 83,
+    "index": 13,
+    "detail": false,
+    "right_view": {
+      "location": [
+        10005.0,
+        0.0,
+        90.0
+      ],
+      "rotation": [
+        -0.5,
+        -0.5,
+        0.5,
+        0.5
+      ],
+      "distance": 300.0,
+      "perspective": "PERSP",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 45.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/same-source-navigation-fix-20261008-a01/orbit-after02/default-paused-back-full-rotor.png",
+    "full_rotor_pixels": {
+      "region_size": [
+        1074,
+        1854
+      ],
+      "blades": [
+        {
+          "object": "SplitMappoTexture.B1",
+          "pixels": [
+            297.2115478515625,
+            532.0825805664062,
+            894.5860595703125,
+            933.6749267578125
+          ]
+        },
+        {
+          "object": "SplitMappoTexture.B2",
+          "pixels": [
+            534.9313354492188,
+            678.42138671875,
+            733.063720703125,
+            926.5081787109375
+          ]
+        },
+        {
+          "object": "SplitMappoTexture.B3",
+          "pixels": [
+            533.0442504882812,
+            629.7962036132812,
+            929.5761108398438,
+            1154.5936279296875
+          ]
+        }
+      ]
+    }
+  },
+  "explicit-detail-before-navigation": {
+    "frame": 52,
+    "index": 8,
+    "detail": true,
+    "right_view": {
+      "location": [
+        10009.6884765625,
+        -1.3730345964431763,
+        43.049190521240234
+      ],
+      "rotation": [
+        0.5004319548606873,
+        -0.5460366606712341,
+        -0.4774186611175537,
+        0.47274017333984375
+      ],
+      "distance": 2.700000047683716,
+      "perspective": "ORTHO",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 50.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/same-source-navigation-fix-20261008-a01/orbit-after02/explicit-detail-before-navigation.png"
+  },
+  "detail_native_orbit": {
+    "before": {
+      "location": [
+        10009.6884765625,
+        -1.3730345964431763,
+        43.049190521240234
+      ],
+      "rotation": [
+        0.5004319548606873,
+        -0.5460366606712341,
+        -0.4774186611175537,
+        0.47274017333984375
+      ],
+      "distance": 2.700000047683716,
+      "perspective": "ORTHO",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 50.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "target_m": [
+      10009.6884765625,
+      -1.3730345964431763,
+      43.049190521240234
+    ],
+    "target_before": {
+      "target_m": [
+        10009.6884765625,
+        -1.3730345964431763,
+        43.049190521240234
+      ],
+      "pixels": [
+        537.0089111328125,
+        926.9984741210938
+      ],
+      "region_size": [
+        1074,
+        1854
+      ]
+    },
+    "operator": "view3d.view_orbit",
+    "type": "ORBITRIGHT",
+    "angle_degrees": 15.0,
+    "target_after": {
+      "target_m": [
+        10009.6884765625,
+        -1.3730345964431763,
+        43.049190521240234
+      ],
+      "pixels": [
+        537.0264282226562,
+        926.9962768554688
+      ],
+      "region_size": [
+        1074,
+        1854
+      ]
+    },
+    "after": {
+      "location": [
+        10009.6884765625,
+        -1.3730345964431763,
+        43.049190521240234
+      ],
+      "rotation": [
+        0.43444567918777466,
+        -0.47904956340789795,
+        -0.5446063280105591,
+        0.5340152382850647
+      ],
+      "distance": 2.700000047683716,
+      "perspective": "ORTHO",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 50.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "clock": {
+      "frame": 52,
+      "index": 8,
+      "relative_time_s": 0.8,
+      "timeline_time_s": 117.85,
+      "held_sample_time_s": 117.8,
+      "age_ms": 50.0,
+      "original_and_texture_evaluated_geometry_bit_identical": true,
+      "max_saved_model_to_native_evaluation_difference_m": 3.812899237232159e-06,
+      "native_evaluation": [
+        {
+          "blade": 1,
+          "same_source_eval_time": 80.00000762939453,
+          "original_eval_time": 80.00000762939453,
+          "same_source_key_time": 80.00000762939453,
+          "original_key_time": 80.00000762939453,
+          "model_to_original_native_difference_m": 3.8098922203744223e-06
+        },
+        {
+          "blade": 2,
+          "same_source_eval_time": 80.00000762939453,
+          "original_eval_time": 80.00000762939453,
+          "same_source_key_time": 80.00000762939453,
+          "original_key_time": 80.00000762939453,
+          "model_to_original_native_difference_m": 3.812899237232159e-06
+        },
+        {
+          "blade": 3,
+          "same_source_eval_time": 80.00000762939453,
+          "original_eval_time": 80.00000762939453,
+          "same_source_key_time": 80.00000762939453,
+          "original_key_time": 80.00000762939453,
+          "model_to_original_native_difference_m": 3.812135560110619e-06
+        }
+      ],
+      "max_left_bound_package_error_m": 1.0912993211320554e-05
+    },
+    "target_after_release": {
+      "target_m": [
+        10009.6884765625,
+        -1.3730345964431763,
+        43.049190521240234
+      ],
+      "pixels": [
+        537.0264282226562,
+        926.9962768554688
+      ],
+      "region_size": [
+        1074,
+        1854
+      ]
+    }
+  },
+  "detail-native-orbit-released": {
+    "frame": 52,
+    "index": 8,
+    "detail": false,
+    "right_view": {
+      "location": [
+        10009.6884765625,
+        -1.3730345964431763,
+        43.049190521240234
+      ],
+      "rotation": [
+        0.43444567918777466,
+        -0.47904956340789795,
+        -0.5446063280105591,
+        0.5340152382850647
+      ],
+      "distance": 2.700000047683716,
+      "perspective": "ORTHO",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 50.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/same-source-navigation-fix-20261008-a01/orbit-after02/detail-native-orbit-released.png"
+  },
+  "manual_view": {
+    "location": [
+      10005.0,
+      1.75,
+      88.75
+    ],
+    "rotation": [
+      0.44499671459198,
+      0.44499671459198,
+      0.5495252013206482,
+      0.5495252013206482
+    ],
+    "distance": 380.0,
+    "perspective": "PERSP",
+    "camera_zoom": 8.706119537353516,
+    "camera_offset": [
+      1.7831000150181353e-05,
+      0.0391840897500515
+    ],
+    "lens": 50.0,
+    "camera": "SplitMappoTexture.Camera",
+    "lock_object": null,
+    "lock_cursor": false,
+    "lock_camera": false
+  },
+  "manual_resume": {
+    "start": {
+      "left": [
+        "6452fb5b705d51c5c6dbc6b4c1c9ed6bb14e5e8603405a14fbdaac8a89353050",
+        "569a687a0557246158d4c88906dc1bd07f612a3db55928d731341241af5fcc2e",
+        "6e3d320641e3f1b4f2a0560002b269f96df5dd3a5b20a182a3239c5e3d24e551"
+      ],
+      "right": [
+        "d2d9ad6eb0c48b97c2a8359a50c37d0cf09df4f8e81749593324955ea846e044",
+        "1cecb01fda5620338e52e92c012100436f562b104a1a9ccca298571f24111256",
+        "bdee1d087c7f40fd2cf53b91dbe07d3e5193ece2f2817be5a14a91da0aa13b02"
+      ],
+      "frame": 52,
+      "index": 8
+    },
+    "observed": [
+      {
+        "motion": {
+          "left": [
+            "fb8c62e8f4b27adca51131d9c7af993f5695d1eee4491f68917d6428470c2d88",
+            "ad46fb390b0ed1a18760743061a074cb3c8a131f37eca1dbc5ffa699a8ed8eef",
+            "452e474111baecf992a6e0d193436767174b3972c439a9782fdf98690135eed5"
+          ],
+          "right": [
+            "338d457c88bdaed7f27e9c9f1c1cf22ed62a2115bc5d4fc29d7b743daf52932e",
+            "c4bc4bb8adcd17ce5d382c5e93ab2cf2f9345f6cac9aa2dc16c9e03c5069daf4",
+            "74954b0257c389d07a2ddc1d54891d1e00f3e76bdcee93e2c37108a250b77718"
+          ],
+          "frame": 70,
+          "index": 11
+        },
+        "clock": {
+          "frame": 70,
+          "index": 11,
+          "relative_time_s": 1.1,
+          "timeline_time_s": 118.15,
+          "held_sample_time_s": 118.1,
+          "age_ms": 50.0,
+          "original_and_texture_evaluated_geometry_bit_identical": true,
+          "max_saved_model_to_native_evaluation_difference_m": 7.598956585752603e-06,
+          "native_evaluation": [
+            {
+              "blade": 1,
+              "same_source_eval_time": 110.00001525878906,
+              "original_eval_time": 110.00001525878906,
+              "same_source_key_time": 110.00001525878906,
+              "original_key_time": 110.00001525878906,
+              "model_to_original_native_difference_m": 3.812081914134069e-06
+            },
+            {
+              "blade": 2,
+              "same_source_eval_time": 110.00001525878906,
+              "original_eval_time": 110.00001525878906,
+              "same_source_key_time": 110.00001525878906,
+              "original_key_time": 110.00001525878906,
+              "model_to_original_native_difference_m": 3.81065103738365e-06
+            },
+            {
+              "blade": 3,
+              "same_source_eval_time": 110.00001525878906,
+              "original_eval_time": 110.00001525878906,
+              "same_source_key_time": 110.00001525878906,
+              "original_key_time": 110.00001525878906,
+              "model_to_original_native_difference_m": 7.598956585752603e-06
+            }
+          ],
+          "max_left_bound_package_error_m": 8.58697538319575e-06
+        },
+        "right_view": {
+          "location": [
+            10005.0,
+            1.75,
+            88.75
+          ],
+          "rotation": [
+            0.44499671459198,
+            0.44499671459198,
+            0.5495252013206482,
+            0.5495252013206482
+          ],
+          "distance": 380.0,
+          "perspective": "PERSP",
+          "camera_zoom": 8.706119537353516,
+          "camera_offset": [
+            1.7831000150181353e-05,
+            0.0391840897500515
+          ],
+          "lens": 50.0,
+          "camera": "SplitMappoTexture.Camera",
+          "lock_object": null,
+          "lock_cursor": false,
+          "lock_camera": false
+        }
+      },
+      {
+        "motion": {
+          "left": [
+            "9b7386aa9e581cd84b29f75ea9f022e81f10190600a8037b10e1908e61494bb2",
+            "bef1be15fb2cc0482cb01d739dfbcc95692b602c4b26c6f56370778f92d211c7",
+            "e555c618a68f32308ba15fbc1bbe1e85762134bcb78bbb287bf24adf5c20e4c8"
+          ],
+          "right": [
+            "5134b993f0caf3073a05b2df0c3b3042ec1177c13ba00b382d421dbf6bf1b51e",
+            "8390c374eb85ba110cd254a405ddb1ab1fb6870ed86c50ec5127d91ca9af3f35",
+            "5e7096354d66a972bd4291db4748a86781660cd03bc9360dbbf2330bf5cadb7e"
+          ],
+          "frame": 103,
+          "index": 17
+        },
+        "clock": {
+          "frame": 103,
+          "index": 17,
+          "relative_time_s": 1.7,
+          "timeline_time_s": 118.7,
+          "held_sample_time_s": 118.7,
+          "age_ms": 0.0,
+          "original_and_texture_evaluated_geometry_bit_identical": true,
+          "max_saved_model_to_native_evaluation_difference_m": 7.584444659869405e-06,
+          "native_evaluation": [
+            {
+              "blade": 1,
+              "same_source_eval_time": 170.00003051757812,
+              "original_eval_time": 170.00003051757812,
+              "same_source_key_time": 170.00003051757812,
+              "original_key_time": 170.00003051757812,
+              "model_to_original_native_difference_m": 3.814061571461025e-06
+            },
+            {
+              "blade": 2,
+              "same_source_eval_time": 170.00003051757812,
+              "original_eval_time": 170.00003051757812,
+              "same_source_key_time": 170.00003051757812,
+              "original_key_time": 170.00003051757812,
+              "model_to_original_native_difference_m": 3.8046708255023987e-06
+            },
+            {
+              "blade": 3,
+              "same_source_eval_time": 170.00003051757812,
+              "original_eval_time": 170.00003051757812,
+              "same_source_key_time": 170.00003051757812,
+              "original_key_time": 170.00003051757812,
+              "model_to_original_native_difference_m": 7.584444659869405e-06
+            }
+          ],
+          "max_left_bound_package_error_m": 8.442306217659734e-06
+        },
+        "right_view": {
+          "location": [
+            10005.0,
+            1.75,
+            88.75
+          ],
+          "rotation": [
+            0.44499671459198,
+            0.44499671459198,
+            0.5495252013206482,
+            0.5495252013206482
+          ],
+          "distance": 380.0,
+          "perspective": "PERSP",
+          "camera_zoom": 8.706119537353516,
+          "camera_offset": [
+            1.7831000150181353e-05,
+            0.0391840897500515
+          ],
+          "lens": 50.0,
+          "camera": "SplitMappoTexture.Camera",
+          "lock_object": null,
+          "lock_cursor": false,
+          "lock_camera": false
+        }
+      }
+    ],
+    "operator": "wfrl.clearance_playback",
+    "pause": {
+      "left": [
+        "9b7386aa9e581cd84b29f75ea9f022e81f10190600a8037b10e1908e61494bb2",
+        "bef1be15fb2cc0482cb01d739dfbcc95692b602c4b26c6f56370778f92d211c7",
+        "e555c618a68f32308ba15fbc1bbe1e85762134bcb78bbb287bf24adf5c20e4c8"
+      ],
+      "right": [
+        "5134b993f0caf3073a05b2df0c3b3042ec1177c13ba00b382d421dbf6bf1b51e",
+        "8390c374eb85ba110cd254a405ddb1ab1fb6870ed86c50ec5127d91ca9af3f35",
+        "5e7096354d66a972bd4291db4748a86781660cd03bc9360dbbf2330bf5cadb7e"
+      ],
+      "frame": 103,
+      "index": 17
+    }
+  },
+  "manual-full-rotor-after-resume": {
+    "frame": 103,
+    "index": 17,
+    "detail": false,
+    "right_view": {
+      "location": [
+        10005.0,
+        1.75,
+        88.75
+      ],
+      "rotation": [
+        0.44499671459198,
+        0.44499671459198,
+        0.5495252013206482,
+        0.5495252013206482
+      ],
+      "distance": 380.0,
+      "perspective": "PERSP",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 50.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/same-source-navigation-fix-20261008-a01/orbit-after02/manual-full-rotor-after-resume.png",
+    "full_rotor_pixels": {
+      "region_size": [
+        1074,
+        1854
+      ],
+      "blades": [
+        {
+          "object": "SplitMappoTexture.B1",
+          "pixels": [
+            531.6297607421875,
+            710.74072265625,
+            810.361083984375,
+            933.5179443359375
+          ]
+        },
+        {
+          "object": "SplitMappoTexture.B2",
+          "pixels": [
+            345.0911560058594,
+            529.4284057617188,
+            834.2244873046875,
+            934.3408813476562
+          ]
+        },
+        {
+          "object": "SplitMappoTexture.B3",
+          "pixels": [
+            524.0679931640625,
+            546.3171997070312,
+            935.8442993164062,
+            1145.1986083984375
+          ]
+        }
+      ]
+    }
+  },
+  "native_seeks": [
+    {
+      "frame": 901,
+      "index": 150,
+      "relative_time_s": 15.0,
+      "timeline_time_s": 132.0,
+      "held_sample_time_s": 132.0,
+      "age_ms": 0.0,
+      "original_and_texture_evaluated_geometry_bit_identical": true,
+      "max_saved_model_to_native_evaluation_difference_m": 3.8139219782351574e-06,
+      "native_evaluation": [
+        {
+          "blade": 1,
+          "same_source_eval_time": 1500.0020751953125,
+          "original_eval_time": 1500.0020751953125,
+          "same_source_key_time": 1500.0020751953125,
+          "original_key_time": 1500.0020751953125,
+          "model_to_original_native_difference_m": 3.812133257952155e-06
+        },
+        {
+          "blade": 2,
+          "same_source_eval_time": 1500.0020751953125,
+          "original_eval_time": 1500.0020751953125,
+          "same_source_key_time": 1500.0020751953125,
+          "original_key_time": 1500.0020751953125,
+          "model_to_original_native_difference_m": 3.8139219782351574e-06
+        },
+        {
+          "blade": 3,
+          "same_source_eval_time": 1500.0020751953125,
+          "original_eval_time": 1500.0020751953125,
+          "same_source_key_time": 1500.0020751953125,
+          "original_key_time": 1500.0020751953125,
+          "model_to_original_native_difference_m": 3.810081793176323e-06
+        }
+      ],
+      "max_left_bound_package_error_m": 6.126360119651508e-06
+    },
+    {
+      "frame": 52,
+      "index": 8,
+      "relative_time_s": 0.8,
+      "timeline_time_s": 117.85,
+      "held_sample_time_s": 117.8,
+      "age_ms": 50.0,
+      "original_and_texture_evaluated_geometry_bit_identical": true,
+      "max_saved_model_to_native_evaluation_difference_m": 3.812899237232159e-06,
+      "native_evaluation": [
+        {
+          "blade": 1,
+          "same_source_eval_time": 80.00000762939453,
+          "original_eval_time": 80.00000762939453,
+          "same_source_key_time": 80.00000762939453,
+          "original_key_time": 80.00000762939453,
+          "model_to_original_native_difference_m": 3.8098922203744223e-06
+        },
+        {
+          "blade": 2,
+          "same_source_eval_time": 80.00000762939453,
+          "original_eval_time": 80.00000762939453,
+          "same_source_key_time": 80.00000762939453,
+          "original_key_time": 80.00000762939453,
+          "model_to_original_native_difference_m": 3.812899237232159e-06
+        },
+        {
+          "blade": 3,
+          "same_source_eval_time": 80.00000762939453,
+          "original_eval_time": 80.00000762939453,
+          "same_source_key_time": 80.00000762939453,
+          "original_key_time": 80.00000762939453,
+          "model_to_original_native_difference_m": 3.812135560110619e-06
+        }
+      ],
+      "max_left_bound_package_error_m": 1.0912993211320554e-05
+    }
+  ],
+  "sample_step": {
+    "frame": 55,
+    "index": 9,
+    "relative_time_s": 0.9,
+    "timeline_time_s": 117.9,
+    "held_sample_time_s": 117.9,
+    "age_ms": 0.0,
+    "original_and_texture_evaluated_geometry_bit_identical": true,
+    "max_saved_model_to_native_evaluation_difference_m": 7.545790168705935e-06,
+    "native_evaluation": [
+      {
+        "blade": 1,
+        "same_source_eval_time": 90.00000762939453,
+        "original_eval_time": 90.00000762939453,
+        "same_source_key_time": 90.00000762939453,
+        "original_key_time": 90.00000762939453,
+        "model_to_original_native_difference_m": 3.810503443446578e-06
+      },
+      {
+        "blade": 2,
+        "same_source_eval_time": 90.00000762939453,
+        "original_eval_time": 90.00000762939453,
+        "same_source_key_time": 90.00000762939453,
+        "original_key_time": 90.00000762939453,
+        "model_to_original_native_difference_m": 3.805694106517876e-06
+      },
+      {
+        "blade": 3,
+        "same_source_eval_time": 90.00000762939453,
+        "original_eval_time": 90.00000762939453,
+        "same_source_key_time": 90.00000762939453,
+        "original_key_time": 90.00000762939453,
+        "model_to_original_native_difference_m": 7.545790168705935e-06
+      }
+    ],
+    "max_left_bound_package_error_m": 1.5107715164219826e-05
+  },
+  "current-restored-free-view": {
+    "frame": 55,
+    "index": 9,
+    "detail": false,
+    "right_view": {
+      "location": [
+        10005.0,
+        1.75,
+        88.75
+      ],
+      "rotation": [
+        0.44499671459198,
+        0.44499671459198,
+        0.5495252013206482,
+        0.5495252013206482
+      ],
+      "distance": 380.0,
+      "perspective": "PERSP",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 50.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/same-source-navigation-fix-20261008-a01/orbit-after02/current-restored-free-view.png",
+    "full_rotor_pixels": {
+      "region_size": [
+        1074,
+        1854
+      ],
+      "blades": [
+        {
+          "object": "SplitMappoTexture.B1",
+          "pixels": [
+            533.5128784179688,
+            736.6136474609375,
+            927.2894897460938,
+            1000.0122680664062
+          ]
+        },
+        {
+          "object": "SplitMappoTexture.B2",
+          "pixels": [
+            493.27935791015625,
+            535.9991455078125,
+            719.9071655273438,
+            927.6389770507812
+          ]
+        },
+        {
+          "object": "SplitMappoTexture.B3",
+          "pixels": [
+            381.499267578125,
+            531.4989624023438,
+            930.012939453125,
+            1071.8271484375
+          ]
+        }
+      ]
+    }
+  },
+  "saved": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/same-source-navigation-fix-20261008-a01/orbit-after02/same-source-saved.blend",
+  "reopen_clock": {
+    "frame": 55,
+    "index": 9,
+    "relative_time_s": 0.9,
+    "timeline_time_s": 117.9,
+    "held_sample_time_s": 117.9,
+    "age_ms": 0.0,
+    "original_and_texture_evaluated_geometry_bit_identical": true,
+    "max_saved_model_to_native_evaluation_difference_m": 7.545790168705935e-06,
+    "native_evaluation": [
+      {
+        "blade": 1,
+        "same_source_eval_time": 90.00000762939453,
+        "original_eval_time": 90.00000762939453,
+        "same_source_key_time": 90.00000762939453,
+        "original_key_time": 90.00000762939453,
+        "model_to_original_native_difference_m": 3.810503443446578e-06
+      },
+      {
+        "blade": 2,
+        "same_source_eval_time": 90.00000762939453,
+        "original_eval_time": 90.00000762939453,
+        "same_source_key_time": 90.00000762939453,
+        "original_key_time": 90.00000762939453,
+        "model_to_original_native_difference_m": 3.805694106517876e-06
+      },
+      {
+        "blade": 3,
+        "same_source_eval_time": 90.00000762939453,
+        "original_eval_time": 90.00000762939453,
+        "same_source_key_time": 90.00000762939453,
+        "original_key_time": 90.00000762939453,
+        "model_to_original_native_difference_m": 7.545790168705935e-06
+      }
+    ],
+    "max_left_bound_package_error_m": 1.5107715164219826e-05
+  },
+  "native-reopen-free-view": {
+    "frame": 55,
+    "index": 9,
+    "detail": false,
+    "right_view": {
+      "location": [
+        10005.0,
+        1.75,
+        88.75
+      ],
+      "rotation": [
+        0.44499671459198,
+        0.44499671459198,
+        0.5495252013206482,
+        0.5495252013206482
+      ],
+      "distance": 380.0,
+      "perspective": "PERSP",
+      "camera_zoom": 8.706119537353516,
+      "camera_offset": [
+        1.7831000150181353e-05,
+        0.0391840897500515
+      ],
+      "lens": 50.0,
+      "camera": "SplitMappoTexture.Camera",
+      "lock_object": null,
+      "lock_cursor": false,
+      "lock_camera": false
+    },
+    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/same-source-navigation-fix-20261008-a01/orbit-after02/native-reopen-free-view.png",
+    "full_rotor_pixels": {
+      "region_size": [
+        1074,
+        1854
+      ],
+      "blades": [
+        {
+          "object": "SplitMappoTexture.B1",
+          "pixels": [
+            533.5128784179688,
+            736.6136474609375,
+            927.2894897460938,
+            1000.0122680664062
+          ]
+        },
+        {
+          "object": "SplitMappoTexture.B2",
+          "pixels": [
+            493.27935791015625,
+            535.9991455078125,
+            719.9071655273438,
+            927.6389770507812
+          ]
+        },
+        {
+          "object": "SplitMappoTexture.B3",
+          "pixels": [
+            381.499267578125,
+            531.4989624023438,
+            930.012939453125,
+            1071.8271484375
+          ]
+        }
+      ]
+    }
+  },
+  "status": "PASS",
+  "error": null,
+  "blender": "5.2.1 LTS",
+  "addon_module": "bl_ext.user_default.wfrl_blender",
+  "addon_file": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "actual_module_root": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "blend": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/same-source-navigation-fix-20261008-a01/orbit-after02/same-source-saved.blend",
+  "verification": "INSTALLED_VISIBLE_WINDOW_NATIVE_ORBIT_PLAY_NAVIGATION_SEEK_STEP_CURRENT_SAVE_REOPEN",
+  "software_sync_and_navigation_only": true,
+  "reconstruction_accuracy_accepted": false,
+  "visible_window_left_open": false
+}

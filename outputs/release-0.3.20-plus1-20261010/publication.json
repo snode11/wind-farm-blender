@@ -1,0 +1,29 @@
+{
+  "status": "PUBLISHED",
+  "evidence": "gh release create exited 0 and returned release URL in this task; no post-upload asset verification",
+  "repo": "snode11/wind-farm-blender",
+  "remote": "blender-sync",
+  "tag": "v0.3.20.1",
+  "extension_version": "0.3.20+1",
+  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.20.1",
+  "target_commit": "8e49b84db1b28de49b61b12924d540ae37f11b8b",
+  "title": "NREL / WFRL 0.3.20+1 · 三相机默认复位修补",
+  "manual_assets": [
+    {
+      "name": "wfrl_blender-0.3.20+1.zip",
+      "local_pre_upload_bytes": 99010020,
+      "local_pre_upload_sha256": "e6e279f5f88c730f3c96158bfca525a9d04f1a09915ad3a997d1d29b00a9f5ba"
+    }
+  ],
+  "only_zip_uploaded": true,
+  "implementation_source_pushed": false,
+  "local_docs_pushed": false,
+  "public_extension_source_baseline": {
+    "tag": "v0.3.18",
+    "commit": "6dfa0eefe410ef3e38d3cbd9ee7d017aafa2fc02"
+  },
+  "automatic_source_archive_matches_current_implementation": false,
+  "release_notes": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.20-plus1-20261010/release-notes.md",
+  "attachment_downloaded_after_upload": false,
+  "remote_attachment_hash_or_bytes_rechecked": false
+}

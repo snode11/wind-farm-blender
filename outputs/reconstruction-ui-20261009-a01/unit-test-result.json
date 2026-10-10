@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "result": "62 passed, 104 subtests passed",
+  "command": "PYTHONPATH=blender_frontend:. outputs/reconstruction-ui-20261009-a01/test-env/bin/python -m pytest blender_frontend/tests/test_split_reconstruction.py blender_frontend/tests/test_split_reconstruction_timing.py blender_frontend/tests/test_split_mappo_texture.py blender_frontend/tests/test_split_texture_settings.py -q",
+  "runtime": "isolated output test-env using existing Python 3.12 trial environment system site packages",
+  "scope": "core mode switch, failure rollback, navigation, timing, simulated structure ownership, one-shot presets, per-source texture state",
+  "record_kind": "result recorded from the completed final implementation test run",
+  "additional_ui_stub_check": "ui-controls-check.json",
+  "native_window_check": "window-a02/reconstruction-workflow-window-validation.json",
+  "accuracy_accepted": false
+}

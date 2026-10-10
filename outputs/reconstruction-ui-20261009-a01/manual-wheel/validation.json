@@ -1,0 +1,49 @@
+{
+  "stage": 1,
+  "start": 1192913.050003291,
+  "deadline": 1193153.050003458,
+  "before": {
+    "location": [
+      10005.876953125,
+      0.0030422210693359375,
+      76.51571655273438
+    ],
+    "rotation": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+    ],
+    "distance": 354.3796691894531,
+    "perspective": "CAMERA",
+    "camera_zoom": 38.552303314208984,
+    "camera_offset": [
+      9.421560207556468e-06,
+      -0.0037275860086083412
+    ],
+    "lens": 50.0
+  },
+  "after": {
+    "location": [
+      10005.876953125,
+      0.0030422210693359375,
+      76.51571655273438
+    ],
+    "rotation": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+    ],
+    "distance": 354.3796691894531,
+    "perspective": "CAMERA",
+    "camera_zoom": 38.552303314208984,
+    "camera_offset": [
+      9.421560207556468e-06,
+      -0.0037275860086083412
+    ],
+    "lens": 50.0
+  },
+  "status": "FAIL",
+  "error": "Traceback (most recent call last):\n  File \"manual_wheel_probe.py\", line 29, in wheel_tick\nAssertionError: wheel did not change navigation\n"
+}

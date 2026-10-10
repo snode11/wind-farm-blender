@@ -1,0 +1,19 @@
+{
+  "status": "READY",
+  "frame": 88,
+  "module": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/split_reconstruction.py",
+  "perspective": "PERSP",
+  "location": [
+    10005.0,
+    0.0,
+    90.0
+  ],
+  "rotation": [
+    -0.5,
+    -0.5,
+    0.5,
+    0.5
+  ],
+  "distance": 208.3333282470703,
+  "detail": false
+}

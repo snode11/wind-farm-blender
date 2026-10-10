@@ -1,0 +1,88 @@
+{
+  "status": "PASS_WITH_RECORDED_SCOPE",
+  "recorded_at": "2026-10-10T07:18:12.082758+00:00",
+  "final_package": {
+    "path": "/Users/eason/Desktop/wfcrl/wind farm RL/dist/wfrl_blender-0.3.20+1.zip",
+    "version": "0.3.20+1",
+    "bytes": 99010020,
+    "sha256": "e6e279f5f88c730f3c96158bfca525a9d04f1a09915ad3a997d1d29b00a9f5ba"
+  },
+  "files": 173,
+  "local_crc_and_payload_comparison": {
+    "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.20-plus1-20261010/payload-comparison.json",
+    "status": "PASS"
+  },
+  "host_tests": {
+    "status": "PASS",
+    "tests": 78,
+    "evidence": "Successful execution output observed earlier in this task; not rerun for documentation alignment"
+  },
+  "prior_repair_payload_validation": {
+    "installed_background": {
+      "status": "PASS",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/docs/maintenance/camera-reset-cleanup-20261010/camera-reset-background-validation.json",
+      "sha256": "3fb67d27e2ea4753f99bd247d54b987855dd8ab40ae27053db2d6160e730fba5",
+      "module": "bl_ext.user_default.wfrl_blender",
+      "addon_path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+      "installed_manifest_version": "0.3.20",
+      "checks": [
+        "ordinary load and reload use bundled supported pose and exact optics",
+        "geometry-only load has no rig",
+        "initial history empty",
+        "legacy C4 rejected",
+        "tilted housing rigid move",
+        "per-camera edit persists over frames",
+        "undo restores supported default",
+        "invalid move unchanged",
+        "atomic publish rollback",
+        "explicit reset restores box and C1-C3 without changing frame, subframe or navigation",
+        "reset undo restores prior box and C2 optics",
+        "repeated default reset is a no-op",
+        "reset blocks drafts, capture, box placement and pending backend pause",
+        "invalid default and failed publication leave layout and history unchanged",
+        "explicit reload resets user edits to bundled default",
+        "tip trails and deflection aids disabled"
+      ]
+    },
+    "native_panel_click": {
+      "status": "PASS",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/docs/maintenance/camera-reset-cleanup-20261010/camera-reset-native-validation.json",
+      "sha256": "65d41fb56249d286a5d3623856374d104719b90c038bb01ac98da1c999bd7682",
+      "module": "bl_ext.user_default.wfrl_blender",
+      "addon_path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+      "installed_manifest_version": "0.3.20",
+      "checks": [
+        "Real panel click restores exact bundled box pose and all three optics",
+        "Current frame and subframe preserved",
+        "Free view preserved",
+        "Camera undo stores the complete prior edited layout",
+        "WATCH reset and exit retain the replacement C2 and original free view"
+      ]
+    }
+  },
+  "official_final_zip_format_check": {
+    "status": "PASS",
+    "exit_code": 0,
+    "command": [
+      "/Applications/Blender.app/Contents/MacOS/Blender",
+      "--background",
+      "--factory-startup",
+      "--command",
+      "extension",
+      "validate",
+      "/Users/eason/Desktop/wfcrl/wind farm RL/dist/wfrl_blender-0.3.20+1.zip"
+    ],
+    "output": "Success parsing TOML",
+    "evidence": "Successful command output observed before publication in this task"
+  },
+  "final_zip_fresh_isolated_install": "NOT_RUN",
+  "final_zip_complete_native_workflow": "NOT_RERUN",
+  "installed_daily_version": "0.3.20",
+  "installed_automatically_updated_after_release": false,
+  "uploaded_attachment_revalidation": "NOT_PERFORMED",
+  "scientific_acceptance": {
+    "geometry_and_texture": "NOT_ACCEPTED",
+    "tip_precision": "FAILED_GATE",
+    "radar": "REVIEW_ONLY / PENDING_ACCEPTANCE"
+  }
+}

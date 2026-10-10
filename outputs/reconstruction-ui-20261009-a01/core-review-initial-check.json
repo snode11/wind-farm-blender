@@ -1,0 +1,101 @@
+{
+  "scope": "host CPU independent core review before fixes",
+  "passed": 21,
+  "failed": 2,
+  "checks": [
+    {
+      "name": "test_saved_marker_supports_legacy_scene_and_explicit_exit",
+      "status": "PASS"
+    },
+    {
+      "name": "test_incomplete_scene_does_not_claim_split_or_unrelated_camera",
+      "status": "PASS"
+    },
+    {
+      "name": "test_loaded_mappo_offers_texture_entry_without_legacy_split_geometry",
+      "status": "PASS"
+    },
+    {
+      "name": "test_texture_camera_owns_right_view_and_legacy_camera_is_retained",
+      "status": "PASS"
+    },
+    {
+      "name": "test_returning_to_saved_geometry_does_not_replace_it_with_texture",
+      "status": "PASS"
+    },
+    {
+      "name": "test_explicit_texture_entry_upgrades_geometry_and_keeps_legacy_objects",
+      "status": "PASS"
+    },
+    {
+      "name": "test_returning_to_retained_texture_restores_its_saved_sample",
+      "status": "PASS"
+    },
+    {
+      "name": "test_loaded_mappo_enters_texture_when_no_saved_geometry_exists",
+      "status": "PASS"
+    },
+    {
+      "name": "test_texture_draw_information_never_restores_or_writes_ids",
+      "status": "PASS"
+    },
+    {
+      "name": "test_pair_requires_existing_correctly_positioned_roles",
+      "status": "PASS"
+    },
+    {
+      "name": "test_all_saved_poses_bound_once_and_cache_invalidates_on_key_count_change",
+      "status": "PASS"
+    },
+    {
+      "name": "test_workspace_without_pair_is_not_mutated_or_rebuilt",
+      "status": "PASS"
+    },
+    {
+      "name": "test_resize_fit_is_debounced_and_camera_changes_do_not_trigger_repair",
+      "status": "PASS"
+    },
+    {
+      "name": "test_automatic_fit_waits_for_two_redraws_and_never_resets_left",
+      "status": "PASS"
+    },
+    {
+      "name": "test_load_boundary_drops_rna_references_and_cached_geometry",
+      "status": "PASS"
+    },
+    {
+      "name": "test_initial_readonly_sidebar_preserves_current_tab_without_killing_lifecycle",
+      "status": "PASS"
+    },
+    {
+      "name": "test_analytic_source_fit_contains_all_depths_and_sidebar_without_projection_feedback",
+      "status": "PASS"
+    },
+    {
+      "name": "test_exit_presentation_restores_source_when_join_retains_right_view",
+      "status": "PASS"
+    },
+    {
+      "name": "test_mode_roundtrip_translates_private_camera_and_pivot_without_moving_clock",
+      "status": "PASS"
+    },
+    {
+      "name": "test_geometry_to_texture_restores_its_record_without_claiming_retained_markers",
+      "status": "FAIL",
+      "error": "Traceback (most recent call last):\n  File \"<stdin>\", line 19, in <module>\n  File \"blender_frontend/tests/test_split_reconstruction.py\", line 456, in test_geometry_to_texture_restores_its_record_without_claiming_retained_markers\n    assert settings.capture(scene) == expected\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+    },
+    {
+      "name": "test_failed_mode_configuration_restores_right_camera_role_and_navigation",
+      "status": "FAIL",
+      "error": "Traceback (most recent call last):\n  File \"<stdin>\", line 19, in <module>\n  File \"blender_frontend/tests/test_split_reconstruction.py\", line 478, in test_failed_mode_configuration_restores_right_camera_role_and_navigation\n    assert right.spaces.active.camera is legacy\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+    },
+    {
+      "name": "test_saved_navigation_reopens_without_scheduling_an_implicit_fit",
+      "status": "PASS"
+    },
+    {
+      "name": "test_return_after_exit_queues_saved_right_navigation_and_current_clock",
+      "status": "PASS"
+    }
+  ]
+}
