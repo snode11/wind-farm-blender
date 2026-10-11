@@ -1,14 +1,14 @@
 # 本地环境配置与入口分流
 
-对齐日期：2026-10-08。以下按当前仓库文件静态核对；本轮没有安装、运行训练、求解或打开 GUI。旧 Windows FLORIS 配置仍作为历史兼容参考，不替代 macOS / Linux 验证。
+本说明区分 Blender 离线查看、Python 研究环境、FAST.Farm 动态后端与 Qt/VTK 桌面入口。命令中的解释器、二进制及路径需匹配实际机器；Windows FLORIS 依赖组合不构成 macOS / Linux 运行验证。
 
-## 1. 只看当前 Blender 演示
+## 1. Blender 离线演示
 
-使用 Blender 5.2+，从 [v0.3.17.1 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.17.1) 安装唯一手动附件 `wfrl_blender-0.3.17.1.zip`（包内 `0.3.17+1`），升级后重启 Blender。
+使用 Blender **5.2+**，从 [v0.3.20.1 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.20.1) 安装 `wfrl_blender-0.3.20+1.zip` 并完全重启。
 
-通过 **N → MAPPO → 同源纹理同步对照** 查看601样本同源纹理；**打开几何重建示例…**保留规范便携场景，**独立合成纹理样例**为另一个120样本来源，或使用 MAPPO 三机回放、三相机、NREL 缺陷编辑器。示例、40 Hz 保存 MAPPO 数据和纹理随 ZIP 提供，无需 conda、Bridge、FAST.Farm、训练或作者本机路径。自动 Source code 未同步这版 ZIP 的新版实现。
+通过 **N → MAPPO → 打开几何重建示例…** 在同一分屏切换几何／同源纹理，也可查看三机柔性回放、三相机和 NREL 缺陷编辑器。601 样本同源纹理与独立 120 样本合成资源使用不同来源和时钟；独立合成工具不在统一重建侧栏显示。随包查看无需 conda、Bridge、FAST.Farm 或网络。
 
-操作见[演示指令单](../demos/演示指令单.md)、[前端使用说明](../../前端readme.md)；验证范围和限制见[当前发布状态](../blender/发布状态与验证范围.md)。0.3.17.1 的软件安装/保存重开证据不代表重建精度、净空现场精度或稳定 60 FPS 已验收。
+公开实现源码基线为 0.3.18，自动 Source code 不对应当前公开扩展。日常本地安装另有相机清理和重建稳定刷新的 `LOCAL_UNPUBLISHED_REVISION`，manifest 同为 0.3.20+1、载荷与公开 ZIP 不同。[安装身份与验证范围见发布状态](../blender/发布状态与验证范围.md)，操作见[前端说明](../../前端readme.md)。软件检查不代表重建精度、现场净空精度或稳定 60 FPS 验收。
 
 ## 2. Python 环境：FLORIS 与算法开发
 
@@ -23,14 +23,14 @@ python -m pip install -e '.[train]'
 python -m pip check
 ```
 
-`wfcrl-env/requirements-floris-local.txt` 标明的是 Windows 历史工作组合，包含 FLORIS 3.5、Gymnasium 0.29.1、PettingZoo 1.24.3、NumPy 1.26.4、SB3 2.3.2，以及训练和 Qt/VTK 依赖。上述为对齐后的命令模板，没有在本次重新安装验证。若只做算法，不需要启动 GUI；根项目 `train` / `gui` / `all` 附加组分别定义于 [pyproject.toml](../../pyproject.toml)。
+`wfcrl-env/requirements-floris-local.txt` 标明的是 Windows 历史工作组合，包含 FLORIS 3.5、Gymnasium 0.29.1、PettingZoo 1.24.3、NumPy 1.26.4、SB3 2.3.2，以及训练和 Qt/VTK 依赖。这些命令是环境模板，执行结果需在目标机器核对。若只做算法，不需要启动 GUI；根项目 `train` / `gui` / `all` 附加组分别定义于 pyproject.toml（本地文件：`pyproject.toml`）。
 
 依赖角色：WFCRL 提供物理环境及 Gymnasium / PettingZoo 接口；SB3 提供 PPO；`wfrl/sb3_wrapper.py` 对齐单智能体接口，`wfrl/mappo_sb3.py` 包装参数共享 IPPO；`wfrl/mappo_central.py` 则实现集中式 MAPPO。共享参数和 `Dec_` 前缀不等于集中式 critic。
 
 当前入口、模型与计数口径见[PPO/IPPO/MAPPO 配置](../training/MAPPO_SETUP.md)。脚本已放在 `scripts/train/` 和 `scripts/analysis/`，旧根目录 `train_ppo.py`、`train_mappo.py`、`eval_visualize_ppo.py` 命令不再适用。
 
 ```bash
-# 实际执行会训练/求解并写 results；本次未执行
+# 执行会训练或求解并写入 results
 python scripts/train/train_ppo.py --timesteps 100000
 python scripts/train/train_mappo.py --timesteps 50000
 python -m wfrl.mappo_central --timesteps 50000
@@ -42,9 +42,9 @@ python scripts/analysis/eval_visualize_ppo.py
 
 ## 3. FAST.Farm 动态后端与实时 Bridge
 
-仓库已有 [FastFarmDriver](../../wfrl/fastfarm_driver.py)、[动态 MAPPO 训练](../../scripts/train/train_fastfarm.py)、[场景运行器](../../wfrl/scene/runtime.py)和 [Bridge 会话](../../wfrl/blender_bridge/backend_session.py)。早期“FAST.Farm 未实现”只描述当时 Windows FLORIS 初装阶段，不能作为当前状态。
+仓库已有 [FastFarmDriver](../../wfrl/fastfarm_driver.py)、[动态 MAPPO 训练](../../scripts/train/train_fastfarm.py)、[场景运行器](../../wfrl/scene/runtime.py)和 [Bridge 会话](../../wfrl/blender_bridge/backend_session.py)。
 
-FAST.Farm 运行需要对应平台的 MPI、FAST.Farm/OpenFAST、supercontroller 与机组控制器二进制及算例资源；FLORIS requirements 刻意没有安装这些运行时。Windows 用 Microsoft MPI，macOS 现有入口使用 OpenMPI；二进制不能跨平台互换。配置检查、解释器选择与实际生命周期证据按[前端使用说明](../../前端readme.md)和[发布状态](../blender/发布状态与验证范围.md)分层阅读。
+FAST.Farm 运行需要对应平台的 MPI、FAST.Farm/OpenFAST、supercontroller 与机组控制器二进制及算例资源；FLORIS requirements 刻意没有安装这些运行时。Windows 用 Microsoft MPI，macOS 现有入口使用 OpenMPI；二进制不能跨平台互换。配置检查、解释器选择与实际生命周期证据按[前端使用说明][(../../前端readme.md)和发布状态](../blender/发布状态与验证范围.md)分层阅读。
 
 当前 macOS Blender 启动器入口是：
 
@@ -65,12 +65,12 @@ scripts/macos/run_desktop.sh studio --scene scenes/turb3_row.yaml
 scripts/macos/run_desktop.sh rviz --backend floris
 ```
 
-这是当前源码入口模板，本次没有重新实测窗口。FAST.Farm 模式或 Studio `--replay` 会重新推进物理仿真；后者从 checkpoint 执行确定性策略，不是读取已经保存的数值轨迹。历史 Windows PowerShell 演示保留在[演示指令单](../demos/演示指令单.md)，其机器绝对路径、耗时与结果只适用于当轮。
+这些是源码入口模板，窗口可用性须在目标环境验证。FAST.Farm 模式或 Studio `--replay` 会重新推进物理仿真；后者从 checkpoint 执行确定性策略，不是读取已经保存的数值轨迹。Windows PowerShell [用法见演示指令单](../demos/演示指令单.md)；使用前须替换仓库路径和解释器路径，运行耗时与结果以实际配置和保留证据为准。
 
-## 5. 历史配置的使用边界
+## 5. 兼容配置与输入约束
 
-早期记录使用 `D:\project\wind farm RL`、用户 `s1155` 的 conda 路径及 MS-MPI，并只部署 FLORIS。这些路径须改为实际机器路径；不建议直接复制当时命令。早期 `UnicodeDecodeError 'gbk'` 的原因不能仅凭文本判断为无害，当前应检查实际进程退出码和日志。
+命令中的仓库路径、conda 解释器与 MPI 路径须指向实际机器配置。遇到 `UnicodeDecodeError 'gbk'` 时，须检查实际进程退出码和日志，不能仅凭错误文本判断任务成功。
 
 稳态 FLORIS 返回当前来流与偏航的稳态解，没有动态尾流传播过程；动态 FAST.Farm 按输入与物理模型推进时序，湍流是否存在及其幅度取决于实际来流配置。示意性的“第 10 步到第 40 步风速变化”不构成保留运行数据，换种子也不能保证轨迹几乎相同。
 
-本文统一维护当前入口与历史边界；历史训练效果见[尾流控制记录](../training/WAKE_STEERING_BREAKTHROUGH.md)，长期原型见[工业 AGI Prototype 计划](../proposal/platform/工业AGI_4D世界模型_可实现性审计与Prototype计划.md)。
+训练测量与限制见[尾流控制研究](../training/WAKE_STEERING_BREAKTHROUGH.md)，长期原型见工业 AGI Prototype [计划](../proposal/platform/工业AGI_4D世界模型_可实现性审计与Prototype计划.md)。

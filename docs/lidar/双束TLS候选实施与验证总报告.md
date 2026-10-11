@@ -1,22 +1,10 @@
 # 双束 TLS 候选实施与验证总报告
 
-> **2026-10-10 当前入口：** 本文是 TLS 三阶段研究的实施与验证总报告；日期、数值、哈希和测试数量对应原实际运行，没有在本次文档对齐中复算。NREL 当前公开版本为[0.3.20+1](../blender/releases/0.3.20+1发布核对.md)（标签 v0.3.20.1），本版仅发布安装 ZIP，公开扩展源码仍为 v0.3.18；继续提供旧法及显式 TLS 结果。默认 `hub-axis.v1`、候选 `hub-tls.v1` 和 `REVIEW_ONLY / PENDING_ACCEPTANCE` 均未改变。原始研究数据入口为三阶段档案（本地路径：`outputs/dual-beam-tls-20261002/README.md`）。下文“未安装/发布”只描述研究完成当轮；0.3.13/0.3.15 的发布补充按各自历史版本阅读。历史 0.3.18 源码发布范围为对应扩展及必要构建资源，不等于整个本地研究工作区已发布，也不代表几何精度已验收。
+默认方法为 `hub-axis.v1`（`two-point-hub-extrapolation.v1`），显式候选为 `hub-tls.v1`（`hub-constrained-tls.v1`）。两种方法均为 **`REVIEW_ONLY / PENDING_ACCEPTANCE`**，软件接入和数值比较不构成现场或用途性能验收。
 
-日期：2026-10-02。状态：**三个阶段的候选工程接入、诊断及独立固定转速工况验证已完成；REVIEW_ONLY / PENDING_ACCEPTANCE**。
+NREL / WFRL 公开安装 ZIP 为 **0.3.20+1**（标签 **v0.3.20.1**），公开扩展源码为 **v0.3.18**；本地日常安装是同版本号的未发布修订。公开包提供主开发片段的旧法与 TLS 回放，[载荷与验证身份见发布状态](../blender/发布状态与验证范围.md)。独立求解工况不替换内置片段。
 
-默认方法仍为 `hub-axis.v1`，算法版本 `two-point-hub-extrapolation.v1`；显式候选为 `hub-tls.v1`，算法版本 `hub-constrained-tls.v1`。没有切换默认、安装 Blender 扩展或发布扩展包。最终仓库 lidar 回归为 **333 passed、7 subtests passed**，第三阶段三个新工具的隔离测试为 **56 passed**。这些软件与数值证据不等于正式性能验收或现场验证。
-
-本报告合并第一阶段候选接入、第二阶段误差与来源诊断、第三阶段独立工况与真实时间加密的执行记录。2026-10-01 的接入方案仅作为方法和冻结条件的背景；其中“尚未实施”的编制时状态已由本报告的实际执行结果取代。**唯一 Markdown 报告阅读入口为本报告**，最终三个阶段数据和实现代码保留，重复研究包、失败记录及缓存按清理记录处理。源包绑定的原始验收元数据归档为 JSON，不作为另一份 TLS 报告；历史冻结记录仍保留原命名的来源事实。
-
-2026-10-03 整理导航：三阶段目录已实际搬入 `outputs/dual-beam-tls-20261002/stages/`，三份历史 JSON 集中到 `review/history/`。当前入口见 统一目录导航（本地路径：`outputs/dual-beam-tls-20261002/README.md`），迁移关系、核验记录及原报告和交付清单备份见 整理记录（本地路径：`outputs/dual-beam-tls-20261002/review/layout-migration-20261003/README.md`）。本次整理未重跑求解或复算，以下历史数字、哈希和结论保留。
-
-清理完成：已将 **72 个明确目标、203 个文件、161,601,192 bytes（约 154.11 MiB）**移入 macOS 废纸篓，包含两份重复研究 ZIP、首次/失败执行、复算载荷副本、旧 Markdown 和缓存。三个阶段的最终源几何、数值结果、第三阶段全部 18,734 个无损 VTP、匹配实现及成功核验证据保留。明细见 清理记录（本地路径：`outputs/dual-beam-tls-20261002/review/history/dual-beam-tls-20261002-cleanup.json`）。清理后三个阶段文件库存及全部 11 个活跃结果包严格读取通过；原几何与数值结果未变，已有 Git 跟踪文件状态保持一致。移入废纸篓可恢复；磁盘空间会在清空废纸篓后释放。
-
-报告直接保存关键数字、证据口径和哈希，无需旧报告即可独立阅读；少量保留的最终 JSON 与复算脚本入口列于第 8 节。哈希能够识别当时的文件，不能恢复文件；若今后清理原始数据，本报告也不能代替原数据执行完整复算。
-
-历史发布补充：NREL/WFRL 0.3.13 作为显式可选回放交付该候选，默认仍为 `hub-axis.v1`。本报告中的“未安装/发布”描述三阶段研究完成时的状态；0.3.13 的安装与发布验证另见 [0.3.13 发布核对](../blender/releases/0.3.13发布核对.md)。公开源码含匹配实现及内置名义源/旧法/TLS结果；下文 `outputs/` 路径标识本地研究档案，原始求解文件与阶段诊断档案未随源码发布。
-
-2026-10-05 当前入口补充：0.3.15继续随ZIP提供相同旧法/TLS结果层，增加便携MAPPO＋重建示例，未重求解或改变本报告精度状态。仅ZIP发布，源码未推送；现行软件验证见[0.3.15发布核对](../blender/releases/0.3.15发布核对.md)，上述源码同步结论仅指0.3.13。
+本文数值、测试规模与指纹对应 **2026-10-02 TLS 研究档案**，按数据源和评价范围分别解释。原始档案位于 `outputs/dual-beam-tls-20261002/`，包括保存回放、残差/来源诊断和独立固定转速工况。原始求解与诊断档案不随扩展源码发布；本页不能代替原数据完整复算。
 
 ## 1. 方法、评分与输入边界
 
@@ -54,19 +42,19 @@ MAE 与 bias 按全部可评分样本加权；P95 使用 nearest-rank，即绝�
 
 经过最低值误差单列：预测侧取该完整经过内有效新鲜配对的最小净空，参考侧取全部固定 ±15° 保存窗口的最小净空，再相减。它不等于逐样本误差，也不称为连续时间最低值。缺测长度是连续缺测保存样本数乘源采样间隔，不推断连续事件持续时间。
 
-## 2. 阶段与数据分工
+## 2. 数据分工与评价范围
 
-|阶段与数据|范围|已执行内容|证据边界|
+|数据|范围|已执行内容|证据边界|
 |---|---|---|---|
-|第一阶段：主开发片段|三机，117–177 s，40 Hz；每机 2,401 时刻|旧法复现、TLS 完整重扫、隔离、兼容性、两类开发压力|复用保存几何；没有新 FAST.Farm/OpenFAST 求解|
-|第二阶段：主开发片段|同一 400 对有效 TLS 配对及全部保存时刻|残差分解、说明性前向可观测性、同源输出与坐标核验|仍为开发数据，不是新增独立运行|
-|第二阶段：既有 C 接口片段|单机，0–6 s，40 Hz，8 m/s 恒风，9 rpm|重扫、方法对照、真值隔离|`interface_only=true`；已用于诊断，不能作为未触碰最终留出集|
-|第三阶段：新独立工况|单机，12 m/s 恒风，9 rpm，0° pitch/初始方位角；0–26 s，评分 18–26 s|实际 OpenFAST、完整原始动态表面留存、两网格重扫及复算|固定转速、ServoDyn 关闭，不代表 MAPPO 控制性能|
-|第三阶段：时间细化|40 Hz/DT=0.00625 s 与 80 Hz/DT=0.003125 s|共同时刻、全部新增时刻、未知、尾部、经过最低值与 S1 比较|同一物理工况的两级敏感性，不计为第二个独立工况|
+|主开发片段回放|三机，117–177 s，40 Hz；每机 2,401 时刻|旧法复现、TLS 完整重扫、隔离、兼容性、两类开发压力|复用保存几何；没有新 FAST.Farm/OpenFAST 求解|
+|主开发片段诊断|同一 400 对有效 TLS 配对及全部保存时刻|残差分解、说明性前向可观测性、同源输出与坐标核验|仍为开发数据，不是新增独立运行|
+|既有 C 接口片段|单机，0–6 s，40 Hz，8 m/s 恒风，9 rpm|重扫、方法对照、真值隔离|`interface_only=true`；已用于诊断，不能作为未触碰最终留出集|
+|独立固定转速工况|单机，12 m/s 恒风，9 rpm，0° pitch/初始方位角；0–26 s，评分 18–26 s|实际 OpenFAST、完整原始动态表面留存、两网格重扫及复算|固定转速、ServoDyn 关闭，不代表 MAPPO 控制性能|
+|同工况时间细化|40 Hz/DT=0.00625 s 与 80 Hz/DT=0.003125 s|共同时刻、全部新增时刻、未知、尾部、经过最低值与 S1 比较|同一物理工况的两级敏感性，不计为第二个独立工况|
 
 主开发来源标识为 `FastFarm__208s__3T_1789663025.003069`，原三机数值输出保存到 183 s。独立零载参考来自 C-rest。`farm-C` 是主来源副本，不计为另一运行；另两份部分/中止 BeamDyn run 没有完整匹配几何和完成证据，也未冒充独立验证集。恒风工况没有随机种子。本报告不把不同工况、开发压力或说明性案例合并成一个正式性能统计。
 
-## 3. 第一阶段：候选接入与完整名义回放
+## 3. 主开发片段的名义回放
 
 对三机全部 **7,203 个机组时刻、21,609 条三束观测**重新射线求交、估计和评分。自身与公共有效集合均为 **400 对**，全部保留。
 
@@ -105,7 +93,7 @@ MAE 与 bias 按全部可评分样本加权；P95 使用 nearest-rank，即绝�
 
 全网格删除和污染 `evaluation`、真实叶尖、真实误差、旧估计、保存命中点和终端柔性变换，在允许输入不变时预测不变。运行时守卫记录实际读取字段并拒绝非允许字段，结合 AST 数据流检查区分生成、估计与评分。两方法共 **14,406 行、43,218 次**原始/删除/污染重算，预测差为零。用未中心化 `eigh(A.T@A)` 独立交叉检查全部有效 TLS 预测，最大净空差 **1.1546319456101628×10⁻¹³ m**；此处是 TLS 数值目标核验，不是结构振型验证。
 
-读取器拒绝 TLS 缺失标识、未知标识及配置/manifest/逐行方法或算法版本混用；历史缺省只映射旧法。Python 3.11/3.13 统计求和差异只允许统计浮点值 `1e-12` 舍入差，测量、报警、时间、计数和类型严格一致。该兼容修复没有放宽物理或历史复现容差。
+读取器拒绝 TLS 缺失标识、未知标识及配置/manifest/逐行方法或算法版本混用；历史缺省只映射旧法。Python 3.11/3.13 统计求和差异只允许统计浮点值 `1e-12` 舍入差，测量、报警、时间、计数和类型严格一致。统计舍入口径不放宽物理或复现容差。
 
 ### 3.2 两类开发压力
 
@@ -129,7 +117,7 @@ MAE 与 bias 按全部可评分样本加权；P95 使用 nearest-rank，即绝�
 
 轮毂、机舱和塔模型误差压力尚无独立冻结预算，未任意选择幅值补做。
 
-## 4. 第二阶段：残差、可观测性与原始来源
+## 4. 残差、可观测性与原始来源
 
 ### 4.1 全部 400 对的评分后残差诊断
 
@@ -162,7 +150,7 @@ T1 固定长度减实际轮毂到尖径向长度的平均差仅约 **1.553 mm**�
 
 section transform 直接拟合独立参考世界表面到当前世界表面，已含刚性和柔性运动。后处理施加一次再加场区布局，机舱 transform 用于运输雷达；前端把变形世界点乘对象 `matrix_world.inverted()` 再写 mesh，抵消对象自身刚体变换。静态审计未发现重复施加运动。
 
-三份原始 `.out`、三份 loaded `.fst`、两个 BeamDyn 输入、风场 BTS 和三份控制器 DLL 的记录哈希可核对。`blade_config.inputs` 是较早单机接口输入记录，不能冒充主运行完整输入清单。InflowWind/Servo 等路径辅助文件仅有本轮快照哈希，原记录没有历史哈希，因此没有宣称所有 FAST 依赖都获得历史完整性证明。
+三份原始 `.out`、三份 loaded `.fst`、两个 BeamDyn 输入、风场 BTS 和三份控制器 DLL 的记录哈希可核对。`blade_config.inputs` 是较早单机接口输入记录，不能冒充主运行完整输入清单。InflowWind/Servo 等路径辅助文件仅有所存快照哈希，原记录没有历史哈希，因此没有宣称所有 FAST 依赖都获得历史完整性证明。
 
 主来源表面清单 **36,033** 条中，**36,030 个 loaded 动态 VTP 已缺失**，3 个独立 Blade reference VTP 保留且哈希吻合。现有 NPZ 可复现保存几何计算，原始数字输出可做同源核验；原始 loaded VTP 重建与空间/时间离散化收敛不能据此完成。本地仓库、研究包和工作树排查没有找到可恢复副本，没有使用插值或新的运行填补旧数据缺口。
 
@@ -190,9 +178,9 @@ section transform 直接拟合独立参考世界表面到当前世界表面，�
 
 旧 B2 在 T1/T2/T3 分别只有 **7/118、27/117、27/121** 个有效样本，整次漏测 **27/33、9/33、5/28**。有效样本误差满足当时 **E95≤0.5 m、Emax≤1 m**，但三台均未同时满足**样本有效率 25%、至少 90% 经过获得量测**的覆盖目标，因此状态是 **`FAILED_AVAILABILITY`**，不能说原客户 Demo 全项验收通过。扩大旧 B2 到 ±15° 后有效样本仍为 7/27/27，只改变分母，没有恢复漏测；未使用真值补缺。旧方向候选筛查也没有得到三机共同达标方案，未据此改原标定。
 
-历史数值链路记录叶片/支撑拟合约 **0.017/0.016 mm**、全部九叶片保存帧 tip 分量差 **2.330 mm**，均满足原 2 mm/5 mm 接口标准。世界坐标直线插值曾产生约 **7.04 mm** 额外轴向缩短，已改为运动叶根坐标中插值形变后恢复刚体姿态，保存物理测量样本未改。原三机启动在 DT=0.00625 s 不收敛，改为 **0.0015625 s** 后完成，控制器采样仍为 0.00625 s；仍有风场网格边界尾流警告。这些历史修复不构成时空收敛、现场精度或可见窗口 FPS 保证，也不替代第三阶段的新 BeamDyn 两级来源。
+源包记录的叶片/支撑拟合约 **0.017/0.016 mm**、九叶片保存帧 tip 分量差 **2.330 mm**，对应原 **2 mm/5 mm** 接口标准。该标准与当前叶尖 0.2 mm 门槛不同。运动叶根坐标中插值形变并恢复刚体姿态；保存物理测量样本不插值补测。主运行积分 DT 为 **0.0015625 s**，控制器采样为 **0.00625 s**，保留风场网格边界尾流警告。接口结果不构成时空收敛、现场精度或窗口 FPS 保证。
 
-## 5. 第三阶段：独立固定转速工况与真实时间加密
+## 5. 独立固定转速工况与真实时间加密
 
 ### 5.1 求解前冻结与原始来源
 
@@ -207,7 +195,7 @@ section transform 直接拟合独立参考世界表面到当前世界表面，�
 |18–26 s 导出时刻数|321|641|
 |六类动态表面加一个 Ground 的原始 VTP 数|6,247|12,487|
 
-每个完整时刻都有 Blade1/2/3、Tower、Nacelle、Hub 六类表面，另每 run 一个 Ground。合计 **18,734 个原始 VTP**，原字节 **10,397,126,802 bytes**，无损 XZ **679,996,120 bytes**。每个 XZ 保留原名、原字节大小/SHA-256、压缩大小/SHA-256；压缩后解压核对原哈希才移除本次未压缩副本。求解期间共享目录峰值记录 **804,114,848 bytes**，低于预算；最终元数据前目录记录 **737,263,193 bytes**。这些是执行时库存记录，不把压缩误称为丢失原信息。
+每个完整时刻都有 Blade1/2/3、Tower、Nacelle、Hub 六类表面，另每 run 一个 Ground。合计 **18,734 个原始 VTP**，原字节 **10,397,126,802 bytes**，无损 XZ **679,996,120 bytes**。每个 XZ 保留原名、原字节大小/SHA-256、压缩大小/SHA-256；压缩后解压核对原哈希才移除匹配的未压缩副本。求解期间共享目录峰值记录 **804,114,848 bytes**，低于预算；最终元数据前目录记录 **737,263,193 bytes**。这些是执行时库存记录，不把压缩误称为丢失原信息。
 
 完整原始 ASCII 时钟先检验零起点、完整行数、严格采样和打印误差，再按声明索引 `i/fps` 恢复精确时间。允许打印误差上限 **5.1×10⁻⁵ s**，两次实际最大差为零。没有缺帧、补帧、插值或用打印时间舍入替代真实保存网格。
 
@@ -240,7 +228,7 @@ v3 源几何包的 `data.json` 只提供真实 motion，旧 B2 `measurements`/`c
 |完整经过最低值误差 MAE / m|3.771897|0.706952|3.672789|0.701465|
 |最长缺测保存网格 / s|0.2250|0.2250|0.2375|0.2375|
 
-本工况 TLS 配对误差全部为正，bias 与 MAE 相同；相较旧法变差的配对为 **0/20、0/42**。这不消除主开发片段的 25 个更差样本和低估尾部。最低参考约 **7.04 m**，未覆盖接近零净空的低净空工况；用途保护阈值尚未冻结。
+该工况 TLS 配对误差全部为正，bias 与 MAE 相同；相较旧法变差的配对为 **0/20、0/42**。这不消除主开发片段的 25 个更差样本和低估尾部。最低参考约 **7.04 m**，未覆盖接近零净空的低净空工况；用途保护阈值尚未冻结。
 
 未知为 **68/88、136/178**，原因均为 `s2_ground_first`。每 run **4 个 S1 事件**，40 Hz **14** 个命中采样，80 Hz **26** 个，保持不计新量测。
 
@@ -260,7 +248,7 @@ v3 源几何包的 `data.json` 只提供真实 motion，旧 B2 `measurements`/`c
 
 真实柔性反演仍需高精度独立结构输出、固定根边界和 FE/气动节点映射、坐标与旋转插值核验、单位载荷/自由衰减检查，以及独立幅值/载荷/噪声界，或经过验证的时域动力学/额外观测。当前结构记录状态为 **`AVAILABLE_INPUTS_UNVALIDATED_MODAL_PRIOR`**，**认证净空区间为空**。旧 ElastoDyn 数字通道的时间检查与本 BeamDyn 结构不同，且其细化 run 没有动态 VTP，不能充当本方法几何收敛证据。
 
-## 7. 已实现工具、失败修复与测试证据
+## 7. 工具与软件验证边界
 
 |实现|职责|
 |---|---|
@@ -275,62 +263,44 @@ v3 源几何包的 `data.json` 只提供真实 motion，旧 B2 `measurements`/`c
 |[compare_dual_beam_time_refinement.py](../../scripts/lidar/compare_dual_beam_time_refinement.py)|冻结输入/来源链接、共同时刻及所有新增网格的比较|
 |[源几何读取器](../../wfrl/camera_video/data.py)、[移动塔筒评分](../../wfrl/lidar/moving_tower.py)|源几何/坐标合同与同高度塔筒净空|
 
-已解决的问题及证明范围：
+实现合同要求统计浮点值按 `1e-12` 舍入口径核对，测量、报警、时间、计数和类型严格一致；历史结果复现容差为 `1e-8 m`。塔顶位移使用 TowerHt=87.6 m，轮毂根坐标包含 Twr2Shft。source→run/reference 以相对 pointer 绑定原 run-config、参考 config、输入、库存和表面哈希，不能通过移动目录重新冻结被篡改的来源。
 
-1. **跨 Python 统计舍入：**采用明确的统计 `1e-12` 舍入口径，测量、报警和时间类别保持严格核对，没有放宽历史 `1e-8 m` 复现条件。
-2. **塔顶参考高度：**修正把 YawBr 位移与 shaft level 比较的坐标混用，使用 TowerHt=87.6 m；轮毂根坐标仍含 Twr2Shft，保留原 2 mm/5 mm 接口标准。
-3. **移机绝对路径绑定：**原路径保留为历史 namespace；当前 source→run/reference 使用相对 pointer，同时严格绑定原 run-config、参考 config、输入、库存和表面哈希。移动目录不改原配置字节、不重新冻结篡改后的来源。
-4. **快照依赖不闭合：**初次移机复算在测试收集时缺 `scripts.lidar.run_physics`；静态导入审计另发现 exporter 的 `wfrl.blender_bridge`/`wfrl.viz` 曾由 conda editable 回退到原仓库，以及 runner 时钟 helper 间接依赖 `scripts.experiments`。补齐必要模块，交付 runner 的末尾时钟检查改为标准库完整采样解析器，保留实际求解 producer 版本。新解析器与两套真实时钟上的旧检查一致，没有重跑真实 solver，也未改变估计器公式或已有结果。
-5. **库存未同步：**第二次移机尝试明确拒绝 `implementation-inventory.json` 完整性不匹配；更新实现与总库存后重新执行，不绕过哈希检查。随后完整目录改名、原绝对路径不可用，Python `-I -S` 禁用 editable 回退并限制项目导入在快照内，最终复算通过。
-6. **报告范围措辞：**4/4 经过明确为每次至少有有效配对；4.977 mm 参考差限定在 88 个固定窗口共同时刻；源几何与 B2 结果、接口容差与物理准确性分别表述。
+研究档案最终仓库 lidar 回归为 **333 passed、7 subtests passed**，独立求解/导出/时间比较工具隔离测试为 **56 passed**。相关测试范围重叠，不相加为独立测试总数。记录环境为 **Python 3.11.16、NumPy 1.26.4、SciPy 1.17.1**；Python 3.13 另有读取/库存验证。版本号不能替代关键二进制来源指纹。
 
-|阶段|仓库 lidar 回归|当时快照/移机检查|新增工具测试|
-|---|---|---|---|
-|第一阶段|236 passed、7 subtests passed|相关快照 152 passed；Python 3.11/3.13 包读取核验通过|包含候选、隔离、S1 与压力检查|
-|第二阶段|277 passed、7 subtests passed|解压移机相关测试 193 passed；全部流程复算通过|三个诊断工具 41 项|
-|第三阶段最终|**333 passed、7 subtests passed**|完整改名移机和隔离快照复算通过|三个新工具 **56 passed**|
-
-以上是各阶段执行时的测试规模，不相加为独立测试总数。记录环境为 **Python 3.11.16、NumPy 1.26.4、SciPy 1.17.1**；另有 Python 3.13 读取/库存验证。第一阶段记录了实际 NumPy/OpenBLAS/Qhull 等关键二进制哈希，不以库版本代替全部二进制来源。
-
-第一阶段全网格重复生成逐字节一致，历史基线数值复现通过；研究包当时 **112 文件、36,876,382 bytes**，3 个包的 Python 3.11/3.13 移机读取通过。第二阶段研究包当时 **180 个交付文件及库存、59,802,401 bytes**，未压缩 payload **132,959,751 bytes**；独立接口新旧结果逐字节一致，主/接口残差样本和分组、可观测性案例和来源数字检查复算一致，Python 3.13 库存及四个结果包读取通过。
-
-第三阶段最终完整移机核验记录 **18,975 个文件、4 个结果包、52 个实现文件**；全部 **18,734 个 VTP** 解压原字节哈希和源/结果读取器通过。两方法真值隔离在 40/80 Hz 分别检查 **642/1,282 行**，执行原始/删除/污染重算 **1,926/3,846 次**，均通过。四套重新生成的 `results.json` 均逐字节一致，两个网格的方法比较、两方法真值隔离及时间比较的物理字段一致。移机核验约 **205.741 s**，未启动 solver。原 run/source 的历史绝对路径在此测试中不可用，复算没有靠原工作目录或 editable 安装补缺。
+独立工况的完整移机核验记录 **18,975 个文件、4 个结果包、52 个实现文件**；全部 **18,734 个 VTP** 解压原字节哈希和源/结果读取器通过。两方法真值隔离在 40/80 Hz 分别检查 **642/1,282 行**，执行原始/删除/污染重算 **1,926/3,846 次**，均通过。四套重新生成的 `results.json` 均逐字节一致，两个网格的方法比较、两方法真值隔离及时间比较的物理字段一致。移机核验约 **205.741 s**，未启动 solver。原 run/source 的历史绝对路径在此测试中不可用，复算没有靠原工作目录或 editable 安装补缺。
 
 ## 8. 关键证据指纹
 
 保留的最终数据阅读与复算入口如下；复算会产生新的派生文件，不启动新的真实 solver：
 
-|阶段|最终 JSON 证据|复算入口|
+|数据用途|最终 JSON 证据|复算入口|
 |---|---|---|
-|第一阶段|完整方法对照（本地路径：`outputs/dual-beam-tls-20261002/stages/01-saved-replay/comparison/comparison.json`）、重复一致性（本地路径：`outputs/dual-beam-tls-20261002/stages/01-saved-replay/repeatability.json`）|reproduce.sh（本地路径：`outputs/dual-beam-tls-20261002/stages/01-saved-replay/reproduce.sh`）|
-|第二阶段|残差（本地路径：`outputs/dual-beam-tls-20261002/stages/02-diagnostics/residuals/diagnostics.json`）、说明性可观测性（本地路径：`outputs/dual-beam-tls-20261002/stages/02-diagnostics/observability/results.json`）、来源（本地路径：`outputs/dual-beam-tls-20261002/stages/02-diagnostics/provenance/provenance.json`）|reproduce.py（本地路径：`outputs/dual-beam-tls-20261002/stages/02-diagnostics/reproduce.py`）|
-|第三阶段|40 Hz 对照（本地路径：`outputs/dual-beam-tls-20261002/stages/03-independent-openfast/comparison/coarse/comparison.json`）、80 Hz 对照（本地路径：`outputs/dual-beam-tls-20261002/stages/03-independent-openfast/comparison/fine/comparison.json`）、时间比较（本地路径：`outputs/dual-beam-tls-20261002/stages/03-independent-openfast/temporal/comparison.json`）、最终交付核验（本地路径：`outputs/dual-beam-tls-20261002/stages/03-independent-openfast/delivery-verification.json`）|reproduce.py（本地路径：`outputs/dual-beam-tls-20261002/stages/03-independent-openfast/reproduce.py`）|
+|保存回放|完整方法对照（本地路径：`outputs/dual-beam-tls-20261002/stages/01-saved-replay/comparison/comparison.json`）、重复一致性（本地路径：`outputs/dual-beam-tls-20261002/stages/01-saved-replay/repeatability.json`）|reproduce.sh（本地路径：`outputs/dual-beam-tls-20261002/stages/01-saved-replay/reproduce.sh`）|
+|诊断与来源|残差（本地路径：`outputs/dual-beam-tls-20261002/stages/02-diagnostics/residuals/diagnostics.json`）、说明性可观测性（本地路径：`outputs/dual-beam-tls-20261002/stages/02-diagnostics/observability/results.json`）、来源（本地路径：`outputs/dual-beam-tls-20261002/stages/02-diagnostics/provenance/provenance.json`）|reproduce.py（本地路径：`outputs/dual-beam-tls-20261002/stages/02-diagnostics/reproduce.py`）|
+|独立固定转速工况|40 Hz 对照（本地路径：`outputs/dual-beam-tls-20261002/stages/03-independent-openfast/comparison/coarse/comparison.json`）、80 Hz 对照（本地路径：`outputs/dual-beam-tls-20261002/stages/03-independent-openfast/comparison/fine/comparison.json`）、时间比较（本地路径：`outputs/dual-beam-tls-20261002/stages/03-independent-openfast/temporal/comparison.json`）、最终交付核验（本地路径：`outputs/dual-beam-tls-20261002/stages/03-independent-openfast/delivery-verification.json`）|reproduce.py（本地路径：`outputs/dual-beam-tls-20261002/stages/03-independent-openfast/reproduce.py`）|
 
-源包原验收说明完整转存 `legacy-acceptance-report.json` 并更新当前源/结果 manifest 哈希链；两份原文 UTF-8 字节一致，当前 7 个结果包的严格读者检查通过，原始几何、`results.json` 数值和估计方法不变。迁移前后哈希见 包装迁移记录（本地路径：`outputs/dual-beam-tls-20261002/review/history/dual-beam-tls-20261002-metadata-migration.json`）。历史冻结记录中的旧文件名和旧哈希用于追溯当时的输入，不解释为当前目录还存在旧 Markdown 副本。
+源包的 B2 验收元数据由 `legacy-acceptance-report.json` 保存，遵循自己的合同；源/结果 manifest 绑定相应摘要。冻结清单中的路径与哈希标识实际输入，不表示其他目录存在同名副本。
 
-以下 SHA-256 是本轮核验时的文件指纹，直接记载以避免依赖研究目录路径。不是数字签名，也不能恢复已清理的文件。
+以下 SHA-256 是研究载荷的文件指纹，直接记载以避免依赖研究目录路径。不是数字签名，也不能恢复已清理的文件。
 
 |对象|SHA-256|
 |---|---|
 |固定标定 `dual-beam-inner-manual-contract.json`|`36b27b8eb72e13f8971ecd5010d2903b938c3d42e00a18bdea21f57ebb9682eb`|
 |主开发源 `geometry.npz`|`289abea277d8a4954836b53bc06a1afcc41d8098a6fabe99f74c7f2ebe4ebac1`|
-|第一阶段重复生成旧法结果|`c576ea9da8c0a7b13ea76d0e57b503c2a9a5e9b15a3c0ba323cfa6ab4ee7b3a0`|
-|第一阶段重复生成 TLS 结果|`f49d785672c60209bb5adc1c3dd15ab3d55509cbb66fabd44fb70c98fa7b258a`|
-|第一阶段研究 ZIP（当时文件）|`2ed94c35be0f30ee3195c1d67619f6f95037e150ad306bafad9cb32d784c796e`|
-|第二阶段研究 ZIP（当时文件）|`71fa2b1ed4da9639a3752b9197d6fc8562c937a6ab260469a9b0b4e010593806`|
+|保存回放旧法结果|`c576ea9da8c0a7b13ea76d0e57b503c2a9a5e9b15a3c0ba323cfa6ab4ee7b3a0`|
+|保存回放 TLS 结果|`f49d785672c60209bb5adc1c3dd15ab3d55509cbb66fabd44fb70c98fa7b258a`|
 |BeamDyn 几何主文件|`8105760c5e7d7b7c030605352e3f5f1fa8cd713e7cac6a54eb6227f91104ce06`|
 |BeamDyn 截面材料文件|`b6031e7e0ebc1b31d905454f0c1aa1af8edd01e2f7882c60047a19bdbdb44138`|
 |C-rest BD1 结构 summary|`defc9673246b2e396db268a054595cf0351ab54e9e5ea71823edbc217da1a0a0`|
-|第三阶段求解前 protocol|`54f2d07f53a39fc9d6274fa67d8869b9138b67d37124868b9636d71669944b6f`|
-|第三阶段求解前 reference inventory|`a454e4c22692404c479325cd4e7d5650acdf6ef07b96b1a1f9ed9bc50f59ad0a`|
+|独立工况冻结 protocol|`54f2d07f53a39fc9d6274fa67d8869b9138b67d37124868b9636d71669944b6f`|
+|独立工况冻结 reference inventory|`a454e4c22692404c479325cd4e7d5650acdf6ef07b96b1a1f9ed9bc50f59ad0a`|
 |实际 OpenFAST 可执行文件|`95a286bcff9326973da53523268bd4f90624d4489c0f852567197259e6fe753a`|
-|第三阶段 40 Hz 旧法结果|`95b63763154258df20f06447175e9ff58036a8e24698a73ef098d08958dcb41f`|
-|第三阶段 40 Hz TLS 结果|`ec09f1c7d2bafd8eed7e321139c270ef3eb6751f03de97bb16b9678edcf453ad`|
-|第三阶段 80 Hz 旧法结果|`3fc382e92fae37fd13e197a83f945f629bf9cbd1ed72f59b6da1ac333e78b6f6`|
-|第三阶段 80 Hz TLS 结果|`553c1d3776ce899c16459605055ea9290e0446f1d8611e1c97a74cb3643be8ab`|
-|第三阶段交付核验记录（清理前版本）|`0586e0500f66908bbf6298cea864509eaa0e012c19dd19b78db1e4447a6dfd44`|
+|独立工况 40 Hz 旧法结果|`95b63763154258df20f06447175e9ff58036a8e24698a73ef098d08958dcb41f`|
+|独立工况 40 Hz TLS 结果|`ec09f1c7d2bafd8eed7e321139c270ef3eb6751f03de97bb16b9678edcf453ad`|
+|独立工况 80 Hz 旧法结果|`3fc382e92fae37fd13e197a83f945f629bf9cbd1ed72f59b6da1ac333e78b6f6`|
+|独立工况 80 Hz TLS 结果|`553c1d3776ce899c16459605055ea9290e0446f1d8611e1c97a74cb3643be8ab`|
 
-第三阶段求解前冻结的核心实现指纹如下；新增求解/导出/核验工具在交付库存另行登记，核心估计器没有为了新工况修改公式。
+独立工况绑定的核心实现指纹如下；求解/导出/核验工具在交付库存登记。指纹标识该研究载荷，不代表当前工作区所有文件与其相同。
 
 |核心实现|SHA-256|
 |---|---|
@@ -341,15 +311,15 @@ v3 源几何包的 `data.json` 只提供真实 motion，旧 B2 `measurements`/`c
 |`scripts/lidar/postprocess_dual_beam.py`|`2ca0185ab2ee117093d0ebb481802785ab75a2c87a8dc6c695cb4fd7491787b4`|
 |`scripts/lidar/compare_dual_beam_methods.py`|`40c2c3a58ef4d91fe1b7be1a9b8613ba200d1012e2fb4f090f5dee222e7c62ba`|
 
-## 9. 完成范围与后续条件
+## 9. 研究状态与验收条件
 
-三个阶段约定的工程与交付工作已完成，第三阶段最终状态为 **`INDEPENDENT_OPERATING_SCREEN_AND_TWO_LEVEL_TRUE_TEMPORAL_SENSITIVITY_COMPLETE`**，移机状态为 **`PASS_FULL_RELOCATION_AND_ISOLATED_SNAPSHOT_REPRODUCTION`**。剩余事项属于进一步研究、用途决策或外部数据条件，不是这些阶段遗漏的实现步骤：
+独立工况状态为 **`INDEPENDENT_OPERATING_SCREEN_AND_TWO_LEVEL_TRUE_TEMPORAL_SENSITIVITY_COMPLETE`**，移机状态为 **`PASS_FULL_RELOCATION_AND_ISOLATED_SNAPSHOT_REPRODUCTION`**。这两个状态描述规定数据的计算与复算范围，不能升级为科学接受。用途性能验收仍受以下条件限制：
 
 - **联合性能门槛：**`performance_tolerances=null`。需按用途事先冻结 MAE、P95、高估/低估尾部、逐机组/关键工况、覆盖、经过最低值、最长缺测和未知输出门槛，不能按已见 0.776 m 倒推，也不能把测距 ±0.2 m 当最终净空门槛。
 - **输入模型误差预算：**轮毂、机舱、塔筒坐标/形状误差与联合扰动幅值尚无独立依据；压力幅值不代替现场误差模型。
 - **真实结构状态界：**需独立验证模态/载荷/幅值/噪声或动态约束，当前没有认证柔性净空区间。
 - **旧 loaded VTP：**本地恢复排查已完成，无可恢复副本；需额外原始备份，新运行不补旧运行的唯一来源缺口。
-- **进一步时间与空间精化：**本轮只有两级真实时间敏感性；下一轮需预先规定更多网格、空间精化、完整窗口比较与预算，不能用动态插值替代新求解。
+- **进一步时间与空间精化：**当前证据只有两级真实时间敏感性；进一步比较需预先规定更多网格、空间精化、完整窗口比较与预算，不能用动态插值替代新求解。
 - **更广独立工况及最终留出集：**需要不同风速/湍流或阵风种子、yaw/pitch/RPM/初相位、控制、低净空及窄事件；相邻帧随机拆分、机组拆分和同工况细化不构成独立运行划分。
 - **设备、DP 与现场验证：**没有设备数据；仍需光心/方向/零点、时钟、叶片关联、哨兵值、独立实测参考及瞬时与 20 ms DP 区间模型。DP 同包不自动表示同一时刻、同一叶片，仿真 S1 保存命中不证明现场保护延迟。
 

@@ -1,0 +1,1532 @@
+{
+  "implementation_verification": "PASS",
+  "scientific_acceptance": "FAILED_GATE",
+  "primary_gains": null,
+  "source_freeze": [
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/actual/contour-analytic/recon.json",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/preview.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/synth.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/run.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/check_alignment.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/rgb_masks.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/test_texture_correctness.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/blender_view.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/blender_export_cameras.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/coverage.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/model.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/surface_observations_subpixel.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/camera.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/eval_texture.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/input_adapter.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/texture.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/evaluate.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/surface_observations.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/atlas.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/contour_support.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/raster.py",
+      "match": true
+    },
+    {
+      "case": "A",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/recon.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/actual/contour-healthy-final/recon.json",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/surface_tracks.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/preview.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/synth.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/run.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/check_alignment.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/rgb_masks.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/test_texture_correctness.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/blender_view.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/blender_export_cameras.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/coverage.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/model.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/surface_observations_subpixel.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/camera.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/eval_texture.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/input_adapter.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/texture_geometry.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/texture.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/evaluate.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/surface_observations.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/atlas.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/contour_support.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/raster.py",
+      "match": true
+    },
+    {
+      "case": "B",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/recon.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/actual/texture-analytic-final/recon.json",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_tracks.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/preview.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/synth.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/run.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/check_alignment.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/rgb_masks.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/test_texture_correctness.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/blender_view.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/blender_export_cameras.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/coverage.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/model.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_observations_subpixel.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/camera.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/eval_texture.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/input_adapter.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/texture_geometry.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/texture.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/evaluate.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_observations.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/atlas.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/contour_support.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/raster.py",
+      "match": true
+    },
+    {
+      "case": "C",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/recon.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/actual/texture-healthy-final/recon.json",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_tracks.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/preview.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/synth.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/run.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/check_alignment.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/rgb_masks.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/test_texture_correctness.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/blender_view.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/blender_export_cameras.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/coverage.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/model.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_observations_subpixel.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/camera.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/eval_texture.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/input_adapter.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/texture_geometry.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/texture.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/evaluate.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_observations.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/atlas.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/contour_support.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/raster.py",
+      "match": true
+    },
+    {
+      "case": "D",
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/recon.py",
+      "match": true
+    }
+  ],
+  "production_matches_frozen": [
+    {
+      "module": "surface_tracks.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "preview.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "synth.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "run.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "check_alignment.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "rgb_masks.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "test_texture_correctness.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "blender_view.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "blender_export_cameras.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "coverage.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "model.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "surface_observations_subpixel.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "camera.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "eval_texture.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "input_adapter.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "texture_geometry.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "texture.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "evaluate.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "surface_observations.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "atlas.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "contour_support.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "raster.py",
+      "match": true,
+      "frozen_match": true
+    },
+    {
+      "module": "recon.py",
+      "match": true,
+      "frozen_match": true
+    }
+  ],
+  "original_inputs_same_between_ablations": [
+    {
+      "path": "unknown_regions.json",
+      "same_hash": true
+    },
+    {
+      "path": "WideA/000045.png",
+      "same_hash": true
+    },
+    {
+      "path": "WideA/000047.png",
+      "same_hash": true
+    },
+    {
+      "path": "WideA/000043.png",
+      "same_hash": true
+    },
+    {
+      "path": "WideA/000042.png",
+      "same_hash": true
+    },
+    {
+      "path": "Crack/000045.png",
+      "same_hash": true
+    },
+    {
+      "path": "Crack/000047.png",
+      "same_hash": true
+    },
+    {
+      "path": "Crack/000043.png",
+      "same_hash": true
+    },
+    {
+      "path": "Crack/000042.png",
+      "same_hash": true
+    },
+    {
+      "path": "Patch/000045.png",
+      "same_hash": true
+    },
+    {
+      "path": "Patch/000047.png",
+      "same_hash": true
+    },
+    {
+      "path": "Patch/000043.png",
+      "same_hash": true
+    },
+    {
+      "path": "Patch/000042.png",
+      "same_hash": true
+    },
+    {
+      "path": "WideB/000045.png",
+      "same_hash": true
+    },
+    {
+      "path": "WideB/000047.png",
+      "same_hash": true
+    },
+    {
+      "path": "WideB/000043.png",
+      "same_hash": true
+    },
+    {
+      "path": "WideB/000042.png",
+      "same_hash": true
+    },
+    {
+      "path": "masks/WideA/000045.png",
+      "same_hash": true
+    },
+    {
+      "path": "masks/WideA/000047.png",
+      "same_hash": true
+    },
+    {
+      "path": "masks/WideA/000043.png",
+      "same_hash": true
+    },
+    {
+      "path": "masks/WideA/000042.png",
+      "same_hash": true
+    },
+    {
+      "path": "masks/Crack/000045.png",
+      "same_hash": true
+    },
+    {
+      "path": "masks/Crack/000047.png",
+      "same_hash": true
+    },
+    {
+      "path": "masks/Crack/000043.png",
+      "same_hash": true
+    },
+    {
+      "path": "masks/Crack/000042.png",
+      "same_hash": true
+    },
+    {
+      "path": "masks/Patch/000045.png",
+      "same_hash": true
+    },
+    {
+      "path": "masks/Patch/000047.png",
+      "same_hash": true
+    },
+    {
+      "path": "masks/Patch/000043.png",
+      "same_hash": true
+    },
+    {
+      "path": "masks/Patch/000042.png",
+      "same_hash": true
+    },
+    {
+      "path": "masks/WideB/000045.png",
+      "same_hash": true
+    },
+    {
+      "path": "masks/WideB/000047.png",
+      "same_hash": true
+    },
+    {
+      "path": "masks/WideB/000043.png",
+      "same_hash": true
+    },
+    {
+      "path": "masks/WideB/000042.png",
+      "same_hash": true
+    }
+  ],
+  "case_numeric_termination": {
+    "A": {
+      "solver_success": 4,
+      "planned": 4
+    },
+    "B": {
+      "solver_success": 4,
+      "planned": 4
+    },
+    "C": {
+      "solver_success": 4,
+      "planned": 4
+    },
+    "D": {
+      "solver_success": 4,
+      "planned": 4
+    }
+  },
+  "independent_and_historical_denominators": {
+    "A_contour_analytic": {
+      "Patch": {
+        "independent": {
+          "planned": 8,
+          "accepted": 0,
+          "missing": 3,
+          "P95_px_min": 1.843629993759111,
+          "P95_px_max": 175.2578192023778,
+          "P95_px_values": [
+            1.843629993759111,
+            4.346059314638028,
+            12.427654914699891,
+            10.951272747334139,
+            null,
+            null,
+            175.2578192023778,
+            null
+          ],
+          "status": "FAILED_GATE"
+        },
+        "historical": {
+          "planned": 7,
+          "accepted": 0,
+          "missing": 0,
+          "P95_px_min": 1.843629993759111,
+          "P95_px_max": 12.553627347499695,
+          "P95_px_values": [
+            4.996308799395013,
+            12.553627347499695,
+            10.878279012157014,
+            1.843629993759111,
+            4.346059314638028,
+            12.427654914699891,
+            10.951272747334139
+          ],
+          "status": "FAILED_GATE"
+        }
+      },
+      "Crack": {
+        "independent": {
+          "planned": 8,
+          "accepted": 1,
+          "missing": 0,
+          "P95_px_min": 0.507214696691302,
+          "P95_px_max": 14.8880713198218,
+          "P95_px_values": [
+            4.4618337286209275,
+            9.72836791782852,
+            14.8880713198218,
+            11.064751995145253,
+            0.507214696691302,
+            5.6715891313030085,
+            13.820988309470758,
+            9.083548776169026
+          ],
+          "status": "FAILED_GATE"
+        },
+        "historical": {
+          "planned": 7,
+          "accepted": 0,
+          "missing": 0,
+          "P95_px_min": 4.4618337286209275,
+          "P95_px_max": 14.8880713198218,
+          "P95_px_values": [
+            5.512088081725971,
+            13.61553061297139,
+            8.31391073076286,
+            4.4618337286209275,
+            9.72836791782852,
+            14.8880713198218,
+            11.064751995145253
+          ],
+          "status": "FAILED_GATE"
+        }
+      }
+    },
+    "B_contour_healthy": {
+      "Patch": {
+        "independent": {
+          "planned": 8,
+          "accepted": 1,
+          "missing": 3,
+          "P95_px_min": 0.5650237748235004,
+          "P95_px_max": 176.6107363202797,
+          "P95_px_values": [
+            0.5650237748235004,
+            2.432715296398796,
+            3.3635311751426724,
+            6.906575509296998,
+            null,
+            null,
+            176.6107363202797,
+            null
+          ],
+          "status": "FAILED_GATE"
+        },
+        "historical": {
+          "planned": 7,
+          "accepted": 1,
+          "missing": 0,
+          "P95_px_min": 0.5650237748235004,
+          "P95_px_max": 6.906575509296998,
+          "P95_px_values": [
+            2.6288240278484603,
+            3.3351795466800933,
+            6.899298339548912,
+            0.5650237748235004,
+            2.432715296398796,
+            3.3635311751426724,
+            6.906575509296998
+          ],
+          "status": "FAILED_GATE"
+        }
+      },
+      "Crack": {
+        "independent": {
+          "planned": 8,
+          "accepted": 1,
+          "missing": 0,
+          "P95_px_min": 0.4628711886345993,
+          "P95_px_max": 3.0034533925048077,
+          "P95_px_values": [
+            1.26963511752939,
+            2.7751292465150987,
+            3.0034533925048077,
+            2.735225792388433,
+            0.4628711886345993,
+            1.5929467970438418,
+            2.9715234975612095,
+            2.3713801402285473
+          ],
+          "status": "FAILED_GATE"
+        },
+        "historical": {
+          "planned": 7,
+          "accepted": 0,
+          "missing": 0,
+          "P95_px_min": 1.26963511752939,
+          "P95_px_max": 3.0034533925048077,
+          "P95_px_values": [
+            1.5970484000797762,
+            2.974028917471268,
+            2.250750275559607,
+            1.26963511752939,
+            2.7751292465150987,
+            3.0034533925048077,
+            2.735225792388433
+          ],
+          "status": "FAILED_GATE"
+        }
+      }
+    },
+    "C_texture_analytic": {
+      "Patch": {
+        "independent": {
+          "planned": 8,
+          "accepted": 0,
+          "missing": 3,
+          "P95_px_min": 1.5058302632594216,
+          "P95_px_max": 176.6900409287765,
+          "P95_px_values": [
+            1.843629993759111,
+            1.560918428075783,
+            2.5090598369737167,
+            1.5058302632594216,
+            null,
+            null,
+            176.6900409287765,
+            null
+          ],
+          "status": "FAILED_GATE"
+        },
+        "historical": {
+          "planned": 7,
+          "accepted": 1,
+          "missing": 0,
+          "P95_px_min": 0.6486936584304395,
+          "P95_px_max": 2.5090598369737167,
+          "P95_px_values": [
+            0.6486936584304395,
+            2.4485414097724836,
+            2.3322509262404743,
+            1.843629993759111,
+            1.560918428075783,
+            2.5090598369737167,
+            1.5058302632594216
+          ],
+          "status": "FAILED_GATE"
+        }
+      },
+      "Crack": {
+        "independent": {
+          "planned": 8,
+          "accepted": 4,
+          "missing": 0,
+          "P95_px_min": 0.507214696691302,
+          "P95_px_max": 4.4618337286209275,
+          "P95_px_values": [
+            4.4618337286209275,
+            4.140076532101027,
+            1.8862378547656358,
+            1.7219965948275324,
+            0.507214696691302,
+            0.8133822596067446,
+            0.85229019523249,
+            0.6384747409898661
+          ],
+          "status": "FAILED_GATE"
+        },
+        "historical": {
+          "planned": 7,
+          "accepted": 3,
+          "missing": 0,
+          "P95_px_min": 0.5274832575543728,
+          "P95_px_max": 4.4618337286209275,
+          "P95_px_values": [
+            0.675832030262146,
+            0.6687264171834313,
+            0.5274832575543728,
+            4.4618337286209275,
+            4.140076532101027,
+            1.8862378547656358,
+            1.7219965948275324
+          ],
+          "status": "FAILED_GATE"
+        }
+      }
+    },
+    "D_texture_healthy": {
+      "Patch": {
+        "independent": {
+          "planned": 8,
+          "accepted": 2,
+          "missing": 3,
+          "P95_px_min": 0.5650237748235004,
+          "P95_px_max": 176.33953884588743,
+          "P95_px_values": [
+            0.5650237748235004,
+            0.688952660998067,
+            2.892506717417393,
+            4.216450491912971,
+            null,
+            null,
+            176.33953884588743,
+            null
+          ],
+          "status": "FAILED_GATE"
+        },
+        "historical": {
+          "planned": 7,
+          "accepted": 3,
+          "missing": 0,
+          "P95_px_min": 0.5650237748235004,
+          "P95_px_max": 4.216450491912971,
+          "P95_px_values": [
+            0.6132267558194283,
+            2.3905426647695145,
+            3.1551720606886926,
+            0.5650237748235004,
+            0.688952660998067,
+            2.892506717417393,
+            4.216450491912971
+          ],
+          "status": "FAILED_GATE"
+        }
+      },
+      "Crack": {
+        "independent": {
+          "planned": 8,
+          "accepted": 4,
+          "missing": 0,
+          "P95_px_min": 0.4628711886345993,
+          "P95_px_max": 2.17207047812427,
+          "P95_px_values": [
+            1.26963511752939,
+            0.9848053583632232,
+            1.0277437201602326,
+            2.17207047812427,
+            0.4628711886345993,
+            0.699270650803106,
+            0.6025879782506629,
+            1.0302233882284915
+          ],
+          "status": "FAILED_GATE"
+        },
+        "historical": {
+          "planned": 7,
+          "accepted": 4,
+          "missing": 0,
+          "P95_px_min": 0.5486281757316861,
+          "P95_px_max": 2.17207047812427,
+          "P95_px_values": [
+            0.6985159090619898,
+            0.7398177595657384,
+            0.5486281757316861,
+            1.26963511752939,
+            0.9848053583632232,
+            1.0277437201602326,
+            2.17207047812427
+          ],
+          "status": "FAILED_GATE"
+        }
+      }
+    }
+  },
+  "critical_strict_JSON": [
+    {
+      "path": "protocol.json",
+      "sha256": "931983589bd63d989714d0e8e44fe6d1798850ef0b2ed256e6377d3e984a8452",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "evaluation-ready.json",
+      "sha256": "bae492f5de4c283141ef6d30a1e1c47df50844586f45e2baeaa800a4f566fc6d",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "evaluation/final-scores/summary.json",
+      "sha256": "d7f1a8aaee7e6e1473dc2bbe0e4dd3682717ad74dccb40539d070b60e767ac57",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "zero-weight-equivalence-final.json",
+      "sha256": "b689ca929528a5527d63bede6a4e89b61841d22c468e6656510ea4eb77572bab",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "image-information-summary.json",
+      "sha256": "addafcb89ca2340a26e96fc23da10ba2c5b52089835b1ae1155730f9d0f10f71",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "performance/summary.json",
+      "sha256": "3de7747baeeb3b7973fd63443ca8e388586bf0e6f480c702895223b0ff50841b",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "healthy-contract/final-independent-audit.json",
+      "sha256": "c4feae5b2700eb193199f4905a8865c4cf4d5edb028724625a6af8bc04d32eda",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "actual/candidate-native/delivery.json",
+      "sha256": "79afa26678e1798377f07c31761e4310b80dbd013e235c0cf9f223d871c22683",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "actual/candidate-native/reopen.json",
+      "sha256": "737bbf5098c36b7cbcd22f2e244fde501f9c7734c7d7c126ffd59880107b3685",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "actual/baseline-native/delivery.json",
+      "sha256": "efe69914041714ef3f1735f894b951d96cff8494e8d16e8b358b34ca6ea4c912",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "actual/baseline-native/reopen.json",
+      "sha256": "2a16beafb10c91fba32a7a73709df18e22a608530ffac82a60fcfa9de48909b5",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "actual/candidate-evidence-final/native-binding-audit.json",
+      "sha256": "7dea88804f053baefa58b00fcfe254bce60674dce649924d34abbc120dc92e7d",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "actual/candidate-evidence-final/evidence.json",
+      "sha256": "733e34c44b5da06fd19c359573951873ccde858417134afa65578f7d0b2fd477",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "actual/baseline-evidence-final/native-binding-audit.json",
+      "sha256": "0d208b2d303f1f96bb7b596b6a85914cba7144cc87ed06096991c4bfeb42a08c",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "actual/baseline-evidence-final/evidence.json",
+      "sha256": "b9c4205d2d1ea6e506a776e18b4797050ff622bb0d89998ea92bb4b6c8b128f1",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "evaluation/baseline-texture-ROI-final.json",
+      "sha256": "44b16b502dc38c7203beb3bedb1d37f8157468f1baba75e0af7028a7ce825fcc",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "evaluation/candidate-texture-ROI-final.json",
+      "sha256": "95bd209098843c3dcbd642cc89420142063d10ee83e2a0d22ef8e0f254568367",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "actual/texture-healthy-final-texture-fixed/texture.json",
+      "sha256": "3929786d7db221bc80b1c6f6477676af4765fd6fb3076758501d1610366dfd55",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "actual/contour-analytic/recon.json",
+      "sha256": "0f214d235b31e0ea11b749f87fd92626c426e0d0e01597f308a125e560741fe2",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "actual/contour-healthy-final/recon.json",
+      "sha256": "c2289fdae90d1a329f31d90b4aa0059bd5fdeef46ddff98b50302ac559b9b11e",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "actual/texture-analytic-final/recon.json",
+      "sha256": "ae61135662173f84e0e5a1d63e536448d896155a36475f4495b91eb9d876d64e",
+      "strict_finite_JSON": true
+    },
+    {
+      "path": "actual/texture-healthy-final/recon.json",
+      "sha256": "ba68572b8d3c490f3181256a852f374e414f3a4745e9e1aa2fe5029a54bc73af",
+      "strict_finite_JSON": true
+    }
+  ],
+  "required_execution_records": [
+    {
+      "record": "baseline-actual",
+      "exit_code": 0
+    },
+    {
+      "record": "contour-healthy-final",
+      "exit_code": 0
+    },
+    {
+      "record": "texture-analytic-final",
+      "exit_code": 0
+    },
+    {
+      "record": "texture-healthy-final",
+      "exit_code": 0
+    },
+    {
+      "record": "texture-zero-analytic-final",
+      "exit_code": 0
+    },
+    {
+      "record": "baseline-texture-actual",
+      "exit_code": 0
+    },
+    {
+      "record": "final-healthy-texture-fixed",
+      "exit_code": 0
+    },
+    {
+      "record": "candidate-native",
+      "exit_code": 0
+    },
+    {
+      "record": "candidate-native-reopen",
+      "exit_code": 0
+    },
+    {
+      "record": "candidate-native-audit-final",
+      "exit_code": 0
+    },
+    {
+      "record": "candidate-evidence-compose-final",
+      "exit_code": 0
+    },
+    {
+      "record": "baseline-native-binding-audit-final",
+      "exit_code": 0
+    },
+    {
+      "record": "baseline-compose-evidence-final",
+      "exit_code": 0
+    }
+  ],
+  "software_tests": {
+    "core88": true,
+    "texture11": true
+  },
+  "zero_weight": {
+    "state_bitwise_equal": true,
+    "same_nfev": true,
+    "frames": 4,
+    "note": "sidecar audited and 17 candidates bound once, weight0 adds no residual rows"
+  },
+  "native_delivery": [
+    {
+      "case": "baseline",
+      "saved_blend_hash_matches": true,
+      "reopen_status": "PASS",
+      "record_count": 16,
+      "native_audit_status": "PASS_DISPLAY_COORDINATE_CONTRACT_ONLY",
+      "scope": "estimate/native display contract only"
+    },
+    {
+      "case": "candidate",
+      "saved_blend_hash_matches": true,
+      "reopen_status": "PASS",
+      "record_count": 16,
+      "native_audit_status": "PASS_DISPLAY_COORDINATE_CONTRACT_ONLY",
+      "scope": "estimate/native display contract only"
+    }
+  ],
+  "document_links": [
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "actual/candidate-native/独立纹理辅助重建.blend",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "actual/baseline-native/独立纹理辅助重建.blend",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "actual/candidate-native/reopen.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "evaluation/final-scores/summary.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "final-verification.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "复现命令与来源.md",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "../../blade_recon0.2/docs/纹理辅助几何_职责与合同.md",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "healthy-contract/健康模板合同实现与静态验证.md",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "observations/RGB固定身份观测与未知域报告.md",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "healthy-contract/installed-compatibility/installed-reader-comparison.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "protocol.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "evaluation-ready.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "healthy-contract/final-independent-audit.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "observations/fit-fixed-anchor-v7/tracks.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "zero-weight-equivalence-final.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "evaluation/final-scores/D_texture_healthy/unknown-domain-audit.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "image-information-summary.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "actual/baseline-evidence-final/Patch_RGB_atlas_Blender_same_position_FAILED.png",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "actual/candidate-evidence-final/Patch_RGB_atlas_Blender_same_position_FAILED.png",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "actual/baseline-evidence-final/Crack_RGB_atlas_Blender_same_position_FAILED.png",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "actual/candidate-evidence-final/Crack_RGB_atlas_Blender_same_position_FAILED.png",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "actual/candidate-evidence-final/native-binding-audit.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "evaluation/baseline-texture-ROI-final.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "evaluation/candidate-texture-ROI-final.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "target": "performance/summary.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/baseline-actual.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/baseline-compose-evidence-final.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/baseline-native-binding-audit-final.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/baseline-native-binding-audit.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/baseline-texture-actual.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/baseline-unknown-domain-audit.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/candidate-evidence-compose-final.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/candidate-evidence-compose.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/candidate-native-audit-final.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/candidate-native-audit.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/candidate-native-reopen.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/candidate-native.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/contour-healthy-final.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/final-healthy-texture-fixed.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/final-healthy-texture.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/healthy-contour-actual.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/texture-analytic-final.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/texture-analytic.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/texture-healthy-final.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/texture-healthy.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/texture-zero-analytic-final.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "target": "runs/texture-zero-analytic.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/docs/纹理辅助几何_职责与合同.md",
+      "target": "../../outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/docs/纹理辅助几何_职责与合同.md",
+      "target": "../../outputs/blade-recon-v02-stage4-20261007-a01/final-verification.json",
+      "exists": true
+    },
+    {
+      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/docs/纹理辅助几何_职责与合同.md",
+      "target": "../../outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "exists": true
+    }
+  ],
+  "preservation": {
+    "scope": "1077 selected existing source/config/document bytes; 35435 old output size/mtime records (not byte proof)",
+    "baseline_selected_count": 1077,
+    "changed_authorized": [
+      "blade_recon0.2/README.md",
+      "blade_recon0.2/docs/算法说明_三摄视频叶片三维重建_v0.2.md",
+      "blade_recon0.2/input_adapter.py",
+      "blade_recon0.2/model.py",
+      "blade_recon0.2/recon.py",
+      "blade_recon0.2/rgb_masks.py",
+      "blade_recon0.2/texture.py"
+    ],
+    "unexpected_changes": [],
+    "baseline_missing": [],
+    "old_output_stat_count": 35435,
+    "old_outputs_changed_by_stat": [],
+    "old_outputs_missing": [],
+    "head_before": "e504ed66548c4b774664233341b70c87512561ef",
+    "head_after": "e504ed66548c4b774664233341b70c87512561ef",
+    "git_actions": {
+      "commit": false,
+      "push": false,
+      "publish": false
+    },
+    "status": "PASS"
+  },
+  "scope": "Software/integrity completion; no accepted field/same-material geometry/depth claim",
+  "known_negative_artifacts": [
+    "old 0/17 anchor binding candidate",
+    "final-healthy-texture exit1 initial provenance failure",
+    "baseline-texture-ROI initial empty eroded line ROI",
+    "old legacy evidence labels retained; final evidence uses independent8 and training3",
+    "installed reader FAIL_UNSUPPORTED"
+  ]
+}

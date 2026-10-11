@@ -1,6 +1,6 @@
 # Lidar replay formats
 
-The original replay 1.0 contract below describes the legacy B2 / normal-close path. It remains supported and is not the contract for the dual-beam overlay bundled in 0.3.12. The newer implementation is in the matching local source; the public source archive has not been synchronized with the ZIP-only releases.
+The replay 1.0 contract below describes the supported B2 / normal-close path; the dual-beam overlay uses its own contract. The public NREL / WFRL installation ZIP is **0.3.20+1** (tag **v0.3.20.1**), while the published extension implementation is **v0.3.18**. The daily installation is a local unpublished revision with the same version number and a different payload. See [release state and validation scope](../../docs/blender/发布状态与验证范围.md) for package identities. Software delivery does not establish research acceptance.
 
 ## Dual-beam review v1
 
@@ -16,7 +16,7 @@ Samples contain `observations` for S1/S2/S3, a reconstruction, evaluation fields
 
 `dual_beam_package.portable_copy(package, output)` requires a new output directory, copies the verified source inventory into `source/`, copies result payloads and writes `source_package: source`, `portable: true`, then resolves the new package again. Transfer the entire directory, not only `manifest.json`. The self-contained source copy removes dependency on the developer's source location.
 
-The installed layout is 10°/12°/14°; 40 Hz saved data and ideal geometric hits do not establish hardware sampling performance, field accuracy or protection latency. See the [release and validation scope](../../docs/blender/发布状态与验证范围.md).
+The installed layout is 10°/12°/14°; 40 Hz saved data and ideal geometric hits do not establish hardware sampling performance, field accuracy or protection latency. See [the release and validation scope](../../docs/blender/发布状态与验证范围.md).
 
 The original NREL 0.3.12 ZIP was checked on 2026-09-30: all 94 complete downward blade passages (T1/T2/T3: 33/33/28) contain same-time, same-blade S2/S3 pairs, with 400 valid pair samples and at least three consecutive saved samples per passage. The passage window is downward ±15°; incomplete boundary windows are excluded. These are dataset results, not a schema promise for every package or a requirement for every replay frame. S1 remains an independent valid-blade-hit alarm, including in passages labeled normal. GW184 0.4.0 is a separate synthetic imaging project and does not use this contract.
 

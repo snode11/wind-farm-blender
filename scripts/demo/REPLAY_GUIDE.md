@@ -1,219 +1,40 @@
-# Studio 回放功能使用指南
+# Studio checkpoint 评估与可视化
 
-## 功能说明
+Studio 的 `--replay` 加载 checkpoint，以确定性动作 `dist.mean` 推进新的物理回合并实时显示。它需要完整源码环境与后端依赖，不是 Blender 5.2+ 扩展内置保存结果的离线回放。当前 Blender [入口见演示指令单](../../docs/demos/演示指令单.md)。
 
-Studio 回放模式可以加载已训练的 checkpoint，用**确定性策略**（`dist.mean`，无探索噪声）跑一个完整回合，并实时 3D 可视化：
+## 入口与输入条件
 
-- **3D 场景**：机组实时偏航角、桨距角、转子转速
-- **FLORIS-proxy 尾流**：稳态尾流平面跟随偏航角实时更新，看到 wake steering 的尾流偏转
-- **数据通道面板**：yaw/pitch/torque/power 曲线实时绘制
-- **安全约束监控**：占空比/转速/桨距限制实时检查
+实现为 `wfrl/studio/trainer.py:_replay_policy()`，命令行入口为 `wfrl/studio/app.py`。运行前核对场景、机组顺序、checkpoint 的 `obs_keys`、`obs_dim`、`act_dim`、控制量及训练归一化统计。相同确定性动作选择不自动保证与另一脚本的场景、控制器、预热、约束、采样和统计窗口完全一致。
 
-这与 `rollout_ckpt.py` 的口径完全一致（都用 `dist.mean` 确定性动作），但多了可视化。
+`scripts/demo/replay_studio.ps1` 与 `test_replay_import.py` 存在，但采用用户 `s1155` 的 Windows Python、MS-MPI 和 `D:\project\wind farm RL` 绝对路径。脚本引用的 `stagE400ref` checkpoint、原 rollout 和训练历史当前缺失；恢复匹配输入和路径前，不能直接宣称该快捷脚本可复现原实验。
 
----
+脚本中的约 12 分钟、T1 33–36°、3.28 MW 和 +5.3% 只对应旧固定来流实验的预期文字。该实验的功率报告为 3.281 / 3.116 MW，原始匹配数据缺失，且“+178 kW”与所列功率差不一致；这些值不保证新运行结果或通用策略收益。[证据状态见固定来流实验](../../docs/training/WAKE_STEERING_BREAKTHROUGH.md)。
 
-## 快速开始
+## 命令模板
 
-### 1. 运行回放（推荐）
-
-直接运行 PowerShell 脚本：
+从完整源码根目录运行，替换 Python、MPI 和 checkpoint 路径。PowerShell 的调用运算符为 `&`，续行符为反引号：
 
 ```powershell
-cd "D:\project\wind farm RL"
-.\scripts\demo\replay_studio.ps1
+$PY = "C:\path\to\python.exe"
+$MPI = "C:\Program Files\Microsoft MPI\Bin\mpiexec.exe"
+$CKPT = "C:\path\to\matching-checkpoint.pt"
+& $MPI -n 1 $PY -m wfrl.studio.app `
+  --scene scenes/turb3_stagger.yaml --replay `
+  --ckpt $CKPT --replay-steps 400 --warmup 8
 ```
 
-**运行时间**：约 12 分钟（400 步 FAST.Farm 前向 + warmup 8 步）
+`--replay` 启用 checkpoint 评估；`--replay-steps` 默认 400，`--warmup` 默认 4。`--no-wake` 关闭 FLORIS proxy 尾流显示。导入检查使用 `python scripts/demo/test_replay_import.py`，它不替代完整后端运行、策略效果或可见窗口验收。
 
-**预期结果**：
-- T1（上游）偏航角逐步增大到 **33-36°**
-- T2/T3（下游）保持 **0°** 接受偏转后的来流
-- 尾流平面（白色网格）随 T1 偏航**向左偏转**
-- 全场功率稳定在 **3.28 MW**（比零偏航基线 3.12 MW 高 **+5.3%**）
+## 画面与操作
 
----
+界面显示场景、偏航/桨距/转矩/功率等通道、策略运行进度与约束状态。左键拖动旋转，滚轮缩放，Shift＋左键平移。暂停用于观察，停止结束回合；外部求解器排空迭代预算的耗时取决于实际环境，不承诺固定秒数。
 
-### 2. 测试导入（可选）
+FLORIS proxy 是用当前偏航求得的稳态示意尾流，不是 FAST.Farm 动态尾流真值。显示方向和功率应按坐标与实际输出解释，不以白色网格证明控制收益。占空比窗口和阈值取实际环境配置，不从旧说明固定推定为 20 步 / 30%。
 
-如果担心环境问题，先运行测试脚本：
+## 动作与模型合同
 
-```powershell
-cd "D:\project\wind farm RL"
-& "C:\Users\s1155\miniconda3\envs\wfcrl\python.exe" scripts/demo/test_replay_import.py
-```
+回放从 checkpoint 读取 actor、观测键与归一化统计。存在 `controls` 时使用其通道列表；缺失时实现按 `act_dim=1` 推断 yaw、`act_dim=3` 推断 yaw/pitch/torque，其他维度回退到场景控制量。此回退是实现状态，不能替代模型兼容性确认。
 
-应看到：
-```
-✓ 导入成功
-✓ 场景加载成功: turb3_stagger, 3 台机组
-✓ Trainer 初始化成功 (replay=True, replay_steps=10)
+单通道动作按 driver 边界裁剪，多通道使用 `tanh` 与逐通道上界缩放；应与产生该 checkpoint 的训练入口匹配。训练分布采样与确定性评估行为不同，评价策略需统一部署方式并报告匹配基线、完整轨迹和重复运行。
 
-所有导入和初始化测试通过！可以运行 replay_studio.ps1
-```
-
----
-
-## 命令行参数
-
-手动调用时可用参数：
-
-```powershell
-python -m wfrl.studio.app \
-  --scene scenes/turb3_stagger.yaml \
-  --replay \
-  --ckpt results/checkpoints/mappo_fastfarm_..._stagE400ref.pt \
-  --replay-steps 400 \
-  --warmup 8
-```
-
-**参数说明**：
-
-- `--replay`：启用回放模式（必需，否则是训练模式）
-- `--ckpt PATH`：checkpoint 路径（必需）
-- `--replay-steps N`：回放步数（默认 400）
-- `--warmup N`：热身步数（默认 4，建议 8 让转子稳定）
-- `--no-wake`：关闭 FLORIS-proxy 尾流可视化（加快启动）
-
----
-
-## 界面操作
-
-启动后界面会**自动开始回放**（~400 步，约 12 分钟）。
-
-### 控制按钮
-
-- **⏸ 暂停**：停在当前帧观察（可随时恢复）
-- **⏹ 停止**：终止回放并关闭 FAST.Farm（需要 ~30 秒排空迭代预算）
-
-### 视角操作
-
-- **左键拖动**：旋转视角
-- **滚轮**：缩放
-- **Shift + 左键**：平移
-
-### 面板说明
-
-**左侧面板**：
-- **场景**：机组数量、布局、风况
-- **数据通道**：勾选要绘制的曲线（yaw/pitch/torque/power/...）
-- **手动摆位**：回放模式下不可用
-
-**右侧面板**：
-- **训练**：显示回放进度（"sampling" 阶段 = 正在回放）
-- **物理与安全约束**：实时监控占空比/转速/桨距限制
-
----
-
-## 观察要点
-
-### 1. Wake Steering 行为
-
-- **T1（上游）**：偏航角从 0° 逐步增大到 **33-36°**（理论最优 ~20-30°）
-- **T2/T3（下游）**：保持 **0°**，接受偏转后的来流（功率增益来源）
-
-### 2. 尾流偏转
-
-- **白色网格平面**：FLORIS-proxy 尾流，跟随 T1 偏航角实时更新
-- **偏转方向**：T1 偏航为正（逆时针看从上方）时，尾流向**左**偏
-
-### 3. 功率增益
-
-- **全场功率**：右侧"训练"面板显示，稳定在 **3.28 MW**
-- **基线对比**：零偏航基线 3.12 MW → 增益 **+5.3%**（+178 kW）
-
-### 4. 占空比约束
-
-- **右侧"物理与安全约束"面板**：
-  - **占空比（滑动窗口）**：最近 20 步内偏航动作占比 ≤ 30%
-  - 策略学会了"偏几步 → 停几步 → 再偏"的节奏（散热恢复）
-
----
-
-## 与 rollout_ckpt.py 的区别
-
-| 特性 | `rollout_ckpt.py` | Studio 回放 |
-|------|-------------------|-------------|
-| **动作采样** | `dist.mean`（确定性） | `dist.mean`（确定性） |
-| **观测归一化** | checkpoint 存的 obs_mean/var | checkpoint 存的 obs_mean/var |
-| **约束层** | 启用（与训练一致） | 启用（与训练一致） |
-| **输出** | npz 文件（yaw/power 轨迹） | 3D 实时可视化 + 尾流 + 曲线 |
-| **用途** | 验证策略、提取数据 | 现场演示、教授汇报 |
-
-两者的**策略执行完全一致**，只是输出形式不同。
-
----
-
-## 常见问题
-
-### Q1: 界面卡顿怎么办？
-
-**A**: 正常现象。FAST.Farm 每步 2-3 秒墙钟，界面每 3 秒更新一次位姿。可以：
-- 关闭尾流可视化（`--no-wake`），节省 ~10% 时间
-- 减少回放步数（`--replay-steps 170`），看前半段即可
-
-### Q2: 尾流平面不更新？
-
-**A**: 检查：
-1. 是否加了 `--no-wake`（这会关掉尾流）
-2. 数据通道面板是否勾选了"wake"相关项
-
-### Q3: 停止按钮无响应？
-
-**A**: FAST.Farm 在排空迭代预算（~30 秒），状态栏会显示"停止中：排空 FAST.Farm 迭代预算…"。**不要强制关闭**，否则会留下卡在 MPI_RECV 的孤儿进程。
-
-### Q4: 回放功率与训练历史不一致？
-
-**A**: **正常**！训练历史用 `dist.sample()`（探索噪声 std=0.57），回放用 `dist.mean`（确定性）。判断策略好坏**必须看回放**，不能看训练曲线。
-
-### Q5: 能否回放其他 checkpoint？
-
-**A**: 可以，只要是 MAPPO 的 checkpoint（包含 `actor`/`obs_mean`/`obs_var`）。修改 `replay_studio.ps1` 里的 `$ckpt` 路径即可。
-
----
-
-## 技术细节
-
-### Checkpoint 兼容性
-
-回放代码自动识别两种 checkpoint 格式：
-
-1. **Studio 训练**：有 `controls` 键，无 `obs_duty`/`recurrent`
-2. **CLI 训练**（`train_fastfarm.py`）：无 `controls` 键，有 `obs_duty`/`recurrent`
-
-当 `controls` 缺失时，从 `act_dim` 推断：
-- `act_dim=1` → `controls=['yaw']`（旧口径，单控偏航）
-- `act_dim=3` → `controls=['yaw','pitch','torque']`（新口径，多控）
-
-### 动作缩放
-
-- **单控（yaw）**：网络输出直接 `clip(a, act_low, act_high)`（与 `rollout_ckpt.py` 同口径）
-- **多控**：网络输出 `tanh(a) * act_high`（与 `train_fastfarm.py` 同口径）
-
-这保证了回放与训练时的动作尺度完全一致。
-
-### FLORIS-proxy 尾流
-
-- **不是真实 FAST.Farm 尾流数据**（FAST.Farm 的涡格几何 API 不公开）
-- 是**稳态近似**：用当前偏航角调 FLORIS 求解器，合成一个瞬时尾流平面
-- 足够展示 wake steering 的偏转效果（教授汇报够用）
-
----
-
-## 相关文件
-
-- **回放脚本**：`scripts/demo/replay_studio.ps1`
-- **测试脚本**：`scripts/demo/test_replay_import.py`
-- **实现代码**：`wfrl/studio/trainer.py:_replay_policy()`
-- **命令行入口**：`wfrl/studio/app.py:main()`
-- **Checkpoint**：`results/checkpoints/mappo_fastfarm_..._stagE400ref.pt`
-
----
-
-## 下一步
-
-回放完成后，可以：
-
-1. **截图/录屏**：用于 PPT/论文（OBS Studio 或 Windows Game Bar）
-2. **提取数据**：运行 `rollout_ckpt.py` 输出 npz 文件，绘制更精细的图表
-3. **复现训练**：运行 `train_reference_s1.ps1` 用不同随机种子验证可复现性
+数值轨迹入口为 `scripts/experiments/rollout_ckpt.py`，也会重新推进物理；它不是读取历史 NPZ 的播放器。当前缺失的旧权重/轨迹不能用其他 level/E128 checkpoint 或 Blender 内置柔性片段替代。

@@ -1,0 +1,75 @@
+# 维护与验证入口
+
+仅在选择或执行验证时读取本文件。命令从 Git 仓库根目录执行；宿主测试路径以 `blender_frontend/tests/` 为基准，原生脚本以 `blender_frontend/tests/blender/` 为基准，其他路径明确标为仓库路径。
+
+## 按功能选择
+
+| 改动范围 | 宿主测试 | Blender 检查与适用范围 |
+| --- | --- | --- |
+| 重建模式、共享结构和样本时钟 | `test_split_mappo_texture.py`、`test_split_reconstruction.py`、`test_split_reconstruction_timing.py`、`test_split_texture_settings.py`、`test_mappo_texture_package.py` | 后台 `split_turbine_context_regression.py` 检查结构复用、T2/T3、稳定刷新、保存重开和资产保持；实际窗口 `reconstruction_workflow_window.py` 检查统一流程。 |
+| 场景恢复与播放归属 | `test_scene_playback_lifecycle.py`、`test_native_camera_lifecycle.py` | 后台 `scene_playback_lifecycle_regression.py` 检查 FULL_COPY 缺失对象和 linked scene 第二时钟拒绝；全局播放器和跨场景关闭行为用实际窗口 `native_camera_enabled_regression.py`。 |
+| 三相机默认布局、事务与槽位 | `test_stacked_camera_rig.py`、`test_stacked_camera_swivel.py`、`test_custom_cameras.py`、`test_custom_camera_v3.py`、`test_custom_camera_sidebar.py` | 后台 `three_camera_default_regression.py`；相关按钮及恢复结果还需实际窗口。 |
+| 相机窗口、资源释放与原图采集 | `test_native_camera_lifecycle.py`、`test_custom_camera_capture.py`、`test_custom_camera_preview.py` | 实际窗口 `native_camera_enabled_regression.py` 检查参与路由、单路和异常清理；`frontend_layout_regression.py` 检查 GRID/STRIP、放大返回和退出；`custom_camera_capture_window.py` 检查真实 GPU 事务、失败和取消恢复。 |
+| NREL 缺陷编辑与几何分析 | `test_nrel_defects.py`、`test_nrel_defect_visibility.py` | 后台 `nrel_defect_editor_regression.py` 检查事务与保存重开，`nrel_defect_ui_state_regression.py` 检查源码 RNA 列表与按钮状态；实际窗口 `nrel_defect_window_regression.py`。 |
+| MAPPO 柔性运动、挠度与取景 | `test_tip_deflection.py` 及受影响模块的现有宿主测试 | 后台按需选 `mappo_demo_regression.py`、`farm_flex_regression.py`、`tip_deflection_regression.py`、`farm_front_view_regression.py`；实际构图需可见窗口。失败的物理门槛不随软件检查通过而改变。 |
+| 雷达方法、统计与便携包 | `test_dual_beam_builtin.py`；仓库 `tests/lidar/test_replay.py`、`test_dual_beam.py`、`test_dual_beam_replay.py`、`test_dual_beam_portable.py` 均位于 `tests/lidar/` | 后台 `dual_beam_regression.py`、`clearance_replay_smoke.py`；实际窗口 `dual_beam_window.py`、`clearance_gui_acceptance.py`。按需核对旧 B2、默认双束及 TLS 各自合同。 |
+| 构建工具与安装包 | `test_frontend_package_validation.py` 测工具逻辑；`test_extension_package.py` 会构建产品 ZIP | 仓库 `scripts/blender/validate_frontend_package.py` 构建并隔离安装，默认执行后台检查；实际窗口另选相应脚本。 |
+| 完整片段与播放性能 | 按基准工具改动选择对应宿主测试 | 仓库 `scripts/blender/run_playback_benchmark.py` 驱动实际窗口 `demo_playback_benchmark.py`，分别判断各路绘制、完成状态与进程退出。 |
+
+## 宿主与原生后台
+
+宿主使用已有依赖环境，按表选择测试，不直接运行整个测试目录：
+
+```bash
+PYTHONPATH=blender_frontend:. python -m pytest <选定测试路径> -q
+```
+
+先阅读脚本入口、导入方式和输出行为。支持后台的原生脚本使用：
+
+```bash
+<Blender可执行文件> --background --factory-startup --python-exit-code 1 --python <脚本路径>
+```
+
+此模板不能用于实际窗口脚本。使用已有安装 profile 时，先核对脚本是否支持工厂启动；工厂启动不是安装版测试的通用前提。
+
+`split_turbine_context_regression.py` 要求后台运行，默认导入工作区 `wfrl_blender`。安装版模式指定 `WFRL_ADDON_MODULE=bl_ext.<仓库名>.wfrl_blender` 并设置精确的 `WFRL_EXPECTED_ADDON_ROOT`；`WFRL_TEST_OUTPUT` 必须是不存在的新目录。可用 `WFRL_SPLIT_INPUT` 选择输入场景副本，保存输出不得覆盖规范资产。
+
+## 实际窗口与安装来源
+
+- 在独立可见 Blender 进程和配置中检查实际按钮、构图、读数及错误提示；保护用户已有脏场景。脚本操作通过与真实鼠标／键盘输入分别说明，不将后台或渲染结果写成窗口通过。
+- `reconstruction_workflow_window.py` 从新的、干净的可见进程启动，通过产品入口打开内置示例。必须设置 `WFRL_ADDON_MODULE=bl_ext.<仓库名>.wfrl_blender`、`WFRL_EXPECTED_ADDON_ROOT` 和新 `WFRL_TEST_OUTPUT`，不要预先打开脏场景。
+- 该脚本默认校验固定的规范几何场景摘要。目标包使用其他已确认资产时，先根据对应 inventory 与验证证据核定身份，再按包设置 `WFRL_EXPECTED_GEOMETRY_SHA256`；不能直接把失败现场的摘要填成期望值来绕过资产校验。
+- 该重建脚本覆盖几何／同源纹理往返、两侧完整取景、共享播放、暂停／单帧步进、一次观察点、绕转与缩放后继续播放、原始／增强、退出返回及保存重开。窗口检查不得重建求解输入或改写正式结果。
+- `native_camera_enabled_regression.py` 支持安装模块选择，安装模式不向导入路径添加工作区源码，并记录 `addon.__file__`；它不读取 `WFRL_EXPECTED_ADDON_ROOT`。`frontend_layout_regression.py` 支持模块选择，`WFRL_ADDON_ROOT` 只改变导入搜索路径，也不自动核验期望安装目录。对未内置目录断言的脚本，须另核对实际模块来源。
+- `custom_camera_capture_window.py` 支持 `WFRL_ADDON_MODULE` 和 `WFRL_EXPECTED_ADDON_ROOT`；GPU 资源复用、PNG/state 一致与失败恢复各自判定，不能据此宣布完整片段 FPS 或长期无泄漏。
+- `nrel_defect_editor_regression.py` 与 `nrel_defect_window_regression.py` 支持模块选择；`nrel_defect_ui_state_regression.py` 硬编码源码导入，只能提供源码后台证据。缺陷保存重开使用相同输出目录，第二个新进程设置脚本接口 `WFRL_NREL_DEFECT_PHASE=reopen`。
+- 上述相机、重建和缺陷脚本的 `WFRL_TEST_OUTPUT` 是目录，按脚本要求选择新目录或保存重开专用目录。其他脚本须单独核对该变量表示文件还是目录，以及是否写入演示 `.blend`。
+- 双束脚本需要匹配内置数据或 `WFRL_DUAL_PACKAGE`；`dual_beam_window.py` 用 `WFRL_BUILTIN_METHOD=TLS` 显式选择候选。方法、源摘要、S1 与双束读数须同时核对，不能用 B2 统计代替双束统计。
+
+实际安装模块通常是日常 `bl_ext.user_default.wfrl_blender` 或隔离 `bl_ext.wfrl_frontend.wfrl_blender`。环境变量只在脚本读取时生效；没有确认导入路径和载荷身份的测试不能作为安装版证据。
+
+## 打包与隔离安装
+
+任务包含构建／安装验证时使用：
+
+```bash
+python3 scripts/blender/validate_frontend_package.py --output <新目录> --blender <Blender可执行文件>
+```
+
+工具构建 ZIP、创建隔离配置并执行后台检查。`--build-only` 仍构建 ZIP，仅跳过安装；禁止打包的任务须排除该工具和 `test_extension_package.py`。额外外部旧法包使用 `--dual-package <匹配目录>`，不将此参数解释为 TLS 选择。
+
+窗口验证继承工具输出的 `environment.json` 和对应 profile，保留其安装目录与偏好。后台安装检查不能替代窗口检查，工作区源码检查也不能证明已安装资产正确。若验证所需脚本或依赖不在当前源码检出中，标明缺项，不借用其他环境的 PASS。
+
+## 完整播放与性能
+
+```bash
+python3 scripts/blender/run_playback_benchmark.py --blender <Blender可执行文件> --output <新目录> --installed-profile <隔离验证目录>
+```
+
+`--installed-profile` 是 benchmark 启动器参数，要求该目录含有效 `environment.json` 且 profile 仍存在；启动器继承安装环境、清除源码导入覆盖并避免工厂启动。按实际需求用 `--path` 和 `--layout` 选择单路、三路、GRID/STRIP、关闭重开或播放切换路径，参数可选值以脚本定义为准。
+
+逐路检查推进、终止、缺绘制、超时、中止和错误，结合进程结果判定完整片段。平均 FPS、单个 PASS、近 2 秒采样或暂停时刷新次数均不能替代完成判定；不把未测平台、长期运行或科学精度纳入结论。
+
+## 纯文档与 skill
+
+核对 YAML frontmatter、Markdown 链接和表格、所列模块／测试／参数是否存在，以及有效要求与实际实现是否分别表述。清理开发过程叙事、失效规则和重复状态；不创建执行日志，不为文档修改启动 Blender、构建包或运行物理求解。验证结果仅报告实际执行的静态检查。

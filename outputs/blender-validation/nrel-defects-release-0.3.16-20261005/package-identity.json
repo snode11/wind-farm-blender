@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "old_development_version": "0.3.15",
+  "version": "0.3.16",
+  "changed_files": [
+    "blender_manifest.toml"
+  ],
+  "unchanged_payloads": 144,
+  "scope": "Compared final NREL defect development ZIP inventory with release ZIP before upload; only manifest version changed."
+}

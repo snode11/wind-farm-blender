@@ -1,0 +1,51 @@
+{
+  "status": "PASS",
+  "source": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-mappo-two-camera-20261004-a02/split-playback/MAPPO_demo_reconstruction_split.blend",
+  "target": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+  "source_sha256": "76aaa3a70eb7d657579af4a6f150f41c085e96f0c7affa0803b830ef117dd578",
+  "images": [
+    {
+      "name": "kloofendal_48d_partly_cloudy_puresky_2k.hdr",
+      "packed": true,
+      "filepath": "//../landscape/kloofendal_48d_partly_cloudy_puresky_2k.hdr"
+    },
+    {
+      "name": "rocky_terrain_02_diff_2k.jpg",
+      "packed": true,
+      "filepath": "//../landscape/rocky_terrain_02_diff_2k.jpg"
+    },
+    {
+      "name": "rocky_terrain_02_nor_gl_2k.jpg",
+      "packed": true,
+      "filepath": "//../landscape/rocky_terrain_02_nor_gl_2k.jpg"
+    },
+    {
+      "name": "rocky_terrain_02_rough_2k.jpg",
+      "packed": true,
+      "filepath": "//../landscape/rocky_terrain_02_rough_2k.jpg"
+    }
+  ],
+  "console_histories": [
+    {
+      "screen": "Layout",
+      "result": "LINE_CONTENT_CLEARED"
+    },
+    {
+      "screen": "Layout",
+      "result": "LINE_CONTENT_CLEARED"
+    },
+    {
+      "screen": "Scripting",
+      "result": "LINE_CONTENT_CLEARED"
+    }
+  ],
+  "texts": [
+    "同步分屏说明.txt"
+  ],
+  "manifest_sha256": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde",
+  "geometry_and_transforms_unchanged": true,
+  "frame": 52,
+  "libraries": [],
+  "target_bytes": 50546009,
+  "target_sha256": "f7c24dba03b34d69e0048a4306c4b359fe785d3281819b5df692872d5e31298d"
+}

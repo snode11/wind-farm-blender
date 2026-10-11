@@ -1,12 +1,12 @@
 # NREL / WFRL Blender 0.3.20+1 安装
 
-更新日期：2026-10-10。本页适用于 NREL 5MW 前端 **0.3.20+1**。本版补回 **恢复默认三相机** 按钮，继续保留完整风机几何／同源纹理分屏与精细支撑结构，以及原三机柔性回放、三相机、六类合成缺陷、双束／TLS 和其他功能页。GW184 三相机与缺陷编辑器 0.4.0 保持独立，见 [GW184 使用说明](GW184三相机与缺陷编辑器.md)。
+适用于 Blender **5.2+** 的 NREL 公开扩展 **0.3.20+1**，包含完整风机几何／同源纹理、精细支撑结构、三相机默认复位、柔性回放、六类合成缺陷、双束／TLS。GW184 **0.4.0** 使用[独立包](GW184三相机与缺陷编辑器.md)。
 
-要求 **Blender 5.2+**。本轮相关宿主检查 **78 passed**，已安装 0.3.20 修补载荷在 macOS Blender 5.2.1 LTS 的后台与原生窗口实际复位点击通过。最终 0.3.20+1 ZIP 相比该载荷只调整 manifest／build-info 版本元数据与权限说明，扩展格式检查通过；未重复完整原生窗口或全新隔离安装。0.3.19 的 73／174、隔离安装与展示工作流保持历史范围。Windows/Linux、完整片段 FPS 和科学精度未验收，当前范围见[0.3.20+1 发布核对](releases/0.3.20+1发布核对.md)。
+公开包与开发机日常安装不同：日常安装为 **LOCAL_UNPUBLISHED_REVISION**，manifest 同为 `0.3.20+1`，相机异常清理与稳定轮询修订尚未发布。其 **217 passed / 113 subtests passed**、173 文件安装核对和原生脚本窗口证据只属于本地载荷。公开包与本地包的完整 SHA-256、实际模块和验证边界见[发布状态](发布状态与验证范围.md)。
 
 ## 发布身份与验证
 
-当前公开安装包为 [v0.3.20.1](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.20.1) 的 **[wfrl_blender-0.3.20+1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.20.1/wfrl_blender-0.3.20%2B1.zip)**，manifest 版本 `0.3.20+1`，173 文件、99,010,020 bytes；上传前本地 SHA-256 为 `e6e279f5f88c730f3c96158bfca525a9d04f1a09915ad3a997d1d29b00a9f5ba`。本版仅上传一个 ZIP 附件，扩展实现源码未推送；安装文档在 ZIP 发布后另行同步。未下载远端附件复验。
+当前公开安装包为 [v0.3.20.1](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.20.1) 的 **[wfrl_blender-0.3.20+1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.20.1/wfrl_blender-0.3.20%2B1.zip)**，manifest 版本 `0.3.20+1`，173 文件、99,010,020 bytes；上传前本地 SHA-256 为 `e6e279f5f88c730f3c96158bfca525a9d04f1a09915ad3a997d1d29b00a9f5ba`。Release 提供一个专用 ZIP 附件，扩展实现源码未推送；未下载远端附件复验。
 
 公开扩展源码基线仍为 [v0.3.18 / `6dfa0eef`](https://github.com/snode11/wind-farm-blender/commit/6dfa0eefe410ef3e38d3cbd9ee7d017aafa2fc02)。自动 Source code 不代表本版对应实现或安装包。最终包和本地验证回执见[0.3.20+1 发布核对](releases/0.3.20+1发布核对.md)；原 **NOT_ACCEPTED／FAILED_GATE** 与雷达研究接受边界不变。
 
@@ -54,21 +54,13 @@ ZIP 内置预弯 v3 三机 60 秒回放、旧法与 TLS 两份双束结果层、
 
 ## 从公开源码构建
 
-**0.3.20+1 仅发布 ZIP，未公开对应扩展实现源码。** 本版从发布页的专用 ZIP 安装；自动 Source code 不包含本版匹配实现。以下源码复建说明仅适用于明确列出的历史版本，不能将 0.3.18 复建结果改称 0.3.20+1。
-
-**0.3.18 已同步匹配扩展源码与 ZIP。** 下载完整 [v0.3.18 Source code](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.18)，或克隆仓库后检出 `v0.3.18`，保留整个 `blender_frontend/wfrl_blender/assets/` 与仓库级 `wfrl/`。从仓库根目录运行 `python3 scripts/blender/build_extension.py`，生成 `dist/wfrl_blender-0.3.18.zip` 及相应 inventory／SHA-256 文件；源码发布复建已确认与最终验证 ZIP 完全一致。自动 Source code 仍是开发归档，Blender 安装用构建后的扩展 ZIP。
-
-0.3.17.1 历史版仅发布 ZIP，`v0.3.17.1` 指向当时提交 `9d7b5596a781b8ea5040d18b2f009268313a8821`，不能据该旧标签构建 0.3.17.1 的完整功能；本次不追改旧标签。本地新增缺陷编辑器和纹理检查 CLI 尚未公开，不能据 0.3.18 扩展源码同步推定这些独立入口可用。
-
-以下是 **0.3.13 历史构建步骤**。0.3.13 同步 NREL 前端、雷达算法、处理工具、测试和自包含构建资源。完整下载并解压 [v0.3.13 的 Source code](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.13)，或克隆仓库后检出该标签。使用 Python 3.11+，从仓库根目录执行：
+公开 0.3.20+1 没有对应实现源码；安装请选择专用 ZIP。公开匹配实现基线为 **v0.3.18**。下载完整 [v0.3.18 Source code](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.18)，或克隆仓库后检出该标签；保留 `blender_frontend/wfrl_blender/assets/` 和仓库级 `wfrl/`。使用 Python 3.11+，从仓库根目录运行：
 
 ```bash
 python3 scripts/blender/build_extension.py
 ```
 
-构建生成 `dist/wfrl_blender-0.3.13.zip`、`.zip.sha256` 与 `.inventory.json`。保留源码中的整个 `blender_frontend/wfrl_blender/assets/` 和仓库级 `wfrl/`；构建会校验共享源与两种双束结果层，并将规范读取器和协议放入扩展。离线包构建不需要外部原始 FAST.Farm / VTP 数据。自动生成的 Source code 是开发归档，Blender 安装使用构建后的扩展 ZIP。
-
-0.3.10–0.3.12 的历史源码归档仍对应原提交，不追改。GW184 0.4.0 的实现继续随独立运行 ZIP 提供。实现与维护见[前端实现说明](../../blender_frontend/README.md)，0.3.13 历史检查见[对应发布核对](releases/0.3.13发布核对.md)，当前检查见[0.3.20+1 发布核对](releases/0.3.20+1发布核对.md)。
+该基线构建生成 `dist/wfrl_blender-0.3.18.zip`、inventory 与 SHA-256。其独立复建与该版本 172 文件最终 ZIP 字节一致，见[来源核对](releases/0.3.18发布核对.md)；不能改称当前公开包或本地可靠性载荷的复建。离线构建无需外部原始 FAST.Farm／VTP 数据。自动 Source code 是开发归档，安装须用构建后的扩展 ZIP。
 
 ## 现有 MP4 输出
 

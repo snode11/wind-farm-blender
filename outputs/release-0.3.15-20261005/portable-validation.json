@@ -1,0 +1,221 @@
+{
+  "status": "PASS",
+  "validation_kind": "ISOLATED_INSTALLED_PORTABLE_EXAMPLE",
+  "blender": "5.2.1 LTS",
+  "saved_blend": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.15-20261005/validation-v2/profile/extensions/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+  "saved_blend_sha256": "f7c24dba03b34d69e0048a4306c4b359fe785d3281819b5df692872d5e31298d",
+  "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.15-20261005/validation-v2/profile/extensions/wfrl_blender/__init__.py",
+  "registration": "INSTALLED_ADDON_ALREADY_REGISTERED",
+  "scene": "MAPPO Demo 与三维重建 · 同步分屏",
+  "source_restore": {
+    "already_active_after_native_load": true,
+    "method": "NATIVE_LOAD_POST_ALREADY_ACTIVE",
+    "originally_saved_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.15-20261005/validation-v2/profile/extensions/wfrl_blender/assets/mappo",
+    "bound_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.15-20261005/validation-v2/profile/extensions/wfrl_blender/assets/mappo",
+    "manifest_sha256": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde",
+    "matching_saved_source": true,
+    "source_replaced": false,
+    "scene_rebuilt": false,
+    "handler_registered": true,
+    "farm_frame_handler_registered": true
+  },
+  "saved_native_animation": [
+    {
+      "object": "SplitRecon.B1",
+      "absolute_shape_keys": 601,
+      "geometry_curves": 1,
+      "material_curves": 105,
+      "interpolation": "CONSTANT",
+      "drivers_absent": true
+    },
+    {
+      "object": "SplitRecon.B2",
+      "absolute_shape_keys": 601,
+      "geometry_curves": 1,
+      "material_curves": 105,
+      "interpolation": "CONSTANT",
+      "drivers_absent": true
+    },
+    {
+      "object": "SplitRecon.B3",
+      "absolute_shape_keys": 601,
+      "geometry_curves": 1,
+      "material_curves": 105,
+      "interpolation": "CONSTANT",
+      "drivers_absent": true
+    }
+  ],
+  "saved_viewport_isolation": {
+    "screen": "Layout",
+    "cameras": [
+      "WFRL.Camera.T1.FrontQuarter",
+      "SplitRecon.Camera"
+    ],
+    "viewport_count": 2,
+    "shared_scene": "MAPPO Demo 与三维重建 · 同步分屏",
+    "checks": [
+      {
+        "blade": 1,
+        "source_visible_in_free_left": true,
+        "source_right": false,
+        "reconstructed_right": true,
+        "reconstruction_display_offset_y": 10000.0
+      },
+      {
+        "blade": 2,
+        "source_visible_in_free_left": true,
+        "source_right": false,
+        "reconstructed_right": true,
+        "reconstruction_display_offset_y": 10000.0
+      },
+      {
+        "blade": 3,
+        "source_visible_in_free_left": true,
+        "source_right": false,
+        "reconstructed_right": true,
+        "reconstruction_display_offset_y": 10000.0
+      }
+    ],
+    "left_free_perspective": true,
+    "left_local_view": false,
+    "left_camera_locked": false,
+    "left_shading": "MATERIAL / scene world / scene lights",
+    "left_sidebar_enabled": true,
+    "mappo_panel_registered": true,
+    "saved_active_sidebar_category": "UNSUPPORTED",
+    "sky_world": "World.001",
+    "sky_image": "kloofendal_48d_partly_cloudy_puresky_2k.hdr",
+    "sky_image_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.15-20261005/validation-v2/profile/extensions/wfrl_blender/assets/examples/../../../../outputs/blade-recon-mappo-two-camera-20261004-a02/landscape/kloofendal_48d_partly_cloudy_puresky_2k.hdr",
+    "sky_resource_available": true,
+    "sky_background_linked": true,
+    "right_local_view": true,
+    "display_offset_y": 10000,
+    "scope": "SAVED_VIEWPORT_DATA_ONLY; NOT_VISIBLE_WINDOW_OR_FPS"
+  },
+  "frames": [
+    {
+      "timeline_frame": 1,
+      "source_simulation_time_s": 117.0,
+      "farm_source_index": 0,
+      "farm_interpolation_alpha": 0.0,
+      "max_source_geometry_error_m": 1.1365219734216225e-05,
+      "reconstruction_source_index": 0,
+      "reconstruction_simulation_time_s": 117.0,
+      "reconstruction_local_time_s": 0.0,
+      "max_reconstruction_geometry_error_m": 7.615851018272224e-06,
+      "max_reconstruction_colour_error": 1.1920928910669204e-08
+    },
+    {
+      "timeline_frame": 6,
+      "source_simulation_time_s": 117.08333333333333,
+      "farm_source_index": 3,
+      "farm_interpolation_alpha": 0.33333333333314386,
+      "max_source_geometry_error_m": 1.1445269507248668e-05,
+      "reconstruction_source_index": 0,
+      "reconstruction_simulation_time_s": 117.0,
+      "reconstruction_local_time_s": 0.0,
+      "max_reconstruction_geometry_error_m": 7.615851018272224e-06,
+      "max_reconstruction_colour_error": 1.1920928910669204e-08
+    },
+    {
+      "timeline_frame": 7,
+      "source_simulation_time_s": 117.1,
+      "farm_source_index": 4,
+      "farm_interpolation_alpha": 0.0,
+      "max_source_geometry_error_m": 7.984907682612175e-06,
+      "reconstruction_source_index": 1,
+      "reconstruction_simulation_time_s": 117.1,
+      "reconstruction_local_time_s": 0.1,
+      "max_reconstruction_geometry_error_m": 7.6142382852140145e-06,
+      "max_reconstruction_colour_error": 1.1920928910669204e-08
+    },
+    {
+      "timeline_frame": 103,
+      "source_simulation_time_s": 118.7,
+      "farm_source_index": 68,
+      "farm_interpolation_alpha": 0.0,
+      "max_source_geometry_error_m": 8.442306217659734e-06,
+      "reconstruction_source_index": 17,
+      "reconstruction_simulation_time_s": 118.7,
+      "reconstruction_local_time_s": 1.7,
+      "max_reconstruction_geometry_error_m": 7.584444659869405e-06,
+      "max_reconstruction_colour_error": 1.1920928910669204e-08
+    },
+    {
+      "timeline_frame": 901,
+      "source_simulation_time_s": 132.0,
+      "farm_source_index": 600,
+      "farm_interpolation_alpha": 0.0,
+      "max_source_geometry_error_m": 6.126360119651508e-06,
+      "reconstruction_source_index": 150,
+      "reconstruction_simulation_time_s": 132.0,
+      "reconstruction_local_time_s": 15.0,
+      "max_reconstruction_geometry_error_m": 3.8139219782351574e-06,
+      "max_reconstruction_colour_error": 1.1920928910669204e-08
+    },
+    {
+      "timeline_frame": 1801,
+      "source_simulation_time_s": 147.0,
+      "farm_source_index": 1200,
+      "farm_interpolation_alpha": 0.0,
+      "max_source_geometry_error_m": 8.815967078135145e-06,
+      "reconstruction_source_index": 300,
+      "reconstruction_simulation_time_s": 147.0,
+      "reconstruction_local_time_s": 30.0,
+      "max_reconstruction_geometry_error_m": 7.622382668159844e-06,
+      "max_reconstruction_colour_error": 1.1920928910669204e-08
+    },
+    {
+      "timeline_frame": 3601,
+      "source_simulation_time_s": 177.0,
+      "farm_source_index": 2399,
+      "farm_interpolation_alpha": 1.0,
+      "max_source_geometry_error_m": 9.191551578524582e-06,
+      "reconstruction_source_index": 600,
+      "reconstruction_simulation_time_s": 177.0,
+      "reconstruction_local_time_s": 60.0,
+      "max_reconstruction_geometry_error_m": 7.598093276328655e-06,
+      "max_reconstruction_colour_error": 1.1920928910669204e-08
+    },
+    {
+      "timeline_frame": 103,
+      "source_simulation_time_s": 118.7,
+      "farm_source_index": 68,
+      "farm_interpolation_alpha": 0.0,
+      "max_source_geometry_error_m": 8.442306217659734e-06,
+      "reconstruction_source_index": 17,
+      "reconstruction_simulation_time_s": 118.7,
+      "reconstruction_local_time_s": 1.7,
+      "max_reconstruction_geometry_error_m": 7.584444659869405e-06,
+      "max_reconstruction_colour_error": 1.1920928910669204e-08
+    }
+  ],
+  "movement_and_holds": {
+    "source_world_motion_m": 78.32949894171806,
+    "source_local_deformation_motion_m": 2.2182745933532715,
+    "reconstruction_sample_advance_motion_m": 7.919602394104004,
+    "reconstruction_frames_1_and_6_equal": true,
+    "backward_seek_frame_103_repeatable": true
+  },
+  "visible_window_test": "NOT_PERFORMED_BY_THIS_BACKGROUND_SCRIPT",
+  "visible_fps": "NOT_MEASURED",
+  "online_solver": false,
+  "reconstruction_precision": "NOT_ACCEPTED",
+  "portable_dependencies": {
+    "bound_package": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.15-20261005/validation-v2/profile/extensions/wfrl_blender/assets/mappo",
+    "packed_images": [
+      "kloofendal_48d_partly_cloudy_puresky_2k.hdr",
+      "rocky_terrain_02_diff_2k.jpg",
+      "rocky_terrain_02_nor_gl_2k.jpg",
+      "rocky_terrain_02_rough_2k.jpg"
+    ],
+    "linked_libraries": [],
+    "open_example_operator_registered": true
+  },
+  "comparison_to_original_max_geometry_error_m": 0.0,
+  "time52": {
+    "playback_s": 117.85,
+    "sample_s": 117.8,
+    "hold_ms": 50.0
+  }
+}

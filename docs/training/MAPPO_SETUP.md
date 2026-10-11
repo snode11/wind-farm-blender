@@ -1,6 +1,6 @@
 # PPO、参数共享 IPPO 与集中式 MAPPO 环境配置
 
-对齐日期：2026-10-08。本文按当前源码区分算法和入口；本轮仅静态核对，没有安装依赖、训练或求解。Blender 当前发布版为 0.3.17.1（包内0.3.17+1），离线演示安装见[演示指令单](../demos/演示指令单.md)，不需要训练环境。
+本文按源码区分算法与训练入口。Blender 公开安装 ZIP 为 **0.3.20+1**（标签 v0.3.20.1），公开扩展源码为 v0.3.18；日常安装为同版本号的本地未发布修订。离线演示无需训练环境，[入口与身份见演示指令单](../demos/演示指令单.md)[和发布状态](../blender/发布状态与验证范围.md)。
 
 ## 1. 先选实际算法
 
@@ -12,7 +12,7 @@
 | 集中式 MAPPO（CTDE） | `python -m wfrl.mappo_central` | 单机局部观测 / 各机局部观测拼接 | Ablaincourt FLORIS，7 机组 |
 | 集中式 MAPPO，可选 GRU critic | `scripts/train/train_fastfarm.py` | 单机局部观测 / 全场拼接状态或其序列 | 默认三机 FAST.Farm，也支持 `--backend floris` |
 
-文件名中的 `mappo`、环境 ID 的 `Dec_` 或共享参数本身不能证明集中式 critic。SB3 路线将机组映射成一个 VecEnv 的多行样本，但 critic 仍只读本机输入；详细数据流见[IPPO 说明](IPPO_TRAINING_EXPLAINED.md)。真实集中式实现已经在仓库中，不再是“需要换框架才能开始”的待办。
+文件名中的 `mappo`、环境 ID 的 `Dec_` 或共享参数本身不能证明集中式 critic。SB3 路线将机组映射成一个 VecEnv 的多行样本，但 critic 仍只读本机输入；详细数据流见[IPPO 说明](IPPO_TRAINING_EXPLAINED.md)。集中式实现使用下表之外独立的入口，不能与 SB3 路线混称。
 
 ## 2. 依赖与安装
 
@@ -27,13 +27,13 @@ python -m pip install -e '.[train]'
 python -m pip check
 ```
 
-这是按当前文件对齐的模板，不是本次重新验证的全平台安装结果。该 requirements 文件不安装 `mpi4py`、`openfast_toolbox` 或 FAST.Farm / 控制器二进制。FAST.Farm 另需与实际平台匹配的 MPI、求解器和 DLL；不能靠改环境 ID 完成部署。完整分流见[本地配置](../setup/setup_local.md)。
+这是源码环境安装模板，不构成全平台验证结果。该 requirements 文件不安装 `mpi4py`、`openfast_toolbox` 或 FAST.Farm / 控制器二进制。FAST.Farm 另需与实际平台匹配的 MPI、求解器和 DLL；不能靠改环境 ID 完成部署。[完整分流见本地配置](../setup/setup_local.md)。
 
 当前 SB3 包装器无需 supersuit；历史部署记录有 generator 序列化问题，因此这条路线使用自定义 `MAParallelVecEnv`。不把当时的问题推定为所有新版本的结论。
 
 ## 3. 当前命令模板
 
-以下命令会创建或覆盖 `results/` 下对应产物，只在需要训练或评估时使用。本文维护没有执行它们。
+以下命令会创建或覆盖 `results/` 下对应产物，在训练或评估任务中使用。
 
 ```bash
 # 参数共享 IPPO，SB3；500 是目标 agent transitions，实际按完整 rollout 取整

@@ -1,6 +1,6 @@
 # WFRL Blender 0.3.9
 
-> **历史 0.3.9 交付说明。** 本页摘要、校验文件与清单仅标识该轮交付，不是当前安装包或完整功能清单。当前公开 NREL / WFRL 使用 [0.3.18 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.18) 的 ZIP，对应扩展源码也已发布；安装和范围见[安装指南](../docs/blender/INSTALL.md)、[0.3.18 发布核对](../docs/blender/releases/0.3.18发布核对.md)。旧独立 normal/close 与当前 MAPPO 柔性回放分开阅读。
+本文标识 **0.3.9** 安装包；其摘要与清单只适用于该载荷。当前 NREL / WFRL 公开安装 ZIP 为 **0.3.20+1**（标签 v0.3.20.1），公开扩展源码为 v0.3.18；本地日常安装是同版本号的未发布修订。当前入口与载荷身份见[安装指南](../docs/blender/INSTALL.md)和[发布状态](../docs/blender/发布状态与验证范围.md)。独立 normal/close 与 MAPPO 柔性回放使用不同数据合同。
 
 要求 Blender 5.2+。安装 ZIP 后重启 Blender，重新加载 MAPPO · 60 秒，自动创建带推荐连续重叠取景的三相机盒体。支架安装端贴住机舱，盒体外伸；支持同一步选点与转向，再分别调整 C1–C3。默认关闭轨迹与挠度辅助物。
 
@@ -10,6 +10,6 @@
 
 SHA-256：`0cabd8f1c95739d585b72ba638be3026db9488757a037b524b50fd8d362b5343`。
 
-历史清单文件名为 `wfrl_blender-0.3.9.zip.sha256`、`wfrl_blender-0.3.9.inventory.json` 与 `lidar-delivery.json`；当前仓库未提供这三份文件，不作为可打开的现行附件。
+[历史逐文件清单](wfrl_blender-0.3.9.inventory.json) · [历史 normal/close 交付清单](lidar-delivery.json)。校验文件名 `wfrl_blender-0.3.9.zip.sha256` 当前未保留在本目录，上方哈希标识 0.3.9 载荷。
 
-该轮 Release 附件仅提供扩展安装 ZIP；上方保留该包 SHA-256，逐文件清单的当前缺失状态如上。GitHub 自动生成的 Source code 归档用于查看版本源码，不是扩展安装包。
+0.3.9 Release 附件仅提供扩展安装 ZIP；历史 SHA-256 与本地逐文件清单见上方。GitHub 自动生成的 Source code 归档用于查看版本源码，不是扩展安装包。

@@ -1,79 +1,41 @@
 # NREL 5MW / WFRL Blender 前端实现与维护
 
-更新日期：2026-10-10。公开安装版为 **NREL 5MW 0.3.20+1**，要求 **Blender 5.2+**。本版仅发布扩展 ZIP，扩展实现源码未推送；使用／维护文档在 ZIP 发布后另行同步。公开扩展实现基线仍为 [v0.3.18 / `6dfa0eef`](https://github.com/snode11/wind-farm-blender/commit/6dfa0eefe410ef3e38d3cbd9ee7d017aafa2fc02)。v0.3.20.1 标签指向既有文档提交 `8e49b84db1b28de49b61b12924d540ae37f11b8b`，自动 Source code 不代表本版对应实现或安装包。用户操作见[前端说明](../前端readme.md)，交付及分层验证见[0.3.20+1 发布核对](../docs/blender/releases/0.3.20+1发布核对.md)，待办见[前端更新计划](../前端更新计划.md)。
+用户操作见[前端说明](../前端readme.md)，当前交付和验证见[发布状态](../docs/blender/发布状态与验证范围.md)，待实施要求见[前端更新计划](../前端更新计划.md)。要求 Blender **5.2+**。
 
-安装使用 [wfrl_blender-0.3.20+1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.20.1/wfrl_blender-0.3.20%2B1.zip)。Install from Disk 安装、启用并重启后，在 **N → MAPPO → 打开几何重建示例…** 进入两侧完整风机；侧栏用一个按钮双向切换几何／同源纹理，保留中段／叶尖一次定位、原始／增强及共享播放控制。三相机的 **N → View → 三相机 → 恢复默认三相机** 恢复原盒体安装位置、朝向与 C1/C2/C3 参数，支持相机布局撤销。独立合成资产和工具保留，统一流程不显示其入口。ZIP 含便携场景、MAPPO 数据和 packed 纹理，无需作者路径或在线后端；历史 Release 保留。
+## 运行来源与能力范围
 
-[0.4.0 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.4.0) 另提供 `gw184_three_camera_defects-0.4.0.zip`：基于 DTU 10MW 分布和 FFA 翼型的 GW184 尺寸合成刚性模型、固定三相机及六类缺陷编辑器，完整解压后运行；它与 NREL 扩展分别运行；NREL 0.3.16 已移植六类缺陷编辑器，两套模型与配置身份分别保留。操作和模型范围见 [GW184 说明](../docs/blender/GW184三相机与缺陷编辑器.md)，项目维护见 [项目 README](../projects/gw184-single/README.md) 与 [缺陷编辑器说明](../projects/gw184-single/DEFECT_EDITOR.md)。
-
-**0.3.18 已发布 ZIP 与对应扩展源码。** 隔离源码复建与发布前最终 172 文件包的逐载荷及完整 ZIP 字节一致，发布核对见[0.3.18 发布核对](../docs/blender/releases/0.3.18发布核对.md)。0.3.13 曾同步完整 NREL 源码与构建资源；0.3.15–0.3.17.1 当次仅更新 ZIP、新版扩展实现未随各自标签推送，是各版本的历史事实。0.3.17.1 标签仍指向历史提交 `9d7b5596a781b8ea5040d18b2f009268313a8821`，包内兼容版本 `0.3.17+1` 的 build metadata 不用于自动升级排序。历史归档不追改，历史 Source code 不能代替对应安装 ZIP；GW184 实现继续随独立 ZIP 提供。版本与分层验证见[当前发布状态](../docs/blender/发布状态与验证范围.md)与[0.3.17.1 历史发布核对](../docs/blender/releases/0.3.17.1发布核对.md)。
-
-0.3.17 安装包增加保存的 v0.2 重建结果与三片 RGBA 纹理导入、packed 恢复和 shader 增强，并随包提供独立 120 样本 `synth_tex` 表面纹理对照。仅集成结果可视化；外部纹理辅助几何／健康 loft 求解器不随扩展打包。最终包验证见 [0.3.17 发布核对](../docs/blender/releases/0.3.17发布核对.md)。
-
-默认内置预弯 v3 三机 MAPPO 60 秒离线记录。相机和材质由 Blender 即时绘制，运动与形变来自保存数据；三相机窗口没有重新运行 FAST.Farm。数据仍为 **REVIEW_ONLY**。当前 S2/S3 已验证完整过叶配对，不能与旧 normal/close 或 v3 B2 的固定三束覆盖率限制混为同一结论。
-
-**0.3.16：T1/B1 默认修补痕迹。** 安装 ZIP 包含约 **1.4 × 0.7 m** 的浅灰色补漆外观，位于原始 T1 第一片叶片距叶根约 34 m 处。普通 MAPPO 加载、包含 T1 的 YAML 场景建立及原有 `.blend` 重开均接入这一默认配置。原 GitHub 0.3.15 ZIP 保留历史内容；当次发布未自动更新日常安装；0.3.18 发布前本地日常安装验证另记于下节。
-
-实现由 `blender_frontend/wfrl_blender/repair_marks.py` 管理：`scene_builder.build_scene()` 创建时添加，刚性旧场景由加载回调补建，`FarmFlex` 更换参考网格后、首次形变前重新绑定。保存的三角形索引和重心权重通过原生 Geometry Nodes 跟随旋转、变桨及柔性形变，无逐帧 Python 重建；隐藏辅助对象采样原网格，原叶片保留其展示修改器。仅原始 `WFRL.Turbine.T1.Blade1` 带标记，重建叶片与 GW184 独立模型不受影响。这是合成外观，不改变气动、刚度、载荷或保存的测量数据，默认修补痕迹与本版 NREL 缺陷编辑器各自保留配置。
-
-0.3.16 安装包与本地规范源码的 NREL 缺陷编辑器位于 `wfrl_blender/nrel_defects/`，由 MAPPO 的「NREL 5MW · 叶片缺陷」面板启用。复用 GW184 的六形态、严格配置和两阶段事务，在 NREL 健康展示 loft 上重新绑定；`farm_flex.rebind_blade()` 重建修改拓扑的静态坐标和形变缓存，`deform_points()` 用相同保存运动驱动支持区域及辅助轮廓。末尾结构/展示叶尖索引、原材质标记和默认补漆附着均保留。保存 `.blend` 后由原回放加载器建立健康参考，再恢复提交 JSON，临时预览不写入保存状态。源码启动、G/A 导出和验证见 [NREL 缺陷编辑器说明](../docs/blender/NREL缺陷编辑器.md)。0.3.16 当次公开 Release 仅提供 ZIP，未自动更新日常安装；安装后需重启。
-
-## 2026-10-10 0.3.20+1 三相机默认复位（仅 ZIP 已发布）
-
-本版补回三相机面板的 **恢复默认三相机** 按钮；`stacked_camera_rig.reset_default(scene)` 从 `assets/cameras/t1-three-camera-default.json` 恢复整个盒体和三路参数，通过原布局事务提交完整撤销记录。没有盒体时不隐式创建；采集、布局草稿、安装及后端忙碌期间拒绝复位。已有默认配置且原生状态有效时不重建对象或增加历史；提交失败回滚原布局。`custom_cameras._publish()` 同步更新 WATCH / LAYOUT 控制器的当前相机、`snapshot.camera` 和 `external_snapshot.camera`，退出观察后仍恢复有效的替换相机。
-
-唯一手动附件 `wfrl_blender-0.3.20+1.zip` 为 173 文件、99,010,020 bytes，上传前本地 SHA-256 为 `e6e279f5f88c730f3c96158bfca525a9d04f1a09915ad3a997d1d29b00a9f5ba`。发布身份、回执与验证范围见[发布核对](../docs/blender/releases/0.3.20+1发布核对.md)及[本地验证摘要](../outputs/release-0.3.20-plus1-20261010/local-verification.json)。
-
-修复前身本地 0.3.20 ZIP 的相关宿主检查为 **78 passed**；实际日常安装 `bl_ext.user_default.wfrl_blender` 的后台回归覆盖复位、撤销、重复无操作、忙碌保护与失败回滚；原生面板实际点击通过，保留 frame 61 / subframe 0.5、自由视角及 WATCH 相机引用，见[后台记录](../docs/maintenance/camera-reset-cleanup-20261010/camera-reset-background-validation.json)和[窗口记录](../docs/maintenance/camera-reset-cleanup-20261010/camera-reset-native-validation.json)。最终 0.3.20+1 ZIP 与该已验证前身的全部功能和资产文件字节一致，仅 manifest / build-info 版本及简短权限说明不同；CRC 与 Blender 扩展校验通过。最终版本未重新隔离安装或重跑完整可见窗口，不能把上述前身检查改写成最终版本新执行；未新增 FPS、精度或科学接受结论。
-
-## 2026-10-09 0.3.20 重建结构与显示修复（仅 ZIP 已发布）
-
-`split_turbine_context.py` 让几何／同源纹理两种模式复用左侧 T1 的塔筒、机舱、轮毂及机械细节网格、材质和修改器，排除叶片及传感器；按原采集的机舱局部坐标转换，并在源姿态和塔筒形变提交后同步。旧示例在载入时升级三个简化占位物；修复切换 T2/T3 时右侧结构误隐藏及完整取景问题。该修订已随 0.3.20 ZIP 发布，0.3.20+1 继续包含；三片叶片的 601 个保存样本、图集及 UV 仍属于原重建结果。原开发记录保留于 `outputs/reconstruction-shared-structure-20261009-a01/`，其测试数量与窗口范围不据发布状态扩写。
-
-## 2026-10-09 0.3.19 完整风机对照（历史 ZIP 发布）
-
-0.3.19 已发布统一几何／同源纹理展示工作流。最终 172 文件 ZIP 的隔离安装、默认相机／投影后台及原生可见窗口工作流通过，相关 CPU 为 73 passed / 174 subtests passed，见[最终本地验证](../outputs/release-0.3.19-20261009/local-verification.json)。此前沿用 0.3.18 版本号的本地实现和日常窗口记录保留于[原界面验证](../outputs/reconstruction-ui-20261009-a01/验证记录.md)，真实滚轮输入只属于该此前轮次，最终包未重复，不能当作公开 0.3.18 的功能或本轮新增执行。
-
-- `panels/farm_replay.py` 与 `split_reconstruction_ui.py`：MAPPO 统一使用 **打开几何重建示例…** 入口；进入后显示当前模式，使用一个按钮双向切换几何／同源纹理。重建流程保留共享播放／暂停、单步、复位和退出，隐藏样本前后跳转、进度滑块、自定义位置、跟随、完整取景、恢复布局和独立合成入口。普通三机回放及挠度、净空、视频输出、工具不受该精简影响。
-- `split_reconstruction.py` 与 `split_mappo_texture.py`：右侧塔筒、机舱和轮毂为模拟展示结构，三片叶片为保存的估计重建结果；几何和同源纹理均按完整风机构图。模式切换保留时间、暂停／播放状态和有效手动视图。时间、样本保持和绿橙含义在右侧视口左下角显示。
-
-- 中段和叶尖按钮仅执行一次人工预设定位，播放不继续跟随。滚轮、平移及绕转保留用户视图；切换原始／增强是显式整机取景动作，两侧先显示完整风机，再由用户放大寻找现有图集细节。
-- 保存重开恢复模式、显示设置、时间及视角，不重放显式原始／增强切换的整机取景动作。embedded 数据、packed 图片、来源摘要及 601 样本严格时钟校验继续沿用；独立合成资产和底层工具保留独立来源及 120 样本游标。
-
-同源纹理仍由原两路 Workbench 仿真 RGB、掩码及动态标定融合为固定灰度图集，增强只改变显示；放大不产生新分辨率，预设观察点不是检测结果。几何／纹理 **NOT_ACCEPTED**、原叶尖 **FAILED_GATE** 及雷达 **REVIEW_ONLY / PENDING_ACCEPTANCE** 保持。0.3.19 仅上传 ZIP，公开扩展源码基线仍为 0.3.18；实际身份与分层验证见[0.3.19 发布核对](../docs/blender/releases/0.3.19发布核对.md)。
-
-## 2026-10-08 0.3.18 修复与源码发布
-
-以下实现已随 0.3.18 扩展源码与 ZIP 发布。发布前本地修复、安装版原生验证及本次隔离源码 CPU／复建分别记录，不合并验证数量或升级科学验收。
-
-| 模块 | 0.3.18 实现与行为 |
+| 对象 | 身份与范围 |
 | --- | --- |
-| `farm_flex.py`、`clearance_replay.py` | 运行实例按 scene 注册，`active_for(scene)` 取得对应绑定；恢复失败只清除该场景读数与柔性标记。FULL_COPY 缺少原名对象时明确未就绪，已恢复原场景继续运动；linked scene 共用可变对象时拒绝第二个回放时钟。 |
-| `playback.py`、`__init__.py` 与播放调用点 | 同进程只有一个原生播放器，`screen.is_animation_playing` 是全局状态。持久 PRE/POST 播放回调记录实际 owner scene；`_cancel_playback(scene)` 仅在目标匹配 owner 时原生取消，同场景全部视图一起暂停。另一场景播放时，当前场景的单步、停止、复位和末帧回调不停止它；播放／重播请求明确拒绝冲突。载入文件清除旧 owner，owner 未知时不猜测；卸载显式执行全局清理。 |
-| `nrel_defects/editor.py` | C1/C2/C3 按实际槽位身份路由；缺少 C2 时明确拒绝 C2 操作，C3 不冒充第二路，不执行不完整三路分析。 |
-| `custom_camera_capture.py`、`custom_cameras.py` | 采集前与采集中核对原生／评估姿态、父级逆矩阵、约束、镜头和裁剪；非有限值或原生修改导致记录不一致时拒绝继续。中断后恢复回放、读数、图表和预览状态，保留用户修改。 |
-| `custom_camera_preview.py` | 时间序列采集在一次事务内按输出尺寸复用 GPU 目标；窗口变化、结束、取消或异常时释放。实际 Metal 窗口三尺寸、三样本的分配／释放为 **9/9 → 3/3**，9 张 PNG 字节与状态哈希一致；不据此宣称播放 FPS 提高或整套 Blender 无泄漏。 |
-| `frontend_diagnostics.py`、`panels/farm_replay.py` | Tools 的“版本、来源与播放诊断”显示实际模块、版本、构建和数据来源。帧率采样默认关闭；开启后统计当前视口近 2 秒绘制的不同场景帧，暂停、未采样或样本不足时显示对应状态。该统计不表示显示器扫描频率，也不是完整片段稳定 FPS 验收。 |
+| 公开安装包 | [NREL 0.3.20+1](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.20.1)，173 文件；完整风机几何／同源纹理切换、三机柔性回放、默认三相机复位及六类合成缺陷。 |
+| 公开实现源码 | [0.3.18 / 6dfa0eef](https://github.com/snode11/wind-farm-blender/commit/6dfa0eefe410ef3e38d3cbd9ee7d017aafa2fc02)；自动 Source code 不对应当前公开 ZIP 或全部本地工作区。 |
+| 本地日常安装 | `bl_ext.user_default.wfrl_blender`，`LOCAL_UNPUBLISHED_REVISION`，manifest 0.3.20+1、173 文件；包 SHA-256 `c7a085b5dcd76163b7589f014f706231d882251423e3281e268495b84b6b68c6`，与公开附件不同。 |
+| GW184 | [0.4.0 独立运行包](../docs/blender/GW184三相机与缺陷编辑器.md)；184 m 尺寸合成刚性模型、固定三相机和六类缺陷。模型与配置不能直接替代 NREL。 |
 
-叶尖显示读取经过摘要、时间轴及姿态一致性校验的 `data.json` float64 姿态，避免先降为 float32 的量化误差；真实结构点仍取保存的表面变换与 Blender 网格，不用挠度通道反推或补差。原 **0.2 mm** 保存帧阈值及 **5 mm** 插值帧阈值不变，叶尖门槛仍为 **FAILED_GATE**。安装版同一抽样的真实网格／独立源运输最大分量误差约为 **1.0613 / 1.0665 mm**，两者世界坐标差不超过 **0.0290 mm**；主要残差来自正式源包的表面／结构点运输近似。历史同样抽样约 0.8945 mm，本次消除量化也消除偶然抵消，不能称精度提高。原始源文件缺失，本轮没有重导出、重跑 FAST.Farm、改正式数据或放宽阈值。
+本地日常修订包含相机异常清理与同源纹理稳定刷新。对应[验证摘要](../outputs/frontend-reliability-20261011-a01/final-verification.json)记录 **217 passed / 113 subtests passed**、隔离与日常安装原生脚本窗口检查，以及 173 个安装文件摘要一致。稳定暂停刷新 20 次时 `_sources`、`_existing`、`_apply` 均为 0 次；该计数不证明 FPS 提升。窗口证据使用脚本操作，不是实体鼠标输入；完整片段、长期运行与跨平台验收仍受限。
 
-发布前本地相关宿主测试 **117 passed / 1 skipped / 6 subtests passed**，跳过项为原始 VTP 来源验证。最终 ZIP 的 172 文件隔离安装、相机／投影及针对性后台检查通过；真实 GPU 与多窗口检查另行通过。开发机日常模块为 `bl_ext.user_default.wfrl_blender`，172 文件与最终 ZIP 一致，65 个正式资产摘要不变。叶尖后台软件行为通过后仍以原阈值失败退出；程序退出时少量未释放内存诊断保留。发布前完整分层结果与精选证据见[本地 0.3.18 修复与验证](../docs/blender/validation/NREL本地0.3.18修复与验证.md)。这些结果不升级 Blade Recon、TLS 或其他科学接受状态。
+公开包 SHA-256 为 `e6e279f5f88c730f3c96158bfca525a9d04f1a09915ad3a997d1d29b00a9f5ba`。工作区源码、构建 ZIP、已安装扩展与公开附件分别核对，不能依据版本号推定文件相同。日常启动器加载安装版；更新安装后需要完全重启 Blender。
 
-0.3.18 发布时隔离源码的相关 CPU 检查为 **215 passed / 2 skipped / 233 subtests passed**，两项跳过因原始 VTP 与历史原版对照源缺失。源码复建与上述最终 172 文件包的载荷及完整 ZIP 字节一致；此新检查与原 117/1/6 分别阅读，不相加。发布身份、源码范围和构建证据见[0.3.18 发布核对](../docs/blender/releases/0.3.18发布核对.md)，没有据此新增原生窗口、长期 FPS 或物理精度接受结论。
+默认 MAPPO 为保存的预弯 v3 三机 60 秒结果，视口绘制不启动 FAST.Farm。几何／纹理 `NOT_ACCEPTED`、叶尖门槛 `FAILED_GATE`、雷达 `REVIEW_ONLY / PENDING_ACCEPTANCE` 保持。源采样频率、显示时间轴和实际绘制帧率分别报告。
+
+## 合成缺陷与默认补漆
+
+`repair_marks.py` 管理 T1/B1 距叶根约 34 m 的 **1.4 × 0.7 m** 浅灰补漆。三角面索引和重心权重通过 Geometry Nodes 跟随旋转、变桨与柔性运动；仅原始 T1/B1 带此默认标记，重建叶片和 GW184 独立模型不受影响。
+
+`nrel_defects/` 管理九片叶片的六类缺陷、预览确认／取消、撤销重做、健康对照和参考身份绑定的 JSON。`farm_flex.rebind_blade()` 与 `deform_points()` 使修改拓扑、支持区域和轮廓沿同一保存运动更新。保存只记录已提交配置。合成外观不改变气动、刚度、载荷或雷达源；G 的几何可见性不等于图片可辨识。操作和约束见[NREL 缺陷编辑器](../docs/blender/NREL缺陷编辑器.md)。
 
 ## 当前主要结构
 
 - `panels/farm_replay.py`：共享播放、单步、复位及功能页；普通三机回放提供进度定位，统一重建对照隐藏进度滑块。View 页组织观察相机，切视角保留回放时刻。
 - `split_reconstruction.py`、`split_reconstruction_timing.py`、`split_reconstruction_ui.py`：保存分屏生命周期、完整风机显示、独立视口、固定采样映射、统一入口、模式切换及左下角状态说明；底层样本步进工具保留，统一侧栏使用单帧步进。规范资源为 `assets/examples/mappo_reconstruction_split.blend`。
-- `split_mappo_texture.py` 与 `assets/blade_recon_mappo_tex/`：0.3.17.1 已发布的同源纹理同步入口，使用原两相机实验的 601 个保存状态与动态标定生成固定 RGBA 图集，共用 MAPPO 的 60 Hz 时间轴；`split_surface_texture.py` 的 120 样本合成实验继续使用独立游标。`split_texture_settings.py` 保存各来源的显示选择并在失败切换时回滚状态。来源和模型等价见[首轮交付记录](../outputs/mappo-same-source-texture-20261007-a01/交付记录.md)，同功能修订的安装与回归见[自检与修复](../outputs/mappo-same-source-texture-20261007-a01/self-check/自检与修复.md)。
+- `split_mappo_texture.py` 与 `assets/blade_recon_mappo_tex/`：同源纹理同步回放，使用原两相机实验的 601 个保存状态与动态标定生成固定 RGBA 图集，共用 MAPPO 的 60 Hz 时间轴；`split_surface_texture.py` 的 120 样本合成实验继续使用独立游标。`split_texture_settings.py` 保存各来源的显示选择并在失败切换时回滚状态。来源、模型等价和安装边界见[发布状态与验证范围](../docs/blender/发布状态与验证范围.md)。
 - `deflection.py`：T1 三叶片独立未受载参考、实际结构叶尖及根系 xyz 分量。参考随同刻塔顶与转子运动；源通道对照按实际可用性显示。
 - `tower_motion.py`：读取并校验 v2 塔架截面与机舱变换，插值运动；`farm_flex.py` 同步塔筒网格、叶片、机舱及雷达挂载。
 - `assets/mappo/`：包含默认预弯 v3 离线记录，无需求解器、Bridge 或项目路径；数据格式代次与扩展版本号分开管理。
 - `assets/dual_beam/` 与 `assets/dual_beam_tls/`：两个结果层共享 `assets/mappo/` 的 40 Hz 源数据；默认 `hub-axis.v1`，显式选择 `hub-tls.v1`。
 - `stacked_camera_rig.py` 与 `panels/stacked_camera_rig.py`：共盒三相机、支架安装端贴合、盒体末端转向、确认／取消／撤销及默认布局复位。
 - `custom_cameras.py`：槽位、相机参数、布局及兼容处理；`native_camera_views.py`：独立原生单路／三路观察窗口。
-- `custom_camera_capture.py`：同刻或时间序列原图采集；`custom_camera_preview.py`：保留预览计算与质量恢复支持，0.3.12 已移除侧栏“精确材质预览”入口，普通原生观察不依赖逐帧 PNG 采集。
-- `assets/cameras/t1-three-camera-default.json`：0.3.9 默认取景配置，加载 MAPPO 时应用；显式重载与普通播放分开处理。
+- `custom_camera_capture.py`：同刻或时间序列原图采集；`custom_camera_preview.py`：保留预览计算与质量恢复支持，普通原生观察不依赖逐帧 PNG 采集。
+- `assets/cameras/t1-three-camera-default.json`：默认取景配置，加载 MAPPO 时应用；显式重载与普通播放分开处理。
 
 ## 当前三相机维护要点
 
@@ -81,9 +43,11 @@
 
 **恢复默认三相机** 复用已保存的默认 JSON，不改变回放帧、播放状态或用户自由视图。布局和原生状态都已默认时保持对象身份与历史；原生对象状态损坏时显式复位可修复。复位沿原事务重建相机时必须同时重绑定当前观察相机及 WATCH / LAYOUT 的退出快照，不能留下已删除的 C2 引用。
 
-当前目标是同一叶片的连续视场与相邻重叠，不要求三等分，不按目标叶长范围裁切图像。C2 可能因透视关系看到较远叶尖；这不再按旧的“只有 C3 见叶尖”判失败。默认参考时刻为 117 s，固定相机在旋转中允许叶片进出画面，不自动追踪叶片。
+当前目标是同一叶片的连续视场与相邻重叠，不要求三等分，不按目标叶长范围裁切图像。C2 可能因透视关系看到较远叶尖；不要求只有 C3 可见叶尖。默认参考时刻为 117 s，固定相机在旋转中允许叶片进出画面，不自动追踪叶片。
 
 原生窗口用临时观察相机表达各路视场，共用场景和时钟。默认 GRID 为 2×2，第四格是 `installation_schematic.py` 生成的静态安装示意；STRIP 为三列对照。两种布局均有播放／暂停、单步及单路放大。独立 WATCH 和放大固定使用 SOLID 材质颜色显示，无单路画质切换；返回三路恢复其原画质。PNG 采集使用独立原始质量设置，异常退出也须恢复回放与预览状态。
+
+本地未发布修订中，观察会话分别保留代理对象与镜头数据引用，分步释放绘制回调、代理和窗口，并独立恢复预览画质及主视口。已经删除的 RNA 不阻止其余清理；未释放的资源保留供再次关闭重试。准备／观察失败保存在场景的 `wfrl_native_camera_error` 并显示于三相机主面板，成功完成重开后清除。关闭及延迟恢复均遵守实际场景播放归属，另一场景的播放保持运行。本地修订不改变已发布 ZIP 的身份。
 
 相机视锥并集、射线可见性与拼接成功是不同检查。参考姿态的连续投影和重叠已有证据；根部连接件、机舱和叶片自身仍会遮挡局部表面，完整无遮挡尚未通过。不能隐藏真实结构制造几何通过结果，也不能将此仿真安装作为实体标定。
 
@@ -120,13 +84,13 @@ scripts/blender/run_wfrl_macos.sh \
 | Formal Training | 正式训练流程、进度与指标 | 是，不提供逐步实时三维遥测 |
 | 独立 normal／close 雷达回放 | 外部 18 秒结果包；前端刚性姿态示意 | 否 |
 
-旧 66 秒本地 SYNTH 时间线、虚构功率、脚本事件与手动覆盖物理姿态入口已从当前 Demo 移除。Bridge 中仍保留旧 Backend Demo 逻辑，不能将其合成运动当成真实 FAST.Farm 验收；FLORIS 也仅支持该旧后端模式。
+当前 Demo 使用保存的 MAPPO 数据。Bridge 中仍保留旧 Backend Demo 逻辑，不能将其合成运动当成真实 FAST.Farm 验收；FLORIS 也仅支持该旧后端模式。
 
 ## 1. 场景如何搭建
 
 前端采用 Python 程序化建模。几何输入来自扩展内的 [nrel5mw_geometry.json](wfrl_blender/assets/nrel5mw_geometry.json)，场景布局由 [scene_model.py](wfrl_blender/scene_model.py) 中的 `SceneDTO` 和 `TurbineDTO` 表达，包含机组编号、平面位置、风速、风向等信息。
 
-[scene_builder.py](wfrl_blender/scene_builder.py) 的 `build_scene()` 创建 `WFRL_Scene` 集合，按机组生成塔筒和上部装配，再加入基础、编号、地形、来流箭头、尾流与传感器示意，最后配置环境和渲染。重新构建时会先清除该同名集合及符合条件的无用户引用资源；这是重建入口，不是普通切换镜头操作。
+scene_builder.py（本地文件：`blender_frontend/wfrl_blender/scene_builder.py`） 的 `build_scene()` 创建 `WFRL_Scene` 集合，按机组生成塔筒和上部装配，再加入基础、编号、地形、来流箭头、尾流与传感器示意，最后配置环境和渲染。重新构建时会先清除该同名集合及符合条件的无用户引用资源；这是重建入口，不是普通切换镜头操作。
 
 几何计算集中在 [turbine_geometry.py](wfrl_blender/turbine_geometry.py)，它读取打包资源并返回顶点和面，不导入后端求解器。场景装配再使用 Blender 数据 API 创建网格、对象、父级关系和材质。日常打开已有 `.blend` 与重新构建场景是两条不同路径。
 
@@ -227,7 +191,7 @@ origin + 0.95 × TipRad × normalize(direction)
 
 ### 5.1 三机结果包与九片形变
 
-[__init__.py](wfrl_blender/__init__.py) 的 `load_demo_scene()` 创建基础场景后，调用 [farm_flex.py](wfrl_blender/farm_flex.py) 加载 [assets/mappo](wfrl_blender/assets/mappo/manifest.json)。结果包包括：
+[__init__.py](wfrl_blender/__init__.py) 的 `load_demo_scene()` 创建基础场景后，调用 farm_flex.py（本地文件：`blender_frontend/wfrl_blender/farm_flex.py`） 加载 [assets/mappo](wfrl_blender/assets/mappo/manifest.json)。结果包包括：
 
 | 文件 | 作用 |
 | --- | --- |
@@ -237,7 +201,7 @@ origin + 0.95 × TipRad × normalize(direction)
 | `telemetry.json` | 同次 OpenFAST 实际保存的功率与转矩通道，含单位、源通道与文件摘要；当前内置 v3 未保存 `load` 通道 |
 | `tower-motion.npz` | 塔筒截面位置/朝向与机舱变换，共享时间轴；用于塔架及挂载运动 |
 | `deflection-t1.json` | 同源 T1 结构叶尖分量输出、高精度姿态与塔顶参考变换；当前 v3 按根系 xyz 解释 |
-| `source-run.json` | 本次运行来源、控制器和原始输出摘要 |
+| `source-run.json` | 对应运行的来源、控制器和原始输出摘要 |
 | `source-surfaces.json` | 生成形变数据所用的原始表面证据索引 |
 | `blade-reference.json`、`reference-surfaces.npz` | v3 独立零载荷静止求解参考及对应表面，用于参考几何与实际形变对照 |
 
@@ -245,7 +209,7 @@ origin + 0.95 × TipRad × normalize(direction)
 
 `FarmFlex` 为九片叶片分配独立 Mesh，根据相邻源时刻和相邻展向站点插值形变，并结合机组偏航与装配变换写回局部顶点。单机镜头只上传可见机组网格；切到全景时，在当前时刻更新全部九片再显示。这里保留物理变形幅度，展示网格的采样密度不等于求解器网格密度。
 
-[tip_tracking.py](wfrl_blender/tip_tracking.py) 从变形网格的叶尖位置记录轨迹，叶片 1／2／3 分别为红／绿／蓝，相邻两圈定格对比 2 个仿真秒后淡出。轨迹不是相机测量；同机切镜头保留轨迹，换机、寻址、重播时按生命周期重置。0.3.9 默认关闭轨迹，需要时主动打开。
+[tip_tracking.py](wfrl_blender/tip_tracking.py) 从变形网格的叶尖位置记录轨迹，叶片 1／2／3 分别为红／绿／蓝，相邻两圈定格对比 2 个仿真秒后淡出。轨迹不是相机测量；同机切镜头保留轨迹，换机、寻址、重播时按生命周期重置。MAPPO 默认关闭轨迹，需要时主动打开。
 
 ### 5.1.1 塔架、叶片参考与净空
 
@@ -257,7 +221,7 @@ v3 净空真值定义为叶片末截面表面到同一全局高度移动塔筒�
 
 ### 5.2 统一侧栏与固定时间轴
 
-[panels/farm_replay.py](wfrl_blender/panels/farm_replay.py) 是 MAPPO 统一入口，顶部共享播放控制；挠度页放 T1 叶片选择、叶尖/叶轮/Down、虚影/分量和数值表；净空页提供默认双束 / S1、TLS 候选与旧 B2 模式切换、机组 Down 和对应卡片；工具页放视角、云台、遥测、环境、截图录制和重新加载。该模式隐藏重复 Camera 面板；其他模式保留 [panels/gimbal.py](wfrl_blender/panels/gimbal.py) 与 [panels/clearance.py](wfrl_blender/panels/clearance.py)。
+panels/farm_replay.py（本地文件：`blender_frontend/wfrl_blender/panels/farm_replay.py`） 是 MAPPO 统一入口，顶部共享播放控制；挠度页放 T1 叶片选择、叶尖/叶轮/Down、虚影/分量和数值表；净空页提供默认双束 / S1、TLS 候选与旧 B2 模式切换、机组 Down 和对应卡片；工具页放视角、云台、遥测、环境、截图录制和重新加载。该模式隐藏重复 Camera 面板；其他模式保留 [panels/gimbal.py](wfrl_blender/panels/gimbal.py) 与 [panels/clearance.py](wfrl_blender/panels/clearance.py)。
 
 时间读取复用 [clearance_replay.py](wfrl_blender/clearance_replay.py) 与结果包的 ReplayReader：
 
@@ -286,7 +250,7 @@ MAPPO 固定 `timebase_fps=60`，仿真片段为 117–177 s：40 Hz 源数据 2
 
 S2/S3 按同一保存时刻、同一叶片的有效命中配对，S1 有效叶片命中独立报警，不能用双束无效来抑制 S1。读数、报警和累计历史共用仿真时钟，寻址不重复累计；无效值保持缺失。可携带包包含自身 `source/` 并校验完整源数据及结果摘要，移走后不依赖开发机绝对路径。损坏或缺包须清空旧状态。
 
-2026-09-30 直接核对原 0.3.12 ZIP 内置记录：
+固定 MAPPO 源的双束完整过叶统计：
 
 | 机组 | 完整过叶次数 | 每次是否存在 S2/S3 配对 |
 | --- | --- | --- |
@@ -318,106 +282,37 @@ S2/S3 按同一保存时刻、同一叶片的有效命中配对，S1 有效叶�
 
 实时 `rotor_speed` 当前由功率／效率／转矩／齿轮比推算，保留 SYNTH 与 `FastFarmDriver._rotor_speed` 来源；yaw、pitch、power、torque 的 DIRECT 标签不能推广到所有通道。离线 MAPPO 使用保存的转速记录。真实后端场景与随包随机阵风记录属于不同运行。
 
-## 6. 修改、安装与验证
+## 修改、安装与验证
 
-### 6.1 维护入口
-
-| 修改目标 | 优先入口 |
-| --- | --- |
-| 基础几何与装配 | `turbine_geometry.py`、`scene_builder.py` |
-| 材质与机械附件 | `materials.py`、`mechanical_details.py` |
-| 雷达外观与光束 | `clearance_visual.py` |
-| 三机形变、数据校验与遥测接入 | `farm_flex.py`、`assets/mappo/` |
-| MAPPO 侧栏、镜头与播放控制 | `panels/farm_replay.py` |
-| 叶尖轨迹 | `tip_tracking.py` |
-| 公共时钟、独立雷达回放与恢复 | `clearance_replay.py`、`panels/clearance.py` |
-| 曲线与历史导出 | `charts.py`、`panels/telemetry.py` |
-| 相机与云台 | `cameras.py`、`panels/gimbal.py` |
-| 共盒三相机、支架贴合与默认布局 | `stacked_camera_rig.py`、`panels/stacked_camera_rig.py`、`assets/cameras/t1-three-camera-default.json` |
-| 单路／三路观察窗口与预览质量 | `native_camera_views.py` |
-| 相机布局、参数、原图与输出信息 | `custom_cameras.py`、`custom_camera_capture.py`、`panels/custom_camera_output.py` |
-| 连接／运行状态 | `runtime.py`、`transport.py`、`panels/status.py`、`panels/run.py` |
-| 原命令启动行为 | 项目侧 `scripts/blender/wfrl_launcher.py`、`wfrl_blender_bootstrap.py` |
-| 后端求解／控制边界 | 项目侧 `wfrl/blender_bridge/` |
-| 测距算法与物理结果生产 | `wfrl/lidar/`、`scripts/lidar/`，见 [算法说明](../wfrl/lidar/README.md) |
-
-源码三机预览入口为 [open_farm_flex.py](../scripts/blender/open_farm_flex.py)。正式原命令走已安装扩展，不自动读取工作区扩展修改。0.3.18 对应的公开 `blender_frontend/wfrl_blender/` 包含扩展实现及规范资源，构建脚本从 `wfrl/blender_bridge/messages.py` 和四个 `wfrl/lidar/` 规范模块生成协议／读取器副本；保留完整匹配资产，不要只复制 Python 文件。公开 `v0.3.13` 可按其历史范围构建；`v0.3.15`–`v0.3.17.1` 未同步各自新版扩展实现源码的历史状态保留，不能套用于已发布源码的 `v0.3.18`。使用 Python 3.11+，从匹配源码根目录运行以下维护命令；指定新的输出目录避免覆盖既有包：
+维护修改应作用于规范源；`protocol.py` 来自 `wfrl/blender_bridge/messages.py`，内置 `_vendor/lidar/` 读取器来自 `wfrl/lidar/`。不要手改生成副本或替换冻结模型及正式资产来消除校验失败。
 
 ```bash
-python3 scripts/blender/build_extension.py --output /path/to/new-build-output
+python3 scripts/blender/build_extension.py --output <新目录>
+python3 scripts/blender/validate_frontend_package.py --output <新目录> --blender <Blender可执行文件>
 ```
 
-构建按当前 manifest 版本生成 ZIP、SHA-256 文件与逐文件 inventory。当前 0.3.20+1 为 **173 文件**，身份和本轮静态校验见[当前发布核对](../docs/blender/releases/0.3.20+1发布核对.md)，公开源码不能复建当前包。历史 0.3.18 为 **172 文件**，SHA-256 为 `f5fb69e6e8cdc58edf1d1f76fd4eacc1e108b688768635cc3a5a05c04bdfc400`，构建身份 `payload_sha256` 为 `e98f64dcd090ba33f93e52bc1e0a26adeff82fb1828bc0239f49babc618a60b0`；见[历史发布核对](../docs/blender/releases/0.3.18发布核对.md)。`build-info.json` 根据载荷路径／摘要和版本生成，不包含 Git commit；同一输入不应因提交变化而改变载荷身份。0.3.18 当轮隔离发布源码复建与正式最终包的 172 载荷及完整 ZIP 字节一致。vendor 模型与资产参考代码保留各自冻结字节和换行，不以另一模型替换或改写正式资产来源字段。
+构建生成 ZIP、SHA-256 与逐文件 inventory，输出目录须独立，避免覆盖同版本包。验证工具默认构建、隔离安装并执行后台检查；`--build-only` 仍会构建 ZIP。纯文档任务仅检查格式、引用、身份与要求一致性。
 
-0.3.17.1 历史包为169文件、98,992,149bytes、包内0.3.17+1，SHA-256 `cfaa108646d77845bfe2b07ff3f052fbaf0529231836ee09b7423f0e00345df3`，见[历史发布核对](../docs/blender/releases/0.3.17.1发布核对.md)。历史0.3.17为157文件、97,836,884bytes，SHA-256 `1a43e2949f14fbc7e79c2933fc84d74eedaff71dd61c7ddd5afbd90effb7f174`；历史0.3.16为145文件、95,604,329bytes，SHA-256 `d7a95e3942e60ccc95d5c97052f478eeafab6df0f2a7f4daa7a2fd5a8fec1ba2`。这些版本当次仅上传 ZIP，其原验证范围保留。完整本地归档仍包括 `outputs/release-0.3.17-20261007/validation/package/wfrl_blender-0.3.17.zip` 与 `outputs/blender-validation/nrel-defects-release-0.3.16-20261005/package/wfrl_blender-0.3.16.zip`；对应 inventory 与 SHA-256 sidecar 按历史路径保留。
+ZIP 包括 MAPPO 源、旧法和 TLS 结果层、规范示例、NREL 缺陷编辑器及生成的协议／读取器。公开 0.3.18 源码的复建结论仅属于该版；本地载荷、公开附件和已安装文件必须分别匹配 inventory 与 build-info，不用 Git 提交或版本字符串替代。
 
-ZIP 包含 MAPPO 源资源、旧法与 TLS 结果层、便携示例、NREL 缺陷编辑器及默认修补痕迹，以及由规范源码生成的读取器和协议副本。安装后重启 Blender，再核对实际安装模块与资源；版本字符串不能替代文件一致性。纯文档或项目侧 bootstrap／Bridge 修改无需重建 ZIP，纯显示修改复用现有结果包。0.3.18 源码发布没有重跑 FAST.Farm；改变物理输入需另核对求解器机型与坐标合同。
+按[维护与验证入口](../.agents/skills/windfarm-blender-dev/references/verification.md)选择宿主、后台、窗口与隔离安装检查。源码导入不证明安装版正确，后台通过不证明可见交互或物理精度。每项测试记录实际模块、输入、环境、输出和终止状态。
 
-### 6.2 回归入口
+完整播放需要每路推进与终段证据；超时、缺绘制、错误和意外回跳不能判为通过。`POST_PIXEL` 是视口绘制回调，不是显示器扫描输出。近两秒采样、GPU 事务复用、固定 60 Hz 时间轴和暂停时稳定刷新均不能替代完整片段 FPS。
 
-| 验证内容 | 入口 |
-| --- | --- |
-| 完整 MAPPO 加载、控制、遥测、保存重开与缺包恢复 | [mappo_demo_regression.py](tests/blender/mappo_demo_regression.py) |
-| 三机独立形变 | [farm_flex_regression.py](tests/blender/farm_flex_regression.py) |
-| 侧前方／Down／全景与轨迹保留 | [farm_front_view_regression.py](tests/blender/farm_front_view_regression.py) |
-| 原命令默认离线、主动连接与自动场景加载 | [launcher_mode_regression.py](tests/blender/launcher_mode_regression.py)，需匹配的待用 Bridge 与 `WFRL_*` 环境配置 |
-| 启动器宿主测试 | [test_launcher.py](tests/test_launcher.py) |
-| 雷达编辑模式重载、卡片交互 | [clearance_edit_mode_regression.py](tests/blender/clearance_edit_mode_regression.py)、[clearance_ux_regression.py](tests/blender/clearance_ux_regression.py) |
-| 后端暂停／单步与立即重连 | [test_part4_backend.py](../tests/blender_bridge/test_part4_backend.py) |
+## Blade Recon 与重建对照
 
-按脚本说明设置独立的 `WFRL_TEST_OUTPUT`，以及所需结果包／扩展路径；不要覆盖既有验收证据。宿主测试通过不能代替 Blender 后台回归，后台回归也不能代替实际 GUI、性能和物理验收。
+外部 `blade_recon0.2` 提供研究算法，扩展只读取已保存结果，不在查看时拟合。材料点候选独立结果为 Patch **2/8**、Crack **7/8**（87.5% < 90%）、跨相机 RGB **0/264**，真实同材料点三维误差 `null`，保持 `FAILED_GATE / NOT_ACCEPTED`。数据与限制见[材料点对应研究](../blade_recon0.2/docs/材料点对应实验报告_2026-10-11.md)；该研究没有替换扩展正式 601 样本资产。
 
-当前 0.3.20+1 的交付、前身修复载荷的 78 项宿主及实际安装窗口检查、最终 ZIP 的一致性与静态校验边界见[当前发布核对](../docs/blender/releases/0.3.20+1发布核对.md)。历史 0.3.19 的最终 ZIP、本地 CPU 73／174、隔离安装及原生窗口检查见[该版发布核对](../docs/blender/releases/0.3.19发布核对.md)。0.3.18 发布时的源码 CPU／复建检查见[历史发布核对](../docs/blender/releases/0.3.18发布核对.md)，发布前本地安装／GPU／播放归属与保留的叶尖失败见[修复验证](../docs/blender/validation/NREL本地0.3.18修复与验证.md)；两轮检查分别记录。历史0.3.17.1的隔离安装、三相机／投影和新进程后台embedded／packed恢复见[该历史发布核对](../docs/blender/releases/0.3.17.1发布核对.md)；此前同功能代码的可见窗口与QA另列，不声称改版本后重做全功能窗口或FPS。历史0.3.17的独立合成纹理验证见[原发布核对](../docs/blender/releases/0.3.17发布核对.md)。0.3.16 的隔离安装、缺陷编辑器保存重开与既有失败边界见[本版发布核对](../docs/blender/releases/0.3.16发布核对.md)；0.3.15 的便携恢复、注册生命周期与实际窗口行为见[对应历史核对](../docs/blender/releases/0.3.15发布核对.md)；0.3.13 当时的测试、构建与安装检查保留于[历史发布核对](../docs/blender/releases/0.3.13发布核对.md)。历史安装包的测试数量和通过结论只适用于对应版本，可查[已发布记录](../CHANGELOG.md)和[当前发布状态](../docs/blender/发布状态与验证范围.md)。不能将历史后端短测或便携回归合并为本版验收；以下保留 0.3.9 的历史基线。
+独立“叶片三维重建”标签通过合成样例或 `recon.json` 创建单独场景，保留原场景与回放位置。`blade_recon_review.py`、`blade_recon_surface.py`、`blade_recon_inspection.py` 与 `panels/blade_recon.py` 负责结果、纹理和图例；图例中的轮廓支持不等于独立三维测量。`synth_tex` 是 **SYNTHETIC** 的 120 个 10 Hz 样本，来源与时钟独立。
 
-### 6.3 0.3.9 历史验证与性能边界
+统一入口 **MAPPO → 打开几何重建示例…** 使用 `assets/examples/mappo_reconstruction_split.blend`，在同一完整风机分屏切换几何／同源纹理。右侧塔筒、机舱、轮毂与机械细节共享源 T1 结构，只有三片叶片属于重建估计。`split_turbine_context.py` 独立管理共享结构的变换与可见性，T2/T3 选择不得隐藏右侧结构。
 
-0.3.9 当时发布的源码、ZIP 校验值和安装验证见 [0.3.9 发布核对](../docs/blender/releases/0.3.9发布核对.md)。以下为 2026-09-27 发布前的相机与播放检查记录，不扩展为全部平台或后端验收。
+`split_reconstruction.py` 管理布局生命周期，`split_reconstruction_timing.py` 定义固定映射，`split_reconstruction_ui.py` 提供统一控制与左下角 HUD。601 个保存状态来自 10 Hz 重建，使用固定 60 Hz 时间轴，每个样本保持 6 帧；MAPPO 源为 40 Hz。两侧共同播放、暂停、步进与循环。
 
-| 层级 | 记录与边界 |
-| --- | --- |
-| 发布前相机与安装交互 | 110 项相关宿主测试通过；源码及安装版检查默认布局、支架转向、导入撤销、原生窗口和采集。发布 ZIP 的文件核对和回归范围另见发布核对 |
-| 可见窗口播放 | Blender 5.2.1、820×473 逻辑窗口、流畅模式、5 秒预热；完整 60 秒片段单路约 12.43 FPS，独立三路约 11.33 FPS，三路帧序列一致、约 1 倍仿真速度；P95 帧间隔约 118 ms |
-| 播放异常 | 首次单路切三路仅推进约 1.28 秒后停住，100 秒超时；独立三路复测完成不能抹除这次异常。原因尚未定位 |
-| 验收脚本限制 | 0.3.9 当时的脚本超时也写 PASS；0.3.10 已修正失败判定，原历史结果不能因此追认为通过 |
-| 几何取景 | 参考姿态的三路视场并集及相邻重叠已检查；根部与极尖端局部不可见，完整表面无遮挡未通过 |
+本地未发布修订的 `split_mappo_texture.refresh()` 复用已校验的对象与结构绑定；来源对象、网格、保存清单或摘要变化时完整校验，文件加载、撤销与重做清缓存。只在矩阵、网格或全局可见性变化时写入，不重复激活显示设置或扫描全部场景。
 
-播放数字来自 `POST_PIXEL` 回调记录的不同场景帧，不是显示器扫描频率，也不是全屏、投影或高清模式性能承诺。源数据 40 Hz、显示时间轴 60 Hz、实际绘制帧率分别报告。
+中段／叶尖观察点只定位一次，手动缩放、平移、绕转后继续播放保留用户视图。原始／增强显式切换回两侧整机；模式切换保留时刻、播放状态和有效视角。保存重开恢复当前模式、显示、时间与视角，不重放按钮取景动作。独立合成入口及底层样本工具不在统一侧栏显示。
 
-这些播放记录来自开发机可见窗口，原始性能日志不是扩展安装 ZIP 的内容。复测时应保留完整片段是否结束、超时与暂停状态、各路帧序列和测量条件；不要将验收脚本的单个 PASS 字段作为流畅性结论。
+便携场景保存 `__WFRL_BUNDLED_MAPPO__` 与 manifest SHA-256，依据实际安装目录匹配 `assets/mappo/`，含 packed 天空／地表图，无 linked libraries。失效路径只恢复相同来源；不匹配则清空并报错，不改成任意默认包。打开入口保留 Blender 原生未保存确认，验证使用副本，不覆盖规范场景。
 
-0.3.17 安装包纳入第1、2阶段的 `texture_path`、三片 packed RGBA、atlas UV 与纹理／证据色切换。独立场景和嵌入恢复沿用原生命周期；`blade_recon0.2/blender_view.py` 另可烘焙原生几何与证据动画。图集周向周期、展向钳制像素中心，按纹理元数据及 packed 图片摘要恢复。公开 0.3.16 附件保留历史内容；阶段开发来源与证据见 本地 `blade_recon0.2/docs/阶段1、2运行与验证.md`（算法研究档案，不随公开文档提供）。
-
-## Blade Recon 叶片三维重建开发入口
-
-三维视口 N 侧栏增加独立 **叶片三维重建** 标签，与 Item、MAPPO、View 并列。通过 **加载合成样例** 或 **导入 recon.json** 创建单独的重建回放场景，保留原风场场景及其回放位置；**返回原场景** 只切换当前窗口的场景。输入使用 `blade_recon` 算法输出的模型参数，Blender 按保存时刻生成三维表面，不在查看时重新拟合。
-
-实现入口为 `wfrl_blender/blade_recon_review.py` 和 `wfrl_blender/panels/blade_recon.py`；类注册及生命周期由 `wfrl_blender/__init__.py` 接入扩展现有的注册和清理机制。重建回放处理器只响应自己的场景，嵌入的输入内容用于保存重开；恢复动态回放需要启用匹配扩展或启动入口。扩展内容变更进入安装版时需要重建 ZIP 并重启 Blender，源码检查、实际安装与窗口检查分别报告。
-
-图例区分与已拟合轮廓相符的采样标记和模型推断部分。观测标记不等于独立三维测量或整个表面可见；合成入口明确标记 **SYNTHETIC**。可选真值及相机输入、视角、原生时间轴播放和保存重开说明见 [Blade Recon 使用说明](../docs/blender/BladeRecon可视化使用说明.md)。
-
-保存的 MAPPO／重建同步分屏由 `split_reconstruction.py` 管理视口角色、进入／退出、模式切换及尺寸变化适配；`split_reconstruction_ui.py` 提供统一模式按钮、一次观察点定位及右侧视口左下角时间／样本／颜色说明，固定映射在 `split_reconstruction_timing.py`。底层布局恢复及样本步进工具仍供生命周期和维护使用，统一侧栏不再显示这些按钮。具备 `split_reconstruction_review` 标记和 `SplitRecon.*` 保存对象的场景自动接入，普通场景不受影响。相机操作在执行时排除右侧重建视口，生命周期定时器仅处理布局和尺寸变化，不事后修复相机覆盖。工作区切换不重建无关工作区；重新载入文件后清除旧RNA引用并恢复已有对照。显式完整取景用解析透视边界容纳 T1 与叶轮旋转范围，右侧缓存全部保存姿态；自动尺寸适配保留用户左侧导航，等待重绘后才标为就绪。退出合并无论保留哪块区域，均恢复左侧原显示样式。
-
-分屏元数据区分仿真起点、固定时间轴频率、采样步长和保存样本数。原601样本片段以60Hz时间轴、每6帧一个10Hz样本保持，界面分别显示播放时间、采样时间及保持时长；改变目标播放FPS不改映射。验证入口为 `tests/test_split_reconstruction*.py` 和 `tests/blender/split_reconstruction_window.py`，后者必须打开已有分屏副本并使用实际安装模块，不重建求解结果。
-
-公开 0.3.18 的侧栏隐藏由进入布局和显式 `focus()` 执行一次。不要在每个 `frame_change_post` 中赋值 `show_region_ui`：Blender 的原生重叠侧栏动画会被重复赋值打断，造成右侧栏反复展开、隐藏。本地针对性窗口回归为 `tests/blender/split_texture_sidebar_window.py`，在真实播放、暂停重播和右侧视口上下文中记录侧栏可见性及区域宽度，也检查用户手动开栏与显式恢复布局；该测试入口及其证据按本地记录读取。
-
-2026-10-08 本地导航修订扩展了 `split_mappo_texture.track()`：比较上次自动设置的取景与当前右侧视图；用户缩放、平移、转动或改变透视类型后，清除近景跟随标记并保留手动导航。该自动取景基线随场景保存，暂停时调整视图再保存也能在重开后识别。只有显式 `focus()` 可以重新启用跟随；样本步进使用同一导航保护。此项手动导航保护未包含于公开 0.3.18，后续随 0.3.19 ZIP 交付；0.3.19 的观察点进一步改为只定位一次，不继续跟随。
-
-公开 0.3.18 已使新建同源纹理及显式 `use_same_source=True` 入口默认使用完整叶轮取景；近景由观察点按钮手动启用。`CURRENT` 恢复布局和退出后返回保留当前完整／近景选择，异常回滚也保留该选择。本地实际安装版窗口回归 `tests/blender/mappo_full_view_default_window.py` 检查整体容纳、播放时固定视角与两侧几何运动，以及手动近景和恢复行为；其运行来源与日期按原记录读取。
-
-本地导航修订还使同源相机取景同时初始化自由视图的叶轮中心、方向和距离，再通过原生 `view_camera` 缓存退出相机时的导航，避免沿用左侧源风机的绕转中心；`CURRENT` 同时保留当前右侧手动导航。此自由绕转和导航恢复修订未包含于公开 0.3.18，后续随 0.3.19 ZIP 交付。手动导航回归 `tests/blender/mappo_same_source_navigation_window.py` 使用日常安装模块在全新 Blender 进程里检查原生退出相机、12 次 15° 绕转至背面、背面播放、暂停近景后手动拉远再播放、寻址／采样步进、CURRENT 恢复及原生保存重开；该轮最终全部通过，证据见本地 `outputs/same-source-navigation-fix-20261008-a01/orbit-after02/navigation-window-validation.json` 和[导航修复记录](../outputs/same-source-navigation-fix-20261008-a01/导航修复记录.md)。0.3.18 当时默认完整取景已发布这一事实不能扩大为当时也已包含上述本地导航修订；这些修订后续随 0.3.19 ZIP 交付。
-
-
-### 0.3.15 便携分屏资源与维护合同
-
-`assets/examples/mappo_reconstruction_split.blend` 是规范示例源，随 ZIP 整体提供，不能作为中间产物清理。右侧 `SplitRecon.B1/B2/B3` 各保存 **601 个 absolute shape keys**，以 **CONSTANT holds** 驱动，**无 drivers**；四张天空／地表图片已 packed，场景没有 linked libraries。左侧保留 40 Hz MAPPO 源，右侧重建保存样本为 10 Hz；共享固定时间轴为 60 Hz、frame 1–3601，每 6 帧一个保存样本。frame 52 的播放时刻为 117.850 s，实际保持样本为 117.800 s，保持时长为 50 ms。
-
-便携场景保存 `wfrl_farm_flex_path=__WFRL_BUNDLED_MAPPO__`，并保存 `wfrl_farm_manifest_sha256=d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde`。这个非空 marker 使既有 `farm_flex.saved_package()` 按 manifest SHA-256 定位当前安装的 `assets/mappo/`，不更换数据来源；运行恢复后记录当前真实安装路径。不要清空保存路径，也不要替换为读取器不支持的 `//` 相对路径。manifest 不匹配时按现有缺包规则处理，不能放宽校验。
-
-`split_reconstruction_ui.packaged_example_path()` 从实际安装模块目录寻找资源；打开 operator 使用 `wm.open_mainfile(INVOKE_DEFAULT)` 保留 Blender 原生未保存确认，不用绕过确认的执行方式。进入／退出、恢复布局、完整取景、窗口缩放适配及保存重开由现有分屏生命周期处理；`cameras.py` 和 MAPPO 面板操作时排除右侧重建视口。样本前后步进先暂停相关窗口并钳制端点，不改变输入数据或新增观测。
-
-本版保存的 `registration_lifecycle.json` 记录重复注册、卸载和再次注册 PASS。日常安装实际模块为 `bl_ext.user_default.wfrl_blender`；隔离 ZIP 安装验证为 `bl_ext.wfrl_frontend.wfrl_blender`。这些 0.3.15 生命周期证据来自 macOS Blender 5.2.1 LTS，不能用此次 0.3.18 源码复建或 CPU 检查扩大其范围。实际窗口行为通过不表示稳定 60 FPS、重建精度或 Windows/Linux 已验收。
-
-0.3.17 纹理分屏复用 `split_reconstruction.py` 的原生布局和 `split_reconstruction_ui.py` 的现有侧栏。`split_surface_texture.py` 将指定 `assets/blade_recon_synth_tex/` 载入同场景独立 `SplitTexture.*` 对象，右侧局部材质预览使用独立样本游标，与左 MAPPO 时间分开标明。嵌入 JSON、模型摘要和 packed 图像摘要用于保存恢复；`blade_recon_data.py` 仅按经核验的内容摘要标明合成来源，不凭目录名猜测。独立导入前保存原视口取景和显示状态，返回时恢复；详情及安装来源见实施与验证（本地路径：`outputs/blade-texture-split-fix-20261007-b01/实施与验证.md`）。该修改已随 0.3.17 ZIP 发布；最终包后台安装与保存重开见 [发布核对](../docs/blender/releases/0.3.17发布核对.md)，此前窗口检查保留其运行来源。
-
-0.3.17.1 已发布的入口修正：打开按钮明确标为 **打开几何重建示例…**，当前场景提供 **同源纹理同步对照**与**独立合成纹理样例**两个入口。`split_reconstruction.enter(use_texture=None)` 按当前数据恢复，保留原几何示例；显式 `use_texture=True` 切到独立合成，`use_same_source=True` 切到同源。侧栏恢复布局使用 `CURRENT` 模式，退出后的几何返回亦使用该模式。安装目录内示例若已被保存为纹理场景，应先备份，再用规范 `assets/examples/mappo_reconstruction_split.blend` 恢复；只更新 Python 文件不能纠正该资源偏移。
+同源纹理为 `SAME_SOURCE_SIMULATION`，绑定来源、模型、图集与全部样本绝对时钟。embedded 数据和 packed 图片用于保存恢复。未观测 texel 保持透明；增强和放大不增加分辨率，条带、接缝、叶尖错贴与拖影如实保留。人工观察点不构成自动检测或科学精度通过。

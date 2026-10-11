@@ -1,6 +1,6 @@
 # PPO 算法执行细节（风电场偏航控制项目）
 
-> 对齐日期：2026-10-06。环境：`Ablaincourt_Floris`（7 台风机）｜算法：集中式单智能体 PPO（Stable-Baselines3）｜后端：FLORIS 稳态尾流。当前入口是 `scripts/train/train_ppo.py`、适配层是 `wfrl/sb3_wrapper.py`；本文不是多智能体 MAPPO 说明。本轮仅静态核对，没有训练或评估。
+> 环境：`Ablaincourt_Floris`（7 台风机）｜算法：集中式单智能体 PPO（Stable-Baselines3）｜后端：FLORIS 稳态尾流。当前入口是 `scripts/train/train_ppo.py`、适配层是 `wfrl/sb3_wrapper.py`；本文不是多智能体 MAPPO 说明。
 
 ---
 
@@ -11,13 +11,13 @@ wfcrl (conda env)
 ├── floris 3.5          ← 风场物理仿真（稳态尾流求解器，纯 Python）
 ├── wfcrl-env           ← Gymnasium/PettingZoo RL 接口（Inria/IFP）
 ├── stable-baselines3 2.3.2  ← PPO 实现
-├── torch >=2.2,<3     ← 根 pyproject.toml 的训练依赖范围，非本轮已安装版本
+├── torch >=2.2,<3     ← 根 pyproject.toml 的训练依赖范围，不是已安装版本证明
 ├── numpy 1.26.4       ← 仓库 Windows FLORIS 历史兼容组合
 ├── tensorboard >=2.14 ← 当前训练依赖范围
 └── matplotlib          ← 尾流场 + 时序图输出
 ```
 
-上表 FLORIS/Gymnasium/SB3/NumPy 的固定版本来自 `wfcrl-env/requirements-floris-local.txt` 历史组合，实际环境需另核对；安装与动态后端分流见[本地配置](../setup/setup_local.md)和[算法配置](MAPPO_SETUP.md)。
+上表 FLORIS/Gymnasium/SB3/NumPy 的固定版本来自 `wfcrl-env/requirements-floris-local.txt` 历史组合，实际环境需另核对；[安装与动态后端分流见本地配置](../setup/setup_local.md)[和算法配置](MAPPO_SETUP.md)。
 
 **三者分工**：
 - **Gymnasium**：接口协议（reset/step 签名标准），不含算法/环境
@@ -153,7 +153,7 @@ critic 只用于训练，部署时可扔掉。
 **explained_variance**（判断训练健康度的头号指标）：
 ```
 explained_variance = 1 − Var(return − V_pred) / Var(return)
-= 1  → V 完美预测（旧文报告 VecNormalize 版约 0.99，本轮未重验）
+= 1  → V 完美预测（0.99 的历史报告缺失匹配验证证据）
 = 0  → V 和瞎猜均值一样差（无归一化版）
 < 0  → 比瞎猜还差
 ```
@@ -234,7 +234,7 @@ L_entropy = −H(π)
 
 ## 七、完整执行流程（一次 PPO 迭代）
 
-### 阶段 0-1：环境重置 + obs 归一化
+### 环境重置 + obs 归一化
 
 ```python
 obs = venv.reset()   # Dict, 每 key 前带 n_envs=1 维
@@ -245,7 +245,7 @@ norm_obs[key] = clip((obs[key] − mean[key]) / sqrt(var[key]+1e-8), −10, 10)
 **为什么必须 VecNormalize**：原始 obs 量纲差异大（风向~270、风速~8、yaw~0），
 奖励经过来流归一化和可用载荷惩罚，不能按“200 步 × 8 kW”直接解释回报。归一化用于改善数值尺度；旧文报告的 explained_variance≈0.99 只是历史训练健康度，不代表策略收益或当前重验结果。
 
-### 阶段 2：前向传播（一步决策）
+### 前向传播（一步决策）
 
 ```
 norm_obs → CombinedExtractor → features(23)
@@ -255,7 +255,7 @@ a 不经过 VecNormalize，直接 → env.step({"yaw": a}) → FLORIS 求解 →
 reward 过 VecNormalize(norm_reward=True) 后存 buffer
 ```
 
-### 阶段 3：采集 rollout（重复 n_steps=1024 步）
+### 采集 rollout（重复 n_steps=1024 步）
 
 每步存 6 个量进 RolloutBuffer：
 
@@ -275,7 +275,7 @@ reward 过 VecNormalize(norm_reward=True) 后存 buffer
 - 太小：采样低效、方差大；太大：策略老化偏离 on-policy 假设。1024-2048 是经验折中。
 - 1024 步 ≈ 5 幕（每幕 max_num_steps=200）
 
-### 阶段 4：GAE 算 advantage + return
+### GAE 算 advantage + return
 
 ```python
 for t in reversed(range(1024)):
@@ -285,7 +285,7 @@ returns = A + values                         # 使用未标准化 GAE，作为 c
 advantages = (A − A.mean()) / (A.std() + 1e-8) # actor 更新时按 mini-batch 标准化
 ```
 
-### 阶段 5：参数更新（n_epochs=10 × 8 mini-batch = 80 次梯度步/轮）
+### 参数更新（n_epochs=10 × 8 mini-batch = 80 次梯度步/轮）
 
 ```python
 # batch_size=128, 1024/128=8 个 mini-batch
@@ -303,9 +303,9 @@ optimizer.step()                  # Adam, lr=3e-4
 TensorBoard `train/` 组记录：explained_variance / value_loss / policy_gradient_loss /
 entropy_loss / approx_kl / clip_fraction / std 等（第一次梯度更新后才出现）。
 
-### 阶段 6：循环 + 保存
+### 循环 + 保存
 
-清空 buffer → 回阶段 1。100k 步 ≈ 97 轮 rollout × 80 = 约 7760 次参数更新。
+清空 buffer → 回到环境采样。100k 步 ≈ 97 轮 rollout × 80 = 约 7760 次参数更新。
 
 ```python
 model.save("results/checkpoints/ppo_ablaincourt")   # 网络权重 θ
@@ -338,7 +338,7 @@ venv.save("results/checkpoints/vecnormalize.pkl")    # obs/reward 的 mean/var�
 
 ## 九、当前运行入口
 
-从仓库根目录、已安装匹配依赖的环境执行。下列命令会求解/训练并写入 results；本轮文档维护没有执行。
+从仓库根目录、已安装匹配依赖的环境执行。下列命令会求解/训练并写入 results；仅在相应计算任务中使用。
 
 ```bash
 python scripts/train/train_ppo.py --timesteps 100000
@@ -353,6 +353,6 @@ python scripts/analysis/eval_visualize_ppo.py
 
 ## 十、当前状态与历史边界
 
-单智能体 PPO 与 SB3 适配层已经存在；原文 100k 训练、explained_variance≈0.99 和可视化成果保留为历史报告，本轮没有重新验证对应训练结果。FLORIS 的集中式单智能体 PPO 与参数共享 IPPO 的样本数、输入和动作维度不同，比较需统一口径。
+单智能体 PPO 与 SB3 适配层已经存在；100k 训练、explained_variance≈0.99 和可视化成果属于未核验的历史报告。FLORIS 的集中式单智能体 PPO 与参数共享 IPPO 的样本数、输入和动作维度不同，比较需统一口径。
 
-FAST.Farm 当前已经有 [动态驱动](../../wfrl/fastfarm_driver.py)、[集中式 MAPPO 训练入口](../../scripts/train/train_fastfarm.py)及可选 GRU critic，不再是“未实现”。动态运行需要匹配的 MPI、求解器、控制器与算例，不能只改本脚本 ENV_ID；本脚本和 `WFCRLSB3Wrapper` 仍是 yaw-only 的 FLORIS 单智能体路径。完整分流见[算法配置](MAPPO_SETUP.md)。
+FAST.Farm 当前已经有 [动态驱动](../../wfrl/fastfarm_driver.py)、[集中式 MAPPO 训练入口](../../scripts/train/train_fastfarm.py)及可选 GRU critic，不再是“未实现”。动态运行需要匹配的 MPI、求解器、控制器与算例，不能只改本脚本 ENV_ID；本脚本和 `WFCRLSB3Wrapper` 仍是 yaw-only 的 FLORIS 单智能体路径。[完整分流见算法配置](MAPPO_SETUP.md)。

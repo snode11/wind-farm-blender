@@ -1,6 +1,6 @@
 # 参数共享 IPPO 训练全流程（WFCRL 风场）
 
-> 对齐日期：2026-10-06。本文解释当前 `scripts/train/train_mappo.py` 委托的 `wfrl/mappo_sb3.py` 参数共享 IPPO 数据流；本轮仅静态核对，没有训练或评估。当前算法入口分流见[配置指南](MAPPO_SETUP.md)。
+> 本文解释 `scripts/train/train_mappo.py` 委托的 `wfrl/mappo_sb3.py` 参数共享 IPPO 数据流。当前算法入口分流见[配置指南](MAPPO_SETUP.md)。
 >
 > **命名澄清**：文件叫 `train_mappo.py`，但严格分类，当前实现是**参数共享 IPPO**——所有机组共享一套网络（参数共享 ✅），但 critic 只看单台机组的局部观测、没有全局状态（集中式 critic ❌）。仓库现已另有 `wfrl/mappo_central.py` 和 `scripts/train/train_fastfarm.py` 的集中式 critic 实现；这并未改变本文件所述 SB3 路线的 IPPO 身份。详见第 10 节。
 
@@ -267,7 +267,7 @@ MAPPO： actor(o_i)，critic(concat(o_1, ..., o_n))
 
 当前 `mappo_central.py` 和 `train_fastfarm.py` 将网络设备设为 CPU；FAST.Farm 路线还涉及外部求解器、MPI、初始化和回合重启。更换 GPU 不会自动改变外部求解器的运行方式，性能瓶颈与并行方案应按目标环境计时，不把旧耗时当作当前保证。
 
-本项目已有集中式 FLORIS、动态前馈 critic 和动态 GRU critic 的入口。下一步应先冻结对照口径，再判断需要哪些实验；当前文档更新不启动这些实验，也不认定 MAPPO 或记忆优于 IPPO。
+本项目已有集中式 FLORIS、动态前馈 critic 和动态 GRU critic 的入口。下一步应先冻结对照口径，再判断需要哪些实验；现有入口不构成 MAPPO 或记忆优于 IPPO 的证据。
 
 ---
 
@@ -281,4 +281,4 @@ MAPPO： actor(o_i)，critic(concat(o_1, ..., o_n))
 | batch_size | 128 | PPO 配置 |
 | n_epochs | 10 | PPO 配置 |
 | net_arch | [128, 128] | 共享 MLP |
-| 50k 探路 explained_variance | 历史文档报告 0.05 → 0.72 | 本轮未找到对应保留日志，未重新验证 |
+| 50k 探路 explained_variance | 历史文档报告 0.05 → 0.72 | 缺失对应日志，未核验 |

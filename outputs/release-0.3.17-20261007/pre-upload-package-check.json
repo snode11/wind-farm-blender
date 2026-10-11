@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "archive": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.17-20261007/validation/package/wfrl_blender-0.3.17.zip",
+  "size_bytes": 97836884,
+  "file_count": 157,
+  "source_delta": [
+    "blender_manifest.toml"
+  ],
+  "b01_payload_delta": [
+    "blender_manifest.toml"
+  ],
+  "blade_provenance": "SYNTHETIC",
+  "clock": {
+    "fps": 10.0,
+    "samples": 120,
+    "source_frame_start": 0,
+    "source_frame_end": 119,
+    "time_start_s": 0.0,
+    "time_end_s": 11.9,
+    "relationship_to_mappo": "independent source and clock; not synchronized measurements"
+  },
+  "sha256": "1a43e2949f14fbc7e79c2933fc84d74eedaff71dd61c7ddd5afbd90effb7f174"
+}

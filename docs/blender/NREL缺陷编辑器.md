@@ -1,10 +1,8 @@
 # NREL 叶片缺陷编辑器
 
-更新日期：2026-10-10。公开扩展为 **NREL / WFRL 0.3.20+1**，要求 Blender 5.2+，见[发布核对](releases/0.3.20+1发布核对.md)。下述列表选择、折叠分区及状态提示已包含在当前 ZIP；本地核对的 10 个缺陷编辑器 Python 文件与最终包一致。本版只上传 ZIP，对应实现源码未推送，使用文档在 ZIP 发布后另行同步。公开扩展实现基线仍为 0.3.18；编辑器历史检查不升级为本版重新执行的整套原生窗口验收。原 0.2 mm 叶尖门槛仍 FAILED_GATE。
+适用于 Blender 5.2+ 的公开 NREL **0.3.20+1** 扩展；[下载专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.20.1/wfrl_blender-0.3.20%2B1.zip)，[按安装说明](INSTALL.md)手动安装并重启。公开对应实现源码基线为 v0.3.18，开发机日常安装使用同 manifest、不同载荷的 LOCAL_UNPUBLISHED_REVISION，见[身份与验证范围](发布状态与验证范围.md)。编辑器窗口证据不等于当前包整套重新验收，原 0.2 mm 叶尖门仍 FAILED_GATE。
 
 该编辑器把 GW184 的六类合成缺陷操作接入 NREL 5MW / MAPPO 柔性回放。先打开主前端的 **MAPPO · 60 秒**，在 **MAPPO** 侧栏的 **NREL 5MW · 叶片缺陷** 面板点击 **启动缺陷编辑器**；目标可以选择 T1、T2、T3 的任一叶片。缺陷尺寸、位置与形态是用户定义的合成参数，不代表现场实测损伤。
-
-该功能已随 [0.3.16 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.16) 的扩展 ZIP 首次发布。当前下载 [wfrl_blender-0.3.20+1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.20.1/wfrl_blender-0.3.20%2B1.zip)，按[安装说明](INSTALL.md)手动更新并重启，再使用上方 MAPPO 面板操作。此处 0.3.16 是功能首次交付与编辑器历史验证版本，不代表新版重跑了编辑器整套窗口验收。
 
 本地源码启动与开发工具尚未公开：`scripts/blender/打开NREL缺陷编辑器.command`、`scripts/blender/open_nrel_defect_editor.py` 和 `scripts/blender/nrel_defects.py` 只存在于完整本地工作区，克隆 GitHub 当前源码不能得到这些入口，公开安装用户无需运行它们。后者的 `edit`、`prepare`、`analyze`、`scan`、`images` 是本地开发模式；证据模式要求明确输出目录，`images` 按显式请求采集图片。公开面板编辑与本地启动都复用保存的 MAPPO 结果，不运行求解器。
 
@@ -26,7 +24,7 @@ blender --factory-startup --python scripts/blender/open_nrel_defect_editor.py
 
 已有缺陷仍支持启用／停用、删除、复制、撤销及重做；复制后自动选中新副本，副本默认停用。没有选中缺陷、正在编辑、健康对照或扫描期间，不适用的操作会置灰；状态提示说明下一步。分析与导出集中在默认折叠的“几何分析与导出（G / A）”，普通编辑无需展开。
 
-本轮仍使用手动“更新预览”；点选定位仍需先选择风机和叶片，尚未加入自动识别目标或视口拖拽手柄。
+编辑使用手动“更新预览”；点选定位仍需先选择风机和叶片，尚未加入自动识别目标或视口拖拽手柄。
 
 缺陷显示网格、辅助轮廓与几何可见性支持区域使用同一份保存的柔性变换。时间跳转和反向寻址更新显示姿态，不重新执行 Boolean，也不修改 FAST.Farm / BeamDyn 的保存结果、材料刚度或净空测量。
 
@@ -34,4 +32,4 @@ G 分析和扫描报告理想针孔相机下的投影与几何遮挡；`VISIBLE`
 
 当前表面域排除根部过渡、示意叶尖和跨前后缘路径；缺失数据不能靠插值生成测量。编辑器不构成结构损伤、修复效果、硬件相机同步或现场检测性能的证据。
 
-0.3.18 源码发布包含宿主 `blender_frontend/tests/test_nrel_defects.py`。`test_nrel_defect_visibility.py`、`blender_frontend/tests/blender/nrel_defect_editor_regression.py` 和 `nrel_defect_window_regression.py` 仍为本地未公开的开发验证入口，不是安装用户的操作前提；原生后台分保存与新进程重开两阶段，窗口和扫描生命周期独立检查。历史结果及基线问题见[移植验证记录](validation/NREL缺陷编辑器移植验证.md)，首次 ZIP 检查见[0.3.16 发布核对](releases/0.3.16发布核对.md)，公开源码基线见[0.3.18 发布核对](releases/0.3.18发布核对.md)，当前公开 ZIP 范围见[0.3.20+1 发布核对](releases/0.3.20+1发布核对.md)；各层通过不代替材质辨识或物理精度验收。
+公开 v0.3.18 基线包含宿主 `blender_frontend/tests/test_nrel_defects.py`。可见性、原生保存重开和窗口扫描脚本属于本地验证工具，不是安装用户操作的前提。输入、显示与几何分析的证据适用范围见[模块验证](validation/NREL缺陷编辑器移植验证.md)、[编辑器包核对](releases/0.3.16发布核对.md)和[当前发布状态](发布状态与验证范围.md)；软件通过不替代材质辨识或物理精度验收。

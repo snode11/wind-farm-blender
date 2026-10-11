@@ -1,0 +1,103 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "installed_module": true,
+  "addon_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/isolated/profile/extensions/wfrl_blender",
+  "blender": "5.2.1 LTS",
+  "phase": "foreign_playback_preserved",
+  "elapsed_s": 18.66477070899782,
+  "method": "scripted visible-window operators and POST_PIXEL draws; not physical mouse input or monitor scanout",
+  "checks": {
+    "registered_here": false,
+    "triple_material_fast_default": true,
+    "disabled_triple_slot_blank": true,
+    "live_participation_changes": true,
+    "capture_quality_restores_on_success_and_error": true,
+    "default_capture_profile_remains_material": true,
+    "image_capture_started": false,
+    "triple_high_quality_to_focus_solid": true,
+    "single_quality_toggle_unavailable": true,
+    "disabled_focus_slot_remains_inspectable": true,
+    "single_playback": {
+      "start": {
+        "frame": 1,
+        "subframe": 0.0,
+        "time_s": 117.0
+      },
+      "paused": {
+        "frame": 118,
+        "subframe": 0.0,
+        "time_s": 118.95
+      },
+      "wall_s": 1.988358957998571,
+      "unique_drawn_frames": 57
+    },
+    "pause_preserves_common_time": true,
+    "return_to_triple_preserves_high_quality_and_time": true,
+    "direct_disabled_watch_defaults_to_solid": true,
+    "calibrated_fov_and_camera_parameters_preserved": true,
+    "deleted_proxy_error": "相机观察中断：StructRNA of type Object has been removed",
+    "deleted_proxy_close_clock": {
+      "actual": {
+        "frame": 118,
+        "subframe": 0.0,
+        "time_s": 118.95
+      },
+      "expected": {
+        "frame": 118,
+        "subframe": 0.0,
+        "time_s": 118.95
+      },
+      "before_delete": {
+        "frame": 118,
+        "subframe": 0.0,
+        "time_s": 118.95
+      },
+      "after_delete": {
+        "frame": 118,
+        "subframe": 0.0,
+        "time_s": 118.95
+      },
+      "lifecycle": [
+        {
+          "event": "close_before",
+          "wall_s": 31009.757875583,
+          "frame": 118,
+          "windows": [
+            [
+              510943462368,
+              false,
+              118
+            ],
+            [
+              511027194520,
+              false,
+              118
+            ]
+          ],
+          "preserve_playback": true,
+          "playing": false
+        },
+        {
+          "event": "window_closed",
+          "wall_s": 31009.866216416,
+          "frame": 118,
+          "windows": [
+            [
+              510943462368,
+              false,
+              118
+            ]
+          ]
+        }
+      ]
+    },
+    "close_restores_quality_source_shading_and_camera": true,
+    "temporary_cameras_cleaned_up": true,
+    "deleted_proxy_cleanup_and_repeated_close": true,
+    "successful_reopen_clears_error": true,
+    "deleted_camera_data_cleanup": true,
+    "closing_camera_preserves_other_scene_player": true
+  },
+  "error": null
+}
