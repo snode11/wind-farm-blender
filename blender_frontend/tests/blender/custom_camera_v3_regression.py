@@ -138,8 +138,10 @@ c.set_enabled(scene,1,True);shell.data.vertices[0].co.x-=.125;shell.data.update(
 h.status(scene);assert not h.HISTORY.entries and '模型' in h.HISTORY.notice
 shell.data.vertices[0].co.x+=.125;shell.data.update();bpy.context.view_layer.update()
 checks['external_transform_inplace_mesh_invalidation']=True
-# Preflight and shared sampling. Restore valid layout first.
-c.import_layout(scene,base,overwrite=True)
+# Preflight and shared sampling. Explicitly restore the native transform too;
+# a no-op config import correctly preserves external edits rather than hiding them.
+c.restore_layout(scene,base)
+bpy.context.view_layer.update()
 assert not capture.preflight(bpy.context)['errors']
 assert output.summary_check(bpy.context,None)['cameras']==3
 c.get_camera(scene,2)['custom_enabled']=False

@@ -1,0 +1,69 @@
+{
+  "schema": "wfrl.dual-beam-independent-engineering-protocol.v1",
+  "declared_before_solver_execution": true,
+  "source_chat": "01a0fa7f-05e5-74d2-a87e-560110580cfd",
+  "purpose": "independent prescribed-speed operating screen and two-level true temporal sensitivity",
+  "formal_validation": false,
+  "performance_tolerances": null,
+  "input_uncertainty_budgets": null,
+  "methods": [
+    "hub-axis.v1",
+    "hub-tls.v1"
+  ],
+  "default_method": "hub-axis.v1",
+  "calibration": "configs/lidar/dual-beam-inner-manual-contract.json",
+  "physics": {
+    "wind_mps": 12.0,
+    "rpm": 9.0,
+    "pitch_deg": 0.0,
+    "azimuth_deg": 0.0,
+    "duration_s": 26.0,
+    "evaluation_window_s": [
+      18.0,
+      26.0
+    ],
+    "structure": "NREL 5MW upwind quadratic prebend derivative / BeamDyn",
+    "tower": "ElastoDyn flexible",
+    "controller": "prescribed rotation; no ServoDyn; no MAPPO policy",
+    "random_seed": null,
+    "independence": "new solver runs with different fixed wind from consumed 8 m/s interface; temporal refinement is same operating case, not another independent scenario"
+  },
+  "cases": [
+    {
+      "id": "steady12-base",
+      "fps": 40,
+      "dt_s": 0.00625
+    },
+    {
+      "id": "steady12-halfdt",
+      "fps": 80,
+      "dt_s": 0.003125
+    }
+  ],
+  "storage_budget_bytes": 1000000000,
+  "raw_surface_retention": "all generated VTP exact bytes retained in individually verified XZ files; no missing-frame interpolation",
+  "evaluation": [
+    "all declared saved times",
+    "old and TLS identical observations/S1 within each run",
+    "own/common valid errors, signed tails and all failures",
+    "full-window reference and passage minima",
+    "coarse matched-time and all fine-added times separately",
+    "truth isolation and independent numerical scoring"
+  ],
+  "limits": [
+    "fixed wind and prescribed rotation only",
+    "two levels are sensitivity, not proven convergence or a strict numerical bound",
+    "no final held-out performance acceptance",
+    "no real shape amplitude or device uncertainty bounds",
+    "old missing loaded VTP remains missing"
+  ],
+  "frozen_implementation": {
+    "wfrl/lidar/dual_beam.py": "9aacbbdba45da1a7e6465113e055fd81a717ef91b4b676a3172dc461df1e6f03",
+    "wfrl/lidar/dual_beam_replay.py": "51bde1e6c08f092a77ddb2507a2994a9582555116043f6788d6617ecb05d6cf2",
+    "wfrl/lidar/moving_tower.py": "7b5dda3a2a35e0861b7c468404ee057ec34c5d4a007c924f5dc6b2c248061f3e",
+    "wfrl/camera_video/data.py": "cef3bfa03f759018d3a802d73fef91ba97c8a3700e800650990e10b01273dae1",
+    "scripts/lidar/postprocess_dual_beam.py": "2ca0185ab2ee117093d0ebb481802785ab75a2c87a8dc6c695cb4fd7491787b4",
+    "scripts/lidar/compare_dual_beam_methods.py": "40c2c3a58ef4d91fe1b7be1a9b8613ba200d1012e2fb4f090f5dee222e7c62ba",
+    "configs/lidar/dual-beam-inner-manual-contract.json": "36b27b8eb72e13f8971ecd5010d2903b938c3d42e00a18bdea21f57ebb9682eb"
+  }
+}

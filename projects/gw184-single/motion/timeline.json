@@ -1,0 +1,17 @@
+{
+  "schema": "gw184.motion.v1",
+  "fps": 30,
+  "stationary_start_s": 10.0,
+  "acceleration_s": 90.0,
+  "hold_s": 120.0,
+  "deceleration_s": 90.0,
+  "stationary_end_s": 10.0,
+  "running_rpm": 8.0,
+  "stopped_pitch_deg": 90.0,
+  "running_pitch_deg": 0.0,
+  "initial_azimuth_deg": 0.0,
+  "interpolation": "cubic smoothstep rpm and pitch; analytic integral for azimuth",
+  "pitch_convention": "right-hand positive rotation about each blade local +Z pitch axis; zero includes static twist",
+  "azimuth_convention": "right-hand positive about world +X; blade 1 points upward at zero; other blades +120/+240 deg",
+  "evidence": "prescribed rigid synthetic animation; no inferred wind-driven response"
+}

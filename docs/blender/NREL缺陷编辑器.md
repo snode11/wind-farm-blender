@@ -1,12 +1,12 @@
 # NREL 叶片缺陷编辑器
 
-适用于 Blender 5.2+ 的公开 NREL **0.3.20+1** 扩展；[下载专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.20.1/wfrl_blender-0.3.20%2B1.zip)，[按安装说明](INSTALL.md)手动安装并重启。公开对应实现源码基线为 v0.3.18，开发机日常安装使用同 manifest、不同载荷的 LOCAL_UNPUBLISHED_REVISION，见[身份与验证范围](发布状态与验证范围.md)。编辑器窗口证据不等于当前包整套重新验收，原 0.2 mm 叶尖门仍 FAILED_GATE。
+适用于 Blender 5.2+ 的公开 NREL **0.3.20+1** 扩展；[下载专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.20.1/wfrl_blender-0.3.20%2B1.zip)，[按安装说明](INSTALL.md)手动安装并重启。当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)，开发机日常安装使用同 manifest、不同载荷的 LOCAL_UNPUBLISHED_REVISION，见[身份与验证范围](发布状态与验证范围.md)。编辑器窗口证据不等于当前包整套重新验收，原 0.2 mm 叶尖门仍 FAILED_GATE。
 
 该编辑器把 GW184 的六类合成缺陷操作接入 NREL 5MW / MAPPO 柔性回放。先打开主前端的 **MAPPO · 60 秒**，在 **MAPPO** 侧栏的 **NREL 5MW · 叶片缺陷** 面板点击 **启动缺陷编辑器**；目标可以选择 T1、T2、T3 的任一叶片。缺陷尺寸、位置与形态是用户定义的合成参数，不代表现场实测损伤。
 
-本地源码启动与开发工具尚未公开：`scripts/blender/打开NREL缺陷编辑器.command`、`scripts/blender/open_nrel_defect_editor.py` 和 `scripts/blender/nrel_defects.py` 只存在于完整本地工作区，克隆 GitHub 当前源码不能得到这些入口，公开安装用户无需运行它们。后者的 `edit`、`prepare`、`analyze`、`scan`、`images` 是本地开发模式；证据模式要求明确输出目录，`images` 按显式请求采集图片。公开面板编辑与本地启动都复用保存的 MAPPO 结果，不运行求解器。
+当前源码分支提供 `scripts/blender/打开NREL缺陷编辑器.command`、`scripts/blender/open_nrel_defect_editor.py` 和 `scripts/blender/nrel_defects.py`。公开安装用户可直接使用面板，无需运行这些项目脚本。后者提供 `edit`、`prepare`、`analyze`、`scan`、`images` 入口；证据模式要求明确输出目录，`images` 按显式请求采集图片。面板编辑与源码启动都复用保存的 MAPPO 结果，不运行求解器。
 
-仅在完整本地工作区，可双击 `scripts/blender/打开NREL缺陷编辑器.command`，或从仓库根目录运行以下命令，打开使用工作区源码的独立 Blender 窗口；这与已安装扩展来源不同：
+在完整源码工作区中，可双击 `scripts/blender/打开NREL缺陷编辑器.command`，或从仓库根目录运行以下命令，打开使用工作区源码的独立 Blender 窗口；这与已安装扩展来源不同：
 
 ```sh
 blender --factory-startup --python scripts/blender/open_nrel_defect_editor.py
@@ -32,4 +32,4 @@ G 分析和扫描报告理想针孔相机下的投影与几何遮挡；`VISIBLE`
 
 当前表面域排除根部过渡、示意叶尖和跨前后缘路径；缺失数据不能靠插值生成测量。编辑器不构成结构损伤、修复效果、硬件相机同步或现场检测性能的证据。
 
-公开 v0.3.18 基线包含宿主 `blender_frontend/tests/test_nrel_defects.py`。可见性、原生保存重开和窗口扫描脚本属于本地验证工具，不是安装用户操作的前提。输入、显示与几何分析的证据适用范围见[模块验证](validation/NREL缺陷编辑器移植验证.md)、[编辑器包核对](releases/0.3.16发布核对.md)和[当前发布状态](发布状态与验证范围.md)；软件通过不替代材质辨识或物理精度验收。
+当前源码提供宿主 `blender_frontend/tests/test_nrel_defects.py` 与对应原生验证工具。可见性、保存重开和窗口扫描脚本用于独立验证，不是安装用户操作的前提。输入、显示与几何分析的证据适用范围见[模块验证](validation/NREL缺陷编辑器移植验证.md)、[编辑器包核对](releases/0.3.16发布核对.md)和[当前发布状态](发布状态与验证范围.md)；软件通过不替代材质辨识或物理精度验收。

@@ -1,0 +1,56 @@
+{
+  "schema": "blade-rgb-track-protocol.v1",
+  "config": {
+    "sensor_roi_fraction_xyxy": [
+      0.25,
+      0.2,
+      0.75,
+      0.8
+    ],
+    "max_features_per_camera": 16,
+    "shi_tomasi_quality": 0.02,
+    "minimum_feature_distance_px": 14.0,
+    "feature_block_size_px": 7,
+    "seed_subpixel_window_px": 5,
+    "lk_window_px": 31,
+    "lk_pyramid_levels": 4,
+    "lk_iterations": 50,
+    "lk_epsilon_px": 0.001,
+    "gray_sigma_px": 0.8,
+    "descriptor_size_px": 25,
+    "independent_peak_exclusion_radius_px": 8,
+    "match_peak_agreement_max_px": 2.0,
+    "localization_sigma_max_px": 1.0,
+    "forward_backward_max_px": 1.0,
+    "ncc_min": 0.8,
+    "contrast_gray_min": 12.0,
+    "identity_margin_min": 2.0,
+    "photometric_noise_floor_gray": 1.0,
+    "affine_rgb_seed": true,
+    "affine_background_sigma_px": 40.0,
+    "affine_iterations": 300,
+    "affine_epsilon": 1e-07,
+    "affine_correlation_min": 0.8,
+    "affine_angle_seeds_deg": [
+      -30.0,
+      -15.0,
+      0.0,
+      15.0,
+      30.0
+    ],
+    "affine_normalized_lk_pyramid_levels": 1
+  },
+  "method": "fixed-anchor Shi-Tomasi subpixel RGB points; RGB-only whole-ROI affine seed, direct pyramidal LK plus backward check and affine-warped sensor ROI descriptor competition",
+  "no_reacquisition": true,
+  "cross_camera_policy": "no cross-camera point identity without independent RGB correspondence",
+  "declared_camera_names": [
+    "Patch",
+    "Crack"
+  ],
+  "planned_frames": [
+    42,
+    43,
+    45,
+    47
+  ]
+}

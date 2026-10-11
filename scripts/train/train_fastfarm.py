@@ -10,7 +10,7 @@ FastFarmDriver（真实 FAST.Farm，MPI 驱动）。产出：
 
 运行（必须 mpiexec）：
     "/c/Program Files/Microsoft MPI/Bin/mpiexec.exe" -n 1 \
-        "C:/Users/s1155/.conda/envs/wfcrl/python.exe" train_fastfarm.py \
+        python3 train_fastfarm.py \
         --env Dec_Turb3_Row1_Fastfarm --iters 6 --n-steps 64 [--recurrent]
 
 注意：FAST.Farm 每个控制步 ~0.6s，且回合是 SC_DLL 在 t=0 收到的固定迭代预算，所以

@@ -831,6 +831,7 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
                         box.label(text=placement.transaction.error[start:start+22],icon='ERROR' if start==0 else 'NONE')
                 return
             box.operator('wfrl.stacked_box_pick', text='贴合安装 / 调整整个盒体', icon='PIVOT_CURSOR')
+            box.operator('wfrl.stacked_box_reset_default', text='恢复默认三相机', icon='LOOP_BACK')
             box.label(text='选位置、调方向、确认，在同一步完成')
             header, body = box.panel('wfrl_box_advanced',default_closed=True)
             header.label(text='高级设置 · 自由坐标')
@@ -848,7 +849,13 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
             layout.label(text='请先加载包含 T1 的演示场景',icon='INFO')
             return
         from .custom_camera_output import draw_output
-        from .. import custom_camera_capture
+        from .. import custom_camera_capture, native_camera_views
+        native_error = native_camera_views.last_error(scene)
+        if native_error:
+            error_box = layout.box()
+            error_box.alert = True
+            for start in range(0, len(native_error), 24):
+                error_box.label(text=native_error[start:start+24], icon='ERROR' if start == 0 else 'NONE')
         if custom_camera_capture.active():
             for part in custom_camera_capture.progress().split('；'):layout.label(text=part)
             layout.label(text='撤销不可用：请先结束采集', icon='INFO')

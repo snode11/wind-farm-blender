@@ -1,0 +1,290 @@
+{
+  "scope": "controlled microbenchmarks only; no full-pipeline throughput claim",
+  "trials": 3,
+  "run_order": [
+    "before-after",
+    "after-before",
+    "before-after"
+  ],
+  "repeat_counts_per_trial": {
+    "residual": 30,
+    "cost": 10,
+    "actual_solve": 1
+  },
+  "background_work": "coordinated pause of repository heavy Blender/texture jobs; macOS remains a general interactive host",
+  "source_sha256": {
+    "before": "5b0798d537d159637eebb6e4a9ec50a0275b931a4bf645f43fdeaeff19a6eb86",
+    "after": "7ec67dba834f47ca439c91236e9d715b3c38399483d90bd3b994988f98ad734b"
+  },
+  "environment": {
+    "python": "REPOSITORY_ROOT/blade_recon/.venv-trial/bin/python",
+    "python_version": "3.12.14",
+    "platform": "macOS-27.0-arm64-arm-64bit",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "opencv": "5.0.0"
+  },
+  "data": {
+    "turbine": {
+      "hub_height_m": 90.0,
+      "overhang_m": 5.0,
+      "tilt_deg": 5.0,
+      "cone_deg": 2.5,
+      "hub_radius_m": 1.5,
+      "tip_radius_m": 63.0,
+      "prebend_tip_m": 0.0,
+      "n_sections": 40,
+      "n_ring": 32,
+      "spin": 1
+    },
+    "camera_count": 3,
+    "image_size": [
+      192,
+      192
+    ],
+    "mask_sha256": [
+      "d0a01deceb016b0601f8c4a2942b081dda9160001d5a1d4585766428a7424868",
+      "d0e09ca4a2e76d265688e9c352b88f3f0c04ade3143a6b893b7d7df55093fffe",
+      "0f6987b2ce695e572e85b4cf0e411ee75efb212f79cde7e8e4dc34c66b6c2bec"
+    ],
+    "params": [
+      80.0,
+      0.0,
+      0.0,
+      0.0,
+      3.0,
+      3.0,
+      3.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "max_nfev": 5,
+    "w_prior": 0.5
+  },
+  "peak_rss_bytes": {
+    "before": [
+      116457472,
+      117456896,
+      122142720
+    ],
+    "after": [
+      116211712,
+      118472704,
+      116178944
+    ]
+  },
+  "quality": "identical residual/Jacobian/state/uncertainty/status/cost in every paired trial",
+  "cases": [
+    {
+      "case": "all-valid",
+      "quality": "BIT_EXACT",
+      "residual": {
+        "before_s": [
+          0.016933718032669277,
+          0.017949565298234424,
+          0.01774175276514143
+        ],
+        "after_s": [
+          0.01684270000162845,
+          0.017867777799256145,
+          0.016862727763752142
+        ],
+        "before_median_s": 0.01774175276514143,
+        "after_median_s": 0.016862727763752142,
+        "median_speedup": 1.0521282804125454,
+        "paired_speedups": [
+          1.0054040047636084,
+          1.0045773738568478,
+          1.0521282804125454
+        ],
+        "before_forward_calls_per_call": 3.0,
+        "after_forward_calls_per_call": 1.0
+      },
+      "cost": {
+        "before_s": [
+          0.01703614169964567,
+          0.019081766693852843,
+          0.017520562489517034
+        ],
+        "after_s": [
+          0.016448379098437726,
+          0.017477058398071676,
+          0.016849241603631528
+        ],
+        "before_median_s": 0.017520562489517034,
+        "after_median_s": 0.016849241603631528,
+        "median_speedup": 1.0398427954015934,
+        "paired_speedups": [
+          1.035733770342378,
+          1.0918179855689114,
+          1.0398427954015934
+        ],
+        "before_forward_calls_per_call": 3.0,
+        "after_forward_calls_per_call": 1.0
+      },
+      "solve": {
+        "before_s": [
+          1.7646482919808477,
+          1.8413149169646204,
+          1.8574326250236481
+        ],
+        "after_s": [
+          1.7638869170332327,
+          1.7776783750159666,
+          1.7905575420008972
+        ],
+        "before_median_s": 1.8413149169646204,
+        "after_median_s": 1.7776783750159666,
+        "median_speedup": 1.0357975564326038,
+        "paired_speedups": [
+          1.000431646122131,
+          1.0357975564326038,
+          1.037348748339034
+        ],
+        "before_forward_calls_per_call": 315.0,
+        "after_forward_calls_per_call": 105.0
+      }
+    },
+    {
+      "case": "one-valid",
+      "quality": "BIT_EXACT",
+      "residual": {
+        "before_s": [
+          0.006592245834569136,
+          0.006770777799344311,
+          0.006897363866058489
+        ],
+        "after_s": [
+          0.005590550000003229,
+          0.0057421916668924195,
+          0.005872094433289021
+        ],
+        "before_median_s": 0.006770777799344311,
+        "after_median_s": 0.0057421916668924195,
+        "median_speedup": 1.1791277951208732,
+        "paired_speedups": [
+          1.1791766167130835,
+          1.1791277951208732,
+          1.1746002971200862
+        ],
+        "before_forward_calls_per_call": 3.0,
+        "after_forward_calls_per_call": 1.0
+      },
+      "cost": {
+        "before_s": [
+          0.0066332750022411345,
+          0.006757183303125203,
+          0.006828408397268504
+        ],
+        "after_s": [
+          0.00566964999306947,
+          0.005785579106304795,
+          0.005719108402263373
+        ],
+        "before_median_s": 0.006757183303125203,
+        "after_median_s": 0.005719108402263373,
+        "median_speedup": 1.1815099186528804,
+        "paired_speedups": [
+          1.1699619924245044,
+          1.167935513276728,
+          1.193963799421273
+        ],
+        "before_forward_calls_per_call": 3.0,
+        "after_forward_calls_per_call": 1.0
+      },
+      "solve": {
+        "before_s": [
+          0.7000308750430122,
+          0.7572942080441862,
+          0.7200192920863628
+        ],
+        "after_s": [
+          0.6008367500035092,
+          0.6531727920519188,
+          0.6075657500186935
+        ],
+        "before_median_s": 0.7200192920863628,
+        "after_median_s": 0.6075657500186935,
+        "median_speedup": 1.185088678985294,
+        "paired_speedups": [
+          1.1650933053594401,
+          1.1594086852043757,
+          1.185088678985294
+        ],
+        "before_forward_calls_per_call": 315.0,
+        "after_forward_calls_per_call": 105.0
+      }
+    },
+    {
+      "case": "no-image",
+      "quality": "BIT_EXACT",
+      "residual": {
+        "before_s": [
+          0.0015574763994663954,
+          0.001593120830754439,
+          0.0015697666676715016
+        ],
+        "after_s": [
+          1.2822231898705164e-05,
+          1.3974999698499838e-05,
+          1.3794435653835535e-05
+        ],
+        "before_median_s": 0.0015697666676715016,
+        "after_median_s": 1.3794435653835535e-05,
+        "median_speedup": 113.79709232505128,
+        "paired_speedups": [
+          121.46687189643443,
+          113.9979152146568,
+          113.79709232505128
+        ],
+        "before_forward_calls_per_call": 3.0,
+        "after_forward_calls_per_call": 0.0
+      },
+      "cost": {
+        "before_s": [
+          0.0015563707915134729,
+          0.0015937415999360382,
+          0.0018801167025230825
+        ],
+        "after_s": [
+          1.5112501569092273e-05,
+          1.5729200094938277e-05,
+          1.562499674037099e-05
+        ],
+        "before_median_s": 0.0015937415999360382,
+        "after_median_s": 1.562499674037099e-05,
+        "median_speedup": 101.9994836746569,
+        "paired_speedups": [
+          102.98564962246391,
+          101.32375393004956,
+          120.32749406374866
+        ],
+        "before_forward_calls_per_call": 3.0,
+        "after_forward_calls_per_call": 0.0
+      },
+      "solve": {
+        "before_s": [
+          0.033162750070914626,
+          0.044473082991316915,
+          0.03439037501811981
+        ],
+        "after_s": [
+          0.0008598329732194543,
+          0.000894458033144474,
+          0.0008987089386209846
+        ],
+        "before_median_s": 0.03439037501811981,
+        "after_median_s": 0.000894458033144474,
+        "median_speedup": 38.44828236068291,
+        "paired_speedups": [
+          38.56882802103302,
+          49.72070387133922,
+          38.26642146331581
+        ],
+        "before_forward_calls_per_call": 63.0,
+        "after_forward_calls_per_call": 0.0
+      }
+    }
+  ]
+}

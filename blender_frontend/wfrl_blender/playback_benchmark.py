@@ -72,32 +72,55 @@ def _rows(rows, label, started, ended, failures):
 
 
 def evaluate_playback(*, target, expected_routes, scene_rows, draws, started, ended,
-                      termination, route_states=None, error=None):
+                      termination, route_states=None, route_starts=None,
+                      pause_intervals=(), error=None):
     """Return JSON-ready verdict, complete observation metrics and diagnostics.
 
     Rows are (monotonic timestamp, scene frame). ``termination`` contains a
     ``reason`` and, for success, ``previous_frame``/``frame`` boundary evidence.
     An operator-driven seek must never be supplied as a playback boundary.
+    Route starts are declared before activation, never inferred from first draw.
+    Explicit, stationary pause intervals are excluded from progression gaps.
     """
     failures = []
     expected = [str(slot) for slot in expected_routes]
     if not expected or len(set(expected)) != len(expected):
         raise ValueError('expected_routes must be nonempty and unique')
-    if ended < started:
+    if not isfinite(started) or not isfinite(ended) or ended < started:
         raise ValueError('observation end precedes start')
     total = ended-started
     reason = termination.get('reason', 'runtime_error')
     completed = reason in {'completed_segment', 'completed_loop'}
     rows = _rows(scene_rows, 'scene', started, ended, failures)
+    pauses = []
+    for interval in pause_intervals:
+        try:
+            left, right = map(float, interval)
+            if (not isfinite(left) or not isfinite(right)
+                    or not started <= left < right <= ended
+                    or (pauses and left < pauses[-1][1])):
+                raise ValueError('pause outside observation or overlapping')
+            if any(left < b[0] < right and a[1] != b[1] for a, b in zip(rows, rows[1:])):
+                raise ValueError('scene advanced during declared pause')
+            pauses.append((left, right))
+        except (ValueError, TypeError):
+            failures.append('invalid pause interval')
+
+    def running_duration(left, right):
+        return max(0., right-left-sum(max(0., min(right, b)-max(left, a)) for a, b in pauses))
+
     high = max((r[1] for r in rows), default=target.start_frame)
     progress = [r for i, r in enumerate(rows) if i and r[1] != rows[i-1][1]]
     if not rows or rows[0][1] != target.start_frame:
         failures.append('scene: missing declared start frame')
     if not any(b[1] > a[1] for a, b in zip(rows, rows[1:])):
         failures.append('scene: no forward progression')
+    loop_times = []
     for previous, current in zip(rows, rows[1:]):
         if current[1] < previous[1] and target.transition(previous[1], current[1]) != 'completed_loop':
             failures.append('scene: unexpected backward transition')
+        elif current[1] < previous[1]:
+            loop_times.append(current[0])
     if completed:
         if termination.get('playback_running') is not True or termination.get('driver_seek') is not False:
             failures.append('termination: not a verified playback transition (seek/stop state)')
@@ -114,16 +137,48 @@ def evaluate_playback(*, target, expected_routes, scene_rows, draws, started, en
     last_progress = progress[-1][0] if progress else None
     states = {str(k): v for k, v in (route_states or {}).items()}
     draw_map = {str(k): v for k, v in draws.items()}
+    starts = {str(k): v for k, v in route_starts.items()} if route_starts is not None else None
     route_results = {}
     distinct_by_route = {}
     for slot in expected:
-        values = _rows(draw_map.get(slot, []), f'C{slot}', started, ended, failures)
+        route_start, start_frame = started, target.start_frame
+        if starts is not None:
+            try:
+                activation = starts[slot]
+                route_start = float(activation['wall_s'])
+                raw_frame = activation['frame']
+                start_frame = int(raw_frame)
+                if (not isfinite(route_start) or not started <= route_start < ended
+                        or start_frame != raw_frame
+                        or not target.start_frame <= start_frame < target.end_frame):
+                    raise ValueError('invalid route activation')
+                observed = next((r[1] for r in reversed(rows) if r[0] <= route_start), None)
+                if observed != start_frame:
+                    raise ValueError('route activation does not match scene clock')
+            except (KeyError, TypeError, ValueError, OverflowError):
+                failures.append(f'C{slot}: invalid or missing route activation')
+                route_start, start_frame = started, target.start_frame
+        values = _rows(draw_map.get(slot, []), f'C{slot}', route_start, ended, failures)
         distinct = [row for i, row in enumerate(values) if i == 0 or row[1] != values[i-1][1]]
         distinct_by_route[slot] = distinct
+        start_covered = bool(distinct and start_frame <= distinct[0][1]
+            <= start_frame+target.terminal_tolerance_frames
+            and running_duration(route_start, distinct[0][0]) <= target.stall_threshold_s)
         terminal = any(row[1] >= target.end_frame-target.terminal_tolerance_frames for row in distinct)
         forward = any(b[1] > a[1] for a, b in zip(distinct, distinct[1:]))
         if not values:
             failures.append(f'C{slot}: zero draws')
+        if not start_covered:
+            failures.append(f'C{slot}: missing start drawing evidence')
+        for previous, current in zip(distinct, distinct[1:]):
+            if current[1] < previous[1] and not (
+                    target.transition(previous[1], current[1]) == 'completed_loop'
+                    and any(previous[0] < t <= current[0] for t in loop_times)):
+                failures.append(f'C{slot}: unexpected backward transition')
+        progress_times = [route_start]+[r[0] for r in distinct]+[ended]
+        max_gap = max(running_duration(a, b) for a, b in zip(progress_times, progress_times[1:]))
+        if max_gap > target.stall_threshold_s:
+            failures.append(f'C{slot}: drawing progression gap exceeds stall threshold')
         if not forward:
             failures.append(f'C{slot}: no drawing progression')
         if not terminal:
@@ -136,6 +191,10 @@ def evaluate_playback(*, target, expected_routes, scene_rows, draws, started, en
             failures.append(f'C{slot}: stale final drawing heartbeat')
         span = distinct[-1][0]-distinct[0][0] if len(distinct) > 1 else 0.
         route_results[slot] = {
+            'activation': {'wall_s': route_start, 'frame': start_frame},
+            'observation_s': ended-route_start,
+            'route_draw_rate_hz': max(0, len(distinct)-1)/(ended-route_start) if ended > route_start else 0.,
+            'has_start_evidence': start_covered, 'max_progress_gap_s': max_gap,
             'draw_callbacks': len(values), 'distinct_draws': len(distinct),
             'active_draw_span_s': span,
             'active_draw_fps': (len(distinct)-1)/span if span > 0 else 0.,
@@ -165,7 +224,8 @@ def evaluate_playback(*, target, expected_routes, scene_rows, draws, started, en
         status = 'FAIL' if failures else 'PASS'
     if status == 'PASS':
         for route in route_results.values():
-            route['full_segment_draw_fps'] = route['observation_draw_rate_hz']
+            if route['activation'] == {'wall_s': started, 'frame': target.start_frame}:
+                route['full_segment_draw_fps'] = route['observation_draw_rate_hz']
     return {
         'status': status, 'termination': dict(termination), 'error': error,
         'failures': list(dict.fromkeys(failures)), 'target': dict(target.__dict__),
@@ -178,6 +238,7 @@ def evaluate_playback(*, target, expected_routes, scene_rows, draws, started, en
         'completed_target_s': ((target.end_frame-target.start_frame)/target.simulation_fps) if status == 'PASS' else None,
         'simulation_speed_ratio': ((target.end_frame-target.start_frame)/target.simulation_fps/total) if status == 'PASS' and total else None,
         'routes': route_results,
+        'pause_intervals': pauses,
         'same_frames_all_routes': all([r[1] for r in distinct_by_route[slot]] == [r[1] for r in distinct_by_route[expected[0]]] for slot in expected),
         'route_draw_time_differences': latency,
         'evidence_scope': 'visible viewport POST_PIXEL callbacks; not monitor scanout or physical synchronization',

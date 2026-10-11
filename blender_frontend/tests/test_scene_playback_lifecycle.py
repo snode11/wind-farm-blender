@@ -39,7 +39,8 @@ def runtimes(monkeypatch):
     monkeypatch.setattr(farm_flex, '_ACTIVES', {})
     monkeypatch.setattr(farm_flex, '_ACTIVE', None)
     monkeypatch.setattr(clearance_replay, '_READERS', {})
-    monkeypatch.setattr(farm_flex, 'read_package', lambda path: ({'turbine_ids': ['T1']},))
+    monkeypatch.setattr(farm_flex, '_load_package',
+                        lambda path: SimpleNamespace(manifest={'turbine_ids': ['T1']}))
     monkeypatch.setattr(tip_tracking, 'register', lambda: None)
 
     def clear(scene, reason):
@@ -48,7 +49,7 @@ def runtimes(monkeypatch):
     monkeypatch.setattr(clearance_replay, 'clear', clear)
 
     class Runtime:
-        def __init__(self, scene, path):
+        def __init__(self, scene, path, *, _package):
             self.scene, self.enabled = scene, True
             self.readers = {'T1': object()}
             self.blades = [(scene.objects['WFRL.Turbine.T1.Blade1'],)]

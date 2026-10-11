@@ -1,0 +1,47 @@
+{
+  "download_url": "https://www.hawc2.dk/-/media/sites/hawc2/hawc2-download/hawc2-model/dtu-10-mw-reference-wind-turbine_download-files/dtu_10_mw_reference_wind_turbine_v_9-2.zip",
+  "official_index": "https://www.hawc2.dk/models/dtu-10-mw",
+  "retrieved_date": "2026-09-28",
+  "archive_sha256": "789477a70427cce2ad8de8eae70a057c8ec8bbc6ce14d7271b2fa95fecbd02af",
+  "archive_inner_directory": "DTU_10_MW_Reference_Wind_Turbine_v_9-1",
+  "files": {
+    "DTU_10MW_RWT_ae.dat": "e1040481d5773d719d3b51ba357cdf9663a26939567845485915e8ac1933536a",
+    "DTU_10MW_RWT.htc": "a3e27a635fd2b976e1b01cadfa6f3643ea7144bf1ae8bb88ed164781cbb51256",
+    "ffa_reference.json": "143f45d96c445af033b308bba3780654156df56648f54b6b3edc755d2856f4fd"
+  },
+  "used_fields": "ae.dat: span, chord, relative thickness; htc blade1 c2_def: span, twist (sign mapped), Y centreline for normalized static prebend shape",
+  "not_used": "No DTU controller, binary library, structural dynamics, aerodynamic coefficient tables, mass, rated power or elastic response used",
+  "section_limitation": "Pinned FFA-W3-241/301/360 coordinate contours from WISDEM IEA-15 reference supply section camber. Only normalized contours are imported; no 15 MW dimensions or dynamics. Scaled thick sections, circular root blending, trailing-edge seam and tip closure are adaptations, not exact GW184 or DTU blade surfaces.",
+  "reference_links": [
+    "https://www.goldwind.com/cn/assets/d80f2f75c48d6e715ed5f65b041bc6b6.pdf",
+    "https://www.goldwind.com/en/news/focus-922521420544742400/?id=922520727327056896",
+    "https://backend.orbit.dtu.dk/ws/portalfiles/portal/55645274/The_DTU_10MW_Reference_Turbine_Christian_Bak.pdf"
+  ],
+  "airfoil_reference": {
+    "schema": "gw184.ffa-reference.v1",
+    "source": "NLRWindSystems/WISDEM examples/02_reference_turbines/IEA-15-240-RWT.yaml",
+    "commit": "bc964bee6e323f6a12d559191470d680da7fd95b",
+    "url": "https://github.com/NLRWindSystems/WISDEM/blob/bc964bee6e323f6a12d559191470d680da7fd95b/examples/02_reference_turbines/IEA-15-240-RWT.yaml",
+    "source_sha256": "9ff187f373dacb9ede298f0679bcbacf2784ad8719d52216903d7e944542ab88",
+    "retrieved": "2026-09-29",
+    "scope": "Only FFA-W3-241/301/360 geometric contours; no IEA-15MW dimensions or polars imported; adapted reference not exact DTU/GW184 surface",
+    "profiles": [
+      {
+        "name": "FFA-W3-241",
+        "relative_thickness": 0.241,
+        "points": 200
+      },
+      {
+        "name": "FFA-W3-301",
+        "relative_thickness": 0.301,
+        "points": 200
+      },
+      {
+        "name": "FFA-W3-360",
+        "relative_thickness": 0.36,
+        "points": 200
+      }
+    ]
+  },
+  "prebend": "HTC blade1 C2-def Y, normalized after root offset removal; chosen target amplitude 3.0 m upwind at zero pitch. Static rigid shape rotates with collective pitch; not measured GW184 or aerodynamic deflection."
+}

@@ -1,0 +1,11 @@
+{
+  "status": "FROZEN_BEFORE_EXTENSION_EXECUTION",
+  "extends_protocol_sha256": "d9af4d684108bf17b08001afd6650996f8b4db355a215e419c01e0ea3050a96c",
+  "purpose": "Distinguish treating Greville samples as coefficients from an interpolating geometric-center B-spline and preserve reproducibility without overwriting the first numerical result.",
+  "additional_predeclared_metrics": [
+    "absolute geometric-center spline Q=A^-1 G; compare BQ with B C+D_z(ell)",
+    "template-relative center spline Qrel=A^-1(G-D_g(0)); compare D_z(0)+B Qrel with B C+D_z(ell)",
+    "naively reused original coefficient penalties on Q and Qrel; inverse/pullback original objective still required"
+  ],
+  "execution": "Same amplitudes, original inputs, and conclusions; no truth, images, or image fitting. Final run writes to fresh verified subdirectory, records module SHA256 before computation; existing first-run outputs retained."
+}

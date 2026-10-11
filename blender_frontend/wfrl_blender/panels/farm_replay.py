@@ -97,18 +97,22 @@ def draw_radar(layout, scene, value):
 
 def draw_playback(layout, context, value, reader):
     """One shared clock and three transport actions, above every task page."""
+    from .. import split_reconstruction
     scene = context.scene
-    duration = reader.end_s - reader.start_s if reader else 0
+    comparison = split_reconstruction.enabled(scene)
     playback = layout.column(align=True)
     text, icon, state = playback_control(scene, context.screen)
-    playback.label(text=(f"仿真 {value['time_s']:.3f} s · {state}" if value else '回放数据未就绪'))
+    if not comparison:
+        playback.label(text=(f"仿真 {value['time_s']:.3f} s · {state}" if value else '回放数据未就绪'))
     row = playback.row(align=True)
     row.scale_y = 1.25
     row.operator('wfrl.clearance_playback', text=text, icon=icon)
     row.operator('wfrl.farm_transport', text='单步', icon='NEXT_KEYFRAME').action = 'STEP'
     row.operator('wfrl.farm_transport', text='复位', icon='LOOP_BACK').action = 'RESET'
-    elapsed = max(0, value['time_s'] - reader.start_s) if value and reader else 0
-    playback.prop(scene, 'wfrl_clearance_progress', text=f'{elapsed:.1f} / {duration:.0f} 秒', slider=True)
+    if not comparison:
+        duration = reader.end_s - reader.start_s if reader else 0
+        elapsed = max(0, value['time_s'] - reader.start_s) if value and reader else 0
+        playback.prop(scene, 'wfrl_clearance_progress', text=f'{elapsed:.1f} / {duration:.0f} 秒', slider=True)
 
 
 def draw_views(layout, context):
@@ -426,7 +430,6 @@ class WFRL_PT_FarmFlex(bpy.types.Panel):
 
     def draw(self,context):
         self.layout.operator('wfrl.split_recon_open_example', text='打开几何重建示例…', icon='FILE_BLEND')
-        self.layout.operator('wfrl.split_recon_same_source', text='同源纹理同步对照', icon='SHADING_TEXTURE')
         if farm_flex.is_active(context.scene):
             draw(self.layout,context)
         else:

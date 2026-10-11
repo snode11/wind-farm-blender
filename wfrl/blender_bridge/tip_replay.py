@@ -17,6 +17,22 @@ from wfrl.lidar.physics import read_surface
 from wfrl.viz.tip_geometry import TurbineGeometry
 
 
+def resolve_raw_source_path(package_path, recorded_path):
+    """Locate declared raw files beside a package in the repository layout."""
+    package = Path(package_path).resolve()
+    recorded = Path(recorded_path)
+    if package.parent.parts[-3:] == ('results', 'lidar', 'packages'):
+        parts = recorded.parts
+        matches = [i for i in range(len(parts) - 2)
+                   if parts[i:i + 3] == ('results', 'lidar', 'raw')]
+        if len(matches) == 1:
+            relative = Path(*parts[matches[0]:])
+            if '..' in relative.parts:
+                raise ValueError('Raw source path must stay inside results/lidar/raw')
+            return (package.parents[3] / relative).resolve()
+    return recorded.resolve()
+
+
 class FastFarmTipReplay:
     def __init__(self, package_path):
         self.path = Path(package_path).resolve()
@@ -24,7 +40,7 @@ class FastFarmTipReplay:
         m = self.package.manifest
         if m.get('source') != 'FAST.Farm' or m.get('model',{}).get('id') != 'nrel5mw':
             raise ValueError('Tip replay currently requires an NREL5MW FAST.Farm result package')
-        sources = {Path(s['path']).resolve():s['sha256'] for s in m['raw_sources']}
+        sources = {resolve_raw_source_path(self.path, s['path']):s['sha256'] for s in m['raw_sources']}
         configs = [p for p in sources if p.name=='run_config.json' and p.parent.name==m['run_id']]
         if len(configs)!=1:raise ValueError('Missing unique base-run configuration')
         self.run = configs[0].parent

@@ -1,0 +1,1715 @@
+{
+  "status": "ALL_THREE_FROZEN_BRANCHES_SCORED",
+  "units": "m",
+  "scoring_config": {
+    "span_bounds_m": [
+      0,
+      61.5
+    ],
+    "section_positions_m": [
+      9.225,
+      30.75,
+      52.275
+    ],
+    "sample_count": 8192,
+    "regional_sample_count": 2048,
+    "seed": 20261002
+  },
+  "engineering_acceptance": "PENDING_USE_CASE_TARGETS",
+  "truth_feedback_used": false,
+  "section_convention": "xy minimum-area enclosing rectangle long side estimates chord and short side estimates body thickness; z fixed before scoring. A shape-only section cannot prove pressure/suction-side orientation.",
+  "branches": {
+    "original_raw": {
+      "models": {
+        "initial": {
+          "global": {
+            "reconstruction_to_truth": {
+              "mean_m": 0.3494425968978986,
+              "p95_m": 0.8548740646999143,
+              "standard_error_mean_m": 0.0028530414755978967,
+              "source_area_m2": 498.86874200820773,
+              "sample_count": 8192,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.34832206813237415,
+              "p95_m": 0.8831197047787213,
+              "standard_error_mean_m": 0.002903297945113879,
+              "source_area_m2": 501.2066016293269,
+              "sample_count": 8192,
+              "null_reason": null
+            }
+          },
+          "regions": {
+            "root": {
+              "span_bounds_m": [
+                0.0,
+                20.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.47997315866138185,
+                "p95_m": 0.9532880662687574,
+                "standard_error_mean_m": 0.006416527431494091,
+                "source_area_m2": 233.74562318923256,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.4859256141053281,
+                "p95_m": 0.9631399925044469,
+                "standard_error_mean_m": 0.006348363638275542,
+                "source_area_m2": 234.70833043421067,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "middle": {
+              "span_bounds_m": [
+                20.5,
+                41.0
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.2739060000375809,
+                "p95_m": 0.5645253432377894,
+                "standard_error_mean_m": 0.0037005649816461415,
+                "source_area_m2": 163.93279374797785,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.262614428769533,
+                "p95_m": 0.5693125947810621,
+                "standard_error_mean_m": 0.003590225301440643,
+                "source_area_m2": 162.69714571127693,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "tip": {
+              "span_bounds_m": [
+                41.0,
+                61.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.18135017659120964,
+                "p95_m": 0.5026201600386457,
+                "standard_error_mean_m": 0.003260502257218276,
+                "source_area_m2": 101.19032507099723,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.1877200341705985,
+                "p95_m": 0.5629880929639653,
+                "standard_error_mean_m": 0.003615279443593355,
+                "source_area_m2": 102.74094490356582,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            }
+          },
+          "sections": [
+            {
+              "z_m": 9.225,
+              "long_side_abs_error_m": 0.08308278441248884,
+              "short_side_abs_error_m": 0.10673202146430993,
+              "reconstruction_long_side_m": 4.388597207956717,
+              "truth_long_side_m": 4.305514423544228,
+              "reconstruction_short_side_m": 2.514155005924023,
+              "truth_short_side_m": 2.4074229844597133,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 30.75,
+              "long_side_abs_error_m": 0.003036081166179372,
+              "short_side_abs_error_m": 0.01947951842599127,
+              "reconstruction_long_side_m": 3.739281324284539,
+              "truth_long_side_m": 3.7423174054507182,
+              "reconstruction_short_side_m": 0.9535167396620758,
+              "truth_short_side_m": 0.9340372212360846,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 52.275,
+              "long_side_abs_error_m": 0.0024234564872016584,
+              "short_side_abs_error_m": 0.03011875882416648,
+              "reconstruction_long_side_m": 2.4532242329097964,
+              "truth_long_side_m": 2.455647689396998,
+              "reconstruction_short_side_m": 0.4718128706924569,
+              "truth_short_side_m": 0.44169411186829044,
+              "section_closed": true,
+              "self_intersections": 0
+            }
+          ]
+        },
+        "prior_only": {
+          "global": {
+            "reconstruction_to_truth": {
+              "mean_m": 0.3494425968978986,
+              "p95_m": 0.8548740646999143,
+              "standard_error_mean_m": 0.0028530414755978967,
+              "source_area_m2": 498.86874200820773,
+              "sample_count": 8192,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.34832206813237415,
+              "p95_m": 0.8831197047787213,
+              "standard_error_mean_m": 0.002903297945113879,
+              "source_area_m2": 501.2066016293269,
+              "sample_count": 8192,
+              "null_reason": null
+            }
+          },
+          "regions": {
+            "root": {
+              "span_bounds_m": [
+                0.0,
+                20.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.47997315866138185,
+                "p95_m": 0.9532880662687574,
+                "standard_error_mean_m": 0.006416527431494091,
+                "source_area_m2": 233.74562318923256,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.4859256141053281,
+                "p95_m": 0.9631399925044469,
+                "standard_error_mean_m": 0.006348363638275542,
+                "source_area_m2": 234.70833043421067,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "middle": {
+              "span_bounds_m": [
+                20.5,
+                41.0
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.2739060000375809,
+                "p95_m": 0.5645253432377894,
+                "standard_error_mean_m": 0.0037005649816461415,
+                "source_area_m2": 163.93279374797785,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.262614428769533,
+                "p95_m": 0.5693125947810621,
+                "standard_error_mean_m": 0.003590225301440643,
+                "source_area_m2": 162.69714571127693,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "tip": {
+              "span_bounds_m": [
+                41.0,
+                61.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.18135017659120964,
+                "p95_m": 0.5026201600386457,
+                "standard_error_mean_m": 0.003260502257218276,
+                "source_area_m2": 101.19032507099723,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.1877200341705985,
+                "p95_m": 0.5629880929639653,
+                "standard_error_mean_m": 0.003615279443593355,
+                "source_area_m2": 102.74094490356582,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            }
+          },
+          "sections": [
+            {
+              "z_m": 9.225,
+              "long_side_abs_error_m": 0.08308278441248884,
+              "short_side_abs_error_m": 0.10673202146430993,
+              "reconstruction_long_side_m": 4.388597207956717,
+              "truth_long_side_m": 4.305514423544228,
+              "reconstruction_short_side_m": 2.514155005924023,
+              "truth_short_side_m": 2.4074229844597133,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 30.75,
+              "long_side_abs_error_m": 0.003036081166179372,
+              "short_side_abs_error_m": 0.01947951842599127,
+              "reconstruction_long_side_m": 3.739281324284539,
+              "truth_long_side_m": 3.7423174054507182,
+              "reconstruction_short_side_m": 0.9535167396620758,
+              "truth_short_side_m": 0.9340372212360846,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 52.275,
+              "long_side_abs_error_m": 0.0024234564872016584,
+              "short_side_abs_error_m": 0.03011875882416648,
+              "reconstruction_long_side_m": 2.4532242329097964,
+              "truth_long_side_m": 2.455647689396998,
+              "reconstruction_short_side_m": 0.4718128706924569,
+              "truth_short_side_m": 0.44169411186829044,
+              "section_closed": true,
+              "self_intersections": 0
+            }
+          ]
+        },
+        "final": {
+          "global": {
+            "reconstruction_to_truth": {
+              "mean_m": 0.1839927612803811,
+              "p95_m": 0.6077903453414697,
+              "standard_error_mean_m": 0.002189108958324101,
+              "source_area_m2": 509.9328454846309,
+              "sample_count": 8192,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.16261727004931575,
+              "p95_m": 0.5114341864467321,
+              "standard_error_mean_m": 0.0016822647353863563,
+              "source_area_m2": 501.2066016293269,
+              "sample_count": 8192,
+              "null_reason": null
+            }
+          },
+          "regions": {
+            "root": {
+              "span_bounds_m": [
+                0.0,
+                20.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.26661952157139196,
+                "p95_m": 0.7337397644425553,
+                "standard_error_mean_m": 0.00552060562200262,
+                "source_area_m2": 254.0927763248971,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.22621796613974382,
+                "p95_m": 0.621037652374805,
+                "standard_error_mean_m": 0.00429022063359545,
+                "source_area_m2": 234.70833043421067,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "middle": {
+              "span_bounds_m": [
+                20.5,
+                41.0
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.13080868190805212,
+                "p95_m": 0.36332492668447947,
+                "standard_error_mean_m": 0.002272058018963078,
+                "source_area_m2": 159.86020885749053,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.1233217682084781,
+                "p95_m": 0.3051233188101514,
+                "standard_error_mean_m": 0.0020055802320936788,
+                "source_area_m2": 162.69714571127693,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "tip": {
+              "span_bounds_m": [
+                41.0,
+                61.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.0848480599635637,
+                "p95_m": 0.17491480894717149,
+                "standard_error_mean_m": 0.001146348078694132,
+                "source_area_m2": 95.9798603022432,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.08651842047059738,
+                "p95_m": 0.18568187109930495,
+                "standard_error_mean_m": 0.0012526846875138718,
+                "source_area_m2": 102.74094490356582,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            }
+          },
+          "sections": [
+            {
+              "z_m": 9.225,
+              "long_side_abs_error_m": 0.30018053686885793,
+              "short_side_abs_error_m": 0.2387070531726856,
+              "reconstruction_long_side_m": 4.605694960413086,
+              "truth_long_side_m": 4.305514423544228,
+              "reconstruction_short_side_m": 2.646130037632399,
+              "truth_short_side_m": 2.4074229844597133,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 30.75,
+              "long_side_abs_error_m": 0.1173096388289574,
+              "short_side_abs_error_m": 0.009660254990009776,
+              "reconstruction_long_side_m": 3.625007766621761,
+              "truth_long_side_m": 3.7423174054507182,
+              "reconstruction_short_side_m": 0.9243769662460748,
+              "truth_short_side_m": 0.9340372212360846,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 52.275,
+              "long_side_abs_error_m": 0.12225751311627064,
+              "short_side_abs_error_m": 0.0070684356718497265,
+              "reconstruction_long_side_m": 2.3333901762807274,
+              "truth_long_side_m": 2.455647689396998,
+              "reconstruction_short_side_m": 0.44876254754014017,
+              "truth_short_side_m": 0.44169411186829044,
+              "section_closed": true,
+              "self_intersections": 0
+            }
+          ]
+        }
+      },
+      "image_contribution": "NOT_YET_ESTABLISHED",
+      "comparison_provenance": "DECLARED_SAME_CONFIGURATION",
+      "coverage_conclusion": "PARTIAL_OR_PRIOR_DEPENDENT",
+      "final_640_total_objective": 0.2937738597393036,
+      "final_fit_image_loss": 0.2856580821486811,
+      "scoring_wall_s": 46.084374500089325
+    },
+    "physical_reference_center": {
+      "models": {
+        "initial": {
+          "global": {
+            "reconstruction_to_truth": {
+              "mean_m": 0.3494425968978986,
+              "p95_m": 0.8548740646999143,
+              "standard_error_mean_m": 0.0028530414755978967,
+              "source_area_m2": 498.86874200820773,
+              "sample_count": 8192,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.34832206813237415,
+              "p95_m": 0.8831197047787213,
+              "standard_error_mean_m": 0.002903297945113879,
+              "source_area_m2": 501.2066016293269,
+              "sample_count": 8192,
+              "null_reason": null
+            }
+          },
+          "regions": {
+            "root": {
+              "span_bounds_m": [
+                0.0,
+                20.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.47997315866138185,
+                "p95_m": 0.9532880662687574,
+                "standard_error_mean_m": 0.006416527431494091,
+                "source_area_m2": 233.74562318923256,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.4859256141053281,
+                "p95_m": 0.9631399925044469,
+                "standard_error_mean_m": 0.006348363638275542,
+                "source_area_m2": 234.70833043421067,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "middle": {
+              "span_bounds_m": [
+                20.5,
+                41.0
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.2739060000375809,
+                "p95_m": 0.5645253432377894,
+                "standard_error_mean_m": 0.0037005649816461415,
+                "source_area_m2": 163.93279374797785,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.262614428769533,
+                "p95_m": 0.5693125947810621,
+                "standard_error_mean_m": 0.003590225301440643,
+                "source_area_m2": 162.69714571127693,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "tip": {
+              "span_bounds_m": [
+                41.0,
+                61.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.18135017659120964,
+                "p95_m": 0.5026201600386457,
+                "standard_error_mean_m": 0.003260502257218276,
+                "source_area_m2": 101.19032507099723,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.1877200341705985,
+                "p95_m": 0.5629880929639653,
+                "standard_error_mean_m": 0.003615279443593355,
+                "source_area_m2": 102.74094490356582,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            }
+          },
+          "sections": [
+            {
+              "z_m": 9.225,
+              "long_side_abs_error_m": 0.08308278441248884,
+              "short_side_abs_error_m": 0.10673202146430993,
+              "reconstruction_long_side_m": 4.388597207956717,
+              "truth_long_side_m": 4.305514423544228,
+              "reconstruction_short_side_m": 2.514155005924023,
+              "truth_short_side_m": 2.4074229844597133,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 30.75,
+              "long_side_abs_error_m": 0.003036081166179372,
+              "short_side_abs_error_m": 0.01947951842599127,
+              "reconstruction_long_side_m": 3.739281324284539,
+              "truth_long_side_m": 3.7423174054507182,
+              "reconstruction_short_side_m": 0.9535167396620758,
+              "truth_short_side_m": 0.9340372212360846,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 52.275,
+              "long_side_abs_error_m": 0.0024234564872016584,
+              "short_side_abs_error_m": 0.03011875882416648,
+              "reconstruction_long_side_m": 2.4532242329097964,
+              "truth_long_side_m": 2.455647689396998,
+              "reconstruction_short_side_m": 0.4718128706924569,
+              "truth_short_side_m": 0.44169411186829044,
+              "section_closed": true,
+              "self_intersections": 0
+            }
+          ]
+        },
+        "prior_only": {
+          "global": {
+            "reconstruction_to_truth": {
+              "mean_m": 0.3494425968978986,
+              "p95_m": 0.8548740646999143,
+              "standard_error_mean_m": 0.0028530414755978967,
+              "source_area_m2": 498.86874200820773,
+              "sample_count": 8192,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.34832206813237415,
+              "p95_m": 0.8831197047787213,
+              "standard_error_mean_m": 0.002903297945113879,
+              "source_area_m2": 501.2066016293269,
+              "sample_count": 8192,
+              "null_reason": null
+            }
+          },
+          "regions": {
+            "root": {
+              "span_bounds_m": [
+                0.0,
+                20.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.47997315866138185,
+                "p95_m": 0.9532880662687574,
+                "standard_error_mean_m": 0.006416527431494091,
+                "source_area_m2": 233.74562318923256,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.4859256141053281,
+                "p95_m": 0.9631399925044469,
+                "standard_error_mean_m": 0.006348363638275542,
+                "source_area_m2": 234.70833043421067,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "middle": {
+              "span_bounds_m": [
+                20.5,
+                41.0
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.2739060000375809,
+                "p95_m": 0.5645253432377894,
+                "standard_error_mean_m": 0.0037005649816461415,
+                "source_area_m2": 163.93279374797785,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.262614428769533,
+                "p95_m": 0.5693125947810621,
+                "standard_error_mean_m": 0.003590225301440643,
+                "source_area_m2": 162.69714571127693,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "tip": {
+              "span_bounds_m": [
+                41.0,
+                61.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.18135017659120964,
+                "p95_m": 0.5026201600386457,
+                "standard_error_mean_m": 0.003260502257218276,
+                "source_area_m2": 101.19032507099723,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.1877200341705985,
+                "p95_m": 0.5629880929639653,
+                "standard_error_mean_m": 0.003615279443593355,
+                "source_area_m2": 102.74094490356582,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            }
+          },
+          "sections": [
+            {
+              "z_m": 9.225,
+              "long_side_abs_error_m": 0.08308278441248884,
+              "short_side_abs_error_m": 0.10673202146430993,
+              "reconstruction_long_side_m": 4.388597207956717,
+              "truth_long_side_m": 4.305514423544228,
+              "reconstruction_short_side_m": 2.514155005924023,
+              "truth_short_side_m": 2.4074229844597133,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 30.75,
+              "long_side_abs_error_m": 0.003036081166179372,
+              "short_side_abs_error_m": 0.01947951842599127,
+              "reconstruction_long_side_m": 3.739281324284539,
+              "truth_long_side_m": 3.7423174054507182,
+              "reconstruction_short_side_m": 0.9535167396620758,
+              "truth_short_side_m": 0.9340372212360846,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 52.275,
+              "long_side_abs_error_m": 0.0024234564872016584,
+              "short_side_abs_error_m": 0.03011875882416648,
+              "reconstruction_long_side_m": 2.4532242329097964,
+              "truth_long_side_m": 2.455647689396998,
+              "reconstruction_short_side_m": 0.4718128706924569,
+              "truth_short_side_m": 0.44169411186829044,
+              "section_closed": true,
+              "self_intersections": 0
+            }
+          ]
+        },
+        "final": {
+          "global": {
+            "reconstruction_to_truth": {
+              "mean_m": 0.18972702316912965,
+              "p95_m": 0.6222913593128235,
+              "standard_error_mean_m": 0.002240546654380727,
+              "source_area_m2": 511.0162861506067,
+              "sample_count": 8192,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.1661077659114398,
+              "p95_m": 0.5221523411265735,
+              "standard_error_mean_m": 0.0017193935488840815,
+              "source_area_m2": 501.2066016293269,
+              "sample_count": 8192,
+              "null_reason": null
+            }
+          },
+          "regions": {
+            "root": {
+              "span_bounds_m": [
+                0.0,
+                20.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.2760990261462769,
+                "p95_m": 0.7521825689185909,
+                "standard_error_mean_m": 0.005610643001545224,
+                "source_area_m2": 254.97413453986496,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.23391754132538695,
+                "p95_m": 0.6316584985381921,
+                "standard_error_mean_m": 0.004364552445591595,
+                "source_area_m2": 234.70833043421067,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "middle": {
+              "span_bounds_m": [
+                20.5,
+                41.0
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.1307324613166407,
+                "p95_m": 0.36821321723807976,
+                "standard_error_mean_m": 0.0022968516246163477,
+                "source_area_m2": 160.02448417125666,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.1229377855375964,
+                "p95_m": 0.30818796238500595,
+                "standard_error_mean_m": 0.0020188956980601025,
+                "source_area_m2": 162.69714571127693,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "tip": {
+              "span_bounds_m": [
+                41.0,
+                61.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.08507799958866835,
+                "p95_m": 0.1759418200328478,
+                "standard_error_mean_m": 0.0011507579098997754,
+                "source_area_m2": 96.017667439485,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.08670438708764944,
+                "p95_m": 0.18549458013432352,
+                "standard_error_mean_m": 0.0012553050249704116,
+                "source_area_m2": 102.74094490356582,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            }
+          },
+          "sections": [
+            {
+              "z_m": 9.225,
+              "long_side_abs_error_m": 0.3153484090621008,
+              "short_side_abs_error_m": 0.24764840816299571,
+              "reconstruction_long_side_m": 4.620862832606329,
+              "truth_long_side_m": 4.305514423544228,
+              "reconstruction_short_side_m": 2.655071392622709,
+              "truth_short_side_m": 2.4074229844597133,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 30.75,
+              "long_side_abs_error_m": 0.11382590172778384,
+              "short_side_abs_error_m": 0.0087719349211407,
+              "reconstruction_long_side_m": 3.6284915037229344,
+              "truth_long_side_m": 3.7423174054507182,
+              "reconstruction_short_side_m": 0.9252652863149439,
+              "truth_short_side_m": 0.9340372212360846,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 52.275,
+              "long_side_abs_error_m": 0.12184623815604656,
+              "short_side_abs_error_m": 0.007147619928999094,
+              "reconstruction_long_side_m": 2.3338014512409515,
+              "truth_long_side_m": 2.455647689396998,
+              "reconstruction_short_side_m": 0.44884173179728953,
+              "truth_short_side_m": 0.44169411186829044,
+              "section_closed": true,
+              "self_intersections": 0
+            }
+          ]
+        }
+      },
+      "image_contribution": "NOT_YET_ESTABLISHED",
+      "comparison_provenance": "DECLARED_SAME_CONFIGURATION",
+      "coverage_conclusion": "PARTIAL_OR_PRIOR_DEPENDENT",
+      "final_640_total_objective": 0.29254984855651855,
+      "final_fit_image_loss": 0.2842615159849326,
+      "scoring_wall_s": 46.12997995899059
+    },
+    "greville_normalized": {
+      "models": {
+        "initial": {
+          "global": {
+            "reconstruction_to_truth": {
+              "mean_m": 0.3494425968978986,
+              "p95_m": 0.8548740646999143,
+              "standard_error_mean_m": 0.0028530414755978967,
+              "source_area_m2": 498.86874200820773,
+              "sample_count": 8192,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.34832206813237415,
+              "p95_m": 0.8831197047787213,
+              "standard_error_mean_m": 0.002903297945113879,
+              "source_area_m2": 501.2066016293269,
+              "sample_count": 8192,
+              "null_reason": null
+            }
+          },
+          "regions": {
+            "root": {
+              "span_bounds_m": [
+                0.0,
+                20.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.47997315866138185,
+                "p95_m": 0.9532880662687574,
+                "standard_error_mean_m": 0.006416527431494091,
+                "source_area_m2": 233.74562318923256,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.4859256141053281,
+                "p95_m": 0.9631399925044469,
+                "standard_error_mean_m": 0.006348363638275542,
+                "source_area_m2": 234.70833043421067,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "middle": {
+              "span_bounds_m": [
+                20.5,
+                41.0
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.2739060000375809,
+                "p95_m": 0.5645253432377894,
+                "standard_error_mean_m": 0.0037005649816461415,
+                "source_area_m2": 163.93279374797785,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.262614428769533,
+                "p95_m": 0.5693125947810621,
+                "standard_error_mean_m": 0.003590225301440643,
+                "source_area_m2": 162.69714571127693,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "tip": {
+              "span_bounds_m": [
+                41.0,
+                61.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.18135017659120964,
+                "p95_m": 0.5026201600386457,
+                "standard_error_mean_m": 0.003260502257218276,
+                "source_area_m2": 101.19032507099723,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.1877200341705985,
+                "p95_m": 0.5629880929639653,
+                "standard_error_mean_m": 0.003615279443593355,
+                "source_area_m2": 102.74094490356582,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            }
+          },
+          "sections": [
+            {
+              "z_m": 9.225,
+              "long_side_abs_error_m": 0.08308278441248884,
+              "short_side_abs_error_m": 0.10673202146430993,
+              "reconstruction_long_side_m": 4.388597207956717,
+              "truth_long_side_m": 4.305514423544228,
+              "reconstruction_short_side_m": 2.514155005924023,
+              "truth_short_side_m": 2.4074229844597133,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 30.75,
+              "long_side_abs_error_m": 0.003036081166179372,
+              "short_side_abs_error_m": 0.01947951842599127,
+              "reconstruction_long_side_m": 3.739281324284539,
+              "truth_long_side_m": 3.7423174054507182,
+              "reconstruction_short_side_m": 0.9535167396620758,
+              "truth_short_side_m": 0.9340372212360846,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 52.275,
+              "long_side_abs_error_m": 0.0024234564872016584,
+              "short_side_abs_error_m": 0.03011875882416648,
+              "reconstruction_long_side_m": 2.4532242329097964,
+              "truth_long_side_m": 2.455647689396998,
+              "reconstruction_short_side_m": 0.4718128706924569,
+              "truth_short_side_m": 0.44169411186829044,
+              "section_closed": true,
+              "self_intersections": 0
+            }
+          ]
+        },
+        "prior_only": {
+          "global": {
+            "reconstruction_to_truth": {
+              "mean_m": 0.3494425968978986,
+              "p95_m": 0.8548740646999143,
+              "standard_error_mean_m": 0.0028530414755978967,
+              "source_area_m2": 498.86874200820773,
+              "sample_count": 8192,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.34832206813237415,
+              "p95_m": 0.8831197047787213,
+              "standard_error_mean_m": 0.002903297945113879,
+              "source_area_m2": 501.2066016293269,
+              "sample_count": 8192,
+              "null_reason": null
+            }
+          },
+          "regions": {
+            "root": {
+              "span_bounds_m": [
+                0.0,
+                20.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.47997315866138185,
+                "p95_m": 0.9532880662687574,
+                "standard_error_mean_m": 0.006416527431494091,
+                "source_area_m2": 233.74562318923256,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.4859256141053281,
+                "p95_m": 0.9631399925044469,
+                "standard_error_mean_m": 0.006348363638275542,
+                "source_area_m2": 234.70833043421067,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "middle": {
+              "span_bounds_m": [
+                20.5,
+                41.0
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.2739060000375809,
+                "p95_m": 0.5645253432377894,
+                "standard_error_mean_m": 0.0037005649816461415,
+                "source_area_m2": 163.93279374797785,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.262614428769533,
+                "p95_m": 0.5693125947810621,
+                "standard_error_mean_m": 0.003590225301440643,
+                "source_area_m2": 162.69714571127693,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "tip": {
+              "span_bounds_m": [
+                41.0,
+                61.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.18135017659120964,
+                "p95_m": 0.5026201600386457,
+                "standard_error_mean_m": 0.003260502257218276,
+                "source_area_m2": 101.19032507099723,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.1877200341705985,
+                "p95_m": 0.5629880929639653,
+                "standard_error_mean_m": 0.003615279443593355,
+                "source_area_m2": 102.74094490356582,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            }
+          },
+          "sections": [
+            {
+              "z_m": 9.225,
+              "long_side_abs_error_m": 0.08308278441248884,
+              "short_side_abs_error_m": 0.10673202146430993,
+              "reconstruction_long_side_m": 4.388597207956717,
+              "truth_long_side_m": 4.305514423544228,
+              "reconstruction_short_side_m": 2.514155005924023,
+              "truth_short_side_m": 2.4074229844597133,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 30.75,
+              "long_side_abs_error_m": 0.003036081166179372,
+              "short_side_abs_error_m": 0.01947951842599127,
+              "reconstruction_long_side_m": 3.739281324284539,
+              "truth_long_side_m": 3.7423174054507182,
+              "reconstruction_short_side_m": 0.9535167396620758,
+              "truth_short_side_m": 0.9340372212360846,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 52.275,
+              "long_side_abs_error_m": 0.0024234564872016584,
+              "short_side_abs_error_m": 0.03011875882416648,
+              "reconstruction_long_side_m": 2.4532242329097964,
+              "truth_long_side_m": 2.455647689396998,
+              "reconstruction_short_side_m": 0.4718128706924569,
+              "truth_short_side_m": 0.44169411186829044,
+              "section_closed": true,
+              "self_intersections": 0
+            }
+          ]
+        },
+        "final": {
+          "global": {
+            "reconstruction_to_truth": {
+              "mean_m": 0.20185515152325884,
+              "p95_m": 0.6649010205959147,
+              "standard_error_mean_m": 0.0024156312087986347,
+              "source_area_m2": 518.6272913931784,
+              "sample_count": 8192,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.1731801789587578,
+              "p95_m": 0.5587680302844684,
+              "standard_error_mean_m": 0.0019230730811790186,
+              "source_area_m2": 501.2066016293269,
+              "sample_count": 8192,
+              "null_reason": null
+            }
+          },
+          "regions": {
+            "root": {
+              "span_bounds_m": [
+                0.0,
+                20.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.31268833659284223,
+                "p95_m": 0.8074556924561427,
+                "standard_error_mean_m": 0.005766128561663197,
+                "source_area_m2": 257.2433124233406,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.2635057799339567,
+                "p95_m": 0.6774924380375211,
+                "standard_error_mean_m": 0.004626026677455625,
+                "source_area_m2": 234.70833043421067,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "middle": {
+              "span_bounds_m": [
+                20.5,
+                41.0
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.12405569448639708,
+                "p95_m": 0.44950400305962673,
+                "standard_error_mean_m": 0.0028707584180327427,
+                "source_area_m2": 163.26630928751015,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.1098331020274894,
+                "p95_m": 0.3432563758666256,
+                "standard_error_mean_m": 0.0023736759698566832,
+                "source_area_m2": 162.69714571127693,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            },
+            "tip": {
+              "span_bounds_m": [
+                41.0,
+                61.5
+              ],
+              "reconstruction_to_truth": {
+                "mean_m": 0.07021180004857942,
+                "p95_m": 0.15230156583607082,
+                "standard_error_mean_m": 0.0009879032445709406,
+                "source_area_m2": 98.11766968232763,
+                "sample_count": 2048,
+                "null_reason": null
+              },
+              "truth_to_reconstruction": {
+                "mean_m": 0.07169849999372784,
+                "p95_m": 0.15572850456383003,
+                "standard_error_mean_m": 0.0010563920359335762,
+                "source_area_m2": 102.74094490356582,
+                "sample_count": 2048,
+                "null_reason": null
+              }
+            }
+          },
+          "sections": [
+            {
+              "z_m": 9.225,
+              "long_side_abs_error_m": 0.3777466619869516,
+              "short_side_abs_error_m": 0.2830447528129252,
+              "reconstruction_long_side_m": 4.683261085531179,
+              "truth_long_side_m": 4.305514423544228,
+              "reconstruction_short_side_m": 2.6904677372726384,
+              "truth_short_side_m": 2.4074229844597133,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 30.75,
+              "long_side_abs_error_m": 0.036432845454479335,
+              "short_side_abs_error_m": 0.010963390952374752,
+              "reconstruction_long_side_m": 3.705884559996239,
+              "truth_long_side_m": 3.7423174054507182,
+              "reconstruction_short_side_m": 0.9450006121884593,
+              "truth_short_side_m": 0.9340372212360846,
+              "section_closed": true,
+              "self_intersections": 0
+            },
+            {
+              "z_m": 52.275,
+              "long_side_abs_error_m": 0.08047118803422482,
+              "short_side_abs_error_m": 0.015106196040006625,
+              "reconstruction_long_side_m": 2.3751765013627733,
+              "truth_long_side_m": 2.455647689396998,
+              "reconstruction_short_side_m": 0.45680030790829707,
+              "truth_short_side_m": 0.44169411186829044,
+              "section_closed": true,
+              "self_intersections": 0
+            }
+          ]
+        }
+      },
+      "image_contribution": "NOT_YET_ESTABLISHED",
+      "comparison_provenance": "DECLARED_SAME_CONFIGURATION",
+      "coverage_conclusion": "PARTIAL_OR_PRIOR_DEPENDENT",
+      "final_640_total_objective": 0.28023040294647217,
+      "final_fit_image_loss": 0.2715180524004002,
+      "scoring_wall_s": 46.42438516707625
+    }
+  },
+  "historical_formal_v2": {
+    "path": "outputs/nrel-video-single-blade/20261002-second/evaluation-only/reconstruction/scores.json",
+    "models": {
+      "initial": {
+        "global": {
+          "reconstruction_to_truth": {
+            "mean_m": 0.3494425968978986,
+            "p95_m": 0.8548740646999143,
+            "standard_error_mean_m": 0.0028530414755978967,
+            "source_area_m2": 498.86874200820773,
+            "sample_count": 8192,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.34832206813237415,
+            "p95_m": 0.8831197047787213,
+            "standard_error_mean_m": 0.002903297945113879,
+            "source_area_m2": 501.2066016293269,
+            "sample_count": 8192,
+            "null_reason": null
+          }
+        },
+        "regions": {
+          "root": {
+            "span_bounds_m": [
+              0.0,
+              20.5
+            ],
+            "reconstruction_to_truth": {
+              "mean_m": 0.47997315866138185,
+              "p95_m": 0.9532880662687574,
+              "standard_error_mean_m": 0.006416527431494091,
+              "source_area_m2": 233.74562318923256,
+              "sample_count": 2048,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.4859256141053281,
+              "p95_m": 0.9631399925044469,
+              "standard_error_mean_m": 0.006348363638275542,
+              "source_area_m2": 234.70833043421067,
+              "sample_count": 2048,
+              "null_reason": null
+            }
+          },
+          "middle": {
+            "span_bounds_m": [
+              20.5,
+              41.0
+            ],
+            "reconstruction_to_truth": {
+              "mean_m": 0.2739060000375809,
+              "p95_m": 0.5645253432377894,
+              "standard_error_mean_m": 0.0037005649816461415,
+              "source_area_m2": 163.93279374797785,
+              "sample_count": 2048,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.262614428769533,
+              "p95_m": 0.5693125947810621,
+              "standard_error_mean_m": 0.003590225301440643,
+              "source_area_m2": 162.69714571127693,
+              "sample_count": 2048,
+              "null_reason": null
+            }
+          },
+          "tip": {
+            "span_bounds_m": [
+              41.0,
+              61.5
+            ],
+            "reconstruction_to_truth": {
+              "mean_m": 0.18135017659120964,
+              "p95_m": 0.5026201600386457,
+              "standard_error_mean_m": 0.003260502257218276,
+              "source_area_m2": 101.19032507099723,
+              "sample_count": 2048,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.1877200341705985,
+              "p95_m": 0.5629880929639653,
+              "standard_error_mean_m": 0.003615279443593355,
+              "source_area_m2": 102.74094490356582,
+              "sample_count": 2048,
+              "null_reason": null
+            }
+          }
+        },
+        "sections": [
+          {
+            "z_m": 9.225,
+            "long_side_abs_error_m": 0.08308278441248884,
+            "short_side_abs_error_m": 0.10673202146430993,
+            "reconstruction_long_side_m": 4.388597207956717,
+            "truth_long_side_m": 4.305514423544228,
+            "reconstruction_short_side_m": 2.514155005924023,
+            "truth_short_side_m": 2.4074229844597133,
+            "section_closed": true,
+            "self_intersections": 0
+          },
+          {
+            "z_m": 30.75,
+            "long_side_abs_error_m": 0.003036081166179372,
+            "short_side_abs_error_m": 0.01947951842599127,
+            "reconstruction_long_side_m": 3.739281324284539,
+            "truth_long_side_m": 3.7423174054507182,
+            "reconstruction_short_side_m": 0.9535167396620758,
+            "truth_short_side_m": 0.9340372212360846,
+            "section_closed": true,
+            "self_intersections": 0
+          },
+          {
+            "z_m": 52.275,
+            "long_side_abs_error_m": 0.0024234564872016584,
+            "short_side_abs_error_m": 0.03011875882416648,
+            "reconstruction_long_side_m": 2.4532242329097964,
+            "truth_long_side_m": 2.455647689396998,
+            "reconstruction_short_side_m": 0.4718128706924569,
+            "truth_short_side_m": 0.44169411186829044,
+            "section_closed": true,
+            "self_intersections": 0
+          }
+        ]
+      },
+      "prior_only": {
+        "global": {
+          "reconstruction_to_truth": {
+            "mean_m": 0.3494425968978986,
+            "p95_m": 0.8548740646999143,
+            "standard_error_mean_m": 0.0028530414755978967,
+            "source_area_m2": 498.86874200820773,
+            "sample_count": 8192,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.34832206813237415,
+            "p95_m": 0.8831197047787213,
+            "standard_error_mean_m": 0.002903297945113879,
+            "source_area_m2": 501.2066016293269,
+            "sample_count": 8192,
+            "null_reason": null
+          }
+        },
+        "regions": {
+          "root": {
+            "span_bounds_m": [
+              0.0,
+              20.5
+            ],
+            "reconstruction_to_truth": {
+              "mean_m": 0.47997315866138185,
+              "p95_m": 0.9532880662687574,
+              "standard_error_mean_m": 0.006416527431494091,
+              "source_area_m2": 233.74562318923256,
+              "sample_count": 2048,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.4859256141053281,
+              "p95_m": 0.9631399925044469,
+              "standard_error_mean_m": 0.006348363638275542,
+              "source_area_m2": 234.70833043421067,
+              "sample_count": 2048,
+              "null_reason": null
+            }
+          },
+          "middle": {
+            "span_bounds_m": [
+              20.5,
+              41.0
+            ],
+            "reconstruction_to_truth": {
+              "mean_m": 0.2739060000375809,
+              "p95_m": 0.5645253432377894,
+              "standard_error_mean_m": 0.0037005649816461415,
+              "source_area_m2": 163.93279374797785,
+              "sample_count": 2048,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.262614428769533,
+              "p95_m": 0.5693125947810621,
+              "standard_error_mean_m": 0.003590225301440643,
+              "source_area_m2": 162.69714571127693,
+              "sample_count": 2048,
+              "null_reason": null
+            }
+          },
+          "tip": {
+            "span_bounds_m": [
+              41.0,
+              61.5
+            ],
+            "reconstruction_to_truth": {
+              "mean_m": 0.18135017659120964,
+              "p95_m": 0.5026201600386457,
+              "standard_error_mean_m": 0.003260502257218276,
+              "source_area_m2": 101.19032507099723,
+              "sample_count": 2048,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.1877200341705985,
+              "p95_m": 0.5629880929639653,
+              "standard_error_mean_m": 0.003615279443593355,
+              "source_area_m2": 102.74094490356582,
+              "sample_count": 2048,
+              "null_reason": null
+            }
+          }
+        },
+        "sections": [
+          {
+            "z_m": 9.225,
+            "long_side_abs_error_m": 0.08308278441248884,
+            "short_side_abs_error_m": 0.10673202146430993,
+            "reconstruction_long_side_m": 4.388597207956717,
+            "truth_long_side_m": 4.305514423544228,
+            "reconstruction_short_side_m": 2.514155005924023,
+            "truth_short_side_m": 2.4074229844597133,
+            "section_closed": true,
+            "self_intersections": 0
+          },
+          {
+            "z_m": 30.75,
+            "long_side_abs_error_m": 0.003036081166179372,
+            "short_side_abs_error_m": 0.01947951842599127,
+            "reconstruction_long_side_m": 3.739281324284539,
+            "truth_long_side_m": 3.7423174054507182,
+            "reconstruction_short_side_m": 0.9535167396620758,
+            "truth_short_side_m": 0.9340372212360846,
+            "section_closed": true,
+            "self_intersections": 0
+          },
+          {
+            "z_m": 52.275,
+            "long_side_abs_error_m": 0.0024234564872016584,
+            "short_side_abs_error_m": 0.03011875882416648,
+            "reconstruction_long_side_m": 2.4532242329097964,
+            "truth_long_side_m": 2.455647689396998,
+            "reconstruction_short_side_m": 0.4718128706924569,
+            "truth_short_side_m": 0.44169411186829044,
+            "section_closed": true,
+            "self_intersections": 0
+          }
+        ]
+      },
+      "final": {
+        "global": {
+          "reconstruction_to_truth": {
+            "mean_m": 0.1839927612803811,
+            "p95_m": 0.6077903453414697,
+            "standard_error_mean_m": 0.002189108958324101,
+            "source_area_m2": 509.9328454846309,
+            "sample_count": 8192,
+            "null_reason": null
+          },
+          "truth_to_reconstruction": {
+            "mean_m": 0.16261727004931575,
+            "p95_m": 0.5114341864467321,
+            "standard_error_mean_m": 0.0016822647353863563,
+            "source_area_m2": 501.2066016293269,
+            "sample_count": 8192,
+            "null_reason": null
+          }
+        },
+        "regions": {
+          "root": {
+            "span_bounds_m": [
+              0.0,
+              20.5
+            ],
+            "reconstruction_to_truth": {
+              "mean_m": 0.26661952157139196,
+              "p95_m": 0.7337397644425553,
+              "standard_error_mean_m": 0.00552060562200262,
+              "source_area_m2": 254.0927763248971,
+              "sample_count": 2048,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.22621796613974382,
+              "p95_m": 0.621037652374805,
+              "standard_error_mean_m": 0.00429022063359545,
+              "source_area_m2": 234.70833043421067,
+              "sample_count": 2048,
+              "null_reason": null
+            }
+          },
+          "middle": {
+            "span_bounds_m": [
+              20.5,
+              41.0
+            ],
+            "reconstruction_to_truth": {
+              "mean_m": 0.13080868190805212,
+              "p95_m": 0.36332492668447947,
+              "standard_error_mean_m": 0.002272058018963078,
+              "source_area_m2": 159.86020885749053,
+              "sample_count": 2048,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.1233217682084781,
+              "p95_m": 0.3051233188101514,
+              "standard_error_mean_m": 0.0020055802320936788,
+              "source_area_m2": 162.69714571127693,
+              "sample_count": 2048,
+              "null_reason": null
+            }
+          },
+          "tip": {
+            "span_bounds_m": [
+              41.0,
+              61.5
+            ],
+            "reconstruction_to_truth": {
+              "mean_m": 0.0848480599635637,
+              "p95_m": 0.17491480894717149,
+              "standard_error_mean_m": 0.001146348078694132,
+              "source_area_m2": 95.9798603022432,
+              "sample_count": 2048,
+              "null_reason": null
+            },
+            "truth_to_reconstruction": {
+              "mean_m": 0.08651842047059738,
+              "p95_m": 0.18568187109930495,
+              "standard_error_mean_m": 0.0012526846875138718,
+              "source_area_m2": 102.74094490356582,
+              "sample_count": 2048,
+              "null_reason": null
+            }
+          }
+        },
+        "sections": [
+          {
+            "z_m": 9.225,
+            "long_side_abs_error_m": 0.30018053686885793,
+            "short_side_abs_error_m": 0.2387070531726856,
+            "reconstruction_long_side_m": 4.605694960413086,
+            "truth_long_side_m": 4.305514423544228,
+            "reconstruction_short_side_m": 2.646130037632399,
+            "truth_short_side_m": 2.4074229844597133,
+            "section_closed": true,
+            "self_intersections": 0
+          },
+          {
+            "z_m": 30.75,
+            "long_side_abs_error_m": 0.1173096388289574,
+            "short_side_abs_error_m": 0.009660254990009776,
+            "reconstruction_long_side_m": 3.625007766621761,
+            "truth_long_side_m": 3.7423174054507182,
+            "reconstruction_short_side_m": 0.9243769662460748,
+            "truth_short_side_m": 0.9340372212360846,
+            "section_closed": true,
+            "self_intersections": 0
+          },
+          {
+            "z_m": 52.275,
+            "long_side_abs_error_m": 0.12225751311627064,
+            "short_side_abs_error_m": 0.0070684356718497265,
+            "reconstruction_long_side_m": 2.3333901762807274,
+            "truth_long_side_m": 2.455647689396998,
+            "reconstruction_short_side_m": 0.44876254754014017,
+            "truth_short_side_m": 0.44169411186829044,
+            "section_closed": true,
+            "self_intersections": 0
+          }
+        ]
+      }
+    },
+    "image_contribution": "NOT_YET_ESTABLISHED"
+  },
+  "cross_branch_deltas": {
+    "primary_greville_minus_physical_center": {
+      "global_delta_m": {
+        "reconstruction_to_truth": {
+          "mean_m": 0.012128128354129186,
+          "p95_m": 0.04260966128309118
+        },
+        "truth_to_reconstruction": {
+          "mean_m": 0.00707241304731801,
+          "p95_m": 0.036615689157894926
+        }
+      },
+      "section_abs_error_delta_m": [
+        {
+          "z_m": 9.225,
+          "long_side_abs_error_m": 0.062398252924850794,
+          "short_side_abs_error_m": 0.03539634464992947
+        },
+        {
+          "z_m": 30.75,
+          "long_side_abs_error_m": -0.0773930562733045,
+          "short_side_abs_error_m": 0.0021914560312340514
+        },
+        {
+          "z_m": 52.275,
+          "long_side_abs_error_m": -0.041375050121821744,
+          "short_side_abs_error_m": 0.007958576111007531
+        }
+      ],
+      "regional_mean_delta_m": {
+        "root": {
+          "reconstruction_to_truth": 0.036589310446565326,
+          "truth_to_reconstruction": 0.02958823860856974
+        },
+        "middle": {
+          "reconstruction_to_truth": -0.0066767668302436245,
+          "truth_to_reconstruction": -0.013104683510107004
+        },
+        "tip": {
+          "reconstruction_to_truth": -0.014866199540088929,
+          "truth_to_reconstruction": -0.015005887093921602
+        }
+      }
+    },
+    "greville_minus_original_raw": {
+      "global_delta_m": {
+        "reconstruction_to_truth": {
+          "mean_m": 0.017862390242877724,
+          "p95_m": 0.05711067525444502
+        },
+        "truth_to_reconstruction": {
+          "mean_m": 0.01056290890944206,
+          "p95_m": 0.04733384383773631
+        }
+      },
+      "section_abs_error_delta_m": [
+        {
+          "z_m": 9.225,
+          "long_side_abs_error_m": 0.07756612511809369,
+          "short_side_abs_error_m": 0.04433769964023959
+        },
+        {
+          "z_m": 30.75,
+          "long_side_abs_error_m": -0.08087679337447806,
+          "short_side_abs_error_m": 0.0013031359623649763
+        },
+        {
+          "z_m": 52.275,
+          "long_side_abs_error_m": -0.04178632508204583,
+          "short_side_abs_error_m": 0.008037760368156899
+        }
+      ],
+      "regional_mean_delta_m": {
+        "root": {
+          "reconstruction_to_truth": 0.04606881502145027,
+          "truth_to_reconstruction": 0.037287813794212865
+        },
+        "middle": {
+          "reconstruction_to_truth": -0.006752987421655032,
+          "truth_to_reconstruction": -0.013488666180988693
+        },
+        "tip": {
+          "reconstruction_to_truth": -0.014636259914984281,
+          "truth_to_reconstruction": -0.014819920476869544
+        }
+      }
+    },
+    "physical_center_minus_original_raw": {
+      "global_delta_m": {
+        "reconstruction_to_truth": {
+          "mean_m": 0.0057342618887485375,
+          "p95_m": 0.014501013971353838
+        },
+        "truth_to_reconstruction": {
+          "mean_m": 0.003490495862124049,
+          "p95_m": 0.010718154679841385
+        }
+      },
+      "section_abs_error_delta_m": [
+        {
+          "z_m": 9.225,
+          "long_side_abs_error_m": 0.015167872193242893,
+          "short_side_abs_error_m": 0.008941354990310124
+        },
+        {
+          "z_m": 30.75,
+          "long_side_abs_error_m": -0.0034837371011735563,
+          "short_side_abs_error_m": -0.0008883200688690751
+        },
+        {
+          "z_m": 52.275,
+          "long_side_abs_error_m": -0.00041127496022408394,
+          "short_side_abs_error_m": 7.918425714936728e-05
+        }
+      ],
+      "regional_mean_delta_m": {
+        "root": {
+          "reconstruction_to_truth": 0.009479504574884945,
+          "truth_to_reconstruction": 0.007699575185643126
+        },
+        "middle": {
+          "reconstruction_to_truth": -7.62205914114078e-05,
+          "truth_to_reconstruction": -0.00038398267088168847
+        },
+        "tip": {
+          "reconstruction_to_truth": 0.00022993962510464705,
+          "truth_to_reconstruction": 0.00018596661705205797
+        }
+      }
+    },
+    "original_raw_minus_historical_formal_v2": {
+      "global_delta_m": {
+        "reconstruction_to_truth": {
+          "mean_m": 0.0,
+          "p95_m": 0.0
+        },
+        "truth_to_reconstruction": {
+          "mean_m": 0.0,
+          "p95_m": 0.0
+        }
+      },
+      "section_abs_error_delta_m": [
+        {
+          "z_m": 9.225,
+          "long_side_abs_error_m": 0.0,
+          "short_side_abs_error_m": 0.0
+        },
+        {
+          "z_m": 30.75,
+          "long_side_abs_error_m": 0.0,
+          "short_side_abs_error_m": 0.0
+        },
+        {
+          "z_m": 52.275,
+          "long_side_abs_error_m": 0.0,
+          "short_side_abs_error_m": 0.0
+        }
+      ],
+      "regional_mean_delta_m": {
+        "root": {
+          "reconstruction_to_truth": 0.0,
+          "truth_to_reconstruction": 0.0
+        },
+        "middle": {
+          "reconstruction_to_truth": 0.0,
+          "truth_to_reconstruction": 0.0
+        },
+        "tip": {
+          "reconstruction_to_truth": 0.0,
+          "truth_to_reconstruction": 0.0
+        }
+      }
+    }
+  },
+  "limitations": [
+    "Three predeclared finite-budget coordinate runs; no new observations or physical information.",
+    "Monte Carlo source-area-weighted triangle-surface statistics, not certified metrology.",
+    "Image objective reduction alone does not establish geometric improvement.",
+    "No complete-surface or use-case accuracy acceptance is implied."
+  ]
+}

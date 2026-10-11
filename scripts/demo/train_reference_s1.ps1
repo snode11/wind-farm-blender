@@ -5,7 +5,7 @@
 $env:SKIP_MPI_CHECK = "1"
 
 $mpiexec = "C:\Program Files\Microsoft MPI\Bin\mpiexec.exe"
-$python = "C:\Users\s1155\miniconda3\envs\wfcrl\python.exe"
+$python = "USER_HOME\miniconda3\envs\wfcrl\python.exe"
 $project = "D:\project\wind farm RL"
 
 Write-Host "开始训练 stagE400ref_s1（seed 1）..."

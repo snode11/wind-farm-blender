@@ -7,7 +7,7 @@ WFRL Blender 是风场仿真的三维观察与操作工作台，提供结构与�
 | 对象 | 身份与范围 |
 | --- | --- |
 | 公开 NREL 扩展 | **0.3.20+1**，173 文件、99,010,020 bytes；[专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.20.1/wfrl_blender-0.3.20%2B1.zip)，手动 Install from Disk 并重启 |
-| 公开实现源码 | **v0.3.18 / `6dfa0eef`**；`v0.3.20.1` 标签指向文档提交，自动 Source code 不包含当前 ZIP 对应实现 |
+| 项目源码 | [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)；当前前端、后端、研究、测试及文档，与既有公开 ZIP 和日常安装分别识别 |
 | 开发机日常安装 | **LOCAL_UNPUBLISHED_REVISION**，manifest 同为 `0.3.20+1`，包含相机异常清理与同源重建稳定轮询修订；与公开 ZIP 载荷不同 |
 | GW184 | **0.4.0 独立运行 ZIP**，合成刚性模型、固定三相机与六类缺陷；完整解压运行，配置不与 NREL 混用 |
 
@@ -272,7 +272,7 @@ ZIP 中 `assets/examples/mappo_reconstruction_split.blend` 提供左侧 MAPPO、
 
 #### 独立 Blade Recon 导入与动态研究
 
-独立 **叶片三维重建** 标签可加载合成样例或导入 `recon.json`，在独立场景显示模型、可选真值与相机位置；输入嵌入 `.blend`，仍需启用匹配代码恢复回放。原 `blade_recon` 以二值轮廓／剪影约束几何，不由 RGB 纹理恢复缺陷几何；v0.2 固定位姿后可反投影灰度图集，不反馈几何求解。操作和输入边界见[Blade Recon 使用说明](BladeRecon可视化使用说明.md)，表面特征扩展最新执行状态见[2026-10-06 方案与交接入口](../proposal/叶片表面重建_2026-10-06/README.md)。合成缺陷可编辑不代表图像重建已恢复该缺陷。
+独立 **叶片三维重建** 标签可加载合成样例或导入 `recon.json`，在独立场景显示模型、可选真值与相机位置；输入嵌入 `.blend`，仍需启用匹配代码恢复回放。原 `blade_recon` 以二值轮廓／剪影约束几何，不由 RGB 纹理恢复缺陷几何；v0.2 固定位姿后可反投影灰度图集，不反馈几何求解。操作和输入边界见[Blade Recon 使用说明](BladeRecon可视化使用说明.md)，表面特征研究的当前结论见[表面研究入口](../../research/blade-surface/README.md)。合成缺陷可编辑不代表图像重建已恢复该缺陷。
 
 另一套 NREL 动态研究查看器（本地路径：`outputs/nrel-video-dynamic/runs/20261004-integrated/README.md`）由合并目录的统一启动器载入 `viewer/frozen-source/` 和冻结研究包，不依赖扩展安装。状态仍为 `REVIEW_ONLY / DY1 NOT PASSED`：三路各 100 帧、20 fps，只有原索引 42–45 四个时刻保存估计，其余 96 帧显示 `UNAVAILABLE; no interpolation`。播放同步检查通过不代表动态计量通过，也不能与上述 601 样本便携分屏的证据合并。
 
@@ -515,7 +515,7 @@ ZIP 中 `assets/examples/mappo_reconstruction_split.blend` 提供左侧 MAPPO、
 
 ### F29　GW184 尺寸单机启停与三路视频项目
 
-**当前状态：GW184 0.4.0 独立运行 ZIP 已发布，包含固定三相机与六类合成缺陷编辑器；实际解压包的 macOS 启动、窗口操作和后台回归通过。完整三路 320 秒 MP4 尚未生成。** 两组零预弯试片和渲染前检查仅验证各自输入，不证明当前编辑器的完整图像或视频交付。
+**当前状态：GW184 0.4.0 独立运行 ZIP 已发布，包含固定三相机与六类合成缺陷编辑器；实际解压包的 macOS 启动、窗口操作和后台回归通过。完整三路 320 秒 MP4 尚未生成。** 当前源码运行前须按[来源说明](../../projects/gw184-single/sources/README.md)恢复未分发的两份必需 DTU 输入；其公开再分发许可尚未确认。两组零预弯试片和渲染前检查仅验证各自输入，不证明当前编辑器的完整图像或视频交付。
 
 #### 6.2.1 模型与相机
 
@@ -615,7 +615,7 @@ G 的 `VISIBLE/PARTIAL`、投影宽度和候选最佳帧是理想投影与遮挡
 | 三相机安装与覆盖 | 在同一叶片、同一时刻核对覆盖、相邻公共表面及遮挡；实体安装、镜头与同步标定另行验收 |
 | 叶尖精度 | 恢复原始 VTP／结构输出，核对表面与结构点运输，以原 0.2 mm 保存帧及 5 mm 插值阈值独立回归；不以放宽阈值或改正式数据获得通过 |
 | 双束净空与报警 | 明确用途容限，补实体标定、同步观测、可验证柔性模型、危险事件分母与实际保护链路；独立数据保留失败样本，测距容差不替代净空精度 |
-| 软件交付 | 当前本地可靠性载荷未公开；需要同步时分别核对 ZIP、源码 commit、实际模块和证据，不因 manifest 相同推定载荷一致 |
+| 软件交付 | 当前源码入口、既有公开 ZIP、日常安装及资源附件分别核对；构建或安装新载荷须保留 ZIP、源码 commit、实际模块和证据身份，不因 manifest 相同推定载荷一致 |
 | GW184 三路视频 | 完整三路 320 秒 MP4 尚未交付；按视频目标独立核对材料／灯光／压缩辨识与每路帧数、时间、尺寸，按具体授权开展渲染 |
 | 成像与拼接 | 标定镜头畸变、玻璃、噪声与曝光；几何覆盖、真实成像和算法拼接分别验收 |
 | 材料对应与缺陷重建 | 先补足独立 RGB 身份和跨相机同材料观测，再评价模型表达能力；不补造 UV、对应点或未观测细节，不追改原失败门槛 |
@@ -682,7 +682,7 @@ G 的 `VISIBLE/PARTIAL`、投影宽度和候选最佳帧是理想投影与遮挡
 | [本地可靠性摘要](../../outputs/frontend-reliability-20261011-a01/final-verification.json)、[安装核对](../../outputs/frontend-reliability-20261011-a01/daily-install-verification.json) | LOCAL_UNPUBLISHED_REVISION 的 217／113、173 文件和脚本窗口检查 |
 | [三相机](T1三相机使用说明.md)、[NREL 缺陷](NREL缺陷编辑器.md)、[Blade Recon](BladeRecon可视化使用说明.md) | 模块操作与限制 |
 | [GW184 指南](GW184三相机与缺陷编辑器.md)、[独立项目](../../projects/gw184-single/README.md) | 独立模型、固定相机、缺陷和视频任务 |
-| [材料点研究](../../blade_recon0.2/docs/材料点对应实验报告_2026-10-11.md)、[表面研究入口](../proposal/叶片表面重建_2026-10-06/README.md) | 独立协议、失败门槛及数据可恢复性 |
+| [材料点研究](../../blade_recon0.2/docs/材料点对应实验报告_2026-10-11.md)、[表面研究入口](../../research/blade-surface/README.md) | 独立协议、失败门槛及数据可恢复性 |
 | [公开源码基线核对](releases/0.3.18发布核对.md) | 该明确版本的匹配源码复建、GPU／多窗口与叶尖 FAILED_GATE |
 | [当前待实施要求](../../前端更新计划.md) | 有效约束、待完成条件和验收方式 |
 

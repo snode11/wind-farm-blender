@@ -22,7 +22,7 @@ $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 # ---- 路径(按需改这三行) --------------------------------------------
-$PY   = "C:\Users\s1155\.conda\envs\wfcrl\python.exe"
+$PY   = "USER_HOME\.conda\envs\wfcrl\python.exe"
 $MPI  = "C:\Program Files\Microsoft MPI\Bin\mpiexec.exe"
 $ROOT = "D:\project\wind farm RL"
 

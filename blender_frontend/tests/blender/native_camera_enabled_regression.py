@@ -50,7 +50,7 @@ def clock():
 
 
 def assert_clock(expected):
-    assert clock() == expected, 'view/quality transition changed the common time'
+    assert clock() == expected, ('view/quality transition changed the common time', clock(), expected)
     assert native._ACTIVE.scene == state['scene']
     assert native._ACTIVE.window.scene == state['window'].scene == state['scene']
 
@@ -157,6 +157,7 @@ def assert_restored():
     scene = state['scene']
     assert native._ACTIVE is None
     assert not any(obj.name.startswith('T1.Native.') for obj in scene.objects)
+    assert not any(camera.name.startswith('T1.Native.') for camera in bpy.data.cameras)
     assert core.layout_dict(scene) == state['baseline']
     assert (scene.render.preview_pixel_size, scene.eevee.taa_samples,
             scene.eevee.use_shadows, scene.eevee.use_fast_gi) == state['quality']
@@ -337,16 +338,89 @@ def tick():
             screenshot('single-solid.png')
             checks['direct_disabled_watch_defaults_to_solid'] = True
             checks['calibrated_fov_and_camera_parameters_preserved'] = True
-            native.shutdown()
+            session = native._ACTIVE
+            before_delete = clock()
+            deleted = session.entries[0]['proxy']
+            bpy.data.objects.remove(deleted, do_unlink=True)
+            after_delete = clock()
+            native.watch()
+            assert native._ACTIVE is None
+            assert native.last_error(scene), 'asynchronous failure disappeared after closing'
+            checks['deleted_proxy_error'] = native.last_error(scene)
+            checks['deleted_proxy_close_clock'] = {'actual': clock(), 'expected': state['paused_clock'],
+                                                   'before_delete': before_delete, 'after_delete': after_delete,
+                                                   'lifecycle': session.lifecycle}
             state['phase'] = 'closed'
             return .5
 
         if phase == 'closed':
             assert_restored()
-            assert clock() == state['paused_clock']
+            assert clock() == state['paused_clock'], (clock(), state['paused_clock'])
             assert not window.screen.is_animation_playing
             checks['close_restores_quality_source_shading_and_camera'] = True
             checks['temporary_cameras_cleaned_up'] = True
+            native.shutdown()
+            native.shutdown()
+            assert_restored()
+            assert native.last_error(scene), 'repeated cleanup cleared the failure reason'
+            checks['deleted_proxy_cleanup_and_repeated_close'] = True
+            with bpy.context.temp_override(window=window, area=area):
+                assert bpy.ops.wfrl.native_camera_view(mode='WATCH') == {'FINISHED'}
+            state['phase'] = 'recovery_reopen'
+            return .5
+
+        if phase == 'recovery_reopen':
+            if wait_for_entries(1):
+                return .25
+            assert_single_solid()
+            assert_clock(state['paused_clock'])
+            assert not native.last_error(scene), 'successful reopen retained a stale failure'
+            checks['successful_reopen_clears_error'] = True
+            session = native._ACTIVE
+            bpy.data.cameras.remove(session.entries[0]['proxy'].data, do_unlink=True)
+            native.watch()
+            assert native._ACTIVE is None
+            assert native.last_error(scene), 'removed camera data did not produce a visible error'
+            assert_restored()
+            checks['deleted_camera_data_cleanup'] = True
+            with bpy.context.temp_override(window=window, area=area):
+                assert bpy.ops.wfrl.native_camera_view(mode='WATCH') == {'FINISHED'}
+            state['phase'] = 'final_reopen'
+            return .5
+
+        if phase == 'final_reopen':
+            if wait_for_entries(1):
+                return .25
+            assert not native.last_error(scene)
+            assert_clock(state['paused_clock'])
+            playback = importlib.import_module(MODULE + '.playback')
+            foreign = bpy.data.scenes.new('NativeCleanup.ForeignPlayer')
+            window.scene = foreign
+            region = next(r for r in area.regions if r.type == 'WINDOW')
+            with bpy.context.temp_override(window=window, area=area, region=region):
+                assert bpy.ops.screen.animation_play() == {'FINISHED'}
+            assert playback.is_playing(foreign)
+            native.shutdown()
+            assert_restored()
+            assert playback.is_playing(foreign), 'closing A cancelled B native player'
+            state['foreign_scene'] = foreign
+            state['foreign_start_frame'] = foreign.frame_current
+            state['phase'] = 'foreign_playback_preserved'
+            return .5
+
+        if phase == 'foreign_playback_preserved':
+            playback = importlib.import_module(MODULE + '.playback')
+            foreign = state['foreign_scene']
+            assert playback.is_playing(foreign), 'delayed cleanup stole the other scene player'
+            assert foreign.frame_current > state['foreign_start_frame'], 'other scene player stopped advancing'
+            region = next(r for r in area.regions if r.type == 'WINDOW')
+            with bpy.context.temp_override(window=window, area=area, region=region):
+                cancel = bpy.ops.screen.animation_cancel(restore_frame=False)
+            assert not playback.any_playing(), ('other scene player did not stop', cancel)
+            window.scene = scene
+            bpy.data.scenes.remove(foreign)
+            checks['closing_camera_preserves_other_scene_player'] = True
+            assert_restored()
             finish('PASS')
             return None
         raise AssertionError('unknown regression phase: ' + phase)

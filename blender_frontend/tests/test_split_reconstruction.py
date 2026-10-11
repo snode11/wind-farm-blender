@@ -111,6 +111,29 @@ def test_returning_to_saved_geometry_does_not_replace_it_with_texture(monkeypatc
     assert layouts == [('DUAL', ('WFRL.Camera.T1.FrontQuarter', 'SplitRecon.Camera'))]
 
 
+def test_explicit_geometry_entry_deactivates_retained_same_source_and_keeps_its_choices(monkeypatch):
+    from wfrl_blender import split_mappo_texture as same
+    from wfrl_blender import split_texture_settings as settings
+    scene = Scene(split_texture_current_source='MAPPO', split_mappo_texture_review=True)
+    context, layouts = _entry_context(monkeypatch, scene)
+    scene.objects[same.CAMERA] = NS(name=same.CAMERA)
+    scene.wfrl_recon_texture_mode = 'CONTRAST'
+    choices = settings.capture(scene)
+
+    def unexpected_texture(_scene):
+        raise AssertionError('explicit geometry entry restored texture')
+
+    monkeypatch.setattr(same, 'ensure', unexpected_texture)
+    assert split.enter(context, use_texture=False)
+    assert scene[settings.CURRENT] == 'GEOMETRY'
+    assert not same.active(scene)
+    assert scene[same.MARKER]
+    assert scene[settings._key('MAPPO')] == settings._encode(choices)
+    assert split.reconstruction_camera(scene) is scene.objects['SplitRecon.Camera']
+    assert layouts == [('DUAL', ('WFRL.Camera.T1.FrontQuarter', 'SplitRecon.Camera'))]
+    assert (scene.frame_current, scene.frame_subframe) == (67, .5)
+
+
 def test_explicit_texture_entry_upgrades_geometry_and_keeps_legacy_objects(monkeypatch):
     from wfrl_blender import split_surface_texture as surface
     scene = Scene()
@@ -346,6 +369,213 @@ def test_exit_presentation_restores_source_when_join_retains_right_view():
                 show_gizmo=False, overlay=NS(show_overlays=False))
     split._restore_presentation(retained_right, split._presentation(source))
     assert split._presentation(retained_right) == split._presentation(source)
+
+
+def _mode_context(monkeypatch, perspective='PERSP'):
+    """Use distinct display offsets and real navigation/camera copy helpers."""
+    from wfrl_blender import cameras, split_mappo_texture as same
+    from wfrl_blender import split_texture_settings as settings
+
+    class Camera:
+        def __init__(self, name, location):
+            self.name = name
+            self.matrix_world = np.eye(4)
+            self.location = location
+            self.data = NS(type='ORTHO', lens=47., ortho_scale=186., sensor_width=36.,
+                           sensor_height=24., sensor_fit='AUTO', shift_x=.12, shift_y=-.08,
+                           clip_start=.1, clip_end=4000.)
+
+        @property
+        def location(self):
+            return self.matrix_world[:3, 3]
+
+        @location.setter
+        def location(self, value):
+            self.matrix_world[:3, 3] = value
+
+    def navigation(location):
+        return NS(view_perspective=perspective, view_location=np.array(location, dtype=float),
+                  view_rotation=np.array([.5, .5, .5, .5]), view_distance=23.,
+                  view_camera_zoom=104., view_camera_offset=(.23, -.11))
+
+    scene = Scene(split_texture_current_source='GEOMETRY', split_mappo_texture_review=True)
+    scene.frame_current, scene.frame_subframe = 67, .5
+    source = Camera('WFRL.Camera.T1.FrontQuarter', (200., 300., 90.))
+    legacy = Camera('SplitRecon.Camera', (280., 10015., 125.))
+    texture = Camera(same.CAMERA, (10001., 0., 0.))
+    scene.camera = source
+    scene.objects['SplitRecon.Camera'] = legacy
+    scene.objects[same.CAMERA] = texture
+    left, right = area(1, source), area(2, legacy, 404)
+    left.spaces.active.region_3d = navigation((7., 9., 90.))
+    right.spaces.active.region_3d = navigation((3., 10004., 88.))
+    right.spaces.active.lens = 61.
+    screen = NS(areas=[left, right], is_animation_playing=True, as_pointer=lambda: 20)
+    window = NS(scene=scene, screen=screen, as_pointer=lambda: 10)
+    context = NS(scene=scene, window=window)
+    monkeypatch.setitem(sys.modules, 'bpy', NS(context=NS(
+        temp_override=lambda **_kw: nullcontext(), window_manager=NS(windows=[window]))))
+    monkeypatch.setattr(cameras, '_LAYOUT_JOB', None)
+    monkeypatch.setattr(split, '_JOBS', {})
+    monkeypatch.setattr(split, '_SESSIONS', {})
+    monkeypatch.setattr(split, '_display_origin', lambda target: np.array(
+        (10000., 0., 0.) if same.active(target) else (0., 10000., 0.)))
+    monkeypatch.setattr(split, '_configure', lambda _window, areas, **_kw:
+                        setattr(areas[1].spaces.active, 'camera', split.reconstruction_camera(scene)))
+    monkeypatch.setattr(split, '_remember', lambda *_a: None)
+    monkeypatch.setattr(split, '_redraw_scene', lambda *_a: None)
+    monkeypatch.setattr(same, 'ensure', lambda target: settings.activate(
+        target, 'MAPPO', same._display_defaults({}), lambda: True))
+    return context, left, right, legacy, texture
+
+
+def _assert_navigation_equal(actual, expected):
+    for name in ('view_rotation', 'view_location', 'view_camera_offset'):
+        np.testing.assert_allclose(actual[name], expected[name], atol=1e-10)
+    for name in ('view_perspective', 'view_distance', 'view_camera_zoom'):
+        assert actual[name] == expected[name]
+
+
+def test_mode_roundtrip_translates_private_camera_and_pivot_without_moving_clock(monkeypatch):
+    from wfrl_blender import split_mappo_texture as same
+    for perspective in ('PERSP', 'ORTHO', 'CAMERA'):
+        context, left, right, legacy, texture = _mode_context(monkeypatch, perspective)
+        left_before = split._navigation(left.spaces.active)
+        right_before = split._navigation(right.spaces.active)
+        camera_before = legacy.matrix_world.copy()
+        optics_before = vars(legacy.data).copy()
+        assert split.switch_mode(context)
+        expected = dict(right_before, view_location=right_before['view_location'] + np.array((10000., -10000., 0.)))
+        _assert_navigation_equal(split._navigation(right.spaces.active), expected)
+        _assert_navigation_equal(split._navigation(left.spaces.active), left_before)
+        np.testing.assert_allclose(texture.location, camera_before[:3, 3] + (10000., -10000., 0.))
+        assert vars(texture.data) == optics_before
+        assert same.active(context.scene) and right.spaces.active.camera is texture
+        assert split.switch_mode(context)
+        _assert_navigation_equal(split._navigation(right.spaces.active), right_before)
+        _assert_navigation_equal(split._navigation(left.spaces.active), left_before)
+        np.testing.assert_allclose(legacy.matrix_world, camera_before)
+        assert vars(legacy.data) == optics_before
+        assert right.spaces.active.camera is legacy and right.spaces.active.lens == 61.
+        assert (context.scene.frame_current, context.scene.frame_subframe) == (67, .5)
+        assert context.window.screen.is_animation_playing
+
+
+def test_geometry_to_texture_restores_its_record_without_claiming_retained_markers(monkeypatch):
+    from wfrl_blender import split_texture_settings as settings
+    for retained_synthetic in (False, True):
+        context, _left, _right, _legacy, _texture = _mode_context(monkeypatch)
+        scene = context.scene
+        scene.wfrl_recon_texture_mode = 'CONTRAST'
+        expected = settings.capture(scene)
+        scene[settings._key('MAPPO')] = settings._encode(expected)
+        synthetic_record = settings._encode(dict(expected, wfrl_recon_texture_gain=13.))
+        scene[settings._key('SYNTHETIC')] = synthetic_record
+        scene['split_texture_review'] = retained_synthetic
+        # Geometry is an explicit source state; its RNA values do not own an
+        # inactive texture source's latest display record.
+        scene.wfrl_recon_texture_mode = 'ORIGINAL'
+        assert split.switch_mode(context)
+        assert settings.capture(scene) == expected
+        assert scene[settings._key('SYNTHETIC')] == synthetic_record
+
+
+def test_failed_mode_configuration_restores_right_camera_role_and_navigation(monkeypatch):
+    from wfrl_blender import split_texture_settings as settings
+    context, left, right, legacy, texture = _mode_context(monkeypatch)
+    left_before = split._navigation(left.spaces.active)
+    right_before = split._navigation(right.spaces.active)
+    target_before = texture.matrix_world.copy()
+    texture.data.lens, texture.data.ortho_scale = 19., 321.
+    optics_before = vars(texture.data).copy()
+    def fail(_window, areas, **_kw):
+        areas[1].spaces.active.camera = texture
+        areas[1].spaces.active.region_3d.view_distance = 987.
+        raise ValueError('native configure failed')
+    monkeypatch.setattr(split, '_configure', fail)
+    try:
+        split.switch_mode(context)
+    except ValueError as exc:
+        assert 'native configure failed' in str(exc)
+    else:
+        raise AssertionError('failed configuration unexpectedly succeeded')
+    assert context.scene[settings.CURRENT] == 'GEOMETRY'
+    assert right.spaces.active.camera is legacy
+    _assert_navigation_equal(split._navigation(left.spaces.active), left_before)
+    _assert_navigation_equal(split._navigation(right.spaces.active), right_before)
+    np.testing.assert_allclose(texture.matrix_world, target_before)
+    assert vars(texture.data) == optics_before
+
+
+def test_saved_navigation_reopens_without_scheduling_an_implicit_fit(monkeypatch):
+    context, left, right, _legacy, _texture = _mode_context(monkeypatch)
+    bpy = sys.modules['bpy']
+    bpy.data = NS(scenes=[context.scene])
+    split._save_pre(None)
+    assert context.scene['split_review_navigation_saved']
+    left_before = split._navigation(left.spaces.active)
+    right_before = split._navigation(right.spaces.active)
+    configured = []
+    monkeypatch.setattr(split, '_REGISTERED', True)
+    monkeypatch.setattr(split, '_advance_jobs', lambda _now: None)
+    monkeypatch.setattr(split, '_configure', lambda *_a, **kw: configured.append(kw))
+    monkeypatch.setattr(split, '_timeline_all', lambda *_a: None)
+    assert split._tick() == split._INTERVAL
+    assert configured == [{}] and split._JOBS == {}
+    assert context.scene['split_review_status'] == 'READY'
+    _assert_navigation_equal(split._navigation(left.spaces.active), left_before)
+    _assert_navigation_equal(split._navigation(right.spaces.active), right_before)
+
+
+def test_return_after_exit_queues_saved_right_navigation_and_current_clock(monkeypatch):
+    import json
+    from wfrl_blender import split_mappo_texture as same
+    scene = Scene(split_texture_current_source='MAPPO', split_mappo_texture_review=True,
+                  split_review_enabled=False)
+    context, _layouts = _entry_context(monkeypatch, scene)
+    scene.objects[same.CAMERA] = NS(name=same.CAMERA)
+    retained = dict(view_perspective='CAMERA', view_rotation=[.5, .5, .5, .5],
+                    view_location=[10003., 4., 88.], view_distance=23.,
+                    view_camera_zoom=104., view_camera_offset=[.23, -.11])
+    scene['split_review_return_navigation'] = json.dumps(retained)
+    monkeypatch.setattr(same, 'ensure', lambda _scene: None)
+    assert split.enter(context)
+    job = split._JOBS[split._key(context.window)]
+    assert job['right_navigation'] == retained
+    assert (job['frame'], job['subframe']) == (67, .5)
+    assert scene['split_texture_current_source'] == 'MAPPO'
+
+
+def test_stable_same_source_timer_refreshes_without_reactivating_settings(monkeypatch):
+    scene = Scene(split_texture_current_source='MAPPO', split_mappo_texture_review=True)
+    window = NS(scene=scene, screen=NS(areas=[], as_pointer=lambda: 20), as_pointer=lambda: 10)
+    monkeypatch.setitem(sys.modules, 'bpy', NS(context=NS(window_manager=NS(windows=[window]))))
+    monkeypatch.setattr(split, '_REGISTERED', True)
+    monkeypatch.setattr(split, '_advance_jobs', lambda _now: None)
+    monkeypatch.setattr(split, '_JOBS', {})
+    calls = []
+    def forbidden(_scene):
+        raise AssertionError('poll reactivated display settings')
+    adapter = NS(active=lambda _scene: True, refresh=lambda target: calls.append(target), ensure=forbidden)
+    monkeypatch.setattr(split, 'texture_adapter', lambda _scene: adapter)
+    monkeypatch.setattr(split, '_pair', lambda *_a: None)
+    for _ in range(20):
+        assert split._tick() == split._INTERVAL
+    assert calls == [scene]*20
+
+
+def test_history_boundary_clears_data_bindings_and_jobs_without_losing_view_session(monkeypatch):
+    from wfrl_blender import split_mappo_texture as same, split_turbine_context as context
+    state = {1: dict(signature='user-sized layout', changed=None, areas=(10, 11))}
+    monkeypatch.setattr(split, '_SESSIONS', state.copy())
+    monkeypatch.setattr(split, '_JOBS', {1: object()})
+    monkeypatch.setattr(split, '_BOUNDS', {1: object()})
+    monkeypatch.setattr(same, '_SESSIONS', {1: object()})
+    monkeypatch.setattr(context, '_SESSIONS', {1: object()})
+    monkeypatch.setattr(split, '_ensure_timer', lambda: None)
+    split._history_post(None)
+    assert split._SESSIONS == state and not split._JOBS and not split._BOUNDS
+    assert not same._SESSIONS and not context._SESSIONS
 
 
 if __name__ == '__main__':

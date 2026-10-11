@@ -31,6 +31,51 @@ def test_manifest_rejects_nan_and_preserves_committed_version(tmp_path):
     assert json.loads(target.read_text())=={'status':'incomplete'}
 
 
+@pytest.mark.parametrize('sequence', [False, True])
+def test_capture_step_requests_pixels_without_texture_and_exports_state(tmp_path, monkeypatch, sequence):
+    job = capture.Capture.__new__(capture.Capture)
+    matrix = tuple(tuple(float(i == j) for j in range(4)) for i in range(4))
+    pixels = bytes([0, 0, 255, 255, 17, 91, 143, 128,
+                    255, 0, 0, 255, 0, 255, 0, 255])
+    image = preview.CameraImage.__new__(preview.CameraImage)
+    image.width = image.height = 2
+    image.view = image.world = image.projection = matrix
+    image.params = core.CameraParameters((1., 2., 3.))
+    image.state_hash, image.texture, image.pixels = 'geometry-state', None, pixels
+    job.closed = job.in_group = job.cancel_requested = False
+    job.index, job.times, job.sequence = 0, [1.25], sequence
+    job.scene = NS(frame_current=76, frame_subframe=0., frame_start=1,
+                   objects={core.ROOT_NAME: NS(matrix_world=matrix)}, get=lambda _key, default: default)
+    job.cameras, job.render_target = [{'wfrl_custom_slot': 3}], object() if sequence else None
+    job.path, job.capture_id, job.source, job.layout_hash = tmp_path, 'capture-id', {}, 'layout-hash'
+    job.reader = NS(start_s=0., at=lambda _at: {'motion': {'yaw_deg': 10.}})
+    job.profile = {'color_management': {'gamma': 1}, 'image_encoding': 'RGBA8 display-transformed once; PNG sRGB'}
+    job.manifest = {'active_camera_ids': ['C3'], 'status': 'incomplete'}
+    context, calls, finishes, evaluations = object(), [], [], []
+    monkeypatch.setattr(job, 'guard', lambda: None)
+    monkeypatch.setattr(job, 'evaluate', lambda *args: evaluations.append(args))
+    monkeypatch.setattr(job, 'finish', lambda **kwargs: finishes.append(kwargs))
+    def render(render_context, cameras, **kwargs):
+        calls.append((render_context, cameras, kwargs))
+        assert kwargs.get('create_texture') is False
+        return {3: image}
+    monkeypatch.setattr(preview, 'render_group', render)
+    assert job.step(context)
+    assert calls == [(context, job.cameras, {'target': job.render_target, 'create_texture': False})]
+    assert finishes == [{'success': True}] and not job.in_group
+    assert evaluations == ([(76, 0., 1.25)] if sequence else [])
+    assert image.texture is None and image.rgba() is None
+    with Image.open(tmp_path/'C3/frame_000000.png') as png:
+        assert list(png.getdata()) == [(255, 0, 0, 255), (0, 255, 0, 255),
+                                       (0, 0, 255, 255), (17, 91, 143, 128)]
+    record = json.loads((tmp_path/'frames.jsonl').read_text())
+    assert record['simulation_state_hash'] == 'geometry-state'
+    assert record['camera_id'] == 'C3' and record['time_s'] == 1.25
+    assert record['T_world_from_camera_blender'] == [list(row) for row in matrix]
+    assert record['color_management'] == {'gamma': 1}
+    assert json.loads((tmp_path/'manifest.json').read_text())['completed_samples'] == 1
+
+
 @pytest.mark.parametrize('termination', ['success', 'cancel', 'exception', 'invalid_session'])
 def test_capture_closes_gpu_resources_for_every_termination(tmp_path, termination, monkeypatch):
     job = capture.Capture.__new__(capture.Capture)

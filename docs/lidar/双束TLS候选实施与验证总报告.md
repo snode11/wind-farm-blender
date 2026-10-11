@@ -186,7 +186,7 @@ section transform 直接拟合独立参考世界表面到当前世界表面，�
 
 求解前固定方法、标定、核心实现哈希、物理参数、评价窗口和 **1,000,000,000 bytes** 新增数据预算。使用 C 输入隔离复制后修改工况，结构为 **NREL 5MW 二次上风预弯改型、BeamDyn 叶片、柔性 ElastoDyn 塔筒**。两次均为 **12 m/s 恒风、规定 9 rpm、0° pitch、初始方位角 0°、总长 26 s**，关闭 ServoDyn，无策略 checkpoint。完整保存 0–26 s，预先剔除前 18 s，仅在 **18–26 s** 统一评价。
 
-实际运行 OpenFAST 的版本为 **`OpenFAST-v3.5.3-dirty`、单精度、OpenMP 1/1 线程**，可执行文件当时位于 `/opt/anaconda3/envs/wfrl-mac/bin/openfast`。两次退出码均为 **0**，日志均含 **`OpenFAST terminated normally.`**。80 Hz 与 40 Hz 只改变 `.fst` 的 **DT、DT_Out、VTK_fps**，其余实际输入、结构、标定、零载参考和 solver 哈希一致。它们是一个新固定工况的两级数值比较，不代表 MAPPO 性能、第二个独立工况、最终留出集或现场实验。
+实际运行 OpenFAST 的版本为 **`OpenFAST-v3.5.3-dirty`、单精度、OpenMP 1/1 线程**，可执行文件当时位于 `PYTHON_ENVIRONMENT/bin/openfast`。两次退出码均为 **0**，日志均含 **`OpenFAST terminated normally.`**。80 Hz 与 40 Hz 只改变 `.fst` 的 **DT、DT_Out、VTK_fps**，其余实际输入、结构、标定、零载参考和 solver 哈希一致。它们是一个新固定工况的两级数值比较，不代表 MAPPO 性能、第二个独立工况、最终留出集或现场实验。
 
 |原始时钟与表面|40 Hz|80 Hz|
 |---|---:|---:|

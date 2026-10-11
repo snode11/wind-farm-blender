@@ -2,7 +2,7 @@
 
 适用于独立 GW184 刚性编辑器，不是实物损伤图库。
 
-共同来源为 预设参数（本地文件：`projects/gw184-single/gw184/defect_schema.py`）、[轮廓生成器](https://github.com/snode11/wind-farm-blender/blob/2c94453226bd4e31206749e579bca32c13d0ea36/blender_frontend/wfrl_blender/nrel_defects/defect_shapes.py) 和 健康参考表面（本地文件：`projects/gw184-single/gw184/reference_surface.py`）。未提供实物照片、扫描或测量尺寸；以下数值都是合成输入，不能解释为 GW184 实机损伤统计。预设位于 B1 吸力面、弦向 u=0.4，方向角 0°，种子 17。长度与宽度沿健康参考表面计量。
+共同来源为[预设参数](gw184/defect_schema.py)、[轮廓生成器](../../blender_frontend/wfrl_blender/nrel_defects/defect_shapes.py)和[健康参考表面](gw184/reference_surface.py)。这些源码属于当前项目分支；其几何构建还需要按[来源说明](sources/README.md)恢复未分发的两份 DTU 输入。既有 0.4.0 运行 ZIP 的来源与验证按其包身份核对。未提供实物照片、扫描或测量尺寸；以下数值都是合成输入，不能解释为 GW184 实机损伤统计。预设位于 B1 吸力面、弦向 u=0.4，方向角 0°，种子 17。长度与宽度沿健康参考表面计量。
 
 | 类型 | 采用的形态特征 | 名义长 × 宽 × 深（m） | 未知信息与未模拟内容 |
 | --- | --- | --- | --- |
@@ -15,4 +15,4 @@
 
 全部实例的 `provenance.reference_asset_id` 为 null，`dimension_basis` 为 `synthetic_example`。材质颜色是示意取值，没有光谱或相机标定依据。几何一致性、近景外观、固定相机可辨认性分别记录；近景采用单独记录的检查灯与色彩变换，不得与固定相机图直接比较亮度。
 
-指定合成图像的检查结果见 外观验收证据（本地文件：`outputs/blade-defects/completion-20260930/验收记录.md`）。可验证的是定义的合成形态、尺寸及编辑行为，不能将其改称真实损伤形态或现场检测准确率通过。
+指定合成图像的检查结果对应 `outputs/blade-defects/completion-20260930/验收记录.md`；按[资源分发说明](../../docs/PUBLICATION.md)核对是否提供并恢复该证据。可验证的是定义的合成形态、尺寸及编辑行为，不能将其改称真实损伤形态或现场检测准确率通过。

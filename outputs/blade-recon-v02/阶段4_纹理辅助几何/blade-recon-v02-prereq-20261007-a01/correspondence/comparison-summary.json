@@ -1,0 +1,202 @@
+{
+  "synthetic-new-score-v3": [
+    {
+      "id": "D1",
+      "passed": 1,
+      "planned": 5,
+      "P95_range_px": [
+        0.4842132525188931,
+        3.0329554444963622
+      ],
+      "cross_frame": true,
+      "heldout": true,
+      "overall_scope": "FAILED_CORRESPONDENCE_GATE"
+    },
+    {
+      "id": "D2",
+      "passed": 5,
+      "planned": 5,
+      "P95_range_px": [
+        0.19400015820894648,
+        0.6850503091827682
+      ],
+      "cross_frame": true,
+      "heldout": true,
+      "overall_scope": "FAILED_CORRESPONDENCE_GATE"
+    },
+    {
+      "id": "D3",
+      "passed": 1,
+      "planned": 5,
+      "P95_range_px": [
+        0.8412761781092702,
+        2.9129510348423664
+      ],
+      "cross_frame": true,
+      "heldout": true,
+      "overall_scope": "FAILED_CORRESPONDENCE_GATE"
+    },
+    {
+      "id": "D6",
+      "passed": 2,
+      "planned": 5,
+      "P95_range_px": [
+        0.8758272321837691,
+        2.030321692565713
+      ],
+      "cross_frame": true,
+      "heldout": true,
+      "overall_scope": "FAILED_CORRESPONDENCE_GATE"
+    }
+  ],
+  "capture2-new-score-v3": [
+    {
+      "id": "D1",
+      "passed": 1,
+      "planned": 1,
+      "P95_range_px": [
+        0.4802043253191039,
+        0.4802043253191039
+      ],
+      "cross_frame": false,
+      "heldout": true,
+      "overall_scope": "FAILED_CORRESPONDENCE_GATE"
+    },
+    {
+      "id": "D2",
+      "passed": 0,
+      "planned": 1,
+      "P95_range_px": [
+        1.283011577554706,
+        1.283011577554706
+      ],
+      "cross_frame": false,
+      "heldout": true,
+      "overall_scope": "FAILED_CORRESPONDENCE_GATE"
+    },
+    {
+      "id": "D3",
+      "passed": 1,
+      "planned": 1,
+      "P95_range_px": [
+        0.48875330045905824,
+        0.48875330045905824
+      ],
+      "cross_frame": false,
+      "heldout": true,
+      "overall_scope": "FAILED_CORRESPONDENCE_GATE"
+    },
+    {
+      "id": "D6",
+      "passed": 0,
+      "planned": 1,
+      "P95_range_px": [
+        5.091782214194421,
+        5.091782214194421
+      ],
+      "cross_frame": false,
+      "heldout": true,
+      "overall_scope": "FAILED_CORRESPONDENCE_GATE"
+    }
+  ],
+  "synthetic-ideal-metric-control-v3/metric": [
+    {
+      "id": "D1",
+      "passed": 5,
+      "planned": 5,
+      "P95_range_px": [
+        0.07380387423715133,
+        0.4533122536112397
+      ],
+      "cross_frame": true,
+      "heldout": true,
+      "overall_scope": "EVALUATION_ONLY_METRIC_CEILING_CONTROL_NOT_AN_ALGORITHM_RESULT"
+    },
+    {
+      "id": "D2",
+      "passed": 5,
+      "planned": 5,
+      "P95_range_px": [
+        0.040516046158725,
+        0.23958062589080756
+      ],
+      "cross_frame": true,
+      "heldout": true,
+      "overall_scope": "EVALUATION_ONLY_METRIC_CEILING_CONTROL_NOT_AN_ALGORITHM_RESULT"
+    },
+    {
+      "id": "D3",
+      "passed": 5,
+      "planned": 5,
+      "P95_range_px": [
+        0.23032223234367374,
+        0.3986480723581176
+      ],
+      "cross_frame": true,
+      "heldout": true,
+      "overall_scope": "EVALUATION_ONLY_METRIC_CEILING_CONTROL_NOT_AN_ALGORITHM_RESULT"
+    },
+    {
+      "id": "D6",
+      "passed": 5,
+      "planned": 5,
+      "P95_range_px": [
+        0.2870740560651764,
+        0.48560415459921613
+      ],
+      "cross_frame": true,
+      "heldout": true,
+      "overall_scope": "EVALUATION_ONLY_METRIC_CEILING_CONTROL_NOT_AN_ALGORITHM_RESULT"
+    }
+  ],
+  "capture2-ideal-metric-control-v3/metric": [
+    {
+      "id": "D1",
+      "passed": 1,
+      "planned": 1,
+      "P95_range_px": [
+        0.4228306633330678,
+        0.4228306633330678
+      ],
+      "cross_frame": false,
+      "heldout": true,
+      "overall_scope": "EVALUATION_ONLY_METRIC_CEILING_CONTROL_NOT_AN_ALGORITHM_RESULT"
+    },
+    {
+      "id": "D2",
+      "passed": 1,
+      "planned": 1,
+      "P95_range_px": [
+        0.4008110846866665,
+        0.4008110846866665
+      ],
+      "cross_frame": false,
+      "heldout": true,
+      "overall_scope": "EVALUATION_ONLY_METRIC_CEILING_CONTROL_NOT_AN_ALGORITHM_RESULT"
+    },
+    {
+      "id": "D3",
+      "passed": 1,
+      "planned": 1,
+      "P95_range_px": [
+        0.42388007670255484,
+        0.42388007670255484
+      ],
+      "cross_frame": false,
+      "heldout": true,
+      "overall_scope": "EVALUATION_ONLY_METRIC_CEILING_CONTROL_NOT_AN_ALGORITHM_RESULT"
+    },
+    {
+      "id": "D6",
+      "passed": 1,
+      "planned": 1,
+      "P95_range_px": [
+        0.4499122531267741,
+        0.4499122531267741
+      ],
+      "cross_frame": false,
+      "heldout": true,
+      "overall_scope": "EVALUATION_ONLY_METRIC_CEILING_CONTROL_NOT_AN_ALGORITHM_RESULT"
+    }
+  ]
+}

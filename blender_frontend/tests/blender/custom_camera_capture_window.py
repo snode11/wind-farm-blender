@@ -1,4 +1,4 @@
-"""Real GPU pool comparison and capture failure/cancellation restoration.
+"""GPU capture pixel equality, resource reuse and failure/cancellation restoration.
 
 Use a fresh Blender configuration and WFRL_TEST_OUTPUT directory. Optional
 WFRL_ADDON_MODULE / WFRL_EXPECTED_ADDON_ROOT select an isolated installed ZIP.
@@ -45,16 +45,26 @@ def protected(scene, area):
 
 def run_capture(times, fresh=False):
     render_group = preview.render_group
+    snapshot = preview.CameraImage.snapshot
     targets = []
-    def per_group(context, cameras, **_kwargs):
+    texture_usage = {'readbacks': 0, 'display_textures': 0}
+    def traced_snapshot(image, offscreen, *, create_texture=True):
+        snapshot(image, offscreen, create_texture=create_texture)
+        texture_usage['readbacks'] += 1
+        texture_usage['display_textures'] += int(image.texture is not None)
+        assert (image.texture is not None) == create_texture
+        assert len(image.rgba()) == image.width * image.height * 4
+    def per_group(context, cameras, **kwargs):
         target = preview.RenderTarget()
         targets.append(target)
         try:
-            return render_group(context, cameras, target=target)
+            kwargs.update(target=target, create_texture=True)
+            return render_group(context, cameras, **kwargs)
         finally:
             target.free()
     if fresh:
         preview.render_group = per_group
+    preview.CameraImage.snapshot = traced_snapshot
     started = time.perf_counter()
     try:
         job = capture.Capture(bpy.context, OUT, times)
@@ -62,6 +72,7 @@ def run_capture(times, fresh=False):
             job.step(bpy.context)
     finally:
         preview.render_group = render_group
+        preview.CameraImage.snapshot = snapshot
     duration = time.perf_counter()-started
     manifest = json.loads((job.path/'manifest.json').read_text())
     rows = [json.loads(line) for line in (job.path/'frames.jsonl').read_text().splitlines()]
@@ -72,6 +83,7 @@ def run_capture(times, fresh=False):
     assert manifest['status'] == 'complete'
     assert usage['allocations'] == usage['releases'] and usage['active_targets'] == 0
     return {'path': str(job.path), 'elapsed_s': duration, 'usage': usage,
+            'texture_usage': texture_usage,
             'png_hashes': hashes, 'state_hashes': [row['simulation_state_hash'] for row in rows]}
 
 
@@ -119,9 +131,12 @@ def tick():
                 assert pooled['usage']['allocations'] == 3, pooled
                 assert baseline['state_hashes'] == pooled['state_hashes']
                 assert baseline['png_hashes'] == pooled['png_hashes'], 'GPU pool changed image pixels'
+                assert baseline['texture_usage'] == {'readbacks': 9, 'display_textures': 9}
+                assert pooled['texture_usage'] == {'readbacks': 9, 'display_textures': 0}
                 assert protected(scene, area) == STATE['original']
                 STATE.update(baseline=baseline, pooled=pooled)
                 STATE['checks']['three_sizes_three_samples_9_to_3_allocations_same_png_bytes'] = True
+                STATE['checks']['capture_omits_display_textures_with_identical_png_and_state'] = True
                 STATE['phase'] = 3
                 return .2
             if STATE['phase'] == 3:
@@ -136,7 +151,7 @@ def tick():
                 job = capture.Capture(bpy.context, OUT, STATE['times'])
                 job.step(bpy.context)
                 original_snapshot = preview.CameraImage.snapshot
-                def failure(_image, _offscreen):
+                def failure(_image, _offscreen, **_kwargs):
                     raise RuntimeError('injected GPU readback failure')
                 preview.CameraImage.snapshot = failure
                 try:

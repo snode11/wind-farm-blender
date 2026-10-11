@@ -47,8 +47,13 @@ def compare(actual, reference, axes, simulation):
                 distance=float(np.linalg.norm(np.asarray(actual) - reference)))
 
 
-def read_comparison(path, manifest, times, poses, *, rigid_poses=None):
-    """Optional sidecar: absent means unavailable; malformed must fail closed."""
+def read_comparison(path, manifest, times, poses, *, rigid_poses=None,
+                    tower_motion=None, blade_reference=None):
+    """Optional sidecar: absent means unavailable; malformed must fail closed.
+
+    Supplied rigid poses and support/reference data must be from a validated
+    farm package. Standalone callers load and validate their source sidecars.
+    """
     name = 'deflection-t1.json'
     if name not in manifest['files']:
         return None
@@ -106,10 +111,11 @@ def read_comparison(path, manifest, times, poses, *, rigid_poses=None):
         from .tower_motion import read_tower
         if data.get('tower_motion_sha256') != manifest['files']['tower-motion.npz']:
             raise ValueError('Deflection tower source mismatch')
-        data['nacelle'] = read_tower(path, manifest, times)['nacelle'][:, 0]
+        support = read_tower(path, manifest, times) if tower_motion is None else tower_motion
+        data['nacelle'] = support['nacelle'][:, 0]
     if beamdyn:
         from .prebend import read_reference
-        ref = read_reference(path, manifest)
+        ref = read_reference(path, manifest) if blade_reference is None else blade_reference
         if ref is None or data.get('reference_sha256') != manifest['files']['blade-reference.json']:
             raise ValueError('BeamDyn reference mismatch')
         data['tip_local_m'] = np.asarray(ref['tip_local_m'])

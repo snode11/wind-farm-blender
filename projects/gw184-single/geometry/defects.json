@@ -1,0 +1,13 @@
+{
+  "schema": "gw184.defects.v1",
+  "surface": "Downstream-facing surface at zero pitch, near mid-chord; actual recessed mesh, no labels or overlay",
+  "defects": [
+    {"id": "B1-mid-crack", "blade": 1, "kind": "crack", "span_m": 45.0, "length_m": 0.6, "max_width_m": 0.08, "depth_m": 0.015},
+    {"id": "B2-mid-pit", "blade": 2, "kind": "pit", "span_m": 45.0, "diameter_m": 0.25, "depth_m": 0.025}
+  ],
+  "assumptions": [
+    "Crack length/maximum width and pit diameter/depth approved by user; crack depth 15 mm is a visual modelling assumption.",
+    "Dimensions describe tangent-plane cutters; measured opening on the curved triangulated blade may differ slightly.",
+    "Dark rough fracture/pit interior is part of the defect material, not a segmentation label. Blade 3 is undamaged."
+  ]
+}

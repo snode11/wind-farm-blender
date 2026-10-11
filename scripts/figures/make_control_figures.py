@@ -8,7 +8,7 @@
 图 2 (fig_control_matched.png)：钉死来流后的两后端对照
     同一组 u_inf 下零偏航的全场功率（原始 MW 与归一化 P/u^3）。
 
-    "C:/Users/s1155/.conda/envs/wfcrl/python.exe" make_control_figures.py
+    python3 make_control_figures.py
 """
 import json
 import os

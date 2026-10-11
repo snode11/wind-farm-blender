@@ -107,7 +107,7 @@ class EditorSession:
             geometry=self.surface.metadata())
         self.payload = None; self.records = None; self.preview = None; self.draft = None
         self.edit_state = None; self.helpers = []; self.helper_rest = {}; self.commit_times = []
-        self.busy = False; self.healthy_payload = None
+        self.busy = False; self.healthy_payload = None; self.save_state = None
         self.geometry = GeometrySet(self)
         self.repair_source = scene.objects.get('WFRL.RepairReference.T1.B1')
         self.repair_rest = self.baseline.get('WFRL.Turbine.T1.Blade1')
@@ -143,15 +143,20 @@ class EditorSession:
 
     def fixed_camera_signature(self):
         return [(c.name, c.parent.name if c.parent else None,
-            tuple(tuple(row) for row in c.matrix_basis), c.data.lens,c.data.sensor_width,c.data.sensor_height,
+            tuple(tuple(row) for row in c.matrix_basis),
+            tuple(tuple(row) for row in c.matrix_parent_inverse),
+            c.data.type,c.data.lens,c.data.sensor_width,c.data.sensor_height,
             c.data.sensor_fit,c.data.shift_x,c.data.shift_y,c.data.clip_start,c.data.clip_end,
             self.camera_resolution(c)) for c in self.cameras()]
 
     def verify_cameras(self):
+        from .. import custom_cameras
         # A missing slot must not shift identities or silently reduce G/A to
         # fewer than the three cameras named in the editor's output contract.
-        for slot in (1, 2, 3):
-            self.camera(slot)
+        cameras = [self.camera(slot) for slot in (1, 2, 3)]
+        # Evaluated poses are checked relative to YawRoot so legitimate replay
+        # motion remains valid while native constraints and drivers are checked.
+        custom_cameras.validate_native_state(self.scene, cameras=cameras)
         current = self.fixed_camera_signature()
         if self.camera_signature is None: self.camera_signature = current
         if current != self.camera_signature:
@@ -171,6 +176,7 @@ class EditorSession:
         self.scene['defect_state_version'] = version
         self.scene['defect_analysis_status'] = 'NOT_EVALUATED'
         self.update_helpers(document)
+        sync_defect_list(self, document)
 
     def update_helpers(self, document=None):
         for obj in self.helpers:
@@ -235,11 +241,15 @@ class EditorSession:
         playing=bool(bpy.context.screen and bpy.context.screen.is_animation_playing)
         if playing: bpy.ops.screen.animation_cancel(restore_frame=False)
         self.edit_state=(float(self.scene['defect_time_s']),playing)
+        p = self.scene.wfrl_nrel_defects
+        self.edit_selection = (p.defect_items[p.selected].defect_id
+                               if 0 <= p.selected < len(p.defect_items) else None)
         self.draft=self.store.document
         if index is None:
             self.draft['defects'].append(new_defect(self.surface,kind,turbine_id=self.scene.wfrl_nrel_defects.turbine_id))
             index=len(self.draft['defects'])-1
         self.draft_index=index
+        sync_defect_list(self, self.draft, self.draft['defects'][index]['id'])
         return self.draft['defects'][index]
 
     def discard_preview(self):
@@ -260,10 +270,44 @@ class EditorSession:
         if commit:
             started=time.perf_counter();self.commit_document(self.draft)
             self.commit_times.append(time.perf_counter()-started)
+        selected_id = self.draft['defects'][self.draft_index]['id'] if commit else self.edit_selection
         self.draft=None
+        sync_defect_list(self, self.store.document, selected_id)
         t,playing=self.edit_state;self.edit_state=None
         self.set_time(t)
         if playing and bpy.context.screen and not bpy.context.screen.is_animation_playing: bpy.ops.screen.animation_play()
+
+    def suspend_for_save(self):
+        """Serialize committed geometry without consuming the live edit transaction."""
+        if self.save_state is not None:
+            self.resume_after_save()
+        if self.draft is None and self.healthy_payload is None:
+            return
+        p = self.scene.wfrl_nrel_defects
+        self.save_state = dict(active=self.geometry.active,
+            healthy_payload=self.healthy_payload, status=p.status,
+            records=self.records, analysis_status=self.scene['defect_analysis_status'])
+        self.healthy_payload = None
+        if self.geometry.active is not self.payload:
+            self.geometry.activate(self.payload)
+        self.update_helpers(self.store.document)
+        p.status = '文件仅包含已应用的缺陷配置'
+
+    def resume_after_save(self, saved=False):
+        """Restore the same preview, draft inputs and comparison after a save attempt."""
+        state = self.save_state
+        if state is None:
+            return
+        self.healthy_payload = state['healthy_payload']
+        if self.geometry.active is not state['active']:
+            self.geometry.activate(state['active'])
+        self.update_helpers(state['active']['document'])
+        self.records = state['records']
+        self.scene['defect_analysis_status'] = state['analysis_status']
+        p = self.scene.wfrl_nrel_defects
+        p.status = ('文件已保存已应用配置；草稿仍保留，需应用后再保存'
+                    if saved and self.draft is not None else state['status'])
+        self.save_state = None
 
     def mutate(self, operation, index):
         if self.draft is not None: raise ValueError('请先确认或取消编辑')
@@ -311,7 +355,8 @@ class EditorSession:
         return self.surface.locate(tuple(local))
 
     def closeup(self,index,oblique=False):
-        d=(self.draft or self.store.document)['defects'][index]
+        d=(defect_from_props(self, self.scene.wfrl_nrel_defects) if self.draft is not None
+           else self.store.document['defects'][index])
         frame=self.surface.frame(d['anchor']);blade=self.blade(d['turbine_id'],d['blade_id'])
         p=Vector(frame['point']);n=Vector(frame['normal']);e=Vector(frame['e_t'])
         mapped=self.flex.deform_points(blade,[p,p+n*.01,p+e*.01],self.scene['defect_time_s'],world=True)
@@ -420,10 +465,35 @@ def detach(scene=None,*,restore=True):
 
 @persistent
 def save_pre(_unused):
-    # Persist only committed JSON; previews and healthy comparisons are temporary.
+    # The file contains committed state; live drafts and previews remain reusable.
+    try:
+        for s in list(_SESSIONS.values()):
+            s.suspend_for_save()
+    except Exception:
+        restore_after_save()
+        raise
+
+
+def restore_after_save(saved=False):
+    errors = []
     for s in list(_SESSIONS.values()):
-        if s.draft is not None: s.finish(False)
-        if s.healthy_payload is not None: s.healthy(0)
+        try:
+            s.resume_after_save(saved)
+        except Exception as exc:
+            s.scene.wfrl_nrel_defects.status = '保存后恢复编辑状态失败：'+str(exc)
+            errors.append(exc)
+    if errors:
+        raise errors[0]
+
+
+@persistent
+def save_post(_unused):
+    restore_after_save(saved=True)
+
+
+@persistent
+def save_post_fail(_unused):
+    restore_after_save()
 
 
 @persistent
@@ -439,8 +509,37 @@ def helper_changed(props,context):
     if s:
         for obj in s.helpers: obj.hide_viewport=not props.show_helpers or s.healthy_payload is not None
 
+
+def sync_defect_list(s, document, selected_id=None):
+    """Refresh display rows at transaction boundaries, preserving object identity."""
+    p = s.scene.wfrl_nrel_defects
+    previous_index = p.selected
+    if selected_id is None and 0 <= previous_index < len(p.defect_items):
+        selected_id = p.defect_items[previous_index].defect_id
+    p.defect_items.clear()
+    for d in document['defects']:
+        item = p.defect_items.add()
+        item.defect_id = d['id']
+        item.name = f"{d['turbine_id']} · 叶片 {d['blade_id']} · {KIND_LABELS[d['morphology']]}"
+        item.enabled = d['enabled']
+    p.selected = next((i for i, item in enumerate(p.defect_items)
+                       if item.defect_id == selected_id),
+                      min(max(previous_index, 0), len(p.defect_items)-1))
+
+
+class NRELDefectListItem(bpy.types.PropertyGroup):
+    defect_id: bpy.props.StringProperty()
+    enabled: bpy.props.BoolProperty()
+
+
+class NREL_UL_defects(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        layout.label(text=item.name, icon='CHECKBOX_HLT' if item.enabled else 'CHECKBOX_DEHLT')
+
+
 class NRELDefectProperties(bpy.types.PropertyGroup):
-    selected: bpy.props.IntProperty(name='列表序号', default=0, min=0)
+    defect_items: bpy.props.CollectionProperty(type=NRELDefectListItem, options={'SKIP_SAVE'})
+    selected: bpy.props.IntProperty(name='当前缺陷', default=-1, min=-1)
     kind: bpy.props.EnumProperty(name='类型', items=[
         (kind, KIND_LABELS[kind], KIND_DESCRIPTIONS[kind]) for kind in PRESETS])
     turbine_id: bpy.props.EnumProperty(name='机组', items=[(tid,tid,'') for tid in ('T1','T2','T3')], default='T1')
@@ -462,7 +561,79 @@ class NRELDefectProperties(bpy.types.PropertyGroup):
     time_s: bpy.props.FloatProperty(name='绝对时刻 (s)', default=117., min=0., max=100000.)
     scan_start: bpy.props.FloatProperty(name='扫描起点 (s)', default=117., min=0.)
     scan_duration: bpy.props.FloatProperty(name='扫描时长 (s)', default=.1, min=1/60)
-    status: bpy.props.StringProperty(default='G 模式；外观尚未审核')
+    status: bpy.props.StringProperty(default='选择类型并新建，或从列表选择已有缺陷')
+
+
+def action_unavailable(s, p, action):
+    """One state contract for disabled controls, tooltips and operator guards."""
+    if action == 'OPEN':
+        return ''
+    if s is None:
+        return '请先启动编辑器'
+    if s.busy:
+        return '扫描进行中；按 Esc 取消后操作'
+    if action == 'CLOSE':
+        return ''
+    if s.healthy_payload is not None:
+        if action == 'HEALTHY':
+            return ''
+        if action not in ('CLOSEUP', 'OBLIQUE', 'CAMERA1', 'CAMERA2', 'CAMERA3'):
+            return '当前是健康对照，请先返回缺陷效果'
+    if s.draft is not None:
+        return '' if action in ('PREVIEW', 'CONFIRM', 'CANCEL', 'CLOSEUP', 'OBLIQUE',
+                               'CAMERA1', 'CAMERA2', 'CAMERA3') else '请先应用或取消当前编辑'
+    if action in ('PREVIEW', 'CONFIRM', 'CANCEL'):
+        return '请先新建或编辑缺陷'
+    if action in ('EDIT', 'COPY', 'DELETE', 'TOGGLE', 'HEALTHY', 'CLOSEUP', 'OBLIQUE'):
+        if not 0 <= p.selected < len(s.store.document['defects']):
+            return '请先从列表选择一个缺陷'
+    if action == 'UNDO' and not s.store.can_undo:
+        return '没有可撤销的操作'
+    if action == 'REDO' and not s.store.can_redo:
+        return '没有可重做的操作'
+    return ''
+
+
+ACTION_MESSAGES = {
+    'OPEN': '编辑器已打开；选择类型并新建，或选择已有缺陷',
+    'CLOSE': '编辑器已关闭',
+    'NEW': '正在新建；调整参数后预览，再应用修改',
+    'EDIT': '正在编辑；调整参数后预览，再应用修改',
+    'PREVIEW': '已更新预览；点击“应用修改”后生效',
+    'CONFIRM': '修改已应用到场景；可在“配置文件”中保存 JSON',
+    'CANCEL': '已取消编辑，恢复编辑前的缺陷状态',
+    'COPY': '已复制并选中新缺陷；副本默认停用',
+    'DELETE': '缺陷已删除；可撤销',
+    'TOGGLE': '已更新缺陷的启用状态',
+    'UNDO': '已撤销上一步缺陷修改',
+    'REDO': '已重做缺陷修改',
+    'SAVE': 'JSON 配置已保存；未渲染图片',
+    'LOAD': 'JSON 配置已加载；可撤销',
+    'TIME': '已定位到指定时刻',
+    'CLOSEUP': '已定位到缺陷正面；可自由缩放和旋转视角',
+    'OBLIQUE': '已定位到缺陷斜侧；可自由缩放和旋转视角',
+    'ANALYZE': '当前帧几何分析已完成；不代表图片中可辨识',
+    'EXPORT_G': '几何分析资料已导出；未渲染图片',
+    'EXPORT_A': '三相机图片已导出；外观仍需人工审核',
+}
+
+ACTION_HELP = {
+    'NEW': '按当前类型和机组创建草稿；应用前不会更改已保存的缺陷状态',
+    'EDIT': '编辑列表中高亮的缺陷',
+    'PREVIEW': '用当前参数更新三维预览；仍可取消并恢复原状态',
+    'CONFIRM': '将当前参数应用到场景；导出 JSON 请使用“保存配置”',
+    'CANCEL': '丢弃本次编辑和预览，恢复编辑前的状态',
+    'COPY': '复制选中缺陷并默认停用，避免与原缺陷重叠生效',
+    'HEALTHY': '临时关闭目标叶片的全部缺陷，再点一次返回；不改写配置',
+    'CLOSEUP': '按当前输入参数定位正面近景；不会自动更新缺陷预览，健康对照时也可使用',
+    'OBLIQUE': '按当前输入参数定位斜侧近景；不会自动更新缺陷预览，健康对照时也可使用',
+    'SAVE': '将已应用的缺陷保存为 JSON；不会渲染图片',
+    'LOAD': '从 JSON 替换当前缺陷配置；可撤销本次加载',
+    'ANALYZE': '计算固定三相机的理想投影和几何遮挡；不判断图片辨识能力',
+    'EXPORT_G': '在新的空目录中保存当前帧几何分析资料，不渲染图片',
+    'EXPORT_A': '在新的空目录中渲染三相机缺陷与健康对照 PNG，可能需要较长时间',
+    'CLOSE': '退出编辑器并恢复健康显示；未应用的草稿会被丢弃，已应用配置保留在场景中',
+}
 
 
 def props_from_defect(p, d):
@@ -476,8 +647,9 @@ def props_from_defect(p, d):
     p.kind = d['morphology']
 
 
-def draft_from_props(s, p):
-    d = s.draft['defects'][s.draft_index]
+def defect_from_props(s, p):
+    """Read the current input as an independent candidate without changing the preview."""
+    d = copy.deepcopy(s.draft['defects'][s.draft_index])
     preset = PRESETS[d['morphology']]
     d['turbine_id'] = p.turbine_id
     d['blade_id'], d['enabled'] = p.blade_id, p.enabled
@@ -491,6 +663,34 @@ def draft_from_props(s, p):
     old = next((i for i in s.store.document['defects'] if i['id'] == d['id']), None)
     if old:
         d['revision'] = old['revision'] + 1
+    return d
+
+
+def draft_from_props(s, p):
+    s.draft['defects'][s.draft_index] = defect_from_props(s, p)
+
+
+def preview_is_current(s, p):
+    """Compare displayed parameters at the precision stored by RNA float inputs."""
+    if s.draft is None:
+        return True
+    candidate = defect_from_props(s, p)
+    document = s.preview.document if s.preview is not None else s.store.document
+    displayed = next((d for d in document['defects'] if d['id'] == candidate['id']), None)
+    if displayed is None:
+        return False
+
+    def rounded(value):
+        if isinstance(value, float):
+            return float(np.float32(value))
+        if isinstance(value, dict):
+            return {key: rounded(item) for key, item in value.items()}
+        if isinstance(value, list):
+            return [rounded(item) for item in value]
+        return value
+
+    return rounded({key: value for key, value in candidate.items() if key != 'revision'}) == rounded(
+        {key: value for key, value in displayed.items() if key != 'revision'})
 
 
 class NREL_OT_defect_action(bpy.types.Operator):
@@ -498,20 +698,23 @@ class NREL_OT_defect_action(bpy.types.Operator):
     bl_label = '叶片缺陷操作'
     action: bpy.props.StringProperty()
 
+    @classmethod
+    def description(cls, context, properties):
+        p = context.scene.wfrl_nrel_defects
+        return (action_unavailable(session(context), p, properties.action)
+                or ACTION_HELP.get(properties.action, ACTION_MESSAGES.get(properties.action, '叶片缺陷操作')))
+
     def execute(self, context):
         s, p = session(context), context.scene.wfrl_nrel_defects
         try:
+            reason = action_unavailable(s, p, self.action)
+            if reason:
+                raise ValueError(reason)
             if self.action == 'OPEN':
-                ensure(context.scene); return {'FINISHED'}
+                ensure(context.scene); p.status = ACTION_MESSAGES['OPEN']; return {'FINISHED'}
             if self.action == 'CLOSE':
-                if s and s.busy: raise ValueError('扫描进行中；按 Esc 取消后关闭')
-                detach(context.scene); context.scene['wfrl_nrel_defect_enabled']=False; return {'FINISHED'}
-            if s is None:
-                raise ValueError('请先启动编辑器')
-            if s.busy:
-                raise ValueError('扫描进行中；按 Esc 取消后操作')
-            if s.healthy_payload is not None and self.action != 'HEALTHY':
-                raise ValueError('当前是健康对照，请先返回损伤状态')
+                detach(context.scene); context.scene['wfrl_nrel_defect_enabled']=False
+                p.status = ACTION_MESSAGES['CLOSE']; return {'FINISHED'}
             if self.action in ('NEW', 'EDIT'):
                 d = s.begin(None if self.action == 'NEW' else p.selected, p.kind)
                 p.selected = s.draft_index
@@ -523,6 +726,8 @@ class NREL_OT_defect_action(bpy.types.Operator):
                 s.finish(False)
             elif self.action in ('COPY', 'DELETE', 'TOGGLE'):
                 s.mutate(self.action, p.selected)
+                if self.action == 'COPY':
+                    p.selected = len(p.defect_items)-1
             elif self.action in ('UNDO', 'REDO'):
                 if s.draft is not None:
                     raise ValueError('请先取消编辑')
@@ -538,7 +743,7 @@ class NREL_OT_defect_action(bpy.types.Operator):
             elif self.action == 'HEALTHY':
                 s.healthy(p.selected)
             elif self.action in ('CLOSEUP', 'OBLIQUE'):
-                s.closeup(p.selected, self.action == 'OBLIQUE')
+                s.closeup(s.draft_index if s.draft is not None else p.selected, self.action == 'OBLIQUE')
             elif self.action.startswith('CAMERA'):
                 s.scene.camera = s.camera(int(self.action[-1]))
                 for area in context.screen.areas:
@@ -557,7 +762,12 @@ class NREL_OT_defect_action(bpy.types.Operator):
             elif self.action == 'EXPORT_A':
                 from .defect_outputs import capture_images
                 capture_images(s,bpy.path.abspath(p.output_path))
-            p.status = '已完成：' + self.action
+            if self.action == 'HEALTHY':
+                p.status = '正在查看目标叶片的健康状态；点击“返回缺陷效果”继续编辑' if s.healthy_payload is not None else '已返回缺陷效果'
+            elif self.action.startswith('CAMERA'):
+                p.status = f'已切换到 C{self.action[-1]} 相机视角'
+            else:
+                p.status = ACTION_MESSAGES[self.action]
             return {'FINISHED'}
         except Exception as exc:
             p.status = str(exc)
@@ -571,19 +781,30 @@ class NREL_OT_defect_pick(bpy.types.Operator):
     bl_idname = 'wfrl.nrel_defect_pick'
     bl_label = '点击健康参考表面'
 
+    _NAVIGATION_EVENTS = frozenset({
+        'MIDDLEMOUSE', 'WHEELUPMOUSE', 'WHEELDOWNMOUSE',
+        'WHEELINMOUSE', 'WHEELOUTMOUSE', 'TRACKPADPAN', 'TRACKPADZOOM',
+        'MOUSEROTATE', 'MOUSESMARTZOOM', 'NDOF_MOTION',
+    })
+
     def invoke(self, context, event):
         s = session(context)
         if s is None or s.draft is None or context.area.type != 'VIEW_3D':
             self.report({'ERROR'}, '先新建或编辑缺陷，再在三维视口中选择位置')
             return {'CANCELLED'}
         context.window_manager.modal_handler_add(self)
-        context.workspace.status_text_set('左键选择健康参考表面；Esc 取消选点')
+        context.workspace.status_text_set('左键选择健康参考表面；中键或滚轮调整视图；Esc 或右键取消选点')
         return {'RUNNING_MODAL'}
+
+    def cancel(self, context):
+        context.workspace.status_text_set(None)
 
     def modal(self, context, event):
         if event.type in {'ESC', 'RIGHTMOUSE'}:
             context.workspace.status_text_set(None)
             return {'CANCELLED'}
+        if event.type in self._NAVIGATION_EVENTS:
+            return {'PASS_THROUGH'}
         if event.type == 'LEFTMOUSE' and event.value == 'PRESS':
             from bpy_extras import view3d_utils
             region = next(r for r in context.area.regions if r.type == 'WINDOW')
@@ -595,12 +816,78 @@ class NREL_OT_defect_pick(bpy.types.Operator):
                 p = context.scene.wfrl_nrel_defects
                 a = session(context).locate_ray(origin, direction, p.blade_id,p.turbine_id)
                 p.span, p.u, p.side = a['s_m'], a['u'], a['surface_side']
+                p.status = '位置已选定；点击“更新预览”检查效果'
                 context.workspace.status_text_set(None)
                 redraw_editor(context)
                 return {'FINISHED'}
             except Exception as exc:
                 self.report({'WARNING'}, str(exc))
         return {'RUNNING_MODAL'}
+
+
+def wrapped_lines(text, available):
+    """Split text into display lines using East Asian character widths."""
+    import unicodedata
+    lines, line, width = [], '', 0
+    for char in str(text):
+        size = 2 if unicodedata.east_asian_width(char) in ('W', 'F') else 1
+        if char == '\n' or width + size > available:
+            lines.append(line)
+            line, width = '', 0
+        if char != '\n':
+            line += char
+            width += size
+    if line:
+        lines.append(line)
+    return lines
+
+
+def text_columns(context):
+    scale = context.preferences.system.ui_scale
+    return max(20, int((context.region.width / scale - 36) / 7))
+
+
+def wrapped_label(layout, text, context):
+    """Show complete explanations with wrapping appropriate to the sidebar."""
+    for line in wrapped_lines(text, text_columns(context)):
+        layout.label(text=line)
+
+
+def status_box(layout, props, context):
+    """Reserve two status rows and a permanent entry to the complete message."""
+    available = max(16, text_columns(context)-4)
+    lines = wrapped_lines(props.status, available)
+    shown = lines[:2]
+    if len(lines) > 2:
+        shown[-1] = (wrapped_lines(shown[-1], available-2) or [''])[0]+'…'
+    box = layout.box().column(align=True)
+    for index in range(2):
+        box.label(text=shown[index] if index < len(shown) else ' ')
+    box.operator('wfrl.nrel_defect_status', text='查看完整提示', icon='INFO')
+
+
+class NREL_OT_defect_status(bpy.types.Operator):
+    bl_idname = 'wfrl.nrel_defect_status'
+    bl_label = '完整状态提示'
+    bl_options = {'INTERNAL'}
+
+    message: bpy.props.StringProperty(options={'HIDDEN', 'SKIP_SAVE'})
+
+    @classmethod
+    def description(cls, context, properties):
+        return context.scene.wfrl_nrel_defects.status
+
+    def invoke(self, context, event):
+        self.message = context.scene.wfrl_nrel_defects.status
+        return context.window_manager.invoke_popup(self, width=500)
+
+    def draw(self, context):
+        self.layout.label(text='完整状态提示', icon='INFO')
+        for line in wrapped_lines(self.message, 64):
+            self.layout.label(text=line)
+
+    def execute(self, context):
+        return {'FINISHED'}
 
 
 class NREL_PT_defects(bpy.types.Panel):
@@ -619,65 +906,139 @@ class NREL_PT_defects(bpy.types.Panel):
         s, p, layout = session(context), context.scene.wfrl_nrel_defects, self.layout
         if s is None:
             layout.operator('wfrl.nrel_defect_action',text='启动缺陷编辑器').action='OPEN'
-            layout.label(text=p.status[:60]);return
-        layout.label(text='轮廓为辅助；材质外观使用材质预览')
-        layout.label(text='合成视觉缺陷 · 跟随柔性回放 · 未耦合物理')
-        layout.label(text='雷达读数仍来自原仿真几何')
-        def buttons(items):
-            row = layout.row(align=True)
+            status_box(layout, p, context)
+            return
+
+        def buttons(parent, items):
+            row = parent.row(align=True)
             for code, label in items:
-                row.operator('wfrl.nrel_defect_action', text=label).action = code
-        for i, d in enumerate(s.store.document['defects']):
-            kind_label = KIND_LABELS[d['morphology']]
-            layout.label(text=f"{i}: {d['turbine_id']}/B{d['blade_id']} {kind_label} {'启用' if d['enabled'] else '禁用'} · r{d['revision']}")
-        layout.prop(p, 'selected')
-        layout.prop(p, 'show_helpers')
+                cell = row.row(align=True)
+                cell.enabled = not action_unavailable(s, p, code)
+                cell.operator('wfrl.nrel_defect_action', text=label).action = code
+
+        def section(key, title, closed=True):
+            header, body = layout.panel('nrel_defects_' + key, default_closed=closed)
+            header.label(text=title)
+            return body
+
+        layout.label(text='合成视觉缺陷 · 未耦合物理', icon='INFO')
+        if s.busy:
+            layout.label(text='扫描中 · 按 Esc 取消', icon='TIME')
+        elif s.healthy_payload is not None:
+            layout.label(text='健康对照中 · 返回后可继续编辑', icon='HIDE_OFF')
+        elif s.draft is not None:
+            layout.label(text='编辑草稿 · 回放时刻已冻结', icon='GREASEPENCIL')
+        else:
+            layout.label(text='待编辑 · 选择缺陷或新建', icon='GREASEPENCIL')
+
+        actions = layout.column(align=True)
+        buttons(actions, [('PREVIEW', '更新预览')])
+        buttons(actions, [('CONFIRM', '应用修改'), ('CANCEL', '取消编辑')])
+        if s.draft is not None:
+            if preview_is_current(s, p):
+                layout.label(text='参数与当前显示一致', icon='CHECKMARK')
+            else:
+                layout.label(text='参数已改，预览未更新', icon='INFO')
+        else:
+            layout.label(text=' ')
+        status_box(layout, p, context)
+
+        listing = layout.column()
+        listing.label(text=f'缺陷列表 · {len(p.defect_items)} 项')
+        if p.defect_items:
+            rows = listing.column()
+            rows.enabled = s.draft is None and s.healthy_payload is None and not s.busy
+            rows.template_list('NREL_UL_defects', '', p, 'defect_items', p, 'selected', rows=3, maxrows=5)
+        else:
+            listing.label(text='暂无缺陷，选择类型后新建')
+
         if s.draft is None:
-            layout.prop(p, 'turbine_id')
-            layout.prop(p, 'kind')
-            buttons([('NEW', '新建'), ('EDIT', '修改'), ('COPY', '复制为禁用')])
-            buttons([('TOGGLE', '启用/禁用缺陷'), ('DELETE', '删除')])
-            buttons([('UNDO', '撤销'), ('REDO', '重做')])
+            selected = s.store.document['defects'][p.selected] if 0 <= p.selected < len(p.defect_items) else None
+            buttons(listing, [('EDIT', '编辑选中缺陷'), ('TOGGLE', '停用' if selected and selected['enabled'] else '启用')])
+            buttons(listing, [('COPY', '复制（默认停用）'), ('DELETE', '删除')])
+            buttons(listing, [('UNDO', '撤销'), ('REDO', '重做')])
+            create = layout.box()
+            create.enabled = not action_unavailable(s, p, 'NEW')
+            create.label(text='新建缺陷')
+            row = create.row(align=True)
+            row.prop(p, 'turbine_id', text='')
+            row.prop(p, 'kind', text='')
+            buttons(create, [('NEW', '新建所选类型')])
         else:
             kind = s.draft['defects'][s.draft_index]['morphology']
             preset = PRESETS[kind]
-            layout.label(text=KIND_LABELS[kind])
-            for name in ('enabled', 'turbine_id', 'blade_id', 'side', 'span', 'u', 'theta', 'length', 'width'):
-                layout.prop(p, name)
+            edit = layout.column()
+            edit.use_property_split = True
+            edit.use_property_decorate = False
+            edit.label(text='编辑 · ' + KIND_LABELS[kind])
+            for name in ('enabled', 'turbine_id', 'blade_id', 'side'):
+                edit.prop(p, name)
+            edit.operator('wfrl.nrel_defect_pick', text='在所选叶片上点选位置', icon='EYEDROPPER')
+            for name in ('span', 'u', 'length', 'width'):
+                edit.prop(p, name)
             if preset['representation'] != 'appearance':
-                layout.prop(p, 'depth')
+                edit.prop(p, 'depth')
             else:
-                layout.label(text='材质外观缺陷：无几何深度')
-            if 'edge_roughness' in preset:
-                layout.prop(p, 'edge_roughness')
-            if 'crater_fraction' in preset:
-                layout.prop(p, 'crater_fraction')
-            layout.prop(p, 'seed')
-            layout.operator('wfrl.nrel_defect_pick')
-            buttons([('PREVIEW', '预览'), ('CONFIRM', '确认'), ('CANCEL', '取消')])
-        buttons([('CLOSEUP', '正面近景'), ('OBLIQUE', '斜侧近景')])
-        buttons([('HEALTHY', '返回损伤状态' if s.healthy_payload else '健康对照（目标叶片）')])
-        buttons([('CAMERA1', 'C1'), ('CAMERA2', 'C2'), ('CAMERA3', 'C3')])
-        layout.prop(p, 'time_s')
-        buttons([('TIME', '定位时刻'), ('ANALYZE', 'G 分析当前帧')])
-        if s.records:
-            for row in s.records:
+                edit.label(text='材质外观缺陷，无几何深度')
+            advanced = section('shape', '高级形态参数')
+            if advanced is not None:
+                advanced.use_property_split = True
+                advanced.use_property_decorate = False
+                advanced.prop(p, 'theta')
+                for name in ('edge_roughness', 'crater_fraction'):
+                    if name in preset:
+                        advanced.prop(p, name)
+                advanced.prop(p, 'seed')
+
+        view = section('view', '观察效果', closed=False)
+        if view is not None:
+            buttons(view, [('CLOSEUP', '正面近景'), ('OBLIQUE', '斜侧近景')])
+            buttons(view, [('HEALTHY', '返回缺陷效果' if s.healthy_payload is not None else '对比健康叶片')])
+            helper = view.row()
+            helper.enabled = not s.busy and s.healthy_payload is None
+            helper.prop(p, 'show_helpers')
+            buttons(view, [('CAMERA1', 'C1'), ('CAMERA2', 'C2'), ('CAMERA3', 'C3')])
+
+        config = section('config', '配置文件')
+        if config is not None:
+            config.enabled = not action_unavailable(s, p, 'SAVE')
+            config.prop(p, 'config_path', text='JSON 文件')
+            buttons(config, [('SAVE', '保存配置'), ('LOAD', '加载配置')])
+            wrapped_label(config, '保存已应用的缺陷参数，不会渲染图片', context)
+
+        analysis = section('analysis', '几何分析与导出（G / A）')
+        if analysis is not None:
+            analysis.enabled = not action_unavailable(s, p, 'ANALYZE')
+            wrapped_label(analysis, 'G 仅分析投影与遮挡，不代表图片中可辨识', context)
+            analysis.prop(p, 'time_s')
+            buttons(analysis, [('TIME', '定位时刻'), ('ANALYZE', '分析当前帧（G）')])
+            status = str(context.scene.get('defect_analysis_status', 'NOT_EVALUATED'))
+            wrapped_label(analysis, {'NOT_EVALUATED': '当前帧尚未分析', 'EVALUATED': '当前帧已分析'}.get(status, status), context)
+            for row in s.records or []:
                 if row.get('primary', True):
-                    layout.label(text=f"{row.get('camera_id', '')} {row.get('defect_id', '')[:8]}: {row.get('status', row.get('state', '?'))}")
+                    wrapped_label(analysis, f"{row.get('camera_id', '')} {row.get('defect_id', '')[:8]}: {row.get('status', row.get('state', '?'))}", context)
                     width = row.get('width_px') or {}
                     if width.get('max') is not None:
-                        layout.label(text=f"投影宽 {width['min']:.3f}–{width['max']:.3f} px；非辨识结论")
-        layout.label(text=str(context.scene.get('defect_analysis_status', 'NOT_EVALUATED')))
-        layout.prop(p, 'config_path')
-        buttons([('SAVE', '保存配置'), ('LOAD', '加载配置')])
-        layout.prop(p, 'output_path')
-        buttons([('EXPORT_G', '保存 G 验收资料')])
-        layout.prop(p, 'scan_start')
-        layout.prop(p, 'scan_duration')
-        layout.operator('wfrl.nrel_defect_scan', text='逐帧 G 扫描（Esc 可取消）')
-        buttons([('EXPORT_A', '渲染当前三相机 A 图'),('CLOSE','关闭编辑器')])
-        layout.label(text='渲染默认关闭；保存配置不会出图')
-        layout.label(text=p.status[:60])
+                        wrapped_label(analysis, f"投影宽 {width['min']:.3f}–{width['max']:.3f} px；非辨识结论", context)
+            analysis.separator()
+            analysis.prop(p, 'output_path')
+            buttons(analysis, [('EXPORT_G', '导出当前帧分析资料（G）')])
+            analysis.prop(p, 'scan_start')
+            analysis.prop(p, 'scan_duration')
+            scan = analysis.row()
+            scan.enabled = not action_unavailable(s, p, 'SCAN')
+            scan.operator('wfrl.nrel_defect_scan', text='逐帧扫描（Esc 取消）')
+            buttons(analysis, [('EXPORT_A', '渲染三相机对照图片（A）')])
+            wrapped_label(analysis, '每次导出或扫描请选择新的空目录', context)
+
+        notes = section('notes', '使用说明与限制')
+        if notes is not None:
+            for note in ('勾选图标表示启用，空框表示停用；列表高亮表示当前选择。',
+                         '辅助轮廓不等于真实外观；请使用材质预览检查。',
+                         '缺陷跟随柔性回放；雷达读数仍来自原仿真几何。',
+                         '合成缺陷未耦合物理，材质外观尚未审核。'):
+                wrapped_label(notes, note, context)
+        buttons(layout, [('CLOSE', '关闭编辑器')])
 
 
 class NREL_OT_defect_scan(bpy.types.Operator):
@@ -689,8 +1050,9 @@ class NREL_OT_defect_scan(bpy.types.Operator):
         from .defect_outputs import create_run
         s, p = session(context), context.scene.wfrl_nrel_defects
         try:
-            if s.busy or s.draft is not None or s.healthy_payload is not None:
-                raise ValueError('请先完成编辑、对照或当前扫描')
+            reason = action_unavailable(s, p, 'SCAN')
+            if reason:
+                raise ValueError(reason)
             # RNA FloatProperty stores float32; recover an intended integral
             # frame count before strict timing validation (e.g. 2/60 seconds).
             duration = float(p.scan_duration)
@@ -763,17 +1125,25 @@ class NREL_OT_defect_scan(bpy.types.Operator):
             return self.finish_scan(context, True, repr(exc))
 
 
-CLASSES=(NRELDefectProperties,NREL_OT_defect_action,NREL_OT_defect_pick,NREL_OT_defect_scan,NREL_PT_defects)
+CLASSES=(NRELDefectListItem,NRELDefectProperties,NREL_UL_defects,
+         NREL_OT_defect_action,NREL_OT_defect_pick,NREL_OT_defect_scan,
+         NREL_OT_defect_status,NREL_PT_defects)
 
 
 def register_properties():
     bpy.types.Scene.wfrl_nrel_defects=bpy.props.PointerProperty(type=NRELDefectProperties)
-    for handlers,fn in ((bpy.app.handlers.save_pre,save_pre),(bpy.app.handlers.frame_change_post,frame_changed)):
+    for handlers,fn in ((bpy.app.handlers.save_pre,save_pre),
+                        (bpy.app.handlers.save_post,save_post),
+                        (bpy.app.handlers.save_post_fail,save_post_fail),
+                        (bpy.app.handlers.frame_change_post,frame_changed)):
         if fn not in handlers: handlers.append(fn)
 
 
 def unregister_properties():
     detach()
-    for handlers,fn in ((bpy.app.handlers.save_pre,save_pre),(bpy.app.handlers.frame_change_post,frame_changed)):
+    for handlers,fn in ((bpy.app.handlers.save_pre,save_pre),
+                        (bpy.app.handlers.save_post,save_post),
+                        (bpy.app.handlers.save_post_fail,save_post_fail),
+                        (bpy.app.handlers.frame_change_post,frame_changed)):
         if fn in handlers: handlers.remove(fn)
     if hasattr(bpy.types.Scene,'wfrl_nrel_defects'): del bpy.types.Scene.wfrl_nrel_defects

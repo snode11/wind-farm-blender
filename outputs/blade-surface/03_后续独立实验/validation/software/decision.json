@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "existing_window_surface_fit_tests": 17,
+  "test_log_sha256": "d9841cf421b482613f5d4f9a6f7577c5343615823e5ff238fd3243a3fc6cb58e",
+  "environment": "existing .venv-trial + isolated runtime_pytest8.4.2; shared dependencies not changed",
+  "numerics": "104 saved-array/branch replay checks,6 prohibited existing-path probes; see numerics/test_manifest.json",
+  "surface_metric_selftest": "exact .25 clipped triangle area and50mm plane distance PASS; no source-data optimizer runs",
+  "scope": "software/math fixtures; not image identity/geometry accuracy/native UI"
+}

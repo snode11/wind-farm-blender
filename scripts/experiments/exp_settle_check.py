@@ -8,7 +8,7 @@ u=8 m/s 下尾流从 T1 到 T3 的对流时间 ≈ 1008/8 = 126 s = 42 个控制
 这里跑 180 步(540 s)，看 T2/T3 的功率是否在 100 步之后已经平掉。
 
     "/c/Program Files/Microsoft MPI/Bin/mpiexec.exe" -n 1 \
-        "C:/Users/s1155/.conda/envs/wfcrl/python.exe" exp_settle_check.py
+        python3 exp_settle_check.py
 """
 import os
 import json

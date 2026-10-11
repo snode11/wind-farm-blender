@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "wfrl_blender"
-version = "0.3.18"
+version = "0.3.20+1"
 name = "WFRL Blender"
 tagline = "Wind farm reinforcement-learning visualization workspace"
 maintainer = "WFRL"
@@ -11,5 +11,5 @@ tags = ["3D View", "Animation", "Scene"]
 
 
 [permissions]
-network = "Connect to WFRL Bridge and serve the selected camera video over RTSP"
-files = "Read simulation and video files, export MP4 and run configured video tools"
+network = "Connect to WFRL Bridge and serve camera video over RTSP"
+files = "Read simulation/video files, export MP4 and run video tools"

@@ -316,7 +316,7 @@ class Capture:
             mapped=self.scene.frame_start+(at-self.reader.start_s)*timebase
             self.evaluate(math.floor(mapped),mapped-math.floor(mapped),at)
         self.guard()
-        images=preview.render_group(context,self.cameras,target=self.render_target)
+        images=preview.render_group(context,self.cameras,target=self.render_target,create_texture=False)
         try:
             self.guard()
             records=[]

@@ -1,0 +1,72 @@
+{
+  "status": "COMPLETED",
+  "review": {
+    "status": "CODEX_RGB_REVIEWED",
+    "reviewer": "root Codex visual review; not user manual annotation or learned automatic backend",
+    "evidence_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/capture/formal_test01/rgb_junction_review/junction_contact_sheet.png",
+    "evidence_sha256": "f11560836b2a6f5e73ebdf666166e5dbda9d58a57dc7542c47f8bb8fa9ecf014",
+    "candidate_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/capture/formal_test01/rgb_junction_review/anonymous_rgb_candidates.json",
+    "candidate_sha256": "8d7b52ded2588920241c2220047d081da269cd7da99c1303477311ca3fc29295",
+    "scope": "96 junction crops: 12 anonymous IDs × 8 frames; visible four-color intersections; no visible centroid replacement or adjacent ID swap",
+    "approval_received": "parent root explicit review message on 2026-10-06",
+    "authorization_evidence_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/capture/formal_annotation_review_authorization.json",
+    "authorization_sha256": "beec4348e65305b5905eb3135bdc03b33d7866196994360b881cd0d1d1372744",
+    "planned_frame_ids": [
+      260,
+      261,
+      262,
+      263,
+      264,
+      265,
+      266,
+      267
+    ],
+    "planned_sim_times_s": [
+      143.0,
+      143.1,
+      143.2,
+      143.3,
+      143.4,
+      143.5,
+      143.6,
+      143.7
+    ],
+    "planned_ids": [
+      "M00",
+      "M01",
+      "M02",
+      "M03",
+      "M04",
+      "M05",
+      "M06",
+      "M07",
+      "M08",
+      "M09",
+      "M10",
+      "M11"
+    ],
+    "planned_query_slots": 96,
+    "null_rule": "RGB_NOT_OBSERVED => uv:null,image_visible:false; retain all planned slots; no source projection substitution",
+    "annotation_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/capture/formal_test01/public_input/manual_annotations.json",
+    "annotation_sha256": "234ddad9d66a7db62f7d35ea534ecb3ee8990e55c8c0ed0e6afb17a328c19efe",
+    "observed_query_slots": 96
+  },
+  "all_frames": {
+    "planned": 96,
+    "evaluated": 96,
+    "failed": 0,
+    "median_px": 0.30769162472479156,
+    "p95_px": 1.5855347330655205
+  },
+  "later_frames": {
+    "planned": 84,
+    "evaluated": 84,
+    "failed": 0,
+    "median_px": 0.3199251815415358,
+    "p95_px": 1.5244228056497644
+  },
+  "P95_threshold_px": 1.0,
+  "gate_passed": false,
+  "permission": "independent evaluation only after RGB review freeze; no uv/xyz returned to solver",
+  "scope": "known synthetic material vertex identity/localization; not camera or geometry accuracy"
+}

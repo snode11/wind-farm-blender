@@ -23,7 +23,7 @@
     "commit": "6dfa0eefe410ef3e38d3cbd9ee7d017aafa2fc02"
   },
   "automatic_source_archive_matches_current_implementation": false,
-  "release_notes": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/release-0.3.20-plus1-20261010/release-notes.md",
+  "release_notes": "REPOSITORY_ROOT/outputs/release-0.3.20-plus1-20261010/release-notes.md",
   "attachment_downloaded_after_upload": false,
   "remote_attachment_hash_or_bytes_rechecked": false
 }

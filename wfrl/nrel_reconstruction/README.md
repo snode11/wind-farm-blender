@@ -27,14 +27,14 @@
 | `evaluate.py` | 单独读取实际 evaluated surface；面积采样到连续三角面的双向距离、分区和固定截面 |
 | `diagnostics.py` / `preview.py` | RGB 投影复核、自包含可旋转模型预览 |
 
-主机依赖可通过 `nrel-reconstruction` extra 表达；FFmpeg/FFprobe 和可见 Blender 5.2+ 单独提供。冻结静态实验使用 `/opt/anaconda3/envs/wfrl-mac/bin/python`，依赖版本和代码签名保存在实验 `implementation_manifest.json`。未要求 CUDA、PyTorch3D 或分割模型权重。
+主机依赖可通过 `nrel-reconstruction` extra 表达；FFmpeg/FFprobe 和可见 Blender 5.2+ 单独提供。冻结静态实验使用 `PYTHON_ENVIRONMENT/bin/python`，依赖版本和代码签名保存在实验 `implementation_manifest.json`。未要求 CUDA、PyTorch3D 或分割模型权重。
 
 ## 可复用命令
 
 以下命令从实际 Git 根执行，所有输出使用新目录。`pack` 会拒绝已有 algorithm-input；`fit` 会拒绝覆盖已有 T1_B1.ply。当前采样/编码支持 15/20/25 fps。
 
 ```bash
-PY=/opt/anaconda3/envs/wfrl-mac/bin/python
+PY=PYTHON_ENVIRONMENT/bin/python
 $PY scripts/nrel_single_blade.py pack --capture <完整采集目录> --output <新运行目录> --start 120 --duration 5 --fps 20
 $PY scripts/nrel_single_blade.py inspect --input <运行目录>/algorithm-input --output <运行目录>/inspection --frames 42 43 44 45
 $PY scripts/nrel_single_blade.py observe --input <运行目录>/algorithm-input --output <运行目录>/observations --fit-frames 42 43 --heldout-frames 44 45 --reference-frame 43
@@ -57,7 +57,7 @@ v2使用 `observe --with-contours`，从 RGB 连通域在 F/B/U 不确定环生�
 ## 验证
 
 ```bash
-/opt/anaconda3/envs/wfrl-mac/bin/python -m pytest -q tests/test_nrel_dataset.py tests/test_nrel_optimizer.py tests/test_nrel_evaluate.py
+PYTHON_ENVIRONMENT/bin/python -m pytest -q tests/test_nrel_dataset.py tests/test_nrel_optimizer.py tests/test_nrel_evaluate.py
 ```
 
 v2对应验证还包括 `test_nrel_model_v2.py`、`test_nrel_contour.py`、`test_nrel_renderer_audit.py`、`test_nrel_observations_v2.py`、`test_nrel_optimize_v2.py` 和 `test_nrel_boundary_metrics.py`；完整本机记录见v2的 `tests.txt`。

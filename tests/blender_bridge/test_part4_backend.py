@@ -183,20 +183,36 @@ def test_immediate_reconnect_reaps_closed_owner_before_accepting_resume():
     client = socket.create_connection(('127.0.0.1', server.port))
     client.settimeout(.5)
     hello = lambda sid: envelope('hello', dict(supported_versions=[1], resume_session_id=sid, capabilities=[]), '', 0)
+
+    def receive_reply():
+        client.setblocking(False)
+        decoder = FrameDecoder()
+        messages = []
+
+        def poll_reply():
+            server.poll()
+            try:
+                data = client.recv(65536)
+            except BlockingIOError:
+                return False
+            assert data, 'Bridge disconnected before the handshake reply'
+            messages.extend(decoder.feed(data))
+            return bool(messages)
+
+        wait_for(poll_reply, timeout=.5)
+        assert len(messages) == 1
+        assert messages[0]['type'] == 'hello_ack'
+        return messages[0]
+
     try:
         client.sendall(encode_message(hello(None)))
-        for _ in range(5):
-            server.poll()
-        sid = FrameDecoder().feed(client.recv(65536))[0]['session_id']
+        sid = receive_reply()['session_id']
         client.close()
         # No server.poll between the old close and the new connection.
         client = socket.create_connection(('127.0.0.1', server.port))
         client.settimeout(.5)
         client.sendall(encode_message(hello(sid)))
-        for _ in range(5):
-            server.poll()
-        reply = FrameDecoder().feed(client.recv(65536))[0]
-        assert reply['type'] == 'hello_ack'
+        reply = receive_reply()
         assert reply['session_id'] == sid and reply['payload']['resumed']
     finally:
         client.close()

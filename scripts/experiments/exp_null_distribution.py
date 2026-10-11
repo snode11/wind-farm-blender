@@ -11,7 +11,7 @@
 
 同时做方差分解：功率的对数方差里，风速贡献多少、风向贡献多少。
 
-    "C:/Users/s1155/.conda/envs/wfcrl/python.exe" exp_null_distribution.py
+    python3 exp_null_distribution.py
 """
 import os
 import json

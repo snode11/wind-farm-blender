@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import math
 import time
+import json
 
 
 _SESSIONS = {}
@@ -29,6 +30,17 @@ def _legacy_available(scene):
     return bool(scene and scene.get('split_reconstruction_review') and
                 scene.objects.get('SplitRecon.Camera') is not None and
                 all(scene.objects.get(f'SplitRecon.B{b}') is not None for b in (1, 2, 3)))
+
+
+def ensure_geometry_structure(scene):
+    """Reuse source T1 supports in the saved reconstruction coordinate frame."""
+    if not _legacy_available(scene):
+        return []
+    from . import split_turbine_context
+    anchor = scene.objects['SplitRecon.B1']
+    return split_turbine_context.ensure(scene, prefix='SplitRecon.Reference.',
+        offset=tuple(anchor.matrix_world.translation),
+        names_key='split_reconstruction_structure_names')
 
 
 def available(scene):
@@ -183,6 +195,7 @@ def _isolate(window, area, scene):
 
 def _configure(window, areas, *, navigation=None, reset_view=False):
     scene = window.scene
+    ensure_geometry_structure(scene)
     left_area, right_area = areas
     left, right = (area.spaces.active for area in areas)
     _leave_local(window, left_area)
@@ -211,6 +224,8 @@ def _configure(window, areas, *, navigation=None, reset_view=False):
     right.camera = reconstruction_camera(scene)
     right.use_local_camera = True
     right.lock_camera = False
+    right.lock_object = None
+    right.lock_cursor = False
     right.show_region_ui = False
     right.show_region_toolbar = False
     right.show_region_tool_header = False
@@ -327,6 +342,34 @@ def _fit_camera(area, points):
     rv = area.spaces.active.region_3d
     if rv.view_perspective != 'CAMERA' or not points:
         return
+    camera = area.spaces.active.camera
+    if camera and (camera.name == 'SplitRecon.Camera' or camera.get('split_mappo_texture_owned')):
+        from mathutils import Vector
+        target = [(min(p[i] for p in points) + max(p[i] for p in points)) / 2
+                  for i in range(3)]
+        target = Vector(target)
+        # Native orbit exits CAMERA using the region's stored pivot. The pane
+        # was split from MAPPO, whose pivot is 10 km from this isolated rotor.
+        # Seed its free navigation as well as its visible camera framing.
+        rv.view_perspective = 'PERSP'
+        rv.view_location = target
+        rv.view_rotation = camera.matrix_world.to_quaternion()
+        rv.view_distance = max(1., (camera.matrix_world.translation - target).length)
+        # The native camera operator also saves the free-view orientation.
+        # Assigning the visible CAMERA rotation alone leaves Blender's cached
+        # exit orientation pointing at the old left-side scene.
+        # A delayed camera transition can restore its cached zoom *after* the
+        # framing below has fitted the full turbine, especially after reopening
+        # a zoomed ORTHO inspection. Complete this programmatic transition now;
+        # keep the user's smooth navigation preference for subsequent input.
+        view_preferences = bpy.context.preferences.view
+        smooth_view = view_preferences.smooth_view
+        try:
+            view_preferences.smooth_view = 0
+            with bpy.context.temp_override(area=area, region=_region(area)):
+                bpy.ops.view3d.view_camera()
+        finally:
+            view_preferences.smooth_view = smooth_view
     scale = bpy.context.preferences.system.ui_scale
     x, y, width, height = _rectangle(area)
     margin, title = 20 * scale, 64 * scale
@@ -486,11 +529,109 @@ def _redraw_scene(scene):
                     area.tag_redraw()
 
 
+def _display_origin(scene):
+    """Both comparisons use nacelle coordinates, at different display offsets."""
+    from . import split_mappo_texture
+    from mathutils import Vector
+    obj = (split_mappo_texture.blades(scene)[0] if split_mappo_texture.active(scene)
+           else scene.objects.get('SplitRecon.B1'))
+    return obj.matrix_world.translation.copy() if obj is not None else Vector((0., 0., 0.))
+
+
+def _transfer_display_camera(source, target, offset):
+    """Carry framing between private display cameras, never source calibration."""
+    target.matrix_world = source.matrix_world.copy()
+    target.location += offset
+    for name in ('type', 'lens', 'ortho_scale', 'sensor_width', 'sensor_height',
+                 'sensor_fit', 'shift_x', 'shift_y', 'clip_start', 'clip_end'):
+        setattr(target.data, name, getattr(source.data, name))
+
+
+_DISPLAY_OPTICS = ('type', 'lens', 'ortho_scale', 'sensor_width', 'sensor_height',
+                   'sensor_fit', 'shift_x', 'shift_y', 'clip_start', 'clip_end')
+
+
+def switch_mode(context):
+    """Switch the current pair in place, preserving its clock and navigation."""
+    import bpy
+    from . import cameras, split_mappo_texture, split_texture_settings as settings
+    scene, window = context.scene, context.window
+    if not enabled(scene) or not _legacy_available(scene):
+        raise ValueError('请先打开几何重建示例')
+    if window is None or cameras._LAYOUT_JOB is not None or _key(window) in _JOBS:
+        raise ValueError('请等待当前布局调整完成')
+    areas = _pair(scene, window.screen)
+    if areas is None:
+        raise ValueError('当前重建分屏尚未就绪')
+    previous = texture_adapter(scene)
+    source_camera = reconstruction_camera(scene)
+    origin = _display_origin(scene)
+    navigation = _navigation(areas[1].spaces.active)
+    left_navigation = _navigation(areas[0].spaces.active)
+    lens = areas[1].spaces.active.lens
+    old_right_navigation = _navigation(areas[1].spaces.active)
+    membership = [(obj, obj.local_view_get(areas[1].spaces.active)) for obj in scene.objects
+                  if hasattr(obj, 'local_view_get')]
+    target_camera = target_state = None
+    try:
+        with settings.rollback_on_error(scene):
+            if previous.active(scene):
+                source = scene.get(settings.CURRENT)
+                if source in {'MAPPO', 'SYNTHETIC'}:
+                    settings._store(scene, settings._key(source), settings._encode(settings.capture(scene)))
+                scene[settings.CURRENT] = 'GEOMETRY'
+                scene[split_mappo_texture.DETAIL] = False
+            else:
+                split_mappo_texture.ensure(scene)
+                scene[split_mappo_texture.DETAIL] = False
+            offset = _display_origin(scene) - origin
+            navigation['view_location'] += offset
+            target_camera = reconstruction_camera(scene)
+            target_state = (target_camera.matrix_world.copy(),
+                            {name: getattr(target_camera.data, name) for name in _DISPLAY_OPTICS})
+            _transfer_display_camera(source_camera, target_camera, offset)
+            with bpy.context.temp_override(window=window, area=areas[0]):
+                _configure(window, areas)
+            _restore_navigation(areas[0].spaces.active, left_navigation)
+            _restore_navigation(areas[1].spaces.active, navigation)
+            areas[1].spaces.active.lens = lens
+            _remember(window, areas)
+            scene['split_review_status'] = 'READY'
+            _redraw_scene(scene)
+    except Exception:
+        if target_state is not None:
+            target_camera.matrix_world = target_state[0]
+            for name, value in target_state[1].items():
+                setattr(target_camera.data, name, value)
+        areas[1].spaces.active.camera = source_camera
+        areas[1].spaces.active.lens = lens
+        _restore_navigation(areas[0].spaces.active, left_navigation)
+        _restore_navigation(areas[1].spaces.active, old_right_navigation)
+        for obj, included in membership:
+            obj.local_view_set(areas[1].spaces.active, included)
+        for obj in scene.objects:
+            if hasattr(obj, 'local_view_set') and all(obj != old for old, _ in membership):
+                obj.local_view_set(areas[1].spaces.active, False)
+        raise
+    return True
+
+
+def _saved_return_navigation(scene):
+    raw = scene.get('split_review_return_navigation')
+    if not raw:
+        return None
+    try:
+        return json.loads(raw)
+    except (ValueError, TypeError):
+        return None
+
+
 def enter(context, reset_layout=True, use_texture=None, use_same_source=False):
-    """Restore the current comparison, or explicitly enter synthetic texture.
+    """Restore the current comparison, or explicitly select its source.
 
     A saved geometry example keeps its original right-hand data when returning
-    or repairing its layout. Only the texture entry explicitly upgrades it.
+    or repairing its layout. False explicitly selects that geometry; True
+    selects synthetic texture, while use_same_source selects MAPPO texture.
     """
     import bpy
     from . import cameras, split_surface_texture, split_mappo_texture, split_texture_settings
@@ -516,11 +657,28 @@ def enter(context, reset_layout=True, use_texture=None, use_same_source=False):
                 scene[split_mappo_texture.DETAIL] = False
             elif use_texture is True:
                 split_surface_texture.ensure(scene)
+            elif use_texture is False:
+                if not _legacy_available(scene):
+                    raise ValueError('请先打开几何重建示例')
+                outgoing_source = split_texture_settings._source(scene)
+                if outgoing_source is not None:
+                    split_texture_settings._store(scene, split_texture_settings._key(outgoing_source),
+                        split_texture_settings._encode(split_texture_settings.capture(scene)))
+                scene[split_texture_settings.CURRENT] = 'GEOMETRY'
+                scene[split_mappo_texture.DETAIL] = False
             else:
                 texture = texture_adapter(scene)
                 if texture.active(scene) or not _legacy_available(scene):
                     texture.ensure(scene)
             texture = texture_adapter(scene)
+            current_pair = _pair(scene, window.screen)
+            right_navigation = None
+            if use_texture is None and not use_same_source and current_pair:
+                if texture.active(scene) and hasattr(texture, 'track'):
+                    texture.track(scene, current_pair[1])
+                right_navigation = _navigation(current_pair[1].spaces.active)
+            elif use_texture is None and not use_same_source:
+                right_navigation = _saved_return_navigation(scene)
             scene['split_review_enabled'] = True
             for key, value in _METADATA.items():
                 if key not in scene:
@@ -528,6 +686,7 @@ def enter(context, reset_layout=True, use_texture=None, use_same_source=False):
             job = dict(window=window, scene=scene, screen=window.screen, stage='layout',
                        navigation=_navigation(source_area.spaces.active), deadline=time.monotonic() + 15,
                        frame=scene.frame_current, subframe=scene.frame_subframe,
+                       right_navigation=right_navigation,
                        explicit=True, detail=bool(texture.active(scene) and
                                                  scene.get(texture.DETAIL, texture is split_surface_texture)))
             scene['split_review_status'] = 'PREPARING'
@@ -581,6 +740,11 @@ def exit_mode(context):
     if cameras._LAYOUT_JOB is not None:
         raise ValueError('请等待当前布局调整完成')
     pair = _pair(scene, window.screen)
+    if pair:
+        values = _navigation(pair[1].spaces.active)
+        scene['split_review_return_navigation'] = json.dumps({
+            name: value if isinstance(value, (str, float, int)) else list(value)
+            for name, value in values.items()})
     source_area = pair[0] if pair else areas[0]
     navigation = _navigation(source_area.spaces.active)
     presentation = _presentation(source_area.spaces.active)
@@ -691,6 +855,8 @@ def _advance_jobs(now):
             if job.get('detail'):
                 with bpy.context.temp_override(window=window, area=areas[1], region=_region(areas[1])):
                     texture_adapter(scene).focus(bpy.context, areas[1])
+            if job.get('right_navigation') is not None:
+                _restore_navigation(areas[1].spaces.active, job['right_navigation'])
             _remember(window, areas)
             scene['split_review_status'] = 'READY'
             _redraw_scene(scene)
@@ -717,7 +883,10 @@ def _tick():
                 continue
             texture = texture_adapter(scene)
             if texture.active(scene):
-                texture.ensure(scene)
+                if scene.get('split_texture_current_source') == 'MAPPO':
+                    texture.refresh(scene)
+                else:
+                    texture.ensure(scene)
             areas = _pair(scene, window.screen)
             if areas is None:
                 # An unrelated workspace remains untouched. Enter is the explicit
@@ -734,9 +903,16 @@ def _tick():
                     _configure(window, areas)
                 _timeline_all(window)
                 _remember(window, areas)
-                _SESSIONS[key]['changed'] = now
-                _SESSIONS[key]['initial'] = True
-                scene['split_review_status'] = 'PREPARING'
+                if scene.get('split_review_navigation_saved'):
+                    # Blender saved the viewport itself. Restoring data/settings
+                    # must not replay a user's explicit original/enhanced fit.
+                    scene['split_review_status'] = 'READY'
+                else:
+                    areas[0].spaces.active.region_3d.view_perspective = 'PERSP'
+                    areas[1].spaces.active.region_3d.view_perspective = 'CAMERA'
+                    _JOBS[key] = dict(window=window, scene=scene, screen=window.screen,
+                        stage='fit', settle=now + _DEBOUNCE, deadline=now + 15, explicit=True)
+                    scene['split_review_status'] = 'PREPARING'
                 continue
             signature = _signature(areas)
             if signature != state['signature']:
@@ -762,17 +938,49 @@ def _ensure_timer():
 
 
 def _load_pre(_unused):
-    from . import cameras, split_surface_texture, split_mappo_texture
+    from . import cameras, split_surface_texture, split_mappo_texture, split_turbine_context
     cameras.cancel_view_layout()
     _SESSIONS.clear()
     _JOBS.clear()
     _BOUNDS.clear()
     split_surface_texture.clear_runtime()
     split_mappo_texture.clear_runtime()
+    split_turbine_context.clear_runtime()
 
 
 def _load_post(_unused):
+    import bpy
+    for scene in bpy.data.scenes:
+        if _legacy_available(scene):
+            try:
+                ensure_geometry_structure(scene)
+            except (ReferenceError, RuntimeError, ValueError, KeyError) as exc:
+                _set_error(scene, exc)
     _ensure_timer()
+
+
+def _save_pre(_unused):
+    import bpy
+    for scene in bpy.data.scenes:
+        if available(scene):
+            scene['split_review_navigation_saved'] = True
+
+
+def _history_post(_unused):
+    """Undo/redo replaces IDs and saved metadata without a file-load callback."""
+    from . import split_mappo_texture, split_turbine_context
+    # Window sessions contain only scalar area/layout signatures. Retain them
+    # so invalidating data cannot schedule a fit that moves the user's view.
+    _JOBS.clear()
+    _BOUNDS.clear()
+    split_mappo_texture.clear_runtime()
+    split_turbine_context.clear_runtime()
+    _ensure_timer()
+
+
+def _depsgraph_post(scene, depsgraph):
+    from . import split_turbine_context
+    split_turbine_context.notice_updates(scene, depsgraph)
 
 
 def register():
@@ -782,6 +990,10 @@ def register():
     _REGISTERED = True
     for collection, callback in ((bpy.app.handlers.load_pre, _load_pre),
                                  (bpy.app.handlers.load_post, _load_post),
+                                 (bpy.app.handlers.save_pre, _save_pre),
+                                 (bpy.app.handlers.undo_post, _history_post),
+                                 (bpy.app.handlers.redo_post, _history_post),
+                                 (bpy.app.handlers.depsgraph_update_post, _depsgraph_post),
                                  (bpy.app.handlers.frame_change_post, split_mappo_texture.frame_changed)):
         bpy.app.handlers.persistent(callback)
         if callback not in collection:
@@ -798,6 +1010,10 @@ def unregister():
         bpy.app.timers.unregister(_tick)
     for collection, callback in ((bpy.app.handlers.load_pre, _load_pre),
                                  (bpy.app.handlers.load_post, _load_post),
+                                 (bpy.app.handlers.save_pre, _save_pre),
+                                 (bpy.app.handlers.undo_post, _history_post),
+                                 (bpy.app.handlers.redo_post, _history_post),
+                                 (bpy.app.handlers.depsgraph_update_post, _depsgraph_post),
                                  (bpy.app.handlers.frame_change_post, split_mappo_texture.frame_changed)):
         if callback in collection:
             collection.remove(callback)

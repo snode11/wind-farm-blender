@@ -1,0 +1,77 @@
+{
+  "schema": "nrel-dynamic-sequence-protocol.v1",
+  "status": "FROZEN_BEFORE_COMPUTATION",
+  "target": "T1/B1",
+  "created_utc": "2026-10-04T04:11:13.075905+00:00",
+  "local_date": "2026-10-04",
+  "timezone": "Asia/Shanghai",
+  "frames": [
+    42,
+    43,
+    44,
+    45
+  ],
+  "q_grid_per_axis_m": [
+    -0.5,
+    -0.45,
+    -0.4,
+    -0.35,
+    -0.3,
+    -0.25,
+    -0.2,
+    -0.15,
+    -0.1,
+    -0.05,
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5
+  ],
+  "anchor_frame_id": 43,
+  "anchor_q_m": [
+    0.0,
+    0.0
+  ],
+  "initialization_q_m": [
+    0.0,
+    0.0
+  ],
+  "dt_s": 0.05,
+  "temporal_weight": 0.05,
+  "temporal_scale_m": 0.1,
+  "node_weight": 0.01,
+  "node_scale_m": 0.5,
+  "component_speed_cap_m_s": 4.0,
+  "image_scale_native_px": 10.0,
+  "equivalence_tolerance_native_px": 3.0,
+  "budget": {
+    "threads": 4,
+    "optimizer_iterations": 0,
+    "restarts": 0,
+    "max_dp_transition_evaluations_per_group": 583443,
+    "time_limit_s": 300
+  },
+  "groups": {
+    "G1": "Same frozen reference and rigidmotion; q0",
+    "G2": "Same initialization/bounds/anchor/kinematicpriors/DPbudget asG3; imagecostoff",
+    "G3": "Same model andDP with cachedactualRGBimagecoston"
+  },
+  "prior_and_history": "Staticreference is historical v2 fitted fromRGB;G2 doesnot meanimage-never-used;all4framesnonblind development",
+  "condition": "IDEAL_SHARED_RIGID_PLANE_ASSISTANCE",
+  "mapping_status": "PRIOR_DEFINED_STRUCTURAL_POINT",
+  "frame_transport": "Existing aerodynamic-reference-axis minimal rotation; no assertion mechanicalsection normal equalsmechanicalcenterline tangent",
+  "time_dependency": "OfflinejointDP usesfutureframes; notcausal/live",
+  "output_scope": "4 discrete researched samples with ambiguousconditionalreadouts; outside4unavailable; no trajectorygapfilling",
+  "speed_scope": "Frozen kinematicbound only; noBeamDyn stiffness/load verification",
+  "range_scope": "Independent per-frame3px finite-grid equalimage band; notjointposterior orconfidenceinterval",
+  "stage_gate": "DY1measurementgate remainsnotpassed; researchprototypeonly",
+  "scoring_policy": "FreezeG1/G2/G3 before anydynamictruth read; scoringcannot alterconfiguration",
+  "display_policy": "REVIEW_ONLY andprior-definedpoint/ranges/ambiguity visible; noengineeringacceptance"
+}

@@ -7,7 +7,7 @@ VTK 自己的 `screenshot()`，再把后者贴进前者 —— 直接抓整窗�
 要跑真训练（截图里的功率、约束事件必须是真的，不是摆拍），所以要 mpiexec：
 
     & "C:\\Program Files\\Microsoft MPI\\Bin\\mpiexec.exe" -n 1 `
-      "C:\\Users\\s1155\\.conda\\envs\\wfcrl\\python.exe" `
+      "USER_HOME\\.conda\\envs\\wfcrl\\python.exe" `
       scripts/figures/capture_studio.py
 
 出两张：

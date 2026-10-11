@@ -97,7 +97,7 @@ def export(template, output):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--template", type=Path, default=ROOT.parent / "wfcrl-env-me/wfcrl/simulators/fastfarm/inputs/template")
+    parser.add_argument("--template", type=Path, default=ROOT / "projects/nrel5mw-reference/template")
     parser.add_argument("--output", type=Path, default=ROOT / "blender_frontend/wfrl_blender/assets/nrel5mw_geometry.json")
     args = parser.parse_args()
     export(args.template, args.output)

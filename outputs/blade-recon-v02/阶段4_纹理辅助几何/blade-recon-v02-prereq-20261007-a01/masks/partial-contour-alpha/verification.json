@@ -1,0 +1,110 @@
+{
+  "old16_RGB_hashes_preserved": true,
+  "old_manifest_sha256_preserved": true,
+  "new16_RGB_and_masks_match_freeze": true,
+  "annotations_sha256_matches": true,
+  "production_rgb_masks_hash": "a58e25215f0b5567fe8d15650da5cd25178ee5f53b2af5d693ccdfb5c88d1100",
+  "production_matches_root_snapshot_a58": true,
+  "full_instance_gate": "FAILED_INPUT_INSTANCE_GATE",
+  "partial_gate": "PASSED_PARTIAL_CONTOUR_GATE",
+  "for_use_only_with_explicit_unknown_censor": true,
+  "no_unknown_texture_or_geometry_claim": true,
+  "rows": [
+    {
+      "frame": 42,
+      "camera": "WideA",
+      "RGB_hash_matches_capture": true,
+      "mask_hash_matches_freeze": true
+    },
+    {
+      "frame": 42,
+      "camera": "WideB",
+      "RGB_hash_matches_capture": true,
+      "mask_hash_matches_freeze": true
+    },
+    {
+      "frame": 42,
+      "camera": "Patch",
+      "RGB_hash_matches_capture": true,
+      "mask_hash_matches_freeze": true
+    },
+    {
+      "frame": 42,
+      "camera": "Crack",
+      "RGB_hash_matches_capture": true,
+      "mask_hash_matches_freeze": true
+    },
+    {
+      "frame": 43,
+      "camera": "WideA",
+      "RGB_hash_matches_capture": true,
+      "mask_hash_matches_freeze": true
+    },
+    {
+      "frame": 43,
+      "camera": "WideB",
+      "RGB_hash_matches_capture": true,
+      "mask_hash_matches_freeze": true
+    },
+    {
+      "frame": 43,
+      "camera": "Patch",
+      "RGB_hash_matches_capture": true,
+      "mask_hash_matches_freeze": true
+    },
+    {
+      "frame": 43,
+      "camera": "Crack",
+      "RGB_hash_matches_capture": true,
+      "mask_hash_matches_freeze": true
+    },
+    {
+      "frame": 45,
+      "camera": "WideA",
+      "RGB_hash_matches_capture": true,
+      "mask_hash_matches_freeze": true
+    },
+    {
+      "frame": 45,
+      "camera": "WideB",
+      "RGB_hash_matches_capture": true,
+      "mask_hash_matches_freeze": true
+    },
+    {
+      "frame": 45,
+      "camera": "Patch",
+      "RGB_hash_matches_capture": true,
+      "mask_hash_matches_freeze": true
+    },
+    {
+      "frame": 45,
+      "camera": "Crack",
+      "RGB_hash_matches_capture": true,
+      "mask_hash_matches_freeze": true
+    },
+    {
+      "frame": 47,
+      "camera": "WideA",
+      "RGB_hash_matches_capture": true,
+      "mask_hash_matches_freeze": true
+    },
+    {
+      "frame": 47,
+      "camera": "WideB",
+      "RGB_hash_matches_capture": true,
+      "mask_hash_matches_freeze": true
+    },
+    {
+      "frame": 47,
+      "camera": "Patch",
+      "RGB_hash_matches_capture": true,
+      "mask_hash_matches_freeze": true
+    },
+    {
+      "frame": 47,
+      "camera": "Crack",
+      "RGB_hash_matches_capture": true,
+      "mask_hash_matches_freeze": true
+    }
+  ]
+}

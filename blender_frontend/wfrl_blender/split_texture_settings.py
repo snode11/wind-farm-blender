@@ -29,6 +29,8 @@ def _key(source):
 
 def _source(scene):
     source = scene.get(CURRENT)
+    if source == 'GEOMETRY':
+        return None
     if source in {'MAPPO', 'SYNTHETIC'}:
         return source
     # Pre-selector saved synthetic scenes retain their current RNA choices.

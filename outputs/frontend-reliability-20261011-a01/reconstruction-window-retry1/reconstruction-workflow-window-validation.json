@@ -13,7 +13,7 @@
   ],
   "smooth_view_preference": 200,
   "input": {
-    "canonical": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/isolated/profile/extensions/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+    "canonical": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/isolated/profile/extensions/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
     "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
     "entry_operator": "wfrl.split_recon_open_example",
     "startup_blend": ""
@@ -217,7 +217,7 @@
       }
     ],
     "texture_mode": "ORIGINAL",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/geometry-unified-entry.png",
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/geometry-unified-entry.png",
     "complete_turbine_framing": [
       {
         "region_size": [
@@ -1791,7 +1791,7 @@
       }
     ],
     "texture_mode": "ORIGINAL",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/same-source-complete-turbine.png",
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/same-source-complete-turbine.png",
     "complete_turbine_framing": [
       {
         "region_size": [
@@ -3178,7 +3178,7 @@
       }
     ],
     "texture_mode": "ORIGINAL",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/same-source-synchronized-paused.png",
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/same-source-synchronized-paused.png",
     "complete_turbine_framing": [
       {
         "region_size": [
@@ -16551,7 +16551,7 @@
       }
     ],
     "texture_mode": "ORIGINAL",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/same-source-native-back-view.png",
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/same-source-native-back-view.png",
     "complete_turbine_framing": [
       {
         "region_size": [
@@ -17746,7 +17746,7 @@
       }
     ],
     "texture_mode": "ORIGINAL",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/manual-zoom-before-resume.png"
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/manual-zoom-before-resume.png"
   },
   "manual-zoom-resume": {
     "start": {
@@ -18221,7 +18221,7 @@
       }
     ],
     "texture_mode": "ORIGINAL",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/manual-zoom-after-resume.png"
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/manual-zoom-after-resume.png"
   },
   "preset_SUPPORTED": {
     "point": [
@@ -18470,7 +18470,7 @@
       }
     ],
     "texture_mode": "ORIGINAL",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/supported-one-shot-focus.png"
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/supported-one-shot-focus.png"
   },
   "supported-preset-play": {
     "start": {
@@ -18945,7 +18945,7 @@
       }
     ],
     "texture_mode": "ORIGINAL",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/supported-free-orbit.png"
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/supported-free-orbit.png"
   },
   "preset_TIP": {
     "point": [
@@ -19194,7 +19194,7 @@
       }
     ],
     "texture_mode": "ORIGINAL",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/tip-one-shot-focus.png"
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/tip-one-shot-focus.png"
   },
   "tip-preset-play": {
     "start": {
@@ -19680,7 +19680,7 @@
       }
     ],
     "texture_mode": "CONTRAST",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/explicit-enhancement-complete-turbine.png",
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/explicit-enhancement-complete-turbine.png",
     "complete_turbine_framing": [
       {
         "region_size": [
@@ -20823,7 +20823,7 @@
       }
     ],
     "texture_mode": "CONTRAST",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/enhanced-manual-observation.png"
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/enhanced-manual-observation.png"
   },
   "explicit-original-complete-turbine": {
     "mode": "MAPPO",
@@ -21054,7 +21054,7 @@
       }
     ],
     "texture_mode": "ORIGINAL",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/explicit-original-complete-turbine.png",
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/explicit-original-complete-turbine.png",
     "complete_turbine_framing": [
       {
         "region_size": [
@@ -22234,7 +22234,7 @@
       }
     ],
     "texture_mode": "ORIGINAL",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/return-to-geometry.png",
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/return-to-geometry.png",
     "complete_turbine_framing": [
       {
         "region_size": [
@@ -23377,7 +23377,7 @@
       }
     ],
     "texture_mode": "ORIGINAL",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/return-to-same-source.png",
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/return-to-same-source.png",
     "complete_turbine_framing": [
       {
         "region_size": [
@@ -24828,7 +24828,7 @@
       }
     ],
     "texture_mode": "CONTRAST",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/before-save-enhanced-full.png",
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/before-save-enhanced-full.png",
     "complete_turbine_framing": [
       {
         "region_size": [
@@ -25971,7 +25971,7 @@
       }
     ],
     "texture_mode": "CONTRAST",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/before-save-enhanced-local.png"
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/before-save-enhanced-local.png"
   },
   "saved-same-source-local": {
     "frame": 1146,
@@ -26062,7 +26062,7 @@
         }
       }
     },
-    "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/saved-same-source-local.blend"
+    "path": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/saved-same-source-local.blend"
   },
   "saved-same-source-local-reopened": {
     "mode": "MAPPO",
@@ -26293,7 +26293,7 @@
       }
     ],
     "texture_mode": "CONTRAST",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/saved-same-source-local-reopened.png"
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/saved-same-source-local-reopened.png"
   },
   "saved-geometry-local": {
     "frame": 1146,
@@ -26384,7 +26384,7 @@
         }
       }
     },
-    "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/saved-geometry-local.blend"
+    "path": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/saved-geometry-local.blend"
   },
   "saved-geometry-local-reopened": {
     "mode": "GEOMETRY",
@@ -26585,7 +26585,7 @@
       }
     ],
     "texture_mode": "CONTRAST",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/saved-geometry-local-reopened.png"
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/saved-geometry-local-reopened.png"
   },
   "final-same-source-enhanced-complete": {
     "mode": "MAPPO",
@@ -26816,7 +26816,7 @@
       }
     ],
     "texture_mode": "CONTRAST",
-    "screenshot": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/final-same-source-enhanced-complete.png",
+    "screenshot": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/final-same-source-enhanced-complete.png",
     "complete_turbine_framing": [
       {
         "region_size": [
@@ -27734,9 +27734,9 @@
   "error": null,
   "blender": "5.2.1 LTS",
   "addon_module": "bl_ext.wfrl_frontend.wfrl_blender",
-  "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/isolated/profile/extensions/wfrl_blender/__init__.py",
-  "actual_module_root": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/isolated/profile/extensions/wfrl_blender",
-  "blend": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/saved-geometry-local.blend",
+  "addon_file": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/isolated/profile/extensions/wfrl_blender/__init__.py",
+  "actual_module_root": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/isolated/profile/extensions/wfrl_blender",
+  "blend": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/saved-geometry-local.blend",
   "verification": "INSTALLED_VISIBLE_WINDOW_UNIFIED_ENTRY_NATIVE_PLAY_NAVIGATION_SWITCH_SAVE_REOPEN",
   "source_regenerated": false,
   "solver_started": false,

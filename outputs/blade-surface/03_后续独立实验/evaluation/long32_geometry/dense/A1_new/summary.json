@@ -1,0 +1,130 @@
+{
+  "status": "EVALUATED_REVIEW_ONLY",
+  "source_label": "long_development48",
+  "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/long32/dense/A1_new/recon.json",
+  "sha256": "3060c96c0143087d7c37fc82e95355e1c80a599dcf9a1cd91e40052ece325659",
+  "density": 512,
+  "frames": 32,
+  "planned_frames": [
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73
+  ],
+  "planned_cameras": [
+    "WideInput"
+  ],
+  "surfaces": {
+    "inner": {
+      "mean_m": 0.2480025698956159,
+      "mixed_p95_m": 0.5673565389587536,
+      "times_equal_weight": true
+    },
+    "middle": {
+      "mean_m": 0.0942257159021033,
+      "mixed_p95_m": 0.23187031487922524,
+      "times_equal_weight": true
+    },
+    "outer": {
+      "mean_m": 0.20578396062855217,
+      "mixed_p95_m": 0.5325880754546511,
+      "times_equal_weight": true
+    },
+    "global": {
+      "mean_m": 0.1831380350235552,
+      "mixed_p95_m": 0.4847995751631488,
+      "times_equal_weight": true
+    }
+  },
+  "q_eval": {
+    "WideInput_first_frame": {
+      "planned": 12,
+      "evaluated": 12,
+      "failed": 0,
+      "camera_reference_missing": 0,
+      "prediction_out_of_frame": 0,
+      "pixel_valid_predictions_only": {
+        "count": 12,
+        "mean": 0.24450734571493826,
+        "median": 0.17005401551708116,
+        "p95": 0.5866992805961552,
+        "max": 0.8953603998996675
+      },
+      "pixel_all_finite_diagnostic_only": {
+        "count": 12,
+        "mean": 0.24450734571493826,
+        "median": 0.17005401551708116,
+        "p95": 0.5866992805961552,
+        "max": 0.8953603998996675
+      },
+      "distance3d_m": {
+        "count": 12,
+        "mean": 0.1743647241975279,
+        "median": 0.1703338223566319,
+        "p95": 0.37825984827456544,
+        "max": 0.3918105945204542
+      },
+      "failed_queries_prevent_success_only_ranking": true
+    },
+    "WideInput_subsequent_31_frames": {
+      "planned": 372,
+      "evaluated": 322,
+      "failed": 50,
+      "camera_reference_missing": 0,
+      "prediction_out_of_frame": 50,
+      "pixel_valid_predictions_only": {
+        "count": 322,
+        "mean": 2.012752129083378,
+        "median": 1.5717105200277117,
+        "p95": 4.86475733923901,
+        "max": 8.345110820815547
+      },
+      "pixel_all_finite_diagnostic_only": {
+        "count": 372,
+        "mean": 2.9286917180190435,
+        "median": 1.855495106335264,
+        "p95": 10.1985475415224,
+        "max": 14.40683454950574
+      },
+      "distance3d_m": {
+        "count": 372,
+        "mean": 0.22281874067916801,
+        "median": 0.1849918089245029,
+        "p95": 0.4962693049101054,
+        "max": 0.7975097182519257
+      },
+      "failed_queries_prevent_success_only_ranking": true
+    }
+  },
+  "no_registration": true,
+  "wall_s": 6.443919499986805,
+  "not_engineering_accuracy": true
+}

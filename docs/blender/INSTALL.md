@@ -2,13 +2,13 @@
 
 适用于 Blender **5.2+** 的 NREL 公开扩展 **0.3.20+1**，包含完整风机几何／同源纹理、精细支撑结构、三相机默认复位、柔性回放、六类合成缺陷、双束／TLS。GW184 **0.4.0** 使用[独立包](GW184三相机与缺陷编辑器.md)。
 
-公开包与开发机日常安装不同：日常安装为 **LOCAL_UNPUBLISHED_REVISION**，manifest 同为 `0.3.20+1`，相机异常清理与稳定轮询修订尚未发布。其 **217 passed / 113 subtests passed**、173 文件安装核对和原生脚本窗口证据只属于本地载荷。公开包与本地包的完整 SHA-256、实际模块和验证边界见[发布状态](发布状态与验证范围.md)。
+公开包、当前源码分支与开发机日常安装分别识别：日常安装的已核对载荷标识为 **LOCAL_UNPUBLISHED_REVISION**，manifest 同为 `0.3.20+1`，包含相机异常清理与稳定轮询；该 ZIP 未作为公开扩展附件发布。其 **217 passed / 113 subtests passed**、173 文件安装核对和原生脚本窗口证据只属于本地载荷。公开包与本地包的完整 SHA-256、实际模块和验证边界见[发布状态](发布状态与验证范围.md)。
 
 ## 发布身份与验证
 
-当前公开安装包为 [v0.3.20.1](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.20.1) 的 **[wfrl_blender-0.3.20+1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.20.1/wfrl_blender-0.3.20%2B1.zip)**，manifest 版本 `0.3.20+1`，173 文件、99,010,020 bytes；上传前本地 SHA-256 为 `e6e279f5f88c730f3c96158bfca525a9d04f1a09915ad3a997d1d29b00a9f5ba`。Release 提供一个专用 ZIP 附件，扩展实现源码未推送；未下载远端附件复验。
+当前公开安装包为 [v0.3.20.1](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.20.1) 的 **[wfrl_blender-0.3.20+1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.20.1/wfrl_blender-0.3.20%2B1.zip)**，manifest 版本 `0.3.20+1`，173 文件、99,010,020 bytes；上传前本地 SHA-256 为 `e6e279f5f88c730f3c96158bfca525a9d04f1a09915ad3a997d1d29b00a9f5ba`。该 Release 提供一个专用 ZIP 附件；当前分支源码与此附件分别识别。
 
-公开扩展源码基线仍为 [v0.3.18 / `6dfa0eef`](https://github.com/snode11/wind-farm-blender/commit/6dfa0eefe410ef3e38d3cbd9ee7d017aafa2fc02)。自动 Source code 不代表本版对应实现或安装包。最终包和本地验证回执见[0.3.20+1 发布核对](releases/0.3.20+1发布核对.md)；原 **NOT_ACCEPTED／FAILED_GATE** 与雷达研究接受边界不变。
+当前项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。`v0.3.20.1` 标签的自动 Source code 不代表该 ZIP 对应实现；源码分支的构建结果也不自动等同于既有公开附件。最终包和本地验证回执见[0.3.20+1 发布核对](releases/0.3.20+1发布核对.md)；原 **NOT_ACCEPTED／FAILED_GATE** 与雷达研究接受边界不变。
 
 ## 安装与升级
 
@@ -42,25 +42,29 @@
 
 ZIP 内置预弯 v3 三机 60 秒回放、旧法与 TLS 两份双束结果层、读取器、默认三相机配置、NREL 缺陷编辑器、T1/B1 默认修补痕迹及同步重建分屏示例。两种双束方法共享原 40 Hz 源数据。示例场景、MAPPO 数据和四张 packed 天空／地表纹理均在包内，无需作者本机路径、克隆仓库、Python 后端、MPI 或 FAST.Farm。
 
-0.3.15／0.3.16 原始几何分屏示例右侧三片叶片各保存 601 个 10 Hz 重建样本，采用 CONSTANT 保持；60 Hz 显示时间轴不会生成额外重建测量。播放时刻、保存样本时刻和保持时长分别显示，例如 frame 52 为 117.850 s／117.800 s／50 ms。绿为输入约束支持，橙为模型推断，均是算法估计。软件播放通过不代表稳定 60 FPS 或重建精度验收。
+规范几何分屏示例右侧三片叶片各保存 601 个 10 Hz 重建样本，采用 CONSTANT 保持；60 Hz 显示时间轴不会生成额外重建测量。播放时刻、保存样本时刻和保持时长分别显示，例如 frame 52 为 117.850 s／117.800 s／50 ms。绿为输入约束支持，橙为模型推断，均是算法估计。软件播放通过不代表稳定 60 FPS 或重建精度验收。
 
-当前包保留 `assets/blade_recon_mappo_tex/`（0.3.17.1 首次交付）：同一次两相机实验的 601 个保存状态、嵌入 JSON 与三张 packed 固定灰度图集，0–60 s 对应 MAPPO 117–177 s，按同源摘要恢复。原图为 Workbench 仿真材质色，图集存在模糊、条带、接缝和叶尖错贴／拖影；几何与纹理准确性仍为 NOT_ACCEPTED，中段／叶尖按钮是人工观察点，不代表缺陷检测。
+当前包包含 `assets/blade_recon_mappo_tex/`：同一次两相机实验的 601 个保存状态、嵌入 JSON 与三张 packed 固定灰度图集，0–60 s 对应 MAPPO 117–177 s，按同源摘要恢复。原图为 Workbench 仿真材质色，图集存在模糊、条带、接缝和叶尖错贴／拖影；几何与纹理准确性仍为 NOT_ACCEPTED，中段／叶尖按钮是人工观察点，不代表缺陷检测。
 
-当前包还保留 0.3.17 加入的 `assets/blade_recon_synth_tex/` 保存重建结果与三片 RGBA 图集。**叶片三维重建** 标签支持独立结果导入、packed 纹理、原始／增强灰度／青洋红显示及保存重开。人工近景和显示增强不构成自动缺陷检测或几何精度验收；外部求解研究代码不随扩展打包。详见 [Blade Recon 使用说明](BladeRecon可视化使用说明.md)。
+当前包还包含 `assets/blade_recon_synth_tex/` 保存重建结果与三片 RGBA 图集。**叶片三维重建** 标签支持独立结果导入、packed 纹理、原始／增强灰度／青洋红显示及保存重开。人工近景和显示增强不构成自动缺陷检测或几何精度验收；外部求解研究代码不随扩展打包。详见 [Blade Recon 使用说明](BladeRecon可视化使用说明.md)。
 
 加载 MAPPO 会生成共盒三相机及外伸支架，应用连续重叠的默认取景。固定光心随机舱运动，不持续追踪叶片；根部和极尖端仍可能遮挡。独立单路和单路放大固定使用轻量实体显示，三路保留流畅／高清，原图采集使用独立原始质量设置。
 
 安装、布局和采集见[详细前端说明](../../前端readme.md)、[三相机说明](T1三相机使用说明.md)。新版完整片段性能、跨平台和现场精度需分别验证。
 
-## 从公开源码构建
+## 从项目源码构建
 
-公开 0.3.20+1 没有对应实现源码；安装请选择专用 ZIP。公开匹配实现基线为 **v0.3.18**。下载完整 [v0.3.18 Source code](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.18)，或克隆仓库后检出该标签；保留 `blender_frontend/wfrl_blender/assets/` 和仓库级 `wfrl/`。使用 Python 3.11+，从仓库根目录运行：
+克隆 [项目仓库](https://github.com/snode11/wind-farm-blender) 的 `wind-farm-rl-all-work` 分支。NREL 扩展构建所需正式载荷随 Git 提供，须保留完整 `blender_frontend/wfrl_blender/assets/`、`_vendor/` 与仓库级 `wfrl/`；缺少正式资产不能生成等价的离线扩展，无需为该构建下载全部研究资源。其他用途的资源按[分发说明](../PUBLICATION.md)取得。使用 Python 3.11+，从仓库根目录运行：
 
 ```bash
-python3 scripts/blender/build_extension.py
+python3 scripts/blender/build_extension.py --output /path/to/new-build-directory
 ```
 
-该基线构建生成 `dist/wfrl_blender-0.3.18.zip`、inventory 与 SHA-256。其独立复建与该版本 172 文件最终 ZIP 字节一致，见[来源核对](releases/0.3.18发布核对.md)；不能改称当前公开包或本地可靠性载荷的复建。离线构建无需外部原始 FAST.Farm／VTP 数据。自动 Source code 是开发归档，安装须用构建后的扩展 ZIP。
+构建生成 `wfrl_blender-0.3.20+1.zip`、逐文件 inventory 和 SHA-256。默认拒绝覆盖已有同名输出；明确需要替换时使用 `--overwrite`。产物先在同一文件系统暂存，再发布校验文件与 ZIP；普通发布异常尝试恢复原产物，恢复冲突保留备份并报告位置。不要把该保护理解为断电或强制终止下的多文件整体原子性。
+
+构建会从规范源生成协议与内置读取器，不依赖训练环境、FAST.Farm 或原始 VTP。构建成功只证明产物生成；安装版后台、可见窗口及性能需按实际 ZIP 单独验证。当前源码不自动更新日常安装，也不替换既有公开附件。v0.3.18 的独立复建与其 172 文件 ZIP 字节一致结论只属于[该标签和包](releases/0.3.18发布核对.md)。
+
+独立 normal/close 雷达包与 Replay 示例权重随 Git 提供；WFCRL 依赖源码与大型研究证据按[分发清单](../PUBLICATION.md)取得。GW184 源码运行前须按[来源说明](../../projects/gw184-single/sources/README.md)恢复未随源码分发的两份 DTU 输入。以上内容均不能以安装 NREL 扩展 ZIP 代替。
 
 ## 现有 MP4 输出
 
@@ -68,7 +72,7 @@ python3 scripts/blender/build_extension.py
 
 ## Bridge 后端更新
 
-本扩展包含连接、通信、协议与运行面板；不包含 Python Bridge 服务及启动器。仅安装 `wfrl_blender-0.3.20+1.zip` 不会更新后端源码。使用已配置的后端时，同步适用后端源码后重启 Bridge；已运行的训练或求解需先正常停止。0.3.18 源码同步范围为扩展、构建脚本与相关测试，后端服务仍需单独核对。GW184 独立运行包不依赖 Bridge。
+本扩展包含连接、通信、协议与运行面板；不包含 Python Bridge 服务及启动器。仅安装 `wfrl_blender-0.3.20+1.zip` 不会更新后端源码。使用已配置的后端时，同步适用后端源码后重启 Bridge；已运行的训练或求解需先正常停止。项目分支包含后端源码，运行时仍须核对所用环境、场景、权重和服务来源。GW184 独立运行包不依赖 Bridge。
 
 ## 升级后确认雷达行为
 

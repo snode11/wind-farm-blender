@@ -2,7 +2,7 @@
   "status": "PASS",
   "module": "bl_ext.wfrl_frontend.wfrl_blender",
   "installed_module": true,
-  "addon_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/isolated/profile/extensions/wfrl_blender",
+  "addon_path": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/isolated/profile/extensions/wfrl_blender",
   "blender": "5.2.1 LTS",
   "phase": "foreign_playback_preserved",
   "elapsed_s": 18.66477070899782,

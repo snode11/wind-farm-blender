@@ -2,6 +2,7 @@
 import hashlib
 import json
 import math
+from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
 import numpy as np
@@ -71,8 +72,28 @@ def is_active(scene):
     return ready
 
 
-def read_package(path):
-    path, overlay = dual_beam_api().resolve_package(path)
+@dataclass(frozen=True)
+class _LoadedPackage:
+    manifest: dict
+    times: np.ndarray
+    transforms: np.ndarray
+    poses: np.ndarray
+    readers: dict
+    source_path: Path
+    result_path: Path
+    overlay: dict | None
+    tower_motion: dict | None
+    reference: dict | None
+
+    @property
+    def playback(self):
+        return self.manifest, self.times, self.transforms, self.poses, self.readers
+
+
+def _load_package(path):
+    """Validate one package and retain its parsed data for scene binding."""
+    result_path = Path(path).resolve()
+    path, overlay = dual_beam_api().resolve_package(result_path)
     manifest=json.loads((path/'manifest.json').read_text())
     if (manifest.get('schema') not in ('wfrl.farm-flex-review.v1','wfrl.farm-flex-review.v2','wfrl.farm-flex-review.v3')
             or manifest.get('status')!='REVIEW_ONLY'
@@ -127,27 +148,34 @@ def read_package(path):
         manifest = {**manifest, 'measurement_mode': 'dual_beam',
                     'dual_beam_calibration': overlay['config'],
                     'dual_beam': overlay['manifest']}
-    return manifest,times,transforms,np.stack(motion_poses,axis=1),readers
+    return _LoadedPackage(manifest, times, transforms, np.stack(motion_poses, axis=1),
+                          readers, path, result_path, overlay, tower_data, reference)
+
+
+def read_package(path):
+    """Return validated manifest, clock, transforms, poses and replay readers."""
+    return _load_package(path).playback
 
 
 class FarmFlex:
-    def __init__(self,scene,path):
+    def __init__(self,scene,path,*,_package=None):
         import bpy
         from .turbine_geometry import geometry_data,blade_mesh
         from .materials import get_material,ensure_blade_tip_markings
         from . import clearance_replay
-        self.manifest,self.times,self.transforms,self.poses,self.readers=read_package(path)
-        result_path = Path(path).resolve()
-        path, overlay = dual_beam_api().resolve_package(path)
-        from .tower_motion import read_tower
-        self.tower_motion = read_tower(path,self.manifest,self.times)
-        from .prebend import read_reference
-        self.reference = read_reference(path, self.manifest)
+        package = _load_package(path) if _package is None else _package
+        self.manifest,self.times,self.transforms,self.poses,self.readers=package.playback
+        result_path = package.result_path
+        path, overlay = package.source_path, package.overlay
+        self.tower_motion = package.tower_motion
+        self.reference = package.reference
         self.towers = []
         self.fittings = []
         from .deflection import read_comparison, ComparisonView
         comparison_data = read_comparison(path, self.manifest, self.times, self.poses,
-                                          rigid_poses=self.poses)
+                                          rigid_poses=self.poses,
+                                          tower_motion=self.tower_motion,
+                                          blade_reference=self.reference)
         self.comparison = None
         telemetry_path = Path(path) / 'telemetry.json'
         self.telemetry = json.loads(telemetry_path.read_text()) if 'telemetry.json' in self.manifest['files'] else None
@@ -523,6 +551,10 @@ class FarmFlex:
             self.comparison.update(scene, i, alpha, t)
         from .nrel_defects import editor
         editor.after_update(scene, t)
+        # Reuse the current source structures only after their pose and flexible
+        # tower mesh have been committed. Reconstruction samples remain separate.
+        from . import split_turbine_context
+        split_turbine_context.sync(scene)
 
 
 def update(scene,depsgraph=None):
@@ -536,6 +568,8 @@ def update(scene,depsgraph=None):
 def detach(scene=None, *, restore=True):
     """Release handlers and mesh references before scene destruction or unload."""
     import bpy
+    from . import split_turbine_context
+    split_turbine_context.clear_runtime(scene)
     global _ACTIVE
     if scene is None:
         actives = list(_ACTIVES.values())
@@ -594,7 +628,8 @@ def attach(scene,path):
         # Validate before releasing the old scene runtime. In particular a
         # FULL_COPY scene contains renamed objects and must not detach an
         # already-restored scene when those required bindings are absent.
-        manifest, *_ = read_package(path)
+        package = _load_package(path)
+        manifest = package.manifest
         required = [f'WFRL.Turbine.{tid}.{suffix}'
                     for tid in manifest['turbine_ids']
                     for suffix in ('YawRoot', 'Rotor', 'Tower', 'Blade1', 'Blade2', 'Blade3')]
@@ -607,7 +642,7 @@ def attach(scene,path):
             if other.scene != scene and any(obj in scene.objects.values() for obj, *_ in other.blades):
                 raise ValueError('FarmFlex objects are already driven by scene: ' + other.scene.name)
         detach(scene)
-        active=FarmFlex(scene,path)
+        active=FarmFlex(scene,path,_package=package)
         _ACTIVES[scene.as_pointer()] = active
         _ACTIVE = active
     except Exception:

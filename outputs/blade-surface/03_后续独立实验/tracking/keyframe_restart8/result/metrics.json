@@ -1,0 +1,104 @@
+{
+  "reference": "Codex reviewed RGB correspondences; not user-provided human truth and not source geometric truth",
+  "all_observation_denominator": 96,
+  "nonquery_reference_denominator": 83,
+  "nonquery_predicted_visible": 83,
+  "nonquery_visibility_fraction": 1.0,
+  "nonquery_error_median_px": 5.245916217435755,
+  "nonquery_error_p95_px": 11.324121784886882,
+  "nonquery_error_max_px": 21.035870713509148,
+  "per_point": {
+    "M00": {
+      "denominator": 7,
+      "visible": 7,
+      "median_error_px": 4.952513580035036,
+      "max_error_px": 9.803046826210453,
+      "mismatch_over_8px": 2
+    },
+    "M01": {
+      "denominator": 7,
+      "visible": 7,
+      "median_error_px": 5.63330267213303,
+      "max_error_px": 7.631087236268759,
+      "mismatch_over_8px": 0
+    },
+    "M02": {
+      "denominator": 7,
+      "visible": 7,
+      "median_error_px": 5.660262185324197,
+      "max_error_px": 8.50572280915818,
+      "mismatch_over_8px": 1
+    },
+    "M03": {
+      "denominator": 7,
+      "visible": 7,
+      "median_error_px": 3.777031222850512,
+      "max_error_px": 6.997127822953169,
+      "mismatch_over_8px": 0
+    },
+    "M04": {
+      "denominator": 7,
+      "visible": 7,
+      "median_error_px": 3.1177774562455145,
+      "max_error_px": 6.439254708244499,
+      "mismatch_over_8px": 0
+    },
+    "M05": {
+      "denominator": 7,
+      "visible": 7,
+      "median_error_px": 3.546792861052004,
+      "max_error_px": 11.164847962859989,
+      "mismatch_over_8px": 2
+    },
+    "M06": {
+      "denominator": 7,
+      "visible": 7,
+      "median_error_px": 4.9304024808204305,
+      "max_error_px": 8.286873911173329,
+      "mismatch_over_8px": 1
+    },
+    "M07": {
+      "denominator": 7,
+      "visible": 7,
+      "median_error_px": 5.5677141015539675,
+      "max_error_px": 9.509901518302854,
+      "mismatch_over_8px": 3
+    },
+    "M08": {
+      "denominator": 7,
+      "visible": 7,
+      "median_error_px": 5.269677995663019,
+      "max_error_px": 6.8680991150184445,
+      "mismatch_over_8px": 0
+    },
+    "M09": {
+      "denominator": 7,
+      "visible": 7,
+      "median_error_px": 4.042844606909868,
+      "max_error_px": 8.735499683050456,
+      "mismatch_over_8px": 2
+    },
+    "M10": {
+      "denominator": 7,
+      "visible": 7,
+      "median_error_px": 14.29604814096099,
+      "max_error_px": 21.035870713509148,
+      "mismatch_over_8px": 6
+    },
+    "M11": {
+      "denominator": 6,
+      "visible": 6,
+      "median_error_px": 5.705600242051645,
+      "max_error_px": 9.797459738064497,
+      "mismatch_over_8px": 2
+    }
+  },
+  "visibility_reference_comparison": {
+    "denominator": 84,
+    "reference_visible": 83,
+    "reference_not_observed": 1,
+    "predicted_visible_reference_not_observed": 0,
+    "predicted_not_visible_reference_visible": 0,
+    "semantics": "RGB reviewed observation presence only; a missing intersection is not source-ID/occlusion truth."
+  }
+}

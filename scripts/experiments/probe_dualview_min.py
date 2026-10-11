@@ -5,7 +5,7 @@
 里隔离出来，确认是 pyvistaqt/VTK 版本本身的问题，还是 app 里挡住了。
 
 跑（真机，有显示器）：
-    & "C:\\Users\\s1155\\.conda\\envs\\wfcrl\\python.exe" scripts/experiments/probe_dualview_min.py
+    & "USER_HOME\\.conda\\envs\\wfcrl\\python.exe" scripts/experiments/probe_dualview_min.py
 
 看窗口：左右两个立方体**都应该在转**。
   · 两个都转           → pyvistaqt 双视口刷新没问题，bug 在我们 app（我据此改）

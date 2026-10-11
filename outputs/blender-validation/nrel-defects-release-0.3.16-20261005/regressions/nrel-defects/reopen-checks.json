@@ -1,6 +1,0 @@
-{
-  "status": "PASS",
-  "phase": "reopen",
-  "module_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blender-validation/nrel-defects-release-0.3.16-20261005/profile/extensions/wfrl_blender/__init__.py",
-  "scope": "background save/reopen and flexible geometry; no viewport or appearance acceptance"
-}

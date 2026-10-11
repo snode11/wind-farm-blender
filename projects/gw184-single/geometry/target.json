@@ -1,0 +1,28 @@
+{
+  "schema": "gw184.geometry.v2",
+  "blade_span_m": 90.0,
+  "max_chord_m": 5.6,
+  "root_radius_m": 2.0,
+  "root_diameter_m": 3.2,
+  "hub_height_m": 112.0,
+  "nacelle_length_m": 11.8,
+  "nacelle_width_m": 4.9,
+  "nacelle_height_m": 4.0,
+  "nacelle_front_x_m": 2.0,
+  "tower_x_m": 6.0,
+  "shaft_tilt_deg": 0.0,
+  "precone_deg": 0.0,
+  "prebend_m": 3.0,
+  "ring_points": 128,
+  "span_step_m": 0.5,
+  "section_model": "DTU chord/thickness/twist; FFA-W3-241/301/360 contours from pinned WISDEM reference; scaled thick root transition; static DTU-shape prebend",
+  "assumptions": [
+    "World +X from hub towards nacelle rear, +Z upward; hub=(0,0,112).",
+    "Blade span is radial pitch-axis distance from root to tip; 2*(2+90)=184 m reference diameter.",
+    "Hub radius 2 m, root diameter 3.2 m, nacelle height 4 m and tower placement are visual assumptions.",
+    "Root chord blends from 3.2 m to independently scaled DTU chord over first 10 m; last 0.6 m closes to a tip.",
+    "Static 3.0 m upwind tip prebend, with normalized DTU C2-def Y distribution; assumed for GW184. Zero tilt/cone; no elastic displacement or controller model.",
+    "90 m is root-to-tip pitch-axis projection. Reference swept diameter at 0 deg pitch is 184 m; feathering rotates prebend into the rotor plane and slightly increases the envelope.",
+    "FFA contour family is a geometry reference; root adaptation and tip cap remain assumptions, not exact GW184/DTU blade surface."
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "reference": "Codex reviewed RGB correspondences; not user-provided human truth and not source geometric truth",
+  "all_observation_denominator": 384,
+  "nonquery_reference_denominator": 322,
+  "nonquery_predicted_visible": 237,
+  "nonquery_visibility_fraction": 0.7360248447204969,
+  "nonquery_error_median_px": 41.61730417041575,
+  "nonquery_error_p95_px": 896.8294616735669,
+  "nonquery_error_max_px": 1158.7397655864781,
+  "per_point": {
+    "M00": {
+      "denominator": 31,
+      "visible": 21,
+      "median_error_px": 20.43462335927641,
+      "max_error_px": 113.37863514533926,
+      "mismatch_over_8px": 24
+    },
+    "M01": {
+      "denominator": 31,
+      "visible": 15,
+      "median_error_px": 53.36053564177858,
+      "max_error_px": 109.4084884426396,
+      "mismatch_over_8px": 22
+    },
+    "M02": {
+      "denominator": 31,
+      "visible": 25,
+      "median_error_px": 63.2897784377374,
+      "max_error_px": 158.1314281424938,
+      "mismatch_over_8px": 25
+    },
+    "M03": {
+      "denominator": 31,
+      "visible": 18,
+      "median_error_px": 17.551879176027978,
+      "max_error_px": 118.56281605467885,
+      "mismatch_over_8px": 18
+    },
+    "M04": {
+      "denominator": 31,
+      "visible": 26,
+      "median_error_px": 97.86803459705726,
+      "max_error_px": 119.53345757601517,
+      "mismatch_over_8px": 22
+    },
+    "M05": {
+      "denominator": 31,
+      "visible": 31,
+      "median_error_px": 80.37168936772237,
+      "max_error_px": 118.56504345810889,
+      "mismatch_over_8px": 24
+    },
+    "M06": {
+      "denominator": 31,
+      "visible": 29,
+      "median_error_px": 78.52700367668989,
+      "max_error_px": 154.96386050896783,
+      "mismatch_over_8px": 22
+    },
+    "M07": {
+      "denominator": 31,
+      "visible": 31,
+      "median_error_px": 50.86281519558037,
+      "max_error_px": 140.78753926876567,
+      "mismatch_over_8px": 22
+    },
+    "M08": {
+      "denominator": 20,
+      "visible": 11,
+      "median_error_px": 16.73241190096342,
+      "max_error_px": 897.4906029878241,
+      "mismatch_over_8px": 11
+    },
+    "M09": {
+      "denominator": 19,
+      "visible": 10,
+      "median_error_px": 13.377790585160563,
+      "max_error_px": 894.9633471646499,
+      "mismatch_over_8px": 15
+    },
+    "M10": {
+      "denominator": 18,
+      "visible": 10,
+      "median_error_px": 17.909389129997976,
+      "max_error_px": 1158.7397655864781,
+      "mismatch_over_8px": 12
+    },
+    "M11": {
+      "denominator": 17,
+      "visible": 10,
+      "median_error_px": 15.555283086691821,
+      "max_error_px": 1154.4841494751063,
+      "mismatch_over_8px": 11
+    }
+  },
+  "visibility_reference_comparison": {
+    "denominator": 372,
+    "reference_visible": 322,
+    "reference_not_observed": 50,
+    "predicted_visible_reference_not_observed": 0,
+    "predicted_not_visible_reference_visible": 85,
+    "semantics": "RGB reviewed observation presence only; a missing intersection is not source-ID/occlusion truth."
+  }
+}

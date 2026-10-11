@@ -1,0 +1,621 @@
+{
+  "classification": "SYNTHETIC_IDEAL_INSPECTION",
+  "blade_shift": 0,
+  "criteria": {
+    "core_coverage_min": 0.9,
+    "contrast_keep_min": 0.5,
+    "patch_boundary_mean_error_m_max": 0.1,
+    "crack_boundary_mean_error_m_max": 0.05,
+    "patch_centroid_error_m_max": 0.1,
+    "crack_centroid_error_m_max": 0.05,
+    "normal_false_anomaly_area_fraction_max": 0.05,
+    "normal_anomaly_threshold_relative_local_background": 0.15
+  },
+  "defects": [
+    {
+      "id": "D1",
+      "type": "crack",
+      "blade_true": 1,
+      "blade_reconstruction": 1,
+      "physical_size_m": [
+        0.015,
+        0.6
+      ],
+      "input_narrow_px": 3.070415525084745,
+      "raw_RGB_contrast_gray_levels": 50.25587463378906,
+      "core_coverage": 1.0,
+      "source_normalized_contrast": 0.5090215562871008,
+      "reconstructed_normalized_contrast": 0.31760969065656564,
+      "contrast_keep": 0.6239611795093132,
+      "centroid_error_span_chord_m": [
+        -0.0067795671739006025,
+        -0.025063080535590365
+      ],
+      "centroid_norm_m": 0.025963831323572398,
+      "boundary_mean_symmetric_m": 0.004619266053692325,
+      "normal_coverage": 1.0,
+      "normal_false_anomaly_fraction": 0.00011835720203574388,
+      "gates": {
+        "input_width": true,
+        "raw_RGB_contrast": true,
+        "core_coverage": true,
+        "contrast": true,
+        "centroid": true,
+        "boundary": true,
+        "normal": true
+      },
+      "acceptance": "PASS"
+    },
+    {
+      "id": "D2",
+      "type": "crack",
+      "blade_true": 1,
+      "blade_reconstruction": 1,
+      "physical_size_m": [
+        0.6,
+        0.015
+      ],
+      "input_narrow_px": 3.071940875887541,
+      "raw_RGB_contrast_gray_levels": 56.2483024597168,
+      "core_coverage": 1.0,
+      "source_normalized_contrast": 0.5496005184890688,
+      "reconstructed_normalized_contrast": 0.38967493338178294,
+      "contrast_keep": 0.7090148576516188,
+      "centroid_error_span_chord_m": [
+        0.003236832717881555,
+        -0.006105931776521745
+      ],
+      "centroid_norm_m": 0.006910824039366542,
+      "boundary_mean_symmetric_m": 0.003147206495960748,
+      "normal_coverage": 1.0,
+      "normal_false_anomaly_fraction": 0.0,
+      "gates": {
+        "input_width": true,
+        "raw_RGB_contrast": true,
+        "core_coverage": true,
+        "contrast": true,
+        "centroid": true,
+        "boundary": true,
+        "normal": true
+      },
+      "acceptance": "PASS"
+    },
+    {
+      "id": "D3",
+      "type": "patch",
+      "blade_true": 1,
+      "blade_reconstruction": 1,
+      "physical_size_m": [
+        0.4,
+        0.3
+      ],
+      "input_narrow_px": 61.30122284303957,
+      "raw_RGB_contrast_gray_levels": 40.18351745605469,
+      "core_coverage": 1.0,
+      "source_normalized_contrast": 0.3876643508632675,
+      "reconstructed_normalized_contrast": 0.3454910189487237,
+      "contrast_keep": 0.8912117355629157,
+      "centroid_error_span_chord_m": [
+        0.0031421235206678944,
+        -0.004038477150077879
+      ],
+      "centroid_norm_m": 0.005116858207028562,
+      "boundary_mean_symmetric_m": 0.0027298814700031826,
+      "normal_coverage": 1.0,
+      "normal_false_anomaly_fraction": 0.0,
+      "gates": {
+        "input_width": true,
+        "raw_RGB_contrast": true,
+        "core_coverage": true,
+        "contrast": true,
+        "centroid": true,
+        "boundary": true,
+        "normal": true
+      },
+      "acceptance": "PASS"
+    },
+    {
+      "id": "D6",
+      "type": "patch",
+      "blade_true": 2,
+      "blade_reconstruction": 2,
+      "physical_size_m": [
+        0.5,
+        0.4
+      ],
+      "input_narrow_px": 81.70944409403775,
+      "raw_RGB_contrast_gray_levels": 39.39508056640625,
+      "core_coverage": 1.0,
+      "source_normalized_contrast": 0.3821059329148611,
+      "reconstructed_normalized_contrast": 0.38300396745681,
+      "contrast_keep": 1.0023502240205964,
+      "centroid_error_span_chord_m": [
+        0.0003779867163800077,
+        0.009613592841539509
+      ],
+      "centroid_norm_m": 0.009621020802423172,
+      "boundary_mean_symmetric_m": 0.004046893200204488,
+      "normal_coverage": 1.0,
+      "normal_false_anomaly_fraction": 0.0,
+      "gates": {
+        "input_width": true,
+        "raw_RGB_contrast": true,
+        "core_coverage": true,
+        "contrast": true,
+        "centroid": true,
+        "boundary": true,
+        "normal": true
+      },
+      "acceptance": "PASS"
+    }
+  ],
+  "heldout": [
+    {
+      "frame": 2,
+      "t": 0.2,
+      "id": "D1",
+      "view": "Check excluded from fit/fusion",
+      "normalized_ROI_MAE": 0.018801402300596237,
+      "ROI_correlation": 0.8870735396964365,
+      "metric_boundary": "same known ROI local brightness-normalized appearance agreement; no classification accuracy",
+      "reprojected": "quality/heldout/D1_000002_reprojected.png"
+    },
+    {
+      "frame": 4,
+      "t": 0.4,
+      "id": "D2",
+      "view": "Check excluded from fit/fusion",
+      "normalized_ROI_MAE": 0.017988108098506927,
+      "ROI_correlation": 0.9083981700039889,
+      "metric_boundary": "same known ROI local brightness-normalized appearance agreement; no classification accuracy",
+      "reprojected": "quality/heldout/D2_000004_reprojected.png"
+    },
+    {
+      "frame": 6,
+      "t": 0.6,
+      "id": "D3",
+      "view": "Check excluded from fit/fusion",
+      "normalized_ROI_MAE": 0.03783199563622475,
+      "ROI_correlation": 0.97738107399527,
+      "metric_boundary": "same known ROI local brightness-normalized appearance agreement; no classification accuracy",
+      "reprojected": "quality/heldout/D3_000006_reprojected.png"
+    },
+    {
+      "frame": 8,
+      "t": 0.8,
+      "id": "D6",
+      "view": "Check excluded from fit/fusion",
+      "normalized_ROI_MAE": 0.026988042518496513,
+      "ROI_correlation": 0.965331038433856,
+      "metric_boundary": "same known ROI local brightness-normalized appearance agreement; no classification accuracy",
+      "reprojected": "quality/heldout/D6_000008_reprojected.png"
+    },
+    {
+      "frame": 11,
+      "t": 1.1,
+      "id": "D1",
+      "view": "Check excluded from fit/fusion",
+      "normalized_ROI_MAE": 0.019276319071650505,
+      "ROI_correlation": 0.8927246742808134,
+      "metric_boundary": "same known ROI local brightness-normalized appearance agreement; no classification accuracy",
+      "reprojected": "quality/heldout/D1_000011_reprojected.png"
+    },
+    {
+      "frame": 14,
+      "t": 1.4,
+      "id": "D2",
+      "view": "Check excluded from fit/fusion",
+      "normalized_ROI_MAE": 0.016419222578406334,
+      "ROI_correlation": 0.914478778762793,
+      "metric_boundary": "same known ROI local brightness-normalized appearance agreement; no classification accuracy",
+      "reprojected": "quality/heldout/D2_000014_reprojected.png"
+    },
+    {
+      "frame": 17,
+      "t": 1.7,
+      "id": "D3",
+      "view": "Check excluded from fit/fusion",
+      "normalized_ROI_MAE": 0.03539462387561798,
+      "ROI_correlation": 0.9712257523776113,
+      "metric_boundary": "same known ROI local brightness-normalized appearance agreement; no classification accuracy",
+      "reprojected": "quality/heldout/D3_000017_reprojected.png"
+    },
+    {
+      "frame": 20,
+      "t": 2.0,
+      "id": "D6",
+      "view": "Check excluded from fit/fusion",
+      "normalized_ROI_MAE": 0.02838023193180561,
+      "ROI_correlation": 0.9785957454617221,
+      "metric_boundary": "same known ROI local brightness-normalized appearance agreement; no classification accuracy",
+      "reprojected": "quality/heldout/D6_000020_reprojected.png"
+    },
+    {
+      "frame": 23,
+      "t": 2.3,
+      "id": "D1",
+      "view": "Check excluded from fit/fusion",
+      "normalized_ROI_MAE": 0.020257867872714996,
+      "ROI_correlation": 0.6901717440353478,
+      "metric_boundary": "same known ROI local brightness-normalized appearance agreement; no classification accuracy",
+      "reprojected": "quality/heldout/D1_000023_reprojected.png"
+    },
+    {
+      "frame": 26,
+      "t": 2.6,
+      "id": "D2",
+      "view": "Check excluded from fit/fusion",
+      "normalized_ROI_MAE": 0.015767885372042656,
+      "ROI_correlation": 0.9787925464959645,
+      "metric_boundary": "same known ROI local brightness-normalized appearance agreement; no classification accuracy",
+      "reprojected": "quality/heldout/D2_000026_reprojected.png"
+    },
+    {
+      "frame": 29,
+      "t": 2.9,
+      "id": "D3",
+      "view": "Check excluded from fit/fusion",
+      "normalized_ROI_MAE": 0.03180379420518875,
+      "ROI_correlation": 0.9825985935858996,
+      "metric_boundary": "same known ROI local brightness-normalized appearance agreement; no classification accuracy",
+      "reprojected": "quality/heldout/D3_000029_reprojected.png"
+    },
+    {
+      "frame": 32,
+      "t": 3.2,
+      "id": "D6",
+      "view": "Check excluded from fit/fusion",
+      "normalized_ROI_MAE": 0.018619095906615257,
+      "ROI_correlation": 0.9898049598969915,
+      "metric_boundary": "same known ROI local brightness-normalized appearance agreement; no classification accuracy",
+      "reprojected": "quality/heldout/D6_000032_reprojected.png"
+    }
+  ],
+  "corresponding_geometry_diagnostic": [
+    {
+      "frame": 2,
+      "id": "D1",
+      "corresponding_material_point_error_m": 0.034312790316060854,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 2,
+      "id": "D2",
+      "corresponding_material_point_error_m": 0.06645317616226754,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 2,
+      "id": "D3",
+      "corresponding_material_point_error_m": 0.022681231130983213,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 2,
+      "id": "D6",
+      "corresponding_material_point_error_m": 0.21738548316721537,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 4,
+      "id": "D1",
+      "corresponding_material_point_error_m": 0.011284043656064124,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 4,
+      "id": "D2",
+      "corresponding_material_point_error_m": 0.03416623431181445,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 4,
+      "id": "D3",
+      "corresponding_material_point_error_m": 0.025009942575823115,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 4,
+      "id": "D6",
+      "corresponding_material_point_error_m": 0.25805092998816903,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 6,
+      "id": "D1",
+      "corresponding_material_point_error_m": 0.047736039672365956,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 6,
+      "id": "D2",
+      "corresponding_material_point_error_m": 0.06648237802596518,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 6,
+      "id": "D3",
+      "corresponding_material_point_error_m": 0.040648180127035916,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 6,
+      "id": "D6",
+      "corresponding_material_point_error_m": 0.19565530536696257,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 8,
+      "id": "D1",
+      "corresponding_material_point_error_m": 0.06695691615047034,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 8,
+      "id": "D2",
+      "corresponding_material_point_error_m": 0.07261189813657323,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 8,
+      "id": "D3",
+      "corresponding_material_point_error_m": 0.06636708145283371,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 8,
+      "id": "D6",
+      "corresponding_material_point_error_m": 0.10348495362211073,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 11,
+      "id": "D1",
+      "corresponding_material_point_error_m": 0.02257744745088405,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 11,
+      "id": "D2",
+      "corresponding_material_point_error_m": 0.02441302426224786,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 11,
+      "id": "D3",
+      "corresponding_material_point_error_m": 0.024484575719892904,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 11,
+      "id": "D6",
+      "corresponding_material_point_error_m": 0.17614591864502507,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 14,
+      "id": "D1",
+      "corresponding_material_point_error_m": 0.05651540170067306,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 14,
+      "id": "D2",
+      "corresponding_material_point_error_m": 0.032975360941551936,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 14,
+      "id": "D3",
+      "corresponding_material_point_error_m": 0.07061740537900536,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 14,
+      "id": "D6",
+      "corresponding_material_point_error_m": 0.156216621156665,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 17,
+      "id": "D1",
+      "corresponding_material_point_error_m": 0.03142159737303957,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 17,
+      "id": "D2",
+      "corresponding_material_point_error_m": 0.006442427858301906,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 17,
+      "id": "D3",
+      "corresponding_material_point_error_m": 0.049943613051318544,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 17,
+      "id": "D6",
+      "corresponding_material_point_error_m": 0.16526169341114572,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 20,
+      "id": "D1",
+      "corresponding_material_point_error_m": 0.10752391522102679,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 20,
+      "id": "D2",
+      "corresponding_material_point_error_m": 0.11469151253558446,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 20,
+      "id": "D3",
+      "corresponding_material_point_error_m": 0.09779798015950418,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 20,
+      "id": "D6",
+      "corresponding_material_point_error_m": 0.0856319002968966,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 23,
+      "id": "D1",
+      "corresponding_material_point_error_m": 0.02768569654506793,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 23,
+      "id": "D2",
+      "corresponding_material_point_error_m": 0.025055209356392414,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 23,
+      "id": "D3",
+      "corresponding_material_point_error_m": 0.05462589548933821,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 23,
+      "id": "D6",
+      "corresponding_material_point_error_m": 0.07400645158640774,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 26,
+      "id": "D1",
+      "corresponding_material_point_error_m": 0.0931036257742399,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 26,
+      "id": "D2",
+      "corresponding_material_point_error_m": 0.02537040778522033,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 26,
+      "id": "D3",
+      "corresponding_material_point_error_m": 0.12823636211398676,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 26,
+      "id": "D6",
+      "corresponding_material_point_error_m": 0.10425293189768485,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 29,
+      "id": "D1",
+      "corresponding_material_point_error_m": 0.018659994256612793,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 29,
+      "id": "D2",
+      "corresponding_material_point_error_m": 0.02637388255342458,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 29,
+      "id": "D3",
+      "corresponding_material_point_error_m": 0.042060884705748564,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 29,
+      "id": "D6",
+      "corresponding_material_point_error_m": 0.06880580381659297,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 32,
+      "id": "D1",
+      "corresponding_material_point_error_m": 0.02511187000470294,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 32,
+      "id": "D2",
+      "corresponding_material_point_error_m": 0.04638900952760681,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 32,
+      "id": "D3",
+      "corresponding_material_point_error_m": 0.012690861310345,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    },
+    {
+      "frame": 32,
+      "id": "D6",
+      "corresponding_material_point_error_m": 0.056287289022384945,
+      "metric": "same physical r/c material-point source-vs-reconstructed position, no alignment/ICP",
+      "solver_success": true
+    }
+  ],
+  "solver_termination": {
+    "successful_frames": 12,
+    "frames": 12,
+    "failed_frames": [],
+    "scope": "separate numerical termination status, never substituted for geometry or appearance acceptance"
+  },
+  "overall": "PASS",
+  "no_detection_module": true,
+  "no_depth_estimation": true
+}

@@ -1,0 +1,16 @@
+{
+  "created_utc": "2026-10-02T21:43:38.341759+00:00",
+  "phase": "PRE_FIT_NO_MODEL_RUN_YET",
+  "reason": "Independent design review identified original center tanh versus normalized G as a combined parameterization change. Add a normalized physical-reference-center arm to separate this factor.",
+  "branches": [
+    "original_raw",
+    "physical_reference_center",
+    "greville_normalized"
+  ],
+  "physical_reference_center": "Cfree=5*q; chord ell=.35*tanh(chord_raw) exactly as both other arms. Same original domain, same feasibility backtracking.",
+  "primary_coordinate_comparison": "physical_reference_center versus greville_normalized",
+  "historical_bridge": "original_raw versus original formal v2; original_raw versus greville combines center tanh removal with coordinate map.",
+  "identical_budget": "All three arms run 100 image steps and 100 prior-only steps; 600 training image objective backward calls per image fit, excluding declared preflight/final reporting. Equal objective budget, not identical wall time or FLOPs.",
+  "fail_rule": "Any infeasible step after 30 halvings aborts whole experiment; no scores until all arms completed.",
+  "numerical_tests": "actual initial image objective abs <1e-6; vertex max <2e-6m; chain gradient relative L2 <2e-4; these are float32 implementation checks, not physical tolerance."
+}

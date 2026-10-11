@@ -1,6 +1,6 @@
 """Reproducible visible-window benchmark; run only in a dedicated Blender UI.
 
-See docs/blender/前端播放验收.md. Every run requires a fresh output directory.
+Every run requires a fresh output directory.
 POST_PIXEL is a viewport draw observation, not display scanout.
 """
 import hashlib
@@ -135,6 +135,13 @@ def set_playing(desired):
           'scene': pointer(window.scene), 'area': pointer(area), 'region': pointer(region)})
     if after != desired:
         raise RuntimeError(f'Playback operation failed: requested={desired}, observed={after}')
+    if state.get('recording') and before != after:
+        if not after:
+            state['pause_started'] = now()
+        else:
+            paused = state.pop('pause_started', None)
+            if paused is not None:
+                state['pause_intervals'].append([paused, now()])
 
 
 def stage(name):
@@ -159,6 +166,8 @@ def open_view(mode, switching=False):
     kwargs = {'mode': mode}
     if 'layout' in bpy.ops.wfrl.native_camera_view.get_rna_type().properties:
         kwargs['layout'] = LAYOUT
+    if switching and state.get('recording'):
+        expect_routes(core.SLOTS if mode == 'TRIPLE' else [state['slot']])
     with bpy.context.temp_override(window=window, area=area, region=region):
         result = bpy.ops.wfrl.native_camera_view(**kwargs)
     event('switch_view' if switching else 'open_view', mode=mode, layout=LAYOUT,
@@ -166,6 +175,14 @@ def open_view(mode, switching=False):
     if result != {'FINISHED'}:
         raise RuntimeError(f'Camera operator did not finish: {result}')
     state['view_mode'] = mode
+
+
+def expect_routes(slots, started=None):
+    """Declare coverage before requesting a route, independently of its draws."""
+    at = now() if started is None else started
+    for slot in slots:
+        state['route_starts'].setdefault(str(slot),
+            {'wall_s': at, 'frame': state['scene'].frame_current})
 
 
 def routes_ready():
@@ -255,9 +272,12 @@ def begin_measurement():
     state.update(target=PlaybackTarget(start, scene.frame_end, terminal_tolerance_frames=tolerance),
         draws={str(slot): [] for slot in (core.SLOTS if PATH in {'playing_switch', 'paused_switch'} or state['mode'] == 'TRIPLE' else [state['slot']])},
         scene_rows=[[now(), start]], measure_started=now(), termination=None,
-        layout_before=core.layout_dict(scene), recording=True, switched=False, fault_done=False)
+        layout_before=core.layout_dict(scene), recording=True, switched=False, fault_done=False,
+        route_starts={}, pause_intervals=[], pause_started=None)
     # Align exact bounds for the pure evaluator.
     state['scene_rows'][0][0] = state['measure_started']
+    expect_routes(core.SLOTS if state['mode'] == 'TRIPLE' else [state['slot']],
+                  started=state['measure_started'])
     if state.get('profile'):
         state['paused_profile'] = state['profile'].snapshot()
         state['profile'].reset()
@@ -274,10 +294,14 @@ def finish_measurement(reason=None, error=None):
     termination = {'reason': reason, 'wall_s': ended} if reason else state.get('termination')
     if not termination:
         termination = {'reason': 'runtime_error', 'wall_s': ended}
+    pauses = list(state['pause_intervals'])
+    if state.get('pause_started') is not None:
+        pauses.append([state['pause_started'], ended])
     state['recording'] = False
     result = evaluate_playback(target=state['target'], expected_routes=state['draws'].keys(),
         scene_rows=state['scene_rows'], draws=state['draws'], started=state['measure_started'], ended=ended,
-        termination=termination, route_states=final_route_states(), error=error)
+        termination=termination, route_states=final_route_states(),
+        route_starts=state['route_starts'], pause_intervals=pauses, error=error)
     result.update(mode=state['mode'], final_view_mode=state['view_mode'], path=PATH, layout=LAYOUT,
         layout_unchanged=core.layout_dict(state['scene']) == state['layout_before'],
         sync_mode=state['scene'].sync_mode,
