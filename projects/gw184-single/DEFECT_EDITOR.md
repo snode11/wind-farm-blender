@@ -8,7 +8,7 @@
 
 以下实现文件、配置、参考来源与测试位于 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 分支，当前源码与既有 0.4.0 运行 ZIP 分别识别；自动 Source code 归档不能替代该 ZIP。所有相对脚本命令从完整解压包根目录，或已按[资源说明](../../docs/PUBLICATION.md)恢复所需文件的源码工作区根目录执行。证据路径仅在相应文件已恢复时可复查，不作为独立公开下载链接。
 
-从源码启动编辑器前，须按[来源说明](sources/README.md)恢复两份必需的 DTU 原始参考输入；它们因公开再分发许可未确认，不在 Git 或项目资源 Release 中。仅有源码和其余资源时，GW184 几何构建与相关测试不能完整运行。此要求与下述既有 0.4.0 ZIP 使用方式分别判断。
+源码随 Git 提供几何构建所需的两份 DTU 原始参考输入；官方来源、固定摘要及缺失或损坏后的恢复方式见[来源说明](sources/README.md)。当前源码与下述既有 0.4.0 ZIP 按各自载荷和验证身份判断。
 
 ## 打开及编辑
 

@@ -1,4 +1,4 @@
 ........................s.......................                                                [100%]
 =========================== short test summary info ============================
 SKIPPED [1] projects/gw184-single/tests/test_defect_four_types.py:171: Set GW184_DEFECT_PRECHANGE_DIR to explicitly compare a saved prechange gw184 source directory
-47 passed, 1 skipped, 121 subtests passed in 5.05s
+47 passed, 1 skipped, 121 subtests passed in 4.79s

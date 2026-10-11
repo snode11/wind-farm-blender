@@ -2,7 +2,7 @@
 
 适用于独立 GW184 刚性编辑器，不是实物损伤图库。
 
-共同来源为[预设参数](gw184/defect_schema.py)、[轮廓生成器](../../blender_frontend/wfrl_blender/nrel_defects/defect_shapes.py)和[健康参考表面](gw184/reference_surface.py)。这些源码属于当前项目分支；其几何构建还需要按[来源说明](sources/README.md)恢复未分发的两份 DTU 输入。既有 0.4.0 运行 ZIP 的来源与验证按其包身份核对。未提供实物照片、扫描或测量尺寸；以下数值都是合成输入，不能解释为 GW184 实机损伤统计。预设位于 B1 吸力面、弦向 u=0.4，方向角 0°，种子 17。长度与宽度沿健康参考表面计量。
+共同来源为[预设参数](gw184/defect_schema.py)、[轮廓生成器](../../blender_frontend/wfrl_blender/nrel_defects/defect_shapes.py)和[健康参考表面](gw184/reference_surface.py)。这些源码属于当前项目分支；几何构建所需的两份 DTU 原始输入随 Git 提供，固定摘要见[来源说明](sources/README.md)。既有 0.4.0 运行 ZIP 的来源与验证按其包身份核对。未提供实物照片、扫描或测量尺寸；以下数值都是合成输入，不能解释为 GW184 实机损伤统计。预设位于 B1 吸力面、弦向 u=0.4，方向角 0°，种子 17。长度与宽度沿健康参考表面计量。
 
 | 类型 | 采用的形态特征 | 名义长 × 宽 × 深（m） | 未知信息与未模拟内容 |
 | --- | --- | --- | --- |

@@ -9,7 +9,7 @@
 | 叶片表面与材料身份 | [表面研究](blade-surface/README.md) | 固定材料绑定、窗口求解和图集存在实现；几何收益未建立，局部深度恢复未执行 |
 | NREL 静态／动态视频研究 | [nrel_reconstruction](../wfrl/nrel_reconstruction/README.md) | 静态正式模型与候选分别保留；动态仅四个保存估计时刻，`REVIEW_ONLY / DY1 NOT PASSED` |
 | 双束净空与 TLS | [雷达算法](../wfrl/lidar/README.md)、[候选研究](../docs/lidar/双束TLS候选实施与验证总报告.md) | `REVIEW_ONLY / PENDING_ACCEPTANCE`，未建立现场精度及保护能力 |
-| GW184 合成成像 | [项目说明](../projects/gw184-single/README.md) | 固定三相机、刚性动画与六类合成缺陷；源码运行需恢复未分发的 DTU 输入，完整三路 320 秒视频尚未生成 |
+| GW184 合成成像 | [项目说明](../projects/gw184-single/README.md) | 固定三相机、刚性动画与六类合成缺陷；必需 DTU 输入随 Git 提供，完整三路 320 秒视频尚未生成 |
 
 前端内置几何／同源纹理使用独立的 601 样本保存资产，状态为 `SAME_SOURCE_SIMULATION / NOT_ACCEPTED`。外部研究候选没有替换这些正式资源。当前安装、源码、公开扩展与研究证据的身份见[发布状态与验证范围](../docs/blender/发布状态与验证范围.md)。
 

@@ -39,7 +39,7 @@
     "passed": 47,
     "skipped": 1,
     "subtests_passed": 121,
-    "prerequisite": "Two hash-pinned DTU references restored from operator-supplied local archive for testing only; not distributed",
+    "prerequisite": "Matching hash-pinned DTU references; the two original inputs are distributed in projects/gw184-single/sources/",
     "skip_condition": "Prechange source directory not supplied",
     "log": "gw184-tests.log",
     "command": "python -m pytest -q projects/gw184-single/tests/test_model.py projects/gw184-single/tests/test_defect_contract.py projects/gw184-single/tests/test_defect_four_types.py projects/gw184-single/tests/test_defect_output_restore.py projects/gw184-single/tests/test_defect_visibility.py"

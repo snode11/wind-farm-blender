@@ -64,7 +64,7 @@ python3 scripts/blender/build_extension.py --output /path/to/new-build-directory
 
 构建会从规范源生成协议与内置读取器，不依赖训练环境、FAST.Farm 或原始 VTP。构建成功只证明产物生成；安装版后台、可见窗口及性能需按实际 ZIP 单独验证。当前源码不自动更新日常安装，也不替换既有公开附件。v0.3.18 的独立复建与其 172 文件 ZIP 字节一致结论只属于[该标签和包](releases/0.3.18发布核对.md)。
 
-独立 normal/close 雷达包与 Replay 示例权重随 Git 提供；WFCRL 依赖源码与大型研究证据按[分发清单](../PUBLICATION.md)取得。GW184 源码运行前须按[来源说明](../../projects/gw184-single/sources/README.md)恢复未随源码分发的两份 DTU 输入。以上内容均不能以安装 NREL 扩展 ZIP 代替。
+独立 normal/close 雷达包与 Replay 示例权重随 Git 提供；WFCRL 依赖源码与大型研究证据按[分发清单](../PUBLICATION.md)取得。GW184 源码所需的两份 DTU 原始输入随 Git 提供，官方来源、固定摘要及缺失或损坏后的恢复方式见[来源说明](../../projects/gw184-single/sources/README.md)。以上内容均不能以安装 NREL 扩展 ZIP 代替。
 
 ## 现有 MP4 输出
 

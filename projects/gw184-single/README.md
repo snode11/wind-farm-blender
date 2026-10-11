@@ -20,15 +20,15 @@
 
 当前参数和证据边界见 [requirements.md](requirements.md)。工作区原三视频管线检查保存在 `outputs/gw184-single/preflight-20260929/ready/`，汇总为工作区文件 `outputs/gw184-single/preflight-20260929/检查说明.md`，证据是否提供及其恢复路径以[资源清单](../../docs/PUBLICATION.md)为准；未恢复的工作区路径不能当作可访问的公开附件。`review/`、`scene-v1/` 和零预弯短片不代表当前模型；现有 preflight 的源码签名与当前实现不匹配；运行视频管线前须重新生成无渲染检查。
 
-## 源码运行前提
+## 源码参考输入
 
-当前源码分发不附带 `sources/DTU_10MW_RWT.htc` 和 `sources/DTU_10MW_RWT_ae.dat`，因为这两份原始输入的公开再分发许可尚未确认。它们是 GW184 几何构建和相关测试的必需输入；克隆源码或下载项目资源 Release 都不能替代该前提。按[参考来源说明](sources/README.md)取得固定官方归档，再从仓库根目录运行：
+`sources/DTU_10MW_RWT.htc` 和 `sources/DTU_10MW_RWT_ae.dat` 是 GW184 几何构建和相关测试的必需输入，随 Git 提供并保留 `sources/provenance.json` 中的固定摘要。项目持有人确认具备这两份输入的公开分发授权。若文件缺失或损坏，按[参考来源说明](sources/README.md)取得固定官方归档，再从仓库根目录运行：
 
 ```sh
 python3 projects/gw184-single/tools/restore_dtu_reference.py --archive /path/to/dtu_reference.zip
 ```
 
-恢复工具核对两份文件的固定摘要。缺少输入时不要将源码入口或测试描述为可完整运行。此例外只说明当前源码分发，既有 0.4.0 ZIP 的载荷和检查仍按其包身份读取。
+恢复工具核对两份文件的固定摘要；已有目标时拒绝写入，确认替换损坏文件时使用 `--overwrite`。既有 0.4.0 ZIP 的载荷和检查仍按其包身份读取。
 
 ## 不渲染的准备与检查
 

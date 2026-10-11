@@ -47,7 +47,7 @@ GW184 使用[独立包操作说明](docs/blender/GW184三相机与缺陷编辑�
 | 扩展构建与离线回放 | `blender_frontend/wfrl_blender/assets/`、`_vendor/`，以及构建使用的规范 `wfrl/` 源码 |
 | 独立净空演示 | `dist/lidar-delivery.json` 与 `results/lidar/packages/normal-v1.1/`、`close-v1.1/` 的完整数据包 |
 | 后端 Replay | 兼容后端环境，以及 `results/checkpoints/mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt` |
-| GW184 项目 | `projects/gw184-single/` 的 geometry、motion、cameras 与 sources；两份 DTU 原始输入须按[来源说明](projects/gw184-single/sources/README.md)从用户自备官方归档恢复，未随源码分发 |
+| GW184 项目 | `projects/gw184-single/` 的 geometry、motion、cameras 与 sources；两份 DTU 原始输入随 Git 提供，官方来源与固定摘要见[来源说明](projects/gw184-single/sources/README.md) |
 | 验证与研究复查 | 分发清单标识的原始测量、摘要、日志和图像；每项证据只适用于其记录的输入与载荷 |
 
 当前源码包含拒绝帧与非有限重建结果的历史／先验保护、启动器停止确认、完整播放证据判定、回放包单次校验复用、PNG 采集纹理分配控制及构建输出保护。源码同步不会替换公开扩展附件或本机日常安装；安装当前实现需按[源码构建说明](docs/blender/INSTALL.md#从项目源码构建)生成并验证独立 ZIP。
