@@ -6297,9 +6297,9 @@
     },
     {
       "path": "docs/PUBLICATION.md",
-      "bytes": 7154,
-      "sha256": "09922433bdf837cc515f9b9f073b7a9f5479b0bb273cc9c5251015d4eb8ab736",
-      "original_sha256": "09922433bdf837cc515f9b9f073b7a9f5479b0bb273cc9c5251015d4eb8ab736",
+      "bytes": 7935,
+      "sha256": "e472b30e2862c1d8f36dabc892958b3c0348f93dc53c2b85d7c416a1bbfc05d8",
+      "original_sha256": "e472b30e2862c1d8f36dabc892958b3c0348f93dc53c2b85d7c416a1bbfc05d8",
       "text_portable": false
     },
     {
@@ -6311,9 +6311,9 @@
     },
     {
       "path": "docs/development/叶片晃动方案.md",
-      "bytes": 5202,
-      "sha256": "c05cb01fb77c41c57c1330bc5125ec3f6857293e612c85eaabce4cef13ecee9b",
-      "original_sha256": "c05cb01fb77c41c57c1330bc5125ec3f6857293e612c85eaabce4cef13ecee9b",
+      "bytes": 5289,
+      "sha256": "eaa7ac0dd644ebcdf57fa822b6da626c10c9cae9cb3f375560852232ec5fe650",
+      "original_sha256": "eaa7ac0dd644ebcdf57fa822b6da626c10c9cae9cb3f375560852232ec5fe650",
       "text_portable": false
     },
     {
@@ -6472,9 +6472,9 @@
     },
     {
       "path": "docs/proposal/reconstruction/NREL5MW_固定三摄叶片三维重建与表面缺陷首轮诊断方案_v1.1.md",
-      "bytes": 54534,
-      "sha256": "764ee751d208506f60c47bb857bea8b2c87b33bc0ab891dfb68a38716ec4db1b",
-      "original_sha256": "764ee751d208506f60c47bb857bea8b2c87b33bc0ab891dfb68a38716ec4db1b",
+      "bytes": 54533,
+      "sha256": "454dfac8f6aa8c32e3c802ce3bc595b052af47f9d68678173cac641d8181f253",
+      "original_sha256": "454dfac8f6aa8c32e3c802ce3bc595b052af47f9d68678173cac641d8181f253",
       "text_portable": false
     },
     {
@@ -6492,10 +6492,17 @@
       "text_portable": false
     },
     {
+      "path": "docs/proposal/叶片表面重建_2026-10-06/叶片表面重建_方案v3修订资料_2026-10-06/P2b_experiment_protocol_DRAFT_v3.json",
+      "bytes": 7102,
+      "sha256": "ef99d490664d0edb3141b25c3c745a60c1fc2bcaad894eb01c9bb95ff134d846",
+      "original_sha256": "ef99d490664d0edb3141b25c3c745a60c1fc2bcaad894eb01c9bb95ff134d846",
+      "text_portable": false
+    },
+    {
       "path": "docs/overview/风场物理仿真平台_功能列表与终极目标.md",
-      "bytes": 7940,
-      "sha256": "0548e66d56aae3c1a62583c0d1ec682a8fa8b2f3671bdd97ff653b72b87be1af",
-      "original_sha256": "0548e66d56aae3c1a62583c0d1ec682a8fa8b2f3671bdd97ff653b72b87be1af",
+      "bytes": 7927,
+      "sha256": "563720d20b9fadd9cefb57e4bd2aca10bfe3553fd99ac0c6d00f5fbab1843019",
+      "original_sha256": "563720d20b9fadd9cefb57e4bd2aca10bfe3553fd99ac0c6d00f5fbab1843019",
       "text_portable": false
     },
     {
@@ -6739,8 +6746,8 @@
     {
       "path": "evidence/README.md",
       "bytes": 1104,
-      "sha256": "d5ab05a7606f918bd9ebb0186ee074ee017abdbf24c42312640a69bfa96d2ebb",
-      "original_sha256": "d5ab05a7606f918bd9ebb0186ee074ee017abdbf24c42312640a69bfa96d2ebb",
+      "sha256": "2ce8a4adef568958bc7c49cee247fd3184c564f9039e2b5420835670bbbff98c",
+      "original_sha256": "2ce8a4adef568958bc7c49cee247fd3184c564f9039e2b5420835670bbbff98c",
       "text_portable": false
     },
     {
@@ -7487,9 +7494,9 @@
     },
     {
       "path": "publication/resources.json",
-      "bytes": 13299413,
-      "sha256": "dc47752f91d54e76b8e077a2ca26c968ea69c1d542f39e024d2a53d8300a090e",
-      "original_sha256": "dc47752f91d54e76b8e077a2ca26c968ea69c1d542f39e024d2a53d8300a090e",
+      "bytes": 13355659,
+      "sha256": "6c6d5483f708291c67b6e824b09f50148f269cfdc01c2bf8f461735d151b092c",
+      "original_sha256": "6c6d5483f708291c67b6e824b09f50148f269cfdc01c2bf8f461735d151b092c",
       "text_portable": false
     },
     {
