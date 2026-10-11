@@ -161,6 +161,96 @@ def test_every_route_needs_own_terminal_evidence_even_after_scene_wrap():
     assert evaluate_playback(**data)['status'] == 'FAIL'
 
 
+def test_two_terminal_draws_cannot_certify_a_full_minute():
+    data = evidence()
+    rows = [[index / 10, 1 + index * 6] for index in range(601)]
+    data.update(target=PlaybackTarget(1, 3601), scene_rows=rows, ended=60.01,
+        draws={'1': rows, '2': rows, '3': rows[-2:]},
+        termination={'reason': 'completed_segment', 'previous_frame': 3595, 'frame': 3601,
+                     'playback_running': True, 'driver_seek': False})
+    result = evaluate_playback(**data)
+    assert result['status'] == 'FAIL'
+    assert 'C3: missing start drawing evidence' in result['failures']
+    assert result['completed_target_s'] is None
+    assert result['routes']['3']['full_segment_draw_fps'] is None
+
+
+@pytest.mark.parametrize('keep_heartbeats', [False, True])
+def test_route_stall_cannot_be_hidden_by_later_recovery(keep_heartbeats):
+    data = evidence()
+    rows = [[index / 10, 1 + index * 5] for index in range(21)]
+    stalled = [[t, 1 if t < 1.9 else frame] for t, frame in rows]
+    if not keep_heartbeats:
+        stalled = [stalled[0], *stalled[-2:]]
+    data.update(scene_rows=rows, draws={'1': rows, '2': rows, '3': stalled}, ended=2.01,
+        termination={'reason': 'completed_segment', 'previous_frame': 96, 'frame': 101,
+                     'playback_running': True, 'driver_seek': False})
+    result = evaluate_playback(**data)
+    assert result['status'] == 'FAIL'
+    assert 'C3: drawing progression gap exceeds stall threshold' in result['failures']
+
+
+@pytest.mark.parametrize('frames', [(1, 61, 31, 91, 101), (1, 95, 3, 91, 101)])
+def test_route_backward_transition_requires_an_observed_scene_loop(frames):
+    data = evidence()
+    data['draws']['3'] = [[index * .1 + .002, frame] for index, frame in enumerate(frames)]
+    result = evaluate_playback(**data)
+    assert result['status'] == 'FAIL'
+    assert 'C3: unexpected backward transition' in result['failures']
+
+
+def test_start_draw_may_skip_within_the_declared_boundary_tolerance():
+    data = evidence()
+    data['draws']['3'][0][1] = 5
+    assert evaluate_playback(**data)['status'] == 'PASS'
+
+
+def test_late_route_activation_is_measured_from_its_declared_start():
+    data = evidence()
+    data['route_starts'] = {
+        '1': {'wall_s': 0., 'frame': 1}, '2': {'wall_s': 0., 'frame': 1},
+        '3': {'wall_s': .2, 'frame': 61}}
+    data['draws']['3'] = data['draws']['3'][2:]
+    result = evaluate_playback(**data)
+    assert result['status'] == 'PASS'
+    route = result['routes']['3']
+    assert route['observation_s'] == pytest.approx(.21)
+    assert route['route_draw_rate_hz'] == pytest.approx(2 / .21)
+    assert route['full_segment_draw_fps'] is None
+    assert result['routes']['1']['full_segment_draw_fps'] is not None
+
+
+@pytest.mark.parametrize('start', [None, {}, {'wall_s': float('nan'), 'frame': 1},
+    {'wall_s': -.1, 'frame': 1}, {'wall_s': 1., 'frame': 1},
+    {'wall_s': 0., 'frame': 200}, {'wall_s': .2, 'frame': 1}])
+def test_invalid_route_activation_cannot_certify_coverage(start):
+    data = evidence()
+    data['route_starts'] = {slot: {'wall_s': 0., 'frame': 1} for slot in ('1', '2')}
+    if start is not None:
+        data['route_starts']['3'] = start
+    assert evaluate_playback(**data)['status'] == 'FAIL'
+
+
+def test_explicit_stationary_pause_is_not_a_route_stall():
+    data = evidence((1, 31, 91, 101))
+    rows = [[0., 1], [.1, 31], [1.9, 91], [2., 101]]
+    data.update(scene_rows=rows, draws={slot: rows for slot in ('1', '2', '3')},
+        ended=2.01, pause_intervals=[[.15, 1.85]])
+    result = evaluate_playback(**data)
+    assert result['status'] == 'PASS'
+    assert result['routes']['3']['max_progress_gap_s'] == pytest.approx(.1)
+
+
+@pytest.mark.parametrize('pauses', [[[.05, .35]], [[-.1, .2]], [[.1, .6]],
+    [[.15, .18], [.17, .19]], [[float('nan'), .2]]])
+def test_pause_evidence_must_be_bounded_ordered_and_stationary(pauses):
+    data = evidence()
+    data['pause_intervals'] = pauses
+    result = evaluate_playback(**data)
+    assert result['status'] == 'FAIL'
+    assert 'invalid pause interval' in result['failures']
+
+
 def _driver_functions(*names):
     """Exercise driver functions without starting Blender or importing bpy."""
     import ast
@@ -195,7 +285,7 @@ def test_driver_start_and_pause_are_idempotent_and_record_actual_states(initial,
         flags['playing'] = value
         window.screen.is_animation_playing = value
         return {'FINISHED'}
-    namespace = {'is_playing': lambda: flags['playing'], 'windows': lambda: [window],
+    namespace = {'state': {}, 'is_playing': lambda: flags['playing'], 'windows': lambda: [window],
         'active_context': lambda: (window, area, area.regions[0]), 'pointer': id,
         'event': lambda name, **data: events.append((name, data)),
         'bpy': NS(context=NS(temp_override=lambda **kwargs: nullcontext()),
@@ -213,13 +303,107 @@ def test_driver_does_not_assume_animation_play_succeeded():
     from contextlib import nullcontext
     from types import SimpleNamespace as NS
     window = NS(screen=object(), scene=object())
-    namespace = {'is_playing': lambda: False, 'active_context': lambda: (window, object(), object()),
+    namespace = {'state': {}, 'is_playing': lambda: False, 'active_context': lambda: (window, object(), object()),
         'pointer': id, 'event': lambda *args, **kwargs: None,
         'bpy': NS(context=NS(temp_override=lambda **kwargs: nullcontext()),
             ops=NS(screen=NS(animation_play=lambda: {'CANCELLED'})))}
     exec(_driver_functions('set_playing'), namespace)
     with pytest.raises(RuntimeError, match='requested=True, observed=False'):
         namespace['set_playing'](True)
+
+
+def test_switch_declares_new_routes_before_open_without_resetting_existing_coverage():
+    from contextlib import nullcontext
+    from types import SimpleNamespace as NS
+    state = {'recording': True, 'slot': 1, 'scene': NS(frame_current=61),
+        'route_starts': {'1': {'wall_s': 0., 'frame': 1}}}
+    def open_camera(**kwargs):
+        assert state['route_starts'] == {
+            '1': {'wall_s': 0., 'frame': 1}, '2': {'wall_s': .2, 'frame': 61},
+            '3': {'wall_s': .2, 'frame': 61}}
+        return {'FINISHED'}
+    open_camera.get_rna_type = lambda: NS(properties={'layout'})
+    namespace = {'state': state, 'now': lambda: .2, 'core': NS(SLOTS=(1, 2, 3)),
+        'active_context': lambda: (object(), object(), object()), 'snapshot': lambda: {},
+        'LAYOUT': 'STRIP', 'event': lambda *args, **kwargs: None,
+        'bpy': NS(context=NS(temp_override=lambda **kwargs: nullcontext()),
+                  ops=NS(wfrl=NS(native_camera_view=open_camera)))}
+    exec(_driver_functions('expect_routes', 'open_view'), namespace)
+    namespace['open_view']('TRIPLE', switching=True)
+    assert state['view_mode'] == 'TRIPLE'
+
+
+def test_driver_records_only_explicit_pause_and_resume_transitions():
+    from contextlib import nullcontext
+    from types import SimpleNamespace as NS
+    window = NS(screen=NS(is_animation_playing=True), scene=object())
+    state = {'recording': True, 'pause_intervals': []}
+    clock = [1.]
+    def operation(value):
+        window.screen.is_animation_playing = value
+        return {'FINISHED'}
+    namespace = {'state': state, 'now': lambda: clock[0],
+        'is_playing': lambda: window.screen.is_animation_playing, 'windows': lambda: [window],
+        'active_context': lambda: (window, object(), object()), 'pointer': id,
+        'event': lambda *args, **kwargs: None,
+        'bpy': NS(context=NS(temp_override=lambda **kwargs: nullcontext()),
+            ops=NS(screen=NS(animation_play=lambda: operation(True),
+                animation_cancel=lambda **kwargs: operation(False))))}
+    exec(_driver_functions('set_playing'), namespace)
+    namespace['set_playing'](False)
+    clock[0] = 2.
+    namespace['set_playing'](False)
+    clock[0] = 3.
+    namespace['set_playing'](True)
+    namespace['set_playing'](True)
+    assert state['pause_intervals'] == [[1., 3.]]
+    assert 'pause_started' not in state
+
+
+@pytest.mark.parametrize('path', ['single', 'triple', 'playing_switch', 'paused_switch'])
+def test_driver_measurement_passes_declared_coverage_and_pause_evidence(tmp_path, path):
+    import json
+    from types import SimpleNamespace as NS
+    mode = 'TRIPLE' if path == 'triple' else 'WATCH'
+    clock = [0.]
+    scene = NS(frame_current=1, frame_end=101, sync_mode='FRAME_DROP',
+        render=NS(fps=60, fps_base=1., preview_pixel_size='1'), eevee=NS(taa_samples=16))
+    state = {'scene': scene, 'slot': 1, 'mode': mode, 'view_mode': mode, 'results': []}
+    namespace = {'state': state, 'now': lambda: clock[0], 'PlaybackTarget': PlaybackTarget,
+        'evaluate_playback': evaluate_playback, 'PATH': path, 'LAYOUT': 'STRIP',
+        'OUT': tmp_path, 'json': json, 'os': NS(environ={}),
+        'core': NS(SLOTS=(1, 2, 3), layout_dict=lambda scene: {'same': True}),
+        'native': NS(_ACTIVE=NS(window=NS(width=800, height=600))),
+        'set_playing': lambda desired: None, 'stage': lambda name: None,
+        'event': lambda *args, **kwargs: None, 'write_result': lambda: None,
+        'frame_observed': lambda scene: None,
+        'final_route_states': lambda: {slot: {'valid': True} for slot in state['draws']}}
+    exec(_driver_functions('expect_routes', 'begin_measurement', 'finish_measurement'), namespace)
+    namespace['begin_measurement']()
+    initial_slots = ('1', '2', '3') if path == 'triple' else ('1',)
+    assert set(state['route_starts']) == set(initial_slots)
+    rows = [[0., 1], [.1, 31], [.2, 61], [.3, 91], [.4, 101]]
+    if path == 'paused_switch':
+        rows = [[0., 1], [.1, 31], [1.9, 61], [2., 91], [2.1, 101]]
+        state['pause_intervals'] = [[.15, 1.85]]
+    state['scene_rows'] = rows
+    for slot in initial_slots:
+        state['draws'][slot] = rows
+    if path in {'playing_switch', 'paused_switch'}:
+        clock[0], scene.frame_current = rows[2]
+        namespace['expect_routes']((1, 2, 3))
+        state['draws'].update({'2': rows[2:], '3': rows[2:]})
+    clock[0], scene.frame_current = rows[-1][0]+.01, 101
+    state['termination'] = {'reason': 'completed_segment', 'previous_frame': 91, 'frame': 101,
+                            'playback_running': True, 'driver_seek': False}
+    namespace['finish_measurement']()
+    result = state['results'][0]
+    assert result['status'] == 'PASS'
+    if path in {'playing_switch', 'paused_switch'}:
+        assert result['routes']['3']['activation']['frame'] == 61
+        assert result['routes']['3']['full_segment_draw_fps'] is None
+    assert result['pause_intervals'] == [tuple(pause) for pause in state['pause_intervals']]
+    assert state['recording'] is False
 
 
 def _runner():

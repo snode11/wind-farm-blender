@@ -1,0 +1,10 @@
+{
+  "baseline/estimate_difference_m": 0.0013491918493091504,
+  "baseline/error_difference_m": 0.004679323859946294,
+  "candidate/estimate_difference_m": 0.0010681328827848446,
+  "candidate/error_difference_m": 0.0040836744308228035,
+  "reference_difference_m": 0.004977190101078222,
+  "s1_state_changed": 0,
+  "s1_first_object_changed": 0,
+  "s1_alarm_changed": 0
+}

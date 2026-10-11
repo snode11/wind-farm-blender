@@ -133,6 +133,25 @@ class WFRL_OT_BoxPosition(bpy.types.Operator):
             self.report({'ERROR'}, str(exc));return {'CANCELLED'}
 
 
+class WFRL_OT_BoxResetDefault(bpy.types.Operator):
+    bl_idname = 'wfrl.stacked_box_reset_default'
+    bl_label = '恢复默认三相机'
+    bl_description = '恢复随包的盒体安装位置和 C1–C3 位置、朝向、视场；可撤销相机修改'
+
+    @classmethod
+    def poll(cls, context):
+        return available(context) and not any(obj.get('wfrl_custom_draft') for obj in context.scene.objects)
+
+    def execute(self, context):
+        try:
+            changed = rig.reset_default(context.scene)
+            self.report({'INFO'}, '已恢复默认三相机；可撤销相机修改' if changed else '三相机已是默认布局')
+            return {'FINISHED'}
+        except (ValueError, RuntimeError, OSError, KeyError, TypeError) as exc:
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+
+
 class WFRL_OT_BoxPick(bpy.types.Operator):
     bl_idname = 'wfrl.stacked_box_pick'
     bl_label = '贴合安装 / 调整整个盒体'
@@ -247,4 +266,4 @@ class WFRL_OT_BoxAction(bpy.types.Operator):
         return {'FINISHED'}
 
 
-CLASSES=(WFRL_OT_BoxPosition,WFRL_OT_BoxPick,WFRL_OT_BoxAction)
+CLASSES=(WFRL_OT_BoxPosition,WFRL_OT_BoxResetDefault,WFRL_OT_BoxPick,WFRL_OT_BoxAction)

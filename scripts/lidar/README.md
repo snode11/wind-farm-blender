@@ -24,22 +24,22 @@ TLS 候选使用显式 `postprocess_dual_beam.py --method hub-tls.v1`；未覆�
 
 以下流程适用于 `results/lidar/packages/normal-v1.1` 与 `close-v1.1` 的本地 FAST.Farm 结果包。两者来自 36 秒真实求解的 18–36 秒窗口。`report.md` 给出逐束误差、手册定义、求交与真值参考点，以及解析和独立时空细化的全部实数。
 
-使用 `/opt/anaconda3/envs/wfrl-mac/bin/python`；求解器位于同环境 `bin/FAST.Farm`，版本 3.5.3。后处理需要 NumPy；设置 `OPENBLAS_NUM_THREADS=1` 避免几何小矩阵调用启动大量线程。无需策略 checkpoint 或训练。规定转速 9 rpm、变桨 0°、无 ServoDyn；这是固定转速工况，不是运行策略的性能结论。
+使用 `PYTHON_ENVIRONMENT/bin/python`；求解器位于同环境 `bin/FAST.Farm`，版本 3.5.3。后处理需要 NumPy；设置 `OPENBLAS_NUM_THREADS=1` 避免几何小矩阵调用启动大量线程。无需策略 checkpoint 或训练。规定转速 9 rpm、变桨 0°、无 ServoDyn；这是固定转速工况，不是运行策略的性能结论。
 
 在仓库根目录执行以下命令。示例用新运行名保护已交付数据；正常工况用 8 m/s，较小净空工况用 12 m/s，其他配置一致。`--source-case` 可显式指定完整原始算例目录；默认来源见 `run_physics.py`，当前是保留的 NREL 5MW 历史算例。源目录不会修改。
 
 ```sh
 export OPENBLAS_NUM_THREADS=1
-/opt/anaconda3/envs/wfrl-mac/bin/python scripts/lidar/run_physics.py --name normal-new --wind 8 --fps 80
-/opt/anaconda3/envs/wfrl-mac/bin/python scripts/lidar/run_physics.py --name normal-new-spatial --wind 8 --fps 80 --refine
-/opt/anaconda3/envs/wfrl-mac/bin/python scripts/lidar/run_physics.py --name normal-new-temporal --wind 8 --fps 160 --dt 0.003125 --refine
+PYTHON_ENVIRONMENT/bin/python scripts/lidar/run_physics.py --name normal-new --wind 8 --fps 80
+PYTHON_ENVIRONMENT/bin/python scripts/lidar/run_physics.py --name normal-new-spatial --wind 8 --fps 80 --refine
+PYTHON_ENVIRONMENT/bin/python scripts/lidar/run_physics.py --name normal-new-temporal --wind 8 --fps 160 --dt 0.003125 --refine
 
-/opt/anaconda3/envs/wfrl-mac/bin/python scripts/lidar/process_physics.py results/lidar/raw/normal-new
-/opt/anaconda3/envs/wfrl-mac/bin/python scripts/lidar/process_physics.py results/lidar/raw/normal-new-spatial --evaluation-only
-/opt/anaconda3/envs/wfrl-mac/bin/python scripts/lidar/process_physics.py results/lidar/raw/normal-new-temporal --evaluation-only
+PYTHON_ENVIRONMENT/bin/python scripts/lidar/process_physics.py results/lidar/raw/normal-new
+PYTHON_ENVIRONMENT/bin/python scripts/lidar/process_physics.py results/lidar/raw/normal-new-spatial --evaluation-only
+PYTHON_ENVIRONMENT/bin/python scripts/lidar/process_physics.py results/lidar/raw/normal-new-temporal --evaluation-only
 
-/opt/anaconda3/envs/wfrl-mac/bin/python scripts/lidar/validate_physics.py results/lidar/raw/normal-new results/lidar/raw/normal-new-spatial results/lidar/raw/normal-new-temporal evidence/lidar-implementation/validation-normal-new.json
-/opt/anaconda3/envs/wfrl-mac/bin/python scripts/lidar/publish_physics.py normal-new normal evidence/lidar-implementation/validation-normal-new.json --destination results/lidar/packages/normal-new
+PYTHON_ENVIRONMENT/bin/python scripts/lidar/validate_physics.py results/lidar/raw/normal-new results/lidar/raw/normal-new-spatial results/lidar/raw/normal-new-temporal evidence/lidar-implementation/validation-normal-new.json
+PYTHON_ENVIRONMENT/bin/python scripts/lidar/publish_physics.py normal-new normal evidence/lidar-implementation/validation-normal-new.json --destination results/lidar/packages/normal-new
 ```
 
 较小净空重复该链路，把名称换为 `close-new`、风速换为 `12`、publish 第二参数换为 `close`。正常/较小工况依据先定的风速选取，不按照误差挑片段。每个工况先运行 19 个展向节点、原 DT，再运行 37 节点保持原 DT，最后保持 37 节点将积分时间步与输出时间步减半。这样分别检查空间差异与时间差异。完整 80/160 Hz 掠塔网格均包含漏测；没有只对旧网格有效命中配对。

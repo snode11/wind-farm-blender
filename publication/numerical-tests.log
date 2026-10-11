@@ -1,0 +1,10 @@
+test_failed_second_image_keeps_bootstrap_and_full_observation_interval (test_rejected_frames.RejectedFrameTests.test_failed_second_image_keeps_bootstrap_and_full_observation_interval) ... ok
+test_failed_tracking_fit_is_only_a_candidate_and_does_not_train_priors (test_rejected_frames.RejectedFrameTests.test_failed_tracking_fit_is_only_a_candidate_and_does_not_train_priors) ... ok
+test_nonfinite_candidate_is_rejected_and_recovery_remains_finite (test_rejected_frames.RejectedFrameTests.test_nonfinite_candidate_is_rejected_and_recovery_remains_finite) ... ok
+test_real_budget_exhaustion_does_not_initialize_observation_history (test_rejected_frames.RejectedFrameTests.test_real_budget_exhaustion_does_not_initialize_observation_history) ... ok
+test_success_without_identifiable_image_does_not_initialize (test_rejected_frames.RejectedFrameTests.test_success_without_identifiable_image_does_not_initialize) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.322s
+
+OK

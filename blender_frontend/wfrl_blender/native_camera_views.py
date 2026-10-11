@@ -12,6 +12,40 @@ from . import installation_schematic as schematic
 
 _ACTIVE = None
 _KEYMAPS = []
+_ERROR_PROPERTY = 'wfrl_native_camera_error'
+
+
+def last_error(scene):
+    """Keep asynchronous failures visible after their observing window closes."""
+    try:
+        return scene.get(_ERROR_PROPERTY, '')
+    except ReferenceError:
+        return ''
+
+
+def _remember_error(scene, message, *, append=False):
+    try:
+        previous = last_error(scene)
+        if append and previous:
+            message = previous if message in previous else previous + '；' + message
+        scene[_ERROR_PROPERTY] = message
+        for window in bpy.context.window_manager.windows:
+            if window.scene == scene:
+                for area in window.screen.areas:
+                    area.tag_redraw()
+    except ReferenceError:
+        # The owning scene may itself have been removed or replaced.
+        pass
+
+
+def _cleanup_step(errors, label, action):
+    """A failed release must not prevent the remaining resources restoring."""
+    try:
+        result = action()
+        if isinstance(result, list):
+            errors.extend(result)
+    except Exception as exc:
+        errors.append(f'{label}：{exc}')
 
 
 def fit_gate(hfov, vfov, scene_aspect):
@@ -67,6 +101,11 @@ class NativeSession:
     def __init__(self, context, slots, layout='GRID'):
         self.window, self.scene, self.original = context.window, context.scene, context.workspace
         self.source_window_id = context.window.as_pointer()
+        self.window_id = self.source_window_id
+        self.closing = False
+        self.closed = False
+        self.resume_when_closed = False
+        self.resume_scheduled = False
         self.lifecycle = []
         self.workspace = None
         self.owns_window = False
@@ -99,6 +138,7 @@ class NativeSession:
         before={w.as_pointer() for w in bpy.context.window_manager.windows}
         bpy.ops.wm.window_new()
         self.window=next(w for w in bpy.context.window_manager.windows if w.as_pointer() not in before)
+        self.window_id = self.window.as_pointer()
         self.owns_window=True
         self.workspace=self.window.workspace
         # The source window stays available but need not run another Eevee view.
@@ -153,12 +193,15 @@ class NativeSession:
             return self._prepare()
         except Exception as exc:
             print('Native camera setup failed:', str(exc))
+            _remember_error(self.scene, f'相机观察准备失败：{exc}')
             shutdown()
             return None
 
     def _prepare(self):
-        if _ACTIVE is not self:return None
-        if not any(w==self.window for w in bpy.context.window_manager.windows):return None
+        if _ACTIVE is not self or self.closing:return None
+        if self.alive_window() is None:
+            shutdown()
+            return None
         self.preparation_steps += 1
         if self.preparation_steps > 30:
             raise RuntimeError('相机窗口分区操作未完成')
@@ -219,30 +262,83 @@ class NativeSession:
         self.handle = bpy.types.SpaceView3D.draw_handler_add(self.draw,(), 'WINDOW','POST_PIXEL')
         self.preparing = False
         bpy.app.timers.register(self.first_paint, first_interval=.5)
+        _remember_error(self.scene, '')
+
+    def alive_window(self):
+        # Never dereference a cached Window RNA after its OS window was closed.
+        return next((w for w in bpy.context.window_manager.windows
+                     if w.as_pointer() == self.window_id), None)
+
+    def release_proxy(self, entry):
+        errors = []
+        proxy, data = entry.get('proxy'), entry.get('proxy_data')
+        if proxy is not None:
+            if data is None:
+                try:
+                    data = proxy.data
+                except ReferenceError:
+                    entry['proxy'] = None
+            entry['proxy_data'] = data
+            if entry.get('proxy') is not None:
+                try:
+                    bpy.data.objects.remove(proxy, do_unlink=True)
+                    entry['proxy'] = None
+                except ReferenceError:
+                    entry['proxy'] = None
+                except Exception as exc:
+                    errors.append(f"清理 C{entry['slot']} 观察相机：{exc}")
+        if entry.get('proxy') is None and data is not None:
+            try:
+                bpy.data.cameras.remove(data)
+                entry['proxy_data'] = None
+            except ReferenceError:
+                entry['proxy_data'] = None
+            except Exception as exc:
+                errors.append(f"清理 C{entry['slot']} 观察镜头：{exc}")
+        return errors
 
     def clear_views(self):
-        if self.handle:
-            bpy.types.SpaceView3D.draw_handler_remove(self.handle,'WINDOW');self.handle=None
-        if self.diagram_handle:
-            bpy.types.SpaceImageEditor.draw_handler_remove(self.diagram_handle,'WINDOW');self.diagram_handle=None
-        alive=next((w for w in bpy.context.window_manager.windows if w==self.window),None)
-        if alive and self.owns_window:
-            for area in alive.screen.areas:
-                if area.type=='VIEW_3D':area.spaces.active.camera=None
+        errors = []
+        for name, owner in (('handle', bpy.types.SpaceView3D),
+                            ('diagram_handle', bpy.types.SpaceImageEditor)):
+            handle = getattr(self, name)
+            if handle is None:
+                continue
+            try:
+                owner.draw_handler_remove(handle, 'WINDOW')
+                setattr(self, name, None)
+            except (ReferenceError, ValueError):
+                setattr(self, name, None)
+            except Exception as exc:
+                errors.append(f'移除相机绘制回调：{exc}')
+        def detach_cameras():
+            alive = self.alive_window()
+            if alive and self.owns_window:
+                for area in alive.screen.areas:
+                    if area.type == 'VIEW_3D':
+                        _cleanup_step(errors, '解除观察相机绑定',
+                                      lambda area=area: setattr(area.spaces.active, 'camera', None))
+        _cleanup_step(errors, '解除观察相机绑定', detach_cameras)
         for entry in self.entries:
-            proxy=entry['proxy']
-            if proxy:
-                data=proxy.data;bpy.data.objects.remove(proxy,do_unlink=True);bpy.data.cameras.remove(data)
-        self.entries.clear()
+            _cleanup_step(errors, '清理观察相机', lambda entry=entry: self.release_proxy(entry))
+        # Retain only unreleased resources so a later shutdown can retry them.
+        self.entries[:] = [e for e in self.entries
+                           if e.get('proxy') is not None or e.get('proxy_data') is not None]
         self.diagram_area = None
+        return errors
 
     def change_view(self, slots, layout=None):
         from . import custom_camera_capture
         if custom_camera_capture.active():raise ValueError('请先完成或取消原图采集')
+        if self.closing:raise ValueError('相机窗口正在恢复，请稍后重开')
         if self.preparing:raise ValueError('请等待当前相机布局完成')
         layout = layout or self.layout
         if list(slots) == list(self.slots) and layout == self.layout:return
-        self.clear_views()
+        errors = self.clear_views()
+        if errors:
+            _remember_error(self.scene, '切换相机观察失败：' + '；'.join(errors))
+            shutdown()
+            raise RuntimeError('；'.join(errors))
         self.slots, self.layout = list(slots), layout
         self.merge_first = True
         self.preparing = True
@@ -253,7 +349,7 @@ class NativeSession:
         # Ensure the paused first frame is swapped after all regions exist.
         # On macOS, tagging inactive regions alone can leave partial titles
         # until the first mouse event. This one-shot repaint is not a loop.
-        if _ACTIVE is self and any(w == self.window for w in bpy.context.window_manager.windows):
+        if _ACTIVE is self and not self.closing and self.alive_window() is not None:
             with bpy.context.temp_override(window=self.window):
                 bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
         return None
@@ -262,6 +358,12 @@ class NativeSession:
         render = self.scene.render
         aspect = render.resolution_x*render.pixel_aspect_x/(render.resolution_y*render.pixel_aspect_y)
         for entry in self.entries:
+            if entry['proxy'] is not None:
+                # Deleted RNA still has a truth value, but accessing it raises.
+                # Let watch close cleanly instead of leaving failing draw hooks.
+                data = entry['proxy'].data
+                if data is None or entry['proxy'].type != 'CAMERA':
+                    raise ValueError(f"C{entry['slot']} 观察相机或镜头已被删除")
             area,slot = entry['area'],entry['slot']
             if not any(a==area for a in self.window.screen.areas):continue
             space = area.spaces.active
@@ -274,11 +376,12 @@ class NativeSession:
             if key != entry['key'] or (camera and entry['proxy'] is None):
                 if entry['proxy']:
                     data=entry['proxy'].data;bpy.data.objects.remove(entry['proxy'],do_unlink=True)
-                    bpy.data.cameras.remove(data);entry['proxy']=None
+                    bpy.data.cameras.remove(data);entry['proxy']=None;entry['proxy_data']=None
                 if camera:
                     params=core.parameters(camera)
                     outer,fx,fy=fit_gate(params.fov,params.vfov,aspect)
                     data=bpy.data.cameras.new(f'T1.Native.C{slot}')
+                    entry['proxy_data'] = data
                     data.sensor_fit='HORIZONTAL'
                     # Keep lens in Blender's valid range even at extreme FOV.
                     data.lens=min(5000.,max(1.,18./outer));data.sensor_width=2*data.lens*outer
@@ -288,10 +391,11 @@ class NativeSession:
                     data.clip_start=params.clip_near_m;data.clip_end=params.clip_far_m
                     data.passepartout_alpha=1.
                     proxy=bpy.data.objects.new(f'T1.Native.C{slot}',data)
+                    entry['proxy'] = proxy
                     self.scene.collection.objects.link(proxy)
                     proxy.hide_render=True
                     constraint=proxy.constraints.new('COPY_TRANSFORMS');constraint.target=camera
-                    entry.update(proxy=proxy,fx=fx,fy=fy)
+                    entry.update(proxy=proxy,proxy_data=data,fx=fx,fy=fy)
                 entry['key']=key
             region=next((r for r in area.regions if r.type=='WINDOW'),None)
             view_key=(key, region.width, region.height) if region else None
@@ -386,57 +490,117 @@ class NativeSession:
                                           for w in bpy.context.window_manager.windows],**details})
 
     def close(self, preserve_playback=True):
-        from . import custom_camera_capture
-        job = custom_camera_capture._ACTIVE
-        if job and job.scene == self.scene and job.window == self.window:
-            job.finish(error='相机观察窗口已关闭', restore=preserve_playback)
-        # is_animation_playing is global, not the timer's owner. Transfer an
-        # observed live playback explicitly; never use stale state after an OS
-        # close, which is indistinguishable from a user pausing immediately.
-        # Product play controls already put the timer in the source window.
-        alive=next((w for w in bpy.context.window_manager.windows if w==self.window),None)
-        playing=bool(alive and alive.screen.is_animation_playing and preserve_playback)
-        self.lifecycle_event('close_before', preserve_playback=preserve_playback, playing=playing)
-        resume_context=self.playback_context() if playing else None
-        if playing and resume_context:
-            with bpy.context.temp_override(**resume_context):
-                result=bpy.ops.screen.animation_cancel(restore_frame=False)
-                self.lifecycle_event('cancel_before_close',result=list(result))
+        if self.closed:
+            return True
+        errors = []
+        first_close = not self.closing
+        self.closing = True
+        if not preserve_playback:
+            self.resume_when_closed = False
+
+        def finish_capture():
+            from . import custom_camera_capture
+            job = custom_camera_capture._ACTIVE
+            if job and job.scene == self.scene and job.window == self.window:
+                job.finish(error='相机观察窗口已关闭', restore=preserve_playback)
+
+        def transfer_playback():
+            if not first_close:
+                return
+            from . import playback
+            # is_animation_playing is global, not the timer's owner. Transfer
+            # only playback owned by this scene before its window is destroyed.
+            alive = self.alive_window()
+            playing = bool(alive and preserve_playback and playback.is_playing(self.scene))
+            self.resume_when_closed = playing
+            self.lifecycle_event('close_before', preserve_playback=preserve_playback, playing=playing)
+            resume_context = self.playback_context() if playing else None
+            if resume_context:
+                with bpy.context.temp_override(**resume_context):
+                    result = bpy.ops.screen.animation_cancel(restore_frame=False)
+                    self.lifecycle_event('cancel_before_close', result=list(result))
+
+        try:
+            _cleanup_step(errors, '结束相机采集', finish_capture)
+            _cleanup_step(errors, '转移共同播放', transfer_playback)
+            _cleanup_step(errors, '清理相机视图', self.clear_views)
+        finally:
+            try:
+                _cleanup_step(errors, '恢复预览画质', self.restore_quality)
+                _cleanup_step(errors, '恢复主视口画质', self.restore_source_shading)
+            finally:
+                _cleanup_step(errors, '关闭观察窗口', self.close_window)
+                self.preparing = False
+                self.diagram = None
+                self.diagram_batches = None
+        if self.resume_when_closed and not self.owns_window and not self.resume_scheduled:
+            # Window/timer destruction is finalized after this event.
+            def schedule_resume():
+                bpy.app.timers.register(self.resume_after_close, first_interval=.01)
+                self.resume_scheduled = True
+            _cleanup_step(errors, '恢复共同播放', schedule_resume)
+        self.closed = not (self.entries or self.handle is not None or self.diagram_handle is not None
+                           or self.preview_quality is not None or self.source_shading or self.owns_window
+                           or (self.resume_when_closed and not self.resume_scheduled))
+        if errors:
+            _remember_error(self.scene, '相机观察恢复未完成：' + '；'.join(errors), append=True)
+        return self.closed
+
+    def restore_quality(self):
         if self.preview_quality is not None:
-            self.set_quality(self.preview_quality)
+            try:
+                self.set_quality(self.preview_quality)
+            except ReferenceError:
+                # A removed scene has no remaining preview settings to restore.
+                self.preview_quality = None
+                return
             self.preview_quality = None
-        self.clear_views()
-        # Closed-window Area RNA may point at freed C memory. Never dereference
-        # cached areas after the user closes the OS window.
-        alive=next((w for w in bpy.context.window_manager.windows if w==self.window),None)
-        self.diagram = None
-        self.diagram_batches = None
+
+    def restore_source_shading(self):
+        pending, errors = [], []
         for window_id, area_id, shading_type in self.source_shading:
-            source = next((w for w in bpy.context.window_manager.windows if w.as_pointer() == window_id), None)
-            if source:
-                area = next((a for a in source.screen.areas if a.as_pointer() == area_id), None)
-                if area and area.type == 'VIEW_3D':
-                    area.spaces.active.shading.type = shading_type
-        self.source_shading.clear()
+            try:
+                source = next((w for w in bpy.context.window_manager.windows
+                               if w.as_pointer() == window_id), None)
+                if source:
+                    area = next((a for a in source.screen.areas if a.as_pointer() == area_id), None)
+                    if area and area.type == 'VIEW_3D':
+                        area.spaces.active.shading.type = shading_type
+            except ReferenceError:
+                pass
+            except Exception as exc:
+                pending.append((window_id, area_id, shading_type))
+                errors.append(f'恢复主视口画质：{exc}')
+        self.source_shading[:] = pending
+        return errors
+
+    def close_window(self):
+        alive = self.alive_window()
         if alive and self.owns_window:
-            with bpy.context.temp_override(window=alive):bpy.ops.wm.window_close()
+            with bpy.context.temp_override(window=alive):
+                if bpy.ops.wm.window_close() != {'FINISHED'}:
+                    raise RuntimeError('观察窗口关闭操作未完成')
+        self.owns_window = False
         self.lifecycle_event('window_closed')
-        if playing:
-            # Window/timer destruction is finalized after this event. Reading
-            # the global flag in this callback can still see the old timer.
-            bpy.app.timers.register(self.resume_after_close, first_interval=.01)
 
     def resume_after_close(self):
         try:
+            from . import playback
             self.lifecycle_event('resume_event')
+            # Another scene may have started during this delayed restoration.
+            # An unknown live owner is protected by the global flag as well.
+            owner = playback.owner_scene()
+            if (owner is not None and owner != self.scene) or playback.any_playing():
+                self.lifecycle_event('resume_skipped', reason='another_or_live_player')
+                return None
             resume_context=self.playback_context()
             if resume_context:
                 with bpy.context.temp_override(**resume_context):
-                    if not bpy.context.screen.is_animation_playing:
-                        result=bpy.ops.screen.animation_play()
-                        self.lifecycle_event('resume_result',result=list(result))
-        except (ReferenceError,RuntimeError) as exc:
+                    result=bpy.ops.screen.animation_play()
+                    self.lifecycle_event('resume_result',result=list(result))
+        except Exception as exc:
             self.lifecycle.append({'event':'resume_error','error':str(exc)})
+            _remember_error(self.scene, f'恢复共同播放失败：{exc}', append=True)
         return None
 
     def draw_diagram(self):
@@ -503,26 +667,30 @@ def capture_quality(scene):
 def shutdown(preserve_playback=True):
     global _ACTIVE
     if _ACTIVE:
-        session,_ACTIVE=_ACTIVE,None
-        session.close(preserve_playback=preserve_playback)
+        session = _ACTIVE
+        # Keep ownership until every retained resource is released. A failed
+        # restoration can then be retried without resuming a half-closed view.
+        if session.close(preserve_playback=preserve_playback) and _ACTIVE is session:
+            _ACTIVE = None
 
 
 def watch():
     if _ACTIVE:
         try:
-            if not any(w==_ACTIVE.window for w in bpy.context.window_manager.windows):
+            if _ACTIVE.closing or _ACTIVE.alive_window() is None:
                 shutdown()
             elif _ACTIVE.window.scene!=_ACTIVE.scene:
                 shutdown(preserve_playback=False)
             else:_ACTIVE.sync()
-        except (ReferenceError,RuntimeError,ValueError) as exc:
+        except Exception as exc:
             print('Native camera view closed:',str(exc))
+            _remember_error(_ACTIVE.scene, f'相机观察中断：{exc}')
             shutdown()
     return .25
 
 
 def header(self,context):
-    if _ACTIVE and context.window==_ACTIVE.window:
+    if _ACTIVE and not _ACTIVE.closing and context.window==_ACTIVE.window:
         row=self.layout.row(align=True)
         entry=next((e for e in _ACTIVE.entries if e['area']==context.area),None)
         row.operator('wfrl.native_camera_play',text='暂停' if context.screen.is_animation_playing else '播放',icon='PAUSE' if context.screen.is_animation_playing else 'PLAY')
@@ -565,20 +733,31 @@ class WFRL_OT_NativeCamera(bpy.types.Operator):
         if self.mode=='WATCH' and not core.get_camera(context.scene,slot):return {'CANCELLED'}
         if panel._ACTIVE:panel._ACTIVE.finish()
         slots = list(core.SLOTS) if self.mode == 'TRIPLE' else [slot]
+        if _ACTIVE and _ACTIVE.closing:
+            shutdown()
         if _ACTIVE and _ACTIVE.scene == context.scene:
             try:
                 _ACTIVE.change_view(slots, self.layout if self.mode=='TRIPLE' else None)
                 return {'FINISHED'}
             except (ValueError, RuntimeError) as exc:
+                _remember_error(context.scene, f'切换相机观察失败：{exc}')
                 self.report({'ERROR'},str(exc));return {'CANCELLED'}
         shutdown()
-        session=NativeSession(context, slots, self.layout)
+        if _ACTIVE:
+            self.report({'ERROR'}, last_error(context.scene) or '相机窗口正在恢复，请稍后重开')
+            return {'CANCELLED'}
+        session = None
         try:
-            session.start();_ACTIVE=session
+            session=NativeSession(context, slots, self.layout)
+            _ACTIVE=session
+            session.start()
             if not bpy.app.timers.is_registered(watch):bpy.app.timers.register(watch,first_interval=.25)
             return {'FINISHED'}
         except Exception as exc:
-            session.close();self.report({'ERROR'},str(exc));return {'CANCELLED'}
+            _remember_error(context.scene, f'打开相机观察失败：{exc}')
+            if session is not None:
+                shutdown()
+            self.report({'ERROR'},str(exc));return {'CANCELLED'}
 
 
 class WFRL_OT_NativeFocus(bpy.types.Operator):
@@ -589,12 +768,13 @@ class WFRL_OT_NativeFocus(bpy.types.Operator):
     @classmethod
     def poll(cls,context):
         from . import custom_camera_capture
-        return bool(_ACTIVE and not _ACTIVE.preparing and not custom_camera_capture.active())
+        return bool(_ACTIVE and not _ACTIVE.closing and not _ACTIVE.preparing and not custom_camera_capture.active())
     def execute(self,context):
         try:
             _ACTIVE.change_view([self.slot])
             return {'FINISHED'}
         except (ValueError,RuntimeError) as exc:
+            _remember_error(context.scene, f'切换相机观察失败：{exc}')
             self.report({'ERROR'},str(exc));return {'CANCELLED'}
 
 
@@ -605,7 +785,7 @@ class WFRL_OT_NativePlay(bpy.types.Operator):
     @classmethod
     def poll(cls,context):
         from . import custom_camera_capture
-        return bool(_ACTIVE and context.window==_ACTIVE.window and not custom_camera_capture.active())
+        return bool(_ACTIVE and not _ACTIVE.closing and context.window==_ACTIVE.window and not custom_camera_capture.active())
     def execute(self,context):
         override=_ACTIVE.playback_context()
         if override is None:return {'CANCELLED'}
@@ -621,7 +801,7 @@ class WFRL_OT_NativeQuality(bpy.types.Operator):
     bl_description='三路切换流畅与高清；原图采集保持原始画质'
     @classmethod
     def poll(cls,context):
-        return bool(_ACTIVE and len(_ACTIVE.slots)>1 and not _ACTIVE.preparing)
+        return bool(_ACTIVE and not _ACTIVE.closing and len(_ACTIVE.slots)>1 and not _ACTIVE.preparing)
     def execute(self,context):
         if not self.poll(context):return {'CANCELLED'}
         _ACTIVE.fast = not _ACTIVE.fast

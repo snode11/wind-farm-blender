@@ -838,6 +838,12 @@ def _publish(scene, replacements):
     saved = [(obj, obj.name, obj.data.name, bool(obj.get('wfrl_custom_camera')),
               bool(obj.get('wfrl_custom_draft')), tuple(obj.users_collection)) for obj in objects]
     refs = [(scene, 'camera', scene.camera)]
+    if controller_stage in panel._VIEWING:
+        # Exiting WATCH/LAYOUT must restore a live replacement camera.
+        for name in ('snapshot', 'external_snapshot'):
+            snapshot = getattr(controller, name, None)
+            if snapshot is not None:
+                refs.append((snapshot, 'camera', snapshot.camera))
     for screen in bpy.data.screens:
         for area in screen.areas:
             if area.type == 'VIEW_3D' and area.spaces.active.use_local_camera:

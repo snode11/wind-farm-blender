@@ -1,0 +1,25 @@
+{
+  "source_files_match_stage12": 24,
+  "source_changes_since_stage12": [],
+  "algorithm_regression_counts": [
+    16,
+    11
+  ],
+  "frontend_passed": 22,
+  "frontend_skipped": 1,
+  "blender_version": "5.2.1",
+  "delivered_reopen": "PASS",
+  "frames_checked": [
+    1,
+    17,
+    18,
+    61,
+    120,
+    17
+  ],
+  "embedded_frame_count": 120,
+  "packed_images": 3,
+  "packed_images_match_historical_png": true,
+  "actual_defect_recovery_acceptance": "NOT_EVALUATED",
+  "source_code_modified_by_review": false
+}

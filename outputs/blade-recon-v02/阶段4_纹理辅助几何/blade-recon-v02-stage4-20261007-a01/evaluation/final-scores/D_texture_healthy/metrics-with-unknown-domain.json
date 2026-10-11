@@ -1,0 +1,1523 @@
+{
+  "classification": "FROZEN_SOLVER_RESULTS_WITH_OLD_AND_LOCKED_INDEPENDENT_RGB",
+  "tracks": [
+    {
+      "track_id": "Patch",
+      "anchor_frame": 42,
+      "anchor_binding_coverage": 1.0,
+      "planned_independent_observations": 11,
+      "accepted_observations": 3,
+      "accepted_fraction": 0.2727272727272727,
+      "cross_frame_validation_available": true,
+      "same_track_heldout_available": true,
+      "status": "FAILED_CORRESPONDENCE_GATE",
+      "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator"
+    },
+    {
+      "track_id": "Crack",
+      "anchor_frame": 42,
+      "anchor_binding_coverage": 1.0,
+      "planned_independent_observations": 11,
+      "accepted_observations": 7,
+      "accepted_fraction": 0.6363636363636364,
+      "cross_frame_validation_available": true,
+      "same_track_heldout_available": true,
+      "status": "FAILED_CORRESPONDENCE_GATE",
+      "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator"
+    }
+  ],
+  "observations": [
+    {
+      "track_id": "Patch",
+      "frame": 42,
+      "t": 4.200000000000003,
+      "camera": "Patch",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "1594e210f583a6961189634a9cbf3bb3c9ec46e5afc7f027c1b07a7b6d92a5d1",
+      "anchor": true,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.0016875311375056062,
+      "centroid_shift_px": 0.0016618394741658082,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_Patch_42_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_Patch_42_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": 1.0,
+      "projected_boundary_known_domain_fraction": 1.0,
+      "unknown_domain_annotation_available": true,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Patch",
+      "frame": 43,
+      "t": 4.299999999999997,
+      "camera": "Patch",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "3c837bd6661eed4bab62df4274fc8ffe242d1e7b6e321178c87507aace96cd78",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.6132267558194283,
+      "centroid_shift_px": 0.2314942428332559,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_Patch_43_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_Patch_43_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": 1.0,
+      "projected_boundary_known_domain_fraction": 1.0,
+      "unknown_domain_annotation_available": true,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Patch",
+      "frame": 45,
+      "t": 4.5,
+      "camera": "Patch",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "6a379b69bc8c612bf91c77caea1dc5f477ac5f20a5b9a88bacb66ed2f6d4a09d",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 2.3905426647695145,
+      "centroid_shift_px": 1.930257539803679,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_Patch_45_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_Patch_45_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": 1.0,
+      "projected_boundary_known_domain_fraction": 1.0,
+      "unknown_domain_annotation_available": true,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Patch",
+      "frame": 47,
+      "t": 4.700000000000003,
+      "camera": "Patch",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "46b1d4956ea01639a5d2d70d06ce1812c2f7ca81cdf3ab284e988ea24e621e94",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 3.1551720606886926,
+      "centroid_shift_px": 3.2593907107771063,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_Patch_47_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_Patch_47_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": 1.0,
+      "projected_boundary_known_domain_fraction": 1.0,
+      "unknown_domain_annotation_available": true,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Patch",
+      "frame": 42,
+      "t": 4.200000000000003,
+      "camera": "HoldoutPatch",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "0846e980dd5252bf488744a7ce6227e685e9039ca1a5e9313633193f3c2d9f7b",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.5650237748235004,
+      "centroid_shift_px": 0.7026841227686998,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_HoldoutPatch_42_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_HoldoutPatch_42_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": null,
+      "projected_boundary_known_domain_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Patch",
+      "frame": 43,
+      "t": 4.299999999999997,
+      "camera": "HoldoutPatch",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "6ad51aad5d4b1a7478135dc9d5636daceea9a472441d9ee4e8fc89bd8861e0be",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.688952660998067,
+      "centroid_shift_px": 0.5853595541136217,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_HoldoutPatch_43_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_HoldoutPatch_43_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": null,
+      "projected_boundary_known_domain_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Patch",
+      "frame": 45,
+      "t": 4.5,
+      "camera": "HoldoutPatch",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "a467aa9f206d88082d6eadfe729eef22a91d21034d5af7c570d2080a998aa1ad",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 2.892506717417393,
+      "centroid_shift_px": 1.1347186685584965,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_HoldoutPatch_45_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_HoldoutPatch_45_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": null,
+      "projected_boundary_known_domain_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Patch",
+      "frame": 47,
+      "t": 4.700000000000003,
+      "camera": "HoldoutPatch",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "8a32e1c44a3db7dd33c36b7f1fe14c64d82a6fc1ce51b76594692acaf0ceb679",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 4.216450491912971,
+      "centroid_shift_px": 2.690644665672577,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_HoldoutPatch_47_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_HoldoutPatch_47_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": null,
+      "projected_boundary_known_domain_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Patch",
+      "frame": 42,
+      "t": 4.200000000000003,
+      "camera": "LockedPatch",
+      "split": "heldout",
+      "RGB_status": "AMBIGUOUS_RGB_FEATURE",
+      "rgb_sha256": "e793b1b51aecc5d2221993a047d35255a6f9d5bbe3b93df7ce40a2fb147ef995",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": null,
+      "centroid_shift_px": null,
+      "visible_fraction": 0.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "independent_RGB_boundary_known_domain_fraction": null,
+      "projected_boundary_known_domain_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Patch",
+      "frame": 43,
+      "t": 4.299999999999997,
+      "camera": "LockedPatch",
+      "split": "heldout",
+      "RGB_status": "AMBIGUOUS_RGB_FEATURE",
+      "rgb_sha256": "0cbb67093cd77629804c9b19db21f9e7a50c253a900eb99a228af33d324624c0",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": null,
+      "centroid_shift_px": null,
+      "visible_fraction": 0.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "independent_RGB_boundary_known_domain_fraction": null,
+      "projected_boundary_known_domain_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Patch",
+      "frame": 45,
+      "t": 4.5,
+      "camera": "LockedPatch",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "7f355cb47c3543e67151850b9e5b258a52f54649ee8e70e53723b545890c3ccf",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 176.33953884588743,
+      "centroid_shift_px": 132.33032157186483,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_LockedPatch_45_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Patch_LockedPatch_45_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": null,
+      "projected_boundary_known_domain_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Patch",
+      "frame": 47,
+      "t": 4.700000000000003,
+      "camera": "LockedPatch",
+      "split": "heldout",
+      "RGB_status": "AMBIGUOUS_RGB_FEATURE",
+      "rgb_sha256": "f9870d0f3bf36a851dacc2b87e48ac49bece5e225b8d042ff9be16a348516838",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": null,
+      "centroid_shift_px": null,
+      "visible_fraction": 0.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "independent_RGB_boundary_known_domain_fraction": null,
+      "projected_boundary_known_domain_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Crack",
+      "frame": 42,
+      "t": 4.200000000000003,
+      "camera": "Crack",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "14334111697c19024d8659202abe1bbffb00847447f963632c1a5670b2153a90",
+      "anchor": true,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.0011362002797196402,
+      "centroid_shift_px": 0.0011349928029725828,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_Crack_42_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_Crack_42_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": 1.0,
+      "projected_boundary_known_domain_fraction": 1.0,
+      "unknown_domain_annotation_available": true,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Crack",
+      "frame": 43,
+      "t": 4.299999999999997,
+      "camera": "Crack",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "bfb2bbf5623ee69a161b3e82f6bff65e70e281b7fec25d76474e7034d57e322c",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.6985159090619898,
+      "centroid_shift_px": 0.5766673021131964,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_Crack_43_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_Crack_43_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": 1.0,
+      "projected_boundary_known_domain_fraction": 1.0,
+      "unknown_domain_annotation_available": true,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Crack",
+      "frame": 45,
+      "t": 4.5,
+      "camera": "Crack",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "7501914e72cf2d205b3ac24bea6be1a0a89df7a72fbb27ec576441b688ef01d5",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.7398177595657384,
+      "centroid_shift_px": 0.7617181654597485,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_Crack_45_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_Crack_45_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": 1.0,
+      "projected_boundary_known_domain_fraction": 1.0,
+      "unknown_domain_annotation_available": true,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Crack",
+      "frame": 47,
+      "t": 4.700000000000003,
+      "camera": "Crack",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "107169d69dae042574798fb4624b7ca15e440014ebc5207f97cc88d78d573eea",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.5486281757316861,
+      "centroid_shift_px": 1.3855845702130725,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_Crack_47_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_Crack_47_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": 1.0,
+      "projected_boundary_known_domain_fraction": 1.0,
+      "unknown_domain_annotation_available": true,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Crack",
+      "frame": 42,
+      "t": 4.200000000000003,
+      "camera": "Holdout",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "c3341be778d2ccbb5da41c6bcfb15f35ea2c0241b07eb43fdadf2be74e24074b",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 1.26963511752939,
+      "centroid_shift_px": 1.2140158153444665,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_Holdout_42_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_Holdout_42_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": null,
+      "projected_boundary_known_domain_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Crack",
+      "frame": 43,
+      "t": 4.299999999999997,
+      "camera": "Holdout",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "115e5e7b1ec4539064a6cc7b48620bd4e9edc732888c7062236ae0298c5a7ac9",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.9848053583632232,
+      "centroid_shift_px": 0.9189466171772912,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_Holdout_43_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_Holdout_43_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": null,
+      "projected_boundary_known_domain_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Crack",
+      "frame": 45,
+      "t": 4.5,
+      "camera": "Holdout",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "71c08d9da7e475e6916c33ebe432b4f212b23799a3b176672dcfcd5262fa8723",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 1.0277437201602326,
+      "centroid_shift_px": 1.6452594998318608,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_Holdout_45_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_Holdout_45_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": null,
+      "projected_boundary_known_domain_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Crack",
+      "frame": 47,
+      "t": 4.700000000000003,
+      "camera": "Holdout",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "c2c14ba8149d49c7735a4b6213608aace6f21f7fd219c205b0cb6f558023806b",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 2.17207047812427,
+      "centroid_shift_px": 2.442818994092934,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_Holdout_47_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_Holdout_47_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": null,
+      "projected_boundary_known_domain_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Crack",
+      "frame": 42,
+      "t": 4.200000000000003,
+      "camera": "LockedCrack",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "e4b9f61eadb0d0a8671d5865a00171622b855ac9c8f1a6fb69a26eb44c347358",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.4628711886345993,
+      "centroid_shift_px": 1.4438841695992495,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_LockedCrack_42_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_LockedCrack_42_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": null,
+      "projected_boundary_known_domain_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Crack",
+      "frame": 43,
+      "t": 4.299999999999997,
+      "camera": "LockedCrack",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "2d89807abfec5c9f8bb95db11274b55f99a8c2c41ae4d7ac5e15085f6ab2a9e7",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.699270650803106,
+      "centroid_shift_px": 0.6515483631255934,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_LockedCrack_43_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_LockedCrack_43_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": null,
+      "projected_boundary_known_domain_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Crack",
+      "frame": 45,
+      "t": 4.5,
+      "camera": "LockedCrack",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "dde747e74675c24282f9ed370ba409efea871fa16a74e0b48038f12dcdb17444",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.6025879782506629,
+      "centroid_shift_px": 1.2195119369656982,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_LockedCrack_45_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_LockedCrack_45_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": null,
+      "projected_boundary_known_domain_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "unknown_domain_pixels_retained_in_denominator": true
+    },
+    {
+      "track_id": "Crack",
+      "frame": 47,
+      "t": 4.700000000000003,
+      "camera": "LockedCrack",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "7823bbf84b9450495f3fe4b5674cdc3fea5a87c5c710c0ac5114e1d2a8ebcb1e",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 1.0302233882284915,
+      "centroid_shift_px": 2.5213824705599706,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_LockedCrack_47_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/D_texture_healthy/Crack_LockedCrack_47_pixel_atlas_model_trace.npz",
+      "independent_RGB_boundary_known_domain_fraction": null,
+      "projected_boundary_known_domain_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "unknown_domain_pixels_retained_in_denominator": true
+    }
+  ],
+  "overall": "FAILED_CORRESPONDENCE_GATE",
+  "primary_metric": "independent RGB region boundary reprojection with fixed anchor triangles, in original pixels",
+  "limitations": [
+    "Known capture target names are region identities, not automatic defect classification",
+    "Bindings are candidate surface regions; pixel boundary threshold is not a pointwise texture descriptor",
+    "No field data, source-point nearest search or local-plane 3D error conversion; optimization-training rows are separately identified"
+  ],
+  "recon_input_access_log": [
+    {
+      "path": "input_bundle.json",
+      "role": "input_manifest",
+      "sha256": "5ab511c5040e59b822c724f8141742956490bf4c89b626a0b275d8b866e9a06e",
+      "bytes": 20973
+    },
+    {
+      "path": "WideA/000042.png",
+      "role": "RGB",
+      "sha256": "36f55e4a9625fd59771b25f8d49219e49e1d9366540bc5cfe744ff9ea3e28b0b",
+      "bytes": 827786
+    },
+    {
+      "path": "masks/WideA/000042.png",
+      "role": "RGB_derived_mask",
+      "sha256": "15982e6674f47095e616896fa68192ee5a36244ecaf9e644cdd1300077b69faf",
+      "bytes": 5175
+    },
+    {
+      "path": "WideB/000042.png",
+      "role": "RGB",
+      "sha256": "337cd63fa396ff2f75e6551c52a200269882c824dd9a2973ac448bc4bbae5d10",
+      "bytes": 835307
+    },
+    {
+      "path": "masks/WideB/000042.png",
+      "role": "RGB_derived_mask",
+      "sha256": "7e1b89ffacbdd826e12dd2861df42551e9c2a84f2179c5d77f1f59b4f7ceb288",
+      "bytes": 5273
+    },
+    {
+      "path": "Patch/000042.png",
+      "role": "RGB",
+      "sha256": "1594e210f583a6961189634a9cbf3bb3c9ec46e5afc7f027c1b07a7b6d92a5d1",
+      "bytes": 643750
+    },
+    {
+      "path": "masks/Patch/000042.png",
+      "role": "RGB_derived_mask",
+      "sha256": "58e8e099c53e9d4d793f107dd130ff102b31d853ea8bfa1ebd78308b30f94e52",
+      "bytes": 3222
+    },
+    {
+      "path": "Crack/000042.png",
+      "role": "RGB",
+      "sha256": "14334111697c19024d8659202abe1bbffb00847447f963632c1a5670b2153a90",
+      "bytes": 644161
+    },
+    {
+      "path": "masks/Crack/000042.png",
+      "role": "RGB_derived_mask",
+      "sha256": "cc7c0f21536f3fd4a9aa7f1c7bf681caedbfcf3ce4c6d181b825c9aabba5ee66",
+      "bytes": 3114
+    },
+    {
+      "path": "WideA/000043.png",
+      "role": "RGB",
+      "sha256": "cb613a1a699883ee5b21d85c8d297f481d42b8da366a11ad2a2bd251fea540a4",
+      "bytes": 835150
+    },
+    {
+      "path": "masks/WideA/000043.png",
+      "role": "RGB_derived_mask",
+      "sha256": "5c274c5244d16230ed89fcc8e97bdf8c6c9b8c7e2005657e11ab42bac7e07bdd",
+      "bytes": 5304
+    },
+    {
+      "path": "WideB/000043.png",
+      "role": "RGB",
+      "sha256": "e063be78555db0c148032471983056d560b9ed6faf97bfc434a68a6fc2cbd754",
+      "bytes": 835976
+    },
+    {
+      "path": "masks/WideB/000043.png",
+      "role": "RGB_derived_mask",
+      "sha256": "49d459bc8bc2ae409120151c1285ddfe9acc5ae6ad7c0bdd77254e5861569894",
+      "bytes": 5229
+    },
+    {
+      "path": "Patch/000043.png",
+      "role": "RGB",
+      "sha256": "3c837bd6661eed4bab62df4274fc8ffe242d1e7b6e321178c87507aace96cd78",
+      "bytes": 635176
+    },
+    {
+      "path": "masks/Patch/000043.png",
+      "role": "RGB_derived_mask",
+      "sha256": "ef9fe93f0e68a414910b84dc539e1766d2ed7f37bd87a55f9f26f0a8199f5932",
+      "bytes": 3015
+    },
+    {
+      "path": "Crack/000043.png",
+      "role": "RGB",
+      "sha256": "bfb2bbf5623ee69a161b3e82f6bff65e70e281b7fec25d76474e7034d57e322c",
+      "bytes": 640741
+    },
+    {
+      "path": "masks/Crack/000043.png",
+      "role": "RGB_derived_mask",
+      "sha256": "e5a41881ad559dbbdc02e0d5c7541de9425d02570ade2018ab7ed30a86b1ee6a",
+      "bytes": 2993
+    },
+    {
+      "path": "WideA/000045.png",
+      "role": "RGB",
+      "sha256": "2d3a54487e9c1513e3a065e54b18d01ffbc0d3b9b4650c5f55f166b08567e8c6",
+      "bytes": 838977
+    },
+    {
+      "path": "masks/WideA/000045.png",
+      "role": "RGB_derived_mask",
+      "sha256": "d7be803a8cb8676d509d6a5eea0f55efec47d6ff703e4d17f210a44907aaf626",
+      "bytes": 5303
+    },
+    {
+      "path": "WideB/000045.png",
+      "role": "RGB",
+      "sha256": "da0ebe62b1f6d47af117b5d1d352f3595549d82b2a526ea6430f8d8de25e7a89",
+      "bytes": 838887
+    },
+    {
+      "path": "masks/WideB/000045.png",
+      "role": "RGB_derived_mask",
+      "sha256": "233aee3a466ba45b1c262cfd602fb64a8b355a943338df1fd76fbc8faf39b12b",
+      "bytes": 5639
+    },
+    {
+      "path": "Patch/000045.png",
+      "role": "RGB",
+      "sha256": "6a379b69bc8c612bf91c77caea1dc5f477ac5f20a5b9a88bacb66ed2f6d4a09d",
+      "bytes": 603538
+    },
+    {
+      "path": "masks/Patch/000045.png",
+      "role": "RGB_derived_mask",
+      "sha256": "5b09730f3cc31af445345efded58730bb021dcbd38c46fbbdcd34579ebcc9e51",
+      "bytes": 2573
+    },
+    {
+      "path": "Crack/000045.png",
+      "role": "RGB",
+      "sha256": "7501914e72cf2d205b3ac24bea6be1a0a89df7a72fbb27ec576441b688ef01d5",
+      "bytes": 614783
+    },
+    {
+      "path": "masks/Crack/000045.png",
+      "role": "RGB_derived_mask",
+      "sha256": "5b7ec63f163b4b4f22b0f27822c4a51fcbbe8ce01b3030033ac946e8c8630199",
+      "bytes": 2726
+    },
+    {
+      "path": "WideA/000047.png",
+      "role": "RGB",
+      "sha256": "c7c751ab6add9e09d553d93901e48d30283eee427276a359e0030fd83ea5eadc",
+      "bytes": 835464
+    },
+    {
+      "path": "masks/WideA/000047.png",
+      "role": "RGB_derived_mask",
+      "sha256": "eb1970e9cd229ff5502c9a364414def4515fe02c5bf2f4129a55ba6b689642c5",
+      "bytes": 5279
+    },
+    {
+      "path": "WideB/000047.png",
+      "role": "RGB",
+      "sha256": "69c55b672960a293a8a3b60130d8ae2d5b1a62ec650fad33873a3ce08acd23ea",
+      "bytes": 839437
+    },
+    {
+      "path": "masks/WideB/000047.png",
+      "role": "RGB_derived_mask",
+      "sha256": "d1cd7ab97f1b2bb0b962bd7e45f7a8002536e7eb4cce91f3a5d181da07d7b473",
+      "bytes": 5565
+    },
+    {
+      "path": "Patch/000047.png",
+      "role": "RGB",
+      "sha256": "46b1d4956ea01639a5d2d70d06ce1812c2f7ca81cdf3ab284e988ea24e621e94",
+      "bytes": 602630
+    },
+    {
+      "path": "masks/Patch/000047.png",
+      "role": "RGB_derived_mask",
+      "sha256": "ea5d261917d12afbd070cd080ceb924e9ba240845a18d2f07d3012cabeac0528",
+      "bytes": 2479
+    },
+    {
+      "path": "Crack/000047.png",
+      "role": "RGB",
+      "sha256": "107169d69dae042574798fb4624b7ca15e440014ebc5207f97cc88d78d573eea",
+      "bytes": 603688
+    },
+    {
+      "path": "masks/Crack/000047.png",
+      "role": "RGB_derived_mask",
+      "sha256": "977511a77d79548e96f07eb47ee500ada54b99bced574087ae45f277d92e4f85",
+      "bytes": 2605
+    },
+    {
+      "path": "unknown_regions.json",
+      "role": "human_2D_annotations",
+      "sha256": "48925e2baedd1294f0ec8bec2b7c7765a9fb1314f164ea0fbf91a40cbc1380e1",
+      "bytes": 7716
+    },
+    {
+      "path": "healthy-loft-40x32.json",
+      "role": "explicit_fixed_healthy_design",
+      "sha256": "83116a84c242518c24a81f0195a1be62f4fec4c9e502f70aa9b845675d0d2008",
+      "payload_sha256": "26d68880988d58cffd60d73b3b574b9e976d2817a7fd328069f8b01f156d15f1",
+      "bytes": 77978
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/observations/fit-fixed-anchor-v7/tracks.json",
+      "role": "solver_rgb_observations",
+      "sha256": "259c7a46bf6c998fa5271ca9db1edbaf80f68d81c2e5fbe27446be603f6477f3",
+      "bytes": 150180
+    }
+  ],
+  "RGB_detection_access_log": [
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/actual-controlled-catalog.json",
+      "role": "calibrated_RGB_observation_catalog",
+      "sha256": "872900fccb707d80717dce6828b1ee26b2f003ab36d34ab9698f0977dcd0c868"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/masks/controlled-capture/input/Patch/000042.png",
+      "role": "original_RGB_only",
+      "sha256": "1594e210f583a6961189634a9cbf3bb3c9ec46e5afc7f027c1b07a7b6d92a5d1"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/masks/controlled-capture/input/Crack/000042.png",
+      "role": "original_RGB_only",
+      "sha256": "14334111697c19024d8659202abe1bbffb00847447f963632c1a5670b2153a90"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/masks/controlled-capture/input/Patch/000043.png",
+      "role": "original_RGB_only",
+      "sha256": "3c837bd6661eed4bab62df4274fc8ffe242d1e7b6e321178c87507aace96cd78"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/masks/controlled-capture/input/Crack/000043.png",
+      "role": "original_RGB_only",
+      "sha256": "bfb2bbf5623ee69a161b3e82f6bff65e70e281b7fec25d76474e7034d57e322c"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/masks/controlled-capture/input/Patch/000045.png",
+      "role": "original_RGB_only",
+      "sha256": "6a379b69bc8c612bf91c77caea1dc5f477ac5f20a5b9a88bacb66ed2f6d4a09d"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/masks/controlled-capture/input/Crack/000045.png",
+      "role": "original_RGB_only",
+      "sha256": "7501914e72cf2d205b3ac24bea6be1a0a89df7a72fbb27ec576441b688ef01d5"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/masks/controlled-capture/input/Patch/000047.png",
+      "role": "original_RGB_only",
+      "sha256": "46b1d4956ea01639a5d2d70d06ce1812c2f7ca81cdf3ab284e988ea24e621e94"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/masks/controlled-capture/input/Crack/000047.png",
+      "role": "original_RGB_only",
+      "sha256": "107169d69dae042574798fb4624b7ca15e440014ebc5207f97cc88d78d573eea"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/masks/controlled-capture/evaluation/Holdout/000042.png",
+      "role": "original_RGB_only",
+      "sha256": "c3341be778d2ccbb5da41c6bcfb15f35ea2c0241b07eb43fdadf2be74e24074b"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/masks/controlled-capture/evaluation/Holdout/000043.png",
+      "role": "original_RGB_only",
+      "sha256": "115e5e7b1ec4539064a6cc7b48620bd4e9edc732888c7062236ae0298c5a7ac9"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/masks/controlled-capture/evaluation/Holdout/000045.png",
+      "role": "original_RGB_only",
+      "sha256": "71c08d9da7e475e6916c33ebe432b4f212b23799a3b176672dcfcd5262fa8723"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/masks/controlled-capture/evaluation/Holdout/000047.png",
+      "role": "original_RGB_only",
+      "sha256": "c2c14ba8149d49c7735a4b6213608aace6f21f7fd219c205b0cb6f558023806b"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/masks/holdout-patch-centered/HoldoutPatch/000042.png",
+      "role": "original_RGB_only",
+      "sha256": "0846e980dd5252bf488744a7ce6227e685e9039ca1a5e9313633193f3c2d9f7b"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/masks/holdout-patch-centered/HoldoutPatch/000043.png",
+      "role": "original_RGB_only",
+      "sha256": "6ad51aad5d4b1a7478135dc9d5636daceea9a472441d9ee4e8fc89bd8861e0be"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/masks/holdout-patch-centered/HoldoutPatch/000045.png",
+      "role": "original_RGB_only",
+      "sha256": "a467aa9f206d88082d6eadfe729eef22a91d21034d5af7c570d2080a998aa1ad"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/masks/holdout-patch-centered/HoldoutPatch/000047.png",
+      "role": "original_RGB_only",
+      "sha256": "8a32e1c44a3db7dd33c36b7f1fe14c64d82a6fc1ce51b76594692acaf0ceb679"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/locked-holdout/catalog.json",
+      "role": "calibrated_RGB_observation_catalog",
+      "sha256": "aee008453b850a9eb36cc7587ce57a2396a1762103e16d07aed666aa0b202095"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/locked-holdout/RGB/LockedPatch/000042.png",
+      "role": "original_RGB_only",
+      "sha256": "e793b1b51aecc5d2221993a047d35255a6f9d5bbe3b93df7ce40a2fb147ef995"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/locked-holdout/RGB/LockedCrack/000042.png",
+      "role": "original_RGB_only",
+      "sha256": "e4b9f61eadb0d0a8671d5865a00171622b855ac9c8f1a6fb69a26eb44c347358"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/locked-holdout/RGB/LockedPatch/000043.png",
+      "role": "original_RGB_only",
+      "sha256": "0cbb67093cd77629804c9b19db21f9e7a50c253a900eb99a228af33d324624c0"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/locked-holdout/RGB/LockedCrack/000043.png",
+      "role": "original_RGB_only",
+      "sha256": "2d89807abfec5c9f8bb95db11274b55f99a8c2c41ae4d7ac5e15085f6ab2a9e7"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/locked-holdout/RGB/LockedPatch/000045.png",
+      "role": "original_RGB_only",
+      "sha256": "7f355cb47c3543e67151850b9e5b258a52f54649ee8e70e53723b545890c3ccf"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/locked-holdout/RGB/LockedCrack/000045.png",
+      "role": "original_RGB_only",
+      "sha256": "dde747e74675c24282f9ed370ba409efea871fa16a74e0b48038f12dcdb17444"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/locked-holdout/RGB/LockedPatch/000047.png",
+      "role": "original_RGB_only",
+      "sha256": "f9870d0f3bf36a851dacc2b87e48ac49bece5e225b8d042ff9be16a348516838"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/locked-holdout/RGB/LockedCrack/000047.png",
+      "role": "original_RGB_only",
+      "sha256": "7823bbf84b9450495f3fe4b5674cdc3fea5a87c5c710c0ac5114e1d2a8ebcb1e"
+    }
+  ],
+  "source_truth_or_texture_read": false,
+  "explicit_unknown_domain_audit": [
+    {
+      "track_id": "Patch",
+      "frame": 42,
+      "camera": "Patch",
+      "split": "fit",
+      "RGB_boundary_pixels": 1618,
+      "RGB_boundary_unknown_pixels": 0,
+      "RGB_boundary_known_fraction": 1.0,
+      "projected_known_fraction": 1.0,
+      "unknown_domain_annotation_available": true,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Patch",
+      "frame": 43,
+      "camera": "Patch",
+      "split": "fit",
+      "RGB_boundary_pixels": 1552,
+      "RGB_boundary_unknown_pixels": 0,
+      "RGB_boundary_known_fraction": 1.0,
+      "projected_known_fraction": 1.0,
+      "unknown_domain_annotation_available": true,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Patch",
+      "frame": 45,
+      "camera": "Patch",
+      "split": "fit",
+      "RGB_boundary_pixels": 1390,
+      "RGB_boundary_unknown_pixels": 0,
+      "RGB_boundary_known_fraction": 1.0,
+      "projected_known_fraction": 1.0,
+      "unknown_domain_annotation_available": true,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Patch",
+      "frame": 47,
+      "camera": "Patch",
+      "split": "fit",
+      "RGB_boundary_pixels": 1448,
+      "RGB_boundary_unknown_pixels": 0,
+      "RGB_boundary_known_fraction": 1.0,
+      "projected_known_fraction": 1.0,
+      "unknown_domain_annotation_available": true,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Patch",
+      "frame": 42,
+      "camera": "HoldoutPatch",
+      "split": "heldout",
+      "RGB_boundary_pixels": 1606,
+      "RGB_boundary_unknown_pixels": null,
+      "RGB_boundary_known_fraction": null,
+      "projected_known_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Patch",
+      "frame": 43,
+      "camera": "HoldoutPatch",
+      "split": "heldout",
+      "RGB_boundary_pixels": 1542,
+      "RGB_boundary_unknown_pixels": null,
+      "RGB_boundary_known_fraction": null,
+      "projected_known_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Patch",
+      "frame": 45,
+      "camera": "HoldoutPatch",
+      "split": "heldout",
+      "RGB_boundary_pixels": 1378,
+      "RGB_boundary_unknown_pixels": null,
+      "RGB_boundary_known_fraction": null,
+      "projected_known_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Patch",
+      "frame": 47,
+      "camera": "HoldoutPatch",
+      "split": "heldout",
+      "RGB_boundary_pixels": 1454,
+      "RGB_boundary_unknown_pixels": null,
+      "RGB_boundary_known_fraction": null,
+      "projected_known_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Patch",
+      "frame": 42,
+      "camera": "LockedPatch",
+      "split": "heldout",
+      "RGB_boundary_pixels": 0,
+      "RGB_boundary_unknown_pixels": null,
+      "RGB_boundary_known_fraction": null,
+      "projected_known_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Patch",
+      "frame": 43,
+      "camera": "LockedPatch",
+      "split": "heldout",
+      "RGB_boundary_pixels": 0,
+      "RGB_boundary_unknown_pixels": null,
+      "RGB_boundary_known_fraction": null,
+      "projected_known_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Patch",
+      "frame": 45,
+      "camera": "LockedPatch",
+      "split": "heldout",
+      "RGB_boundary_pixels": 1076,
+      "RGB_boundary_unknown_pixels": null,
+      "RGB_boundary_known_fraction": null,
+      "projected_known_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Patch",
+      "frame": 47,
+      "camera": "LockedPatch",
+      "split": "heldout",
+      "RGB_boundary_pixels": 0,
+      "RGB_boundary_unknown_pixels": null,
+      "RGB_boundary_known_fraction": null,
+      "projected_known_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 42,
+      "camera": "Crack",
+      "split": "fit",
+      "RGB_boundary_pixels": 462,
+      "RGB_boundary_unknown_pixels": 0,
+      "RGB_boundary_known_fraction": 1.0,
+      "projected_known_fraction": 1.0,
+      "unknown_domain_annotation_available": true,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 43,
+      "camera": "Crack",
+      "split": "fit",
+      "RGB_boundary_pixels": 450,
+      "RGB_boundary_unknown_pixels": 0,
+      "RGB_boundary_known_fraction": 1.0,
+      "projected_known_fraction": 1.0,
+      "unknown_domain_annotation_available": true,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 45,
+      "camera": "Crack",
+      "split": "fit",
+      "RGB_boundary_pixels": 394,
+      "RGB_boundary_unknown_pixels": 0,
+      "RGB_boundary_known_fraction": 1.0,
+      "projected_known_fraction": 1.0,
+      "unknown_domain_annotation_available": true,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 47,
+      "camera": "Crack",
+      "split": "fit",
+      "RGB_boundary_pixels": 374,
+      "RGB_boundary_unknown_pixels": 0,
+      "RGB_boundary_known_fraction": 1.0,
+      "projected_known_fraction": 1.0,
+      "unknown_domain_annotation_available": true,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 42,
+      "camera": "Holdout",
+      "split": "heldout",
+      "RGB_boundary_pixels": 468,
+      "RGB_boundary_unknown_pixels": null,
+      "RGB_boundary_known_fraction": null,
+      "projected_known_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 43,
+      "camera": "Holdout",
+      "split": "heldout",
+      "RGB_boundary_pixels": 450,
+      "RGB_boundary_unknown_pixels": null,
+      "RGB_boundary_known_fraction": null,
+      "projected_known_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 45,
+      "camera": "Holdout",
+      "split": "heldout",
+      "RGB_boundary_pixels": 398,
+      "RGB_boundary_unknown_pixels": null,
+      "RGB_boundary_known_fraction": null,
+      "projected_known_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 47,
+      "camera": "Holdout",
+      "split": "heldout",
+      "RGB_boundary_pixels": 374,
+      "RGB_boundary_unknown_pixels": null,
+      "RGB_boundary_known_fraction": null,
+      "projected_known_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 42,
+      "camera": "LockedCrack",
+      "split": "heldout",
+      "RGB_boundary_pixels": 468,
+      "RGB_boundary_unknown_pixels": null,
+      "RGB_boundary_known_fraction": null,
+      "projected_known_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 43,
+      "camera": "LockedCrack",
+      "split": "heldout",
+      "RGB_boundary_pixels": 450,
+      "RGB_boundary_unknown_pixels": null,
+      "RGB_boundary_known_fraction": null,
+      "projected_known_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 45,
+      "camera": "LockedCrack",
+      "split": "heldout",
+      "RGB_boundary_pixels": 392,
+      "RGB_boundary_unknown_pixels": null,
+      "RGB_boundary_known_fraction": null,
+      "projected_known_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 47,
+      "camera": "LockedCrack",
+      "split": "heldout",
+      "RGB_boundary_pixels": 370,
+      "RGB_boundary_unknown_pixels": null,
+      "RGB_boundary_known_fraction": null,
+      "projected_known_fraction": null,
+      "unknown_domain_annotation_available": false,
+      "scope": "fit input known-domain contract subtracts declared RGB unknown polygons (empty unknown set for Patch/Crack); heldout has no contour-domain contract, all independent detected RGB boundary pixels retained unscreened, no all-known assumption or fit support reuse"
+    }
+  ],
+  "reconstruction_source_identity": {
+    "classification": "STAGE4_CANDIDATE_FIXED_RGB_REPROJECTION",
+    "modules": {
+      "surface_tracks.py": "7897b6773f1071af2046c688a1fc1e8b6e5706092fc93e169e591a9cacfff59d",
+      "preview.py": "aadf90942c642f268bc25255df714a1968cd5beb3411c35417ccfd1f2b6d5002",
+      "synth.py": "83d2f506a3022abd7efcdffda0371310954d430ddf86f589b4b571bc05cf5f9c",
+      "run.py": "fbe47a92200caece029b911009d4696110c3b9eb7c57862ae6f81104c6b70126",
+      "check_alignment.py": "df8350a6f0bb26c719d0ee80e624ba1bab7bbc2b44286b7dbc4504149254b5bc",
+      "rgb_masks.py": "df622e7019f8d0e273e7d2a09c0812e18dfefddc7817e6064ab6e08cb2a7fa75",
+      "test_texture_correctness.py": "b3fe1019898bf6ce2e1d9d0bbce8f1b5a09aab52bb967144535af750846673fc",
+      "blender_view.py": "f3aed291e145183fd71213b038f686149e327c62765df02d6f2123beeeafb76e",
+      "blender_export_cameras.py": "aafa7bd1eb94f7c3c56578af317c2833002463509cd4301804f65714ddb7ea16",
+      "coverage.py": "f05e2d467dd45893291cb1f71ee3260590fff8768c1b06c9804ac049cf8978d4",
+      "model.py": "427e6073d21b8c68f8ceaea44f7177ce3a761bbe5faa3fa9c65ad4643b74967c",
+      "surface_observations_subpixel.py": "95d0f1d8e279cd6e1f17e664b95bd73ca2b7331aab2f23a4773a1c188400a367",
+      "camera.py": "3c18384c5bb549a80945a766412c5c0ae14cd890f4900b5b94e6022cc123d644",
+      "eval_texture.py": "89ff2acc4829ea0ec64814fab48ad4324d1b90fa9d319df8426bf9b0e9ed5365",
+      "input_adapter.py": "8b8329f551e3e90a9fd542ae50afae795bde5e41dc244630cdfed247c2b73d43",
+      "texture_geometry.py": "41ed5b598f15d49a5ad870f3a8a7ae775902f12dc5d60c994b39b407870d30ea",
+      "texture.py": "e82e46f83b729086d079782b7c1a60523e5496678343ff335abafb68a50c7a1a",
+      "evaluate.py": "02b70c14077f609ec60d16b18d49fcea3061c71843d8d4f3e0f74dc6f40ef8f2",
+      "surface_observations.py": "f869359c0ef99c18e98d07506cb9f5b01fc770e62e91d8c1fab2e6f0bc1273f1",
+      "atlas.py": "3c5a944fe26ea56b7a02d358baf642119655883fc77f0b62cf1724eb15568b63",
+      "contour_support.py": "9e7658c2fd081665be16298860d88ec370f9841c4ff00539808f9713089b790c",
+      "raster.py": "329fa72599cc19ccaef1b44ead6feed2cca481f6278737ad725ed25d65329f38",
+      "recon.py": "53b8b9fac8068d27212db03b1b9ebc1e166e6dd07718dd9d43d6c4834eb42e01"
+    },
+    "tests": {
+      "test_surface_observations_subpixel.py": "8f70fe87cd946d6aec80207c05562214c493da7b9c0bf0fecba0190071772ac7",
+      "test_numerical_contours.py": "339c2316d964ad981a05ec67f96674db9358b845e01c99ef035219b076cfcaa3",
+      "test_healthy_template.py": "6c739640b680062a8366eaa35e12ae3d5c531ed20f7ed36aae17d8a2100ac705",
+      "test_texture_performance_contract.py": "a90513b38c9a723a242eb50fc28c6b269571fa55af819fa188e3e68dc508e890",
+      "test_bound_origin.py": "56abca89a6d741455e74b99bdf3f0902e476bb8f70c6625bece926e8b02bd850",
+      "test_surface_observations.py": "755462324f581fe0b743914bce3ec8da477c0ce6da3d310ae9a347aa0c87163a",
+      "test_texture_geometry.py": "bae3523ac20138201b915c64f0ec3f30a2006a930081ef962b27a66d4e756bfd",
+      "test_full_model_state.py": "09e986b390ac7722f5f7b29c998d8ed2a8f121725193d41af607bedab45d4a7c",
+      "test_input_recon.py": "86accf152ef7dff66f0ecd1f26d4013acf885fe117e4b46862378c30fa0754a7",
+      "test_recon_mesh_reuse.py": "5a3ccebf0a4a93923c6a870d9ba907c10bb6bc78077bc4a717084cbb3c275465",
+      "test_startup_recon.py": "21267926b36c76f79b1eb5090a35edd54adf87fe62c698684284d20307236a37",
+      "test_surface_tracks.py": "31b300075ea9bab47f47e1b1fd2131fa4bfdce9a0330c041d77bfbb997727f6f",
+      "test_unknown_contours.py": "2c68a4b9da872425623f22dd939c89c3d6c1c0a676489d3728c6028c48a64181",
+      "test_solver_budgets.py": "85e0c2c3299dd739350e8922d0ab316ece68f22e71513eaf3645a40717f0895e",
+      "test_rgb_masks.py": "6e3ff547feae738dec600803b6c39e6d60b3c2ad5deb9b42979be30ee4b34b41"
+    },
+    "tracks": {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/observations/fit-fixed-anchor-v7/tracks.json",
+      "sha256": "259c7a46bf6c998fa5271ca9db1edbaf80f68d81c2e5fbe27446be603f6477f3"
+    },
+    "healthy_asset": {
+      "sha256": "83116a84c242518c24a81f0195a1be62f4fec4c9e502f70aa9b845675d0d2008"
+    },
+    "criteria_sha256": "931983589bd63d989714d0e8e44fe6d1798850ef0b2ed256e6377d3e984a8452",
+    "heldout_opened_before_freeze": false
+  },
+  "reconstruction_source_identity_sha256": "6cfbbd0d035ecf283e65c967a97bdbe915ce0feace0791d564ecac32b6abed89",
+  "input_manifest_sha256": "5ab511c5040e59b822c724f8141742956490bf4c89b626a0b275d8b866e9a06e",
+  "unknown_annotation_sha256": "48925e2baedd1294f0ec8bec2b7c7765a9fb1314f164ea0fbf91a40cbc1380e1"
+}

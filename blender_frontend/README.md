@@ -7,11 +7,11 @@
 | 对象 | 身份与范围 |
 | --- | --- |
 | 公开安装包 | [NREL 0.3.20+1](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.20.1)，173 文件；完整风机几何／同源纹理切换、三机柔性回放、默认三相机复位及六类合成缺陷。 |
-| 公开实现源码 | [0.3.18 / 6dfa0eef](https://github.com/snode11/wind-farm-blender/commit/6dfa0eefe410ef3e38d3cbd9ee7d017aafa2fc02)；自动 Source code 不对应当前公开 ZIP 或全部本地工作区。 |
+| 项目源码 | [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)；包含当前实现、测试与研究工具。当前分支不等于既有公开 ZIP 或日常安装载荷。 |
 | 本地日常安装 | `bl_ext.user_default.wfrl_blender`，`LOCAL_UNPUBLISHED_REVISION`，manifest 0.3.20+1、173 文件；包 SHA-256 `c7a085b5dcd76163b7589f014f706231d882251423e3281e268495b84b6b68c6`，与公开附件不同。 |
 | GW184 | [0.4.0 独立运行包](../docs/blender/GW184三相机与缺陷编辑器.md)；184 m 尺寸合成刚性模型、固定三相机和六类缺陷。模型与配置不能直接替代 NREL。 |
 
-本地日常修订包含相机异常清理与同源纹理稳定刷新。对应[验证摘要](../outputs/frontend-reliability-20261011-a01/final-verification.json)记录 **217 passed / 113 subtests passed**、隔离与日常安装原生脚本窗口检查，以及 173 个安装文件摘要一致。稳定暂停刷新 20 次时 `_sources`、`_existing`、`_apply` 均为 0 次；该计数不证明 FPS 提升。窗口证据使用脚本操作，不是实体鼠标输入；完整片段、长期运行与跨平台验收仍受限。
+日常安装的已核对载荷包含相机异常清理与同源纹理稳定刷新；当前分支源码还包含包单次校验、PNG 采集、完整播放判定及构建保护等实现。对应[验证摘要](../outputs/frontend-reliability-20261011-a01/final-verification.json)记录 **217 passed / 113 subtests passed**、隔离与日常安装原生脚本窗口检查，以及 173 个安装文件摘要一致。稳定暂停刷新 20 次时 `_sources`、`_existing`、`_apply` 均为 0 次；该计数不证明 FPS 提升。窗口证据使用脚本操作，不是实体鼠标输入；完整片段、长期运行与跨平台验收仍受限。
 
 公开包 SHA-256 为 `e6e279f5f88c730f3c96158bfca525a9d04f1a09915ad3a997d1d29b00a9f5ba`。工作区源码、构建 ZIP、已安装扩展与公开附件分别核对，不能依据版本号推定文件相同。日常启动器加载安装版；更新安装后需要完全重启 Blender。
 
@@ -47,11 +47,13 @@
 
 原生窗口用临时观察相机表达各路视场，共用场景和时钟。默认 GRID 为 2×2，第四格是 `installation_schematic.py` 生成的静态安装示意；STRIP 为三列对照。两种布局均有播放／暂停、单步及单路放大。独立 WATCH 和放大固定使用 SOLID 材质颜色显示，无单路画质切换；返回三路恢复其原画质。PNG 采集使用独立原始质量设置，异常退出也须恢复回放与预览状态。
 
-本地未发布修订中，观察会话分别保留代理对象与镜头数据引用，分步释放绘制回调、代理和窗口，并独立恢复预览画质及主视口。已经删除的 RNA 不阻止其余清理；未释放的资源保留供再次关闭重试。准备／观察失败保存在场景的 `wfrl_native_camera_error` 并显示于三相机主面板，成功完成重开后清除。关闭及延迟恢复均遵守实际场景播放归属，另一场景的播放保持运行。本地修订不改变已发布 ZIP 的身份。
+工作区的 PNG 采集调用 `render_group(..., create_texture=False)`，只回读 RGBA 像素，不建立用于显示的 GPU 纹理；预览默认创建显示纹理。两条路径共用颜色管理、相机参数、场景状态校验和资源清理。
+
+当前源码中，观察会话分别保留代理对象与镜头数据引用，分步释放绘制回调、代理和窗口，并独立恢复预览画质及主视口。已经删除的 RNA 不阻止其余清理；未释放的资源保留供再次关闭重试。准备／观察失败保存在场景的 `wfrl_native_camera_error` 并显示于三相机主面板，成功完成重开后清除。关闭及延迟恢复均遵守实际场景播放归属，另一场景的播放保持运行。源码同步不改变既有公开 ZIP 或日常安装的身份。
 
 相机视锥并集、射线可见性与拼接成功是不同检查。参考姿态的连续投影和重叠已有证据；根部连接件、机舱和叶片自身仍会遮挡局部表面，完整无遮挡尚未通过。不能隐藏真实结构制造几何通过结果，也不能将此仿真安装作为实体标定。
 
-`playback_benchmark.py` 区分完成、超时、中止、错误与缺绘制；每路须有推进和终止证据，不能只看 FPS 或一个 PASS 字段。旧停止异常根因仍未定位，当前完整片段性能与跨平台稳定性继续单独验证。
+`playback_benchmark.py` 区分完成、超时、中止、错误与缺绘制。场景须从声明起点推进至终段；循环只接受末端到起点边界的已验证原生播放转换，寻址不能作为完成证据。每路须有声明激活时刻对应的起始绘制、持续推进、终段、有效最终状态和新鲜心跳；晚启用从实际激活时刻检查，只有场景静止的显式暂停区间可从推进间隔中扣除。FPS 或单个 PASS 字段不能替代这些证据。旧停止异常根因仍未定位，当前完整片段性能与跨平台稳定性继续单独验证。
 
 ## 启动与模式切换
 
@@ -61,10 +63,10 @@
 cd "/path/to/wind farm RL"
 scripts/blender/run_wfrl_macos.sh \
   --blender "/Applications/Blender.app/Contents/MacOS/Blender" \
-  --python /opt/anaconda3/envs/wfrl-mac/bin/python \
+  --python /path/to/wfrl-env/bin/python \
   --scene scenes/turb3_row.yaml \
-  --mpi /opt/homebrew/bin/mpiexec \
-  --fastfarm /opt/anaconda3/envs/wfrl-mac/bin/FAST.Farm
+  --mpi /path/to/mpiexec \
+  --fastfarm /path/to/FAST.Farm
 ```
 
 启动器预检环境并启动自己拥有的 Bridge；Blender 加载**已安装扩展**，停在 MAPPO 的 T1 侧前方首帧。默认状态为 **OFFLINE RESULTS**，Bridge 在 `127.0.0.1:8765` 待用，不自动连接或开始运行。这条入口需要完整后端环境；只看离线演示时直接打开扩展并点击“加载 MAPPO · 60 秒”，或用便携入口，无需 Python 后端、MPI、FAST.Farm 和网络。
@@ -73,7 +75,7 @@ scripts/blender/run_wfrl_macos.sh \
 
 需要后端时，进入 **Item → WFRL / CONNECTION → 后端连接（高级）**，选择 Replay 或 Interactive，再点 Connect / Reconnect。Item 不可见时先选中一片叶片。启动脚本在握手确认后发送 `scene.load`，自动加载命令指定的 YAML；确认 **CONNECTED / READY** 后，到 **WFRL / 后端运行** 设置参数并点击 Start Replay / Start Training。Replay 需兼容 checkpoint，例如项目中的 `results/checkpoints/mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt`。
 
-切换模式会断开前端，需要重新连接。运行结束先 Stop 并等待 STOPPED，再选择 MAPPO · 60 秒返回离线回放。关闭该命令启动的 Blender 后，启动器清理自己拥有的 Bridge。普通 Blender 窗口不运行此 bootstrap，连接已有 Bridge 后需手动 Load & Validate Scene。
+切换模式会断开前端，需要重新连接。运行结束先 Stop 并等待 STOPPED，再选择 MAPPO · 60 秒返回离线回放。关闭该命令启动的 Blender 后，有活动扩展会话时，启动器恢复会话并请求 `run.stop`；只有明确收到 READY、STOPPED 或 FAILED 的非运行状态才清理自己拥有的 Bridge。EOF、超时、致命错误或无效响应均视为停止未确认，保留 Bridge 并返回错误；没有活动会话时按自身进程清理流程处理。普通 Blender 窗口不运行此 bootstrap，连接已有 Bridge 后需手动 Load & Validate Scene。
 
 | 路径 | 前端显示与数据 | 是否启动求解／训练 |
 | --- | --- | --- |
@@ -205,7 +207,7 @@ origin + 0.95 × TipRad × normalize(direction)
 | `source-surfaces.json` | 生成形变数据所用的原始表面证据索引 |
 | `blade-reference.json`、`reference-surfaces.npz` | v3 独立零载荷静止求解参考及对应表面，用于参考几何与实际形变对照 |
 
-`read_package()` 校验格式、机组列表、文件哈希、数组维度、有限值、时间轴和运动一致性；遥测还要与几何摘要及时间轴匹配。不能在校验失败时改用假数据。原始 VTP 不需要随播放器分发；生成新结果与日常播放是不同流程。
+`read_package()` 校验格式、机组列表、文件哈希、数组维度、有限值、时间轴和运动一致性；遥测还要与几何摘要及时间轴匹配。工作区的场景绑定通过 `_load_package()` 取得一次完整校验载荷，构造器及挠度比较复用其中的几何、运动、塔架和叶片参考数据；每次重新加载仍独立校验，不使用跨加载缓存。公开 `read_package()` 保持五元组接口。不能在校验失败时改用假数据。原始 VTP 不需要随播放器分发；生成新结果与日常播放是不同流程。
 
 `FarmFlex` 为九片叶片分配独立 Mesh，根据相邻源时刻和相邻展向站点插值形变，并结合机组偏航与装配变换写回局部顶点。单机镜头只上传可见机组网格；切到全景时，在当前时刻更新全部九片再显示。这里保留物理变形幅度，展示网格的采样密度不等于求解器网格密度。
 
@@ -291,7 +293,7 @@ python3 scripts/blender/build_extension.py --output <新目录>
 python3 scripts/blender/validate_frontend_package.py --output <新目录> --blender <Blender可执行文件>
 ```
 
-构建生成 ZIP、SHA-256 与逐文件 inventory，输出目录须独立，避免覆盖同版本包。验证工具默认构建、隔离安装并执行后台检查；`--build-only` 仍会构建 ZIP。纯文档任务仅检查格式、引用、身份与要求一致性。
+构建生成 ZIP、SHA-256 与逐文件 inventory，默认拒绝任一同名产物已存在的输出，包括断符号链接。使用新目录保留各包身份；明确需要替换时使用 `build_extension.py --output <目录> --overwrite`。文件在同一文件系统的临时目录中完成后逐个发布，ZIP 最后发布；普通发布异常恢复原产物，恢复冲突保留备份并报告位置，不保证断电或进程强制终止时三文件整体原子性。验证工具默认构建、隔离安装并执行后台检查；`--build-only` 仍会构建 ZIP。纯文档任务仅检查格式、引用、身份与要求一致性。
 
 ZIP 包括 MAPPO 源、旧法和 TLS 结果层、规范示例、NREL 缺陷编辑器及生成的协议／读取器。公开 0.3.18 源码的复建结论仅属于该版；本地载荷、公开附件和已安装文件必须分别匹配 inventory 与 build-info，不用 Git 提交或版本字符串替代。
 
@@ -309,7 +311,7 @@ ZIP 包括 MAPPO 源、旧法和 TLS 结果层、规范示例、NREL 缺陷编�
 
 `split_reconstruction.py` 管理布局生命周期，`split_reconstruction_timing.py` 定义固定映射，`split_reconstruction_ui.py` 提供统一控制与左下角 HUD。601 个保存状态来自 10 Hz 重建，使用固定 60 Hz 时间轴，每个样本保持 6 帧；MAPPO 源为 40 Hz。两侧共同播放、暂停、步进与循环。
 
-本地未发布修订的 `split_mappo_texture.refresh()` 复用已校验的对象与结构绑定；来源对象、网格、保存清单或摘要变化时完整校验，文件加载、撤销与重做清缓存。只在矩阵、网格或全局可见性变化时写入，不重复激活显示设置或扫描全部场景。
+当前源码的 `split_mappo_texture.refresh()` 复用已校验的对象与结构绑定；来源对象、网格、保存清单或摘要变化时完整校验，文件加载、撤销与重做清缓存。只在矩阵、网格或全局可见性变化时写入，不重复激活显示设置或扫描全部场景。
 
 中段／叶尖观察点只定位一次，手动缩放、平移、绕转后继续播放保留用户视图。原始／增强显式切换回两侧整机；模式切换保留时刻、播放状态和有效视角。保存重开恢复当前模式、显示、时间与视角，不重放按钮取景动作。独立合成入口及底层样本工具不在统一侧栏显示。
 

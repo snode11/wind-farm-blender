@@ -1,0 +1,638 @@
+{
+  "classification": "RECORDED_MAPPO_BLENDER_SCENE",
+  "tracks": [
+    {
+      "track_id": "Patch",
+      "anchor_frame": 42,
+      "anchor_binding_coverage": 1.0,
+      "planned_independent_observations": 3,
+      "accepted_observations": 0,
+      "accepted_fraction": 0.0,
+      "status": "FAILED_CORRESPONDENCE_GATE",
+      "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator"
+    },
+    {
+      "track_id": "Crack",
+      "anchor_frame": 42,
+      "anchor_binding_coverage": 1.0,
+      "planned_independent_observations": 7,
+      "accepted_observations": 0,
+      "accepted_fraction": 0.0,
+      "status": "FAILED_CORRESPONDENCE_GATE",
+      "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator"
+    }
+  ],
+  "observations": [
+    {
+      "track_id": "Patch",
+      "frame": 42,
+      "t": 4.200000000000003,
+      "camera": "Patch",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "1dc8a2d3b3c8558863153f9c9ac73b207afddaaea369c321cec0f3f7fe352ad8",
+      "anchor": true,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.0008371563841711895,
+      "centroid_shift_px": 6.179751158889173e-06,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.010683760683760684,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/actual-old-score/Patch_Patch_42_independent_reprojection.png"
+    },
+    {
+      "track_id": "Patch",
+      "frame": 43,
+      "t": 4.299999999999997,
+      "camera": "Patch",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "7e595061c770884c4c85205995d886fddc4da57193bc272f020c03bbd05551db",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 36.840988257545966,
+      "centroid_shift_px": 29.09460209860106,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.00641025641025641,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/actual-old-score/Patch_Patch_43_independent_reprojection.png"
+    },
+    {
+      "track_id": "Patch",
+      "frame": 45,
+      "t": 4.5,
+      "camera": "Patch",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "5459eeb500922b174a3741afcb612916423736435f2c865752366a9fb8908220",
+      "anchor": false,
+      "reconstruction_valid": false,
+      "P95_symmetric_boundary_px": 59.702741613557194,
+      "centroid_shift_px": 51.393123120462604,
+      "visible_fraction": 0.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.015491452991452992,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/actual-old-score/Patch_Patch_45_independent_reprojection.png"
+    },
+    {
+      "track_id": "Patch",
+      "frame": 47,
+      "t": 4.700000000000003,
+      "camera": "Patch",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "32c0e41f84a12f234466a1b75aa2e5ccfb299410848805bbd241b2fd2810a47a",
+      "anchor": false,
+      "reconstruction_valid": false,
+      "P95_symmetric_boundary_px": 52.01317253673845,
+      "centroid_shift_px": 43.430562863043136,
+      "visible_fraction": 0.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.01282051282051282,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/actual-old-score/Patch_Patch_47_independent_reprojection.png"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 42,
+      "t": 4.200000000000003,
+      "camera": "Crack",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "97538efd65404dca427d300e3c3f2d7d833881bdb95a030a1c82e5e03d52394d",
+      "anchor": true,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.001275071855235149,
+      "centroid_shift_px": 2.972964184019098e-07,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.01655982905982906,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/actual-old-score/Crack_Crack_42_independent_reprojection.png"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 43,
+      "t": 4.299999999999997,
+      "camera": "Crack",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "6ed69813f67821ecf8ee41d5b427ee9b95b4de4c15076b1107dc7fd94334b497",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 56.38888058719113,
+      "centroid_shift_px": 57.10062309257704,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.012286324786324786,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/actual-old-score/Crack_Crack_43_independent_reprojection.png"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 45,
+      "t": 4.5,
+      "camera": "Crack",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "2ce7a44301be7e510813b50346754d62755065070563b6e9cb7315712b3b30e5",
+      "anchor": false,
+      "reconstruction_valid": false,
+      "P95_symmetric_boundary_px": 97.76680357204965,
+      "centroid_shift_px": 95.99267473228412,
+      "visible_fraction": 0.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.011752136752136752,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/actual-old-score/Crack_Crack_45_independent_reprojection.png"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 47,
+      "t": 4.700000000000003,
+      "camera": "Crack",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "37d255b0408035f3e5cdcdcd248f3bf1e8f711f755fc75614ea28c4bb3dd9d9a",
+      "anchor": false,
+      "reconstruction_valid": false,
+      "P95_symmetric_boundary_px": 76.60179938756367,
+      "centroid_shift_px": 75.53025829300596,
+      "visible_fraction": 0.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.011752136752136752,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/actual-old-score/Crack_Crack_47_independent_reprojection.png"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 42,
+      "t": 4.200000000000003,
+      "camera": "Holdout",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "ee855b645533592bebe1bdecd16dc73118e5606537098bd1ca77c390144d1fdc",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 2.107176702372229,
+      "centroid_shift_px": 2.2078542074034635,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.016025641025641024,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/actual-old-score/Crack_Holdout_42_independent_reprojection.png"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 43,
+      "t": 4.299999999999997,
+      "camera": "Holdout",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "ed63d2e7f340eac66addbccc165f2b8187a02bdecfcc11006bc52dec45b99b69",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 34.21661030058915,
+      "centroid_shift_px": 36.61507447103871,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.011217948717948718,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/actual-old-score/Crack_Holdout_43_independent_reprojection.png"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 45,
+      "t": 4.5,
+      "camera": "Holdout",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "a7e708f20d5700b9ac619256005d3f6999b6faa75be13bfad82bdf005bb46bd8",
+      "anchor": false,
+      "reconstruction_valid": false,
+      "P95_symmetric_boundary_px": 59.063511436732526,
+      "centroid_shift_px": 58.46989264948723,
+      "visible_fraction": 0.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.014957264957264958,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/actual-old-score/Crack_Holdout_45_independent_reprojection.png"
+    },
+    {
+      "track_id": "Crack",
+      "frame": 47,
+      "t": 4.700000000000003,
+      "camera": "Holdout",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "ee08b7c997d7ce2f077af5526d95e80cf26329967ac54a505482e3e778ee34ae",
+      "anchor": false,
+      "reconstruction_valid": false,
+      "P95_symmetric_boundary_px": 39.54705539086449,
+      "centroid_shift_px": 39.496688391046966,
+      "visible_fraction": 0.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          672,
+          153,
+          720,
+          192
+        ],
+        "pixels": 1872,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.01014957264957265,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": false,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/actual-old-score/Crack_Holdout_47_independent_reprojection.png"
+    }
+  ],
+  "overall": "FAILED_CORRESPONDENCE_GATE",
+  "primary_metric": "independent RGB region boundary reprojection with fixed anchor triangles, in original pixels",
+  "limitations": [
+    "Known capture target names are region identities, not automatic defect classification",
+    "Bindings are candidate surface regions; pixel boundary threshold is not a pointwise texture descriptor",
+    "No field data, geometry objective changes, source-point nearest search or local-plane 3D error conversion"
+  ],
+  "recon_input_access_log": [
+    {
+      "path": "input_bundle.json",
+      "role": "input_manifest",
+      "sha256": "35a3b5bcd3f78b0601db82137ff6ea9f7533513519904d8d5c69d48244c35f04",
+      "bytes": 19648
+    },
+    {
+      "path": "WideA/000042.png",
+      "role": "RGB",
+      "sha256": "b4d7b8e969dd825aa77bd2622e15be9b853cd8ee96cc2cd3b469dfb7922b2145",
+      "bytes": 1273239
+    },
+    {
+      "path": "masks/WideA/000042.png",
+      "role": "RGB_derived_mask",
+      "sha256": "5d9317dcbbd83516a55bc2bdd67488ebc807ae6966bce8627b56c7890f2347c8",
+      "bytes": 9566
+    },
+    {
+      "path": "WideB/000042.png",
+      "role": "RGB",
+      "sha256": "faebfe9ab7b965265d81873c2790f403b656ec8a60ca5e74f235a9b29b75a404",
+      "bytes": 1272745
+    },
+    {
+      "path": "masks/WideB/000042.png",
+      "role": "RGB_derived_mask",
+      "sha256": "5e25776408379bfc182eea397efd97e15acdcb9912dc5baa599ad2c83d7706f9",
+      "bytes": 8816
+    },
+    {
+      "path": "Patch/000042.png",
+      "role": "RGB",
+      "sha256": "1dc8a2d3b3c8558863153f9c9ac73b207afddaaea369c321cec0f3f7fe352ad8",
+      "bytes": 1551206
+    },
+    {
+      "path": "masks/Patch/000042.png",
+      "role": "RGB_derived_mask",
+      "sha256": "31f77f6810478af5ed931c167f9eebe463ce14687bb921d5b97d9f162ec13e49",
+      "bytes": 2956
+    },
+    {
+      "path": "Crack/000042.png",
+      "role": "RGB",
+      "sha256": "97538efd65404dca427d300e3c3f2d7d833881bdb95a030a1c82e5e03d52394d",
+      "bytes": 1555884
+    },
+    {
+      "path": "masks/Crack/000042.png",
+      "role": "RGB_derived_mask",
+      "sha256": "112b353bb9e3abbad3d2af24543e9cb784906db4af6442fc3508de65f957a7c3",
+      "bytes": 3128
+    },
+    {
+      "path": "WideA/000043.png",
+      "role": "RGB",
+      "sha256": "ad853324b74af5f28a6e4d12bdbff348452fdf3a7ad63f79668aab75d5c11ca2",
+      "bytes": 1273446
+    },
+    {
+      "path": "masks/WideA/000043.png",
+      "role": "RGB_derived_mask",
+      "sha256": "262e0b1d56de9f40bed89f82359597277a962d5f46d662bfcc0ed2eb1b3276b0",
+      "bytes": 9882
+    },
+    {
+      "path": "WideB/000043.png",
+      "role": "RGB",
+      "sha256": "6fb25155a992f5dea4ddac08020b48e4723d4c3603a0d47a29cd6d5f237c2e92",
+      "bytes": 1273674
+    },
+    {
+      "path": "masks/WideB/000043.png",
+      "role": "RGB_derived_mask",
+      "sha256": "413ce2f6f5507d7818e1175177b1cc10a9fa30cdd79ba5ba4e12e62664ae1dae",
+      "bytes": 8278
+    },
+    {
+      "path": "Patch/000043.png",
+      "role": "RGB",
+      "sha256": "7e595061c770884c4c85205995d886fddc4da57193bc272f020c03bbd05551db",
+      "bytes": 1543137
+    },
+    {
+      "path": "masks/Patch/000043.png",
+      "role": "RGB_derived_mask",
+      "sha256": "49730f3ab5f7b3fb57bb9c8f9114f30019ef95b8d43772faafeede7c51df2cd0",
+      "bytes": 2888
+    },
+    {
+      "path": "Crack/000043.png",
+      "role": "RGB",
+      "sha256": "6ed69813f67821ecf8ee41d5b427ee9b95b4de4c15076b1107dc7fd94334b497",
+      "bytes": 1551627
+    },
+    {
+      "path": "masks/Crack/000043.png",
+      "role": "RGB_derived_mask",
+      "sha256": "a7533f3606f4f9b0a7f3ac981c2f5b08190bb3f7c93f178c20a5e917aac6bc26",
+      "bytes": 3010
+    },
+    {
+      "path": "WideA/000045.png",
+      "role": "RGB",
+      "sha256": "5046ade8d903785c1eedcc3c8e88e22cb605478156181ce1e10846b5d7a680be",
+      "bytes": 1276697
+    },
+    {
+      "path": "masks/WideA/000045.png",
+      "role": "RGB_derived_mask",
+      "sha256": "768249f4b0e7ff440e78041061d7828154481c60b66933a81ab44dc317265057",
+      "bytes": 10491
+    },
+    {
+      "path": "WideB/000045.png",
+      "role": "RGB",
+      "sha256": "a6c96872b306d3a97de7a28d7057ebd36718b27d6fec44b9082fb5752e55dbb4",
+      "bytes": 1273815
+    },
+    {
+      "path": "masks/WideB/000045.png",
+      "role": "RGB_derived_mask",
+      "sha256": "996dec1319d5176f58deeeb21bc1919ae9876ae5e63fd383e5433124c5a054e2",
+      "bytes": 9907
+    },
+    {
+      "path": "Patch/000045.png",
+      "role": "RGB",
+      "sha256": "5459eeb500922b174a3741afcb612916423736435f2c865752366a9fb8908220",
+      "bytes": 1526996
+    },
+    {
+      "path": "masks/Patch/000045.png",
+      "role": "RGB_derived_mask",
+      "sha256": "a7b775b397a9c31f32fc2a17ca6a3ccf7537bf60a2922c02fbe025bfc37c691a",
+      "bytes": 2579
+    },
+    {
+      "path": "Crack/000045.png",
+      "role": "RGB",
+      "sha256": "2ce7a44301be7e510813b50346754d62755065070563b6e9cb7315712b3b30e5",
+      "bytes": 1539156
+    },
+    {
+      "path": "masks/Crack/000045.png",
+      "role": "RGB_derived_mask",
+      "sha256": "7ea6a21417d7f3d502bde4a1fa1c096cb311144b940b545455332a6793c34c78",
+      "bytes": 2755
+    },
+    {
+      "path": "WideA/000047.png",
+      "role": "RGB",
+      "sha256": "2505e5066170a6536ac03bf91ea004bc0cfc483f8d55fb47db729a1b5db80739",
+      "bytes": 1271229
+    },
+    {
+      "path": "masks/WideA/000047.png",
+      "role": "RGB_derived_mask",
+      "sha256": "7e9c834ffd91c1e22b5fc0bb1dd7821f6d060ac262122c94661e3323d23d81e4",
+      "bytes": 10448
+    },
+    {
+      "path": "WideB/000047.png",
+      "role": "RGB",
+      "sha256": "d123c3b151fa5769cfede180233243a7c3f1c6e71ff030f1fb16aa308b646853",
+      "bytes": 1272876
+    },
+    {
+      "path": "masks/WideB/000047.png",
+      "role": "RGB_derived_mask",
+      "sha256": "978487deb781cbedfb213545c861529e397e6a535d60454b1a02b8dcd40ad858",
+      "bytes": 10374
+    },
+    {
+      "path": "Patch/000047.png",
+      "role": "RGB",
+      "sha256": "32c0e41f84a12f234466a1b75aa2e5ccfb299410848805bbd241b2fd2810a47a",
+      "bytes": 1527646
+    },
+    {
+      "path": "masks/Patch/000047.png",
+      "role": "RGB_derived_mask",
+      "sha256": "ea5d261917d12afbd070cd080ceb924e9ba240845a18d2f07d3012cabeac0528",
+      "bytes": 2479
+    },
+    {
+      "path": "Crack/000047.png",
+      "role": "RGB",
+      "sha256": "37d255b0408035f3e5cdcdcd248f3bf1e8f711f755fc75614ea28c4bb3dd9d9a",
+      "bytes": 1539414
+    },
+    {
+      "path": "masks/Crack/000047.png",
+      "role": "RGB_derived_mask",
+      "sha256": "b92d3a148f64e611ea5ef0ca29677eb2641f8ecb86fc327d724d580fdb0a4c22",
+      "bytes": 2714
+    }
+  ],
+  "RGB_detection_access_log": [
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/actual-catalog.json",
+      "role": "calibrated_RGB_observation_catalog",
+      "sha256": "feae732b66f0969d35d3141583cdcb6af8a92114a80b138460888b0ba2bc3251"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/actual/input/Patch/000042.png",
+      "role": "original_RGB_only",
+      "sha256": "1dc8a2d3b3c8558863153f9c9ac73b207afddaaea369c321cec0f3f7fe352ad8"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/actual/input/Crack/000042.png",
+      "role": "original_RGB_only",
+      "sha256": "97538efd65404dca427d300e3c3f2d7d833881bdb95a030a1c82e5e03d52394d"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/actual/input/Patch/000043.png",
+      "role": "original_RGB_only",
+      "sha256": "7e595061c770884c4c85205995d886fddc4da57193bc272f020c03bbd05551db"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/actual/input/Crack/000043.png",
+      "role": "original_RGB_only",
+      "sha256": "6ed69813f67821ecf8ee41d5b427ee9b95b4de4c15076b1107dc7fd94334b497"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/actual/input/Patch/000045.png",
+      "role": "original_RGB_only",
+      "sha256": "5459eeb500922b174a3741afcb612916423736435f2c865752366a9fb8908220"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/actual/input/Crack/000045.png",
+      "role": "original_RGB_only",
+      "sha256": "2ce7a44301be7e510813b50346754d62755065070563b6e9cb7315712b3b30e5"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/actual/input/Patch/000047.png",
+      "role": "original_RGB_only",
+      "sha256": "32c0e41f84a12f234466a1b75aa2e5ccfb299410848805bbd241b2fd2810a47a"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/actual/input/Crack/000047.png",
+      "role": "original_RGB_only",
+      "sha256": "37d255b0408035f3e5cdcdcd248f3bf1e8f711f755fc75614ea28c4bb3dd9d9a"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/actual/evaluation/Holdout/000042.png",
+      "role": "original_RGB_only",
+      "sha256": "ee855b645533592bebe1bdecd16dc73118e5606537098bd1ca77c390144d1fdc"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/actual/evaluation/Holdout/000043.png",
+      "role": "original_RGB_only",
+      "sha256": "ed63d2e7f340eac66addbccc165f2b8187a02bdecfcc11006bc52dec45b99b69"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/actual/evaluation/Holdout/000045.png",
+      "role": "original_RGB_only",
+      "sha256": "a7e708f20d5700b9ac619256005d3f6999b6faa75be13bfad82bdf005bb46bd8"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/actual/evaluation/Holdout/000047.png",
+      "role": "original_RGB_only",
+      "sha256": "ee08b7c997d7ce2f077af5526d95e80cf26329967ac54a505482e3e778ee34ae"
+    }
+  ],
+  "source_truth_or_texture_read": false
+}

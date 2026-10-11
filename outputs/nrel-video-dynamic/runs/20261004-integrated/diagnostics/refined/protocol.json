@@ -1,0 +1,102 @@
+{
+  "schema": "nrel-dynamic-dy1-refine-protocol.v1",
+  "status": "FROZEN_BEFORE_COMPUTATION",
+  "created_utc": "2026-10-04T03:39:27.357886+00:00",
+  "local_date": "2026-10-04",
+  "timezone": "Asia/Shanghai",
+  "target": "T1/B1",
+  "input_route": "A / existing ideal-calibrated MP4, ideal B1 rigid pose and separately frozen ideal axis-normal plane",
+  "predecessor": "20261004-a01 DY1 gate not passed",
+  "purpose": "Investigate coarse-grid false uniqueness at43/44 and camera-conditioned ambiguity; no additional imaging, fitting or acceptance",
+  "frames": [
+    42,
+    43,
+    44,
+    45
+  ],
+  "use_history": "All four frames previously inspected/development; no blind validation",
+  "primary_group": "all3",
+  "secondary_groups": [
+    "C1C2",
+    "C2C3",
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "candidate_structural_point": {
+    "s_m": 61.5,
+    "reference": "frozen v2 quarter-chord model reference-axis endpoint",
+    "mapping_status": "NOT_VERIFIED_AS_BEAMDYN_STRUCTURAL_TIP",
+    "d_scope": "candidate-axis sensitivity only"
+  },
+  "candidate_model": {
+    "q_grid_per_axis_m": [
+      -0.5,
+      -0.45,
+      -0.4,
+      -0.35,
+      -0.3,
+      -0.25,
+      -0.2,
+      -0.15,
+      -0.1,
+      -0.05,
+      0.0,
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.45,
+      0.5
+    ],
+    "q_units": "m",
+    "q_directions": [
+      "blade_root_x",
+      "blade_root_y"
+    ],
+    "maximum_tip_q_component_m": 0.5,
+    "state_count": 441,
+    "phi": "(s/61.5)^2",
+    "section": "Fixed v2 chord/thickness/twist and minimal reference-tangent rotation; unchanged A01 geometry",
+    "time_parameterization": "none; independent states; no smoothing or interpolation"
+  },
+  "budget": {
+    "threads": 4,
+    "image_size": [
+      320,
+      180
+    ],
+    "time_limit_s": 900,
+    "optimizer_iterations": 0,
+    "restarts": 0,
+    "max_candidate_states": 1764,
+    "max_image_evaluations": 5292
+  },
+  "equivalence_tolerance_native_px": 3.0,
+  "equivalence_rule": "group equal-camera native bidirectional mean distance <= its grid minimum +3px; secondary groups separately summarized without altering primary selection",
+  "tolerance_source": "Same exploratory boundary heuristic as A01; no calibrated statistical or engineering meaning",
+  "image_free_contrast": "Full candidate-grid d span only; initialized static reference used historical RGB, so not a DY2 G2 arm",
+  "calibration_uncertainty": "Ideal inputs conditional; no claim of measured calibration/time errors",
+  "stop_conditions": [
+    "Input/hash/plane/time/provenance mismatch",
+    "Invalid or nonfinite geometry/image terms retained as unavailable",
+    "Budget exhausted",
+    "Unmapped structural reference prevents structural metric acceptance",
+    "No stage advances based on selecting one low-residual grid point"
+  ],
+  "future_data_use": "None",
+  "elastic_delta": null,
+  "elastic_delta_reason": "No independent unloaded reference supplied to estimator",
+  "forbidden": [
+    "Flexible source state",
+    "Source meshes or truth coordinates",
+    "Truth masks/material correspondences",
+    "Independent dynamic scoring",
+    "Rendering or FAST.Farm"
+  ],
+  "stage_advance": "No automatic DY2 pass. New supported measurement protocol required if either mapping or d observability remains unresolved."
+}

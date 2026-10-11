@@ -5,472 +5,472 @@
   "source_freeze": [
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/actual/contour-analytic/recon.json",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/actual/contour-analytic/recon.json",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/preview.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/preview.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/synth.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/synth.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/run.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/run.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/check_alignment.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/check_alignment.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/rgb_masks.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/rgb_masks.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/test_texture_correctness.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/test_texture_correctness.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/blender_view.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/blender_view.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/blender_export_cameras.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/blender_export_cameras.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/coverage.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/coverage.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/model.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/model.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/surface_observations_subpixel.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/surface_observations_subpixel.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/camera.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/camera.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/eval_texture.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/eval_texture.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/input_adapter.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/input_adapter.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/texture.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/texture.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/evaluate.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/evaluate.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/surface_observations.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/surface_observations.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/atlas.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/atlas.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/contour_support.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/contour_support.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/raster.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/raster.py",
       "match": true
     },
     {
       "case": "A",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/recon.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/recon.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/actual/contour-healthy-final/recon.json",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/actual/contour-healthy-final/recon.json",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/surface_tracks.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/surface_tracks.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/preview.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/preview.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/synth.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/synth.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/run.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/run.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/check_alignment.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/check_alignment.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/rgb_masks.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/rgb_masks.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/test_texture_correctness.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/test_texture_correctness.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/blender_view.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/blender_view.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/blender_export_cameras.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/blender_export_cameras.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/coverage.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/coverage.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/model.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/model.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/surface_observations_subpixel.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/surface_observations_subpixel.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/camera.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/camera.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/eval_texture.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/eval_texture.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/input_adapter.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/input_adapter.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/texture_geometry.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/texture_geometry.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/texture.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/texture.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/evaluate.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/evaluate.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/surface_observations.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/surface_observations.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/atlas.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/atlas.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/contour_support.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/contour_support.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/raster.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/raster.py",
       "match": true
     },
     {
       "case": "B",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/recon.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/recon.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/actual/texture-analytic-final/recon.json",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/actual/texture-analytic-final/recon.json",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_tracks.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_tracks.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/preview.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/preview.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/synth.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/synth.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/run.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/run.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/check_alignment.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/check_alignment.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/rgb_masks.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/rgb_masks.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/test_texture_correctness.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/test_texture_correctness.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/blender_view.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/blender_view.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/blender_export_cameras.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/blender_export_cameras.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/coverage.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/coverage.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/model.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/model.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_observations_subpixel.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_observations_subpixel.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/camera.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/camera.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/eval_texture.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/eval_texture.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/input_adapter.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/input_adapter.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/texture_geometry.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/texture_geometry.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/texture.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/texture.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/evaluate.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/evaluate.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_observations.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_observations.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/atlas.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/atlas.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/contour_support.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/contour_support.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/raster.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/raster.py",
       "match": true
     },
     {
       "case": "C",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/recon.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/recon.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/actual/texture-healthy-final/recon.json",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/actual/texture-healthy-final/recon.json",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_tracks.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_tracks.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/preview.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/preview.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/synth.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/synth.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/run.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/run.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/check_alignment.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/check_alignment.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/rgb_masks.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/rgb_masks.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/test_texture_correctness.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/test_texture_correctness.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/blender_view.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/blender_view.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/blender_export_cameras.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/blender_export_cameras.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/coverage.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/coverage.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/model.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/model.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_observations_subpixel.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_observations_subpixel.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/camera.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/camera.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/eval_texture.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/eval_texture.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/input_adapter.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/input_adapter.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/texture_geometry.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/texture_geometry.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/texture.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/texture.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/evaluate.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/evaluate.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_observations.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/surface_observations.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/atlas.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/atlas.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/contour_support.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/contour_support.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/raster.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/raster.py",
       "match": true
     },
     {
       "case": "D",
-      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/recon.py",
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/recon.py",
       "match": true
     }
   ],
@@ -1245,252 +1245,252 @@
   ],
   "document_links": [
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "actual/candidate-native/独立纹理辅助重建.blend",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "actual/baseline-native/独立纹理辅助重建.blend",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "actual/candidate-native/reopen.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "evaluation/final-scores/summary.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "final-verification.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "复现命令与来源.md",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "../../blade_recon0.2/docs/纹理辅助几何_职责与合同.md",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "healthy-contract/健康模板合同实现与静态验证.md",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "observations/RGB固定身份观测与未知域报告.md",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "healthy-contract/installed-compatibility/installed-reader-comparison.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "protocol.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "evaluation-ready.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "healthy-contract/final-independent-audit.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "observations/fit-fixed-anchor-v7/tracks.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "zero-weight-equivalence-final.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "evaluation/final-scores/D_texture_healthy/unknown-domain-audit.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "image-information-summary.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "actual/baseline-evidence-final/Patch_RGB_atlas_Blender_same_position_FAILED.png",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "actual/candidate-evidence-final/Patch_RGB_atlas_Blender_same_position_FAILED.png",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "actual/baseline-evidence-final/Crack_RGB_atlas_Blender_same_position_FAILED.png",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "actual/candidate-evidence-final/Crack_RGB_atlas_Blender_same_position_FAILED.png",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "actual/candidate-evidence-final/native-binding-audit.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "evaluation/baseline-texture-ROI-final.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "evaluation/candidate-texture-ROI-final.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "target": "performance/summary.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/baseline-actual.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/baseline-compose-evidence-final.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/baseline-native-binding-audit-final.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/baseline-native-binding-audit.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/baseline-texture-actual.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/baseline-unknown-domain-audit.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/candidate-evidence-compose-final.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/candidate-evidence-compose.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/candidate-native-audit-final.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/candidate-native-audit.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/candidate-native-reopen.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/candidate-native.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/contour-healthy-final.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/final-healthy-texture-fixed.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/final-healthy-texture.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/healthy-contour-actual.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/texture-analytic-final.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/texture-analytic.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/texture-healthy-final.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/texture-healthy.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/texture-zero-analytic-final.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
+      "doc": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "target": "runs/texture-zero-analytic.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/docs/纹理辅助几何_职责与合同.md",
+      "doc": "REPOSITORY_ROOT/blade_recon0.2/docs/纹理辅助几何_职责与合同.md",
       "target": "../../outputs/blade-recon-v02-stage4-20261007-a01/优化与独立验收报告.md",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/docs/纹理辅助几何_职责与合同.md",
+      "doc": "REPOSITORY_ROOT/blade_recon0.2/docs/纹理辅助几何_职责与合同.md",
       "target": "../../outputs/blade-recon-v02-stage4-20261007-a01/final-verification.json",
       "exists": true
     },
     {
-      "doc": "/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/docs/纹理辅助几何_职责与合同.md",
+      "doc": "REPOSITORY_ROOT/blade_recon0.2/docs/纹理辅助几何_职责与合同.md",
       "target": "../../outputs/blade-recon-v02-stage4-20261007-a01/复现命令与来源.md",
       "exists": true
     }

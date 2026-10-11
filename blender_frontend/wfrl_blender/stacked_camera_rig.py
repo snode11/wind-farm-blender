@@ -232,18 +232,56 @@ def build(scene, config=RigParameters()):
     return cameras, assembly
 
 
-def build_default(scene):
-    """Create the reviewed preset in a fresh MAPPO scene, using bundled data."""
+def _default_layout():
     import json
     from pathlib import Path
-    from . import custom_camera_history as history
     path = Path(__file__).parent / 'assets' / 'cameras' / 't1-three-camera-default.json'
-    layout = json.loads(path.read_text(encoding='utf-8'))
+    return json.loads(path.read_text(encoding='utf-8'))
+
+
+def build_default(scene):
+    """Create the reviewed preset in a fresh MAPPO scene, using bundled data."""
+    from . import custom_camera_history as history
+    layout = _default_layout()
     build(scene)
     core.restore_layout(scene, layout)
     # Loading a new scene is the baseline, not three user camera edits.
     history.HISTORY.clear()
     return core.enabled_cameras(scene), scene.objects[PREFIX]
+
+
+def reset_default(scene):
+    """Explicit, reversible reset of an existing box and all three optics.
+
+    Publication replaces camera references atomically without seeking the
+    timeline, changing navigation, or stopping native playback.
+    """
+    from . import custom_camera_history as history, custom_camera_capture as capture
+    from .panels import custom_cameras as panel
+    if scene.objects.get(PREFIX) is None:
+        raise ValueError('请先加载三相机盒体，再恢复默认布局')
+    if capture.active():
+        raise ValueError('请先结束采集，再恢复默认三相机')
+    if any(obj.get('wfrl_custom_draft') for obj in scene.objects):
+        raise ValueError('请先确认或取消相机草稿，再恢复默认三相机')
+    reason = panel.installation_block_reason(scene)
+    if reason:
+        raise ValueError(reason)
+    if panel._ACTIVE and panel._ACTIVE.stage not in panel._VIEWING:
+        raise ValueError('请先确认或取消当前相机调整，再恢复默认三相机')
+    layout = _default_layout()
+    core.validate_layout(scene, layout)
+    before = history.before_change(scene)
+    if core.config_equal(before[1], layout):
+        try:
+            core.validate_native_state(scene)
+        except ValueError:
+            pass  # An explicit reset also repairs native optics edits.
+        else:
+            return False
+    core.restore_layout(scene, layout)
+    history.committed(scene, before, '恢复默认三相机')
+    return True
 
 
 def sync_modules(scene):

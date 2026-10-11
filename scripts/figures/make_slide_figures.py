@@ -8,7 +8,7 @@
   fig_training.png        静态 vs 动态 vs GRU 训练曲线（读 runs/*_hist.json）
 
 用法：
-    "C:/Users/s1155/.conda/envs/wfcrl/python.exe" make_slide_figures.py
+    python3 make_slide_figures.py
 """
 import json
 import os

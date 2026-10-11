@@ -3,7 +3,7 @@
 对应日报 §1.4 的最后一块：物理层的受控结论已经有了，这里补含策略的那一层。
 只吃文件名带 `_s{seed}_u{ws}` 的历史（不钉风的老 run 不混进来）。
 
-    "C:/Users/s1155/.conda/envs/wfcrl/python.exe" compare_pinned_seeds.py
+    python3 compare_pinned_seeds.py
 """
 import glob
 import json

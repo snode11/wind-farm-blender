@@ -5,6 +5,13 @@ from pathlib import Path
 import argparse, json, re, shutil, subprocess, os, hashlib, math
 ROOT=Path(__file__).resolve().parents[2]
 DEFAULT_SOURCE=ROOT/'__simul__/fastfarm/FastFarm__604s__3T_1789056088.7327092'
+def resolve_executable(command=None, *, env_var='WFCRL_FASTFARM_EXECUTABLE', default='FAST.Farm'):
+    configured = str(command or os.environ.get(env_var) or default)
+    found = shutil.which(configured)
+    if found is None:
+        raise FileNotFoundError(f'Executable not found or not executable: {configured}; set {env_var} or add {default} to PATH')
+    return Path(found).resolve()
+
 def replace(p, values):
     text=p.read_text()
     for key,value in values.items():
@@ -47,11 +54,11 @@ def prepare(name,wind,duration=36,fps=80,dt=.00625,refine=False,source_case=None
     (dest/'run_config.json').write_text(json.dumps(config,indent=2))
     return dest
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--name',required=True);p.add_argument('--wind',type=float,required=True);p.add_argument('--duration',type=float,default=36);p.add_argument('--fps',type=int,default=80);p.add_argument('--dt',type=float,default=.00625);p.add_argument('--refine',action='store_true');p.add_argument('--source-case',type=Path,default=DEFAULT_SOURCE);p.add_argument('--executable',default='/opt/anaconda3/envs/wfrl-mac/bin/FAST.Farm');a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--name',required=True);p.add_argument('--wind',type=float,required=True);p.add_argument('--duration',type=float,default=36);p.add_argument('--fps',type=int,default=80);p.add_argument('--dt',type=float,default=.00625);p.add_argument('--refine',action='store_true');p.add_argument('--source-case',type=Path,default=DEFAULT_SOURCE);p.add_argument('--executable',help='FAST.Farm path or command; default: WFCRL_FASTFARM_EXECUTABLE or FAST.Farm on PATH');a=p.parse_args()
     dest=prepare(a.name,a.wind,a.duration,a.fps,a.dt,a.refine,a.source_case)
     status={'exit_code':None,'executable':a.executable,'status':'FAILED'}
     try:
-        executable=Path(shutil.which(a.executable) or a.executable).resolve()
+        executable=resolve_executable(a.executable)
         status.update(executable=str(executable),sha256=hashlib.sha256(executable.read_bytes()).hexdigest())
         with (dest/'solver.log').open('w') as log:
             r=subprocess.run([str(executable),'Case.fstf'],cwd=dest/'FarmInputs',env={**os.environ,'OMP_NUM_THREADS':'2'},stdout=log,stderr=subprocess.STDOUT)

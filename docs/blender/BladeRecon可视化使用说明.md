@@ -1,6 +1,6 @@
 # Blade Recon 叶片三维重建可视化 · 0.3.20+1
 
-适用于 Blender 5.2+ 的公开 NREL **0.3.20+1**。从[专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.20.1/wfrl_blender-0.3.20%2B1.zip)安装并重启；公开对应实现源码基线仍为 v0.3.18。开发机日常安装使用同 manifest、不同载荷的 **LOCAL_UNPUBLISHED_REVISION**，相机异常清理与重建稳定轮询修订未公开，详见[身份与验证范围](发布状态与验证范围.md)。外部研究求解器不随扩展打包。
+适用于 Blender 5.2+ 的公开 NREL **0.3.20+1**。从[专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.20.1/wfrl_blender-0.3.20%2B1.zip)安装并重启；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装使用同 manifest、不同载荷的 **LOCAL_UNPUBLISHED_REVISION**，该安装载荷与当前源码及既有公开 ZIP 分别识别，详见[身份与验证范围](发布状态与验证范围.md)。外部研究求解器不随扩展打包。
 
 几何与纹理保持 **NOT_ACCEPTED**，原 0.2 mm 叶尖门保持 **FAILED_GATE**。外部材料点候选 Patch 2/8、Crack 7/8、跨相机 RGB 0/264，仍为 FAILED_GATE / NOT_ACCEPTED，same_material_error_m 与 primary_gains 均 null；该[研究结果](../../blade_recon0.2/docs/材料点对应实验报告_2026-10-11.md)未替换正式 601 样本与图集。
 
@@ -52,7 +52,7 @@ ZIP 自带 MAPPO 数据、便携场景及四张 packed 天空／地表纹理，�
 
 独立算法导入场景使用 **叶片三维重建 → 表面纹理** 的增强与局部检查控件。
 
-`scripts/blender/打开纹理细节检查.command` 是完整本地工作区中的源码启动入口，尚未公开；克隆 GitHub 当前源码无法使用该脚本。当前公开扩展的同源纹理从上述统一入口切换，独立算法导入使用 **叶片三维重建** 面板。
+当前源码分支提供 `scripts/blender/打开纹理细节检查.command`；按所需输入和[资源说明](../PUBLICATION.md)准备完整源码工作区后使用，启动来源与已安装扩展分别核对。当前公开扩展的同源纹理从上述统一入口切换，独立算法导入使用 **叶片三维重建** 面板。
 
 打开 **表面纹理** 后可选 **原始纹理**、**增强灰度** 或 **青／洋红增强**。增强强度可调；青色表示比叶片基准偏亮，洋红表示偏暗，亮暗阈值越低会显示越多细节及噪声。未覆盖区域继续保留绿色／橙色证据显示。开关与增强只影响材质，原始 packed 图片、重建状态和尺寸不变。
 
@@ -70,7 +70,7 @@ ZIP 自带 MAPPO 数据、便携场景及四张 packed 天空／地表纹理，�
 
 轮廓以外的完整三维表面由算法模型推断。查看这些部分时结合原输入、相机布局和可选真值判断，不把合成样例的完整表面当作实拍重建精度结果。
 
-正式 601 样本几何来自轮廓／剪影约束，固定保存位姿后把 RGB 灰度反投影为纹理；安装扩展不运行外部材料点求解器，不能把修补颜色或局部纹理解释为缺陷高度／深度。 [NREL 缺陷编辑器](NREL缺陷编辑器.md)提供合成展示与输入制作，两者不构成缺陷重建验证。表面特征扩展的最新执行状态从 [2026-10-06 方案与交接入口](../proposal/叶片表面重建_2026-10-06/README.md)读取。
+正式 601 样本几何来自轮廓／剪影约束，固定保存位姿后把 RGB 灰度反投影为纹理；安装扩展不运行外部材料点求解器，不能把修补颜色或局部纹理解释为缺陷高度／深度。 [NREL 缺陷编辑器](NREL缺陷编辑器.md)提供合成展示与输入制作，两者不构成缺陷重建验证。表面特征研究的当前结论从 [表面研究入口](../../research/blade-surface/README.md)读取。
 
 独立 NREL 动态研究查看器使用 合并目录的统一入口（本地路径：`outputs/nrel-video-dynamic/runs/20261004-integrated/README.md`），载入冻结源码与研究包，状态仍为 `REVIEW_ONLY / DY1 NOT PASSED`。它只有四个保存估计时刻，其余帧为 `UNAVAILABLE; no interpolation`；这与上述 601 样本便携分屏分别判断，软件播放同步不证明动态计量通过。
 
@@ -84,4 +84,4 @@ ZIP 自带 MAPPO 数据、便携场景及四张 packed 天空／地表纹理，�
 
 工作区源码、构建 ZIP、公开附件和已安装扩展是不同来源。更新扩展后重启 Blender，核对实际模块与 payload；输入读取、模型回放、场景切换、保存重开、窗口、性能与科学精度分别验收。
 
-当前本地可靠性载荷的 217 passed / 113 subtests passed 及相机／重建原生脚本窗口检查只适用于该未发布载荷；不能改记为公开 ZIP 的完整安装或性能验收。详细来源和剩余限制见[发布状态][(发布状态与验证范围.md)与实现维护](../../blender_frontend/README.md)。
+当前本地可靠性载荷的 217 passed / 113 subtests passed 及相机／重建原生脚本窗口检查只适用于该未发布载荷；不能改记为公开 ZIP 的完整安装或性能验收。详细来源和剩余限制见[发布状态](发布状态与验证范围.md)与[实现维护](../../blender_frontend/README.md)。

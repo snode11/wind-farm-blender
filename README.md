@@ -9,9 +9,9 @@
 
 ## 当前身份与安装来源
 
-NREL 的 [v0.3.20.1 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.20.1) 只提供专用扩展 ZIP，对应实现源码未公开。公开扩展实现基线为 [v0.3.18 / `6dfa0eef`](https://github.com/snode11/wind-farm-blender/commit/6dfa0eefe410ef3e38d3cbd9ee7d017aafa2fc02)。`v0.3.20.1` 标签指向文档提交 `8e49b84db1b28de49b61b12924d540ae37f11b8b`；自动 Source code 不能用于复建当前扩展。
+项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)，包含当前前端、后端、重建研究、测试和配套文档。NREL 的 [v0.3.20.1 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.20.1) 提供既有专用扩展 ZIP；该标签指向文档提交 `8e49b84db1b28de49b61b12924d540ae37f11b8b`，其自动 Source code 不对应安装 ZIP。当前分支源码、既有公开安装包与本机安装分别识别。
 
-开发机日常扩展 `bl_ext.user_default.wfrl_blender` 使用 **LOCAL_UNPUBLISHED_REVISION**，包含相机异常资源清理与同源重建稳定轮询修订。它与公开 ZIP 使用相同 manifest 版本，载荷不同；工作区、安装目录、构建 ZIP 和公开源码须分别核对。
+开发机日常扩展 `bl_ext.user_default.wfrl_blender` 的已核对载荷标识为 **LOCAL_UNPUBLISHED_REVISION**，包含相机异常资源清理与同源重建稳定轮询。当前源码还包含独立的可靠性与构建保护实现，不会自动更新日常安装或既有公开 ZIP。源码、安装目录、构建 ZIP 和公开附件须分别核对；相同 manifest 版本不能证明载荷一致。
 
 | 对象 | manifest | 身份 |
 | --- | --- | --- |
@@ -38,13 +38,29 @@ NREL 的 [v0.3.20.1 Release](https://github.com/snode11/wind-farm-blender/releas
 
 GW184 使用[独立包操作说明](docs/blender/GW184三相机与缺陷编辑器.md)，不通过扩展安装。
 
+## 源码与运行资源
+
+当前源码、测试、研究工具与文档使用 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 分支。运行资源与证据分别随 Git 或 [project-resources-v1](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1) 提供，具体位置及取得方式见[分发说明](docs/PUBLICATION.md)。NREL 离线扩展构建所需正式载荷随 Git 提供；其他入口按需恢复对应资源。
+
+| 用途 | 必须保留的内容 |
+| --- | --- |
+| 扩展构建与离线回放 | `blender_frontend/wfrl_blender/assets/`、`_vendor/`，以及构建使用的规范 `wfrl/` 源码 |
+| 独立净空演示 | `dist/lidar-delivery.json` 与 `results/lidar/packages/normal-v1.1/`、`close-v1.1/` 的完整数据包 |
+| 后端 Replay | 兼容后端环境，以及 `results/checkpoints/mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt` |
+| GW184 项目 | `projects/gw184-single/` 的 geometry、motion、cameras 与 sources；两份 DTU 原始输入随 Git 提供，官方来源与固定摘要见[来源说明](projects/gw184-single/sources/README.md) |
+| 验证与研究复查 | 分发清单标识的原始测量、摘要、日志和图像；每项证据只适用于其记录的输入与载荷 |
+
+当前源码包含拒绝帧与非有限重建结果的历史／先验保护、启动器停止确认、完整播放证据判定、回放包单次校验复用、PNG 采集纹理分配控制及构建输出保护。源码同步不会替换公开扩展附件或本机日常安装；安装当前实现需按[源码构建说明](docs/blender/INSTALL.md#从项目源码构建)生成并验证独立 ZIP。
+
 ## 验证与限制
+
+当前源码验收为 **前端 726 passed / 3 skipped，后端 837 passed / 5 skipped**，跳过条件包括原始 VTP／来源数据缺失、未配置 RTSP 和测试环境依赖；其范围与资源身份见[分发说明](docs/PUBLICATION.md#证据身份与限制)。该源码结果不作为既有公开 ZIP 或日常安装的重复验收。
 
 公开 ZIP 的 CRC、Blender 扩展格式和功能／资产载荷一致性检查通过；相机默认复位载荷的 78 项宿主与实际面板点击属于其明确记录的安装来源，未重复最终公开 ZIP 的完整隔离安装和窗口工作流。当前本地未发布载荷的 **217 passed / 113 subtests passed**、隔离安装及日常安装原生窗口检查只适用于该本地载荷；窗口操作由 Blender 脚本执行，不是实体鼠标或显示器扫描验收。
 
 同源纹理是 **SAME_SOURCE_SIMULATION**：601 个 10 Hz 保存样本对应 117–177 s，60 Hz 时间轴每 6 帧保持一个样本；独立 `synth_tex` 是另一来源的 120 样本、0–11.9 s。放大与增强不会补出未观测表面。两者的几何／纹理仍为 **NOT_ACCEPTED**，图集模糊、条带、接缝和叶尖错贴限制保留。
 
-外部材料点研究候选为 Patch **2/8**、Crack **7/8**、跨相机接受 **0/264**，仍为 **FAILED_GATE / NOT_ACCEPTED**，`same_material_error_m` 与 `primary_gains` 为 `null`；正式 601 样本和图集未替换。原 0.2 mm 叶尖精度门仍为 **FAILED_GATE**；雷达仍为 **REVIEW_ONLY / PENDING_ACCEPTANCE**。
+外部材料点研究候选为 Patch **2/8**、Crack **7/8**、跨相机接受 **0/264**，仍为 **FAILED_GATE / NOT_ACCEPTED**，`same_material_error_m` 与 `primary_gains` 为 `null`；正式 601 样本和图集未替换。材料点 F/G 的原始输入、冻结脚本和完整运行产物未分发，报告不能支持完整精确复现。原 0.2 mm 叶尖精度门仍为 **FAILED_GATE**；雷达仍为 **REVIEW_ONLY / PENDING_ACCEPTANCE**。
 
 Windows/Linux、稳定 30／60 FPS、长期运行、实物相机标定、自动缺陷检测、现场精度及安全保护均未验收。三相机参考姿态的重叠不等于全周期无遮挡或拼接成功；合成缺陷几何可见不证明图片可辨识。
 

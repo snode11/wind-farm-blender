@@ -5,7 +5,7 @@
 $env:SKIP_MPI_CHECK = "1"
 
 $mpiexec = "C:\Program Files\Microsoft MPI\Bin\mpiexec.exe"
-$python = "C:\Users\s1155\miniconda3\envs\wfcrl\python.exe"
+$python = "USER_HOME\miniconda3\envs\wfcrl\python.exe"
 $project = "D:\project\wind farm RL"
 
 $ckpt = "$project\results\checkpoints\mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_reference_E400_none_stagE400ref_s1.pt"

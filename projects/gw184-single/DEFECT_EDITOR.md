@@ -1,12 +1,14 @@
 # GW184 叶片缺陷编辑器 · 0.4.0
 
-按照 v1.1 开发规格实现的独立刚性场景，已随 [GW184 0.4.0 运行 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.4.0/gw184_three_camera_defects-0.4.0.zip)发布。v1.1 是规格版本，0.4.0 是运行包版本。它不安装或修改主前端扩展，不接入 NREL 柔性回放、雷达或 FAST.Farm；NREL 使用独立的 [0.3.20+1 安装包](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.20.1)，GW184 运行包为 0.4.0。
+按照 v1.1 编辑器规格实现的独立刚性场景，已随 [GW184 0.4.0 运行 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.4.0/gw184_three_camera_defects-0.4.0.zip)发布。v1.1 是规格版本，0.4.0 是运行包版本。它不安装或修改主前端扩展，不接入 NREL 柔性回放、雷达或 FAST.Farm；NREL 使用独立的 [0.3.20+1 安装包](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.20.1)，GW184 运行包为 0.4.0。
 
-当前提供 G 几何检查及 A 图像生成入口。**2026-09-30 获准的 18 张静态检查图已完成并作有限外观审核；完整成像与性能仍未整体验收。** 开发规格、原始检查图及验收记录保存在匹配工作区的 `docs/proposal/defects/叶片缺陷编辑与固定相机成像验证开发规格.md`、`outputs/blade-defects/completion-20260930/检查图.html` 和 `outputs/blade-defects/completion-20260930/验收记录.md`，不随公开仓库文档或运行 ZIP 提供。
+当前提供 G 几何检查及 A 图像生成入口。**18 张指定静态检查图已完成有限外观审核；完整成像与性能仍未整体验收。** 编辑器规格、原始检查图及验收记录对应 `docs/proposal/defects/叶片缺陷编辑与固定相机成像验证开发规格.md`、`outputs/blade-defects/completion-20260930/检查图.html` 和 `outputs/blade-defects/completion-20260930/验收记录.md`；资源是否提供及其恢复路径以[分发清单](../../docs/PUBLICATION.md)为准，不能从文档路径推定附件已包含。
 
 实际发布 ZIP 的检查为 47 项宿主测试通过、1 项因没有历史修改前源码目录跳过；macOS Blender 5.2.1 LTS 的 126 项六类型后台检查通过，36 条三相机 G 记录，真实渲染器调用为零。解压包的 macOS 启动器及独立窗口检查通过，确认六类型、固定相机、编辑面板、时间及近景切换和包内模块来源；不是已安装扩展、完整片段性能或实机损伤验证。Windows 启动器只有静态检查，Windows/Linux 实机尚未验证。发布范围见 [发布状态与验证范围](../../docs/blender/发布状态与验证范围.md)，六类型源码验证结果保存在工作区 `outputs/blade-defects/four-types-20260930/验证记录.md`。
 
-公开 GitHub 目录只同步文档；以下实现文件、配置、参考资源与测试随独立运行 ZIP 提供，自动生成的 Source code 归档不能替代该 ZIP。所有相对脚本命令从完整解压包根目录或匹配实现工作区根目录执行。工作区 `outputs/` 中的开发证据路径只用于已有工作区追溯，不作为公开下载链接。
+以下实现文件、配置、参考来源与测试位于 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 分支，当前源码与既有 0.4.0 运行 ZIP 分别识别；自动 Source code 归档不能替代该 ZIP。所有相对脚本命令从完整解压包根目录，或已按[资源说明](../../docs/PUBLICATION.md)恢复所需文件的源码工作区根目录执行。证据路径仅在相应文件已恢复时可复查，不作为独立公开下载链接。
+
+源码随 Git 提供几何构建所需的两份 DTU 原始参考输入；官方来源、固定摘要及缺失或损坏后的恢复方式见[来源说明](sources/README.md)。当前源码与下述既有 0.4.0 ZIP 按各自载荷和验证身份判断。
 
 ## 打开及编辑
 
@@ -24,7 +26,7 @@
 
 固定相机被 Blender 原生工具手动修改后，分析会拒绝继续，须重新打开场景恢复冻结安装布局。原图不会为了缺陷而自动转向、缩放或放大尺寸。
 
-**SOLID 轮廓线是定位和编辑辅助，不是缺陷外观图。** 实体凹陷可在该视口检查，但细裂纹、涂层露底和雷击烧蚀的解析材质不能凭辅助轮廓验收；2026-09-30 指定预设的材质外观已作有限 A 审核，修改参数后的新场景须独立检查。健康对照会隐藏这些辅助对象，返回损伤状态后按辅助开关恢复。
+**SOLID 轮廓线是定位和编辑辅助，不是缺陷外观图。** 实体凹陷可在该视口检查，但细裂纹、涂层露底和雷击烧蚀的解析材质不能凭辅助轮廓验收；指定预设的材质外观已作有限 A 审核，修改参数后的新场景须独立检查。健康对照会隐藏这些辅助对象，返回损伤状态后按辅助开关恢复。
 
 ## 无渲染命令
 
@@ -76,7 +78,7 @@ BLENDER=/Applications/Blender.app/Contents/MacOS/Blender
 
 `--mode images` 提供固定相机无叠加原图、1:1 无损裁切、目标叶片健康配对、正面/斜侧近景及检查灯光元数据。默认拒绝启动；只有获得对应图像渲染授权，才可使用 `--render-authorized`。`--camera C2` 可限定固定相机；不传则为三路同刻。
 
-A 默认瞬时理想针孔，无曝光模糊、噪声、畸变或压缩效果。近景额外检查光照与固定相机图分开。图像生成也不会自动将审核标记为可辨认；新运行的 `review.md` 默认保留 `NOT_REVIEWED`；2026-09-30 指定图像的后续人工审核单独记录为 `REVIEWED_WITH_LIMITATIONS`。健康差分可能包含阴影和反射，不等于缺陷分割标签。
+A 默认瞬时理想针孔，无曝光模糊、噪声、畸变或压缩效果。近景额外检查光照与固定相机图分开。图像生成也不会自动将审核标记为可辨认；新运行的 `review.md` 默认保留 `NOT_REVIEWED`；指定图像的后续人工审核单独记录为 `REVIEWED_WITH_LIMITATIONS`。健康差分可能包含阴影和反射，不等于缺陷分割标签。
 
 ## 冻结模型与支持域
 

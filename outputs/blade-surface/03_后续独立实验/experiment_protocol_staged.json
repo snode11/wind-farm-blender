@@ -1,0 +1,92 @@
+{
+  "status": "STAGED_NOT_FORMALLY_FROZEN",
+  "source_authorization": "plan_and_authorization.md",
+  "metric": "evaluation/metric_protocol_development.json",
+  "development_configuration": "p2b/development/configuration/frozen_configuration.json",
+  "development_group_freeze": "p2b/groups/development/groups_hash_frozen.json",
+  "capture_configuration": "capture/capture_configuration_freeze.json",
+  "test_selection": "capture/test_selection_result_v2.json",
+  "groups": {
+    "A1_new": [],
+    "A3_C4": [
+      "M04",
+      "M05",
+      "M06",
+      "M07"
+    ],
+    "A3_D4": [
+      "M00",
+      "M05",
+      "M06",
+      "M11"
+    ],
+    "A3_D12": [
+      "M00",
+      "M01",
+      "M02",
+      "M03",
+      "M04",
+      "M05",
+      "M06",
+      "M07",
+      "M08",
+      "M09",
+      "M10",
+      "M11"
+    ]
+  },
+  "test_times_s": [
+    [
+      143.0,
+      143.1,
+      143.2,
+      143.3,
+      143.4,
+      143.5,
+      143.6,
+      143.7
+    ],
+    [
+      148.5,
+      148.6,
+      148.7,
+      148.8,
+      148.9,
+      149.0,
+      149.1,
+      149.2
+    ],
+    [
+      165.0,
+      165.1,
+      165.2,
+      165.3,
+      165.4,
+      165.5,
+      165.6,
+      165.7
+    ]
+  ],
+  "target_model_blade": 0,
+  "only_solver_camera": "WideInput",
+  "heldout_camera": "WideEval",
+  "solver": "frozen centered physical FD/dense exact/minimum TRF radius1;60budget;1e-7stops",
+  "source_truth_forbidden_to_solver_initializer_texture": true,
+  "mask": "same frozen RGB ROI/occupancy/local palette-v2; no source segmentation",
+  "observation_gate_p95_max_raw_px": 1.0,
+  "thresholds": {
+    "relative_gain": 0.1,
+    "minimum_clips_passing": 2,
+    "delta_dev_m": null,
+    "delta_min_m": null,
+    "projection_protection_band_raw_px": null,
+    "maximum_clip_degradation": "max(.05*baseline_mean,delta_min)"
+  },
+  "repair_after_test_rule": "If estimator changes, retain failed data and demote existing tests to development before choosing fresh unused windows; no score-based tuning",
+  "all12_test_geometries_and_common_q_eval_frozen_before_any_test_surface_scoring": true,
+  "invalid_rule": "keep planned denominator and FAILED/null; no success-only ranking",
+  "three_clips_are_saved_replay_not_independent_field_samples": true,
+  "selected_first_RGB_phase_limitation": "all starts approximately -25..-30deg visible marker direction, no broad phase generalization",
+  "A2_new": "optional appearance only; recon bytes identical to A1_new",
+  "blind_decision_code_sha256": "d36472ceff5fd52b18819ec2dcbfa2e2d35e951dcdf5032109d575dfcfbc50cb"
+}

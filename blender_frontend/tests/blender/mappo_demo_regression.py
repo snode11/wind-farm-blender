@@ -23,10 +23,17 @@ assert len(farm_flex._ACTIVE.blades) == 9
 scene.frame_set(901)
 stamp = clearance_replay.sample(scene)['time_s']
 for tid in ('T1','T2','T3'):
+    saved_channels = {'yaw', 'pitch', 'rotor_speed'} | set(
+        (farm_flex._ACTIVE.telemetry or {}).get('turbines', {}).get(tid, {}))
     for channel in ('yaw','pitch','rotor_speed','power','torque','load','pitch_command'):
         point = charts.history.points(tid, channel)[-1]
-        assert point.time == stamp and point.fidelity == 'FAST.Farm'
-        assert point.value is not None
+        assert point.time == stamp
+        if channel in saved_channels:
+            assert point.fidelity == 'FAST.Farm' and point.validity == 'valid'
+            assert point.value is not None
+        else:
+            # Missing source channels stay unavailable; v3 does not save load.
+            assert (point.fidelity, point.validity, point.value) == ('UNKNOWN', 'unsupported', None)
     assert charts.history.points(tid, 'reward')[-1].value is None
 assert abs(charts.history.points(charts.FARM, 'power')[-1].value - sum(charts.history.points(t, 'power')[-1].value for t in ('T1','T2','T3'))) < 1e-8
 before = charts.raw_history.snapshot()

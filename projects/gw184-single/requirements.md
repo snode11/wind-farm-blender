@@ -2,9 +2,11 @@
 
 本文记录原三路视频管线的模型、镜头与启停配置；对应几何、相机及时间线已随 [GW184 0.4.0 独立运行 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.4.0/gw184_three_camera_defects-0.4.0.zip)提供。运行包支持六类缺陷编辑器，但其预设实例不等于下文原视频管线默认的两处缺陷。编辑器规格和操作见 [DEFECT_EDITOR.md](DEFECT_EDITOR.md)，安装见 [GW184 使用说明](../../docs/blender/GW184三相机与缺陷编辑器.md)。
 
-当前模型、取景与动画可供无渲染检查；完整三路视频尚未生成，后续渲染须获明确授权。2026-09-30 另行授权的 18 张缺陷编辑器静态检查图已完成有限外观审核，不能替代三视频管线的试片或成片验收。
+当前模型、取景与动画可供无渲染检查；完整三路视频尚未生成，后续渲染须获明确授权。18 张指定缺陷编辑器静态检查图已完成有限外观审核，不能替代三视频管线的试片或成片验收。
 
 最终给朋友的内容仍只有三路独立、同步、完整画幅的 `C1.mp4`、`C2.mp4`、`C3.mp4`。相机参数和检查报告仅作内部复核，不作为附加视频交付。运行 ZIP 是供用户启动场景和编辑器的另一项交付，不包含这三个完整 MP4。NREL 5MW 使用独立的 [0.3.20+1 扩展](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.20.1)；GW184 0.4.0 不继承其柔性结果或雷达算法。
+
+当前源码随 Git 提供几何构建、编辑器启动及相关测试所需的两份 DTU 原始参考输入，文件摘要与 `sources/provenance.json` 对应；官方来源及缺失或损坏后的恢复方式见[来源说明](sources/README.md)。
 
 ## 外形与来源
 
@@ -54,4 +56,4 @@ C2 在假定舱顶上方 0.8 m；共有盒体有实体背板、侧板、底板�
 
 零预弯试片不验证当前带预弯和缺陷的模型。完整三路 MP4 尚未生成，等待用户明确开始渲染。现有视频 preflight 的源码签名与当前实现不匹配；后续运行原视频管线须按 [项目说明](README.md)重新生成无渲染检查，不复用旧签名。
 
-本文中的 `sources/`、几何、相机和时间线文件指运行 ZIP / 匹配工作区中的 `projects/gw184-single/` 子目录；公开 GitHub 项目目录只同步说明文档。GitHub 自动生成的 Source code 归档不能替代运行 ZIP；本机 `outputs/` 检查记录不随公开仓库或运行包交付。
+本文中的 `sources/`、几何、相机和时间线文件位于 `projects/gw184-single/`。当前源码与测试见 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 分支，正式输入和证据按[资源分发说明](../../docs/PUBLICATION.md)恢复。当前分支源码、既有 0.4.0 运行 ZIP 与保存的检查记录分别识别；自动 Source code 归档不能替代该运行 ZIP，未列入分发清单的 `outputs/` 路径不代表公开附件。

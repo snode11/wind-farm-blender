@@ -1,0 +1,32 @@
+{
+  "original_raw": {
+    "video_fit_wall_s": 26.281394083052874,
+    "prior_only_wall_s": 0.25971620809286833,
+    "steps": 100,
+    "image_forward_backward_evaluations": 600,
+    "feasibility_reduced_steps": 0,
+    "min_center_bound_margin_m": 3.194180488586426,
+    "min_chord_log_bound_margin": 0.16031686961650848,
+    "final_640_total_objective": 0.2937738597393036
+  },
+  "physical_reference_center": {
+    "video_fit_wall_s": 26.34342683397699,
+    "prior_only_wall_s": 0.260568332974799,
+    "steps": 100,
+    "image_forward_backward_evaluations": 600,
+    "feasibility_reduced_steps": 0,
+    "min_center_bound_margin_m": 3.160978078842163,
+    "min_chord_log_bound_margin": 0.1565956026315689,
+    "final_640_total_objective": 0.29254984855651855
+  },
+  "greville_normalized": {
+    "video_fit_wall_s": 26.80459008400794,
+    "prior_only_wall_s": 0.30869641702156514,
+    "steps": 100,
+    "image_forward_backward_evaluations": 600,
+    "feasibility_reduced_steps": 0,
+    "min_center_bound_margin_m": 3.032806873321533,
+    "min_chord_log_bound_margin": 0.16495873034000397,
+    "final_640_total_objective": 0.28023040294647217
+  }
+}

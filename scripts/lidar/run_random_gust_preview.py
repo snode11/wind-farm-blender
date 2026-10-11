@@ -12,7 +12,7 @@ import json
 import os
 import subprocess
 import numpy as np
-from run_physics import prepare, replace
+from run_physics import prepare, replace, resolve_executable
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -67,7 +67,7 @@ def main():
                       UsableTime='"ALL"', HubHt=101, GridHeight=200, GridWidth=220,
                       IECturbc=args.ti*100, URef=mean_wind, RefHt=90,
                       WindProfileType='"PL"', PLExp=.2, ScaleIEC=1))
-    turbsim = Path('/opt/anaconda3/envs/wfrl-mac/bin/turbsim')
+    turbsim = resolve_executable(env_var='WFCRL_TURBSIM_EXECUTABLE', default='turbsim')
     execute(turbsim, ['random.inp'], farm, run/'turbsim.log')
     from openfast_toolbox.io import TurbSimFile
     wind = TurbSimFile(str(farm/'random.bts'))
@@ -109,7 +109,7 @@ def main():
     cfg['inputs']=[dict(path=str(f.relative_to(run)),sha256=hashlib.sha256(f.read_bytes()).hexdigest())
         for f in sorted(run.rglob('*')) if f.is_file() and f.name not in ('run_config.json','turbsim.log')]
     (run/'run_config.json').write_text(json.dumps(cfg,indent=2))
-    exe=Path('/opt/anaconda3/envs/wfrl-mac/bin/FAST.Farm')
+    exe=resolve_executable()
     status=dict(status='PREPARED_ONLY',exit_code=None,executable=str(exe),sha256=hashlib.sha256(exe.read_bytes()).hexdigest())
     try:
         if args.run:

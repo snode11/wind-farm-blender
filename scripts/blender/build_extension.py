@@ -7,7 +7,10 @@ import argparse
 import importlib.util
 import json
 import math
+import os
 from pathlib import Path
+import shutil
+import tempfile
 import tomllib
 from typing import NamedTuple
 from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
@@ -30,6 +33,67 @@ class BuildResult(NamedTuple):
     checksum: Path
     inventory: Path
     sha256: str
+
+
+class _PublicationRollbackError(RuntimeError):
+    pass
+
+
+def _check_outputs(paths, *, overwrite):
+    for path in paths:
+        if path.exists() or path.is_symlink():
+            if not overwrite:
+                raise FileExistsError(f'Output already exists: {path}; use --overwrite to replace it')
+            if path.is_dir() and not path.is_symlink():
+                raise IsADirectoryError(f'Output is a directory: {path}')
+
+
+def _publish_outputs(staging, paths, *, overwrite):
+    """Publish complete files; recover prior files if publication raises."""
+    _check_outputs(paths, overwrite=overwrite)
+    backups = {}
+    if overwrite:
+        backup_dir = staging / 'previous'
+        backup_dir.mkdir()
+        for path in paths:
+            if path.exists() or path.is_symlink():
+                backup = backup_dir / path.name
+                os.link(path, backup, follow_symlinks=False)
+                backups[path] = backup
+    published = []
+    try:
+        # Each file is atomic; the archive is published after its sidecars.
+        for path in (*paths[1:], paths[0]):
+            source = staging / path.name
+            source_stat = source.lstat()
+            identity = (source_stat.st_dev, source_stat.st_ino)
+            if overwrite:
+                os.replace(source, path)
+            else:
+                os.link(source, path)
+            published.append((path, identity))
+    except BaseException:
+        rollback_errors = []
+        for path, identity in reversed(published):
+            try:
+                try:
+                    current = path.lstat()
+                except FileNotFoundError:
+                    current = None
+                if current is None or (current.st_dev, current.st_ino) != identity:
+                    rollback_errors.append(f'Recovery conflict at {path}: published file was replaced or removed')
+                    continue
+                if path in backups:
+                    os.replace(backups[path], path)
+                else:
+                    path.unlink()
+            except OSError as error:
+                rollback_errors.append(str(error))
+        if rollback_errors:
+            raise _PublicationRollbackError(
+                f'Output recovery failed; retained staged files and backups at {staging}: '
+                + '; '.join(rollback_errors))
+        raise
 
 
 def _payloads() -> list[tuple[str, bytes]]:
@@ -225,11 +289,17 @@ def _validate_mappo_texture_payloads(payloads):
 
 
 def build(output_dir: Path = DIST, *, farm_package: Path | None = None,
-          dual_package: Path | None = None, dual_tls_package: Path | None = None) -> BuildResult:
+          dual_package: Path | None = None, dual_tls_package: Path | None = None,
+          overwrite: bool = False) -> BuildResult:
     manifest = tomllib.loads((PACKAGE_SOURCE / "blender_manifest.toml").read_text(encoding="utf-8"))
     package_id, version = manifest["id"], manifest["version"]
-    output_dir.mkdir(parents=True, exist_ok=True)
+    output_dir = Path(output_dir)
     archive = output_dir / f"{package_id}-{version}.zip"
+    checksum = archive.with_suffix('.zip.sha256')
+    inventory = archive.with_suffix('.inventory.json')
+    paths = (archive, checksum, inventory)
+    _check_outputs(paths, overwrite=overwrite)
+    output_dir.mkdir(parents=True, exist_ok=True)
     payloads = _payloads()
     if farm_package is not None:
         farm_package = Path(farm_package)
@@ -261,27 +331,36 @@ def build(output_dir: Path = DIST, *, farm_package: Path | None = None,
             separators=(',', ':')).encode()).hexdigest(), payload_files=len(payloads))
     payloads.append(('build-info.json', (json.dumps(build_info, sort_keys=True, indent=2)+'\n').encode()))
     payloads.sort()
-    with ZipFile(archive, "w", ZIP_DEFLATED, compresslevel=9) as zipped:
-        for name, data in payloads:
-            info = ZipInfo(name, ZIP_TIMESTAMP)
-            info.compress_type = ZIP_DEFLATED
-            info.create_system = 3
-            info.external_attr = 0o100644 << 16
-            zipped.writestr(info, data, compresslevel=9)
+    staging = Path(tempfile.mkdtemp(prefix=f'.{package_id}-{version}-', dir=output_dir))
+    cleanup = True
+    try:
+        staged_archive = staging / archive.name
+        with ZipFile(staged_archive, "w", ZIP_DEFLATED, compresslevel=9) as zipped:
+            for name, data in payloads:
+                info = ZipInfo(name, ZIP_TIMESTAMP)
+                info.compress_type = ZIP_DEFLATED
+                info.create_system = 3
+                info.external_attr = 0o100644 << 16
+                zipped.writestr(info, data, compresslevel=9)
 
-    archive_sha256 = hashlib.sha256(archive.read_bytes()).hexdigest()
-    checksum = archive.with_suffix(".zip.sha256")
-    checksum.write_text(f"{archive_sha256}  {archive.name}\n", encoding="ascii")
-    inventory = archive.with_suffix(".inventory.json")
-    inventory.write_text(json.dumps({
-        "schema_version": "wfrl.extension-package.v1",
-        "package_id": package_id,
-        "version": version,
-        "archive": archive.name,
-        "archive_sha256": archive_sha256,
-        "files": [{"path": name, "sha256": hashlib.sha256(data).hexdigest(), "size": len(data)}
-                  for name, data in payloads],
-    }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        archive_sha256 = hashlib.sha256(staged_archive.read_bytes()).hexdigest()
+        (staging / checksum.name).write_text(f"{archive_sha256}  {archive.name}\n", encoding="ascii")
+        (staging / inventory.name).write_text(json.dumps({
+            "schema_version": "wfrl.extension-package.v1",
+            "package_id": package_id,
+            "version": version,
+            "archive": archive.name,
+            "archive_sha256": archive_sha256,
+            "files": [{"path": name, "sha256": hashlib.sha256(data).hexdigest(), "size": len(data)}
+                      for name, data in payloads],
+        }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        _publish_outputs(staging, paths, overwrite=overwrite)
+    except _PublicationRollbackError:
+        cleanup = False
+        raise
+    finally:
+        if cleanup:
+            shutil.rmtree(staging)
     return BuildResult(archive, checksum, inventory, archive_sha256)
 
 
@@ -290,8 +369,11 @@ def main() -> None:
     parser.add_argument('--output', type=Path, default=DIST)
     parser.add_argument('--dual-package', type=Path)
     parser.add_argument('--dual-tls-package', type=Path)
+    parser.add_argument('--overwrite', action='store_true',
+                        help='replace existing ZIP, checksum, and inventory after a successful build')
     args = parser.parse_args()
-    result = build(args.output, dual_package=args.dual_package, dual_tls_package=args.dual_tls_package)
+    result = build(args.output, dual_package=args.dual_package,
+                   dual_tls_package=args.dual_tls_package, overwrite=args.overwrite)
     print(result.archive)
     print(result.checksum)
     print(result.inventory)

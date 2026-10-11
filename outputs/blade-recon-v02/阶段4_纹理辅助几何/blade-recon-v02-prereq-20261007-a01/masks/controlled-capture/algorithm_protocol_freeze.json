@@ -1,0 +1,7 @@
+{
+  "algorithm_sha256": "a58e25215f0b5567fe8d15650da5cd25178ee5f53b2af5d693ccdfb5c88d1100",
+  "capture_script_sha256": "a645bdb5292f04e96a045c3013613cca41e72c506b892c99be8f89f9dd88fe16",
+  "protocol_sha256": "8dc818746e79fada63c9e770e5af16765fd449a67bbcb65a4e07d06277ee9db4",
+  "params_fixed_before_controlled_score": true,
+  "no_controlled_truth_read_by_segmenter": true
+}

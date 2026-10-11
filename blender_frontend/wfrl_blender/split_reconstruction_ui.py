@@ -103,9 +103,6 @@ class WFRL_OT_SplitReconStep(bpy.types.Operator):
             texture = _core().texture_adapter(context.scene)
             if texture.active(context.scene):
                 texture.step(context.scene, self.direction)
-                pair = _core()._pair(context.scene, context.window.screen)
-                if pair and context.scene.get(texture.DETAIL):
-                    texture.focus(context, pair[1])
             else:
                 spec = spec_from_scene(context.scene)
                 destination = step_sample_frame(_frame(context.scene), self.direction, spec)
@@ -178,6 +175,26 @@ class WFRL_OT_SplitReconExit(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class WFRL_OT_SplitReconSwitchMode(bpy.types.Operator):
+    bl_idname = 'wfrl.split_recon_switch_mode'
+    bl_label = '切换重建模式'
+    bl_description = '切换几何重建与同源纹理对照，保留当前时间、播放状态和有效视角'
+    bl_options = {'REGISTER'}
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene is not None and _core().enabled(context.scene)
+
+    def execute(self, context):
+        try:
+            _core().switch_mode(context)
+            _redraw(context)
+        except (ValueError, RuntimeError, OSError) as exc:
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        return {'FINISHED'}
+
+
 class WFRL_OT_SplitReconFit(bpy.types.Operator):
     bl_idname = 'wfrl.split_recon_fit'
     bl_label = '完整取景'
@@ -200,7 +217,7 @@ class WFRL_OT_SplitReconFit(bpy.types.Operator):
 class WFRL_OT_SplitReconTextureToggle(bpy.types.Operator):
     bl_idname = 'wfrl.split_recon_texture_toggle'
     bl_label = '原始 / 增强纹理'
-    bl_description = '一键对照原始纹理和亮暗增强；保留原始图像、UV、几何和观测证据'
+    bl_description = '切换原始纹理和对比增强并显示完整风机，再用鼠标缩放观察；不修改原始图像、UV、几何或观测证据'
 
     @classmethod
     def poll(cls, context):
@@ -209,6 +226,9 @@ class WFRL_OT_SplitReconTextureToggle(bpy.types.Operator):
     def execute(self, context):
         try:
             _core().texture_adapter(context.scene).toggle(context.scene)
+            # This reset is specific to the user's explicit display switch.
+            # Loading a saved setting never invokes this operator.
+            _core().fit(context)
             _redraw(context)
         except (ValueError, RuntimeError) as exc:
             self.report({'ERROR'}, str(exc))
@@ -219,7 +239,7 @@ class WFRL_OT_SplitReconTextureToggle(bpy.types.Operator):
 class WFRL_OT_SplitReconInspect(bpy.types.Operator):
     bl_idname = 'wfrl.split_recon_inspect'
     bl_label = '局部纹理检查'
-    bl_description = '放大右侧手动选取的表面纹理位置；同源模式随旋转追踪，此操作不识别缺陷'
+    bl_description = '一次定位并放大右侧人工观察位置，之后可自由缩放、平移和绕转；不跟随或识别缺陷'
     point: EnumProperty(items=(('CURRENT', '当前位置', ''), ('BRIGHT', '亮斑', ''),
                                ('HORIZONTAL', '横细线', ''), ('VERTICAL', '纵细线', ''),
                                ('SUPPORTED', '中段观察点', ''), ('TIP', '叶尖观察点', '')),
@@ -233,7 +253,7 @@ class WFRL_OT_SplitReconInspect(bpy.types.Operator):
         try:
             pair = _core()._pair(context.scene, context.window.screen)
             if pair is None or _core()._key(context.window) in _core()._JOBS:
-                raise ValueError('请等待布局就绪，或点击恢复布局')
+                raise ValueError('请等待对照布局就绪')
             _pause_all_playback(context)
             _core().texture_adapter(context.scene).focus(context, pair[1], None if self.point == 'CURRENT' else self.point)
             _redraw(context)
@@ -244,100 +264,47 @@ class WFRL_OT_SplitReconInspect(bpy.types.Operator):
 
 
 _CLASSES = (WFRL_OT_SplitReconOpenExample, WFRL_OT_SplitReconStep, WFRL_OT_SplitReconEnter, WFRL_OT_SplitReconSameSource,
-            WFRL_OT_SplitReconExit, WFRL_OT_SplitReconFit, WFRL_OT_SplitReconTextureToggle,
+            WFRL_OT_SplitReconExit, WFRL_OT_SplitReconSwitchMode, WFRL_OT_SplitReconFit, WFRL_OT_SplitReconTextureToggle,
             WFRL_OT_SplitReconInspect)
 
 
 def draw_controls(layout, context):
-    """Embed the comparison controls in the existing MAPPO sidebar."""
+    """Keep the saved comparison in one workflow with one mode switch."""
     scene = context.scene
-    if not _core().available(scene):
+    core = _core()
+    if not core.available(scene):
+        return
+    texture = core.texture_adapter(scene)
+    textured = texture.active(scene)
+    # A plain MAPPO scene starts from the packaged geometry example above.
+    # Only retained comparison data offer a return action after exiting.
+    if not core.enabled(scene) and not (core._legacy_available(scene) or textured):
         return
     box = layout.box()
-    texture = _core().texture_adapter(scene)
+    if not core.enabled(scene):
+        box.operator('wfrl.split_recon_enter', text='返回重建对照', icon='MOD_MIRROR').mode = 'CURRENT'
+        return
     from . import split_mappo_texture
     synchronized = split_mappo_texture.active(scene)
-    if not _core().enabled(scene):
-        if synchronized:
-            box.label(text='同源纹理 · 共享时间轴')
-            box.operator('wfrl.split_recon_enter', text='返回同源同步对照', icon='MOD_MIRROR').mode = 'CURRENT'
-        elif _core()._legacy_available(scene) and not texture.active(scene):
-            box.label(text='原几何示例 · 共享时间轴')
-            box.operator('wfrl.split_recon_enter', text='返回几何对照', icon='MOD_MIRROR').mode = 'CURRENT'
-        else:
-            box.operator('wfrl.split_recon_enter', text='返回独立合成纹理样例', icon='SHADING_TEXTURE').mode = 'CURRENT'
-        box.operator('wfrl.split_recon_same_source', text='同源纹理同步对照', icon='SHADING_TEXTURE')
-        box.operator('wfrl.split_recon_enter', text='独立合成纹理样例', icon='SHADING_TEXTURE')
-        return
-    textured = texture.active(scene)
-    if synchronized:
-        box.label(text='同源纹理同步对照')
-        try:
-            value = texture.information(scene)
-            if value is None:
-                box.label(text='正在恢复同源纹理…', icon='TIME')
-            elif value['in_range']:
-                box.label(text=f"播放 {value['timeline_time_s']:.3f} s")
-                box.label(text=f"重建 {value['sample_time_s']:.3f} s · 保持 {_age_text(value['age_ms'])} ms")
-                box.label(text=f"样本 {value['index']+1}/601 · 10 Hz · 精度未验收")
-            else:
-                box.label(text='时间轴超出保存片段', icon='ERROR')
-        except ValueError:
-            box.label(text='同源纹理数据恢复失败', icon='ERROR')
-        box.label(text='两路原图固定灰度图集 · 无观测处保留约束色')
-        box.operator('wfrl.split_recon_inspect', text='跟随选中表面近景', icon='VIEW_ZOOM').point = 'CURRENT'
-        row = box.row(align=True)
-        for point, (label, _blade, _radius, _tau, _size) in split_mappo_texture.POINTS.items():
-            row.operator('wfrl.split_recon_inspect', text=label).point = point
-        row = box.row(align=True)
-        row.prop(scene, 'wfrl_recon_inspect_blade', text='叶片')
-        row.prop(scene, 'wfrl_recon_inspect_radius', text='半径')
-        row = box.row(align=True)
-        row.prop(scene, 'wfrl_recon_inspect_tau', text='周向 UV')
-        row.prop(scene, 'wfrl_recon_inspect_size', text='范围')
-        original = scene.wfrl_recon_texture_mode == 'ORIGINAL'
-        box.operator('wfrl.split_recon_texture_toggle',
-            text='原始纹理 → 对比增强' if original else '对比增强 → 原始纹理', icon='SHADING_TEXTURE')
-        box.operator('wfrl.split_recon_enter', text='独立合成纹理样例', icon='SHADING_TEXTURE')
-    elif textured:
-        from . import split_surface_texture
-        box.label(text='MAPPO＋细节表面纹理')
-        try:
-            value = texture.information(scene)
-            if value is None:
-                box.label(text='正在恢复表面纹理…', icon='TIME')
-            else:
-                box.label(text=f"合成纹理 {value['time_s']:.3f} s · 样本 {value['index']+1}/{value['samples']}")
-                box.label(text=f"右侧 {value['fps']:g} Hz · 独立时钟 / 精度未验收")
-        except ValueError:
-            box.label(text='表面纹理数据恢复失败', icon='ERROR')
-        box.label(text='右侧为合成样例，非左侧 MAPPO 同源重建')
-        original = scene.wfrl_recon_texture_mode == 'ORIGINAL'
-        box.operator('wfrl.split_recon_texture_toggle',
-                     text='原始纹理 → 增强显示' if original else '增强显示 → 原始纹理', icon='SHADING_TEXTURE')
-        row = box.row(align=True)
-        for point, (label, _radius, _tau) in split_surface_texture.POINTS.items():
-            row.operator('wfrl.split_recon_inspect', text=label).point = point
+    if synchronized or not textured:
+        box.label(text='当前模式：' + ('同源纹理对照' if synchronized else '几何重建'))
+        box.operator('wfrl.split_recon_switch_mode',
+            text='切换到几何重建' if synchronized else '切换到同源纹理对照',
+            icon='MOD_MIRROR' if synchronized else 'SHADING_TEXTURE')
     else:
-        box.label(text='原几何示例 · 共享时间轴')
-        box.operator('wfrl.split_recon_same_source', text='同源纹理同步对照', icon='SHADING_TEXTURE')
-        box.operator('wfrl.split_recon_enter', text='独立合成纹理样例', icon='SHADING_TEXTURE')
-        try:
-            spec, value = _timing(scene)
-            if value.in_range:
-                box.label(text=f'播放 {value.timeline_time_s:.3f} s')
-                box.label(text=f'重建 {value.sample_time_s:.3f} s · 保持 {_age_text(value.age_ms)} ms')
-                box.label(text=f'样本 {value.index + 1}/{spec.samples} · {spec.sampling_hz:g} Hz · 精度未验收')
-            else:
-                box.label(text='时间轴超出保存片段', icon='ERROR')
-        except ValueError:
-            box.label(text='重建时间元数据无效', icon='ERROR')
-    row = box.row(align=True)
-    row.operator('wfrl.split_recon_step', text='上一样本', icon='PREV_KEYFRAME').direction = -1
-    row.operator('wfrl.split_recon_step', text='下一样本', icon='NEXT_KEYFRAME').direction = 1
-    row = box.row(align=True)
-    row.operator('wfrl.split_recon_fit', text='完整取景', icon='VIEW_ZOOM')
-    row.operator('wfrl.split_recon_enter', text='恢复布局', icon='MOD_MIRROR').mode = 'CURRENT'
+        # Retain compatibility for already saved independent samples without
+        # adding an independent-source entry to this geometry workflow.
+        box.label(text='当前模式：独立合成纹理')
+    if synchronized:
+        row = box.row(align=True)
+        for point in ('SUPPORTED', 'TIP'):
+            label = split_mappo_texture.POINTS[point][0]
+            row.operator('wfrl.split_recon_inspect', text=label).point = point
+    if textured:
+        original = scene.wfrl_recon_texture_mode == 'ORIGINAL'
+        box.operator('wfrl.split_recon_texture_toggle',
+            text='原始纹理 → 对比增强' if original else '对比增强 → 原始纹理',
+            icon='SHADING_TEXTURE')
     box.operator('wfrl.split_recon_exit', text='退出对照', icon='LOOP_BACK')
     status = str(scene.get('split_review_status', ''))
     if status == 'PREPARING':
@@ -357,8 +324,57 @@ def _draw_header(self, context):
              '细节表面纹理 · 合成样例' if split_surface_texture.active(scene) else '三维重建回放')
     self.layout.label(text=title
                            if right else 'MAPPO Demo')
-    if right:
-        self.layout.operator('wfrl.split_recon_fit', text='', icon='VIEW_ZOOM')
+
+
+def _hud_lines(scene):
+    """Return bottom-left readouts owned by the reconstruction viewport."""
+    from . import split_surface_texture, split_mappo_texture
+    lines = []
+    if split_mappo_texture.active(scene):
+        try:
+            value = split_mappo_texture.information(scene)
+            if value is None:
+                lines.append('正在恢复同源纹理…')
+            elif value['in_range']:
+                lines.append(f"播放 {value['timeline_time_s']:.3f} s · 同源 MAPPO")
+                lines.append(f"重建 {value['sample_time_s']:.3f} s · 样本 {value['index']+1}/601")
+                lines.append(f"10 Hz 保存 · 保持 {_age_text(value['age_ms'])} ms")
+            else:
+                lines.append('时间轴超出同源保存片段')
+        except ValueError:
+            lines.append('同源纹理数据恢复失败')
+        mode = '原始纹理' if scene.wfrl_recon_texture_mode == 'ORIGINAL' else '对比增强'
+        lines.extend((mode + ' · 固定灰度图集',
+                      '绿：截面受图像约束   橙：模型推断 · 均为估计',
+                      '塔筒 / 轮毂为模拟展示',
+                      '无观测处保留约束色 · 重建精度未验收'))
+        return lines
+    if split_surface_texture.active(scene):
+        try:
+            value = split_surface_texture.information(scene)
+            if value is None:
+                lines.append('正在恢复表面纹理…')
+            else:
+                lines.append(f"合成纹理 {value['time_s']:.3f} s · 样本 {value['index']+1}/{value['samples']}")
+            lines.append('独立样例与时钟 · 非 MAPPO 同源重建')
+            lines.append('原始纹理' if scene.wfrl_recon_texture_mode == 'ORIGINAL' else '对比增强：亮青 / 暗洋红')
+        except ValueError:
+            lines.append('表面纹理数据恢复失败')
+        lines.append('手动纹理位置 · 外观显示 / 精度未验收')
+        return lines
+    try:
+        spec, value = _timing(scene)
+        if value.in_range:
+            lines.append(f'播放 {value.timeline_time_s:.3f} s')
+            lines.append(f'重建 {value.sample_time_s:.3f} s · 样本 {value.index + 1}/{spec.samples}')
+            lines.append(f'{spec.sampling_hz:g} Hz 保存 · 保持 {_age_text(value.age_ms)} ms')
+        else:
+            lines.append('时间轴超出保存片段')
+    except ValueError:
+        lines.append('重建时间元数据无效')
+    lines.extend(('绿：截面受图像约束   橙：模型推断 · 均为估计',
+                  '塔筒 / 轮毂为模拟展示 · 重建精度未验收'))
+    return lines
 
 
 def _draw_hud():
@@ -368,64 +384,24 @@ def _draw_hud():
             or not _core().enabled(scene) or not _core().is_reconstruction_view(scene, space)):
         return
     scale = context.preferences.system.ui_scale
-    x, top = 14 * scale, region.height - 58 * scale
-
-    def line(text, y, color=(.94, .96, 1., 1.)):
+    x = 14 * scale
+    lines = _hud_lines(scene)
+    for index, text in enumerate(lines):
         blf.size(0, 11 * scale)
-        # Keep the HUD compact even if the user narrows the right viewport.
         width = max(0, region.width - 28 * scale)
         if blf.dimensions(0, text)[0] > width:
             while text and blf.dimensions(0, text + '…')[0] > width:
                 text = text[:-1]
             text += '…'
+        y = (18 + 17 * (len(lines) - index - 1)) * scale
         blf.position(0, x, y, 0)
-        blf.color(0, *color)
+        blf.color(0, .94, .96, 1., 1.)
         blf.enable(0, blf.SHADOW)
         try:
             blf.shadow(0, 5, 0., 0., 0., .8)
             blf.draw(0, text)
         finally:
             blf.disable(0, blf.SHADOW)
-
-    from . import split_surface_texture, split_mappo_texture
-    if split_mappo_texture.active(scene):
-        value = split_mappo_texture.information(scene)
-        if value is None:
-            line('正在恢复同源纹理…', top)
-        elif value['in_range']:
-            line(f"播放 {value['timeline_time_s']:.3f} s · 同源 MAPPO", top)
-            line(f"重建 {value['sample_time_s']:.3f} s · 样本 {value['index']+1}/601", top-17*scale)
-            line(f"10 Hz 保存 / 保持 {_age_text(value['age_ms'])} ms · 固定灰度图集", top-34*scale)
-        else:
-            line('时间轴超出同源保存片段', top, (1.,.68,.3,1.))
-        line('绿：截面受图像约束   橙：模型推断 · 均为估计', 35*scale, (.85,.88,.92,1.))
-        line('无观测处保留约束色 · 重建精度未验收', 18*scale, (.85,.88,.92,1.))
-        return
-    if split_surface_texture.active(scene):
-        try:
-            value = split_surface_texture.information(scene)
-            if value is None:
-                line('正在恢复表面纹理…', top)
-            else:
-                line(f"合成纹理 {value['time_s']:.3f} s · 样本 {value['index']+1}/{value['samples']}", top)
-            line('独立样例与时钟 · 非 MAPPO 同源重建', top - 17 * scale)
-            label = '原始纹理' if scene.wfrl_recon_texture_mode == 'ORIGINAL' else '亮暗增强：亮青 / 暗洋红'
-            line(label, top - 34 * scale)
-        except ValueError:
-            line('表面纹理数据恢复失败', top, (1., .68, .3, 1.))
-        line('手动纹理位置 · 外观显示 / 精度未验收', 18 * scale, (.85, .88, .92, 1.))
-        return
-    try:
-        spec, value = _timing(scene)
-        if value.in_range:
-            line(f'播放 {value.timeline_time_s:.3f} s', top)
-            line(f'重建样本 {value.sample_time_s:.3f} s · 保持 {_age_text(value.age_ms)} ms', top - 17 * scale)
-        else:
-            line('时间轴超出保存片段', top, (1., .68, .3, 1.))
-        line(f'{spec.sampling_hz:g} Hz 保存结果 · 精度未验收', top - 34 * scale)
-    except ValueError:
-        line('重建时间元数据无效', top, (1., .68, .3, 1.))
-    line('绿：两端截面受约束   橙：模型推断 · 均为估计', 18 * scale, (.85, .88, .92, 1.))
 
 
 def _no_legacy_hud():

@@ -50,9 +50,10 @@ def draw_body():
     return compile(ast.Module(body=[draw], type_ignores=[]), str(SOURCE), 'exec')
 
 
+@pytest.mark.parametrize('native_error', ['', '相机观察中断：injected native failure'])
 @pytest.mark.parametrize('stage', [None, 'WATCH', 'LAYOUT', 'AIM'])
 @pytest.mark.parametrize('stacked', [False, True])
-def test_main_sidebar_keeps_camera_session_distinct_from_button_properties(monkeypatch, stage, stacked):
+def test_main_sidebar_keeps_camera_session_distinct_from_button_properties(monkeypatch, stage, stacked, native_error):
     scene = {'wfrl_stacked_camera_rig': stacked}
     camera = {'custom_label': 'C1', 'custom_enabled': True}
     params = SimpleNamespace(location=(1., -2., 3.), yaw=0., pitch=10., roll=0.,
@@ -67,6 +68,7 @@ def test_main_sidebar_keeps_camera_session_distinct_from_button_properties(monke
         'wfrl_blender.panels.custom_camera_output': {'draw_output': lambda *_args: None},
         'wfrl_blender.panels.stacked_camera_rig': {'_ACTIVE': None},
         'wfrl_blender.custom_camera_capture': {'active': lambda: False},
+        'wfrl_blender.native_camera_views': {'last_error': lambda _scene: native_error},
     }.items():
         module = ModuleType(name)
         module.__dict__.update(attributes)
@@ -79,6 +81,10 @@ def test_main_sidebar_keeps_camera_session_distinct_from_button_properties(monke
     panel = SimpleNamespace(layout=Layout(calls))
     wm = SimpleNamespace(wfrl_custom_slot=1, wfrl_custom_has_focal=False)
     namespace['draw'](panel, SimpleNamespace(scene=scene, window_manager=wm))
+    if native_error:
+        assert native_error in ''.join(calls['labels'])
+    else:
+        assert not any(label.startswith('相机观察中断') for label in calls['labels'])
     buttons = calls['buttons']
     native = [button for button in buttons if button.identifier == 'wfrl.native_camera_view']
     grouped = [button for button in native if getattr(button, 'mode', None) == 'TRIPLE']

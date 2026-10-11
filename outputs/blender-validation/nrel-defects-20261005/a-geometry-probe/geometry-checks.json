@@ -1,8 +1,0 @@
-{
-  "status": "PASS",
-  "blades": 9,
-  "active_mesh_restored": true,
-  "coordinates_identical": true,
-  "materials_identical": true,
-  "renderer_called": false
-}

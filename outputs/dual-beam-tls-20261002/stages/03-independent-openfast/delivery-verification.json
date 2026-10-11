@@ -1,0 +1,90 @@
+{
+  "schema": "wfrl.dual-beam-tls-stage3-delivery-verification.v1",
+  "status": "PASS",
+  "performance_status": "PENDING_ACCEPTANCE",
+  "default_method": "hub-axis.v1",
+  "new_solver_executed_for_delivery_verification": false,
+  "full_relocated_verification": {
+    "status": "PASS",
+    "mode": "full",
+    "files": 18975,
+    "packages": 4,
+    "raw_surfaces": {
+      "coarse": 6247,
+      "fine": 12487
+    },
+    "decompressed_original_surfaces": 18734,
+    "protocol_sha256": "54f2d07f53a39fc9d6274fa67d8869b9138b67d37124868b9636d71669944b6f",
+    "solver_executed": false,
+    "evidence_scope": "portable byte integrity, frozen protocol/input links and software readers; no performance acceptance"
+  },
+  "relocation": {
+    "status": "PASS",
+    "exit_code": 0,
+    "method": "rename complete delivery directory; original absolute path absent; Python -I -S snapshot-only project imports; no raw-data copies",
+    "relocated_directory": "REPOSITORY_ROOT/outputs/dual-beam-tls-20261002-stage3-relocation-check",
+    "restored_directory": "REPOSITORY_ROOT/outputs/dual-beam-tls-20261002-stage3",
+    "elapsed_s": 205.74139225005638,
+    "new_solver_executed": false
+  },
+  "reproduction_status": "PASS",
+  "reproduction_checks": {
+    "baseline/coarse": {
+      "results_json_exact": true,
+      "results_byte_identical": true
+    },
+    "candidate/coarse": {
+      "results_json_exact": true,
+      "results_byte_identical": true
+    },
+    "comparison/coarse": {
+      "physical_fields_exact": true
+    },
+    "isolation/coarse": {
+      "status": "PASS",
+      "physical_fields_exact": true
+    },
+    "baseline/fine": {
+      "results_json_exact": true,
+      "results_byte_identical": true
+    },
+    "candidate/fine": {
+      "results_json_exact": true,
+      "results_byte_identical": true
+    },
+    "comparison/fine": {
+      "physical_fields_exact": true
+    },
+    "isolation/fine": {
+      "status": "PASS",
+      "physical_fields_exact": true
+    },
+    "temporal": {
+      "physical_fields_exact": true
+    }
+  },
+  "import_isolation": "Python -I -S; ordinary dependency directories only; project imports restricted to snapshot; pytest plugin autoload disabled",
+  "implementation_files": 52,
+  "tests": {
+    "workspace_passed": 333,
+    "workspace_subtests_passed": 7,
+    "isolated_new_tools_passed": 56
+  },
+  "storage": {
+    "budget_bytes": 1000000000,
+    "peak_recorded_during_solver_bytes": 804114848,
+    "retained_directory_measured_before_final_metadata_bytes": 737263193
+  },
+  "scope": "Exact retained raw byte integrity and independent snapshot replay after complete directory relocation; no formal performance acceptance, spatial convergence or hardware validation",
+  "reproduction_record": "reproduction-evidence/reproduction.json",
+  "reproduction_log": "reproduction-evidence/reproduction.log",
+  "initial_failures_preserved_before_cleanup": [
+    "relocation-validation-attempt1.json",
+    "failed-reproduction-attempt1/",
+    "relocation-validation-attempt2.json",
+    "logs/relocation-reproduction-attempt1.log",
+    "logs/relocation-reproduction-attempt2.log",
+    "logs/snapshot-new-tool-tests-attempt2.log"
+  ],
+  "cleanup_policy": "Successful evidence and primary inputs retained; failure logs and duplicated reproduction payload moved to Trash after consolidation"
+}

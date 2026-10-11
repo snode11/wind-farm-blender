@@ -1,8 +1,8 @@
 # NREL 5MW / WFRL 前端使用说明
 
-本页面向 **Blender 5.2+** 的 NREL 前端操作。公开安装版为 **0.3.20+1**（Release 标签 `v0.3.20.1`），仅提供专用 ZIP；公开对应实现源码基线为 **v0.3.18**。GW184 **0.4.0** 是独立运行包，模型、配置和入口与 NREL 分开。
+本页面向 **Blender 5.2+** 的 NREL 前端操作。公开安装版为 **0.3.20+1**（Release 标签 `v0.3.20.1`），安装使用专用 ZIP；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。GW184 **0.4.0** 是独立运行包，模型、配置和入口与 NREL 分开。
 
-开发机日常安装为 **LOCAL_UNPUBLISHED_REVISION**，manifest 同为 `0.3.20+1`，包含相机异常清理与同源重建稳定轮询修订。它与公开附件载荷不同；具体 SHA-256、[安装来源及验证范围见当前发布状态](docs/blender/发布状态与验证范围.md)。相同版本号不能替代载荷核对。
+开发机日常安装的已核对载荷标识为 **LOCAL_UNPUBLISHED_REVISION**，manifest 同为 `0.3.20+1`，包含相机异常清理与同源重建稳定轮询。当前分支源码、日常安装与公开附件载荷分别识别；具体 SHA-256、[安装来源及验证范围见当前发布状态](docs/blender/发布状态与验证范围.md)。相同版本号不能替代载荷核对。
 
 公开用户从 [NREL 0.3.20+1 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.20.1) 下载 [wfrl_blender-0.3.20+1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.20.1/wfrl_blender-0.3.20%2B1.zip)，使用 Install from Disk 手动安装并重启。自动 Source code 不代表本版实现。[GW184 指南](docs/blender/GW184三相机与缺陷编辑器.md) · [安装说明](docs/blender/INSTALL.md) · [实现与维护](blender_frontend/README.md) · [当前待实施要求](前端更新计划.md)。
 
@@ -64,10 +64,10 @@ cd "/path/to/wind farm RL"
 
 scripts/blender/run_wfrl_macos.sh \
   --blender "/Applications/Blender.app/Contents/MacOS/Blender" \
-  --python /opt/anaconda3/envs/wfrl-mac/bin/python \
+  --python /path/to/wfrl-env/bin/python \
   --scene scenes/turb3_row.yaml \
-  --mpi /opt/homebrew/bin/mpiexec \
-  --fastfarm /opt/anaconda3/envs/wfrl-mac/bin/FAST.Farm
+  --mpi /path/to/mpiexec \
+  --fastfarm /path/to/FAST.Farm
 ```
 
 这条入口会预检后端环境、启动其管理的 Bridge，并让 Blender 加载**已安装的扩展**。默认进入 **OFFLINE RESULTS** 的 MAPPO 回放，Bridge 待用，不自动开始求解或训练。
@@ -193,7 +193,7 @@ T1 Down 和三相机观察都使用 Blender 相机视图。三相机的价值在
 
 公开 ZIP 的 CRC、扩展格式及载荷一致性通过；相机默认复位载荷的 78 项宿主与真实面板点击归属其记录的安装来源。最终公开 ZIP 未重复全新隔离安装或完整窗口工作流。
 
-当前本地未发布载荷的 **217 passed / 113 subtests passed**、隔离与日常安装原生相机／重建窗口检查通过；173 个日常安装文件与该本地 ZIP 一致。稳定暂停刷新 20 次无完整扫描或重绑定，载荷及对象身份保持。这些结果仅属于该本地载荷，窗口由脚本执行原生操作，不是实体鼠标、显示器扫描或 FPS 验收。身份与[验证摘要][(outputs/frontend-reliability-20261011-a01/final-verification.json)见发布状态](docs/blender/发布状态与验证范围.md)。
+当前本地未发布载荷的 **217 passed / 113 subtests passed**、隔离与日常安装原生相机／重建窗口检查通过；173 个日常安装文件与该本地 ZIP 一致。稳定暂停刷新 20 次无完整扫描或重绑定，载荷及对象身份保持。这些结果仅属于该本地载荷，窗口由脚本执行原生操作，不是实体鼠标、显示器扫描或 FPS 验收。身份与[验证摘要](outputs/frontend-reliability-20261011-a01/final-verification.json)的适用范围见[发布状态](docs/blender/发布状态与验证范围.md)。
 
 完整完成、超时、中止和错误须分别判断。POST_PIXEL 是视口绘制回调，60 Hz 是时间映射；稳定 30／60 FPS、完整片段性能、长期运行和 Windows/Linux 尚未验收。原因未定的停止异常、控制台原生 SIGSEGV 与退出内存诊断仍构成验证限制。
 
@@ -238,7 +238,7 @@ T1 Down 和三相机观察都使用 Blender 相机视图。三相机的价值在
 
 代码结构、启动器生命周期、[数据合同及回归入口见实现与维护](blender_frontend/README.md)。源码或打包资源改变后，需重建并安装匹配 ZIP；安装版不会自动读取当前工作区的扩展修改。
 
-后续重点是恢复叶尖原始源并修正表面／结构点运输、新版完整片段播放与切换稳定性、双束精度、跨平台和实体验证。2×2、单路放大、单步及轻量单路已经实现；[前端更新计划](前端更新计划.md)保留 0.3.10 的实施要求与历史基线。
+后续重点是恢复叶尖原始源并修正表面／结构点运输、新版完整片段播放与切换稳定性、双束精度、跨平台和实体验证。2×2、单路放大、单步及轻量单路已经实现；[前端更新计划](前端更新计划.md)仅维护当前尚未完成的有效要求与验收条件。
 
 ## 视频输出
 

@@ -24,11 +24,11 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from scripts.lidar.run_physics import replace
+from scripts.lidar.run_physics import replace, resolve_executable
 
 DEFAULT_TEMPLATE = ROOT / 'results/prebend-20260918/C'
 DEFAULT_REFERENCE = ROOT / 'results/prebend-20260918/C-rest'
-DEFAULT_EXECUTABLE = Path('/opt/anaconda3/envs/wfrl-mac/bin/openfast')
+DEFAULT_EXECUTABLE = Path(os.environ.get('WFCRL_OPENFAST_EXECUTABLE', 'openfast'))
 SURFACE_KINDS = ('Blade1', 'Blade2', 'Blade3', 'Tower', 'Nacelle', 'Hub')
 
 
@@ -73,7 +73,7 @@ def prepare(output, *, template=DEFAULT_TEMPLATE, reference=DEFAULT_REFERENCE,
             dt=.00625, rpm=9., pitch=0., azimuth=0., evaluation_start=18.):
     validate_parameters(wind, duration, fps, dt, rpm, pitch, azimuth, evaluation_start)
     output, template, reference = map(lambda p: Path(p).resolve(), (output, template, reference))
-    executable = Path(shutil.which(str(executable)) or executable).resolve()
+    executable = resolve_executable(executable, env_var='WFCRL_OPENFAST_EXECUTABLE', default='openfast')
     if output.exists():
         raise FileExistsError(output)
     # Validate everything before creating the task-owned directory.

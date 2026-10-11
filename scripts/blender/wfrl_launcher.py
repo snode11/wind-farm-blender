@@ -53,7 +53,7 @@ def wait_for_bridge(process: subprocess.Popen, port: int, timeout: float) -> Non
 
 
 def request_protocol_stop(port: int, session_id: str, timeout: float) -> bool:
-    """Resume the Blender-owned protocol session and wait for backend STOPPED."""
+    """Resume the owned session; success requires an explicit inactive backend state."""
     def frame(kind: str, sequence: int, payload: dict) -> bytes:
         envelope_session = "" if kind == "hello" else session_id
         body = json.dumps({"protocol_version": 1, "type": kind, "session_id": envelope_session,
@@ -66,7 +66,6 @@ def request_protocol_stop(port: int, session_id: str, timeout: float) -> bool:
             client.settimeout(0.5)
             client.sendall(frame("hello", 0, {"supported_versions": [1], "capabilities": [],
                                                "resume_session_id": session_id}))
-            sent_stop = False
             while time.monotonic() < deadline:
                 try:
                     chunk = client.recv(65536)
@@ -87,12 +86,11 @@ def request_protocol_stop(port: int, session_id: str, timeout: float) -> bool:
                             return True
                         client.sendall(frame("command", 2**53 - 1,
                                              {"command": "run.stop", "arguments": {}}))
-                        sent_stop = True
                     elif message["type"] == "lifecycle" and payload["run_status"] in {"STOPPED", "FAILED"}:
                         return True
                     elif message["type"] == "error" and payload.get("fatal"):
                         return False
-            return not sent_stop
+            return False
     except (OSError, ValueError, KeyError, json.JSONDecodeError):
         return False
 

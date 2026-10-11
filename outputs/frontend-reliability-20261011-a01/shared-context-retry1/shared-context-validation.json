@@ -1532,7 +1532,7 @@
     }
   },
   "geometry_reopen": {
-    "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/shared-context-retry1/geometry-context.blend",
+    "path": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/shared-context-retry1/geometry-context.blend",
     "tower_mesh_rebound": true,
     "saved_visibility_flags_repaired": true,
     "groups": {
@@ -21346,7 +21346,7 @@
     "scope": "paused native data refresh; not an FPS measurement"
   },
   "texture_reopen": {
-    "path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/shared-context-retry1/texture-context.blend",
+    "path": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/shared-context-retry1/texture-context.blend",
     "tower_mesh_rebound": true,
     "saved_visibility_flags_repaired": true,
     "groups": {
@@ -24401,8 +24401,8 @@
     "hidden_source_texture_creation_visible": true
   },
   "addon_module": "bl_ext.wfrl_frontend.wfrl_blender",
-  "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/isolated/profile/extensions/wfrl_blender/__init__.py",
-  "opened_blend": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/isolated/profile/extensions/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+  "addon_file": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/isolated/profile/extensions/wfrl_blender/__init__.py",
+  "opened_blend": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/isolated/profile/extensions/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
   "canonical_geometry_sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
   "geometry_components": 46,
   "texture_components": 46,

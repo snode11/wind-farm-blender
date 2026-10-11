@@ -1,5 +1,8 @@
 import hashlib
 import json
+from pathlib import Path
+import sys
+from types import SimpleNamespace
 import numpy as np
 import pytest
 
@@ -83,3 +86,82 @@ def test_reject_flexible_reference_mismatch(tmp_path):
     m['files']['data.json']=hashlib.sha256((path/'data.json').read_bytes()).hexdigest()
     (path/'manifest.json').write_text(json.dumps(m))
     with pytest.raises(ValueError,match='Nacelle position'):read_package(path)
+
+
+@pytest.mark.parametrize('entrypoint', ['attach', 'constructor'])
+@pytest.mark.parametrize('source', ['farm', 'dual_beam'])
+def test_runtime_reuses_one_validated_package(monkeypatch, entrypoint, source):
+    from wfrl_blender import clearance_replay, deflection, farm_flex, prebend, tower_motion
+
+    path = (farm_flex.default_package() if source == 'farm'
+            else farm_flex.default_dual_package())
+    calls = dict(archives=[], resolved=[], references=[], towers=[], comparison_paths=[])
+    original_load = np.load
+    original_resolve = farm_flex.dual_beam_api().resolve_package
+    original_reference = prebend.read_reference
+    original_tower = tower_motion.read_tower
+    original_comparison = deflection.read_comparison
+    runtime_type = farm_flex.FarmFlex
+    runtime = runtime_type.__new__(runtime_type)
+
+    def load_archive(path, **kwargs):
+        calls['archives'].append(Path(path).name)
+        return original_load(path, **kwargs)
+
+    def resolve(path):
+        result = original_resolve(path)
+        calls['resolved'].append(result)
+        return result
+
+    def reference(*args):
+        result = original_reference(*args)
+        calls['references'].append(result)
+        return result
+
+    def tower(*args):
+        result = original_tower(*args)
+        calls['towers'].append(result)
+        return result
+
+    class BeforeMeshBinding(Exception):
+        pass
+
+    def comparison(path, *args, **kwargs):
+        calls['comparison_paths'].append(path)
+        original_comparison(path, *args, **kwargs)
+        raise BeforeMeshBinding
+
+    def construct(scene, path, **kwargs):
+        runtime_type.__init__(runtime, scene, path, **kwargs)
+        return runtime
+
+    monkeypatch.setitem(sys.modules, 'bpy', SimpleNamespace())
+    monkeypatch.setattr(np, 'load', load_archive)
+    monkeypatch.setattr(farm_flex.dual_beam_api(), 'resolve_package', resolve)
+    monkeypatch.setattr(prebend, 'read_reference', reference)
+    monkeypatch.setattr(tower_motion, 'read_tower', tower)
+    monkeypatch.setattr(deflection, 'read_comparison', comparison)
+    monkeypatch.setattr(farm_flex, 'FarmFlex', construct)
+    monkeypatch.setattr(farm_flex, '_ACTIVES', {})
+    monkeypatch.setattr(farm_flex, 'detach', lambda scene: None)
+    monkeypatch.setattr(clearance_replay, 'clear', lambda scene, reason: None)
+
+    class Scene(dict):
+        objects = {f'WFRL.Turbine.{tid}.{suffix}': object()
+                   for tid in ('T1', 'T2', 'T3')
+                   for suffix in ('YawRoot', 'Rotor', 'Tower', 'Blade1', 'Blade2', 'Blade3')}
+
+    scene = Scene()
+    with pytest.raises(BeforeMeshBinding):
+        if entrypoint == 'attach':
+            farm_flex.attach(scene, path)
+        else:
+            construct(scene, path)
+    assert calls['archives'].count('geometry.npz') == 1
+    assert calls['archives'].count('tower-motion.npz') == 1
+    assert len(calls['resolved']) == len(calls['references']) == len(calls['towers']) == 1
+    assert runtime.reference is calls['references'][0]
+    assert runtime.tower_motion is calls['towers'][0]
+    assert calls['comparison_paths'] == [calls['resolved'][0][0]]
+    if entrypoint == 'attach':
+        assert scene['wfrl_flex_active'] is False

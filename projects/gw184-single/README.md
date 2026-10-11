@@ -2,7 +2,7 @@
 
 独立的 Blender 合成场景，包含固定三相机、六类叶片缺陷编辑器，以及原三路原始 MP4 管线；复用前端网格与针孔投影辅助函数。
 
-**GW184 0.4.0 已作为独立运行 ZIP 发布；完整 320 秒三路视频仍未生成。** 给朋友的视频任务最终仅交付 `C1.mp4`、`C2.mp4`、`C3.mp4`，这项视频交付约束与供用户启动编辑器的运行 ZIP 分别处理。2026-09-30 的 18 张授权静态图已完成有限外观审核；它们不代替完整视频、拼接算法或整体成像验收。
+**GW184 0.4.0 已作为独立运行 ZIP 发布；完整 320 秒三路视频仍未生成。** 给朋友的视频任务最终仅交付 `C1.mp4`、`C2.mp4`、`C3.mp4`，这项视频交付约束与供用户启动编辑器的运行 ZIP 分别处理。18 张指定合成静态图已完成有限外观审核；它们不代替完整视频、拼接算法或整体成像验收。
 
 ## 已发布运行包
 
@@ -16,9 +16,19 @@
 
 模型为 184 m 参考直径、90 m 叶片、3 m 静态预弯的合成刚性几何：借用 DTU 10MW 的弦长、厚度、扭角分布和固定 FFA 翼型，不是制造商 CAD，也不是放大后的 NREL 柔性模型。六类缺陷不耦合结构或气动求解。
 
-本 GitHub 项目目录同步的是说明文档；实现源码、配置、参考资源和测试随运行 ZIP 提供。GitHub 自动生成的 Source code 归档不能替代运行 ZIP。下文的脚本和配置命令适用于完整运行包根目录或具备匹配实现的工作区，不能在仅含公开文档的仓库副本中直接运行。
+当前实现源码、配置、参考来源与测试位于 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 分支；大资源和研究证据按[分发说明](../../docs/PUBLICATION.md)恢复。当前源码与既有 0.4.0 独立运行 ZIP 分别识别，GitHub 自动 Source code 归档不是该运行 ZIP。下文脚本命令从完整运行包根目录，或已恢复所需资源的源码工作区根目录执行。
 
-当前参数和证据边界见 [requirements.md](requirements.md)。工作区原三视频管线检查保存在 `outputs/gw184-single/preflight-20260929/ready/`，汇总为工作区文件 `outputs/gw184-single/preflight-20260929/检查说明.md`，不随发布 ZIP 或公开文档交付。旧 `review/`、`scene-v1/` 和两组历史短片不代表当前模型；现有 preflight 的源码签名与当前实现不匹配；运行视频管线前须重新生成无渲染检查。
+当前参数和证据边界见 [requirements.md](requirements.md)。工作区原三视频管线检查保存在 `outputs/gw184-single/preflight-20260929/ready/`，汇总为工作区文件 `outputs/gw184-single/preflight-20260929/检查说明.md`，证据是否提供及其恢复路径以[资源清单](../../docs/PUBLICATION.md)为准；未恢复的工作区路径不能当作可访问的公开附件。`review/`、`scene-v1/` 和零预弯短片不代表当前模型；现有 preflight 的源码签名与当前实现不匹配；运行视频管线前须重新生成无渲染检查。
+
+## 源码参考输入
+
+`sources/DTU_10MW_RWT.htc` 和 `sources/DTU_10MW_RWT_ae.dat` 是 GW184 几何构建和相关测试的必需输入，随 Git 提供并保留 `sources/provenance.json` 中的固定摘要。项目持有人确认具备这两份输入的公开分发授权。若文件缺失或损坏，按[参考来源说明](sources/README.md)取得固定官方归档，再从仓库根目录运行：
+
+```sh
+python3 projects/gw184-single/tools/restore_dtu_reference.py --archive /path/to/dtu_reference.zip
+```
+
+恢复工具核对两份文件的固定摘要；已有目标时拒绝写入，确认替换损坏文件时使用 `--overwrite`。既有 0.4.0 ZIP 的载荷和检查仍按其包身份读取。
 
 ## 不渲染的准备与检查
 
@@ -60,4 +70,4 @@ python3 -m unittest discover -s projects/gw184-single/tests -p 'test_model.py' -
 
 保存场景使用实体视口供建模检查，不自动开始动画渲染。内部 `metadata/` 和检查报告留在项目中，不打包交付给朋友。
 
-独立刚性缺陷编辑器的启动、配置、六类形态、G 扫描和按需 A 图入口见 [DEFECT_EDITOR.md](DEFECT_EDITOR.md)。v1.1 是开发规格版本，0.4.0 是已发布运行包版本，二者不能互换。发布包不含视频，整体成像验收及三份完整 MP4 渲染仍待完成。
+独立刚性缺陷编辑器的启动、配置、六类形态、G 扫描和按需 A 图入口见 [DEFECT_EDITOR.md](DEFECT_EDITOR.md)。v1.1 是编辑器规格版本，0.4.0 是已发布运行包版本，二者不能互换。发布包不含视频，整体成像验收及三份完整 MP4 渲染仍待完成。

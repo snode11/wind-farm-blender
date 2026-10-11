@@ -1,0 +1,6 @@
+# 本机运行环境与可再生成的缓存
+.venv/
+.venv-trial/
+__pycache__/
+*.py[cod]
+.DS_Store

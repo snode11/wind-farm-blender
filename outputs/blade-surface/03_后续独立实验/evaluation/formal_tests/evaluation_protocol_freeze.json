@@ -1,0 +1,227 @@
+{
+  "status": "ALL_JOB_GEOMETRIES_AND_Q_FROZEN_BEFORE_ANY_BATCH_TRUTH_READ",
+  "job_file_sha256": "dab4dd1d432033a8c65789f666cedf3b0489c4018420a2872bae364e6c9b1f2a",
+  "metric_protocol_sha256": "9211aef5bf13c02e6e614c33af4f90bfb985cbd77e1bf9a8a4050b71778b3b33",
+  "evaluation_code_sha256": "c10784e1c38c0278d5bc50f979a6a5ff4853f84643b5b8306d54b7d71be0e0b3",
+  "sampler_module_sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70",
+  "parallel_processes": 2,
+  "BLAS_threads": 1,
+  "jobs": [
+    {
+      "id": "test01/A1_new",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window01/groups/A1_new/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window01/groups/A1_new/q_eval_common_RGB.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/input/test_window01/annotations.json",
+      "source_label": "formal_test01",
+      "frames": [
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267
+      ],
+      "density": 512
+    },
+    {
+      "id": "test01/A3_C4",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window01/groups/A3_C4/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window01/groups/A3_C4/q_eval_common_RGB.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/input/test_window01/annotations.json",
+      "source_label": "formal_test01",
+      "frames": [
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267
+      ],
+      "density": 512
+    },
+    {
+      "id": "test01/A3_D4",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window01/groups/A3_D4/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window01/groups/A3_D4/q_eval_common_RGB.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/input/test_window01/annotations.json",
+      "source_label": "formal_test01",
+      "frames": [
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267
+      ],
+      "density": 512
+    },
+    {
+      "id": "test01/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window01/groups/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window01/groups/A3_D12/q_eval_common_RGB.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/input/test_window01/annotations.json",
+      "source_label": "formal_test01",
+      "frames": [
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267
+      ],
+      "density": 512
+    },
+    {
+      "id": "test02/A1_new",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window02/groups/A1_new/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window02/groups/A1_new/q_eval_common_RGB.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/input/test_window02/annotations.json",
+      "source_label": "formal_test02",
+      "frames": [
+        315,
+        316,
+        317,
+        318,
+        319,
+        320,
+        321,
+        322
+      ],
+      "density": 512
+    },
+    {
+      "id": "test02/A3_C4",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window02/groups/A3_C4/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window02/groups/A3_C4/q_eval_common_RGB.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/input/test_window02/annotations.json",
+      "source_label": "formal_test02",
+      "frames": [
+        315,
+        316,
+        317,
+        318,
+        319,
+        320,
+        321,
+        322
+      ],
+      "density": 512
+    },
+    {
+      "id": "test02/A3_D4",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window02/groups/A3_D4/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window02/groups/A3_D4/q_eval_common_RGB.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/input/test_window02/annotations.json",
+      "source_label": "formal_test02",
+      "frames": [
+        315,
+        316,
+        317,
+        318,
+        319,
+        320,
+        321,
+        322
+      ],
+      "density": 512
+    },
+    {
+      "id": "test02/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window02/groups/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window02/groups/A3_D12/q_eval_common_RGB.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/input/test_window02/annotations.json",
+      "source_label": "formal_test02",
+      "frames": [
+        315,
+        316,
+        317,
+        318,
+        319,
+        320,
+        321,
+        322
+      ],
+      "density": 512
+    },
+    {
+      "id": "test03/A1_new",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window03/groups/A1_new/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window03/groups/A1_new/q_eval_common_RGB.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/input/test_window03/annotations.json",
+      "source_label": "formal_test03",
+      "frames": [
+        480,
+        481,
+        482,
+        483,
+        484,
+        485,
+        486,
+        487
+      ],
+      "density": 512
+    },
+    {
+      "id": "test03/A3_C4",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window03/groups/A3_C4/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window03/groups/A3_C4/q_eval_common_RGB.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/input/test_window03/annotations.json",
+      "source_label": "formal_test03",
+      "frames": [
+        480,
+        481,
+        482,
+        483,
+        484,
+        485,
+        486,
+        487
+      ],
+      "density": 512
+    },
+    {
+      "id": "test03/A3_D4",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window03/groups/A3_D4/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window03/groups/A3_D4/q_eval_common_RGB.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/input/test_window03/annotations.json",
+      "source_label": "formal_test03",
+      "frames": [
+        480,
+        481,
+        482,
+        483,
+        484,
+        485,
+        486,
+        487
+      ],
+      "density": 512
+    },
+    {
+      "id": "test03/A3_D12",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window03/groups/A3_D12/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/groups/formal_tests/test_window03/groups/A3_D12/q_eval_common_RGB.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/input/test_window03/annotations.json",
+      "source_label": "formal_test03",
+      "frames": [
+        480,
+        481,
+        482,
+        483,
+        484,
+        485,
+        486,
+        487
+      ],
+      "density": 512
+    }
+  ]
+}

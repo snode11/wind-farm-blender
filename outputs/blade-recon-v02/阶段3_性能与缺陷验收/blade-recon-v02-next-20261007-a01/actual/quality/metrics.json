@@ -1,0 +1,140 @@
+{
+  "overall": "FAILED_GATE",
+  "known_ROIs": [
+    {
+      "id": "Patch",
+      "source_frame": 42,
+      "classification": "RECORDED_MAPPO_BLENDER_SCENE",
+      "physical_definition": "native 1.4x0.7m cosmetic repair",
+      "candidate_blade": 1,
+      "candidate_r_c_m": [
+        35.495,
+        -2.0242374941909116
+      ],
+      "source_center_to_estimate_surface_m": 0.03612530105708046,
+      "candidate_center_window_coverage": 1.0,
+      "raw_gray_contrast": 25.69325968521406,
+      "normalized_contrast_keep": 0.9915805034575677,
+      "image_centroid_shift_xy_px": [
+        11.199367275981615,
+        27.495076856015828
+      ],
+      "boundary_mean_symmetric_px": 17.79583253923763,
+      "input_plane_m_per_px": 0.003959610904745192,
+      "approx_image_shift_input_plane_m": 0.1175547780711788,
+      "normal_same_view_anomaly_fraction": 0.0002,
+      "correspondence": "post-fit evaluation nearest-surface candidate; no accepted material correspondence",
+      "acceptance": "FAILED_GATE",
+      "scope": "known source ROI image/appearance agreement; no detection precision/recall or defect geometry recovery"
+    },
+    {
+      "id": "Crack",
+      "source_frame": 42,
+      "classification": "RECORDED_MAPPO_BLENDER_SCENE",
+      "physical_definition": "appearance-only fine line: .6m length, .015m max tapered width",
+      "candidate_blade": 1,
+      "candidate_r_c_m": [
+        45.535000000000004,
+        -1.412312024477171
+      ],
+      "source_center_to_estimate_surface_m": 0.1107095626566484,
+      "candidate_center_window_coverage": 1.0,
+      "raw_gray_contrast": 79.48797841899193,
+      "normalized_contrast_keep": 0.7943183830399594,
+      "image_centroid_shift_xy_px": [
+        8.890049790976207,
+        50.892018700028586
+      ],
+      "boundary_mean_symmetric_px": 46.03490426168761,
+      "input_plane_m_per_px": 0.0030696140628762034,
+      "approx_image_shift_input_plane_m": 0.15858443105945755,
+      "normal_same_view_anomaly_fraction": 0.0,
+      "correspondence": "post-fit evaluation nearest-surface candidate; no accepted material correspondence",
+      "acceptance": "FAILED_GATE",
+      "scope": "known source ROI image/appearance agreement; no detection precision/recall or defect geometry recovery"
+    }
+  ],
+  "heldout": [
+    {
+      "frame": 42,
+      "view": "Holdout excluded from fit/fusion",
+      "independent_source_center_uv": [
+        479.49955908602584,
+        383.49952657981885
+      ],
+      "nearest_estimated_surface_uv": [
+        473.36885985971145,
+        379.0661440210008
+      ],
+      "projection_center_gap_px": 7.565735517209404,
+      "scope": "surface support diagnostic only; atlas appearance heldout needs independently established material correspondence",
+      "appearance_centroid_shift_px": 49.24146946168928,
+      "source_blob_pixels": 859,
+      "reprojected_blob_pixels": 745,
+      "scope_appearance": "postdeclared known-ROI diagnostic with fixed grayscale threshold, not detection accuracy"
+    },
+    {
+      "frame": 43,
+      "view": "Holdout excluded from fit/fusion",
+      "independent_source_center_uv": [
+        479.49890664913494,
+        383.5010988146289
+      ],
+      "nearest_estimated_surface_uv": [
+        495.98614671321525,
+        440.82589294592543
+      ],
+      "projection_center_gap_px": 59.648647152522614,
+      "scope": "surface support diagnostic only; atlas appearance heldout needs independently established material correspondence",
+      "appearance_centroid_shift_px": 22.029137739754997,
+      "source_blob_pixels": 870,
+      "reprojected_blob_pixels": 950,
+      "scope_appearance": "postdeclared known-ROI diagnostic with fixed grayscale threshold, not detection accuracy"
+    },
+    {
+      "frame": 45,
+      "view": "Holdout excluded from fit/fusion",
+      "independent_source_center_uv": [
+        479.5002184225939,
+        383.4999797488208
+      ],
+      "nearest_estimated_surface_uv": [
+        446.5643685233507,
+        482.68452520564995
+      ],
+      "projection_center_gap_px": 104.51001993140792,
+      "scope": "surface support diagnostic only; atlas appearance heldout needs independently established material correspondence",
+      "appearance_centroid_shift_px": 8.996969857351528,
+      "source_blob_pixels": 890,
+      "reprojected_blob_pixels": 1097,
+      "scope_appearance": "postdeclared known-ROI diagnostic with fixed grayscale threshold, not detection accuracy"
+    },
+    {
+      "frame": 47,
+      "view": "Holdout excluded from fit/fusion",
+      "independent_source_center_uv": [
+        479.49988433435453,
+        383.5014003180929
+      ],
+      "nearest_estimated_surface_uv": [
+        423.08777313556504,
+        495.35768146667704
+      ],
+      "projection_center_gap_px": 125.27631029965596,
+      "scope": "surface support diagnostic only; atlas appearance heldout needs independently established material correspondence",
+      "appearance_centroid_shift_px": 22.228071685854996,
+      "source_blob_pixels": 926,
+      "reprojected_blob_pixels": 1081,
+      "scope_appearance": "postdeclared known-ROI diagnostic with fixed grayscale threshold, not detection accuracy"
+    }
+  ],
+  "truth_isolation": {
+    "solver_truth_or_holdout_opened": false,
+    "fusion_truth_or_holdout_opened": false
+  },
+  "limitations": [
+    "RGB occupancy includes connected hub/tower/cloud contamination; source display loft differs from parameterized solver model",
+    "Input-plane scale is a local camera diagnostic, not measured geometric localization",
+    "Normal area fraction is known surface display ROI, not detector false positive rate"
+  ]
+}

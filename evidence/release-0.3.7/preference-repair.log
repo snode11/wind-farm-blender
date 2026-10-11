@@ -1,4 +1,4 @@
-00:00.378  blend            | Writing user preferences: "/Users/eason/Library/Application Support/Blender/5.2/config/userpref.blend" 
+00:00.378  blend            | Writing user preferences: "USER_HOME/Library/Application Support/Blender/5.2/config/userpref.blend" 
 addon_utils.disable: bl_ext.release_test.wfrl_blender not enabled
 Info: Preferences saved
 USER_EXTENSION_REENABLED_TEMP_REPOSITORY_REMOVED

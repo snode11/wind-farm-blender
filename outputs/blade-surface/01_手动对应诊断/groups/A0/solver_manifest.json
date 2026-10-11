@@ -1,0 +1,49 @@
+{
+ "status": "COMPLETED",
+ "algorithm_root": "REPOSITORY_ROOT/blade_recon",
+ "algorithm_sources": {
+  "recon.py": {
+   "path": "REPOSITORY_ROOT/blade_recon/recon.py",
+   "sha256": "e5aeeb8b5cfe9f69507a07e925e7a85ca763a3204757bb1bb57de5dc07e6bf88"
+  },
+  "model.py": {
+   "path": "REPOSITORY_ROOT/blade_recon/model.py",
+   "sha256": "9253fdfb7bb1e76790129511a24b98311c08c7c14a2a54b0c012d260842b888c"
+  },
+  "camera.py": {
+   "path": "REPOSITORY_ROOT/blade_recon/camera.py",
+   "sha256": "3c18384c5bb549a80945a766412c5c0ae14cd890f4900b5b94e6022cc123d644"
+  }
+ },
+ "wrapper": {
+  "path": "REPOSITORY_ROOT/outputs/blade-surface-20261005-manual-a01/scripts/solve_a0.py",
+  "sha256": "fb28ad02a1af777ef5ad6cb9a3fcbca0b53e85dcbefab700d15598db5ae95ac7"
+ },
+ "input": "REPOSITORY_ROOT/outputs/blade-surface-20261005-manual-a01/input/solver_bundle",
+ "calibration_sha256": "258f8e841af642cbeaf48e5b10a95959b75ec0af7d3604d19bf896f833c36f2b",
+ "expected_frames": 8,
+ "fit_scale": 0.25,
+ "input_camera_count": 1,
+ "camera_names": [
+  "WideInput"
+ ],
+ "original_solver_parameters": {
+  "rpm_max": 20.0,
+  "first_max_nfev": 150,
+  "second_max_nfev": 150,
+  "later_max_nfev": 60,
+  "w_prior_first": 0.0,
+  "w_prior_second": 0.2,
+  "w_prior_later": 0.5
+ },
+ "adaptations": [
+  "Required external PNG masks; no automatic segmentation fallback",
+  "Camera instantiated from each frame calibration; transform already maps MODEL to CV",
+  "dt from successive relative timestamps; first-frame dt is 1/fps",
+  "Original optimizer, initialization, PhysPrior, last_obs and observability gating retained",
+  "Additional solver diagnostics and incremental progress output"
+ ],
+ "forbidden_input_sources": "No evaluation artifacts, MAPPO geometry or MAPPO states read",
+ "completed_frames": 8,
+ "elapsed_s": 7.362239837646484
+}

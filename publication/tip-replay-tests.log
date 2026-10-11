@@ -1,0 +1,6 @@
+......ss.s                                                               [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/blender_bridge/test_tip_replay.py:84: Original FAST.Farm raw run is not installed; the offline replay package does not contain native VTP geometry
+SKIPPED [1] tests/blender_bridge/test_tip_replay.py:100: Original FAST.Farm raw run is not installed; the offline replay package does not contain native VTP geometry
+SKIPPED [1] tests/blender_bridge/test_tip_replay.py:116: Original FAST.Farm raw run is not installed; the offline replay package does not contain native VTP geometry
+7 passed, 3 skipped in 0.21s

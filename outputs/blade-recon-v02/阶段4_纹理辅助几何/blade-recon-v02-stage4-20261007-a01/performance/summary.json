@@ -1,0 +1,41 @@
+{
+  "A": {
+    "elapsed_s": [
+      46.321173332980834,
+      47.517439832910895,
+      47.735949583002366
+    ],
+    "peak_RSS_bytes": [
+      219889664,
+      220512256,
+      221560832
+    ],
+    "median_elapsed_s": 47.517439832910895,
+    "median_peak_RSS_bytes": 220512256.0
+  },
+  "C": {
+    "elapsed_s": [
+      49.570861375075765,
+      49.224337209016085,
+      49.130884082987905
+    ],
+    "peak_RSS_bytes": [
+      220987392,
+      219578368,
+      222576640
+    ],
+    "median_elapsed_s": 49.224337209016085,
+    "median_peak_RSS_bytes": 220987392.0
+  },
+  "order": [
+    "A",
+    "C",
+    "C",
+    "A",
+    "A",
+    "C"
+  ],
+  "median_time_ratio_C_over_A": 1.0359214928688767,
+  "median_RSS_ratio_C_over_A": 1.0021546920276394,
+  "scope": "Same4frames/16RGB/16mask/originalK/T/t/13D/bounds/150-60 budget, analytic template, opt-in RGB residual vs off, separate serial processes; includes declared eagerRGB loading and sidecar validation, excludes 7.8s tracker preparation and texture fusion; CPU child max RSS not GPU"
+}

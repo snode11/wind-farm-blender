@@ -1,0 +1,57 @@
+{
+  "before": {
+    "elapsed_s": [
+      17.78518983302638,
+      18.251347000012174,
+      18.23083095799666
+    ],
+    "median_elapsed_s": 18.23083095799666,
+    "peak_RSS_bytes": [
+      2893676544,
+      2947661824,
+      2951823360
+    ],
+    "median_peak_RSS_bytes": 2947661824
+  },
+  "after": {
+    "elapsed_s": [
+      19.688335000071675,
+      20.15496900002472,
+      20.18034704204183
+    ],
+    "median_elapsed_s": 20.15496900002472,
+    "peak_RSS_bytes": [
+      3066986496,
+      3039150080,
+      3067871232
+    ],
+    "median_peak_RSS_bytes": 3066986496
+  },
+  "boundary": "Same original 12-frame manifest, all 24 declared RGB files read by both versions, same frozen reconstruction and three gate-eligible fusion identities [2,11,14], best/.01m/768 columns. Triangle correction changes samples; this measures runtime and RSS, not byte equivalence or whole-sequence throughput.",
+  "order": [
+    "before",
+    "after",
+    "after",
+    "before",
+    "before",
+    "after"
+  ],
+  "median_ratio_after_over_before": 1.105543079548114,
+  "eligible_frames": [
+    2,
+    11,
+    14
+  ],
+  "observed_RGB_read_counts": {
+    "before": [
+      24,
+      24,
+      24
+    ],
+    "after": [
+      24,
+      24,
+      24
+    ]
+  }
+}

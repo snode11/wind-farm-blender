@@ -1,13 +1,13 @@
 {
   "status": "PASS",
-  "installed_root": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "installed_root": "USER_HOME/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
   "module": "bl_ext.user_default.wfrl_blender",
   "matched_files": 173,
   "package": {
-    "archive": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/isolated/package/wfrl_blender-0.3.20+1.zip",
+    "archive": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/isolated/package/wfrl_blender-0.3.20+1.zip",
     "sha256": "c7a085b5dcd76163b7589f014f706231d882251423e3281e268495b84b6b68c6",
-    "checksum": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/isolated/package/wfrl_blender-0.3.20+1.zip.sha256",
-    "inventory": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/isolated/package/wfrl_blender-0.3.20+1.inventory.json",
+    "checksum": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/isolated/package/wfrl_blender-0.3.20+1.zip.sha256",
+    "inventory": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/isolated/package/wfrl_blender-0.3.20+1.inventory.json",
     "package_id": "wfrl_blender",
     "version": "0.3.20+1",
     "file_count": 173
@@ -188,7 +188,7 @@
     "wake.py": "2f5043bad3eb8d02be8a0d33789e5604e1fa653cb52be7c161034107f1bd8192",
     "workspace.py": "69d5dab7181fdd237a3d9e2a3126bdd5c3427ce92b7a1224a84023ae1b08026e"
   },
-  "daily_backup": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/frontend-reliability-20261011-a01/daily-backup",
+  "daily_backup": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/daily-backup",
   "daily_preferences_sha256": "08008d90dad523f3ef418f0efdecb9fad38997c5fcfc2c5a20a037bba2b2e393",
   "preferences_unchanged": true
 }

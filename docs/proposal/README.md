@@ -8,7 +8,7 @@
 | --- | --- |
 | 静态NREL单叶片 | 正式v2保留，坐标及RGB边界候选未采用，完整几何验收待建立；[模块说明](../../wfrl/nrel_reconstruction/README.md) |
 | 动态NREL叶片 | `REVIEW_ONLY`、`DY1 NOT PASSED`，仅四个保存估计时刻，其余未插值；[动态方案](reconstruction/NREL_视频动态叶片与叶尖面外读数验证方案_v0.1.md) |
-| 共享材料点表面研究 | P2b `FAILED_GATE / REVIEW_ONLY`、主增益null；自动长身份延续失败，32帧联合几何数值结论不确定，局部恢复未执行；[资料与合同](叶片表面重建_2026-10-06/README.md) |
+| 共享材料点表面研究 | P2b `FAILED_GATE / REVIEW_ONLY`、主增益null；自动长身份延续失败，32帧联合几何数值结论不确定，局部恢复未执行；[当前研究与合同](../../research/blade-surface/README.md) |
 | 局部材料点候选 | 独立Patch2/8、Crack7/8，跨相机RGB0/264，`FAILED_GATE / NOT_ACCEPTED`，真实同材料三维误差null；[blade_recon v0.2](../../blade_recon0.2/README.md) |
 
 上述研究输入、评分及结论独立，不能相互替代，也未替换前端601样本正式纹理资源。

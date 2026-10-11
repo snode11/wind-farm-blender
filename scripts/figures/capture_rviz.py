@@ -5,8 +5,8 @@ VTK 自己的 screenshot 拿（避开 OpenGL 子窗口 BitBlt 发黑的老问题
 贴进前者。这样窗口被遮挡/不在前台也能出图。
 
 用法：
-    "C:/Users/s1155/.conda/envs/wfcrl/python.exe" capture_rviz.py            # FLORIS 三视图
-    "C:/Users/s1155/.conda/envs/wfcrl/python.exe" capture_rviz.py --fastfarm # 追加动态后端一张
+    python3 capture_rviz.py            # FLORIS 三视图
+    python3 capture_rviz.py --fastfarm # 追加动态后端一张
 """
 import argparse
 import os

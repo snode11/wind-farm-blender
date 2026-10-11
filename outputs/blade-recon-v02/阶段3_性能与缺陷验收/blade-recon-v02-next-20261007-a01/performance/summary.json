@@ -1,0 +1,84 @@
+{
+  "status": "performance implemented and quality/identity parity verified; defect FAILED_GATE baseline unchanged",
+  "report": "性能报告.md",
+  "changed_files": [
+    "blade_recon0.2/texture.py",
+    "blade_recon0.2/input_adapter.py",
+    "blade_recon0.2/tests/test_texture_performance_contract.py"
+  ],
+  "unchanged_owned_file": "blade_recon0.2/raster.py",
+  "formal_measured_source": "after-source",
+  "final_source": "source-final",
+  "final_source_delta": "final-provenance-delta.patch",
+  "formal_best": {
+    "wall_reduction_percent": 22.362288853892466,
+    "peak_rss_reduction_percent": -3.18496135742925,
+    "all_quality_and_identity_equal": true
+  },
+  "formal_old32": {
+    "wall_reduction_percent": 81.90898175259906,
+    "peak_rss_reduction_percent": 65.24891981991962,
+    "all_quality_and_identity_equal": true
+  },
+  "functional_only_one_pair": [
+    "mean",
+    "register",
+    "new-sparse"
+  ],
+  "all_quality_and_identity_equal": true,
+  "final_provenance_hardening_quality_exact": true,
+  "formal_best_before_runs": [
+    "before-best-2",
+    "before-best-3",
+    "before-best-4"
+  ],
+  "formal_best_after_runs": [
+    "after-best-1",
+    "after-best-2",
+    "after-best-3"
+  ],
+  "excluded_first_probe": {
+    "path": "before-best-1",
+    "reason": "may overlap previously started seconds-long capture2 render"
+  },
+  "measurement_order_limitation": "before batch then after batch; nonrandom, not alternating; 3 repeats on same host only",
+  "full_loading_vs_fusion": {
+    "eager_decoded_frames": 12,
+    "identity_lookup_frames": 12,
+    "fused_frames": 3,
+    "contributing_views": 12
+  },
+  "sparse_loading_vs_fusion": {
+    "selected_frames": [
+      2,
+      32
+    ],
+    "original_source_indices": [
+      [
+        0,
+        0
+      ],
+      [
+        11,
+        11
+      ]
+    ],
+    "before_eager_frames": 12,
+    "after_eager_frames": 2,
+    "lookup_frames": 2,
+    "fused_frames": 1,
+    "contributing_views": 4
+  },
+  "accumulator_allocation": {
+    "before_bytes": 538444800,
+    "after_bytes": 425088000,
+    "reduction_bytes": 113356800,
+    "full_peak_RSS_reduction_proven": false
+  },
+  "baseline_quality": "synthetic/quality/metrics.json, D1/D6 PASS and D2/D3 FAILED_GATE unchanged",
+  "new_regressions": {
+    "run": 8,
+    "passed": 8
+  },
+  "stage4_texture_assisted_geometry": "not implemented"
+}

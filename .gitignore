@@ -3,9 +3,11 @@ __pycache__/
 *.egg-info/
 .eggs/
 build/
-dist/
+dist/*
+!dist/lidar-delivery.json
+!dist/README-lidar.md
 
-# 上游依赖与仿真器二进制（本地部署，见 docs/setup_local.md）
+# 上游依赖源码通过资源 Release 分发；求解器按平台安装。
 wfcrl-env/
 simulators/
 _msmpi_installer/
@@ -13,9 +15,9 @@ _msmpi_installer/
 # FAST.Farm 每次 make() 都会新建一个算例目录，累积到 GB 级
 __simul__/
 
-# 跑出来的东西：权重、tensorboard、评估图都可重建，不进库；
-# results/runs/*.json 是实验记录本身（数字），要留。
-results/checkpoints/
+# Replay 示例权重是运行输入，其他训练权重按资源清单分发。
+results/checkpoints/*
+!results/checkpoints/mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt
 results/logs/
 results/eval_outputs/
 results/camera-video/
@@ -47,3 +49,6 @@ example*.png
 
 # Local verification caches
 .pytest_cache/
+.venv/
+.venv-trial/
+.claude/settings.local.json

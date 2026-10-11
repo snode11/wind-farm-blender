@@ -2,7 +2,7 @@
 
 研究对象为原NREL 5MW预弯改型与WFRL前端。表面可观测性、整体外形、图像缺陷地图和局部几何分别建立证据，不能因局部软件有输出就宣称全表面恢复或精度验收。[产品使用及发布范围见发布状态](../../blender/发布状态与验证范围.md)。
 
-静态正式v2保留且完整几何验收待建立；动态 `DY1 NOT PASSED`；共享材料点表面研究P2b为 `FAILED_GATE / REVIEW_ONLY`、主增益null。证据见[静态与动态模块](../../../wfrl/nrel_reconstruction/README.md)及[表面研究入口](../叶片表面重建_2026-10-06/README.md)。本方案的全表面诊断和局部计量仍按对应输入、协议与证据分别验收。
+静态正式v2保留且完整几何验收待建立；动态 `DY1 NOT PASSED`；共享材料点表面研究P2b为 `FAILED_GATE / REVIEW_ONLY`、主增益null。证据见[静态与动态模块](../../../wfrl/nrel_reconstruction/README.md)及[表面研究入口](../../../research/blade-surface/README.md)。本方案的全表面诊断和局部计量仍按对应输入、协议与证据分别验收。
 
 ## 1. 项目目标与首轮范围
 

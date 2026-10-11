@@ -554,13 +554,16 @@ def clear_scene(collection_name: str = COLLECTION_NAME):
         return
     # Drop replay references while their mesh and trail objects still exist.
     import sys
-    from . import tip_tracking, clearance_replay
+    from . import tip_tracking, clearance_replay, split_turbine_context
     custom = sys.modules.get(__package__ + '.panels.custom_cameras')
     if custom is not None:
         custom.cancel_on_load()
     farm = sys.modules.get(__package__ + '.farm_flex')
     for owner in bpy.data.scenes:
         if any(obj.name in owner.objects for obj in collection.objects):
+            # Display copies survive outside WFRL_Scene, but their cached
+            # parents/sources are about to be deleted and rebuilt.
+            split_turbine_context.clear_runtime(owner)
             if farm is not None:
                 farm.detach(owner)
             for key in ('wfrl_stacked_camera_rig', 'wfrl_stacked_reference_frame'):

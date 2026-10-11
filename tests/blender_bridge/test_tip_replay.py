@@ -2,9 +2,11 @@ from copy import deepcopy
 from pathlib import Path
 import threading
 import time
+from types import SimpleNamespace
 import numpy as np
 import pytest
-from wfrl.blender_bridge.tip_replay import FastFarmTipReplay,sample_from_snapshot
+from wfrl.blender_bridge.tip_replay import FastFarmTipReplay,resolve_raw_source_path,sample_from_snapshot
+from wfrl.lidar.replay import ReplayPackage
 from wfrl.blender_bridge.messages import encode_message,FrameDecoder
 from wfrl.blender_bridge.workflow import validate_run_options
 
@@ -14,7 +16,69 @@ PACKAGE=ROOT/'results/lidar/packages/normal-v1.1'
 @pytest.fixture
 def reader():
     if not (PACKAGE/'manifest.json').is_file():pytest.skip('Archived physical results not installed')
-    return FastFarmTipReplay(PACKAGE)
+    package=ReplayPackage.load(PACKAGE)
+    configs=[resolve_raw_source_path(PACKAGE,s['path']) for s in package.manifest['raw_sources']
+             if Path(s['path']).name=='run_config.json'
+             and Path(s['path']).parent.name==package.manifest['run_id']]
+    if len(configs)==1 and not configs[0].is_file():
+        pytest.skip('Original FAST.Farm raw run is not installed; the offline replay package does not contain native VTP geometry')
+    result=FastFarmTipReplay(PACKAGE)
+    tid=result.package.manifest['turbine_id']
+    missing=sum(not (result.run/f'FarmInputs/vtk/Case.{tid}.Blade{bid}Surface.{round(t*result.fps):05d}.vtp').is_file()
+                for t in result.times for bid in (1,2,3))
+    if missing:
+        pytest.skip(f'Original FAST.Farm native VTP geometry is not installed ({missing} required files missing); offline package assertions remain separate')
+    return result
+
+
+@pytest.mark.parametrize('absolute_record', [False, True])
+def test_raw_source_relocation_uses_the_package_repository_without_old_path_fallback(tmp_path, monkeypatch, absolute_record):
+    package=tmp_path/'relocated/results/lidar/packages/normal-v1.1'
+    source=Path('results/lidar/raw/normal-v1/run_config.json')
+    recorded=tmp_path/'original'/source if absolute_record else source
+    if absolute_record:
+        recorded.parent.mkdir(parents=True)
+        recorded.write_text('original source metadata')
+    elsewhere=tmp_path/'unrelated'
+    elsewhere.mkdir()
+    monkeypatch.chdir(elsewhere)
+    expected=tmp_path/'relocated'/source
+    assert resolve_raw_source_path(package,recorded)==expected.resolve()
+    assert not expected.exists()
+
+
+def test_raw_source_relocation_rejects_parent_traversal(tmp_path):
+    package=tmp_path/'results/lidar/packages/normal-v1.1'
+    with pytest.raises(ValueError,match='inside results/lidar/raw'):
+        resolve_raw_source_path(package,'results/lidar/raw/../other/run_config.json')
+
+
+def test_standalone_package_keeps_explicit_raw_source_reference(tmp_path):
+    recorded=tmp_path/'archive/normal-v1/run_config.json'
+    assert resolve_raw_source_path(tmp_path/'standalone-package',recorded)==recorded.resolve()
+
+
+@pytest.mark.parametrize('corrupt_layer', ['package', 'raw_metadata'])
+def test_missing_vtp_does_not_turn_present_data_corruption_into_a_skip(tmp_path, monkeypatch, corrupt_layer):
+    package=tmp_path/'results/lidar/packages/normal-v1.1'
+    package.mkdir(parents=True)
+    (package/'manifest.json').write_text('{}')
+    config=tmp_path/'results/lidar/raw/normal-v1/run_config.json'
+    config.parent.mkdir(parents=True)
+    config.write_text('{}')
+    monkeypatch.setitem(reader.__wrapped__.__globals__,'PACKAGE',package)
+
+    def corrupt(*args):
+        raise ValueError('Present data integrity mismatch')
+
+    if corrupt_layer=='package':
+        monkeypatch.setattr(ReplayPackage,'load',corrupt)
+    else:
+        manifest={'run_id':'normal-v1','raw_sources':[{'path':str(config)}]}
+        monkeypatch.setattr(ReplayPackage,'load',lambda path: SimpleNamespace(manifest=manifest))
+        monkeypatch.setitem(reader.__wrapped__.__globals__,'FastFarmTipReplay',corrupt)
+    with pytest.raises(ValueError,match='integrity mismatch'):
+        reader.__wrapped__()
 
 
 def test_recorded_geometry_matches_saved_truth_and_wire(reader):

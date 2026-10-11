@@ -1,0 +1,62 @@
+[
+  {
+    "case": "old_short",
+    "frames": 8,
+    "queries": 4,
+    "inference_seconds": 0.3365026250248775,
+    "total_seconds": 1.446088333032094,
+    "peak_rss_bytes": 818495488,
+    "mps_driver_allocated_at_end_bytes": 2294448128,
+    "all_sample_count": 32,
+    "scored_nonquery_reference": 28,
+    "visible_reference": 28,
+    "median_error_px": 3.719579205707612,
+    "p95_error_px": 7.630826836377556,
+    "max_error_px": 9.540055994914376
+  },
+  {
+    "case": "new_short",
+    "frames": 8,
+    "queries": 12,
+    "inference_seconds": 1.2210469170240685,
+    "total_seconds": 2.483345666900277,
+    "peak_rss_bytes": 597458944,
+    "mps_driver_allocated_at_end_bytes": 2294431744,
+    "all_sample_count": 96,
+    "scored_nonquery_reference": 84,
+    "visible_reference": 84,
+    "median_error_px": 4.247962594624955,
+    "p95_error_px": 11.16615528885424,
+    "max_error_px": 17.34295645951843
+  },
+  {
+    "case": "new_long32",
+    "frames": 32,
+    "queries": 12,
+    "inference_seconds": 1.6377447090344504,
+    "total_seconds": 4.458532833028585,
+    "peak_rss_bytes": 612745216,
+    "mps_driver_allocated_at_end_bytes": 5390008320,
+    "all_sample_count": 384,
+    "scored_nonquery_reference": 322,
+    "visible_reference": 237,
+    "median_error_px": 41.61730417041575,
+    "p95_error_px": 896.8294616735669,
+    "max_error_px": 1158.7397655864781
+  },
+  {
+    "case": "keyframe_restart8",
+    "frames": 8,
+    "queries": 12,
+    "inference_seconds": 0.4777224169811234,
+    "total_seconds": 1.538522458053194,
+    "peak_rss_bytes": 826146816,
+    "mps_driver_allocated_at_end_bytes": 2294431744,
+    "all_sample_count": 96,
+    "scored_nonquery_reference": 83,
+    "visible_reference": 83,
+    "median_error_px": 5.245916217435755,
+    "p95_error_px": 11.324121784886882,
+    "max_error_px": 21.035870713509148
+  }
+]

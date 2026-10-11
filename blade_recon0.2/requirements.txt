@@ -1,0 +1,5 @@
+# Verified existing external runtime on 2026-10-07, Python 3.12.14.
+# Blender only displays saved results; solve/texture use this external environment.
+numpy==2.5.3
+opencv-python-headless==5.0.0.93
+scipy==1.18.1

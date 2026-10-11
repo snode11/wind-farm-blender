@@ -2,7 +2,7 @@
 
 跑：
     & "C:\\Program Files\\Microsoft MPI\\Bin\\mpiexec.exe" -n 1 `
-      "C:\\Users\\s1155\\.conda\\envs\\wfcrl\\python.exe" `
+      "USER_HOME\\.conda\\envs\\wfcrl\\python.exe" `
       scripts/experiments/probe_studio.py
 
 D2 的验收句子是："点开始训练，3D 里偏航在动，约束面板上出现裁剪记录。"

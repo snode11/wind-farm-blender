@@ -14,7 +14,7 @@ FAST.Farm 侧会被写进 InflowWind 的 HWindSpeed，见 interface.py:437-456�
 
 运行（FAST.Farm 需要 MPI 进程管理器）：
     "/c/Program Files/Microsoft MPI/Bin/mpiexec.exe" -n 1 \
-        "C:/Users/s1155/.conda/envs/wfcrl/python.exe" exp_matched_inflow.py
+        python3 exp_matched_inflow.py
 """
 import os
 import json

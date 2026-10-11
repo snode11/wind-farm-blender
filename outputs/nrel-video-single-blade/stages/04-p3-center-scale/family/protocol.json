@@ -1,0 +1,37 @@
+{
+  "status": "FROZEN_BEFORE_EXECUTION",
+  "scope": "NO_TRUTH_NO_IMAGE_FIT_FUNCTION_SPACE_AUDIT",
+  "inputs": {
+    "wfrl/nrel_reconstruction/model.py": "47165adb7a8f8d75f4d23a4632c1afd690370edf9d665736782fba4ac7f632ad",
+    "outputs/nrel-video-single-blade/20261002-second/reconstruction/model_state.json": "777f37387c6cfa098b1af3aec3e4e0de5a892f491a7716daeea20141c1f4d8d5",
+    "outputs/nrel-video-single-blade/20261003-diagnostics/parameters/parameter_semantics.json": "6da3de19b5bc69a64a1b1f8a4a06887394d57f1187db9d3897543c48c03f8e62",
+    "outputs/nrel-video-single-blade/20261003-diagnostics/parameters/README.md": "b35d7c7ab1c74996d8f6de81f6ab8261d425f1bee60c6bea10850389508e0bf7"
+  },
+  "model": "model_state.json models.T1_B1; existing 25 rings, 7 controls, frozen float32 buffers cast to float64 arithmetic",
+  "perturbation": "control index 1 chord-log increment, normalized to signed half-chord change at z=9.225 m; continuous B-spline weights and ring-interpolated base chord",
+  "amplitudes_m": [
+    -0.05,
+    -0.02,
+    -0.01,
+    -0.005,
+    0.005,
+    0.01,
+    0.02,
+    0.05
+  ],
+  "centroid_formula": "G=B C+c u/4; u=(-sin(twist),cos(twist)); exact compensating field f=-delta(c) u/4",
+  "projection": "Minimize sum across all 25 rings and xy of |B_free deltaC_free-f|^2 with deltaC_0=0 and -5<C+deltaC<5. Solve rooted least squares, verify inactive bounds; fail rather than silently relax bounds. This is a function-space projection, not fitting image data.",
+  "diagnostic_positions": "Report all 25 ring residuals; z=9.225 m continuous extension with fixed buffer interpolation; root band [6.15,12.3] m sampled at 247 fixed equal intervals including target; no tuning based on results.",
+  "reported_metrics": "vector norm max and RMS in metres, coordinate RMS, signed control deltas and inherited bounds, continuous target residual; numerical exactness threshold 1e-10 m only for float64 algebra, not physical tolerance",
+  "regularization": "Compute original formulas on C,ell; map actual Greville geometric center samples back to C and verify pullback equality. Also report naive same formulas on absolute G, template-relative H=G-D(0), and reference-axis samples A C to expose changed penalty, not suggested defaults.",
+  "reparameterization": "A=B(Greville), G=A C+D_g(ell); C=A^-1(G-D_g(ell)), root G0=D0(ell), bounds inherited through inverse. G(z)=B(z)A^-1(G-D_g)+D_z, not B(z)G. Inspect invertibility only; no new fit implementation.",
+  "forbidden": [
+    "truth geometry",
+    "images",
+    "image optimization",
+    "fit execution",
+    "baseline replacement",
+    "new shape-prior acceptance"
+  ],
+  "decision_rule": "Nonzero best-projection residual prohibits claim of exact per-ring center-preserving original-family chord direction. Exact invertible coordinates with pullback objective preserve family, while direct interpolation/reused regularizer/fixed new independent boxes alter assumptions."
+}

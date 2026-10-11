@@ -168,17 +168,20 @@ class CameraImage:
         self.texture = None
         self.pixels = None
 
-    def snapshot(self, offscreen):
+    def snapshot(self, offscreen, *, create_texture=True):
+        """Read display RGBA bytes; create a texture only for on-screen preview."""
         import gpu
         with offscreen.bind():
             buffer = gpu.state.active_framebuffer_get().read_color(
                 0, 0, self.width, self.height, 4, 0, 'UBYTE')
             buffer.dimensions = self.width * self.height * 4
             self.pixels = bytes(buffer)
-            import numpy as np
-            values = np.frombuffer(self.pixels, dtype=np.uint8).astype(np.float32) / 255.
-            pixels = gpu.types.Buffer('FLOAT', len(values), values)
-            self.texture = gpu.types.GPUTexture((self.width, self.height), format='RGBA8', data=pixels)
+            self.texture = None
+            if create_texture:
+                import numpy as np
+                values = np.frombuffer(self.pixels, dtype=np.uint8).astype(np.float32) / 255.
+                pixels = gpu.types.Buffer('FLOAT', len(values), values)
+                self.texture = gpu.types.GPUTexture((self.width, self.height), format='RGBA8', data=pixels)
 
     def free(self):
         self.texture = self.pixels = None
@@ -214,8 +217,8 @@ def simulation_state_hash(scene, depsgraph):
     return digest.hexdigest()
 
 
-def render_group(context, cameras, long_edge=None, target=None, fast=False):
-    """Synchronous draw on one frozen main-thread state; no event yield per route."""
+def render_group(context, cameras, long_edge=None, target=None, fast=False, *, create_texture=True):
+    """Draw one frozen main-thread state, with optional preview texture upload."""
     global _DRAWING
     import bpy
     if _DRAWING:
@@ -250,7 +253,7 @@ def render_group(context, cameras, long_edge=None, target=None, fast=False):
                 offscreen = target.get(context, image.width, image.height)
                 offscreen.draw_view3d(scene, context.view_layer, context.space_data, region,
                     image.view, image.projection, do_color_management=True, draw_background=True)
-                image.snapshot(offscreen)
+                image.snapshot(offscreen, create_texture=create_texture)
         if (session_identity(scene) != identity or stamp != (scene.frame_current, scene.frame_subframe)
                 or simulation_state_hash(scene, depsgraph) != state_hash):
             raise RuntimeError('采集期间场景 / 仿真时刻变化，本组无效')

@@ -2,7 +2,7 @@
   "status": "PASS",
   "module": "bl_ext.user_default.wfrl_blender",
   "installed_module": true,
-  "addon_path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "addon_path": "USER_HOME/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
   "blender": "5.2.1 LTS",
   "phase": "foreign_playback_preserved",
   "elapsed_s": 18.42540899999949,

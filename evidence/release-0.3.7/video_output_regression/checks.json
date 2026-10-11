@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "installed_module": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-037-e3oweiqo/extensions/release_test/wfrl_blender/__init__.py",
+  "installed_module": "TEMPORARY_PATH",
   "blender": "5.2.1 LTS",
   "export_bytes_match": true,
   "source_sha256": "339289805d06429ea1968ee61f6d37270ab13e46ef8f39cc0bf3627b41dcd64c",
