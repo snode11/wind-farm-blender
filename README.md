@@ -4,21 +4,21 @@
 
 | 产品 | 公开版本 | 用途与使用方式 |
 | --- | --- | --- |
-| NREL 5MW / WFRL 前端 | **0.3.20+1** | 三机柔性回放、几何／同源纹理分屏、六类合成缺陷、三相机与双束／TLS；[下载扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.20.1/wfrl_blender-0.3.20%2B1.zip)，使用 Install from Disk 安装并重启 |
+| NREL 5MW / WFRL 前端 | **0.3.21** | 三机柔性回放、几何／同源纹理分屏、六类合成缺陷、三相机与双束／TLS；[下载扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.21/wfrl_blender-0.3.21.zip)，使用 Install from Disk 安装并重启 |
 | GW184 三相机与叶片缺陷 | **0.4.0** | GW184 尺寸合成刚性模型、固定三相机与六类缺陷；[下载独立运行 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.4.0/gw184_three_camera_defects-0.4.0.zip)，完整解压后启动 |
 
 ## 当前身份与安装来源
 
-项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)，包含当前前端、后端、重建研究、测试和配套文档。NREL 的 [v0.3.20.1 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.20.1) 提供既有专用扩展 ZIP；该标签指向文档提交 `8e49b84db1b28de49b61b12924d540ae37f11b8b`，其自动 Source code 不对应安装 ZIP。当前分支源码、既有公开安装包与本机安装分别识别。
+项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)，包含当前前端、后端、重建研究、测试和配套文档。NREL 的 [v0.3.21 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.21) 提供专用扩展 ZIP；安装时使用 `wfrl_blender-0.3.21.zip`。源码提交、构建 ZIP 与本机安装分别识别，GitHub 自动 Source code 不作为扩展安装包。
 
-开发机日常扩展 `bl_ext.user_default.wfrl_blender` 的已核对载荷标识为 **LOCAL_UNPUBLISHED_REVISION**，包含相机异常资源清理与同源重建稳定轮询。当前源码还包含独立的可靠性与构建保护实现，不会自动更新日常安装或既有公开 ZIP。源码、安装目录、构建 ZIP 和公开附件须分别核对；相同 manifest 版本不能证明载荷一致。
+开发机日常扩展 `bl_ext.user_default.wfrl_blender` 的已核对载荷标识为 **LOCAL_UNPUBLISHED_REVISION**，manifest 为 `0.3.20+1`，包含相机异常资源清理与同源重建稳定轮询。公开 0.3.21 包含当前扩展侧的可靠性与保护实现；项目启动器、重建求解器和构建工具使用独立项目源码，不随扩展 ZIP 安装。发布不会自动升级日常安装。
 
 | 对象 | manifest | 身份 |
 | --- | --- | --- |
-| 公开 NREL ZIP | `0.3.20+1` | 173 文件、99,010,020 bytes；上传前本地 SHA-256 `e6e279f5f88c730f3c96158bfca525a9d04f1a09915ad3a997d1d29b00a9f5ba` |
+| 公开 NREL ZIP | `0.3.21` | 173 文件、99,016,888 bytes；上传前 SHA-256 与[交付身份](publication/blender-0.3.21.json)见[发布状态](docs/blender/发布状态与验证范围.md) |
 | 当前开发机日常安装对应 ZIP | `0.3.20+1` | 173 文件；本地 SHA-256 `c7a085b5dcd76163b7589f014f706231d882251423e3281e268495b84b6b68c6`；未发布 |
 
-身份、[发布核对](docs/blender/releases/0.3.20+1发布核对.md)与[本地验证摘要](outputs/frontend-reliability-20261011-a01/final-verification.json)的适用范围见[发布状态与验证范围](docs/blender/发布状态与验证范围.md)。同一版本号不证明内容相同；升级后完全重启 Blender。
+身份、[发布核对](docs/blender/发布状态与验证范围.md#软件验证的适用对象)与[本地验证摘要](outputs/frontend-reliability-20261011-a01/final-verification.json)的适用范围见[发布状态与验证范围](docs/blender/发布状态与验证范围.md)。同一版本号不证明内容相同；升级后完全重启 Blender。
 
 ## 主要能力
 
@@ -50,13 +50,13 @@ GW184 使用[独立包操作说明](docs/blender/GW184三相机与缺陷编辑�
 | GW184 项目 | `projects/gw184-single/` 的 geometry、motion、cameras 与 sources；两份 DTU 原始输入随 Git 提供，官方来源与固定摘要见[来源说明](projects/gw184-single/sources/README.md) |
 | 验证与研究复查 | 分发清单标识的原始测量、摘要、日志和图像；每项证据只适用于其记录的输入与载荷 |
 
-当前源码包含拒绝帧与非有限重建结果的历史／先验保护、启动器停止确认、完整播放证据判定、回放包单次校验复用、PNG 采集纹理分配控制及构建输出保护。源码同步不会替换公开扩展附件或本机日常安装；安装当前实现需按[源码构建说明](docs/blender/INSTALL.md#从项目源码构建)生成并验证独立 ZIP。
+公开 0.3.21 扩展包含相机异常资源清理、同源重建稳定刷新、完整播放覆盖和循环判定、回放包单次校验复用及 PNG 采集纹理分配控制。拒绝帧与非有限重建结果的历史／先验保护、启动器停止确认及构建输出保护属于项目侧工具，按[源码使用说明](docs/blender/INSTALL.md#从项目源码构建)独立取得；源码同步与公开发布均不会替换本机日常安装。
 
 ## 验证与限制
 
 当前源码验收为 **前端 726 passed / 3 skipped，后端 837 passed / 5 skipped**，跳过条件包括原始 VTP／来源数据缺失、未配置 RTSP 和测试环境依赖；其范围与资源身份见[分发说明](docs/PUBLICATION.md#证据身份与限制)。该源码结果不作为既有公开 ZIP 或日常安装的重复验收。
 
-公开 ZIP 的 CRC、Blender 扩展格式和功能／资产载荷一致性检查通过；相机默认复位载荷的 78 项宿主与实际面板点击属于其明确记录的安装来源，未重复最终公开 ZIP 的完整隔离安装和窗口工作流。当前本地未发布载荷的 **217 passed / 113 subtests passed**、隔离安装及日常安装原生窗口检查只适用于该本地载荷；窗口操作由 Blender 脚本执行，不是实体鼠标或显示器扫描验收。
+公开 0.3.21 ZIP 的检查及适用范围见[发布状态](docs/blender/发布状态与验证范围.md#软件验证的适用对象)。开发机日常 0.3.20+1 未发布载荷的 **217 passed / 113 subtests passed**、隔离安装及日常安装原生窗口检查只适用于该本地载荷；窗口操作由 Blender 脚本执行，不是实体鼠标或显示器扫描验收。
 
 同源纹理是 **SAME_SOURCE_SIMULATION**：601 个 10 Hz 保存样本对应 117–177 s，60 Hz 时间轴每 6 帧保持一个样本；独立 `synth_tex` 是另一来源的 120 样本、0–11.9 s。放大与增强不会补出未观测表面。两者的几何／纹理仍为 **NOT_ACCEPTED**，图集模糊、条带、接缝和叶尖错贴限制保留。
 

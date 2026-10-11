@@ -1,0 +1,138 @@
+{
+  "schema": "wfrl.extension-release.v1",
+  "version": "0.3.21",
+  "blender_minimum": "5.2.0",
+  "validated_blender": "5.2.1 LTS",
+  "validated_platform": "macOS",
+  "archive": {
+    "name": "wfrl_blender-0.3.21.zip",
+    "path": "dist/wfrl_blender-0.3.21.zip",
+    "bytes": 99016888,
+    "file_count": 173,
+    "sha256": "ac52fc91e6373357dcc033b257b12231dfdf2f78d578c6fbe2e5190177cae9bd",
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.21/wfrl_blender-0.3.21.zip",
+    "inventory": "dist/wfrl_blender-0.3.21.inventory.json",
+    "checksum": "dist/wfrl_blender-0.3.21.zip.sha256"
+  },
+  "source": {
+    "repository": "https://github.com/snode11/wind-farm-blender",
+    "branch": "wind-farm-rl-all-work",
+    "tag": "v0.3.21",
+    "reproduced_source_commit": "26ec67b72267ddeef59674dadbf92d60bd4a5718",
+    "rebuild_zip_bytes_identical": true,
+    "tag_payload_source_matches_reproduced_commit": true
+  },
+  "validation": {
+    "archive_crc_and_inventory": "PASS",
+    "blender_extension_manifest": "PASS",
+    "isolated_installation": "PASS",
+    "actual_module": "bl_ext.wfrl_frontend.wfrl_blender",
+    "installed_files": 173,
+    "installed_payload_unchanged_after_tests": true,
+    "host": {
+      "passed": 326,
+      "failed": 0,
+      "skipped": 1,
+      "warnings": 3,
+      "subtests_passed": 189
+    },
+    "host_skip_reason": "Original VTP is not distributed with the offline release",
+    "background_software_status": "PASS",
+    "background_checks": [
+      {
+        "case": "tip-deflection",
+        "status": "SOFTWARE_PASS_PHYSICAL_GATE_FAILED",
+        "returncode": 1,
+        "source_identity": "PASS"
+      },
+      {
+        "case": "scene-playback",
+        "status": "PASS",
+        "returncode": 0,
+        "source_identity": "PASS"
+      },
+      {
+        "case": "nrel-save",
+        "status": "PASS",
+        "returncode": 0,
+        "source_identity": "PASS"
+      },
+      {
+        "case": "nrel-reopen",
+        "status": "PASS",
+        "returncode": 0,
+        "source_identity": "PASS"
+      },
+      {
+        "case": "nrel-camera-slots",
+        "status": "PASS",
+        "returncode": 0,
+        "source_identity": "PASS"
+      },
+      {
+        "case": "split-context",
+        "status": "PASS",
+        "returncode": 0,
+        "source_identity": "PASS"
+      }
+    ],
+    "visible_windows": {
+      "gpu_png_capture": "PASS",
+      "native_camera_lifecycle": "PASS",
+      "geometry_and_same_source_reconstruction": "PASS",
+      "interaction": "Scripts invoked native Blender operations; selected saved window screenshots visually reviewed",
+      "physical_mouse_input": false
+    },
+    "scientific_tip_gate": "FAILED_GATE",
+    "saved_mesh_max_error_m": 0.0010612851396875622,
+    "saved_gate_threshold_m": 0.0002,
+    "full_clip_fps_benchmark": "NOT_RUN",
+    "windows_linux": "NOT_RUN",
+    "long_duration_stability": "NOT_RUN"
+  },
+  "limitations": [
+    "Geometry and texture remain NOT_ACCEPTED; same-source data is SAME_SOURCE_SIMULATION.",
+    "Lidar remains REVIEW_ONLY / PENDING_ACCEPTANCE.",
+    "Blender exit memory-block diagnostics remain in the reports; no long-term leak-free claim.",
+    "Original VTP, backend services, solvers and project launchers are not installed by the extension ZIP."
+  ],
+  "daily_installation": {
+    "updated_by_publication": false,
+    "last_verified_version": "0.3.20+1",
+    "last_verified_identity": "LOCAL_UNPUBLISHED_REVISION"
+  },
+  "verification_reports": [
+    {
+      "path": "publication/blender-0.3.21/package-validation.json",
+      "sha256": "8ee805564179552755452f006538c6a34f715aae4256b5b742fa032dda40f87f",
+      "original_local_report_sha256": "56dfde1baaf0edf8b23c640c1c781370088991c44ac56e4364354b0378645afb"
+    },
+    {
+      "path": "publication/blender-0.3.21/background-validation.json",
+      "sha256": "0b800e00532a7489091b3cebbe5b6aa1534a87ffbc267757627e38015a18b56c",
+      "original_local_report_sha256": "229a129943e8cb65cdaf1405e5b3d711f34c32ede1d95ba2e72b29bdbad70aa2"
+    },
+    {
+      "path": "publication/blender-0.3.21/capture-window.json",
+      "sha256": "d05d59d4a5ec812a4e42de2aca08f1034faa676cf8c9199a7ac3d7db1bbb02ce",
+      "original_local_report_sha256": "dc3f59d2351164ba71cea6dc9b92c9131a82b713de293de847a829a6508322b0"
+    },
+    {
+      "path": "publication/blender-0.3.21/native-camera-window.json",
+      "sha256": "ee7847e4b414e53c5fe46e03e972876cfb9dd2a08862d58c7a3965415560ed85",
+      "original_local_report_sha256": "a48f0168ad77731eb0f7833c9edbeb962ef1da4df4398b894ccd447d4a45eb6c"
+    },
+    {
+      "path": "publication/blender-0.3.21/reconstruction-window.json",
+      "sha256": "20023d20fe2c4316a12ee9b862bf79d7c7f6b8e770ca4362e77e38a7f701507e",
+      "original_local_report_sha256": "6e6b158a8df1182cbdba055bcea5f7df5f0cd4960fd197dbbdee93791f5ca77c"
+    },
+    {
+      "path": "publication/blender-0.3.21/host-tests.json",
+      "sha256": "70401c21bfc107e65873ef3ee4bafc6a456151b46dc2a63268eabdecbb7d0574",
+      "original_local_report_sha256": "6a9dc492bd4916b00b8517469e5ea5ac6ae9ead08abc851f5cf71331d3d5f81c"
+    }
+  ],
+  "report_path_encoding": "PROJECT_ROOT and PYTHON_ENVIRONMENT replace machine-specific path prefixes in public report copies; measurements and acceptance results are unchanged.",
+  "remote_asset_download_verification": false
+}
