@@ -1,10 +1,10 @@
 # NREL 5MW / WFRL 前端使用说明
 
-本页面向 **Blender 5.2+** 的 NREL 前端操作。公开安装版为 **0.3.20+1**（Release 标签 `v0.3.20.1`），安装使用专用 ZIP；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。GW184 **0.4.0** 是独立运行包，模型、配置和入口与 NREL 分开。
+本页面向 **Blender 5.2+** 的 NREL 前端操作。公开安装版为 **0.3.21**（Release 标签 `v0.3.21`），安装使用专用 ZIP；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。GW184 **0.4.0** 是独立运行包，模型、配置和入口与 NREL 分开。
 
-开发机日常安装的已核对载荷标识为 **LOCAL_UNPUBLISHED_REVISION**，manifest 同为 `0.3.20+1`，包含相机异常清理与同源重建稳定轮询。当前分支源码、日常安装与公开附件载荷分别识别；具体 SHA-256、[安装来源及验证范围见当前发布状态](docs/blender/发布状态与验证范围.md)。相同版本号不能替代载荷核对。
+开发机日常安装使用公开 **0.3.21** 载荷，实际模块为 `bl_ext.user_default.wfrl_blender`；173 文件与正式 ZIP 匹配，新进程加载与启用状态检查通过，见[当前安装核对](publication/daily-installation.json)。当前分支源码、日常安装与公开附件分别识别；具体 SHA-256、[安装来源及验证范围见当前发布状态](docs/blender/发布状态与验证范围.md)。相同版本号不能替代载荷核对。
 
-公开用户从 [NREL 0.3.20+1 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.20.1) 下载 [wfrl_blender-0.3.20+1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.20.1/wfrl_blender-0.3.20%2B1.zip)，使用 Install from Disk 手动安装并重启。自动 Source code 不代表本版实现。[GW184 指南](docs/blender/GW184三相机与缺陷编辑器.md) · [安装说明](docs/blender/INSTALL.md) · [实现与维护](blender_frontend/README.md) · [当前待实施要求](前端更新计划.md)。
+公开用户从 [NREL 0.3.21 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.21) 下载 [wfrl_blender-0.3.21.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.21/wfrl_blender-0.3.21.zip)，使用 Install from Disk 手动安装并重启。GitHub 自动 Source code 用于源码查看与构建，不作为扩展安装包。[GW184 指南](docs/blender/GW184三相机与缺陷编辑器.md) · [安装说明](docs/blender/INSTALL.md) · [实现与维护](blender_frontend/README.md) · [当前待实施要求](前端更新计划.md)。
 
 WFRL 默认播放三台 NREL 5 MW 风机的 60 秒 MAPPO 保存仿真记录，支持柔性形变、相机数据制作、合成缺陷及研究结果对照。几何／纹理 **NOT_ACCEPTED**、叶尖 **FAILED_GATE** 和雷达 **REVIEW_ONLY / PENDING_ACCEPTANCE** 保持。
 
@@ -32,7 +32,7 @@ WFRL 默认播放三台 NREL 5 MW 风机的 60 秒 MAPPO 保存仿真记录，�
 ### 2.1 只看离线演示
 
 1. 安装 Blender 5.2 或更新版本。
-2. 从 NREL 0.3.20+1 发布页下载 **[wfrl_blender-0.3.20+1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.20.1/wfrl_blender-0.3.20%2B1.zip)**，保留 ZIP 格式。不要选择 GW184 独立运行 ZIP；GitHub 自动生成的 Source code 也不是这个扩展安装包。
+2. 从 NREL 0.3.21 发布页下载 **[wfrl_blender-0.3.21.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.21/wfrl_blender-0.3.21.zip)**，保留 ZIP 格式。不要选择 GW184 独立运行 ZIP；GitHub 自动生成的 Source code 也不是这个扩展安装包。
 3. 打开 Blender → **Edit → Preferences → Get Extensions**，在菜单中选择 **Install from Disk**，选中 ZIP 并启用 **WFRL Blender**。
 4. 更新旧扩展后，保存自己的工作并退出、重启 Blender，使新代码和资源生效。
 5. 鼠标放在三维视图中，按 **N** 打开侧栏，在 **MAPPO** 中点击 **打开几何重建示例…**，打开扩展自带的便携几何分屏。当前文件未保存时，Blender 会先提示保存。
@@ -72,7 +72,7 @@ scripts/blender/run_wfrl_macos.sh \
 
 这条入口会预检后端环境、启动其管理的 Bridge，并让 Blender 加载**已安装的扩展**。默认进入 **OFFLINE RESULTS** 的 MAPPO 回放，Bridge 待用，不自动开始求解或训练。
 
-匹配的 0.3.20+1 安装版会自动建立推荐三相机，无需手动导入 JSON。启动主视图仍为 T1 总览，通过 View 打开三路即可。修改仓库代码或文档，不会自动替换 Blender 当前加载的扩展。
+匹配的 0.3.21 安装版会自动建立推荐三相机，无需手动导入 JSON。启动主视图仍为 T1 总览，通过 View 打开三路即可。修改仓库代码或文档，不会自动替换 Blender 当前加载的扩展。
 
 ## 3. 时间、回放与观察视角
 
@@ -191,9 +191,9 @@ T1 Down 和三相机观察都使用 Blender 相机视图。三相机的价值在
 
 ## 7. 当前验证与播放表现
 
-公开 ZIP 的 CRC、扩展格式及载荷一致性通过；相机默认复位载荷的 78 项宿主与真实面板点击归属其记录的安装来源。最终公开 ZIP 未重复全新隔离安装或完整窗口工作流。
+公开 0.3.21 ZIP 的 CRC、扩展格式、载荷一致性及全新隔离安装检查通过，173 个安装文件已核对；GPU PNG 采集、原生相机生命周期、几何／同源纹理切换及保存重开的可见窗口检查通过。窗口检查由脚本调用 Blender 原生操作，不代表实体鼠标、完整片段性能或科学精度验收；具体范围见[交付身份](publication/blender-0.3.21.json)。相机默认复位载荷的 78 项宿主与真实面板点击归属其记录的安装来源。
 
-当前本地未发布载荷的 **217 passed / 113 subtests passed**、隔离与日常安装原生相机／重建窗口检查通过；173 个日常安装文件与该本地 ZIP 一致。稳定暂停刷新 20 次无完整扫描或重绑定，载荷及对象身份保持。这些结果仅属于该本地载荷，窗口由脚本执行原生操作，不是实体鼠标、显示器扫描或 FPS 验收。身份与[验证摘要](outputs/frontend-reliability-20261011-a01/final-verification.json)的适用范围见[发布状态](docs/blender/发布状态与验证范围.md)。
+当前日常 **0.3.21** 安装的 173 文件与正式 ZIP 一致，持久启用、实际模块路径、原生相机操作符注册及新进程加载检查通过，见[安装核对](publication/daily-installation.json)。该检查只覆盖安装身份和后台启动；公开包的软件与窗口检查按[发布状态](docs/blender/发布状态与验证范围.md)中的既有证据使用，不作为日常安装的完整窗口、FPS 或长期稳定性复测。
 
 完整完成、超时、中止和错误须分别判断。POST_PIXEL 是视口绘制回调，60 Hz 是时间映射；稳定 30／60 FPS、完整片段性能、长期运行和 Windows/Linux 尚未验收。原因未定的停止异常、控制台原生 SIGSEGV 与退出内存诊断仍构成验证限制。
 
@@ -215,8 +215,8 @@ T1 Down 和三相机观察都使用 Blender 相机视图。三相机的价值在
 
 | 问题 | 解释与处理 |
 | --- | --- |
-| 更新后还是旧界面或旧取景 | 确认安装的是 0.3.20+1 ZIP，保存工作后重启 Blender，重新加载 MAPPO。仓库文档不会热更新扩展 |
-| 找不到“恢复默认三相机” | 安装 0.3.20+1 ZIP 并重启，在已加载三相机的场景中展开 View → 三相机 · T1 · 研发 → 1 安装整个盒体 |
+| 更新后还是旧界面或旧取景 | 确认安装的是 0.3.21 ZIP，保存工作后重启 Blender，重新加载 MAPPO。仓库文档不会热更新扩展 |
+| 找不到“恢复默认三相机” | 安装 0.3.21 ZIP 并重启，在已加载三相机的场景中展开 View → 三相机 · T1 · 研发 → 1 安装整个盒体 |
 | 找不到“版本、来源与播放诊断” | 安装公开专用 ZIP 并重启，再核对工具页与实际载入模块 |
 | 从原 macOS 命令启动后只看到总览 | 这是默认主视图；通过 View → 三相机 → 三路对照打开观察窗口 |
 | C2 为什么也能看到叶尖 | 当前目标是连续覆盖并留重叠，真实透视可能包含远端叶尖，不按固定叶长区间裁图 |

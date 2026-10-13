@@ -25,7 +25,7 @@ MAPPO · 60 秒是随包柔性结果回放，离线查看不需要 Bridge、FAST
 - 分别核对工作区源码、构建 ZIP、公开附件和实际安装目录。Blender 兼容版本与扩展版本读取 blender_manifest.toml（本地文件：`blender_frontend/wfrl_blender/blender_manifest.toml`）；包身份核对 `build-info.json`、SHA-256 与 inventory，不以版本字符串推定载荷一致。
 - 日常启动器加载 `bl_ext.user_default.wfrl_blender`；隔离验证使用 `bl_ext.wfrl_frontend.wfrl_blender`。以实际 `addon.__file__` 和加载环境为准，源码或资源修改不会自动更新安装版；安装后须重启 Blender。
 - `frontend_diagnostics.py` 提供实际模块、目录、构建身份和数据来源。其默认关闭的近 2 秒视口采样仅用于排障，不能替代完整片段性能验收。
-- 发布身份按[发布状态与验证范围](../../../docs/blender/发布状态与验证范围.md)及对应包证据核对。本地可靠性包的[验证文件](../../../outputs/frontend-reliability-20261011-a01/final-verification.json)标为 `LOCAL_UNPUBLISHED_REVISION`，与公开附件可使用同一版本号；验证结论只归属于证据指向的载荷。GitHub 自动 Source code 归档不证明与安装 ZIP 对应。
+- 发布身份按[发布状态与验证范围](../../../docs/blender/发布状态与验证范围.md)及对应包证据核对；当前日常安装身份见[安装核对](../../../publication/daily-installation.json)。验证结论只归属于证据指向的载荷与范围，同一版本号不证明载荷相同。GitHub 自动 Source code 归档不证明与安装 ZIP 对应。
 
 ## 按功能定位
 
@@ -105,7 +105,7 @@ NREL 动态研究的仓库入口为 `scripts/blender/open_nrel_dynamic_review.py
 
 - 只有任务涉及扩展构建或交付时才调用构建与安装工具。扩展 Python／资源、规范 Bridge 协议或内置读取器变化要进入安装版时需重建 ZIP；skill、AGENTS.md、外部说明或项目侧启动器／后端修改不要求重建，除非改变打包内容。
 - 修改规范源：`protocol.py` 来自仓库 `wfrl/blender_bridge/messages.py`；内置 `_vendor/lidar/` 来自 `wfrl/lidar/` 的 `replay.py`、`evidence.py`、`dual_beam_replay.py`、`molas_cl.py`。不手改生成副本，也不替换冻结模型或正式资产来源来消除校验失败。
-- 构建使用 `python3 scripts/blender/build_extension.py --output <新目录>`，避免默认同版本 `dist` 路径覆盖。默认包含 `assets/mappo/`、`assets/dual_beam/`、`assets/dual_beam_tls/` 和规范重建示例；两种雷达结果层通过 `../mappo` 共享源，严格校验方法及完整来源摘要。
+- 构建使用 `python3 scripts/blender/build_extension.py --output <新目录>`；工具默认拒绝覆盖已有 ZIP、校验和及 inventory，仅显式指定 `--overwrite` 时允许替换。默认包含 `assets/mappo/`、`assets/dual_beam/`、`assets/dual_beam_tls/` 和规范重建示例；两种雷达结果层通过 `../mappo` 共享源，严格校验方法及完整来源摘要。
 - 外部覆盖分别使用 `--dual-package <旧法匹配目录>` 与 `--dual-tls-package <TLS匹配目录>`；更换 farm 源不能沿用不匹配 sidecar。外部便携双束包含自身 `source/`，须整体移动并校验；normal/close 外部包和原始 VTP 不随扩展提供。
 - 对实际包生成并核对 manifest、ZIP、SHA-256 和 inventory，交付前完成适用的安装版验证。重建 ZIP 不等于生成物理结果、通过科学验收或公开发布。附件上传与文档同步遵守 AGENTS.md 的边界。
 - 项目启动器加载已安装扩展。`scripts/blender/run_wfrl_macos.sh` 已包含 `launch`，调用时不再追加该子命令；直接调用 `wfrl_launcher.py` 才使用 `launch`。普通手动后端连接需要 `Load & Validate Scene`，启动器主动连接流程提供自动加载。

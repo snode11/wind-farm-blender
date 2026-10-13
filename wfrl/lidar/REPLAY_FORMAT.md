@@ -1,6 +1,6 @@
 # Lidar replay formats
 
-The replay 1.0 contract below describes the supported B2 / normal-close path; the dual-beam overlay uses its own contract. The public NREL / WFRL installation ZIP is **0.3.20+1** (tag **v0.3.20.1**), while the published extension implementation is **v0.3.18**. The daily installation is a local unpublished revision with the same version number and a different payload. See [release state and validation scope](../../docs/blender/发布状态与验证范围.md) for package identities. Software delivery does not establish research acceptance.
+The replay 1.0 contract below describes the supported B2 / normal-close path; the dual-beam overlay uses its own contract. The public NREL / WFRL installation ZIP is **0.3.21** (tag **v0.3.21**), and the current project source is on the **wind-farm-rl-all-work** branch. The daily installation is **0.3.21**; its 173 files match the public ZIP, and fresh-process startup checks pass. See [daily installation verification](../../publication/daily-installation.json). See [release state and validation scope](../../docs/blender/发布状态与验证范围.md) for package identities. Software delivery does not establish research acceptance.
 
 ## Dual-beam review v1
 
