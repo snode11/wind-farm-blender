@@ -105,7 +105,7 @@ NREL 动态研究的仓库入口为 `scripts/blender/open_nrel_dynamic_review.py
 
 - 只有任务涉及扩展构建或交付时才调用构建与安装工具。扩展 Python／资源、规范 Bridge 协议或内置读取器变化要进入安装版时需重建 ZIP；skill、AGENTS.md、外部说明或项目侧启动器／后端修改不要求重建，除非改变打包内容。
 - 修改规范源：`protocol.py` 来自仓库 `wfrl/blender_bridge/messages.py`；内置 `_vendor/lidar/` 来自 `wfrl/lidar/` 的 `replay.py`、`evidence.py`、`dual_beam_replay.py`、`molas_cl.py`。不手改生成副本，也不替换冻结模型或正式资产来源来消除校验失败。
-- 构建使用 `python3 scripts/blender/build_extension.py --output <新目录>`，避免默认同版本 `dist` 路径覆盖。默认包含 `assets/mappo/`、`assets/dual_beam/`、`assets/dual_beam_tls/` 和规范重建示例；两种雷达结果层通过 `../mappo` 共享源，严格校验方法及完整来源摘要。
+- 构建使用 `python3 scripts/blender/build_extension.py --output <新目录>`；工具默认拒绝覆盖已有 ZIP、校验和及 inventory，仅显式指定 `--overwrite` 时允许替换。默认包含 `assets/mappo/`、`assets/dual_beam/`、`assets/dual_beam_tls/` 和规范重建示例；两种雷达结果层通过 `../mappo` 共享源，严格校验方法及完整来源摘要。
 - 外部覆盖分别使用 `--dual-package <旧法匹配目录>` 与 `--dual-tls-package <TLS匹配目录>`；更换 farm 源不能沿用不匹配 sidecar。外部便携双束包含自身 `source/`，须整体移动并校验；normal/close 外部包和原始 VTP 不随扩展提供。
 - 对实际包生成并核对 manifest、ZIP、SHA-256 和 inventory，交付前完成适用的安装版验证。重建 ZIP 不等于生成物理结果、通过科学验收或公开发布。附件上传与文档同步遵守 AGENTS.md 的边界。
 - 项目启动器加载已安装扩展。`scripts/blender/run_wfrl_macos.sh` 已包含 `launch`，调用时不再追加该子命令；直接调用 `wfrl_launcher.py` 才使用 `launch`。普通手动后端连接需要 `Load & Validate Scene`，启动器主动连接流程提供自动加载。
