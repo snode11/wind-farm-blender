@@ -1,6 +1,6 @@
 # Blade Recon 叶片三维重建可视化 · 0.3.21
 
-适用于 Blender 5.2+ 的公开 NREL **0.3.21**。从[专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.21/wfrl_blender-0.3.21.zip)安装并重启；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装使用 manifest 为 0.3.20+1 的 **LOCAL_UNPUBLISHED_REVISION**，该安装载荷与当前源码及既有公开 ZIP 分别识别，详见[身份与验证范围](发布状态与验证范围.md)。外部研究求解器不随扩展打包。
+适用于 Blender 5.2+ 的公开 NREL **0.3.21**。从[专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.21/wfrl_blender-0.3.21.zip)安装并重启；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **0.3.21**，173 文件与公开 ZIP 一致；实际安装与当前源码分别识别，详见[身份与验证范围](发布状态与验证范围.md)。外部研究求解器不随扩展打包。
 
 几何与纹理保持 **NOT_ACCEPTED**，原 0.2 mm 叶尖门保持 **FAILED_GATE**。外部材料点候选 Patch 2/8、Crack 7/8、跨相机 RGB 0/264，仍为 FAILED_GATE / NOT_ACCEPTED，same_material_error_m 与 primary_gains 均 null；该[研究结果](../../blade_recon0.2/docs/材料点对应实验报告_2026-10-11.md)未替换正式 601 样本与图集。
 
@@ -84,4 +84,4 @@ ZIP 自带 MAPPO 数据、便携场景及四张 packed 天空／地表纹理，�
 
 工作区源码、构建 ZIP、公开附件和已安装扩展是不同来源。更新扩展后重启 Blender，核对实际模块与 payload；输入读取、模型回放、场景切换、保存重开、窗口、性能与科学精度分别验收。
 
-当前本地可靠性载荷的 217 passed / 113 subtests passed 及相机／重建原生脚本窗口检查只适用于该未发布载荷；不能改记为公开 ZIP 的完整安装或性能验收。详细来源和剩余限制见[发布状态](发布状态与验证范围.md)与[实现维护](../../blender_frontend/README.md)。
+公开 0.3.21 ZIP 的匹配载荷已通过隔离安装、宿主与后台软件、原生相机及几何／同源重建脚本窗口检查。当前日常安装的 173 文件与公开 ZIP 一致，新进程启动核对 PASS，见[日常安装核对](../../publication/daily-installation.json)。窗口检查不代表实体鼠标输入、完整片段性能、长期运行或科学精度验收。详细来源和剩余限制见[发布状态](发布状态与验证范围.md)与[实现维护](../../blender_frontend/README.md)。

@@ -11,14 +11,14 @@
 
 项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)，包含当前前端、后端、重建研究、测试和配套文档。NREL 的 [v0.3.21 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.21) 提供专用扩展 ZIP；安装时使用 `wfrl_blender-0.3.21.zip`。源码提交、构建 ZIP 与本机安装分别识别，GitHub 自动 Source code 不作为扩展安装包。
 
-开发机日常扩展 `bl_ext.user_default.wfrl_blender` 的已核对载荷标识为 **LOCAL_UNPUBLISHED_REVISION**，manifest 为 `0.3.20+1`，包含相机异常资源清理与同源重建稳定轮询。公开 0.3.21 包含当前扩展侧的可靠性与保护实现；项目启动器、重建求解器和构建工具使用独立项目源码，不随扩展 ZIP 安装。发布不会自动升级日常安装。
+开发机日常扩展 `bl_ext.user_default.wfrl_blender` 使用公开 **0.3.21** 载荷，173 个安装文件与正式 ZIP 匹配，新进程加载与启用状态检查通过，见[当前安装核对](publication/daily-installation.json)。项目启动器、重建求解器和构建工具使用独立项目源码，不随扩展 ZIP 安装；源码同步与公开发布不会自动升级日常安装。
 
 | 对象 | manifest | 身份 |
 | --- | --- | --- |
 | 公开 NREL ZIP | `0.3.21` | 173 文件、99,016,888 bytes；上传前 SHA-256 与[交付身份](publication/blender-0.3.21.json)见[发布状态](docs/blender/发布状态与验证范围.md) |
-| 当前开发机日常安装对应 ZIP | `0.3.20+1` | 173 文件；本地 SHA-256 `c7a085b5dcd76163b7589f014f706231d882251423e3281e268495b84b6b68c6`；未发布 |
+| 当前开发机日常安装对应 ZIP | `0.3.21` | 与公开 NREL ZIP 匹配；SHA-256 `ac52fc91e6373357dcc033b257b12231dfdf2f78d578c6fbe2e5190177cae9bd`；[173 文件安装核对](publication/daily-installation.json) |
 
-身份、[发布核对](docs/blender/发布状态与验证范围.md#软件验证的适用对象)与[本地验证摘要](outputs/frontend-reliability-20261011-a01/final-verification.json)的适用范围见[发布状态与验证范围](docs/blender/发布状态与验证范围.md)。同一版本号不证明内容相同；升级后完全重启 Blender。
+身份、[发布核对](docs/blender/发布状态与验证范围.md#软件验证的适用对象)与[当前安装核对](publication/daily-installation.json)的适用范围见[发布状态与验证范围](docs/blender/发布状态与验证范围.md)。同一版本号不证明内容相同；升级后完全重启 Blender。
 
 ## 主要能力
 
@@ -56,7 +56,7 @@ GW184 使用[独立包操作说明](docs/blender/GW184三相机与缺陷编辑�
 
 当前源码验收为 **前端 726 passed / 3 skipped，后端 837 passed / 5 skipped**，跳过条件包括原始 VTP／来源数据缺失、未配置 RTSP 和测试环境依赖；其范围与资源身份见[分发说明](docs/PUBLICATION.md#证据身份与限制)。该源码结果不作为既有公开 ZIP 或日常安装的重复验收。
 
-公开 0.3.21 ZIP 的检查及适用范围见[发布状态](docs/blender/发布状态与验证范围.md#软件验证的适用对象)。开发机日常 0.3.20+1 未发布载荷的 **217 passed / 113 subtests passed**、隔离安装及日常安装原生窗口检查只适用于该本地载荷；窗口操作由 Blender 脚本执行，不是实体鼠标或显示器扫描验收。
+公开 0.3.21 ZIP 的检查及适用范围见[发布状态](docs/blender/发布状态与验证范围.md#软件验证的适用对象)。日常安装核对覆盖 173 文件一致性、持久启用和新进程模块加载；公开包的原生窗口证据由 Blender 脚本执行，不是实体鼠标或显示器扫描验收。
 
 同源纹理是 **SAME_SOURCE_SIMULATION**：601 个 10 Hz 保存样本对应 117–177 s，60 Hz 时间轴每 6 帧保持一个样本；独立 `synth_tex` 是另一来源的 120 样本、0–11.9 s。放大与增强不会补出未观测表面。两者的几何／纹理仍为 **NOT_ACCEPTED**，图集模糊、条带、接缝和叶尖错贴限制保留。
 

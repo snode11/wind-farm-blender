@@ -25,7 +25,7 @@ MAPPO · 60 秒是随包柔性结果回放，离线查看不需要 Bridge、FAST
 - 分别核对工作区源码、构建 ZIP、公开附件和实际安装目录。Blender 兼容版本与扩展版本读取 blender_manifest.toml（本地文件：`blender_frontend/wfrl_blender/blender_manifest.toml`）；包身份核对 `build-info.json`、SHA-256 与 inventory，不以版本字符串推定载荷一致。
 - 日常启动器加载 `bl_ext.user_default.wfrl_blender`；隔离验证使用 `bl_ext.wfrl_frontend.wfrl_blender`。以实际 `addon.__file__` 和加载环境为准，源码或资源修改不会自动更新安装版；安装后须重启 Blender。
 - `frontend_diagnostics.py` 提供实际模块、目录、构建身份和数据来源。其默认关闭的近 2 秒视口采样仅用于排障，不能替代完整片段性能验收。
-- 发布身份按[发布状态与验证范围](../../../docs/blender/发布状态与验证范围.md)及对应包证据核对。本地可靠性包的[验证文件](../../../outputs/frontend-reliability-20261011-a01/final-verification.json)标为 `LOCAL_UNPUBLISHED_REVISION`，与公开附件可使用同一版本号；验证结论只归属于证据指向的载荷。GitHub 自动 Source code 归档不证明与安装 ZIP 对应。
+- 发布身份按[发布状态与验证范围](../../../docs/blender/发布状态与验证范围.md)及对应包证据核对；当前日常安装身份见[安装核对](../../../publication/daily-installation.json)。验证结论只归属于证据指向的载荷与范围，同一版本号不证明载荷相同。GitHub 自动 Source code 归档不证明与安装 ZIP 对应。
 
 ## 按功能定位
 

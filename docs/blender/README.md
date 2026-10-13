@@ -1,6 +1,6 @@
 # Blender 文档分类
 
-公开 NREL 安装版为 **0.3.21**，使用 173 文件专用扩展 ZIP；项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **LOCAL_UNPUBLISHED_REVISION**，manifest 为 0.3.20+1。GW184 为 **0.4.0 独立运行包**。身份与证据适用范围见[发布状态](发布状态与验证范围.md)。[返回总索引](../README.md)。
+公开 NREL 安装版为 **0.3.21**，使用 173 文件专用扩展 ZIP；项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **0.3.21**，173 文件与公开 ZIP 一致，新进程启动核对 PASS，见[日常安装核对](../../publication/daily-installation.json)。GW184 为 **0.4.0 独立运行包**。身份与证据适用范围见[发布状态](发布状态与验证范围.md)。[返回总索引](../README.md)。
 
 ## 当前操作和功能
 

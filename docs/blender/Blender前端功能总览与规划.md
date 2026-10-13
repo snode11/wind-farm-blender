@@ -8,10 +8,10 @@ WFRL Blender 是风场仿真的三维观察与操作工作台，提供结构与�
 | --- | --- |
 | 公开 NREL 扩展 | **0.3.21**；[专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.21/wfrl_blender-0.3.21.zip)，手动 Install from Disk 并重启；包身份与验证范围见[发布状态](发布状态与验证范围.md) |
 | 项目源码 | [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)；当前前端、后端、研究、测试及文档，与既有公开 ZIP 和日常安装分别识别 |
-| 开发机日常安装 | **LOCAL_UNPUBLISHED_REVISION**，manifest 为 `0.3.20+1`，包含相机异常清理与同源重建稳定轮询修订；与公开 ZIP 载荷不同 |
+| 开发机日常安装 | **0.3.21**，实际模块 `bl_ext.user_default.wfrl_blender`；173 文件与公开 ZIP 一致，新进程启动核对 PASS |
 | GW184 | **0.4.0 独立运行 ZIP**，合成刚性模型、固定三相机与六类缺陷；完整解压运行，配置不与 NREL 混用 |
 
-公开 0.3.21 ZIP 的上传前 SHA-256 与验证身份见[发布状态与验证范围](发布状态与验证范围.md)。本地未发布 ZIP 为 `c7a085b5dcd76163b7589f014f706231d882251423e3281e268495b84b6b68c6`。当前日常模块 `bl_ext.user_default.wfrl_blender` 的 173 文件与本地包匹配；发布不会自动升级该安装，安装后须完全重启 Blender。
+公开 0.3.21 ZIP 的上传前 SHA-256 与验证身份见[发布状态与验证范围](发布状态与验证范围.md)。当前日常安装的载荷与新进程核对见[日常安装核对](../../publication/daily-installation.json)；源码与公开发布不会自动更新实际安装，升级扩展后须完全重启 Blender。
 
 | 功能状态 | 含义 |
 | --- | --- |
@@ -22,7 +22,7 @@ WFRL Blender 是风场仿真的三维观察与操作工作台，提供结构与�
 
 公开包的统一入口为 **N → MAPPO → 打开几何重建示例…**，在同一完整风机分屏切换几何／同源纹理；默认三相机复位、三机柔性回放、缺陷编辑、双束／S1、TLS 和旧 B2 保留。公开 0.3.21 会独立清理损坏相机观察资源并恢复预览，稳定重建刷新复用已验证绑定；身份、来源、清单或撤销状态变化时重新校验，不重复设置用户视图。
 
-当前日常 0.3.20+1 未发布载荷为 **217 passed / 113 subtests passed**，隔离／日常安装后台与原生脚本窗口检查通过；暂停刷新 20 次完整扫描／重绑定均为 0，载荷及对象身份保持。这些证据只属于该本地载荷；公开 0.3.21 ZIP 的检查范围见[发布状态](发布状态与验证范围.md#软件验证的适用对象)。测试、安装、窗口、性能、科学精度与现场接受分别判定。
+公开 0.3.21 ZIP 的宿主结果为 **326 passed / 189 subtests passed**，1 项因未分发原始 VTP 跳过；匹配载荷的隔离安装、后台软件、GPU PNG 采集、原生相机生命周期，以及几何／同源重建窗口检查通过。当前日常安装的文件身份与新进程启动另行核对；具体范围见[发布状态](发布状态与验证范围.md#软件验证的适用对象)。测试、安装、窗口、性能、科学精度与现场接受分别判定。
 
 几何／纹理 **NOT_ACCEPTED**、0.2 mm 叶尖 **FAILED_GATE**、雷达 **REVIEW_ONLY / PENDING_ACCEPTANCE** 保持。Windows/Linux、稳定 FPS、完整片段性能、长期运行、现场精度和安全保护未验收。
 
@@ -649,7 +649,7 @@ G 的 `VISIBLE/PARTIAL`、投影宽度和候选最佳帧是理想投影与遮挡
 
 ### 10.1 展示默认物理回放
 
-需要同源纹理对照时，安装 0.3.18 ZIP 并重启，按 **N → MAPPO → 加载 MAPPO · 60 秒 → 同源纹理同步对照**；原几何与独立合成入口按F09分别使用。下列步骤用于普通三机回放。
+需要同源纹理对照时，安装 0.3.21 ZIP 并重启，按 **N → MAPPO → 打开几何重建示例… → 切换到同源纹理对照**；原几何与独立合成入口按F09分别使用。下列步骤用于普通三机回放。
 
 1. 加载“MAPPO · 60 秒”，确认数据来源和当前机组。
 2. 在全场与单机视角之间切换，说明机组结构和柔性运动。
@@ -679,7 +679,7 @@ G 的 `VISIBLE/PARTIAL`、投影宽度和候选最佳帧是理想投影与遮挡
 | --- | --- |
 | [前端操作](../../前端readme.md)、[用户手册](用户使用手册.md)、[安装](INSTALL.md) | 当前入口、数据语义、后端与输出操作 |
 | [发布状态](发布状态与验证范围.md)、[公开 ZIP 核对](发布状态与验证范围.md#软件验证的适用对象) | 公开包、源码、当前日常安装、哈希及验证边界 |
-| [本地可靠性摘要](../../outputs/frontend-reliability-20261011-a01/final-verification.json)、[安装核对](../../outputs/frontend-reliability-20261011-a01/daily-install-verification.json) | LOCAL_UNPUBLISHED_REVISION 的 217／113、173 文件和脚本窗口检查 |
+| [公开包验证身份](../../publication/blender-0.3.21.json)、[日常安装核对](../../publication/daily-installation.json) | 公开 0.3.21 的软件／窗口范围；日常安装 173 文件一致与新进程启动核对 |
 | [三相机](T1三相机使用说明.md)、[NREL 缺陷](NREL缺陷编辑器.md)、[Blade Recon](BladeRecon可视化使用说明.md) | 模块操作与限制 |
 | [GW184 指南](GW184三相机与缺陷编辑器.md)、[独立项目](../../projects/gw184-single/README.md) | 独立模型、固定相机、缺陷和视频任务 |
 | [材料点研究](../../blade_recon0.2/docs/材料点对应实验报告_2026-10-11.md)、[表面研究入口](../../research/blade-surface/README.md) | 独立协议、失败门槛及数据可恢复性 |

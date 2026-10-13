@@ -2,7 +2,7 @@
 
 本页面向 **Blender 5.2+** 的 NREL 前端操作。公开安装版为 **0.3.21**（Release 标签 `v0.3.21`），安装使用专用 ZIP；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。GW184 **0.4.0** 是独立运行包，模型、配置和入口与 NREL 分开。
 
-开发机日常安装的已核对载荷标识为 **LOCAL_UNPUBLISHED_REVISION**，manifest 为 `0.3.20+1`，包含相机异常清理与同源重建稳定轮询。当前分支源码、日常安装与公开附件载荷分别识别；具体 SHA-256、[安装来源及验证范围见当前发布状态](docs/blender/发布状态与验证范围.md)。相同版本号不能替代载荷核对。
+开发机日常安装使用公开 **0.3.21** 载荷，实际模块为 `bl_ext.user_default.wfrl_blender`；173 文件与正式 ZIP 匹配，新进程加载与启用状态检查通过，见[当前安装核对](publication/daily-installation.json)。当前分支源码、日常安装与公开附件分别识别；具体 SHA-256、[安装来源及验证范围见当前发布状态](docs/blender/发布状态与验证范围.md)。相同版本号不能替代载荷核对。
 
 公开用户从 [NREL 0.3.21 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.21) 下载 [wfrl_blender-0.3.21.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.21/wfrl_blender-0.3.21.zip)，使用 Install from Disk 手动安装并重启。GitHub 自动 Source code 用于源码查看与构建，不作为扩展安装包。[GW184 指南](docs/blender/GW184三相机与缺陷编辑器.md) · [安装说明](docs/blender/INSTALL.md) · [实现与维护](blender_frontend/README.md) · [当前待实施要求](前端更新计划.md)。
 
@@ -193,7 +193,7 @@ T1 Down 和三相机观察都使用 Blender 相机视图。三相机的价值在
 
 公开 0.3.21 ZIP 的 CRC、扩展格式、载荷一致性及全新隔离安装检查通过，173 个安装文件已核对；GPU PNG 采集、原生相机生命周期、几何／同源纹理切换及保存重开的可见窗口检查通过。窗口检查由脚本调用 Blender 原生操作，不代表实体鼠标、完整片段性能或科学精度验收；具体范围见[交付身份](publication/blender-0.3.21.json)。相机默认复位载荷的 78 项宿主与真实面板点击归属其记录的安装来源。
 
-当前本地未发布载荷的 **217 passed / 113 subtests passed**、隔离与日常安装原生相机／重建窗口检查通过；173 个日常安装文件与该本地 ZIP 一致。稳定暂停刷新 20 次无完整扫描或重绑定，载荷及对象身份保持。这些结果仅属于该本地载荷，窗口由脚本执行原生操作，不是实体鼠标、显示器扫描或 FPS 验收。身份与[验证摘要](outputs/frontend-reliability-20261011-a01/final-verification.json)的适用范围见[发布状态](docs/blender/发布状态与验证范围.md)。
+当前日常 **0.3.21** 安装的 173 文件与正式 ZIP 一致，持久启用、实际模块路径、原生相机操作符注册及新进程加载检查通过，见[安装核对](publication/daily-installation.json)。该检查只覆盖安装身份和后台启动；公开包的软件与窗口检查按[发布状态](docs/blender/发布状态与验证范围.md)中的既有证据使用，不作为日常安装的完整窗口、FPS 或长期稳定性复测。
 
 完整完成、超时、中止和错误须分别判断。POST_PIXEL 是视口绘制回调，60 Hz 是时间映射；稳定 30／60 FPS、完整片段性能、长期运行和 Windows/Linux 尚未验收。原因未定的停止异常、控制台原生 SIGSEGV 与退出内存诊断仍构成验证限制。
 
