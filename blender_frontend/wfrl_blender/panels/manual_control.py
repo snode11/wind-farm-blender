@@ -40,13 +40,21 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
         if all_target:
             layout.label(text='编辑仅同步当前字段', icon='INFO')
             if mixed:
-                layout.label(text='多值项输入框显示 T1 数值')
+                layout.label(text='* 表示多值，输入框显示 T1')
+
+        presets = layout.row(align=True)
+        for preset, label in (('BLADE_DOWN', '叶片1朝下'), ('BLADE_SIDE', '叶片1侧向'), ('FEATHER', '顺桨90°')):
+            presets.operator('wfrl.manual_pose_preset', text=label).preset = preset
+        layout.prop(scene, 'wfrl_manual_step_deg')
 
         def draw_property(parent, field, *, text=None, slider=False):
             row = parent.row(align=True)
-            row.prop(target, field, text=text or target.bl_rna.properties[field].name, slider=slider)
-            if field in mixed:
-                row.label(text='多值')
+            label = text or target.bl_rna.properties[field].name
+            row.prop(target, field, text=label + (' *' if field in mixed else ''), slider=slider)
+            if field.endswith('_deg'):
+                for sign, icon in ((-1, 'REMOVE'), (1, 'ADD')):
+                    operator = row.operator('wfrl.manual_pose_nudge', text='', icon=icon)
+                    operator.field, operator.delta = field, sign * scene.wfrl_manual_step_deg
 
         pose = layout.column(align=True)
         draw_property(pose, 'yaw_deg', slider=True)
@@ -55,9 +63,11 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
             pose.label(text='修改此项会覆盖独立桨距', icon='INFO')
         draw_property(pose, 'rpm', slider=True)
         draw_property(pose, 'individual_pitch')
-        if target.individual_pitch:
+        if all(entry.individual_pitch for entry in entries):
             for index in range(1, 4):
                 draw_property(pose, f'pitch_b{index}_deg', slider=True)
+        elif any(entry.individual_pitch for entry in entries):
+            pose.label(text='桨距模式不同，可选择单台编辑', icon='INFO')
         angle = layout.column()
         angle.enabled = not any(entry.running and entry.rpm > 0 for entry in entries)
         draw_property(angle, 'azimuth_deg', slider=True)
@@ -75,9 +85,31 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
         row = layout.row(align=True)
         row.operator('wfrl.manual_action', text='停转', icon='SNAP_FACE').action = 'STOP'
         row.operator('wfrl.manual_action', text='复位', icon='LOOP_BACK').action = 'RESET'
-        for entry in entries:
+        if all_target:
+            header, body = layout.panel('wfrl_manual_actual_values', default_closed=False)
+            header.label(text='三机实际参数')
+            if body:
+                for entry in entries:
+                    box = body.box()
+                    state = '运行中' if entry.running and entry.rpm > 0 else '已暂停'
+                    box.label(text=f'{entry.turbine_id}  ·  {state}  ·  {entry.rpm:.2f} RPM')
+                    box.label(text=f'朝向 {entry.yaw_deg:.1f}°  ·  叶轮 {entry.azimuth_deg:.1f}°')
+                    if entry.individual_pitch:
+                        pitches = ' / '.join(f'{getattr(entry, f"pitch_b{i}_deg"):.1f}°' for i in range(1, 4))
+                        box.label(text=f'独立桨距  {pitches}')
+                    else:
+                        box.label(text=f'统一桨距  {entry.pitch_deg:.1f}°')
+        else:
+            entry = entries[0]
             state = '运行中' if entry.running and entry.rpm > 0 else '已暂停'
             layout.label(text=f'{entry.turbine_id}  {state}  ·  {entry.rpm:.2f} RPM')
+        header, body = layout.panel('wfrl_manual_pose_files', default_closed=False)
+        header.label(text='姿态文件')
+        if body:
+            row = body.row(align=True)
+            row.operator('wfrl.manual_pose_export', text='保存三机…', icon='EXPORT')
+            row.operator('wfrl.manual_pose_import', text='载入所选…', icon='IMPORT')
+            body.label(text='按机组编号载入，保持暂停')
         layout.separator()
         layout.label(text='刚性运动示意 · 不计算功率或载荷', icon='INFO')
 

@@ -213,6 +213,68 @@ class ManualControlState(unittest.TestCase):
                                   before[turbine_id][3], before[turbine_id][4]))
                 self.assertBladePitch(entry, (24.0,) * 3)
 
+    def configure_mixed_pitch_batch(self):
+        for index, entry in enumerate(self.entries.values(), 1):
+            entry.yaw_deg, entry.azimuth_deg = index * 11.0, index * 13.0
+            entry.pitch_deg = index * 5.0
+            entry.rpm = (0.0, 6.0, 9.0)[index - 1]
+        t2 = self.entries['T2']
+        t2.individual_pitch = True
+        for index, pitch in enumerate((3.0, 9.0, 21.0), 1):
+            setattr(t2, f'pitch_b{index}_deg', pitch)
+        self.scene.wfrl_manual_target = 'ALL'
+        self.assertEqual(self.action('START'), {'FINISHED'})
+        self.assertEqual(tuple(entry.running for entry in self.entries.values()), (False, True, True))
+        return parameters(self.scene)
+
+    def test_batch_individual_pitch_enable_preserves_existing_independent_values(self):
+        before = self.configure_mixed_pitch_batch()
+        self.scene.wfrl_manual_batch.individual_pitch = True
+        expected = {'T1': (5.0,) * 3, 'T2': (3.0, 9.0, 21.0), 'T3': (15.0,) * 3}
+        after = parameters(self.scene)
+        for turbine_id, entry in self.entries.items():
+            with self.subTest(turbine=turbine_id):
+                self.assertTrue(entry.individual_pitch)
+                self.assertEqual(after[turbine_id][:5], before[turbine_id][:5])
+                self.assertEqual(after[turbine_id][6:], expected[turbine_id])
+                self.assertBladePitch(entry, expected[turbine_id])
+
+    def test_repeated_batch_individual_pitch_enable_preserves_values(self):
+        self.configure_mixed_pitch_batch()
+        for index, entry in enumerate(self.entries.values(), 1):
+            entry.individual_pitch = True
+            for blade, pitch in enumerate((index * 2.0, index * 4.0, index * 8.0), 1):
+                setattr(entry, f'pitch_b{blade}_deg', pitch)
+        before = parameters(self.scene)
+        for repeat in range(2):
+            self.scene.wfrl_manual_batch.individual_pitch = True
+            with self.subTest(repeat=repeat):
+                self.assertEqual(parameters(self.scene), before)
+                for turbine_id, entry in self.entries.items():
+                    self.assertBladePitch(entry, before[turbine_id][6:])
+
+    def test_batch_individual_pitch_reenable_initializes_current_collective(self):
+        self.configure_mixed_pitch_batch()
+        before = parameters(self.scene)
+        self.scene.wfrl_manual_batch.individual_pitch = False
+        for turbine_id, entry in self.entries.items():
+            with self.subTest(check='disabled', turbine=turbine_id):
+                self.assertFalse(entry.individual_pitch)
+                self.assertEqual(parameters(self.scene)[turbine_id][:5], before[turbine_id][:5])
+                self.assertEqual(parameters(self.scene)[turbine_id][6:], before[turbine_id][6:])
+                self.assertBladePitch(entry, (entry.pitch_deg,) * 3)
+        for index, entry in enumerate(self.entries.values(), 1):
+            entry.pitch_deg = index * 7.0
+            entry.pitch_b2_deg = index * 3.0
+        before = parameters(self.scene)
+        self.scene.wfrl_manual_batch.individual_pitch = True
+        for turbine_id, entry in self.entries.items():
+            with self.subTest(check='reenabled', turbine=turbine_id):
+                self.assertTrue(entry.individual_pitch)
+                self.assertEqual(parameters(self.scene)[turbine_id][:5], before[turbine_id][:5])
+                self.assertEqual(parameters(self.scene)[turbine_id][6:], (entry.pitch_deg,) * 3)
+                self.assertBladePitch(entry, (entry.pitch_deg,) * 3)
+
     def test_single_turbine_controls_leave_other_turbines_unchanged(self):
         before = parameters(self.scene)
         before_poses = {tid: pose(self.entries[tid]) for tid in ('T2', 'T3')}

@@ -1,19 +1,24 @@
 """Independent manual turbine state, rigid poses and main-thread motion."""
 import math
+import os
+from pathlib import Path
+import tempfile
 import time
+from dataclasses import replace
 
 import bpy
 from bpy.app.handlers import persistent
+from bpy_extras.io_utils import ExportHelper, ImportHelper
 
 from .manual_motion import RotorClock
+from . import manual_pose
 
 
 DEFAULT_RPM = 9.0
 TICK_SECONDS = 1.0 / 60.0
 IDLE_SECONDS = 0.25
 _POINTER_FIELDS = ('yaw_object', 'rotor_object', 'blade1_object', 'blade2_object', 'blade3_object')
-_POSE_FIELDS = ('yaw_deg', 'pitch_deg', 'rpm', 'azimuth_deg', 'individual_pitch',
-                'pitch_b1_deg', 'pitch_b2_deg', 'pitch_b3_deg')
+_POSE_FIELDS = manual_pose.POSE_FIELDS
 _CLOCKS = {}
 _updating = False
 _registered = False
@@ -238,6 +243,8 @@ def _batch_update(field):
             return
         value = getattr(batch, field)
         for entry in scene.wfrl_manual_turbines:
+            if field == 'individual_pitch' and entry.individual_pitch == value:
+                continue
             setattr(entry, field, value)
         sync_batch(scene)
     return changed
@@ -269,6 +276,58 @@ def mixed_fields(scene):
     return [field for field in _POSE_FIELDS
             if any(abs(float(getattr(entry, field)) - float(getattr(entries[0], field))) > 1e-4
                    for entry in entries[1:])]
+
+
+def pose_snapshot(scene, *, now=None):
+    """Capture all turbine parameters at one wall-clock instant."""
+    now = time.monotonic() if now is None else now
+    poses = {}
+    for entry in scene.wfrl_manual_turbines:
+        values = {field: getattr(entry, field) for field in _POSE_FIELDS}
+        clock = _CLOCKS.get(_entry_key(scene, entry))
+        if entry.running and clock is not None:
+            values['azimuth_deg'] = replace(clock).sample(now)
+        poses[entry.turbine_id] = manual_pose.pose_values(values)
+    return poses
+
+
+def _apply_poses(scene, poses, *, pause=True, now=None):
+    """Validate every target before applying poses and synchronizing its clock."""
+    global _updating
+    valid, reason = validate_scene(scene)
+    if not valid:
+        raise ValueError(reason)
+    entries = {entry.turbine_id: entry for entry in scene.wfrl_manual_turbines}
+    if not poses or not set(poses) <= set(entries):
+        raise ValueError('姿态文件中的风机与当前场景不匹配')
+    checked = {tid: manual_pose.pose_values(values) for tid, values in poses.items()}
+    now = time.monotonic() if now is None else now
+    previous = _updating
+    _updating = True
+    try:
+        for tid, values in checked.items():
+            entry = entries[tid]
+            running = not pause and entry.running and values['rpm'] > 0
+            for field, value in values.items():
+                setattr(entry, field, value)
+            entry.running = running
+            key = _entry_key(scene, entry)
+            _CLOCKS.pop(key, None)
+            if running:
+                _CLOCKS[key] = RotorClock(entry.azimuth_deg, entry.rpm, True, now)
+            _apply_entry(entry)
+    finally:
+        _updating = previous
+    sync_batch(scene)
+    _redraw(scene)
+
+
+def _selected_pose_changes(scene, changes, *, now):
+    poses = pose_snapshot(scene, now=now)
+    result = {}
+    for entry in selected_entries(scene):
+        result[entry.turbine_id] = {**poses[entry.turbine_id], **changes}
+    return result
 
 
 def tick(now=None):
@@ -504,13 +563,150 @@ class WFRL_OT_ManualFocus(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class _ManualPoseTarget:
+    @classmethod
+    def poll(cls, context):
+        return is_manual(context.scene) and bool(selected_entries(context.scene))
+
+
+class WFRL_OT_ManualPosePreset(_ManualPoseTarget, bpy.types.Operator):
+    bl_idname = 'wfrl.manual_pose_preset'
+    bl_label = '应用常用姿态'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    preset: bpy.props.EnumProperty(items=(
+        ('BLADE_DOWN', '叶片1朝下', '暂停所选风机，将叶片1转到叶轮盘下方，保留桨距、朝向与转速'),
+        ('BLADE_SIDE', '叶片1侧向', '暂停所选风机，将叶片1转到叶轮盘侧方，保留桨距、朝向与转速'),
+        ('FEATHER', '顺桨 90°', '暂停所选风机，关闭分别变桨并将三片桨距设为90°，保留朝向、叶轮角度与转速')))
+
+    def execute(self, context):
+        scene = context.scene
+        try:
+            valid, reason = validate_scene(scene)
+            if not valid:
+                raise ValueError(reason)
+            now = time.monotonic()
+            poses = _selected_pose_changes(scene, manual_pose.preset_changes(self.preset), now=now)
+            _apply_poses(scene, poses, now=now)
+        except (ValueError, ReferenceError, AttributeError) as exc:
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        return {'FINISHED'}
+
+
+class WFRL_OT_ManualPoseNudge(_ManualPoseTarget, bpy.types.Operator):
+    bl_idname = 'wfrl.manual_pose_nudge'
+    bl_label = '微调角度'
+    bl_description = '按各台风机当前值增减角度；角度限于预览范围，叶轮角度循环'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    field: bpy.props.EnumProperty(items=tuple((name, label, '') for name, label in (
+        ('yaw_deg', '机舱朝向'), ('pitch_deg', '统一桨距'), ('azimuth_deg', '叶轮角度'),
+        ('pitch_b1_deg', '叶片1桨距'), ('pitch_b2_deg', '叶片2桨距'), ('pitch_b3_deg', '叶片3桨距'))))
+    delta: bpy.props.FloatProperty(name='增量 °', default=1.0)
+
+    def execute(self, context):
+        scene = context.scene
+        try:
+            valid, reason = validate_scene(scene)
+            if not valid:
+                raise ValueError(reason)
+            entries = selected_entries(scene)
+            if self.field == 'azimuth_deg' and any(entry.running and entry.rpm > 0 for entry in entries):
+                raise ValueError('请先暂停所选风机，再微调叶轮角度')
+            if self.field.startswith('pitch_b') and any(not entry.individual_pitch for entry in entries):
+                raise ValueError('请先为所选风机启用分别变桨')
+            now = time.monotonic()
+            snapshot = pose_snapshot(scene, now=now)
+            poses = {}
+            for entry in entries:
+                values = snapshot[entry.turbine_id]
+                values[self.field] = manual_pose.adjusted_angle(self.field, values[self.field], self.delta)
+                if self.field == 'pitch_deg':
+                    for index in range(1, 4):
+                        values[f'pitch_b{index}_deg'] = values['pitch_deg']
+                poses[entry.turbine_id] = values
+            _apply_poses(scene, poses, pause=False, now=now)
+        except (ValueError, ReferenceError, AttributeError) as exc:
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        return {'FINISHED'}
+
+
+class WFRL_OT_ManualPoseExport(_ManualPoseTarget, bpy.types.Operator, ExportHelper):
+    bl_idname = 'wfrl.manual_pose_export'
+    bl_label = '保存三机姿态'
+    bl_description = '将三台风机的姿态、桨距模式和转速保存为JSON，不保存运行状态'
+    filename_ext = '.json'
+
+    filter_glob: bpy.props.StringProperty(default='*.json', options={'HIDDEN'})
+
+    def execute(self, context):
+        temporary = None
+        try:
+            valid, reason = validate_scene(context.scene)
+            if not valid:
+                raise ValueError(reason)
+            payload = manual_pose.encode_poses(pose_snapshot(context.scene))
+            path = Path(bpy.path.abspath(self.filepath))
+            if not path.name or path.is_dir():
+                raise ValueError('请选择JSON文件位置')
+            with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=path.parent,
+                                             prefix='.' + path.name, suffix='.tmp', delete=False) as stream:
+                temporary = Path(stream.name)
+                stream.write(payload)
+            os.replace(temporary, path)
+        except (OSError, ValueError, ReferenceError, AttributeError) as exc:
+            self.report({'ERROR'}, f'无法保存姿态：{exc}')
+            return {'CANCELLED'}
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
+        self.report({'INFO'}, '三机姿态已保存')
+        return {'FINISHED'}
+
+
+class WFRL_OT_ManualPoseImport(_ManualPoseTarget, bpy.types.Operator, ImportHelper):
+    bl_idname = 'wfrl.manual_pose_import'
+    bl_label = '载入所选姿态'
+    bl_description = '按T1/T2/T3编号恢复所选风机，保持暂停；未选风机保持原状态'
+    bl_options = {'REGISTER', 'UNDO'}
+    filename_ext = '.json'
+
+    filter_glob: bpy.props.StringProperty(default='*.json', options={'HIDDEN'})
+
+    def execute(self, context):
+        try:
+            valid, reason = validate_scene(context.scene)
+            if not valid:
+                raise ValueError(reason)
+            path = Path(bpy.path.abspath(self.filepath))
+            with path.open('r', encoding='utf-8') as stream:
+                contents = stream.read(1024 * 1024 + 1)
+            if len(contents) > 1024 * 1024:
+                raise ValueError('姿态文件过大')
+            poses = manual_pose.decode_poses(contents)
+            ids = [entry.turbine_id for entry in selected_entries(context.scene)]
+            missing = set(ids) - set(poses)
+            if missing:
+                raise ValueError('姿态文件缺少所选风机：' + '、'.join(sorted(missing)))
+            _apply_poses(context.scene, {tid: poses[tid] for tid in ids})
+        except (OSError, ValueError, ReferenceError, AttributeError) as exc:
+            self.report({'ERROR'}, f'无法载入姿态：{exc}')
+            return {'CANCELLED'}
+        self.report({'INFO'}, '所选风机姿态已载入，保持暂停')
+        return {'FINISHED'}
+
+
 CLASSES = (WFRL_ManualTurbine, WFRL_ManualBatch, WFRL_OT_ManualEnter,
-           WFRL_OT_ManualLeave, WFRL_OT_ManualAction, WFRL_OT_ManualFocus)
+           WFRL_OT_ManualLeave, WFRL_OT_ManualAction, WFRL_OT_ManualFocus,
+           WFRL_OT_ManualPosePreset, WFRL_OT_ManualPoseNudge,
+           WFRL_OT_ManualPoseExport, WFRL_OT_ManualPoseImport)
 _HANDLERS = (('load_pre', _before_load), ('load_post', _after_restore),
              ('undo_pre', _before_restore), ('undo_post', _after_restore),
              ('redo_pre', _before_restore), ('redo_post', _after_restore))
 _SCENE_PROPERTIES = ('wfrl_manual_turbines', 'wfrl_manual_batch', 'wfrl_manual_target',
-                     'wfrl_manual_return_scene', 'wfrl_manual_scene')
+                     'wfrl_manual_return_scene', 'wfrl_manual_scene', 'wfrl_manual_step_deg')
 
 
 def register():
@@ -524,6 +720,9 @@ def register():
     bpy.types.Scene.wfrl_manual_batch = bpy.props.PointerProperty(type=WFRL_ManualBatch)
     bpy.types.Scene.wfrl_manual_return_scene = bpy.props.PointerProperty(type=bpy.types.Scene)
     bpy.types.Scene.wfrl_manual_scene = bpy.props.PointerProperty(type=bpy.types.Scene)
+    bpy.types.Scene.wfrl_manual_step_deg = bpy.props.FloatProperty(
+        name='微调步长 °', description='加减按钮按每台风机的当前值调整，不统一已有差异',
+        default=1.0, min=.1, max=15.0, precision=1)
     bpy.types.Scene.wfrl_manual_target = bpy.props.EnumProperty(
         name='控制对象', items=(('T1', 'T1', '控制风机 T1'), ('T2', 'T2', '控制风机 T2'),
                               ('T3', 'T3', '控制风机 T3'), ('ALL', '全部', '只将编辑的参数应用到全部风机')),
