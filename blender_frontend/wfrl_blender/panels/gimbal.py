@@ -46,6 +46,8 @@ def show(context):
     if split_reconstruction.is_reconstruction_view(context.scene, context.space_data):
         raise ValueError('请在左侧 demo 视口控制云台')
     camera = current(context.scene)
+    from ..nacelle_camera import select_output
+    select_output(context.scene, camera)
     space = context.space_data
     if space and space.type == 'VIEW_3D':
         from .custom_cameras import dismiss_for_view_switch

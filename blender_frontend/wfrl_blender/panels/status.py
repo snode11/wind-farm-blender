@@ -13,6 +13,10 @@ class WFRL_PT_connection(bpy.types.Panel):
     bl_category = 'Item'
     bl_order = -101
 
+    @classmethod
+    def poll(cls, context):
+        return context.scene.get("wfrl_scene_kind") != "manual"
+
     def draw(self, context):
         ui = runtime.get_state()
         layout = self.layout

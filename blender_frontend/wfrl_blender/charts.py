@@ -199,7 +199,8 @@ def draw_plot():
     from gpu_extras.batch import batch_for_shader
     context = bpy.context
     scene = context.scene
-    if not getattr(scene, 'wfrl_chart_visible', False) or context.region.type != 'WINDOW':
+    if (scene.get("wfrl_scene_kind") == "manual"
+            or not getattr(scene, 'wfrl_chart_visible', False) or context.region.type != 'WINDOW'):
         return
     scale = max(1., context.preferences.system.ui_scale)
     region_width = context.region.width

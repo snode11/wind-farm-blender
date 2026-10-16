@@ -27,6 +27,8 @@ def build_live_scene(scene):
     from .scene_builder import build_scene
     from .cameras import build_cameras
     display_scene = bpy.context.scene
+    if display_scene.get("wfrl_scene_kind") == "manual":
+        raise ValueError("手动场景不接受后端场景数据")
     selected = getattr(display_scene, "wfrl_selected_turbine", "")
     _cancel_playback(display_scene)
     build_scene(scene)

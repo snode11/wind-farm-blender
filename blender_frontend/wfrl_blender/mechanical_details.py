@@ -28,12 +28,14 @@ def recess_yaw_seal(obj, tower_height):
     obj['wfrl_seal_geometry_revision'] = 1
 
 
-def add_mechanical_details(collection, root, yaw, rotor, prefix, scalars, shell):
+def add_mechanical_details(collection, root, yaw, rotor, prefix, scalars, shell, *, material_factory=None):
     from .scene_builder import _mesh_object, _finish
     from .materials import get_material
 
+    material_for = material_factory or get_material
+
     def part(name, vertices, faces, parent, material='hub', bevel=0):
-        obj = _mesh_object(collection, prefix + '.' + name, vertices, faces, get_material(material))
+        obj = _mesh_object(collection, prefix + '.' + name, vertices, faces, material_for(material))
         obj.parent = parent
         obj['geometry_source'] = 'Illustrative service fitting; presentation only'
         _finish(obj, bevel=bevel)

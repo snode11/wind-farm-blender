@@ -56,12 +56,15 @@ def select_camera(scene, name: str, *, fov_deg: float | None = None, focus: str 
         if not 1.0 <= value <= 179.0:
             raise ValueError('fov_deg must be between 1 and 179')
         import math
-        camera.data.lens = 36.0 / (2.0 * math.tan(math.radians(value) / 2.0))
+        sensor_width = nacelle_camera.SENSOR_WIDTH_MM if camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID else 36.0
+        camera.data.lens = sensor_width / (2.0 * math.tan(math.radians(value) / 2.0))
         camera['fov_deg'] = value
     if focus is not None:
         camera['focus'] = str(focus)
     scene.camera = camera
     scene['wfrl_camera'] = camera.name
+    from .nacelle_camera import select_output
+    select_output(scene, camera)
     return camera
 
 
@@ -160,7 +163,7 @@ def configure_camera(scene, name, fov_deg, pitch_deg, focus='farm'):
         camera.rotation_euler = (target-camera.location).to_track_quat('-Z', 'Y').to_euler()
     camera.data.type = 'PERSP'
     camera.data.sensor_fit = 'HORIZONTAL'
-    camera.data.sensor_width = 36.0
+    camera.data.sensor_width = nacelle_camera.SENSOR_WIDTH_MM if camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID else 36.0
     select_camera(scene, name, fov_deg=fov, focus=focus)
     camera['pitch_deg'] = pitch
     return camera
@@ -427,12 +430,16 @@ def reset_gimbal(camera):
     return aim_gimbal(camera, yaw, pitch, 62)
 
 
-# Metres relative to YawRoot, +X downwind and +Z up. These are optical
-# coordinates for the project's service shell, not NREL mounting-hole data.
-NACELLE_LOCATION = (-1.5, -2.3, 0.0)
-NACELLE_TARGET = (-13.2, -2.3, -60.6)
-# User-selected widest PTZ view, measured in the actual Blender window.
-NACELLE_FOV = 120.0
+from . import nacelle_camera
+from .turbine_geometry import geometry_data, hub_position
+
+# Nominal static location for callers that inspect the packaged NREL datum.
+# Camera construction uses the scene Rotor origin rather than the visible Hub.
+_NACELLE_HUB = hub_position()
+NACELLE_LOCATION = (_NACELLE_HUB[0] + nacelle_camera.HUB_OFFSET_M[0], 0.0,
+                    _NACELLE_HUB[2] - geometry_data()['scalars']['TowerHt']
+                    + nacelle_camera.HUB_OFFSET_M[2])
+NACELLE_FOV = nacelle_camera.HFOV_DEG
 
 
 def nacelle_side_view(camera):
@@ -466,29 +473,50 @@ def restore_nacelle_view(camera):
 
 
 def reset_nacelle_gimbal(camera):
-    """Restore the installed optical centre and fixed clearance composition."""
-    import math
-    from mathutils import Vector
+    """Restore the nominal hub-axis mount and the 8 mm, 59° by 40° view."""
+    import bpy
     if 'wfrl_nacelle_before_side' in camera:
         del camera['wfrl_nacelle_before_side']
-    camera.location = NACELLE_LOCATION
-    direction = Vector(NACELLE_TARGET) - camera.location
-    yaw = math.degrees(math.atan2(direction.y, direction.x))
-    pitch = math.degrees(math.atan2(direction.z, math.hypot(direction.x, direction.y)))
-    camera['gimbal_roll'] = 180.0
-    camera['wfrl_nacelle_view_revision'] = 2
+    root = camera.parent
+    rotor_name = root.name.removesuffix('.YawRoot') + '.Rotor' if root else ''
+    rotor = next((child for child in root.children if child.name == rotor_name), None) if root else None
+    if rotor is None:
+        raise ValueError('NREL nacelle camera requires the mechanical Rotor datum')
+    camera.location = nacelle_camera.mount_location(rotor)
+    camera['gimbal_roll'] = nacelle_camera.ROLL_DEG
+    camera['wfrl_nacelle_view_revision'] = 3
+    camera['wfrl_nacelle_intrinsics'] = nacelle_camera.INTRINSICS_ID
+    camera['mount'] = 'nominal nacelle underside / hub-axis installation'
+    camera['mount_reference'] = rotor.name + ' mechanical origin; no visible Hub offset'
+    camera['mount_coordinate_frame'] = 'YawRoot; +X downwind; +Z up; metres'
+    camera['mount_offset_from_hub_m'] = nacelle_camera.HUB_OFFSET_M
+    camera['mount_location_m'] = tuple(camera.location)
+    camera['mount_nominal_focal_length_mm'] = nacelle_camera.FOCAL_LENGTH_MM
+    camera['mount_nominal_hfov_deg'] = nacelle_camera.HFOV_DEG
+    camera['mount_nominal_vfov_deg'] = nacelle_camera.VFOV_DEG
+    camera['mount_scope'] = 'nominal optical installation; exterior shell fit unverified; no certified bracket'
+    camera['optical_roll_scope'] = '180 deg image orientation; optical axis unchanged'
+    for key in ('bracket_anchor_m', 'bracket_pivot_m', 'bracket_length_m'):
+        if key in camera:
+            del camera[key]
+    bracket = bpy.data.objects.get(root.name.removesuffix('.YawRoot') + '.NacelleCameraBracket')
+    if bracket is not None:
+        bpy.data.objects.remove(bracket, do_unlink=True)
     camera.data.shift_x = camera.data.shift_y = 0
-    return aim_gimbal(camera, yaw, pitch, NACELLE_FOV)
+    result = aim_gimbal(camera, nacelle_camera.YAW_DEG, nacelle_camera.PITCH_DEG, NACELLE_FOV)
+    for scene in camera.users_scene:
+        if scene.camera == camera:
+            nacelle_camera.select_output(scene, camera)
+    return result
 
 
 def ensure_nacelle_gimbal(scene, turbine):
-    """Independent, persistent PTZ camera, inheriting nacelle motion once.
+    """Persistent NREL camera, inheriting nacelle motion without rotor spin.
 
-    The short support joins the actual shell surface to the gimbal pivot.
-    It documents a geometric mounting envelope, not a certified bracket.
+    Reset establishes the nominal fixed optical baseline. Manual PTZ persists
+    until reset, and no support geometry implies an externally validated mount.
     """
     import bpy
-    from mathutils import Vector
     root = scene.objects.get(f'WFRL.Turbine.{turbine}.YawRoot')
     shell = scene.objects.get(f'WFRL.Turbine.{turbine}.Nacelle')
     if root is None or shell is None:
@@ -496,12 +524,6 @@ def ensure_nacelle_gimbal(scene, turbine):
     name = f'WFRL.Camera.{turbine}.NacelleGimbal'
     camera = scene.objects.get(name)
     if camera is not None:
-        # Upgrade the former 35-degree default in existing scenes once.
-        # Other saved zoom values, manual aim and the mount remain intact.
-        if camera.get('wfrl_nacelle_view_revision', 1) < 2:
-            if abs(float(camera.get('gimbal_fov', 0)) - 35.0) < 1e-6:
-                aim_gimbal(camera, camera['gimbal_yaw'], camera['gimbal_pitch'], NACELLE_FOV)
-            camera['wfrl_nacelle_view_revision'] = 2
         return camera  # Selecting/reloading must not overwrite manual PTZ.
     camera = bpy.data.objects.new(name, bpy.data.cameras.new(name + '.Data'))
     collection = root.users_collection[0]
@@ -509,39 +531,10 @@ def ensure_nacelle_gimbal(scene, turbine):
     camera.parent = root
     camera.matrix_parent_inverse.identity()
     camera['wfrl_nacelle_camera'] = True
-    camera['mount'] = 'nacelle front lower side / short bracket / geometric demonstration'
-    camera['mount_coordinate_frame'] = 'YawRoot; +X downwind; +Z up; metres'
-    camera['mount_location_m'] = NACELLE_LOCATION
-    camera.data.clip_start, camera.data.clip_end = .02, 30000
+    camera.data.clip_start, camera.data.clip_end = .005, 30000
     camera.data.display_size = .18
     camera.data.show_passepartout = False
     reset_nacelle_gimbal(camera)
-    # A vertical swivel stem ends above the optical centre. Find its shell
-    # attachment from the real mesh instead of an assumed bounding box.
-    pivot = Vector(NACELLE_LOCATION) + Vector((0, 0, .25))
-    found, point, normal, _ = shell.closest_point_on_mesh(shell.matrix_basis.inverted() @ pivot)
-    if not found:
-        bpy.data.objects.remove(camera, do_unlink=True)
-        raise ValueError('Cannot locate the nacelle bracket attachment')
-    anchor = shell.matrix_basis @ point
-    camera['bracket_anchor_m'] = anchor
-    camera['bracket_pivot_m'] = pivot
-    camera['bracket_length_m'] = (pivot - anchor).length
-    camera['mount_scope'] = 'model clearance only; no structural certification or visual ranging'
-    curve = bpy.data.curves.new(name + '.Bracket.Data', 'CURVE')
-    curve.dimensions = '3D'
-    curve.bevel_depth = .025
-    curve.bevel_resolution = 2
-    spline = curve.splines.new('POLY')
-    spline.points.add(2)
-    for item, xyz in zip(spline.points, (anchor, pivot, Vector(NACELLE_LOCATION) + Vector((0, 0, .12)))):
-        item.co = (*xyz, 1)
-    bracket = bpy.data.objects.new(f'WFRL.Turbine.{turbine}.NacelleCameraBracket', curve)
-    collection.objects.link(bracket)
-    bracket.parent = root
-    from .materials import get_material
-    curve.materials.append(get_material('hub'))
-    bracket['provenance'] = 'Camera support envelope; not radar hardware or certified mount'
     return camera
 
 
@@ -558,25 +551,38 @@ def aim_gimbal(camera, yaw, pitch, fov):
     camera.rotation_euler = (orientation @ Quaternion((0, 0, 1), roll)).to_euler('XYZ')
     camera.data.type = 'PERSP'
     camera.data.sensor_fit = 'HORIZONTAL'
-    camera.data.sensor_width = 36
-    camera.data.lens = 36 / (2 * math.tan(math.radians(fov) / 2))
+    sensor_width = nacelle_camera.SENSOR_WIDTH_MM if camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID else 36
+    camera.data.sensor_width = sensor_width
+    if camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID:
+        camera.data.sensor_height = nacelle_camera.SENSOR_HEIGHT_MM
+    camera.data.lens = sensor_width / (2 * math.tan(math.radians(fov) / 2))
     camera['gimbal_yaw'], camera['gimbal_pitch'], camera['gimbal_fov'] = yaw, pitch, fov
     return camera
 
 
-def fill_camera_view(area, scene):
-    """Fill the viewport with the camera image, hiding frame and passepartout.
+def apply_nacelle_output(scene, camera):
+    """Select the nominal nacelle gate or restore the previous scene output."""
+    return nacelle_camera.select_output(scene, camera)
 
-    This is viewport overscan only; exported camera framing stays unchanged.
-    """
+
+def fill_camera_view(area, scene):
+    """Fit the calibrated nacelle gate; other demonstration views use overscan."""
     import math
+    import bpy
     space = area.spaces.active
     region = next((r for r in area.regions if r.type == 'WINDOW'), None)
     if region is None or not region.width or not region.height:
         return
     camera = space.camera if space.use_local_camera else scene.camera
+    calibrated = camera is not None and camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID
     if camera:
-        camera.data.show_passepartout = False
+        camera.data.show_passepartout = calibrated
+        if calibrated:
+            camera.data.passepartout_alpha = 1.0
+            if not bpy.app.background:
+                from .native_camera_views import frame_gate
+                frame_gate(scene, {'area': area, 'proxy': camera, 'fx': 1.0, 'fy': 1.0}, region, space)
+            return
     aspect = (scene.render.resolution_x * scene.render.pixel_aspect_x /
               (scene.render.resolution_y * scene.render.pixel_aspect_y))
     base = max(region.width, region.height)

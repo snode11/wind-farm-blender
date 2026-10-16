@@ -51,7 +51,7 @@ def height(x, y):
     return -.25 + corridor * (rolling + ridge * (70 + 45 * math.sin(x * .0017) + 22 * detail))
 
 
-def terrain_shader(material):
+def terrain_shader(material, *, image_loader=None):
     nodes, links = material.node_tree.nodes, material.node_tree.links
     nodes.clear()
     out = nodes.new('ShaderNodeOutputMaterial')
@@ -95,7 +95,9 @@ def terrain_shader(material):
     links.new(coord.outputs['Object'],mapping.inputs[0])
     def image_node(suffix, noncolor=False):
         tex = nodes.new('ShaderNodeTexImage')
-        tex.image = bpy.data.images.load(str(asset / ('rocky_terrain_02_' + suffix + '_2k.jpg')), check_existing=True)
+        path = asset / ('rocky_terrain_02_' + suffix + '_2k.jpg')
+        tex.image = (image_loader(path) if image_loader else
+                     bpy.data.images.load(str(path), check_existing=True))
         if noncolor: tex.image.colorspace_settings.name = 'Non-Color'
         tex.projection = 'BOX'; tex.projection_blend = .3
         links.new(mapping.outputs[0],tex.inputs['Vector'])

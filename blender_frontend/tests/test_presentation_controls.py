@@ -13,7 +13,10 @@ class Camera(dict):
 
 
 class Scene(dict):
-    pass
+    def __init__(self):
+        super().__init__()
+        self.render = SimpleNamespace(resolution_x=1920, resolution_y=1080,
+                                      pixel_aspect_x=1.0, pixel_aspect_y=1.0)
 
 
 class PresentationControlsTests(unittest.TestCase):
@@ -30,6 +33,9 @@ class PresentationControlsTests(unittest.TestCase):
         self.assertIs(select_camera(scene, 'test', fov_deg=90, focus='T2'), camera)
         self.assertAlmostEqual(camera.data.lens, 18)
         self.assertEqual(camera['focus'], 'T2')
+        self.assertIs(scene.camera, camera)
+        self.assertEqual(vars(scene.render), dict(resolution_x=1920, resolution_y=1080,
+                                                 pixel_aspect_x=1.0, pixel_aspect_y=1.0))
         with self.assertRaises(ValueError):
             select_camera(scene, 'missing')
 

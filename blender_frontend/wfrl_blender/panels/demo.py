@@ -58,6 +58,8 @@ class WFRL_OT_SelectCamera(bpy.types.Operator):
         dismiss_for_view_switch(context.scene)
         context.scene.camera = camera
         context.scene["wfrl_camera"] = self.camera_name
+        from ..nacelle_camera import select_output
+        select_output(context.scene, camera)
         if context.screen:
             from .. import split_reconstruction
             for area in context.screen.areas:

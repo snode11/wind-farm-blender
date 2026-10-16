@@ -15,7 +15,8 @@ class WFRL_PT_WorkflowRun(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return runtime.get_state().connection not in {'LOCAL DEMO', 'OFFLINE RESULTS'}
+        return (not runtime.manual_display_active()
+                and runtime.get_state().connection not in {'LOCAL DEMO', 'OFFLINE RESULTS'})
 
     def draw(self, context):
         layout, settings = self.layout, context.scene.wfrl_workflow

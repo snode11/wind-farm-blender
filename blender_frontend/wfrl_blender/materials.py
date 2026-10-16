@@ -39,10 +39,10 @@ SURFACES = {
 }
 
 
-def get_material(name: str):
+def get_material(name: str, *, namespace="WFRL"):
     import bpy
 
-    material = bpy.data.materials.get(f"WFRL.{name}") or bpy.data.materials.new(f"WFRL.{name}")
+    material = bpy.data.materials.get(f"{namespace}.{name}") or bpy.data.materials.new(f"{namespace}.{name}")
     material.diffuse_color = PALETTE.get(name, PALETTE["tower"])
     material.use_nodes = True
     if name in {"wake_line", "wake_pulse", "cinematic_line"}:
@@ -185,12 +185,13 @@ def flow_material(material, *, pulse=False, cinematic=False):
 BLADE_TIP_BANDS = ((.25, 1.0), (1.7, 2.45), (3.15, 3.9))
 
 
-def ensure_blade_tip_markings(objects):
+def ensure_blade_tip_markings(objects, *, object_prefix="WFRL.Turbine.",
+                              material_name="WFRL.BladeTipRed"):
     """Paint three tip bands on new and saved owned blade meshes, once per mesh."""
     import bpy
-    material = bpy.data.materials.get('WFRL.BladeTipRed')
+    material = bpy.data.materials.get(material_name)
     if material is None:
-        material = bpy.data.materials.new('WFRL.BladeTipRed')
+        material = bpy.data.materials.new(material_name)
         material.use_nodes = True
         material.diffuse_color = (.8, .006, .012, 1)
         node = material.node_tree.nodes.get('Principled BSDF')
@@ -200,7 +201,7 @@ def ensure_blade_tip_markings(objects):
         node.inputs['Emission Strength'].default_value = .7
         material['provenance'] = 'Illustrative night-visible tip paint; not a physical light specification'
     for obj in objects:
-        if (obj.type != 'MESH' or not obj.name.startswith('WFRL.Turbine.')
+        if (obj.type != 'MESH' or not obj.name.startswith(object_prefix)
                 or obj.name.rsplit('.', 1)[-1] not in {'Blade1', 'Blade2', 'Blade3'}):
             continue
         mesh = obj.data

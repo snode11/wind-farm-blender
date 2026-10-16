@@ -19,6 +19,7 @@ if not hasattr(bpy.types.Scene, 'wfrl_gimbal_kind'):
     wfrl_blender.register()
 wfrl_blender.load_demo_scene(farm_flex.default_package())
 s=bpy.context.scene
+s.wfrl_flex_show_tip_trails=True
 out=Path(os.environ['WFRL_TEST_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
 area=next(a for a in bpy.context.screen.areas if a.type=='VIEW_3D')
 region=next(r for r in area.regions if r.type=='WINDOW')
@@ -45,25 +46,22 @@ for tid in ('T1','T2','T3'):
     old[tid]=pose(down)
     cam=cameras.ensure_nacelle_gimbal(s,tid)
     assert cam!=down and cam.data!=down.data and cam.parent==down.parent
-    # Existing scenes adopt the new wide default once, without repeatedly
-    # overwriting subsequent manual zoom (including an explicit 35 degrees).
+    # Selecting the camera preserves explicit manual PTZ until reset.
     cameras.aim_gimbal(cam,cam['gimbal_yaw'],cam['gimbal_pitch'],35)
     del cam['wfrl_nacelle_view_revision']
     cameras.ensure_nacelle_gimbal(s,tid)
-    assert cam['gimbal_fov']==120
+    assert cam['gimbal_fov']==35
     cameras.aim_gimbal(cam,cam['gimbal_yaw'],cam['gimbal_pitch'],35)
     assert cameras.ensure_nacelle_gimbal(s,tid)['gimbal_fov']==35
     cameras.aim_gimbal(cam,cam['gimbal_yaw'],cam['gimbal_pitch'],60)
-    del cam['wfrl_nacelle_view_revision']
     assert cameras.ensure_nacelle_gimbal(s,tid)['gimbal_fov']==60
     cameras.reset_nacelle_gimbal(cam)
-    anchor=Vector(cam['bracket_anchor_m']);pivot=Vector(cam['bracket_pivot_m'])
-    shell=s.objects[f'WFRL.Turbine.{tid}.Nacelle']
-    hit,point,normal,_=shell.closest_point_on_mesh(shell.matrix_basis.inverted()@anchor)
-    assert hit and (shell.matrix_basis@point-anchor).length<1e-5
-    assert (Vector(cam.location)-anchor).length>.2
-    assert cam['bracket_length_m']<1.5
-    mounts[tid]={**pose(cam), 'anchor':list(anchor),'pivot':list(pivot),'bracket_m':cam['bracket_length_m']}
+    rotor=s.objects[f'WFRL.Turbine.{tid}.Rotor']
+    np.testing.assert_allclose(cam.location-rotor.location,[1.5,0,-1.5],atol=1e-6)
+    assert cam.data.lens==8 and cam['gimbal_fov']==59
+    assert s.objects.get(f'WFRL.Turbine.{tid}.NacelleCameraBracket') is None
+    mounts[tid]={**pose(cam), 'hub_offset_m':list(cam.location-rotor.location),
+                 'mount_scope':cam['mount_scope']}
     with bpy.context.temp_override(area=area,region=region):
         bpy.ops.wfrl.farm_flex_view(turbine=tid,angle='NACELLE')
         assert gimbal.current(s)==cam

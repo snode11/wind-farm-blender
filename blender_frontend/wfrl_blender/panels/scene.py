@@ -11,6 +11,10 @@ class WFRL_PT_WorkflowScene(bpy.types.Panel):
     bl_category = 'Item'
     bl_options = {'DEFAULT_CLOSED'}
 
+    @classmethod
+    def poll(cls, context):
+        return context.scene.get("wfrl_scene_kind") != "manual"
+
     def draw(self, context):
         layout, settings = self.layout, context.scene.wfrl_workflow
         col = layout.column(); col.enabled = runtime.configuration_editable()

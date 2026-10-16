@@ -43,6 +43,8 @@ def sample(scene):
 
 
 def load(scene, path, demo):
+    if scene.get("wfrl_scene_kind") == "manual":
+        raise ValueError("请先返回原场景，再加载净空回放")
     from . import runtime, _cancel_playback
     if not runtime.configuration_editable():
         raise ValueError('Stop the active backend before loading results')
@@ -157,7 +159,7 @@ def on_load(_):
             try:
                 if scene.get('wfrl_farm_flex_path'):
                     from . import farm_flex, runtime
-                    runtime.enter_result_replay()
+                    runtime.enter_result_replay(scene=scene)
                     candidate = farm_flex.saved_package(scene)
                     expected = scene.get('wfrl_farm_manifest_sha256')
                     if expected:

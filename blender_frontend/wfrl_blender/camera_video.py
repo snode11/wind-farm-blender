@@ -94,16 +94,40 @@ def _nodes(tree):
             l.to_node.name, l.to_socket.name] for l in tree.links]}
 
 
+def output_geometry(camera, width, height):
+    """Calibrated nacelle exports use their optical aspect and requested long edge.
+
+    The nearest even short edge supports H.264 4:2:0 delivery. A small pixel
+    aspect correction preserves the exact gate after integer size rounding.
+    Other cameras retain the explicitly requested square-pixel rectangle.
+    """
+    from . import nacelle_camera as nominal, camera_projection as projection
+    if camera.get('wfrl_nacelle_intrinsics') != nominal.INTRINSICS_ID:
+        return width, height, 1.0, 1.0, 'REQUESTED_RECTANGLE'
+    width = max(width, height)
+    height = max(2, 2 * round(width / (2 * projection.aspect(nominal.HFOV_DEG, nominal.VFOV_DEG))))
+    pixel_x, pixel_y = projection.pixel_scales(nominal.HFOV_DEG, nominal.VFOV_DEG, width, height)
+    return width, height, pixel_x, pixel_y, 'CALIBRATED_GATE_LONG_EDGE_EVEN_SHORT_EDGE'
+
+
 def camera_configuration(scene, camera, args):
+    import bpy
     from mathutils import Matrix
     from .turbine_geometry import geometry_data
     data = camera.data
     local_mount = camera.matrix_parent_inverse @ camera.matrix_basis
     mount = Matrix.Translation((0, 0, geometry_data()['scalars']['TowerHt'])) @ local_mount
-    aspect = args.width / args.height
+    width, height = scene.render.resolution_x, scene.render.resolution_y
+    pixel_x, pixel_y = scene.render.pixel_aspect_x, scene.render.pixel_aspect_y
+    aspect = width * pixel_x / (height * pixel_y)
     horizontal = data.sensor_fit == 'HORIZONTAL' or (data.sensor_fit == 'AUTO' and aspect >= 1)
     effective_width = data.sensor_width if horizontal else data.sensor_height * aspect
     effective_height = data.sensor_width / aspect if horizontal else data.sensor_height
+    matrix = camera.calc_matrix_camera(bpy.context.evaluated_depsgraph_get(),
+        x=width, y=height, scale_x=pixel_x, scale_y=pixel_y)
+    intrinsics = [[width * matrix[0][0] / 2, 0, width * (1 - matrix[0][2]) / 2 - .5],
+                  [0, height * matrix[1][1] / 2, height * (1 + matrix[1][2]) / 2 - .5],
+                  [0, 0, 1]]
     return dict(schema='wfrl.camera-video-camera.v1', camera_name=camera.name,
         turbine_id=args.turbine, camera_mount=[list(row) for row in mount],
         camera_mount_definition='world = turbine_layout @ nacelle_source_transform @ camera_mount',
@@ -111,12 +135,17 @@ def camera_configuration(scene, camera, args):
         lens_mm=data.lens, sensor_width_mm=data.sensor_width, sensor_height_mm=data.sensor_height,
         effective_sensor_width_mm=effective_width, effective_sensor_height_mm=effective_height,
         sensor_fit=data.sensor_fit, shift_x=data.shift_x, shift_y=data.shift_y,
-        pixel_aspect=[scene.render.pixel_aspect_x, scene.render.pixel_aspect_y],
+        pixel_aspect=[pixel_x, pixel_y],
+        hfov_effective_deg=math.degrees(2 * math.atan(1 / matrix[0][0])),
+        vfov_effective_deg=math.degrees(2 * math.atan(1 / matrix[1][1])),
+        projection_matrix_camera=[list(row) for row in matrix], intrinsics_K=intrinsics,
         focus_distance_m=data.dof.focus_distance, aperture_fstop=data.dof.aperture_fstop,
         dof_enabled=data.dof.use_dof, clip_start_m=data.clip_start, clip_end_m=data.clip_end,
         exposure_s=args.exposure_s, shutter='ideal_global_uniform',
         camera_model='ideal perspective; no distortion, sensor noise, autofocus or stabilization',
-        resolution=[args.width, args.height], world={'name': scene.world.name,
+        resolution=[width, height], requested_resolution=[args.width, args.height],
+        resolution_policy=output_geometry(camera, args.width, args.height)[4],
+        world={'name': scene.world.name,
             'color': list(scene.world.color), 'nodes': _nodes(scene.world.node_tree)},
         lights=[dict(name=o.name, type=o.data.type, energy=o.data.energy,
             color=list(o.data.color), matrix_world=[list(row) for row in o.matrix_world],
@@ -129,17 +158,18 @@ def camera_configuration(scene, camera, args):
 
 def prepare_scene(args):
     import bpy
-    import wfrl_blender
+    import importlib
+    addon = importlib.import_module(__package__)
     from . import cameras, farm_flex
     if not bpy.app.background:
         raise RuntimeError('Export requires separate Blender --background process; live scene is protected')
-    wfrl_blender.register()
+    addon.register()
     if args.scene:
         bpy.ops.wm.open_mainfile(filepath=str(Path(args.scene).resolve()))
         scene = bpy.context.scene
         farm_flex.attach(scene, args.package)
     else:
-        wfrl_blender.load_demo_scene(args.package)
+        addon.load_demo_scene(args.package)
         scene = bpy.context.scene
     active = farm_flex._ACTIVE
     if args.turbine not in active.readers:
@@ -205,11 +235,12 @@ def prepare_scene(args):
     scene.cycles.seed = 0
     scene.cycles.use_animated_seed = False
     scene.render.use_motion_blur = False
-    scene.render.resolution_x, scene.render.resolution_y = args.width, args.height
+    width, height, pixel_x, pixel_y, _policy = output_geometry(camera, args.width, args.height)
+    scene.render.resolution_x, scene.render.resolution_y = width, height
     scene.render.resolution_percentage = 100
     scene.render.use_border = False
     scene.render.use_crop_to_border = False
-    scene.render.pixel_aspect_x = scene.render.pixel_aspect_y = 1
+    scene.render.pixel_aspect_x, scene.render.pixel_aspect_y = pixel_x, pixel_y
     scene.render.fps, scene.render.fps_base = args.fps, 1
     scene.render.film_transparent = False
     scene.use_nodes = False
@@ -281,6 +312,7 @@ def _render_package(args):
     args.exposure_s = args.exposure_s if args.exposure_s is not None else .001
     preparation_begun = time.monotonic()
     scene, camera, active, hidden = prepare_scene(args)
+    width, height = scene.render.resolution_x, scene.render.resolution_y
     preparation_seconds = time.monotonic() - preparation_begun
     start = float(active.times[0]) if args.start_s is None else args.start_s
     end = float(active.times[-1]) if args.end_s is None else args.end_s
@@ -303,7 +335,8 @@ def _render_package(args):
             for image in bpy.data.images if image.filepath and not image.packed_file
             and Path(bpy.path.abspath(image.filepath)).is_file()},
         fps=args.fps, start_s=start, end_s=end, frame_count=len(centers),
-        width=args.width, height=args.height, exposure_s=args.exposure_s,
+        width=width, height=height, requested_resolution=[args.width, args.height],
+        resolution_policy=camera_config['resolution_policy'], exposure_s=args.exposure_s,
         exposure_samples=args.exposure_samples, spatial_samples=args.samples,
         integration='uniform midpoint shutter quadrature; scene-linear float EXR then one view transform',
         intermediate_exr_codec=scene.render.image_settings.exr_codec,
@@ -363,7 +396,7 @@ def _render_package(args):
             if previous is None or sha256(target) != previous['sha256']:
                 raise ValueError(f'Unverified or changed master frame: {target}')
             continue
-        accumulation = np.zeros(args.width * args.height * 4, dtype=np.float64)
+        accumulation = np.zeros(width * height * 4, dtype=np.float64)
         times = shutter_times(centers[index], args.exposure_s, args.exposure_samples)
         frame_begun = time.monotonic()
         timings = dict(geometry=0., render_write=0., read_accumulate=0., master_write=0.)
@@ -391,8 +424,8 @@ def _render_package(args):
                 bpy.data.images.remove(linear)
             timings['read_accumulate'] += time.monotonic() - stage
         stage = time.monotonic()
-        integrated = bpy.data.images.new('WFRL.IntegratedLinearExposure', width=args.width,
-                                         height=args.height, alpha=True, float_buffer=True)
+        integrated = bpy.data.images.new('WFRL.IntegratedLinearExposure', width=width,
+                                         height=height, alpha=True, float_buffer=True)
         try:
             integrated.colorspace_settings.name = 'Linear Rec.709'
             integrated.pixels.foreach_set(accumulation.astype(np.float32))

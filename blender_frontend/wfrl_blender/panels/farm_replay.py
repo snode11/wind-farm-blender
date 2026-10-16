@@ -169,6 +169,9 @@ def draw_turbine_views(layout, scene):
     op.turbine = scene.get('wfrl_clearance_turbine', 'T1')
     op.angle = 'NACELLE_SIDE'
     if scene.wfrl_gimbal_kind == 'NACELLE':
+        camera = scene.objects.get(f"WFRL.Camera.{scene.get('wfrl_clearance_turbine', 'T1')}.NacelleGimbal")
+        if camera and camera.get('wfrl_nacelle_intrinsics'):
+            layout.label(text='名义安装与模型相交；外壳待标定', icon='ERROR')
         from . import gimbal
         row = layout.row(align=True)
         row.operator('wfrl.gimbal_mode', text='退出摇杆' if gimbal._ACTIVE else '云台摇杆', icon='ORIENTATION_GIMBAL')
@@ -368,6 +371,8 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
             else:
                 camera=ensure_gimbal(scene,self.turbine);down_gimbal(camera)
         scene.camera=camera;scene['wfrl_camera']=camera.name
+        from ..nacelle_camera import select_output
+        select_output(scene, camera)
         from ..cameras import demo_view_areas
         for area in demo_view_areas(scene):
             area.spaces.active.use_local_camera=False
@@ -426,7 +431,7 @@ class WFRL_PT_FarmFlex(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return True
+        return context.scene.get("wfrl_scene_kind") != "manual"
 
     def draw(self,context):
         self.layout.operator('wfrl.split_recon_open_example', text='打开几何重建示例…', icon='FILE_BLEND')

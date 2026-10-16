@@ -123,10 +123,12 @@ def _cone(collection, name: str, radius1: float, radius2: float, depth: float, m
     return obj
 
 
-def _make_blade(collection, parent, name: str, angle: float):
+def _make_blade(collection, parent, name: str, angle: float, *,
+                mesh_name="WFRL.SharedBlade.SourceLoft", material_factory=None):
     from .turbine_geometry import blade_mesh, geometry_data
 
     bpy = _bpy()
+    material = material_factory or get_material
     # ZYX gives Rx(azimuth) @ Ry(precone), followed by the blade's Rz(pitch).
     # Pitching therefore cannot collapse the three radial span directions.
     pitch_root = bpy.data.objects.new(name + ".PitchRoot", None)
@@ -136,16 +138,18 @@ def _make_blade(collection, parent, name: str, angle: float):
     pitch_root.rotation_euler = (angle, math.radians(geometry_data()["scalars"]["PreCone(1)"]), 0.0)
     # Higher presentation sampling keeps the aerofoil trailing edge and root
     # transition smooth in close shots while preserving the source stations.
-    shared = bpy.data.meshes.get("WFRL.SharedBlade.SourceLoft")
+    shared = bpy.data.meshes.get(mesh_name)
     if shared is None:
         vertices, faces = blade_mesh(subdiv=8, ring_points=96)
-        blade = _mesh_object(collection, name, vertices, faces, get_material("blade"))
-        blade.data.name = "WFRL.SharedBlade.SourceLoft"
+        blade = _mesh_object(collection, name, vertices, faces, material("blade"))
+        blade.data.name = mesh_name
     else:
         blade = bpy.data.objects.new(name, shared)
         _link(collection, blade)
     from .materials import ensure_blade_tip_markings
-    ensure_blade_tip_markings([blade])
+    ensure_blade_tip_markings(
+        [blade], object_prefix=name.rsplit(".Blade", 1)[0] + ".",
+        material_name=mesh_name + ".TipRed" if material_factory else "WFRL.BladeTipRed")
     blade.parent = pitch_root
     blade.rotation_mode = "XYZ"
     _finish(blade, bevel=0.012, smooth=True)
@@ -157,7 +161,7 @@ def _make_blade(collection, parent, name: str, angle: float):
         radius1=1.79,
         radius2=1.771,
         depth=0.18,
-        material=get_material("blade"),
+        material=material("blade"),
     )
     root_fairing.parent = pitch_root
     root_fairing.location = (0, 0, 1.62)
@@ -166,18 +170,21 @@ def _make_blade(collection, parent, name: str, angle: float):
     return blade
 
 
-def _make_turbine(collection, turbine):
+def _make_turbine(collection, turbine, *, object_prefix=None,
+                  blade_mesh_name="WFRL.SharedBlade.SourceLoft", material_factory=None,
+                  include_radar=True):
     from .turbine_geometry import geometry_data, hub_position, tower_mesh
 
     bpy = _bpy()
+    material = material_factory or get_material
     data = geometry_data()
     scalars, shell = data["scalars"], data["shell"]
-    prefix = f"WFRL.Turbine.{turbine.turbine_id}"
+    prefix = object_prefix or f"WFRL.Turbine.{turbine.turbine_id}"
     root = bpy.data.objects.new(prefix, None)
     root.location = (turbine.x_m, turbine.y_m, 0.0)
     _link(collection, root)
     vertices, faces = tower_mesh()
-    tower = _mesh_object(collection, prefix + ".Tower", vertices, faces, get_material("tower"))
+    tower = _mesh_object(collection, prefix + ".Tower", vertices, faces, material("tower"))
     tower.parent = root
     _finish(tower, smooth=True)
     bearing = _primitive(
@@ -186,14 +193,14 @@ def _make_turbine(collection, turbine):
         prefix + ".YawBearing",
         (0, 0, 0),
         (1.98, 1.98, 0.10),
-        get_material("hub"),
+        material("hub"),
     )
     bearing.parent = root
     bearing.location = (0, 0, scalars["TowerHt"])
     _finish(bearing, bevel=0.025, smooth=True)
     bearing["geometry_source"] = "NREL 5MW tower-top yaw bearing presentation detail"
     for z, radius in ((0.28, 3.06), (scalars["TowerHt"] - .08, 1.945)):
-        collar = _primitive(collection, "cylinder", prefix + f".TowerCollar{int(z)}", (0, 0, 0), (radius, radius, 0.16), get_material("hub"))
+        collar = _primitive(collection, "cylinder", prefix + f".TowerCollar{int(z)}", (0, 0, 0), (radius, radius, 0.16), material("hub"))
         collar.parent = root
         collar.location = (0, 0, z)
         _finish(collar, bevel=0.04, smooth=True)
@@ -212,16 +219,16 @@ def _make_turbine(collection, turbine):
         prefix + ".Nacelle",
         nacelle_vertices,
         nacelle_faces,
-        get_material("nacelle"),
+        material("nacelle"),
     )
     nacelle.parent = yaw
     nacelle.location = (shell["nacelle_x_bias"] * scalars["OverHang"], 0, 0.15)
     _finish(nacelle, smooth=True)
-    roof = _primitive(collection, "cube", prefix + ".NacelleRoof", (0, 0, 0), (1.2, 0.82, 0.045), get_material("nacelle"))
+    roof = _primitive(collection, "cube", prefix + ".NacelleRoof", (0, 0, 0), (1.2, 0.82, 0.045), material("nacelle"))
     roof.parent = yaw
     roof.location = (0.65, 0, shell["height"] / 2 + 0.09)
     _finish(roof, bevel=0.025)
-    shaft = _primitive(collection, "cylinder", prefix + ".MainShaft", (0, 0, 0), (0.95, 0.95, 0.7), get_material("hub"))
+    shaft = _primitive(collection, "cylinder", prefix + ".MainShaft", (0, 0, 0), (0.95, 0.95, 0.7), material("hub"))
     shaft.parent = yaw
     shaft.location = (hub_x + 0.7, 0, hub_z - scalars["TowerHt"] - 0.06)
     shaft.rotation_euler[1] = math.radians(90.0 - scalars["ShftTilt"])
@@ -239,7 +246,7 @@ def _make_turbine(collection, turbine):
         prefix + ".Hub",
         (0, 0, 0),
         (radius * 0.62, radius, radius * 0.95),
-        get_material("hub"),
+        material("hub"),
     )
     hub.parent = rotor
     hub.location = (-0.35, 0.0, 0.0)
@@ -257,14 +264,16 @@ def _make_turbine(collection, turbine):
     faces.append(tuple(range(segments)))
     pole=len(verts);verts.append((-3.05,0,0));a=(rings-1)*segments
     faces.extend((a+j,pole,a+(j+1)%segments) for j in range(segments))
-    spinner = _mesh_object(collection,prefix + ".Spinner",verts,faces,get_material("hub"))
+    spinner = _mesh_object(collection,prefix + ".Spinner",verts,faces,material("hub"))
     spinner.parent = rotor
     _finish(spinner, smooth=True)
     spinner["geometry_source"] = "NREL 5MW rotor spinner presentation detail"
     for index in range(3):
-        _make_blade(collection, rotor, prefix + f".Blade{index + 1}", math.radians(120.0 * index))
+        _make_blade(collection, rotor, prefix + f".Blade{index + 1}", math.radians(120.0 * index),
+                    mesh_name=blade_mesh_name, material_factory=material_factory)
     from .mechanical_details import add_mechanical_details
-    add_mechanical_details(collection, root, yaw, rotor, prefix, scalars, shell)
+    add_mechanical_details(collection, root, yaw, rotor, prefix, scalars, shell,
+                           material_factory=material_factory)
     # Yaw pivot stays at tower top. Move only the shell-mounted assembly;
     # rotor/shaft already use the full hub height, and tower fittings stay put.
     for child in list(yaw.children):
@@ -274,7 +283,7 @@ def _make_turbine(collection, turbine):
     # pedestal bridges that gap with overlap; this exterior is illustrative.
     bottom = scalars['Twr2Shft'] + .15 - shell['height'] / 2
     pedestal = _primitive(collection, 'cylinder', prefix + '.YawPedestal',
-                          (0, 0, 0), (1.90, 1.90, (bottom + .10) / 2), get_material('hub'))
+                          (0, 0, 0), (1.90, 1.90, (bottom + .10) / 2), material('hub'))
     pedestal.parent = yaw
     pedestal.location.z = (bottom + .10) / 2 - .05
     _finish(pedestal, bevel=.025, smooth=True)
@@ -285,9 +294,11 @@ def _make_turbine(collection, turbine):
     root["rotor_diameter_m"] = 2 * scalars["TipRad"]
     root["hub_height_m"] = hub_z
     from .clearance_visual import ensure_radar
-    ensure_radar(bpy.context.scene, turbine.turbine_id)
+    if include_radar:
+        ensure_radar(bpy.context.scene, turbine.turbine_id)
     from .materials import refresh_turbine_surfaces
-    refresh_turbine_surfaces(collection.objects)
+    if material_factory is None:
+        refresh_turbine_surfaces(collection.objects)
     return root
 
 
@@ -587,6 +598,8 @@ def clear_scene(collection_name: str = COLLECTION_NAME):
 
 def build_scene(scene: SceneDTO, collection_name: str = COLLECTION_NAME):
     bpy = _bpy()
+    if bpy.context.scene.get("wfrl_scene_kind") == "manual":
+        raise ValueError("手动场景不接受回放或后端场景重建")
     existing = bpy.data.collections.get(collection_name)
     if existing:
         clear_scene(collection_name)

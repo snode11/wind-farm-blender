@@ -126,9 +126,10 @@ def _classes():
     from .operators.workflow import CLASSES as WORKFLOW_CLASSES
     from .panels import scene, channels, run, safety, presentation, training, gimbal, clearance, farm_replay, video_output, custom_cameras, blade_recon
     from .nrel_defects.editor import CLASSES as DEFECT_CLASSES
+    from .panels.manual_control import CLASSES as MANUAL_CLASSES
     return (PREFERENCE_CLASSES + CLASSES + CONNECTION_CLASSES + RUN_CLASSES + STATUS_CLASSES + TELEMETRY_CLASSES
             + WORKFLOW_CLASSES + HISTORY_EXPORT_CLASSES + scene.CLASSES + channels.CLASSES + run.CLASSES
-            + safety.CLASSES + presentation.CLASSES + training.CLASSES + gimbal.CLASSES + clearance.CLASSES + farm_replay.CLASSES + video_output.CLASSES + custom_cameras.CLASSES + blade_recon.CLASSES + DEFECT_CLASSES)
+            + safety.CLASSES + presentation.CLASSES + training.CLASSES + gimbal.CLASSES + clearance.CLASSES + farm_replay.CLASSES + video_output.CLASSES + custom_cameras.CLASSES + blade_recon.CLASSES + DEFECT_CLASSES + MANUAL_CLASSES)
 
 
 def register():
@@ -218,6 +219,8 @@ def register():
     defect_editor.register_properties()
     from . import frontend_diagnostics
     frontend_diagnostics.register()
+    from . import manual_control
+    manual_control.register()
     registered_classes = _classes()
     registered_handlers = ((bpy.app.handlers.load_post, _on_load),)
     registered_properties = tuple(definitions)
@@ -235,7 +238,9 @@ def register():
     split_ui_cleanup = split_reconstruction_ui.unregister
     diagnostics_cleanup = frontend_diagnostics.unregister
     playback_cleanup = playback.unregister
+    manual_cleanup = manual_control.unregister
     def cleanup():
+        manual_cleanup()
         diagnostics_cleanup()
         defect_editor.unregister_properties()
         split_ui_cleanup()
@@ -303,6 +308,8 @@ def unregister():
 def build_demo_geometry():
     """Shared three-turbine geometry, without animation or fabricated telemetry."""
     import bpy
+    if bpy.context.scene.get("wfrl_scene_kind") == "manual":
+        raise ValueError("请先返回原场景，再加载 MAPPO")
     dto = SceneDTO.from_mapping({"name": "mappo_60s", "backend": "demo", "turbine": "nrel5mw", "dt": 1,
         "layout": [{"id": "T1", "x": 0.0, "y": 0.0}, {"id": "T2", "x": 504.0, "y": 0.0}, {"id": "T3", "x": 1008.0, "y": 0.0}],
         "inflow": {"speed": 8.0, "direction": 270.0}})
@@ -321,6 +328,8 @@ def build_demo_geometry():
 
 def load_demo_scene(path=None, *, camera_rig=True):
     import bpy
+    if bpy.context.scene.get("wfrl_scene_kind") == "manual":
+        raise ValueError("请先返回原场景，再加载 MAPPO")
     from . import runtime, farm_flex
     if not runtime.configuration_editable():
         raise ValueError('Stop the active backend before loading MAPPO')

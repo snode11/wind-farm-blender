@@ -40,8 +40,16 @@ def get_state():
     return _state
 
 
-def configuration_editable():
-    return not _pending_command and get_state().allows('configure') and not (_client and _client.progress in {'Connecting', 'Awaiting handshake'})
+def manual_display_active():
+    import sys
+    bpy = sys.modules.get("bpy")
+    scene = getattr(getattr(bpy, "context", None), "scene", None)
+    return bool(scene is not None and hasattr(scene, "get") and scene.get("wfrl_scene_kind") == "manual")
+
+
+def configuration_editable(scene=None):
+    manual = manual_display_active() if scene is None else scene.get("wfrl_scene_kind") == "manual"
+    return not manual and not _pending_command and get_state().allows('configure') and not (_client and _client.progress in {'Connecting', 'Awaiting handshake'})
 
 
 def select_mode(mode):
@@ -93,6 +101,8 @@ def select_mode(mode):
 
 def connect(port):
     global _client, _state
+    if manual_display_active():
+        raise ValueError("请先返回原场景，再连接后端")
     from .transport import TransportClient
     if get_state().connection == 'LOCAL DEMO' and not configuration_editable():
         raise ValueError('Stop the local Demo before connecting to a backend')
@@ -215,6 +225,9 @@ def tick():
     global _pending_command, _pending_lifecycle_sequence, _last_tick, kinematics, _live_scene, _desired_mode, latest_wake
     import bpy
     performance.count("runtime.timer_calls")
+    if _client is not None and manual_display_active():
+        _last_tick = None
+        return 0.05
     now = time.monotonic()
     dt = 0.0 if _last_tick is None else max(0.0, now - _last_tick)
     _last_tick = now
@@ -413,9 +426,9 @@ def register():
         bpy.app.timers.register(tick, first_interval=0.05, persistent=True)
 
 
-def enter_result_replay():
+def enter_result_replay(*, scene=None):
     """Detach a stopped backend and reset transport without a synthetic demo clock."""
-    if not configuration_editable():
+    if not configuration_editable(scene):
         raise ValueError('Stop the active backend before loading results')
     enter_local_demo()
     _state.connection = 'OFFLINE RESULTS'

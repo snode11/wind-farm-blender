@@ -35,7 +35,8 @@ def get_preset(name: str) -> AtmospherePreset:
     return PRESETS[key]
 
 
-def apply_preset(scene, name: str = "clear", *, enabled: bool = True, quality: str = "realtime") -> AtmospherePreset:
+def apply_preset(scene, name: str = "clear", *, enabled: bool = True, quality: str = "realtime",
+                 image_loader=None) -> AtmospherePreset:
     """Apply a preset to Blender scene nodes when Blender is available."""
     preset = get_preset(name)
     if quality not in {"realtime", "render"}:
@@ -72,7 +73,9 @@ def apply_preset(scene, name: str = "clear", *, enabled: bool = True, quality: s
                 import bpy
                 env = nodes.get('WFRL.Atmosphere.HDRI') or nodes.new('ShaderNodeTexEnvironment')
                 env.name = 'WFRL.Atmosphere.HDRI'
-                env.image = bpy.data.images.load(str(Path(__file__).parent / 'assets/landscape/kloofendal_48d_partly_cloudy_puresky_2k.hdr'), check_existing=True)
+                path = Path(__file__).parent / 'assets/landscape/kloofendal_48d_partly_cloudy_puresky_2k.hdr'
+                env.image = (image_loader(path) if image_loader else
+                             bpy.data.images.load(str(path), check_existing=True))
                 links.new(env.outputs['Color'], background.inputs['Color'])
             else:
                 background.inputs["Color"].default_value = preset.world_color

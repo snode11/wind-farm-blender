@@ -35,6 +35,12 @@ assert scene.render.image_settings.exr_codec == 'ZIP'
 assert scene.render.image_settings.color_management == 'FOLLOW_SCENE'
 source = SourceGeometry(args.package)
 config = video.camera_configuration(scene, camera, args)
+assert (args.width, args.height) == (160, 90)
+assert config['resolution'] == [160, 102]
+assert config['requested_resolution'] == [160, 90]
+assert abs(config['hfov_effective_deg'] - 59) < 1e-5
+assert abs(config['vfov_effective_deg'] - 40) < 1e-5
+assert abs(config['effective_sensor_height_mm'] - camera.data.sensor_height) < 1e-6
 mount = np.asarray(config['camera_mount'])
 local = np.asarray(camera.matrix_basis).copy()
 errors = []
@@ -100,6 +106,16 @@ with video.output_lock(output / 'lock-test', args.package): pass
 # Render, resume, reject configuration mixing, and reject corrupted masters.
 first = video.render_package(args)
 assert first['status'] == 'partial' and first['rendered_this_run'] == 1
+manifest = json.loads((output / 'masters/render_manifest.json').read_text())
+metadata = json.loads((output / 'masters/camera.json').read_text())
+assert (manifest['width'], manifest['height']) == (160, 102)
+assert metadata['resolution'] == [160, 102]
+assert abs(metadata['vfov_effective_deg'] - 40) < 1e-5
+image = bpy.data.images.load(str(output / 'masters/master_frames/000000.png'), check_existing=False)
+try:
+    assert tuple(image.size) == (160, 102)
+finally:
+    bpy.data.images.remove(image)
 args.max_frames = None
 second = video.render_package(args)
 assert second['status'] == 'complete' and second['rendered_this_run'] == 1

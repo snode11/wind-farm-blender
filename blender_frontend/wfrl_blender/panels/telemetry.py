@@ -15,7 +15,7 @@ class WFRL_PT_live_telemetry(bpy.types.Panel):
     @classmethod
     def poll(cls, context):
         from .. import farm_flex
-        return not farm_flex.is_active(context.scene)
+        return context.scene.get("wfrl_scene_kind") != "manual" and not farm_flex.is_active(context.scene)
 
     def draw(self, context):
         layout = self.layout
