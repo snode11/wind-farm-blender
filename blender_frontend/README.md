@@ -8,10 +8,10 @@
 | --- | --- |
 | 公开安装包 | [NREL 0.3.22](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.22)；独立风机手动控制、完整风机几何／同源纹理切换、三机柔性回放、默认三相机复位、六类合成缺陷，以及相机清理、稳定刷新、采集与播放保护。 |
 | 项目源码 | [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)；包含当前实现、测试与研究工具。当前分支不等于既有公开 ZIP 或日常安装载荷。 |
-| 本地日常安装 | `bl_ext.user_default.wfrl_blender`，0.3.21 载荷、173 文件；源 ZIP SHA-256 `ac52fc91e6373357dcc033b257b12231dfdf2f78d578c6fbe2e5190177cae9bd`，[安装核对](../publication/daily-installation.json)通过；不包含独立风机手动控制。 |
+| 本地日常安装 | `bl_ext.user_default.wfrl_blender`，0.3.22 载荷、179 文件；源 ZIP SHA-256 `49c791868d77cd094ea6f7ad07ccfe94ad22ad96f05612595b40b354f5723918`，[安装核对](../publication/daily-installation.json)及[新进程检查](../publication/daily-installation-probe.json)通过，包含独立风机手动控制。 |
 | GW184 | [0.4.0 独立运行包](../docs/blender/GW184三相机与缺陷编辑器.md)；184 m 尺寸合成刚性模型、固定三相机和六类缺陷。模型与配置不能直接替代 NREL。 |
 
-日常安装与 0.3.21 正式载荷匹配，包含相机异常清理、同源纹理稳定刷新、扩展内包单次校验、PNG 采集和完整播放判定等实现；构建输出保护属于项目工具。[当前安装核对](../publication/daily-installation.json)覆盖 173 文件摘要、持久启用、实际模块路径和新进程后台启动。其原生脚本窗口证据见[0.3.21 交付身份](../publication/blender-0.3.21.json)，不作为日常安装的完整窗口或性能复测；完整片段、长期运行与跨平台验收仍受限。
+日常安装与 0.3.22 正式载荷匹配。[安装核对](../publication/daily-installation.json)覆盖全部 179 文件，[新进程检查](../publication/daily-installation-probe.json)在主动启用或注册前确认持久启用，并核对实际模块和全部命名空间路径均来自日常扩展根目录。四个手动操作器与实际面板注册、0／6／9 RPM 分别暂停／运行／运行、全部暂停及原场景恢复通过。公开包的隔离环境软件与窗口证据见[0.3.22 交付身份](../publication/blender-0.3.22.json)，不作为日常安装的完整窗口、长期运行或性能复测。
 
 公开包 SHA-256 和匹配验证见[发布状态](../docs/blender/发布状态与验证范围.md)。工作区源码、构建 ZIP、已安装扩展与公开附件分别核对，不能依据版本号推定文件相同。日常启动器加载安装版；发布不会自动升级日常安装，更新安装后需要完全重启 Blender。
 

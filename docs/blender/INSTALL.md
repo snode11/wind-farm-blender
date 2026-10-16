@@ -2,7 +2,7 @@
 
 适用于 Blender **5.2+** 的 NREL 公开扩展 **0.3.22**，包含独立风机手动控制、完整风机几何／同源纹理、精细支撑结构、三相机默认复位、柔性回放、六类合成缺陷、双束／TLS。GW184 **0.4.0** 使用[独立包](GW184三相机与缺陷编辑器.md)。
 
-开发机日常安装为 **0.3.21** 载荷，实际模块 `bl_ext.user_default.wfrl_blender`；173 文件与该版发布 ZIP 一致，新进程启动与启用状态核对 PASS，见[日常安装核对](../../publication/daily-installation.json)。该安装不包含独立风机手动控制。公开包、当前源码分支与实际安装分别识别；SHA-256、模块和软件验证边界见[发布状态](发布状态与验证范围.md)。
+开发机日常安装为 **0.3.22** 载荷，实际模块 `bl_ext.user_default.wfrl_blender`；179 文件与发布 ZIP 一致，持久启用、新进程来源与手动控制后台检查通过，见[日常安装核对](../../publication/daily-installation.json)及[新进程检查](../../publication/daily-installation-probe.json)。公开包、当前源码分支与实际安装分别识别；SHA-256、模块和软件验证边界见[发布状态](发布状态与验证范围.md)。
 
 ## 发布身份与验证
 

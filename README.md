@@ -11,12 +11,12 @@
 
 项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)，包含当前前端、后端、重建研究、测试和配套文档。NREL 的 [v0.3.22 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.22) 提供专用扩展 ZIP；安装时使用 `wfrl_blender-0.3.22.zip`。源码提交、构建 ZIP 与本机安装分别识别，GitHub 自动 Source code 不作为扩展安装包。
 
-开发机日常扩展 `bl_ext.user_default.wfrl_blender` 使用 **0.3.21** 载荷，173 个安装文件与该版正式 ZIP 匹配，新进程加载与启用状态检查通过，见[当前安装核对](publication/daily-installation.json)。该安装不包含独立风机手动控制。项目启动器、重建求解器和构建工具使用独立项目源码，不随扩展 ZIP 安装；源码同步与公开发布不会自动升级日常安装。
+开发机日常扩展 `bl_ext.user_default.wfrl_blender` 使用 **0.3.22** 载荷，179 个安装文件与正式 ZIP 匹配，持久启用、新进程实际模块来源与手动控制检查通过，见[当前安装核对](publication/daily-installation.json)及[新进程检查](publication/daily-installation-probe.json)。项目启动器、重建求解器和构建工具使用独立项目源码，不随扩展 ZIP 安装；源码同步与公开发布不会自动升级日常安装。
 
 | 对象 | manifest | 身份 |
 | --- | --- | --- |
 | 公开 NREL ZIP | `0.3.22` | 文件数、大小、上传前 SHA-256、源码提交及适用验证见[交付身份](publication/blender-0.3.22.json)与[发布状态](docs/blender/发布状态与验证范围.md) |
-| 当前开发机日常安装对应 ZIP | `0.3.21` | 与 0.3.21 正式 ZIP 匹配；SHA-256 `ac52fc91e6373357dcc033b257b12231dfdf2f78d578c6fbe2e5190177cae9bd`；[173 文件安装核对](publication/daily-installation.json) |
+| 当前开发机日常安装对应 ZIP | `0.3.22` | 179 文件与正式 ZIP 匹配；SHA-256 `49c791868d77cd094ea6f7ad07ccfe94ad22ad96f05612595b40b354f5723918`；[安装身份](publication/daily-installation.json)与[新进程检查](publication/daily-installation-probe.json) |
 
 身份、[发布核对](docs/blender/发布状态与验证范围.md#软件验证的适用对象)与[当前安装核对](publication/daily-installation.json)的适用范围见[发布状态与验证范围](docs/blender/发布状态与验证范围.md)。同一版本号不证明内容相同；升级后完全重启 Blender。
 
@@ -57,7 +57,7 @@ GW184 使用[独立包操作说明](docs/blender/GW184三相机与缺陷编辑�
 
 源码检查的命令、依赖、跳过条件与记录范围见[分发说明](docs/PUBLICATION.md#证据身份与限制)及其对应源码快照；各项结果只适用于记录的源码与输入，不作为 0.3.22 ZIP 或日常安装的重复验收。
 
-公开 0.3.22 ZIP 的文件身份与各项验证见[交付身份](publication/blender-0.3.22.json)及[发布状态](docs/blender/发布状态与验证范围.md#软件验证的适用对象)。日常 0.3.21 安装核对覆盖 173 文件一致性、持久启用和新进程模块加载；各包的后台、窗口与软件结果按实际载荷分别引用。
+公开 0.3.22 ZIP 的文件身份与各项验证见[交付身份](publication/blender-0.3.22.json)及[发布状态](docs/blender/发布状态与验证范围.md#软件验证的适用对象)。日常 0.3.22 安装核对覆盖 179 文件一致性、持久启用、新进程模块加载与手动控制后台行为；未据此完成日常安装的完整窗口、长期运行或性能复测。
 
 同源纹理是 **SAME_SOURCE_SIMULATION**：601 个 10 Hz 保存样本对应 117–177 s，60 Hz 时间轴每 6 帧保持一个样本；独立 `synth_tex` 是另一来源的 120 样本、0–11.9 s。放大与增强不会补出未观测表面。两者的几何／纹理仍为 **NOT_ACCEPTED**，图集模糊、条带、接缝和叶尖错贴限制保留。
 

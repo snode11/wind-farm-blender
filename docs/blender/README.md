@@ -1,6 +1,6 @@
 # Blender 文档分类
 
-公开 NREL 安装版为 **0.3.22**，使用[专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.22/wfrl_blender-0.3.22.zip)；项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **0.3.21**，173 文件与 0.3.21 ZIP 一致，新进程启动核对 PASS，见[日常安装核对](../../publication/daily-installation.json)；该安装不包含独立风机手动控制。GW184 为 **0.4.0 独立运行包**。身份与证据适用范围见[发布状态](发布状态与验证范围.md)。[返回总索引](../README.md)。
+公开 NREL 安装版为 **0.3.22**，使用[专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.22/wfrl_blender-0.3.22.zip)；项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **0.3.22**，179 文件与正式 ZIP 一致，持久启用、新进程来源与手动控制后台检查 PASS，见[日常安装核对](../../publication/daily-installation.json)及[新进程检查](../../publication/daily-installation-probe.json)。GW184 为 **0.4.0 独立运行包**。身份与证据适用范围见[发布状态](发布状态与验证范围.md)。[返回总索引](../README.md)。
 
 ## 当前操作和功能
 
@@ -21,7 +21,7 @@
 | 文档 | 阅读范围 |
 | --- | --- |
 | [0.3.22](../../publication/blender-0.3.22.json) | 当前 ZIP、源码提交、文件身份与适用验证范围。 |
-| [0.3.21](../../publication/blender-0.3.21.json) | 日常安装所用 ZIP、173 文件身份与对应软件证据。 |
+| [0.3.21](../../publication/blender-0.3.21.json) | 该版 ZIP、173 文件身份与对应软件证据。 |
 | [0.3.20+1](releases/0.3.20+1发布核对.md) | 该版三相机默认复位载荷、173 文件 ZIP；载荷测试／安装版按钮验证与最终包格式及字节一致性分层记录。 |
 | [0.3.19](releases/0.3.19发布核对.md) | 完整风机几何／同源纹理切换与隔离安装、原生窗口工作流；当版仅发布 ZIP。[当前源结构复用见功能总览](Blender前端功能总览与规划.md)。 |
 | [0.3.18](releases/0.3.18发布核对.md) | 对应标签源码、172 文件 ZIP、源码复建与 CPU 检查；匹配安装 GPU／多窗口及 FAILED_GATE 分层保留。 |

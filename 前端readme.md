@@ -2,7 +2,7 @@
 
 本页面向 **Blender 5.2+** 的 NREL 前端操作。公开安装版为 **0.3.22**（Release 标签 `v0.3.22`），安装使用专用 ZIP；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。GW184 **0.4.0** 是独立运行包，模型、配置和入口与 NREL 分开。
 
-开发机日常安装使用 **0.3.21** 载荷，实际模块为 `bl_ext.user_default.wfrl_blender`；173 文件与该版正式 ZIP 匹配，新进程加载与启用状态检查通过，见[当前安装核对](publication/daily-installation.json)。该安装不包含独立风机手动控制。当前分支源码、日常安装与公开附件分别识别；具体 SHA-256、[安装来源及验证范围见当前发布状态](docs/blender/发布状态与验证范围.md)。相同版本号不能替代载荷核对。
+开发机日常安装使用 **0.3.22** 载荷，实际模块为 `bl_ext.user_default.wfrl_blender`；179 文件与正式 ZIP 匹配，持久启用、新进程实际模块与手动控制后台检查通过，见[当前安装核对](publication/daily-installation.json)及[新进程检查](publication/daily-installation-probe.json)。当前分支源码、日常安装与公开附件分别识别；具体 SHA-256、[安装来源及验证范围见当前发布状态](docs/blender/发布状态与验证范围.md)。相同版本号不能替代载荷核对。
 
 公开用户从 [NREL 0.3.22 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.22) 下载 [wfrl_blender-0.3.22.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.22/wfrl_blender-0.3.22.zip)，使用 Install from Disk 手动安装并重启。GitHub 自动 Source code 用于源码查看与构建，不作为扩展安装包。[GW184 指南](docs/blender/GW184三相机与缺陷编辑器.md) · [安装说明](docs/blender/INSTALL.md) · [实现与维护](blender_frontend/README.md) · [当前待实施要求](前端更新计划.md)。
 
@@ -203,7 +203,7 @@ T1 Down 和三相机观察都使用 Blender 相机视图。三相机的价值在
 
 公开 0.3.22 ZIP 的文件数、大小、SHA-256、源码身份及适用验证项目见[交付身份](publication/blender-0.3.22.json)。安装、宿主、后台与可见窗口结果只适用于记录的载荷；脚本窗口操作不代表实体鼠标、完整片段性能或科学精度验收。相机默认复位载荷的 78 项宿主与真实面板点击归属其记录的安装来源。
 
-当前日常 **0.3.21** 安装的 173 文件与该版正式 ZIP 一致，持久启用、实际模块路径、原生相机操作符注册及新进程加载检查通过，见[安装核对](publication/daily-installation.json)。该检查只覆盖安装身份和后台启动；其软件与窗口证据见[0.3.21 交付身份](publication/blender-0.3.21.json)，不作为日常安装的完整窗口、FPS 或长期稳定性复测。
+当前日常 **0.3.22** 安装的 179 文件与正式 ZIP 一致，持久启用在主动启用或注册前已确认，新进程模块及命名空间来源、四个手动操作器与实际面板注册检查通过，见[安装核对](publication/daily-installation.json)及[新进程检查](publication/daily-installation-probe.json)。手动风机 0／6／9 RPM 启动状态分别为暂停／运行／运行，全部暂停及原场景恢复通过；这些后台检查不作为日常安装的完整窗口、长期运行或性能复测。
 
 完整完成、超时、中止和错误须分别判断。POST_PIXEL 是视口绘制回调，60 Hz 是时间映射；稳定 30／60 FPS、完整片段性能、长期运行和 Windows/Linux 尚未验收。原因未定的停止异常、控制台原生 SIGSEGV 与退出内存诊断仍构成验证限制。
 

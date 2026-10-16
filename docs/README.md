@@ -23,7 +23,7 @@
 | --- | --- |
 | NREL 公开安装包 | **0.3.22**；安装使用 [v0.3.22 专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.22/wfrl_blender-0.3.22.zip)，包身份与适用验证见[交付身份](../publication/blender-0.3.22.json)。 |
 | 项目源码 | [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 包含当前前端、后端、研究、测试与文档；源码分支不等于既有公开安装包或日常安装载荷。 |
-| 本地日常安装 | **0.3.21**，实际模块 `bl_ext.user_default.wfrl_blender`；173 文件与 0.3.21 ZIP 一致，新进程启动核对 PASS，见[日常安装核对](../publication/daily-installation.json)；不包含独立风机手动控制。 |
+| 本地日常安装 | **0.3.22**，实际模块 `bl_ext.user_default.wfrl_blender`；179 文件与正式 ZIP 一致，持久启用、新进程来源及手动控制后台检查 PASS，见[日常安装核对](../publication/daily-installation.json)及[新进程检查](../publication/daily-installation-probe.json)。 |
 | GW184 | **0.4.0 独立解压运行包**，模型、配置和 NREL 扩展分别使用。 |
 | 材料点研究 | Patch **2/8**、Crack **7/8**、跨相机 RGB **0/264**；真实同材料点三维误差 `null`，`FAILED_GATE / NOT_ACCEPTED`；未替换正式 601 样本资产。 |
 | 其他研究门槛 | 叶尖 0.2 mm 门槛 `FAILED_GATE`；雷达 `REVIEW_ONLY / PENDING_ACCEPTANCE`；表面 P2b `FAILED_GATE / REVIEW_ONLY`、主增益 `null`、局部恢复 `NOT_RUN`；独立动态原型 `DY1 NOT PASSED`。 |
