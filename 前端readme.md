@@ -1,14 +1,14 @@
 # NREL 5MW / WFRL 前端使用说明
 
-本页面向 **Blender 5.2+** 的 NREL 前端操作。公开安装版为 **0.3.22**（Release 标签 `v0.3.22`），安装使用专用 ZIP；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。GW184 **0.4.0** 是独立运行包，模型、配置和入口与 NREL 分开。
+本页面向 **Blender 5.2+** 的 NREL 前端操作。公开安装版为 **0.3.24**（Release 标签 `v0.3.24`），安装使用专用 ZIP；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。GW184 **0.4.0** 是独立运行包，模型、配置和入口与 NREL 分开。
 
-开发机日常安装使用 **0.3.22** 载荷，实际模块为 `bl_ext.user_default.wfrl_blender`；179 文件与正式 ZIP 匹配，持久启用、新进程实际模块与手动控制后台检查通过，见[当前安装核对](publication/daily-installation.json)及[新进程检查](publication/daily-installation-probe.json)。当前分支源码、日常安装与公开附件分别识别；具体 SHA-256、[安装来源及验证范围见当前发布状态](docs/blender/发布状态与验证范围.md)。相同版本号不能替代载荷核对。
+开发机日常安装使用 **0.3.24**，实际模块为 `bl_ext.user_default.wfrl_blender`；已有记录中的 180 个安装文件与上传源 ZIP 匹配，见[安装核对](publication/daily-installation.json)及[新进程检查](publication/daily-installation-probe.json)。当前分支源码、日常安装与公开附件分别识别；公开身份见[交付身份](publication/blender-0.3.24.json)，具体[安装来源及验证范围见发布状态](docs/blender/发布状态与验证范围.md)。
 
-公开用户从 [NREL 0.3.22 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.22) 下载 [wfrl_blender-0.3.22.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.22/wfrl_blender-0.3.22.zip)，使用 Install from Disk 手动安装并重启。GitHub 自动 Source code 用于源码查看与构建，不作为扩展安装包。[GW184 指南](docs/blender/GW184三相机与缺陷编辑器.md) · [安装说明](docs/blender/INSTALL.md) · [实现与维护](blender_frontend/README.md) · [当前待实施要求](前端更新计划.md)。
+公开用户从 [NREL 0.3.24 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.24) 下载 [wfrl_blender-0.3.24.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.24/wfrl_blender-0.3.24.zip)，使用 Install from Disk 手动安装并重启。GitHub 自动 Source code 用于源码查看与构建，不作为扩展安装包。[GW184 指南](docs/blender/GW184三相机与缺陷编辑器.md) · [安装说明](docs/blender/INSTALL.md) · [实现与维护](blender_frontend/README.md) · [当前待实施要求](前端更新计划.md)。
 
 WFRL 默认播放三台 NREL 5 MW 风机的 60 秒 MAPPO 保存仿真记录，支持柔性形变、相机数据制作、合成缺陷及研究结果对照。几何／纹理 **NOT_ACCEPTED**、叶尖 **FAILED_GATE** 和雷达 **REVIEW_ONLY / PENDING_ACCEPTANCE** 保持。
 
-公开 0.3.22 提供独立的[风机手动控制](docs/blender/风机手动控制.md)：在 **N → 风机控制 → 创建 / 进入手动场景** 调节 T1/T2/T3 或全部风机的朝向、统一／分别变桨、RPM、叶轮角度与运行／暂停／停转。多机参数不同时标明“多值”；统一桨距会覆盖三片独立桨距。手动场景使用独立刚性模型、蓝天白云与轻量地形，保留原 demo；不生成手动姿态对应的功率、载荷、尾流、柔性形变或雷达读数。
+公开 0.3.24 提供独立的[风机手动控制](docs/blender/风机手动控制.md)：在 **N → 风机控制 → 创建 / 进入手动场景** 调节 T1/T2/T3 或全部风机的朝向、统一／分别变桨、RPM、叶轮角度与运行／暂停／停转。多机参数不同时标明“多值”；统一桨距会覆盖三片独立桨距。手动场景使用独立刚性模型、蓝天白云与轻量地形，保留原 demo；不生成手动姿态对应的功率、载荷、尾流、柔性形变或雷达读数。
 
 ## 1. 可以展示什么
 
@@ -34,7 +34,7 @@ WFRL 默认播放三台 NREL 5 MW 风机的 60 秒 MAPPO 保存仿真记录，�
 ### 2.1 只看离线演示
 
 1. 安装 Blender 5.2 或更新版本。
-2. 从 NREL 0.3.22 发布页下载 **[wfrl_blender-0.3.22.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.22/wfrl_blender-0.3.22.zip)**，保留 ZIP 格式。不要选择 GW184 独立运行 ZIP；GitHub 自动生成的 Source code 也不是这个扩展安装包。
+2. 从 NREL 0.3.24 发布页下载 **[wfrl_blender-0.3.24.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.24/wfrl_blender-0.3.24.zip)**，保留 ZIP 格式。不要选择 GW184 独立运行 ZIP；GitHub 自动生成的 Source code 也不是这个扩展安装包。
 3. 打开 Blender → **Edit → Preferences → Get Extensions**，在菜单中选择 **Install from Disk**，选中 ZIP 并启用 **WFRL Blender**。
 4. 更新旧扩展后，保存自己的工作并退出、重启 Blender，使新代码和资源生效。
 5. 鼠标放在三维视图中，按 **N** 打开侧栏，在 **MAPPO** 中点击 **打开几何重建示例…**，打开扩展自带的便携几何分屏。当前文件未保存时，Blender 会先提示保存。
@@ -59,7 +59,9 @@ ZIP 内置播放器、MAPPO 数据、`assets/examples/mappo_reconstruction_split
 
 ### 独立风机手动控制
 
-安装 0.3.22 并重启后，按 **N → 风机控制 → 创建 / 进入手动场景**。无需加载 MAPPO；须处于对象模式并先停止、断开活动后端。选择单机或“全部”后调整参数；零 RPM 风机保持暂停，全部为零时运行按钮禁用。暂停保留转速和叶轮位置，停转将 RPM 设为 0；复位恢复 9 RPM 并保持暂停。
+安装 0.3.24 并重启后，按 **N → 风机控制 → 创建 / 进入手动场景**。无需加载 MAPPO；须处于对象模式并先停止、断开活动后端。选择单机或“全部”后调整参数；零 RPM 风机保持暂停，全部为零时运行按钮禁用。暂停保留转速和叶轮位置，停转将 RPM 设为 0；复位恢复 9 RPM 并保持暂停。
+
+0.3.24 的常用姿态可将叶片1转到朝下／侧向或将三片顺桨至90°；角度右侧 −／＋ 按每台当前值微调，默认步长1°。选择“全部”后查看三机实际参数，多值字段以 * 标记。批量启用分别变桨时，仅从统一桨距切到分别变桨的机组按各自集体桨距初始化，已启用机组保留独立桨距；显式修改统一桨距仍会覆盖三片叶片。**保存三机…** 导出全部姿态，**载入所选…** 按机组编号恢复并保持暂停。
 
 参数和姿态随 `.blend` 保存，重开、撤销及重做后保持暂停。点击“返回原场景”回到进入前的场景与有效视图；原 demo 数据和播放位置保留。具体范围、集体与独立变桨规则见[手动控制说明](docs/blender/风机手动控制.md)。
 
@@ -80,7 +82,7 @@ scripts/blender/run_wfrl_macos.sh \
 
 这条入口会预检后端环境、启动其管理的 Bridge，并让 Blender 加载**已安装的扩展**。默认进入 **OFFLINE RESULTS** 的 MAPPO 回放，Bridge 待用，不自动开始求解或训练。
 
-匹配的 0.3.22 安装版会自动建立推荐三相机，无需手动导入 JSON。启动主视图仍为 T1 总览，通过 View 打开三路即可。修改仓库代码或文档，不会自动替换 Blender 当前加载的扩展。
+匹配的 0.3.24 安装版会自动建立推荐三相机，无需手动导入 JSON。启动主视图仍为 T1 总览，通过 View 打开三路即可。修改仓库代码或文档，不会自动替换 Blender 当前加载的扩展。
 
 ## 3. 时间、回放与观察视角
 
@@ -201,9 +203,9 @@ T1 Down 和三相机观察都使用 Blender 相机视图。三相机的价值在
 
 ## 7. 当前验证与播放表现
 
-公开 0.3.22 ZIP 的文件数、大小、SHA-256、源码身份及适用验证项目见[交付身份](publication/blender-0.3.22.json)。安装、宿主、后台与可见窗口结果只适用于记录的载荷；脚本窗口操作不代表实体鼠标、完整片段性能或科学精度验收。相机默认复位载荷的 78 项宿主与真实面板点击归属其记录的安装来源。
+公开 0.3.24 ZIP 的附件、上传源包身份与源码提交见[交付身份](publication/blender-0.3.24.json)。公开交付没有新增测试、安装或窗口验收，也没有源码重建一致性结论。安装、宿主、后台与可见窗口结果只适用于原记录的载荷；脚本窗口操作不代表实体鼠标、完整片段性能或科学精度验收。相机默认复位载荷的 78 项宿主与真实面板点击归属其记录的安装来源，0.3.22 的证据仍只属于[该版载荷](publication/blender-0.3.22.json)。
 
-当前日常 **0.3.22** 安装的 179 文件与正式 ZIP 一致，持久启用在主动启用或注册前已确认，新进程模块及命名空间来源、四个手动操作器与实际面板注册检查通过，见[安装核对](publication/daily-installation.json)及[新进程检查](publication/daily-installation-probe.json)。手动风机 0／6／9 RPM 启动状态分别为暂停／运行／运行，全部暂停及原场景恢复通过；这些后台检查不作为日常安装的完整窗口、长期运行或性能复测。
+当前日常 **0.3.24** 的已有安装记录中，180 文件与上传源 ZIP 一致；持久启用、新进程模块与姿态工具、短时窗口行为的实际范围见[安装核对](publication/daily-installation.json)及[新进程检查](publication/daily-installation-probe.json)。姿态工具只处理独立刚性场景，完整片段性能、长期运行和科学精度分别验证。
 
 完整完成、超时、中止和错误须分别判断。POST_PIXEL 是视口绘制回调，60 Hz 是时间映射；稳定 30／60 FPS、完整片段性能、长期运行和 Windows/Linux 尚未验收。原因未定的停止异常、控制台原生 SIGSEGV 与退出内存诊断仍构成验证限制。
 
@@ -225,8 +227,8 @@ T1 Down 和三相机观察都使用 Blender 相机视图。三相机的价值在
 
 | 问题 | 解释与处理 |
 | --- | --- |
-| 更新后还是旧界面或旧取景 | 确认安装的是 0.3.22 ZIP，保存工作后重启 Blender，重新加载 MAPPO。仓库文档不会热更新扩展 |
-| 找不到“恢复默认三相机” | 安装 0.3.22 ZIP 并重启，在已加载三相机的场景中展开 View → 三相机 · T1 · 研发 → 1 安装整个盒体 |
+| 更新后还是旧界面或旧取景 | 确认安装的是 0.3.24 ZIP，保存工作后重启 Blender，重新加载 MAPPO。仓库文档不会热更新扩展 |
+| 找不到“恢复默认三相机” | 安装 0.3.24 ZIP 并重启，在已加载三相机的场景中展开 View → 三相机 · T1 · 研发 → 1 安装整个盒体 |
 | 找不到“版本、来源与播放诊断” | 安装公开专用 ZIP 并重启，再核对工具页与实际载入模块 |
 | 从原 macOS 命令启动后只看到总览 | 这是默认主视图；通过 View → 三相机 → 三路对照打开观察窗口 |
 | C2 为什么也能看到叶尖 | 当前目标是连续覆盖并留重叠，真实透视可能包含远端叶尖，不按固定叶长区间裁图 |

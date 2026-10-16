@@ -3,7 +3,7 @@
   "status": "PASS",
   "module": "bl_ext.user_default.wfrl_blender",
   "module_file": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/__init__.py",
-  "version": "0.3.22",
+  "version": "0.3.24",
   "blender": "5.2.1 LTS",
   "background": true,
   "persistent_enablement_before_probe": true,
@@ -79,6 +79,7 @@
     "bl_ext.user_default.wfrl_blender.nrel_defects.defect_geometry": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/nrel_defects/defect_geometry.py",
     "bl_ext.user_default.wfrl_blender.nrel_defects.editor": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/nrel_defects/editor.py",
     "bl_ext.user_default.wfrl_blender.manual_motion": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/manual_motion.py",
+    "bl_ext.user_default.wfrl_blender.manual_pose": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/manual_pose.py",
     "bl_ext.user_default.wfrl_blender.manual_control": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/manual_control.py",
     "bl_ext.user_default.wfrl_blender.panels.manual_control": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/panels/manual_control.py",
     "bl_ext.user_default.wfrl_blender.playback": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/playback.py",
@@ -90,19 +91,34 @@
     "bl_ext.user_default.wfrl_blender.frontend_diagnostics": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/frontend_diagnostics.py",
     "bl_ext.user_default.wfrl_blender.repair_marks": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/repair_marks.py"
   },
-  "installed_files_checked": 179,
+  "installed_files_checked": 180,
   "mismatches": [],
   "build_info": {
-    "payload_files": 178,
-    "payload_sha256": "f13fd58035119291dd5028808ac0de3adad13cb0239913a13e175c662df6ceb0",
+    "payload_files": 179,
+    "payload_sha256": "76e5b0271b9f9ed6c6b3f56f24b947f8ea12273edd96e9021a08b11bff9c030a",
     "schema": "wfrl.extension-build.v1",
-    "version": "0.3.22"
+    "version": "0.3.24"
   },
   "manual_operators_registered": true,
+  "manual_pose_operators_registered": true,
   "manual_panel_registered": true,
   "mixed_rpm_start": "PASS",
   "pause_all": "PASS",
+  "pose_presets": "PASS",
+  "relative_nudge": "PASS",
+  "batch_individual_pitch_preserved": "PASS",
   "original_scene_restored": true,
   "scene_or_preferences_saved_by_probe": false,
-  "full_window_acceptance": false
+  "full_window_acceptance": false,
+  "installed_inventory": {
+    "status": "PASS",
+    "package_path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+    "verified_files": 180,
+    "mismatches": [],
+    "unexpected_files": [],
+    "ignored": [
+      "__pycache__",
+      "*.pyc"
+    ]
+  }
 }

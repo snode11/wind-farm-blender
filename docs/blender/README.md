@@ -1,13 +1,13 @@
 # Blender 文档分类
 
-公开 NREL 安装版为 **0.3.22**，使用[专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.22/wfrl_blender-0.3.22.zip)；项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **0.3.22**，179 文件与正式 ZIP 一致，持久启用、新进程来源与手动控制后台检查 PASS，见[日常安装核对](../../publication/daily-installation.json)及[新进程检查](../../publication/daily-installation-probe.json)。GW184 为 **0.4.0 独立运行包**。身份与证据适用范围见[发布状态](发布状态与验证范围.md)。[返回总索引](../README.md)。
+公开 NREL 安装版为 **0.3.24**，使用[专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.24/wfrl_blender-0.3.24.zip)；项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **0.3.24**，已有记录中的 180 文件与上传源 ZIP 一致，提供手动姿态工具；见[安装核对](../../publication/daily-installation.json)及[新进程检查](../../publication/daily-installation-probe.json)。公开附件身份见[交付身份](../../publication/blender-0.3.24.json)，GW184 为 **0.4.0 独立运行包**。证据范围见[发布状态](发布状态与验证范围.md)。[返回总索引](../README.md)。
 
 ## 当前操作和功能
 
 | 文档 | 用途 |
 | --- | --- |
 | [INSTALL](INSTALL.md) | NREL 安装、升级和平台验证范围。 |
-| [风机手动控制](风机手动控制.md) | 独立刚性场景的朝向、变桨、转速、叶轮角度、运行与保存。 |
+| [风机手动控制](风机手动控制.md) | 独立刚性场景的朝向、变桨、转速、姿态预设、微调、三机概览、姿态 JSON 与撤销重做。 |
 | [用户使用手册](用户使用手册.md) | MAPPO 回放、视角、三相机、净空、后端模式、导出与保存。 |
 | [功能总览与规划](Blender前端功能总览与规划.md) | 已有功能、后端依赖、独立原型、研究边界和待完成事项。 |
 | [发布状态与验证范围](发布状态与验证范围.md) | 公开版本、源码与 ZIP 及实际安装的区别、已保存软件证据和限制。 |
@@ -20,7 +20,8 @@
 
 | 文档 | 阅读范围 |
 | --- | --- |
-| [0.3.22](../../publication/blender-0.3.22.json) | 当前 ZIP、源码提交、文件身份与适用验证范围。 |
+| [0.3.24](../../publication/blender-0.3.24.json) | 当前公开 ZIP、上传源包、源码提交及已有安装与行为证据的归属；公开交付未新增验证。 |
+| [0.3.22](../../publication/blender-0.3.22.json) | 该版 ZIP、源码提交、文件身份与适用验证范围。 |
 | [0.3.21](../../publication/blender-0.3.21.json) | 该版 ZIP、173 文件身份与对应软件证据。 |
 | [0.3.20+1](releases/0.3.20+1发布核对.md) | 该版三相机默认复位载荷、173 文件 ZIP；载荷测试／安装版按钮验证与最终包格式及字节一致性分层记录。 |
 | [0.3.19](releases/0.3.19发布核对.md) | 完整风机几何／同源纹理切换与隔离安装、原生窗口工作流；当版仅发布 ZIP。[当前源结构复用见功能总览](Blender前端功能总览与规划.md)。 |
