@@ -6,12 +6,12 @@
 
 | 对象 | 身份与范围 |
 | --- | --- |
-| 公开安装包 | [NREL 0.3.21](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.21)；完整风机几何／同源纹理切换、三机柔性回放、默认三相机复位、六类合成缺陷，以及相机清理、稳定刷新、采集与播放保护。 |
+| 公开安装包 | [NREL 0.3.22](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.22)；独立风机手动控制、完整风机几何／同源纹理切换、三机柔性回放、默认三相机复位、六类合成缺陷，以及相机清理、稳定刷新、采集与播放保护。 |
 | 项目源码 | [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)；包含当前实现、测试与研究工具。当前分支不等于既有公开 ZIP 或日常安装载荷。 |
-| 本地日常安装 | `bl_ext.user_default.wfrl_blender`，公开 0.3.21 载荷、173 文件；源 ZIP SHA-256 `ac52fc91e6373357dcc033b257b12231dfdf2f78d578c6fbe2e5190177cae9bd`，[安装核对](../publication/daily-installation.json)通过。 |
+| 本地日常安装 | `bl_ext.user_default.wfrl_blender`，0.3.21 载荷、173 文件；源 ZIP SHA-256 `ac52fc91e6373357dcc033b257b12231dfdf2f78d578c6fbe2e5190177cae9bd`，[安装核对](../publication/daily-installation.json)通过；不包含独立风机手动控制。 |
 | GW184 | [0.4.0 独立运行包](../docs/blender/GW184三相机与缺陷编辑器.md)；184 m 尺寸合成刚性模型、固定三相机和六类缺陷。模型与配置不能直接替代 NREL。 |
 
-日常安装与公开 0.3.21 载荷匹配，包含相机异常清理、同源纹理稳定刷新、扩展内包单次校验、PNG 采集和完整播放判定等实现；构建输出保护属于项目工具。[当前安装核对](../publication/daily-installation.json)覆盖 173 文件摘要、持久启用、实际模块路径和新进程后台启动。公开包的原生脚本窗口证据见[发布状态](../docs/blender/发布状态与验证范围.md)，不作为日常安装的完整窗口或性能复测；完整片段、长期运行与跨平台验收仍受限。
+日常安装与 0.3.21 正式载荷匹配，包含相机异常清理、同源纹理稳定刷新、扩展内包单次校验、PNG 采集和完整播放判定等实现；构建输出保护属于项目工具。[当前安装核对](../publication/daily-installation.json)覆盖 173 文件摘要、持久启用、实际模块路径和新进程后台启动。其原生脚本窗口证据见[0.3.21 交付身份](../publication/blender-0.3.21.json)，不作为日常安装的完整窗口或性能复测；完整片段、长期运行与跨平台验收仍受限。
 
 公开包 SHA-256 和匹配验证见[发布状态](../docs/blender/发布状态与验证范围.md)。工作区源码、构建 ZIP、已安装扩展与公开附件分别核对，不能依据版本号推定文件相同。日常启动器加载安装版；发布不会自动升级日常安装，更新安装后需要完全重启 Blender。
 
@@ -25,6 +25,7 @@
 
 ## 当前主要结构
 
+- `manual_scene.py`、`manual_control.py`、`manual_motion.py` 与 `panels/manual_control.py`：0.3.22 扩展的独立手动场景、每机参数、墙钟转速积分和“风机控制”侧栏；[操作说明](../docs/blender/风机手动控制.md)。
 - `panels/farm_replay.py`：共享播放、单步、复位及功能页；普通三机回放提供进度定位，统一重建对照隐藏进度滑块。View 页组织观察相机，切视角保留回放时刻。
 - `split_reconstruction.py`、`split_reconstruction_timing.py`、`split_reconstruction_ui.py`：保存分屏生命周期、完整风机显示、独立视口、固定采样映射、统一入口、模式切换及左下角状态说明；底层样本步进工具保留，统一侧栏使用单帧步进。规范资源为 `assets/examples/mappo_reconstruction_split.blend`。
 - `split_mappo_texture.py` 与 `assets/blade_recon_mappo_tex/`：同源纹理同步回放，使用原两相机实验的 601 个保存状态与动态标定生成固定 RGBA 图集，共用 MAPPO 的 60 Hz 时间轴；`split_surface_texture.py` 的 120 样本合成实验继续使用独立游标。`split_texture_settings.py` 保存各来源的显示选择并在失败切换时回滚状态。来源、模型等价和安装边界见[发布状态与验证范围](../docs/blender/发布状态与验证范围.md)。
@@ -35,7 +36,10 @@
 - `stacked_camera_rig.py` 与 `panels/stacked_camera_rig.py`：共盒三相机、支架安装端贴合、盒体末端转向、确认／取消／撤销及默认布局复位。
 - `custom_cameras.py`：槽位、相机参数、布局及兼容处理；`native_camera_views.py`：独立原生单路／三路观察窗口。
 - `custom_camera_capture.py`：同刻或时间序列原图采集；`custom_camera_preview.py`：保留预览计算与质量恢复支持，普通原生观察不依赖逐帧 PNG 采集。
-- `assets/cameras/t1-three-camera-default.json`：默认取景配置，加载 MAPPO 时应用；显式重载与普通播放分开处理。
+- `assets/cameras/t1-three-camera-default.json`：默认三相机取景配置，加载 MAPPO 时应用；显式重载与普通播放分开处理。
+- `nacelle_camera.py`：单路机舱相机的机械转轴安装基准、8 mm 镜头及独立 59°/40°视场；`nacelle_visibility.py`：三角面与视锥裁剪、展向覆盖及有限首命中采样。[参数与当前模型限制](../docs/blender/NREL机舱相机.md)。
+
+手动场景以 `wfrl_scene_kind=manual` 标识，使用独立命名空间的对象、网格、材质、World 与图片，复用 NREL 参考几何构造，不加载 demo 的柔性结果驱动。每台风机通过场景内对象指针绑定偏航、转子及叶片；控制前检查归属、装配层级和跨场景共享。RPM 按单调墙钟积分，改变速度保留相位；“全部”只传播正在编辑的字段，参数差异以“多值”提示，集体桨距统一覆盖三片叶片。暂停时可设置叶轮角度；全部零 RPM 时禁用运行。参数和姿态随 `.blend` 保存，加载、撤销、重做、退出及失效绑定均暂停运动。首次创建与损坏重建分别形成撤销记录，重建保留返回视图。材质预览使用独立天空和轻量地形，退出恢复源场景预览设置。面板进入／返回保留源场景及播放位置，活动后端连接阻止进入；手动运动不写入后端或回放时钟，也不产生物理测量值。
 
 ## 当前三相机维护要点
 
@@ -71,7 +75,7 @@ scripts/blender/run_wfrl_macos.sh \
 
 启动器预检环境并启动自己拥有的 Bridge；Blender 加载**已安装扩展**，停在 MAPPO 的 T1 侧前方首帧。默认状态为 **OFFLINE RESULTS**，Bridge 在 `127.0.0.1:8765` 待用，不自动连接或开始运行。这条入口需要完整后端环境；只看离线演示时直接打开扩展并点击“加载 MAPPO · 60 秒”，或用便携入口，无需 Python 后端、MPI、FAST.Farm 和网络。
 
-匹配的 0.3.21 安装版会同时建立推荐三相机配置，默认关闭叶尖轨迹和挠度辅助物。主视图仍先显示 T1 总览，进入 **View → 三相机 → 三路对照** 查看。仅更新仓库 README 不会改变已运行的 Blender 扩展。
+匹配的 0.3.22 安装版会同时建立推荐三相机配置，默认关闭叶尖轨迹和挠度辅助物。主视图仍先显示 T1 总览，进入 **View → 三相机 → 三路对照** 查看。仅更新仓库 README 不会改变已运行的 Blender 扩展。
 
 需要后端时，进入 **Item → WFRL / CONNECTION → 后端连接（高级）**，选择 Replay 或 Interactive，再点 Connect / Reconnect。Item 不可见时先选中一片叶片。启动脚本在握手确认后发送 `scene.load`，自动加载命令指定的 YAML；确认 **CONNECTED / READY** 后，到 **WFRL / 后端运行** 设置参数并点击 Start Replay / Start Training。Replay 需兼容 checkpoint，例如项目中的 `results/checkpoints/mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt`。
 
@@ -248,7 +252,7 @@ MAPPO 固定 `timebase_fps=60`，仿真片段为 117–177 s：40 Hz 源数据 2
 
 ### 5.3.1 双束与独立 S1 数据合同
 
-当前 0.3.21 安装包延续默认 `hub-axis.v1` 与显式可选 `hub-tls.v1` 两份双束结果层及读取器，共享原 `assets/mappo/` 40 Hz 源几何。`farm_flex.py` 按 `measurement_mode=dual_beam` 接入，`panels/farm_replay.py` 提供“双束净空 / S1”“TLS 候选 / S1”与旧 B2 切换；读取及可携带打包由规范源码 `wfrl/lidar/dual_beam_replay.py`、`dual_beam_package.py` 负责，构建时生成扩展内置副本。
+当前 0.3.22 安装包包含默认 `hub-axis.v1` 与显式可选 `hub-tls.v1` 两份双束结果层及读取器，共享原 `assets/mappo/` 40 Hz 源几何。`farm_flex.py` 按 `measurement_mode=dual_beam` 接入，`panels/farm_replay.py` 提供“双束净空 / S1”“TLS 候选 / S1”与旧 B2 切换；读取及可携带打包由规范源码 `wfrl/lidar/dual_beam_replay.py`、`dual_beam_package.py` 负责，构建时生成扩展内置副本。
 
 S2/S3 按同一保存时刻、同一叶片的有效命中配对，S1 有效叶片命中独立报警，不能用双束无效来抑制 S1。读数、报警和累计历史共用仿真时钟，寻址不重复累计；无效值保持缺失。可携带包包含自身 `source/` 并校验完整源数据及结果摘要，移走后不依赖开发机绝对路径。损坏或缺包须清空旧状态。
 
@@ -278,7 +282,7 @@ S2/S3 按同一保存时刻、同一叶片的有效命中配对，S1 有效叶�
 
 扩展 [runtime.py](wfrl_blender/runtime.py) 和 [transport.py](wfrl_blender/transport.py) 维护连接、协议状态与回传。[panels/status.py](wfrl_blender/panels/status.py) 管连接与诊断，[panels/run.py](wfrl_blender/panels/run.py) 是唯一后端运行按钮入口。CONNECTED 表示握手；实际运行还需 READY 后显式 Start，并观察 RUNNING 与不断更新的真实快照。
 
-当前 0.3.21 扩展延续前端连接、协议和运行状态修复；后端服务器、训练启动器和 MPI 环境不随扩展 ZIP 安装。后端 [backend_session.py](../wfrl/blender_bridge/backend_session.py) 只在新的控制步边界处理暂停和单步，预热或重复第 0 步的进度通知不能重复消耗单步许可。[server.py](../wfrl/blender_bridge/server.py) 在接收新连接前回收已有连接的 EOF，允许断开后立即重连，同时保留活动客户端独占。
+当前 0.3.22 扩展包含前端连接、协议和运行状态处理；后端服务器、训练启动器和 MPI 环境不随扩展 ZIP 安装。后端 [backend_session.py](../wfrl/blender_bridge/backend_session.py) 只在新的控制步边界处理暂停和单步，预热或重复第 0 步的进度通知不能重复消耗单步许可。[server.py](../wfrl/blender_bridge/server.py) 在接收新连接前回收已有连接的 EOF，允许断开后立即重连，同时保留活动客户端独占。
 
 公开源码提交 [`1c2b334b`](https://github.com/snode11/wind-farm-blender/commit/1c2b334b583dfcd1219911c12804271fe0aa6a66) 更新 [isolated_trainer.py](../wfrl/blender_bridge/isolated_trainer.py) 的 `launcher_environment`：移除继承的 OMPI/PMI/PMIX/OPAL/PRTE 等 MPI 作业身份变量，保留显式 BTL/PML 传输配置；macOS 在没有显式接口配置时使用 `self,tcp` / `lo0` 默认值。9 项宿主回归通过。需要此修复时，更新后端项目源码到该提交或更新版本，并重新启动 Bridge；重新安装 NREL ZIP 不会更新服务器。该验证不包含真实 FAST.Farm 求解或训练。
 

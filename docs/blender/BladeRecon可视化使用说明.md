@@ -1,6 +1,6 @@
-# Blade Recon 叶片三维重建可视化 · 0.3.21
+# Blade Recon 叶片三维重建可视化 · 0.3.22
 
-适用于 Blender 5.2+ 的公开 NREL **0.3.21**。从[专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.21/wfrl_blender-0.3.21.zip)安装并重启；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **0.3.21**，173 文件与公开 ZIP 一致；实际安装与当前源码分别识别，详见[身份与验证范围](发布状态与验证范围.md)。外部研究求解器不随扩展打包。
+适用于 Blender 5.2+ 的公开 NREL **0.3.22**。从[专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.22/wfrl_blender-0.3.22.zip)安装并重启；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **0.3.21**，173 文件与 0.3.21 ZIP 一致；实际安装与当前源码分别识别，详见[身份与验证范围](发布状态与验证范围.md)。外部研究求解器不随扩展打包。
 
 几何与纹理保持 **NOT_ACCEPTED**，原 0.2 mm 叶尖门保持 **FAILED_GATE**。外部材料点候选 Patch 2/8、Crack 7/8、跨相机 RGB 0/264，仍为 FAILED_GATE / NOT_ACCEPTED，same_material_error_m 与 primary_gains 均 null；该[研究结果](../../blade_recon0.2/docs/材料点对应实验报告_2026-10-11.md)未替换正式 601 样本与图集。
 
@@ -23,7 +23,7 @@
 
 ## 规范几何示例
 
-1. 使用 Blender 5.2+，在 Preferences → Get Extensions → Install from Disk 安装启用 [0.3.21 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.21) 的扩展附件 `wfrl_blender-0.3.21.zip`，升级后重启 Blender。
+1. 使用 Blender 5.2+，在 Preferences → Get Extensions → Install from Disk 安装启用 [0.3.22 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.22) 的扩展附件 `wfrl_blender-0.3.22.zip`，升级后重启 Blender。
 2. 三维视图按 **N → MAPPO → 打开几何重建示例…**。当前文件未保存时由 Blender 原生对话框提示保存；打开的是安装目录内 `assets/examples/mappo_reconstruction_split.blend`，原几何示例和同源 MAPPO 纹理均含 601 个保存样本，与独立合成纹理的 120 样本分开。当前分屏用 **切换到同源纹理对照／切换到几何重建**双向切换；退出后用 **返回重建对照**恢复当前模式。建议另存到自己的文件，避免覆盖安装目录里的示例。
 3. 两侧均显示完整风机，播放／暂停共用时间轴。直接用时间轴寻址，侧栏只保留模式切换、同源中段／叶尖观察点、原始／增强显示及退出；旧样本步进、完整取景与恢复布局工具继续保留在底层。两侧可自由缩放和绕转，窗口缩放可恢复可用区域，左侧相机切换保留右侧独立视图。
 4. **退出对照**保留数据和当前时间，可重新进入。另存自己的 `.blend` 后，启用匹配扩展即可原生重开恢复。
@@ -84,4 +84,4 @@ ZIP 自带 MAPPO 数据、便携场景及四张 packed 天空／地表纹理，�
 
 工作区源码、构建 ZIP、公开附件和已安装扩展是不同来源。更新扩展后重启 Blender，核对实际模块与 payload；输入读取、模型回放、场景切换、保存重开、窗口、性能与科学精度分别验收。
 
-公开 0.3.21 ZIP 的匹配载荷已通过隔离安装、宿主与后台软件、原生相机及几何／同源重建脚本窗口检查。当前日常安装的 173 文件与公开 ZIP 一致，新进程启动核对 PASS，见[日常安装核对](../../publication/daily-installation.json)。窗口检查不代表实体鼠标输入、完整片段性能、长期运行或科学精度验收。详细来源和剩余限制见[发布状态](发布状态与验证范围.md)与[实现维护](../../blender_frontend/README.md)。
+公开 0.3.22 ZIP 的文件、源码与适用验证，以[交付身份](../../publication/blender-0.3.22.json)记录的实际范围为准；其他载荷的宿主、后台或几何／同源重建脚本窗口结论不转记为当前包验收。当前日常 0.3.21 安装的 173 文件与 0.3.21 ZIP 一致，新进程启动核对 PASS，见[日常安装核对](../../publication/daily-installation.json)。窗口检查不代表实体鼠标输入、完整片段性能、长期运行或科学精度验收。详细来源和剩余限制见[发布状态](发布状态与验证范围.md)与[实现维护](../../blender_frontend/README.md)。

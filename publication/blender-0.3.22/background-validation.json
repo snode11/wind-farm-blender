@@ -1,0 +1,418 @@
+{
+  "status": "PASS",
+  "scope": "Blender native background software checks",
+  "addon_module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "expected_addon_root": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender",
+  "environment": {
+    "BLENDER_USER_CONFIG": "PROJECT_ROOT/outputs/release-0.3.22/profile/config",
+    "BLENDER_USER_SCRIPTS": "PROJECT_ROOT/outputs/release-0.3.22/profile/scripts",
+    "BLENDER_USER_DATAFILES": "PROJECT_ROOT/outputs/release-0.3.22/profile/datafiles",
+    "WFRL_ADDON_MODULE": "bl_ext.wfrl_frontend.wfrl_blender"
+  },
+  "factory_startup": false,
+  "pythonpath_removed": true,
+  "physics_solver_run": false,
+  "cases": [
+    {
+      "case": "manual_control_state_regression",
+      "scope": "installed",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_s": 1.849,
+      "command": [
+        "BLENDER_APP/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "PROJECT_ROOT/outputs/release-0.3.22/background/run_case.py"
+      ],
+      "script": "PROJECT_ROOT/blender_frontend/tests/blender/manual_control_state_regression.py",
+      "script_sha256": "6236381b258f65643c75b7ac8de048593a45df7c156fa21babcce6b0fb43250f",
+      "output": "PROJECT_ROOT/outputs/release-0.3.22/background/manual_control_state_regression",
+      "stdout": "PROJECT_ROOT/outputs/release-0.3.22/background/manual_control_state_regression.stdout.txt",
+      "identity": {
+        "scope": "installed",
+        "addon_module": "bl_ext.wfrl_frontend.wfrl_blender",
+        "addon_file": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender/__init__.py",
+        "actual_addon_root": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender",
+        "expected_addon_root": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender",
+        "module_identity_verified": true,
+        "blender": "5.2.1 LTS",
+        "script": "PROJECT_ROOT/blender_frontend/tests/blender/manual_control_state_regression.py",
+        "script_completed": true
+      },
+      "checks": "PROJECT_ROOT/outputs/release-0.3.22/background/manual_control_state_regression/checks.json",
+      "warnings": [
+        "Warning: 请先设置大于 0 的转速",
+        "Warning: 请先设置大于 0 的转速"
+      ],
+      "module_selection_contract": "WFRL_ADDON_MODULE and WFRL_EXPECTED_ADDON_ROOT",
+      "expected_guard_messages": [
+        "Warning: 请先设置大于 0 的转速",
+        "Warning: 请先设置大于 0 的转速"
+      ],
+      "exit_memory_diagnostics": [],
+      "unexpected_diagnostics": []
+    },
+    {
+      "case": "manual_control_regression",
+      "scope": "installed",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_s": 12.836,
+      "command": [
+        "BLENDER_APP/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "PROJECT_ROOT/outputs/release-0.3.22/background/run_case.py"
+      ],
+      "script": "PROJECT_ROOT/blender_frontend/tests/blender/manual_control_regression.py",
+      "script_sha256": "1fe448737c605461f445dd312c89f3dc60fe3cfbc60a80d858f726d8217d75ff",
+      "output": "PROJECT_ROOT/outputs/release-0.3.22/background/manual_control_regression",
+      "stdout": "PROJECT_ROOT/outputs/release-0.3.22/background/manual_control_regression.stdout.txt",
+      "identity": {
+        "scope": "installed",
+        "addon_module": "bl_ext.wfrl_frontend.wfrl_blender",
+        "addon_file": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender/__init__.py",
+        "actual_addon_root": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender",
+        "expected_addon_root": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender",
+        "module_identity_verified": true,
+        "blender": "5.2.1 LTS",
+        "script": "PROJECT_ROOT/blender_frontend/tests/blender/manual_control_regression.py",
+        "script_completed": true
+      },
+      "checks": "PROJECT_ROOT/outputs/release-0.3.22/background/manual_control_regression/checks.json",
+      "warnings": [
+        "Error: 控制对象与其他场景共享，请使用独立副本",
+        "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB"
+      ],
+      "module_selection_contract": "WFRL_ADDON_MODULE and WFRL_EXPECTED_ADDON_ROOT",
+      "expected_guard_messages": [
+        "Error: 控制对象与其他场景共享，请使用独立副本"
+      ],
+      "exit_memory_diagnostics": [
+        "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB"
+      ],
+      "unexpected_diagnostics": []
+    },
+    {
+      "case": "manual_control_undo_regression",
+      "scope": "installed",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_s": 2.36,
+      "command": [
+        "BLENDER_APP/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "PROJECT_ROOT/outputs/release-0.3.22/background/run_case.py"
+      ],
+      "script": "PROJECT_ROOT/blender_frontend/tests/blender/manual_control_undo_regression.py",
+      "script_sha256": "68b04e25f47acb1b320112b6b54cc8e19280e6108ddecd25c64d813973838418",
+      "output": "PROJECT_ROOT/outputs/release-0.3.22/background/manual_control_undo_regression",
+      "stdout": "PROJECT_ROOT/outputs/release-0.3.22/background/manual_control_undo_regression.stdout.txt",
+      "identity": {
+        "scope": "installed",
+        "addon_module": "bl_ext.wfrl_frontend.wfrl_blender",
+        "addon_file": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender/__init__.py",
+        "actual_addon_root": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender",
+        "expected_addon_root": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender",
+        "module_identity_verified": true,
+        "blender": "5.2.1 LTS",
+        "script": "PROJECT_ROOT/blender_frontend/tests/blender/manual_control_undo_regression.py",
+        "script_completed": true
+      },
+      "checks": "PROJECT_ROOT/outputs/release-0.3.22/background/manual_control_undo_regression/checks.json",
+      "warnings": [],
+      "module_selection_contract": "WFRL_ADDON_MODULE and WFRL_EXPECTED_ADDON_ROOT",
+      "expected_guard_messages": [],
+      "exit_memory_diagnostics": [],
+      "unexpected_diagnostics": []
+    },
+    {
+      "case": "manual_scene_recovery_regression",
+      "scope": "installed",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_s": 1.925,
+      "command": [
+        "BLENDER_APP/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "PROJECT_ROOT/outputs/release-0.3.22/background/run_case.py"
+      ],
+      "script": "PROJECT_ROOT/blender_frontend/tests/blender/manual_scene_recovery_regression.py",
+      "script_sha256": "e5dcbf1a14a77c28a73df8d770c2cdcd398a9e27bdb6ba8882e1fa422294ae27",
+      "output": "PROJECT_ROOT/outputs/release-0.3.22/background/manual_scene_recovery_regression",
+      "stdout": "PROJECT_ROOT/outputs/release-0.3.22/background/manual_scene_recovery_regression.stdout.txt",
+      "identity": {
+        "scope": "installed",
+        "addon_module": "bl_ext.wfrl_frontend.wfrl_blender",
+        "addon_file": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender/__init__.py",
+        "actual_addon_root": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender",
+        "expected_addon_root": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender",
+        "module_identity_verified": true,
+        "blender": "5.2.1 LTS",
+        "script": "PROJECT_ROOT/blender_frontend/tests/blender/manual_scene_recovery_regression.py",
+        "script_completed": true
+      },
+      "checks": "PROJECT_ROOT/outputs/release-0.3.22/background/manual_scene_recovery_regression/checks.json",
+      "warnings": [],
+      "module_selection_contract": "WFRL_ADDON_MODULE and WFRL_EXPECTED_ADDON_ROOT",
+      "expected_guard_messages": [],
+      "exit_memory_diagnostics": [],
+      "unexpected_diagnostics": []
+    },
+    {
+      "case": "manual_environment_regression",
+      "scope": "installed",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_s": 5.622,
+      "command": [
+        "BLENDER_APP/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "PROJECT_ROOT/outputs/release-0.3.22/background/run_case.py"
+      ],
+      "script": "PROJECT_ROOT/blender_frontend/tests/blender/manual_environment_regression.py",
+      "script_sha256": "2d4add2c3f3daddeebc017787159db9298d0e004d7282e9cfaa531578af8bf36",
+      "output": "PROJECT_ROOT/outputs/release-0.3.22/background/manual_environment_regression",
+      "stdout": "PROJECT_ROOT/outputs/release-0.3.22/background/manual_environment_regression.stdout.txt",
+      "identity": {
+        "scope": "installed",
+        "addon_module": "bl_ext.wfrl_frontend.wfrl_blender",
+        "addon_file": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender/__init__.py",
+        "actual_addon_root": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender",
+        "expected_addon_root": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender",
+        "module_identity_verified": true,
+        "blender": "5.2.1 LTS",
+        "script": "PROJECT_ROOT/blender_frontend/tests/blender/manual_environment_regression.py",
+        "script_completed": true
+      },
+      "checks": "PROJECT_ROOT/outputs/release-0.3.22/background/manual_environment_regression/checks.json",
+      "warnings": [
+        "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB"
+      ],
+      "module_selection_contract": "WFRL_ADDON_MODULE and WFRL_EXPECTED_ADDON_ROOT",
+      "expected_guard_messages": [],
+      "exit_memory_diagnostics": [
+        "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB"
+      ],
+      "unexpected_diagnostics": []
+    },
+    {
+      "case": "nacelle_camera_intrinsics_regression",
+      "scope": "installed",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_s": 7.482,
+      "command": [
+        "BLENDER_APP/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "PROJECT_ROOT/outputs/release-0.3.22/background/run_case.py"
+      ],
+      "script": "PROJECT_ROOT/blender_frontend/tests/blender/nacelle_camera_intrinsics_regression.py",
+      "script_sha256": "cd8940f7081694db6c65a701bbfa774aca6f47be3960fc42f56e6959f5789c86",
+      "output": "PROJECT_ROOT/outputs/release-0.3.22/background/nacelle_camera_intrinsics_regression",
+      "stdout": "PROJECT_ROOT/outputs/release-0.3.22/background/nacelle_camera_intrinsics_regression.stdout.txt",
+      "identity": {
+        "scope": "installed",
+        "addon_module": "bl_ext.wfrl_frontend.wfrl_blender",
+        "addon_file": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender/__init__.py",
+        "actual_addon_root": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender",
+        "expected_addon_root": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender",
+        "module_identity_verified": true,
+        "blender": "5.2.1 LTS",
+        "script": "PROJECT_ROOT/blender_frontend/tests/blender/nacelle_camera_intrinsics_regression.py",
+        "script_completed": true
+      },
+      "checks": "PROJECT_ROOT/outputs/release-0.3.22/background/nacelle_camera_intrinsics_regression/checks.json",
+      "warnings": [
+        "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB"
+      ],
+      "module_selection_contract": "WFRL_ADDON_MODULE and WFRL_EXPECTED_ADDON_ROOT",
+      "expected_guard_messages": [],
+      "exit_memory_diagnostics": [
+        "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB"
+      ],
+      "unexpected_diagnostics": []
+    },
+    {
+      "case": "nacelle_camera_regression",
+      "scope": "installed",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_s": 23.276,
+      "command": [
+        "BLENDER_APP/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "PROJECT_ROOT/outputs/release-0.3.22/background/run_case.py"
+      ],
+      "script": "PROJECT_ROOT/blender_frontend/tests/blender/nacelle_camera_regression.py",
+      "script_sha256": "4e9038869515f6fbe21861511c20d08e32b5b0cb5a8d757e0843bc9ad3eafc8e",
+      "output": "PROJECT_ROOT/outputs/release-0.3.22/background/nacelle_camera_regression",
+      "stdout": "PROJECT_ROOT/outputs/release-0.3.22/background/nacelle_camera_regression.stdout.txt",
+      "identity": {
+        "scope": "installed",
+        "addon_module": "bl_ext.wfrl_frontend.wfrl_blender",
+        "addon_file": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender/__init__.py",
+        "actual_addon_root": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender",
+        "expected_addon_root": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender",
+        "module_identity_verified": true,
+        "blender": "5.2.1 LTS",
+        "script": "PROJECT_ROOT/blender_frontend/tests/blender/nacelle_camera_regression.py",
+        "script_completed": true
+      },
+      "checks": "PROJECT_ROOT/outputs/release-0.3.22/background/nacelle_camera_regression/checks.json",
+      "warnings": [
+        "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB"
+      ],
+      "module_selection_contract": "WFRL_TEST_RUNTIME; wrapper asserts exact installed addon root",
+      "expected_guard_messages": [],
+      "exit_memory_diagnostics": [
+        "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB"
+      ],
+      "unexpected_diagnostics": []
+    },
+    {
+      "case": "camera_video_regression",
+      "scope": "source",
+      "status": "PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_s": 74.457,
+      "command": [
+        "BLENDER_APP/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "PROJECT_ROOT/outputs/release-0.3.22/background/run_case.py"
+      ],
+      "script": "PROJECT_ROOT/blender_frontend/tests/blender/camera_video_regression.py",
+      "script_sha256": "ea439077f3625560a266ff3fed9479b4e9311562ee3995f9e1ef7dfaf86ca528",
+      "output": "PROJECT_ROOT/outputs/release-0.3.22/background/camera_video_regression",
+      "stdout": "PROJECT_ROOT/outputs/release-0.3.22/background/camera_video_regression.stdout.txt",
+      "identity": {
+        "scope": "source",
+        "addon_module": "wfrl_blender",
+        "addon_file": "PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py",
+        "actual_addon_root": "PROJECT_ROOT/blender_frontend/wfrl_blender",
+        "expected_addon_root": "PROJECT_ROOT/blender_frontend/wfrl_blender",
+        "module_identity_verified": true,
+        "blender": "5.2.1 LTS",
+        "script": "PROJECT_ROOT/blender_frontend/tests/blender/camera_video_regression.py",
+        "script_completed": true
+      },
+      "checks": "PROJECT_ROOT/outputs/release-0.3.22/background/camera_video_regression/checks.json",
+      "warnings": [
+        "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB"
+      ],
+      "module_selection_contract": "Hardcoded source import; source-only evidence",
+      "limitation": "Small diagnostic renders; no installed-package export or production quality convergence claim",
+      "expected_guard_messages": [],
+      "exit_memory_diagnostics": [
+        "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB"
+      ],
+      "unexpected_diagnostics": [],
+      "camera_video_payload_static_comparison": {
+        "source_sha256": "560562ff48451057c0d3a177b54fe2bd527db32a12e9c10c526837f46dd28f1a",
+        "installed_sha256": "560562ff48451057c0d3a177b54fe2bd527db32a12e9c10c526837f46dd28f1a",
+        "equal": true,
+        "conclusion": "Static equality does not change the source-only execution scope."
+      }
+    }
+  ],
+  "installed_cases_passed": 7,
+  "source_cases_passed": 1,
+  "build_info": {
+    "path": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender/build-info.json",
+    "sha256": "77ca5cc89a54698ba4b9e6a336b9450b10561e2387e56435c0fde1ec639aeb96",
+    "data": {
+      "payload_files": 178,
+      "payload_sha256": "f13fd58035119291dd5028808ac0de3adad13cb0239913a13e175c662df6ceb0",
+      "schema": "wfrl.extension-build.v1",
+      "version": "0.3.22"
+    }
+  },
+  "limitations": [
+    "Installed cases are native background software checks; actual visible-window interactions and full-clip FPS are outside this report.",
+    "camera_video_regression hardcodes source imports and supplies source-only export evidence.",
+    "No new physical solve or scientific accuracy acceptance is performed."
+  ],
+  "exit_memory_diagnostics": [
+    {
+      "case": "manual_control_regression",
+      "scope": "installed",
+      "messages": [
+        "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB"
+      ],
+      "exit_code": 0
+    },
+    {
+      "case": "manual_environment_regression",
+      "scope": "installed",
+      "messages": [
+        "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB"
+      ],
+      "exit_code": 0
+    },
+    {
+      "case": "nacelle_camera_intrinsics_regression",
+      "scope": "installed",
+      "messages": [
+        "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB"
+      ],
+      "exit_code": 0
+    },
+    {
+      "case": "nacelle_camera_regression",
+      "scope": "installed",
+      "messages": [
+        "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB"
+      ],
+      "exit_code": 0
+    },
+    {
+      "case": "camera_video_regression",
+      "scope": "source",
+      "messages": [
+        "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "summary": {
+    "installed_cases": 7,
+    "installed_cases_passed": 7,
+    "source_cases": 1,
+    "source_cases_passed": 1,
+    "all_exit_codes_zero": true,
+    "all_module_identities_verified": true,
+    "unexpected_diagnostics": 0,
+    "memory_diagnostic_cases": 5
+  }
+}

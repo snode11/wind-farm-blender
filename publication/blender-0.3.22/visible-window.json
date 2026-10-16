@@ -1,0 +1,94 @@
+{
+  "status": "PASS",
+  "scope": "Installed extension native visible-window software checks with scripted operators and real timer",
+  "addon_module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "addon_file": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender/__init__.py",
+  "expected_addon_root": "PROJECT_ROOT/outputs/release-0.3.22/profile/extensions/wfrl_blender",
+  "module_identity_verified": true,
+  "blender": "5.2.1 LTS",
+  "temporary_category": {
+    "original": "风机控制",
+    "active": "Item",
+    "in_process_only": true,
+    "installed_files_modified": false,
+    "hidden_other_panels": [
+      "WFRL_PT_Gimbal",
+      "WFRL_PT_TrainingDashboard",
+      "WFRL_PT_Presentation",
+      "WFRL_PT_WorkflowSafety",
+      "WFRL_PT_WorkflowRun",
+      "WFRL_PT_WorkflowChannels",
+      "WFRL_PT_WorkflowScene",
+      "WFRL_PT_live_telemetry",
+      "WFRL_PT_connection",
+      "VIEW3D_PT_active_spline",
+      "VIEW3D_PT_context_properties"
+    ]
+  },
+  "physical_mouse": false,
+  "checks": {
+    "real_timer": true,
+    "pause_stop_reset": true,
+    "batch_motion": true,
+    "source_scene_preserved": true,
+    "demo_playback_restored": true,
+    "mixed_zero_and_positive_rpm": true,
+    "zero_rpm_turbine_paused": true,
+    "mixed_value_labels_visible": true,
+    "independent_pitch_override_hint_visible": true,
+    "all_zero_start_visually_disabled": true,
+    "actual_panel_draw_without_errors": true
+  },
+  "screenshots": {
+    "manual-control-panel": "PROJECT_ROOT/outputs/release-0.3.22/windows/manual-control-visible/manual-control-panel.png",
+    "mixed-values-independent-pitch": "PROJECT_ROOT/outputs/release-0.3.22/windows/manual-control-visible/mixed-values-independent-pitch.png",
+    "mixed-rpm-running": "PROJECT_ROOT/outputs/release-0.3.22/windows/manual-control-visible/mixed-rpm-running.png",
+    "all-zero-start-disabled": "PROJECT_ROOT/outputs/release-0.3.22/windows/manual-control-visible/all-zero-start-disabled.png"
+  },
+  "limitations": [
+    "Scripted UI and operator checks; no physical mouse acceptance.",
+    "Temporary sidebar category and hidden unrelated panels expose the same actual panel draw; original category navigation and unmodified sidebar layout are not accepted here.",
+    "Short interaction check; no full-clip performance or scientific accuracy acceptance."
+  ],
+  "visual_review": {
+    "status": "PASS",
+    "method": "view_image inspection of saved actual-window screenshots",
+    "inspected": [
+      "PROJECT_ROOT/outputs/release-0.3.22/windows/manual-control-visible/mixed-values-independent-pitch.png",
+      "PROJECT_ROOT/outputs/release-0.3.22/windows/manual-control-visible/mixed-rpm-running.png",
+      "PROJECT_ROOT/outputs/release-0.3.22/windows/manual-control-visible/all-zero-start-disabled.png"
+    ],
+    "confirmed": [
+      "Mixed-value labels and independent-pitch override hint are visible.",
+      "T1 at zero RPM stays paused while T2 and T3 show running states.",
+      "All-zero RPM shows the speed prompt and a visibly disabled Run button."
+    ]
+  },
+  "warnings": [
+    "Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB"
+  ],
+  "installed_python_files_unchanged": {
+    "checked_files": 116,
+    "unchanged": true
+  },
+  "detailed_report": "PROJECT_ROOT/outputs/release-0.3.22/windows/manual-control-visible/visible-validation.json",
+  "base_report": "PROJECT_ROOT/outputs/release-0.3.22/windows/manual-control-visible/window-checks.json",
+  "process": {
+    "command": [
+      "BLENDER_APP/Contents/MacOS/Blender",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "PROJECT_ROOT/outputs/release-0.3.22/windows/manual_window_probe.py"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed_s": 18.205,
+    "factory_startup": false,
+    "pythonpath_removed": true,
+    "report": "PROJECT_ROOT/outputs/release-0.3.22/windows/manual-control-visible/visible-validation.json"
+  },
+  "probe_sha256": "14e3278190fd60684b9c15b4da48716385bb61522efb160f63ca5656e64aa73c",
+  "physics_solver_run": false,
+  "full_clip_performance_run": false
+}

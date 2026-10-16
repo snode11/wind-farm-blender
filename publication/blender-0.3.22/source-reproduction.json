@@ -1,0 +1,21 @@
+{
+  "schema": "wfrl.extension-source-reproduction.v1",
+  "status": "PASS",
+  "source_commit": "71bb2426f8fcf08d877dbfa3b75160a46c3b3033",
+  "build_command": [
+    "python3",
+    "scripts/blender/build_extension.py",
+    "--output",
+    "REPRODUCTION_OUTPUT"
+  ],
+  "archive": "wfrl_blender-0.3.22.zip",
+  "bytes": 99036330,
+  "sha256": "49c791868d77cd094ea6f7ad07ccfe94ad22ad96f05612595b40b354f5723918",
+  "file_count": 179,
+  "bytes_identical": true,
+  "installed_inventory_after_checks": {
+    "files": 179,
+    "mismatches": []
+  },
+  "remote_asset_download_verification": false
+}

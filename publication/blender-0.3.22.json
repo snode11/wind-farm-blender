@@ -1,0 +1,179 @@
+{
+  "schema": "wfrl.extension-release.v1",
+  "version": "0.3.22",
+  "blender_minimum": "5.2.0",
+  "validated_blender": "5.2.1 LTS",
+  "validated_platform": "macOS",
+  "archive": {
+    "name": "wfrl_blender-0.3.22.zip",
+    "path": "dist/wfrl_blender-0.3.22.zip",
+    "bytes": 99036330,
+    "file_count": 179,
+    "sha256": "49c791868d77cd094ea6f7ad07ccfe94ad22ad96f05612595b40b354f5723918",
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.22/wfrl_blender-0.3.22.zip",
+    "inventory": "dist/wfrl_blender-0.3.22.inventory.json",
+    "checksum": "dist/wfrl_blender-0.3.22.zip.sha256"
+  },
+  "source": {
+    "repository": "https://github.com/snode11/wind-farm-blender",
+    "branch": "wind-farm-rl-all-work",
+    "tag": "v0.3.22",
+    "reproduced_source_commit": "71bb2426f8fcf08d877dbfa3b75160a46c3b3033",
+    "rebuild_zip_bytes_identical": true,
+    "tag_payload_source_matches_reproduced_commit": true
+  },
+  "validation": {
+    "archive_crc_and_inventory": "PASS",
+    "blender_extension_manifest": "PASS",
+    "isolated_installation": "PASS",
+    "actual_module": "bl_ext.wfrl_frontend.wfrl_blender",
+    "installed_files": 179,
+    "installed_payload_unchanged_after_tests": true,
+    "host": {
+      "passed": 355,
+      "failed": 0,
+      "skipped": 1,
+      "warnings": 3,
+      "subtests_passed": 189
+    },
+    "host_selected_test_files": 23,
+    "host_skip_reason": "Original VTP is not distributed with the offline release",
+    "background_software_status": "PASS",
+    "background_checks": [
+      {
+        "case": "manual_control_state_regression",
+        "scope": "installed",
+        "status": "PASS",
+        "returncode": 0,
+        "source_identity": "PASS"
+      },
+      {
+        "case": "manual_control_regression",
+        "scope": "installed",
+        "status": "PASS",
+        "returncode": 0,
+        "source_identity": "PASS"
+      },
+      {
+        "case": "manual_control_undo_regression",
+        "scope": "installed",
+        "status": "PASS",
+        "returncode": 0,
+        "source_identity": "PASS"
+      },
+      {
+        "case": "manual_scene_recovery_regression",
+        "scope": "installed",
+        "status": "PASS",
+        "returncode": 0,
+        "source_identity": "PASS"
+      },
+      {
+        "case": "manual_environment_regression",
+        "scope": "installed",
+        "status": "PASS",
+        "returncode": 0,
+        "source_identity": "PASS"
+      },
+      {
+        "case": "nacelle_camera_intrinsics_regression",
+        "scope": "installed",
+        "status": "PASS",
+        "returncode": 0,
+        "source_identity": "PASS"
+      },
+      {
+        "case": "nacelle_camera_regression",
+        "scope": "installed",
+        "status": "PASS",
+        "returncode": 0,
+        "source_identity": "PASS"
+      },
+      {
+        "case": "camera_video_regression",
+        "scope": "source",
+        "status": "PASS",
+        "returncode": 0,
+        "source_identity": "PASS"
+      }
+    ],
+    "installed_background_cases_passed": 7,
+    "source_background_cases_passed": 1,
+    "visible_windows": {
+      "manual_turbine_controls": "PASS",
+      "checks": {
+        "real_timer": true,
+        "pause_stop_reset": true,
+        "batch_motion": true,
+        "source_scene_preserved": true,
+        "demo_playback_restored": true,
+        "mixed_zero_and_positive_rpm": true,
+        "zero_rpm_turbine_paused": true,
+        "mixed_value_labels_visible": true,
+        "independent_pitch_override_hint_visible": true,
+        "all_zero_start_visually_disabled": true,
+        "actual_panel_draw_without_errors": true
+      },
+      "interaction": "Scripted native Blender operators with real timer; screenshots visually reviewed",
+      "physical_mouse_input": false,
+      "temporary_panel_category": "Item",
+      "other_panels_temporarily_hidden": 11,
+      "original_category_navigation": "NOT_RUN",
+      "unmodified_sidebar_layout": "NOT_RUN",
+      "installed_python_files_unchanged": 116,
+      "screenshots": [
+        "publication/blender-0.3.22/screenshots/mixed-values-independent-pitch.png",
+        "publication/blender-0.3.22/screenshots/mixed-rpm-running.png",
+        "publication/blender-0.3.22/screenshots/all-zero-start-disabled.png"
+      ]
+    },
+    "scientific_tip_gate": "FAILED_GATE",
+    "scientific_tip_gate_evidence": "publication/blender-0.3.21.json",
+    "scientific_gate_retested": false,
+    "full_clip_fps_benchmark": "NOT_RUN",
+    "windows_linux": "NOT_RUN",
+    "long_duration_stability": "NOT_RUN"
+  },
+  "limitations": [
+    "Geometry and texture remain NOT_ACCEPTED; same-source data is SAME_SOURCE_SIMULATION.",
+    "Lidar remains REVIEW_ONLY / PENDING_ACCEPTANCE.",
+    "Blender exit memory-block diagnostics remain in the reports; no long-term leak-free claim.",
+    "Camera video export has source-only small diagnostic-render evidence; installed-package video export is not accepted here.",
+    "The manual controls use rigid illustrative motion and do not calculate power or loads.",
+    "Original VTP, backend services, solvers and project launchers are not installed by the extension ZIP."
+  ],
+  "daily_installation": {
+    "updated_by_publication": false,
+    "last_verified_version": "0.3.21",
+    "last_verified_identity": "publication/daily-installation.json"
+  },
+  "verification_reports": [
+    {
+      "path": "publication/blender-0.3.22/package-validation.json",
+      "sha256": "967d7b46a3b182a51d412e3b09cd9370b4c5f5bf6406e9e61da63617eef87cd7",
+      "original_local_report_sha256": "267c08db7f34df8ba82475a4da44646eeb7f3ebf816be81179d1f53aeabf5dbc"
+    },
+    {
+      "path": "publication/blender-0.3.22/background-validation.json",
+      "sha256": "956765b789be4641b4e7d39eb1e6de296d0480f20a2b14d5b88b9a4f54abbb8d",
+      "original_local_report_sha256": "cc944e362ba4fe7eab840efecd4170a82907cf473e8963636984be51e9639b43"
+    },
+    {
+      "path": "publication/blender-0.3.22/visible-window.json",
+      "sha256": "cf35df048b3d16cf9c013a9666eb2838f887507a3d05d330f3a6445179879dd2",
+      "original_local_report_sha256": "6c99412297a85df21c89ec8d401795f9689f7fb1b560d9a27303b23aa01d9d0a"
+    },
+    {
+      "path": "publication/blender-0.3.22/host-tests.json",
+      "sha256": "6cae7966a7abd6ee18d36374964d2029871c0ce280de04f268e1545b5307d285",
+      "original_local_report_sha256": "3001baade225689a88adf5c2bae8047b680ee4bab95580bf385ffd5ac5182a5d"
+    },
+    {
+      "path": "publication/blender-0.3.22/source-reproduction.json",
+      "sha256": "78a6f065f8c60814c2c40e692154ae1f0fef871a28935cdcb36166f72d8535ee",
+      "original_local_report_sha256": "78a6f065f8c60814c2c40e692154ae1f0fef871a28935cdcb36166f72d8535ee"
+    }
+  ],
+  "report_path_encoding": "PROJECT_ROOT, PYTHON_ENVIRONMENT and BLENDER_APP replace machine-specific path prefixes in public report copies; measurements and acceptance results are unchanged.",
+  "remote_asset_download_verification": false
+}

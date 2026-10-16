@@ -8,6 +8,7 @@
 | --- | --- |
 | 当前功能与限制 | [Blender 功能总览](blender/Blender前端功能总览与规划.md)、[发布状态与验证范围](blender/发布状态与验证范围.md) |
 | 安装和用户操作 | [安装说明](blender/INSTALL.md)、[前端说明](../前端readme.md)、[用户手册](blender/用户使用手册.md) |
+| 独立风机手动控制 | [控件、运行与保存规则](blender/风机手动控制.md) |
 | 实现与维护 | [前端维护说明](../blender_frontend/README.md)、[Blender 文档索引](blender/README.md) |
 | 待实施要求与验收 | [前端更新计划](../前端更新计划.md) |
 | 叶片重建算法 | [Blade Recon 0.2](../blade_recon0.2/README.md)、[材料点对应研究](../blade_recon0.2/docs/材料点对应实验报告_2026-10-11.md) |
@@ -20,9 +21,9 @@
 
 | 对象 | 当前范围 |
 | --- | --- |
-| NREL 公开安装包 | **0.3.21**，173 文件；安装使用 [v0.3.21 专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.21)。 |
+| NREL 公开安装包 | **0.3.22**；安装使用 [v0.3.22 专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.22/wfrl_blender-0.3.22.zip)，包身份与适用验证见[交付身份](../publication/blender-0.3.22.json)。 |
 | 项目源码 | [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 包含当前前端、后端、研究、测试与文档；源码分支不等于既有公开安装包或日常安装载荷。 |
-| 本地日常安装 | **0.3.21**，实际模块 `bl_ext.user_default.wfrl_blender`；173 文件与公开 ZIP 一致，新进程启动核对 PASS，见[日常安装核对](../publication/daily-installation.json)。 |
+| 本地日常安装 | **0.3.21**，实际模块 `bl_ext.user_default.wfrl_blender`；173 文件与 0.3.21 ZIP 一致，新进程启动核对 PASS，见[日常安装核对](../publication/daily-installation.json)；不包含独立风机手动控制。 |
 | GW184 | **0.4.0 独立解压运行包**，模型、配置和 NREL 扩展分别使用。 |
 | 材料点研究 | Patch **2/8**、Crack **7/8**、跨相机 RGB **0/264**；真实同材料点三维误差 `null`，`FAILED_GATE / NOT_ACCEPTED`；未替换正式 601 样本资产。 |
 | 其他研究门槛 | 叶尖 0.2 mm 门槛 `FAILED_GATE`；雷达 `REVIEW_ONLY / PENDING_ACCEPTANCE`；表面 P2b `FAILED_GATE / REVIEW_ONLY`、主增益 `null`、局部恢复 `NOT_RUN`；独立动态原型 `DY1 NOT PASSED`。 |
