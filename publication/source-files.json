@@ -32,9 +32,9 @@
     },
     {
       "path": "README.md",
-      "bytes": 10350,
-      "sha256": "ab4066f68c8b9bc79ebfd855b06308f2ac0978337832d3deefa930266b163f92",
-      "original_sha256": "ab4066f68c8b9bc79ebfd855b06308f2ac0978337832d3deefa930266b163f92",
+      "bytes": 10532,
+      "sha256": "879cb57d836f23703b2046e4c83fd00d97e95efa7a431600bbe3598cebbc1ade",
+      "original_sha256": "879cb57d836f23703b2046e4c83fd00d97e95efa7a431600bbe3598cebbc1ade",
       "text_portable": false
     },
     {
@@ -781,9 +781,9 @@
     },
     {
       "path": "blender_frontend/README.md",
-      "bytes": 45580,
-      "sha256": "c540ec23932070211fbd2f17e8d254e698414fbae6e8cd153073c9a595d793b9",
-      "original_sha256": "c540ec23932070211fbd2f17e8d254e698414fbae6e8cd153073c9a595d793b9",
+      "bytes": 45530,
+      "sha256": "747ac1b564ed4b273c70e2cd098c408712f33232950933baffe72319b9c4c240",
+      "original_sha256": "747ac1b564ed4b273c70e2cd098c408712f33232950933baffe72319b9c4c240",
       "text_portable": false
     },
     {
@@ -3511,44 +3511,44 @@
     },
     {
       "path": "docs/PUBLICATION.md",
-      "bytes": 8314,
-      "sha256": "519858286bc84dec5f7fa2f78d2183a265e95614084e4c1829b4e38b2e713dc5",
-      "original_sha256": "519858286bc84dec5f7fa2f78d2183a265e95614084e4c1829b4e38b2e713dc5",
+      "bytes": 8588,
+      "sha256": "75ab6665c8356d4526231f54410a7f95a280f62507a391e9e855f4b41b208f60",
+      "original_sha256": "75ab6665c8356d4526231f54410a7f95a280f62507a391e9e855f4b41b208f60",
       "text_portable": false
     },
     {
       "path": "docs/README.md",
-      "bytes": 3991,
-      "sha256": "18212e0307fb19a260afd9e5f23fcc7a0a68147f05304570897d23cc0a73c3de",
-      "original_sha256": "18212e0307fb19a260afd9e5f23fcc7a0a68147f05304570897d23cc0a73c3de",
+      "bytes": 3967,
+      "sha256": "16b922be77fec7ff747cedbb60df32c8eb2dab69f5029727d9a160780999c558",
+      "original_sha256": "16b922be77fec7ff747cedbb60df32c8eb2dab69f5029727d9a160780999c558",
       "text_portable": false
     },
     {
       "path": "docs/blender/BladeRecon可视化使用说明.md",
       "bytes": 12919,
-      "sha256": "18f7fe1fb0edb9a1137ac5e4e68421966b5ed418192af7ee92ac9a3365de93c0",
-      "original_sha256": "18f7fe1fb0edb9a1137ac5e4e68421966b5ed418192af7ee92ac9a3365de93c0",
+      "sha256": "0c234d80bc319381b660b8a5d31bed549e766796225664a887e89858cefe6a52",
+      "original_sha256": "0c234d80bc319381b660b8a5d31bed549e766796225664a887e89858cefe6a52",
       "text_portable": false
     },
     {
       "path": "docs/blender/Blender前端功能总览与规划.md",
-      "bytes": 59384,
-      "sha256": "34cdfbdcf130fad33f7027074d81132704a73c5ce931af705736a713a31e162d",
-      "original_sha256": "34cdfbdcf130fad33f7027074d81132704a73c5ce931af705736a713a31e162d",
+      "bytes": 59458,
+      "sha256": "86ef24abf030780bd42fb40ac007b56545ec2e4f00a6b306843667870508ebc2",
+      "original_sha256": "86ef24abf030780bd42fb40ac007b56545ec2e4f00a6b306843667870508ebc2",
       "text_portable": false
     },
     {
       "path": "docs/blender/GW184三相机与缺陷编辑器.md",
-      "bytes": 4887,
-      "sha256": "df1553306333b214b03c6b518a993e3d88af22556c6f1095bee04c4d62afb58c",
-      "original_sha256": "df1553306333b214b03c6b518a993e3d88af22556c6f1095bee04c4d62afb58c",
+      "bytes": 4857,
+      "sha256": "4e0552aa8244e460292437528e328083b887c9f6dd28db8bc9fbbe9ba8dab742",
+      "original_sha256": "4e0552aa8244e460292437528e328083b887c9f6dd28db8bc9fbbe9ba8dab742",
       "text_portable": false
     },
     {
       "path": "docs/blender/INSTALL.md",
-      "bytes": 11860,
-      "sha256": "db33b689e33c1ebab6647f6e827e45cba70c5cb4aeceee437710e5e3feb8b79e",
-      "original_sha256": "db33b689e33c1ebab6647f6e827e45cba70c5cb4aeceee437710e5e3feb8b79e",
+      "bytes": 12201,
+      "sha256": "760d50ad52f029841b6b5b1b585df70a1a7ed286d901288d0c50d96ab22fb92c",
+      "original_sha256": "760d50ad52f029841b6b5b1b585df70a1a7ed286d901288d0c50d96ab22fb92c",
       "text_portable": false
     },
     {
@@ -3560,30 +3560,30 @@
     },
     {
       "path": "docs/blender/NREL缺陷编辑器.md",
-      "bytes": 5991,
-      "sha256": "cf2231218276f66d4a2e4191eddbce1deb3c8c1c26f76e032bb81b674a368b2b",
-      "original_sha256": "cf2231218276f66d4a2e4191eddbce1deb3c8c1c26f76e032bb81b674a368b2b",
+      "bytes": 5977,
+      "sha256": "e24682e67257734a8e798ca2e91d7a47a6906c30ee4fd01a574912102d90a2c0",
+      "original_sha256": "e24682e67257734a8e798ca2e91d7a47a6906c30ee4fd01a574912102d90a2c0",
       "text_portable": false
     },
     {
       "path": "docs/blender/README.md",
-      "bytes": 5197,
-      "sha256": "a477489ca6b1a9f996a80a39e6b209cae78217d187d848e5f7ff498d4033d7ef",
-      "original_sha256": "a477489ca6b1a9f996a80a39e6b209cae78217d187d848e5f7ff498d4033d7ef",
+      "bytes": 5208,
+      "sha256": "b2d1cf999d1c49056da08ad93e8f3027673194ddd163ec1158c53e8d74ebba93",
+      "original_sha256": "b2d1cf999d1c49056da08ad93e8f3027673194ddd163ec1158c53e8d74ebba93",
       "text_portable": false
     },
     {
       "path": "docs/blender/T1Down机舱下视.md",
-      "bytes": 7122,
-      "sha256": "357379390010ca6122e3d1cec52160ef639bfd800de7e00393586c7f91d695c9",
-      "original_sha256": "357379390010ca6122e3d1cec52160ef639bfd800de7e00393586c7f91d695c9",
+      "bytes": 7303,
+      "sha256": "08fd455c6957617abcd7777192f827b993fc0a51e38944f027df8eebde8f5aba",
+      "original_sha256": "08fd455c6957617abcd7777192f827b993fc0a51e38944f027df8eebde8f5aba",
       "text_portable": false
     },
     {
       "path": "docs/blender/T1三相机使用说明.md",
-      "bytes": 11309,
-      "sha256": "8a2e80f147dc6853349e2d5ec139ec19a4a5c6f74b3d2b9eb5e9ca51a2da5ce7",
-      "original_sha256": "8a2e80f147dc6853349e2d5ec139ec19a4a5c6f74b3d2b9eb5e9ca51a2da5ce7",
+      "bytes": 11303,
+      "sha256": "0ee682bebdcff4eb6867c7de4b41782878871ae51a98dcf2e8b2faae7bc24f7c",
+      "original_sha256": "0ee682bebdcff4eb6867c7de4b41782878871ae51a98dcf2e8b2faae7bc24f7c",
       "text_portable": false
     },
     {
@@ -3756,30 +3756,30 @@
     },
     {
       "path": "docs/blender/发布状态与验证范围.md",
-      "bytes": 13912,
-      "sha256": "861ae781967c0392bce1e9f0c70b8026d0840fb14334d6587f93433334e8c0e7",
-      "original_sha256": "861ae781967c0392bce1e9f0c70b8026d0840fb14334d6587f93433334e8c0e7",
+      "bytes": 14123,
+      "sha256": "f14caedb234c4aeff134a542c9b80b143730f11ac1f4de6fe0dd617fbdb08882",
+      "original_sha256": "f14caedb234c4aeff134a542c9b80b143730f11ac1f4de6fe0dd617fbdb08882",
       "text_portable": false
     },
     {
       "path": "docs/blender/用户使用手册.md",
-      "bytes": 54640,
-      "sha256": "935761ac0f734603a4622a851181cd9f0cf1fbc91d874aca252cc56c5f01f357",
-      "original_sha256": "935761ac0f734603a4622a851181cd9f0cf1fbc91d874aca252cc56c5f01f357",
+      "bytes": 54651,
+      "sha256": "5034cad5bf2bccf206e667563d01f6018e716c3b47d76097fbbf84a0e995b598",
+      "original_sha256": "5034cad5bf2bccf206e667563d01f6018e716c3b47d76097fbbf84a0e995b598",
       "text_portable": false
     },
     {
       "path": "docs/blender/风机手动控制.md",
       "bytes": 7026,
-      "sha256": "0bf7b0eda59c256443d5fe9fdc517c4800d8308a790a89d2b2759dadfda8f4f9",
-      "original_sha256": "0bf7b0eda59c256443d5fe9fdc517c4800d8308a790a89d2b2759dadfda8f4f9",
+      "sha256": "c4b07d167c354539e4e77408f11d3b054262bda8bd868445e86f739a781335d6",
+      "original_sha256": "c4b07d167c354539e4e77408f11d3b054262bda8bd868445e86f739a781335d6",
       "text_portable": false
     },
     {
       "path": "docs/demos/演示指令单.md",
-      "bytes": 5938,
-      "sha256": "dca2e0d97827c6621a963db8ede23980cb5d65853641b75a9d6817ec43c1b215",
-      "original_sha256": "d63781d5c7f9bcba094681efef10c83e58a460b0f05c65693bfe870261104f9d",
+      "bytes": 5908,
+      "sha256": "265ae4dc5e81047d19fb86eb75a9acf09469e1f0acfdae0322ad86a4085ea43b",
+      "original_sha256": "9b9b7e3c0ad82168f4eeec9944f6ec9c9c5de984e2d0776446a68b1348013ba3",
       "text_portable": true
     },
     {
@@ -3798,9 +3798,9 @@
     },
     {
       "path": "docs/development/叶片晃动方案.md",
-      "bytes": 5336,
-      "sha256": "a1ad7f0b963807ffdc9da500fa97c71f4bd6ef02a7f259514386acd3df869c97",
-      "original_sha256": "a1ad7f0b963807ffdc9da500fa97c71f4bd6ef02a7f259514386acd3df869c97",
+      "bytes": 5306,
+      "sha256": "5a927b94277f5d0b6f05ee8fce55986c1e28d3f0bfe12e932aba5febe0c700d8",
+      "original_sha256": "5a927b94277f5d0b6f05ee8fce55986c1e28d3f0bfe12e932aba5febe0c700d8",
       "text_portable": false
     },
     {
@@ -3819,9 +3819,9 @@
     },
     {
       "path": "docs/lidar/双束TLS候选实施与验证总报告.md",
-      "bytes": 36302,
-      "sha256": "107d51c10166988ba2f1e2c40a44a27d1431d65341e2f643a3d7162443268efb",
-      "original_sha256": "fd0053ec2de266780fa1d53cf0019457a81a5aab019d62c2a48b68228a5d44bf",
+      "bytes": 36272,
+      "sha256": "11269d9f0f0282198f141d76d8a4aa9a0438591d5bd7b06e60c2ae1438226224",
+      "original_sha256": "be02184ae8eda74608016f3032aeffd2a9e640e40f9a3a2b1cececb393938321",
       "text_portable": true
     },
     {
@@ -3840,9 +3840,9 @@
     },
     {
       "path": "docs/overview/风场物理仿真平台_功能列表与终极目标.md",
-      "bytes": 8036,
-      "sha256": "689fe81b3d6db9191ce8efcb3ca51d63989add476ebccc0c71e10c901f0df58b",
-      "original_sha256": "689fe81b3d6db9191ce8efcb3ca51d63989add476ebccc0c71e10c901f0df58b",
+      "bytes": 8087,
+      "sha256": "e975dbb2376cd200b964fcdf556ebb0d5d6dee48f4a46d5ee0dc90657cbe678f",
+      "original_sha256": "e975dbb2376cd200b964fcdf556ebb0d5d6dee48f4a46d5ee0dc90657cbe678f",
       "text_portable": false
     },
     {
@@ -3966,9 +3966,9 @@
     },
     {
       "path": "docs/setup/setup_local.md",
-      "bytes": 6192,
-      "sha256": "8e68e54b8d48ce5e10c210596d94eca6d407b43571aa6e76b519bbbee00da17f",
-      "original_sha256": "8e68e54b8d48ce5e10c210596d94eca6d407b43571aa6e76b519bbbee00da17f",
+      "bytes": 6162,
+      "sha256": "6b680ca088ff8d59c8b4451e68276057728a40deb7ed7f8cd3d78594ffb21efb",
+      "original_sha256": "6b680ca088ff8d59c8b4451e68276057728a40deb7ed7f8cd3d78594ffb21efb",
       "text_portable": false
     },
     {
@@ -3980,9 +3980,9 @@
     },
     {
       "path": "docs/training/MAPPO_SETUP.md",
-      "bytes": 5531,
-      "sha256": "96c2498f0624ec69f956afd45ae66c5c0f9bf1616e78b22af572c0eb1abb786c",
-      "original_sha256": "96c2498f0624ec69f956afd45ae66c5c0f9bf1616e78b22af572c0eb1abb786c",
+      "bytes": 5501,
+      "sha256": "87a9768fb930fd64a6884d6c1db95c6fe9109920d5652772a4e295f78b51b176",
+      "original_sha256": "87a9768fb930fd64a6884d6c1db95c6fe9109920d5652772a4e295f78b51b176",
       "text_portable": false
     },
     {
@@ -3995,8 +3995,8 @@
     {
       "path": "docs/training/WAKE_STEERING_BREAKTHROUGH.md",
       "bytes": 5919,
-      "sha256": "6d7d6edd203b734712d74a96d5ad9a38d8902c68a9cc52e5d5cc3fd7ceb900e3",
-      "original_sha256": "6d7d6edd203b734712d74a96d5ad9a38d8902c68a9cc52e5d5cc3fd7ceb900e3",
+      "sha256": "65a489910a20487a4a479e5061224e9b8ae0db62058c2ddbc9ef5c5be6855f6a",
+      "original_sha256": "65a489910a20487a4a479e5061224e9b8ae0db62058c2ddbc9ef5c5be6855f6a",
       "text_portable": false
     },
     {
@@ -11301,6 +11301,13 @@
       "text_portable": false
     },
     {
+      "path": "publication/blender-0.3.28.json",
+      "bytes": 3098,
+      "sha256": "c1c7c36358a4ba1486b2220c386669ac0ca58115c34fca49b5e5bb5b36ad0350",
+      "original_sha256": "c1c7c36358a4ba1486b2220c386669ac0ca58115c34fca49b5e5bb5b36ad0350",
+      "text_portable": false
+    },
+    {
       "path": "publication/daily-installation-probe.json",
       "bytes": 11891,
       "sha256": "62dea870bfe4bacb6753264d3fb2fdf90744b8f0e410d094507df975644c46f3",
@@ -11309,9 +11316,9 @@
     },
     {
       "path": "publication/daily-installation.json",
-      "bytes": 4699,
-      "sha256": "751299dec6c798dcc84da630cb569bf92988ea94aac12c43505c2f923a95e941",
-      "original_sha256": "cd678f82b81bb9f98ee9136043a9b38479dd72697498889a31d4b1215dc32f40",
+      "bytes": 4755,
+      "sha256": "76fcae8c3bd22ff2ff7f379e2ea10e48be2fef7640c590ddb71fe42e870a8aa0",
+      "original_sha256": "3634cf7cb64e212adcc939a8bcfb6961451b0078b7cf9d4e4d37c403a258d0cf",
       "text_portable": true
     },
     {
@@ -12450,9 +12457,9 @@
     },
     {
       "path": "scripts/lidar/README.md",
-      "bytes": 11688,
-      "sha256": "2b911060e6d27d9c6ad06863d3ea72be21f64f2bab24baf0719eaa183130faab",
-      "original_sha256": "ecd431a99864207bb456236b07a8dc00b72b66e1cbbe0144f49b80c0537d754b",
+      "bytes": 11658,
+      "sha256": "b867108bde1c02d1bb1b2243d2bf2cff1722ced6de1bd0a110932e3798df9dab",
+      "original_sha256": "6da674ab05521e7512fd5600df66e97c8abbe256202eda1cec1e89940f86cdd1",
       "text_portable": true
     },
     {
@@ -12982,9 +12989,9 @@
     },
     {
       "path": "slides/演说稿_45min.md",
-      "bytes": 19608,
-      "sha256": "c8e03fc546b4c40dd6eecbc1a982ff2f77b17f862d1323ebdf0541e72c1cb41f",
-      "original_sha256": "c8e03fc546b4c40dd6eecbc1a982ff2f77b17f862d1323ebdf0541e72c1cb41f",
+      "bytes": 19633,
+      "sha256": "3bf68bf7b97558331dfd7caffbe37c7c501700507cc428d67cdb5d72e9ea7ade",
+      "original_sha256": "3bf68bf7b97558331dfd7caffbe37c7c501700507cc428d67cdb5d72e9ea7ade",
       "text_portable": false
     },
     {
@@ -13745,16 +13752,16 @@
     },
     {
       "path": "wfrl/lidar/README.md",
-      "bytes": 21633,
-      "sha256": "0e5e71818402ae3cff1dc5f5e6d90c0fa1b260e3cf6a9ffa84075b12b5707e6b",
-      "original_sha256": "0e5e71818402ae3cff1dc5f5e6d90c0fa1b260e3cf6a9ffa84075b12b5707e6b",
+      "bytes": 21603,
+      "sha256": "3ce36bd41dd4fb76d2fe2bf484bcda7e4c264a5ea3d7a074af63c9c5eac819f5",
+      "original_sha256": "3ce36bd41dd4fb76d2fe2bf484bcda7e4c264a5ea3d7a074af63c9c5eac819f5",
       "text_portable": false
     },
     {
       "path": "wfrl/lidar/REPLAY_FORMAT.md",
-      "bytes": 10638,
-      "sha256": "933a99e094ef991beb205eeb39be9eb8f774ff40552b4096514af470eee32961",
-      "original_sha256": "933a99e094ef991beb205eeb39be9eb8f774ff40552b4096514af470eee32961",
+      "bytes": 10628,
+      "sha256": "dc19818f0bb74b80da25f59ea3a4271547e1f6053eeebbc4d720b248f86f8de8",
+      "original_sha256": "dc19818f0bb74b80da25f59ea3a4271547e1f6053eeebbc4d720b248f86f8de8",
       "text_portable": false
     },
     {
@@ -14221,16 +14228,16 @@
     },
     {
       "path": "前端readme.md",
-      "bytes": 35981,
-      "sha256": "38d0400aebb235b13d22137e989f1c9097843aa7812999d40f94e96fe1e510ef",
-      "original_sha256": "38d0400aebb235b13d22137e989f1c9097843aa7812999d40f94e96fe1e510ef",
+      "bytes": 35989,
+      "sha256": "f41876d7104c3266ac8a2afeb724e6e255a320b44d4aa5e5f650211079c149db",
+      "original_sha256": "f41876d7104c3266ac8a2afeb724e6e255a320b44d4aa5e5f650211079c149db",
       "text_portable": false
     },
     {
       "path": "前端更新计划.md",
-      "bytes": 5170,
-      "sha256": "41f187f2a0d31aab3a56018510a03173a3e1e630ebc7e7970545d0c80db2ea6d",
-      "original_sha256": "41f187f2a0d31aab3a56018510a03173a3e1e630ebc7e7970545d0c80db2ea6d",
+      "bytes": 5140,
+      "sha256": "b7faa41355568daba54d68100e47a8e6ee82d5bfdd23b112f2d22f1699e51c67",
+      "original_sha256": "b7faa41355568daba54d68100e47a8e6ee82d5bfdd23b112f2d22f1699e51c67",
       "text_portable": false
     }
   ],

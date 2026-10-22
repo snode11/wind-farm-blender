@@ -25,7 +25,7 @@
   "startup_scene_preserved": true,
   "user_preferences_preserved": true,
   "formal_scene_preserved": true,
-  "public_release": false,
+  "public_release": true,
   "evidence": {
     "installed_regressions": "outputs/frontend-stability-fixes/installed-regressions.json",
     "daily_profile_probe": "outputs/frontend-stability-fixes/daily-probe.json",
@@ -56,5 +56,6 @@
   ],
   "source_host_scope": "Selected suites may overlap; counts are not a distinct-test total. Host checks do not import the installed Blender extension.",
   "limits": "Scripted native-window checks do not cover physical mouse interaction or the existing user window. No whole-frontend regression, complete playback/FPS benchmark, long-term memory stability, world-axis camera stabilization or scientific acceptance claim. One source test requires undistributed original VTP and is skipped.",
-  "activation_requirement": "Restart Blender after replacing the installed extension; source synchronization does not reload a running process."
+  "activation_requirement": "Restart Blender after replacing the installed extension; source synchronization does not reload a running process.",
+  "release_identity": "publication/blender-0.3.28.json"
 }

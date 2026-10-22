@@ -1,6 +1,6 @@
 # Blender 文档分类
 
-公开 NREL 安装版为 **0.3.24**，使用[专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.24/wfrl_blender-0.3.24.zip)；项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **0.3.28 本地包**，尚未公开发布；实际模块、181 文件载荷及验证范围见[安装核对](../../publication/daily-installation.json)。公开附件身份见[交付身份](../../publication/blender-0.3.24.json)，GW184 为 **0.4.0 独立运行包**。证据范围见[发布状态](发布状态与验证范围.md)。[返回总索引](../README.md)。
+公开 NREL 安装版为 **0.3.28**，使用[专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.28/wfrl_blender-0.3.28.zip)；项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **0.3.28**，与公开上传源包使用同一载荷；实际模块、181 文件载荷及验证范围见[安装核对](../../publication/daily-installation.json)。公开附件身份见[交付身份](../../publication/blender-0.3.28.json)，GW184 为 **0.4.0 独立运行包**。证据范围见[发布状态](发布状态与验证范围.md)。[返回总索引](../README.md)。
 
 ## 当前操作和功能
 
@@ -20,7 +20,7 @@
 
 | 文档 | 阅读范围 |
 | --- | --- |
-| [0.3.24](../../publication/blender-0.3.24.json) | 当前公开 ZIP、上传源包、源码提交及已有安装与行为证据的归属；公开交付未新增验证。 |
+| [0.3.28](../../publication/blender-0.3.28.json) | 当前公开 ZIP、上传源包、源码提交及已有安装与行为证据的归属；公开交付未新增验证。 |
 | [0.3.22](../../publication/blender-0.3.22.json) | 该版 ZIP、源码提交、文件身份与适用验证范围。 |
 | [0.3.21](../../publication/blender-0.3.21.json) | 该版 ZIP、173 文件身份与对应软件证据。 |
 | [0.3.20+1](releases/0.3.20+1发布核对.md) | 该版三相机默认复位载荷、173 文件 ZIP；载荷测试／安装版按钮验证与最终包格式及字节一致性分层记录。 |
