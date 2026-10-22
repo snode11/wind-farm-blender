@@ -1,0 +1,5 @@
+00:00.301  blend            | Read blend: "PROJECT_ROOT/outputs/frontend-stability/editor-source/nrel-defect-editor.blend"
+NREL_DEFECT_EDITOR_REOPEN_PASS {"status": "PASS", "phase": "reopen", "module_file": "PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py", "scope": "background save/reopen and flexible geometry; no viewport or appearance acceptance"}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

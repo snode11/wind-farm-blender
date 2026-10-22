@@ -41,12 +41,13 @@ def table(lines, header, columns, count):
     raise ValueError(f"Incomplete {header} table")
 
 
-def export(template, output):
+def export(template, output, shell=None, source=None):
+    shell = shell or ROOT / "wfrl/turbines/nrel5mw.yaml"
     sources = {}
 
     def read(path):
         raw = path.read_bytes()
-        sources[str(path.relative_to(template))] = hashlib.sha256(raw).hexdigest()
+        sources[path.relative_to(template).as_posix()] = hashlib.sha256(raw).hexdigest()
         return raw.decode("latin-1").splitlines()
 
     base = template / "5MW_Baseline"
@@ -66,16 +67,16 @@ def export(template, output):
         pairs = [nums(ln)[:2] for ln in coords
                  if ln.strip() and not ln.lstrip().startswith("!") and len(nums(ln)) >= 2]
         airfoils.append({"name": polar.stem, "reference": pairs[0], "coordinates": pairs[1:]})
-    shell_path = ROOT / "wfrl/turbines/nrel5mw.yaml"
-    shell_raw = shell_path.read_bytes()
+    shell_raw = shell.read_bytes()
     shell_lines = shell_raw.decode().splitlines()
-    shell = {}
+    shell_dimensions = {}
     for key in ("length", "width", "height", "spinner_radius", "nacelle_x_bias"):
         line = next(ln for ln in shell_lines if re.match(rf"\s*{key}:", ln))
-        shell[key] = float(line.split(":", 1)[1].split("#")[0])
+        shell_dimensions[key] = float(line.split(":", 1)[1].split("#")[0])
     result = {
         "schema_version": 1,
-        "source": "Local FAST.Farm NREL 5MW template; shell dimensions from wfrl/turbines/nrel5mw.yaml",
+        "source": source or (f"Local FAST.Farm template {template.relative_to(ROOT).as_posix()}; "
+                             f"shell dimensions from {shell.relative_to(ROOT).as_posix()}"),
         "source_sha256": dict(sorted(sources.items())),
         "shell_source_sha256": hashlib.sha256(shell_raw).hexdigest(),
         "units": {"length": "m", "angle": "deg"},
@@ -86,7 +87,7 @@ def export(template, output):
         "tower_columns": ["elevation", "diameter"],
         "tower_stations": table(ad, "TwrElev", 2, int(scalar(ad, "NumTwrNds"))),
         "airfoils": airfoils,
-        "shell": shell,
+        "shell": shell_dimensions,
     }
     assert len(result["blade_stations"]) == 19 and len(airfoils) == 8
     assert all(len(af["coordinates"]) == 399 for af in airfoils)
@@ -99,5 +100,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--template", type=Path, default=ROOT / "projects/nrel5mw-reference/template")
     parser.add_argument("--output", type=Path, default=ROOT / "blender_frontend/wfrl_blender/assets/nrel5mw_geometry.json")
+    parser.add_argument("--shell", type=Path, default=None,
+                        help="Turbine shell YAML; defaults to wfrl/turbines/nrel5mw.yaml")
+    parser.add_argument("--source", default=None, help="Override the recorded source description")
     args = parser.parse_args()
-    export(args.template, args.output)
+    export(args.template, args.output, args.shell, args.source)

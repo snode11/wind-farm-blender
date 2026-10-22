@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "passed": 76,
+  "skipped": 1,
+  "skip_reason": "Original VTP is not distributed with the offline release",
+  "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. PYTHON_ENV_ROOT/bin/python -m pytest blender_frontend/tests/test_scene_playback_lifecycle.py blender_frontend/tests/test_blade_models.py blender_frontend/tests/test_split_reconstruction.py blender_frontend/tests/test_split_mappo_texture.py blender_frontend/tests/test_tip_deflection.py -q -p no:cacheprovider"
+}

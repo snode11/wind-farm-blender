@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "archive_sha256": "d82d4a72dcafe2e6d246ee18c856d5b43a79f713a3df0d76fc6121fe7ecfd883",
+  "fresh_process_after_install": true,
+  "scene_file": "PROJECT_ROOT/outputs/t1-down-shoulder-view/T1_Down_后缘肩部.blend",
+  "screenshot": "PROJECT_ROOT/outputs/t1-down-shoulder-view/installed-native-window.png",
+  "observed_frame": 52,
+  "observed_simulation_time_s": 117.85,
+  "paused": true,
+  "t1_down_clicked": true,
+  "camera_reset_clicked": true,
+  "complete_camera_gate": true,
+  "mount_label": "T1 Down / 机舱侧下方外伸安装",
+  "observed_world_pan_deg": 140.4,
+  "observed_world_tilt_deg": -80.3,
+  "observed_world_roll_deg": 178.9,
+  "shoulder_contour_visible_in_selected_frame": true,
+  "tower_enters_from_upper_left": true,
+  "continuous_playback_checked": false,
+  "scope": "Native installed window at the saved frame; T1 Down and camera reset preserve time and restore the preset. Full-clip playback and reference-photo matching are not established."
+}

@@ -1,0 +1,62 @@
+{
+  "scope": "Source module, isolated Blender 5.2.1 LTS background processes, factory startup; no installed-window or physical-input verification",
+  "source_sha256": {
+    "blender_frontend/wfrl_blender/farm_flex.py": "46386af506f69de86ff1d3c708da85e49830c88ee7f92bd2ed41df15a6b19b04",
+    "blender_frontend/wfrl_blender/clearance_replay.py": "88952bf46768b4bc17133001ba4add63ac9ea4935239b6491d68433b43f16598",
+    "blender_frontend/wfrl_blender/__init__.py": "ab815becf794e82284f8eab915e0182ea8cb40d6c85826a6d11dc42eea1d7eaa"
+  },
+  "reproduction": {
+    "camera_undo": [
+      "addon.register(); addon.load_demo_scene(camera_rig=False)",
+      "Select scene.camera; set active; enable global undo; bpy.ops.ed.undo_push(message=\"Review baseline\")",
+      "bpy.ops.transform.translate(\"EXEC_DEFAULT\", True, value=(1,0,0)); bpy.ops.ed.undo()",
+      "Re-fetch bpy.context.scene; check farm_flex.is_active and farm_transport.poll; set frame to 121",
+      "Call addon.load_demo_scene(camera_rig=False), then addon.unregister()"
+    ],
+    "scene_delete": [
+      "addon.register(); addon.load_demo_scene(camera_rig=False)",
+      "Create another scene and assign bpy.context.window.scene to it",
+      "bpy.data.scenes.remove(original_scene)",
+      "Call farm_flex.detach(), then addon.unregister()"
+    ]
+  },
+  "results": {
+    "camera_undo": {
+      "mode": "camera_undo",
+      "blender": "5.2.1 LTS",
+      "module": "PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py",
+      "before_active": true,
+      "camera": "WFRL.Camera.T1.Gimbal",
+      "translate_operator": "{'FINISHED'}",
+      "undo_operator": "{'FINISHED'}",
+      "after_active": false,
+      "reader_available_after_undo": true,
+      "transport_poll_after_undo": false,
+      "t2_mesh_changed_after_frame_121": false,
+      "reported_time_s": 119.0,
+      "reload_via_product_entry": {
+        "error": "ReferenceError: StructRNA of type Scene has been removed",
+        "traceback": "Traceback (most recent call last):\n  File \"SYSTEM_TMP/wfrl-review-playback-byvivko3/focused_probe.py\", line 9, in probe\n    try: result[name]={'value':fn()}\n                               ~~^^\n  File \"SYSTEM_TMP/wfrl-review-playback-byvivko3/focused_probe.py\", line 34, in <lambda>\n    probe('reload_via_product_entry',lambda:bool(addon.load_demo_scene(camera_rig=False)))\n                                                 ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^\n  File \"PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py\", line 417, in load_demo_scene\n    collection = build_demo_geometry()\n  File \"PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py\", line 395, in build_demo_geometry\n    collection = build_scene(dto)\n  File \"PROJECT_ROOT/blender_frontend/wfrl_blender/scene_builder.py\", line 605, in build_scene\n    clear_scene(collection_name)\n    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"PROJECT_ROOT/blender_frontend/wfrl_blender/scene_builder.py\", line 579, in clear_scene\n    farm.detach(owner)\n    ~~~~~~~~~~~^^^^^^^\n  File \"PROJECT_ROOT/blender_frontend/wfrl_blender/farm_flex.py\", line 675, in detach\n    _ACTIVES.pop(active.scene.as_pointer(), None)\n                 ^^^^^^^^^^^^^^^^^^^^^^^\nReferenceError: StructRNA of type Scene has been removed\n"
+      },
+      "unregister": {
+        "error": "ReferenceError: StructRNA of type Scene has been removed",
+        "traceback": "Traceback (most recent call last):\n  File \"SYSTEM_TMP/wfrl-review-playback-byvivko3/focused_probe.py\", line 9, in probe\n    try: result[name]={'value':fn()}\n                               ~~^^\n  File \"SYSTEM_TMP/wfrl-review-playback-byvivko3/focused_probe.py\", line 41, in <lambda>\n    probe('unregister',lambda:addon.unregister())\n                              ~~~~~~~~~~~~~~~~^^\n  File \"PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py\", line 360, in unregister\n    previous()\n    ~~~~~~~~^^\n  File \"PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py\", line 334, in cleanup\n    clearance_replay.unregister()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"PROJECT_ROOT/blender_frontend/wfrl_blender/clearance_replay.py\", line 205, in unregister\n    farm.detach()\n    ~~~~~~~~~~~^^\n  File \"PROJECT_ROOT/blender_frontend/wfrl_blender/farm_flex.py\", line 675, in detach\n    _ACTIVES.pop(active.scene.as_pointer(), None)\n                 ^^^^^^^^^^^^^^^^^^^^^^^\nReferenceError: StructRNA of type Scene has been removed\n"
+      }
+    },
+    "scene_delete": {
+      "mode": "scene_delete",
+      "blender": "5.2.1 LTS",
+      "module": "PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py",
+      "before_active": true,
+      "runtime_count_after_remove": 1,
+      "detach_after_delete": {
+        "error": "ReferenceError: StructRNA of type Scene has been removed",
+        "traceback": "Traceback (most recent call last):\n  File \"SYSTEM_TMP/wfrl-review-playback-byvivko3/focused_probe.py\", line 9, in probe\n    try: result[name]={'value':fn()}\n                               ~~^^\n  File \"SYSTEM_TMP/wfrl-review-playback-byvivko3/focused_probe.py\", line 40, in <lambda>\n    probe('detach_after_delete',lambda:farm_flex.detach())\n                                       ~~~~~~~~~~~~~~~~^^\n  File \"PROJECT_ROOT/blender_frontend/wfrl_blender/farm_flex.py\", line 675, in detach\n    _ACTIVES.pop(active.scene.as_pointer(), None)\n                 ^^^^^^^^^^^^^^^^^^^^^^^\nReferenceError: StructRNA of type Scene has been removed\n"
+      },
+      "unregister": {
+        "error": "ReferenceError: StructRNA of type Scene has been removed",
+        "traceback": "Traceback (most recent call last):\n  File \"SYSTEM_TMP/wfrl-review-playback-byvivko3/focused_probe.py\", line 9, in probe\n    try: result[name]={'value':fn()}\n                               ~~^^\n  File \"SYSTEM_TMP/wfrl-review-playback-byvivko3/focused_probe.py\", line 41, in <lambda>\n    probe('unregister',lambda:addon.unregister())\n                              ~~~~~~~~~~~~~~~~^^\n  File \"PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py\", line 360, in unregister\n    previous()\n    ~~~~~~~~^^\n  File \"PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py\", line 334, in cleanup\n    clearance_replay.unregister()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"PROJECT_ROOT/blender_frontend/wfrl_blender/clearance_replay.py\", line 205, in unregister\n    farm.detach()\n    ~~~~~~~~~~~^^\n  File \"PROJECT_ROOT/blender_frontend/wfrl_blender/farm_flex.py\", line 675, in detach\n    _ACTIVES.pop(active.scene.as_pointer(), None)\n                 ^^^^^^^^^^^^^^^^^^^^^^^\nReferenceError: StructRNA of type Scene has been removed\n"
+      }
+    }
+  }
+}

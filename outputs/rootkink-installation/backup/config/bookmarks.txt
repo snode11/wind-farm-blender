@@ -1,0 +1,12 @@
+[Bookmarks]
+[Recent]
+PROJECT_ROOT/outputs/farm-down-nacelle-view/
+PROJECT_ROOT/outputs/t1-down-shoulder-view/
+PROJECT_ROOT/outputs/t1-down-nacelle-2b_04fhj/
+PROJECT_ROOT/outputs/manual-controls-polish/daily-window/
+PROJECT_ROOT/outputs/sidebar-defaults/
+PROJECT_ROOT/outputs/reconstruction-shared-structure-20261009-a01/installed-window-a02/
+PROJECT_ROOT/outputs/nrel-b1-repair-20261005/
+USER_HOME/Desktop/
+PROJECT_ROOT/evidence/camera-v3-20260922/final-interaction/
+PROJECT_ROOT/evidence/camera-v3-20260922/v3-window/

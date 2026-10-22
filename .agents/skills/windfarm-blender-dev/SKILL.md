@@ -1,6 +1,6 @@
 ---
 name: windfarm-blender-dev
-description: 开发、排查或验收本仓库 Blender 原生前端的 MAPPO 回放、重建对照、三相机、NREL 缺陷编辑、净空雷达与扩展交付时使用。
+description: 开发、排查或验收本仓库 Blender 原生前端的风机手动控制、MAPPO 回放、重建对照、相机、NREL 缺陷编辑、净空雷达与扩展交付时使用。
 ---
 
 # Windfarm Blender 开发
@@ -20,6 +20,8 @@ description: 开发、排查或验收本仓库 Blender 原生前端的 MAPPO 回
 
 MAPPO · 60 秒是随包柔性结果回放，离线查看不需要 Bridge、FAST.Farm 或网络。后端 Replay、Interactive、Formal Training 涉及推理或训练，须单独确认入口和环境。纯界面、相机、回放或 skill 修改不触发物理求解。
 
+网页实验室按[方案与分工](../../../docs/proposal/platform/风场网页实验室_第一版方案与分工汇总.md)处理：已确认方向为网页即时预览、Ubuntu 异步计算和网页结果渲染，运行与回放链路绕过 Blender，不要求现有 Blender TCP 连接。逐机操作适配、独立计算入口、结果导出和网页联调仍待实现与验证，目标 Ubuntu 尚未完成验证；本 skill 的原生前端检查不作为该链路的验收。
+
 ## 运行来源与包身份
 
 - 分别核对工作区源码、构建 ZIP、公开附件和实际安装目录。Blender 兼容版本与扩展版本读取 blender_manifest.toml（本地文件：`blender_frontend/wfrl_blender/blender_manifest.toml`）；包身份核对 `build-info.json`、SHA-256 与 inventory，不以版本字符串推定载荷一致。
@@ -33,6 +35,7 @@ MAPPO · 60 秒是随包柔性结果回放，离线查看不需要 Bridge、FAST
 
 | 功能 | 维护入口 | 按需资料 |
 | --- | --- | --- |
+| 独立风机手动控制与墙钟转动 | `manual_scene.py`、`manual_control.py`、`manual_motion.py`、`panels/manual_control.py` | [手动控制说明](../../../docs/blender/风机手动控制.md)及验证入口的手动控制检查 |
 | MAPPO 统一侧栏、三机柔性运动与挠度 | `panels/farm_replay.py`、`farm_flex.py`、`tower_motion.py`、`prebend.py`、`deflection.py`、`tip_tracking.py`、`assets/mappo/` | 前端实现说明的时间轴、柔性运动与测量参考章节 |
 | 场景恢复、全局播放归属与诊断 | `playback.py`、`farm_flex.py`、`clearance_replay.py`、`frontend_diagnostics.py`、`__init__.py` | [验证入口](references/verification.md)的场景与播放检查 |
 | 重建统一入口、模式切换与视图 | `split_reconstruction.py`、`split_reconstruction_ui.py`、`split_reconstruction_timing.py`、`split_mappo_texture.py`、`split_texture_settings.py`、`cameras.py`、`assets/examples/` | 前端使用说明的重建对照章节 |
@@ -41,6 +44,7 @@ MAPPO · 60 秒是随包柔性结果回放，离线查看不需要 Bridge、FAST
 | NREL 九片叶片缺陷编辑、JSON 与 G 分析 | `nrel_defects/`、`farm_flex.py`、`repair_marks.py`；仓库 `scripts/blender/nrel_defects.py`、`scripts/blender/open_nrel_defect_editor.py` | [NREL 缺陷编辑器](../../../docs/blender/NREL缺陷编辑器.md) |
 | 三相机盒体、支架与默认配置 | `stacked_camera_rig.py`、`panels/stacked_camera_rig.py`、`custom_cameras.py`、`assets/cameras/t1-three-camera-default.json` | [T1 三相机说明](../../../docs/blender/T1三相机使用说明.md) |
 | GRID / STRIP / WATCH、窗口清理与原图采集 | `native_camera_views.py`、`installation_schematic.py`、`custom_camera_capture.py`、`custom_camera_preview.py`、`panels/custom_camera_output.py`；播放归属见 `playback.py` | 验证入口的相机生命周期与实际窗口检查 |
+| NREL 单路机舱相机、光学画幅与可见性 | `nacelle_camera.py`、`nacelle_visibility.py`、`cameras.py`；仓库 `scripts/blender/check_nrel_nacelle_camera.py`、`scripts/blender/render_camera_video.py` | [机舱相机参数与模型限制](../../../docs/blender/NREL机舱相机.md)及验证入口的机舱相机检查 |
 | 云台、总览和雷达外观 | `cameras.py`、`panels/gimbal.py`、`clearance_visual.py`；涉及几何时读 `scene_builder.py`、`turbine_geometry.py` | 前端使用说明与前端实现说明 |
 | B2、双束净空与 S1 报警 | `clearance_replay.py`、`radar_feedback.py`、`panels/clearance.py`、`panels/farm_replay.py`；仓库 `wfrl/lidar/replay.py`、`wfrl/lidar/dual_beam_replay.py`、`wfrl/lidar/evidence.py` | [结果包合同](../../../wfrl/lidar/REPLAY_FORMAT.md) |
 | 雷达标定、计算与结果打包 | 仓库 `wfrl/lidar/physics.py`、`wfrl/lidar/sampling.py`、`wfrl/lidar/dual_beam.py`、`wfrl/lidar/dual_beam_package.py`、`scripts/lidar/` | [雷达算法说明](../../../wfrl/lidar/README.md)、[计算流程](../../../scripts/lidar/README.md) |
@@ -52,12 +56,19 @@ NREL 动态研究的仓库入口为 `scripts/blender/open_nrel_dynamic_review.py
 
 ## 当前行为与约束
 
-### 时间、场景与播放
+### 独立风机手动控制
+
+- **N → 风机控制 → 创建 / 进入手动场景** 创建独立三机刚性场景，对象、网格、材质与环境独立于 MAPPO。进入须处于对象模式，并先停止、断开后端及处理待执行命令。手动姿态与转动不启动物理求解，不生成相应功率、载荷、尾流、形变或雷达读数；界面角度与转速范围不代表实体运行或安全限值。
+- 每台风机保留独立参数；选择“全部”不改值，编辑只同步当前字段。统一桨距显式覆盖三片叶片的独立桨距，多值字段保留提示。转动按墙钟时间积分，改变 RPM 保留当前叶轮角度，不受 Blender FPS 或 MAPPO 60 秒片段限制；零 RPM 保持暂停，全部零 RPM 时禁用运行。
+- 保存保留参数与姿态；重开、撤销、重做、无窗口显示或场景结构无效时暂停。返回原场景保留其数据和播放位置，同一会话仅在原生 player 未被其他场景占用时恢复原有播放；重开文件不自动恢复播放。
+
+### 回放时间、场景与播放
 
 - MAPPO 使用 40 Hz 保存源和固定 60 Hz 显示时间轴；重建使用 10 Hz 保存样本。源采样率、时间轴与实际绘制帧率分别报告。修改 Blender FPS 只改变目标墙钟播放速度。
 - 姿态、卡片、S1 和累计统计共用仿真时钟；暂停单步前进一帧，播放中单步先暂停，末帧钳制。后退、寻址与重播不重复累计统计或暴露未来事件，显示插值不生成缺失测量。
 - 回放实例按场景绑定；FULL_COPY 缺少对象时保持未就绪，共用网格的 linked scene 拒绝第二个时钟。Blender 同进程只有一个全局原生 player，归属由 `playback.py` 的开始／结束回调确定，不能由各窗口播放标志推断多个播放器。
-- MAPPO 驱动九片叶片及三机塔架柔性运动；刚性姿态示意仅指独立 normal/close 路径。该路径由仓库 `scripts/blender/open_clearance_demo.py` 加载外部包，工况切换从片段起点开始；只切视角保留工况、时刻和暂停状态。
+- 原生撤销／重做释放旧 RNA 引用并按恢复后的场景身份重绑回放，保留相机、机组、时间与时间轴设置；缺包或绑定失败保持未就绪，不降为刚性读数。删除场景后仍可清理、重新加载和卸载扩展。
+- MAPPO 驱动九片叶片及三机塔架柔性运动。独立 normal/close 净空演示使用刚性姿态示意，由仓库 `scripts/blender/open_clearance_demo.py` 加载外部包，工况切换从片段起点开始；只切视角保留工况、时刻和暂停状态。
 
 ### 重建对照
 
@@ -70,18 +81,26 @@ NREL 动态研究的仓库入口为 `scripts/blender/open_nrel_dynamic_review.py
 - 便携示例保存 `wfrl_farm_flex_path=__WFRL_BUNDLED_MAPPO__`，依据保存的 manifest SHA-256 匹配安装目录的 `assets/mappo/`；保留 packed 天空／地表图及无 linked libraries 的可携带性。失效路径只恢复同哈希内置包，已有目录也须通过加载校验；不匹配则清空并报错，不改为任意默认包或读取器不支持的 `//` 路径。
 - 几何与纹理仍为 `NOT_ACCEPTED`，纹理辅助几何的科学门槛仍为 `FAILED_GATE`。增强只改变显示，缩放不增加观测分辨率；图集条带、接缝、错贴及拖影如实保留，人工观察点不作为自动缺陷检测结果。
 
+### NREL 单路机舱相机
+
+- 使用现有 MAPPO 视口与回放，继承机舱和塔顶运动、不继承叶轮自转；独立于 C1/C2/C3。名义安装与光学参数由 `nacelle_camera.py` 定义，详细坐标和画幅见机舱相机说明；选中已有相机保留原生姿态与镜头，显式复位才恢复名义基准。
+- 保持完整光学画幅及水平／垂直视场关系；手动变焦不改传感器尺寸。视频导出分别记录请求尺寸、实际尺寸和内参，不能由输出分辨率推定现场可辨识度；切换观察镜头不重新生成同源纹理图集。
+- 保留机舱、叶根封口、塔筒和结构遮挡，不通过隐藏或缩小结构制造照片匹配。名义参数下当前模型未达到参考照片的近根外表面连续延伸至叶尖效果；表面入框、有限射线可见、完整轮廓入框与图片可辨识分别判断，不将模拟几何检查视为实体安装或现场标定通过。
+
 ### 三相机与资源生命周期
 
 - C1/C2/C3 按实际槽位路由，缺失明确报错。三路共用场景和时钟；GRID 是三路加静态安装示意的 2×2，STRIP 为三列。WATCH／单路放大固定使用 SOLID 材质颜色，返回三路恢复原画质；PNG 原图质量独立管理。
+- 主窗口切换镜头不覆盖原生观察窗口的局部相机。观察期间保存使用原始画质及真实槽位相机，不写入临时代理；正常保存和文件写入失败后恢复当前观察状态。原生撤销关闭观察会话并恢复所属场景设置。
 - 盒体贴合约束作用于支架安装端；固定相机不自动追踪叶片，不要求三等分或按目标叶长裁图。连续投影、重叠、射线可见、无遮挡和拼接成功分别判断，不隐藏真实结构制造通过结果。
 - **恢复默认三相机** 从内置 JSON 恢复盒体与三路参数，保留帧、播放状态和自由视图，支持布局撤销；无盒体时不隐式创建，采集、草稿及安装／后端忙碌时拒绝。配置与原生状态均有效时保持对象身份和撤销历史，失败回滚。
-- 相机事务提交由 `custom_cameras._publish()` 重绑定 WATCH / LAYOUT 当前相机及退出快照。窗口清理处理已删除 RNA、重复关闭和释放失败，保留未释放资源以供清理重试，向用户报告错误。延迟恢复播放须再次核对全局播放归属，不打断其他场景的 player。
+- 当前源码的 `custom_cameras._publish()` 在同一事务中重绑定场景、局部视口及同场景未关闭控制器的 `snapshot`、`external_snapshot`、`session.snapshot` 相机引用，包含编辑状态，随相机对象一起提交或回滚；`_refresh_references()` 仅在 WATCH / LAYOUT 刷新当前观察相机。窗口清理处理已删除 RNA、重复关闭和释放失败，保留未释放资源以供清理重试，向用户报告错误。延迟恢复播放须再次核对全局播放归属，不打断其他场景的 player。
 - 原图采集核对原生与评估相机状态；非有限值或采集中途原生修改须中断，恢复事务状态并保留用户修改。真实 GPU 事务、PNG/state 一致性、资源释放和 FPS 各自验证。
 
 ### NREL 缺陷编辑
 
 - `nrel_defects/` 管理九片叶片的合成缺陷、预览确认／取消、撤销重做、健康对照与 JSON；`repair_marks.py` 的默认修补痕迹独立保留。缺陷网格、辅助轮廓和分析支持区域沿同一保存柔性运动更新，`physics_coupled=False`，不修改 FAST.Farm / BeamDyn 结果或雷达测量。
 - JSON 绑定 NREL 健康参考几何与参数化身份，不直接使用 GW184 配置或按叶长自动缩放。保存与重开恢复已提交配置，不把临时预览写成已应用状态。
+- 删除辅助轮廓不改变缺陷配置；寻址和显隐跳过失效对象，重新生成标记时依据当前配置恢复。关闭逐项释放自有资源，保护共享数据；释放失败保留会话并提示重试，不阻断其他叶片管理器清理。
 - G 分析要求 C1/C2/C3 完整并使用冻结的相机配置；安装、父级、矩阵、镜头或分辨率变化需关闭重开编辑器以重新冻结。`VISIBLE/PARTIAL` 只表示几何可见性，不能升级为图片可辨识或检测通过；外观审查状态单独判断。
 - 当前 0.2 mm 叶尖精度门槛仍为 `FAILED_GATE`。显示编辑、保存重开或软件回归通过不改变该结论，也不证明物理损伤或修复效果。
 

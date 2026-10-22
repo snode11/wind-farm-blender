@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "package_path": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender",
+  "verified_files": 181,
+  "mismatches": [],
+  "unexpected_files": [],
+  "ignored": [
+    "__pycache__",
+    "*.pyc"
+  ],
+  "profile_files_unchanged": {
+    "startup.blend": true,
+    "userpref.blend": true
+  },
+  "version": "0.3.27",
+  "archive": "outputs/frontend-stability/validation/package/wfrl_blender-0.3.27.zip",
+  "archive_sha256": "6d449fb37f868ac4728702d26897cd4d6ff85ff11328f024cccf97b0c390b806",
+  "source_payloads_checked": 180,
+  "source_payload_match": true
+}

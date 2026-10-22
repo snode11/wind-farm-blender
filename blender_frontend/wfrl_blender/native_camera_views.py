@@ -4,6 +4,7 @@ Shared scene aspect is expanded to contain each calibrated rectangle. A mask
 shows only that rectangle. Proxy cameras follow originals without modifying them.
 """
 import math
+import uuid
 from contextlib import contextmanager
 import bpy
 from bpy.app.handlers import persistent
@@ -13,6 +14,28 @@ from . import installation_schematic as schematic
 _ACTIVE = None
 _KEYMAPS = []
 _ERROR_PROPERTY = 'wfrl_native_camera_error'
+_PROXY_OWNER = 'wfrl_native_camera_owner'
+_HISTORY_QUALITY = None
+
+
+def owns_view(window, area):
+    """Reserve every area of the observation window, including layout setup."""
+    session = _ACTIVE
+    return bool(session is not None and session.owns_window
+                and window.as_pointer() == session.window_id)
+
+
+def _view_state(space):
+    rv = space.region_3d
+    return {name: getattr(rv, name).copy() if hasattr(getattr(rv, name), 'copy')
+            else getattr(rv, name) for name in (
+                'view_perspective', 'view_rotation', 'view_location',
+                'view_distance', 'view_camera_zoom', 'view_camera_offset')}
+
+
+def _restore_view(space, state):
+    for name, value in state.items():
+        setattr(space.region_3d, name, value)
 
 
 def last_error(scene):
@@ -125,6 +148,8 @@ class NativeSession:
         self.slots = slots
         self.source_shading = []
         self.preview_quality = None
+        self.proxy_owner = uuid.uuid4().hex
+        self.save_state = None
         self.fast = True
         shader=context.space_data.shading
         self.material_settings={key:getattr(shader,key) for key in (
@@ -289,7 +314,8 @@ class NativeSession:
                     errors.append(f"清理 C{entry['slot']} 观察相机：{exc}")
         if entry.get('proxy') is None and data is not None:
             try:
-                bpy.data.cameras.remove(data)
+                if not getattr(data, 'users', 0):
+                    bpy.data.cameras.remove(data)
                 entry['proxy_data'] = None
             except ReferenceError:
                 entry['proxy_data'] = None
@@ -355,6 +381,8 @@ class NativeSession:
         return None
 
     def sync(self):
+        if self.save_state is not None:
+            return
         render = self.scene.render
         aspect = render.resolution_x*render.pixel_aspect_x/(render.resolution_y*render.pixel_aspect_y)
         for entry in self.entries:
@@ -375,12 +403,14 @@ class NativeSession:
             key = (camera.as_pointer(),repr(core.parameters(camera)),aspect) if camera else None
             if key != entry['key'] or (camera and entry['proxy'] is None):
                 if entry['proxy']:
-                    data=entry['proxy'].data;bpy.data.objects.remove(entry['proxy'],do_unlink=True)
-                    bpy.data.cameras.remove(data);entry['proxy']=None;entry['proxy_data']=None
+                    errors = self.release_proxy(entry)
+                    if errors:
+                        raise RuntimeError('；'.join(errors))
                 if camera:
                     params=core.parameters(camera)
                     outer,fx,fy=fit_gate(params.fov,params.vfov,aspect)
                     data=bpy.data.cameras.new(f'T1.Native.C{slot}')
+                    data[_PROXY_OWNER] = self.proxy_owner
                     entry['proxy_data'] = data
                     data.sensor_fit='HORIZONTAL'
                     # Keep lens in Blender's valid range even at extreme FOV.
@@ -391,6 +421,7 @@ class NativeSession:
                     data.clip_start=params.clip_near_m;data.clip_end=params.clip_far_m
                     data.passepartout_alpha=1.
                     proxy=bpy.data.objects.new(f'T1.Native.C{slot}',data)
+                    proxy[_PROXY_OWNER] = self.proxy_owner
                     entry['proxy'] = proxy
                     self.scene.collection.objects.link(proxy)
                     proxy.hide_render=True
@@ -399,11 +430,14 @@ class NativeSession:
                 entry['key']=key
             region=next((r for r in area.regions if r.type=='WINDOW'),None)
             view_key=(key, region.width, region.height) if region else None
-            if entry['proxy'] and view_key != entry['view_key']:
+            if entry['proxy'] and (not space.use_local_camera or space.camera != entry['proxy']):
                 space.use_local_camera=True;space.camera=entry['proxy']
-                space.region_3d.view_perspective='CAMERA'
+            if entry['proxy'] and view_key != entry['view_key']:
+                initial = entry['view_key'] is None
+                if initial:
+                    space.region_3d.view_perspective='CAMERA'
                 region=next((r for r in area.regions if r.type=='WINDOW'),None)
-                if region:
+                if region and space.region_3d.view_perspective == 'CAMERA':
                     with bpy.context.temp_override(window=self.window,area=area,region=region):
                         bpy.context.view_layer.update()
                         frame_gate(self.scene,entry,region,space)
@@ -417,8 +451,8 @@ class NativeSession:
                 self.diagram_stale = True
                 self.diagram_error = ''
                 self.diagram_area.tag_redraw()
-                # First expose invalidation. Snapshot on the following watch
-                # pass, so an old image never appears to be the new layout.
+                # Invalidate before sampling so the old diagram is not shown
+                # as the current camera layout.
             elif self.diagram_stale and not self.diagram_error:
                 try:
                     self.diagram = schematic.capture(self.scene)
@@ -427,11 +461,55 @@ class NativeSession:
                     self.diagram_error = str(exc)
                 self.diagram_area.tag_redraw()
 
+    def suspend_for_save(self):
+        """Serialize ordinary cameras and original quality, retaining live views."""
+        if self.save_state is not None or self.closing:
+            return
+        state = {'quality': self.quality_settings(), 'shading': [], 'views': []}
+        self.save_state = state
+        if self.preview_quality is not None:
+            self.set_quality(self.preview_quality)
+        for window_id, area_id, original in self.source_shading:
+            window = next((w for w in bpy.context.window_manager.windows
+                           if w.as_pointer() == window_id), None)
+            area = next((a for a in window.screen.areas if a.as_pointer() == area_id), None) if window else None
+            if area and area.type == 'VIEW_3D':
+                shader = area.spaces.active.shading
+                state['shading'].append((shader, shader.type))
+                shader.type = original
+        errors = []
+        for entry in self.entries:
+            space = entry['area'].spaces.active
+            if space.type == 'VIEW_3D':
+                state['views'].append((entry, _view_state(space)))
+                space.camera = core.get_camera(self.scene, entry['slot'])
+                space.use_local_camera = True
+            errors.extend(self.release_proxy(entry))
+            entry['key'] = entry['view_key'] = None
+        if errors:
+            raise RuntimeError('；'.join(errors))
+
+    def resume_after_save(self):
+        """Restore the same live inspection after either save result."""
+        state, self.save_state = self.save_state, None
+        if state is None:
+            return
+        errors = []
+        _cleanup_step(errors, '恢复观察画质', lambda: self.set_quality(state['quality']))
+        for shader, value in state['shading']:
+            _cleanup_step(errors, '恢复主视口', lambda shader=shader, value=value: setattr(shader, 'type', value))
+        _cleanup_step(errors, '恢复观察相机', self.sync)
+        for entry, view in state['views']:
+            _cleanup_step(errors, '恢复观察视角', lambda entry=entry, view=view:
+                          _restore_view(entry['area'].spaces.active, view))
+        if errors:
+            raise RuntimeError('；'.join(errors))
+
     def draw(self):
         if bpy.context.window != self.window or bpy.context.workspace != self.workspace:return
         entry=next((e for e in self.entries if e['area']==bpy.context.area),None)
         if not entry:return
-        from . import performance
+        from . import performance, playback
         performance.count('native.draw')
         import gpu,blf
         from gpu_extras.batch import batch_for_shader
@@ -462,7 +540,7 @@ class NativeSession:
             label_width,_=blf.dimensions(font,label)
             time_s=self.scene.get('wfrl_clearance_time_s')
             clock=f'共同 {time_s:.2f} s' if time_s is not None else f'共同帧 {self.scene.frame_current}'
-            clock += ' · 播放' if self.window.screen.is_animation_playing else ' · 暂停'
+            clock += ' · 播放' if playback.is_playing(self.scene) else ' · 暂停'
             blf.size(font,11*scale);blf.color(font,.65,.73,.81,1)
             width,_=blf.dimensions(font,clock)
             available=max(1,region.width-label_width-30*scale)
@@ -689,13 +767,29 @@ def watch():
     return .25
 
 
+def _playback_control_state(scene):
+    """Protect another or unknown owner even when global screen flags disagree."""
+    from . import playback
+    owner = playback.owner_scene()
+    if owner is not None and owner != scene:
+        return False, f'播放器由场景“{owner.name}”占用，请先在对应窗口暂停'
+    playing = playback.any_playing()
+    if playing and owner is None:
+        return False, '无法确认当前播放器归属，请先在播放窗口暂停'
+    return playing, ''
+
+
 def header(self,context):
     if _ACTIVE and not _ACTIVE.closing and context.window==_ACTIVE.window:
         row=self.layout.row(align=True)
         entry=next((e for e in _ACTIVE.entries if e['area']==context.area),None)
-        row.operator('wfrl.native_camera_play',text='暂停' if context.screen.is_animation_playing else '播放',icon='PAUSE' if context.screen.is_animation_playing else 'PLAY')
+        playing, blocked = _playback_control_state(_ACTIVE.scene)
+        controls_enabled = WFRL_OT_NativePlay.poll(context) and not blocked
+        play = row.row(align=True)
+        play.enabled = controls_enabled
+        play.operator('wfrl.native_camera_play',text='播放器占用中' if blocked else '暂停' if playing else '播放',icon='PAUSE' if playing else 'PLAY')
         step=row.row(align=True)
-        step.enabled=WFRL_OT_NativePlay.poll(context)
+        step.enabled=controls_enabled
         step.operator('wfrl.farm_transport',text='单步',icon='NEXT_KEYFRAME').action='STEP'
         if entry and len(_ACTIVE.slots)>1:
             op=row.operator('wfrl.native_camera_focus',text=f"放大 C{entry['slot']}",icon='FULLSCREEN_ENTER')
@@ -785,12 +879,20 @@ class WFRL_OT_NativePlay(bpy.types.Operator):
     @classmethod
     def poll(cls,context):
         from . import custom_camera_capture
+        # Keep Space dispatch here so an occupied player cannot fall through
+        # to Blender's global playback shortcut. The header disables its button.
         return bool(_ACTIVE and not _ACTIVE.closing and context.window==_ACTIVE.window and not custom_camera_capture.active())
     def execute(self,context):
-        override=_ACTIVE.playback_context()
+        if not WFRL_OT_NativePlay.poll(context):return {'CANCELLED'}
+        session = _ACTIVE
+        override=session.playback_context()
         if override is None:return {'CANCELLED'}
         with context.temp_override(**override):
-            if context.screen.is_animation_playing:bpy.ops.screen.animation_cancel(restore_frame=False)
+            playing, blocked = _playback_control_state(session.scene)
+            if blocked:
+                self.report({'WARNING'}, blocked)
+                return {'CANCELLED'}
+            if playing:bpy.ops.screen.animation_cancel(restore_frame=False)
             else:bpy.ops.screen.animation_play()
         return {'FINISHED'}
 
@@ -820,6 +922,10 @@ def register():
     bpy.types.VIEW3D_HT_header.prepend(header)
     bpy.types.IMAGE_HT_header.prepend(header)
     bpy.app.handlers.load_pre.append(on_load)
+    bpy.app.handlers.load_post.append(on_loaded)
+    bpy.app.handlers.save_pre.append(on_save)
+    bpy.app.handlers.save_post.append(on_saved)
+    bpy.app.handlers.save_post_fail.append(on_saved)
     config=bpy.context.window_manager.keyconfigs.addon
     if config:
         keymap=config.keymaps.new(name='Frames',space_type='EMPTY')
@@ -831,12 +937,82 @@ def register():
 def on_load(_):shutdown(preserve_playback=False)
 
 
+@persistent
+def on_loaded(_):
+    """Discard only explicitly owned observation resources from loaded files."""
+    for obj in list(bpy.data.objects):
+        owner = obj.get(_PROXY_OWNER)
+        if owner and obj.type == 'CAMERA' and obj.data.get(_PROXY_OWNER) == owner:
+            data = obj.data
+            bpy.data.objects.remove(obj, do_unlink=True)
+            if data.users == 0:
+                bpy.data.cameras.remove(data)
+    for data in list(bpy.data.cameras):
+        if data.get(_PROXY_OWNER) and data.users == 0:
+            bpy.data.cameras.remove(data)
+
+
+def on_history_pre(_):
+    """End transient observation before Blender replaces scene RNA."""
+    global _HISTORY_QUALITY
+    _HISTORY_QUALITY = None
+    if _ACTIVE is not None:
+        try:
+            _HISTORY_QUALITY = (_ACTIVE.scene.session_uid, _ACTIVE.preview_quality)
+        except ReferenceError:
+            pass
+        shutdown(preserve_playback=False)
+
+
+def on_history_post(_):
+    """Restore quality only to the same scene identity in the undo result."""
+    global _HISTORY_QUALITY
+    snapshot, _HISTORY_QUALITY = _HISTORY_QUALITY, None
+    on_loaded(None)
+    if snapshot is not None and snapshot[1] is not None:
+        scene = next((s for s in bpy.data.scenes if s.session_uid == snapshot[0]), None)
+        if scene is not None:
+            pixel_size, samples, shadows, gi = snapshot[1]
+            scene.render.preview_pixel_size = pixel_size
+            scene.eevee.taa_samples = samples
+            scene.eevee.use_shadows = shadows
+            scene.eevee.use_fast_gi = gi
+
+
+@persistent
+def on_save(_):
+    if _ACTIVE:
+        try:
+            _ACTIVE.suspend_for_save()
+        except Exception as exc:
+            _remember_error(_ACTIVE.scene, f'相机观察保存准备失败：{exc}')
+            # Blender continues writing after handler exceptions. End the
+            # failed observation so ordinary cleanup can retry every resource.
+            shutdown()
+
+
+@persistent
+def on_saved(_):
+    if _ACTIVE:
+        try:
+            _ACTIVE.resume_after_save()
+        except Exception as exc:
+            _remember_error(_ACTIVE.scene, f'相机观察保存恢复失败：{exc}')
+            shutdown()
+
+
 def unregister():
     shutdown(preserve_playback=False)
     if bpy.app.timers.is_registered(watch):bpy.app.timers.unregister(watch)
     bpy.types.VIEW3D_HT_header.remove(header)
     bpy.types.IMAGE_HT_header.remove(header)
     if on_load in bpy.app.handlers.load_pre:bpy.app.handlers.load_pre.remove(on_load)
+    for handlers, callback in ((bpy.app.handlers.load_post, on_loaded),
+                               (bpy.app.handlers.save_pre, on_save),
+                               (bpy.app.handlers.save_post, on_saved),
+                               (bpy.app.handlers.save_post_fail, on_saved)):
+        if callback in handlers:
+            handlers.remove(callback)
     for keymap,item in _KEYMAPS:keymap.keymap_items.remove(item)
     _KEYMAPS.clear()
 

@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "archive": "PROJECT_ROOT/outputs/farm-down-nacelle-view/package/wfrl_blender-0.3.24.zip",
+  "sha256": "054bc6a4bfd28270dfb605402aebb9e3a2b2bb8be9615785585a5571c2e59750",
+  "baseline_build_info": {
+    "payload_files": 179,
+    "payload_sha256": "4e87c11870cdaacdd6f28cd3eb3b9b109315d97be675d53958afe7c62240e79b",
+    "schema": "wfrl.extension-build.v1",
+    "version": "0.3.24"
+  },
+  "changed_from_installed": [
+    "build-info.json",
+    "cameras.py",
+    "panels/farm_replay.py",
+    "panels/gimbal.py"
+  ],
+  "build_info": {
+    "payload_files": 179,
+    "payload_sha256": "bb0f70ec22c4ad9899c25d6dfea1208ef8b980dc162673e29c6c14d9c368c4a1",
+    "schema": "wfrl.extension-build.v1",
+    "version": "0.3.24"
+  },
+  "geometry_assets_unchanged": true
+}

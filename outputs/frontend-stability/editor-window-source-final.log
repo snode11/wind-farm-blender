@@ -1,0 +1,5 @@
+NREL_EDITOR_PLAYBACK_PASS
+00:11.137  blend            | Saved session recovery to "PROJECT_ROOT/outputs/frontend-stability/editor-window-source-final/scratch/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

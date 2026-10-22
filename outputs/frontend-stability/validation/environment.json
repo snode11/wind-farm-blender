@@ -1,0 +1,6 @@
+{
+  "BLENDER_USER_CONFIG": "PROJECT_ROOT/outputs/frontend-stability/validation/profile/config",
+  "BLENDER_USER_SCRIPTS": "PROJECT_ROOT/outputs/frontend-stability/validation/profile/scripts",
+  "BLENDER_USER_DATAFILES": "PROJECT_ROOT/outputs/frontend-stability/validation/profile/datafiles",
+  "WFRL_ADDON_MODULE": "bl_ext.wfrl_frontend.wfrl_blender"
+}

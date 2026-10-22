@@ -1,4 +1,4 @@
-"""NREL 5MW design meshes, using only the packaged asset and Python stdlib.
+"""Selectable blade display meshes from packaged geometry and Python stdlib.
 
 The loft follows wfrl/viz/geometry.py: reference-point aligned airfoil sections,
 structural twist, and interpolation of the 19 AeroDyn stations. Local blade
@@ -13,9 +13,23 @@ import math
 from pathlib import Path
 
 
-@lru_cache(maxsize=1)
-def geometry_data():
-    return json.loads((Path(__file__).parent / "assets/nrel5mw_geometry.json").read_text())
+# Packaged section geometry shares the NREL station coordinates. Selecting a
+# display model does not change the saved NREL motion or run a new solver.
+MODELS = {
+    'nrel5mw': ('assets/nrel5mw_geometry.json', 'NREL 5MW 预弯改型'),
+    'rootkink': ('assets/rootkink_geometry.json', '商用形制叶根拐点改型'),
+}
+DEFAULT_MODEL = 'nrel5mw'
+
+
+def model_label(model=DEFAULT_MODEL):
+    return MODELS.get(model, MODELS[DEFAULT_MODEL])[1]
+
+
+@lru_cache(maxsize=len(MODELS))
+def geometry_data(model=DEFAULT_MODEL):
+    asset = MODELS.get(model, MODELS[DEFAULT_MODEL])[0]
+    return json.loads((Path(__file__).parent / asset).read_text())
 
 
 def hub_position():
@@ -86,8 +100,8 @@ def _hermite(a, b, da, db, width, t):
             + (-2*t**3 + 3*t**2)*b + (t**3 - t**2)*width*db)
 
 
-@lru_cache(maxsize=4)
-def blade_mesh(subdiv=8, ring_points=96):
+@lru_cache(maxsize=4 * len(MODELS))
+def blade_mesh(subdiv=8, ring_points=96, model=DEFAULT_MODEL):
     """Smooth source-station loft with a presentation-only tapered tip.
 
     Original sections remain exact through the penultimate station. The last
@@ -96,7 +110,7 @@ def blade_mesh(subdiv=8, ring_points=96):
     """
     if subdiv < 1 or ring_points < 12:
         raise ValueError("Blade loft needs positive subdivision and at least 12 outline points")
-    data = geometry_data()
+    data = geometry_data(model)
     sections = []
     for span, curve, sweep, _, twist, chord, afid in data["blade_stations"]:
         airfoil = data["airfoils"][int(afid) - 1]
@@ -130,7 +144,7 @@ def blade_mesh(subdiv=8, ring_points=96):
                 vertices.append((*[tip_center[axis] + (xy[axis] - tip_center[axis])*taper
                                    for axis in range(2)], spans[i] + width*t))
     rings = len(vertices) // ring_points
-    # Replace the old flat terminal polygon with a closed triangle fan.
+    # Close the terminal ring with a triangle fan at the tip.
     faces = _ring_faces(rings, ring_points)[:-1]
     tip = len(vertices)
     vertices.append((*tip_center, spans[-1]))

@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "save": {
+    "status": "PASS",
+    "phase": "save",
+    "module_file": "PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py",
+    "types": 6,
+    "turbines": 3,
+    "blades": 9,
+    "seeking_boolean_calls": 0,
+    "draft_clock_frozen": true,
+    "close_and_restore": true,
+    "scope": "background edit transactions and flexible geometry; no viewport or appearance acceptance"
+  },
+  "reopen": {
+    "status": "PASS",
+    "phase": "reopen",
+    "module_file": "PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py",
+    "scope": "background save/reopen and flexible geometry; no viewport or appearance acceptance"
+  },
+  "test": "blender_frontend/tests/blender/nrel_defect_editor_regression.py",
+  "scope": "Source payload in two independent factory-startup background processes; committed document, all six defect types, nine blades, transaction undo/redo, clock freeze, close/reopen and saved file recovery; no visible-window, GPU or physical accuracy claim",
+  "source_sha256": {
+    "blender_frontend/wfrl_blender/nrel_defects/editor.py": "5ced1bd90370aad9581737729c96f62812d173ea9d263b1118375632c389ba2a",
+    "blender_frontend/wfrl_blender/nrel_defects/defect_geometry.py": "08a81154ddf13a4b08413a3ce1408d13321c590dce26a089e5926dd6d2a8634f"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "module": "bl_ext.user_default.wfrl_blender",
+  "addon_file": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/__init__.py",
+  "enablement_persisted": true,
+  "gimbal_preset_registered": true,
+  "scene_properties_registered": true,
+  "manual_registration_called": false,
+  "archive_sha256": "d82d4a72dcafe2e6d246ee18c856d5b43a79f713a3df0d76fc6121fe7ecfd883",
+  "build_info": {
+    "payload_files": 179,
+    "payload_sha256": "4e87c11870cdaacdd6f28cd3eb3b9b109315d97be675d53958afe7c62240e79b",
+    "schema": "wfrl.extension-build.v1",
+    "version": "0.3.24"
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "status": "PASS",
+  "package_sha256": "b15c491db68fda6a2bdfce4228d5db040fa6ae0f0a69f886935ab0af9b775fda",
+  "runs": {
+    "replay-installed": {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python-expr",
+        "import bpy; bpy.context.preferences.filepaths.temporary_directory = 'SYSTEM_TMP/wfrl-installed-fixes-z6n3t39m/replay-installed'",
+        "--python",
+        "PROJECT_ROOT/blender_frontend/tests/blender/replay_history_regression.py"
+      ],
+      "returncode": 0,
+      "elapsed_s": 14.809025249967817,
+      "status": "PASS",
+      "addon_file": "PROJECT_ROOT/outputs/frontend-stability-fixes/validation/profile/extensions/wfrl_blender/__init__.py",
+      "background": true,
+      "evidence": "outputs/frontend-stability-fixes/replay-installed/checks.json"
+    },
+    "editor-installed": {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python-expr",
+        "import bpy; bpy.context.preferences.filepaths.temporary_directory = 'SYSTEM_TMP/wfrl-installed-fixes-z6n3t39m/editor-installed'",
+        "--python",
+        "PROJECT_ROOT/blender_frontend/tests/blender/nrel_editor_resource_regression.py"
+      ],
+      "returncode": 0,
+      "elapsed_s": 24.858146541984752,
+      "status": "PASS",
+      "addon_file": "PROJECT_ROOT/outputs/frontend-stability-fixes/validation/profile/extensions/wfrl_blender/__init__.py",
+      "background": true,
+      "evidence": "outputs/frontend-stability-fixes/editor-installed/checks.json"
+    },
+    "blade-model-installed": {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python-expr",
+        "import bpy; bpy.context.preferences.filepaths.temporary_directory = 'SYSTEM_TMP/wfrl-installed-fixes-z6n3t39m/blade-model-installed'",
+        "--python",
+        "PROJECT_ROOT/blender_frontend/tests/blender/blade_model_regression.py"
+      ],
+      "returncode": 0,
+      "elapsed_s": 39.43678500002716,
+      "status": "PASS",
+      "addon_file": "PROJECT_ROOT/outputs/frontend-stability-fixes/validation/profile/extensions/wfrl_blender/__init__.py",
+      "background": true,
+      "evidence": "outputs/frontend-stability-fixes/blade-model-installed/checks.json"
+    },
+    "camera-installed": {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--python-exit-code",
+        "1",
+        "--python-expr",
+        "import bpy; bpy.context.preferences.filepaths.temporary_directory = 'SYSTEM_TMP/wfrl-installed-fixes-z6n3t39m/camera-installed'",
+        "--python",
+        "PROJECT_ROOT/blender_frontend/tests/blender/native_camera_save_regression.py"
+      ],
+      "returncode": 0,
+      "elapsed_s": 12.844856459007133,
+      "status": "PASS",
+      "addon_file": "PROJECT_ROOT/outputs/frontend-stability-fixes/validation/profile/extensions/wfrl_blender/__init__.py",
+      "background": false,
+      "evidence": "outputs/frontend-stability-fixes/camera-installed/checks.json"
+    },
+    "shared-context-installed": {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--python-exit-code",
+        "1",
+        "--python-expr",
+        "import bpy; bpy.context.preferences.filepaths.temporary_directory = 'SYSTEM_TMP/wfrl-installed-fixes-z6n3t39m/shared-context-installed'",
+        "--python",
+        "PROJECT_ROOT/blender_frontend/tests/blender/shared_context_switch_regression.py"
+      ],
+      "returncode": 0,
+      "elapsed_s": 29.898318041989114,
+      "status": "PASS",
+      "addon_file": "PROJECT_ROOT/outputs/frontend-stability-fixes/validation/profile/extensions/wfrl_blender/__init__.py",
+      "background": false,
+      "evidence": "outputs/frontend-stability-fixes/shared-context-installed/checks.json"
+    }
+  },
+  "scope": "Independent processes loading isolated installed package; visible runs use native scripted operators."
+}

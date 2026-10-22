@@ -14,9 +14,16 @@ def _stop_finished_playback():
 
 
 def reader_for(scene):
-    if scene.get('wfrl_scene_kind') != 'clearance_replay':
+    try:
+        if scene.get('wfrl_scene_kind') != 'clearance_replay':
+            return None
+        if scene.get('wfrl_farm_flex_path'):
+            from . import farm_flex
+            if farm_flex.active_for(scene) is None:
+                return None
+        return _READERS.get(scene.as_pointer())
+    except ReferenceError:
         return None
-    return _READERS.get(scene.as_pointer())
 
 
 def clear(scene, reason='回放数据未就绪'):
@@ -155,6 +162,7 @@ def on_load(_):
         if scene.get('wfrl_scene_kind') == 'clearance_replay':
             demo = scene.get('wfrl_clearance_demo', 'normal')
             frame = scene.frame_current
+            subframe = scene.frame_subframe
             path = getattr(scene, 'wfrl_clearance_' + demo + '_path', '')
             try:
                 if scene.get('wfrl_farm_flex_path'):
@@ -175,18 +183,60 @@ def on_load(_):
                     if turbine in preview.readers:
                         scene['wfrl_clearance_turbine'] = turbine
                         _READERS[scene.as_pointer()] = preview.readers[turbine]
-                    scene.frame_set(frame)
+                    scene.frame_set(frame, subframe=subframe)
                     continue
                 load(scene, bpy.path.abspath(path), demo)
                 scene.frame_set(frame)
-            except (ValueError, OSError, ImportError, KeyError, TypeError) as exc:
+            except (ValueError, OSError, ImportError, KeyError, TypeError, ReferenceError) as exc:
                 clear(scene, '回放数据未就绪：' + str(exc))
+
+
+def on_history_pre(_):
+    """Release replay references before native undo/redo replaces Blender IDs."""
+    from . import farm_flex, playback, tip_tracking, native_camera_views, _cancel_playback
+    native_camera_views.on_history_pre(_)
+    owner = playback.owner_scene()
+    if owner is not None and reader_for(owner) is not None:
+        _cancel_playback(owner)
+    farm_flex.detach(restore=False)
+    tip_tracking.on_load_pre(_)
+    _READERS.clear()
+
+
+def on_history_post(_):
+    """Restore saved replay identity and clock after native undo/redo."""
+    import bpy
+    from . import farm_flex, native_camera_views
+    native_camera_views.on_history_post(_)
+    states = [(scene, scene.render.fps, scene.render.fps_base, scene.sync_mode,
+               scene.use_preview_range, scene.frame_start, scene.frame_end,
+               scene.frame_current, scene.frame_subframe,
+               {i for i, tid in enumerate(('T1', 'T2', 'T3'))
+                if (obj := scene.objects.get(f'WFRL.Turbine.{tid}.Tower')) is not None
+                and not obj.hide_render}) for scene in bpy.data.scenes
+              if scene.get('wfrl_scene_kind') == 'clearance_replay']
+    on_load(_)
+    for scene, fps, base, sync, preview, start, end, frame, subframe, visible in states:
+        scene.render.fps, scene.render.fps_base = fps, base
+        scene.sync_mode, scene.use_preview_range = sync, preview
+        scene.frame_start, scene.frame_end = start, end
+        active = farm_flex.active_for(scene)
+        if active is not None:
+            active.visible_turbines = visible
+            active.cache.clear()
+        scene.frame_set(frame, subframe=subframe)
+
+
+_HANDLERS = (('frame_change_post', update), ('load_post', on_load),
+             ('undo_pre', on_history_pre), ('redo_pre', on_history_pre),
+             ('undo_post', on_history_post), ('redo_post', on_history_post))
 
 
 def register():
     import bpy
     from bpy.app.handlers import persistent
-    for handlers, callback in ((bpy.app.handlers.frame_change_post, update), (bpy.app.handlers.load_post, on_load)):
+    for name, callback in _HANDLERS:
+        handlers = getattr(bpy.app.handlers, name)
         persistent(callback)
         if callback not in handlers:
             handlers.append(callback)
@@ -207,6 +257,7 @@ def unregister():
     _READERS.clear()
     if bpy.app.timers.is_registered(_stop_finished_playback):
         bpy.app.timers.unregister(_stop_finished_playback)
-    for handlers, callback in ((bpy.app.handlers.frame_change_post, update), (bpy.app.handlers.load_post, on_load)):
+    for name, callback in _HANDLERS:
+        handlers = getattr(bpy.app.handlers, name)
         if callback in handlers:
             handlers.remove(callback)

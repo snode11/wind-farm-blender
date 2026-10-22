@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "version": "0.3.15",
+  "module": "bl_ext.user_default.wfrl_blender",
+  "addon_file": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/__init__.py",
+  "opened": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+  "frame": 52,
+  "farm_package": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/assets/mappo",
+  "split_ready": true,
+  "example_entry_registered": true,
+  "window_running": true,
+  "same_zip_as_github_candidate": true
+}

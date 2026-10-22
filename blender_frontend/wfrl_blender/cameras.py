@@ -31,14 +31,16 @@ def camera_view_names():
 
 
 def demo_view_areas(scene):
-    """Visible demo views for this scene, excluding the independent reconstruction."""
+    """Visible main views, excluding independent reconstruction and observation."""
     import bpy
-    from . import split_reconstruction
+    from . import native_camera_views, split_reconstruction
     seen = set()
     for window in bpy.context.window_manager.windows:
         if window.scene != scene:
             continue
         for area in window.screen.areas:
+            if native_camera_views.owns_view(window, area):
+                continue
             if area.type != 'VIEW_3D' or area.as_pointer() in seen:
                 continue
             seen.add(area.as_pointer())
@@ -367,6 +369,33 @@ def cancel_view_layout():
         pass
 
 
+_DOWN_GIMBAL_NAMES = frozenset(f'WFRL.Camera.{turbine}.Gimbal'
+                              for turbine in ('T1', 'T2', 'T3'))
+
+
+def _down_mount(camera):
+    """Locate the optical centre below the nacelle's forward centreline."""
+    import bpy
+    from mathutils import Vector
+    root = camera.parent
+    shell = next((obj for obj in root.children if obj.name.endswith('.Nacelle')), None)
+    if shell is None:
+        raise ValueError('Down requires the nacelle shell to locate its installation point')
+    bpy.context.view_layer.update()
+    local = shell.matrix_local.copy()
+    inverse = local.inverted()
+    hit, point, _normal, _face = shell.ray_cast(
+        inverse @ Vector((-3.8, 0, -5)),
+        (inverse.to_3x3() @ Vector((0, 0, 1))).normalized())
+    if not hit:
+        raise ValueError('Down installation point does not intersect the nacelle underside')
+    anchor = local @ point
+    offset = Vector((0, 0, -.40))
+    camera['wfrl_mount_anchor'] = list(anchor)
+    camera['wfrl_mount_offset'] = list(offset)
+    return anchor + offset
+
+
 def ensure_gimbal(scene, turbine):
     """Lazily add a camera to existing saved scenes without rebuilding geometry."""
     import bpy
@@ -378,44 +407,37 @@ def ensure_gimbal(scene, turbine):
     if camera is None:
         camera = bpy.data.objects.new(name, bpy.data.cameras.new(name + '.Data'))
         root.users_collection[0].objects.link(camera)
-    if camera.get('wfrl_gimbal_mount_revision', 0) < 1:
-        from .turbine_geometry import geometry_data
-        radius = geometry_data()['scalars']['TipRad']
-        # Tower-side inspection station, lowered toward the passing blade tip.
-        # Looking from the hub along the entire span foreshortens the last
-        # metres into a few pixels and lets the near blade fill the image.
-        # A 1.2 m chordwise offset is only a slight deviation from front-on.
+    revision = 3
+    if camera.get('wfrl_gimbal_mount_revision', 0) < revision:
         camera.parent = root
         camera.matrix_parent_inverse.identity()
-        camera.location = (-3.5, 1.2, -radius * .60)
         camera.data.clip_start, camera.data.clip_end = .05, 30000
         camera.data.display_size = .5
-        camera['mount'] = 'tower-side inner blade-tip observation / illustrative SYNTH position'
-        camera['wfrl_gimbal_mount_revision'] = 1
         reset_gimbal(camera)
-    camera.data.show_passepartout = False
-    camera.data.passepartout_alpha = 0
+        camera['wfrl_gimbal_mount_revision'] = revision
+    camera.data.show_passepartout = True
+    camera.data.passepartout_alpha = 1
     return camera
 
 
 
 def down_gimbal(camera):
-    """Tower-side inner-tip composition for the selected turbine."""
+    """Restore a centreline-mounted nadir view, with the tower toward image top."""
     if camera.get('wfrl_nacelle_camera'):
         return reset_nacelle_gimbal(camera)
-    from .turbine_geometry import geometry_data
-    camera.location = (-3.5, 1.2, -geometry_data()['scalars']['TipRad'] * .60)
-    # Orient the downward image like the reference: tower above, passing
-    # blade below. This is an optical roll, not a change to rotor pose.
+    camera.location = _down_mount(camera)
+    camera['mount'] = 'nacelle forward underside / fixed Down / 0.40 m downward extension'
     camera['gimbal_roll'] = 180.0
-    camera.data.shift_x = camera.data.shift_y = 0
-    return aim_gimbal(camera, 180, -67, 85)
+    camera.data.shift_x, camera.data.shift_y = .10, -.07
+    return aim_gimbal(camera, 180, -90, 110)
 
 
 def reset_gimbal(camera):
-    """Return to an oblique overview of the selected turbine."""
+    """Restore a mounted Down view or another camera's oblique overview."""
     if camera.get('wfrl_nacelle_camera'):
         return reset_nacelle_gimbal(camera)
+    if camera.name in _DOWN_GIMBAL_NAMES:
+        return down_gimbal(camera)
     from mathutils import Vector
     from .turbine_geometry import geometry_data
     import math
@@ -566,7 +588,7 @@ def apply_nacelle_output(scene, camera):
 
 
 def fill_camera_view(area, scene):
-    """Fit the calibrated nacelle gate; other demonstration views use overscan."""
+    """Fit each turbine's Down and calibrated nacelle gates; other views use overscan."""
     import math
     import bpy
     space = area.spaces.active
@@ -576,6 +598,11 @@ def fill_camera_view(area, scene):
     camera = space.camera if space.use_local_camera else scene.camera
     calibrated = camera is not None and camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID
     if camera:
+        if camera.name in _DOWN_GIMBAL_NAMES:
+            camera.data.show_passepartout = True
+            camera.data.passepartout_alpha = 1.0
+            fit_camera_view(area, scene)
+            return
         camera.data.show_passepartout = calibrated
         if calibrated:
             camera.data.passepartout_alpha = 1.0

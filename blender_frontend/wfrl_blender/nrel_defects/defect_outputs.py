@@ -80,11 +80,14 @@ def capture_images(editor,directory):
     saved=(scene.camera,render.filepath,render.image_settings.file_format,render.image_settings.color_mode,
         render.image_settings.color_depth,render.use_file_extension,scene.frame_current,scene.frame_subframe,
         render.resolution_x,render.resolution_y,render.resolution_percentage)
+    saved_border = (render.use_border, render.use_crop_to_border)
     blur=hasattr(render,'use_motion_blur')
     old_blur=render.use_motion_blur if blur else None
     frame_time=float(scene['defect_time_s'])
     try:
         render.image_settings.file_format='PNG';render.image_settings.color_mode='RGBA';render.image_settings.color_depth='8';render.use_file_extension=True
+        render.use_border = False
+        render.use_crop_to_border = False
         if blur: render.use_motion_blur=False
         empty=editor.store.document
         for defect in empty['defects']: defect['enabled']=False
@@ -114,6 +117,7 @@ def capture_images(editor,directory):
         raise
     finally:
         scene.camera,render.filepath,render.image_settings.file_format,render.image_settings.color_mode,render.image_settings.color_depth,render.use_file_extension,frame,subframe,render.resolution_x,render.resolution_y,render.resolution_percentage=saved
+        render.use_border, render.use_crop_to_border = saved_border
         if blur: render.use_motion_blur=old_blur
         scene.frame_set(frame,subframe=subframe)
         editor.set_time(frame_time)

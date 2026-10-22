@@ -1,0 +1,106 @@
+{
+  "status": "PASS",
+  "addon_file": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/__init__.py",
+  "build_info": {
+    "payload_files": 179,
+    "payload_sha256": "bb0f70ec22c4ad9899c25d6dfea1208ef8b980dc162673e29c6c14d9c368c4a1",
+    "schema": "wfrl.extension-build.v1",
+    "version": "0.3.24"
+  },
+  "render_engine": "BLENDER_WORKBENCH",
+  "studio_light": "studio.sl",
+  "resolution": [
+    1920,
+    1080
+  ],
+  "shared_frame": 52,
+  "preview_time_s": 117.85,
+  "cameras": [
+    {
+      "turbine": "T1",
+      "camera": "WFRL.Camera.T1.Gimbal",
+      "parent": "WFRL.Turbine.T1.YawRoot",
+      "location": [
+        -2.5028650760650635,
+        -3.2013254165649414,
+        0.6125631332397461
+      ],
+      "world_location": [
+        -2.202801465988159,
+        -3.2035868167877197,
+        88.22465515136719
+      ],
+      "yaw": 139.3,
+      "pitch": -80.55,
+      "roll": 180.0,
+      "hfov": 60.0,
+      "shift": [
+        -0.024000000208616257,
+        -0.03999999910593033
+      ],
+      "lens_mm": 31.17691421508789,
+      "frame": 52,
+      "subframe": 0.0,
+      "file": "PROJECT_ROOT/outputs/farm-down-nacelle-view/T1_Down.png"
+    },
+    {
+      "turbine": "T2",
+      "camera": "WFRL.Camera.T2.Gimbal",
+      "parent": "WFRL.Turbine.T2.YawRoot",
+      "location": [
+        -2.50286865234375,
+        -3.2013254165649414,
+        0.6125621795654297
+      ],
+      "world_location": [
+        501.7125549316406,
+        -3.261758804321289,
+        88.21729278564453
+      ],
+      "yaw": 139.3,
+      "pitch": -80.55,
+      "roll": 180.0,
+      "hfov": 60.0,
+      "shift": [
+        -0.024000000208616257,
+        -0.03999999910593033
+      ],
+      "lens_mm": 31.17691421508789,
+      "frame": 52,
+      "subframe": 0.0,
+      "file": "PROJECT_ROOT/outputs/farm-down-nacelle-view/T2_Down.png"
+    },
+    {
+      "turbine": "T3",
+      "camera": "WFRL.Camera.T3.Gimbal",
+      "parent": "WFRL.Turbine.T3.YawRoot",
+      "location": [
+        -2.5028076171875,
+        -3.2013254165649414,
+        0.6125674247741699
+      ],
+      "world_location": [
+        1005.6716918945312,
+        -3.255032777786255,
+        88.21611022949219
+      ],
+      "yaw": 139.3,
+      "pitch": -80.55,
+      "roll": 180.0,
+      "hfov": 60.0,
+      "shift": [
+        -0.024000000208616257,
+        -0.03999999910593033
+      ],
+      "lens_mm": 31.17691421508789,
+      "frame": 52,
+      "subframe": 0.0,
+      "file": "PROJECT_ROOT/outputs/farm-down-nacelle-view/T3_Down.png"
+    }
+  ],
+  "scene_file": "PROJECT_ROOT/outputs/farm-down-nacelle-view/Farm_Down.blend",
+  "measurement_beams_hidden": true,
+  "geometry_modified": false,
+  "physics_rerun": false,
+  "scope": "Three saved renders at a shared replay frame; not all-azimuth shoulder visibility."
+}

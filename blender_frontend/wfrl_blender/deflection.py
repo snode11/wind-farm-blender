@@ -130,6 +130,17 @@ COLORS = {'Reference': (.55, .61, .69, 1), 'Actual': (1, .27, .04, 1),
 
 
 class ComparisonView:
+    @staticmethod
+    def _release_data(data):
+        """Release only unused local comparison data without retained assets."""
+        import bpy
+        if (data is not None and data.library is None and data.users == 0
+                and not data.use_fake_user and getattr(data, 'shape_keys', None) is None):
+            if isinstance(data, bpy.types.Mesh):
+                bpy.data.meshes.remove(data)
+            elif isinstance(data, bpy.types.Curve):
+                bpy.data.curves.remove(data)
+
     def __init__(self, owner, data, vertices, faces):
         import bpy
         from .scene_builder import _mesh_object, _primitive
@@ -143,7 +154,12 @@ class ComparisonView:
         # Saved .blend files already contain the previous comparison geometry.
         for obj in list(owner.scene.objects):
             if obj.name.startswith('WFRL.Deflection.T1.'):
+                previous = obj.data
+                owned = (obj.get('wfrl_deflection_owned') or
+                         obj.get('provenance') == data['reference'] + '; true scale in metres')
                 bpy.data.objects.remove(obj, do_unlink=True)
+                if owned:
+                    self._release_data(previous)
         self.materials = {key: _material('WFRL.Deflection.' + key, color) for key, color in COLORS.items()}
         mat = _material('WFRL.Deflection.Ghost', COLORS['Reference'])
         mat.diffuse_color = (*COLORS['Reference'][:3], .38)
@@ -174,6 +190,7 @@ class ComparisonView:
             self.objects.append(obj)
         for obj in self.objects:
             obj.hide_select = True
+            obj['wfrl_deflection_owned'] = True
             obj['provenance'] = data['reference'] + '; true scale in metres'
         self.handle = bpy.types.SpaceView3D.draw_handler_add(self.draw_labels, (), 'WINDOW', 'POST_PIXEL')
 
@@ -290,9 +307,7 @@ class ComparisonView:
             try:
                 data = obj.data
                 bpy.data.objects.remove(obj, do_unlink=True)
-                if data.users == 0:
-                    if isinstance(data, bpy.types.Mesh): bpy.data.meshes.remove(data)
-                    elif isinstance(data, bpy.types.Curve): bpy.data.curves.remove(data)
+                self._release_data(data)
             except ReferenceError:
                 pass
         self.objects.clear()

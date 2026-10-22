@@ -260,7 +260,14 @@ def draw(layout, context):
     reader = clearance_replay.reader_for(scene)
     layout.use_property_decorate = False
     if farm_flex._ACTIVE.reference is not None:
-        layout.label(text='单机预弯接口验证' if farm_flex._ACTIVE.manifest.get('interface_only') else 'NREL 5MW 预弯改型 · BeamDyn')
+        from ..turbine_geometry import model_label
+        layout.label(text='单机预弯接口验证' if farm_flex._ACTIVE.manifest.get('interface_only')
+                     else model_label(farm_flex._ACTIVE.model) + ' · BeamDyn')
+    layout.prop(scene, 'wfrl_blade_model', text='叶片外形')
+    if farm_flex._ACTIVE.model != 'nrel5mw':
+        layout.label(text='合成叶形；运动、载荷与雷达读数来自 NREL 基线', icon='INFO')
+    if scene.get('wfrl_blade_model_error'):
+        layout.label(text=scene['wfrl_blade_model_error'], icon='ERROR')
     if farm_flex._ACTIVE.manifest.get('measurement_mode') == 'dual_beam':
         layout.label(text=dual_method_label(value), icon='INFO')
         installation_status = (value or {}).get('installation_status')
@@ -321,7 +328,7 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
     bl_idname='wfrl.farm_flex_view'
     bl_label='查看机组'
     turbine:bpy.props.StringProperty(default='T1')
-    angle:bpy.props.EnumProperty(items=[('DOWN','Down 演示视角',''),('NACELLE','机舱云台',''),('NACELLE_SIDE','侧下视角','原位转向叶轮侧下方，使用同一台机舱相机'),('FRONT','侧前方','')],default='DOWN')
+    angle:bpy.props.EnumProperty(items=[('DOWN','Down 视角','从对应机组机舱前部底壳下方 0.40 米沿机舱局部正下观察，随机舱与塔顶姿态运动'),('NACELLE','机舱云台',''),('NACELLE_SIDE','侧下视角','原位转向叶轮侧下方，使用同一台机舱相机'),('FRONT','侧前方','')],default='DOWN')
     @classmethod
     def poll(cls, context):
         return farm_flex.is_active(context.scene)

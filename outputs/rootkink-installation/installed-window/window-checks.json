@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "interaction": "Blender RNA and native playback operator in visible window",
+  "addon_module": "bl_ext.user_default.wfrl_blender",
+  "addon_file": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "models_seen": [
+    "nrel5mw",
+    "rootkink"
+  ],
+  "current_model": "rootkink",
+  "frame": 1182,
+  "playing": false,
+  "rootkink_playback_frames": [
+    915,
+    932,
+    948,
+    963,
+    979,
+    995,
+    1010,
+    1025,
+    1041,
+    1057,
+    1072,
+    1087,
+    1103,
+    1119,
+    1135,
+    1150,
+    1166,
+    1182
+  ],
+  "distinct_deformed_vertex_positions": 18,
+  "camera_preserved": true,
+  "saved_scene": "PROJECT_ROOT/outputs/rootkink-installation/installed-window/rootkink-preview.blend"
+}

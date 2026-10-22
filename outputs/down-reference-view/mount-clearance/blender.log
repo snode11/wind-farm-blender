@@ -1,0 +1,12 @@
+MOUNT_CLEARANCE_PROGRESS 1 120 4.7
+MOUNT_CLEARANCE_PROGRESS 21 120 6.12
+MOUNT_CLEARANCE_PROGRESS 41 120 7.55
+MOUNT_CLEARANCE_PROGRESS 61 120 9.0
+MOUNT_CLEARANCE_PROGRESS 81 120 10.43
+MOUNT_CLEARANCE_PROGRESS 101 120 11.86
+MOUNT_CLEARANCE_PROGRESS 120 120 13.24
+MOUNT_CLEARANCE_RESULT {"status": "PASS_FINITE_SAMPLES", "summary": {"T1": {"samples": 120, "sampled_intersections": 0, "minimum_optical_centre_surface_distance_m": 0.6264234185218811, "minimum_optical_centre_at_time_s": 164.9, "minimum_optical_centre_nearest_blade": 2, "minimum_segment_surface_distance_lower_bound_m": 0.38325896611902865, "minimum_segment_at_time_s": 141.2, "minimum_segment_nearest_blade": 3}, "T2": {"samples": 120, "sampled_intersections": 0, "minimum_optical_centre_surface_distance_m": 0.620138943195343, "minimum_optical_centre_at_time_s": 146.75, "minimum_optical_centre_nearest_blade": 1, "minimum_segment_surface_distance_lower_bound_m": 0.3817695056507364, "minimum_segment_at_time_s": 152.3, "minimum_segment_nearest_blade": 1}, "T3": {"samples": 120, "sampled_intersections": 0, "minimum_optical_centre_surface_distance_m": 0.6194172501564026, "minimum_optical_centre_at_time_s": 135.65, "minimum_optical_centre_nearest_blade": 3, "minimum_segment_surface_distance_lower_bound_m": 0.38134819021914157, "minimum_segment_at_time_s": 169.425, "minimum_segment_nearest_blade": 2}}, "all_surfaces_closed_manifold": true, "elapsed_s": 13.242467375006527}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

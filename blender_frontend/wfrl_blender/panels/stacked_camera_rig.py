@@ -162,14 +162,14 @@ class WFRL_OT_BoxPick(bpy.types.Operator):
 
     def invoke(self, context, event):
         global _ACTIVE
+        from .. import _cancel_playback
         from .custom_cameras import installation_block_reason
         reason=installation_block_reason(context.scene)
         if reason:self.report({'ERROR'},reason);return {'CANCELLED'}
         finish_view()
         self.area=context.area;self.scene=context.scene;self.window=context.window;self.wm=context.window_manager
         self.region=next(r for r in self.area.regions if r.type=='WINDOW')
-        if context.screen.is_animation_playing:
-            bpy.ops.screen.animation_cancel(restore_frame=False)
+        _cancel_playback(self.scene)
         # Reuse the existing external nacelle view, then detach its controller.
         bpy.ops.wfrl.custom_camera('INVOKE_DEFAULT',mode='LAYOUT')
         from . import custom_cameras as panel
@@ -220,7 +220,8 @@ class WFRL_OT_BoxPick(bpy.types.Operator):
                 self.transaction.finish(confirm=True);self.cleanup();return {'FINISHED'}
             return {'RUNNING_MODAL'}
         if event.type=='TIMER':
-            if context.screen.is_animation_playing:bpy.ops.screen.animation_cancel(restore_frame=False)
+            from .. import _cancel_playback
+            _cancel_playback(self.scene)
             if (self.scene.frame_current,self.scene.frame_subframe)!=self.transaction.frame:
                 shutdown();return {'CANCELLED'}
             return {'PASS_THROUGH'}

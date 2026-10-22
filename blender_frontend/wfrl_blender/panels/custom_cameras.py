@@ -10,7 +10,7 @@ from mathutils import Vector
 
 from .. import custom_cameras as core
 from .. import custom_camera_history as history, custom_camera_diagnostics as diagnostics
-from .. import camera_projection as projection, custom_camera_preview as preview
+from .. import camera_projection as projection, custom_camera_preview as preview, playback
 
 _ACTIVE = None
 _SYNCING = False
@@ -91,7 +91,7 @@ class EditSession:
         self.area, self.window, self.wm = area, window, wm
         self.identity = session_identity(scene)
         self.frame, self.subframe = scene.frame_current, scene.frame_subframe
-        self.playing = bool(window and window.screen.is_animation_playing)
+        self.playing = bool(window and playback.is_playing(scene))
         self.snapshot = ViewportSnapshot(area) if area else None
         self.original_camera = core.get_camera(scene, slot)
         self.draft, self.closed = None, False
@@ -111,12 +111,17 @@ class EditSession:
             return False
 
     def _play(self, playing):
-        if self.window and bool(self.window.screen.is_animation_playing) != playing:
-            with bpy.context.temp_override(window=self.window, screen=self.window.screen):
-                if playing:
-                    bpy.ops.screen.animation_play()
-                else:
-                    bpy.ops.screen.animation_cancel(restore_frame=False)
+        if not self.window:
+            return
+        with bpy.context.temp_override(window=self.window, screen=self.window.screen):
+            owner = playback.owner_scene()
+            live = playback.any_playing()
+            if (owner is not None and owner != self.scene) or (live and owner is None):
+                return
+            if playing and not live:
+                bpy.ops.screen.animation_play()
+            elif not playing and live:
+                bpy.ops.screen.animation_cancel(restore_frame=False)
 
     def begin(self):
         reason = installation_block_reason(self.scene)

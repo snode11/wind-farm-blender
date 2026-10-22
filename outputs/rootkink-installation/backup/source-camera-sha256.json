@@ -1,0 +1,8 @@
+{
+  "cameras.py": "651bd9a20d1fb0fd709b64f1b19b0c08ab1bc10cc8ef80e0daf4eb69a4441a4b",
+  "nacelle_camera.py": "984e45cd9dae367b7ec6a66166e99982fb268f7a1fdc2e2311d39a1c0e990aef",
+  "custom_cameras.py": "b460d6324b96093de3e78b8115e8a3a66cff8ff13689174728b7394fac2536c5",
+  "native_camera_views.py": "523ed235840f8fc27fb7b6831339039956264265444ffd32d025a9725c4dba19",
+  "stacked_camera_rig.py": "19d3f26d31e3b53b0a351ce24ba2d1c2f32279875038abb6abd6ec89d8bb2285",
+  "assets/cameras/t1-three-camera-default.json": "cb1fd8a51b40fa38697c08edda632cdf2859ee5a713dc28d43e92918f620958f"
+}

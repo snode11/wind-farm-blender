@@ -1,0 +1,54 @@
+{
+  "status": "PASS",
+  "module": "wfrl_blender",
+  "addon_file": "PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "mount": {
+    "location": [
+      -2.5028650760650635,
+      -3.2013254165649414,
+      0.6125588417053223
+    ],
+    "rotation": [
+      -0.16493365168571472,
+      -1.2221240019982815e-08,
+      -2.2811455726623535
+    ],
+    "lens": 31.17691421508789,
+    "sensor_width": 36.0,
+    "sensor_height": 24.0,
+    "shift_x": -0.024000000208616257,
+    "shift_y": -0.03999999910593033,
+    "yaw": 139.3,
+    "pitch": -80.55,
+    "roll": 180.0,
+    "fov": 60.0
+  },
+  "exterior_mount": {
+    "anchor": [
+      -2.5028650760650635,
+      -1.5613255500793457,
+      1.2125588655471802
+    ],
+    "offset": [
+      0.0,
+      -1.6399999856948853,
+      -0.6000000238418579
+    ],
+    "bracket_length_m": 1.746310397709938,
+    "surface_anchor_error_m": 0.0
+  },
+  "parent_motion_error_m": 7.62939453125e-06,
+  "rotor_spin_independent": true,
+  "repeated_ensure_preserves_ptz": true,
+  "reset_restores_mount": true,
+  "selection_preserves_replay": true,
+  "save_reopen_preserves_ptz": true,
+  "saved_scene_mount_migrations": [
+    1,
+    2
+  ],
+  "independent_nacelle_unchanged": true,
+  "other_down_presets_unchanged": true,
+  "visible_window": "NOT_RUN"
+}

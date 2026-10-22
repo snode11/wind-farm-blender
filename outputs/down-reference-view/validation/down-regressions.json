@@ -1,0 +1,634 @@
+{
+  "status": "PASS",
+  "package": {
+    "archive": "PROJECT_ROOT/outputs/down-reference-view/validation/package/wfrl_blender-0.3.26.zip",
+    "sha256": "ee2e6b1bbf9efb33e8106d76459b39c2fbb362e5a6c0dcf6ad59f5a36039aa3e",
+    "checksum": "PROJECT_ROOT/outputs/down-reference-view/validation/package/wfrl_blender-0.3.26.zip.sha256",
+    "inventory": "PROJECT_ROOT/outputs/down-reference-view/validation/package/wfrl_blender-0.3.26.inventory.json",
+    "package_id": "wfrl_blender",
+    "version": "0.3.26",
+    "file_count": 181
+  },
+  "module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "expected_addon_root": "PROJECT_ROOT/outputs/down-reference-view/validation/profile/extensions/wfrl_blender",
+  "environment_file": "PROJECT_ROOT/outputs/down-reference-view/validation/environment.json",
+  "installed_inventory_before": {
+    "status": "PASS",
+    "package_path": "PROJECT_ROOT/outputs/down-reference-view/validation/profile/extensions/wfrl_blender",
+    "verified_files": 181,
+    "mismatches": [],
+    "unexpected_files": [],
+    "ignored": [
+      "__pycache__",
+      "*.pyc"
+    ]
+  },
+  "commands": [
+    {
+      "name": "farm-down",
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "PROJECT_ROOT/blender_frontend/tests/blender/farm_down_mount_regression.py"
+      ],
+      "returncode": 0,
+      "log": "PROJECT_ROOT/outputs/down-reference-view/validation/logs/farm-down.log",
+      "required_markers": [
+        "FARM_DOWN_MOUNT_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [
+        {
+          "kind": "blender_exit_memory_diagnostic",
+          "message": "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB",
+          "blocks": 350,
+          "reported_mb": 0.02594,
+          "bytes": 27200,
+          "bytes_note": "Reported MB converted by 1024^2 and rounded; limited by log precision"
+        }
+      ],
+      "elapsed_s": 14.25819333398249,
+      "status": "PASS"
+    },
+    {
+      "name": "t1-down",
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "PROJECT_ROOT/blender_frontend/tests/blender/t1_down_mount_regression.py"
+      ],
+      "returncode": 0,
+      "log": "PROJECT_ROOT/outputs/down-reference-view/validation/logs/t1-down.log",
+      "required_markers": [
+        "T1_DOWN_MOUNT_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [
+        {
+          "kind": "blender_exit_memory_diagnostic",
+          "message": "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB",
+          "blocks": 350,
+          "reported_mb": 0.02594,
+          "bytes": 27200,
+          "bytes_note": "Reported MB converted by 1024^2 and rounded; limited by log precision"
+        }
+      ],
+      "elapsed_s": 15.010714832984377,
+      "status": "PASS"
+    },
+    {
+      "name": "nacelle",
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "PROJECT_ROOT/blender_frontend/tests/blender/nacelle_camera_regression.py"
+      ],
+      "returncode": 0,
+      "log": "PROJECT_ROOT/outputs/down-reference-view/validation/logs/nacelle.log",
+      "required_markers": [
+        "NACELLE_CAMERA_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [
+        {
+          "kind": "blender_exit_memory_diagnostic",
+          "message": "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB",
+          "blocks": 350,
+          "reported_mb": 0.02594,
+          "bytes": 27200,
+          "bytes_note": "Reported MB converted by 1024^2 and rounded; limited by log precision"
+        }
+      ],
+      "elapsed_s": 27.629521999973804,
+      "status": "PASS"
+    }
+  ],
+  "checks": {
+    "farm-down": {
+      "status": "PASS",
+      "module": "bl_ext.wfrl_frontend.wfrl_blender",
+      "addon_file": "PROJECT_ROOT/outputs/down-reference-view/validation/profile/extensions/wfrl_blender/__init__.py",
+      "blender": "5.2.1 LTS",
+      "default_poses": {
+        "T1": {
+          "name": "WFRL.Camera.T1.Gimbal",
+          "data": "WFRL.Camera.T1.Gimbal.Data",
+          "parent": "WFRL.Turbine.T1.YawRoot",
+          "location": [
+            -3.799999713897705,
+            -1.1102230246251565e-16,
+            0.06255564093589783
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            -1.5707964897155762
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "lens": 12.60373592376709,
+          "parent_inverse": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "clip_start": 0.05000000074505806,
+          "clip_end": 30000.0,
+          "passepartout": true,
+          "passepartout_alpha": 1.0,
+          "sensor_width": 36.0,
+          "sensor_height": 24.0,
+          "sensor_fit": "HORIZONTAL",
+          "type": "PERSP",
+          "shift_x": 0.10000000149011612,
+          "shift_y": -0.07000000029802322,
+          "yaw": 180.0,
+          "pitch": -90,
+          "roll": 180.0,
+          "fov": 110.0
+        },
+        "T2": {
+          "name": "WFRL.Camera.T2.Gimbal",
+          "data": "WFRL.Camera.T2.Gimbal.Data",
+          "parent": "WFRL.Turbine.T2.YawRoot",
+          "location": [
+            -3.799999952316284,
+            -3.247402347028583e-15,
+            0.06256136298179626
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            -1.5707964897155762
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "lens": 12.60373592376709,
+          "parent_inverse": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "clip_start": 0.05000000074505806,
+          "clip_end": 30000.0,
+          "passepartout": true,
+          "passepartout_alpha": 1.0,
+          "sensor_width": 36.0,
+          "sensor_height": 24.0,
+          "sensor_fit": "HORIZONTAL",
+          "type": "PERSP",
+          "shift_x": 0.10000000149011612,
+          "shift_y": -0.07000000029802322,
+          "yaw": 180.0,
+          "pitch": -90,
+          "roll": 180.0,
+          "fov": 110.0
+        },
+        "T3": {
+          "name": "WFRL.Camera.T3.Gimbal",
+          "data": "WFRL.Camera.T3.Gimbal.Data",
+          "parent": "WFRL.Turbine.T3.YawRoot",
+          "location": [
+            -3.8000001907348633,
+            -3.5388358909926865e-16,
+            0.06256076693534851
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            -1.5707964897155762
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "lens": 12.60373592376709,
+          "parent_inverse": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "clip_start": 0.05000000074505806,
+          "clip_end": 30000.0,
+          "passepartout": true,
+          "passepartout_alpha": 1.0,
+          "sensor_width": 36.0,
+          "sensor_height": 24.0,
+          "sensor_fit": "HORIZONTAL",
+          "type": "PERSP",
+          "shift_x": 0.10000000149011612,
+          "shift_y": -0.07000000029802322,
+          "yaw": 180.0,
+          "pitch": -90,
+          "roll": 180.0,
+          "fov": 110.0
+        }
+      },
+      "migrated_revision_one": [
+        "T2",
+        "T3"
+      ],
+      "t1_revision_three_hand_pose_preserved": true,
+      "parent_motion_error_m": {
+        "T1": 9.313225746154785e-10,
+        "T2": 3.145679951185349e-05,
+        "T3": 6.103515625e-05
+      },
+      "rotor_spin_independent": true,
+      "optical_axis_matches_parent_negative_z": true,
+      "hand_pose_and_reset_each_turbine": true,
+      "switch_preserves_replay_clock": true,
+      "save_reopen_preserves_all_hand_poses": true,
+      "independent_nacelle_and_c1_c3_unchanged": true,
+      "gate_check": "1200x700 synthetic viewport with 300px right sidebar",
+      "gate_bounds_px": {
+        "T1": [
+          15.999999999999943,
+          105.87499999999994,
+          884.0,
+          594.125
+        ],
+        "T2": [
+          15.999999999999943,
+          105.87499999999994,
+          884.0,
+          594.125
+        ],
+        "T3": [
+          15.999999999999943,
+          105.87499999999994,
+          884.0,
+          594.125
+        ]
+      },
+      "visible_window": "NOT_RUN"
+    },
+    "t1-down": {
+      "status": "PASS",
+      "module": "bl_ext.wfrl_frontend.wfrl_blender",
+      "addon_file": "PROJECT_ROOT/outputs/down-reference-view/validation/profile/extensions/wfrl_blender/__init__.py",
+      "blender": "5.2.1 LTS",
+      "mount": {
+        "location": [
+          -3.799999952316284,
+          2.931682674400804e-16,
+          0.06255921721458435
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          -1.5707964897155762
+        ],
+        "lens": 12.60373592376709,
+        "sensor_width": 36.0,
+        "sensor_height": 24.0,
+        "shift_x": 0.10000000149011612,
+        "shift_y": -0.07000000029802322,
+        "yaw": 180.0,
+        "pitch": -90,
+        "roll": 180.0,
+        "fov": 110.0
+      },
+      "exterior_mount": {
+        "anchor": [
+          -3.799999952316284,
+          2.931682674400804e-16,
+          0.46255922317504883
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          -0.4000000059604645
+        ],
+        "bracket_length_m": 0.40000001415610287,
+        "surface_anchor_error_m": 0.0
+      },
+      "parent_motion_error_m": 7.62939453125e-06,
+      "rotor_spin_independent": true,
+      "optical_axis_matches_parent_negative_z": true,
+      "repeated_ensure_preserves_ptz": true,
+      "reset_restores_mount": true,
+      "selection_preserves_replay": true,
+      "save_reopen_preserves_ptz": true,
+      "saved_scene_mount_migrations": [
+        1,
+        2
+      ],
+      "independent_nacelle_unchanged": true,
+      "other_down_presets_unchanged": true,
+      "visible_window": "NOT_RUN"
+    },
+    "nacelle": {
+      "status": "PASS",
+      "module": "bl_ext.wfrl_frontend.wfrl_blender",
+      "addon_file": "PROJECT_ROOT/outputs/down-reference-view/validation/profile/extensions/wfrl_blender/__init__.py",
+      "blender": "5.2.1 LTS",
+      "down_presets": {
+        "T1": {
+          "location": [
+            -3.799999952316284,
+            2.931682674400804e-16,
+            0.06255921721458435
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            -1.5707964897155762
+          ],
+          "lens": 12.60373592376709,
+          "shift_x": 0.10000000149011612,
+          "shift_y": -0.07000000029802322,
+          "yaw": 180.0,
+          "pitch": -90,
+          "fov": 110.0,
+          "roll": 180.0
+        },
+        "T2": {
+          "location": [
+            -3.799999952316284,
+            4.3021142204224816e-16,
+            0.06256303191184998
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            -1.5707964897155762
+          ],
+          "lens": 12.60373592376709,
+          "shift_x": 0.10000000149011612,
+          "shift_y": -0.07000000029802322,
+          "yaw": 180.0,
+          "pitch": -90,
+          "fov": 110.0,
+          "roll": 180.0
+        },
+        "T3": {
+          "location": [
+            -3.8000001907348633,
+            -2.5326962749261384e-16,
+            0.06256076693534851
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            -1.5707964897155762
+          ],
+          "lens": 12.60373592376709,
+          "shift_x": 0.10000000149011612,
+          "shift_y": -0.07000000029802322,
+          "yaw": 180.0,
+          "pitch": -90,
+          "fov": 110.0,
+          "roll": 180.0
+        }
+      },
+      "down_contracts": {
+        "T1": {
+          "parent": "WFRL.Turbine.T1.YawRoot",
+          "exterior_mount": {
+            "anchor": [
+              -3.799999952316284,
+              2.931682674400804e-16,
+              0.46255922317504883
+            ],
+            "offset": [
+              0.0,
+              0.0,
+              -0.4000000059604645
+            ],
+            "parent_negative_z_axis_error": 0.0
+          },
+          "mount_revision": 3,
+          "horizontal_fov_deg": 109.99999850756943,
+          "sensor_fit": "HORIZONTAL",
+          "passepartout": true,
+          "passepartout_alpha": 1.0
+        },
+        "T2": {
+          "parent": "WFRL.Turbine.T2.YawRoot",
+          "exterior_mount": {
+            "anchor": [
+              -3.799999952316284,
+              4.3021142204224816e-16,
+              0.46256303787231445
+            ],
+            "offset": [
+              0.0,
+              0.0,
+              -0.4000000059604645
+            ],
+            "parent_negative_z_axis_error": 0.0
+          },
+          "mount_revision": 3,
+          "horizontal_fov_deg": 109.99999850756943,
+          "sensor_fit": "HORIZONTAL",
+          "passepartout": true,
+          "passepartout_alpha": 1.0
+        },
+        "T3": {
+          "parent": "WFRL.Turbine.T3.YawRoot",
+          "exterior_mount": {
+            "anchor": [
+              -3.8000001907348633,
+              -2.5326962749261384e-16,
+              0.462560772895813
+            ],
+            "offset": [
+              0.0,
+              0.0,
+              -0.4000000059604645
+            ],
+            "parent_negative_z_axis_error": 0.0
+          },
+          "mount_revision": 3,
+          "horizontal_fov_deg": 109.99999850756943,
+          "sensor_fit": "HORIZONTAL",
+          "passepartout": true,
+          "passepartout_alpha": 1.0
+        }
+      },
+      "nacelle": {
+        "T1": {
+          "location": [
+            -3.5000009536743164,
+            0.0,
+            0.9000034332275391
+          ],
+          "rotation": [
+            -0.13962635397911072,
+            -2.7526629864382812e-08,
+            -1.5707964897155762
+          ],
+          "lens": 8.0,
+          "shift_x": 0.0,
+          "shift_y": 0.0,
+          "yaw": 180.0,
+          "pitch": -82.0,
+          "fov": 59.0,
+          "roll": 180.0,
+          "hub_offset_m": [
+            1.5,
+            0.0,
+            -1.5
+          ],
+          "mount_scope": "nominal optical installation; exterior shell fit unverified; no certified bracket"
+        },
+        "T2": {
+          "location": [
+            -3.5000009536743164,
+            0.0,
+            0.9000034332275391
+          ],
+          "rotation": [
+            -0.13962635397911072,
+            -2.7526629864382812e-08,
+            -1.5707964897155762
+          ],
+          "lens": 8.0,
+          "shift_x": 0.0,
+          "shift_y": 0.0,
+          "yaw": 180.0,
+          "pitch": -82.0,
+          "fov": 59.0,
+          "roll": 180.0,
+          "hub_offset_m": [
+            1.5,
+            0.0,
+            -1.5
+          ],
+          "mount_scope": "nominal optical installation; exterior shell fit unverified; no certified bracket"
+        },
+        "T3": {
+          "location": [
+            -3.5000009536743164,
+            0.0,
+            0.9000034332275391
+          ],
+          "rotation": [
+            -0.13962635397911072,
+            -2.7526629864382812e-08,
+            -1.5707964897155762
+          ],
+          "lens": 8.0,
+          "shift_x": 0.0,
+          "shift_y": 0.0,
+          "yaw": 180.0,
+          "pitch": -82.0,
+          "fov": 59.0,
+          "roll": 180.0,
+          "hub_offset_m": [
+            1.5,
+            0.0,
+            -1.5
+          ],
+          "mount_scope": "nominal optical installation; exterior shell fit unverified; no certified bracket"
+        }
+      },
+      "independent_ptz": true,
+      "rolled_ptz_screen_axes": true,
+      "pole_ptz_screen_axes": true,
+      "ptz_projection_cases": 120,
+      "mount_reset": true,
+      "button_bindings": true,
+      "same_turbine_trails_retained": true,
+      "readings_and_alarm_unchanged": true,
+      "turbine_data_switch": true,
+      "parent_motion_once": true,
+      "seek_reset": true,
+      "save_reload": true
+    }
+  },
+  "visible_ui": "NOT_RUN",
+  "scope": "Installed-package background regressions; 120 actual-projection PTZ cases cover multiple rolls at pitch -50, -82, -90, -89.9, 89.9 and 90 degrees, including optical-axis movement and preserved orientation at poles.",
+  "installed_inventory_after": {
+    "status": "PASS",
+    "package_path": "PROJECT_ROOT/outputs/down-reference-view/validation/profile/extensions/wfrl_blender",
+    "verified_files": 181,
+    "mismatches": [],
+    "unexpected_files": [],
+    "ignored": [
+      "__pycache__",
+      "*.pyc"
+    ]
+  },
+  "errors": []
+}

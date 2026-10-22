@@ -22,6 +22,7 @@ MAX_CUSTOM_CAMERAS = 3
 SLOTS = tuple(range(1, MAX_CUSTOM_CAMERAS + 1))
 SCHEMA_VERSION = 2
 _RETIRED = []
+_RETIRED_DATA = []
 
 
 @dataclass(frozen=True)
@@ -809,6 +810,28 @@ def _refresh_references(scene):
         op.area.tag_redraw()
 
 
+def _remember_retired(obj, data):
+    """Keep each failed release independent of the other resource's RNA lifetime."""
+    if obj not in _RETIRED:
+        _RETIRED.append(obj)
+    if data is not None and data not in _RETIRED_DATA:
+        _RETIRED_DATA.append(data)
+
+
+def _cleanup_retired_data():
+    import bpy
+    for data in tuple(_RETIRED_DATA):
+        try:
+            if data.users:
+                continue
+            bpy.data.cameras.remove(data)
+        except ReferenceError:
+            pass
+        except (RuntimeError, ValueError):
+            continue
+        _RETIRED_DATA.remove(data)
+
+
 def cleanup_retired():
     for obj in tuple(_RETIRED):
         try:
@@ -819,6 +842,7 @@ def cleanup_retired():
             _RETIRED.remove(obj)
         except (RuntimeError, ValueError):
             pass
+    _cleanup_retired_data()
 
 
 def _publish(scene, replacements):
@@ -838,10 +862,14 @@ def _publish(scene, replacements):
     saved = [(obj, obj.name, obj.data.name, bool(obj.get('wfrl_custom_camera')),
               bool(obj.get('wfrl_custom_draft')), tuple(obj.users_collection)) for obj in objects]
     refs = [(scene, 'camera', scene.camera)]
-    if controller_stage in panel._VIEWING:
-        # Exiting WATCH/LAYOUT must restore a live replacement camera.
-        for name in ('snapshot', 'external_snapshot'):
-            snapshot = getattr(controller, name, None)
+    if controller_stage is not None and not controller.closed:
+        # Confirmation publishes while editing; every restore path needs a live camera.
+        snapshots = [getattr(controller, name, None)
+                     for name in ('snapshot', 'external_snapshot')]
+        session = getattr(controller, 'session', None)
+        if session is not None:
+            snapshots.append(session.snapshot)
+        for snapshot in snapshots:
             if snapshot is not None:
                 refs.append((snapshot, 'camera', snapshot.camera))
     for screen in bpy.data.screens:
@@ -897,10 +925,11 @@ def _publish(scene, replacements):
     # refuses garbage collection. Retry on the next transaction.
     for original in originals.values():
         if original is not None:
+            data = original.data
             try:
                 _remove(original)
             except (RuntimeError, ValueError):
-                _RETIRED.append(original)
+                _remember_retired(original, data)
 
 
 def restore_layout(scene, payload):

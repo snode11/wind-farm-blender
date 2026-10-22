@@ -735,45 +735,80 @@ class DefectGeometry:
         return previous
 
     def close(self, restore=True):
-        """Release editor resources, optionally restoring the healthy rest loft.
+        """Release private resources, retaining failed releases for retry.
 
-        The caller owns replay rebind/update after this operation. This callback
-        never changes a deformation cache or applies a loaded replay pose.
+        The caller owns replay rebind/update. Shared or fake-user datablocks
+        remain owned by their other users; deleted RNA handles need no release.
         """
         if self._closed:
             return self._active
-        previous = self._active
+        errors = []
+        previous = getattr(self, '_closing_payload', self._active)
         if restore:
             for i, blade in enumerate(self.rig['blades'], 1):
-                blade.data = self._baseline[i]
-            restored = dict(document=None, supports=[], measurements=[], meshes=dict(self._baseline),
-                            materials=[], node_groups=[], bvh_by_blade={}, version=0, owned_meshes=False)
+                try:
+                    if not blade.as_pointer():
+                        continue
+                except ReferenceError:
+                    continue
+                try:
+                    blade.data = self._baseline[i]
+                except Exception as exc:
+                    errors.append(exc)
+            if errors:
+                raise RuntimeError('健康叶片恢复失败：' + '; '.join(map(str, errors)))
+            self._active = dict(document=None, supports=[], measurements=[], meshes=dict(self._baseline),
+                                materials=[], node_groups=[], bvh_by_blade={}, version=0, owned_meshes=False)
             self.rig['defect_supports'] = []
             self.rig['defect_measurements'] = []
             self.rig['defect_document'] = None
-            self._active = restored
         else:
             self._active = None
-        self._closed = True
-        self.dispose(previous)
-        for mesh in list(self._healthy.values())+list(self._baseline.values()):
-            if mesh.users == 0:
-                bpy.data.meshes.remove(mesh)
+        self._closing_payload = previous
+        try:
+            self.dispose(previous)
+        except Exception as exc:
+            errors.append(exc)
+        for meshes in (self._healthy, self._baseline):
+            for index, mesh in list(meshes.items()):
+                try:
+                    if mesh.users == 0:
+                        bpy.data.meshes.remove(mesh)
+                except ReferenceError:
+                    pass
+                except Exception as exc:
+                    errors.append(exc)
+                    continue
+                # Baseline bindings must remain available until all releases
+                # succeed, so retries can finish a partially closed manager.
+                if meshes is self._healthy:
+                    meshes.pop(index, None)
+        if errors:
+            raise RuntimeError('缺陷几何清理失败：' + '; '.join(map(str, errors)))
         self._healthy.clear()
         self._baseline.clear()
+        self._closing_payload = None
+        self._closed = True
         return self._active
 
     def dispose(self, payload):
         if payload is None or payload is self._active or payload.get('_disposed', False):
             return
-        payload['_disposed'] = True
+        errors = []
+        groups = [(bpy.data.materials, payload.get('materials', [])),
+                  (bpy.data.node_groups, payload.get('node_groups', []))]
         if payload.get('owned_meshes', True):
-            for mesh in payload.get('meshes', {}).values():
-                if mesh.users == 0 and mesh not in self._healthy.values():
-                    bpy.data.meshes.remove(mesh)
-        for mat in payload.get('materials', []):
-            if mat.users == 0:
-                bpy.data.materials.remove(mat)
-        for group in payload.get('node_groups', []):
-            if group.users == 0:
-                bpy.data.node_groups.remove(group)
+            groups.insert(0, (bpy.data.meshes, [mesh for mesh in payload.get('meshes', {}).values()
+                                             if mesh not in self._healthy.values()]))
+        for collection, resources in groups:
+            for resource in resources:
+                try:
+                    if resource.users == 0:
+                        collection.remove(resource)
+                except ReferenceError:
+                    pass
+                except Exception as exc:
+                    errors.append(exc)
+        if errors:
+            raise RuntimeError('缺陷资源释放失败：' + '; '.join(map(str, errors)))
+        payload['_disposed'] = True

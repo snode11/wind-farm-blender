@@ -2,7 +2,7 @@
 
 适用于 Blender **5.2+** 的 NREL 公开扩展 **0.3.24**，包含独立风机手动控制、完整风机几何／同源纹理、精细支撑结构、三相机默认复位、柔性回放、六类合成缺陷、双束／TLS。GW184 **0.4.0** 使用[独立包](GW184三相机与缺陷编辑器.md)。
 
-开发机日常安装为 **0.3.24**，实际模块 `bl_ext.user_default.wfrl_blender`；已有记录中的 180 个安装文件与上传源 ZIP 一致，见[安装核对](../../publication/daily-installation.json)及[新进程检查](../../publication/daily-installation-probe.json)。该包提供手动姿态预设、相对微调、三机概览和姿态 JSON。公开附件、源码及证据归属见[交付身份](../../publication/blender-0.3.24.json)和[发布状态](发布状态与验证范围.md)。
+开发机日常安装为 **0.3.28 本地包**，实际模块 `bl_ext.user_default.wfrl_blender`，尚未公开发布。181 个安装文件的来源、摘要与验证范围见[安装核对](../../publication/daily-installation.json)及[发布状态](发布状态与验证范围.md)。公开 0.3.24 附件的身份与适用证据见[交付身份](../../publication/blender-0.3.24.json)。
 
 ## 发布身份与验证
 
@@ -64,7 +64,7 @@ ZIP 内置预弯 v3 三机 60 秒回放、旧法与 TLS 两份双束结果层、
 python3 scripts/blender/build_extension.py --output /path/to/new-build-directory
 ```
 
-构建生成 `wfrl_blender-0.3.24.zip`、逐文件 inventory 和 SHA-256。默认拒绝覆盖已有同名输出；明确需要替换时使用 `--overwrite`。产物先在同一文件系统暂存，再发布校验文件与 ZIP；普通发布异常尝试恢复原产物，恢复冲突保留备份并报告位置。不要把该保护理解为断电或强制终止下的多文件整体原子性。
+构建版本取自所选源码的 `blender_manifest.toml`：当前分支生成 `wfrl_blender-0.3.28.zip`，`v0.3.24` 标签源码生成 `wfrl_blender-0.3.24.zip`；两者均生成逐文件 inventory 和 SHA-256。默认拒绝覆盖已有同名输出；明确需要替换时使用 `--overwrite`。产物先在同一文件系统暂存，再发布校验文件与 ZIP；普通发布异常尝试恢复原产物，恢复冲突保留备份并报告位置。不要把该保护理解为断电或强制终止下的多文件整体原子性。
 
 构建会从规范源生成协议与内置读取器，不依赖训练环境、FAST.Farm 或原始 VTP。构建成功只证明产物生成；安装版后台、可见窗口及性能需按实际 ZIP 单独验证。当前源码不自动更新日常安装，也不替换既有公开附件。v0.3.18 的独立复建与其 172 文件 ZIP 字节一致结论只属于[该标签和包](releases/0.3.18发布核对.md)。
 

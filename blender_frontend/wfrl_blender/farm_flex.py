@@ -55,9 +55,14 @@ def active_for(scene):
     """Return the runtime bound to this scene, never another window's scene."""
     if scene is None:
         return None
-    active = _ACTIVES.get(scene.as_pointer())
-    if active is not None and active.enabled and active.scene == scene:
-        return active
+    try:
+        active = _ACTIVES.get(scene.as_pointer())
+        if active is not None and active.enabled and active.scene == scene:
+            # Undo can preserve a pointer value while replacing the RNA wrapper.
+            active.scene.as_pointer()
+            return active
+    except ReferenceError:
+        pass
     return None
 
 
@@ -157,10 +162,87 @@ def read_package(path):
     return _load_package(path).playback
 
 
+def _update_scene_transforms(scene):
+    """Evaluate the replay scene even when another scene is current."""
+    import bpy
+    view_layer = bpy.context.view_layer if bpy.context.scene == scene else scene.view_layers[0]
+    view_layer.update()
+
+
+class _MeshBindings:
+    """Own one replay binding's new meshes and reversible object assignments."""
+    _OWNER = 'wfrl_farm_flex_owned'
+
+    def __init__(self):
+        self.created = []
+        self.replaced = []
+
+    def own(self, mesh):
+        mesh[self._OWNER] = True
+        self.created.append(mesh)
+        return mesh
+
+    def replace(self, obj, mesh):
+        previous = obj.data
+        obj.data = mesh
+        self.replaced.append((obj, previous, mesh))
+
+    def follow(self, obj):
+        """Restore a managed sampling object's shared reference on rollback."""
+        for target, previous, mesh in self.replaced:
+            if obj != target and obj.data == mesh:
+                self.replaced.append((obj, previous, mesh))
+                return
+
+    @classmethod
+    def _release(cls, mesh):
+        import bpy
+        try:
+            if (mesh.get(cls._OWNER) and mesh.library is None and mesh.users == 0
+                    and not mesh.use_fake_user and mesh.shape_keys is None):
+                bpy.data.meshes.remove(mesh)
+        except ReferenceError:
+            pass
+
+    def commit(self):
+        for _obj, previous, _mesh in self.replaced:
+            self._release(previous)
+        for mesh in self.created:
+            self._release(mesh)
+        self.created.clear()
+        self.replaced.clear()
+
+    def rollback(self):
+        for obj, previous, mesh in reversed(self.replaced):
+            try:
+                if obj.data == mesh:
+                    obj.data = previous
+            except ReferenceError:
+                pass
+        for mesh in self.created:
+            self._release(mesh)
+        self.created.clear()
+        self.replaced.clear()
+
+
 class FarmFlex:
     def __init__(self,scene,path,*,_package=None):
+        self._meshes = _MeshBindings()
+        try:
+            self._bind(scene, path, _package=_package)
+        except Exception:
+            comparison = getattr(self, 'comparison', None)
+            try:
+                if comparison is not None:
+                    comparison.close()
+            finally:
+                self._meshes.rollback()
+            raise
+        self._meshes.commit()
+
+    def _bind(self,scene,path,*,_package=None):
         import bpy
-        from .turbine_geometry import geometry_data,blade_mesh
+        from .turbine_geometry import geometry_data,blade_mesh,MODELS,DEFAULT_MODEL
         from .materials import get_material,ensure_blade_tip_markings
         from . import clearance_replay
         package = _load_package(path) if _package is None else _package
@@ -200,12 +282,16 @@ class FarmFlex:
             scene.objects[f'WFRL.Turbine.{tid}.Rotor'].rotation_euler.x=0
             for b in (1,2,3):scene.objects[f'WFRL.Turbine.{tid}.Blade{b}'].rotation_euler.z=0
         phase_started = performance.begin()
-        bpy.context.view_layer.update()
+        _update_scene_transforms(scene)
         performance.end("flex.depsgraph_update", phase_started)
-        spans=np.array([s[0]+geometry_data()['scalars']['HubRad'] for s in geometry_data()['blade_stations']])
+        self.model = scene.get('wfrl_blade_model', DEFAULT_MODEL)
+        if self.model not in MODELS:
+            self.model = DEFAULT_MODEL
+        model_geometry = geometry_data(self.model)
+        spans=np.array([s[0]+model_geometry['scalars']['HubRad'] for s in model_geometry['blade_stations']])
         # Retain the same 19-station loft, with fewer presentation samples.
         # Physical transforms, amplitude and the stable tip apex are unchanged.
-        vertices,faces=blade_mesh(subdiv=4,ring_points=48)
+        vertices,faces=blade_mesh(subdiv=4,ring_points=48,model=self.model)
         # Preserve the cosmetic apex at -1 for existing coloured trails. The
         # extra loose vertex follows exactly the same deformation as the mesh.
         if comparison_data is not None:
@@ -216,7 +302,7 @@ class FarmFlex:
         if self.reference is not None:
             from .prebend import bend_vertices
             vertices = bend_vertices(vertices, self.reference).tolist()
-        display_mesh=bpy.data.meshes.new('WFRL.FarmFlex.SourceLoft')
+        display_mesh=self._meshes.own(bpy.data.meshes.new('WFRL.FarmFlex.SourceLoft'))
         display_mesh.from_pydata(vertices,[],faces)
         display_mesh.materials.append(get_material('blade'))
         for polygon in display_mesh.polygons:polygon.use_smooth=True
@@ -225,7 +311,7 @@ class FarmFlex:
             offset=np.array(self.manifest['layout_m'][turbine])
             for b in (1,2,3):
                 obj=scene.objects[f'WFRL.Turbine.{tid}.Blade{b}']
-                obj.data=display_mesh.copy()
+                self._meshes.replace(obj, self._meshes.own(display_mesh.copy()))
                 ensure_blade_tip_markings([obj])
                 # The source loft already has smooth normals. Avoid rebuilding
                 # a 12 mm cosmetic bevel on nine moving meshes every frame.
@@ -246,7 +332,14 @@ class FarmFlex:
         # any playback frame writes deform it. Saved anchor indices from the
         # rigid presentation mesh must never be reused on this replacement.
         from . import repair_marks
-        repair_marks.ensure(scene, force=True)
+        try:
+            repair_marks.ensure(scene, force=True)
+        finally:
+            blade = scene.objects.get(repair_marks.TARGET_NAME)
+            if blade is not None:
+                for obj in scene.objects:
+                    if obj.type == 'MESH' and repair_marks._owned(obj, blade):
+                        self._meshes.follow(obj)
         if self.tower_motion is not None:
             from .turbine_geometry import tower_mesh
             tower_vertices, tower_faces = tower_mesh()
@@ -258,11 +351,11 @@ class FarmFlex:
                 prefix = f'WFRL.Turbine.{tid}'
                 obj = scene.objects[prefix+'.Tower']
                 # Rebuild from rest geometry so save/reload never compounds bending.
-                mesh = bpy.data.meshes.new(prefix+'.FlexibleTower')
+                mesh = self._meshes.own(bpy.data.meshes.new(prefix+'.FlexibleTower'))
                 mesh.from_pydata(tower_vertices,[],tower_faces)
                 mesh.materials.append(get_material('tower'))
                 for polygon in mesh.polygons: polygon.use_smooth=True
-                obj.data=mesh
+                self._meshes.replace(obj, mesh)
                 self.towers.append((obj,rest.copy(),index,weight,k))
                 # Primitive collars store height in object.location; decorative
                 # rings store it in their vertices. Apply the same support
@@ -325,6 +418,8 @@ class FarmFlex:
         clearance_replay._READERS[scene.as_pointer()]=self.readers['T1']
         if comparison_data is not None:
             self.comparison = ComparisonView(self, comparison_data, vertices, faces)
+        from . import split_turbine_context
+        split_turbine_context.rebind_meshes(scene, self._meshes)
 
     def restore_support(self):
         for obj,rest,*_ in self.towers:
@@ -336,8 +431,11 @@ class FarmFlex:
             except ReferenceError: pass
         if self.tower_motion is not None:
             for tid in self.readers:
-                obj=self.scene.objects.get(f'WFRL.Turbine.{tid}.YawRoot')
-                if obj: obj.location=(0,0,87.6);obj.rotation_euler=(0,0,0)
+                try:
+                    obj=self.scene.objects.get(f'WFRL.Turbine.{tid}.YawRoot')
+                    if obj: obj.location=(0,0,87.6);obj.rotation_euler=(0,0,0)
+                except ReferenceError:
+                    pass
 
     def record_telemetry(self, scene, pose=None):
         if not getattr(scene, 'wfrl_channel_telemetry', True):
@@ -457,7 +555,6 @@ class FarmFlex:
 
     @performance.timed("flex.update")
     def update(self,scene, *, sim_time_s=None, record_telemetry=True, update_comparison=True):
-        import bpy
         from . import clearance_replay
         if scene!=self.scene or not self.enabled:return
         reader=clearance_replay.reader_for(scene)
@@ -521,7 +618,7 @@ class FarmFlex:
                 obj.location=tr[:,:3]@rest_location+tr[:,3]
                 obj.rotation_euler=Matrix(tr[:,:3].tolist()).to_euler()
         phase_started = performance.begin()
-        bpy.context.view_layer.update()
+        _update_scene_transforms(scene)
         performance.end("flex.depsgraph_update", phase_started)
         inverses=[np.array(obj.matrix_world.inverted()) for obj,*_ in self.blades]
         for (obj,rest,world,index,weight,k,b,offset),inverse,lo,hi in zip(self.blades,inverses,lower,upper):
@@ -572,10 +669,15 @@ def detach(scene=None, *, restore=True):
     split_turbine_context.clear_runtime(scene)
     global _ACTIVE
     if scene is None:
-        actives = list(_ACTIVES.values())
+        entries = list(_ACTIVES.items())
     else:
-        active = _ACTIVES.get(scene.as_pointer())
-        actives = [active] if active is not None else []
+        try:
+            key = scene.as_pointer()
+            entries = [(key, _ACTIVES[key])] if key in _ACTIVES else []
+        except ReferenceError:
+            entries = [(key, active) for key, active in _ACTIVES.items()
+                       if active.scene is scene]
+    actives = [active for _key, active in entries]
     from .nrel_defects import editor
     editor.detach(scene, restore=restore)
     # End camera drafts before invalidating their replay and parent references.
@@ -584,8 +686,10 @@ def detach(scene=None, *, restore=True):
     if custom is not None and (scene is None or
             getattr(getattr(custom, '_ACTIVE', None), 'scene', None) == scene):
         custom.cancel_on_load()
-    for active in actives:
-        _ACTIVES.pop(active.scene.as_pointer(), None)
+    from . import clearance_replay
+    for key, active in entries:
+        _ACTIVES.pop(key, None)
+        clearance_replay._READERS.pop(key, None)
         active.enabled = False
         if active.comparison is not None:
             active.comparison.close()
@@ -620,7 +724,7 @@ def on_load_pre(_unused):
     detach(restore=False)
 
 
-def attach(scene,path):
+def attach(scene,path,*,_package=None):
     import bpy
     from . import tip_tracking
     global _ACTIVE
@@ -628,7 +732,10 @@ def attach(scene,path):
         # Validate before releasing the old scene runtime. In particular a
         # FULL_COPY scene contains renamed objects and must not detach an
         # already-restored scene when those required bindings are absent.
-        package = _load_package(path)
+        package = _load_package(path) if _package is None else _package
+        if _package is not None and (not isinstance(package, _LoadedPackage)
+                or package.result_path != Path(path).resolve()):
+            raise ValueError('Validated package does not match the requested result path')
         manifest = package.manifest
         required = [f'WFRL.Turbine.{tid}.{suffix}'
                     for tid in manifest['turbine_ids']
@@ -638,10 +745,15 @@ def attach(scene,path):
             raise ValueError('Scene lacks required FarmFlex objects: ' + ', '.join(missing))
         # Linked scenes share the same object transforms/meshes; two separate
         # timeline clocks cannot safely drive them. Keep the first owner ready.
-        for other in _ACTIVES.values():
+        for other in list(_ACTIVES.values()):
+            try:
+                other.scene.as_pointer()
+            except ReferenceError:
+                detach(other.scene, restore=False)
+                continue
             if other.scene != scene and any(obj in scene.objects.values() for obj, *_ in other.blades):
                 raise ValueError('FarmFlex objects are already driven by scene: ' + other.scene.name)
-        detach(scene)
+        detach(scene, restore=False)
         active=FarmFlex(scene,path,_package=package)
         _ACTIVES[scene.as_pointer()] = active
         _ACTIVE = active

@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "passed": 73,
+  "subtests_passed": 174,
+  "command": "PYTHONPATH=blender_frontend:. outputs/release-0.3.19-20261009/test-env/bin/python -m pytest blender_frontend/tests/test_split_reconstruction.py blender_frontend/tests/test_split_reconstruction_timing.py blender_frontend/tests/test_split_mappo_texture.py blender_frontend/tests/test_split_texture_settings.py blender_frontend/tests/test_mappo_texture_package.py -q",
+  "accuracy_accepted": false
+}

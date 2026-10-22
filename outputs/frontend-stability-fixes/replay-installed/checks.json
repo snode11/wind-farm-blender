@@ -1,0 +1,91 @@
+{
+  "scope": "Independent Blender process; native operators invoked by script",
+  "blender": "5.2.1 LTS",
+  "addon_file": "PROJECT_ROOT/outputs/frontend-stability-fixes/validation/profile/extensions/wfrl_blender/__init__.py",
+  "checks": [
+    {
+      "label": "camera_undo",
+      "deltas": {
+        "WFRL.Turbine.T1.Blade1": 4.043794894361344,
+        "WFRL.Turbine.T1.Blade2": 3.3200496188638176,
+        "WFRL.Turbine.T1.Blade3": 0.6786137994557571,
+        "WFRL.Turbine.T2.Blade1": 0.9641237610186122,
+        "WFRL.Turbine.T2.Blade2": 1.4091391858089695,
+        "WFRL.Turbine.T2.Blade3": 0.7492456383397521,
+        "WFRL.Turbine.T3.Blade1": 1.4186494393628908,
+        "WFRL.Turbine.T3.Blade2": 1.100670009385481,
+        "WFRL.Turbine.T3.Blade3": 1.457107982127398
+      },
+      "time_s": 120.00416666666666,
+      "resources": {
+        "meshes": 273,
+        "curves": 170,
+        "comparison_orphans": []
+      }
+    },
+    {
+      "label": "camera_redo",
+      "deltas": {
+        "WFRL.Turbine.T1.Blade1": 4.043794894361344,
+        "WFRL.Turbine.T1.Blade2": 3.3200496188638176,
+        "WFRL.Turbine.T1.Blade3": 0.6786137994557571,
+        "WFRL.Turbine.T2.Blade1": 0.9641237610186122,
+        "WFRL.Turbine.T2.Blade2": 1.4091391858089695,
+        "WFRL.Turbine.T2.Blade3": 0.7492456383397521,
+        "WFRL.Turbine.T3.Blade1": 1.4186494393628908,
+        "WFRL.Turbine.T3.Blade2": 1.100670009385481,
+        "WFRL.Turbine.T3.Blade3": 1.457107982127398
+      },
+      "time_s": 120.00416666666666,
+      "resources": {
+        "meshes": 273,
+        "curves": 170,
+        "comparison_orphans": []
+      }
+    },
+    {
+      "label": "saved_package_failure_remains_unavailable",
+      "passed": true
+    },
+    {
+      "label": "missing_runtime_no_rigid_fallback",
+      "passed": true
+    },
+    {
+      "label": "reload_after_scene_delete",
+      "deltas": {
+        "WFRL.Turbine.T1.Blade1": 1.463101026039652,
+        "WFRL.Turbine.T1.Blade2": 1.199114000679726,
+        "WFRL.Turbine.T1.Blade3": 0.13869976526337968,
+        "WFRL.Turbine.T2.Blade1": 2.014719131872856,
+        "WFRL.Turbine.T2.Blade2": 1.3565252670839911,
+        "WFRL.Turbine.T2.Blade3": 1.1108994432129287,
+        "WFRL.Turbine.T3.Blade1": 1.1112765015571955,
+        "WFRL.Turbine.T3.Blade2": 0.7632458256039997,
+        "WFRL.Turbine.T3.Blade3": 0.6498680348787368
+      },
+      "time_s": 117.0,
+      "resources": {
+        "meshes": 276,
+        "curves": 170,
+        "comparison_orphans": []
+      }
+    },
+    {
+      "label": "unregister_after_reload",
+      "passed": true
+    }
+  ],
+  "baseline_resources": {
+    "meshes": 273,
+    "curves": 170,
+    "comparison_orphans": []
+  },
+  "sha256": {
+    "farm_flex.py": "0c118a73fb5f47b90392c8a317e4a190deaf6c35886140527c96604474f7e137",
+    "clearance_replay.py": "a08ef18779af622e9ccb8eb3defe7fe83cccfdabbeb2ed56cf95e4073e42fe69",
+    "split_turbine_context.py": "c1abd4f0297065ffc54f5a9079d9f6be6629bc450d5e0c8a6dc97f9c0a325602",
+    "deflection.py": "bf122d10240bf6f9c12025a3e1d37f1fed8d88c0a259908bc6afb512c6515ff7"
+  },
+  "status": "PASS"
+}

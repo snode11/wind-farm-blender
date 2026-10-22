@@ -1,0 +1,106 @@
+{
+  "status": "PASS",
+  "addon_file": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/__init__.py",
+  "build_info": {
+    "payload_files": 179,
+    "payload_sha256": "4e87c11870cdaacdd6f28cd3eb3b9b109315d97be675d53958afe7c62240e79b",
+    "schema": "wfrl.extension-build.v1",
+    "version": "0.3.24"
+  },
+  "frames": [
+    {
+      "delta_deg": -18,
+      "time_s": 117.49195247724785,
+      "file": "PROJECT_ROOT/outputs/t1-down-shoulder-view/passing-frames/000.png",
+      "local_position": [
+        -2.5028650760650635,
+        -3.2013254165649414,
+        0.6125588417053223
+      ]
+    },
+    {
+      "delta_deg": -12,
+      "time_s": 117.58309906572366,
+      "file": "PROJECT_ROOT/outputs/t1-down-shoulder-view/passing-frames/001.png",
+      "local_position": [
+        -2.5028650760650635,
+        -3.2013254165649414,
+        0.6125588417053223
+      ]
+    },
+    {
+      "delta_deg": -6,
+      "time_s": 117.67415277989258,
+      "file": "PROJECT_ROOT/outputs/t1-down-shoulder-view/passing-frames/002.png",
+      "local_position": [
+        -2.5028650760650635,
+        -3.2013254165649414,
+        0.6125588417053223
+      ]
+    },
+    {
+      "delta_deg": 0,
+      "time_s": 117.76504036937504,
+      "file": "PROJECT_ROOT/outputs/t1-down-shoulder-view/passing-frames/003.png",
+      "local_position": [
+        -2.5028650760650635,
+        -3.2013254165649414,
+        0.6125588417053223
+      ]
+    },
+    {
+      "delta_deg": 6,
+      "time_s": 117.85576226191203,
+      "file": "PROJECT_ROOT/outputs/t1-down-shoulder-view/passing-frames/004.png",
+      "local_position": [
+        -2.5028650760650635,
+        -3.2013254165649414,
+        0.6125588417053223
+      ]
+    },
+    {
+      "delta_deg": 12,
+      "time_s": 117.94631757902187,
+      "file": "PROJECT_ROOT/outputs/t1-down-shoulder-view/passing-frames/005.png",
+      "local_position": [
+        -2.5028650760650635,
+        -3.2013254165649414,
+        0.6125588417053223
+      ]
+    },
+    {
+      "delta_deg": 18,
+      "time_s": 118.0367274330494,
+      "file": "PROJECT_ROOT/outputs/t1-down-shoulder-view/passing-frames/006.png",
+      "local_position": [
+        -2.5028650760650635,
+        -3.2013254165649414,
+        0.6125588417053223
+      ]
+    }
+  ],
+  "preview_time_s": 117.85,
+  "location": [
+    -2.5028650760650635,
+    -3.2013254165649414,
+    0.6125588417053223
+  ],
+  "angles": {
+    "gimbal_yaw": 139.3,
+    "gimbal_pitch": -80.55,
+    "gimbal_roll": 180.0,
+    "gimbal_fov": 60.0
+  },
+  "lens_mm": 31.17691421508789,
+  "render_engine": "BLENDER_WORKBENCH",
+  "studio_light": "studio.sl",
+  "measurement_beams_hidden": true,
+  "geometry_modified": false,
+  "physics_rerun": false,
+  "enablement_persisted": true,
+  "manual_registration_called": false,
+  "shift": [
+    -0.024000000208616257,
+    -0.03999999910593033
+  ]
+}

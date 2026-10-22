@@ -29,7 +29,29 @@ def clear_runtime(scene=None):
     if scene is None:
         _SESSIONS.clear()
     else:
-        _SESSIONS.pop(scene.as_pointer(), None)
+        try:
+            _SESSIONS.pop(scene.as_pointer(), None)
+        except ReferenceError:
+            for key, groups in list(_SESSIONS.items()):
+                if any(group['scene'] is scene for group in groups.values()):
+                    _SESSIONS.pop(key, None)
+
+
+def rebind_meshes(scene, bindings):
+    """Include existing, provenance-checked display meshes in a farm transaction."""
+    replacements = []
+    sources = None
+    for names_key, prefix, _offset in _SAVED_GROUPS:
+        if scene.get(names_key) is None:
+            continue
+        if sources is None:
+            sources, _yaw = _sources(scene)
+        existing, _legacy = _existing(scene, prefix, names_key, sources)
+        replacements.extend((obj, sources[part].data) for part, obj in existing.items()
+                            if obj.data != sources[part].data)
+    for obj, mesh in replacements:
+        bindings.replace(obj, mesh)
+    clear_runtime(scene)
 
 
 def release(scene, names_key):

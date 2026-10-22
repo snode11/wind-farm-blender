@@ -292,10 +292,10 @@ def _surface_sample(sequence, obj, blade, index, radius, tau):
 
 def focus(context, sequence, blades, areas=None, scene=None, index=None):
     """Pause and face the selected estimated surface; repeated clicks are stable."""
+    from . import _cancel_playback
     scene = scene or context.scene
     screen = context.screen
-    if screen and screen.is_animation_playing:
-        bpy.ops.screen.animation_cancel(restore_frame=False)
+    _cancel_playback(scene)
     blade, radius, tau, size = _coordinates(scene, sequence.rotor)
     if blade >= len(blades):
         raise ValueError('选中的重建叶片尚未加载')

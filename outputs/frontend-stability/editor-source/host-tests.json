@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "command": [
+    "PYTHON_ENV_ROOT/bin/python",
+    "-m",
+    "pytest",
+    "-p",
+    "no:cacheprovider",
+    "blender_frontend/tests/test_nrel_editor_playback.py",
+    "blender_frontend/tests/test_nrel_defects.py",
+    "blender_frontend/tests/test_scene_playback_lifecycle.py",
+    "-q"
+  ],
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONPATH": "blender_frontend:."
+  },
+  "exit_code": 0,
+  "source_sha256": "f15db8e3fe3ee898e544125020dd414921a87778df104f83d7b98c143b69ce8b",
+  "summary": ".................................                                        [100%]\n33 passed in 0.74s",
+  "scope": "Host editor/scan player ownership, defect document transactions and scene lifecycle; native windows checked separately."
+}

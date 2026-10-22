@@ -1,0 +1,6 @@
+{
+  "status": "PASS",
+  "phase": "reopen",
+  "module_file": "PROJECT_ROOT/outputs/blender-validation/nrel-defects-release-0.3.16-20261005/profile/extensions/wfrl_blender/__init__.py",
+  "scope": "background save/reopen and flexible geometry; no viewport or appearance acceptance"
+}

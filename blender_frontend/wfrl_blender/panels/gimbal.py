@@ -79,11 +79,31 @@ def switch(scene, context):
 
 
 def change(camera, dx=0, dy=0, zoom=0):
-    # The reference shot is rolled 180 degrees; keep drag/joystick directions
-    # aligned with the image rather than reversing them with the optical roll.
-    sign = -1 if camera.get('gimbal_roll', 0) % 360 == 180 else 1
-    aim_gimbal(camera, camera['gimbal_yaw'] + sign * dx,
-               camera['gimbal_pitch'] + sign * dy, camera['gimbal_fov'] + zoom)
+    """Map screen-axis input to mounted yaw/pitch at the current optical roll."""
+    pitch = camera['gimbal_pitch']
+    if abs(math.cos(math.radians(pitch))) < .05 and (dx or dy):
+        from mathutils import Euler, Quaternion, Vector
+        rotation = (camera.rotation_euler.to_quaternion()
+                    @ Quaternion((0, 1, 0), math.radians(dx * .05))
+                    @ Quaternion((1, 0, 0), math.radians(dy)))
+        rotation.normalize()
+        forward = rotation @ Vector((0, 0, -1))
+        horizontal = math.hypot(forward.x, forward.y)
+        yaw = (math.degrees(math.atan2(forward.y, forward.x))
+               if horizontal > 1e-8 else camera['gimbal_yaw'])
+        pitch = math.degrees(math.atan2(forward.z, horizontal))
+        base = Euler((math.radians(90 + pitch), 0, math.radians(yaw - 90)), 'XYZ').to_quaternion()
+        optical_roll = base.conjugated() @ rotation
+        camera['gimbal_roll'] = math.degrees(2 * math.atan2(optical_roll.z, optical_roll.w)) % 360
+        aim_gimbal(camera, yaw, pitch, camera['gimbal_fov'] + zoom)
+        return
+    roll = math.radians(float(camera.get('gimbal_roll', 0)) % 360)
+    cosine, sine = math.cos(roll), math.sin(roll)
+    horizontal_scale = max(abs(math.cos(math.radians(pitch))), .05)
+    yaw_delta = cosine * dx + sine * dy / horizontal_scale
+    pitch_delta = -sine * dx * horizontal_scale + cosine * dy
+    aim_gimbal(camera, camera['gimbal_yaw'] + yaw_delta,
+               pitch + pitch_delta, camera['gimbal_fov'] + zoom)
 
 
 class GimbalAvailable:
@@ -289,12 +309,16 @@ def draw_gimbal_controls(layout, context, *, allow_turbine_selection=True):
     layout.operator('wfrl.gimbal_mode', text='Exit Camera Mode / 退出' if _ACTIVE else 'Camera Mode / 相机模式', icon='CAMERA_DATA')
     layout.prop(scene, 'wfrl_gimbal_speed')
     row = layout.row(align=True)
-    for value, label in (('DOWN', 'Down 演示视角'), ('NACELLE', '机舱云台')):
+    for value, label in (('DOWN', 'Down 视角'), ('NACELLE', '机舱云台')):
         row.operator('wfrl.gimbal_preset', text=label).preset = value
     row = layout.row(align=True)
     row.operator('wfrl.gimbal_preset', text='Back').preset = 'BACK'
     row.operator('wfrl.gimbal_preset', text='相机复位').preset = 'RESET'
-    layout.label(text='机舱固定安装点' if scene.wfrl_gimbal_kind == 'NACELLE' else 'Down / 外部演示相机')
+    if scene.wfrl_gimbal_kind == 'NACELLE':
+        layout.label(text='机舱固定安装点')
+    else:
+        layout.label(text=f'{scene.wfrl_gimbal_turbine} Down / 机舱底壳下方 0.40 m')
+        layout.label(text='预设：机舱局部正下，随塔顶姿态运动')
     # Pose is an observation, so keep it readable even if the selected
     # turbine's joystick controls are unavailable.
     pose = layout.column(align=True)
@@ -350,7 +374,7 @@ def register_properties():
         bpy.app.handlers.load_pre.append(cancel_on_load)
     bpy.types.Scene.wfrl_gimbal_turbine = EnumProperty(name='Camera turbine', items=[(t, t, '') for t in ('T1', 'T2', 'T3')], default='T1', update=switch)
     bpy.types.Scene.wfrl_gimbal_kind = EnumProperty(name='Camera mount',
-        items=[('DEMO', 'Down 演示视角', ''), ('NACELLE', '机舱云台', '')], default='DEMO')
+        items=[('DEMO', 'Down 视角', ''), ('NACELLE', '机舱云台', '')], default='DEMO')
     bpy.types.Scene.wfrl_gimbal_speed = FloatProperty(name='Joystick speed °/s', default=45, min=1, max=180)
 
 

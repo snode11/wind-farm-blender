@@ -1,6 +1,6 @@
 """Independent N-sidebar tab for three-dimensional blade reconstruction."""
 import bpy
-from .. import blade_recon_review as review
+from .. import blade_recon_review as review, playback
 
 
 class WFRL_OT_BladeReconLoad(bpy.types.Operator):
@@ -54,11 +54,39 @@ class WFRL_OT_BladeReconStep(bpy.types.Operator):
         return review.active(context.scene) and review.session(context.scene) is not None
 
     def execute(self,context):
-        if context.screen.is_animation_playing:
-            bpy.ops.screen.animation_cancel(restore_frame=False)
+        from .. import _cancel_playback
         scene = context.scene
+        _cancel_playback(scene)
         scene.frame_set(scene.frame_start if self.first else min(max(scene.frame_current+self.delta,scene.frame_start),scene.frame_end))
         review.apply(scene)
+        return {'FINISHED'}
+
+
+class WFRL_OT_BladeReconPlay(bpy.types.Operator):
+    bl_idname = 'wfrl.blade_recon_play'
+    bl_label = '播放 / 暂停重建'
+
+    @classmethod
+    def poll(cls, context):
+        return (context.window is not None and review.active(context.scene)
+                and review.session(context.scene) is not None)
+
+    def execute(self, context):
+        scene = context.scene
+        with context.temp_override(window=context.window, screen=context.window.screen):
+            owner = playback.owner_scene()
+            playing = playback.any_playing()
+            if owner is not None and owner != scene:
+                self.report({'WARNING'}, f'播放器由场景“{owner.name}”占用，请先在对应窗口暂停')
+                return {'CANCELLED'}
+            if playing and owner is None:
+                self.report({'WARNING'}, '无法确认当前播放器归属，请先在播放窗口暂停')
+                return {'CANCELLED'}
+            if playing:
+                from .. import _cancel_playback
+                _cancel_playback(scene)
+            else:
+                bpy.ops.screen.animation_play()
         return {'FINISHED'}
 
 
@@ -203,7 +231,8 @@ class WFRL_PT_BladeRecon(bpy.types.Panel):
         row = layout.row(align=True)
         row.operator('wfrl.blade_recon_step',text='',icon='REW').first = True
         row.operator('wfrl.blade_recon_step',text='',icon='TRIA_LEFT').delta = -1
-        row.operator('screen.animation_play',text='暂停' if context.screen.is_animation_playing else '播放',icon='PAUSE' if context.screen.is_animation_playing else 'PLAY')
+        playing = playback.is_playing(scene)
+        row.operator('wfrl.blade_recon_play',text='暂停' if playing else '播放',icon='PAUSE' if playing else 'PLAY')
         row.operator('wfrl.blade_recon_step',text='',icon='TRIA_RIGHT').delta = 1
         layout.prop(scene,'frame_current',text='显示帧',slider=True)
         layout.label(text=f'源帧 {seq.source_frames[i]}  ·  {seq.times[i]:.2f} s  ·  {i+1}/{len(seq.states)}')
@@ -240,5 +269,5 @@ class WFRL_PT_BladeRecon(bpy.types.Panel):
         layout.operator('wfrl.blade_recon_return',icon='LOOP_BACK')
 
 
-CLASSES = (WFRL_OT_BladeReconLoad,WFRL_OT_BladeReconView,WFRL_OT_BladeReconStep,
+CLASSES = (WFRL_OT_BladeReconLoad,WFRL_OT_BladeReconView,WFRL_OT_BladeReconStep,WFRL_OT_BladeReconPlay,
            WFRL_OT_BladeReconInspect,WFRL_OT_BladeReconReturn,WFRL_OT_BladeReconTextureToggle,WFRL_PT_BladeRecon)

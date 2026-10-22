@@ -207,6 +207,10 @@ def observe():
                 action('RESET')
                 assert (t1.yaw_deg, t1.pitch_deg, t1.azimuth_deg, t1.rpm, t1.running) == (0.0, 0.0, 0.0, 9.0, False)
                 t1.yaw_deg, t1.pitch_deg, t1.azimuth_deg = 28.0, 18.0, 72.0
+                t2 = entries(manual)['T2']
+                t2.individual_pitch = True
+                t2.pitch_b1_deg, t2.pitch_b2_deg, t2.pitch_b3_deg = 3.0, 9.0, 21.0
+                manual.wfrl_manual_target = 'ALL'
                 assert bpy.ops.wfrl.manual_focus() == {'FINISHED'}
                 show_panel(area)
                 return delay('capture', .6)
@@ -222,6 +226,7 @@ def observe():
                           real_timer_motion_deg=STATE['first_motion_deg'],
                           rpm_phase_continuity=True, pause_stop_reset=True,
                           individual_pitch=True, all_target_motion=True,
+                          mixed_mode_summary_drawn=True,
                           source_unchanged_during_manual=True,
                           demo_pause_and_resume=True, manual_paused_on_return=True,
                           screenshot=str(screenshot),

@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "addon_file": "PROJECT_ROOT/outputs/frontend-stability-fixes/validation/profile/extensions/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "method": "Independent visible process, scripted native operators and RNA assertions; no mouse input or FPS acceptance.",
+  "source_sha256": {
+    "native_camera_views.py": "8e4d8b3f05bbd2bbe441822b99d356399b0290469513fd4d5ae7d84b97cc28d4",
+    "cameras.py": "24980abe377a19508642eb1fc06224792e1aed7d686810adc2762cec13eb1ad2"
+  },
+  "checks": {
+    "main_view_excludes_observation_areas": true,
+    "routing_T1": true,
+    "routing_all": true,
+    "routing_T2": true,
+    "sync_repairs_binding_without_resetting_free_view": true,
+    "save_serializes_original_quality": true,
+    "save_serializes_original_main_shading": true,
+    "save_excludes_proxy_objects_and_data": true,
+    "save_binds_real_slot_cameras": true,
+    "save_pre_probe_executed": true,
+    "save_restores_live_session": true,
+    "save_restores_free_view": true,
+    "save_restores_temporary_main_shading": true,
+    "save_preserves_unrelated_scene": true,
+    "native_save_failure_callback_executed": true,
+    "failed_save_restores_live_session": true,
+    "failed_save_restores_free_view": true,
+    "save_does_not_seek_time": true,
+    "undo_closes_observation_without_proxy_residue": true,
+    "undo_restores_owning_scene_quality": true,
+    "undo_preserves_unrelated_scene_quality": true,
+    "reopen_has_original_quality": true,
+    "reopen_has_no_proxy_resources": true,
+    "reopen_has_no_observation_session": true,
+    "ordinary_similar_named_camera_preserved": true,
+    "reopen_preserves_unrelated_quality": true
+  },
+  "error": null
+}

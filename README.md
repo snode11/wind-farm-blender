@@ -11,12 +11,12 @@
 
 项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)，包含当前前端、后端、重建研究、测试和配套文档。NREL 的 [v0.3.24 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.24) 提供专用扩展 ZIP；安装时使用 `wfrl_blender-0.3.24.zip`。发布源码标签 `v0.3.24` 指向 `844b1de6a04a612b72b244d42749ae5ba6ee9213`。源码提交、构建 ZIP 与本机安装分别识别，GitHub 自动 Source code 不作为扩展安装包。
 
-开发机日常扩展 `bl_ext.user_default.wfrl_blender` 使用 **0.3.24**，已有安装记录中的 180 个文件与上传源 ZIP 匹配。该载荷提供常用姿态、角度微调、三机参数概览和 JSON 姿态保存／选择性载入，见[手动控制说明](docs/blender/风机手动控制.md)、[安装身份](publication/daily-installation.json)及[新进程检查](publication/daily-installation-probe.json)。公开附件身份见[交付身份](publication/blender-0.3.24.json)。项目启动器、重建求解器和构建工具使用独立项目源码，不随扩展 ZIP 安装。
+开发机日常扩展 `bl_ext.user_default.wfrl_blender` 使用 **0.3.28 本地安装包**，包含 NREL／rootkink 叶片外形选择、[T1/T2/T3 Down 机舱下视](docs/blender/T1Down机舱下视.md)及当前工作区的相机与播放修复，安装身份与验证范围见[安装核对](publication/daily-installation.json)。0.3.28 尚未公开发布；公开附件仍为 0.3.24，身份见[交付身份](publication/blender-0.3.24.json)。项目启动器、重建求解器和构建工具使用独立项目源码，不随扩展 ZIP 安装。
 
 | 对象 | manifest | 身份 |
 | --- | --- | --- |
 | 公开 NREL ZIP | `0.3.24` | 180 文件；上传源包的已有 SHA-256、源码提交及证据归属见[交付身份](publication/blender-0.3.24.json)与[发布状态](docs/blender/发布状态与验证范围.md) |
-| 当前开发机日常安装对应 ZIP | `0.3.24` | 180 个安装文件与[上传源包](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.24/wfrl_blender-0.3.24.zip)匹配；已有 SHA-256 `99351530ddb27a1a1a4896977d4472e85c7e81983cad88ddd3421706de603a25`；[安装身份](publication/daily-installation.json) |
+| 当前开发机日常安装对应 ZIP | `0.3.28` | `outputs/frontend-stability-fixes/validation/package/wfrl_blender-0.3.28.zip`（本地文件；[逐文件清单](outputs/frontend-stability-fixes/validation/package/wfrl_blender-0.3.28.inventory.json)），181 文件；SHA-256 `b15c491db68fda6a2bdfce4228d5db040fa6ae0f0a69f886935ab0af9b775fda`；[安装身份](publication/daily-installation.json) |
 
 身份、[发布核对](docs/blender/发布状态与验证范围.md#软件验证的适用对象)与[当前安装核对](publication/daily-installation.json)的适用范围见[发布状态与验证范围](docs/blender/发布状态与验证范围.md)。同一版本号不证明内容相同；升级后完全重启 Blender。
 
@@ -24,6 +24,7 @@
 
 - **风机手动控制**：**N → 风机控制 → 创建 / 进入手动场景** 提供 T1/T2/T3 或全部风机的朝向、统一／分别变桨、RPM、叶轮角度与运行／暂停／停转，支持朝下／侧向／顺桨预设、相对角度微调、三机参数概览、JSON 姿态保存／选择性载入及撤销重做。批量启用分别变桨保留已启用机组的独立桨距。使用独立刚性场景和环境，保留原 demo；不产生功率、载荷、尾流或测量结果。[操作说明](docs/blender/风机手动控制.md)。
 - **离线物理结果回放**：三台 NREL 5 MW 风机、九片叶片及柔性塔架，播放 117–177 s 的 60 秒 MAPPO 保存记录，提供偏航、功率、转矩、挠度和净空对照。离线观看无需 Python 后端、MPI、FAST.Farm 或网络。
+- **叶片外形（本地 0.3.28）**：MAPPO 侧栏可选择默认 NREL 或合成的 rootkink 外形；切换保留时刻、所选机组和相机设置，继续使用 NREL 保存运动与读数。[操作与使用边界](前端readme.md#3-时间回放与观察视角)。
 - **几何／同源纹理分屏**：通过 **N → MAPPO → 打开几何重建示例…** 进入两侧完整风机，在几何与同源纹理间切换。共享播放、单帧步进与暂停；人工观察点仅定位一次，播放保留手动缩放和绕转，保存重开恢复模式与视图。
 - **三相机与图像采集**：共盒 C1/C2/C3、整盒安装与默认复位，支持 2×2、三列、独立单路、单路放大和同刻／时间序列 PNG。第四格是静态安装示意；采集使用独立原始画质设置。
 - **合成缺陷编辑**：NREL 九片叶片上的六类缺陷支持预览、确认／取消、健康对照、撤销重做、JSON 和 `.blend` 保存；外观随保存的柔性运动，不改变结构与气动物理。
@@ -57,7 +58,7 @@ GW184 使用[独立包操作说明](docs/blender/GW184三相机与缺陷编辑�
 
 源码检查的命令、依赖、跳过条件与记录范围见[分发说明](docs/PUBLICATION.md#证据身份与限制)及其对应源码快照；各项结果只适用于记录的源码与输入，不作为当前公开 ZIP 或日常安装的重复验收。
 
-公开 0.3.24 ZIP 的附件、上传源包与源码身份见[交付身份](publication/blender-0.3.24.json)。已有本地 0.3.24 的安装身份、姿态合同、原生后台与短时窗口证据见[安装核对](publication/daily-installation.json)及[发布状态](docs/blender/发布状态与验证范围.md#软件验证的适用对象)，仅适用于记录的载荷、环境和范围。公开交付没有新增测试、安装或窗口验收；源码重建一致性、长期运行、完整片段性能和科学精度未验收。
+公开 0.3.24 ZIP 的附件、上传源包与源码身份见[交付身份](publication/blender-0.3.24.json)。当前本地 0.3.28 安装包的身份与验证范围见[安装核对](publication/daily-installation.json)；姿态合同、原生后台与短时窗口证据的载荷归属见[发布状态](docs/blender/发布状态与验证范围.md#软件验证的适用对象)。各项结果仅适用于记录的载荷、环境和范围。公开交付没有新增测试、安装或窗口验收；公开 ZIP 与标签源码复建的一致性、长期运行、完整片段性能和科学精度未验收。
 
 同源纹理是 **SAME_SOURCE_SIMULATION**：601 个 10 Hz 保存样本对应 117–177 s，60 Hz 时间轴每 6 帧保持一个样本；独立 `synth_tex` 是另一来源的 120 样本、0–11.9 s。放大与增强不会补出未观测表面。两者的几何／纹理仍为 **NOT_ACCEPTED**，图集模糊、条带、接缝和叶尖错贴限制保留。
 

@@ -6,6 +6,12 @@ from .scene_builder import build_scene
 from .scene_model import SceneDTO
 from .workspace import ensure_workspace
 from . import atmosphere, cameras, wake
+from .turbine_geometry import MODELS, DEFAULT_MODEL
+
+
+_BLADE_MODEL_KEYS = tuple(MODELS)
+_BLADE_MODEL_ITEMS = tuple((key, label, '选择回放叶片外形', index)
+                          for index, (key, (_, label)) in enumerate(MODELS.items()))
 
 
 def _cancel_playback(scene=None, *, all_scenes=False):
@@ -25,7 +31,8 @@ def _cancel_playback(scene=None, *, all_scenes=False):
         window = next(iter(bpy.context.window_manager.windows), None)
     if window is not None:
         with bpy.context.temp_override(window=window, screen=window.screen):
-            bpy.ops.screen.animation_cancel(restore_frame=False)
+            if playback.any_playing() and (all_scenes or playback.is_playing(scene)):
+                bpy.ops.screen.animation_cancel(restore_frame=False)
 
 
 def _update_layers(scene, context=None):
@@ -101,6 +108,75 @@ def _update_demo_status(scene, depsgraph=None):
         farm_flex._ACTIVE.record_telemetry(scene)
 
 
+def _get_blade_model(scene):
+    model = scene.get('wfrl_blade_model', DEFAULT_MODEL)
+    return _BLADE_MODEL_KEYS.index(model) if model in MODELS else 0
+
+
+def _set_blade_model(scene, index):
+    from . import custom_camera_capture, native_camera_views, split_reconstruction
+    from .panels import custom_cameras, stacked_camera_rig
+    model = _BLADE_MODEL_KEYS[index]
+    reason = ''
+    if model != DEFAULT_MODEL and scene.get('wfrl_nrel_defect_enabled'):
+        reason = '请先关闭 NREL 缺陷编辑器，再切换叶片外形'
+    elif model != DEFAULT_MODEL and split_reconstruction.enabled(scene):
+        reason = '请先退出 NREL 重建对照，再切换叶片外形'
+    elif custom_camera_capture.active():
+        reason = '请先完成或取消相机采集，再切换叶片外形'
+    else:
+        for session in (custom_cameras._ACTIVE, stacked_camera_rig._ACTIVE, native_camera_views._ACTIVE):
+            if session is not None and getattr(session, 'scene', None) == scene:
+                reason = '请先结束相机编辑或观察会话，再切换叶片外形'
+                break
+    scene['wfrl_blade_model_error'] = reason
+    if not reason:
+        scene['wfrl_blade_model'] = model
+
+
+def _update_blade_model(scene, context=None):
+    """Re-loft recorded motion while preserving the observation state."""
+    from . import farm_flex, clearance_replay
+    chosen = scene.wfrl_blade_model
+    active = farm_flex.active_for(scene)
+    if active is None or active.model == chosen:
+        return
+    frame, subframe = scene.frame_current, scene.frame_subframe
+    turbine = scene.get('wfrl_clearance_turbine', 'T1')
+    visible = set(active.visible_turbines)
+    render = scene.render
+    clock = (render.fps, render.fps_base, scene.frame_start, scene.frame_end,
+             scene.sync_mode, scene.use_preview_range)
+    previous_model = active.model
+    try:
+        path = farm_flex.saved_package(scene)
+        package = farm_flex._load_package(path)
+    except Exception as exc:
+        scene['wfrl_blade_model'] = previous_model
+        scene['wfrl_blade_model_error'] = '叶片外形切换失败：' + str(exc)
+        return
+    try:
+        replacement = farm_flex.attach(scene, path, _package=package)
+    except Exception as exc:
+        scene['wfrl_blade_model'] = previous_model
+        scene['wfrl_blade_model_error'] = '叶片外形切换失败：' + str(exc)
+        try:
+            replacement = farm_flex.attach(scene, path, _package=package)
+        except Exception as restore_error:
+            scene['wfrl_blade_model_error'] += '；原模型恢复失败：' + str(restore_error)
+            (render.fps, render.fps_base, scene.frame_start, scene.frame_end,
+             scene.sync_mode, scene.use_preview_range) = clock
+            scene.frame_set(frame, subframe=subframe)
+            return
+    replacement.visible_turbines = visible
+    if turbine in replacement.readers:
+        scene['wfrl_clearance_turbine'] = turbine
+        clearance_replay._READERS[scene.as_pointer()] = replacement.readers[turbine]
+    (render.fps, render.fps_base, scene.frame_start, scene.frame_end,
+     scene.sync_mode, scene.use_preview_range) = clock
+    scene.frame_set(frame, subframe=subframe)
+
+
 def _on_load(_unused):
     import bpy
     from .scene_builder import refresh_saved_surface_style
@@ -155,6 +231,9 @@ def register():
         "wfrl_deflection_visible": bpy.props.BoolProperty(default=True, update=refresh_deflection),
         "wfrl_deflection_blade": bpy.props.EnumProperty(items=(("1", "叶片 1", "T1 第一片"), ("2", "叶片 2", "T1 第二片"), ("3", "叶片 3", "T1 第三片")), default="1", update=refresh_deflection),
         "wfrl_selected_turbine": bpy.props.EnumProperty(items=_turbine_items, update=_update_selection),
+        "wfrl_blade_model": bpy.props.EnumProperty(
+            name="叶片外形", items=_BLADE_MODEL_ITEMS,
+            get=_get_blade_model, set=_set_blade_model, update=_update_blade_model),
         "wfrl_show_wake": bpy.props.BoolProperty(default=True, update=_update_layers),
         "wfrl_wake_display": bpy.props.EnumProperty(items=(("SCIENTIFIC", "Scientific", "Green diagnostic tracers"), ("CINEMATIC", "Cinematic", "Animated incoming filaments and yaw-deflected wake (SYNTH)")), default="SCIENTIFIC", update=_update_layers),
         "wfrl_cinematic_wind_mode": bpy.props.EnumProperty(name="Wind mode", items=(("FRONT", "Front / 迎风", "Shared wind follows the reference turbine's heading plus a manual offset"), ("RANDOM", "360° random / 随机", "Shared, repeatable wind headings with smooth transitions")), default="FRONT", update=_update_layers),

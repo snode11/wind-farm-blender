@@ -1,0 +1,42 @@
+{
+  "addon_file": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/__init__.py",
+  "helper": "NREL.Defect.Helper.D50b58b2183444fa0b97c53be3316cd0b",
+  "helper_hide_select": false,
+  "helper_count": 1,
+  "initial_defects": 1,
+  "seek_error": "ReferenceError('StructRNA of type Object has been removed')",
+  "seek_traceback": "Traceback (most recent call last):\n  File \"SYSTEM_TMP/wfrl-editor-review-9tu141pt/probe.py\", line 20, in <module>\n    s.set_time(float(s.flex.times[0])+1)\n    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/nrel_defects/editor.py\", line 231, in set_time\n    self.flex.update(self.scene,sim_time_s=t,record_telemetry=False)\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/performance.py\", line 53, in wrapped\n    return function(*args, **kwargs)\n  File \"BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/farm_flex.py\", line 640, in update\n    editor.after_update(scene, t)\n    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^\n  File \"BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/nrel_defects/editor.py\", line 474, in after_update\n    found.update_attachments(t);scene['defect_time_s']=float(t)\n    ~~~~~~~~~~~~~~~~~~~~~~~~^^^\n  File \"BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/nrel_defects/editor.py\", line 212, in update_attachments\n    coords = self.flex.deform_points(obj.parent,self.helper_rest[obj.name],t)\n                                     ^^^^^^^^^^\nReferenceError: StructRNA of type Object has been removed\n",
+  "detach_error": "ReferenceError('StructRNA of type Object has been removed')",
+  "detach_traceback": "Traceback (most recent call last):\n  File \"SYSTEM_TMP/wfrl-editor-review-9tu141pt/probe.py\", line 26, in <module>\n    editor.detach(scene)\n    ~~~~~~~~~~~~~^^^^^^^\n  File \"BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/nrel_defects/editor.py\", line 500, in detach\n    data=obj.data;bpy.data.objects.remove(obj,do_unlink=True)\n         ^^^^^^^^\nReferenceError: StructRNA of type Object has been removed\n",
+  "session_registered_after_detach": false,
+  "enabled_after_detach": true,
+  "managers_closed": [
+    false,
+    false,
+    false
+  ],
+  "blade_meshes_after_detach": [
+    "NREL.Editor.Blade1.StableTips.003",
+    "NREL.Editor.Blade2.StableTips.003",
+    "NREL.Editor.Blade3.StableTips.003",
+    "NREL.Editor.Blade1.StableTips.004",
+    "NREL.Editor.Blade2.StableTips.004",
+    "NREL.Editor.Blade3.StableTips.004",
+    "NREL.Editor.Blade1.StableTips.005",
+    "NREL.Editor.Blade2.StableTips.005",
+    "NREL.Editor.Blade3.StableTips.005"
+  ],
+  "blender": "5.2.1 LTS",
+  "source_package": "outputs/frontend-stability/validation/package/wfrl_blender-0.3.27.zip",
+  "archive_sha256": "6d449fb37f868ac4728702d26897cd4d6ff85ff11328f024cccf97b0c390b806",
+  "scope": "Installed payload in independent factory-startup background process; scripted native object deletion; no visible-window or physical mouse claim",
+  "reproduction": [
+    "Import installed payload and register in independent factory-startup background Blender",
+    "load_demo_scene(); editor.ensure(scene)",
+    "Create and commit one fine_crack using new_defect and store.restore",
+    "Remove the selectable NREL.Defect.Helper object with bpy.data.objects.remove(do_unlink=True)",
+    "set_time(start+1) raises ReferenceError",
+    "detach(scene) raises ReferenceError before geometry managers close"
+  ],
+  "probe_source": "import sys,json,traceback,hashlib\nfrom pathlib import Path\nimport bpy\nroot=Path('BLENDER_USER_EXTENSIONS/user_default')\nsys.path.insert(0,str(root))\nimport wfrl_blender as addon\nfrom wfrl_blender import farm_flex\nfrom wfrl_blender.nrel_defects import editor,defect_schema\naddon.register()\naddon.load_demo_scene()\nscene=bpy.context.scene\ns=editor.ensure(scene)\ndoc=s.store.document\ndoc['defects']=[defect_schema.new_defect(s.surface,'fine_crack')]\ns.store.restore(doc)\nhelper=s.helpers[0]\nresult={'addon_file':addon.__file__,'helper':helper.name,'helper_hide_select':helper.hide_select,'helper_count':len(s.helpers),'initial_defects':len(s.store.document['defects'])}\nbpy.data.objects.remove(helper,do_unlink=True)\ntry:\n s.set_time(float(s.flex.times[0])+1)\n result['seek']='PASS'\nexcept Exception as e:\n result['seek_error']=repr(e)\n result['seek_traceback']=traceback.format_exc()\ntry:\n editor.detach(scene)\n result['detach']='PASS'\nexcept Exception as e:\n result['detach_error']=repr(e)\n result['detach_traceback']=traceback.format_exc()\nresult['session_registered_after_detach']=editor.session() is not None\nresult['enabled_after_detach']=bool(scene.get('wfrl_nrel_defect_enabled'))\nresult['managers_closed']=[m._closed for m in s.geometry.managers.values()]\nresult['blade_meshes_after_detach']=[o.data.name for o,*_ in s.flex.blades]\nprint('REVIEW_RESULT='+json.dumps(result,ensure_ascii=False))\nPath(__file__).with_name('result.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))\n"
+}

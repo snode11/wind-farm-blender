@@ -1,0 +1,60 @@
+{
+  "status": "PASS",
+  "scope": "FINAL_0.3.19_ZIP_LOCAL_PRE_UPLOAD_VERIFICATION",
+  "package": {
+    "version": "0.3.19",
+    "files": 172,
+    "sha256": "15e75fde95828df58fe6394ff1522bc4444d5e78a848ccf88ced4e3d9ad0f27b",
+    "bytes": 99002099
+  },
+  "cpu": {
+    "status": "PASS",
+    "passed": 73,
+    "subtests_passed": 174,
+    "command": "PYTHONPATH=blender_frontend:. outputs/release-0.3.19-20261009/test-env/bin/python -m pytest blender_frontend/tests/test_split_reconstruction.py blender_frontend/tests/test_split_reconstruction_timing.py blender_frontend/tests/test_split_mappo_texture.py blender_frontend/tests/test_split_texture_settings.py blender_frontend/tests/test_mappo_texture_package.py -q",
+    "accuracy_accepted": false
+  },
+  "isolated_package": {
+    "status": "PASS",
+    "record": "isolated/package-validation.json"
+  },
+  "visible_window": {
+    "status": "PASS",
+    "stage": 32,
+    "record": "window/reconstruction-workflow-window-validation.json",
+    "checks": [
+      "Unified installed entry opens unchanged canonical geometry; both panes contain tower, nacelle, hub and three blades",
+      "Paused geometry to same-source switch preserves clock and navigation; right isolation contains three estimated blades and simulated support structure",
+      "Native playback moves both source and reconstruction on the 601 sample, 10 Hz, fixed 60 Hz shared clock",
+      "Native back orbit and zoom remain unchanged when playback resumes",
+      "SUPPORTED and TIP are one-shot manual observation presets; playback preserves their static views without tracking",
+      "Each explicit original/enhanced click fits both complete turbines; packed atlases, UVs and saved geometry remain identical",
+      "Bidirectional mode switches preserve paused or playing state and time; exit and return restore the same source, time and display setting",
+      "Native save/reopen restores same-source mode, enhanced setting, time, packed data and manually orbited local view without an implicit fit",
+      "Native save/reopen also restores geometry mode and navigation without replacing the current mode"
+    ]
+  },
+  "visual_review": {
+    "status": "PASS",
+    "record": "window/final-same-source-enhanced-complete.png",
+    "observed": [
+      "完整风机塔筒轮毂三叶片",
+      "精简侧栏",
+      "时间样本与颜色说明在右视口左下"
+    ]
+  },
+  "mouse_wheel": {
+    "final_zip": "NOT_REPEATED",
+    "earlier_equivalent_implementation": "outputs/reconstruction-ui-20261009-a01/manual-wheel-a02/validation.json",
+    "final_native_zoom_orbit": "PASS"
+  },
+  "formal_assets": {
+    "status": "NOT_COMPARED",
+    "reason": "prior local inventory unavailable"
+  },
+  "source_regenerated": false,
+  "solver_started": false,
+  "reconstruction_accuracy": "NOT_ACCEPTED",
+  "physical_accuracy_gate": "FAILED_GATE",
+  "remote_asset_verification": "NOT_REQUESTED_AND_NOT_PERFORMED"
+}

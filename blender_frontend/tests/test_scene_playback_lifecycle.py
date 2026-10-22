@@ -117,6 +117,59 @@ def test_linked_scene_cannot_drive_same_objects_with_second_clock(runtimes):
     assert not farm_flex.is_active(linked)
 
 
+def test_deleted_scene_runtime_can_be_detached_by_stored_key(runtimes):
+    class RemovedScene(Scene):
+        removed = False
+
+        def as_pointer(self):
+            if self.removed:
+                raise ReferenceError('Scene has been removed')
+            return super().as_pointer()
+
+        def __setitem__(self, key, value):
+            if self.removed:
+                raise ReferenceError('Scene has been removed')
+            super().__setitem__(key, value)
+
+    scene = RemovedScene('Removed')
+    active = farm_flex.attach(scene, 'package')
+    scene.removed = True
+    assert farm_flex.active_for(scene) is None
+    assert clearance_replay.reader_for(scene) is None
+    farm_flex.detach(scene, restore=False)
+    assert not active.enabled and not farm_flex._ACTIVES
+    assert not clearance_replay._READERS
+    farm_flex.detach(restore=False)
+
+
+def test_farm_reader_requires_its_deformation_runtime(runtimes):
+    scene = Scene('Farm')
+    active = farm_flex.attach(scene, 'package')
+    scene['wfrl_farm_flex_path'] = 'package'
+    assert clearance_replay.reader_for(scene) is active.readers['T1']
+    farm_flex._ACTIVES.clear()
+    assert clearance_replay.reader_for(scene) is None
+    assert clearance_replay.sample(scene) is None
+
+
+@pytest.mark.parametrize('retained', [dict(users=1), dict(use_fake_user=True),
+                                     dict(shape_keys=object()), dict(library=object()), {}])
+def test_comparison_cleanup_preserves_retained_data(monkeypatch, retained):
+    from wfrl_blender.deflection import ComparisonView
+    class Mesh:
+        def __init__(self):
+            self.users, self.use_fake_user = 0, False
+            self.shape_keys = self.library = None
+            self.__dict__.update(retained)
+    removed = []
+    bpy = SimpleNamespace(types=SimpleNamespace(Mesh=Mesh, Curve=type('Curve', (), {})),
+                          data=SimpleNamespace(meshes=SimpleNamespace(remove=removed.append)))
+    monkeypatch.setitem(sys.modules, 'bpy', bpy)
+    mesh = Mesh()
+    ComparisonView._release_data(mesh)
+    assert removed == ([] if retained else [mesh])
+
+
 @pytest.fixture
 def native_player(monkeypatch):
     a, b = Scene('A'), Scene('B')

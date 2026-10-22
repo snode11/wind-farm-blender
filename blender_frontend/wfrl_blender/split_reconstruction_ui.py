@@ -39,13 +39,8 @@ def _age_text(value):
 
 
 def _pause_all_playback(context):
-    for window in context.window_manager.windows:
-        if window.scene != context.scene:
-            continue
-        screen = window.screen
-        if screen is not None and screen.is_animation_playing:
-            with context.temp_override(window=window, screen=screen):
-                bpy.ops.screen.animation_cancel(restore_frame=False)
+    from . import _cancel_playback
+    _cancel_playback(context.scene)
 
 
 def _redraw(context):

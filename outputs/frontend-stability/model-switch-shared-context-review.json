@@ -1,0 +1,120 @@
+{
+  "checks": [
+    {
+      "operator": "split_recon_open_example",
+      "result": [
+        "FINISHED"
+      ]
+    },
+    {
+      "operator": "split_recon_exit",
+      "result": [
+        "FINISHED"
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "label": "comparison_ready",
+      "model": "nrel5mw",
+      "meshes": 291,
+      "owned_orphans": [],
+      "status": "READY",
+      "structure_count": 46
+    },
+    {
+      "label": "comparison_exited",
+      "model": "nrel5mw",
+      "meshes": 291,
+      "owned_orphans": [],
+      "status": "OFF",
+      "structure_count": 46
+    },
+    {
+      "label": "rootkink",
+      "model": "rootkink",
+      "meshes": 292,
+      "owned_orphans": [
+        [
+          "WFRL.Turbine.T1.FlexibleTower.001",
+          768
+        ]
+      ],
+      "status": "OFF",
+      "structure_count": 46
+    },
+    {
+      "label": "nrel5mw",
+      "model": "nrel5mw",
+      "meshes": 293,
+      "owned_orphans": [
+        [
+          "WFRL.Turbine.T1.FlexibleTower.001",
+          768
+        ],
+        [
+          "WFRL.Turbine.T1.FlexibleTower.002",
+          768
+        ]
+      ],
+      "status": "OFF",
+      "structure_count": 46
+    },
+    {
+      "label": "rootkink",
+      "model": "rootkink",
+      "meshes": 294,
+      "owned_orphans": [
+        [
+          "WFRL.Turbine.T1.FlexibleTower.001",
+          768
+        ],
+        [
+          "WFRL.Turbine.T1.FlexibleTower.002",
+          768
+        ],
+        [
+          "WFRL.Turbine.T1.FlexibleTower.003",
+          768
+        ]
+      ],
+      "status": "OFF",
+      "structure_count": 46
+    },
+    {
+      "label": "nrel5mw",
+      "model": "nrel5mw",
+      "meshes": 295,
+      "owned_orphans": [
+        [
+          "WFRL.Turbine.T1.FlexibleTower.001",
+          768
+        ],
+        [
+          "WFRL.Turbine.T1.FlexibleTower.002",
+          768
+        ],
+        [
+          "WFRL.Turbine.T1.FlexibleTower.003",
+          768
+        ],
+        [
+          "WFRL.Turbine.T1.FlexibleTower.004",
+          768
+        ]
+      ],
+      "status": "OFF",
+      "structure_count": 46
+    }
+  ],
+  "module": "PROJECT_ROOT/blender_frontend/wfrl_blender/__init__.py",
+  "input": "PROJECT_ROOT/blender_frontend/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+  "result": "PASS_REPRODUCED",
+  "scope": "Source-mode Blender 5.2.1 independent native window. Product open-example and exit operators called; model RNA selection invoked through script, not physical mouse interaction. No official blend file saved.",
+  "source_sha256": {
+    "farm_flex.py": "46386af506f69de86ff1d3c708da85e49830c88ee7f92bd2ed41df15a6b19b04",
+    "split_turbine_context.py": "12214f2bd874f5c3b08fba722db2a3c7ef5b73b1735e37817cff3e1624e05174",
+    "__init__.py": "ab815becf794e82284f8eab915e0182ea8cb40d6c85826a6d11dc42eea1d7eaa"
+  },
+  "input_sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b"
+}

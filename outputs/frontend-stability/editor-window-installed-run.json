@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "command": [
+    "/Applications/Blender.app/Contents/MacOS/Blender",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "PROJECT_ROOT/blender_frontend/tests/blender/nrel_editor_playback_regression.py"
+  ],
+  "module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "expected_addon_root": "PROJECT_ROOT/outputs/frontend-stability/validation/profile/extensions/wfrl_blender",
+  "elapsed_s": 12.252835916995537,
+  "returncode": 0,
+  "evidence": "outputs/frontend-stability/editor-window-installed/checks.json"
+}

@@ -4,11 +4,11 @@
 
 ## 1. Blender 离线演示
 
-使用 Blender **5.2+**，从 [v0.3.21 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.21) 安装 `wfrl_blender-0.3.21.zip` 并完全重启。
+使用 Blender **5.2+**，从 [v0.3.24 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.24) 安装 `wfrl_blender-0.3.24.zip` 并完全重启。
 
 通过 **N → MAPPO → 打开几何重建示例…** 在同一分屏切换几何／同源纹理，也可查看三机柔性回放、三相机和 NREL 缺陷编辑器。601 样本同源纹理与独立 120 样本合成资源使用不同来源和时钟；独立合成工具不在统一重建侧栏显示。随包查看无需 conda、Bridge、FAST.Farm 或网络。
 
-当前项目源码使用 `wind-farm-rl-all-work` 分支，GitHub 自动 Source code 不作为扩展安装包。日常本地安装为 **0.3.21**，173 文件与公开 ZIP 一致，新进程启动核对 PASS，见[日常安装核对](../../publication/daily-installation.json)；源码和公开发布不会自动更新实际安装。[安装身份与验证范围见发布状态](../blender/发布状态与验证范围.md)，操作见[前端说明](../../前端readme.md)。软件检查不代表重建精度、现场净空精度或稳定 60 FPS 验收。
+当前项目源码使用 `wind-farm-rl-all-work` 分支，GitHub 自动 Source code 不作为扩展安装包。日常本地安装为 **0.3.28 本地包**，181 文件与对应本地 ZIP 一致，尚未公开发布；新进程检查与安装版回归按其记录范围使用，见[日常安装核对](../../publication/daily-installation.json)；源码和公开发布不会自动更新实际安装。[安装身份与验证范围见发布状态](../blender/发布状态与验证范围.md)，操作见[前端说明](../../前端readme.md)。软件检查不代表重建精度、现场净空精度或稳定 60 FPS 验收。
 
 ## 2. Python 环境：FLORIS 与算法开发
 
@@ -44,7 +44,7 @@ python scripts/analysis/eval_visualize_ppo.py
 
 仓库已有 [FastFarmDriver](../../wfrl/fastfarm_driver.py)、[动态 MAPPO 训练](../../scripts/train/train_fastfarm.py)、[场景运行器](../../wfrl/scene/runtime.py)和 [Bridge 会话](../../wfrl/blender_bridge/backend_session.py)。
 
-FAST.Farm 运行需要对应平台的 MPI、FAST.Farm/OpenFAST、supercontroller 与机组控制器二进制及算例资源；FLORIS requirements 刻意没有安装这些运行时。Windows 用 Microsoft MPI，macOS 现有入口使用 OpenMPI；二进制不能跨平台互换。配置检查、解释器选择与实际生命周期证据按[前端使用说明][(../../前端readme.md)和发布状态](../blender/发布状态与验证范围.md)分层阅读。
+FAST.Farm 运行需要对应平台的 MPI、FAST.Farm/OpenFAST、supercontroller 与机组控制器二进制及算例资源；FLORIS requirements 刻意没有安装这些运行时。Windows 用 Microsoft MPI，macOS 现有入口使用 OpenMPI；二进制不能跨平台互换。配置检查、解释器选择与实际生命周期证据按[前端使用说明](../../前端readme.md)和[发布状态](../blender/发布状态与验证范围.md)分层阅读。
 
 当前 macOS Blender 启动器入口是：
 

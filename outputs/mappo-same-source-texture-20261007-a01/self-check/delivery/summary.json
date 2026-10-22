@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "date": "2026-10-08",
+  "reports": {
+    "self-check/data-review/before-after-summary.json": "PASS",
+    "self-check/frontend-review/source-settings-native.json": "PASS",
+    "isolated-package/attempt02/package-validation.json": "PASS",
+    "isolated-window/attempt04/window-validation.json": "PASS",
+    "daily-window/attempt02/window-validation.json": "PASS",
+    "self-check/native-edge/attempt02/report.json": "PASS",
+    "self-check/native-settings-reopen/prepare-attempt01/prepare-report.json": "PASS",
+    "self-check/native-settings-reopen/reopen-attempt02/settings-reopen-report.json": "PASS",
+    "daily-reopen/attempt02/independent-reopen-validation.json": "PASS",
+    "self-check/delivery/daily-installed.json": "PASS",
+    "self-check/delivery/final-preservation.json": "PASS",
+    "self-check/delivery/manual-ui-observations.json": "PASS"
+  },
+  "host_result": "85 passed, 1 skipped, 227 subtests passed",
+  "documentation_links_checked": 25,
+  "missing_documentation_links": [],
+  "zip_sha256": "36fc6c837c23da9d99c6e29609775fb8bdb776ae86250758353b9b9b407502d0",
+  "software_verification_complete": true,
+  "reconstruction_accuracy": "NOT_ACCEPTED",
+  "texture_accuracy": "NOT_ACCEPTED",
+  "simulations_rerun": false,
+  "release_published": false
+}

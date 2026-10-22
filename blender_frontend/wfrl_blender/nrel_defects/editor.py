@@ -93,7 +93,9 @@ class EditorSession:
         from .. import farm_flex, clearance_replay
         if not farm_flex.is_active(scene):
             raise ValueError('请先加载 NREL 5MW MAPPO 柔性回放')
-        self.scene, self.flex = scene, farm_flex._ACTIVE
+        if farm_flex.active_for(scene).model != 'nrel5mw':
+            raise ValueError('NREL 缺陷编辑器需要 NREL 叶片外形，请先切回 NREL 5MW')
+        self.scene, self.flex = scene, farm_flex.active_for(scene)
         self.baseline = {obj.name:rest.copy() for obj,rest,*_ in self.flex.blades}
         obj, rest, *_ = self.flex.blades[0]
         self.surface = ReferenceSurface(rest.tolist(), [tuple(p.vertices) for p in obj.data.polygons],
@@ -107,6 +109,7 @@ class EditorSession:
             geometry=self.surface.metadata())
         self.payload = None; self.records = None; self.preview = None; self.draft = None
         self.edit_state = None; self.helpers = []; self.helper_rest = {}; self.commit_times = []
+        self.helper_meshes = []; self.closing = False
         self.busy = False; self.healthy_payload = None; self.save_state = None
         self.geometry = GeometrySet(self)
         self.repair_source = scene.objects.get('WFRL.RepairReference.T1.B1')
@@ -178,25 +181,64 @@ class EditorSession:
         self.update_helpers(document)
         sync_defect_list(self, document)
 
-    def update_helpers(self, document=None):
+    def live_helpers(self):
+        """Discard deleted RNA handles without changing the defect document."""
+        live = []
         for obj in self.helpers:
-            data = obj.data
-            bpy.data.objects.remove(obj,do_unlink=True)
-            if data and data.users==0: bpy.data.meshes.remove(data)
-        self.helpers = []; self.helper_rest = {}
+            try:
+                if obj.as_pointer():
+                    live.append(obj)
+            except ReferenceError:
+                pass
+        self.helpers = live
+        return live
+
+    def clear_helpers(self):
+        """Release only session-owned meshes and retain failed releases for retry."""
+        errors, pending = [], []
+        for obj in self.live_helpers():
+            try:
+                bpy.data.objects.remove(obj, do_unlink=True)
+            except ReferenceError:
+                pass
+            except Exception as exc:
+                errors.append(exc)
+                pending.append(obj)
+        self.helpers = pending
+        pending_meshes = []
+        for mesh in getattr(self, 'helper_meshes', []):
+            try:
+                if mesh.users == 0:
+                    bpy.data.meshes.remove(mesh)
+                elif pending:
+                    pending_meshes.append(mesh)
+            except ReferenceError:
+                pass
+            except Exception as exc:
+                errors.append(exc)
+                pending_meshes.append(mesh)
+        self.helper_meshes = pending_meshes
+        if errors:
+            raise RuntimeError('辅助标记清理失败：' + '; '.join(map(str, errors)))
+        self.helper_rest.clear()
+
+    def update_helpers(self, document=None):
+        self.clear_helpers()
         document = document or (self.store.document if hasattr(self,'store') else new_document(self.surface))
         props = self.scene.wfrl_nrel_defects
         def add(points, edges, d, role):
             mesh = bpy.data.meshes.new('NREL.Defect.Helper')
+            self.helper_meshes.append(mesh)
             mesh.from_pydata(points,edges,[]); mesh.update()
             obj = bpy.data.objects.new('NREL.Defect.Helper.'+d['id'],mesh)
+            self.helpers.append(obj)
             self.rig['collection'].objects.link(obj)
             obj.parent = self.blade(d['turbine_id'],d['blade_id'])
             obj.hide_render = True; obj.show_in_front = True
             obj['nrel_defect_role'] = 'editor_marker'; obj['turbine_id'] = d['turbine_id']; obj['blade_id'] = d['blade_id']
             obj['defect_id'] = d['id']; obj['outline'] = role
             obj.hide_viewport = not props.show_helpers or self.healthy_payload is not None
-            self.helpers.append(obj); self.helper_rest[obj.name] = np.array(points)
+            self.helper_rest[obj.name] = np.array(points)
         for d in document['defects']:
             if not d['enabled']: continue
             for shape,label in ((d,'support'),(lightning_crater(d),'crater')) if d['morphology']=='lightning' else ((d,'support'),):
@@ -206,10 +248,19 @@ class EditorSession:
         self.update_attachments(float(self.scene.get('wfrl_clearance_time_s',self.flex.times[0])))
 
     def update_attachments(self, t):
-        for obj in self.helpers:
-            coords = self.flex.deform_points(obj.parent,self.helper_rest[obj.name],t)
+        for obj in self.live_helpers():
+            rest = self.helper_rest.get(obj.name)
+            if obj.parent is None or obj.data is None or rest is None or obj.data not in self.helper_meshes:
+                continue
+            if len(obj.data.vertices) != len(rest):
+                continue
+            coords = self.flex.deform_points(obj.parent,rest,t)
             obj.data.vertices.foreach_set('co',coords.astype(np.float32).ravel()); obj.data.update()
-        if self.repair_source is not None and len(self.repair_source.data.vertices)==len(self.repair_rest):
+        try:
+            repair_live = self.repair_source is not None and self.repair_source.as_pointer()
+        except ReferenceError:
+            repair_live = False
+        if repair_live and self.repair_source.data is not None and len(self.repair_source.data.vertices)==len(self.repair_rest):
             coords = self.flex.deform_points(self.blade('T1',1),self.repair_rest,t)
             self.repair_source.data.vertices.foreach_set('co',coords.astype(np.float32).ravel());self.repair_source.data.update()
 
@@ -234,23 +285,64 @@ class EditorSession:
         finally: _UPDATING=False
 
     def begin(self, index=None, kind='fine_crack'):
+        from .. import playback, _cancel_playback
         if self.draft is not None or self.healthy_payload is not None or self.busy:
             raise ValueError('请先完成当前编辑、扫描或健康对照')
-        if index is not None and not 0<=index<len(self.store.document['defects']):
+        draft = self.store.document
+        if index is not None and not 0<=index<len(draft['defects']):
             raise ValueError('请选择已有缺陷')
-        playing=bool(bpy.context.screen and bpy.context.screen.is_animation_playing)
-        if playing: bpy.ops.screen.animation_cancel(restore_frame=False)
-        self.edit_state=(float(self.scene['defect_time_s']),playing)
         p = self.scene.wfrl_nrel_defects
         self.edit_selection = (p.defect_items[p.selected].defect_id
                                if 0 <= p.selected < len(p.defect_items) else None)
-        self.draft=self.store.document
         if index is None:
-            self.draft['defects'].append(new_defect(self.surface,kind,turbine_id=self.scene.wfrl_nrel_defects.turbine_id))
-            index=len(self.draft['defects'])-1
-        self.draft_index=index
-        sync_defect_list(self, self.draft, self.draft['defects'][index]['id'])
-        return self.draft['defects'][index]
+            draft['defects'].append(new_defect(self.surface,kind,turbine_id=p.turbine_id))
+            index=len(draft['defects'])-1
+        window = None
+        if playback.is_playing(self.scene):
+            window = playback.owner_window()
+            if window is None or window.scene != self.scene:
+                raise RuntimeError('无法确定当前场景的播放窗口')
+            _cancel_playback(self.scene)
+            if playback.is_playing(self.scene):
+                raise RuntimeError('无法暂停当前场景播放')
+        self.edit_state=(float(self.scene['defect_time_s']),window)
+        self.draft, self.draft_index = draft, index
+        try:
+            sync_defect_list(self, draft, draft['defects'][index]['id'])
+            return draft['defects'][index]
+        except BaseException:
+            self.draft = None
+            try:
+                sync_defect_list(self, self.store.document, self.edit_selection)
+            finally:
+                self._restore_edit_state()
+            raise
+
+    def _restore_edit_state(self):
+        """Restore edit time and resume only the original scene's surviving window."""
+        from .. import playback
+        state, self.edit_state = self.edit_state, None
+        if state is None:
+            return
+        t, window = state
+        with bpy.context.temp_override(scene=self.scene, view_layer=self.scene.view_layers[0]):
+            self.set_time(t)
+        if window is None:
+            return
+        try:
+            def can_resume():
+                owner = playback.owner_scene()
+                return (_SESSIONS.get(self.scene.as_pointer()) is self
+                        and window in tuple(bpy.context.window_manager.windows)
+                        and window.scene == self.scene
+                        and (owner is None or owner == self.scene)
+                        and not playback.any_playing())
+            if can_resume():
+                with bpy.context.temp_override(window=window):
+                    if can_resume():
+                        bpy.ops.screen.animation_play()
+        except (ReferenceError, RuntimeError):
+            pass
 
     def discard_preview(self):
         if self.preview is not None:
@@ -272,10 +364,10 @@ class EditorSession:
             self.commit_times.append(time.perf_counter()-started)
         selected_id = self.draft['defects'][self.draft_index]['id'] if commit else self.edit_selection
         self.draft=None
-        sync_defect_list(self, self.store.document, selected_id)
-        t,playing=self.edit_state;self.edit_state=None
-        self.set_time(t)
-        if playing and bpy.context.screen and not bpy.context.screen.is_animation_playing: bpy.ops.screen.animation_play()
+        try:
+            sync_defect_list(self, self.store.document, selected_id)
+        finally:
+            self._restore_edit_state()
 
     def suspend_for_save(self):
         """Serialize committed geometry without consuming the live edit transaction."""
@@ -340,7 +432,7 @@ class EditorSession:
             if (d['turbine_id'],d['blade_id'])==(target['turbine_id'],target['blade_id']): d['enabled']=False
         self.healthy_payload=self.geometry.prepare(doc)
         self.geometry.activate(self.healthy_payload)
-        for helper in self.helpers: helper.hide_viewport=True
+        for helper in self.live_helpers(): helper.hide_viewport=True
 
     def locate_ray(self,origin,direction,blade_id,turbine_id=None):
         blade=self.blade(turbine_id or self.scene.wfrl_nrel_defects.turbine_id,blade_id)
@@ -420,14 +512,16 @@ class EditorSession:
 
 def ensure(scene):
     found=_SESSIONS.get(scene.as_pointer())
-    if found: return found
+    if found:
+        if not getattr(found, 'closing', False): return found
+        detach(scene)
     document=json.loads(scene[DOCUMENT_KEY]) if scene.get(DOCUMENT_KEY) else None
     return EditorSession(scene,document)
 
 
 def after_update(scene,t):
     found=_SESSIONS.get(scene.as_pointer())
-    if found:
+    if found and not getattr(found, 'closing', False):
         found.update_attachments(t);scene['defect_time_s']=float(t)
         found.records=None;scene['defect_analysis_status']='NOT_EVALUATED'
 
@@ -442,25 +536,59 @@ def restore_saved(scene):
 
 
 def detach(scene=None,*,restore=True):
+    errors = []
     for key,s in list(_SESSIONS.items()):
-        if scene is not None and s.scene!=scene: continue
+        if scene is not None and s.scene != scene: continue
+        s.closing = True
+        failed = []
+        def attempt(callback):
+            try:
+                callback()
+            except Exception as exc:
+                failed.append(exc)
+        scan = getattr(s, 'scan_operator', None)
+        if scan is not None:
+            attempt(lambda: scan.finish_scan(None, True, restore_time=restore, resume_playback=False))
+        s.draft = s.edit_state = None
+        attempt(s.clear_helpers)
+        for manager in s.geometry.managers.values():
+            attempt(lambda manager=manager: manager.close(restore=restore))
+        # Geometry managers own restoration. Closing must not reactivate a live
+        # preview or access a scene whose RNA has already been deleted.
+        s.geometry.active = None
+        for payload in (getattr(s, 'payload', None), s.healthy_payload,
+                        s.preview.resource if s.preview is not None else None):
+            if payload is not None:
+                attempt(lambda payload=payload: s.geometry.dispose(payload))
+        if not failed and restore:
+            def restore_replay():
+                for row in list(s.flex.blades):
+                    obj = row[0]
+                    try:
+                        name = obj.name
+                    except ReferenceError:
+                        continue
+                    if name in s.baseline: s.flex.rebind_blade(obj,s.baseline[name])
+                try:
+                    scene_live = bool(s.scene.as_pointer())
+                except ReferenceError:
+                    scene_live = False
+                if scene_live:
+                    from .. import repair_marks
+                    repair_marks.ensure(s.scene,force=True)
+                    s.flex.update(s.scene,record_telemetry=False)
+            attempt(restore_replay)
+        if failed:
+            errors.extend(failed)
+            try:
+                s.scene.wfrl_nrel_defects.status = '关闭未完成，请重试关闭：' + '; '.join(map(str, failed))
+            except ReferenceError:
+                pass
+            continue
+        s.preview = s.healthy_payload = None
         _SESSIONS.pop(key,None)
-        if s.preview is not None:
-            s.geometry.activate(s.payload);s.store.cancel(s.preview);s.preview=None
-        if s.healthy_payload is not None:
-            s.geometry.activate(s.payload);s.geometry.dispose(s.healthy_payload);s.healthy_payload=None
-        for obj in s.helpers:
-            data=obj.data;bpy.data.objects.remove(obj,do_unlink=True)
-            if data.users==0:bpy.data.meshes.remove(data)
-        s.helpers=[]
-        for manager in s.geometry.managers.values(): manager.close(restore=restore)
-        if restore:
-            for row in list(s.flex.blades):
-                obj=row[0]
-                if obj.name in s.baseline: s.flex.rebind_blade(obj,s.baseline[obj.name])
-            from .. import repair_marks
-            repair_marks.ensure(s.scene,force=True)
-            s.flex.update(s.scene,record_telemetry=False)
+    if errors:
+        raise RuntimeError('缺陷编辑器清理失败：' + '; '.join(map(str, errors)))
 
 
 @persistent
@@ -468,6 +596,9 @@ def save_pre(_unused):
     # The file contains committed state; live drafts and previews remain reusable.
     try:
         for s in list(_SESSIONS.values()):
+            scan = getattr(s, 'scan_operator', None)
+            if scan is not None:
+                scan.finish_scan(None, True, resume_playback=False)
             s.suspend_for_save()
     except Exception:
         restore_after_save()
@@ -499,7 +630,7 @@ def save_post_fail(_unused):
 @persistent
 def frame_changed(scene,depsgraph=None):
     s=_SESSIONS.get(scene.as_pointer())
-    if s is not None and not _UPDATING and (s.draft is not None or s.busy):
+    if s is not None and not getattr(s, 'closing', False) and not _UPDATING and (s.draft is not None or s.busy):
         frozen = s.edit_state[0] if s.draft is not None else s.freeze_time
         if abs(float(scene.get('defect_time_s',0))-frozen)>1e-8: s.set_time(frozen)
 
@@ -507,7 +638,7 @@ def frame_changed(scene,depsgraph=None):
 def helper_changed(props,context):
     s=session(context)
     if s:
-        for obj in s.helpers: obj.hide_viewport=not props.show_helpers or s.healthy_payload is not None
+        for obj in s.live_helpers(): obj.hide_viewport=not props.show_helpers or s.healthy_payload is not None
 
 
 def sync_defect_list(s, document, selected_id=None):
@@ -570,6 +701,8 @@ def action_unavailable(s, p, action):
         return ''
     if s is None:
         return '请先启动编辑器'
+    if getattr(s, 'closing', False):
+        return '' if action == 'CLOSE' else '关闭未完成，请重试关闭编辑器'
     if s.busy:
         return '扫描进行中；按 Esc 取消后操作'
     if action == 'CLOSE':
@@ -1048,6 +1181,12 @@ class NREL_OT_defect_scan(bpy.types.Operator):
     def invoke(self, context, event):
         from .defect_timeline import FrameMapping
         from .defect_outputs import create_run
+        from .. import playback, _cancel_playback
+        self.scan_session = None
+        self.timer = self.run = None
+        self.finished = False
+        self.finish_result = {'CANCELLED'}
+        self.playing = False
         s, p = session(context), context.scene.wfrl_nrel_defects
         try:
             reason = action_unavailable(s, p, 'SCAN')
@@ -1063,53 +1202,130 @@ class NREL_OT_defect_scan(bpy.types.Operator):
             self.mapping = FrameMapping(p.scan_start,duration,60.,60.,float(s.flex.times[0]))
             if p.scan_start < s.flex.times[0] or p.scan_start+p.scan_duration > s.flex.times[-1]+1e-9:
                 raise ValueError('扫描超出时间线')
-            self.run = create_run(s, bpy.path.abspath(p.output_path), mapping=self.mapping)
+            self.scan_session, self.scan_scene = s, s.scene
+            self.scene_key = s.scene.as_pointer()
+            self.scan_window, self.scan_wm = context.window, context.window_manager
+            self.scan_view_layer = context.view_layer
             self.saved_time = float(s.scene['defect_time_s'])
-            s.freeze_time = self.saved_time
-            self.playing = context.screen.is_animation_playing
-            if self.playing:
-                bpy.ops.screen.animation_cancel(restore_frame=False)
             self.rows, self.index, self.version = [], 0, s.store.version
+            self.run = create_run(s, bpy.path.abspath(p.output_path), mapping=self.mapping)
+            s.freeze_time = self.saved_time
+            if playback.is_playing(s.scene):
+                _cancel_playback(s.scene)
+                if playback.is_playing(s.scene):
+                    raise RuntimeError('无法暂停当前场景播放')
+                self.playing = True
             self.started = time.perf_counter()
             s.busy = True
-            self.timer = context.window_manager.event_timer_add(.05, window=context.window)
-            context.window_manager.modal_handler_add(self)
+            s.scan_operator = self
+            self.timer = self.scan_wm.event_timer_add(.05, window=self.scan_window)
+            self.scan_wm.modal_handler_add(self)
             return {'RUNNING_MODAL'}
         except Exception as exc:
             self.report({'ERROR'}, str(exc))
+            if self.run is not None:
+                return self.finish_scan(context, True, repr(exc))
             return {'CANCELLED'}
 
-    def finish_scan(self, context, cancelled=False, error=None):
+    def bound_session_valid(self):
+        try:
+            return (_SESSIONS.get(self.scene_key) is self.scan_session
+                    and self.scan_scene.as_pointer() == self.scene_key)
+        except (AttributeError, ReferenceError):
+            return False
+
+    def finish_scan(self, context, cancelled=False, error=None, *, restore_time=True, resume_playback=True):
         from .defect_outputs import save_records, write_json, update_run, save_review
         from .defect_timeline import summarize_intervals
-        s = session(context)
-        context.window_manager.event_timer_remove(self.timer)
+        from .. import playback
+        if self.finished:
+            return self.finish_result
+        self.finished = True
+        s = self.scan_session
         s.busy = False
-        s.set_time(self.saved_time)
-        if self.playing:
-            bpy.ops.screen.animation_play()
+        if getattr(s, 'scan_operator', None) is self:
+            s.scan_operator = None
+        timer, self.timer = self.timer, None
+        if timer is not None:
+            try:
+                self.scan_wm.event_timer_remove(timer)
+            except (ReferenceError, RuntimeError):
+                pass
+        valid = self.bound_session_valid()
+        restored = False
+        if restore_time and valid:
+            try:
+                # Restore the originating scene without borrowing the new scene's depsgraph.
+                with bpy.context.temp_override(scene=self.scan_scene, view_layer=self.scan_view_layer):
+                    s.set_time(self.saved_time)
+                restored = True
+            except Exception as exc:
+                error = '; '.join(filter(None, (error, 'RESTORE_FAILED: '+repr(exc))))
+        if resume_playback and self.playing and restored:
+            try:
+                def can_resume():
+                    owner = playback.owner_scene()
+                    return (self.bound_session_valid() and self.scan_window in tuple(self.scan_wm.windows)
+                            and self.scan_window.scene == self.scan_scene
+                            and (owner is None or owner == self.scan_scene)
+                            and not playback.any_playing())
+                if can_resume():
+                    with bpy.context.temp_override(window=self.scan_window):
+                        if can_resume():
+                            bpy.ops.screen.animation_play()
+            except (ReferenceError, RuntimeError):
+                pass
         complete = not cancelled and error is None and self.index == self.mapping.frame_count
-        save_records(self.run, self.rows)
-        write_json(self.run['output']/'visible_intervals.json', dict(
-            completed=complete, completed_frames=self.index, next_frame_index=None if complete else self.index,
-            frame_mapping=self.mapping.to_dict(), error=error,
-            intervals=summarize_intervals(self.rows, self.mapping, complete)))
-        self.run['manifest']['state'] = 'FAILED' if error else 'G_SCAN_COMPLETE' if complete else 'G_SCAN_PARTIAL'
-        self.run['manifest']['products']['visible_intervals'] = dict(state='GENERATED', complete=complete)
-        update_run(self.run)
-        save_review(s, self.run)
-        context.scene.wfrl_nrel_defects.status = f'扫描 {self.index}/{self.mapping.frame_count} 帧；' + self.run['manifest']['state']
-        return {'FINISHED'} if complete else {'CANCELLED'}
+        try:
+            save_records(self.run, self.rows)
+            write_json(self.run['output']/'visible_intervals.json', dict(
+                completed=complete, completed_frames=self.index, next_frame_index=None if complete else self.index,
+                frame_mapping=self.mapping.to_dict(), error=error,
+                intervals=summarize_intervals(self.rows, self.mapping, complete)))
+            self.run['manifest']['state'] = 'FAILED' if error else 'G_SCAN_COMPLETE' if complete else 'G_SCAN_PARTIAL'
+            self.run['manifest']['products']['visible_intervals'] = dict(state='GENERATED', complete=complete)
+            update_run(self.run)
+            save_review(s, self.run)
+        except Exception as exc:
+            complete = False
+            error = '; '.join(filter(None, (error, 'OUTPUT_FAILED: '+repr(exc))))
+            self.run['manifest'].update(state='FAILED', error=error)
+            try:
+                update_run(self.run)
+            except Exception:
+                pass
+        if valid:
+            try:
+                self.scan_scene.wfrl_nrel_defects.status = f'扫描 {self.index}/{self.mapping.frame_count} 帧；' + self.run['manifest']['state']
+            except ReferenceError:
+                pass
+        if error:
+            try:
+                self.report({'ERROR'}, error)
+            except ReferenceError:
+                pass
+        self.finish_result = {'FINISHED'} if complete else {'CANCELLED'}
+        return self.finish_result
+
+    def cancel(self, context):
+        if getattr(self, 'run', None) is not None:
+            self.finish_scan(context, True)
 
     def modal(self, context, event):
-        if session(context) is None:
-            context.window_manager.event_timer_remove(self.timer)
-            return {'CANCELLED'}
+        if self.finished:
+            return self.finish_result
+        try:
+            current = (self.bound_session_valid() and context.scene == self.scan_scene
+                       and context.window == self.scan_window and context.window_manager == self.scan_wm)
+        except ReferenceError:
+            current = False
+        if not current:
+            return self.finish_scan(context, True)
         if event.type == 'ESC':
             return self.finish_scan(context, True)
         if event.type != 'TIMER':
             return {'PASS_THROUGH'}
-        s = session(context)
+        s = self.scan_session
         try:
             s.verify_cameras()
             if not s.store.accepts_version(self.version):
@@ -1117,7 +1333,7 @@ class NREL_OT_defect_scan(bpy.types.Operator):
             sample = self.mapping.sample(self.index)
             self.rows.extend(s.analyze(sample['time_s'],self.index,self.run['manifest']['run_id'],self.version))
             self.index += 1
-            context.scene.wfrl_nrel_defects.status = f'扫描 {self.index}/{self.mapping.frame_count}；Esc 取消'
+            self.scan_scene.wfrl_nrel_defects.status = f'扫描 {self.index}/{self.mapping.frame_count}；Esc 取消'
             if self.index == self.mapping.frame_count:
                 return self.finish_scan(context)
             return {'RUNNING_MODAL'}

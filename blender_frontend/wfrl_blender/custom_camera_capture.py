@@ -18,7 +18,7 @@ import time
 from . import custom_camera_diagnostics as diagnostics
 
 from . import camera_projection as projection, custom_cameras as core
-from . import custom_camera_preview as preview
+from . import custom_camera_preview as preview, playback
 
 _ACTIVE = None
 
@@ -199,7 +199,7 @@ class Capture:
             if any(not isinstance(t,(int,float)) or not math.isfinite(t)
                    or t < self.farm.times[0] or t > self.farm.times[-1] for t in self.times):
                 raise ValueError(f'序列时间必须位于 {self.farm.times[0]}–{self.farm.times[-1]} s')
-        self.playing = bool(self.window.screen.is_animation_playing)
+        self.playing = bool(self.window and playback.is_playing(self.scene))
         self.closed, self.index, self.error = False, 0, ''
         self.in_group, self.cancel_requested = False, False
         self.cancel_accepted_at = None
@@ -233,15 +233,22 @@ class Capture:
 
     def _play(self, playing):
         import bpy
-        if bool(self.window.screen.is_animation_playing) != playing:
-            from . import native_camera_views
-            session=native_camera_views._ACTIVE
-            override=(session.playback_context() if session and session.window==self.window
-                      and session.scene==self.scene else None)
-            override=override or {'window':self.window,'screen':self.window.screen}
-            with bpy.context.temp_override(**override):
-                if playing:bpy.ops.screen.animation_play()
-                else:bpy.ops.screen.animation_cancel(restore_frame=False)
+        if not self.window:
+            return
+        from . import native_camera_views
+        session=native_camera_views._ACTIVE
+        override=(session.playback_context() if session and session.window==self.window
+                  and session.scene==self.scene else None)
+        override=override or {'window':self.window,'screen':self.window.screen}
+        with bpy.context.temp_override(**override):
+            owner = playback.owner_scene()
+            live = playback.any_playing()
+            if (owner is not None and owner != self.scene) or (live and owner is None):
+                return
+            if playing and not live:
+                bpy.ops.screen.animation_play()
+            elif not playing and live:
+                bpy.ops.screen.animation_cancel(restore_frame=False)
 
     def same_session(self):
         from .panels.custom_cameras import session_identity
@@ -259,7 +266,9 @@ class Capture:
             raise RuntimeError('场景、窗口或回放会话已变化，采集未完成')
         reason=installation_block_reason(self.scene)
         if reason:raise RuntimeError(reason)
-        if self.window.screen.is_animation_playing or (self.scene.frame_current,self.scene.frame_subframe) != self.expected_frame:
+        owner = playback.owner_scene()
+        if ((owner is None or owner == self.scene) and self.window.screen.is_animation_playing
+                or (self.scene.frame_current,self.scene.frame_subframe) != self.expected_frame):
             raise RuntimeError('采集时刻被外部操作改变，采集未完成')
         try:
             core.validate_native_state(self.scene)

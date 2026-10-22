@@ -636,6 +636,8 @@ def enter(context, reset_layout=True, use_texture=None, use_same_source=False):
     import bpy
     from . import cameras, split_surface_texture, split_mappo_texture, split_texture_settings
     scene, window = context.scene, context.window
+    if scene.get('wfrl_blade_model', 'nrel5mw') != 'nrel5mw':
+        raise ValueError('重建对照需要 NREL 叶片外形，请先切回 NREL 5MW')
     if not available(scene) or window is None or bpy.app.background:
         raise ValueError('请先载入 MAPPO 回放或打开 MAPPO 重建示例')
     areas = _views(window.screen)

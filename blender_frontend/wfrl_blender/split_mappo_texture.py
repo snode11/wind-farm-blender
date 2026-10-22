@@ -208,6 +208,8 @@ def _validate_clock(sequence):
 
 def _validate_source(scene, provenance, *, check_files=True):
     from .blade_recon_data import MODEL_SHA256
+    if scene.get('wfrl_blade_model', 'nrel5mw') != 'nrel5mw':
+        raise ValueError('同源纹理对照需要 NREL 叶片外形，请先切回 NREL 5MW')
     source_files = provenance.get('source_package_hashes', {})
     expected = provenance.get('mappo_manifest_sha256', source_files.get('assets/mappo/manifest.json'))
     if expected != SOURCE_HASH or scene.get('wfrl_farm_manifest_sha256') != expected:
