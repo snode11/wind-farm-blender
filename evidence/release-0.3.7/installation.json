@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.release_test.wfrl_blender",
+  "directory": "TEMPORARY_PATH",
+  "version": "0.3.7",
+  "verified_files": 97,
+  "config": "isolated temporary preferences; user installation unchanged"
+}

@@ -1,0 +1,24 @@
+[
+  {
+    "method": "baseline",
+    "samples": 6400,
+    "mae_m": 4.274069958422949,
+    "bias_m": 4.26619663076455,
+    "p95_abs_error_m": 7.331740394204785,
+    "max_overestimate_m": 8.413822167870993,
+    "min_signed_error_m": -1.0680267179137086,
+    "maximum_output_change_m": 1.5692091464817448,
+    "rejected": 0
+  },
+  {
+    "method": "candidate",
+    "samples": 6400,
+    "mae_m": 0.7935822543971903,
+    "bias_m": -0.20340960822985518,
+    "p95_abs_error_m": 2.025408275340004,
+    "max_overestimate_m": 2.604022418857298,
+    "min_signed_error_m": -3.278472361293904,
+    "maximum_output_change_m": 0.26518621402713816,
+    "rejected": 0
+  }
+]

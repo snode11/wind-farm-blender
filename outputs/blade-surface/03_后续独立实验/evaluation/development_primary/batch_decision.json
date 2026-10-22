@@ -1,0 +1,51 @@
+{
+  "status": "COMPLETED",
+  "planned": 6,
+  "completed": 6,
+  "failed": 0,
+  "jobs": [
+    {
+      "id": "primary/A1_new",
+      "exit_code": 0,
+      "wall_s": 2.000779040972702,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_primary/primary/A1_new"
+    },
+    {
+      "id": "primary/A3_C4",
+      "exit_code": 0,
+      "wall_s": 2.002271582954563,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_primary/primary/A3_C4"
+    },
+    {
+      "id": "primary/A3_D4",
+      "exit_code": 0,
+      "wall_s": 1.949277792009525,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_primary/primary/A3_D4"
+    },
+    {
+      "id": "primary/A3_D12",
+      "exit_code": 0,
+      "wall_s": 1.779243208002299,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_primary/primary/A3_D12"
+    },
+    {
+      "id": "density1024/A1_new",
+      "exit_code": 0,
+      "wall_s": 3.7215017089620233,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_primary/density1024/A1_new"
+    },
+    {
+      "id": "density1024/A3_D12",
+      "exit_code": 0,
+      "wall_s": 3.697787082986906,
+      "status": "COMPLETED",
+      "out": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/evaluation/development_primary/density1024/A3_D12"
+    }
+  ],
+  "wall_s": 7.651850541005842
+}

@@ -1,0 +1,57 @@
+{
+  "schema": "wfrl.extension-release.v1",
+  "version": "0.3.24",
+  "blender_minimum": "5.2.0",
+  "publication_status": "PUBLISHED",
+  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.24",
+  "archive": {
+    "name": "wfrl_blender-0.3.24.zip",
+    "path": "outputs/manual-controls-fix/package-validation/package/wfrl_blender-0.3.24.zip",
+    "bytes": 99040468,
+    "file_count": 180,
+    "sha256": "99351530ddb27a1a1a4896977d4472e85c7e81983cad88ddd3421706de603a25",
+    "identity_source": "Existing package inventory and saved installation evidence; no new package validation",
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.24/wfrl_blender-0.3.24.zip",
+    "inventory_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.24/wfrl_blender-0.3.24.inventory.json",
+    "checksum_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.24/wfrl_blender-0.3.24.zip.sha256"
+  },
+  "source": {
+    "repository": "https://github.com/snode11/wind-farm-blender",
+    "branch": "wind-farm-rl-all-work",
+    "synchronized_branch": "main",
+    "tag": "v0.3.24",
+    "commit": "844b1de6a04a612b72b244d42749ae5ba6ee9213",
+    "source_rebuild_verification": "NOT_RUN"
+  },
+  "validation": {
+    "additional_release_checks": "NOT_RUN",
+    "evidence_basis": "Existing saved evidence for the archive identified above; no new acceptance result",
+    "saved_platform": "macOS",
+    "saved_blender": "5.2.1 LTS",
+    "saved_reports": [
+      "publication/daily-installation.json",
+      "publication/daily-installation-probe.json",
+      "publication/manual-controls-validation.json"
+    ],
+    "saved_report_publication_fields": "LOCAL_ONLY and public_release=false describe the saved observations; current publication status is recorded by this release identity",
+    "native_file_chooser": "NOT_RUN",
+    "full_clip_fps_benchmark": "NOT_RUN",
+    "long_duration_stability": "NOT_RUN",
+    "windows_linux": "NOT_RUN",
+    "scientific_acceptance": "NOT_RUN"
+  },
+  "daily_installation": {
+    "updated_by_publication": false,
+    "saved_version": "0.3.24",
+    "saved_identity": "publication/daily-installation.json"
+  },
+  "limitations": [
+    "Manual controls provide rigid illustrative motion without power, load, wake, deformation or radar computation.",
+    "Manual-scene integration with three-camera controls and the defect editor is outside the current scope.",
+    "Geometry and texture remain NOT_ACCEPTED; lidar remains REVIEW_ONLY / PENDING_ACCEPTANCE.",
+    "Existing evidence applies only to its recorded payload, environment and short interaction scope.",
+    "Raw evidence paths under outputs identify local files and are not included in this release.",
+    "Original VTP, backend services, solvers and project launchers are not installed by the extension ZIP."
+  ],
+  "remote_asset_download_verification": false
+}

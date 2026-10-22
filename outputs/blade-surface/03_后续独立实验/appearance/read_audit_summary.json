@@ -1,0 +1,62 @@
+{
+  "audited_runs": [
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/appearance/packages/A2_new/read_audit.json",
+      "events": 304,
+      "prohibited_read_count": 0
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/appearance/packages/A3_D12/read_audit.json",
+      "events": 304,
+      "prohibited_read_count": 0
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/appearance/verify_read_audit.json",
+      "events": 224,
+      "prohibited_read_count": 0
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/validation/display/A3_window/read_audit.json",
+      "events": 57,
+      "prohibited_read_count": 0
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/validation/display/A2_window/read_audit.json",
+      "events": 59,
+      "prohibited_read_count": 0
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/validation/display/comparison/read_audit.json",
+      "events": 77,
+      "prohibited_read_count": 0
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/validation/display/comparison/independent_reopen_read_audit.json",
+      "events": 113,
+      "prohibited_read_count": 0
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/validation/display/comparison/independent_reopen_failed_context01_audit.json",
+      "events": 103,
+      "prohibited_read_count": 0
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/validation/display/comparison/failed_layout01/independent_reopen_read_audit.json",
+      "events": 113,
+      "prohibited_read_count": 0
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/validation/display/comparison/v2_read_audit.json",
+      "events": 25,
+      "prohibited_read_count": 0
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/validation/display/comparison/v2_distance_only_draft/v2_read_audit.json",
+      "events": 25,
+      "prohibited_read_count": 0
+    }
+  ],
+  "events_total": 1404,
+  "prohibited_reads_total": 0,
+  "failed_startup_audit_flush": "not available for schema refusal and missing adapter import; OS sandbox active"
+}

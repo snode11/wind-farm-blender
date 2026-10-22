@@ -1,0 +1,49 @@
+{
+  "status": "FIXED_BEFORE_RGB_DETECTION_AND_NEW_RECON_SCORING",
+  "planned": {
+    "synthetic": 24,
+    "capture2": 8,
+    "actual": 12
+  },
+  "detection": {
+    "sensor_roi_fraction_xyxy": [
+      0.25,
+      0.2,
+      0.75,
+      0.8
+    ],
+    "gaussian_sigma_px": 1.0,
+    "anomaly_threshold_gray": 15.0,
+    "minimum_component_pixels": 30,
+    "dominance_ratio_min": 2.0
+  },
+  "criteria": {
+    "planned_validation_accepted_fraction_min": 0.9,
+    "independent_symmetric_boundary_P95_px_max": 1.0,
+    "anchor_binding_boundary_coverage_min": 0.9,
+    "visibility_fraction_min": 0.9,
+    "normal_RGB_anomaly_fraction_max": 0.05
+  },
+  "normal": "fixed original RGB sensor box x=.70-.75W,y=.20-.25H, anomaly relative to own median threshold .15; this pixel-side control is separate from old physical normal ROI",
+  "binding": "first valid fit observation with >=.9 RGB-boundary surface support; frozen blade/face/perspective barycentric, no reset after missing; original frame/t retained; targets changing per Inspection schedule never conflated",
+  "scope": "region correspondence precondition only, no geometric fitting residual; no source truth positions/texture/mesh read by detect or score",
+  "catalog_source_files": [
+    {
+      "file": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/input/input_bundle.json",
+      "sha256": "104b6b2df3075e5d0472a794440907dabc6644996d00b36ae3944b8788c56a2c"
+    },
+    {
+      "file": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/evaluation/heldout.json",
+      "sha256": "e3de13d8f955ac6488ce3130d61ae60d7be10c7489ba57d6343aa6ef4b9a7aa4"
+    },
+    {
+      "file": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/actual/input/input_bundle.json",
+      "sha256": "35a3b5bcd3f78b0601db82137ff6ea9f7533513519904d8d5c69d48244c35f04"
+    },
+    {
+      "file": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/actual/evaluation/source.json",
+      "sha256": "164c02cff31870b7fb291cf80764b8aa41addf50185dadb9b423c67ae4558347"
+    }
+  ],
+  "catalog_filtering": "source.json read solely in catalog construction to copy Holdout K/T/RGB/frame/t; all points, source vertices and states omitted; detector/score read only filtered catalog"
+}

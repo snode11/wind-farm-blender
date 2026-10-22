@@ -1,0 +1,80 @@
+[
+  {
+    "time_s": 144.0,
+    "density_per_direction": 512,
+    "definition": "area-sampled bidirectional separation of healthy and dent source counterexamples; NOT recovered accuracy",
+    "units": "m",
+    "local_surface_area_healthy_m2": 7.864895021450305,
+    "local_surface_area_dent_m2": 7.861502248732818,
+    "healthy_to_dent_mean_m": 0.009770778750218315,
+    "dent_to_healthy_mean_m": 0.009741564530538222,
+    "symmetric_mean_m": 0.009756171640378269,
+    "mixed_p95_m": 0.037140232268802205,
+    "paint_geometry_equal_to_healthy": true
+  },
+  {
+    "time_s": 144.0,
+    "density_per_direction": 1024,
+    "definition": "area-sampled bidirectional separation of healthy and dent source counterexamples; NOT recovered accuracy",
+    "units": "m",
+    "local_surface_area_healthy_m2": 7.864895021450305,
+    "local_surface_area_dent_m2": 7.861502248732818,
+    "healthy_to_dent_mean_m": 0.010653043854458966,
+    "dent_to_healthy_mean_m": 0.010658148875138152,
+    "symmetric_mean_m": 0.01065559636479856,
+    "mixed_p95_m": 0.03740886814398165,
+    "paint_geometry_equal_to_healthy": true
+  },
+  {
+    "time_s": 144.4,
+    "density_per_direction": 512,
+    "definition": "area-sampled bidirectional separation of healthy and dent source counterexamples; NOT recovered accuracy",
+    "units": "m",
+    "local_surface_area_healthy_m2": 7.863979083522274,
+    "local_surface_area_dent_m2": 7.860600725335768,
+    "healthy_to_dent_mean_m": 0.009770701756884931,
+    "dent_to_healthy_mean_m": 0.009741497398106237,
+    "symmetric_mean_m": 0.009756099577495583,
+    "mixed_p95_m": 0.03714074519547865,
+    "paint_geometry_equal_to_healthy": true
+  },
+  {
+    "time_s": 144.4,
+    "density_per_direction": 1024,
+    "definition": "area-sampled bidirectional separation of healthy and dent source counterexamples; NOT recovered accuracy",
+    "units": "m",
+    "local_surface_area_healthy_m2": 7.863979083522274,
+    "local_surface_area_dent_m2": 7.860600725335768,
+    "healthy_to_dent_mean_m": 0.010652975619771092,
+    "dent_to_healthy_mean_m": 0.010658088881782532,
+    "symmetric_mean_m": 0.010655532250776811,
+    "mixed_p95_m": 0.03740892160652046,
+    "paint_geometry_equal_to_healthy": true
+  },
+  {
+    "time_s": 146.0,
+    "density_per_direction": 512,
+    "definition": "area-sampled bidirectional separation of healthy and dent source counterexamples; NOT recovered accuracy",
+    "units": "m",
+    "local_surface_area_healthy_m2": 7.868606984439353,
+    "local_surface_area_dent_m2": 7.865098710168615,
+    "healthy_to_dent_mean_m": 0.009770395583577732,
+    "dent_to_healthy_mean_m": 0.009741122888399994,
+    "symmetric_mean_m": 0.009755759235988863,
+    "mixed_p95_m": 0.037141167118311315,
+    "paint_geometry_equal_to_healthy": true
+  },
+  {
+    "time_s": 146.0,
+    "density_per_direction": 1024,
+    "definition": "area-sampled bidirectional separation of healthy and dent source counterexamples; NOT recovered accuracy",
+    "units": "m",
+    "local_surface_area_healthy_m2": 7.868606984439353,
+    "local_surface_area_dent_m2": 7.865098710168615,
+    "healthy_to_dent_mean_m": 0.010652668438018376,
+    "dent_to_healthy_mean_m": 0.010657704150178145,
+    "symmetric_mean_m": 0.01065518629409826,
+    "mixed_p95_m": 0.03740839423003618,
+    "paint_geometry_equal_to_healthy": true
+  }
+]

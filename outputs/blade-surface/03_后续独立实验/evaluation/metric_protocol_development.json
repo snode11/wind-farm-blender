@@ -1,0 +1,52 @@
+{
+  "schema": "p2b-independent-surface-metrics.v1",
+  "state": "FROZEN_DEVELOPMENT_METRIC_BEFORE_NEW_GEOMETRY_SCORING",
+  "coordinate_frame": "same MODEL meter; same committed source time",
+  "target_source_blade_index": 0,
+  "target_model_blade_index": 0,
+  "mapping": "source T1/B1 lower airfoil arc after MODEL flip corresponds to template blade0 upper arc; capture/evaluation only",
+  "source_side_indices": "source ring48 j=24..47 plus seam j0 for wrap47->0; root/tip excluded by xi bands",
+  "template_side_indices": "template ring32 j=0..16, upper arc; lateral triangles only",
+  "regions_xi": {
+    "inner": [
+      0.18,
+      0.35
+    ],
+    "middle": [
+      0.45,
+      0.65
+    ],
+    "outer": [
+      0.75,
+      0.92
+    ]
+  },
+  "region_rule": "exact linear clipping of each triangle by immutable reference material xi. Current MODEL z is not span. Global region is union of three bands.",
+  "metric": "bidirectional point-to-triangle surface distance; same correct side/region target meshes, no ICP/pose/scale alignment",
+  "sampler": {
+    "seed": 20261006,
+    "count_per_direction_region_or_global": 512,
+    "development_density_comparison_count": 1024,
+    "area_weighting": "each direction uniformly sampled by its own current mesh triangle area, internally normalized; directions weight .5/.5; same source samples per frame across all groups"
+  },
+  "aggregate": {
+    "per_frame_mean": "equal direction means; area weights inside each region/global union",
+    "clip_mean": "equal 8 frame means",
+    "test_mean": "equal3clips",
+    "p95": "quantile of equally mixed direction/time/clip distributions; not average of directional P95"
+  },
+  "q_eval": {
+    "points": 12,
+    "source": "same first WideInput RGB pixels on each frozen estimated blade0; nearest lateral ray hit; upper side enforced",
+    "geometry_update": false,
+    "fit_q_separate": true,
+    "miss_rule": "null explicit failure counts; no success-only denominators",
+    "frame_splits": [
+      "first_frame",
+      "subsequent_7_frames"
+    ]
+  },
+  "invalid_rule": "zero area/nonfinite/frame missing => failed/null, not0 or omitted; retain planned denominators",
+  "secondary_source_reference": "known synthetic marker vertices only independent evaluation, not source-rays to initialize solver; directsource and historicalray refs separate",
+  "noise_band": "delta_dev=max(P95 paired perturb gain difference, numericalmethod gain difference, density gain difference). delta_min=max(.005,2delta_dev), protection max(.25,dev projectionband). Bands are development sensitivity, not CI."
+}

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="720" viewBox="0 0 920 720">
+<rect width="920" height="720" fill="#fafbfc"/><g font-family="sans-serif" fill="#17212f">
+<text x="36" y="40" font-size="23">Dual-beam installation — metres</text>
+<text x="36" y="72" font-size="16">S1/S2/S3 = 10°/12°/14°; common emitter approximation; rest pose</text>
+<line x1="228.0" y1="650.0" x2="221.61" y2="124.40000000000009" stroke="#667085" stroke-width="4"/><line x1="210.0" y1="650.0" x2="210.0" y2="110.0" stroke="#aab1be" stroke-width="2"/><line x1="225.0" y1="124.71463999999992" x2="288.8454182875376" y2="486.8" stroke="#d42c44" stroke-width="2"/><line x1="225.0" y1="124.71463999999992" x2="301.9636191526522" y2="486.8" stroke="#247da5" stroke-width="2"/><line x1="225.0" y1="124.71463999999992" x2="315.2780196675541" y2="486.8" stroke="#9362c6" stroke-width="2"/><line x1="226.02" y1="486.8" x2="288.8454182875376" y2="486.8" stroke="#d42c44" stroke-width="3"/>
+<text x="330" y="125">Emitter z = 87.5 m; forward = 2.50 m; lateral = 0.00 m</text>
+<text x="330" y="450">Nominal tip z = 27.2 m; tower radius = 2.67 m</text>
+<text x="330" y="485">S1 radial wall gap = 10.471 m (includes lateral offset)</text>
+<text x="330" y="525">Reference target = 4.50 m; no forced numerical offset</text>
+<text x="330" y="560">Simulation mount selected; see saved-pose audit.</text>
+<text x="36" y="690">Equal-scale side projection; lateral offset annotated; physical installation not certified.</text>
+</g></svg>

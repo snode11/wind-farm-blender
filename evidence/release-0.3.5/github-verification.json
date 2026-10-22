@@ -1,0 +1,23 @@
+{
+  "url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.5",
+  "tag": "v0.3.5",
+  "published_at": "2026-09-20T04:39:11Z",
+  "commit": "1cf80582e99b146724590a10a281ed044a3ada4a",
+  "assets": [
+    {
+      "name": "wfrl_blender-0.3.5.inventory.json",
+      "size": 13452,
+      "digest": "sha256:e3e5617b05f0d71ba9cc589ae719bd68841f3aea438d58272852d63ce23bef2e"
+    },
+    {
+      "name": "wfrl_blender-0.3.5.zip",
+      "size": 41429028,
+      "digest": "sha256:709aa8151263b97bd1c89fb74f61f72c3becb0432a11677fe35643a40763aaa9"
+    },
+    {
+      "name": "wfrl_blender-0.3.5.zip.sha256",
+      "size": 89,
+      "digest": "sha256:08a5feefb24b3ece258f4eedc750628806b05557189f50f4113d30c211de2dd8"
+    }
+  ]
+}

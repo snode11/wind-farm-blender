@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "passed": 117,
+  "skipped": 1,
+  "subtests_passed": 6,
+  "skip_reason": "Original raw VTP file absent",
+  "warning": "Pillow getdata deprecation in existing test",
+  "scope": "Selected frontend host regression suite; not scientific precision acceptance",
+  "modules": [
+    "scene_playback_lifecycle",
+    "custom_cameras",
+    "custom_camera_preview",
+    "custom_camera_capture",
+    "custom_camera_v3",
+    "custom_camera_sidebar",
+    "nrel_defects",
+    "tip_deflection",
+    "frontend_diagnostics",
+    "extension_package"
+  ]
+}

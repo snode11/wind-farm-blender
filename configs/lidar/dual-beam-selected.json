@@ -1,0 +1,72 @@
+{
+  "schema": "wfrl.dual-beam-calibration.v1",
+  "id": "rotor-front-7p3-2p0-89p6-2-4-6-v1",
+  "status": "REJECTED_OUTSIDE_INNER_MOUNT",
+  "frame": "rest nacelle material frame, transported by source nacelle rotation and translation",
+  "origins_m": [
+    [
+      -7.3,
+      -2.0,
+      89.6
+    ],
+    [
+      -7.3,
+      -2.0,
+      89.6
+    ],
+    [
+      -7.3,
+      -2.0,
+      89.6
+    ]
+  ],
+  "common_origin_approximation": true,
+  "angles_deg": [
+    2.0,
+    4.0,
+    6.0
+  ],
+  "angle_basis": "user nominal angles from downward gravity vertical at rest, toward rotor; not manual relative angles",
+  "range_m": [
+    5.0,
+    100.0
+  ],
+  "range_basis": "inherited ideal-simulation range, not a hardware certification",
+  "min_point_separation_m": 0.25,
+  "min_orientation_projection_m": 0.01,
+  "threshold_basis": "fixed before source evaluation; conditioning guard, tested with independent analytic perturbations",
+  "effective_length_m": 63.00793600809346,
+  "length_basis": "norm([-1, 0, 63]) from independent unloaded prebend structural tip; hub centre includes HubRad=1.5 m, no per-frame fit",
+  "hub_source": "source nacelle pose and fixed turbine scalars",
+  "tower_input": "known same-time simulated deformed tower surface",
+  "blade_association": "simulation first-hit blade labels",
+  "expected_window_half_angle_deg": 15.0,
+  "expected_window_basis": "fixed before evaluation: each blade azimuth within 15 degrees of downward (180 degrees); full 60 s scanned regardless",
+  "measurement_hold_s": 1.0,
+  "alarm_hold_s": 1.0,
+  "alarm_reset": "simulation-time hold expires after last hit; unknown channel remains unknown and does not erase history; seeking recomputes prefix state",
+  "performance_tolerances": null,
+  "installation": {
+    "nominal_tip_height_m": 27.2,
+    "nominal_tower_radius_m": 2.67,
+    "target_gap_m": 4.5,
+    "note": "Optical simulation position selected for same-blade S2/S3 passage coverage, not by reconstruction error; nacelle-fixed front-side support requires separate engineering design.",
+    "mount_type": "rotor-front stationary optical simulation point",
+    "support_status": "PENDING_ENGINEERING",
+    "physical_installation_approved": false,
+    "reference_target_met": false
+  },
+  "selection": {
+    "criterion": "Same-blade pairs on every complete saved passage, then consecutive samples; no truth error fit",
+    "source_search": "outputs/dual-beam-mount-search-20260928/front-fine.json",
+    "search_sha256": "8ab6f3a1743a401a14d2038c033df975832fd30956adc79d85bd3e45ef2cd7b8",
+    "selected_complete_passages": 94,
+    "selected_covered_passages": 94,
+    "selected_min_consecutive_samples": 2,
+    "predefined_three_sample_target_met": false,
+    "sample_scope": "117-177s, 40Hz source saves; no continuous or out-of-segment guarantee",
+    "choice_note": "chosen over x=-7.2 to increase frontal body separation, despite fewer optical samples",
+    "rejected_reason": "User requires installation on the inner side between rotor and tower; this rotor-front external candidate is inadmissible.",
+    "selected_for_use": false
+  }
+}

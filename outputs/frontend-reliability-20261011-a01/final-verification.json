@@ -1,0 +1,85 @@
+{
+  "status": "PASS",
+  "date": "2026-10-11",
+  "scope": "requested fixes 1 and 2: native camera cleanup and stable same-source reconstruction refresh",
+  "publication": "LOCAL_UNPUBLISHED_REVISION",
+  "package": {
+    "archive": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/isolated/package/wfrl_blender-0.3.20+1.zip",
+    "sha256": "c7a085b5dcd76163b7589f014f706231d882251423e3281e268495b84b6b68c6",
+    "checksum": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/isolated/package/wfrl_blender-0.3.20+1.zip.sha256",
+    "inventory": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/isolated/package/wfrl_blender-0.3.20+1.inventory.json",
+    "package_id": "wfrl_blender",
+    "version": "0.3.20+1",
+    "file_count": 173
+  },
+  "host_tests": {
+    "passed": 217,
+    "subtests_passed": 113,
+    "warning": "existing Pillow getdata deprecation",
+    "environment": "/tmp/wfrl-fixes-20261011-tests/bin/python"
+  },
+  "reports": {
+    "isolated_package": {
+      "status": "PASS",
+      "path": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/isolated/package-validation.json",
+      "sha256": "9cb08f5a177c315316cf339e70ff41072a647d1eabd24595e680f9097d86d7f7"
+    },
+    "isolated_camera_window": {
+      "status": "PASS",
+      "path": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/camera-window-retry2/validation.json",
+      "sha256": "d3f1de61d374150ec7be197d4e0be4f5f94b0b13602835e18de366db40cbc032"
+    },
+    "isolated_reconstruction_window": {
+      "status": "PASS",
+      "path": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/reconstruction-window-retry1/reconstruction-workflow-window-validation.json",
+      "sha256": "49a8fdefde164277220fb686084303b68b2de107a09aef163bd15f988316f9f7"
+    },
+    "isolated_shared_context": {
+      "status": "PASS",
+      "path": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/shared-context-retry1/shared-context-validation.json",
+      "sha256": "3976d1fed193c4e5962ecbf7dde489d9fafc983c60dbfe171cc3bb91b7249fb9"
+    },
+    "daily_camera_window": {
+      "status": "PASS",
+      "path": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/daily-camera-window/validation.json",
+      "sha256": "b2f21d271da89b51e661d6797ef7b58aab747ffa7a1496b484f282efd1d01444"
+    },
+    "daily_reconstruction_window": {
+      "status": "PASS",
+      "path": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/daily-reconstruction-window/reconstruction-workflow-window-validation.json",
+      "sha256": "c00d82a31a79a9640b614a26fab1b21667ac337321a02de62a251f181e1033cb"
+    },
+    "daily_install_bytes": {
+      "status": "PASS",
+      "path": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/daily-install-verification.json",
+      "sha256": "d80923cb243377e429d03cc1eef22f4e228728cda20360b775e2145597abdfcf"
+    },
+    "preferences_restoration": {
+      "status": "PASS",
+      "path": "REPOSITORY_ROOT/outputs/frontend-reliability-20261011-a01/preferences-restoration.json",
+      "sha256": "f9879771baa760fda8be736f2ad86b4ec7f34a859e64824e411ec6b5688b51c8"
+    }
+  },
+  "stable_runtime": {
+    "refreshes": 20,
+    "full_rebind_calls": {
+      "_sources": 0,
+      "_existing": 0,
+      "_apply": 0
+    },
+    "identity_and_payload_preserved": true,
+    "scope": "paused native data refresh; not an FPS measurement"
+  },
+  "daily_installed_module": "bl_ext.user_default.wfrl_blender",
+  "daily_loaded_in_fresh_processes": true,
+  "protected_assets_unchanged_after_window_tests": true,
+  "original_preferences_restored_after_native_tests": true,
+  "existing_window_restart_required": true,
+  "evidence_limits": [
+    "visible-window behavior uses scripted Blender operators, not physical mouse input or monitor scanout",
+    "stable refresh counts are not measured FPS",
+    "no complete-clip performance, long-running or cross-platform acceptance",
+    "scientific NOT_ACCEPTED / FAILED_GATE boundaries unchanged"
+  ],
+  "publication_note": "Public portable copy; original evidence identities remain original. Software results apply only to the explicitly recorded local package."
+}

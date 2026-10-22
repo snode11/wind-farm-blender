@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "module_file": "<ISOLATED_ADDON>/__init__.py",
+  "missing_slot_preserves_camera": true,
+  "c3_identity_preserved": true,
+  "incomplete_analysis_rejected": true,
+  "restored_c2_selected": true
+}

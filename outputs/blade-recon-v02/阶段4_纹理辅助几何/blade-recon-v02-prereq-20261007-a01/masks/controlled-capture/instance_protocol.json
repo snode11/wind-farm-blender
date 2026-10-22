@@ -1,0 +1,49 @@
+{
+  "schema": "rgb-instance-gate.v1",
+  "classification": "RECORDED_MAPPO_BLENDER_SCENE_WITH_NEW_TARGET_ABSENT_RGB_REFERENCE",
+  "gates": {
+    "iou_min": 0.9,
+    "precision_min": 0.95,
+    "recall_min": 0.95,
+    "boundary_symmetric_mean_px_max": 1.5,
+    "boundary_symmetric_p95_px_max": 3.0
+  },
+  "planned_observations": 16,
+  "no_interior_contour_policy": "occupancy is scored by IoU/precision/recall; if both masks have no interior boundary, boundary score is NOT_APPLICABLE and geometry contour remains unavailable",
+  "scope": "visible T1 blade union, occlusion retained; not blade identity or field evidence",
+  "old_original_rgb_is_unchanged": true,
+  "new_RGB_condition": "128-sample Cycles denoising, same physical scene and same camera/frame/t; new independently captured RGB and background references",
+  "reference_condition": "same camera, illumination, background; target temporarily absent for independently acquired reference; not available from old four-frame RGB alone",
+  "truth_use": "evaluation only; never input to segmentation or solver",
+  "persistent_root_diagnostic": {
+    "cameras": "WideA/WideB",
+    "RGB_pixel_ROI": "annulus around principal point K[cx,cy], radius 12..60 original pixels",
+    "requirement": "report precision/recall separately; no material truth enters masks; no root completion inferred"
+  },
+  "RGB_tower_difference_diagnostic": {
+    "development_frames": [
+      42,
+      43
+    ],
+    "independent_parameter_score_frames": [
+      45,
+      47
+    ],
+    "manually_checked_static_RGB_ROI_frame42": {
+      "x_range": [
+        466,
+        477
+      ],
+      "y_range": [
+        520,
+        730
+      ]
+    },
+    "static_ROI_rgb_difference_max_WideA": 29.8994,
+    "static_ROI_rgb_difference_max_WideB": 36.7162,
+    "sky_RGB_difference_max": 0.2487,
+    "candidate_Wide_rgb_delta_min": 40.0,
+    "candidate_closeup_rgb_delta_min": 12.0,
+    "scope": "indirect illumination mismatch from target-absent reference; thresholds come from RGB pairs, not source silhouettes"
+  }
+}

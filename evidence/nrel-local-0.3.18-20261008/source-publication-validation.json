@@ -1,0 +1,43 @@
+{
+  "schema_version": "wfrl.release-source-verification.v1",
+  "date": "2026-10-08",
+  "source_commit": "6dfa0eefe410ef3e38d3cbd9ee7d017aafa2fc02",
+  "source_parent": "a63de6a92cf1a8908b0ddbe4779d7b559c46f936",
+  "repository": "https://github.com/snode11/wind-farm-blender",
+  "source_scope": "Matching extension implementation, 65 necessary packaged assets, build rules and selected regressions; unrelated dirty-worktree changes excluded.",
+  "source_changed_files": 87,
+  "rebuild": {
+    "command": "python3 scripts/blender/build_extension.py --output <NEW_OUTPUT>",
+    "status": "PASS",
+    "zip_members": 172,
+    "members_equal": true,
+    "archive_byte_equal": true,
+    "archive_sha256": "f5fb69e6e8cdc58edf1d1f76fd4eacc1e108b688768635cc3a5a05c04bdfc400",
+    "rebuilt_archive_sha256": "f5fb69e6e8cdc58edf1d1f76fd4eacc1e108b688768635cc3a5a05c04bdfc400",
+    "build_info_payload_sha256": "e98f64dcd090ba33f93e52bc1e0a26adeff82fb1828bc0239f49babc618a60b0"
+  },
+  "host_regression": {
+    "status": "PASS",
+    "passed": 215,
+    "skipped": 2,
+    "subtests_passed": 233,
+    "warning": "Existing Pillow Image.Image.getdata deprecation",
+    "skip_reasons": [
+      "Original VTP absent",
+      "Historical original comparison source absent"
+    ],
+    "log": "source-host-final.log",
+    "log_raw_sha256": "e029da6211359157549e181a20712e8bb075abdf8f87380bb53f32a6a63d218c",
+    "log_public_sha256": "1731894b48670be09b687ce62e2548bdf0e683d7591e5fbaac678c653c2b47ca",
+    "log_transformation": "Only local checkout root replaced with <RELEASE_CHECKOUT>; statuses and counts unchanged."
+  },
+  "format_validation": {
+    "status": "PASS",
+    "command": "git -c core.whitespace=cr-at-eol,-blank-at-eof diff --cached --check",
+    "reason": "Preserve the validated frozen CRLF payloads and final blank lines byte-for-byte; other whitespace checks remain enabled."
+  },
+  "prior_native_validation": "Final archive byte-identical to the artifact with saved isolated-install, Metal GPU and native playback validation; no new full-window acceptance run during publication.",
+  "scientific_precision": "FAILED_GATE",
+  "saved_gate_threshold_m": 0.0002,
+  "unrelated_original_worktree": "Preserved; publication used isolated checkout."
+}

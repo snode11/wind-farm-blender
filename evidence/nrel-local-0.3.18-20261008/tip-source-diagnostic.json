@@ -1,0 +1,36 @@
+{
+  "scope": "Independent SciPy rigid reference; saved source terminal-section transport; not Blender pixels",
+  "source_identity": {
+    "geometry.npz": "289abea277d8a4954836b53bc06a1afcc41d8098a6fabe99f74c7f2ebe4ebac1",
+    "deflection-t1.json": "08f7950203164b9a726b35a4d234d8cdc551590ddc900092daafb6fe01d97f61",
+    "data.json": "11088f05a90a81bac2b4ab964d837b942ee20b07984147c79c688e6fae9c14cf",
+    "tower-motion.npz": "a8450e914a052d1a79b50bc380023655bf97332c2776c3e8eceb37d2bcc80b86",
+    "blade-reference.json": "a3fb99709cdeb689917675d210defb434a37e3211838f047af23c69e3a292212"
+  },
+  "samples": 7203,
+  "threshold_m": 0.0002,
+  "physical_gate": "FAILED_GATE",
+  "source_max_error_m": {
+    "stored_sidecar_pose": [
+      0.000284289447180619,
+      0.0016154487763008485,
+      1.7854232433885814e-05
+    ],
+    "original_motion_pose": [
+      0.0002680394368583805,
+      0.0013515492922672456,
+      1.767758602088873e-05
+    ]
+  },
+  "maximum_pose_quantization_deg": [
+    4.982910084549985e-09,
+    0.0004882500070380047,
+    5.000000058430487e-08,
+    4.999999969612645e-09,
+    4.999999969612645e-09,
+    4.999999969612645e-09
+  ],
+  "original_source_available": false,
+  "raw_surface_validation": "SKIPPED_SOURCE_ABSENT",
+  "formal_package_modified": false
+}

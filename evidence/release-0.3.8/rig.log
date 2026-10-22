@@ -1,0 +1,8 @@
+CAMERA_CHECK {'camera': 'WFRL.Camera.T1.Custom.1', 'target_span_m': (0.0, 23.0), 'hfov': 77.90273115055132, 'vfov': 48.90386729285686, 'near_field_blocked_rays': {}, 'front_surface_samples': 87, 'visible_front_surface_samples': 82, 'surface_occluders': {'WFRL.Turbine.T1.Blade1.PitchSeal': 1, 'WFRL.Turbine.T1.Nacelle': 3, 'WFRL.Turbine.T1.NacelleCameraBracket': 1}}
+CAMERA_CHECK {'camera': 'WFRL.Camera.T1.Custom.2', 'target_span_m': (19.0, 44.0), 'hfov': 23.19407296373421, 'vfov': 13.169513316867015, 'near_field_blocked_rays': {}, 'front_surface_samples': 78, 'visible_front_surface_samples': 78, 'surface_occluders': {}}
+CAMERA_CHECK {'camera': 'WFRL.Camera.T1.Custom.3', 'target_span_m': (40.0, 61.5), 'hfov': 8.356034973962977, 'vfov': 4.705971055408892, 'near_field_blocked_rays': {}, 'front_surface_samples': 126, 'visible_front_surface_samples': 124, 'surface_occluders': {'WFRL.Turbine.T1.Blade1': 2}}
+STACKED_CAMERAS_PASS
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

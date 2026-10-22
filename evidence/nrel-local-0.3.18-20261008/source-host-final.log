@@ -1,0 +1,11 @@
+........................................................................ [ 33%]
+......................................s................................... [ 67%]
+.............................................s....... [ 91%]
+..................                                                       [100%]
+=============================== warnings summary ===============================
+blender_frontend/tests/test_custom_camera_capture.py::test_png_preserves_display_bytes_and_flips_only_rows
+  <RELEASE_CHECKOUT>/blender_frontend/tests/test_custom_camera_capture.py:22: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    assert list(image.getdata())==[(255,0,0,255),(0,255,0,255),(0,0,255,255),(17,91,143,128)]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+215 passed, 2 skipped, 1 warning, 233 subtests passed in 13.36s

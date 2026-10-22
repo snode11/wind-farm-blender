@@ -1,0 +1,29 @@
+{
+  "status": "ALL_JOB_GEOMETRIES_AND_Q_FROZEN_BEFORE_ANY_BATCH_TRUTH_READ",
+  "job_file_sha256": "35383d83800227bbe383390db264a016d4a256fdfdec30270053347198067aab",
+  "metric_protocol_sha256": "9211aef5bf13c02e6e614c33af4f90bfb985cbd77e1bf9a8a4050b71778b3b33",
+  "evaluation_code_sha256": "c10784e1c38c0278d5bc50f979a6a5ff4853f84643b5b8306d54b7d71be0e0b3",
+  "sampler_module_sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70",
+  "parallel_processes": 1,
+  "BLAS_threads": 1,
+  "jobs": [
+    {
+      "id": "automatic8",
+      "recon": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/automatic8/groups/A3_automatic/recon.json",
+      "q_eval": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/automatic8/groups/A3_automatic/q_eval_common_RGB.json",
+      "annotations": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/p2b/development/input/annotations.json",
+      "source_label": "development_heldout_pair",
+      "frames": [
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49
+      ],
+      "density": 512
+    }
+  ]
+}

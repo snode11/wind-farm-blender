@@ -1,0 +1,104 @@
+{
+  "synthetic/reconstruction": {
+    "sha256": "e24f25c470d1e6c7f3836fa3a47b334167f3f1ce90209868b084539da1ca16ee",
+    "frames": 12,
+    "success": 12,
+    "ranks": [
+      10
+    ],
+    "estimated_direction_nulls": 0,
+    "fixed_flap2_nulls": 36,
+    "psi_obs_std_deg_range": [
+      0.09614843506830544,
+      0.25602347381761525
+    ],
+    "pitch_obs_std_deg_range": [
+      1.6930647252876876,
+      20.72402286301025
+    ],
+    "flap_obs_std_m_range": [
+      0.08387331068632432,
+      9.332319537927152
+    ],
+    "edge_obs_std_m_range": [
+      0.23277402725604196,
+      1.0422261311054244
+    ],
+    "cost_range": [
+      40.92356873019219,
+      59.04164062635246
+    ],
+    "gradient_range": [
+      0.00014464990265139477,
+      0.02741338046484998
+    ]
+  },
+  "synthetic/capture2-reconstruction": {
+    "sha256": "f085de1462f2132436976542047a02d6bdf79735be2c16609bac38b8afa9ce1c",
+    "frames": 4,
+    "success": 4,
+    "ranks": [
+      10
+    ],
+    "estimated_direction_nulls": 0,
+    "fixed_flap2_nulls": 12,
+    "psi_obs_std_deg_range": [
+      0.17985569977904708,
+      0.2853114731606524
+    ],
+    "pitch_obs_std_deg_range": [
+      3.394507271833804,
+      20.571816997439893
+    ],
+    "flap_obs_std_m_range": [
+      0.11403690587316498,
+      9.317216012542012
+    ],
+    "edge_obs_std_m_range": [
+      0.47596049966857495,
+      1.074470692899044
+    ],
+    "cost_range": [
+      44.29613576853967,
+      50.73695466086909
+    ],
+    "gradient_range": [
+      0.001772981760723269,
+      0.025264609521698844
+    ]
+  },
+  "old-actual/reconstruction": {
+    "sha256": "6a836b4a4b8c7293f9b979e89e943b7bdb1da6d1c37ad48f1bfeea464e4ee163",
+    "frames": 4,
+    "success": 4,
+    "ranks": [
+      10
+    ],
+    "estimated_direction_nulls": 0,
+    "fixed_flap2_nulls": 12,
+    "psi_obs_std_deg_range": [
+      0.008374508167529486,
+      0.10611554174613036
+    ],
+    "pitch_obs_std_deg_range": [
+      2.4362253197451373,
+      5.4249571412863045
+    ],
+    "flap_obs_std_m_range": [
+      0.06573831907569884,
+      0.5245990459389815
+    ],
+    "edge_obs_std_m_range": [
+      0.0742459195550245,
+      0.3609498757382559
+    ],
+    "cost_range": [
+      113105.75757193386,
+      161544.09459948516
+    ],
+    "gradient_range": [
+      19.180661225191983,
+      123878.98276795488
+    ]
+  }
+}

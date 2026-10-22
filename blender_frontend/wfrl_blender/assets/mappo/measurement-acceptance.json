@@ -1,0 +1,71 @@
+{
+  "status": "FAILED_AVAILABILITY",
+  "budget": {
+    "status": "FROZEN_BEFORE_FULL_FARM_AND_ALGORITHM_COMPARISON",
+    "point_tolerance_m": 0.05,
+    "geometry_tolerance_m": 0.002,
+    "deflection_tolerance_m": 0.005,
+    "E95_m": 0.5,
+    "Emax_m": 1.0,
+    "Vmin_sample_fraction": 0.25,
+    "Vmin_passage_fraction": 0.9,
+    "target_host": "macOS arm64, Blender 5.2.1; Windows unverified",
+    "sampler_p95_budget_ms": 5,
+    "load_budget_s": 10,
+    "reason": {
+      "point": "5 cm is five displayed 0.01 m increments; classification changes always require handling",
+      "geometry": "Retain existing 2 mm surface-fit contract",
+      "deflection": "5 mm bounds reference/component mapping without treating it as field validation",
+      "error": "Internal demo: most valid observations within 0.5 m and none beyond 1 m; independent of threshold safety interpretation",
+      "validity": "At least 1 in 4 expected samples and 90% of passages; T1 baseline does not meet these and is not grandfathered",
+      "performance": "Sampler uses at most 5 ms of a 60 Hz frame budget; source scene load within 10 s",
+      "frame_p95": "Before full-package comparison: new playback P95 at most 20% above same-host legacy package with same runtime and sampling sequence. This is a regression bound, not a stable 60 FPS claim.",
+      "rss": "After warmup, peak RSS growth within 64 MiB across ten full-timeline traversals; no accumulating objects/curves/materials or trail points."
+    },
+    "baseline_status": "A fails sample/passage availability on T1 and exceeds E95 on T1; no compensation decision yet",
+    "frame_p95_relative_limit": 1.2,
+    "rss_growth_ten_loops_mib": 64
+  },
+  "statistics": {
+    "T1": {
+      "expected": 118,
+      "valid": 7,
+      "valid_fraction": 0.059322033898305086,
+      "passages": 33,
+      "missed_passages": 27,
+      "mae_m": 0.2070477641201667,
+      "p95_m": 0.28816001875776287,
+      "max_abs_m": 0.290917845238579,
+      "max_overestimate_m": 0.0,
+      "signed_min_m": -0.290917845238579,
+      "signed_max_m": -0.12398061746825295
+    },
+    "T2": {
+      "expected": 117,
+      "valid": 27,
+      "valid_fraction": 0.23076923076923078,
+      "passages": 33,
+      "missed_passages": 9,
+      "mae_m": 0.11147391687592151,
+      "p95_m": 0.22717174099742898,
+      "max_abs_m": 0.2665664222316577,
+      "max_overestimate_m": 0.11530560493915587,
+      "signed_min_m": -0.2665664222316577,
+      "signed_max_m": 0.11530560493915587
+    },
+    "T3": {
+      "expected": 121,
+      "valid": 27,
+      "valid_fraction": 0.2231404958677686,
+      "passages": 28,
+      "missed_passages": 5,
+      "mae_m": 0.1081562006528726,
+      "p95_m": 0.20556792501952195,
+      "max_abs_m": 0.21824961192458314,
+      "max_overestimate_m": 0.04708945557379085,
+      "signed_min_m": -0.21824961192458314,
+      "signed_max_m": 0.04708945557379085
+    }
+  },
+  "decision": "Original calibration retained as explicit failed-coverage baseline; no truth-filled or synthetic replacement measurements; original formula errors evaluated only on valid samples."
+}

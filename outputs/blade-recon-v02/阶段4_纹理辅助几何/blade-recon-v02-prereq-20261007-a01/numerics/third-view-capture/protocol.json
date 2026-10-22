@@ -1,0 +1,157 @@
+{
+  "status": "FIXED_BEFORE_TRUTH_RENDER_AND_NEW_SOLVE",
+  "classification": "NEW_SYNTHETIC_GLOBAL_SIDE_OBSERVATION_CONDITION",
+  "camera_design": "static healthy hub/rotor only: hub-130*n+150*e_lat, aim hub, up rotor.e_up; no defect target, source state or ROI used",
+  "camera": {
+    "name": "GlobalSide",
+    "W": 2400,
+    "H": 2200,
+    "K": [
+      [
+        3150.0,
+        0.0,
+        1199.5
+      ],
+      [
+        0.0,
+        3150.0,
+        1099.5
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "T_cv_from_model": [
+      [
+        -0.7528134576810304,
+        -0.6549305384178419,
+        -0.06586264329684309,
+        9.691705185121043
+      ],
+      [
+        0.08715574274765817,
+        -1.3877787807814457e-17,
+        -0.9961946980917455,
+        89.22174411451881
+      ],
+      [
+        0.6524383299902263,
+        -0.7556890827898175,
+        0.05708095752393069,
+        190.09485458568716
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "healthy_phase_framing": [
+    {
+      "healthy_phase_deg": 0.0,
+      "u_range": [
+        482.6441400498237,
+        1672.6124209563222
+      ],
+      "v_range": [
+        98.89827752891051,
+        1733.6221334682155
+      ],
+      "min_depth_m": 156.90493834338662,
+      "all_in_frame": true
+    },
+    {
+      "healthy_phase_deg": 30.0,
+      "u_range": [
+        823.9744516599264,
+        1730.8196029891824
+      ],
+      "v_range": [
+        112.47688240900538,
+        2084.4427173355516
+      ],
+      "min_depth_m": 174.15046109445157,
+      "all_in_frame": true
+    },
+    {
+      "healthy_phase_deg": 60.0,
+      "u_range": [
+        485.7610790639111,
+        1673.7008082135724
+      ],
+      "v_range": [
+        459.0524814299255,
+        2101.5806736362997
+      ],
+      "min_depth_m": 157.04258366204473,
+      "all_in_frame": true
+    },
+    {
+      "healthy_phase_deg": 90.0,
+      "u_range": [
+        341.2223339015834,
+        1498.8622122083634
+      ],
+      "v_range": [
+        324.49923607481503,
+        1878.257214626719
+      ],
+      "min_depth_m": 150.71428813300628,
+      "all_in_frame": true
+    }
+  ],
+  "frame_ids": [
+    2,
+    4,
+    6,
+    8,
+    11,
+    14,
+    17,
+    20,
+    23,
+    26,
+    29,
+    32
+  ],
+  "times": [
+    0.2,
+    0.4,
+    0.6,
+    0.8,
+    1.1,
+    1.4,
+    1.7,
+    2.0,
+    2.3,
+    2.6,
+    2.9,
+    3.2
+  ],
+  "pilot_D6_frame_ids": [
+    8,
+    20,
+    32
+  ],
+  "input_preservation": "original Global/Inspection RGB/mask/K/T/frame/t unchanged copied/hardlinked; side new RGB generated separately",
+  "mask_method": "recon.segment(gray): real generated RGB only; ideal raster mask evaluation-only",
+  "noise_sigma_gray": 1.0,
+  "noise_seed_rule": "67453+frame",
+  "solver_source_sha256": "b00e0694938228cbede4b20435f2e4b57558303c9eac51d24a9962473d5924ea",
+  "solver_initial_max_nfev": 150,
+  "solver_tracking_max_nfev": 60,
+  "heldout": "old Check every original frame remains excluded from fit/fusion",
+  "gates": {
+    "core_coverage_min": 0.9,
+    "contrast_keep_min": 0.5,
+    "crack_centroid_boundary_m_max": 0.05,
+    "patch_centroid_boundary_m_max": 0.1,
+    "independent_correspondence_P95_px_max": 1.0,
+    "planned_correspondence_accept_fraction_min": 0.9
+  },
+  "scope": "observation redesign diagnosis; must not replace original 12-frame failure status; no texture geometry residual/no FAST.Farm"
+}

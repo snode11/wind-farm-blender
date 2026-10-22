@@ -1,0 +1,101 @@
+{
+  "status": "CAPTURE_ROLE_AUDIT_WITH_EXPLICIT_SCOPE",
+  "actual_source_identities": [
+    {
+      "label": "candidate_first_frames01",
+      "source_identity_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/private_evaluation/candidate_first_frames01/source_identity.json",
+      "source_identity_sha256": "7e1985bab243b87763827532bd8a2c9986ac5b9683dba7376714635c93304d68",
+      "native_scene_sha256": "1f1ff1d5211c54bd513eb272e4c1d3d99dffe6df5d1a4e511d5cff4566cf1328",
+      "full_formal_Python_native_declared_read_audit_path": null,
+      "read_audit_scope_limitation": "Earlier captures have declared source/module identity, not complete syscall trace"
+    },
+    {
+      "label": "candidate_second_frames",
+      "source_identity_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/private_evaluation/candidate_second_frames/source_identity.json",
+      "source_identity_sha256": "7e1985bab243b87763827532bd8a2c9986ac5b9683dba7376714635c93304d68",
+      "native_scene_sha256": "1f1ff1d5211c54bd513eb272e4c1d3d99dffe6df5d1a4e511d5cff4566cf1328",
+      "full_formal_Python_native_declared_read_audit_path": null,
+      "read_audit_scope_limitation": "Earlier captures have declared source/module identity, not complete syscall trace"
+    },
+    {
+      "label": "chromatic_mask_negative",
+      "source_identity_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/private_evaluation/chromatic_mask_negative/source_identity.json",
+      "source_identity_sha256": "7e1985bab243b87763827532bd8a2c9986ac5b9683dba7376714635c93304d68",
+      "native_scene_sha256": "1f1ff1d5211c54bd513eb272e4c1d3d99dffe6df5d1a4e511d5cff4566cf1328",
+      "full_formal_Python_native_declared_read_audit_path": null,
+      "read_audit_scope_limitation": "Earlier captures have declared source/module identity, not complete syscall trace"
+    },
+    {
+      "label": "development_heldout_pair",
+      "source_identity_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/private_evaluation/development_heldout_pair/source_identity.json",
+      "source_identity_sha256": "6b6bc2f8c7084853117342581d5769e38e770a69d3455b2be89529786e608ad3",
+      "native_scene_sha256": "1f1ff1d5211c54bd513eb272e4c1d3d99dffe6df5d1a4e511d5cff4566cf1328",
+      "full_formal_Python_native_declared_read_audit_path": null,
+      "read_audit_scope_limitation": "Earlier captures have declared source/module identity, not complete syscall trace"
+    },
+    {
+      "label": "development_window01",
+      "source_identity_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/private_evaluation/development_window01/source_identity.json",
+      "source_identity_sha256": "7e1985bab243b87763827532bd8a2c9986ac5b9683dba7376714635c93304d68",
+      "native_scene_sha256": "1f1ff1d5211c54bd513eb272e4c1d3d99dffe6df5d1a4e511d5cff4566cf1328",
+      "full_formal_Python_native_declared_read_audit_path": null,
+      "read_audit_scope_limitation": "Earlier captures have declared source/module identity, not complete syscall trace"
+    },
+    {
+      "label": "formal_test01",
+      "source_identity_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/private_evaluation/formal_test01/source_identity.json",
+      "source_identity_sha256": "89599cb5a13b041462131a1ee80495eb7da8f8b2032cb3e07b2eea7d21ad00a6",
+      "native_scene_sha256": "1f1ff1d5211c54bd513eb272e4c1d3d99dffe6df5d1a4e511d5cff4566cf1328",
+      "full_formal_Python_native_declared_read_audit_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/private_evaluation/formal_test01/read_audit.json",
+      "read_audit_scope_limitation": "Earlier captures have declared source/module identity, not complete syscall trace"
+    },
+    {
+      "label": "formal_test02",
+      "source_identity_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/private_evaluation/formal_test02/source_identity.json",
+      "source_identity_sha256": "89599cb5a13b041462131a1ee80495eb7da8f8b2032cb3e07b2eea7d21ad00a6",
+      "native_scene_sha256": "1f1ff1d5211c54bd513eb272e4c1d3d99dffe6df5d1a4e511d5cff4566cf1328",
+      "full_formal_Python_native_declared_read_audit_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/private_evaluation/formal_test02/read_audit.json",
+      "read_audit_scope_limitation": "Earlier captures have declared source/module identity, not complete syscall trace"
+    },
+    {
+      "label": "formal_test03",
+      "source_identity_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/private_evaluation/formal_test03/source_identity.json",
+      "source_identity_sha256": "89599cb5a13b041462131a1ee80495eb7da8f8b2032cb3e07b2eea7d21ad00a6",
+      "native_scene_sha256": "1f1ff1d5211c54bd513eb272e4c1d3d99dffe6df5d1a4e511d5cff4566cf1328",
+      "full_formal_Python_native_declared_read_audit_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/private_evaluation/formal_test03/read_audit.json",
+      "read_audit_scope_limitation": "Earlier captures have declared source/module identity, not complete syscall trace"
+    },
+    {
+      "label": "long_development48",
+      "source_identity_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/private_evaluation/long_development48/source_identity.json",
+      "source_identity_sha256": "7e1985bab243b87763827532bd8a2c9986ac5b9683dba7376714635c93304d68",
+      "native_scene_sha256": "1f1ff1d5211c54bd513eb272e4c1d3d99dffe6df5d1a4e511d5cff4566cf1328",
+      "full_formal_Python_native_declared_read_audit_path": null,
+      "read_audit_scope_limitation": "Earlier captures have declared source/module identity, not complete syscall trace"
+    },
+    {
+      "label": "test_first_frame_candidates",
+      "source_identity_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/private_evaluation/test_first_frame_candidates/source_identity.json",
+      "source_identity_sha256": "7e1985bab243b87763827532bd8a2c9986ac5b9683dba7376714635c93304d68",
+      "native_scene_sha256": "1f1ff1d5211c54bd513eb272e4c1d3d99dffe6df5d1a4e511d5cff4566cf1328",
+      "full_formal_Python_native_declared_read_audit_path": null,
+      "read_audit_scope_limitation": "Earlier captures have declared source/module identity, not complete syscall trace"
+    },
+    {
+      "label": "test_first_frame_candidates_v2",
+      "source_identity_path": "REPOSITORY_ROOT/outputs/blade-surface-20261006-exec-a01/private_evaluation/test_first_frame_candidates_v2/source_identity.json",
+      "source_identity_sha256": "7e1985bab243b87763827532bd8a2c9986ac5b9683dba7376714635c93304d68",
+      "native_scene_sha256": "1f1ff1d5211c54bd513eb272e4c1d3d99dffe6df5d1a4e511d5cff4566cf1328",
+      "full_formal_Python_native_declared_read_audit_path": null,
+      "read_audit_scope_limitation": "Earlier captures have declared source/module identity, not complete syscall trace"
+    }
+  ],
+  "RGB_only_reader_audits": [
+    "development_window01/rgb_junction_review/anonymous_rgb_candidates.json",
+    "development_window01/rgb_junction_review/localization_repeatability.json",
+    "long32_public_bundle/read_audit.json",
+    "development_window01/public_input/mask_manifest.json"
+  ],
+  "no_geometry_scores_read": true,
+  "solver_tracking_access_control": "Separate root-enforced system sandbox; cannot be inferred from this source identity ledger"
+}

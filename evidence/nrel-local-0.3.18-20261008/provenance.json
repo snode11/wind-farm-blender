@@ -1,0 +1,167 @@
+{
+  "schema_version": "wfrl.curated-documentation-evidence.v1",
+  "date": "2026-10-08",
+  "publication": "LOCAL_ONLY_UNPUBLISHED",
+  "scope": "Selected final local 0.3.18 software validation and retained failed precision gate; not a new test run or code/package publication.",
+  "local_source_directory": "outputs/nrel-all-fixes-20261008-a01 (local provenance, not a published repository directory)",
+  "path_tokens": {
+    "<LOCAL_REPO>": "Local working repository; implementation and test files are not published by this documentation commit.",
+    "<LOCAL_EVIDENCE>": "Local authoritative evidence directory; archives, profiles and backup installations are excluded.",
+    "<ISOLATED_ADDON>": "Actual isolated installed bl_ext.wfrl_frontend.wfrl_blender root; not workspace-source import.",
+    "<DAILY_ADDON>": "Actual Blender 5.2 user_default installed extension root, module bl_ext.user_default.wfrl_blender.",
+    "<TEMP_SCENE>": "Temporary scene directory used by installed precision regression."
+  },
+  "omissions": "No ZIP, .blend, Python, profile, backups, raw captures or dirty-worktree inventory. Local archive names and hashes identify tested artifacts but are not download links.",
+  "files": [
+    {
+      "public_file": "result.json",
+      "local_source": "result.json",
+      "source_sha256": "1276e78f831c4f4fea9db921dd4318136a8bd872054a0ba4d635fc6cfde5aaee",
+      "public_sha256": "e6ef57d673cecff7a98f282c1a696f3a051bd41325d5f56242387f793134a5ed",
+      "selected_top_level_fields": null,
+      "omitted_top_level_fields": [
+        "final_ui"
+      ],
+      "transformation": "Only field selection and documented path-token replacement; numeric, status and hash values unchanged.",
+      "omitted_nested_fields": [
+        "daily_installation.rollback_original",
+        "daily_installation.rollback_snapshot"
+      ]
+    },
+    {
+      "public_file": "daily-installation.json",
+      "local_source": "daily-installation.json",
+      "source_sha256": "ea04b7771d244f27d755e54f784c28dfaafdce8aa53e89f604bcdda18b364e67",
+      "public_sha256": "59446d5799ea8a474027edb7b1ecb3094da75b23d4b33a01906a810898ecdc49",
+      "selected_top_level_fields": null,
+      "omitted_top_level_fields": [
+        "rollback_original",
+        "rollback_snapshot"
+      ],
+      "transformation": "Only field selection and documented path-token replacement; numeric, status and hash values unchanged."
+    },
+    {
+      "public_file": "host-final.json",
+      "local_source": "validation/host-final.json",
+      "source_sha256": "71fbecfd5e44a00006237bfd5ac3ecea39f7d0e743f3ff7da04af17065f006bf",
+      "public_sha256": "1542f2a75af3671fa6a269d412480b5a3a63db3cb483541e4343bab3e21449a5",
+      "selected_top_level_fields": null,
+      "omitted_top_level_fields": [],
+      "transformation": "Only field selection and documented path-token replacement; numeric, status and hash values unchanged."
+    },
+    {
+      "public_file": "package-validation.json",
+      "local_source": "validation/installed-final/package-validation.json",
+      "source_sha256": "c9a2fb9b1cf1608720aa453f7ecf0ffb9b95630a4ad073a59af4f90d3fb6f0ee",
+      "public_sha256": "a5af02ada005c86e2af27ce8c9147d377cf0ff3cfd00a55c2ccc1a29791ce7ee",
+      "selected_top_level_fields": [
+        "schema_version",
+        "status",
+        "module",
+        "commands",
+        "checks",
+        "build_only",
+        "scope",
+        "package",
+        "installation",
+        "background_regressions",
+        "visible_ui",
+        "actual_presentation"
+      ],
+      "omitted_top_level_fields": [],
+      "transformation": "Only field selection and documented path-token replacement; numeric, status and hash values unchanged."
+    },
+    {
+      "public_file": "gpu-window.json",
+      "local_source": "validation/installed-final/gpu-window/result.json",
+      "source_sha256": "69c3196c98747746fff459dcfb55fd044bd0b8316b1bb1d4a163d3ffbfd6a6ea",
+      "public_sha256": "86b6c626fd83bd6161f2d34ca27a255bd66c3d7057cd1bf3d9967140ddbe5046",
+      "selected_top_level_fields": null,
+      "omitted_top_level_fields": [],
+      "transformation": "Only field selection and documented path-token replacement; numeric, status and hash values unchanged."
+    },
+    {
+      "public_file": "playback-window.json",
+      "local_source": "validation/installed-final/playback-window/window-checks.json",
+      "source_sha256": "9ea8cc3d8b53fcf778b388511c872857b31cfe5143e65d51376142505e77c98b",
+      "public_sha256": "757f0888fed02248449519460e495d36d159037e731d5c173f34b7bb64dab6b1",
+      "selected_top_level_fields": null,
+      "omitted_top_level_fields": [],
+      "transformation": "Only field selection and documented path-token replacement; numeric, status and hash values unchanged."
+    },
+    {
+      "public_file": "daily-window.json",
+      "local_source": "validation/daily-window-final/window-checks.json",
+      "source_sha256": "410e22baa62c3963751af89af17699bcfa3dfec8c5fe61fdb14302a2a528a20c",
+      "public_sha256": "64fb373de25e7fd004060a8369f3169e35ec87942cefc9ff11075bae7f5bddea",
+      "selected_top_level_fields": null,
+      "omitted_top_level_fields": [],
+      "transformation": "Only field selection and documented path-token replacement; numeric, status and hash values unchanged."
+    },
+    {
+      "public_file": "tip-installed.json",
+      "local_source": "validation/installed-final/native/tip/tip.json",
+      "source_sha256": "aefaa1695fcdfe210227d709a1903cb4264dbd4cf188a69b103f305995c153f3",
+      "public_sha256": "0a93f6126ddfb6662914da382c82073561a61088c043e5519209bcba806d15fa",
+      "selected_top_level_fields": null,
+      "omitted_top_level_fields": [],
+      "transformation": "Only field selection and documented path-token replacement; numeric, status and hash values unchanged."
+    },
+    {
+      "public_file": "tip-source-diagnostic.json",
+      "local_source": "validation/tip-source/tip-source-diagnostic-after.json",
+      "source_sha256": "2ca24b3c8f9b279aedba5a79f7dd271429dfea2398bfb60221054263445cc117",
+      "public_sha256": "b2942a566562a597d237d88dba2215b90f8b105b424bcdb55001f641031c629a",
+      "selected_top_level_fields": null,
+      "omitted_top_level_fields": [],
+      "transformation": "Only field selection and documented path-token replacement; numeric, status and hash values unchanged."
+    },
+    {
+      "public_file": "scene-lifecycle.json",
+      "local_source": "validation/installed-final/native/lifecycle/checks.json",
+      "source_sha256": "5581123139d1a26a55ecef3e1412a2fff80736fc19927be24426e0778f3811dd",
+      "public_sha256": "d86fea3c1a8d3a1a6006077f02fd6a7b8ae47bb15bfa8248bb21434e6f9112bc",
+      "selected_top_level_fields": null,
+      "omitted_top_level_fields": [],
+      "transformation": "Only field selection and documented path-token replacement; numeric, status and hash values unchanged."
+    },
+    {
+      "public_file": "camera-slots.json",
+      "local_source": "validation/installed-final/native/camera-slots/camera-slots.json",
+      "source_sha256": "4f564b04757079adce171fc0dda38619c7a73b3e9b0631d2189f504b7a611bc4",
+      "public_sha256": "a750be0bed863f4bcf33d9df5b9a7ff0f134c2f25b17f3bc8796eb92a9ac344b",
+      "selected_top_level_fields": null,
+      "omitted_top_level_fields": [],
+      "transformation": "Only field selection and documented path-token replacement; numeric, status and hash values unchanged."
+    },
+    {
+      "public_file": "camera-guard.json",
+      "local_source": "validation/installed-final/native/camera-guard/result.json",
+      "source_sha256": "94b03eac6a6d72732ed7fedf7066ff4a4e8e695e311e6dc3b9abcdb24d67687b",
+      "public_sha256": "c93e313b50601c06b3a44030eb596ba0c174f5d9badd564d3a859d9157d88ead",
+      "selected_top_level_fields": null,
+      "omitted_top_level_fields": [],
+      "transformation": "Only field selection and documented path-token replacement; numeric, status and hash values unchanged."
+    },
+    {
+      "public_file": "tip-installed.log",
+      "local_source": "validation/installed-final/native/tip/blender.log",
+      "source_sha256": "ff63435a41afceac9d9f78c2d04748724509f1eff8e614a772f168d558173022",
+      "public_sha256": "db093b131af0a8cbc11cadc5763a3d936fa2fc0dfbb1788eb0629aa6f44c542e",
+      "transformation": "Path-token replacement; one temporary scene path normalized; all results, assertion failure and exit-memory diagnostic preserved."
+    }
+  ],
+  "authority_documents": [
+    {
+      "local_source": "修复记录.md",
+      "source_sha256": "7d61572257db66b51f7aad89907d20395905f7482a0c94f20c56b0ff0de9b9fa",
+      "publication": "Summarized in docs/blender/validation/NREL本地0.3.18修复与验证.md; not copied with local backup/archive links."
+    },
+    {
+      "local_source": "validation/tip-source/tip-findings.md",
+      "source_sha256": "c9252ad2a60ee25d6c90b2ed0e825e1df9e50093c583ccb93f09c61e7f1b8aab",
+      "publication": "Summarized in docs/blender/validation/NREL本地0.3.18修复与验证.md; not copied with local backup/archive links."
+    }
+  ],
+  "publication_context": "Historical LOCAL_ONLY_UNPUBLISHED identity at validation time. Later 0.3.18 ZIP and source publication is recorded separately in publication.json; source-publication-validation.json and source-host-final.log have their own provenance fields."
+}

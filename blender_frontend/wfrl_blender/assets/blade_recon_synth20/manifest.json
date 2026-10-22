@@ -1,0 +1,33 @@
+{
+  "schema": "wfrl.blade-recon-provenance.v1",
+  "source_classification": "SYNTHETIC",
+  "source_label": "SYNTHETIC · synth20 · original blade_recon saved reconstruction",
+  "description": "Existing boss-algorithm reconstruction of synthetic three-camera videos. Truth is optional comparison only and is not used to generate reconstructed geometry.",
+  "source_project": "/Users/eason/Desktop/wfcrl/blade_recon",
+  "source_run": "/Users/eason/Desktop/wfcrl/blade_recon/out/trial-20261004",
+  "files": {
+    "recon.json": {
+      "source_path": "/Users/eason/Desktop/wfcrl/blade_recon/out/trial-20261004/synth20/recon.json",
+      "sha256": "ee9aba1550d61b919fb435a266fa8efd01fe45f66538263aacbb17bf0bc91277",
+      "size_bytes": 341600
+    },
+    "truth.json": {
+      "source_path": "/Users/eason/Desktop/wfcrl/blade_recon/data/synth20/truth.json",
+      "sha256": "fe9bbadea62d6925e111952e68199c4447ed1bc551068f45f26619b5748f83f2",
+      "size_bytes": 69181
+    },
+    "cameras.json": {
+      "source_path": "/Users/eason/Desktop/wfcrl/blade_recon/data/synth20/cameras.json",
+      "sha256": "12bd1e4cb6d4d354f5cbc995392e0b85fbab73c1c28fc7ab421f9d8d92eb5552",
+      "size_bytes": 2252
+    }
+  },
+  "model": {
+    "source_path": "/Users/eason/Desktop/wfcrl/blade_recon/model.py",
+    "bundled_path": "../../_vendor/blade_recon/model.py",
+    "sha256": "9253fdfb7bb1e76790129511a24b98311c08c7c14a2a54b0c012d260842b888c",
+    "copy_policy": "byte-identical; no solver or forward-model changes"
+  },
+  "geometry_policy": "Saved state -> original model.Rotor.forward; observed_sections is preserved as image-constrained versus model-inferred coverage",
+  "truth_policy": "Optional SYNTHETIC truth, aligned by original frame id and matching time; never used to fill reconstruction values"
+}

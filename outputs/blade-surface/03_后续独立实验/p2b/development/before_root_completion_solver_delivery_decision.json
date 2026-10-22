@@ -1,0 +1,20 @@
+{
+  "solver_source_truth_reads": false,
+  "development_main_actual4": 4,
+  "negative_actual4": 4,
+  "method_sensitivity_actual2": 2,
+  "paired_actual_expected60": {
+    "A3_C4": 20,
+    "A3_D4": 20,
+    "A3_D12": 20
+  },
+  "paired_actual_completed": 60,
+  "paired_A1_reused_identical20_new_optimizer_runs0": 20,
+  "automatic8_actual1": 1,
+  "long32_actual_expected4": 0,
+  "development_numerical_method_gate": "PASS",
+  "long_numerical_gate": "RUNNING_FINITE4_MATRIX",
+  "formal_tests": "NOT_YET_ALL12_FROZEN",
+  "geometry_benefit_accuracy": "root independent evaluation; never read by solver",
+  "observer_source_free": true
+}

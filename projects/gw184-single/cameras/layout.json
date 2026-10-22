@@ -1,0 +1,53 @@
+{
+  "schema": "gw184.cameras.v2",
+  "sensor_mm": [
+    7.68,
+    4.32
+  ],
+  "lens_mm": 8.0,
+  "resolution": [
+    3840,
+    2160
+  ],
+  "center_relative_hub_m": [
+    11.0,
+    0.0,
+    2.8
+  ],
+  "vertical_spacing_m": 0.08,
+  "housing_size_m": [
+    0.16,
+    0.22,
+    0.34
+  ],
+  "cameras": [
+    {
+      "name": "C1",
+      "yaw_deg": 180.0,
+      "pitch_deg": 17.0,
+      "roll_deg": 90.0,
+      "region": "root and inner blade"
+    },
+    {
+      "name": "C2",
+      "yaw_deg": 180.0,
+      "pitch_deg": 53.0,
+      "roll_deg": 90.0,
+      "region": "middle blade, including 45 m defects at operating overhead passage"
+    },
+    {
+      "name": "C3",
+      "yaw_deg": 180.0,
+      "pitch_deg": 76.0,
+      "roll_deg": 90.0,
+      "region": "outer blade and tip, with overlap onto middle blade"
+    }
+  ],
+  "assumptions": [
+    "C2 optical centre is 11 m behind hub along X, 0.8 m above assumed nacelle roof; measurement datum unconfirmed.",
+    "Centres stacked at 80 mm pitch in a shared housing; body is behind optical centres with an ideal open front/top aperture.",
+    "Roll=90 deg puts long sensor edge along blade span without changing 3840x2160 output.",
+    "Static directions, no tracking, zoom, image crop or hidden turbine geometry; mounting and lens aperture are not mechanical validation."
+  ],
+  "direction_decision": "2026-09-29: user delegates suitable fixed views of three blade regions; no mandatory 30-degree yaw/pitch."
+}

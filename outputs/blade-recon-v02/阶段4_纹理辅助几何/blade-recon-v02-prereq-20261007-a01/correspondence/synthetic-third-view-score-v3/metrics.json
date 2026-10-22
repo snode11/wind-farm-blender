@@ -1,0 +1,1326 @@
+{
+  "classification": "SYNTHETIC_IDEAL_INSPECTION",
+  "tracks": [
+    {
+      "track_id": "D1",
+      "anchor_frame": 2,
+      "anchor_binding_coverage": 1.0,
+      "planned_independent_observations": 5,
+      "accepted_observations": 5,
+      "accepted_fraction": 1.0,
+      "cross_frame_validation_available": true,
+      "same_track_heldout_available": true,
+      "status": "PASS",
+      "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator"
+    },
+    {
+      "track_id": "D2",
+      "anchor_frame": 4,
+      "anchor_binding_coverage": 1.0,
+      "planned_independent_observations": 5,
+      "accepted_observations": 5,
+      "accepted_fraction": 1.0,
+      "cross_frame_validation_available": true,
+      "same_track_heldout_available": true,
+      "status": "PASS",
+      "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator"
+    },
+    {
+      "track_id": "D3",
+      "anchor_frame": 6,
+      "anchor_binding_coverage": 1.0,
+      "planned_independent_observations": 5,
+      "accepted_observations": 5,
+      "accepted_fraction": 1.0,
+      "cross_frame_validation_available": true,
+      "same_track_heldout_available": true,
+      "status": "PASS",
+      "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator"
+    },
+    {
+      "track_id": "D6",
+      "anchor_frame": 8,
+      "anchor_binding_coverage": 1.0,
+      "planned_independent_observations": 5,
+      "accepted_observations": 5,
+      "accepted_fraction": 1.0,
+      "cross_frame_validation_available": true,
+      "same_track_heldout_available": true,
+      "status": "PASS",
+      "identity_policy": "one fixed reconstructed blade/face/bary binding; no reset/reacquisition; invalid and RGB missing retain denominator"
+    }
+  ],
+  "observations": [
+    {
+      "track_id": "D1",
+      "frame": 2,
+      "t": 0.2,
+      "camera": "Inspection",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "cbb0b5928844df757c03d6f6c211d0025488dcaf44047f0e3f6c6c7a96745cec",
+      "anchor": true,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 1.8127614929542202e-11,
+      "centroid_shift_px": 1.3985329484054982e-11,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D1_Inspection_2_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D1_Inspection_2_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D1",
+      "frame": 11,
+      "t": 1.1,
+      "camera": "Inspection",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "7dfa335da947bb84641a7aeb9c30c46305778d355554beb9b7f39017fa3ac9ae",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.5056158689833855,
+      "centroid_shift_px": 0.4476708677204935,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D1_Inspection_11_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D1_Inspection_11_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D1",
+      "frame": 23,
+      "t": 2.3,
+      "camera": "Inspection",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "ed84d57b099af54a441c35a711c127c94f1ad6b80d3f2e7df7ba2efa40cc92cb",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.1898069046554535,
+      "centroid_shift_px": 0.29826777477055155,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D1_Inspection_23_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D1_Inspection_23_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D1",
+      "frame": 2,
+      "t": 0.2,
+      "camera": "Check",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "73d82294e0970023e5e46c9fa6f10e9bb158c335728035c797485efd889809fb",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.4454155838604892,
+      "centroid_shift_px": 0.5306300581287661,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D1_Check_2_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D1_Check_2_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D1",
+      "frame": 11,
+      "t": 1.1,
+      "camera": "Check",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "e8f0c619451c99c9e13cb01e7d54f666b359db2395cb8fbd1e220d307c0fe624",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.6338429969310115,
+      "centroid_shift_px": 0.6129105358392953,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D1_Check_11_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D1_Check_11_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D1",
+      "frame": 23,
+      "t": 2.3,
+      "camera": "Check",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "1c598d5873976b507599dfb384787ffd810d45efddff792f94b6a6a056a33f69",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.5052187307343853,
+      "centroid_shift_px": 0.3108238781656538,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D1_Check_23_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D1_Check_23_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D2",
+      "frame": 4,
+      "t": 0.4,
+      "camera": "Inspection",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "3b55aa45af8fd04461fafb3c12f9bf4ba9e5d1f760baa268a552bf49509460f3",
+      "anchor": true,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 6.2372126483293296e-12,
+      "centroid_shift_px": 2.7719546188192475e-12,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D2_Inspection_4_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D2_Inspection_4_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D2",
+      "frame": 14,
+      "t": 1.4,
+      "camera": "Inspection",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "2bd3bd49dbd4ebbd6091f53619c9152460f496a9dbbcf2d365e04ba771603cda",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.24244823054614256,
+      "centroid_shift_px": 0.22534567027381242,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D2_Inspection_14_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D2_Inspection_14_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D2",
+      "frame": 26,
+      "t": 2.6,
+      "camera": "Inspection",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "66a70800442cdc489268c5189b8507c28592c4373a8921e0f273e4b1b49cbbc7",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.28414823794227634,
+      "centroid_shift_px": 0.2605378984394858,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D2_Inspection_26_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D2_Inspection_26_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D2",
+      "frame": 4,
+      "t": 0.4,
+      "camera": "Check",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "136bbd8e130d107e7a8f1727bf6e0cce292f27d1e39de89a6ed27819b7223651",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.3403223446360159,
+      "centroid_shift_px": 0.24128461894665387,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D2_Check_4_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D2_Check_4_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D2",
+      "frame": 14,
+      "t": 1.4,
+      "camera": "Check",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "fdb4c8627b0d8164b3a62d54dfc42768b62a09a0caa2f799cbd457f8adeb4a96",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.5263023368324747,
+      "centroid_shift_px": 0.36433152173840394,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D2_Check_14_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D2_Check_14_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D2",
+      "frame": 26,
+      "t": 2.6,
+      "camera": "Check",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "fa35becee9c6752f47b86fba42dcb3dbd8644afde1d875fd335b1db257fac193",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.4255114835717626,
+      "centroid_shift_px": 0.19458516302056164,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D2_Check_26_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D2_Check_26_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D3",
+      "frame": 6,
+      "t": 0.6,
+      "camera": "Inspection",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "98d483094af36e31b00ecd2719e2c6d66dda282a215204adbb80ce72bc7932c6",
+      "anchor": true,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 1.1425527191022411e-11,
+      "centroid_shift_px": 9.339634925045571e-12,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D3_Inspection_6_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D3_Inspection_6_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D3",
+      "frame": 17,
+      "t": 1.7,
+      "camera": "Inspection",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "c6d42d043206efb9d0013f0d792c3d45493fb310fdd754f6134ee3e870e7e336",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.2211607881161809,
+      "centroid_shift_px": 0.14238994736082655,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D3_Inspection_17_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D3_Inspection_17_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D3",
+      "frame": 29,
+      "t": 2.9,
+      "camera": "Inspection",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "45bd99a9066cc08ac1a0dd8914a9bc16a12bd51e94168b01d304934a5d3b7fa5",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.31923108405192135,
+      "centroid_shift_px": 0.4942891417220585,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D3_Inspection_29_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D3_Inspection_29_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D3",
+      "frame": 6,
+      "t": 0.6,
+      "camera": "Check",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "2d9be054479dddc14cd1688e05f671043ed17f183e284febba314df4852cf890",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.49418423962639796,
+      "centroid_shift_px": 1.2922134130222573,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D3_Check_6_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D3_Check_6_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D3",
+      "frame": 17,
+      "t": 1.7,
+      "camera": "Check",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "65ad4290bdce806af3e8677efa0c5448053016534122df82f8cda627b7efcd57",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.3911599604164723,
+      "centroid_shift_px": 1.1308139788131346,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D3_Check_17_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D3_Check_17_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D3",
+      "frame": 29,
+      "t": 2.9,
+      "camera": "Check",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "8a0ef6eea24f319d88b98cac38338098341e2c5494ea7ab1b67f3000fd58b2d3",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.48463766234159655,
+      "centroid_shift_px": 0.19677480253575952,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D3_Check_29_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D3_Check_29_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D6",
+      "frame": 8,
+      "t": 0.8,
+      "camera": "Inspection",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "a2c10ef4f62302699a7f4f99c7fa796831e882cbb2480d608eba314e08a2ff32",
+      "anchor": true,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 3.0716492088018404e-12,
+      "centroid_shift_px": 8.601970165740088e-13,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D6_Inspection_8_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D6_Inspection_8_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D6",
+      "frame": 20,
+      "t": 2.0,
+      "camera": "Inspection",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "d31fbecbce8134a738eb1af80d58a3e2008448d82d68050db6f469a03c48c3a4",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.534441793250861,
+      "centroid_shift_px": 0.5954861487591216,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D6_Inspection_20_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D6_Inspection_20_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D6",
+      "frame": 32,
+      "t": 3.2,
+      "camera": "Inspection",
+      "split": "fit",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "98e2d27e719ebd63ffa4bc326bbff46d21b9d21c97284c07f324b2ebbfcf1a0b",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.2721008247531995,
+      "centroid_shift_px": 0.37985226465643973,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D6_Inspection_32_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D6_Inspection_32_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D6",
+      "frame": 8,
+      "t": 0.8,
+      "camera": "Check",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "6a8dde7a50b16035f745ed769bf9c6194d008765f1121504f318896dc49cedf2",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.3324630970908913,
+      "centroid_shift_px": 0.7449108506458887,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D6_Check_8_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D6_Check_8_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D6",
+      "frame": 20,
+      "t": 2.0,
+      "camera": "Check",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "973e4bf466da57fe6c83737f68b70cc930250c7ed09bef6305d9948234346a82",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.6330879165611183,
+      "centroid_shift_px": 0.9912420905830669,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D6_Check_20_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D6_Check_20_pixel_atlas_model_trace.npz"
+    },
+    {
+      "track_id": "D6",
+      "frame": 32,
+      "t": 3.2,
+      "camera": "Check",
+      "split": "heldout",
+      "RGB_status": "RGB_FEATURE_OBSERVED",
+      "rgb_sha256": "e6347aca1bd46082ce75dbceceebfb68df24874447090fce77f4481e12329dc2",
+      "anchor": false,
+      "reconstruction_valid": true,
+      "P95_symmetric_boundary_px": 0.47286423009353157,
+      "centroid_shift_px": 0.8496416079689059,
+      "visible_fraction": 1.0,
+      "normal_RGB_control": {
+        "sensor_box_xyxy": [
+          716,
+          153,
+          768,
+          192
+        ],
+        "pixels": 2028,
+        "observed_fraction": 1.0,
+        "relative_local_background_anomaly_fraction": 0.0,
+        "semantic_scope": "predeclared RGB normal-appearance control; not physical material correspondence or detector false positive rate"
+      },
+      "accepted": true,
+      "overlay": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D6_Check_32_independent_reprojection.png",
+      "pixel_atlas_model_trace_npz": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-third-view-score-v3/D6_Check_32_pixel_atlas_model_trace.npz"
+    }
+  ],
+  "overall": "PASS",
+  "primary_metric": "independent RGB region boundary reprojection with fixed anchor triangles, in original pixels",
+  "limitations": [
+    "Known capture target names are region identities, not automatic defect classification",
+    "Bindings are candidate surface regions; pixel boundary threshold is not a pointwise texture descriptor",
+    "No field data, geometry objective changes, source-point nearest search or local-plane 3D error conversion"
+  ],
+  "recon_input_access_log": [
+    {
+      "path": "input_bundle.json",
+      "role": "input_manifest",
+      "sha256": "3c0684d9537691a8e28296d563dd649c5bd05c6933a3ff06298447530e9f2363",
+      "bytes": 41043
+    },
+    {
+      "path": "rgb/Global/000002.png",
+      "role": "RGB",
+      "sha256": "555fa35a846ee81599d525b1f8911cf86f470001fd6ec1a3130602b51a7c96b9",
+      "bytes": 493427
+    },
+    {
+      "path": "masks/Global/000002.png",
+      "role": "RGB_derived_mask",
+      "sha256": "20d8c84922088bd446105d33b8a59528597f1e70fc272434ad2c5ea971e6ef84",
+      "bytes": 3873
+    },
+    {
+      "path": "rgb/Inspection/000002.png",
+      "role": "RGB",
+      "sha256": "cbb0b5928844df757c03d6f6c211d0025488dcaf44047f0e3f6c6c7a96745cec",
+      "bytes": 752813
+    },
+    {
+      "path": "masks/Inspection/000002.png",
+      "role": "RGB_derived_mask",
+      "sha256": "07803deadf9aa8c39c66816fcc29f61c4bf3cdfd332824968de7cfabde6c2086",
+      "bytes": 4899
+    },
+    {
+      "path": "rgb/GlobalSide/000002.png",
+      "role": "RGB",
+      "sha256": "429138fa4ff1fb94540b2d4e8b1189b0de9c879b1c1648364884043c5e69a273",
+      "bytes": 4908038
+    },
+    {
+      "path": "masks/GlobalSide/000002.png",
+      "role": "RGB_derived_mask",
+      "sha256": "5df87fc4acf6b973d3513531ab514bd4c71f0f94e45d449e68099b7980b3024f",
+      "bytes": 18486
+    },
+    {
+      "path": "rgb/Global/000004.png",
+      "role": "RGB",
+      "sha256": "81d0cd8e13ebfb88903d070c9820146878a402e7438d6252015ef39520fef15e",
+      "bytes": 492348
+    },
+    {
+      "path": "masks/Global/000004.png",
+      "role": "RGB_derived_mask",
+      "sha256": "3d66acd3d7005872eaf9b421101f1adbe146e1edda2166fadf0e5d7843a5ea0a",
+      "bytes": 3690
+    },
+    {
+      "path": "rgb/Inspection/000004.png",
+      "role": "RGB",
+      "sha256": "3b55aa45af8fd04461fafb3c12f9bf4ba9e5d1f760baa268a552bf49509460f3",
+      "bytes": 755805
+    },
+    {
+      "path": "masks/Inspection/000004.png",
+      "role": "RGB_derived_mask",
+      "sha256": "18d119b0bb0ff4eeeee39136376a3bb54312f63948b0cc3c9c4d15e471dda9d1",
+      "bytes": 5010
+    },
+    {
+      "path": "rgb/GlobalSide/000004.png",
+      "role": "RGB",
+      "sha256": "b79b5efba4d6507510dde9bea8f94aab4d6b2e4bceee0384d16f39589b0d4840",
+      "bytes": 4906158
+    },
+    {
+      "path": "masks/GlobalSide/000004.png",
+      "role": "RGB_derived_mask",
+      "sha256": "baaa669fe874fbbf364ad14842b9f8996b1f9e6c6bd5c661b4a4886b32f024fa",
+      "bytes": 18303
+    },
+    {
+      "path": "rgb/Global/000006.png",
+      "role": "RGB",
+      "sha256": "27a09b6c6e79fcbd0079214c06990c2eac7716cd492a10e6c9c580c6cf73138a",
+      "bytes": 493210
+    },
+    {
+      "path": "masks/Global/000006.png",
+      "role": "RGB_derived_mask",
+      "sha256": "dcd311a7c2891a817911ab3598a8c76719b423167fc3a200720f0199b9681642",
+      "bytes": 3839
+    },
+    {
+      "path": "rgb/Inspection/000006.png",
+      "role": "RGB",
+      "sha256": "98d483094af36e31b00ecd2719e2c6d66dda282a215204adbb80ce72bc7932c6",
+      "bytes": 754265
+    },
+    {
+      "path": "masks/Inspection/000006.png",
+      "role": "RGB_derived_mask",
+      "sha256": "2a4947a21fb249c26718f2077db3b36d878f162ec56365a8e446e52bc14d6754",
+      "bytes": 5051
+    },
+    {
+      "path": "rgb/GlobalSide/000006.png",
+      "role": "RGB",
+      "sha256": "b0e1df99a616df6ebb04ad280b8e76979a196765c87cd24af1b8f8cd3334210b",
+      "bytes": 4906858
+    },
+    {
+      "path": "masks/GlobalSide/000006.png",
+      "role": "RGB_derived_mask",
+      "sha256": "316d97b4736fc436badd9d2831f57ba31ab31e140d4147112a8fa86ab814b1bc",
+      "bytes": 18401
+    },
+    {
+      "path": "rgb/Global/000008.png",
+      "role": "RGB",
+      "sha256": "40126b522d8197002ef4296d7f024b076aba4dbd9222c09603e457d177125906",
+      "bytes": 493554
+    },
+    {
+      "path": "masks/Global/000008.png",
+      "role": "RGB_derived_mask",
+      "sha256": "38bc795f2f1d6604fbd0846977dde7459d074fd4e5b020e7e34e75dd65a4a3d8",
+      "bytes": 3822
+    },
+    {
+      "path": "rgb/Inspection/000008.png",
+      "role": "RGB",
+      "sha256": "a2c10ef4f62302699a7f4f99c7fa796831e882cbb2480d608eba314e08a2ff32",
+      "bytes": 744834
+    },
+    {
+      "path": "masks/Inspection/000008.png",
+      "role": "RGB_derived_mask",
+      "sha256": "7232f0d48815593e3d741ecad97cc5a68c2282d98378f99f7ae38a988109e18b",
+      "bytes": 5267
+    },
+    {
+      "path": "rgb/GlobalSide/000008.png",
+      "role": "RGB",
+      "sha256": "b996e2b96d7548fbcc78e7adcc2e0b2b70ed1e616172e958ed5e050965acaf4a",
+      "bytes": 4909524
+    },
+    {
+      "path": "masks/GlobalSide/000008.png",
+      "role": "RGB_derived_mask",
+      "sha256": "27fc494bfc0e4906e4d222bec0adc2b0229c34216dff10025ea04f44a51fa08a",
+      "bytes": 18085
+    },
+    {
+      "path": "rgb/Global/000011.png",
+      "role": "RGB",
+      "sha256": "b6c6175b90fb2adff734ed3925f64f655e48d72029815da47915055d0a7fbedd",
+      "bytes": 493314
+    },
+    {
+      "path": "masks/Global/000011.png",
+      "role": "RGB_derived_mask",
+      "sha256": "763ba25b0f4ee7ca5d7f97de03c640b4889a946d160e2ee7e0f847d6ccab246e",
+      "bytes": 3804
+    },
+    {
+      "path": "rgb/Inspection/000011.png",
+      "role": "RGB",
+      "sha256": "7dfa335da947bb84641a7aeb9c30c46305778d355554beb9b7f39017fa3ac9ae",
+      "bytes": 751030
+    },
+    {
+      "path": "masks/Inspection/000011.png",
+      "role": "RGB_derived_mask",
+      "sha256": "2d4ab9893e142dca9ffe2e34c88448ac1c5f5dead2c9033ea1b05c4e1450df90",
+      "bytes": 4899
+    },
+    {
+      "path": "rgb/GlobalSide/000011.png",
+      "role": "RGB",
+      "sha256": "f4bdd4d41f91363eed17da5bb7471d25bd82722f8aff1d873e56545eac6aa75a",
+      "bytes": 4903240
+    },
+    {
+      "path": "masks/GlobalSide/000011.png",
+      "role": "RGB_derived_mask",
+      "sha256": "e9bc7abc47dc6409e97e067a6f504fa3560ee1b30c22fd7a9ae1f0ecae701be3",
+      "bytes": 17059
+    },
+    {
+      "path": "rgb/Global/000014.png",
+      "role": "RGB",
+      "sha256": "d57d549f30cd6a4055dbaaddc889c1ec861f4dc572a5a2a1925e5623089c779f",
+      "bytes": 493109
+    },
+    {
+      "path": "masks/Global/000014.png",
+      "role": "RGB_derived_mask",
+      "sha256": "29516bc5a29918c3b93c4b8f6215f5ca7f86be7e4b26b92d7a59806d9f6242d9",
+      "bytes": 3826
+    },
+    {
+      "path": "rgb/Inspection/000014.png",
+      "role": "RGB",
+      "sha256": "2bd3bd49dbd4ebbd6091f53619c9152460f496a9dbbcf2d365e04ba771603cda",
+      "bytes": 753595
+    },
+    {
+      "path": "masks/Inspection/000014.png",
+      "role": "RGB_derived_mask",
+      "sha256": "4a567c633cd5aaa18718b40931c0ca8630a25941548fcc644c99ba6028b42a8c",
+      "bytes": 5012
+    },
+    {
+      "path": "rgb/GlobalSide/000014.png",
+      "role": "RGB",
+      "sha256": "98f434b81bc58d46e54ad2e1b7c06fbe6f993b11c124694c41ffbb4b38c2d5a8",
+      "bytes": 4905299
+    },
+    {
+      "path": "masks/GlobalSide/000014.png",
+      "role": "RGB_derived_mask",
+      "sha256": "746d6a0d71629318dc785df16f926c024d168dfa1fef03c5dc3580393abb8938",
+      "bytes": 17248
+    },
+    {
+      "path": "rgb/Global/000017.png",
+      "role": "RGB",
+      "sha256": "4bc35daaabb6e2f4872c32a9d7d199dd50fff0aa1ed175ec6a508d04b5f1b65e",
+      "bytes": 493141
+    },
+    {
+      "path": "masks/Global/000017.png",
+      "role": "RGB_derived_mask",
+      "sha256": "d25810294ab17539f252a278bfe918a81f4881f97ec039c6a9080abc4739ce58",
+      "bytes": 3845
+    },
+    {
+      "path": "rgb/Inspection/000017.png",
+      "role": "RGB",
+      "sha256": "c6d42d043206efb9d0013f0d792c3d45493fb310fdd754f6134ee3e870e7e336",
+      "bytes": 749514
+    },
+    {
+      "path": "masks/Inspection/000017.png",
+      "role": "RGB_derived_mask",
+      "sha256": "13fa6507293f5172ea3b4ede048adf7c479e1796551b3511dd20af381046137b",
+      "bytes": 5050
+    },
+    {
+      "path": "rgb/GlobalSide/000017.png",
+      "role": "RGB",
+      "sha256": "a707481fcfcca593502c86c0001bf379c517dfccef66492dc145797b4f527b41",
+      "bytes": 4910394
+    },
+    {
+      "path": "masks/GlobalSide/000017.png",
+      "role": "RGB_derived_mask",
+      "sha256": "4cc2018525871fa8c2b76675cacd2288c7110200181958f365c19c6cb20aea48",
+      "bytes": 18140
+    },
+    {
+      "path": "rgb/Global/000020.png",
+      "role": "RGB",
+      "sha256": "9295b143ca78177798585efa2895aa4fba427b8e5da83650cad75395e6ae8f07",
+      "bytes": 492493
+    },
+    {
+      "path": "masks/Global/000020.png",
+      "role": "RGB_derived_mask",
+      "sha256": "055e2ce5605aa07706d70538c05460665826d77e6d0081617d1474d69ea22f1c",
+      "bytes": 3742
+    },
+    {
+      "path": "rgb/Inspection/000020.png",
+      "role": "RGB",
+      "sha256": "d31fbecbce8134a738eb1af80d58a3e2008448d82d68050db6f469a03c48c3a4",
+      "bytes": 753498
+    },
+    {
+      "path": "masks/Inspection/000020.png",
+      "role": "RGB_derived_mask",
+      "sha256": "1a90e353a6d4d4a12c0e1aec9df769a493bfd70223ace38ea4d9549ed9f27a22",
+      "bytes": 5269
+    },
+    {
+      "path": "rgb/GlobalSide/000020.png",
+      "role": "RGB",
+      "sha256": "2fa3965e68bac3ed2b1a4c7f66553609dd32f195a741987798f4e0b1035a30ba",
+      "bytes": 4909229
+    },
+    {
+      "path": "masks/GlobalSide/000020.png",
+      "role": "RGB_derived_mask",
+      "sha256": "9f78995bd4e939b98c4378e4b759e21d364b4f0526475e742042c33524064e52",
+      "bytes": 18337
+    },
+    {
+      "path": "rgb/Global/000023.png",
+      "role": "RGB",
+      "sha256": "f0a78a094f6c9fcc71662537f8602d4703e9e13350cdd606bcb33ef6293d5d4b",
+      "bytes": 494142
+    },
+    {
+      "path": "masks/Global/000023.png",
+      "role": "RGB_derived_mask",
+      "sha256": "084c9bbd945cd95b5d6fa9433845326f5b39ffb41a1dd0e97f9e84aad82d347b",
+      "bytes": 3860
+    },
+    {
+      "path": "rgb/Inspection/000023.png",
+      "role": "RGB",
+      "sha256": "ed84d57b099af54a441c35a711c127c94f1ad6b80d3f2e7df7ba2efa40cc92cb",
+      "bytes": 743010
+    },
+    {
+      "path": "masks/Inspection/000023.png",
+      "role": "RGB_derived_mask",
+      "sha256": "4849afddd634457c1bd0e80ced317048f340b46f6d2d1e1751ac43783d3d7008",
+      "bytes": 4899
+    },
+    {
+      "path": "rgb/GlobalSide/000023.png",
+      "role": "RGB",
+      "sha256": "085142d9cc0da0731a6e0cf98e46eba6c2d0f570ae2ce905345bf17b8de38c73",
+      "bytes": 4907476
+    },
+    {
+      "path": "masks/GlobalSide/000023.png",
+      "role": "RGB_derived_mask",
+      "sha256": "336a14ef34406ad9413c5481c1d5a28ae1d584b267fe8f7e1b50bbb47365b43f",
+      "bytes": 18399
+    },
+    {
+      "path": "rgb/Global/000026.png",
+      "role": "RGB",
+      "sha256": "b67caa79a20e48c6b5f1650c4d293b91b38588c02c24f961f525afc728ae8b1f",
+      "bytes": 494197
+    },
+    {
+      "path": "masks/Global/000026.png",
+      "role": "RGB_derived_mask",
+      "sha256": "cacf80bf6b0bd517196ce2bacf12dbb5d541e73209e64ace7c75a6c1f8cab718",
+      "bytes": 3880
+    },
+    {
+      "path": "rgb/Inspection/000026.png",
+      "role": "RGB",
+      "sha256": "66a70800442cdc489268c5189b8507c28592c4373a8921e0f273e4b1b49cbbc7",
+      "bytes": 752601
+    },
+    {
+      "path": "masks/Inspection/000026.png",
+      "role": "RGB_derived_mask",
+      "sha256": "97b81d85b151588ca8766886beb6a38d73ad89a745c9f5981a8e6e7642a60a9f",
+      "bytes": 5008
+    },
+    {
+      "path": "rgb/GlobalSide/000026.png",
+      "role": "RGB",
+      "sha256": "0d635dcbaf80e251b5f1b7dedba445842d22bf8784523f83fc199b094264ae33",
+      "bytes": 4907495
+    },
+    {
+      "path": "masks/GlobalSide/000026.png",
+      "role": "RGB_derived_mask",
+      "sha256": "21cf842e913ac00669b6d8928b7fdd89019abb7cc44ba2b4f05ffedd87e89095",
+      "bytes": 17778
+    },
+    {
+      "path": "rgb/Global/000029.png",
+      "role": "RGB",
+      "sha256": "00c80663220b940f3669a1ff2835082e507e9e3079cdafd036466f5d0ffea23f",
+      "bytes": 492861
+    },
+    {
+      "path": "masks/Global/000029.png",
+      "role": "RGB_derived_mask",
+      "sha256": "9974e32148a448e413b9499a93a3831a6317c439cc40ab78dbece819444947a3",
+      "bytes": 3688
+    },
+    {
+      "path": "rgb/Inspection/000029.png",
+      "role": "RGB",
+      "sha256": "45bd99a9066cc08ac1a0dd8914a9bc16a12bd51e94168b01d304934a5d3b7fa5",
+      "bytes": 759994
+    },
+    {
+      "path": "masks/Inspection/000029.png",
+      "role": "RGB_derived_mask",
+      "sha256": "4f36437ba85b8c300b27c246c5c8848ee6af4e78de59ecbb46b757a96ca7e2fb",
+      "bytes": 5046
+    },
+    {
+      "path": "rgb/GlobalSide/000029.png",
+      "role": "RGB",
+      "sha256": "03abc34c745853758eb2bc18c282a877b210732702386f45d52c4434ac73a95c",
+      "bytes": 4900734
+    },
+    {
+      "path": "masks/GlobalSide/000029.png",
+      "role": "RGB_derived_mask",
+      "sha256": "a0da6528cf8d8b482e092be5c5f92326447e3dade20ebdf2f581fc1d7fa7e57d",
+      "bytes": 16496
+    },
+    {
+      "path": "rgb/Global/000032.png",
+      "role": "RGB",
+      "sha256": "2a28cc7036e3fbced2f087fb71af73049afc63233ce43495e4f48713ac146573",
+      "bytes": 493089
+    },
+    {
+      "path": "masks/Global/000032.png",
+      "role": "RGB_derived_mask",
+      "sha256": "4fa3a1cfd9ae55913e9c58b9d00727087200de899e46b53709166cadd012041f",
+      "bytes": 3899
+    },
+    {
+      "path": "rgb/Inspection/000032.png",
+      "role": "RGB",
+      "sha256": "98e2d27e719ebd63ffa4bc326bbff46d21b9d21c97284c07f324b2ebbfcf1a0b",
+      "bytes": 753589
+    },
+    {
+      "path": "masks/Inspection/000032.png",
+      "role": "RGB_derived_mask",
+      "sha256": "fe4a8a3b365fcabd6b665cd62bf05150856e8d22f2970f3585d019e652f6fa88",
+      "bytes": 5269
+    },
+    {
+      "path": "rgb/GlobalSide/000032.png",
+      "role": "RGB",
+      "sha256": "bd9569629c4315b613cb823474392fb403f4f2955f8bc922f0f9e8278b6c85d8",
+      "bytes": 4907744
+    },
+    {
+      "path": "masks/GlobalSide/000032.png",
+      "role": "RGB_derived_mask",
+      "sha256": "e16d66948b8e7be01c819a0d44ce1a3e641de7b25d31db6907cce16abf384019",
+      "bytes": 17951
+    }
+  ],
+  "RGB_detection_access_log": [
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-prereq-20261007-a01/correspondence/synthetic-catalog.json",
+      "role": "calibrated_RGB_observation_catalog",
+      "sha256": "8580ee8d2cbbf7803c2ba2a641a7ed7c500a007e969bf5d566c9a9f2df3f61f4"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/input/rgb/Inspection/000002.png",
+      "role": "original_RGB_only",
+      "sha256": "cbb0b5928844df757c03d6f6c211d0025488dcaf44047f0e3f6c6c7a96745cec"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/input/rgb/Inspection/000004.png",
+      "role": "original_RGB_only",
+      "sha256": "3b55aa45af8fd04461fafb3c12f9bf4ba9e5d1f760baa268a552bf49509460f3"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/input/rgb/Inspection/000006.png",
+      "role": "original_RGB_only",
+      "sha256": "98d483094af36e31b00ecd2719e2c6d66dda282a215204adbb80ce72bc7932c6"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/input/rgb/Inspection/000008.png",
+      "role": "original_RGB_only",
+      "sha256": "a2c10ef4f62302699a7f4f99c7fa796831e882cbb2480d608eba314e08a2ff32"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/input/rgb/Inspection/000011.png",
+      "role": "original_RGB_only",
+      "sha256": "7dfa335da947bb84641a7aeb9c30c46305778d355554beb9b7f39017fa3ac9ae"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/input/rgb/Inspection/000014.png",
+      "role": "original_RGB_only",
+      "sha256": "2bd3bd49dbd4ebbd6091f53619c9152460f496a9dbbcf2d365e04ba771603cda"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/input/rgb/Inspection/000017.png",
+      "role": "original_RGB_only",
+      "sha256": "c6d42d043206efb9d0013f0d792c3d45493fb310fdd754f6134ee3e870e7e336"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/input/rgb/Inspection/000020.png",
+      "role": "original_RGB_only",
+      "sha256": "d31fbecbce8134a738eb1af80d58a3e2008448d82d68050db6f469a03c48c3a4"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/input/rgb/Inspection/000023.png",
+      "role": "original_RGB_only",
+      "sha256": "ed84d57b099af54a441c35a711c127c94f1ad6b80d3f2e7df7ba2efa40cc92cb"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/input/rgb/Inspection/000026.png",
+      "role": "original_RGB_only",
+      "sha256": "66a70800442cdc489268c5189b8507c28592c4373a8921e0f273e4b1b49cbbc7"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/input/rgb/Inspection/000029.png",
+      "role": "original_RGB_only",
+      "sha256": "45bd99a9066cc08ac1a0dd8914a9bc16a12bd51e94168b01d304934a5d3b7fa5"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/input/rgb/Inspection/000032.png",
+      "role": "original_RGB_only",
+      "sha256": "98e2d27e719ebd63ffa4bc326bbff46d21b9d21c97284c07f324b2ebbfcf1a0b"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/evaluation/rgb/Check/000002.png",
+      "role": "original_RGB_only",
+      "sha256": "73d82294e0970023e5e46c9fa6f10e9bb158c335728035c797485efd889809fb"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/evaluation/rgb/Check/000004.png",
+      "role": "original_RGB_only",
+      "sha256": "136bbd8e130d107e7a8f1727bf6e0cce292f27d1e39de89a6ed27819b7223651"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/evaluation/rgb/Check/000006.png",
+      "role": "original_RGB_only",
+      "sha256": "2d9be054479dddc14cd1688e05f671043ed17f183e284febba314df4852cf890"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/evaluation/rgb/Check/000008.png",
+      "role": "original_RGB_only",
+      "sha256": "6a8dde7a50b16035f745ed769bf9c6194d008765f1121504f318896dc49cedf2"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/evaluation/rgb/Check/000011.png",
+      "role": "original_RGB_only",
+      "sha256": "e8f0c619451c99c9e13cb01e7d54f666b359db2395cb8fbd1e220d307c0fe624"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/evaluation/rgb/Check/000014.png",
+      "role": "original_RGB_only",
+      "sha256": "fdb4c8627b0d8164b3a62d54dfc42768b62a09a0caa2f799cbd457f8adeb4a96"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/evaluation/rgb/Check/000017.png",
+      "role": "original_RGB_only",
+      "sha256": "65ad4290bdce806af3e8677efa0c5448053016534122df82f8cda627b7efcd57"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/evaluation/rgb/Check/000020.png",
+      "role": "original_RGB_only",
+      "sha256": "973e4bf466da57fe6c83737f68b70cc930250c7ed09bef6305d9948234346a82"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/evaluation/rgb/Check/000023.png",
+      "role": "original_RGB_only",
+      "sha256": "1c598d5873976b507599dfb384787ffd810d45efddff792f94b6a6a056a33f69"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/evaluation/rgb/Check/000026.png",
+      "role": "original_RGB_only",
+      "sha256": "fa35becee9c6752f47b86fba42dcb3dbd8644afde1d875fd335b1db257fac193"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/evaluation/rgb/Check/000029.png",
+      "role": "original_RGB_only",
+      "sha256": "8a0ef6eea24f319d88b98cac38338098341e2c5494ea7ab1b67f3000fd58b2d3"
+    },
+    {
+      "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-next-20261007-a01/synthetic/dataset/evaluation/rgb/Check/000032.png",
+      "role": "original_RGB_only",
+      "sha256": "e6347aca1bd46082ce75dbceceebfb68df24874447090fce77f4481e12329dc2"
+    }
+  ],
+  "source_truth_or_texture_read": false
+}

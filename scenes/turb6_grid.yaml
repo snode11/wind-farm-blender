@@ -1,0 +1,27 @@
+name: turb6_grid
+backend: fastfarm
+turbine: nrel5mw
+dt: 3
+
+# 2 行 x 3 列。第二行横向偏 252 m（2D），下游机组不完全落在上游尾流轴线上 ——
+# 这是偏航控制真正有增益的构型：偏一点就能把尾流推开。
+layout:
+  - {id: A1, x: 0.0,    y: -252.0}
+  - {id: A2, x: 504.0,  y: -252.0}
+  - {id: A3, x: 1008.0, y: -252.0}
+  - {id: B1, x: 0.0,    y: 252.0}
+  - {id: B2, x: 504.0,  y: 252.0}
+  - {id: B3, x: 1008.0, y: 252.0}
+
+inflow:
+  speed: 8.0
+  direction: 270.0
+  turbulence: null
+
+controls: [yaw]
+
+sensors:
+  - {type: power,     turbines: all}
+  - {type: actuator,  turbines: all}
+  - {type: bladeload, turbines: all}
+  - {type: lidar,     turbines: "A1,B1"}

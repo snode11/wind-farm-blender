@@ -1,0 +1,72 @@
+{
+  "schema": "wfrl.manual-controls-validation.v1",
+  "status": "PASS",
+  "version": "0.3.24",
+  "publication": "LOCAL_ONLY",
+  "archive": "outputs/manual-controls-fix/package-validation/package/wfrl_blender-0.3.24.zip",
+  "archive_sha256": "99351530ddb27a1a1a4896977d4472e85c7e81983cad88ddd3421706de603a25",
+  "inventory": "outputs/manual-controls-fix/package-validation/package/wfrl_blender-0.3.24.inventory.json",
+  "file_count": 180,
+  "host_tests": {
+    "tests_passed": 15,
+    "subtests_passed": 133,
+    "command": "PYTHONPATH=blender_frontend:. /opt/anaconda3/envs/wfrl-mac/bin/python -m pytest blender_frontend/tests/test_manual_motion.py blender_frontend/tests/test_manual_pose.py -q"
+  },
+  "isolated_package": "outputs/manual-controls-fix/package-validation/package-validation.json",
+  "background_pose_contract": "outputs/manual-controls-fix/isolated-pose/checks.json",
+  "background_pose_undo": "outputs/manual-controls-fix/isolated-undo/checks.json",
+  "background_manual_state": "outputs/manual-controls-fix/isolated-state/checks.json",
+  "native_state_tests_passed": 11,
+  "batch_individual_pitch": {
+    "existing_independent_values_preserved": true,
+    "repeated_enable_preserves_values": true,
+    "disabled_then_enabled_initializes_current_collective": true,
+    "other_pose_rpm_and_running_state_preserved": true
+  },
+  "daily_probe": "publication/daily-installation-probe.json",
+  "daily_window": "outputs/manual-controls-fix/daily-window/window-checks.json",
+  "native_input_checks": {
+    "method": "Native CUA checkbox click and visible summary inspection; RNA readback after input",
+    "evidence": "outputs/manual-controls-fix/daily-window/batch-mode-input-checks.json",
+    "category_or_other_panels_modified": false,
+    "mixed_mode_before": [
+      false,
+      true,
+      false
+    ],
+    "modes_after": [
+      true,
+      true,
+      true
+    ],
+    "existing_T2_pitches_before": [
+      3.0,
+      9.0,
+      21.0
+    ],
+    "pitches_after": {
+      "T1": [
+        18.0,
+        18.0,
+        18.0
+      ],
+      "T2": [
+        3.0,
+        9.0,
+        21.0
+      ],
+      "T3": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "file_chooser_checks": "NOT_RUN"
+  },
+  "limitations": [
+    "macOS Blender 5.2.1 only; short interaction checks",
+    "No full-clip FPS, long-duration, Windows/Linux, physics or field acceptance",
+    "Native file chooser interaction is not covered by this payload validation",
+    "Human-operated acceptance is not claimed"
+  ]
+}

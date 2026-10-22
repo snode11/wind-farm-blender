@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "archive_sha256": "709aa8151263b97bd1c89fb74f61f72c3becb0432a11677fe35643a40763aaa9",
+  "installed_files": 85,
+  "changed_files": [
+    "blender_manifest.toml",
+    "cameras.py",
+    "clearance_replay.py",
+    "panels/clearance.py",
+    "panels/farm_replay.py",
+    "panels/gimbal.py",
+    "tip_tracking.py"
+  ],
+  "assets_unchanged": true,
+  "host_tests": "2 passed",
+  "reproducible": true
+}

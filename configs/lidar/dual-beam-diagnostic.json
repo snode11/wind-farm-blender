@@ -1,0 +1,32 @@
+{
+  "schema": "wfrl.dual-beam-calibration.v1",
+  "id": "nominal-2-4-6-old-mount-diagnostic-v1",
+  "status": "DIAGNOSTIC_INSTALLATION_UNCONFIRMED",
+  "frame": "rest nacelle material frame, transported by source nacelle rotation and translation",
+  "origins_m": [[-2.0, 0.0, 87.6], [-2.0, 0.0, 87.6], [-2.0, 0.0, 87.6]],
+  "common_origin_approximation": true,
+  "angles_deg": [2.0, 4.0, 6.0],
+  "angle_basis": "user nominal angles from downward gravity vertical at rest, toward rotor; not manual relative angles",
+  "range_m": [5.0, 100.0],
+  "range_basis": "inherited ideal-simulation range, not a hardware certification",
+  "min_point_separation_m": 0.25,
+  "min_orientation_projection_m": 0.01,
+  "threshold_basis": "fixed before source evaluation; conditioning guard, tested with independent analytic perturbations",
+  "effective_length_m": 63.00793600809346,
+  "length_basis": "norm([-1, 0, 63]) from independent unloaded prebend structural tip; hub centre includes HubRad=1.5 m, no per-frame fit",
+  "hub_source": "source nacelle pose and fixed turbine scalars",
+  "tower_input": "known same-time simulated deformed tower surface",
+  "blade_association": "simulation first-hit blade labels",
+  "expected_window_half_angle_deg": 15.0,
+  "expected_window_basis": "fixed before evaluation: each blade azimuth within 15 degrees of downward (180 degrees); full 60 s scanned regardless",
+  "measurement_hold_s": 1.0,
+  "alarm_hold_s": 1.0,
+  "alarm_reset": "simulation-time hold expires after last hit; unknown channel remains unknown and does not erase history; seeking recomputes prefix state",
+  "performance_tolerances": null,
+  "installation": {
+    "nominal_tip_height_m": 27.2,
+    "nominal_tower_radius_m": 2.67,
+    "target_gap_m": 4.5,
+    "note": "old mount retained only for diagnosis; 4.5 m target is not approved or forced"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": "wfrl.github-release-publication.v1",
+  "status": "PUBLISHED",
+  "version": "0.3.18",
+  "tag": "v0.3.18",
+  "repository": "snode11/wind-farm-blender",
+  "default_branch": "main",
+  "source_commit": "6dfa0eefe410ef3e38d3cbd9ee7d017aafa2fc02",
+  "source_parent": "a63de6a92cf1a8908b0ddbe4779d7b559c46f936",
+  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.18",
+  "published_at_utc": "2026-10-08T12:59:43Z",
+  "published_at_asia_shanghai": "2026-10-08 20:59:43 +08:00",
+  "draft": false,
+  "prerelease": false,
+  "assets": [
+    {
+      "name": "wfrl_blender-0.3.18.zip",
+      "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.18/wfrl_blender-0.3.18.zip"
+    }
+  ],
+  "publication_operations": [
+    "Normal non-force fast-forward git push to blender-sync main",
+    "gh release create v0.3.18 with the validated local ZIP and target source commit"
+  ],
+  "verification_boundary": "Release creation returned success; release metadata confirms published non-draft/non-prerelease and named download link. No post-upload asset download or byte/checksum comparison.",
+  "historical_validation_status": "Other JSON records preserve LOCAL_ONLY_UNPUBLISHED as their status at local validation time, before this publication.",
+  "scientific_precision": "FAILED_GATE"
+}

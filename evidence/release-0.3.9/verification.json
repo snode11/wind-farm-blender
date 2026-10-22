@@ -1,0 +1,260 @@
+{
+  "schema": "wfrl.release-verification.v1",
+  "version": "0.3.9",
+  "date": "2026-09-27",
+  "baseline_commit": "ca16151526f9dcb69cae5f8c9dc4937e20064444",
+  "archive": "dist/wfrl_blender-0.3.9.zip",
+  "archive_sha256": "0cabd8f1c95739d585b72ba638be3026db9488757a037b524b50fd8d362b5343",
+  "archive_bytes": 41513001,
+  "payload_files": 100,
+  "artifact_matches_previous_local_zip": true,
+  "installed_extension_files_match": 100,
+  "installed_extension_modified": false,
+  "host_tests": {
+    "passed": 381,
+    "skipped": 2,
+    "warnings": 1,
+    "warning": "Pillow Image.getdata deprecation",
+    "command": "PYTHONPATH=blender_frontend:. python -m pytest blender_frontend/tests --ignore=blender_frontend/tests/blender -q"
+  },
+  "actual_zip_regressions": {
+    "default": {
+      "status": "PASS",
+      "module": "wfrl_blender",
+      "addon_path": "outputs/release-0.3.9/zip-root/wfrl_blender/__init__.py",
+      "blender": "5.2.1 LTS",
+      "preset_path": "outputs/release-0.3.9/zip-root/wfrl_blender/assets/cameras/t1-three-camera-default.json",
+      "checks": [
+        "ordinary load and reload use bundled supported pose and exact optics",
+        "geometry-only load has no rig",
+        "initial history empty",
+        "legacy C4 rejected",
+        "tilted housing rigid move",
+        "per-camera edit persists over frames",
+        "undo restores supported default",
+        "invalid move unchanged",
+        "atomic publish rollback",
+        "explicit reload resets user edits to bundled default",
+        "tip trails and deflection aids disabled"
+      ]
+    },
+    "surface": {
+      "status": "PASS",
+      "module": "wfrl_blender",
+      "blender": "5.2.1 LTS",
+      "cases": [
+        {
+          "point": [
+            0.0,
+            0.0,
+            3.7625603675842285
+          ],
+          "normal": [
+            0.0,
+            -0.014173772186040878,
+            0.9998995661735535
+          ],
+          "spins": [
+            0,
+            37,
+            90,
+            -45
+          ]
+        },
+        {
+          "point": [
+            1.0,
+            -1.622828483581543,
+            1.5
+          ],
+          "normal": [
+            0.0,
+            -0.9883747100830078,
+            -0.15203790366649628
+          ],
+          "spins": [
+            0,
+            37,
+            90,
+            -45
+          ]
+        },
+        {
+          "point": [
+            0.0,
+            -1.6473426818847656,
+            2.299999952316284
+          ],
+          "normal": [
+            0.0,
+            -0.9998995661735535,
+            0.014174426905810833
+          ],
+          "spins": [
+            0,
+            37,
+            90,
+            -45
+          ]
+        }
+      ],
+      "checks": [
+        "support contact and 0.274 m housing clearance",
+        "rigid camera transform",
+        "cancel",
+        "single undo",
+        "JSON round trip",
+        "independent camera aim",
+        "invalid placement unchanged",
+        "legacy layout"
+      ]
+    },
+    "swivel": {
+      "status": "PASS",
+      "module": "wfrl_blender",
+      "blender": "5.2.1 LTS",
+      "cases": [
+        {
+          "point": [
+            0.0,
+            0.0,
+            3.7625603675842285
+          ],
+          "normal": [
+            0.0,
+            -0.014173772186040878,
+            0.9998995661735535
+          ],
+          "spins": [
+            0,
+            37
+          ],
+          "aims": [
+            0,
+            -30,
+            30,
+            -45,
+            45
+          ]
+        },
+        {
+          "point": [
+            1.0,
+            -1.622828483581543,
+            1.5
+          ],
+          "normal": [
+            0.0,
+            -0.9883747100830078,
+            -0.15203790366649628
+          ],
+          "spins": [
+            0,
+            37
+          ],
+          "aims": [
+            0,
+            -30,
+            30,
+            -45,
+            45
+          ]
+        },
+        {
+          "point": [
+            0.0,
+            -1.6473426818847656,
+            2.299999952316284
+          ],
+          "normal": [
+            0.0,
+            -0.9998995661735535,
+            0.014174426905810833
+          ],
+          "spins": [
+            0,
+            37
+          ],
+          "aims": [
+            0,
+            -30,
+            30,
+            -45,
+            45
+          ]
+        }
+      ],
+      "checks": [
+        "zero-aim geometry preserved",
+        "fixed support base and arm under housing yaw",
+        "fixed rear pivot",
+        "rigid optics",
+        "cancel",
+        "single undo",
+        "JSON round trip",
+        "forged/nonfinite aim rejection",
+        "legacy no-aim SUPPORT layout"
+      ]
+    },
+    "window": {
+      "status": "PASS",
+      "module": "wfrl_blender",
+      "blender": "5.2.1 LTS",
+      "capture_path": "outputs/release-0.3.9/window/capture_20260927_152140_7748b4b4b5",
+      "native_views": 3,
+      "tip_trails": false,
+      "deflection_helpers": false,
+      "layout_roundtrip": false,
+      "ordinary_demo_load": true,
+      "external_layout_import": false,
+      "saved_scene": "static reference snapshot"
+    },
+    "presentation": {
+      "status": "PASS",
+      "capture": "outputs/release-0.3.9/presentation/capture_20260927_152222_7a7a90636e",
+      "blender": "5.2.1 LTS",
+      "checks": [
+        "equal_ordered_columns",
+        "common_16_9",
+        "capture_1920_same_clock_state",
+        "capture_original_quality",
+        "capture_failure_restores_preview",
+        "high_quality_toggle",
+        "source_view_and_quality_restored",
+        "view_switch_keeps_time",
+        "os_close_cleanup"
+      ]
+    }
+  },
+  "native_process_exit_codes": {
+    "default": 0,
+    "surface": 0,
+    "swivel": 0,
+    "window": 0,
+    "presentation": 0
+  },
+  "native_environment": {
+    "os": "macOS",
+    "blender": "5.2.1 LTS",
+    "module": "wfrl_blender",
+    "import_root": "outputs/release-0.3.9/zip-root",
+    "isolated_user_config": true
+  },
+  "native_warning": "Blender exit reported 0.025940 to 0.038147 MB unfreed memory; all listed processes exited 0 and result JSONs passed.",
+  "visual_review": "Inspected actual ZIP native three-view and housing window screenshots.",
+  "not_run": [
+    "new 60-second playback performance benchmark",
+    "manual mouse acceptance",
+    "Windows/Linux GUI",
+    "FAST.Farm solver or training",
+    "stitching",
+    "physical calibration or field experiment"
+  ],
+  "known_limits": [
+    "local root/extreme-tip occlusion",
+    "fixed views do not guarantee whole-rotation coverage",
+    "prior low FPS and unlocated single-to-three playback stop",
+    "REVIEW_ONLY physics and failed fixed-beam availability"
+  ],
+  "remote_asset_verification": "Post-publication download checksum verification is recorded separately in the Release notes."
+}

@@ -1,0 +1,6 @@
+Info: 盒体已整体移动；现在可分别调整 C1–C3 俯仰角
+BOX_UI_OPERATOR_PASS
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

@@ -1,0 +1,63 @@
+{
+  "status": "COMPLETED_DESCRIPTIVE_REVIEW_ONLY",
+  "frames": [
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49
+  ],
+  "comparisons": [
+    {
+      "group": "A1_no_points",
+      "global_mean_m": 0.15740415368686558,
+      "global_mixed_p95_m": 0.3457366777818236,
+      "heldout_later_planned": 84,
+      "heldout_later_failed": 0,
+      "heldout_later_median_raw_px": 0.9572744334509289,
+      "heldout_later_p95_raw_px": 1.9098353413243905
+    },
+    {
+      "group": "A3_RGB_reviewed",
+      "global_mean_m": 0.1614321011250856,
+      "global_mixed_p95_m": 0.3571178563634075,
+      "heldout_later_planned": 84,
+      "heldout_later_failed": 0,
+      "heldout_later_median_raw_px": 0.9946656313702376,
+      "heldout_later_p95_raw_px": 1.4966385290679776
+    },
+    {
+      "group": "A3_automatic",
+      "global_mean_m": 0.17427689317370437,
+      "global_mixed_p95_m": 0.4345892841037143,
+      "heldout_later_planned": 84,
+      "heldout_later_failed": 0,
+      "heldout_later_median_raw_px": 1.222073182111401,
+      "heldout_later_p95_raw_px": 8.563558790843517
+    }
+  ],
+  "matched_components": [
+    "decoded RGB",
+    "RGB masks",
+    "fresh A0",
+    "first RGB q initialization",
+    "sigma and group normalization",
+    "active states",
+    "priors",
+    "bounds",
+    "stops",
+    "dense exact repaired TRF",
+    "512 area sampling",
+    "same evaluation query pixels"
+  ],
+  "changed_component": "point trajectories: frozen RGB reviewed versus official automatic output",
+  "automatic_geometry_change_vs_no_points_m": 0.01687273948683879,
+  "automatic_geometry_change_vs_RGB_reviewed_m": 0.01284479204861877,
+  "three_blind_windows_for_automatic_backend": false,
+  "geometry_gain_established": false,
+  "automatic_reidentification_or_field_health": false,
+  "limitation": "Same development 8 frames only. RGB references are Codex reviewed junction pixels. This is not source material identity or a confidence interval."
+}

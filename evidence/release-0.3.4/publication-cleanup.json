@@ -1,0 +1,112 @@
+{
+  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.4",
+  "commit": "bc36a096",
+  "download_sha256_verified": "3f2c718e3ae438a49786df4de2f92a1153fd405ea026521d8c19f3e22434a9b0",
+  "temporary_cleanup": [
+    {
+      "path": "/tmp/wfrl-release-034-20260918",
+      "bytes": 520029321
+    },
+    {
+      "path": "/tmp/wfrl-034-test-runtime",
+      "bytes": 50394784
+    },
+    {
+      "path": "/tmp/wfrl-034-test-env",
+      "bytes": 58266382
+    },
+    {
+      "path": "/tmp/wfrl-034-download-check",
+      "bytes": 41426777
+    },
+    {
+      "path": "/tmp/wfrl-034-pip.log",
+      "bytes": 1290
+    },
+    {
+      "path": "/tmp/wfrl-034-isolated-tests.log",
+      "bytes": 110
+    },
+    {
+      "path": "REPOSITORY_ROOT/blender_frontend/wfrl_blender/__pycache__",
+      "bytes": 1247445
+    },
+    {
+      "path": "REPOSITORY_ROOT/blender_frontend/wfrl_blender/operators/__pycache__",
+      "bytes": 18952
+    },
+    {
+      "path": "REPOSITORY_ROOT/blender_frontend/wfrl_blender/panels/__pycache__",
+      "bytes": 169556
+    },
+    {
+      "path": "REPOSITORY_ROOT/blender_frontend/tests/__pycache__",
+      "bytes": 128433
+    },
+    {
+      "path": "REPOSITORY_ROOT/wfrl/__pycache__",
+      "bytes": 136832
+    },
+    {
+      "path": "REPOSITORY_ROOT/wfrl/studio/__pycache__",
+      "bytes": 93640
+    },
+    {
+      "path": "REPOSITORY_ROOT/wfrl/lidar/__pycache__",
+      "bytes": 270210
+    },
+    {
+      "path": "REPOSITORY_ROOT/wfrl/blender_bridge/__pycache__",
+      "bytes": 440255
+    },
+    {
+      "path": "REPOSITORY_ROOT/wfrl/viz/__pycache__",
+      "bytes": 309520
+    },
+    {
+      "path": "REPOSITORY_ROOT/wfrl/scene/__pycache__",
+      "bytes": 60269
+    },
+    {
+      "path": "REPOSITORY_ROOT/wfrl/channels/__pycache__",
+      "bytes": 92474
+    },
+    {
+      "path": "REPOSITORY_ROOT/scripts/experiments/__pycache__",
+      "bytes": 21686
+    },
+    {
+      "path": "REPOSITORY_ROOT/scripts/lidar/__pycache__",
+      "bytes": 224831
+    },
+    {
+      "path": "REPOSITORY_ROOT/scripts/train/__pycache__",
+      "bytes": 46953
+    },
+    {
+      "path": "REPOSITORY_ROOT/scripts/blender/__pycache__",
+      "bytes": 47577
+    },
+    {
+      "path": "REPOSITORY_ROOT/tests/__pycache__",
+      "bytes": 55286
+    },
+    {
+      "path": "REPOSITORY_ROOT/tests/lidar/__pycache__",
+      "bytes": 107190
+    },
+    {
+      "path": "REPOSITORY_ROOT/tests/blender_bridge/__pycache__",
+      "bytes": 220990
+    },
+    {
+      "path": "REPOSITORY_ROOT/tests/viz/__pycache__",
+      "bytes": 36845
+    },
+    {
+      "path": "REPOSITORY_ROOT/.pytest_cache",
+      "bytes": 5516
+    }
+  ],
+  "removed_bytes": 673853124
+}

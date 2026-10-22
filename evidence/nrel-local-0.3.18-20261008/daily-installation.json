@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "package_path": "<DAILY_ADDON>",
+  "verified_files": 172,
+  "mismatches": [],
+  "unexpected_files": [],
+  "ignored": [
+    "__pycache__",
+    "*.pyc"
+  ],
+  "version": "0.3.18",
+  "archive": "<LOCAL_EVIDENCE>/validation/installed-final/package/wfrl_blender-0.3.18.zip",
+  "archive_sha256": "f5fb69e6e8cdc58edf1d1f76fd4eacc1e108b688768635cc3a5a05c04bdfc400",
+  "userpref_unchanged": true,
+  "publication": "LOCAL_ONLY_UNPUBLISHED"
+}

@@ -1,0 +1,5 @@
+planned_clip,frame_list,status,A1_mean_m,C4_mean_m,D4_mean_m,D12_mean_m,note
+development,,NOT_RUN_NUMERICAL_GATE_FAILED,,,,,No clip was frozen or captured; empty cells are not zero errors
+test_1,,NOT_RUN_NUMERICAL_GATE_FAILED,,,,,No clip was frozen or captured; empty cells are not zero errors
+test_2,,NOT_RUN_NUMERICAL_GATE_FAILED,,,,,No clip was frozen or captured; empty cells are not zero errors
+test_3,,NOT_RUN_NUMERICAL_GATE_FAILED,,,,,No clip was frozen or captured; empty cells are not zero errors

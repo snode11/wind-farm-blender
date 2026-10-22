@@ -1,0 +1,15 @@
+TIP_DEFLECTION_ADDON {"module": "bl_ext.wfrl_frontend.wfrl_blender", "file": "<ISOLATED_ADDON>/__init__.py"}
+00:11.946  blend            | Read blend: "<TEMP_SCENE>/deflection.blend"
+Info: Saved as "deflection.blend"
+TIP_DEFLECTION_RESULT {"addon_module": "bl_ext.wfrl_frontend.wfrl_blender", "addon_file": "<ISOLATED_ADDON>/__init__.py", "verification_layer": "INSTALLED_EXTENSION", "saved_mesh_max_error_m": [0.00020351976514199066, 0.0010612851396875622, 2.9086288567223284e-05], "interpolated_mesh_max_error_m": [2.8258155350791014e-05, 0.00013565605585430518, 2.298421120006111e-05], "independent_source_max_error_m": [0.00020506496892203074, 0.0010665028159974055, 1.7677585993764594e-05], "mesh_transport_max_error_m": [4.7508910094862244e-06, 1.720011175621039e-05, 2.8986271729536384e-05], "saved_gate_threshold_m": 0.0002, "interpolated_gate_threshold_m": 0.005, "physical_gate": "FAILED_GATE", "software_checks": "PASS", "switching": true, "seeking": true, "hidden_t1": true, "fixed_clock": true, "reload": true}
+Traceback (most recent call last):
+  File "<LOCAL_REPO>/blender_frontend/tests/blender/tip_deflection_regression.py", line 130, in <module>
+    assert max(saved_max) < .0002, saved_max
+           ^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: [2.03519765e-04 1.06128514e-03 2.90862886e-05]
+
+Error: script failed, file: '<LOCAL_REPO>/blender_frontend/tests/blender/tip_deflection_regression.py', exiting.
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 700, total unfreed memory 0.051880 MB

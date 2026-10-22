@@ -1,0 +1,18 @@
+{
+  "archive": "dual-beam-tls-20261002-stage1-research-data.zip",
+  "archive_bytes": 36876382,
+  "archive_sha256": "2ed94c35be0f30ee3195c1d67619f6f95037e150ad306bafad9cb32d784c796e",
+  "relocated_verification": {
+    "python311": "PASS",
+    "python313": "PASS",
+    "packages": 3
+  },
+  "research_payload_files": 112,
+  "repository_tests": {
+    "passed": 236,
+    "subtests": 7
+  },
+  "snapshot_tests": 152,
+  "performance_status": "PENDING_ACCEPTANCE",
+  "default_method": "hub-axis.v1"
+}

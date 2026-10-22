@@ -1,0 +1,526 @@
+{
+  "v1": {
+    "tracks_sha256": "261854da4bf82eab1291d1d777ca08f69fbff51e39744829ef6df8f7a29e27c0",
+    "summary": {
+      "cameras": {
+        "Patch": {
+          "status": "RGB_FIXED_ANCHOR_TRACKS",
+          "planned_points": 12,
+          "planned_observations": 48,
+          "sensor_roi_xyxy": [
+            240,
+            154,
+            720,
+            614
+          ]
+        },
+        "Crack": {
+          "status": "RGB_FIXED_ANCHOR_TRACKS",
+          "planned_points": 10,
+          "planned_observations": 40,
+          "sensor_roi_xyxy": [
+            240,
+            154,
+            720,
+            614
+          ]
+        }
+      },
+      "planned_tracks": 22,
+      "planned_observations": 88,
+      "status_counts": {
+        "RGB_TRACK_OBSERVED": 20,
+        "COMPETING_MATCH_PEAK": 4,
+        "IDENTITY_TERMINATED": 46,
+        "FORWARD_BACKWARD_MISMATCH": 8,
+        "AMBIGUOUS_RGB_IDENTITY": 5,
+        "LOCALIZATION_UNCERTAIN": 1,
+        "LK_FAILED": 4
+      }
+    },
+    "per_camera": {
+      "Patch": {
+        "planned_tracks": 12,
+        "accepted_anchors": 7,
+        "complete_four_frame_tracks": 0,
+        "target_planned": 36,
+        "target_accepted": 3,
+        "target_status_counts": {
+          "COMPETING_MATCH_PEAK": 3,
+          "IDENTITY_TERMINATED": 26,
+          "RGB_TRACK_OBSERVED": 3,
+          "FORWARD_BACKWARD_MISMATCH": 2,
+          "AMBIGUOUS_RGB_IDENTITY": 1,
+          "LOCALIZATION_UNCERTAIN": 1
+        },
+        "accepted_by_frame": {
+          "43": 3,
+          "45": 0,
+          "47": 0
+        },
+        "maximum_accepted_FB_px": 0.23189255595207214,
+        "maximum_conditional_sigma_px": 0.06945141405285175,
+        "minimum_NCC": 0.9736100435256958,
+        "minimum_contrast_gray": 26.0,
+        "minimum_identity_margin": 2.328446308444158
+      },
+      "Crack": {
+        "planned_tracks": 10,
+        "accepted_anchors": 10,
+        "complete_four_frame_tracks": 0,
+        "target_planned": 30,
+        "target_accepted": 0,
+        "target_status_counts": {
+          "FORWARD_BACKWARD_MISMATCH": 6,
+          "IDENTITY_TERMINATED": 20,
+          "LK_FAILED": 4
+        },
+        "accepted_by_frame": {
+          "43": 0,
+          "45": 0,
+          "47": 0
+        },
+        "maximum_accepted_FB_px": null,
+        "maximum_conditional_sigma_px": null,
+        "minimum_NCC": null,
+        "minimum_contrast_gray": null,
+        "minimum_identity_margin": null
+      }
+    }
+  },
+  "v2": {
+    "tracks_sha256": "88a0ae35ef233c260652d8f85550a34914f3e283ef3da17d196e1499f3cfbcf2",
+    "summary": {
+      "cameras": {
+        "Patch": {
+          "status": "RGB_FIXED_ANCHOR_TRACKS",
+          "planned_points": 12,
+          "planned_observations": 48,
+          "sensor_roi_xyxy": [
+            240,
+            154,
+            720,
+            614
+          ]
+        },
+        "Crack": {
+          "status": "RGB_FIXED_ANCHOR_TRACKS",
+          "planned_points": 10,
+          "planned_observations": 40,
+          "sensor_roi_xyxy": [
+            240,
+            154,
+            720,
+            614
+          ]
+        }
+      },
+      "planned_tracks": 22,
+      "planned_observations": 88,
+      "status_counts": {
+        "RGB_TRACK_OBSERVED": 22,
+        "AMBIGUOUS_RGB_IDENTITY": 6,
+        "IDENTITY_TERMINATED": 44,
+        "COMPETING_MATCH_PEAK": 2,
+        "FORWARD_BACKWARD_MISMATCH": 10,
+        "LK_FAILED": 4
+      }
+    },
+    "per_camera": {
+      "Patch": {
+        "planned_tracks": 12,
+        "accepted_anchors": 7,
+        "complete_four_frame_tracks": 0,
+        "target_planned": 36,
+        "target_accepted": 5,
+        "target_status_counts": {
+          "RGB_TRACK_OBSERVED": 5,
+          "AMBIGUOUS_RGB_IDENTITY": 2,
+          "IDENTITY_TERMINATED": 24,
+          "FORWARD_BACKWARD_MISMATCH": 4,
+          "COMPETING_MATCH_PEAK": 1
+        },
+        "accepted_by_frame": {
+          "43": 5,
+          "45": 0,
+          "47": 0
+        },
+        "maximum_accepted_FB_px": 0.24315693974494934,
+        "maximum_conditional_sigma_px": 0.13810876836386893,
+        "minimum_NCC": 0.89109206199646,
+        "minimum_contrast_gray": 26.0,
+        "minimum_identity_margin": 2.0377745141569044
+      },
+      "Crack": {
+        "planned_tracks": 10,
+        "accepted_anchors": 10,
+        "complete_four_frame_tracks": 0,
+        "target_planned": 30,
+        "target_accepted": 0,
+        "target_status_counts": {
+          "FORWARD_BACKWARD_MISMATCH": 6,
+          "IDENTITY_TERMINATED": 20,
+          "LK_FAILED": 4
+        },
+        "accepted_by_frame": {
+          "43": 0,
+          "45": 0,
+          "47": 0
+        },
+        "maximum_accepted_FB_px": null,
+        "maximum_conditional_sigma_px": null,
+        "minimum_NCC": null,
+        "minimum_contrast_gray": null,
+        "minimum_identity_margin": null
+      }
+    }
+  },
+  "v3": {
+    "tracks_sha256": "8027839e2be0bf9512cc98c1e103f97f31c1850813fb4f83f592f47cc48c7582",
+    "summary": {
+      "cameras": {
+        "Patch": {
+          "status": "RGB_FIXED_ANCHOR_TRACKS",
+          "planned_points": 12,
+          "planned_observations": 48,
+          "sensor_roi_xyxy": [
+            240,
+            154,
+            720,
+            614
+          ]
+        },
+        "Crack": {
+          "status": "RGB_FIXED_ANCHOR_TRACKS",
+          "planned_points": 10,
+          "planned_observations": 40,
+          "sensor_roi_xyxy": [
+            240,
+            154,
+            720,
+            614
+          ]
+        }
+      },
+      "planned_tracks": 22,
+      "planned_observations": 88,
+      "status_counts": {
+        "RGB_TRACK_OBSERVED": 37,
+        "AMBIGUOUS_RGB_IDENTITY": 7,
+        "IDENTITY_TERMINATED": 32,
+        "COMPETING_MATCH_PEAK": 7,
+        "FORWARD_BACKWARD_MISMATCH": 4,
+        "LOCALIZATION_UNCERTAIN": 1
+      }
+    },
+    "per_camera": {
+      "Patch": {
+        "planned_tracks": 12,
+        "accepted_anchors": 7,
+        "complete_four_frame_tracks": 0,
+        "target_planned": 36,
+        "target_accepted": 6,
+        "target_status_counts": {
+          "RGB_TRACK_OBSERVED": 6,
+          "AMBIGUOUS_RGB_IDENTITY": 2,
+          "IDENTITY_TERMINATED": 23,
+          "FORWARD_BACKWARD_MISMATCH": 4,
+          "LOCALIZATION_UNCERTAIN": 1
+        },
+        "accepted_by_frame": {
+          "43": 6,
+          "45": 0,
+          "47": 0
+        },
+        "maximum_accepted_FB_px": 0.011750495992600918,
+        "maximum_conditional_sigma_px": 0.04499638733462733,
+        "minimum_NCC": 0.9952204823493958,
+        "minimum_contrast_gray": 25.705215454101562,
+        "minimum_identity_margin": 2.0377745141569044
+      },
+      "Crack": {
+        "planned_tracks": 10,
+        "accepted_anchors": 10,
+        "complete_four_frame_tracks": 3,
+        "target_planned": 30,
+        "target_accepted": 14,
+        "target_status_counts": {
+          "RGB_TRACK_OBSERVED": 14,
+          "COMPETING_MATCH_PEAK": 6,
+          "IDENTITY_TERMINATED": 9,
+          "AMBIGUOUS_RGB_IDENTITY": 1
+        },
+        "accepted_by_frame": {
+          "43": 8,
+          "45": 3,
+          "47": 3
+        },
+        "maximum_accepted_FB_px": 0.6982940435409546,
+        "maximum_conditional_sigma_px": 0.10215365844538218,
+        "minimum_NCC": 0.9849759340286255,
+        "minimum_contrast_gray": 32.323974609375,
+        "minimum_identity_margin": 2.470236972782702
+      }
+    }
+  },
+  "v4": {
+    "tracks_sha256": "8e53c747a71696a27f7d4a569b9b79bc95adb5e27213855ae6082b08aa0abb06",
+    "summary": {
+      "cameras": {
+        "Patch": {
+          "status": "RGB_FIXED_ANCHOR_TRACKS",
+          "planned_points": 12,
+          "planned_observations": 48,
+          "sensor_roi_xyxy": [
+            240,
+            154,
+            720,
+            614
+          ]
+        },
+        "Crack": {
+          "status": "RGB_FIXED_ANCHOR_TRACKS",
+          "planned_points": 10,
+          "planned_observations": 40,
+          "sensor_roi_xyxy": [
+            240,
+            154,
+            720,
+            614
+          ]
+        }
+      },
+      "planned_tracks": 22,
+      "planned_observations": 88,
+      "status_counts": {
+        "RGB_TRACK_OBSERVED": 39,
+        "LK_FAILED": 6,
+        "AMBIGUOUS_RGB_IDENTITY": 7,
+        "IDENTITY_TERMINATED": 29,
+        "COMPETING_MATCH_PEAK": 6,
+        "FORWARD_BACKWARD_MISMATCH": 1
+      }
+    },
+    "per_camera": {
+      "Patch": {
+        "planned_tracks": 12,
+        "accepted_anchors": 7,
+        "complete_four_frame_tracks": 0,
+        "target_planned": 36,
+        "target_accepted": 9,
+        "target_status_counts": {
+          "RGB_TRACK_OBSERVED": 9,
+          "LK_FAILED": 4,
+          "AMBIGUOUS_RGB_IDENTITY": 1,
+          "IDENTITY_TERMINATED": 20,
+          "COMPETING_MATCH_PEAK": 1,
+          "FORWARD_BACKWARD_MISMATCH": 1
+        },
+        "accepted_by_frame": {
+          "43": 6,
+          "45": 3,
+          "47": 0
+        },
+        "maximum_accepted_FB_px": 0.19574332237243652,
+        "maximum_conditional_sigma_px": 0.06394962031804131,
+        "minimum_NCC": 0.9776284098625183,
+        "minimum_contrast_gray": 25.705215454101562,
+        "minimum_identity_margin": 2.0377745141569044
+      },
+      "Crack": {
+        "planned_tracks": 10,
+        "accepted_anchors": 10,
+        "complete_four_frame_tracks": 2,
+        "target_planned": 30,
+        "target_accepted": 13,
+        "target_status_counts": {
+          "RGB_TRACK_OBSERVED": 13,
+          "LK_FAILED": 2,
+          "COMPETING_MATCH_PEAK": 4,
+          "IDENTITY_TERMINATED": 9,
+          "AMBIGUOUS_RGB_IDENTITY": 2
+        },
+        "accepted_by_frame": {
+          "43": 7,
+          "45": 4,
+          "47": 2
+        },
+        "maximum_accepted_FB_px": 0.6811091899871826,
+        "maximum_conditional_sigma_px": 0.10820751258532905,
+        "minimum_NCC": 0.9823161959648132,
+        "minimum_contrast_gray": 30.894515991210938,
+        "minimum_identity_margin": 2.2024339068401173
+      }
+    }
+  },
+  "v5": {
+    "tracks_sha256": "40163c720a520f6b544d07c5248a4ac716bba36dc9cdcd757db69a456c2c9efd",
+    "summary": {
+      "cameras": {
+        "Patch": {
+          "status": "RGB_FIXED_ANCHOR_TRACKS",
+          "planned_points": 12,
+          "planned_observations": 48,
+          "sensor_roi_xyxy": [
+            240,
+            154,
+            720,
+            614
+          ]
+        },
+        "Crack": {
+          "status": "RGB_FIXED_ANCHOR_TRACKS",
+          "planned_points": 10,
+          "planned_observations": 40,
+          "sensor_roi_xyxy": [
+            240,
+            154,
+            720,
+            614
+          ]
+        }
+      },
+      "planned_tracks": 22,
+      "planned_observations": 88,
+      "status_counts": {
+        "RGB_TRACK_OBSERVED": 46,
+        "COMPETING_MATCH_PEAK": 10,
+        "AMBIGUOUS_RGB_IDENTITY": 7,
+        "IDENTITY_TERMINATED": 25
+      }
+    },
+    "per_camera": {
+      "Patch": {
+        "planned_tracks": 12,
+        "accepted_anchors": 7,
+        "complete_four_frame_tracks": 1,
+        "target_planned": 36,
+        "target_accepted": 12,
+        "target_status_counts": {
+          "RGB_TRACK_OBSERVED": 12,
+          "COMPETING_MATCH_PEAK": 5,
+          "AMBIGUOUS_RGB_IDENTITY": 1,
+          "IDENTITY_TERMINATED": 18
+        },
+        "accepted_by_frame": {
+          "43": 6,
+          "45": 5,
+          "47": 1
+        },
+        "maximum_accepted_FB_px": 0.19621926546096802,
+        "maximum_conditional_sigma_px": 0.08982838016610671,
+        "minimum_NCC": 0.9696071743965149,
+        "minimum_contrast_gray": 25.70556640625,
+        "minimum_identity_margin": 2.0377745141569044
+      },
+      "Crack": {
+        "planned_tracks": 10,
+        "accepted_anchors": 10,
+        "complete_four_frame_tracks": 4,
+        "target_planned": 30,
+        "target_accepted": 17,
+        "target_status_counts": {
+          "RGB_TRACK_OBSERVED": 17,
+          "COMPETING_MATCH_PEAK": 4,
+          "IDENTITY_TERMINATED": 7,
+          "AMBIGUOUS_RGB_IDENTITY": 2
+        },
+        "accepted_by_frame": {
+          "43": 8,
+          "45": 5,
+          "47": 4
+        },
+        "maximum_accepted_FB_px": 0.7562530636787415,
+        "maximum_conditional_sigma_px": 0.12336941908401255,
+        "minimum_NCC": 0.9823195338249207,
+        "minimum_contrast_gray": 30.894515991210938,
+        "minimum_identity_margin": 2.2024339068401173
+      }
+    }
+  },
+  "v6": {
+    "tracks_sha256": "259c7a46bf6c998fa5271ca9db1edbaf80f68d81c2e5fbe27446be603f6477f3",
+    "summary": {
+      "cameras": {
+        "Patch": {
+          "status": "RGB_FIXED_ANCHOR_TRACKS",
+          "planned_points": 12,
+          "planned_observations": 48,
+          "sensor_roi_xyxy": [
+            240,
+            154,
+            720,
+            614
+          ]
+        },
+        "Crack": {
+          "status": "RGB_FIXED_ANCHOR_TRACKS",
+          "planned_points": 10,
+          "planned_observations": 40,
+          "sensor_roi_xyxy": [
+            240,
+            154,
+            720,
+            614
+          ]
+        }
+      },
+      "planned_tracks": 22,
+      "planned_observations": 88,
+      "status_counts": {
+        "RGB_TRACK_OBSERVED": 46,
+        "COMPETING_MATCH_PEAK": 10,
+        "AMBIGUOUS_RGB_IDENTITY": 7,
+        "IDENTITY_TERMINATED": 25
+      }
+    },
+    "per_camera": {
+      "Patch": {
+        "planned_tracks": 12,
+        "accepted_anchors": 7,
+        "complete_four_frame_tracks": 1,
+        "target_planned": 36,
+        "target_accepted": 12,
+        "target_status_counts": {
+          "RGB_TRACK_OBSERVED": 12,
+          "COMPETING_MATCH_PEAK": 5,
+          "AMBIGUOUS_RGB_IDENTITY": 1,
+          "IDENTITY_TERMINATED": 18
+        },
+        "accepted_by_frame": {
+          "43": 6,
+          "45": 5,
+          "47": 1
+        },
+        "maximum_accepted_FB_px": 0.19621926546096802,
+        "maximum_conditional_sigma_px": 0.08982838016610671,
+        "minimum_NCC": 0.9696071743965149,
+        "minimum_contrast_gray": 25.70556640625,
+        "minimum_identity_margin": 2.0377745141569044
+      },
+      "Crack": {
+        "planned_tracks": 10,
+        "accepted_anchors": 10,
+        "complete_four_frame_tracks": 4,
+        "target_planned": 30,
+        "target_accepted": 17,
+        "target_status_counts": {
+          "RGB_TRACK_OBSERVED": 17,
+          "COMPETING_MATCH_PEAK": 4,
+          "IDENTITY_TERMINATED": 7,
+          "AMBIGUOUS_RGB_IDENTITY": 2
+        },
+        "accepted_by_frame": {
+          "43": 8,
+          "45": 5,
+          "47": 4
+        },
+        "maximum_accepted_FB_px": 0.7562530636787415,
+        "maximum_conditional_sigma_px": 0.12336941908401255,
+        "minimum_NCC": 0.9823195338249207,
+        "minimum_contrast_gray": 30.894515991210938,
+        "minimum_identity_margin": 2.2024339068401173
+      }
+    }
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "version": "0.3.7",
+  "archive_sha256": "c087776e1b5a9b0269523177b9c4d52bedd163e87813f0a6de1118204dfec74e",
+  "inventory_files": 97,
+  "host_tests": {
+    "passed": 408,
+    "skipped_initially": 3,
+    "rtsp_followup": "rtsp-integration.log",
+    "remaining_skip": "Original VTP is not distributed with the offline release",
+    "rtsp_followup_passed": 2,
+    "total_unique_passed": 410,
+    "remaining_skipped": 1
+  },
+  "blender_tests": [
+    {
+      "test": "custom_camera_registration_regression",
+      "window": false,
+      "exit_code": 0,
+      "seconds": 1.16,
+      "error_files": []
+    },
+    {
+      "test": "custom_camera_v3_regression",
+      "window": false,
+      "exit_code": 0,
+      "seconds": 0.84,
+      "error_files": []
+    },
+    {
+      "test": "native_camera_projection_regression",
+      "window": false,
+      "exit_code": 0,
+      "seconds": 0.78,
+      "error_files": []
+    },
+    {
+      "test": "four_camera_projection_regression",
+      "window": false,
+      "exit_code": 0,
+      "seconds": 0.78,
+      "error_files": []
+    },
+    {
+      "test": "video_output_regression",
+      "window": false,
+      "exit_code": 0,
+      "seconds": 13.53,
+      "error_files": []
+    },
+    {
+      "test": "nacelle_camera_regression",
+      "window": false,
+      "exit_code": 0,
+      "seconds": 39.13,
+      "error_files": []
+    },
+    {
+      "test": "native_camera_views_regression",
+      "window": true,
+      "exit_code": 0,
+      "seconds": 15.89,
+      "error_files": []
+    },
+    {
+      "test": "custom_camera_v3_window",
+      "window": true,
+      "exit_code": 0,
+      "seconds": 17.54,
+      "error_files": []
+    },
+    {
+      "test": "four_cameras_window_regression",
+      "window": true,
+      "exit_code": 0,
+      "seconds": 23.13,
+      "error_files": []
+    },
+    {
+      "test": "custom_camera_exit_regression",
+      "window": true,
+      "exit_code": 0,
+      "seconds": 8.34,
+      "error_files": []
+    }
+  ],
+  "blender": "5.2.1 LTS",
+  "installed_module": "bl_ext.release_test.wfrl_blender",
+  "isolated_preferences": true,
+  "prior_package_changed_files": [
+    "blender_manifest.toml"
+  ],
+  "review_only_data_reused": true,
+  "windows_linux_runtime_verified": false,
+  "manual_interaction_acceptance": false,
+  "notes": [
+    "Initial video test lacked environment variables; corrected harness and passed.",
+    "Initial preferences isolation directory did not exist; Blender wrote global preferences. Temporary repository removed and original extension reenabled. Exact original preferences backup unavailable; not claiming byte-identical restoration."
+  ],
+  "source_snapshot_build_sha256": "c087776e1b5a9b0269523177b9c4d52bedd163e87813f0a6de1118204dfec74e"
+}

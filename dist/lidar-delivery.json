@@ -1,0 +1,26 @@
+{
+  "schema": "wfrl.lidar-delivery.v1",
+  "version": "0.3.9",
+  "archive": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.9/wfrl_blender-0.3.9.zip",
+  "archive_sha256": "0cabd8f1c95739d585b72ba638be3026db9488757a037b524b50fd8d362b5343",
+  "packages": {
+    "normal": "results/lidar/packages/normal-v1.1",
+    "close": "results/lidar/packages/close-v1.1"
+  },
+  "package_manifest_sha256": {
+    "normal": "658922c57ecf7b69028d55eae604119a4b44e60e66247817edbd145d9dc0fe2d",
+    "close": "91895c64e0bc962c956d57fe8bb507fe9e26f0af6cf6aa2f59cef5a19a9cc30b"
+  },
+  "demo": {
+    "kind": "MAPPO",
+    "duration_s": 60,
+    "bundled_data": "blender_frontend/wfrl_blender/assets/mappo",
+    "status": "REVIEW_ONLY",
+    "manifest_sha256": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde",
+    "schema": "wfrl.farm-flex-review.v3",
+    "tower_model": "elastodyn-flexible"
+  },
+  "delivery_status": "External normal/close packages are repository runtime inputs. The referenced extension archive has its own release identity and does not identify current source or bundled MAPPO assets.",
+  "verification": "evidence/release-0.3.9/verification.json",
+  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.9"
+}

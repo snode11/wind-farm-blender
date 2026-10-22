@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "elapsed": 2.765041416976601,
+  "frames_advanced": 163,
+  "unique_frames_drawn": {
+    "1": 18,
+    "2": 18,
+    "3": 18,
+    "4": 18
+  },
+  "peak_rss_gib": 0.961456298828125
+}

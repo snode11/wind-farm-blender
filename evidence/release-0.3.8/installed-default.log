@@ -1,0 +1,6 @@
+THREE_CAMERA_DEFAULT_PASS [27, 27] <installed-extension-root>/wfrl_blender/__init__.py
+BOX_PLACEMENT_PITCH_UNDO_ROLLBACK_PASS
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

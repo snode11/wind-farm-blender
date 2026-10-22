@@ -1,0 +1,9 @@
+Processing /tmp/wfrl-publication/dependency-check/wfcrl-env
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: WFCRL
+  Building wheel for WFCRL (pyproject.toml): started
+  Building wheel for WFCRL (pyproject.toml): finished with status 'done'
+  Created wheel for WFCRL: filename=wfcrl-0.0.1-py3-none-any.whl size=28523593 sha256=db8d33c65308ce5209fd46f9855835bdea83f5546fc36062523c64e084caee3b
+  Stored in directory: /privateTEMPORARY_PATH
+Successfully built WFCRL

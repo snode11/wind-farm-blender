@@ -1,0 +1,5 @@
+V3_WINDOW_AUTOMATED_PASS
+00:16.973  blend            | Saved session recovery to "TEMPORARY_PATH"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

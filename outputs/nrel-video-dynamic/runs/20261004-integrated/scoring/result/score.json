@@ -1,0 +1,406 @@
+{
+  "schema": "nrel-a03-conditional-structural-score.v1",
+  "status": "POST_FREEZE_RESEARCH_SCORE_NOT_ENGINEERING_ACCEPTANCE",
+  "target": "T1/B1 BeamDyn mechanical material tip",
+  "groups": {
+    "G1": {
+      "rows": [
+        {
+          "frame_id": 42,
+          "sim_time_s": 122.125,
+          "status": "PRIOR_DEFINED_BASELINE",
+          "point_error_xyz_m": [
+            0.01232557745938756,
+            -0.060060510072602824,
+            0.12378846557396628
+          ],
+          "point_error_norm_m": 0.13814039575390546,
+          "signed_d_error_m": 0.0013164941552070708,
+          "estimated_d_m": -2.97745658182655,
+          "true_d_m": -2.9787730759817572,
+          "true_d_in_frozen_estimate_plane_m": -2.9787720518695484,
+          "signed_d_error_shared_plane_m": 0.0013154700429982569,
+          "ideal_plane_center_difference_m": 3.412023595997325e-06,
+          "ideal_plane_normal_difference": 1.6020215061532945e-09
+        },
+        {
+          "frame_id": 43,
+          "sim_time_s": 122.175,
+          "status": "PRIOR_DEFINED_BASELINE",
+          "point_error_xyz_m": [
+            0.050695319966070684,
+            -0.04893298792273981,
+            0.09009797711839695
+          ],
+          "point_error_norm_m": 0.1143770005479094,
+          "signed_d_error_m": 0.042508186083686006,
+          "estimated_d_m": -2.9775156368050335,
+          "true_d_m": -3.0200238228887195,
+          "true_d_in_frozen_estimate_plane_m": -3.0200237637254252,
+          "signed_d_error_shared_plane_m": 0.04250812692039174,
+          "ideal_plane_center_difference_m": 4.310596199207661e-06,
+          "ideal_plane_normal_difference": 1.690734877255666e-09
+        },
+        {
+          "frame_id": 44,
+          "sim_time_s": 122.225,
+          "status": "PRIOR_DEFINED_BASELINE",
+          "point_error_xyz_m": [
+            0.094857658274897,
+            -0.0381788676288366,
+            0.06138432096370394
+          ],
+          "point_error_norm_m": 0.11926288662862553,
+          "signed_d_error_m": 0.08903423031388824,
+          "estimated_d_m": -2.9775535406942084,
+          "true_d_m": -3.0665877710080967,
+          "true_d_in_frozen_estimate_plane_m": -3.066587900407864,
+          "signed_d_error_shared_plane_m": 0.08903435971365559,
+          "ideal_plane_center_difference_m": 4.2794428287031214e-07,
+          "ideal_plane_normal_difference": 3.33493419034343e-09
+        },
+        {
+          "frame_id": 45,
+          "sim_time_s": 122.275,
+          "status": "PRIOR_DEFINED_BASELINE",
+          "point_error_xyz_m": [
+            0.13067920114884046,
+            -0.03038757096999234,
+            0.041232276605462914
+          ],
+          "point_error_norm_m": 0.1403586788069225,
+          "signed_d_error_m": 0.12649829538915824,
+          "estimated_d_m": -2.9775713099192056,
+          "true_d_m": -3.104069605308364,
+          "true_d_in_frozen_estimate_plane_m": -3.104069505924726,
+          "signed_d_error_shared_plane_m": 0.12649819600552048,
+          "ideal_plane_center_difference_m": 1.6970468613029338e-06,
+          "ideal_plane_normal_difference": 1.1774953424555086e-09
+        }
+      ],
+      "point_norm_error_m": {
+        "count": 4,
+        "mean": 0.1280347404343407,
+        "rmse": 0.12853896494526407,
+        "mean_absolute": 0.1280347404343407,
+        "p95_absolute": 0.14002593634896993,
+        "max_absolute": 0.1403586788069225
+      },
+      "signed_d_error_m": {
+        "count": 4,
+        "mean": 0.06483930148548489,
+        "rmse": 0.08021469931523648,
+        "mean_absolute": 0.06483930148548489,
+        "p95_absolute": 0.12087868562786773,
+        "max_absolute": 0.12649829538915824
+      },
+      "signed_d_error_shared_plane_m": {
+        "count": 4,
+        "mean": 0.06483903817064152,
+        "rmse": 0.08021468400172417,
+        "mean_absolute": 0.06483903817064152,
+        "p95_absolute": 0.12087862056174073,
+        "max_absolute": 0.12649819600552048
+      }
+    },
+    "G2": {
+      "rows": [
+        {
+          "frame_id": 42,
+          "sim_time_s": 122.125,
+          "status": "PRIOR_ONLY_AMBIGUOUS",
+          "point_error_xyz_m": [
+            0.01232557745938756,
+            -0.060060510072602824,
+            0.12378846557396628
+          ],
+          "point_error_norm_m": 0.13814039575390546,
+          "signed_d_error_m": 0.0013164941552070708,
+          "estimated_d_m": -2.97745658182655,
+          "true_d_m": -2.9787730759817572,
+          "true_d_in_frozen_estimate_plane_m": -2.9787720518695484,
+          "signed_d_error_shared_plane_m": 0.0013154700429982569,
+          "ideal_plane_center_difference_m": 3.412023595997325e-06,
+          "ideal_plane_normal_difference": 1.6020215061532945e-09
+        },
+        {
+          "frame_id": 43,
+          "sim_time_s": 122.175,
+          "status": "PRIOR_ONLY_AMBIGUOUS",
+          "point_error_xyz_m": [
+            0.050695319966070684,
+            -0.04893298792273981,
+            0.09009797711839695
+          ],
+          "point_error_norm_m": 0.1143770005479094,
+          "signed_d_error_m": 0.042508186083686006,
+          "estimated_d_m": -2.9775156368050335,
+          "true_d_m": -3.0200238228887195,
+          "true_d_in_frozen_estimate_plane_m": -3.0200237637254252,
+          "signed_d_error_shared_plane_m": 0.04250812692039174,
+          "ideal_plane_center_difference_m": 4.310596199207661e-06,
+          "ideal_plane_normal_difference": 1.690734877255666e-09
+        },
+        {
+          "frame_id": 44,
+          "sim_time_s": 122.225,
+          "status": "PRIOR_ONLY_AMBIGUOUS",
+          "point_error_xyz_m": [
+            0.094857658274897,
+            -0.0381788676288366,
+            0.06138432096370394
+          ],
+          "point_error_norm_m": 0.11926288662862553,
+          "signed_d_error_m": 0.08903423031388824,
+          "estimated_d_m": -2.9775535406942084,
+          "true_d_m": -3.0665877710080967,
+          "true_d_in_frozen_estimate_plane_m": -3.066587900407864,
+          "signed_d_error_shared_plane_m": 0.08903435971365559,
+          "ideal_plane_center_difference_m": 4.2794428287031214e-07,
+          "ideal_plane_normal_difference": 3.33493419034343e-09
+        },
+        {
+          "frame_id": 45,
+          "sim_time_s": 122.275,
+          "status": "PRIOR_ONLY_AMBIGUOUS",
+          "point_error_xyz_m": [
+            0.13067920114884046,
+            -0.03038757096999234,
+            0.041232276605462914
+          ],
+          "point_error_norm_m": 0.1403586788069225,
+          "signed_d_error_m": 0.12649829538915824,
+          "estimated_d_m": -2.9775713099192056,
+          "true_d_m": -3.104069605308364,
+          "true_d_in_frozen_estimate_plane_m": -3.104069505924726,
+          "signed_d_error_shared_plane_m": 0.12649819600552048,
+          "ideal_plane_center_difference_m": 1.6970468613029338e-06,
+          "ideal_plane_normal_difference": 1.1774953424555086e-09
+        }
+      ],
+      "point_norm_error_m": {
+        "count": 4,
+        "mean": 0.1280347404343407,
+        "rmse": 0.12853896494526407,
+        "mean_absolute": 0.1280347404343407,
+        "p95_absolute": 0.14002593634896993,
+        "max_absolute": 0.1403586788069225
+      },
+      "signed_d_error_m": {
+        "count": 4,
+        "mean": 0.06483930148548489,
+        "rmse": 0.08021469931523648,
+        "mean_absolute": 0.06483930148548489,
+        "p95_absolute": 0.12087868562786773,
+        "max_absolute": 0.12649829538915824
+      },
+      "signed_d_error_shared_plane_m": {
+        "count": 4,
+        "mean": 0.06483903817064152,
+        "rmse": 0.08021468400172417,
+        "mean_absolute": 0.06483903817064152,
+        "p95_absolute": 0.12087862056174073,
+        "max_absolute": 0.12649819600552048
+      }
+    },
+    "G3": {
+      "rows": [
+        {
+          "frame_id": 42,
+          "sim_time_s": 122.125,
+          "status": "PRIOR_ASSISTED_AMBIGUOUS",
+          "point_error_xyz_m": [
+            0.01232557745938756,
+            -0.060060510072602824,
+            0.12378846557396628
+          ],
+          "point_error_norm_m": 0.13814039575390546,
+          "signed_d_error_m": 0.0013164941552070708,
+          "estimated_d_m": -2.97745658182655,
+          "true_d_m": -2.9787730759817572,
+          "true_d_in_frozen_estimate_plane_m": -2.9787720518695484,
+          "signed_d_error_shared_plane_m": 0.0013154700429982569,
+          "ideal_plane_center_difference_m": 3.412023595997325e-06,
+          "ideal_plane_normal_difference": 1.6020215061532945e-09
+        },
+        {
+          "frame_id": 43,
+          "sim_time_s": 122.175,
+          "status": "IMAGE_CONSTRAINED_AMBIGUOUS",
+          "point_error_xyz_m": [
+            0.050695319966070684,
+            -0.04893298792273981,
+            0.09009797711839695
+          ],
+          "point_error_norm_m": 0.1143770005479094,
+          "signed_d_error_m": 0.042508186083686006,
+          "estimated_d_m": -2.9775156368050335,
+          "true_d_m": -3.0200238228887195,
+          "true_d_in_frozen_estimate_plane_m": -3.0200237637254252,
+          "signed_d_error_shared_plane_m": 0.04250812692039174,
+          "ideal_plane_center_difference_m": 4.310596199207661e-06,
+          "ideal_plane_normal_difference": 1.690734877255666e-09
+        },
+        {
+          "frame_id": 44,
+          "sim_time_s": 122.225,
+          "status": "IMAGE_CONSTRAINED_AMBIGUOUS",
+          "point_error_xyz_m": [
+            0.11793073253492636,
+            -0.10408181293878016,
+            0.13297032028731337
+          ],
+          "point_error_norm_m": 0.20596550084457899,
+          "signed_d_error_m": 0.10565720242777266,
+          "estimated_d_m": -2.960930568580324,
+          "true_d_m": -3.0665877710080967,
+          "true_d_in_frozen_estimate_plane_m": -3.066587900407864,
+          "signed_d_error_shared_plane_m": 0.10565733182754,
+          "ideal_plane_center_difference_m": 4.2794428287031214e-07,
+          "ideal_plane_normal_difference": 3.33493419034343e-09
+        },
+        {
+          "frame_id": 45,
+          "sim_time_s": 122.275,
+          "status": "PRIOR_ASSISTED_AMBIGUOUS",
+          "point_error_xyz_m": [
+            0.2245382208909774,
+            -0.1664571058793527,
+            0.16444903262564736
+          ],
+          "point_error_norm_m": 0.3242974947022049,
+          "signed_d_error_m": 0.2090252074429051,
+          "estimated_d_m": -2.8950443978654588,
+          "true_d_m": -3.104069605308364,
+          "true_d_in_frozen_estimate_plane_m": -3.104069505924726,
+          "signed_d_error_shared_plane_m": 0.20902510805926733,
+          "ideal_plane_center_difference_m": 1.6970468613029338e-06,
+          "ideal_plane_normal_difference": 1.1774953424555086e-09
+        }
+      ],
+      "point_norm_error_m": {
+        "count": 4,
+        "mean": 0.19569509796214968,
+        "rmse": 0.21198792406742595,
+        "mean_absolute": 0.19569509796214968,
+        "p95_absolute": 0.306547695623561,
+        "max_absolute": 0.3242974947022049
+      },
+      "signed_d_error_m": {
+        "count": 4,
+        "mean": 0.0896267725273927,
+        "rmse": 0.11902065032211721,
+        "mean_absolute": 0.0896267725273927,
+        "p95_absolute": 0.19352000669063518,
+        "max_absolute": 0.2090252074429051
+      },
+      "signed_d_error_shared_plane_m": {
+        "count": 4,
+        "mean": 0.08962650921254933,
+        "rmse": 0.11902062729188735,
+        "mean_absolute": 0.08962650921254933,
+        "p95_absolute": 0.1935199416245082,
+        "max_absolute": 0.20902510805926733
+      }
+    }
+  },
+  "truth": [
+    {
+      "frame_id": 42,
+      "sim_time_s": 122.125,
+      "point_world_m": [
+        -11.09990972765622,
+        -51.4943179421475,
+        54.09648266808208
+      ],
+      "center_world_m": [
+        -4.92746639411266,
+        -0.07123544014245933,
+        90.00656553423083
+      ],
+      "normal_world_unit": [
+        0.9960780592390226,
+        0.00015196345441958654,
+        -0.08847867997281
+      ],
+      "signed_d_m": -2.9787730759817572
+    },
+    {
+      "frame_id": 43,
+      "sim_time_s": 122.175,
+      "point_world_m": [
+        -11.408507085154518,
+        -49.205431607970404,
+        51.072303046006155
+      ],
+      "center_world_m": [
+        -4.922770774125199,
+        -0.0729913125411897,
+        90.0070098044418
+      ],
+      "normal_world_unit": [
+        0.9960700811120501,
+        0.00016611403053371144,
+        -0.08856842507103053
+      ],
+      "signed_d_m": -3.0200238228887195
+    },
+    {
+      "frame_id": 44,
+      "sim_time_s": 122.225,
+      "point_world_m": [
+        -11.71013954205156,
+        -46.73812921023256,
+        48.19439938617327
+      ],
+      "center_world_m": [
+        -4.917715040010507,
+        -0.07451479664046065,
+        90.00749980773935
+      ],
+      "normal_world_unit": [
+        0.996061239493973,
+        0.0001798339856624052,
+        -0.08866777789855881
+      ],
+      "signed_d_m": -3.0665877710080967
+    },
+    {
+      "frame_id": 45,
+      "sim_time_s": 122.275,
+      "point_world_m": [
+        -11.98925510668446,
+        -44.09966378655775,
+        45.46853211622828
+      ],
+      "center_world_m": [
+        -4.91247560789296,
+        -0.07570616777739014,
+        90.00792694584294
+      ],
+      "normal_world_unit": [
+        0.9960535046556729,
+        0.00018842222829271955,
+        -0.08875460754358262
+      ],
+      "signed_d_m": -3.104069605308364
+    }
+  ],
+  "condition": "IDEAL_SHARED_RIGID_PLANE_ASSISTANCE",
+  "source_interface_max_component_difference_m": 0.0023302667236249075,
+  "source_interface_conservative_vector_difference_bound_m": 0.004036140360505403,
+  "source_interface_difference_is_not_calibrated_measurement_uncertainty": true,
+  "mapping_status": "PRIOR_DEFINED_STRUCTURAL_POINT_NOT_CORRESPONDENCE_VERIFIED",
+  "error_scope": "Total error of predeclared model hypothesis against mechanical tip; includes mapping and geometry bias",
+  "data_use": "Four historical nonblind development times; no unseen time/case generalization",
+  "numerical_hypothesis_samples_per_group": 4,
+  "accepted_measurement_samples": 0,
+  "comparison": {
+    "G3_minus_G2_d_rmse_m": 0.03880595100688074,
+    "G3_minus_G2_point_rmse_m": 0.08344895912216188
+  },
+  "elapsed_s": 0.031183916958980262,
+  "engineering_acceptance": "PENDING_USE_CASE_TARGETS",
+  "dy1_measurement_gate": "NOT_PASSED",
+  "retuning_after_score": false
+}

@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "version": "0.3.4",
+  "sha256": "3f2c718e3ae438a49786df4de2f92a1153fd405ea026521d8c19f3e22434a9b0",
+  "installed_files_match": true,
+  "files": 85,
+  "schema": "wfrl.farm-flex-review.v3"
+}

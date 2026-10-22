@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "scope": "isolated background Blender",
+  "addon_module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "addon_file": "<ISOLATED_ADDON>/__init__.py",
+  "ready_scene": "A_MAPPO",
+  "failed_scene": "B_FULL_COPY",
+  "failed_status": "回放数据未就绪：Scene lacks required FarmFlex objects: WFRL.Turbine.T1.YawRoot, WFRL.Turbine.T1.Rotor, WFRL.Turbine.T1.Tower, WFRL.Turbine.T1.Blade1, WFRL.Turbine.T1.Blade2, WFRL.Turbine.T1.Blade3, WFRL.Turbine.T2.YawRoot, WFRL.Turbine.T2.Rotor, WFRL.Turbine.T2.Tower, WFRL.Turbine.T2.Blade1, WFRL.Turbine.T2.Blade2, WFRL.Turbine.T2.Blade3, WFRL.Turbine.T3.YawRoot, WFRL.Turbine.T3.Rotor, WFRL.Turbine.T3.Tower, WFRL.Turbine.T3.Blade1, WFRL.Turbine.T3.Blade2, WFRL.Turbine.T3.Blade3",
+  "mesh_change_max_m": 0.2769445519647368,
+  "frame": 181,
+  "time_s": 120.0,
+  "linked_scene_rejected": true
+}

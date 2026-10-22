@@ -1,0 +1,20 @@
+............................................. [  5%]
+.ss.s................................................................... [ 13%]
+........................................................................ [ 22%]
+........................................................................ [ 30%]
+........................................................................ [ 39%]
+................................................................. [ 47%]
+.................................................s...................... [ 55%]
+........................................................................ [ 64%]
+........................................................................ [ 72%]
+........................................................................ [ 81%]
+........................................................................ [ 90%]
+........................................................................ [ 98%]
+........s...                                                             [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/blender_bridge/test_tip_replay.py:60: Original FAST.Farm raw run is not installed; the offline replay package does not contain native VTP geometry
+SKIPPED [1] tests/blender_bridge/test_tip_replay.py:76: Original FAST.Farm raw run is not installed; the offline replay package does not contain native VTP geometry
+SKIPPED [1] tests/blender_bridge/test_tip_replay.py:92: Original FAST.Farm raw run is not installed; the offline replay package does not contain native VTP geometry
+SKIPPED [1] tests/test_camera_video_stream.py:63: Set WFRL_MEDIAMTX to run the real RTSP integration
+SKIPPED [1] tests/viz/test_tip_tracking.py:80: could not import 'cv2': No module named 'cv2'
+837 passed, 5 skipped, 5 warnings, 34 subtests passed in 34.18s

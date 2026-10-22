@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "runtime": "bl_ext.user_default.wfrl_blender",
+  "blender": "5.2.1 LTS",
+  "comparison_frame": 642,
+  "colors": [
+    [
+      1.0,
+      0.05,
+      0.04
+    ],
+    [
+      0.05,
+      1.0,
+      0.12
+    ],
+    [
+      0.05,
+      0.35,
+      1.0
+    ]
+  ],
+  "fade_levels": [
+    18,
+    18,
+    18,
+    18,
+    18,
+    18
+  ],
+  "hold_seconds": 2,
+  "fade_seconds": 0.75,
+  "paused_stable": true,
+  "fps_independent": true,
+  "seek_clears": true,
+  "toggle_clears": true
+}

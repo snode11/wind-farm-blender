@@ -1,0 +1,747 @@
+{
+  "schema": "blade-stage4-pixel-ablation-score.v1",
+  "overall": "FAILED_GATE",
+  "primary_gains": null,
+  "primary_gains_status": "not accepted; correspondence/precondition gates and same-material geometry must be established",
+  "conditions": {
+    "A_contour_analytic": {
+      "criteria": {
+        "boundary_P95_original_px_max": 1.0,
+        "visibility_min": 0.9,
+        "acceptance_fraction_min": 0.9
+      },
+      "rows": [
+        {
+          "track_id": "Patch",
+          "training_nonanchor": {
+            "planned": 3,
+            "accepted": 0,
+            "missing": 0,
+            "P95_px_min": 4.996308799395013,
+            "P95_px_max": 12.553627347499695,
+            "P95_px_values": [
+              4.996308799395013,
+              12.553627347499695,
+              10.878279012157014
+            ],
+            "status": "FAILED_GATE"
+          },
+          "old_independent": {
+            "planned": 4,
+            "accepted": 0,
+            "missing": 0,
+            "P95_px_min": 1.843629993759111,
+            "P95_px_max": 12.427654914699891,
+            "P95_px_values": [
+              1.843629993759111,
+              4.346059314638028,
+              12.427654914699891,
+              10.951272747334139
+            ],
+            "status": "FAILED_GATE"
+          },
+          "locked_independent": {
+            "planned": 4,
+            "accepted": 0,
+            "missing": 3,
+            "P95_px_min": 175.2578192023778,
+            "P95_px_max": 175.2578192023778,
+            "P95_px_values": [
+              null,
+              null,
+              175.2578192023778,
+              null
+            ],
+            "status": "FAILED_GATE"
+          },
+          "all_independent": {
+            "planned": 8,
+            "accepted": 0,
+            "missing": 3,
+            "P95_px_min": 1.843629993759111,
+            "P95_px_max": 175.2578192023778,
+            "P95_px_values": [
+              1.843629993759111,
+              4.346059314638028,
+              12.427654914699891,
+              10.951272747334139,
+              null,
+              null,
+              175.2578192023778,
+              null
+            ],
+            "status": "FAILED_GATE"
+          },
+          "historical_nonanchor_denom": {
+            "planned": 7,
+            "accepted": 0,
+            "missing": 0,
+            "P95_px_min": 1.843629993759111,
+            "P95_px_max": 12.553627347499695,
+            "P95_px_values": [
+              4.996308799395013,
+              12.553627347499695,
+              10.878279012157014,
+              1.843629993759111,
+              4.346059314638028,
+              12.427654914699891,
+              10.951272747334139
+            ],
+            "status": "FAILED_GATE"
+          },
+          "anchor_binding_coverage": 1.0,
+          "geometry_same_material_error_m": null,
+          "geometry_same_material_status": "NOT_ESTABLISHED: independent same-material surface correspondence absent; no nearest-source substitution"
+        },
+        {
+          "track_id": "Crack",
+          "training_nonanchor": {
+            "planned": 3,
+            "accepted": 0,
+            "missing": 0,
+            "P95_px_min": 5.512088081725971,
+            "P95_px_max": 13.61553061297139,
+            "P95_px_values": [
+              5.512088081725971,
+              13.61553061297139,
+              8.31391073076286
+            ],
+            "status": "FAILED_GATE"
+          },
+          "old_independent": {
+            "planned": 4,
+            "accepted": 0,
+            "missing": 0,
+            "P95_px_min": 4.4618337286209275,
+            "P95_px_max": 14.8880713198218,
+            "P95_px_values": [
+              4.4618337286209275,
+              9.72836791782852,
+              14.8880713198218,
+              11.064751995145253
+            ],
+            "status": "FAILED_GATE"
+          },
+          "locked_independent": {
+            "planned": 4,
+            "accepted": 1,
+            "missing": 0,
+            "P95_px_min": 0.507214696691302,
+            "P95_px_max": 13.820988309470758,
+            "P95_px_values": [
+              0.507214696691302,
+              5.6715891313030085,
+              13.820988309470758,
+              9.083548776169026
+            ],
+            "status": "FAILED_GATE"
+          },
+          "all_independent": {
+            "planned": 8,
+            "accepted": 1,
+            "missing": 0,
+            "P95_px_min": 0.507214696691302,
+            "P95_px_max": 14.8880713198218,
+            "P95_px_values": [
+              4.4618337286209275,
+              9.72836791782852,
+              14.8880713198218,
+              11.064751995145253,
+              0.507214696691302,
+              5.6715891313030085,
+              13.820988309470758,
+              9.083548776169026
+            ],
+            "status": "FAILED_GATE"
+          },
+          "historical_nonanchor_denom": {
+            "planned": 7,
+            "accepted": 0,
+            "missing": 0,
+            "P95_px_min": 4.4618337286209275,
+            "P95_px_max": 14.8880713198218,
+            "P95_px_values": [
+              5.512088081725971,
+              13.61553061297139,
+              8.31391073076286,
+              4.4618337286209275,
+              9.72836791782852,
+              14.8880713198218,
+              11.064751995145253
+            ],
+            "status": "FAILED_GATE"
+          },
+          "anchor_binding_coverage": 1.0,
+          "geometry_same_material_error_m": null,
+          "geometry_same_material_status": "NOT_ESTABLISHED: independent same-material surface correspondence absent; no nearest-source substitution"
+        }
+      ],
+      "overall": "FAILED_GATE",
+      "scope": "fixed one-time boundary binding and original RGB errors; training rows excluded from independent denominator"
+    },
+    "B_contour_healthy": {
+      "criteria": {
+        "boundary_P95_original_px_max": 1.0,
+        "visibility_min": 0.9,
+        "acceptance_fraction_min": 0.9
+      },
+      "rows": [
+        {
+          "track_id": "Patch",
+          "training_nonanchor": {
+            "planned": 3,
+            "accepted": 0,
+            "missing": 0,
+            "P95_px_min": 2.6288240278484603,
+            "P95_px_max": 6.899298339548912,
+            "P95_px_values": [
+              2.6288240278484603,
+              3.3351795466800933,
+              6.899298339548912
+            ],
+            "status": "FAILED_GATE"
+          },
+          "old_independent": {
+            "planned": 4,
+            "accepted": 1,
+            "missing": 0,
+            "P95_px_min": 0.5650237748235004,
+            "P95_px_max": 6.906575509296998,
+            "P95_px_values": [
+              0.5650237748235004,
+              2.432715296398796,
+              3.3635311751426724,
+              6.906575509296998
+            ],
+            "status": "FAILED_GATE"
+          },
+          "locked_independent": {
+            "planned": 4,
+            "accepted": 0,
+            "missing": 3,
+            "P95_px_min": 176.6107363202797,
+            "P95_px_max": 176.6107363202797,
+            "P95_px_values": [
+              null,
+              null,
+              176.6107363202797,
+              null
+            ],
+            "status": "FAILED_GATE"
+          },
+          "all_independent": {
+            "planned": 8,
+            "accepted": 1,
+            "missing": 3,
+            "P95_px_min": 0.5650237748235004,
+            "P95_px_max": 176.6107363202797,
+            "P95_px_values": [
+              0.5650237748235004,
+              2.432715296398796,
+              3.3635311751426724,
+              6.906575509296998,
+              null,
+              null,
+              176.6107363202797,
+              null
+            ],
+            "status": "FAILED_GATE"
+          },
+          "historical_nonanchor_denom": {
+            "planned": 7,
+            "accepted": 1,
+            "missing": 0,
+            "P95_px_min": 0.5650237748235004,
+            "P95_px_max": 6.906575509296998,
+            "P95_px_values": [
+              2.6288240278484603,
+              3.3351795466800933,
+              6.899298339548912,
+              0.5650237748235004,
+              2.432715296398796,
+              3.3635311751426724,
+              6.906575509296998
+            ],
+            "status": "FAILED_GATE"
+          },
+          "anchor_binding_coverage": 1.0,
+          "geometry_same_material_error_m": null,
+          "geometry_same_material_status": "NOT_ESTABLISHED: independent same-material surface correspondence absent; no nearest-source substitution"
+        },
+        {
+          "track_id": "Crack",
+          "training_nonanchor": {
+            "planned": 3,
+            "accepted": 0,
+            "missing": 0,
+            "P95_px_min": 1.5970484000797762,
+            "P95_px_max": 2.974028917471268,
+            "P95_px_values": [
+              1.5970484000797762,
+              2.974028917471268,
+              2.250750275559607
+            ],
+            "status": "FAILED_GATE"
+          },
+          "old_independent": {
+            "planned": 4,
+            "accepted": 0,
+            "missing": 0,
+            "P95_px_min": 1.26963511752939,
+            "P95_px_max": 3.0034533925048077,
+            "P95_px_values": [
+              1.26963511752939,
+              2.7751292465150987,
+              3.0034533925048077,
+              2.735225792388433
+            ],
+            "status": "FAILED_GATE"
+          },
+          "locked_independent": {
+            "planned": 4,
+            "accepted": 1,
+            "missing": 0,
+            "P95_px_min": 0.4628711886345993,
+            "P95_px_max": 2.9715234975612095,
+            "P95_px_values": [
+              0.4628711886345993,
+              1.5929467970438418,
+              2.9715234975612095,
+              2.3713801402285473
+            ],
+            "status": "FAILED_GATE"
+          },
+          "all_independent": {
+            "planned": 8,
+            "accepted": 1,
+            "missing": 0,
+            "P95_px_min": 0.4628711886345993,
+            "P95_px_max": 3.0034533925048077,
+            "P95_px_values": [
+              1.26963511752939,
+              2.7751292465150987,
+              3.0034533925048077,
+              2.735225792388433,
+              0.4628711886345993,
+              1.5929467970438418,
+              2.9715234975612095,
+              2.3713801402285473
+            ],
+            "status": "FAILED_GATE"
+          },
+          "historical_nonanchor_denom": {
+            "planned": 7,
+            "accepted": 0,
+            "missing": 0,
+            "P95_px_min": 1.26963511752939,
+            "P95_px_max": 3.0034533925048077,
+            "P95_px_values": [
+              1.5970484000797762,
+              2.974028917471268,
+              2.250750275559607,
+              1.26963511752939,
+              2.7751292465150987,
+              3.0034533925048077,
+              2.735225792388433
+            ],
+            "status": "FAILED_GATE"
+          },
+          "anchor_binding_coverage": 1.0,
+          "geometry_same_material_error_m": null,
+          "geometry_same_material_status": "NOT_ESTABLISHED: independent same-material surface correspondence absent; no nearest-source substitution"
+        }
+      ],
+      "overall": "FAILED_GATE",
+      "scope": "fixed one-time boundary binding and original RGB errors; training rows excluded from independent denominator"
+    },
+    "C_texture_analytic": {
+      "criteria": {
+        "boundary_P95_original_px_max": 1.0,
+        "visibility_min": 0.9,
+        "acceptance_fraction_min": 0.9
+      },
+      "rows": [
+        {
+          "track_id": "Patch",
+          "training_nonanchor": {
+            "planned": 3,
+            "accepted": 1,
+            "missing": 0,
+            "P95_px_min": 0.6486936584304395,
+            "P95_px_max": 2.4485414097724836,
+            "P95_px_values": [
+              0.6486936584304395,
+              2.4485414097724836,
+              2.3322509262404743
+            ],
+            "status": "FAILED_GATE"
+          },
+          "old_independent": {
+            "planned": 4,
+            "accepted": 0,
+            "missing": 0,
+            "P95_px_min": 1.5058302632594216,
+            "P95_px_max": 2.5090598369737167,
+            "P95_px_values": [
+              1.843629993759111,
+              1.560918428075783,
+              2.5090598369737167,
+              1.5058302632594216
+            ],
+            "status": "FAILED_GATE"
+          },
+          "locked_independent": {
+            "planned": 4,
+            "accepted": 0,
+            "missing": 3,
+            "P95_px_min": 176.6900409287765,
+            "P95_px_max": 176.6900409287765,
+            "P95_px_values": [
+              null,
+              null,
+              176.6900409287765,
+              null
+            ],
+            "status": "FAILED_GATE"
+          },
+          "all_independent": {
+            "planned": 8,
+            "accepted": 0,
+            "missing": 3,
+            "P95_px_min": 1.5058302632594216,
+            "P95_px_max": 176.6900409287765,
+            "P95_px_values": [
+              1.843629993759111,
+              1.560918428075783,
+              2.5090598369737167,
+              1.5058302632594216,
+              null,
+              null,
+              176.6900409287765,
+              null
+            ],
+            "status": "FAILED_GATE"
+          },
+          "historical_nonanchor_denom": {
+            "planned": 7,
+            "accepted": 1,
+            "missing": 0,
+            "P95_px_min": 0.6486936584304395,
+            "P95_px_max": 2.5090598369737167,
+            "P95_px_values": [
+              0.6486936584304395,
+              2.4485414097724836,
+              2.3322509262404743,
+              1.843629993759111,
+              1.560918428075783,
+              2.5090598369737167,
+              1.5058302632594216
+            ],
+            "status": "FAILED_GATE"
+          },
+          "anchor_binding_coverage": 1.0,
+          "geometry_same_material_error_m": null,
+          "geometry_same_material_status": "NOT_ESTABLISHED: independent same-material surface correspondence absent; no nearest-source substitution"
+        },
+        {
+          "track_id": "Crack",
+          "training_nonanchor": {
+            "planned": 3,
+            "accepted": 3,
+            "missing": 0,
+            "P95_px_min": 0.5274832575543728,
+            "P95_px_max": 0.675832030262146,
+            "P95_px_values": [
+              0.675832030262146,
+              0.6687264171834313,
+              0.5274832575543728
+            ],
+            "status": "PASS"
+          },
+          "old_independent": {
+            "planned": 4,
+            "accepted": 0,
+            "missing": 0,
+            "P95_px_min": 1.7219965948275324,
+            "P95_px_max": 4.4618337286209275,
+            "P95_px_values": [
+              4.4618337286209275,
+              4.140076532101027,
+              1.8862378547656358,
+              1.7219965948275324
+            ],
+            "status": "FAILED_GATE"
+          },
+          "locked_independent": {
+            "planned": 4,
+            "accepted": 4,
+            "missing": 0,
+            "P95_px_min": 0.507214696691302,
+            "P95_px_max": 0.85229019523249,
+            "P95_px_values": [
+              0.507214696691302,
+              0.8133822596067446,
+              0.85229019523249,
+              0.6384747409898661
+            ],
+            "status": "PASS"
+          },
+          "all_independent": {
+            "planned": 8,
+            "accepted": 4,
+            "missing": 0,
+            "P95_px_min": 0.507214696691302,
+            "P95_px_max": 4.4618337286209275,
+            "P95_px_values": [
+              4.4618337286209275,
+              4.140076532101027,
+              1.8862378547656358,
+              1.7219965948275324,
+              0.507214696691302,
+              0.8133822596067446,
+              0.85229019523249,
+              0.6384747409898661
+            ],
+            "status": "FAILED_GATE"
+          },
+          "historical_nonanchor_denom": {
+            "planned": 7,
+            "accepted": 3,
+            "missing": 0,
+            "P95_px_min": 0.5274832575543728,
+            "P95_px_max": 4.4618337286209275,
+            "P95_px_values": [
+              0.675832030262146,
+              0.6687264171834313,
+              0.5274832575543728,
+              4.4618337286209275,
+              4.140076532101027,
+              1.8862378547656358,
+              1.7219965948275324
+            ],
+            "status": "FAILED_GATE"
+          },
+          "anchor_binding_coverage": 1.0,
+          "geometry_same_material_error_m": null,
+          "geometry_same_material_status": "NOT_ESTABLISHED: independent same-material surface correspondence absent; no nearest-source substitution"
+        }
+      ],
+      "overall": "FAILED_GATE",
+      "scope": "fixed one-time boundary binding and original RGB errors; training rows excluded from independent denominator"
+    },
+    "D_texture_healthy": {
+      "criteria": {
+        "boundary_P95_original_px_max": 1.0,
+        "visibility_min": 0.9,
+        "acceptance_fraction_min": 0.9
+      },
+      "rows": [
+        {
+          "track_id": "Patch",
+          "training_nonanchor": {
+            "planned": 3,
+            "accepted": 1,
+            "missing": 0,
+            "P95_px_min": 0.6132267558194283,
+            "P95_px_max": 3.1551720606886926,
+            "P95_px_values": [
+              0.6132267558194283,
+              2.3905426647695145,
+              3.1551720606886926
+            ],
+            "status": "FAILED_GATE"
+          },
+          "old_independent": {
+            "planned": 4,
+            "accepted": 2,
+            "missing": 0,
+            "P95_px_min": 0.5650237748235004,
+            "P95_px_max": 4.216450491912971,
+            "P95_px_values": [
+              0.5650237748235004,
+              0.688952660998067,
+              2.892506717417393,
+              4.216450491912971
+            ],
+            "status": "FAILED_GATE"
+          },
+          "locked_independent": {
+            "planned": 4,
+            "accepted": 0,
+            "missing": 3,
+            "P95_px_min": 176.33953884588743,
+            "P95_px_max": 176.33953884588743,
+            "P95_px_values": [
+              null,
+              null,
+              176.33953884588743,
+              null
+            ],
+            "status": "FAILED_GATE"
+          },
+          "all_independent": {
+            "planned": 8,
+            "accepted": 2,
+            "missing": 3,
+            "P95_px_min": 0.5650237748235004,
+            "P95_px_max": 176.33953884588743,
+            "P95_px_values": [
+              0.5650237748235004,
+              0.688952660998067,
+              2.892506717417393,
+              4.216450491912971,
+              null,
+              null,
+              176.33953884588743,
+              null
+            ],
+            "status": "FAILED_GATE"
+          },
+          "historical_nonanchor_denom": {
+            "planned": 7,
+            "accepted": 3,
+            "missing": 0,
+            "P95_px_min": 0.5650237748235004,
+            "P95_px_max": 4.216450491912971,
+            "P95_px_values": [
+              0.6132267558194283,
+              2.3905426647695145,
+              3.1551720606886926,
+              0.5650237748235004,
+              0.688952660998067,
+              2.892506717417393,
+              4.216450491912971
+            ],
+            "status": "FAILED_GATE"
+          },
+          "anchor_binding_coverage": 1.0,
+          "geometry_same_material_error_m": null,
+          "geometry_same_material_status": "NOT_ESTABLISHED: independent same-material surface correspondence absent; no nearest-source substitution"
+        },
+        {
+          "track_id": "Crack",
+          "training_nonanchor": {
+            "planned": 3,
+            "accepted": 3,
+            "missing": 0,
+            "P95_px_min": 0.5486281757316861,
+            "P95_px_max": 0.7398177595657384,
+            "P95_px_values": [
+              0.6985159090619898,
+              0.7398177595657384,
+              0.5486281757316861
+            ],
+            "status": "PASS"
+          },
+          "old_independent": {
+            "planned": 4,
+            "accepted": 1,
+            "missing": 0,
+            "P95_px_min": 0.9848053583632232,
+            "P95_px_max": 2.17207047812427,
+            "P95_px_values": [
+              1.26963511752939,
+              0.9848053583632232,
+              1.0277437201602326,
+              2.17207047812427
+            ],
+            "status": "FAILED_GATE"
+          },
+          "locked_independent": {
+            "planned": 4,
+            "accepted": 3,
+            "missing": 0,
+            "P95_px_min": 0.4628711886345993,
+            "P95_px_max": 1.0302233882284915,
+            "P95_px_values": [
+              0.4628711886345993,
+              0.699270650803106,
+              0.6025879782506629,
+              1.0302233882284915
+            ],
+            "status": "FAILED_GATE"
+          },
+          "all_independent": {
+            "planned": 8,
+            "accepted": 4,
+            "missing": 0,
+            "P95_px_min": 0.4628711886345993,
+            "P95_px_max": 2.17207047812427,
+            "P95_px_values": [
+              1.26963511752939,
+              0.9848053583632232,
+              1.0277437201602326,
+              2.17207047812427,
+              0.4628711886345993,
+              0.699270650803106,
+              0.6025879782506629,
+              1.0302233882284915
+            ],
+            "status": "FAILED_GATE"
+          },
+          "historical_nonanchor_denom": {
+            "planned": 7,
+            "accepted": 4,
+            "missing": 0,
+            "P95_px_min": 0.5486281757316861,
+            "P95_px_max": 2.17207047812427,
+            "P95_px_values": [
+              0.6985159090619898,
+              0.7398177595657384,
+              0.5486281757316861,
+              1.26963511752939,
+              0.9848053583632232,
+              1.0277437201602326,
+              2.17207047812427
+            ],
+            "status": "FAILED_GATE"
+          },
+          "anchor_binding_coverage": 1.0,
+          "geometry_same_material_error_m": null,
+          "geometry_same_material_status": "NOT_ESTABLISHED: independent same-material surface correspondence absent; no nearest-source substitution"
+        }
+      ],
+      "overall": "FAILED_GATE",
+      "scope": "fixed one-time boundary binding and original RGB errors; training rows excluded from independent denominator"
+    }
+  },
+  "observation_artifact": {
+    "path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/evaluation/final-scores/all-observations.json",
+    "sha256": "e3f82a86122b6b6c8f2895ccff8e368dc29be9e099f4898e0d09091f2f1bcc2d"
+  },
+  "planned_records": 24,
+  "barrier_sha256": "bae492f5de4c283141ef6d30a1e1c47df50844586f45e2baeaa800a4f566fc6d",
+  "criteria": {
+    "boundary_P95_original_px_max": 1.0,
+    "binding_coverage_min": 0.9,
+    "visibility_min": 0.9,
+    "accepted_fraction_min": 0.9
+  },
+  "score_identity": {
+    "A_contour_analytic": {
+      "recon_path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/actual/contour-analytic/recon.json",
+      "recon_sha256": "0f214d235b31e0ea11b749f87fd92626c426e0d0e01597f308a125e560741fe2",
+      "model_source": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-baseline/blade_recon0.2/model.py",
+      "model_sha256": "3b0bb519fa6543783165523631945b8564adc0387fe62e0be787a013a64a1bfe"
+    },
+    "B_contour_healthy": {
+      "recon_path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/actual/contour-healthy-final/recon.json",
+      "recon_sha256": "c2289fdae90d1a329f31d90b4aa0059bd5fdeef46ddff98b50302ac559b9b11e",
+      "model_source": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-candidate/blade_recon0.2/model.py",
+      "model_sha256": "427e6073d21b8c68f8ceaea44f7177ce3a761bbe5faa3fa9c65ad4643b74967c"
+    },
+    "C_texture_analytic": {
+      "recon_path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/actual/texture-analytic-final/recon.json",
+      "recon_sha256": "ae61135662173f84e0e5a1d63e536448d896155a36475f4495b91eb9d876d64e",
+      "model_source": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/model.py",
+      "model_sha256": "427e6073d21b8c68f8ceaea44f7177ce3a761bbe5faa3fa9c65ad4643b74967c"
+    },
+    "D_texture_healthy": {
+      "recon_path": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/actual/texture-healthy-final/recon.json",
+      "recon_sha256": "ba68572b8d3c490f3181256a852f374e414f3a4745e9e1aa2fe5029a54bc73af",
+      "model_source": "REPOSITORY_ROOT/outputs/blade-recon-v02-stage4-20261007-a01/source-final/blade_recon0.2/model.py",
+      "model_sha256": "427e6073d21b8c68f8ceaea44f7177ce3a761bbe5faa3fa9c65ad4643b74967c"
+    }
+  },
+  "scope": "full planned denominators; original 7 = 3 fit + 4 old heldout; independent 8 = 4 old + 4 locked per ID; no display accuracy inference"
+}

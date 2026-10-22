@@ -1,0 +1,72 @@
+{
+  "scope": "Curated public source snapshot; current docs and source, original runtime assets; no new public extension ZIP built or installed",
+  "frontend": {
+    "passed": 726,
+    "skipped": 3,
+    "subtests_passed": 256,
+    "command": "PYTHONPATH=blender_frontend:. python -m pytest -q blender_frontend/tests",
+    "skip_conditions": [
+      "Original boss source unavailable; portable bundle checked separately",
+      "Original VTP not in offline release",
+      "Real RTSP server not configured"
+    ],
+    "log": "frontend-tests.log"
+  },
+  "backend": {
+    "full_suite_passed": 837,
+    "full_suite_skipped": 5,
+    "subtests_passed": 34,
+    "additional_integrity_regressions_passed": 2,
+    "focused_tip_replay_passed": 7,
+    "focused_tip_replay_skipped": 3,
+    "command": "PYTHONPATH=blender_frontend:. python -m pytest -q tests",
+    "skip_conditions": [
+      "3 native tip geometry integrations need undistributed original VTP",
+      "Real RTSP server not configured",
+      "cv2 unavailable in backend test interpreter"
+    ],
+    "log": "backend-tests.log",
+    "additional_integrity_command": "PYTHONPATH=blender_frontend:. python -m pytest -q tests/blender_bridge/test_tip_replay.py -k missing_vtp_does_not_turn_present_data_corruption_into_a_skip",
+    "focused_tip_replay_command": "PYTHONPATH=blender_frontend:. python -m pytest -q tests/blender_bridge/test_tip_replay.py",
+    "focused_tip_replay_log": "tip-replay-tests.log"
+  },
+  "numerical_rejected_frames": {
+    "passed": 5,
+    "command": "python -B -m unittest discover -s blade_recon0.2/tests -p 'test_rejected_frames.py' -v",
+    "log": "numerical-tests.log"
+  },
+  "gw184": {
+    "passed": 47,
+    "skipped": 1,
+    "subtests_passed": 121,
+    "prerequisite": "Matching hash-pinned DTU references; the two original inputs are distributed in projects/gw184-single/sources/",
+    "skip_condition": "Prechange source directory not supplied",
+    "log": "gw184-tests.log",
+    "command": "python -m pytest -q projects/gw184-single/tests/test_model.py projects/gw184-single/tests/test_defect_contract.py projects/gw184-single/tests/test_defect_four_types.py projects/gw184-single/tests/test_defect_output_restore.py projects/gw184-single/tests/test_defect_visibility.py"
+  },
+  "geometry_export": {
+    "input_files": 19,
+    "all_input_hashes_match_formal_asset": true,
+    "generated_geometry_bytes_match_formal_asset": true,
+    "command": "python scripts/blender/export_geometry.py --output /path/to/isolated-output/nrel5mw_geometry.json",
+    "reference": "blender_frontend/wfrl_blender/assets/nrel5mw_geometry.json"
+  },
+  "runtime_asset_hashes": {
+    "formal_assets": 65,
+    "changed_by_export": 0
+  },
+  "resources": {
+    "archives_safety_checked": 11,
+    "unsafe_paths_or_special_files": 0,
+    "frozen_original_code_identities_checked": 75,
+    "dependency_source_wheel_build": "PASS",
+    "dependency_source_wheel_command": "python -m pip wheel --no-deps --no-build-isolation ./wfcrl-env --wheel-dir /path/to/isolated-wheel-output",
+    "dependency_source_wheel_log": "dependency-wheel.log"
+  },
+  "test_environments": [
+    "Existing Python 3.11 environment for frontend/backend/GW184",
+    "Existing external numerical environment with OpenCV/SciPy; environment itself not distributed"
+  ],
+  "native_window_performance_cross_platform_and_scientific_acceptance": "Not claimed by these source checks",
+  "existing_public_packages": "Existing release identities and original reports apply separately"
+}

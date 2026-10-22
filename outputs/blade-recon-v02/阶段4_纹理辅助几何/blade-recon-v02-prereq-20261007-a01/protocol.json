@@ -1,0 +1,13 @@
+{
+  "status": "FIXED_BEFORE_NEW_RECONSTRUCTION_AND_SCORING",
+  "date": "2026-10-07",
+  "datasets": ["old synthetic 12 frames", "old synthetic capture2 4 frames", "old recorded MAPPO 4 frames", "new RGB mask observation if produced"],
+  "solver": {"initial_max_nfev": 150, "tracking_max_nfev": 60, "success_is_not_geometry_acceptance": true, "invalid_frames_excluded_from_fusion": true},
+  "appearance": {"core_coverage_min": 0.9, "contrast_keep_min": 0.5, "crack_centroid_and_boundary_m_max": 0.05, "patch_centroid_and_boundary_m_max": 0.1, "normal_false_anomaly_fraction_max": 0.05},
+  "heldout": "Existing synthetic Check and recorded MAPPO Holdout RGB excluded from fit and fusion. New captures must define withheld frames/views before scoring.",
+  "correspondence": "RGB-only observed pixels are recorded independently from source truth. Bind an observed pixel to the estimated triangle/barycentric point and reproject that same point. Missing/failed tracking remains in the denominator. Post-fit nearest source-surface candidates do not count as correspondences.",
+  "truth_isolation": "Freeze input hashes, source, parameters and reconstruction/texture artifacts before independent evaluator opens truth. Solver uses healthy template, calibrated original RGB and RGB-derived masks only.",
+  "unknown": "No fill or success substitution for missing observations; atlas alpha=0 stays unknown.",
+  "stage4": "DEFERRED: no texture-feature geometric objective; no crack depth, dent or bulge research",
+  "classification": "Synthetic ideal observations, recorded MAPPO Blender, and field observations reported separately; no field data exists."
+}

@@ -1,0 +1,31 @@
+{
+  "status": "COMPLETED",
+  "review": {
+    "status": "CODEX_RGB_REVIEWED",
+    "reviewer": "root Codex",
+    "user_human_annotation": false,
+    "learned_backend_track": false,
+    "scope": "all96 junction crops viewed; no evident centroid substitution or interpoint jump",
+    "candidate_sha256": "fcca3282313d877389f59aedd93a8fceb694f2ace6c07c5194092f50b06d3fea",
+    "review_sheet_sha256": "b0aeb6c585bfce5d12838bdc829099efc5eadeabdeced1e0cad68d0b933c84eb",
+    "observations": 96
+  },
+  "all_frames": {
+    "planned": 96,
+    "evaluated": 96,
+    "failed": 0,
+    "median_px": 0.3018653861125783,
+    "p95_px": 0.9311912028825686
+  },
+  "later_frames": {
+    "planned": 84,
+    "evaluated": 84,
+    "failed": 0,
+    "median_px": 0.31388209218353946,
+    "p95_px": 0.9769120936751403
+  },
+  "P95_threshold_px": 1.0,
+  "gate_passed": true,
+  "permission": "independent evaluation only after RGB review freeze; no uv/xyz returned to solver",
+  "scope": "known synthetic material vertex identity/localization; not camera or geometry accuracy"
+}

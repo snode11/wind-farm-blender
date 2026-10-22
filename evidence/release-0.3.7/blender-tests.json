@@ -1,0 +1,79 @@
+[
+  {
+    "test": "custom_camera_registration_regression",
+    "window": false,
+    "exit_code": 0,
+    "seconds": 1.16,
+    "error_files": []
+  },
+  {
+    "test": "custom_camera_v3_regression",
+    "window": false,
+    "exit_code": 0,
+    "seconds": 0.84,
+    "error_files": []
+  },
+  {
+    "test": "native_camera_projection_regression",
+    "window": false,
+    "exit_code": 0,
+    "seconds": 0.78,
+    "error_files": []
+  },
+  {
+    "test": "four_camera_projection_regression",
+    "window": false,
+    "exit_code": 0,
+    "seconds": 0.78,
+    "error_files": []
+  },
+  {
+    "test": "video_output_regression",
+    "window": false,
+    "exit_code": 1,
+    "seconds": 0.78,
+    "error_files": []
+  },
+  {
+    "test": "video_output_regression",
+    "window": false,
+    "exit_code": 0,
+    "seconds": 13.53,
+    "error_files": []
+  },
+  {
+    "test": "nacelle_camera_regression",
+    "window": false,
+    "exit_code": 0,
+    "seconds": 39.13,
+    "error_files": []
+  },
+  {
+    "test": "native_camera_views_regression",
+    "window": true,
+    "exit_code": 0,
+    "seconds": 15.89,
+    "error_files": []
+  },
+  {
+    "test": "custom_camera_v3_window",
+    "window": true,
+    "exit_code": 0,
+    "seconds": 17.54,
+    "error_files": []
+  },
+  {
+    "test": "four_cameras_window_regression",
+    "window": true,
+    "exit_code": 0,
+    "seconds": 23.13,
+    "error_files": []
+  },
+  {
+    "test": "custom_camera_exit_regression",
+    "window": true,
+    "exit_code": 0,
+    "seconds": 8.34,
+    "error_files": []
+  }
+]

@@ -1,0 +1,446 @@
+{
+ "atlas": {
+  "r0": 1.5,
+  "r1": 63.0,
+  "dr": 0.025,
+  "H": 2460,
+  "W": 768,
+  "rows": "第 0 行 = 叶根",
+  "cols": "τ：后缘0→压力面→前缘→吸力面→后缘1"
+ },
+ "n_ring": 32,
+ "n_sections": 40,
+ "png": {
+  "tex": "光照归一化后的表面细节，150 = 叶片平均亮度；A 通道 0 = 未观测",
+  "raw": "原始亮度融合(含明暗)",
+  "res": "最佳视角展向分辨率，红 = 好(<2 cm/px)，蓝 = 差(≥20 cm/px)"
+ },
+ "params": {
+  "pow": 4.0,
+  "edge_px": [
+   1.5,
+   6.0
+  ],
+  "min_cos": 0.08,
+  "low_sigma_m": [
+   2.0,
+   0.6
+  ],
+  "fusion": "best",
+  "register": false,
+  "reg_range_m": [
+   0.5,
+   0.06
+  ],
+  "exposure_ms": 0.0,
+  "skip": 0
+ },
+ "blades": [
+  {
+   "blade": 1,
+   "bands": [
+    {
+     "r_m": [
+      0,
+      5
+     ],
+     "suction_cover": 0.0,
+     "res_span_cm_median": null,
+     "res_chord_cm_median": null,
+     "views_median": 0
+    },
+    {
+     "r_m": [
+      5,
+      10
+     ],
+     "suction_cover": 0.645,
+     "res_span_cm_median": 0.32,
+     "res_chord_cm_median": 0.23,
+     "views_median": 10
+    },
+    {
+     "r_m": [
+      10,
+      15
+     ],
+     "suction_cover": 0.934,
+     "res_span_cm_median": 0.71,
+     "res_chord_cm_median": 0.31,
+     "views_median": 32
+    },
+    {
+     "r_m": [
+      15,
+      20
+     ],
+     "suction_cover": 0.971,
+     "res_span_cm_median": 1.21,
+     "res_chord_cm_median": 0.4,
+     "views_median": 27
+    },
+    {
+     "r_m": [
+      20,
+      25
+     ],
+     "suction_cover": 0.967,
+     "res_span_cm_median": 2.14,
+     "res_chord_cm_median": 0.55,
+     "views_median": 24
+    },
+    {
+     "r_m": [
+      25,
+      30
+     ],
+     "suction_cover": 0.974,
+     "res_span_cm_median": 2.99,
+     "res_chord_cm_median": 0.69,
+     "views_median": 22
+    },
+    {
+     "r_m": [
+      30,
+      35
+     ],
+     "suction_cover": 0.977,
+     "res_span_cm_median": 3.91,
+     "res_chord_cm_median": 0.83,
+     "views_median": 19
+    },
+    {
+     "r_m": [
+      35,
+      40
+     ],
+     "suction_cover": 0.983,
+     "res_span_cm_median": 4.68,
+     "res_chord_cm_median": 0.97,
+     "views_median": 16
+    },
+    {
+     "r_m": [
+      40,
+      45
+     ],
+     "suction_cover": 0.984,
+     "res_span_cm_median": 5.53,
+     "res_chord_cm_median": 1.1,
+     "views_median": 15
+    },
+    {
+     "r_m": [
+      45,
+      50
+     ],
+     "suction_cover": 0.985,
+     "res_span_cm_median": 5.98,
+     "res_chord_cm_median": 1.21,
+     "views_median": 14
+    },
+    {
+     "r_m": [
+      50,
+      55
+     ],
+     "suction_cover": 0.985,
+     "res_span_cm_median": 6.45,
+     "res_chord_cm_median": 1.32,
+     "views_median": 12
+    },
+    {
+     "r_m": [
+      55,
+      60
+     ],
+     "suction_cover": 0.978,
+     "res_span_cm_median": 7.0,
+     "res_chord_cm_median": 1.43,
+     "views_median": 12
+    },
+    {
+     "r_m": [
+      60,
+      65
+     ],
+     "suction_cover": 0.82,
+     "res_span_cm_median": 7.97,
+     "res_chord_cm_median": 1.51,
+     "views_median": 9
+    }
+   ]
+  },
+  {
+   "blade": 2,
+   "bands": [
+    {
+     "r_m": [
+      0,
+      5
+     ],
+     "suction_cover": 0.0,
+     "res_span_cm_median": null,
+     "res_chord_cm_median": null,
+     "views_median": 0
+    },
+    {
+     "r_m": [
+      5,
+      10
+     ],
+     "suction_cover": 0.648,
+     "res_span_cm_median": 0.32,
+     "res_chord_cm_median": 0.23,
+     "views_median": 12
+    },
+    {
+     "r_m": [
+      10,
+      15
+     ],
+     "suction_cover": 0.935,
+     "res_span_cm_median": 0.71,
+     "res_chord_cm_median": 0.3,
+     "views_median": 40
+    },
+    {
+     "r_m": [
+      15,
+      20
+     ],
+     "suction_cover": 0.97,
+     "res_span_cm_median": 1.22,
+     "res_chord_cm_median": 0.4,
+     "views_median": 33
+    },
+    {
+     "r_m": [
+      20,
+      25
+     ],
+     "suction_cover": 0.968,
+     "res_span_cm_median": 2.16,
+     "res_chord_cm_median": 0.55,
+     "views_median": 28
+    },
+    {
+     "r_m": [
+      25,
+      30
+     ],
+     "suction_cover": 0.974,
+     "res_span_cm_median": 3.05,
+     "res_chord_cm_median": 0.69,
+     "views_median": 26
+    },
+    {
+     "r_m": [
+      30,
+      35
+     ],
+     "suction_cover": 0.977,
+     "res_span_cm_median": 4.06,
+     "res_chord_cm_median": 0.83,
+     "views_median": 23
+    },
+    {
+     "r_m": [
+      35,
+      40
+     ],
+     "suction_cover": 0.983,
+     "res_span_cm_median": 4.78,
+     "res_chord_cm_median": 0.97,
+     "views_median": 20
+    },
+    {
+     "r_m": [
+      40,
+      45
+     ],
+     "suction_cover": 0.984,
+     "res_span_cm_median": 5.96,
+     "res_chord_cm_median": 1.08,
+     "views_median": 17
+    },
+    {
+     "r_m": [
+      45,
+      50
+     ],
+     "suction_cover": 0.986,
+     "res_span_cm_median": 6.4,
+     "res_chord_cm_median": 1.2,
+     "views_median": 17
+    },
+    {
+     "r_m": [
+      50,
+      55
+     ],
+     "suction_cover": 0.986,
+     "res_span_cm_median": 6.96,
+     "res_chord_cm_median": 1.32,
+     "views_median": 15
+    },
+    {
+     "r_m": [
+      55,
+      60
+     ],
+     "suction_cover": 0.978,
+     "res_span_cm_median": 7.62,
+     "res_chord_cm_median": 1.43,
+     "views_median": 15
+    },
+    {
+     "r_m": [
+      60,
+      65
+     ],
+     "suction_cover": 0.842,
+     "res_span_cm_median": 8.83,
+     "res_chord_cm_median": 1.53,
+     "views_median": 13
+    }
+   ]
+  },
+  {
+   "blade": 3,
+   "bands": [
+    {
+     "r_m": [
+      0,
+      5
+     ],
+     "suction_cover": 0.0,
+     "res_span_cm_median": null,
+     "res_chord_cm_median": null,
+     "views_median": 0
+    },
+    {
+     "r_m": [
+      5,
+      10
+     ],
+     "suction_cover": 0.644,
+     "res_span_cm_median": 0.33,
+     "res_chord_cm_median": 0.23,
+     "views_median": 10
+    },
+    {
+     "r_m": [
+      10,
+      15
+     ],
+     "suction_cover": 0.934,
+     "res_span_cm_median": 0.71,
+     "res_chord_cm_median": 0.3,
+     "views_median": 29
+    },
+    {
+     "r_m": [
+      15,
+      20
+     ],
+     "suction_cover": 0.971,
+     "res_span_cm_median": 1.23,
+     "res_chord_cm_median": 0.4,
+     "views_median": 26
+    },
+    {
+     "r_m": [
+      20,
+      25
+     ],
+     "suction_cover": 0.967,
+     "res_span_cm_median": 2.17,
+     "res_chord_cm_median": 0.55,
+     "views_median": 23
+    },
+    {
+     "r_m": [
+      25,
+      30
+     ],
+     "suction_cover": 0.974,
+     "res_span_cm_median": 3.09,
+     "res_chord_cm_median": 0.69,
+     "views_median": 21
+    },
+    {
+     "r_m": [
+      30,
+      35
+     ],
+     "suction_cover": 0.977,
+     "res_span_cm_median": 4.06,
+     "res_chord_cm_median": 0.84,
+     "views_median": 18
+    },
+    {
+     "r_m": [
+      35,
+      40
+     ],
+     "suction_cover": 0.982,
+     "res_span_cm_median": 4.89,
+     "res_chord_cm_median": 0.97,
+     "views_median": 17
+    },
+    {
+     "r_m": [
+      40,
+      45
+     ],
+     "suction_cover": 0.984,
+     "res_span_cm_median": 5.95,
+     "res_chord_cm_median": 1.09,
+     "views_median": 14
+    },
+    {
+     "r_m": [
+      45,
+      50
+     ],
+     "suction_cover": 0.986,
+     "res_span_cm_median": 6.38,
+     "res_chord_cm_median": 1.21,
+     "views_median": 14
+    },
+    {
+     "r_m": [
+      50,
+      55
+     ],
+     "suction_cover": 0.986,
+     "res_span_cm_median": 6.99,
+     "res_chord_cm_median": 1.32,
+     "views_median": 12
+    },
+    {
+     "r_m": [
+      55,
+      60
+     ],
+     "suction_cover": 0.977,
+     "res_span_cm_median": 7.66,
+     "res_chord_cm_median": 1.44,
+     "views_median": 12
+    },
+    {
+     "r_m": [
+      60,
+      65
+     ],
+     "suction_cover": 0.882,
+     "res_span_cm_median": 8.8,
+     "res_chord_cm_median": 1.52,
+     "views_median": 10
+    }
+   ]
+  }
+ ],
+ "registration": []
+}

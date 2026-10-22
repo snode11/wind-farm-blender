@@ -1,0 +1,162 @@
+{
+  "status": "FROZEN_BEFORE_ANY_TEST_SOLVE_OR_GEOMETRY_EVALUATION",
+  "source_authorization": "plan_and_authorization.md",
+  "metric": "evaluation/metric_protocol_development.json",
+  "development_configuration": "p2b/development/configuration/frozen_configuration.json",
+  "development_group_freeze": "p2b/groups/development/groups_hash_frozen.json",
+  "capture_configuration": "capture/capture_configuration_freeze.json",
+  "test_selection": "capture/test_selection_result_v2.json",
+  "groups": {
+    "A1_new": [],
+    "A3_C4": [
+      "M04",
+      "M05",
+      "M06",
+      "M07"
+    ],
+    "A3_D4": [
+      "M00",
+      "M05",
+      "M06",
+      "M11"
+    ],
+    "A3_D12": [
+      "M00",
+      "M01",
+      "M02",
+      "M03",
+      "M04",
+      "M05",
+      "M06",
+      "M07",
+      "M08",
+      "M09",
+      "M10",
+      "M11"
+    ]
+  },
+  "test_times_s": [
+    [
+      143.0,
+      143.1,
+      143.2,
+      143.3,
+      143.4,
+      143.5,
+      143.6,
+      143.7
+    ],
+    [
+      148.5,
+      148.6,
+      148.7,
+      148.8,
+      148.9,
+      149.0,
+      149.1,
+      149.2
+    ],
+    [
+      165.0,
+      165.1,
+      165.2,
+      165.3,
+      165.4,
+      165.5,
+      165.6,
+      165.7
+    ]
+  ],
+  "target_model_blade": 0,
+  "only_solver_camera": "WideInput",
+  "heldout_camera": "WideEval",
+  "solver": "frozen centered physical FD/dense exact/minimum TRF radius1;60budget;1e-7stops",
+  "source_truth_forbidden_to_solver_initializer_texture": true,
+  "mask": "same frozen RGB ROI/occupancy/local palette-v2; no source segmentation",
+  "observation_gate_p95_max_raw_px": 1.0,
+  "thresholds": {
+    "relative_gain": 0.1,
+    "minimum_clips_passing": 2,
+    "delta_dev_m": 0.003199128301331469,
+    "delta_min_m": 0.006398256602662938,
+    "projection_protection_band_raw_px": 0.25,
+    "maximum_clip_degradation": "max(.05*baseline_mean,delta_min)"
+  },
+  "repair_after_test_rule": "If estimator changes, retain failed data and demote existing tests to development before choosing fresh unused windows; no score-based tuning",
+  "all12_test_geometries_and_common_q_eval_frozen_before_any_test_surface_scoring": true,
+  "invalid_rule": "keep planned denominator and FAILED/null; no success-only ranking",
+  "three_clips_are_saved_replay_not_independent_field_samples": true,
+  "selected_first_RGB_phase_limitation": "all starts approximately -25..-30deg visible marker direction, no broad phase generalization",
+  "A2_new": "optional appearance only; recon bytes identical to A1_new",
+  "blind_decision_code_sha256": "c2201a0d4eec1d7a2ca819e712aa29322e34d26fb3e94528a6cb2f64174b092b",
+  "freeze_utc": "2026-10-06T04:35:25.556087+00:00",
+  "test_frame_ids": {
+    "test01": [
+      260,
+      261,
+      262,
+      263,
+      264,
+      265,
+      266,
+      267
+    ],
+    "test02": [
+      315,
+      316,
+      317,
+      318,
+      319,
+      320,
+      321,
+      322
+    ],
+    "test03": [
+      480,
+      481,
+      482,
+      483,
+      484,
+      485,
+      486,
+      487
+    ]
+  },
+  "test_cameras": [
+    "WideInput",
+    "WideEval"
+  ],
+  "development_sensitivity_status": "COMPLETED_REVIEW_ONLY",
+  "development_sensitivity_sha256": "5540ae59c64198bf655dea166ffa2478492d3d124b3eddee3e1cf986d1e7ba65",
+  "development_projection_invalid_predictions_present": false,
+  "public_camera_contract": "Exact approved per-frame frame/time/K/T SHA; constant K equals development anchor, per-frame T may vary. MODEL-relative roll is explicitly known calibration, not solver-estimated pose.",
+  "camera_calibration_explanation_sha256": "254108563b97dc3b97c67003b7f3f3b507749b9f9b5f2c059520fd4f98e1d275",
+  "test_helper_preparation_sha256": "2b150e9b7013e8b42a2c587fb8285e5872a7cdc7173f436153dd3784404dfd69",
+  "final_code_and_protocol_identity": {
+    "evaluation/scripts/decide_blind_test.py": "c2201a0d4eec1d7a2ca819e712aa29322e34d26fb3e94528a6cb2f64174b092b",
+    "evaluation/scripts/evaluate_surface.py": "c10784e1c38c0278d5bc50f979a6a5ff4853f84643b5b8306d54b7d71be0e0b3",
+    "evaluation/scripts/run_surface_batch.py": "96538a4ddb8aa578d63b2d62c169a3886fe9e48e127dd15c2293c2afc3096a0c",
+    "evaluation/scripts/development_sensitivity.py": "798ff399bbb45b370bafd82ff1199701c600230bf65e639e54b76eecb0ff5d17",
+    "evaluation/scripts/evaluate_rgb_observation_gate.py": "a1132e6a0dd8401a2b21924c81faba9a3af76001ba26634ea3f551b4885e4a42",
+    "evaluation/scripts/freeze_formal_protocol.py": "dfca7bd8369a4ed41c1630c6d982ca07096ffff2066f269d5cc85b4e2596bef4",
+    "evaluation/metric_protocol_development.json": "9211aef5bf13c02e6e614c33af4f90bfb985cbd77e1bf9a8a4050b71778b3b33",
+    "evaluation/development_band_preregistration.json": "f1f59286e7ac76140190a7eb03ecb63c65ffa1ac42a982bcb8b4e34dd06192cc",
+    "capture/capture_configuration_freeze.json": "50927e5454d1f4f3c21b614beef7a3940eab73e723c19ed6ad6c8fe3e34ab5d6",
+    "capture/run_formal_capture_wrapper.py": "f26f3fb5d9dbfc2efa9dcc73885995075e496ebe44bfa6e7f407416fd90bb926",
+    "p2b/scripts/p2b_guard.py": "3c1fa196d39117061dfee526c148e223c264d1f443828c22b43f30b5d9123134",
+    "p2b/scripts/solve_groups.py": "538ab2643b7577bcc6a3151644b4f73c9f432da4e36f406a78ac023de3d17a60",
+    "p2b/development/configuration/frozen_configuration.json": "a61fc45bad9347dffee23a0e10dd18f3b7d08d475a3c7eaba3b1dd13af8f7712",
+    "numerics/solver_api.py": "ee88b73e0b8a4354c6a8b8b243b698a3456f23c1531c735c0bdaa3c5d6a7a2c7"
+  },
+  "point_to_triangle_sampler_module_sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70",
+  "source_identity_check": {
+    "checked": 25,
+    "all_current_equal_start": true,
+    "manifest_sha256": "af0c1ae63209b2d3211c61f463b210652c85b6de8de998320eaa530dc30e4f94"
+  },
+  "test_observation_order": "Capture fixed windows; independently review RGB junction crop sheets; freeze public annotations/masks; evaluate identity/localization against private projection without returning UV/XYZ to solver. No test reselection.",
+  "q_eval_order": "Freeze every reconstruction and common all12 first RGB ray query before any test surface evaluation; require 24-path common recon/q SHA manifest at final decision.",
+  "missing_primary_rule": "FAILED_GATE and primary aggregate null; retain finite diagnostic statistics with complete planned denominators.",
+  "unsuccessful_test_solver_rule": "Any of the12 solver-reported unsuccessful terminations or nonfinite states fails integrity; retain planned finite-run diagnostics without reselection or expanded budget.",
+  "acceptance": "REVIEW_ONLY; controlled saved replay only; no field geometry or health acceptance."
+}

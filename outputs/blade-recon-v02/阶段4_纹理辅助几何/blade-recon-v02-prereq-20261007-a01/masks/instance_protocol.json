@@ -1,0 +1,16 @@
+{
+  "schema": "rgb-instance-gate.v1",
+  "classification": "RECORDED_MAPPO_BLENDER_SCENE_WITH_NEW_TARGET_ABSENT_RGB_REFERENCE",
+  "gates": {
+    "iou_min": 0.9,
+    "precision_min": 0.95,
+    "recall_min": 0.95,
+    "boundary_symmetric_mean_px_max": 1.5,
+    "boundary_symmetric_p95_px_max": 3.0
+  },
+  "planned_observations": 16,
+  "scope": "visible T1 blade union, occlusion retained; not blade identity or field evidence",
+  "original_rgb_is_unchanged": true,
+  "reference_condition": "same camera, illumination, background; target temporarily absent for independently acquired reference; not available from old four-frame RGB alone",
+  "truth_use": "evaluation only; never input to segmentation or solver"
+}
