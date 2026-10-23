@@ -3,6 +3,8 @@ import dataclasses
 import math
 import numpy as np
 
+from wfrl.scene.power import farm_power_total
+
 UNITS = dict(yaw='deg', pitch='deg', rotor_speed='rpm', power='MW', load='',
              torque='N m', pitch_command='deg', pitch_measured='deg', wind_speed='m/s', wind_direction='deg', reward='',
              m_flap='N m', m_edge='N m')
@@ -43,8 +45,14 @@ class SnapshotAdapter:
         if missing or value is None:
             value, validity, error = None, 'unsupported', 'Source channel unavailable'
         else:
-            try: value = json_value(value)
-            except ValueError as exc: value, validity, error = None, 'invalid', str(exc)
+            try:
+                if key == 'power':
+                    value = farm_power_total([value], 1)
+                    if not math.isfinite(value):
+                        raise ValueError('power must be a finite scalar number')
+                value = json_value(value)
+            except (ValueError, OverflowError) as exc:
+                value, validity, error = None, 'invalid', str(exc)
         return dict(value=value, unit=UNITS.get(key, ''), validity=validity, error=error,
                     fidelity=fidelity, provenance=provenance,
                     source_age_seconds=0.0, stale_after_seconds=threshold)
@@ -73,12 +81,26 @@ class SnapshotAdapter:
             for key in UNITS:
                 value = m.get(key)
                 if value is not None:
-                    arr = np.asarray(value)
-                    value = arr[i] if arr.ndim >= 1 and len(arr) == len(self.ids) else float('nan')
+                    try:
+                        if key == 'power':
+                            arr = value if isinstance(value, np.ndarray) else np.asarray(value, dtype=object)
+                        else:
+                            arr = np.asarray(value)
+                        shape_ok = arr.ndim >= 1 and len(arr) == len(self.ids)
+                        if key == 'power':
+                            shape_ok = shape_ok and arr.ndim == 1
+                        value = arr[i] if shape_ok else float('nan')
+                    except (TypeError, ValueError):
+                        value = float('nan')
                 channels[key] = self.channel(value, key, missing=key not in m)
             turbines.append(dict(turbine_id=tid, channels=channels))
+        farm_power = self.channel(snapshot.farm_power, 'power', missing='power' not in m)
+        if 'power' in m and (not math.isfinite(farm_power_total(m['power'], len(self.ids)))
+                             or any(t['channels']['power']['validity'] != 'valid' for t in turbines)):
+            farm_power.update(value=None, validity='invalid',
+                              error='Farm power requires one finite value per expected turbine and a finite total')
         payload = dict(self.context(snapshot), turbines=turbines,
-                    farm={'power': self.channel(snapshot.farm_power, 'power'),
+                    farm={'power': farm_power,
                           'reward': self.channel(snapshot.reward, 'reward')})
         if hasattr(self.scene, 'to_dict'): payload['scene'] = self.scene.to_dict()
         return payload

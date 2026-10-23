@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 
 from wfrl.channels import registry
+from wfrl.scene.power import farm_power_total
 from wfrl.scene.schema import Scene
 
 
@@ -163,7 +164,7 @@ class SceneRuntime:
                     frame[topic] = data
         frame["_meta"] = {"t": self._t, "u_inf": self.u_inf,
                           "reward": m.get("reward"), "done": self.done,
-                          "farm_power": float(np.nansum(m.get("power", [0.0])))}
+                          "farm_power": farm_power_total(m.get("power"), self.scene.n)}
         self._last_frame = frame
         return frame
 

@@ -75,7 +75,8 @@ def clock_state():
 def source_identity(active):
     arrays = {name: hashlib.sha256(np.ascontiguousarray(getattr(active, name)).tobytes()).hexdigest()
               for name in ('times', 'transforms', 'poses')}
-    arrays['telemetry'] = hashlib.sha256(json.dumps(active.telemetry, sort_keys=True).encode()).hexdigest()
+    arrays['telemetry'] = hashlib.sha256(json.dumps(active.telemetry, sort_keys=True,
+        default=lambda value: value.tolist() if isinstance(value, np.ndarray) else value).encode()).hexdigest()
     arrays['manifest'] = hashlib.sha256(json.dumps(active.manifest, sort_keys=True).encode()).hexdigest()
     return arrays
 

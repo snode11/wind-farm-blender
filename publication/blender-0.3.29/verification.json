@@ -1,0 +1,129 @@
+{
+  "schema": "wfrl.release-verification.v1",
+  "version": "0.3.29",
+  "scope": "Selected source regressions and isolated extension ZIP background validation",
+  "host": {
+    "status": "PASS",
+    "passed": 247,
+    "skipped": 1,
+    "warnings": 5,
+    "python": "3.11.16",
+    "numpy": "existing wfrl-mac environment",
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. /path/to/wfrl-mac/bin/python -m pytest blender_frontend/tests/test_farm_flex_workload.py blender_frontend/tests/test_farm_telemetry_arrays.py blender_frontend/tests/test_performance.py blender_frontend/tests/test_comparison_visibility.py blender_frontend/tests/test_tip_deflection.py blender_frontend/tests/test_camera_video_geometry.py blender_frontend/tests/test_nrel_defect_visibility.py blender_frontend/tests/test_blade_models.py blender_frontend/tests/test_scene_playback_lifecycle.py blender_frontend/tests/test_runtime_redraw.py blender_frontend/tests/test_live_runtime.py blender_frontend/tests/test_transport.py blender_frontend/tests/test_training_stats_protocol.py tests/blender_bridge/test_disconnect_progress.py tests/blender_bridge/test_training_progress.py tests/blender_bridge/test_farm_power_validity.py tests/test_interactive_ppo_objective.py tests/test_wheel_resources.py -q -p no:cacheprovider",
+    "log": "host-tests.log"
+  },
+  "source_workload": {
+    "status": "PASS",
+    "command": "/Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup --python-exit-code 1 --python blender_frontend/tests/blender/farm_flex_workload_regression.py",
+    "log": "source-workload.log",
+    "result": {
+      "status": "PASS",
+      "source": "/path/to/wind-farm-blender/blender_frontend/wfrl_blender/__init__.py",
+      "sampled_times_s": [
+        117.0,
+        117.01666666666667,
+        117.025,
+        132.01666666666668,
+        147.01666666666665,
+        177.0
+      ],
+      "workloads": {
+        "[0]": {
+          "flex.scene_updates": 1,
+          "flex.participating_turbines": 1,
+          "flex.cache_miss": 2,
+          "flex.tower_vertices_written": 768,
+          "flex.blade_updates": 3,
+          "flex.vertices_written": 13254,
+          "comparison.blades": 3,
+          "comparison.hidden_geometry_skips": 1
+        },
+        "[1]": {
+          "flex.scene_updates": 1,
+          "flex.participating_turbines": 1,
+          "flex.cache_miss": 2,
+          "flex.tower_vertices_written": 1536,
+          "flex.blade_updates": 3,
+          "flex.vertices_written": 13254,
+          "flex.measurement_points": 3,
+          "comparison.blades": 3,
+          "comparison.hidden_geometry_skips": 1
+        },
+        "[2]": {
+          "flex.scene_updates": 1,
+          "flex.participating_turbines": 1,
+          "flex.cache_miss": 2,
+          "flex.tower_vertices_written": 1536,
+          "flex.blade_updates": 3,
+          "flex.vertices_written": 13254,
+          "flex.measurement_points": 3,
+          "comparison.blades": 3,
+          "comparison.hidden_geometry_skips": 1
+        },
+        "all": {
+          "flex.scene_updates": 1,
+          "flex.participating_turbines": 3,
+          "flex.cache_miss": 2,
+          "flex.tower_vertices_written": 2304,
+          "flex.blade_updates": 9,
+          "flex.vertices_written": 39762,
+          "comparison.blades": 3,
+          "comparison.hidden_geometry_skips": 1
+        },
+        "single_export_T2": {
+          "flex.scene_updates": 1,
+          "flex.participating_turbines": 1,
+          "flex.cache_miss": 2,
+          "flex.tower_vertices_written": 768,
+          "flex.blade_updates": 3,
+          "flex.vertices_written": 13254
+        }
+      },
+      "exact_tip_transport": true,
+      "same_time_selection": true,
+      "rebind_invalidation": true,
+      "model_switch_clock": true,
+      "first_shared_support": true,
+      "missing_T1_export": true,
+      "scope": "native background geometry workload; viewport FPS not measured"
+    }
+  },
+  "isolated_package": {
+    "status": "PASS",
+    "report": "package-validation.json",
+    "command": "PYTHONDONTWRITEBYTECODE=1 /path/to/python-installation/bin/python scripts/blender/validate_frontend_package.py --output publication/blender-0.3.29 --blender /Applications/Blender.app/Contents/MacOS/Blender",
+    "platform": "macOS",
+    "blender": "5.2.1 LTS",
+    "checks": [
+      "ZIP integrity and inventory",
+      "Isolated extension installation",
+      "Installed module path and build identity",
+      "Default three-camera background regression",
+      "Native camera projection background regression",
+      "Installed inventory after regressions"
+    ]
+  },
+  "source_sha256": {
+    "blender_frontend/tests/blender/blade_model_regression.py": "3d1b30c3b745b3c4716d703a828de79fc028b410727df563c167bd7e2f751c2f",
+    "blender_frontend/tests/blender/farm_flex_workload_regression.py": "b92c01b94ef5007b361e4c55945a8a938edae313d75b8a4e27022e7758ca1b0a",
+    "blender_frontend/wfrl_blender/deflection.py": "17d7c6d27aee0c2748fd5ee059111759cb2ffa191c316eb47cefaad8a71ed6f4",
+    "blender_frontend/wfrl_blender/farm_flex.py": "3cf87f1602bec7a6f9397577d17f01e97e8bf2f9615c14c9dbacd49f25911549",
+    "blender_frontend/wfrl_blender/panels/farm_replay.py": "cdc10e2da906599b2ee22f8356249f826a5369d0400857751d47ead7efb3d07d",
+    "blender_frontend/wfrl_blender/runtime.py": "2fd58da5dd9de3937ebd0f33c7ca0d485a4a4f68bc5ff06dd3d53728ff8c6e64",
+    "wfrl/blender_bridge/backend_session.py": "58202b72ea7dbf201eed92c9f2156d7483cf04cf785c5261a4aad44eab34a85d",
+    "wfrl/blender_bridge/server.py": "6bbca6c89aa0d1eff36f9fdd87b1feef86e4cb96652171b910c023faf8762095",
+    "wfrl/blender_bridge/snapshot_adapter.py": "1660d949a9f7182e3243d145efda935a187fd594150b9df840d7ff8fa91fdeb9",
+    "wfrl/scene/power.py": "f6f73595ee639d2311afad0795cb4d9195a571fc700f6228a98401f4c63c0b8f",
+    "wfrl/scene/runtime.py": "6dc9c891af3a7f00201a378b94192f95041f5902b48391057b36f9736069b441",
+    "wfrl/studio/trainer.py": "7fbbafd864db3019983ad5946f7be819ee80fe36a703a025469dff1fdd8873df",
+    "wfrl/turbines/__init__.py": "c7243ebbe300e7b3091f8b06f357d430c79f27d0925c36846694398ed849e1ce"
+  },
+  "visible_window": "NOT_RUN",
+  "whole_frontend_regression": "NOT_RUN",
+  "full_clip_fps": "NOT_RUN",
+  "long_duration_stability": "NOT_RUN",
+  "windows_linux": "NOT_RUN",
+  "scientific_acceptance": "NOT_RUN",
+  "tag_source_independent_rebuild": "NOT_RUN",
+  "daily_installation_updated": false
+}

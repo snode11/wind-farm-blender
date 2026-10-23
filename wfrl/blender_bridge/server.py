@@ -5,8 +5,12 @@ import ipaddress
 import socket
 import time
 import uuid
-from .backend_session import BackendSession
+from .backend_session import BackendSession, _aged_payload
 from .messages import FrameDecoder, SessionSequenceGuard, ProtocolError, encode_message, TRAINING_STATS_CAPABILITY
+
+
+class _SendQueueFull(ProtocolError):
+    pass
 
 
 class BridgeServer:
@@ -26,15 +30,34 @@ class BridgeServer:
         self.pending = deque()
         self.pending_bytes = 0
         self.backlog = deque()
+        self._deferred = {}
         self.close_after_flush = False
         self.negotiated_capabilities = frozenset()
         self.ready = False
         self.session_claimed = False
         self.closed = False
 
-    def _drop_replaceable_tail(self):
-        if self.pending and self.pending[-1]['kind'] == 'snapshot' and self.pending[-1]['offset'] == 0:
-            self.pending_bytes -= len(self.pending.pop()['frame'])
+    def _observation_key(self, kind, payload):
+        return kind, payload.get('record_kind') if kind == 'training_stats' else None
+
+    def _drop_replaceable(self, kind, payload):
+        key = self._observation_key(kind, payload)
+        identifies_run = kind == 'lifecycle' and 'run_id' in payload
+        if identifies_run:
+            for deferred_key, (observation, _) in list(self._deferred.items()):
+                if observation.get('run_id') != payload['run_id']:
+                    self._deferred.pop(deferred_key)
+        for item in list(self.pending):
+            if item['offset'] or item['kind'] not in {'snapshot', 'training_stats'}:
+                continue
+            same = self._observation_key(item['kind'], item['payload']) == key
+            prioritize = kind in {'lifecycle', 'safety_event', 'error'} and item['kind'] == 'snapshot'
+            obsolete = identifies_run and item['payload'].get('run_id') != payload['run_id']
+            if same or prioritize or obsolete:
+                if prioritize and not obsolete:
+                    self._deferred[('snapshot', None)] = item['payload'], item['queued_monotonic']
+                self.pending.remove(item)
+                self.pending_bytes -= len(item['frame'])
 
     def _connection_capabilities(self, capabilities):
         return [cap for cap in capabilities if cap != TRAINING_STATS_CAPABILITY] + sorted(self.negotiated_capabilities)
@@ -44,16 +67,20 @@ class BridgeServer:
             return
         if kind in ('hello_ack', 'lifecycle'):
             payload = dict(payload, capabilities=self._connection_capabilities(payload['capabilities']))
-        if kind == 'training_stats':
+        if kind in {'training_stats', 'snapshot'}:
             payload = deepcopy(payload)
-        # An unsent Snapshot can be replaced or moved behind a reliable event.
-        # A partially sent frame must finish to preserve framing.
-        self._drop_replaceable_tail()
+        # Partially sent frames are immutable; unsent observations can coalesce.
+        self._drop_replaceable(kind, payload)
+        key = self._observation_key(kind, payload)
+        self._deferred.pop(key, None)
         self.sequence += 1
         data = encode_message(dict(protocol_version=1, type=kind, session_id=self.session.session_id,
                                    sequence=self.sequence, payload=payload))
         if self.pending_bytes + len(data) > self.max_queue_bytes:
-            raise ProtocolError('Server send queue overflow')
+            if kind in {'snapshot', 'training_stats'}:
+                self._deferred[key] = payload, time.monotonic()
+                return
+            raise _SendQueueFull('Server send queue overflow')
         self.pending.append(dict(kind=kind, payload=payload, frame=data, offset=0,
                                  sequence=self.sequence, queued_monotonic=time.monotonic()))
         self.pending_bytes += len(data)
@@ -67,6 +94,7 @@ class BridgeServer:
             self.backlog = deque(retained + list(self.backlog))
         self.pending.clear()
         self.pending_bytes = 0
+        self._deferred.clear()
 
     def _disconnect(self):
         if self.client is not None: self.client.close()
@@ -75,10 +103,21 @@ class BridgeServer:
         self.client = None; self.ready = False; self.close_after_flush = False
 
     def _queue_session_events(self):
+        # One reliable batch may be outstanding. Backpressure leaves later
+        # events in the session's bounded buffer, including while disconnected.
+        if any(item['kind'] in {'lifecycle', 'safety_event', 'error'} for item in self.pending):
+            return
         while self.backlog:
             kind, payload = self.backlog[0]
-            self._send(kind, payload)
+            try:
+                self._send(kind, payload)
+            except _SendQueueFull:
+                if self.pending:
+                    return
+                raise
             self.backlog.popleft()
+        if any(item['kind'] in {'lifecycle', 'safety_event', 'error'} for item in self.pending):
+            return
         events = self.session.poll()
         for index, (kind, payload) in enumerate(events):
             try:
@@ -88,24 +127,24 @@ class BridgeServer:
                             if event[0] in {'lifecycle', 'safety_event', 'error'}]
                 self.backlog.extend(reliable)
                 raise
+        if not any(item['kind'] in {'lifecycle', 'safety_event', 'error'} for item in self.pending):
+            for key, (payload, queued_at) in list(self._deferred.items()):
+                self._send(key[0], _aged_payload(payload, max(0., time.monotonic() - queued_at)))
 
     def _flush(self):
         if not self.pending:
             return
         item = self.pending[0]
-        if item['kind'] == 'training_stats' and item['offset'] == 0:
+        if item['kind'] in {'training_stats', 'snapshot'} and item['offset'] == 0:
             # Always derive from the original ages: would-block retries must not
             # compound elapsed queue time. Once bytes leave, framing is immutable.
             elapsed = max(0., time.monotonic() - item['queued_monotonic'])
-            payload = deepcopy(item['payload'])
-            payload['source_age_seconds'] += elapsed
-            for channel in payload['stats'].values():
-                channel['source_age_seconds'] += elapsed
+            payload = _aged_payload(item['payload'], elapsed)
             frame = encode_message(dict(protocol_version=1, type=item['kind'],
                 session_id=self.session.session_id, sequence=item['sequence'], payload=payload))
             pending_bytes = self.pending_bytes + len(frame) - len(item['frame'])
             if pending_bytes > self.max_queue_bytes:
-                raise ProtocolError('Server send queue overflow')
+                raise _SendQueueFull('Server send queue overflow')
             self.pending_bytes = pending_bytes
             item['frame'] = frame
         chunk = item['frame'][item['offset']:item['offset'] + 65536]
@@ -119,6 +158,8 @@ class BridgeServer:
 
     def poll(self):
         if self.closed: return
+        if hasattr(self.session, 'tick'):
+            self.session.tick()
         # A client may close and reconnect before the next 10 ms poll. Reap
         # its EOF before accepting, or the stale owner rejects the resume.
         # MSG_PEEK leaves any live owner's queued commands untouched.
@@ -135,16 +176,28 @@ class BridgeServer:
             if self.client is not None: conn.close()
             else:
                 self.client = conn; conn.setblocking(False)
-                self.decoder = FrameDecoder(); self.deadline = time.monotonic() + self.handshake_timeout
+                self.decoder = FrameDecoder(); self._incoming = []
+                self.deadline = time.monotonic() + self.handshake_timeout
         except BlockingIOError: pass
         if self.client is None: return
         try:
             if not self.ready and time.monotonic() >= self.deadline: raise ProtocolError('Handshake timeout')
             for _ in range(4):
-                try: data = self.client.recv(16384)
-                except BlockingIOError: break
-                if not data: self._disconnect(); return
-                for message in self.decoder.feed(data):
+                if self.ready and self.backlog:
+                    break
+                if self._incoming:
+                    messages, self._incoming = self._incoming, []
+                else:
+                    try: data = self.client.recv(16384)
+                    except BlockingIOError: break
+                    if not data: self._disconnect(); return
+                    messages = self.decoder.feed(data)
+                for index, message in enumerate(messages):
+                    if self.ready and self.backlog:
+                        # Retain only this decoded read; do not read more commands
+                        # until reliable resume history has entered the send queue.
+                        self._incoming = messages[index:]
+                        break
                     if not self.ready:
                         if message['type'] != 'hello': raise ProtocolError('Expected hello')
                         resume = message['payload']['resume_session_id']
@@ -155,6 +208,8 @@ class BridgeServer:
                             # lifecycle or safety events from the previous one.
                             self.backlog.clear()
                             self.session.poll()
+                            if hasattr(self.session, 'clear_observations'):
+                                self.session.clear_observations()
                             self.session.session_id = uuid.uuid4().hex
                             self.guard = SessionSequenceGuard(self.session.session_id)
                             self.sequence = 0
@@ -164,12 +219,19 @@ class BridgeServer:
                                    run_id=getattr(self.session, 'run_id', None)))
                         self.ready = True
                         self.session_claimed = True
+                        if resume is not None and hasattr(self.session, 'replay_latest'):
+                            self.session.replay_latest()
                     else:
                         self.guard.accept(message)
                         if message['type'] != 'command': raise ProtocolError('Expected command')
                         try: self.session.command(message['payload'])
                         except (ValueError, TypeError, OSError) as exc:
-                            self._send('error', dict(code='COMMAND_REJECTED', message=str(exc), fatal=False))
+                            payload = dict(code='COMMAND_REJECTED', message=str(exc), fatal=False)
+                            try:
+                                self._send('error', payload)
+                            except (ProtocolError, ValueError, TypeError):
+                                self.backlog.append(('error', payload))
+                                raise
             if self.ready:
                 self._queue_session_events()
             if self.pending:

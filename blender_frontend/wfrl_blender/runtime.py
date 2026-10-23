@@ -376,8 +376,7 @@ def tick():
             health_results[result.component] = result
             health_changed = True
     # A paused recorded scene with no new data need not redraw every viewport.
-    # Keep playing redraws (their removal showed no FPS benefit), backend
-    # validity aging, and async status changes observable.
+    # Redraw during playback, backend validity aging, and async status changes.
     if (_client is None and _state.connection in {'LOCAL DEMO', 'OFFLINE RESULTS'}
             and not health_changed and charts.export_job.status == export_status
             and not any(getattr(w.screen, 'is_animation_playing', False)

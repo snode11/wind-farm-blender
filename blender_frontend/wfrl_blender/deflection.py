@@ -1,8 +1,8 @@
 """T1 ElastoDyn tip comparison, independent of the displayed tip taper.
 
 The rigid reference uses turbine geometry and recorded rigid pose only. The
-actual point is a dedicated vertex carried by the existing surface deformation
-pipeline. Output deflections enter only the comparison, never either position.
+actual point follows a dedicated structural vertex's bound surface deformation,
+including when its mesh is hidden. Output channels never drive either position.
 """
 import hashlib
 import json
@@ -229,7 +229,9 @@ class ComparisonView:
             else:
                 reference = hub + axes[:, 2] * data['scalars']['TipRad']
             # -2 is the structural reference vertex, -1 remains the cosmetic apex.
-            actual = obj.matrix_world @ obj.data.vertices[-2].co
+            actual = (obj.matrix_world @ obj.data.vertices[-2].co
+                      if 0 in self.owner.mesh_turbines()
+                      else self.owner.structural_tip_world(b, i, alpha))
             row = compare(actual, reference, axes, simulation[b - 1])
             row.update(time=float(time), blade=b, pitched=pitched, hub=hub,
                        interpolated=bool(1e-8 < alpha < 1 - 1e-8))

@@ -1,8 +1,8 @@
 """机型定义：渲染 + 相机仿真这一层的机型单一来源。
 
 一份机型文件（wfrl/turbines/<name>.yaml）承载三样东西：
-  · 外壳外形（机舱盒体 + 导流罩尺寸）—— 之前写死在 animate.py 的推算系数里
-  · 挂机点位库（命名点位 → 机舱系三维偏移）—— 之前散在 sensors.py 的 mount 分支
+  · 外壳外形（机舱盒体 + 导流罩尺寸）
+  · 挂机点位库（命名点位 → 机舱系三维偏移）
   · 元数据 / 气弹几何来源指针
 
 复杂的气弹几何（叶片截面 / 翼型 / 塔筒锥度 / 振型）不在机型文件里重复：它本就
@@ -44,11 +44,11 @@ class TurbineSpec:
     mounts: Dict[str, dict] = field(default_factory=dict)
     source_path: Optional[str] = None
 
-    # ---- 外壳外形（缺省回退到既有推算式，保证零行为变化）-------------------
+    # ---- 外壳外形（缺省尺寸由 geo 推算）-----------------------------------
     def nacelle_dims(self, geo=None) -> Tuple[float, float, float]:
         """机舱盒体 (length, width, height)，单位 m。
 
-        机型文件给了绝对值就用；没给则回退到 animate.py 的历史推算式
+        机型文件给了绝对值就用；缺省尺寸按以下公式推算
         （length=1.6·|OverHang|、width=height=2.2·HubRad），需要 geo。
         """
         nac = (self.shell or {}).get("nacelle") or {}

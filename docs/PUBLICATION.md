@@ -7,6 +7,7 @@
 | 内容 | 位置与分发 |
 | --- | --- |
 | 当前实现、测试、配置与文档 | Git 分支中的 `wfrl/`、`scripts/`、`tests/`、`blender_frontend/`、`blade_recon/`、`blade_recon0.2/`、`projects/` 等 |
+| 普通 Python 包 | `wfrl` 模块及 `wfrl/turbines/` 内置 YAML 机型定义，核心依赖为 PyYAML；不包含 WFCRL、求解器、仓库级场景或 Blender 扩展 ZIP |
 | 扩展正式载荷 | `blender_frontend/wfrl_blender/assets/` 与 `_vendor/` 随 Git 提供；构建不需要重新运行 FAST.Farm |
 | normal/close 独立净空演示 | `results/lidar/packages/normal-v1.1/`、`close-v1.1/` 与 `dist/lidar-delivery.json` 随 Git 提供；与柔性 MAPPO 数据分别使用 |
 | 后端 Replay 示例权重 | `results/checkpoints/mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt` 随 Git 提供；保存权重不代表训练已重现 |
@@ -17,7 +18,7 @@
 | 三相机重建与同源纹理 | `blade-reconstruction`、`same-source` 资源包含合成输入、保存重建及纹理再生成所需数据；扩展日常运行直接使用正式载荷 |
 | 表面材料点与雷达研究 | `blade-surface`、`lidar-research` 资源包保留正负结果、原始观测、数值数组与独立评分；合成真值与求解输入保持各自角色 |
 | 相机视频运行输入 | `camera-video` 提供演示视频与保存清单；`runtime-inputs` 提供帧映射、相机几何数组与 MediaMTX 配置；完整包的输入限制见下文 |
-| 0.3.28 扩展与证据 | [v0.3.28 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.28)提供 [wfrl_blender-0.3.28.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.28/wfrl_blender-0.3.28.zip)、inventory 与 SHA-256；181 文件、99,065,625 字节，身份见[交付身份](../publication/blender-0.3.28.json)。`outputs/frontend-stability-fixes/` 与所引用的机位验证 JSON／日志按保存身份提供；隔离 profile 和生成测试场景不随源码提供。原运行路径标识证据来源，不表示该临时目录仍存在 |
+| 0.3.29 扩展与证据 | [v0.3.29 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.29)提供 [wfrl_blender-0.3.29.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.29/wfrl_blender-0.3.29.zip)、inventory 与 SHA-256；181 文件、99,066,277 字节，身份见[交付身份](../publication/blender-0.3.29.json)，[当前载荷验证](../publication/blender-0.3.29/verification.json)标识宿主检查及隔离安装后台范围。隔离 profile 与生成测试场景仅保留本机；报告中的运行路径标识证据来源 |
 | 软件验证与展示 | Git 保留小型判定、来源与测试输入；`frontend-evidence` 资源包提供所选可见窗口证据。演示视频和两份正式演示文稿独立提供 |
 
 资源附件的完整文件路径、字节数与 SHA-256 见 [resources.json](../publication/resources.json)。同专题的编号附件是独立归档，须全部取得后才具备清单声明的完整输入。附件文件名不改变内部项目相对路径。最后解压 `zz-frozen-code-originals.tar.gz`，以原字节实验脚本满足冻结代码摘要；这些脚本可能保存生产机来源位置，应显式适配调用环境，不能把可携带报告副本当作原字节源码。
@@ -32,7 +33,9 @@ cd wind-farm-blender
 tar -xzf /path/to/resource-part.tar.gz
 ```
 
-解压目标必须是该源码仓库根目录。资源文件不会安装 Python 环境、覆盖日常 Blender 扩展或启动求解器。WFCRL 源码恢复后，可在自行准备的 Python 环境中执行 `python -m pip install -e ./wfcrl-env`；项目包为 `python -m pip install -e .`，具体可选依赖由 `pyproject.toml` 定义。FAST.Farm、OpenFAST、TurbSim、MPI 与控制器须按目标平台单独安装或编译。求解脚本接受 `WFCRL_FASTFARM_EXECUTABLE`、`WFCRL_OPENFAST_EXECUTABLE`、`WFCRL_TURBSIM_EXECUTABLE`，否则在 `PATH` 中寻找可执行文件。
+解压目标必须是该源码仓库根目录。资源文件不会安装 Python 环境、覆盖日常 Blender 扩展或启动求解器。WFCRL 源码恢复后，可在自行准备的 Python 环境中执行 `python -m pip install -e ./wfcrl-env`。根项目普通安装使用 `python -m pip install .`，源码开发使用 `python -m pip install -e .`；两者以及构建的 wheel 均提供内置机型 YAML，并按核心依赖声明安装 PyYAML。训练仍需 `train` 附加组和匹配的后端环境，安装范围与命令模板见[本地配置](setup/setup_local.md#2-python-环境floris-与算法开发)。
+
+FAST.Farm、OpenFAST、TurbSim、MPI 与控制器须按目标平台单独安装或编译。求解脚本接受 `WFCRL_FASTFARM_EXECUTABLE`、`WFCRL_OPENFAST_EXECUTABLE`、`WFCRL_TURBSIM_EXECUTABLE`，否则在 `PATH` 中寻找可执行文件。Python 包安装和后端源码变更不更新公开扩展附件或本机已安装扩展；Interactive、Formal Training 与 SB3 的入口及统计定义见[算法配置](training/MAPPO_SETUP.md)。
 
 仅离线使用公开扩展时，按[安装说明](blender/INSTALL.md)安装专用 ZIP 即可，无需恢复研究数据和后端环境。源码扩展可在新输出目录构建；源码发布不证明新生成 ZIP 已通过公开安装版的所有窗口和平台验收。
 

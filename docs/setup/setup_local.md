@@ -12,7 +12,9 @@
 
 ## 2. Python 环境：FLORIS 与算法开发
 
-从实际 Git 根目录 `wind farm RL` 工作。建议新建 Python 3.11 环境，保留现有环境：
+从实际 Git 根目录 `wind farm RL` 工作。根项目支持普通安装 `python -m pip install .`；修改源码时使用 editable 安装 `python -m pip install -e .`。两种安装均提供 `wfrl` 模块和内置机型定义 `wfrl/turbines/*.yaml`、`*.yml`；直接构建的 wheel 及从 sdist 构建的 wheel 也包含这些机型资源，`load_turbine_spec("nrel5mw")` 从实际安装包读取定义。
+
+[pyproject.toml](../../pyproject.toml) 将 `PyYAML>=6.0.1,<7` 声明为核心依赖，训练、GUI 等依赖按功能附加组安装。普通 Python 包不包含 WFCRL、求解器、仓库级场景文件或 Blender 扩展 ZIP；训练仍需 `train` 附加组、匹配的 WFCRL 环境及相应后端运行时。建议新建 Python 3.11 环境，保留现有环境，按以下模板准备 FLORIS 算法环境：
 
 ```bash
 conda create -n wfrl-doc-example python=3.11
@@ -23,7 +25,7 @@ python -m pip install -e '.[train]'
 python -m pip check
 ```
 
-`wfcrl-env/requirements-floris-local.txt` 标明的是 Windows 历史工作组合，包含 FLORIS 3.5、Gymnasium 0.29.1、PettingZoo 1.24.3、NumPy 1.26.4、SB3 2.3.2，以及训练和 Qt/VTK 依赖。这些命令是环境模板，执行结果需在目标机器核对。若只做算法，不需要启动 GUI；根项目 `train` / `gui` / `all` 附加组分别定义于 pyproject.toml（本地文件：`pyproject.toml`）。
+`wfcrl-env/requirements-floris-local.txt` 标明的是 Windows 历史工作组合，包含 FLORIS 3.5、Gymnasium 0.29.1、PettingZoo 1.24.3、NumPy 1.26.4、SB3 2.3.2，以及训练和 Qt/VTK 依赖。这些命令是环境模板，执行结果需在目标机器核对。若只做算法，不需要启动 GUI；根项目 `train` / `gui` / `all` 附加组分别定义于 [pyproject.toml](../../pyproject.toml)。
 
 依赖角色：WFCRL 提供物理环境及 Gymnasium / PettingZoo 接口；SB3 提供 PPO；`wfrl/sb3_wrapper.py` 对齐单智能体接口，`wfrl/mappo_sb3.py` 包装参数共享 IPPO；`wfrl/mappo_central.py` 则实现集中式 MAPPO。共享参数和 `Dec_` 前缀不等于集中式 critic。
 
@@ -43,6 +45,8 @@ python scripts/analysis/eval_visualize_ppo.py
 ## 3. FAST.Farm 动态后端与实时 Bridge
 
 仓库已有 [FastFarmDriver](../../wfrl/fastfarm_driver.py)、[动态 MAPPO 训练](../../scripts/train/train_fastfarm.py)、[场景运行器](../../wfrl/scene/runtime.py)和 [Bridge 会话](../../wfrl/blender_bridge/backend_session.py)。
+
+Bridge 的 Interactive 在 POSIX 平台通过 `IsolatedTrainer` 启动独立 worker，由 `wfrl/studio/trainer.py` 执行共享 actor、集中式 critic 的训练；Formal Training 委托独立命令行入口，SB3 PPO/IPPO 使用各自包装器。[算法与统计口径](../training/MAPPO_SETUP.md#interactive-的采样与更新)按实际入口区分。后端 Python 源码、公开扩展 ZIP 和本机已安装扩展分别识别，安装 Python 包不会替换 Blender 扩展。
 
 FAST.Farm 运行需要对应平台的 MPI、FAST.Farm/OpenFAST、supercontroller 与机组控制器二进制及算例资源；FLORIS requirements 刻意没有安装这些运行时。Windows 用 Microsoft MPI，macOS 现有入口使用 OpenMPI；二进制不能跨平台互换。配置检查、解释器选择与实际生命周期证据按[前端使用说明](../../前端readme.md)和[发布状态](../blender/发布状态与验证范围.md)分层阅读。
 

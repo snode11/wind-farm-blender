@@ -48,8 +48,8 @@ MAPPO · 60 秒是随包柔性结果回放，离线查看不需要 Bridge、FAST
 | 云台、总览和雷达外观 | `cameras.py`、`panels/gimbal.py`、`clearance_visual.py`；涉及几何时读 `scene_builder.py`、`turbine_geometry.py` | 前端使用说明与前端实现说明 |
 | B2、双束净空与 S1 报警 | `clearance_replay.py`、`radar_feedback.py`、`panels/clearance.py`、`panels/farm_replay.py`；仓库 `wfrl/lidar/replay.py`、`wfrl/lidar/dual_beam_replay.py`、`wfrl/lidar/evidence.py` | [结果包合同](../../../wfrl/lidar/REPLAY_FORMAT.md) |
 | 雷达标定、计算与结果打包 | 仓库 `wfrl/lidar/physics.py`、`wfrl/lidar/sampling.py`、`wfrl/lidar/dual_beam.py`、`wfrl/lidar/dual_beam_package.py`、`scripts/lidar/` | [雷达算法说明](../../../wfrl/lidar/README.md)、[计算流程](../../../scripts/lidar/README.md) |
-| 后端连接与启动器 | `runtime.py`、`transport.py`、`panels/status.py`、`panels/run.py`；仓库 `scripts/blender/wfrl_launcher.py`、`scripts/blender/wfrl_blender_bootstrap.py` | 前端实现说明的启动与连接生命周期章节 |
-| 性能、重绘与完整播放 | `playback_benchmark.py`、`performance.py`、`runtime.py`；仓库 `scripts/blender/run_playback_benchmark.py` | 验证入口的完整播放检查 |
+| 后端连接与启动器 | `runtime.py`、`transport.py`、`panels/status.py`、`panels/run.py`；仓库 `wfrl/blender_bridge/server.py`、`backend_session.py`、`isolated_trainer.py`，以及 `scripts/blender/wfrl_launcher.py`、`scripts/blender/wfrl_blender_bootstrap.py` | 前端实现说明的实时连接与控制生命周期章节、[训练入口与合同](../../../docs/training/MAPPO_SETUP.md) |
+| 柔性工作量、计时、重绘与完整播放 | `farm_flex.py`、`deflection.py`、`playback_benchmark.py`、`performance.py`、`runtime.py`；仓库 `scripts/blender/run_playback_benchmark.py` | 验证入口的柔性工作量与完整播放检查 |
 | 构建、隔离安装与包校验 | `blender_manifest.toml`；仓库 `scripts/blender/build_extension.py`、`scripts/blender/validate_frontend_package.py` | 本文“扩展与数据交付”及验证入口 |
 
 NREL 动态研究的仓库入口为 `scripts/blender/open_nrel_dynamic_review.py` 与 `wfrl/nrel_reconstruction/dynamic_review.py`。本地研究查看器（本地文件：`outputs/nrel-video-dynamic/runs/20261004-integrated/README.md`）使用自身 `viewer/frozen-source/` 和研究包，独立运行；工作区改动不会更新冻结源码。其状态为 `REVIEW_ONLY / DY1 NOT PASSED`，仅四个保存估计时刻，其余帧为 `UNAVAILABLE; no interpolation`。该查看器与 601 样本重建对照分别判定。GW184 的独立模型与配置见[项目说明](../../../projects/gw184-single/README.md)，不混用 NREL 几何身份。
@@ -69,6 +69,8 @@ NREL 动态研究的仓库入口为 `scripts/blender/open_nrel_dynamic_review.py
 - 回放实例按场景绑定；FULL_COPY 缺少对象时保持未就绪，共用网格的 linked scene 拒绝第二个时钟。Blender 同进程只有一个全局原生 player，归属由 `playback.py` 的开始／结束回调确定，不能由各窗口播放标志推断多个播放器。
 - 原生撤销／重做释放旧 RNA 引用并按恢复后的场景身份重绑回放，保留相机、机组、时间与时间轴设置；缺包或绑定失败保持未就绪，不降为刚性读数。删除场景后仍可清理、重新加载和卸载扩展。
 - MAPPO 驱动九片叶片及三机塔架柔性运动。独立 normal/close 净空演示使用刚性姿态示意，由仓库 `scripts/blender/open_clearance_demo.py` 加载外部包，工况切换从片段起点开始；只切视角保留工况、时刻和暂停状态。
+- 工作区源码按消费方的机组工作集计算整叶网格；隐藏 T1 时挠度比较仍采样三个结构叶尖，普通回放保留 T1 塔筒与挂载更新，供 T2/T3 视图及首次创建的共享结构使用。缺陷几何分析可请求全量，单机导出仅更新显式所选机组；不能仅按视口显隐移除这些依赖。
+- 同刻切视图须补齐所需网格。形变缓存按源帧与工作集区分，叶片重绑清缓存，换包或换模型重新绑定；可见整叶与隐藏结构叶尖的计算须保持读数一致。遥测每次加载校验后保留 NumPy 数组供插值复用，不使用跨加载缓存，不改变缺测、单位与来源。
 
 ### 重建对照
 
@@ -112,6 +114,12 @@ NREL 动态研究的仓库入口为 `scripts/blender/open_nrel_dynamic_review.py
 - 无效、缺失、过期或空统计不转成零净空／零误差；保留整组读数有限保持与过期规则。缺包、损坏、机型或版本不匹配时清除旧读数并显示原因。保存路径失效时只匹配同 manifest 哈希内置包，已有目录不被替换，加载仍严格核验保存身份。
 - 区分结构叶尖、展示叶尖、测量参考和平滑显示表面；不为画面吻合改写测距。光束显示长度不参与测量，亮线末端不宣称真实命中点。
 
+### 后端生命周期与训练回传
+
+- 后端 `BridgeServer.poll()` 无客户端时仍推进 `BackendSession.tick()`，读取进度、检测退出和失败并清理已结束会话资源。快照与统计可以合并为最新状态，可靠生命周期、安全事件和错误使用独立有界队列；真实溢出必须报告 `EVENT_OVERFLOW` 并失败停止，不能静默丢弃。重连恢复最新状态及保留的可靠事件，不承诺完整观察历史；等待时间计入读数年龄。
+- 全场功率仅在同一步全部预期机组读数及合计均有限时有效，缺测不补零、不以部分合计冒充全场；有效单机通道保持可用，完整未返回的源通道保留 `unsupported`。Interactive 的迭代统计与共享 actor、集中式 critic 目标按[训练入口与合同](../../../docs/training/MAPPO_SETUP.md)核对，不套用 Formal Training 或 SB3 的更新路径。
+- MPI 启动环境清除继承作业身份，保留 BTL/PML 及其下划线子项的显式传输配置；macOS 的 `self,tcp` 和 `lo0` 仅作缺省值。项目侧服务器、训练启动器和 MPI 环境独立于扩展 ZIP，修改后重启 Bridge；前端源码行为进入安装载荷仍需重新构建并核对实际安装来源。
+
 ## 验证选择
 
 按改动读取[维护与验证入口](references/verification.md)，选择宿主、原生后台、实际窗口或隔离安装检查。先确认脚本的输入、输出、副作用和模块来源；相关检查通过且没有新改动或未解决问题即可结束。
@@ -119,6 +127,8 @@ NREL 动态研究的仓库入口为 `scripts/blender/open_nrel_dynamic_review.py
 纯文档修改核对格式、链接、路径和要求一致性。可见交互需实际窗口证据；源代码导入、后台 PASS 或渲染图不能代替安装版原生窗口验证。交付时说明实际命令、环境与结果，区分“已运行通过”“仅静态检查”“尚未验证”，不混用不同载荷、平台或测试范围的证据。
 
 `POST_PIXEL` 表示视口绘制完成，不是显示器扫描输出或实体相机同步；60 Hz 时间轴不等于稳定 60 FPS。理想射线、保存几何和软件回归不证明现场漏测率、硬件采样、净空精度或保护延迟，不通过放宽容差隐藏差异。
+
+`performance.py` 的可选计时只汇总 CPU 回调：`flex.deformation_cache` 覆盖 `deformed_at()` 查询、命中和计算，`flex.rebind_blade` 独立记录。缓存命中／未命中、参与机组、叶片与塔筒写入、隐藏叶尖采样计数用于核对工作集；嵌套计时不能相加，也不构成 FPS 验收。
 
 ## 扩展与数据交付
 

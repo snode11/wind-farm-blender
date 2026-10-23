@@ -9,7 +9,7 @@ description = "Multi-agent RL for wind farm wake-steering control on the WFCRL b
 requires-python = ">=3.11"
 
 # 运行依赖按功能分组，避免在不需要训练或 GUI 的环境中强制安装大型组件。
-dependencies = []
+dependencies = ["PyYAML>=6.0.1,<7"]
 
 [project.optional-dependencies]
 camera-video = [
@@ -51,3 +51,6 @@ all = [
 
 [tool.setuptools]
 packages = {find = {include = ["wfrl*"]}}
+
+[tool.setuptools.package-data]
+"wfrl.turbines" = ["*.yaml", "*.yml"]

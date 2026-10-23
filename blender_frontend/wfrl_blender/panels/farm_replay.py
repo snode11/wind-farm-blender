@@ -350,8 +350,8 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
         dismiss_for_view_switch(scene)
         preview.visible_turbines=set(range(len(preview.readers))) if self.turbine=='all' else {int(self.turbine[1:])-1}
         preview.cache.clear()
-        # Hidden turbines need no mesh uploads. Switching to overview samples
-        # all nine at the current time before revealing them.
+        # Hidden blade meshes need no uploads; T1 tip measurements and shared
+        # support stay current. Overview samples all nine blades before display.
         for index,tid in enumerate(('T1','T2','T3')):
             for obj in scene.objects:
                 if obj.name.startswith(f'WFRL.Turbine.{tid}.') and '.ClearanceRadar.' not in obj.name and '.TipTrail.' not in obj.name:

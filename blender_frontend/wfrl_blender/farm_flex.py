@@ -162,6 +162,27 @@ def read_package(path):
     return _load_package(path).playback
 
 
+def _read_telemetry(path, manifest, times, readers):
+    """Read matching telemetry and retain numeric arrays for interpolation."""
+    if 'telemetry.json' not in manifest['files']:
+        return None
+    extra = json.loads((Path(path) / 'telemetry.json').read_text())
+    if extra is None:
+        return None
+    if (extra['schema'] != 'wfrl.farm-telemetry.v1'
+            or extra['geometry_sha256'] != manifest['files']['geometry.npz']
+            or not np.array_equal(extra['times'], times)
+            or set(extra['turbines']) != set(readers)):
+        raise ValueError('Telemetry and geometry do not match')
+    for channels in extra['turbines'].values():
+        for record in channels.values():
+            values = np.asarray(record['values'])
+            if values.shape != times.shape or not np.isfinite(values).all():
+                raise ValueError('Invalid telemetry samples')
+            record['values'] = np.asarray(values, dtype=float)
+    return extra
+
+
 def _update_scene_transforms(scene):
     """Evaluate the replay scene even when another scene is current."""
     import bpy
@@ -259,20 +280,7 @@ class FarmFlex:
                                           tower_motion=self.tower_motion,
                                           blade_reference=self.reference)
         self.comparison = None
-        telemetry_path = Path(path) / 'telemetry.json'
-        self.telemetry = json.loads(telemetry_path.read_text()) if 'telemetry.json' in self.manifest['files'] else None
-        if self.telemetry is not None:
-            extra = self.telemetry
-            if (extra['schema'] != 'wfrl.farm-telemetry.v1'
-                    or extra['geometry_sha256'] != self.manifest['files']['geometry.npz']
-                    or not np.array_equal(extra['times'], self.times)
-                    or set(extra['turbines']) != set(self.readers)):
-                raise ValueError('Telemetry and geometry do not match')
-            for channels in extra['turbines'].values():
-                for record in channels.values():
-                    values = np.asarray(record['values'])
-                    if values.shape != self.times.shape or not np.isfinite(values).all():
-                        raise ValueError('Invalid telemetry samples')
+        self.telemetry = _read_telemetry(path, self.manifest, self.times, self.readers)
         self.scene=scene;self.blades=[];self.groups={};self.cache={};self.enabled=True
         self.reference_matrices = {}
         self.visible_turbines=set(range(len(self.readers)))
@@ -465,7 +473,7 @@ class FarmFlex:
         scene['wfrl_telemetry_time_s'] = t
         self.last_telemetry_frame = t
 
-    @performance.timed("flex.deformation_cache")
+    @performance.timed("flex.rebind_blade")
     def rebind_blade(self, obj, coordinates):
         """Bind an edited rest mesh without using its currently posed vertices."""
         from .turbine_geometry import geometry_data
@@ -530,15 +538,65 @@ class FarmFlex:
         inverse = np.array(obj.matrix_world.inverted())
         return result@inverse[:3,:3].T+inverse[:3,3]
 
+    def mesh_turbines(self):
+        """Turbines whose blade meshes are consumed by the view or export."""
+        exported = getattr(self, 'export_turbines', None)
+        return frozenset(self.visible_turbines if exported is None else exported)
+
+    def _interpolate_blade(self, row, lo, hi, i, alpha, pose, nacelle):
+        _, _, _, _, _, k, b, offset = row
+        if self.reference is not None and 1e-8 < alpha < 1-1e-8:
+            # Interpolate in the moving root frame to avoid rotation-induced
+            # shortening from a world-space chord between source samples.
+            from .deflection import rigid_frame
+            scalars = self.comparison.data['scalars']
+            h0, _, a0 = rigid_frame(scalars, self.poses[i,k], b+1, self.tower_motion['nacelle'][i,k])
+            h1, _, a1 = rigid_frame(scalars, self.poses[i+1,k], b+1, self.tower_motion['nacelle'][i+1,k])
+            hub, _, axes = rigid_frame(scalars, pose[k], b+1, nacelle[k])
+            local_shape = ((lo-h0)@a0)*(1-alpha)+((hi-h1)@a1)*alpha
+            return local_shape@axes.T+hub+offset
+        return lo*(1-alpha)+hi*alpha+offset
+
+    def _structural_tip_local(self, row, i, alpha, pose, nacelle):
+        """Use identical point arithmetic for visible and hidden measurements."""
+        obj, _, world, index, weight, k, b, _ = row
+        section = index[-2]
+        points = world[-2:-1]
+        w = weight[-2:-1]
+        def endpoint(frame):
+            lo, hi = self.transforms[frame,k,b,section:section+2]
+            a = points@lo[:,:3].T+lo[:,3]
+            z = points@hi[:,:3].T+hi[:,3]
+            return (a*(1-w)+z*w).astype(world.dtype)
+        deformed = self._interpolate_blade(row, endpoint(i), endpoint(i+1), i, alpha, pose, nacelle)
+        inverse = np.array(obj.matrix_world.inverted())
+        return (deformed@inverse[:3,:3].T+inverse[:3,3]).astype(np.float32)[0]
+
+    def structural_tip_world(self, blade, i, alpha):
+        """Transport a hidden T1 tip with the mesh's bound rest and precision."""
+        from mathutils import Vector
+        row = next(row for row in self.blades if row[5:7] == (0, blade-1))
+        pose = self.poses[i]*(1-alpha)+self.poses[i+1]*alpha
+        nacelle = None
+        if self.reference is not None and 1e-8 < alpha < 1-1e-8:
+            from .tower_motion import interpolate_transform
+            nacelle = interpolate_transform(self.tower_motion['nacelle'][i], self.tower_motion['nacelle'][i+1], alpha)
+        local = self._structural_tip_local(row, i, alpha, pose, nacelle)
+        performance.count('flex.measurement_points', 1)
+        return row[0].matrix_world @ Vector(local)
+
+    @performance.timed("flex.deformation_cache")
     def deformed_at(self,frame):
-        if frame in self.cache:
+        turbines = self.mesh_turbines()
+        key = (frame, turbines)
+        if key in self.cache:
             performance.count("flex.cache_hit")
-            return self.cache[frame]
+            return self.cache[key]
         performance.count("flex.cache_miss")
         transforms=self.transforms[frame]
         result=[]
         for obj,rest,world,index,weight,k,b,offset in self.blades:
-            if k not in self.visible_turbines and not (k == 0 and self.comparison is not None):
+            if k not in turbines:
                 result.append(None)
                 continue
             deformed=np.empty_like(world)
@@ -549,7 +607,7 @@ class FarmFlex:
                 z=points@hi[:,:3].T+hi[:,3]
                 deformed[ids]=a*(1-weight[ids])+z*weight[ids]
             result.append(deformed)
-        self.cache[frame]=result
+        self.cache[key]=result
         while len(self.cache)>3:self.cache.pop(next(iter(self.cache)))
         return result
 
@@ -573,7 +631,13 @@ class FarmFlex:
         i=int(np.clip(np.searchsorted(self.times,t,side='right')-1,0,len(self.times)-2))
         alpha=float(np.clip((t-self.times[i])/(self.times[i+1]-self.times[i]),0,1))
         performance.count("flex.scene_updates")
-        performance.count("flex.participating_turbines", len(self.visible_turbines))
+        mesh_turbines = self.mesh_turbines()
+        support_turbines = set(mesh_turbines)
+        # Reconstruction can first share T1's support while playback is paused.
+        # Keep that source current even before a shared group has been created.
+        if getattr(self, 'export_turbines', None) is None:
+            support_turbines.add(0)
+        performance.count("flex.participating_turbines", len(mesh_turbines))
         lower=self.deformed_at(i);upper=self.deformed_at(i+1)
         pose=self.poses[i]*(1-alpha)+self.poses[i+1]*alpha
         if record_telemetry:
@@ -602,6 +666,8 @@ class FarmFlex:
                 obj.rotation_euler=Matrix(nacelle[k,:,:3].tolist()).to_euler()
                 obj.location=nacelle[k,:,:3]@np.array([0,0,87.6])+nacelle[k,:,3]
             for obj,rest,index,weight,k in self.towers:
+                if k not in support_turbines:
+                    continue
                 phase_started = performance.begin()
                 lo,hi=tower[k,index],tower[k,index+1]
                 a=np.einsum('nij,nj->ni',lo[:,:,:3],rest)+lo[:,:,3]
@@ -612,6 +678,8 @@ class FarmFlex:
                 performance.count("flex.tower_vertices_written", len(rest))
             heights=support['heights']
             for obj,k,z,rest_location in self.fittings:
+                if k not in support_turbines:
+                    continue
                 j=int(np.clip(np.searchsorted(heights,z)-1,0,len(heights)-2))
                 f=float((z-heights[j])/(heights[j+1]-heights[j]))
                 tr=interpolate_transform(tower[k,j],tower[k,j+1],f)
@@ -620,24 +688,19 @@ class FarmFlex:
         phase_started = performance.begin()
         _update_scene_transforms(scene)
         performance.end("flex.depsgraph_update", phase_started)
-        inverses=[np.array(obj.matrix_world.inverted()) for obj,*_ in self.blades]
-        for (obj,rest,world,index,weight,k,b,offset),inverse,lo,hi in zip(self.blades,inverses,lower,upper):
+        for row,lo,hi in zip(self.blades,lower,upper):
             if lo is None:continue
+            obj = row[0]
+            inverse = np.array(obj.matrix_world.inverted())
             phase_started = performance.begin()
-            if self.reference is not None and 1e-8 < alpha < 1-1e-8:
-                # Interpolate deformation in the moving blade root frame.
-                # A world-space chord between rotating tips creates artificial
-                # axial shortening (about 7 mm at this 40 Hz source rate).
-                from .deflection import rigid_frame
-                scalars=self.comparison.data['scalars']
-                h0,_,a0=rigid_frame(scalars,self.poses[i,k],b+1,self.tower_motion['nacelle'][i,k])
-                h1,_,a1=rigid_frame(scalars,self.poses[i+1,k],b+1,self.tower_motion['nacelle'][i+1,k])
-                hub,_,axes=rigid_frame(scalars,pose[k],b+1,nacelle[k])
-                local_shape=((lo-h0)@a0)*(1-alpha)+((hi-h1)@a1)*alpha
-                deformed=local_shape@axes.T+hub+offset
-            else:
-                deformed=lo*(1-alpha)+hi*alpha+offset
+            deformed = self._interpolate_blade(row, lo, hi, i, alpha, pose,
+                                               nacelle if self.tower_motion is not None else None)
             local=deformed@inverse[:3,:3].T+inverse[:3,3]
+            if row[5] == 0 and self.comparison is not None:
+                # The loose structural vertex and hidden numerical sample use
+                # identical float32 transport, independent of mesh batch size.
+                local[-2] = self._structural_tip_local(row, i, alpha, pose,
+                                                      nacelle if self.tower_motion is not None else None)
             performance.end('flex.interpolation', phase_started)
             phase_started = performance.begin()
             obj.data.vertices.foreach_set('co',local.astype(np.float32).ravel());obj.data.update()

@@ -1,5 +1,6 @@
 """Own one existing Trainer or formal CLI process; never duplicate training."""
 from collections import deque
+from copy import deepcopy
 from pathlib import Path
 import os
 import signal
@@ -27,14 +28,81 @@ FORMAL_VALUE_OPTIONS = {
 FORMAL_FLAG_OPTIONS = {'no_purge', 'obs_duty', 'recurrent'}
 
 
+def _aged_payload(payload, elapsed):
+    payload = deepcopy(payload)
+    def age(value):
+        if isinstance(value, dict):
+            if 'source_age_seconds' in value:
+                value['source_age_seconds'] += elapsed
+            for child in value.values():
+                age(child)
+        elif isinstance(value, list):
+            for child in value:
+                age(child)
+    age(payload)
+    return payload
+
+
+class _EventBuffer:
+    """Bound reliable history separately from coalescible training observations."""
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.stats_capacity = max(2, capacity)
+        self._items = deque()
+        self._lock = threading.Lock()
+        self._reliable_count = self._stats_count = 0
+
+    def put_nowait(self, event):
+        kind, payload = event
+        with self._lock:
+            if kind == 'training_stats':
+                if self._stats_count >= self.stats_capacity:
+                    # Keep the latest metrics even when newer progress has no stats.
+                    for index, (old_kind, old_payload, _) in enumerate(self._items):
+                        if old_kind == kind and old_payload['record_kind'] == payload['record_kind']:
+                            del self._items[index]
+                            self._stats_count -= 1
+                            break
+                    else:
+                        for index, (old_kind, _, _) in enumerate(self._items):
+                            if old_kind == kind:
+                                del self._items[index]
+                                self._stats_count -= 1
+                                break
+                self._stats_count += 1
+            else:
+                if self._reliable_count >= self.capacity:
+                    raise queue.Full
+                self._reliable_count += 1
+            self._items.append((kind, deepcopy(payload), time.monotonic()))
+
+    def get_nowait(self):
+        with self._lock:
+            if not self._items:
+                raise queue.Empty
+            kind, payload, queued_at = self._items.popleft()
+            if kind == 'training_stats':
+                self._stats_count -= 1
+                payload = _aged_payload(payload, max(0., time.monotonic() - queued_at))
+            else:
+                self._reliable_count -= 1
+            return kind, payload
+
+    def __len__(self):
+        with self._lock:
+            return len(self._items)
+
+
 class BackendSession:
     def __init__(self, scene=None, trainer_factory=None, scene_loader=None,
                  max_events=2048, kill_grace_seconds=5.0, mpi_launcher=None):
+        if type(max_events) is not int or max_events < 1:
+            raise ValueError('max_events must be a positive integer')
         self.session_id = uuid.uuid4().hex
         self.run_id = None
         self._progress_reader = None
         self._progress_dir = None
-        self._progress_events = queue.Queue(maxsize=max_events)
+        self._progress_events = _EventBuffer(max_events)
         self.scene = scene
         self.mode = 'demo'
         self.status = 'READY'
@@ -44,8 +112,13 @@ class BackendSession:
         self.kill_grace_seconds = kill_grace_seconds
         self.mpi_launcher = mpi_launcher
         self._condition = threading.Condition(threading.RLock())
-        self._events = deque()
+        self._events = _EventBuffer(max_events)
+        self._overflowed = False
+        self._overflow_error = self._overflow_lifecycle = None
         self._latest = None
+        self._latest_at = None
+        self._last_snapshot = None
+        self._last_stats = {}
         self._trainer = self._thread = self._process = None
         self._paused = False
         self._permits = 0
@@ -60,15 +133,43 @@ class BackendSession:
 
     def emit(self, kind, payload):
         with self._condition:
-            if kind == 'snapshot': self._latest = (kind, payload)
-            else:
-                if len(self._events) >= self.max_events:
-                    self._stopping = True
-                    self._condition.notify_all()
-                    self._events.clear()
-                    self._events.append(('error', dict(code='EVENT_OVERFLOW', message='Reliable event queue overflow; event history incomplete', fatal=True)))
-                    raise RuntimeError('Reliable event queue overflow')
-                self._events.append((kind, payload))
+            if kind == 'snapshot':
+                self._latest = (kind, deepcopy(payload))
+                self._latest_at = time.monotonic()
+                self._last_snapshot = self._latest, self._latest_at
+                return
+            if kind == 'training_stats':
+                key = payload['record_kind']
+                self._last_stats.pop(key, None)
+                self._last_stats[key] = deepcopy(payload), time.monotonic()
+            if self._overflowed and kind == 'lifecycle' and payload['run_status'] == 'FAILED':
+                self._overflow_lifecycle = (kind, payload)
+                return
+            try:
+                self._events.put_nowait((kind, payload))
+            except queue.Full:
+                message = 'Reliable event queue overflow; additional event rejected'
+                self._overflowed = self._stopping = True
+                self._condition.notify_all()
+                # Reserved diagnostic/terminal slots preserve the accepted history.
+                self._overflow_error = ('error', dict(code='EVENT_OVERFLOW', message=message, fatal=True))
+                self.lifecycle('FAILED', message)
+                self.stop(0)
+                raise RuntimeError(message)
+
+    def replay_latest(self):
+        """Restore the current run's last observations for a resumed connection."""
+        with self._condition:
+            for payload, queued_at in self._last_stats.values():
+                self._events.put_nowait(('training_stats',
+                    _aged_payload(payload, max(0., time.monotonic() - queued_at))))
+            if self._last_snapshot is not None:
+                self._latest, self._latest_at = self._last_snapshot
+
+    def clear_observations(self):
+        with self._condition:
+            self._latest = self._last_snapshot = None
+            self._last_stats.clear()
 
     def channel_table(self):
         runtime = getattr(self._trainer, "runtime", None)
@@ -108,7 +209,16 @@ class BackendSession:
             self._progress_dir.cleanup()
             self._progress_dir = None
 
-    def poll(self):
+    def tick(self):
+        """Advance backend completion and cleanup independently of event consumers."""
+        with self._condition:
+            try:
+                self._advance()
+            except RuntimeError:
+                if not self._overflowed:
+                    raise
+
+    def _advance(self):
         with self._condition:
             self._collect_progress()
             if self.status in ('RUNNING', 'PAUSED', 'STARTING'):
@@ -129,8 +239,21 @@ class BackendSession:
             if self.status in {'STOPPED', 'FAILED'} and not self.alive() and self._formal_scene_dir is not None:
                 self._formal_scene_dir.cleanup()
                 self._formal_scene_dir = None
-            result = list(self._events); self._events.clear()
-            if self._latest is not None: result.append(self._latest); self._latest = None
+
+    def poll(self):
+        with self._condition:
+            self.tick()
+            result = []
+            while True:
+                try: result.append(self._events.get_nowait())
+                except queue.Empty: break
+            for event in (self._overflow_error, self._overflow_lifecycle):
+                if event is not None: result.append(event)
+            self._overflow_error = self._overflow_lifecycle = None
+            if self._latest is not None:
+                kind, payload = self._latest
+                result.append((kind, _aged_payload(payload, max(0., time.monotonic() - self._latest_at))))
+                self._latest = None
             return result
 
     def _load(self, path):
@@ -184,6 +307,7 @@ class BackendSession:
             self._paused = self._stopping = False
             self._permits = 0
             self._trainer = self._thread = self._process = None
+            self.clear_observations()
             self.run_id = uuid.uuid4().hex
             self.lifecycle('STARTING')
             try:
@@ -201,12 +325,7 @@ class BackendSession:
                     argv.extend(['--training-progress', str(progress_path), '--run-id', self.run_id])
                     def observability_error(message):
                         payload = dict(code='TRAINING_OBSERVABILITY_ERROR', message=message, fatal=False)
-                        try: self._progress_events.put_nowait(('error', payload))
-                        except queue.Full:
-                            # Reserve visibility by replacing one queued statistic.
-                            try: self._progress_events.get_nowait()
-                            except queue.Empty: pass
-                            self._progress_events.put_nowait(('error', payload))
+                        self._progress_events.put_nowait(('error', payload))
                     self._progress_reader = TrainingProgressReader(progress_path, self.run_id,
                         lambda record: self._progress_events.put_nowait(('training_stats', record)), observability_error)
                     from .isolated_trainer import launcher_environment
@@ -308,6 +427,8 @@ class BackendSession:
                     candidate = self._load(args.get('scene', args.get('scene_path')))
                     self.scene = configured_scene(candidate, args.get('scene_overrides', {}))
                 self._channel_states.clear()
+                self.clear_observations()
+                self._overflowed = False
                 self.run_id = None
                 self.lifecycle('READY'); return
             if self.mode == 'formal_training': raise ValueError('Formal CLI does not support pause or single step')

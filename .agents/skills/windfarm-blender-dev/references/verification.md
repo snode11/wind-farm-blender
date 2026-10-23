@@ -16,16 +16,20 @@
 | 相机窗口、资源释放与原图采集 | `test_native_camera_lifecycle.py`、`test_custom_camera_retirement.py`、`test_custom_camera_capture.py`、`test_custom_camera_preview.py` | 后台 `custom_camera_retirement_regression.py` 检查布局部分释放失败后的对象／镜头数据重试及共享数据保护。实际窗口 `native_camera_enabled_regression.py` 检查参与路由、单路和异常清理；`frontend_layout_regression.py` 检查 GRID/STRIP、放大返回和退出；`custom_camera_capture_window.py` 检查真实 GPU 事务、失败和取消恢复；`native_camera_save_regression.py` 检查主镜头隔离、保存及实际写入失败恢复、重开无代理和观察中撤销。 |
 | NREL 缺陷编辑与几何分析 | `test_nrel_defects.py`、`test_nrel_defect_visibility.py`、`test_nrel_editor_playback.py` | 后台 `nrel_editor_resource_regression.py` 检查辅助对象删除、共享保护、关闭重试及已删除场景清理；`nrel_defect_editor_regression.py` 检查事务与保存重开，`nrel_defect_ui_state_regression.py` 检查源码 RNA 列表与按钮状态；实际窗口 `nrel_defect_window_regression.py`；`nrel_editor_playback_regression.py` 检查跨场景播放隔离、原窗口恢复、切场景与关窗保护。 |
 | MAPPO 柔性运动、挠度与取景 | `test_tip_deflection.py` 及受影响模块的现有宿主测试 | 后台按需选 `mappo_demo_regression.py`、`farm_flex_regression.py`、`tip_deflection_regression.py`、`farm_front_view_regression.py`；实际构图需可见窗口。失败的物理门槛不随软件检查通过而改变。 |
+| 柔性工作集、遥测数组与 CPU 计时 | `test_farm_flex_workload.py`、`test_farm_telemetry_arrays.py`、`test_performance.py`；按消费方选择 `test_comparison_visibility.py`、`test_tip_deflection.py`、`test_camera_video_geometry.py`、`test_nrel_defect_visibility.py` | 源码后台 `farm_flex_workload_regression.py` 检查保存／插值／终点时刻、可见与隐藏 T1 结构叶尖一致、同刻切换工作集、重绑缓存失效、模型切换时钟、首次共享 T1 塔筒与单机 T2 导出。共享结构及外形绑定另选表中对应原生脚本；不证明安装载荷或 FPS。 |
+| 后端断连、可靠事件与前端回传 | 仓库 `tests/blender_bridge/test_disconnect_progress.py`、`tests/blender_bridge/test_training_progress.py`；前端 `test_transport.py`、`test_training_stats_protocol.py`、`test_live_runtime.py`、`test_runtime_redraw.py` | 宿主检查断连期间生命周期、可合并统计、可靠事件、实际溢出失败、重连年龄和有界发送；原生连接按实际后端与安装来源另验，宿主模拟后端不证明真实训练完成。 |
+| 全场功率与 Interactive 目标 | 仓库 `tests/blender_bridge/test_farm_power_validity.py`、`tests/test_interactive_ppo_objective.py` | 宿主检查完整机组读数、缺测传播、迭代统计与固定张量 PPO 目标；不启动物理求解。算法与路由依据[训练入口与合同](../../../../docs/training/MAPPO_SETUP.md)。 |
+| 项目启动器与 MPI 环境 | `test_launcher.py`；仓库 `tests/blender_bridge/test_isolated_trainer.py` | 检查启动参数、继承作业身份清理、显式传输配置和取消逻辑；真实 MPI / FAST.Farm 运行须在目标环境单独验证，不归入扩展 ZIP 安装检查。 |
 | 雷达方法、统计与便携包 | `test_dual_beam_builtin.py`；仓库 `tests/lidar/test_replay.py`、`test_dual_beam.py`、`test_dual_beam_replay.py`、`test_dual_beam_portable.py` 均位于 `tests/lidar/` | 后台 `dual_beam_regression.py`、`clearance_replay_smoke.py`；实际窗口 `dual_beam_window.py`、`clearance_gui_acceptance.py`。按需核对旧 B2、默认双束及 TLS 各自合同。 |
 | 构建工具与安装包 | `test_frontend_package_validation.py` 测工具逻辑；`test_extension_package.py` 会构建产品 ZIP | 仓库 `scripts/blender/validate_frontend_package.py` 构建并隔离安装，默认执行后台检查；实际窗口另选相应脚本。 |
 | 完整片段与播放性能 | 按基准工具改动选择对应宿主测试 | 仓库 `scripts/blender/run_playback_benchmark.py` 驱动实际窗口 `demo_playback_benchmark.py`，分别判断各路绘制、完成状态与进程退出。 |
 
 ## 宿主与原生后台
 
-宿主使用已有依赖环境，按表选择测试，不直接运行整个测试目录：
+宿主使用已有依赖环境，按表选择测试，不直接运行整个测试目录。柔性工作集与遥测测试需要 NumPy；Interactive 目标测试还需 PyTorch，后端检查按其导入核对项目依赖，不为文档检查安装环境：
 
 ```bash
-PYTHONPATH=blender_frontend:. python -m pytest <选定测试路径> -q
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定测试路径> -q -p no:cacheprovider
 ```
 
 先阅读脚本入口、导入方式和输出行为。支持后台的原生脚本使用：
@@ -35,6 +39,8 @@ PYTHONPATH=blender_frontend:. python -m pytest <选定测试路径> -q
 ```
 
 此模板不能用于实际窗口脚本。使用已有安装 profile 时，先核对脚本是否支持工厂启动；工厂启动不是安装版测试的通用前提。
+
+`farm_flex_workload_regression.py` 只支持工作区源码，必须使用独立 `--background --factory-startup` 进程；脚本断言模块目录与空白注册状态，不读取安装模块选择变量。结果写到标准输出的 `FARM_FLEX_WORKLOAD_REGRESSION_PASS`，不保存场景或报告，不需要 `WFRL_TEST_OUTPUT`。工作集计数与数值一致性不能替代真实窗口、安装包或物理精度检查。
 
 `split_turbine_context_regression.py` 要求后台运行，默认导入工作区 `wfrl_blender`。安装版模式指定 `WFRL_ADDON_MODULE=bl_ext.<仓库名>.wfrl_blender` 并设置精确的 `WFRL_EXPECTED_ADDON_ROOT`；`WFRL_TEST_OUTPUT` 必须是不存在的新目录。可用 `WFRL_SPLIT_INPUT` 选择输入场景副本，保存输出不得覆盖规范资产。
 
@@ -75,6 +81,8 @@ python3 scripts/blender/validate_frontend_package.py --output <新目录> --blen
 
 ## 完整播放与性能
 
+`performance.py` 默认关闭，启用后汇总 CPU 回调耗时和计数，不保存逐帧无限样本。`flex.deformation_cache` 覆盖 `deformed_at()` 的查询、命中返回与未命中计算，`flex.rebind_blade` 单独计时。核对 `flex.cache_hit` / `flex.cache_miss`、`flex.participating_turbines`、`flex.blade_updates`、`flex.vertices_written`、`flex.tower_vertices_written` 与 `flex.measurement_points`，确认整叶、塔筒及隐藏结构叶尖各自的工作量。计时可能嵌套，不能相加推算帧耗时；后台结果和减少写入次数均不是视口 FPS。
+
 ```bash
 python3 scripts/blender/run_playback_benchmark.py --blender <Blender可执行文件> --output <新目录> --installed-profile <隔离验证目录>
 ```
@@ -82,6 +90,8 @@ python3 scripts/blender/run_playback_benchmark.py --blender <Blender可执行文
 `--installed-profile` 是 benchmark 启动器参数，要求该目录含有效 `environment.json` 且 profile 仍存在；启动器继承安装环境、清除源码导入覆盖并避免工厂启动。按实际需求用 `--path` 和 `--layout` 选择单路、三路、GRID/STRIP、关闭重开或播放切换路径，参数可选值以脚本定义为准。
 
 逐路检查推进、终止、缺绘制、超时、中止和错误，结合进程结果判定完整片段。平均 FPS、单个 PASS、近 2 秒采样或暂停时刷新次数均不能替代完成判定；不把未测平台、长期运行或科学精度纳入结论。
+
+单路完整播放后关闭、重开三路时停止推进的问题根因仍未定位；相关源码检查不能将该路径或完整片段 FPS 标为已验收。
 
 ## 纯文档与 skill
 

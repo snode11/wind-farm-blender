@@ -19,9 +19,9 @@ PyVista 的 actor 绑在创建它的 render window 上，跨线程改 `user_matr
         ...
     tr.stop()                       # 幂等；会等 driver 排空迭代预算
 
-算法与 `mappo_central.py` 完全一致（PPO 裁剪代理 + 集中式 critic），网络也复用
-那边的 `Actor`/`Critic`，不另开一套 —— 训练面板里跑的东西和命令行训练出来的
-checkpoint 必须能互相加载。
+复用 `mappo_central.py` 的 `Actor`、`Critic` 和 `RunningMeanStd` 结构。
+共享 actor 读取本机观测，集中式 critic 读取全场拼接观测；PPO 对每台机组的
+联合动作概率计算裁剪代理目标。
 """
 from __future__ import annotations
 
@@ -39,6 +39,12 @@ from wfrl.mappo_central import Actor, Critic, RunningMeanStd
 from wfrl.safety import SafetyLimiter
 
 DEVICE = torch.device("cpu")
+
+
+def _frame_farm_power(frame):
+    """读取 runtime 校验后的全场功率，缺测在内部保留为 NaN。"""
+    value = frame.get("_meta", {}).get("farm_power")
+    return float(value) if value is not None else float("nan")
 
 
 @dataclass
@@ -237,7 +243,7 @@ class Trainer:
         m = self.runtime.last_measure
         self._publish(step=0, iters_done=0, frame=frame, measure=m,
                       ctx=self.runtime.last_ctx,
-                      farm_power=float(frame["_meta"].get("farm_power") or 0.0),
+                      farm_power=_frame_farm_power(frame),
                       reward=0.0, events=[], phase="warmup")
         for _ in range(want_warmup):
             if self._stop.is_set():
@@ -246,7 +252,7 @@ class Trainer:
             m = self.runtime.last_measure
             self._publish(step=0, iters_done=0, frame=frame, measure=m,
                           ctx=self.runtime.last_ctx,
-                          farm_power=float(frame["_meta"].get("farm_power") or 0.0),
+                          farm_power=_frame_farm_power(frame),
                           reward=0.0, events=[], phase="warmup")
 
         act_high = np.array([self.runtime.driver.act_bounds[c][1]
@@ -284,15 +290,14 @@ class Trainer:
 
             # 回放专用：记录每步数据
             yaw_vals = np.asarray(m.get("yaw", np.zeros(n)), float).ravel()
-            pow_vals = np.asarray(m.get("power", np.zeros(n)), float).ravel()
             replay_history["step"].append(k + 1)
             replay_history["yaw"].append(yaw_vals[0] if len(yaw_vals) > 0 else 0.0)
-            replay_history["power"].append(float(pow_vals.sum()))
+            replay_history["power"].append(_frame_farm_power(frame))
             replay_history["reward"].append(r)
 
             self._publish(step=k + 1, iters_done=0, frame=frame, measure=m,
                           ctx=self.runtime.last_ctx,
-                          farm_power=float(frame["_meta"]["farm_power"]),
+                          farm_power=_frame_farm_power(frame),
                           reward=r, events=evs, phase="sampling")
             if self.runtime.done:
                 break
@@ -314,7 +319,7 @@ class Trainer:
 
         self._publish(step=ep, iters_done=1, frame=frame, measure=m,
                       ctx=self.runtime.last_ctx,
-                      farm_power=float(frame["_meta"].get("farm_power") or 0.0),
+                      farm_power=_frame_farm_power(frame),
                       reward=0.0, events=[], phase="done")
 
     def _pack_keys(self, m, obs_keys, obs_duty, n):
@@ -577,7 +582,7 @@ class Trainer:
         m = self.runtime.last_measure
         self._publish(step=0, iters_done=0, frame=frame, measure=m,
                       ctx=self.runtime.last_ctx,
-                      farm_power=float(frame["_meta"].get("farm_power") or 0.0),
+                      farm_power=_frame_farm_power(frame),
                       reward=0.0, events=[], phase="warmup")
         for _ in range(want_warmup):
             if self._stop.is_set():
@@ -586,7 +591,7 @@ class Trainer:
             m = self.runtime.last_measure
             self._publish(step=0, iters_done=0, frame=frame, measure=m,
                           ctx=self.runtime.last_ctx,
-                          farm_power=float(frame["_meta"].get("farm_power") or 0.0),
+                          farm_power=_frame_farm_power(frame),
                           reward=0.0, events=[], phase="warmup")
 
         # 观测 = (各被控量当前值, wind_speed, wind_direction)，动作 = 各被控量增量。
@@ -604,7 +609,8 @@ class Trainer:
             list(self.actor.parameters()) + list(self.critic.parameters()),
             lr=self.hp["lr"])
         rms = RunningMeanStd(obs_dim)
-        ret_rms_var, ret_acc = 1.0, 0.0     # 回报归一化（等价 VecNormalize）
+        # 折扣回报平方的指数移动平均 M 和累加器 G，跨 rollout 保留。
+        ret_rms_var, ret_acc = 1.0, 0.0
 
         gstep = 0
         for it in range(self.iters):
@@ -612,7 +618,7 @@ class Trainer:
                 break
             obs_buf = np.zeros((self.n_steps, n, obs_dim), np.float32)
             act_buf = np.zeros((self.n_steps, n, act_dim), np.float32)
-            logp_buf = np.zeros((self.n_steps, n, act_dim), np.float32)
+            logp_buf = np.zeros((self.n_steps, n), np.float32)
             rew_buf = np.zeros(self.n_steps, np.float32)
             pow_buf = np.full(self.n_steps, np.nan, np.float32)
             val_buf = np.zeros(self.n_steps + 1, np.float32)
@@ -633,7 +639,7 @@ class Trainer:
                 with torch.no_grad():
                     dist = self.actor.dist(ot)
                     a = dist.sample()
-                    logp = dist.log_prob(a)
+                    logp = dist.log_prob(a).sum(-1)  # 每台机组的联合动作对数概率，(n,)
                     st = torch.as_tensor(on.reshape(-1), device=DEVICE)
                     v = self.critic.v(st).squeeze(-1)
 
@@ -652,19 +658,20 @@ class Trainer:
                 r = float(frame["_meta"].get("reward") or 0.0)
                 obs_buf[k], act_buf[k] = on, a.cpu().numpy()
                 logp_buf[k], rew_buf[k], val_buf[k] = logp.cpu().numpy(), r, v
-                pow_buf[k] = float(frame["_meta"]["farm_power"])
+                pow_buf[k] = _frame_farm_power(frame)
                 filled = k + 1
                 gstep += 1
                 self._publish(step=gstep, iters_done=it, frame=frame,
                               measure=m, ctx=self.runtime.last_ctx,
-                              farm_power=float(frame["_meta"]["farm_power"]),
+                              farm_power=_frame_farm_power(frame),
                               reward=r, events=evs, phase="sampling")
                 if self.runtime.done:
                     break
 
             if self._stop.is_set() or filled == 0:
                 break
-            # 回报归一化：奖励量级随风速三次方变，不归一 vloss 会压过策略梯度
+            # 每步 G = gamma * G + r，M = 0.99 * M + 0.01 * G**2。
+            # 本轮全部奖励除以本轮末的 sqrt(M) + 1e-8，再送入 GAE。
             for r in rew_buf[:filled]:
                 ret_acc = ret_acc * self.hp["gamma"] + float(r)
                 ret_rms_var = 0.99 * ret_rms_var + 0.01 * ret_acc ** 2
@@ -680,22 +687,21 @@ class Trainer:
             adv, ret = self._gae(rew_n, val_buf[:filled + 1])
             stats = self._update(obs_buf[:filled], act_buf[:filled],
                                  logp_buf[:filled], adv, ret, opt)
-            # 全场功率取**本轮整段**的均值而不是最后一帧：一帧受尾流蜿蜒的
-            # 瞬时起伏影响能差 10%，画在曲线上看不出策略有没有在涨。
+            # 全场功率取本轮全部采样步的均值；任何一步缺测使整轮统计无效。
             stats.update(iter=it, step=gstep,
-                         mean_power=float(np.nanmean(pow_buf[:filled])),
+                         mean_power=float(np.mean(pow_buf[:filled])),
                          mean_reward=float(rew_buf[:filled].mean()))
             self.history.append(stats)
             self._publish(step=gstep, iters_done=it + 1, frame=frame,
                           measure=m, ctx=self.runtime.last_ctx,
-                          farm_power=float(frame["_meta"]["farm_power"]),
+                          farm_power=_frame_farm_power(frame),
                           reward=float(rew_buf.mean()), events=[],
                           phase="updating", stats=dict(stats))
 
         if self.ckpt_path:
             self._save(rms)
 
-    # ---- 算法细节（与 mappo_central.py 同一套口径）-----------------------
+    # ---- 观测打包、GAE 与 PPO 更新 --------------------------------------
     def _pack(self, m):
         """观测矩阵 (n, obs_dim)：列 = 各被控量当前值 + 风速 + 风向。
 
@@ -725,6 +731,8 @@ class Trainer:
         ot = torch.as_tensor(obs[:T], device=DEVICE)
         at = torch.as_tensor(act[:T], device=DEVICE)
         lt = torch.as_tensor(logp[:T], device=DEVICE)
+        if lt.shape != at.shape[:-1]:
+            raise ValueError("logp must have shape (steps, agents), with action dimensions summed")
         advt = torch.as_tensor(adv, device=DEVICE)
         rett = torch.as_tensor(ret, device=DEVICE)
         stt = ot.reshape(T, -1)
@@ -735,15 +743,16 @@ class Trainer:
             for s in range(0, T, mb):
                 b = idx[s:s + mb]
                 dist = self.actor.dist(ot[b])
-                new_logp = dist.log_prob(at[b])
+                new_logp = dist.log_prob(at[b]).sum(-1)  # (b, n)，不合并机组维
                 ratio = (new_logp - lt[b]).exp()
-                # 团队奖励 ⇒ 标量优势广播给 n 台。这是 MAPPO 的参数共享口径，
-                # 不是 bug：每台机组的信用分配靠集中式 critic，不靠拆奖励。
-                A = advt[b].unsqueeze(-1).unsqueeze(-1).expand_as(ratio)
-                A = (A - A.mean()) / (A.std() + 1e-8)
+                # 每步的标量团队优势沿机组维广播到 (b, n)，再统一归一化。
+                # 各机组保留独立的联合动作 ratio，代理目标对时间步与机组取均值。
+                A = advt[b].unsqueeze(-1).expand_as(ratio)
+                std = A.std() if A.numel() > 1 else A.new_zeros(())
+                A = (A - A.mean()) / (std + 1e-8)
                 pg = -torch.min(ratio * A,
                                 torch.clamp(ratio, 1 - clip, 1 + clip) * A).mean()
-                ent = dist.entropy().mean()
+                ent = dist.entropy().sum(-1).mean()
                 v = self.critic.v(stt[b]).squeeze(-1)
                 vloss = ((v - rett[b]) ** 2).mean()
                 loss = (pg - self.hp["ent_coef"] * ent
