@@ -1,7 +1,7 @@
 {
   "schema": "wfrl.extension-release.v1",
   "version": "0.3.30",
-  "publication_status": "VALIDATED_NOT_UPLOADED",
+  "publication_status": "PUBLISHED",
   "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.30",
   "archive": {
     "name": "wfrl_blender-0.3.30.zip",
@@ -21,7 +21,11 @@
     "tag": "v0.3.30",
     "canonical_payload_files_checked": 183,
     "canonical_payload_match": true,
-    "source_rebuild_verification": "NOT_RUN"
+    "source_rebuild_verification": "NOT_RUN",
+    "commit": "63741f315be6f6b1ede6fff58c258c7fa9f71af6",
+    "commit_url": "https://github.com/snode11/wind-farm-blender/commit/63741f315be6f6b1ede6fff58c258c7fa9f71af6",
+    "archive_name": "wind-farm-blender-source-0.3.30.zip",
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wind-farm-blender-source-0.3.30.zip"
   },
   "validation": {
     "report": "publication/blender-0.3.30/verification.json",

@@ -1,6 +1,6 @@
 # T1/T2/T3 Down 机舱下视
 
-本说明适用于公开扩展 **0.3.29**，包含 T1/T2/T3 Down 机舱下视与 NREL／rootkink 叶片外形选择。[下载专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.29/wfrl_blender-0.3.29.zip) 后手动安装并完全重启 Blender；包身份见[交付身份](../../publication/blender-0.3.29.json)，日常安装与适用验证见[安装核对](../../publication/daily-installation.json)。
+本说明适用于公开扩展 **0.3.30**，包含 T1/T2/T3 Down 机舱下视与 NREL／rootkink 叶片外形选择。[下载专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl_blender-0.3.30.zip) 后手动安装并完全重启 Blender；包身份见[交付身份](../../publication/blender-0.3.30.json)，日常安装与适用验证见[安装核对](../../publication/daily-installation.json)。
 
 ## 使用
 

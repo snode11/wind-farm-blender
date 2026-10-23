@@ -71,5 +71,13 @@
     "Windows/Linux",
     "scientific accuracy"
   ],
-  "daily_installation_changed": false
+  "daily_installation_changed": false,
+  "retention": {
+    "reports": "retained",
+    "isolated_profile": "recoverably removed",
+    "generated_scenes": "recoverably removed",
+    "current_extension_archive": "retained",
+    "cleanup": "cleanup.json",
+    "runtime_paths": "Reports identify run-time locations; removed profiles are not required for reading preserved results."
+  }
 }

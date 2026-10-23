@@ -1,13 +1,13 @@
 # Blender 文档分类
 
-公开 NREL 安装版为 **0.3.29**，使用[专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.29/wfrl_blender-0.3.29.zip)；项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **0.3.28**；实际模块、181 文件载荷及验证范围见[安装核对](../../publication/daily-installation.json)。公开附件身份见[交付身份](../../publication/blender-0.3.29.json)，GW184 为 **0.4.0 独立运行包**。证据范围见[发布状态](发布状态与验证范围.md)。[返回总索引](../README.md)。
+公开 NREL 安装版为 **0.3.30**，使用[专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl_blender-0.3.30.zip)；项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **0.3.28**；实际模块、181 文件载荷及验证范围见[安装核对](../../publication/daily-installation.json)。公开附件身份见[交付身份](../../publication/blender-0.3.30.json)，GW184 为 **0.4.0 独立运行包**。证据范围见[发布状态](发布状态与验证范围.md)。[返回总索引](../README.md)。
 
 ## 当前操作和功能
 
 | 文档 | 用途 |
 | --- | --- |
 | [INSTALL](INSTALL.md) | NREL 安装、升级和平台验证范围。 |
-| [风机手动控制](风机手动控制.md) | 独立刚性场景的参数、姿态、JSON 与撤销重做；工作区 T1 恒速变桨、独立 Down、离线视频、持久化作业监管、完整母版重试及发布约束。 |
+| [风机手动控制](风机手动控制.md) | 独立刚性场景的参数、姿态、JSON 与撤销重做；T1 恒速变桨、独立 Down、离线视频、持久化作业监管、完整母版重试及发布约束。 |
 | [用户使用手册](用户使用手册.md) | MAPPO 回放、视角、三相机、净空、后端模式、导出与保存。 |
 | [功能总览与规划](Blender前端功能总览与规划.md) | 已有功能、后端依赖、独立原型、研究边界和待完成事项。 |
 | [发布状态与验证范围](发布状态与验证范围.md) | 公开版本、源码与 ZIP 及实际安装的区别、已保存软件证据和限制。 |
@@ -20,7 +20,7 @@
 
 | 文档 | 阅读范围 |
 | --- | --- |
-| [0.3.29](../../publication/blender-0.3.29.json) | 当前公开 ZIP、源码标签、宿主检查、源码工作集后台与隔离安装后台验证的归属。 |
+| [0.3.30](../../publication/blender-0.3.30.json) | 当前公开 ZIP、源码标签、宿主检查、源码工作集后台与隔离安装后台验证的归属。 |
 | [0.3.22](../../publication/blender-0.3.22.json) | 该版 ZIP、源码提交、文件身份与适用验证范围。 |
 | [0.3.21](../../publication/blender-0.3.21.json) | 该版 ZIP、173 文件身份与对应软件证据。 |
 | [0.3.20+1](releases/0.3.20+1发布核对.md) | 该版三相机默认复位载荷、173 文件 ZIP；载荷测试／安装版按钮验证与最终包格式及字节一致性分层记录。 |

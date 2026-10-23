@@ -18,7 +18,7 @@
 | 三相机重建与同源纹理 | `blade-reconstruction`、`same-source` 资源包含合成输入、保存重建及纹理再生成所需数据；扩展日常运行直接使用正式载荷 |
 | 表面材料点与雷达研究 | `blade-surface`、`lidar-research` 资源包保留正负结果、原始观测、数值数组与独立评分；合成真值与求解输入保持各自角色 |
 | 相机视频运行输入 | `camera-video` 提供演示视频与保存清单；`runtime-inputs` 提供帧映射、相机几何数组与 MediaMTX 配置；完整包的输入限制见下文 |
-| 0.3.29 扩展与证据 | [v0.3.29 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.29)提供 [wfrl_blender-0.3.29.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.29/wfrl_blender-0.3.29.zip)、inventory 与 SHA-256；181 文件、99,066,277 字节，身份见[交付身份](../publication/blender-0.3.29.json)，[当前载荷验证](../publication/blender-0.3.29/verification.json)标识宿主检查及隔离安装后台范围。隔离 profile 与生成测试场景仅保留本机；报告中的运行路径标识证据来源 |
+| 0.3.30 扩展与证据 | [v0.3.30 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.30)提供 [wfrl_blender-0.3.30.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl_blender-0.3.30.zip)、inventory 与 SHA-256；184 文件、99,091,527 字节，身份见[交付身份](../publication/blender-0.3.30.json)，[当前载荷验证](../publication/blender-0.3.30/verification.json)标识 475 项选定宿主、隔离安装、相机连续重开与归属窗口、手动变桨及非媒体视频控制器跨进程恢复范围。隔离 profile 与生成测试场景属于可清理中间产物，验证报告保留运行时来源；报告中的运行路径标识证据来源 |
 | 软件验证与展示 | Git 保留小型判定、来源与测试输入；`frontend-evidence` 资源包提供所选可见窗口证据。演示视频和两份正式演示文稿独立提供 |
 
 资源附件的完整文件路径、字节数与 SHA-256 见 [resources.json](../publication/resources.json)。同专题的编号附件是独立归档，须全部取得后才具备清单声明的完整输入。附件文件名不改变内部项目相对路径。最后解压 `zz-frozen-code-originals.tar.gz`，以原字节实验脚本满足冻结代码摘要；这些脚本可能保存生产机来源位置，应显式适配调用环境，不能把可携带报告副本当作原字节源码。
