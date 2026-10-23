@@ -1,6 +1,6 @@
 {
   "schema": "wfrl.public-source-files.v1",
-  "scope": "Curated current source and scoped verification; excludes this manifest itself. Original/public SHA-256 distinguish portable evidence copies.",
+  "scope": "Curated current source, distribution identities and scoped verification; excludes this manifest itself. Original/public SHA-256 distinguish portable copies.",
   "files": [
     {
       "path": ".agents/skills/windfarm-blender-dev/SKILL.md",
@@ -3658,9 +3658,9 @@
     },
     {
       "path": "docs/PUBLICATION.md",
-      "bytes": 9370,
-      "sha256": "e5a02ee7646a222859ee731c91e79b2eba1a607d9d00d60c8545b0a7d6347d60",
-      "original_sha256": "e5a02ee7646a222859ee731c91e79b2eba1a607d9d00d60c8545b0a7d6347d60",
+      "bytes": 10033,
+      "sha256": "bdc8f6f952c90174ce5ae87b2ce4798664959918bbfe0a030a3081f3fd094a15",
+      "original_sha256": "bdc8f6f952c90174ce5ae87b2ce4798664959918bbfe0a030a3081f3fd094a15",
       "text_portable": false
     },
     {
@@ -3903,9 +3903,9 @@
     },
     {
       "path": "docs/blender/发布状态与验证范围.md",
-      "bytes": 15773,
-      "sha256": "b9b6f355d831cc6161b005f78c536876ca946821bc5fb1f8afc52d9465512556",
-      "original_sha256": "b9b6f355d831cc6161b005f78c536876ca946821bc5fb1f8afc52d9465512556",
+      "bytes": 15942,
+      "sha256": "b2de254352670250febbc20a07e9579ef16bac655f0a3bafc58376c9eeb9eb60",
+      "original_sha256": "b2de254352670250febbc20a07e9579ef16bac655f0a3bafc58376c9eeb9eb60",
       "text_portable": false
     },
     {
@@ -11918,16 +11918,16 @@
     },
     {
       "path": "publication/blender-0.3.30.json",
-      "bytes": 2143,
-      "sha256": "22b8a525ccb0e2a3e1103527721a826c32963b34001e8275089eeb12d94987ff",
-      "original_sha256": "22b8a525ccb0e2a3e1103527721a826c32963b34001e8275089eeb12d94987ff",
+      "bytes": 2597,
+      "sha256": "0b2584e7a1b1f751b3682f3f1ddde1c6f118a0604c4b5f7626023e414cb53692",
+      "original_sha256": "0b2584e7a1b1f751b3682f3f1ddde1c6f118a0604c4b5f7626023e414cb53692",
       "text_portable": false
     },
     {
       "path": "publication/blender-0.3.30/cleanup.json",
-      "bytes": 538,
-      "sha256": "3c001f445016ea1b8eedcd3fdd82128b072687704b63e1a275a0c748558b637c",
-      "original_sha256": "2d4f876afd2908a0b63b5dccc4ba35eeb5cfe91fbe0c32760f07305542ee5c5f",
+      "bytes": 592,
+      "sha256": "a65bee30f53ce5bf4a1dbb3821f7f6a0a4e4a7e30ac23b7f082709d82187a2e4",
+      "original_sha256": "fa220fe286c61afe114936906c28016629696b50013eaee3de06771eab26a83e",
       "text_portable": true
     },
     {
@@ -11943,6 +11943,13 @@
       "sha256": "3566cc058918bb0961a26f58e8b19dc09d0c100bb3d2f5bfff53cc6b06cb3196",
       "original_sha256": "0d9c9ea48255e2d542d01c82361aad4bd03b433dc34d06585914737e98887e56",
       "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/final-check.json",
+      "bytes": 867,
+      "sha256": "a1144c4eee9040c742a8841517bdad5abe65bd67873ec1b8894a2f17dabb88f9",
+      "original_sha256": "a1144c4eee9040c742a8841517bdad5abe65bd67873ec1b8894a2f17dabb88f9",
+      "text_portable": false
     },
     {
       "path": "publication/blender-0.3.30/host-checks.json",
@@ -12141,6 +12148,27 @@
       "text_portable": true
     },
     {
+      "path": "publication/blender-0.3.30/package/wfrl-delivery-0.3.30.json",
+      "bytes": 3059,
+      "sha256": "6839e977c3ced0295546d47258290564b13fdeb9964aca981bab8882caf4c27e",
+      "original_sha256": "6839e977c3ced0295546d47258290564b13fdeb9964aca981bab8882caf4c27e",
+      "text_portable": false
+    },
+    {
+      "path": "publication/blender-0.3.30/package/wfrl-validation-0.3.30.inventory.json",
+      "bytes": 20027,
+      "sha256": "d90f6a0c7546f845fc68d28547f7237e240d92dee794b3fba8083ee34cc13178",
+      "original_sha256": "d90f6a0c7546f845fc68d28547f7237e240d92dee794b3fba8083ee34cc13178",
+      "text_portable": false
+    },
+    {
+      "path": "publication/blender-0.3.30/package/wfrl-validation-0.3.30.zip.sha256",
+      "bytes": 93,
+      "sha256": "a9be30b21cfdfaadf32c9fa52e6bb06d565105fa35a547f481391110ae0a6112",
+      "original_sha256": "a9be30b21cfdfaadf32c9fa52e6bb06d565105fa35a547f481391110ae0a6112",
+      "text_portable": false
+    },
+    {
       "path": "publication/blender-0.3.30/package/wfrl_blender-0.3.30.inventory.json",
       "bytes": 29836,
       "sha256": "f7efa8dc4e4375d31789d7e720090ab278805112d90e580696110cf45e78f5b3",
@@ -12152,6 +12180,13 @@
       "bytes": 90,
       "sha256": "39b4882ad2ac0a375dea67053aa471ba7867076e231a775856fcf956af1f79c4",
       "original_sha256": "39b4882ad2ac0a375dea67053aa471ba7867076e231a775856fcf956af1f79c4",
+      "text_portable": false
+    },
+    {
+      "path": "publication/blender-0.3.30/package/wind-farm-blender-source-0.3.30.zip.sha256",
+      "bytes": 102,
+      "sha256": "61f071a7e9f71df769f47fa799e5d1610e8216e577fc9104b65e5d38e2555cb9",
+      "original_sha256": "61f071a7e9f71df769f47fa799e5d1610e8216e577fc9104b65e5d38e2555cb9",
       "text_portable": false
     },
     {
@@ -12191,9 +12226,9 @@
     },
     {
       "path": "publication/blender-0.3.30/upload-result.json",
-      "bytes": 384,
-      "sha256": "4efc79bb93292500a4ee5fddf48c8fd3dfb58f4d2876ae72c2284fc119ef675f",
-      "original_sha256": "4efc79bb93292500a4ee5fddf48c8fd3dfb58f4d2876ae72c2284fc119ef675f",
+      "bytes": 663,
+      "sha256": "da9867fdf1c435cb3bdda93c0b75e26236dfc802067417cf5954e34c95c0e08d",
+      "original_sha256": "da9867fdf1c435cb3bdda93c0b75e26236dfc802067417cf5954e34c95c0e08d",
       "text_portable": false
     },
     {
@@ -12268,9 +12303,9 @@
     },
     {
       "path": "publication/resources.json",
-      "bytes": 13355659,
-      "sha256": "6c6d5483f708291c67b6e824b09f50148f269cfdc01c2bf8f461735d151b092c",
-      "original_sha256": "6c6d5483f708291c67b6e824b09f50148f269cfdc01c2bf8f461735d151b092c",
+      "bytes": 13357584,
+      "sha256": "47b16d55ad00ac8abefbe86d33fc2d6a7502b15a856feb5111db2111a76e700f",
+      "original_sha256": "47b16d55ad00ac8abefbe86d33fc2d6a7502b15a856feb5111db2111a76e700f",
       "text_portable": false
     },
     {

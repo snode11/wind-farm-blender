@@ -1,0 +1,24 @@
+{
+  "schema": "wfrl.final-delivery-check.v1",
+  "status": "PASS",
+  "version": "0.3.30",
+  "extension_tag": "v0.3.30",
+  "extension_source_commit": "63741f315be6f6b1ede6fff58c258c7fa9f71af6",
+  "source_archive_commit": "6469a55a5f992a6c3de0509c40504fa568af0955",
+  "archive_and_tag_executable_tree_equal": true,
+  "uploaded_assets": 9,
+  "remote_attachment_redownload": false,
+  "host_passed": 475,
+  "native_reopen_checks": 45,
+  "native_ownership_checks": 21,
+  "daily_installation_preserved": "0.3.28 / 181 recorded files",
+  "cleanup_groups": 21,
+  "cleanup_files": 915,
+  "cleanup_bytes": 693662246,
+  "original_checkout_head_and_index_preserved": true,
+  "limits": [
+    "Scripted native windows; no physical mouse or stable FPS claim",
+    "No real training, solver or complete video in this delivery",
+    "Scientific negative results remain unchanged"
+  ]
+}

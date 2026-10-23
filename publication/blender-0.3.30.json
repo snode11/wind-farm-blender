@@ -25,7 +25,9 @@
     "commit": "63741f315be6f6b1ede6fff58c258c7fa9f71af6",
     "commit_url": "https://github.com/snode11/wind-farm-blender/commit/63741f315be6f6b1ede6fff58c258c7fa9f71af6",
     "archive_name": "wind-farm-blender-source-0.3.30.zip",
-    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wind-farm-blender-source-0.3.30.zip"
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wind-farm-blender-source-0.3.30.zip",
+    "archive_commit": "6469a55a5f992a6c3de0509c40504fa568af0955",
+    "archive_note": "Source archive includes release documentation; its executable payload matches the immutable extension tag."
   },
   "validation": {
     "report": "publication/blender-0.3.30/verification.json",
@@ -42,5 +44,7 @@
     "saved_version": "0.3.28",
     "saved_identity": "publication/daily-installation.json"
   },
-  "remote_asset_download_verification": false
+  "remote_asset_download_verification": false,
+  "delivery_manifest_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl-delivery-0.3.30.json",
+  "verification_archive_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl-validation-0.3.30.zip"
 }

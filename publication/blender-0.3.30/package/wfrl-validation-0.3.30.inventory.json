@@ -1,0 +1,462 @@
+{
+  "archive": "wfrl-validation-0.3.30.zip",
+  "sha256": "25a53882a7192ffb366a0cfa4349c0700499ce204866d3ea22afd3ca27dfe228",
+  "source_commit": "6469a55a5f992a6c3de0509c40504fa568af0955",
+  "files": [
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/draw-coverage.json",
+      "bytes": 781,
+      "sha256": "d2f01fb8275c3933133a36435747c506747fc264e1ba1c6107a4cf4e6d1c0e1b"
+    },
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/final-native.log",
+      "bytes": 973,
+      "sha256": "3e71c40dc0ea512062d18daf33c902867c5d19599470cf0982fd2ae2bdd92eb0"
+    },
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/final-native/result.json",
+      "bytes": 721360,
+      "sha256": "cdaa9d18a1405562963f65072214a22bfe8149cf49c7c18fe81c241089b76294"
+    },
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/final-native/single-advancing.png",
+      "bytes": 256158,
+      "sha256": "a4d657f69c0d99ef3590a0ea8d3fa06999c1a9e3bf9dd742f7cbf5cf76e4f4b6"
+    },
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/final-native/single-terminal.png",
+      "bytes": 246138,
+      "sha256": "60d3f4fab806f72307ec6de06074dfe93729c0d23ca4f0469c579b8f2f51711d"
+    },
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/final-native/triple-advancing.png",
+      "bytes": 1104619,
+      "sha256": "8ae5b0983d21c82729de2ff1c8c8b42aedd9f4e3042342c1bac8b25d0d3a7942"
+    },
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/final-native/triple-terminal.png",
+      "bytes": 1081338,
+      "sha256": "9c400e516e7694993b85a5ed763945a836664e0fc4cc1e67d216752ad87c8954"
+    },
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/formal-scene-readonly.log",
+      "bytes": 292,
+      "sha256": "650b198b8ed81650b7c7e12bc6e9329825c09de8509848559002e56aa4ba5139"
+    },
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/host-tests.log",
+      "bytes": 1285,
+      "sha256": "34e41326a187eb24b423ed294cbe4ab3d0c6fd85882192dbd67dbdd3ceb0f6e7"
+    },
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/host-tests.xml",
+      "bytes": 15963,
+      "sha256": "e4f9fe170e47a2be2fbc1499f8d0614048fdaf2795bf79888f68d9cc455805d1"
+    },
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/ownership-window.log",
+      "bytes": 489,
+      "sha256": "4c9b2870f204aad2b8fd36672efbe975d3d88812207249e6058fa676ecc11858"
+    },
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/ownership-window/result.json",
+      "bytes": 11722,
+      "sha256": "16854b06720d92a0a21225562ed1c26e0ca190488134cdddca493af563373800"
+    },
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/replay-background.log",
+      "bytes": 1195,
+      "sha256": "9d7e8edf87219b3da47faf692f8b3a091e7e01e0e24f0ed4e6b1da5fa4922539"
+    },
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/replay-background/checks.json",
+      "bytes": 881,
+      "sha256": "c1be4490cb1f50afa2c937c5c5ba2c3ea23f7cfb5e299221d2a0bfac33c6d15b"
+    },
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/save-window.log",
+      "bytes": 341,
+      "sha256": "c8e872688e906e296863f7ebf93a221c4133dfb31f48c5bf9b9620e32846982c"
+    },
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/save-window/checks.json",
+      "bytes": 1671,
+      "sha256": "d14ab9c18decd852072dd91782674688fcd37bc478cd2c17e355f517cc1caf7d"
+    },
+    {
+      "path": "wind-farm-blender/outputs/camera-reopen-verification/source-identity.json",
+      "bytes": 762,
+      "sha256": "86840cc603e88f9914f58abfe3abd01fff08b2fd47677658807a26488a2ea5c3"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/camera-retirement-background/import-identity.json",
+      "bytes": 958,
+      "sha256": "9a9fd10c4ef35bf1e1a3b371915603b7f47cb90c5000a27cc673cbfb2ce2a7f5"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/camera-retirement-background/invocation.json",
+      "bytes": 1303,
+      "sha256": "6ca31f76f2613ef51ad9508e46769a72191468da06b2c6d8d18da767261cb222"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/camera-retirement-background/process-result.json",
+      "bytes": 79,
+      "sha256": "a11e4b2fde0b11dcc8ede31c65a3b92fc69e3b37088b01a685a99d2194a6c619"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/camera-retirement-background/process.log",
+      "bytes": 819,
+      "sha256": "795e41ad9d8811e234bc7618cdc0926ba4c4ccd1a90c8c6b7e40a5b62473fa84"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/camera-retirement-background/result/retirement-validation.json",
+      "bytes": 764,
+      "sha256": "8d87fb25b00c4c5b318f676f2a0619a5e09f0f57013bcdd6cf0f67e7cbe546b4"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/camera-transactions-background/import-identity.json",
+      "bytes": 958,
+      "sha256": "9a9fd10c4ef35bf1e1a3b371915603b7f47cb90c5000a27cc673cbfb2ce2a7f5"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/camera-transactions-background/invocation.json",
+      "bytes": 1307,
+      "sha256": "332b80aeb00ca620ebb4865cba83a7c0858edd7bcca0ae8db335c6ddbae8ab37"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/camera-transactions-background/process-result.json",
+      "bytes": 78,
+      "sha256": "726c81eb77260db917f1df1a7ea07d4644c47d1db1a9f833b156a524c4690ed9"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/camera-transactions-background/process.log",
+      "bytes": 110,
+      "sha256": "8133385e75c54122406bc62e7f04074b39d1276bea749976a0e9aa89e21c7e0c"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/camera-transactions-background/result/result.json",
+      "bytes": 670,
+      "sha256": "48a663b77f5bfa23ab655141f9490b890ecfc9c33500fbecb10b6efe0cb5a7cc"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/host-tests.xml",
+      "bytes": 22414,
+      "sha256": "397d317fcf05f91c6a3209f9472643c302691f9e925e60d80d5c4b3fb3d71b5a"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/installed-identity.json",
+      "bytes": 482,
+      "sha256": "b7520fd369ad4c9b40b5ec0088b8b01f4fa880f31bb5c76f4fa06f273e521a53"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-camera-window/import-identity.json",
+      "bytes": 959,
+      "sha256": "81d21b8fe7b139b132213151146dcbb68ef69170d97a71d6fedd9337f85ffc93"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-camera-window/invocation.json",
+      "bytes": 1232,
+      "sha256": "cc1fbbf81c78b3c0a7fefc6eed05dc50c0b60f8337f4fc191611b2369e99f098"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-camera-window/process-result.json",
+      "bytes": 78,
+      "sha256": "fa2b633ff925549108564459f18d54ffea5de5f2f38923666fe4d8f39be59a0b"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-camera-window/process.log",
+      "bytes": 795,
+      "sha256": "a5ef77d728de3d537591b88b8657b193a600b82e858a42b60a8cd7563875b6ef"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-camera-window/result/focused-single-solid.png",
+      "bytes": 180510,
+      "sha256": "45abaca977d8a4e78cc2a0f1f022b9df95d7826a9bc4cf0654ebfc1333613c22"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-camera-window/result/single-solid.png",
+      "bytes": 101736,
+      "sha256": "72144da136cee76a8e90bcc93e2c66a8f17137b63f72f7074093f35c973b92c2"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-camera-window/result/triple-c2-disabled.png",
+      "bytes": 929696,
+      "sha256": "202061e28018c0137287c8ab8d0d0fd23cfeb23d6fb9e373d300606874aa94c5"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-camera-window/result/triple-high-quality-restored.png",
+      "bytes": 965167,
+      "sha256": "d024dfb9d75a324b054a9148705dd56a1bff47b4a1d2e92a6a4e90a5f69fa20c"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-camera-window/result/validation.json",
+      "bytes": 2942,
+      "sha256": "759cbca78e77e47131270a377b297f734bfa5a9c60814a3cf88fdbe7fb7cc4a4"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-player-verified-window/import-identity.json",
+      "bytes": 959,
+      "sha256": "81d21b8fe7b139b132213151146dcbb68ef69170d97a71d6fedd9337f85ffc93"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-player-verified-window/invocation.json",
+      "bytes": 1333,
+      "sha256": "129ff09caeb60ec8632a664d69a1a47405800df07f7884f3d15466d86d914976"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-player-verified-window/process-result.json",
+      "bytes": 77,
+      "sha256": "fdc0eeb954eb8d1a97e2b63fc1c54d2e12b8d78f8f65ff028a96289b852a68d9"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-player-verified-window/process.log",
+      "bytes": 745,
+      "sha256": "a8c9ccb8c8c8cd270bb47e617b129ba5fe5ae483bfa2c1123332358407989a09"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-player-verified-window/result/external-input.json",
+      "bytes": 408,
+      "sha256": "923e579e73b23a53dd3d03c53b7e441b51b447bda0a2dc6cdcfad1afd97006e6"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-player-verified-window/result/manual-space-after.png",
+      "bytes": 249187,
+      "sha256": "54eb54355d7dba955c21fe31040892ec600b9a3297850a4a553a59c6556f433e"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-player-verified-window/result/manual-space-before.png",
+      "bytes": 249872,
+      "sha256": "d412a6cb3f571ff95adb2e78dc90726fcd596b41d1a4fade283463682d9c4e15"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-player-verified-window/result/manual-space-events.json",
+      "bytes": 451,
+      "sha256": "9ff4448e031c3c6162381d05b828380c971113f4179d7969bf9fbd0f112cdb9b"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/native-player-verified-window/result/result.json",
+      "bytes": 13787,
+      "sha256": "d0dcf11d71f4479431a906b50e3c2619ad8676a758707e29bcd72f4ad5541569"
+    },
+    {
+      "path": "wind-farm-blender/outputs/multi-view-repair-verification/validation.json",
+      "bytes": 2565,
+      "sha256": "a46f5255f02aeabbd7171bc6685dcfa2509c4c8fa54b0ad042aa630d59ceee78"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30.json",
+      "bytes": 2143,
+      "sha256": "22b8a525ccb0e2a3e1103527721a826c32963b34001e8275089eeb12d94987ff"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/cleanup.json",
+      "bytes": 538,
+      "sha256": "3c001f445016ea1b8eedcd3fdd82128b072687704b63e1a275a0c748558b637c"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/daily-preserved.json",
+      "bytes": 206,
+      "sha256": "e89a3f28561c7a630942e016fe6a78149023c664a09ccc4972e811ea8d34c6c3"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/environment.json",
+      "bytes": 319,
+      "sha256": "3566cc058918bb0961a26f58e8b19dc09d0c100bb3d2f5bfff53cc6b06cb3196"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/host-checks.json",
+      "bytes": 4336,
+      "sha256": "4922e899e834c050575372b508ff13b245aeaf34e4ae2c91a47b362860af9585"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/host-tests.log",
+      "bytes": 2322,
+      "sha256": "aee5040b5406947baec5aea53e661ce6361c194457b19d2f552eca6997b05973"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/host-tests.xml",
+      "bytes": 68391,
+      "sha256": "3afd310438b54d8ccddcbf60a6898abd418866181dcdd0958af5acf6df0f9b94"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/logs/camera-ownership.log",
+      "bytes": 495,
+      "sha256": "c5c7a80822e430de435682ec17cfb088a481d9603eae05f3831f6d21eb98bad0"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/logs/camera-reopen.log",
+      "bytes": 1067,
+      "sha256": "1e3ade70bba4a2712fd184f4a2e3c24534e6ddbd07a31d92914ba053d2b40a8b"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/logs/camera-save.log",
+      "bytes": 395,
+      "sha256": "060d3be2f9cffad22017bd2bf5b0750a9d4f92358e0067c57f3231207d6bedb6"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/logs/install-file.log",
+      "bytes": 32,
+      "sha256": "86b14db26d5d5c7d279264f6af5a5c28d661ba989840c217502d1357f6b7799c"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/logs/manual-pitch.log",
+      "bytes": 2795,
+      "sha256": "1c4acfb08629097b3a490a040ffc8a8cbc45159d098294a4086020c6d7f61e25"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/logs/module-probe.log",
+      "bytes": 12778,
+      "sha256": "ba27943f6896546c510dd6e0d705d5c29ceab8861af5c6e09159650e6a8ad2c5"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/logs/native-projection.log",
+      "bytes": 247,
+      "sha256": "09385a5595ae753f94a4a38d05398db2951320df3e30c6f0a909a29cb5710afd"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/logs/repo-add.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/logs/repo-probe.log",
+      "bytes": 266,
+      "sha256": "d9dcd88906889fba4f3b927ea4f86a39f7ee3a002f02df90e501a333e2fe0fdc"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/logs/three-camera-default.log",
+      "bytes": 356,
+      "sha256": "88183c4403a63c83147a06e666b002388b0b3f3cabcbfc277b0f48572359801c"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/logs/video-create.log",
+      "bytes": 147,
+      "sha256": "95660d5c49ef9f467ec0e903f2a1b08d4d69c73530e56429b0a674e94e6294b0"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/logs/video-recover.log",
+      "bytes": 239,
+      "sha256": "16a3197508818a8c8796a7f7cd008bf27c670e7c02abcabd90810ed453752027"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/module-probe.json",
+      "bytes": 13032,
+      "sha256": "a8d8651ee4cce45974189d89bc18eaa896646385fd4ae0d8b5430885cff9e5a2"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/native-checks.json",
+      "bytes": 1994,
+      "sha256": "3d6cb9fb3bfeff437f3237d6ebd7fda0c2cbe035d639870b2caa36063baac7f0"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/native/camera-ownership/result.json",
+      "bytes": 11803,
+      "sha256": "9e9e2a6a476b49d2dabd040fdc7facb0871740b9b102c44a4f6e4f76f81a772f"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/native/camera-reopen/result.json",
+      "bytes": 736822,
+      "sha256": "da4d06fe145d8bdc81a304f8bdcb5a3d317abd61a7b1ae1d8ea80257a8b552aa"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/native/camera-reopen/single-advancing.png",
+      "bytes": 256158,
+      "sha256": "a4d657f69c0d99ef3590a0ea8d3fa06999c1a9e3bf9dd742f7cbf5cf76e4f4b6"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/native/camera-reopen/single-terminal.png",
+      "bytes": 251049,
+      "sha256": "b194f84f30417d7087a019700ec6ed8a54b4d53e380be91c56a29617f3554586"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/native/camera-reopen/triple-advancing.png",
+      "bytes": 1104754,
+      "sha256": "21265a3f8bfd5ff6bd35f9a59d0950b6f6b7bb975bea5e9555027b3a129846c6"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/native/camera-reopen/triple-terminal.png",
+      "bytes": 1104114,
+      "sha256": "a2b4a71d38646f64bdd6f34f2c7de348c5839f4529b79d55f91854f4c013c693"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/native/camera-save/checks.json",
+      "bytes": 1721,
+      "sha256": "aaa9b36c5d7b1bb2ed8091ad2be4dec834b87d0f201c627c405d08e77e707c5f"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/native/manual-pitch/checks.json",
+      "bytes": 1027,
+      "sha256": "7603bca54fe583f19c6f30a5386f5e68552f0e4b3fdb41337459b8228d0c2984"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/native/video-controller/create.json",
+      "bytes": 296,
+      "sha256": "d5e064325ad560eb94759da7da14089e2e99021531176e9ff2adcf1a3384cff6"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/native/video-controller/recover.json",
+      "bytes": 352,
+      "sha256": "d26b104c769274ef4202caedd8fdd7c44ecef4666ec77ecfefc521424e05a658"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/package-validation.json",
+      "bytes": 21729,
+      "sha256": "6f69d1d9fb251509fb4d23f1795af2d5e8ad20754ffce498426add2b10ee31e7"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/package/wfrl_blender-0.3.30.inventory.json",
+      "bytes": 29836,
+      "sha256": "f7efa8dc4e4375d31789d7e720090ab278805112d90e580696110cf45e78f5b3"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/package/wfrl_blender-0.3.30.zip.sha256",
+      "bytes": 90,
+      "sha256": "39b4882ad2ac0a375dea67053aa471ba7867076e231a775856fcf956af1f79c4"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/regressions/native-projection/native-projection-validation.json",
+      "bytes": 308,
+      "sha256": "d9ac7ef4a527d9db59c9e0cf9c9e61460cad0adb9a290c0b2c8e20e145548263"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/regressions/three-camera-default/default-validation.json",
+      "bytes": 1148,
+      "sha256": "5e8dfc3ea872528246e2d9f365e1e5ba7113e4b3673f0420a410470647c73865"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/repo-probe.json",
+      "bytes": 182,
+      "sha256": "a5bcd78bbad78a4b3cae74ff58e6f6772d356d861ccc7033923b69ab81f44c4b"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/resource-availability.json",
+      "bytes": 4564,
+      "sha256": "343407a61d74437e9f47b3aaf0906aff4dd296e8939bef7979478a73a5035241"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/test-inputs/native_camera_reopen_regression.py",
+      "bytes": 13240,
+      "sha256": "5db230748d81a0c01bfaf34e94d6520e749763db08f2304636a7fa12b458f74f"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/upload-result.json",
+      "bytes": 384,
+      "sha256": "4efc79bb93292500a4ee5fddf48c8fd3dfb58f4d2876ae72c2284fc119ef675f"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/verification.json",
+      "bytes": 3198,
+      "sha256": "3317083f6341f8a67f658312c04c267216493a0e6a0321fb2089fa6193cff7f6"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/video-host-tests.log",
+      "bytes": 185,
+      "sha256": "855a2ce9328ab848d93d514fb15f9582376513fd4327de319f80afd2be0125c8"
+    },
+    {
+      "path": "wind-farm-blender/publication/blender-0.3.30/video-host-tests.xml",
+      "bytes": 5708,
+      "sha256": "5fce6b33ad097e39a990e2bc76646f145054ce225636b98b38407b81ba1ffcbe"
+    }
+  ]
+}

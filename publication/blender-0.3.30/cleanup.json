@@ -1,13 +1,14 @@
 {
   "schema": "wfrl.cleanup-verification.v1",
   "status": "PASS",
-  "groups": 20,
-  "regular_files": 886,
+  "groups": 21,
+  "regular_files": 915,
   "symlinks": 0,
-  "logical_bytes": 686124983,
+  "logical_bytes": 693662246,
   "recovery": "RECOVERY_ROOT/wfrl-delivery-0.3.30-20261024",
   "all_moved_hashes_verified": true,
   "sample_restore": "PASS",
   "prior_recovery_preserved": "RECOVERY_ROOT/wfrl-intermediates-20261024-01a16927",
-  "protected_scope": "Formal source, tests, documentation, current delivery ZIP, research assets/results, Git, environments, daily installation and existing recovery areas"
+  "protected_scope": "Formal source, tests, documentation, current delivery ZIP, research assets/results, Git, environments, daily installation and existing recovery areas",
+  "original_checkout_head_and_index_preserved": true
 }

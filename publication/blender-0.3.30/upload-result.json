@@ -3,10 +3,16 @@
   "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.30",
   "status": "UPLOADED",
   "assets": [
+    "wfrl-validation-0.3.30.inventory.json",
+    "wfrl-validation-0.3.30.zip",
+    "wfrl-validation-0.3.30.zip.sha256",
+    "wfrl_blender-0.3.30.inventory.json",
     "wfrl_blender-0.3.30.zip",
     "wfrl_blender-0.3.30.zip.sha256",
-    "wfrl_blender-0.3.30.inventory.json"
+    "wind-farm-blender-source-0.3.30.zip",
+    "wind-farm-blender-source-0.3.30.zip.sha256",
+    "wfrl-delivery-0.3.30.json"
   ],
-  "transport": "gh release create returned exit 0",
+  "transport": "gh release create and gh release upload each completed with exit 0",
   "post_upload_download_or_hash_comparison": false
 }

@@ -21,7 +21,7 @@
 | 0.3.30 扩展与证据 | [v0.3.30 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.30)提供 [wfrl_blender-0.3.30.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl_blender-0.3.30.zip)、inventory 与 SHA-256；184 文件、99,091,527 字节，身份见[交付身份](../publication/blender-0.3.30.json)，[当前载荷验证](../publication/blender-0.3.30/verification.json)标识 475 项选定宿主、隔离安装、相机连续重开与归属窗口、手动变桨及非媒体视频控制器跨进程恢复范围。隔离 profile 与生成测试场景属于可清理中间产物，验证报告保留运行时来源；报告中的运行路径标识证据来源 |
 | 软件验证与展示 | Git 保留小型判定、来源与测试输入；`frontend-evidence` 资源包提供所选可见窗口证据。演示视频和两份正式演示文稿独立提供 |
 
-资源附件的完整文件路径、字节数与 SHA-256 见 [resources.json](../publication/resources.json)。同专题的编号附件是独立归档，须全部取得后才具备清单声明的完整输入。附件文件名不改变内部项目相对路径。最后解压 `zz-frozen-code-originals.tar.gz`，以原字节实验脚本满足冻结代码摘要；这些脚本可能保存生产机来源位置，应显式适配调用环境，不能把可携带报告副本当作原字节源码。
+当前完整源码归档为 [wind-farm-blender-source-0.3.30.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wind-farm-blender-source-0.3.30.zip)，对应提交 `6469a55a5f992a6c3de0509c40504fa568af0955`；扩展源码标签 `v0.3.30` 固定在 `63741f315be6f6b1ede6fff58c258c7fa9f71af6`，两者可执行载荷一致。验证附件为 [wfrl-validation-0.3.30.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl-validation-0.3.30.zip)，范围和摘要见 [交付清单](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl-delivery-0.3.30.json)。大型资源继续使用原 Release；资源及补充附件的路径、字节数与 SHA-256 见 [resources.json](../publication/resources.json)。同专题的编号附件是独立归档，须全部取得后才具备清单声明的完整输入。附件文件名不改变内部项目相对路径。最后解压 `zz-frozen-code-originals.tar.gz`，以原字节实验脚本满足冻结代码摘要；这些脚本可能保存生产机来源位置，应显式适配调用环境，不能把可携带报告副本当作原字节源码。
 
 ## 恢复与使用
 
