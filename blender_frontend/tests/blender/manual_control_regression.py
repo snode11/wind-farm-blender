@@ -38,12 +38,13 @@ def vertices(obj):
 
 
 def snapshot(scene, prefix, *, identities=True):
-    bpy.context.view_layer.update()
+    graph = scene.view_layers[0].depsgraph
+    graph.update()
     result = {}
     for obj in scene.objects:
         if not obj.name.startswith(prefix):
             continue
-        item = dict(matrix=tuple(value for row in obj.matrix_world for value in row),
+        item = dict(matrix=tuple(value for row in obj.evaluated_get(graph).matrix_world for value in row),
                     parent=obj.parent.name if obj.parent else None,
                     hidden=(obj.hide_viewport, obj.hide_render))
         if identities:

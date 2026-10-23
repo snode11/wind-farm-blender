@@ -6,6 +6,7 @@ import uuid
 
 _VIEWS = {}
 _RESUME = {}
+MANUAL_BLADE_MODEL = 'rootkink'
 
 
 def is_manual(scene):
@@ -41,6 +42,7 @@ def _remember_view(context):
         saved.append((area, space, dict(
             location=region.view_location.copy(), rotation=region.view_rotation.copy(),
             distance=region.view_distance, perspective=region.view_perspective,
+            camera_zoom=region.view_camera_zoom, camera_offset=tuple(region.view_camera_offset),
             camera=space.camera, local_camera=space.use_local_camera,
             clip_start=space.clip_start, clip_end=space.clip_end,
             shading=space.shading.type, color_type=space.shading.color_type,
@@ -93,6 +95,10 @@ def _restore_view(context, saved_scene=None):
             region.view_rotation = saved['rotation']
             region.view_distance = saved['distance']
             region.view_perspective = saved['perspective']
+            if 'camera_zoom' in saved:
+                region.view_camera_zoom = saved['camera_zoom']
+            if 'camera_offset' in saved:
+                region.view_camera_offset = saved['camera_offset']
             space.camera = saved['camera']
             space.use_local_camera = saved['local_camera']
             space.clip_start, space.clip_end = saved['clip_start'], saved['clip_end']
@@ -145,6 +151,38 @@ def focus(context, target=None):
         region.view_distance = 800.0 if len(chosen) > 1 else 310.0
         region.view_perspective = 'PERSP'
         area.tag_redraw()
+
+
+def down_view(context):
+    """Observe the manual T1 geometry from its own fixed nacelle camera."""
+    from . import cameras, manual_control
+    scene = context.scene
+    valid, reason = manual_control.validate_scene(scene)
+    if not valid:
+        raise ValueError(reason)
+    entry = next(item for item in scene.wfrl_manual_turbines if item.turbine_id == 'T1')
+    manual_control._validate_native_controls((entry.yaw_object,))
+    owner = scene['wfrl_manual_owner']
+    camera = cameras.ensure_gimbal(scene, 'T1', yaw_object=entry.yaw_object,
+                                   name=owner + '.Camera.T1.Down', owner=owner)
+    manual_control._validate_native_controls((camera,))
+    cameras.down_gimbal(camera)
+    scene.camera = camera
+    for area in context.screen.areas:
+        if area.type != 'VIEW_3D':
+            continue
+        space = area.spaces.active
+        space.use_local_camera = False
+        space.camera = camera
+        space.clip_start, space.clip_end = .05, 30000.0
+        space.shading.type = 'MATERIAL'
+        space.shading.use_scene_world = space.shading.use_scene_lights = True
+        space.overlay.show_overlays = False
+        space.show_region_ui = True
+        space.region_3d.view_perspective = 'CAMERA'
+        cameras.fill_camera_view(area, scene)
+        area.tag_redraw()
+    return camera
 
 
 def _environment(scene, collection, prefix):
@@ -229,6 +267,33 @@ def _ensure_environment(scene):
     _environment(scene, collection, prefix)
 
 
+def _ensure_blade_model(scene):
+    """Use owned rootkink meshes while retaining poses, materials and topology."""
+    from .turbine_geometry import blade_mesh
+    blades = [getattr(entry, f'blade{index}_object')
+              for entry in scene.wfrl_manual_turbines for index in (1, 2, 3)]
+    if (scene.get('wfrl_manual_blade_model') == MANUAL_BLADE_MODEL
+            and all(blade.data.get('wfrl_manual_blade_model') == MANUAL_BLADE_MODEL for blade in blades)):
+        return
+    vertices, faces = blade_mesh(subdiv=8, ring_points=96, model=MANUAL_BLADE_MODEL)
+    sources = {blade.data.as_pointer(): blade.data for blade in blades}
+    for mesh in sources.values():
+        if (len(mesh.vertices) != len(vertices)
+                or tuple(tuple(face.vertices) for face in mesh.polygons) != tuple(faces)):
+            raise ValueError('手动叶片拓扑与 rootkink 不匹配，请创建独立手动场景')
+    replacements = {}
+    for key, mesh in sources.items():
+        owned = mesh.copy()
+        owned.name = scene['wfrl_manual_owner'] + '.RootkinkBlade'
+        owned.vertices.foreach_set('co', [value for vertex in vertices for value in vertex])
+        owned['wfrl_manual_blade_model'] = MANUAL_BLADE_MODEL
+        owned.update()
+        replacements[key] = owned
+    for blade in blades:
+        blade.data = replacements[blade.data.as_pointer()]
+    scene['wfrl_manual_blade_model'] = MANUAL_BLADE_MODEL
+
+
 def _discard(scene, collection, prefix):
     """Remove only this failed construction's owned data."""
     import bpy
@@ -287,6 +352,7 @@ def create(context):
                 setattr(entry, f'blade{blade}_object', collection.objects[name + f'.Blade{blade}'])
         for obj in collection.objects:
             obj['wfrl_manual_owner'] = prefix
+        _ensure_blade_model(scene)
         _environment(scene, collection, prefix)
         source.wfrl_manual_scene = scene
         if not manual_control.apply_scene(scene):
@@ -311,6 +377,8 @@ def enter(context):
     source = context.scene
     if is_manual(source):
         if manual_control.validate_scene(source)[0]:
+            manual_control.pause_scene(source)
+            _ensure_blade_model(source)
             _ensure_environment(source)
             return source
         original = source.wfrl_manual_return_scene
@@ -343,6 +411,7 @@ def enter(context):
                 context.window.scene = scene
                 _ensure_environment(scene)
         manual_control.pause_scene(scene)
+        _ensure_blade_model(scene)
         _RESUME[context.window.as_pointer()] = (source, playing)
         _save_return_view(context, scene)
         focus(context)

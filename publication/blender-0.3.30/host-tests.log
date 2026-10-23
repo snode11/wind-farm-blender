@@ -1,0 +1,30 @@
+........................................................................ [ 16%]
+........................................................................ [ 32%]
+........................................................................ [ 48%]
+........................................................................ [ 65%]
+........................................................ [ 77%]
+........... [ 80%]
+.......................... [ 86%]
+.............................................................            [100%]
+=============================== warnings summary ===============================
+tests/test_interactive_replay_policy.py::test_cli_training_and_periodic_final_checkpoints_keep_clip
+  PROJECT_ROOT/scripts/train/train_fastfarm.py:490: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+  Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:823.)
+    pg_log.append(float(pg)); v_log.append(float(vloss))
+
+tests/test_interactive_replay_policy.py::test_cli_training_and_periodic_final_checkpoints_keep_clip
+tests/test_interactive_replay_policy.py::test_cli_resume_validates_contract_and_preserves_legacy_clip
+tests/blender_bridge/test_training_progress.py::test_actual_trainer_uses_buffers_without_physics[zero]
+tests/blender_bridge/test_training_progress.py::test_actual_trainer_uses_buffers_without_physics[learn]
+  PROJECT_ROOT/scripts/train/train_fastfarm.py:501: RuntimeWarning: Mean of empty slice
+    hist["raw_reward"].append(float(np.nanmean(B_raw)))
+
+tests/test_interactive_replay_policy.py::test_cli_training_and_periodic_final_checkpoints_keep_clip
+tests/test_interactive_replay_policy.py::test_cli_resume_validates_contract_and_preserves_legacy_clip
+tests/blender_bridge/test_training_progress.py::test_actual_trainer_uses_buffers_without_physics[zero]
+tests/blender_bridge/test_training_progress.py::test_actual_trainer_uses_buffers_without_physics[learn]
+  PROJECT_ROOT/scripts/train/train_fastfarm.py:512: RuntimeWarning: Mean of empty slice
+    f"rew(1step) {B_rew.mean():+.4f}  raw {np.nanmean(B_raw):.3f}  "
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+442 passed, 9 warnings, 4659 subtests passed in 18.91s

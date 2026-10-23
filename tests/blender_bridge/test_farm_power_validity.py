@@ -409,6 +409,7 @@ def test_multicontrol_real_ppo_update_preserves_missing_power_statistics(monkeyp
 def test_replay_history_uses_validated_totals_for_incomplete_measurements(tmp_path, monkeypatch):
     import torch
     from wfrl.mappo_central import Actor
+    from wfrl.policy_actions import PolicyActionContract
     from wfrl.studio.trainer import Trainer
 
     _fake_runtime(monkeypatch, [{}, {"power": [3.0]}, {"power": [2.0, 4.0]}])
@@ -416,6 +417,9 @@ def test_replay_history_uses_validated_totals_for_incomplete_measurements(tmp_pa
     torch.save(dict(
         obs_keys=["yaw", "wind_speed", "wind_direction"],
         obs_mean=np.zeros(3), obs_var=np.ones(3), obs_dim=3, act_dim=1,
+        state_dim=3 * _scene().n,
+        action_contract=PolicyActionContract.from_bounds(
+            ["yaw"], {"yaw": (-5.0, 5.0)}, "tanh_scale").to_dict(),
         controls=["yaw"], actor=Actor(3, 1).state_dict(),
     ), checkpoint)
     snapshots = []

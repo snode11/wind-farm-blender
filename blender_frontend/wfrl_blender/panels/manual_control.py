@@ -1,7 +1,45 @@
 """A dedicated sidebar for independent rigid turbine motion."""
 import bpy
 
-from .. import manual_control
+from .. import manual_control, manual_video
+
+
+def draw_trial(layout, scene):
+    trial = scene.wfrl_manual_trial
+    entry = next(item for item in scene.wfrl_manual_turbines if item.turbine_id == 'T1')
+    active = manual_control.trial_active(scene)
+    box = layout.box()
+    box.label(text='T1 恒速变桨试验')
+    box.label(text='叶片模型：rootkink · 叶根拐点改型')
+    inputs = box.column(align=True)
+    inputs.enabled = not active
+    inputs.prop(entry, 'rpm', text='恒定 RPM')
+    for index in range(1, 4):
+        row = inputs.row(align=True)
+        row.prop(trial, f'select_b{index}', text=f'B{index}')
+        target = row.row(align=True)
+        target.enabled = getattr(trial, f'select_b{index}')
+        target.prop(trial, f'target_b{index}_deg', text='目标 °')
+    inputs.prop(trial, 'duration_s')
+    inputs.prop(trial, 'interpolation')
+    inputs.operator('wfrl.manual_trial', text='确认并开始', icon='PLAY').action = 'CONFIRM'
+    if active:
+        _start, spec = manual_control.trial_configuration(scene)
+        state = '变桨中' if trial.elapsed_s < spec.duration_s else '保持目标'
+        box.label(text=f'{trial.elapsed_s:.2f} s · {state} · {spec.rpm:.2f} RPM')
+        row = box.row(align=True)
+        row.operator('wfrl.manual_trial', text='暂停' if entry.running else '继续',
+                     icon='PAUSE' if entry.running else 'PLAY').action = 'PAUSE' if entry.running else 'START'
+        row.operator('wfrl.manual_trial', text='复位试验', icon='LOOP_BACK').action = 'RESET'
+        box.operator('wfrl.manual_trial', text='结束试验，保留当前姿态').action = 'END'
+        box.label(text='修改起始姿态或 RPM 前先结束试验', icon='INFO')
+    else:
+        box.label(text='目标仅暂存；未选叶片保持实际桨距')
+    pitches = manual_control.effective_pitches(entry)
+    box.label(text='当前 ' + ' / '.join(f'B{i} {pitch:.1f}°' for i, pitch in enumerate(pitches, 1)))
+    row = box.row(align=True)
+    row.operator('wfrl.manual_down', text='T1 Down', icon='CAMERA_DATA')
+    row.operator('wfrl.manual_focus', text='返回整机', icon='VIEWZOOM')
 
 
 class WFRL_PT_ManualControl(bpy.types.Panel):
@@ -36,6 +74,10 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
             return
         target = scene.wfrl_manual_batch if scene.wfrl_manual_target == 'ALL' else entries[0]
         all_target = scene.wfrl_manual_target == 'ALL'
+        trial_locked = manual_control.trial_active(scene) and any(entry.turbine_id == 'T1' for entry in entries)
+        if scene.wfrl_manual_target in {'T1', 'ALL'}:
+            draw_trial(layout, scene)
+            manual_video.draw(layout, scene)
         mixed = set(manual_control.mixed_fields(scene)) if all_target else set()
         if all_target:
             layout.label(text='编辑仅同步当前字段', icon='INFO')
@@ -43,6 +85,7 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
                 layout.label(text='* 表示多值，输入框显示 T1')
 
         presets = layout.row(align=True)
+        presets.enabled = not trial_locked
         for preset, label in (('BLADE_DOWN', '叶片1朝下'), ('BLADE_SIDE', '叶片1侧向'), ('FEATHER', '顺桨90°')):
             presets.operator('wfrl.manual_pose_preset', text=label).preset = preset
         layout.prop(scene, 'wfrl_manual_step_deg')
@@ -57,6 +100,7 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
                     operator.field, operator.delta = field, sign * scene.wfrl_manual_step_deg
 
         pose = layout.column(align=True)
+        pose.enabled = not trial_locked
         draw_property(pose, 'yaw_deg', slider=True)
         draw_property(pose, 'pitch_deg', text='三片统一桨距 °', slider=True)
         if any(entry.individual_pitch for entry in entries):
@@ -69,7 +113,7 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
         elif any(entry.individual_pitch for entry in entries):
             pose.label(text='桨距模式不同，可选择单台编辑', icon='INFO')
         angle = layout.column()
-        angle.enabled = not any(entry.running and entry.rpm > 0 for entry in entries)
+        angle.enabled = not trial_locked and not any(entry.running and entry.rpm > 0 for entry in entries)
         draw_property(angle, 'azimuth_deg', slider=True)
 
         has_positive_rpm = any(entry.rpm > 0 for entry in entries)
@@ -78,13 +122,18 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
         elif any(entry.rpm == 0 for entry in entries):
             layout.label(text='零 RPM 风机保持暂停', icon='INFO')
         row = layout.row(align=True)
+        row.enabled = not (trial_locked and scene.wfrl_manual_target == 'T1')
         start = row.row(align=True)
         start.enabled = has_positive_rpm
         start.operator('wfrl.manual_action', text='运行', icon='PLAY').action = 'START'
         row.operator('wfrl.manual_action', text='暂停', icon='PAUSE').action = 'PAUSE'
         row = layout.row(align=True)
-        row.operator('wfrl.manual_action', text='停转', icon='SNAP_FACE').action = 'STOP'
-        row.operator('wfrl.manual_action', text='复位', icon='LOOP_BACK').action = 'RESET'
+        stop = row.row(align=True)
+        stop.enabled = not trial_locked
+        stop.operator('wfrl.manual_action', text='停转', icon='SNAP_FACE').action = 'STOP'
+        reset = row.row(align=True)
+        reset.enabled = not (trial_locked and scene.wfrl_manual_target == 'T1')
+        reset.operator('wfrl.manual_action', text='复位所选' if trial_locked else '复位', icon='LOOP_BACK').action = 'RESET'
         if all_target:
             header, body = layout.panel('wfrl_manual_actual_values', default_closed=False)
             header.label(text='三机实际参数')
@@ -108,10 +157,13 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
         if body:
             row = body.row(align=True)
             row.operator('wfrl.manual_pose_export', text='保存三机…', icon='EXPORT')
-            row.operator('wfrl.manual_pose_import', text='载入所选…', icon='IMPORT')
+            load = row.row(align=True)
+            load.enabled = not trial_locked
+            load.operator('wfrl.manual_pose_import', text='载入所选…', icon='IMPORT')
             body.label(text='按机组编号载入，保持暂停')
         layout.separator()
         layout.label(text='刚性运动示意 · 不计算功率或载荷', icon='INFO')
+        layout.label(text='参数范围仅供预览，不是实体运行限值')
 
 
 CLASSES = (WFRL_PT_ManualControl,)

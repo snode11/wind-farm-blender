@@ -114,6 +114,31 @@ def test_camera_play_starts_from_surviving_source_window(controls):
     assert not c.reports
 
 
+def test_camera_replay_uses_shared_restart_control_at_terminal(controls, monkeypatch):
+    from wfrl_blender import clearance_replay
+    c, r = controls, controls.runtime
+    c.set_player(None, False)
+    r.scene.frame_current = r.scene.frame_end = 121
+    monkeypatch.setattr(clearance_replay, 'reader_for', lambda scene: object() if scene is r.scene else None)
+    r.bpy.ops.wfrl = NS(clearance_playback=lambda: c.calls.append(('replay', c.context.window)) or {'FINISHED'})
+    assert r.native.WFRL_OT_NativePlay.execute(c.operator, c.context) == {'FINISHED'}
+    assert c.calls == [('replay', r.source)]
+
+
+def test_delayed_close_resume_cannot_restart_after_a_new_player_was_paused(controls):
+    c, r = controls, controls.runtime
+    c.set_player(r.scene)
+    r.native.shutdown()
+    assert r.session.resume_scheduled and not playback.any_playing()
+    with c.context.temp_override(window=r.source):
+        r.bpy.ops.screen.animation_play()
+        r.bpy.ops.screen.animation_cancel(restore_frame=False)
+    before = list(c.calls)
+    r.session.resume_after_close()
+    assert c.calls == before and not playback.any_playing()
+    assert r.session.lifecycle[-1]['reason'] == 'playback_state_changed'
+
+
 def test_execute_rechecks_player_after_context_selection(controls, monkeypatch):
     c, r = controls, controls.runtime
     c.set_player(None, False)

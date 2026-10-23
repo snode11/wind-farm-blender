@@ -1,0 +1,8 @@
+Warning: 1 × Draw window and swap: 63.0292 ms, average: 63.02916701 ms
+Warning: 播放器由场景“NativeCamera.IndependentPlayerB”占用，请先在对应窗口暂停
+Warning: 1 × Draw window and swap: 12.5455 ms, average: 12.54554209 ms
+NATIVE_CAMERA_PLAYBACK_PASS
+00:18.348  blend            | Saved session recovery to "PROJECT_ROOT/outputs/camera-reopen-verification/ownership-temp/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

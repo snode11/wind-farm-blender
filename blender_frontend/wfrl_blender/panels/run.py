@@ -24,6 +24,8 @@ class WFRL_PT_WorkflowRun(bpy.types.Panel):
         col = layout.column(); col.enabled = runtime.configuration_editable()
         if mode in {'interactive_training', 'formal_training'}:
             for key in ('iters', 'n_steps', 'warmup_steps', 'seed'): col.prop(settings, key)
+        if mode == 'interactive_training':
+            col.prop(settings, 'episode_steps')
         if mode in {'formal_training', 'replay'}: col.prop(settings, 'checkpoint')
         if mode == 'replay':
             for key in ('replay_steps', 'warmup_steps', 'seed'): col.prop(settings, key)

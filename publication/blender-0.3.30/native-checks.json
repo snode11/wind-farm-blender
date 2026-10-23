@@ -1,0 +1,77 @@
+[
+  {
+    "name": "camera-reopen",
+    "command": [
+      "/Applications/Blender.app/Contents/MacOS/Blender",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "PROJECT_ROOT/blender_frontend/tests/blender/native_camera_reopen_regression.py"
+    ],
+    "returncode": 0,
+    "log": "logs/camera-reopen.log"
+  },
+  {
+    "name": "camera-ownership",
+    "command": [
+      "/Applications/Blender.app/Contents/MacOS/Blender",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "PROJECT_ROOT/blender_frontend/tests/blender/native_camera_playback_regression.py"
+    ],
+    "returncode": 0,
+    "log": "logs/camera-ownership.log"
+  },
+  {
+    "name": "camera-save",
+    "command": [
+      "/Applications/Blender.app/Contents/MacOS/Blender",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "PROJECT_ROOT/blender_frontend/tests/blender/native_camera_save_regression.py"
+    ],
+    "returncode": 0,
+    "log": "logs/camera-save.log"
+  },
+  {
+    "name": "manual-pitch",
+    "command": [
+      "/Applications/Blender.app/Contents/MacOS/Blender",
+      "--background",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "PROJECT_ROOT/blender_frontend/tests/blender/manual_pitch_trial_regression.py"
+    ],
+    "returncode": 0,
+    "log": "logs/manual-pitch.log"
+  },
+  {
+    "name": "video-create",
+    "command": [
+      "/Applications/Blender.app/Contents/MacOS/Blender",
+      "--background",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "PROJECT_ROOT/blender_frontend/tests/blender/manual_video_installed_regression.py"
+    ],
+    "returncode": 0,
+    "log": "logs/video-create.log"
+  },
+  {
+    "name": "video-recover",
+    "command": [
+      "/Applications/Blender.app/Contents/MacOS/Blender",
+      "--background",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "PROJECT_ROOT/blender_frontend/tests/blender/manual_video_installed_regression.py"
+    ],
+    "returncode": 0,
+    "log": "logs/video-recover.log"
+  }
+]

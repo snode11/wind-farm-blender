@@ -59,9 +59,13 @@ class SnapshotAdapter:
 
     def context(self, snapshot):
         timestamp = snapshot.ctx.get('t', snapshot.step * (0.12 if self.mode == 'demo' else self.scene.dt))
-        return dict(mode=self.mode, step=int(snapshot.step),
+        context = dict(mode=self.mode, step=int(snapshot.step),
                     iteration=int(getattr(snapshot, 'iters_done', 0)), phase=getattr(snapshot, 'phase', 'waiting'),
                     timestamp=dict(value=float(timestamp), timebase='simulation_seconds'))
+        episode = getattr(snapshot, 'episode', None)
+        if episode is not None:
+            context['episode'] = int(episode)
+        return context
 
     def encode(self, snapshot):
         self.backend_demo = bool(snapshot.ctx.get('backend_demo'))

@@ -195,7 +195,10 @@ def native_player(monkeypatch):
         native.scene = None
 
     handlers = SimpleNamespace(animation_playback_pre=[], animation_playback_post=[], load_pre=[])
-    bpy = SimpleNamespace(app=SimpleNamespace(background=False, handlers=handlers),
+    pending = []
+    timers = SimpleNamespace(register=lambda callback, **_kw: pending.append(callback),
+                             is_registered=lambda callback: callback in pending)
+    bpy = SimpleNamespace(app=SimpleNamespace(background=False, handlers=handlers, timers=timers),
         context=SimpleNamespace(scene=a, window=windows[0], window_manager=SimpleNamespace(windows=windows),
                                 temp_override=override),
         ops=SimpleNamespace(screen=SimpleNamespace(animation_cancel=cancel)))
@@ -203,6 +206,7 @@ def native_player(monkeypatch):
     monkeypatch.setitem(sys.modules, 'bpy.app.handlers', SimpleNamespace(persistent=lambda fn: fn))
     monkeypatch.setattr(playback, '_OWNER_SCENE', None)
     monkeypatch.setattr(playback, '_OWNER_WINDOW', None)
+    monkeypatch.setattr(clearance_replay, '_END_REQUEST', None)
     def start(window):
         bpy.context.window = window
         native.scene = window.scene
@@ -270,13 +274,57 @@ def test_queued_end_callback_cannot_stop_another_scene(native_player, monkeypatc
     a.frame_current = a.frame_end = 121
     b.frame_current, b.frame_end = 10, 200
     monkeypatch.setattr(clearance_replay, '_READERS', {a.as_pointer(): object()})
+    start(windows[0])
+    clearance_replay._queue_finished_playback(a)
+    wfrl_blender._cancel_playback(a)
+    overridden.clear()
     start(windows[1])
     clearance_replay._stop_finished_playback()
     assert native.playing and playback.is_playing(b) and overridden == []
     monkeypatch.setattr(clearance_replay, '_READERS', {a.as_pointer(): object(), b.as_pointer(): object()})
     b.frame_current = b.frame_end
+    clearance_replay._queue_finished_playback(b)
     clearance_replay._stop_finished_playback()
     assert not native.playing and overridden == [windows[1]]
+
+
+def test_completed_playback_callback_cannot_cancel_same_scene_restart(native_player, monkeypatch):
+    bpy, native, windows, overridden, start = native_player
+    scene = windows[0].scene
+    scene.frame_current = scene.frame_end = 121
+    monkeypatch.setattr(clearance_replay, '_READERS', {scene.as_pointer(): object()})
+    start(windows[0])
+    clearance_replay._queue_finished_playback(scene)
+    wfrl_blender._cancel_playback(scene)
+    overridden.clear()
+    start(windows[2])
+    clearance_replay._stop_finished_playback()
+    assert native.playing and playback.owner_window() is windows[2]
+    assert overridden == []
+
+
+def test_paused_terminal_evaluation_does_not_queue_future_player_stop(native_player, monkeypatch):
+    bpy, native, windows, overridden, start = native_player
+    scene = windows[0].scene
+    scene.frame_current = scene.frame_end = 121
+    monkeypatch.setattr(clearance_replay, '_READERS', {scene.as_pointer(): object()})
+    clearance_replay._queue_finished_playback(scene)
+    assert not bpy.app.timers.is_registered(clearance_replay._stop_finished_playback)
+    start(windows[0])
+    clearance_replay._stop_finished_playback()
+    assert native.playing and overridden == []
+
+
+def test_terminal_callback_rejects_replaced_reader(native_player, monkeypatch):
+    bpy, native, windows, overridden, start = native_player
+    scene = windows[0].scene
+    scene.frame_current = scene.frame_end = 121
+    monkeypatch.setattr(clearance_replay, '_READERS', {scene.as_pointer(): object()})
+    start(windows[0])
+    clearance_replay._queue_finished_playback(scene)
+    clearance_replay._READERS[scene.as_pointer()] = object()
+    clearance_replay._stop_finished_playback()
+    assert native.playing and overridden == []
 
 
 def test_pause_background_never_calls_window_operator(monkeypatch):

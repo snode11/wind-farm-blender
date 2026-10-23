@@ -1,6 +1,7 @@
 """Native camera playback ownership in independent Blender window groups.
 
-Run with --factory-startup --python this_file, without --background, and a new
+Run source with --factory-startup, or an installed module in its isolated profile,
+without --background, and a new
 WFRL_TEST_OUTPUT directory. WFRL_ADDON_MODULE defaults to workspace source
 wfrl_blender. Installed bl_ext modules require WFRL_EXPECTED_ADDON_ROOT.
 WFRL_NATIVE_PLAYBACK_MANUAL_SPACE=1 waits for external keyboard inspection
@@ -195,7 +196,8 @@ def native_toggle():
 
 def run():
     require('isolated_visible_factory_startup', not bpy.app.background and not bpy.data.filepath
-            and '--factory-startup' in sys.argv and len(bpy.context.window_manager.windows) == 1)
+            and (MODULE.startswith('bl_ext.') or '--factory-startup' in sys.argv)
+            and len(bpy.context.window_manager.windows) == 1)
     if hasattr(bpy.context.preferences.filepaths, 'use_save_on_exit'):
         bpy.context.preferences.filepaths.use_save_on_exit = False
     addon.register()

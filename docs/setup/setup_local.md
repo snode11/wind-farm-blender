@@ -4,11 +4,11 @@
 
 ## 1. Blender 离线演示
 
-使用 Blender **5.2+**，从 [v0.3.28 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.28) 安装 `wfrl_blender-0.3.28.zip` 并完全重启。
+使用 Blender **5.2+**，按[安装说明](../blender/INSTALL.md)取得公开扩展 ZIP，安装后完全重启。公开包与开发机日常安装分别按[发布状态](../blender/发布状态与验证范围.md)识别。
 
 通过 **N → MAPPO → 打开几何重建示例…** 在同一分屏切换几何／同源纹理，也可查看三机柔性回放、三相机和 NREL 缺陷编辑器。601 样本同源纹理与独立 120 样本合成资源使用不同来源和时钟；独立合成工具不在统一重建侧栏显示。随包查看无需 conda、Bridge、FAST.Farm 或网络。
 
-当前项目源码使用 `wind-farm-rl-all-work` 分支，GitHub 自动 Source code 不作为扩展安装包。日常本地安装为 **0.3.28**，181 文件与公开上传源包一致；新进程检查与安装版回归按其记录范围使用，见[日常安装核对](../../publication/daily-installation.json)；源码和公开发布不会自动更新实际安装。[安装身份与验证范围见发布状态](../blender/发布状态与验证范围.md)，操作见[前端说明](../../前端readme.md)。软件检查不代表重建精度、现场净空精度或稳定 60 FPS 验收。
+当前项目源码使用 `wind-farm-rl-all-work` 分支，GitHub 自动 Source code 不作为扩展安装包。日常安装的版本、逐文件身份和适用验证见[日常安装核对](../../publication/daily-installation.json)；源码和公开发布不会自动更新实际安装。操作见[前端说明](../../前端readme.md)。软件检查不代表重建精度、现场净空精度或稳定 60 FPS 验收。
 
 ## 2. Python 环境：FLORIS 与算法开发
 
@@ -40,7 +40,7 @@ tensorboard --logdir results/logs/ppo_wf
 python scripts/analysis/eval_visualize_ppo.py
 ```
 
-输出由 [wfrl/paths.py](../../wfrl/paths.py) 统一到 `results/checkpoints/`、`results/logs/`、`results/runs/` 和 `results/eval_outputs/`。再次训练可能覆盖同名模型；评估前确认权重与归一化匹配，不把缺文件时创建的新模型当作已训练策略。
+输出由 [wfrl/paths.py](../../wfrl/paths.py) 统一到 `results/checkpoints/`、`results/logs/`、`results/runs/` 和 `results/eval_outputs/`。再次训练可能覆盖同名模型。SB3 IPPO 的 `--eval-only` 与 `--resume` 必须配套加载模型和归一化文件，缺项或不兼容时明确失败；其他入口按各自规则核对文件与来源。[评估、续训和动作合同](../training/MAPPO_SETUP.md#评估续训与归一化)分别按实际训练路线使用。
 
 ## 3. FAST.Farm 动态后端与实时 Bridge
 

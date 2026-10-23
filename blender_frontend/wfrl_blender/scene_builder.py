@@ -222,6 +222,7 @@ def _make_turbine(collection, turbine, *, object_prefix=None,
         material("nacelle"),
     )
     nacelle.parent = yaw
+    nacelle['wfrl_nacelle_shell'] = True
     nacelle.location = (shell["nacelle_x_bias"] * scalars["OverHang"], 0, 0.15)
     _finish(nacelle, smooth=True)
     roof = _primitive(collection, "cube", prefix + ".NacelleRoof", (0, 0, 0), (1.2, 0.82, 0.045), material("nacelle"))

@@ -1,0 +1,9 @@
+{
+  "module_file": "PROJECT_ROOT/publication/blender-0.3.30/profile/extensions/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "scope": "Installed controller, configured project, non-media child, fresh-process recovery and cancellation",
+  "recovered_in_fresh_process": true,
+  "cancellation": "CANCELLED",
+  "final": true,
+  "status": "PASS"
+}

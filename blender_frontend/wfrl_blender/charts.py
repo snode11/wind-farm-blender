@@ -26,6 +26,7 @@ class Point:
     fidelity: str
     validity: str
     provenance: object
+    episode: object = None
 
 
 def scalar(value):
@@ -73,9 +74,10 @@ class ChartHistory:
                     validity = 'stale'
                 point = Point(step, payload['timestamp']['value'], value if validity == 'valid' else None,
                               record.get('unit', ''), record.get('fidelity', 'UNKNOWN'), validity,
-                              deepcopy(record.get('provenance', {})))
+                              deepcopy(record.get('provenance', {})),
+                              payload.get('context', {}).get('episode'))
                 values = self.series.setdefault((tid, channel), deque(maxlen=self.capacity))
-                if values and values[-1].step == step:
+                if values and values[-1].step == step and values[-1].episode == point.episode:
                     values[-1] = point
                 else:
                     values.append(point)
@@ -89,17 +91,20 @@ class ChartHistory:
 
 
 def segments(points):
-    """Split gaps and source/unit changes so visual continuity is truthful."""
+    """Split gaps, episode/time resets and source/unit changes."""
     result, current, previous = [], [], None
+    previous_time = None
     for point in points:
-        signature = (point.unit, point.fidelity)
-        if point.value is None or (previous is not None and signature != previous):
+        signature = (point.unit, point.fidelity, point.episode)
+        if (point.value is None or (previous is not None and signature != previous)
+                or (previous_time is not None and point.time < previous_time)):
             if current:
                 result.append(current)
             current = []
         if point.value is not None:
             current.append((point.time, point.value))
         previous = signature
+        previous_time = point.time
     if current:
         result.append(current)
     return result

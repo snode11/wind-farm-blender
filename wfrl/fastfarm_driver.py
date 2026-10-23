@@ -442,22 +442,23 @@ class FastFarmDriver:
         return self._read(reward=reward)
 
     # ------------------------------------------------------------------
-    def close(self, drain_cap=None, purge=False):
+    def close(self, drain_cap=None, purge=False, *, strict=False):
         """排空 FAST.Farm 剩余迭代预算，让子进程干净退出（避免 MPI_RECV 孤儿）。
 
         早退时调用；用零增量把回合走完（有上限，防止极长回合把关闭卡死）。
         `purge=True` 额外删掉本次 `envs.make()` 建的算例目录 —— 按回合重启训练时
         每回合一个 ~37 MB 的目录，不清会把 `__simul__/` 撑爆（README §8 第 5 条）。
+        `strict=True` 要求排空完成、环境关闭成功且 MPI 子通信器已断开；失败后
+        禁止重复排空不确定的 AEC 状态，由拥有工作进程的调用方处理取消。
         """
-        if not self._started or self.done:
-            self._safe_close()
-            if purge:
-                self._purge_case()
-            return
-        cap = drain_cap if drain_cap is not None else self.max_steps
+        prior_error = getattr(self, "_strict_close_error", None)
+        if strict and prior_error is not None:
+            raise RuntimeError("FAST.Farm close previously failed; cleanup is unconfirmed") from prior_error
+        cap = drain_cap if drain_cap is not None else getattr(self, "max_steps", 0)
         drained = 0
+        close_error = None
         try:
-            while not self.done and drained < cap:
+            while getattr(self, "_started", False) and not self.done and drained < cap:
                 for _ in range(self.n):
                     _, _, term, trunc, _ = self.env.last()
                     if term or trunc:
@@ -469,9 +470,20 @@ class FastFarmDriver:
                 drained += 1
                 if self._steps + drained >= self.max_steps:
                     self.done = True
+            if strict and getattr(self, "_started", False) and not self.done:
+                raise RuntimeError("FAST.Farm drain budget exhausted before shutdown")
         except Exception as e:                       # noqa: BLE001
-            print(f"[fastfarm-driver] drain 出错（忽略）: {e}", flush=True)
-        self._safe_close()
+            if strict:
+                close_error = e
+            else:
+                print(f"[fastfarm-driver] drain 出错（忽略）: {e}", flush=True)
+        try:
+            self._safe_close(strict=strict)
+        except Exception as e:                       # noqa: BLE001
+            close_error = close_error or e
+        if close_error is not None:
+            self._strict_close_error = close_error
+            raise close_error
         if purge:
             self._purge_case()
 
@@ -510,11 +522,22 @@ class FastFarmDriver:
                         time.sleep(1.5)
         _PENDING_PURGE[:] = left
 
-    def _safe_close(self):
+    def _safe_close(self, *, strict=False):
         try:
-            self.env.close()
+            env = getattr(self, "env", None)
+            if env is not None:
+                env.close()
+            if strict:
+                # WFCRL 的 env.close 可以是空操作；FAST.Farm 的最后一次通信负责
+                # Disconnect。仍有效的子通信器表示不能确认旧求解器已释放。
+                from wfcrl.interface import MPI
+                mdp = getattr(getattr(self, "_uenv", env), "mdp", None)
+                comm = getattr(getattr(mdp, "interface", None), "_comm", None)
+                if MPI is not None and isinstance(comm, MPI.Intercomm) and bool(comm):
+                    raise RuntimeError("FAST.Farm MPI communicator is still connected")
         except Exception:                            # noqa: BLE001
-            pass
+            if strict:
+                raise
 
 
 # ---------------------------------------------------------------------------

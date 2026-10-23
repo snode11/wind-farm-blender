@@ -1,5 +1,6 @@
 """Independent manual turbine state, rigid poses and main-thread motion."""
 import math
+import json
 import os
 from pathlib import Path
 import tempfile
@@ -10,7 +11,7 @@ import bpy
 from bpy.app.handlers import persistent
 from bpy_extras.io_utils import ExportHelper, ImportHelper
 
-from .manual_motion import RotorClock
+from .manual_motion import PitchTrial, RotorClock, TrialClock
 from . import manual_pose
 
 
@@ -20,6 +21,7 @@ IDLE_SECONDS = 0.25
 _POINTER_FIELDS = ('yaw_object', 'rotor_object', 'blade1_object', 'blade2_object', 'blade3_object')
 _POSE_FIELDS = manual_pose.POSE_FIELDS
 _CLOCKS = {}
+_TRIAL_CLOCKS = {}
 _updating = False
 _registered = False
 
@@ -37,6 +39,170 @@ def _scene_key(scene):
 
 def _entry_key(scene, entry):
     return (_scene_key(scene), entry.turbine_id)
+
+
+def trial_active(scene):
+    return is_manual(scene) and scene.wfrl_manual_trial.engaged
+
+
+def _t1(scene):
+    return next(entry for entry in scene.wfrl_manual_turbines if entry.turbine_id == 'T1')
+
+
+def effective_pitches(entry):
+    return tuple(getattr(entry, f'pitch_b{i}_deg') if entry.individual_pitch else entry.pitch_deg
+                 for i in range(1, 4))
+
+
+def _validate_native_controls(objects):
+    """Reject native evaluation that can override rigid poses or fixed optics."""
+    objects = set(objects)
+    for obj in tuple(objects):
+        ancestor = obj.parent
+        while ancestor is not None:
+            objects.add(ancestor)
+            ancestor = ancestor.parent
+    for obj in objects:
+        if obj.constraints or obj.animation_data:
+            raise ValueError(f'{obj.name} 含约束、动作或驱动，无法保证手动参数与实际姿态一致；'
+                             '请在独立副本中处理后再操作')
+        if obj.type == 'CAMERA' and obj.data.animation_data:
+            raise ValueError(f'{obj.data.name} 镜头含动作或驱动，无法保证固定相机参数')
+
+
+def _validate_controlled_rotation(entry):
+    """Require controlled axes to match the last pose written to the objects."""
+    _validate_native_controls(getattr(entry, field) for field in _POINTER_FIELDS)
+    axes = [(entry.yaw_object, 2, math.radians(entry.yaw_deg), '机舱'),
+            (entry.rotor_object, 0, math.radians(entry.azimuth_deg), '叶轮')]
+    axes.extend((getattr(entry, f'blade{index}_object'), 2, -math.radians(pitch), f'B{index}')
+                for index, pitch in enumerate(effective_pitches(entry), 1))
+    for obj, axis, expected, label in axes:
+        actual = obj.rotation_euler[axis]
+        if (obj.rotation_mode != 'XYZ' or not math.isfinite(actual)
+                or abs(math.remainder(actual - expected, math.tau)) > 1e-5):
+            raise ValueError(f'T1 {label} 的原生旋转与手动控制参数不一致；'
+                             '请撤销原生变换或通过手动面板重新设置姿态后再确认')
+
+
+def trial_configuration(scene):
+    """Read the saved start pose and frozen trial independently of pending inputs."""
+    values = json.loads(scene.wfrl_manual_trial.configuration)
+    if values['schema'] != 'wfrl.manual-pitch-trial.v1':
+        raise ValueError('无法识别变桨试验配置')
+    if values['blade_model'] != scene.get('wfrl_manual_blade_model'):
+        raise ValueError('试验叶片模型与保存配置不匹配')
+    start = manual_pose.pose_values(values['start_pose'])
+    pitches = tuple(start[f'pitch_b{i}_deg'] if start['individual_pitch'] else start['pitch_deg']
+                    for i in range(1, 4))
+    spec = PitchTrial(start['azimuth_deg'], start['rpm'], pitches,
+                      tuple(values['targets']), tuple(values['selected']), values['duration_s'],
+                      values.get('interpolation', 'SMOOTH'))
+    return start, spec
+
+
+def _trial_clock(scene, now):
+    key, configuration = _scene_key(scene), scene.wfrl_manual_trial.configuration
+    cached = _TRIAL_CLOCKS.get(key)
+    if cached is None or cached[0] != configuration:
+        _start, spec = trial_configuration(scene)
+        cached = (configuration, TrialClock(spec, scene.wfrl_manual_trial.elapsed_s, False, now))
+        _TRIAL_CLOCKS[key] = cached
+    return cached[1]
+
+
+def _sync_trial(scene, now, *, running=None, reset=False):
+    """Write rotor and all blade pitches from one trial-time sample."""
+    global _updating
+    trial, entry = scene.wfrl_manual_trial, _t1(scene)
+    clock = _trial_clock(scene, now)
+    if running:
+        running = _scene_key(scene) in visible_scenes()
+    pose = clock.configure(now, running=running, reset=reset)
+    start, _spec = trial_configuration(scene)
+    previous = _updating
+    _updating = True
+    try:
+        trial.elapsed_s = pose.time_s
+        entry.yaw_deg, entry.rpm, entry.pitch_deg = start['yaw_deg'], clock.trial.rpm, start['pitch_deg']
+        entry.azimuth_deg = pose.azimuth_deg % 360.0
+        at_start = pose.time_s == 0.0
+        entry.individual_pitch = start['individual_pitch'] if at_start else True
+        for index, pitch in enumerate(pose.pitches_deg, 1):
+            setattr(entry, f'pitch_b{index}_deg', start[f'pitch_b{index}_deg'] if at_start else pitch)
+        entry.running = clock.running
+        _apply_entry(entry)
+    finally:
+        _updating = previous
+    return pose
+
+
+def confirm_trial(scene, *, now=None):
+    """Validate all inputs before freezing one T1 trial and starting its clock."""
+    valid, reason = validate_scene(scene)
+    if not valid:
+        raise ValueError(reason)
+    if trial_active(scene):
+        raise ValueError('请先结束当前试验，再确认另一组目标')
+    _validate_controlled_rotation(_t1(scene))
+    now = time.monotonic() if now is None else now
+    pending = scene.wfrl_manual_trial
+    start = pose_snapshot(scene, now=now)['T1']
+    pitches = tuple(start[f'pitch_b{i}_deg'] if start['individual_pitch'] else start['pitch_deg']
+                    for i in range(1, 4))
+    selected = tuple(getattr(pending, f'select_b{i}') for i in range(1, 4))
+    targets = tuple(getattr(pending, f'target_b{i}_deg') for i in range(1, 4))
+    spec = PitchTrial(start['azimuth_deg'], start['rpm'], pitches, targets, selected,
+                      pending.duration_s, pending.interpolation)
+    configuration = json.dumps(dict(schema='wfrl.manual-pitch-trial.v1', start_pose=start,
+                                    blade_model=scene.get('wfrl_manual_blade_model'),
+                                    selected=selected, targets=targets, duration_s=spec.duration_s,
+                                    interpolation=spec.interpolation),
+                               allow_nan=False)
+    _CLOCKS.pop(_entry_key(scene, _t1(scene)), None)
+    pending.configuration, pending.elapsed_s, pending.engaged = configuration, 0.0, True
+    _TRIAL_CLOCKS[_scene_key(scene)] = (configuration, TrialClock(spec, 0.0, False, now))
+    _sync_trial(scene, now, running=True)
+    sync_batch(scene)
+    _redraw(scene)
+    _wake_timer()
+
+
+def _trial_undo_checkpoint(scene, now):
+    """Materialize the running pose before an undoable reset or completion."""
+    if not _t1(scene).running:
+        return
+    _sync_trial(scene, now, running=False)
+    for entry in scene.wfrl_manual_turbines:
+        if entry.turbine_id != 'T1' and entry.running:
+            clock = _clock(scene, entry, now)
+            _write_azimuth(entry, clock.configure(now, rpm=entry.rpm, running=True))
+            _apply_rotor(entry)
+    sync_batch(scene)
+    if bpy.context.preferences.edit.use_global_undo:
+        bpy.ops.ed.undo_push(message='T1 变桨试验当前姿态')
+
+
+def trial_action(scene, action, *, now=None, undo_checkpoint=False):
+    if not trial_active(scene):
+        raise ValueError('请先确认并开始 T1 变桨试验')
+    valid, reason = validate_scene(scene)
+    if not valid:
+        pause_scene(scene)
+        raise ValueError(reason)
+    if action not in {'START', 'PAUSE', 'RESET', 'END'}:
+        raise ValueError('试验期间请使用暂停、继续、复位或结束试验')
+    now = time.monotonic() if now is None else now
+    if undo_checkpoint and action in {'RESET', 'END'}:
+        _trial_undo_checkpoint(scene, now)
+    _sync_trial(scene, now, running=action == 'START', reset=action == 'RESET')
+    if action == 'END':
+        scene.wfrl_manual_trial.engaged = False
+        _TRIAL_CLOCKS.pop(_scene_key(scene), None)
+    sync_batch(scene)
+    _redraw(scene)
+    if action == 'START':
+        _wake_timer()
 
 
 def visible_scenes():
@@ -95,8 +261,17 @@ def validate_scene(scene):
                 seen_objects.add(key)
                 if any(owner != scene for owner in obj.users_scene):
                     return False, '控制对象与其他场景共享，请使用独立副本'
+        if trial_active(scene):
+            trial_configuration(scene)
+            elapsed = scene.wfrl_manual_trial.elapsed_s
+            if 'T1' not in seen_ids or not math.isfinite(elapsed) or elapsed < 0:
+                return False, 'T1 变桨试验时间或对象无效'
+            try:
+                _validate_native_controls(getattr(_t1(scene), field) for field in _POINTER_FIELDS)
+            except ValueError as exc:
+                return False, str(exc)
         return True, ''
-    except (AttributeError, ReferenceError, TypeError):
+    except (AttributeError, ReferenceError, TypeError, ValueError, KeyError):
         return False, '控制对象已失效，请重新创建场景'
 
 
@@ -168,7 +343,13 @@ def pause_scene(scene, *, now=None):
     previous = _updating
     _updating = True
     try:
+        if trial_active(scene) and valid:
+            _sync_trial(scene, now, running=False)
         for entry in scene.wfrl_manual_turbines:
+            if trial_active(scene) and entry.turbine_id == 'T1':
+                entry.running = False
+                _TRIAL_CLOCKS.pop(_scene_key(scene), None)
+                continue
             clock = _CLOCKS.pop(_entry_key(scene, entry), None)
             changed = clock is not None or entry.running
             if clock is not None:
@@ -193,6 +374,11 @@ def _update_entry(entry, context, field):
         pause_scene(scene)
         return
     now = time.monotonic()
+    if entry.turbine_id == 'T1' and trial_active(scene):
+        _sync_trial(scene, now, running=entry.running if field == 'running' else None)
+        sync_batch(scene)
+        _redraw(scene)
+        return
     clock = _clock(scene, entry, now)
     angle = entry.azimuth_deg if field == 'azimuth_deg' else None
     if field == 'individual_pitch' and entry.individual_pitch:
@@ -241,6 +427,9 @@ def _batch_update(field):
         if not valid:
             pause_scene(scene)
             return
+        if trial_active(scene):
+            sync_batch(scene)
+            return
         value = getattr(batch, field)
         for entry in scene.wfrl_manual_turbines:
             if field == 'individual_pitch' and entry.individual_pitch == value:
@@ -284,9 +473,19 @@ def pose_snapshot(scene, *, now=None):
     poses = {}
     for entry in scene.wfrl_manual_turbines:
         values = {field: getattr(entry, field) for field in _POSE_FIELDS}
-        clock = _CLOCKS.get(_entry_key(scene, entry))
-        if entry.running and clock is not None:
-            values['azimuth_deg'] = replace(clock).sample(now)
+        if entry.turbine_id == 'T1' and trial_active(scene):
+            clock = _trial_clock(scene, now)
+            pose = replace(clock).sample(now)
+            values['azimuth_deg'] = pose.azimuth_deg % 360.0
+            if pose.time_s > 0:
+                values['individual_pitch'] = True
+            if values['individual_pitch']:
+                for index, pitch in enumerate(pose.pitches_deg, 1):
+                    values[f'pitch_b{index}_deg'] = pitch
+        else:
+            clock = _CLOCKS.get(_entry_key(scene, entry))
+            if entry.running and clock is not None:
+                values['azimuth_deg'] = replace(clock).sample(now)
         poses[entry.turbine_id] = manual_pose.pose_values(values)
     return poses
 
@@ -300,6 +499,8 @@ def _apply_poses(scene, poses, *, pause=True, now=None):
     entries = {entry.turbine_id: entry for entry in scene.wfrl_manual_turbines}
     if not poses or not set(poses) <= set(entries):
         raise ValueError('姿态文件中的风机与当前场景不匹配')
+    if 'T1' in poses and trial_active(scene):
+        raise ValueError('请先结束 T1 变桨试验，再调整或载入 T1 姿态')
     checked = {tid: manual_pose.pose_values(values) for tid, values in poses.items()}
     now = time.monotonic() if now is None else now
     previous = _updating
@@ -347,6 +548,11 @@ def tick(now=None):
         for entry in scene.wfrl_manual_turbines:
             key = _entry_key(scene, entry)
             active_keys.add(key)
+            if entry.turbine_id == 'T1' and trial_active(scene):
+                if entry.running:
+                    _sync_trial(scene, now)
+                    changed = moving = True
+                continue
             if not entry.running:
                 _CLOCKS.pop(key, None)
                 continue
@@ -357,11 +563,14 @@ def tick(now=None):
                 changed = True
                 moving = True
         if changed:
-            sync_batch(scene, fields=('azimuth_deg',))
+            sync_batch(scene)
             _redraw(scene)
     for key in tuple(_CLOCKS):
         if key not in active_keys:
             _CLOCKS.pop(key, None)
+    for key in tuple(_TRIAL_CLOCKS):
+        if (key, 'T1') not in active_keys:
+            _TRIAL_CLOCKS.pop(key, None)
     return TICK_SECONDS if moving else IDLE_SECONDS
 
 
@@ -370,7 +579,7 @@ def _timer():
         return None
     try:
         return tick()
-    except (AttributeError, ReferenceError, RuntimeError):
+    except (AttributeError, ReferenceError, RuntimeError, ValueError, KeyError):
         pause_all()
         return IDLE_SECONDS
 
@@ -387,6 +596,7 @@ def pause_all():
     for scene in getattr(bpy.data, 'scenes', ()):
         pause_scene(scene)
     _CLOCKS.clear()
+    _TRIAL_CLOCKS.clear()
 
 
 @persistent
@@ -443,6 +653,73 @@ class WFRL_ManualTurbine(bpy.types.PropertyGroup):
 
 class WFRL_ManualBatch(bpy.types.PropertyGroup):
     __annotations__ = _properties(_batch_update)
+
+
+class WFRL_ManualTrial(bpy.types.PropertyGroup):
+    """Pending inputs and the saved configuration of one T1 pitch trial."""
+
+    __annotations__ = {
+        **{f'select_b{i}': bpy.props.BoolProperty(name=f'B{i}', default=i == 1)
+           for i in range(1, 4)},
+        **{f'target_b{i}_deg': bpy.props.FloatProperty(name=f'B{i} 目标 °', default=20.0,
+                                                     min=-30.0, max=90.0, precision=1)
+           for i in range(1, 4)},
+        'duration_s': bpy.props.FloatProperty(name='变桨时长 s', default=8.0, min=.01,
+                                             soft_max=60.0, precision=2),
+        'interpolation': bpy.props.EnumProperty(name='变桨方式', default='SMOOTH', items=(
+            ('SMOOTH', '平滑', '起止变桨速度为零的平滑过渡'),
+            ('LINEAR', '匀速', '按桨距差除以时长的固定角速度变桨，到达目标后保持'))),
+        'configuration': bpy.props.StringProperty(options={'HIDDEN'}),
+        'engaged': bpy.props.BoolProperty(default=False, options={'HIDDEN'}),
+        'elapsed_s': bpy.props.FloatProperty(name='试验时间 s', min=0.0, precision=3),
+    }
+
+
+class WFRL_OT_ManualTrial(bpy.types.Operator):
+    bl_idname = 'wfrl.manual_trial'
+    bl_label = 'T1 恒速变桨试验'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    action: bpy.props.EnumProperty(items=(
+        ('CONFIRM', '确认并开始', '整体校验，保存当前实际姿态并以恒定正 RPM 开始'),
+        ('START', '继续', '从暂停的试验时间继续叶轮旋转和变桨'),
+        ('PAUSE', '暂停', '同时冻结叶轮与三片桨距'),
+        ('RESET', '复位试验', '暂停并恢复本次试验的起始姿态'),
+        ('END', '结束试验', '暂停并保留当前姿态，允许调整下一组输入')))
+
+    @classmethod
+    def poll(cls, context):
+        return is_manual(context.scene)
+
+    def execute(self, context):
+        try:
+            if self.action == 'CONFIRM':
+                confirm_trial(context.scene)
+            else:
+                trial_action(context.scene, self.action, undo_checkpoint=True)
+        except (ValueError, KeyError, AttributeError, ReferenceError) as exc:
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        return {'FINISHED'}
+
+
+class WFRL_OT_ManualDown(bpy.types.Operator):
+    bl_idname = 'wfrl.manual_down'
+    bl_label = 'T1 Down'
+    bl_description = '从手动 T1 机舱固定下视同一叶轮；保留试验时间与运行状态'
+
+    @classmethod
+    def poll(cls, context):
+        return is_manual(context.scene)
+
+    def execute(self, context):
+        from . import manual_scene
+        try:
+            manual_scene.down_view(context)
+        except (ValueError, RuntimeError, AttributeError, ReferenceError) as exc:
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        return {'FINISHED'}
 
 
 class WFRL_OT_ManualEnter(bpy.types.Operator):
@@ -514,11 +791,20 @@ class WFRL_OT_ManualAction(bpy.types.Operator):
             self.report({'ERROR'}, reason)
             return {'CANCELLED'}
         entries = selected_entries(scene)
+        t1_trial = trial_active(scene) and any(entry.turbine_id == 'T1' for entry in entries)
+        if t1_trial and self.action == 'STOP':
+            self.report({'WARNING'}, '请先结束 T1 变桨试验，再修改 RPM')
+            return {'CANCELLED'}
         if self.action == 'START' and not any(entry.rpm > 0 for entry in entries):
             self.report({'WARNING'}, '请先设置大于 0 的转速')
             return {'CANCELLED'}
         now = time.monotonic()
+        if t1_trial and self.action == 'RESET':
+            _trial_undo_checkpoint(scene, now)
         for entry in entries:
+            if t1_trial and entry.turbine_id == 'T1':
+                trial_action(scene, self.action, now=now)
+                continue
             clock = _clock(scene, entry, now)
             _write_azimuth(entry, clock.configure(now, running=False))
             _updating = True
@@ -698,7 +984,8 @@ class WFRL_OT_ManualPoseImport(_ManualPoseTarget, bpy.types.Operator, ImportHelp
         return {'FINISHED'}
 
 
-CLASSES = (WFRL_ManualTurbine, WFRL_ManualBatch, WFRL_OT_ManualEnter,
+CLASSES = (WFRL_ManualTurbine, WFRL_ManualBatch, WFRL_ManualTrial,
+           WFRL_OT_ManualTrial, WFRL_OT_ManualDown, WFRL_OT_ManualEnter,
            WFRL_OT_ManualLeave, WFRL_OT_ManualAction, WFRL_OT_ManualFocus,
            WFRL_OT_ManualPosePreset, WFRL_OT_ManualPoseNudge,
            WFRL_OT_ManualPoseExport, WFRL_OT_ManualPoseImport)
@@ -706,7 +993,8 @@ _HANDLERS = (('load_pre', _before_load), ('load_post', _after_restore),
              ('undo_pre', _before_restore), ('undo_post', _after_restore),
              ('redo_pre', _before_restore), ('redo_post', _after_restore))
 _SCENE_PROPERTIES = ('wfrl_manual_turbines', 'wfrl_manual_batch', 'wfrl_manual_target',
-                     'wfrl_manual_return_scene', 'wfrl_manual_scene', 'wfrl_manual_step_deg')
+                     'wfrl_manual_return_scene', 'wfrl_manual_scene', 'wfrl_manual_step_deg',
+                     'wfrl_manual_trial')
 
 
 def register():
@@ -718,6 +1006,7 @@ def register():
             bpy.utils.register_class(cls)
     bpy.types.Scene.wfrl_manual_turbines = bpy.props.CollectionProperty(type=WFRL_ManualTurbine)
     bpy.types.Scene.wfrl_manual_batch = bpy.props.PointerProperty(type=WFRL_ManualBatch)
+    bpy.types.Scene.wfrl_manual_trial = bpy.props.PointerProperty(type=WFRL_ManualTrial)
     bpy.types.Scene.wfrl_manual_return_scene = bpy.props.PointerProperty(type=bpy.types.Scene)
     bpy.types.Scene.wfrl_manual_scene = bpy.props.PointerProperty(type=bpy.types.Scene)
     bpy.types.Scene.wfrl_manual_step_deg = bpy.props.FloatProperty(
@@ -728,6 +1017,8 @@ def register():
                               ('T3', 'T3', '控制风机 T3'), ('ALL', '全部', '只将编辑的参数应用到全部风机')),
         default='T1', update=_selection_update)
     _registered = True
+    from . import manual_video
+    manual_video.register()
     for name, function in _HANDLERS:
         handlers = getattr(bpy.app.handlers, name)
         if function not in handlers:
@@ -741,6 +1032,8 @@ def register():
 def unregister():
     global _registered
     from . import manual_scene
+    from . import manual_video
+    manual_video.unregister()
     _registered = False
     if bpy.app.timers.is_registered(_timer):
         bpy.app.timers.unregister(_timer)

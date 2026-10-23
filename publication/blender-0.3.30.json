@@ -1,0 +1,42 @@
+{
+  "schema": "wfrl.extension-release.v1",
+  "version": "0.3.30",
+  "publication_status": "VALIDATED_NOT_UPLOADED",
+  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.30",
+  "archive": {
+    "name": "wfrl_blender-0.3.30.zip",
+    "path": "publication/blender-0.3.30/package/wfrl_blender-0.3.30.zip",
+    "bytes": 99091527,
+    "file_count": 184,
+    "sha256": "9f381674407c07138986eb8fc96d35f8ef50ac91e9ad58b43bd8c7f5afbac16a",
+    "payload_sha256": "4ac669ad13e7959e6fff6084b57dc77e1c7de42c22613b760341eed73d2cd003",
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl_blender-0.3.30.zip",
+    "inventory_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl_blender-0.3.30.inventory.json",
+    "checksum_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl_blender-0.3.30.zip.sha256"
+  },
+  "source": {
+    "repository": "https://github.com/snode11/wind-farm-blender",
+    "branch": "wind-farm-rl-all-work",
+    "synchronized_branch": "main",
+    "tag": "v0.3.30",
+    "canonical_payload_files_checked": 183,
+    "canonical_payload_match": true,
+    "source_rebuild_verification": "NOT_RUN"
+  },
+  "validation": {
+    "report": "publication/blender-0.3.30/verification.json",
+    "host_passed": 475,
+    "isolated_installation": "PASS",
+    "fresh_process_module_probe": "PASS",
+    "native_windows": "PASS_SCRIPTED_SCOPED",
+    "video_controller_new_process": "PASS_NON_MEDIA",
+    "full_video": "NOT_RUN",
+    "scientific_acceptance": "NOT_RUN"
+  },
+  "daily_installation": {
+    "updated_by_publication": false,
+    "saved_version": "0.3.28",
+    "saved_identity": "publication/daily-installation.json"
+  },
+  "remote_asset_download_verification": false
+}

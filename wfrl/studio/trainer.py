@@ -36,6 +36,7 @@ import numpy as np
 import torch
 
 from wfrl.mappo_central import Actor, Critic, RunningMeanStd
+from wfrl.policy_actions import PolicyActionContract, load_action_contract
 from wfrl.safety import SafetyLimiter
 
 DEVICE = torch.device("cpu")
@@ -61,14 +62,14 @@ class Snapshot:
     stats: Optional[Dict[str, float]] = None
     phase: str = "idle"          # idle | warmup | sampling | updating | done
     demo_label: str = ""         # demo 模式：当前阶段中文提示（"变桨: 90°→0° 启动"等）
+    episode: Optional[int] = None  # Interactive 回合编号，从 0 开始
 
 
 class Trainer:
     """把 MAPPO 训练跑在后台线程，逐步把快照交给 UI。
 
-    `episode_steps` 控制回合结构：>0 时每回合重起一个 FAST.Farm 进程（阶段 3
-    的结论 —— 单长回合等于一次风况抽签决定整段的功率量级），=0 退回单长回合，
-    只在做对照时用。
+    `episode_steps > 0` 时按训练控制步切分回合，每回合关闭并重建 runtime；
+    `episode_steps == 0` 使用单长回合。每回合的 warmup 不计入训练样本。
     """
 
     def __init__(self, scene, iters: int = 8, n_steps: int = 64,
@@ -109,6 +110,8 @@ class Trainer:
         self.runtime = None
         self.actor = None
         self.critic = None
+        self.action_contract = None
+        self.episode: Optional[int] = None
 
         self._lock = threading.Lock()
         self._latest: Optional[Snapshot] = None
@@ -158,6 +161,7 @@ class Trainer:
 
     # ---- 工作线程 -------------------------------------------------------
     def _publish(self, **kw):
+        kw.setdefault("episode", self.episode)
         snap = Snapshot(**kw)
         with self._lock:
             self._latest = snap
@@ -182,10 +186,15 @@ class Trainer:
         finally:
             if self.runtime is not None:
                 try:
-                    self.runtime.close(purge=True)
+                    self.runtime.close(purge=True, **({"strict": True}
+                                                     if not (self.demo or self.replay) else {}))
                 except Exception as e:                   # noqa: BLE001
-                    print(f"[trainer] 收尾出错（忽略）: {e}", flush=True)
-                self.runtime = None
+                    cleanup_error = traceback.format_exc()
+                    self.error = (self.error + "\n" + cleanup_error
+                                  if self.error else cleanup_error)
+                    print(f"[trainer] 收尾出错: {e}", flush=True)
+                else:
+                    self.runtime = None
             with self._lock:
                 if self._latest is not None:
                     self._latest.phase = "done"
@@ -193,13 +202,9 @@ class Trainer:
     def _replay_policy(self):
         """加载 checkpoint，用确定性策略 (dist.mean) 跑一回合，逐步发快照。
 
-        不做任何 PPO 更新、不建 critic、不采 buffer —— 纯前向。动作口径与
-        rollout_ckpt.py 完全一致：obs 用 ckpt 存的 obs_mean/var 归一化，网络输出
-        取 dist.mean（去掉训练时的探索噪声），逐通道 clip 到 driver 的动作边界，
-        再过约束层（约束层是仿真器真实会施加的，回放照走以贴合训练时的执行）。
-
-        兼容两种 checkpoint：Studio 的 _save（只有 obs_keys/obs_mean/...）与命令行
-        train_fastfarm.py 的（多 obs_duty/recurrent 键）。obs_duty 缺省当 False。
+        obs 用 checkpoint 的 obs_mean/var 归一化，网络输出取 dist.mean。
+        动作按 checkpoint 合同变换，再经过约束层；合同与场景、driver 边界
+        必须兼容。无版本模型只接受可确认来源的 Studio 或 CLI 元数据。
         """
         from wfrl.scene.runtime import SceneRuntime
         if not self.ckpt_path or not os.path.exists(self.ckpt_path):
@@ -209,21 +214,13 @@ class Trainer:
         n = self.scene.n
 
         ck = torch.load(self.ckpt_path, map_location="cpu", weights_only=False)
+        self.action_contract = load_action_contract(
+            ck, controls=self.controls, n_agents=n, scene=self.scene.to_dict())
         obs_keys = ck["obs_keys"]
         obs_duty = bool(ck.get("obs_duty", False))
         mean = np.asarray(ck["obs_mean"], np.float32)
         std = np.sqrt(np.asarray(ck["obs_var"], np.float32) + 1e-8)
-        # CLI 训练的 checkpoint 没有 controls 键（旧口径只控 yaw），Studio 的有。
-        # 从 act_dim 推：1 维→yaw，3 维→yaw/pitch/torque（与当前 scene 对齐）。
-        act_dim = ck["act_dim"]
-        if "controls" in ck and ck["controls"]:
-            controls = list(ck["controls"])
-        elif act_dim == 1:
-            controls = ["yaw"]
-        elif act_dim == 3:
-            controls = ["yaw", "pitch", "torque"]
-        else:
-            controls = list(self.scene.controls)  # fallback：从场景推
+        controls = self.action_contract.controls
         self.actor = Actor(ck["obs_dim"], ck["act_dim"]).to(DEVICE)
         self.actor.load_state_dict(ck["actor"])
         self.actor.eval()
@@ -240,6 +237,7 @@ class Trainer:
         want_warmup = self.warmup_steps
         self._publish(phase="warmup")
         frame = self.runtime.reset()
+        self.action_contract.validate_runtime(self.controls, self.runtime.driver.act_bounds)
         m = self.runtime.last_measure
         self._publish(step=0, iters_done=0, frame=frame, measure=m,
                       ctx=self.runtime.last_ctx,
@@ -255,10 +253,6 @@ class Trainer:
                           farm_power=_frame_farm_power(frame),
                           reward=0.0, events=[], phase="warmup")
 
-        act_high = np.array([self.runtime.driver.act_bounds[c][1]
-                             for c in controls], np.float32)
-        lo, hi = self.runtime.driver.act_low, self.runtime.driver.act_high
-
         # 回放专用：记录每步数据，让训练面板能画曲线
         replay_history = {"step": [], "yaw": [], "power": [], "reward": []}
 
@@ -271,15 +265,8 @@ class Trainer:
             on = ((obs - mean) / std).astype(np.float32)
             with torch.no_grad():
                 a = self.actor.dist(torch.as_tensor(on, device=DEVICE)).mean
-            a_np = a.cpu().numpy()
-            # 单控 yaw（多数 checkpoint）走 rollout 的 clip 口径；多控走逐通道
-            # tanh*上界 的训练口径。act_dim 决定走哪条，与训练时一致。
-            if len(controls) == 1:
-                a_scaled = np.clip(a_np.ravel(), lo, hi)[:, None]
-            else:
-                a_scaled = np.tanh(a_np) * act_high
             cmd, evs = self.limiter.apply(
-                {c: a_scaled[:, j] for j, c in enumerate(controls)},
+                self.action_contract.commands(a.cpu().numpy(), n),
                 m, enforce_duty=self.enforce_duty)
             frame = self.runtime.step(
                 yaw_delta=cmd.get("yaw"), pitch_delta=cmd.get("pitch"),
@@ -560,47 +547,78 @@ class Trainer:
                       ctx=ctx, farm_power=0.0, reward=0.0,
                       events=[], phase="done", demo_label=_live_label())
 
-    def _train(self):
+    def _wait_for_control_step(self):
+        """暂停和停止只在完整控制步之间生效，也适用于回合启动与 warmup。"""
+        while self._paused.is_set() and not self._stop.is_set():
+            self._stop.wait(0.05)
+        return not self._stop.is_set()
+
+    def _start_training_episode(self, steps, *, step, iters_done):
+        """关闭旧 runtime，再为剩余训练步数分配独立预算并执行 warmup。"""
         from wfrl.scene.runtime import SceneRuntime
-        torch.manual_seed(self.seed)
-        np.random.seed(self.seed)
-        n = self.scene.n
-        total = self.iters * self.n_steps
-        # driver 的预算要一次给够：FAST.Farm 在 t=0 领到固定迭代数，中途加不了。
-        # +8 留给 close() 排空与热身。
-        budget = total + self.warmup_steps + 8
-        self.runtime = SceneRuntime(self.scene, max_steps=budget,
-                                    warmup_steps=self.warmup_steps)
-        # warmup 交给 trainer 逐步发快照：runtime.reset 里默认会把 warmup 步全部
-        # 空转完再返回，那段几十秒里 GUI 拿不到 measure、叶片静止不动。这里把
-        # warmup 设 0、先 reset（driver 一 reset 就有 rotor_speed），立刻发一帧让
-        # 叶片开始转，再自己逐步跑 warmup、每步发快照 —— 转子在 spawn 一结束就动。
-        want_warmup = self.warmup_steps
-        self.runtime.warmup_steps = 0
-        self._publish(phase="warmup")
+        if not self._wait_for_control_step():
+            return None
+        if self.runtime is not None:
+            self.runtime.close(purge=True, strict=True)
+            self.runtime = None
+        if not self._wait_for_control_step():
+            return None
+        # FAST.Farm 在启动时领取固定预算；余量避开 AEC 清空末轮奖励的步次。
+        self.runtime = SceneRuntime(
+            self.scene, max_steps=steps + self.warmup_steps + 8, warmup_steps=0)
+        self.episode = 0 if self.episode is None else self.episode + 1
+        # 只重置约束的回合内累加指令；事件编号和统计贯穿训练，UI 保留同一 limiter。
+        self.limiter.state = {c: np.zeros(self.scene.n) for c in self.controls}
+        self._publish(step=step, iters_done=iters_done, phase="warmup")
+        if not self._wait_for_control_step():
+            return None
         frame = self.runtime.reset()
+        if self.runtime.done:
+            raise RuntimeError("Interactive runtime ended during reset")
+        if self.action_contract is None:
+            self.action_contract = PolicyActionContract.from_bounds(
+                self.controls, self.runtime.driver.act_bounds, "tanh_scale")
+        else:
+            self.action_contract.validate_runtime(self.controls, self.runtime.driver.act_bounds)
         m = self.runtime.last_measure
-        self._publish(step=0, iters_done=0, frame=frame, measure=m,
+        self._publish(step=step, iters_done=iters_done, frame=frame, measure=m,
                       ctx=self.runtime.last_ctx,
                       farm_power=_frame_farm_power(frame),
                       reward=0.0, events=[], phase="warmup")
-        for _ in range(want_warmup):
-            if self._stop.is_set():
-                break
-            frame = self.runtime.step(yaw_delta=np.zeros(n))
+        for _ in range(self.warmup_steps):
+            if not self._wait_for_control_step():
+                return None
+            frame = self.runtime.step(yaw_delta=np.zeros(self.scene.n))
+            if self.runtime.done:
+                raise RuntimeError("Interactive runtime ended during warmup")
             m = self.runtime.last_measure
-            self._publish(step=0, iters_done=0, frame=frame, measure=m,
+            self._publish(step=step, iters_done=iters_done, frame=frame, measure=m,
                           ctx=self.runtime.last_ctx,
                           farm_power=_frame_farm_power(frame),
                           reward=0.0, events=[], phase="warmup")
+        if not self._wait_for_control_step():
+            return None
+        return frame, m
+
+    def _train(self):
+        if self.iters < 0 or self.n_steps < 1:
+            raise ValueError("iters must be nonnegative and n_steps must be positive")
+        if self.episode_steps < 0 or self.warmup_steps < 0:
+            raise ValueError("episode_steps and warmup_steps must be nonnegative")
+        torch.manual_seed(self.seed)
+        np.random.seed(self.seed)
+        self.episode = None
+        n = self.scene.n
+        total = self.iters * self.n_steps
+        episode_left = min(self.episode_steps or total, total)
+        initial = self._start_training_episode(episode_left, step=0, iters_done=0)
+        if initial is None:
+            return
+        frame, m = initial
 
         # 观测 = (各被控量当前值, wind_speed, wind_direction)，动作 = 各被控量增量。
-        # 维度从 scene.controls 派生（obs_keys 在 __init__ 里已建好）：controls=[yaw]
-        # 时回到 3/1，与旧的单控路径逐位一致；[yaw,pitch,torque] 时是 5/3。被控量在
-        # m 里存的是 driver 回读值（yaw/pitch 是累加指令、torque 是实测转矩），都是
-        # 策略该看的状态。act_high 逐通道取各自动作边界，tanh 后各乘各的上界。
-        act_high = np.array([self.runtime.driver.act_bounds[c][1]
-                             for c in self.controls], np.float32)
+        # 维度和通道顺序来自 scene.controls；动作合同保存实际 driver 边界。
+        # m 的被控量来自 driver 回读：yaw/pitch 是累加指令，torque 是实测转矩。
         obs_dim, act_dim = len(self.obs_keys), len(self.controls)
         state_dim = n * obs_dim
         self.actor = Actor(obs_dim, act_dim).to(DEVICE)
@@ -609,7 +627,7 @@ class Trainer:
             list(self.actor.parameters()) + list(self.critic.parameters()),
             lr=self.hp["lr"])
         rms = RunningMeanStd(obs_dim)
-        # 折扣回报平方的指数移动平均 M 和累加器 G，跨 rollout 保留。
+        # 二阶矩 EMA 跨回合保留；折扣回报累加器仅在同一回合跨 rollout 保留。
         ret_rms_var, ret_acc = 1.0, 0.0
 
         gstep = 0
@@ -621,17 +639,22 @@ class Trainer:
             logp_buf = np.zeros((self.n_steps, n), np.float32)
             rew_buf = np.zeros(self.n_steps, np.float32)
             pow_buf = np.full(self.n_steps, np.nan, np.float32)
-            val_buf = np.zeros(self.n_steps + 1, np.float32)
-            # 实际采到的步数。回合提前结束（预算耗尽 / 用户停）时它 < n_steps，
-            # 后面所有切片都必须用它 —— 拿满长度去算 GAE 等于把尾部一串零当成
-            # 真实的零回报学进去，价值函数会被拽平。
+            val_buf = np.zeros(self.n_steps, np.float32)
+            next_val_buf = np.zeros(self.n_steps, np.float32)
+            episode_end = np.zeros(self.n_steps, bool)
+            # 一个 rollout 可跨多个回合；只使用实际采集的样本。
             filled = 0
 
             for k in range(self.n_steps):
-                while self._paused.is_set() and not self._stop.is_set():
-                    time.sleep(0.05)
-                if self._stop.is_set():
+                if not self._wait_for_control_step():
                     break
+                if episode_left == 0:
+                    episode_left = min(self.episode_steps or total, total - gstep)
+                    initial = self._start_training_episode(
+                        episode_left, step=gstep, iters_done=it)
+                    if initial is None:
+                        break
+                    frame, m = initial
                 o = self._pack(m)
                 rms.update(o)
                 on = rms.norm(o).astype(np.float32)
@@ -643,15 +666,17 @@ class Trainer:
                     st = torch.as_tensor(on.reshape(-1), device=DEVICE)
                     v = self.critic.v(st).squeeze(-1)
 
-                # a: (n, act_dim)。tanh 后逐通道乘各自动作上界（act_high 按
-                # controls 顺序），再过约束层。约束层要一份 {控制量: (n,)} 的字典。
-                a_scaled = np.tanh(a.cpu().numpy()) * act_high            # (n, act_dim)
+                # buffer 保留原始高斯动作；仅执行路径按合同转换为控制增量。
                 cmd, evs = self.limiter.apply(
-                    {c: a_scaled[:, j] for j, c in enumerate(self.controls)},
+                    self.action_contract.commands(a.cpu().numpy(), n),
                     m, enforce_duty=self.enforce_duty)
                 frame = self.runtime.step(
                     yaw_delta=cmd.get("yaw"), pitch_delta=cmd.get("pitch"),
                     torque_delta=cmd.get("torque"))
+                # 训练边界早于 driver 预算；提前 done 没有可辨别的终止原因，不能
+                # 当作正常时间截断继续采样已停止的后端。
+                if self.runtime.done:
+                    raise RuntimeError("Interactive runtime ended before its allocated training budget")
                 m = self.runtime.last_measure
                 evs = evs + self.limiter.monitor(m)
 
@@ -661,30 +686,35 @@ class Trainer:
                 pow_buf[k] = _frame_farm_power(frame)
                 filled = k + 1
                 gstep += 1
+                episode_left -= 1
+                episode_end[k] = episode_left == 0
+                if k > 0 and not episode_end[k - 1]:
+                    next_val_buf[k - 1] = val_buf[k]
+                if episode_end[k] or filled == self.n_steps:
+                    # 时间截断和 rollout 尾部使用重置前终点；不更新观测统计，
+                    # 下一回合的初始观测不能替代当前回合的终点价值。
+                    with torch.no_grad():
+                        st = torch.as_tensor(self._pack_norm(m, rms).reshape(-1),
+                                             device=DEVICE)
+                        next_val_buf[k] = self.critic.v(st).squeeze(-1)
                 self._publish(step=gstep, iters_done=it, frame=frame,
                               measure=m, ctx=self.runtime.last_ctx,
                               farm_power=_frame_farm_power(frame),
                               reward=r, events=evs, phase="sampling")
-                if self.runtime.done:
-                    break
 
             if self._stop.is_set() or filled == 0:
                 break
             # 每步 G = gamma * G + r，M = 0.99 * M + 0.01 * G**2。
             # 本轮全部奖励除以本轮末的 sqrt(M) + 1e-8，再送入 GAE。
-            for r in rew_buf[:filled]:
+            for r, end in zip(rew_buf[:filled], episode_end[:filled]):
                 ret_acc = ret_acc * self.hp["gamma"] + float(r)
                 ret_rms_var = 0.99 * ret_rms_var + 0.01 * ret_acc ** 2
+                if end:
+                    ret_acc = 0.0
             rew_n = rew_buf[:filled] / (np.sqrt(ret_rms_var) + 1e-8)
 
-            with torch.no_grad():
-                st = torch.as_tensor(self._pack_norm(m, rms).reshape(-1),
-                                     device=DEVICE)
-                # 回合是被**预算截断**的，不是真终止 —— 尾值必须自举，置 0
-                # 等于告诉 critic"这里之后再无回报"，价值函数会在每个回合末尾
-                # 被拽出一个假的塌陷。
-                val_buf[filled] = self.critic.v(st).squeeze(-1)
-            adv, ret = self._gae(rew_n, val_buf[:filled + 1])
+            adv, ret = self._gae(rew_n, val_buf[:filled],
+                                 next_val_buf[:filled], episode_end[:filled])
             stats = self._update(obs_buf[:filled], act_buf[:filled],
                                  logp_buf[:filled], adv, ret, opt)
             # 全场功率取本轮全部采样步的均值；任何一步缺测使整轮统计无效。
@@ -695,10 +725,10 @@ class Trainer:
             self._publish(step=gstep, iters_done=it + 1, frame=frame,
                           measure=m, ctx=self.runtime.last_ctx,
                           farm_power=_frame_farm_power(frame),
-                          reward=float(rew_buf.mean()), events=[],
+                          reward=float(rew_buf[:filled].mean()), events=[],
                           phase="updating", stats=dict(stats))
 
-        if self.ckpt_path:
+        if self.ckpt_path and self.history:
             self._save(rms)
 
     # ---- 观测打包、GAE 与 PPO 更新 --------------------------------------
@@ -715,16 +745,17 @@ class Trainer:
     def _pack_norm(self, m, rms):
         return rms.norm(self._pack(m)).astype(np.float32)
 
-    def _gae(self, rew, val):
+    def _gae(self, rew, val, next_val, episode_end):
+        """时间截断保留终点价值自举，同时切断跨回合的优势递推。"""
         gamma, lam = self.hp["gamma"], self.hp["lam"]
         T = len(rew)
         adv = np.zeros(T, np.float32)
         last = 0.0
         for t in reversed(range(T)):
-            delta = rew[t] + gamma * val[t + 1] - val[t]
-            last = delta + gamma * lam * last
+            delta = rew[t] + gamma * next_val[t] - val[t]
+            last = delta + gamma * lam * (not episode_end[t]) * last
             adv[t] = last
-        return adv, adv + val[:T]
+        return adv, adv + val
 
     def _update(self, obs, act, logp, adv, ret, opt):
         T = len(adv)
@@ -773,7 +804,9 @@ class Trainer:
         return last
 
     def _save(self, rms):
-        os.makedirs(os.path.dirname(self.ckpt_path), exist_ok=True)
+        if self.action_contract is None:
+            raise ValueError("saving a policy requires its training action_contract")
+        os.makedirs(os.path.dirname(self.ckpt_path) or ".", exist_ok=True)
         obs_dim = len(self.obs_keys)
         torch.save({"actor": self.actor.state_dict(),
                     "critic": self.critic.state_dict(),
@@ -781,6 +814,8 @@ class Trainer:
                     "obs_keys": list(self.obs_keys),
                     "obs_dim": obs_dim, "act_dim": len(self.controls),
                     "controls": list(self.controls),
+                    "policy_source": "studio",
+                    "action_contract": self.action_contract.to_dict(),
                     "state_dim": self.scene.n * obs_dim,
                     "scene": self.scene.to_dict()}, self.ckpt_path)
         print(f"[trainer] checkpoint → {self.ckpt_path}", flush=True)

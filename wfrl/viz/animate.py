@@ -1,5 +1,5 @@
 """
-第 2 步：策略驱动的 3D 尾流动画。
+策略驱动的 3D 尾流动画。
 
 加载训练好的 MAPPO 模型，在多智能体 env 上逐步 rollout；每个 control step：
   - 用共享策略给出各机组 yaw
@@ -14,16 +14,13 @@
     python animate_farm3d.py --gif rollout.gif --steps 40
 """
 import argparse
-import os
 
 import numpy as np
 import pyvista as pv
-from stable_baselines3.common.vec_env import VecNormalize
 
 from wfrl import mappo_sb3 as T
 from wfrl.viz.field import BLADE_LEN, add_wake_plane, extract_wake_plane
-# 4x4 齐次变换助手挪到 geometry.py：扫塔间隙要用同一条装配链算距离，
-# 两份实现一旦漂移，算出来的间隙就和画面上的不是一回事了。
+# 可视化与扫塔间隙计算共用 geometry.py 的 4x4 齐次变换和装配链。
 from wfrl.viz.geometry import (rot_x as _rot_x, rot_y as _rot_y,
                                rot_z as _rot_z, trans as _trans)
 
@@ -297,19 +294,8 @@ def find_floris(root):
 
 
 def load_model_and_env():
-    """复用 train_mappo 的 env 构造 + 归一化统计 + 训练好的策略。"""
-    from stable_baselines3 import PPO
-
-    venv = T.make_venv(norm_reward=False, training=False)
-    if os.path.exists(T.VECNORM_PATH):
-        venv = VecNormalize.load(T.VECNORM_PATH, venv.venv)
-        venv.training = False
-        venv.norm_reward = False
-    if not os.path.exists(T.MODEL_PATH + ".zip"):
-        raise FileNotFoundError(
-            f"没找到模型 {T.MODEL_PATH}.zip，先跑 train_mappo.py 训练。")
-    model = PPO.load(T.MODEL_PATH, env=venv)
-    return model, venv
+    """加载配套策略和冻结的归一化统计，返回由调用方关闭的环境。"""
+    return T.load_evaluation_pair()
 
 
 def current_yaws(fi):

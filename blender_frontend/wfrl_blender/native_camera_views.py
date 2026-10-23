@@ -129,6 +129,7 @@ class NativeSession:
         self.closed = False
         self.resume_when_closed = False
         self.resume_scheduled = False
+        self.resume_generation = None
         self.lifecycle = []
         self.workspace = None
         self.owns_window = False
@@ -597,6 +598,7 @@ class NativeSession:
                 with bpy.context.temp_override(**resume_context):
                     result = bpy.ops.screen.animation_cancel(restore_frame=False)
                     self.lifecycle_event('cancel_before_close', result=list(result))
+                    self.resume_generation = playback.generation()
 
         try:
             _cleanup_step(errors, '结束相机采集', finish_capture)
@@ -670,6 +672,9 @@ class NativeSession:
             owner = playback.owner_scene()
             if (owner is not None and owner != self.scene) or playback.any_playing():
                 self.lifecycle_event('resume_skipped', reason='another_or_live_player')
+                return None
+            if playback.generation() != self.resume_generation:
+                self.lifecycle_event('resume_skipped', reason='playback_state_changed')
                 return None
             resume_context=self.playback_context()
             if resume_context:
@@ -892,8 +897,13 @@ class WFRL_OT_NativePlay(bpy.types.Operator):
             if blocked:
                 self.report({'WARNING'}, blocked)
                 return {'CANCELLED'}
-            if playing:bpy.ops.screen.animation_cancel(restore_frame=False)
-            else:bpy.ops.screen.animation_play()
+            if playing:
+                bpy.ops.screen.animation_cancel(restore_frame=False)
+            else:
+                from . import clearance_replay
+                if clearance_replay.reader_for(session.scene) is not None:
+                    return bpy.ops.wfrl.clearance_playback()
+                bpy.ops.screen.animation_play()
         return {'FINISHED'}
 
 

@@ -1,0 +1,23 @@
+{
+  "command": [
+    "/Applications/Blender.app/Contents/MacOS/Blender",
+    "--background",
+    "--factory-startup",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "PROJECT_ROOT/outputs/multi-view-repair-verification/source_bootstrap.py"
+  ],
+  "environment": {
+    "BLENDER_USER_CONFIG": "PROJECT_ROOT/outputs/multi-view-repair-verification/camera-retirement-background/profile/config",
+    "BLENDER_USER_SCRIPTS": "PROJECT_ROOT/outputs/multi-view-repair-verification/camera-retirement-background/profile/scripts",
+    "BLENDER_USER_DATAFILES": "PROJECT_ROOT/outputs/multi-view-repair-verification/camera-retirement-background/profile/datafiles",
+    "BLENDER_USER_EXTENSIONS": "PROJECT_ROOT/outputs/multi-view-repair-verification/camera-retirement-background/profile/extensions",
+    "WFRL_ADDON_MODULE": "wfrl_blender",
+    "WFRL_EXPECTED_ADDON_ROOT": "PROJECT_ROOT/blender_frontend/wfrl_blender",
+    "WFRL_ADDON_ROOT": "PROJECT_ROOT/blender_frontend",
+    "WFRL_TEST_OUTPUT": "PROJECT_ROOT/outputs/multi-view-repair-verification/camera-retirement-background/result",
+    "WFRL_CASE_ROOT": "PROJECT_ROOT/outputs/multi-view-repair-verification/camera-retirement-background",
+    "WFRL_PROBE_SCRIPT": "PROJECT_ROOT/blender_frontend/tests/blender/custom_camera_retirement_regression.py"
+  }
+}

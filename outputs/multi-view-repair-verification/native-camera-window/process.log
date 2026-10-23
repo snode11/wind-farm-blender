@@ -1,0 +1,13 @@
+Warning: 1 × Draw window and swap: 94.0264 ms, average: 94.02637498 ms
+Warning: 1 × Draw window and swap: 24.1003 ms, average: 24.10033403 ms
+Warning: 1 × Draw window and swap: 5.9589 ms, average: 5.95887494 ms
+Warning: 1 × Draw window and swap: 7.0382 ms, average: 7.03820807 ms
+Warning: 1 × Draw window and swap: 171.0054 ms, average: 171.00541596 ms
+Warning: 1 × Draw window and swap: 6.1560 ms, average: 6.15595793 ms
+Native camera view closed: StructRNA of type Object has been removed
+Native camera view closed: StructRNA of type Object has been removed
+NATIVE_CAMERA_ENABLED_PASS
+00:17.762  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

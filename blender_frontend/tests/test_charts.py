@@ -71,6 +71,28 @@ class ChartTests(unittest.TestCase):
         self.assertEqual(history.points('T1', 'power')[-1].validity, 'stale')
         self.assertIsNone(history.points('T1', 'power')[-1].value)
 
+    def test_simulation_time_reset_breaks_line_without_discarding_history(self):
+        history = ChartHistory()
+        for step, stamp in ((4, 12), (5, 0), (6, 3)):
+            history.ingest(snapshot(step, timestamp=dict(value=stamp, timebase='simulation_seconds')))
+        points = history.points('T1', 'power')
+        self.assertEqual(len(points), 3)
+        self.assertEqual(segments(points), [[(12, 4)], [(0, 5), (3, 6)]])
+
+    def test_episode_reset_at_same_global_step_preserves_boundary_and_training_stats(self):
+        history = ChartHistory()
+        first = snapshot(4, context=dict(episode=1))
+        history.ingest(first)
+        training_stats = history.series[(FARM, 'mean_reward')] = history.series[(FARM, 'reward')].copy()
+        second = snapshot(4, context=dict(episode=2))
+        second['sequence'] = first['sequence'] + 1
+        history.ingest(second)
+        points = history.points('T1', 'power')
+        self.assertEqual([p.episode for p in points], [1, 2])
+        self.assertEqual(len(segments(points)), 2)
+        self.assertIs(history.series[(FARM, 'mean_reward')], training_stats)
+        self.assertEqual(len(training_stats), 1)
+
 
 class PlotReadabilityTests(unittest.TestCase):
     def test_constant_and_single_sample_axes_have_room(self):

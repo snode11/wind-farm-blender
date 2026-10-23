@@ -376,11 +376,16 @@ _DOWN_GIMBAL_NAMES = frozenset(f'WFRL.Camera.{turbine}.Gimbal'
 def _down_mount(camera):
     """Locate the optical centre below the nacelle's forward centreline."""
     import bpy
+    import re
     from mathutils import Vector
     root = camera.parent
-    shell = next((obj for obj in root.children if obj.name.endswith('.Nacelle')), None)
-    if shell is None:
+    children = [obj for obj in root.children if obj.type == 'MESH'] if root else []
+    shells = [obj for obj in children if obj.get('wfrl_nacelle_shell')]
+    if not shells:
+        shells = [obj for obj in children if re.search(r'\.Nacelle(?:\.\d+)*$', obj.name)]
+    if len(shells) != 1:
         raise ValueError('Down requires the nacelle shell to locate its installation point')
+    shell = shells[0]
     bpy.context.view_layer.update()
     local = shell.matrix_local.copy()
     inverse = local.inverted()
@@ -396,25 +401,54 @@ def _down_mount(camera):
     return anchor + offset
 
 
-def ensure_gimbal(scene, turbine):
+def is_down_camera(camera):
+    return camera is not None and (camera.name in _DOWN_GIMBAL_NAMES or camera.get('wfrl_down_camera', False))
+
+
+def ensure_gimbal(scene, turbine, *, yaw_object=None, name=None, owner=None):
     """Lazily add a camera to existing saved scenes without rebuilding geometry."""
     import bpy
-    root = scene.objects.get(f'WFRL.Turbine.{turbine}.YawRoot')
-    if root is None:
+    root = yaw_object if yaw_object is not None else scene.objects.get(f'WFRL.Turbine.{turbine}.YawRoot')
+    if root is None or scene.objects.get(root.name) != root:
         raise ValueError(f'{turbine} is not present in this scene')
-    name = f'WFRL.Camera.{turbine}.Gimbal'
+    name = name or f'WFRL.Camera.{turbine}.Gimbal'
     camera = scene.objects.get(name)
+    if camera is None and owner is not None:
+        candidates = [obj for obj in root.children if obj.get('wfrl_down_camera')
+                      and obj.get('wfrl_manual_owner') == owner
+                      and scene.objects.get(obj.name) == obj]
+        if len(candidates) > 1:
+            raise ValueError('Multiple Down cameras belong to this turbine scene')
+        camera = next(iter(candidates), None)
+    created = camera is None
     if camera is None:
         camera = bpy.data.objects.new(name, bpy.data.cameras.new(name + '.Data'))
         root.users_collection[0].objects.link(camera)
+    elif (camera.type != 'CAMERA' or (owner is not None and
+          (camera.get('wfrl_manual_owner') != owner or camera.parent != root
+           or camera.data.get('wfrl_manual_owner') != owner or camera.data.users != 1
+           or any(other != scene for other in camera.users_scene)))):
+        raise ValueError('Down camera does not belong to this turbine scene')
+    camera['wfrl_down_camera'] = True
+    if owner is not None:
+        camera['wfrl_manual_owner'] = owner
+        camera.data['wfrl_manual_owner'] = owner
     revision = 3
-    if camera.get('wfrl_gimbal_mount_revision', 0) < revision:
-        camera.parent = root
-        camera.matrix_parent_inverse.identity()
-        camera.data.clip_start, camera.data.clip_end = .05, 30000
-        camera.data.display_size = .5
-        reset_gimbal(camera)
-        camera['wfrl_gimbal_mount_revision'] = revision
+    try:
+        if camera.get('wfrl_gimbal_mount_revision', 0) < revision:
+            camera.parent = root
+            camera.matrix_parent_inverse.identity()
+            camera.data.clip_start, camera.data.clip_end = .05, 30000
+            camera.data.display_size = .5
+            reset_gimbal(camera)
+            camera['wfrl_gimbal_mount_revision'] = revision
+    except Exception:
+        if created:
+            data = camera.data
+            bpy.data.objects.remove(camera, do_unlink=True)
+            if data.users == 0:
+                bpy.data.cameras.remove(data)
+        raise
     camera.data.show_passepartout = True
     camera.data.passepartout_alpha = 1
     return camera
@@ -436,7 +470,7 @@ def reset_gimbal(camera):
     """Restore a mounted Down view or another camera's oblique overview."""
     if camera.get('wfrl_nacelle_camera'):
         return reset_nacelle_gimbal(camera)
-    if camera.name in _DOWN_GIMBAL_NAMES:
+    if is_down_camera(camera):
         return down_gimbal(camera)
     from mathutils import Vector
     from .turbine_geometry import geometry_data
@@ -598,7 +632,7 @@ def fill_camera_view(area, scene):
     camera = space.camera if space.use_local_camera else scene.camera
     calibrated = camera is not None and camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID
     if camera:
-        if camera.name in _DOWN_GIMBAL_NAMES:
+        if is_down_camera(camera):
             camera.data.show_passepartout = True
             camera.data.passepartout_alpha = 1.0
             fit_camera_view(area, scene)

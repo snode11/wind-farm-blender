@@ -206,5 +206,8 @@ def interactive_progress(snapshot, run_id, turbine_count):
         iteration=snapshot.iters_done, phase=snapshot.phase if snapshot.phase != 'idle' else 'waiting',
         timestamp=dict(value=time.time(), timebase='unix_seconds'), source_age_seconds=0.,
         stale_after_seconds=30., stats=stats)
+    episode = getattr(snapshot, 'episode', None)
+    if episode is not None:
+        record['episode'] = int(episode)
     validate_training_stats_payload(record)
     return record

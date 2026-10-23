@@ -1,0 +1,66 @@
+{
+  "status": "PASS",
+  "payload": "workspace source",
+  "source_root": "PROJECT_ROOT/blender_frontend/wfrl_blender",
+  "source_sha256": {
+    "native_camera_views.py": "523ed235840f8fc27fb7b6831339039956264265444ffd32d025a9725c4dba19",
+    "custom_cameras.py": "8e775849b80ac16b618e8bf7179c5cda4fde5d6b8d7bc163398940b8352114f7",
+    "playback.py": "f08067b36bacbfe1832d3a71e9a17dc22f77ada084ba9e52c3ee3eff51192c93"
+  },
+  "blender": "5.2.1 LTS",
+  "host_tests": {
+    "passed": 140,
+    "failed": 0,
+    "errors": 0,
+    "evidence": "host-tests.xml"
+  },
+  "blender_suites": [
+    {
+      "case": "camera-retirement-background",
+      "result": "camera-retirement-background/result/retirement-validation.json",
+      "checks": 6,
+      "status": "PASS"
+    },
+    {
+      "case": "camera-transactions-background",
+      "result": "camera-transactions-background/result/result.json",
+      "checks": 14,
+      "status": "PASS"
+    },
+    {
+      "case": "native-camera-window",
+      "result": "native-camera-window/result/validation.json",
+      "checks": 23,
+      "status": "PASS"
+    },
+    {
+      "case": "native-player-verified-window",
+      "result": "native-player-verified-window/result/result.json",
+      "checks": 24,
+      "status": "PASS"
+    }
+  ],
+  "physical_space_input": {
+    "status": "PASS",
+    "events": "native-player-verified-window/result/manual-space-events.json",
+    "input": "native-player-verified-window/result/external-input.json",
+    "player_result": "native-player-verified-window/result/result.json"
+  },
+  "installed_payload_updated": false,
+  "installed_identity_unchanged": true,
+  "modified_files": [
+    "PROJECT_ROOT/blender_frontend/wfrl_blender/native_camera_views.py",
+    "PROJECT_ROOT/blender_frontend/wfrl_blender/custom_cameras.py",
+    "PROJECT_ROOT/blender_frontend/tests/test_native_camera_playback.py",
+    "PROJECT_ROOT/blender_frontend/tests/test_custom_camera_retirement.py",
+    "PROJECT_ROOT/blender_frontend/tests/blender/native_camera_playback_regression.py",
+    "PROJECT_ROOT/blender_frontend/tests/blender/custom_camera_retirement_regression.py",
+    "PROJECT_ROOT/blender_frontend/README.md",
+    "PROJECT_ROOT/.agents/skills/windfarm-blender-dev/references/verification.md"
+  ],
+  "limitations": [
+    "Source-only validation; no ZIP build, daily extension update or publication.",
+    "No full-clip performance, long-duration leak or scientific-accuracy acceptance.",
+    "Blender visible-process exit logs contain 525 unfreed blocks (0.038147 MiB); no module attribution is established."
+  ]
+}

@@ -1,19 +1,19 @@
 {
   "schema": "wfrl.public-source-files.v1",
-  "scope": "Public source files; this manifest excludes its own bytes and records the preserved output alias separately",
+  "scope": "Curated current source and scoped verification; excludes this manifest itself. Original/public SHA-256 distinguish portable evidence copies.",
   "files": [
     {
       "path": ".agents/skills/windfarm-blender-dev/SKILL.md",
-      "bytes": 23878,
-      "sha256": "98e7ba93b4c66a420c212093c99a3db55aefa07408df5426a510f4feb8680d7c",
-      "original_sha256": "98e7ba93b4c66a420c212093c99a3db55aefa07408df5426a510f4feb8680d7c",
+      "bytes": 13657,
+      "sha256": "ea7631b38079879ec4254096afa90831d3e6e96165459702f28b9ab668463aa5",
+      "original_sha256": "ea7631b38079879ec4254096afa90831d3e6e96165459702f28b9ab668463aa5",
       "text_portable": false
     },
     {
       "path": ".agents/skills/windfarm-blender-dev/references/verification.md",
-      "bytes": 18171,
-      "sha256": "dfaf4b59ef016383393d6995afa3fd4a926fb59bde436a7a71767ca3f18702d4",
-      "original_sha256": "dfaf4b59ef016383393d6995afa3fd4a926fb59bde436a7a71767ca3f18702d4",
+      "bytes": 13749,
+      "sha256": "4744508a9db212ad46af5c157b6c978fb4fae05702a67dbea4c58ab0f4e57f06",
+      "original_sha256": "4744508a9db212ad46af5c157b6c978fb4fae05702a67dbea4c58ab0f4e57f06",
       "text_portable": false
     },
     {
@@ -25,16 +25,16 @@
     },
     {
       "path": "AGENTS.md",
-      "bytes": 3554,
-      "sha256": "ef98eed1b23532d2ba08deffc03588284f31425265aa20f9918962fde19f9dc7",
-      "original_sha256": "ef98eed1b23532d2ba08deffc03588284f31425265aa20f9918962fde19f9dc7",
+      "bytes": 2469,
+      "sha256": "1792c599a2e4a772cd9a458fcb41e4b29e5a56a18f73a6ebef1935fe8e0c6c2b",
+      "original_sha256": "1792c599a2e4a772cd9a458fcb41e4b29e5a56a18f73a6ebef1935fe8e0c6c2b",
       "text_portable": false
     },
     {
       "path": "README.md",
-      "bytes": 10793,
-      "sha256": "439440920f8723b2f9ce973aa9aec8bbe9fcefd87bd02fb25f6eb66b1f960d49",
-      "original_sha256": "439440920f8723b2f9ce973aa9aec8bbe9fcefd87bd02fb25f6eb66b1f960d49",
+      "bytes": 11696,
+      "sha256": "30d162016085c9cf9a85ace3a43464f7ef9c3e4f150cc4c443adcfcc40ae3192",
+      "original_sha256": "30d162016085c9cf9a85ace3a43464f7ef9c3e4f150cc4c443adcfcc40ae3192",
       "text_portable": false
     },
     {
@@ -781,9 +781,9 @@
     },
     {
       "path": "blender_frontend/README.md",
-      "bytes": 48829,
-      "sha256": "50fc8a1b79f54234ac596353a885b7d7a8abf37ef6ffa1e742f53a62257fc5c1",
-      "original_sha256": "50fc8a1b79f54234ac596353a885b7d7a8abf37ef6ffa1e742f53a62257fc5c1",
+      "bytes": 57064,
+      "sha256": "9c6b6bfe958579b4e62fe941df66e78a54fc15767ddb13a895fadb15f14991e3",
+      "original_sha256": "9c6b6bfe958579b4e62fe941df66e78a54fc15767ddb13a895fadb15f14991e3",
       "text_portable": false
     },
     {
@@ -1214,6 +1214,13 @@
       "text_portable": false
     },
     {
+      "path": "blender_frontend/tests/blender/interactive_options_regression.py",
+      "bytes": 1451,
+      "sha256": "10a052cd1169d1e0cd010d0b7eea795211ec1e4a709b31bb60a4e1c5319e0b2f",
+      "original_sha256": "10a052cd1169d1e0cd010d0b7eea795211ec1e4a709b31bb60a4e1c5319e0b2f",
+      "text_portable": false
+    },
+    {
       "path": "blender_frontend/tests/blender/launcher_mode_regression.py",
       "bytes": 2283,
       "sha256": "51e7e84acb28d61a1508fa98bbdd5d41ec3cfa9386b8a08262cf1e4537d2e9ef",
@@ -1229,9 +1236,9 @@
     },
     {
       "path": "blender_frontend/tests/blender/manual_control_regression.py",
-      "bytes": 20734,
-      "sha256": "1fe448737c605461f445dd312c89f3dc60fe3cfbc60a80d858f726d8217d75ff",
-      "original_sha256": "1fe448737c605461f445dd312c89f3dc60fe3cfbc60a80d858f726d8217d75ff",
+      "bytes": 20781,
+      "sha256": "81f68e99100dd8a0de54bcabac3f20fa12a84f87495df4db4e2391f6540a0c7e",
+      "original_sha256": "81f68e99100dd8a0de54bcabac3f20fa12a84f87495df4db4e2391f6540a0c7e",
       "text_portable": false
     },
     {
@@ -1256,10 +1263,45 @@
       "text_portable": false
     },
     {
+      "path": "blender_frontend/tests/blender/manual_down_copy_regression.py",
+      "bytes": 7580,
+      "sha256": "b4e8f561e03b5e7d244b013575d29787fcdf5e7ffe9654e5982acf6df86ebf86",
+      "original_sha256": "b4e8f561e03b5e7d244b013575d29787fcdf5e7ffe9654e5982acf6df86ebf86",
+      "text_portable": false
+    },
+    {
       "path": "blender_frontend/tests/blender/manual_environment_regression.py",
       "bytes": 4662,
       "sha256": "2d4add2c3f3daddeebc017787159db9298d0e004d7282e9cfaa531578af8bf36",
       "original_sha256": "2d4add2c3f3daddeebc017787159db9298d0e004d7282e9cfaa531578af8bf36",
+      "text_portable": false
+    },
+    {
+      "path": "blender_frontend/tests/blender/manual_native_conflict_regression.py",
+      "bytes": 4321,
+      "sha256": "2cdd98a0dec2a614c24c26f0500681038ef53b9e2d2440df8ae3e1737a2d312f",
+      "original_sha256": "2cdd98a0dec2a614c24c26f0500681038ef53b9e2d2440df8ae3e1737a2d312f",
+      "text_portable": false
+    },
+    {
+      "path": "blender_frontend/tests/blender/manual_pitch_trial_regression.py",
+      "bytes": 15252,
+      "sha256": "ac0ab52577446eff31a9e60c772546f0cef0d7a9377d16ccba679bd115822349",
+      "original_sha256": "ac0ab52577446eff31a9e60c772546f0cef0d7a9377d16ccba679bd115822349",
+      "text_portable": false
+    },
+    {
+      "path": "blender_frontend/tests/blender/manual_pitch_trial_undo_regression.py",
+      "bytes": 4656,
+      "sha256": "6b29f5f4cb8dce7aef4176032cf7a4bbe06e27680c70f3397673a1237f46501f",
+      "original_sha256": "6b29f5f4cb8dce7aef4176032cf7a4bbe06e27680c70f3397673a1237f46501f",
+      "text_portable": false
+    },
+    {
+      "path": "blender_frontend/tests/blender/manual_pitch_trial_window.py",
+      "bytes": 9805,
+      "sha256": "76a857599e5cdb397bad7af990dcdd4979186de9c86a40cabcd3eb9ccb5e1b78",
+      "original_sha256": "76a857599e5cdb397bad7af990dcdd4979186de9c86a40cabcd3eb9ccb5e1b78",
       "text_portable": false
     },
     {
@@ -1299,9 +1341,44 @@
     },
     {
       "path": "blender_frontend/tests/blender/manual_scene_recovery_regression.py",
-      "bytes": 11789,
-      "sha256": "e5dcbf1a14a77c28a73df8d770c2cdcd398a9e27bdb6ba8882e1fa422294ae27",
-      "original_sha256": "e5dcbf1a14a77c28a73df8d770c2cdcd398a9e27bdb6ba8882e1fa422294ae27",
+      "bytes": 12786,
+      "sha256": "730ef3f958f15cec44edbf7bf2b26608988ef7429bfca80d0ab3916f42d489ef",
+      "original_sha256": "730ef3f958f15cec44edbf7bf2b26608988ef7429bfca80d0ab3916f42d489ef",
+      "text_portable": false
+    },
+    {
+      "path": "blender_frontend/tests/blender/manual_video_installed_regression.py",
+      "bytes": 3163,
+      "sha256": "42022b7dc48d31b82f2165d5908fb389a9f72672a3749b8cde8ba654552de869",
+      "original_sha256": "42022b7dc48d31b82f2165d5908fb389a9f72672a3749b8cde8ba654552de869",
+      "text_portable": false
+    },
+    {
+      "path": "blender_frontend/tests/blender/manual_video_launch_regression.py",
+      "bytes": 4479,
+      "sha256": "bb8b697da38c19f5efa1f1b88197ca2ef85ea49fd68a342951cd7ecc869c201b",
+      "original_sha256": "bb8b697da38c19f5efa1f1b88197ca2ef85ea49fd68a342951cd7ecc869c201b",
+      "text_portable": false
+    },
+    {
+      "path": "blender_frontend/tests/blender/manual_video_lifecycle_regression.py",
+      "bytes": 5306,
+      "sha256": "88ce8750136a729d2f8dc94af549d6b2acd453cad275bb0dc3ec9f6d9b5f48c8",
+      "original_sha256": "88ce8750136a729d2f8dc94af549d6b2acd453cad275bb0dc3ec9f6d9b5f48c8",
+      "text_portable": false
+    },
+    {
+      "path": "blender_frontend/tests/blender/manual_video_render_regression.py",
+      "bytes": 8480,
+      "sha256": "7a37e458bb000123d187bf552d1b51c37cdb76ede49ebe4c1717d3049ba24f44",
+      "original_sha256": "7a37e458bb000123d187bf552d1b51c37cdb76ede49ebe4c1717d3049ba24f44",
+      "text_portable": false
+    },
+    {
+      "path": "blender_frontend/tests/blender/manual_video_window_regression.py",
+      "bytes": 5047,
+      "sha256": "071120a22286bebd99005350a9f95fede7b80bf5b2bc3ace89a04e2c2906f2e9",
+      "original_sha256": "071120a22286bebd99005350a9f95fede7b80bf5b2bc3ace89a04e2c2906f2e9",
       "text_portable": false
     },
     {
@@ -1390,9 +1467,9 @@
     },
     {
       "path": "blender_frontend/tests/blender/native_camera_playback_regression.py",
-      "bytes": 17704,
-      "sha256": "e4c9b0c5af8187fee05f388303340c5159849b64079986ffd755f8e82ec3c0ba",
-      "original_sha256": "e4c9b0c5af8187fee05f388303340c5159849b64079986ffd755f8e82ec3c0ba",
+      "bytes": 17786,
+      "sha256": "a39159b2ccbe527fd5ddc188a88ad6588333d6011ddcb9d8cbe4d97b831b7192",
+      "original_sha256": "a39159b2ccbe527fd5ddc188a88ad6588333d6011ddcb9d8cbe4d97b831b7192",
       "text_portable": false
     },
     {
@@ -1400,6 +1477,13 @@
       "bytes": 1947,
       "sha256": "6e92360ec827b5f4156ee0af7f144f1c2adf75c45e1183e5664d08308d1415c4",
       "original_sha256": "6e92360ec827b5f4156ee0af7f144f1c2adf75c45e1183e5664d08308d1415c4",
+      "text_portable": false
+    },
+    {
+      "path": "blender_frontend/tests/blender/native_camera_reopen_regression.py",
+      "bytes": 13301,
+      "sha256": "4ed279a77ff67c61d39e7f8356687eb971012e17088097e60a0bf7f3c7e547f9",
+      "original_sha256": "4ed279a77ff67c61d39e7f8356687eb971012e17088097e60a0bf7f3c7e547f9",
       "text_portable": false
     },
     {
@@ -1817,9 +1901,9 @@
     },
     {
       "path": "blender_frontend/tests/test_charts.py",
-      "bytes": 4236,
-      "sha256": "df54deb8977309f7cf424f97e1da112220669162519f24224f41b97b9f720006",
-      "original_sha256": "df54deb8977309f7cf424f97e1da112220669162519f24224f41b97b9f720006",
+      "bytes": 5406,
+      "sha256": "f5ec65833c90f90e76370dafc3eff43353716997edd4d028bdc1648b55b14864",
+      "original_sha256": "f5ec65833c90f90e76370dafc3eff43353716997edd4d028bdc1648b55b14864",
       "text_portable": false
     },
     {
@@ -1992,9 +2076,9 @@
     },
     {
       "path": "blender_frontend/tests/test_manual_motion.py",
-      "bytes": 1829,
-      "sha256": "bbc20af294c9f625cfd6c149fed0911b838a8f384a0cabd91396ac51bc86ca9a",
-      "original_sha256": "bbc20af294c9f625cfd6c149fed0911b838a8f384a0cabd91396ac51bc86ca9a",
+      "bytes": 6058,
+      "sha256": "6efab49fc98d7362dc3b06bed1bba193334933f52199a1d79319040ea659c669",
+      "original_sha256": "6efab49fc98d7362dc3b06bed1bba193334933f52199a1d79319040ea659c669",
       "text_portable": false
     },
     {
@@ -2002,6 +2086,20 @@
       "bytes": 7532,
       "sha256": "2de6f0a5e1c06c16dbe6cf302a894006cd4034caa6515fa6ec9712a038c1eb31",
       "original_sha256": "2de6f0a5e1c06c16dbe6cf302a894006cd4034caa6515fa6ec9712a038c1eb31",
+      "text_portable": false
+    },
+    {
+      "path": "blender_frontend/tests/test_manual_video_job.py",
+      "bytes": 31369,
+      "sha256": "b3926e1b6667de543fd2abbeff9824bc153440fb91ee7c8d1ddad040be1a527a",
+      "original_sha256": "b3926e1b6667de543fd2abbeff9824bc153440fb91ee7c8d1ddad040be1a527a",
+      "text_portable": false
+    },
+    {
+      "path": "blender_frontend/tests/test_manual_video_render.py",
+      "bytes": 2069,
+      "sha256": "855c205526d9b86707f22baabf5fe409340d865737089d1cf82c8b26061def94",
+      "original_sha256": "855c205526d9b86707f22baabf5fe409340d865737089d1cf82c8b26061def94",
       "text_portable": false
     },
     {
@@ -2034,9 +2132,9 @@
     },
     {
       "path": "blender_frontend/tests/test_native_camera_playback.py",
-      "bytes": 7294,
-      "sha256": "b1a97c98604859fbf1a5cf494d7a91fd7b02eef08929e97ca23c00b5883cb15c",
-      "original_sha256": "b1a97c98604859fbf1a5cf494d7a91fd7b02eef08929e97ca23c00b5883cb15c",
+      "bytes": 8499,
+      "sha256": "6afd58c372dd294561e3be939bba847bfb43e9bde60cf166487a2d9a997afd92",
+      "original_sha256": "6afd58c372dd294561e3be939bba847bfb43e9bde60cf166487a2d9a997afd92",
       "text_portable": false
     },
     {
@@ -2125,9 +2223,9 @@
     },
     {
       "path": "blender_frontend/tests/test_scene_playback_lifecycle.py",
-      "bytes": 12067,
-      "sha256": "d4cb15ce45b0b215bcbde1e103213b6e596e7bd78ed36f1138b9b8a34604d75f",
-      "original_sha256": "d4cb15ce45b0b215bcbde1e103213b6e596e7bd78ed36f1138b9b8a34604d75f",
+      "bytes": 14254,
+      "sha256": "c47cab82a5d572c9febad31e9d95d51b67b3ad595854a7a47f8d36efcbeb9b01",
+      "original_sha256": "c47cab82a5d572c9febad31e9d95d51b67b3ad595854a7a47f8d36efcbeb9b01",
       "text_portable": false
     },
     {
@@ -2226,6 +2324,13 @@
       "bytes": 4460,
       "sha256": "9d26900c4b087b94947e975932582775dccd85d9450a131bd61e667dff036f08",
       "original_sha256": "9d26900c4b087b94947e975932582775dccd85d9450a131bd61e667dff036f08",
+      "text_portable": false
+    },
+    {
+      "path": "blender_frontend/tests/test_workflow_options.py",
+      "bytes": 4055,
+      "sha256": "8a5882eb12da7c1a1c002fc9f7ab90a3814799d257914c17206b2e3ce5203f53",
+      "original_sha256": "8a5882eb12da7c1a1c002fc9f7ab90a3814799d257914c17206b2e3ce5203f53",
       "text_portable": false
     },
     {
@@ -2770,8 +2875,8 @@
     {
       "path": "blender_frontend/wfrl_blender/blender_manifest.toml",
       "bytes": 439,
-      "sha256": "a1cdd62d33cef2a28dd4d466eac424087f9741f59e1620c3a257f8ab84db47d7",
-      "original_sha256": "a1cdd62d33cef2a28dd4d466eac424087f9741f59e1620c3a257f8ab84db47d7",
+      "sha256": "179e1f84e885436014262d523f301f484b6ae0bdc4f4aac07b7ba2543acf18e6",
+      "original_sha256": "179e1f84e885436014262d523f301f484b6ae0bdc4f4aac07b7ba2543acf18e6",
       "text_portable": false
     },
     {
@@ -2790,16 +2895,16 @@
     },
     {
       "path": "blender_frontend/wfrl_blender/cameras.py",
-      "bytes": 34814,
-      "sha256": "24980abe377a19508642eb1fc06224792e1aed7d686810adc2762cec13eb1ad2",
-      "original_sha256": "24980abe377a19508642eb1fc06224792e1aed7d686810adc2762cec13eb1ad2",
+      "bytes": 36516,
+      "sha256": "343569848f39c3837d716f11237f8ff403d1ce7565d615154bed78a72dc30a1e",
+      "original_sha256": "343569848f39c3837d716f11237f8ff403d1ce7565d615154bed78a72dc30a1e",
       "text_portable": false
     },
     {
       "path": "blender_frontend/wfrl_blender/charts.py",
-      "bytes": 14346,
-      "sha256": "0c4b465e9e84c2c232ae4b563cb826734d2ed1203cbc82f1156e97a2ce4e9dff",
-      "original_sha256": "0c4b465e9e84c2c232ae4b563cb826734d2ed1203cbc82f1156e97a2ce4e9dff",
+      "bytes": 14629,
+      "sha256": "3aaf8966e184f2b7f177727f49e7722fc2bcb85bb68a3604075d873491e9d863",
+      "original_sha256": "3aaf8966e184f2b7f177727f49e7722fc2bcb85bb68a3604075d873491e9d863",
       "text_portable": false
     },
     {
@@ -2811,9 +2916,9 @@
     },
     {
       "path": "blender_frontend/wfrl_blender/clearance_replay.py",
-      "bytes": 11918,
-      "sha256": "a08ef18779af622e9ccb8eb3defe7fe83cccfdabbeb2ed56cf95e4073e42fe69",
-      "original_sha256": "a08ef18779af622e9ccb8eb3defe7fe83cccfdabbeb2ed56cf95e4073e42fe69",
+      "bytes": 12794,
+      "sha256": "f651917c3f300f5713ab9f2efb6821b4b7b686ae5c903e92e9c12e6f84a73e0c",
+      "original_sha256": "f651917c3f300f5713ab9f2efb6821b4b7b686ae5c903e92e9c12e6f84a73e0c",
       "text_portable": false
     },
     {
@@ -2923,16 +3028,16 @@
     },
     {
       "path": "blender_frontend/wfrl_blender/manual_control.py",
-      "bytes": 29198,
-      "sha256": "94a0b0e44a95842e5bffc5ee33c9b442249e819d1c0ba16d927426451eff8a77",
-      "original_sha256": "94a0b0e44a95842e5bffc5ee33c9b442249e819d1c0ba16d927426451eff8a77",
+      "bytes": 42671,
+      "sha256": "8157a69d0d7743e751c792a282c6ef481a4fa448f4d03ebf7b2cc68776e37db2",
+      "original_sha256": "8157a69d0d7743e751c792a282c6ef481a4fa448f4d03ebf7b2cc68776e37db2",
       "text_portable": false
     },
     {
       "path": "blender_frontend/wfrl_blender/manual_motion.py",
-      "bytes": 1271,
-      "sha256": "c6a79a04c99693bbf1dfac98801def9a46838e223cf02ea6cec73da66384c7d5",
-      "original_sha256": "c6a79a04c99693bbf1dfac98801def9a46838e223cf02ea6cec73da66384c7d5",
+      "bytes": 4152,
+      "sha256": "86cf045da89debc3f3fe8be3ea5b4835c91d09da8f65ae9ddaa465a31f869e45",
+      "original_sha256": "86cf045da89debc3f3fe8be3ea5b4835c91d09da8f65ae9ddaa465a31f869e45",
       "text_portable": false
     },
     {
@@ -2944,9 +3049,30 @@
     },
     {
       "path": "blender_frontend/wfrl_blender/manual_scene.py",
-      "bytes": 15047,
-      "sha256": "3944cfa8669376fbb3b2de08913a4775402e060a26cabd625394f99b12d2a0c6",
-      "original_sha256": "3944cfa8669376fbb3b2de08913a4775402e060a26cabd625394f99b12d2a0c6",
+      "bytes": 18304,
+      "sha256": "2cec8a347af66863eba5fd06cd514b40fc7b80c7f8dcc2571ea7b71271eb88c1",
+      "original_sha256": "2cec8a347af66863eba5fd06cd514b40fc7b80c7f8dcc2571ea7b71271eb88c1",
+      "text_portable": false
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/manual_video.py",
+      "bytes": 13928,
+      "sha256": "cb660ef13225661debae0cb198b1f9ee08faef4ddc40b2ccaebb2ff341da00fb",
+      "original_sha256": "cb660ef13225661debae0cb198b1f9ee08faef4ddc40b2ccaebb2ff341da00fb",
+      "text_portable": false
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/manual_video_job.py",
+      "bytes": 21457,
+      "sha256": "44484e9aaf108b620ade5324343acf2c0acb58a61844aaab760cb4d31d158062",
+      "original_sha256": "44484e9aaf108b620ade5324343acf2c0acb58a61844aaab760cb4d31d158062",
+      "text_portable": false
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/manual_video_render.py",
+      "bytes": 25928,
+      "sha256": "b250a89427266b4522622a2c711a5625f9b77a05df536e5943beb0410de98f6c",
+      "original_sha256": "b250a89427266b4522622a2c711a5625f9b77a05df536e5943beb0410de98f6c",
       "text_portable": false
     },
     {
@@ -2979,9 +3105,9 @@
     },
     {
       "path": "blender_frontend/wfrl_blender/native_camera_views.py",
-      "bytes": 48934,
-      "sha256": "8e4d8b3f05bbd2bbe441822b99d356399b0290469513fd4d5ae7d84b97cc28d4",
-      "original_sha256": "8e4d8b3f05bbd2bbe441822b99d356399b0290469513fd4d5ae7d84b97cc28d4",
+      "bytes": 49436,
+      "sha256": "5ff5c2d8475d709c2b1a90678c379856196ef69e2ed56fb884bbf2d2f439f0b2",
+      "original_sha256": "5ff5c2d8475d709c2b1a90678c379856196ef69e2ed56fb884bbf2d2f439f0b2",
       "text_portable": false
     },
     {
@@ -3084,9 +3210,9 @@
     },
     {
       "path": "blender_frontend/wfrl_blender/operators/workflow.py",
-      "bytes": 4620,
-      "sha256": "905ba1ed7fcd9639ca9ef74e377d4f7b305a48347cf3ff0daa4a341af9b365dc",
-      "original_sha256": "905ba1ed7fcd9639ca9ef74e377d4f7b305a48347cf3ff0daa4a341af9b365dc",
+      "bytes": 4916,
+      "sha256": "224491a8ab5808114a1171066bb736634c4373639779970cebfa79084222229f",
+      "original_sha256": "224491a8ab5808114a1171066bb736634c4373639779970cebfa79084222229f",
       "text_portable": false
     },
     {
@@ -3168,9 +3294,9 @@
     },
     {
       "path": "blender_frontend/wfrl_blender/panels/manual_control.py",
-      "bytes": 6153,
-      "sha256": "4152d673eede31a34c5ef190f9774cb0aa1d7031ecff12415a5166c82b661877",
-      "original_sha256": "4152d673eede31a34c5ef190f9774cb0aa1d7031ecff12415a5166c82b661877",
+      "bytes": 9106,
+      "sha256": "3badfda5ddcb54dba3154d9fb00ed4f783b14f6260cc47033a8c3c97af892ac9",
+      "original_sha256": "3badfda5ddcb54dba3154d9fb00ed4f783b14f6260cc47033a8c3c97af892ac9",
       "text_portable": false
     },
     {
@@ -3182,9 +3308,9 @@
     },
     {
       "path": "blender_frontend/wfrl_blender/panels/run.py",
-      "bytes": 2154,
-      "sha256": "d14d5811ef293a5c66ba0cadf73522f3b777816607f231ae66c81b972e6d3be3",
-      "original_sha256": "d14d5811ef293a5c66ba0cadf73522f3b777816607f231ae66c81b972e6d3be3",
+      "bytes": 2245,
+      "sha256": "cbb2520f00e9af261feb917d10506c2a6c3571650aceeb02a0a807ce06824199",
+      "original_sha256": "cbb2520f00e9af261feb917d10506c2a6c3571650aceeb02a0a807ce06824199",
       "text_portable": false
     },
     {
@@ -3245,9 +3371,9 @@
     },
     {
       "path": "blender_frontend/wfrl_blender/playback.py",
-      "bytes": 2665,
-      "sha256": "f08067b36bacbfe1832d3a71e9a17dc22f77ada084ba9e52c3ee3eff51192c93",
-      "original_sha256": "f08067b36bacbfe1832d3a71e9a17dc22f77ada084ba9e52c3ee3eff51192c93",
+      "bytes": 2907,
+      "sha256": "c83edad2173b1b81cca0e8df8cb637f38ff6478d4589de508e9bf98168772d29",
+      "original_sha256": "c83edad2173b1b81cca0e8df8cb637f38ff6478d4589de508e9bf98168772d29",
       "text_portable": false
     },
     {
@@ -3308,9 +3434,9 @@
     },
     {
       "path": "blender_frontend/wfrl_blender/scene_builder.py",
-      "bytes": 28721,
-      "sha256": "626a4c1c0e1c9a677e5bd8eae85200e9b108e9cf16a27cb62cd22fdae41a995c",
-      "original_sha256": "626a4c1c0e1c9a677e5bd8eae85200e9b108e9cf16a27cb62cd22fdae41a995c",
+      "bytes": 28762,
+      "sha256": "adf03ed992bd91a6339ba3f8485d8d013e4d72cc86fd4f509bd61392ba984843",
+      "original_sha256": "adf03ed992bd91a6339ba3f8485d8d013e4d72cc86fd4f509bd61392ba984843",
       "text_portable": false
     },
     {
@@ -3588,9 +3714,9 @@
     },
     {
       "path": "docs/blender/README.md",
-      "bytes": 5157,
-      "sha256": "61451ff59424fb4539e67ca352f0f00a61d9becc7468f60a9da540578a16170f",
-      "original_sha256": "61451ff59424fb4539e67ca352f0f00a61d9becc7468f60a9da540578a16170f",
+      "bytes": 5219,
+      "sha256": "96d6b571648f74072d928b1d5f3ea1a74764429c5020b28c651a0465caf07869",
+      "original_sha256": "96d6b571648f74072d928b1d5f3ea1a74764429c5020b28c651a0465caf07869",
       "text_portable": false
     },
     {
@@ -3602,9 +3728,9 @@
     },
     {
       "path": "docs/blender/T1三相机使用说明.md",
-      "bytes": 11303,
-      "sha256": "97ea2c8fe6bd72d97905407a386a20d936c37651f0c4aa9680c7f0de16f1092b",
-      "original_sha256": "97ea2c8fe6bd72d97905407a386a20d936c37651f0c4aa9680c7f0de16f1092b",
+      "bytes": 11758,
+      "sha256": "b98ea52e5ef2a73c1f2e4ee222cdf85b4959529e505c946a7597b7bc4c6e7c08",
+      "original_sha256": "b98ea52e5ef2a73c1f2e4ee222cdf85b4959529e505c946a7597b7bc4c6e7c08",
       "text_portable": false
     },
     {
@@ -3777,9 +3903,9 @@
     },
     {
       "path": "docs/blender/发布状态与验证范围.md",
-      "bytes": 15405,
-      "sha256": "3ae8a768231798e58ecb484a278e49661be014d539d7d7acf3e68b0520e0b4d6",
-      "original_sha256": "3ae8a768231798e58ecb484a278e49661be014d539d7d7acf3e68b0520e0b4d6",
+      "bytes": 15529,
+      "sha256": "d50a06a89f15b72ddf3d83d24f1c0453e4f18a1fb6f2a518c262aac85a3511f5",
+      "original_sha256": "d50a06a89f15b72ddf3d83d24f1c0453e4f18a1fb6f2a518c262aac85a3511f5",
       "text_portable": false
     },
     {
@@ -3791,9 +3917,9 @@
     },
     {
       "path": "docs/blender/风机手动控制.md",
-      "bytes": 7026,
-      "sha256": "ae4683757dea8adcaf4d0db24bb0df3321b21fbc45e1ed5829e62a810545e426",
-      "original_sha256": "ae4683757dea8adcaf4d0db24bb0df3321b21fbc45e1ed5829e62a810545e426",
+      "bytes": 16949,
+      "sha256": "b90b83cbabb48a17239ab403c56da1556f1a215f704d84672f9db9e551d966aa",
+      "original_sha256": "b90b83cbabb48a17239ab403c56da1556f1a215f704d84672f9db9e551d966aa",
       "text_portable": false
     },
     {
@@ -3879,6 +4005,13 @@
       "sha256": "fae8515c5df003312319dd3465eb7220b87878d539eda480ccec54e51de2d0dd",
       "original_sha256": "df3825f586481cd95bfc8ebe9646bcf1dad919d8771c2a6d30098636d15d592a",
       "text_portable": true
+    },
+    {
+      "path": "docs/proposal/cameras/手动恒速变桨与T1Down成像方案.md",
+      "bytes": 19113,
+      "sha256": "7c681cd6fa610bcc2e02ad4d323a0874eb83c4ff56fdc0b0098604c9d5bed9dc",
+      "original_sha256": "7c681cd6fa610bcc2e02ad4d323a0874eb83c4ff56fdc0b0098604c9d5bed9dc",
+      "text_portable": false
     },
     {
       "path": "docs/proposal/defects/叶片缺陷编辑与固定相机成像验证开发规格.md",
@@ -3987,23 +4120,23 @@
     },
     {
       "path": "docs/setup/setup_local.md",
-      "bytes": 7349,
-      "sha256": "1c47e4f01eda4c8b1ddd073a07e173c242c14f4ee91e4bd31d518e390731a670",
-      "original_sha256": "1c47e4f01eda4c8b1ddd073a07e173c242c14f4ee91e4bd31d518e390731a670",
+      "bytes": 7426,
+      "sha256": "335ee97dfb3189551f279ed72bf120e2e196fb4d6c316e04c3fb3e292b3e1920",
+      "original_sha256": "335ee97dfb3189551f279ed72bf120e2e196fb4d6c316e04c3fb3e292b3e1920",
       "text_portable": false
     },
     {
       "path": "docs/training/IPPO_TRAINING_EXPLAINED.md",
-      "bytes": 14725,
-      "sha256": "a0f86b58fad3bb5b5428d9db3815a8fb1b8f31847717212551c6de506672b373",
-      "original_sha256": "a0f86b58fad3bb5b5428d9db3815a8fb1b8f31847717212551c6de506672b373",
+      "bytes": 14758,
+      "sha256": "6444c1eb835e60d6cebd12ea89b0d42c1a42dd6ee4702da3cd974f3e5023ef0e",
+      "original_sha256": "6444c1eb835e60d6cebd12ea89b0d42c1a42dd6ee4702da3cd974f3e5023ef0e",
       "text_portable": false
     },
     {
       "path": "docs/training/MAPPO_SETUP.md",
-      "bytes": 8640,
-      "sha256": "382131b9fcfc7a35780cf79f7fea9000ed78c8968add3e40a9c692a29c8be474",
-      "original_sha256": "382131b9fcfc7a35780cf79f7fea9000ed78c8968add3e40a9c692a29c8be474",
+      "bytes": 13179,
+      "sha256": "4a774781c38fcc997bf214aca5b6df22538bcb9aa70fd938dd4db70804744ef4",
+      "original_sha256": "4a774781c38fcc997bf214aca5b6df22538bcb9aa70fd938dd4db70804744ef4",
       "text_portable": false
     },
     {
@@ -8039,6 +8172,125 @@
       "text_portable": false
     },
     {
+      "path": "outputs/camera-reopen-verification/draw-coverage.json",
+      "bytes": 781,
+      "sha256": "d2f01fb8275c3933133a36435747c506747fc264e1ba1c6107a4cf4e6d1c0e1b",
+      "original_sha256": "d2f01fb8275c3933133a36435747c506747fc264e1ba1c6107a4cf4e6d1c0e1b",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/camera-reopen-verification/final-native.log",
+      "bytes": 973,
+      "sha256": "3e71c40dc0ea512062d18daf33c902867c5d19599470cf0982fd2ae2bdd92eb0",
+      "original_sha256": "3e71c40dc0ea512062d18daf33c902867c5d19599470cf0982fd2ae2bdd92eb0",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/camera-reopen-verification/final-native/result.json",
+      "bytes": 721360,
+      "sha256": "cdaa9d18a1405562963f65072214a22bfe8149cf49c7c18fe81c241089b76294",
+      "original_sha256": "b2adeab9d8aa35102a16e52804b7d4a5b598631beeb389e60bd00b1ca686556d",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/camera-reopen-verification/final-native/single-advancing.png",
+      "bytes": 256158,
+      "sha256": "a4d657f69c0d99ef3590a0ea8d3fa06999c1a9e3bf9dd742f7cbf5cf76e4f4b6",
+      "original_sha256": "a4d657f69c0d99ef3590a0ea8d3fa06999c1a9e3bf9dd742f7cbf5cf76e4f4b6",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/camera-reopen-verification/final-native/single-terminal.png",
+      "bytes": 246138,
+      "sha256": "60d3f4fab806f72307ec6de06074dfe93729c0d23ca4f0469c579b8f2f51711d",
+      "original_sha256": "60d3f4fab806f72307ec6de06074dfe93729c0d23ca4f0469c579b8f2f51711d",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/camera-reopen-verification/final-native/triple-advancing.png",
+      "bytes": 1104619,
+      "sha256": "8ae5b0983d21c82729de2ff1c8c8b42aedd9f4e3042342c1bac8b25d0d3a7942",
+      "original_sha256": "8ae5b0983d21c82729de2ff1c8c8b42aedd9f4e3042342c1bac8b25d0d3a7942",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/camera-reopen-verification/final-native/triple-terminal.png",
+      "bytes": 1081338,
+      "sha256": "9c400e516e7694993b85a5ed763945a836664e0fc4cc1e67d216752ad87c8954",
+      "original_sha256": "9c400e516e7694993b85a5ed763945a836664e0fc4cc1e67d216752ad87c8954",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/camera-reopen-verification/formal-scene-readonly.log",
+      "bytes": 292,
+      "sha256": "650b198b8ed81650b7c7e12bc6e9329825c09de8509848559002e56aa4ba5139",
+      "original_sha256": "91fb91e2e9854fd8ece970441b1302f57c08a1082e04000fc42ed2bfa51f1886",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/camera-reopen-verification/host-tests.log",
+      "bytes": 1285,
+      "sha256": "34e41326a187eb24b423ed294cbe4ab3d0c6fd85882192dbd67dbdd3ceb0f6e7",
+      "original_sha256": "30dd1b52c7092d70f357f661b7b3527f46fe36d1bca43b12dad2376f06d7d29d",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/camera-reopen-verification/host-tests.xml",
+      "bytes": 15963,
+      "sha256": "e4f9fe170e47a2be2fbc1499f8d0614048fdaf2795bf79888f68d9cc455805d1",
+      "original_sha256": "3efd448267a03cfd2a503946a6af05c12f804b0b0d8870b053f474d7faaa0319",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/camera-reopen-verification/ownership-window.log",
+      "bytes": 489,
+      "sha256": "4c9b2870f204aad2b8fd36672efbe975d3d88812207249e6058fa676ecc11858",
+      "original_sha256": "cfdfb9f926746bca1a6c86e3a727e47c0a490ffa559d620b57e6d35826680631",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/camera-reopen-verification/ownership-window/result.json",
+      "bytes": 11722,
+      "sha256": "16854b06720d92a0a21225562ed1c26e0ca190488134cdddca493af563373800",
+      "original_sha256": "8e177c6b272dde077e8aa4d856495811dfbd951e65c792eb5e46234f326700d5",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/camera-reopen-verification/replay-background.log",
+      "bytes": 1195,
+      "sha256": "9d7e8edf87219b3da47faf692f8b3a091e7e01e0e24f0ed4e6b1da5fa4922539",
+      "original_sha256": "535a1cafb9c6cbd933fac5ed9458e9350978b9dfb78414412884f1f0b262cf02",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/camera-reopen-verification/replay-background/checks.json",
+      "bytes": 881,
+      "sha256": "c1be4490cb1f50afa2c937c5c5ba2c3ea23f7cfb5e299221d2a0bfac33c6d15b",
+      "original_sha256": "e0301128c798912b1084f69383df90aa3a886e926c55d4946dc7e3225be8ba3a",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/camera-reopen-verification/save-window.log",
+      "bytes": 341,
+      "sha256": "c8e872688e906e296863f7ebf93a221c4133dfb31f48c5bf9b9620e32846982c",
+      "original_sha256": "c45e037c993ccf67c8b944e017032650508092e60bc2804aa721fc998993f5bc",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/camera-reopen-verification/save-window/checks.json",
+      "bytes": 1671,
+      "sha256": "d14ab9c18decd852072dd91782674688fcd37bc478cd2c17e355f517cc1caf7d",
+      "original_sha256": "6b7858950d39534465392790ca5f482e81fb4828c9aa4f518cd60756d1949d72",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/camera-reopen-verification/source-identity.json",
+      "bytes": 762,
+      "sha256": "86840cc603e88f9914f58abfe3abd01fff08b2fd47677658807a26488a2ea5c3",
+      "original_sha256": "86840cc603e88f9914f58abfe3abd01fff08b2fd47677658807a26488a2ea5c3",
+      "text_portable": false
+    },
+    {
       "path": "outputs/down-reference-view/backup/blender_manifest.toml",
       "bytes": 439,
       "sha256": "a4bcf432d8a1cb6f352ace860adc183d82114150fdceb18e171431ff3cfe4f9b",
@@ -9262,6 +9514,223 @@
       "sha256": "b77826bf760c7a7ec7bf0a77fbccc3fad919fa0a69e75f37c576e7774b3ba6e9",
       "original_sha256": "b77826bf760c7a7ec7bf0a77fbccc3fad919fa0a69e75f37c576e7774b3ba6e9",
       "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/camera-retirement-background/import-identity.json",
+      "bytes": 958,
+      "sha256": "9a9fd10c4ef35bf1e1a3b371915603b7f47cb90c5000a27cc673cbfb2ce2a7f5",
+      "original_sha256": "a94344a7639c4cf985f381bb1f69e3e45d94c9f1f05d4a1796198eaa85a2c15f",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/camera-retirement-background/invocation.json",
+      "bytes": 1303,
+      "sha256": "6ca31f76f2613ef51ad9508e46769a72191468da06b2c6d8d18da767261cb222",
+      "original_sha256": "c9d045f227929ceb5ae174990a21262f7925a1be64b883f6b924c09fd9af2ecd",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/camera-retirement-background/process-result.json",
+      "bytes": 79,
+      "sha256": "a11e4b2fde0b11dcc8ede31c65a3b92fc69e3b37088b01a685a99d2194a6c619",
+      "original_sha256": "a11e4b2fde0b11dcc8ede31c65a3b92fc69e3b37088b01a685a99d2194a6c619",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/camera-retirement-background/process.log",
+      "bytes": 819,
+      "sha256": "795e41ad9d8811e234bc7618cdc0926ba4c4ccd1a90c8c6b7e40a5b62473fa84",
+      "original_sha256": "45b271c27919d66f9bcad543b93f526cfd90ea68df559e14646f7962078e2a59",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/camera-retirement-background/result/retirement-validation.json",
+      "bytes": 764,
+      "sha256": "8d87fb25b00c4c5b318f676f2a0619a5e09f0f57013bcdd6cf0f67e7cbe546b4",
+      "original_sha256": "779298bc437cddaee70cc6ee85de6f34c3d0a65336e9394a333d7de6fe0634de",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/camera-transactions-background/import-identity.json",
+      "bytes": 958,
+      "sha256": "9a9fd10c4ef35bf1e1a3b371915603b7f47cb90c5000a27cc673cbfb2ce2a7f5",
+      "original_sha256": "a94344a7639c4cf985f381bb1f69e3e45d94c9f1f05d4a1796198eaa85a2c15f",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/camera-transactions-background/invocation.json",
+      "bytes": 1307,
+      "sha256": "332b80aeb00ca620ebb4865cba83a7c0858edd7bcca0ae8db335c6ddbae8ab37",
+      "original_sha256": "f93fb0986b322144de9807bc8bf09d46e744ea32e8f4dc81e35942c8ec06f131",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/camera-transactions-background/process-result.json",
+      "bytes": 78,
+      "sha256": "726c81eb77260db917f1df1a7ea07d4644c47d1db1a9f833b156a524c4690ed9",
+      "original_sha256": "726c81eb77260db917f1df1a7ea07d4644c47d1db1a9f833b156a524c4690ed9",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/camera-transactions-background/process.log",
+      "bytes": 110,
+      "sha256": "8133385e75c54122406bc62e7f04074b39d1276bea749976a0e9aa89e21c7e0c",
+      "original_sha256": "8133385e75c54122406bc62e7f04074b39d1276bea749976a0e9aa89e21c7e0c",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/camera-transactions-background/result/result.json",
+      "bytes": 670,
+      "sha256": "48a663b77f5bfa23ab655141f9490b890ecfc9c33500fbecb10b6efe0cb5a7cc",
+      "original_sha256": "48a663b77f5bfa23ab655141f9490b890ecfc9c33500fbecb10b6efe0cb5a7cc",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/host-tests.xml",
+      "bytes": 22414,
+      "sha256": "397d317fcf05f91c6a3209f9472643c302691f9e925e60d80d5c4b3fb3d71b5a",
+      "original_sha256": "6b77df7211030fc148d4ddd55754c526e0926f7bc51214c88820ca9040a0fff3",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/installed-identity.json",
+      "bytes": 482,
+      "sha256": "b7520fd369ad4c9b40b5ec0088b8b01f4fa880f31bb5c76f4fa06f273e521a53",
+      "original_sha256": "b5a7593dfb3c872a02dbf0665e9abe1ed0d357d16d61ea7d3e9bedf9d3f0492a",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-camera-window/import-identity.json",
+      "bytes": 959,
+      "sha256": "81d21b8fe7b139b132213151146dcbb68ef69170d97a71d6fedd9337f85ffc93",
+      "original_sha256": "4bef87e46d2f29beceb3b65dc8ed2a27b05515023279d25af0784c51a9a86082",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-camera-window/invocation.json",
+      "bytes": 1232,
+      "sha256": "cc1fbbf81c78b3c0a7fefc6eed05dc50c0b60f8337f4fc191611b2369e99f098",
+      "original_sha256": "22c40b053d6b31fd8f134b15111dbd316b736dd0f7674c21841579ef01242ebb",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-camera-window/process-result.json",
+      "bytes": 78,
+      "sha256": "fa2b633ff925549108564459f18d54ffea5de5f2f38923666fe4d8f39be59a0b",
+      "original_sha256": "fa2b633ff925549108564459f18d54ffea5de5f2f38923666fe4d8f39be59a0b",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-camera-window/process.log",
+      "bytes": 795,
+      "sha256": "a5ef77d728de3d537591b88b8657b193a600b82e858a42b60a8cd7563875b6ef",
+      "original_sha256": "a5ef77d728de3d537591b88b8657b193a600b82e858a42b60a8cd7563875b6ef",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-camera-window/result/focused-single-solid.png",
+      "bytes": 180510,
+      "sha256": "45abaca977d8a4e78cc2a0f1f022b9df95d7826a9bc4cf0654ebfc1333613c22",
+      "original_sha256": "45abaca977d8a4e78cc2a0f1f022b9df95d7826a9bc4cf0654ebfc1333613c22",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-camera-window/result/single-solid.png",
+      "bytes": 101736,
+      "sha256": "72144da136cee76a8e90bcc93e2c66a8f17137b63f72f7074093f35c973b92c2",
+      "original_sha256": "72144da136cee76a8e90bcc93e2c66a8f17137b63f72f7074093f35c973b92c2",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-camera-window/result/triple-c2-disabled.png",
+      "bytes": 929696,
+      "sha256": "202061e28018c0137287c8ab8d0d0fd23cfeb23d6fb9e373d300606874aa94c5",
+      "original_sha256": "202061e28018c0137287c8ab8d0d0fd23cfeb23d6fb9e373d300606874aa94c5",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-camera-window/result/triple-high-quality-restored.png",
+      "bytes": 965167,
+      "sha256": "d024dfb9d75a324b054a9148705dd56a1bff47b4a1d2e92a6a4e90a5f69fa20c",
+      "original_sha256": "d024dfb9d75a324b054a9148705dd56a1bff47b4a1d2e92a6a4e90a5f69fa20c",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-camera-window/result/validation.json",
+      "bytes": 2942,
+      "sha256": "759cbca78e77e47131270a377b297f734bfa5a9c60814a3cf88fdbe7fb7cc4a4",
+      "original_sha256": "736849b479dbc0dcae4c731f96ecc95ffed70fe21ab9079db0f5499d898b993c",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-player-verified-window/import-identity.json",
+      "bytes": 959,
+      "sha256": "81d21b8fe7b139b132213151146dcbb68ef69170d97a71d6fedd9337f85ffc93",
+      "original_sha256": "4bef87e46d2f29beceb3b65dc8ed2a27b05515023279d25af0784c51a9a86082",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-player-verified-window/invocation.json",
+      "bytes": 1333,
+      "sha256": "129ff09caeb60ec8632a664d69a1a47405800df07f7884f3d15466d86d914976",
+      "original_sha256": "1de842b83101d370f35f84cca469a4853ad2b801c10eba63c4c5e134548b9796",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-player-verified-window/process-result.json",
+      "bytes": 77,
+      "sha256": "fdc0eeb954eb8d1a97e2b63fc1c54d2e12b8d78f8f65ff028a96289b852a68d9",
+      "original_sha256": "fdc0eeb954eb8d1a97e2b63fc1c54d2e12b8d78f8f65ff028a96289b852a68d9",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-player-verified-window/process.log",
+      "bytes": 745,
+      "sha256": "a8c9ccb8c8c8cd270bb47e617b129ba5fe5ae483bfa2c1123332358407989a09",
+      "original_sha256": "a8c9ccb8c8c8cd270bb47e617b129ba5fe5ae483bfa2c1123332358407989a09",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-player-verified-window/result/external-input.json",
+      "bytes": 408,
+      "sha256": "923e579e73b23a53dd3d03c53b7e441b51b447bda0a2dc6cdcfad1afd97006e6",
+      "original_sha256": "923e579e73b23a53dd3d03c53b7e441b51b447bda0a2dc6cdcfad1afd97006e6",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-player-verified-window/result/manual-space-after.png",
+      "bytes": 249187,
+      "sha256": "54eb54355d7dba955c21fe31040892ec600b9a3297850a4a553a59c6556f433e",
+      "original_sha256": "54eb54355d7dba955c21fe31040892ec600b9a3297850a4a553a59c6556f433e",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-player-verified-window/result/manual-space-before.png",
+      "bytes": 249872,
+      "sha256": "d412a6cb3f571ff95adb2e78dc90726fcd596b41d1a4fade283463682d9c4e15",
+      "original_sha256": "d412a6cb3f571ff95adb2e78dc90726fcd596b41d1a4fade283463682d9c4e15",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-player-verified-window/result/manual-space-events.json",
+      "bytes": 451,
+      "sha256": "9ff4448e031c3c6162381d05b828380c971113f4179d7969bf9fbd0f112cdb9b",
+      "original_sha256": "9ff4448e031c3c6162381d05b828380c971113f4179d7969bf9fbd0f112cdb9b",
+      "text_portable": false
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/native-player-verified-window/result/result.json",
+      "bytes": 13787,
+      "sha256": "d0dcf11d71f4479431a906b50e3c2619ad8676a758707e29bcd72f4ad5541569",
+      "original_sha256": "b882082fa379dc215e7409d3a47832bc112e89db845b7546c8a3eb1fcafb8130",
+      "text_portable": true
+    },
+    {
+      "path": "outputs/multi-view-repair-verification/validation.json",
+      "bytes": 2565,
+      "sha256": "a46f5255f02aeabbd7171bc6685dcfa2509c4c8fa54b0ad042aa630d59ceee78",
+      "original_sha256": "8e139f8f5dced099f01104b4eb793c789eb7eeb9f9b44f851f61f963361e2587",
+      "text_portable": true
     },
     {
       "path": "outputs/nrel-b1-repair/02_默认方案/launcher-scene.json",
@@ -11448,6 +11917,279 @@
       "text_portable": true
     },
     {
+      "path": "publication/blender-0.3.30.json",
+      "bytes": 1795,
+      "sha256": "582f51821cc75867ca0d679054fa124819cedbe88051e95a4df1f569dbe921ce",
+      "original_sha256": "582f51821cc75867ca0d679054fa124819cedbe88051e95a4df1f569dbe921ce",
+      "text_portable": false
+    },
+    {
+      "path": "publication/blender-0.3.30/environment.json",
+      "bytes": 319,
+      "sha256": "3566cc058918bb0961a26f58e8b19dc09d0c100bb3d2f5bfff53cc6b06cb3196",
+      "original_sha256": "0d9c9ea48255e2d542d01c82361aad4bd03b433dc34d06585914737e98887e56",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/host-checks.json",
+      "bytes": 4336,
+      "sha256": "4922e899e834c050575372b508ff13b245aeaf34e4ae2c91a47b362860af9585",
+      "original_sha256": "54955191ebf8b9f125a4d460b6c6ff3ea3c4b8300a51abf22abb322d372a04f7",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/host-tests.log",
+      "bytes": 2322,
+      "sha256": "aee5040b5406947baec5aea53e661ce6361c194457b19d2f552eca6997b05973",
+      "original_sha256": "3f17516b37ac0db006547b49f0b19653db6aa28db3371acd7673360fa91356a7",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/host-tests.xml",
+      "bytes": 68391,
+      "sha256": "3afd310438b54d8ccddcbf60a6898abd418866181dcdd0958af5acf6df0f9b94",
+      "original_sha256": "6d1db86eed55489a51d381bda2aa62c8c772f04d6b179e328515bb7ae4b2670a",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/logs/camera-ownership.log",
+      "bytes": 495,
+      "sha256": "c5c7a80822e430de435682ec17cfb088a481d9603eae05f3831f6d21eb98bad0",
+      "original_sha256": "2772e3a2c2694d3fd7e6fc71292e45105f3b1f300fa07f283f4b42b0d5143d2b",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/logs/camera-reopen.log",
+      "bytes": 1067,
+      "sha256": "1e3ade70bba4a2712fd184f4a2e3c24534e6ddbd07a31d92914ba053d2b40a8b",
+      "original_sha256": "1a8e2212be5026af4055233120bf2d3eca63bab8015cc6c7fed21b84ca45ddac",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/logs/camera-save.log",
+      "bytes": 395,
+      "sha256": "060d3be2f9cffad22017bd2bf5b0750a9d4f92358e0067c57f3231207d6bedb6",
+      "original_sha256": "060d3be2f9cffad22017bd2bf5b0750a9d4f92358e0067c57f3231207d6bedb6",
+      "text_portable": false
+    },
+    {
+      "path": "publication/blender-0.3.30/logs/install-file.log",
+      "bytes": 32,
+      "sha256": "86b14db26d5d5c7d279264f6af5a5c28d661ba989840c217502d1357f6b7799c",
+      "original_sha256": "86b14db26d5d5c7d279264f6af5a5c28d661ba989840c217502d1357f6b7799c",
+      "text_portable": false
+    },
+    {
+      "path": "publication/blender-0.3.30/logs/manual-pitch.log",
+      "bytes": 2795,
+      "sha256": "1c4acfb08629097b3a490a040ffc8a8cbc45159d098294a4086020c6d7f61e25",
+      "original_sha256": "c3a2a4eecaffde6cb8a7e11d032c6c82b648d33ff4aa6ac575c36c131d8273e9",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/logs/module-probe.log",
+      "bytes": 12778,
+      "sha256": "ba27943f6896546c510dd6e0d705d5c29ceab8861af5c6e09159650e6a8ad2c5",
+      "original_sha256": "007bb017f883514ca548994f6d321c1a8d581a251e0c8f8d125a4d552598c7f8",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/logs/native-projection.log",
+      "bytes": 247,
+      "sha256": "09385a5595ae753f94a4a38d05398db2951320df3e30c6f0a909a29cb5710afd",
+      "original_sha256": "747b14cfefcd133d27eba49d80c06ec3fb2a6d16cd0865e66250d0665b04fbd6",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/logs/repo-add.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "text_portable": false
+    },
+    {
+      "path": "publication/blender-0.3.30/logs/repo-probe.log",
+      "bytes": 266,
+      "sha256": "d9dcd88906889fba4f3b927ea4f86a39f7ee3a002f02df90e501a333e2fe0fdc",
+      "original_sha256": "d78ae37851235d65de7439b04d91a00208a5b530a65da368082a9ed0490ef3de",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/logs/three-camera-default.log",
+      "bytes": 356,
+      "sha256": "88183c4403a63c83147a06e666b002388b0b3f3cabcbfc277b0f48572359801c",
+      "original_sha256": "56d5741eb5c13b4be12f35a3e3ed273c8d037f440d4886fd255c83a60100dcfd",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/logs/video-create.log",
+      "bytes": 147,
+      "sha256": "95660d5c49ef9f467ec0e903f2a1b08d4d69c73530e56429b0a674e94e6294b0",
+      "original_sha256": "95660d5c49ef9f467ec0e903f2a1b08d4d69c73530e56429b0a674e94e6294b0",
+      "text_portable": false
+    },
+    {
+      "path": "publication/blender-0.3.30/logs/video-recover.log",
+      "bytes": 239,
+      "sha256": "16a3197508818a8c8796a7f7cd008bf27c670e7c02abcabd90810ed453752027",
+      "original_sha256": "edc2dcf87863be7dfee92f012f2325badac79f5fae46f42ff06edcbec0f52f90",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/module-probe.json",
+      "bytes": 13032,
+      "sha256": "a8d8651ee4cce45974189d89bc18eaa896646385fd4ae0d8b5430885cff9e5a2",
+      "original_sha256": "3d9e74d222ab634bcc011e48292a6365635faa9060262ce5e5dfc2fb7604e129",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/native-checks.json",
+      "bytes": 1994,
+      "sha256": "3d6cb9fb3bfeff437f3237d6ebd7fda0c2cbe035d639870b2caa36063baac7f0",
+      "original_sha256": "d1d8bb9e7656defb78e33781bae12a18a5921fc9291124715b93438059b9dbbe",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/native/camera-ownership/result.json",
+      "bytes": 11803,
+      "sha256": "9e9e2a6a476b49d2dabd040fdc7facb0871740b9b102c44a4f6e4f76f81a772f",
+      "original_sha256": "b1bad81b62d0318489505f08bcead1cc683b9808dcab2acfc9c398c12eaad1e7",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/native/camera-reopen/result.json",
+      "bytes": 736822,
+      "sha256": "da4d06fe145d8bdc81a304f8bdcb5a3d317abd61a7b1ae1d8ea80257a8b552aa",
+      "original_sha256": "49c6ef3519846f880149d3e0a7f034314063faee8c2d48e029d5b49929420f1e",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/native/camera-reopen/single-advancing.png",
+      "bytes": 256158,
+      "sha256": "a4d657f69c0d99ef3590a0ea8d3fa06999c1a9e3bf9dd742f7cbf5cf76e4f4b6",
+      "original_sha256": "a4d657f69c0d99ef3590a0ea8d3fa06999c1a9e3bf9dd742f7cbf5cf76e4f4b6",
+      "text_portable": false
+    },
+    {
+      "path": "publication/blender-0.3.30/native/camera-reopen/single-terminal.png",
+      "bytes": 251049,
+      "sha256": "b194f84f30417d7087a019700ec6ed8a54b4d53e380be91c56a29617f3554586",
+      "original_sha256": "b194f84f30417d7087a019700ec6ed8a54b4d53e380be91c56a29617f3554586",
+      "text_portable": false
+    },
+    {
+      "path": "publication/blender-0.3.30/native/camera-reopen/triple-advancing.png",
+      "bytes": 1104754,
+      "sha256": "21265a3f8bfd5ff6bd35f9a59d0950b6f6b7bb975bea5e9555027b3a129846c6",
+      "original_sha256": "21265a3f8bfd5ff6bd35f9a59d0950b6f6b7bb975bea5e9555027b3a129846c6",
+      "text_portable": false
+    },
+    {
+      "path": "publication/blender-0.3.30/native/camera-reopen/triple-terminal.png",
+      "bytes": 1104114,
+      "sha256": "a2b4a71d38646f64bdd6f34f2c7de348c5839f4529b79d55f91854f4c013c693",
+      "original_sha256": "a2b4a71d38646f64bdd6f34f2c7de348c5839f4529b79d55f91854f4c013c693",
+      "text_portable": false
+    },
+    {
+      "path": "publication/blender-0.3.30/native/camera-save/checks.json",
+      "bytes": 1721,
+      "sha256": "aaa9b36c5d7b1bb2ed8091ad2be4dec834b87d0f201c627c405d08e77e707c5f",
+      "original_sha256": "a9452650f9800d4dadc48729e6ed864f6b3c258e5ef5aa9a2b103d9bf9abbf90",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/native/manual-pitch/checks.json",
+      "bytes": 1027,
+      "sha256": "7603bca54fe583f19c6f30a5386f5e68552f0e4b3fdb41337459b8228d0c2984",
+      "original_sha256": "744f503e78eefbf223acca2cc34133ffdf5a34b4b09334cbf39a2e7d2a462c33",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/native/video-controller/create.json",
+      "bytes": 296,
+      "sha256": "d5e064325ad560eb94759da7da14089e2e99021531176e9ff2adcf1a3384cff6",
+      "original_sha256": "47efb793435f51b3dcd8dd5c83cbe3da0b0edf233c966bbcc38fb00190511718",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/native/video-controller/recover.json",
+      "bytes": 352,
+      "sha256": "d26b104c769274ef4202caedd8fdd7c44ecef4666ec77ecfefc521424e05a658",
+      "original_sha256": "9f0a5436b7f955c0b916ebff7e3b525451ba09f5c22231d77cae15ecef81c9e5",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/package-validation.json",
+      "bytes": 21729,
+      "sha256": "6f69d1d9fb251509fb4d23f1795af2d5e8ad20754ffce498426add2b10ee31e7",
+      "original_sha256": "3caad5b02e830a806020252441c7ec6128e6ffebc9836430cc6d4dd8124f2595",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/package/wfrl_blender-0.3.30.inventory.json",
+      "bytes": 29836,
+      "sha256": "f7efa8dc4e4375d31789d7e720090ab278805112d90e580696110cf45e78f5b3",
+      "original_sha256": "f7efa8dc4e4375d31789d7e720090ab278805112d90e580696110cf45e78f5b3",
+      "text_portable": false
+    },
+    {
+      "path": "publication/blender-0.3.30/package/wfrl_blender-0.3.30.zip.sha256",
+      "bytes": 90,
+      "sha256": "39b4882ad2ac0a375dea67053aa471ba7867076e231a775856fcf956af1f79c4",
+      "original_sha256": "39b4882ad2ac0a375dea67053aa471ba7867076e231a775856fcf956af1f79c4",
+      "text_portable": false
+    },
+    {
+      "path": "publication/blender-0.3.30/regressions/native-projection/native-projection-validation.json",
+      "bytes": 308,
+      "sha256": "d9ac7ef4a527d9db59c9e0cf9c9e61460cad0adb9a290c0b2c8e20e145548263",
+      "original_sha256": "7c658563c5c02d1c43a728d05e2515e884a68eb3197679038458e0be0dca40fa",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/regressions/three-camera-default/default-validation.json",
+      "bytes": 1148,
+      "sha256": "5e8dfc3ea872528246e2d9f365e1e5ba7113e4b3673f0420a410470647c73865",
+      "original_sha256": "d52dfc81d5710b8c1aace0164b8a3e87c872e9a6d5071fac899f5b7241092acb",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/repo-probe.json",
+      "bytes": 182,
+      "sha256": "a5bcd78bbad78a4b3cae74ff58e6f6772d356d861ccc7033923b69ab81f44c4b",
+      "original_sha256": "78b24ea0f5f869079cbacad2c19dab935b9b989fcb19156fef522541cc5fb3e1",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/resource-availability.json",
+      "bytes": 4564,
+      "sha256": "343407a61d74437e9f47b3aaf0906aff4dd296e8939bef7979478a73a5035241",
+      "original_sha256": "343407a61d74437e9f47b3aaf0906aff4dd296e8939bef7979478a73a5035241",
+      "text_portable": false
+    },
+    {
+      "path": "publication/blender-0.3.30/verification.json",
+      "bytes": 2854,
+      "sha256": "a8e6f6bdbbebc92baacc280136ea34adc39f12419ddffbf85429aa33072244f6",
+      "original_sha256": "922dae1b26bfc339544151df3cbc955d69349c4bcda57e9dbf7e19ef1b99a19e",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/video-host-tests.log",
+      "bytes": 185,
+      "sha256": "855a2ce9328ab848d93d514fb15f9582376513fd4327de319f80afd2be0125c8",
+      "original_sha256": "49abebf796cc34137b9a1011a6a7d3ad6ed79e27196cfcacba71814bc03cdc89",
+      "text_portable": true
+    },
+    {
+      "path": "publication/blender-0.3.30/video-host-tests.xml",
+      "bytes": 5708,
+      "sha256": "5fce6b33ad097e39a990e2bc76646f145054ce225636b98b38407b81ba1ffcbe",
+      "original_sha256": "726ba9ec23baad2a9921ffb76b71d8a5bb74a09dfcee379e892ff83a0ca0ea84",
+      "text_portable": true
+    },
+    {
       "path": "publication/daily-installation-probe.json",
       "bytes": 11891,
       "sha256": "62dea870bfe4bacb6753264d3fb2fdf90744b8f0e410d094507df975644c46f3",
@@ -11687,9 +12429,9 @@
     },
     {
       "path": "scripts/analysis/compare_eval.py",
-      "bytes": 3440,
-      "sha256": "4401ccd0d7257f38f97de5d1bfb078b9789a0b2cca2f949065425dc6738b121a",
-      "original_sha256": "4401ccd0d7257f38f97de5d1bfb078b9789a0b2cca2f949065425dc6738b121a",
+      "bytes": 3182,
+      "sha256": "7ebede0d5686bf1aa88d79337249731408a2648fc35a033d18c1ca481ea9ffe8",
+      "original_sha256": "7ebede0d5686bf1aa88d79337249731408a2648fc35a033d18c1ca481ea9ffe8",
       "text_portable": false
     },
     {
@@ -11833,6 +12575,13 @@
       "text_portable": false
     },
     {
+      "path": "scripts/blender/generate_manual_pitch_video.py",
+      "bytes": 4010,
+      "sha256": "967a5bbd869680dcb6fc5c53f005f4b3049e9e5dc72fccb0358b1eb02b1b0e8b",
+      "original_sha256": "967a5bbd869680dcb6fc5c53f005f4b3049e9e5dc72fccb0358b1eb02b1b0e8b",
+      "text_portable": false
+    },
+    {
       "path": "scripts/blender/gw184_defects.py",
       "bytes": 7312,
       "sha256": "461258557ca35937f5ce49d468ae05fd9eff97d815d6d0c9cbea212bf26b132e",
@@ -11851,6 +12600,13 @@
       "bytes": 4655,
       "sha256": "6698ab38bd18aced86094fcab2a037ef61aa7b530ffdee699f5c557cc2484513",
       "original_sha256": "6698ab38bd18aced86094fcab2a037ef61aa7b530ffdee699f5c557cc2484513",
+      "text_portable": false
+    },
+    {
+      "path": "scripts/blender/manage_manual_video.py",
+      "bytes": 306,
+      "sha256": "5fab5488ceb7a79a91289098f726441b397f5aa41f697617410ff9bc0e597775",
+      "original_sha256": "5fab5488ceb7a79a91289098f726441b397f5aa41f697617410ff9bc0e597775",
       "text_portable": false
     },
     {
@@ -11938,6 +12694,13 @@
       "text_portable": false
     },
     {
+      "path": "scripts/blender/open_manual_control.py",
+      "bytes": 2088,
+      "sha256": "a74503fa6e1dde666a5c7973acf53f9746732e801de2ae419eb4baf160377008",
+      "original_sha256": "a74503fa6e1dde666a5c7973acf53f9746732e801de2ae419eb4baf160377008",
+      "text_portable": false
+    },
+    {
       "path": "scripts/blender/open_nrel_defect_editor.py",
       "bytes": 808,
       "sha256": "5b98db0a27fe497429902e693d2adb06904904d15c5c387b358a585be1a107b8",
@@ -12005,6 +12768,13 @@
       "bytes": 2162,
       "sha256": "31103d550b5eedcaeacf2c8449364c92a6b45a2fd1016fce6ca8bd1c66d3e718",
       "original_sha256": "31103d550b5eedcaeacf2c8449364c92a6b45a2fd1016fce6ca8bd1c66d3e718",
+      "text_portable": false
+    },
+    {
+      "path": "scripts/blender/render_manual_video.py",
+      "bytes": 933,
+      "sha256": "64441840d379072a5d070ceda82c481c9f2ee40d6b957eafca795b220f1a1d0b",
+      "original_sha256": "64441840d379072a5d070ceda82c481c9f2ee40d6b957eafca795b220f1a1d0b",
       "text_portable": false
     },
     {
@@ -12187,6 +12957,13 @@
       "bytes": 229,
       "sha256": "d7530d012dc2765b3ec144c6b8e4be6158e5d85199bab7361735902e6c65cbc3",
       "original_sha256": "d7530d012dc2765b3ec144c6b8e4be6158e5d85199bab7361735902e6c65cbc3",
+      "text_portable": false
+    },
+    {
+      "path": "scripts/blender/打开手动恒速变桨.command",
+      "bytes": 537,
+      "sha256": "97c471216ce97fc6d784dc172ab388c5d682a8e0610c188f6de1cd0b24a86b3f",
+      "original_sha256": "97c471216ce97fc6d784dc172ab388c5d682a8e0610c188f6de1cd0b24a86b3f",
       "text_portable": false
     },
     {
@@ -12527,9 +13304,9 @@
     },
     {
       "path": "scripts/experiments/rollout_ckpt.py",
-      "bytes": 5110,
-      "sha256": "cb8c0a3df5b2ed694d7ee258ee416759bd3d23f94cce8530eacc8de3303ed881",
-      "original_sha256": "cb8c0a3df5b2ed694d7ee258ee416759bd3d23f94cce8530eacc8de3303ed881",
+      "bytes": 5688,
+      "sha256": "f8ad53a934a62acf8bc0fe62d51e584c4809190d26ddbf04a30e30c1eecf0804",
+      "original_sha256": "f8ad53a934a62acf8bc0fe62d51e584c4809190d26ddbf04a30e30c1eecf0804",
       "text_portable": false
     },
     {
@@ -12947,9 +13724,9 @@
     },
     {
       "path": "scripts/train/train_fastfarm.py",
-      "bytes": 34867,
-      "sha256": "9710f1eaf261e8aae7caa794dfd44609b2317e231899b89343e8ab557ab0b517",
-      "original_sha256": "9710f1eaf261e8aae7caa794dfd44609b2317e231899b89343e8ab557ab0b517",
+      "bytes": 36461,
+      "sha256": "ef8c49bc1f4da57049156169ed2845de1fd75172c0313b67924504a882aad334",
+      "original_sha256": "ef8c49bc1f4da57049156169ed2845de1fd75172c0313b67924504a882aad334",
       "text_portable": false
     },
     {
@@ -13142,10 +13919,17 @@
       "text_portable": false
     },
     {
+      "path": "tests/blender_bridge/test_episode_worker.py",
+      "bytes": 6092,
+      "sha256": "15fb594c3f035efede4220fb80fc8b25826187dc081b741314ee021cff82664e",
+      "original_sha256": "15fb594c3f035efede4220fb80fc8b25826187dc081b741314ee021cff82664e",
+      "text_portable": false
+    },
+    {
       "path": "tests/blender_bridge/test_farm_power_validity.py",
-      "bytes": 18583,
-      "sha256": "56001c73301057d0d0c83b5cab8db92666a9ddf09ea08496e62056f1ce0cabc3",
-      "original_sha256": "56001c73301057d0d0c83b5cab8db92666a9ddf09ea08496e62056f1ce0cabc3",
+      "bytes": 18800,
+      "sha256": "4c53753c72f3b3ce6db8b240583a200a0c6cb15c9314b580cab038cb4a8eea8d",
+      "original_sha256": "4c53753c72f3b3ce6db8b240583a200a0c6cb15c9314b580cab038cb4a8eea8d",
       "text_portable": false
     },
     {
@@ -13429,10 +14213,24 @@
       "text_portable": false
     },
     {
+      "path": "tests/test_camera_video_media_recovery.py",
+      "bytes": 5912,
+      "sha256": "ffeda6b111ea33de0212326994e56b3f932b0588949c699f5ba0c322607b970d",
+      "original_sha256": "ffeda6b111ea33de0212326994e56b3f932b0588949c699f5ba0c322607b970d",
+      "text_portable": false
+    },
+    {
       "path": "tests/test_camera_video_package.py",
       "bytes": 6050,
       "sha256": "af634eb2bd8115f2d6c06924425e860424f5d62dcaf8705bbac5d808f69664cb",
       "original_sha256": "af634eb2bd8115f2d6c06924425e860424f5d62dcaf8705bbac5d808f69664cb",
+      "text_portable": false
+    },
+    {
+      "path": "tests/test_camera_video_publication.py",
+      "bytes": 6849,
+      "sha256": "ba126e451fb142081c9292b39d0dc442b678eb706f8f7ccefc8cb7c4fc152c34",
+      "original_sha256": "ba126e451fb142081c9292b39d0dc442b678eb706f8f7ccefc8cb7c4fc152c34",
       "text_portable": false
     },
     {
@@ -13457,10 +14255,45 @@
       "text_portable": false
     },
     {
+      "path": "tests/test_interactive_episodes.py",
+      "bytes": 15688,
+      "sha256": "f8a10c18a835315bb105c46a64c71119d43c2479833a96ecf9fa2078b883c87f",
+      "original_sha256": "f8a10c18a835315bb105c46a64c71119d43c2479833a96ecf9fa2078b883c87f",
+      "text_portable": false
+    },
+    {
       "path": "tests/test_interactive_ppo_objective.py",
       "bytes": 5667,
       "sha256": "0213f60ae2721c3d0b74cf63ad341ceea63eae09b9e35806760d053b4821a8c6",
       "original_sha256": "0213f60ae2721c3d0b74cf63ad341ceea63eae09b9e35806760d053b4821a8c6",
+      "text_portable": false
+    },
+    {
+      "path": "tests/test_interactive_replay_policy.py",
+      "bytes": 12852,
+      "sha256": "249254bcb4682790c4d927bef45452d1f0f9c245775a15b68832a4e83fbb346c",
+      "original_sha256": "249254bcb4682790c4d927bef45452d1f0f9c245775a15b68832a4e83fbb346c",
+      "text_portable": false
+    },
+    {
+      "path": "tests/test_interactive_runtime_close.py",
+      "bytes": 5827,
+      "sha256": "2174ed99ac043b7e363c45db1eba17e22fa252a614b47ef9d7f1aa2d7bb021cc",
+      "original_sha256": "2174ed99ac043b7e363c45db1eba17e22fa252a614b47ef9d7f1aa2d7bb021cc",
+      "text_portable": false
+    },
+    {
+      "path": "tests/test_mappo_sb3_lifecycle.py",
+      "bytes": 15002,
+      "sha256": "d53c760b05280fce11e4f976ed971b585315a4ded65680ac4a8d1bf8eab8fd73",
+      "original_sha256": "d53c760b05280fce11e4f976ed971b585315a4ded65680ac4a8d1bf8eab8fd73",
+      "text_portable": false
+    },
+    {
+      "path": "tests/test_mappo_truncation.py",
+      "bytes": 12757,
+      "sha256": "a8f8890f0c751b4e30b6960e2f8515c8ba092d2fdc621542dc4468bfae13ce27",
+      "original_sha256": "a8f8890f0c751b4e30b6960e2f8515c8ba092d2fdc621542dc4468bfae13ce27",
       "text_portable": false
     },
     {
@@ -13674,6 +14507,13 @@
       "text_portable": false
     },
     {
+      "path": "tests/test_policy_action_contract.py",
+      "bytes": 7707,
+      "sha256": "c77b0601a51fe078da30c61dabd0815d8a4eea679d4649be272bab5cbc91c84e",
+      "original_sha256": "c77b0601a51fe078da30c61dabd0815d8a4eea679d4649be272bab5cbc91c84e",
+      "text_portable": false
+    },
+    {
       "path": "tests/test_prebend_contract.py",
       "bytes": 2106,
       "sha256": "e59e611b1d2ed39b135171ab4496f7a0746704382f6e3c333684f7edf02f56a8",
@@ -13801,9 +14641,9 @@
     },
     {
       "path": "wfrl/blender_bridge/snapshot_adapter.py",
-      "bytes": 6607,
-      "sha256": "1660d949a9f7182e3243d145efda935a187fd594150b9df840d7ff8fa91fdeb9",
-      "original_sha256": "1660d949a9f7182e3243d145efda935a187fd594150b9df840d7ff8fa91fdeb9",
+      "bytes": 6764,
+      "sha256": "a8759c8e7ce060bbc84dce577dd64de3978671ac05d1b0a63fb78b79774d2445",
+      "original_sha256": "a8759c8e7ce060bbc84dce577dd64de3978671ac05d1b0a63fb78b79774d2445",
       "text_portable": false
     },
     {
@@ -13829,9 +14669,9 @@
     },
     {
       "path": "wfrl/blender_bridge/training_progress.py",
-      "bytes": 10373,
-      "sha256": "b0566084faa7a124238cde76e5e041986f53eeee375178666e76e58d52e03723",
-      "original_sha256": "b0566084faa7a124238cde76e5e041986f53eeee375178666e76e58d52e03723",
+      "bytes": 10491,
+      "sha256": "0f021b49236a2e1c59359050d9a2255b0cd699a820d5cb85faa942610738da49",
+      "original_sha256": "0f021b49236a2e1c59359050d9a2255b0cd699a820d5cb85faa942610738da49",
       "text_portable": false
     },
     {
@@ -13864,9 +14704,9 @@
     },
     {
       "path": "wfrl/camera_video/media.py",
-      "bytes": 9370,
-      "sha256": "fdea4421e6fda67e211fe665313ea6a21187439fca659239bc51026f1375556b",
-      "original_sha256": "fdea4421e6fda67e211fe665313ea6a21187439fca659239bc51026f1375556b",
+      "bytes": 11215,
+      "sha256": "90223d37cd6deecd2f1be61ff2bf09bcd34fa1b49eb4284f19f0f4c18dbe37b4",
+      "original_sha256": "90223d37cd6deecd2f1be61ff2bf09bcd34fa1b49eb4284f19f0f4c18dbe37b4",
       "text_portable": false
     },
     {
@@ -13874,6 +14714,13 @@
       "bytes": 8047,
       "sha256": "a45825ef21ca8211c40fbc8ef5c1259f31e632aa77022c0bb2067b6245c63bb6",
       "original_sha256": "a45825ef21ca8211c40fbc8ef5c1259f31e632aa77022c0bb2067b6245c63bb6",
+      "text_portable": false
+    },
+    {
+      "path": "wfrl/camera_video/publication.py",
+      "bytes": 3972,
+      "sha256": "cc0fadfa7f0a30973eb1fb74a9e2bd2ae9deae63a065e40d151bcce0fa4e09bd",
+      "original_sha256": "cc0fadfa7f0a30973eb1fb74a9e2bd2ae9deae63a065e40d151bcce0fa4e09bd",
       "text_portable": false
     },
     {
@@ -13906,9 +14753,9 @@
     },
     {
       "path": "wfrl/fastfarm_driver.py",
-      "bytes": 28720,
-      "sha256": "644369b9066f7fa4fb9d4e85217d6f80013f7c29f45f45be8ad76209461f8842",
-      "original_sha256": "644369b9066f7fa4fb9d4e85217d6f80013f7c29f45f45be8ad76209461f8842",
+      "bytes": 30304,
+      "sha256": "2907de6fd48b52d7b6a30cad2f9dbbb022a08e50cd828cf788a18751f0b2ceb4",
+      "original_sha256": "2907de6fd48b52d7b6a30cad2f9dbbb022a08e50cd828cf788a18751f0b2ceb4",
       "text_portable": false
     },
     {
@@ -14004,16 +14851,16 @@
     },
     {
       "path": "wfrl/mappo_central.py",
-      "bytes": 12450,
-      "sha256": "46a9d049c9c33e48bd028756afb0fa6721ee6e044e68f8742999a02c9a221972",
-      "original_sha256": "46a9d049c9c33e48bd028756afb0fa6721ee6e044e68f8742999a02c9a221972",
+      "bytes": 15047,
+      "sha256": "386c7e10a1ccde5474065b1727c4f587098f0c895f1fa9f235fadee9a539dacb",
+      "original_sha256": "386c7e10a1ccde5474065b1727c4f587098f0c895f1fa9f235fadee9a539dacb",
       "text_portable": false
     },
     {
       "path": "wfrl/mappo_sb3.py",
-      "bytes": 7250,
-      "sha256": "d618bdab3ca8976ceb222ba010af1bf77f269405139152df187bcb5266165af9",
-      "original_sha256": "d618bdab3ca8976ceb222ba010af1bf77f269405139152df187bcb5266165af9",
+      "bytes": 12302,
+      "sha256": "359036dd5a287af436b524ef47f9fd25c0d2abfa881fd0d0e04137ae1c8ab6a1",
+      "original_sha256": "359036dd5a287af436b524ef47f9fd25c0d2abfa881fd0d0e04137ae1c8ab6a1",
       "text_portable": false
     },
     {
@@ -14220,6 +15067,13 @@
       "text_portable": false
     },
     {
+      "path": "wfrl/policy_actions.py",
+      "bytes": 10725,
+      "sha256": "cbe19e70e492dcc0115cf087cc6c6b15de8407cdab211f574bd4783c8148a948",
+      "original_sha256": "cbe19e70e492dcc0115cf087cc6c6b15de8407cdab211f574bd4783c8148a948",
+      "text_portable": false
+    },
+    {
       "path": "wfrl/rewards.py",
       "bytes": 6508,
       "sha256": "276937b218d5dc04bb1ec7b0bf69e7caa377bb18f18d2a1e170ee1e12785e7b6",
@@ -14256,9 +15110,9 @@
     },
     {
       "path": "wfrl/scene/runtime.py",
-      "bytes": 8217,
-      "sha256": "6dc9c891af3a7f00201a378b94192f95041f5902b48391057b36f9736069b441",
-      "original_sha256": "6dc9c891af3a7f00201a378b94192f95041f5902b48391057b36f9736069b441",
+      "bytes": 8465,
+      "sha256": "eb00d3b792e242b4b72899601297789e7a5358346ad970831176140013c17344",
+      "original_sha256": "eb00d3b792e242b4b72899601297789e7a5358346ad970831176140013c17344",
       "text_portable": false
     },
     {
@@ -14284,9 +15138,9 @@
     },
     {
       "path": "wfrl/studio/trainer.py",
-      "bytes": 38525,
-      "sha256": "7fbbafd864db3019983ad5946f7be819ee80fe36a703a025469dff1fdd8873df",
-      "original_sha256": "7fbbafd864db3019983ad5946f7be819ee80fe36a703a025469dff1fdd8873df",
+      "bytes": 40240,
+      "sha256": "d3572f5db031b29e31248bc4e1aa1f438a20afd8b8a7501cad704dd45c72fdfd",
+      "original_sha256": "d3572f5db031b29e31248bc4e1aa1f438a20afd8b8a7501cad704dd45c72fdfd",
       "text_portable": false
     },
     {
@@ -14319,9 +15173,9 @@
     },
     {
       "path": "wfrl/viz/animate.py",
-      "bytes": 18712,
-      "sha256": "2f5d8d92062f2e247c056067f75fcaf5c2c1d03cca5458ee054944b8f019dab8",
-      "original_sha256": "2f5d8d92062f2e247c056067f75fcaf5c2c1d03cca5458ee054944b8f019dab8",
+      "bytes": 18088,
+      "sha256": "24745fb792b3111d7772cbc22af5de3a075c152c38b40e558bd8730573523314",
+      "original_sha256": "24745fb792b3111d7772cbc22af5de3a075c152c38b40e558bd8730573523314",
       "text_portable": false
     },
     {
@@ -14403,16 +15257,16 @@
     },
     {
       "path": "前端readme.md",
-      "bytes": 35807,
-      "sha256": "59340c2d22f5185022227b25e76e3425014a2fb0c290c140d6d94f01ed161911",
-      "original_sha256": "59340c2d22f5185022227b25e76e3425014a2fb0c290c140d6d94f01ed161911",
+      "bytes": 38422,
+      "sha256": "91859537048712e9b582c0e9f268c1a53caba032c41ad3e151779f4279b27d30",
+      "original_sha256": "91859537048712e9b582c0e9f268c1a53caba032c41ad3e151779f4279b27d30",
       "text_portable": false
     },
     {
       "path": "前端更新计划.md",
-      "bytes": 5140,
-      "sha256": "b7faa41355568daba54d68100e47a8e6ee82d5bfdd23b112f2d22f1699e51c67",
-      "original_sha256": "b7faa41355568daba54d68100e47a8e6ee82d5bfdd23b112f2d22f1699e51c67",
+      "bytes": 5740,
+      "sha256": "1a88744a0cb54526a83df37631ef832c6d6a2773fddbc0851ad727c33bc45808",
+      "original_sha256": "1a88744a0cb54526a83df37631ef832c6d6a2773fddbc0851ad727c33bc45808",
       "text_portable": false
     }
   ],

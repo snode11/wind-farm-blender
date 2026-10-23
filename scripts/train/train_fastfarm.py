@@ -26,6 +26,7 @@ import torch.nn as nn
 
 from wfrl.fastfarm_driver import FastFarmDriver
 from wfrl.mappo_central import Actor, Critic, RunningMeanStd
+from wfrl.policy_actions import PolicyActionContract, load_action_contract
 from wfrl.rewards import CHOICES as REWARD_CHOICES, make_shaper
 
 from wfrl import paths, windcond
@@ -210,9 +211,8 @@ def compute_gae_trunc(rews, vals, next_vals, dones, gamma=0.99, lam=0.95):
 
     偏航控制这个任务没有真正的终止状态：回合结束只是"预算走完了"，此后世界照常
     存在。所以 δ 里必须照常 bootstrap `V(s_{t+1})`（用截断**前**那个观测，不是
-    reset 之后的），只把 GAE 的递推链在边界处断开。`mappo_central.compute_gae`
-    是把 `mask` 同时乘进两处的通用版，在这里会把边界那步的回报硬压成 r_t，
-    系统性低估回合末端的价值。
+    reset 之后的），只把 GAE 的递推链在边界处断开。`next_vals` 为各步在
+    reset 前计算的下一状态价值，`dones` 只控制优势递推是否跨过回合边界。
     """
     T = len(rews)
     adv = np.zeros(T, dtype=np.float32)
@@ -236,6 +236,27 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
           load_coef=1.0, policy="learn", purge=True, tag_extra="",
           obs_duty=False, duty_penalty=0.0, scene=None,
           save_interval=0, resume_from=None, training_progress=None, run_id=None):
+    policy_scene = None
+    if scene is not None:
+        from wfrl.scene.schema import load_scene
+        policy_scene = load_scene(scene)
+        if list(policy_scene.controls) != ["yaw"]:
+            raise ValueError("train_fastfarm requires scene controls ['yaw']; use Studio for other controls")
+    ckpt = None
+    action_contract = None
+    if resume_from:
+        ckpt = torch.load(resume_from, map_location=DEVICE, weights_only=False)
+        action_contract = load_action_contract(
+            ckpt, controls=["yaw"],
+            n_agents=policy_scene.n if policy_scene is not None else None,
+            scene=policy_scene.to_dict() if policy_scene is not None else None,
+            env_id=env_id)
+        if action_contract.transform != "clip":
+            raise ValueError("train_fastfarm resume requires the clip action contract")
+        if ckpt.get("obs_duty") != bool(obs_duty) or ckpt.get("recurrent") != bool(recurrent):
+            raise ValueError("resume obs_duty/recurrent settings must match the checkpoint")
+        if not {"actor", "critic", "optimizer"} <= ckpt.keys():
+            raise ValueError("resume requires a full training checkpoint with actor/critic/optimizer")
     # Validate resume provenance before launching any physics process.
     progress = None
     if training_progress:
@@ -243,7 +264,7 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
         import uuid
         counts = (0, 0)
         if resume_from:
-            checkpoint = torch.load(resume_from, map_location=DEVICE, weights_only=False)
+            checkpoint = ckpt
             counts = resume_counts(checkpoint)
             required = {'actor', 'critic', 'optimizer', 'obs_mean', 'obs_var'}
             if not required <= checkpoint.keys():
@@ -269,6 +290,25 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
                           obs_duty=obs_duty, duty_penalty=duty_penalty,
                           scene_path=scene, progress=progress)
     n = smp.n
+    try:
+        bounds = {"yaw": (smp.act_low, smp.act_high)}
+        if action_contract is None:
+            action_contract = PolicyActionContract.from_bounds(["yaw"], bounds, "clip")
+        else:
+            load_action_contract(
+                ckpt, controls=["yaw"], n_agents=n,
+                scene=policy_scene.to_dict() if policy_scene is not None else None,
+                env_id=env_id)
+            action_contract.validate_runtime(["yaw"], bounds)
+    except Exception:
+        smp.close()
+        if progress is not None:
+            progress.close()
+        raise
+    policy_metadata = {"controls": ["yaw"], "policy_source": "train_fastfarm",
+                       "action_contract": action_contract.to_dict()}
+    if policy_scene is not None:
+        policy_metadata["scene"] = policy_scene.to_dict()
 
     actor = Actor(smp.obs_dim, smp.act_dim).to(DEVICE)
     critic = (RecurrentCritic(smp.state_dim) if recurrent
@@ -281,28 +321,21 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
 
     # 恢复训练（如果给了 checkpoint）
     start_iter = 1
-    if resume_from:
-        if os.path.exists(resume_from):
-            ckpt = torch.load(resume_from, map_location=DEVICE, weights_only=False)
-            actor.load_state_dict(ckpt["actor"])
-            critic.load_state_dict(ckpt["critic"])
-            opt.load_state_dict(ckpt["optimizer"])
-            obs_rms.mean = ckpt["obs_mean"]
-            obs_rms.var = ckpt["obs_var"]
-            obs_rms.count = ckpt.get("obs_count", 1e4)
-            ret_rms.mean = ckpt.get("ret_mean", 0.0)
-            ret_rms.var = ckpt.get("ret_var", 1.0)
-            ret_rms.count = ckpt.get("ret_count", 1e4)
-            start_iter = ckpt.get("iteration", 0) + 1
-            hist = ckpt.get("history", {"reward": [], "power_mw": [], "power_norm": [],
-                                        "u_inf": [], "explained_var": [], "pg": [],
-                                        "vloss": [], "episodes": [], "raw_reward": []})
-            print(f"[resume] 从 {resume_from} 恢复，继续从 iter {start_iter}/{iters}", flush=True)
-        else:
-            print(f"[resume] 警告：{resume_from} 不存在，从头开始", flush=True)
-            hist = {"reward": [], "power_mw": [], "power_norm": [], "u_inf": [],
-                    "explained_var": [], "pg": [], "vloss": [], "episodes": [],
-                    "raw_reward": []}
+    if ckpt is not None:
+        actor.load_state_dict(ckpt["actor"])
+        critic.load_state_dict(ckpt["critic"])
+        opt.load_state_dict(ckpt["optimizer"])
+        obs_rms.mean = ckpt["obs_mean"]
+        obs_rms.var = ckpt["obs_var"]
+        obs_rms.count = ckpt.get("obs_count", 1e4)
+        ret_rms.mean = ckpt.get("ret_mean", 0.0)
+        ret_rms.var = ckpt.get("ret_var", 1.0)
+        ret_rms.count = ckpt.get("ret_count", 1e4)
+        start_iter = ckpt.get("iteration", 0) + 1
+        hist = ckpt.get("history", {"reward": [], "power_mw": [], "power_norm": [],
+                                    "u_inf": [], "explained_var": [], "pg": [],
+                                    "vloss": [], "episodes": [], "raw_reward": []})
+        print(f"[resume] 从 {resume_from} 恢复，继续从 iter {start_iter}/{iters}", flush=True)
     else:
         hist = {"reward": [], "power_mw": [], "power_norm": [], "u_inf": [],
                 "explained_var": [], "pg": [], "vloss": [], "episodes": [],
@@ -374,7 +407,7 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
             # 动作 = 连续偏航增量，裁剪到边界；零偏航基线走同一条采样路径，
             # 只把动作换成 0 —— 这样基线与策略的回合结构/来流/统计口径完全一致
             a_clip = (np.zeros_like(a_np) if policy == "zero"
-                      else np.clip(a_np, smp.act_low, smp.act_high))
+                      else action_contract.commands(a_np, n)["yaw"][:, None])
             obs, r, trunc, meas = smp.step(a_clip)
 
             ret_acc = ret_acc * gamma + r
@@ -498,6 +531,7 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
                         "state_dim": smp.state_dim, "obs_keys": smp.obs_keys,
                         "obs_duty": smp.obs_duty, "duty_penalty": smp.duty_penalty,
                         "recurrent": recurrent, "env_id": env_id,
+                        **policy_metadata,
                         "iteration": it, "history": hist,
                         **({"training_progress": {"step": progress.step, "agent_step": progress.agent_step}}
                            if progress is not None else {})}, ckpt_path)
@@ -515,7 +549,8 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
                 "obs_dim": smp.obs_dim, "act_dim": smp.act_dim,
                 "state_dim": smp.state_dim, "obs_keys": smp.obs_keys,
                 "obs_duty": smp.obs_duty, "duty_penalty": smp.duty_penalty,
-                "recurrent": recurrent, "env_id": env_id}, model_path)
+                "recurrent": recurrent, "env_id": env_id,
+                **policy_metadata}, model_path)
     print(f"[{tag}] saved -> {model_path}", flush=True)
 
     _dump_hist(hist, env_id, tag)

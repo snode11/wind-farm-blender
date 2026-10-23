@@ -5,12 +5,25 @@ import csv
 from fractions import Fraction
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
+import tempfile
+
+
+def owned_process_options():
+    """Keep a supervised output lease alive while an owned codec is still running."""
+    value = os.environ.get('WFRL_MANUAL_OUTPUT_FD')
+    if os.name == 'posix' and os.environ.get('WFRL_MANUAL_ATTEMPT') and value is not None:
+        fd = int(value)
+        os.fstat(fd)
+        return dict(pass_fds=(fd,))
+    return {}
 
 
 def _run(args):
-    return subprocess.run([str(x) for x in args], check=True, capture_output=True, text=True).stdout
+    return subprocess.run([str(x) for x in args], check=True, capture_output=True, text=True,
+                          **owned_process_options()).stdout
 
 
 def sha256(path):
@@ -61,12 +74,21 @@ def validate_video(video, frames_csv, fps, *, ffprobe='ffprobe'):
 
 def _write_json_atomic(path, value):
     path = Path(path)
-    writing = path.with_name(path.name + '.writing')
-    writing.write_text(json.dumps(value, indent=2) + '\n')
-    writing.replace(path)
+    writing = None
+    try:
+        with tempfile.NamedTemporaryFile(mode='w', dir=path.parent, prefix='.encoding-', delete=False) as handle:
+            writing = Path(handle.name)
+            json.dump(value, handle, indent=2)
+            handle.flush()
+            os.fsync(handle.fileno())
+        writing.replace(path)
+    finally:
+        if writing is not None:
+            writing.unlink(missing_ok=True)
 
 
-def encode_video(package_dir, fps, *, pattern='%06d.png', ffmpeg='ffmpeg', ffprobe='ffprobe', crf=18, preset='medium'):
+def encode_video(package_dir, fps, *, pattern='%06d.png', ffmpeg='ffmpeg', ffprobe='ffprobe', crf=18, preset='medium',
+                 resume=False):
     """Encode an immutable PNG master; resume only an identical owned transaction.
 
     A pending intent binds every master hash, CSV hash and encoding option before
@@ -79,13 +101,16 @@ def encode_video(package_dir, fps, *, pattern='%06d.png', ffmpeg='ffmpeg', ffpro
     rows = read_frames(root / 'frames.csv')
     master = root / 'master_frames'
     expected = [master / (pattern % i) for i in range(len(rows))]
-    if any(not p.is_file() for p in expected) or len(list(master.glob('*.png'))) != len(expected):
+    if (master.is_symlink() or any(p.is_symlink() or not p.is_file() for p in expected)
+            or len(list(master.glob('*.png'))) != len(expected)):
         raise ValueError('PNG master count or frame numbering differs from frames.csv')
     output = root / 'video.mp4'
     temporary = root / 'video.encoding.mp4'
     checks = root / 'checks'; checks.mkdir(exist_ok=True)
     pending = checks / 'encoding.pending.json'
     final_report = checks / 'encoding.json'
+    if any(path.is_symlink() for path in (root / 'frames.csv', checks, output, temporary, pending, final_report)):
+        raise ValueError('Encoding transaction paths must not be symbolic links')
     intent = {'fps': fps, 'pattern': pattern, 'crf': crf, 'preset': preset,
               'ffmpeg': str(ffmpeg), 'ffprobe': str(ffprobe),
               'master_sha256': {p.name: sha256(p) for p in expected},
@@ -94,12 +119,21 @@ def encode_video(package_dir, fps, *, pattern='%06d.png', ffmpeg='ffmpeg', ffpro
     state = json.loads(pending.read_text()) if pending.exists() else None
     if state is not None and state.get('intent') != intent:
         raise ValueError('Pending encoding belongs to different masters, CSV, code or parameters; use a new package directory')
-    if output.exists():
-        report = state.get('report') if state else None
+    if not os.path.lexists(output) and final_report.exists():
+        previous = json.loads(final_report.read_text())
+        if previous.get('encoding_intent') != intent:
+            raise ValueError('Saved encoding report belongs to different inputs; use a new package directory')
+    if os.path.lexists(output):
+        report = state.get('report') if state else (
+            json.loads(final_report.read_text()) if resume and final_report.is_file() else None)
+        if report and report.get('encoding_intent') != intent:
+            raise ValueError('Completed encoding belongs to different masters, CSV, code or parameters')
         if report and sha256(output) == report['video_sha256']:
-            validate_video(output, root / 'frames.csv', fps, ffprobe=ffprobe)
+            verified = validate_video(output, root / 'frames.csv', fps, ffprobe=ffprobe)
+            if any(report.get(key) != value for key, value in verified.items()):
+                raise ValueError('Saved encoding report differs from the verified video')
             _write_json_atomic(final_report, report)
-            pending.unlink()
+            pending.unlink(missing_ok=True)
             return report
         raise FileExistsError(output)
     if temporary.exists() and state is None:
@@ -125,9 +159,11 @@ def encode_video(package_dir, fps, *, pattern='%06d.png', ffmpeg='ffmpeg', ffpro
                    'ffprobe_version': _run([ffprobe, '-version']).splitlines()[0],
                    'master_sha256': intent['master_sha256'],
                    'encoder_source_sha256': intent['encoder_source_sha256'], 'lossless_master_retained': True,
+                   'encoding_intent': intent,
                    'color_conversion': 'Full-range display-transformed sRGB PNG to limited-range BT.709 YCbCr; sRGB transfer retained and signaled; lossy H.264 4:2:0'})
     _write_json_atomic(pending, {'intent': intent, 'report': report})
-    temporary.rename(output)
+    from .publication import commit_exclusive
+    commit_exclusive(temporary, output)
     _write_json_atomic(final_report, report)
     pending.unlink()
     return report

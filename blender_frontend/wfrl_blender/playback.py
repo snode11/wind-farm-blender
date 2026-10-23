@@ -11,24 +11,33 @@ if _previous_unregister:
 
 _OWNER_SCENE = None
 _OWNER_WINDOW = None
+_GENERATION = 0
 
 
 def animation_started(scene, depsgraph=None):
     import bpy
-    global _OWNER_SCENE, _OWNER_WINDOW
+    global _OWNER_SCENE, _OWNER_WINDOW, _GENERATION
+    _GENERATION += 1
     _OWNER_SCENE = scene
     _OWNER_WINDOW = getattr(bpy.context, 'window', None)
 
 
 def animation_stopped(scene, depsgraph=None):
-    global _OWNER_SCENE, _OWNER_WINDOW
+    global _OWNER_SCENE, _OWNER_WINDOW, _GENERATION
     if _OWNER_SCENE == scene:
+        _GENERATION += 1
         _OWNER_SCENE = _OWNER_WINDOW = None
 
 
 def on_load_pre(_unused=None):
-    global _OWNER_SCENE, _OWNER_WINDOW
+    global _OWNER_SCENE, _OWNER_WINDOW, _GENERATION
+    _GENERATION += 1
     _OWNER_SCENE = _OWNER_WINDOW = None
+
+
+def generation():
+    """Identify the current start/stop state for deferred scene controls."""
+    return _GENERATION
 
 
 def owner_scene():

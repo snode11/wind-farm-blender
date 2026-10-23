@@ -2,15 +2,34 @@
 import math
 
 _READERS = {}
+_END_REQUEST = None
 
 
 def _stop_finished_playback():
     """A queued end callback must not stop a newly selected/restarted clip."""
     from . import playback, _cancel_playback
-    scene = playback.owner_scene()
-    if (scene is not None and reader_for(scene) is not None
-            and scene.frame_current >= scene.frame_end and playback.is_playing(scene)):
+    global _END_REQUEST
+    request, _END_REQUEST = _END_REQUEST, None
+    if request is None:
+        return
+    scene, generation, reader = request
+    if (playback.generation() == generation and playback.is_playing(scene)
+            and reader_for(scene) is reader and scene.frame_current >= scene.frame_end):
         _cancel_playback(scene)
+
+
+def _queue_finished_playback(scene):
+    import bpy
+    from . import playback
+    global _END_REQUEST
+    if bpy.app.background or not playback.is_playing(scene):
+        return
+    reader = reader_for(scene)
+    if reader is None:
+        return
+    _END_REQUEST = (scene, playback.generation(), reader)
+    if not bpy.app.timers.is_registered(_stop_finished_playback):
+        bpy.app.timers.register(_stop_finished_playback, first_interval=0)
 
 
 def reader_for(scene):
@@ -119,6 +138,10 @@ def update(scene, depsgraph=None):
     if scene.get('wfrl_scene_kind') != 'clearance_replay':
         return
     if reader_for(scene) is not None:
+        # The native player clamps dropped frames before evaluating the end.
+        # Python frame callbacks alone cannot see a terminal frame it skipped.
+        if getattr(scene, 'playback_loop_mode', None) != 'STOP_END_FRAME':
+            scene.playback_loop_mode = 'STOP_END_FRAME'
         frame = min(scene.frame_end, max(scene.frame_start, scene.frame_current))
         if frame != scene.frame_current:
             # Native timeline edits must obey the same bounds as the replay slider.
@@ -150,12 +173,12 @@ def update(scene, depsgraph=None):
                 blade.rotation_euler.z = math.radians(pitch)
     scene['wfrl_clearance_time_s'] = value['time_s']
     if scene.frame_current >= scene.frame_end:
-        import bpy
-        if not bpy.app.background and not bpy.app.timers.is_registered(_stop_finished_playback):
-            bpy.app.timers.register(_stop_finished_playback, first_interval=0)
+        _queue_finished_playback(scene)
 
 
 def on_load(_):
+    global _END_REQUEST
+    _END_REQUEST = None
     _READERS.clear()
     import bpy
     for scene in bpy.data.scenes:
@@ -194,6 +217,8 @@ def on_load(_):
 def on_history_pre(_):
     """Release replay references before native undo/redo replaces Blender IDs."""
     from . import farm_flex, playback, tip_tracking, native_camera_views, _cancel_playback
+    global _END_REQUEST
+    _END_REQUEST = None
     native_camera_views.on_history_pre(_)
     owner = playback.owner_scene()
     if owner is not None and reader_for(owner) is not None:
@@ -247,6 +272,8 @@ def register():
 def unregister():
     import bpy
     import sys
+    global _END_REQUEST
+    _END_REQUEST = None
     from . import radar_feedback
     radar_feedback.unregister()
     farm = sys.modules.get(__package__ + '.farm_flex')

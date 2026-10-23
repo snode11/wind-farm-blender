@@ -1,0 +1,75 @@
+{
+  "schema": "wfrl.release-verification.v1",
+  "version": "0.3.30",
+  "platform": "macOS",
+  "blender": "5.2.1 LTS",
+  "status": "PASS_SCOPED",
+  "host": {
+    "passed": 475,
+    "skipped": 0,
+    "groups": [
+      {
+        "passed": 442,
+        "python": "/opt/anaconda3/envs/wfrl-mac/bin/python",
+        "evidence": "host-checks.json",
+        "log": "host-tests.log"
+      },
+      {
+        "passed": 33,
+        "python": "/opt/anaconda3/bin/python",
+        "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. /opt/anaconda3/bin/python -m pytest blender_frontend/tests/test_manual_video_job.py -q -p no:cacheprovider",
+        "log": "video-host-tests.log"
+      }
+    ]
+  },
+  "package": {
+    "archive": "PROJECT_ROOT/publication/blender-0.3.30/package/wfrl_blender-0.3.30.zip",
+    "sha256": "9f381674407c07138986eb8fc96d35f8ef50ac91e9ad58b43bd8c7f5afbac16a",
+    "checksum": "PROJECT_ROOT/publication/blender-0.3.30/package/wfrl_blender-0.3.30.zip.sha256",
+    "inventory": "PROJECT_ROOT/publication/blender-0.3.30/package/wfrl_blender-0.3.30.inventory.json",
+    "package_id": "wfrl_blender",
+    "version": "0.3.30",
+    "file_count": 184
+  },
+  "canonical_payload_files_checked": 183,
+  "canonical_payload_match": true,
+  "installed_inventory_after_native": {
+    "status": "PASS",
+    "package_path": "PROJECT_ROOT/publication/blender-0.3.30/profile/extensions/wfrl_blender",
+    "verified_files": 184,
+    "mismatches": [],
+    "unexpected_files": [],
+    "ignored": [
+      "__pycache__",
+      "*.pyc"
+    ]
+  },
+  "native": {
+    "reports": [
+      "native/camera-reopen/result.json",
+      "native/camera-ownership/result.json",
+      "native/camera-save/checks.json",
+      "native/manual-pitch/checks.json",
+      "native/video-controller/create.json",
+      "native/video-controller/recover.json"
+    ],
+    "camera_reopen_checks": 45,
+    "camera_ownership_checks": 21,
+    "camera_path": "Single full saved clip to terminal -> close -> triple reopen -> replay full clip to terminal; repeated GRID/STRIP, pause/resume and delayed close race",
+    "video_controller": "Installed controller restores saved job in a second Blender process and cancels an authenticated non-media child. No rendering or encoding in this check."
+  },
+  "warnings": [
+    "Existing trainer warning on detached scalar conversion and absent raw-reward fixture arrays.",
+    "Blender exit memory diagnostics up to 0.042572 MB; no long-term memory acceptance.",
+    "Expected rejected pose edits and deliberately failing save paths are asserted by native tests."
+  ],
+  "not_verified": [
+    "physical mouse input",
+    "stable full-clip FPS",
+    "full manual video or actual encoding in this delivery",
+    "actual training or physical solver",
+    "Windows/Linux",
+    "scientific accuracy"
+  ],
+  "daily_installation_changed": false
+}

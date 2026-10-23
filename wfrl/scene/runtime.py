@@ -168,11 +168,15 @@ class SceneRuntime:
         self._last_frame = frame
         return frame
 
-    def close(self, purge: bool = True):
+    def close(self, purge: bool = True, *, strict: bool = False):
+        """strict 模式传播关闭失败并保留 driver，供调用方阻止回合重启。"""
         if self.driver is not None:
             try:
-                self.driver.close(purge=purge)
+                options = {"strict": True} if strict else {}
+                self.driver.close(purge=purge, **options)
             except Exception as e:                          # noqa: BLE001
+                if strict:
+                    raise
                 print(f"[runtime] 关闭出错（忽略）: {e}", flush=True)
             self.driver = None
 

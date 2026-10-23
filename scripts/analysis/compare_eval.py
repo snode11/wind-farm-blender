@@ -8,12 +8,9 @@ Usage:
     python compare_eval.py --episodes 20
 """
 import argparse
-import os
 
 import numpy as np
 import torch
-from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import VecNormalize
 
 from wfrl import mappo_sb3 as T
 from wfrl import mappo_central as MC
@@ -21,23 +18,20 @@ from wfrl import mappo_central as MC
 
 def eval_ippo(n_episodes):
     """参数共享 IPPO：train_mappo 的 SB3 模型。返回每回合总 return 数组。"""
-    venv = T.make_venv(norm_reward=False, training=False)
-    if os.path.exists(T.VECNORM_PATH):
-        venv = VecNormalize.load(T.VECNORM_PATH, venv.venv)
-        venv.training = False
-        venv.norm_reward = False
-    model = PPO.load(T.MODEL_PATH, env=venv)
-    rets = []
-    for _ in range(n_episodes):
-        obs, ep = venv.reset(), 0.0
-        done = np.zeros(venv.num_envs, dtype=bool)
-        while not done.all():
-            a, _ = model.predict(obs, deterministic=True)
-            obs, rew, done, _ = venv.step(a)
-            ep += float(rew[0])
-        rets.append(ep)
-    venv.close()
-    return np.array(rets)
+    model, venv = T.load_evaluation_pair()
+    try:
+        rets = []
+        for _ in range(n_episodes):
+            obs, ep = venv.reset(), 0.0
+            done = np.zeros(venv.num_envs, dtype=bool)
+            while not done.all():
+                a, _ = model.predict(obs, deterministic=True)
+                obs, rew, done, _ = venv.step(a)
+                ep += float(rew[0])
+            rets.append(ep)
+        return np.array(rets)
+    finally:
+        venv.close()
 
 
 def eval_central(n_episodes):

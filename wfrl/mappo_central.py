@@ -118,31 +118,67 @@ class Sampler:
         self._obs = self._pack(obs_dict)
         return self._obs
 
-    def step(self, actions):                              # actions: (n, act_dim)
+    def step(self, actions, *, return_info=False):         # actions: (n, act_dim)
+        """Return reset observations at episode boundaries and optional terminal state."""
         clipped = np.clip(actions, self.act_low, self.act_high)
         act_dict = {ag: {"yaw": clipped[i].astype(np.float32)}
                     for i, ag in enumerate(self.agents)}
         obs_dict, rew, term, trunc, _ = self.par.step(act_dict)
         self._obs = self._pack(obs_dict)
         r = float(np.ravel(rew[self.agents[0]])[0])       # 共享团队奖励，取一个即可
-        done = bool(term[self.agents[0]] or trunc[self.agents[0]])
+        term_flags = np.array([term[a] for a in self.agents], dtype=bool)
+        trunc_flags = np.array([trunc[a] for a in self.agents], dtype=bool)
+        done_flags = term_flags | trunc_flags
+        if done_flags.any() and not done_flags.all():
+            raise ValueError("MAPPO Sampler requires synchronized episode boundaries")
+        done = bool(done_flags.all())
+        info = {"terminated": bool(term_flags.any()),
+                "truncated": bool(trunc_flags.any())}
         if done:
+            info["terminal_observation"] = self._obs.copy()
             self._obs = self.reset()
+        if return_info:
+            return self._obs, r, done, info
         return self._obs, r, done
 
 
 # ---------------------------------------------------------------------------
 # GAE
 # ---------------------------------------------------------------------------
-def compute_gae(rews, vals, dones, last_v, gamma=0.99, lam=0.95):
+def compute_gae(rews, vals, dones, last_v, gamma=0.99, lam=0.95, *,
+                terminated=None, terminal_values=None):
+    """GAE cuts recursion at every done; only true termination disables bootstrap.
+
+    terminal_values contains the pre-reset critic value for truncated steps.
+    Calls without terminated treat each done as a true terminal state.
+    """
+    rews, vals = np.asarray(rews), np.asarray(vals)
+    dones = np.asarray(dones, dtype=bool)
+    terminated = dones if terminated is None else np.asarray(terminated, dtype=bool)
+    if rews.ndim != 1 or any(x.shape != rews.shape for x in (vals, dones, terminated)):
+        raise ValueError("GAE rewards, values and boundary flags must be matching 1D arrays")
+    if np.any(terminated & ~dones):
+        raise ValueError("A terminated step must also be an episode boundary")
+    timeouts = dones & ~terminated
+    if timeouts.any():
+        if terminal_values is None:
+            raise ValueError("Truncated steps require pre-reset terminal_values")
+        terminal_values = np.asarray(terminal_values)
+        if (terminal_values.shape != rews.shape
+                or not np.isfinite(terminal_values[timeouts]).all()):
+            raise ValueError("Truncated steps require matching finite terminal_values")
     T = len(rews)
     adv = np.zeros(T, dtype=np.float32)
     gae = 0.0
     for t in reversed(range(T)):
-        mask = 1.0 - dones[t]
-        next_v = last_v if t == T - 1 else vals[t + 1]
-        delta = rews[t] + gamma * next_v * mask - vals[t]
-        gae = delta + gamma * lam * mask * gae
+        if terminated[t]:
+            next_v = 0.0
+        elif timeouts[t]:
+            next_v = terminal_values[t]
+        else:
+            next_v = last_v if t == T - 1 else vals[t + 1]
+        delta = rews[t] + gamma * next_v - vals[t]
+        gae = delta + gamma * lam * (not dones[t]) * gae
         adv[t] = gae
     ret = adv + vals
     return adv, ret
@@ -182,7 +218,9 @@ def train(total_timesteps, n_steps=1024, n_epochs=10, mb_steps=256,
         B_state = np.zeros((n_steps, smp.state_dim), np.float32)
         B_val = np.zeros(n_steps, np.float32)
         B_rew = np.zeros(n_steps, np.float32)
-        B_done = np.zeros(n_steps, np.float32)
+        B_done = np.zeros(n_steps, dtype=bool)
+        B_terminated = np.zeros(n_steps, dtype=bool)
+        B_terminal_value = np.zeros(n_steps, np.float32)
 
         for t in range(n_steps):
             raw_obs = smp._obs                              # (n, obs_dim)
@@ -195,7 +233,7 @@ def train(total_timesteps, n_steps=1024, n_epochs=10, mb_steps=256,
                 logp = dist.log_prob(a).sum(-1)
                 v = critic(torch.as_tensor(state_n, device=DEVICE))
             a_np = a.cpu().numpy()
-            _, r, done = smp.step(a_np)
+            _, r, done, info = smp.step(a_np, return_info=True)
 
             # 回报归一化：先累加折扣回报、更新 std，再用它归一当前 reward
             ret_acc = ret_acc * gamma + r
@@ -207,15 +245,22 @@ def train(total_timesteps, n_steps=1024, n_epochs=10, mb_steps=256,
             B_obs[t], B_act[t] = obs_n, a_np
             B_logp[t] = logp.cpu().numpy()
             B_state[t], B_val[t] = state_n, float(v)
-            B_rew[t], B_done[t] = r_norm, float(done)
+            B_rew[t], B_done[t] = r_norm, done
+            B_terminated[t] = info["terminated"]
             obs_rms.update(raw_obs)
+            if done and not info["terminated"]:
+                # Use the same statistics as the next policy/value observation.
+                terminal_state = obs_rms.norm(info["terminal_observation"]).astype(np.float32).reshape(-1)
+                with torch.no_grad():
+                    B_terminal_value[t] = float(critic(torch.as_tensor(terminal_state, device=DEVICE)))
             global_step += n
 
         # bootstrap 最后一步的 value
         with torch.no_grad():
             last_state = obs_rms.norm(smp._obs).astype(np.float32).reshape(-1)
             last_v = float(critic(torch.as_tensor(last_state, device=DEVICE)))
-        adv, ret = compute_gae(B_rew, B_val, B_done, last_v, gamma, lam)
+        adv, ret = compute_gae(B_rew, B_val, B_done, last_v, gamma, lam,
+                               terminated=B_terminated, terminal_values=B_terminal_value)
 
         # ---- 更新 ----
         obs_t = torch.as_tensor(B_obs, device=DEVICE)        # (T,n,obs)

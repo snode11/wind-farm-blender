@@ -1,6 +1,6 @@
 # PPO、参数共享 IPPO 与集中式 MAPPO 环境配置
 
-本文按源码区分算法与训练入口。Blender 公开安装 ZIP 为 **0.3.28**（标签 v0.3.28），当前项目源码使用 `wind-farm-rl-all-work` 分支；日常安装为 **0.3.28**，181 文件与公开上传源包一致。离线演示无需训练环境，[入口与身份见演示指令单](../demos/演示指令单.md)[和发布状态](../blender/发布状态与验证范围.md)。
+本文按项目 Python 源码区分算法与训练入口，源码入口使用 `wind-farm-rl-all-work` 分支。Blender 公开安装包与开发机日常安装分别按[发布状态与验证范围](../blender/发布状态与验证范围.md)识别；项目后端与训练工具不随扩展 ZIP 安装。离线演示无需训练环境，[入口见演示指令单](../demos/演示指令单.md)。
 
 ## 1. 先选实际算法
 
@@ -21,11 +21,31 @@ Bridge 在 POSIX 平台通过 [IsolatedTrainer](../../wfrl/blender_bridge/isolat
 
 Interactive 记录未经过 `tanh` 和动作约束层的高斯采样动作。采样与更新均只沿动作维汇总 log-prob，缓存形状为 `(steps, agents)`。每个机组分别计算 `ratio = exp(new_logp - old_logp)` 并进行 PPO 裁剪；多控制量先组成该机组的联合动作概率，不逐分量独立裁剪，也不把所有机组的概率合并为一个 ratio。团队优势广播到 `(batch, agents)` 后统一标准化，单元素时使用零标准差以避免非有限值；代理目标对时间步和机组取均值。熵项对高斯分布的动作维求和，再对时间步与机组取均值。
 
-训练奖励缩放使用折扣累加器 `G = gamma * G + reward` 和二阶矩指数移动平均 `M = 0.99 * M + 0.01 * G**2`，两者跨 rollout 保留；本轮实际采集的奖励统一除以本轮末的 `sqrt(M) + 1e-8` 后计算 GAE。该实现不等同于 SB3 `VecNormalize`。仪表板的 `mean_raw_reward` 来自本轮原始奖励均值，归一化 `mean_reward` 通道没有输出，不将两者混称。
+Interactive 的 `episode_steps` 指每回合用于训练的控制步数，默认 `0` 表示单长回合；正值按回合关闭并重建 runtime，每回合执行 `warmup_steps` 次预热。预热不进入训练样本，总训练预算仍为 `iters * n_steps`，最后一个回合按剩余步数缩短。一个 rollout 可以跨回合；回合末使用重置前终点的 critic 值自举，并切断跨回合 GAE 递推。后端提前结束时明确报错，不继续采样已停止的 runtime。
+
+回合切换与训练收尾使用严格关闭：排空、环境关闭或 MPI 子通信器断开无法确认时报告失败并阻止启动下一回合；不把清理异常视为正常回合完成。暂停和取消在控制步、回合启动及预热边界检查。
+
+`step` 和迭代计数贯穿训练，`episode` 从零编号；仿真时间属于当前回合，可以在回合重启时回零。实时曲线在回合变化或时间回退处断线，保留训练统计。Blender 工作区的 **WFRL / 后端运行 → Episode steps** 设置仅用于 Interactive；安装版需要匹配扩展载荷，后端改动需重启 Bridge。
+
+训练奖励缩放使用折扣累加器 `G = gamma * G + reward` 和二阶矩指数移动平均 `M = 0.99 * M + 0.01 * G**2`。`G` 在同一回合跨 rollout 保留，并在回合边界清零；`M` 跨回合保留。本轮实际采集的奖励统一除以本轮末的 `sqrt(M) + 1e-8` 后计算 GAE。该实现不等同于 SB3 `VecNormalize`。仪表板的 `mean_raw_reward` 来自本轮原始奖励均值，归一化 `mean_reward` 通道没有输出，不将两者混称。
 
 全场功率只有在同一步的所有预期机组都具有有限标量读数且合计有限时有效。缺测在 Trainer 内部保留为 `NaN`；迭代 `mean_power` 使用本轮实际收集窗口的全部控制步，任一步全场功率无效就将整轮统计通过协议输出为 `null / invalid`，不忽略缺测样本计算部分均值。实时功率通道完全未返回时保留 `unsupported`；真实零功率仍是有效数值。有效机组自己的通道不因其他机组缺测而被抹除。
 
-以上定义属于当前后端源码，不据此宣称公开 0.3.28 ZIP、本机已安装扩展或保存 checkpoint 已重新验证；训练收敛、物理控制收益和跨平台运行须另有匹配证据。
+以上定义属于当前后端源码，不据此宣称 Blender 安装包、日常扩展或已有 checkpoint 的运行效果已验证；训练收敛、物理控制收益和跨平台运行须另有匹配证据。
+
+### 策略动作与 checkpoint
+
+项目使用 [PolicyActionContract](../../wfrl/policy_actions.py) 描述高斯网络输出到控制增量的变换。checkpoint 的 `action_contract` 包含 `version=1`、有序 `controls`、`transform`、逐通道 `low` 和 `high`。`tanh_scale` 要求对称边界，计算 `tanh(raw) * high`；`clip` 将原始输出裁剪到保存的上下界。变换结果随后进入约束层，PPO 缓存仍保留原始高斯动作及其 log-prob。
+
+Studio / Interactive 使用 `tanh_scale`，包括仅控制 yaw 或单个非 yaw 控制量的场景；Replay 从 checkpoint 读取同一合同，不按动作维度猜测变换。`train_fastfarm.py` 的高斯 yaw 策略使用 `clip`，其 checkpoint 与命令行 rollout 保持相同规则。控制顺序、动作和观测维度、归一化统计、机组数量及运行时边界须一致；保存了场景的模型还校验后端、机型、时间步长与机组布局。
+
+无版本动作合同的模型只接受可识别的保存格式：Studio 的 `scene`、`controls`、`critic` 组合对应 `tanh_scale`；CLI 的完整 `env_id`、`obs_duty`、`recurrent`、`duty_penalty` 组合对应 yaw 的 `clip`。该兼容路径使用固定控制边界，并须与实际运行时一致；缺失、冲突或无法判定的元数据明确报错。没有保存场景的 CLI 模型不能仅凭现有字段证明完整布局、机型和时间步长匹配。
+
+### 回合结束与时间截断
+
+SB3 包装器在自动重置前保存各机组的完整 `terminal_observation`，包括派生观测字段；只有截断且没有真正终止时才设置 `TimeLimit.truncated=True`，供 SB3 用终点观测计算价值自举。共用风场要求机组同步结束，不能在部分机组结束后把其复位状态当作普通下一步。
+
+集中式 FLORIS MAPPO 分开处理价值自举和 GAE 递推边界：真正终止的下一状态价值为零；步数上限截断使用重置前终点的 critic 值；两种回合边界都截断优势递推，避免下一回合的奖励传播回来。普通 rollout 切片使用连续轨迹的下一状态价值。这些规则分别由对应入口实现，不代替其他训练路线的算法定义。
 
 ## 2. 依赖与安装
 
@@ -64,17 +84,22 @@ mpiexec -n 1 python scripts/train/train_fastfarm.py \
 
 动态入口默认每回合重新启动后端，warmup 不进入训练统计；`--episode-steps 0` 才是保留的单长回合历史口径。`--recurrent` 仅切换 GRU critic，actor 仍是前馈共享网络。源码存在不代表 GRU 优于前馈或 MAPPO 优于 IPPO 已得到对照证据。
 
-### 评估前核对模型与归一化
+### 评估、续训与归一化
 
 - SB3 IPPO：`results/checkpoints/mappo_ablaincourt.zip` 与 `vecnormalize_mappo.pkl`。
 - 单智能体 PPO：`ppo_ablaincourt.zip` 与 `vecnormalize.pkl`。
 - 集中式 FLORIS MAPPO：`mappo_central_ablaincourt.pt`；观测统计在 checkpoint 内。
 - FAST.Farm MAPPO：由环境、种子、奖励、回合及 tag 共同命名的 `.pt`，检查其中 `obs_keys`、维度、机组顺序、控制量与观测统计。
 
-SB3 两个脚本缺少权重时可能创建新模型，缺少归一化时也有回退路径；不能仅凭 `--eval-only` 返回就认定已评估训练模型。确认配套文件后才使用：
+SB3 IPPO 的 `--eval-only` 自动加载模型与归一化文件，缺少任一文件或校验不兼容时明确失败。评估固定 `training=False`、`norm_reward=False`，冻结观测统计并报告原始奖励。`--resume` 恢复模型、观测及奖励统计和累计步数，设置 `training=True`、`norm_reward=True`；`--timesteps` 表示追加的 agent transitions，实际仍按完整 rollout 取整。
+
+算法对比入口 `scripts/analysis/compare_eval.py` 的 IPPO 分支和 `wfrl/viz/animate.py` 的策略动画通过 `load_evaluation_pair()` 加载同一模型／归一化配对，使用冻结统计和原始奖励；缺文件或配对不匹配时停止。该函数返回的环境由调用方关闭，加载失败时函数负责关闭已创建的环境。
+
+SB3 IPPO 保存时给模型和归一化文件写入相同配对标识，加载时校验标识、观测／动作空间、有限统计量和折扣因子。无配对标识的现有文件可以按兼容性校验加载，但仅凭空间和统计形状不能证明二者来自同次训练，仍须核对来源。单智能体 PPO 和多模态 IPPO 有各自的加载入口，不能据此推定它们也具备上述配套加载检查；单智能体 PPO 缺少权重或统计量时仍有回退路径，使用前须确认对应文件。
 
 ```bash
-python scripts/train/train_mappo.py --resume --eval-only
+python scripts/train/train_mappo.py --eval-only
+python scripts/train/train_mappo.py --resume --timesteps 50000
 python scripts/train/train_ppo.py --eval-only
 python -m wfrl.mappo_central --eval-only
 ```

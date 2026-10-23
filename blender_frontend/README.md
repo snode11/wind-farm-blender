@@ -11,7 +11,7 @@
 | 本地日常安装 | `bl_ext.user_default.wfrl_blender`，0.3.28 安装包、181 文件，包含 NREL／rootkink 叶片外形选择、T1/T2/T3 Down 机舱下视及当前相机与播放修复。[安装核对](../publication/daily-installation.json)标识实际来源与验证范围；该安装载荷身份见[交付身份](../publication/blender-0.3.28.json)。 |
 | GW184 | [0.4.0 独立运行包](../docs/blender/GW184三相机与缺陷编辑器.md)；184 m 尺寸合成刚性模型、固定三相机和六类缺陷。模型与配置不能直接替代 NREL。 |
 
-日常安装使用`outputs/frontend-stability-fixes/validation/package/wfrl_blender-0.3.28.zip`（本地文件；[逐文件清单](../outputs/frontend-stability-fixes/validation/package/wfrl_blender-0.3.28.inventory.json)），SHA-256 为 `b15c491db68fda6a2bdfce4228d5db040fa6ae0f0a69f886935ab0af9b775fda`，该安装载荷身份见[交付身份](../publication/blender-0.3.28.json)。[安装身份](../publication/daily-installation.json)记录源码、ZIP、181 个安装文件及用户配置保护结果。[安装载荷回归](../outputs/frontend-stability-fixes/installed-regressions.json)覆盖原生撤销／重做与场景删除、三路镜头隔离、观察保存与失败恢复、缺陷辅助对象删除和关闭重试、退出重建后的模型切换及共享绑定故障恢复。窗口检查使用脚本和原生操作器；完整片段性能、长期运行、物理输入和科学精度另行验证。
+日常安装使用`outputs/frontend-stability-fixes/validation/package/wfrl_blender-0.3.28.zip`（记录的构建路径，当前本地 ZIP 缺失；[逐文件清单](../outputs/frontend-stability-fixes/validation/package/wfrl_blender-0.3.28.inventory.json)），SHA-256 为 `b15c491db68fda6a2bdfce4228d5db040fa6ae0f0a69f886935ab0af9b775fda`，该安装载荷身份见[交付身份](../publication/blender-0.3.28.json)。[安装身份](../publication/daily-installation.json)记录源码、ZIP、181 个安装文件及用户配置保护结果。[安装载荷回归](../outputs/frontend-stability-fixes/installed-regressions.json)覆盖原生撤销／重做与场景删除、三路镜头隔离、观察保存与失败恢复、缺陷辅助对象删除和关闭重试、退出重建后的模型切换及共享绑定故障恢复。窗口检查使用脚本和原生操作器；完整片段性能、长期运行、物理输入和科学精度另行验证。
 
 公开包 SHA-256 和匹配验证见[发布状态](../docs/blender/发布状态与验证范围.md)。工作区源码、构建 ZIP、已安装扩展与公开附件分别核对，不能依据版本号推定文件相同。日常启动器加载安装版；发布不会自动升级日常安装，更新安装后需要完全重启 Blender。
 
@@ -28,6 +28,7 @@
 ## 当前主要结构
 
 - `manual_scene.py`、`manual_control.py`、`manual_motion.py`、`manual_pose.py` 与 `panels/manual_control.py`：独立刚性场景、墙钟积分、姿态预设、按机组当前值微调、三机概览及严格姿态 JSON。`manual_pose.py` 只使用标准库，定义 `wfrl.manual-pose.v1` 和角度边界；Blender 操作器先校验所选机组再写入参数、对象与时钟，导入后暂停。文件保存不暂停运行，运动相位以同一墙钟时刻采样；[操作说明](../docs/blender/风机手动控制.md)。
+- `manual_video.py`、`manual_video_job.py`、`manual_video_render.py` 与仓库 `scripts/blender/render_manual_video.py`：保存已确认试验的场景副本，独立监管后台渲染 T1 Down，复用 `wfrl.camera_video.media` 编码与检查。`scripts/blender/manage_manual_video.py` 提供持久化作业的查询、等待、取消和完整母版重试。面板提供输出路径、保持时长、进度、取消和打开视频；安装入口通过偏好的 `project_dir` 定位完整工作区；注册阶段延迟到可访问场景后恢复作业。渲染后台使用该工作区源码，监管进程显式继承该项目的模块搜索目录。依赖独立 Python 3.11+、FFmpeg／FFprobe，以及 macOS／Linux 的 `flock` 和 `waitid(WNOWAIT)`。
 - `panels/farm_replay.py`：共享播放、单步、复位及功能页；普通三机回放提供进度定位，统一重建对照隐藏进度滑块。View 页组织观察相机，切视角保留回放时刻。
 - `split_reconstruction.py`、`split_reconstruction_timing.py`、`split_reconstruction_ui.py`：保存分屏生命周期、完整风机显示、独立视口、固定采样映射、统一入口、模式切换及左下角状态说明；底层样本步进工具保留，统一侧栏使用单帧步进。规范资源为 `assets/examples/mappo_reconstruction_split.blend`。
 - `split_mappo_texture.py` 与 `assets/blade_recon_mappo_tex/`：同源纹理同步回放，使用原两相机实验的 601 个保存状态与动态标定生成固定 RGBA 图集，共用 MAPPO 的 60 Hz 时间轴；`split_surface_texture.py` 的 120 样本合成实验继续使用独立游标。`split_texture_settings.py` 保存各来源的显示选择并在失败切换时回滚状态。来源、模型等价和安装边界见[发布状态与验证范围](../docs/blender/发布状态与验证范围.md)。
@@ -44,6 +45,22 @@
 
 手动场景以 `wfrl_scene_kind=manual` 标识，使用独立命名空间的对象、网格、材质、World 与图片，复用 NREL 参考几何构造，不加载 demo 的柔性结果驱动。每台风机通过场景内对象指针绑定偏航、转子及叶片；控制前检查归属、装配层级和跨场景共享。RPM 按单调墙钟积分，改变速度保留相位；“全部”只传播正在编辑的字段，参数差异以“多值”提示，集体桨距统一覆盖三片叶片。批量设置分别变桨模式时，`_batch_update` 跳过已处于目标模式的机组；只在从关闭切换为开启时，以该机当前集体桨距初始化三片叶片。暂停时可设置叶轮角度；全部零 RPM 时禁用运行。参数和姿态随 `.blend` 保存，加载、撤销、重做、退出及失效绑定均暂停运动。首次创建与损坏重建分别形成撤销记录，重建保留返回视图。材质预览使用独立天空和轻量地形，退出恢复源场景预览设置。面板进入／返回保留源场景及播放位置，活动后端连接阻止进入；手动运动不写入后端或回放时钟，也不产生物理测量值。手动场景与三相机、缺陷编辑器的串联暂缓，不属于当前交付范围。
 
+工作区源码的手动场景固定使用 `rootkink` 叶根拐点改型；`manual_scene._ensure_blade_model()` 以独立网格保留材质、UV、装配与参数，不改 demo 网格。`manual_motion.PitchTrial.pose_at(t)` 从冻结起点计算累计方位及三片桨距；`interpolation` 为 `SMOOTH` 时使用起止速度为零的三次平滑插值，为 `LINEAR` 时按各片桨距差除以共同变桨时长匀速过渡，到达目标后保持。未指定该字段的配置按 `SMOOTH` 解析。`TrialClock` 是 T1 试验的唯一时钟，普通 `_CLOCKS` 不再写入该 T1。`wfrl_manual_trial` 分开保存待确认输入、JSON 冻结配置、控制启用状态与已过时间；结束试验保留最近确认的冻结配置，下一次确认才替换。目标填写不应用，整体校验后按当前实际姿态确认。暂停／继续作用于旋转和变桨，复位恢复完整起点，结束试验后才能设置另一组或更改 T1 姿态与 RPM。模型身份、起点、目标、时长、变桨方式和试验时间随 `.blend` 保存，重开和撤销重做后暂停；姿态 JSON 仍只保存同刻姿态。
+
+手动 **T1 Down** 向 `cameras.ensure_gimbal()` 显式提供 T1 条目的 `yaw_object`、独立相机名与资源归属，复用 `_down_mount()`、`down_gimbal()` 和完整画框适配。相机继承机舱，不随叶轮旋转或追踪叶片；切换 Down／整机保留试验时钟及状态，真实结构和自遮挡保留。这些手动试验能力仅属于工作区源码，尚未构建到公开包或日常安装；手动工况的 RTSP 接入及识别算法不在实现范围。
+
+手动面板的视频规格为 1920×1080、25 fps、H.264 MP4；变桨时长默认 8 s，目标保持默认 7 s，共 15 s、375 帧。`manual_video_render.frame_count()` 要求总时长对应整数帧。每帧以 `PitchTrial.pose_at(k/fps)` 从冻结起点确定累计叶轮角和三片桨距，导出不依赖预览已过时间；后台停用墙钟，只驱动 T1，T2/T3 保持快照姿态。EEVEE 默认 16 个采样，关闭运动模糊，固定完整画幅和色彩设置，不模拟实体曝光。
+
+`wfrl.manual-video-job.v2` 记录随机作业身份和监管凭据、场景副本、场景名、冻结试验、输出路径、画幅、帧率、保持时长及编码器路径。`<文件名>_data_<标识>/` 保留 `master_frames/`、`frames.csv`、`camera.json`、`experiment.json`、`scene.blend`、作业／状态／监管端点 JSON、运行日志和检查结果。`frames.csv` 使用连续 `frame_id`／`video_pts` 和 `time_s=k/fps`，另存同刻 RPM、累计方位、三片桨距及变桨／保持标记。固定的单叶片 20° 工况保持 rootkink、T1 Down、9 RPM、4 s 匀速变桨和 176 s 保持，共 4500 帧；B2/B3 全程 0°。
+
+`manual_video_job` 的独立监管进程继承输出与作业锁，持有原始 `Popen` 身份；在停止进程组前用 `waitid(WNOWAIT)` 保留主进程身份，避免 PID／进程组编号复用。取消覆盖同组子进程并处理主进程先退出的情况；写入最终状态前完成进程收尾。查询和取消通过绑定作业、运行实例和随机请求的 HMAC 本机端点完成，磁盘 PID 仅用于诊断。`PREPARING`、`RENDERING`、`ENCODING`、`VERIFYING`、`PUBLISHING`、`FINALIZING`、`CANCELLING` 属于运行状态；仅带 `final=true` 的 `COMPLETE`／`FAILED`／`CANCELLED` 是最终结果。`LOST` 表示无法验证监管联系，不冒充退出或取消；输出锁仍被持有时继续拒绝重复启动。源 `.blend` 保存 `wfrl_manual_video_job` 后可在重开时恢复监管，作业路径也可独立查询。场景副本不认领源场景作业。
+
+`master.json` 只在全帧完成后封存，绑定 `job.json`、快照、相机、实验来源、姿态 CSV、逐帧 SHA-256 和编码配置。`retry --job <job.json>` 在同一作业和输出锁下核对完整母版，调用 `encode_video(..., resume=True)` 恢复受输入哈希和所有权限制的编码事务，再执行严格解码、尺寸、帧数、时间戳与时长验证。已完成编码通过其保存的 `encoding_intent` 和成片哈希复用；未知成片、符号链接、缺帧、内容或来源变化均拒绝，已成功作业不改写状态。此入口不启动 Blender，不实现逐帧渲染续传。
+
+发布由 `wfrl.camera_video.publication` 在目标文件系统复制、刷新并提交完整文件。macOS `renamex_np(RENAME_EXCL)`、Linux `renameat2(RENAME_NOREPLACE)` 或可用的硬链接提交均拒绝替换已有目录项；原生接口不可用且目标不支持硬链接时，渲染前预检拒绝。跨文件系统复制使用目标侧暂存，发布凭据绑定暂存文件身份和成片哈希，支持提交完成但状态写入中断后的识别。普通失败及监管取消清理已记录的自有暂存，未知文件保留。输出侧锁名持久保留，只释放锁；按目标父目录身份和规范化文件名串行化同机作业。生成脚本默认等待最终结果，脱离运行须显式 `--detach`；命令和退出码见[手动视频操作说明](../docs/blender/风机手动控制.md#导出变桨视频)。
+
+监管、恢复与发布有纯 Python 子进程及非媒体占位文件回归；真实 Blender 场景重开、编码、完整视频、Linux 及实际跨文件系统集成仍需单独验证。源码修改不表示安装版或公开附件已更新。
+
 ## 当前三相机维护要点
 
 三台相机共同安装在 T1 机舱外伸支架末端，光心随整个盒体运动，各路保留独立方向与视场。贴合约束作用于支架安装端，不能把盒体背面贴住机舱当作默认安装；自由 XYZ 操作会解除贴合约束。
@@ -59,6 +76,10 @@
 当前源码中，观察会话分别保留代理对象与镜头数据引用，分步释放绘制回调、代理和窗口，并独立恢复预览画质及主视口。已经删除的 RNA 不阻止其余清理；未释放的资源保留供再次关闭重试。布局事务提交后，释放失败的旧相机对象与镜头数据也分别进入重试队列；对象已删除仍可回收其镜头数据，数据仍有用户时等待后续清理。正常释放时仍被其他对象共享的数据不纳入失败重试队列。准备／观察失败保存在场景的 `wfrl_native_camera_error` 并显示于三相机主面板，成功完成重开后清除。
 
 相机窗口的播放按钮和时间提示按实际场景播放归属显示。另一场景占用播放器或活跃播放器归属不明时，播放与单步按钮禁用；空格键请求和直接调用同样拒绝暂停或抢占该播放器。关闭及延迟恢复也保留另一场景的播放。源码同步不改变既有公开 ZIP 或日常安装的身份。
+
+工作区的单路与三路播放按钮复用回放重播入口：位于终帧时从起点播放，播放期间采用 Blender 的 `STOP_END_FRAME` 模式停在片尾，丢帧不使片段意外循环。片尾停止请求绑定场景、读取器与播放代次；关闭后的延迟续播也校验播放代次，期间发生新的播放、暂停或加载就使旧请求失效。中途关闭保留当前时刻和同场景播放，不抢占其他场景。
+
+[源码窗口验证](../outputs/camera-reopen-verification/final-native/result.json)记录 macOS Blender 5.2.1 独立窗口中的单路完整片段、终帧关闭重开三路、三路完整片段、重复切换、暂停、关闭续播及旧延迟恢复失效。三路均有推进与终帧绘制记录；脚本调用原生操作器，不等同于物理鼠标操作、稳定 FPS、安装载荷或跨平台验收。记录中的源码摘要界定证据范围。
 
 相机视锥并集、射线可见性与拼接成功是不同检查。参考姿态的连续投影和重叠已有证据；根部连接件、机舱和叶片自身仍会遮挡局部表面，完整无遮挡尚未通过。不能隐藏真实结构制造几何通过结果，也不能将此仿真安装作为实体标定。
 
@@ -306,6 +327,10 @@ S2/S3 按同一保存时刻、同一叶片的有效命中配对，S1 有效叶�
 当前后端源码的 `BridgeServer.poll()` 即使没有客户端也调用 `BackendSession.tick()`，继续读取训练进度、检测退出与失败并清理已结束会话的临时资源。快照保留最新状态，训练统计可以按类型合并；`lifecycle`、`safety_event` 和 `error` 使用独立有界可靠队列，不被统计挤出。可靠队列真实溢出时报告 `EVENT_OVERFLOW`、进入 `FAILED` 并停止会话，不静默丢弃。重连恢复当前状态、各类最新统计及仍保留的可靠事件，并计入等待期间的数据年龄；不承诺补回每个观察样本或完整观察历史。
 
 实时全场功率要求同一步的全部预期机组都有有限标量读数，且合计有限；任一缺测或无效都使全场值保持 `null / invalid`，通道完全未返回时为 `unsupported`。有效机组自己的功率仍可显示，真实零功率仍有效，不能以部分合计或补零掩盖缺测。Interactive 在 POSIX 平台经 `IsolatedTrainer` 和 `trainer_worker` 进入 Studio Trainer 的共享 actor、集中式 critic 路径；Formal Training 使用独立训练入口。迭代统计完整性与目标定义见[训练入口与合同](../docs/training/MAPPO_SETUP.md)。
+
+项目侧 Replay 从 checkpoint 的动作合同读取控制顺序、变换与边界，并校验观测、机组及运行时兼容性。Studio / Interactive 的 `tanh_scale` 与 CLI 高斯 yaw 策略的 `clip` 分别保留；单控制量不作为选择变换的依据。可识别的无版本模型按保存格式校验，元数据缺失或冲突时明确失败。[动作合同与兼容范围](../docs/training/MAPPO_SETUP.md#策略动作与-checkpoint)属于项目 Python 后端，更新后须重启 Bridge，不表示扩展安装包或既有模型的物理控制效果已验收。
+
+工作区 Interactive 的 **Episode steps** 对应 `episode_steps`：`0` 保持单长回合，正值指定每回合训练控制步数；每回合独立预热，预热不占 `iters * n_steps` 的训练预算。快照的全局 `step` 保持递增，`context.episode` 区分从零编号的回合；仿真时间允许回零，遥测曲线在回合或时间边界断线，训练统计继续保留。[回合与 GAE 规则](../docs/training/MAPPO_SETUP.md#interactive-的采样与更新)由后端实现；配置面板和曲线变更需匹配的扩展安装载荷。
 
 [isolated_trainer.py](../wfrl/blender_bridge/isolated_trainer.py) 的 `launcher_environment()` 移除继承的 OMPI/PMI/PMIX/OPAL/PRTE 作业身份变量，只保留 `OMPI_MCA_btl`、`OMPI_MCA_pml` 及各自以下划线连接的传输配置子项。macOS 未显式设置 BTL 时默认 `self,tcp`；未设置 TCP 接口 include/exclude 时默认 `lo0`，保留调用方的显式传输选择。后端源码需在重启 Bridge 后生效，重新安装扩展 ZIP 不会更新服务器或 MPI 环境。
 
