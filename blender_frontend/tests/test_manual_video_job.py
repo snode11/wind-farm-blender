@@ -477,6 +477,19 @@ class SupervisionTests(unittest.TestCase):
         time.sleep(.1)
         self.assertEqual(content, (self.root / 'heartbeat').read_bytes())
 
+    @unittest.skipUnless(os.name == 'posix', 'Lease requires POSIX flock')
+    def test_empty_lock_file_can_be_claimed_under_exclusive_flock(self):
+        path = jobs.output_lock(self.job['output_mp4'])
+        path.touch()
+        inode = path.stat().st_ino
+        with jobs.Lease(path, self.job['job_id']):
+            self.assertEqual(path.stat().st_ino, inode)
+            self.assertEqual(jobs.read_json(path), dict(schema=jobs.LEASE_SCHEMA, owner=self.job['job_id']))
+            self.assertTrue(jobs.lease_busy(path, owner=self.job['job_id']))
+            with self.assertRaisesRegex(ValueError, '已有作业占用'):
+                jobs.Lease(path, 'other owner')
+        self.assertFalse(jobs.lease_busy(path))
+
     def test_unowned_or_symlink_lock_files_are_rejected(self):
         path = jobs.output_lock(self.job['output_mp4'])
         for content in (b'foreign file', b'[]', b'{}'):
@@ -530,6 +543,7 @@ class SceneRecoveryTests(unittest.TestCase):
         jobs.write_json(self.root / 'scene-binding.json', dict(scene_name='manual', scene_owner='owner'))
 
     def cleanup(self):
+        self.ui._QUERIES.clear()
         if jobs.lease_busy(self.root / 'supervision.lock'):
             jobs.cancel(self.path)
         self.temp.cleanup()
@@ -545,6 +559,14 @@ class SceneRecoveryTests(unittest.TestCase):
         copy.name, copy.session_uid = 'manual copy', 2
         self.assertFalse(self.ui.active(copy))
         self.assertEqual(self.ui.cancel(self.scene)['state'], 'CANCELLED')
+
+    def test_terminal_status_does_not_reactivate_poll_tracking(self):
+        jobs.start(self.path, command=[sys.executable, '-B', '-c', 'import time;time.sleep(20)'])
+        self.ui._after_load(None)
+        self.ui.cancel(self.scene)
+        self.ui._poll()
+        self.assertEqual(self.ui.status(self.scene)['state'], 'CANCELLED')
+        self.assertFalse(self.ui._JOBS)
 
     def test_publish_preflight_failure_precedes_snapshot_or_background_launch(self):
         from wfrl.camera_video import publication

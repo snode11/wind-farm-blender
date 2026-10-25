@@ -92,24 +92,31 @@ def get_material(name: str, *, namespace="WFRL"):
     return material
 
 
-def refresh_turbine_surfaces(objects):
-    """Rebind only named WFRL fittings, including models saved by older builds."""
-    import bpy
-    for name in SURFACES:
-        if bpy.data.materials.get('WFRL.' + name):
-            get_material(name)
+def turbine_surface_kind(name):
+    """Material role for generated exterior metalwork and elastomer fittings."""
     metal_parts = ('MainShaft', 'YawBearing', 'YawPedestal', 'RootFlange',
                    'Vent.Louvre', 'ServiceDoor.Handle', 'ServiceDoor.Hinge', 'AccessRail.')
     rubber_parts = ('PitchSeal', 'YawSeal', 'YawSkirt', 'RoofGasket')
+    return ('metal' if any(part in name for part in metal_parts) else
+            'rubber' if any(part in name for part in rubber_parts) else None)
+
+
+def refresh_turbine_surfaces(objects, *, object_prefix='WFRL.Turbine.', material_factory=None):
+    """Rebind named generated fittings using the selected material factory."""
+    import bpy
+    material_for = material_factory or get_material
+    if material_factory is None:
+        for name in SURFACES:
+            if bpy.data.materials.get('WFRL.' + name):
+                get_material(name)
     for obj in objects:
-        if obj.type != 'MESH' or not obj.name.startswith('WFRL.Turbine.'):
+        if obj.type != 'MESH' or not obj.name.startswith(object_prefix):
             continue
         if '.ClearanceRadar' in obj.name:
             continue  # Radar material slots are maintained by ensure_radar.
-        kind = ('metal' if any(part in obj.name for part in metal_parts) else
-                'rubber' if any(part in obj.name for part in rubber_parts) else None)
+        kind = turbine_surface_kind(obj.name)
         if kind and obj.data.materials:
-            obj.data.materials[0] = get_material(kind)
+            obj.data.materials[0] = material_for(kind)
 
 
 def wake_volume_material():

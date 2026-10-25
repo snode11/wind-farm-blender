@@ -110,7 +110,7 @@ def _pack_obs(self, obs_dict):
 - 输出：`{"yaw": (7,1), "wind_speed": (7,1), ...}`（按 key 组织，每个 key 把 7 台**堆叠成一个批**）。
 - **为什么**：网络前向要的是「批张量」。把 7 台同一个 key 堆成 `(7, dim)`，就能一次前向同时算 7 台——批里的第 i 行就是第 i 台机组。这一步是「7 台共用一次前向」的物理形态。
 
-> 多模态版 `MMVecEnv` 只在这里多塞两个 key：`vibration (7,6)` 和 `wake_image (7,1,48,48)`，其余流程完全一致。
+多模态版 `MMVecEnv` 在此加入 `vibration (7,6)` 和可选的 `wake_image (7,1,48,48)`；`--no-image` 省略图像字段。Actor 与 critic 都读取这些本机观测，机组仍映射为 VecEnv 的各行样本。
 
 ---
 
@@ -170,6 +170,8 @@ for epoch in 1..10:
 `--resume` 将 `mappo_ablaincourt.zip` 与 `vecnormalize_mappo.pkl` 配套恢复，保留观测／奖励统计与累计训练步数。加载检查观测／动作空间、统计量、折扣因子和文件配对标识；缺项或不匹配时明确报错。无配对标识的兼容文件仍需核对训练来源，形状匹配不能证明其归属。
 
 > 多模态版有个关键区别：`norm_obs_keys` 只归一化标量+振动，**图像不使用 VecNormalize 的逐维运行统计**；它仍由当前图像输入和特征提取路径处理。不能一般化为“图像归一化会毁掉空间结构”。
+
+多模态入口 `scripts/train/train_mappo_mm.py` 使用独立配对 `mappo_mm_ablaincourt.zip` 与 `vecnormalize_mappo_mm.pkl`。`--eval-only` 自动加载二者，冻结统计并返回原始奖励；`--resume` 恢复模型、观测／奖励统计与累计 agent transitions，`--timesteps` 为追加量，按完整 rollout 取整。图像模式须与保存模型一致；使用 `--no-image` 训练时，续训和评估也须携带该参数。缺少文件、归一化通道或模型空间不兼容时明确失败。
 
 ---
 

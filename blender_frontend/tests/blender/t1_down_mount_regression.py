@@ -50,11 +50,14 @@ def assert_default_pose(camera, expected):
         key: value for key, value in expected.items() if key != 'location'}
 
 
-def assert_nadir(camera):
+def assert_down_axis(camera):
     bpy.context.view_layer.update()
     forward = (camera.matrix_world.to_3x3() @ Vector((0, 0, -1))).normalized()
-    parent_down = (camera.parent.matrix_world.to_3x3() @ Vector((0, 0, -1))).normalized()
-    assert (forward - parent_down).length < 1e-6, (tuple(forward), tuple(parent_down))
+    local_axis = Vector((math.cos(math.radians(-82.5))*math.cos(math.radians(181.2)),
+                         math.cos(math.radians(-82.5))*math.sin(math.radians(181.2)),
+                         math.sin(math.radians(-82.5))))
+    expected = (camera.parent.matrix_world.to_3x3() @ local_axis).normalized()
+    assert (forward - expected).length < 1e-6, (tuple(forward), tuple(expected))
 
 
 def exterior_mount(camera):
@@ -63,19 +66,19 @@ def exterior_mount(camera):
     shell = scene.objects['WFRL.Turbine.T1.Nacelle'].evaluated_get(graph)
     anchor = Vector(camera['wfrl_mount_anchor'])
     offset = Vector(camera['wfrl_mount_offset'])
-    assert (offset - Vector((0, 0, -.4))).length < 1e-6
+    assert (offset - Vector((0, 0, -.2151))).length < 1e-6
     assert (camera.location - anchor - offset).length < 1e-6
     local = shell.matrix_local
     inverse = local.inverted()
     hit, point, normal, _ = shell.ray_cast(
-        inverse @ Vector((-3.8, 0, -5)),
+        inverse @ Vector((-3.5, -1.15, -5)),
         (inverse.to_3x3() @ Vector((0, 0, 1))).normalized())
     assert hit, 'The mounting anchor must intersect the nacelle underside'
     expected_anchor = local @ point
     assert (anchor - expected_anchor).length < 1e-5
-    assert (anchor - Vector((-3.8, 0, .46256))).length < 1e-4
+    assert abs(anchor.x + 3.5) < 1e-4 and abs(anchor.y + 1.15) < 1e-4
     root_normal = (inverse.to_3x3().transposed() @ normal).normalized()
-    assert root_normal.dot(Vector((0, 0, -1))) > .95, 'Anchor must be on the outward underside face'
+    assert (root_normal - Vector((0, -.55536884, -.83160424))).length < 1e-5, 'Anchor must be on the outward underside face'
     local_origin = inverse @ camera.location
     direction = point - local_origin
     hit, entry, _, _ = shell.ray_cast(local_origin, direction.normalized(), distance=direction.length + .01)
@@ -101,21 +104,23 @@ cameras.down_gimbal(down)
 root = scene.objects['WFRL.Turbine.T1.YawRoot']
 rotor = scene.objects['WFRL.Turbine.T1.Rotor']
 assert down.parent == root and down.parent != rotor
-assert down.get('wfrl_gimbal_mount_revision') == 3
+assert down.get('wfrl_gimbal_mount_revision') == 5
 nominal = pose(down)
-assert [nominal[key] for key in ('yaw', 'pitch', 'roll', 'fov')] == [180, -90, 180, 110]
-assert abs(nominal['shift_x'] - .1) < 1e-6 and abs(nominal['shift_y'] + .07) < 1e-6
-assert abs(math.degrees(down.data.angle_x) - 110) < 1e-4
-assert_nadir(down)
+assert [nominal[key] for key in ('yaw', 'pitch', 'roll', 'fov')] == [181.2, -82.5, 175.9, cameras.DOWN_HFOV_DEG]
+assert abs(nominal['shift_x']) < 1e-6 and abs(nominal['shift_y']) < 1e-6
+assert abs(math.degrees(down.data.angle_x) - cameras.DOWN_HFOV_DEG) < 1e-4
+assert abs(down.data.lens - 8.0) < 1e-5
+assert abs(math.degrees(2*math.atan(down.data.sensor_width/(2*down.data.lens)/(16/9))) - 60) < 1e-4
+assert_down_axis(down)
 mount_geometry = exterior_mount(down)
 other_presets = {}
 for turbine in ('T2', 'T3'):
     camera = cameras.ensure_gimbal(scene, turbine)
     cameras.down_gimbal(camera)
     assert camera.parent == scene.objects[f'WFRL.Turbine.{turbine}.YawRoot']
-    assert camera.get('wfrl_gimbal_mount_revision') == 3
+    assert camera.get('wfrl_gimbal_mount_revision') == 5
     assert_default_pose(camera, nominal)
-    assert_nadir(camera)
+    assert_down_axis(camera)
     assert camera.data.show_passepartout and camera.data.passepartout_alpha == 1
     other_presets[turbine] = pose(camera)
 nacelle = cameras.ensure_nacelle_gimbal(scene, 'T1')
@@ -153,7 +158,7 @@ motion_error = 0.0
 for frame in (1, 67, 901, 1801, scene.frame_end):
     scene.frame_set(frame)
     bpy.context.view_layer.update()
-    assert_nadir(down)
+    assert_down_axis(down)
     assert (down.location - mount).length < 1e-6
     expected = root.matrix_world @ mount
     motion_error = max(motion_error, (down.matrix_world.translation - expected).length)
@@ -183,10 +188,12 @@ assert pose(down) == custom and replay_state() == saved_state
 assert farm_flex.is_active(scene) and scene.camera == down
 exterior_mount(down)
 
-# Saved cameras with either supported mount revision migrate in place.
+# Saved cameras with supported mount revisions migrate in place.
 legacy_mounts = {
     1: dict(location=(-3.5, 1.2, -37.8), yaw=180, pitch=-67, fov=85),
     2: dict(location=(-2.502865, 0, .16256), yaw=180, pitch=-84, fov=85),
+    3: dict(location=(-3.8, 0, .06256), yaw=180, pitch=-90, fov=110),
+    4: dict(location=(-3.8, 0, .06256), yaw=180, pitch=-90, fov=110),
 }
 for revision, legacy in legacy_mounts.items():
     down['wfrl_gimbal_mount_revision'] = revision
@@ -209,11 +216,11 @@ for revision, legacy in legacy_mounts.items():
         assert replay_state() == before
     down = scene.camera
     assert down.name == camera_name and down.data.name == data_name
-    assert down.get('wfrl_gimbal_mount_revision') == 3
+    assert down.get('wfrl_gimbal_mount_revision') == 5
     assert sum(obj.type == 'CAMERA' for obj in scene.objects) == camera_count
     assert down.parent == scene.objects['WFRL.Turbine.T1.YawRoot']
     assert_default_pose(down, nominal)
-    assert_nadir(down)
+    assert_down_axis(down)
     exterior_mount(down)
 assert pose(scene.objects['WFRL.Camera.T1.NacelleGimbal']) == nacelle_pose
 for turbine, state in other_presets.items():
@@ -222,10 +229,10 @@ for turbine, state in other_presets.items():
 result = dict(status='PASS', module=MODULE, addon_file=addon.__file__,
               blender=bpy.app.version_string, mount=nominal, exterior_mount=mount_geometry,
               parent_motion_error_m=motion_error, rotor_spin_independent=True,
-              optical_axis_matches_parent_negative_z=True,
+              optical_axis_matches_parent_local_preset=True,
               repeated_ensure_preserves_ptz=True, reset_restores_mount=True,
               selection_preserves_replay=True, save_reopen_preserves_ptz=True,
-              saved_scene_mount_migrations=[1, 2],
+              saved_scene_mount_migrations=[1, 2, 3, 4],
               independent_nacelle_unchanged=True, other_down_presets_unchanged=True,
               visible_window='NOT_RUN' if bpy.app.background else 'SCRIPTED_CHECK_ONLY')
 (output / 'checks.json').write_text(json.dumps(result, indent=2) + '\n')

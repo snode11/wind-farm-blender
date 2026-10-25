@@ -7,6 +7,7 @@ import shutil
 import socket
 import subprocess
 import time
+from unittest.mock import Mock
 
 import pytest
 
@@ -21,6 +22,70 @@ def wait_export(job):
     while job.active and time.monotonic() < deadline:
         time.sleep(.01)
     assert not job.active
+
+
+@pytest.mark.skipif(not hasattr(os, 'pread'), reason='os.pread required')
+@pytest.mark.parametrize('size', [128, 16384])
+def test_log_tail_preserves_shared_file_offset(tmp_path, size):
+    content = b'x' * (size - 4) + b'tail'
+    with (tmp_path / 'child.log').open('w+b') as handle:
+        handle.write(content)
+        handle.flush()
+        handle.seek(11)
+        assert video_output._tail(handle) == content[-8192:].decode()
+        assert os.lseek(handle.fileno(), 0, os.SEEK_CUR) == 11
+
+
+@pytest.mark.skipif(not hasattr(os, 'pread'), reason='os.pread required')
+def test_large_log_tail_resets_shared_offset_before_truncation(tmp_path):
+    content = b'x' * (1024 * 1024) + b'tail'
+    with (tmp_path / 'child.log').open('w+b') as handle:
+        handle.write(content)
+        handle.flush()
+        assert video_output._tail(handle) == content[-8192:].decode()
+        assert os.fstat(handle.fileno()).st_size == 0
+        assert os.lseek(handle.fileno(), 0, os.SEEK_CUR) == 0
+        os.write(handle.fileno(), b'next log')
+        assert os.pread(handle.fileno(), 8192, 0) == b'next log'
+
+
+def test_stream_without_pread_keeps_polling_and_releases_owned_processes(tmp_path, monkeypatch):
+    monkeypatch.delattr(video_output.os, 'pread', raising=False)
+    monkeypatch.setattr(video_output, 'executable', lambda value, name: name)
+    processes = []
+
+    def spawn(command, log):
+        process = Mock()
+        process.poll.return_value = None
+        process.terminate.side_effect = lambda: setattr(process.poll, 'return_value', 0)
+        processes.append(process)
+        if len(processes) == 1:
+            log.write(b'listener opened on :8554\nis publishing to path windfarm/camera1\n')
+        else:
+            log.write(b'frame=1\n')
+        log.flush()
+        return process
+
+    monkeypatch.setattr(video_output, '_spawn', spawn)
+    source = tmp_path / 'video.mp4'
+    source.touch()
+    stream = video_output.Stream()
+    try:
+        stream.start(source)
+        directory = Path(stream.directory.name)
+        server_position = stream.logs[0].tell()
+        stream.poll()
+        assert stream.state == 'RUNNING', stream.message
+        assert stream.logs[0].tell() == server_position
+        stream.logs[1].write(b'frame=2\n')
+        stream.logs[1].flush()
+        assert video_output._tail(stream.logs[1]) == 'frame=1\nframe=2\n'
+    finally:
+        stream.stop()
+    assert len(processes) == 2
+    for process in processes:
+        process.terminate.assert_called_once_with()
+    assert not directory.exists() and not stream.active
 
 
 def test_export_preserves_bytes_and_refuses_overwrite(tmp_path):

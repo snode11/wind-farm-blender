@@ -57,9 +57,10 @@ def _publish(source, destination, **kwargs):
 def _spec(job):
     from .manual_motion import PitchTrial
     from .manual_pose import pose_values
+    from .turbine_geometry import MODELS
     values = json.loads(job['configuration'])
-    if values['schema'] != 'wfrl.manual-pitch-trial.v1' or values['blade_model'] != 'rootkink':
-        raise ValueError('无法识别 rootkink 冻结试验')
+    if values['schema'] != 'wfrl.manual-pitch-trial.v1' or values['blade_model'] not in MODELS:
+        raise ValueError('无法识别冻结试验或叶片模型')
     start = pose_values(values['start_pose'])
     pitches = tuple(start[f'pitch_b{i}_deg'] if start['individual_pitch'] else start['pitch_deg']
                     for i in range(1, 4))
@@ -79,6 +80,7 @@ def _sources():
     from wfrl.camera_video import media, publication
     root = Path(__file__).resolve().parent
     paths = list(root.rglob('*.py')) + [root / 'assets/rootkink_geometry.json',
+                                      root / 'assets/nrel5mw_geometry.json',
                                       Path(media.__file__), Path(publication.__file__)]
     paths.extend(root.parents[1] / 'scripts/blender' / name for name in
                  ('render_manual_video.py', 'generate_manual_pitch_video.py', 'manage_manual_video.py'))
@@ -347,6 +349,7 @@ def _apply_pose(scene, start, spec, sample):
         for index, pitch in enumerate(sample.pitches_deg, 1):
             setattr(entry, f'pitch_b{index}_deg', pitch)
         scene.wfrl_manual_trial.elapsed_s = sample.time_s
+        control._settle_pitch(entry)
         control._apply_entry(entry)
     finally:
         control._updating = previous
@@ -440,13 +443,20 @@ def _render_job(job_path, job):
         valid, reason = control.validate_scene(scene)
         if not valid:
             raise ValueError(reason)
-        if scene.get('wfrl_manual_blade_model') != 'rootkink':
-            raise ValueError('手动视频要求修改后的 rootkink 叶片模型')
         if scene.wfrl_manual_trial.configuration != job['configuration']:
             raise ValueError('视频作业与场景快照的已确认试验配置不一致')
         start, spec = control.trial_configuration(scene)
+        frozen_model = json.loads(job['configuration'])['blade_model']
+        if scene.get('wfrl_manual_blade_model') != frozen_model:
+            raise ValueError('手动视频叶片模型与冻结试验不一致')
+        from .manual_geometry import set_detail
+        set_detail(scene, 'CLOSEUP')
         count = frame_count(spec.duration_s, job['hold_s'], job['fps'])
         scene.wfrl_manual_trial.engaged = False
+        for obj in scene.objects:
+            if obj.get('wfrl_down_label'):
+                obj.hide_render = True
+                obj.hide_viewport = True
         for entry in scene.wfrl_manual_turbines:
             entry.running = False
         entry = control._t1(scene)
@@ -476,7 +486,7 @@ def _render_job(job_path, job):
             resource = Path(bpy.path.abspath(library.filepath)).resolve()
             resources[str(resource)] = sha256(_absolute_file(str(resource), '场景链接库'))
         experiment = dict(schema='wfrl.manual-video-experiment.v1',
-                          fidelity='SYNTH_RIGID', physics_coupled=False, blade_model='rootkink',
+                          fidelity='SYNTH_RIGID', physics_coupled=False, blade_model=frozen_model,
                           configuration=json.loads(job['configuration']),
                           snapshot_sha256=sha256(snapshot), fps=job['fps'],
                           resolution=[job['width'], job['height']], frame_count=count,
@@ -491,7 +501,7 @@ def _render_job(job_path, job):
                                       render_source=_sources(), resources_sha256=resources,
                                       module_sha256={name: sha256(source / name) for name in
                                           ('manual_video_render.py', 'manual_motion.py', 'manual_control.py', 'cameras.py')},
-                                      geometry_sha256=sha256(source / 'assets/rootkink_geometry.json')))
+                                      geometry_sha256=sha256(source / 'assets' / f'{frozen_model}_geometry.json')))
         _write_json(root / 'experiment.json', experiment)
         master.mkdir()
         fields = ('frame_id', 'video_pts', 'time_s', 'rpm', 'azimuth_deg',

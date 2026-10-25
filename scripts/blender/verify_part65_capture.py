@@ -1,9 +1,9 @@
 import bpy, sys, json, pathlib
-sys.path.insert(0, 'PROJECT_ROOT/blender_frontend')
+sys.path.insert(0, '/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend')
 from wfrl_blender.panels import presentation as p
 for cls in p.CLASSES: bpy.utils.register_class(cls)
 p.register_properties()
-out=pathlib.Path('PROJECT_ROOT/evidence/part6.5/capture'); out.mkdir(exist_ok=True)
+out=pathlib.Path('/Users/eason/Desktop/wfcrl/wind farm RL/evidence/part6.5/capture'); out.mkdir(exist_ok=True)
 def start():
     s=bpy.context.scene
     s.wfrl_capture_directory=str(out)

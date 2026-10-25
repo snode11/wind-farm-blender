@@ -79,8 +79,9 @@ try:
     assert bpy.ops.wfrl.manual_enter() == {'FINISHED'}
     scene = bpy.context.scene
     turbine_geometry = importlib.import_module(MODULE + '.turbine_geometry')
-    expected_vertices, _faces = turbine_geometry.blade_mesh(model='rootkink')
-    original_vertices, _faces = turbine_geometry.blade_mesh(model='nrel5mw')
+    sampling = turbine_geometry.MANUAL_DISPLAY_SAMPLING[scene.wfrl_manual_display_detail]
+    expected_vertices, _faces = turbine_geometry.blade_mesh(*sampling, model='rootkink')
+    original_vertices, _faces = turbine_geometry.blade_mesh(*sampling, model='nrel5mw')
     assert scene['wfrl_manual_blade_model'] == 'rootkink'
     assert np.count_nonzero(np.linalg.norm(np.array(expected_vertices) - original_vertices, axis=1) > 1e-4) > 1000
     for entry in scene.wfrl_manual_turbines:
@@ -214,12 +215,12 @@ try:
         assert control.pose_snapshot(scene) == state and pending.elapsed_s == elapsed
         local_camera = camera.matrix_local.copy()
         cameras.down_gimbal(camera)
-        close(math.degrees(camera.data.angle_x), 110)
-        close(camera.data.shift_x, .1)
-        close(camera.data.shift_y, -.07)
-        close((Vector(camera['wfrl_mount_offset']) - Vector((0, 0, -.4))).length, 0)
+        close(math.degrees(camera.data.angle_x), 91.4928445)
+        close(camera.data.shift_x, 0)
+        close(camera.data.shift_y, 0)
+        close((Vector(camera['wfrl_mount_offset']) - Vector((0, 0, -.2151))).length, 0)
         direction = camera.rotation_euler.to_matrix() @ Vector((0, 0, -1))
-        assert (direction - Vector((0, 0, -1))).length < 1e-5
+        close(math.degrees(direction.angle(Vector((0, 0, -1)))), 7.5)
         visibility = {obj.name: (obj.hide_render, obj.hide_viewport) for obj in scene.objects}
         assert bpy.ops.wfrl.manual_focus() == {'FINISHED'}
         assert control.pose_snapshot(scene) == state and pending.elapsed_s == elapsed

@@ -213,6 +213,82 @@ def test_runtime_bound_mismatch_fails_before_warmup_or_actions(tmp_path, runtime
     assert created[0].closed
 
 
+@pytest.mark.parametrize("stop_after", [0, 1, 4, None])
+def test_replay_reports_executed_steps_after_stop_or_completion(tmp_path, runtime, stop_after):
+    _, created = runtime
+    path = tmp_path / "replay.pt"
+    _legacy_cli(path)
+    published = []
+
+    def snapshot(sample):
+        published.append((sample.phase, sample.step, sample.iters_done))
+        if sample.phase == "sampling" and sample.step == stop_after:
+            replay._stop.set()
+
+    replay = Trainer(_scene(), ckpt_path=str(path), replay=True, replay_steps=6,
+                     warmup_steps=2, on_snapshot=snapshot)
+    if stop_after == 0:
+        replay._stop.set()
+    replay._run()
+    assert replay.error is None
+    if stop_after == 0:
+        assert not created and not published
+        return
+    actual_steps = 6 if stop_after is None else stop_after
+    assert len(created) == 1 and created[0].closed
+    assert len(created[0].steps) == actual_steps + 2
+    assert [step for phase, step, _ in published if phase == "sampling"] == list(range(1, actual_steps + 1))
+    assert replay.latest().step == actual_steps
+    assert replay.latest().iters_done == int(stop_after is None)
+    assert replay.latest().phase == "done"
+    assert replay.history[-1]["step"] == actual_steps
+
+
+def test_replay_early_runtime_end_does_not_inflate_progress(tmp_path, monkeypatch, runtime):
+    runtime_type, created = runtime
+    step = runtime_type.step
+
+    def end_early(self, **commands):
+        frame = step(self, **commands)
+        self.done = len(self.steps) == 2
+        return frame
+
+    monkeypatch.setattr(runtime_type, "step", end_early)
+    path = tmp_path / "replay.pt"
+    _legacy_cli(path)
+    replay = Trainer(_scene(), ckpt_path=str(path), replay=True, replay_steps=6,
+                     warmup_steps=0)
+    replay._run()
+    assert replay.error is None and created[0].closed
+    assert len(created[0].steps) == 2
+    assert replay.latest().step == 2 and replay.latest().iters_done == 0
+    assert replay.history[-1]["step"] == 2
+
+
+def test_replay_stop_during_preparation_does_not_start_backend(tmp_path, monkeypatch, runtime):
+    runtime_type, created = runtime
+    resets = []
+    reset = runtime_type.reset
+
+    def record_reset(self):
+        resets.append(self)
+        return reset(self)
+
+    def stop_at_preparation(sample):
+        if sample.phase == "warmup" and not sample.frame:
+            replay._stop.set()
+
+    monkeypatch.setattr(runtime_type, "reset", record_reset)
+    path = tmp_path / "replay.pt"
+    _legacy_cli(path)
+    replay = Trainer(_scene(), ckpt_path=str(path), replay=True, replay_steps=6,
+                     warmup_steps=2, on_snapshot=stop_at_preparation)
+    replay._run()
+    assert replay.error is None
+    assert not resets
+    assert created[0].closed and not created[0].steps
+
+
 @pytest.mark.parametrize("kind, controls", [("cli", ["yaw"]), ("studio", ["yaw"]),
                                            ("studio", ["pitch"]),
                                            ("studio", ["torque", "yaw", "pitch"])])

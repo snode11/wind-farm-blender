@@ -1,0 +1,31 @@
+{
+  "command": [
+    "/Applications/Blender.app/Contents/MacOS/Blender",
+    "--background",
+    "--factory-startup",
+    "--addons",
+    "bl_ext.user_default.wfrl_blender",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "PROJECT_ROOT/blender_frontend/tests/blender/tip_deflection_regression.py"
+  ],
+  "returncode": 0,
+  "log": "PROJECT_ROOT/outputs/local-install-0.3.36-qo69g52o/logs/tip-deflection.log",
+  "required_markers": [
+    "TIP_DEFLECTION_PASS"
+  ],
+  "error_markers": [],
+  "warnings": [
+    {
+      "kind": "blender_exit_memory_diagnostic",
+      "message": "Error: Not freed memory blocks: 700, total unfreed memory 0.051880 MB",
+      "blocks": 700,
+      "reported_mb": 0.05188,
+      "bytes": 54400,
+      "bytes_note": "Reported MB converted by 1024^2 and rounded; limited by log precision"
+    }
+  ],
+  "elapsed_s": 5.667096458957531,
+  "status": "PASS"
+}

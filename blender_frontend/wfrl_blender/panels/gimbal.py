@@ -317,8 +317,8 @@ def draw_gimbal_controls(layout, context, *, allow_turbine_selection=True):
     if scene.wfrl_gimbal_kind == 'NACELLE':
         layout.label(text='机舱固定安装点')
     else:
-        layout.label(text=f'{scene.wfrl_gimbal_turbine} Down / 机舱底壳下方 0.40 m')
-        layout.label(text='预设：机舱局部正下，随塔顶姿态运动')
+        layout.label(text=f'{scene.wfrl_gimbal_turbine} Down / 机舱底壳外侧支架')
+        layout.label(text='预设：8 mm · 垂直 60° · 偏离正下 7.5°，随塔顶姿态运动')
     # Pose is an observation, so keep it readable even if the selected
     # turbine's joystick controls are unavailable.
     pose = layout.column(align=True)

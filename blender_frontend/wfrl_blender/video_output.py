@@ -54,8 +54,15 @@ def _spawn(command, log):
 def _tail(handle):
     size = os.fstat(handle.fileno()).st_size
     # Logs are diagnostics, not permanent frame archives.
-    handle.seek(max(0, size - 8192))
-    text = handle.read().decode('utf-8', errors='replace')
+    offset = max(0, size - 8192)
+    if hasattr(os, 'pread'):
+        data = os.pread(handle.fileno(), 8192, offset)
+    else:
+        # A separate open keeps the child process's shared write offset intact.
+        with open(handle.name, 'rb') as reader:
+            reader.seek(offset)
+            data = reader.read(8192)
+    text = data.decode('utf-8', errors='replace')
     if size > 1024 * 1024:
         handle.seek(0); handle.truncate()
     return text
@@ -89,7 +96,8 @@ class Stream:
         self.directory = tempfile.TemporaryDirectory(prefix='wfrl-rtsp-')
         config_path = Path(self.directory.name) / 'mediamtx.yml'
         config_path.write_text(config, encoding='utf-8')
-        self.logs = [tempfile.TemporaryFile(mode='w+b') for _ in range(2)]
+        self.logs = [tempfile.NamedTemporaryFile(mode='w+b', dir=self.directory.name,
+                                                suffix='.log', delete=False) for _ in range(2)]
         try:
             self.server = _spawn([mediamtx, str(config_path)], self.logs[0])
         except BaseException:

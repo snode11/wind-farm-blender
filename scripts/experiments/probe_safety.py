@@ -11,7 +11,7 @@
   7. 超速：monitor 分得清"真超速"和"转矩趋零导致的反解发散"
 
 跑：
-    "USER_HOME\\.conda\\envs\\wfcrl\\python.exe" scripts/experiments/probe_safety.py
+    "C:\\Users\\s1155\\.conda\\envs\\wfcrl\\python.exe" scripts/experiments/probe_safety.py
 """
 import os
 import sys

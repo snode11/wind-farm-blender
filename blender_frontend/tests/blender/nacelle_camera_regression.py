@@ -52,28 +52,31 @@ def pose(cam):
 def assert_down_mount(cam, tid):
     bpy.context.view_layer.update()
     forward = (cam.matrix_world.to_3x3() @ Vector((0, 0, -1))).normalized()
-    parent_down = (cam.parent.matrix_world.to_3x3() @ Vector((0, 0, -1))).normalized()
-    axis_error = (forward-parent_down).length
-    assert axis_error < 1e-6, (tid, tuple(forward), tuple(parent_down))
+    local_axis = Vector((math.cos(math.radians(-82.5))*math.cos(math.radians(181.2)),
+                         math.cos(math.radians(-82.5))*math.sin(math.radians(181.2)),
+                         math.sin(math.radians(-82.5))))
+    expected = (cam.parent.matrix_world.to_3x3() @ local_axis).normalized()
+    axis_error = (forward-expected).length
+    assert axis_error < 1e-6, (tid, tuple(forward), tuple(expected))
     shell = s.objects[f'WFRL.Turbine.{tid}.Nacelle'].evaluated_get(bpy.context.evaluated_depsgraph_get())
     local = shell.matrix_local
     inverse = local.inverted()
     hit, point, normal, _ = shell.ray_cast(
-        inverse @ Vector((-3.8, 0, -5)),
+        inverse @ Vector((-3.5, -1.15, -5)),
         (inverse.to_3x3() @ Vector((0, 0, 1))).normalized())
     assert hit, 'The mounting anchor must intersect the nacelle underside'
     root_normal = (inverse.to_3x3().transposed() @ normal).normalized()
-    assert root_normal.z < -.95
+    assert (root_normal - Vector((0, -.55536884, -.83160424))).length < 1e-5, tuple(root_normal)
     anchor, offset = Vector(cam['wfrl_mount_anchor']), Vector(cam['wfrl_mount_offset'])
     assert (anchor-local@point).length < 1e-5
-    assert (anchor-Vector((-3.8, 0, .46256))).length < 1e-4
-    assert (offset-Vector((0, 0, -.4))).length < 1e-6
+    assert abs(anchor.x + 3.5) < 1e-4 and abs(anchor.y + 1.15) < 1e-4
+    assert (offset-Vector((0, 0, -.2151))).length < 1e-6
     assert (cam.location-anchor-offset).length < 1e-6
     origin = inverse @ cam.location
     direction = point-origin
     hit, entry, _, _ = shell.ray_cast(origin, direction.normalized(), distance=direction.length+.01)
     assert hit and (entry-point).length < 1e-4
-    return dict(anchor=list(anchor), offset=list(offset), parent_negative_z_axis_error=axis_error)
+    return dict(anchor=list(anchor), offset=list(offset), parent_local_preset_axis_error=axis_error)
 
 
 def assert_screen_controls(cam):
@@ -130,12 +133,14 @@ def assert_screen_controls(cam):
 down_presets={};down_contracts={};mounts={}
 for tid in ('T1','T2','T3'):
     down=cameras.ensure_gimbal(s,tid);cameras.down_gimbal(down)
-    assert down.get('wfrl_gimbal_mount_revision')==3
-    assert [down[k] for k in ('gimbal_yaw','gimbal_pitch','gimbal_roll','gimbal_fov')]==[180,-90,180,110]
-    np.testing.assert_allclose([down.data.shift_x,down.data.shift_y],[.1,-.07],atol=1e-6)
+    assert down.get('wfrl_gimbal_mount_revision')==5
+    assert [down[k] for k in ('gimbal_yaw','gimbal_pitch','gimbal_roll','gimbal_fov')]==[181.2,-82.5,175.9,cameras.DOWN_HFOV_DEG]
+    np.testing.assert_allclose([down.data.shift_x,down.data.shift_y],[0,0],atol=1e-6)
     assert down.parent==s.objects[f'WFRL.Turbine.{tid}.YawRoot']
     assert down.data.type=='PERSP' and down.data.sensor_fit=='HORIZONTAL'
-    np.testing.assert_allclose(np.degrees(down.data.angle_x),110,rtol=0,atol=1e-5)
+    np.testing.assert_allclose(np.degrees(down.data.angle_x),cameras.DOWN_HFOV_DEG,rtol=0,atol=1e-5)
+    assert abs(down.data.lens - 8.0) < 1e-5
+    assert abs(math.degrees(2*math.atan(down.data.sensor_width/(2*down.data.lens)/(16/9))) - 60) < 1e-4
     assert down.data.show_passepartout and down.data.passepartout_alpha==1
     down_presets[tid]=pose(down)
     down_contracts[tid]=dict(parent=down.parent.name,

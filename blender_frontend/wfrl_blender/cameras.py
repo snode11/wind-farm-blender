@@ -1,6 +1,7 @@
 """Meter-scale camera rig with explicit rotor-envelope framing."""
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 
@@ -58,7 +59,7 @@ def select_camera(scene, name: str, *, fov_deg: float | None = None, focus: str 
         if not 1.0 <= value <= 179.0:
             raise ValueError('fov_deg must be between 1 and 179')
         import math
-        sensor_width = nacelle_camera.SENSOR_WIDTH_MM if camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID else 36.0
+        sensor_width = _sensor_width(camera)
         camera.data.lens = sensor_width / (2.0 * math.tan(math.radians(value) / 2.0))
         camera['fov_deg'] = value
     if focus is not None:
@@ -165,7 +166,7 @@ def configure_camera(scene, name, fov_deg, pitch_deg, focus='farm'):
         camera.rotation_euler = (target-camera.location).to_track_quat('-Z', 'Y').to_euler()
     camera.data.type = 'PERSP'
     camera.data.sensor_fit = 'HORIZONTAL'
-    camera.data.sensor_width = nacelle_camera.SENSOR_WIDTH_MM if camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID else 36.0
+    camera.data.sensor_width = _sensor_width(camera)
     select_camera(scene, name, fov_deg=fov, focus=focus)
     camera['pitch_deg'] = pitch
     return camera
@@ -372,9 +373,28 @@ def cancel_view_layout():
 _DOWN_GIMBAL_NAMES = frozenset(f'WFRL.Camera.{turbine}.Gimbal'
                               for turbine in ('T1', 'T2', 'T3'))
 
+# Down is fixed to the nacelle underside, behind the hub on the trailing-edge
+# side. Its optical axis is 7.5 degrees from local -Z toward the rotor.
+# The 8 mm lens covers 60 degrees vertically at a 16:9 output aspect.
+DOWN_MOUNT_XY = (-3.5, -1.15)
+DOWN_MOUNT_OFFSET = (0.0, 0.0, -0.2151)
+DOWN_YAW_DEG, DOWN_PITCH_DEG, DOWN_ROLL_DEG = 181.2, -82.5, 175.9
+DOWN_VFOV_DEG = 60.0
+DOWN_ASPECT = 16 / 9
+DOWN_HFOV_DEG = math.degrees(2 * math.atan(math.tan(math.radians(DOWN_VFOV_DEG / 2)) * DOWN_ASPECT))
+DOWN_FOCAL_LENGTH_MM = 8.0
+DOWN_SENSOR_WIDTH_MM = 2 * DOWN_FOCAL_LENGTH_MM * math.tan(math.radians(DOWN_HFOV_DEG / 2))
+DOWN_MOUNT_REVISION = 5
+
+
+def _sensor_width(camera):
+    if camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID:
+        return nacelle_camera.SENSOR_WIDTH_MM
+    return DOWN_SENSOR_WIDTH_MM if is_down_camera(camera) else 36.0
+
 
 def _down_mount(camera):
-    """Locate the optical centre below the nacelle's forward centreline."""
+    """Locate the optical centre below the nacelle underside mount point."""
     import bpy
     import re
     from mathutils import Vector
@@ -390,12 +410,12 @@ def _down_mount(camera):
     local = shell.matrix_local.copy()
     inverse = local.inverted()
     hit, point, _normal, _face = shell.ray_cast(
-        inverse @ Vector((-3.8, 0, -5)),
+        inverse @ Vector((*DOWN_MOUNT_XY, -5)),
         (inverse.to_3x3() @ Vector((0, 0, 1))).normalized())
     if not hit:
         raise ValueError('Down installation point does not intersect the nacelle underside')
     anchor = local @ point
-    offset = Vector((0, 0, -.40))
+    offset = Vector(DOWN_MOUNT_OFFSET)
     camera['wfrl_mount_anchor'] = list(anchor)
     camera['wfrl_mount_offset'] = list(offset)
     return anchor + offset
@@ -408,6 +428,8 @@ def is_down_camera(camera):
 def ensure_gimbal(scene, turbine, *, yaw_object=None, name=None, owner=None):
     """Lazily add a camera to existing saved scenes without rebuilding geometry."""
     import bpy
+    if owner is not None:
+        from .manual_control import other_scene_objects
     root = yaw_object if yaw_object is not None else scene.objects.get(f'WFRL.Turbine.{turbine}.YawRoot')
     if root is None or scene.objects.get(root.name) != root:
         raise ValueError(f'{turbine} is not present in this scene')
@@ -427,13 +449,13 @@ def ensure_gimbal(scene, turbine, *, yaw_object=None, name=None, owner=None):
     elif (camera.type != 'CAMERA' or (owner is not None and
           (camera.get('wfrl_manual_owner') != owner or camera.parent != root
            or camera.data.get('wfrl_manual_owner') != owner or camera.data.users != 1
-           or any(other != scene for other in camera.users_scene)))):
+           or camera.as_pointer() in other_scene_objects(scene)))):
         raise ValueError('Down camera does not belong to this turbine scene')
     camera['wfrl_down_camera'] = True
     if owner is not None:
         camera['wfrl_manual_owner'] = owner
         camera.data['wfrl_manual_owner'] = owner
-    revision = 3
+    revision = DOWN_MOUNT_REVISION
     try:
         if camera.get('wfrl_gimbal_mount_revision', 0) < revision:
             camera.parent = root
@@ -456,14 +478,14 @@ def ensure_gimbal(scene, turbine, *, yaw_object=None, name=None, owner=None):
 
 
 def down_gimbal(camera):
-    """Restore a centreline-mounted nadir view, with the tower toward image top."""
+    """Restore the underside view of the passing blade, with the tower toward image top."""
     if camera.get('wfrl_nacelle_camera'):
         return reset_nacelle_gimbal(camera)
     camera.location = _down_mount(camera)
-    camera['mount'] = 'nacelle forward underside / fixed Down / 0.40 m downward extension'
-    camera['gimbal_roll'] = 180.0
-    camera.data.shift_x, camera.data.shift_y = .10, -.07
-    return aim_gimbal(camera, 180, -90, 110)
+    camera['mount'] = 'nacelle underside, behind hub, trailing-edge side / fixed Down'
+    camera['gimbal_roll'] = DOWN_ROLL_DEG
+    camera.data.shift_x = camera.data.shift_y = 0
+    return aim_gimbal(camera, DOWN_YAW_DEG, DOWN_PITCH_DEG, DOWN_HFOV_DEG)
 
 
 def reset_gimbal(camera):
@@ -607,7 +629,7 @@ def aim_gimbal(camera, yaw, pitch, fov):
     camera.rotation_euler = (orientation @ Quaternion((0, 0, 1), roll)).to_euler('XYZ')
     camera.data.type = 'PERSP'
     camera.data.sensor_fit = 'HORIZONTAL'
-    sensor_width = nacelle_camera.SENSOR_WIDTH_MM if camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID else 36
+    sensor_width = _sensor_width(camera)
     camera.data.sensor_width = sensor_width
     if camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID:
         camera.data.sensor_height = nacelle_camera.SENSOR_HEIGHT_MM

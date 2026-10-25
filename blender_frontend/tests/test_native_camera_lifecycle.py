@@ -152,6 +152,17 @@ def assert_restored(runtime):
     assert runtime.view not in runtime.windows
 
 
+@pytest.mark.parametrize('operator_name', ['WFRL_OT_NativeFocus', 'WFRL_OT_NativeQuality'])
+def test_camera_controls_are_scoped_to_the_observed_scene(runtime, operator_name):
+    runtime.session.slots = [1, 2, 3]
+    operator = getattr(runtime.native, operator_name)
+    assert operator.poll(runtime.bpy.context)
+    assert operator.poll(NS(window=runtime.view, scene=runtime.scene))
+    foreign = NS(window=runtime.source, scene=Scene('unrelated'))
+    assert not operator.poll(foreign)
+    assert operator().execute(foreign) == {'CANCELLED'}
+
+
 @pytest.mark.parametrize('deleted_proxy', [False, True])
 @pytest.mark.parametrize('os_closed_window', [False, True])
 def test_repeated_close_restores_and_releases_deleted_resources(runtime, deleted_proxy, os_closed_window):

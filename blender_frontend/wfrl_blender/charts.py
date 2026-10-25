@@ -162,10 +162,11 @@ def record_farm(time_s, poses, manifest, extra=None):
                   'policy_sha256': manifest.get('policy', {}).get('sha256'),
                   'geometry_sha256': manifest['files']['geometry.npz'],
                   'pitch': 'mean of three measured blade pitches'}
+    flat_provenance = all(type(value) in (str, int, float, bool, type(None)) for value in provenance.values())
     def record(value, unit):
-        return dict(value=float(value), unit=unit, validity='valid', error=None,
+        return dict(value=float(value), unit=deepcopy(unit), validity='valid', error=None,
                     fidelity='FAST.Farm', source_age_seconds=0., stale_after_seconds=2.,
-                    provenance=provenance)
+                    provenance=provenance.copy() if flat_provenance else deepcopy(provenance))
     turbines = []
     for tid, pose in zip(manifest['turbine_ids'], poses):
         channels = {'yaw': record(pose[0], 'deg'),
@@ -173,16 +174,18 @@ def record_farm(time_s, poses, manifest, extra=None):
                     'rotor_speed': record(pose[2], 'rpm')}
         for name, value in (extra or {}).get(tid, {}).items():
             channels[name] = record(value['value'], value['unit'])
-            channels[name]['provenance'] = dict(provenance, source_channel=value['source_channel'],
-                                                source_sha256=value['source_sha256'])
+            channels[name]['provenance'].update(source_channel=deepcopy(value['source_channel']),
+                                               source_sha256=deepcopy(value['source_sha256']))
         turbines.append(dict(turbine_id=tid, channels=channels))
     farm = {}
     if all('power' in turbine['channels'] for turbine in turbines):
         farm['power'] = record(sum(t['channels']['power']['value'] for t in turbines), 'MW')
-    return record_snapshot(dict(session_id='mappo-results', sequence=_local_sequence,
+    message = dict(type='snapshot', session_id='mappo-results', sequence=_local_sequence,
         payload=dict(mode='replay', run_id=_local_run_id, step=round(time_s * 1000),
                      timestamp=dict(value=time_s, timebase='simulation_seconds'),
-                     turbines=turbines, farm=farm)))
+                     turbines=turbines, farm=farm))
+    raw_history.ingest(message, copy_records=False)
+    return history.ingest(message)
 
 
 _handle = None

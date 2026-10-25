@@ -68,11 +68,11 @@ def sample(scene):
     return reader.at(min(reader.end_s, max(reader.start_s, reader.start_s + elapsed)))
 
 
-def load(scene, path, demo):
+def load(scene, path, demo, *, restoring=False):
     if scene.get("wfrl_scene_kind") == "manual":
         raise ValueError("请先返回原场景，再加载净空回放")
     from . import runtime, _cancel_playback
-    if not runtime.configuration_editable():
+    if not (restoring and runtime.has_backend_session()) and not runtime.configuration_editable(scene):
         raise ValueError('Stop the active backend before loading results')
     _cancel_playback(scene)
     clear(scene)
@@ -116,7 +116,7 @@ def load(scene, path, demo):
     tip_tracking.disable(scene, 'standalone_replay')
     if 'wfrl_farm_flex_path' in scene:
         del scene['wfrl_farm_flex_path']
-    runtime.enter_result_replay()
+    runtime.enter_result_replay(scene=scene, restoring=restoring)
     timebase = (scene.get('wfrl_clearance_timebase_fps')
                 if scene.get('wfrl_scene_kind') == 'clearance_replay' else None)
     if type(timebase) not in (int, float) or not math.isfinite(timebase) or timebase <= 0:
@@ -176,6 +176,12 @@ def update(scene, depsgraph=None):
         _queue_finished_playback(scene)
 
 
+def on_load_pre(_):
+    """File loads release parsed packages even when no replay is attached."""
+    from . import farm_flex
+    farm_flex.clear_package_cache()
+
+
 def on_load(_):
     global _END_REQUEST
     _END_REQUEST = None
@@ -190,7 +196,7 @@ def on_load(_):
             try:
                 if scene.get('wfrl_farm_flex_path'):
                     from . import farm_flex, runtime
-                    runtime.enter_result_replay(scene=scene)
+                    runtime.enter_result_replay(scene=scene, restoring=True)
                     candidate = farm_flex.saved_package(scene)
                     expected = scene.get('wfrl_farm_manifest_sha256')
                     if expected:
@@ -208,7 +214,7 @@ def on_load(_):
                         _READERS[scene.as_pointer()] = preview.readers[turbine]
                     scene.frame_set(frame, subframe=subframe)
                     continue
-                load(scene, bpy.path.abspath(path), demo)
+                load(scene, bpy.path.abspath(path), demo, restoring=True)
                 scene.frame_set(frame)
             except (ValueError, OSError, ImportError, KeyError, TypeError, ReferenceError) as exc:
                 clear(scene, '回放数据未就绪：' + str(exc))
@@ -252,7 +258,7 @@ def on_history_post(_):
         scene.frame_set(frame, subframe=subframe)
 
 
-_HANDLERS = (('frame_change_post', update), ('load_post', on_load),
+_HANDLERS = (('frame_change_post', update), ('load_pre', on_load_pre), ('load_post', on_load),
              ('undo_pre', on_history_pre), ('redo_pre', on_history_pre),
              ('undo_post', on_history_post), ('redo_post', on_history_post))
 
@@ -278,6 +284,7 @@ def unregister():
     radar_feedback.unregister()
     farm = sys.modules.get(__package__ + '.farm_flex')
     if farm is not None:
+        farm.clear_package_cache()
         farm.detach()
     from . import tip_tracking
     tip_tracking.unregister()

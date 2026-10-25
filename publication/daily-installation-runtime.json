@@ -1,0 +1,402 @@
+{
+  "schema": "wfrl.daily-runtime.v3",
+  "status": "PASS",
+  "version": "0.3.36",
+  "blender": "5.2.1 LTS",
+  "background": false,
+  "module": "bl_ext.user_default.wfrl_blender",
+  "module_file": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/__init__.py",
+  "fresh_process": true,
+  "imported_modules_probe": 87,
+  "source_hashes": {
+    "bl_ext.user_default.wfrl_blender.camera_projection": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/camera_projection.py",
+      "sha256": "8b74e83a51ce30f204b67435d7ba8a0d7ae1273ad1f1fff7899a8bcc3f93622a"
+    },
+    "bl_ext.user_default.wfrl_blender.nacelle_camera": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/nacelle_camera.py",
+      "sha256": "984e45cd9dae367b7ec6a66166e99982fb268f7a1fdc2e2311d39a1c0e990aef"
+    },
+    "bl_ext.user_default.wfrl_blender.turbine_geometry": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/turbine_geometry.py",
+      "sha256": "8f62c1f96873e198b978d9d3aca84c43223d5c79ce47bb59ef9e75d07940f29c"
+    },
+    "bl_ext.user_default.wfrl_blender.cameras": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/cameras.py",
+      "sha256": "26d68c5bee3f77074c0fd4d99f83cde8ca1fff8399e8b9adff200e1ad5afbe7c"
+    },
+    "bl_ext.user_default.wfrl_blender.materials": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/materials.py",
+      "sha256": "6bc74b502c9275f4b657d0bb9e25c24f53191a1682f72e49567aa92b69c8c5fb"
+    },
+    "bl_ext.user_default.wfrl_blender.scene_model": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/scene_model.py",
+      "sha256": "4a6cdbe9d51293cd8bc9644d55c346cdc53e2c690b27c25db29593142e25d5b2"
+    },
+    "bl_ext.user_default.wfrl_blender.scene_builder": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/scene_builder.py",
+      "sha256": "d96f3400c96767df035c4df004afa21317ac3c3daec449756d9157cc1213407b"
+    },
+    "bl_ext.user_default.wfrl_blender.workspace": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/workspace.py",
+      "sha256": "69d5dab7181fdd237a3d9e2a3126bdd5c3427ce92b7a1224a84023ae1b08026e"
+    },
+    "bl_ext.user_default.wfrl_blender.atmosphere": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/atmosphere.py",
+      "sha256": "b450761e8b1541f83c8f2941da75bd0010e4ac3f949614cb769569759692536e"
+    },
+    "bl_ext.user_default.wfrl_blender.wake": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/wake.py",
+      "sha256": "2f5043bad3eb8d02be8a0d33789e5604e1fa653cb52be7c161034107f1bd8192"
+    },
+    "bl_ext.user_default.wfrl_blender": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/__init__.py",
+      "sha256": "0c743c061b338ccb4542e984abc7c4d780948c58da5381f9fa270ade54ed1f5a"
+    },
+    "bl_ext.user_default.wfrl_blender.state": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/state.py",
+      "sha256": "12f2504deed4af9c8407ba17a28d92348f3359f3bb830096d1abc6b3ecdfdfe4"
+    },
+    "bl_ext.user_default.wfrl_blender.animation": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/animation.py",
+      "sha256": "9c855c6c758809a3cd49697bcc16a65656149effa9eee9b1f0733a34edfa5c64"
+    },
+    "bl_ext.user_default.wfrl_blender.training": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/training.py",
+      "sha256": "6e66099a7ca55ffc2d932640c0a22acd6e7a736d9568ed5d046c2a015238b61f"
+    },
+    "bl_ext.user_default.wfrl_blender.live_scene": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/live_scene.py",
+      "sha256": "4fe142ae16ff240ad1f750fb7dfc09ea3ff7183108e4c54a1d2e4ba7042b2eb1"
+    },
+    "bl_ext.user_default.wfrl_blender.performance": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/performance.py",
+      "sha256": "cb0b5d3400d361e6d1f648b76a03d50944d9fa94acbdf2ee2b979d11ec283b50"
+    },
+    "bl_ext.user_default.wfrl_blender.runtime": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/runtime.py",
+      "sha256": "01bf7252bb955c4e576e81f6d1eef06dc2d725581a0936c9d7b4de531f227aec"
+    },
+    "bl_ext.user_default.wfrl_blender.deflection": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/deflection.py",
+      "sha256": "7135fef01a9db080c88f893151464f5839fe0472d40adb5025683b874b015d67"
+    },
+    "bl_ext.user_default.wfrl_blender.panels": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/__init__.py",
+      "sha256": "d1bb420d2b334154d781489c2a3819e2bb1c155b607ef9f7ba4dfdef7c5289d5"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.demo": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/demo.py",
+      "sha256": "f9040672f26e2e3c3fbd0956e807a10c32b0bc7e6b652db5e24411645da5c51b"
+    },
+    "bl_ext.user_default.wfrl_blender.preferences": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/preferences.py",
+      "sha256": "d61a09030b72253f15dd7366965fb8b61411f661de7ab9bdec88c0241cf200b3"
+    },
+    "bl_ext.user_default.wfrl_blender.diagnostics": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/diagnostics.py",
+      "sha256": "7675f89a3b0f05cf0933a571ffd765223438626e4b455b0fa0f0ea2279a0af3e"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.diagnostics": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/diagnostics.py",
+      "sha256": "c574177031850c37500351f2c64e57958c0e0a1d7c67970a27917910fe2fd69e"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.status": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/status.py",
+      "sha256": "d151471ce3c895ebb41cfb48e32b9894e825348e365a4719e1da843966950418"
+    },
+    "bl_ext.user_default.wfrl_blender.operators": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/operators/__init__.py",
+      "sha256": "5cc0aac0982c7fd21323e75cdd92630bcb3d6da86ecdc4645f3211805c58e848"
+    },
+    "bl_ext.user_default.wfrl_blender.operators.connection": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/operators/connection.py",
+      "sha256": "0d0b12c4881ba45b2e9b3b2543d420f94d699e68a84a6b978bac6c08a6d327be"
+    },
+    "bl_ext.user_default.wfrl_blender.operators.run": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/operators/run.py",
+      "sha256": "3c614e375639a9542825d679bb7d10aed0982ed72e92425bac2baa936b68a1c7"
+    },
+    "bl_ext.user_default.wfrl_blender.history": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/history.py",
+      "sha256": "d73d50b77e37a055c183eb90de50f59be4bd0b2c2595b0748ee80337d2805de3"
+    },
+    "bl_ext.user_default.wfrl_blender.charts": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/charts.py",
+      "sha256": "810abdc79d279d4b2c58132ae6d0af294955a4729bacdc838296320ce3c3ae13"
+    },
+    "bl_ext.user_default.wfrl_blender.operators.history_export": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/operators/history_export.py",
+      "sha256": "311982ff76b28848b4b908d5af6e32d590489775b7ccd117ec0a086adee7aea9"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.telemetry": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/telemetry.py",
+      "sha256": "692d55b5113f228eb7d5994b3c78694fdea6a741482e71d7a7b6f2349673b826"
+    },
+    "bl_ext.user_default.wfrl_blender.operators.workflow": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/operators/workflow.py",
+      "sha256": "224491a8ab5808114a1171066bb736634c4373639779970cebfa79084222229f"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.scene": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/scene.py",
+      "sha256": "6c57274c659f1241b13e4f8b9ae135424c88ad1a6f28e4c2646f2111c9ef12d9"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.channels": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/channels.py",
+      "sha256": "da783fa12ee42958f48405f393ae2e5178d900dc101860ef92ec622cbdc208ea"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.run": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/run.py",
+      "sha256": "cbb2520f00e9af261feb917d10506c2a6c3571650aceeb02a0a807ce06824199"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.safety": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/safety.py",
+      "sha256": "dda5d4cb536a96c1abe4b4f32974ab4e4528a3d723d89eeaf5a19873c3090f41"
+    },
+    "bl_ext.user_default.wfrl_blender.presentation": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/presentation.py",
+      "sha256": "f0f7500b2f797b8b869cf26921cd6a9de4006610d69b1ac778d1a8454f37f62f"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.presentation": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/presentation.py",
+      "sha256": "441aa3f16cdc0a06810d8b4fa0392be570da9daed48c6e706142192d9a284883"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.training": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/training.py",
+      "sha256": "5529f2da77aa7d27dadcc2c461126078d59c2115e11e6e18ed284b635aed8199"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.gimbal": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/gimbal.py",
+      "sha256": "0684beeb54b7c2ddc1677a80c5bf98c2418313144f1f1c788302485468b12f3f"
+    },
+    "bl_ext.user_default.wfrl_blender.clearance_replay": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/clearance_replay.py",
+      "sha256": "6613fdee6611d1c01e82618248d66d194a6addd83b297a161dde49243aadf4fb"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.clearance": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/clearance.py",
+      "sha256": "8db125163f01543736bbdb0ddc26910150c945b03a8cddc76328a92e56fe0609"
+    },
+    "bl_ext.user_default.wfrl_blender.farm_flex": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/farm_flex.py",
+      "sha256": "5e34d97235138b07697238e4d187361bdbbe71bc8e5a05707426263f70a19864"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.farm_replay": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/farm_replay.py",
+      "sha256": "0fa9186bf3f704e2c03d5d1770ce166fdba311f47867e8cb95f70b297764a50f"
+    },
+    "bl_ext.user_default.wfrl_blender.video_output": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/video_output.py",
+      "sha256": "a039902b86cf9d9134c5b9a64f727a214d2757dfb6b64754474718195b86662f"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.video_output": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/video_output.py",
+      "sha256": "1e8e4e552c13a725a3671b08b1bced255a9cb00957d996c4b0e8d15ff0d1f0cc"
+    },
+    "bl_ext.user_default.wfrl_blender.custom_cameras": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/custom_cameras.py",
+      "sha256": "b460d6324b96093de3e78b8115e8a3a66cff8ff13689174728b7394fac2536c5"
+    },
+    "bl_ext.user_default.wfrl_blender.custom_camera_history": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/custom_camera_history.py",
+      "sha256": "53dc81bc9105ada3ee952d1b5f7ddda3fd536f4fb4f5599f25b2a20fbe945bb9"
+    },
+    "bl_ext.user_default.wfrl_blender.custom_camera_diagnostics": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/custom_camera_diagnostics.py",
+      "sha256": "d59fe6af7ac7129bf3bd4bf5653128b5d009c268ffbae0a9c3e31d5c25345d44"
+    },
+    "bl_ext.user_default.wfrl_blender.custom_camera_preview": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/custom_camera_preview.py",
+      "sha256": "2aa020d481a06c526e7dd3f7048095ed95c17555809582fbe058b081ea8db09d"
+    },
+    "bl_ext.user_default.wfrl_blender.playback": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/playback.py",
+      "sha256": "c83edad2173b1b81cca0e8df8cb637f38ff6478d4589de508e9bf98168772d29"
+    },
+    "bl_ext.user_default.wfrl_blender.custom_camera_capture": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/custom_camera_capture.py",
+      "sha256": "e24f17ad15efddf2f4721a7bcf14f73b3a630b8b4d0b9794261d09a970bbb6f1"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.custom_camera_output": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/custom_camera_output.py",
+      "sha256": "e87bad05e89ca7bf7363a71285e16ecafb701e9f3bc545cc2e895b02081933fc"
+    },
+    "bl_ext.user_default.wfrl_blender.installation_schematic": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/installation_schematic.py",
+      "sha256": "4a39586b6fc7b0e4d0a0fa276b39da1c0e0578cb2908020222711dceaa076f3b"
+    },
+    "bl_ext.user_default.wfrl_blender.native_camera_views": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/native_camera_views.py",
+      "sha256": "4337beddec0a21ecebd92610ec6921609acdc60363c3c50c0361eb2aa1462acb"
+    },
+    "bl_ext.user_default.wfrl_blender.stacked_camera_rig": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/stacked_camera_rig.py",
+      "sha256": "3665f040c04fb20c2e2b87c4f1f57041df28f7a20f172622cc8699c92cec75b8"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.stacked_camera_rig": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/stacked_camera_rig.py",
+      "sha256": "fd2fe530d17bbf578b7d0c28befaf836afb1d7615c18c23468503e95c007904e"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.custom_cameras": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/custom_cameras.py",
+      "sha256": "4a73cab9a6c1d3d371eea41e312084c012ed291900815647a1d250132808540a"
+    },
+    "bl_ext.user_default.wfrl_blender._vendor": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/_vendor/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "bl_ext.user_default.wfrl_blender._vendor.blade_recon": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/_vendor/blade_recon/__init__.py",
+      "sha256": "512ecf9886c48c5a092b4e91de2cc00350c1ffcf7d46a527aee8c5d68e34446f"
+    },
+    "bl_ext.user_default.wfrl_blender._vendor.blade_recon.model": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/_vendor/blade_recon/model.py",
+      "sha256": "9253fdfb7bb1e76790129511a24b98311c08c7c14a2a54b0c012d260842b888c"
+    },
+    "bl_ext.user_default.wfrl_blender.blade_recon_data": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/blade_recon_data.py",
+      "sha256": "65c631d330ceee58074bf8f98c0543fb9e6c783a5b7bd3b0fd9c793d91f3d53a"
+    },
+    "bl_ext.user_default.wfrl_blender.blade_recon_review": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/blade_recon_review.py",
+      "sha256": "b5ef59a7aa26e3b4d71a0d782d5710c2d12db62d385d0a9cbc8faf6b3b0d1442"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.blade_recon": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/blade_recon.py",
+      "sha256": "f6488b8de7e03c21a9c885c29c557ce47f19e053670ab1818bb10e4ff0cb54b7"
+    },
+    "bl_ext.user_default.wfrl_blender.nrel_defects": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/nrel_defects/__init__.py",
+      "sha256": "a7b65805cad40b0277be398df9930b3aa35d3264227da441480b23c04894c750"
+    },
+    "bl_ext.user_default.wfrl_blender.nrel_defects.defect_shapes": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/nrel_defects/defect_shapes.py",
+      "sha256": "7a3ee1ce6f8900666bbc0cab5558bd1c5c76739050cd8cafa032323a9f0cd37b"
+    },
+    "bl_ext.user_default.wfrl_blender.nrel_defects.reference_surface": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/nrel_defects/reference_surface.py",
+      "sha256": "e8d04aa0085a7c855fa60dedf463a4611d90e960a03217e2d04bcf61099824ba"
+    },
+    "bl_ext.user_default.wfrl_blender.nrel_defects.defect_schema": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/nrel_defects/defect_schema.py",
+      "sha256": "b25eeae56e9fc63311016327515dfab1e4e5b38eeb0c93e8b325b3de5b9f5509"
+    },
+    "bl_ext.user_default.wfrl_blender.nrel_defects.defect_store": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/nrel_defects/defect_store.py",
+      "sha256": "8ee09a7e455e6150eaa41d34c1128355741b9c458370307abc5371eb5f7fef74"
+    },
+    "bl_ext.user_default.wfrl_blender.nrel_defects.defect_geometry": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/nrel_defects/defect_geometry.py",
+      "sha256": "08a81154ddf13a4b08413a3ce1408d13321c590dce26a089e5926dd6d2a8634f"
+    },
+    "bl_ext.user_default.wfrl_blender.nrel_defects.editor": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/nrel_defects/editor.py",
+      "sha256": "5ced1bd90370aad9581737729c96f62812d173ea9d263b1118375632c389ba2a"
+    },
+    "bl_ext.user_default.wfrl_blender.manual_motion": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/manual_motion.py",
+      "sha256": "b8d6cd05240ad881d13fd121ddffc871c792a50fc810283703e5f88c8a0d356e"
+    },
+    "bl_ext.user_default.wfrl_blender.manual_pose": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/manual_pose.py",
+      "sha256": "ddd675d9e52c0eff62bb1d9427b75fff5c17cb49ec3243c781c9e7b127f37fb3"
+    },
+    "bl_ext.user_default.wfrl_blender.manual_control": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/manual_control.py",
+      "sha256": "50582e72da890ad95cbe7ba92efe8b8f0efccd074867ab2e25fdf453b15c8a4f"
+    },
+    "bl_ext.user_default.wfrl_blender.manual_video": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/manual_video.py",
+      "sha256": "6d96170ccf834df9dc6fec721f63a6b96fd0966382c79911249cd83139a48b89"
+    },
+    "bl_ext.user_default.wfrl_blender.panels.manual_control": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/panels/manual_control.py",
+      "sha256": "978383a9bd2b0d77ac7ab3f665be907bdcd898c2b538eb4e238755940aae97ce"
+    },
+    "bl_ext.user_default.wfrl_blender.tip_tracking": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/tip_tracking.py",
+      "sha256": "b4569914ecccf55e517226069584532668513e479841ef9095a87cb5c64afc8a"
+    },
+    "bl_ext.user_default.wfrl_blender.split_reconstruction": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/split_reconstruction.py",
+      "sha256": "fa6ec494c5d84731693d4898221222c054bd10543637682fde37db27c9f13213"
+    },
+    "bl_ext.user_default.wfrl_blender.split_reconstruction_timing": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/split_reconstruction_timing.py",
+      "sha256": "292eb9d75ca91a65ce45509293c42912ca6b7004a89f9defb14ee6b0406541cf"
+    },
+    "bl_ext.user_default.wfrl_blender.split_reconstruction_ui": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/split_reconstruction_ui.py",
+      "sha256": "e676878a428fb3bbc6a0ce6b36af2ef8001a8eb7b451013bd4b0dd254cac5451"
+    },
+    "bl_ext.user_default.wfrl_blender.split_mappo_texture": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/split_mappo_texture.py",
+      "sha256": "70c54f888f4b80b11fa9c9c914333411515c4b5cd9b2b103068895cd99326afa"
+    },
+    "bl_ext.user_default.wfrl_blender.frontend_diagnostics": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/frontend_diagnostics.py",
+      "sha256": "92c8daf932bf6b45318c9605af5eb785bd1bb5c3b120d425251e5bd6c11213c0"
+    },
+    "bl_ext.user_default.wfrl_blender.manual_down": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/manual_down.py",
+      "sha256": "8eb1dfec5ddc96b411a5fb68375e1e4a77cbd921055bf3773768465cca6cb159"
+    },
+    "bl_ext.user_default.wfrl_blender.manual_geometry": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/manual_geometry.py",
+      "sha256": "c6766b03f015a83e3970c36072f0b0340edb807165eb2bf21d33398b8f350ef7"
+    },
+    "bl_ext.user_default.wfrl_blender.manual_scene_links": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/manual_scene_links.py",
+      "sha256": "6592167dfc694f26549be23b635e58f6464b0d23bb742287bbeeec34d1ea422c"
+    },
+    "bl_ext.user_default.wfrl_blender.repair_marks": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/repair_marks.py",
+      "sha256": "bf31e29951c64ae884d15d2a92319938dfb96ed2f64e2cd59a25b9246c8388eb"
+    },
+    "bl_ext.user_default.wfrl_blender.blade_root_display": {
+      "path": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/blade_root_display.py",
+      "sha256": "b3a136a3a8d005eb0aff21d0e5b5c1f7ac6afba0c0f45f982b54d3e089f58ebd"
+    }
+  },
+  "checks": {
+    "visible_window_import": "PASS",
+    "window_count": 1,
+    "persistent_enablement": true,
+    "operator_registration": true,
+    "installed_background": {
+      "manual-control": {
+        "status": "PASS",
+        "result": "outputs/local-install-0.3.36-qo69g52o/manual-control/checks.json"
+      },
+      "manual-trial": {
+        "status": "PASS",
+        "result": "outputs/local-install-0.3.36-qo69g52o/manual-trial/checks.json"
+      },
+      "installed-model": {
+        "status": "PASS",
+        "result": "outputs/local-install-0.3.36-qo69g52o/installed-model/checks.json"
+      }
+    },
+    "tip_display": {
+      "status": "PASS",
+      "sampled_frames": 45,
+      "saved_max_component_error_mm": 0.04169043754453927,
+      "interpolated_max_component_error_mm": 0.054776422304669836,
+      "result": "outputs/local-install-0.3.36-qo69g52o/tip-deflection.json"
+    },
+    "isolated_background": {
+      "three_camera_default": "PASS",
+      "native_projection": "PASS"
+    }
+  },
+  "backend_test": "NOT_RUN",
+  "navigation_input": "NOT_RUN",
+  "all_buttons_physical_input": false,
+  "full_video": "NOT_RUN",
+  "stable_fps": "NOT_ACCEPTED",
+  "evidence": {
+    "window": "outputs/local-install-0.3.36-qo69g52o/daily-window.json",
+    "package_validation": "outputs/local-install-0.3.36-qo69g52o/validation/package-validation.json"
+  },
+  "limits": "Fresh visible daily-profile import and registration; installed background manual control, pitch trial, model detail, Down, saved scene links and 45-frame tip-display sample. No physical input, full video, sustained FPS, backend training, other-platform or scientific-accuracy acceptance."
+}

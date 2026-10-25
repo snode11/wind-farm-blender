@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "scope": "Isolated background Blender software regression",
+  "addon_module": "bl_ext.user_default.wfrl_blender",
+  "addon_file": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/__init__.py",
+  "source_scene": "Manual Control Source MAPPO",
+  "manual_scene": "\u98ce\u673a\u624b\u52a8\u63a7\u5236",
+  "isolated_meshes": 56,
+  "isolated_materials": 10,
+  "yaw_pitch_axes": true,
+  "individual_pitch": true,
+  "rpm_phase_continuity": true,
+  "pause_stop_reset": true,
+  "all_targets": true,
+  "demo_writer_guards": true,
+  "demo_reload_isolation": true,
+  "linked_scene_rejected": true,
+  "save_reopen_paused": true,
+  "source_viewport_restore": true,
+  "source_viewport_count": 1,
+  "demo_mesh_change_max_m": 0.2769445776939392,
+  "unregister_timer_cleanup": true
+}

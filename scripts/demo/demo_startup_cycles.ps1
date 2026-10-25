@@ -9,7 +9,7 @@
 
 $env:SKIP_MPI_CHECK = "1"
 
-$python = "USER_HOME\.conda\envs\wfcrl\python.exe"
+$python = "C:\Users\s1155\.conda\envs\wfcrl\python.exe"
 $project = "D:\project\wind farm RL"
 $scene = "$project\scenes\turb3_demo.yaml"
 

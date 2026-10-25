@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "returncode": 0,
+  "log": "PROJECT_ROOT/outputs/local-install-0.3.36-qo69g52o/logs/manual-trial.log",
+  "expected_guard_diagnostics": [
+    "Error: T1 机舱 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认",
+    "Error: T1 机舱 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认",
+    "Error: T1 叶轮 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认",
+    "Error: T1 叶轮 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认",
+    "Error: T1 B1 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认",
+    "Error: T1 B1 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认",
+    "Error: T1 B2 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认",
+    "Error: T1 B2 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认",
+    "Error: T1 B3 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认",
+    "Error: T1 B3 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认",
+    "Error: T1 B2 的原生旋转与手动控制参数不一致；请撤销原生变换或通过手动面板重新设置姿态后再确认"
+  ],
+  "result": "PROJECT_ROOT/outputs/local-install-0.3.36-qo69g52o/manual-trial/checks.json",
+  "scope": "Installed extension in background factory scene; expected rejection diagnostics checked against the exercised guard cases."
+}

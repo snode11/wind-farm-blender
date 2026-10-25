@@ -224,6 +224,28 @@ def run():
     assert_separate()
     require('independent_scene_fixture', scene != foreign and not playback.any_playing())
 
+    session = STATE['session']
+    session.change_view([1, 2, 3])
+    deadline = time.monotonic() + 30.0
+    while session.preparing:
+        assert time.monotonic() < deadline, 'Three-camera layout timeout'
+        yield .2
+    require('three_camera_controls_ready', len(session.entries) == 3)
+    with bpy.context.temp_override(**override(STATE['main'])):
+        require('source_scene_can_focus_and_set_quality', bpy.ops.wfrl.native_camera_focus.poll()
+                and bpy.ops.wfrl.native_camera_quality.poll())
+    with bpy.context.temp_override(**override(STATE['foreign_window'])):
+        require('foreign_scene_cannot_focus_or_set_quality', not bpy.ops.wfrl.native_camera_focus.poll()
+                and not bpy.ops.wfrl.native_camera_quality.poll())
+    with bpy.context.temp_override(**override(session.window, session.entries[0]['area'])):
+        fast = session.fast
+        require('observer_can_set_quality', bpy.ops.wfrl.native_camera_quality() == {'FINISHED'}
+                and session.fast != fast)
+        require('observer_can_restore_quality', bpy.ops.wfrl.native_camera_quality() == {'FINISHED'}
+                and session.fast == fast)
+        require('observer_can_focus', bpy.ops.wfrl.native_camera_focus(slot=1) == {'FINISHED'})
+    yield from wait_camera()
+
     start = scene.frame_current
     require('A_button_starts_A', native_toggle() == {'FINISHED'} and playback.is_playing(scene)
             and not playback.is_playing(foreign))

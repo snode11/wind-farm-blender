@@ -108,6 +108,7 @@ def blade_geometry(scene):
 def _housing(scene, cameras, config):
     import bpy
     from mathutils import Vector
+    from .scene_builder import _primitive_mesh
     root = scene.objects[core.ROOT_NAME]
     collection = root.users_collection[0]
     assembly = bpy.data.objects.new(PREFIX, None)
@@ -131,12 +132,9 @@ def _housing(scene, cameras, config):
         materials[name] = mat
 
     def cube(name, location, size, material='Body', rotation=None):
-        bpy.ops.mesh.primitive_cube_add(size=1)
-        obj = bpy.context.object
-        for owner in tuple(obj.users_collection):
-            owner.objects.unlink(obj)
+        data = _primitive_mesh(PREFIX+'.'+name+'.Mesh', 'cube', size=1.0)
+        obj = bpy.data.objects.new(PREFIX+'.'+name, data)
         collection.objects.link(obj)
-        obj.name = PREFIX+'.'+name
         obj.parent = assembly
         obj.location = location
         obj.scale = size

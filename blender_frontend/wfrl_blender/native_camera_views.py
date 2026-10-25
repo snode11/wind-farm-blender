@@ -867,8 +867,9 @@ class WFRL_OT_NativeFocus(bpy.types.Operator):
     @classmethod
     def poll(cls,context):
         from . import custom_camera_capture
-        return bool(_ACTIVE and not _ACTIVE.closing and not _ACTIVE.preparing and not custom_camera_capture.active())
+        return bool(_ACTIVE and context.scene == _ACTIVE.scene and not _ACTIVE.closing and not _ACTIVE.preparing and not custom_camera_capture.active())
     def execute(self,context):
+        if not self.poll(context):return {'CANCELLED'}
         try:
             _ACTIVE.change_view([self.slot])
             return {'FINISHED'}
@@ -913,7 +914,7 @@ class WFRL_OT_NativeQuality(bpy.types.Operator):
     bl_description='三路切换流畅与高清；原图采集保持原始画质'
     @classmethod
     def poll(cls,context):
-        return bool(_ACTIVE and not _ACTIVE.closing and len(_ACTIVE.slots)>1 and not _ACTIVE.preparing)
+        return bool(_ACTIVE and context.scene == _ACTIVE.scene and not _ACTIVE.closing and len(_ACTIVE.slots)>1 and not _ACTIVE.preparing)
     def execute(self,context):
         if not self.poll(context):return {'CANCELLED'}
         _ACTIVE.fast = not _ACTIVE.fast

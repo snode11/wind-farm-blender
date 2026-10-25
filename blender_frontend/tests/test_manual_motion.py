@@ -2,6 +2,40 @@
 import unittest
 
 from wfrl_blender.manual_motion import PitchTrial, RotorClock, TrialClock
+from wfrl_blender import manual_motion
+
+
+class RatePitchTests(unittest.TestCase):
+    def test_rate_limited_pitch_holds_target_in_both_directions(self):
+        self.assertTrue(callable(getattr(manual_motion, 'pitch_at', None)))
+        for args, expected in (((0, 20, 5, 2), 10), ((20, 0, 5, 3), 5),
+                               ((0, 20, 5, 9), 20), ((2, 20, 0, 0), 20)):
+            self.assertEqual(manual_motion.pitch_at(*args), expected)
+
+    def test_retarget_and_rate_change_preserve_actual_pitch(self):
+        self.assertTrue(callable(getattr(manual_motion, 'PitchClock', None)))
+        clock = manual_motion.PitchClock((0, 10, 20), (20, 0, 20), 5, True, 100)
+        self.assertEqual(clock.configure(102, targets=(0, 20, 20), rate=2), (10, 0, 20))
+        self.assertEqual(clock.sample(104), (6, 4, 20))
+        self.assertEqual(clock.configure(105, running=False), (4, 6, 20))
+        self.assertEqual(clock.sample(900), (4, 6, 20))
+        clock.configure(901, running=True)
+        self.assertEqual(clock.sample(902), (2, 8, 20))
+
+    def test_partitioned_ticks_and_zero_rate(self):
+        self.assertTrue(callable(getattr(manual_motion, 'PitchClock', None)))
+        clock = manual_motion.PitchClock((0, 0, 0), (10, -10, 5), 5, True, 0)
+        for i in range(1, 121):
+            clock.sample(i / 60)
+        for actual, expected in zip(clock.pitches, (10, -10, 5)):
+            self.assertAlmostEqual(actual, expected)
+        self.assertEqual(clock.configure(2, targets=(20, 30, 40), rate=0), (20, 30, 40))
+
+    def test_invalid_rate_and_targets_rejected(self):
+        self.assertTrue(callable(getattr(manual_motion, 'pitch_at', None)))
+        for args in ((0, 2, -1, 0), (0, float('nan'), 1, 1), (0, 2, 1, float('inf'))):
+            with self.assertRaises(ValueError):
+                manual_motion.pitch_at(*args)
 
 
 class ManualMotionTests(unittest.TestCase):

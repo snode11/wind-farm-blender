@@ -239,7 +239,9 @@ def update(scene, phase):
     if getattr(scene, 'wfrl_wake_display', 'SCIENTIFIC') != 'CINEMATIC' or not scene.wfrl_show_wake:
         return
     from .turbine_geometry import hub_position, geometry_data
-    if backend_inflow.active(scene):
+    backend_active = backend_inflow.active(scene)
+    rows = backend_inflow.history(scene) if backend_active else []
+    if backend_active:
         phase = float(scene['wfrl_cinematic_backend_time']) * .9
     elif scene.get('wfrl_scene_kind') == 'live':
         return
@@ -249,7 +251,8 @@ def update(scene, phase):
             obj.hide_render = True
             obj.hide_set(True)
     hub_offset = hub_position()[2] - geometry_data()['scalars']['TowerHt']
-    wind_angle = wind_heading(scene, phase / .9)
+    wind_angle = backend_inflow.sample(rows, phase / .9)[1] if backend_active else wind_heading(scene, phase / .9)
+    travel_m = rows[-1][3] if backend_active else None
     scene['wfrl_cinematic_direction_deg'] = (270 - math.degrees(wind_angle)) % 360
     transports = {}
     for obj in list(scene.objects):
@@ -272,12 +275,10 @@ def update(scene, phase):
         obj.rotation_euler.z = 0.0
         yaw = root.rotation_euler.z - wind_angle
         if speed not in transports:
-            rows = backend_inflow.history(scene) if backend_inflow.active(scene) else []
             transports[speed] = WindTransport(phase / .9, speed,
                 (lambda at: backend_inflow.sample(rows, at)[1]) if rows else (lambda at: wind_heading(scene, at)),
                 (lambda at: backend_inflow.sample(rows, at)[0]) if rows else None)
         transport = transports[speed]
-        travel_m = backend_inflow.history(scene)[-1][3] if backend_inflow.active(scene) else None
         body = scene.objects.get('WFRL.Turbine.' + obj['turbine_id'] + '.Nacelle')
         clearance = None
         if body is not None:

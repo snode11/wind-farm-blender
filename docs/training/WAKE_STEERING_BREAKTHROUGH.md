@@ -58,7 +58,7 @@ shaped = (raw_reward - reference) / reference
 - [确定性评估](../../scripts/experiments/rollout_ckpt.py)：从匹配 checkpoint 重新推进后端，输出数值轨迹。
 - [Studio Trainer](../../wfrl/studio/trainer.py)：`_replay_policy` 加载权重并重新执行物理仿真；不读取历史 NPZ。界面的 FLORIS proxy 尾流不能当作 FAST.Farm 动态尾流真值。
 - [算法与依赖分流](MAPPO_SETUP.md)、[本地配置](../setup/setup_local.md)：当前源码入口与平台要求。
-- 当前 Blender [演示](../demos/演示指令单.md)：0.3.28 内置保存结果，适合离线展示；它与本实验效果分别判定。
+- 当前 Blender [演示](../demos/演示指令单.md)：0.3.36 内置保存结果，适合离线展示；它与本实验效果分别判定。
 
 恢复完整复现需要找到或重新生成匹配的权重、基线、策略 rollout、训练历史及配置来源，随后再重新评分。复现需要匹配完整输入与独立评价。
 

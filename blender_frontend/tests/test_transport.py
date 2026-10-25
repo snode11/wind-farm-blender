@@ -3,6 +3,7 @@ import socket
 import struct
 import time
 import unittest
+from unittest.mock import Mock
 from wfrl_blender.transport import TransportClient
 from wfrl_blender.protocol import encode_message
 
@@ -15,6 +16,23 @@ def wire(message):
 def ack(session='test', sequence=0, resumed=False):
     return dict(protocol_version=1, type='hello_ack', session_id=session, sequence=sequence,
                 payload=dict(selected_version=1, capabilities=[], run_status='READY', mode='demo', resumed=resumed))
+
+
+def test_accepted_lifecycle_survives_later_sequence_error():
+    stopped = dict(protocol_version=1, type='lifecycle', session_id='test', sequence=2,
+                   payload=dict(run_status='STOPPED', reason=None, mode='demo', capabilities=[]))
+    sock = Mock()
+    sock.recv.return_value = wire(stopped) * 2 + wire(dict(stopped, sequence=3))
+    client = TransportClient(5555)
+    client._socket = sock
+    client._phase, client.status, client.session_id = 'connected', 'CONNECTED', 'test'
+    client._last_inbound = 1
+    assert client.poll() == [stopped]
+    assert client._last_inbound == 2
+    assert client.last_error == 'inbound sequence must increase'
+    assert client.status == 'DISCONNECTED'
+    assert not client._incoming
+    sock.close.assert_called_once_with()
 
 
 class TransportTests(unittest.TestCase):

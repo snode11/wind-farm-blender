@@ -10,7 +10,8 @@ def draw_trial(layout, scene):
     active = manual_control.trial_active(scene)
     box = layout.box()
     box.label(text='T1 恒速变桨试验')
-    box.label(text='叶片模型：rootkink · 叶根拐点改型')
+    from ..turbine_geometry import model_label
+    box.label(text='叶片模型：' + model_label(scene.get('wfrl_manual_blade_model', 'rootkink')))
     inputs = box.column(align=True)
     inputs.enabled = not active
     inputs.prop(entry, 'rpm', text='恒定 RPM')
@@ -67,6 +68,11 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
             layout.operator('wfrl.manual_enter', text='重新创建手动场景', icon='FILE_REFRESH')
             return
         layout.prop(scene, 'wfrl_manual_target', expand=True)
+        layout.prop(scene, 'wfrl_manual_display_detail')
+        layout.label(text='固定精度 · Down / 视频使用近景')
+        layout.label(text='静帧渲染请选近景')
+        if scene.get('wfrl_manual_geometry_error'):
+            layout.label(text=scene['wfrl_manual_geometry_error'], icon='ERROR')
         layout.operator('wfrl.manual_focus', icon='VIEWZOOM')
         entries = manual_control.selected_entries(scene)
         if not entries:
@@ -112,6 +118,13 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
                 draw_property(pose, f'pitch_b{index}_deg', slider=True)
         elif any(entry.individual_pitch for entry in entries):
             pose.label(text='桨距模式不同，可选择单台编辑', icon='INFO')
+        pose.prop(scene, 'wfrl_manual_pitch_rate_deg_s')
+        for entry in entries:
+            if manual_control.pitch_ramping(entry):
+                actual = ' / '.join(f'{value:.1f}°' for value in manual_control.effective_pitches(entry))
+                pose.label(text=f'{entry.turbine_id} 当前桨距 {actual}')
+        if any(manual_control.pitch_ramping(entry) and entry.pitch_paused for entry in entries):
+            pose.operator('wfrl.manual_pitch_resume', icon='PLAY')
         angle = layout.column()
         angle.enabled = not trial_locked and not any(entry.running and entry.rpm > 0 for entry in entries)
         draw_property(angle, 'azimuth_deg', slider=True)
@@ -143,15 +156,26 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
                     state = '运行中' if entry.running and entry.rpm > 0 else '已暂停'
                     box.label(text=f'{entry.turbine_id}  ·  {state}  ·  {entry.rpm:.2f} RPM')
                     box.label(text=f'朝向 {entry.yaw_deg:.1f}°  ·  叶轮 {entry.azimuth_deg:.1f}°')
-                    if entry.individual_pitch:
-                        pitches = ' / '.join(f'{getattr(entry, f"pitch_b{i}_deg"):.1f}°' for i in range(1, 4))
-                        box.label(text=f'独立桨距  {pitches}')
-                    else:
-                        box.label(text=f'统一桨距  {entry.pitch_deg:.1f}°')
+                    pitches = ' / '.join(f'{value:.1f}°' for value in manual_control.effective_pitches(entry))
+                    box.label(text=f'实际桨距  {pitches}')
         else:
             entry = entries[0]
             state = '运行中' if entry.running and entry.rpm > 0 else '已暂停'
             layout.label(text=f'{entry.turbine_id}  {state}  ·  {entry.rpm:.2f} RPM')
+        header, body = layout.panel('wfrl_manual_down', default_closed=False)
+        header.label(text='Down 相机与叶片外形')
+        if body:
+            shape = body.column()
+            shape.enabled = not manual_control.trial_active(scene)
+            shape.prop(scene, 'wfrl_manual_blade_shape')
+            body.prop(scene, 'wfrl_manual_blade_labels')
+            row = body.row(align=True)
+            for turbine in ('T1', 'T2', 'T3'):
+                row.operator('wfrl.manual_down_view', text=f'{turbine} Down').turbine = turbine
+            export = body.column()
+            export.enabled = not manual_control.trial_active(scene)
+            export.operator('wfrl.manual_down_video', text='导出所选 Down MP4…', icon='RENDER_ANIMATION')
+            body.label(text='冻结试验使用上方的 T1 后台视频导出')
         header, body = layout.panel('wfrl_manual_pose_files', default_closed=False)
         header.label(text='姿态文件')
         if body:

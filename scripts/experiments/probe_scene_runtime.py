@@ -2,7 +2,7 @@
 
 必须经官方 mpiexec 启动：
     & "C:\\Program Files\\Microsoft MPI\\Bin\\mpiexec.exe" -n 1 `
-      "USER_HOME\\.conda\\envs\\wfcrl\\python.exe" `
+      "C:\\Users\\s1155\\.conda\\envs\\wfcrl\\python.exe" `
       scripts/experiments/probe_scene_runtime.py
 
 验收点：

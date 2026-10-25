@@ -27,7 +27,8 @@ def main():
     assert len(grass.data.materials) == 4
     assert soil["cluster_count"] >= 8
     assert cover["cluster_count"] >= 25
-    shrub_roots = [obj.location for obj in bpy.data.objects if obj.name.startswith("WFRL.Landscape.Shrub")]
+    shrubs = bpy.data.objects["WFRL.Landscape.Shrubs"]
+    shrub_roots = [shrubs.matrix_world @ vertex.co for vertex in shrubs.data.vertices]
     assert shrub_roots
     assert min(road_clearance(point.x, point.y) for point in shrub_roots) >= 10.0
 

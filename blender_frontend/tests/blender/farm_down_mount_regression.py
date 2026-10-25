@@ -55,34 +55,40 @@ def assert_default_pose(actual, expected):
         key: value for key, value in expected.items() if key != 'location'}
 
 
-def assert_nadir(camera):
+def assert_down_axis(camera):
     bpy.context.view_layer.update()
     forward = (camera.matrix_world.to_3x3() @ Vector((0, 0, -1))).normalized()
-    parent_down = (camera.parent.matrix_world.to_3x3() @ Vector((0, 0, -1))).normalized()
-    assert (forward - parent_down).length < 1e-6, (camera.name, tuple(forward), tuple(parent_down))
+    local_axis = Vector((math.cos(math.radians(-82.5))*math.cos(math.radians(181.2)),
+                         math.cos(math.radians(-82.5))*math.sin(math.radians(181.2)),
+                         math.sin(math.radians(-82.5))))
+    expected = (camera.parent.matrix_world.to_3x3() @ local_axis).normalized()
+    assert (forward - expected).length < 1e-6, (camera.name, tuple(forward), tuple(expected))
 
 
 def assert_nominal(camera, turbine):
     assert camera.parent == scene.objects[f'WFRL.Turbine.{turbine}.YawRoot']
-    assert camera.get('wfrl_gimbal_mount_revision') == 3
-    assert [camera[key] for key in ('gimbal_yaw', 'gimbal_pitch', 'gimbal_roll', 'gimbal_fov')] == [180, -90, 180, 110]
-    assert abs(camera.data.shift_x - .1) < 1e-6 and abs(camera.data.shift_y + .07) < 1e-6
-    assert abs(math.degrees(camera.data.angle_x) - 110) < 1e-4
+    assert camera.get('wfrl_gimbal_mount_revision') == 5
+    assert [camera[key] for key in ('gimbal_yaw', 'gimbal_pitch', 'gimbal_roll', 'gimbal_fov')] == [181.2, -82.5, 175.9, cameras.DOWN_HFOV_DEG]
+    assert abs(camera.data.shift_x) < 1e-6 and abs(camera.data.shift_y) < 1e-6
+    assert abs(math.degrees(camera.data.angle_x) - cameras.DOWN_HFOV_DEG) < 1e-4
+    assert abs(camera.data.lens - 8.0) < 1e-5
+    assert abs(math.degrees(2*math.atan(camera.data.sensor_width/(2*camera.data.lens)/(16/9))) - 60) < 1e-4
     assert camera.data.show_passepartout and camera.data.passepartout_alpha == 1
-    assert_nadir(camera)
+    assert_down_axis(camera)
     shell = scene.objects[f'WFRL.Turbine.{turbine}.Nacelle'].evaluated_get(bpy.context.evaluated_depsgraph_get())
     local = shell.matrix_local
     inverse = local.inverted()
     hit, point, normal, _ = shell.ray_cast(
-        inverse @ Vector((-3.8, 0, -5)),
+        inverse @ Vector((-3.5, -1.15, -5)),
         (inverse.to_3x3() @ Vector((0, 0, 1))).normalized())
     root_normal = (inverse.to_3x3().transposed() @ normal).normalized()
-    assert hit and root_normal.z < -.95
+    assert hit
+    assert (root_normal - Vector((0, -.55536884, -.83160424))).length < 1e-5, tuple(root_normal)
     anchor = Vector(camera['wfrl_mount_anchor'])
     offset = Vector(camera['wfrl_mount_offset'])
     assert (anchor - local @ point).length < 1e-5
-    assert (anchor - Vector((-3.8, 0, .46256))).length < 1e-4
-    assert (offset - Vector((0, 0, -.4))).length < 1e-6
+    assert abs(anchor.x + 3.5) < 1e-4 and abs(anchor.y + 1.15) < 1e-4
+    assert (offset - Vector((0, 0, -.2151))).length < 1e-6
     assert (camera.location - anchor - offset).length < 1e-6
     local_origin = inverse @ camera.location
     direction = point - local_origin
@@ -163,7 +169,7 @@ assert clock_state() == saved_clock and farm.is_active(scene)
 loaded_objects = {turbine: scene.objects[identities[turbine][0]] for turbine in TURBINES}
 loaded_data = {turbine: camera.data for turbine, camera in loaded_objects.items()}
 downs = {turbine: cameras.ensure_gimbal(scene, turbine) for turbine in TURBINES}
-assert pose(downs['T1']) == t1_custom, 'T1 revision-3 hand pose must survive another turbine migration'
+assert pose(downs['T1']) == t1_custom, 'T1 current-revision hand pose must survive another turbine migration'
 assert sum(obj.type == 'CAMERA' for obj in scene.objects) == camera_count
 for turbine in TURBINES:
     assert downs[turbine] == loaded_objects[turbine] and downs[turbine].data == loaded_data[turbine]
@@ -204,7 +210,7 @@ for frame in (1, 67, 901, 1801, scene.frame_end):
     scene.frame_set(frame)
     bpy.context.view_layer.update()
     for turbine, camera in downs.items():
-        assert_nadir(camera)
+        assert_down_axis(camera)
         mount = fixed_mounts[turbine]
         assert (camera.location - mount).length < 1e-6
         expected = camera.parent.matrix_world @ mount
@@ -240,9 +246,9 @@ for name, state in independent_state.items():
 
 result = dict(status='PASS', module=MODULE, addon_file=addon.__file__,
               blender=bpy.app.version_string, default_poses=nominal,
-              migrated_revision_one=['T2', 'T3'], t1_revision_three_hand_pose_preserved=True,
+              migrated_revision_one=['T2', 'T3'], t1_current_revision_hand_pose_preserved=True,
               parent_motion_error_m=motion_errors, rotor_spin_independent=True,
-              optical_axis_matches_parent_negative_z=True,
+              optical_axis_matches_parent_local_preset=True,
               hand_pose_and_reset_each_turbine=True, switch_preserves_replay_clock=True,
               save_reopen_preserves_all_hand_poses=True, independent_nacelle_and_c1_c3_unchanged=True,
               gate_check='1200x700 synthetic viewport with 300px right sidebar', gate_bounds_px=gates,

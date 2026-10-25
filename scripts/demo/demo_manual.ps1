@@ -5,7 +5,7 @@
 $env:SKIP_MPI_CHECK = "1"
 
 $mpiexec = "C:\Program Files\Microsoft MPI\Bin\mpiexec.exe"
-$python = "USER_HOME\.conda\envs\wfcrl\python.exe"
+$python = "C:\Users\s1155\.conda\envs\wfcrl\python.exe"
 $project = "D:\project\wind farm RL"
 
 Write-Host "Starting demo mode: 2 startup-shutdown cycles"

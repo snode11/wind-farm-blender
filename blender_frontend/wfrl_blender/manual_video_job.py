@@ -89,8 +89,8 @@ class Lease:
             except BlockingIOError as exc:
                 raise ValueError(f'已有作业占用：{self.path}') from exc
             existing = os.read(fd, 65536)
-            if not created:
-                record = json.loads(existing) if existing else None
+            if not created and existing:
+                record = json.loads(existing)
                 if not isinstance(record, dict) or record.get('schema') != LEASE_SCHEMA:
                     raise ValueError(f'拒绝使用未知锁文件：{self.path}')
             os.lseek(fd, 0, os.SEEK_SET)

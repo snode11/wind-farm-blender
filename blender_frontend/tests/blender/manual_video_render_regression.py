@@ -22,8 +22,14 @@ OUT.mkdir(parents=True, exist_ok=False)
 WIDTH = int(os.environ.get('WFRL_TEST_WIDTH', '320'))
 HEIGHT = int(os.environ.get('WFRL_TEST_HEIGHT', '180'))
 SAMPLES = int(os.environ.get('WFRL_TEST_SAMPLES', '4'))
+BLADE_MODEL = os.environ.get('WFRL_TEST_BLADE_MODEL', 'rootkink')
 control.register()
+if BLADE_MODEL != 'rootkink':
+    from wfrl_blender import manual_down
+    manual_down.register()
 scene = manual_scene.create(bpy.context)
+if BLADE_MODEL != 'rootkink':
+    scene.wfrl_manual_blade_shape = BLADE_MODEL
 entries = {entry.turbine_id: entry for entry in scene.wfrl_manual_turbines}
 entries['T1'].azimuth_deg = 180
 entries['T1'].rpm = 9
@@ -53,6 +59,9 @@ started = time.monotonic()
 report = render_job(OUT / 'job.json')
 elapsed = time.monotonic() - started
 scene = bpy.data.scenes[job['scene_name']]
+assert scene.wfrl_manual_display_detail == 'CLOSEUP'
+assert all(len(getattr(entry, f'blade{i}_object').data.vertices) == 15361
+           for entry in scene.wfrl_manual_turbines for i in (1, 2, 3))
 assert not bpy.app.timers.is_registered(control._timer)
 assert all(not entry.running for entry in scene.wfrl_manual_turbines)
 assert (report['width'], report['height'], report['frame_count']) == (WIDTH, HEIGHT, 5)
@@ -81,7 +90,7 @@ assert camera.parent == control._t1(scene).yaw_object
 assert camera.name.endswith('.Camera.T1.Down')
 assert not scene.render.use_motion_blur
 assert scene.render.pixel_aspect_x == scene.render.pixel_aspect_y == 1
-assert scene.get('wfrl_manual_blade_model') == 'rootkink'
+assert scene.get('wfrl_manual_blade_model') == BLADE_MODEL
 published = (OUT / 'delivered.mp4').read_bytes()
 try:
     render_job(OUT / 'job.json')

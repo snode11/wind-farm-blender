@@ -1,12 +1,13 @@
 """Bounded world-space blade-tip trails for the Down/gimbal view.
 
 The trail is a presentation aid attached to the existing replay timeline.  It
-samples the actual (possibly deformed) blade mesh after the frame is evaluated;
+samples the actual (possibly deformed) blade mesh after replay writes its pose;
 it does not infer a tip from the radar beams or alter the simulation pose.
 """
 
 from collections import deque
 import math
+import numpy as np
 
 
 HOLD_S = 2.0
@@ -32,9 +33,8 @@ def _scene_key(scene):
 
 
 def _is_playing(scene):
-    import bpy
-    return any(window.scene == scene and window.screen.is_animation_playing
-               for window in bpy.context.window_manager.windows)
+    from . import playback
+    return playback.is_playing(scene)
 
 
 def opacity(age_s, lifetime_s=LIFETIME_S):
@@ -135,14 +135,17 @@ def _ensure_curve(scene, turbine_id, blade_id):
     return obj
 
 
-def _tip_world(obj, depsgraph=None):
+def _tip_world(obj, depsgraph=None, *, scene=None):
     """Follow the stable apex authored by turbine_geometry.blade_mesh()."""
     # blade_mesh appends its apex last. Re-selecting max local Z after flexing
     # can jump onto an adjacent surface vertex instead of following that apex.
     vertices = getattr(obj.data, 'vertices', ())
     if not vertices:
         return None
-    return obj.matrix_world @ vertices[-1].co
+    from . import farm_flex
+    flex = farm_flex.active_for(scene)
+    matrix = obj.matrix_world if flex is None else flex.world_matrix(obj)
+    return matrix @ vertices[-1].co
 
 
 class TipTrail:
@@ -164,6 +167,8 @@ class TipTrail:
         self.compare_since = None
         self.points = {bid: deque(maxlen=max_points) for bid in (1, 2, 3)}
         self.objects = {bid: _ensure_curve(scene, self.turbine_id, bid) for bid in (1, 2, 3)}
+        self._geometry_revision = {bid: 0 for bid in (1, 2, 3)}
+        self._drawn = {bid: None for bid in (1, 2, 3)}
         self.enabled = True
         self.last_frame = None
         self.scene['wfrl_tip_trail_enabled'] = True
@@ -188,6 +193,8 @@ class TipTrail:
             self.times[bid].clear()
             self.completed[bid].clear()
             self._clear_curve(obj)
+            self._geometry_revision[bid] = 0
+            self._drawn[bid] = None
         self.last_frame = None
         self.last_time = None
         self.last_angle = None
@@ -208,13 +215,23 @@ class TipTrail:
         self._set_visible(True)
         self.scene['wfrl_tip_trail_enabled'] = True
         self.last_frame = None  # next update starts exactly at current frame
+        self._drawn = {bid: None for bid in (1, 2, 3)}
 
     def _redraw(self, bid, now):
-        obj = self.objects[bid]
-        obj.data.splines.clear()
         alpha = 1.0 if self.compare_since is None else opacity(
             max(0.0, now - self.compare_since - HOLD_S))
         level = round(alpha * (FADE_LEVELS - 1))
+        revision = self._geometry_revision[bid]
+        drawn = self._drawn[bid]
+        if drawn == (revision, level):
+            return
+        obj = self.objects[bid]
+        if drawn is not None and drawn[0] == revision and drawn[1] > 0 and level > 0:
+            for spline in obj.data.splines:
+                spline.material_index = level
+            self._drawn[bid] = (revision, level)
+            return
+        obj.data.splines.clear()
         groups = [(level, coordinates) for coordinates in
                   [*self.completed[bid], list(self.points[bid])]
                   if len(coordinates) >= 2 and level > 0]
@@ -222,7 +239,11 @@ class TipTrail:
             spline = obj.data.splines.new('POLY')
             spline.material_index = level
             spline.points.add(len(coordinates) - 1)
-            spline.points.foreach_set('co', [v for xyz in coordinates for v in (*xyz, 1.0)])
+            coordinates4 = np.empty((len(coordinates), 4), dtype=np.float32)
+            coordinates4[:, :3] = coordinates
+            coordinates4[:, 3] = 1.0
+            spline.points.foreach_set('co', coordinates4.ravel())
+        self._drawn[bid] = (revision, level)
 
     def update(self, scene, depsgraph=None):
         if scene != self.scene or not self.enabled:
@@ -258,13 +279,15 @@ class TipTrail:
         bucket = math.floor((now + 1e-9) / self.interval_s)
         for bid in (1, 2, 3):
             points, times = self.points[bid], self.times[bid]
+            geometry_changed = False
             blade = scene.objects.get(f'WFRL.Turbine.{self.turbine_id}.Blade{bid}')
-            point = _tip_world(blade, depsgraph) if blade is not None else None
+            point = _tip_world(blade, depsgraph, scene=scene) if blade is not None else None
             if point is None or not all(math.isfinite(float(v)) for v in point):
                 self.clear('tip_unavailable')
                 return
             xyz = tuple(float(v) for v in point)
             if crossed and points:
+                geometry_changed = True
                 boundary = tuple(a + fraction * (b - a) for a, b in zip(points[-1], xyz))
                 self.completed[bid].append([*points, boundary])
                 points.clear()
@@ -274,6 +297,7 @@ class TipTrail:
                     times.append(now)
             if len(self.completed[bid]) < 2:
                 if len(points) >= self.max_points - 1:
+                    geometry_changed = True
                     # Preserve the entire revolution even at low rotor speed.
                     kept = list(zip(times, points))[::2]
                     times.clear()
@@ -282,10 +306,14 @@ class TipTrail:
                         times.append(t)
                         points.append(p)
                 if not crossed and len(times) > 1 and math.floor((times[-1] + 1e-9) / self.interval_s) == bucket:
+                    geometry_changed = geometry_changed or points[-1] != xyz
                     times[-1], points[-1] = now, xyz
                 else:
+                    geometry_changed = True
                     times.append(now)
                     points.append(xyz)
+            if geometry_changed:
+                self._geometry_revision[bid] += 1
         if crossed:
             self.turn_angle = max(0.0, self.turn_angle - math.tau)
             if len(self.completed[1]) == 2:

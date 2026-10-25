@@ -56,3 +56,42 @@ def test_resources_and_time_list():
     with pytest.raises(ValueError):p.projection(90,60,1,1)
     assert p.sample_times(3,3.3,.1)==pytest.approx([3,3.1,3.2,3.3])
     with pytest.raises(ValueError):p.sample_times(3,4,0)
+
+
+def test_down_optics_preserve_independent_camera_sensors(monkeypatch):
+    from types import SimpleNamespace
+    from wfrl_blender import cameras, nacelle_camera
+
+    class Camera(dict):
+        def __init__(self, name, **tags):
+            super().__init__(tags)
+            self.name = name
+            self.type = 'CAMERA'
+            self.data = SimpleNamespace(lens=50.0)
+
+    down = Camera('Manual Down.001', wfrl_down_camera=True)
+    recorded = Camera('WFRL.Camera.T1.Gimbal')
+    nacelle = Camera('Nacelle', wfrl_nacelle_intrinsics=nacelle_camera.INTRINSICS_ID)
+    custom = Camera('C1')
+    assert cameras.is_down_camera(None) is False
+    assert not cameras.is_down_camera(custom)
+    assert cameras.DOWN_FOCAL_LENGTH_MM == 8
+    assert cameras.DOWN_VFOV_DEG == 60
+    assert cameras.DOWN_HFOV_DEG == pytest.approx(
+        math.degrees(2*math.atan(math.tan(math.radians(30))*16/9)))
+    assert cameras._sensor_width(down) == cameras._sensor_width(recorded)
+    assert cameras._sensor_width(nacelle) == nacelle_camera.SENSOR_WIDTH_MM
+    assert cameras._sensor_width(custom) == 36
+    scene = SimpleNamespace(objects={cam.name: cam for cam in (down, nacelle, custom)})
+    class Scene(dict):
+        objects = scene.objects
+    scene = Scene()
+    monkeypatch.setattr(nacelle_camera, 'select_output', lambda scene, camera: None)
+    cameras.select_camera(scene, down.name, fov_deg=cameras.DOWN_HFOV_DEG)
+    assert down.data.lens == pytest.approx(8)
+    assert nacelle.data.lens == custom.data.lens == 50
+    cameras.select_camera(scene, nacelle.name, fov_deg=60)
+    assert nacelle.data.lens == pytest.approx(nacelle_camera.SENSOR_WIDTH_MM/(2*math.tan(math.radians(30))))
+    cameras.select_camera(scene, custom.name, fov_deg=60)
+    assert custom.data.lens == pytest.approx(36/(2*math.tan(math.radians(30))))
+    assert down.data.lens == pytest.approx(8)

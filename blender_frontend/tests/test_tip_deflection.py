@@ -9,7 +9,9 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
-from wfrl_blender.deflection import rigid_frame, compare, read_comparison, rotation
+from wfrl_blender.deflection import (rigid_frame, beamdyn_root_frame,
+                                   interpolated_beamdyn_root_frame,
+                                   compare, read_comparison, rotation)
 
 
 class DeflectionTests(unittest.TestCase):
@@ -56,7 +58,7 @@ class DeflectionTests(unittest.TestCase):
                 support = d['nacelle'][i] if 'nacelle' in d else None
                 hub, axes, pitched = rigid_frame(d['scalars'], pose, b, support)
                 if 'tip_local_m' in d:
-                    axes = pitched
+                    hub, axes = beamdyn_root_frame(d['scalars'], b, g['transforms'][i, 0, b - 1, 0])
                     reference = hub + axes @ d['tip_local_m']
                 else:
                     reference = hub + axes[:, 2] * d['scalars']['TipRad']
@@ -69,8 +71,43 @@ class DeflectionTests(unittest.TestCase):
                     np.testing.assert_allclose(row['components'][:2], [3.47831678, -.84240049], atol=.00001)
                     self.assertGreater(row['distance'], abs(row['components'][0]))
         maximum = np.max(np.abs(errors), axis=0)
-        np.testing.assert_array_less(maximum, [.005] * 3 if 'tip_local_m' in d else ([.0002, .0002] if 'nacelle' in d else [.00001, .00006]))
+        np.testing.assert_array_less(maximum, [.0002] * 3 if 'tip_local_m' in d else ([.0002, .0002] if 'nacelle' in d else [.00001, .00006]))
         print('ALL_7203_SAVED_TIPS_MAX_ERROR_M', maximum.tolist())
+
+    def test_beamdyn_reference_uses_boundary_pitch_not_command_pitch(self):
+        s = self.data['scalars']
+        tip = np.array([-1., 0., s['TipRad']])
+        for blade in (1, 2, 3):
+            hub0, _, axes0 = rigid_frame(s, [0] * 6, blade)
+            hub, _, boundary_axes = rigid_frame(s, [23, 181, 11, 4, 5, 6], blade)
+            r = boundary_axes @ axes0.T
+            transform = np.column_stack((r, hub - r @ hub0))
+            origin, axes = beamdyn_root_frame(s, blade, transform)
+            reference = origin + axes @ tip
+            actual = r @ (hub0 + axes0 @ tip) + transform[:, 3]
+            np.testing.assert_allclose(reference, actual, atol=1e-12, rtol=0)
+            np.testing.assert_allclose(compare(actual, reference, axes, [0, 0, 0])['error'], 0, atol=1e-12)
+            _, _, command_axes = rigid_frame(s, [23, 181, 11, 5, 6, 7], blade)
+            self.assertGreater(np.linalg.norm(reference - (hub + command_axes @ tip)), .01)
+
+    def test_beamdyn_reference_rejects_invalid_boundary_transform(self):
+        for transform in (np.zeros((3, 4)), np.ones((4, 4)), np.full((3, 4), np.nan),
+                          np.column_stack((np.diag([-1., 1., 1.]), [0, 0, 0]))):
+            with self.assertRaisesRegex(ValueError, 'Invalid BeamDyn root'):
+                beamdyn_root_frame(self.data['scalars'], 1, transform)
+
+    def test_beamdyn_boundary_interpolation_preserves_the_hub(self):
+        s = self.data['scalars']
+        hub0, _, axes0 = rigid_frame(s, [0] * 6, 1)
+        transforms = []
+        for azimuth in (0, 2):
+            hub, _, axes = rigid_frame(s, [0, azimuth, 10, 0, 0, 0], 1)
+            r = axes @ axes0.T
+            transforms.append(np.column_stack((r, hub - r @ hub0)))
+        hub, axes = interpolated_beamdyn_root_frame(s, 1, *transforms, .5)
+        expected_hub, _, expected_axes = rigid_frame(s, [0, 1, 10, 0, 0, 0], 1)
+        np.testing.assert_allclose(hub, expected_hub, rtol=0, atol=1e-12)
+        np.testing.assert_allclose(axes, expected_axes, rtol=0, atol=1e-12)
 
     def test_deflection_channels_cannot_move_either_point(self):
         s = self.data['scalars']

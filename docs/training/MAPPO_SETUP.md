@@ -9,6 +9,7 @@
 | 集中式单智能体 PPO | `scripts/train/train_ppo.py` | 全场 Dict 观测 / 同一全场观测 | Ablaincourt FLORIS，7 机组 |
 | 参数共享 IPPO | `scripts/train/train_mappo.py` → `wfrl/mappo_sb3.py` | 单机局部观测 / 单机局部观测 | Ablaincourt FLORIS，7 机组 |
 | 多模态参数共享 IPPO | `scripts/train/train_mappo_mm.py` | 局部观测及代理振动、尾流图 / 同一输入 | FLORIS |
+| HornsRev2 集中式单智能体 PPO | `scripts/train/train_ppo_hornsrev2.py` | 全场 Dict 观测 / 同一全场观测 | HornsRev2 FLORIS，91 机组；多个独立风场 worker |
 | 集中式 MAPPO（CTDE） | `python -m wfrl.mappo_central` | 单机局部观测 / 各机局部观测拼接 | Ablaincourt FLORIS，7 机组 |
 | 集中式 MAPPO，可选 GRU critic | `scripts/train/train_fastfarm.py` | 单机局部观测 / 全场拼接状态或其序列 | 默认三机 FAST.Farm，也支持 `--backend floris` |
 | Interactive 共享 actor、集中式 critic | Bridge → `IsolatedTrainer`（POSIX）→ `trainer_worker` → `wfrl/studio/trainer.py` | 单机局部观测 / 各机局部观测拼接 | FAST.Farm |
@@ -39,6 +40,8 @@ Interactive 的 `episode_steps` 指每回合用于训练的控制步数，默认
 
 Studio / Interactive 使用 `tanh_scale`，包括仅控制 yaw 或单个非 yaw 控制量的场景；Replay 从 checkpoint 读取同一合同，不按动作维度猜测变换。`train_fastfarm.py` 的高斯 yaw 策略使用 `clip`，其 checkpoint 与命令行 rollout 保持相同规则。控制顺序、动作和观测维度、归一化统计、机组数量及运行时边界须一致；保存了场景的模型还校验后端、机型、时间步长与机组布局。
 
+Replay 在后端启动、预热和控制步边界响应暂停与停止。最终快照的 `step` 使用实际完成的策略控制步数，预热不计入；只有达到请求的 `replay_steps` 才将 `iters_done` 置为 `1`。取消或后端提前结束保留实际计数。
+
 无版本动作合同的模型只接受可识别的保存格式：Studio 的 `scene`、`controls`、`critic` 组合对应 `tanh_scale`；CLI 的完整 `env_id`、`obs_duty`、`recurrent`、`duty_penalty` 组合对应 yaw 的 `clip`。该兼容路径使用固定控制边界，并须与实际运行时一致；缺失、冲突或无法判定的元数据明确报错。没有保存场景的 CLI 模型不能仅凭现有字段证明完整布局、机型和时间步长匹配。
 
 ### 回合结束与时间截断
@@ -59,6 +62,8 @@ python -m pip install -e ./wfcrl-env --no-deps
 python -m pip install -e '.[train]'
 python -m pip check
 ```
+
+`train_ppo.py`、`train_mappo_mm.py` 与 `train_ppo_hornsrev2.py` 默认使用普通训练日志；`--progress-bar` 可启用进度条，需另有 `tqdm` 与 `rich`。这些入口的默认训练不依赖可选进度条组件。
 
 这是源码环境安装模板，不构成全平台验证结果。该 requirements 文件不安装 `mpi4py`、`openfast_toolbox` 或 FAST.Farm / 控制器二进制。FAST.Farm 另需与实际平台匹配的 MPI、求解器和 DLL；不能靠改环境 ID 完成部署。[完整分流见本地配置](../setup/setup_local.md)。
 
@@ -88,6 +93,8 @@ mpiexec -n 1 python scripts/train/train_fastfarm.py \
 
 - SB3 IPPO：`results/checkpoints/mappo_ablaincourt.zip` 与 `vecnormalize_mappo.pkl`。
 - 单智能体 PPO：`ppo_ablaincourt.zip` 与 `vecnormalize.pkl`。
+- 多模态 IPPO：`mappo_mm_ablaincourt.zip` 与 `vecnormalize_mappo_mm.pkl`。
+- HornsRev2 PPO：`ppo_hornsrev2.zip` 与 `vecnormalize_hr2.pkl`。
 - 集中式 FLORIS MAPPO：`mappo_central_ablaincourt.pt`；观测统计在 checkpoint 内。
 - FAST.Farm MAPPO：由环境、种子、奖励、回合及 tag 共同命名的 `.pt`，检查其中 `obs_keys`、维度、机组顺序、控制量与观测统计。
 
@@ -95,12 +102,24 @@ SB3 IPPO 的 `--eval-only` 自动加载模型与归一化文件，缺少任一�
 
 算法对比入口 `scripts/analysis/compare_eval.py` 的 IPPO 分支和 `wfrl/viz/animate.py` 的策略动画通过 `load_evaluation_pair()` 加载同一模型／归一化配对，使用冻结统计和原始奖励；缺文件或配对不匹配时停止。该函数返回的环境由调用方关闭，加载失败时函数负责关闭已创建的环境。
 
-SB3 IPPO 保存时给模型和归一化文件写入相同配对标识，加载时校验标识、观测／动作空间、有限统计量和折扣因子。无配对标识的现有文件可以按兼容性校验加载，但仅凭空间和统计形状不能证明二者来自同次训练，仍须核对来源。单智能体 PPO 和多模态 IPPO 有各自的加载入口，不能据此推定它们也具备上述配套加载检查；单智能体 PPO 缺少权重或统计量时仍有回退路径，使用前须确认对应文件。
+SB3 IPPO、多模态 IPPO、单智能体 PPO 与 HornsRev2 PPO 的最终保存均给模型和归一化文件写入相同配对标识，加载时校验标识、观测／动作空间、有限统计量和折扣因子。无配对标识的现有文件可以按兼容性校验加载，但仅凭空间和统计形状不能证明二者来自同次训练，仍须核对来源。
+
+单智能体 PPO 的 `--resume` 和 `--eval-only` 都要求完整的 `ppo_ablaincourt.zip` 与 `vecnormalize.pkl`；缺失、损坏或配对不兼容时停止。续训恢复观测与奖励统计及累计步数，`--timesteps` 表示追加的全场控制步数，按完整 rollout 向上取整。评估冻结统计并报告原始奖励；训练前评估使用当前训练环境统计量的独立副本，新训练不会读取磁盘上的旧统计量。定期检查点同时保存同一步数的 `ppo_wf_<steps>_steps.zip` 和 `ppo_wf_vecnormalize_<steps>_steps.pkl`。正常结束、加载、推理、训练或保存失败时均关闭本次创建的环境。
+
+多模态 IPPO 的 `--eval-only` 直接加载保存模型，无需额外指定 `--resume`；评估固定统计并报告原始奖励。`--resume` 恢复观测／奖励统计和累计 agent transitions，`--timesteps` 表示追加量。归一化仅作用于 `yaw`、`wind_speed`、`wind_direction`、`vibration`；`wake_image` 不使用 VecNormalize 的逐维运行统计。训练、续训和评估的图像模式须一致：使用 `--no-image` 训练的模型，后续也需传入该参数；模式、统计通道或空间不兼容时明确报错。两种模式共用默认输出路径，开始新训练会覆盖该路径的配对文件。
+
+HornsRev2 PPO 的 `--resume` 恢复保存的统计量和累计步数，允许调整 `--n-envs`；新建 worker 的回合回报累加器清零，已学习的统计量保留。`--timesteps` 表示所有独立风场 worker 的追加环境 transition 总数，按 `n_steps * n_envs` 的完整 rollout 向上取整，每个 worker 的一步包含整个 91 机组风场。评估只使用一个风场、冻结统计并报告原始奖励。训练前评估使用当前训练统计的独立副本；定期检查点同时保存同一步数的 `ppo_hr2_<steps>_steps.zip` 和 `ppo_hr2_vecnormalize_<steps>_steps.pkl`。
+
+多模态 IPPO 与 HornsRev2 PPO 的续训／评估均要求完整、兼容的模型和归一化文件；缺失、损坏或不兼容时停止，不回退随机策略或新统计量。正常结束以及加载、预测、训练或保存失败时关闭已创建的环境；HornsRev2 的归一化加载失败也会关闭其 worker。
 
 ```bash
 python scripts/train/train_mappo.py --eval-only
 python scripts/train/train_mappo.py --resume --timesteps 50000
 python scripts/train/train_ppo.py --eval-only
+python scripts/train/train_mappo_mm.py --eval-only
+python scripts/train/train_mappo_mm.py --resume --no-image --timesteps 50000
+python scripts/train/train_ppo_hornsrev2.py --resume --n-envs 4 --timesteps 50000
+python scripts/train/train_ppo_hornsrev2.py --eval-only
 python -m wfrl.mappo_central --eval-only
 ```
 

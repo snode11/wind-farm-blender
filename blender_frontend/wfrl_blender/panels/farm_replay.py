@@ -328,7 +328,7 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
     bl_idname='wfrl.farm_flex_view'
     bl_label='查看机组'
     turbine:bpy.props.StringProperty(default='T1')
-    angle:bpy.props.EnumProperty(items=[('DOWN','Down 视角','从对应机组机舱前部底壳下方 0.40 米沿机舱局部正下观察，随机舱与塔顶姿态运动'),('NACELLE','机舱云台',''),('NACELLE_SIDE','侧下视角','原位转向叶轮侧下方，使用同一台机舱相机'),('FRONT','侧前方','')],default='DOWN')
+    angle:bpy.props.EnumProperty(items=[('DOWN','Down 视角','从对应机组机舱底壳偏叶片后缘一侧的支架朝叶轮侧下俯视经过的叶片，随机舱与塔顶姿态运动'),('NACELLE','机舱云台',''),('NACELLE_SIDE','侧下视角','原位转向叶轮侧下方，使用同一台机舱相机'),('FRONT','侧前方','')],default='DOWN')
     @classmethod
     def poll(cls, context):
         return farm_flex.is_active(context.scene)

@@ -1,7 +1,7 @@
 """场景 → 3D 视图的离线验收（不起 FAST.Farm，用离屏渲染）。
 
 跑：
-    "USER_HOME\\.conda\\envs\\wfcrl\\python.exe" scripts/experiments/probe_scene_view.py
+    "C:\\Users\\s1155\\.conda\\envs\\wfcrl\\python.exe" scripts/experiments/probe_scene_view.py
 
 这是 D1 验收的渲染那一半。要证的是同一句话：**改 YAML 里的机位，3D 跟着变**，
 而且变的是画面上机组真实所在的位置，不是某张预注册表里的坐标。

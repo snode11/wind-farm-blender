@@ -20,6 +20,12 @@ MODELS = {
     'rootkink': ('assets/rootkink_geometry.json', '商用形制叶根拐点改型'),
 }
 DEFAULT_MODEL = 'nrel5mw'
+# Display-only spanwise shear toward local -x; radial binding stays unchanged.
+ROOT_CANT_DEG = {'rootkink': 5.0}
+
+# Manual rigid scenes use one fixed sampling level for all simultaneous views.
+# Recorded flexible blades retain their independent source sampling.
+MANUAL_DISPLAY_SAMPLING = {'OVERVIEW': (4, 48), 'BALANCED': (6, 64), 'CLOSEUP': (8, 96)}
 
 
 def model_label(model=DEFAULT_MODEL):
@@ -104,8 +110,9 @@ def _hermite(a, b, da, db, width, t):
 def blade_mesh(subdiv=8, ring_points=96, model=DEFAULT_MODEL):
     """Smooth source-station loft with a presentation-only tapered tip.
 
-    Original sections remain exact through the penultimate station. The last
-    1.3666 m closes smoothly to one vertex at the original radial extent;
+    Source sections are lofted through the penultimate station. Rootkink also
+    applies a display-only upwind shear. The last 1.3666 m closes smoothly to
+    one vertex at the original radial extent;
     this tip finish is illustrative, not a replacement aerodynamic dataset.
     """
     if subdiv < 1 or ring_points < 12:
@@ -150,6 +157,10 @@ def blade_mesh(subdiv=8, ring_points=96, model=DEFAULT_MODEL):
     vertices.append((*tip_center, spans[-1]))
     last = (rings - 1)*ring_points
     faces.extend((last + j, last + (j + 1) % ring_points, tip) for j in range(ring_points))
+    lean = math.tan(math.radians(ROOT_CANT_DEG.get(model, 0.0)))
+    if lean:
+        root = data["scalars"]["HubRad"]
+        vertices = [(x - (z - root)*lean, y, z) for x, y, z in vertices]
     # Swapping airfoil (chord, thickness) into (axial, tangent) reverses winding.
     return vertices, [tuple(reversed(face)) for face in faces]
 

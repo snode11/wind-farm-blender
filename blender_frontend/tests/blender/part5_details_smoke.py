@@ -28,9 +28,14 @@ for obj in bpy.data.objects:
             x,y,z=vertex.co
             hit,point,_,_=terrain.ray_cast(Vector((x,y,1500)),Vector((0,0,-1)))
             assert hit and .015<z-point.z<.225, (obj.name,z-point.z)
-shrubs=[o for o in bpy.data.objects if o.name.startswith('WFRL.Landscape.Shrub')]
-assert len({o.data.as_pointer() for o in shrubs})==3
-assert all(len(o.data.materials)==2 for o in shrubs)
-assert all(o.data.polygons[-1].normal.z>0 for o in shrubs)
+shrubs=bpy.data.objects['WFRL.Landscape.Shrubs']
+group=shrubs.modifiers['WFRL.Landscape.Instances'].node_group
+prototypes=sorted(group.nodes['WFRL.Prototypes'].inputs['Collection'].default_value.objects,
+                  key=lambda obj:obj.name)
+used={point.value for point in shrubs.data.attributes['prototype_index'].data}
+meshes=[prototypes[index].data for index in used]
+assert len({data.as_pointer() for data in meshes})==3
+assert all(len(data.materials)==2 for data in meshes)
+assert all(data.polygons[-1].normal.z>0 for data in meshes)
 print('WFRL_PART5_DETAILS_SMOKE=PASS')
 print('Fitting parents, source-shared shrub prototypes, upward cover normals and pad ground clearance checked.')

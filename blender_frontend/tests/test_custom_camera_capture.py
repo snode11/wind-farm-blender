@@ -93,6 +93,7 @@ def test_capture_closes_gpu_resources_for_every_termination(tmp_path, terminatio
     monkeypatch.setattr(job, 'same_session', lambda: termination != 'invalid_session')
     # The restoration mechanism is independently exercised in native tests.
     monkeypatch.setattr(job, '_play', lambda *_: None)
+    monkeypatch.setattr(job, '_clock_unchanged', lambda: True)
     job.sequence, job.original_time_property, job.scene, job.playing = False, None, {}, False
     monkeypatch.setattr(capture, '_ACTIVE', job)
     if termination == 'exception':
@@ -119,6 +120,7 @@ def test_guard_reports_invalid_native_pose_before_layout_hashing(monkeypatch):
     job.scene = NS(frame_current=1, frame_subframe=0)
     job.window = NS(screen=NS(is_animation_playing=False))
     job.expected_frame = (1, 0)
+    job.playback_generation = capture.playback.generation()
     monkeypatch.setattr(job, 'same_session', lambda: True)
     monkeypatch.setitem(sys.modules, core.__package__+'.panels.custom_cameras',
                         NS(installation_block_reason=lambda _scene: ''))
@@ -130,3 +132,109 @@ def test_guard_reports_invalid_native_pose_before_layout_hashing(monkeypatch):
     monkeypatch.setattr(core, 'layout_dict', unexpected)
     with pytest.raises(RuntimeError, match='C1 实际姿态含非有限数值'):
         job.guard()
+
+
+@pytest.fixture
+def clock_capture(tmp_path, monkeypatch):
+    class Scene(dict):
+        frame_current = 10
+        frame_subframe = .25
+
+    job = capture.Capture.__new__(capture.Capture)
+    job.scene = Scene(wfrl_clearance_time_s=9.25)
+    job.window = NS(screen=NS(is_animation_playing=False))
+    job.closed = job.in_group = job.cancel_requested = False
+    job.cancel_accepted_at = job.cancel_stopped_at = None
+    job.index, job.times = 1, [0., 1., 2.]
+    job.path, job.manifest, job.render_target = tmp_path, {'status': 'incomplete'}, None
+    job.sequence, job.playing = True, True
+    job.frame, job.subframe, job.time = 1, .5, .5
+    job.expected_frame = (10, .25)
+    job.original_time_property = .5
+    job.playback_generation = 3
+    job.layout_hash, job.live_layout_hash, job.profile = 'saved', 'native', {}
+    calls = []
+    generation = [3]
+
+    def evaluate(frame, subframe, time_s):
+        job.scene.frame_current, job.scene.frame_subframe = frame, subframe
+        job.scene['wfrl_clearance_time_s'] = time_s
+        calls.append(('evaluate', frame, subframe, time_s))
+
+    monkeypatch.setattr(job, 'same_session', lambda: True)
+    monkeypatch.setattr(job, '_play', lambda playing: calls.append(('play', playing)))
+    monkeypatch.setattr(job, 'evaluate', evaluate)
+    monkeypatch.setattr(capture.playback, 'generation', lambda: generation[0])
+    monkeypatch.setattr(capture.playback, 'owner_scene', lambda: None)
+    monkeypatch.setattr(capture, '_ACTIVE', job)
+    monkeypatch.setitem(sys.modules, core.__package__ + '.panels.custom_cameras',
+                        NS(installation_block_reason=lambda _scene: ''))
+    monkeypatch.setattr(core, 'validate_native_state', lambda _scene: None)
+    monkeypatch.setattr(core, 'layout_dict', lambda _scene: {})
+    monkeypatch.setattr(core, 'layout_hash', lambda _layout: 'saved')
+    monkeypatch.setattr(core, 'live_layout_hash', lambda _scene: 'native')
+    monkeypatch.setattr(preview, 'render_profile', lambda _scene: {})
+    return job, calls, generation
+
+
+@pytest.mark.parametrize('intervention', ['frame', 'subframe', 'playback'])
+def test_external_clock_change_aborts_capture_without_restoring_over_user_state(clock_capture, intervention):
+    job, calls, generation = clock_capture
+    job.guard()
+    if intervention == 'playback':
+        generation[0] += 2
+    else:
+        setattr(job.scene, 'frame_current' if intervention == 'frame' else 'frame_subframe', 20 if intervention == 'frame' else .75)
+        job.scene['wfrl_clearance_time_s'] = 19.75
+    edited = (job.scene.frame_current, job.scene.frame_subframe, dict(job.scene))
+    with pytest.raises(RuntimeError, match='采集时刻'):
+        job.guard()
+    job.finish(error='采集时刻被外部操作改变，采集未完成')
+    assert (job.scene.frame_current, job.scene.frame_subframe, dict(job.scene)) == edited
+    assert calls == []
+    assert job.closed and not capture.active()
+    assert job.manifest['status'] == 'incomplete'
+
+
+@pytest.mark.parametrize('success', [False, True])
+def test_capture_restores_unchanged_clock_on_completion_or_cancel(clock_capture, success):
+    job, calls, _generation = clock_capture
+    if success:
+        job.finish(success=True)
+    else:
+        job.request_cancel()
+    assert calls == [('play', False), ('evaluate', 1, .5, .5), ('play', True)]
+    assert (job.scene.frame_current, job.scene.frame_subframe) == (1, .5)
+    assert job.scene['wfrl_clearance_time_s'] == .5
+    assert job.closed and not capture.active()
+    assert job.manifest['status'] == ('complete' if success else 'incomplete')
+
+
+def test_capture_restores_own_frame_change_when_geometry_evaluation_fails(clock_capture, monkeypatch):
+    from contextlib import nullcontext
+    job, calls, _generation = clock_capture
+    evaluations = []
+
+    def set_frame(frame, *, subframe):
+        job.scene.frame_current, job.scene.frame_subframe = frame, subframe
+
+    def update(scene, *, sim_time_s, **kwargs):
+        evaluations.append(sim_time_s)
+        if len(evaluations) == 1:
+            raise RuntimeError('injected geometry evaluation failure')
+        scene['wfrl_clearance_time_s'] = sim_time_s
+
+    job.scene.frame_set = set_frame
+    job.farm = NS(update=update)
+    monkeypatch.setattr(job, 'evaluate', capture.Capture.evaluate.__get__(job))
+    monkeypatch.setattr(capture, 'readonly_frame_handlers', nullcontext)
+    monkeypatch.setitem(sys.modules, 'bpy', NS(context=NS(view_layer=NS(update=lambda: None))))
+    monkeypatch.setattr(job, '_step_group', lambda _context: job.evaluate(20, .5, 19.5))
+    with pytest.raises(RuntimeError, match='geometry evaluation failure'):
+        job.step(None)
+    assert evaluations == [19.5, .5]
+    assert calls == [('play', False), ('play', True)]
+    assert (job.scene.frame_current, job.scene.frame_subframe) == (1, .5)
+    assert job.scene['wfrl_clearance_time_s'] == .5
+    assert job.closed and not capture.active()
+    assert job.manifest['status'] == 'incomplete'

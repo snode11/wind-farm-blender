@@ -222,6 +222,7 @@ class Capture:
             'pixel_convention':'top-left pixel centre (0,0); boundaries -.5 and W/H-.5',
             'distortion':'ideal undistorted pinhole; not calibrated physical lens'}
         self._play(False)
+        self.playback_generation = playback.generation()
         try:
             self.path.mkdir()
             write_json(self.path/'layout.json',self.layout)
@@ -266,9 +267,7 @@ class Capture:
             raise RuntimeError('场景、窗口或回放会话已变化，采集未完成')
         reason=installation_block_reason(self.scene)
         if reason:raise RuntimeError(reason)
-        owner = playback.owner_scene()
-        if ((owner is None or owner == self.scene) and self.window.screen.is_animation_playing
-                or (self.scene.frame_current,self.scene.frame_subframe) != self.expected_frame):
+        if not self._clock_unchanged():
             raise RuntimeError('采集时刻被外部操作改变，采集未完成')
         try:
             core.validate_native_state(self.scene)
@@ -281,15 +280,23 @@ class Capture:
         if preview.render_profile(self.scene) != self.profile:
             raise RuntimeError('采集期间颜色设置已变化，采集未完成')
 
+    def _clock_unchanged(self):
+        """Restore only the timeline and playback state still owned by capture."""
+        owner = playback.owner_scene()
+        playing = ((owner is None or owner == self.scene)
+                   and self.window.screen.is_animation_playing)
+        return (not playing and playback.generation() == self.playback_generation
+                and (self.scene.frame_current, self.scene.frame_subframe) == self.expected_frame)
+
     def evaluate(self, frame, subframe, sim_time):
         if self.farm is None:
             return
         import bpy
         with readonly_frame_handlers():
             self.scene.frame_set(frame,subframe=subframe)
+            self.expected_frame = (self.scene.frame_current, self.scene.frame_subframe)
             self.farm.update(self.scene,sim_time_s=sim_time,record_telemetry=False,update_comparison=False)
             bpy.context.view_layer.update()
-        self.expected_frame=(self.scene.frame_current,self.scene.frame_subframe)
 
     def request_cancel(self):
         if self.closed or self.cancel_requested:
@@ -379,7 +386,11 @@ class Capture:
         if self.closed:return
         same=self.same_session()
         try:
-            if restore and same:
+            clock_unchanged = same and self._clock_unchanged()
+            if success and not clock_unchanged:
+                success = False
+                error = error or '场景或采集时刻已变化，采集未完成'
+            if restore and clock_unchanged:
                 self._play(False)
                 if self.sequence:
                     self.evaluate(self.frame,self.subframe,self.time)

@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "repository": "PROJECT_ROOT/outputs/local-install-0.3.36-qo69g52o/validation/profile/extensions",
+  "repo_module": "wfrl_frontend",
+  "blender": "5.2.1 LTS",
+  "background": true
+}

@@ -1,5 +1,4 @@
 """Owned rigid wind-farm scenes, separate from recorded and backend scenes."""
-from functools import partial
 import json
 import math
 import uuid
@@ -155,7 +154,7 @@ def focus(context, target=None):
 
 def down_view(context):
     """Observe the manual T1 geometry from its own fixed nacelle camera."""
-    from . import cameras, manual_control
+    from . import cameras, manual_control, manual_down
     scene = context.scene
     valid, reason = manual_control.validate_scene(scene)
     if not valid:
@@ -163,8 +162,7 @@ def down_view(context):
     entry = next(item for item in scene.wfrl_manual_turbines if item.turbine_id == 'T1')
     manual_control._validate_native_controls((entry.yaw_object,))
     owner = scene['wfrl_manual_owner']
-    camera = cameras.ensure_gimbal(scene, 'T1', yaw_object=entry.yaw_object,
-                                   name=owner + '.Camera.T1.Down', owner=owner)
+    camera = manual_down.ensure_down_camera(scene, 'T1')
     manual_control._validate_native_controls((camera,))
     cameras.down_gimbal(camera)
     scene.camera = camera
@@ -268,30 +266,67 @@ def _ensure_environment(scene):
 
 
 def _ensure_blade_model(scene):
-    """Use owned rootkink meshes while retaining poses, materials and topology."""
-    from .turbine_geometry import blade_mesh
-    blades = [getattr(entry, f'blade{index}_object')
-              for entry in scene.wfrl_manual_turbines for index in (1, 2, 3)]
-    if (scene.get('wfrl_manual_blade_model') == MANUAL_BLADE_MODEL
-            and all(blade.data.get('wfrl_manual_blade_model') == MANUAL_BLADE_MODEL for blade in blades)):
+    """Bind one coherent rigid display model and its matching root fittings."""
+    from .manual_geometry import ensure_model
+    ensure_model(scene)
+    _ensure_surface_roles(scene)
+
+
+def _ensure_surface_roles(scene):
+    """Give unclassified generated fittings private metal and rubber surfaces.
+
+    Materials outside generated hub/graphite slots retain their assignments.
+    Mesh data with external users is detached before material slots are written.
+    """
+    import bpy
+    import re
+    from .materials import get_material, refresh_turbine_surfaces, turbine_surface_kind
+    if scene.get('wfrl_manual_surface_roles_revision', 0) >= 1:
         return
-    vertices, faces = blade_mesh(subdiv=8, ring_points=96, model=MANUAL_BLADE_MODEL)
-    sources = {blade.data.as_pointer(): blade.data for blade in blades}
-    for mesh in sources.values():
-        if (len(mesh.vertices) != len(vertices)
-                or tuple(tuple(face.vertices) for face in mesh.polygons) != tuple(faces)):
-            raise ValueError('手动叶片拓扑与 rootkink 不匹配，请创建独立手动场景')
-    replacements = {}
-    for key, mesh in sources.items():
-        owned = mesh.copy()
-        owned.name = scene['wfrl_manual_owner'] + '.RootkinkBlade'
-        owned.vertices.foreach_set('co', [value for vertex in vertices for value in vertex])
-        owned['wfrl_manual_blade_model'] = MANUAL_BLADE_MODEL
-        owned.update()
-        replacements[key] = owned
-    for blade in blades:
-        blade.data = replacements[blade.data.as_pointer()]
-    scene['wfrl_manual_blade_model'] = MANUAL_BLADE_MODEL
+    owner = scene['wfrl_manual_owner']
+    targets = [obj for obj in scene.objects if obj.type == 'MESH'
+               and obj.get('wfrl_manual_owner') == owner and obj.data.materials
+               and turbine_surface_kind(obj.name) and obj.data.materials[0]
+               and re.fullmatch(re.escape(owner) + r'\.(hub|graphite)(?:\.\d+)*',
+                                obj.data.materials[0].name)]
+    originals = {obj: obj.data for obj in targets}
+    slots = {obj.data: obj.data.materials[0] for obj in targets}
+    copies, materials = {}, {}
+    namespace = owner + '.Surfaces.' + uuid.uuid4().hex[:8]
+
+    def material(kind):
+        if kind not in materials:
+            materials[kind] = get_material(kind, namespace=namespace)
+            materials[kind]['wfrl_manual_owner'] = owner
+        return materials[kind]
+
+    try:
+        for obj in targets:
+            mesh = obj.data
+            users = [other for other in bpy.data.objects if other.type == 'MESH' and other.data == mesh]
+            if (mesh.library or mesh.use_fake_user or mesh.users != len(users)
+                    or any(set(user.users_scene) != {scene} for user in users)):
+                if mesh not in copies:
+                    copies[mesh] = mesh.copy()
+                    copies[mesh].use_fake_user = False
+                    copies[mesh]['wfrl_manual_mesh_owner'] = owner
+                    copies[mesh]['wfrl_manual_owner'] = owner
+                obj.data = copies[mesh]
+        refresh_turbine_surfaces(targets, object_prefix=owner + '.Turbine.', material_factory=material)
+        scene['wfrl_manual_surface_roles_revision'] = 1
+    except BaseException:
+        for obj, mesh in originals.items():
+            obj.data = mesh
+        for mesh, material in slots.items():
+            if mesh.library is None:
+                mesh.materials[0] = material
+        for mesh in copies.values():
+            if mesh.users == 0:
+                bpy.data.meshes.remove(mesh)
+        for material in materials.values():
+            if material.users == 0:
+                bpy.data.materials.remove(material)
+        raise
 
 
 def _discard(scene, collection, prefix):
@@ -329,7 +364,10 @@ def create(context):
     scene.use_fake_user = True
     scene.wfrl_manual_return_scene = source
     collection = None
-    material = partial(get_material, namespace=prefix)
+    def material(name):
+        result = get_material(name, namespace=prefix)
+        result['wfrl_manual_owner'] = prefix
+        return result
     try:
         context.window.scene = scene
         collection = bpy.data.collections.new(prefix + '.Scene')
@@ -352,7 +390,10 @@ def create(context):
                 setattr(entry, f'blade{blade}_object', collection.objects[name + f'.Blade{blade}'])
         for obj in collection.objects:
             obj['wfrl_manual_owner'] = prefix
+        from .manual_geometry import tag_generated_assembly, share_static_meshes
+        tag_generated_assembly(scene)
         _ensure_blade_model(scene)
+        share_static_meshes(scene)
         _environment(scene, collection, prefix)
         source.wfrl_manual_scene = scene
         if not manual_control.apply_scene(scene):

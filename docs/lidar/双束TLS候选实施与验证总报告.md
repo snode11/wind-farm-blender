@@ -2,7 +2,7 @@
 
 默认方法为 `hub-axis.v1`（`two-point-hub-extrapolation.v1`），显式候选为 `hub-tls.v1`（`hub-constrained-tls.v1`）。两种方法均为 **`REVIEW_ONLY / PENDING_ACCEPTANCE`**，软件接入和数值比较不构成现场或用途性能验收。
 
-NREL / WFRL 公开安装 ZIP 为 **0.3.28**（标签 **v0.3.28**），当前项目源码使用 `wind-farm-rl-all-work` 分支；本地日常安装为 **0.3.28**，181 文件与公开上传源包一致。公开包提供主开发片段的旧法与 TLS 回放，[载荷与验证身份见发布状态](../blender/发布状态与验证范围.md)。独立求解工况不替换内置片段。
+NREL / WFRL 公开与本地日常安装 ZIP 均为 **0.3.36**（标签 **v0.3.36**），当前项目源码使用 `wind-farm-rl-all-work` 分支；188 个日常安装文件与正式 ZIP 一致，实际重启窗口核对见[安装身份](../../publication/daily-installation.json)。公开包提供主开发片段的旧法与 TLS 回放，[载荷与验证身份见发布状态](../blender/发布状态与验证范围.md)。独立求解工况不替换内置片段。
 
 本文数值、测试规模与指纹对应 **2026-10-02 TLS 研究档案**，按数据源和评价范围分别解释。原始档案位于 `outputs/dual-beam-tls-20261002/`，包括保存回放、残差/来源诊断和独立固定转速工况。原始求解与诊断档案不随扩展源码发布；本页不能代替原数据完整复算。
 
@@ -186,7 +186,7 @@ section transform 直接拟合独立参考世界表面到当前世界表面，�
 
 求解前固定方法、标定、核心实现哈希、物理参数、评价窗口和 **1,000,000,000 bytes** 新增数据预算。使用 C 输入隔离复制后修改工况，结构为 **NREL 5MW 二次上风预弯改型、BeamDyn 叶片、柔性 ElastoDyn 塔筒**。两次均为 **12 m/s 恒风、规定 9 rpm、0° pitch、初始方位角 0°、总长 26 s**，关闭 ServoDyn，无策略 checkpoint。完整保存 0–26 s，预先剔除前 18 s，仅在 **18–26 s** 统一评价。
 
-实际运行 OpenFAST 的版本为 **`OpenFAST-v3.5.3-dirty`、单精度、OpenMP 1/1 线程**，可执行文件当时位于 `PYTHON_ENV_ROOT/envs/wfrl-mac/bin/openfast`。两次退出码均为 **0**，日志均含 **`OpenFAST terminated normally.`**。80 Hz 与 40 Hz 只改变 `.fst` 的 **DT、DT_Out、VTK_fps**，其余实际输入、结构、标定、零载参考和 solver 哈希一致。它们是一个新固定工况的两级数值比较，不代表 MAPPO 性能、第二个独立工况、最终留出集或现场实验。
+实际运行 OpenFAST 的版本为 **`OpenFAST-v3.5.3-dirty`、单精度、OpenMP 1/1 线程**，可执行文件当时位于 `/opt/anaconda3/envs/wfrl-mac/bin/openfast`。两次退出码均为 **0**，日志均含 **`OpenFAST terminated normally.`**。80 Hz 与 40 Hz 只改变 `.fst` 的 **DT、DT_Out、VTK_fps**，其余实际输入、结构、标定、零载参考和 solver 哈希一致。它们是一个新固定工况的两级数值比较，不代表 MAPPO 性能、第二个独立工况、最终留出集或现场实验。
 
 |原始时钟与表面|40 Hz|80 Hz|
 |---|---:|---:|

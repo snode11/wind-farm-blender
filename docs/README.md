@@ -22,12 +22,12 @@
 
 | 对象 | 当前范围 |
 | --- | --- |
-| NREL 公开安装包 | **0.3.28**；安装使用 [v0.3.28 专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.28/wfrl_blender-0.3.28.zip)，包身份与适用验证见[交付身份](../publication/blender-0.3.28.json)。 |
+| NREL 公开安装包 | **0.3.36**；安装使用 [v0.3.36 专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.36/wfrl_blender-0.3.36.zip)，包身份与适用验证见[交付身份](../publication/blender-0.3.36.json)。 |
 | 项目源码 | [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 包含当前前端、后端、研究、测试与文档；源码分支不等于既有公开安装包或日常安装载荷。 |
-| 本地日常安装 | **0.3.28**，实际模块 `bl_ext.user_default.wfrl_blender`；181 文件与公开上传源包一致。包身份、五组安装版回归及新进程检查的范围见[日常安装核对](../publication/daily-installation.json)。 |
+| 本地日常安装 | **0.3.36**，实际模块 `bl_ext.user_default.wfrl_blender`；188 文件与正式 ZIP 一致。实际重启窗口来源、场景与偏好保护见[日常安装核对](../publication/daily-installation.json)。 |
 | GW184 | **0.4.0 独立解压运行包**，模型、配置和 NREL 扩展分别使用。 |
 | 材料点研究 | Patch **2/8**、Crack **7/8**、跨相机 RGB **0/264**；真实同材料点三维误差 `null`，`FAILED_GATE / NOT_ACCEPTED`；未替换正式 601 样本资产。 |
-| 其他研究门槛 | 叶尖 0.2 mm 门槛 `FAILED_GATE`；雷达 `REVIEW_ONLY / PENDING_ACCEPTANCE`；表面 P2b `FAILED_GATE / REVIEW_ONLY`、主增益 `null`、局部恢复 `NOT_RUN`；独立动态原型 `DY1 NOT PASSED`。 |
+| 其他研究门槛 | 叶尖显示精度的源码全时间轴与本地 0.3.36 安装版抽样分别见[验证范围](blender/发布状态与验证范围.md#研究与物理边界)；材料点研究保持 FAILED_GATE，雷达 REVIEW_ONLY / PENDING_ACCEPTANCE，表面 P2b FAILED_GATE / REVIEW_ONLY、主增益 null、局部恢复 NOT_RUN，独立动态原型 DY1 NOT PASSED。 |
 
 ## 文档职责
 

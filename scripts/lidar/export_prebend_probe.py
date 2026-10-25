@@ -19,7 +19,7 @@ from wfrl.lidar.physics import simplified_estimate
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT/'blender_frontend'))
-from wfrl_blender.deflection import rigid_frame
+from wfrl_blender.deflection import rigid_frame, beamdyn_root_frame
 from wfrl_blender.turbine_geometry import geometry_data
 
 
@@ -76,7 +76,7 @@ def export(run, reference, output):
             max_fit = max(max_fit,err)
             mats.append(np.concatenate((r,d[:,:,None]),axis=2))
             point = r[-1]@reference_tip[b-1] + d[-1]
-            hub, _, axes = rigid_frame(scalars, poses[i], b, nacelle)
+            hub, axes = beamdyn_root_frame(scalars, b, np.column_stack((r[0], d[0])))
             ref = hub + axes@tip_local
             actual.append(point); rigid.append(ref); delta.append(axes.T@(point-ref))
             sim.append([columns[f'B{b}TipTD{axis}r'][i] for axis in 'xyz'])

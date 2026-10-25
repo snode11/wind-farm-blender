@@ -1,4 +1,6 @@
 import json
+from copy import deepcopy
+import pytest
 from wfrl_blender.history import HistoryWindow, export_document, ExportJob
 
 
@@ -71,3 +73,77 @@ def test_export_serialization_runs_off_calling_thread(monkeypatch, tmp_path):
     release.set()
     job.thread.join(2)
     assert job.poll() == 'COMPLETE'
+
+
+def test_owned_snapshot_records_preserve_export_and_snapshot_isolation():
+    record = sample(1, 'iteration_stats')['payload']['stats']['mean_power']
+    message = {'type': 'snapshot', 'session_id': 's', 'sequence': 1, 'payload': {
+        'run_id': 'run', 'mode': 'replay', 'step': 5, 'timestamp': {'value': .5, 'timebase': 'simulation_seconds'},
+        'farm': {}, 'turbines': [{'turbine_id': 'T1', 'channels': {'power': record}}]}}
+    copied = HistoryWindow(clock=lambda: 10.)
+    owned = HistoryWindow(clock=lambda: 10.)
+    assert copied.ingest(message)
+    assert owned.ingest(deepcopy(message), copy_records=False)
+    expected = copied.snapshot()
+    detached = owned.snapshot()
+    assert export_document(expected, now_monotonic=40., now_unix=1000.) == export_document(
+        detached, now_monotonic=40., now_unix=1000.)
+    message['payload']['timestamp']['value'] = 99.
+    record['provenance']['file'] = 'changed'
+    detached['series'][0]['records'][0]['data']['provenance']['file'] = 'snapshot-only'
+    assert copied.snapshot() == owned.snapshot() == expected
+
+
+@pytest.mark.parametrize('existing', [False, True])
+@pytest.mark.parametrize('failure', ['serialization', 'write'])
+def test_failed_export_keeps_destination_unchanged(tmp_path, monkeypatch, existing, failure):
+    import wfrl_blender.history as module
+    target = tmp_path / 'history.json'
+    previous = b'{"run_id": "saved-run"}\n'
+    if existing:
+        target.write_bytes(previous)
+    snapshot = HistoryWindow().snapshot()
+    if failure == 'serialization':
+        snapshot['run_id'] = float('nan')
+    else:
+        def fail_write(document, output, **kwargs):
+            output.write('{"partial":')
+            raise OSError('injected write failure')
+        monkeypatch.setattr(module.json, 'dump', fail_write)
+    job = ExportJob()
+    job.start(target, snapshot)
+    job.thread.join(2)
+    assert not job.thread.is_alive()
+    assert job.poll() == 'FAILED' and job.error
+    assert target.read_bytes() == previous if existing else not target.exists()
+    assert list(tmp_path.iterdir()) == ([target] if existing else [])
+
+
+def test_existing_export_is_replaced_only_after_complete_write(tmp_path, monkeypatch):
+    import threading
+    import wfrl_blender.history as module
+    entered, release = threading.Event(), threading.Event()
+    original = module.json.dump
+    target = tmp_path / 'history.json'
+    previous = b'{"run_id": "saved-run"}\n'
+    target.write_bytes(previous)
+
+    def slow_write(document, output, **kwargs):
+        output.write(' ')
+        output.flush()
+        entered.set()
+        assert release.wait(2)
+        return original(document, output, **kwargs)
+
+    monkeypatch.setattr(module.json, 'dump', slow_write)
+    job = ExportJob()
+    job.start(target, HistoryWindow().snapshot())
+    try:
+        assert entered.wait(1)
+        assert target.read_bytes() == previous
+    finally:
+        release.set()
+        job.thread.join(2)
+    assert job.poll() == 'COMPLETE'
+    assert json.loads(target.read_text())['schema_version'] == 'wfrl.history.v1'
+    assert list(tmp_path.iterdir()) == [target]

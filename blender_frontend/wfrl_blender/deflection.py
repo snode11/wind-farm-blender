@@ -1,7 +1,8 @@
-"""T1 ElastoDyn tip comparison, independent of the displayed tip taper.
+"""T1 structural tip comparison, independent of the displayed tip taper.
 
-The rigid reference uses turbine geometry and recorded rigid pose only. The
-actual point follows a dedicated structural vertex's bound surface deformation,
+The BeamDyn unloaded reference follows the saved structural root boundary;
+ElastoDyn uses the recorded rigid pose. The actual point follows a dedicated
+structural vertex's bound surface deformation,
 including when its mesh is hidden. Output channels never drive either position.
 """
 import hashlib
@@ -24,8 +25,9 @@ def rotation(axis, degrees):
 def rigid_frame(scalars, pose, blade, nacelle=None):
     """World origin, unpitched coned axes (TipDxc/yc/zc), pitched axes.
 
-    Fixed tower/platform, 3 blades, zero skew/teeter. See ElastoDyn v3.5.3
-    SetCoordSy axes i1/i2/i3 and CalcOutput tip motions. Pitch leaves i3 fixed.
+    Three blades, zero skew/teeter. A supplied nacelle transform carries support
+    motion; otherwise the support is fixed. See ElastoDyn v3.5.3 SetCoordSy
+    axes i1/i2/i3 and CalcOutput tip motions. Pitch leaves i3 fixed.
     """
     yaw = rotation(2, pose[0]) if nacelle is None else np.asarray(nacelle)[:, :3]
     tilt = np.radians(scalars['ShftTilt'])
@@ -37,6 +39,37 @@ def rigid_frame(scalars, pose, blade, nacelle=None):
             @ rotation(1, scalars['PreCone(1)']))
     if nacelle is not None: hub = hub + np.asarray(nacelle)[:, 3]
     return hub, axes, axes @ rotation(2, -pose[blade + 2])
+
+
+def beamdyn_root_frame(scalars, blade, transform):
+    """Transport the independent unloaded frame by the saved root contour.
+
+    The v3 first AeroDyn contour is at the constrained BeamDyn root, with
+    zero aerodynamic-center offset. Its transform contains boundary motion,
+    not elastic blade deflection. BeamDyn TipTD*r uses this pitched root frame;
+    the ElastoDyn BlPitch output need not be the coupled root's same-step pitch.
+    No displacement output or loaded tip geometry enters the reference.
+    """
+    transform = np.asarray(transform, dtype=np.float64)
+    if transform.shape != (3, 4) or not np.isfinite(transform).all():
+        raise ValueError('Invalid BeamDyn root transform')
+    r = transform[:, :3]
+    if not np.allclose(r.T @ r, np.eye(3), atol=2e-5, rtol=0) or np.linalg.det(r) < .9999:
+        raise ValueError('Invalid BeamDyn root rotation')
+    u, _, vt = np.linalg.svd(r)
+    r = u @ vt
+    hub, _, axes = rigid_frame(scalars, [0] * 6, blade)
+    return r @ hub + transform[:, 3], r @ axes
+
+
+def interpolated_beamdyn_root_frame(scalars, blade, a, b, alpha):
+    """Interpolate boundary motion about its transported hub, not world zero."""
+    from .tower_motion import interpolate_transform
+    hub0, axes0 = beamdyn_root_frame(scalars, blade, a)
+    hub1, axes1 = beamdyn_root_frame(scalars, blade, b)
+    frame = interpolate_transform(np.column_stack((axes0, hub0)),
+                                  np.column_stack((axes1, hub1)), alpha)
+    return frame[:, 3], frame[:, :3]
 
 
 def compare(actual, reference, axes, simulation):
@@ -80,11 +113,8 @@ def read_comparison(path, manifest, times, poses, *, rigid_poses=None,
     if not np.allclose(data['poses'], poses[:, 0], atol=.002, rtol=0):
         raise ValueError('T1 deflection rigid poses differ')
     if rigid_poses is None:
-        # The NPZ and early v3 sidecars quantized unwrapped azimuth to float32.
-        # data.json retains the original rigid motion. The pose fields read here
-        # contain no tip displacement.
-        # Use that independent, hashed source for the rigid reference; do not
-        # compensate the transported mesh with the simulation channels.
+        # data.json retains rigid pose precision beyond float32 NPZ storage.
+        # These pose fields contain no structural displacement channels.
         motion_raw = (path / 'data.json').read_bytes()
         if hashlib.sha256(motion_raw).hexdigest() != manifest['files']['data.json']:
             raise ValueError('T1 rigid motion integrity mismatch')
@@ -224,12 +254,15 @@ class ComparisonView:
             obj = self.owner.blades[b - 1][0]
             hub, axes, pitched = rigid_frame(data['scalars'], pose, b, nacelle)
             if 'tip_local_m' in data:
-                axes = pitched
+                hub, axes = interpolated_beamdyn_root_frame(
+                    data['scalars'], b, self.owner.transforms[i, 0, b - 1, 0],
+                    self.owner.transforms[i + 1, 0, b - 1, 0], alpha)
+                pitched = axes
                 reference = hub + pitched @ data['tip_local_m']
             else:
                 reference = hub + axes[:, 2] * data['scalars']['TipRad']
             # -2 is the structural reference vertex, -1 remains the cosmetic apex.
-            actual = (obj.matrix_world @ obj.data.vertices[-2].co
+            actual = (self.owner.world_matrix(obj) @ obj.data.vertices[-2].co
                       if 0 in self.owner.mesh_turbines()
                       else self.owner.structural_tip_world(b, i, alpha))
             row = compare(actual, reference, axes, simulation[b - 1])

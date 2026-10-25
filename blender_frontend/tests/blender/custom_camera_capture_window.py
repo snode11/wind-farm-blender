@@ -193,6 +193,58 @@ def tick():
                 bpy.context.view_layer.update()
                 assert protected(scene, area) == STATE['original']
                 STATE['checks']['native_edit_aborts_without_overwriting_edit'] = True
+                job = capture.Capture(bpy.context, OUT, STATE['times'][1:])
+                update = job.farm.update
+                evaluations = []
+                def fail_first_evaluation(*args, **kwargs):
+                    evaluations.append(kwargs['sim_time_s'])
+                    if len(evaluations) == 1:
+                        raise RuntimeError('injected geometry evaluation failure')
+                    return update(*args, **kwargs)
+                job.farm.update = fail_first_evaluation
+                try:
+                    job.step(bpy.context)
+                except RuntimeError as exc:
+                    assert 'geometry evaluation failure' in str(exc)
+                else:
+                    raise AssertionError('geometry failure was not propagated')
+                finally:
+                    job.farm.update = update
+                assert len(evaluations) == 2
+                assert job.closed and job.manifest['status'] == 'incomplete'
+                assert protected(scene, area) == STATE['original']
+                STATE['checks']['geometry_evaluation_failure_restores_owned_frame'] = True
+                job = capture.Capture(bpy.context, OUT, STATE['times'])
+                job.step(bpy.context)
+                scene.frame_set(810, subframe=.75)
+                edited = protected(scene, area)
+                try:
+                    job.step(bpy.context)
+                except RuntimeError as exc:
+                    assert '采集时刻' in str(exc)
+                else:
+                    raise AssertionError('external timeline seek was accepted')
+                assert job.closed and job.manifest['status'] == 'incomplete'
+                assert protected(scene, area) == edited
+                STATE['checks']['external_seek_preserves_frame_readings_and_history'] = True
+
+                job = capture.Capture(bpy.context, OUT, STATE['times'])
+                job.step(bpy.context)
+                assert bpy.ops.screen.animation_play() == {'FINISHED'}
+                bpy.ops.screen.animation_cancel(restore_frame=False)
+                assert not capture.playback.any_playing()
+                assert capture.playback.generation() != job.playback_generation
+                edited = protected(scene, area)
+                try:
+                    job.step(bpy.context)
+                except RuntimeError as exc:
+                    assert '采集时刻' in str(exc)
+                else:
+                    raise AssertionError('external playback restart was accepted')
+                assert job.closed and job.manifest['status'] == 'incomplete'
+                assert protected(scene, area) == edited
+                assert not capture.playback.any_playing()
+                STATE['checks']['external_play_pause_preserves_clock_and_stopped_player'] = True
                 import gpu
                 result = {'status': 'PASS', 'module': addon.__file__, 'blender': bpy.app.version_string,
                     'gpu': gpu.platform.renderer_get(), 'checks': STATE['checks'],

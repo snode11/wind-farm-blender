@@ -215,6 +215,17 @@ def native_player(monkeypatch):
     return bpy, native, windows, overridden, start
 
 
+def test_tip_trail_playback_uses_native_owner_scene(native_player):
+    bpy, native, windows, overridden, start = native_player
+    start(windows[0])
+    assert all(window.screen.is_animation_playing for window in windows)
+    assert tip_tracking._is_playing(windows[0].scene)
+    assert not tip_tracking._is_playing(windows[1].scene)
+    start(windows[1])
+    assert not tip_tracking._is_playing(windows[0].scene)
+    assert tip_tracking._is_playing(windows[1].scene)
+
+
 def test_pause_cancels_single_native_owner_and_its_same_scene_views(native_player):
     bpy, native, windows, overridden, start = native_player
     start(windows[0])

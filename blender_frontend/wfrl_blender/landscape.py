@@ -4,6 +4,43 @@ import random
 
 
 TURBINE_X = (0.0, 504.0, 1008.0)
+GRASS_DETAIL_RADIUS = 450.0
+
+
+def _terrain_axes(detail):
+    """Keep the farm's sampling grid, with wider spacing outside its habitat."""
+    def axis(start, span, count, near_min, near_max):
+        values = []
+        for index in range(count + 1):
+            value = start + index * span / count
+            distance = max(near_min - value, value - near_max, 0.0)
+            stride = 1 if detail == 'full' or distance == 0 else (2 if distance < 200 else 4)
+            if index in (0, count) or index % stride == 0:
+                values.append(value)
+        return values
+    return (axis(-3500, 8500, 360, -1100, 2150),
+            axis(-2100, 6500, 300, -1050, 1250))
+
+
+def _ridge_geometry(layer, distance, base_height, detail):
+    """Sample a continuous ridge with an exact central crest and flat feet."""
+    nx, ncross = (1000, 32) if detail == 'full' else (500, 16)
+    vertices, faces = [], []
+    for j in range(ncross + 1):
+        cross = j / ncross
+        y = distance + (cross - .5) * 1800
+        envelope = math.sin(math.pi * cross) ** 2
+        for i in range(nx + 1):
+            x = -26000 + i * 56000 / nx
+            profile = base_height + 55 * math.sin(x * .0013 + layer * 1.8)
+            profile += 25 * math.sin(x * .003 + layer)
+            profile += (12 / layer) * math.sin(x * .008 + layer * 2)
+            vertices.append((x, y, -35 + envelope * profile))
+    for j in range(ncross):
+        for i in range(nx):
+            k = j * (nx + 1) + i
+            faces.append((k, k + 1, k + nx + 2, k + nx + 1))
+    return vertices, faces
 
 
 def road_y(x):
@@ -138,9 +175,177 @@ def terrain_sampler(terrain):
     return surface
 
 
-def build_landscape(collection):
+def _vegetation_points(rng, lush_centers, dry_centers, surface):
+    """Sample location, XYZ Euler rotation, scale, species and cluster in draw order."""
+    shrubs = []
+    rocks = []
+    for patch_index, (cx, cy, cz, spread) in enumerate(lush_centers):
+        attempts = 72 if lowland_factor(cz) > .65 else 48
+        for _ in range(attempts):
+            x = rng.gauss(cx, spread*.62)
+            y = rng.gauss(cy, spread*.62)
+            z = surface(x, y)
+            if rng.random() > vegetation_factor(x, y, z):
+                continue
+            palette = 0 if lowland_factor(z) > .7 and rng.random() < .7 else 1
+            r = rng.uniform(.65, 2.4)
+            scale = (r, r*rng.uniform(.65, .95), r*rng.uniform(.45, .72))
+            rotation = (0.0, 0.0, rng.random()*math.tau)
+            shrubs.append(((x, y, z-.04), rotation, scale, palette, patch_index))
+    for patch_index, (cx, cy, cz, spread) in enumerate(dry_centers):
+        for _ in range(22):
+            x = rng.gauss(cx, spread*.7)
+            y = rng.gauss(cy, spread*.7)
+            z = surface(x, y)
+            if road_clearance(x, y) < 18 or rng.random() > .58:
+                continue
+            r = rng.uniform(.45, 1.55)
+            scale = (r, r*rng.uniform(.55, .9), r*rng.uniform(.35, .58))
+            rotation = (0.0, 0.0, rng.random()*math.tau)
+            shrubs.append(((x, y, z-.03), rotation, scale, 2, len(lush_centers)+patch_index))
+    for patch_index, (cx, cy, _, spread) in enumerate(dry_centers):
+        for _ in range(24):
+            x = rng.gauss(cx, spread*.72)
+            y = rng.gauss(cy, spread*.72)
+            if road_clearance(x, y) < 16:
+                continue
+            z = surface(x, y)
+            r = rng.uniform(.25, 1.25)
+            scale = (r, r*rng.uniform(.65, 1.15), r*rng.uniform(.38, .7))
+            rotation = (0.0, 0.0, rng.random()*math.tau)
+            rocks.append(((x, y, z+r*.2), rotation, scale, 0, patch_index))
+    return shrubs, rocks
+
+
+def _new_landscape_prototype(collection, name, data):
+    import bpy
+    obj = bpy.data.objects.new(name, data)
+    collection.objects.link(obj)
+    obj['wfrl_landscape_prototype'] = True
+    data['wfrl_landscape_prototype'] = True
+    return obj
+
+
+def _landscape_instancer(collection, name, meshes, points, kind):
+    """Instance an unlinked prototype collection from float32 point transforms."""
+    import bpy
+    data = bpy.data.meshes.new(name+'.Data')
+    data.from_pydata([row[0] for row in points], [], [])
+    data.update()
+    data['wfrl_landscape_points'] = True
+    for attribute_name, data_type, column, field in (
+            ('rotation', 'FLOAT_VECTOR', 1, 'vector'),
+            ('scale', 'FLOAT_VECTOR', 2, 'vector'),
+            ('prototype_index', 'INT', 3, 'value'),
+            ('cluster', 'INT', 4, 'value')):
+        attribute = data.attributes.new(name=attribute_name, type=data_type, domain='POINT')
+        values = ([value for row in points for value in row[column]] if field == 'vector'
+                  else [row[column] for row in points])
+        attribute.data.foreach_set(field, values)
+    obj = bpy.data.objects.new(name, data)
+    collection.objects.link(obj)
+    obj['fidelity'] = 'SYNTH'
+    obj['provenance'] = 'Procedural clustered vegetation; presentation only'
+    obj['wfrl_landscape_instances'] = kind
+    obj['instance_count'] = len(points)
+    obj['cluster_count'] = len({row[4] for row in points})
+    prototypes = bpy.data.collections.new(name+'.Prototypes')
+    prototypes['wfrl_landscape_prototypes'] = True
+    for index, mesh in enumerate(meshes):
+        _new_landscape_prototype(prototypes, name+f'.Prototype{index:03d}', mesh)
+    group = bpy.data.node_groups.new(name+'.Instances', 'GeometryNodeTree')
+    group['wfrl_landscape_instances'] = True
+    group.interface.new_socket(name='Geometry', in_out='INPUT', socket_type='NodeSocketGeometry')
+    group.interface.new_socket(name='Geometry', in_out='OUTPUT', socket_type='NodeSocketGeometry')
+    nodes, links = group.nodes, group.links
+    source = nodes.new('NodeGroupInput')
+    output = nodes.new('NodeGroupOutput')
+    info = nodes.new('GeometryNodeCollectionInfo')
+    info.name = 'WFRL.Prototypes'
+    info.transform_space = 'ORIGINAL'
+    info.inputs['Collection'].default_value = prototypes
+    info.inputs['Separate Children'].default_value = True
+    info.inputs['Reset Children'].default_value = True
+    instances = nodes.new('GeometryNodeInstanceOnPoints')
+    instances.inputs['Pick Instance'].default_value = True
+    links.new(source.outputs['Geometry'], instances.inputs['Points'])
+    links.new(info.outputs['Instances'], instances.inputs['Instance'])
+    for attribute_name, data_type, socket in (
+            ('rotation', 'FLOAT_VECTOR', 'Rotation'),
+            ('scale', 'FLOAT_VECTOR', 'Scale'),
+            ('prototype_index', 'INT', 'Instance Index')):
+        attribute = nodes.new('GeometryNodeInputNamedAttribute')
+        attribute.data_type = data_type
+        attribute.inputs['Name'].default_value = attribute_name
+        links.new(attribute.outputs['Attribute'], instances.inputs[socket])
+    links.new(instances.outputs['Instances'], output.inputs['Geometry'])
+    modifier = obj.modifiers.new('WFRL.Landscape.Instances', 'NODES')
+    modifier.node_group = group
+    return obj
+
+
+def _instance_collection(obj):
+    modifier = obj.modifiers.get('WFRL.Landscape.Instances')
+    group = modifier.node_group if modifier is not None else None
+    if group is None or not group.get('wfrl_landscape_instances'):
+        return None
+    node = group.nodes.get('WFRL.Prototypes')
+    return node.inputs['Collection'].default_value if node is not None else None
+
+
+def _remove_landscape_mesh(data, ownership):
+    import bpy
+    if (data.get(ownership) and data.users == 0 and not data.use_fake_user
+            and data.shape_keys is None):
+        bpy.data.meshes.remove(data)
+
+
+def _remove_landscape_prototype(obj):
+    import bpy
+    if obj.get('wfrl_landscape_prototype') and obj.users == 0 and not obj.use_fake_user:
+        data = obj.data
+        bpy.data.objects.remove(obj)
+        _remove_landscape_mesh(data, 'wfrl_landscape_prototype')
+
+
+def remove_landscape_instancer(obj):
+    """Release owned point data and unshared node/prototype resources on rebuild."""
+    import bpy
+    resources = {}
+    for modifier in obj.modifiers:
+        group = modifier.node_group if modifier.type == 'NODES' else None
+        if group is not None and group.get('wfrl_landscape_instances'):
+            node = group.nodes.get('WFRL.Prototypes')
+            prototypes = node.inputs['Collection'].default_value if node is not None else None
+            resources[group.as_pointer()] = (group, prototypes)
+    data = obj.data
+    bpy.data.objects.remove(obj, do_unlink=True)
+    _remove_landscape_mesh(data, 'wfrl_landscape_points')
+    for group, prototypes in resources.values():
+        if group.users or group.use_fake_user:
+            continue
+        bpy.data.node_groups.remove(group)
+        if (prototypes is None or not prototypes.get('wfrl_landscape_prototypes')
+                or prototypes.users or prototypes.use_fake_user):
+            continue
+        objects = list(prototypes.objects)
+        bpy.data.collections.remove(prototypes)
+        for prototype in objects:
+            _remove_landscape_prototype(prototype)
+
+
+def build_landscape(collection, *, detail='balanced'):
+    """Build static, camera-independent ground and vegetation.
+
+    Balanced detail preserves the farm/habitat grid and full grass within 450 m
+    of turbines. Full detail also retains dense outer ground, ridges and grass.
+    Both modes keep all backgrounds available to simultaneous views and renders.
+    """
+    if detail not in ('balanced', 'full'):
+        raise ValueError("Landscape detail must be 'balanced' or 'full'")
     import bpy
     from .materials import get_material
+    from .scene_builder import _primitive_mesh
     rng = random.Random(4207)
     def mesh(name, verts, faces, material, *, smooth=True):
         data=bpy.data.meshes.new(name+'.Data'); data.from_pydata(verts,[],faces); data.update()
@@ -183,17 +388,18 @@ def build_landscape(collection):
         mat.surface_render_method='DITHERED'
         return mat
     # Broad enough to remove the visible rectangular edge from ground-level views.
-    nx,ny=360,300
+    xs,ys=_terrain_axes(detail)
+    nx,ny=len(xs)-1,len(ys)-1
     verts=[];faces=[]
-    for j in range(ny+1):
-        y=-2100+j*6500/ny
-        for i in range(nx+1):
-            x=-3500+i*8500/nx; verts.append((x,y,height(x,y)))
+    for y in ys:
+        for x in xs:
+            verts.append((x,y,height(x,y)))
     for j in range(ny):
         for i in range(nx):
             k=j*(nx+1)+i;faces.append((k,k+1,k+nx+2,k+nx+1))
     terrain=mesh('WFRL.Terrain',verts,faces,get_material('terrain'))
     terrain['provenance']='Procedural grassland and ridges, presentation only'
+    terrain['wfrl_landscape_detail']=detail
     gravel=material('WFRL.Landscape.Gravel',(.28,.235,.17))
     # Roughness and gravel-scale normals avoid a perfectly flat road ribbon.
     nodes,links=gravel.node_tree.nodes,gravel.node_tree.links
@@ -349,8 +555,7 @@ def build_landscape(collection):
     soil=patch_mesh('WFRL.Landscape.BareSoilPatches',soil_specs,(bare_soil,))
     soil['provenance']='Procedural exposed-soil clusters; presentation only'
 
-    # Low shrubs use three shared meshes/materials, so color varies by habitat
-    # without creating a unique mesh datablock for every plant.
+    # Shared shrub species keep leaf and stem materials on their prototypes.
     shrub_materials=(
         material('WFRL.Landscape.Shrub.Dark',(.022,.052,.009)),
         material('WFRL.Landscape.Shrub.Mid',(.055,.095,.018)),
@@ -358,10 +563,8 @@ def build_landscape(collection):
     )
     rockmat=material('WFRL.Landscape.Rock',(.19,.17,.125))
     def instance_data(mat):
-        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=1)
-        source=bpy.context.object;data=source.data;data.materials.append(mat)
-        data.name = "WFRL.Landscape.Rock.Data"
-        bpy.data.objects.remove(source,do_unlink=True)
+        data = _primitive_mesh("WFRL.Landscape.Rock.Data", "ico_sphere", subdivisions=1, radius=1.0)
+        data.materials.append(mat)
         return data
     bark=material('WFRL.Landscape.Shrub.Stem',(.07,.045,.02))
     def shrub_prototype(mat, seed):
@@ -399,35 +602,11 @@ def build_landscape(collection):
         return data
     shrub_data=tuple(shrub_prototype(mat,140+i) for i,mat in enumerate(shrub_materials))
     rock_data=instance_data(rockmat)
-    shrub_count=0
-    for patch_index,(cx,cy,cz,spread) in enumerate(lush_centers):
-        attempts=72 if lowland_factor(cz)>.65 else 48
-        for _ in range(attempts):
-            x=rng.gauss(cx,spread*.62);y=rng.gauss(cy,spread*.62);z=surface(x,y)
-            if rng.random()>vegetation_factor(x,y,z):continue
-            palette=0 if lowland_factor(z)>.7 and rng.random()<.7 else 1
-            data=shrub_data[palette]
-            obj=bpy.data.objects.new(f'WFRL.Landscape.Shrub{shrub_count}',data);collection.objects.link(obj)
-            r=rng.uniform(.65,2.4);obj.location=(x,y,z-.04);obj.scale=(r,r*rng.uniform(.65,.95),r*rng.uniform(.45,.72));obj.rotation_euler[2]=rng.random()*math.tau
-            obj['cluster']=patch_index;shrub_count+=1
-    for patch_index,(cx,cy,cz,spread) in enumerate(dry_centers):
-        for _ in range(22):
-            x=rng.gauss(cx,spread*.7);y=rng.gauss(cy,spread*.7);z=surface(x,y)
-            if road_clearance(x,y)<18 or rng.random()>.58:continue
-            obj=bpy.data.objects.new(f'WFRL.Landscape.Shrub{shrub_count}',shrub_data[2]);collection.objects.link(obj)
-            r=rng.uniform(.45,1.55);obj.location=(x,y,z-.03);obj.scale=(r,r*rng.uniform(.55,.9),r*rng.uniform(.35,.58));obj.rotation_euler[2]=rng.random()*math.tau
-            obj['cluster']=len(lush_centers)+patch_index;shrub_count+=1
+    shrub_points, rock_points = _vegetation_points(rng, lush_centers, dry_centers, surface)
+    _landscape_instancer(collection, 'WFRL.Landscape.Shrubs', shrub_data, shrub_points, 'SHRUB')
+    _landscape_instancer(collection, 'WFRL.Landscape.Rocks', (rock_data,), rock_points, 'ROCK')
 
-    rock_count=0
-    for patch_index,(cx,cy,_,spread) in enumerate(dry_centers):
-        for _ in range(24):
-            x=rng.gauss(cx,spread*.72);y=rng.gauss(cy,spread*.72)
-            if road_clearance(x,y)<16:continue
-            z=surface(x,y);obj=bpy.data.objects.new(f'WFRL.Landscape.Rock{rock_count}',rock_data);collection.objects.link(obj)
-            r=rng.uniform(.25,1.25);obj.location=(x,y,z+r*.2);obj.scale=(r,r*rng.uniform(.65,1.15),r*rng.uniform(.38,.7));obj.rotation_euler[2]=rng.random()*math.tau
-            obj['cluster']=patch_index;rock_count+=1
-
-    # Curved blade clusters are batched into one mesh. Gaussian placement
+    # Grass blade clusters are batched into one mesh. Gaussian placement
     # produces dense cores and soft edges instead of uniformly sprinkled dots.
     grass_verts=[];grass_faces=[];grass_material_indices=[]
     tuft_count=0
@@ -435,21 +614,26 @@ def build_landscape(collection):
         nonlocal tuft_count
         tuft_count+=1
         angle=rng.random()*math.tau
-        # Three bent ribbons, each with one broad base quad and a tapered
-        # tip triangle. No duplicated zero-width tip or invisible extra rings.
+        near = detail == 'full' or min((x-tx)**2+y*y for tx in TURBINE_X) < GRASS_DETAIL_RADIUS**2
+        # Three blades share base width, tip, material and random draw order.
+        # Close blades bend at mid-height; distant blades use a single triangle.
         for blade in range(3):
             a=angle+blade*2.399;h=height_m*rng.uniform(.55,1.0)
             lean=h*rng.uniform(.25,.6);w=width*rng.uniform(.28,.48)
             ox,oy=math.cos(a)*width*.5,math.sin(a)*width*.5
             k=len(grass_verts)
-            for t in (0., .5):
+            for t in ((0., .5) if near else (0.,)):
                 bend=lean*t*t;half=w*(1-t)*.5
                 cx=x+ox+math.cos(a)*bend;cy=y+oy+math.sin(a)*bend
                 grass_verts.extend(((cx-math.sin(a)*half,cy+math.cos(a)*half,z+h*t),
                                     (cx+math.sin(a)*half,cy-math.cos(a)*half,z+h*t)))
             grass_verts.append((x+ox+math.cos(a)*lean,y+oy+math.sin(a)*lean,z+h))
-            grass_faces.extend(((k,k+1,k+3,k+2),(k+2,k+3,k+4)))
-            grass_material_indices.extend((material_index,material_index))
+            if near:
+                grass_faces.extend(((k,k+1,k+3,k+2),(k+2,k+3,k+4)))
+                grass_material_indices.extend((material_index,material_index))
+            else:
+                grass_faces.append((k,k+1,k+2))
+                grass_material_indices.append(material_index)
     for patch_index,(cx,cy,cz,spread) in enumerate(lush_centers):
         density=380 if lowland_factor(cz)>.65 else 260
         for _ in range(density):
@@ -474,70 +658,75 @@ def build_landscape(collection):
     mesh('WFRL.Landscape.FarGround',
          [(-40000,-40000,-35),(40000,-40000,-35),(40000,40000,-35),(-40000,40000,-35)],
          [(0,1,2,3)],get_material('terrain'))
-    # One continuous terrain palette and camera-distance haze across foothills
-    # and ridges avoids the previous three solid-color silhouette bands.
+    # Foothills and ridges share the terrain palette and camera-distance haze.
     mat = terrain.data.materials[0]
     for layer,(distance,base_height) in enumerate((
             (3700,180), (5200,340), (7000,530)),start=1):
-        v=[];f=[]
-        nx,ncross=1000,32
-        for j in range(ncross+1):
-            cross=j/ncross
-            y=distance+(cross-.5)*1800
-            for i in range(nx+1):
-                x=-26000+i*56000/nx
-                profile=base_height+55*math.sin(x*.0013+layer*1.8)+25*math.sin(x*.003+layer)
-                profile+=(12/layer)*math.sin(x*.008+layer*2)
-                # Smooth foothills meet the far ground with zero slope.
-                envelope=math.sin(math.pi*cross)**2
-                z=-35+envelope*profile
-                v.append((x,y,z))
-        for j in range(ncross):
-            for i in range(nx):
-                k=j*(nx+1)+i;f.append((k,k+1,k+nx+2,k+nx+1))
+        v,f=_ridge_geometry(layer,distance,base_height,detail)
         ridge=mesh(f'WFRL.Landscape.DistantRidge{layer}',v,f,mat)
         ridge['provenance']='Presentation-only distant ridge; excluded from simulation terrain'
     optimize_shrubs(collection)
-    # Some prototypes lose every instance during distance reduction. Release
-    # only meshes created by this build; never sweep user orphan datablocks.
-    for prototype in (*shrub_data, rock_data):
-        if prototype.users == 0:
-            bpy.data.meshes.remove(prototype)
     return terrain
 
 
-def optimize_shrubs(collection):
-    """Shared reduced meshes outside turbine inspection zones; no per-frame work.
-
-    Nearby shrubs keep their full leaf geometry. Far shrubs retain placement,
-    materials and silhouette using one cached reduction per original mesh.
-    """
+def _distant_shrub_mesh(collection, data):
     import bpy
-    shrubs = [o for o in collection.objects if o.type == 'MESH'
-              and o.name.startswith('WFRL.Landscape.Shrub')]
-    sources = {}
-    before = sum(len(o.data.vertices) for o in shrubs)
-    for obj in shrubs:
-        if obj.get('wfrl_shrub_optimized'):
+    original = data.copy()
+    temp = bpy.data.objects.new('WFRL.ShrubReduction', original)
+    collection.objects.link(temp)
+    try:
+        modifier = temp.modifiers.new('Distant leaf reduction', 'DECIMATE')
+        modifier.ratio = .18
+        graph = bpy.context.evaluated_depsgraph_get()
+        reduced = bpy.data.meshes.new_from_object(temp.evaluated_get(graph), depsgraph=graph)
+        reduced.name = data.name + '.Distant'
+        return reduced
+    finally:
+        bpy.data.objects.remove(temp, do_unlink=True)
+        if original.users == 0:
+            bpy.data.meshes.remove(original)
+
+
+def optimize_shrubs(collection):
+    """Assign full meshes within 180 m of turbines and shared reductions elsewhere.
+
+    Counts describe represented shrub vertices and plants, including instances.
+    Point transforms, cluster attributes and prototype materials are retained.
+    """
+    before = after = count = 0
+    for obj in list(collection.objects):
+        if obj.get('wfrl_landscape_instances') != 'SHRUB':
             continue
-        near = min(math.hypot(obj.location.x - x, obj.location.y) for x in TURBINE_X) < 180
-        if near:
+        prototypes = _instance_collection(obj)
+        if prototypes is None:
             continue
-        key = obj.data.as_pointer()
-        if key not in sources:
-            temp = bpy.data.objects.new('WFRL.ShrubReduction', obj.data.copy())
-            collection.objects.link(temp)
-            original = temp.data
-            modifier = temp.modifiers.new('Distant leaf reduction', 'DECIMATE')
-            modifier.ratio = .18
-            graph = bpy.context.evaluated_depsgraph_get()
-            reduced = bpy.data.meshes.new_from_object(temp.evaluated_get(graph), depsgraph=graph)
-            reduced.name = obj.data.name + '.Distant'
-            sources[key] = reduced
-            bpy.data.objects.remove(temp, do_unlink=True)
-            if original.users == 0:
-                bpy.data.meshes.remove(original)
-        obj.data = sources[key]
-        obj['wfrl_shrub_optimized'] = True
-    after = sum(len(o.data.vertices) for o in shrubs)
-    return {'before': before, 'after': after, 'objects': len(shrubs)}
+        sources = sorted(prototypes.objects, key=lambda source: source.name)
+        indices = obj.data.attributes['prototype_index'].data
+        assigned = [sources[index.value] for index in indices]
+        before += sum(len(source.data.vertices) for source in assigned)
+        reductions = {}
+        for index, (vertex, source) in enumerate(zip(obj.data.vertices, assigned)):
+            if source.get('wfrl_shrub_optimized'):
+                continue
+            x, y, _ = vertex.co
+            if min(math.hypot(x-tx, y) for tx in TURBINE_X) < 180:
+                continue
+            key = source.data.as_pointer()
+            if key not in reductions:
+                reduced = _distant_shrub_mesh(collection, source.data)
+                prototype = _new_landscape_prototype(prototypes, source.name+'.Distant', reduced)
+                prototype['wfrl_shrub_optimized'] = True
+                reductions[key] = prototype
+            assigned[index] = reductions[key]
+        used = {source.as_pointer() for source in assigned}
+        for source in sources:
+            if source.as_pointer() not in used and source.get('wfrl_landscape_prototype'):
+                prototypes.objects.unlink(source)
+                _remove_landscape_prototype(source)
+        ordered = sorted(prototypes.objects, key=lambda source: source.name)
+        mapping = {source.as_pointer(): index for index, source in enumerate(ordered)}
+        indices.foreach_set('value', [mapping[source.as_pointer()] for source in assigned])
+        obj.data.update()
+        after += sum(len(source.data.vertices) for source in assigned)
+        count += len(assigned)
+    return {'before': before, 'after': after, 'objects': count}

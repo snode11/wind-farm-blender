@@ -10,6 +10,53 @@ def _finite(value, name):
     return number
 
 
+def pitch_at(start_deg, target_deg, rate_deg_s, elapsed_s):
+    """Move toward the target without overshoot; zero rate means immediate placement."""
+    start, target = _finite(start_deg, 'Pitch'), _finite(target_deg, 'Pitch')
+    rate = _finite(rate_deg_s, 'Pitch rate')
+    elapsed = max(0.0, _finite(elapsed_s, 'Time'))
+    if rate < 0:
+        raise ValueError('Pitch rate must be nonnegative')
+    if rate == 0:
+        return target
+    step = rate * elapsed
+    return target if abs(target - start) <= step else start + math.copysign(step, target - start)
+
+
+@dataclass
+class PitchClock:
+    """Preserve actual pitch across target, rate and pause changes."""
+
+    pitches: tuple[float, float, float]
+    targets: tuple[float, float, float]
+    rate: float = 0.0
+    running: bool = False
+    last_time: float = 0.0
+
+    def sample(self, now):
+        now = _finite(now, 'Time')
+        if self.running:
+            self.pitches = tuple(pitch_at(a, b, self.rate, max(0.0, now - self.last_time))
+                                 for a, b in zip(self.pitches, self.targets))
+        self.last_time = now
+        return self.pitches
+
+    def configure(self, now, *, targets=None, rate=None, running=None):
+        checked = tuple(_finite(value, 'Pitch') for value in targets) if targets is not None else self.targets
+        if len(checked) != 3:
+            raise ValueError('Pitch requires B1/B2/B3')
+        checked_rate = self.rate if rate is None else _finite(rate, 'Pitch rate')
+        if checked_rate < 0:
+            raise ValueError('Pitch rate must be nonnegative')
+        self.sample(now)
+        self.targets, self.rate = checked, checked_rate
+        if running is not None:
+            self.running = bool(running)
+        if self.rate == 0:
+            self.pitches = self.targets
+        return self.pitches
+
+
 @dataclass
 class RotorClock:
     """Preserve phase when the speed or running state changes between ticks."""

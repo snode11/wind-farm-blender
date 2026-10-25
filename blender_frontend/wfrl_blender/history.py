@@ -3,6 +3,8 @@ from collections import deque
 from copy import deepcopy
 from pathlib import Path
 import json
+import os
+import tempfile
 import threading
 import time
 
@@ -21,7 +23,8 @@ class HistoryWindow:
         self.last_sequence = None
         self.session_id = None
 
-    def ingest(self, message):
+    def ingest(self, message, *, copy_records=True):
+        """copy_records=False consumes records detached from caller-owned data."""
         p = message['payload']
         run_id = p.get('run_id') or message.get('session_id') or 'local-demo'
         if self.run_id != run_id:
@@ -41,25 +44,26 @@ class HistoryWindow:
             groups.extend((t['turbine_id'], t['channels']) for t in p.get('turbines', []))
             for turbine_id, channels in groups:
                 for channel, record in channels.items():
-                    self._append(context, turbine_id, channel, record)
+                    self._append(context, turbine_id, channel, record, copy_record=copy_records)
         elif message['type'] == 'curve':
-            self._append(context, p['turbine_id'], p['channel'], p['data'])
+            self._append(context, p['turbine_id'], p['channel'], p['data'], copy_record=copy_records)
         elif message['type'] == 'training_stats':
             if p['record_kind'] == 'progress':
                 self._append(context, None, '__progress__', {
                     'source_age_seconds': p['source_age_seconds'],
-                    'stale_after_seconds': p['stale_after_seconds']})
+                    'stale_after_seconds': p['stale_after_seconds']}, copy_record=copy_records)
             else:
                 for channel, record in p['stats'].items():
-                    self._append(context, None, channel, record)
+                    self._append(context, None, channel, record, copy_record=copy_records)
         return True
 
-    def _append(self, context, turbine_id, channel, record):
+    def _append(self, context, turbine_id, channel, record, *, copy_record=True):
         key = (context['message_type'], context.get('record_kind'), turbine_id, channel)
         values = self.series.setdefault(key, deque(maxlen=self.capacity))
         if len(values) == self.capacity:
             self.dropped[key] = self.dropped.get(key, 0) + 1
-        values.append(dict(context, turbine_id=turbine_id, channel=channel, data=deepcopy(record)))
+        values.append(dict(context, turbine_id=turbine_id, channel=channel,
+                           data=deepcopy(record) if copy_record else record))
 
     def snapshot(self):
         """Main thread takes only a bounded copy; JSON and disk I/O happen later."""
@@ -115,9 +119,21 @@ class ExportJob:
         def write():
             try:
                 document = export_document(snapshot)
-                with Path(path).open('w', encoding='utf-8') as output:
-                    json.dump(document, output, ensure_ascii=False, allow_nan=False, indent=2)
-                    output.write('\n')
+                target = Path(path)
+                temporary = None
+                try:
+                    with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8',
+                            dir=target.parent, prefix=f'.{target.name}.', suffix='.tmp',
+                            delete=False) as output:
+                        temporary = Path(output.name)
+                        json.dump(document, output, ensure_ascii=False, allow_nan=False, indent=2)
+                        output.write('\n')
+                        output.flush()
+                        os.fsync(output.fileno())
+                    temporary.replace(target)
+                finally:
+                    if temporary is not None:
+                        temporary.unlink(missing_ok=True)
                 self._result = ('COMPLETE', None)
             except Exception as exc:
                 self._result = ('FAILED', f'{type(exc).__name__}: {exc}')

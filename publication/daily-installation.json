@@ -1,61 +1,44 @@
 {
   "schema": "wfrl.daily-installation.v1",
   "status": "PASS",
-  "version": "0.3.28",
+  "version": "0.3.36",
   "blender": "5.2.1 LTS",
   "platform": "macOS",
   "module": "bl_ext.user_default.wfrl_blender",
-  "module_file": "BLENDER_USER_EXTENSIONS/user_default/wfrl_blender/__init__.py",
-  "source_archive": "outputs/frontend-stability-fixes/validation/package/wfrl_blender-0.3.28.zip",
-  "archive_sha256": "b15c491db68fda6a2bdfce4228d5db040fa6ae0f0a69f886935ab0af9b775fda",
-  "payload_sha256": "e968115fcd8d0c1c93597562200ce778aa2e0f70099845edacdb72368ec82324",
-  "source_payload_files_checked": 180,
-  "installed_files_checked": 181,
+  "module_file": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/__init__.py",
+  "source_archive": "dist/wfrl_blender-0.3.36.zip",
+  "archive_sha256": "c7e7360b06a340b7c6867f50f8e30ed4e4b0114ad721d2eeaa762d1a3021da20",
+  "installed_files_checked": 188,
+  "loaded_module_files_checked": 87,
   "file_mismatches": 0,
   "unexpected_files": [],
   "enablement_persisted": true,
-  "blade_property_registered": true,
   "fresh_process_import": "PASS",
-  "installation_scope": "Workspace extension sources and bundled assets; native undo/redo replay recovery, independent observer cameras and save isolation, missing defect helper tolerance and retryable cleanup, transactional shared display mesh binding.",
-  "validation_scope": "Five installed-package regressions pass in independent Blender processes: replay undo/redo and deleted-scene cleanup, native observer camera switching and save/save-failure recovery, deleted defect resources and close retry, blade-model transaction protection, and 20 shared-context model switches after leaving reconstruction. Source suites and source save/reopen evidence have separate payload identities. Fresh daily-profile process loads the formal rootkink scene without saving and verifies all nine blades move with synchronized replay readout.",
-  "package_evidence": "outputs/frontend-stability-fixes/installed-identity.json",
-  "isolated_package_evidence": "outputs/frontend-stability-fixes/validation/package-validation.json",
-  "native_window_status": "PASS_SCRIPTED_SCOPED",
-  "backup": "RECOVERY_ROOT/wfrl_blender-0.3.27-before-0.3.28",
-  "startup_scene_preserved": true,
+  "native_window_status": "PASS_FRESH_PROCESS_IMPORT_AND_REGISTRATION",
+  "startup_file_preserved": true,
   "user_preferences_preserved": true,
-  "formal_scene_preserved": true,
+  "existing_blend_files_checked": 59,
+  "profile_files_checked": 6,
   "public_release": true,
-  "evidence": {
-    "installed_regressions": "outputs/frontend-stability-fixes/installed-regressions.json",
-    "daily_profile_probe": "outputs/frontend-stability-fixes/daily-probe.json",
-    "protected_files": "outputs/frontend-stability-fixes/protected-files.json",
-    "camera_source": "outputs/frontend-stability-fixes/camera/source/checks.json",
-    "replay_source": "outputs/frontend-stability-fixes/playback-mesh/source-replay-history.json",
-    "shared_context_source": "outputs/frontend-stability-fixes/playback-mesh/source-shared-context-switch.json",
-    "editor_source": "outputs/frontend-stability-fixes/editor/source/checks.json",
-    "editor_source_save_reopen": "outputs/frontend-stability-fixes/editor/transaction-save-reopen.json",
-    "delivery_verification": "outputs/frontend-stability-fixes/delivery-verification.json",
-    "artifact_retention": "outputs/frontend-stability-fixes/artifact-retention.json"
+  "installation_scope": "Blender official extension install-file into user_default with --enable --no-prefs; existing configuration and saved scenes match their protected byte snapshots.",
+  "validation_scope": "Fresh visible daily-profile import and registration; installed background manual control, pitch trial, model detail, Down, saved scene links and 45-frame tip-display sample. No physical input, full video, sustained FPS, backend training, other-platform or scientific-accuracy acceptance.",
+  "isolated_installation": {
+    "status": "PASS",
+    "module": "bl_ext.wfrl_frontend.wfrl_blender",
+    "verified_files": 188,
+    "checks": [
+      "archive_inventory",
+      "installed_inventory",
+      "module_probe",
+      "three-camera-default",
+      "native-projection"
+    ]
   },
-  "source_host_checks": [
-    {
-      "scope": "replay, models, reconstruction and deflection",
-      "passed": 76,
-      "skipped": 1,
-      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. PYTHON_ENV_ROOT/bin/python -m pytest blender_frontend/tests/test_scene_playback_lifecycle.py blender_frontend/tests/test_blade_models.py blender_frontend/tests/test_split_reconstruction.py blender_frontend/tests/test_split_mappo_texture.py blender_frontend/tests/test_tip_deflection.py -q -p no:cacheprovider",
-      "evidence": "outputs/frontend-stability-fixes/playback-mesh/host-tests.json"
-    },
-    {
-      "scope": "native camera lifecycle and presentation",
-      "passed": 41,
-      "skipped": 0,
-      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. PYTHON_ENV_ROOT/bin/python -m pytest blender_frontend/tests/test_native_camera_lifecycle.py blender_frontend/tests/test_native_camera_playback.py blender_frontend/tests/test_presentation_controls.py -q -p no:cacheprovider",
-      "evidence": "outputs/frontend-stability-fixes/camera/host-tests.json"
-    }
-  ],
-  "source_host_scope": "Selected suites may overlap; counts are not a distinct-test total. Host checks do not import the installed Blender extension.",
-  "limits": "Scripted native-window checks do not cover physical mouse interaction or the existing user window. No whole-frontend regression, complete playback/FPS benchmark, long-term memory stability, world-axis camera stabilization or scientific acceptance claim. One source test requires undistributed original VTP and is skipped.",
-  "activation_requirement": "Restart Blender after replacing the installed extension; source synchronization does not reload a running process.",
-  "release_identity": "publication/blender-0.3.28.json"
+  "evidence": {
+    "runtime": "publication/daily-installation-runtime.json",
+    "protected_files": "publication/daily-installation-protection.json",
+    "package_validation": "outputs/local-install-0.3.36-qo69g52o/validation/package-validation.json",
+    "backup": "LOCAL_ONLY_NOT_DISTRIBUTED"
+  },
+  "limits": "No physical input, full video, sustained FPS, backend training, other-platform or scientific-accuracy acceptance."
 }

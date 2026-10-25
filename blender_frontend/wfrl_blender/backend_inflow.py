@@ -41,7 +41,7 @@ def history(scene):
 
 def sample(rows, at):
     """Hold measured snapshots; never invent a future wind transition."""
-    i = max(0, bisect_right([r[0] for r in rows], at) - 1)
+    i = max(0, bisect_right(rows, at, key=lambda row: row[0]) - 1)
     return rows[i][1], rows[i][2]
 
 

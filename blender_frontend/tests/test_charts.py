@@ -111,5 +111,47 @@ class PlotReadabilityTests(unittest.TestCase):
         self.assertTrue(all(a < b for a, b in zip(ticks, ticks[1:])))
 
 
+def test_farm_records_detach_inputs_and_keep_history_metadata_independent(monkeypatch):
+    from copy import deepcopy
+
+    from wfrl_blender import charts
+    from wfrl_blender.history import HistoryWindow
+    for nested in (False, True):
+        monkeypatch.setattr(charts, 'history', ChartHistory())
+        monkeypatch.setattr(charts, 'raw_history', HistoryWindow(clock=lambda: 10.))
+        monkeypatch.setattr(charts, '_local_sequence', 0)
+        manifest = {'source': {'files': ['farm.out']} if nested else 'FAST.Farm',
+                    'status': 'verified', 'policy': {'sha256': 'policy'},
+                    'files': {'geometry.npz': 'geometry'}, 'turbine_ids': ['T1', 'T2']}
+        extra = {'T1': {'power': {'value': 2., 'unit': 'MW', 'source_channel': ['GenPwr'] if nested else 'GenPwr',
+                                'source_sha256': 'power-source'}},
+                 'T2': {'power': {'value': 3., 'unit': 'MW', 'source_channel': 'GenPwr', 'source_sha256': 'power-source'}}}
+        assert charts.record_farm(1.25, [(10., 0., 9., 1., 2., 3.), (20., 0., 8., 4., 5., 6.)], manifest, extra)
+        raw = charts.raw_history.series[('snapshot', None, 'T1', 'power')][0]
+        yaw = charts.raw_history.series[('snapshot', None, 'T1', 'yaw')][0]
+        point = charts.history.points('T1', 'power')[0]
+        expected = deepcopy(point.provenance)
+        manifest['status'] = 'changed'
+        manifest['files']['geometry.npz'] = 'changed'
+        extra['T1']['power'].update(value=100., source_sha256='changed')
+        if nested:
+            manifest['source']['files'].append('changed')
+            extra['T1']['power']['source_channel'].append('changed')
+            assert point.provenance['source'] == {'files': ['farm.out']}
+            assert raw['data']['provenance']['source_channel'] == ['GenPwr']
+        assert raw['data']['provenance'] == expected == point.provenance
+        assert raw['data']['value'] == point.value == 2.
+        assert charts.history.points(FARM, 'power')[0].value == 5.
+        assert charts.history.points('T1', 'pitch')[0].value == 2.
+        assert charts.history.points('T1', 'torque')[0].value is None
+        point.provenance['status'] = 'chart-only'
+        yaw['data']['provenance']['status'] = 'yaw-only'
+        if nested:
+            point.provenance['source']['files'].append('chart-only')
+            yaw['data']['provenance']['source']['files'].append('yaw-only')
+        assert raw['data']['provenance'] == expected
+        assert raw['timestamp'] == {'value': 1.25, 'timebase': 'simulation_seconds'}
+
+
 if __name__ == '__main__':
     unittest.main()

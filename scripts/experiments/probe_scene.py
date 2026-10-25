@@ -1,7 +1,7 @@
 """场景层 + 通道注册表的验收测试（纯离线，不起 FAST.Farm）。
 
 跑：
-    "USER_HOME\\.conda\\envs\\wfcrl\\python.exe" scripts/experiments/probe_scene.py
+    "C:\\Users\\s1155\\.conda\\envs\\wfcrl\\python.exe" scripts/experiments/probe_scene.py
 
 验收点：
   1. 两份场景文件都能加载并通过校验

@@ -216,5 +216,5 @@ class TransportClient:
                     break
         except (OSError, ValueError, KeyError, TypeError) as exc:
             self._fail(str(exc))
-            return []
+            return result
         return result

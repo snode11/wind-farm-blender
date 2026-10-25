@@ -44,25 +44,61 @@ def _mesh_object(collection, name: str, vertices, faces, material):
     return obj
 
 
-def _primitive(collection, kind: str, name: str, location, scale, material):
+def _primitive_mesh(name: str, kind: str, **parameters):
+    """Build primitive mesh data with UVs, flat faces and selected mesh elements."""
+    import bmesh
+    from mathutils import Matrix
+
     bpy = _bpy()
+    bm = bmesh.new()
+    mesh = None
+    try:
+        bm.loops.layers.uv.new("UVMap")
+        options = dict(matrix=Matrix.Identity(4), calc_uvs=True, **parameters)
+        if kind == "cone":
+            bmesh.ops.create_cone(bm, cap_ends=True, cap_tris=False, **options)
+        elif kind == "cube":
+            bmesh.ops.create_cube(bm, **options)
+        elif kind == "uv_sphere":
+            bmesh.ops.create_uvsphere(bm, **options)
+        elif kind == "ico_sphere":
+            bmesh.ops.create_icosphere(bm, **options)
+        else:
+            raise ValueError(kind)
+        for vertex in bm.verts:
+            vertex.select_set(True)
+        bm.select_flush(True)
+        for face in bm.faces:
+            face.smooth = False
+        mesh = bpy.data.meshes.new(name)
+        bm.to_mesh(mesh)
+        return mesh
+    except Exception:
+        if mesh is not None:
+            bpy.data.meshes.remove(mesh)
+        raise
+    finally:
+        bm.free()
+
+
+def _primitive(collection, kind: str, name: str, location, scale, material):
     if kind == "cylinder":
-        bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=1.0, depth=2.0, location=location)
+        mesh = _primitive_mesh(name + ".Mesh", "cone", segments=32,
+                               radius1=1.0, radius2=1.0, depth=2.0)
     elif kind == "cone":
-        bpy.ops.mesh.primitive_cone_add(vertices=32, radius1=1.0, radius2=0.78, depth=2.0, location=location)
+        mesh = _primitive_mesh(name + ".Mesh", "cone", segments=32,
+                               radius1=1.0, radius2=0.78, depth=2.0)
     elif kind == "cube":
-        bpy.ops.mesh.primitive_cube_add(location=location)
+        mesh = _primitive_mesh(name + ".Mesh", "cube", size=2.0)
     elif kind == "uv_sphere":
-        bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, location=location)
+        mesh = _primitive_mesh(name + ".Mesh", "uv_sphere", u_segments=24,
+                               v_segments=12, radius=1.0)
     else:
         raise ValueError(kind)
-    obj = bpy.context.view_layer.objects.active
-    obj.name = name
-    obj.data.name = name + ".Mesh"
+    obj = _bpy().data.objects.new(name, mesh)
+    obj.location = location
     obj.scale = scale
-    obj.data.materials.append(material)
-    for old in list(obj.users_collection):
-        old.objects.unlink(obj)
+    mesh.materials.append(material)
     _link(collection, obj)
     return obj
 
@@ -105,20 +141,14 @@ def _rounded_nacelle_mesh(length: float, width: float, height: float):
 
 def _cone(collection, name: str, radius1: float, radius2: float, depth: float, material):
     """Create a cone at the origin so its parent can own the local placement."""
-    bpy = _bpy()
-    bpy.ops.mesh.primitive_cone_add(
-        vertices=96,
+    mesh = _primitive_mesh(
+        name + ".Mesh", "cone", segments=96,
         radius1=radius1,
         radius2=radius2,
         depth=depth,
-        location=(0, 0, 0),
     )
-    obj = bpy.context.view_layer.objects.active
-    obj.name = name
-    obj.data.name = name + ".Mesh"
-    obj.data.materials.append(material)
-    for old in list(obj.users_collection):
-        old.objects.unlink(obj)
+    obj = _bpy().data.objects.new(name, mesh)
+    mesh.materials.append(material)
     _link(collection, obj)
     return obj
 
@@ -185,6 +215,8 @@ def _make_turbine(collection, turbine, *, object_prefix=None,
     _link(collection, root)
     vertices, faces = tower_mesh()
     tower = _mesh_object(collection, prefix + ".Tower", vertices, faces, material("tower"))
+    # FarmFlex may retire this new mesh after a committed replacement.
+    tower.data['wfrl_farm_flex_owned'] = True
     tower.parent = root
     _finish(tower, smooth=True)
     bearing = _primitive(
@@ -193,7 +225,7 @@ def _make_turbine(collection, turbine, *, object_prefix=None,
         prefix + ".YawBearing",
         (0, 0, 0),
         (1.98, 1.98, 0.10),
-        material("hub"),
+        material("metal"),
     )
     bearing.parent = root
     bearing.location = (0, 0, scalars["TowerHt"])
@@ -229,7 +261,7 @@ def _make_turbine(collection, turbine, *, object_prefix=None,
     roof.parent = yaw
     roof.location = (0.65, 0, shell["height"] / 2 + 0.09)
     _finish(roof, bevel=0.025)
-    shaft = _primitive(collection, "cylinder", prefix + ".MainShaft", (0, 0, 0), (0.95, 0.95, 0.7), material("hub"))
+    shaft = _primitive(collection, "cylinder", prefix + ".MainShaft", (0, 0, 0), (0.95, 0.95, 0.7), material("metal"))
     shaft.parent = yaw
     shaft.location = (hub_x + 0.7, 0, hub_z - scalars["TowerHt"] - 0.06)
     shaft.rotation_euler[1] = math.radians(90.0 - scalars["ShftTilt"])
@@ -252,8 +284,7 @@ def _make_turbine(collection, turbine, *, object_prefix=None,
     hub.parent = rotor
     hub.location = (-0.35, 0.0, 0.0)
     _finish(hub, smooth=True)
-    # Rounded spinner closes to one pole; the previous truncated cone had
-    # a visibly flat nose. Retain the same 3.2 m illustrative axial envelope.
+    # Rounded spinner closes to one pole within a 3.2 m illustrative axial envelope.
     verts=[];faces=[];segments=64;rings=24
     for i in range(rings):
         angle=math.pi*i/(2*rings)
@@ -284,7 +315,7 @@ def _make_turbine(collection, turbine, *, object_prefix=None,
     # pedestal bridges that gap with overlap; this exterior is illustrative.
     bottom = scalars['Twr2Shft'] + .15 - shell['height'] / 2
     pedestal = _primitive(collection, 'cylinder', prefix + '.YawPedestal',
-                          (0, 0, 0), (1.90, 1.90, (bottom + .10) / 2), material('hub'))
+                          (0, 0, 0), (1.90, 1.90, (bottom + .10) / 2), material('metal'))
     pedestal.parent = yaw
     pedestal.location.z = (bottom + .10) / 2 - .05
     _finish(pedestal, bevel=.025, smooth=True)
@@ -559,14 +590,41 @@ def _configure_render():
     scene['wfrl_surface_revision'] = 1
 
 
-def clear_scene(collection_name: str = COLLECTION_NAME):
+def validate_scene_build(collection_name: str = COLLECTION_NAME):
+    """Reject rebuilding globally named resources used by another scene."""
     bpy = _bpy()
     collection = bpy.data.collections.get(collection_name)
+    if collection is not None:
+        target = bpy.context.scene
+        owners = [owner.name for owner in bpy.data.scenes if owner != target
+                  and (collection in owner.collection.children_recursive
+                       or any(obj.name in owner.objects for obj in collection.objects))]
+        if owners:
+            raise ValueError('风场资源属于其他场景：' + '、'.join(owners)
+                             + '；请返回原场景，或在独立 Blender 进程中加载')
+    return collection
+
+
+def _release_scene_data(block):
+    """Release unused local scene data, preserving deliberate retention."""
+    try:
+        if (block is not None and block.name.startswith("WFRL.")
+                and block.users == 0 and block.library is None
+                and not block.use_fake_user and getattr(block, 'shape_keys', None) is None):
+            _bpy().data.batch_remove(ids=(block,))
+    except ReferenceError:
+        pass
+
+
+def clear_scene(collection_name: str = COLLECTION_NAME):
+    bpy = _bpy()
+    collection = validate_scene_build(collection_name)
     if not collection:
         return
     # Drop replay references while their mesh and trail objects still exist.
     import sys
     from . import tip_tracking, clearance_replay, split_turbine_context
+    from .landscape import remove_landscape_instancer
     custom = sys.modules.get(__package__ + '.panels.custom_cameras')
     if custom is not None:
         custom.cancel_on_load()
@@ -588,12 +646,14 @@ def clear_scene(collection_name: str = COLLECTION_NAME):
             from . import repair_marks
             repair_marks.remove(owner)
     for obj in list(collection.objects):
+        if obj.get('wfrl_landscape_instances'):
+            remove_landscape_instancer(obj)
+            continue
         data = obj.data
         action = obj.animation_data.action if obj.animation_data else None
         bpy.data.objects.remove(obj, do_unlink=True)
         for block in (data, action):
-            if block is not None and block.users == 0 and block.name.startswith("WFRL."):
-                bpy.data.batch_remove(ids=(block,))
+            _release_scene_data(block)
     bpy.data.collections.remove(collection)
 
 
@@ -601,7 +661,7 @@ def build_scene(scene: SceneDTO, collection_name: str = COLLECTION_NAME):
     bpy = _bpy()
     if bpy.context.scene.get("wfrl_scene_kind") == "manual":
         raise ValueError("手动场景不接受回放或后端场景重建")
-    existing = bpy.data.collections.get(collection_name)
+    existing = validate_scene_build(collection_name)
     if existing:
         clear_scene(collection_name)
     collection = bpy.data.collections.new(collection_name)

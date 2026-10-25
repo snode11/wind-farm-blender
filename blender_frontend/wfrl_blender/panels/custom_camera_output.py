@@ -6,7 +6,7 @@ from copy import deepcopy
 import bpy
 from bpy.props import EnumProperty, FloatProperty, StringProperty
 from .. import custom_cameras as core, custom_camera_capture as capture
-from .. import camera_projection as projection
+from .. import camera_projection as projection, playback
 from .. import custom_camera_history as history, custom_camera_preview as preview
 
 _PENDING_IMPORT = None
@@ -255,12 +255,14 @@ def summary_check(context, times):
     scene = context.scene
     cameras = tuple((slot, cam.as_pointer(), repr(core.parameters(cam)), bool(cam.get('custom_enabled',True)))
                     for slot in core.SLOTS if (cam := core.get_camera(scene,slot)) is not None)
-    key = (session_identity(scene), preview._REVISION, cameras, repr(preview.render_profile(scene)),
+    key = (session_identity(scene), cameras, repr(preview.render_profile(scene)),
            scene.wfrl_capture_mode, scene.wfrl_capture_start, scene.wfrl_capture_end,
            scene.wfrl_capture_step, capture.active(), installation_block_reason(scene),
            any(obj.get('wfrl_custom_draft') for obj in scene.objects))
-    if _SUMMARY_CACHE.get('key') != key:
-        _SUMMARY_CACHE.update(key=key, value=capture.preflight(context, times))
+    held = playback.any_playing() and _SUMMARY_CACHE.get('key') == key
+    if not held and (_SUMMARY_CACHE.get('key') != key or _SUMMARY_CACHE.get('revision') != preview._REVISION):
+        _SUMMARY_CACHE.update(key=key, revision=preview._REVISION, value=capture.preflight(context, times))
+    _SUMMARY_CACHE['held'] = held
     return _SUMMARY_CACHE['value']
 
 
@@ -268,6 +270,8 @@ def draw_summary(layout,context):
     try:
         times=requested_times(context.scene)
         result=summary_check(context,times)
+        if _SUMMARY_CACHE.get('held'):
+            layout.label(text='播放中：预检查结果暂停刷新')
         if times:
             layout.label(text=f'实际首末：{times[0]:.4f}–{times[-1]:.4f} s；{len(times)} 个采样点')
         n,m=result['samples'],result['cameras']

@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "addon_path": "USER_HOME/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "addon_path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
   "blender": "5.2.1 LTS",
   "checks": [
     "Real panel click restores exact bundled box pose and all three optics",

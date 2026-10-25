@@ -6,6 +6,7 @@ from .live_scene import snapshot_scene, build_live_scene
 from .wake import WakeFrameBuffer, validate_wake_payload, apply_disxy_frame
 from collections import deque
 import time
+import traceback
 from . import performance
 
 # Blender reloads submodules too. Tear down the old timer before rebinding its
@@ -25,6 +26,8 @@ _pending_step = None
 _pending_command = None
 _pending_lifecycle_sequence = None
 _last_tick = None
+_last_async_display_state = None
+_tick_failures = set()
 health_results = globals().get('health_results', {})
 wake_buffer = globals().get('wake_buffer', WakeFrameBuffer())
 latest_wake = globals().get('latest_wake')
@@ -47,6 +50,11 @@ def manual_display_active():
     return bool(scene is not None and hasattr(scene, "get") and scene.get("wfrl_scene_kind") == "manual")
 
 
+def has_backend_session():
+    """A claimed session retains its transport counters until synchronization."""
+    return bool(_state.session_id or getattr(_client, 'session_id', None))
+
+
 def configuration_editable(scene=None):
     manual = manual_display_active() if scene is None else scene.get("wfrl_scene_kind") == "manual"
     return not manual and not _pending_command and get_state().allows('configure') and not (_client and _client.progress in {'Connecting', 'Awaiting handshake'})
@@ -57,6 +65,8 @@ def select_mode(mode):
     from .state import MODES
     if mode not in MODES or not configuration_editable():
         raise ValueError('Stop the active session before changing mode')
+    from .scene_builder import validate_scene_build
+    validate_scene_build()
     if _client:
         _client.close()
         _client = None
@@ -124,12 +134,21 @@ def connect(port):
 
 
 def disconnect(force=False):
+    global kinematics, _live_scene, _last_tick, _pending_command, _pending_step
+    global _pending_lifecycle_sequence, latest_wake
     if _client:
         _client.close()
     if force or get_state().connection != 'LOCAL DEMO':
         _state.disconnect('Disconnected; backend state is unconfirmed')
         if not force and not _state.session_id and not (_client and _client.session_id):
             _state.confirmed = True
+    if force:
+        kinematics = KinematicState()
+        _live_scene = None
+        _last_tick = None
+        _pending_command = _pending_step = _pending_lifecycle_sequence = None
+        wake_buffer.pop_latest()
+        latest_wake = None
 
 
 def enter_local_demo():
@@ -221,8 +240,56 @@ def send_workflow_command(name, arguments):
 
 @performance.timed("runtime.tick")
 def tick():
+    """Keep the timer alive and report backend or local polling errors."""
+    try:
+        return _tick()
+    except Exception as exc:
+        error = f'Runtime polling failed: {exc}'
+        if _client is not None or _state.connection not in {'LOCAL DEMO', 'OFFLINE RESULTS'}:
+            _state.disconnect(error + '; backend state is unconfirmed')
+        else:
+            _state.error = error
+        failure = (type(exc), str(exc))
+        if failure not in _tick_failures:
+            _tick_failures.add(failure)
+            try:
+                traceback.print_exc()
+            except Exception:
+                pass
+        try:
+            if _client is not None:
+                _client.close()
+        except Exception:
+            pass
+        try:
+            _redraw_viewports()
+        except Exception:
+            pass
+        return 0.05
+
+
+def _redraw_viewports():
+    import bpy
+    for window in bpy.context.window_manager.windows:
+        for area in window.screen.areas:
+            if area.type == 'VIEW_3D':
+                performance.count("runtime.redraw_requests")
+                area.tag_redraw()
+
+
+def _async_display_state(job, context):
+    """Track labels published by export and window-recording callbacks."""
+    scenes = (getattr(window, 'scene', getattr(context, 'scene', None))
+              for window in context.window_manager.windows)
+    return (job.status, getattr(job, 'error', None), getattr(job, 'path', None),
+            tuple((scene.get('wfrl_history_export_status'), scene.get('wfrl_capture_status'))
+                  for scene in scenes if scene is not None))
+
+
+def _tick():
     """Timer work is bounded by transport budgets; health polls only queued results."""
     global _pending_command, _pending_lifecycle_sequence, _last_tick, kinematics, _live_scene, _desired_mode, latest_wake
+    global _last_async_display_state
     import bpy
     performance.count("runtime.timer_calls")
     if _client is not None and manual_display_active():
@@ -368,28 +435,27 @@ def tick():
         animate_illustrative_wake(getattr(bpy.context, 'scene', None), dt,
                                  running=connected and _state.run_status == 'RUNNING')
     from . import charts
-    export_status = charts.export_job.status
+    display_before = (_async_display_state(charts.export_job, bpy.context)
+                      if _last_async_display_state is None else _last_async_display_state)
     charts.export_job.poll()
+    display_state = _async_display_state(charts.export_job, bpy.context)
+    display_changed = display_state != display_before
+    _last_async_display_state = display_state
     health_changed = False
     if _health:
         for result in _health.poll():
             health_results[result.component] = result
             health_changed = True
-    # A paused recorded scene with no new data need not redraw every viewport.
-    # Redraw during playback, backend validity aging, and async status changes.
+    # Local animation and manual motion own their redraws. This timer refreshes
+    # async results and playback; backend snapshots retain validity aging.
     if (_client is None and _state.connection in {'LOCAL DEMO', 'OFFLINE RESULTS'}
-            and not health_changed and charts.export_job.status == export_status
+            and not health_changed and not display_changed
+            and kinematics.snapshot is None
             and not any(getattr(w.screen, 'is_animation_playing', False)
                         for w in bpy.context.window_manager.windows)):
-        from . import farm_flex
-        if farm_flex.is_active(getattr(bpy.context, 'scene', None)):
-            performance.count('runtime.unchanged_redraw_skips')
-            return 0.05
-    for window in bpy.context.window_manager.windows:
-        for area in window.screen.areas:
-            if area.type == 'VIEW_3D':
-                performance.count("runtime.redraw_requests")
-                area.tag_redraw()
+        performance.count('runtime.unchanged_redraw_skips')
+        return 0.05
+    _redraw_viewports()
     return 0.05
 
 
@@ -398,8 +464,9 @@ def progress():
 
 
 def shutdown():
-    global _client, _health, _last_tick
+    global _client, _health, _last_tick, _last_async_display_state
     _last_tick = None
+    _last_async_display_state = None
     import bpy
     if bpy.app.timers.is_registered(tick):
         bpy.app.timers.unregister(tick)
@@ -425,8 +492,18 @@ def register():
         bpy.app.timers.register(tick, first_interval=0.05, persistent=True)
 
 
-def enter_result_replay(*, scene=None):
-    """Detach a stopped backend and reset transport without a synthetic demo clock."""
+def enter_result_replay(*, scene=None, restoring=False):
+    """Restore saved replay without discarding a claimed backend session.
+
+    Explicit result loading requires an editable backend. File and history
+    restoration can bind saved geometry while backend control stays unconfirmed.
+    """
+    if (restoring and scene is not None
+            and scene.get('wfrl_scene_kind') == 'clearance_replay'
+            and has_backend_session()):
+        if _state.connection != 'DISCONNECTED' or _state.confirmed:
+            disconnect(force=True)
+        return
     if not configuration_editable(scene):
         raise ValueError('Stop the active backend before loading results')
     enter_local_demo()

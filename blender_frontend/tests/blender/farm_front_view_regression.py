@@ -15,6 +15,10 @@ from wfrl_blender.panels import farm_replay
 from unittest.mock import patch
 scene=bpy.context.scene
 out=Path(os.environ['WFRL_TEST_OUTPUT']);out.mkdir(parents=True,exist_ok=True)
+assert scene.wfrl_flex_show_tip_trails is False
+assert tip_tracking.active(scene) is None
+scene.wfrl_flex_show_tip_trails = True
+assert tip_tracking.active(scene) is not None
 
 class ViewButtons:
     """Capture actual panel bindings, including properties omitted by a button."""
@@ -97,7 +101,8 @@ bpy.ops.wfrl.farm_flex_view(turbine='T1',angle='FRONT')
 scene.frame_set(1)
 for frame in range(2,541):scene.frame_set(frame)
 assert all(len(points)<=540 for points in tip_tracking.active(scene).points.values())
-result=dict(status='PASS',camera=scene.camera.name,retained_samples_per_blade=len(before[1]),bounds=limits)
+result=dict(status='PASS',camera=scene.camera.name,retained_samples_per_blade=len(before[1]),bounds=limits,
+            default_trails_disabled=True,explicit_trails_enabled=True)
 (out/'checks.json').write_text(json.dumps(result,indent=2))
 if os.environ.get('WFRL_RENDER_FRONT'):
     scene.render.resolution_x=1280;scene.render.resolution_y=720;scene.render.resolution_percentage=100

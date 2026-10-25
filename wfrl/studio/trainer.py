@@ -207,6 +207,8 @@ class Trainer:
         必须兼容。无版本模型只接受可确认来源的 Studio 或 CLI 元数据。
         """
         from wfrl.scene.runtime import SceneRuntime
+        if not self._wait_for_control_step():
+            return
         if not self.ckpt_path or not os.path.exists(self.ckpt_path):
             raise FileNotFoundError(f"回放需要 checkpoint，未找到: {self.ckpt_path!r}")
         torch.manual_seed(self.seed)
@@ -232,10 +234,14 @@ class Trainer:
 
         ep = self.replay_steps
         budget = ep + self.warmup_steps + 8
+        if not self._wait_for_control_step():
+            return
         self.runtime = SceneRuntime(self.scene, max_steps=budget,
                                     warmup_steps=0)
         want_warmup = self.warmup_steps
         self._publish(phase="warmup")
+        if not self._wait_for_control_step():
+            return
         frame = self.runtime.reset()
         self.action_contract.validate_runtime(self.controls, self.runtime.driver.act_bounds)
         m = self.runtime.last_measure
@@ -244,7 +250,7 @@ class Trainer:
                       farm_power=_frame_farm_power(frame),
                       reward=0.0, events=[], phase="warmup")
         for _ in range(want_warmup):
-            if self._stop.is_set():
+            if not self._wait_for_control_step():
                 return
             frame = self.runtime.step(yaw_delta=np.zeros(n))
             m = self.runtime.last_measure
@@ -257,9 +263,7 @@ class Trainer:
         replay_history = {"step": [], "yaw": [], "power": [], "reward": []}
 
         for k in range(ep):
-            while self._paused.is_set() and not self._stop.is_set():
-                time.sleep(0.05)
-            if self._stop.is_set():
+            if not self._wait_for_control_step():
                 break
             obs = self._pack_keys(m, obs_keys, obs_duty, n)
             on = ((obs - mean) / std).astype(np.float32)
@@ -304,7 +308,9 @@ class Trainer:
                     "explained_var": 0.0,
                 })
 
-        self._publish(step=ep, iters_done=1, frame=frame, measure=m,
+        completed_steps = len(replay_history["step"])
+        self._publish(step=completed_steps, iters_done=int(completed_steps == ep),
+                      frame=frame, measure=m,
                       ctx=self.runtime.last_ctx,
                       farm_power=_frame_farm_power(frame),
                       reward=0.0, events=[], phase="done")

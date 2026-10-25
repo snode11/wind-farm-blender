@@ -2,7 +2,7 @@
 
 跑：
     & "C:\\Program Files\\Microsoft MPI\\Bin\\mpiexec.exe" -n 1 `
-      "USER_HOME\\.conda\\envs\\wfcrl\\python.exe" `
+      "C:\\Users\\s1155\\.conda\\envs\\wfcrl\\python.exe" `
       scripts/experiments/probe_trainer.py
 
 这是 D2 的一半：训练必须在后台线程跑，主线程能一直响应。所以判据不是"loss 降了"

@@ -2,6 +2,8 @@
 import hashlib
 import json
 import math
+from collections import OrderedDict
+from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
@@ -12,6 +14,8 @@ _ACTIVE=None
 # Each scene owns its deformation runtime. _ACTIVE remains the last explicitly
 # selected instance for existing panel integrations; callbacks use active_for.
 _ACTIVES={}
+_PACKAGE_CACHE = OrderedDict()
+_PACKAGE_CACHE_SIZE = 2
 
 
 def dual_beam_api():
@@ -95,11 +99,39 @@ class _LoadedPackage:
         return self.manifest, self.times, self.transforms, self.poses, self.readers
 
 
+@dataclass(frozen=True)
+class _ParsedPackage:
+    times: np.ndarray
+    transforms: np.ndarray
+    poses: np.ndarray
+    contents: dict
+    tower_motion: dict | None
+    reference: dict | None
+
+
+def clear_package_cache():
+    """Release parsed source data without changing any scene's runtime."""
+    _PACKAGE_CACHE.clear()
+
+
+def _readonly_arrays(value):
+    if isinstance(value, np.ndarray):
+        value.setflags(write=False)
+    elif isinstance(value, dict):
+        for item in value.values():
+            _readonly_arrays(item)
+    elif isinstance(value, (list, tuple)):
+        for item in value:
+            _readonly_arrays(item)
+
+
 def _load_package(path):
-    """Validate one package and retain its parsed data for scene binding."""
+    """Verify every file on every load; reuse only matching parsed source data."""
     result_path = Path(path).resolve()
     path, overlay = dual_beam_api().resolve_package(result_path)
-    manifest=json.loads((path/'manifest.json').read_text())
+    path = Path(path).resolve()
+    manifest_raw = (path / 'manifest.json').read_bytes()
+    manifest = json.loads(manifest_raw)
     if (manifest.get('schema') not in ('wfrl.farm-flex-review.v1','wfrl.farm-flex-review.v2','wfrl.farm-flex-review.v3')
             or manifest.get('status')!='REVIEW_ONLY'
             or manifest.get('turbine_ids') not in (['T1','T2','T3'], ['T1'])
@@ -108,6 +140,42 @@ def _load_package(path):
     for name in set(manifest['files']) | {'geometry.npz','data.json','source-surfaces.json'}:
         if hashlib.sha256((path/name).read_bytes()).hexdigest()!=manifest['files'][name]:
             raise ValueError('Farm package integrity mismatch: '+name)
+    result_raw = manifest_raw if result_path == path else (result_path / 'manifest.json').read_bytes()
+    # resolve_package verifies sidecar files and their complete source inventory.
+    # Both manifests and resolved paths distinguish geometry and result variants.
+    key = (result_path, path, hashlib.sha256(manifest_raw).hexdigest(),
+           hashlib.sha256(result_raw).hexdigest())
+    parsed = _PACKAGE_CACHE.get(key)
+    if parsed is None:
+        parsed = _parse_package(path, manifest)
+    try:
+        from ._vendor.lidar.replay import ReplayReader
+    except ImportError:
+        from wfrl.lidar.replay import ReplayReader
+    readers = {}
+    for tid in manifest['turbine_ids']:
+        # Cached rows are read-only inputs; ReplayReader.at copies its outputs.
+        # Reader identity and per-reader indexes belong to each scene binding.
+        readers[tid] = ReplayReader(SimpleNamespace(
+            manifest=deepcopy({**manifest, 'turbine_id': tid}), **parsed.contents[tid]))
+        if overlay is not None:
+            readers[tid] = dual_beam_api().DualBeamReader(readers[tid], overlay, tid)
+    if overlay is not None:
+        manifest = {**manifest, 'measurement_mode': 'dual_beam',
+                    'dual_beam_calibration': overlay['config'],
+                    'dual_beam': overlay['manifest']}
+    _PACKAGE_CACHE[key] = parsed
+    _PACKAGE_CACHE.move_to_end(key)
+    while len(_PACKAGE_CACHE) > _PACKAGE_CACHE_SIZE:
+        _PACKAGE_CACHE.popitem(last=False)
+    tower_data = None if parsed.tower_motion is None else dict(parsed.tower_motion)
+    return _LoadedPackage(manifest, parsed.times, parsed.transforms, parsed.poses,
+                          readers, path, result_path, overlay, tower_data,
+                          deepcopy(parsed.reference))
+
+
+def _parse_package(path, manifest):
+    """Parse and validate geometry, motion and independent support/reference data."""
     with np.load(path/'geometry.npz',allow_pickle=False) as data:
         times=data['times'].copy();transforms=data['transforms'].copy();poses=data['poses'].copy()
     n=len(times); turbines=len(manifest['turbine_ids'])
@@ -123,11 +191,7 @@ def _load_package(path):
     from .tower_motion import read_tower
     tower_data=read_tower(path,manifest,times)
     contents=json.loads((path/'data.json').read_text())
-    try:
-        from ._vendor.lidar.replay import ReplayReader
-    except ImportError:
-        from wfrl.lidar.replay import ReplayReader
-    readers={}; motion_poses=[]
+    motion_poses=[]
     for index,tid in enumerate(manifest['turbine_ids']):
         payload=contents[tid]
         if not np.array_equal([r['time_s'] for r in payload['motion']],times):
@@ -146,15 +210,9 @@ def _load_package(path):
             top=np.einsum('nij,j->ni',actual[:,:,:3],[0,0,87.6])+actual[:,:,3]+manifest['layout_m'][index]
             if not np.allclose(top,[r['nacelle_position_m'] for r in payload['motion']],atol=1e-8,rtol=0):
                 raise ValueError('Nacelle position and geometry differ: '+tid)
-        readers[tid]=ReplayReader(SimpleNamespace(manifest={**manifest,'turbine_id':tid},**payload))
-        if overlay is not None:
-            readers[tid] = dual_beam_api().DualBeamReader(readers[tid], overlay, tid)
-    if overlay is not None:
-        manifest = {**manifest, 'measurement_mode': 'dual_beam',
-                    'dual_beam_calibration': overlay['config'],
-                    'dual_beam': overlay['manifest']}
-    return _LoadedPackage(manifest, times, transforms, np.stack(motion_poses, axis=1),
-                          readers, path, result_path, overlay, tower_data, reference)
+    poses = np.stack(motion_poses, axis=1)
+    _readonly_arrays((times, transforms, poses, tower_data, reference))
+    return _ParsedPackage(times, transforms, poses, contents, tower_data, reference)
 
 
 def read_package(path):
@@ -188,6 +246,55 @@ def _update_scene_transforms(scene):
     import bpy
     view_layer = bpy.context.view_layer if bpy.context.scene == scene else scene.view_layers[0]
     view_layer.update()
+
+
+class _EvaluatedTransformRequired(Exception):
+    pass
+
+
+def _world_from_basis(obj, cache):
+    """Match the depsgraph's two float32 products at each object parent link."""
+    key = obj.as_pointer()
+    if key not in cache:
+        animation = obj.animation_data
+        parent = obj.parent
+        if (obj.constraints or (animation is not None and animation.drivers)
+                or obj.rigid_body is not None
+                or (parent is not None and (obj.parent_type != 'OBJECT'
+                    or (parent.type == 'CURVE' and parent.data.use_path)))):
+            raise _EvaluatedTransformRequired(obj.name)
+        basis = np.array(obj.matrix_basis, dtype=np.float32)
+        if parent is None:
+            cache[key] = basis
+        else:
+            parent_world = _world_from_basis(parent, cache)
+            parent_inverse = np.array(obj.matrix_parent_inverse, dtype=np.float32)
+            cache[key] = (parent_world @ parent_inverse).astype(np.float32) @ basis
+    return cache[key]
+
+
+class _WorldMatrices:
+    """One replay update's matrices, with one evaluated fallback for the scene."""
+    def __init__(self, scene, key):
+        self.scene, self.key = scene, key
+        self.matrices = {}
+        self.evaluated = False
+
+    def evaluate(self):
+        phase_started = performance.begin()
+        _update_scene_transforms(self.scene)
+        performance.end('flex.depsgraph_update', phase_started)
+        self.matrices.clear()
+        self.evaluated = True
+
+    def world(self, obj):
+        if not self.evaluated:
+            try:
+                from mathutils import Matrix
+                return Matrix(_world_from_basis(obj, self.matrices).tolist())
+            except _EvaluatedTransformRequired:
+                self.evaluate()
+        return obj.matrix_world.copy()
 
 
 class _MeshBindings:
@@ -266,6 +373,7 @@ class FarmFlex:
         from .turbine_geometry import geometry_data,blade_mesh,MODELS,DEFAULT_MODEL
         from .materials import get_material,ensure_blade_tip_markings
         from . import clearance_replay
+        self._world_matrices = None
         package = _load_package(path) if _package is None else _package
         self.manifest,self.times,self.transforms,self.poses,self.readers=package.playback
         result_path = package.result_path
@@ -336,18 +444,6 @@ class FarmFlex:
                 weight=np.clip((rest[:,2]-spans[index])/(spans[index+1]-spans[index]),0,1)[:,None]
                 self.blades.append((obj,rest,world,index,weight.astype(np.float32),turbine,b-1,offset))
                 self.groups[obj.name]=[(s,np.flatnonzero(index==s)) for s in np.unique(index)]
-        # Bind cosmetic surface attachments to the new reference loft before
-        # any playback frame writes deform it. Saved anchor indices from the
-        # rigid presentation mesh must never be reused on this replacement.
-        from . import repair_marks
-        try:
-            repair_marks.ensure(scene, force=True)
-        finally:
-            blade = scene.objects.get(repair_marks.TARGET_NAME)
-            if blade is not None:
-                for obj in scene.objects:
-                    if obj.type == 'MESH' and repair_marks._owned(obj, blade):
-                        self._meshes.follow(obj)
         if self.tower_motion is not None:
             from .turbine_geometry import tower_mesh
             tower_vertices, tower_faces = tower_mesh()
@@ -428,8 +524,21 @@ class FarmFlex:
             self.comparison = ComparisonView(self, comparison_data, vertices, faces)
         from . import split_turbine_context
         split_turbine_context.rebind_meshes(scene, self._meshes)
+        # Rebuild cosmetic anchors only after structural bindings succeed,
+        # while the replacement loft is still at rest. Earlier binding failures
+        # must leave the original attachment and sampling mesh intact.
+        from . import repair_marks
+        try:
+            repair_marks.ensure(scene, force=True)
+        finally:
+            blade = scene.objects.get(repair_marks.TARGET_NAME)
+            if blade is not None:
+                for obj in scene.objects:
+                    if obj.type == 'MESH' and repair_marks._owned(obj, blade):
+                        self._meshes.follow(obj)
 
     def restore_support(self):
+        self._world_matrices = None
         for obj,rest,*_ in self.towers:
             try:
                 obj.data.vertices.foreach_set('co',rest.ravel());obj.data.update()
@@ -491,6 +600,25 @@ class FarmFlex:
         self.blades[position] = (obj,rest,world,index,weight,k,b,offset)
         self.groups[obj.name] = [(s,np.flatnonzero(index==s)) for s in np.unique(index)]
         self.cache.clear()
+        self._world_matrices = None
+
+    def _world_cache(self):
+        import bpy
+        exported = getattr(self, 'export_turbines', None)
+        key = (self.scene.frame_current, self.scene.frame_subframe,
+               self.scene == bpy.context.scene,
+               frozenset(self.visible_turbines),
+               None if exported is None else frozenset(exported))
+        if self._world_matrices is None or self._world_matrices.key != key:
+            self._world_matrices = _WorldMatrices(self.scene, key)
+            # Other scenes and isolated exports need evaluated data on return.
+            if self.scene != bpy.context.scene or exported is not None:
+                self._world_matrices.evaluate()
+        return self._world_matrices
+
+    def world_matrix(self, obj):
+        """Read the rigid pose written by replay before the depsgraph evaluates."""
+        return self._world_cache().world(obj)
 
     def deform_points(self, obj, coordinates, time_s, *, world=False, high_precision=False):
         """Map immutable rest points through the same saved blade motion as replay."""
@@ -535,7 +663,7 @@ class FarmFlex:
             result = lo*(1-alpha)+hi*alpha+offset
         if world:
             return result
-        inverse = np.array(obj.matrix_world.inverted())
+        inverse = np.array(self.world_matrix(obj).inverted())
         return result@inverse[:3,:3].T+inverse[:3,3]
 
     def mesh_turbines(self):
@@ -569,7 +697,7 @@ class FarmFlex:
             z = points@hi[:,:3].T+hi[:,3]
             return (a*(1-w)+z*w).astype(world.dtype)
         deformed = self._interpolate_blade(row, endpoint(i), endpoint(i+1), i, alpha, pose, nacelle)
-        inverse = np.array(obj.matrix_world.inverted())
+        inverse = np.array(self.world_matrix(obj).inverted())
         return (deformed@inverse[:3,:3].T+inverse[:3,3]).astype(np.float32)[0]
 
     def structural_tip_world(self, blade, i, alpha):
@@ -583,7 +711,7 @@ class FarmFlex:
             nacelle = interpolate_transform(self.tower_motion['nacelle'][i], self.tower_motion['nacelle'][i+1], alpha)
         local = self._structural_tip_local(row, i, alpha, pose, nacelle)
         performance.count('flex.measurement_points', 1)
-        return row[0].matrix_world @ Vector(local)
+        return self.world_matrix(row[0]) @ Vector(local)
 
     @performance.timed("flex.deformation_cache")
     def deformed_at(self,frame):
@@ -615,6 +743,7 @@ class FarmFlex:
     def update(self,scene, *, sim_time_s=None, record_telemetry=True, update_comparison=True):
         from . import clearance_replay
         if scene!=self.scene or not self.enabled:return
+        self._world_matrices = None
         reader=clearance_replay.reader_for(scene)
         if reader not in self.readers.values():
             for obj,rest,*_ in self.blades:
@@ -685,13 +814,11 @@ class FarmFlex:
                 tr=interpolate_transform(tower[k,j],tower[k,j+1],f)
                 obj.location=tr[:,:3]@rest_location+tr[:,3]
                 obj.rotation_euler=Matrix(tr[:,:3].tolist()).to_euler()
-        phase_started = performance.begin()
-        _update_scene_transforms(scene)
-        performance.end("flex.depsgraph_update", phase_started)
+        self._world_cache()
         for row,lo,hi in zip(self.blades,lower,upper):
             if lo is None:continue
             obj = row[0]
-            inverse = np.array(obj.matrix_world.inverted())
+            inverse = np.array(self.world_matrix(obj).inverted())
             phase_started = performance.begin()
             deformed = self._interpolate_blade(row, lo, hi, i, alpha, pose,
                                                nacelle if self.tower_motion is not None else None)
@@ -770,6 +897,7 @@ def detach(scene=None, *, restore=True):
         if restore:
             active.restore_support()
         active.cache.clear()
+        active._world_matrices = None
     if _ACTIVE in actives:
         _ACTIVE = next(iter(_ACTIVES.values()), None)
     if not _ACTIVES:
@@ -783,6 +911,7 @@ def on_load_pre(_unused):
     # Detach removes this handler; clear trails here before handler-list mutation
     # can skip the following load_pre callback.
     from . import tip_tracking
+    clear_package_cache()
     tip_tracking.on_load_pre(_unused)
     detach(restore=False)
 

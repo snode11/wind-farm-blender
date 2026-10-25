@@ -16,11 +16,13 @@ class History:
         self.entries = deque(maxlen=limit)
         self.identity = None
         self.notice = ''
+        self._watchdog_signature = None
 
     def clear(self, reason=''):
         self.entries.clear()
         self.identity = None
         self.notice = reason
+        self._watchdog_signature = None
 
     def check(self, identity, current):
         if self.entries and identity != self.identity:
@@ -73,6 +75,44 @@ def status(scene):
     except (ValueError, RuntimeError, ReferenceError, KeyError):
         HISTORY.clear('模型或场景失效，相机撤销历史已清理')
     return ('撤销：' + HISTORY.entries[-1].description) if HISTORY.entries else HISTORY.notice or '暂无可撤销的相机修改'
+
+
+def watchdog_status(scene):
+    from . import custom_camera_preview as preview
+    from . import custom_cameras as core
+    from . import stacked_camera_rig as rig
+    from .panels.custom_cameras import session_identity
+    if not HISTORY.entries:
+        return
+    try:
+        cameras = []
+        for slot in core.SLOTS:
+            cam = core.get_camera(scene, slot)
+            if cam is None:
+                continue
+            data = cam.data
+            cameras.append((slot, cam.as_pointer(), repr(core.parameters(cam)), repr(core.anchor(cam)),
+                tuple(repr(cam.get(key)) for key in ('custom_schema_version', 'custom_enabled', 'custom_label',
+                    'custom_mount_mode', 'custom_mount_validation', 'custom_research_confirmed',
+                    'custom_nearest_distance', 'custom_mount_warning')),
+                tuple(v for row in cam.matrix_basis for v in row),
+                tuple(v for row in cam.matrix_world for v in row),
+                tuple(v for row in cam.matrix_parent_inverse for v in row),
+                (cam.parent.as_pointer(), cam.parent.name) if cam.parent else None,
+                data.as_pointer(), data.type, data.lens, data.clip_start, data.clip_end,
+                data.sensor_fit, data.sensor_width, data.shift_x, data.shift_y))
+        box = scene.objects.get(rig.PREFIX)
+        box_pose = (box.as_pointer(), tuple(box.location), tuple(box.rotation_euler),
+                    box.get('surface_mount_json'), tuple(v for row in box.matrix_world for v in row)) if box else None
+        # The depsgraph revision also covers evaluated mount geometry and model edits.
+        signature = (session_identity(scene), preview._REVISION, tuple(cameras), box_pose,
+                     id(HISTORY.entries[-1]))
+        if signature != HISTORY._watchdog_signature:
+            status(scene)
+            if HISTORY.entries:
+                HISTORY._watchdog_signature = signature
+    except (ValueError, RuntimeError, ReferenceError, KeyError):
+        HISTORY.clear('模型或场景失效，相机撤销历史已清理')
 
 
 def undo(scene):

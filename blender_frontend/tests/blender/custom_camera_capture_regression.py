@@ -121,6 +121,7 @@ checks['common_parent_motion_accepted'] = True
 job = capture.Capture.__new__(capture.Capture)
 job.scene, job.window = scene, SimpleNamespace(screen=SimpleNamespace(is_animation_playing=False))
 job.expected_frame = (scene.frame_current, scene.frame_subframe)
+job.playback_generation = capture.playback.generation()
 job.layout_hash, job.live_layout_hash, job.profile = layout_hash, native_hash, preview.render_profile(scene)
 job.same_session = lambda: True
 job.guard()

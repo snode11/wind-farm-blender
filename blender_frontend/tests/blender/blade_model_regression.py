@@ -131,7 +131,7 @@ baseline_topology = mesh_topology(baseline)
 for turbine in ('T1', 'T2', 'T3'):
     camera = cameras.ensure_gimbal(scene, turbine)
     cameras.down_gimbal(camera)
-    assert [camera[key] for key in ('gimbal_yaw', 'gimbal_pitch', 'gimbal_roll', 'gimbal_fov')] == [180, -90, 180, 110]
+    assert [camera[key] for key in ('gimbal_yaw', 'gimbal_pitch', 'gimbal_roll', 'gimbal_fov')] == [181.2, -82.5, 175.9, cameras.DOWN_HFOV_DEG]
     cameras.ensure_nacelle_gimbal(scene, turbine)
 
 assert bpy.ops.wfrl.farm_flex_view(turbine='T2', angle='DOWN') == {'FINISHED'}

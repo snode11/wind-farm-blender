@@ -1014,8 +1014,9 @@ def lifecycle_watchdog():
             valid = False
         if not valid:
             _ACTIVE.finish(restore=False,resume=False)
-    if not box_panel._ACTIVE and history.HISTORY.entries and getattr(bpy.context, 'scene', None) is not None:
-        history.status(bpy.context.scene)
+    if (not box_panel._ACTIVE and history.HISTORY.entries and getattr(bpy.context, 'scene', None) is not None
+            and not playback.any_playing()):
+        history.watchdog_status(bpy.context.scene)
     return .25
 
 

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from .cameras import build_cameras
-from .scene_builder import build_scene
+from .scene_builder import build_scene, validate_scene_build
 from .scene_model import SceneDTO
 from .workspace import ensure_workspace
 from . import atmosphere, cameras, wake
@@ -137,6 +137,7 @@ def _set_blade_model(scene, index):
 def _update_blade_model(scene, context=None):
     """Re-loft recorded motion while preserving the observation state."""
     from . import farm_flex, clearance_replay
+    from .blade_root_display import RootFittingBindings
     chosen = scene.wfrl_blade_model
     active = farm_flex.active_for(scene)
     if active is None or active.model == chosen:
@@ -151,13 +152,16 @@ def _update_blade_model(scene, context=None):
     try:
         path = farm_flex.saved_package(scene)
         package = farm_flex._load_package(path)
+        fittings = RootFittingBindings(scene, chosen)
     except Exception as exc:
         scene['wfrl_blade_model'] = previous_model
         scene['wfrl_blade_model_error'] = '叶片外形切换失败：' + str(exc)
         return
     try:
+        fittings.apply()
         replacement = farm_flex.attach(scene, path, _package=package)
     except Exception as exc:
+        fittings.rollback()
         scene['wfrl_blade_model'] = previous_model
         scene['wfrl_blade_model_error'] = '叶片外形切换失败：' + str(exc)
         try:
@@ -175,17 +179,27 @@ def _update_blade_model(scene, context=None):
     (render.fps, render.fps_base, scene.frame_start, scene.frame_end,
      scene.sync_mode, scene.use_preview_range) = clock
     scene.frame_set(frame, subframe=subframe)
+    fittings.commit()
 
 
 def _on_load(_unused):
     import bpy
+    from .manual_scene_links import restore
+    restore()
     from .scene_builder import refresh_saved_surface_style
     from . import runtime, repair_marks
+    from .blade_root_display import refresh as refresh_root_fittings
     for scene in bpy.data.scenes:
         if scene.objects:
             refresh_saved_surface_style(scene)
+            if scene.get('wfrl_scene_kind') in {'clearance_replay', 'demo'}:
+                try:
+                    refresh_root_fittings(scene, scene.get('wfrl_blade_model', DEFAULT_MODEL))
+                except (ValueError, RuntimeError, ReferenceError) as exc:
+                    scene['wfrl_blade_model_error'] = str(exc)
             repair_marks.ensure_on_load(scene)
-    if any(scene.get('wfrl_scene_kind') == 'live' for scene in bpy.data.scenes):
+    if (runtime.has_backend_session()
+            or any(scene.get('wfrl_scene_kind') == 'live' for scene in bpy.data.scenes)):
         runtime.disconnect(force=True)
     else:
         runtime.enter_local_demo()
@@ -288,6 +302,8 @@ def register():
     clearance.register_properties()
     clearance_replay.register()
     charts.register()
+    from .operators.history_export import register_timer as history_export_register
+    history_export_register()
     runtime.register()
     from . import blade_recon_review
     blade_recon_review.register()
@@ -298,8 +314,9 @@ def register():
     defect_editor.register_properties()
     from . import frontend_diagnostics
     frontend_diagnostics.register()
-    from . import manual_control
+    from . import manual_control, manual_down
     manual_control.register()
+    manual_down.register()
     registered_classes = _classes()
     registered_handlers = ((bpy.app.handlers.load_post, _on_load),)
     registered_properties = tuple(definitions)
@@ -318,7 +335,9 @@ def register():
     diagnostics_cleanup = frontend_diagnostics.unregister
     playback_cleanup = playback.unregister
     manual_cleanup = manual_control.unregister
+    manual_down_cleanup = manual_down.unregister
     def cleanup():
+        manual_down_cleanup()
         manual_cleanup()
         diagnostics_cleanup()
         defect_editor.unregister_properties()
@@ -397,6 +416,8 @@ def build_demo_geometry():
     scene = bpy.context.scene
     scene['wfrl_scene_kind'] = 'clearance_replay'
     scene['wfrl_run_status'] = 'READY'
+    from .blade_root_display import refresh as refresh_root_fittings
+    refresh_root_fittings(scene, scene.get('wfrl_blade_model', DEFAULT_MODEL))
     atmosphere.apply_preset(scene, 'clear', enabled=True, quality='realtime')
     scene.wfrl_show_wake = False
     _update_layers(scene)
@@ -412,6 +433,7 @@ def load_demo_scene(path=None, *, camera_rig=True):
     from . import runtime, farm_flex
     if not runtime.configuration_editable():
         raise ValueError('Stop the active backend before loading MAPPO')
+    validate_scene_build()
     _cancel_playback(bpy.context.scene)
     runtime.enter_result_replay()
     collection = build_demo_geometry()

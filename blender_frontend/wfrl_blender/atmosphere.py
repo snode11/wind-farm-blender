@@ -163,6 +163,7 @@ def build_sky_features(collection, *, center=(500.0, 30.0, 68.0), camera_locatio
         shadow_shader.inputs["Roughness"].default_value = 0.96
         shadow_shader.inputs["Emission Color"].default_value = (0.05, 0.08, 0.12, 1.0)
         shadow_shader.inputs["Emission Strength"].default_value = 0.05
+    from .scene_builder import _primitive_mesh
     for cloud_index, (u, v, width, height, depth) in enumerate(cloud_layout, start=1):
         cloud_center = screen_point(u, v, depth)
         for puff_index, (dx, dy, dz, sx, sy, sz) in enumerate((
@@ -171,18 +172,15 @@ def build_sky_features(collection, *, center=(500.0, 30.0, 68.0), camera_locatio
             (0.18, 0.10, 0.10, 0.85, 0.58, 0.52),
             (0.50, -0.02, -0.02, 0.58, 0.38, 0.40),
         )):
-            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3, radius=1.0,
-                                                   location=(cloud_center.x + dx * width,
-                                                             cloud_center.y + dy * width,
-                                                             cloud_center.z + dz * height))
-            puff = bpy.context.object
-            puff.name = f"WFRL.Atmosphere.Cloud{cloud_index:02d}.{puff_index:02d}"
+            data = _primitive_mesh("Icosphere", "ico_sphere", subdivisions=3, radius=1.0)
+            puff = bpy.data.objects.new(f"WFRL.Atmosphere.Cloud{cloud_index:02d}.{puff_index:02d}", data)
+            puff.location = (cloud_center.x + dx * width,
+                             cloud_center.y + dy * width,
+                             cloud_center.z + dz * height)
             puff.scale = (width * sx, width * sy, height * sz)
             puff.data.materials.append(shadow_material if puff_index in {0, 3} else sky_material)
             puff["fidelity"] = "SYNTH"
             puff["provenance"] = "Presentation cloud bank; not weather simulation"
-            for old in list(puff.users_collection):
-                old.objects.unlink(puff)
             collection.objects.link(puff)
 
     return tuple(obj.name for obj in collection.objects if obj.name.startswith("WFRL.Atmosphere."))
