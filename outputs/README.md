@@ -14,7 +14,7 @@
 | 机舱相机 | `nrel-nacelle-camera/`（本地证据目录，使用入口见[机舱相机](../docs/blender/NREL机舱相机.md)）：相机取景、原始渲染、诊断、对照页面与隔离安装包 |
 | GW184 试片 | `gw184-single/review/index.html`（本地查看页，来源及使用见[项目说明](../projects/gw184-single/README.md)）：试片、参数、参考帧与几何检查；下载入口使用 `delivery/GW184-trials.zip` |
 | 前端验证 | [`frontend-reliability-20261011-a01/`](frontend-reliability-20261011-a01/)、`reconstruction-*`、`blender-validation/`、`release-*` 等：按包身份解释的软件检查、截图和日志 |
-| 当前本地扩展 | [`frontend-stability-fixes/validation/package/`](frontend-stability-fixes/validation/package/)：0.3.28 ZIP、逐文件清单及摘要；[安装版回归](frontend-stability-fixes/installed-regressions.json)与[日常安装身份](../publication/daily-installation.json)分别标识验证载荷和实际模块 |
+| 当前本地扩展 | [0.3.36 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.36/wfrl_blender-0.3.36.zip)、[逐文件清单](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.36/wfrl_blender-0.3.36.inventory.json)及[摘要](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.36/wfrl_blender-0.3.36.zip.sha256)；[安装核对](../publication/daily-installation.json)与[运行验证](../publication/daily-installation-runtime.json)标识实际模块和验证范围 |
 
 目录名中的编号和日期属于现有资源定位符，不代表当前软件开发顺序。根目录的部分别名是符号链接，不是另一份数据。
 
@@ -25,6 +25,8 @@
 - 截图、日志和软件验证 JSON 按其记录的输入、包身份及平台解释；一次运行的结果不能替代另一包或另一运行的验证。
 - 内容相同的原始文件可能服务于独立数据包。单个文件的摘要相同不意味着其路径、包清单和来源关系可以删除。
 - Python `__pycache__` 可重新生成。安装包的解压副本只有在逐文件匹配保留 ZIP、且没有当前入口依赖时才可移除。
+- 独立演示场景、采集清单及其配套图像、视频母版按完整资源保留。配置备份、临时会话快照和未被有效入口引用的中间预览须排除运行依赖后才可清理；用途不明的文件保留。
+- 验证记录中的历史工作路径用于标识运行来源，不保证临时副本仍可作为入口使用。当前操作入口以[前端使用说明](../前端readme.md)和[前端实现说明](../blender_frontend/README.md)为准。
 
 ## 机舱相机安装资源
 
