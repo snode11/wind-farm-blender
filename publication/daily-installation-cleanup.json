@@ -1,0 +1,24 @@
+{
+  "schema": "wfrl.recoverable-cleanup.v1",
+  "status": "PASS",
+  "trash_root": "/path/to/user/.Trash/WFRL-install-cleanup-fe8e6c16c0",
+  "items_moved": 25,
+  "files_moved": 3550,
+  "bytes_moved": 748554233,
+  "inventory": "/path/to/user/.Trash/WFRL-install-cleanup-fe8e6c16c0/cleanup-inventory.json",
+  "restore_tool": "/path/to/user/.Trash/WFRL-install-cleanup-fe8e6c16c0/restore.py",
+  "protected_workspace_files_checked": 2335,
+  "protected_profile_files_checked": 6,
+  "git_head_preserved": true,
+  "git_index_preserved": true,
+  "permanent_deletion": false,
+  "preserved_installation": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "preserved_package": "publication/blender-0.3.37/package/wfrl_blender-0.3.37.zip",
+  "rollback_backup": "/path/to/user/.Trash/WFRL-install-cleanup-fe8e6c16c0/rollback",
+  "restoration_check": {
+    "status": "PASS",
+    "mode": "dry-run",
+    "item": 3,
+    "overwrite_protection": true
+  }
+}

@@ -11,15 +11,15 @@
 
 项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)，包含当前前端、后端、重建研究、测试和配套文档。NREL 的 [v0.3.37 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.37) 提供专用扩展 ZIP；安装使用 `wfrl_blender-0.3.37.zip`，发布源码使用 `v0.3.37` 标签。源码提交、构建 ZIP 与本机安装分别识别，GitHub 自动 Source code 用于源码查看与构建。
 
-开发机日常扩展 `bl_ext.user_default.wfrl_blender` 使用 **本地 0.3.37 安装包**，191 个文件与本地归档 `dist/wfrl_blender-0.3.37.zip` 一致。[安装核对](publication/daily-installation.json)记录日常新窗口的 89 个模块来源、启用与操作器注册、6 个配置文件保护，以及独立安装版的窗口录制中断、播放归属、视口隔离和短 PNG 后台渲染检查。公开载荷身份见[交付身份](publication/blender-0.3.37.json)。项目启动器、重建求解器和构建工具使用项目源码。
+开发机日常扩展 `bl_ext.user_default.wfrl_blender` 使用公开 **0.3.37 安装包**，193 个文件与[发布载荷](publication/blender-0.3.37.json)一致。[安装核对](publication/daily-installation.json)记录重启窗口的 91 个模块来源、持久启用、WFRL 主入口注册及 6 个配置文件保护。项目启动器、重建求解器和构建工具使用项目源码。
 
-公开 0.3.37 为当前源码构建的 **193 文件**载荷，包含 WFRL 主入口、录制与后台 PNG 渲染。开发机日常同版本安装为 **191 文件**载荷；两者 SHA-256 和验证范围分别以交付身份与安装核对为准。
+公开 0.3.37 与开发机日常安装共用 **193 文件**载荷，包含 WFRL 主入口、录制与后台 PNG 渲染。文件摘要和安装来源分别见交付身份与安装核对，验证结论按实际检查范围使用。
 
 | 对象 | manifest | 身份 |
 | --- | --- | --- |
 | 当前本地工作区 | `0.3.37` | WFRL 统一工作台、明确的就绪／占用／错误状态、手动保护暂停反馈、相机编辑预览与按需重绘、同刻几何复用和有界曲线缓存；包含窗口录制、后台 PNG、手动 Down、冻结试验和柔性回放。日常安装以其独立载荷记录为准 |
 | 公开 NREL ZIP | `0.3.37` | 193 文件、99,147,096 字节；SHA-256、源码身份及验证范围见[交付身份](publication/blender-0.3.37.json)与[发布状态](docs/blender/发布状态与验证范围.md) |
-| 当前开发机日常安装对应 ZIP | `0.3.37` | 本地归档 `dist/wfrl_blender-0.3.37.zip`，191 文件；摘要与实际来源见[安装身份](publication/daily-installation.json)；与公开 193 文件载荷分别识别 |
+| 当前开发机日常安装对应 ZIP | `0.3.37` | 公开 193 文件载荷；[安装身份](publication/daily-installation.json)记录日常新进程来源、启用、主入口注册与配置保护 |
 
 身份、[发布核对](docs/blender/发布状态与验证范围.md#软件验证的适用对象)与[当前安装核对](publication/daily-installation.json)的适用范围见[发布状态与验证范围](docs/blender/发布状态与验证范围.md)。同一版本号不证明内容相同；升级后完全重启 Blender。
 
@@ -67,7 +67,7 @@ GW184 使用[独立包操作说明](docs/blender/GW184三相机与缺陷编辑�
 
 源码检查的命令、依赖、跳过条件与记录范围见[分发说明](docs/PUBLICATION.md#证据身份与限制)及其对应源码快照；各项结果只适用于记录的源码与输入，不作为当前公开 ZIP 或日常安装的重复验收。
 
-公开 0.3.37 ZIP 的文件、源码标签、下载地址与发布状态见[交付身份](publication/blender-0.3.37.json)，ZIP 逐文件校验、隔离安装、新进程来源与三相机默认配置／投影后台检查通过；可见窗口复验为 NOT_RUN。[本地 0.3.37 安装记录](publication/daily-installation.json)区分独立安装版功能检查与日常新进程身份检查，覆盖 191 文件、89 个加载模块及 6 个配置文件保护；短片检查包括三帧普通场景、三个 MAPPO 保存时刻、取消、输出设置与源状态保持。完整视频、稳定 FPS、长期运行、其他平台、真实后端训练和科学精度没有验收结论。
+公开 0.3.37 ZIP 的文件、源码标签和下载地址见[交付身份](publication/blender-0.3.37.json)；ZIP 逐文件核对、隔离安装、新进程来源与两项相机后台检查通过。[日常安装记录](publication/daily-installation.json)核对同一载荷的 193 文件、91 个新窗口模块、WFRL 主入口注册及 6 个配置文件保护。完整行为、完整视频、稳定 FPS、长期运行、其他平台、真实后端训练和科学精度没有由该日常身份检查产生的验收结论。
 
 同源纹理是 **SAME_SOURCE_SIMULATION**：601 个 10 Hz 保存样本对应 117–177 s，60 Hz 时间轴每 6 帧保持一个样本；独立 `synth_tex` 是另一来源的 120 样本、0–11.9 s。放大与增强不会补出未观测表面。两者的几何／纹理仍为 **NOT_ACCEPTED**，图集模糊、条带、接缝和叶尖错贴限制保留。
 

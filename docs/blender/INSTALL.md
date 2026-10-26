@@ -2,7 +2,7 @@
 
 适用于 Blender **5.2+** 的 NREL 公开扩展 **0.3.37**，包含 NREL／rootkink 叶片外形选择、T1/T2/T3 Down、独立风机手动控制、完整风机几何／同源纹理、精细支撑结构、三相机默认复位、柔性回放、六类合成缺陷、双束／TLS。GW184 **0.4.0** 使用[独立包](GW184三相机与缺陷编辑器.md)。
 
-开发机日常安装为 **本地 0.3.37**，实际模块 `bl_ext.user_default.wfrl_blender`，191 个文件匹配本地归档 `dist/wfrl_blender-0.3.37.zip`。独立安装版的窗口录制／播放／视口和短 PNG 后台渲染检查，以及日常新窗口来源、启用、操作器注册和 6 个配置文件保护见[安装核对](../../publication/daily-installation.json)。日常安装的 191 文件载荷与公开 193 文件载荷分别识别；公开载荷身份见[交付身份](../../publication/blender-0.3.37.json)。
+开发机日常安装为公开 **0.3.37** 的同一 193 文件载荷，实际模块 `bl_ext.user_default.wfrl_blender`。重启窗口的 91 个模块来源、启用、WFRL 主入口注册与 6 个配置文件保护见[安装核对](../../publication/daily-installation.json)。隔离安装及两项相机后台检查见[包验证](../../publication/blender-0.3.37/package-validation.json)；公开载荷见[交付身份](../../publication/blender-0.3.37.json)。
 
 ## 发布身份与验证
 

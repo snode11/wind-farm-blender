@@ -2,7 +2,7 @@
 
 本页面向 **Blender 5.2+** 的 NREL 前端操作。公开安装版为 **0.3.37**（Release 标签 `v0.3.37`），安装使用专用 ZIP；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。GW184 **0.4.0** 是独立运行包，模型、配置和入口与 NREL 分开。
 
-开发机日常安装使用 **本地 0.3.37 安装包**，实际模块为 `bl_ext.user_default.wfrl_blender`；191 个安装文件与本地 ZIP 一致，89 个新窗口加载模块及 6 个配置文件保护结果见[安装核对](publication/daily-installation.json)。独立安装版功能与日常新进程身份分别记录；公开载荷身份见[交付身份](publication/blender-0.3.37.json)和[发布状态](docs/blender/发布状态与验证范围.md)。源码同步与发布不会自动更新日常安装。
+开发机日常安装使用公开 **0.3.37 安装包**，实际模块为 `bl_ext.user_default.wfrl_blender`；193 个安装文件、91 个重启窗口模块来源、启用、WFRL 主入口注册及 6 个配置文件保护见[安装核对](publication/daily-installation.json)。公开载荷身份与检查范围见[交付身份](publication/blender-0.3.37.json)和[发布状态](docs/blender/发布状态与验证范围.md)。源码同步不会自动替换运行中的扩展。
 
 公开用户从 [NREL 0.3.37 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.37) 下载 [wfrl_blender-0.3.37.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.37/wfrl_blender-0.3.37.zip)，使用 Install from Disk 手动安装并重启。GitHub 自动 Source code 用于源码查看与构建，不作为扩展安装包。[GW184 指南](docs/blender/GW184三相机与缺陷编辑器.md) · [安装说明](docs/blender/INSTALL.md) · [实现与维护](blender_frontend/README.md) · [当前待实施要求](前端更新计划.md)。
 
@@ -252,7 +252,7 @@ T1/T2/T3 Down 和 C1/C2/C3 观察都使用 Blender 相机视图。三相机的�
 
 公开 0.3.37 ZIP 的附件与源码标签见[交付身份](publication/blender-0.3.37.json)。ZIP 逐文件校验、隔离安装、新进程来源与三相机默认配置／投影后台检查通过；可见窗口复验为 NOT_RUN；本地安装的模块来源、后台功能和窗口加载证据见[安装核对](publication/daily-installation.json)，各项结论仅属于记录的输入、载荷与环境。相机默认复位、完整片段、性能与科学精度按[发布状态](docs/blender/发布状态与验证范围.md#软件验证的适用对象)分别判定。
 
-当前日常 **0.3.37 安装包** 的[安装检查](publication/daily-installation.json)核对 191 个文件、新窗口加载与注册及 6 个配置文件保护；独立安装版检查窗口录制中断、播放归属、视口隔离和短 PNG 后台渲染。普通旋转遇到受控轴原生改动、约束、动作或驱动时拒绝启动或暂停，保留用户改动。[功能检查](outputs/manual-camera-checks-dc5mz864/summary.json)分别记录其源码的完整单路／三路片段、45 项播放恢复检查、20 轮相机开关和 GPU 采集；这些证据不替代当前安装包的完整视频、稳定 FPS、长期运行或科学精度验收。
+当前日常 **0.3.37 安装包** 的[安装检查](publication/daily-installation.json)核对 193 个文件、91 个新窗口模块、主入口注册及 6 个配置文件保护。普通旋转遇到受控轴原生改动、约束、动作或驱动时拒绝启动或暂停，保留用户改动。[功能检查](outputs/manual-camera-checks-dc5mz864/summary.json)分别记录其源码的完整单路／三路片段、45 项播放恢复检查、20 轮相机开关和 GPU 采集；这些证据不替代当前安装包的完整视频、稳定 FPS、长期运行或科学精度验收。
 
 完整完成、超时、中止和错误须分别判断。POST_PIXEL 是视口绘制回调，60 Hz 是时间映射；稳定 30／60 FPS、完整片段性能、长期运行和 Windows/Linux 尚未验收。原因未定的停止异常、控制台原生 SIGSEGV 与退出内存诊断仍构成验证限制。
 

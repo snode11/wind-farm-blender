@@ -9,10 +9,10 @@
 | 公开安装包 | [NREL 0.3.37](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.37)；193 文件、99,147,096 字节；WFRL 主入口、录制安全收尾、视口隔离、可取消后台 PNG 渲染、叶片外形选择、T1/T2/T3 Down 及独立风机手动控制、姿态预设、相对微调、三机概览、姿态 JSON、完整风机几何／同源纹理切换、三机柔性回放、默认三相机复位、六类合成缺陷，以及相机清理、稳定刷新、采集与播放保护。 |
 | 本地工作区 | **0.3.37**；WFRL 主入口、场景／占用／后端状态、手动保护反馈、相机编辑预览与按需重绘、同刻几何及曲线缓存；包含录制安全收尾、视口隔离、后台 PNG、叶根装配、固定显示精度和环境几何预算。公开附件与日常安装分别核对。 |
 | 项目源码 | [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)；包含当前实现、测试与研究工具。发布源码使用 `v0.3.37` 标签；当前分支与公开 ZIP、日常安装载荷分别识别。 |
-| 本地日常安装 | `bl_ext.user_default.wfrl_blender`，本地 0.3.37 安装包、191 文件，与本地 ZIP 一致；[安装核对](../publication/daily-installation.json)区分独立安装版功能检查与日常新进程来源、启用及配置保护。 |
+| 本地日常安装 | `bl_ext.user_default.wfrl_blender`，公开 0.3.37 的 193 文件载荷；[安装核对](../publication/daily-installation.json)记录 91 个重启窗口模块、持久启用、WFRL 主入口注册与 6 个配置文件保护。 |
 | GW184 | [0.4.0 独立运行包](../docs/blender/GW184三相机与缺陷编辑器.md)；184 m 尺寸合成刚性模型、固定三相机和六类缺陷。模型与配置不能直接替代 NREL。 |
 
-日常安装使用本地归档 `dist/wfrl_blender-0.3.37.zip`，摘要见[安装身份](../publication/daily-installation.json)。当前核对覆盖 191 个文件、89 个新窗口加载模块、持久启用与 6 个配置文件保护。独立安装版检查三相机默认配置和投影、真实窗口录制中断、播放标签、视口隔离，以及短普通场景／MAPPO PNG 后台渲染、取消、24 fps、指定分辨率／曝光和源状态保持。源码的完整片段、20 轮相机开关及 GPU 采集证据见[功能检查](../outputs/manual-camera-checks-dc5mz864/summary.json)，各项来源与范围独立，不代表当前安装包的完整视频、稳定 FPS 或科学精度验收。
+日常安装使用公开 0.3.37 ZIP，193 个文件与交付 inventory 一致；[安装身份](../publication/daily-installation.json)核对 91 个重启窗口模块、启用和主入口注册，并保护 6 个配置文件。公开 ZIP 的隔离安装与相机后台检查见[包验证](../publication/blender-0.3.37/package-validation.json)。源码的完整片段、20 轮相机开关及 GPU 采集证据见[功能检查](../outputs/manual-camera-checks-dc5mz864/summary.json)，各项来源与范围独立，不代表当前安装包的完整视频、稳定 FPS 或科学精度验收。
 
 公开包 SHA-256 和匹配验证见[发布状态](../docs/blender/发布状态与验证范围.md)。工作区源码、构建 ZIP、已安装扩展与公开附件分别核对，不能依据版本号推定文件相同。日常启动器加载安装版；发布不会自动升级日常安装，更新安装后需要完全重启 Blender。
 

@@ -35,10 +35,10 @@
   },
   "daily_installation": {
     "version": "0.3.37",
-    "file_count": 191,
-    "archive_sha256": "eee74b83d16165de480ab3957abd8ad8ab800bf1af58cfbf87d136ac0ea831d8",
+    "file_count": 193,
+    "archive_sha256": "ca58d4aa494db5115b5cbb41db20c4de4024e1331e4f830e749311d9a0dbbda8",
     "saved_identity": "publication/daily-installation.json",
-    "same_as_public_archive": false
+    "same_as_public_archive": true
   },
   "remote_asset_download_verification": false,
   "delivery_manifest_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.37/wfrl-delivery-0.3.37.json"
