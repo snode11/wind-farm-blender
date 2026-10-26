@@ -5226,9 +5226,9 @@
     },
     {
       "path": "outputs/README.md",
-      "bytes": 4670,
-      "sha256": "8f23790dc1308f73a53143cf9d42eb5f77b4d018a9a5b0bf38c49af1ad3b617a",
-      "original_sha256": "8f23790dc1308f73a53143cf9d42eb5f77b4d018a9a5b0bf38c49af1ad3b617a",
+      "bytes": 4927,
+      "sha256": "0b033285b885d9f831d596730ee158d921b65fb8d4e3784e0d2a7e3e6986054a",
+      "original_sha256": "0b033285b885d9f831d596730ee158d921b65fb8d4e3784e0d2a7e3e6986054a",
       "text_portable": false
     },
     {
@@ -8648,20 +8648,6 @@
       "text_portable": false
     },
     {
-      "path": "outputs/down-reference-view/backup/blender_manifest.toml",
-      "bytes": 439,
-      "sha256": "a4bcf432d8a1cb6f352ace860adc183d82114150fdceb18e171431ff3cfe4f9b",
-      "original_sha256": "a4bcf432d8a1cb6f352ace860adc183d82114150fdceb18e171431ff3cfe4f9b",
-      "text_portable": false
-    },
-    {
-      "path": "outputs/down-reference-view/backup/cameras.py",
-      "bytes": 34654,
-      "sha256": "651bd9a20d1fb0fd709b64f1b19b0c08ab1bc10cc8ef80e0daf4eb69a4441a4b",
-      "original_sha256": "651bd9a20d1fb0fd709b64f1b19b0c08ab1bc10cc8ef80e0daf4eb69a4441a4b",
-      "text_portable": false
-    },
-    {
       "path": "outputs/down-reference-view/camera-mount.png",
       "bytes": 2066875,
       "sha256": "82cda0ca73e8303282076bbc18774cf5c9ac082743a43b9f01971d1f4959c103",
@@ -11532,83 +11518,6 @@
       "text_portable": true
     },
     {
-      "path": "outputs/rootkink-installation/backup/config/bookmarks.txt",
-      "bytes": 519,
-      "sha256": "707ceb3390b06afc40adc7bc63b776c22ff044f87bd4f185bcc36e2d26480422",
-      "original_sha256": "f60b6fd5ba93eac273992b675f1899c1e940545c294452919306043a8353634f",
-      "text_portable": true
-    },
-    {
-      "path": "outputs/rootkink-installation/backup/config/platform_support.txt",
-      "bytes": 39,
-      "sha256": "4dbce3526384ef82878d01e1d704b953f67248b1f3354282fc9ae6285b750426",
-      "original_sha256": "4dbce3526384ef82878d01e1d704b953f67248b1f3354282fc9ae6285b750426",
-      "text_portable": false
-    },
-    {
-      "path": "outputs/rootkink-installation/backup/config/recent-files.txt",
-      "bytes": 2518,
-      "sha256": "5d65508ef565a603c443df42f6fabc9947dee90517a6e27ae8732df6ae8c60c3",
-      "original_sha256": "b704af80a986d4fe3d6e348a7051019a6f96d8bfdf63e19f32e5fc5238c3cabb",
-      "text_portable": true
-    },
-    {
-      "path": "outputs/rootkink-installation/backup/config/recent-searches.txt",
-      "bytes": 93,
-      "sha256": "f57d26a947e656261b1cdd0d41c3782993828f18bc8d3c4063f6b1e4ed0d2057",
-      "original_sha256": "f57d26a947e656261b1cdd0d41c3782993828f18bc8d3c4063f6b1e4ed0d2057",
-      "text_portable": false
-    },
-    {
-      "path": "outputs/rootkink-installation/backup/pre-merge-source/baseline-sha256.json",
-      "bytes": 64282,
-      "sha256": "9a0badeb2fc9d1ae8106659b522137ffb1efebcc49e23e310dd48c896443dbca",
-      "original_sha256": "9a0badeb2fc9d1ae8106659b522137ffb1efebcc49e23e310dd48c896443dbca",
-      "text_portable": false
-    },
-    {
-      "path": "outputs/rootkink-installation/backup/pre-merge-source/blender_frontend/wfrl_blender/__init__.py",
-      "bytes": 17393,
-      "sha256": "2005190d437865f6984a56b4230a2d4ab8b0262754ef462d1071e3e649c4a826",
-      "original_sha256": "2005190d437865f6984a56b4230a2d4ab8b0262754ef462d1071e3e649c4a826",
-      "text_portable": false
-    },
-    {
-      "path": "outputs/rootkink-installation/backup/pre-merge-source/blender_frontend/wfrl_blender/farm_flex.py",
-      "bytes": 35754,
-      "sha256": "b9630fb5929f6e239cad4730ed27d277888d8f22f125982c666a096f1e905b6d",
-      "original_sha256": "b9630fb5929f6e239cad4730ed27d277888d8f22f125982c666a096f1e905b6d",
-      "text_portable": false
-    },
-    {
-      "path": "outputs/rootkink-installation/backup/pre-merge-source/blender_frontend/wfrl_blender/panels/farm_replay.py",
-      "bytes": 27244,
-      "sha256": "81e74af6f71dac3e4071c970cf49c477225052317b5601354019b596cd15a216",
-      "original_sha256": "81e74af6f71dac3e4071c970cf49c477225052317b5601354019b596cd15a216",
-      "text_portable": false
-    },
-    {
-      "path": "outputs/rootkink-installation/backup/pre-merge-source/blender_frontend/wfrl_blender/turbine_geometry.py",
-      "bytes": 6617,
-      "sha256": "e6d3779f110134a2132c50862f3e37cb388407c5bd28d2291458edfc7b0251fa",
-      "original_sha256": "e6d3779f110134a2132c50862f3e37cb388407c5bd28d2291458edfc7b0251fa",
-      "text_portable": false
-    },
-    {
-      "path": "outputs/rootkink-installation/backup/pre-merge-source/scripts/blender/export_geometry.py",
-      "bytes": 4268,
-      "sha256": "5855d8aadc774948a4da0dd664e09fe72519afbcc46e9d1b4e8cdd3550be6f70",
-      "original_sha256": "5855d8aadc774948a4da0dd664e09fe72519afbcc46e9d1b4e8cdd3550be6f70",
-      "text_portable": false
-    },
-    {
-      "path": "outputs/rootkink-installation/backup/source-camera-sha256.json",
-      "bytes": 577,
-      "sha256": "aab74d69d344d79863adbf32f0a5e6e3eb70fa750f4d63012fd5a81958efa88a",
-      "original_sha256": "aab74d69d344d79863adbf32f0a5e6e3eb70fa750f4d63012fd5a81958efa88a",
-      "text_portable": false
-    },
-    {
       "path": "outputs/rootkink-installation/existing-farm-down/saved-camera-baseline.json",
       "bytes": 19082,
       "sha256": "1927c1be4db5b241740af9df5c5ee787175c8d0cc055fa1ac1a41f69332eaf28",
@@ -13101,9 +13010,9 @@
     },
     {
       "path": "publication/daily-installation-cleanup.json",
-      "bytes": 982,
-      "sha256": "1199789a96836a97f314f9070e776a4378abc406283aa779c42daf296e24a607",
-      "original_sha256": "03546a2b200a5766ba43d9b59b36d643b0bd26cd4982868ff5b3144872d6abaa",
+      "bytes": 1803,
+      "sha256": "ea413c78021319025bb15c5814b2a5cac1c80a022f5b8b08d219d288624d4ee9",
+      "original_sha256": "2f35feaa69e63e917e88992b932396e959586989451c37e33b290546bd495927",
       "text_portable": true
     },
     {

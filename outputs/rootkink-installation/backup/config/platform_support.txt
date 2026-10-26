@@ -1,1 +1,0 @@
-{Apple M5 Pro/Metal API/1.2}=SUPPORTED

@@ -1,3 +1,0 @@
-删除 ▸ 删除关键帧
-   WFRL.Camera.T1.Closeup
-File ▸ Defaults ▸ Save Startup File
