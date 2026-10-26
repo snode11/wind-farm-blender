@@ -27,6 +27,8 @@ _pending_command = None
 _pending_lifecycle_sequence = None
 _last_tick = None
 _last_async_display_state = None
+_last_display_state = None
+_backend_scene = None
 _tick_failures = set()
 health_results = globals().get('health_results', {})
 wake_buffer = globals().get('wake_buffer', WakeFrameBuffer())
@@ -61,7 +63,7 @@ def configuration_editable(scene=None):
 
 
 def select_mode(mode):
-    global _state, _client, kinematics, _pending_command, _pending_lifecycle_sequence, _desired_mode, _live_scene, latest_wake
+    global _state, _client, kinematics, _pending_command, _pending_lifecycle_sequence, _desired_mode, _live_scene, latest_wake, _backend_scene
     from .state import MODES
     if mode not in MODES or not configuration_editable():
         raise ValueError('Stop the active session before changing mode')
@@ -73,6 +75,7 @@ def select_mode(mode):
     kinematics = KinematicState()
     _desired_mode = mode
     _live_scene = None
+    _backend_scene = None
     wake_buffer.pop_latest()
     latest_wake = None
     _pending_command = None
@@ -135,7 +138,7 @@ def connect(port):
 
 def disconnect(force=False):
     global kinematics, _live_scene, _last_tick, _pending_command, _pending_step
-    global _pending_lifecycle_sequence, latest_wake
+    global _pending_lifecycle_sequence, latest_wake, _backend_scene
     if _client:
         _client.close()
     if force or get_state().connection != 'LOCAL DEMO':
@@ -145,6 +148,7 @@ def disconnect(force=False):
     if force:
         kinematics = KinematicState()
         _live_scene = None
+        _backend_scene = None
         _last_tick = None
         _pending_command = _pending_step = _pending_lifecycle_sequence = None
         wake_buffer.pop_latest()
@@ -152,7 +156,7 @@ def disconnect(force=False):
 
 
 def enter_local_demo():
-    global _client, _state, kinematics, _pending_command, _pending_lifecycle_sequence, _live_scene, _desired_mode, latest_wake
+    global _client, _state, kinematics, _pending_command, _pending_lifecycle_sequence, _live_scene, _desired_mode, latest_wake, _backend_scene
     if _client:
         _client.close()
     _client = None
@@ -162,6 +166,7 @@ def enter_local_demo():
     _pending_command = None
     _pending_lifecycle_sequence = None
     _live_scene = None
+    _backend_scene = None
     wake_buffer.pop_latest()
     latest_wake = None
     safety_events.clear()
@@ -268,9 +273,13 @@ def tick():
         return 0.05
 
 
-def _redraw_viewports():
+def _redraw_viewports(*, scenes=None):
     import bpy
+    targets = tuple(scenes) if scenes is not None else (getattr(bpy.context, 'scene', None),)
     for window in bpy.context.window_manager.windows:
+        scene = getattr(window, 'scene', getattr(bpy.context, 'scene', None))
+        if not any(scene == target for target in targets):
+            continue
         for area in window.screen.areas:
             if area.type == 'VIEW_3D':
                 performance.count("runtime.redraw_requests")
@@ -282,26 +291,59 @@ def _async_display_state(job, context):
     scenes = (getattr(window, 'scene', getattr(context, 'scene', None))
               for window in context.window_manager.windows)
     return (job.status, getattr(job, 'error', None), getattr(job, 'path', None),
-            tuple((scene.get('wfrl_history_export_status'), scene.get('wfrl_capture_status'))
+            tuple((_scene_key(scene), scene.get('wfrl_history_export_status'), scene.get('wfrl_capture_status'))
                   for scene in scenes if scene is not None))
+
+
+def _scene_key(scene):
+    return scene.as_pointer() if hasattr(scene, 'as_pointer') else id(scene)
+
+
+def _display_state():
+    """Observe displayed values and expiry boundaries without continuous redraws."""
+    connected = _state.connection == 'CONNECTED' and _state.confirmed
+    snapshot = kinematics.snapshot
+    validity = []
+    if snapshot:
+        groups = [snapshot.get('farm', {})]
+        groups.extend(t['channels'] for t in snapshot.get('turbines', ()))
+        validity = [kinematics.validity(record, connected)
+                    for channels in groups for record in channels.values()]
+    training = ()
+    if training_stats_negotiated():
+        phase = training_dashboard.phase()
+        training = (training_dashboard.last_sequence, phase['validity'],
+                    int(phase['age']) if phase['age'] is not None else None,
+                    tuple((key, record['validity'], int(record['age']) if 'age' in record else None)
+                          for key in training_dashboard.metrics
+                          for record in (training_dashboard.metric(key),)))
+    return (_state.connection, _state.run_status, _state.confirmed, _state.error,
+            _state.mode, _desired_mode, _pending_command,
+            getattr(_client, 'progress', None), getattr(_client, 'last_error', None),
+            id(snapshot), tuple(validity), tuple(getattr(kinematics, 'rotor_angles', {}).items()),
+            training, len(safety_events))
 
 
 def _tick():
     """Timer work is bounded by transport budgets; health polls only queued results."""
     global _pending_command, _pending_lifecycle_sequence, _last_tick, kinematics, _live_scene, _desired_mode, latest_wake
-    global _last_async_display_state
+    global _last_async_display_state, _last_display_state, _backend_scene
     import bpy
     performance.count("runtime.timer_calls")
     if _client is not None and manual_display_active():
         _last_tick = None
         return 0.05
     now = time.monotonic()
+    display_before = _last_display_state if _last_display_state is not None else _display_state()
+    first_backend_display = (_last_display_state is None
+                             and (_client is not None or kinematics.snapshot is not None))
     dt = 0.0 if _last_tick is None else max(0.0, now - _last_tick)
     _last_tick = now
     if _state.connection != 'LOCAL DEMO':
         kinematics.advance(dt, running=_state.run_status == 'RUNNING',
                            connected=_state.connection == 'CONNECTED' and _state.confirmed)
     latest_snapshot = None
+    messages = []
     if _client:
         messages = _client.poll()
         try:
@@ -325,6 +367,7 @@ def _tick():
                             loaded_scene = SceneDTO.from_mapping(payload['scene'])
                             if _live_scene is None or loaded_scene.geometry_key() != _live_scene.geometry_key():
                                 build_live_scene(loaded_scene)
+                                _backend_scene = getattr(bpy.context, 'scene', None)
                             _live_scene = loaded_scene
                     if 'channel_states' in payload:
                         channel_states.clear(); channel_states.update(payload['channel_states'] or {})
@@ -379,6 +422,7 @@ def _tick():
                 scene = snapshot_scene(payload)
                 if _live_scene is None or scene.geometry_key() != _live_scene.geometry_key():
                     build_live_scene(scene)
+                    _backend_scene = getattr(bpy.context, 'scene', None)
                 _live_scene = scene
                 kinematics.apply_snapshot(latest_snapshot)
                 _state.mode = payload['mode']
@@ -430,32 +474,42 @@ def _tick():
             _state.disconnect(f'Invalid backend data or scene: {exc}')
     if _state.connection != 'LOCAL DEMO':
         connected = _state.connection == 'CONNECTED' and _state.confirmed
-        kinematics.apply_objects(bpy.data.objects, connected=connected)
+        if first_backend_display or display_before != _display_state():
+            kinematics.apply_objects(bpy.data.objects, connected=connected)
         from .live_scene import animate_illustrative_wake
         animate_illustrative_wake(getattr(bpy.context, 'scene', None), dt,
                                  running=connected and _state.run_status == 'RUNNING')
     from . import charts
-    display_before = (_async_display_state(charts.export_job, bpy.context)
+    async_before = (_async_display_state(charts.export_job, bpy.context)
                       if _last_async_display_state is None else _last_async_display_state)
     charts.export_job.poll()
-    display_state = _async_display_state(charts.export_job, bpy.context)
-    display_changed = display_state != display_before
-    _last_async_display_state = display_state
+    async_state = _async_display_state(charts.export_job, bpy.context)
+    _last_async_display_state = async_state
     health_changed = False
     if _health:
         for result in _health.poll():
             health_results[result.component] = result
             health_changed = True
-    # Local animation and manual motion own their redraws. This timer refreshes
-    # async results and playback; backend snapshots retain validity aging.
-    if (_client is None and _state.connection in {'LOCAL DEMO', 'OFFLINE RESULTS'}
-            and not health_changed and not display_changed
-            and kinematics.snapshot is None
-            and not any(getattr(w.screen, 'is_animation_playing', False)
-                        for w in bpy.context.window_manager.windows)):
+    display_state = _display_state()
+    backend_changed = first_backend_display or display_state != display_before or bool(messages)
+    _last_display_state = display_state
+    targets = []
+    current_scene = getattr(bpy.context, 'scene', None)
+    if backend_changed:
+        targets.append(_backend_scene if _backend_scene is not None else current_scene)
+    if health_changed or async_state[:3] != async_before[:3]:
+        targets.append(current_scene)
+    previous_rows = {row[0]: row[1:] for row in async_before[3]}
+    changed_scenes = {row[0] for row in async_state[3]
+                      if row[1:] != previous_rows.get(row[0], row[1:])}
+    for window in bpy.context.window_manager.windows:
+        scene = getattr(window, 'scene', current_scene)
+        if _scene_key(scene) in changed_scenes:
+            targets.append(scene)
+    if not targets:
         performance.count('runtime.unchanged_redraw_skips')
         return 0.05
-    _redraw_viewports()
+    _redraw_viewports(scenes=targets)
     return 0.05
 
 
@@ -464,9 +518,11 @@ def progress():
 
 
 def shutdown():
-    global _client, _health, _last_tick, _last_async_display_state
+    global _client, _health, _last_tick, _last_async_display_state, _last_display_state, _backend_scene
     _last_tick = None
     _last_async_display_state = None
+    _last_display_state = None
+    _backend_scene = None
     import bpy
     if bpy.app.timers.is_registered(tick):
         bpy.app.timers.unregister(tick)

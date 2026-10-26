@@ -54,6 +54,12 @@ class Regression:
 
 
 REGRESSIONS = (
+    Regression('frontend_sessions_window.py', 'FRONTEND_SESSIONS_WINDOW_PASS', 'result.json',
+               mode='visible', package='synthetic',
+               scope='Native window screenshots, recording cleanup and scene ownership; scripted controls.'),
+    Regression('animation_render_regression.py', 'ANIMATION_RENDER_REGRESSION_PASS', 'result.json',
+               timeout_s=240, package='synthetic_then_builtin_mappo',
+               scope='Native short PNG renders, cancellation and source preservation; not full-clip FPS.'),
     Regression('farm_flex_regression.py', 'FARM_FLEX_SWITCH_RANGE_LIFECYCLE_PASS'),
     Regression('farm_flex_workload_regression.py', 'FARM_FLEX_WORKLOAD_REGRESSION_PASS', None),
     Regression('tip_deflection_regression.py', 'TIP_DEFLECTION_PASS', 'checks.json', 'file',

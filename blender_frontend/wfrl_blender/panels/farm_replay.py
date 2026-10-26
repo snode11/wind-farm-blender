@@ -224,6 +224,8 @@ def draw_tools(layout, context):
         row = presentation.row(align=True)
         row.operator('wfrl.render_still', text='渲染静帧')
         row.operator('wfrl.render_animation', text='渲染动画')
+        from .. import animation_render_ui
+        animation_render_ui.draw(presentation, context)
     data = section(layout, 'wfrl_farm_data', '数据来源与重新加载')
     if data is not None:
         if farm_flex._ACTIVE.manifest.get('interface_only'):
@@ -441,14 +443,15 @@ class WFRL_PT_FarmFlex(bpy.types.Panel):
         return context.scene.get("wfrl_scene_kind") != "manual"
 
     def draw(self,context):
-        self.layout.operator('wfrl.split_recon_open_example', text='打开几何重建示例…', icon='FILE_BLEND')
+        from .home import draw_load, draw_status
+        busy = draw_status(self.layout, context)
         if farm_flex.is_active(context.scene):
-            draw(self.layout,context)
+            controls = self.layout.column()
+            controls.enabled = not busy
+            controls.operator('wfrl.split_recon_open_example', text='打开几何重建示例…', icon='FILE_BLEND')
+            draw(controls,context)
         else:
-            self.layout.operator('wfrl.load_demo', icon='FILE_REFRESH')
-            self.layout.operator('wfrl.load_dual_beam', icon='IMPORT')
-            self.layout.operator('wfrl.load_dual_beam', text='加载 TLS 候选 / S1', icon='IMPORT').builtin_method = 'TLS'
-            self.layout.label(text=context.scene.get('wfrl_clearance_status', '完整离线演示 · 无需后端'), icon='INFO')
+            draw_load(self.layout, context, busy=busy)
 
 
 

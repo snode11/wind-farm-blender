@@ -51,7 +51,8 @@ def update(time_s, visible):
     bpy.context.view_layer.update()
     snapshot = performance.snapshot()
     assert snapshot['counts']['flex.scene_updates'] == 1, snapshot
-    assert snapshot['timings']['flex.deformation_cache']['calls'] == 2, snapshot
+    calls = snapshot['timings'].get('flex.deformation_cache', {}).get('calls', 0)
+    assert calls == (0 if snapshot['counts'].get('flex.update_cache_hit') else 2), snapshot
     assert 'flex.rebind_blade' not in snapshot['timings'], snapshot
     assert scene['wfrl_clearance_time_s'] == float(time_s)
     return snapshot
@@ -59,9 +60,12 @@ def update(time_s, visible):
 
 def check_counts(snapshot, blades, supports, measurement_points):
     counts = snapshot['counts']
-    assert counts['flex.blade_updates'] == 3 * len(blades), counts
-    assert counts['flex.vertices_written'] == sum(len(row[1]) for row in active.blades if row[5] in blades), counts
-    assert counts['flex.tower_vertices_written'] == sum(len(row[1]) for row in active.towers if row[4] in supports), counts
+    reused = bool(counts.get('flex.update_cache_hit'))
+    assert counts.get('flex.blade_updates', 0) == (0 if reused else 3 * len(blades)), counts
+    assert counts.get('flex.vertices_written', 0) == (0 if reused else sum(len(row[1]) for row in active.blades if row[5] in blades)), counts
+    assert counts.get('flex.tower_vertices_written', 0) == (0 if reused else sum(len(row[1]) for row in active.towers if row[4] in supports)), counts
+    if reused:
+        assert counts.get('flex.mesh_writes_skipped') == 3 * len(blades) + len(supports), counts
     assert counts.get('flex.measurement_points', 0) == measurement_points, counts
 
 

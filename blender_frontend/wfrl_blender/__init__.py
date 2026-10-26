@@ -190,6 +190,7 @@ def _on_load(_unused):
     from . import runtime, repair_marks
     from .blade_root_display import refresh as refresh_root_fittings
     for scene in bpy.data.scenes:
+        scene.pop('wfrl_home_load_error', None)
         if scene.objects:
             refresh_saved_surface_style(scene)
             if scene.get('wfrl_scene_kind') in {'clearance_replay', 'demo'}:
@@ -214,12 +215,12 @@ def _classes():
     from .operators.history_export import CLASSES as HISTORY_EXPORT_CLASSES
     from .panels.telemetry import CLASSES as TELEMETRY_CLASSES
     from .operators.workflow import CLASSES as WORKFLOW_CLASSES
-    from .panels import scene, channels, run, safety, presentation, training, gimbal, clearance, farm_replay, video_output, custom_cameras, blade_recon
+    from .panels import scene, channels, run, safety, presentation, training, gimbal, clearance, farm_replay, video_output, custom_cameras, blade_recon, home
     from .nrel_defects.editor import CLASSES as DEFECT_CLASSES
     from .panels.manual_control import CLASSES as MANUAL_CLASSES
     return (PREFERENCE_CLASSES + CLASSES + CONNECTION_CLASSES + RUN_CLASSES + STATUS_CLASSES + TELEMETRY_CLASSES
             + WORKFLOW_CLASSES + HISTORY_EXPORT_CLASSES + scene.CLASSES + channels.CLASSES + run.CLASSES
-            + safety.CLASSES + presentation.CLASSES + training.CLASSES + gimbal.CLASSES + clearance.CLASSES + farm_replay.CLASSES + video_output.CLASSES + custom_cameras.CLASSES + blade_recon.CLASSES + DEFECT_CLASSES + MANUAL_CLASSES)
+            + safety.CLASSES + presentation.CLASSES + training.CLASSES + gimbal.CLASSES + clearance.CLASSES + farm_replay.CLASSES + video_output.CLASSES + custom_cameras.CLASSES + blade_recon.CLASSES + DEFECT_CLASSES + MANUAL_CLASSES + home.CLASSES)
 
 
 def register():
@@ -234,6 +235,8 @@ def register():
     for cls in _classes():
         if not cls.is_registered:
             bpy.utils.register_class(cls)
+    from .panels import home
+    home.register_properties()
     definitions = {
         "wfrl_diagnostics_sampling": bpy.props.BoolProperty(name="视口播放帧率", default=False),
         "wfrl_farm_panel_page": bpy.props.EnumProperty(
@@ -289,6 +292,8 @@ def register():
     from .panels import presentation as capture_panel
     workflow.register_properties()
     capture_panel.register_properties()
+    from . import animation_render_ui
+    animation_render_ui.register()
     from .panels import video_output
     video_output.register()
     from .panels import gimbal
@@ -336,7 +341,10 @@ def register():
     playback_cleanup = playback.unregister
     manual_cleanup = manual_control.unregister
     manual_down_cleanup = manual_down.unregister
+    home_cleanup = home.unregister_properties
     def cleanup():
+        home_cleanup()
+        animation_render_ui.unregister()
         manual_down_cleanup()
         manual_cleanup()
         diagnostics_cleanup()
@@ -372,6 +380,7 @@ def register():
 
 def unregister():
     import bpy
+    from .panels import home
     from .cameras import cancel_view_layout
     cancel_view_layout()
     previous = getattr(bpy, '_wfrl_registered_cleanup', None)
@@ -398,6 +407,7 @@ def unregister():
     for cls in reversed(_classes()):
         if cls.is_registered:
             bpy.utils.unregister_class(cls)
+    home.unregister_properties()
     for name in ("wfrl_selected_turbine", "wfrl_fixture_state", "wfrl_show_wake", "wfrl_wake_display", "wfrl_show_lidar", "wfrl_show_disxy", "wfrl_show_atmosphere", "wfrl_atmosphere_preset", "wfrl_wake_quality", "wfrl_camera_view", "wfrl_channel_telemetry", "wfrl_manual_enabled", "wfrl_manual_yaw", "wfrl_manual_pitch"):
         if hasattr(bpy.types.Scene, name):
             delattr(bpy.types.Scene, name)
@@ -427,6 +437,19 @@ def build_demo_geometry():
 
 
 def load_demo_scene(path=None, *, camera_rig=True):
+    """Load recorded results and retain a visible error until a successful load."""
+    import bpy
+    scene = bpy.context.scene
+    try:
+        collection = _load_demo_scene(path, camera_rig=camera_rig)
+    except Exception as exc:
+        scene['wfrl_home_load_error'] = str(exc)
+        raise
+    scene.pop('wfrl_home_load_error', None)
+    return collection
+
+
+def _load_demo_scene(path=None, *, camera_rig=True):
     import bpy
     if bpy.context.scene.get("wfrl_scene_kind") == "manual":
         raise ValueError("请先返回原场景，再加载 MAPPO")

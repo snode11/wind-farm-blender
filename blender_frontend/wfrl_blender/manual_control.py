@@ -44,6 +44,67 @@ def _entry_key(scene, entry):
     return (_scene_key(scene), entry.turbine_id)
 
 
+def _pause_status(scene, reason):
+    if not scene.wfrl_manual_error:
+        scene.wfrl_manual_status = reason
+
+
+def _record_error(scene, reason, turbine=''):
+    """Latch a scene-local protection reason until explicit validation succeeds."""
+    reason = str(reason) or '控制对象无法读取'
+    if not turbine and reason.startswith(('T1 ', 'T2 ', 'T3 ')):
+        turbine = reason[:2]
+    if '约束' in reason or '驱动' in reason or '动作' in reason:
+        recovery = '在独立副本中移除冲突约束、动作或驱动'
+    elif '旋转' in reason:
+        recovery = '撤销原生旋转，或用手动面板重设姿态'
+    elif '共享' in reason or '归属' in reason:
+        recovery = '解除跨场景共享，或重新创建独立手动场景'
+    else:
+        recovery = '撤销对象修改；对象缺失时重新创建手动场景'
+    values = (reason, turbine or '全部机组', recovery, 'ERROR')
+    fields = ('wfrl_manual_error', 'wfrl_manual_error_turbine',
+              'wfrl_manual_recovery', 'wfrl_manual_status')
+    changed = any(getattr(scene, field) != value for field, value in zip(fields, values))
+    for field, value in zip(fields, values):
+        setattr(scene, field, value)
+    return changed
+
+
+def _protect_scene(scene, reason, *, turbine='', now=None):
+    if not is_manual(scene):
+        return
+    changed = _record_error(scene, reason, turbine)
+    pause_scene(scene, now=now, apply=False)
+    if changed:
+        _redraw(scene)
+
+
+def recheck_feedback(scene):
+    """Validate every controlled pose without writing or restarting motion."""
+    if not is_manual(scene):
+        return False, '请先进入手动控制场景'
+    pause_scene(scene, apply=False)
+    valid, reason = validate_scene(scene)
+    turbine = ''
+    if valid:
+        try:
+            for entry in scene.wfrl_manual_turbines:
+                turbine = entry.turbine_id
+                _validate_controlled_rotation(entry)
+        except (ValueError, AttributeError, ReferenceError, RuntimeError) as exc:
+            valid, reason = False, str(exc)
+    if not valid:
+        _protect_scene(scene, reason, turbine=turbine)
+        return False, reason
+    scene.wfrl_manual_error = ''
+    scene.wfrl_manual_error_turbine = ''
+    scene.wfrl_manual_recovery = ''
+    scene.wfrl_manual_status = 'READY'
+    _redraw(scene)
+    return True, ''
+
+
 def trial_active(scene):
     return is_manual(scene) and scene.wfrl_manual_trial.engaged
 
@@ -132,7 +193,10 @@ def _validate_native_controls(objects):
 
 def _validate_controlled_rotation(entry):
     """Require controlled axes to match the last pose written to the objects."""
-    _validate_native_controls(getattr(entry, field) for field in _POINTER_FIELDS)
+    try:
+        _validate_native_controls(getattr(entry, field) for field in _POINTER_FIELDS)
+    except ValueError as exc:
+        raise ValueError(f'{entry.turbine_id} {exc}') from exc
     axes = [(entry.yaw_object, 2, math.radians(entry.yaw_deg), '机舱'),
             (entry.rotor_object, 0, math.radians(entry.azimuth_deg), '叶轮')]
     axes.extend((getattr(entry, f'blade{index}_object'), 2, -math.radians(pitch), f'B{index}')
@@ -205,6 +269,10 @@ def confirm_trial(scene, *, now=None):
         raise ValueError(reason)
     if trial_active(scene):
         raise ValueError('请先结束当前试验，再确认另一组目标')
+    if scene.wfrl_manual_error:
+        valid, reason = recheck_feedback(scene)
+        if not valid:
+            raise ValueError(reason)
     _validate_controlled_rotation(_t1(scene))
     now = time.monotonic() if now is None else now
     pending = scene.wfrl_manual_trial
@@ -249,10 +317,22 @@ def trial_action(scene, action, *, now=None, undo_checkpoint=False):
         raise ValueError('请先确认并开始 T1 变桨试验')
     valid, reason = validate_scene(scene)
     if not valid:
-        pause_scene(scene)
+        _protect_scene(scene, reason, turbine='T1', now=now)
         raise ValueError(reason)
     if action not in {'START', 'PAUSE', 'RESET', 'END'}:
         raise ValueError('试验期间请使用暂停、继续、复位或结束试验')
+    try:
+        if action == 'RESET':
+            _validate_native_controls(getattr(_t1(scene), field) for field in _POINTER_FIELDS)
+        else:
+            _validate_controlled_rotation(_t1(scene))
+    except (ValueError, AttributeError, ReferenceError) as exc:
+        _protect_scene(scene, exc, turbine='T1', now=now)
+        raise ValueError(str(exc)) from exc
+    if action == 'START' and scene.wfrl_manual_error:
+        valid, reason = recheck_feedback(scene)
+        if not valid:
+            raise ValueError(reason)
     now = time.monotonic() if now is None else now
     if undo_checkpoint and action in {'RESET', 'END'}:
         _trial_undo_checkpoint(scene, now)
@@ -260,6 +340,10 @@ def trial_action(scene, action, *, now=None, undo_checkpoint=False):
     if action == 'END':
         scene.wfrl_manual_trial.engaged = False
         _TRIAL_CLOCKS.pop(_scene_key(scene), None)
+    if action != 'START':
+        _pause_status(scene, 'USER')
+    if action == 'RESET' and scene.wfrl_manual_error:
+        recheck_feedback(scene)
     sync_batch(scene)
     _redraw(scene)
     if action == 'START':
@@ -290,6 +374,7 @@ def validate_scene(scene):
     """Reject incomplete controls and objects shared with another scene."""
     if not is_manual(scene):
         return False, '请先进入手动控制场景'
+    turbine = ''
     try:
         entries = scene.wfrl_manual_turbines
         if not entries:
@@ -302,13 +387,14 @@ def validate_scene(scene):
         if not math.isfinite(scene.wfrl_manual_pitch_rate_deg_s):
             return False, '变桨速度必须是有限数值'
         for entry in entries:
+            turbine = entry.turbine_id
             if not entry.turbine_id or entry.turbine_id in seen_ids:
                 return False, '风机标识缺失或重复'
             seen_ids.add(entry.turbine_id)
             if any(not math.isfinite(float(getattr(entry, field))) for field in _POSE_FIELDS):
-                return False, '控制参数必须是有限数值'
+                return False, f'{turbine} 控制参数必须是有限数值'
             if entry.pitch_state_ready and any(not math.isfinite(value) for value in effective_pitches(entry)):
-                return False, '实际桨距必须是有限数值'
+                return False, f'{turbine} 实际桨距必须是有限数值'
             objects = [getattr(entry, field) for field in _POINTER_FIELDS]
             if any(obj is None for obj in objects):
                 return False, f'{entry.turbine_id} 控制对象缺失，请重新创建场景'
@@ -324,16 +410,17 @@ def validate_scene(scene):
                 if obj is None or scene.objects.get(obj.name) != obj:
                     return False, f'{entry.turbine_id} 控制对象缺失，请重新创建场景'
                 if obj.get('wfrl_manual_owner') != owner:
-                    return False, '控制对象不属于此手动场景'
+                    return False, f'{turbine} 控制对象不属于此手动场景'
                 key = obj.as_pointer()
                 if key in seen_objects:
-                    return False, '风机控制对象不能重复使用'
+                    return False, f'{turbine} 风机控制对象不能重复使用'
                 seen_objects.add(key)
                 if shared is None:
                     shared = other_scene_objects(scene)
                 if key in shared:
-                    return False, '控制对象与其他场景共享，请使用独立副本'
+                    return False, f'{turbine} 控制对象与其他场景共享，请使用独立副本'
         if trial_active(scene):
+            turbine = 'T1'
             trial_configuration(scene)
             elapsed = scene.wfrl_manual_trial.elapsed_s
             if 'T1' not in seen_ids or not math.isfinite(elapsed) or elapsed < 0:
@@ -341,10 +428,10 @@ def validate_scene(scene):
             try:
                 _validate_native_controls(getattr(_t1(scene), field) for field in _POINTER_FIELDS)
             except ValueError as exc:
-                return False, str(exc)
+                return False, f'T1 {exc}'
         return True, ''
     except (AttributeError, ReferenceError, TypeError, ValueError, KeyError):
-        return False, '控制对象已失效，请重新创建场景'
+        return False, f'{turbine} 控制对象已失效，请重新创建场景'.strip()
 
 
 def _clock(scene, entry, now):
@@ -383,20 +470,26 @@ def _redraw(scene):
     for listener in tuple(POSE_LISTENERS):
         try:
             listener(scene)
-        except (AttributeError, ReferenceError, KeyError, ValueError) as exc:
+        except (AttributeError, ReferenceError, RuntimeError, KeyError, ValueError) as exc:
             print('WFRL manual pose listener:', exc)
-    for window in bpy.context.window_manager.windows:
-        if window.scene == scene:
-            for area in window.screen.areas:
-                if area.type == 'VIEW_3D':
-                    area.tag_redraw()
+    for window in getattr(bpy.context.window_manager, 'windows', ()):
+        try:
+            if window.scene == scene and window.screen is not None:
+                for area in window.screen.areas:
+                    if area.type == 'VIEW_3D':
+                        area.tag_redraw()
+        except (AttributeError, ReferenceError):
+            continue
 
 
 def apply_scene(scene):
     """Apply saved manual poses without changing scene, playback or backend state."""
     valid, reason = validate_scene(scene)
     if not valid:
-        pause_scene(scene)
+        _protect_scene(scene, reason)
+        return False
+    if scene.wfrl_manual_error:
+        pause_scene(scene, apply=False)
         return False
     try:
         for entry in scene.wfrl_manual_turbines:
@@ -408,46 +501,57 @@ def apply_scene(scene):
         return False
 
 
-def pause_scene(scene, *, now=None, apply=True):
+def pause_scene(scene, *, now=None, apply=True, reason='USER'):
     """Pause motion, retaining each turbine's RPM and final visible phase."""
     global _updating
     if not is_manual(scene):
         return
-    valid, _reason = validate_scene(scene)
+    valid, invalid_reason = validate_scene(scene)
     now = time.monotonic() if now is None else now
     apply = apply and valid
+    if not valid:
+        _record_error(scene, invalid_reason)
     if apply:
         try:
             for entry in scene.wfrl_manual_turbines:
                 _validate_controlled_rotation(entry)
-        except ValueError:
+        except (ValueError, AttributeError, ReferenceError) as exc:
+            _record_error(scene, str(exc), entry.turbine_id)
             apply = False
+    _pause_status(scene, reason)
     previous = _updating
     _updating = True
     try:
         if trial_active(scene) and apply:
             _sync_trial(scene, now, running=False)
         for entry in scene.wfrl_manual_turbines:
-            if trial_active(scene) and entry.turbine_id == 'T1':
+            try:
+                entry.pitch_paused = True
+                if trial_active(scene) and entry.turbine_id == 'T1':
+                    entry.running = False
+                    continue
+                pitch_clock = _PITCH_CLOCKS.pop(_entry_key(scene, entry), None)
+                changed = pitch_clock is not None or entry.running
+                if pitch_clock is not None and apply:
+                    _write_pitches(entry, pitch_clock.configure(now, running=False))
+                clock = _CLOCKS.pop(_entry_key(scene, entry), None)
+                changed = changed or clock is not None
+                if clock is not None and apply:
+                    entry.azimuth_deg = clock.configure(now, running=False)
                 entry.running = False
-                _TRIAL_CLOCKS.pop(_scene_key(scene), None)
+                if valid and changed and apply:
+                    _apply_entry(entry)
+            except (ReferenceError, AttributeError):
                 continue
-            pitch_clock = _PITCH_CLOCKS.pop(_entry_key(scene, entry), None)
-            changed = pitch_clock is not None or entry.running
-            if pitch_clock is not None and apply:
-                _write_pitches(entry, pitch_clock.configure(now, running=False))
-            entry.pitch_paused = True
-            clock = _CLOCKS.pop(_entry_key(scene, entry), None)
-            changed = changed or clock is not None
-            if clock is not None and apply:
-                entry.azimuth_deg = clock.configure(now, running=False)
-            if entry.running:
-                entry.running = False
-            if valid and changed and apply:
-                _apply_entry(entry)
     except (ReferenceError, AttributeError):
         pass
     finally:
+        key = _scene_key(scene)
+        _TRIAL_CLOCKS.pop(key, None)
+        for clocks in (_CLOCKS, _PITCH_CLOCKS):
+            for entry_key in tuple(clocks):
+                if entry_key[0] == key:
+                    clocks.pop(entry_key, None)
         _updating = previous
 
 
@@ -456,11 +560,21 @@ def _update_entry(entry, context, field):
     if _updating:
         return
     scene = entry.id_data
-    valid, _reason = validate_scene(scene)
+    valid, reason = validate_scene(scene)
     if not valid:
-        pause_scene(scene)
+        _protect_scene(scene, reason)
         return
     now = time.monotonic()
+    protected = bool(scene.wfrl_manual_error)
+    if protected:
+        pause_scene(scene, now=now, apply=False)
+        if field == 'running' or (entry.turbine_id == 'T1' and trial_active(scene)):
+            return
+        try:
+            _validate_native_controls(getattr(entry, name) for name in _POINTER_FIELDS)
+        except (ValueError, AttributeError, ReferenceError) as exc:
+            _protect_scene(scene, exc, turbine=entry.turbine_id, now=now)
+            return
     if entry.turbine_id == 'T1' and trial_active(scene):
         _sync_trial(scene, now, running=entry.running if field == 'running' else None)
         sync_batch(scene)
@@ -483,7 +597,8 @@ def _update_entry(entry, context, field):
         finally:
             _updating = False
     if field in _PITCH_FIELDS:
-        _sync_pitch(scene, entry, now, running=_scene_key(scene) in visible_scenes(), retarget=True)
+        _sync_pitch(scene, entry, now, running=not protected and _scene_key(scene) in visible_scenes(),
+                    retarget=True)
     running = entry.running and entry.rpm > 0 and _scene_key(scene) in visible_scenes()
     _write_azimuth(entry, clock.configure(now, rpm=entry.rpm, running=running, azimuth_deg=angle))
     if entry.running != running:
@@ -492,7 +607,16 @@ def _update_entry(entry, context, field):
             entry.running = running
         finally:
             _updating = False
-    _apply_entry(entry)
+    if protected:
+        if field == 'yaw_deg':
+            entry.yaw_object.rotation_mode = 'XYZ'
+            entry.yaw_object.rotation_euler.z = math.radians(entry.yaw_deg)
+        elif field == 'azimuth_deg':
+            _apply_rotor(entry)
+        elif field in _PITCH_FIELDS:
+            apply_pitch(entry, effective_pitches(entry))
+    else:
+        _apply_entry(entry)
     sync_batch(scene)
     _redraw(scene)
     if (running and entry.rpm > 0) or (pitch_ramping(entry) and not entry.pitch_paused):
@@ -601,6 +725,12 @@ def _apply_poses(scene, poses, *, pause=True, now=None, ramp=False, preserve_pit
         raise ValueError('请先结束 T1 变桨试验，再调整或载入 T1 姿态')
     checked = {tid: manual_pose.pose_values(values) for tid, values in poses.items()}
     now = time.monotonic() if now is None else now
+    protected = bool(scene.wfrl_manual_error)
+    if protected:
+        pause_scene(scene, now=now, apply=False)
+        pause = True
+        for tid in checked:
+            _validate_native_controls(getattr(entries[tid], field) for field in _POINTER_FIELDS)
     previous = _updating
     _updating = True
     try:
@@ -615,12 +745,17 @@ def _apply_poses(scene, poses, *, pause=True, now=None, ramp=False, preserve_pit
             if running:
                 _CLOCKS[key] = RotorClock(entry.azimuth_deg, entry.rpm, True, now)
             if ramp:
-                _sync_pitch(scene, entry, now, running=_scene_key(scene) in visible_scenes(), retarget=True)
+                _sync_pitch(scene, entry, now,
+                            running=not protected and _scene_key(scene) in visible_scenes(), retarget=True)
             elif not preserve_pitch:
                 _settle_pitch(entry)
             _apply_entry(entry)
     finally:
         _updating = previous
+    if protected:
+        recheck_feedback(scene)
+    elif pause:
+        _pause_status(scene, 'USER')
     sync_batch(scene)
     _redraw(scene)
     if ramp:
@@ -635,35 +770,37 @@ def _selected_pose_changes(scene, changes, *, now):
     return result
 
 
-def tick(now=None):
-    """Advance visible manual scenes; invalid or hidden scenes remain paused."""
-    now = time.monotonic() if now is None else now
-    visible = visible_scenes()
-    active_keys = set()
-    moving = False
-    for scene in bpy.data.scenes:
-        if not is_manual(scene) or scene.get('wfrl_manual_exporting'):
-            continue
-        valid, _reason = validate_scene(scene)
-        if not valid or _scene_key(scene) not in visible:
-            pause_scene(scene, now=now)
-            continue
-        changed = False
+def _tick_scene(scene, now, visible, active_keys):
+    """Keep protection failures local to the scene that owns the controls."""
+    turbine = ''
+    try:
+        valid, reason = validate_scene(scene)
+        if not valid:
+            _protect_scene(scene, reason, now=now)
+            return False
+        if scene.wfrl_manual_error:
+            pause_scene(scene, now=now, apply=False)
+            return False
+        if _scene_key(scene) not in visible:
+            if any(entry.running or not entry.pitch_paused for entry in scene.wfrl_manual_turbines):
+                pause_scene(scene, now=now, reason='HIDDEN')
+                _redraw(scene)
+            return False
+        changed = moving = False
         for entry in scene.wfrl_manual_turbines:
+            turbine = entry.turbine_id
+            active_keys.add(_entry_key(scene, entry))
+            if entry.running or (pitch_ramping(entry) and not entry.pitch_paused):
+                _validate_controlled_rotation(entry)
+        for entry in scene.wfrl_manual_turbines:
+            turbine = entry.turbine_id
             key = _entry_key(scene, entry)
-            active_keys.add(key)
             if entry.turbine_id == 'T1' and trial_active(scene):
                 if entry.running:
                     _sync_trial(scene, now)
                     changed = moving = True
                 continue
             pitch_moving = pitch_ramping(entry) and not entry.pitch_paused
-            if entry.running or pitch_moving:
-                try:
-                    _validate_controlled_rotation(entry)
-                except ValueError:
-                    pause_scene(scene, now=now, apply=False)
-                    break
             if pitch_moving:
                 _sync_pitch(scene, entry, now)
                 apply_pitch(entry, effective_pitches(entry))
@@ -681,6 +818,22 @@ def tick(now=None):
         if changed:
             sync_batch(scene)
             _redraw(scene)
+        return moving
+    except (AttributeError, ReferenceError, RuntimeError, ValueError, KeyError) as exc:
+        _protect_scene(scene, exc, turbine=turbine, now=now)
+        return False
+
+
+def tick(now=None):
+    """Advance visible manual scenes; invalid or hidden scenes remain paused."""
+    now = time.monotonic() if now is None else now
+    visible = visible_scenes()
+    active_keys = set()
+    moving = False
+    for scene in bpy.data.scenes:
+        if not is_manual(scene) or scene.get('wfrl_manual_exporting'):
+            continue
+        moving = _tick_scene(scene, now, visible, active_keys) or moving
     for key in tuple(_CLOCKS):
         if key not in active_keys:
             _CLOCKS.pop(key, None)
@@ -698,8 +851,10 @@ def _timer():
         return None
     try:
         return tick()
-    except (AttributeError, ReferenceError, RuntimeError, ValueError, KeyError):
-        pause_all()
+    except (AttributeError, ReferenceError, RuntimeError, ValueError, KeyError) as exc:
+        for scene in getattr(bpy.data, 'scenes', ()):
+            if is_manual(scene) and not scene.get('wfrl_manual_exporting'):
+                _protect_scene(scene, f'手动控制计时异常：{exc}')
         return IDLE_SECONDS
 
 
@@ -711,9 +866,9 @@ def _wake_timer():
     bpy.app.timers.register(_timer, first_interval=TICK_SECONDS, persistent=True)
 
 
-def pause_all():
+def pause_all(*, reason='USER', apply=True):
     for scene in getattr(bpy.data, 'scenes', ()):
-        pause_scene(scene)
+        pause_scene(scene, reason=reason, apply=apply)
     _CLOCKS.clear()
     _TRIAL_CLOCKS.clear()
     _PITCH_CLOCKS.clear()
@@ -721,13 +876,13 @@ def pause_all():
 
 @persistent
 def _before_restore(_unused):
-    pause_all()
+    pause_all(reason='RESTORED')
 
 
 @persistent
 def _before_load(_unused):
     from . import manual_scene
-    pause_all()
+    pause_all(reason='RESTORED')
     manual_scene.clear_views()
 
 
@@ -735,11 +890,14 @@ def _before_load(_unused):
 def _after_restore(_unused):
     from .manual_scene_links import restore
     restore()
-    pause_all()
+    pause_all(reason='RESTORED', apply=False)
     for scene in bpy.data.scenes:
         if is_manual(scene):
-            apply_scene(scene)
-            sync_batch(scene)
+            valid, _reason = recheck_feedback(scene)
+            if valid:
+                scene.wfrl_manual_status = 'RESTORED'
+                apply_scene(scene)
+                sync_batch(scene)
     if _registered and not bpy.app.timers.is_registered(_timer):
         bpy.app.timers.register(_timer, first_interval=TICK_SECONDS, persistent=True)
 
@@ -781,6 +939,24 @@ class WFRL_ManualBatch(bpy.types.PropertyGroup):
     __annotations__ = _properties(_batch_update)
 
 
+class WFRL_OT_ManualRecheck(bpy.types.Operator):
+    bl_idname = 'wfrl.manual_recheck'
+    bl_label = '检查恢复（保持暂停）'
+    bl_description = '检查所有机组的对象、原生控制和实际姿态；通过后清除保护提示，不启动运动'
+
+    @classmethod
+    def poll(cls, context):
+        return is_manual(context.scene)
+
+    def execute(self, context):
+        valid, reason = recheck_feedback(context.scene)
+        if not valid:
+            self.report({'WARNING'}, reason)
+            return {'CANCELLED'}
+        self.report({'INFO'}, '检查通过，保持暂停；请手动运行或继续变桨')
+        return {'FINISHED'}
+
+
 class WFRL_OT_ManualPitchResume(bpy.types.Operator):
     bl_idname = 'wfrl.manual_pitch_resume'
     bl_label = '继续变桨'
@@ -795,13 +971,19 @@ class WFRL_OT_ManualPitchResume(bpy.types.Operator):
 
     def execute(self, context):
         scene = context.scene
+        turbine = ''
         try:
             valid, reason = validate_scene(scene)
             if not valid:
                 raise ValueError(reason)
+            if scene.wfrl_manual_error:
+                valid, reason = recheck_feedback(scene)
+                if not valid:
+                    raise ValueError(reason)
             now = time.monotonic()
             entries = selected_entries(scene)
             for entry in entries:
+                turbine = entry.turbine_id
                 _validate_controlled_rotation(entry)
             for entry in entries:
                 _sync_pitch(scene, entry, now, running=True)
@@ -809,6 +991,7 @@ class WFRL_OT_ManualPitchResume(bpy.types.Operator):
             _redraw(scene)
             _wake_timer()
         except (ValueError, AttributeError, ReferenceError) as exc:
+            _protect_scene(scene, exc, turbine=turbine)
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}
         return {'FINISHED'}
@@ -946,7 +1129,7 @@ class WFRL_OT_ManualAction(bpy.types.Operator):
         scene = context.scene
         valid, reason = validate_scene(scene)
         if not valid:
-            pause_scene(scene)
+            _protect_scene(scene, reason)
             self.report({'ERROR'}, reason)
             return {'CANCELLED'}
         entries = selected_entries(scene)
@@ -957,13 +1140,20 @@ class WFRL_OT_ManualAction(bpy.types.Operator):
         if self.action == 'START' and not any(entry.rpm > 0 for entry in entries):
             self.report({'WARNING'}, '请先设置大于 0 的转速')
             return {'CANCELLED'}
-        if self.action != 'RESET':
-            try:
-                for entry in entries:
+        try:
+            for entry in entries:
+                if self.action == 'RESET':
+                    _validate_native_controls(getattr(entry, field) for field in _POINTER_FIELDS)
+                else:
                     _validate_controlled_rotation(entry)
-            except ValueError as exc:
-                pause_scene(scene, apply=False)
-                self.report({'ERROR'}, str(exc))
+        except (ValueError, AttributeError, ReferenceError) as exc:
+            _protect_scene(scene, exc, turbine=entry.turbine_id)
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        if self.action == 'START' and scene.wfrl_manual_error:
+            valid, reason = recheck_feedback(scene)
+            if not valid:
+                self.report({'ERROR'}, reason)
                 return {'CANCELLED'}
         now = time.monotonic()
         if t1_trial and self.action == 'RESET':
@@ -992,6 +1182,10 @@ class WFRL_OT_ManualAction(bpy.types.Operator):
                 _updating = False
             clock.configure(now, rpm=entry.rpm, running=entry.running, azimuth_deg=entry.azimuth_deg)
             _apply_entry(entry)
+        if self.action == 'RESET' and scene.wfrl_manual_error:
+            recheck_feedback(scene)
+        elif self.action != 'START':
+            _pause_status(scene, 'USER')
         sync_batch(scene)
         _redraw(scene)
         if self.action == 'START':
@@ -1154,7 +1348,7 @@ class WFRL_OT_ManualPoseImport(_ManualPoseTarget, bpy.types.Operator, ImportHelp
         return {'FINISHED'}
 
 
-CLASSES = (WFRL_ManualTurbine, WFRL_ManualBatch, WFRL_ManualTrial, WFRL_OT_ManualPitchResume,
+CLASSES = (WFRL_ManualTurbine, WFRL_ManualBatch, WFRL_ManualTrial, WFRL_OT_ManualRecheck, WFRL_OT_ManualPitchResume,
            WFRL_OT_ManualTrial, WFRL_OT_ManualDown, WFRL_OT_ManualEnter,
            WFRL_OT_ManualLeave, WFRL_OT_ManualAction, WFRL_OT_ManualFocus,
            WFRL_OT_ManualPosePreset, WFRL_OT_ManualPoseNudge,
@@ -1164,15 +1358,20 @@ _HANDLERS = (('load_pre', _before_load), ('load_post', _after_restore),
              ('redo_pre', _before_restore), ('redo_post', _after_restore))
 _SCENE_PROPERTIES = ('wfrl_manual_turbines', 'wfrl_manual_batch', 'wfrl_manual_target',
                      'wfrl_manual_return_scene', 'wfrl_manual_scene', 'wfrl_manual_step_deg',
-                     'wfrl_manual_trial', 'wfrl_manual_pitch_rate_deg_s', 'wfrl_manual_display_detail')
+                     'wfrl_manual_trial', 'wfrl_manual_pitch_rate_deg_s', 'wfrl_manual_display_detail',
+                     'wfrl_manual_error', 'wfrl_manual_error_turbine',
+                     'wfrl_manual_recovery', 'wfrl_manual_status')
 
 
 def _pitch_rate_update(scene, context):
     if _updating or not is_manual(scene):
         return
     now = time.monotonic()
-    valid, _reason = validate_scene(scene)
+    valid, reason = validate_scene(scene)
     if not valid:
+        _protect_scene(scene, reason, now=now)
+        return
+    if scene.wfrl_manual_error:
         pause_scene(scene, now=now, apply=False)
         return
     entries = [entry for entry in scene.wfrl_manual_turbines
@@ -1180,8 +1379,8 @@ def _pitch_rate_update(scene, context):
     try:
         for entry in entries:
             _validate_controlled_rotation(entry)
-    except ValueError:
-        pause_scene(scene, now=now, apply=False)
+    except (ValueError, AttributeError, ReferenceError) as exc:
+        _protect_scene(scene, exc, turbine=entry.turbine_id, now=now)
         return
     for entry in entries:
         _sync_pitch(scene, entry, now)
@@ -1200,6 +1399,13 @@ def register():
     bpy.types.Scene.wfrl_manual_turbines = bpy.props.CollectionProperty(type=WFRL_ManualTurbine)
     bpy.types.Scene.wfrl_manual_batch = bpy.props.PointerProperty(type=WFRL_ManualBatch)
     bpy.types.Scene.wfrl_manual_trial = bpy.props.PointerProperty(type=WFRL_ManualTrial)
+    for field in ('wfrl_manual_error', 'wfrl_manual_error_turbine', 'wfrl_manual_recovery'):
+        setattr(bpy.types.Scene, field, bpy.props.StringProperty(options={'HIDDEN'}))
+    bpy.types.Scene.wfrl_manual_status = bpy.props.EnumProperty(options={'HIDDEN'}, default='IDLE', items=(
+        ('IDLE', '已暂停', ''), ('USER', '已主动暂停', ''),
+        ('HIDDEN', '场景未在窗口显示，已暂停', ''),
+        ('RESTORED', '载入或撤销恢复，已暂停', ''),
+        ('ERROR', '保护暂停', ''), ('READY', '检查通过，保持暂停', '')))
     from .manual_geometry import DETAIL_ITEMS, detail_update
     bpy.types.Scene.wfrl_manual_display_detail = bpy.props.EnumProperty(
         name='显示精度', items=DETAIL_ITEMS, default='OVERVIEW', update=detail_update)
@@ -1225,7 +1431,7 @@ def register():
             handlers.append(function)
     if hasattr(bpy.data, 'scenes'):
         restore()
-        pause_all()
+        pause_all(reason='RESTORED', apply=False)
     if not bpy.app.timers.is_registered(_timer):
         bpy.app.timers.register(_timer, first_interval=TICK_SECONDS, persistent=True)
 

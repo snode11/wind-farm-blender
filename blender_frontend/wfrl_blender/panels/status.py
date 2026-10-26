@@ -2,11 +2,12 @@
 import bpy
 from .. import runtime
 from ..preferences import get_preferences
+from ..home_state import backend_status
 from .diagnostics import CLASSES as DIAGNOSTIC_CLASSES, draw_diagnostic
 
 
 class WFRL_PT_connection(bpy.types.Panel):
-    bl_label = 'WFRL / CONNECTION'
+    bl_label = 'WFRL / 后端连接'
     bl_idname = 'WFRL_PT_connection'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -21,13 +22,9 @@ class WFRL_PT_connection(bpy.types.Panel):
         ui = runtime.get_state()
         layout = self.layout
         offline_results = ui.connection == 'OFFLINE RESULTS'
-        if offline_results:
-            layout.label(text='离线结果回放 · 无需连接后端', icon='INFO')
-            layout.label(text='MAPPO：MAPPO → 三机 MAPPO 回放')
-        else:
-            layout.label(text=ui.connection, icon='LINKED' if ui.connection == 'CONNECTED' else 'UNLINKED')
-            layout.label(text=f'Run: {ui.run_status}' + ('' if ui.confirmed else ' (unconfirmed)'))
-            if runtime.progress(): layout.label(text=runtime.progress())
+        layout.label(text=backend_status(ui), icon='LINKED' if ui.connection == 'CONNECTED' else 'UNLINKED')
+        layout.label(text='主入口：N → WFRL')
+        if runtime.progress(): layout.label(text=runtime.progress())
         # Errors stay visible even when advanced connection controls are folded.
         if ui.error:
             box = layout.box(); box.alert = True
@@ -45,9 +42,9 @@ class WFRL_PT_connection(bpy.types.Panel):
             row = controls.row(); row.enabled = runtime.configuration_editable()
             row.operator('wfrl.connection_mode', text=title, depress=runtime.desired_mode() == mode).mode = mode
         if ui.connection == 'LOCAL DEMO':
-            controls.operator('wfrl.bridge_connect', text='Connect Backend Demo')
+            controls.operator('wfrl.bridge_connect', text='连接后端 Demo')
         else:
-            controls.operator('wfrl.bridge_connect', text='Connect / Reconnect')
+            controls.operator('wfrl.bridge_connect', text='连接 / 重新连接后端')
             if not offline_results:
                 controls.operator('wfrl.bridge_disconnect')
         # Run actions have a single home in the backend run panel.

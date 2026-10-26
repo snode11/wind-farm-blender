@@ -131,6 +131,10 @@ class Vertices(list):
         for vertex, co in zip(self, np.asarray(values).reshape(-1, 3), strict=True):
             vertex.co = co.astype(np.float32)
 
+    def foreach_get(self, name, values):
+        assert name == 'co'
+        values[:] = np.asarray([vertex.co for vertex in self]).ravel()
+
 
 class Scene(dict):
     def as_pointer(self):

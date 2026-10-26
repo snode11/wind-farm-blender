@@ -6,6 +6,7 @@
 
 | 范围 | 宿主入口 | 原生入口 |
 | --- | --- | --- |
+| WFRL 主入口与状态 | `test_home_state.py` | 后台 `home_entry_smoke.py`：真实 RNA／操作器配合布局适配器，检查页面、相机草稿取消、回放推进、手动场景往返与卸载；不代替可见窗口排版或真实鼠标操作。 |
 | 手动场景与姿态 | `test_manual_motion.py`、`test_manual_pose.py` | 后台 `manual_control_regression.py`、`manual_pose_undo_regression.py`、`manual_scene_recovery_regression.py`、`manual_scene_link_compatibility_regression.py`、`manual_rotor_conflict_regression.py`；窗口 `manual_control_window.py`。 |
 | 手动装配、精度与静态复用 | `test_blade_models.py`、`test_scene_mesh_lifecycle.py` | 后台 `manual_model_regression.py`、`manual_geometry_compatibility_regression.py`；跨场景、回放接头、导出副本和环境共用 `model_environment_integration.py`。 |
 | 冻结试验、普通变桨与 Down | `test_manual_motion.py`、`test_manual_down.py` | 后台 `manual_pitch_trial_regression.py`、`manual_pitch_trial_undo_regression.py`、`manual_down_copy_regression.py`、`manual_rate_pitch_regression.py`、`manual_down_regression.py`；窗口 `manual_pitch_trial_window.py`。 |
@@ -14,6 +15,8 @@
 | 环境几何与贴地 | `test_landscape_geometry.py`、`test_landscape_distribution.py` | 后台 `landscape_geometry_regression.py`；同机位输出与多窗口背景另外核对。 |
 | 重建、纹理与共享结构 | `test_split_reconstruction.py`、`test_split_mappo_texture.py`、`test_mappo_texture_package.py` | 后台 `split_turbine_context_regression.py`；窗口 `reconstruction_workflow_window.py`。 |
 | 场景与播放归属 | `test_scene_mesh_lifecycle.py`、`test_scene_playback_lifecycle.py`、`test_native_camera_playback.py` | 后台 `scene_playback_lifecycle_regression.py`、`replay_history_regression.py`；窗口 `native_camera_reopen_regression.py`、`native_camera_playback_regression.py`。 |
+| 窗口录制、视口隔离与刷新 | `test_recording_runtime.py`、`test_live_viewport_isolation.py`、`test_runtime_redraw.py` | 窗口 `frontend_sessions_window.py` 验证真实截图、场景删除、窗口关闭、播放标签和其他视口保护。 |
+| 普通后台动画渲染 | `test_animation_render.py` | 后台 `animation_render_regression.py` 验证短 PNG、取消、源状态和 MAPPO 运动；不代替完整片段或 FPS 验收。 |
 | 机舱相机与 Down | `test_camera_projection.py`、`test_nacelle_visibility.py` | 后台 `nacelle_camera_intrinsics_regression.py`、`farm_down_mount_regression.py`、`t1_down_mount_regression.py`、`nacelle_camera_regression.py`；仓库 `scripts/blender/check_nrel_nacelle_camera.py` 做投影、射线与渲染检查。 |
 | 三相机布局与绑定 | `test_stacked_camera_rig.py`、`test_custom_cameras.py`、`test_custom_camera_v3.py` | 后台 `three_camera_default_regression.py`、`custom_camera_edit_binding_regression.py`；按钮交互另验。 |
 | 相机窗口、释放与采集 | `test_native_camera_lifecycle.py`、`test_custom_camera_retirement.py`、`test_custom_camera_capture.py` | 后台 `custom_camera_retirement_regression.py`；窗口 `native_camera_enabled_regression.py`、`frontend_layout_regression.py`、`custom_camera_capture_window.py`、`native_camera_save_regression.py`。 |

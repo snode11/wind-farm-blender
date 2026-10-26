@@ -1,7 +1,47 @@
 """A dedicated sidebar for independent rigid turbine motion."""
 import bpy
+import unicodedata
 
 from .. import manual_control, manual_video
+
+
+def _feedback_lines(text, width):
+    """Wrap Chinese and object names within the sidebar width."""
+    line, used = '', 0
+    for char in text:
+        size = 2 if unicodedata.east_asian_width(char) in {'W', 'F'} else 1
+        if char == '\n' or (line and used + size > width):
+            yield line
+            line, used = '', 0
+        if char != '\n':
+            line += char
+            used += size
+    if line:
+        yield line
+
+
+def draw_feedback(layout, context):
+    scene = context.scene
+    if scene.wfrl_manual_error:
+        box = layout.box()
+        title = box.row()
+        title.alert = True
+        title.label(text=f'保护暂停 · {scene.wfrl_manual_error_turbine}', icon='ERROR')
+        box.label(text='本场景全部机组保持暂停')
+        scale = getattr(context.preferences.system, 'ui_scale', 1.0)
+        width = max(16, int((context.region.width / max(scale, .5) - 50) / 7))
+        for message in (scene.wfrl_manual_error.split('；', 1)[0], scene.wfrl_manual_recovery):
+            for line in _feedback_lines(message, width):
+                box.label(text=line)
+        box.operator('wfrl.manual_recheck', icon='FILE_REFRESH')
+        box.label(text='检查通过后，再手动运行或继续变桨')
+        return
+    states = {'USER': '已主动暂停', 'HIDDEN': '场景未在窗口显示，已暂停',
+              'RESTORED': '载入或撤销恢复，已暂停', 'READY': '检查通过，保持暂停'}
+    text = states.get(scene.wfrl_manual_status)
+    if text and not any(entry.running or (manual_control.pitch_ramping(entry) and not entry.pitch_paused)
+                        for entry in scene.wfrl_manual_turbines):
+        layout.label(text=text, icon='INFO')
 
 
 def draw_trial(layout, scene):
@@ -62,6 +102,7 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
             return
 
         layout.operator('wfrl.manual_leave', text='返回原场景', icon='BACK')
+        draw_feedback(layout, context)
         valid, reason = manual_control.validate_scene(scene)
         if not valid:
             layout.label(text=reason, icon='ERROR')

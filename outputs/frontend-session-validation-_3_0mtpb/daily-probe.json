@@ -1,0 +1,374 @@
+{
+  "status": "PASS",
+  "version": "0.3.37",
+  "blender": "5.2.1 LTS",
+  "module": "bl_ext.user_default.wfrl_blender",
+  "module_file": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "packaged": true,
+  "build": "2801a3e947689b2b73179ea65ef92dc5419301525c2001e0ce216dc0d84695f0",
+  "installed_files_checked": 191,
+  "loaded_module_files_checked": 89,
+  "loaded_modules": [
+    {
+      "module": "bl_ext.user_default.wfrl_blender.camera_projection",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/camera_projection.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.nacelle_camera",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/nacelle_camera.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.turbine_geometry",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/turbine_geometry.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.cameras",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/cameras.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.materials",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/materials.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.scene_model",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/scene_model.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.scene_builder",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/scene_builder.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.workspace",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/workspace.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.atmosphere",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/atmosphere.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.wake",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/wake.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.state",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/state.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.animation",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/animation.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.training",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/training.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.live_scene",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/live_scene.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.performance",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/performance.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.runtime",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/runtime.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.deflection",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/deflection.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/__init__.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.demo",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/demo.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.preferences",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/preferences.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.diagnostics",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/diagnostics.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.diagnostics",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/diagnostics.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.status",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/status.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.operators",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/operators/__init__.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.operators.connection",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/operators/connection.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.operators.run",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/operators/run.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.history",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/history.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.charts",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/charts.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.operators.history_export",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/operators/history_export.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.telemetry",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/telemetry.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.operators.workflow",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/operators/workflow.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.scene",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/scene.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.channels",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/channels.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.run",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/run.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.safety",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/safety.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.presentation",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/presentation.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.presentation",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/presentation.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.training",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/training.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.gimbal",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/gimbal.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.clearance_replay",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/clearance_replay.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.clearance",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/clearance.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.farm_flex",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/farm_flex.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.farm_replay",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/farm_replay.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.video_output",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/video_output.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.video_output",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/video_output.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.custom_cameras",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/custom_cameras.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.custom_camera_history",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/custom_camera_history.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.custom_camera_diagnostics",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/custom_camera_diagnostics.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.custom_camera_preview",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/custom_camera_preview.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.playback",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/playback.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.custom_camera_capture",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/custom_camera_capture.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.custom_camera_output",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/custom_camera_output.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.installation_schematic",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/installation_schematic.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.native_camera_views",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/native_camera_views.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.stacked_camera_rig",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/stacked_camera_rig.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.stacked_camera_rig",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/stacked_camera_rig.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.custom_cameras",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/custom_cameras.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender._vendor",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/_vendor/__init__.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender._vendor.blade_recon",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/_vendor/blade_recon/__init__.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender._vendor.blade_recon.model",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/_vendor/blade_recon/model.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.blade_recon_data",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/blade_recon_data.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.blade_recon_review",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/blade_recon_review.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.blade_recon",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/blade_recon.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.nrel_defects",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/nrel_defects/__init__.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.nrel_defects.defect_shapes",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/nrel_defects/defect_shapes.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.nrel_defects.reference_surface",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/nrel_defects/reference_surface.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.nrel_defects.defect_schema",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/nrel_defects/defect_schema.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.nrel_defects.defect_store",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/nrel_defects/defect_store.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.nrel_defects.defect_geometry",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/nrel_defects/defect_geometry.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.nrel_defects.editor",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/nrel_defects/editor.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.manual_motion",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/manual_motion.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.manual_pose",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/manual_pose.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.manual_control",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/manual_control.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.manual_video",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/manual_video.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.panels.manual_control",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/manual_control.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.animation_render",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/animation_render.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.animation_render_ui",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/animation_render_ui.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.tip_tracking",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/tip_tracking.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.split_reconstruction",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/split_reconstruction.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.split_reconstruction_timing",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/split_reconstruction_timing.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.split_reconstruction_ui",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/split_reconstruction_ui.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.split_mappo_texture",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/split_mappo_texture.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.frontend_diagnostics",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/frontend_diagnostics.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.manual_down",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/manual_down.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.manual_geometry",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/manual_geometry.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.manual_scene_links",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/manual_scene_links.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.repair_marks",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/repair_marks.py"
+    },
+    {
+      "module": "bl_ext.user_default.wfrl_blender.blade_root_display",
+      "path": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/blade_root_display.py"
+    }
+  ],
+  "file_mismatches": 0,
+  "unexpected_files": [],
+  "enablement_persisted": true,
+  "fresh_visible_process": true,
+  "render_operators_registered": true
+}

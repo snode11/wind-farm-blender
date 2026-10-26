@@ -1,4 +1,4 @@
-"""Viewport overlap and the camera-card interaction geometry."""
+"""Preview resource ownership, state validation and camera-card geometry."""
 import sys
 from contextlib import nullcontext
 from types import SimpleNamespace as NS
@@ -35,15 +35,21 @@ def gpu_capture(monkeypatch):
 
     class Offscreen:
         def __init__(self, *_args, **_kwargs):
-            pass
+            self.texture_color = NS(offscreen=self)
+            self.freed = False
+            self.draws = 0
 
         def bind(self):
             return nullcontext()
 
         def draw_view3d(self, *args, **kwargs):
+            assert not self.freed
+            self.draws += 1
             state.draws.append((args, kwargs))
 
         def free(self):
+            assert not self.freed
+            self.freed = True
             state.frees += 1
 
     monkeypatch.setitem(sys.modules, 'gpu', NS(
@@ -118,6 +124,157 @@ def test_pixel_only_render_failure_releases_partial_group_and_target(gpu_capture
         preview.render_group(context, cameras, create_texture=False)
     assert len(images) == 2 and all(image.texture is None and image.rgba() is None for image in images)
     assert state.frees == 1 and not preview._DRAWING
+
+
+def test_leased_preview_skips_readback_and_keeps_committed_targets_immutable(gpu_capture, monkeypatch):
+    state, context, cameras = gpu_capture
+    pool = preview.PreviewTargets()
+    monkeypatch.setattr(pool.state_cache, 'hash', lambda *_: 'geometry-state')
+    first = preview.render_group(context, cameras, target=pool)
+    first_targets = {image._lease[1] for image in first.values()}
+    second = preview.render_group(context, cameras, target=pool)
+    assert not state.reads and not state.textures and not state.buffers
+    assert first_targets.isdisjoint(image._lease[1] for image in second.values())
+    assert all(target.offscreen.draws == 1 for target in first_targets)
+    assert first[1].rgba() == first[1].rgba() == state.pixels
+    assert len(state.reads) == 1
+    for image in first.values():
+        image.free()
+        image.free()
+    third = preview.render_group(context, cameras, target=pool)
+    assert len(pool.targets) == 4
+    assert {image._lease[1] for image in third.values()} == first_targets
+    for image in (*second.values(), *third.values()):
+        image.free()
+    pool.trim(2)
+    assert len(pool.targets) == 2 and state.frees == 2
+    pool.free()
+    pool.free()
+    assert state.frees == 4 and not pool.leased
+
+
+def test_failed_leased_group_releases_staging_without_touching_old_images(gpu_capture, monkeypatch):
+    state, context, cameras = gpu_capture
+    pool = preview.PreviewTargets()
+    monkeypatch.setattr(pool.state_cache, 'hash', lambda *_: 'geometry-state')
+    old = preview.render_group(context, cameras, target=pool)
+    old_targets = set(pool.leased)
+    staged = []
+    snapshot = preview.CameraImage.snapshot
+    def interrupted(image, offscreen, **kwargs):
+        snapshot(image, offscreen, **kwargs)
+        staged.append(image)
+        if len(staged) == 2:
+            raise RuntimeError('injected GPU staging failure')
+    monkeypatch.setattr(preview.CameraImage, 'snapshot', interrupted)
+    with pytest.raises(RuntimeError, match='GPU staging failure'):
+        preview.render_group(context, cameras, target=pool)
+    assert pool.leased == old_targets
+    assert all(image.texture is None and image._lease is None for image in staged)
+    assert all(target.offscreen.draws == 1 for target in old_targets)
+    assert old[1].rgba() == state.pixels and not preview._DRAWING
+    for image in old.values():
+        image.free()
+    pool.free()
+
+
+def test_geometry_cache_reuses_coordinates_but_tracks_native_edits_and_scope(monkeypatch):
+    handlers = []
+    monkeypatch.setitem(sys.modules, 'bpy', NS(app=NS(handlers=NS(depsgraph_update_post=handlers))))
+    matrix = [[float(i == j) for j in range(4)] for i in range(4)]
+    mesh = NS(as_pointer=lambda: 20, bl_rna=NS(identifier='Mesh'))
+    obj = NS(name='WFRL.Turbine.T1.Blade', type='MESH', as_pointer=lambda: 10,
+             data=mesh, matrix_world=matrix, bl_rna=NS(identifier='Object'))
+    obj.evaluated_get = lambda _: obj
+    scene = NS(as_pointer=lambda: 1, frame_current=1, frame_subframe=0., objects=[obj])
+    graph = NS(as_pointer=lambda: 2, updates=[])
+    coordinates = [b'first geometry']
+    monkeypatch.setattr(preview, '_mesh_coordinates', lambda _: coordinates[0])
+    cache = preview.GeometryCache()
+    original = cache.hash(scene, graph, 'source')
+    assert original == preview.simulation_state_hash(scene, graph)
+    assert cache.hash(scene, graph, 'source') == original and cache.mesh_reads == 1
+    camera = NS(type='CAMERA', bl_rna=NS(identifier='Object'))
+    graph.updates = [NS(id=camera, is_updated_geometry=True)]
+    cache.updated(scene, graph)
+    matrix[0][3] = 2.
+    moved = cache.hash(scene, graph, 'source')
+    assert moved != original and cache.mesh_reads == 1
+    coordinates[0] = b'native edited geometry'
+    graph.updates = [NS(id=mesh, is_updated_geometry=True)]
+    cache.updated(scene, graph)
+    edited = cache.hash(scene, graph, 'source')
+    assert edited != moved and edited == preview.simulation_state_hash(scene, graph)
+    assert cache.mesh_reads == 2
+    scene.frame_current += 1
+    cache.hash(scene, graph, 'source')
+    cache.hash(scene, graph, 'new source')
+    handlers.clear()
+    cache.hash(scene, graph, 'new source')
+    assert cache.mesh_reads == 5 and len(handlers) == 1
+    scene.objects.clear()
+    cache.hash(scene, graph, 'new source')
+    assert not cache.meshes
+    cache.free()
+    cache.free()
+    assert not handlers and cache.scope is None
+
+
+def test_camera_feedback_coalesces_input_and_reserves_draw_time(monkeypatch):
+    from copy import deepcopy
+    state = dict(identity='source', frame=1, subframe=0., time_s=0., revision=1,
+                 profile='sRGB', long_edge=640, slots=(1,), cameras=((42, False, 'fov=75'),))
+    clock = [1.]
+    draws = []
+    class Image:
+        width, height = 2, 2
+        def free(self):
+            pass
+    monkeypatch.setattr(preview, 'provenance', lambda *_: deepcopy(state))
+    monkeypatch.setattr(preview.time, 'monotonic', lambda: clock[0])
+    monkeypatch.setattr(preview.time, 'perf_counter', lambda: clock[0])
+    def render(*_):
+        draws.append(deepcopy(state))
+        return {1: Image()}
+    monkeypatch.setattr(preview, 'render_group', render)
+    context = NS(view_layer=NS(update=lambda: None))
+    renderer = preview.Preview()
+    renderer.refresh(context, [])
+    state['cameras'] = ((42, False, 'fov=80'),)
+    clock[0] += .02
+    renderer.refresh(context, [])
+    assert len(draws) == 1
+    state['cameras'] = ((42, False, 'fov=85'),)
+    clock[0] += .04
+    renderer.refresh(context, [])
+    assert len(draws) == 1
+    clock[0] += .06
+    renderer.refresh(context, [])
+    assert len(draws) == 2 and renderer.key['cameras'] == state['cameras']
+    renderer.refresh(context, [])
+    assert len(draws) == 2
+    renderer.elapsed_s = .2
+    state['cameras'] = ((42, False, 'fov=90'),)
+    clock[0] += .06
+    renderer.refresh(context, [])
+    assert len(draws) == 2
+    clock[0] += .15
+    renderer.refresh(context, [])
+    assert len(draws) == 3
+    renderer.elapsed_s = .01
+    for step in range(1, 6):
+        state['cameras'] = ((42, False, f'fov={90 + step}'),)
+        clock[0] += .04
+        renderer.refresh(context, [])
+    assert len(draws) == 3
+    clock[0] += .06
+    renderer.refresh(context, [])
+    assert len(draws) == 4
+    state['frame'] += 1
+    clock[0] += .1
+    renderer.refresh(context, [])
+    assert len(draws) == 4
+    renderer.free()
 
 
 @pytest.mark.parametrize('overlap', [True, False])

@@ -42,14 +42,13 @@ def build_live_scene(scene):
     display_scene = bpy.context.scene
     atmosphere.apply_preset(display_scene, "clear", enabled=True, quality="realtime")
     # Configure the viewport without switching workspaces, camera, or run state.
-    for screen in bpy.data.screens:
-        for area in screen.areas:
-            if area.type == 'VIEW_3D':
-                space = area.spaces.active
-                space.clip_start = 1.0
-                space.clip_end = 10000
-                space.overlay.show_overlays = False
-                space.shading.type = 'RENDERED'
+    from .cameras import demo_view_areas
+    for area in demo_view_areas(display_scene):
+        space = area.spaces.active
+        space.clip_start = 1.0
+        space.clip_end = 10000
+        space.overlay.show_overlays = False
+        space.shading.type = 'RENDERED'
     display_scene['wfrl_proxy_note'] = 'SYNTH: illustrative wake, not FAST.Farm wind data'
     bpy.context.scene["wfrl_scene_kind"] = "live"
     for obj in bpy.data.objects:

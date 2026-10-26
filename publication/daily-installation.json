@@ -1,44 +1,59 @@
 {
   "schema": "wfrl.daily-installation.v1",
   "status": "PASS",
-  "version": "0.3.36",
+  "version": "0.3.37",
   "blender": "5.2.1 LTS",
   "platform": "macOS",
   "module": "bl_ext.user_default.wfrl_blender",
-  "module_file": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/__init__.py",
-  "source_archive": "dist/wfrl_blender-0.3.36.zip",
-  "archive_sha256": "c7e7360b06a340b7c6867f50f8e30ed4e4b0114ad721d2eeaa762d1a3021da20",
-  "installed_files_checked": 188,
-  "loaded_module_files_checked": 87,
+  "module_file": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "source_archive": "dist/wfrl_blender-0.3.37.zip",
+  "archive_sha256": "eee74b83d16165de480ab3957abd8ad8ab800bf1af58cfbf87d136ac0ea831d8",
+  "installed_files_checked": 191,
+  "loaded_module_files_checked": 89,
   "file_mismatches": 0,
   "unexpected_files": [],
   "enablement_persisted": true,
   "fresh_process_import": "PASS",
-  "native_window_status": "PASS_FRESH_PROCESS_IMPORT_AND_REGISTRATION",
+  "native_window_status": "PASS_ISOLATED_BEHAVIOR_AND_DAILY_FRESH_PROCESS_IDENTITY",
   "startup_file_preserved": true,
   "user_preferences_preserved": true,
-  "existing_blend_files_checked": 59,
   "profile_files_checked": 6,
-  "public_release": true,
-  "installation_scope": "Blender official extension install-file into user_default with --enable --no-prefs; existing configuration and saved scenes match their protected byte snapshots.",
-  "validation_scope": "Fresh visible daily-profile import and registration; installed background manual control, pitch trial, model detail, Down, saved scene links and 45-frame tip-display sample. No physical input, full video, sustained FPS, backend training, other-platform or scientific-accuracy acceptance.",
+  "existing_blend_files_checked": 0,
+  "public_release": false,
+  "installation_scope": "Official extension install-file into user_default with --enable --no-prefs; six configuration files match their protected hashes.",
+  "validation_scope": "Isolated installed package: native recording interruptions, playback label, viewport isolation, short cube and recorded MAPPO PNG renders, cancellation, frozen output settings, source preservation, recursive compositor output preflight and original preview-quality snapshot. Daily profile: fresh visible process, module identity, enablement, operator registration and complete installed inventory.",
   "isolated_installation": {
     "status": "PASS",
     "module": "bl_ext.wfrl_frontend.wfrl_blender",
-    "verified_files": 188,
+    "verified_files": 191,
     "checks": [
       "archive_inventory",
       "installed_inventory",
       "module_probe",
       "three-camera-default",
-      "native-projection"
+      "native-projection",
+      "frontend_sessions_window",
+      "animation_render_regression"
     ]
   },
   "evidence": {
-    "runtime": "publication/daily-installation-runtime.json",
-    "protected_files": "publication/daily-installation-protection.json",
-    "package_validation": "outputs/local-install-0.3.36-qo69g52o/validation/package-validation.json",
-    "backup": "LOCAL_ONLY_NOT_DISTRIBUTED"
+    "runtime": "outputs/frontend-session-validation-_3_0mtpb/daily-probe.json",
+    "protected_files": "outputs/frontend-session-validation-_3_0mtpb/daily-protection.json",
+    "package_validation": "outputs/frontend-session-validation-_3_0mtpb/package-validation-037/package-validation.json",
+    "window_behavior": "outputs/frontend-session-validation-_3_0mtpb/installed-session-controls/result.json",
+    "background_render": "outputs/frontend-session-validation-_3_0mtpb/installed-png-render/result.json",
+    "backup": "/path/to/user/.Trash/WFRL-frontend-intermediates-20bfa6d8dc/project/outputs/frontend-session-validation-_3_0mtpb/daily-backup"
   },
-  "limits": "No physical input, full video, sustained FPS, backend training, other-platform or scientific-accuracy acceptance."
+  "limits": "Scripted native interaction and short PNG output only. No full-clip FPS, long-running, physical input, real backend training, other-platform or scientific-accuracy acceptance; existing scene files were not byte-audited.",
+  "build": "2801a3e947689b2b73179ea65ef92dc5419301525c2001e0ce216dc0d84695f0",
+  "artifact_availability": {
+    "final_archive": true,
+    "result_records": true,
+    "raw_validation_logs": true,
+    "intermediate_capture_media": false,
+    "render_scene_copies": false,
+    "isolated_runtime_profiles": false,
+    "duplicate_validation_archives": false,
+    "installation_backup": "recoverable_trash"
+  }
 }

@@ -95,7 +95,7 @@ def matrices(camera, depsgraph, long_edge, max_size=None):
 
 
 class RenderTarget:
-    """One reusable viewport engine; committed images own only colour textures."""
+    """One reusable viewport engine and its explicitly released framebuffer."""
     def __init__(self):
         self.offscreen = None
         self.key = None
@@ -125,8 +125,8 @@ class RenderTarget:
 class RenderTargetPool:
     """Capture-owned targets, reused per output size until transaction close.
 
-    Preview keeps its single-target resize behavior. A capture has at most three
-    fixed camera sizes; its pool avoids resize/reallocation on every sample.
+    Each participating camera has a fixed output size; the pool avoids
+    resize/reallocation on every sample.
     """
     def __init__(self):
         self.targets = {}
@@ -158,6 +158,47 @@ class RenderTargetPool:
                 'active_targets': len(self.targets), 'policy': 'transaction / output size'}
 
 
+class PreviewTargets:
+    """Lease offscreen colour textures until their whole image group is retired.
+
+    A committed image and an in-progress image never use the same target. Idle
+    targets form a bounded spare group, allowing GPU-only preview replacement.
+    """
+    def __init__(self):
+        self.targets = []
+        self.leased = set()
+        self.state_cache = GeometryCache()
+
+    def acquire(self, context, image):
+        key = (context.window.as_pointer(), image.width, image.height)
+        idle = [target for target in self.targets if target not in self.leased]
+        target = next((target for target in idle if target.key == key), None)
+        if target is None:
+            target = idle[0] if idle else RenderTarget()
+        if target not in self.targets:
+            self.targets.append(target)
+        offscreen = target.get(context, image.width, image.height)
+        self.leased.add(target)
+        image._lease = (self, target)
+        return offscreen
+
+    def release(self, target):
+        self.leased.discard(target)
+
+    def trim(self, spare_count):
+        idle = [target for target in self.targets if target not in self.leased]
+        for target in idle[spare_count:]:
+            target.free()
+            self.targets.remove(target)
+
+    def free(self):
+        for target in self.targets:
+            target.free()
+        self.targets.clear()
+        self.leased.clear()
+        self.state_cache.free()
+
+
 class CameraImage:
     def __init__(self, camera, depsgraph, long_edge):
         import gpu
@@ -167,10 +208,15 @@ class CameraImage:
         self.params = core.parameters(camera)
         self.texture = None
         self.pixels = None
+        self._lease = None
 
     def snapshot(self, offscreen, *, create_texture=True):
-        """Read display RGBA bytes; create a texture only for on-screen preview."""
+        """Keep a leased GPU image, or read independent RGBA for capture."""
         import gpu
+        if create_texture and self._lease is not None:
+            self.pixels = None
+            self.texture = offscreen.texture_color
+            return
         with offscreen.bind():
             buffer = gpu.state.active_framebuffer_get().read_color(
                 0, 0, self.width, self.height, 4, 0, 'UBYTE')
@@ -185,18 +231,101 @@ class CameraImage:
 
     def free(self):
         self.texture = self.pixels = None
+        lease = getattr(self, '_lease', None)
+        self._lease = None
+        if lease is not None:
+            owner, target = lease
+            owner.release(target)
 
     def rgba(self):
+        if self.pixels is None and getattr(self, '_lease', None) is not None:
+            import gpu
+            with self._lease[1].offscreen.bind():
+                buffer = gpu.state.active_framebuffer_get().read_color(
+                    0, 0, self.width, self.height, 4, 0, 'UBYTE')
+                buffer.dimensions = self.width * self.height * 4
+                self.pixels = bytes(buffer)
         return self.pixels
 
 
-def simulation_state_hash(scene, depsgraph):
-    """Version evaluated turbine geometry and transforms, not only the timeline.
-
-    This catches callbacks that mutate pose/shape without advancing frame_current.
-    Temporary annotation visibility is intentionally not part of the state.
-    """
+def _mesh_coordinates(evaluated):
     from array import array
+    mesh = evaluated.to_mesh()
+    try:
+        coords = array('f', [0.]) * (len(mesh.vertices) * 3)
+        mesh.vertices.foreach_get('co', coords)
+        return coords.tobytes()
+    finally:
+        evaluated.to_mesh_clear()
+
+
+class GeometryCache:
+    """Cache evaluated coordinates with dependency-graph invalidation.
+
+    Transforms and object membership are read on every hash. Geometry updates,
+    source/clock/graph changes and missing handlers invalidate the byte cache.
+    Capture does not use this cache and always reads the evaluated meshes.
+    """
+    def __init__(self):
+        self.meshes = {}
+        self.scope = None
+        self.handler_list = None
+        self.mesh_reads = 0
+        self.cache_hits = 0
+
+    def updated(self, scene, depsgraph):
+        if self.scope is None or (scene.as_pointer(), depsgraph.as_pointer()) != self.scope[:2]:
+            return
+        try:
+            for update in depsgraph.updates:
+                item = getattr(update.id, 'original', update.id)
+                # Camera optics/pose cannot by themselves change a mesh. A
+                # camera-dependent modifier also reports its geometry update.
+                is_camera = (getattr(item, 'type', None) == 'CAMERA' or
+                             item.bl_rna.identifier == 'Camera')
+                if update.is_updated_geometry and not is_camera:
+                    identifier = item.bl_rna.identifier
+                    if identifier in {'Object', 'Mesh'}:
+                        pointer = item.as_pointer()
+                        index = 0 if identifier == 'Object' else 1
+                        self.meshes = {key: value for key, value in self.meshes.items()
+                                       if key[index] != pointer}
+                    else:
+                        self.meshes.clear()
+                        return
+        except (AttributeError, ReferenceError, RuntimeError):
+            self.meshes.clear()
+
+    def hash(self, scene, depsgraph, identity):
+        import bpy
+        handlers = bpy.app.handlers.depsgraph_update_post
+        scope = (scene.as_pointer(), depsgraph.as_pointer(), identity,
+                 scene.frame_current, scene.frame_subframe)
+        if self.scope != scope or self.updated not in handlers:
+            self.meshes.clear()
+            self.scope = scope
+        if self.updated not in handlers:
+            handlers.append(self.updated)
+        self.handler_list = handlers
+        return _simulation_state_hash(scene, depsgraph, self)
+
+    def coordinates(self, obj, evaluated):
+        key = (obj.as_pointer(), obj.data.as_pointer())
+        if key not in self.meshes:
+            self.meshes[key] = _mesh_coordinates(evaluated)
+            self.mesh_reads += 1
+        else:
+            self.cache_hits += 1
+        return self.meshes[key]
+
+    def free(self):
+        if self.handler_list is not None and self.updated in self.handler_list:
+            self.handler_list.remove(self.updated)
+        self.handler_list = self.scope = None
+        self.meshes.clear()
+
+
+def _simulation_state_hash(scene, depsgraph, cache=None):
     import hashlib
     import struct
     digest = hashlib.sha256()
@@ -207,18 +336,24 @@ def simulation_state_hash(scene, depsgraph):
         digest.update(obj.name.encode())
         digest.update(struct.pack('16d', *(v for row in evaluated.matrix_world for v in row)))
         if obj.type == 'MESH':
-            mesh = evaluated.to_mesh()
-            try:
-                coords = array('f', [0.]) * (len(mesh.vertices) * 3)
-                mesh.vertices.foreach_get('co', coords)
-                digest.update(coords.tobytes())
-            finally:
-                evaluated.to_mesh_clear()
+            digest.update(cache.coordinates(obj, evaluated) if cache else _mesh_coordinates(evaluated))
+    if cache is not None:
+        alive = {(obj.as_pointer(), obj.data.as_pointer()) for obj in scene.objects
+                 if obj.name.startswith(('WFRL.Turbine.', 'WFRL.Camera.T1.Custom.')) and obj.type == 'MESH'}
+        cache.meshes = {key: value for key, value in cache.meshes.items() if key in alive}
     return digest.hexdigest()
 
 
+def simulation_state_hash(scene, depsgraph):
+    """Read evaluated geometry and transforms, including same-frame native edits.
+
+    Temporary annotation visibility is intentionally not part of the state.
+    """
+    return _simulation_state_hash(scene, depsgraph)
+
+
 def render_group(context, cameras, long_edge=None, target=None, fast=False, *, create_texture=True):
-    """Draw one frozen main-thread state, with optional preview texture upload."""
+    """Draw one frozen state into owned/leased textures or capture-only RGBA."""
     global _DRAWING
     import bpy
     if _DRAWING:
@@ -235,11 +370,15 @@ def render_group(context, cameras, long_edge=None, target=None, fast=False, *, c
     images = {}
     owned_target = target is None
     target = target if target is not None else RenderTarget()
+    leased_preview = create_texture and isinstance(target, PreviewTargets)
     _DRAWING = True
     try:
         context.view_layer.update()
         depsgraph = context.evaluated_depsgraph_get()
-        state_hash = simulation_state_hash(scene, depsgraph)
+        def fingerprint():
+            return (target.state_cache.hash(scene, depsgraph, identity) if leased_preview
+                    else simulation_state_hash(scene, depsgraph))
+        state_hash = fingerprint()
         from contextlib import nullcontext
         import sys
         native = sys.modules.get(__package__ + '.native_camera_views')
@@ -250,15 +389,18 @@ def render_group(context, cameras, long_edge=None, target=None, fast=False, *, c
                 image = CameraImage(camera, depsgraph, long_edge if long_edge is not None else params.output_long_edge_px)
                 image.state_hash = state_hash
                 images[int(camera['wfrl_custom_slot'])] = image
-                offscreen = target.get(context, image.width, image.height)
+                offscreen = (target.acquire(context, image) if leased_preview else
+                             target.get(context, image.width, image.height))
                 offscreen.draw_view3d(scene, context.view_layer, context.space_data, region,
                     image.view, image.projection, do_color_management=True, draw_background=True)
                 image.snapshot(offscreen, create_texture=create_texture)
         if (session_identity(scene) != identity or stamp != (scene.frame_current, scene.frame_subframe)
-                or simulation_state_hash(scene, depsgraph) != state_hash):
+                or fingerprint() != state_hash):
             raise RuntimeError('采集期间场景 / 仿真时刻变化，本组无效')
         return images
     except Exception:
+        if leased_preview:
+            target.state_cache.meshes.clear()
         for image in images.values():
             image.free()
         raise
@@ -346,6 +488,7 @@ def provenance(context, cameras, long_edge):
     from .custom_camera_capture import current_time
     scene = context.scene
     return {'identity': session_identity(scene), 'frame': scene.frame_current,
+        'context': (context.window.as_pointer(), context.area.as_pointer(), context.view_layer.as_pointer()),
         'subframe': scene.frame_subframe, 'time_s': current_time(scene),
         'revision': _REVISION, 'profile': repr(render_profile(scene, playback_preview(context))), 'long_edge': long_edge,
         'slots': tuple(int(cam['wfrl_custom_slot']) for cam in cameras),
@@ -372,9 +515,10 @@ def change_reasons(old, new):
 
 class Preview:
     def __init__(self):
-        self.target = RenderTarget()
+        self.target = PreviewTargets()
         self.images, self.key, self.error = {}, None, ''
         self.request = None
+        self.camera_changed_at = 0.
         self.metadata = None
         self.last = 0.
         self.attempt = 0.
@@ -386,10 +530,10 @@ class Preview:
         _RENDERERS.add(self)
 
     def free(self):
-        self.target.free()
         for image in self.images.values():
             image.free()
         self.images.clear()
+        self.target.free()
         self.key = self.metadata = self.request = None
         self.time_s, self.error = None, ''
         _RENDERERS.discard(self)
@@ -397,11 +541,14 @@ class Preview:
     def observe(self, context, cameras, long_edge=640):
         long_edge = min(long_edge, 320) if playback_preview(context) else long_edge
         requested = provenance(context, cameras, long_edge)
-        if self.key and self.key['identity'] != requested['identity']:
+        if self.key and (self.key['identity'] != requested['identity'] or
+                         self.key.get('context') != requested.get('context')):
             self.free()
         # Draft and confirmed groups must never share the same old image.
         if self.key and tuple(c[1] for c in self.key['cameras']) != tuple(c[1] for c in requested['cameras']):
             self.free()
+        if self.request is None or self.request['cameras'] != requested['cameras']:
+            self.camera_changed_at = time.monotonic()
         self.request = requested
         return requested
 
@@ -422,10 +569,17 @@ class Preview:
         long_edge = min(long_edge, 320) if playback_preview(context) else long_edge
         key = self.observe(context, cameras, long_edge)
         now = time.monotonic()
-        if key == self.key or (self.images and now - self.last < max(.25, self.elapsed_s)) or (self.error and now - self.attempt < .5):
+        camera_edit = (self.key is not None and key['cameras'] != self.key['cameras'] and
+                       all(key[k] == self.key[k] for k in key if k not in {'revision', 'cameras'}))
+        # Continuous input keeps the regular budget; a settled edit can flush
+        # its latest state early. Reserve a draw's duration for other UI work.
+        settled_edit = camera_edit and now - self.camera_changed_at >= .05
+        cooldown = max(.05 if settled_edit else .25, self.elapsed_s)
+        if key == self.key or (self.images and now - self.last < cooldown) or (self.error and now - self.attempt < .5):
             return
         started = time.perf_counter()
         self.attempt, self.updating = now, True
+        _RENDERERS.add(self)
         images = None
         try:
             # RNA edits can leave matrix_world pending until depsgraph evaluation.
@@ -457,6 +611,7 @@ class Preview:
             self.error = str(exc)
             diagnostics.record('preview_failure', reason=self.error)
         finally:
+            self.target.trim(len(self.images))
             self.updating = False
 
     def draw(self, context, cameras, slot=1, hint='', closable=True):

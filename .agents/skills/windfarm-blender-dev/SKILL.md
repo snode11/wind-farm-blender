@@ -17,8 +17,10 @@ description: Use when developing, troubleshooting, or documenting this repositor
 
 | 功能 | 主要模块／仓库入口 | 专题 |
 | --- | --- | --- |
+| WFRL 主入口与状态 | `panels/home.py`、`home_state.py`；复用回放／相机／手动／导出／后端操作器，保留原页签 | [操作入口](../../../前端readme.md#工作区的-wfrl-主入口)、[验证入口](references/verification.md) |
 | 手动场景、姿态与变桨 | `manual_scene.py`、`manual_control.py`、`manual_motion.py`、`manual_pose.py`；仓库 `scripts/blender/open_manual_control.py` | [手动控制](../../../docs/blender/风机手动控制.md) |
 | Down 视频与后台作业 | `manual_down.py`、`manual_video*.py`；仓库 `scripts/blender/manage_manual_video.py`、`wfrl/camera_video/` | [视频操作与依赖](../../../docs/blender/风机手动控制.md#导出变桨视频) |
+| 普通 PNG 后台动画 | `animation_render.py`、`animation_render_ui.py`、`animation_render_worker.py` | [实现与边界](../../../blender_frontend/README.md#52-统一侧栏与固定时间轴)、[验证入口](references/verification.md) |
 | 柔性运动、外形与测量 | `farm_flex.py`、`turbine_geometry.py`、`deflection.py` | [实现说明](../../../blender_frontend/README.md) |
 | 场景、播放归属与性能 | `scene_builder.py`、`playback.py`、`performance.py` | [验证入口](references/verification.md) |
 | 重建对照与纹理 | `split_reconstruction*.py`、`split_turbine_context.py`、`blade_recon_*.py` | [操作说明](../../../前端readme.md)、[Blade Recon](../../../docs/blender/BladeRecon可视化使用说明.md) |
@@ -55,6 +57,7 @@ description: Use when developing, troubleshooting, or documenting this repositor
 
 ### 视频作业
 
+- 普通 PNG 动画使用独立场景副本、独立 Blender 进程及任务配置目录，按冻结的场景相机、帧范围／步长和原画质输出到唯一目录；取消、失败保留已生成帧，正常退出和完整帧数共同确认完成。相机流畅预览预算不进入快照；合成器独立文件输出节点须禁用，UI 与后台递归核对。源场景重载、撤销／重做及扩展卸载取消任务；此入口不承诺跨进程恢复，也不代替冻结试验 MP4 监管。
 - Down 便捷视频只驱动所选机组，源场景暂停；冻结试验视频使用最近确认配置，按 `t=k/fps` 生成整数帧，不依赖预览。均用独立场景，其余机组保持快照，后台副本停用墙钟；严格媒体验证和 MP4／JSON 拒绝覆盖提交不可省略，短片不替代完整视频或监管验证。
 - 冻结试验监管需完整工作区、FFmpeg／FFprobe 及支持 `flock / waitid(WNOWAIT)` 的 macOS／Linux Python 3.11+（`WFRL_VIDEO_PYTHON`）。扩展 ZIP 不含配套脚本及 `wfrl.camera_video`，安装入口通过偏好 `project_dir` 选工作区。注册容忍受限数据访问，场景可用后恢复；按身份、凭据及锁恢复，复制场景不认领原作业，取消不信任磁盘 PID。
 - 仅 `final=true` 的 `COMPLETE / FAILED / CANCELLED` 是最终结果；`LOST` 不等于失败或取消，`--detach` 只确认启动。`retry` 只从匹配完整母版重做编码、验证与发布，不恢复未渲染帧；保留目标预检及失败母版，只清理自有暂存，不改写成功状态。

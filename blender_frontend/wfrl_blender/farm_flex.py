@@ -248,6 +248,42 @@ def _update_scene_transforms(scene):
     view_layer.update()
 
 
+def _rna_identity(value):
+    """Distinguish native data replacements as well as ordinary Python owners."""
+    pointer = getattr(value, 'as_pointer', None)
+    return pointer() if pointer is not None else id(value)
+
+
+def _array_state(value):
+    array = np.asarray(value)
+    return array.shape, array.dtype.str, array.tobytes()
+
+
+def _bound_array_state(value):
+    # Bound reference arrays own read-only storage. Native mesh edits are
+    # checked separately; rebind_blade replaces these arrays after rest edits.
+    if value.flags.owndata and not value.flags.writeable:
+        return id(value)
+    return _array_state(value)
+
+
+def _write_coordinates(obj, coordinates, *, check_current):
+    """Skip a reused write only after checking the current native coordinates."""
+    values = np.asarray(coordinates, dtype=np.float32).reshape(-1)
+    mesh = obj.data
+    if len(mesh.vertices) * 3 != len(values):
+        raise ValueError('Replay mesh topology no longer matches its binding: ' + obj.name)
+    if check_current and not getattr(mesh, 'is_editmode', False):
+        current = np.empty_like(values)
+        mesh.vertices.foreach_get('co', current)
+        if current.tobytes() == values.tobytes():
+            performance.count('flex.mesh_writes_skipped')
+            return False
+    mesh.vertices.foreach_set('co', values)
+    mesh.update()
+    return True
+
+
 class _EvaluatedTransformRequired(Exception):
     pass
 
@@ -374,6 +410,7 @@ class FarmFlex:
         from .materials import get_material,ensure_blade_tip_markings
         from . import clearance_replay
         self._world_matrices = None
+        self._update_geometry = None
         package = _load_package(path) if _package is None else _package
         self.manifest,self.times,self.transforms,self.poses,self.readers=package.playback
         result_path = package.result_path
@@ -436,21 +473,22 @@ class FarmFlex:
                         modifier.show_viewport=False
                         modifier.show_render=False
                 rest=np.empty(len(obj.data.vertices)*3,np.float32)
-                obj.data.vertices.foreach_get('co',rest);rest=rest.reshape(-1,3)
+                obj.data.vertices.foreach_get('co',rest);rest=rest.reshape(-1,3).copy()
                 matrix=np.array(obj.matrix_world)
                 self.reference_matrices[obj.name] = matrix.copy()
                 world=(rest@matrix[:3,:3].T+matrix[:3,3]-offset).astype(np.float32)
                 index=np.clip(np.searchsorted(spans,rest[:,2],side='right')-1,0,len(spans)-2)
                 weight=np.clip((rest[:,2]-spans[index])/(spans[index+1]-spans[index]),0,1)[:,None]
                 self.blades.append((obj,rest,world,index,weight.astype(np.float32),turbine,b-1,offset))
-                self.groups[obj.name]=[(s,np.flatnonzero(index==s)) for s in np.unique(index)]
+                self.groups[obj.name]=[(s,np.flatnonzero(index==s).copy()) for s in np.unique(index)]
+                _readonly_arrays((self.blades[-1][1:], self.groups[obj.name]))
         if self.tower_motion is not None:
             from .turbine_geometry import tower_mesh
             tower_vertices, tower_faces = tower_mesh()
             heights = self.tower_motion['heights']
             rest = np.asarray(tower_vertices, dtype=np.float32)
             index = np.clip(np.searchsorted(heights,rest[:,2],side='right')-1,0,len(heights)-2)
-            weight = ((rest[:,2]-heights[index])/(heights[index+1]-heights[index]))[:,None]
+            weight = ((rest[:,2]-heights[index])/(heights[index+1]-heights[index]))[:,None].copy()
             for k,tid in enumerate(self.readers):
                 prefix = f'WFRL.Turbine.{tid}'
                 obj = scene.objects[prefix+'.Tower']
@@ -461,6 +499,7 @@ class FarmFlex:
                 for polygon in mesh.polygons: polygon.use_smooth=True
                 self._meshes.replace(obj, mesh)
                 self.towers.append((obj,rest.copy(),index,weight,k))
+                _readonly_arrays(self.towers[-1][1:])
                 # Primitive collars store height in object.location; decorative
                 # rings store it in their vertices. Apply the same support
                 # transform without adding the baked height a second time.
@@ -539,6 +578,7 @@ class FarmFlex:
 
     def restore_support(self):
         self._world_matrices = None
+        self._update_geometry = None
         for obj,rest,*_ in self.towers:
             try:
                 obj.data.vertices.foreach_set('co',rest.ravel());obj.data.update()
@@ -598,9 +638,11 @@ class FarmFlex:
         index = np.clip(np.searchsorted(spans,rest[:,2],side='right')-1,0,len(spans)-2)
         weight = np.clip((rest[:,2]-spans[index])/(spans[index+1]-spans[index]),0,1)[:,None].astype(np.float32)
         self.blades[position] = (obj,rest,world,index,weight,k,b,offset)
-        self.groups[obj.name] = [(s,np.flatnonzero(index==s)) for s in np.unique(index)]
+        self.groups[obj.name] = [(s,np.flatnonzero(index==s).copy()) for s in np.unique(index)]
+        _readonly_arrays((self.blades[position][1:], self.groups[obj.name]))
         self.cache.clear()
         self._world_matrices = None
+        self._update_geometry = None
 
     def _world_cache(self):
         import bpy
@@ -713,10 +755,60 @@ class FarmFlex:
         performance.count('flex.measurement_points', 1)
         return self.world_matrix(row[0]) @ Vector(local)
 
+    def _blade_inputs(self):
+        return tuple((_rna_identity(row[0]), _rna_identity(row[0].data),
+                      row[0].name, len(row[0].data.vertices),
+                      *(_bound_array_state(value) for value in row[1:5]), row[5:7],
+                      _bound_array_state(row[7]),
+                      tuple((section, _bound_array_state(ids))
+                            for section, ids in self.groups[row[0].name]))
+                     for row in self.blades)
+
+    def _geometry_sample(self, reader, t, i, alpha):
+        """Cache one sample's pure geometry; consumers and native state stay live."""
+        blades = self._blade_inputs()
+        support = self.tower_motion
+        support_key = None if support is None else (
+            id(support), _array_state(support['heights']),
+            _array_state(support['transforms'][i:i+2]),
+            _array_state(support['nacelle'][i:i+2]))
+        comparison = self.comparison
+        scalars = None if comparison is None else tuple(sorted(comparison.data['scalars'].items()))
+        exported = getattr(self, 'export_turbines', None)
+        key = (_rna_identity(self.scene), id(reader),
+               tuple((name, id(value)) for name, value in self.readers.items()),
+               self.scene.get('wfrl_farm_flex_path'), self.scene.get('wfrl_farm_manifest_sha256'),
+               self.scene.get('wfrl_blade_model'), getattr(self, 'model', None),
+               t, i, alpha, id(self.times), id(self.transforms), id(self.poses),
+               _array_state(self.times[i:i+2]), _array_state(self.transforms[i:i+2]),
+               _array_state(self.poses[i:i+2]), support_key,
+               id(self.reference), id(comparison), scalars, blades,
+               tuple((_rna_identity(obj), _rna_identity(obj.data), len(obj.data.vertices),
+                      _bound_array_state(rest), _bound_array_state(index), _bound_array_state(weight), k)
+                     for obj, rest, index, weight, k in self.towers),
+               frozenset(self.visible_turbines),
+               None if exported is None else frozenset(exported))
+        cached = getattr(self, '_update_geometry', None)
+        if cached is not None and cached[0] == key:
+            performance.count('flex.update_cache_hit')
+            return cached[1]
+        performance.count('flex.update_cache_miss')
+        sample = dict(lower=self.deformed_at(i, _bindings=blades),
+                      upper=self.deformed_at(i+1, _bindings=blades),
+                      pose=self.poses[i]*(1-alpha)+self.poses[i+1]*alpha,
+                      blades={}, towers={})
+        if support is not None:
+            from .tower_motion import interpolate_transform
+            sample['tower'] = support['transforms'][i]*(1-alpha)+support['transforms'][i+1]*alpha
+            sample['nacelle'] = interpolate_transform(support['nacelle'][i], support['nacelle'][i+1], alpha)
+        self._update_geometry = key, sample
+        return sample
+
     @performance.timed("flex.deformation_cache")
-    def deformed_at(self,frame):
+    def deformed_at(self,frame, *, _bindings=None):
         turbines = self.mesh_turbines()
-        key = (frame, turbines)
+        key = (frame, turbines, id(self.transforms), _array_state(self.transforms[frame]),
+               self._blade_inputs() if _bindings is None else _bindings)
         if key in self.cache:
             performance.count("flex.cache_hit")
             return self.cache[key]
@@ -767,8 +859,8 @@ class FarmFlex:
         if getattr(self, 'export_turbines', None) is None:
             support_turbines.add(0)
         performance.count("flex.participating_turbines", len(mesh_turbines))
-        lower=self.deformed_at(i);upper=self.deformed_at(i+1)
-        pose=self.poses[i]*(1-alpha)+self.poses[i+1]*alpha
+        sample = self._geometry_sample(reader, t, i, alpha)
+        lower, upper, pose = sample['lower'], sample['upper'], sample['pose']
         if record_telemetry:
             self.record_telemetry(scene, pose)
         scene['wfrl_clearance_time_s']=float(t)
@@ -786,8 +878,7 @@ class FarmFlex:
             from mathutils import Matrix
             from .tower_motion import interpolate_transform
             support = self.tower_motion
-            tower = support['transforms'][i]*(1-alpha)+support['transforms'][i+1]*alpha
-            nacelle = interpolate_transform(support['nacelle'][i],support['nacelle'][i+1],alpha)
+            tower, nacelle = sample['tower'], sample['nacelle']
             for k,tid in enumerate(self.readers):
                 if getattr(self, 'export_turbines', None) is not None and k not in self.export_turbines:
                     continue
@@ -798,13 +889,17 @@ class FarmFlex:
                 if k not in support_turbines:
                     continue
                 phase_started = performance.begin()
-                lo,hi=tower[k,index],tower[k,index+1]
-                a=np.einsum('nij,nj->ni',lo[:,:,:3],rest)+lo[:,:,3]
-                b=np.einsum('nij,nj->ni',hi[:,:,:3],rest)+hi[:,:,3]
-                obj.data.vertices.foreach_set('co',((1-weight)*a+weight*b).astype(np.float32).ravel())
-                obj.data.update()
+                key = _rna_identity(obj)
+                reused = key in sample['towers']
+                if not reused:
+                    lo,hi=tower[k,index],tower[k,index+1]
+                    a=np.einsum('nij,nj->ni',lo[:,:,:3],rest)+lo[:,:,3]
+                    b=np.einsum('nij,nj->ni',hi[:,:,:3],rest)+hi[:,:,3]
+                    sample['towers'][key] = ((1-weight)*a+weight*b).astype(np.float32)
+                written = _write_coordinates(obj, sample['towers'][key], check_current=reused)
                 performance.end("flex.tower_interpolate_write", phase_started)
-                performance.count("flex.tower_vertices_written", len(rest))
+                if written:
+                    performance.count("flex.tower_vertices_written", len(rest))
             heights=support['heights']
             for obj,k,z,rest_location in self.fittings:
                 if k not in support_turbines:
@@ -819,21 +914,29 @@ class FarmFlex:
             if lo is None:continue
             obj = row[0]
             inverse = np.array(self.world_matrix(obj).inverted())
+            key = _rna_identity(obj)
+            matrix_key = _array_state(inverse)
+            cached = sample['blades'].get(key)
+            reused = cached is not None and cached[0] == matrix_key
+            if not reused:
+                phase_started = performance.begin()
+                deformed = self._interpolate_blade(row, lo, hi, i, alpha, pose,
+                                                   nacelle if self.tower_motion is not None else None)
+                local=deformed@inverse[:3,:3].T+inverse[:3,3]
+                if row[5] == 0 and self.comparison is not None:
+                    # The loose structural vertex and hidden numerical sample use
+                    # identical float32 transport, independent of mesh batch size.
+                    local[-2] = self._structural_tip_local(row, i, alpha, pose,
+                                                          nacelle if self.tower_motion is not None else None)
+                sample['blades'][key] = matrix_key, local.astype(np.float32)
+                performance.end('flex.interpolation', phase_started)
+            local = sample['blades'][key][1]
             phase_started = performance.begin()
-            deformed = self._interpolate_blade(row, lo, hi, i, alpha, pose,
-                                               nacelle if self.tower_motion is not None else None)
-            local=deformed@inverse[:3,:3].T+inverse[:3,3]
-            if row[5] == 0 and self.comparison is not None:
-                # The loose structural vertex and hidden numerical sample use
-                # identical float32 transport, independent of mesh batch size.
-                local[-2] = self._structural_tip_local(row, i, alpha, pose,
-                                                      nacelle if self.tower_motion is not None else None)
-            performance.end('flex.interpolation', phase_started)
-            phase_started = performance.begin()
-            obj.data.vertices.foreach_set('co',local.astype(np.float32).ravel());obj.data.update()
+            written = _write_coordinates(obj, local, check_current=reused)
             performance.end('flex.mesh_write_update', phase_started)
-            performance.count('flex.blade_updates')
-            performance.count('flex.vertices_written', len(local))
+            if written:
+                performance.count('flex.blade_updates')
+                performance.count('flex.vertices_written', len(local))
         if update_comparison and self.comparison is not None and getattr(self, 'export_turbines', None) is None:
             self.comparison.update(scene, i, alpha, t)
         from .nrel_defects import editor
@@ -898,6 +1001,7 @@ def detach(scene=None, *, restore=True):
             active.restore_support()
         active.cache.clear()
         active._world_matrices = None
+        active._update_geometry = None
     if _ACTIVE in actives:
         _ACTIVE = next(iter(_ACTIVES.values()), None)
     if not _ACTIVES:

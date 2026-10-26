@@ -1,4 +1,4 @@
-"""New Part 4 main-thread integration tests; no Blender launch."""
+"""Main-thread integration tests without a Blender process."""
 import sys
 import unittest
 from types import SimpleNamespace
@@ -245,9 +245,11 @@ class LiveRuntimeTests(unittest.TestCase):
 
     def test_saved_live_scene_load_stays_disconnected_and_unconfirmed(self):
         import wfrl_blender
-        scene = SimpleNamespace(get={'wfrl_scene_kind': 'live'}.get,
+        properties = {'wfrl_scene_kind': 'live', 'wfrl_home_load_error': 'stale error'}
+        scene = SimpleNamespace(get=properties.get, pop=properties.pop,
                                 objects={}, library=None)
         bpy = SimpleNamespace(data=SimpleNamespace(scenes=[scene], cameras=[]))
         with patch.dict(sys.modules, bpy=bpy), patch.object(runtime, 'disconnect') as disconnect:
             wfrl_blender._on_load(None)
             disconnect.assert_called_once_with(force=True)
+            self.assertNotIn('wfrl_home_load_error', properties)

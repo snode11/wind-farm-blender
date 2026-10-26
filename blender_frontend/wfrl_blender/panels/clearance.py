@@ -111,9 +111,10 @@ class WFRL_OT_ClearancePlayback(bpy.types.Operator):
 
 
 def playback_control(scene, screen):
+    from .. import playback
     if scene.frame_current >= scene.frame_end:
         return '重新播放', 'REW', '本段已结束'
-    if screen is not None and screen.is_animation_playing:
+    if screen is not None and playback.is_playing(scene):
         return '暂停', 'PAUSE', '正在播放'
     return '播放', 'PLAY', '已暂停'
 

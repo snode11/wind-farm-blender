@@ -143,18 +143,44 @@ class WFRL_OT_RenderStill(bpy.types.Operator):
 
 class WFRL_OT_RenderAnimation(bpy.types.Operator):
     bl_idname = "wfrl.render_animation"
-    bl_label = "Render Animation"
-    bl_description = "Render the current WFRL frame range from the active camera"
+    bl_label = "后台渲染动画"
+    bl_description = "独立场景副本按当前相机与帧范围生成 PNG；提供进度与取消，不改变源场景"
     directory: bpy.props.StringProperty(subtype="DIR_PATH", default="//wfrl-animation/")
 
+    @classmethod
+    def poll(cls, context):
+        from ..animation_render import job
+        return context.scene.camera is not None and not job.active
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
     def execute(self, context):
-        scene = context.scene
-        scene.render.image_settings.file_format = "PNG"
-        scene.render.filepath = bpy.path.abspath(self.directory)
-        scene["wfrl_last_animation_render"] = scene.render.filepath
-        bpy.ops.render.render(animation=True)
+        from .. import animation_render_ui
+        try:
+            path = animation_render_ui.start(context, self.directory)
+        except (OSError, ValueError, RuntimeError) as exc:
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        self.report({'INFO'}, '动画正在后台渲染：' + str(path))
         return {"FINISHED"}
 
 
+class WFRL_OT_CancelRenderAnimation(bpy.types.Operator):
+    bl_idname = 'wfrl.cancel_render_animation'
+    bl_label = '取消后台动画渲染'
+
+    @classmethod
+    def poll(cls, context):
+        from ..animation_render import job
+        return job.active
+
+    def execute(self, context):
+        from ..animation_render import job
+        job.cancel()
+        return {'FINISHED'}
+
+
 CLASSES = (WFRL_OT_LoadDemo, WFRL_OT_LoadDualBeam, WFRL_OT_SelectCamera, WFRL_OT_RenderStill,
-           WFRL_OT_RenderAnimation)
+           WFRL_OT_RenderAnimation, WFRL_OT_CancelRenderAnimation)

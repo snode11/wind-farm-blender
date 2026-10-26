@@ -18,6 +18,63 @@ _FIELDS = ('x', 'y', 'z', 'yaw', 'pitch', 'roll', 'fov', 'vfov', 'distance', 'fo
 _VIEWING = {'WATCH', 'LAYOUT'}
 
 
+def _timer_advanced(op, event):
+    """Consume at most one poll per advance of this operator's own timer.
+
+    Blender Event RNA does not expose the originating timer. Its Timer RNA does
+    expose time_duration, so unrelated TIMER events cannot multiply our polls.
+    """
+    if getattr(event, 'timer', None) not in (None, op.timer):
+        return False
+    duration = op.timer.time_duration
+    if duration <= op._timer_duration:
+        return False
+    op._timer_duration = duration
+    return True
+
+
+def _display_state(op):
+    """Immutable values used by the overlay; no mesh or image readback."""
+    from .. import custom_camera_capture
+    cameras = [op.camera]
+    if op.stage not in {'AIM', 'WATCH'}:
+        cameras = [core.get_camera(op.scene, slot) for slot in core.SLOTS]
+        if op.stage != 'LAYOUT':
+            cameras[op.slot - 1] = op.camera if op.ready else None
+    camera_state = tuple((cam.as_pointer(), core.parameters(cam),
+                          tuple(v for row in cam.matrix_world for v in row),
+                          cam.get('custom_label', ''), cam.get('custom_enabled', True),
+                          core.anchor(cam)) for cam in cameras if cam is not None)
+    parent = op.scene.objects.get(core.ROOT_NAME)
+    parent_state = (tuple(v for row in parent.matrix_world for v in row)
+                    if parent is not None and op.stage not in {'AIM', 'WATCH'} else None)
+    request = op.preview.request or {}
+    system = bpy.context.preferences.system
+    return (op.stage, op.slot, op.ready, op.error, op.drag, op.stick,
+            op.hover, tuple(op.candidates), camera_state, parent_state,
+            op.scene.frame_current, op.scene.frame_subframe,
+            bool(op.window.screen.is_animation_playing), custom_camera_capture.active(),
+            tuple(request.get(key) for key in ('time_s', 'frame', 'subframe')),
+            op.preview.version, bool(op.preview.images), op.preview.status(),
+            tuple((r.type, r.x, r.y, r.width, r.height) for r in op.area.regions),
+            system.ui_scale, system.use_region_overlap,
+            tuple(getattr(op.wm, 'wfrl_custom_' + key) for key in
+                  ('engineering', 'show_axis', 'show_frustum')))
+
+
+def _redraw_if_changed(op):
+    if op.closed:
+        return False
+    state = _display_state(op)
+    if state == getattr(op, '_redraw_state', None):
+        return False
+    op._redraw_state = state
+    op.area.tag_redraw()
+    diagnostics.record('overlay_redraw', slot=op.slot, stage=op.stage,
+                       version=op.preview.version)
+    return True
+
+
 def dismiss_for_view_switch(scene):
     """Release the overlay before a legacy camera writes its target view.
 
@@ -208,7 +265,6 @@ def fields_changed(wm, context):
         if wm.wfrl_custom_mount_mode == 'RESEARCH':
             core.apply_research(op.scene, op.camera, params, wm.wfrl_custom_research_confirmed)
             op.ready, op.error = True, ''
-            op.area.tag_redraw()
             return
         old = core.parameters(op.camera)
         if any(abs(a-b) > 1e-7 for a,b in zip(params.location, old.location)):
@@ -225,9 +281,10 @@ def fields_changed(wm, context):
             core.apply_parameters(op.camera, params)
         op.ready = core.anchor(op.camera) is not None
         op.error = '' if op.ready else '请先点击机舱外壳选择有效安装位置'
-        op.area.tag_redraw()
     except (ValueError, RuntimeError) as exc:
         op.ready, op.error = False, str(exc)
+    finally:
+        _redraw_if_changed(op)
 
 
 def distance_changed(wm, context):
@@ -239,6 +296,8 @@ def distance_changed(wm, context):
         _ACTIVE.ready, _ACTIVE.error = True, ''
     except (ValueError, RuntimeError) as exc:
         _ACTIVE.ready, _ACTIVE.error = False, str(exc)
+    finally:
+        _redraw_if_changed(_ACTIVE)
 
 
 class Available:
@@ -314,10 +373,11 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
             self.identity = session_identity(self.scene)
             self.last_time = time.monotonic()
             self.timer = self.wm.event_timer_add(.025, window=self.window)
+            self._timer_duration = self.timer.time_duration
             self.handle = bpy.types.SpaceView3D.draw_handler_add(self.draw_overlay, (), 'WINDOW', 'POST_PIXEL')
             _ACTIVE = self
             self.wm.modal_handler_add(self)
-            self.area.tag_redraw()
+            _redraw_if_changed(self)
             return {'RUNNING_MODAL'}
         except (ValueError, RuntimeError) as exc:
             if self.session:
@@ -414,6 +474,8 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
         return r.x <= event.mouse_x < r.x+r.width and r.y <= event.mouse_y < r.y+r.height
 
     def change(self, dx=0, dy=0, zoom=0):
+        if not (dx or dy or zoom):
+            return
         diagnostics.record('t1', input='direction', slot=self.slot, dx=dx, dy=dy, zoom=zoom)
         p = core.parameters(self.camera)
         yaw, pitch = core.screen_direction_delta(p.yaw, p.pitch, p.roll, dx, dy)
@@ -423,9 +485,12 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
                 h, v = projection.linked_fov(h, v, math.exp(zoom * .025))
             except ValueError:
                 return
-        core.apply_parameters(self.camera, replace(p, yaw=yaw, pitch=pitch, fov=h, vfov=v))
+        updated = replace(p, yaw=yaw, pitch=pitch, fov=h, vfov=v)
+        if updated == p:
+            return
+        core.apply_parameters(self.camera, updated)
         sync_fields(self.wm, self.camera)
-        self.area.tag_redraw()
+        _redraw_if_changed(self)
 
     def pick(self, x, y):
         from bpy_extras.view3d_utils import region_2d_to_origin_3d, region_2d_to_vector_3d
@@ -438,6 +503,8 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
             return {'FINISHED'}
         try:
             if context.window != self.window:
+                return {'PASS_THROUGH'}
+            if event.type == 'TIMER' and not _timer_advanced(self, event):
                 return {'PASS_THROUGH'}
             valid = (self.window in list(self.wm.windows) and self.window.scene == self.scene
                      and self.area in list(self.window.screen.areas) and self.area.type == 'VIEW_3D'
@@ -466,10 +533,8 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
                     self.cancel_edit()
                 return {'FINISHED'} if self.closed else {'RUNNING_MODAL'}
             if event.type == 'TIMER':
-                if getattr(event, 'timer', self.timer) != self.timer:
-                    return {'PASS_THROUGH'}
                 now = time.monotonic()
-                dt, self.last_time = min(now-self.last_time, .1), now
+                dt, self.last_time = max(0., min(now-self.last_time, .1)), now
                 if self.stage not in _VIEWING:
                     self.session._play(False)
                     if (self.scene.frame_current != self.session.frame or
@@ -488,8 +553,9 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
                                 self.preview.refresh(context, cameras)
                         except Exception as exc:
                             self.preview.error = str(exc)
-                    self.show_camera()
-                self.area.tag_redraw()
+                    if self.area.spaces.active.lock_camera:
+                        self.area.spaces.active.lock_camera = False
+                _redraw_if_changed(self)
                 return {'PASS_THROUGH'}
             from .. import custom_camera_capture
             if custom_camera_capture.active():
@@ -502,6 +568,7 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
                 if self.drag:
                     diagnostics.record('drag_release', slot=self.slot)
                     self.drag, self.stick = None, (0,0)
+                    _redraw_if_changed(self)
                     return {'RUNNING_MODAL'}
                 if self.stage == 'PLACE' and self.press:
                     px,py = self.press
@@ -517,6 +584,7 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
                                 self.ready, self.error = False, str(exc)
                         else:
                             self.error = '请选择 T1 机舱本体外壳表面'
+                    _redraw_if_changed(self)
                     return {'RUNNING_MODAL'}
             if event.type == 'MOUSEMOVE' and self.drag:
                 if self.drag == 'stick':
@@ -527,6 +595,7 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
                 else:
                     self.change((x-self.last[0])*(.04 if event.shift else .2),(y-self.last[1])*(.04 if event.shift else .2))
                 self.last = (x,y)
+                _redraw_if_changed(self)
                 return {'RUNNING_MODAL'}
             if not inside:
                 return {'PASS_THROUGH'}
@@ -550,7 +619,7 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
                     self.press = None
                 if event.type == 'MOUSEMOVE':
                     self.hover = self.pick(x,y) if self.stage == 'PLACE' else None
-                    self.area.tag_redraw()
+                    _redraw_if_changed(self)
                 if self.stage == 'PLACE' and event.type == 'LEFTMOUSE' and event.value == 'PRESS' and not (event.alt or event.ctrl or event.shift):
                     self.press = (x,y)
                     return {'RUNNING_MODAL'}
@@ -560,8 +629,10 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
                     cx,cy,r = self.geometry()
                     self.drag = 'stick' if math.hypot(x-cx,y-cy) <= r else 'look'
                     self.last = (x,y)
+                    self.last_time = time.monotonic()
                     if self.drag == 'stick':
                         self.stick = ((x-cx)/r,(y-cy)/r)
+                    _redraw_if_changed(self)
                     return {'RUNNING_MODAL'}
                 if event.type in {'WHEELUPMOUSE', 'WHEELDOWNMOUSE'}:
                     self.change(zoom=-3 if event.type == 'WHEELUPMOUSE' else 3)
@@ -779,6 +850,9 @@ class WFRL_OT_CustomAction(bpy.types.Operator):
                 op.error = str(exc)
             self.report({'ERROR'},str(exc))
             return {'CANCELLED'}
+        finally:
+            if op and not op.closed:
+                _redraw_if_changed(op)
 
 
 class WFRL_OT_CustomCoordinates(bpy.types.Operator):

@@ -27,16 +27,15 @@ def evaluate(item, *, report=None, code=0, transport=None, marker=None, timeout=
                            item.marker if marker is None else marker, changed)
 
 
-def test_suite_matches_original_24_and_visible_contracts():
+def test_suite_has_unique_scripts_and_explicit_window_contracts():
     selected = runner.select_tests(None)
-    assert len(selected) == 24
-    assert len({item.script for item in selected}) == 24
+    assert len({item.script for item in selected}) == len(selected)
+    assert all((runner.TEST_ROOT / item.script).is_file() for item in selected)
     assert {item.script for item in selected if item.mode == 'visible'} == {
         'shared_context_switch_regression.py', 'native_camera_playback_regression.py',
-        'nrel_editor_playback_regression.py'}
-    original = ROOT / 'outputs/farm-flex-world-matrices-validation/test-list.txt'
-    if original.is_file():
-        assert [item.script for item in selected] == original.read_text().split()
+        'nrel_editor_playback_regression.py', 'frontend_sessions_window.py'}
+    assert spec('animation_render_regression').package == 'synthetic_then_builtin_mappo'
+    assert spec('animation_render_regression').report == 'result.json'
     assert spec('nrel_defect_editor_regression').phases == ('save', 'reopen')
     assert spec('rebuild_mesh_regression').output_kind == 'directory'
     assert spec('rebuild_mesh_regression').report == 'checks.json'

@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "module": "/path/to/wind-farm-blender/outputs/frontend-session-validation-_3_0mtpb/package-validation-037/profile/extensions/wfrl_blender/__init__.py",
+  "complete_frames": 3,
+  "source_preserved": true,
+  "cancellation": true,
+  "output": "/path/to/wind-farm-blender/outputs/frontend-session-validation-_3_0mtpb/installed-png-render/animation-a20612c1ba7e",
+  "cancelled": "/path/to/wind-farm-blender/outputs/frontend-session-validation-_3_0mtpb/installed-png-render/animation-37e730eb30dd",
+  "mappo_output": "/path/to/wind-farm-blender/outputs/frontend-session-validation-_3_0mtpb/installed-png-render/animation-8c942f7ed3d5",
+  "recorded_motion_frames": [
+    1,
+    301,
+    601
+  ],
+  "compositor_output_guard": true,
+  "original_camera_quality_snapshot": true
+}
