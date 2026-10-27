@@ -1,4 +1,5 @@
 """Nonblocking video status, authoritative actions and controller lifecycle without bpy."""
+import gc
 import importlib.util
 from pathlib import Path
 import sys
@@ -142,9 +143,16 @@ def stall(controller, result=None):
 
 
 def immediate(function):
-    started = time.monotonic()
-    result = function()
-    elapsed = time.monotonic() - started
+    # Cyclic test doubles outside this callback do not belong to its latency budget.
+    collecting = gc.isenabled()
+    gc.disable()
+    try:
+        started = time.monotonic()
+        result = function()
+        elapsed = time.monotonic() - started
+    finally:
+        if collecting:
+            gc.enable()
     assert elapsed < .05, f'cached UI call took {elapsed:.3f} s'
     return result
 

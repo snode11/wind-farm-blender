@@ -2398,9 +2398,9 @@
     },
     {
       "path": "blender_frontend/tests/test_manual_video_cache.py",
-      "bytes": 19350,
-      "sha256": "ce30b0163dfad794ae1aba2483268c663c2b5cfeb6b42b0d606b76011906b2cc",
-      "original_sha256": "ce30b0163dfad794ae1aba2483268c663c2b5cfeb6b42b0d606b76011906b2cc",
+      "bytes": 19575,
+      "sha256": "56d4b3f215d9291e6e6df737a7dc39b1757314d4084c71aba81cc71d52d44595",
+      "original_sha256": "56d4b3f215d9291e6e6df737a7dc39b1757314d4084c71aba81cc71d52d44595",
       "text_portable": false
     },
     {
@@ -13725,8 +13725,8 @@
     {
       "path": "publication/blender-0.3.39/frontend.xml",
       "bytes": 201331,
-      "sha256": "1b29362711fa4ec5c508fd0ca83eeecfb60d5420413967650f529f082032e172",
-      "original_sha256": "1b29362711fa4ec5c508fd0ca83eeecfb60d5420413967650f529f082032e172",
+      "sha256": "91c8cb587f7d01243b52caa0b679de4a75bddfd52c3f2f82f0542b440b2242b4",
+      "original_sha256": "91c8cb587f7d01243b52caa0b679de4a75bddfd52c3f2f82f0542b440b2242b4",
       "text_portable": false
     },
     {
@@ -13766,9 +13766,9 @@
     },
     {
       "path": "publication/blender-0.3.39/logs/frontend.log",
-      "bytes": 3309,
-      "sha256": "6ebc643e2ce8a210d859eaed136ebf5ea8e7f675ad68df03dce6c43f1fb73f57",
-      "original_sha256": "6ebc643e2ce8a210d859eaed136ebf5ea8e7f675ad68df03dce6c43f1fb73f57",
+      "bytes": 2732,
+      "sha256": "eba1c1b42ee3894b9aadc24d67613d7c6ab9c4075eb2ee7aeb22d5f3600757db",
+      "original_sha256": "eba1c1b42ee3894b9aadc24d67613d7c6ab9c4075eb2ee7aeb22d5f3600757db",
       "text_portable": false
     },
     {
@@ -14229,8 +14229,8 @@
     {
       "path": "publication/blender-0.3.39/source-evidence.json",
       "bytes": 100268,
-      "sha256": "35256a99482548066dded43edd3b18a6fdf499fe9f83f0e55698242448fe1c50",
-      "original_sha256": "35256a99482548066dded43edd3b18a6fdf499fe9f83f0e55698242448fe1c50",
+      "sha256": "6ba016042c97e814cd4b8dfb806e640e7c3135cf74749a3aeb180e51ff38952e",
+      "original_sha256": "6ba016042c97e814cd4b8dfb806e640e7c3135cf74749a3aeb180e51ff38952e",
       "text_portable": false
     },
     {

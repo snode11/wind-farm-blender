@@ -28,9 +28,4 @@ blender_frontend/tests/test_custom_camera_capture.py::test_capture_step_requests
     assert list(png.getdata()) == [(255, 0, 0, 255), (0, 255, 0, 255),
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-=========================== short test summary info ============================
-SKIPPED [1] blender_frontend/tests/test_blade_models.py:102: Rootkink regeneration requires projects/commercial-rootkink-reference/template
-SKIPPED [1] blender_frontend/tests/test_blade_recon_data.py:244: Original boss source is unavailable; portable bundle hash tested separately
-SKIPPED [1] blender_frontend/tests/test_tip_deflection.py:159: Original VTP is not distributed with the offline release
-SKIPPED [1] blender_frontend/tests/test_video_output.py:129: Set WFRL_MEDIAMTX for actual RTSP
-1293 passed, 4 skipped, 2 deselected, 3 warnings, 4923 subtests passed in 86.65s (0:01:26)
+1293 passed, 4 skipped, 2 deselected, 3 warnings, 4923 subtests passed in 75.35s (0:01:15)

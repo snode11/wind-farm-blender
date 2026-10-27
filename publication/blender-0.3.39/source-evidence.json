@@ -597,7 +597,7 @@
     "blender_frontend/tests/test_manual_error_feedback.py": "1a4bc15e12fcff2618ee3a2a957e4275c13e606ea5a1d70220f1666508d8f1f3",
     "blender_frontend/tests/test_manual_motion.py": "a24e22da2fbc266c3c1e5677ae0e143b4c54c02ccc60de0e124d2e188de1582b",
     "blender_frontend/tests/test_manual_pose.py": "2de6f0a5e1c06c16dbe6cf302a894006cd4034caa6515fa6ec9712a038c1eb31",
-    "blender_frontend/tests/test_manual_video_cache.py": "ce30b0163dfad794ae1aba2483268c663c2b5cfeb6b42b0d606b76011906b2cc",
+    "blender_frontend/tests/test_manual_video_cache.py": "56d4b3f215d9291e6e6df737a7dc39b1757314d4084c71aba81cc71d52d44595",
     "blender_frontend/tests/test_manual_video_job.py": "b11eef766e21d88f340e9f58e80867d922a7ee66b99ec0fbe3f3a318b416036a",
     "blender_frontend/tests/test_manual_video_render.py": "855c205526d9b86707f22baabf5fe409340d865737089d1cf82c8b26061def94",
     "blender_frontend/tests/test_mappo_texture_package.py": "b8ecb14874ee4b84d497d42f840d232bf3dca052be6401bc90cd388f0f75ac69",
