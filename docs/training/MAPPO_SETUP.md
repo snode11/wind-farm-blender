@@ -50,6 +50,14 @@ SB3 包装器在自动重置前保存各机组的完整 `terminal_observation`�
 
 集中式 FLORIS MAPPO 分开处理价值自举和 GAE 递推边界：真正终止的下一状态价值为零；步数上限截断使用重置前终点的 critic 值；两种回合边界都截断优势递推，避免下一回合的奖励传播回来。普通 rollout 切片使用连续轨迹的下一状态价值。这些规则分别由对应入口实现，不代替其他训练路线的算法定义。
 
+### FAST.Farm 实验身份与 GRU
+
+`train_fastfarm.py` 使用完整有效配置和源码／实际输入的内容身份确定 `experiment_id`，每次执行另有独立 `run_id`。配置包含训练预算、预热、回合、奖励及其参数、PPO 参数、观测、风况、种子和循环 critic 设置；源码身份覆盖项目训练代码、WFCRL、求解器／模板／风文件及运行依赖。产物名由可读标签、实验摘要和运行 UUID 组成，已有检查点和历史文件不会被静默覆盖。
+
+`run_stage3.py` 仅复用配置、来源、完成预算、终态、历史和完整检查点全部对应的独立完成任务；检查点字节须匹配历史中的摘要。空文件、部分训练、缺少身份的既有结果及恢复训练段都不能被视为新的完整实验已完成。改变有效配置会形成不同实验身份，可用 `--dry-run` 检查待运行组合而不启动求解。
+
+`--recurrent` 只作用于集中式 critic。采样逐步维护隐藏状态，rollout 边界保留并 detach，回合起点清零；训练使用该 rollout 起点的隐藏状态及逐步回合起点标记。截断的 bootstrap 使用重置前观测和同一历史条件，但不提前消耗下一控制步的隐藏状态。数值一致性不代表 GRU 对前馈网络的控制收益已得到物理训练验证。
+
 ## 2. 依赖与安装
 
 仓库的 `wfcrl-env/requirements-floris-local.txt` 保留 Windows + Python 3.11 的历史兼容组合：FLORIS 3.5、Gymnasium 0.29.1、PettingZoo 1.24.3、NumPy 1.26.4、SB3 2.3.2，以及训练和 GUI 依赖。根 [pyproject.toml](../../pyproject.toml) 将 PyYAML 声明为核心依赖；普通安装、editable 安装和 wheel 均提供内置机型 YAML。`train` / `gui` / `all` 是功能附加组，训练仍需匹配的 WFCRL 环境，FAST.Farm 路径另需外部求解器与控制器，不能用普通 Python 包或 Blender ZIP 代替。[安装范围见本地配置](../setup/setup_local.md#2-python-环境floris-与算法开发)。
@@ -71,7 +79,7 @@ python -m pip check
 
 ## 3. 当前命令模板
 
-以下命令会创建或覆盖 `results/` 下对应产物，在训练或评估任务中使用。
+以下命令使用 `results/` 下的产物。FAST.Farm MAPPO 每次执行使用独立运行身份；其他训练入口的输出与覆盖规则按其加载／保存说明使用。
 
 ```bash
 # 参数共享 IPPO，SB3；500 是目标 agent transitions，实际按完整 rollout 取整
@@ -87,7 +95,7 @@ mpiexec -n 1 python scripts/train/train_fastfarm.py \
   --episode-steps 128 --warmup-steps 8 --wind-speed 8 --seed 0
 ```
 
-动态入口默认每回合重新启动后端，warmup 不进入训练统计；`--episode-steps 0` 才是保留的单长回合历史口径。`--recurrent` 仅切换 GRU critic，actor 仍是前馈共享网络。源码存在不代表 GRU 优于前馈或 MAPPO 优于 IPPO 已得到对照证据。
+动态入口默认每回合重新启动后端，warmup 不进入训练统计；`--episode-steps 0` 使用单长回合。`--recurrent` 仅切换 GRU critic，actor 仍是前馈共享网络。源码存在不代表 GRU 优于前馈或 MAPPO 优于 IPPO 已得到对照证据。
 
 ### 评估、续训与归一化
 
@@ -96,7 +104,11 @@ mpiexec -n 1 python scripts/train/train_fastfarm.py \
 - 多模态 IPPO：`mappo_mm_ablaincourt.zip` 与 `vecnormalize_mappo_mm.pkl`。
 - HornsRev2 PPO：`ppo_hornsrev2.zip` 与 `vecnormalize_hr2.pkl`。
 - 集中式 FLORIS MAPPO：`mappo_central_ablaincourt.pt`；观测统计在 checkpoint 内。
-- FAST.Farm MAPPO：由环境、种子、奖励、回合及 tag 共同命名的 `.pt`，检查其中 `obs_keys`、维度、机组顺序、控制量与观测统计。
+- FAST.Farm MAPPO：环境与可读标签、完整实验摘要及运行 UUID 共同命名的 `.pt`，检查其中 `obs_keys`、维度、机组顺序、控制量、观测统计及配置／来源身份；最终保存和定期检查点均包含完整软件恢复状态。
+
+FAST.Farm MAPPO 的 `--resume-from` 使用明确的 `new_episode_segment`：从已完成训练迭代恢复模型、优化器、归一化、随机状态、奖励整形、累计控制步／agent 步及下一回合风况序号，并开始新的物理回合。恢复段记录父运行、父实验、父检查点摘要及起始计数，不冒充未中断的物理轨迹。未结束回合的物理状态不恢复，丢弃的回合内步数保留在恢复元数据中；这不支持任意控制步的 FAST.Farm 物理状态续接。
+
+恢复前要求完整、兼容的软件检查点和有效配置／来源身份；只有总目标 `iters` 可以增加，其他有效配置须一致。参数、模型、优化器和统计不兼容时在创建求解器前拒绝；缺少恢复与来源信息的既有检查点仍可按动作合同用于推理，但不能用于该续训入口。物理回合初始化、跨平台及真实求解器运行仍需匹配环境单独验证。
 
 SB3 IPPO 的 `--eval-only` 自动加载模型与归一化文件，缺少任一文件或校验不兼容时明确失败。评估固定 `training=False`、`norm_reward=False`，冻结观测统计并报告原始奖励。`--resume` 恢复模型、观测及奖励统计和累计步数，设置 `training=True`、`norm_reward=True`；`--timesteps` 表示追加的 agent transitions，实际仍按完整 rollout 取整。
 

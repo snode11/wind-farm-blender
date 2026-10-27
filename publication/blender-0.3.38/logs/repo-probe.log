@@ -1,2 +1,2 @@
-FRONTEND_REPOSITORY_PROBE_PASS {"status": "PASS", "repository": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.38/profile/extensions", "repo_module": "wfrl_frontend", "blender": "5.2.1 LTS", "background": true}
+FRONTEND_REPOSITORY_PROBE_PASS {"status": "PASS", "repository": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-s9ipezx3/package-validation/profile/extensions", "repo_module": "wfrl_frontend", "blender": "5.2.1 LTS", "background": true}
 Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)

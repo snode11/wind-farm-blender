@@ -1,6 +1,6 @@
 {
   "archive": "wfrl_blender-0.3.38.zip",
-  "archive_sha256": "813dea0f6a5d74c78e813a9d4f51ad0bb1ac0041ba575536cd66022b03dcb916",
+  "archive_sha256": "f6896ed8f441d98c55a1b810840c7e63c78d6d07583c71930d44a4fb8d1b18f8",
   "files": [
     {
       "path": "__init__.py",
@@ -444,7 +444,7 @@
     },
     {
       "path": "build-info.json",
-      "sha256": "26adaa2f1216bc0fda384f083f74424165c91fa197a3de11b223eddf5ccfd7ae",
+      "sha256": "7c6cce95affa1332823620424649ada78c35ed5c08bd5708cc933638b7f0c246",
       "size": 177
     },
     {
@@ -484,8 +484,8 @@
     },
     {
       "path": "custom_camera_capture.py",
-      "sha256": "e24f17ad15efddf2f4721a7bcf14f73b3a630b8b4d0b9794261d09a970bbb6f1",
-      "size": 20990
+      "sha256": "020448811f8ea8c7a39593cf7332b111a7d900320ffe875d71f79cde99bdc8d3",
+      "size": 21029
     },
     {
       "path": "custom_camera_diagnostics.py",
@@ -504,8 +504,8 @@
     },
     {
       "path": "custom_cameras.py",
-      "sha256": "75b9a598f3022eedd84d651ba03f94033a2bad597456d685e8ce66588100b3a0",
-      "size": 48344
+      "sha256": "08f438e56980d2262bbaed12756a296afc219173ee5277b433e889bb151f3b50",
+      "size": 48671
     },
     {
       "path": "deflection.py",
@@ -859,8 +859,8 @@
     },
     {
       "path": "protocol.py",
-      "sha256": "79f9ed24e263fb0c6d02111c1e681c808b8cf12174d9405eb627e8c1ccb193ed",
-      "size": 17121
+      "sha256": "e5a8a8c776460712e5ae8b0339a03c55b380b92bb5454193c8d3a3c779456745",
+      "size": 17577
     },
     {
       "path": "radar_feedback.py",
@@ -874,8 +874,8 @@
     },
     {
       "path": "runtime.py",
-      "sha256": "4f6c50eaab474bc80a6fa23b9ca13732fc19673034c3a4e86a2a46a1fd9a5971",
-      "size": 28140
+      "sha256": "d6da28899465ffc2d4370c0bc0d3d412525a67f651ef4569cf87a555a06b9312",
+      "size": 28741
     },
     {
       "path": "scene_builder.py",
@@ -934,8 +934,8 @@
     },
     {
       "path": "state.py",
-      "sha256": "b881f127778f1065bf4c17b012b57f7465776898a9b157735eedd909e8dfd394",
-      "size": 4858
+      "sha256": "2618725f3332a7e88284809ba148da2e5390a0262216a4e2a6cd242f2046c974",
+      "size": 6203
     },
     {
       "path": "tip_tracking.py",

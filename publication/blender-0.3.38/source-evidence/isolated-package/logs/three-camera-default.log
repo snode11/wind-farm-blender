@@ -1,0 +1,7 @@
+Info: 已恢复默认三相机；可撤销相机修改
+Info: 三相机已是默认布局
+THREE_CAMERA_DEFAULT_PASS [27, 27] /private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-s9ipezx3/package-validation/profile/extensions/wfrl_blender/__init__.py
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

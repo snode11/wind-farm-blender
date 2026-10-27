@@ -1,32 +1,95 @@
 {
   "schema": "wfrl.scoped-source-verification.v1",
-  "source_runtime_version": "0.3.37",
-  "source_archive_sha256": "5cd8672f1a3a411566b981f22b68517a93367f057ace6d8ae395c6e24a4173cf",
-  "source_archive_file_count": 195,
   "release_version": "0.3.38",
-  "release_archive_sha256": "813dea0f6a5d74c78e813a9d4f51ad0bb1ac0041ba575536cd66022b03dcb916",
-  "equal_payload_files": 193,
-  "different_payload_files": [
-    "blender_manifest.toml",
-    "build-info.json"
-  ],
+  "release_archive_sha256": "f6896ed8f441d98c55a1b810840c7e63c78d6d07583c71930d44a4fb8d1b18f8",
+  "release_archive_file_count": 195,
   "frontend_host": {
-    "python": "3.13",
-    "passed": 1275,
+    "passed": 1287,
     "skipped": 4,
-    "log": "source-evidence/host-frontend-verified.log"
+    "failures": 0,
+    "errors": 0,
+    "junit": "source-evidence/frontend.xml",
+    "python": "3.13",
+    "log": "source-evidence/frontend.log"
   },
   "project_host": {
+    "passed": 1382,
+    "skipped": 4,
+    "failures": 0,
+    "errors": 0,
+    "junit": "source-evidence/backend.xml",
     "python": "3.11",
-    "passed": 1259,
-    "skipped": 5,
-    "subtests_passed": 50,
-    "log": "source-evidence/host-project-final.log"
+    "subtests_passed": 59,
+    "log": "source-evidence/backend.log"
   },
   "native_source": {
     "status": "PASS",
-    "passed": 4,
-    "report": "source-evidence/native/result.json"
+    "checks": [
+      "custom_camera_capture_regression.py",
+      "connection_recovery_regression.py",
+      "animation_render_regression.py"
+    ],
+    "report": "source-evidence/native-source/result.json"
   },
-  "scope": "Saved software results belong to the identified pre-version source and candidate payload. All 193 remaining ZIP payloads match 0.3.38 byte-for-byte. These records do not assert installed 0.3.38 visible-window, full-video, physical-solver, performance or scientific acceptance. Raw reports retain their original paths; temporary profiles, scenes and rendered images are not provided."
+  "isolated_package": {
+    "status": "PASS",
+    "report": "package-validation.json",
+    "files": 195,
+    "fresh_process_modules": 93
+  },
+  "tested_source_inputs": {
+    ".github/workflows/checks.yml": "f15f53e9e3ed900722e3ac66137c7996a37234296e9c34f21266dbca0190577f",
+    "AGENTS.md": "370b2a11a0906dcffd7e59452f555ac3830ff40917c1d31d5cf274c1217e7fab",
+    "README.md": "4114efbb257a28aaa3e8873edb8d1bd477548eb2a0202fe66cbf0907564ce1ac",
+    "blade_recon/README.md": "2cefe9b6cd7c684b9c9a77ff0e25cd7b4bb597a90f25b73951aa64b8c7b22495",
+    "blade_recon/evaluate.py": "1b38c6529baad9e570ebb28cae5b1cca98ac49d86bea9bda8e9f36fd6964f81a",
+    "blade_recon/synth.py": "e5083a4a3487a14cbe6cc2fe48c9fd8d191f185212f79271a858c2a36597f301",
+    "blade_recon0.2/README.md": "ffe40abe953f5e778e09e8ec5bb617647ac7c74a579db0710b67bd4f537f8c09",
+    "blade_recon0.2/evaluate.py": "1b38c6529baad9e570ebb28cae5b1cca98ac49d86bea9bda8e9f36fd6964f81a",
+    "blade_recon0.2/synth.py": "65d931dc731b5b1b0fe0cb896404bdb83792d817189f3f9283b15683cc2e45f8",
+    "blender_frontend/README.md": "7e9c7fa07565fe60f70892aecbefc093a54eb732631fbc44a8c859c757749dd3",
+    "blender_frontend/tests/blender/custom_camera_capture_regression.py": "f0c32777d04269f9d3d05bdd09fb334d11678e0508b701b7f95d5b83ff472f4c",
+    "blender_frontend/tests/test_custom_camera_capture.py": "c3d0005b1a294a5655f9c31112f981ecfa4a35c0332eaddfc8cfe1e2a6f00056",
+    "blender_frontend/tests/test_custom_camera_geometry.py": "999c59cd6080b32cc24df8037f56aa10bb8f191713222947beb4727eac7078df",
+    "blender_frontend/tests/test_launcher.py": "99c3503cd6c0e4c633137f62c3de00e9283a9e7f5d4dafb2a7face820c59a9fb",
+    "blender_frontend/tests/test_live_runtime.py": "73712a31bf5201c81ced5faca95df68a98b4712b96f11191e7f1dec29b4148e4",
+    "blender_frontend/tests/test_ui_state.py": "1b75bdbe8a75273c64cd70b9ae26eac9be5350706b83d3b143bc75f3bc890958",
+    "blender_frontend/wfrl_blender/custom_camera_capture.py": "020448811f8ea8c7a39593cf7332b111a7d900320ffe875d71f79cde99bdc8d3",
+    "blender_frontend/wfrl_blender/custom_cameras.py": "08f438e56980d2262bbaed12756a296afc219173ee5277b433e889bb151f3b50",
+    "blender_frontend/wfrl_blender/runtime.py": "d6da28899465ffc2d4370c0bc0d3d412525a67f651ef4569cf87a555a06b9312",
+    "blender_frontend/wfrl_blender/state.py": "2618725f3332a7e88284809ba148da2e5390a0262216a4e2a6cd242f2046c974",
+    "configs/ci-native-tests.txt": "52ec90064d0b3c0fafaab7355a9d8b605a89cad4b186f80a0688a2ee31699702",
+    "docs/README.md": "a1c5b6486800e262d31ca5565eec2bcbd383c764e56cab0937d689629f66a0fa",
+    "docs/development/自动检查.md": "2265314051efdc5aefe1248729a0a13ca0320589f053526c45abf17ee6e7dec5",
+    "docs/training/MAPPO_SETUP.md": "dace2c457538c3533fee523a329ba2f1d04bb42523981534c7281f74b3f7bfbc",
+    "requirements-ci-numerical.txt": "5252999fe70e1f33280fb65a9bb78159e5fad845947f9e0045866ab9def07869",
+    "scripts/blender/wfrl_launcher.py": "68c0106b5d0bd4b26310345a4ec78730e07459d62de42d97d691aaa58aeba3ca",
+    "scripts/train/run_stage3.py": "39ee599cd436123e9c1023a112c58008deb1ed7c85b85ed71450ae583cf6374c",
+    "scripts/train/train_fastfarm.py": "2543859ab77e1466dd9305f839ac073be223d459ac42fca3c81e31b013fb596b",
+    "tests/blender_bridge/test_cleanup_confirmation.py": "5ee13693876a207c8acb89c7e786d6cd46307852cb213bd86345065ddce29f0a",
+    "tests/blender_bridge/test_disconnect_progress.py": "75c0e825e7377cc989fe2c0716358d080a1fccc0df80ea478a2f7de19ea27a22",
+    "tests/blender_bridge/test_part4_backend.py": "d4b8b278af886431e892b21071dd7b8f1f1fcc401a25b0b306a836a63c85b0e3",
+    "tests/test_blade_recon_scoring_contract.py": "ab3dc28ef9aba573ef2bf74165ac96bf95937183072243792813722b0720f5b2",
+    "tests/test_fastfarm_training_integrity.py": "2864a8610099d8e4b69bf86c4ce17d9de347bbc97ab1501a1b37997c7d3d4085",
+    "tests/test_mappo_truncation.py": "ce78394b826c6725a99167d55c512cf071d7dfb5e7fd0d7f1adc5b4a1806c203",
+    "tests/test_numeric_imports.py": "18246a275cd4f96a579c28b8775ff16d4cfced522ed20acdf9b79af54e1e4851",
+    "wfrl/blender_bridge/__main__.py": "14dccebaa595992a1fa114ddf2c7ea94c9bd4ca0798d8a1a54a6e852fc1b9b6a",
+    "wfrl/blender_bridge/backend_session.py": "cec9b2d7b92c3f95ade9fdab835a0322ddb957c87f19a771b1b71c4a0cf85ac2",
+    "wfrl/blender_bridge/messages.py": "e5a8a8c776460712e5ae8b0339a03c55b380b92bb5454193c8d3a3c779456745",
+    "wfrl/blender_bridge/server.py": "a0a148caf4ee63f00de0536880350db5b04c73b454394efb8db39c25b51693c8",
+    "wfrl/mappo_central.py": "847e0f6cc1c3411339904f3a6bd31ab54ef5997bbfa408abc50c007d8a1b8941",
+    "wfrl/rewards.py": "48f1e8ebbc7c906c5fbc56ce7bf6e73a4de18c8eaa10de0f0e1028e04a65f06d",
+    "wfrl/studio/__init__.py": "2499ecf6568c457a922b2833fc5bb3a176458cc4fd89e9a6cceb0cc013cd19ef",
+    "wfrl/training_integrity.py": "e753fbfb11d5369f14efdbd9328e3f753c946d1671b628554e24b902721b133f",
+    "前端readme.md": "b9a65734e376f6a5390b85fd4d0f12280c3350d0a1ce5094bada64704e8e5373"
+  },
+  "raw_validation": "source-evidence/validation.json",
+  "boundaries": {
+    "visible_ui": "NOT_RUN",
+    "gpu_performance": "NOT_MEASURED",
+    "real_fastfarm_training": "NOT_RUN",
+    "scientific_accuracy": "NOT_ASSESSED",
+    "linux_actions": "NOT_RUN"
+  },
+  "scope": "Raw local test and Blender reports retain their measured source and package identities and original paths. All runtime source inputs and all 195 extension payloads match the published snapshot; documentation and publication metadata are outside runtime behavior. Temporary profiles, scene copies and full rendered frame sets are not reusable inputs."
 }

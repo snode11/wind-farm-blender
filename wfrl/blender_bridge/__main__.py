@@ -1,6 +1,7 @@
 """Run with the backend environment: python -m wfrl.blender_bridge."""
 import argparse
 import signal
+import time
 from .backend_session import BackendSession
 from .server import BridgeServer
 
@@ -20,17 +21,29 @@ def main():
     if args.scene: session.scene = session._load(args.scene)
     server = BridgeServer(args.host, args.port, session)
     def request_shutdown(_signum, _frame):
-        raise KeyboardInterrupt
+        server.shutdown_requested = True
     for name in ('SIGTERM', 'SIGHUP'):
         if hasattr(signal, name):
             signal.signal(getattr(signal, name), request_shutdown)
     print(f'WFRL Bridge listening on {args.host}:{server.port}', flush=True)
-    try: server.serve_forever()
-    except KeyboardInterrupt: pass
+    stop_requested = False
+    try:
+        while not server.closed:
+            try:
+                server.poll()
+                if server.shutdown_requested:
+                    if not stop_requested:
+                        session.stop()
+                        stop_requested = True
+                    state = session.synchronization_state()
+                    if state['cleanup_confirmed'] and not state['worker_alive']:
+                        break
+                time.sleep(.01)
+            except KeyboardInterrupt:
+                request_shutdown(None, None)
     finally:
         server.close()
         if session._stop_worker: session._stop_worker.join()
-        if session.alive(): raise SystemExit('Backend cleanup unconfirmed; process must remain supervised')
 
 
 if __name__ == '__main__': main()

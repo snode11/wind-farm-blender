@@ -1,6 +1,6 @@
 {
-  "BLENDER_USER_CONFIG": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.38/profile/config",
-  "BLENDER_USER_SCRIPTS": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.38/profile/scripts",
-  "BLENDER_USER_DATAFILES": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.38/profile/datafiles",
+  "BLENDER_USER_CONFIG": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-s9ipezx3/package-validation/profile/config",
+  "BLENDER_USER_SCRIPTS": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-s9ipezx3/package-validation/profile/scripts",
+  "BLENDER_USER_DATAFILES": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-s9ipezx3/package-validation/profile/datafiles",
   "WFRL_ADDON_MODULE": "bl_ext.wfrl_frontend.wfrl_blender"
 }

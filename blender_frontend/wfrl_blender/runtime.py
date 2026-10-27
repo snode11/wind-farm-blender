@@ -245,10 +245,12 @@ def training_stats_negotiated():
 
 def allows_command(action):
     ui = get_state()
-    if ui.connection != 'CONNECTED' or _pending_command:
+    if ui.connection != 'CONNECTED':
         return False
-    if action == 'reset':
-        return ui.confirmed and ui.run_status in {'READY', 'FAILED', 'STOPPED'}
+    if _pending_command and not (action == 'stop' and _pending_command in {'pause', 'step'}):
+        return False
+    if _pending_command and (not _client or ui.session_id != _client.session_id):
+        return False
     return ui.allows(action)
 
 
@@ -400,7 +402,9 @@ def _tick():
                 if message['type'] == 'lifecycle':
                     applied = _state.lifecycle(message['session_id'], payload['run_status'],
                                                payload['mode'], payload['capabilities'],
-                                               state_revision=payload.get('state_revision'))
+                                               state_revision=payload.get('state_revision'),
+                                               cleanup_confirmed=payload.get('cleanup_confirmed'),
+                                               worker_alive=payload.get('worker_alive'))
                     if not applied:
                         continue
                 if message['type'] in {'hello_ack', 'lifecycle'}:
@@ -437,11 +441,15 @@ def _tick():
                         charts.clear()
                     _state.synchronize(message['session_id'], payload['run_status'],
                                        payload['mode'], payload['capabilities'],
-                                       state_revision=payload.get('state_revision'))
+                                       state_revision=payload.get('state_revision'),
+                                       cleanup_confirmed=payload.get('cleanup_confirmed'),
+                                       worker_alive=payload.get('worker_alive'))
                     if payload['run_status'] in {'STARTING', 'RUNNING', 'PAUSED', 'DRAINING'}:
                         _desired_mode = payload['mode']
                 elif message['type'] == 'lifecycle':
-                    if (_pending_command not in {'pause', 'step'} or
+                    if _pending_command == 'stop' and payload['run_status'] not in {'DRAINING', 'STOPPED', 'FAILED'}:
+                        pass
+                    elif (_pending_command not in {'pause', 'step'} or
                             payload['run_status'] in {'DRAINING', 'STOPPED', 'FAILED'}):
                         _pending_command = None
                         _pending_lifecycle_sequence = None

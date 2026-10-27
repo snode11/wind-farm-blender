@@ -1,0 +1,52 @@
+{
+  "schema": "wfrl.animation-render.v1",
+  "job_id": "a9710ca35da74ac7b18a9ca6060c046b",
+  "state": "STARTING",
+  "completed_frames": 0,
+  "total_frames": 3,
+  "snapshot": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-s9ipezx3/native/animation_render_regression/artifacts/animation-a9710ca35da7/scene.blend",
+  "addon_root": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender",
+  "scene_name": "Scene",
+  "frame_start": 2,
+  "frame_end": 6,
+  "frame_step": 2,
+  "render_settings": {
+    "render": {
+      "engine": "BLENDER_EEVEE",
+      "resolution_x": 32,
+      "resolution_y": 32,
+      "resolution_percentage": 100,
+      "pixel_aspect_x": 1.0,
+      "pixel_aspect_y": 1.0,
+      "fps": 24,
+      "fps_base": 1.0,
+      "film_transparent": false,
+      "use_motion_blur": false,
+      "preview_pixel_size": "AUTO"
+    },
+    "display_settings": {
+      "display_device": "sRGB"
+    },
+    "view_settings": {
+      "view_transform": "AgX",
+      "look": "None",
+      "exposure": 1.25,
+      "gamma": 1.0
+    },
+    "image_settings": {
+      "color_mode": "RGBA",
+      "color_depth": "8",
+      "compression": 15
+    },
+    "eevee": {
+      "taa_render_samples": 1,
+      "taa_samples": 16,
+      "use_shadows": true,
+      "use_fast_gi": true
+    },
+    "cycles": {
+      "samples": 4096,
+      "use_denoising": true
+    }
+  }
+}

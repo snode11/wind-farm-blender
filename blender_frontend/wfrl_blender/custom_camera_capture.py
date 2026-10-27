@@ -273,9 +273,10 @@ class Capture:
             core.validate_native_state(self.scene)
         except ValueError as exc:
             raise RuntimeError(f'采集期间{exc}，采集未完成') from exc
-        if core.layout_hash(core.layout_dict(self.scene)) != self.layout_hash:
+        layout = core.layout_dict(self.scene)
+        if core.layout_hash(layout) != self.layout_hash:
             raise RuntimeError('采集期间相机布局已变化，采集未完成')
-        if core.live_layout_hash(self.scene) != self.live_layout_hash:
+        if core.live_layout_hash(self.scene, layout=layout) != self.live_layout_hash:
             raise RuntimeError('采集期间原生相机姿态或镜头已变化，采集未完成')
         if preview.render_profile(self.scene) != self.profile:
             raise RuntimeError('采集期间颜色设置已变化，采集未完成')

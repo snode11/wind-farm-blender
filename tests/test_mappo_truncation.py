@@ -156,8 +156,7 @@ def test_sb3_algorithm_does_not_propagate_next_episode_rewards():
 
 
 def _sampler(monkeypatch, par):
-    monkeypatch.setattr(central.envs, "make", lambda *args, **kwargs: par)
-    monkeypatch.setattr(central, "aec_to_parallel", lambda env: env)
+    monkeypatch.setattr(central, "_parallel_environment", lambda: par)
     return central.Sampler()
 
 

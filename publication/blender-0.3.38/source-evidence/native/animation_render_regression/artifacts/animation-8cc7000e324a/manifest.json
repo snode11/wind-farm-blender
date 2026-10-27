@@ -1,8 +1,0 @@
-{
-  "schema": "wfrl.animation-render.v1",
-  "job_id": "8cc7000e324a4e4ebbf6c02c4e55e31c",
-  "state": "CANCELLED",
-  "completed_frames": 0,
-  "total_frames": 1,
-  "error": "用户取消或源场景关闭；已生成帧保留"
-}

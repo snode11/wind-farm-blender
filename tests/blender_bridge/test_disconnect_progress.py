@@ -268,7 +268,14 @@ def test_offline_completion_failure_and_stop_are_observed_without_client(outcome
         assert ack['payload']['state_revision'] == session.state_revision
         peer.until(lambda items: any(m['type'] == 'lifecycle' and m['payload']['run_status'] == terminal
                                     for m in items))
-        statuses = [m['payload']['run_status'] for m in peer.messages if m['type'] == 'lifecycle']
+        lifecycle = [m['payload'] for m in peer.messages if m['type'] == 'lifecycle']
+        for before, after in zip(lifecycle, lifecycle[1:]):
+            assert before['state_revision'] < after['state_revision']
+            if before['run_status'] == after['run_status']:
+                assert (before['cleanup_confirmed'], before['worker_alive']) != (
+                    after['cleanup_confirmed'], after['worker_alive'])
+        statuses = [item['run_status'] for index, item in enumerate(lifecycle)
+                    if not index or item['run_status'] != lifecycle[index - 1]['run_status']]
         assert statuses == (['FAILED'] if outcome == 'fail' else ['DRAINING', 'STOPPED'])
         assert all(m['payload']['state_revision'] <= ack['payload']['state_revision']
                    for m in peer.messages if m['type'] == 'lifecycle')

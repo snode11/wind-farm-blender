@@ -1,5 +1,6 @@
 """Native camera/config guards; no GPU or installed-extension claim."""
 from dataclasses import replace
+import hashlib
 import json
 import importlib
 import os
@@ -124,7 +125,58 @@ job.expected_frame = (scene.frame_current, scene.frame_subframe)
 job.playback_generation = capture.playback.generation()
 job.layout_hash, job.live_layout_hash, job.profile = layout_hash, native_hash, preview.render_profile(scene)
 job.same_session = lambda: True
+surface_extractions = []
+original_surface_geometry = core._surface_geometry
+
+def counted_surface_geometry(*args, **kwargs):
+    surface_extractions.append(kwargs.get('with_normals', False))
+    return original_surface_geometry(*args, **kwargs)
+
+core._surface_geometry = counted_surface_geometry
+try:
+    job.guard()
+    assert surface_extractions == [False], surface_extractions
+finally:
+    core._surface_geometry = original_surface_geometry
+checks['guard_extracts_evaluated_signature_once_without_collision_geometry'] = True
+
+geometry = core._geometry(scene)
+signature_payload = [(name, [tuple(round(float(v), 4) for v in vertex) for vertex in vertices], faces)
+                     for name, vertices, faces, _normals, _tree in geometry]
+collision_signature = 'sha256:' + hashlib.sha256(json.dumps(signature_payload, separators=(',', ':')).encode()).hexdigest()[:20]
+assert core.model_signature(scene) == collision_signature
+checks['signature_and_collision_share_evaluated_surface_coordinates_and_faces'] = True
+
+def expect_guard_geometry_rejected():
+    try:
+        job.guard()
+    except RuntimeError as exc:
+        assert '相机布局已变化' in str(exc), str(exc)
+    else:
+        raise AssertionError('evaluated mount geometry mutation during capture was accepted')
+
+saved_vertex = shell.data.vertices[0].co.copy()
+try:
+    shell.data.vertices[0].co.z += .125
+    shell.data.update()
+    bpy.context.view_layer.update()
+    expect_guard_geometry_rejected()
+finally:
+    shell.data.vertices[0].co = saved_vertex
+    shell.data.update()
+    bpy.context.view_layer.update()
 job.guard()
+modifier = shell.modifiers.new('CaptureMountSurface', 'SOLIDIFY')
+try:
+    modifier.thickness = .125
+    bpy.context.view_layer.update()
+    expect_guard_geometry_rejected()
+finally:
+    shell.modifiers.remove(modifier)
+    bpy.context.view_layer.update()
+job.guard()
+checks['guard_detects_native_mesh_and_evaluated_modifier_changes'] = True
+
 cam.rotation_euler.z += .1
 bpy.context.view_layer.update()
 assert core.layout_hash(core.layout_dict(scene)) == layout_hash

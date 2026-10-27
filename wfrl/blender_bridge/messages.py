@@ -180,6 +180,11 @@ def _validate_message(message):
         _require(p['run_id'] is None or _text(p['run_id']), 'Invalid run_id')
     if kind in ('hello_ack', 'lifecycle') and 'state_revision' in p:
         _require(type(p['state_revision']) is int and p['state_revision'] >= 0, 'Invalid state_revision')
+    if kind in ('hello_ack', 'lifecycle') and {'cleanup_confirmed', 'worker_alive'} & p.keys():
+        _require(type(p.get('cleanup_confirmed')) is bool and type(p.get('worker_alive')) is bool,
+                 'Cleanup confirmation and worker liveness must both be boolean')
+        _require(not p['cleanup_confirmed'] or (not p['worker_alive'] and
+                 p.get('run_status') in ('READY', 'STOPPED', 'FAILED')), 'Invalid cleanup confirmation')
     if kind == 'hello':
         _require(message['session_id'] == '' and message['sequence'] == 0, 'hello must use empty session and sequence zero')
         versions = p.get('supported_versions')

@@ -6,7 +6,7 @@
 
 ## 发布身份与验证
 
-当前公开安装包为 [v0.3.38](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.38) 的 **[wfrl_blender-0.3.38.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.38/wfrl_blender-0.3.38.zip)**，manifest 版本 `0.3.38`，共 195 文件、99,151,445 字节。SHA-256 为 `813dea0f6a5d74c78e813a9d4f51ad0bb1ac0041ba575536cd66022b03dcb916`。Release 提供 ZIP、SHA-256、inventory 和配套源码归档；身份见[交付身份](../../publication/blender-0.3.38.json)。ZIP 逐文件校验、隔离安装、新进程来源与三相机默认配置／投影后台检查通过；可见窗口复验为 NOT_RUN；[本地安装核对](../../publication/daily-installation.json)记录安装文件、新窗口模块来源和后台功能范围，不能据此扩大到完整视频、稳定 FPS、其他平台或科学精度。
+当前公开安装包为 [v0.3.38](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.38) 的 **[wfrl_blender-0.3.38.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.38/wfrl_blender-0.3.38.zip)**，manifest 版本 `0.3.38`，共 195 文件、99,151,969 字节。SHA-256 为 `f6896ed8f441d98c55a1b810840c7e63c78d6d07583c71930d44a4fb8d1b18f8`。Release 提供 ZIP、SHA-256、inventory 和配套源码归档；身份见[交付身份](../../publication/blender-0.3.38.json)。ZIP 逐文件校验、隔离安装、新进程来源与三相机默认配置／投影后台检查通过；可见窗口复验为 NOT_RUN；[本地安装核对](../../publication/daily-installation.json)记录安装文件、新窗口模块来源和后台功能范围，不能据此扩大到完整视频、稳定 FPS、其他平台或科学精度。
 
 当前项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。GitHub 自动 Source code 不作为扩展安装包；构建结果须以实际 ZIP 和 inventory 核对。最终包和验证范围见[发布状态](发布状态与验证范围.md)；叶尖显示门槛按源码全时间轴和本地安装抽样分别记录，几何／纹理、材料点和雷达的研究接受边界分别保留。
 
@@ -68,7 +68,7 @@ python3 scripts/blender/build_extension.py --output /path/to/new-build-directory
 
 构建会从规范源生成协议与内置读取器，不依赖训练环境、FAST.Farm 或原始 VTP。构建成功只证明产物生成；安装版后台、可见窗口及性能需按实际 ZIP 单独验证。当前源码不自动更新日常安装，也不替换既有公开附件。v0.3.18 的独立复建与其 172 文件 ZIP 字节一致结论只属于[该标签和包](releases/0.3.18发布核对.md)。
 
-[发布源码](发布状态与验证范围.md#源码软件合同与验证)可复建 `wfrl_blender-0.3.38.zip`，按 SHA-256、inventory 和模块来源核对。隔离安装验证不表示日常安装已更新；可见窗口、性能和平台范围使用对应载荷的记录。
+[发布源码](发布状态与验证范围.md#源码软件合同与验证)的规范构建输入与 `wfrl_blender-0.3.38.zip` 全部 195 份载荷匹配；本发布复用已验证 ZIP，未重跑压缩构建。按 SHA-256、inventory 和模块来源核对。隔离安装验证不表示日常安装已更新；可见窗口、性能和平台范围使用对应载荷的记录。
 
 独立 normal/close 雷达包与 Replay 示例权重随 Git 提供；WFCRL 依赖源码与大型研究证据按[分发清单](../PUBLICATION.md)取得。GW184 源码所需的两份 DTU 原始输入随 Git 提供，官方来源、固定摘要及缺失或损坏后的恢复方式见[来源说明](../../projects/gw184-single/sources/README.md)。以上内容均不能以安装 NREL 扩展 ZIP 代替。
 

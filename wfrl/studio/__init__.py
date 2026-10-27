@@ -2,7 +2,7 @@
 
 与 `wfrl/viz/rviz_app.py` 的分工：rviz_app 是从 `env_id` 出发的既有演示程序，
 布局来自预注册常量表；studio 从**场景文件**出发，机位、传感器、通道全部由 YAML
-决定，是 D1~D2 的交付路径。两者共用 `viz/animate.py` 的机组几何与
+决定。两者共用 `viz/animate.py` 的机组几何与
 `viz/field.py` 的尾流平面，不重复实现。
 
 分层（下层不知道上层存在）：
@@ -14,6 +14,15 @@
 `app` 是唯一 import Qt 的模块，所以前两层的验收脚本不需要显示服务器。
 """
 from wfrl.studio.trainer import Snapshot, Trainer
-from wfrl.studio.view import SceneView, floris_proxy, TURB_SCALE
 
 __all__ = ["SceneView", "Snapshot", "Trainer", "floris_proxy", "TURB_SCALE"]
+
+
+def __getattr__(name):
+    if name in {"SceneView", "floris_proxy", "TURB_SCALE"}:
+        from importlib import import_module
+
+        value = getattr(import_module('.view', __name__), name)
+        globals()[name] = value
+        return value
+    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')

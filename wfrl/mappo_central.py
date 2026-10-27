@@ -21,10 +21,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.distributions import Normal
-from pettingzoo.utils.conversions import aec_to_parallel
-
-from wfcrl import environments as envs
-
 from wfrl import paths
 
 ENV_ID = "Dec_Ablaincourt_Floris"
@@ -91,10 +87,17 @@ class Critic(nn.Module):
 # ---------------------------------------------------------------------------
 # 环境采样器：直接驱动 PettingZoo parallel env（不需要 VecEnv）
 # ---------------------------------------------------------------------------
+def _parallel_environment():
+    from pettingzoo.utils.conversions import aec_to_parallel
+    from wfcrl import environments as envs
+
+    raw = envs.make(ENV_ID, controls=["yaw"], max_num_steps=MAX_STEPS)
+    return aec_to_parallel(raw)
+
+
 class Sampler:
     def __init__(self):
-        raw = envs.make(ENV_ID, controls=["yaw"], max_num_steps=MAX_STEPS)
-        self.par = aec_to_parallel(raw)
+        self.par = _parallel_environment()
         self.agents = self.par.possible_agents
         self.n = len(self.agents)
         self.obs_keys = list(self.par.observation_space(self.agents[0]).keys())

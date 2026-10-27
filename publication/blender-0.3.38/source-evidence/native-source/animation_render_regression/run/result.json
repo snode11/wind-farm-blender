@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "phase": "run",
+  "reasons": [],
+  "returncode": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "duration_s": 8.676069083041511,
+  "source_changed": false,
+  "execution": {
+    "status": "PASS",
+    "final": true,
+    "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/animation_render_regression.py",
+    "background": true,
+    "blender": "5.2.1 LTS",
+    "startup_dirty": false,
+    "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+    "returned_normally": true,
+    "post_script_dirty": false
+  },
+  "script_result": {
+    "status": "PASS",
+    "blender": "5.2.1 LTS",
+    "module": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+    "complete_frames": 3,
+    "source_preserved": true,
+    "cancellation": true,
+    "output": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-s9ipezx3/native/animation_render_regression/artifacts/animation-a9710ca35da7",
+    "cancelled": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-s9ipezx3/native/animation_render_regression/artifacts/animation-331f95beff86",
+    "mappo_output": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-s9ipezx3/native/animation_render_regression/artifacts/animation-db98a02ae1f3",
+    "recorded_motion_frames": [
+      1,
+      301,
+      601
+    ],
+    "compositor_output_guard": true,
+    "original_camera_quality_snapshot": true
+  },
+  "log": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-s9ipezx3/native/animation_render_regression/run/blender.log",
+  "report": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-s9ipezx3/native/animation_render_regression/artifacts/result.json"
+}

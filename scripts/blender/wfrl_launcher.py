@@ -54,6 +54,17 @@ def wait_for_bridge(process: subprocess.Popen, port: int, timeout: float) -> Non
 
 def _request_inactive_session(port: int, session_id: str | None, timeout: float) -> str | None:
     """Confirm current inactivity, excluding lifecycle history covered by hello_ack."""
+    def inactive(payload):
+        if {'cleanup_confirmed', 'worker_alive'} & payload.keys():
+            if (type(payload.get('cleanup_confirmed')) is not bool or
+                    type(payload.get('worker_alive')) is not bool):
+                raise ValueError('Invalid cleanup confirmation')
+            if payload['cleanup_confirmed'] and (payload['worker_alive'] or
+                    payload['run_status'] not in {'READY', 'STOPPED', 'FAILED'}):
+                raise ValueError('Contradictory cleanup confirmation')
+            return payload['cleanup_confirmed'] and not payload['worker_alive']
+        return payload['run_status'] in {'READY', 'STOPPED'}
+
     def frame(kind: str, sequence: int, payload: dict) -> bytes:
         envelope_session = "" if kind == "hello" else session_id
         body = json.dumps({"protocol_version": 1, "type": kind, "session_id": envelope_session,
@@ -109,7 +120,7 @@ def _request_inactive_session(port: int, session_id: str | None, timeout: float)
                             return None
                         resumed = True
                         synchronized_revision = current_revision = revision
-                        if payload["run_status"] in {"READY", "STOPPED", "FAILED"}:
+                        if inactive(payload):
                             return confirmed_id
                         if session_id is None:
                             return None
@@ -130,7 +141,7 @@ def _request_inactive_session(port: int, session_id: str | None, timeout: float)
                         if revision <= current_revision:
                             return None
                         current_revision = revision
-                        if payload["run_status"] in {"STOPPED", "FAILED"}:
+                        if inactive(payload):
                             return confirmed_id
                     elif message["type"] == "error" and payload.get("fatal"):
                         return None

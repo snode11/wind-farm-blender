@@ -1,0 +1,9 @@
+00:00.017  color_management | Using OCIO=/Applications/Blender.app/Contents/Resources/5.2/datafiles/colormanagement/config.ocio
+00:00.582  blend            | Read blend: "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-s9ipezx3/native/animation_render_regression/artifacts/animation-db98a02ae1f3/scene.blend"
+00:02.451  render           | Saved: '/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-s9ipezx3/native/animation_render_regression/artifacts/animation-db98a02ae1f3/frames/frame_0001.png'
+00:02.557  render           | Saved: '/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-s9ipezx3/native/animation_render_regression/artifacts/animation-db98a02ae1f3/frames/frame_0301.png'
+00:02.656  render           | Saved: '/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-s9ipezx3/native/animation_render_regression/artifacts/animation-db98a02ae1f3/frames/frame_0601.png'
+Warning: Library file, loading empty scene
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

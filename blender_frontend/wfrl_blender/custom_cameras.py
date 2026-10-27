@@ -334,11 +334,9 @@ def set_enabled(scene, slot, enabled):
     _refresh_references(scene)
 
 
-def _geometry(scene, depsgraph=None):
-    """Evaluated shell triangles in the actual nacelle reference frame."""
+def _surface_geometry(scene, depsgraph=None, *, with_normals=False):
+    """Evaluated shell vertices/faces in the actual nacelle reference frame."""
     import bpy
-    from mathutils import Vector
-    from mathutils.bvhtree import BVHTree
     root = _root(scene)
     depsgraph = depsgraph or bpy.context.evaluated_depsgraph_get()
     root_eval = root.evaluated_get(depsgraph)
@@ -358,13 +356,23 @@ def _geometry(scene, depsgraph=None):
             mesh.calc_loop_triangles()
             vertices = [transform @ v.co for v in mesh.vertices]
             faces = [tuple(t.vertices) for t in mesh.loop_triangles]
-            normal_matrix = transform.to_3x3().inverted().transposed()
-            normals = [(normal_matrix @ t.normal).normalized() for t in mesh.loop_triangles]
-            tree = BVHTree.FromPolygons(vertices, faces, all_triangles=True)
-            result.append((name, vertices, faces, normals, tree))
+            normals = None
+            if with_normals:
+                normal_matrix = transform.to_3x3().inverted().transposed()
+                normals = [(normal_matrix @ t.normal).normalized() for t in mesh.loop_triangles]
+            result.append((name, vertices, faces, normals))
         finally:
             evaluated.to_mesh_clear()
     return result
+
+
+def _geometry(scene, depsgraph=None):
+    """Collision acceleration for the evaluated mount surfaces."""
+    from mathutils.bvhtree import BVHTree
+    return [(name, vertices, faces, normals,
+             BVHTree.FromPolygons(vertices, faces, all_triangles=True))
+            for name, vertices, faces, normals in
+            _surface_geometry(scene, depsgraph, with_normals=True)]
 
 
 def _inside(point, tree, normals):
@@ -466,8 +474,8 @@ def set_distance(camera, distance):
 
 
 def model_signature(scene, depsgraph=None):
-    geometry = _geometry(scene, depsgraph)
-    payload = [(name, [tuple(round(float(v), 4) for v in vertex) for vertex in vertices], faces) for name, vertices, faces, _normals, _tree in geometry]
+    geometry = _surface_geometry(scene, depsgraph)
+    payload = [(name, [tuple(round(float(v), 4) for v in vertex) for vertex in vertices], faces) for name, vertices, faces, _normals in geometry]
     return 'sha256:' + hashlib.sha256(json.dumps(payload, separators=(',', ':')).encode()).hexdigest()[:20]
 
 

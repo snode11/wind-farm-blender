@@ -42,7 +42,32 @@
 """
 import numpy as np
 
-from wfcrl.rewards import RewardShaper, StepPercentage    # noqa: F401
+class RewardShaper:
+    """Reward callable interface accepted by the simulation environment."""
+
+    def __call__(self, reward):
+        raise NotImplementedError
+
+    def update(self):
+        pass
+
+    def reset(self):
+        pass
+
+
+class StepPercentage(RewardShaper):
+    """Relative change against the preceding reward; reset establishes the reference."""
+
+    def __init__(self, reference=0.0):
+        self.reference = reference
+
+    def __call__(self, reward):
+        shaped = 0.0 if self.reference == 0 else (reward - self.reference) / self.reference
+        self.reference = reward
+        return shaped
+
+    def reset(self, reference=0.0):
+        self.reference = reference
 
 
 class _Recording(RewardShaper):

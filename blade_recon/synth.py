@@ -120,7 +120,7 @@ def main():
               {'turbine': cfg.to_dict(), 'fps': args.fps,
                'cameras': [c.to_dict() for c in cams_s]})
     save_json(os.path.join(args.out, 'truth.json'),
-              {'note': '仅评分使用，重建器不读', 'frames': truth})
+              {'note': '仅评分使用，重建器不读', 'turbine': cfg.to_dict(), 'frames': truth})
     print('wrote', args.out)
 
 

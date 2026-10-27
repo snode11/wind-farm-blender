@@ -172,9 +172,34 @@ def clock_capture(tmp_path, monkeypatch):
     monkeypatch.setattr(core, 'validate_native_state', lambda _scene: None)
     monkeypatch.setattr(core, 'layout_dict', lambda _scene: {})
     monkeypatch.setattr(core, 'layout_hash', lambda _layout: 'saved')
-    monkeypatch.setattr(core, 'live_layout_hash', lambda _scene: 'native')
+    monkeypatch.setattr(core, 'live_layout_hash', lambda _scene, layout=None: 'native')
     monkeypatch.setattr(preview, 'render_profile', lambda _scene: {})
     return job, calls, generation
+
+
+def test_guard_reuses_one_fresh_layout_and_detects_subsequent_mutation(clock_capture, monkeypatch):
+    job, _calls, _generation = clock_capture
+    layouts = []
+    current = {'model_signature': 'mesh-a'}
+
+    def layout_dict(_scene):
+        layout = dict(current)
+        layouts.append(layout)
+        return layout
+
+    def live_hash(_scene, layout=None):
+        assert layout is layouts[-1]
+        return 'native'
+
+    monkeypatch.setattr(core, 'layout_dict', layout_dict)
+    monkeypatch.setattr(core, 'layout_hash', lambda layout: 'saved' if layout == {'model_signature': 'mesh-a'} else 'changed')
+    monkeypatch.setattr(core, 'live_layout_hash', live_hash)
+    job.guard()
+    assert len(layouts) == 1
+    current['model_signature'] = 'mesh-b'
+    with pytest.raises(RuntimeError, match='相机布局已变化'):
+        job.guard()
+    assert len(layouts) == 2
 
 
 @pytest.mark.parametrize('intervention', ['frame', 'subframe', 'playback'])

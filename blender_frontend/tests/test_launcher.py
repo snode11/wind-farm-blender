@@ -119,6 +119,9 @@ def test_launch_fake_cleans_up_owned_bridge(tmp_path):
 
 def protocol_frame(kind, status=None, *, session_id="owned-session", sequence=1, **changes):
     payload = {"run_status": status, "mode": "demo", "capabilities": []}
+    if kind in {'hello_ack', 'lifecycle'}:
+        inactive = status in {'READY', 'STOPPED', 'FAILED'}
+        payload.update(cleanup_confirmed=inactive, worker_alive=not inactive)
     if kind == "hello_ack":
         payload.update(selected_version=1, resumed=True)
     elif kind == "lifecycle":
@@ -459,6 +462,27 @@ def test_launch_retains_recovery_credentials_when_supervision_is_interrupted(
     assert "stop-session" in error
     assert str(session_files[0]) in error
     assert "--port 8765" in error
+
+
+def test_failed_live_backend_never_authorizes_bridge_exit_or_credential_removal(
+        tmp_path, monkeypatch, owned_launch):
+    from wfrl.blender_bridge.backend_session import BackendSession
+    session = BackendSession()
+    session._trainer = SimpleNamespace(running=True, stop=lambda timeout: None)
+    session.lifecycle('FAILED', 'Controlled worker failure')
+    bridge, session_files = owned_launch(session_id=session.session_id)
+    client = socket_client([protocol_frame('hello_ack', session_id=session.session_id,
+                                           **session.synchronization_state()), b''])
+    connect = Mock(side_effect=[client, KeyboardInterrupt()])
+    monkeypatch.setattr(launcher.socket, 'create_connection', connect)
+    stop_owned = Mock(side_effect=AssertionError('Cannot stop Bridge while worker cleanup is unconfirmed'))
+    monkeypatch.setattr(launcher, 'stop_owned', stop_owned)
+    with pytest.raises(KeyboardInterrupt):
+        launcher.main(['launch', *base_args(tmp_path), '--fake'])
+    assert bridge.poll() is None
+    assert session_files[0].read_text() == session.session_id
+    assert client.sendall.call_count == 2
+    stop_owned.assert_not_called()
 
 
 @pytest.mark.parametrize("confirmed", [False, True])

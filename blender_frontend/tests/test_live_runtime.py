@@ -1,5 +1,6 @@
 """Main-thread integration tests without a Blender process."""
 import sys
+import threading
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -10,6 +11,87 @@ from test_animation_math import snapshot
 
 
 class LiveRuntimeTests(unittest.TestCase):
+    def test_stop_preemption_requires_confirmed_matching_connected_identity(self):
+        bpy = SimpleNamespace(context=SimpleNamespace(scene=None))
+        for connection, confirmed, client_session in [('DISCONNECTED', True, 's'),
+                                                     ('CONNECTED', False, 's'),
+                                                     ('CONNECTED', True, 'other')]:
+            with self.subTest(connection=connection, confirmed=confirmed, client_session=client_session):
+                ui = FrontendState(connection=connection, confirmed=confirmed,
+                                   run_status='RUNNING', session_id='s')
+                with patch.dict(sys.modules, bpy=bpy), patch.multiple(
+                        runtime, _state=ui, _client=SimpleNamespace(session_id=client_session),
+                        _pending_command='pause'):
+                    self.assertFalse(runtime.allows_command('stop'))
+
+    def test_stop_preempts_pending_pause_or_step_without_a_solver_boundary(self):
+        from wfrl.blender_bridge.backend_session import BackendSession
+        for pending, initial, delayed_pause in [('pause', 'RUNNING', False),
+                                                ('pause', 'RUNNING', True),
+                                                ('step', 'PAUSED', False)]:
+            with self.subTest(pending=pending, delayed_pause=delayed_pause):
+                session = BackendSession()
+                release = threading.Event()
+                thread = threading.Thread(target=release.wait, daemon=True)
+                def stop(timeout):
+                    release.set()
+                    thread.join(timeout)
+                session._trainer = SimpleNamespace(stop=stop)
+                session._thread = thread
+                thread.start()
+                self.addCleanup(release.set)
+                session.mode = 'interactive_training'
+                session.lifecycle(initial)
+                session.poll()
+                messages = []
+                sent = []
+                sequence = [10]
+                def send(message):
+                    sent.append(message)
+                    session.command(message['payload'])
+                client = SimpleNamespace(session_id=session.session_id, _last_outbound=2,
+                    last_error='', status='CONNECTED', progress='Connected', send=send,
+                    poll=lambda: list(messages), close=lambda: None)
+                ui = FrontendState()
+                ui.synchronize(session.session_id, initial, session.mode, session.capabilities,
+                               state_revision=session.state_revision, cleanup_confirmed=False,
+                               worker_alive=True)
+                session.command(dict(command='run.' + pending, arguments={}))
+                if delayed_pause:
+                    session.lifecycle('PAUSED')
+                delayed = [dict(type=kind, session_id=session.session_id, sequence=9, payload=payload)
+                           for kind, payload in session.poll() if kind == 'lifecycle']
+                bpy = SimpleNamespace(context=SimpleNamespace(window_manager=SimpleNamespace(windows=[])),
+                                      data=SimpleNamespace(objects={}))
+                with patch.dict(sys.modules, bpy=bpy), patch.multiple(
+                        runtime, _client=client, _state=ui, _pending_command=pending,
+                        _pending_step=1, _pending_lifecycle_sequence=8, _last_tick=None,
+                        _health=None, _live_scene=None, kinematics=KinematicState(),
+                        _desired_mode=session.mode, safety_events=[]):
+                    self.assertTrue(runtime.allows_command('stop'))
+                    self.assertFalse(runtime.allows_command('resume'))
+                    runtime.send_command('stop')
+                    self.assertEqual(sent[-1]['payload']['command'], 'run.stop')
+                    self.assertEqual(runtime._pending_command, 'stop')
+                    if delayed:
+                        messages[:] = delayed
+                        runtime.tick()
+                        self.assertEqual(runtime._pending_command, 'stop')
+                        self.assertFalse(runtime.allows_command('step'))
+                    session._stop_worker.join(1)
+                    self.assertFalse(session.alive())
+                    messages.clear()
+                    for kind, payload in session.poll():
+                        if kind != 'lifecycle':
+                            continue
+                        sequence[0] += 1
+                        messages.append(dict(type=kind, session_id=session.session_id,
+                                             sequence=sequence[0], payload=payload))
+                    runtime.tick()
+                    self.assertEqual(ui.run_status, 'STOPPED')
+                    self.assertIsNone(runtime._pending_command)
+                    self.assertTrue(runtime.allows_command('start'))
+
     def test_workflow_metadata_keeps_channel_rows_and_waits_for_ack(self):
         sent = []
         messages = []

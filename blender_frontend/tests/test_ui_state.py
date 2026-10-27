@@ -78,4 +78,30 @@ class UIStateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Invalid lifecycle transition'):
             ui.lifecycle('legacy', 'DRAINING', 'demo', [])
 
+    def test_failed_cleanup_proof_controls_retry_and_reset_independently(self):
+        ui = FrontendState()
+        ui.synchronize('s', 'FAILED', 'replay', [], state_revision=4,
+                       cleanup_confirmed=False, worker_alive=True)
+        self.assertTrue(ui.allows('stop'))
+        self.assertFalse(ui.allows('reset'))
+        self.assertFalse(ui.allows('configure'))
+        ui.lifecycle('s', 'FAILED', 'replay', [], state_revision=5,
+                     cleanup_confirmed=True, worker_alive=False)
+        self.assertFalse(ui.allows('stop'))
+        self.assertTrue(ui.allows('reset'))
+        ui.synchronize('legacy', 'FAILED', 'replay', [])
+        self.assertFalse(ui.allows('reset'))
+        self.assertTrue(ui.allows('stop'))
+
+    def test_stopped_waits_for_cleanup_before_start_or_configuration(self):
+        ui = FrontendState()
+        ui.synchronize('s', 'STOPPED', 'replay', [], state_revision=4,
+                       cleanup_confirmed=False, worker_alive=False)
+        for action in ('start', 'reset', 'configure'):
+            self.assertFalse(ui.allows(action))
+        ui.lifecycle('s', 'STOPPED', 'replay', [], state_revision=5,
+                     cleanup_confirmed=True, worker_alive=False)
+        for action in ('start', 'reset', 'configure'):
+            self.assertTrue(ui.allows(action))
+
 if __name__ == '__main__': unittest.main()

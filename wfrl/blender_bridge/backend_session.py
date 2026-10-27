@@ -26,6 +26,7 @@ FORMAL_VALUE_OPTIONS = {
     'seed', 'tag', 'warmup_steps', 'wind_direction', 'wind_sched', 'wind_speed',
 }
 FORMAL_FLAG_OPTIONS = {'no_purge', 'obs_duty', 'recurrent'}
+_UNSPECIFIED_REASON = object()
 
 
 def _aged_payload(payload, elapsed):
@@ -107,6 +108,7 @@ class BackendSession:
         self.scene = scene
         self.mode = 'demo'
         self.status = 'READY'
+        self._lifecycle_reason = None
         self.trainer_factory = trainer_factory
         self.scene_loader = scene_loader
         self.max_events = max_events
@@ -127,6 +129,8 @@ class BackendSession:
         self._stop_worker = None
         self._channel_states = {}
         self._formal_scene_dir = None
+        self.cleanup_confirmed = True
+        self.worker_alive = False
 
     @property
     def capabilities(self):
@@ -183,19 +187,44 @@ class BackendSession:
         return [[topic, sensor, fidelity_map.get(str(fidelity), str(fidelity)), enabled, provenance]
                 for topic, sensor, fidelity, enabled, provenance in runtime.channel_table()]
 
-    def lifecycle(self, status, reason=None):
+    def lifecycle(self, status, reason=_UNSPECIFIED_REASON):
         with self._condition:
+            if reason is _UNSPECIFIED_REASON:
+                reason = self._lifecycle_reason if status == self.status else None
             self.status = status
+            self._lifecycle_reason = reason
+            self._refresh_cleanup_state()
             self.state_revision += 1
-            self.emit('lifecycle', dict(self.synchronization_state(), reason=reason))
+            self.emit('lifecycle', dict(self._state_payload(), reason=reason))
+
+    def _refresh_cleanup_state(self):
+        alive = self.alive()
+        inactive = self.status in {'READY', 'STOPPED', 'FAILED'}
+        draining = self._stop_worker is not None and self._stop_worker.is_alive()
+        if inactive and not alive and not draining:
+            self._collect_progress(final=True)
+            if self._formal_scene_dir is not None:
+                self._formal_scene_dir.cleanup()
+                self._formal_scene_dir = None
+        confirmed = inactive and not alive and not draining
+        changed = (self.cleanup_confirmed, self.worker_alive) != (confirmed, alive)
+        self.cleanup_confirmed, self.worker_alive = confirmed, alive
+        return changed
+
+    def _state_payload(self):
+        return dict(run_status=self.status, mode=self.mode, run_id=self.run_id,
+                    state_revision=self.state_revision, capabilities=self.capabilities,
+                    cleanup_confirmed=self.cleanup_confirmed, worker_alive=self.worker_alive,
+                    scene=self.scene.to_dict() if hasattr(self.scene, 'to_dict') else None,
+                    channel_states=dict(self._channel_states), channel_table=self.channel_table())
 
     def synchronization_state(self):
         """Capture current state and its lifecycle watermark under the same lock."""
         with self._condition:
-            return dict(run_status=self.status, mode=self.mode, run_id=self.run_id,
-                        state_revision=self.state_revision, capabilities=self.capabilities,
-                        scene=self.scene.to_dict() if hasattr(self.scene, 'to_dict') else None,
-                        channel_states=dict(self._channel_states), channel_table=self.channel_table())
+            if self._refresh_cleanup_state():
+                self.state_revision += 1
+                self.emit('lifecycle', dict(self._state_payload(), reason=self._lifecycle_reason))
+            return self._state_payload()
 
     def _collect_progress(self, final=False):
         if final and self._progress_reader is not None:
@@ -243,9 +272,9 @@ class BackendSession:
                     else:
                         if not error: self.lifecycle('DRAINING')
                         self.lifecycle('FAILED' if error else 'STOPPED', error)
-            if self.status in {'STOPPED', 'FAILED'} and not self.alive() and self._formal_scene_dir is not None:
-                self._formal_scene_dir.cleanup()
-                self._formal_scene_dir = None
+            if self._refresh_cleanup_state():
+                self.state_revision += 1
+                self.emit('lifecycle', dict(self._state_payload(), reason=self._lifecycle_reason))
 
     def poll(self):
         with self._condition:
@@ -479,7 +508,9 @@ class BackendSession:
             if self._stop_worker is not None and self._stop_worker.is_alive(): return
             if not self.alive():
                 self._collect_progress(final=True)
-                if self.status == 'FAILED': return
+                if self.status == 'FAILED':
+                    self.synchronization_state()
+                    return
                 if self.status in ('STARTING', 'RUNNING', 'PAUSED'):
                     self.lifecycle('DRAINING')
                 if self.status == 'DRAINING': self.lifecycle('STOPPED')
@@ -508,7 +539,7 @@ class BackendSession:
                         self.lifecycle('FAILED', 'Stop timeout: backend cleanup unconfirmed; restart blocked')
                     else:
                         with self._condition: self._collect_progress(final=True)
-                        if self.status != 'FAILED': self.lifecycle('STOPPED')
+                        self.lifecycle('FAILED' if self.status == 'FAILED' else 'STOPPED')
                 except Exception as exc: self.lifecycle('FAILED', 'Cleanup failed: ' + str(exc))
             self._stop_worker = threading.Thread(target=drain, name='wfrl-bridge-drain', daemon=True)
             self._stop_worker.start()

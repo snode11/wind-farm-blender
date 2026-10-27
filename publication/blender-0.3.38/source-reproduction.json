@@ -1,14 +1,15 @@
 {
   "schema": "wfrl.source-reproduction.v1",
-  "status": "PASS",
+  "status": "PASS_PAYLOAD_IDENTITY",
   "version": "0.3.38",
-  "verification_layer": "ISOLATED_SOURCE_SNAPSHOT_BUILD_INPUTS",
-  "tested_tree": "03082cb3bd6e0346fdd3df488e8d491b51e87132",
+  "verification_layer": "STATIC_SOURCE_SNAPSHOT_AND_VALIDATED_PACKAGE_PAYLOADS",
   "archive_name": "wfrl_blender-0.3.38.zip",
-  "archive_sha256": "813dea0f6a5d74c78e813a9d4f51ad0bb1ac0041ba575536cd66022b03dcb916",
-  "archive_bytes": 99151445,
+  "archive_sha256": "f6896ed8f441d98c55a1b810840c7e63c78d6d07583c71930d44a4fb8d1b18f8",
+  "archive_bytes": 99151969,
   "file_count": 195,
-  "reproduced_byte_identical": true,
+  "payload_files_verified": 195,
+  "payload_sha256": "bc7764b19659133e3fc3ea10a2ccd11a28da7ca707c783b345392e553b463098",
+  "rebuild_executed": false,
   "build_inputs": [
     {
       "path": "blender_frontend/wfrl_blender/__init__.py",
@@ -457,8 +458,8 @@
     },
     {
       "path": "blender_frontend/wfrl_blender/custom_camera_capture.py",
-      "sha256": "e24f17ad15efddf2f4721a7bcf14f73b3a630b8b4d0b9794261d09a970bbb6f1",
-      "bytes": 20990
+      "sha256": "020448811f8ea8c7a39593cf7332b111a7d900320ffe875d71f79cde99bdc8d3",
+      "bytes": 21029
     },
     {
       "path": "blender_frontend/wfrl_blender/custom_camera_diagnostics.py",
@@ -477,8 +478,8 @@
     },
     {
       "path": "blender_frontend/wfrl_blender/custom_cameras.py",
-      "sha256": "75b9a598f3022eedd84d651ba03f94033a2bad597456d685e8ce66588100b3a0",
-      "bytes": 48344
+      "sha256": "08f438e56980d2262bbaed12756a296afc219173ee5277b433e889bb151f3b50",
+      "bytes": 48671
     },
     {
       "path": "blender_frontend/wfrl_blender/deflection.py",
@@ -831,11 +832,6 @@
       "bytes": 1754
     },
     {
-      "path": "blender_frontend/wfrl_blender/protocol.py",
-      "sha256": "cf9e4bbfecd54f2e27ce04ea663345abc17da667d700fbfc0e478bb9b9e8e20c",
-      "bytes": 576
-    },
-    {
       "path": "blender_frontend/wfrl_blender/radar_feedback.py",
       "sha256": "3ccb470fd0257ae262122600f7bf2f842628dec52d9256634b3b60f2ee9ca375",
       "bytes": 2178
@@ -847,8 +843,8 @@
     },
     {
       "path": "blender_frontend/wfrl_blender/runtime.py",
-      "sha256": "4f6c50eaab474bc80a6fa23b9ca13732fc19673034c3a4e86a2a46a1fd9a5971",
-      "bytes": 28140
+      "sha256": "d6da28899465ffc2d4370c0bc0d3d412525a67f651ef4569cf87a555a06b9312",
+      "bytes": 28741
     },
     {
       "path": "blender_frontend/wfrl_blender/scene_builder.py",
@@ -907,8 +903,8 @@
     },
     {
       "path": "blender_frontend/wfrl_blender/state.py",
-      "sha256": "b881f127778f1065bf4c17b012b57f7465776898a9b157735eedd909e8dfd394",
-      "bytes": 4858
+      "sha256": "2618725f3332a7e88284809ba148da2e5390a0262216a4e2a6cd242f2046c974",
+      "bytes": 6203
     },
     {
       "path": "blender_frontend/wfrl_blender/tip_tracking.py",
@@ -957,8 +953,8 @@
     },
     {
       "path": "wfrl/blender_bridge/messages.py",
-      "sha256": "79f9ed24e263fb0c6d02111c1e681c808b8cf12174d9405eb627e8c1ccb193ed",
-      "bytes": 17121
+      "sha256": "e5a8a8c776460712e5ae8b0339a03c55b380b92bb5454193c8d3a3c779456745",
+      "bytes": 17577
     },
     {
       "path": "wfrl/lidar/dual_beam_replay.py",
@@ -981,5 +977,5 @@
       "bytes": 17157
     }
   ],
-  "scope": "A clean export of the curated source index rebuilds the extension ZIP byte-for-byte. Published build inputs must match this manifest. Source metadata and documentation are outside the build inputs. No solver, real backend, visible window, full-video or scientific validation."
+  "scope": "Canonical build input expansion, generated protocol, vendored readers, dual-beam manifests and build-info match all 195 validated ZIP payloads. The validated ZIP is reused; compression and installation are not rerun. No solver, real training, visible window, FPS, other-platform or scientific acceptance."
 }

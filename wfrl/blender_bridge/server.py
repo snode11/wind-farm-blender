@@ -36,6 +36,7 @@ class BridgeServer:
         self.ready = False
         self.session_claimed = False
         self.closed = False
+        self.shutdown_requested = False
 
     def _observation_key(self, kind, payload):
         return kind, payload.get('record_kind') if kind == 'training_stats' else None
@@ -235,7 +236,11 @@ class BridgeServer:
                     else:
                         self.guard.accept(message)
                         if message['type'] != 'command': raise ProtocolError('Expected command')
-                        try: self.session.command(message['payload'])
+                        try:
+                            if (self.shutdown_requested and
+                                    message['payload']['command'] not in {'run.stop', 'session.sync'}):
+                                raise ValueError('Bridge shutdown is pending; only cleanup and synchronization commands are available')
+                            self.session.command(message['payload'])
                         except (ValueError, TypeError, OSError) as exc:
                             payload = dict(code='COMMAND_REJECTED', message=str(exc), fatal=False)
                             try:
