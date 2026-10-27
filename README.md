@@ -7,6 +7,17 @@
 | NREL 5MW / WFRL 前端 | **0.3.38** | NREL／rootkink 叶片外形、T1/T2/T3 Down、独立风机手动控制、姿态预设与 JSON、三机柔性回放、几何／同源纹理分屏、六类合成缺陷、三相机与双束／TLS；[下载扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.38/wfrl_blender-0.3.38.zip)，使用 Install from Disk 安装并重启 |
 | GW184 三相机与叶片缺陷 | **0.4.0** | GW184 尺寸合成刚性模型、固定三相机与六类缺陷；[下载独立运行 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.4.0/gw184_three_camera_defects-0.4.0.zip)，完整解压后启动 |
 
+## 更新记录
+
+| 发布日期（北京时间） | NREL / WFRL 版本 | 主要变化 |
+| --- | --- | --- |
+| 2026-10-27 | [0.3.38](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.38) | PNG 最终完成判断、曲线回合边界、断线重连与三相机资源保护 |
+| 2026-10-26 | [0.3.37](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.37) | WFRL 统一工作台、可取消的后台 PNG 渲染、录制收尾与预览优化 |
+| 2026-10-25 | [0.3.36](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.36) | 三档显示精度、手动外形切换、变桨速度与三机 Down 视频 |
+| 2026-10-24 | [0.3.30](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.30) | 手动恒速变桨、T1 Down、视频作业监管与三相机重开修复 |
+
+[完整更新记录](CHANGELOG.md) · [所有发布](https://github.com/snode11/wind-farm-blender/releases)
+
 ## 当前身份与安装来源
 
 项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)，包含当前前端、后端、重建研究、测试和配套文档。NREL 的 [v0.3.38 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.38) 提供专用扩展 ZIP；安装使用 `wfrl_blender-0.3.38.zip`，发布源码使用 `v0.3.38` 标签。源码提交、构建 ZIP 与本机安装分别识别，GitHub 自动 Source code 用于源码查看与构建。
@@ -78,6 +89,7 @@ Windows/Linux、稳定 30／60 FPS、长期运行、实物相机标定、自动�
 
 ## 使用与资料
 
+- [更新记录](CHANGELOG.md)
 - [安装说明](docs/blender/INSTALL.md) · [前端操作](前端readme.md) · [完整用户手册](docs/blender/用户使用手册.md)
 - [功能总览与规划](docs/blender/Blender前端功能总览与规划.md) · [当前待实施要求](前端更新计划.md)
 - [实现与维护](blender_frontend/README.md) · [三相机](docs/blender/T1三相机使用说明.md) · [NREL 缺陷](docs/blender/NREL缺陷编辑器.md) · [Blade Recon](docs/blender/BladeRecon可视化使用说明.md)
