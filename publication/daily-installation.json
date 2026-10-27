@@ -56,6 +56,6 @@
     "temporary_source_checkouts": false,
     "installation_backup": "recoverable_trash"
   },
-  "compared_public_release": "0.3.38",
+  "compared_public_release": "0.3.39",
   "matches_source_archive": true
 }

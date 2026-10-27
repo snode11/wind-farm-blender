@@ -523,7 +523,8 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
                 ret_rms.update(np.array([ret_acc]))
                 r_norm = r / np.sqrt(ret_rms.var + 1e-8)
 
-                # 截断处的 bootstrap 必须用**截断前**那个观测，所以在 reset 之前算
+                # Bootstrap 与下一次决策使用同一份统计；截断仍在 reset 前估值。
+                obs_rms.update(raw_obs)
                 with torch.no_grad():
                     B_nextv[t], _ = critic_value(
                         obs_rms.norm(obs).astype(np.float32).reshape(-1), critic_hidden)
@@ -536,7 +537,6 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
                                  getattr(smp.shaper, "raw", None) else np.nan)
                 B_power[t] = float(np.sum(meas["power"]))       # 全场总功率 MW
                 B_u[t] = smp.u_inf                              # 本步的自由来流
-                obs_rms.update(raw_obs)
                 global_step += n
                 control_steps += 1
                 episode_control_steps += 1

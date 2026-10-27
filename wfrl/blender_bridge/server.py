@@ -228,7 +228,8 @@ class BridgeServer:
                             # the transport cannot infer a safe history watermark.
                             state = dict(capabilities=self.session.capabilities, run_status=self.session.status,
                                          mode=self.session.mode, run_id=getattr(self.session, 'run_id', None))
-                        self._send('hello_ack', dict(state, selected_version=1, resumed=resume is not None))
+                        self._send('hello_ack', dict(state, selected_version=1, resumed=resume is not None,
+                                                    last_command_sequence=self.guard.last_sequence))
                         self.ready = True
                         self.session_claimed = True
                         if resume is not None and hasattr(self.session, 'replay_latest'):

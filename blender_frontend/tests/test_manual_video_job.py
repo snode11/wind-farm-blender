@@ -543,10 +543,21 @@ class SceneRecoveryTests(unittest.TestCase):
         jobs.write_json(self.root / 'scene-binding.json', dict(scene_name='manual', scene_owner='owner'))
 
     def cleanup(self):
+        cancellations = [entry[1] for entry in self.ui._QUERIES._cancellations.values()]
         self.ui._QUERIES.clear()
         if jobs.lease_busy(self.root / 'supervision.lock'):
             jobs.cancel(self.path)
+        for worker in cancellations:
+            worker.join(3)
         self.temp.cleanup()
+
+    def wait_final_status(self):
+        queries = self.ui._QUERIES
+        with queries._condition:
+            self.assertTrue(queries._condition.wait_for(
+                lambda: bool((queries.snapshot(str(self.path))[0] or {}).get('final')), timeout=5))
+        self.ui._poll()
+        return self.ui.status(self.scene)
 
     def test_fresh_scene_controller_restores_supervision_and_cancel(self):
         jobs.start(self.path, command=[sys.executable, '-B', '-c', 'import time;time.sleep(20)'])
@@ -558,14 +569,14 @@ class SceneRecoveryTests(unittest.TestCase):
         copy = type(self.scene)(self.scene)
         copy.name, copy.session_uid = 'manual copy', 2
         self.assertFalse(self.ui.active(copy))
-        self.assertEqual(self.ui.cancel(self.scene)['state'], 'CANCELLED')
+        self.assertTrue(self.ui.cancel(self.scene)['cancel_requested'])
+        self.assertEqual(self.wait_final_status()['state'], 'CANCELLED')
 
     def test_terminal_status_does_not_reactivate_poll_tracking(self):
         jobs.start(self.path, command=[sys.executable, '-B', '-c', 'import time;time.sleep(20)'])
         self.ui._after_load(None)
         self.ui.cancel(self.scene)
-        self.ui._poll()
-        self.assertEqual(self.ui.status(self.scene)['state'], 'CANCELLED')
+        self.assertEqual(self.wait_final_status()['state'], 'CANCELLED')
         self.assertFalse(self.ui._JOBS)
 
     def test_publish_preflight_failure_precedes_snapshot_or_background_launch(self):

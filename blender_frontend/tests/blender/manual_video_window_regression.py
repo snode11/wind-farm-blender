@@ -70,21 +70,28 @@ def observe():
                     STATE['progress_capture'] = True
                 return .1
             record = video.status(scene)
-            assert record.get('state') == 'COMPLETE', record
-            assert STATE['progress_capture'] and STATE['draws'] > 0
-            assert Path(record['output_mp4']).is_file()
-            assert control.pose_snapshot(scene) == STATE['pose']
-            if 'completed' not in STATE:
-                STATE['completed'] = record
-                return .3
-            assert bpy.ops.screen.screenshot(filepath=str(OUT / 'video-complete.png')) == {'FINISHED'}
-            assert bpy.ops.wfrl.manual_video(filepath=str(OUT / 'cancelled.mp4')) == {'FINISHED'}
-            assert bpy.ops.wfrl.manual_video_cancel() == {'FINISHED'}
-            assert video.status(scene)['state'] == 'CANCELLED'
+            if not STATE.get('cancelling'):
+                assert record.get('state') == 'COMPLETE', record
+                assert STATE['progress_capture'] and STATE['draws'] > 0
+                assert Path(record['output_mp4']).is_file()
+                assert control.pose_snapshot(scene) == STATE['pose']
+                if 'completed' not in STATE:
+                    STATE['completed'] = record
+                    return .3
+                assert bpy.ops.screen.screenshot(filepath=str(OUT / 'video-complete.png')) == {'FINISHED'}
+                assert bpy.ops.wfrl.manual_video(filepath=str(OUT / 'cancelled.mp4')) == {'FINISHED'}
+                started = time.monotonic()
+                assert bpy.ops.wfrl.manual_video_cancel() == {'FINISHED'}
+                STATE['cancel_call_s'] = time.monotonic() - started
+                assert STATE['cancel_call_s'] < .2, STATE['cancel_call_s']
+                STATE['cancelling'] = True
+                return .05
+            assert record['state'] == 'CANCELLED' and record['final'], record
             assert not (OUT / 'cancelled.mp4').exists()
             video._poll()
             report = dict(status='PASS', addon_file=addon.__file__, blender=bpy.app.version_string,
                           panel_draws=STATE['draws'], progress_visible=True, complete_visible=True,
+                          cancel_call_s=STATE['cancel_call_s'],
                           scripted_product_export_and_cancel=True, source_pose_preserved=True,
                           completed=STATE['completed'], job=STATE['job'],
                           boundary='Source visible window and scripted operators; no file-picker or mouse-input validation')

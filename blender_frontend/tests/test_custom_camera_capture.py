@@ -1,4 +1,6 @@
 from pathlib import Path
+from contextlib import nullcontext
+import importlib.util
 import io
 import json
 import sys
@@ -263,3 +265,45 @@ def test_capture_restores_own_frame_change_when_geometry_evaluation_fails(clock_
     assert job.scene['wfrl_clearance_time_s'] == .5
     assert job.closed and not capture.active()
     assert job.manifest['status'] == 'incomplete'
+
+
+@pytest.mark.parametrize('already_closed', [False, True])
+@pytest.mark.parametrize('restore_failure', [False, True])
+def test_capture_operator_reports_the_committed_transaction_result(clock_capture, monkeypatch,
+                                                                  already_closed, restore_failure):
+    job, _calls, _generation = clock_capture
+    props = NS(EnumProperty=lambda **kw: None, FloatProperty=lambda **kw: None,
+               StringProperty=lambda **kw: None)
+    monkeypatch.setitem(sys.modules, 'bpy', NS(types=NS(Operator=type('Operator', (), {}),
+                                                       Panel=type('Panel', (), {}))))
+    monkeypatch.setitem(sys.modules, 'bpy.props', props)
+    path = Path(capture.__file__).parent / 'panels/custom_camera_output.py'
+    spec = importlib.util.spec_from_file_location('wfrl_blender.panels._capture_result_test', path)
+    panel = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(panel)
+    operator = panel.WFRL_OT_CustomCapture.__new__(panel.WFRL_OT_CustomCapture)
+    operator.transaction = job
+    operator.timer = object()
+    operator.wm = NS(event_timer_remove=lambda timer: None)
+    operator.area = NS(regions=[NS(type='WINDOW')], tag_redraw=lambda: None)
+    reports = []
+    operator.report = lambda level, message: reports.append((level, message))
+    context = NS(temp_override=lambda **kw: nullcontext())
+
+    def final_group(_context):
+        job.finish(success=True)
+        return True
+
+    monkeypatch.setattr(job, '_step_group', final_group)
+    if restore_failure:
+        def fail_restore(*args):
+            raise RuntimeError('injected restore failure')
+        monkeypatch.setattr(job, 'evaluate', fail_restore)
+    if already_closed:
+        final_group(context)
+    result = operator.modal(context, NS(type='TIMER', timer=operator.timer))
+    assert result == ({'CANCELLED'} if restore_failure else {'FINISHED'})
+    assert reports and reports[-1][0] == ({'ERROR'} if restore_failure else {'INFO'})
+    assert ('injected restore failure' in reports[-1][1]) is restore_failure
+    assert json.loads((job.path / 'manifest.json').read_text())['status'] == (
+        'incomplete' if restore_failure else 'complete')

@@ -38,6 +38,7 @@ class _StatusQueries:
         self._due = {}
         self._records = {}
         self._revisions = {}
+        self._cancellations = {}
 
     def clear(self):
         with self._condition:
@@ -50,7 +51,48 @@ class _StatusQueries:
     def snapshot(self, path):
         with self._condition:
             record, obtained = self._records.get(path, (None, None))
-            return (dict(record) if record is not None else None), obtained
+            result = dict(record) if record is not None else None
+            if result is not None and path in self._cancellations and not result.get('final'):
+                result['cancel_requested'] = True
+            return result, obtained
+
+    def cancel(self, path):
+        with self._condition:
+            record, _obtained = self.snapshot(path)
+            if record is not None and record.get('final'):
+                return record
+            pending = dict(record or _PENDING, cancel_requested=True)
+            pending.pop('cancel_error', None)
+            self.store(path, pending)
+            if path not in self._cancellations:
+                token = object()
+                worker = threading.Thread(target=self._cancel, args=(path, token, self._generation),
+                                          name='WFRL video cancellation', daemon=True)
+                self._cancellations[path] = (token, worker)
+                worker.start()
+            self.track(path)
+            return pending
+
+    def _cancel(self, path, token, generation):
+        from . import manual_video_job as jobs
+        try:
+            record, error = jobs.cancel(path), None
+        except Exception as exc:
+            record, error = None, str(exc)
+        with self._condition:
+            entry = self._cancellations.get(path)
+            if entry is None or entry[0] is not token:
+                return
+            self._cancellations.pop(path)
+            if generation != self._generation:
+                return
+            current, _obtained = self.snapshot(path)
+            if current is not None and current.get('final'):
+                return
+            if error is not None:
+                record = dict(current or _PENDING, cancel_requested=False, cancel_error=error)
+            self.store(path, record)
+            self.track(path)
 
     def track(self, path):
         with self._condition:
@@ -103,6 +145,9 @@ class _StatusQueries:
                         or revision != self._revisions.get(path, 0)):
                     continue
                 obtained = time.monotonic()
+                previous, _previous_time = self._records.get(path, ({}, None))
+                if previous.get('cancel_error') and not record.get('final'):
+                    record = dict(record, cancel_error=previous['cancel_error'])
                 self._records[path] = (dict(record), obtained)
                 if record.get('active'):
                     self._due[path] = obtained + .5
@@ -328,7 +373,8 @@ def launch(scene, output_mp4):
 
 def _display_record(record):
     return tuple(record.get(key) for key in (
-        'state', 'active', 'final', 'completed_frames', 'total_frames', 'error', 'output_mp4'))
+        'state', 'active', 'final', 'completed_frames', 'total_frames', 'error', 'output_mp4',
+        'cancel_requested', 'cancel_error'))
 
 
 def _poll():
@@ -361,11 +407,7 @@ def cancel(scene):
     job = _job_for(scene)
     if job is None:
         return
-    from . import manual_video_job as jobs
-    record = jobs.cancel(job['job_path'])
-    _QUERIES.store(job['job_path'], record)
-    _QUERIES.track(job['job_path'])
-    return record
+    return _QUERIES.cancel(job['job_path'])
 
 
 class WFRL_OT_ManualVideo(bpy.types.Operator, ExportHelper):
@@ -427,7 +469,10 @@ def draw(layout, scene):
             box.label(text='正在查询视频作业状态…')
         else:
             box.label(text=f"已渲染 {record.get('completed_frames', 0)} / {record.get('total_frames', 0)} 帧")
-        box.operator('wfrl.manual_video_cancel')
+        if record.get('cancel_requested'):
+            box.label(text='正在取消，等待监管确认…')
+        else:
+            box.operator('wfrl.manual_video_cancel')
     elif record.get('final') is True and state == 'COMPLETE':
         box.label(text='视频已完成', icon='CHECKMARK')
         box.operator('wm.path_open', text='打开视频', icon='PLAY').filepath = record['output_mp4']
@@ -437,6 +482,8 @@ def draw(layout, scene):
         box.label(text='视频生成已取消')
     if state == 'LOST':
         box.label(text='无法联系监管进程；请查询作业目录', icon='ERROR')
+    if record.get('cancel_error'):
+        box.label(text='取消未确认：' + record['cancel_error'], icon='ERROR')
 
 
 CLASSES = (WFRL_OT_ManualVideo, WFRL_OT_ManualVideoCancel)

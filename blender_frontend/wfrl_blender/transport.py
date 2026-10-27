@@ -162,6 +162,7 @@ class TransportClient:
                     raise ProtocolError('new session must use a new session_id')
                 self._last_inbound = -1
                 self._last_outbound = 0
+            self._last_outbound = max(self._last_outbound, payload.get('last_command_sequence', -1))
             extensions = set(payload['capabilities']) & {TRAINING_STATS_CAPABILITY}
             if not extensions <= self.capabilities:
                 raise ProtocolError('unrequested training_stats_v1 capability')

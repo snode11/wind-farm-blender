@@ -477,7 +477,7 @@ def test_command_rejection_overflow_is_retained_and_delivered_after_resume():
         cleanup(session, server, peer)
 
 
-@pytest.mark.parametrize('queue_bytes', [420, 2 * 1024 * 1024])
+@pytest.mark.parametrize('queue_bytes', [450, 2 * 1024 * 1024])
 def test_reset_discards_unsent_and_deferred_observations_from_previous_run(queue_bytes):
     session = BackendSession(scene(), max_events=4)
     session.status = 'STOPPED'
@@ -495,7 +495,7 @@ def test_reset_discards_unsent_and_deferred_observations_from_previous_run(queue
         session.emit('snapshot', telemetry)
         session.emit('training_stats', interactive_progress(snapshot(1), session.run_id, 2))
         peer.poll()
-        if queue_bytes == 420:
+        if queue_bytes == 450:
             assert {key[0] for key in server._deferred} == {'snapshot', 'training_stats'}
         else:
             assert {item['kind'] for item in server.pending} == {'snapshot', 'training_stats'}

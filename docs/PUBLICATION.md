@@ -18,10 +18,10 @@
 | 三相机重建与同源纹理 | `blade-reconstruction`、`same-source` 资源包含合成输入、保存重建及纹理再生成所需数据；扩展日常运行直接使用正式载荷 |
 | 表面材料点与雷达研究 | `blade-surface`、`lidar-research` 资源包保留正负结果、原始观测、数值数组与独立评分；合成真值与求解输入保持各自角色 |
 | 相机视频运行输入 | `camera-video` 提供演示视频与保存清单；`runtime-inputs` 提供帧映射、相机几何数组与 MediaMTX 配置；完整包的输入限制见下文 |
-| 0.3.38 扩展与源码 | [v0.3.38 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.38)提供 [wfrl_blender-0.3.38.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.38/wfrl_blender-0.3.38.zip)、inventory、SHA-256 和配套源码归档；195 文件、99,151,969 字节，身份见[交付身份](../publication/blender-0.3.38.json)。ZIP 逐文件校验、隔离安装、新进程来源与三相机默认配置／投影后台检查通过；可见窗口复验为 NOT_RUN，本地安装检查按[安装身份](../publication/daily-installation.json)记录的实际范围使用 |
+| 0.3.39 扩展与源码 | [v0.3.39 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.39)提供 [wfrl_blender-0.3.39.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.39/wfrl_blender-0.3.39.zip)、inventory、SHA-256 和配套源码归档；195 文件、99,152,603 字节，身份见[交付身份](../publication/blender-0.3.39.json)。ZIP 逐文件校验、隔离安装、新进程来源与三相机默认配置／投影后台检查通过；可见窗口复验为 NOT_RUN，本地安装检查按[安装身份](../publication/daily-installation.json)记录的实际范围使用 |
 | 软件验证与展示 | Git 保留小型判定、来源与测试输入；`frontend-evidence` 资源包提供所选可见窗口证据。演示视频和两份正式演示文稿独立提供 |
 
-公开完整源码归档为 [wind-farm-blender-source-0.3.38.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.38/wind-farm-blender-source-0.3.38.zip)，对应 [`v0.3.38` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.38)；附件身份见[交付清单](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.38/wfrl-delivery-0.3.38.json)。归档包含该发布源码快照、操作与实现文档及已列入分发的轻量证据，覆盖所列前后端源码、独立雷达正式运行输入与匹配证据；发布源码的规范构建输入展开后与 ZIP 的 195 份载荷匹配；复用已验证 ZIP，压缩构建未重跑。附件下载复验为 NOT_RUN。大型资源继续使用[资源 Release](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1)，路径、字节数与 SHA-256 见 [resources.json](../publication/resources.json)。同专题的编号附件是独立归档，须全部取得后才具备清单声明的完整输入；附件名称不改变项目相对路径。恢复冻结实验时最后解压 `zz-frozen-code-originals.tar.gz`，保留原字节脚本与摘要合同，显式适配调用环境。
+公开完整源码归档为 [wind-farm-blender-source-0.3.39.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.39/wind-farm-blender-source-0.3.39.zip)，对应 [`v0.3.39` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.39)；附件身份见[交付清单](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.39/wfrl-delivery-0.3.39.json)。归档包含该发布源码快照、操作与实现文档及已列入分发的轻量证据，覆盖所列前后端源码、独立雷达正式运行输入与匹配证据；发布源码的规范构建输入展开后与 ZIP 的 195 份载荷匹配；公开源码独立重建的 ZIP 与已验证安装包逐字节相同。附件下载复验为 NOT_RUN。大型资源继续使用[资源 Release](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1)，路径、字节数与 SHA-256 见 [resources.json](../publication/resources.json)。同专题的编号附件是独立归档，须全部取得后才具备清单声明的完整输入；附件名称不改变项目相对路径。恢复冻结实验时最后解压 `zz-frozen-code-originals.tar.gz`，保留原字节脚本与摘要合同，显式适配调用环境。
 
 ## 恢复与使用
 
@@ -49,7 +49,7 @@ FAST.Farm、OpenFAST、TurbSim、MPI 与控制器须按目标平台单独安装�
 
 普通离线结果包不含原始 FAST.Farm VTP，Bridge 的原始叶尖几何回放仍需完整原始运行目录；缺失时明确拒绝，不能使用示意几何代替。材料点 F/G 实验的原始输入、冻结脚本及完整运行产物不在当前工作区和本资源分发中；当前报告不能支持其完整精确复现。CoTracker 的第三方源码和权重不随资源包分发，相关固定来源与许可见研究 provenance。研究精确重跑还需要匹配的外部依赖、求解器及实际输入；本资源分发不声明已经重跑。
 
-几何／纹理与材料点研究保持 `NOT_ACCEPTED / FAILED_GATE`；叶尖显示精度的源码全时间轴、本地 0.3.36 安装抽样和当前 0.3.38 未重复精度验收的范围分别见[验证范围](blender/发布状态与验证范围.md#研究与物理边界)。雷达保持 `REVIEW_ONLY / PENDING_ACCEPTANCE`，动态研究保持 `DY1 NOT PASSED`。软件测试和保存场景不能替代物理精度、实物相机、长期运行或 Windows/Linux 验收。
+几何／纹理与材料点研究保持 `NOT_ACCEPTED / FAILED_GATE`；叶尖显示精度的源码全时间轴、本地 0.3.36 安装抽样和当前 0.3.39 未重复精度验收的范围分别见[验证范围](blender/发布状态与验证范围.md#研究与物理边界)。雷达保持 `REVIEW_ONLY / PENDING_ACCEPTANCE`，动态研究保持 `DY1 NOT PASSED`。软件测试和保存场景不能替代物理精度、实物相机、长期运行或 Windows/Linux 验收。
 
 ## 不分发的本地内容
 

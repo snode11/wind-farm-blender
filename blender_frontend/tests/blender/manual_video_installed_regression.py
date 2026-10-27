@@ -50,7 +50,10 @@ elif phase == 'recover':
     record = ui.status(scene)
     assert record['active'], record
     job_path = OUT / 'job.json'
-    jobs.cancel(job_path)
+    started = time.monotonic()
+    pending = ui.cancel(scene)
+    elapsed = time.monotonic() - started
+    assert elapsed < .2 and pending['cancel_requested'] and not pending['final'], pending
     deadline = time.monotonic() + 15
     while time.monotonic() < deadline:
         record = ui.status(scene)
@@ -59,7 +62,8 @@ elif phase == 'recover':
         time.sleep(.1)
     assert record['state'] == 'CANCELLED' and record['final'] and not record['active'], record
     assert not (OUT / 'unused.mp4').exists()
-    report.update(recovered_in_fresh_process=True, cancellation=record['state'], final=record['final'])
+    report.update(recovered_in_fresh_process=True, cancellation=record['state'], final=record['final'],
+                  cancel_call_s=elapsed)
 else:
     raise ValueError(phase)
 report['status'] = 'PASS'

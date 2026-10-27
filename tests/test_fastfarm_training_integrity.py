@@ -178,6 +178,25 @@ def test_truncation_bootstrap_is_pre_reset_but_gae_chain_stops():
     np.testing.assert_allclose(advantage, [2., 2.5])
 
 
+@pytest.mark.parametrize("recurrent", [False, True])
+def test_adjacent_bootstrap_values_use_the_next_decision_normalization(monkeypatch, tmp_path, recurrent):
+    fake_training(monkeypatch, tmp_path, episode_steps=3)
+    original = trainer.compute_gae_trunc
+    checked = []
+
+    def gae(rewards, values, next_values, dones, gamma, lam):
+        adjacent = dones[:-1] == 0
+        np.testing.assert_allclose(next_values[:-1][adjacent], values[1:][adjacent],
+                                   rtol=1e-6, atol=1e-7)
+        checked.append(int(adjacent.sum()))
+        return original(rewards, values, next_values, dones, gamma, lam)
+
+    monkeypatch.setattr(trainer, "compute_gae_trunc", gae)
+    trainer.train("fake", 2, 5, n_epochs=1, lr=0., recurrent=recurrent,
+                  episode_steps=3, warmup_steps=0, wind_sched="pin:8")
+    assert len(checked) == 2 and all(checked)
+
+
 @pytest.mark.parametrize("length,rollout", [(2, 5), (7, 3), (5, 3)])
 def test_training_recurrent_update_values_match_sampling_with_frozen_weights(monkeypatch, tmp_path, length, rollout):
     fake_training(monkeypatch, tmp_path, episode_steps=length)

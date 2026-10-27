@@ -198,6 +198,10 @@ def _validate_message(message):
         _require(type(p.get('selected_version')) is int and p['selected_version'] == 1, 'Unsupported selected version')
         _require(p.get('run_status') in RUN_STATUSES and p.get('mode') in MODES, 'Invalid session state')
         _require(type(p.get('resumed')) is bool, 'Missing resumed flag')
+        if 'last_command_sequence' in p:
+            watermark = p['last_command_sequence']
+            _require(type(watermark) is int and -1 <= watermark <= 2**53 - 1,
+                     'Invalid command sequence watermark')
     elif kind == 'command':
         _require(p.get('command') in ('scene.load', 'run.start', 'run.pause', 'run.resume', 'run.step', 'run.stop', 'run.reset', 'session.sync', 'channel.set'), 'Unknown command')
         _require(isinstance(p.get('arguments'), dict), 'Command arguments required')

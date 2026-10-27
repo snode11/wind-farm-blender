@@ -124,8 +124,11 @@ def _request_inactive_session(port: int, session_id: str | None, timeout: float)
                             return confirmed_id
                         if session_id is None:
                             return None
+                        watermark = payload.get('last_command_sequence', 0)
+                        if type(watermark) is not int or not -1 <= watermark < 2**53 - 1:
+                            return None
                         client.settimeout(remaining_timeout())
-                        client.sendall(frame("command", 2**53 - 1,
+                        client.sendall(frame("command", max(0, watermark) + 1,
                                              {"command": "run.stop", "arguments": {}}))
                     elif resumed and message["type"] == "lifecycle":
                         if synchronized_revision is None:

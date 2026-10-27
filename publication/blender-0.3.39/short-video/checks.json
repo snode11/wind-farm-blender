@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "launched_via_product_operator": true,
+  "source_scene_preserved": true,
+  "source_filepath_preserved": true,
+  "concurrent_job_rejected": true,
+  "overwrite_rejected": true,
+  "cancellation": true,
+  "dangling_output_link_rejected": true,
+  "frozen_configuration_after_end_and_parameter_edits": true,
+  "all_frame_poses_checked": true,
+  "polling_restored_after_registration": true,
+  "output_mp4": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-039-1c7_0445/short-video/T1-Down-9RPM-1080p25.mp4",
+  "job": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-039-1c7_0445/short-video/T1-Down-9RPM-1080p25_data_3e65ea024d824024bf1b9eec5fc24c6e/job.json",
+  "completed": {
+    "job_id": "3e65ea024d824024bf1b9eec5fc24c6e",
+    "attempt_id": "c932f6a8063646e984761dbd1c86db05",
+    "state": "COMPLETE",
+    "active": false,
+    "final": true,
+    "completed_frames": 3,
+    "total_frames": 3,
+    "schema": "wfrl.manual-video-status.v2",
+    "elapsed_wall_s": 3.7799201669404283,
+    "output_mp4": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-039-1c7_0445/short-video/T1-Down-9RPM-1080p25.mp4",
+    "video_sha256": "6f25a1d7de16c4408fd49d9901940b4d6dba779424cfc0dbfb50bc368942efef",
+    "duration_s": 0.12,
+    "exit_code": 0
+  }
+}

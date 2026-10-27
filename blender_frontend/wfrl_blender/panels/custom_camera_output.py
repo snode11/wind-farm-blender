@@ -198,13 +198,24 @@ class WFRL_OT_CustomCapture(bpy.types.Operator):
         if getattr(self,'timer',None):
             self.wm.event_timer_remove(self.timer);self.timer=None
 
+    def completion_result(self):
+        self.remove_timer()
+        transaction = self.transaction
+        if transaction.closed and transaction.manifest.get('status') == 'complete':
+            self.report({'INFO'}, '已导出：' + str(transaction.path))
+            return {'FINISHED'}
+        error = transaction.error or transaction.manifest.get('error') or '采集未完成'
+        self.report({'INFO'} if transaction.cancel_requested and '恢复失败' not in error else {'ERROR'}, error)
+        return {'CANCELLED'}
+
     def modal(self,context,event):
         if self.transaction.closed:
-            self.remove_timer();return {'FINISHED'}
+            return self.completion_result()
         if event.type=='ESC' and event.value=='PRESS':
-            self.transaction.request_cancel();self.remove_timer()
-            self.report({'INFO'},'取消请求已接受；已停止，保留已完成组')
-            return {'CANCELLED'}
+            self.transaction.request_cancel()
+            if self.transaction.closed:
+                return self.completion_result()
+            return {'RUNNING_MODAL'}
         if event.type=='TIMER':
             if getattr(event, 'timer', self.timer)!=self.timer:return {'PASS_THROUGH'}
             try:
@@ -214,9 +225,7 @@ class WFRL_OT_CustomCapture(bpy.types.Operator):
                     complete=self.transaction.step(context)
                 self.area.tag_redraw()
                 if complete:
-                    self.remove_timer()
-                    self.report({'INFO'},'已导出：'+str(self.transaction.path))
-                    return {'FINISHED'}
+                    return self.completion_result()
             except Exception as exc:
                 self.transaction.finish(error=str(exc));self.remove_timer()
                 self.report({'ERROR'},str(exc));return {'CANCELLED'}

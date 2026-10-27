@@ -1,0 +1,35 @@
+........................................................................ [  5%]
+...............................................................................................ss.s........ [ 12%]
+........................................................................ [ 17%]
+........................................................................ [ 22%]
+........................................................................ [ 28%]
+........................................................................ [ 33%]
+........................................................... [ 37%]
+....s............................................................. [ 41%]
+.....s.................................................................. [ 47%]
+........................................................................ [ 52%]
+........................................................................ [ 57%]
+........................................................................ [ 62%]
+........................................................................ [ 67%]
+........................................................................ [ 72%]
+........................................................................ [ 77%]
+........................................................................ [ 82%]
+........................................................................ [ 87%]
+........................................................................ [ 93%]
+........................................................................ [ 98%]
+......................s...                                               [100%]
+=============================== warnings summary ===============================
+tests/test_mappo_truncation.py::test_central_training_uses_terminal_state_and_matching_normalization
+  /Users/eason/Desktop/wfcrl/wind farm RL/wfrl/mappo_central.py:299: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+  Consider using tensor.detach() first. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:823.)
+    pg_log.append(float(pg)); v_log.append(float(vloss))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/blender_bridge/test_tip_replay.py:84: Original FAST.Farm native VTP geometry is not installed (4323 required files missing); offline package assertions remain separate
+SKIPPED [1] tests/blender_bridge/test_tip_replay.py:100: Original FAST.Farm native VTP geometry is not installed (4323 required files missing); offline package assertions remain separate
+SKIPPED [1] tests/blender_bridge/test_tip_replay.py:116: Original FAST.Farm native VTP geometry is not installed (4323 required files missing); offline package assertions remain separate
+SKIPPED [1] tests/test_blade_recon_scoring_contract.py:158: synth output requires OpenCV
+SKIPPED [1] tests/test_camera_video_stream.py:63: Set WFRL_MEDIAMTX to run the real RTSP integration
+SKIPPED [1] tests/viz/test_tip_tracking.py:80: could not import 'cv2': No module named 'cv2'
+1404 passed, 6 skipped, 1 warning, 56 subtests passed in 70.48s (0:01:10)

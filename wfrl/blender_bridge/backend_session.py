@@ -123,6 +123,7 @@ class BackendSession:
         self._last_snapshot = None
         self._last_stats = {}
         self._trainer = self._thread = self._process = None
+        self._formal_processes = None
         self._paused = False
         self._permits = 0
         self._stopping = False
@@ -343,6 +344,7 @@ class BackendSession:
             self._paused = self._stopping = False
             self._permits = 0
             self._trainer = self._thread = self._process = None
+            self._formal_processes = None
             self.clear_observations()
             self.run_id = uuid.uuid4().hex
             self.lifecycle('STARTING')
@@ -365,7 +367,9 @@ class BackendSession:
                     self._progress_reader = TrainingProgressReader(progress_path, self.run_id,
                         lambda record: self._progress_events.put_nowait(('training_stats', record)), observability_error)
                     from .isolated_trainer import launcher_environment
-                    self._process = subprocess.Popen(argv, cwd=root, env=launcher_environment(), start_new_session=True)
+                    from .formal_process import FormalProcesses
+                    self._formal_processes = FormalProcesses()
+                    self._process = self._formal_processes.start(argv, cwd=root, env=launcher_environment())
                     self._progress_reader.start()
                 else:
                     factory = self.trainer_factory
@@ -480,6 +484,8 @@ class BackendSession:
     def alive(self):
         if getattr(self._trainer, "running", False): return True
         if self._thread is not None and self._thread.is_alive(): return True
+        if self._formal_processes is not None:
+            return self._formal_processes.alive()
         if self._process is not None:
             self._process.poll()
             try: os.killpg(self._process.pid, 0); return True
@@ -497,6 +503,9 @@ class BackendSession:
         return not self.alive()
 
     def _signal_process_group(self, signum):
+        if self._formal_processes is not None:
+            self._formal_processes.signal(signum)
+            return
         try:
             os.killpg(self._process.pid, signum)
         except (ProcessLookupError, PermissionError):
@@ -522,7 +531,7 @@ class BackendSession:
                 try:
                     if self._trainer is not None: self._trainer.stop(timeout=timeout_seconds)
                     if self._process is not None:
-                        # Signal only our isolated process group, never a global MPI process.
+                        # Formal ownership includes identified children in independent groups.
                         self._signal_process_group(signal.SIGINT)
                         graceful = self._wait_until_stopped(timeout_seconds)
                         if not graceful:

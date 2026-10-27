@@ -2,7 +2,7 @@
 
 默认方法为 `hub-axis.v1`（`two-point-hub-extrapolation.v1`），显式候选为 `hub-tls.v1`（`hub-constrained-tls.v1`）。两种方法均为 **`REVIEW_ONLY / PENDING_ACCEPTANCE`**，软件接入和数值比较不构成现场或用途性能验收。
 
-NREL / WFRL 公开与本地日常安装 ZIP 均为 **0.3.36**（标签 **v0.3.36**），当前项目源码使用 `wind-farm-rl-all-work` 分支；188 个日常安装文件与正式 ZIP 一致，实际重启窗口核对见[安装身份](../../publication/daily-installation.json)。公开包提供主开发片段的旧法与 TLS 回放，[载荷与验证身份见发布状态](../blender/发布状态与验证范围.md)。独立求解工况不替换内置片段。
+NREL / WFRL 公开安装 ZIP 为 **0.3.39**（标签 **v0.3.39**），项目源码使用 `wind-farm-rl-all-work` 分支；开发机日常安装为 **公开 0.3.37 的 193 文件独立载荷**，见[安装身份](../../publication/daily-installation.json)。公开包提供主开发片段的旧法与 TLS 回放，[载荷与验证身份](../blender/发布状态与验证范围.md)分别核对；独立求解工况不替换内置片段。
 
 本文数值、测试规模与指纹对应 **2026-10-02 TLS 研究档案**，按数据源和评价范围分别解释。原始档案位于 `outputs/dual-beam-tls-20261002/`，包括保存回放、残差/来源诊断和独立固定转速工况。原始求解与诊断档案不随扩展源码发布；本页不能代替原数据完整复算。
 

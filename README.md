@@ -4,31 +4,31 @@
 
 | 产品 | 公开版本 | 用途与使用方式 |
 | --- | --- | --- |
-| NREL 5MW / WFRL 前端 | **0.3.38** | NREL／rootkink 叶片外形、T1/T2/T3 Down、独立风机手动控制、姿态预设与 JSON、三机柔性回放、几何／同源纹理分屏、六类合成缺陷、三相机与双束／TLS；[下载扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.38/wfrl_blender-0.3.38.zip)，使用 Install from Disk 安装并重启 |
+| NREL 5MW / WFRL 前端 | **0.3.39** | NREL／rootkink 叶片外形、T1/T2/T3 Down、独立风机手动控制、姿态预设与 JSON、三机柔性回放、几何／同源纹理分屏、六类合成缺陷、三相机与双束／TLS；[下载扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.39/wfrl_blender-0.3.39.zip)，使用 Install from Disk 安装并重启 |
 | GW184 三相机与叶片缺陷 | **0.4.0** | GW184 尺寸合成刚性模型、固定三相机与六类缺陷；[下载独立运行 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.4.0/gw184_three_camera_defects-0.4.0.zip)，完整解压后启动 |
 
 ## 当前身份与安装来源
 
-GitHub 默认分支为 [`main`](https://github.com/snode11/wind-farm-blender/tree/main)；完整项目源码分支为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)，包含前端、后端、重建研究、测试和配套文档。NREL 的 [v0.3.38 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.38) 提供专用扩展 ZIP；安装使用 `wfrl_blender-0.3.38.zip`，发布源码使用 `v0.3.38` 标签。源码提交、构建 ZIP 与本机安装分别识别，GitHub 自动 Source code 用于源码查看与构建。
+GitHub 默认分支为 [`main`](https://github.com/snode11/wind-farm-blender/tree/main)；完整项目源码分支为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)，包含前端、后端、重建研究、测试和配套文档。NREL 的 [v0.3.39 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.39) 提供专用扩展 ZIP；安装使用 `wfrl_blender-0.3.39.zip`，发布源码使用 `v0.3.39` 标签。源码提交、构建 ZIP 与本机安装分别识别，GitHub 自动 Source code 用于源码查看与构建。
 
 开发机日常扩展模块为 `bl_ext.user_default.wfrl_blender`。公开包、日常安装的版本与载荷分别取自下列身份记录；源码工作区的模块职责见[实现与维护](blender_frontend/README.md)。项目启动器、重建求解器和构建工具使用项目源码。
 
-0.3.38 配套源码提供[停止与清理合同](blender_frontend/README.md#55-实时连接与控制生命周期)、[实验身份／GRU／续训](docs/training/MAPPO_SETUP.md#fastfarm-实验身份与-gru)及[同模型评分](blade_recon0.2/README.md#评分模型与样本身份)。扩展 ZIP 包含匹配的停止状态、连接协议及相机几何缓存；Bridge、训练、评分和启动器通过完整源码归档提供。载荷按 `build-info.json`、inventory 和[交付身份](publication/blender-0.3.38.json)核对。
+0.3.39 配套源码提供[停止重试与本机进程监管](blender_frontend/README.md#55-实时连接与控制生命周期)、[实验配对／价值归一化／GRU／续训](docs/training/MAPPO_SETUP.md#fastfarm-实验身份与-gru)及[同模型评分](blade_recon0.2/README.md#评分模型与样本身份)。扩展 ZIP 包含命令水位恢复、相机采集事务结果、后台视频取消和相机几何缓存；Bridge、训练、评分和启动器通过完整源码归档提供。载荷按 `build-info.json`、inventory 和[交付身份](publication/blender-0.3.39.json)核对。
 
 <!-- release-identity:start -->
 | 对象 | 版本 | 身份依据 |
 | --- | --- | --- |
-| NREL 公开安装包 | **0.3.38** | [wfrl_blender-0.3.38.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.38/wfrl_blender-0.3.38.zip)；195 个文件；[交付身份](publication/blender-0.3.38.json) |
+| NREL 公开安装包 | **0.3.39** | [wfrl_blender-0.3.39.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.39/wfrl_blender-0.3.39.zip)；195 个文件；[交付身份](publication/blender-0.3.39.json) |
 | 开发机日常安装 | **0.3.37** | 独立载荷，按安装记录核对；193 个文件、91 个新进程模块已核对；[安装身份](publication/daily-installation.json) |
 <!-- release-identity:end -->
 
 身份、[发布核对](docs/blender/发布状态与验证范围.md#软件验证的适用对象)与[当前安装核对](publication/daily-installation.json)的适用范围见[发布状态与验证范围](docs/blender/发布状态与验证范围.md)。同一版本号不证明内容相同；升级后完全重启 Blender。
 
-0.3.38 发布源码与扩展包含后台 PNG 完成确认、回合曲线边界、连接恢复及三相机共享资源保护；配套启动器与 Bridge 通过源码归档提供。合同与保存证据见[源码软件合同与验证](docs/blender/发布状态与验证范围.md#源码软件合同与验证)。日常安装保持 0.3.37，按独立身份记录使用。
+0.3.39 发布源码与扩展包含后台 PNG 完成确认、回合曲线边界、连接恢复及三相机共享资源保护；配套启动器与 Bridge 通过源码归档提供。合同与保存证据见[源码软件合同与验证](docs/blender/发布状态与验证范围.md#源码软件合同与验证)。日常安装保持 0.3.37，按独立身份记录使用。
 
 公开扩展在 **N → WFRL** 提供回放、相机、手动、导出和后端页面，保留原页签。主入口按实际数据与播放归属显示状态，离线保存结果、独立手动刚性运动和后端运行分别说明。公开包包含主入口、录制与后台 PNG 渲染；用法见[前端操作](前端readme.md#wfrl-主入口)。工作区的源码变动不自动替换公开附件或日常安装。
 
-公开 0.3.38 前端按网格与数值消费者选择形变计算范围，保留隐藏 T1 的结构叶尖测量和共享塔架运动，并复用已校验遥测数组。后端的完整功率校验、断连期间的生命周期推进与进度合并、Interactive 联合动作 PPO 使用项目 Python 源码，说明见[前端与后端接口](blender_frontend/README.md#55-实时连接与控制生命周期)及[训练配置](docs/training/MAPPO_SETUP.md)。普通 Python 包的机型资源与依赖见[本地配置](docs/setup/setup_local.md#2-python-环境floris-与算法开发)。
+公开 0.3.39 前端按网格与数值消费者选择形变计算范围，保留隐藏 T1 的结构叶尖测量和共享塔架运动，并复用已校验遥测数组。后端的完整功率校验、断连期间的生命周期推进与进度合并、Interactive 联合动作 PPO 使用项目 Python 源码，说明见[前端与后端接口](blender_frontend/README.md#55-实时连接与控制生命周期)及[训练配置](docs/training/MAPPO_SETUP.md)。普通 Python 包的机型资源与依赖见[本地配置](docs/setup/setup_local.md#2-python-环境floris-与算法开发)。
 
 ## 主要能力
 
@@ -64,13 +64,13 @@ GW184 使用[独立包操作说明](docs/blender/GW184三相机与缺陷编辑�
 | GW184 项目 | `projects/gw184-single/` 的 geometry、motion、cameras 与 sources；两份 DTU 原始输入随 Git 提供，官方来源与固定摘要见[来源说明](projects/gw184-single/sources/README.md) |
 | 验证与研究复查 | 分发清单标识的原始测量、摘要、日志和图像；每项证据只适用于其记录的输入与载荷 |
 
-公开 0.3.38 扩展包含独立风机手动控制、相机异常资源清理、同源重建稳定刷新、完整播放覆盖和循环判定、回放包单次校验复用及 PNG 采集纹理分配控制。拒绝帧与非有限重建结果的历史／先验保护、启动器停止确认及构建输出保护属于项目侧工具，按[源码使用说明](docs/blender/INSTALL.md#从项目源码构建)独立取得；源码同步与公开发布均不会替换本机日常安装。
+公开 0.3.39 扩展包含独立风机手动控制、相机异常资源清理、同源重建稳定刷新、完整播放覆盖和循环判定、回放包单次校验复用及 PNG 采集纹理分配控制。拒绝帧与非有限重建结果的历史／先验保护、启动器停止确认及构建输出保护属于项目侧工具，按[源码使用说明](docs/blender/INSTALL.md#从项目源码构建)独立取得；源码同步与公开发布均不会替换本机日常安装。
 
 ## 验证与限制
 
 源码检查的命令、依赖、跳过条件与记录范围见[分发说明](docs/PUBLICATION.md#证据身份与限制)及其对应源码快照；各项结果只适用于记录的源码与输入，不作为当前公开 ZIP 或日常安装的重复验收。
 
-公开 ZIP 的文件、源码标签和下载地址见[交付身份](publication/blender-0.3.38.json)；195 文件、99,151,969 字节，SHA-256 为 `f6896ed8f441d98c55a1b810840c7e63c78d6d07583c71930d44a4fb8d1b18f8`。保存的宿主结果为前端 1287 项、后端／项目 1382 项通过，8 项跳过；三项源码 Blender 后台检查及 ZIP 隔离安装、新进程来源与两项相机后台检查通过。[日常安装记录](publication/daily-installation.json)覆盖文件、模块来源、WFRL 主入口注册及配置保护，数量与载荷关系见[身份摘要](#当前身份与安装来源)。完整行为、完整视频、稳定 FPS、长期运行、其他平台、真实后端训练和科学精度没有由该日常身份检查产生的验收结论。
+公开 ZIP 的文件、源码标签和下载地址见[交付身份](publication/blender-0.3.39.json)；195 文件、99,152,603 字节，SHA-256 为 `02b9ad6415873f9e320122497a8d09897f99ee0c2e0ce3a4f388618e508ef9aa`。保存的宿主结果为前端 1295 项、后端／项目 1404 项通过，10 项跳过；三项源码 Blender 后台检查及 ZIP 隔离安装、新进程来源与两项相机后台检查通过。[日常安装记录](publication/daily-installation.json)覆盖文件、模块来源、WFRL 主入口注册及配置保护，数量与载荷关系见[身份摘要](#当前身份与安装来源)。完整行为、完整视频、稳定 FPS、长期运行、其他平台、真实后端训练和科学精度没有由该日常身份检查产生的验收结论。
 
 同源纹理是 **SAME_SOURCE_SIMULATION**：601 个 10 Hz 保存样本对应 117–177 s，60 Hz 时间轴每 6 帧保持一个样本；独立 `synth_tex` 是另一来源的 120 样本、0–11.9 s。放大与增强不会补出未观测表面。两者的几何／纹理仍为 **NOT_ACCEPTED**，图集模糊、条带、接缝和叶尖错贴限制保留。
 

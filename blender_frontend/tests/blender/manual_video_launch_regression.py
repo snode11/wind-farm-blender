@@ -94,6 +94,9 @@ video.unregister()
 video.register()
 assert bpy.app.timers.is_registered(video._poll)
 video.cancel(scene)
+deadline = time.monotonic() + 20
+while video.active(scene) and time.monotonic() < deadline:
+    time.sleep(.05)
 video._poll()
 assert video.status(scene)['state'] == 'CANCELLED'
 assert not cancel_output.exists()

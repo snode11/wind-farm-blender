@@ -34,7 +34,7 @@
 
 使用已有依赖环境；NumPy／PyTorch 等按选定测试要求准备，不为文档任务安装依赖。
 
-持续集成的宿主依赖、触发条件与后台选择见[自动检查](../../../../docs/development/自动检查.md)。`configs/ci-native-tests.txt` 是后台 CI 的脚本选择；运行器继续核对来源、正常退出、完成标记和最终报告。README 的身份摘要用仓库 `scripts/ci/check_release_identity.py --release publication/blender-0.3.38.json` 检查；显式 `--write` 从身份记录同步摘要，不更改记录本身或验证范围。
+持续集成的宿主依赖、触发条件与后台选择见[自动检查](../../../../docs/development/自动检查.md)。`configs/ci-native-tests.txt` 是后台 CI 的脚本选择；运行器继续核对来源、正常退出、完成标记和最终报告。README 的身份摘要用仓库 `scripts/ci/check_release_identity.py --release publication/blender-0.3.39.json` 检查；显式 `--write` 从身份记录同步摘要，不更改记录本身或验证范围。
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定测试路径> -q -p no:cacheprovider

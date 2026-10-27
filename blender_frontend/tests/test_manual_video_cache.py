@@ -107,9 +107,13 @@ def controller(tmp_path, monkeypatch):
                  calls=calls, redraw=redraw, timers=timers, releases=[], control=control, spec=spec)
     yield runtime
     worker = ui._QUERIES._thread
+    cancellations = [entry[1] for entry in ui._QUERIES._cancellations.values()]
     ui.unregister()
     for release in runtime.releases:
         release.set()
+    for action in cancellations:
+        action.join(timeout=2)
+        assert not action.is_alive()
     if worker is not None:
         worker.join(timeout=2)
         assert not worker.is_alive(), 'test query did not release its daemon'
@@ -298,15 +302,76 @@ def test_cancel_caches_verified_result_and_discards_older_query(controller):
     assert entered.wait(2)
     worker = controller.ui._QUERIES._thread
     result = controller.ui.cancel(controller.scene)
+    wait_snapshot(controller, lambda record, _time: record and record.get('state') == 'CANCELLED')
     controller.jobs.cancel.assert_called_once_with(controller.path)
-    assert result['state'] == 'CANCELLED'
-    assert controller.ui.status(controller.scene) == result
+    assert result['cancel_requested'] and not result['final']
+    final = controller.ui.status(controller.scene)
+    assert final['state'] == 'CANCELLED' and final['final']
     assert controller.ui._poll() is None
     release.set()
     worker.join(timeout=2)
     assert not worker.is_alive()
-    assert controller.ui.status(controller.scene) == result
+    assert controller.ui.status(controller.scene) == final
     assert not controller.ui._JOBS
+
+
+def test_cancel_never_waits_on_the_ui_thread_and_repeated_clicks_share_one_request(controller):
+    entered, release = threading.Event(), threading.Event()
+    controller.releases.append(release)
+
+    def cancel(path):
+        assert threading.get_ident() != threading.main_thread().ident
+        entered.set()
+        assert release.wait(3)
+        return dict(state='CANCELLED', active=False, final=True)
+
+    controller.jobs.cancel.side_effect = cancel
+    result = immediate(lambda: controller.ui.cancel(controller.scene))
+    assert result['cancel_requested'] and result['active'] and not result['final']
+    assert entered.wait(1)
+    for _ in range(10):
+        assert immediate(lambda: controller.ui.cancel(controller.scene))['cancel_requested']
+    assert controller.jobs.cancel.call_count == 1
+    assert immediate(controller.ui._poll) == .5
+    release.set()
+    wait_snapshot(controller, lambda record, _time: record and record.get('final'))
+    assert controller.ui.status(controller.scene)['state'] == 'CANCELLED'
+
+
+@pytest.mark.parametrize('error', [TimeoutError('still running'), ValueError('endpoint unverified')])
+def test_unconfirmed_cancellation_keeps_tracking_and_reports_the_error(controller, error):
+    controller.jobs.cancel.side_effect = error
+    immediate(lambda: controller.ui.cancel(controller.scene))
+    wait_snapshot(controller, lambda record, _time: record and record.get('cancel_error'))
+    record = controller.ui.status(controller.scene)
+    assert record['active'] and not record['final'] and not record['cancel_requested']
+    layout = Layout()
+    immediate(lambda: controller.ui.draw(layout, controller.scene))
+    assert any(str(error) in text for text in layout.labels)
+    controller.response.update(state='CANCELLED', active=False, final=True)
+    wait_snapshot(controller, lambda record, _time: record and record.get('final'))
+    assert controller.ui.status(controller.scene)['state'] == 'CANCELLED'
+
+
+def test_cancel_reply_from_a_cleared_generation_cannot_replace_current_status(controller):
+    entered, release = threading.Event(), threading.Event()
+    controller.releases.append(release)
+
+    def cancel(_path):
+        entered.set()
+        assert release.wait(3)
+        return dict(state='CANCELLED', active=False, final=True)
+
+    controller.jobs.cancel.side_effect = cancel
+    controller.ui.cancel(controller.scene)
+    assert entered.wait(1)
+    action = controller.ui._QUERIES._cancellations[controller.path][1]
+    controller.ui._QUERIES.clear()
+    controller.ui.status(controller.scene)
+    wait_snapshot(controller, lambda record, _time: record and record.get('state') == 'RENDERING')
+    release.set()
+    action.join(2)
+    assert controller.ui.status(controller.scene)['state'] == 'RENDERING'
 
 
 def test_completed_saved_path_is_not_added_to_polling_jobs(controller):

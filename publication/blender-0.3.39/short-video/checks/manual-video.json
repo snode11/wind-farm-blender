@@ -1,0 +1,12 @@
+{
+  "valid": true,
+  "frame_count": 3,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "duration_s": 0.12,
+  "fps": 25,
+  "full_decode": true,
+  "video_sha256": "6f25a1d7de16c4408fd49d9901940b4d6dba779424cfc0dbfb50bc368942efef"
+}

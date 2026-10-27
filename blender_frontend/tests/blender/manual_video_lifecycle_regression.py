@@ -21,6 +21,16 @@ OUT = Path(os.environ['WFRL_TEST_OUTPUT']).resolve()
 OUT.mkdir(parents=True, exist_ok=False)
 report = dict(addon_file=addon.__file__, blender=bpy.app.version_string)
 job_path = None
+
+
+def wait_cancelled(scene):
+    deadline = time.monotonic() + 20
+    while video.active(scene) and time.monotonic() < deadline:
+        time.sleep(.05)
+    video._poll()
+    assert video.status(scene)['state'] == 'CANCELLED'
+
+
 addon.register()
 try:
     bpy.context.preferences.edit.use_global_undo = True
@@ -72,8 +82,7 @@ try:
     assert bpy.app.timers.is_registered(video._poll)
     video.cancel(scene)
     video.cancel(scene)
-    video._poll()
-    assert video.status(scene)['state'] == 'CANCELLED'
+    wait_cancelled(scene)
     assert not output.exists()
     assert not video._JOBS
     entry = control._t1(scene)
@@ -95,8 +104,7 @@ try:
     assert not failed_output.exists() and not video._JOBS
     job_path = video.launch(scene, OUT / 'retry-cancelled.mp4')
     video.cancel(scene)
-    video._poll()
-    assert video.status(scene)['state'] == 'CANCELLED'
+    wait_cancelled(scene)
     report.update(status='PASS', undo_redo_task_retained=True, duplicate_task_rejected=True,
                   renamed_scene_retained=True, copied_scene_independent=True,
                   pre_export_save_reload_retained=True,
