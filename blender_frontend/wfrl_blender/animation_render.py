@@ -154,6 +154,7 @@ class RenderJob:
                 self.message = f'后台渲染 {self.completed_frames}/{self.total_frames} 帧'
             return
         self.process = None
+        progress_error = self._read_progress()
         complete = (not progress_error and self._record.get('state') == 'COMPLETE'
                     and self.completed_frames == self.total_frames)
         if code == 0 and complete:

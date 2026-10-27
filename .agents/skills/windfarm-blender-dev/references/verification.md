@@ -20,9 +20,12 @@
 | 机舱相机与 Down | `test_camera_projection.py`、`test_nacelle_visibility.py` | 后台 `nacelle_camera_intrinsics_regression.py`、`farm_down_mount_regression.py`、`t1_down_mount_regression.py`、`nacelle_camera_regression.py`；仓库 `scripts/blender/check_nrel_nacelle_camera.py` 做投影、射线与渲染检查。 |
 | 三相机布局与绑定 | `test_stacked_camera_rig.py`、`test_custom_cameras.py`、`test_custom_camera_v3.py` | 后台 `three_camera_default_regression.py`、`custom_camera_edit_binding_regression.py`；按钮交互另验。 |
 | 相机窗口、释放与采集 | `test_native_camera_lifecycle.py`、`test_custom_camera_retirement.py`、`test_custom_camera_capture.py` | 后台 `custom_camera_retirement_regression.py`；窗口 `native_camera_enabled_regression.py`、`frontend_layout_regression.py`、`custom_camera_capture_window.py`、`native_camera_save_regression.py`。 |
+| 相机加载与场景共享 | `test_custom_camera_retirement.py`、`test_custom_camera_preview.py` | 后台 `custom_camera_load_invalidation_regression.py` 检查真实文件加载、通知、几何指纹与适配渲染请求；`custom_camera_shared_object_regression.py` 检查跨场景 Object 拒绝及独立 Object 共享 Camera DATA。两者只接受新输出目录，不验证 GPU 像素或窗口操作。 |
 | 缺陷编辑与播放 | `test_nrel_defects.py`、`test_nrel_editor_playback.py` | 后台 `nrel_editor_resource_regression.py`、`nrel_defect_editor_regression.py`；窗口 `nrel_defect_window_regression.py`、`nrel_editor_playback_regression.py`。 |
 | 柔性运动与工作集 | `test_tip_deflection.py`、`test_farm_flex_workload.py`、`test_farm_telemetry_arrays.py`、`test_performance.py` | 后台 `farm_flex_regression.py`、`tip_deflection_regression.py`、`farm_flex_workload_regression.py`；另查受影响的对照、缺陷及视频消费者，构图另验窗口。 |
 | Bridge 与训练 | `test_transport.py`、`test_live_runtime.py`；仓库 `tests/blender_bridge/`、`tests/test_interactive_ppo_objective.py` | 回合、动作及训练路径按[训练合同](../../../../docs/training/MAPPO_SETUP.md)选择对应测试；模拟测试不代替真实连接／训练。 |
+| 连接恢复与身份 | `test_connection_recovery.py`、`test_transport.py`、`test_ui_state.py`；仓库 `tests/blender_bridge/test_disconnect_progress.py` | 后台 `connection_recovery_regression.py` 核对真实 RNA／操作器确认及 socketpair 握手，不连接 TCP 服务、不运行后端，也不验证模态窗口布局。 |
+| 快照与曲线回合边界 | `test_chart_snapshot_contract.py`、`test_charts.py`、`test_history_export.py` | 使用实际 `SnapshotAdapter` 到 `ChartHistory` 的生产与消费合同；不启动训练或验证控制效果。 |
 | 启动器与 MPI | `test_launcher.py`；仓库 `tests/blender_bridge/test_isolated_trainer.py` | MPI／FAST.Farm 须目标环境验证。 |
 | 雷达与便携包 | `test_dual_beam_builtin.py`；仓库 `tests/lidar/` 的 `test_replay.py`、`test_dual_beam_replay.py`、`test_dual_beam_portable.py` | 后台 `dual_beam_regression.py`、`clearance_replay_smoke.py`；窗口 `dual_beam_window.py`、`clearance_gui_acceptance.py`。 |
 | 构建与安装 | `test_frontend_package_validation.py`、`test_extension_package.py` | 见下文构建入口；后者会构建 ZIP。 |
@@ -30,6 +33,8 @@
 ## 执行环境与来源
 
 使用已有依赖环境；NumPy／PyTorch 等按选定测试要求准备，不为文档任务安装依赖。
+
+持续集成的宿主依赖、触发条件与后台选择见[自动检查](../../../../docs/development/自动检查.md)。`configs/ci-native-tests.txt` 是后台 CI 的脚本选择；运行器继续核对来源、正常退出、完成标记和最终报告。README 的身份摘要用仓库 `scripts/ci/check_release_identity.py --release publication/blender-0.3.38.json` 检查；显式 `--write` 从身份记录同步摘要，不更改记录本身或验证范围。
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定测试路径> -q -p no:cacheprovider

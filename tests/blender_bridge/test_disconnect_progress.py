@@ -265,16 +265,51 @@ def test_offline_completion_failure_and_stop_are_observed_without_client(outcome
         assert server.client is None
         ack = peer.connect()
         assert ack['payload']['run_status'] == terminal
+        assert ack['payload']['state_revision'] == session.state_revision
         peer.until(lambda items: any(m['type'] == 'lifecycle' and m['payload']['run_status'] == terminal
                                     for m in items))
         statuses = [m['payload']['run_status'] for m in peer.messages if m['type'] == 'lifecycle']
         assert statuses == (['FAILED'] if outcome == 'fail' else ['DRAINING', 'STOPPED'])
+        assert all(m['payload']['state_revision'] <= ack['payload']['state_revision']
+                   for m in peer.messages if m['type'] == 'lifecycle')
         if outcome == 'fail':
             assert any(m['payload'].get('reason') == 'fake training failure' for m in peer.messages)
         assert not any(m['type'] == 'error' and m['payload']['code'] == 'EVENT_OVERFLOW'
                        for m in peer.messages)
     finally:
         cleanup(session, server, peer)
+
+
+def test_synchronization_state_and_revision_are_captured_atomically():
+    serializing, release, attempted, transitioned = (threading.Event() for _ in range(4))
+    class BlockingScene:
+        def to_dict(self):
+            serializing.set()
+            assert release.wait(2.)
+            return {'name': 'authoritative'}
+    session = BackendSession(BlockingScene())
+    captured = []
+    reader = threading.Thread(target=lambda: captured.append(session.synchronization_state()))
+    def transition():
+        attempted.set()
+        session.lifecycle('STARTING')
+        transitioned.set()
+    writer = threading.Thread(target=transition)
+    try:
+        reader.start()
+        assert serializing.wait(2.)
+        writer.start()
+        assert attempted.wait(2.)
+        assert not transitioned.is_set()
+    finally:
+        release.set()
+        reader.join(2.)
+        writer.join(2.)
+    assert not reader.is_alive() and not writer.is_alive()
+    assert (captured[0]['run_status'], captured[0]['state_revision'], captured[0]['scene']) == (
+        'READY', 0, {'name': 'authoritative'})
+    lifecycle = session.poll()[0][1]
+    assert (lifecycle['run_status'], lifecycle['state_revision']) == ('STARTING', 1)
 
 
 def test_incomplete_handshake_does_not_block_backend_completion():

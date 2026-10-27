@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "phase": "run",
+  "reasons": [],
+  "returncode": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "duration_s": 0.628163541899994,
+  "source_changed": false,
+  "execution": {
+    "status": "PASS",
+    "final": true,
+    "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/custom_camera_shared_object_regression.py",
+    "background": true,
+    "blender": "5.2.1 LTS",
+    "startup_dirty": false,
+    "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+    "returned_normally": true,
+    "post_script_dirty": false
+  },
+  "script_result": {
+    "status": "PASS",
+    "blender": "5.2.1 LTS",
+    "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+    "background": true,
+    "method": "Real Blender scene/collection and local-viewport references, including shared Camera data.",
+    "source_sha256": "75b9a598f3022eedd84d651ba03f94033a2bad597456d685e8ce66588100b3a0",
+    "checks": {
+      "edit_separate_collections": true,
+      "restore_separate_collections": true,
+      "clear_separate_collections": true,
+      "edit_shared_collection": true,
+      "restore_shared_collection": true,
+      "clear_shared_collection": true,
+      "edit_camera_reference": true,
+      "restore_camera_reference": true,
+      "clear_camera_reference": true,
+      "edit_inactive_viewport": true,
+      "restore_inactive_viewport": true,
+      "clear_inactive_viewport": true,
+      "edit_marker_reference": true,
+      "restore_marker_reference": true,
+      "clear_marker_reference": true,
+      "edit_independent_object_shared_data_supported": true,
+      "restore_independent_object_shared_data_supported": true,
+      "clear_independent_object_shared_data_supported": true,
+      "foreign_window_local_camera_only": true
+    },
+    "failures": {}
+  },
+  "log": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-20261027-h2hginrn/native-final/custom_camera_shared_object_regression/run/blender.log",
+  "report": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-20261027-h2hginrn/native-final/custom_camera_shared_object_regression/artifacts/checks.json"
+}

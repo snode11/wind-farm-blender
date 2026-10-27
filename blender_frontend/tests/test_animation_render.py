@@ -83,6 +83,36 @@ def test_completion_requires_successful_process_and_all_frames(tmp_path, rendere
     assert json.loads((job.directory / 'manifest.json').read_text())['state'] == 'FAILED'
 
 
+@pytest.mark.parametrize('initial', ['running', 'missing', 'incomplete_json'])
+def test_poll_rereads_final_manifest_after_process_exit(tmp_path, initial):
+    module = importlib.import_module('wfrl_blender.animation_render')
+    job = module.RenderJob()
+    job.directory = tmp_path
+    job.total_frames = 3
+    job._record = dict(job_id='render-fixture', state='RUNNING', completed_frames=0, total_frames=3)
+    manifest = tmp_path / 'manifest.json'
+    if initial == 'running':
+        manifest.write_text(json.dumps(dict(job._record, completed_frames=2)))
+    elif initial == 'incomplete_json':
+        manifest.write_text('{')
+
+    class CompletingProcess:
+        def poll(self):
+            manifest.write_text(json.dumps(dict(job_id='render-fixture', state='COMPLETE',
+                                                completed_frames=3, total_frames=3)))
+            return 0
+
+    job.process = CompletingProcess()
+    job.poll()
+
+    assert job.state == 'COMPLETE'
+    assert job.completed_frames == 3
+    assert not job.active
+    saved = json.loads(manifest.read_text())
+    assert saved['state'] == 'COMPLETE'
+    assert saved['completed_frames'] == 3
+
+
 def test_cancel_is_nonblocking_and_only_stops_owned_process(tmp_path, renderer, monkeypatch):
     monkeypatch.setenv('WFRL_TEST_RENDER_MODE', 'wait')
     job = start(tmp_path, renderer)

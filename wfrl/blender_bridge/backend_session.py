@@ -99,6 +99,7 @@ class BackendSession:
         if type(max_events) is not int or max_events < 1:
             raise ValueError('max_events must be a positive integer')
         self.session_id = uuid.uuid4().hex
+        self.state_revision = 0
         self.run_id = None
         self._progress_reader = None
         self._progress_dir = None
@@ -185,10 +186,16 @@ class BackendSession:
     def lifecycle(self, status, reason=None):
         with self._condition:
             self.status = status
-            self.emit('lifecycle', dict(run_status=status, reason=reason, mode=self.mode, run_id=self.run_id,
-                                        capabilities=self.capabilities,
-                                        scene=self.scene.to_dict() if hasattr(self.scene, "to_dict") else None,
-                                        channel_states=dict(self._channel_states), channel_table=self.channel_table()))
+            self.state_revision += 1
+            self.emit('lifecycle', dict(self.synchronization_state(), reason=reason))
+
+    def synchronization_state(self):
+        """Capture current state and its lifecycle watermark under the same lock."""
+        with self._condition:
+            return dict(run_status=self.status, mode=self.mode, run_id=self.run_id,
+                        state_revision=self.state_revision, capabilities=self.capabilities,
+                        scene=self.scene.to_dict() if hasattr(self.scene, 'to_dict') else None,
+                        channel_states=dict(self._channel_states), channel_table=self.channel_table())
 
     def _collect_progress(self, final=False):
         if final and self._progress_reader is not None:

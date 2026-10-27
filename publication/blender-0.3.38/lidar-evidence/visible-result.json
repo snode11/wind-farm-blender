@@ -1,0 +1,62 @@
+{
+  "status": "PASS",
+  "verification_layer": "SOURCE_RUNTIME_VISIBLE_WINDOW",
+  "blender": "5.2.1 LTS",
+  "module": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+  "actual_entrypoint": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/open_clearance_demo.py",
+  "physical_mouse": false,
+  "clips": {
+    "normal": {
+      "start": "PASS",
+      "start_frame": 1,
+      "end_frame": 1081,
+      "window_capture": "/Users/eason/Desktop/wfcrl/交付包/独立雷达演示-ba6a85d1368f/normal-playback.png",
+      "playback_to_end": "PASS",
+      "automatic_stop": "PASS",
+      "final_time_s": 36,
+      "final_statistics": {
+        "expected_samples": 71,
+        "valid_samples": 25,
+        "valid_ratio": 0.352112676056338,
+        "mae_m": 0.327238963013196,
+        "max_abs_error_m": 0.4102756009662496,
+        "p95_abs_error_m": 0.4091196291603687,
+        "max_positive_bias_m": 0.0,
+        "passage_count": 8,
+        "missed_passage_count": 0
+      },
+      "observed_measurements": 8,
+      "wall_elapsed_s": 18.00432962505147,
+      "end_holds_without_loop": "PASS"
+    },
+    "close": {
+      "start": "PASS",
+      "start_frame": 1,
+      "end_frame": 1081,
+      "pause_freezes_frame_and_readout": "PASS",
+      "resume": "PASS",
+      "window_capture": "/Users/eason/Desktop/wfcrl/交付包/独立雷达演示-ba6a85d1368f/close-playback.png",
+      "playback_to_end": "PASS",
+      "automatic_stop": "PASS",
+      "final_time_s": 36,
+      "final_statistics": {
+        "expected_samples": 71,
+        "valid_samples": 33,
+        "valid_ratio": 0.4647887323943662,
+        "mae_m": 0.10580540262181932,
+        "max_abs_error_m": 0.14851108042209393,
+        "p95_abs_error_m": 0.14823110833413544,
+        "max_positive_bias_m": 0.07684957451002017,
+        "passage_count": 8,
+        "missed_passage_count": 0
+      },
+      "observed_measurements": 8,
+      "wall_elapsed_s": 18.620716375065967,
+      "end_holds_without_loop": "PASS"
+    }
+  },
+  "errors": [],
+  "restart_after_end": "PASS",
+  "physical_accuracy_acceptance": "NOT_RUN",
+  "stable_fps_acceptance": "NOT_RUN"
+}

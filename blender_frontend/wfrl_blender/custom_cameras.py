@@ -851,14 +851,30 @@ def _publish(scene, replacements):
     Originals stay alive and linked until replacement objects and references are
     ready. A failure at any pre-commit stage restores object identity and links.
     Deletion is post-commit garbage collection, never part of layout visibility.
+    Objects used by another scene require independent scene ownership first.
     """
     import bpy
+    originals = {slot: get_camera(scene, slot) for slot in replacements}
+    objects = [obj for obj in (*originals.values(), *replacements.values()) if obj is not None]
+    for obj in objects:
+        owners = sorted(other.name for other in bpy.data.scenes if other != scene
+                        and (other.user_of_id(obj) > 0 or other.objects.get(obj.name) == obj))
+        if owners:
+            raise ValueError(f'相机对象“{obj.name}”被其他场景共享：{", ".join(owners)}；'
+                             '请先解除这些场景对此对象的关联，或为当前场景创建独立相机对象后再修改或清除')
+        for screen in bpy.data.screens:
+            if not any(area.type == 'VIEW_3D' and area.spaces.active.use_local_camera
+                       and area.spaces.active.camera == obj for area in screen.areas):
+                continue
+            windows = [window for manager in bpy.data.window_managers for window in manager.windows
+                       if window.screen == screen]
+            if not windows or any(window.scene != scene for window in windows):
+                raise ValueError(f'相机对象“{obj.name}”被未归属于当前场景的局部相机视口引用（屏幕“{screen.name}”）；'
+                                 '请先解除该视口的局部相机关联，或为当前场景创建独立相机对象后再修改或清除')
     cleanup_retired()
     from .panels import custom_cameras as panel
     controller = panel._ACTIVE
     controller_stage = controller.stage if controller and controller.scene == scene else None
-    originals = {slot: get_camera(scene, slot) for slot in replacements}
-    objects = [obj for obj in (*originals.values(), *replacements.values()) if obj is not None]
     saved = [(obj, obj.name, obj.data.name, bool(obj.get('wfrl_custom_camera')),
               bool(obj.get('wfrl_custom_draft')), tuple(obj.users_collection)) for obj in objects]
     refs = [(scene, 'camera', scene.camera)]
@@ -881,7 +897,8 @@ def _publish(scene, replacements):
             if original is not None:
                 original['wfrl_custom_camera'] = False
                 original.name += '.Retired'
-                original.data.name += '.Retired'
+                if original.data.users == 1:
+                    original.data.name += '.Retired'
             _publication_checkpoint('retire', slot)
         for slot, cam in replacements.items():
             if cam is not None:

@@ -1,0 +1,13 @@
+home_entry_smoke.py
+manual_control_regression.py
+manual_control_state_regression.py
+manual_rate_pitch_regression.py
+manual_rotor_conflict_regression.py
+manual_pitch_trial_regression.py
+manual_pitch_trial_undo_regression.py
+manual_pose_undo_regression.py
+manual_scene_recovery_regression.py
+manual_scene_link_compatibility_regression.py
+custom_camera_load_invalidation_regression.py
+custom_camera_shared_object_regression.py
+connection_recovery_regression.py

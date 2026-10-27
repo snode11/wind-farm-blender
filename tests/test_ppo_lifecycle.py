@@ -84,19 +84,22 @@ def save_pair(mutate_norm=None):
 def observe_model(monkeypatch, model, probe):
     probe.models.append(model)
     model.tensorboard_log = None
-    learn, predict = model.learn, model.predict
+    learn, predict = PPO.learn, PPO.predict
 
-    def record_learn(**options):
-        probe.learn_calls.append(options.copy())
-        options["progress_bar"] = False
-        return learn(**options)
+    def record_learn(self, **options):
+        if self is model:
+            probe.learn_calls.append(options.copy())
+            options["progress_bar"] = False
+        return learn(self, **options)
 
-    def record_predict(observation, **options):
-        probe.observations.append(observation["yaw"].copy())
-        return predict(observation, **options)
+    def record_predict(self, observation, **options):
+        if self is model:
+            probe.observations.append(observation["yaw"].copy())
+        return predict(self, observation, **options)
 
-    monkeypatch.setattr(model, "learn", record_learn)
-    monkeypatch.setattr(model, "predict", record_predict)
+    # SB3 serializes instance attributes; observers belong outside checkpoint data.
+    monkeypatch.setattr(PPO, "learn", record_learn)
+    monkeypatch.setattr(PPO, "predict", record_predict)
     return model
 
 

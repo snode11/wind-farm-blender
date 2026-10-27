@@ -164,19 +164,22 @@ def harness(request, monkeypatch, tmp_path):
         state.environments.append(venv)
         state.before.append((venv.obs_rms["yaw"].count, venv.ret_rms.count,
                              venv.training, venv.norm_reward))
-        learn, predict = model.learn, model.predict
+        learn, predict = PPO.learn, PPO.predict
 
-        def record_learn(**kwargs):
-            state.learned.append(kwargs.copy())
-            kwargs["progress_bar"] = False
-            return learn(**kwargs)
+        def record_learn(self, **kwargs):
+            if self is model:
+                state.learned.append(kwargs.copy())
+                kwargs["progress_bar"] = False
+            return learn(self, **kwargs)
 
-        def record_predict(observation, **kwargs):
-            state.observations.append({key: value.copy() for key, value in observation.items()})
-            return predict(observation, **kwargs)
+        def record_predict(self, observation, **kwargs):
+            if self is model:
+                state.observations.append({key: value.copy() for key, value in observation.items()})
+            return predict(self, observation, **kwargs)
 
-        monkeypatch.setattr(model, "learn", record_learn)
-        monkeypatch.setattr(model, "predict", record_predict)
+        # SB3 serializes instance attributes; observers belong outside checkpoint data.
+        monkeypatch.setattr(PPO, "learn", record_learn)
+        monkeypatch.setattr(PPO, "predict", record_predict)
         return model
 
     def probe():
@@ -318,19 +321,21 @@ def test_fresh_training_uses_new_statistics(harness, monkeypatch):
         kwargs.update(n_steps=2, batch_size=2, n_epochs=1, verbose=0, tensorboard_log=None)
         kwargs["policy_kwargs"]["net_arch"] = [4]
         model = PPO(**kwargs)
-        learn, predict = model.learn, model.predict
+        learn, predict = PPO.learn, PPO.predict
 
-        def record_learn(**options):
-            calls.append(options.copy())
-            options["progress_bar"] = False
-            return learn(**options)
+        def record_learn(self, **options):
+            if self is model:
+                calls.append(options.copy())
+                options["progress_bar"] = False
+            return learn(self, **options)
 
-        def record_predict(observation, **options):
-            predictions.append(observation["yaw"].copy())
-            return predict(observation, **options)
+        def record_predict(self, observation, **options):
+            if self is model:
+                predictions.append(observation["yaw"].copy())
+            return predict(self, observation, **options)
 
-        monkeypatch.setattr(model, "learn", record_learn)
-        monkeypatch.setattr(model, "predict", record_predict)
+        monkeypatch.setattr(PPO, "learn", record_learn)
+        monkeypatch.setattr(PPO, "predict", record_predict)
         return model
 
     monkeypatch.setattr(h.cli, "PPO", construct)

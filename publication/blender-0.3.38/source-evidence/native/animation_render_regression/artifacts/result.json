@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "module": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+  "complete_frames": 3,
+  "source_preserved": true,
+  "cancellation": true,
+  "output": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-20261027-h2hginrn/native-final/animation_render_regression/artifacts/animation-6c68c1ab2f74",
+  "cancelled": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-20261027-h2hginrn/native-final/animation_render_regression/artifacts/animation-849ee697cb34",
+  "mappo_output": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-20261027-h2hginrn/native-final/animation_render_regression/artifacts/animation-55220f31cf5b",
+  "recorded_motion_frames": [
+    1,
+    301,
+    601
+  ],
+  "compositor_output_guard": true,
+  "original_camera_quality_snapshot": true
+}

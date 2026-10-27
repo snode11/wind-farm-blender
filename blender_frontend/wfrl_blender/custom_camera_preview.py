@@ -15,12 +15,33 @@ from . import camera_projection as projection, custom_cameras as core
 _DRAWING = False
 _REVISION = 0
 _RENDERERS = set()
+_CHANGE_CALLBACKS = globals().get('_CHANGE_CALLBACKS', set())
+if 'changed' in globals():
+    _CHANGE_CALLBACKS.add(changed)
 
 
 def changed(*_args):
     global _REVISION
     if not _DRAWING:
         _REVISION += 1
+
+
+def register_change_handler():
+    """Keep scene invalidation active across file loads without duplicate callbacks."""
+    import bpy
+    unregister_change_handler()
+    bpy.app.handlers.persistent(changed)
+    bpy.app.handlers.depsgraph_update_post.append(changed)
+    _CHANGE_CALLBACKS.add(changed)
+
+
+def unregister_change_handler():
+    import bpy
+    handlers = bpy.app.handlers.depsgraph_update_post
+    for callback in _CHANGE_CALLBACKS | {changed}:
+        while callback in handlers:
+            handlers.remove(callback)
+    _CHANGE_CALLBACKS.clear()
 
 
 def render_profile(scene, fast=False):

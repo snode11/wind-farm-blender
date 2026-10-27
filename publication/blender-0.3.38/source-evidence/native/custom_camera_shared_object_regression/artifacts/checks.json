@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+  "background": true,
+  "method": "Real Blender scene/collection and local-viewport references, including shared Camera data.",
+  "source_sha256": "75b9a598f3022eedd84d651ba03f94033a2bad597456d685e8ce66588100b3a0",
+  "checks": {
+    "edit_separate_collections": true,
+    "restore_separate_collections": true,
+    "clear_separate_collections": true,
+    "edit_shared_collection": true,
+    "restore_shared_collection": true,
+    "clear_shared_collection": true,
+    "edit_camera_reference": true,
+    "restore_camera_reference": true,
+    "clear_camera_reference": true,
+    "edit_inactive_viewport": true,
+    "restore_inactive_viewport": true,
+    "clear_inactive_viewport": true,
+    "edit_marker_reference": true,
+    "restore_marker_reference": true,
+    "clear_marker_reference": true,
+    "edit_independent_object_shared_data_supported": true,
+    "restore_independent_object_shared_data_supported": true,
+    "clear_independent_object_shared_data_supported": true,
+    "foreign_window_local_camera_only": true
+  },
+  "failures": {}
+}

@@ -7,6 +7,7 @@ import shutil
 import socket
 import subprocess
 import sys
+import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -25,14 +26,17 @@ fastfarm = executable('WFCRL_FASTFARM_EXECUTABLE', os.environ.get('WFRL_FASTFARM
 mpiexec = executable('WFCRL_MPIEXEC', 'mpiexec')
 blender_default = shutil.which('blender') or '/Applications/Blender.app/Contents/MacOS/Blender'
 blender = executable('WFRL_BLENDER', blender_default)
-OUT = Path(os.environ.get('WFRL_ACCEPT_OUTPUT', ROOT / 'evidence' / 'frontend_completion'))
-OUT.mkdir(parents=True, exist_ok=True)
+output_root = Path(os.environ.get('WFRL_ACCEPT_OUTPUT', ROOT / 'evidence' / 'frontend_completion')).expanduser().absolute()
+output_root.mkdir(parents=True, exist_ok=True)
+OUT = Path(tempfile.mkdtemp(prefix='run-', dir=output_root))
+print(f'Acceptance output: {OUT}', flush=True)
 env = os.environ.copy()
-env.update(WFCRL_FASTFARM_EXECUTABLE=fastfarm, WFCRL_MPIEXEC=mpiexec, PYTHONUNBUFFERED='1')
+env.update(WFCRL_FASTFARM_EXECUTABLE=fastfarm, WFCRL_MPIEXEC=mpiexec, PYTHONUNBUFFERED='1',
+           WFRL_ACCEPT_OUTPUT=str(OUT))
 env.setdefault('OMP_NUM_THREADS', '2')
 children = []
 started = time.monotonic()
-result = {}
+result = {'output_dir': str(OUT)}
 try:
     with (OUT/'backend.log').open('w') as log, (OUT/'blender.log').open('w') as frontlog:
         bridge = subprocess.Popen([backend_python,'-m','wfrl.blender_bridge','--port','8881'],

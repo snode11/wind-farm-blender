@@ -307,3 +307,4 @@ report = dict(status='PASS' if result.wasSuccessful() else 'FAIL',
 print(json.dumps(report), flush=True)
 if not result.wasSuccessful():
     raise AssertionError('Manual control state regression failed; see checks.json')
+print('MANUAL_CONTROL_STATE_PASS', flush=True)

@@ -54,6 +54,17 @@ class Regression:
 
 
 REGRESSIONS = (
+    Regression('home_entry_smoke.py', 'HOME_ENTRY_SMOKE_PASS', None,
+               scope='Native RNA and entry operations with a layout adapter; visible layout and FPS not verified.'),
+    Regression('manual_control_regression.py', 'MANUAL_CONTROL_REGRESSION_PASS', timeout_s=600),
+    Regression('manual_control_state_regression.py', 'MANUAL_CONTROL_STATE_PASS'),
+    Regression('manual_rate_pitch_regression.py', 'MANUAL_RATE_PITCH_PASS', 'result.json'),
+    Regression('manual_rotor_conflict_regression.py', 'MANUAL_ROTOR_CONFLICT_PASS'),
+    Regression('manual_pitch_trial_regression.py', 'MANUAL_PITCH_TRIAL_PASS'),
+    Regression('manual_pitch_trial_undo_regression.py', 'MANUAL_PITCH_TRIAL_UNDO_PASS'),
+    Regression('manual_pose_undo_regression.py', 'MANUAL_POSE_UNDO_PASS'),
+    Regression('manual_scene_recovery_regression.py', 'MANUAL_SCENE_RECOVERY_PASS', timeout_s=600),
+    Regression('manual_scene_link_compatibility_regression.py', 'MANUAL_SCENE_LINK_COMPATIBILITY_PASS'),
     Regression('frontend_sessions_window.py', 'FRONTEND_SESSIONS_WINDOW_PASS', 'result.json',
                mode='visible', package='synthetic',
                scope='Native window screenshots, recording cleanup and scene ownership; scripted controls.'),
@@ -92,6 +103,14 @@ REGRESSIONS = (
     Regression('custom_camera_capture_regression.py', 'CUSTOM_CAMERA_CAPTURE_NATIVE_PASS',
                'result.json', package='synthetic',
                scope='Native camera/configuration guards; GPU capture not verified.'),
+    Regression('custom_camera_load_invalidation_regression.py',
+               'CUSTOM_CAMERA_LOAD_INVALIDATION_REGRESSION_PASS', package='synthetic',
+               scope='Native file loads, invalidation callbacks and refresh requests with a render adapter; GPU pixels not verified.'),
+    Regression('custom_camera_shared_object_regression.py',
+               'CUSTOM_CAMERA_SHARED_OBJECT_REGRESSION_PASS', package='synthetic',
+               scope='Native scene ownership, camera objects/data and transactional rejection; GPU drawing not verified.'),
+    Regression('connection_recovery_regression.py', 'CONNECTION_RECOVERY_NATIVE_PASS', package='synthetic',
+               scope='Native RNA, confirmed recovery action and runtime/transport over socketpair; modal UI and real backend not verified.'),
     Regression('three_cameras_regression.py', 'THREE_CAMERAS_NATIVE_PASS', None, package='synthetic'),
     Regression('farm_front_view_regression.py', 'FARM_FRONT_VIEW_PASS'),
     Regression('shared_context_switch_regression.py', 'SHARED_CONTEXT_SWITCH_PASS', mode='visible',
@@ -326,8 +345,8 @@ def main(argv=None):
                         shutil.which('blender') or '/Applications/Blender.app/Contents/MacOS/Blender')
     parser.add_argument('--output', type=Path)
     parser.add_argument('--scratch-root', type=Path, default=Path(tempfile.gettempdir()))
-    parser.add_argument('--tests', nargs='+', help='Script names or stems; defaults to the original 24 tests')
-    parser.add_argument('--test-list', type=Path, help='Whitespace-separated names, e.g. the original test-list.txt')
+    parser.add_argument('--tests', nargs='+', help='Script names or stems; defaults to all registered tests')
+    parser.add_argument('--test-list', type=Path, help='File containing whitespace-separated script names')
     parser.add_argument('--mode', choices=('all', 'background', 'visible'), default='all')
     parser.add_argument('--timeout', type=float, help='Per-process timeout override in seconds')
     parser.add_argument('--list', action='store_true', help='Print execution contracts without launching Blender')

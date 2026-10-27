@@ -1,0 +1,6 @@
+{
+  "BLENDER_USER_CONFIG": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-20261027-h2hginrn/package-validation/profile/config",
+  "BLENDER_USER_SCRIPTS": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-20261027-h2hginrn/package-validation/profile/scripts",
+  "BLENDER_USER_DATAFILES": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-review-fixes-20261027-h2hginrn/package-validation/profile/datafiles",
+  "WFRL_ADDON_MODULE": "bl_ext.wfrl_frontend.wfrl_blender"
+}

@@ -58,4 +58,24 @@ class UIStateTests(unittest.TestCase):
         ui.confirmed = False
         self.assertFalse(ui.allows('configure'))
 
+    def test_resume_watermark_retains_current_state_and_keeps_live_transitions_strict(self):
+        ui = FrontendState()
+        ui.synchronize('s', 'STOPPED', 'interactive_training', ['pause'], state_revision=8)
+        self.assertFalse(ui.lifecycle('s', 'DRAINING', 'replay', [], state_revision=7))
+        self.assertEqual((ui.run_status, ui.mode, ui.capabilities),
+                         ('STOPPED', 'interactive_training', {'pause'}))
+        with self.assertRaisesRegex(ValueError, 'Invalid lifecycle transition'):
+            ui.lifecycle('s', 'PAUSED', 'interactive_training', ['pause'], state_revision=9)
+        self.assertTrue(ui.lifecycle('s', 'STARTING', 'interactive_training', ['pause'], state_revision=9))
+        with self.assertRaisesRegex(ValueError, 'revision'):
+            ui.lifecycle('s', 'RUNNING', 'interactive_training', ['pause'], state_revision=9)
+        with self.assertRaisesRegex(ValueError, 'revision'):
+            ui.lifecycle('s', 'RUNNING', 'interactive_training', ['pause'])
+
+    def test_unversioned_lifecycle_keeps_strict_transition_validation(self):
+        ui = FrontendState()
+        ui.synchronize('legacy', 'STOPPED', 'demo', [])
+        with self.assertRaisesRegex(ValueError, 'Invalid lifecycle transition'):
+            ui.lifecycle('legacy', 'DRAINING', 'demo', [])
+
 if __name__ == '__main__': unittest.main()

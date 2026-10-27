@@ -1,0 +1,64 @@
+{
+  "schema": "wfrl.clearance-delivery-validation.v1",
+  "status": "PASS",
+  "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+  "delivery": {
+    "path": "dist/lidar-delivery.json",
+    "bytes": 1265,
+    "sha256": "ba6a85d1368f1e63c04c54e4a8a3caebf9c1d3a724f67c1d40917ca64fdb4800",
+    "source_commit": "2e75e8ff8ff08055592a77adcd103455de2974ae",
+    "matches_record": "publication/source-files.json"
+  },
+  "packages": {
+    "normal": {
+      "path": "results/lidar/packages/normal-v1.1",
+      "manifest_sha256": "658922c57ecf7b69028d55eae604119a4b44e60e66247817edbd145d9dc0fe2d",
+      "files": {
+        "motion.json": "037d6d863f50e3dc5d5628008123010bc7e7b6bd1d821849761484a9d3f75403",
+        "measurements.json": "e156a563a4515c170f6efdb05688a4d7b498fec66c628ae69135f04de66c1b40",
+        "cumulative.json": "a705c9259c12749eb759ced45fe1452c6dee50631d868b19d53880d818c8cddd",
+        "statistics.json": "152512d5353418cf76066176ed8e490295a50a653e1ce274fdfa30f937b82b17",
+        "report.md": "6ea67f06e578994ccea839957ccbe0a7e1dbea78a3e06396c447ff888bb123ae"
+      },
+      "status": "PASS"
+    },
+    "close": {
+      "path": "results/lidar/packages/close-v1.1",
+      "manifest_sha256": "91895c64e0bc962c956d57fe8bb507fe9e26f0af6cf6aa2f59cef5a19a9cc30b",
+      "files": {
+        "motion.json": "037d6d863f50e3dc5d5628008123010bc7e7b6bd1d821849761484a9d3f75403",
+        "measurements.json": "3543afe6f71f579270a2a2d75aceeaf31db27d5b204a7ed3689def94be7c2936",
+        "cumulative.json": "df264ec55a9e03ffb128727da5c8c01a7278555f469e9675ec5ba0fba1c7c50a",
+        "statistics.json": "7ec96ae03c5d87a44ebf9f839f482bd60e228be8de78e11848784fc6addd44f3",
+        "report.md": "3adeffcf40fa065457ea4c8212bee94d3f793cd84c92f5373a947068377973ba"
+      },
+      "status": "PASS"
+    }
+  },
+  "source_files_sha256": {
+    "scripts/blender/open_clearance_demo.py": "6a29ade42532c97568d546041ab277e241df9fbd707cd59a16abf79f40647edc",
+    "scripts/blender/打开净空雷达演示.command": "d7530d012dc2765b3ec144c6b8e4be6158e5d85199bab7361735902e6c65cbc3",
+    "blender_frontend/wfrl_blender/clearance_replay.py": "6613fdee6611d1c01e82618248d66d194a6addd83b297a161dde49243aadf4fb",
+    "blender_frontend/wfrl_blender/panels/clearance.py": "0159cc551e36158d76a7a1232b4694e299b32ad6eb9abb260faa84a6fb39f55f",
+    "wfrl/lidar/replay.py": "ba68593d849b76840243cd82dbdad194cad23780a4d68f776340aa64bf228ee6"
+  },
+  "host_reader_tests": {
+    "python": "/opt/anaconda3/envs/wfrl-mac/bin/python",
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. /opt/anaconda3/envs/wfrl-mac/bin/python -m pytest tests/lidar/test_replay.py tests/lidar/test_replay_failures.py -q -p no:cacheprovider",
+    "passed": 17,
+    "subtests_passed": 7,
+    "raw_log_saved": false
+  },
+  "background_result": "background-result.json",
+  "background_exit_code": 0,
+  "visible_result": "visible-result.json",
+  "visible_exit_code": 0,
+  "physical_mouse": false,
+  "window_layout_acceptance": "NOT_RUN",
+  "stable_fps_acceptance": "NOT_RUN",
+  "physical_accuracy_acceptance": "NOT_RUN",
+  "temporary_profiles_and_recovery_files": "REMOVED",
+  "temporary_paths_in_original_logs": [
+    "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-clearance-window-0y1lpni_/quit.blend"
+  ]
+}

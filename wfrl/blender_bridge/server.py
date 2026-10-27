@@ -62,7 +62,7 @@ class BridgeServer:
     def _connection_capabilities(self, capabilities):
         return [cap for cap in capabilities if cap != TRAINING_STATS_CAPABILITY] + sorted(self.negotiated_capabilities)
 
-    def _send(self, kind, payload):
+    def _send(self, kind, payload, *, retain=True):
         if kind == 'training_stats' and TRAINING_STATS_CAPABILITY not in self.negotiated_capabilities:
             return
         if kind in ('hello_ack', 'lifecycle'):
@@ -82,14 +82,14 @@ class BridgeServer:
                 return
             raise _SendQueueFull('Server send queue overflow')
         self.pending.append(dict(kind=kind, payload=payload, frame=data, offset=0,
-                                 sequence=self.sequence, queued_monotonic=time.monotonic()))
+                                 sequence=self.sequence, queued_monotonic=time.monotonic(), retain=retain))
         self.pending_bytes += len(data)
         if kind == 'error' and payload.get('fatal'):
             self.close_after_flush = True
 
     def _retain_reliable_pending(self):
         retained = [(item['kind'], item['payload']) for item in self.pending
-                    if item['kind'] in {'lifecycle', 'safety_event', 'error'}]
+                    if item['kind'] in {'lifecycle', 'safety_event', 'error'} and item.get('retain', True)]
         if retained:
             self.backlog = deque(retained + list(self.backlog))
         self.pending.clear()
@@ -182,7 +182,7 @@ class BridgeServer:
         if self.client is None: return
         try:
             if not self.ready and time.monotonic() >= self.deadline: raise ProtocolError('Handshake timeout')
-            for _ in range(4):
+            for _ in range(0 if self.close_after_flush else 4):
                 if self.ready and self.backlog:
                     break
                 if self._incoming:
@@ -201,9 +201,15 @@ class BridgeServer:
                     if not self.ready:
                         if message['type'] != 'hello': raise ProtocolError('Expected hello')
                         resume = message['payload']['resume_session_id']
-                        if resume not in (None, self.session.session_id): raise ProtocolError('Unknown session to resume')
+                        if resume not in (None, self.session.session_id):
+                            self._send('error', dict(code='UNKNOWN_SESSION', message='Unknown session to resume; explicitly confirm a new backend connection to forget the previous identity',
+                                                    fatal=True, rejected_session_id=resume), retain=False)
+                            break
                         if resume is None and self.session_claimed:
-                            if self.session.alive(): raise ProtocolError('Active session requires resume_session_id')
+                            if self.session.alive():
+                                self._send('error', dict(code='RESUME_REQUIRED', message='Active session requires resume_session_id',
+                                                        fatal=True, rejected_session_id=None), retain=False)
+                                break
                             # A fresh protocol session must never inherit terminal
                             # lifecycle or safety events from the previous one.
                             self.backlog.clear()
@@ -214,9 +220,14 @@ class BridgeServer:
                             self.guard = SessionSequenceGuard(self.session.session_id)
                             self.sequence = 0
                         self.negotiated_capabilities = frozenset(message['payload']['capabilities']) & {TRAINING_STATS_CAPABILITY}
-                        self._send('hello_ack', dict(selected_version=1, capabilities=self.session.capabilities,
-                                   run_status=self.session.status, mode=self.session.mode, resumed=resume is not None,
-                                   run_id=getattr(self.session, 'run_id', None)))
+                        if hasattr(self.session, 'synchronization_state'):
+                            state = self.session.synchronization_state()
+                        else:
+                            # Unversioned producers keep strict transition handling;
+                            # the transport cannot infer a safe history watermark.
+                            state = dict(capabilities=self.session.capabilities, run_status=self.session.status,
+                                         mode=self.session.mode, run_id=getattr(self.session, 'run_id', None))
+                        self._send('hello_ack', dict(state, selected_version=1, resumed=resume is not None))
                         self.ready = True
                         self.session_claimed = True
                         if resume is not None and hasattr(self.session, 'replay_latest'):
@@ -232,6 +243,8 @@ class BridgeServer:
                             except (ProtocolError, ValueError, TypeError):
                                 self.backlog.append(('error', payload))
                                 raise
+                if self.close_after_flush:
+                    break
             if self.ready:
                 self._queue_session_events()
             if self.pending:

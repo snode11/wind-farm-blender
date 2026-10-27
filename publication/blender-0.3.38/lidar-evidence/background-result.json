@@ -1,0 +1,49 @@
+{
+  "status": "PASS",
+  "verification_layer": "SOURCE_RUNTIME",
+  "blender": "5.2.1 LTS",
+  "module": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+  "actual_entrypoint": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/open_clearance_demo.py",
+  "background": true,
+  "clips": {
+    "normal": {
+      "segment_start_s": 18,
+      "segment_end_s": 36,
+      "frames_checked": 1081,
+      "distinct_displayed_measurements": 20,
+      "final_statistics": {
+        "expected_samples": 71,
+        "valid_samples": 25,
+        "valid_ratio": 0.352112676056338,
+        "mae_m": 0.327238963013196,
+        "max_abs_error_m": 0.4102756009662496,
+        "p95_abs_error_m": 0.4091196291603687,
+        "max_positive_bias_m": 0.0,
+        "passage_count": 8,
+        "missed_passage_count": 0
+      },
+      "end_progress_percent": 100.0,
+      "restart": "PASS"
+    },
+    "close": {
+      "segment_start_s": 18,
+      "segment_end_s": 36,
+      "frames_checked": 1081,
+      "distinct_displayed_measurements": 26,
+      "final_statistics": {
+        "expected_samples": 71,
+        "valid_samples": 33,
+        "valid_ratio": 0.4647887323943662,
+        "mae_m": 0.10580540262181932,
+        "max_abs_error_m": 0.14851108042209393,
+        "p95_abs_error_m": 0.14823110833413544,
+        "max_positive_bias_m": 0.07684957451002017,
+        "passage_count": 8,
+        "missed_passage_count": 0
+      },
+      "end_progress_percent": 100.0,
+      "restart": "PASS"
+    }
+  },
+  "physical_accuracy_acceptance": "NOT_RUN"
+}

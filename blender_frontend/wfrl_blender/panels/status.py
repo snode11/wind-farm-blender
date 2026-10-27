@@ -47,6 +47,18 @@ class WFRL_PT_connection(bpy.types.Panel):
             controls.operator('wfrl.bridge_connect', text='连接 / 重新连接后端')
             if not offline_results:
                 controls.operator('wfrl.bridge_disconnect')
+        if runtime.can_connect_new_backend():
+            controls.operator('wfrl.bridge_connect_new', icon='UNLINKED')
+            controls.label(text='放弃旧连接不会停止旧后端作业', icon='INFO')
+        if runtime.forgotten_connections:
+            previous = runtime.forgotten_connections[-1]
+            header, body = controls.panel('wfrl_forgotten_backend_identity', default_closed=True)
+            header.label(text='已放弃的连接 · 作业状态未确认')
+            if body is not None:
+                body.label(text=f"会话：{previous['session_id']}")
+                if previous['run_id']:
+                    body.label(text=f"作业：{previous['run_id']}")
+                body.label(text=f"最后状态：{previous['run_status']} · 当前未确认")
         # Run actions have a single home in the backend run panel.
         header, body = layout.panel('wfrl_backend_environment', default_closed=True)
         header.label(text='环境与路径（高级）')

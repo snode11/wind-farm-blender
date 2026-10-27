@@ -34,6 +34,8 @@ class FrontendState:
     run_id: str | None = None
     capabilities: set[str] = field(default_factory=set)
     error: str = ""
+    state_revision: int | None = None
+    _synchronized_revision: int | None = field(default=None, init=False, repr=False)
 
     def allows(self, action: str) -> bool:
         if action == "configure":
@@ -65,22 +67,37 @@ class FrontendState:
         self.confirmed = False
         self.error = error
 
-    def synchronize(self, session_id: str, status: str, mode: str, capabilities) -> None:
+    def synchronize(self, session_id: str, status: str, mode: str, capabilities, *, state_revision=None) -> None:
         if not session_id or status not in TRANSITIONS or mode not in MODES:
             raise ValueError("Invalid session synchronization")
+        if state_revision is not None and (type(state_revision) is not int or state_revision < 0):
+            raise ValueError("Invalid state revision")
         self.session_id, self.run_status, self.mode = session_id, status, mode
+        self.state_revision = self._synchronized_revision = state_revision
         self.capabilities = set(capabilities)
         self.connection, self.confirmed, self.error = "CONNECTED", True, ""
 
-    def lifecycle(self, session_id: str, status: str, mode: str, capabilities) -> None:
+    def lifecycle(self, session_id: str, status: str, mode: str, capabilities, *, state_revision=None) -> bool:
+        """Retain watermark-covered history without applying it as current state."""
         if not self.confirmed or session_id != self.session_id:
             raise ValueError("Unconfirmed or obsolete session")
-        if mode not in MODES:
+        if mode not in MODES or status not in TRANSITIONS:
             raise ValueError("Invalid lifecycle mode")
         capabilities = set(capabilities)
         if any(not isinstance(capability, str) or not capability.strip()
                for capability in capabilities):
             raise ValueError("Invalid lifecycle capabilities")
+        if state_revision is not None and (type(state_revision) is not int or state_revision < 0):
+            raise ValueError("Invalid state revision")
+        if self._synchronized_revision is not None:
+            if state_revision is None:
+                raise ValueError("Lifecycle state revision required after versioned synchronization")
+            if state_revision <= self._synchronized_revision:
+                return False
+            if state_revision <= self.state_revision:
+                raise ValueError("Lifecycle state revision must increase")
         if status != self.run_status and status not in TRANSITIONS.get(self.run_status, set()):
             raise ValueError(f"Invalid lifecycle transition: {self.run_status} -> {status}")
         self.run_status, self.mode, self.capabilities = status, mode, capabilities
+        self.state_revision = state_revision
+        return True

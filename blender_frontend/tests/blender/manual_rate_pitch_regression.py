@@ -162,6 +162,11 @@ class ManualRatePitchTests(unittest.TestCase):
 
 
 result = unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(ManualRatePitchTests))
-(OUT / 'result.json').write_text(json.dumps(dict(passed=result.wasSuccessful(), tests=result.testsRun)), encoding='utf-8')
+(OUT / 'result.json').write_text(json.dumps(dict(
+    status='PASS' if result.wasSuccessful() else 'FAIL', passed=result.wasSuccessful(),
+    tests=result.testsRun, addon_file=addon.__file__, blender=bpy.app.version_string,
+    failures=[dict(test=test.id(), traceback=detail) for test, detail in result.failures],
+    errors=[dict(test=test.id(), traceback=detail) for test, detail in result.errors])), encoding='utf-8')
 if not result.wasSuccessful():
     raise AssertionError('Manual rate-pitch regression failed')
+print('MANUAL_RATE_PITCH_PASS', flush=True)

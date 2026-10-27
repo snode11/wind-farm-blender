@@ -233,11 +233,49 @@ class TransportTests(unittest.TestCase):
         self.assertEqual(self.client.next_sequence, 8)
         self.peer.close()
         self.peer = None
+        self.client.close()
+        self.client.forget_session(confirmed=True)
         self.connect()
         self.peer.sendall(wire(ack(session='new')))
         self.wait_messages()
         self.assertEqual(self.client.session_id, 'new')
         self.assertEqual(self.client.next_sequence, 1)
+
+    def test_reconnect_cannot_silently_replace_the_claimed_session(self):
+        self.establish()
+        self.peer.close()
+        self.peer = None
+        self.connect()
+        self.peer.sendall(wire(ack(session='other')))
+        self.wait_messages()
+        self.assertEqual(self.client.session_id, 'test')
+        self.assertEqual(self.client.status, 'DISCONNECTED')
+        self.assertIn('explicit', self.client.last_error)
+
+    def test_unknown_session_rejection_is_machine_readable_and_preserves_identity(self):
+        self.establish()
+        self.peer.close()
+        self.peer = None
+        self.connect()
+        rejection = dict(protocol_version=1, type='error', session_id='replacement', sequence=1,
+                         payload=dict(code='UNKNOWN_SESSION', message='Unknown session to resume',
+                                      fatal=True, rejected_session_id='test'))
+        self.peer.sendall(wire(rejection))
+        self.assertEqual(self.wait_messages(), [rejection])
+        self.assertEqual(self.client.last_error_code, 'UNKNOWN_SESSION')
+        self.assertEqual(self.client.session_id, 'test')
+        with self.assertRaisesRegex(ValueError, 'confirmation'):
+            self.client.forget_session()
+        self.client.forget_session(confirmed=True)
+        self.assertIsNone(self.client.session_id)
+        self.assertEqual(self.client.forgotten_session_id, 'test')
+        self.assertEqual(self.client.next_sequence, 1)
+
+    def test_forget_session_requires_a_disconnected_transport(self):
+        self.establish()
+        with self.assertRaisesRegex(ValueError, 'Disconnect'):
+            self.client.forget_session(confirmed=True)
+        self.assertEqual(self.client.session_id, 'test')
 
     def test_no_dns_or_non_loopback(self):
         for host in ['localhost', 'example.com', '192.168.1.2']:

@@ -48,7 +48,9 @@ class TransportClient:
         self.status = 'DISCONNECTED'
         self.progress = 'Disconnected'
         self.last_error = None
+        self.last_error_code = None
         self.session_id = None
+        self.forgotten_session_id = None
         self._last_inbound = -1
         self._last_outbound = 0
         self._socket = None
@@ -66,6 +68,7 @@ class TransportClient:
     def connect(self):
         self.close()
         self.last_error = None
+        self.last_error_code = None
         self.progress = 'Connecting'
         self._deadline = self._clock() + self.timeout_seconds
         try:
@@ -93,6 +96,18 @@ class TransportClient:
         self._incoming.clear()
         self._queued_bytes = 0
         self._decoder = FrameDecoder()
+
+    def forget_session(self, *, confirmed=False):
+        """Discard only local resume identity; this sends no backend stop command."""
+        if confirmed is not True:
+            raise ValueError('Explicit confirmation is required to forget the previous backend identity')
+        if self._phase != 'closed' or self.status != 'DISCONNECTED':
+            raise ValueError('Disconnect before forgetting the previous backend identity')
+        self.forgotten_session_id = self.session_id
+        self.session_id = None
+        self._last_inbound, self._last_outbound = -1, 0
+        self.last_error = self.last_error_code = None
+        self.progress = 'Previous identity forgotten locally; previous backend may still be running'
 
     def _fail(self, error):
         self.close()
@@ -124,9 +139,16 @@ class TransportClient:
 
     def _accept(self, message):
         if self._phase == 'handshake':
+            payload = message['payload']
+            if (message['type'] == 'error' and payload.get('fatal') is True
+                    and payload.get('code') in {'UNKNOWN_SESSION', 'RESUME_REQUIRED'}
+                    and 'rejected_session_id' in payload
+                    and payload['rejected_session_id'] == self.session_id):
+                self.last_error_code = payload['code']
+                self._fail(payload['message'])
+                return
             if message['type'] != 'hello_ack':
                 raise ProtocolError('expected hello_ack before application messages')
-            payload = message['payload']
             session = message['session_id']
             if payload['selected_version'] != 1:
                 raise ProtocolError('unsupported negotiated protocol version')
@@ -134,6 +156,8 @@ class TransportClient:
                 if session != self.session_id or message['sequence'] <= self._last_inbound:
                     raise ProtocolError('invalid resumed session or sequence')
             else:
+                if self.session_id is not None:
+                    raise ProtocolError('new backend identity requires explicit confirmation to forget the previous session')
                 if session == self.session_id:
                     raise ProtocolError('new session must use a new session_id')
                 self._last_inbound = -1
@@ -212,6 +236,7 @@ class TransportClient:
                 self._accept(message)
                 result.append(message)
                 if message['type'] == 'error' and message['payload']['fatal']:
+                    self.last_error_code = message['payload']['code']
                     self._fail(message['payload']['message'])
                     break
         except (OSError, ValueError, KeyError, TypeError) as exc:

@@ -59,6 +59,8 @@ scripts/blender/run_wfrl_macos.sh --help
 
 它委托 `scripts/blender/wfrl_launcher.py launch`，使用实际配置的解释器和已安装扩展；修改仓库源码不会自动更新已安装扩展。不能将“离线示例能播放”推定为 Bridge 或 FAST.Farm 环境可用。
 
+当前工作区启动器保留虚拟环境解释器路径，使用所选后端 Python 解析 YAML 并统一后端预检与 MPI 配置判定。停止未确认时继续监管并保留会话凭据；普通重连保留原身份，认领新后端须显式确认且不停止旧任务。连接恢复的 `state_revision` 语义需要匹配的前端与 Bridge；源码合同见[维护说明](../../blender_frontend/README.md#55-实时连接与控制生命周期)，0.3.38 发布源码与日常 0.3.37 的适用范围见[源码验证](../blender/发布状态与验证范围.md#源码软件合同与验证)。
+
 ## 4. 旧 Studio / RViz 桌面入口
 
 这些是仍保留的 Python Qt/VTK 路线，与当前 Blender 离线流程不同。macOS 原生窗口需要 `pythonw`；仓库启动器同时检查 `pythonw` 和 `mpiexec`：

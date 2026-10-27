@@ -63,6 +63,18 @@ class CodecTests(unittest.TestCase):
         with self.assertRaises(ProtocolError): encode_message(msg('hello_ack', selected_version=2))
         with self.assertRaisesRegex(ProtocolError, 'binary'): encode_message(msg('wake_binary'))
 
+    def test_lifecycle_revision_is_an_optional_nonnegative_integer(self):
+        payloads = [
+            ('hello_ack', dict(selected_version=1, capabilities=[], run_status='READY', mode='demo', resumed=True)),
+            ('lifecycle', dict(run_status='RUNNING', reason=None, mode='demo', capabilities=[])),
+        ]
+        for kind, payload in payloads:
+            for revision in (0, 1, 100):
+                encode_message(msg(kind, **dict(payload, state_revision=revision)))
+            for revision in (-1, True, None, '1', 1.5):
+                with self.subTest(kind=kind, revision=revision), self.assertRaisesRegex(ProtocolError, 'state_revision'):
+                    encode_message(msg(kind, **dict(payload, state_revision=revision)))
+
     def test_sequence_session(self):
         guard = SessionSequenceGuard('s')
         guard.accept(msg(sequence=1)); guard.accept(msg(sequence=5))

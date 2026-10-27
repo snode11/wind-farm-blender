@@ -88,14 +88,23 @@ def test_reject_flexible_reference_mismatch(tmp_path):
     with pytest.raises(ValueError,match='Nacelle position'):read_package(path)
 
 
+@pytest.fixture
+def cold_package_cache():
+    from wfrl_blender import farm_flex
+
+    farm_flex.clear_package_cache()
+    yield
+    farm_flex.clear_package_cache()
+
+
 @pytest.mark.parametrize('entrypoint', ['attach', 'constructor'])
 @pytest.mark.parametrize('source', ['farm', 'dual_beam'])
-def test_runtime_reuses_one_validated_package(monkeypatch, entrypoint, source):
+def test_runtime_reuses_one_validated_package(monkeypatch, cold_package_cache, entrypoint, source):
     from wfrl_blender import clearance_replay, deflection, farm_flex, prebend, tower_motion
 
     path = (farm_flex.default_package() if source == 'farm'
             else farm_flex.default_dual_package())
-    calls = dict(archives=[], resolved=[], references=[], towers=[], comparison_paths=[])
+    calls = dict(archives=[], resolved=[], references=[], towers=[], comparison_paths=[], comparison_inputs=[])
     original_load = np.load
     original_resolve = farm_flex.dual_beam_api().resolve_package
     original_reference = prebend.read_reference
@@ -128,6 +137,7 @@ def test_runtime_reuses_one_validated_package(monkeypatch, entrypoint, source):
 
     def comparison(path, *args, **kwargs):
         calls['comparison_paths'].append(path)
+        calls['comparison_inputs'].append(kwargs)
         original_comparison(path, *args, **kwargs)
         raise BeforeMeshBinding
 
@@ -143,7 +153,7 @@ def test_runtime_reuses_one_validated_package(monkeypatch, entrypoint, source):
     monkeypatch.setattr(deflection, 'read_comparison', comparison)
     monkeypatch.setattr(farm_flex, 'FarmFlex', construct)
     monkeypatch.setattr(farm_flex, '_ACTIVES', {})
-    monkeypatch.setattr(farm_flex, 'detach', lambda scene: None)
+    monkeypatch.setattr(farm_flex, 'detach', lambda scene=None, *, restore=True: None)
     monkeypatch.setattr(clearance_replay, 'clear', lambda scene, reason: None)
 
     class Scene(dict):
@@ -160,8 +170,16 @@ def test_runtime_reuses_one_validated_package(monkeypatch, entrypoint, source):
     assert calls['archives'].count('geometry.npz') == 1
     assert calls['archives'].count('tower-motion.npz') == 1
     assert len(calls['resolved']) == len(calls['references']) == len(calls['towers']) == 1
-    assert runtime.reference is calls['references'][0]
-    assert runtime.tower_motion is calls['towers'][0]
+    assert runtime.reference is not calls['references'][0]
+    assert runtime.reference == calls['references'][0]
+    assert runtime.reference['curve'] is not calls['references'][0]['curve']
+    assert runtime.tower_motion is not calls['towers'][0]
+    assert runtime.tower_motion.keys() == calls['towers'][0].keys()
+    for key, values in runtime.tower_motion.items():
+        assert values is calls['towers'][0][key]
+        assert not values.flags.writeable
+    assert calls['comparison_inputs'][0]['blade_reference'] is runtime.reference
+    assert calls['comparison_inputs'][0]['tower_motion'] is runtime.tower_motion
     assert calls['comparison_paths'] == [calls['resolved'][0][0]]
     if entrypoint == 'attach':
         assert scene['wfrl_flex_active'] is False

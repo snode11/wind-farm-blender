@@ -61,6 +61,7 @@ class ChartHistory:
             self.clear()
         self.session, self.identity = session, identity
         self.last_step, self.last_sequence = step, sequence
+        episode = payload['episode'] if 'episode' in payload else payload.get('context', {}).get('episode')
         groups = {FARM: payload.get('farm', {})}
         groups.update((t['turbine_id'], t['channels']) for t in payload['turbines'])
         # Prune removed turbines to bound total history as well as each series.
@@ -78,7 +79,7 @@ class ChartHistory:
                 point = Point(step, payload['timestamp']['value'], value if validity == 'valid' else None,
                               record.get('unit', ''), record.get('fidelity', 'UNKNOWN'), validity,
                               deepcopy(record.get('provenance', {})),
-                              payload.get('context', {}).get('episode'))
+                              episode)
                 values = self.series.setdefault((tid, channel), deque(maxlen=self.capacity))
                 if values and values[-1].step == step and values[-1].episode == point.episode:
                     if values[-1] != point:

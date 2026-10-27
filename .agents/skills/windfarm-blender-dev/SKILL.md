@@ -17,8 +17,8 @@ description: Use when developing, troubleshooting, or documenting this repositor
 
 | 功能 | 主要模块／仓库入口 | 专题 |
 | --- | --- | --- |
-| WFRL 主入口与状态 | `panels/home.py`、`home_state.py`；复用回放／相机／手动／导出／后端操作器，保留原页签 | [操作入口](../../../前端readme.md#工作区的-wfrl-主入口)、[验证入口](references/verification.md) |
-| 手动场景、姿态与变桨 | `manual_scene.py`、`manual_control.py`、`manual_motion.py`、`manual_pose.py`；仓库 `scripts/blender/open_manual_control.py` | [手动控制](../../../docs/blender/风机手动控制.md) |
+| WFRL 主入口与状态 | `panels/home.py`、`home_state.py`；复用回放／相机／手动／导出／后端操作器，保留原页签 | [操作入口](../../../前端readme.md#wfrl-主入口)、[验证入口](references/verification.md) |
+| 手动场景、姿态与变桨 | `manual_scene.py`、`manual_control.py`、`manual_operators.py`、`manual_rna.py`、`manual_motion.py`、`manual_pose.py`；仓库 `scripts/blender/open_manual_control.py` | [手动控制](../../../docs/blender/风机手动控制.md) |
 | Down 视频与后台作业 | `manual_down.py`、`manual_video*.py`；仓库 `scripts/blender/manage_manual_video.py`、`wfrl/camera_video/` | [视频操作与依赖](../../../docs/blender/风机手动控制.md#导出变桨视频) |
 | 普通 PNG 后台动画 | `animation_render.py`、`animation_render_ui.py`、`animation_render_worker.py` | [实现与边界](../../../blender_frontend/README.md#52-统一侧栏与固定时间轴)、[验证入口](references/verification.md) |
 | 柔性运动、外形与测量 | `farm_flex.py`、`turbine_geometry.py`、`deflection.py` | [实现说明](../../../blender_frontend/README.md) |
@@ -45,7 +45,7 @@ description: Use when developing, troubleshooting, or documenting this repositor
 ### 相机、资源与重建
 
 - Down 随各自机舱／塔顶运动，不随叶轮或锁定世界重力；手动 Down 绑定条目 `yaw_object`。Down、独立机舱相机与 C1/C2/C3 分别维护光学和复位规则；三相机按真实槽位路由、共用时钟，支架端贴合，不追踪叶片或强制三等分。
-- 替换相机须事务重绑场景、局部视口与退出快照，保留忙时保护、撤销及失败回滚；复位保留时刻、播放和自由视图。保存写真实槽位与原画质，保留局部镜头，失败也恢复观察状态；采集中异常或原生修改须中断并保留用户修改。关闭只释放自有资源，容忍删除的 RNA，失败可重试；保护共享、fake-user、shape-key 及无关数据。
+- 替换相机须事务重绑场景、局部视口与退出快照，保留忙时保护、撤销及失败回滚；复位保留时刻、播放和自由视图。相机 Object 的外部 Scene 直接引用、对象成员与外部／无归属局部视口在发布前拒绝；独立 Object 可共享 Camera DATA，保留其名称与参数。预览失效回调须跨文件加载保留、重载不重复、卸载无残留。保存写真实槽位与原画质，保留局部镜头，失败也恢复观察状态；采集中异常或原生修改须中断并保留用户修改。关闭只释放自有资源，容忍删除的 RNA，失败可重试；保护共享、fake-user、shape-key 及无关数据。
 - rootkink 为合成展示外形，沿用 NREL 运动、载荷与测量；切换结束冲突会话，网格与共享引用共同提交或回滚。重建右侧只有叶片是估计，塔筒、机舱和轮毂是共享仿真结构，随源姿态更新并核验绑定。
 - 同源纹理绑定 manifest、模型、摘要与保存样本时钟；独立 `synth_tex` 来源和游标分开。播放、切模式及恢复保留手动视角，增强不生成未观测细节或检测结果。便携场景保留 packed 图片、无 linked libraries，以 `__WFRL_BUNDLED_MAPPO__` 和 manifest SHA-256 识别内置源；只恢复同哈希包，不匹配清空报错，不任意回退或使用不支持的 `//` 路径。
 - 缺陷是 `physics_coupled=False` 的 NREL 合成几何，不直接套用 GW184；预览不写提交配置，删除辅助轮廓不删缺陷。G 分析冻结完整三相机配置，变更后重新冻结。保留完整画幅与真实遮挡；入框、射线可见、全周期无遮挡、图像检测、拼接及实体标定分别判断。
@@ -53,7 +53,7 @@ description: Use when developing, troubleshooting, or documenting this repositor
 ### 测量与后端
 
 - B2 主统计只用 B2，分母为全部 expected 样本，偏差为同次估计减真值；不借其他叶片或真值补缺。双束同刻、同叶片配对，S1 报警独立；`hub-axis.v1`／`hub-tls.v1` 保留方法、来源及结果层身份。缺失、过期、空统计不补零，缺包、损坏或身份不符清旧读数；结构叶尖、展示表面、测量参考和光束长度分开，无读数或无报警不等于安全。
-- `BridgeServer.poll()` 无客户端仍推进；快照／统计与可靠生命周期／安全／错误事件分队列，溢出报 `EVENT_OVERFLOW` 并失败停止，重连保留等待年龄但不保证完整观察历史。全场功率要求同一步全部预期机组及合计有限；Interactive 与 Formal Training／SB3 分别核对。MPI 清除继承作业身份、保留显式传输配置，macOS 设置仅作缺省；后端修改后重启 Bridge。
+- `BridgeServer.poll()` 无客户端仍推进；快照／统计与可靠生命周期／安全／错误事件分队列，溢出报 `EVENT_OVERFLOW` 并失败停止，重连保留等待年龄但不保证完整观察历史。`state_revision` 握手覆盖的生命周期只进入诊断，不回退当前状态；新事件保持严格迁移，启动器也不能把旧终态作为当前停止确认。连接新后端身份需显式确认，不能据此认定旧作业已停止。启动器停止未确认时持续监管并保留恢复身份，确认进程退出才删除；`stop-session` 只确认非运行，不确认进程退出。全场功率要求同一步全部预期机组及合计有限；Interactive 与 Formal Training／SB3 分别核对。MPI 清除继承作业身份、保留显式传输配置，macOS 设置仅作缺省；后端修改后重启 Bridge。
 
 ### 视频作业
 

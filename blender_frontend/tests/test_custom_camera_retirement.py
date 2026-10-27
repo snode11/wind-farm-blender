@@ -86,6 +86,9 @@ class Links:
     def __contains__(self, name):
         return any(obj.name == name for obj in self.items)
 
+    def get(self, name):
+        return next((obj for obj in self.items if obj.name == name), None)
+
     def link(self, obj):
         self.items.append(obj)
         obj._collections.append(self.owner)
@@ -121,14 +124,25 @@ class Resources:
         self.removed.append(item)
 
 
+class Scene:
+    def __init__(self, name, objects):
+        self.name, self.objects = name, objects
+        self.camera = None
+        self.timeline_markers = []
+
+    def user_of_id(self, obj):
+        return (int(self.camera is obj) + sum(item is obj for item in self.objects)
+                + sum(marker.camera is obj for marker in self.timeline_markers))
+
+
 @pytest.fixture
 def runtime(monkeypatch):
     objects = Resources('Object')
     cameras = Resources('Camera', objects)
     collection = NS()
     collection.objects = Links(collection)
-    scene = NS(objects=collection.objects, camera=None)
-    monkeypatch.setitem(sys.modules, 'bpy', NS(data=NS(objects=objects, cameras=cameras, screens=[])))
+    scene = Scene('CurrentScene', collection.objects)
+    monkeypatch.setitem(sys.modules, 'bpy', NS(data=NS(objects=objects, cameras=cameras, screens=[], scenes=[scene])))
     monkeypatch.setitem(sys.modules, 'wfrl_blender.panels.custom_cameras',
                         NS(_ACTIVE=None, _VIEWING={'WATCH', 'LAYOUT'}))
     monkeypatch.setattr(core, '_refresh_references', lambda _scene: None)
@@ -157,6 +171,37 @@ def assert_published(runtime):
     assert runtime.scene.camera is runtime.replacement[1]
     assert all(not obj.removed and obj.data in runtime.cameras.items
                for obj in runtime.replacement.values())
+
+
+@pytest.mark.parametrize('reference_kind', ['camera', 'marker', 'collection'])
+def test_foreign_scene_reference_rejects_publication_before_cleanup(runtime, reference_kind):
+    old = runtime.old[2]
+    collection = NS()
+    collection.objects = Links(collection)
+    other = Scene('ExternalCameraOwner', collection.objects)
+    if reference_kind == 'camera':
+        other.camera = old
+    elif reference_kind == 'marker':
+        other.timeline_markers.append(NS(camera=old))
+    else:
+        collection.objects.link(old)
+    sys.modules['bpy'].data.scenes.append(other)
+    cleanup = []
+    checkpoints = []
+    runtime.monkeypatch.setattr(core, 'cleanup_retired', lambda: cleanup.append(True))
+    runtime.monkeypatch.setattr(core, '_publication_checkpoint', lambda *args: checkpoints.append(args))
+    names = [(obj, obj.name, obj.data.name) for obj in runtime.objects.items]
+
+    with pytest.raises(ValueError, match='ExternalCameraOwner'):
+        core._publish(runtime.scene, runtime.replacement)
+
+    assert not cleanup and not checkpoints
+    assert all(not obj.removed and obj.name == name and obj.data.name == data_name
+               for obj, name, data_name in names)
+    assert runtime.scene.camera is runtime.old[1]
+    assert all(core.get_camera(runtime.scene, slot) is obj for slot, obj in runtime.old.items())
+    assert other.user_of_id(old) == 1
+    assert all(obj.get('wfrl_custom_draft') for obj in runtime.replacement.values())
 
 
 def test_camera_release_failure_after_object_removal_remains_retryable(runtime):

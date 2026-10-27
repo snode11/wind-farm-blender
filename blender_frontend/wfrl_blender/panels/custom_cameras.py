@@ -1096,6 +1096,7 @@ def lifecycle_watchdog():
 
 @persistent
 def migrate_loaded(_unused=None):
+    preview.register_change_handler()
     if not bpy.app.timers.is_registered(lifecycle_watchdog):
         bpy.app.timers.register(lifecycle_watchdog, first_interval=.25)
     for scene in bpy.data.scenes:
@@ -1135,8 +1136,7 @@ def register_properties():
     }.items():setattr(bpy.types.WindowManager,'wfrl_custom_'+key,prop)
     from .custom_camera_output import register_settings
     register_settings()
-    if preview.changed not in bpy.app.handlers.depsgraph_update_post:
-        bpy.app.handlers.depsgraph_update_post.append(preview.changed)
+    preview.register_change_handler()
 
 
 def unregister_properties():
@@ -1157,8 +1157,7 @@ def unregister_properties():
     from .. import custom_camera_capture
     custom_camera_capture.shutdown()
     preview.shutdown()
-    if preview.changed in bpy.app.handlers.depsgraph_update_post:
-        bpy.app.handlers.depsgraph_update_post.remove(preview.changed)
+    preview.unregister_change_handler()
     from .custom_camera_output import unregister_settings
     unregister_settings()
     history.HISTORY.clear()

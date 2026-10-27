@@ -1,0 +1,32 @@
+{
+  "schema": "wfrl.scoped-source-verification.v1",
+  "source_runtime_version": "0.3.37",
+  "source_archive_sha256": "5cd8672f1a3a411566b981f22b68517a93367f057ace6d8ae395c6e24a4173cf",
+  "source_archive_file_count": 195,
+  "release_version": "0.3.38",
+  "release_archive_sha256": "813dea0f6a5d74c78e813a9d4f51ad0bb1ac0041ba575536cd66022b03dcb916",
+  "equal_payload_files": 193,
+  "different_payload_files": [
+    "blender_manifest.toml",
+    "build-info.json"
+  ],
+  "frontend_host": {
+    "python": "3.13",
+    "passed": 1275,
+    "skipped": 4,
+    "log": "source-evidence/host-frontend-verified.log"
+  },
+  "project_host": {
+    "python": "3.11",
+    "passed": 1259,
+    "skipped": 5,
+    "subtests_passed": 50,
+    "log": "source-evidence/host-project-final.log"
+  },
+  "native_source": {
+    "status": "PASS",
+    "passed": 4,
+    "report": "source-evidence/native/result.json"
+  },
+  "scope": "Saved software results belong to the identified pre-version source and candidate payload. All 193 remaining ZIP payloads match 0.3.38 byte-for-byte. These records do not assert installed 0.3.38 visible-window, full-video, physical-solver, performance or scientific acceptance. Raw reports retain their original paths; temporary profiles, scenes and rendered images are not provided."
+}

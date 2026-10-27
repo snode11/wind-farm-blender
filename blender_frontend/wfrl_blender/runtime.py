@@ -20,6 +20,8 @@ _health = None
 kinematics = KinematicState()
 training_dashboard = TrainingDashboard()
 safety_events = deque(globals().get('safety_events', []), maxlen=256)
+backend_events = deque(globals().get('backend_events', []), maxlen=256)
+forgotten_connections = deque(globals().get('forgotten_connections', []), maxlen=16)
 _desired_mode = globals().get('_desired_mode', _state.mode)
 _live_scene = None
 _pending_step = None
@@ -81,6 +83,7 @@ def select_mode(mode):
     _pending_command = None
     _pending_lifecycle_sequence = None
     safety_events.clear()
+    backend_events.clear()
     from . import charts
     charts.clear()
     training_dashboard.reset()
@@ -155,8 +158,48 @@ def disconnect(force=False):
         latest_wake = None
 
 
+def can_connect_new_backend():
+    return (not manual_display_active() and get_state().connection == 'DISCONNECTED'
+            and has_backend_session() and progress() not in {'Connecting', 'Awaiting handshake'})
+
+
+def connect_new_backend(port, *, confirmed=False):
+    """Require explicit consent to abandon local ownership of an unknown backend."""
+    global _client, _state, kinematics, _pending_command, _pending_step, _pending_lifecycle_sequence
+    global _live_scene, _backend_scene, latest_wake
+    if confirmed is not True:
+        raise ValueError('Explicit confirmation is required; forgetting this connection does not stop the previous backend')
+    if not can_connect_new_backend():
+        raise ValueError('Disconnect the previous backend before connecting to a new identity')
+    from .transport import TransportClient
+    replacement = TransportClient(port=port)
+    forgotten_connections.append(dict(session_id=_state.session_id or getattr(_client, 'session_id', None),
+                                     run_id=_state.run_id, run_status=_state.run_status, confirmed=False))
+    if _client:
+        _client.close()
+        _client.forget_session(confirmed=True)
+    _client = replacement
+    _state = FrontendState(mode=_desired_mode, connection='DISCONNECTED', confirmed=False)
+    kinematics = KinematicState()
+    _pending_command = _pending_step = _pending_lifecycle_sequence = None
+    _live_scene = _backend_scene = None
+    wake_buffer.pop_latest()
+    latest_wake = None
+    safety_events.clear()
+    backend_events.clear()
+    training_dashboard.reset()
+    from . import charts
+    charts.clear()
+    workflow_scene.clear()
+    channel_states.clear()
+    channel_table.clear()
+    connect(port)
+
+
 def enter_local_demo():
     global _client, _state, kinematics, _pending_command, _pending_lifecycle_sequence, _live_scene, _desired_mode, latest_wake, _backend_scene
+    if has_backend_session() and not configuration_editable():
+        raise ValueError('Confirm the previous backend state before entering local Demo')
     if _client:
         _client.close()
     _client = None
@@ -170,6 +213,7 @@ def enter_local_demo():
     wake_buffer.pop_latest()
     latest_wake = None
     safety_events.clear()
+    backend_events.clear()
     from . import charts
     charts.clear()
     training_dashboard.reset()
@@ -349,6 +393,16 @@ def _tick():
         try:
             for message in messages:
                 payload = message['payload']
+                if message['type'] == 'hello_ack' and _state.session_id != message['session_id']:
+                    backend_events.clear()
+                if message['type'] in {'lifecycle', 'safety_event', 'error'}:
+                    backend_events.append(message)
+                if message['type'] == 'lifecycle':
+                    applied = _state.lifecycle(message['session_id'], payload['run_status'],
+                                               payload['mode'], payload['capabilities'],
+                                               state_revision=payload.get('state_revision'))
+                    if not applied:
+                        continue
                 if message['type'] in {'hello_ack', 'lifecycle'}:
                     if 'run_id' in payload and payload['run_id'] != _state.run_id:
                         _state.run_id = payload['run_id']
@@ -382,7 +436,8 @@ def _tick():
                         from . import charts
                         charts.clear()
                     _state.synchronize(message['session_id'], payload['run_status'],
-                                       payload['mode'], payload['capabilities'])
+                                       payload['mode'], payload['capabilities'],
+                                       state_revision=payload.get('state_revision'))
                     if payload['run_status'] in {'STARTING', 'RUNNING', 'PAUSED', 'DRAINING'}:
                         _desired_mode = payload['mode']
                 elif message['type'] == 'lifecycle':
@@ -392,8 +447,6 @@ def _tick():
                         _pending_lifecycle_sequence = None
                     elif payload['run_status'] == 'PAUSED':
                         _pending_lifecycle_sequence = message['sequence']
-                    _state.lifecycle(message['session_id'], payload['run_status'],
-                                     payload['mode'], payload['capabilities'])
                     if payload['run_status'] in {'STARTING', 'RUNNING', 'PAUSED', 'DRAINING'}:
                         _desired_mode = payload['mode']
                 elif message['type'] == 'training_stats':

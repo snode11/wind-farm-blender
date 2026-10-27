@@ -41,6 +41,27 @@ def test_suite_has_unique_scripts_and_explicit_window_contracts():
     assert spec('rebuild_mesh_regression').report == 'checks.json'
 
 
+def test_manual_control_and_home_checks_have_background_completion_contracts():
+    names = ('home_entry_smoke', 'manual_control_regression', 'manual_control_state_regression',
+             'manual_rate_pitch_regression', 'manual_rotor_conflict_regression',
+             'manual_pitch_trial_regression', 'manual_pitch_trial_undo_regression',
+             'manual_pose_undo_regression', 'manual_scene_recovery_regression',
+             'manual_scene_link_compatibility_regression')
+    for name in names:
+        item = spec(name)
+        assert item.mode == 'background'
+        assert (runner.TEST_ROOT / item.script).is_file()
+        assert evaluate(item, report={'status': 'PASS'} if item.report else None) == ('PASS', [])
+        assert evaluate(item, report={'status': 'PASS'} if item.report else None, marker='')[0] == 'FAIL'
+
+
+def test_ci_selection_can_only_run_registered_background_checks():
+    names = (ROOT / 'configs/ci-native-tests.txt').read_text().split()
+    selected = runner.select_tests(names)
+    assert selected
+    assert all(item.mode == 'background' for item in selected)
+
+
 @pytest.mark.parametrize('name', ['shared_context_switch_regression', 'native_camera_playback_regression',
                                   'nrel_editor_playback_regression'])
 @pytest.mark.parametrize('status', ['RUNNING', 'FAIL', 'MISSING_OR_INVALID_JSON'])
