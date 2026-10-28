@@ -31,6 +31,21 @@ def camera_view_names():
     return tuple(view.name for view in CAMERA_VIEWS)
 
 
+def clear_camera_mask(camera):
+    """Camera observation leaves the surrounding viewport unobscured."""
+    camera.data.show_passepartout = False
+    camera.data.passepartout_alpha = 0.0
+
+
+def clear_viewport_masks(scene):
+    """Apply the observation display to owned cameras in a saved scene."""
+    for camera in scene.objects:
+        if getattr(camera, 'type', None) == 'CAMERA' and (camera.name.startswith(
+                ('WFRL.', 'WFRLManual.', 'SplitRecon.', 'SplitTexture.', 'SplitMappoTexture.'))
+                or camera.get('wfrl_custom_camera') or camera.get('wfrl_native_camera_owner')):
+            clear_camera_mask(camera)
+
+
 def demo_view_areas(scene):
     """Visible main views, excluding independent reconstruction and observation."""
     import bpy
@@ -185,6 +200,21 @@ def _layout_active_views(screen):
             if area.width > 0 and area.height > 0]
 
 
+def select_sidebar_category(area, category):
+    """Keep the current tab when Blender's UI region is not editable yet."""
+    for region in area.regions:
+        if region.type != 'UI':
+            continue
+        try:
+            if region.active_panel_category != category:
+                region.active_panel_category = category
+            return region.active_panel_category == category
+        except (AttributeError, RuntimeError):
+            area.tag_redraw()
+            return False
+    return False
+
+
 def _layout_finish(job):
     screen, scene, count, layout = job['screen'], job['scene'], job['count'], job['layout']
     names = job.get('camera_names') or ('WFRL.Camera.World', 'WFRL.Camera.T1.Sensor',
@@ -208,9 +238,7 @@ def _layout_finish(job):
         if job.get('camera_names'):
             space.show_region_ui = index == count - 1
             if space.show_region_ui:
-                sidebar = next((r for r in area.regions if r.type == 'UI'), None)
-                if sidebar:
-                    sidebar.active_panel_category = 'MAPPO'
+                select_sidebar_category(area, 'MAPPO')
         fill_camera_view(area, scene)
         if job.get('camera_names') and count > 1:
             # Fit in the unobscured region. The front camera has generous
@@ -234,7 +262,7 @@ def _layout_timer():
         return None
     try:
         _layout_step()
-    except (ValueError, RuntimeError, ReferenceError) as exc:
+    except (ValueError, RuntimeError, ReferenceError, AttributeError) as exc:
         job = _LAYOUT_JOB
         _LAYOUT_JOB = None
         if job is not None:
@@ -471,8 +499,7 @@ def ensure_gimbal(scene, turbine, *, yaw_object=None, name=None, owner=None):
             if data.users == 0:
                 bpy.data.cameras.remove(data)
         raise
-    camera.data.show_passepartout = True
-    camera.data.passepartout_alpha = 1
+    clear_camera_mask(camera)
     return camera
 
 
@@ -602,6 +629,7 @@ def ensure_nacelle_gimbal(scene, turbine):
     name = f'WFRL.Camera.{turbine}.NacelleGimbal'
     camera = scene.objects.get(name)
     if camera is not None:
+        clear_camera_mask(camera)
         return camera  # Selecting/reloading must not overwrite manual PTZ.
     camera = bpy.data.objects.new(name, bpy.data.cameras.new(name + '.Data'))
     collection = root.users_collection[0]
@@ -644,7 +672,7 @@ def apply_nacelle_output(scene, camera):
 
 
 def fill_camera_view(area, scene):
-    """Fit each turbine's Down and calibrated nacelle gates; other views use overscan."""
+    """Frame observation views without a camera exterior mask."""
     import math
     import bpy
     space = area.spaces.active
@@ -654,14 +682,11 @@ def fill_camera_view(area, scene):
     camera = space.camera if space.use_local_camera else scene.camera
     calibrated = camera is not None and camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID
     if camera:
+        clear_camera_mask(camera)
         if is_down_camera(camera):
-            camera.data.show_passepartout = True
-            camera.data.passepartout_alpha = 1.0
             fit_camera_view(area, scene)
             return
-        camera.data.show_passepartout = calibrated
         if calibrated:
-            camera.data.passepartout_alpha = 1.0
             if not bpy.app.background:
                 from .native_camera_views import frame_gate
                 frame_gate(scene, {'area': area, 'proxy': camera, 'fx': 1.0, 'fy': 1.0}, region, space)

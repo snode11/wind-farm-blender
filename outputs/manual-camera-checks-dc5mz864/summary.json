@@ -1,0 +1,163 @@
+{
+  "schema": "wfrl.manual-camera-validation.v1",
+  "status": "PASS_FOCUSED_SCOPE",
+  "environment": {
+    "blender": "5.2.1 LTS",
+    "platform": "macOS",
+    "gpu": "Metal API",
+    "daily_module": "bl_ext.user_default.wfrl_blender",
+    "version": "0.3.34"
+  },
+  "source_sha256": {
+    "manual_control.py": "d4bbbfcc119bb793fb0ad7a3f9af3b1cc09030548436085ba00cd00afd4be595",
+    "manual_motion.py": "b8d6cd05240ad881d13fd121ddffc871c792a50fc810283703e5f88c8a0d356e",
+    "manual_scene.py": "a8e0e52f5769fd972959a470fd801aabd9e1d36926c05271cced6e978b245831",
+    "manual_down.py": "2e41e1daa8f8a3869b067c05bd1d0926b8a4b2a9fce82e1dfa497ed6212fc8e7",
+    "native_camera_views.py": "5ff5c2d8475d709c2b1a90678c379856196ef69e2ed56fb884bbf2d2f439f0b2",
+    "custom_cameras.py": "b460d6324b96093de3e78b8115e8a3a66cff8ff13689174728b7394fac2536c5",
+    "custom_camera_capture.py": "6a8688a048bb6f413fff3ab6fb64a486b8ffc308ef205255624888168409e54e",
+    "stacked_camera_rig.py": "19d3f26d31e3b53b0a351ce24ba2d1c2f32279875038abb6abd6ec89d8bb2285",
+    "blender_manifest.toml": "f973ee7157478bb46d185806578d2909347981c8967c533f2e4675cccaec2aea"
+  },
+  "bug": {
+    "id": "manual-rotor-native-conflict",
+    "status": "FIXED",
+    "symptom": "Ordinary rotor motion continued under competing native rotation or constraints and could overwrite user edits, including pause before the next timer tick.",
+    "behavior": "Start validates every selected turbine; ordinary moving rotors and pitches detect conflicts; pause/scene exit retain the displayed pose and native edits.",
+    "regression_tests": 7,
+    "red_evidence": [
+      "manual-rotor-conflict-red/checks.json",
+      "manual-pause-conflict-red/checks.json"
+    ],
+    "green_evidence": "installed-manual_rotor_conflict_regression/checks.json"
+  },
+  "checks": {
+    "host": {
+      "status": "PASS",
+      "test_items": 431,
+      "subtests": 4643,
+      "warnings": 3,
+      "junit": "host-tests-final.xml",
+      "warning_scope": "Pillow deprecation in test pixel inspection only"
+    },
+    "source_native_scripts": {
+      "status": "PASS",
+      "results": "native-results.json",
+      "script_count": 20
+    },
+    "source_manual_after_fix": {
+      "status": "PASS",
+      "results": "manual-final-results.json"
+    },
+    "camera_full_clip": {
+      "status": "PASS",
+      "checks": 45,
+      "single_clip_seconds": 60,
+      "triple_clip_seconds": 60,
+      "evidence": "native-camera-reopen/result.json",
+      "scope": "Source native camera/playback components, matching installed component hashes; scripted visible operators and POST_PIXEL records."
+    },
+    "camera_resource_cycles": {
+      "status": "PASS",
+      "cycles": 20,
+      "seconds": 53.88740470795892,
+      "counts_return_to_baseline": true,
+      "baseline": {
+        "objects": 2753,
+        "cameras": 16,
+        "meshes": 299,
+        "scenes": 1,
+        "windows": 1,
+        "proxies": 0
+      },
+      "evidence": "camera-resource-cycles/result.json"
+    },
+    "gpu_capture": {
+      "status": "PASS",
+      "checks": {
+        "three_sizes_three_samples_9_to_3_allocations_same_png_bytes": true,
+        "capture_omits_display_textures_with_identical_png_and_state": true,
+        "cancel_releases_and_restores_frame_statistics_quality": true,
+        "gpu_failure_releases_and_restores_frame_statistics_quality": true,
+        "native_edit_aborts_without_overwriting_edit": true
+      },
+      "evidence": "visible-custom_camera_capture_window/result.json"
+    },
+    "daily_installation": {
+      "status": "PASS",
+      "files": 185,
+      "profile_files_preserved": 6,
+      "scene_files_preserved": 63,
+      "evidence": "../../publication/daily-installation.json"
+    }
+  },
+  "performance_observations": {
+    "method": "POST_PIXEL draw callbacks, not display scanout or stable FPS acceptance. Large test window; source native camera workflow.",
+    "routes": {
+      "single:C1": {
+        "draws": 2050,
+        "observed_seconds": 61.024,
+        "draw_callbacks_per_second": 33.577,
+        "median_gap_ms": 25.917,
+        "max_gap_ms": 423.195
+      },
+      "triple:C3": {
+        "draws": 1380,
+        "observed_seconds": 61.02,
+        "draw_callbacks_per_second": 22.599,
+        "median_gap_ms": 39.333,
+        "max_gap_ms": 358.954
+      },
+      "triple:C1": {
+        "draws": 1380,
+        "observed_seconds": 61.002,
+        "draw_callbacks_per_second": 22.606,
+        "median_gap_ms": 39.258,
+        "max_gap_ms": 357.772
+      },
+      "triple:C2": {
+        "draws": 1380,
+        "observed_seconds": 60.963,
+        "draw_callbacks_per_second": 22.62,
+        "median_gap_ms": 39.172,
+        "max_gap_ms": 356.733
+      }
+    }
+  },
+  "remaining_optimization_candidates": [
+    {
+      "area": "Three-camera rendering",
+      "evidence": "Three simultaneous routes have lower draw throughput than a single route and gaps above 300 ms in this configuration.",
+      "next_check": "Profile GPU/CPU work and compare full clips across window sizes and quality presets."
+    },
+    {
+      "area": "Manual sidebar",
+      "evidence": "The trial and video controls precede ordinary yaw/pitch/RPM controls in the current full sidebar.",
+      "next_check": "Evaluate collapsible trial/video sections and place frequent controls earlier."
+    },
+    {
+      "area": "Long-run robustness",
+      "evidence": "Twenty short open/focus/layout/close cycles preserve resource counts; this is not a 30-minute continuous test.",
+      "next_check": "Continuous playback and mixed-operation endurance on the presentation machine."
+    }
+  ],
+  "not_run": [
+    "Full-length video rendering/encoding",
+    "Thirty-minute continuous playback",
+    "All-button physical mouse/keyboard acceptance",
+    "Windows/Linux",
+    "Physics, measurement accuracy and real camera calibration"
+  ],
+  "local_archive": "dist/wfrl_blender-0.3.34.zip",
+  "public_release": false,
+  "artifact_retention": {
+    "core_reports_and_images": "RETAINED",
+    "generated_test_scenes": "RECOVERABLY_REMOVED",
+    "isolated_installation": "RECOVERABLY_REMOVED",
+    "temporary_environments_and_scratch": "RECOVERABLY_REMOVED",
+    "canonical_archive": "dist/wfrl_blender-0.3.34.zip",
+    "cleanup_manifest": "publication/manual-camera-cleanup.json",
+    "restoration_check": "PASS",
+    "generated_test_fixtures_and_incomplete_frames": "RECOVERABLY_REMOVED"
+  }
+}

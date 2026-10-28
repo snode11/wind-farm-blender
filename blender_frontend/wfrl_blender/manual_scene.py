@@ -248,6 +248,8 @@ def _environment(scene, collection, prefix):
         collection.objects.link(camera)
     else:
         camera.data = data
+    from .cameras import clear_camera_mask
+    clear_camera_mask(camera)
     camera.location = (-420, -850, 330)
     camera.rotation_euler = (Vector((210, 0, 80)) - camera.location).to_track_quat('-Z', 'Y').to_euler()
     data.lens = 45

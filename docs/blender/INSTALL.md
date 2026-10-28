@@ -1,20 +1,20 @@
 # NREL / WFRL Blender 安装
 
-适用于 Blender **5.2+** 的 NREL 公开扩展 **0.3.39**，包含 NREL／rootkink 叶片外形选择、T1/T2/T3 Down、独立风机手动控制、完整风机几何／同源纹理、精细支撑结构、三相机默认复位、柔性回放、六类合成缺陷、双束／TLS。GW184 **0.4.0** 使用[独立包](GW184三相机与缺陷编辑器.md)。
+适用于 Blender **5.2+** 的 NREL 公开扩展 **0.3.40**，包含 NREL／rootkink 叶片外形选择、T1/T2/T3 Down、独立风机手动控制、完整风机几何／同源纹理、精细支撑结构、三相机默认复位、柔性回放、六类合成缺陷、双束／TLS。GW184 **0.4.0** 使用[独立包](GW184三相机与缺陷编辑器.md)。
 
-开发机日常安装为 **0.3.39 工作区构建**，与公开包同一载荷，共 195 文件，实际模块 `bl_ext.user_default.wfrl_blender`。新后台进程的 94 个模块来源、持久启用、WFRL 主入口注册与 6 个配置文件保护见[安装核对](../../publication/daily-installation.json)。公开 0.3.39 的隔离安装及两项相机后台检查见[包验证](../../publication/blender-0.3.39/package-validation.json)；公开载荷见[交付身份](../../publication/blender-0.3.39.json)，与日常工作区构建分别识别。
+开发机日常安装为 **0.3.40 工作区构建**，与公开扩展使用同一载荷，共 195 文件，实际模块 `bl_ext.user_default.wfrl_blender`。新后台进程的 94 个模块来源、持久启用、WFRL 主入口注册与 6 个配置文件保护见[安装核对](../../publication/daily-installation.json)。公开 0.3.40 的隔离安装及两项相机后台检查见[包验证](../../publication/blender-0.3.40/validated/package-validation.json)；公开载荷见[交付身份](../../publication/blender-0.3.40.json)，与日常安装使用同一载荷，安装记录独立核对。
 
-日常工作区构建的最终 ZIP、inventory 与 SHA-256 保存在 [package](../../publication/daily-installation-current/package/)，与公开同版本附件内容一致。原始验证记录由安装身份索引；已清理的隔离 profile 不能直接用于重跑，产物可用性与恢复位置见[清理记录](../../publication/daily-installation-cleanup.json)。
+日常工作区构建的最终 ZIP、inventory 与 SHA-256 保存在 [package](../../publication/blender-0.3.40/validated/package/)，按其 inventory 核对。原始验证记录由安装身份索引；最终包、必要验证证据与安装回退备份由[安装身份](../../publication/daily-installation.json)索引。
 
 ## 发布身份与验证
 
-当前公开安装包为 [v0.3.39](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.39) 的 **[wfrl_blender-0.3.39.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.39/wfrl_blender-0.3.39.zip)**，manifest 版本 `0.3.39`，共 195 文件、99,154,677 字节。SHA-256 为 `d200b240f257bf202e8a72ea749950669fa4235bd9740079d409a33641877fa6`。Release 提供 ZIP、SHA-256、inventory 和配套源码归档；身份见[交付身份](../../publication/blender-0.3.39.json)。ZIP 逐文件校验、隔离安装、新进程来源与三相机默认配置／投影后台检查通过；可见窗口复验为 NOT_RUN。[本地安装核对](../../publication/daily-installation.json)记录日常构建的安装文件、新后台进程模块来源和后台功能范围，可见窗口检查同为 NOT_RUN，不能据此扩大到完整视频、稳定 FPS、其他平台或科学精度。
+当前公开安装包为 [v0.3.40](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.40) 的 **[wfrl_blender-0.3.40.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.40/wfrl_blender-0.3.40.zip)**，manifest 版本 `0.3.40`，共 195 文件、99,155,067 字节。SHA-256 为 `0b90d4c176f816cef8ea3434deead1420e9dc9a84b00ae8a27f5e93165d15dec`。Release 提供 ZIP、SHA-256、inventory 和配套源码归档；身份见[交付身份](../../publication/blender-0.3.40.json)。ZIP 逐文件校验、隔离安装、新进程来源与三相机默认配置／投影后台检查通过；隔离脚本可见窗口覆盖代理姿态／光学／取景／短播放／清理重试和相机参与／画质／删除 RNA 恢复。[本地安装核对](../../publication/daily-installation.json)记录日常构建的安装文件、新后台进程模块来源和后台功能范围；日常后台已核对 T1/T2/T3 Down 保存重开与无遮罩恢复；同一归档的隔离窗口检查核对三相机代理与恢复，不能据此扩大到完整视频、稳定 FPS、其他平台或科学精度。
 
 当前项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。GitHub 自动 Source code 不作为扩展安装包；构建结果须以实际 ZIP 和 inventory 核对。最终包和验证范围见[发布状态](发布状态与验证范围.md)；叶尖显示门槛按源码全时间轴和本地安装抽样分别记录，几何／纹理、材料点和雷达的研究接受边界分别保留。
 
 ## 安装与升级
 
-1. 下载 [wfrl_blender-0.3.39.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.39/wfrl_blender-0.3.39.zip)，保留压缩格式。
+1. 下载 [wfrl_blender-0.3.40.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.40/wfrl_blender-0.3.40.zip)，保留压缩格式。
 2. 保存现有 Blender 工作，进入 **Edit → Preferences → Get Extensions → Install from Disk**，选择 ZIP 并启用 **WFRL Blender**。
 3. 升级后完全退出并重启 Blender，使新模块和资源生效。
 4. 在三维视图按 **N → MAPPO → 打开几何重建示例…**，打开包内完整风机几何分屏；当前文件未保存时，Blender 会先提示保存。
@@ -24,11 +24,11 @@
 
 统一重建流程侧栏不再提供上一／下一样本、进度滑块、自定义位置、自动跟随、完整取景、恢复布局或独立合成入口；独立合成资产和底层工具保留，来源及 120 样本游标不与同源数据混用。普通三机回放的进度定位及其他功能页保留。详细操作见[前端说明](../../前端readme.md#22-使用-mappo重建分屏)。
 
-附件名称和 manifest 版本为 `0.3.39`，GitHub 发布标签为 `v0.3.39`。升级已有安装时，保存自己的场景和相机布局，手动安装新 ZIP 并完全重启 Blender。公开发布不会自动升级开发机日常安装。
+附件名称和 manifest 版本为 `0.3.40`，GitHub 发布标签为 `v0.3.40`。升级已有安装时，保存自己的场景和相机布局，手动安装新 ZIP 并完全重启 Blender。公开发布不会自动升级开发机日常安装。
 
 ## 风机手动控制
 
-安装 0.3.39 并重启后，按 **N → 风机控制 → 创建 / 进入手动场景** 创建三台采用 rootkink 叶片的独立刚性风机，无需加载 MAPPO。选择 T1/T2/T3 或全部风机，调整朝向、统一／分别变桨、RPM、叶轮角度和运行状态；零 RPM 风机保持暂停。可使用朝下／侧向／顺桨预设、相对角度微调、三机参数概览和 JSON 姿态保存／选择性载入，支持撤销重做。批量启用分别变桨保留已启用机组的独立桨距，只初始化从关闭切换为开启的机组。手动场景使用独立天空、地形和材质，保存参数与姿态并可返回原场景；不启动物理求解或生成手动姿态对应的测量值。[完整操作及限制](风机手动控制.md)。
+安装 0.3.40 并重启后，按 **N → 风机控制 → 创建 / 进入手动场景** 创建三台采用 rootkink 叶片的独立刚性风机，无需加载 MAPPO。选择 T1/T2/T3 或全部风机，调整朝向、统一／分别变桨、RPM、叶轮角度和运行状态；零 RPM 风机保持暂停。可使用朝下／侧向／顺桨预设、相对角度微调、三机参数概览和 JSON 姿态保存／选择性载入，支持撤销重做。批量启用分别变桨保留已启用机组的独立桨距，只初始化从关闭切换为开启的机组。手动场景使用独立天空、地形和材质，保存参数与姿态并可返回原场景；不启动物理求解或生成手动姿态对应的测量值。[完整操作及限制](风机手动控制.md)。
 
 ## 原三机回放与雷达入口
 
@@ -60,17 +60,17 @@ ZIP 内置预弯 v3 三机 60 秒回放、旧法与 TLS 两份双束结果层、
 
 ## 从项目源码构建
 
-0.3.39 发布源码使用 [项目仓库的 `v0.3.39` 标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.39)，上传源包与源码的身份关系见[交付身份](../../publication/blender-0.3.39.json)；当前开发源码使用 `wind-farm-rl-all-work` 分支，构建产物按各自输入分别识别。NREL 扩展构建所需正式载荷随 Git 提供，须保留完整 `blender_frontend/wfrl_blender/assets/`、`_vendor/` 与仓库级 `wfrl/`；缺少正式资产不能生成等价的离线扩展，无需为该构建下载全部研究资源。其他用途的资源按[分发说明](../PUBLICATION.md)取得。使用 Python 3.11+，从仓库根目录运行：
+0.3.40 发布源码使用 [项目仓库的 `v0.3.40` 标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.40)，上传源包与源码的身份关系见[交付身份](../../publication/blender-0.3.40.json)；当前开发源码使用 `wind-farm-rl-all-work` 分支，构建产物按各自输入分别识别。NREL 扩展构建所需正式载荷随 Git 提供，须保留完整 `blender_frontend/wfrl_blender/assets/`、`_vendor/` 与仓库级 `wfrl/`；缺少正式资产不能生成等价的离线扩展，无需为该构建下载全部研究资源。其他用途的资源按[分发说明](../PUBLICATION.md)取得。使用 Python 3.11+，从仓库根目录运行：
 
 ```bash
 python3 scripts/blender/build_extension.py --output /path/to/new-build-directory
 ```
 
-构建版本取自所选源码的 `blender_manifest.toml`：`v0.3.39` 标签生成 `wfrl_blender-0.3.39.zip`，并生成逐文件 inventory 和 SHA-256。默认拒绝覆盖已有同名输出；明确需要替换时使用 `--overwrite`。产物先在同一文件系统暂存，再发布校验文件与 ZIP；普通发布异常尝试恢复原产物，恢复冲突保留备份并报告位置。不要把该保护理解为断电或强制终止下的多文件整体原子性。
+构建版本取自所选源码的 `blender_manifest.toml`：`v0.3.40` 标签生成 `wfrl_blender-0.3.40.zip`，并生成逐文件 inventory 和 SHA-256。默认拒绝覆盖已有同名输出；明确需要替换时使用 `--overwrite`。产物先在同一文件系统暂存，再发布校验文件与 ZIP；普通发布异常尝试恢复原产物，恢复冲突保留备份并报告位置。不要把该保护理解为断电或强制终止下的多文件整体原子性。
 
 构建会从规范源生成协议与内置读取器，不依赖训练环境、FAST.Farm 或原始 VTP。构建成功只证明产物生成；安装版后台、可见窗口及性能需按实际 ZIP 单独验证。当前源码不自动更新日常安装，也不替换既有公开附件。v0.3.18 的独立复建与其 172 文件 ZIP 字节一致结论只属于[该标签和包](releases/0.3.18发布核对.md)。
 
-[发布源码](发布状态与验证范围.md#源码软件合同与验证)包含当前前端、文档与开发 skill。当前公开包与日常安装使用同一已验证载荷，来源见[安装身份](../../publication/daily-installation.json)；源码归档未另行重建扩展。可见窗口、性能和平台范围使用对应载荷的记录。
+[发布源码](发布状态与验证范围.md#源码软件合同与验证)包含当前前端、文档与开发 skill。当前公开包与日常安装按各自载荷核对，来源见[安装身份](../../publication/daily-installation.json)；源码独立复建结果见交付身份。可见窗口、性能和平台范围使用对应载荷的记录。
 
 独立 normal/close 雷达包与 Replay 示例权重随 Git 提供；WFCRL 依赖源码与大型研究证据按[分发清单](../PUBLICATION.md)取得。GW184 源码所需的两份 DTU 原始输入随 Git 提供，官方来源、固定摘要及缺失或损坏后的恢复方式见[来源说明](../../projects/gw184-single/sources/README.md)。以上内容均不能以安装 NREL 扩展 ZIP 代替。
 
@@ -80,9 +80,9 @@ python3 scripts/blender/build_extension.py --output /path/to/new-build-directory
 
 ## Bridge 后端更新
 
-本扩展包含连接、通信、协议与运行面板；不包含 Python Bridge 服务及启动器。仅安装 `wfrl_blender-0.3.39.zip` 不会更新后端源码。使用已配置的后端时，同步适用后端源码后重启 Bridge；已运行的训练或求解需先正常停止。项目分支包含后端源码，运行时仍须核对所用环境、场景、权重和服务来源。GW184 独立运行包不依赖 Bridge。
+本扩展包含连接、通信、协议与运行面板；不包含 Python Bridge 服务及启动器。仅安装 `wfrl_blender-0.3.40.zip` 不会更新后端源码。使用已配置的后端时，同步适用后端源码后重启 Bridge；已运行的训练或求解需先正常停止。项目分支包含后端源码，运行时仍须核对所用环境、场景、权重和服务来源。GW184 独立运行包不依赖 Bridge。
 
-当前工作区的连接恢复使用 `hello_ack` 与生命周期消息的 `state_revision`，完整恢复语义需要匹配的前端和 Bridge。旧的无版本消息仍接受严格状态转换检查，不能据此认领未知活动任务。普通重连保留原 session／run 身份；后端身份变化时使用需显式确认的“连接新后端身份…”，该操作不停止旧任务。启动器停止未确认时持续监管并保留会话凭据；协议停止入口与限制见[后端连接与维护](../../前端readme.md#10-连接后端与维护)。这些连接合同由 0.3.39 前端及配套 Bridge 实现；日常 0.3.39 工作区构建按独立身份记录使用。
+当前工作区的连接恢复使用 `hello_ack` 与生命周期消息的 `state_revision`，完整恢复语义需要匹配的前端和 Bridge。旧的无版本消息仍接受严格状态转换检查，不能据此认领未知活动任务。普通重连保留原 session／run 身份；后端身份变化时使用需显式确认的“连接新后端身份…”，该操作不停止旧任务。启动器停止未确认时持续监管并保留会话凭据；协议停止入口与限制见[后端连接与维护](../../前端readme.md#10-连接后端与维护)。这些连接合同由 0.3.40 前端及配套 Bridge 实现；日常 0.3.40 工作区构建按独立身份记录使用。
 
 ## 升级后确认雷达行为
 

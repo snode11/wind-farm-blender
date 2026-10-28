@@ -58,5 +58,55 @@ class PresentationControlsTests(unittest.TestCase):
         self.assertTrue(space.show_gizmo)
 
 
+def test_readonly_sidebar_does_not_leave_native_layout_pending(monkeypatch):
+    import sys
+    import time
+    from wfrl_blender import cameras
+
+    class Sidebar:
+        type = 'UI'
+
+        @property
+        def active_panel_category(self):
+            return 'Item'
+
+    redraws = []
+    space = SimpleNamespace(region_3d=SimpleNamespace())
+    area = SimpleNamespace(type='VIEW_3D', x=0, y=0, width=900, height=700,
+                           spaces=SimpleNamespace(active=space), regions=[Sidebar()],
+                           tag_redraw=lambda: redraws.append(1))
+    screen = SimpleNamespace(areas=[area])
+    scene = Scene()
+    camera = object()
+    scene.objects = {'camera': camera}
+    window = SimpleNamespace(scene=scene, screen=screen)
+    job = dict(window=window, scene=scene, screen=screen, count=1, layout='SINGLE',
+               camera_names=('camera',), regions_ready=True, deadline=time.monotonic()+10)
+    monkeypatch.setitem(sys.modules, 'bpy', SimpleNamespace())
+    monkeypatch.setattr(cameras, '_LAYOUT_JOB', job)
+    monkeypatch.setattr(cameras, 'fill_camera_view', lambda *_: None)
+
+    assert cameras._layout_timer() is None
+    assert cameras._LAYOUT_JOB is None
+    assert scene['wfrl_view_layout'] == 'SINGLE'
+    assert scene.camera is camera and space.camera is camera
+    assert space.show_region_ui and area.regions[0].active_panel_category == 'Item'
+
+
+def test_native_layout_attribute_error_ends_job_with_visible_error(monkeypatch):
+    from wfrl_blender import cameras
+
+    scene = {}
+    monkeypatch.setattr(cameras, '_LAYOUT_JOB', {'scene': scene})
+
+    def invalid_native_state():
+        raise AttributeError('Native region is unavailable')
+
+    monkeypatch.setattr(cameras, '_layout_step', invalid_native_state)
+    assert cameras._layout_timer() is None
+    assert cameras._LAYOUT_JOB is None
+    assert scene['wfrl_view_layout_error'] == 'Native region is unavailable'
+
+
 if __name__ == '__main__':
     unittest.main()

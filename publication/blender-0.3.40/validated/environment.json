@@ -1,0 +1,6 @@
+{
+  "BLENDER_USER_CONFIG": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/profile/config",
+  "BLENDER_USER_SCRIPTS": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/profile/scripts",
+  "BLENDER_USER_DATAFILES": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/profile/datafiles",
+  "WFRL_ADDON_MODULE": "bl_ext.wfrl_frontend.wfrl_blender"
+}

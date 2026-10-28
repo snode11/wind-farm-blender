@@ -1,0 +1,66 @@
+{
+  "schema": "wfrl.release-verification.v1",
+  "version": "0.3.40",
+  "status": "PASS",
+  "archive_sha256": "0b90d4c176f816cef8ea3434deead1420e9dc9a84b00ae8a27f5e93165d15dec",
+  "build": {
+    "payload_files": 194,
+    "payload_sha256": "f9e21c00cf2162abb034849deaeb48007d74670f91e92a31d6c17e2705f7fed1",
+    "schema": "wfrl.extension-build.v1",
+    "version": "0.3.40"
+  },
+  "host": {
+    "python311": {
+      "passed": 1305,
+      "skipped": 4,
+      "subtests_passed": 4915,
+      "log": "checks/host.log"
+    },
+    "python315": {
+      "passed": 35,
+      "framework": "unittest",
+      "log": "checks/supervision.log"
+    },
+    "passed_total": 1340,
+    "skipped_total": 4
+  },
+  "source_background": {
+    "status": "PASS",
+    "count": 2,
+    "result": "checks/source-native/result.json"
+  },
+  "package": {
+    "status": "PASS",
+    "result": "validated/package-validation.json"
+  },
+  "daily": {
+    "status": "PASS",
+    "identity": "../daily-installation.json",
+    "module_count": 94,
+    "profile_unchanged": true
+  },
+  "windows": {
+    "proxy": "checks/proxy-window/checks.json",
+    "participation": "checks/enabled-window/validation.json",
+    "status": "PASS",
+    "physical_input": false
+  },
+  "warnings": {
+    "native_exit_memory_blocks": 525,
+    "native_exit_memory_mb": 0.038147,
+    "cause": "UNDETERMINED",
+    "long_term_memory_acceptance": false
+  },
+  "initial_attempts": {
+    "host-python311-without-waitid.log": "Python 3.11 lacks os.waitid; test_manual_video_job.py is verified separately under Python 3.15. Initial 23 failures retained.",
+    "supervision-pytest-unavailable.log": "Python 3.15 has no pytest; same 35 tests executed using unittest.",
+    "daily-checks.log": "Proxy process exit 0 and report PASS; orchestration requested incorrect completion marker. Actual marker NATIVE_CAMERA_PROXY_PASS retained in logs/daily-proxy.log."
+  },
+  "limits": [
+    "No physical mouse/keyboard",
+    "No complete FPS or media validation",
+    "No long-running acceptance",
+    "No real backend training or solver run",
+    "No other platform or scientific acceptance"
+  ]
+}

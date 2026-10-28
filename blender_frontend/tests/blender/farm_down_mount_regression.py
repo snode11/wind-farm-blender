@@ -73,7 +73,7 @@ def assert_nominal(camera, turbine):
     assert abs(math.degrees(camera.data.angle_x) - cameras.DOWN_HFOV_DEG) < 1e-4
     assert abs(camera.data.lens - 8.0) < 1e-5
     assert abs(math.degrees(2*math.atan(camera.data.sensor_width/(2*camera.data.lens)/(16/9))) - 60) < 1e-4
-    assert camera.data.show_passepartout and camera.data.passepartout_alpha == 1
+    assert not camera.data.show_passepartout and camera.data.passepartout_alpha == 0
     assert_down_axis(camera)
     shell = scene.objects[f'WFRL.Turbine.{turbine}.Nacelle'].evaluated_get(bpy.context.evaluated_depsgraph_get())
     local = shell.matrix_local
@@ -235,10 +235,15 @@ for turbine, camera in downs.items():
 saved_poses = {turbine: pose(camera) for turbine, camera in downs.items()}
 saved_clock = clock_state()
 path = output / 'farm-down-hand-poses.blend'
+for camera in downs.values():
+    camera.data.show_passepartout = True
+    camera.data.passepartout_alpha = 1
 bpy.ops.wm.save_as_mainfile(filepath=str(path))
 bpy.ops.wm.open_mainfile(filepath=str(path))
 scene = bpy.context.scene
 assert clock_state() == saved_clock
+assert all(not obj.data.show_passepartout and obj.data.passepartout_alpha == 0
+           for obj in scene.objects if obj.type == 'CAMERA' and obj.name.startswith('WFRL.'))
 for turbine, state in saved_poses.items():
     assert pose(cameras.ensure_gimbal(scene, turbine)) == state
 for name, state in independent_state.items():

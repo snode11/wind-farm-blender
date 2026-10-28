@@ -277,18 +277,22 @@ def _refresh_status(path):
 
 def _python_binary():
     """Find a standalone interpreter for the supervisor, independent of Blender."""
+    probe = ('import fcntl, os, sys; assert sys.version_info >= (3, 11); '
+             'assert os.name == "posix" and callable(fcntl.flock); '
+             'assert all(hasattr(os, key) for key in ("waitid", "WNOWAIT", "P_PID"))')
     candidates = [os.environ.get('WFRL_VIDEO_PYTHON'), str(Path(sys.prefix) / 'bin/python3'),
                   *map(str, sorted((Path(sys.prefix) / 'bin').glob('python3.*'))), shutil.which('python3')]
     for value in candidates:
         if not value or not Path(value).is_file() or not os.access(value, os.X_OK):
             continue
         try:
-            subprocess.run([value, '-B', '-c', 'import sys; assert sys.version_info >= (3, 11)'],
+            subprocess.run([value, '-B', '-c', probe],
                            check=True, capture_output=True, timeout=5)
             return str(Path(value).resolve())
         except (OSError, subprocess.SubprocessError):
             continue
-    raise ValueError('未找到独立 Python 3.11+；可用 WFRL_VIDEO_PYTHON 指定监管解释器')
+    raise ValueError('未找到支持 flock 和 waitid(WNOWAIT) 的独立 Python 3.11+；'
+                     '可用 WFRL_VIDEO_PYTHON 指定监管解释器')
 
 
 def _workspace_root():

@@ -196,6 +196,7 @@ def _on_load(_unused):
     from . import runtime, repair_marks
     from .blade_root_display import refresh as refresh_root_fittings
     for scene in bpy.data.scenes:
+        cameras.clear_viewport_masks(scene)
         scene.pop('wfrl_home_load_error', None)
         if scene.objects:
             refresh_saved_surface_style(scene)
@@ -291,6 +292,9 @@ def register():
     # Blender installs extensions under _RestrictData; scene setup belongs to Load Demo.
     if hasattr(bpy.data, "workspaces"):
         ensure_workspace()
+    if hasattr(bpy.data, "scenes"):
+        for scene in bpy.data.scenes:
+            cameras.clear_viewport_masks(scene)
     from .presentation import register_overlay
     register_overlay()
     from . import charts

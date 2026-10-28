@@ -1,0 +1,248 @@
+{
+  "status": "PASS",
+  "final": true,
+  "scope": "Workspace source integration acceptance for the seven diagnosed Blender regression failures; no build, installation or publication.",
+  "repo": "/Users/eason/Desktop/wfcrl/wind farm RL",
+  "git_head": "e504ed66548c4b774664233341b70c87512561ef",
+  "seven_original_failures_resolved": true,
+  "original_failure_results": [
+    {
+      "test": "rebuild_mesh_regression.py",
+      "status": "PASS",
+      "resolution": "Generated tower ownership and rig mesh names support bounded cleanup; shared/fake-user/shape-key/linked/user data retention and initial structural-binding attachment rollback pass."
+    },
+    {
+      "test": "farm_front_view_regression.py",
+      "status": "PASS",
+      "resolution": "Explicit trail enablement preserves disabled-by-default coverage and 121 retained samples."
+    },
+    {
+      "test": "clearance_replay_smoke.py",
+      "status": "PASS",
+      "resolution": "Complete B1/B2/B3 synthetic fixture, public loader detachment, and independent 25 Hz simulation timebase; package-file deserialization and physics remain outside this synthetic test."
+    },
+    {
+      "test": "tower_fittings_regression.py",
+      "status": "PASS",
+      "resolution": "All-turbine assertions request all turbines, including after rebuild; same-time hidden-turbine selection is checked."
+    },
+    {
+      "test": "shared_context_switch_regression.py",
+      "status": "PASS",
+      "resolution": "Independent visible factory-startup process with no window focus; final completion JSON and stable source hashes are required."
+    },
+    {
+      "test": "tip_deflection_regression.py",
+      "status": "PASS",
+      "resolution": "Independent unloaded reference and component axes follow the authenticated structural root boundary; actual deformation and simulation channels are not corrected or replaced."
+    },
+    {
+      "test": "tower_flex_regression.py",
+      "status": "PASS",
+      "resolution": "Matching package is supplied explicitly; moving support, original tip gates, seeks, fixed clock, and save/reload pass."
+    }
+  ],
+  "runtime": {
+    "blender": "5.2.1 LTS",
+    "build_hash": "9e2066aef7ef",
+    "platform": "macOS",
+    "verification_layer": "SOURCE_RUNTIME",
+    "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py"
+  },
+  "validation": {
+    "original_native_batch": {
+      "status": "PASS",
+      "script_counts": {
+        "expected": 24,
+        "completed": 24,
+        "passed": 24,
+        "failed": 0,
+        "skipped": 0,
+        "not_run": 0
+      },
+      "background_scripts": 21,
+      "visible_scripts": 3,
+      "native_process_invocations": 25,
+      "report": "native-24/result.json",
+      "execution_audit": "execution-audit.json",
+      "visible_scope": "Scripted product operators in separate clean visible processes; actual mouse/keyboard, GPU appearance and viewport FPS are not claimed."
+    },
+    "host": {
+      "status": "PASS_WITH_EXISTING_RESOURCE_SKIPS",
+      "passed": 175,
+      "skipped": 2,
+      "failed": 0,
+      "skips": [
+        {
+          "test": "blender_frontend.tests.test_tip_deflection.DeflectionTests::test_retained_vtp_independent_transport",
+          "reason": "Original VTP is not distributed with the offline release"
+        },
+        {
+          "test": "blender_frontend.tests.test_blade_models.BladeModelTests::test_regeneration_matches_packaged_alternate_asset",
+          "reason": "Rootkink regeneration requires projects/commercial-rootkink-reference/template"
+        }
+      ],
+      "log": "host-tests.log",
+      "junit": "host-tests.xml",
+      "source_snapshot": "source-final.json"
+    },
+    "additional_native": {
+      "status": "PASS",
+      "passed": 3,
+      "tests": [
+        "full 3601-frame tip_deflection_regression.py",
+        "blade_model_regression.py",
+        "three_camera_default_regression.py"
+      ],
+      "report": "additional-native/result.json",
+      "overlap_with_original_batch": true
+    },
+    "attachment_rollback": {
+      "status": "PASS",
+      "fault_injections": [
+        "initial T2 tower replacement",
+        "initial shared-structure rebinding"
+      ],
+      "original_objects_mesh_bindings_and_coordinates_preserved": true,
+      "report": "native-24/rebuild_mesh_regression/artifacts/checks.json"
+    },
+    "precision": {
+      "status": "PASS",
+      "acceptance_object": "Structural-tip display and reference comparison against saved simulation channels",
+      "saved_gate_threshold_m": 0.0002,
+      "interpolated_gate_threshold_m": 0.005,
+      "saved_max_error_m": 4.169043754453927e-05,
+      "interpolated_max_error_m": 0.0002897637579262202,
+      "frames": 3601,
+      "channel_independence": true,
+      "actual_mesh_and_formal_assets_preserved": true,
+      "report": "additional-native/tip_deflection_regression/checks.json",
+      "independent_original_source_validation": {
+        "status": "PASS",
+        "tip_samples": 21609,
+        "max_error_m": 4.538890515348726e-05,
+        "report": "../precision/independent-source-validation.json",
+        "relevant_helper_source_sha256": "7135fef01a9db080c88f893151464f5839fe0472d40adb5025683b874b015d67"
+      },
+      "root_cause": "The BlPitch telemetry-derived reference differs from the saved constrained root frame used by BeamDyn TipTD*r. Reference transport now uses that recorded root motion with the independent unloaded geometry. No time shift, displacement correction or threshold relaxation is applied."
+    },
+    "p2": {
+      "status": "PASS",
+      "per_frame_matrix_arithmetic_and_fallback_unchanged": true,
+      "ast_audit": "p2-preservation.json",
+      "original_207_sample_bitwise_evidence_preserved": "../../farm-flex-world-matrices-validation",
+      "scope": "The 207-sample result belongs to the original optimization comparison. Integration preserves its matrix/deformation algorithms; the corrected reference comparison intentionally uses the structural root frame."
+    },
+    "static": {
+      "status": "PASS",
+      "report": "static-checks.json"
+    }
+  },
+  "additional_finding_resolution": {
+    "status": "RESOLVED",
+    "finding": "Initial raw FarmFlex binding failure could regenerate RepairPaint while restoring the original blade mesh.",
+    "implementation": "Cosmetic attachment construction runs after tower and shared-structure bindings succeed, before any frame deformation.",
+    "evidence": "native-24/rebuild_mesh_regression/artifacts/checks.json",
+    "prior_diagnostic_preserved": "../mesh/whole-bind-diagnostic.json"
+  },
+  "remaining_failures": [],
+  "unverified_or_unavailable": [
+    "Original loaded VTP surface refitting: source files are absent; authenticated saved transforms, matching raw structural outputs and unloaded reference passed independent checks.",
+    "Rootkink source-geometry regeneration: optional template is absent; packaged model switching and runtime geometry passed.",
+    "No new solver run or complete raw-VTP probe export; the original v3.5.3-dirty binary internal timing cause is not reproduced.",
+    "No extension build, installation, public release, actual manual input, stable viewport FPS, long-duration allocator test, other platform, solver convergence or field-accuracy acceptance."
+  ],
+  "excluded_evidence": {
+    "description": "Intermediate diagnostic failures, dirty-window startup failures, and executions invalidated by concurrent source changes remain in their owning output folders and are not counted as final passes.",
+    "references": [
+      "../mesh/result.json",
+      "../tests/result.json",
+      "../precision/result.json"
+    ]
+  },
+  "changed_files": [
+    ".agents/skills/windfarm-blender-dev/references/verification.md",
+    "README.md",
+    "blender_frontend/README.md",
+    "blender_frontend/tests/blender/clearance_replay_smoke.py",
+    "blender_frontend/tests/blender/farm_front_view_regression.py",
+    "blender_frontend/tests/blender/rebuild_mesh_regression.py",
+    "blender_frontend/tests/blender/tip_deflection_regression.py",
+    "blender_frontend/tests/blender/tower_fittings_regression.py",
+    "blender_frontend/tests/test_regression_runner.py",
+    "blender_frontend/tests/test_scene_mesh_lifecycle.py",
+    "blender_frontend/tests/test_tip_deflection.py",
+    "blender_frontend/wfrl_blender/deflection.py",
+    "blender_frontend/wfrl_blender/farm_flex.py",
+    "blender_frontend/wfrl_blender/scene_builder.py",
+    "blender_frontend/wfrl_blender/stacked_camera_rig.py",
+    "docs/blender/BladeRecon可视化使用说明.md",
+    "docs/blender/Blender前端功能总览与规划.md",
+    "docs/blender/INSTALL.md",
+    "docs/blender/NREL缺陷编辑器.md",
+    "docs/blender/releases/0.3.18发布核对.md",
+    "docs/blender/发布状态与验证范围.md",
+    "docs/blender/用户使用手册.md",
+    "docs/development/叶片晃动方案.md",
+    "scripts/blender/run_regressions.py",
+    "scripts/lidar/export_prebend_probe.py",
+    "scripts/lidar/export_prebend_sidecars.py",
+    "前端readme.md",
+    "前端更新计划.md"
+  ],
+  "source_sha256": {
+    ".agents/skills/windfarm-blender-dev/references/verification.md": "feafbd48bccaef99c2f7b2df1fcca71ddd193a4c8f5559163caff80a8152e9e5",
+    "README.md": "602dfa6e11f63d3f4a0c36b661386d579c27beb04a7f85316bdebf0a46bafd26",
+    "blender_frontend/README.md": "57763b8243970f8f03c7f8659c598b5f6ce27a79df7c8f04ed0aec58c87b8a71",
+    "blender_frontend/tests/blender/clearance_replay_smoke.py": "53b6538dc63b693acb7f406900d5295c02525624dcf88716d334d6f27ebde7ae",
+    "blender_frontend/tests/blender/farm_front_view_regression.py": "b998c45a32ab814499b94f93f5522b7191eda799364a86875284ed59fd56928d",
+    "blender_frontend/tests/blender/rebuild_mesh_regression.py": "93beeb1670987ec26561fe234430e79f0718b2139095b3e5afdfcc905019a746",
+    "blender_frontend/tests/blender/tip_deflection_regression.py": "e5c4bc5afeb5d492dceaf775a39f3878e327dfe9707ee5dface3e9d867e5498d",
+    "blender_frontend/tests/blender/tower_fittings_regression.py": "71996e4c0421ab20ba8853f8a3837d21290bab99dbbea79fbcb8dbdb8f1fe47a",
+    "blender_frontend/tests/test_regression_runner.py": "cb8ae8f64334916c80034f04285ffc1308e14eb3c18833a09a40e291e08a72de",
+    "blender_frontend/tests/test_scene_mesh_lifecycle.py": "3739bb15eefb77d52e64d397c5c2ae854748ae050f7b0786b0ae301976181816",
+    "blender_frontend/tests/test_tip_deflection.py": "aad2cfe7b9d38a179fb9bee6f19cb7bd9cc73bf67abe7604f87b7c5bb889d7fe",
+    "blender_frontend/wfrl_blender/deflection.py": "7135fef01a9db080c88f893151464f5839fe0472d40adb5025683b874b015d67",
+    "blender_frontend/wfrl_blender/farm_flex.py": "5e34d97235138b07697238e4d187361bdbbe71bc8e5a05707426263f70a19864",
+    "blender_frontend/wfrl_blender/scene_builder.py": "5d0d8bb2e73a9a871fffb2839c457058640db83be0eacef7da8e64cabe455f28",
+    "blender_frontend/wfrl_blender/stacked_camera_rig.py": "3665f040c04fb20c2e2b87c4f1f57041df28f7a20f172622cc8699c92cec75b8",
+    "docs/blender/BladeRecon可视化使用说明.md": "47c7033f7285315f3c21989d3d627915c33a4684a11327304d4065f2fda498f9",
+    "docs/blender/Blender前端功能总览与规划.md": "65badb819882255de03230cc3caf7ac5608985292f5a61bb494cb6e05b2081ef",
+    "docs/blender/INSTALL.md": "71ff409404acd29e6028cb196458453fad7b099a96bc7d34b3500c6cc0cb82a5",
+    "docs/blender/NREL缺陷编辑器.md": "39978a8eca05579f9f8a705fa60a2dd0ba4649b65827eeb9257418deea419934",
+    "docs/blender/releases/0.3.18发布核对.md": "d0c104328364da9401195e3d6778881a518da17c011e7a17388a8ccef8c0d3d2",
+    "docs/blender/发布状态与验证范围.md": "59d5ddda694e0dc53492226ee5e8736de5a66a1e180bdb96c1eb12a104bcf78f",
+    "docs/blender/用户使用手册.md": "e6cb8bf55ff8652c882c39f641268b5147684cf1abf108a8d7b1ff75a9b636b5",
+    "docs/development/叶片晃动方案.md": "3790ce1cf138f7f3d632a25e5bf712731dc0fe872f24569e80b6a58c03b01654",
+    "scripts/blender/run_regressions.py": "3fdf1ce45e7a2a783d45d5e17e7a000188448ec0b9d2c7eccbe7c4566397dd30",
+    "scripts/lidar/export_prebend_probe.py": "ae9c4cb0727441c06e39366fe9170c6560bc226aa280fa0c246848e238f66c6e",
+    "scripts/lidar/export_prebend_sidecars.py": "4c6e5fa33841d62c8e7f89e06967c71b5628cd4136f240e1c9146abfdc0b7e6f",
+    "前端readme.md": "8bdb848599a1980c01539bc569953a075930154b60015a1b4069af09ce999db6",
+    "前端更新计划.md": "755b15723ee068a951df597ba9871764c048dd027da5476ea011985903bec421"
+  },
+  "complete_source_manifest": "source-final.json",
+  "integration_patch": "integration.patch",
+  "handoff_source_identity_check": "handoff-review.json",
+  "all_native_sources_stable_and_match_final": true,
+  "protection": {
+    "status": "PASS",
+    "report": "protection-checks.json",
+    "baseline_source_paths_missing": [],
+    "installed_files_unchanged": 185,
+    "asset_files_unchanged": 66,
+    "no_git_reset_restore_clean_stash_commit_push": true,
+    "pre_existing_evidence_retained": [
+      "outputs/regression-failure-analysis",
+      "outputs/farm-flex-world-matrices-validation"
+    ]
+  },
+  "retained_evidence": [
+    "native-24/ JSON, launch manifests, per-invocation source hashes and Blender logs",
+    "additional-native/ final full-timeline, blade model and three-camera results",
+    "host-tests.log and host-tests.xml",
+    "original-baseline.json, source-final.json, integration.patch, static-checks.json",
+    "../mesh/, ../tests/, ../precision/ required diagnostic logs, numeric arrays, screenshots and source identities",
+    "../../regression-failure-analysis and ../../farm-flex-world-matrices-validation"
+  ],
+  "evidence_checksums": "checksums.json"
+}

@@ -1,7 +1,7 @@
 """Native camera viewing in an independent window; no offscreen preview loop.
 
-Shared scene aspect is expanded to contain each calibrated rectangle. A mask
-shows only that rectangle. Proxy cameras follow originals without modifying them.
+Shared scene aspect is expanded to contain each calibrated rectangle. Proxy
+cameras follow originals, with no exterior mask over the surrounding viewport.
 """
 import math
 import uuid
@@ -397,18 +397,22 @@ class NativeSession:
             if not any(a==area for a in self.window.screen.areas):continue
             space = area.spaces.active
             if space.type != 'VIEW_3D':continue
+            camera_view = space.region_3d.view_perspective == 'CAMERA'
             camera = core.get_camera(self.scene,slot)
             # Participation controls grouped views; a disabled camera can still
             # be inspected individually before the user enables it again.
             if len(self.slots)>1 and camera and not camera.get('custom_enabled',True):camera=None
-            key = (camera.as_pointer(),repr(core.parameters(camera)),aspect) if camera else None
+            params = core.parameters(camera) if camera else None
+            # COPY_TRANSFORMS follows pose changes without replacing the proxy.
+            # Only optical changes require a new lens and calibrated view fit.
+            key = (camera.as_pointer(), params.fov, params.vfov,
+                   params.clip_near_m, params.clip_far_m, aspect) if camera else None
             if key != entry['key'] or (camera and entry['proxy'] is None):
                 if entry['proxy']:
                     errors = self.release_proxy(entry)
                     if errors:
                         raise RuntimeError('；'.join(errors))
                 if camera:
-                    params=core.parameters(camera)
                     outer,fx,fy=fit_gate(params.fov,params.vfov,aspect)
                     data=bpy.data.cameras.new(f'T1.Native.C{slot}')
                     data[_PROXY_OWNER] = self.proxy_owner
@@ -420,7 +424,8 @@ class NativeSession:
                         bpy.data.cameras.remove(data)
                         raise ValueError('当前视场超出原生相机范围，请使用精确预览')
                     data.clip_start=params.clip_near_m;data.clip_end=params.clip_far_m
-                    data.passepartout_alpha=1.
+                    data.show_passepartout=False
+                    data.passepartout_alpha=0.
                     proxy=bpy.data.objects.new(f'T1.Native.C{slot}',data)
                     proxy[_PROXY_OWNER] = self.proxy_owner
                     entry['proxy'] = proxy
@@ -433,6 +438,9 @@ class NativeSession:
             view_key=(key, region.width, region.height) if region else None
             if entry['proxy'] and (not space.use_local_camera or space.camera != entry['proxy']):
                 space.use_local_camera=True;space.camera=entry['proxy']
+                # Removing an active local camera can switch Blender to PERSP.
+                if camera_view:
+                    space.region_3d.view_perspective='CAMERA'
             if entry['proxy'] and view_key != entry['view_key']:
                 initial = entry['view_key'] is None
                 if initial:
@@ -514,20 +522,14 @@ class NativeSession:
         performance.count('native.draw')
         import gpu,blf
         from gpu_extras.batch import batch_for_shader
-        region=bpy.context.region;rv=bpy.context.space_data.region_3d
+        region=bpy.context.region
         shader=gpu.shader.from_builtin('UNIFORM_COLOR')
         def rect(x,y,w,h):
             if w<=0 or h<=0:return
             shader.bind();shader.uniform_float('color',(.015,.02,.025,1))
             batch_for_shader(shader,'TRI_FAN',{'pos':[(x,y),(x+w,y),(x+w,y+h),(x,y+h)]}).draw(shader)
         proxy=entry['proxy']
-        if proxy:
-            bounds=gate_bounds(self.scene,entry,region,rv)
-            if not bounds:return
-            left,bottom,w,h=bounds;right,top=left+w,bottom+h
-            rect(0,0,region.width,max(0,bottom));rect(0,top,region.width,region.height-top)
-            rect(0,bottom,max(0,left),h);rect(right,bottom,region.width-right,h)
-        else:rect(0,0,region.width,region.height)
+        if not proxy:rect(0,0,region.width,region.height)
         label=(f"C{entry['slot']} · " + ('叶根为主', '中段为主', '叶尖为主')[entry['slot']-1]) if proxy else f"C{entry['slot']} · 未安装或未参与"
         scale=bpy.context.preferences.system.ui_scale
         from .custom_camera_preview import available_rectangle
@@ -769,7 +771,7 @@ def watch():
             print('Native camera view closed:',str(exc))
             _remember_error(_ACTIVE.scene, f'相机观察中断：{exc}')
             shutdown()
-    return .25
+    return .25 if _ACTIVE is not None else None
 
 
 def _playback_control_state(scene):

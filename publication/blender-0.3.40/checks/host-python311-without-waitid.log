@@ -1,0 +1,551 @@
+................................s.................s................................ [  6%]
+........................................................................ [ 11%]
+........................................................................ [ 16%]
+........................................................................ [ 22%]
+........................................................................ [ 27%]
+.................................................................. [ 32%]
+........................................................................ [ 37%]
+........................................................................ [ 43%]
+........................................................................ [ 48%]
+.................................................................................................F [ 55%]
+F.......FFF..FFFFFFFFFFFFFFFF.F.F............................... [ 60%]
+.................................................................. [ 65%]
+........................................................................ [ 70%]
+........................................................................ [ 76%]
+........................................................................ [ 81%]
+....................................................................................................... [ 89%]
+..............................s......................................... [ 94%]
+....................................................s................... [100%]
+=================================== FAILURES ===================================
+_ MasterRecoveryTests.test_commit_before_status_failure_is_recognized_by_file_identity _
+
+self = <test_manual_video_job.MasterRecoveryTests testMethod=test_commit_before_status_failure_is_recognized_by_file_identity>
+
+    def test_commit_before_status_failure_is_recognized_by_file_identity(self):
+        original = video._write_json
+        def interrupted(path, value):
+            if path.name == 'status.json' and value.get('state') == 'COMPLETE':
+                raise OSError('simulated final status interruption')
+            original(path, value)
+        with patch.object(video, '_write_json', side_effect=interrupted):
+            with self.assertRaises(OSError):
+>               self.finish()
+
+blender_frontend/tests/test_manual_video_job.py:201: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+blender_frontend/tests/test_manual_video_job.py:96: in finish
+    return video.resume_job(self.path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+blender_frontend/wfrl_blender/manual_video_render.py:315: in resume_job
+    with _worker_guard(job_path) as (path, job):
+/opt/anaconda3/envs/wfrl-mac/lib/python3.11/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+blender_frontend/wfrl_blender/manual_video_render.py:289: in _worker_guard
+    with jobs.Lease(path.parent / 'render.lock', job['job_id']):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+blender_frontend/wfrl_blender/manual_video_job.py:74: in __init__
+    require_supervision()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+_ MasterRecoveryTests.test_complete_master_retries_encoding_and_publication_without_bpy _
+
+self = <test_manual_video_job.MasterRecoveryTests testMethod=test_complete_master_retries_encoding_and_publication_without_bpy>
+
+    def test_complete_master_retries_encoding_and_publication_without_bpy(self):
+        before = {p.name: media.sha256(p) for p in (self.root / 'master_frames').iterdir()}
+>       self.finish()
+
+blender_frontend/tests/test_manual_video_job.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+blender_frontend/tests/test_manual_video_job.py:96: in finish
+    return video.resume_job(self.path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+blender_frontend/wfrl_blender/manual_video_render.py:315: in resume_job
+    with _worker_guard(job_path) as (path, job):
+/opt/anaconda3/envs/wfrl-mac/lib/python3.11/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+blender_frontend/wfrl_blender/manual_video_render.py:289: in _worker_guard
+    with jobs.Lease(path.parent / 'render.lock', job['job_id']):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+blender_frontend/wfrl_blender/manual_video_job.py:74: in __init__
+    require_supervision()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+_ MasterRecoveryTests.test_publication_failure_can_retry_with_identical_master _
+
+self = <test_manual_video_job.MasterRecoveryTests testMethod=test_publication_failure_can_retry_with_identical_master>
+
+    def test_publication_failure_can_retry_with_identical_master(self):
+        with patch.object(video, '_publish', side_effect=OSError('simulated full destination')):
+            with self.assertRaises(OSError):
+>               self.finish()
+
+blender_frontend/tests/test_manual_video_job.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+blender_frontend/tests/test_manual_video_job.py:96: in finish
+    return video.resume_job(self.path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+blender_frontend/wfrl_blender/manual_video_render.py:315: in resume_job
+    with _worker_guard(job_path) as (path, job):
+/opt/anaconda3/envs/wfrl-mac/lib/python3.11/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+blender_frontend/wfrl_blender/manual_video_render.py:289: in _worker_guard
+    with jobs.Lease(path.parent / 'render.lock', job['job_id']):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+blender_frontend/wfrl_blender/manual_video_job.py:74: in __init__
+    require_supervision()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+_______ MasterRecoveryTests.test_successful_state_is_immutable_on_retry ________
+
+self = <test_manual_video_job.MasterRecoveryTests testMethod=test_successful_state_is_immutable_on_retry>
+
+    def test_successful_state_is_immutable_on_retry(self):
+>       self.finish()
+
+blender_frontend/tests/test_manual_video_job.py:138: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+blender_frontend/tests/test_manual_video_job.py:96: in finish
+    return video.resume_job(self.path)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+blender_frontend/wfrl_blender/manual_video_render.py:315: in resume_job
+    with _worker_guard(job_path) as (path, job):
+/opt/anaconda3/envs/wfrl-mac/lib/python3.11/contextlib.py:137: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+blender_frontend/wfrl_blender/manual_video_render.py:289: in _worker_guard
+    with jobs.Lease(path.parent / 'render.lock', job['job_id']):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+blender_frontend/wfrl_blender/manual_video_job.py:74: in __init__
+    require_supervision()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+_ MasterRecoveryTests.test_supervised_cli_retry_waits_for_simulated_codec_failure_and_recovery _
+
+self = <test_manual_video_job.MasterRecoveryTests testMethod=test_supervised_cli_retry_waits_for_simulated_codec_failure_and_recovery>
+
+        def test_supervised_cli_retry_waits_for_simulated_codec_failure_and_recovery(self):
+            executable = Path(self.job['ffmpeg'])
+            executable.write_text(f'#!{sys.executable}\n' + '''import json,sys
+    from pathlib import Path
+    args=sys.argv[1:]
+    complete=b'NON-MEDIA simulated codec placeholder'
+    if '-version' in args:
+        print('simulated-codec fixture 1')
+    elif '-framerate' in args:
+        flag=Path(__file__).with_name('fail-encode.fixture')
+        if flag.exists():
+            flag.unlink()
+            Path(args[-1]).write_bytes(b'NON-MEDIA partial')
+            raise SystemExit(7)
+        Path(args[-1]).write_bytes(complete)
+    elif '-show_frames' in args:
+        if Path(args[-1]).read_bytes()!=complete:
+            raise SystemExit(8)
+        stream=dict(codec_name='h264',pix_fmt='yuv420p',has_b_frames=0,time_base='1/25',avg_frame_rate='25/1',
+                    width=1920,height=1080,color_space='bt709',color_transfer='iec61966-2-1',
+                    color_primaries='bt709',color_range='tv')
+        print(json.dumps(dict(streams=[stream],frames=[dict(pts=i,key_frame=int(i==0),pict_type='I' if i==0 else 'P') for i in range(3)])))
+    elif '-show_entries' in args:
+        print(json.dumps(dict(format=dict(duration=.12),streams=[dict(duration=.12)])))
+    ''')
+            executable.chmod(0o700)
+            (self.root / 'master.json').unlink()
+            video.seal_master(self.path)
+            before = {p.name: media.sha256(p) for p in (self.root / 'master_frames').iterdir()}
+            (self.root / 'fail-encode.fixture').touch()
+            command = [sys.executable, '-B', str(ROOT / 'scripts/blender/manage_manual_video.py'),
+                       'retry', '--job', str(self.path)]
+            failed = subprocess.run(command, capture_output=True, text=True, timeout=15)
+            self.assertEqual(failed.returncode, 1, failed.stderr)
+            self.assertEqual(jobs.query(self.path)['state'], 'FAILED')
+            recovered = subprocess.run(command, capture_output=True, text=True, timeout=15)
+>           self.assertEqual(recovered.returncode, 0, recovered.stderr + recovered.stdout)
+E           AssertionError: 1 != 0 : Traceback (most recent call last):
+E             File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/manage_manual_video.py", line 7, in <module>
+E               runpy.run_path(str(root / 'blender_frontend/wfrl_blender/manual_video_job.py'), run_name='__main__')
+E             File "<frozen runpy>", line 291, in run_path
+E             File "<frozen runpy>", line 98, in _run_module_code
+E             File "<frozen runpy>", line 88, in _run_code
+E             File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/manual_video_job.py", line 487, in <module>
+E               raise SystemExit(main())
+E                                ^^^^^^
+E             File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/manual_video_job.py", line 476, in main
+E               start(args.job, retry=True)
+E             File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/manual_video_job.py", line 240, in start
+E               require_supervision()
+E             File "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/manual_video_job.py", line 55, in require_supervision
+E               raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/tests/test_manual_video_job.py:188: AssertionError
+_ SupervisionTests.test_cancel_after_failed_root_exit_does_not_relabel_failure _
+
+self = <test_manual_video_job.SupervisionTests testMethod=test_cancel_after_failed_root_exit_does_not_relabel_failure>
+
+    def setUp(self):
+>       jobs.require_supervision()
+
+blender_frontend/tests/test_manual_video_job.py:271: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+_ SupervisionTests.test_cancel_after_verified_commit_before_worker_status_preserves_completion _
+
+self = <test_manual_video_job.SupervisionTests testMethod=test_cancel_after_verified_commit_before_worker_status_preserves_completion>
+
+    def setUp(self):
+>       jobs.require_supervision()
+
+blender_frontend/tests/test_manual_video_job.py:271: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+___ SupervisionTests.test_codec_lease_survives_an_abrupt_render_parent_exit ____
+
+self = <test_manual_video_job.SupervisionTests testMethod=test_codec_lease_survives_an_abrupt_render_parent_exit>
+
+    def setUp(self):
+>       jobs.require_supervision()
+
+blender_frontend/tests/test_manual_video_job.py:271: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+__ SupervisionTests.test_empty_lock_file_can_be_claimed_under_exclusive_flock __
+
+self = <test_manual_video_job.SupervisionTests testMethod=test_empty_lock_file_can_be_claimed_under_exclusive_flock>
+
+    def setUp(self):
+>       jobs.require_supervision()
+
+blender_frontend/tests/test_manual_video_job.py:271: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+_ SupervisionTests.test_exited_root_still_cleans_lingering_children_before_reaping _
+
+self = <test_manual_video_job.SupervisionTests testMethod=test_exited_root_still_cleans_lingering_children_before_reaping>
+
+    def setUp(self):
+>       jobs.require_supervision()
+
+blender_frontend/tests/test_manual_video_job.py:271: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+___ SupervisionTests.test_fresh_controller_recovers_and_cancels_all_children ___
+
+self = <test_manual_video_job.SupervisionTests testMethod=test_fresh_controller_recovers_and_cancels_all_children>
+
+    def setUp(self):
+>       jobs.require_supervision()
+
+blender_frontend/tests/test_manual_video_job.py:271: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+_ SupervisionTests.test_lost_job_without_live_lease_is_not_marked_cancelled_or_failed _
+
+self = <test_manual_video_job.SupervisionTests testMethod=test_lost_job_without_live_lease_is_not_marked_cancelled_or_failed>
+
+    def setUp(self):
+>       jobs.require_supervision()
+
+blender_frontend/tests/test_manual_video_job.py:271: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+______________ SupervisionTests.test_output_aliases_share_a_lease ______________
+
+self = <test_manual_video_job.SupervisionTests testMethod=test_output_aliases_share_a_lease>
+
+    def setUp(self):
+>       jobs.require_supervision()
+
+blender_frontend/tests/test_manual_video_job.py:271: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+_ SupervisionTests.test_process_exit_without_completion_is_failure_and_cli_wait_fails _
+
+self = <test_manual_video_job.SupervisionTests testMethod=test_process_exit_without_completion_is_failure_and_cli_wait_fails>
+
+    def setUp(self):
+>       jobs.require_supervision()
+
+blender_frontend/tests/test_manual_video_job.py:271: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+_ SupervisionTests.test_reused_port_cannot_impersonate_supervisor_by_echoing_request _
+
+self = <test_manual_video_job.SupervisionTests testMethod=test_reused_port_cannot_impersonate_supervisor_by_echoing_request>
+
+    def setUp(self):
+>       jobs.require_supervision()
+
+blender_frontend/tests/test_manual_video_job.py:271: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+____ SupervisionTests.test_same_output_is_exclusively_reserved_across_jobs _____
+
+self = <test_manual_video_job.SupervisionTests testMethod=test_same_output_is_exclusively_reserved_across_jobs>
+
+    def setUp(self):
+>       jobs.require_supervision()
+
+blender_frontend/tests/test_manual_video_job.py:271: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+___ SupervisionTests.test_supervisor_spawn_failure_has_final_failure_status ____
+
+self = <test_manual_video_job.SupervisionTests testMethod=test_supervisor_spawn_failure_has_final_failure_status>
+
+    def setUp(self):
+>       jobs.require_supervision()
+
+blender_frontend/tests/test_manual_video_job.py:271: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+_______ SupervisionTests.test_unowned_or_symlink_lock_files_are_rejected _______
+
+self = <test_manual_video_job.SupervisionTests testMethod=test_unowned_or_symlink_lock_files_are_rejected>
+
+    def setUp(self):
+>       jobs.require_supervision()
+
+blender_frontend/tests/test_manual_video_job.py:271: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+_ SupervisionTests.test_unreachable_or_wrong_authenticated_endpoint_is_lost_without_signals _
+
+self = <test_manual_video_job.SupervisionTests testMethod=test_unreachable_or_wrong_authenticated_endpoint_is_lost_without_signals>
+
+    def setUp(self):
+>       jobs.require_supervision()
+
+blender_frontend/tests/test_manual_video_job.py:271: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+_ SupervisionTests.test_verified_complete_job_and_cancel_exit_race_keep_success _
+
+self = <test_manual_video_job.SupervisionTests testMethod=test_verified_complete_job_and_cancel_exit_race_keep_success>
+
+    def setUp(self):
+>       jobs.require_supervision()
+
+blender_frontend/tests/test_manual_video_job.py:271: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+_ SceneRecoveryTests.test_fresh_scene_controller_restores_supervision_and_cancel _
+
+self = <test_manual_video_job.SceneRecoveryTests testMethod=test_fresh_scene_controller_restores_supervision_and_cancel>
+
+    def test_fresh_scene_controller_restores_supervision_and_cancel(self):
+>       jobs.start(self.path, command=[sys.executable, '-B', '-c', 'import time;time.sleep(20)'])
+
+blender_frontend/tests/test_manual_video_job.py:563: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+blender_frontend/wfrl_blender/manual_video_job.py:240: in start
+    require_supervision()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+_ SceneRecoveryTests.test_publish_preflight_failure_precedes_snapshot_or_background_launch _
+
+self = <test_manual_video_job.SceneRecoveryTests testMethod=test_publish_preflight_failure_precedes_snapshot_or_background_launch>
+
+    def test_publish_preflight_failure_precedes_snapshot_or_background_launch(self):
+        from wfrl.camera_video import publication
+        control = types.ModuleType(PACKAGE + '.manual_control')
+        control.validate_scene = lambda scene: (True, '')
+        control.trial_configuration = lambda scene: ({}, video._spec(self.job))
+        self.scene.pop('wfrl_manual_video_job')
+        with patch.dict(sys.modules, {PACKAGE + '.manual_control': control}), \
+             patch.object(self.ui, '_binary', return_value=sys.executable), \
+             patch.object(self.ui, '_python_binary', return_value=sys.executable), \
+             patch.object(self.ui, '_preflight_output', side_effect=OSError('unsupported publication')):
+            with self.assertRaises(OSError):
+>               self.ui.launch(self.scene, self.root / 'new.mp4')
+
+blender_frontend/tests/test_manual_video_job.py:593: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+blender_frontend/wfrl_blender/manual_video.py:325: in launch
+    jobs.require_supervision()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+__ SceneRecoveryTests.test_terminal_status_does_not_reactivate_poll_tracking ___
+
+self = <test_manual_video_job.SceneRecoveryTests testMethod=test_terminal_status_does_not_reactivate_poll_tracking>
+
+    def test_terminal_status_does_not_reactivate_poll_tracking(self):
+>       jobs.start(self.path, command=[sys.executable, '-B', '-c', 'import time;time.sleep(20)'])
+
+blender_frontend/tests/test_manual_video_job.py:576: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+blender_frontend/wfrl_blender/manual_video_job.py:240: in start
+    require_supervision()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_supervision():
+        if os.name != 'posix' or not all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')):
+>           raise ValueError('手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python')
+E           ValueError: 手动视频监管需要支持 flock 和 waitid(WNOWAIT) 的 macOS / Linux Python
+
+blender_frontend/wfrl_blender/manual_video_job.py:55: ValueError
+=============================== warnings summary ===============================
+blender_frontend/tests/test_custom_camera_capture.py::test_png_preserves_display_bytes_and_flips_only_rows
+  /Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/test_custom_camera_capture.py:24: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    assert list(image.getdata())==[(255,0,0,255),(0,255,0,255),(0,0,255,255),(17,91,143,128)]
+
+blender_frontend/tests/test_custom_camera_capture.py::test_capture_step_requests_pixels_without_texture_and_exports_state[False]
+blender_frontend/tests/test_custom_camera_capture.py::test_capture_step_requests_pixels_without_texture_and_exports_state[True]
+  /Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/test_custom_camera_capture.py:71: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    assert list(png.getdata()) == [(255, 0, 0, 255), (0, 255, 0, 255),
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED blender_frontend/tests/test_manual_video_job.py::MasterRecoveryTests::test_commit_before_status_failure_is_recognized_by_file_identity
+FAILED blender_frontend/tests/test_manual_video_job.py::MasterRecoveryTests::test_complete_master_retries_encoding_and_publication_without_bpy
+FAILED blender_frontend/tests/test_manual_video_job.py::MasterRecoveryTests::test_publication_failure_can_retry_with_identical_master
+FAILED blender_frontend/tests/test_manual_video_job.py::MasterRecoveryTests::test_successful_state_is_immutable_on_retry
+FAILED blender_frontend/tests/test_manual_video_job.py::MasterRecoveryTests::test_supervised_cli_retry_waits_for_simulated_codec_failure_and_recovery
+FAILED blender_frontend/tests/test_manual_video_job.py::SupervisionTests::test_cancel_after_failed_root_exit_does_not_relabel_failure
+FAILED blender_frontend/tests/test_manual_video_job.py::SupervisionTests::test_cancel_after_verified_commit_before_worker_status_preserves_completion
+FAILED blender_frontend/tests/test_manual_video_job.py::SupervisionTests::test_codec_lease_survives_an_abrupt_render_parent_exit
+FAILED blender_frontend/tests/test_manual_video_job.py::SupervisionTests::test_empty_lock_file_can_be_claimed_under_exclusive_flock
+FAILED blender_frontend/tests/test_manual_video_job.py::SupervisionTests::test_exited_root_still_cleans_lingering_children_before_reaping
+FAILED blender_frontend/tests/test_manual_video_job.py::SupervisionTests::test_fresh_controller_recovers_and_cancels_all_children
+FAILED blender_frontend/tests/test_manual_video_job.py::SupervisionTests::test_lost_job_without_live_lease_is_not_marked_cancelled_or_failed
+FAILED blender_frontend/tests/test_manual_video_job.py::SupervisionTests::test_output_aliases_share_a_lease
+FAILED blender_frontend/tests/test_manual_video_job.py::SupervisionTests::test_process_exit_without_completion_is_failure_and_cli_wait_fails
+FAILED blender_frontend/tests/test_manual_video_job.py::SupervisionTests::test_reused_port_cannot_impersonate_supervisor_by_echoing_request
+FAILED blender_frontend/tests/test_manual_video_job.py::SupervisionTests::test_same_output_is_exclusively_reserved_across_jobs
+FAILED blender_frontend/tests/test_manual_video_job.py::SupervisionTests::test_supervisor_spawn_failure_has_final_failure_status
+FAILED blender_frontend/tests/test_manual_video_job.py::SupervisionTests::test_unowned_or_symlink_lock_files_are_rejected
+FAILED blender_frontend/tests/test_manual_video_job.py::SupervisionTests::test_unreachable_or_wrong_authenticated_endpoint_is_lost_without_signals
+FAILED blender_frontend/tests/test_manual_video_job.py::SupervisionTests::test_verified_complete_job_and_cancel_exit_race_keep_success
+FAILED blender_frontend/tests/test_manual_video_job.py::SceneRecoveryTests::test_fresh_scene_controller_restores_supervision_and_cancel
+FAILED blender_frontend/tests/test_manual_video_job.py::SceneRecoveryTests::test_publish_preflight_failure_precedes_snapshot_or_background_launch
+FAILED blender_frontend/tests/test_manual_video_job.py::SceneRecoveryTests::test_terminal_status_does_not_reactivate_poll_tracking
+23 failed, 1317 passed, 4 skipped, 3 warnings, 4920 subtests passed in 60.17s (0:01:00)

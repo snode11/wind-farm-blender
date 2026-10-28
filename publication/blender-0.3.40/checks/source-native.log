@@ -1,0 +1,5 @@
+RUN native_camera_proxy_regression.py [background/run]
+PASS native_camera_proxy_regression.py
+RUN scene_playback_lifecycle_regression.py [background/run]
+PASS scene_playback_lifecycle_regression.py
+{"status": "PASS", "counts": {"PASS": 2}, "result": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/checks/source-native/result.json"}

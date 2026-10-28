@@ -1,0 +1,124 @@
+{
+  "status": "PASS",
+  "final": true,
+  "verification_layer": "SOURCE_RUNTIME",
+  "blender": "/Applications/Blender.app/Contents/MacOS/Blender",
+  "package_inputs": {
+    "builtin_mappo": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/mappo",
+      "manifest_sha256": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde"
+    },
+    "builtin_dual_beam": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/dual_beam",
+      "manifest_sha256": "9eea6aa1bb5c44d5b307a63017be7b81c8e43ea092f92cfb30822d9fc63b5645"
+    },
+    "builtin_split_example": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+      "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b"
+    }
+  },
+  "tests": [
+    {
+      "script": "native_camera_proxy_regression.py",
+      "mode": "background",
+      "scope": "Real Blender camera resources and evaluated constraints with a viewport adapter; no pixels/FPS.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 0.6296756670344621,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/native_camera_proxy_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "module": "wfrl_blender",
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "blender": "5.2.1 LTS",
+            "background": true,
+            "pose_updates": 60,
+            "proxy_replacements_during_pose_updates": 0,
+            "source_sha256": "7116afe0ebfb1964e44e5a5ee4238a0824fa54ab0e33098013fe2c61e4db55f0",
+            "checks": [
+              "60 pose/metadata changes retain one proxy/data pair and manual view",
+              "evaluated COPY_TRANSFORMS follows source pose",
+              "proxy masks remain disabled",
+              "FOV and clip changes rebuild one calibrated proxy without resource growth",
+              "pixel-aspect changes invalidate optical proxy",
+              "source replacement rebinds constraint while preserving shared camera data",
+              "proxy release removes owned object and data"
+            ],
+            "scope": "Real Blender camera data and evaluated constraints; viewport adapter, no window/GPU/FPS acceptance"
+          },
+          "log": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/checks/source-native/native_camera_proxy_regression/run/blender.log",
+          "report": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/checks/source-native/native_camera_proxy_regression/artifacts/checks.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "scene_playback_lifecycle_regression.py",
+      "mode": "background",
+      "scope": "Native background data checks; visible interaction not verified.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 3.271248291945085,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/scene_playback_lifecycle_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "scope": "isolated background Blender",
+            "addon_module": "wfrl_blender",
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "ready_scene": "A_MAPPO",
+            "failed_scene": "B_FULL_COPY",
+            "failed_status": "回放数据未就绪：Scene lacks required FarmFlex objects: WFRL.Turbine.T1.YawRoot, WFRL.Turbine.T1.Rotor, WFRL.Turbine.T1.Tower, WFRL.Turbine.T1.Blade1, WFRL.Turbine.T1.Blade2, WFRL.Turbine.T1.Blade3, WFRL.Turbine.T2.YawRoot, WFRL.Turbine.T2.Rotor, WFRL.Turbine.T2.Tower, WFRL.Turbine.T2.Blade1, WFRL.Turbine.T2.Blade2, WFRL.Turbine.T2.Blade3, WFRL.Turbine.T3.YawRoot, WFRL.Turbine.T3.Rotor, WFRL.Turbine.T3.Tower, WFRL.Turbine.T3.Blade1, WFRL.Turbine.T3.Blade2, WFRL.Turbine.T3.Blade3",
+            "mesh_change_max_m": 0.2769445519647368,
+            "frame": 181,
+            "time_s": 120.0,
+            "linked_scene_rejected": true
+          },
+          "log": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/checks/source-native/scene_playback_lifecycle_regression/run/blender.log",
+          "report": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/checks/source-native/scene_playback_lifecycle_regression/artifacts/checks.json"
+        }
+      ],
+      "status": "PASS"
+    }
+  ],
+  "temporary_paths": [
+    "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/scratch/wfrl-regressions-3bpv205b"
+  ],
+  "visible_processes": "serial, independent factory-startup profiles",
+  "counts": {
+    "PASS": 2
+  }
+}

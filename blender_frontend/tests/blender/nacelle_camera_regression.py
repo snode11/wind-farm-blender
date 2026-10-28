@@ -141,7 +141,7 @@ for tid in ('T1','T2','T3'):
     np.testing.assert_allclose(np.degrees(down.data.angle_x),cameras.DOWN_HFOV_DEG,rtol=0,atol=1e-5)
     assert abs(down.data.lens - 8.0) < 1e-5
     assert abs(math.degrees(2*math.atan(down.data.sensor_width/(2*down.data.lens)/(16/9))) - 60) < 1e-4
-    assert down.data.show_passepartout and down.data.passepartout_alpha==1
+    assert not down.data.show_passepartout and down.data.passepartout_alpha==0
     down_presets[tid]=pose(down)
     down_contracts[tid]=dict(parent=down.parent.name,
                             exterior_mount=assert_down_mount(down,tid),
@@ -186,7 +186,7 @@ for tid in ('T1','T2','T3'):
         assert pose(cam)==custom
         bpy.ops.wfrl.farm_flex_view(turbine=tid,angle='DOWN')
         assert pose(down)==down_presets[tid]
-        assert down.data.show_passepartout and down.data.passepartout_alpha==1
+        assert not down.data.show_passepartout and down.data.passepartout_alpha==0
         bpy.ops.wfrl.farm_flex_view(turbine=tid,angle='NACELLE')
         assert pose(cam)==custom and (cam.location-saved).length==0
         bpy.ops.wfrl.gimbal_preset(preset='RESET')

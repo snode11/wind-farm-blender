@@ -1,0 +1,29 @@
+{
+  "started_utc": "2026-10-28T17:04:52.417744+00:00",
+  "argv": [
+    "/Applications/Blender.app/Contents/MacOS/Blender",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/native_camera_proxy_window.py"
+  ],
+  "cwd": "/Users/eason/Desktop/wfcrl/wind farm RL",
+  "timeout_s": 210,
+  "environment": {
+    "BLENDER_USER_CONFIG": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/profile/config",
+    "BLENDER_USER_SCRIPTS": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/profile/scripts",
+    "BLENDER_USER_DATAFILES": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/profile/datafiles",
+    "WFRL_ADDON_MODULE": "bl_ext.wfrl_frontend.wfrl_blender",
+    "WFRL_EXPECTED_ADDON_ROOT": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/profile/extensions/wfrl_blender",
+    "WFRL_EXPECTED_INVENTORY": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/package/wfrl_blender-0.3.40.inventory.json",
+    "WFRL_TEST_OUTPUT": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/checks/proxy-window",
+    "TMPDIR": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/scratch/gui/proxy-window"
+  },
+  "script_sha256": "d1d5f465af6da77dc402e1a9bf8b0c33367f2fd755d4d08403e634952574ffb5",
+  "package_sha256": "0b90d4c176f816cef8ea3434deead1420e9dc9a84b00ae8a27f5e93165d15dec",
+  "timeout": false,
+  "pid": 58041,
+  "exit_code": 0,
+  "elapsed_s": 12.865649708081037,
+  "finished_utc": "2026-10-28T17:05:05.322142+00:00"
+}

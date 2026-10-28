@@ -93,6 +93,8 @@ REGRESSIONS = (
                'result.json', mode='visible',
                scope='Scripted native-window camera playback; external Space events and FPS not verified.'),
     Regression('scene_playback_lifecycle_regression.py', 'SCENE_PLAYBACK_LIFECYCLE_PASS'),
+    Regression('native_camera_proxy_regression.py', 'NATIVE_CAMERA_PROXY_PASS', package='synthetic',
+               scope='Real Blender camera resources and evaluated constraints with a viewport adapter; no pixels/FPS.'),
     Regression('farm_down_mount_regression.py', 'FARM_DOWN_MOUNT_PASS'),
     Regression('t1_down_mount_regression.py', 'T1_DOWN_MOUNT_PASS'),
     Regression('rebuild_mesh_regression.py', 'REBUILD_MESH_REGRESSION=PASS'),

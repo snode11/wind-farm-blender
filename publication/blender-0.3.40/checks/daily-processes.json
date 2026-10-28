@@ -1,0 +1,30 @@
+[
+  {
+    "command": [
+      "/Applications/Blender.app/Contents/MacOS/Blender",
+      "--background",
+      "--python-exit-code",
+      "1",
+      "--python",
+      "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/farm_down_mount_regression.py"
+    ],
+    "returncode": 0,
+    "log": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/logs/daily-down.log",
+    "required_markers": [
+      "FARM_DOWN_MOUNT_PASS"
+    ],
+    "error_markers": [],
+    "warnings": [
+      {
+        "kind": "blender_exit_memory_diagnostic",
+        "message": "Error: Not freed memory blocks: 586, total unfreed memory 0.042572 MB",
+        "blocks": 586,
+        "reported_mb": 0.042572,
+        "bytes": 44640,
+        "bytes_note": "Reported MB converted by 1024^2 and rounded; limited by log precision"
+      }
+    ],
+    "elapsed_s": 3.587340833968483,
+    "status": "PASS"
+  }
+]

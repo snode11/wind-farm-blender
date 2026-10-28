@@ -1,0 +1,10 @@
+Warning: 1 × Draw window and swap: 3.3640 ms, average: 3.36400000 ms
+Warning: 1 × Draw window and swap: 3.4317 ms, average: 3.43170902 ms
+Warning: 1 × Draw window and swap: 1.3612 ms, average: 1.36116706 ms
+Warning: 1 × Draw window and swap: 3.5265 ms, average: 3.52654187 ms
+Warning: 1 × Draw window and swap: 3.8503 ms, average: 3.85025004 ms
+NATIVE_CAMERA_PROXY_WINDOW_PASS
+00:12.497  blend            | Saved session recovery to "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/scratch/gui/proxy-window/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

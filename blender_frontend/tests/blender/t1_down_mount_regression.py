@@ -121,7 +121,7 @@ for turbine in ('T2', 'T3'):
     assert camera.get('wfrl_gimbal_mount_revision') == 5
     assert_default_pose(camera, nominal)
     assert_down_axis(camera)
-    assert camera.data.show_passepartout and camera.data.passepartout_alpha == 1
+    assert not camera.data.show_passepartout and camera.data.passepartout_alpha == 0
     other_presets[turbine] = pose(camera)
 nacelle = cameras.ensure_nacelle_gimbal(scene, 'T1')
 assert nacelle != down and nacelle.data != down.data

@@ -4,7 +4,7 @@
 
 - 从实际 Git 根目录工作，检查适用规则和 Git 状态，保留已有修改与未跟踪文件。独立工作树的文档同步须逐项合并主工作区已确认内容，不用整仓覆盖或重置代替。
 - 唯一 GitHub 入口为 [snode11/wind-farm-blender](https://github.com/snode11/wind-farm-blender)，remote 为 `blender-sync`；项目说明、网页 GPT 交接与源码核对统一使用此入口。
-- Blender 前端开发、排障和文档维护使用 [windfarm-blender-dev](.agents/skills/windfarm-blender-dev/SKILL.md)，按需读取模块定位、运行来源、数据合同及验证／打包规则。
+- Blender 前端开发、排障和文档维护使用 [windfarm-blender-dev](.agents/skills/windfarm-blender-dev/SKILL.md#按任务选专题)，根据任务读取对应专题及验证入口。技能以本仓库内这一份为准；从父工作区接到任务时，先定位此仓库再执行命令。
 
 ## 文档与代码注释
 

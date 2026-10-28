@@ -1,0 +1,13 @@
+Warning: 1 × Draw window and swap: 61.1096 ms, average: 61.10958289 ms
+Warning: 1 × Draw window and swap: 5.6645 ms, average: 5.66445920 ms
+Warning: 1 × Draw window and swap: 1.2449 ms, average: 1.24491705 ms
+Warning: 1 × Draw window and swap: 0.9382 ms, average: 0.93816710 ms
+Warning: 1 × Draw window and swap: 92.0635 ms, average: 92.06354199 ms
+Warning: 1 × Draw window and swap: 1.0092 ms, average: 1.00920792 ms
+Native camera view closed: StructRNA of type Object has been removed
+Native camera view closed: StructRNA of type Object has been removed
+NATIVE_CAMERA_ENABLED_PASS
+00:12.234  blend            | Saved session recovery to "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/scratch/gui/enabled-window/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

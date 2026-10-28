@@ -1,0 +1,44 @@
+{
+  "backup": "/Users/eason/.codex/backups/wfrl-release-0.3.40",
+  "head": "e504ed66548c4b774664233341b70c87512561ef",
+  "index_sha256": "2c1bd541cf22e13c13d09da7d6cbea17d0fb99f4d655fbd08a77196f7e80552d",
+  "profile": [
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/bookmarks.txt",
+      "sha256": "f60b6fd5ba93eac273992b675f1899c1e940545c294452919306043a8353634f",
+      "sha256_after": "f60b6fd5ba93eac273992b675f1899c1e940545c294452919306043a8353634f",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/platform_support.txt",
+      "sha256": "4dbce3526384ef82878d01e1d704b953f67248b1f3354282fc9ae6285b750426",
+      "sha256_after": "4dbce3526384ef82878d01e1d704b953f67248b1f3354282fc9ae6285b750426",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/recent-files.txt",
+      "sha256": "7d929bccbc3e5ed3e078e0661a82103ea767325c62f8ea64ca2f747270a08f01",
+      "sha256_after": "7d929bccbc3e5ed3e078e0661a82103ea767325c62f8ea64ca2f747270a08f01",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/recent-searches.txt",
+      "sha256": "f57d26a947e656261b1cdd0d41c3782993828f18bc8d3c4063f6b1e4ed0d2057",
+      "sha256_after": "f57d26a947e656261b1cdd0d41c3782993828f18bc8d3c4063f6b1e4ed0d2057",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/startup.blend",
+      "sha256": "064d7a57df06e1b35e543e3e85ab87df108a07969790c0aea87c9b7c2e6b1a46",
+      "sha256_after": "064d7a57df06e1b35e543e3e85ab87df108a07969790c0aea87c9b7c2e6b1a46",
+      "unchanged": true
+    },
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/userpref.blend",
+      "sha256": "e06ff65baae263c0c4c7b231b78fa0265ab0eaf6e9eb3121f9410cd664beaf51",
+      "sha256_after": "e06ff65baae263c0c4c7b231b78fa0265ab0eaf6e9eb3121f9410cd664beaf51",
+      "unchanged": true
+    }
+  ],
+  "index_unchanged": true
+}

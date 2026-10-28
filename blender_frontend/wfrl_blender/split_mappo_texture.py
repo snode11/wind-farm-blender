@@ -164,6 +164,8 @@ def _create_camera(scene, review, target, ortho_scale):
         cam.animation_data_clear()
         cam.matrix_world = _display_matrix(scene, source)
         scene.collection.objects.link(cam)
+    from .cameras import clear_camera_mask
+    clear_camera_mask(cam)
     cam['split_texture_owned'] = True
     cam['split_mappo_texture_owned'] = True
     return cam

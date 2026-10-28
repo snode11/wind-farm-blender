@@ -117,6 +117,8 @@ def _camera(scene,name,position,target):
     data.lens=45
     data.clip_end=3000
     obj=bpy.data.objects.new(name,data)
+    from .cameras import clear_camera_mask
+    clear_camera_mask(obj)
     scene.collection.objects.link(obj)
     obj.location=position
     obj.rotation_euler=(Vector(target)-obj.location).to_track_quat('-Z','Y').to_euler()

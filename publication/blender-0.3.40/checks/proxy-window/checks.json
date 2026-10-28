@@ -1,0 +1,155 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "blender": "5.2.1 LTS",
+  "method": "Scripted native operators and Blender API in a visible, disposable window; no physical mouse input, GPU image capture, full-clip FPS or display scanout.",
+  "test_sha256": "d1d5f465af6da77dc402e1a9bf8b0c33367f2fd755d4d08403e634952574ffb5",
+  "checks": {
+    "visible_installed_identity": {
+      "passed": true,
+      "inventory_verified": true
+    },
+    "single_visible_window_ready": {
+      "passed": true,
+      "region_size": [
+        1632,
+        938
+      ]
+    },
+    "pose_metadata_preserve_proxy_and_manual_camera_framing": {
+      "passed": true,
+      "changes": 16,
+      "observed_timer_syncs": 16,
+      "max_world_matrix_error": 0.0,
+      "zoom": 18.0,
+      "offset": [
+        0.07999999821186066,
+        -0.05999999865889549
+      ],
+      "object_camera_counts": [
+        508,
+        17
+      ]
+    },
+    "free_view_survives_pose_and_metadata": {
+      "passed": true,
+      "view": [
+        "PERSP",
+        [
+          3.0,
+          4.0,
+          5.0
+        ],
+        23.0
+      ]
+    },
+    "fov_and_vfov_rebuild_calibrated_unmasked_proxy": {
+      "passed": true
+    },
+    "optical_rebuild_preserves_free_perspective_and_ortho_views": {
+      "passed": true
+    },
+    "short_play_and_pause": {
+      "passed": true,
+      "before": {
+        "frame": 1,
+        "subframe": 0.0,
+        "time_s": 117.0
+      },
+      "paused": {
+        "frame": 60,
+        "subframe": 0.0,
+        "time_s": 117.98333333333333
+      }
+    },
+    "watch_retries_owned_cleanup_then_stops": {
+      "passed": true,
+      "release_calls": 2
+    },
+    "reopen_registers_watch_and_final_close_stops_it": {
+      "passed": true
+    },
+    "other_scene_clock_and_frozen_assets_preserved": {
+      "passed": true,
+      "other_scene_clocks": {
+        "2607": {
+          "frame": 1,
+          "subframe": 0.0,
+          "time_s": null
+        }
+      },
+      "asset_sha256": {
+        "assets/mappo/manifest.json": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde",
+        "assets/mappo/geometry.npz": "289abea277d8a4954836b53bc06a1afcc41d8098a6fabe99f74c7f2ebe4ebac1",
+        "assets/mappo/data.json": "11088f05a90a81bac2b4ab964d837b942ee20b07984147c79c688e6fae9c14cf"
+      }
+    }
+  },
+  "observations": [
+    {
+      "field": "fov",
+      "perspective_before_edit": "CAMERA",
+      "perspective_after_edit": "CAMERA",
+      "perspective_after_sync": "CAMERA"
+    },
+    {
+      "field": "fov",
+      "value": 90.0,
+      "calibration": {
+        "horizontal_fov": 90.0,
+        "vertical_fov": 46.70606820408862,
+        "gate_bounds": [
+          20.003936767578125,
+          71.30750993375688,
+          1591.9989929199219,
+          687.3714646600741
+        ],
+        "region": [
+          1632,
+          938
+        ]
+      }
+    },
+    {
+      "field": "vfov",
+      "perspective_before_edit": "CAMERA",
+      "perspective_after_edit": "CAMERA",
+      "perspective_after_sync": "CAMERA"
+    },
+    {
+      "field": "vfov",
+      "value": 40.0,
+      "calibration": {
+        "horizontal_fov": 90.0,
+        "vertical_fov": 40.0,
+        "gate_bounds": [
+          20.003936767578125,
+          125.27278892219499,
+          1591.9989929199219,
+          579.4409066831979
+        ],
+        "region": [
+          1632,
+          938
+        ]
+      }
+    }
+  ],
+  "addon_root": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/profile/extensions/wfrl_blender",
+  "module_sha256": {
+    "__init__.py": "a77d645e03e58f1ae500a1074eab28dca8a87b70bcfbb06f9103ea56d67ae09a",
+    "native_camera_views.py": "7116afe0ebfb1964e44e5a5ee4238a0824fa54ab0e33098013fe2c61e4db55f0",
+    "custom_cameras.py": "d588524898ee901124c2a5727af3aab670cee83ca4b80a2ae52fe0ad444aca4b",
+    "playback.py": "c83edad2173b1b81cca0e8df8cb637f38ff6478d4589de508e9bf98168772d29"
+  },
+  "build_info": {
+    "payload_files": 194,
+    "payload_sha256": "f9e21c00cf2162abb034849deaeb48007d74670f91e92a31d6c17e2705f7fed1",
+    "schema": "wfrl.extension-build.v1",
+    "version": "0.3.40"
+  },
+  "inventory": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/package/wfrl_blender-0.3.40.inventory.json",
+  "phase": "complete",
+  "elapsed_s": 11.9239241250325,
+  "error": null
+}

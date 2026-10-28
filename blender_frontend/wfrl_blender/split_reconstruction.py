@@ -222,6 +222,9 @@ def _configure(window, areas, *, navigation=None, reset_view=False):
     _sidebar_category(left_area)
     _isolate(window, right_area, scene)
     right.camera = reconstruction_camera(scene)
+    if right.camera is not None:
+        from .cameras import clear_camera_mask
+        clear_camera_mask(right.camera)
     right.use_local_camera = True
     right.lock_camera = False
     right.lock_object = None
@@ -242,19 +245,8 @@ def _configure(window, areas, *, navigation=None, reset_view=False):
 
 
 def _sidebar_category(area):
-    """A newly loaded UI region can expose its category as read-only briefly."""
-    for region in area.regions:
-        if region.type != 'UI':
-            continue
-        try:
-            if region.active_panel_category != 'MAPPO':
-                region.active_panel_category = 'MAPPO'
-            return region.active_panel_category == 'MAPPO'
-        except (AttributeError, RuntimeError):
-            # Keep the existing tab and visible sidebar; retry after redraw.
-            area.tag_redraw()
-            return False
-    return False
+    from .cameras import select_sidebar_category
+    return select_sidebar_category(area, 'MAPPO')
 
 
 def _corners(low, high):

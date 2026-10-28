@@ -249,8 +249,8 @@ def begin_draft(scene, slot):
     if original is None:
         camera.data.clip_start, camera.data.clip_end = .005, 30000
     camera.data.display_size = .15
-    camera.data.show_passepartout = True
-    camera.data.passepartout_alpha = .6
+    from .cameras import clear_camera_mask
+    clear_camera_mask(camera)
     camera.hide_render = True
     camera.lock_location = (True, True, True)
     camera.lock_rotation = (True, True, True)

@@ -1,0 +1,41 @@
+{
+  "mode": "read-only routing review",
+  "cases": [
+    {
+      "id": "home-copy",
+      "route": "scene-playback; static copy/operation alignment",
+      "criteria_review": "PASS"
+    },
+    {
+      "id": "portrait-preview",
+      "route": "cameras-reconstruction; host/background, window/GPU separately",
+      "criteria_review": "PASS"
+    },
+    {
+      "id": "bridge-reconnect",
+      "route": "measurement-backend; scene/session/run/revision and expiry",
+      "criteria_review": "PASS"
+    },
+    {
+      "id": "frozen-video",
+      "route": "video-jobs; frozen input, final media and process recovery",
+      "criteria_review": "PASS"
+    },
+    {
+      "id": "extension-identity",
+      "route": "verification; canonical input, isolated and daily identity",
+      "criteria_review": "PASS"
+    },
+    {
+      "id": "policy-scope",
+      "route": "wfcrl-env-me/AGENTS.md; algorithm scope separate",
+      "criteria_review": "PASS"
+    },
+    {
+      "id": "web-lab-scope",
+      "route": "docs/proposal/platform/风场网页实验室_第一版方案与分工汇总.md; immediate preview and async compute",
+      "criteria_review": "PASS"
+    }
+  ],
+  "product_acceptance": false
+}

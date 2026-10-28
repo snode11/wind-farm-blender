@@ -123,6 +123,7 @@ def pair(expected=None):
     assert not modules.synth.active(scene), 'Independent synth_tex is outside this workflow'
     assert left.local_view is None and right.local_view is not None
     assert right.use_local_camera and right.camera == modules.core.reconstruction_camera(scene)
+    assert not right.camera.data.show_passepartout
     assert left.shading.type == 'MATERIAL'
     assert right.shading.type == ('MATERIAL' if actual == 'MAPPO' else 'SOLID')
     objects = right_objects()
@@ -434,7 +435,18 @@ def new_save(name):
     expected = dict(frame=bpy.context.scene.frame_current, mode=mode(),
         texture_mode=bpy.context.scene.wfrl_recon_texture_mode,
         navigation=navigation_pair(), immutable=immutable(), path=str(path))
-    assert bpy.ops.wm.save_as_mainfile(filepath=str(path)) == {'FINISHED'}
+    masks = [(obj.data, obj.data.show_passepartout, obj.data.passepartout_alpha)
+             for obj in bpy.context.scene.objects if obj.type == 'CAMERA'
+             and obj.name.startswith(('SplitRecon.', 'SplitTexture.', 'SplitMappoTexture.'))]
+    try:
+        for data, _enabled, _alpha in masks:
+            data.show_passepartout = True
+            data.passepartout_alpha = 1.0
+        assert bpy.ops.wm.save_as_mainfile(filepath=str(path)) == {'FINISHED'}
+    finally:
+        for data, enabled, alpha in masks:
+            data.show_passepartout = enabled
+            data.passepartout_alpha = alpha
     state[name] = expected
 
 
