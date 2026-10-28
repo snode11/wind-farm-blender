@@ -21,7 +21,11 @@
     "archive_path": "publication/blender-0.3.40/delivery/wind-farm-blender-source-0.3.40.zip",
     "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.40/wind-farm-blender-source-0.3.40.zip",
     "source_reproduction": "publication/blender-0.3.40/source-reproduction.json",
-    "source_rebuild_verification": "PASS_BYTE_IDENTICAL"
+    "source_rebuild_verification": "PASS_BYTE_IDENTICAL",
+    "commit": "a92fb58b10a284e107168c010332fcfea94c0b04",
+    "tree": "dee93dbcc30303044a7fb41c2372e4c9656ba54c",
+    "archive_sha256": "e0646086720d3f4e5c2e0378bdb6da3b8c7f969aaa2e39adf0b57aa597d9f09b",
+    "archive_bytes": 176306798
   },
   "validation": {
     "verification": "publication/blender-0.3.40/verification.json",

@@ -1,23 +1,32 @@
 {
   "schema": "wfrl.recoverable-cleanup.v1",
   "status": "PASS",
-  "scope": "Installed workspace build intermediates, task scratch directories, completed task pytest outputs, temporary browser review and regenerable project/installation caches.",
+  "scope": "Frontend verification profiles, duplicate build archives, test scene copies, intermediate screenshots, project-owned test scratch and regenerable caches.",
   "trash_roots": [
-    "/Users/eason/.Trash/WFRL-install-cleanup-8aacd7a00a"
+    "/Users/eason/.Trash/WFRL-frontend-cleanup-5311474275",
+    "/Users/eason/.Trash/WFRL-install-cleanup-8aacd7a00a",
+    "/Users/eason/.Trash/WFRL-native-optimization-826fa72371",
+    "/Users/eason/.Trash/WFRL-release-0.3.40-38889658e6"
   ],
-  "items_moved": 20,
-  "files_moved": 2894,
-  "bytes_moved": 1222276159,
+  "items_moved": 120,
+  "files_moved": 11338,
+  "bytes_moved": 3181818992,
   "inventories": [
-    "/Users/eason/.Trash/WFRL-install-cleanup-8aacd7a00a/removed-items.json"
+    "/Users/eason/.Trash/WFRL-frontend-cleanup-5311474275/removed-items.json",
+    "/Users/eason/.Trash/WFRL-install-cleanup-8aacd7a00a/removed-items.json",
+    "/Users/eason/.Trash/WFRL-native-optimization-826fa72371/removed-items.json",
+    "/Users/eason/.Trash/WFRL-release-0.3.40-38889658e6/removed-items.json"
   ],
   "restore_tools": [
-    "/Users/eason/.Trash/WFRL-install-cleanup-8aacd7a00a/restore.py"
+    "/Users/eason/.Trash/WFRL-frontend-cleanup-5311474275/restore.py",
+    "/Users/eason/.Trash/WFRL-install-cleanup-8aacd7a00a/restore.py",
+    "/Users/eason/.Trash/WFRL-native-optimization-826fa72371/restore.py",
+    "/Users/eason/.Trash/WFRL-release-0.3.40-38889658e6/restore.py"
   ],
   "permanent_deletion": false,
   "preserved_installation": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
-  "preserved_package": "publication/daily-installation-current/package/wfrl_blender-0.3.39.zip",
-  "rollback_backup": "/Users/eason/.Trash/WFRL-install-cleanup-8aacd7a00a/daily-install/rollback",
+  "preserved_package": "publication/blender-0.3.40/validated/package/wfrl_blender-0.3.40.zip",
+  "rollback_backup": "/Users/eason/.codex/backups/wfrl-release-0.3.40",
   "protected_profile_files_checked": 6,
   "git_head_preserved": true,
   "git_index_preserved": true,
@@ -25,11 +34,13 @@
   "formal_presentations_preserved": true,
   "unrelated_test_temporaries_excluded": true,
   "isolated_runtime_profiles_remaining": false,
-  "workspace_cache_and_common_temporary_file_scan": "PASS_ZERO_REMAINING",
+  "workspace_cache_and_common_temporary_file_scan": "PASS_RELEASE_OWNED_SCOPE",
   "installation_and_asset_integrity": "PASS",
   "restoration_dry_run": {
-    "status": "PASS",
-    "items_checked": 20,
+    "status": "DRY_RUN_PASS",
+    "items": 120,
     "overwrite_protection": true
-  }
+  },
+  "source_asset_files_checked": 66,
+  "current_cleanup": "publication/blender-0.3.40/cleanup.json"
 }

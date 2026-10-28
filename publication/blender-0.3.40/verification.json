@@ -62,5 +62,14 @@
     "No long-running acceptance",
     "No real backend training or solver run",
     "No other platform or scientific acceptance"
-  ]
+  ],
+  "source_archive_verification": "final-source-verification.json",
+  "publication_status": "UPLOADED",
+  "cleanup": "cleanup.json",
+  "github_actions": {
+    "status": "PASS",
+    "url": "https://github.com/snode11/wind-farm-blender/actions/runs/40733367810",
+    "jobs_passed": 5,
+    "scope": "Linux Python 3.11/3.12 host and CPU numerical contracts; Blender background and isolated package contracts. No visible desktop, long-running or field acceptance."
+  }
 }

@@ -37,5 +37,16 @@
     "backup": "/Users/eason/.codex/backups/wfrl-release-0.3.40",
     "cleanup": "publication/daily-installation-cleanup.json"
   },
-  "limits": "Scripted windows use isolated profile of same archive. No physical input, full FPS/video, long-running, backend training, other platform or scientific acceptance."
+  "limits": "Scripted windows use isolated profile of same archive. No physical input, full FPS/video, long-running, backend training, other platform or scientific acceptance.",
+  "artifact_availability": {
+    "final_archive": true,
+    "source_archive": true,
+    "result_records": true,
+    "selected_visual_evidence": true,
+    "raw_validation_logs": true,
+    "isolated_runtime_profiles": false,
+    "intermediate_scene_copies": false,
+    "duplicate_builds": false,
+    "regenerable_caches": false
+  }
 }

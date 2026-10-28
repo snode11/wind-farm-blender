@@ -1,0 +1,619 @@
+Refreshing run status every 20 seconds. Press Ctrl+C to quit.
+
+* v0.3.40 Checks · 40733367810
+Triggered via push about 4 minutes ago
+
+JOBS
+✓ Python 3.12 contracts in 3m8s (ID 122975306215)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 CPU numerical contracts in 1m22s (ID 122975306796)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 contracts in 2m19s (ID 122975306952)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.12 CPU numerical contracts in 1m18s (ID 122975306976)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+* Blender background and package contracts (ID 122977126323)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install package-check dependencies
+  ✓ Install Blender runtime libraries
+  * Install verified Blender archive
+  * Run native source regressions
+  * Validate isolated extension package
+  * Retain native results
+  * Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  * Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+Refreshing run status every 20 seconds. Press Ctrl+C to quit.
+
+* v0.3.40 Checks · 40733367810
+Triggered via push about 4 minutes ago
+
+JOBS
+✓ Python 3.12 contracts in 3m8s (ID 122975306215)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 CPU numerical contracts in 1m22s (ID 122975306796)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 contracts in 2m19s (ID 122975306952)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.12 CPU numerical contracts in 1m18s (ID 122975306976)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+* Blender background and package contracts (ID 122977126323)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install package-check dependencies
+  ✓ Install Blender runtime libraries
+  ✓ Install verified Blender archive
+  * Run native source regressions
+  * Validate isolated extension package
+  * Retain native results
+  * Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  * Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+Refreshing run status every 20 seconds. Press Ctrl+C to quit.
+
+* v0.3.40 Checks · 40733367810
+Triggered via push about 5 minutes ago
+
+JOBS
+✓ Python 3.12 contracts in 3m8s (ID 122975306215)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 CPU numerical contracts in 1m22s (ID 122975306796)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 contracts in 2m19s (ID 122975306952)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.12 CPU numerical contracts in 1m18s (ID 122975306976)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+* Blender background and package contracts (ID 122977126323)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install package-check dependencies
+  ✓ Install Blender runtime libraries
+  ✓ Install verified Blender archive
+  * Run native source regressions
+  * Validate isolated extension package
+  * Retain native results
+  * Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  * Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+Refreshing run status every 20 seconds. Press Ctrl+C to quit.
+
+* v0.3.40 Checks · 40733367810
+Triggered via push about 5 minutes ago
+
+JOBS
+✓ Python 3.12 contracts in 3m8s (ID 122975306215)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 CPU numerical contracts in 1m22s (ID 122975306796)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 contracts in 2m19s (ID 122975306952)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.12 CPU numerical contracts in 1m18s (ID 122975306976)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+* Blender background and package contracts (ID 122977126323)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install package-check dependencies
+  ✓ Install Blender runtime libraries
+  ✓ Install verified Blender archive
+  * Run native source regressions
+  * Validate isolated extension package
+  * Retain native results
+  * Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  * Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+Refreshing run status every 20 seconds. Press Ctrl+C to quit.
+
+* v0.3.40 Checks · 40733367810
+Triggered via push about 6 minutes ago
+
+JOBS
+✓ Python 3.12 contracts in 3m8s (ID 122975306215)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 CPU numerical contracts in 1m22s (ID 122975306796)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 contracts in 2m19s (ID 122975306952)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.12 CPU numerical contracts in 1m18s (ID 122975306976)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+* Blender background and package contracts (ID 122977126323)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install package-check dependencies
+  ✓ Install Blender runtime libraries
+  ✓ Install verified Blender archive
+  * Run native source regressions
+  * Validate isolated extension package
+  * Retain native results
+  * Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  * Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+Refreshing run status every 20 seconds. Press Ctrl+C to quit.
+
+* v0.3.40 Checks · 40733367810
+Triggered via push about 6 minutes ago
+
+JOBS
+✓ Python 3.12 contracts in 3m8s (ID 122975306215)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 CPU numerical contracts in 1m22s (ID 122975306796)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 contracts in 2m19s (ID 122975306952)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.12 CPU numerical contracts in 1m18s (ID 122975306976)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+* Blender background and package contracts (ID 122977126323)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install package-check dependencies
+  ✓ Install Blender runtime libraries
+  ✓ Install verified Blender archive
+  * Run native source regressions
+  * Validate isolated extension package
+  * Retain native results
+  * Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  * Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+Refreshing run status every 20 seconds. Press Ctrl+C to quit.
+
+* v0.3.40 Checks · 40733367810
+Triggered via push about 6 minutes ago
+
+JOBS
+✓ Python 3.12 contracts in 3m8s (ID 122975306215)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 CPU numerical contracts in 1m22s (ID 122975306796)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 contracts in 2m19s (ID 122975306952)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.12 CPU numerical contracts in 1m18s (ID 122975306976)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+* Blender background and package contracts (ID 122977126323)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install package-check dependencies
+  ✓ Install Blender runtime libraries
+  ✓ Install verified Blender archive
+  * Run native source regressions
+  * Validate isolated extension package
+  * Retain native results
+  * Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  * Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+Refreshing run status every 20 seconds. Press Ctrl+C to quit.
+
+* v0.3.40 Checks · 40733367810
+Triggered via push about 7 minutes ago
+
+JOBS
+✓ Python 3.12 contracts in 3m8s (ID 122975306215)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 CPU numerical contracts in 1m22s (ID 122975306796)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 contracts in 2m19s (ID 122975306952)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.12 CPU numerical contracts in 1m18s (ID 122975306976)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+* Blender background and package contracts (ID 122977126323)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install package-check dependencies
+  ✓ Install Blender runtime libraries
+  ✓ Install verified Blender archive
+  ✓ Run native source regressions
+  * Validate isolated extension package
+  * Retain native results
+  * Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  * Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+Refreshing run status every 20 seconds. Press Ctrl+C to quit.
+
+* v0.3.40 Checks · 40733367810
+Triggered via push about 7 minutes ago
+
+JOBS
+✓ Python 3.12 contracts in 3m8s (ID 122975306215)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 CPU numerical contracts in 1m22s (ID 122975306796)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 contracts in 2m19s (ID 122975306952)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.12 CPU numerical contracts in 1m18s (ID 122975306976)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+* Blender background and package contracts (ID 122977126323)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install package-check dependencies
+  ✓ Install Blender runtime libraries
+  ✓ Install verified Blender archive
+  ✓ Run native source regressions
+  ✓ Validate isolated extension package
+  * Retain native results
+  * Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  * Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+✓ v0.3.40 Checks · 40733367810
+Triggered via push about 7 minutes ago
+
+JOBS
+✓ Python 3.12 contracts in 3m8s (ID 122975306215)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 CPU numerical contracts in 1m22s (ID 122975306796)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.11 contracts in 2m19s (ID 122975306952)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install contract-test dependencies
+  ✓ Check release identity summary
+  ✓ Frontend and release contracts
+  ✓ Bridge protocol and lifecycle contracts
+  ✓ Retain test results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Python 3.12 CPU numerical contracts in 1m18s (ID 122975306976)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install CPU numerical dependencies
+  ✓ Training, scoring, and action contracts without simulators
+  ✓ Retain numerical results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job
+✓ Blender background and package contracts in 4m31s (ID 122977126323)
+  ✓ Set up job
+  ✓ Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Install package-check dependencies
+  ✓ Install Blender runtime libraries
+  ✓ Install verified Blender archive
+  ✓ Run native source regressions
+  ✓ Validate isolated extension package
+  ✓ Retain native results
+  ✓ Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+  ✓ Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+  ✓ Complete job

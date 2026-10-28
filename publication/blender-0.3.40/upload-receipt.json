@@ -1,0 +1,34 @@
+{
+  "status": "UPLOADED",
+  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.40",
+  "tag": "v0.3.40",
+  "commit": "a92fb58b10a284e107168c010332fcfea94c0b04",
+  "assets": [
+    {
+      "name": "wfrl_blender-0.3.40.zip",
+      "bytes_before_upload": 99155067
+    },
+    {
+      "name": "wfrl_blender-0.3.40.inventory.json",
+      "bytes_before_upload": 31516
+    },
+    {
+      "name": "wfrl_blender-0.3.40.zip.sha256",
+      "bytes_before_upload": 90
+    },
+    {
+      "name": "wind-farm-blender-source-0.3.40.zip",
+      "bytes_before_upload": 176306798
+    },
+    {
+      "name": "wind-farm-blender-source-0.3.40.zip.sha256",
+      "bytes_before_upload": 102
+    },
+    {
+      "name": "wfrl-delivery-0.3.40.json",
+      "bytes_before_upload": 2554
+    }
+  ],
+  "upload_command_exit": 0,
+  "post_upload_download_or_byte_verification": false
+}
