@@ -140,11 +140,9 @@ def _load_package(path):
     for name in set(manifest['files']) | {'geometry.npz','data.json','source-surfaces.json'}:
         if hashlib.sha256((path/name).read_bytes()).hexdigest()!=manifest['files'][name]:
             raise ValueError('Farm package integrity mismatch: '+name)
-    result_raw = manifest_raw if result_path == path else (result_path / 'manifest.json').read_bytes()
-    # resolve_package verifies sidecar files and their complete source inventory.
-    # Both manifests and resolved paths distinguish geometry and result variants.
-    key = (result_path, path, hashlib.sha256(manifest_raw).hexdigest(),
-           hashlib.sha256(result_raw).hexdigest())
+    # The verified source owns parsed geometry; each load owns its result layer.
+    # resolve_package independently validates sidecars and their source inventory.
+    key = (path, hashlib.sha256(manifest_raw).hexdigest())
     parsed = _PACKAGE_CACHE.get(key)
     if parsed is None:
         parsed = _parse_package(path, manifest)

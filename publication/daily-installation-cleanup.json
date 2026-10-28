@@ -1,40 +1,35 @@
 {
   "schema": "wfrl.recoverable-cleanup.v1",
   "status": "PASS",
-  "scope": "Complete local wind farm project inventory plus installed extension and configuration; retained research assets, frozen method inputs, published deliveries, source and active environments.",
+  "scope": "Installed workspace build intermediates, task scratch directories, completed task pytest outputs, temporary browser review and regenerable project/installation caches.",
   "trash_roots": [
-    "/path/to/user/.Trash/WFRL-install-cleanup-fe8e6c16c0",
-    "/path/to/user/.Trash/WFRL-workspace-cleanup-a787c66f48"
+    "/Users/eason/.Trash/WFRL-install-cleanup-8aacd7a00a"
   ],
-  "items_moved": 37,
-  "files_moved": 3563,
-  "bytes_moved": 749093054,
+  "items_moved": 20,
+  "files_moved": 2894,
+  "bytes_moved": 1222276159,
   "inventories": [
-    "/path/to/user/.Trash/WFRL-install-cleanup-fe8e6c16c0/cleanup-inventory.json",
-    "/path/to/user/.Trash/WFRL-workspace-cleanup-a787c66f48/removed-items.json"
+    "/Users/eason/.Trash/WFRL-install-cleanup-8aacd7a00a/removed-items.json"
   ],
   "restore_tools": [
-    "/path/to/user/.Trash/WFRL-install-cleanup-fe8e6c16c0/restore.py",
-    "/path/to/user/.Trash/WFRL-workspace-cleanup-a787c66f48/restore.py"
+    "/Users/eason/.Trash/WFRL-install-cleanup-8aacd7a00a/restore.py"
   ],
-  "full_workspace_inventory_files": 41014,
-  "full_workspace_inventory_bytes": 11071077657,
-  "protected_files_checked": 41001,
+  "permanent_deletion": false,
+  "preserved_installation": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "preserved_package": "publication/daily-installation-current/package/wfrl_blender-0.3.39.zip",
+  "rollback_backup": "/Users/eason/.Trash/WFRL-install-cleanup-8aacd7a00a/daily-install/rollback",
   "protected_profile_files_checked": 6,
   "git_head_preserved": true,
   "git_index_preserved": true,
-  "permanent_deletion": false,
-  "preserved_installation": "/path/to/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
-  "preserved_package": "publication/blender-0.3.37/package/wfrl_blender-0.3.37.zip",
-  "rollback_backup": "/path/to/user/.Trash/WFRL-install-cleanup-fe8e6c16c0/rollback",
-  "active_algorithm_environment": "blade_recon/.venv-trial",
   "formal_research_inputs_results_and_frozen_methods_preserved": true,
   "formal_presentations_preserved": true,
   "unrelated_test_temporaries_excluded": true,
+  "isolated_runtime_profiles_remaining": false,
   "workspace_cache_and_common_temporary_file_scan": "PASS_ZERO_REMAINING",
+  "installation_and_asset_integrity": "PASS",
   "restoration_dry_run": {
     "status": "PASS",
-    "items_checked": 12,
+    "items_checked": 20,
     "overwrite_protection": true
   }
 }

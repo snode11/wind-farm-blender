@@ -3,7 +3,7 @@ from .state import FrontendState
 from .animation import KinematicState
 from .training import TrainingDashboard
 from .live_scene import snapshot_scene, build_live_scene
-from .wake import WakeFrameBuffer, validate_wake_payload, apply_disxy_frame
+from .wake import WakeFrameBuffer, validate_wake_payload, apply_disxy_frame, set_disxy_validity
 from collections import deque
 import time
 import traceback
@@ -71,6 +71,7 @@ def select_mode(mode):
         raise ValueError('Stop the active session before changing mode')
     from .scene_builder import validate_scene_build
     validate_scene_build()
+    _clear_backend_wake()
     if _client:
         _client.close()
         _client = None
@@ -116,7 +117,7 @@ def select_mode(mode):
 
 
 def connect(port):
-    global _client, _state
+    global _client, _state, _backend_scene, _live_scene, kinematics, _last_tick
     if manual_display_active():
         raise ValueError("请先返回原场景，再连接后端")
     from .transport import TransportClient
@@ -133,9 +134,20 @@ def connect(port):
         _client = TransportClient(port=port)
     import bpy
     from . import backend_inflow
-    if bpy.context.scene is not None:
-        bpy.context.scene[backend_inflow.KEY] = "[]"
-        bpy.context.scene["wfrl_cinematic_inflow_valid"] = False
+    try:
+        scene = backend_scene()
+    except ValueError:
+        scene = None
+    if scene is None:
+        _backend_scene = getattr(bpy.context, 'scene', None)
+        _live_scene = None
+        kinematics = KinematicState()
+        _last_tick = None
+        _clear_backend_wake()
+        scene = backend_scene()
+    if scene is not None:
+        scene[backend_inflow.KEY] = "[]"
+        scene["wfrl_cinematic_inflow_valid"] = False
     _client.connect()
 
 
@@ -144,6 +156,7 @@ def disconnect(force=False):
     global _pending_lifecycle_sequence, latest_wake, _backend_scene
     if _client:
         _client.close()
+    _clear_backend_wake('stale')
     if force or get_state().connection != 'LOCAL DEMO':
         _state.disconnect('Disconnected; backend state is unconfirmed')
         if not force and not _state.session_id and not (_client and _client.session_id):
@@ -173,6 +186,7 @@ def connect_new_backend(port, *, confirmed=False):
         raise ValueError('Disconnect the previous backend before connecting to a new identity')
     from .transport import TransportClient
     replacement = TransportClient(port=port)
+    _clear_backend_wake()
     forgotten_connections.append(dict(session_id=_state.session_id or getattr(_client, 'session_id', None),
                                      run_id=_state.run_id, run_status=_state.run_status, confirmed=False))
     if _client:
@@ -200,6 +214,7 @@ def enter_local_demo():
     global _client, _state, kinematics, _pending_command, _pending_lifecycle_sequence, _live_scene, _desired_mode, latest_wake, _backend_scene
     if has_backend_session() and not configuration_editable():
         raise ValueError('Confirm the previous backend state before entering local Demo')
+    _clear_backend_wake()
     if _client:
         _client.close()
     _client = None
@@ -310,6 +325,7 @@ def tick():
         try:
             if _client is not None:
                 _client.close()
+            _clear_backend_wake('stale')
         except Exception:
             pass
         try:
@@ -345,6 +361,50 @@ def _scene_key(scene):
     return scene.as_pointer() if hasattr(scene, 'as_pointer') else id(scene)
 
 
+def backend_scene():
+    """Return the bound live scene; a deleted owner is never replaced implicitly."""
+    import bpy
+    scene = _backend_scene
+    if scene is None:
+        return None
+    try:
+        key = _scene_key(scene)
+        scenes = getattr(getattr(bpy, 'data', None), 'scenes', None)
+        if not key or (scenes is not None and not any(_scene_key(item) == key for item in scenes)):
+            raise ValueError('Backend scene is unavailable; reconnect with an explicitly selected scene')
+    except ReferenceError as exc:
+        raise ValueError('Backend scene was removed or reloaded; data application is stopped') from exc
+    return scene
+
+
+def _build_backend_scene(dto):
+    global _backend_scene
+    import bpy
+    scene = backend_scene()
+    if scene is None:
+        scene = getattr(bpy.context, 'scene', None)
+        _backend_scene = scene
+    if scene is None or scene == getattr(bpy.context, 'scene', None):
+        build_live_scene(dto)
+    else:
+        with bpy.context.temp_override(scene=scene, view_layer=scene.view_layers[0],
+                                       collection=scene.collection):
+            build_live_scene(dto)
+
+
+def _clear_backend_wake(validity='waiting'):
+    global latest_wake
+    wake_buffer.pop_latest()
+    latest_wake = None
+    try:
+        scene = backend_scene()
+    except ValueError:
+        return
+    if scene is not None:
+        scene['wfrl_wake_validity'] = validity
+        set_disxy_validity(scene, validity)
+
+
 def _display_state():
     """Observe displayed values and expiry boundaries without continuous redraws."""
     connected = _state.connection == 'CONNECTED' and _state.confirmed
@@ -367,7 +427,9 @@ def _display_state():
             _state.mode, _desired_mode, _pending_command,
             getattr(_client, 'progress', None), getattr(_client, 'last_error', None),
             id(snapshot), tuple(validity), tuple(getattr(kinematics, 'rotor_angles', {}).items()),
-            training, len(safety_events))
+            training, len(safety_events),
+            (latest_wake.sequence, latest_wake.validity_at(time.monotonic(), connected=connected))
+            if latest_wake is not None else None)
 
 
 def _tick():
@@ -376,7 +438,7 @@ def _tick():
     global _last_async_display_state, _last_display_state, _backend_scene
     import bpy
     performance.count("runtime.timer_calls")
-    if _client is not None and manual_display_active():
+    if _client is not None and _backend_scene is None and manual_display_active():
         _last_tick = None
         return 0.05
     now = time.monotonic()
@@ -391,12 +453,14 @@ def _tick():
     latest_snapshot = None
     messages = []
     if _client:
-        messages = _client.poll()
         try:
+            backend_scene()
+            messages = _client.poll()
             for message in messages:
                 payload = message['payload']
                 if message['type'] == 'hello_ack' and _state.session_id != message['session_id']:
                     backend_events.clear()
+                    _clear_backend_wake()
                 if message['type'] in {'lifecycle', 'safety_event', 'error'}:
                     backend_events.append(message)
                 if message['type'] == 'lifecycle':
@@ -412,6 +476,7 @@ def _tick():
                         _state.run_id = payload['run_id']
                         training_dashboard.reset(_state.run_id)
                         kinematics = KinematicState()
+                        _clear_backend_wake()
                         latest_snapshot = None
                         from . import charts
                         charts.clear(_state.run_id)
@@ -424,8 +489,7 @@ def _tick():
                             from .scene_model import SceneDTO
                             loaded_scene = SceneDTO.from_mapping(payload['scene'])
                             if _live_scene is None or loaded_scene.geometry_key() != _live_scene.geometry_key():
-                                build_live_scene(loaded_scene)
-                                _backend_scene = getattr(bpy.context, 'scene', None)
+                                _build_backend_scene(loaded_scene)
                             _live_scene = loaded_scene
                     if 'channel_states' in payload:
                         channel_states.clear(); channel_states.update(payload['channel_states'] or {})
@@ -471,6 +535,8 @@ def _tick():
                     charts.record_snapshot(message)
                     latest_snapshot = message
                 elif message['type'] == 'wake':
+                    if _state.run_id is not None and payload.get('run_id', _state.run_id) != _state.run_id:
+                        continue
                     wake_buffer.push(validate_wake_payload(message['payload'], sequence=message['sequence']))
                 elif message['type'] == 'safety_event':
                     safety_events.append(message)
@@ -482,12 +548,11 @@ def _tick():
                 payload = latest_snapshot['payload']
                 scene = snapshot_scene(payload)
                 if _live_scene is None or scene.geometry_key() != _live_scene.geometry_key():
-                    build_live_scene(scene)
-                    _backend_scene = getattr(bpy.context, 'scene', None)
+                    _build_backend_scene(scene)
                 _live_scene = scene
                 kinematics.apply_snapshot(latest_snapshot)
                 _state.mode = payload['mode']
-                scene_obj = getattr(getattr(bpy, 'context', None), 'scene', None)
+                scene_obj = backend_scene()
                 if scene_obj is not None:
                     scene_data = payload.get('scene') or {}
                     scene_obj['wfrl_backend'] = scene_data.get('backend', 'backend')
@@ -517,13 +582,14 @@ def _tick():
             wake_frame = wake_buffer.pop_latest()
             if wake_frame is not None:
                 latest_wake = wake_frame
-                scene = bpy.context.scene
-                scene['wfrl_wake_source'] = wake_frame.source_label
-                scene['wfrl_wake_fidelity'] = wake_frame.fidelity
-                scene['wfrl_wake_sequence'] = wake_frame.sequence
-                scene['wfrl_wake_provenance'] = wake_frame.provenance
-                if wake_frame.kind == 'disxy' and wake_frame.is_renderable:
-                    apply_disxy_frame(wake_frame)
+                scene = backend_scene()
+                if scene is not None:
+                    scene['wfrl_wake_source'] = wake_frame.source_label
+                    scene['wfrl_wake_fidelity'] = wake_frame.fidelity
+                    scene['wfrl_wake_sequence'] = wake_frame.sequence
+                    scene['wfrl_wake_provenance'] = wake_frame.provenance
+                    if wake_frame.kind == 'disxy' and wake_frame.is_renderable:
+                        apply_disxy_frame(wake_frame, scene=scene)
             if _client.last_error:
                 _state.disconnect(_client.last_error)
                 if not _state.session_id and not _client.session_id:
@@ -533,12 +599,24 @@ def _tick():
         except (ValueError, KeyError, TypeError, RuntimeError) as exc:
             _client.close()
             _state.disconnect(f'Invalid backend data or scene: {exc}')
+    display_scene = None
     if _state.connection != 'LOCAL DEMO':
         connected = _state.connection == 'CONNECTED' and _state.confirmed
+        try:
+            scene = backend_scene()
+        except ValueError:
+            scene = None
+            connected = False
+        display_scene = scene
+        if scene is not None and latest_wake is not None:
+            validity = latest_wake.validity_at(now, connected=connected)
+            if scene.get('wfrl_wake_validity') != validity:
+                scene['wfrl_wake_validity'] = validity
+            set_disxy_validity(scene, validity if latest_wake.kind == 'disxy' or validity != 'valid' else 'waiting')
         if first_backend_display or display_before != _display_state():
-            kinematics.apply_objects(bpy.data.objects, connected=connected)
+            kinematics.apply_objects(getattr(scene, 'objects', {}), connected=connected)
         from .live_scene import animate_illustrative_wake
-        animate_illustrative_wake(getattr(bpy.context, 'scene', None), dt,
+        animate_illustrative_wake(scene, dt,
                                  running=connected and _state.run_status == 'RUNNING')
     from . import charts
     async_before = (_async_display_state(charts.export_job, bpy.context)
@@ -557,7 +635,7 @@ def _tick():
     targets = []
     current_scene = getattr(bpy.context, 'scene', None)
     if backend_changed:
-        targets.append(_backend_scene if _backend_scene is not None else current_scene)
+        targets.append(display_scene if display_scene is not None else current_scene)
     if health_changed or async_state[:3] != async_before[:3]:
         targets.append(current_scene)
     previous_rows = {row[0]: row[1:] for row in async_before[3]}
@@ -583,6 +661,7 @@ def shutdown():
     _last_tick = None
     _last_async_display_state = None
     _last_display_state = None
+    _clear_backend_wake('stale')
     _backend_scene = None
     import bpy
     if bpy.app.timers.is_registered(tick):

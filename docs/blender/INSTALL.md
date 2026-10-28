@@ -2,11 +2,13 @@
 
 适用于 Blender **5.2+** 的 NREL 公开扩展 **0.3.39**，包含 NREL／rootkink 叶片外形选择、T1/T2/T3 Down、独立风机手动控制、完整风机几何／同源纹理、精细支撑结构、三相机默认复位、柔性回放、六类合成缺陷、双束／TLS。GW184 **0.4.0** 使用[独立包](GW184三相机与缺陷编辑器.md)。
 
-开发机日常安装为公开 **0.3.37** 的 193 文件独立载荷，实际模块 `bl_ext.user_default.wfrl_blender`。重启窗口的 91 个模块来源、启用、WFRL 主入口注册与 6 个配置文件保护见[安装核对](../../publication/daily-installation.json)。公开 0.3.39 的隔离安装及两项相机后台检查见[包验证](../../publication/blender-0.3.39/package-validation.json)；公开载荷见[交付身份](../../publication/blender-0.3.39.json)。
+开发机日常安装为 **0.3.39 工作区构建**，与公开包同一载荷，共 195 文件，实际模块 `bl_ext.user_default.wfrl_blender`。新后台进程的 94 个模块来源、持久启用、WFRL 主入口注册与 6 个配置文件保护见[安装核对](../../publication/daily-installation.json)。公开 0.3.39 的隔离安装及两项相机后台检查见[包验证](../../publication/blender-0.3.39/package-validation.json)；公开载荷见[交付身份](../../publication/blender-0.3.39.json)，与日常工作区构建分别识别。
+
+日常工作区构建的最终 ZIP、inventory 与 SHA-256 保存在 [package](../../publication/daily-installation-current/package/)，与公开同版本附件内容一致。原始验证记录由安装身份索引；已清理的隔离 profile 不能直接用于重跑，产物可用性与恢复位置见[清理记录](../../publication/daily-installation-cleanup.json)。
 
 ## 发布身份与验证
 
-当前公开安装包为 [v0.3.39](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.39) 的 **[wfrl_blender-0.3.39.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.39/wfrl_blender-0.3.39.zip)**，manifest 版本 `0.3.39`，共 195 文件、99,152,603 字节。SHA-256 为 `02b9ad6415873f9e320122497a8d09897f99ee0c2e0ce3a4f388618e508ef9aa`。Release 提供 ZIP、SHA-256、inventory 和配套源码归档；身份见[交付身份](../../publication/blender-0.3.39.json)。ZIP 逐文件校验、隔离安装、新进程来源与三相机默认配置／投影后台检查通过；可见窗口复验为 NOT_RUN；[本地安装核对](../../publication/daily-installation.json)记录安装文件、新窗口模块来源和后台功能范围，不能据此扩大到完整视频、稳定 FPS、其他平台或科学精度。
+当前公开安装包为 [v0.3.39](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.39) 的 **[wfrl_blender-0.3.39.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.39/wfrl_blender-0.3.39.zip)**，manifest 版本 `0.3.39`，共 195 文件、99,154,677 字节。SHA-256 为 `d200b240f257bf202e8a72ea749950669fa4235bd9740079d409a33641877fa6`。Release 提供 ZIP、SHA-256、inventory 和配套源码归档；身份见[交付身份](../../publication/blender-0.3.39.json)。ZIP 逐文件校验、隔离安装、新进程来源与三相机默认配置／投影后台检查通过；可见窗口复验为 NOT_RUN。[本地安装核对](../../publication/daily-installation.json)记录日常构建的安装文件、新后台进程模块来源和后台功能范围，可见窗口检查同为 NOT_RUN，不能据此扩大到完整视频、稳定 FPS、其他平台或科学精度。
 
 当前项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。GitHub 自动 Source code 不作为扩展安装包；构建结果须以实际 ZIP 和 inventory 核对。最终包和验证范围见[发布状态](发布状态与验证范围.md)；叶尖显示门槛按源码全时间轴和本地安装抽样分别记录，几何／纹理、材料点和雷达的研究接受边界分别保留。
 
@@ -68,7 +70,7 @@ python3 scripts/blender/build_extension.py --output /path/to/new-build-directory
 
 构建会从规范源生成协议与内置读取器，不依赖训练环境、FAST.Farm 或原始 VTP。构建成功只证明产物生成；安装版后台、可见窗口及性能需按实际 ZIP 单独验证。当前源码不自动更新日常安装，也不替换既有公开附件。v0.3.18 的独立复建与其 172 文件 ZIP 字节一致结论只属于[该标签和包](releases/0.3.18发布核对.md)。
 
-[发布源码](发布状态与验证范围.md#源码软件合同与验证)的规范构建输入与 `wfrl_blender-0.3.39.zip` 全部 195 份载荷匹配；公开源码独立重建的 ZIP 与已验证安装包逐字节一致。按 SHA-256、inventory 和模块来源核对。隔离安装验证不表示日常安装已更新；可见窗口、性能和平台范围使用对应载荷的记录。
+[发布源码](发布状态与验证范围.md#源码软件合同与验证)包含当前前端、文档与开发 skill。当前公开包与日常安装使用同一已验证载荷，来源见[安装身份](../../publication/daily-installation.json)；源码归档未另行重建扩展。可见窗口、性能和平台范围使用对应载荷的记录。
 
 独立 normal/close 雷达包与 Replay 示例权重随 Git 提供；WFCRL 依赖源码与大型研究证据按[分发清单](../PUBLICATION.md)取得。GW184 源码所需的两份 DTU 原始输入随 Git 提供，官方来源、固定摘要及缺失或损坏后的恢复方式见[来源说明](../../projects/gw184-single/sources/README.md)。以上内容均不能以安装 NREL 扩展 ZIP 代替。
 
@@ -80,7 +82,7 @@ python3 scripts/blender/build_extension.py --output /path/to/new-build-directory
 
 本扩展包含连接、通信、协议与运行面板；不包含 Python Bridge 服务及启动器。仅安装 `wfrl_blender-0.3.39.zip` 不会更新后端源码。使用已配置的后端时，同步适用后端源码后重启 Bridge；已运行的训练或求解需先正常停止。项目分支包含后端源码，运行时仍须核对所用环境、场景、权重和服务来源。GW184 独立运行包不依赖 Bridge。
 
-当前工作区的连接恢复使用 `hello_ack` 与生命周期消息的 `state_revision`，完整恢复语义需要匹配的前端和 Bridge。旧的无版本消息仍接受严格状态转换检查，不能据此认领未知活动任务。普通重连保留原 session／run 身份；后端身份变化时使用需显式确认的“连接新后端身份…”，该操作不停止旧任务。启动器停止未确认时持续监管并保留会话凭据；协议停止入口与限制见[后端连接与维护](../../前端readme.md#10-连接后端与维护)。这些连接合同由 0.3.39 前端及配套 Bridge 实现；日常 0.3.37 按独立身份记录使用。
+当前工作区的连接恢复使用 `hello_ack` 与生命周期消息的 `state_revision`，完整恢复语义需要匹配的前端和 Bridge。旧的无版本消息仍接受严格状态转换检查，不能据此认领未知活动任务。普通重连保留原 session／run 身份；后端身份变化时使用需显式确认的“连接新后端身份…”，该操作不停止旧任务。启动器停止未确认时持续监管并保留会话凭据；协议停止入口与限制见[后端连接与维护](../../前端readme.md#10-连接后端与维护)。这些连接合同由 0.3.39 前端及配套 Bridge 实现；日常 0.3.39 工作区构建按独立身份记录使用。
 
 ## 升级后确认雷达行为
 

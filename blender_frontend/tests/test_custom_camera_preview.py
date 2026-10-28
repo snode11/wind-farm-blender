@@ -8,6 +8,18 @@ import pytest
 from wfrl_blender import custom_camera_preview as preview
 
 
+def test_preview_quality_tracks_the_scene_owning_playback(monkeypatch):
+    from wfrl_blender import playback
+    owner = NS(as_pointer=lambda: 1)
+    other = NS(as_pointer=lambda: 2)
+    monkeypatch.setattr(playback, '_OWNER_SCENE', owner)
+    screen = NS(is_animation_playing=True)
+    monkeypatch.setitem(sys.modules, 'bpy', NS(app=NS(background=False),
+        context=NS(window_manager=NS(windows=[NS(screen=screen)]))))
+    assert preview.playback_preview(NS(scene=owner, screen=screen))
+    assert not preview.playback_preview(NS(scene=other, screen=screen))
+
+
 @pytest.fixture
 def gpu_capture(monkeypatch):
     pixels = bytes([0, 17, 91, 143, 255, 0, 128, 255,
@@ -372,6 +384,6 @@ def test_playback_profile_is_explicit_and_does_not_change_export_default():
         gamma=1, use_curve_mapping=False), display_settings=NS(display_device='sRGB'))
     assert preview.render_profile(scene)['shading'] == 'MATERIAL'
     assert preview.render_profile(scene, True)['shading'] == 'SOLID'
-    assert preview.playback_preview(NS(screen=NS(is_animation_playing=True)))
+    assert not preview.playback_preview(NS(screen=NS(is_animation_playing=True)))
     assert not preview.playback_preview(NS(screen=NS(is_animation_playing=False)))
     assert not preview.playback_preview(NS())

@@ -182,9 +182,9 @@ def test_overlay_variants_and_readers_are_distinct(parses, variant):
     base = farm_flex._load_package(farm_flex.default_package())
     path = getattr(farm_flex, variant)()
     first, second = farm_flex._load_package(path), farm_flex._load_package(path)
-    assert parses.call_count == 2
+    assert parses.call_count == 1
     assert first.source_path == base.source_path and first.result_path != base.result_path
-    assert first.times is second.times and first.times is not base.times
+    assert first.times is second.times and first.times is base.times
     assert first.overlay is not None and base.overlay is None
     for tid in first.readers:
         a, b = first.readers[tid], second.readers[tid]
@@ -192,7 +192,7 @@ def test_overlay_variants_and_readers_are_distinct(parses, variant):
         assert a.at(a.start_s) == b.at(b.start_s)
 
 
-def test_overlay_manifest_change_misses_and_modified_sidecar_is_rejected(tmp_path, parses):
+def test_overlay_manifest_refreshes_identity_without_reparsing_source(tmp_path, parses):
     source = farm_flex.default_dual_package()
     manifest = json.loads((source / 'manifest.json').read_bytes())
     manifest['source_package'] = str(farm_flex.default_package())
@@ -204,13 +204,39 @@ def test_overlay_manifest_change_misses_and_modified_sidecar_is_rejected(tmp_pat
     assert parses.call_count == 1
     manifest['provenance_label'] = 'Verified dual-beam review'
     (tmp_path / 'manifest.json').write_text(json.dumps(manifest))
-    assert farm_flex._load_package(tmp_path).times is not first.times
-    assert parses.call_count == 2
-    with (tmp_path / 'calibration.json').open('ab') as output:
-        output.write(b' ')
+    second = farm_flex._load_package(tmp_path)
+    assert second.times is first.times
+    assert second.manifest['dual_beam']['provenance_label'] == 'Verified dual-beam review'
+    assert 'provenance_label' not in first.manifest['dual_beam']
+    assert parses.call_count == 1
+    target = tmp_path / 'calibration.json'
+    stat, raw = target.stat(), target.read_bytes()
+    target.write_bytes(raw[:-1] + bytes([raw[-1] ^ 1]))
+    os.utime(target, ns=(stat.st_atime_ns, stat.st_mtime_ns))
     with pytest.raises(ValueError, match='Dual-beam result integrity mismatch: calibration.json'):
         farm_flex._load_package(tmp_path)
-    assert parses.call_count == 2
+    assert parses.call_count == 1
+
+
+def test_base_dual_and_tls_share_source_but_keep_results_independent(parses):
+    paths = (farm_flex.default_package(), farm_flex.default_dual_package(),
+             farm_flex.default_dual_tls_package())
+    loaded = [farm_flex._load_package(path) for path in paths * 2]
+    assert parses.call_count == 1
+    for package in loaded:
+        assert package.times is loaded[0].times
+        assert package.transforms is loaded[0].transforms
+        assert_readonly(package)
+    assert loaded[0].overlay is None
+    assert loaded[1].overlay['config']['reconstruction_method'] == 'hub-axis.v1'
+    assert loaded[2].overlay['config']['reconstruction_method'] == 'hub-tls.v1'
+    for index in (1, 2):
+        reader = loaded[index].readers['T1']
+        sample = reader.at(reader.start_s)
+        original = sample['motion']['pitch_deg'][0]
+        sample['motion']['pitch_deg'][0] = 99.
+        assert reader.at(reader.start_s)['motion']['pitch_deg'][0] == original
+        assert loaded[index + 3].readers['T1'] is not reader
 
 
 @pytest.mark.parametrize('callback', ['replay_load_pre', 'farm_load_pre', 'unregister', 'history_pre'])

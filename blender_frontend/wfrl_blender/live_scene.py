@@ -51,7 +51,7 @@ def build_live_scene(scene):
         space.shading.type = 'RENDERED'
     display_scene['wfrl_proxy_note'] = 'SYNTH: illustrative wake, not FAST.Farm wind data'
     bpy.context.scene["wfrl_scene_kind"] = "live"
-    for obj in bpy.data.objects:
+    for obj in display_scene.objects:
         if obj.name.startswith('WFRL.Turbine.'):
             obj.animation_data_clear()
         if obj.name.startswith('WFRL.WakeProxy.'):

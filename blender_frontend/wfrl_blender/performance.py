@@ -6,11 +6,18 @@ Timings may nest, so they must not be added to estimate total frame time.
 from collections import defaultdict
 from functools import wraps
 from time import perf_counter
+import sys
 
 _enabled = False
 _counts = defaultdict(int)
 _timings = {}
 _started = perf_counter()
+
+
+def peak_rss_mib(value, *, platform=None):
+    """Normalize getrusage's peak RSS: bytes on Darwin, KiB on Linux."""
+    platform = sys.platform if platform is None else platform
+    return float(value) / (1024**2 if platform == 'darwin' else 1024)
 
 
 def configure(enabled=False):

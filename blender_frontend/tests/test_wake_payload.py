@@ -1,8 +1,32 @@
 import math
 import unittest
+import pytest
 
 from wfrl_blender.wake import (WakeFrameBuffer, WakePayloadError, grid_mesh,
                                proxy_ring_points, validate_wake_payload)
+
+
+def test_wake_age_uses_source_age_and_local_monotonic_time():
+    data = channel({'kind': 'disxy', 'shape': [2, 2], 'values': [1, 2, 3, 4],
+                    'x': [0, 1], 'y': [0, 1]})
+    data['source_age_seconds'] = 1.5
+    frame = validate_wake_payload({'encoding': 'json', 'turbine_ids': ['T1'],
+                                   'data': data}, received_monotonic=10.)
+    assert frame.validity_at(13.49) == 'valid'
+    assert frame.validity_at(13.5) == 'stale'
+    assert frame.validity_at(10., connected=False) == 'stale'
+    assert frame.source_age_seconds == 1.5
+
+
+@pytest.mark.parametrize('validity', ['invalid', 'waiting', 'stale', 'unsupported'])
+def test_nonvalid_wake_keeps_reason_and_cannot_become_current(validity):
+    data = channel(None)
+    data.update(validity=validity, error='source unavailable')
+    frame = validate_wake_payload({'encoding': 'json', 'kind': 'disxy',
+        'turbine_ids': ['T1'], 'data': data}, received_monotonic=10.)
+    assert frame.validity_at(10.) == validity
+    assert not frame.is_renderable
+    assert frame.error == 'source unavailable'
 
 
 def channel(value, *, fidelity="SYNTH", provenance=None):

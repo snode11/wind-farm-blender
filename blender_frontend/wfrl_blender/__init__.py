@@ -52,11 +52,17 @@ def _update_layers(scene, context=None):
                     obj.data.bevel_depth = .48 if ".Pulse" in obj.name else .11
         elif obj.name.startswith("WFRL.Fixture.T1.Lidar") or obj.name == "WFRL.Fixture.T1.SensorFrustum":
             visible = scene.wfrl_show_lidar
-        elif obj.name == "WFRL.WakeDisXY":
-            visible = scene.wfrl_show_disxy
         if visible is not None:
             obj.hide_render = not visible
-            obj.hide_set(not visible)
+            for layer in scene.view_layers:
+                if obj.name in layer.objects:
+                    obj.hide_set(not visible, view_layer=layer)
+    wake.set_disxy_validity(scene, scene.get('wfrl_disxy_validity', 'waiting'))
+
+
+def _update_disxy(scene, context=None):
+    wake.set_disxy_validity(scene, scene.get('wfrl_disxy_validity', 'waiting'),
+                            visible=scene.wfrl_show_disxy)
 
 
 def _update_atmosphere(scene, context=None):
@@ -259,7 +265,7 @@ def register():
         "wfrl_cinematic_seed": bpy.props.IntProperty(name="Seed / 随机种子", default=42, min=0, max=1000000, update=_update_layers),
         "wfrl_cinematic_interval": bpy.props.FloatProperty(name="Change every / 换向间隔 (s)", default=8.0, min=2.0, max=60.0, update=_update_layers),
         "wfrl_show_lidar": bpy.props.BoolProperty(default=False, update=_update_layers),
-        "wfrl_show_disxy": bpy.props.BoolProperty(default=True, update=_update_layers),
+        "wfrl_show_disxy": bpy.props.BoolProperty(default=True, update=_update_disxy),
         "wfrl_show_atmosphere": bpy.props.BoolProperty(default=True, update=_update_atmosphere),
         "wfrl_atmosphere_preset": bpy.props.EnumProperty(
             items=(("clear", "Clear", "Light blue daylight"),

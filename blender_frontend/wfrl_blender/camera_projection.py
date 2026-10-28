@@ -40,6 +40,19 @@ def resolution(hfov, vfov, long_edge=DEFAULT_LONG_EDGE, max_size=None):
     return w, h
 
 
+def preview_resolution(hfov, vfov, long_edge, max_size=None):
+    """Raise the preview long edge only as needed to preserve the full FOV."""
+    ratio = aspect(hfov, vfov)
+    if isinstance(long_edge, bool) or not isinstance(long_edge, int) or long_edge < MIN_SHORT_EDGE:
+        raise ValueError('输出长边须为至少 16 的整数像素')
+    # Match the integer rounding in resolution(), including its GPU boundary.
+    stretch = max(ratio, 1 / ratio)
+    minimum = math.ceil((MIN_SHORT_EDGE - .5) * stretch)
+    if round(minimum / stretch) < MIN_SHORT_EDGE:
+        minimum += 1
+    return resolution(hfov, vfov, max(long_edge, minimum), max_size)
+
+
 def pixel_scales(hfov, vfov, width, height):
     q = aspect(hfov, vfov) * height / width
     return (q, 1.) if q >= 1 else (1., 1. / q)

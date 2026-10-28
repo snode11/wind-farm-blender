@@ -16,7 +16,8 @@ def summarize(root):
         run['segments'] = []
         for segment in data.get('results', []):
             item = {key: segment.get(key) for key in ('status', 'mode', 'termination', 'failures',
-                'observation_s', 'effective_progress_s', 'stopped_progress_s', 'simulation_progress_s',
+                'observation_s', 'intentional_pause_s', 'running_observation_s', 'pause_intervals',
+                'effective_progress_s', 'stopped_progress_s', 'simulation_progress_s',
                 'simulation_speed_ratio', 'same_frames_all_routes', 'window_px', 'pause_resume',
                 'profile', 'paused_profile')}
             item['routes'] = {slot: {key: row.get(key) for key in ('distinct_draws',

@@ -58,6 +58,30 @@ def test_resources_and_time_list():
     with pytest.raises(ValueError):p.sample_times(3,4,0)
 
 
+@pytest.mark.parametrize('hfov,vfov,budget,expected', [
+    (90, 4, 320, (444, 16)), (4, 90, 320, (16, 444)),
+    (90, 4, 640, (640, 22)), (75, p.DEFAULT_VFOV, 320, (320, 180)),
+])
+def test_preview_budget_preserves_a_minimum_short_edge(hfov, vfov, budget, expected):
+    assert p.preview_resolution(hfov, vfov, budget, max_size=4096) == expected
+
+
+def test_preview_budget_does_not_relax_export_or_gpu_limits():
+    assert p.resolution(90, 4, 1920) == (1920, 67)
+    with pytest.raises(ValueError, match='短边'):
+        p.resolution(90, 4, 320)
+    with pytest.raises(ValueError, match='GPU'):
+        p.preview_resolution(90, 4, 320, max_size=256)
+
+
+@pytest.mark.parametrize('hfov,vfov', [(132, 1), (1, 132), (133, 1), (1, 133)])
+def test_preview_accepts_a_legal_full_resolution_at_gpu_boundary(hfov, vfov):
+    assert min(p.resolution(hfov, vfov, 4096, max_size=4096)) == 16
+    width, height = p.preview_resolution(hfov, vfov, 320, max_size=4096)
+    assert min(width, height) == 16
+    assert max(width, height) <= 4096
+
+
 def test_down_optics_preserve_independent_camera_sensors(monkeypatch):
     from types import SimpleNamespace
     from wfrl_blender import cameras, nacelle_camera

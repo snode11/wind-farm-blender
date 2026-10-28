@@ -239,6 +239,22 @@ def test_explicit_stationary_pause_is_not_a_route_stall():
     result = evaluate_playback(**data)
     assert result['status'] == 'PASS'
     assert result['routes']['3']['max_progress_gap_s'] == pytest.approx(.1)
+    assert result['intentional_pause_s'] == pytest.approx(1.7)
+    assert result['running_observation_s'] == pytest.approx(.31)
+    assert result['stopped_progress_s'] == 0.
+    assert result['effective_progress_s'] == pytest.approx(.31)
+    assert result['observation_s'] == pytest.approx(2.01)
+
+
+def test_real_scene_stall_is_retained_after_excluding_pause():
+    data = evidence((1, 31, 91, 101))
+    rows = [[0., 1], [.1, 31], [2.9, 91], [3., 101]]
+    data.update(scene_rows=rows, draws={slot: rows for slot in ('1', '2', '3')},
+                ended=3.01, pause_intervals=[[.15, 1.85]])
+    result = evaluate_playback(**data)
+    assert result['stopped_progress_s'] == pytest.approx(.6)
+    assert result['running_observation_s'] == pytest.approx(1.31)
+    assert result['effective_progress_s'] == pytest.approx(.71)
 
 
 @pytest.mark.parametrize('pauses', [[[.05, .35]], [[-.1, .2]], [[.1, .6]],

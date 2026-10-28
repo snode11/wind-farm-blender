@@ -104,10 +104,11 @@ def without_annotations(scene, view_layer):
         view_layer.update()
 
 
-def matrices(camera, depsgraph, long_edge, max_size=None):
+def matrices(camera, depsgraph, long_edge, max_size=None, preview=False):
     from mathutils import Matrix
     params = core.parameters(camera)
-    width, height = projection.resolution(params.fov, params.vfov, long_edge, max_size)
+    resolve = projection.preview_resolution if preview else projection.resolution
+    width, height = resolve(params.fov, params.vfov, long_edge, max_size)
     # Analytic P avoids Blender lens RNA limits and is checked against Blender's
     # calc_matrix_camera using the half-angle pixel-aspect correction in tests.
     p = Matrix(projection.projection(params.fov, params.vfov, params.clip_near_m, params.clip_far_m))
@@ -221,10 +222,10 @@ class PreviewTargets:
 
 
 class CameraImage:
-    def __init__(self, camera, depsgraph, long_edge):
+    def __init__(self, camera, depsgraph, long_edge, *, preview=False):
         import gpu
         self.width, self.height, self.view, self.projection, self.world = matrices(
-            camera, depsgraph, long_edge, gpu.capabilities.max_texture_size_get())
+            camera, depsgraph, long_edge, gpu.capabilities.max_texture_size_get(), preview)
         self.camera_id = f"C{camera['wfrl_custom_slot']}"
         self.params = core.parameters(camera)
         self.texture = None
@@ -407,7 +408,9 @@ def render_group(context, cameras, long_edge=None, target=None, fast=False, *, c
         with quality, drawing_settings(context.space_data, fast), without_annotations(scene, context.view_layer):
             for camera in cameras:
                 params = core.parameters(camera)
-                image = CameraImage(camera, depsgraph, long_edge if long_edge is not None else params.output_long_edge_px)
+                image = CameraImage(camera, depsgraph,
+                    long_edge if long_edge is not None else params.output_long_edge_px,
+                    preview=leased_preview)
                 image.state_hash = state_hash
                 images[int(camera['wfrl_custom_slot'])] = image
                 offscreen = (target.acquire(context, image) if leased_preview else
@@ -501,7 +504,9 @@ def clock_text(time_s, frame, subframe):
 
 
 def playback_preview(context):
-    return bool(getattr(getattr(context, 'screen', None), 'is_animation_playing', False))
+    from . import playback
+    scene = getattr(context, 'scene', None)
+    return scene is not None and playback.is_playing(scene)
 
 
 def provenance(context, cameras, long_edge):
@@ -666,7 +671,7 @@ class Preview:
         self.observe(context, cameras)
         current = self.request
         at = clock_text(current['time_s'], current['frame'], current['subframe'])
-        playing = bool(context.window and context.window.screen.is_animation_playing)
+        playing = playback_preview(context)
         reserve = (270 if closable else 150) * ui
         text(hint or f'C{slot} · 已锁定；拖动不会修改相机', x+12*ui, y+h-23*ui, w-reserve, size=13)
         text('当前回放：' + at + (' · 播放中' if playing else ' · 已暂停'), x+12*ui, y+h-45*ui, w-24*ui, size=11)

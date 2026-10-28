@@ -1,8 +1,8 @@
 # Blender 文档分类
 
-公开 NREL 安装版为 **0.3.39**，使用[专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.39/wfrl_blender-0.3.39.zip)；项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **公开 0.3.37 的 193 文件独立载荷**；实际模块来源及验证范围见[安装核对](../../publication/daily-installation.json)。公开附件身份见[交付身份](../../publication/blender-0.3.39.json)，GW184 为 **0.4.0 独立运行包**。证据范围见[发布状态](发布状态与验证范围.md)。[返回总索引](../README.md)。
+公开 NREL 安装版为 **0.3.39**，使用[专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.39/wfrl_blender-0.3.39.zip)；项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **与公开包同一载荷的 0.3.39 工作区构建，共 195 文件**；实际模块来源及验证范围见[安装核对](../../publication/daily-installation.json)。公开附件身份见[交付身份](../../publication/blender-0.3.39.json)，GW184 为 **0.4.0 独立运行包**。证据范围见[发布状态](发布状态与验证范围.md)。[返回总索引](../README.md)。
 
-0.3.39 发布源码与扩展的连接恢复、后台渲染、回合曲线和相机保护合同见[源码软件合同与验证](发布状态与验证范围.md#源码软件合同与验证)，详细合同见[维护说明](../../blender_frontend/README.md)。日常安装保持 0.3.37。
+0.3.39 发布源码与扩展的连接恢复、后台渲染、回合曲线和相机保护合同见[源码软件合同与验证](发布状态与验证范围.md#源码软件合同与验证)，详细合同见[维护说明](../../blender_frontend/README.md)。日常安装使用 0.3.39 工作区构建。
 
 ## 当前操作和功能
 

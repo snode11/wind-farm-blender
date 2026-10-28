@@ -4,7 +4,7 @@ ROOT=Path(__file__).resolve().parents[3]
 sys.path[:0]=[os.environ.get('WFRL_ADDON_PATH',str(ROOT/'blender_frontend')),str(ROOT)]
 import bpy
 import wfrl_blender as addon
-from wfrl_blender import native_camera_views as native,custom_cameras as core
+from wfrl_blender import native_camera_views as native,custom_cameras as core,performance
 OUT=Path(os.environ.get('WFRL_TEST_OUTPUT',str(ROOT/'outputs/native-camera-views')));OUT.mkdir(exist_ok=True)
 state={}
 def count_draw():
@@ -60,7 +60,7 @@ def tick():
   if state['stage']==4:
    assert native._ACTIVE is None
    assert not any(o.name.startswith('T1.Native.') for o in s.objects)
-   (OUT/'check.json').write_text(json.dumps({'status':'PASS','elapsed':state['elapsed'],'frames_advanced':state['end_frame']-state['start_frame'],'unique_frames_drawn':{str(k):len(v) for k,v in state['draws'].items()},'peak_rss_gib':resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1024**3},indent=2))
+   (OUT/'check.json').write_text(json.dumps({'status':'PASS','elapsed':state['elapsed'],'frames_advanced':state['end_frame']-state['start_frame'],'unique_frames_drawn':{str(k):len(v) for k,v in state['draws'].items()},'peak_rss_gib':performance.peak_rss_mib(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)/1024},indent=2))
    print('NATIVE_PASS',flush=True)
  except Exception:
   (OUT/'error.txt').write_text(traceback.format_exc());print(traceback.format_exc(),flush=True)

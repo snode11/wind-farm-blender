@@ -21,6 +21,7 @@ def area():
 
 def test_backend_build_only_configures_its_main_viewports(monkeypatch):
     scene, unrelated = Scene(name='owned'), Scene(name='unrelated')
+    scene.objects = []
     own, independent, other = area(), area(), area()
     screen = NS(areas=[own, independent])
     other_screen = NS(areas=[other])

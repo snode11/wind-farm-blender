@@ -14,7 +14,8 @@
 | 机舱相机 | `nrel-nacelle-camera/`（本地证据目录，使用入口见[机舱相机](../docs/blender/NREL机舱相机.md)）：相机取景、原始渲染、诊断、对照页面与隔离安装包 |
 | GW184 试片 | `gw184-single/review/index.html`（本地查看页，来源及使用见[项目说明](../projects/gw184-single/README.md)）：试片、参数、参考帧与几何检查；下载入口使用 `delivery/GW184-trials.zip` |
 | 前端验证 | [`frontend-reliability-20261011-a01/`](frontend-reliability-20261011-a01/)、`reconstruction-*`、`blender-validation/`、`release-*` 等：按包身份解释的软件检查、截图和日志 |
-| 当前公开扩展 | [0.3.37 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.37/wfrl_blender-0.3.37.zip)、[逐文件清单](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.37/wfrl_blender-0.3.37.inventory.json)及[摘要](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.37/wfrl_blender-0.3.37.zip.sha256)；[安装核对](../publication/daily-installation.json)与[运行验证](../publication/daily-installation-runtime.json)标识实际模块和验证范围 |
+| 当前公开扩展 | [0.3.39 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.39/wfrl_blender-0.3.39.zip)、[逐文件清单](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.39/wfrl_blender-0.3.39.inventory.json)及[摘要](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.39/wfrl_blender-0.3.39.zip.sha256)；[交付身份](../publication/blender-0.3.39.json)标识公开载荷和验证范围 |
+| 日常工作区构建 | [安装核对](../publication/daily-installation.json)、[后台运行验证](../publication/daily-installation-current/runtime.json)及[最终安装包](../publication/daily-installation-current/package/)；当前公开包与日常工作区构建载荷一致，均按摘要核对 |
 
 目录名中的编号和日期属于现有资源定位符，不代表当前软件开发顺序。根目录的部分别名是符号链接，不是另一份数据。
 

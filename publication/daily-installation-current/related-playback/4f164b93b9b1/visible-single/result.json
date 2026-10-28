@@ -1,0 +1,4162 @@
+{
+  "schema_version": 2,
+  "status": "PASS",
+  "path": "single",
+  "layout": "STRIP",
+  "blender": "5.2.1 LTS",
+  "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+  "addon_path": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-five-fixes-07uo9tmu/verified-package-check/profile/extensions/wfrl_blender/__init__.py",
+  "background": false,
+  "source_hashes": {
+    "runtime.py": {
+      "path": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-five-fixes-07uo9tmu/verified-package-check/profile/extensions/wfrl_blender/runtime.py",
+      "sha256": "78478856172d9ad17229c322de296b732254337c4acd143804da69eeb9a5b422"
+    },
+    "deflection.py": {
+      "path": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-five-fixes-07uo9tmu/verified-package-check/profile/extensions/wfrl_blender/deflection.py",
+      "sha256": "7135fef01a9db080c88f893151464f5839fe0472d40adb5025683b874b015d67"
+    },
+    "farm_flex.py": {
+      "path": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-five-fixes-07uo9tmu/verified-package-check/profile/extensions/wfrl_blender/farm_flex.py",
+      "sha256": "e3d9f5cfc101cfbfb6221801a38a23ef3f96e7409e31a06bd445f0f93d7ce2b5"
+    },
+    "native_camera_views.py": {
+      "path": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-five-fixes-07uo9tmu/verified-package-check/profile/extensions/wfrl_blender/native_camera_views.py",
+      "sha256": "4337beddec0a21ecebd92610ec6921609acdc60363c3c50c0361eb2aa1462acb"
+    },
+    "performance.py": {
+      "path": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-five-fixes-07uo9tmu/verified-package-check/profile/extensions/wfrl_blender/performance.py",
+      "sha256": "ee3972b9c549e8ca759d17aa6ddc935eb71edeceb3ce02dd8e78534318a476f5"
+    },
+    "demo_playback_benchmark.py": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/demo_playback_benchmark.py",
+      "sha256": "10f8d762cfb85499eedc602b93884bbdfc2fccbb777d7f54705f4e73e958aa3d"
+    },
+    "playback_benchmark.py": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/playback_benchmark.py",
+      "sha256": "67dea03e75a157a5d0f84fb663e0f1f0419ac27137026a2e5716198362d1b6f4"
+    }
+  },
+  "method": "Visible-window POST_PIXEL draws; fixed 60 Hz simulation mapping; not display scanout",
+  "configuration": {
+    "warm_s": 5.0,
+    "timeouts_s": {
+      "load": 120.0,
+      "ready": 30.0,
+      "warm": 30.0,
+      "settle": 10.0,
+      "measure": 100.0,
+      "switch_ready": 30.0,
+      "pause_check": 10.0,
+      "resume_check": 10.0
+    },
+    "switch_at_s": 3.0,
+    "fault": "",
+    "profile_requested": "0",
+    "terminal_tolerance_frames": 30,
+    "screen_scale": 2.0
+  },
+  "observation_s": 72.00034633406904,
+  "termination": {
+    "reason": "finished",
+    "wall_s": 72.00024708395358,
+    "stage": "resume_check"
+  },
+  "error": null,
+  "stage": "resume_check",
+  "stage_started_s": 71.16638133395463,
+  "results": [
+    {
+      "status": "PASS",
+      "termination": {
+        "reason": "completed_segment",
+        "previous_frame": 3600,
+        "frame": 3601,
+        "wall_s": 70.12106333405245,
+        "playback_running": true,
+        "driver_seek": false
+      },
+      "error": null,
+      "failures": [],
+      "target": {
+        "start_frame": 1,
+        "end_frame": 3601,
+        "simulation_fps": 60.0,
+        "terminal_tolerance_frames": 30,
+        "loop_expected": true,
+        "stall_threshold_s": 0.5
+      },
+      "observation_s": 60.11428404098842,
+      "intentional_pause_s": 0.0,
+      "running_observation_s": 60.11428404098842,
+      "effective_progress_s": 60.11428404098842,
+      "stopped_progress_s": 0.0,
+      "stall_threshold_s": 0.5,
+      "last_scene_progress_wall_s": 70.12106141704135,
+      "last_scene_progress_age_s": 0.09829033294226974,
+      "observed_max_frame": 3601,
+      "simulation_progress_s": 60.0,
+      "completed_target_s": 60.0,
+      "simulation_speed_ratio": 0.99809888709794,
+      "routes": {
+        "1": {
+          "activation": {
+            "wall_s": 10.105067708995193,
+            "frame": 1
+          },
+          "observation_s": 60.11428404098842,
+          "route_draw_rate_hz": 59.78612333716661,
+          "has_start_evidence": true,
+          "max_progress_gap_s": 0.13427329203113914,
+          "draw_callbacks": 3602,
+          "distinct_draws": 3595,
+          "active_draw_span_s": 60.002571624936536,
+          "active_draw_fps": 59.897432771137524,
+          "observation_draw_rate_hz": 59.78612333716661,
+          "full_segment_draw_fps": 59.78612333716661,
+          "p50_ms": 16.69818750815466,
+          "p95_ms": 21.064864279469475,
+          "max_ms": 134.27329203113914,
+          "intervals_over_100ms": 1,
+          "has_forward_progress": true,
+          "has_terminal_evidence": true,
+          "last_heartbeat": {
+            "wall_s": 70.18751695903484,
+            "frame": 3601
+          },
+          "last_heartbeat_age_s": 0.03183479094877839,
+          "state": {
+            "valid": true,
+            "area": 516501439160,
+            "area_px": [
+              1208,
+              712
+            ],
+            "camera": 516294812680,
+            "displayed_camera": 516294812680,
+            "scene": 516596351008,
+            "window_scene": 516596351008
+          }
+        }
+      },
+      "pause_intervals": [],
+      "same_frames_all_routes": true,
+      "route_draw_time_differences": {},
+      "evidence_scope": "visible viewport POST_PIXEL callbacks; not monitor scanout or physical synchronization",
+      "mode": "WATCH",
+      "final_view_mode": "WATCH",
+      "path": "single",
+      "layout": "STRIP",
+      "layout_unchanged": true,
+      "sync_mode": "FRAME_DROP",
+      "render_fps": 60,
+      "render_fps_base": 1.0,
+      "preview_pixel_size": "2",
+      "preview_samples": 8,
+      "window_px": [
+        608,
+        360
+      ],
+      "paused_profile": {
+        "enabled": false,
+        "observation_s": 2.054489874979481,
+        "counts": {},
+        "timings": {},
+        "boundary": "CPU callback timings, possibly nested; not draw FPS or hardware presentation"
+      },
+      "profile": {
+        "enabled": false,
+        "observation_s": 60.11936104204506,
+        "counts": {},
+        "timings": {},
+        "boundary": "CPU callback timings, possibly nested; not draw FPS or hardware presentation"
+      },
+      "pause_resume": {
+        "status": "PASS",
+        "resume_frame": 803
+      },
+      "raw_files": [
+        "01-WATCH-draws.json",
+        "01-WATCH-scene.json"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "event": "stage",
+      "context": {
+        "wall_s": 2.550522500067018,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": null,
+        "last_draws": {}
+      },
+      "name": "open"
+    },
+    {
+      "event": "open_view",
+      "context": {
+        "wall_s": 2.7935730840545148,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": false,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {}
+      },
+      "mode": "WATCH",
+      "layout": "STRIP",
+      "before": {
+        "wall_s": 2.7694768339861184,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": null,
+        "last_draws": {}
+      },
+      "operator_result": [
+        "FINISHED"
+      ]
+    },
+    {
+      "event": "stage",
+      "context": {
+        "wall_s": 2.7935929590603337,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": false,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {}
+      },
+      "name": "ready"
+    },
+    {
+      "event": "pause",
+      "context": {
+        "wall_s": 2.9933232920011505,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": false,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {}
+      },
+      "before": false,
+      "after": false,
+      "operator_result": [
+        "NOOP"
+      ],
+      "operator_context": {
+        "window": 516614935256,
+        "screen": 516679383432,
+        "scene": 516596351008,
+        "area": 516501439160,
+        "region": 516670567576
+      }
+    },
+    {
+      "event": "seek",
+      "context": {
+        "wall_s": 2.995848041959107,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": false,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {}
+      },
+      "before_frame": 1,
+      "after_frame": 1
+    },
+    {
+      "event": "start",
+      "context": {
+        "wall_s": 3.0328182090306655,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": true,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": true,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {}
+      },
+      "before": false,
+      "after": true,
+      "operator_result": [
+        "FINISHED"
+      ],
+      "operator_context": {
+        "window": 516614935256,
+        "screen": 516679383432,
+        "scene": 516596351008,
+        "area": 516501439160,
+        "region": 516670567576
+      }
+    },
+    {
+      "event": "stage",
+      "context": {
+        "wall_s": 3.032837750040926,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": true,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": true,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {}
+      },
+      "name": "warm"
+    },
+    {
+      "event": "pause",
+      "context": {
+        "wall_s": 8.05070045904722,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 304,
+            "simulation_s": 5.05,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 304,
+            "simulation_s": 5.05,
+            "playing": false,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {}
+      },
+      "before": true,
+      "after": false,
+      "operator_result": [
+        "PASS_THROUGH"
+      ],
+      "operator_context": {
+        "window": 516595406176,
+        "screen": 516544439712,
+        "scene": 516596351008,
+        "area": 516544344128,
+        "region": 516596520608
+      }
+    },
+    {
+      "event": "seek",
+      "context": {
+        "wall_s": 8.063093167031184,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": false,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {}
+      },
+      "before_frame": 304,
+      "after_frame": 1
+    },
+    {
+      "event": "stage",
+      "context": {
+        "wall_s": 8.063114666962065,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": false,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {}
+      },
+      "name": "settle"
+    },
+    {
+      "event": "stage",
+      "context": {
+        "wall_s": 10.117636709008366,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": false,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {
+          "1": null
+        }
+      },
+      "name": "measure"
+    },
+    {
+      "event": "start",
+      "context": {
+        "wall_s": 10.119731958955526,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": true,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 1,
+            "simulation_s": 0.0,
+            "playing": true,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {
+          "1": null
+        }
+      },
+      "before": false,
+      "after": true,
+      "operator_result": [
+        "FINISHED"
+      ],
+      "operator_context": {
+        "window": 516614935256,
+        "screen": 516679383432,
+        "scene": 516596351008,
+        "area": 516501439160,
+        "region": 516670567576
+      }
+    },
+    {
+      "event": "measurement_ended",
+      "context": {
+        "wall_s": 70.24264779197983,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 3601,
+            "simulation_s": 60.0,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 3601,
+            "simulation_s": 60.0,
+            "playing": false,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {
+          "1": [
+            70.18751695903484,
+            3601
+          ]
+        }
+      },
+      "termination": {
+        "reason": "completed_segment",
+        "previous_frame": 3600,
+        "frame": 3601,
+        "wall_s": 70.12106333405245,
+        "playback_running": true,
+        "driver_seek": false
+      },
+      "status": "PASS"
+    },
+    {
+      "event": "pause",
+      "context": {
+        "wall_s": 70.24324195901863,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 3601,
+            "simulation_s": 60.0,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 3601,
+            "simulation_s": 60.0,
+            "playing": false,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {
+          "1": [
+            70.18751695903484,
+            3601
+          ]
+        }
+      },
+      "before": false,
+      "after": false,
+      "operator_result": [
+        "NOOP"
+      ],
+      "operator_context": {
+        "window": 516614935256,
+        "screen": 516679383432,
+        "scene": 516596351008,
+        "area": 516501439160,
+        "region": 516670567576
+      }
+    },
+    {
+      "event": "stage",
+      "context": {
+        "wall_s": 70.24325912503991,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 3601,
+            "simulation_s": 60.0,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 3601,
+            "simulation_s": 60.0,
+            "playing": false,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {
+          "1": [
+            70.18751695903484,
+            3601
+          ]
+        }
+      },
+      "name": "pause_check"
+    },
+    {
+      "event": "seek",
+      "context": {
+        "wall_s": 71.16548337496351,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 755,
+            "simulation_s": 12.566666666666666,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 755,
+            "simulation_s": 12.566666666666666,
+            "playing": false,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {
+          "1": [
+            70.18751695903484,
+            3601
+          ]
+        }
+      },
+      "before_frame": 3601,
+      "after_frame": 755
+    },
+    {
+      "event": "start",
+      "context": {
+        "wall_s": 71.1663778340444,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 755,
+            "simulation_s": 12.566666666666666,
+            "playing": true,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 755,
+            "simulation_s": 12.566666666666666,
+            "playing": true,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {
+          "1": [
+            70.18751695903484,
+            3601
+          ]
+        }
+      },
+      "before": false,
+      "after": true,
+      "operator_result": [
+        "FINISHED"
+      ],
+      "operator_context": {
+        "window": 516614935256,
+        "screen": 516679383432,
+        "scene": 516596351008,
+        "area": 516501439160,
+        "region": 516670567576
+      }
+    },
+    {
+      "event": "stage",
+      "context": {
+        "wall_s": 71.16639374999795,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 755,
+            "simulation_s": 12.566666666666666,
+            "playing": true,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 755,
+            "simulation_s": 12.566666666666666,
+            "playing": true,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {
+          "1": [
+            70.18751695903484,
+            3601
+          ]
+        }
+      },
+      "name": "resume_check"
+    },
+    {
+      "event": "pause",
+      "context": {
+        "wall_s": 71.98268091701902,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 803,
+            "simulation_s": 13.366666666666667,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 803,
+            "simulation_s": 13.366666666666667,
+            "playing": false,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {
+          "1": [
+            70.18751695903484,
+            3601
+          ]
+        }
+      },
+      "before": true,
+      "after": false,
+      "operator_result": [
+        "PASS_THROUGH"
+      ],
+      "operator_context": {
+        "window": 516595406176,
+        "screen": 516544439712,
+        "scene": 516596351008,
+        "area": 516544344128,
+        "region": 516596520608
+      }
+    },
+    {
+      "event": "close_view_before",
+      "context": {
+        "wall_s": 71.98270195897203,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 803,
+            "simulation_s": 13.366666666666667,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "window": 516614935256,
+            "screen": 516679383432,
+            "scene": 516596351008,
+            "frame": 803,
+            "simulation_s": 13.366666666666667,
+            "playing": false,
+            "window_px": [
+              608,
+              360
+            ],
+            "areas": [
+              {
+                "area": 516501439160,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516670565272,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516670565656,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516670566040,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516670566424,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516670566808,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516670567192,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516670567576,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": 516614935256,
+        "last_draws": {
+          "1": [
+            70.18751695903484,
+            3601
+          ]
+        }
+      }
+    },
+    {
+      "event": "close_view_after",
+      "context": {
+        "wall_s": 72.00020912499167,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 803,
+            "simulation_s": 13.366666666666667,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": null,
+        "last_draws": {
+          "1": [
+            70.18751695903484,
+            3601
+          ]
+        }
+      }
+    },
+    {
+      "event": "close_view_before",
+      "context": {
+        "wall_s": 72.00022458401509,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 803,
+            "simulation_s": 13.366666666666667,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": null,
+        "last_draws": {
+          "1": [
+            70.18751695903484,
+            3601
+          ]
+        }
+      }
+    },
+    {
+      "event": "close_view_after",
+      "context": {
+        "wall_s": 72.00023445906118,
+        "windows": [
+          {
+            "window": 516595406176,
+            "screen": 516544439712,
+            "scene": 516596351008,
+            "frame": 803,
+            "simulation_s": 13.366666666666667,
+            "playing": false,
+            "window_px": [
+              1280,
+              800
+            ],
+            "areas": [
+              {
+                "area": 516544343232,
+                "type": "PROPERTIES",
+                "regions": [
+                  {
+                    "region": 516596496672,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596497056,
+                    "type": "NAVIGATION_BAR"
+                  },
+                  {
+                    "region": 516596497440,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343680,
+                "type": "OUTLINER",
+                "regions": [
+                  {
+                    "region": 516596497824,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596514848,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544343904,
+                "type": "DOPESHEET_EDITOR",
+                "regions": [
+                  {
+                    "region": 516596515616,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596516000,
+                    "type": "FOOTER"
+                  },
+                  {
+                    "region": 516596516384,
+                    "type": "CHANNELS"
+                  },
+                  {
+                    "region": 516596516768,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596517152,
+                    "type": "WINDOW"
+                  }
+                ]
+              },
+              {
+                "area": 516544344128,
+                "type": "VIEW_3D",
+                "regions": [
+                  {
+                    "region": 516596517920,
+                    "type": "HEADER"
+                  },
+                  {
+                    "region": 516596518304,
+                    "type": "TOOL_HEADER"
+                  },
+                  {
+                    "region": 516596518688,
+                    "type": "ASSET_SHELF"
+                  },
+                  {
+                    "region": 516596519072,
+                    "type": "ASSET_SHELF_HEADER"
+                  },
+                  {
+                    "region": 516596519456,
+                    "type": "TOOLS"
+                  },
+                  {
+                    "region": 516596519840,
+                    "type": "UI"
+                  },
+                  {
+                    "region": 516596520224,
+                    "type": "HUD"
+                  },
+                  {
+                    "region": 516596520608,
+                    "type": "WINDOW"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "native_window": null,
+        "last_draws": {
+          "1": [
+            70.18751695903484,
+            3601
+          ]
+        }
+      }
+    }
+  ],
+  "process_log_validation": {
+    "status": "PASS",
+    "error_markers": [],
+    "missing_markers": [],
+    "warnings": [
+      {
+        "kind": "blender_exit_memory_diagnostic",
+        "message": "Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB",
+        "blocks": 525,
+        "reported_mb": 0.038147,
+        "bytes": 40000,
+        "bytes_note": "Reported MB converted by 1024^2 and rounded; limited by log precision"
+      }
+    ]
+  },
+  "process_returncode": 0,
+  "process_log": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-five-fixes-07uo9tmu/visible-single-process.log"
+}

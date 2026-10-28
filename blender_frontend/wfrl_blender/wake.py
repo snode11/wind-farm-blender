@@ -6,9 +6,11 @@ FLORIS proxy is marked ``SYNTH`` while a FAST.Farm DisXY export is marked
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import math
+import time
 from typing import Any, Iterable, Mapping
+from .protocol import STALE_AFTER_SECONDS
 
 
 MAX_WAKE_POINTS = 250_000
@@ -57,6 +59,16 @@ class WakeFrame:
     y: tuple[float, ...] = ()
     z: float | None = None
     vectors: tuple[float, ...] = ()
+    source_age_seconds: float = 0.
+    stale_after_seconds: float = STALE_AFTER_SECONDS['wake']
+    received_monotonic: float = field(default_factory=time.monotonic)
+    error: str | None = None
+
+    def validity_at(self, now_monotonic, *, connected=True):
+        if self.validity != 'valid':
+            return self.validity
+        age = self.source_age_seconds + max(0., now_monotonic-self.received_monotonic)
+        return 'stale' if not connected or age >= self.stale_after_seconds else 'valid'
 
     @property
     def point_count(self) -> int:
@@ -64,11 +76,11 @@ class WakeFrame:
 
     @property
     def source_label(self) -> str:
-        return "FLORIS proxy" if self.kind == "floris_proxy" else "FAST.Farm DisXY"
+        return {'floris_proxy': 'FLORIS proxy', 'disxy': 'FAST.Farm DisXY'}.get(self.kind, 'Wake unavailable')
 
     @property
     def is_renderable(self) -> bool:
-        return self.validity == "valid" and bool(self.values) and bool(self.shape)
+        return self.validity_at(time.monotonic()) == "valid" and bool(self.values) and bool(self.shape)
 
 
 def _channel_payload(payload: Mapping[str, Any]) -> Mapping[str, Any]:
@@ -80,7 +92,8 @@ def _channel_payload(payload: Mapping[str, Any]) -> Mapping[str, Any]:
     return data
 
 
-def validate_wake_payload(payload: Mapping[str, Any], *, sequence: int = 0) -> WakeFrame:
+def validate_wake_payload(payload: Mapping[str, Any], *, sequence: int = 0,
+                          received_monotonic=None) -> WakeFrame:
     """Validate the JSON wake payload frozen by the v1 wire protocol.
 
     Accepted ``data.value`` fields are ``grid``/``values`` for DisXY and
@@ -98,13 +111,21 @@ def validate_wake_payload(payload: Mapping[str, Any], *, sequence: int = 0) -> W
         raise WakePayloadError("wake turbine_ids must be unique")
     data = _channel_payload(payload)
     validity = str(data.get("validity", "valid"))
+    if validity not in {'valid', 'waiting', 'unsupported', 'invalid', 'stale'}:
+        raise WakePayloadError('Invalid wake validity')
+    timing = dict(source_age_seconds=_finite(data.get('source_age_seconds', 0.), 'wake source age'),
+                  stale_after_seconds=_finite(data.get('stale_after_seconds', STALE_AFTER_SECONDS['wake']), 'wake stale threshold'),
+                  received_monotonic=_finite(time.monotonic() if received_monotonic is None else received_monotonic, 'wake receive time'),
+                  error=data.get('error'))
+    if timing['source_age_seconds'] < 0 or timing['stale_after_seconds'] != STALE_AFTER_SECONDS['wake']:
+        raise WakePayloadError('Invalid wake age or staleness threshold')
     if validity != "valid":
         return WakeFrame(
-            kind=str(payload.get("kind", "floris_proxy")), sequence=int(sequence),
+            kind=str(payload.get("kind", data.get('kind', 'unknown'))), sequence=int(sequence),
             fidelity=str(data.get("fidelity", "SYNTH")),
             provenance=str((data.get("provenance") or {}).get("channel", "wake")),
             validity=validity, turbine_ids=tuple(ids), timestamp_s=0.0,
-            values=(), shape=(),
+            values=(), shape=(), **timing,
         )
     value = data.get("value") if isinstance(data.get("value"), Mapping) else data
     kind = str(value.get("kind", data.get("kind", payload.get("kind", "floris_proxy")))).lower()
@@ -152,7 +173,7 @@ def validate_wake_payload(payload: Mapping[str, Any], *, sequence: int = 0) -> W
         timestamp_value = timestamp_value.get("value", 0.0)
     timestamp = _finite(timestamp_value, "wake timestamp")
     return WakeFrame(kind, int(sequence), fidelity, provenance_text, validity,
-                     tuple(ids), timestamp, values_tuple, shape, x, y, z, vectors)
+                     tuple(ids), timestamp, values_tuple, shape, x, y, z, vectors, **timing)
 
 
 def proxy_ring_points(hub: Iterable[float], rotor_radius: float, wind_direction_deg: float,
@@ -314,16 +335,20 @@ def update_proxy_objects(scene, *, phase: float, rotor_radius: float = 63.0) -> 
     return updated
 
 
-def apply_disxy_frame(frame: WakeFrame, *, collection_name: str = "WFRL_Scene"):
+def apply_disxy_frame(frame: WakeFrame, *, scene=None, collection_name: str = "WFRL_Scene"):
     """Create or update one reusable DisXY mesh object in Blender."""
     if frame.kind != "disxy":
         raise WakePayloadError("apply_disxy_frame requires a DisXY frame")
     import bpy
-    collection = bpy.data.collections.get(collection_name)
+    scene = bpy.context.scene if scene is None else scene
+    collection = next((item for item in (scene.collection, *scene.collection.children_recursive)
+                       if item.name == collection_name), None)
     if collection is None:
         raise WakePayloadError(f"missing Blender collection: {collection_name}")
     vertices, faces = grid_mesh(frame)
-    obj = bpy.data.objects.get("WFRL.WakeDisXY")
+    obj = scene.objects.get("WFRL.WakeDisXY")
+    if obj is None and bpy.data.objects.get("WFRL.WakeDisXY") is not None:
+        raise WakePayloadError('DisXY object belongs to another scene')
     if obj is None:
         mesh = bpy.data.meshes.new("WFRL.WakeDisXY.Mesh")
         mesh.from_pydata(vertices, [], faces)
@@ -349,6 +374,52 @@ def apply_disxy_frame(frame: WakeFrame, *, collection_name: str = "WFRL_Scene"):
     obj["wake_kind"] = "FAST.Farm DisXY"
     obj["sequence"] = frame.sequence
     obj["validity"] = frame.validity
-    obj.hide_render = frame.validity != "valid"
-    obj.hide_set(frame.validity != "valid")
+    set_disxy_validity(scene, frame.validity_at(time.monotonic()))
     return obj
+
+
+def set_disxy_validity(scene, validity, *, visible=None):
+    """Retract unavailable data while preserving user visibility on fresh samples."""
+    if scene.get('wfrl_disxy_validity') != validity:
+        scene['wfrl_disxy_validity'] = validity
+    obj = getattr(scene, 'objects', {}).get('WFRL.WakeDisXY')
+    if obj is None:
+        return
+    if obj.get('validity') != validity:
+        obj['validity'] = validity
+    layers = [layer for layer in getattr(scene, 'view_layers', ()) if obj.name in layer.objects]
+    if not hasattr(scene, 'view_layers'):
+        layers = [None]
+    hidden = {layer.name if layer else 'default': bool(obj.hide_get(view_layer=layer)
+              if layer else obj.hide_get()) for layer in layers}
+    auto_hidden = obj.get('wfrl_wake_auto_hidden', False)
+    render_hidden = bool(obj.hide_render)
+    if auto_hidden:
+        previous = obj['wfrl_wake_previous_visibility']
+        render_hidden = bool(previous['render'])
+        hidden = dict(previous['layers'].items())
+    if visible is not None:
+        render_hidden = not visible
+        hidden = {layer.name if layer else 'default': not visible for layer in layers}
+    if validity != 'valid':
+        if not auto_hidden or visible is not None:
+            obj['wfrl_wake_previous_visibility'] = dict(render=render_hidden, layers=hidden)
+            obj['wfrl_wake_auto_hidden'] = True
+        obj.hide_render = True
+        for layer in layers:
+            if layer is None:
+                obj.hide_set(True)
+            else:
+                obj.hide_set(True, view_layer=layer)
+    else:
+        if auto_hidden:
+            del obj['wfrl_wake_auto_hidden']
+            del obj['wfrl_wake_previous_visibility']
+        enabled = getattr(scene, 'wfrl_show_disxy', True)
+        obj.hide_render = render_hidden or not enabled
+        for layer in layers:
+            value = bool(hidden.get(layer.name if layer else 'default', False)) or not enabled
+            if layer is None:
+                obj.hide_set(value)
+            else:
+                obj.hide_set(value, view_layer=layer)

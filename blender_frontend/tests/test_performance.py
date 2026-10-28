@@ -3,6 +3,11 @@ import pytest
 from wfrl_blender import performance as p
 
 
+@pytest.mark.parametrize('raw,platform', [(102400, 'linux'), (104857600, 'darwin')])
+def test_peak_rss_units_report_the_same_memory(raw, platform):
+    assert p.peak_rss_mib(raw, platform=platform) == 100.
+
+
 def test_disabled_and_exception_path():
     @p.timed('failure')
     def fail():

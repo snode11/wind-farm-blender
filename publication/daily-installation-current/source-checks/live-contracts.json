@@ -1,0 +1,6 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "background": true,
+  "scope": "Native RNA, scene override, data ownership, validity and projection; no GPU pixels or FPS"
+}

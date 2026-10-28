@@ -225,6 +225,12 @@ def ensure(scene):
         obj['turbine_id'] = tid
 
 
+def _hide_in_scene(scene, obj, hidden):
+    for layer in scene.view_layers:
+        if obj.name in layer.objects:
+            obj.hide_set(hidden, view_layer=layer)
+
+
 def set_visibility(scene):
     enabled = getattr(scene, 'wfrl_wake_display', 'SCIENTIFIC') == 'CINEMATIC' and scene.wfrl_show_wake
     if enabled:
@@ -232,7 +238,7 @@ def set_visibility(scene):
     for obj in scene.objects:
         if obj.name.startswith(PREFIX):
             obj.hide_render = not enabled
-            obj.hide_set(not enabled)
+            _hide_in_scene(scene, obj, not enabled)
 
 
 def update(scene, phase):
@@ -249,7 +255,7 @@ def update(scene, phase):
     for obj in scene.objects:
         if obj.name.startswith('WFRL.WakeProxy.') and not obj.hide_render:
             obj.hide_render = True
-            obj.hide_set(True)
+            _hide_in_scene(scene, obj, True)
     hub_offset = hub_position()[2] - geometry_data()['scalars']['TowerHt']
     wind_angle = backend_inflow.sample(rows, phase / .9)[1] if backend_active else wind_heading(scene, phase / .9)
     travel_m = rows[-1][3] if backend_active else None
@@ -265,7 +271,7 @@ def update(scene, phase):
         speed = float(scene.get('wfrl_wind_speed_mps', collection.get('wind_speed_mps', 8.0)) or 0)
         if speed <= .001:
             obj.hide_render = True
-            obj.hide_set(True)
+            _hide_in_scene(scene, obj, True)
             continue
         obj.location = root.matrix_world.translation
         # Saved meshes may predate the current asset or have a custom height.
@@ -295,4 +301,4 @@ def update(scene, phase):
             spline.points.foreach_set('co', coords)
             spline.points.foreach_set('radius', widths)
         obj.hide_render = False
-        obj.hide_set(False)
+        _hide_in_scene(scene, obj, False)

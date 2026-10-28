@@ -13,6 +13,7 @@ TRAINING_STATS_CAPABILITY = 'training_stats_v1'
 TRAINING_STATS_STALE_AFTER_SECONDS = 30.0
 TRAINING_STATS_CHANNELS = frozenset(('mean_power', 'mean_reward', 'value_loss', 'explained_variance', 'episode_return', 'learning_rate'))
 SCALAR_NUMERIC_CHANNELS = frozenset(('rotor_speed', 'power', 'yaw', 'pitch', 'wind_speed', 'wind_direction', 'torque', 'reward'))
+DISPLAY_CHANNEL_UNITS = {'rotor_speed': 'rpm', 'yaw': 'deg', 'pitch': 'deg', 'power': 'MW'}
 MODES = frozenset(('demo', 'interactive_training', 'formal_training', 'replay'))
 RUN_STATUSES = frozenset(('READY', 'STARTING', 'RUNNING', 'PAUSED', 'DRAINING', 'STOPPED', 'FAILED'))
 MESSAGE_TYPES = frozenset(('hello', 'hello_ack', 'command', 'lifecycle', 'snapshot', 'safety_event', 'curve', 'wake', 'error', 'training_stats'))
@@ -114,7 +115,13 @@ def _channels(mapping):
         _channel(channel)
         if key in SCALAR_NUMERIC_CHANNELS and channel['value'] is not None:
             _require(_number(channel['value']), key + ' must be a finite scalar number')
-        if key == 'rotor_speed': _require(channel['unit'] == 'rpm', 'rotor_speed unit must be rpm')
+        _display_unit(key, channel)
+
+
+def _display_unit(name, channel):
+    expected = DISPLAY_CHANNEL_UNITS.get(name)
+    if expected is not None:
+        _require(channel['unit'] == expected, name + ' unit must be ' + expected)
 
 
 def _data_context(payload):
@@ -228,8 +235,7 @@ def _validate_message(message):
             _require(p.get('channel') != 'rotorspeed', 'Wire key must be canonical rotor_speed')
             _require('turbine_id' in p and (p['turbine_id'] is None or _text(p['turbine_id'])), 'Curve scope required')
             _channel(p.get('data'))
-            if p['channel'] == 'rotor_speed':
-                _require(p['data']['unit'] == 'rpm', 'rotor_speed unit must be rpm')
+            _display_unit(p['channel'], p['data'])
             _require(isinstance(p['data']['value'], list) or p['data']['value'] is None, 'Curve value must be points or null')
             for point in p['data']['value'] or []:
                 _require(isinstance(point, list) and len(point) == 2 and all(_number(x) for x in point), 'Curve points must be finite [time,value] pairs')

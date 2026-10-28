@@ -91,7 +91,7 @@ class CodecTests(unittest.TestCase):
         with self.assertRaises(ProtocolError): encode_message(bad)
         good = snapshot(); good['payload']['turbines'][0]['channels']['rotor_speed'] = channel(None, validity='waiting', error='No first frame')
         encode_message(good)
-        good['payload']['farm'] = {'power': channel(3, fidelity='EXPORTED', provenance={'file': 'run.csv', 'channel': 'power'})}
+        good['payload']['farm'] = {'power': channel(3, unit='MW', fidelity='EXPORTED', provenance={'file': 'run.csv', 'channel': 'power'})}
         encode_message(good)
 
     def test_aliases(self):
@@ -116,7 +116,7 @@ class CodecTests(unittest.TestCase):
 
     def test_data_families(self):
         context = dict(mode='replay', step=2, timestamp={'value': 2, 'timebase': 'replay_seconds'})
-        encode_message(msg('curve', **context, channel='power', turbine_id=None, data=channel([[0, 1], [1, 2]])))
+        encode_message(msg('curve', **context, channel='power', turbine_id=None, data=channel([[0, 1], [1, 2]], unit='MW')))
         encode_message(msg('wake', **context, encoding='json', turbine_ids=['T1'], data=channel([[[1.0]]], stale_after_seconds=5)))
         encode_message(msg('safety_event', **context, event_id='e1', severity='warning', message='limited', turbine_id='T1', data=channel(True, stale_after_seconds=10)))
         bad = snapshot(); bad['payload']['turbines'][0]['channels']['rotor_speed'] = channel(4, validity='stale', error='age threshold exceeded')
@@ -148,6 +148,22 @@ class CodecTests(unittest.TestCase):
         self.assertTrue(channel_is_stale(data, 100, 102))
         bad = snapshot(); bad['payload']['turbines'][0]['channels']['rotor_speed']['stale_after_seconds'] = 999
         with self.assertRaises(ProtocolError): encode_message(bad)
+
+    def test_display_channel_units_are_enforced_for_snapshots_and_curves(self):
+        context = dict(mode='replay', step=2, timestamp={'value': 2, 'timebase': 'replay_seconds'})
+        for name, correct, wrong in [('yaw', 'deg', 'rad'), ('pitch', 'deg', 'rad'),
+                                      ('power', 'MW', 'kW')]:
+            valid = snapshot()
+            valid['payload']['turbines'][0]['channels'] = {name: channel(1., unit=correct)}
+            self.assertEqual(FrameDecoder().feed(encode_message(valid)), [valid])
+            bad = snapshot()
+            bad['payload']['turbines'][0]['channels'] = {name: channel(1., unit=wrong)}
+            with self.subTest(name=name), self.assertRaisesRegex(ProtocolError, 'unit'):
+                encode_message(bad)
+            curve = msg('curve', **context, channel=name, turbine_id='T1',
+                        data=channel([[0, 1]], unit=wrong))
+            with self.subTest(curve=name), self.assertRaisesRegex(ProtocolError, 'unit'):
+                encode_message(curve)
 
     def test_scalar_numeric_channels_and_curve_units(self):
         for key in ['rotor_speed', 'power', 'yaw', 'pitch']:

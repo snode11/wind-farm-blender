@@ -4,43 +4,43 @@
   "files_checked": 6,
   "files": [
     {
-      "path": "/path/to/user/Library/Application Support/Blender/5.2/config/bookmarks.txt",
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/bookmarks.txt",
       "bytes": 765,
       "sha256": "f60b6fd5ba93eac273992b675f1899c1e940545c294452919306043a8353634f",
       "status": "PASS"
     },
     {
-      "path": "/path/to/user/Library/Application Support/Blender/5.2/config/platform_support.txt",
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/platform_support.txt",
       "bytes": 39,
       "sha256": "4dbce3526384ef82878d01e1d704b953f67248b1f3354282fc9ae6285b750426",
       "status": "PASS"
     },
     {
-      "path": "/path/to/user/Library/Application Support/Blender/5.2/config/recent-files.txt",
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/recent-files.txt",
       "bytes": 3371,
       "sha256": "7d929bccbc3e5ed3e078e0661a82103ea767325c62f8ea64ca2f747270a08f01",
       "status": "PASS"
     },
     {
-      "path": "/path/to/user/Library/Application Support/Blender/5.2/config/recent-searches.txt",
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/recent-searches.txt",
       "bytes": 93,
       "sha256": "f57d26a947e656261b1cdd0d41c3782993828f18bc8d3c4063f6b1e4ed0d2057",
       "status": "PASS"
     },
     {
-      "path": "/path/to/user/Library/Application Support/Blender/5.2/config/startup.blend",
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/startup.blend",
       "bytes": 512317,
       "sha256": "064d7a57df06e1b35e543e3e85ab87df108a07969790c0aea87c9b7c2e6b1a46",
       "status": "PASS"
     },
     {
-      "path": "/path/to/user/Library/Application Support/Blender/5.2/config/userpref.blend",
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/userpref.blend",
       "bytes": 182219,
       "sha256": "e06ff65baae263c0c4c7b231b78fa0265ab0eaf6e9eb3121f9410cd664beaf51",
       "status": "PASS"
     }
   ],
-  "backup": "/path/to/user/.Trash/WFRL-install-cleanup-fe8e6c16c0/rollback",
+  "backup": "/Users/eason/.Trash/WFRL-install-cleanup-8aacd7a00a/daily-install/rollback",
   "git_head_preserved": true,
   "git_index_preserved": true
 }
