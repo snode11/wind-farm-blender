@@ -42,7 +42,7 @@ manifest = dict(source='SYNTHETIC_TEST_ONLY', turbine_id='T1',
                 calibration=dict(origin_m=[-2, 0, 87.6], beam_directions=[
                     [-math.sin(math.radians(a)), 0, -math.cos(math.radians(a))]
                     for a in (6.45, 8.5, 10.54)]), replay=replay)
-motion = [dict(time_s=t, azimuth_deg=359+2*t, yaw_deg=12, pitch_deg=[1,2,3],
+motion = [dict(time_s=t, azimuth_deg=359+2*t, yaw_deg=12, pitch_deg=[15,-10,30],
                rotor_speed_rpm=1/3, nacelle_position_m=[0, 0, 87.6],
                nacelle_orientation_deg=[0, 0, 12]) for t in (0,10)]
 hit = [origin + 58 * direction for origin, direction in
@@ -77,6 +77,25 @@ assert first['time_s'] == 1
 assert first['measurement']['time_s'] == 1
 assert [beam['wfrl_beam_active'] for beam in beams] == [False, True, False]
 assert math.isclose(scene.objects['WFRL.Turbine.T1.Rotor'].rotation_euler.x, math.radians(361), abs_tol=1e-6)
+from wfrl_blender.deflection import rigid_frame
+from wfrl_blender.animation import apply_pose
+import numpy as np
+def assert_axes(pitches):
+    bpy.context.view_layer.update()
+    yaw = math.degrees(scene.objects['WFRL.Turbine.T1.YawRoot'].rotation_euler.z)
+    azimuth = math.degrees(scene.objects['WFRL.Turbine.T1.Rotor'].rotation_euler.x)
+    for blade_id in (1, 2, 3):
+        blade = scene.objects[f'WFRL.Turbine.T1.Blade{blade_id}']
+        expected = rigid_frame(geometry, [yaw, azimuth, 0, *pitches], blade_id)[2]
+        actual = np.asarray(blade.matrix_world.to_3x3())
+        actual = actual / np.linalg.norm(actual, axis=0)
+        np.testing.assert_allclose(actual, expected, atol=1e-6, rtol=0)
+assert_axes([15, -10, 30])
+for pitch in (0, 15, -15, 30):
+    apply_pose(scene.objects, 'T1', 27, pitch)
+    assert_axes([pitch] * 3)
+playback.update(scene)
+assert_axes([15, -10, 30])
 addon._update_demo_status(scene)
 assert math.isclose(scene.objects['WFRL.Turbine.T1.Rotor'].rotation_euler.x, math.radians(361), abs_tol=1e-6)
 scene.render.fps = 60

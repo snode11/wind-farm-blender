@@ -153,5 +153,30 @@ def test_farm_records_detach_inputs_and_keep_history_metadata_independent(monkey
         assert raw['timestamp'] == {'value': 1.25, 'timebase': 'simulation_seconds'}
 
 
+def test_scene_history_draw_and_export_never_read_another_scene():
+    from wfrl_blender import charts
+    class Scene:
+        def as_pointer(self): return id(self)
+    a, b = Scene(), Scene()
+    charts.clear_scene_histories()
+    try:
+        charts.record_snapshot(snapshot(4), scene=a)
+        assert charts.history_for(a).points('T1', 'power')
+        assert not charts.history_for(b).points('T1', 'power')
+        assert charts._plot_data('power', 'ALL', b).bounds is None
+        assert not charts.raw_history_for(b).series
+        charts.record_snapshot(snapshot(9), scene=b)
+        before = charts.raw_history_for(b).snapshot()
+        charts.clear(scene=a)
+        charts.record_snapshot(snapshot(1), scene=a)
+        assert charts.raw_history_for(b).snapshot() == before
+        assert charts.history_for(b).points('T1', 'power')[-1].step == 9
+        assert charts._plot_data('power', 'ALL', a).bounds != charts._plot_data('power', 'ALL', b).bounds
+        charts.clear_scene_histories()
+        assert not charts.history_for(a).points('T1', 'power')
+    finally:
+        charts.clear_scene_histories()
+
+
 if __name__ == '__main__':
     unittest.main()

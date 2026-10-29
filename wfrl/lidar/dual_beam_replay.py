@@ -129,6 +129,7 @@ def precompute(rows, config):
     passages = {}
     previous_passage, completed, missed = None, 0, 0
     initial_partial = rows[0].get('passage_id') if rows else None
+    error_stats = error_statistics(errors)
     for row in rows:
         t = row['time_s']
         pair, evaluation = row['reconstruction'], row['evaluation']
@@ -149,6 +150,7 @@ def precompute(rows, config):
             err = evaluation.get('clearance_error_m')
             if err is not None:
                 errors.append(err)
+                error_stats = error_statistics(errors)
             held = dict(time_s=t, blade_id=pair['blade_id'], estimate_m=pair['clearance_estimate'],
                         truth_m=evaluation.get('clearance_reference_m'), error_m=err,
                         expires_at_s=t + config['measurement_hold_s'])
@@ -172,7 +174,7 @@ def precompute(rows, config):
                           valid_ratio=valid_expected/expected if expected else None,
                           passage_count=len(passages), completed_passage_count=completed,
                           missed_passage_count=missed,
-                          **error_statistics(errors))
+                          **error_stats)
         cumulative.append(dict(time_s=t, measurement=deepcopy(held), alarm=state, statistics=statistics))
     return cumulative, events
 

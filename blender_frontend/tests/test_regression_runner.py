@@ -2,6 +2,10 @@
 import importlib.util
 from pathlib import Path
 import sys
+import os
+import subprocess
+import time
+from dataclasses import replace
 
 import pytest
 
@@ -173,3 +177,97 @@ def test_explicit_mode_skip_is_reported_without_launching(tmp_path, monkeypatch)
     assert code == 2 and result['final'] and result['status'] == 'NOT_RUN'
     assert result['counts'] == {'SKIP': 1}
     assert result['tests'][0]['invocations'] == []
+
+
+@pytest.mark.parametrize('name', ['home_entry_smoke', 'native_camera_playback_regression'])
+def test_uncaught_callback_overrides_success_and_skip(name):
+    item = spec(name)
+    log = item.marker + '\nTraceback (most recent call last):\n  File "panel.py", line 5, in draw\nRuntimeError: callback failed\n'
+    assert evaluate(item, report={'status': 'PASS'} if item.report else None, marker=log)[0] == 'FAIL'
+    assert evaluate(item, report={'status': 'SKIP'}, marker=log)[0] == 'FAIL'
+    allowed = replace(item, expected_exceptions=(('RuntimeError: callback failed', 1),))
+    assert evaluate(allowed, report={'status': 'PASS'} if item.report else None, marker=log) == ('PASS', [])
+    assert evaluate(allowed, marker=log + log)[0] == 'FAIL'
+    assert evaluate(allowed, marker=log.replace('RuntimeError:', 'ValueError:'))[0] == 'FAIL'
+
+
+@pytest.mark.parametrize('text', [
+    'The phrase Traceback (most recent call last): describes an exception.',
+    '{"error": "Traceback (most recent call last):\\n  File \\"old.py\\", line 1\\nRuntimeError: historical"}',
+    'Traceback (most recent call last):\nThis paragraph explains Python diagnostics.',
+])
+def test_prose_and_escaped_history_are_not_execution_diagnostics(text):
+    assert evaluate(spec('home_entry_smoke'), marker='HOME_ENTRY_SMOKE_PASS\n' + text) == ('PASS', [])
+
+
+def test_blender_prefixed_and_incomplete_tracebacks_fail():
+    item = spec('home_entry_smoke')
+    for tail in ('RuntimeError: callback failed\n', ''):
+        log = item.marker + '\nError: Python: Traceback (most recent call last):\n  File "panel.py", line 5, in draw\n' + tail
+        assert evaluate(item, marker=log)[0] == 'FAIL'
+
+
+@pytest.mark.parametrize('nested', [False, True])
+def test_real_exception_group_and_chained_tracebacks_fail(nested):
+    import traceback
+    failures = [RuntimeError('first callback'), ValueError('second callback')]
+    if nested:
+        failures[1] = ExceptionGroup('nested', [failures[1], KeyError('third callback')])
+    try:
+        try:
+            raise LookupError('initial callback')
+        except LookupError as exc:
+            raise ExceptionGroup('callback errors', failures) from exc
+    except ExceptionGroup as exc:
+        diagnostic = ''.join(traceback.format_exception(exc))
+    for name in ('home_entry_smoke', 'native_camera_playback_regression'):
+        item = spec(name)
+        assert evaluate(item, report={'status': 'PASS'} if item.report else None,
+                        marker=item.marker + '\n' + diagnostic)[0] == 'FAIL'
+    parsed = runner.traceback_exceptions(diagnostic)
+    assert 'RuntimeError: first callback' in parsed and 'ValueError: second callback' in parsed
+    assert any('ExceptionGroup:' in item for item in parsed)
+
+
+@pytest.mark.skipif(os.name != 'posix', reason='POSIX process-session regression')
+@pytest.mark.parametrize('parent_mode', ['exit_on_term', 'ignore_term', 'already_exited'])
+def test_stop_reaps_owned_descendants_after_launcher_exit(tmp_path, parent_mode):
+    import psutil
+
+    child_script = tmp_path / 'child.py'
+    ready = tmp_path / 'child.pid'
+    child_script.write_text('import os,signal,sys,time\nfrom pathlib import Path\n'
+        'signal.signal(signal.SIGTERM,signal.SIG_IGN)\n'
+        'Path(sys.argv[1]).write_text(str(os.getpid()))\ntime.sleep(120)\n')
+    parent_script = tmp_path / 'parent.py'
+    parent_script.write_text('import subprocess,sys,time,signal\n'
+        'if sys.argv[3] == "ignore_term": signal.signal(signal.SIGTERM,signal.SIG_IGN)\n'
+        'subprocess.Popen([sys.executable,sys.argv[1],sys.argv[2]])\n'
+        'if sys.argv[3] != "already_exited": time.sleep(120)\n')
+    owner = runner.OwnedProcesses(env_key='WFRL_TEST_REGRESSION_TOKEN')
+    unrelated = subprocess.Popen([sys.executable, '-c', 'import time;time.sleep(120)'])
+    process = owner.start([sys.executable, str(parent_script), str(child_script), str(ready), parent_mode],
+                          cwd=tmp_path, env=os.environ)
+    child = None
+    try:
+        deadline = time.monotonic() + 5
+        while not ready.exists():
+            assert time.monotonic() < deadline
+            time.sleep(.01)
+        child = psutil.Process(int(ready.read_text()))
+        if parent_mode == 'already_exited':
+            process.wait(timeout=5)
+        runner.stop_process(process, owner, grace=.5)
+        assert process.returncode is not None
+        assert not owner.alive()
+        assert not child.is_running() or child.status() == psutil.STATUS_ZOMBIE
+        assert unrelated.poll() is None
+    finally:
+        if child is not None:
+            try: child.kill()
+            except psutil.NoSuchProcess: pass
+        if process.poll() is None:
+            process.kill()
+        process.wait(timeout=5)
+        unrelated.terminate()
+        unrelated.wait(timeout=5)

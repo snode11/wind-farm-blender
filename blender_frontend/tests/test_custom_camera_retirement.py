@@ -297,3 +297,28 @@ def test_failed_objects_sharing_data_have_one_data_retry_record(runtime):
     assert runtime.cameras.removed.count(data) == 1
     assert not core._RETIRED and not core._RETIRED_DATA
     assert_published(runtime)
+
+
+@pytest.mark.parametrize('replacement', ['camera', 'empty'])
+def test_current_scene_marker_tracks_replacement_and_clear(runtime, replacement):
+    marker = NS(camera=runtime.old[1])
+    runtime.scene.timeline_markers.append(marker)
+    target = runtime.replacement[1] if replacement == 'camera' else None
+    core._publish(runtime.scene, {1: target})
+    assert marker.camera is target
+    assert runtime.scene.camera is target
+
+
+@pytest.mark.parametrize('checkpoint', ['references', 'detach', 'commit'])
+def test_marker_reference_rolls_back_with_failed_publication(runtime, checkpoint):
+    marker = NS(camera=runtime.old[1])
+    runtime.scene.timeline_markers.append(marker)
+    def fail(stage, slot=None):
+        if stage == checkpoint:
+            raise RuntimeError('Injected publication failure')
+    runtime.monkeypatch.setattr(core, '_publication_checkpoint', fail)
+    with pytest.raises(RuntimeError, match='Injected'):
+        core._publish(runtime.scene, runtime.replacement)
+    assert marker.camera is runtime.old[1]
+    assert runtime.scene.camera is runtime.old[1]
+    assert not runtime.old[1].removed

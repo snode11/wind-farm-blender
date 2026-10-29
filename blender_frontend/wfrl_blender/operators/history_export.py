@@ -59,7 +59,7 @@ class WFRL_OT_ExportHistory(bpy.types.Operator):
                 raise ValueError('A history export is already running')
             # This bounded detached copy is the only history work on Blender's
             # main thread. ExportJob performs serialization and disk I/O.
-            snapshot = charts.raw_history.snapshot()
+            snapshot = charts.raw_history_for(context.scene).snapshot()
             charts.export_job.start(path, snapshot)
         except (OSError, ValueError) as exc:
             context.scene['wfrl_history_export_status'] = f'FAILED / {exc}'

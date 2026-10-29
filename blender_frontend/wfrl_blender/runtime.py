@@ -86,7 +86,7 @@ def select_mode(mode):
     safety_events.clear()
     backend_events.clear()
     from . import charts
-    charts.clear()
+    charts.clear(scene=_backend_scene)
     training_dashboard.reset()
     workflow_scene.clear()
     channel_states.clear()
@@ -203,7 +203,7 @@ def connect_new_backend(port, *, confirmed=False):
     backend_events.clear()
     training_dashboard.reset()
     from . import charts
-    charts.clear()
+    charts.clear(scene=_backend_scene)
     workflow_scene.clear()
     channel_states.clear()
     channel_table.clear()
@@ -230,7 +230,7 @@ def enter_local_demo():
     safety_events.clear()
     backend_events.clear()
     from . import charts
-    charts.clear()
+    charts.clear(scene=_backend_scene)
     training_dashboard.reset()
     workflow_scene.clear()
     channel_states.clear()
@@ -479,7 +479,7 @@ def _tick():
                         _clear_backend_wake()
                         latest_snapshot = None
                         from . import charts
-                        charts.clear(_state.run_id)
+                        charts.clear(_state.run_id, scene=_backend_scene)
                     if 'scene' in payload:
                         workflow_scene.clear(); workflow_scene.update(payload['scene'] or {})
                         # scene.load is acknowledged before the first training
@@ -502,7 +502,7 @@ def _tick():
                         kinematics = KinematicState()
                         safety_events.clear()
                         from . import charts
-                        charts.clear()
+                        charts.clear(scene=_backend_scene)
                     _state.synchronize(message['session_id'], payload['run_status'],
                                        payload['mode'], payload['capabilities'],
                                        state_revision=payload.get('state_revision'),
@@ -524,15 +524,15 @@ def _tick():
                 elif message['type'] == 'training_stats':
                     from . import charts
                     training_dashboard.ingest(message, negotiated='training_stats_v1' in getattr(_client, 'negotiated_capabilities', set()))
-                    charts.record_training(message)
+                    charts.record_training(message, scene=_backend_scene)
                 elif message['type'] == 'curve':
                     from . import charts
-                    charts.record_curve(message)
+                    charts.record_curve(message, scene=_backend_scene)
                 elif message['type'] == 'snapshot':
                     if _state.run_id is not None and payload.get('run_id', _state.run_id) != _state.run_id:
                         continue
                     from . import charts
-                    charts.record_snapshot(message)
+                    charts.record_snapshot(message, scene=_backend_scene)
                     latest_snapshot = message
                 elif message['type'] == 'wake':
                     if _state.run_id is not None and payload.get('run_id', _state.run_id) != _state.run_id:

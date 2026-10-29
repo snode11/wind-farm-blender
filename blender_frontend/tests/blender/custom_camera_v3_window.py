@@ -124,7 +124,7 @@ def tick():
                 from wfrl_blender import clearance_replay, farm_flex, charts
                 STATE['protected']=(scene.frame_current,scene.frame_subframe,
                     json.dumps(clearance_replay.sample(scene)['statistics'],sort_keys=True),
-                    repr(charts.history.__dict__),farm_flex._ACTIVE.last_telemetry_frame)
+                    repr(charts.history_for(bpy.context.scene).__dict__),farm_flex._ACTIVE.last_telemetry_frame)
                 transaction=capture.Capture(bpy.context,OUT,times);transaction.step(bpy.context)
                 accepted=time.perf_counter();transaction.request_cancel()
                 assert transaction.closed and transaction.index==1
@@ -134,7 +134,7 @@ def tick():
                 assert len((transaction.path/'frames.jsonl').read_text().splitlines())==4
                 assert STATE['protected']==(scene.frame_current,scene.frame_subframe,
                     json.dumps(clearance_replay.sample(scene)['statistics'],sort_keys=True),
-                    repr(charts.history.__dict__),farm_flex._ACTIVE.last_telemetry_frame)
+                    repr(charts.history_for(bpy.context.scene).__dict__),farm_flex._ACTIVE.last_telemetry_frame)
                 STATE['cancel_call_to_accept_s']=transaction.cancel_accepted_at-accepted
                 STATE['cancel_accept_to_stop_s']=transaction.cancel_stopped_at-transaction.cancel_accepted_at
                 STATE['checks']['cancel_between_groups_no_extra_group_restore']=True

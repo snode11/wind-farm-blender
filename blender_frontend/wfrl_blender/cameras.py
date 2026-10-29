@@ -626,21 +626,59 @@ def ensure_nacelle_gimbal(scene, turbine):
     shell = scene.objects.get(f'WFRL.Turbine.{turbine}.Nacelle')
     if root is None or shell is None:
         raise ValueError(f'{turbine} nacelle shell is not present in this scene')
+    rotor = scene.objects.get(f'WFRL.Turbine.{turbine}.Rotor')
+    if rotor is None or rotor.parent != root:
+        raise ValueError('NREL nacelle camera requires the mechanical Rotor datum')
     name = f'WFRL.Camera.{turbine}.NacelleGimbal'
     camera = scene.objects.get(name)
     if camera is not None:
+        if camera.type != 'CAMERA' or camera.parent != root or not camera.get('wfrl_nacelle_camera'):
+            raise ValueError(f'{name} is occupied by an incompatible object')
+        initialized = (camera.get('wfrl_nacelle_initialized') is not False
+                       and camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID
+                       and all(key in camera for key in ('gimbal_yaw', 'gimbal_pitch', 'gimbal_roll',
+                                                        'gimbal_fov', 'mount_location_m')))
+        if not initialized:
+            if any(other != scene and other.user_of_id(camera) for other in bpy.data.scenes):
+                raise ValueError(f'{name} is shared by another scene; initialization requires an independent camera')
+            camera['wfrl_nacelle_initialized'] = False
+            reset_nacelle_gimbal(camera)
+            camera['wfrl_nacelle_initialized'] = True
         clear_camera_mask(camera)
         return camera  # Selecting/reloading must not overwrite manual PTZ.
-    camera = bpy.data.objects.new(name, bpy.data.cameras.new(name + '.Data'))
-    collection = root.users_collection[0]
-    collection.objects.link(camera)
-    camera.parent = root
-    camera.matrix_parent_inverse.identity()
-    camera['wfrl_nacelle_camera'] = True
-    camera.data.clip_start, camera.data.clip_end = .005, 30000
-    camera.data.display_size = .18
-    camera.data.show_passepartout = False
-    reset_nacelle_gimbal(camera)
+    if bpy.data.objects.get(name) is not None:
+        raise ValueError(f'{name} belongs outside this scene; use its owning scene')
+    scene_collections = (scene.collection, *scene.collection.children_recursive)
+    collections = [collection for collection in root.users_collection
+                   if collection in scene_collections
+                   and not any(other != scene and collection in
+                               (other.collection, *other.collection.children_recursive)
+                               for other in bpy.data.scenes)]
+    if not collections:
+        raise ValueError('NREL nacelle camera requires a mount collection owned by this scene')
+    collection = collections[0]
+    data = bpy.data.cameras.new(name + '.Data')
+    camera = None
+    try:
+        camera = bpy.data.objects.new(name, data)
+        collection.objects.link(camera)
+        if scene.objects.get(camera.name) != camera:
+            raise ValueError('NREL nacelle camera was not linked to the requested scene')
+        camera.parent = root
+        camera.matrix_parent_inverse.identity()
+        camera['wfrl_nacelle_camera'] = True
+        camera['wfrl_nacelle_initialized'] = False
+        data.clip_start, data.clip_end = .005, 30000
+        data.display_size = .18
+        data.show_passepartout = False
+        reset_nacelle_gimbal(camera)
+        camera['wfrl_nacelle_initialized'] = True
+    except Exception:
+        if camera is not None:
+            bpy.data.objects.remove(camera, do_unlink=True)
+        if data.users == 0:
+            bpy.data.cameras.remove(data)
+        raise
     return camera
 
 

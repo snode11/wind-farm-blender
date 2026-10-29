@@ -174,7 +174,7 @@ def tick():
                 STATE['telemetry']=farm_flex._ACTIVE.last_telemetry_frame
                 STATE['statistics']=json.dumps(clearance_replay.sample(scene)['statistics'],sort_keys=True)
                 STATE['before_layout']=core.layout_dict(scene)
-                STATE['history']=repr(charts.history.__dict__) if hasattr(charts,'history') else None
+                STATE['history']=repr(charts.history_for(bpy.context.scene).__dict__) if hasattr(charts,'history') else None
                 STATE['frame']=(scene.frame_current,scene.frame_subframe)
                 bpy.ops.screen.animation_play()
                 transaction=capture.Capture(bpy.context,OUT)
@@ -225,7 +225,7 @@ def tick():
                 for i in range(3):assert len({r['simulation_state_hash'] for r in rows[i*3:(i+1)*3]})==1
                 assert (scene.frame_current,scene.frame_subframe)==STATE['frame']
                 assert farm_flex._ACTIVE.last_telemetry_frame==STATE['telemetry']
-                assert repr(charts.history.__dict__)==STATE['history']
+                assert repr(charts.history_for(bpy.context.scene).__dict__)==STATE['history']
                 assert json.dumps(clearance_replay.sample(scene)['statistics'],sort_keys=True)==STATE['statistics']
                 cancel=capture.Capture(bpy.context,OUT,times);cancel.step(bpy.context);cancel.finish(error='test cancellation')
                 assert json.loads((cancel.path/'manifest.json').read_text())['status']=='incomplete'

@@ -35,7 +35,7 @@ def protected(scene, area):
     return {'frame': (scene.frame_current, scene.frame_subframe),
         'time_property': scene.get('wfrl_clearance_time_s'),
         'statistics': json.dumps(clearance_replay.sample(scene)['statistics'], sort_keys=True),
-        'charts': repr(charts.history.__dict__),
+        'charts': repr(charts.history_for(bpy.context.scene).__dict__),
         'telemetry': farm_flex.active_for(scene).last_telemetry_frame,
         'profile': preview.render_profile(scene),
         'shading': {name: getattr(area.spaces.active.shading, name) for name in

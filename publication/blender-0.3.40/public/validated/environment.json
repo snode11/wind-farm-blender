@@ -1,0 +1,6 @@
+{
+  "BLENDER_USER_CONFIG": "/private/tmp/wfrl-release-0.3.40-e4u3zodh/validated/profile/config",
+  "BLENDER_USER_SCRIPTS": "/private/tmp/wfrl-release-0.3.40-e4u3zodh/validated/profile/scripts",
+  "BLENDER_USER_DATAFILES": "/private/tmp/wfrl-release-0.3.40-e4u3zodh/validated/profile/datafiles",
+  "WFRL_ADDON_MODULE": "bl_ext.wfrl_frontend.wfrl_blender"
+}

@@ -170,7 +170,7 @@ def update(scene, depsgraph=None):
         for index, pitch in enumerate(motion['pitch_deg'], 1):
             blade = scene.objects.get(prefix + f'.Blade{index}')
             if blade:
-                blade.rotation_euler.z = math.radians(pitch)
+                blade.rotation_euler.z = -math.radians(pitch)
     scene['wfrl_clearance_time_s'] = value['time_s']
     if scene.frame_current >= scene.frame_end:
         _queue_finished_playback(scene)

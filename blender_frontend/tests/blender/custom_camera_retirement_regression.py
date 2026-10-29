@@ -108,8 +108,29 @@ try:
             core.apply_parameters(camera, params, core.validate_position(scene, location)[0])
         core.commit_draft(scene, slot, camera)
     scene.camera = core.get_camera(scene, 1)
+    marker = scene.timeline_markers.new('C1 observation', frame=10)
+    marker.camera = scene.camera
+    for checkpoint in ('references', 'detach', 'commit'):
+        old = scene.camera
+        def fail(stage, slot=None):
+            if stage == checkpoint:
+                raise RuntimeError('Injected publication rollback')
+        original_checkpoint = core._publication_checkpoint
+        core._publication_checkpoint = fail
+        try:
+            core.import_layout(scene, replacement(), overwrite=True)
+        except RuntimeError as exc:
+            assert 'Injected publication rollback' in str(exc)
+        else:
+            raise AssertionError('Publication did not reach the injected checkpoint')
+        finally:
+            core._publication_checkpoint = original_checkpoint
+        assert scene.camera == old and marker.camera == old
+    RESULT['checks']['marker_rollback'] = True
 
     old, data, object_pointer, data_pointer, current = publish_with_failure(True)
+    assert marker.camera == current
+    RESULT['checks']['marker_replacement'] = True
     assert not present(bpy.data.objects, object_pointer) and data.users == 0
     core.cleanup_retired()
     assert_released(object_pointer, data_pointer, current)
@@ -148,6 +169,9 @@ try:
     core.cleanup_retired()
     assert present(bpy.data.cameras, data_pointer) and data.users == 0
     RESULT['checks']['normal_removal_preserves_shared_data_ownership'] = True
+    core._publish(scene, {1: None})
+    assert marker.camera is None and scene.camera is None
+    RESULT['checks']['marker_clear'] = True
     RESULT['status'] = 'PASS'
 except Exception:
     RESULT['status'] = 'ERROR'

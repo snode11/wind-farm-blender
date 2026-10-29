@@ -116,8 +116,8 @@ def test_recording_reuses_arrays_when_seeking(telemetry, monkeypatch):
     samples = iter([1.5, .5])
     monkeypatch.setattr(clearance_replay, 'sample', lambda _scene: {'time_s': next(samples)})
     recorded, cleared, inputs = [], [], []
-    monkeypatch.setattr(charts, 'record_farm', lambda *args: recorded.append(args))
-    monkeypatch.setattr(charts, 'clear', lambda: cleared.append(True))
+    monkeypatch.setattr(charts, 'record_farm', lambda *args, scene: recorded.append(args))
+    monkeypatch.setattr(charts, 'clear', lambda *, scene: cleared.append(True))
     interpolate = np.interp
 
     def observe_interpolation(t, xp, fp):

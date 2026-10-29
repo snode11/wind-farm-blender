@@ -26,6 +26,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import signal
 import subprocess
@@ -35,6 +36,10 @@ import time
 
 
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from wfrl.blender_bridge.formal_process import OwnedProcesses
+
 TEST_ROOT = ROOT / 'blender_frontend/tests/blender'
 ADDON_ROOT = ROOT / 'blender_frontend/wfrl_blender'
 
@@ -51,9 +56,16 @@ class Regression:
     required_flags: tuple[str, ...] = ()
     phases: tuple[str, ...] = ('run',)
     scope: str = 'Native background data checks; visible interaction not verified.'
+    expected_exceptions: tuple[tuple[str, int], ...] = ()
 
 
 REGRESSIONS = (
+    Regression('camera_failure_recovery_regression.py', 'CAMERA_FAILURE_RECOVERY_PASS', 'result.json',
+               package='synthetic'),
+    Regression('custom_camera_retirement_regression.py', 'CUSTOM_CAMERA_RETIREMENT',
+               'retirement-validation.json', package='synthetic'),
+    Regression('chart_scene_ownership_regression.py', 'CHART_SCENE_OWNERSHIP_PASS', 'result.json'),
+    Regression('video_compositor_regression.py', 'VIDEO_COMPOSITOR_PASS', 'result.json', timeout_s=240),
     Regression('home_entry_smoke.py', 'HOME_ENTRY_SMOKE_PASS', None,
                scope='Native RNA and entry operations with a layout adapter; visible layout and FPS not verified.'),
     Regression('manual_control_regression.py', 'MANUAL_CONTROL_REGRESSION_PASS', timeout_s=600),
@@ -219,9 +231,51 @@ def isolated_environment(scratch, output, phase, inherited=None):
     return env
 
 
+def traceback_exceptions(log):
+    """Read rendered Python diagnostics, excluding prose and escaped JSON text."""
+    header = re.compile(r'^(?:(?:Error: |ERROR: )?Python: )?Traceback \(most recent call last\):\s*$')
+    group_header = re.compile(r'^(?:(?:Error: |ERROR: )?Python: )? *\+ Exception Group Traceback \(most recent call last\):\s*$')
+    frame = re.compile(r'^\s+File ".+", line \d+(?:, in .+)?$')
+    summary = re.compile(r'^[\w.]+(?::.*)?$')
+    lines, found = log.splitlines(), []
+    for index, line in enumerate(lines):
+        if group_header.fullmatch(line):
+            summaries, has_frame = [], False
+            for following in lines[index + 1:]:
+                if not following.startswith(' '):
+                    break
+                content = re.sub(r'^(?:[ \t]*[|+])+(?: )?', '', following)
+                has_frame = has_frame or bool(frame.fullmatch(content))
+                if summary.fullmatch(content):
+                    summaries.append(content)
+            if has_frame:
+                found.extend(summaries or ['<incomplete exception group traceback>'])
+            continue
+        if not header.fullmatch(line):
+            continue
+        has_frame = False
+        for following in lines[index + 1:]:
+            if frame.fullmatch(following):
+                has_frame = True
+            elif following.startswith((' ', '\t')) or not following:
+                continue
+            else:
+                if has_frame:
+                    found.append(following if summary.fullmatch(following) else '<incomplete traceback>')
+                break
+        else:
+            if has_frame:
+                found.append('<incomplete traceback>')
+    return found
+
+
 def evaluate(spec, phase, returncode, timed_out, execution, report, log, source_changed=False):
     """A zero exit cannot stand in for final assertions or asynchronous completion."""
     failures = []
+    exceptions = Counter(traceback_exceptions(log))
+    expected = Counter(dict(spec.expected_exceptions))
+    if exceptions != expected:
+        failures.append(f'Python exception diagnostics: actual={dict(exceptions)}, expected={dict(expected)}')
     if timed_out:
         failures.append('Process exceeded its timeout')
     if returncode != 0:
@@ -258,28 +312,17 @@ def evaluate(spec, phase, returncode, timed_out, execution, report, log, source_
     return ('FAIL', failures) if failures else ('PASS', [])
 
 
-def stop_process(process):
-    if process.poll() is not None:
-        return
-    try:
-        if os.name == 'posix':
-            os.killpg(process.pid, signal.SIGTERM)
-        else:
-            process.terminate()
-    except ProcessLookupError:
-        process.wait(timeout=8)
-        return
-    try:
-        process.wait(timeout=8)
-    except subprocess.TimeoutExpired:
-        try:
-            if os.name == 'posix':
-                os.killpg(process.pid, signal.SIGKILL)
-            else:
-                process.kill()
-        except ProcessLookupError:
-            pass
-        process.wait(timeout=8)
+def stop_process(process, owner, *, grace=8.):
+    """Reap the launcher only after all identified descendants have stopped."""
+    for signum in (signal.SIGTERM, signal.SIGKILL):
+        owner.signal(signum)
+        deadline = time.monotonic() + grace
+        while owner.alive() and time.monotonic() < deadline:
+            time.sleep(.02)
+        if not owner.alive():
+            process.wait(timeout=grace)
+            return
+    raise RuntimeError('Regression process cleanup unconfirmed')
 
 
 def run_invocation(spec, phase, args, case, scratch, bootstrap):
@@ -304,19 +347,23 @@ def run_invocation(spec, phase, args, case, scratch, bootstrap):
     returncode = None
     with (run / 'blender.log').open('w', encoding='utf-8') as log:
         try:
-            process = subprocess.Popen(command, cwd=ROOT, env=environment, stdout=log,
-                                       stderr=subprocess.STDOUT, start_new_session=True)
+            owner = OwnedProcesses(env_key='WFRL_REGRESSION_RUN_TOKEN')
+            process = owner.start(command, cwd=ROOT, env=environment, stdout=log,
+                                  stderr=subprocess.STDOUT)
             try:
                 returncode = process.wait(timeout=args.timeout or spec.timeout_s)
             except subprocess.TimeoutExpired:
                 timed_out = True
-                stop_process(process)
+                stop_process(process, owner)
                 returncode = process.returncode
             except KeyboardInterrupt:
                 interrupted = True
-                stop_process(process)
+                stop_process(process, owner)
                 returncode = process.returncode
-        except OSError as exc:
+            if owner.alive():
+                stop_process(process, owner)
+                launch_error = 'Regression left live descendants after its launcher exited'
+        except (OSError, RuntimeError) as exc:
             launch_error = str(exc)
     after = source_hashes(script)
     write_json(run / 'source-after.json', after)

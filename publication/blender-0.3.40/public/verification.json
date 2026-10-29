@@ -1,0 +1,52 @@
+{
+  "status": "PASS",
+  "version": "0.3.40",
+  "archive_sha256": "f7907be0bd6737f0b0d8ddde8b856c151b6ebc7392ee1c796fc9252b806f018b",
+  "scope": "Worktree software contracts, scripted source windows, and this archive in an isolated installation.",
+  "host": {
+    "unique_passed": 2768,
+    "unique_skipped": 6,
+    "unique_failed": 0,
+    "report": "checks/host-summary.json"
+  },
+  "source_background": {
+    "status": "PASS",
+    "tests": 40,
+    "report": "checks/source-background.json"
+  },
+  "source_windows": {
+    "status": "PASS",
+    "tests": 4,
+    "report": "checks/source-windows.json"
+  },
+  "chart_gpu": {
+    "status": "PASS",
+    "report": "checks/chart-gpu.json",
+    "scope": "Synthetic draw callback and per-window resources; no FPS claim."
+  },
+  "isolated_package": {
+    "status": "PASS",
+    "report": "validated/package-validation.json",
+    "installation": "PASS",
+    "module_origin": "PASS",
+    "default_cameras_and_projection": "PASS",
+    "visible_window": "NOT_RUN"
+  },
+  "source_archive_rebuild": "NOT_RUN",
+  "daily_installation": {
+    "identity": "publication/daily-installation.json",
+    "same_as_public_archive": false
+  },
+  "limits": [
+    "Missing raw-source assets account for six host skips.",
+    "No physical keyboard/mouse, full video, full-clip FPS, long-running memory, real MPI/solver/training, other-platform or scientific acceptance.",
+    "Source scripted-window results do not assert installed-window validation."
+  ],
+  "artifact_availability": {
+    "archive": true,
+    "inventory": true,
+    "raw_reports": true,
+    "source_archive": false,
+    "isolated_runtime_profile": false
+  }
+}

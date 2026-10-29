@@ -275,12 +275,21 @@ def _remove(camera):
         pass
 
 
-def cancel_draft(camera):
+def cancel_draft(camera, *, data=None):
     try:
         if camera is not None and camera.get('wfrl_custom_draft'):
+            if data is None:
+                data = camera.data
             _remove(camera)
     except ReferenceError:
         pass
+    if data is not None:
+        import bpy
+        try:
+            if data.users == 0:
+                bpy.data.cameras.remove(data)
+        except ReferenceError:
+            pass
 
 
 def commit_draft(scene, slot, camera):
@@ -886,6 +895,7 @@ def _publish(scene, replacements):
     saved = [(obj, obj.name, obj.data.name, bool(obj.get('wfrl_custom_camera')),
               bool(obj.get('wfrl_custom_draft')), tuple(obj.users_collection)) for obj in objects]
     refs = [(scene, 'camera', scene.camera)]
+    refs.extend((marker, 'camera', marker.camera) for marker in scene.timeline_markers)
     if controller_stage is not None and not controller.closed:
         # Confirmation publishes while editing; every restore path needs a live camera.
         snapshots = [getattr(controller, name, None)

@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "repository": "/private/tmp/wfrl-release-0.3.40-e4u3zodh/validated/profile/extensions",
+  "repo_module": "wfrl_frontend",
+  "blender": "5.2.1 LTS",
+  "background": true
+}

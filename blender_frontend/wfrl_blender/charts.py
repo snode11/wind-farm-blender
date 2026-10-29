@@ -129,24 +129,66 @@ raw_history = HistoryWindow()
 export_job = ExportJob()
 _local_run_id = uuid.uuid4().hex
 _local_sequence = 0
+_scene_histories = {}
 
 
-def clear(run_id=None):
-    global _local_run_id, _local_sequence
-    history.clear()
-    raw_history.clear(run_id)
-    _local_run_id = run_id or uuid.uuid4().hex
-    _local_sequence = 0
+class _SceneHistory:
+    def __init__(self, scene):
+        self.scene = scene
+        self.history = ChartHistory()
+        self.raw = HistoryWindow()
+        self.run_id = uuid.uuid4().hex
+        self.sequence = 0
+
+
+def _scene_history(scene):
+    for key, state in tuple(_scene_histories.items()):
+        try:
+            if hasattr(state.scene, 'as_pointer') and not state.scene.as_pointer():
+                _scene_histories.pop(key, None)
+        except ReferenceError:
+            _scene_histories.pop(key, None)
+    key = scene.as_pointer() if hasattr(scene, 'as_pointer') else id(scene)
+    state = _scene_histories.get(key)
+    if state is None or state.scene != scene:
+        state = _scene_histories[key] = _SceneHistory(scene)
+    return state
+
+
+def history_for(scene=None):
+    return history if scene is None else _scene_history(scene).history
+
+
+def raw_history_for(scene=None):
+    return raw_history if scene is None else _scene_history(scene).raw
+
+
+def clear_scene_histories(*_args):
+    _scene_histories.clear()
     invalidate_render_cache()
 
 
-def record_snapshot(message):
-    raw_history.ingest(dict(message, type='snapshot'))
-    return history.ingest(message)
+def clear(run_id=None, *, scene=None):
+    global _local_run_id, _local_sequence
+    history_for(scene).clear()
+    raw_history_for(scene).clear(run_id)
+    if scene is None:
+        _local_run_id = run_id or uuid.uuid4().hex
+        _local_sequence = 0
+    else:
+        state = _scene_history(scene)
+        state.run_id, state.sequence = run_id or uuid.uuid4().hex, 0
+    invalidate_render_cache()
 
 
-def record_training(message):
-    raw_history.ingest(message)
+def record_snapshot(message, *, scene=None):
+    raw_history_for(scene).ingest(dict(message, type='snapshot'))
+    return history_for(scene).ingest(message)
+
+
+def record_training(message, *, scene=None):
+    history = history_for(scene)
+    raw_history_for(scene).ingest(message)
     p = message['payload']
     # Versions track writes, including multiple observations at one global step.
     if p['stats']:
@@ -158,8 +200,9 @@ def record_training(message):
         history.series.setdefault((FARM, key), deque(maxlen=600)).append(point)
 
 
-def record_curve(message):
-    raw_history.ingest(message)
+def record_curve(message, *, scene=None):
+    history = history_for(scene)
+    raw_history_for(scene).ingest(message)
     p = message['payload']; record = p['data']
     history.revision += 1
     values = history.series.setdefault((p['turbine_id'] or FARM, p['channel']), deque(maxlen=600))
@@ -168,10 +211,16 @@ def record_curve(message):
                             record['unit'], record['fidelity'], record['validity'], deepcopy(record['provenance'])))
 
 
-def record_farm(time_s, poses, manifest, extra=None):
+def record_farm(time_s, poses, manifest, extra=None, *, scene=None):
     """Record only fields present in the physical result; preserve absent channels."""
     global _local_sequence
-    _local_sequence += 1
+    if scene is None:
+        _local_sequence += 1
+        sequence, run_id = _local_sequence, _local_run_id
+    else:
+        state = _scene_history(scene)
+        state.sequence += 1
+        sequence, run_id = state.sequence, state.run_id
     provenance = {'source': manifest.get('source','FAST.Farm'), 'status': manifest['status'],
                   'policy_sha256': manifest.get('policy', {}).get('sha256'),
                   'geometry_sha256': manifest['files']['geometry.npz'],
@@ -194,12 +243,12 @@ def record_farm(time_s, poses, manifest, extra=None):
     farm = {}
     if all('power' in turbine['channels'] for turbine in turbines):
         farm['power'] = record(sum(t['channels']['power']['value'] for t in turbines), 'MW')
-    message = dict(type='snapshot', session_id='mappo-results', sequence=_local_sequence,
-        payload=dict(mode='replay', run_id=_local_run_id, step=round(time_s * 1000),
+    message = dict(type='snapshot', session_id='mappo-results', sequence=sequence,
+        payload=dict(mode='replay', run_id=run_id, step=round(time_s * 1000),
                      timestamp=dict(value=time_s, timebase='simulation_seconds'),
                      turbines=turbines, farm=farm))
-    raw_history.ingest(message, copy_records=False)
-    return history.ingest(message)
+    raw_history_for(scene).ingest(message, copy_records=False)
+    return history_for(scene).ingest(message)
 
 
 _handle = None
@@ -217,7 +266,6 @@ def axis_ticks(values, count=5):
 _CACHE_LIMIT = 8
 _data_cache = OrderedDict()
 _resource_cache = OrderedDict()
-_data_token = None
 _registered = False
 _COLORS = ((.25, .85, 1, 1), (1, .7, .2, 1), (.5, 1, .55, 1), (.85, .6, 1, 1))
 _MUTED = (.6, .68, .76, 1)
@@ -252,21 +300,19 @@ class _PlotResources:
 
 def invalidate_render_cache(*_args):
     """Release cached buffers and CPU geometry without changing observations."""
-    global _data_token
     for resources in _resource_cache.values():
         resources.release()
     _resource_cache.clear()
     _data_cache.clear()
-    _data_token = None
 
 
-def _plot_data(channel, selected):
-    global _data_token
+def _plot_data(channel, selected, scene=None):
+    history = history_for(scene)
     token = (history, history.revision, history.session, history.identity)
-    if token != _data_token:
-        _data_cache.clear()
-        _data_token = token
-    key = (channel, selected)
+    for cached in tuple(_data_cache):
+        if cached[0][0] is history and cached[0] != token:
+            _data_cache.pop(cached)
+    key = (token, channel, selected)
     if key in _data_cache:
         _data_cache.move_to_end(key)
         return _data_cache[key]
@@ -457,7 +503,7 @@ def draw_plot():
     if panel_width < 280 * scale or region.height < 300 * scale:
         _forget_resources(_owner_key(_owner(context)))
         return
-    data = _plot_data(scene.wfrl_chart_channel, getattr(scene, 'wfrl_selected_turbine', 'ALL'))
+    data = _plot_data(scene.wfrl_chart_channel, getattr(scene, 'wfrl_selected_turbine', 'ALL'), scene)
     resources = _plot_resources(context, data, scale, panel_width, gpu, blf, batch_for_shader)
     if resources is None:
         return
@@ -499,10 +545,13 @@ def register():
         _handle = bpy.types.SpaceView3D.draw_handler_add(draw_plot, (), 'WINDOW', 'POST_PIXEL')
     _registered = True
     bpy.app.handlers.persistent(invalidate_render_cache)
+    bpy.app.handlers.persistent(clear_scene_histories)
     for name in ('load_pre', 'undo_pre', 'redo_pre'):
         handlers = getattr(bpy.app.handlers, name)
         if invalidate_render_cache not in handlers:
             handlers.append(invalidate_render_cache)
+        if clear_scene_histories not in handlers:
+            handlers.append(clear_scene_histories)
     if not bpy.app.background and not bpy.app.timers.is_registered(_cache_maintenance):
         bpy.app.timers.register(_cache_maintenance, first_interval=.5, persistent=True)
 
@@ -517,6 +566,8 @@ def unregister():
         handlers = getattr(bpy.app.handlers, name)
         if invalidate_render_cache in handlers:
             handlers.remove(invalidate_render_cache)
+        if clear_scene_histories in handlers:
+            handlers.remove(clear_scene_histories)
     invalidate_render_cache()
     if _handle is not None:
         bpy.types.SpaceView3D.draw_handler_remove(_handle, 'WINDOW')
@@ -525,3 +576,4 @@ def unregister():
         if hasattr(bpy.types.Scene, name):
             delattr(bpy.types.Scene, name)
     clear()
+    clear_scene_histories()

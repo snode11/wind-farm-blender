@@ -243,7 +243,7 @@ def prepare_scene(args):
     scene.render.pixel_aspect_x, scene.render.pixel_aspect_y = pixel_x, pixel_y
     scene.render.fps, scene.render.fps_base = args.fps, 1
     scene.render.film_transparent = False
-    scene.use_nodes = False
+    scene.render.use_compositing = False
     scene.render.use_sequencer = False
     scene.render.image_settings.color_mode = 'RGBA'
     scene.render.image_settings.exr_codec = args.exr_codec

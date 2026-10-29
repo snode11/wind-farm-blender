@@ -69,7 +69,7 @@ assert home.snapshot(bpy.context)[0].title == '离线回放 · 就绪'
 scene.frame_set(scene.frame_current + 1)
 assert farm_flex.is_active(scene)
 assert clearance_replay.sample(scene) is not None
-assert charts.history.points('T1', 'yaw')
+assert charts.history_for(bpy.context.scene).points('T1', 'yaw')
 bpy.context.window_manager.wfrl_home_page = 'MANUAL'
 assert bpy.ops.wfrl.manual_enter() == {'FINISHED'}
 assert bpy.context.window_manager.wfrl_home_page == 'MANUAL'

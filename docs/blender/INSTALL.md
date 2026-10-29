@@ -2,13 +2,13 @@
 
 适用于 Blender **5.2+** 的 NREL 公开扩展 **0.3.40**，包含 NREL／rootkink 叶片外形选择、T1/T2/T3 Down、独立风机手动控制、完整风机几何／同源纹理、精细支撑结构、三相机默认复位、柔性回放、六类合成缺陷、双束／TLS。GW184 **0.4.0** 使用[独立包](GW184三相机与缺陷编辑器.md)。
 
-开发机日常安装为 **0.3.40 工作区构建**，与公开扩展使用同一载荷，共 195 文件，实际模块 `bl_ext.user_default.wfrl_blender`。新后台进程的 94 个模块来源、持久启用、WFRL 主入口注册与 6 个配置文件保护见[安装核对](../../publication/daily-installation.json)。公开 0.3.40 的隔离安装及两项相机后台检查见[包验证](../../publication/blender-0.3.40/validated/package-validation.json)；公开载荷见[交付身份](../../publication/blender-0.3.40.json)，与日常安装使用同一载荷，安装记录独立核对。
+开发机日常安装为 **0.3.40 工作区构建**，共 195 文件，实际模块 `bl_ext.user_default.wfrl_blender`；其载荷独立于当前公开包。94 个新后台进程模块来源、持久启用、主入口注册及 6 个配置文件保护见[安装身份](../../publication/daily-installation.json)。公开包的逐文件、隔离安装和相机后台结果见[包验证](../../publication/blender-0.3.40/public/validated/package-validation.json)；两者按各自摘要与验证范围使用。
 
 日常工作区构建的最终 ZIP、inventory 与 SHA-256 保存在 [package](../../publication/blender-0.3.40/validated/package/)，按其 inventory 核对。原始验证记录由安装身份索引；最终包、必要验证证据与安装回退备份由[安装身份](../../publication/daily-installation.json)索引。
 
 ## 发布身份与验证
 
-当前公开安装包为 [v0.3.40](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.40) 的 **[wfrl_blender-0.3.40.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.40/wfrl_blender-0.3.40.zip)**，manifest 版本 `0.3.40`，共 195 文件、99,155,067 字节。SHA-256 为 `0b90d4c176f816cef8ea3434deead1420e9dc9a84b00ae8a27f5e93165d15dec`。Release 提供 ZIP、SHA-256、inventory 和配套源码归档；身份见[交付身份](../../publication/blender-0.3.40.json)。ZIP 逐文件校验、隔离安装、新进程来源与三相机默认配置／投影后台检查通过；隔离脚本可见窗口覆盖代理姿态／光学／取景／短播放／清理重试和相机参与／画质／删除 RNA 恢复。[本地安装核对](../../publication/daily-installation.json)记录日常构建的安装文件、新后台进程模块来源和后台功能范围；日常后台已核对 T1/T2/T3 Down 保存重开与无遮罩恢复；同一归档的隔离窗口检查核对三相机代理与恢复，不能据此扩大到完整视频、稳定 FPS、其他平台或科学精度。
+当前公开安装包为 [v0.3.40](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.40) 的 **[wfrl_blender-0.3.40.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.40/wfrl_blender-0.3.40.zip)**，manifest 版本 `0.3.40`，共 195 文件、99,156,317 字节，SHA-256 为 `f7907be0bd6737f0b0d8ddde8b856c151b6ebc7392ee1c796fc9252b806f018b`。Release 提供 ZIP、SHA-256、inventory、配套源码和交付清单。ZIP 逐文件、隔离安装、持久启用、新进程来源与默认三相机／投影后台检查通过。源码的 40 项后台和 4 项脚本窗口结果单独记录；安装窗口、完整视频、稳定 FPS、其他平台和科学精度未验收。[日常安装](../../publication/daily-installation.json)的代理／Down 保存重开和配置保护仅适用于其自身载荷。
 
 当前项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。GitHub 自动 Source code 不作为扩展安装包；构建结果须以实际 ZIP 和 inventory 核对。最终包和验证范围见[发布状态](发布状态与验证范围.md)；叶尖显示门槛按源码全时间轴和本地安装抽样分别记录，几何／纹理、材料点和雷达的研究接受边界分别保留。
 

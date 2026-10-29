@@ -368,7 +368,7 @@ def _configure_render(scene, camera, job):
     scene.render.use_motion_blur = False
     scene.render.film_transparent = False
     scene.render.use_sequencer = False
-    scene.use_nodes = False
+    scene.render.use_compositing = False
     scene.render.image_settings.file_format = 'PNG'
     scene.render.image_settings.color_mode = 'RGB'
     scene.render.image_settings.color_depth = '8'

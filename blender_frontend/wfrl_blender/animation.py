@@ -51,7 +51,7 @@ def apply_pose(objects, turbine_id, yaw_deg, pitch_deg, *, manual=None,
             if obj is not None:
                 # Blade pitch is the local-Z rotation on the per-blade PitchRoot
                 # hierarchy established by scene_builder.
-                obj.rotation_euler.z = math.radians(float(pitch_value))
+                obj.rotation_euler.z = -math.radians(float(pitch_value))
 
 
 class KinematicState:

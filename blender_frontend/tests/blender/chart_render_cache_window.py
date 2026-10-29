@@ -32,7 +32,7 @@ if os.environ.get('WFRL_CHART_BASELINE'):
     baseline = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = baseline
     spec.loader.exec_module(baseline)
-    baseline.history = charts.history
+    baseline.history = charts.history_for(bpy.context.scene)
 
 state = {'deadline': monotonic() + 30., 'seen': set(), 'metrics': {}, 'error': None}
 draw = charts.draw_plot
@@ -41,7 +41,8 @@ draw = charts.draw_plot
 def measured(module, count):
     metrics = dict(batch_builds=0, vertices_built=0, history_reads=0, segment_scans=0, axis_scans=0)
     geometry = []
-    originals = (gpu_extras.batch.batch_for_shader, charts.history.points, module.segments, module.axis_ticks)
+    chart_history = charts.history_for(bpy.context.scene)
+    originals = (gpu_extras.batch.batch_for_shader, chart_history.points, module.segments, module.axis_ticks)
     def batch(shader, kind, attributes):
         metrics['batch_builds'] += 1
         metrics['vertices_built'] += len(attributes['pos'])
@@ -57,7 +58,7 @@ def measured(module, count):
         metrics['axis_scans'] += 1
         return originals[3](*args)
     gpu_extras.batch.batch_for_shader = batch
-    charts.history.points, module.segments, module.axis_ticks = points, segments, axes
+    chart_history.points, module.segments, module.axis_ticks = points, segments, axes
     try:
         callback = draw if module is charts else module.draw_plot
         started = perf_counter()
@@ -66,7 +67,7 @@ def measured(module, count):
         metrics.update(draws=count, cpu_ms=(perf_counter() - started) * 1000)
     finally:
         gpu_extras.batch.batch_for_shader = originals[0]
-        charts.history.points, module.segments, module.axis_ticks = originals[1:]
+        chart_history.points, module.segments, module.axis_ticks = originals[1:]
     return metrics, geometry
 
 
@@ -142,7 +143,7 @@ def poll():
         charts._cache_maintenance()
         assert resources.shader is None and resources.commands == ()
         state['closed_window_released'] = True
-        assert charts.raw_history.snapshot() == state['raw']
+        assert charts.raw_history_for(scene).snapshot() == state['raw']
         finish()
     except Exception:
         finish(traceback.format_exc())
@@ -161,8 +162,8 @@ for step in range(600):
         provenance={'source': 'synthetic chart fixture'})}) for index in range(3)]
     charts.record_snapshot(dict(type='snapshot', session_id='chart-render-cache', sequence=step+1,
         payload=dict(mode='replay', run_id='synthetic', step=step, turbines=turbines, farm={},
-                     timestamp=dict(value=step * .1, timebase='simulation_seconds'))))
-state.update(main=bpy.context.window, raw=charts.raw_history.snapshot())
+                     timestamp=dict(value=step * .1, timebase='simulation_seconds'))), scene=scene)
+state.update(main=bpy.context.window, raw=charts.raw_history_for(scene).snapshot())
 for area in bpy.context.screen.areas:
     if area.type == 'VIEW_3D':
         area.tag_redraw()

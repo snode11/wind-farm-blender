@@ -188,14 +188,15 @@ def draw_tools(layout, context):
     if telemetry is not None:
         telemetry.prop(scene, 'wfrl_channel_telemetry', text='采样遥测与曲线')
         from .. import charts
+        chart_history = charts.history_for(scene)
         for tid in farm_flex._ACTIVE.readers:
             card = telemetry.box()
             card.label(text=tid)
             for key in ('yaw', 'pitch', 'rotor_speed', 'power', 'torque', 'load'):
-                points = charts.history.points(tid, key)
+                points = chart_history.points(tid, key)
                 point = points[-1] if points else None
                 card.label(text=charts.LABELS[key] + ': ' + (f'{point.value:.2f} {point.unit}' if point and point.value is not None else '—'))
-        power = charts.history.points(charts.FARM, 'power')
+        power = chart_history.points(charts.FARM, 'power')
         telemetry.label(text='风场功率：' + (f'{power[-1].value:.2f} MW' if power and power[-1].value is not None else '—'))
         telemetry.label(text='变桨为三叶片平均；载荷为 B1 叶根弯矩')
         telemetry.label(text='奖励未记录；不填补缺失通道')

@@ -1,4 +1,4 @@
-"""Part 4 only: live wall-time integration and metadata semantics."""
+"""Live wall-time integration, blade axes and metadata semantics."""
 import math
 import unittest
 from types import SimpleNamespace
@@ -47,10 +47,15 @@ class AnimationMathTests(unittest.TestCase):
                    for name in ['YawRoot', 'Rotor', 'Blade1', 'Blade2', 'Blade3']}
         self.state.apply_objects(objects)
         self.assertAlmostEqual(objects['WFRL.Turbine.custom.YawRoot'].rotation_euler.z, math.pi / 6)
-        self.assertAlmostEqual(objects['WFRL.Turbine.custom.Blade2'].rotation_euler.z, math.radians(5))
+        self.assertAlmostEqual(objects['WFRL.Turbine.custom.Blade2'].rotation_euler.z, -math.radians(5))
         data = snapshot(); data['turbines'][0]['channels']['yaw'] = record(None, validity='invalid', error='missing')
         self.state.apply_snapshot(data); self.state.apply_objects(objects)
         self.assertAlmostEqual(objects['WFRL.Turbine.custom.YawRoot'].rotation_euler.z, math.pi / 6)
+        pitch = objects['WFRL.Turbine.custom.Blade2'].rotation_euler.z
+        apply_pose(objects, 'custom', 30, float('nan'))
+        self.assertEqual(objects['WFRL.Turbine.custom.Blade2'].rotation_euler.z, pitch)
+        apply_pose(objects, 'custom', 30, 20, connected=False)
+        self.assertEqual(objects['WFRL.Turbine.custom.Blade2'].rotation_euler.z, pitch)
 
     def test_metadata_preserved_and_source_age_used(self):
         data = snapshot(); data['farm']['reward'] = record(None, '', validity='unsupported', error='no reward', fidelity='SYNTH', provenance={'formula': 'none'})

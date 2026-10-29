@@ -1,8 +1,8 @@
 """Cancellable POSIX MPI worker, with one acknowledged snapshot in flight.
 
-The simulator's fixed-budget MPI protocol has no early-stop message. Keeping the
-Trainer and its spawned simulator in their own process group lets a user cancel
-that computation without taking down the Bridge or touching another run.
+The simulator's fixed-budget MPI protocol has no early-stop message. Inherited
+run identity and creation-time checks retain ownership when descendants change
+sessions or outlive their launcher, without claiming another run's processes.
 """
 import json
 import os
@@ -15,8 +15,8 @@ import sys
 import tempfile
 import threading
 import time
-import psutil
 from types import SimpleNamespace
+from .formal_process import OwnedProcesses
 
 
 
@@ -49,8 +49,8 @@ class IsolatedTrainer:
         self._thread = self._process = self._directory = None
         self._write_lock = threading.Lock()
         self._cleanup_lock = threading.Lock()
-        self._owned = set()
         self._root_process = None
+        self._processes = None
         self._listener = self._connection = None
         self._cancelled = False
         self._channels = []
@@ -77,25 +77,13 @@ class IsolatedTrainer:
                 'wfrl.blender_bridge.trainer_worker', str(Path(self._directory.name) / 'config.json')]
 
     def _remember_children(self):
-        if self._root_process is not None:
-            try:
-                self._owned.update(self._root_process.children(recursive=True))
-            except psutil.NoSuchProcess:
-                pass
+        if self._processes is not None:
+            self._processes.alive()
 
     def _group_alive(self):
         if self._process is None:
             return False
-        self._remember_children()
-        self._process.poll()
-        return any(self._exists(p) for p in tuple(self._owned))
-
-    @staticmethod
-    def _exists(process):
-        try:
-            return process.is_running() and process.status() != psutil.STATUS_ZOMBIE
-        except psutil.NoSuchProcess:
-            return False
+        return self._processes is not None and self._processes.alive()
 
     @property
     def running(self):
@@ -108,7 +96,6 @@ class IsolatedTrainer:
         self.error = None
         self._cancelled = False
         self._channels = []
-        self._owned.clear()
         self._channel_states.clear()
         self._directory = tempfile.TemporaryDirectory(prefix='wfrl-interactive-')
         scene_path = str(Path(self._directory.name) / 'scene.yaml')
@@ -122,14 +109,14 @@ class IsolatedTrainer:
         config = dict(scene=scene_path, session_id=self.session_id, options=self.options, socket=socket_path)
         (Path(self._directory.name) / 'config.json').write_text(json.dumps(config))
         root = Path(__file__).resolve().parents[2]
+        self._processes = OwnedProcesses(env_key='WFRL_INTERACTIVE_RUN_TOKEN')
         try:
-            self._process = subprocess.Popen(self._worker_command(), cwd=root,
-                env=launcher_environment(), start_new_session=True, stdin=subprocess.DEVNULL)
+            self._process = self._processes.start(self._worker_command(), cwd=root,
+                env=launcher_environment(), stdin=subprocess.DEVNULL)
         except Exception:
             self._directory.cleanup()
             raise
-        self._root_process = psutil.Process(self._process.pid)
-        self._owned.add(self._root_process)
+        self._root_process = self._processes.root
         self._thread = threading.Thread(target=self._read, name='wfrl-mpi-worker', daemon=True)
         self._thread.start()
 
@@ -212,11 +199,7 @@ class IsolatedTrainer:
                 break
             # MPI ranks may create their own process groups. Track process
             # identity (PID plus creation time), not a global name or bare PID.
-            for process in tuple(self._owned):
-                try:
-                    process.send_signal(sig)
-                except psutil.NoSuchProcess:
-                    pass
+            self._processes.signal(sig)
             deadline = time.monotonic() + 3.0
             while self._group_alive() and time.monotonic() < deadline:
                 time.sleep(.02)

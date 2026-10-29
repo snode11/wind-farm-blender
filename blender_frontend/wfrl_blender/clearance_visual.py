@@ -32,8 +32,19 @@ def update_beams(scene, turbine_id, activity=(False, False, False)):
 
 
 def reset_beams(scene):
+    from . import farm_flex
+    protected = []
+    for active in tuple(farm_flex._ACTIVES.values()):
+        try:
+            if active.scene != scene:
+                protected.extend((obj, obj.data) for obj in active.scene.objects
+                                 if '.ClearanceRadar.Beam' in obj.name)
+        except ReferenceError:
+            continue
     for beam in scene.objects:
         if '.ClearanceRadar.Beam' in beam.name:
+            if any(beam == obj or beam.data == data for obj, data in protected):
+                continue
             beam.data.materials.clear()
             beam.data.materials.append(beam_material(False))
             beam.data.bevel_depth = .018

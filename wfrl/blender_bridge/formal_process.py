@@ -1,4 +1,4 @@
-"""Local Formal CLI ownership across process-group changes and reparenting."""
+"""Local process ownership across process-group changes and reparenting."""
 import os
 import subprocess
 import threading
@@ -8,24 +8,27 @@ import uuid
 import psutil
 
 
-class FormalProcesses:
+class OwnedProcesses:
     """Signal process identities; inherited run identity also locates orphaned children."""
-    ENV_KEY = 'WFRL_FORMAL_RUN_TOKEN'
+    ENV_KEY = 'WFRL_PROCESS_RUN_TOKEN'
 
-    def __init__(self):
+    def __init__(self, *, env_key='WFRL_PROCESS_RUN_TOKEN'):
+        self.ENV_KEY = env_key
         self.token = uuid.uuid4().hex
         self.process = None
+        self.root = None
         self._owned = set()
         self._lock = threading.RLock()
         self._started = time.time()
         self._last_scan = float('-inf')
         self._cleaned = False
 
-    def start(self, argv, *, cwd, env):
+    def start(self, argv, *, cwd, env, **options):
         self.process = subprocess.Popen(argv, cwd=cwd, env=dict(env, **{self.ENV_KEY: self.token}),
-                                        start_new_session=True)
+                                        start_new_session=True, **options)
         try:
-            self._owned.add(psutil.Process(self.process.pid))
+            self.root = psutil.Process(self.process.pid)
+            self._owned.add(self.root)
         except psutil.NoSuchProcess:
             pass
         return self.process
@@ -41,10 +44,14 @@ class FormalProcesses:
 
     def _scan_orphans(self):
         self._last_scan = time.monotonic()
-        for process in psutil.process_iter(['pid', 'create_time', 'uids']):
+        same_user = hasattr(os, 'getuid')
+        attributes = ['pid', 'create_time'] + (['uids'] if same_user else [])
+        for process in psutil.process_iter(attributes):
             try:
-                created, uids = process.info['create_time'], process.info['uids']
-                if created is None or uids is None or created < self._started - 1 or uids.real != os.getuid():
+                created = process.info['create_time']
+                if created is None or created < self._started - 1:
+                    continue
+                if same_user and (process.info['uids'] is None or process.info['uids'].real != os.getuid()):
                     continue
                 if process.environ().get(self.ENV_KEY) == self.token:
                     self._owned.add(process)
@@ -89,3 +96,8 @@ class FormalProcesses:
                     process.send_signal(signum)
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     pass
+
+
+class FormalProcesses(OwnedProcesses):
+    def __init__(self):
+        super().__init__(env_key='WFRL_FORMAL_RUN_TOKEN')

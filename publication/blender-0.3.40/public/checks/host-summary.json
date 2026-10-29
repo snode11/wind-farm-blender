@@ -1,0 +1,76 @@
+{
+  "unique_total": 2774,
+  "unique_passed": 2768,
+  "unique_skipped": 6,
+  "unique_failed": 0,
+  "groups": {
+    "frontend": {
+      "testcases": 1369,
+      "passed": 1365,
+      "skipped": 4,
+      "failed": 0
+    },
+    "backend-numerical": {
+      "testcases": 1344,
+      "passed": 1339,
+      "skipped": 5,
+      "failed": 0
+    },
+    "media": {
+      "testcases": 69,
+      "passed": 68,
+      "skipped": 1,
+      "failed": 0
+    },
+    "opencv-contracts": {
+      "testcases": 2,
+      "passed": 2,
+      "skipped": 0,
+      "failed": 0
+    },
+    "rtsp-contracts": {
+      "testcases": 2,
+      "passed": 2,
+      "skipped": 0,
+      "failed": 0
+    }
+  },
+  "remaining_skips": [
+    {
+      "group": "frontend",
+      "classname": "blender_frontend.tests.test_blade_models.BladeModelTests",
+      "test": "test_regeneration_matches_packaged_alternate_asset",
+      "reason": "Rootkink regeneration requires projects/commercial-rootkink-reference/template"
+    },
+    {
+      "group": "frontend",
+      "classname": "blender_frontend.tests.test_blade_recon_data.BundledProvenanceTests",
+      "test": "test_geometry_equals_original_source_import",
+      "reason": "Original boss source is unavailable; portable bundle hash tested separately"
+    },
+    {
+      "group": "frontend",
+      "classname": "blender_frontend.tests.test_tip_deflection.DeflectionTests",
+      "test": "test_retained_vtp_independent_transport",
+      "reason": "Original VTP is not distributed with the offline release"
+    },
+    {
+      "group": "backend-numerical",
+      "classname": "tests.blender_bridge.test_tip_replay",
+      "test": "test_recorded_geometry_matches_saved_truth_and_wire",
+      "reason": "Original FAST.Farm native VTP geometry is not installed (4323 required files missing); offline package assertions remain separate"
+    },
+    {
+      "group": "backend-numerical",
+      "classname": "tests.blender_bridge.test_tip_replay",
+      "test": "test_bad_geometry_rejected",
+      "reason": "Original FAST.Farm native VTP geometry is not installed (4323 required files missing); offline package assertions remain separate"
+    },
+    {
+      "group": "backend-numerical",
+      "classname": "tests.blender_bridge.test_tip_replay",
+      "test": "test_real_bridge_pause_step_and_stop",
+      "reason": "Original FAST.Farm native VTP geometry is not installed (4323 required files missing); offline package assertions remain separate"
+    }
+  ]
+}

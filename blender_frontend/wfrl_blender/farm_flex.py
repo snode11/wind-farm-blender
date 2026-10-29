@@ -605,7 +605,7 @@ class FarmFlex:
             pose = np.array([[np.interp(t, self.times, self.poses[:, k, j])
                               for j in range(6)] for k in range(len(self.readers))])
         if self.last_telemetry_frame is not None and t < self.last_telemetry_frame:
-            charts.clear()
+            charts.clear(scene=scene)
         extra = {}
         if self.telemetry:
             for tid, channels in self.telemetry['turbines'].items():
@@ -613,7 +613,7 @@ class FarmFlex:
                                         unit=record['unit'], source_channel=record['source_channel'],
                                         source_sha256=self.telemetry['sources'][tid]['sha256'])
                               for name, record in channels.items()}
-        charts.record_farm(t, pose, self.manifest, extra)
+        charts.record_farm(t, pose, self.manifest, extra, scene=scene)
         scene['wfrl_yaw_deg'] = pose[:, 0].tolist()
         scene['wfrl_pitch_deg'] = pose[:, 3:].mean(axis=1).tolist()
         scene['wfrl_rpm'] = pose[:, 2].tolist()
@@ -1048,6 +1048,8 @@ def attach(scene,path,*,_package=None):
             if other.scene != scene and any(obj in scene.objects.values() for obj, *_ in other.blades):
                 raise ValueError('FarmFlex objects are already driven by scene: ' + other.scene.name)
         detach(scene, restore=False)
+        from . import charts
+        charts.clear(scene=scene)
         active=FarmFlex(scene,path,_package=package)
         _ACTIVES[scene.as_pointer()] = active
         _ACTIVE = active

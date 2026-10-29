@@ -24,7 +24,7 @@ for step in range(60):
     data=dict(mode='replay',step=step,timestamp=dict(value=step*.1,timebase='simulation_seconds'),
        scene={'backend':'fastfarm','inflow':{'speed':8}},
        turbines=[dict(turbine_id=f'T{i+1}',channels={'power':record(1+i*.3+.2*math.sin(step*.12+i))}) for i in range(3)],farm={})
-    charts.record_snapshot(dict(session_id='test',sequence=step+1,payload=data))
+    charts.record_snapshot(dict(session_id='test',sequence=step+1,payload=data), scene=bpy.context.scene)
 runtime._state=FrontendState(mode='replay',connection='CONNECTED',run_status='PAUSED',confirmed=True)
 runtime.kinematics=KinematicState();runtime.kinematics.apply_snapshot(data)
 presentation.register_overlay()

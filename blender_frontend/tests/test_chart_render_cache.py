@@ -96,10 +96,14 @@ def plot(monkeypatch):
     charts.invalidate_render_cache()
 
 
+def _record_snapshot(plot, message):
+    return charts.record_snapshot(message, scene=plot.context.scene)
+
+
 def test_paused_draw_reuses_data_geometry_and_batches(plot, monkeypatch):
     for step in range(600):
-        charts.record_snapshot(snapshot(step))
-    raw = charts.raw_history.snapshot()
+        _record_snapshot(plot, snapshot(step))
+    raw = charts.raw_history_for(plot.context.scene).snapshot()
     charts.draw_plot()
     first = plot.calls.copy()
     resources = next(iter(charts._resource_cache.values()))
@@ -120,32 +124,32 @@ def test_paused_draw_reuses_data_geometry_and_batches(plot, monkeypatch):
     assert plot.calls['shader'] == first['shader']
     assert plot.calls['dimensions'] == first['dimensions']
     assert plot.calls['draw'] == first['draw'] * 4
-    assert charts.raw_history.snapshot() == raw
+    assert charts.raw_history_for(plot.context.scene).snapshot() == raw
     assert plot.state.blend == 'NONE' and plot.state.width == 1. and plot.state.point == 1.
 
-    assert charts.record_snapshot(snapshot(599, value=900., sequence=601))
+    assert _record_snapshot(plot, snapshot(599, value=900., sequence=601))
     charts.draw_plot()
     assert resources.commands == () and resources.shader is None
     assert next(iter(charts._resource_cache.values())).data.bounds[-1] == 900.
-    assert len(charts.history.points('T1', 'power')) == 600
-    assert charts.record_snapshot(snapshot(600, sequence=602))
+    assert len(charts.history_for(plot.context.scene).points('T1', 'power')) == 600
+    assert _record_snapshot(plot, snapshot(600, sequence=602))
     charts.draw_plot()
-    assert charts.history.points('T1', 'power')[0].step == 1
-    revision = charts.history.revision
+    assert charts.history_for(plot.context.scene).points('T1', 'power')[0].step == 1
+    revision = charts.history_for(plot.context.scene).revision
     counts = plot.calls.copy()
-    assert not charts.record_snapshot(snapshot(600, sequence=602))
+    assert not _record_snapshot(plot, snapshot(600, sequence=602))
     charts.draw_plot()
-    assert charts.history.revision == revision
+    assert charts.history_for(plot.context.scene).revision == revision
     assert plot.calls['batch'] == counts['batch']
-    assert charts.record_snapshot(snapshot(600, sequence=603))
+    assert _record_snapshot(plot, snapshot(600, sequence=603))
     charts.draw_plot()
-    assert charts.history.revision == revision
+    assert charts.history_for(plot.context.scene).revision == revision
     assert plot.calls['batch'] == counts['batch']
-    assert charts.raw_history.last_sequence == 603
+    assert charts.raw_history_for(plot.context.scene).last_sequence == 603
 
 
 def test_selection_dimensions_timebase_and_run_invalidate(plot):
-    charts.record_snapshot(snapshot(1))
+    _record_snapshot(plot, snapshot(1))
     charts.draw_plot()
     context = plot.context
     for target, name, value in (
@@ -165,28 +169,28 @@ def test_selection_dimensions_timebase_and_run_invalidate(plot):
         assert len(charts._resource_cache) == 1
     for changes in ({'timestamp': dict(value=1000., timebase='unix_seconds')}, {'run_id': 'other'}):
         previous = next(iter(charts._resource_cache.values()))
-        charts.record_snapshot(snapshot(1, **changes))
+        _record_snapshot(plot, snapshot(1, **changes))
         charts.draw_plot()
         assert previous.shader is None
-        assert len(charts.history.points('T1', 'power')) == 1
+        assert len(charts.history_for(plot.context.scene).points('T1', 'power')) == 1
     assert any(text.startswith('s since ') for text in plot.labels)
 
 
 def test_training_and_curve_writes_change_version_at_same_step(plot):
     record = dict(value=2., unit='MW', fidelity='DIRECT', validity='valid', provenance={})
     for kind in ('training_stats', 'curve'):
-        before = charts.history.revision
+        before = charts.history_for(plot.context.scene).revision
         payload = dict(mode='formal_training', run_id='run', step=3,
                        timestamp=dict(value=100., timebase='unix_seconds'), record_kind='iteration_stats',
                        stats={'mean_power': record}, turbine_id='T1', channel='power',
                        data=dict(record, value=[(1., 2.), (2., 3.)]))
         message = dict(type=kind, session_id='s', sequence=2, payload=payload)
         callback = charts.record_training if kind == 'training_stats' else charts.record_curve
-        callback(message)
-        first = charts._plot_data('mean_power' if kind == 'training_stats' else 'power', 'ALL')
-        callback(dict(message, sequence=3))
-        second = charts._plot_data(first.channel, 'ALL')
-        assert charts.history.revision > before
+        callback(message, scene=plot.context.scene)
+        first = charts._plot_data('mean_power' if kind == 'training_stats' else 'power', 'ALL', plot.context.scene)
+        callback(dict(message, sequence=3), scene=plot.context.scene)
+        second = charts._plot_data(first.channel, 'ALL', plot.context.scene)
+        assert charts.history_for(plot.context.scene).revision > before
         assert first is not second
 
 
@@ -198,13 +202,13 @@ def test_gaps_source_episode_and_units_preserve_drawing_contract(plot):
             record['validity'] = 'missing'
         if step >= 3:
             record['fidelity'] = 'EXPORTED'
-        charts.record_snapshot(message)
+        _record_snapshot(plot, message)
     charts.draw_plot()
     data = next(iter(charts._resource_cache.values())).data
     assert data.series[0][1] == (((0., 0),), ((.2, 2),), ((.3, 3),), ((.4, 4), (.5, 5)))
     message = snapshot(6)
     message['payload']['turbines'][0]['channels']['power']['unit'] = 'W'
-    charts.record_snapshot(message)
+    _record_snapshot(plot, message)
     charts.draw_plot()
     resources = next(iter(charts._resource_cache.values()))
     assert sum(command[0] == 'line' for command in resources.commands) == 1
@@ -213,7 +217,7 @@ def test_gaps_source_episode_and_units_preserve_drawing_contract(plot):
 
 def test_window_scene_eviction_and_lifecycle_release(plot):
     charts.register()
-    charts.record_snapshot(snapshot(1))
+    _record_snapshot(plot, snapshot(1))
     charts.draw_plot()
     original = next(iter(charts._resource_cache.values()))
     first_batches = tuple(plot.batches)
@@ -233,13 +237,13 @@ def test_window_scene_eviction_and_lifecycle_release(plot):
     charts.draw_plot()
     assert second.shader is None
     assert len(charts._resource_cache) == 1
-    before = charts.raw_history.snapshot()
+    before = charts.raw_history_for(plot.context.scene).snapshot()
     for hook in ('load_pre', 'undo_pre', 'redo_pre'):
         charts.draw_plot()
         for callback in getattr(plot.bpy.app.handlers, hook):
             callback(None)
         assert not charts._resource_cache and not charts._data_cache
-        assert charts.raw_history.snapshot() == before
+        assert charts.raw_history_for(plot.context.scene).snapshot() == before
     for i in range(charts._CACHE_LIMIT + 2):
         context.window = RNA(scene=context.scene, screen=context.window.screen)
         context.window_manager.windows.append(context.window)
@@ -256,7 +260,7 @@ def test_window_scene_eviction_and_lifecycle_release(plot):
 
 
 def test_hidden_small_view_and_gpu_failure_release(plot):
-    charts.record_snapshot(snapshot(1))
+    _record_snapshot(plot, snapshot(1))
     charts.draw_plot()
     resources = next(iter(charts._resource_cache.values()))
     batch = next(command[1] for command in resources.commands if command[0] == 'line')

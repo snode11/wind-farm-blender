@@ -1,0 +1,6 @@
+{
+  "status": "NOT_RUN",
+  "source_tag": "v0.3.40",
+  "expected_extension_sha256": "f7907be0bd6737f0b0d8ddde8b856c151b6ebc7392ee1c796fc9252b806f018b",
+  "scope": "Tagged source archive extraction and independent byte-identical extension rebuild."
+}

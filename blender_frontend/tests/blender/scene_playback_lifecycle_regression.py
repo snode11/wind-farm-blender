@@ -1,4 +1,4 @@
-"""Save/reopen FULL_COPY failure must preserve the ready scene's deformation."""
+"""Scene-load failures preserve the owning scene's deformation and radar."""
 import json
 import importlib
 import os
@@ -64,6 +64,14 @@ np.testing.assert_array_equal(after, [vertex.co[:] for vertex in obj.data.vertic
 # that second writer explicitly instead of claiming two independent replays.
 linked = scene_a.copy()
 linked.name = 'C_LINKED_COPY'
+linked.use_fake_user = True
+clearance_visual = importlib.import_module(ADDON_MODULE + '.clearance_visual')
+clearance_visual.update_beams(scene_a, 'T1', (True, False, True))
+def beam_state(scene):
+    return [(obj.as_pointer(), obj.data.as_pointer(), tuple(m.as_pointer() for m in obj.data.materials),
+             obj.data.bevel_depth, obj['wfrl_beam_active']) for obj in scene.objects
+            if '.ClearanceRadar.Beam' in obj.name]
+beam_before = beam_state(scene_a)
 try:
     farm_flex.attach(linked, farm_flex.saved_package(scene_a))
 except ValueError as exc:
@@ -73,6 +81,25 @@ else:
 assert farm_flex.is_active(scene_a) and runtime_a.enabled
 assert clearance_replay.reader_for(linked) is None
 assert not linked['wfrl_flex_active']
+assert beam_state(scene_a) == beam_before
+assert clearance_replay.reader_for(scene_a) is runtime_a.readers['T1']
+shared_curve_scene = bpy.data.scenes.new('D_SHARED_CURVE')
+shared_curve_scene.use_fake_user = True
+shared_beam = scene_a.objects['WFRL.Turbine.T1.ClearanceRadar.Beam1'].copy()
+shared_curve_scene.collection.objects.link(shared_beam)
+clearance_replay.clear(shared_curve_scene)
+assert beam_state(scene_a) == beam_before
+saved_linked = OUT / 'linked-copy.blend'
+bpy.ops.wm.save_as_mainfile(filepath=str(saved_linked))
+bpy.ops.wm.open_mainfile(filepath=str(saved_linked))
+scene_a, linked = bpy.data.scenes['A_MAPPO'], bpy.data.scenes['C_LINKED_COPY']
+scene_b = bpy.data.scenes['B_FULL_COPY']
+assert farm_flex.is_active(scene_a) and not farm_flex.is_active(linked)
+assert clearance_replay.reader_for(scene_a) is not None and clearance_replay.reader_for(linked) is None
+clearance_visual.update_beams(scene_a, 'T1', (True, False, True))
+beam_before = beam_state(scene_a)
+clearance_replay.clear(linked)
+assert beam_state(scene_a) == beam_before
 
 result = dict(status='PASS', scope='isolated background Blender', addon_module=ADDON_MODULE,
     addon_file=addon.__file__, ready_scene=scene_a.name, failed_scene=scene_b.name,

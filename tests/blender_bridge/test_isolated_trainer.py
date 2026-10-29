@@ -150,3 +150,51 @@ for line in connection.makefile('r'):
                     try: psutil.Process(sample['child_pid']).kill()
                     except psutil.NoSuchProcess: pass
             unrelated.terminate(); unrelated.wait(timeout=5)
+
+
+def test_orphan_before_first_snapshot_is_owned_and_restart_is_blocked(tmp_path):
+    import subprocess
+    import psutil
+    from wfrl.blender_bridge.isolated_trainer import IsolatedTrainer
+    from wfrl.scene.schema import load_scene
+
+    ready, release, child_pid = (tmp_path / name for name in ('ready', 'release', 'child.pid'))
+    script = tmp_path / 'launcher.py'
+    script.write_text('import subprocess,sys,time\nfrom pathlib import Path\n'
+        'ready,release,pidfile=map(Path,sys.argv[1:])\nready.touch()\n'
+        'while not release.exists(): time.sleep(.01)\n'
+        'child=subprocess.Popen([sys.executable,"-c","import time;time.sleep(120)"],'
+        'start_new_session=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)\n'
+        'pidfile.write_text(str(child.pid))\n')
+
+    class FixtureTrainer(IsolatedTrainer):
+        def _worker_command(self):
+            return [sys.executable, str(script), str(ready), str(release), str(child_pid)]
+
+    trainer = FixtureTrainer(load_scene('scenes/turb3_ctrl3.yaml'), lambda s: None)
+    unrelated = subprocess.Popen([sys.executable, '-c', 'import time;time.sleep(120)'])
+    child = None
+    try:
+        trainer.start()
+        wait_for(ready.exists)
+        assert trainer._root_process is not None
+        release.touch()
+        wait_for(child_pid.exists)
+        child = psutil.Process(int(child_pid.read_text()))
+        wait_for(lambda: trainer._process.poll() is not None)
+        trainer._thread.join(3)
+        assert trainer.running
+        original = trainer._process
+        trainer.start()
+        assert trainer._process is original
+        trainer.stop(timeout=0)
+        assert not trainer.running
+        assert not child.is_running() or child.status() == psutil.STATUS_ZOMBIE
+        assert unrelated.poll() is None
+    finally:
+        if child is not None:
+            try: child.kill()
+            except psutil.NoSuchProcess: pass
+        trainer.stop(timeout=0)
+        unrelated.terminate()
+        unrelated.wait(timeout=5)

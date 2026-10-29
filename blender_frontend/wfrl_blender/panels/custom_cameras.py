@@ -151,7 +151,8 @@ class EditSession:
         self.playing = bool(window and playback.is_playing(scene))
         self.snapshot = ViewportSnapshot(area) if area else None
         self.original_camera = core.get_camera(scene, slot)
-        self.draft, self.closed = None, False
+        self.draft, self.draft_data, self.closed = None, None, False
+        self.error = ''
 
     def valid(self):
         try:
@@ -187,6 +188,7 @@ class EditSession:
         self._play(False)
         try:
             self.draft = core.begin_draft(self.scene, self.slot)
+            self.draft_data = self.draft.data
         except Exception:
             self._play(self.playing)
             raise
@@ -197,7 +199,7 @@ class EditSession:
             self.cancel(restore=False)
             raise ValueError('场景或回放会话已变化，请重新安装')
         camera = core.commit_draft(self.scene, self.slot, self.draft)
-        self.draft = None
+        self.draft = self.draft_data = None
         self._play(self.playing)
         self.closed = True
         return camera
@@ -208,15 +210,17 @@ class EditSession:
         same = self.valid()
         if self.draft is not None:
             try:
-                core.cancel_draft(self.draft)
-            except (ReferenceError, RuntimeError):
-                pass
-            self.draft = None
+                core.cancel_draft(self.draft, data=self.draft_data)
+            except (RuntimeError, ValueError) as exc:
+                self.error = '相机草稿清理失败，请重试取消：' + str(exc)
+                raise RuntimeError(self.error) from exc
+            self.draft = self.draft_data = None
         if restore and same:
             if self.snapshot:
                 self.snapshot.restore()
             self._play(self.playing)
         self.closed = True
+        self.error = ''
 
 
 def _parameters(wm):
@@ -433,7 +437,12 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
         if getattr(self, 'closed', True):
             return
         if self.session and not self.session.closed:
-            self.session.cancel(restore=resume)
+            try:
+                self.session.cancel(restore=resume)
+            except (RuntimeError, ValueError) as exc:
+                self.error = str(exc)
+                self.report({'ERROR'}, self.error)
+                raise
         if restore:
             self.external_snapshot.restore()
         if getattr(self, 'timer', None):
@@ -644,8 +653,12 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
             if event.type not in {'N', 'T', 'MOUSEMOVE', 'INBETWEEN_MOUSEMOVE', 'WINDOW_DEACTIVATE'}:
                 return {'RUNNING_MODAL'}
             return {'PASS_THROUGH'}
-        except (ReferenceError, RuntimeError, ValueError, KeyError):
-            self.finish(restore=False, resume=False)
+        except (ReferenceError, RuntimeError, ValueError, KeyError) as exc:
+            self.error = str(exc)
+            try:
+                self.finish(restore=False, resume=False)
+            except (RuntimeError, ValueError):
+                return {'RUNNING_MODAL'}
             return {'CANCELLED'}
 
     def state_text(self):
@@ -1087,7 +1100,10 @@ def lifecycle_watchdog():
         except (ReferenceError, RuntimeError):
             valid = False
         if not valid:
-            _ACTIVE.finish(restore=False,resume=False)
+            try:
+                _ACTIVE.finish(restore=False,resume=False)
+            except (RuntimeError, ValueError):
+                pass  # finish reports the error and retains resources for retry.
     if (not box_panel._ACTIVE and history.HISTORY.entries and getattr(bpy.context, 'scene', None) is not None
             and not playback.any_playing()):
         history.watchdog_status(bpy.context.scene)
