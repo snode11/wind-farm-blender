@@ -1,6 +1,10 @@
 {
-  "status": "NOT_RUN",
+  "status": "PASS",
   "source_tag": "v0.3.40",
+  "identity_scope": "Canonical build inputs exported from Git and independently rebuilt; archive-specific commit and digest are recorded in the delivery manifest.",
+  "canonical_payload_sha256": "720cb9aa1bff4d52ef154594824a8d2bff4e4f068635344a49a4ccf7e0886114",
+  "canonical_payload_files": 194,
   "expected_extension_sha256": "f7907be0bd6737f0b0d8ddde8b856c151b6ebc7392ee1c796fc9252b806f018b",
-  "scope": "Tagged source archive extraction and independent byte-identical extension rebuild."
+  "rebuilt_extension_sha256": "f7907be0bd6737f0b0d8ddde8b856c151b6ebc7392ee1c796fc9252b806f018b",
+  "byte_identical": true
 }

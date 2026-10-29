@@ -32,7 +32,7 @@
     "default_cameras_and_projection": "PASS",
     "visible_window": "NOT_RUN"
   },
-  "source_archive_rebuild": "NOT_RUN",
+  "source_archive_rebuild": "PASS_CANONICAL_BUILD_INPUTS",
   "daily_installation": {
     "identity": "publication/daily-installation.json",
     "same_as_public_archive": false
