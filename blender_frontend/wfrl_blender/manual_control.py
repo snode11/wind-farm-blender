@@ -10,16 +10,23 @@ import bpy
 from bpy.app.handlers import persistent
 from bpy_extras.io_utils import ExportHelper, ImportHelper
 
-from .manual_motion import RotorClock
+from .manual_motion import RotorClock, pitch_at
 from . import manual_pose
 
 
 DEFAULT_RPM = 9.0
+# A stopped turbine is feathered; a running one pitches to fine pitch.
+FEATHER_PITCH_DEG = 90.0
+RUN_PITCH_DEG = 0.0
+DEFAULT_PITCH_RATE_DEG_S = 5.0
 TICK_SECONDS = 1.0 / 60.0
 IDLE_SECONDS = 0.25
 _POINTER_FIELDS = ('yaw_object', 'rotor_object', 'blade1_object', 'blade2_object', 'blade3_object')
 _POSE_FIELDS = manual_pose.POSE_FIELDS
 _CLOCKS = {}
+_PITCH_TIMES = {}
+# Called with the scene after manual poses change, e.g. to move Down labels.
+POSE_LISTENERS = []
 _updating = False
 _registered = False
 
@@ -123,18 +130,80 @@ def _apply_rotor(entry):
     entry.rotor_object.rotation_euler.x = math.radians(entry.azimuth_deg)
 
 
+def target_pitch(entry, index):
+    """Commanded pitch of one blade; the actual pitch follows at the scene rate."""
+    return getattr(entry, f'pitch_b{index}_deg') if entry.individual_pitch else entry.pitch_deg
+
+
+def _pitch_rate(entry):
+    return max(0.0, float(entry.id_data.wfrl_manual_pitch_rate_deg_s))
+
+
+def _settle_pitch(entry):
+    """Place every blade at its commanded pitch, ending any ramp."""
+    for index in range(1, 4):
+        value = target_pitch(entry, index)
+        setattr(entry, f'pitch_actual_b{index}_deg', value)
+        setattr(entry, f'pitch_start_b{index}_deg', value)
+    entry.pitch_state_ready = True
+
+
+def _retarget_pitch(entry):
+    """Start a ramp from the current actual pitch, or settle when the rate is zero."""
+    if not entry.pitch_state_ready or _pitch_rate(entry) <= 0:
+        _settle_pitch(entry)
+        return
+    for index in range(1, 4):
+        if abs(target_pitch(entry, index) - getattr(entry, f'pitch_actual_b{index}_deg')) > 1e-9:
+            setattr(entry, f'pitch_start_b{index}_deg', getattr(entry, f'pitch_actual_b{index}_deg'))
+
+
+def _command_pitch(entry, pitch, *, settle=False):
+    """Command all three blades to ``pitch``; they ramp unless ``settle``."""
+    entry.individual_pitch = False
+    entry.pitch_deg = pitch
+    for index in range(1, 4):
+        setattr(entry, f'pitch_b{index}_deg', pitch)
+    if settle:
+        _settle_pitch(entry)
+    else:
+        _retarget_pitch(entry)
+
+
+def pitch_ramping(entry):
+    return any(abs(target_pitch(entry, index) - getattr(entry, f'pitch_actual_b{index}_deg')) > 1e-9
+               for index in range(1, 4))
+
+
+def _advance_pitch(entry, elapsed):
+    rate = _pitch_rate(entry)
+    for index in range(1, 4):
+        actual = getattr(entry, f'pitch_actual_b{index}_deg')
+        setattr(entry, f'pitch_actual_b{index}_deg', pitch_at(actual, target_pitch(entry, index), rate, elapsed))
+
+
+def apply_pitch(entry, pitches):
+    for index, pitch in enumerate(pitches, 1):
+        blade = getattr(entry, f'blade{index}_object')
+        blade.rotation_mode = 'XYZ'
+        blade.rotation_euler.z = -math.radians(pitch)
+
+
 def _apply_entry(entry):
     entry.yaw_object.rotation_mode = 'XYZ'
     entry.yaw_object.rotation_euler.z = math.radians(entry.yaw_deg)
     _apply_rotor(entry)
-    for index in range(1, 4):
-        blade = getattr(entry, f'blade{index}_object')
-        blade.rotation_mode = 'XYZ'
-        pitch = getattr(entry, f'pitch_b{index}_deg') if entry.individual_pitch else entry.pitch_deg
-        blade.rotation_euler.z = -math.radians(pitch)
+    if not entry.pitch_state_ready:
+        _settle_pitch(entry)
+    apply_pitch(entry, [getattr(entry, f'pitch_actual_b{index}_deg') for index in range(1, 4)])
 
 
 def _redraw(scene):
+    for listener in POSE_LISTENERS:
+        try:
+            listener(scene)
+        except (AttributeError, ReferenceError, KeyError, ValueError) as exc:
+            print('WFRL manual pose listener:', exc)
     for window in bpy.context.window_manager.windows:
         if window.scene == scene:
             for area in window.screen.areas:
@@ -209,6 +278,8 @@ def _update_entry(entry, context, field):
                 setattr(entry, f'pitch_b{index}_deg', entry.pitch_deg)
         finally:
             _updating = False
+    if field in _PITCH_FIELDS:
+        _retarget_pitch(entry)
     running = entry.running and entry.rpm > 0 and _scene_key(scene) in visible_scenes()
     _write_azimuth(entry, clock.configure(now, rpm=entry.rpm, running=running, azimuth_deg=angle))
     if entry.running != running:
@@ -220,8 +291,11 @@ def _update_entry(entry, context, field):
     _apply_entry(entry)
     sync_batch(scene)
     _redraw(scene)
-    if running and entry.rpm > 0:
+    if (running and entry.rpm > 0) or pitch_ramping(entry):
         _wake_timer()
+
+
+_PITCH_FIELDS = frozenset(('pitch_deg', 'individual_pitch', 'pitch_b1_deg', 'pitch_b2_deg', 'pitch_b3_deg'))
 
 
 def _update(field):
@@ -291,8 +365,11 @@ def pose_snapshot(scene, *, now=None):
     return poses
 
 
-def _apply_poses(scene, poses, *, pause=True, now=None):
-    """Validate every target before applying poses and synchronizing its clock."""
+def _apply_poses(scene, poses, *, pause=True, now=None, ramp=False):
+    """Validate every target before applying poses and synchronizing its clock.
+
+    Poses settle pitch immediately unless ``ramp`` asks the blades to follow the
+    scene pitch rate from their current actual pitch."""
     global _updating
     valid, reason = validate_scene(scene)
     if not valid:
@@ -315,11 +392,17 @@ def _apply_poses(scene, poses, *, pause=True, now=None):
             _CLOCKS.pop(key, None)
             if running:
                 _CLOCKS[key] = RotorClock(entry.azimuth_deg, entry.rpm, True, now)
+            if ramp:
+                _retarget_pitch(entry)
+            else:
+                _settle_pitch(entry)
             _apply_entry(entry)
     finally:
         _updating = previous
     sync_batch(scene)
     _redraw(scene)
+    if ramp and any(pitch_ramping(entry) for entry in scene.wfrl_manual_turbines):
+        _wake_timer()
 
 
 def _selected_pose_changes(scene, changes, *, now):
@@ -337,13 +420,24 @@ def tick(now=None):
     active_keys = set()
     moving = False
     for scene in bpy.data.scenes:
-        if not is_manual(scene):
+        if not is_manual(scene) or scene.get('wfrl_manual_exporting'):
             continue
         valid, _reason = validate_scene(scene)
         if not valid or _scene_key(scene) not in visible:
             pause_scene(scene, now=now)
+            _PITCH_TIMES.pop(_scene_key(scene), None)
             continue
         changed = False
+        scene_key = _scene_key(scene)
+        last = _PITCH_TIMES.pop(scene_key, now)
+        for entry in scene.wfrl_manual_turbines:
+            if pitch_ramping(entry):
+                _advance_pitch(entry, max(0.0, now - last))
+                apply_pitch(entry, [getattr(entry, f'pitch_actual_b{index}_deg') for index in range(1, 4)])
+                changed = True
+                if pitch_ramping(entry):
+                    _PITCH_TIMES[scene_key] = now
+                    moving = True
         for entry in scene.wfrl_manual_turbines:
             key = _entry_key(scene, entry)
             active_keys.add(key)
@@ -387,6 +481,7 @@ def pause_all():
     for scene in getattr(bpy.data, 'scenes', ()):
         pause_scene(scene)
     _CLOCKS.clear()
+    _PITCH_TIMES.clear()
 
 
 @persistent
@@ -416,7 +511,7 @@ def _properties(update_factory):
     return {
         'yaw_deg': bpy.props.FloatProperty(name='机舱朝向 °', default=0.0, min=-180.0, max=180.0,
                                            precision=1, update=update_factory('yaw_deg')),
-        'pitch_deg': bpy.props.FloatProperty(name='集体桨距 °', default=0.0, min=-30.0, max=90.0,
+        'pitch_deg': bpy.props.FloatProperty(name='集体桨距 °', default=FEATHER_PITCH_DEG, min=-30.0, max=90.0,
                                              description='统一设置三片叶片桨距，覆盖各片独立桨距',
                                              precision=1, update=update_factory('pitch_deg')),
         'rpm': bpy.props.FloatProperty(name='转速 RPM', default=DEFAULT_RPM, min=0.0, max=30.0,
@@ -425,7 +520,7 @@ def _properties(update_factory):
                                                precision=1, update=update_factory('azimuth_deg')),
         'individual_pitch': bpy.props.BoolProperty(name='分别调整三片叶片', default=False,
                                                    update=update_factory('individual_pitch')),
-        **{f'pitch_b{i}_deg': bpy.props.FloatProperty(name=f'叶片 {i} 桨距 °', default=0.0,
+        **{f'pitch_b{i}_deg': bpy.props.FloatProperty(name=f'叶片 {i} 桨距 °', default=FEATHER_PITCH_DEG,
                                                       min=-30.0, max=90.0, precision=1,
                                                       update=update_factory(f'pitch_b{i}_deg'))
            for i in range(1, 4)},
@@ -436,6 +531,11 @@ class WFRL_ManualTurbine(bpy.types.PropertyGroup):
     __annotations__ = {
         **_properties(_update),
         'turbine_id': bpy.props.StringProperty(),
+        # Actual blade pitch follows the commanded pitch at the scene rate;
+        # the start value records where the current ramp began.
+        **{f'pitch_actual_b{i}_deg': bpy.props.FloatProperty(default=FEATHER_PITCH_DEG) for i in range(1, 4)},
+        **{f'pitch_start_b{i}_deg': bpy.props.FloatProperty(default=FEATHER_PITCH_DEG) for i in range(1, 4)},
+        'pitch_state_ready': bpy.props.BoolProperty(default=False),
         'running': bpy.props.BoolProperty(default=False, options={'SKIP_SAVE'}, update=_update('running')),
         **{field: bpy.props.PointerProperty(type=bpy.types.Object) for field in _POINTER_FIELDS},
     }
@@ -496,10 +596,12 @@ class WFRL_OT_ManualAction(bpy.types.Operator):
     bl_label = '风机手动控制'
     bl_options = {'REGISTER', 'UNDO'}
 
-    action: bpy.props.EnumProperty(items=(('START', '运行', '按当前 RPM 运行'),
-                                         ('PAUSE', '暂停', '暂停运动并保留 RPM'),
-                                         ('STOP', '停转', '将 RPM 设为 0 并暂停'),
-                                         ('RESET', '复位', '恢复默认姿态与 9 RPM，保持暂停')))
+    action: bpy.props.EnumProperty(items=(('START', '运行', '按当前 RPM 运行，叶片变桨到 0°'),
+                                         ('PAUSE', '暂停', '暂停运动并保留 RPM，叶片顺桨到 90°'),
+                                         ('STOP', '停转', '将 RPM 设为 0 并暂停，叶片顺桨到 90°'),
+                                         ('RESET', '复位', '恢复默认朝向、叶轮角度与 9 RPM，叶片立即顺桨 90°，保持暂停')))
+    # 运行 pitches the blades to 0°; 暂停 and 停转 feather them to 90° at the
+    # scene pitch rate; 复位 places them at 90° immediately.
 
     @classmethod
     def poll(cls, context):
@@ -526,20 +628,20 @@ class WFRL_OT_ManualAction(bpy.types.Operator):
                 if self.action == 'STOP':
                     entry.rpm = 0.0
                 elif self.action == 'RESET':
-                    entry.yaw_deg = entry.pitch_deg = entry.azimuth_deg = 0.0
+                    entry.yaw_deg = entry.azimuth_deg = 0.0
                     entry.rpm = DEFAULT_RPM
-                    entry.individual_pitch = False
-                    for index in range(1, 4):
-                        setattr(entry, f'pitch_b{index}_deg', 0.0)
                 entry.running = (self.action == 'START' and entry.rpm > 0
                                  and _scene_key(scene) in visible_scenes())
+                if self.action != 'START' or entry.running:
+                    _command_pitch(entry, RUN_PITCH_DEG if entry.running else FEATHER_PITCH_DEG,
+                                   settle=self.action == 'RESET')
             finally:
                 _updating = False
             clock.configure(now, rpm=entry.rpm, running=entry.running, azimuth_deg=entry.azimuth_deg)
             _apply_entry(entry)
         sync_batch(scene)
         _redraw(scene)
-        if self.action == 'START':
+        if self.action == 'START' or any(pitch_ramping(entry) for entry in entries):
             _wake_timer()
         return {'FINISHED'}
 
@@ -626,7 +728,8 @@ class WFRL_OT_ManualPoseNudge(_ManualPoseTarget, bpy.types.Operator):
                     for index in range(1, 4):
                         values[f'pitch_b{index}_deg'] = values['pitch_deg']
                 poses[entry.turbine_id] = values
-            _apply_poses(scene, poses, pause=False, now=now)
+            _apply_poses(scene, poses, pause=False, now=now,
+                         ramp=self.field in _PITCH_FIELDS)
         except (ValueError, ReferenceError, AttributeError) as exc:
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}
@@ -706,7 +809,21 @@ _HANDLERS = (('load_pre', _before_load), ('load_post', _after_restore),
              ('undo_pre', _before_restore), ('undo_post', _after_restore),
              ('redo_pre', _before_restore), ('redo_post', _after_restore))
 _SCENE_PROPERTIES = ('wfrl_manual_turbines', 'wfrl_manual_batch', 'wfrl_manual_target',
-                     'wfrl_manual_return_scene', 'wfrl_manual_scene', 'wfrl_manual_step_deg')
+                     'wfrl_manual_return_scene', 'wfrl_manual_scene', 'wfrl_manual_step_deg',
+                     'wfrl_manual_pitch_rate_deg_s')
+
+
+def _pitch_rate_update(scene, context):
+    if not is_manual(scene) or _updating:
+        return
+    for entry in scene.wfrl_manual_turbines:
+        if scene.wfrl_manual_pitch_rate_deg_s <= 0:
+            _settle_pitch(entry)
+            try:
+                _apply_entry(entry)
+            except (AttributeError, ReferenceError):
+                pass
+    _wake_timer()
 
 
 def register():
@@ -723,6 +840,9 @@ def register():
     bpy.types.Scene.wfrl_manual_step_deg = bpy.props.FloatProperty(
         name='微调步长 °', description='加减按钮按每台风机的当前值调整，不统一已有差异',
         default=1.0, min=.1, max=15.0, precision=1)
+    bpy.types.Scene.wfrl_manual_pitch_rate_deg_s = bpy.props.FloatProperty(
+        name='变桨速度 °/s', description='叶片按此速度转向设定桨距，到位后保持；0 表示立即到位',
+        default=DEFAULT_PITCH_RATE_DEG_S, min=0.0, max=30.0, precision=1, update=_pitch_rate_update)
     bpy.types.Scene.wfrl_manual_target = bpy.props.EnumProperty(
         name='控制对象', items=(('T1', 'T1', '控制风机 T1'), ('T2', 'T2', '控制风机 T2'),
                               ('T3', 'T3', '控制风机 T3'), ('ALL', '全部', '只将编辑的参数应用到全部风机')),
