@@ -6,5 +6,9 @@
   "canonical_payload_files": 194,
   "expected_extension_sha256": "f7907be0bd6737f0b0d8ddde8b856c151b6ebc7392ee1c796fc9252b806f018b",
   "rebuilt_extension_sha256": "f7907be0bd6737f0b0d8ddde8b856c151b6ebc7392ee1c796fc9252b806f018b",
-  "byte_identical": true
+  "byte_identical": true,
+  "source_commit": "d5bd9d53467f6218034b2f2f5f0f094c1a47d782",
+  "source_tree": "96cf73a60bc84ae0168c522983f093ced52a424e",
+  "source_archive_sha256": "21afcb288955b12f8a68638b49d09b903fb24475603045283f8f3f2ba4658673",
+  "source_archive_crc": "PASS"
 }
