@@ -56,6 +56,18 @@ GW184 使用[独立包操作说明](docs/blender/GW184三相机与缺陷编辑�
 
 ## 源码与运行资源
 
+仓库按运行职责组织；脚本入口与环境要求见[脚本索引](scripts/README.md)。
+
+| 目录 | 职责 |
+| --- | --- |
+| `blender_frontend/` | Blender 扩展、正式离线资产及前端检查 |
+| `wfrl/`、`scripts/`、`tests/`、`scenes/` | 后端、训练、数据工具、合同测试与场景配置 |
+| `blade_recon/`、`blade_recon0.2/`、`research/`、`projects/` | 独立研究实现、对照基线与机型输入；按各自 README 使用 |
+| `docs/` | 当前操作、实现合同、待实施要求及按对象解释的验证说明 |
+| `publication/`、`evidence/` | 发布与安装身份、原始软件验证及来源证据 |
+| `outputs/`、`results/` | 保存输入、研究结果和本地运行产物；已跟踪资产须按引用与资源清单保留 |
+| `dist/`、`slides/` | 独立净空演示清单、包身份旁文件与演示材料 |
+
 完整项目的 Python 环境统一使用根目录 [requirements.txt](requirements.txt)，文件顶部提供 macOS 简要安装命令。使用匹配架构的 Miniforge，由 conda 安装 Python 3.11、OpenMPI 与 OpenFAST 3.5.3（含原生 FAST.Farm）；恢复 WFCRL 资源后安装 Python 依赖，动态后端还需本机编译两个控制器。下载、编译与短仿真检查见[完整环境配置](docs/setup/setup_local.md#2-macos-完整-python-环境)。
 
 当前源码、测试、研究工具与文档使用 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 分支。运行资源与证据分别随 Git 或 [project-resources-v1](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1) 提供，具体位置及取得方式见[分发说明](docs/PUBLICATION.md)。NREL 离线扩展构建所需正式载荷随 Git 提供；其他入口按需恢复对应资源。
