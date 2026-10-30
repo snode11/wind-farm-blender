@@ -280,3 +280,30 @@ def test_hidden_small_view_and_gpu_failure_release(plot):
     plot.context.scene.wfrl_chart_visible = False
     charts._prune_plot_resources(plot.context)
     assert not charts._resource_cache
+
+
+def test_response_plot_reuses_resources_and_returns_to_telemetry(plot, monkeypatch):
+    from wfrl_blender import imbalance
+    scene = plot.context.scene
+    scene.wfrl_farm_panel_page = 'IMBALANCE'
+    scene.wfrl_imbalance_curve = True
+    data = charts._PlotData((('B1', (((0., 1.), (360., 2.)),), 'offline'),),
+                           ('B1',), ('m',), (0., 360., 1., 2.), 'azimuth / deg',
+                           'tip_x', 'ALL', title='Offline blade comparison')
+    monkeypatch.setattr(imbalance, 'plot_data', lambda owner: data if owner is scene else None)
+    charts.draw_plot()
+    resources = next(iter(charts._resource_cache.values()))
+    assert resources.data is data
+    before = plot.calls['batch']
+    charts.draw_plot()
+    assert plot.calls['batch'] == before
+    assert 'Offline blade comparison' in plot.labels
+    scene.wfrl_farm_panel_page = 'RADAR'
+    _record_snapshot(plot, snapshot(1))
+    charts.draw_plot()
+    assert resources.shader is None
+    assert next(iter(charts._resource_cache.values())).data.channel == 'power'
+    scene.wfrl_farm_panel_page = 'IMBALANCE'
+    monkeypatch.setattr(imbalance, 'plot_data', lambda owner: None)
+    charts.draw_plot()
+    assert not charts._resource_cache

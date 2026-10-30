@@ -38,6 +38,7 @@ class ManualRatePitchTests(unittest.TestCase):
         bpy.ops.wfrl.manual_action(action='RESET')
         self.scene.wfrl_manual_target = 'T1'
         self.entry = self.scene.wfrl_manual_turbines[0]
+        self.entry.pitch_deg = 0
 
     def tick(self, seconds):
         self.now[0] += seconds
@@ -46,17 +47,19 @@ class ManualRatePitchTests(unittest.TestCase):
     def pitch(self, index=1):
         return -math.degrees(getattr(self.entry, f'blade{index}_object').rotation_euler.z)
 
-    def test_pause_freezes_pitch_and_run_resumes_without_jump(self):
+    def test_pause_feathers_and_start_retargets_without_jump(self):
         self.scene.wfrl_manual_pitch_rate_deg_s = 5
         self.entry.pitch_deg = 20
         self.tick(2)
         self.assertAlmostEqual(self.pitch(), 10, places=3)
         bpy.ops.wfrl.manual_action(action='PAUSE')
-        self.tick(20)
-        self.assertAlmostEqual(self.pitch(), 10, places=3)
+        self.tick(4)
+        self.assertAlmostEqual(self.pitch(), 30, places=3)
+        self.assertFalse(self.entry.running)
         bpy.ops.wfrl.manual_action(action='START')
+        self.assertAlmostEqual(self.pitch(), 30, places=3)
         self.tick(1)
-        self.assertAlmostEqual(self.pitch(), 15, places=3)
+        self.assertAlmostEqual(self.pitch(), 25, places=3)
 
     def test_pose_snapshot_uses_actual_pitch_and_load_settles(self):
         self.scene.wfrl_manual_pitch_rate_deg_s = 5
@@ -97,7 +100,7 @@ class ManualRatePitchTests(unittest.TestCase):
         self.scene.wfrl_manual_pitch_rate_deg_s = 5
         self.entry.pitch_deg = 20
         self.tick(1)
-        bpy.ops.wfrl.manual_action(action='PAUSE')
+        control.pause_scene(self.scene)
         self.tick(10)
         self.assertAlmostEqual(self.pitch(), 5, places=3)
         self.assertEqual(bpy.ops.wfrl.manual_pitch_resume(), {'FINISHED'})

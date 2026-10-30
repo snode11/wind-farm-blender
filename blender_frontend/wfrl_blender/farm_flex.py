@@ -82,6 +82,15 @@ def is_active(scene):
 
 
 @dataclass(frozen=True)
+class _VerifiedSource:
+    """Source identity and telemetry belonging to one complete load transaction."""
+    path: Path
+    manifest: dict
+    hashes: dict
+    telemetry: dict | None
+
+
+@dataclass(frozen=True)
 class _LoadedPackage:
     manifest: dict
     times: np.ndarray
@@ -93,6 +102,7 @@ class _LoadedPackage:
     overlay: dict | None
     tower_motion: dict | None
     reference: dict | None
+    verified_source: _VerifiedSource | None = None
 
     @property
     def playback(self):
@@ -137,9 +147,19 @@ def _load_package(path):
             or manifest.get('turbine_ids') not in (['T1','T2','T3'], ['T1'])
             or (manifest.get('turbine_ids') == ['T1'] and (manifest.get('schema') != 'wfrl.farm-flex-review.v3' or not manifest.get('interface_only')))):
         raise ValueError('Expected a complete three-turbine flexible review package')
+    source_hashes = {'manifest.json': hashlib.sha256(manifest_raw).hexdigest()}
+    telemetry_raw = None
     for name in set(manifest['files']) | {'geometry.npz','data.json','source-surfaces.json'}:
-        if hashlib.sha256((path/name).read_bytes()).hexdigest()!=manifest['files'][name]:
+        raw = (path/name).read_bytes()
+        digest = hashlib.sha256(raw).hexdigest()
+        if digest != manifest['files'][name]:
             raise ValueError('Farm package integrity mismatch: '+name)
+        source_hashes[name] = digest
+        if name == 'telemetry.json':
+            telemetry_raw = raw
+    del raw
+    verified_source = _VerifiedSource(path, manifest, source_hashes,
+        json.loads(telemetry_raw) if telemetry_raw is not None else None)
     # The verified source owns parsed geometry; each load owns its result layer.
     # resolve_package independently validates sidecars and their source inventory.
     key = (path, hashlib.sha256(manifest_raw).hexdigest())
@@ -169,7 +189,7 @@ def _load_package(path):
     tower_data = None if parsed.tower_motion is None else dict(parsed.tower_motion)
     return _LoadedPackage(manifest, parsed.times, parsed.transforms, parsed.poses,
                           readers, path, result_path, overlay, tower_data,
-                          deepcopy(parsed.reference))
+                          deepcopy(parsed.reference), verified_source)
 
 
 def _parse_package(path, manifest):
@@ -218,11 +238,14 @@ def read_package(path):
     return _load_package(path).playback
 
 
-def _read_telemetry(path, manifest, times, readers):
+def _read_telemetry(path, manifest, times, readers, *, _source=None):
     """Read matching telemetry and retain numeric arrays for interpolation."""
     if 'telemetry.json' not in manifest['files']:
         return None
-    extra = json.loads((Path(path) / 'telemetry.json').read_text())
+    if _source is not None and _source.path != Path(path).resolve():
+        raise ValueError('verified source belongs to another package')
+    extra = (_source.telemetry if _source is not None else
+             json.loads((Path(path) / 'telemetry.json').read_text()))
     if extra is None:
         return None
     if (extra['schema'] != 'wfrl.farm-telemetry.v1'
@@ -423,7 +446,15 @@ class FarmFlex:
                                           tower_motion=self.tower_motion,
                                           blade_reference=self.reference)
         self.comparison = None
-        self.telemetry = _read_telemetry(path, self.manifest, self.times, self.readers)
+        verified_source = package.verified_source
+        self.telemetry = _read_telemetry(path, self.manifest, self.times, self.readers,
+                                         _source=verified_source)
+        from .imbalance import load_for_source
+        self.imbalance, self.imbalance_error, self.imbalance_plots = None, '', {}
+        try:
+            self.imbalance = load_for_source(path, _source=verified_source)
+        except (OSError, ValueError) as error:
+            self.imbalance_error = str(error)
         self.scene=scene;self.blades=[];self.groups={};self.cache={};self.enabled=True
         self.reference_matrices = {}
         self.visible_turbines=set(range(len(self.readers)))
@@ -594,7 +625,6 @@ class FarmFlex:
 
     def record_telemetry(self, scene, pose=None):
         if not getattr(scene, 'wfrl_channel_telemetry', True):
-            self.last_telemetry_frame = None
             return
         from . import clearance_replay, charts
         value = clearance_replay.sample(scene)

@@ -323,6 +323,62 @@ def test_cancel_caches_verified_result_and_discards_older_query(controller):
     assert not controller.ui._JOBS
 
 
+@pytest.mark.parametrize('state', ['FAILED', 'CANCELLED'])
+def test_cancel_rechecks_a_cached_terminal_attempt_without_blocking(controller, state):
+    ui = controller.ui
+    ui._QUERIES.store(controller.path, dict(state=state, active=False, final=True, attempt_id='old'))
+
+    def cancel(path):
+        assert path == controller.path
+        assert threading.get_ident() != threading.main_thread().ident
+        return dict(state='CANCELLED', active=False, final=True, attempt_id='new')
+
+    controller.jobs.cancel.side_effect = cancel
+    record = immediate(lambda: ui.cancel(controller.scene))
+    assert record['active'] and not record['final'] and record['cancel_requested']
+    wait_snapshot(controller, lambda current, _time: current and current.get('attempt_id') == 'new')
+    assert ui.status(controller.scene)['state'] == 'CANCELLED'
+
+
+@pytest.mark.parametrize('state', ['FAILED', 'CANCELLED', 'LOST'])
+def test_expired_inactive_status_asynchronously_observes_an_external_attempt(controller, state):
+    ui = controller.ui
+    ui._QUERIES.store(controller.path, dict(state=state, active=False,
+                                          final=state != 'LOST', attempt_id='old'))
+    with ui._QUERIES._condition:
+        record, obtained = ui._QUERIES._records[controller.path]
+        ui._QUERIES._records[controller.path] = record, obtained - 10.0
+    entered, release = stall(controller, dict(controller.response, attempt_id='new'))
+    record = immediate(lambda: ui.status(controller.scene))
+    assert record['active'] and not record['final']
+    assert entered.wait(2)
+    release.set()
+    wait_snapshot(controller, lambda current, _time: current and current.get('attempt_id') == 'new')
+    assert ui.active(controller.scene)
+
+
+def test_old_cancellation_cannot_replace_a_different_new_attempt(controller):
+    ui = controller.ui
+    entered, release = threading.Event(), threading.Event()
+    controller.releases.append(release)
+    ui._QUERIES.store(controller.path, dict(controller.response, attempt_id='old'))
+
+    def cancel(_path):
+        entered.set()
+        assert release.wait(3)
+        return dict(state='CANCELLED', active=False, final=True, attempt_id='old')
+
+    controller.jobs.cancel.side_effect = cancel
+    ui.cancel(controller.scene)
+    assert entered.wait(1)
+    action = ui._QUERIES._cancellations[controller.path][1]
+    current = dict(controller.response, attempt_id='new')
+    ui._QUERIES.store(controller.path, current)
+    release.set()
+    action.join(2)
+    assert ui.status(controller.scene) == current
+
+
 def test_cancel_never_waits_on_the_ui_thread_and_repeated_clicks_share_one_request(controller):
     entered, release = threading.Event(), threading.Event()
     controller.releases.append(release)

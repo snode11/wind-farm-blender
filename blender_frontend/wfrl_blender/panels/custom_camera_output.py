@@ -8,6 +8,7 @@ from bpy.props import EnumProperty, FloatProperty, StringProperty
 from .. import custom_cameras as core, custom_camera_capture as capture
 from .. import camera_projection as projection, playback
 from .. import custom_camera_history as history, custom_camera_preview as preview
+from .ui_helpers import message, diagnostic
 
 _PENDING_IMPORT = None
 _SUMMARY_CACHE = {}
@@ -117,7 +118,7 @@ class WFRL_OT_CustomLayoutConfirm(bpy.types.Operator):
             if row['enabled'] is not None:
                 box.label(text='备注：'+row['label']+'；'+('参与' if row['enabled'] else '不参与')+'三路预览与采集')
             for change in row['changes']:
-                for start in range(0,len(change),58):box.label(text=change[start:start+58])
+                message(box, change, context=context)
         self.layout.label(text='确认仅提交当前场景；整套变化记为一步相机撤销。')
 
     def execute(self,context):
@@ -244,11 +245,16 @@ class WFRL_OT_CustomCaptureCancel(bpy.types.Operator):
     bl_idname='wfrl.custom_capture_cancel'
     bl_label='取消图像采集'
     @classmethod
-    def poll(cls,context):return capture.active()
+    def poll(cls,context):return capture.active() and capture._ACTIVE.scene == context.scene
 
     def execute(self,context):
-        if capture.active():capture._ACTIVE.request_cancel()
-        self.report({'INFO'},'取消请求已接受；已停止，保留已完成组')
+        if not capture.active() or capture._ACTIVE.scene != context.scene:
+            self.report({'WARNING'}, '请在图像采集所属场景中取消')
+            return {'CANCELLED'}
+        transaction = capture._ACTIVE
+        transaction.request_cancel()
+        self.report({'INFO'}, '已停止，保留已完成组' if transaction.closed
+                    else '取消请求已接受；当前组完成后停止')
         return {'FINISHED'}
 
 
@@ -269,8 +275,9 @@ def summary_check(context, times):
            scene.wfrl_capture_step, capture.active(), installation_block_reason(scene),
            any(obj.get('wfrl_custom_draft') for obj in scene.objects))
     held = playback.any_playing() and _SUMMARY_CACHE.get('key') == key
-    if not held and (_SUMMARY_CACHE.get('key') != key or _SUMMARY_CACHE.get('revision') != preview._REVISION):
-        _SUMMARY_CACHE.update(key=key, revision=preview._REVISION, value=capture.preflight(context, times))
+    revision = preview.revision(scene)
+    if not held and (_SUMMARY_CACHE.get('key') != key or _SUMMARY_CACHE.get('revision') != revision):
+        _SUMMARY_CACHE.update(key=key, revision=revision, value=capture.preflight(context, times))
     _SUMMARY_CACHE['held'] = held
     return _SUMMARY_CACHE['value']
 
@@ -291,11 +298,11 @@ def draw_summary(layout,context):
         if result['bounds']:
             layout.label(text=f'来源可求值范围：{result["bounds"][0]:.4f}–{result["bounds"][1]:.4f} s')
         for reason in result['errors']:
-            for start in range(0,len(reason),24):layout.label(text=reason[start:start+24],icon='ERROR' if start==0 else 'NONE')
+            diagnostic(layout, '相机采集预检查', reason, error=True, context=context)
         if not result['errors']:layout.label(text='预检查通过；实际开始前重新检查',icon='CHECKMARK')
         return not result['errors']
     except (ValueError,RuntimeError) as exc:
-        layout.label(text=str(exc),icon='ERROR')
+        diagnostic(layout, '相机采集预检查', str(exc), error=True, context=context)
         return False
 
 
@@ -311,7 +318,10 @@ class WFRL_PT_CustomCapture(bpy.types.Panel):
     def draw(self,context):
         layout,scene=self.layout,context.scene
         if capture.active():
-            for part in capture.progress().split('；'):layout.label(text=part)
+            if capture._ACTIVE.scene != scene:
+                message(layout, '其他场景正在采集相机图像，请在所属场景查看进度或取消。', context=context)
+                return
+            message(layout, capture.progress(), context=context)
             layout.operator('wfrl.custom_capture_cancel',text='取消采集（当前组完成后生效）')
             return
         for slot in core.SLOTS:
@@ -322,7 +332,7 @@ class WFRL_PT_CustomCapture(bpy.types.Panel):
                 try:
                     p=core.parameters(cam);w,h=projection.resolution(p.fov,p.vfov,p.output_long_edge_px)
                     box.label(text=f'长边 {p.output_long_edge_px} px → {w} × {h} px')
-                except ValueError as exc:box.label(text=str(exc),icon='ERROR')
+                except ValueError as exc:diagnostic(box, '相机输出参数', str(exc), error=True, context=context)
                 row=box.row();row.enabled=editable(context)
                 row.operator('wfrl.custom_output_edit',text=f'编辑 C{slot} 输出参数').slot=str(slot)
         layout.prop(scene,'wfrl_capture_mode',text='采集方式')

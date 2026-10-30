@@ -1,8 +1,8 @@
-"""Explicit, cancellable capture transactions. No background threads or file saves.
+"""Explicit capture with main-thread GPU access and detached PNG workers.
 
 A sequence evaluates the existing FarmFlex geometry without recording telemetry
-or comparison trails. Each sample is drawn synchronously; event loop yields only
-between complete groups. Files stay incomplete until the entire request succeeds.
+or comparison trails. One image group is encoded at a time while the event loop
+remains available. Files stay incomplete until every group and source guard pass.
 """
 from contextlib import contextmanager
 from datetime import datetime
@@ -14,6 +14,8 @@ import struct
 import uuid
 import zlib
 import time
+import threading
+import weakref
 
 from . import custom_camera_diagnostics as diagnostics
 
@@ -21,6 +23,7 @@ from . import camera_projection as projection, custom_cameras as core
 from . import custom_camera_preview as preview, playback
 
 _ACTIVE = None
+_WRITERS = globals().get('_WRITERS', weakref.WeakSet())
 
 
 def active():
@@ -34,7 +37,8 @@ def progress():
     total = len(job.times)
     text = f'已完成 {job.index}/{total} 组'
     if job.in_group:
-        text += f'；正在生成第 {job.index+1}/{total} 组'
+        work = '压缩并写入' if job._writer is not None else '生成'
+        text += f'；正在{work}第 {job.index+1}/{total} 组'
     elif job.index < total:
         text += f'；下一组 {job.index+1}/{total}'
     if job.index < total:
@@ -63,6 +67,34 @@ def write_png(path, width, height, rgba_bottom_up):
         stream.write(payload)
 
 
+class ImageWriter:
+    """Own only detached pixel bytes and paths; never access Blender or GPU data."""
+    def __init__(self, images):
+        self.images = tuple(images)
+        self.done = threading.Event()
+        self.cancelled = threading.Event()
+        self.error = None
+        self.thread = threading.Thread(target=self._write, name='wfrl-camera-png', daemon=True)
+        _WRITERS.add(self)
+        self.thread.start()
+
+    def _write(self):
+        try:
+            for path, width, height, pixels in self.images:
+                if self.cancelled.is_set():
+                    break
+                path.parent.mkdir(exist_ok=True)
+                write_png(path, width, height, pixels)
+        except Exception as exc:
+            self.error = exc
+        finally:
+            self.images = ()
+            self.done.set()
+
+    def cancel(self):
+        self.cancelled.set()
+
+
 def _matrix(matrix):
     return [[float(value) for value in row] for row in matrix]
 
@@ -81,6 +113,8 @@ def preflight(context, times=None):
     errors = []
     if active():
         errors.append('已有图像采集事务')
+    elif any(writer.thread.is_alive() for writer in tuple(_WRITERS)):
+        errors.append('上一组图像正在结束写盘，请稍后重试')
     if any(obj.get('wfrl_custom_draft') for obj in scene.objects):
         errors.append('请先确认或取消相机草稿')
     reason = installation_block_reason(scene)
@@ -202,6 +236,7 @@ class Capture:
         self.playing = bool(self.window and playback.is_playing(self.scene))
         self.closed, self.index, self.error = False, 0, ''
         self.in_group, self.cancel_requested = False, False
+        self._writer = self._pending_records = None
         self.cancel_accepted_at = None
         self.cancel_stopped_at = None
         self.capture_id = uuid.uuid4().hex
@@ -311,7 +346,7 @@ class Capture:
     def step(self, context):
         if self.closed:
             return True
-        if self.cancel_requested:
+        if self.cancel_requested and not self.in_group:
             self.finish(error='用户取消：已停止')
             return True
         self.in_group = True
@@ -321,11 +356,14 @@ class Capture:
             self.finish(error=str(exc))
             raise
         finally:
-            self.in_group = False
-            if self.cancel_requested and not self.closed:
-                self.finish(error='用户取消：已停止')
+            if self._writer is None:
+                self.in_group = False
+                if self.cancel_requested and not self.closed:
+                    self.finish(error='用户取消：已停止')
 
     def _step_group(self, context):
+        if self._writer is not None:
+            return self._poll_write()
         self.guard()
         at=self.times[self.index]
         if self.sequence:
@@ -337,11 +375,11 @@ class Capture:
         try:
             self.guard()
             records=[]
+            packets=[]
             for camera in self.cameras:
                 slot=int(camera['wfrl_custom_slot']);image=images[slot];p=image.params
-                folder=self.path/f'C{slot}';folder.mkdir(exist_ok=True)
                 relative=f'C{slot}/frame_{self.index:06d}.png'
-                write_png(self.path/relative,image.width,image.height,image.rgba())
+                packets.append((self.path/relative, image.width, image.height, bytes(image.rgba())))
                 scales=projection.pixel_scales(p.fov,p.vfov,image.width,image.height)
                 motion=None
                 if self.reader is not None and at is not None:
@@ -370,14 +408,32 @@ class Capture:
                     'image_relative_path':relative,'capture_status':'complete'}
                 records.append(record)
             self.guard()
-            with (self.path/'frames.jsonl').open('a',encoding='utf-8') as stream:
-                stream.write(''.join(json.dumps(r,ensure_ascii=False,allow_nan=False)+'\n' for r in records))
-            self.index+=1
-            self.manifest['completed_samples']=self.index
-            write_json(self.path/'manifest.json',self.manifest)
+            self._pending_records = records
+            self._writer = ImageWriter(packets)
         finally:
             for image in images.values():image.free()
-        if self.index==len(self.times) and not self.cancel_requested:
+        return False
+
+    def _poll_write(self):
+        self.guard()
+        writer = self._writer
+        if not writer.done.is_set():
+            return False
+        self._writer = None
+        records, self._pending_records = self._pending_records, None
+        if writer.error is not None:
+            raise writer.error
+        if writer.cancelled.is_set():
+            raise InterruptedError('图像写入已取消，采集未完成')
+        with (self.path/'frames.jsonl').open('a',encoding='utf-8') as stream:
+            stream.write(''.join(json.dumps(r,ensure_ascii=False,allow_nan=False)+'\n' for r in records))
+        self.index += 1
+        self.manifest['completed_samples'] = self.index
+        write_json(self.path/'manifest.json',self.manifest)
+        if self.cancel_requested:
+            self.finish(error='用户取消：已停止')
+            return True
+        if self.index==len(self.times):
             self.finish(success=True)
             return True
         return False
@@ -387,6 +443,9 @@ class Capture:
         if self.closed:return
         same=self.same_session()
         try:
+            if success and self._writer is not None:
+                success = False
+                error = error or '图像写入尚未提交，采集未完成'
             clock_unchanged = same and self._clock_unchanged()
             if success and not clock_unchanged:
                 success = False
@@ -402,6 +461,10 @@ class Capture:
         except Exception as exc:
             success=False;error=f'{error} 恢复失败：{exc}'
         finally:
+            if self._writer is not None:
+                self._writer.cancel()
+                self._writer = self._pending_records = None
+            self.in_group = False
             if self.render_target is not None:
                 self.render_target.free()
                 self.manifest['gpu_target_usage'] = self.render_target.usage()
@@ -423,3 +486,5 @@ class Capture:
 
 def shutdown(restore=True):
     if active():_ACTIVE.finish(error='场景重载 / 功能关闭',restore=restore)
+    for writer in tuple(_WRITERS):
+        writer.cancel()

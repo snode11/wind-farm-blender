@@ -88,7 +88,7 @@ def _write_json_atomic(path, value):
 
 
 def encode_video(package_dir, fps, *, pattern='%06d.png', ffmpeg='ffmpeg', ffprobe='ffprobe', crf=18, preset='medium',
-                 resume=False):
+                 resume=False, expected_master_sha256=None):
     """Encode an immutable PNG master; resume only an identical owned transaction.
 
     A pending intent binds every master hash, CSV hash and encoding option before
@@ -116,6 +116,8 @@ def encode_video(package_dir, fps, *, pattern='%06d.png', ffmpeg='ffmpeg', ffpro
               'master_sha256': {p.name: sha256(p) for p in expected},
               'frames_csv_sha256': sha256(root / 'frames.csv'),
               'encoder_source_sha256': sha256(__file__)}
+    if expected_master_sha256 is not None and intent['master_sha256'] != expected_master_sha256:
+        raise ValueError('PNG master identity differs from the validated source')
     state = json.loads(pending.read_text()) if pending.exists() else None
     if state is not None and state.get('intent') != intent:
         raise ValueError('Pending encoding belongs to different masters, CSV, code or parameters; use a new package directory')

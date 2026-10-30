@@ -1,5 +1,6 @@
 """History contracts run without Blender or GPU dependencies."""
 import unittest
+import pytest
 from wfrl_blender.charts import ChartHistory, segments, FARM
 
 
@@ -176,6 +177,30 @@ def test_scene_history_draw_and_export_never_read_another_scene():
         assert not charts.history_for(a).points('T1', 'power')
     finally:
         charts.clear_scene_histories()
+
+
+@pytest.mark.parametrize(('age', 'validity', 'values'), [
+    (1.99, 'valid', [1., 2.]), (2., 'stale', [None, None]), (3., 'stale', [None, None]),
+])
+def test_curve_source_expiry_creates_gaps_without_rewriting_raw_observations(monkeypatch, age, validity, values):
+    from wfrl_blender import charts
+    from wfrl_blender.history import HistoryWindow
+    from wfrl_blender.protocol import validate_message
+
+    monkeypatch.setattr(charts, 'history', ChartHistory())
+    monkeypatch.setattr(charts, 'raw_history', HistoryWindow())
+    data = dict(value=[[0., 1.], [1., 2.]], unit='MW', fidelity='DIRECT', validity='valid', error=None,
+                provenance={'backend_session': 'fixture', 'channel': 'power'},
+                source_age_seconds=age, stale_after_seconds=2.)
+    message = dict(protocol_version=1, type='curve', session_id='fixture', sequence=1, payload=dict(
+        mode='replay', step=1, run_id='run', turbine_id='T1', channel='power',
+        timestamp={'value': 1., 'timebase': 'simulation_seconds'}, data=data))
+    validate_message(message)
+    charts.record_curve(message)
+    points = charts.history.points('T1', 'power')
+    assert [point.value for point in points] == values
+    assert [point.validity for point in points] == [validity, validity]
+    assert charts.raw_history.snapshot()['series'][0]['records'][0]['data'] == data
 
 
 if __name__ == '__main__':

@@ -18,6 +18,7 @@ _SCENE_JOBS = {}
 _RESOLVING = {}
 _DISPLAYED = {}
 _PENDING = dict(state='QUERYING', active=True, final=False, completed_frames=0, total_frames=0)
+_RETRY_REFRESH_SECONDS = 2.0
 
 
 def _query_record(path):
@@ -56,24 +57,37 @@ class _StatusQueries:
                 result['cancel_requested'] = True
             return result, obtained
 
+    def refresh_terminal(self, path):
+        """Recheck inactive, retryable attempts when the UI requests an aged status."""
+        with self._condition:
+            record, obtained = self._records.get(path, (None, None))
+            if (record is not None and not record.get('active')
+                    and record.get('state') in {'FAILED', 'CANCELLED', 'LOST'}
+                    and time.monotonic() - obtained >= _RETRY_REFRESH_SECONDS):
+                pending = dict(_PENDING)
+                if record.get('attempt_id'):
+                    pending['attempt_id'] = record['attempt_id']
+                self.store(path, pending)
+
     def cancel(self, path):
         with self._condition:
             record, _obtained = self.snapshot(path)
-            if record is not None and record.get('final'):
+            if record is not None and record.get('final') and record.get('state') == 'COMPLETE':
                 return record
-            pending = dict(record or _PENDING, cancel_requested=True)
+            pending = dict(record or _PENDING, active=True, final=False, cancel_requested=True)
             pending.pop('cancel_error', None)
             self.store(path, pending)
             if path not in self._cancellations:
                 token = object()
-                worker = threading.Thread(target=self._cancel, args=(path, token, self._generation),
+                worker = threading.Thread(target=self._cancel,
+                                          args=(path, token, self._generation, (record or {}).get('attempt_id')),
                                           name='WFRL video cancellation', daemon=True)
                 self._cancellations[path] = (token, worker)
                 worker.start()
             self.track(path)
             return pending
 
-    def _cancel(self, path, token, generation):
+    def _cancel(self, path, token, generation, attempt):
         from . import manual_video_job as jobs
         try:
             record, error = jobs.cancel(path), None
@@ -87,10 +101,16 @@ class _StatusQueries:
             if generation != self._generation:
                 return
             current, _obtained = self.snapshot(path)
-            if current is not None and current.get('final'):
+            current_attempt = (current or {}).get('attempt_id')
+            if (current_attempt and current_attempt != attempt
+                    and current_attempt != (record or {}).get('attempt_id')):
+                self.track(path)
+                return
+            if current is not None and current.get('final') and current.get('state') == 'COMPLETE':
                 return
             if error is not None:
-                record = dict(current or _PENDING, cancel_requested=False, cancel_error=error)
+                record = dict(current or _PENDING, state='LOST', active=True, final=False,
+                              cancel_requested=False, cancel_error=error)
             self.store(path, record)
             self.track(path)
 
@@ -175,7 +195,7 @@ def _binary(name):
 
 
 def _job_for(scene):
-    """Resolve the saved association without reactivating completed polling entries."""
+    """Resolve saved ownership; completed deliveries do not restart polling."""
     path = _SCENE_JOBS.get(scene.session_uid)
     if not path:
         saved = scene.get('wfrl_manual_video_job', '')
@@ -191,6 +211,7 @@ def _job_for(scene):
     if not path:
         return None
     entry = _JOBS.get(path) or _RESOLVING.get(path) or dict(directory=Path(path).parent, scene_name=scene.name)
+    _QUERIES.refresh_terminal(path)
     record, _obtained = _QUERIES.snapshot(path)
     if record is not None and not record.get('active'):
         return dict(entry, job_path=path)
@@ -411,7 +432,11 @@ def cancel(scene):
     job = _job_for(scene)
     if job is None:
         return
-    return _QUERIES.cancel(job['job_path'])
+    record = _QUERIES.cancel(job['job_path'])
+    if record.get('active'):
+        _JOBS[job['job_path']] = job
+        _ensure_poll()
+    return record
 
 
 class WFRL_OT_ManualVideo(bpy.types.Operator, ExportHelper):

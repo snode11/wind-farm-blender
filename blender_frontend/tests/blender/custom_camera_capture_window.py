@@ -87,6 +87,16 @@ def run_capture(times, fresh=False):
             'png_hashes': hashes, 'state_hashes': [row['simulation_state_hash'] for row in rows]}
 
 
+def step_group(job):
+    index = job.index
+    deadline = time.monotonic() + 30
+    while not job.closed and job.index == index:
+        job.step(bpy.context)
+        assert time.monotonic() < deadline, 'Image group did not complete'
+        if job._writer is not None:
+            job._writer.done.wait(.001)
+
+
 def tick():
     try:
         if STATE['phase'] == 0:
@@ -141,7 +151,7 @@ def tick():
                 return .2
             if STATE['phase'] == 3:
                 job = capture.Capture(bpy.context, OUT, STATE['times'])
-                job.step(bpy.context)
+                step_group(job)
                 job.request_cancel()
                 manifest = json.loads((job.path/'manifest.json').read_text())
                 assert job.closed and job.index == 1 and manifest['status'] == 'incomplete'
@@ -149,7 +159,7 @@ def tick():
                 assert protected(scene, area) == STATE['original']
                 STATE['checks']['cancel_releases_and_restores_frame_statistics_quality'] = True
                 job = capture.Capture(bpy.context, OUT, STATE['times'])
-                job.step(bpy.context)
+                step_group(job)
                 original_snapshot = preview.CameraImage.snapshot
                 def failure(_image, _offscreen, **_kwargs):
                     raise RuntimeError('injected GPU readback failure')
@@ -173,7 +183,7 @@ def tick():
                 # A native edit after the first group invalidates the transaction
                 # without replacing the user's edited position with saved XYZ.
                 job = capture.Capture(bpy.context, OUT, STATE['times'])
-                job.step(bpy.context)
+                step_group(job)
                 cam = core.get_camera(scene, 1)
                 params = core.parameters(cam)
                 cam.lock_location = (False, False, False)
@@ -215,7 +225,7 @@ def tick():
                 assert protected(scene, area) == STATE['original']
                 STATE['checks']['geometry_evaluation_failure_restores_owned_frame'] = True
                 job = capture.Capture(bpy.context, OUT, STATE['times'])
-                job.step(bpy.context)
+                step_group(job)
                 scene.frame_set(810, subframe=.75)
                 edited = protected(scene, area)
                 try:
@@ -229,7 +239,7 @@ def tick():
                 STATE['checks']['external_seek_preserves_frame_readings_and_history'] = True
 
                 job = capture.Capture(bpy.context, OUT, STATE['times'])
-                job.step(bpy.context)
+                step_group(job)
                 assert bpy.ops.screen.animation_play() == {'FINISHED'}
                 bpy.ops.screen.animation_cancel(restore_frame=False)
                 assert not capture.playback.any_playing()

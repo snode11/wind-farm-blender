@@ -1,0 +1,57 @@
+{
+  "status": "PASS",
+  "files_checked": 6,
+  "files": [
+    {
+      "name": "bookmarks.txt",
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/bookmarks.txt",
+      "expected_sha256": "f60b6fd5ba93eac273992b675f1899c1e940545c294452919306043a8353634f",
+      "after_sha256": "f60b6fd5ba93eac273992b675f1899c1e940545c294452919306043a8353634f",
+      "restored_test_changes": true,
+      "status": "PASS"
+    },
+    {
+      "name": "platform_support.txt",
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/platform_support.txt",
+      "expected_sha256": "4dbce3526384ef82878d01e1d704b953f67248b1f3354282fc9ae6285b750426",
+      "after_sha256": "4dbce3526384ef82878d01e1d704b953f67248b1f3354282fc9ae6285b750426",
+      "restored_test_changes": false,
+      "status": "PASS"
+    },
+    {
+      "name": "recent-files.txt",
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/recent-files.txt",
+      "expected_sha256": "7d929bccbc3e5ed3e078e0661a82103ea767325c62f8ea64ca2f747270a08f01",
+      "after_sha256": "7d929bccbc3e5ed3e078e0661a82103ea767325c62f8ea64ca2f747270a08f01",
+      "restored_test_changes": false,
+      "status": "PASS"
+    },
+    {
+      "name": "recent-searches.txt",
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/recent-searches.txt",
+      "expected_sha256": "f57d26a947e656261b1cdd0d41c3782993828f18bc8d3c4063f6b1e4ed0d2057",
+      "after_sha256": "f57d26a947e656261b1cdd0d41c3782993828f18bc8d3c4063f6b1e4ed0d2057",
+      "restored_test_changes": true,
+      "status": "PASS"
+    },
+    {
+      "name": "startup.blend",
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/startup.blend",
+      "expected_sha256": "064d7a57df06e1b35e543e3e85ab87df108a07969790c0aea87c9b7c2e6b1a46",
+      "after_sha256": "064d7a57df06e1b35e543e3e85ab87df108a07969790c0aea87c9b7c2e6b1a46",
+      "restored_test_changes": false,
+      "status": "PASS"
+    },
+    {
+      "name": "userpref.blend",
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/config/userpref.blend",
+      "expected_sha256": "e06ff65baae263c0c4c7b231b78fa0265ab0eaf6e9eb3121f9410cd664beaf51",
+      "after_sha256": "e06ff65baae263c0c4c7b231b78fa0265ab0eaf6e9eb3121f9410cd664beaf51",
+      "restored_test_changes": false,
+      "status": "PASS"
+    }
+  ],
+  "startup_file_preserved": true,
+  "user_preferences_preserved": true,
+  "backup": "/Users/eason/.codex/backups/wfrl-daily-0.3.40-optimized-hudn6u5r"
+}

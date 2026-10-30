@@ -70,6 +70,8 @@ class Layout:
     def box(self): return self
     def prop(self, owner, name, **kw):
         if not name.startswith('['): assert hasattr(owner, name),name
+    def prop_enum(self, owner, name, value, **kw):
+        assert value in owner.bl_rna.properties[name].enum_items
     def operator(self, name, **kw):
         namespace,op = name.split('.')
         getattr(getattr(bpy.ops, namespace), op).get_rna_type()

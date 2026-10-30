@@ -33,10 +33,14 @@ def run(job_path):
         if scene is None or scene.camera is None:
             raise ValueError('独立渲染场景或相机不可用')
         service.validate_output_nodes(scene)
-        if scene.get('wfrl_scene_kind') == 'clearance_replay' and scene.get('wfrl_farm_flex_path'):
-            farm = import_module(spec.name + '.farm_flex')
-            if not farm.is_active(scene):
+        if scene.get('wfrl_scene_kind') == 'clearance_replay':
+            replay = import_module(spec.name + '.clearance_replay')
+            if replay.reader_for(scene) is None:
                 raise ValueError(scene.get('wfrl_clearance_status', '回放数据恢复失败'))
+            if scene.get('wfrl_farm_flex_path'):
+                farm = import_module(spec.name + '.farm_flex')
+                if not farm.is_active(scene):
+                    raise ValueError(scene.get('wfrl_clearance_status', '回放数据恢复失败'))
         control = import_module(spec.name + '.manual_control')
         control.pause_all()
         scene.render.image_settings.file_format = 'PNG'

@@ -138,6 +138,30 @@ def _validate_farm_payloads(payloads):
             raise ValueError('Farm package integrity mismatch: ' + name)
 
 
+def _validate_blade_response_payloads(payloads):
+    bundled = dict(payloads)
+    prefix = 'assets/blade_response/'
+    if prefix + 'manifest.json' not in bundled:
+        return
+    manifest = json.loads(bundled[prefix + 'manifest.json'])
+    spec = importlib.util.spec_from_file_location('blade_response_reader', PACKAGE_SOURCE / 'imbalance.py')
+    reader = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(reader)
+    if (manifest.get('schema') != 'wfrl.blade-response-package.v1'
+            or set(manifest.get('source_hashes', {})) != reader.SOURCE_FILES
+            or set(manifest.get('files', {})) != {'results.json'}):
+        raise ValueError('Invalid blade response manifest')
+    for name, expected in manifest['source_hashes'].items():
+        if hashlib.sha256(bundled.get('assets/mappo/' + name, b'')).hexdigest() != expected:
+            raise ValueError('Blade response source mismatch: ' + name)
+    for name, expected in manifest['files'].items():
+        if hashlib.sha256(bundled.get(prefix + name, b'')).hexdigest() != expected:
+            raise ValueError('Blade response integrity mismatch: ' + name)
+    reader.validate(json.loads(bundled[prefix + 'results.json']),
+                    json.loads(bundled['assets/mappo/manifest.json']),
+                    json.loads(bundled['assets/mappo/telemetry.json']))
+
+
 def _validate_blade_texture_payloads(payloads):
     """The sidebar surface entry must deliver one matching saved output."""
     bundled = dict(payloads)
@@ -307,11 +331,13 @@ def build(output_dir: Path = DIST, *, farm_package: Path | None = None,
         for name,digest in data_manifest['files'].items():
             if hashlib.sha256((farm_package/name).read_bytes()).hexdigest()!=digest:
                 raise ValueError('Farm package integrity mismatch: '+name)
-        payloads = [(name,data) for name,data in payloads if not name.startswith('assets/mappo/')]
+        payloads = [(name,data) for name,data in payloads
+                    if not name.startswith(('assets/mappo/', 'assets/blade_response/'))]
         payloads += [('assets/mappo/'+name,(farm_package/name).read_bytes())
                      for name in sorted(set(data_manifest['files']) | {'manifest.json'})]
         payloads.sort()
     _validate_farm_payloads(payloads)
+    _validate_blade_response_payloads(payloads)
     _validate_blade_texture_payloads(payloads)
     _validate_mappo_texture_payloads(payloads)
     for package, asset_dir, method in ((dual_package, 'dual_beam', 'hub-axis.v1'),

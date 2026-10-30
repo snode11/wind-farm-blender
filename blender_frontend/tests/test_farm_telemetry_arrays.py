@@ -141,6 +141,39 @@ def test_recording_reuses_arrays_when_seeking(telemetry, monkeypatch):
             }
 
 
+def test_rewind_while_sampling_disabled_keeps_chart_and_export_on_the_same_timeline(monkeypatch):
+    from wfrl_blender import charts, clearance_replay
+
+    class Scene(dict):
+        wfrl_channel_telemetry = True
+
+        def as_pointer(self):
+            return id(self)
+
+    scene = Scene()
+    replay = object.__new__(farm_flex.FarmFlex)
+    replay.telemetry = None
+    replay.readers = {'T1': object()}
+    replay.manifest = {'status': 'REVIEW_ONLY', 'files': {'geometry.npz': 'fixture'},
+                       'turbine_ids': ['T1']}
+    replay.last_telemetry_frame = None
+    now = [10.]
+    monkeypatch.setattr(clearance_replay, 'sample', lambda _scene: {'time_s': now[0]})
+    monkeypatch.setattr(charts, '_scene_histories', {})
+    pose = np.zeros((1, 6))
+    replay.record_telemetry(scene, pose)
+    scene.wfrl_channel_telemetry = False
+    now[0] = 2.
+    replay.record_telemetry(scene, pose)
+    scene.wfrl_channel_telemetry = True
+    replay.record_telemetry(scene, pose)
+
+    assert [point.time for point in charts.history_for(scene).points('T1', 'yaw')] == [2.]
+    exported = charts.raw_history_for(scene).snapshot()
+    records = next(series['records'] for series in exported['series'] if series['key'][-1] == 'yaw')
+    assert [record['timestamp']['value'] for record in records] == [2.]
+
+
 def test_package_loading_still_rejects_telemetry_checksum_mismatch(tmp_path, monkeypatch):
     files = {}
     for name in ('geometry.npz', 'data.json', 'source-surfaces.json', 'telemetry.json'):

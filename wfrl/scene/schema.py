@@ -148,8 +148,11 @@ class Scene:
             raise SceneError(f"turbine 必须是 {TURBINES}，收到 {self.turbine!r}")
         if self.n < 1:
             raise SceneError("layout 至少要有一台机组")
-        if self.dt <= 0:
-            raise SceneError(f"dt 必须为正，收到 {self.dt}")
+        if not math.isfinite(self.dt) or self.dt <= 0:
+            raise SceneError(f"dt 必须为有限正数，收到 {self.dt}")
+        for index, turbine in enumerate(self.turbines):
+            if not (math.isfinite(turbine.x) and math.isfinite(turbine.y)):
+                raise SceneError(f"layout[{index}] 坐标必须是有限数值")
 
         ids = [t.id for t in self.turbines]
         dup = {i for i in ids if ids.count(i) > 1}

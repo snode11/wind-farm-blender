@@ -1,0 +1,150 @@
+[
+  {
+    "original": "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/background-summary.json",
+    "retained": "publication/blender-0.3.40/public/daily/background-summary.json"
+  },
+  {
+    "original": "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/runtime.json",
+    "retained": "publication/blender-0.3.40/public/daily/runtime.json"
+  },
+  {
+    "original": "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/logs/install-file.log",
+    "retained": "publication/blender-0.3.40/public/daily/logs/install-file.log"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/logs/runtime.log",
+    "retained": "publication/blender-0.3.40/public/daily/logs/runtime.log"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/three-camera-default/default-validation.json",
+    "retained": "publication/blender-0.3.40/public/daily/background/three-camera-default/default-validation.json"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/logs/three-camera-default.log",
+    "retained": "publication/blender-0.3.40/public/daily/logs/three-camera-default.log"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/native-projection/native-projection-validation.json",
+    "retained": "publication/blender-0.3.40/public/daily/background/native-projection/native-projection-validation.json"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/logs/native-projection.log",
+    "retained": "publication/blender-0.3.40/public/daily/logs/native-projection.log"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/native-proxy/checks.json",
+    "retained": "publication/blender-0.3.40/public/daily/background/native-proxy/checks.json"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/logs/native-proxy.log",
+    "retained": "publication/blender-0.3.40/public/daily/logs/native-proxy.log"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/camera-retirement/retirement-validation.json",
+    "retained": "publication/blender-0.3.40/public/daily/background/camera-retirement/retirement-validation.json"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/logs/camera-retirement.log",
+    "retained": "publication/blender-0.3.40/public/daily/logs/camera-retirement.log"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/nacelle/checks.json",
+    "retained": "publication/blender-0.3.40/public/daily/background/nacelle/checks.json"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/logs/nacelle.log",
+    "retained": "publication/blender-0.3.40/public/daily/logs/nacelle.log"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/farm-down/checks.json",
+    "retained": "publication/blender-0.3.40/public/daily/background/farm-down/checks.json"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/logs/farm-down.log",
+    "retained": "publication/blender-0.3.40/public/daily/logs/farm-down.log"
+  },
+  {
+    "original": "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/manual-control/checks.json",
+    "retained": "publication/blender-0.3.40/public/daily/background/manual-control/checks.json"
+  },
+  {
+    "original": "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/logs/manual-control.log",
+    "retained": "publication/blender-0.3.40/public/daily/logs/manual-control.log"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/window-summary.json",
+    "retained": "publication/blender-0.3.40/public/daily/window-summary.json"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/runtime-after.json",
+    "retained": "publication/blender-0.3.40/public/daily/runtime.json"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/logs/runtime-after.log",
+    "retained": "publication/blender-0.3.40/public/daily/logs/runtime-after.log"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/logs/physical-ui.log",
+    "retained": "publication/blender-0.3.40/public/daily/logs/physical-ui.log"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/bytecode.json",
+    "retained": "publication/blender-0.3.40/public/daily/bytecode.json"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/logs/bytecode.log",
+    "retained": "publication/blender-0.3.40/public/daily/logs/bytecode.log"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/windows/frontend-sessions/result.json",
+    "retained": "publication/blender-0.3.40/public/daily/windows/frontend-sessions/result.json"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/windows/logs/frontend-sessions.log",
+    "retained": "publication/blender-0.3.40/public/daily/logs/frontend-sessions.log"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/windows/frontend-sessions/recording-1793256107774587000/000000.png",
+    "retained": "publication/blender-0.3.40/public/daily/windows/frontend-sessions/recording-1793256107774587000/000000.png"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/windows/frontend-sessions/recording-1793256108798814000/000000.png",
+    "retained": "publication/blender-0.3.40/public/daily/windows/frontend-sessions/recording-1793256108798814000/000000.png"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/windows/native-camera-playback/result.json",
+    "retained": "publication/blender-0.3.40/public/daily/windows/native-camera-playback/result.json"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/windows/logs/native-camera-playback.log",
+    "retained": "publication/blender-0.3.40/public/daily/logs/native-camera-playback.log"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/cameras-reference-frame1.png",
+    "retained": "publication/blender-0.3.40/public/daily/ui/cameras-reference-frame1.png"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/cu-result.json",
+    "retained": "publication/blender-0.3.40/public/daily/ui/cu-result.json"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/events.json",
+    "retained": "publication/blender-0.3.40/public/daily/ui/events.json"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/latest.json",
+    "retained": "publication/blender-0.3.40/public/daily/ui/latest.json"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/manual-paused.png",
+    "retained": "publication/blender-0.3.40/public/daily/ui/manual-paused.png"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/replay-home-frame1.png",
+    "retained": "publication/blender-0.3.40/public/daily/ui/replay-home-frame1.png"
+  },
+  {
+    "original": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/runtime.json",
+    "retained": "publication/blender-0.3.40/public/daily/ui/runtime.json"
+  }
+]

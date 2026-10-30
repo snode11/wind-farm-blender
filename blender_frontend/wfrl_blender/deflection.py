@@ -397,4 +397,4 @@ def draw_panel(layout, scene):
         details.label(text='偏差 = 坐标差投影 − 仿真输出')
         details.label(text='参考点随塔顶平移、倾斜与叶轮姿态移动' if active.tower_motion is not None else '参考点按同刻刚性姿态独立计算')
         details.label(text='结构叶尖与彩色轨迹尖端定义不同')
-        details.label(text='轨迹：叶片 1 橙 · 叶片 2 蓝 · 叶片 3 红')
+        details.label(text='轨迹：叶片 1 红 · 叶片 2 绿 · 叶片 3 蓝')

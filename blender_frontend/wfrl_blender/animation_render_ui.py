@@ -94,6 +94,7 @@ def _render_settings(scene):
 
 
 def draw(layout, context):
+    from .panels.ui_helpers import message, output_directory
     if service.job.directory is None:
         return
     if context.scene != _SOURCE_SCENE:
@@ -101,12 +102,13 @@ def draw(layout, context):
             layout.label(text='另一场景正在后台渲染动画', icon='INFO')
         return
     current = service.job
-    layout.label(text=current.message, icon='ERROR' if current.state == 'FAILED' else 'RENDER_ANIMATION')
+    message(layout, current.message, 'ERROR' if current.state == 'FAILED' else 'RENDER_ANIMATION', context=context)
     layout.label(text=f'{current.completed_frames}/{current.total_frames} 帧 · {current.state}')
     if current.active:
         layout.operator('wfrl.cancel_render_animation', text='取消后台动画渲染', icon='CANCEL')
     elif current.directory:
-        layout.label(text='输出：' + str(current.directory))
+        message(layout, '输出：' + str(current.directory), context=context)
+        output_directory(layout, current.directory, is_directory=True)
     if current.error:
         from .panels.diagnostics import draw_diagnostic
         draw_diagnostic(layout, '后台动画渲染', current.error, error=current.state == 'FAILED')

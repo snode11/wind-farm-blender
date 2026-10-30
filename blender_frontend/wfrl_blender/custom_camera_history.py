@@ -105,7 +105,7 @@ def watchdog_status(scene):
         box_pose = (box.as_pointer(), tuple(box.location), tuple(box.rotation_euler),
                     box.get('surface_mount_json'), tuple(v for row in box.matrix_world for v in row)) if box else None
         # The depsgraph revision also covers evaluated mount geometry and model edits.
-        signature = (session_identity(scene), preview._REVISION, tuple(cameras), box_pose,
+        signature = (session_identity(scene), preview.revision(scene), tuple(cameras), box_pose,
                      id(HISTORY.entries[-1]))
         if signature != HISTORY._watchdog_signature:
             status(scene)

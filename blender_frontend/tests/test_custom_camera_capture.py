@@ -4,6 +4,8 @@ import importlib.util
 import io
 import json
 import sys
+import threading
+import time
 from types import SimpleNamespace as NS
 import pytest
 from PIL import Image
@@ -45,6 +47,7 @@ def test_capture_step_requests_pixels_without_texture_and_exports_state(tmp_path
     image.params = core.CameraParameters((1., 2., 3.))
     image.state_hash, image.texture, image.pixels = 'geometry-state', None, pixels
     job.closed = job.in_group = job.cancel_requested = False
+    job._writer = job._pending_records = None
     job.index, job.times, job.sequence = 0, [1.25], sequence
     job.scene = NS(frame_current=76, frame_subframe=0., frame_start=1,
                    objects={core.ROOT_NAME: NS(matrix_world=matrix)}, get=lambda _key, default: default)
@@ -62,7 +65,11 @@ def test_capture_step_requests_pixels_without_texture_and_exports_state(tmp_path
         assert kwargs.get('create_texture') is False
         return {3: image}
     monkeypatch.setattr(preview, 'render_group', render)
-    assert job.step(context)
+    assert job.step(context) is False
+    deadline = time.monotonic() + 5
+    while not job.step(context):
+        assert time.monotonic() < deadline, 'PNG capture did not complete'
+        threading.Event().wait(.001)
     assert calls == [(context, job.cameras, {'target': job.render_target, 'create_texture': False})]
     assert finishes == [{'success': True}] and not job.in_group
     assert evaluations == ([(76, 0., 1.25)] if sequence else [])
@@ -82,6 +89,7 @@ def test_capture_step_requests_pixels_without_texture_and_exports_state(tmp_path
 def test_capture_closes_gpu_resources_for_every_termination(tmp_path, termination, monkeypatch):
     job = capture.Capture.__new__(capture.Capture)
     job.closed = job.in_group = job.cancel_requested = False
+    job._writer = job._pending_records = None
     job.cancel_accepted_at = job.cancel_stopped_at = None
     job.index, job.times, job.error = 0, [0, 1], ''
     job.path, job.manifest = tmp_path, {'status': 'incomplete'}
@@ -146,6 +154,7 @@ def clock_capture(tmp_path, monkeypatch):
     job.scene = Scene(wfrl_clearance_time_s=9.25)
     job.window = NS(screen=NS(is_animation_playing=False))
     job.closed = job.in_group = job.cancel_requested = False
+    job._writer = job._pending_records = None
     job.cancel_accepted_at = job.cancel_stopped_at = None
     job.index, job.times = 1, [0., 1., 2.]
     job.path, job.manifest, job.render_target = tmp_path, {'status': 'incomplete'}, None
@@ -265,6 +274,86 @@ def test_capture_restores_own_frame_change_when_geometry_evaluation_fails(clock_
     assert job.scene['wfrl_clearance_time_s'] == .5
     assert job.closed and not capture.active()
     assert job.manifest['status'] == 'incomplete'
+
+
+@pytest.mark.parametrize('intervention', ['cancel', 'seek', 'write_failure', 'shutdown'])
+def test_pending_png_yields_and_never_commits_an_invalid_group(clock_capture, monkeypatch, intervention):
+    job, calls, _generation = clock_capture
+    entered, release = threading.Event(), threading.Event()
+    original_write = capture.write_png
+    target = job.path / 'C1/frame_000001.png'
+
+    def blocked_write(*args):
+        assert threading.current_thread() is not threading.main_thread()
+        entered.set()
+        assert release.wait(3), 'PNG worker was not released'
+        if intervention == 'write_failure':
+            raise OSError('injected PNG disk failure')
+        original_write(*args)
+
+    monkeypatch.setattr(capture, 'write_png', blocked_write)
+    writer = capture.ImageWriter([(target, 1, 1, bytes([17, 91, 143, 128]))])
+    job._writer, job._pending_records = writer, [{'camera_id': 'C1', 'sample_index': 1}]
+    job.in_group = True
+    try:
+        assert entered.wait(1)
+        assert job.step(None) is False
+        assert job.index == 1 and not (job.path / 'frames.jsonl').exists()
+        if intervention == 'cancel':
+            job.request_cancel()
+            assert not job.closed and capture.active()
+            assert job.step(None) is False
+        elif intervention == 'seek':
+            job.scene.frame_current = 20
+            with pytest.raises(RuntimeError, match='采集时刻'):
+                job.step(None)
+            assert job.scene.frame_current == 20 and calls == []
+        elif intervention == 'shutdown':
+            capture.shutdown(restore=False)
+            assert job.closed and writer.cancelled.is_set() and calls == []
+        release.set()
+        assert writer.done.wait(3)
+        if intervention == 'write_failure':
+            with pytest.raises(OSError, match='PNG disk failure'):
+                job.step(None)
+        elif intervention == 'cancel':
+            assert job.step(None)
+            assert calls == [('play', False), ('evaluate', 1, .5, .5), ('play', True)]
+        assert job.closed and not capture.active()
+        manifest = json.loads((job.path / 'manifest.json').read_text())
+        assert manifest['status'] == 'incomplete'
+        assert job.index == (2 if intervention == 'cancel' else 1)
+        if intervention == 'cancel':
+            assert manifest['completed_samples'] == 2
+            with Image.open(target) as image:
+                assert image.getpixel((0, 0)) == (17, 91, 143, 128)
+        else:
+            assert not (job.path / 'frames.jsonl').exists()
+    finally:
+        release.set()
+        writer.thread.join(3)
+        assert not writer.thread.is_alive()
+
+
+def test_unfinished_png_cannot_be_published_as_a_complete_capture(clock_capture, monkeypatch):
+    job, _calls, _generation = clock_capture
+    entered, release = threading.Event(), threading.Event()
+
+    def blocked_write(*_args):
+        entered.set()
+        assert release.wait(3)
+
+    monkeypatch.setattr(capture, 'write_png', blocked_write)
+    writer = capture.ImageWriter([(job.path / 'C1/frame_000001.png', 1, 1, bytes(4))])
+    job._writer, job._pending_records, job.in_group = writer, [], True
+    try:
+        assert entered.wait(1)
+        job.finish(success=True)
+        assert job.manifest['status'] == 'incomplete'
+        assert '写入' in job.error
+    finally:
+        release.set()
+        writer.thread.join(3)
 
 
 @pytest.mark.parametrize('already_closed', [False, True])

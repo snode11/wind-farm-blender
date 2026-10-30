@@ -23,7 +23,7 @@ def scene_status(*, kind='', ready=False, playing=False, load_error='',
                            '根据下方原因处理路径或占用状态，再重新加载。', 'ERROR')
     if ready:
         return SceneStatus('离线回放 · 播放中' if playing else '离线回放 · 就绪',
-                           '使用“回放”控制时间，在“相机”观察或编辑，在“导出”保存数据。',
+                           '主入口：N → WFRL',
                            'PLAY' if playing else 'CHECKMARK')
     if kind == 'live':
         return SceneStatus('后端场景', '在“后端”页查看连接、加载场景与已确认的运行状态。')

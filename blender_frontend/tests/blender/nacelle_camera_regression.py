@@ -36,10 +36,13 @@ region=next(r for r in area.regions if r.type=='WINDOW')
 class Buttons:
     def __init__(self): self.buttons={}
     def row(self,**kw): return self
+    def column(self,**kw): return self
     def operator(self,kind,*,text,**kw):
         op=SimpleNamespace();self.buttons[kind,text]=op;return op
     def label(self,**kw): pass
     def prop(self,*a,**kw): pass
+    def prop_enum(self,owner,name,value,**kw):
+        assert value in owner.bl_rna.properties[name].enum_items
     def panel(self,*a,**kw): return self,None
 
 

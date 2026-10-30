@@ -18,7 +18,7 @@
 | 三相机重建与同源纹理 | `blade-reconstruction`、`same-source` 资源包含合成输入、保存重建及纹理再生成所需数据；扩展日常运行直接使用正式载荷 |
 | 表面材料点与雷达研究 | `blade-surface`、`lidar-research` 资源包保留正负结果、原始观测、数值数组与独立评分；合成真值与求解输入保持各自角色 |
 | 相机视频运行输入 | `camera-video` 提供演示视频与保存清单；`runtime-inputs` 提供帧映射、相机几何数组与 MediaMTX 配置；完整包的输入限制见下文 |
-| 0.3.40 扩展与源码 | [v0.3.40 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.40)提供 [wfrl_blender-0.3.40.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.40/wfrl_blender-0.3.40.zip)、inventory、SHA-256 和配套源码归档；195 文件、99,156,317 字节，身份见[交付身份](../publication/blender-0.3.40.json)。ZIP 逐文件、隔离安装、新进程来源与三相机默认配置／投影后台检查通过；2768 项宿主用例通过、6 项因原始资产缺失跳过，40 项源码后台与 4 项源码脚本窗口检查通过；安装窗口、完整 FPS 和科学验收未运行。日常安装按[安装身份](../publication/daily-installation.json)记录的实际范围使用 |
+| 0.3.40 扩展与源码 | [v0.3.40 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.40)提供 [wfrl_blender-0.3.40.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.40/wfrl_blender-0.3.40.zip)、inventory、SHA-256 和配套源码归档；195 文件、99,156,317 字节，身份见[交付身份](../publication/blender-0.3.40.json)。ZIP 逐文件、隔离安装、新进程来源与三相机默认配置／投影后台检查通过；2768 项宿主用例通过、6 项因原始资产缺失跳过，40 项源码后台与 4 项源码脚本窗口检查通过；公开载荷的安装检查保存在 `publication/blender-0.3.40/public/daily/`，当前本地构建的独立验证见[安装身份](../publication/daily-installation.json)；完整 FPS 和科学精度未验收 |
 | 软件验证与展示 | Git 保留小型判定、来源与测试输入；`frontend-evidence` 资源包提供所选可见窗口证据。演示视频和两份正式演示文稿独立提供 |
 
 公开完整源码归档为 [wind-farm-blender-source-0.3.40.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.40/wind-farm-blender-source-0.3.40.zip)，对应 [`v0.3.40` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.40)；附件身份见[交付清单](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.40/wfrl-delivery-0.3.40.json)。归档包含该发布源码快照、操作与实现文档及已列入分发的轻量证据，覆盖所列前后端源码、独立雷达正式运行输入与匹配证据；发布源码的规范输入、独立重建与扩展载荷关系见[源码验证](../publication/blender-0.3.40/public/source-reproduction.json)。附件下载复验为 NOT_RUN。大型资源继续使用[资源 Release](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1)，路径、字节数与 SHA-256 见 [resources.json](../publication/resources.json)。同专题的编号附件是独立归档，须全部取得后才具备清单声明的完整输入；附件名称不改变项目相对路径。恢复冻结实验时最后解压 `zz-frozen-code-originals.tar.gz`，保留原字节脚本与摘要合同，显式适配调用环境。
@@ -33,7 +33,7 @@ cd wind-farm-blender
 tar -xzf /path/to/resource-part.tar.gz
 ```
 
-解压目标必须是该源码仓库根目录。资源文件不会安装 Python 环境、覆盖日常 Blender 扩展或启动求解器。WFCRL 源码恢复后，可在自行准备的 Python 环境中执行 `python -m pip install -e ./wfcrl-env`。根项目普通安装使用 `python -m pip install .`，源码开发使用 `python -m pip install -e .`；两者以及构建的 wheel 均提供内置机型 YAML，并按核心依赖声明安装 PyYAML。训练仍需 `train` 附加组和匹配的后端环境，安装范围与命令模板见[本地配置](setup/setup_local.md#2-python-环境floris-与算法开发)。
+解压目标必须是该源码仓库根目录。资源文件不会安装 Python 环境、覆盖日常 Blender 扩展或启动求解器。恢复 `wfcrl-dependency-01.tar.gz` 后，完整 Python 环境统一执行 `python -m pip install -r requirements.txt`，同时安装 WFCRL、根项目、训练、桌面 GUI 与相机/重建依赖。macOS 的 Python 3.11、OpenMPI、编译工具和应用程序准备方式见[本地配置](setup/setup_local.md#2-macos-完整-python-环境)。根项目的最小包安装仍可使用 `python -m pip install .`，源码开发使用 `python -m pip install -e .`；两者以及构建的 wheel 均提供内置机型 YAML，最小安装仅包含声明的核心依赖。
 
 FAST.Farm、OpenFAST、TurbSim、MPI 与控制器须按目标平台单独安装或编译。求解脚本接受 `WFCRL_FASTFARM_EXECUTABLE`、`WFCRL_OPENFAST_EXECUTABLE`、`WFCRL_TURBSIM_EXECUTABLE`，否则在 `PATH` 中寻找可执行文件。Python 包安装和后端源码变更不更新公开扩展附件或本机已安装扩展；Interactive、Formal Training 与 SB3 的入口及统计定义见[算法配置](training/MAPPO_SETUP.md)。
 

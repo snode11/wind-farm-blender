@@ -283,7 +283,20 @@ def draw_flex_trails(layout, scene):
         layout.label(text='形变网格叶尖位置 · 非相机测量')
 
 
-def draw(layout, scene):
+def draw_playback(layout, scene, value, screen):
+    text, icon, state = playback_control(scene, screen)
+    layout.label(text=f"仿真时刻 {value['time_s']:.3f} s · {state}")
+    row = layout.row(align=True)
+    row.operator('wfrl.clearance_playback', text=text, icon=icon)
+    row.operator('wfrl.clearance_restart', text='从头重播', icon='REW')
+    reader = clearance_replay.reader_for(scene)
+    elapsed = max(0.0, value['time_s'] - reader.start_s)
+    duration = reader.end_s - reader.start_s
+    layout.label(text=f'片段进度 {elapsed:.1f} / {duration:.1f} 秒')
+    layout.prop(scene, 'wfrl_clearance_progress', text='', slider=True)
+
+
+def draw(layout, scene, *, show_playback=True):
     import sys
     farm = sys.modules.get(__package__.rsplit('.', 1)[0]+'.farm_flex')
     farm_active = farm is not None and farm.is_active(scene)
@@ -314,16 +327,8 @@ def draw(layout, scene):
         if scene.get('wfrl_clearance_demo') == 'near_tower' and not farm_active:
             box.label(text='较小净空工况 · 以数值比较')
         draw_measurement(box, scene, value)
-        text, icon, state = playback_control(scene, bpy.context.screen)
-        row = box.row(align=True)
-        row.operator('wfrl.clearance_playback', text=text, icon=icon)
-        row.operator('wfrl.clearance_restart', text='从头重播', icon='REW')
-        box.prop(scene, 'wfrl_clearance_progress', text='回放进度', slider=True)
-        reader = clearance_replay.reader_for(scene)
-        elapsed = max(0.0, value['time_s'] - reader.start_s)
-        duration = reader.end_s - reader.start_s
-        box.label(text=f'{state} · {elapsed:.2f} / {duration:.2f} s')
-        box.label(text=f"仿真时间：{value['time_s']:.2f} s")
+        if show_playback:
+            draw_playback(box, scene, value, bpy.context.screen)
         if scene.frame_current >= scene.frame_end:
             summary = box.box()
             stats = value['statistics']

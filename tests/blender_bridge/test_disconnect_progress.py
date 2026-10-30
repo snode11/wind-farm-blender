@@ -5,6 +5,7 @@ import sys
 import threading
 import time
 from types import SimpleNamespace
+from unittest.mock import Mock
 
 import numpy as np
 import pytest
@@ -19,6 +20,43 @@ from wfrl.blender_bridge.training_progress import interactive_progress
 def scene():
     return SimpleNamespace(turbines=[SimpleNamespace(id='A'), SimpleNamespace(id='B')],
                            dt=3., backend='fastfarm')
+
+
+@pytest.mark.parametrize('field', ['dt', 'x', 'y', 'sensor'])
+def test_invalid_scene_load_keeps_connection_and_resumed_handshake_usable(tmp_path, field):
+    import yaml
+    from wfrl.scene.schema import load_scene
+    source = load_scene('scenes/turb3_demo.yaml')
+    data = source.to_dict()
+    if field == 'dt':
+        data['dt'] = float('nan')
+    elif field == 'sensor':
+        data['sensors'] = [dict(type='power', params={'unused': float('nan')})]
+    else:
+        data['layout'][0][field] = float('inf')
+    path = tmp_path / 'invalid-scene.yaml'
+    path.write_text(yaml.safe_dump(data))
+    session = BackendSession(source)
+    server = BridgeServer(port=0, session=session)
+    peer = Peer(server)
+    try:
+        peer.connect()
+        peer.command('scene.load', scene=str(path))
+        peer.until(lambda items: server.client is None or any(m['type'] == 'error' for m in items))
+        assert server.client is not None
+        assert session.scene is source and session.status == 'READY'
+        assert any(m['type'] == 'error' and m['payload']['code'] == 'COMMAND_REJECTED'
+                   for m in peer.messages)
+        peer.messages.clear()
+        peer.command('session.sync')
+        peer.until(lambda items: any(m['type'] == 'lifecycle' for m in items))
+        assert peer.messages[-1]['payload']['scene'] == source.to_dict()
+        disconnect(server, peer)
+        ack = peer.connect(sync=True)
+        assert ack['payload']['run_status'] == 'READY'
+        assert session.scene is source
+    finally:
+        cleanup(session, server, peer)
 
 
 def snapshot(step, *, phase=None, safety=False):
@@ -359,6 +397,59 @@ class SlowSocket:
 
     def __getattr__(self, name):
         return getattr(self.sock, name)
+
+
+def test_blocked_socket_does_not_reencode_unsent_observations(monkeypatch):
+    import wfrl.blender_bridge.server as server_module
+    session = BackendSession(scene())
+    server = BridgeServer(port=0, session=session)
+    outgoing, incoming = socket.socketpair()
+    outgoing.setblocking(False)
+    incoming.setblocking(False)
+    outgoing.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 4096)
+    server.client = outgoing
+    clock = [100.0]
+    monkeypatch.setattr(server_module, 'time', SimpleNamespace(monotonic=lambda: clock[0]))
+    try:
+        while True:
+            try:
+                outgoing.send(b'x' * 16384)
+            except BlockingIOError:
+                break
+        payload = SnapshotAdapter(scene(), session.session_id).encode(snapshot(1))
+        server._send('snapshot', payload)
+        age = Mock(wraps=server_module._aged_payload)
+        encode = Mock(wraps=server_module.encode_message)
+        monkeypatch.setattr(server_module, '_aged_payload', age)
+        monkeypatch.setattr(server_module, 'encode_message', encode)
+        clock[0] = 103.0
+        for _ in range(100):
+            try:
+                server._flush()
+            except BlockingIOError:
+                pass
+        assert age.call_count == encode.call_count == 0
+        while True:
+            try:
+                incoming.recv(65536)
+            except BlockingIOError:
+                break
+        decoder, messages = FrameDecoder(), []
+        deadline = time.monotonic() + 2.0
+        while server.pending:
+            assert time.monotonic() < deadline
+            server._flush()
+            try:
+                messages.extend(decoder.feed(incoming.recv(65536)))
+            except BlockingIOError:
+                pass
+        assert len(messages) == 1 and messages[0]['type'] == 'snapshot'
+        channel = messages[0]['payload']['turbines'][0]['channels']['rotor_speed']
+        assert channel['source_age_seconds'] == pytest.approx(3.0)
+        assert age.call_count == encode.call_count == 1
+    finally:
+        incoming.close()
+        server.close()
 
 
 def test_partial_slow_client_bounds_progress_and_keeps_safety_events():

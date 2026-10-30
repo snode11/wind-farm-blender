@@ -14,16 +14,38 @@ from . import camera_projection as projection, custom_cameras as core
 
 _DRAWING = False
 _REVISION = 0
+_ALL_SCENES_REVISION = 0
+_SCENE_REVISIONS = {}
 _RENDERERS = set()
 _CHANGE_CALLBACKS = globals().get('_CHANGE_CALLBACKS', set())
 if 'changed' in globals():
     _CHANGE_CALLBACKS.add(changed)
 
 
-def changed(*_args):
-    global _REVISION
+def changed(scene=None, *_args):
+    global _REVISION, _ALL_SCENES_REVISION
     if not _DRAWING:
         _REVISION += 1
+        if scene is None or not hasattr(scene, 'as_pointer'):
+            _ALL_SCENES_REVISION = _REVISION
+            _SCENE_REVISIONS.clear()
+        else:
+            try:
+                _SCENE_REVISIONS[scene.as_pointer()] = (scene, _REVISION)
+            except ReferenceError:
+                pass
+
+
+def revision(scene):
+    """Invalidate only the owning scene; file loads invalidate every preview."""
+    for key, (owner, _value) in tuple(_SCENE_REVISIONS.items()):
+        try:
+            if not owner.as_pointer():
+                _SCENE_REVISIONS.pop(key, None)
+        except ReferenceError:
+            _SCENE_REVISIONS.pop(key, None)
+    owner, value = _SCENE_REVISIONS.get(scene.as_pointer(), (None, 0))
+    return _ALL_SCENES_REVISION, value if owner == scene else 0
 
 
 def register_change_handler():
@@ -32,16 +54,18 @@ def register_change_handler():
     unregister_change_handler()
     bpy.app.handlers.persistent(changed)
     bpy.app.handlers.depsgraph_update_post.append(changed)
+    bpy.app.handlers.load_pre.append(changed)
     _CHANGE_CALLBACKS.add(changed)
 
 
 def unregister_change_handler():
     import bpy
-    handlers = bpy.app.handlers.depsgraph_update_post
-    for callback in _CHANGE_CALLBACKS | {changed}:
-        while callback in handlers:
-            handlers.remove(callback)
+    for handlers in (bpy.app.handlers.depsgraph_update_post, bpy.app.handlers.load_pre):
+        for callback in _CHANGE_CALLBACKS | {changed}:
+            while callback in handlers:
+                handlers.remove(callback)
     _CHANGE_CALLBACKS.clear()
+    changed()
 
 
 def render_profile(scene, fast=False):
@@ -516,7 +540,7 @@ def provenance(context, cameras, long_edge):
     return {'identity': session_identity(scene), 'frame': scene.frame_current,
         'context': (context.window.as_pointer(), context.area.as_pointer(), context.view_layer.as_pointer()),
         'subframe': scene.frame_subframe, 'time_s': current_time(scene),
-        'revision': _REVISION, 'profile': repr(render_profile(scene, playback_preview(context))), 'long_edge': long_edge,
+        'revision': revision(scene), 'profile': repr(render_profile(scene, playback_preview(context))), 'long_edge': long_edge,
         'slots': tuple(int(cam['wfrl_custom_slot']) for cam in cameras),
         'cameras': tuple((cam.as_pointer(), bool(cam.get('wfrl_custom_draft')),
             repr(asdict(core.parameters(cam))), tuple(v for row in cam.matrix_world for v in row)) for cam in cameras)}

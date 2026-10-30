@@ -1,0 +1,13 @@
+{
+  "schema": "wfrl.blade-response-package.v1",
+  "source_hashes": {
+    "manifest.json": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde",
+    "data.json": "11088f05a90a81bac2b4ab964d837b942ee20b07984147c79c688e6fae9c14cf",
+    "geometry.npz": "289abea277d8a4954836b53bc06a1afcc41d8098a6fabe99f74c7f2ebe4ebac1",
+    "telemetry.json": "14bb1f2d074576fae9cfceaa20b2e8898fcf6c94d50c1501b719941af2a0da32",
+    "deflection-t1.json": "08f7950203164b9a726b35a4d234d8cdc551590ddc900092daafb6fe01d97f61"
+  },
+  "files": {
+    "results.json": "a7b2d4e5ac229d1fc2cbc1b5db8680472ce42261b0f334b4be24491ac1b73902"
+  }
+}

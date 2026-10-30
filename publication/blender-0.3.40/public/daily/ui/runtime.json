@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.user_default.wfrl_blender",
+  "addon_file": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "pid": 56319,
+  "blender": "5.2.1 LTS",
+  "background": false,
+  "archive_sha256": "f7907be0bd6737f0b0d8ddde8b856c151b6ebc7392ee1c796fc9252b806f018b",
+  "build": {
+    "payload_files": 194,
+    "payload_sha256": "720cb9aa1bff4d52ef154594824a8d2bff4e4f068635344a49a4ccf7e0886114",
+    "schema": "wfrl.extension-build.v1",
+    "version": "0.3.40"
+  }
+}

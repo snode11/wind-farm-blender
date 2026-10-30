@@ -12,6 +12,9 @@ from . import manual_pose
 
 
 DEFAULT_RPM = 9.0
+FEATHER_PITCH_DEG = 90.0
+RUN_PITCH_DEG = 0.0
+DEFAULT_PITCH_RATE_DEG_S = 5.0
 TICK_SECONDS = 1.0 / 60.0
 IDLE_SECONDS = 0.25
 _POINTER_FIELDS = ('yaw_object', 'rotor_object', 'blade1_object', 'blade2_object', 'blade3_object')
@@ -141,6 +144,20 @@ def _settle_pitch(entry):
 
 def pitch_ramping(entry):
     return any(abs(a - b) > 1e-6 for a, b in zip(effective_pitches(entry), target_pitches(entry)))
+
+
+def _command_pitch(entry, pitch, *, now, settle=False):
+    """Set collective pitch, following the scene rate unless immediate placement is requested."""
+    scene = entry.id_data
+    _sync_pitch(scene, entry, now, running=False)
+    entry.individual_pitch = False
+    entry.pitch_deg = pitch
+    for index in range(1, 4):
+        setattr(entry, f'pitch_b{index}_deg', pitch)
+    if settle:
+        _settle_pitch(entry)
+    else:
+        _sync_pitch(scene, entry, now, running=True, retarget=True)
 
 
 def _pitch_clock(scene, entry, now):
@@ -295,11 +312,17 @@ def confirm_trial(scene, *, now=None):
 
 def _trial_undo_checkpoint(scene, now):
     """Materialize the running pose before an undoable reset or completion."""
-    if not _t1(scene).running:
+    if not any(entry.running or (pitch_ramping(entry) and not entry.pitch_paused)
+               for entry in scene.wfrl_manual_turbines):
         return
     _sync_trial(scene, now, running=False)
     for entry in scene.wfrl_manual_turbines:
-        if entry.turbine_id != 'T1' and entry.running:
+        if entry.turbine_id == 'T1':
+            continue
+        if pitch_ramping(entry) and not entry.pitch_paused:
+            _sync_pitch(scene, entry, now)
+            apply_pitch(entry, effective_pitches(entry))
+        if entry.running:
             clock = _clock(scene, entry, now)
             _write_azimuth(entry, clock.configure(now, rpm=entry.rpm, running=True))
             _apply_rotor(entry)
@@ -362,8 +385,21 @@ def selected_entries(scene):
             if target == 'ALL' or entry.turbine_id == target]
 
 
-def other_scene_objects(scene):
-    return {obj.as_pointer() for other in bpy.data.scenes if other != scene for obj in other.objects}
+def other_scene_objects(scene, *, objects=None):
+    """Find objects linked into foreign scenes, optionally restricted to controls."""
+    others = tuple(other for other in bpy.data.scenes if other != scene)
+    if objects is None:
+        return {obj.as_pointer() for other in others for obj in other.objects}
+    objects = tuple(objects)
+    if not objects or not others:
+        return set()
+    foreign = {collection for other in others
+               for collection in (other.collection, *other.collection.children_recursive)}
+    foreign.update(others)
+    users = bpy.data.user_map(subset=set(objects), value_types={'COLLECTION', 'SCENE'})
+    return {obj.as_pointer() for obj in objects
+            if users.get(obj, set()) & foreign
+            and any(other.objects.get(obj.name) == obj for other in others)}
 
 
 def validate_scene(scene):
@@ -379,7 +415,7 @@ def validate_scene(scene):
         if not owner:
             return False, '手动控制场景缺少对象归属标识'
         seen_objects, seen_ids = set(), set()
-        shared = None
+        controlled = []
         if not math.isfinite(scene.wfrl_manual_pitch_rate_deg_s):
             return False, '变桨速度必须是有限数值'
         for entry in entries:
@@ -411,10 +447,11 @@ def validate_scene(scene):
                 if key in seen_objects:
                     return False, f'{turbine} 风机控制对象不能重复使用'
                 seen_objects.add(key)
-                if shared is None:
-                    shared = other_scene_objects(scene)
-                if key in shared:
-                    return False, f'{turbine} 控制对象与其他场景共享，请使用独立副本'
+                controlled.append((turbine, obj))
+        shared = other_scene_objects(scene, objects=(obj for _tid, obj in controlled))
+        for turbine, obj in controlled:
+            if obj.as_pointer() in shared:
+                return False, f'{turbine} 控制对象与其他场景共享，请使用独立副本'
         if trial_active(scene):
             turbine = 'T1'
             trial_configuration(scene)

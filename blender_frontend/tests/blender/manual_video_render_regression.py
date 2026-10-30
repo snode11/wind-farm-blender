@@ -9,6 +9,7 @@ import shutil
 import sys
 import time
 import uuid
+from unittest.mock import patch
 
 import bpy
 
@@ -16,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
 from wfrl_blender import cameras, manual_control as control, manual_scene
 from wfrl_blender.manual_video_render import render_job
+from wfrl.camera_video import media
 
 OUT = Path(os.environ['WFRL_TEST_OUTPUT']).resolve()
 OUT.mkdir(parents=True, exist_ok=False)
@@ -28,6 +30,7 @@ if BLADE_MODEL != 'rootkink':
     from wfrl_blender import manual_down
     manual_down.register()
 scene = manual_scene.create(bpy.context)
+scene.wfrl_manual_pitch_rate_deg_s = 0.0
 if BLADE_MODEL != 'rootkink':
     scene.wfrl_manual_blade_shape = BLADE_MODEL
 entries = {entry.turbine_id: entry for entry in scene.wfrl_manual_turbines}
@@ -56,7 +59,11 @@ job = dict(schema='wfrl.manual-video-job.v2', job_id=uuid.uuid4().hex,
            ffprobe=shutil.which('ffprobe') or '/opt/homebrew/bin/ffprobe')
 (OUT / 'job.json').write_text(json.dumps(job))
 started = time.monotonic()
-report = render_job(OUT / 'job.json')
+with patch.object(media, 'sha256', wraps=media.sha256) as digest:
+    report = render_job(OUT / 'job.json')
+master_reads = [Path(call.args[0]).name for call in digest.call_args_list
+                if Path(call.args[0]).parent.resolve() == (OUT / 'master_frames').resolve()]
+assert sorted(master_reads) == sorted([f'{index:06d}.png' for index in range(5)] * 2)
 elapsed = time.monotonic() - started
 scene = bpy.data.scenes[job['scene_name']]
 assert scene.wfrl_manual_display_detail == 'CLOSEUP'
@@ -158,6 +165,7 @@ result = dict(status='PASS', source=str(ROOT / 'blender_frontend/wfrl_blender'),
               renderer_source_sha256=hashlib.sha256((ROOT / 'blender_frontend/wfrl_blender/manual_video_render.py').read_bytes()).hexdigest(),
               blender=bpy.app.version_string, elapsed_render_encode_s=elapsed,
               frame_count=5, resolution=[WIDTH, HEIGHT], fps=25, samples=SAMPLES,
+              png_master_hash_reads=len(master_reads),
               checks=['deterministic poses', 'frozen unselected blades', 'stationary T2/T3',
                       'fixed own Down', 'no geometry hidden', 'strict H264 PTS decode',
                       'exact duration', 'no output overwrite', 'failed attempt status',

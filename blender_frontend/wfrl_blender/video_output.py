@@ -156,6 +156,12 @@ class Export:
         self.done_bytes = self.total_bytes = 0
         self.message = '导出所选视频为 MP4'
         self.error = ''
+        self.source_path = self.output_path = ''
+        self._source_identity = None
+
+    @staticmethod
+    def _identity(stat):
+        return stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns
 
     @property
     def active(self):
@@ -171,9 +177,12 @@ class Export:
             raise FileExistsError('目标文件已存在，请另选文件名；不会覆盖源视频')
         if not target.parent.is_dir():
             raise ValueError('输出目录不存在')
+        identity = self._identity(source.stat())
         self.cancelled.clear()
-        self.done_bytes, self.total_bytes = 0, source.stat().st_size
+        self.done_bytes, self.total_bytes = 0, identity[2]
         self.message, self.error = '正在导出 MP4…', ''
+        self.source_path, self.output_path = str(source), ''
+        self._source_identity = identity
         self.thread = threading.Thread(target=self._copy, args=(source, target), daemon=True)
         self.thread.start()
 
@@ -182,13 +191,22 @@ class Export:
         try:
             with source.open('rb') as incoming, target.open('xb') as outgoing:
                 owned = True
+                if (self._source_identity is not None and
+                        self._identity(os.fstat(incoming.fileno())) != self._source_identity):
+                    raise ValueError('源视频在导出期间发生变化，请等待源文件写入完成后重试')
                 while block := incoming.read(4 * 1024 * 1024):
                     if self.cancelled.is_set():
                         raise InterruptedError('导出已取消')
                     outgoing.write(block)
                     self.done_bytes += len(block)
+                if self._source_identity is not None and (
+                        self._identity(os.fstat(incoming.fileno())) != self._source_identity
+                        or self._identity(source.stat()) != self._source_identity
+                        or self.done_bytes != self.total_bytes):
+                    raise ValueError('源视频在导出期间发生变化，请等待源文件写入完成后重试')
             if self.cancelled.is_set():
                 raise InterruptedError('导出已取消')
+            self.output_path = str(target)
             self.message = '已导出：' + str(target)
         except Exception as exc:
             if owned:

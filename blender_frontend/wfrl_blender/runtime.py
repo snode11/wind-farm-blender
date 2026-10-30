@@ -69,8 +69,10 @@ def select_mode(mode):
     from .state import MODES
     if mode not in MODES or not configuration_editable():
         raise ValueError('Stop the active session before changing mode')
+    import bpy
     from .scene_builder import validate_scene_build
-    validate_scene_build()
+    scene = bpy.context.scene
+    collection = validate_scene_build()
     _clear_backend_wake()
     if _client:
         _client.close()
@@ -86,16 +88,17 @@ def select_mode(mode):
     safety_events.clear()
     backend_events.clear()
     from . import charts
-    charts.clear(scene=_backend_scene)
+    charts.clear(scene=scene)
     training_dashboard.reset()
     workflow_scene.clear()
     channel_states.clear()
     channel_table.clear()
     if mode != 'demo':
-        import bpy
         from . import _cancel_playback
-        _cancel_playback(bpy.context.scene)
-        for obj in bpy.data.objects:
+        _cancel_playback(scene)
+        for obj in collection.all_objects if collection is not None else ():
+            if scene.objects.get(obj.name) != obj:
+                continue
             if obj.name.startswith('WFRL.Turbine.'):
                 obj.animation_data_clear()
             if obj.name.startswith(('WFRL.WakeProxy.', 'WFRL.Fixture.')):
@@ -106,10 +109,8 @@ def select_mode(mode):
         from . import load_demo_scene
         load_demo_scene()
     else:
-        import bpy
         from . import farm_flex, clearance_replay, tip_tracking
-        farm_flex.detach()
-        scene = getattr(bpy.context, 'scene', None)
+        farm_flex.detach(scene)
         if scene is not None:
             tip_tracking.disable(scene, 'backend_mode')
             clearance_replay.clear(scene)

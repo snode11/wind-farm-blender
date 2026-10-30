@@ -241,6 +241,9 @@ def run_demo_regression():
     manual.wfrl_manual_target = 'T1'
     t1 = entries(manual)['T1']
     assert tuple(control.selected_entries(manual)) == (t1,)
+    assert t1.pitch_deg == control.FEATHER_PITCH_DEG  # a stopped turbine enters feathered
+    # Pitch geometry is checked at once; the default ramp is tested separately.
+    manual.wfrl_manual_pitch_rate_deg_s = 0.0
     t1.yaw_deg = t1.pitch_deg = t1.azimuth_deg = 0.0
     control.apply_scene(manual)
     bpy.context.view_layer.update()
@@ -271,7 +274,7 @@ def run_demo_regression():
     assert (t1.rotor_object.matrix_world.translation - expected_rotor).length < 1e-4
     close(math.degrees(t1.yaw_object.rotation_euler.z), 57.0, 1e-3)
     assert entries(manual)['T2'].yaw_deg == 0.0
-    assert entries(manual)['T2'].pitch_deg == 0.0
+    assert entries(manual)['T2'].pitch_deg == control.FEATHER_PITCH_DEG
     assert snapshot(source, 'WFRL.Turbine.') == source_before
 
     for call in (lambda: addon.load_demo_scene(camera_rig=False), addon.build_demo_geometry,
@@ -318,7 +321,7 @@ def run_demo_regression():
         close(t1.azimuth_deg, phase)
         action('RESET')
         assert not t1.running
-        assert (t1.yaw_deg, t1.pitch_deg, t1.azimuth_deg) == (0.0, 0.0, 0.0)
+        assert (t1.yaw_deg, t1.pitch_deg, t1.azimuth_deg) == (0.0, control.FEATHER_PITCH_DEG, 0.0)
         t1.yaw_deg = 13.0
         entries(manual)['T2'].pitch_deg = 7.0
         before_selection = parameters(manual)

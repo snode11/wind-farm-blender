@@ -1,0 +1,46 @@
+{
+  "status": "PASS",
+  "release_identity": "PASS",
+  "release_identity_unit_cases": 8,
+  "python_source_files_unchanged": 765,
+  "git_head_preserved": true,
+  "git_index_preserved": true,
+  "profile_files_checked": 6,
+  "cache_candidates": [
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/nrel_defects/__pycache__",
+      "files": 7,
+      "bytes": 245546
+    },
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/operators/__pycache__",
+      "files": 5,
+      "bytes": 22740
+    },
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/_vendor/blade_recon/__pycache__",
+      "files": 2,
+      "bytes": 16819
+    },
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/_vendor/__pycache__",
+      "files": 1,
+      "bytes": 206
+    },
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/_vendor/lidar/__pycache__",
+      "files": 4,
+      "bytes": 60515
+    },
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/__pycache__",
+      "files": 21,
+      "bytes": 384604
+    },
+    {
+      "path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__pycache__",
+      "files": 70,
+      "bytes": 1694371
+    }
+  ]
+}

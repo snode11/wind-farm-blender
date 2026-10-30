@@ -60,6 +60,8 @@ class ManualControlState(unittest.TestCase):
         self.addCleanup(self.time_patch.stop)
         bpy.context.window.scene = self.scene
         control.pause_all()
+        # Pitch geometry is checked at once; ramps are tested with an explicit rate.
+        self.scene.wfrl_manual_pitch_rate_deg_s = 0.0
         self.scene.wfrl_manual_target = 'ALL'
         self.assertEqual(bpy.ops.wfrl.manual_action(action='RESET'), {'FINISHED'})
         self.scene.wfrl_manual_target = 'T1'
@@ -81,6 +83,67 @@ class ManualControlState(unittest.TestCase):
             with self.subTest(turbine=entry.turbine_id, blade=index):
                 blade = getattr(entry, f'blade{index}_object')
                 self.assertAlmostEqual(math.degrees(blade.rotation_euler.z), -pitch, delta=1e-3)
+
+    def test_stopped_turbine_is_feathered_and_running_pitches_to_fine(self):
+        rate_property = bpy.types.Scene.bl_rna.properties['wfrl_manual_pitch_rate_deg_s']
+        with self.subTest(check='defaults'):
+            self.assertEqual(rate_property.default, 5.0)
+            self.assertEqual(self.t1.bl_rna.properties['pitch_deg'].default, 90.0)
+        with self.subTest(check='reset_feathers_at_once'):
+            self.assertEqual(self.t1.pitch_deg, 90.0)
+            self.assertBladePitch(self.t1, (90.0,) * 3)
+        self.scene.wfrl_manual_pitch_rate_deg_s = 5.0
+        self.t1.rpm = 12.0
+        self.assertEqual(self.action('START'), {'FINISHED'})
+        self.assertEqual(self.t1.pitch_deg, 0.0)
+        self.advance(0.0)  # the first tick starts the ramp clock
+        self.advance(2.0)
+        with self.subTest(check='start_ramps_at_rate'):
+            self.assertBladePitch(self.t1, (80.0,) * 3)
+        self.advance(16.0)
+        with self.subTest(check='running_fine_pitch'):
+            self.assertFalse(control.pitch_ramping(self.t1))
+            self.assertBladePitch(self.t1, (0.0,) * 3)
+        for name in ('PAUSE', 'STOP'):
+            self.t1.rpm = 12.0
+            self.assertEqual(self.action('START'), {'FINISHED'})
+            self.advance(0.0)
+            self.advance(20.0)
+            self.assertBladePitch(self.t1, (0.0,) * 3)
+            self.assertEqual(self.action(name), {'FINISHED'})
+            self.advance(0.0)
+            self.advance(4.0)
+            with self.subTest(check='feather_ramp', action=name):
+                self.assertFalse(self.t1.running)
+                self.assertEqual(self.t1.pitch_deg, 90.0)
+                self.assertBladePitch(self.t1, (20.0,) * 3)
+            self.advance(20.0)
+            self.assertBladePitch(self.t1, (90.0,) * 3)
+
+    def test_manual_scene_enters_feathered(self):
+        for entry in self.entries.values():
+            with self.subTest(turbine=entry.turbine_id):
+                self.assertFalse(entry.running)
+                self.assertEqual(entry.pitch_deg, 90.0)
+
+    def test_metadata_references_allow_controls_but_scene_links_reject_them(self):
+        other = bpy.data.scenes.new('Manual metadata references')
+        nested = bpy.data.collections.new('Manual metadata collection')
+        other.collection.children.link(nested)
+        controlled = self.t1.blade1_object
+        try:
+            other['control_reference'] = controlled
+            nested['control_reference'] = controlled
+            valid, reason = control.validate_scene(self.scene)
+            self.assertTrue(valid, reason)
+            nested.objects.link(controlled)
+            self.assertFalse(control.validate_scene(self.scene)[0])
+            nested.objects.unlink(controlled)
+            valid, reason = control.validate_scene(self.scene)
+            self.assertTrue(valid, reason)
+        finally:
+            bpy.data.scenes.remove(other)
+            bpy.data.collections.remove(nested)
 
     def test_single_zero_rpm_start_is_rejected_and_azimuth_is_editable(self):
         self.t1.rpm = 0.0
@@ -133,7 +196,10 @@ class ManualControlState(unittest.TestCase):
         for turbine_id, entry in self.entries.items():
             with self.subTest(check='motion_and_parameters', turbine=turbine_id):
                 self.assertAngle(entry.azimuth_deg, before[turbine_id][3] + (18.0 if turbine_id == 'T2' else 0.0))
-                self.assertEqual((entry.yaw_deg, entry.pitch_deg, entry.rpm), before[turbine_id][:3])
+                # Only the started turbine leaves its set pitch for the running pitch.
+                pitch = control.RUN_PITCH_DEG if turbine_id == 'T2' else before[turbine_id][1]
+                self.assertEqual((entry.yaw_deg, entry.pitch_deg, entry.rpm),
+                                 (before[turbine_id][0], pitch, before[turbine_id][2]))
 
     def test_all_zero_rpm_start_is_rejected_without_parameter_changes(self):
         for index, entry in enumerate(self.entries.values()):
@@ -216,15 +282,19 @@ class ManualControlState(unittest.TestCase):
     def configure_mixed_pitch_batch(self):
         for index, entry in enumerate(self.entries.values(), 1):
             entry.yaw_deg, entry.azimuth_deg = index * 11.0, index * 13.0
-            entry.pitch_deg = index * 5.0
             entry.rpm = (0.0, 6.0, 9.0)[index - 1]
+        self.scene.wfrl_manual_target = 'ALL'
+        self.assertEqual(self.action('START'), {'FINISHED'})
+        self.assertEqual(tuple(entry.running for entry in self.entries.values()), (False, True, True))
+        # 运行 sets the running pitch; pitch stays adjustable while running.
+        self.scene.wfrl_manual_target = 'T1'
+        for index, entry in enumerate(self.entries.values(), 1):
+            entry.pitch_deg = index * 5.0
         t2 = self.entries['T2']
         t2.individual_pitch = True
         for index, pitch in enumerate((3.0, 9.0, 21.0), 1):
             setattr(t2, f'pitch_b{index}_deg', pitch)
         self.scene.wfrl_manual_target = 'ALL'
-        self.assertEqual(self.action('START'), {'FINISHED'})
-        self.assertEqual(tuple(entry.running for entry in self.entries.values()), (False, True, True))
         return parameters(self.scene)
 
     def test_batch_individual_pitch_enable_preserves_existing_independent_values(self):
@@ -307,4 +377,5 @@ report = dict(status='PASS' if result.wasSuccessful() else 'FAIL',
 print(json.dumps(report), flush=True)
 if not result.wasSuccessful():
     raise AssertionError('Manual control state regression failed; see checks.json')
+
 print('MANUAL_CONTROL_STATE_PASS', flush=True)

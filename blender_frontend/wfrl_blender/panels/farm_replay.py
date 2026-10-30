@@ -2,6 +2,7 @@
 import bpy
 from .. import clearance_replay, farm_flex
 from .clearance import number, playback_control, selected_installation_label, dual_method_label
+from .ui_helpers import message, diagnostic, history_status
 
 
 def unified_panel_active(scene):
@@ -95,15 +96,17 @@ def draw_radar(layout, scene, value):
             details.label(text='暂无有效回放数据')
 
 
-def draw_playback(layout, context, value, reader):
+def draw_playback(layout, context, value, reader, *, show_time=None):
     """One shared clock and three transport actions, above every task page."""
     from .. import split_reconstruction
     scene = context.scene
     comparison = split_reconstruction.enabled(scene)
     playback = layout.column(align=True)
     text, icon, state = playback_control(scene, context.screen)
-    if not comparison:
-        playback.label(text=(f"仿真 {value['time_s']:.3f} s · {state}" if value else '回放数据未就绪'))
+    if show_time is None:
+        show_time = not comparison
+    if show_time:
+        playback.label(text=(f"仿真时刻 {value['time_s']:.3f} s · {state}" if value else '回放数据未就绪'))
     row = playback.row(align=True)
     row.scale_y = 1.25
     row.operator('wfrl.clearance_playback', text=text, icon=icon)
@@ -112,7 +115,8 @@ def draw_playback(layout, context, value, reader):
     if not comparison:
         duration = reader.end_s - reader.start_s if reader else 0
         elapsed = max(0, value['time_s'] - reader.start_s) if value and reader else 0
-        playback.prop(scene, 'wfrl_clearance_progress', text=f'{elapsed:.1f} / {duration:.0f} 秒', slider=True)
+        playback.label(text=f'片段进度 {elapsed:.1f} / {duration:.1f} 秒')
+        playback.prop(scene, 'wfrl_clearance_progress', text='', slider=True)
 
 
 def draw_views(layout, context):
@@ -151,7 +155,7 @@ def draw_split_views(layout, context):
     layout.operator('wfrl.farm_split_view', text='恢复单屏', icon='FULLSCREEN_ENTER').mode = 'SINGLE'
     error = context.scene.get('wfrl_view_layout_error')
     if error:
-        layout.label(text=error, icon='ERROR')
+        diagnostic(layout, '视图布局', error, error=True, context=context)
 
 
 def draw_turbine_views(layout, scene):
@@ -205,7 +209,7 @@ def draw_tools(layout, context):
         telemetry.prop(scene, 'wfrl_chart_channel', text='曲线通道')
         telemetry.prop(scene, 'wfrl_selected_turbine', text='曲线机组')
         telemetry.operator('wfrl.export_history', text='导出已采样历史', icon='EXPORT')
-        telemetry.label(text=scene.get('wfrl_history_export_status', '每通道最多 600 点'))
+        history_status(telemetry, scene.get('wfrl_history_export_status', '每通道最多 600 点'), context=context)
     presentation = section(layout, 'wfrl_farm_environment', '画面与环境')
     if presentation is not None:
         presentation.prop(scene, 'wfrl_show_atmosphere', text='环境显示')
@@ -257,39 +261,54 @@ def draw_tools(layout, context):
         frontend_diagnostics.draw_panel(diagnostics, context)
 
 
-def draw(layout, context):
+def draw(layout, context, *, show_playback=True):
     scene = context.scene
     value = clearance_replay.sample(scene)
     reader = clearance_replay.reader_for(scene)
     layout.use_property_decorate = False
-    if farm_flex._ACTIVE.reference is not None:
-        from ..turbine_geometry import model_label
-        layout.label(text='单机预弯接口验证' if farm_flex._ACTIVE.manifest.get('interface_only')
-                     else model_label(farm_flex._ACTIVE.model) + ' · BeamDyn')
-    layout.prop(scene, 'wfrl_blade_model', text='叶片外形')
     if farm_flex._ACTIVE.model != 'nrel5mw':
-        layout.label(text='合成叶形；运动、载荷与雷达读数来自 NREL 基线', icon='INFO')
+        message(layout, '合成叶形；运动、载荷与雷达读数来自 NREL 基线', context=context)
     if scene.get('wfrl_blade_model_error'):
-        layout.label(text=scene['wfrl_blade_model_error'], icon='ERROR')
+        diagnostic(layout, '叶片外形', scene['wfrl_blade_model_error'], error=True, context=context)
     if farm_flex._ACTIVE.manifest.get('measurement_mode') == 'dual_beam':
-        layout.label(text=dual_method_label(value), icon='INFO')
+        message(layout, dual_method_label(value), context=context)
         installation_status = (value or {}).get('installation_status')
-        layout.label(text=('双束重建 · ' + selected_installation_label(getattr(reader, 'config', {}))
-                           if installation_status == 'SIMULATION_SELECTED'
-                           else '双束诊断 · 安装与性能待验收'), icon='INFO')
+        message(layout, ('双束重建 · ' + selected_installation_label(getattr(reader, 'config', {}))
+                         if installation_status == 'SIMULATION_SELECTED'
+                         else '双束诊断 · 安装与性能待验收'), context=context)
     elif farm_flex._ACTIVE.manifest.get('acceptance_status', '').startswith('FAILED'):
         layout.label(text='测量覆盖未达演示目标', icon='ERROR')
-    draw_playback(layout, context, value, reader)
-    draw_split_views(layout, context)
-    tabs = layout.row(align=True)
-    tabs.scale_y = 1.25
-    tabs.prop(scene, 'wfrl_farm_panel_page', expand=True)
+    if show_playback:
+        draw_playback(layout, context, value, reader)
+    from .. import split_reconstruction
+    if split_reconstruction.enabled(scene):
+        draw_split_views(layout, context)
+    else:
+        views = section(layout, 'wfrl_farm_quick_views', '观察视角与分屏')
+        if views is not None:
+            draw_split_views(views, context)
+        model = section(layout, 'wfrl_farm_model_details', '叶片外形与模型来源')
+        if model is not None:
+            if farm_flex._ACTIVE.reference is not None:
+                from ..turbine_geometry import model_label
+                model.label(text='单机预弯接口验证' if farm_flex._ACTIVE.manifest.get('interface_only')
+                            else model_label(farm_flex._ACTIVE.model) + ' · BeamDyn')
+            model.prop(scene, 'wfrl_blade_model', text='叶片外形')
+    tabs = layout.column(align=True)
+    for pages in (('DEFLECTION', 'RADAR', 'IMBALANCE'), ('VIDEO', 'TOOLS')):
+        row = tabs.row(align=True)
+        row.scale_y = 1.25
+        for page in pages:
+            row.prop_enum(scene, 'wfrl_farm_panel_page', page)
     if scene.wfrl_farm_panel_page == 'DEFLECTION':
         from ..deflection import draw_panel
         draw_panel(layout, scene)
     elif scene.wfrl_farm_panel_page == 'RADAR':
         draw_turbine_views(layout, scene)
         draw_radar(layout, scene, value)
+    elif scene.wfrl_farm_panel_page == 'IMBALANCE':
+        from . import imbalance
+        imbalance.draw(layout, scene)
     elif scene.wfrl_farm_panel_page == 'VIDEO':
         from . import video_output
         video_output.draw(layout, context)

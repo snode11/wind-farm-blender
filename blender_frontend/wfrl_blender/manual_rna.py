@@ -9,7 +9,7 @@ def _properties(update_factory):
     return {
         'yaw_deg': bpy.props.FloatProperty(name='机舱朝向 °', default=0.0, min=-180.0, max=180.0,
                                            precision=1, update=update_factory('yaw_deg')),
-        'pitch_deg': bpy.props.FloatProperty(name='集体桨距 °', default=0.0, min=-30.0, max=90.0,
+        'pitch_deg': bpy.props.FloatProperty(name='集体桨距 °', default=control.FEATHER_PITCH_DEG, min=-30.0, max=90.0,
                                              description='统一设置三片叶片桨距，覆盖各片独立桨距',
                                              precision=1, update=update_factory('pitch_deg')),
         'rpm': bpy.props.FloatProperty(name='转速 RPM', default=control.DEFAULT_RPM, min=0.0, max=30.0,
@@ -18,7 +18,7 @@ def _properties(update_factory):
                                                precision=1, update=update_factory('azimuth_deg')),
         'individual_pitch': bpy.props.BoolProperty(name='分别调整三片叶片', default=False,
                                                    update=update_factory('individual_pitch')),
-        **{f'pitch_b{i}_deg': bpy.props.FloatProperty(name=f'叶片 {i} 桨距 °', default=0.0,
+        **{f'pitch_b{i}_deg': bpy.props.FloatProperty(name=f'叶片 {i} 桨距 °', default=control.FEATHER_PITCH_DEG,
                                                       min=-30.0, max=90.0, precision=1,
                                                       update=update_factory(f'pitch_b{i}_deg'))
            for i in range(1, 4)},
@@ -29,8 +29,8 @@ class WFRL_ManualTurbine(bpy.types.PropertyGroup):
     __annotations__ = {
         **_properties(control._update),
         'turbine_id': bpy.props.StringProperty(),
-        **{f'pitch_actual_b{i}_deg': bpy.props.FloatProperty(default=0.0) for i in range(1, 4)},
-        **{f'pitch_start_b{i}_deg': bpy.props.FloatProperty(default=0.0) for i in range(1, 4)},
+        **{f'pitch_actual_b{i}_deg': bpy.props.FloatProperty(default=control.FEATHER_PITCH_DEG) for i in range(1, 4)},
+        **{f'pitch_start_b{i}_deg': bpy.props.FloatProperty(default=control.FEATHER_PITCH_DEG) for i in range(1, 4)},
         'pitch_state_ready': bpy.props.BoolProperty(default=False),
         'pitch_paused': bpy.props.BoolProperty(default=True, options={'SKIP_SAVE'}),
         'running': bpy.props.BoolProperty(default=False, options={'SKIP_SAVE'}, update=control._update('running')),
@@ -91,8 +91,8 @@ def register():
     bpy.types.Scene.wfrl_manual_display_detail = bpy.props.EnumProperty(
         name='显示精度', items=DETAIL_ITEMS, default='OVERVIEW', update=detail_update)
     bpy.types.Scene.wfrl_manual_pitch_rate_deg_s = bpy.props.FloatProperty(
-        name='变桨速度 °/s', description='普通手动桨距按此速度到位；0 为立即到位，冻结试验使用自己的时间曲线',
-        default=0.0, min=0.0, max=30.0, precision=1, update=control._pitch_rate_update)
+        name='变桨速度 °/s', description='叶片按此速度转向设定桨距，到位后保持；0 表示立即到位',
+        default=control.DEFAULT_PITCH_RATE_DEG_S, min=0.0, max=30.0, precision=1, update=control._pitch_rate_update)
     bpy.types.Scene.wfrl_manual_return_scene = bpy.props.PointerProperty(type=bpy.types.Scene)
     from .manual_scene_links import bind, resolve, restore
     bpy.types.Scene.wfrl_manual_scene = property(resolve, bind)
