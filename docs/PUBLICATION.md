@@ -37,7 +37,7 @@ tar -xzf /path/to/resource-part.tar.gz
 
 解压目标必须是该源码仓库根目录。资源文件不会安装 Python 环境、覆盖日常 Blender 扩展或启动求解器。恢复 `wfcrl-dependency-01.tar.gz` 后，完整 Python 环境统一执行 `python -m pip install -r requirements.txt`，同时安装 WFCRL、根项目、训练、桌面 GUI 与相机/重建依赖。macOS 的 Python 3.11、OpenMPI、编译工具和应用程序准备方式见[本地配置](setup/setup_local.md#2-macos-完整-python-环境)。根项目的最小包安装仍可使用 `python -m pip install .`，源码开发使用 `python -m pip install -e .`；两者以及构建的 wheel 均提供内置机型 YAML，最小安装仅包含声明的核心依赖。
 
-FAST.Farm、OpenFAST、TurbSim、MPI 与控制器须按目标平台单独安装或编译。求解脚本接受 `WFCRL_FASTFARM_EXECUTABLE`、`WFCRL_OPENFAST_EXECUTABLE`、`WFCRL_TURBSIM_EXECUTABLE`，否则在 `PATH` 中寻找可执行文件。Python 包安装和后端源码变更不更新公开扩展附件或本机已安装扩展；Interactive、Formal Training 与 SB3 的入口及统计定义见[算法配置](training/MAPPO_SETUP.md)。
+macOS 通过 conda-forge 安装 OpenFAST 3.5.3（含 FAST.Farm）与 OpenMPI，并从恢复的 WFCRL 资源源码编译机组控制器和 supercontroller；简要命令见根目录 [requirements.txt](../requirements.txt)，完整步骤见[本地配置](setup/setup_local.md#3-fastfarm-动态后端与实时-bridge)。pip 只安装 Python 依赖，生成新来流另需可用的 TurbSim。求解脚本接受 `WFCRL_FASTFARM_EXECUTABLE`、`WFCRL_OPENFAST_EXECUTABLE`、`WFCRL_TURBSIM_EXECUTABLE`，否则在 `PATH` 中寻找可执行文件。Python 包安装和后端源码变更不更新公开扩展附件或本机已安装扩展；Interactive、Formal Training 与 SB3 的入口及统计定义见[算法配置](training/MAPPO_SETUP.md)。
 
 仅离线使用公开扩展时，按[安装说明](blender/INSTALL.md)安装专用 ZIP 即可，无需恢复研究数据和后端环境。源码扩展可在新输出目录构建；源码发布不证明新生成 ZIP 已通过公开安装版的所有窗口和平台验收。
 

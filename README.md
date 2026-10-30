@@ -56,7 +56,7 @@ GW184 使用[独立包操作说明](docs/blender/GW184三相机与缺陷编辑�
 
 ## 源码与运行资源
 
-完整项目的 Python 环境统一使用根目录 [requirements.txt](requirements.txt)，包括 WFCRL、FLORIS、FAST.Farm Python 接口、训练、桌面 GUI 和相机/重建依赖。macOS 使用 Python 3.11，先恢复 WFCRL 资源并准备 OpenMPI；安装命令及 Blender、求解器与控制器要求见[完整环境配置](docs/setup/setup_local.md#2-macos-完整-python-环境)。
+完整项目的 Python 环境统一使用根目录 [requirements.txt](requirements.txt)，文件顶部提供 macOS 简要安装命令。使用匹配架构的 Miniforge，由 conda 安装 Python 3.11、OpenMPI 与 OpenFAST 3.5.3（含原生 FAST.Farm）；恢复 WFCRL 资源后安装 Python 依赖，动态后端还需本机编译两个控制器。下载、编译与短仿真检查见[完整环境配置](docs/setup/setup_local.md#2-macos-完整-python-环境)。
 
 当前源码、测试、研究工具与文档使用 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 分支。运行资源与证据分别随 Git 或 [project-resources-v1](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1) 提供，具体位置及取得方式见[分发说明](docs/PUBLICATION.md)。NREL 离线扩展构建所需正式载荷随 Git 提供；其他入口按需恢复对应资源。
 

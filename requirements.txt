@@ -1,14 +1,16 @@
 # 完整项目 Python 环境：macOS / Python 3.11，从仓库根目录执行。
-# 系统环境（conda-forge）：
-#   conda create -n wfrl-full -c conda-forge python=3.11 pip git openmpi mpi4py python.app cmake fortran-compiler ffmpeg
+# 准备：安装 Miniforge（M 系列选 arm64，Intel 选 x86_64），执行 xcode-select --install。
+# 系统环境与求解器（conda-forge）：
+#   conda create -n wfrl-full -c conda-forge python=3.11 pip git openmpi "mpi4py>=3.1.5,<5" \
+#     openfast=3.5.3 "cmake<4" c-compiler cxx-compiler fortran-compiler python.app ffmpeg
 #   conda activate wfrl-full
 # 源码资源：从 project-resources-v1 解压 wfcrl-dependency-01.tar.gz 到仓库根目录，提供 wfcrl-env/。
 # 安装：python -m pip install -r requirements.txt
 # 检查：python -m pip check
-# Blender 5.2+、FAST.Farm/OpenFAST/TurbSim、supercontroller 和机组控制器须单独安装或编译。
-# macOS 本机编译还需 Xcode Command Line Tools：xcode-select --install。
+# openfast=3.5.3 提供原生 FAST.Farm/OpenFAST；supercontroller 与机组控制器须本机编译。
+# Blender 5.2+ 单独安装；pip 不安装求解器二进制、控制器、算例数据或模型权重。
 # Python、MPI、求解器与控制器必须使用同一 CPU 架构和兼容的 MPI 运行时。
-# 配置与启动：docs/setup/setup_local.md；本文件不安装应用程序、算例数据或模型权重。
+# 下载、控制器编译与短仿真检查：docs/setup/setup_local.md。
 
 # WFCRL、FLORIS 与 FAST.Farm 的 Python 接口。
 numpy==1.26.4
