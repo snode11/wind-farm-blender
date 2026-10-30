@@ -12,7 +12,7 @@
 |---|---|
 | `scenes/turb3_stagger.yaml` | 存在；三机错列，4D 纵向间距、逐机横向偏移 31.5 m，8 m/s、270°，controls 为 yaw |
 | `scripts/train/train_fastfarm.py`、`wfrl/rewards.py` | 存在；集中式 MAPPO 与 reference 奖励实现可静态检查 |
-| `scripts/demo/train_reference_s1.ps1`、`rollout_reference_s1.ps1`、`replay_studio.ps1` | 存在；历史 Windows 绝对路径，未重跑 |
+| 实验启动配置 | [v0.3.41 脚本快照](https://github.com/snode11/wind-farm-blender/tree/v0.3.41/scripts/demo)保留原命令；它们引用的权重与结果未分发 |
 | `results/runs/stagE400ref_rollout.npz` | 当前缺失，不能重新计算报告的末 50 步统计 |
 | `results/runs/fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_reference_E400_none_stagE400ref_hist.json` | 当前缺失 |
 | `results/checkpoints/..._stagE400ref.pt`、`..._stagE400ref_s1.pt` | 当前没有找到；历史脚本引用不等于权重仍保留 |
@@ -52,13 +52,14 @@ shaped = (raw_reward - reference) / reference
 
 ## 4. 当前复现与演示入口
 
-历史 PowerShell 脚本硬编码 `D:\project\wind farm RL`、用户 `s1155` 的 Python 路径和 MS-MPI。它们调用现有训练/rollout/Studio 模块，但权重与结果当前缺失；脚本中的“8 小时”“12 分钟”“预期 +5%”不是现行保证。`train_reference_s1.ps1` 的命令使用 seed 1，脚本打印和 rollout 引用的文件名仍含 `s0`；运行前应按训练入口实际命名核对。
+训练与评估使用下列模块，并显式指定匹配的场景、权重和输出路径。`stagE400ref` 的权重与结果当前缺失，报告中的耗时与收益不能作为新运行的保证；checkpoint 名称与实验身份以训练入口的实际输出为准。
 
 - [动态训练入口](../../scripts/train/train_fastfarm.py)：训练与同路径零动作基线，支持回合、预热、奖励、种子和场景配置。
 - [确定性评估](../../scripts/experiments/rollout_ckpt.py)：从匹配 checkpoint 重新推进后端，输出数值轨迹。
 - [Studio Trainer](../../wfrl/studio/trainer.py)：`_replay_policy` 加载权重并重新执行物理仿真；不读取历史 NPZ。界面的 FLORIS proxy 尾流不能当作 FAST.Farm 动态尾流真值。
 - [算法与依赖分流](MAPPO_SETUP.md)、[本地配置](../setup/setup_local.md)：当前源码入口与平台要求。
-- 当前 Blender [演示](../demos/演示指令单.md)：0.3.39 内置保存结果，适合离线展示；它与本实验效果分别判定。
+- [Studio 策略评估](../demos/Studio策略评估.md)：macOS 与 Windows 命令模板、模型兼容条件及可见窗口边界。
+- 当前 Blender [演示](../demos/演示指令单.md)：使用扩展内置保存结果离线观看；它与本实验效果分别判定。
 
 恢复完整复现需要找到或重新生成匹配的权重、基线、策略 rollout、训练历史及配置来源，随后再重新评分。复现需要匹配完整输入与独立评价。
 

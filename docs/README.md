@@ -10,6 +10,7 @@
 | --- | --- |
 | 当前功能与限制 | [Blender 功能总览](blender/Blender前端功能总览与规划.md)、[发布状态与验证范围](blender/发布状态与验证范围.md) |
 | 自动检查与本地复用 | [Python 合同、Blender 后台与发布身份检查](development/自动检查.md) |
+| 脚本与桌面策略评估 | [脚本索引](../scripts/README.md)、[Studio checkpoint 评估](demos/Studio策略评估.md) |
 | 安装和用户操作 | [安装说明](blender/INSTALL.md)、[前端说明](../前端readme.md)、[用户手册](blender/用户使用手册.md) |
 | 独立风机手动控制 | [控件、运行与保存规则](blender/风机手动控制.md) |
 | 实现与维护 | [前端维护说明](../blender_frontend/README.md)、[Blender 文档索引](blender/README.md) |

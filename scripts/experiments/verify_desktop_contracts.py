@@ -1,4 +1,4 @@
-"""Day 2 验收脚本 —— 把之前散在命令行里的检查固化成可复跑的断言。
+"""RViz 桌面、来流与地形合同检查。
 
 分两层，因为两层的代价差三个数量级：
 
@@ -13,9 +13,9 @@
       F. 全栈联跑：真实切面 + 湍流 + 地形 + 双视图，查湍流是否真的进来了
 
 用法：
-    python scripts/experiments/verify_day2.py                    # 离线层
-    python scripts/experiments/verify_day2.py --only bts,terrain # 挑着跑
-    mpiexec -n 1 python scripts/experiments/verify_day2.py --online   # 全部
+    python scripts/experiments/verify_desktop_contracts.py
+    python scripts/experiments/verify_desktop_contracts.py --only bts,terrain
+    mpiexec -n 1 python scripts/experiments/verify_desktop_contracts.py --online
 
 D 组会**真的弹出窗口**（FLORIS 后端，秒级起步），截图落在 `results/verify/`。
 判据是画面本身：两个视口各有内容且互不相同、机组 actor 确实共享、方位角在推进、
@@ -209,9 +209,7 @@ def check_label():
 def check_dualview(seconds=6.0, shot_dir=None):
     """拉起真的 `MainWindow`，让它自己跑几秒，再对**画面**下断言。
 
-    这才是这个平台该有的验收：不是"renderer 语义对不对"，而是"窗口起来了、
-    两个视口都画了东西、叶片在转、策略在动"。之前用 pv.Plotter 代验是因为我
-    自己设了 QT_QPA_PLATFORM=offscreen —— 那是自找的，真实桌面会话下 Qt 正常。
+    检查窗口可见、两个视口均有内容、叶片转动及策略推进；需要可用的桌面会话。
 
     用 FLORIS 后端：秒级起步、不占 MPI，而双视图/地形/共享 actor 全是渲染层的
     东西，与哪个后端喂数据无关。FAST.Farm 那一路由 F 组覆盖。
@@ -277,11 +275,8 @@ def check_dualview(seconds=6.0, shot_dir=None):
         state["alive"] = win.isVisible() and win.rtimer.isActive()
         state["playing"] = win._playing
 
-        # 分屏滑块：QSplitter 那条路已验证不行（actor 的 GL 资源绑在创建它的
-        # render window 上，跨窗口共享那侧 ink=0，见 probe_splitter.py）。
-        # 这里验的是替代方案 —— 同一 render window 内改 renderer 的 viewport。
-        # 判据不能只看 viewport 数值（设了不等于画面跟着变），要看两侧墨迹随
-        # 拖动此消彼长。
+        # 分屏滑块在同一 render window 内调整两个 renderer 的 viewport；
+        # 同时检查两侧画面内容随宽度变化，viewport 数值不能单独证明绘制正确。
         sp = []
         for pct in (25, 80):
             win.split_slider.setValue(pct)
@@ -385,11 +380,7 @@ def check_dualview(seconds=6.0, shot_dir=None):
 
 # --- E. 源码结构 ------------------------------------------------------------
 def check_source():
-    """扫"函数体内 return 之后还有语句"。
-
-    这一轮真踩过：`_farm_bounds` 被插进 `__init__` 内部，它的 return 把侧栏、
-    工具条、拖拽和两个定时器全变成死代码，而语法完全合法、import 也不报错。
-    """
+    """检查函数内不可达语句，以及 MainWindow 方法、定时器与拾取入口。"""
     import ast
 
     c = Check("E. 源码结构（无 return 之后的死代码）")

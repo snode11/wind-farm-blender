@@ -24,6 +24,12 @@ results/camera-video/
 results/runs/*.png
 results/runs/*.log
 
+# 本地运行产物；Git 已跟踪的输入和证据仍受版本管理。
+/outputs/
+/results/verify/
+/ci-results/
+/fort.[0-9]*
+
 # LaTeX 编译产物
 *.aux
 *.nav

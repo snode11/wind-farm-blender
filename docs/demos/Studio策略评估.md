@@ -1,18 +1,23 @@
 # Studio checkpoint 评估与可视化
 
-Studio 的 `--replay` 加载 checkpoint，以确定性动作 `dist.mean` 推进新的物理回合并实时显示。它需要完整源码环境与后端依赖，不是 Blender 5.2+ 扩展内置保存结果的离线回放。当前 Blender [入口见演示指令单](../../docs/demos/演示指令单.md)。
+Studio 的 `--replay` 加载 checkpoint，以确定性动作 `dist.mean` 推进新的物理回合并实时显示。它需要完整源码环境与后端依赖；Blender 内置保存结果的离线回放见[演示指令单](演示指令单.md)。
 
 ## 入口与输入条件
 
 实现为 `wfrl/studio/trainer.py:_replay_policy()`，命令行入口为 `wfrl/studio/app.py`。运行前核对场景、机组顺序、checkpoint 的 `obs_keys`、`obs_dim`、`act_dim`、控制量及训练归一化统计。相同确定性动作选择不自动保证与另一脚本的场景、控制器、预热、约束、采样和统计窗口完全一致。
 
-`scripts/demo/replay_studio.ps1` 与 `test_replay_import.py` 存在，但采用用户 `s1155` 的 Windows Python、MS-MPI 和 `D:\project\wind farm RL` 绝对路径。脚本引用的 `stagE400ref` checkpoint、原 rollout 和训练历史当前缺失；恢复匹配输入和路径前，不能直接宣称该快捷脚本可复现原实验。
-
-脚本中的约 12 分钟、T1 33–36°、3.28 MW 和 +5.3% 只对应旧固定来流实验的预期文字。该实验的功率报告为 3.281 / 3.116 MW，原始匹配数据缺失，且“+178 kW”与所列功率差不一致；这些值不保证新运行结果或通用策略收益。[证据状态见固定来流实验](../../docs/training/WAKE_STEERING_BREAKTHROUGH.md)。
+`stagE400ref` checkpoint、原 rollout 和训练历史当前缺失。保留的 level/E128 权重属于另一配置；不能用它补作原实验的收益证据。[固定来流实验](../training/WAKE_STEERING_BREAKTHROUGH.md)说明报告值与复现限制。新运行的耗时、偏航角和功率以实际输出为准。
 
 ## 命令模板
 
-从完整源码根目录运行，替换 Python、MPI 和 checkpoint 路径。PowerShell 的调用运算符为 `&`，续行符为反引号：
+从完整源码根目录运行，使用与 checkpoint 匹配的场景和已配置的环境。macOS 通过桌面启动器使用 `pythonw` 与 OpenMPI：
+
+```bash
+scripts/macos/run_desktop.sh studio --scene scenes/turb3_stagger.yaml \
+  --replay --ckpt /absolute/path/matching-checkpoint.pt --replay-steps 400 --warmup 8
+```
+
+Windows 替换 Python、MPI 和 checkpoint 路径。PowerShell 的调用运算符为 `&`，续行符为反引号：
 
 ```powershell
 $PY = "C:\path\to\python.exe"
@@ -23,7 +28,7 @@ $CKPT = "C:\path\to\matching-checkpoint.pt"
   --ckpt $CKPT --replay-steps 400 --warmup 8
 ```
 
-`--replay` 启用 checkpoint 评估；`--replay-steps` 默认 400，`--warmup` 默认 4。`--no-wake` 关闭 FLORIS proxy 尾流显示。导入检查使用 `python scripts/demo/test_replay_import.py`，它不替代完整后端运行、策略效果或可见窗口验收。
+`--replay` 启用 checkpoint 评估；`--replay-steps` 默认 400，`--warmup` 默认 4。`--no-wake` 关闭 FLORIS proxy 尾流显示。环境与平台要求见[本地配置](../setup/setup_local.md#4-旧-studio--rviz-桌面入口)；命令模板不证明目标环境已经通过后端、策略效果或可见窗口验收。
 
 ## 画面与操作
 
