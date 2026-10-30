@@ -1,0 +1,75 @@
+{
+  "status": "PASS",
+  "version": "0.3.41",
+  "source_commit": "e14cd76fb8581a5b2b5e684895b7f364fa044d15",
+  "host": {
+    "status": "PASS",
+    "source_tag": "v0.3.41",
+    "source_commit": "e14cd76fb8581a5b2b5e684895b7f364fa044d15",
+    "python": "3.13.9",
+    "platform": "macOS arm64",
+    "scope": "blender_frontend/tests and tests/test_release_identity.py",
+    "counts": {
+      "tests": 1429,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 5,
+      "passed": 1424
+    },
+    "duration_s": 90.304,
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest blender_frontend/tests tests/test_release_identity.py -q -p no:cacheprovider",
+    "skipped": [
+      {
+        "test": "blender_frontend.tests.test_blade_models.BladeModelTests::test_regeneration_matches_packaged_alternate_asset",
+        "reason": "Rootkink regeneration requires projects/commercial-rootkink-reference/template"
+      },
+      {
+        "test": "blender_frontend.tests.test_blade_recon_data.BundledProvenanceTests::test_geometry_equals_original_source_import",
+        "reason": "Original boss source is unavailable; portable bundle hash tested separately"
+      },
+      {
+        "test": "blender_frontend.tests.test_imbalance::test_export_is_reproducible_from_saved_sources",
+        "reason": "Original OpenFAST output files are not distributed"
+      },
+      {
+        "test": "blender_frontend.tests.test_tip_deflection.DeflectionTests::test_retained_vtp_independent_transport",
+        "reason": "Original VTP is not distributed with the offline release"
+      },
+      {
+        "test": "blender_frontend.tests.test_video_output::test_stream_decode_failure_cleanup_restart_and_busy_port",
+        "reason": "Set WFRL_MEDIAMTX for actual RTSP"
+      }
+    ],
+    "environment_constraint": "Manual-video supervision requires flock and waitid(WNOWAIT). macOS CPython 3.11 lacks os.waitid; the supported host run uses CPython 3.13.",
+    "counting": "Pytest reports collected cases; this is not a deduplicated cross-suite count."
+  },
+  "package": {
+    "status": "PASS",
+    "file_count": 201,
+    "sha256": "11b0cec549eea8e137770afd00996f56b34d48ff875d333896f046ac5da4adae",
+    "checks": [
+      "archive inventory",
+      "isolated installation",
+      "persistent enablement",
+      "fresh-process module origins",
+      "default three cameras",
+      "native camera projection"
+    ]
+  },
+  "source_rebuild": "PASS_BYTE_IDENTICAL",
+  "public_copy": {
+    "path_policy": "Machine-specific roots are replaced with portable labels; measurement results and payload identities are preserved.",
+    "profile_path_scope": "Profile paths identify the measured isolated environment; the profile is not distributed as source."
+  },
+  "not_run": [
+    "visible windows",
+    "physical keyboard/mouse",
+    "full video",
+    "full-clip FPS",
+    "long-term memory",
+    "other platforms",
+    "real MPI/solver/training",
+    "scientific acceptance",
+    "remote asset download verification"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "source_tag": "v0.3.41",
+  "source_commit": "e14cd76fb8581a5b2b5e684895b7f364fa044d15",
+  "source_tree": "20d565425d8ee8425f4384db43f62a344f947163",
+  "source_archive_sha256": "a9d52b122dcc43a71cab0120fea95376bec98f8c892b2c9956a11594c01ede60",
+  "source_archive_bytes": 190620910,
+  "source_archive_files": 2729,
+  "source_archive_crc": "PASS",
+  "canonical_payload_sha256": "1b6b1807a9399cd1846ec55859443e4f7d464b0d5de50691f55a68b85266b8cf",
+  "canonical_payload_files": 200,
+  "expected_extension_sha256": "11b0cec549eea8e137770afd00996f56b34d48ff875d333896f046ac5da4adae",
+  "rebuilt_extension_sha256": "11b0cec549eea8e137770afd00996f56b34d48ff875d333896f046ac5da4adae",
+  "byte_identical": true,
+  "identity_scope": "Independent extraction and build of the tagged source archive before upload; no remote download verification."
+}

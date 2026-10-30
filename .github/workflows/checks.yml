@@ -44,7 +44,7 @@ jobs:
       - name: Install contract-test dependencies
         run: python -m pip install -r requirements-ci.txt
       - name: Check release identity summary
-        run: python scripts/ci/check_release_identity.py --release publication/blender-0.3.40.json
+        run: python scripts/ci/check_release_identity.py --release publication/blender-0.3.41.json
       - name: Frontend and release contracts
         run: >-
           python -m pytest blender_frontend/tests tests/test_release_identity.py
