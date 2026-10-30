@@ -1,15 +1,17 @@
 # Blender 文档分类
 
-公开 NREL 安装版为 **0.3.40**，使用[专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.40/wfrl_blender-0.3.40.zip)；项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **0.3.40 发布载荷，共 195 文件**；实际模块来源及验证范围见[安装核对](../../publication/daily-installation.json)。公开附件身份见[交付身份](../../publication/blender-0.3.40.json)，GW184 为 **0.4.0 独立运行包**。证据范围见[发布状态](发布状态与验证范围.md)。[返回总索引](../README.md)。
+当前项目源码版本为 **0.3.41**，对应 [`v0.3.41` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.41)。公开扩展附件仍为 **0.3.40**；本机日常安装为独立的 **0.3.40 本地源码构建**，实际身份见[安装记录](../../publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
 
-0.3.40 发布源码与扩展的连接恢复、后台渲染、回合曲线和相机保护合同见[源码软件合同与验证](发布状态与验证范围.md#源码软件合同与验证)，详细合同见[维护说明](../../blender_frontend/README.md)。日常安装使用同一 0.3.40 发布载荷。
+公开 NREL 安装版为 **0.3.40**，使用[专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.40/wfrl_blender-0.3.40.zip)；项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **0.3.40 本地源码构建，共 201 文件**；实际模块来源及验证范围见[安装核对](../../publication/daily-installation.json)。公开附件身份见[交付身份](../../publication/blender-0.3.40.json)，GW184 为 **0.4.0 独立运行包**。证据范围见[发布状态](发布状态与验证范围.md)。[返回总索引](../README.md)。
+
+0.3.40 发布源码与扩展的连接恢复、后台渲染、回合曲线和相机保护合同见[源码软件合同与验证](发布状态与验证范围.md#源码软件合同与验证)，详细合同见[维护说明](../../blender_frontend/README.md)。日常安装使用独立的 0.3.40 本地源码构建。
 
 ## 当前操作和功能
 
 | 文档 | 用途 |
 | --- | --- |
 | [INSTALL](INSTALL.md) | NREL 安装、升级和平台验证范围。 |
-| [风机手动控制](风机手动控制.md) | 独立刚性场景的参数、姿态、JSON 与撤销重做；T1 恒速变桨、独立 Down、离线视频、持久化作业监管、完整母版重试及发布约束。 |
+| [风机手动控制](风机手动控制.md) | 独立刚性场景的参数、姿态、JSON 与撤销重做；源码研究接口见[手动场景研究接口](手动场景研究接口.md)。 |
 | [用户使用手册](用户使用手册.md) | MAPPO 回放、视角、三相机、净空、后端模式、导出与保存。 |
 | [功能总览与规划](Blender前端功能总览与规划.md) | 已有功能、后端依赖、独立原型、研究边界和待完成事项。 |
 | [发布状态与验证范围](发布状态与验证范围.md) | 公开版本、源码与 ZIP 及实际安装的区别、已保存软件证据和限制。 |

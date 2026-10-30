@@ -1,5 +1,7 @@
 # 文档索引
 
+当前项目源码版本为 **0.3.41**，对应 [`v0.3.41` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.41)。公开扩展附件仍为 **0.3.40**；本机日常安装为独立的 **0.3.40 本地源码构建**，实际身份见[安装记录](../publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
+
 项目仓库为 [snode11/wind-farm-blender](https://github.com/snode11/wind-farm-blender)。文档按功能、使用、实现、约束和验证对象组织；包身份、实际安装和研究接受状态分别说明。
 
 ## 阅读入口
@@ -25,8 +27,8 @@
 | --- | --- |
 | NREL 公开安装包 | **0.3.40**；安装使用 [v0.3.40 专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.40/wfrl_blender-0.3.40.zip)，包身份与适用验证见[交付身份](../publication/blender-0.3.40.json)。 |
 | 项目源码 | [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 包含当前前端、后端、研究、测试与文档；源码分支不等于既有公开安装包或日常安装载荷。 |
-| 发布源码 | `v0.3.40` 标签与配套源码归档；软件合同、保存证据及适用范围见[源码软件合同与验证](blender/发布状态与验证范围.md#源码软件合同与验证)。 |
-| 本地日常安装 | **0.3.40 工作区构建**，实际模块 `bl_ext.user_default.wfrl_blender`；195 文件与本地安装归档匹配，与公开 0.3.40 附件载荷一致。94 个新后台进程模块来源、持久启用、主入口注册及配置保护见[日常安装核对](../publication/daily-installation.json)。 |
+| 发布源码 | `v0.3.41` 源码标签；公开 0.3.40 附件的配套归档保留其原身份；软件合同、保存证据及适用范围见[源码软件合同与验证](blender/发布状态与验证范围.md#源码软件合同与验证)。 |
+| 本地日常安装 | **0.3.40 工作区构建**，实际模块 `bl_ext.user_default.wfrl_blender`；201 文件与本地安装归档匹配，独立于公开附件。95 个新后台进程模块来源、持久启用、主入口注册及配置保护见[日常安装核对](../publication/daily-installation.json)。 |
 | GW184 | **0.4.0 独立解压运行包**，模型、配置和 NREL 扩展分别使用。 |
 | 材料点研究 | Patch **2/8**、Crack **7/8**、跨相机 RGB **0/264**；真实同材料点三维误差 `null`，`FAILED_GATE / NOT_ACCEPTED`；未替换正式 601 样本资产。 |
 | 其他研究门槛 | 叶尖显示精度的源码全时间轴与本地 0.3.36 安装版抽样分别见[验证范围](blender/发布状态与验证范围.md#研究与物理边界)；材料点研究保持 FAILED_GATE，雷达 REVIEW_ONLY / PENDING_ACCEPTANCE，表面 P2b FAILED_GATE / REVIEW_ONLY、主增益 null、局部恢复 NOT_RUN，独立动态原型 DY1 NOT PASSED。 |

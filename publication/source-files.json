@@ -46,9 +46,9 @@
     },
     {
       "path": "README.md",
-      "bytes": 14402,
-      "sha256": "8bae7842ea42561c0b501bc7b04f4cd899f3763116e887e4d5d5f12c9a507667",
-      "original_sha256": "8bae7842ea42561c0b501bc7b04f4cd899f3763116e887e4d5d5f12c9a507667",
+      "bytes": 14795,
+      "sha256": "cd9835d051b022b3f8ba93bfb14866ae57790b0a841d4a37777552e1493d52c8",
+      "original_sha256": "cd9835d051b022b3f8ba93bfb14866ae57790b0a841d4a37777552e1493d52c8",
       "text_portable": false
     },
     {
@@ -837,9 +837,9 @@
     },
     {
       "path": "blender_frontend/README.md",
-      "bytes": 86819,
-      "sha256": "d17e5d3a610d90ce87675164a49e181f471a870cabc160f9810ac6a85649e622",
-      "original_sha256": "d17e5d3a610d90ce87675164a49e181f471a870cabc160f9810ac6a85649e622",
+      "bytes": 87259,
+      "sha256": "9016bdbf6a13c4033528f084dbd0ceba79b66f1f62ae9831f91a6c7c2b7fbcbf",
+      "original_sha256": "9016bdbf6a13c4033528f084dbd0ceba79b66f1f62ae9831f91a6c7c2b7fbcbf",
       "text_portable": false
     },
     {
@@ -3323,8 +3323,8 @@
     {
       "path": "blender_frontend/wfrl_blender/blender_manifest.toml",
       "bytes": 439,
-      "sha256": "104426141ec51e3b2ea15b9f6cb681cec61802e29d514594c05b9139909c4d3d",
-      "original_sha256": "104426141ec51e3b2ea15b9f6cb681cec61802e29d514594c05b9139909c4d3d",
+      "sha256": "bf176bd9b15a62d44230f87281c31bf686ccc397f515565c8e6892c1dcc39959",
+      "original_sha256": "bf176bd9b15a62d44230f87281c31bf686ccc397f515565c8e6892c1dcc39959",
       "text_portable": false
     },
     {
@@ -4190,44 +4190,44 @@
     },
     {
       "path": "docs/PUBLICATION.md",
-      "bytes": 10766,
-      "sha256": "1a42427cbeba8f3b78fd8cb2412625f0b7d21c024d867bb2e624423216ba300f",
-      "original_sha256": "1a42427cbeba8f3b78fd8cb2412625f0b7d21c024d867bb2e624423216ba300f",
+      "bytes": 11153,
+      "sha256": "5b236f5163720270e42d0c0d74de083c4cbc7d6147e0c74277f3d61f013e0399",
+      "original_sha256": "5b236f5163720270e42d0c0d74de083c4cbc7d6147e0c74277f3d61f013e0399",
       "text_portable": false
     },
     {
       "path": "docs/README.md",
-      "bytes": 4579,
-      "sha256": "e5f9bbb3d5f964937b79cea92a29851f676f48c279636da5c81e52f78d622ff5",
-      "original_sha256": "e5f9bbb3d5f964937b79cea92a29851f676f48c279636da5c81e52f78d622ff5",
+      "bytes": 5028,
+      "sha256": "879fa4c4bf85fd427d69dff594c5df0bd8d6b8cdb1af0b62cf18ba1dbaa92036",
+      "original_sha256": "879fa4c4bf85fd427d69dff594c5df0bd8d6b8cdb1af0b62cf18ba1dbaa92036",
       "text_portable": false
     },
     {
       "path": "docs/blender/BladeRecon可视化使用说明.md",
-      "bytes": 12996,
-      "sha256": "9f87cf9166f03be297539c55b061bde2f2965065f3857e68d9c0e79cd36de039",
-      "original_sha256": "9f87cf9166f03be297539c55b061bde2f2965065f3857e68d9c0e79cd36de039",
+      "bytes": 13386,
+      "sha256": "b5f704ecf0c33b34333b2c71c79d6f3633079e81491078079cef1677ef037174",
+      "original_sha256": "b5f704ecf0c33b34333b2c71c79d6f3633079e81491078079cef1677ef037174",
       "text_portable": false
     },
     {
       "path": "docs/blender/Blender前端功能总览与规划.md",
-      "bytes": 60505,
-      "sha256": "5f61273f2b3efc3fd453fc6f28c5984900cdf70ed0827c417f5dbdb35a252db3",
-      "original_sha256": "5f61273f2b3efc3fd453fc6f28c5984900cdf70ed0827c417f5dbdb35a252db3",
+      "bytes": 61636,
+      "sha256": "e0d6777eb03027c78a03898c68a72128d825cb3ee29be998bac739e2ae94d3a0",
+      "original_sha256": "e0d6777eb03027c78a03898c68a72128d825cb3ee29be998bac739e2ae94d3a0",
       "text_portable": false
     },
     {
       "path": "docs/blender/GW184三相机与缺陷编辑器.md",
-      "bytes": 4874,
-      "sha256": "56edbbbd3ac39d0994b51c7fc1d1826404613b3107a0cd85feb73d55fe5da463",
-      "original_sha256": "56edbbbd3ac39d0994b51c7fc1d1826404613b3107a0cd85feb73d55fe5da463",
+      "bytes": 5260,
+      "sha256": "925c945646031b61118a2eadc28e30ac16359595ee8cd79b8dc8a470bc931c44",
+      "original_sha256": "925c945646031b61118a2eadc28e30ac16359595ee8cd79b8dc8a470bc931c44",
       "text_portable": false
     },
     {
       "path": "docs/blender/INSTALL.md",
-      "bytes": 13701,
-      "sha256": "1f4bdb6a42922dc0b1923e8601fcc32c407bf41de9e8efc6b25c1e3c3bdc41a2",
-      "original_sha256": "1f4bdb6a42922dc0b1923e8601fcc32c407bf41de9e8efc6b25c1e3c3bdc41a2",
+      "bytes": 14091,
+      "sha256": "2ec881433dc2e11ea7f5e417d814deac6a6f5eb116cc0d86db402144a817c084",
+      "original_sha256": "2ec881433dc2e11ea7f5e417d814deac6a6f5eb116cc0d86db402144a817c084",
       "text_portable": false
     },
     {
@@ -4239,16 +4239,16 @@
     },
     {
       "path": "docs/blender/NREL缺陷编辑器.md",
-      "bytes": 6041,
-      "sha256": "4484b53713f6ef4981d10861a3b280be08047cf7fd2198a4c109d69810a1be16",
-      "original_sha256": "4484b53713f6ef4981d10861a3b280be08047cf7fd2198a4c109d69810a1be16",
+      "bytes": 6431,
+      "sha256": "41679def9b57cbaac3d67207587aa543c04043ebd40fb8db10110b4f1129d236",
+      "original_sha256": "41679def9b57cbaac3d67207587aa543c04043ebd40fb8db10110b4f1129d236",
       "text_portable": false
     },
     {
       "path": "docs/blender/README.md",
-      "bytes": 5503,
-      "sha256": "d90eb3b8f4fc515788aebfbf07ec78499702e39a6eafe2e77932acf952d0b4b7",
-      "original_sha256": "d90eb3b8f4fc515788aebfbf07ec78499702e39a6eafe2e77932acf952d0b4b7",
+      "bytes": 5895,
+      "sha256": "8ab1b913c1c30fda9cb6114b7d02b560a468a5df45381980c2e6c81423ca0532",
+      "original_sha256": "8ab1b913c1c30fda9cb6114b7d02b560a468a5df45381980c2e6c81423ca0532",
       "text_portable": false
     },
     {
@@ -4260,9 +4260,9 @@
     },
     {
       "path": "docs/blender/T1三相机使用说明.md",
-      "bytes": 12807,
-      "sha256": "5ba590863d3544eb621ee714a944207c202f9c7b4fe8e2e215cc309fae211b94",
-      "original_sha256": "5ba590863d3544eb621ee714a944207c202f9c7b4fe8e2e215cc309fae211b94",
+      "bytes": 13672,
+      "sha256": "0d9a6613721a6c06be536fb4f50d18687d943fce07723e77f5151600ea5ed2f8",
+      "original_sha256": "0d9a6613721a6c06be536fb4f50d18687d943fce07723e77f5151600ea5ed2f8",
       "text_portable": false
     },
     {
@@ -4435,9 +4435,9 @@
     },
     {
       "path": "docs/blender/发布状态与验证范围.md",
-      "bytes": 14195,
-      "sha256": "559ec576d5aa9aaf18bdcea97dfc400eb4e808a69a565a432a12909db383b1ae",
-      "original_sha256": "559ec576d5aa9aaf18bdcea97dfc400eb4e808a69a565a432a12909db383b1ae",
+      "bytes": 14905,
+      "sha256": "5d49719958dec16b3fe2c838f14ef4da321fd8f6eb426e995b26d40871d09988",
+      "original_sha256": "5d49719958dec16b3fe2c838f14ef4da321fd8f6eb426e995b26d40871d09988",
       "text_portable": false
     },
     {
@@ -4449,9 +4449,9 @@
     },
     {
       "path": "docs/blender/用户使用手册.md",
-      "bytes": 56530,
-      "sha256": "6a760a319ed8c057ba79ef49b15518848708fdc54d6123d65bde55df60d4e150",
-      "original_sha256": "6a760a319ed8c057ba79ef49b15518848708fdc54d6123d65bde55df60d4e150",
+      "bytes": 56800,
+      "sha256": "e1c2d51b930fa2eb5be6faf4471ec1cca197462fb12a2588d8f3a47439391637",
+      "original_sha256": "e1c2d51b930fa2eb5be6faf4471ec1cca197462fb12a2588d8f3a47439391637",
       "text_portable": false
     },
     {
@@ -4463,9 +4463,9 @@
     },
     {
       "path": "docs/collab/cross-platform-dev.md",
-      "bytes": 4088,
-      "sha256": "c35a03977d1f9577559a13dfe0d20cc068d86f86227dc259dd9543ec624fa621",
-      "original_sha256": "c35a03977d1f9577559a13dfe0d20cc068d86f86227dc259dd9543ec624fa621",
+      "bytes": 4478,
+      "sha256": "84bcbf593a28ef74c3a56fb215636deeb25870d01b84e3b2a5af5d9b3b38b9b8",
+      "original_sha256": "84bcbf593a28ef74c3a56fb215636deeb25870d01b84e3b2a5af5d9b3b38b9b8",
       "text_portable": false
     },
     {
@@ -17973,16 +17973,16 @@
     },
     {
       "path": "前端readme.md",
-      "bytes": 47206,
-      "sha256": "da47e8d8b0b8750defb8b826f5a261f4c28b6b9eca3d7c09ae2944d13c61585c",
-      "original_sha256": "da47e8d8b0b8750defb8b826f5a261f4c28b6b9eca3d7c09ae2944d13c61585c",
+      "bytes": 47590,
+      "sha256": "8d799e5f44f01e80db48381f92bf636f5ec05e1c1698975fc226a083a236ee21",
+      "original_sha256": "8d799e5f44f01e80db48381f92bf636f5ec05e1c1698975fc226a083a236ee21",
       "text_portable": false
     },
     {
       "path": "前端更新计划.md",
-      "bytes": 6853,
-      "sha256": "6b5540a47df9f1ed09c53b02125bc54e096b2dc8ecde0a7ad9431f2dc4a74413",
-      "original_sha256": "6b5540a47df9f1ed09c53b02125bc54e096b2dc8ecde0a7ad9431f2dc4a74413",
+      "bytes": 7237,
+      "sha256": "f07311e2b5c4debadb77d4412fe508cb9596af8de7c33d228756b2c9b8aa91fc",
+      "original_sha256": "f07311e2b5c4debadb77d4412fe508cb9596af8de7c33d228756b2c9b8aa91fc",
       "text_portable": false
     }
   ],

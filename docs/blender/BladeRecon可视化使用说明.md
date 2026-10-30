@@ -1,5 +1,7 @@
 # Blade Recon 叶片三维重建可视化
 
+当前项目源码版本为 **0.3.41**，对应 [`v0.3.41` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.41)。公开扩展附件仍为 **0.3.40**；本机日常安装为独立的 **0.3.40 本地源码构建**，实际身份见[安装记录](../../publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
+
 适用于 Blender 5.2+ 的公开 NREL **0.3.40**。从[专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.40/wfrl_blender-0.3.40.zip)安装并重启；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装的当前版本、实际来源与验证范围见[统一发布状态](发布状态与验证范围.md)和[安装核对](../../publication/daily-installation.json)。外部研究求解器不随扩展打包。
 
 几何与纹理保持 **NOT_ACCEPTED**，叶尖显示门槛按[工作区源码与安装载荷](发布状态与验证范围.md#研究与物理边界)分别判定。外部材料点候选 Patch 2/8、Crack 7/8、跨相机 RGB 0/264，仍为 FAILED_GATE / NOT_ACCEPTED，same_material_error_m 与 primary_gains 均 null；该[研究结果](../../blade_recon0.2/docs/材料点对应实验报告_2026-10-11.md)未替换正式 601 样本与图集。

@@ -1,5 +1,7 @@
 # NREL 叶片缺陷编辑器
 
+当前项目源码版本为 **0.3.41**，对应 [`v0.3.41` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.41)。公开扩展附件仍为 **0.3.40**；本机日常安装为独立的 **0.3.40 本地源码构建**，实际身份见[安装记录](../../publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
+
 适用于 Blender 5.2+ 的公开 NREL **0.3.40** 扩展；[下载专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.40/wfrl_blender-0.3.40.zip)，[按安装说明](INSTALL.md)手动安装并重启。当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)，开发机日常安装的版本、实际来源与验证范围见[统一发布状态](发布状态与验证范围.md)和[安装核对](../../publication/daily-installation.json)。当前公开包的身份与适用验证见[0.3.40 交付身份](../../publication/blender-0.3.40.json)；其他载荷的编辑器窗口证据不等于当前包或日常安装整套重新验收，叶尖显示门槛按工作区源码与安装载荷分别判定，源码通过不替代安装验收。
 
 该编辑器把 GW184 的六类合成缺陷操作接入 NREL 5MW / MAPPO 柔性回放。先打开主前端的 **MAPPO · 60 秒**，在 **MAPPO** 侧栏的 **NREL 5MW · 叶片缺陷** 面板点击 **启动缺陷编辑器**；目标可以选择 T1、T2、T3 的任一叶片。缺陷尺寸、位置与形态是用户定义的合成参数，不代表现场实测损伤。
