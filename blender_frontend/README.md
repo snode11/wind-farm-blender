@@ -1,5 +1,7 @@
 # NREL 5MW / WFRL Blender 前端实现与维护
 
+当前项目源码版本为 **0.3.41**，对应 [`v0.3.41` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.41)。公开扩展附件仍为 **0.3.40**；本机日常安装为独立的 **0.3.40 本地源码构建**，实际身份见[安装记录](../publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
+
 用户操作见[前端说明](../前端readme.md)，当前交付和验证见[发布状态](../docs/blender/发布状态与验证范围.md)，待实施要求见[前端更新计划](../前端更新计划.md)。要求 Blender **5.2+**。
 
 ## 运行来源与能力范围
@@ -7,8 +9,8 @@
 | 对象 | 身份与范围 |
 | --- | --- |
 | 公开安装包 | [NREL 0.3.40](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.40)；载荷见[交付身份](../publication/blender-0.3.40.json)；WFRL 主入口、录制安全收尾、视口隔离、可取消后台 PNG 渲染、叶片外形选择、T1/T2/T3 Down 及独立风机手动控制、姿态预设、相对微调、三机概览、姿态 JSON、完整风机几何／同源纹理切换、三机柔性回放、默认三相机复位、六类合成缺陷，以及相机清理、稳定刷新、采集与播放保护。 |
-| 本地工作区 | **0.3.40**；WFRL 主入口、场景／占用／后端状态、手动保护反馈、相机编辑预览与按需重绘、同刻几何及曲线缓存；包含录制安全收尾、视口隔离、后台 PNG、叶根装配、固定显示精度和环境几何预算。公开附件与日常安装分别核对。 |
-| 项目源码 | [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)；包含当前实现、测试与研究工具。发布源码使用 `v0.3.40` 标签；当前分支与公开 ZIP、日常安装载荷分别识别。 |
+| 本地工作区 | **0.3.41**；WFRL 主入口、场景／占用／后端状态、手动保护反馈、相机编辑预览与按需重绘、同刻几何及曲线缓存；包含录制安全收尾、视口隔离、后台 PNG、叶根装配、固定显示精度和环境几何预算。公开附件与日常安装分别核对。 |
+| 项目源码 | [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)；包含当前实现、测试与研究工具。当前源码使用 `v0.3.41` 标签；公开扩展的对应源码保留 `v0.3.40` 标签；当前分支与公开 ZIP、日常安装载荷分别识别。 |
 | 本地日常安装 | `bl_ext.user_default.wfrl_blender`，0.3.40 本地源码构建，未公开发布；文件核对、新进程模块来源、启用、窗口交互与配置保护见[身份摘要](../README.md#当前身份与安装来源)和[安装核对](../publication/daily-installation.json)。 |
 | GW184 | [0.4.0 独立运行包](../docs/blender/GW184三相机与缺陷编辑器.md)；184 m 尺寸合成刚性模型、固定三相机和六类缺陷。模型与配置不能直接替代 NREL。 |
 

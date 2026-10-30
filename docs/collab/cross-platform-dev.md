@@ -1,5 +1,7 @@
 # 跨平台协作开发
 
+当前项目源码版本为 **0.3.41**，对应 [`v0.3.41` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.41)。公开扩展附件仍为 **0.3.40**；本机日常安装为独立的 **0.3.40 本地源码构建**，实际身份见[安装记录](../../publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
+
 ## 仓库与分支
 
 仓库入口为 [snode11/wind-farm-blender](https://github.com/snode11/wind-farm-blender)，本工作区对应 remote `blender-sync`。从 `main` 创建功能分支，通过 Pull Request 评审后合并，不直接推送主分支。工作前检查实际 Git 根和未提交修改，保留已有文件。

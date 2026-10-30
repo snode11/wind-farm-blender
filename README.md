@@ -1,10 +1,12 @@
 # Wind Farm Blender
 
+当前项目源码版本为 **0.3.41**，对应 [`v0.3.41` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.41)。公开扩展附件仍为 **0.3.40**；本机日常安装为独立的 **0.3.40 本地源码构建**，实际身份见[安装记录](publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
+
 面向风场仿真观察、相机数据制作和叶片重建研究的 Blender 工作台。项目包含两个独立产品，均要求 **Blender 5.2+**。
 
 | 产品 | 公开版本 | 用途与使用方式 |
 | --- | --- | --- |
-| NREL 5MW / WFRL 前端 | **0.3.40** | NREL／rootkink 叶片外形、T1/T2/T3 Down、独立风机手动控制、姿态预设与 JSON、三机柔性回放、几何／同源纹理分屏、六类合成缺陷、三相机与双束／TLS；[下载扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.40/wfrl_blender-0.3.40.zip)，使用 Install from Disk 安装并重启 |
+| NREL 5MW / WFRL 公开扩展 | **0.3.40** | NREL／rootkink 叶片外形、T1/T2/T3 Down、独立风机手动控制、姿态预设与 JSON、三机柔性回放、几何／同源纹理分屏、六类合成缺陷、三相机与双束／TLS；[下载扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.40/wfrl_blender-0.3.40.zip)，使用 Install from Disk 安装并重启 |
 | GW184 三相机与叶片缺陷 | **0.4.0** | GW184 尺寸合成刚性模型、固定三相机与六类缺陷；[下载独立运行 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.4.0/gw184_three_camera_defects-0.4.0.zip)，完整解压后启动 |
 
 ## 当前身份与安装来源
@@ -13,7 +15,7 @@ GitHub 默认分支为 [`main`](https://github.com/snode11/wind-farm-blender/tre
 
 开发机日常扩展模块为 `bl_ext.user_default.wfrl_blender`。公开包、日常安装的版本与载荷分别取自下列身份记录；源码工作区的模块职责见[实现与维护](blender_frontend/README.md)。项目启动器、重建求解器和构建工具使用项目源码。
 
-0.3.40 配套源码提供[停止重试与本机进程监管](blender_frontend/README.md#55-实时连接与控制生命周期)、[实验配对／价值归一化／GRU／续训](docs/training/MAPPO_SETUP.md#fastfarm-实验身份与-gru)及[同模型评分](blade_recon0.2/README.md#评分模型与样本身份)。扩展 ZIP 包含命令水位恢复、相机采集事务结果、后台视频取消和相机几何缓存；Bridge、训练、评分和启动器通过完整源码归档提供。载荷按 `build-info.json`、inventory 和[交付身份](publication/blender-0.3.40.json)核对。
+0.3.41 项目源码提供[停止重试与本机进程监管](blender_frontend/README.md#55-实时连接与控制生命周期)、[实验配对／价值归一化／GRU／续训](docs/training/MAPPO_SETUP.md#fastfarm-实验身份与-gru)及[同模型评分](blade_recon0.2/README.md#评分模型与样本身份)。扩展 ZIP 包含命令水位恢复、相机采集事务结果、后台视频取消和相机几何缓存；Bridge、训练、评分和启动器通过完整源码归档提供。载荷按 `build-info.json`、inventory 和[交付身份](publication/blender-0.3.40.json)核对。
 
 <!-- release-identity:start -->
 | 对象 | 版本 | 身份依据 |
@@ -30,10 +32,10 @@ GitHub 默认分支为 [`main`](https://github.com/snode11/wind-farm-blender/tre
 
 公开 0.3.40 前端按网格与数值消费者选择形变计算范围，保留隐藏 T1 的结构叶尖测量和共享塔架运动，并复用已校验遥测数组。后端的完整功率校验、断连期间的生命周期推进与进度合并、Interactive 联合动作 PPO 使用项目 Python 源码，说明见[前端与后端接口](blender_frontend/README.md#55-实时连接与控制生命周期)及[训练配置](docs/training/MAPPO_SETUP.md)。普通 Python 包的机型资源与依赖见[本地配置](docs/setup/setup_local.md#2-macos-完整-python-环境)。
 
-## 主要能力
+## 当前源码主要能力
 
 - **风机手动控制**：**N → 风机控制 → 创建 / 进入手动场景** 提供 T1/T2/T3 或全部风机的朝向、统一／分别变桨、RPM、叶轮角度与运行／暂停／停转，支持朝下／侧向／顺桨预设、相对角度微调、三机参数概览、JSON 姿态保存／选择性载入及撤销重做。批量启用分别变桨保留已启用机组的独立桨距。使用独立刚性场景和环境，保留原 demo；不产生功率、载荷、尾流或测量结果。[操作说明](docs/blender/风机手动控制.md)。
-- **手动试验与视频**：公开扩展与配套源码提供 rootkink 手动场景的 T1 恒速变桨、独立 T1 Down 和 1920×1080、25 fps H.264 视频生成；视频后台需要配套项目源码，日常扩展按其独立安装身份识别。生成命令默认等待最终结果，显式 `--detach` 可脱离运行；持久化作业支持查询、取消和完整母版校验后的编码重试，发布前预检目标文件系统并拒绝覆盖已有输出。[生成、监管、重试与验证范围](docs/blender/手动场景研究接口.md#导出变桨视频)。
+- **手动试验与视频**：源码研究接口提供 rootkink 手动场景的 T1 恒速变桨、独立 T1 Down 和 1920×1080、25 fps H.264 视频生成；视频后台需要配套项目源码，日常扩展按其独立安装身份识别。生成命令默认等待最终结果，显式 `--detach` 可脱离运行；持久化作业支持查询、取消和完整母版校验后的编码重试，发布前预检目标文件系统并拒绝覆盖已有输出。[生成、监管、重试与验证范围](docs/blender/手动场景研究接口.md#导出变桨视频)。
 - **离线物理结果回放**：三台 NREL 5 MW 风机、九片叶片及柔性塔架，播放 117–177 s 的 60 秒 MAPPO 保存记录，提供偏航、功率、转矩、挠度和净空对照。离线观看无需 Python 后端、MPI、FAST.Farm 或网络。
 - **叶片外形**：MAPPO 侧栏可选择默认 NREL 或合成的 rootkink 外形；切换保留时刻、所选机组和相机设置，继续使用 NREL 保存运动与读数。[操作与使用边界](前端readme.md#3-时间回放与观察视角)。
 - **几何／同源纹理分屏**：通过 **N → MAPPO → 打开几何重建示例…** 进入两侧完整风机，在几何与同源纹理间切换。共享播放、单帧步进与暂停；人工观察点仅定位一次，播放保留手动缩放和绕转，保存重开恢复模式与视图。

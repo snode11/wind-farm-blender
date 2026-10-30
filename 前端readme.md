@@ -1,5 +1,7 @@
 # NREL 5MW / WFRL 前端使用说明
 
+当前项目源码版本为 **0.3.41**，对应 [`v0.3.41` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.41)。公开扩展附件仍为 **0.3.40**；本机日常安装为独立的 **0.3.40 本地源码构建**，实际身份见[安装记录](publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
+
 本页面向 **Blender 5.2+** 的 NREL 前端操作。公开安装版为 **0.3.40**（Release 标签 `v0.3.40`），安装使用专用 ZIP；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。GW184 **0.4.0** 是独立运行包，模型、配置和入口与 NREL 分开。
 
 开发机日常安装的实际模块为 `bl_ext.user_default.wfrl_blender`；版本、文件核对、新进程模块来源、启用及配置保护见[安装身份摘要](README.md#当前身份与安装来源)和[安装核对](publication/daily-installation.json)。公开载荷身份与检查范围见[交付身份](publication/blender-0.3.40.json)和[发布状态](docs/blender/发布状态与验证范围.md)。源码同步不会自动替换运行中的扩展。
