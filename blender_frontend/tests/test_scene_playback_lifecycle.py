@@ -341,3 +341,26 @@ def test_terminal_callback_rejects_replaced_reader(native_player, monkeypatch):
 def test_pause_background_never_calls_window_operator(monkeypatch):
     monkeypatch.setitem(sys.modules, 'bpy', SimpleNamespace(app=SimpleNamespace(background=True)))
     wfrl_blender._cancel_playback()
+
+
+def test_standalone_replay_restores_saved_fractional_frame(monkeypatch):
+    class SavedScene(dict):
+        frame_current = 61
+        frame_subframe = .375
+        wfrl_clearance_normal_path = '/fixture/normal'
+
+        def frame_set(self, frame, *, subframe=0.):
+            self.frame_current, self.frame_subframe = frame, subframe
+
+    scene = SavedScene(wfrl_scene_kind='clearance_replay', wfrl_clearance_demo='normal')
+    monkeypatch.setitem(sys.modules, 'bpy', SimpleNamespace(data=SimpleNamespace(scenes=[scene]),
+                                                          path=SimpleNamespace(abspath=str)))
+    monkeypatch.setattr(clearance_replay, '_READERS', {})
+
+    def load(target, path, demo, *, restoring):
+        assert target is scene and path == '/fixture/normal' and demo == 'normal' and restoring
+        target.frame_set(1)
+
+    monkeypatch.setattr(clearance_replay, 'load', load)
+    clearance_replay.on_load(None)
+    assert (scene.frame_current, scene.frame_subframe) == (61, .375)

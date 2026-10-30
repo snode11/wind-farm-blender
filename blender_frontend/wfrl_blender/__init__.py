@@ -247,11 +247,21 @@ def register():
     definitions = {
         "wfrl_diagnostics_sampling": bpy.props.BoolProperty(name="视口播放帧率", default=False),
         "wfrl_farm_panel_page": bpy.props.EnumProperty(
-            name="回放面板", items=(("DEFLECTION", "挠度", "T1 叶尖位置与挠度对照"),
-                                    ("RADAR", "净空", "当前机组的雷达与净空读数"),
-                                    ("VIDEO", "视频输出", "导出离线 MP4 或启动 RTSP 视频流"),
-                                    ("TOOLS", "工具", "视角、遥测、截图录制与数据")),
+            name="回放面板", items=(("DEFLECTION", "挠度", "T1 叶尖位置与挠度对照", 0),
+                                    ("RADAR", "净空", "当前机组的雷达与净空读数", 1),
+                                    ("IMBALANCE", "不平衡", "质量、气动指标与三叶离线响应对比", 4),
+                                    ("VIDEO", "视频输出", "导出离线 MP4 或启动 RTSP 视频流", 2),
+                                    ("TOOLS", "工具", "视角、遥测、截图录制与数据", 3)),
             default="DEFLECTION"),
+        "wfrl_imbalance_turbine": bpy.props.EnumProperty(
+            name="分析机组", items=tuple((tid, tid, '离线响应分析') for tid in ('T1', 'T2', 'T3')),
+            default='T1'),
+        "wfrl_imbalance_metric": bpy.props.EnumProperty(
+            name="响应分量", items=tuple((key, label, '同方位角的三叶响应对比') for key, label in (
+                ('tip_x', '叶尖根系 x'), ('tip_y', '叶尖根系 y'), ('tip_z', '叶尖根系 z'),
+                ('root_Mx', '叶根弯矩 Mx'), ('root_My', '叶根弯矩 My'), ('root_Mz', '叶根弯矩 Mz'))),
+            default='tip_x'),
+        "wfrl_imbalance_curve": bpy.props.BoolProperty(name="三叶均值曲线", default=False),
         "wfrl_deflection_visible": bpy.props.BoolProperty(default=True, update=refresh_deflection),
         "wfrl_deflection_blade": bpy.props.EnumProperty(items=(("1", "叶片 1", "T1 第一片"), ("2", "叶片 2", "T1 第二片"), ("3", "叶片 3", "T1 第三片")), default="1", update=refresh_deflection),
         "wfrl_selected_turbine": bpy.props.EnumProperty(items=_turbine_items, update=_update_selection),

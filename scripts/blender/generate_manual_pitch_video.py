@@ -18,7 +18,7 @@ import bpy
 sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
 
 import wfrl_blender as addon
-from wfrl_blender import manual_control as control, manual_scene, manual_video, manual_video_job
+from wfrl_blender import manual_control as control, manual_geometry, manual_scene, manual_video, manual_video_job
 from wfrl_blender.turbine_geometry import blade_mesh
 
 assert bpy.app.background
@@ -26,6 +26,7 @@ assert Path(addon.__file__).resolve().parent == ROOT / 'blender_frontend/wfrl_bl
 addon.register()
 scene = manual_scene.create(bpy.context)
 assert scene['wfrl_manual_blade_model'] == 'rootkink'
+manual_geometry.set_detail(scene, 'CLOSEUP')
 vertices, faces = blade_mesh(subdiv=8, ring_points=96, model='rootkink')
 maximum_error = 0.0
 for entry in scene.wfrl_manual_turbines:
@@ -39,6 +40,7 @@ for entry in scene.wfrl_manual_turbines:
             for actual, expected in zip(mesh.vertices, vertices) for axis in range(3)))
 assert maximum_error < 1e-4
 
+scene.wfrl_manual_pitch_rate_deg_s = 0
 entry = control._t1(scene)
 entry.yaw_deg = 0
 entry.azimuth_deg = 180

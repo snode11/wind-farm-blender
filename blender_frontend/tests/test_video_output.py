@@ -6,6 +6,7 @@ from pathlib import Path
 import shutil
 import socket
 import subprocess
+import threading
 import time
 from unittest.mock import Mock
 
@@ -114,6 +115,31 @@ def test_cancel_removes_partial_export(tmp_path, monkeypatch):
     assert job.error
     assert not target.exists()
     assert source.read_bytes() == b'x' * 100
+
+
+@pytest.mark.parametrize('changed_size', [0, 50, 200])
+def test_export_rejects_a_source_changed_after_start(tmp_path, monkeypatch, changed_size):
+    source = tmp_path / 'source.mp4'
+    source.write_bytes(b'x' * 100)
+    target = tmp_path / 'output.mp4'
+    job = video_output.Export()
+    proceed = threading.Event()
+    original_copy = job._copy
+
+    def copy_after_source_change(source, target):
+        assert proceed.wait(5)
+        original_copy(source, target)
+
+    monkeypatch.setattr(job, '_copy', copy_after_source_change)
+    job.start(source, target)
+    try:
+        source.write_bytes(b'y' * changed_size)
+    finally:
+        proceed.set()
+    wait_export(job)
+    assert job.error, 'A changed source must not be reported as a successful export'
+    assert not target.exists()
+    assert source.read_bytes() == b'y' * changed_size
 
 
 def test_invalid_tools_or_video_never_start_server(tmp_path):

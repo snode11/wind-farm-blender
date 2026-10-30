@@ -1,0 +1,92 @@
+{
+  "status": "PASS",
+  "module": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "pid": 87211,
+  "heartbeat_pending": 10,
+  "cancel_heartbeat": 5,
+  "release_heartbeat": 10,
+  "cancel_while_writer_pending": true,
+  "step_durations_s": [
+    0.962139124982059,
+    0.009410916944034398,
+    0.00973979092668742,
+    0.006902082939632237,
+    0.006775667075999081,
+    0.007042999961413443,
+    0.006560291047208011,
+    0.006580958957783878,
+    0.006232124986127019,
+    0.006728332955390215,
+    0.006930250092409551,
+    0.04582766711246222
+  ],
+  "pending_poll_durations_s": [
+    0.009410916944034398,
+    0.00973979092668742,
+    0.006902082939632237,
+    0.006775667075999081,
+    0.007042999961413443,
+    0.006560291047208011,
+    0.006580958957783878,
+    0.006232124986127019,
+    0.006728332955390215,
+    0.006930250092409551
+  ],
+  "writer_thread_alive": false,
+  "writer_wait_s": 0.5827378329122439,
+  "writer_detached_bytes": true,
+  "source_state_unchanged": true,
+  "manifest_path": "/Users/eason/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes/ui-verification/event-loop-captures/capture_20261030_115433_b73b82e0f9/manifest.json",
+  "manifest_status": "incomplete",
+  "completed_samples": 1,
+  "rows": 3,
+  "pngs": [
+    {
+      "path": "/Users/eason/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes/ui-verification/event-loop-captures/capture_20261030_115433_b73b82e0f9/C1/frame_000000.png",
+      "width": 128,
+      "height": 74,
+      "pixels": 9472,
+      "distinct_rgba_colors": 2343,
+      "center_rgba": [
+        114,
+        136,
+        159,
+        255
+      ],
+      "sha256": "8e3faf3afe04534806a8081d0fe3c6a52fd1a98b85872c8aa9e4e9089c4c76d6",
+      "file_bytes": 15006
+    },
+    {
+      "path": "/Users/eason/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes/ui-verification/event-loop-captures/capture_20261030_115433_b73b82e0f9/C2/frame_000000.png",
+      "width": 39,
+      "height": 128,
+      "pixels": 4992,
+      "distinct_rgba_colors": 1930,
+      "center_rgba": [
+        128,
+        143,
+        161,
+        255
+      ],
+      "sha256": "934a260d914dfa33da79820bba797cb77c76c7a7916c1e1a74aa0bbcd8ab8d64",
+      "file_bytes": 9025
+    },
+    {
+      "path": "/Users/eason/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes/ui-verification/event-loop-captures/capture_20261030_115433_b73b82e0f9/C3/frame_000000.png",
+      "width": 128,
+      "height": 128,
+      "pixels": 16384,
+      "distinct_rgba_colors": 65,
+      "center_rgba": [
+        201,
+        206,
+        211,
+        255
+      ],
+      "sha256": "a2f46927cc7043dd54106c8b518dbad8f13a866ba25e553ead70a7fc8f17ff1f",
+      "file_bytes": 9304
+    }
+  ],
+  "measurement_boundary": "isolated scripted GPU capture, event-loop heartbeat and cancellation; not video FPS"
+}

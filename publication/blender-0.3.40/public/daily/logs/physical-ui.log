@@ -1,0 +1,10 @@
+2026-10-29 14:28:12.275 Blender[56319:28745054] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
+2026-10-29 14:28:12.281 Blender[56319:28745054] error messaging the mach port for IMKCFRunLoopWakeUpReliable
+16:28.307  blend            | Saved session recovery to "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/scratch/quit.blend"
+16:28.328  blend            | Writing user preferences: "BLENDER_USER_PROFILE/config/userpref.blend"
+16:28.330  reports          | Preferences saved
+Warning: 1 × Draw window and swap: 5.8075 ms, average: 5.80745912 ms
+Warning: 1 × Draw window and swap: 6.3334 ms, average: 6.33341703 ms
+
+Blender quit
+Error: Not freed memory blocks: 526, total unfreed memory 0.038208 MB

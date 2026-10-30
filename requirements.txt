@@ -1,0 +1,45 @@
+# 完整项目 Python 环境：macOS / Python 3.11，从仓库根目录执行。
+# 系统环境（conda-forge）：
+#   conda create -n wfrl-full -c conda-forge python=3.11 pip git openmpi mpi4py python.app cmake fortran-compiler ffmpeg
+#   conda activate wfrl-full
+# 源码资源：从 project-resources-v1 解压 wfcrl-dependency-01.tar.gz 到仓库根目录，提供 wfcrl-env/。
+# 安装：python -m pip install -r requirements.txt
+# 检查：python -m pip check
+# Blender 5.2+、FAST.Farm/OpenFAST/TurbSim、supercontroller 和机组控制器须单独安装或编译。
+# macOS 本机编译还需 Xcode Command Line Tools：xcode-select --install。
+# Python、MPI、求解器与控制器必须使用同一 CPU 架构和兼容的 MPI 运行时。
+# 配置与启动：docs/setup/setup_local.md；本文件不安装应用程序、算例数据或模型权重。
+
+# WFCRL、FLORIS 与 FAST.Farm 的 Python 接口。
+numpy==1.26.4
+FLORIS==3.5
+gymnasium==0.29.1
+pettingzoo==1.24.3
+pandas==2.2.*
+PyYAML==6.0.1
+mpi4py>=3.1.5,<5
+openfast_toolbox @ git+https://github.com/cibeah/openfast_toolbox
+
+# PPO / IPPO / MAPPO 与训练监控；Intel macOS 使用 PyTorch 2.2 系列。
+torch==2.2.2 ; sys_platform == "darwin" and platform_machine == "x86_64"
+torch>=2.2,<3 ; sys_platform != "darwin" or platform_machine != "x86_64"
+psutil>=5.9,<8
+stable-baselines3==2.3.2
+tensorboard>=2.14
+
+# Studio / RViz 桌面界面。
+pyvista>=0.43
+pyvistaqt>=0.11
+qtpy>=2.4
+PySide6>=6.6
+
+# 相机视频、轮廓/纹理重建、评分与绘图。
+# 只安装一个 cv2 提供者；此版本可与 NumPy 1.26.4 共同解析。
+opencv-python==4.11.0.86
+scipy>=1.11,<2
+Pillow>=10,<13
+matplotlib>=3.8,<4
+
+# 安装本机恢复的 WFCRL 源码及当前项目，保留可编辑源码入口。
+-e ./wfcrl-env
+-e .

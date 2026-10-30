@@ -785,6 +785,12 @@ class WFRL_OT_CustomAction(bpy.types.Operator):
     def execute(self, context):
         op = _ACTIVE
         wm,scene = context.window_manager,context.scene
+        if op is not None and op.scene != scene:
+            if op.stage not in _VIEWING or self.action in {
+                    'NEXT', 'BACK', 'CONFIRM', 'CANCEL', 'EXIT', 'VALIDATE', 'ANCHOR'}:
+                self.report({'WARNING'}, '请在相机编辑所属场景中完成或取消操作')
+                return {'CANCELLED'}
+            op = None
         editing = op is not None and op.stage not in _VIEWING
         from .. import custom_camera_capture
         if custom_camera_capture.active():
@@ -891,15 +897,22 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
     bl_idname = 'WFRL_PT_custom_cameras'
     bl_space_type,bl_region_type,bl_category = 'VIEW_3D','UI','View'
     def draw(self,context):
+        from .ui_helpers import message, diagnostic
+        from . import stacked_camera_rig as box_panel
         layout,wm,scene = self.layout,context.window_manager,context.scene
         op = _ACTIVE if _ACTIVE and _ACTIVE.scene == scene else None
         editing = op is not None and op.stage not in _VIEWING
         stacked = bool(scene.get('wfrl_stacked_camera_rig'))
-        if stacked:
-            from . import stacked_camera_rig as box_panel
-            box = layout.box();box.enabled = not editing
-            box.label(text='1 · 安装整个盒体')
-            placement = box_panel._ACTIVE
+        placement = box_panel._ACTIVE
+        if placement is not None and placement.scene != scene:
+            message(layout, '其他场景正在安装相机盒体，请在该场景完成或取消。', context=context)
+            return
+        if _ACTIVE and _ACTIVE.scene != scene and _ACTIVE.stage not in _VIEWING:
+            message(layout, '其他场景正在编辑相机草稿，请在该场景完成或取消。', context=context)
+            return
+
+        def draw_installation(box):
+            box.enabled = not editing
             if placement:
                 box.label(text='点击机舱表面，支架安装端贴合')
                 box.label(text='盒体位于支架外端，保留离舱间距')
@@ -919,18 +932,20 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
                 confirm.operator('wfrl.stacked_box_action',text='确认安装',icon='CHECKMARK').action='CONFIRM'
                 row.operator('wfrl.stacked_box_action',text='取消',icon='X').action='CANCEL'
                 if placement.transaction.error:
-                    for start in range(0,len(placement.transaction.error),22):
-                        box.label(text=placement.transaction.error[start:start+22],icon='ERROR' if start==0 else 'NONE')
+                    diagnostic(box, '相机盒体安装', placement.transaction.error, error=True, context=context)
                 return
             box.operator('wfrl.stacked_box_pick', text='贴合安装 / 调整整个盒体', icon='PIVOT_CURSOR')
             box.operator('wfrl.stacked_box_reset_default', text='恢复默认三相机', icon='LOOP_BACK')
             box.label(text='选位置、调方向、确认，在同一步完成')
             header, body = box.panel('wfrl_box_advanced',default_closed=True)
             header.label(text='高级设置 · 自由坐标')
-            if body:
+            if body is not None:
                 body.label(text='自由调整会解除表面贴合')
                 body.operator('wfrl.stacked_box_position', text='整体 XYZ / 水平转向')
-            layout.label(text='2 · 选择相机，调整俯仰角')
+        if stacked and placement:
+            draw_installation(layout.box())
+            return
+        layout.label(text='相机观察', icon='CAMERA_DATA')
         row = layout.row(align=True); row.enabled = not editing
         for slot in core.SLOTS:
             installed = core.get_camera(scene, slot)
@@ -946,10 +961,12 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
         if native_error:
             error_box = layout.box()
             error_box.alert = True
-            for start in range(0, len(native_error), 24):
-                error_box.label(text=native_error[start:start+24], icon='ERROR' if start == 0 else 'NONE')
+            diagnostic(error_box, '相机观察', native_error, error=True, context=context)
         if custom_camera_capture.active():
-            for part in custom_camera_capture.progress().split('；'):layout.label(text=part)
+            if custom_camera_capture._ACTIVE.scene != scene:
+                message(layout, '其他场景正在采集相机图像，请等待完成或在所属场景取消。', context=context)
+                return
+            message(layout, custom_camera_capture.progress(), context=context)
             layout.label(text='撤销不可用：请先结束采集', icon='INFO')
             layout.operator('wfrl.custom_capture_cancel', text='取消采集')
             return
@@ -957,18 +974,24 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
             layout.label(text='撤销不可用：请先确认或取消草稿', icon='INFO')
         if not editing:
             views=layout.row(align=True)
-            views.operator('wfrl.custom_camera',text='外部布局').mode='LAYOUT'
+            views.operator('wfrl.native_camera_view',text='查看单路',icon='VIEW_CAMERA').mode='WATCH'
             native_button=views.operator('wfrl.native_camera_view',text='2×2 展示')
             native_button.mode='TRIPLE';native_button.layout='GRID'
             native_button=views.operator('wfrl.native_camera_view',text='三列对照')
             native_button.mode='TRIPLE';native_button.layout='STRIP'
+            layout.operator('wfrl.custom_camera',text='查看外部安装布局').mode='LAYOUT'
             if scene.get('wfrl_stacked_camera_rig'):
                 layout.label(text='共用盒体 · C1 / C2 / C3 随盒体排列')
             if op:
                 layout.operator('wfrl.custom_camera_action',text='退出相机视图 · Esc',icon='X').action='EXIT'
+        if stacked:
+            header, body = layout.panel('wfrl_camera_box_installation', default_closed=True)
+            header.label(text='盒体安装与复位')
+            if body is not None:
+                draw_installation(body)
         block_reason = installation_block_reason(scene)
         if block_reason and not editing:
-            for start in range(0,len(block_reason),22):layout.label(text=block_reason[start:start+22],icon='INFO' if start==0 else 'NONE')
+            message(layout, block_reason, context=context)
         camera=op.camera if editing else core.get_camera(scene,wm.wfrl_custom_slot)
         layout.label(text=f'C{wm.wfrl_custom_slot} · '+('正在调整' if editing else '已安装' if camera else '待设置位置'))
         if op and op.stage in {'AIM', 'WATCH'} and getattr(op, 'frame_fits', True) is False:
@@ -980,7 +1003,7 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
             container.operator('wfrl.custom_camera_action',text=text).action=key
         if camera and not editing:
             action('参与三路预览与采集 ✓' if camera.get('custom_enabled', True) else '未参与三路预览与采集', 'ENABLE')
-            layout.label(text='标签：'+camera.get('custom_label', ''))
+            message(layout, '标签：'+camera.get('custom_label', ''), context=context)
         if editing:
             layout.prop(wm,'wfrl_custom_label',text='标签')
             if op.stage == 'INPUT':
@@ -1004,30 +1027,35 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
             action('确认修改','CONFIRM',confirm);action('取消修改','CANCEL',row)
             if op.error:
                 box=layout.box();box.alert=True
-                # Keep errors readable in narrow sidebars.
-                for start in range(0,len(op.error),24):box.label(text=op.error[start:start+24])
+                diagnostic(box, '相机编辑', op.error, error=True, context=context)
         elif camera:
             if not stacked:
                 layout.operator('wfrl.custom_camera',text=f'更改 C{wm.wfrl_custom_slot} 安装位置',icon='PIVOT_CURSOR').mode='PLACE'
                 layout.operator('wfrl.custom_camera',text='输入 XYZ 位置 / 参数',icon='DRIVER_DISTANCE').mode='INPUT'
             layout.operator('wfrl.custom_camera',text='调整俯仰角 / 方向与视场',icon='ORIENTATION_GIMBAL').mode='EDIT'
-            layout.operator('wfrl.native_camera_view',text='查看单路画面',icon='VIEW_CAMERA').mode='WATCH'
             if not stacked:action(f'清除 C{wm.wfrl_custom_slot}', 'CLEAR')
         else:
             layout.label(text='各槽位分别选点、分别保存',icon='INFO')
             layout.operator('wfrl.custom_camera',text=f'为 C{wm.wfrl_custom_slot} 选安装位置',icon='PIVOT_CURSOR').mode='PLACE'
             layout.operator('wfrl.custom_camera',text='输入 XYZ 位置 / 参数',icon='DRIVER_DISTANCE').mode='INPUT'
-        box=layout.box();box.label(text='安装参数 · 相对 T1 机舱')
+        if editing:
+            box = layout.box()
+            box.label(text='安装参数 · 相对 T1 机舱')
+        else:
+            header, box = layout.panel('wfrl_camera_engineering_parameters', default_closed=True)
+            header.label(text='工程参数与显示')
         if editing:
             for key,label in [('x','镜头 X (m)'),('y','镜头 Y (m)'),('z','镜头 Z (m)'),('pitch','俯仰角 (°)'),('yaw','水平角 (°)'),('roll','画面旋转角 (°)'),('fov','HFOV (°)'),('vfov','VFOV (°)')]:
                 if stacked and key in {'x','y','z'}:continue
                 row=box.row();row.enabled=not (op.stage=='AIM' and key in {'x','y','z'})
                 row.prop(wm,'wfrl_custom_'+key,text=label)
-        elif camera:
+        elif box is not None and camera:
+            box.label(text='安装参数 · 相对 T1 机舱')
             p=core.parameters(camera)
             for key,value in zip(('X','Y','Z'),p.location):box.label(text=f'镜头 {key}：{value:.4f} m')
             for label,key in [('水平角','yaw'),('俯仰角','pitch'),('画面旋转角','roll'),('HFOV','fov'),('VFOV','vfov')]:box.label(text=f'{label}：{getattr(p,key):.3f}°')
-        else:box.label(text='未安装')
+        elif box is not None:
+            box.label(text='未安装')
         if editing:
             box.prop(wm,'wfrl_custom_linked_zoom',text='联动视场调整（滚轮）')
             box.prop(wm,'wfrl_custom_has_focal',text='记录焦距（不影响画面）')
@@ -1039,29 +1067,29 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
             p=core.parameters(camera)
             try:
                 w,h=projection.resolution(p.fov,p.vfov,p.output_long_edge_px)
-                box.label(text=f'独立输出：{w} × {h} px')
-                axis=projection.optical_axis(p.yaw,p.pitch)
-                box.label(text='光轴：'+', '.join(f'{v:.3f}' for v in axis))
-                box.label(text=f'记录焦距：{p.focal_length_mm_record or "未填写"} mm')
+                if box is not None:
+                    box.label(text=f'独立输出：{w} × {h} px')
+                    axis=projection.optical_axis(p.yaw,p.pitch)
+                    box.label(text='光轴：'+', '.join(f'{v:.3f}' for v in axis))
+                    box.label(text=f'记录焦距：{p.focal_length_mm_record or "未填写"} mm')
                 if min(p.fov,p.vfov)<5 or max(p.fov,p.vfov)>150 or max(w,h)/min(w,h)>8:
-                    box.label(text='极端视场 / 画幅：请核对研发用途',icon='INFO')
+                    layout.label(text='极端视场 / 画幅：请核对研发用途',icon='INFO')
                 warning=camera.get('custom_mount_warning','')
-                if warning:box.label(text=warning,icon='INFO')
-            except ValueError as exc:box.label(text=str(exc),icon='ERROR')
+                if warning:message(layout, warning, context=context)
+            except ValueError as exc:diagnostic(layout, '相机参数', str(exc), error=True, context=context)
+        if box is not None:
+            box.prop(wm, 'wfrl_custom_engineering', text='卡片显示工程参数')
+            row=box.row(align=True)
+            row.prop(wm,'wfrl_custom_show_axis',text='光轴')
+            row.prop(wm,'wfrl_custom_show_frustum',text='视锥')
+            row=box.row();row.enabled=camera is not None and (not editing or op.ready)
+            action('复制参数','COPY',row)
+            box.operator('wfrl.custom_camera_coordinates',text='坐标说明')
         undo_row = layout.row()
         undo_row.enabled = not editing and not block_reason and bool(history.HISTORY.entries)
         undo_row.operator('wfrl.custom_camera_action', text='撤销上次相机修改', icon='LOOP_BACK').action='UNDO'
         notice = ('撤销：' + history.HISTORY.entries[-1].description) if history.HISTORY.entries else history.HISTORY.notice or '暂无可撤销的相机修改'
-        for start in range(0, len(notice), 22):
-            layout.label(text=notice[start:start+22])
-        layout.prop(wm, 'wfrl_custom_engineering', text='卡片显示工程参数')
-        row=layout.row(align=True)
-        row.prop(wm,'wfrl_custom_show_axis',text='光轴')
-        row.prop(wm,'wfrl_custom_show_frustum',text='视锥')
-        # Capture settings live in their own collapsible View panel.
-        row=box.row();row.enabled=camera is not None and (not editing or op.ready)
-        action('复制参数','COPY',row)
-        box.operator('wfrl.custom_camera_coordinates',text='坐标说明')
+        message(layout, notice, context=context)
 
 
 @persistent

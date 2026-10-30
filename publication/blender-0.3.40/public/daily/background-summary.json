@@ -1,0 +1,198 @@
+{
+  "status": "PASS",
+  "archive_sha256": "f7907be0bd6737f0b0d8ddde8b856c151b6ebc7392ee1c796fc9252b806f018b",
+  "module": "bl_ext.user_default.wfrl_blender",
+  "checks": [
+    {
+      "name": "runtime",
+      "report": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/runtime.json",
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/installed_probe.py"
+      ],
+      "returncode": 0,
+      "log": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/logs/runtime.log",
+      "required_markers": [
+        "DAILY_INSTALLED_PROBE_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 1.630544750019908,
+      "status": "PASS"
+    },
+    {
+      "name": "three-camera-default",
+      "report": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/three-camera-default/default-validation.json",
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/three_camera_default_regression.py"
+      ],
+      "returncode": 0,
+      "log": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/logs/three-camera-default.log",
+      "required_markers": [
+        "THREE_CAMERA_DEFAULT_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [
+        {
+          "kind": "blender_exit_memory_diagnostic",
+          "message": "Error: Not freed memory blocks: 586, total unfreed memory 0.042572 MB",
+          "blocks": 586,
+          "reported_mb": 0.042572,
+          "bytes": 44640,
+          "bytes_note": "Reported MB converted by 1024^2 and rounded; limited by log precision"
+        }
+      ],
+      "elapsed_s": 6.648392125032842,
+      "status": "PASS"
+    },
+    {
+      "name": "native-projection",
+      "report": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/native-projection/native-projection-validation.json",
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/native_camera_projection_regression.py"
+      ],
+      "returncode": 0,
+      "log": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/logs/native-projection.log",
+      "required_markers": [
+        "NATIVE_PROJECTION_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.5431257500313222,
+      "status": "PASS"
+    },
+    {
+      "name": "native-proxy",
+      "report": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/native-proxy/checks.json",
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/native_camera_proxy_regression.py"
+      ],
+      "returncode": 0,
+      "log": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/logs/native-proxy.log",
+      "required_markers": [
+        "NATIVE_CAMERA_PROXY_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.5409189169295132,
+      "status": "PASS"
+    },
+    {
+      "name": "camera-retirement",
+      "report": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/camera-retirement/retirement-validation.json",
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/custom_camera_retirement_regression.py"
+      ],
+      "returncode": 0,
+      "log": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/logs/camera-retirement.log",
+      "required_markers": [
+        "\"status\": \"PASS\""
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.5627150000073016,
+      "status": "PASS"
+    },
+    {
+      "name": "nacelle",
+      "report": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/nacelle/checks.json",
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/nacelle_camera_regression.py"
+      ],
+      "returncode": 0,
+      "log": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/logs/nacelle.log",
+      "required_markers": [
+        "NACELLE_CAMERA_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [
+        {
+          "kind": "blender_exit_memory_diagnostic",
+          "message": "Error: Not freed memory blocks: 586, total unfreed memory 0.042572 MB",
+          "blocks": 586,
+          "reported_mb": 0.042572,
+          "bytes": 44640,
+          "bytes_note": "Reported MB converted by 1024^2 and rounded; limited by log precision"
+        }
+      ],
+      "elapsed_s": 5.937100415932946,
+      "status": "PASS"
+    },
+    {
+      "name": "farm-down",
+      "report": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/farm-down/checks.json",
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/farm_down_mount_regression.py"
+      ],
+      "returncode": 0,
+      "log": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/logs/farm-down.log",
+      "required_markers": [
+        "FARM_DOWN_MOUNT_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [
+        {
+          "kind": "blender_exit_memory_diagnostic",
+          "message": "Error: Not freed memory blocks: 586, total unfreed memory 0.042572 MB",
+          "blocks": 586,
+          "reported_mb": 0.042572,
+          "bytes": 44640,
+          "bytes_note": "Reported MB converted by 1024^2 and rounded; limited by log precision"
+        }
+      ],
+      "elapsed_s": 3.3578531669918448,
+      "status": "PASS"
+    },
+    {
+      "name": "manual-control",
+      "status": "PASS",
+      "report": "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/manual-control/checks.json",
+      "returncode": 0,
+      "log": "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/logs/manual-control.log",
+      "required_markers": [
+        "MANUAL_CONTROL_REGRESSION_PASS"
+      ],
+      "expected_rejections": [
+        "Error: T1 \u63a7\u5236\u5bf9\u8c61\u4e0e\u5176\u4ed6\u573a\u666f\u5171\u4eab\uff0c\u8bf7\u4f7f\u7528\u72ec\u7acb\u526f\u672c"
+      ],
+      "warnings": [
+        "Error: Not freed memory blocks: 586, total unfreed memory 0.042572 MB"
+      ],
+      "classification": "Expected linked-scene refusal confirmed by final assertions; all other diagnostic patterns rejected."
+    }
+  ]
+}

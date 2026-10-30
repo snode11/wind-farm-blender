@@ -83,8 +83,18 @@ def draw_status(layout, context):
     status, busy, issues = snapshot(context)
     box = layout.box()
     box.label(text=status.title, icon=status.icon)
-    message(box, status.next_step)
-    message(box, backend_status(runtime.get_state()), 'LINKED' if runtime.get_state().connection == 'CONNECTED' else 'UNLINKED')
+    offline = (clearance_replay.reader_for(context.scene) is not None
+               and context.scene.get('wfrl_scene_kind') != 'manual'
+               and context.window_manager.wfrl_home_page not in {'MANUAL', 'BACKEND'})
+    if not offline or status.next_step != '主入口：N → WFRL':
+        message(box, status.next_step)
+    if offline:
+        header, body = box.panel('wfrl_home_backend_details', default_closed=True)
+        header.label(text='后端连接状态')
+        if body is not None:
+            message(body, backend_status(runtime.get_state()))
+    else:
+        message(box, backend_status(runtime.get_state()), 'LINKED' if runtime.get_state().connection == 'CONNECTED' else 'UNLINKED')
     for title, detail in issues:
         error = layout.box()
         error.alert = True
@@ -95,7 +105,8 @@ def draw_status(layout, context):
         from .. import custom_camera_capture
         if custom_camera_capture.active():
             message(layout, custom_camera_capture.progress())
-            layout.operator('wfrl.custom_capture_cancel', text='取消相机采集', icon='CANCEL')
+            if custom_camera_capture._ACTIVE.scene == context.scene:
+                layout.operator('wfrl.custom_capture_cancel', text='取消相机采集', icon='CANCEL')
         elif '相机' in busy:
             layout.label(text='在“相机”页确认或取消编辑。', icon='INFO')
     from .. import animation_render_ui
@@ -124,7 +135,6 @@ def draw_export(layout, context, *, busy=''):
     if scene.get('wfrl_scene_kind') == 'manual':
         layout.label(text='保存刚性姿态；不包含仿真结果', icon='INFO')
         layout.operator('wfrl.manual_pose_export', text='保存三机姿态 JSON…', icon='EXPORT')
-        layout.label(text='Down 视频与冻结试验导出见“手动”页。')
         return
     if clearance_replay.reader_for(scene) is None and scene.get('wfrl_scene_kind') != 'live':
         layout.label(text='请先在“回放”页加载数据。', icon='INFO')
@@ -134,7 +144,8 @@ def draw_export(layout, context, *, busy=''):
     data.operator('wfrl.export_history', text='导出已采样历史…', icon='EXPORT')
     data.label(text='仅导出已采样数据，缺失通道不补值。')
     if scene.get('wfrl_history_export_status'):
-        message(layout, scene['wfrl_history_export_status'])
+        from .ui_helpers import history_status
+        history_status(layout, scene['wfrl_history_export_status'], context=context)
     if core.is_available(scene):
         from .custom_camera_output import WFRL_PT_CustomCapture
         WFRL_PT_CustomCapture.draw(SimpleNamespace(layout=layout), context)
@@ -161,26 +172,36 @@ class WFRL_PT_Home(bpy.types.Panel):
         layout, scene = self.layout, context.scene
         layout.use_property_decorate = False
         busy = draw_status(layout, context)
-        layout.prop(context.window_manager, 'wfrl_home_page', expand=True)
         page = context.window_manager.wfrl_home_page
+        reader = clearance_replay.reader_for(scene)
+        shared_playback = reader is not None and page != 'MANUAL'
+        if shared_playback:
+            controls = layout.column(align=True)
+            controls.enabled = not busy
+            value = clearance_replay.sample(scene)
+            if farm_flex.is_active(scene):
+                from .farm_replay import draw_playback
+                draw_playback(controls, context, value, reader, show_time=True)
+            else:
+                from .clearance import draw_playback
+                draw_playback(controls, scene, value, context.screen)
+        layout.prop(context.window_manager, 'wfrl_home_page', expand=True)
         if page == 'REPLAY':
             if farm_flex.is_active(scene):
                 from .farm_replay import draw
                 controls = layout.column()
                 controls.enabled = not busy
-                draw(controls, context)
+                draw(controls, context, show_playback=not shared_playback)
             elif clearance_replay.reader_for(scene) is not None:
-                from .clearance import draw, playback_control
+                from .clearance import draw
                 controls = layout.column()
                 controls.enabled = not busy
-                text, icon, _state = playback_control(scene, context.screen)
-                controls.operator('wfrl.clearance_playback', text=text, icon=icon)
-                draw(controls, scene)
+                draw(controls, scene, show_playback=not shared_playback)
             else:
                 draw_load(layout, context, busy=busy)
         elif page == 'CAMERA':
             if scene.get('wfrl_scene_kind') == 'manual':
-                layout.label(text='手动场景使用“手动”页的 Down 相机。', icon='INFO')
+                layout.label(text='在“手动”页调整机组姿态。', icon='INFO')
             else:
                 from .custom_cameras import WFRL_PT_CustomCameras
                 WFRL_PT_CustomCameras.draw(self, context)

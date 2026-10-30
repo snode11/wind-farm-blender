@@ -1,6 +1,6 @@
 # 本地环境配置与入口分流
 
-本说明区分 Blender 离线查看、Python 研究环境、FAST.Farm 动态后端与 Qt/VTK 桌面入口。命令中的解释器、二进制及路径需匹配实际机器；Windows FLORIS 依赖组合不构成 macOS / Linux 运行验证。
+完整项目的 Python 安装入口为根目录 [requirements.txt](../../requirements.txt)，覆盖 WFCRL、FLORIS、FAST.Farm Python 接口、训练、Qt/VTK 桌面界面、相机视频与重建工具。本说明同时提供系统组件、资源恢复和启动要求；依赖解析成功不等于目标机器上的求解器、训练和窗口运行已经验证。
 
 ## 1. Blender 离线演示
 
@@ -10,22 +10,25 @@
 
 当前项目源码使用 `wind-farm-rl-all-work` 分支，GitHub 自动 Source code 不作为扩展安装包。日常安装的版本、逐文件身份和适用验证见[日常安装核对](../../publication/daily-installation.json)；源码和公开发布不会自动更新实际安装。操作见[前端说明](../../前端readme.md)。软件检查不代表重建精度、现场净空精度或稳定 60 FPS 验收。
 
-## 2. Python 环境：FLORIS 与算法开发
+## 2. macOS 完整 Python 环境
 
 从实际 Git 根目录 `wind farm RL` 工作。根项目支持普通安装 `python -m pip install .`；修改源码时使用 editable 安装 `python -m pip install -e .`。两种安装均提供 `wfrl` 模块和内置机型定义 `wfrl/turbines/*.yaml`、`*.yml`；直接构建的 wheel 及从 sdist 构建的 wheel 也包含这些机型资源，`load_turbine_spec("nrel5mw")` 从实际安装包读取定义。
 
-[pyproject.toml](../../pyproject.toml) 将 `PyYAML>=6.0.1,<7` 声明为核心依赖，训练、GUI 等依赖按功能附加组安装。普通 Python 包不包含 WFCRL、求解器、仓库级场景文件或 Blender 扩展 ZIP；训练仍需 `train` 附加组、匹配的 WFCRL 环境及相应后端运行时。建议新建 Python 3.11 环境，保留现有环境，按以下模板准备 FLORIS 算法环境：
+[requirements.txt](../../requirements.txt) 是完整运行环境入口；[pyproject.toml](../../pyproject.toml) 保留普通包安装的核心与功能分组声明。完整环境使用 Python 3.11，先准备 conda，再克隆源码并从[资源 Release](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1)取得 `wfcrl-dependency-01.tar.gz`。在克隆的仓库根目录执行：
 
 ```bash
-conda create -n wfrl-doc-example python=3.11
-conda activate wfrl-doc-example
-python -m pip install -r wfcrl-env/requirements-floris-local.txt
-python -m pip install -e ./wfcrl-env --no-deps
-python -m pip install -e '.[train]'
+tar -xzf /path/to/wfcrl-dependency-01.tar.gz
+conda create -n wfrl-full -c conda-forge python=3.11 pip git openmpi mpi4py python.app cmake fortran-compiler ffmpeg
+conda activate wfrl-full
+python -m pip install -r requirements.txt
 python -m pip check
 ```
 
-`wfcrl-env/requirements-floris-local.txt` 标明的是 Windows 历史工作组合，包含 FLORIS 3.5、Gymnasium 0.29.1、PettingZoo 1.24.3、NumPy 1.26.4、SB3 2.3.2，以及训练和 Qt/VTK 依赖。这些命令是环境模板，执行结果需在目标机器核对。若只做算法，不需要启动 GUI；根项目 `train` / `gui` / `all` 附加组分别定义于 [pyproject.toml](../../pyproject.toml)。
+将 `/path/to/` 换为下载目录；`wfcrl-env/` 不随 Git 源码克隆提供，未恢复该资源时，完整安装会因缺少本地包失败。requirements 同时安装 `wfcrl-env/` 和根项目的可编辑包，无需分别执行包安装命令。Git、OpenMPI、编译工具、FFmpeg 与 `pythonw` 由 conda 提供；macOS 本机编译还需 Xcode Command Line Tools，可执行 `xcode-select --install` 安装。Blender 和动态求解器按下节单独准备。
+
+数值组合使用 NumPy 1.26.4、FLORIS 3.5、Gymnasium 0.29.1、PettingZoo 1.24.3、SB3 2.3.2 和 OpenCV 4.11；同一环境只安装 `opencv-python`，不同时安装其他提供 `cv2` 的包。Intel macOS 的 PyTorch 固定为 2.2.2，Apple Silicon 使用 `torch>=2.2,<3`；Python、MPI、求解器和控制器须使用相同 CPU 架构，避免混用 Rosetta 与原生二进制。MPI 安装方式见 [mpi4py 官方说明](https://mpi4py.github.io/mpi4py/stable/html/install.html)。
+
+本入口包含重建工具的通用依赖；`blade_recon/requirements.txt` 和 `blade_recon0.2/requirements.txt` 固定的是独立研究环境，不能叠加安装到本环境。完整环境不声明精确复现这些固定环境的测量结果，第三方研究模型源码、权重和输入仍按各自资源说明取得。只需要部分模块时可使用 pyproject 的功能分组；`all` 组仅包含训练与桌面 GUI，不等同于完整环境。
 
 依赖角色：WFCRL 提供物理环境及 Gymnasium / PettingZoo 接口；SB3 提供 PPO；`wfrl/sb3_wrapper.py` 对齐单智能体接口，`wfrl/mappo_sb3.py` 包装参数共享 IPPO；`wfrl/mappo_central.py` 则实现集中式 MAPPO。共享参数和 `Dec_` 前缀不等于集中式 critic。
 
@@ -48,7 +51,9 @@ python scripts/analysis/eval_visualize_ppo.py
 
 Bridge 的 Interactive 在 POSIX 平台通过 `IsolatedTrainer` 启动独立 worker，由 `wfrl/studio/trainer.py` 执行共享 actor、集中式 critic 的训练；Formal Training 委托独立命令行入口，SB3 PPO/IPPO 使用各自包装器。[算法与统计口径](../training/MAPPO_SETUP.md#interactive-的采样与更新)按实际入口区分。后端 Python 源码、公开扩展 ZIP 和本机已安装扩展分别识别，安装 Python 包不会替换 Blender 扩展。
 
-FAST.Farm 运行需要对应平台的 MPI、FAST.Farm/OpenFAST、supercontroller 与机组控制器二进制及算例资源；FLORIS requirements 刻意没有安装这些运行时。Windows 用 Microsoft MPI，macOS 现有入口使用 OpenMPI；二进制不能跨平台互换。配置检查、解释器选择与实际生命周期证据按[前端使用说明](../../前端readme.md)和[发布状态](../blender/发布状态与验证范围.md)分层阅读。
+FAST.Farm 运行需要 macOS 对应 CPU 架构的 FAST.Farm/OpenFAST、supercontroller、机组控制器与算例资源；生成来流的相关入口还需 TurbSim。requirements 安装 Python 接口，不能安装或编译这些求解器和控制器。编译工具已在完整 conda 环境中声明，但编译参数与产物须匹配具体算例、控制器接口和 OpenMPI；不能直接使用 Windows DLL 或其他架构产物。Blender 5.2+ 及项目扩展仍按[安装说明](../blender/INSTALL.md)安装。
+
+求解脚本可通过 `WFCRL_FASTFARM_EXECUTABLE`、`WFCRL_OPENFAST_EXECUTABLE`、`WFCRL_TURBSIM_EXECUTABLE` 或 `PATH` 定位二进制；Blender 启动器使用自身的 `--python`、`--mpi`、`--fastfarm` 参数或对应配置。机组控制器、supercontroller 路径由算例输入决定，必须分别核对。执行下列入口前，恢复选定场景需要的资源和模型权重，见[分发说明](../PUBLICATION.md)。解释器选择与生命周期的验证范围见[前端使用说明](../../前端readme.md)和[发布状态](../blender/发布状态与验证范围.md)。
 
 当前 macOS Blender 启动器入口是：
 

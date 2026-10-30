@@ -68,7 +68,7 @@ python3 scripts/blender/run_playback_benchmark.py --blender <Blender可执行文
 - `native_camera_reopen_regression.py` 覆盖单路末帧→关闭→三路重开／重播及延迟恢复；安装模式须传模块与期望目录，不借其他路径推定通过。`performance.py` 只计 CPU 回调，嵌套耗时不相加；平均 FPS、缓存计数或短时诊断不替代完整片段验收。
 - 播放报告保留 `observation_s`、`intentional_pause_s`、`running_observation_s` 和暂停区间；停滞判断扣除已确认的静止主动暂停，FPS 分母仍是完整墙钟时长。峰值 RSS 按平台换算（Darwin 字节、Linux KiB），与峰值差分别报告，不把峰值差称为当前内存增长或无泄漏证明。
 
-日常安装以[安装身份](../../../../publication/daily-installation.json)为准；相同 manifest 版本不代表与公开附件相同。保留的最终 ZIP、inventory 和 SHA-256 在 [package](../../../../publication/blender-0.3.40/validated/package/)，运行来源及配置保护见记录中的证据链接。后台身份／注册、可见窗口和完整播放结论分别读取，其他候选载荷的性能记录不得转记到当前安装。
+日常安装以[安装身份](../../../../publication/daily-installation.json)为准；相同 manifest 版本不代表与公开附件相同。日常构建的 ZIP、inventory 和 SHA-256 由安装记录的 `source_archive` 标识；公开 ZIP 保留于 [package](../../../../publication/blender-0.3.40/public/validated/package/)。运行来源及配置保护见安装记录中的证据链接。后台身份／注册、可见窗口和完整播放结论分别读取，其他候选载荷的性能记录不得转记到当前安装。
 
 清理后的可用产物与恢复映射见[清理记录](../../../../publication/daily-installation-cleanup.json)。原始日志和 JSON 中的临时路径保留测量时来源，不改写成当前路径；留存 `environment.json` 不表示隔离 profile 仍存在。使用安装验证或性能入口前核对 profile，缺失时须建立并验证匹配的新隔离环境，不能把历史目录当作可运行配置。
 

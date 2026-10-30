@@ -45,6 +45,7 @@ try:
     bpy.ops.ed.undo_push(message='Factory startup')
     assert bpy.ops.wfrl.manual_enter('EXEC_DEFAULT', True) == {'FINISHED'}
     scene = bpy.context.scene
+    scene.wfrl_manual_pitch_rate_deg_s = 0.0
     scene.wfrl_manual_target = 'ALL'
     for index, entry in enumerate(scene.wfrl_manual_turbines, 1):
         entry.yaw_deg = index * 10

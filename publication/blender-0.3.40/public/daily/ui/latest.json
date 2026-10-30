@@ -1,0 +1,28 @@
+{
+  "scene": "Scene",
+  "frame": 1,
+  "kind": "clearance_replay",
+  "home_page": "REPLAY",
+  "playing": false,
+  "windows": 1,
+  "objects": 503,
+  "cameras": [
+    "Camera",
+    "WFRL.Camera.World",
+    "WFRL.Camera.Top",
+    "WFRL.Camera.Side",
+    "WFRL.Camera.T1.Closeup",
+    "WFRL.Camera.T1.Sensor",
+    "WFRL.Camera.T1.NacelleGimbal",
+    "WFRL.Camera.T2.NacelleGimbal",
+    "WFRL.Camera.T3.NacelleGimbal",
+    "WFRL.Camera.T1.TipComparison",
+    "WFRL.Camera.FarmFlexOverview",
+    "WFRL.Camera.T1.FrontQuarter",
+    "WFRL.Camera.T1.Gimbal",
+    "WFRL.Camera.T1.Custom.1",
+    "WFRL.Camera.T1.Custom.2",
+    "WFRL.Camera.T1.Custom.3"
+  ],
+  "manual": []
+}

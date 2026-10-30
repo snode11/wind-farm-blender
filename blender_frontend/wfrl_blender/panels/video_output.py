@@ -6,6 +6,7 @@ from bpy.app.handlers import persistent
 
 from .. import video_output as service
 from ..preferences import get_preferences
+from .ui_helpers import message, diagnostic, output_directory
 
 
 def _source(context):
@@ -48,6 +49,8 @@ class WFRL_OT_VideoExport(bpy.types.Operator):
             service.export.start(_source(context), bpy.path.abspath(self.filepath))
             _watch()
         except (OSError, ValueError, RuntimeError) as exc:
+            if not service.export.active:
+                service.export.error = service.export.message = str(exc)
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}
         return {'FINISHED'}
@@ -71,6 +74,8 @@ class WFRL_OT_VideoStream(bpy.types.Operator):
                                  prefs.video_rtsp_port, prefs.video_rtsp_lan)
             _watch()
         except (OSError, ValueError, RuntimeError) as exc:
+            if not service.stream.active:
+                service.stream.state, service.stream.message = 'ERROR', str(exc)
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}
         return {'FINISHED'}
@@ -113,25 +118,52 @@ def draw(layout, context):
     source = layout.column()
     source.enabled = not service.stream.active and not service.export.active
     source.prop(prefs, 'camera_video_file', text='视频')
-    layout.label(text='输出所选的相机视频')
-    layout.label(text='不随当前视口改变')
-    row = layout.column(align=True)
+    source_path = _source(context)
+    if source_path:
+        message(layout, '源文件：' + Path(source_path).name, context=context)
+    message(layout, '输出已有 MP4 文件；当前视口与回放进度不影响所选视频。', context=context)
+    export = layout.box()
+    export.label(text='离线 MP4 文件', icon='FILE_MOVIE')
+    row = export.column(align=True)
     row.scale_y = 1.3
-    row.operator('wfrl.video_export', icon='EXPORT')
+    row.operator('wfrl.video_export', text='导出所选 MP4…', icon='EXPORT')
+    if service.export.active:
+        factor = min(1., service.export.done_bytes / max(1, service.export.total_bytes))
+        export.progress(factor=factor, type='BAR', text=f'复制进度 {factor:.0%}')
+        export.label(text=f'{service.export.done_bytes / 1048576:.1f} / {service.export.total_bytes / 1048576:.1f} MiB')
+    elif service.export.error:
+        diagnostic(export, 'MP4 导出失败', service.export.error, error=True, context=context)
+    elif service.export.output_path:
+        export.label(text='MP4 导出完成', icon='CHECKMARK')
+        message(export, '输出：' + service.export.output_path, context=context)
+        output_directory(export, service.export.output_path)
+    else:
+        message(export, service.export.message, context=context)
+    stream = layout.box()
+    stream.label(text='RTSP 循环输出', icon='LINKED')
+    row = stream.column(align=True)
+    row.scale_y = 1.3
     if service.stream.active:
         row.operator('wfrl.video_stop', icon='PAUSE')
     else:
         row.operator('wfrl.video_stream', icon='PLAY')
-    if service.export.active:
-        layout.label(text=f'正在导出 {service.export.done_bytes / max(1, service.export.total_bytes):.0%}')
+    if service.stream.state == 'ERROR':
+        diagnostic(stream, 'RTSP 输出失败', service.stream.message, error=True, context=context)
     else:
-        layout.label(text=service.export.message, icon='ERROR' if service.export.error else 'FILE_MOVIE')
-    layout.label(text=service.stream.message.splitlines()[0][:90], icon='ERROR' if service.stream.state == 'ERROR' else 'INFO')
+        message(stream, service.stream.message, context=context)
     if service.stream.state == 'RUNNING':
-        layout.label(text=service.stream.url)
-        layout.operator('wfrl.video_copy_url', icon='COPYDOWN')
+        message(stream, '本机地址：' + service.stream.url, context=context)
+        stream.operator('wfrl.video_copy_url', icon='COPYDOWN')
         if prefs.video_rtsp_lan:
-            layout.label(text='远端读取：将 127.0.0.1 换成本机局域网 IP')
+            message(stream, '远端读取：将 127.0.0.1 换成本机局域网 IP', context=context)
+    header, paths = layout.panel('wfrl_video_output_paths', default_closed=True)
+    header.label(text='源文件与导出位置')
+    if paths is not None:
+        message(paths, '当前源文件：' + (source_path or '未选择'), context=context)
+        if service.export.source_path:
+            message(paths, '最近一次导出源：' + service.export.source_path, context=context)
+        if service.export.output_path:
+            message(paths, '最近一次导出：' + service.export.output_path, context=context)
     header, settings = layout.panel('wfrl_video_output_settings', default_closed=True)
     header.label(text='视频输出设置')
     if settings is not None:

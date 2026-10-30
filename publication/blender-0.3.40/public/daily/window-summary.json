@@ -1,0 +1,56 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.user_default.wfrl_blender",
+  "archive_sha256": "f7907be0bd6737f0b0d8ddde8b856c151b6ebc7392ee1c796fc9252b806f018b",
+  "checks": [
+    {
+      "name": "frontend-sessions",
+      "report": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/windows/frontend-sessions/result.json",
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/frontend_sessions_window.py"
+      ],
+      "returncode": 0,
+      "log": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/windows/logs/frontend-sessions.log",
+      "required_markers": [
+        "FRONTEND_SESSIONS_WINDOW_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 5.895888832979836,
+      "status": "PASS"
+    },
+    {
+      "name": "native-camera-playback",
+      "report": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/windows/native-camera-playback/result.json",
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/native_camera_playback_regression.py"
+      ],
+      "returncode": 0,
+      "log": "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/windows/logs/native-camera-playback.log",
+      "required_markers": [
+        "NATIVE_CAMERA_PLAYBACK_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [
+        {
+          "kind": "blender_exit_memory_diagnostic",
+          "message": "Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB",
+          "blocks": 525,
+          "reported_mb": 0.038147,
+          "bytes": 40000,
+          "bytes_note": "Reported MB converted by 1024^2 and rounded; limited by log precision"
+        }
+      ],
+      "elapsed_s": 9.707311292062514,
+      "status": "PASS"
+    }
+  ]
+}

@@ -5,6 +5,7 @@ manual_rate_pitch_regression.py
 manual_rotor_conflict_regression.py
 manual_pitch_trial_regression.py
 manual_pitch_trial_undo_regression.py
+manual_video_generator_preflight_regression.py
 manual_pose_undo_regression.py
 manual_scene_recovery_regression.py
 manual_scene_link_compatibility_regression.py
@@ -12,10 +13,13 @@ custom_camera_load_invalidation_regression.py
 custom_camera_shared_object_regression.py
 connection_recovery_regression.py
 animation_render_regression.py
+animation_replay_restore_regression.py
 custom_camera_capture_regression.py
 camera_failure_recovery_regression.py
 custom_camera_retirement_regression.py
 chart_scene_ownership_regression.py
+imbalance_regression.py
+mode_scene_ownership_regression.py
 video_compositor_regression.py
 scene_playback_lifecycle_regression.py
 clearance_replay_smoke.py

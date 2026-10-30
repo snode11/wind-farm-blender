@@ -24,6 +24,7 @@ try:
     assert bpy.ops.wfrl.manual_enter() == {'FINISHED'}
     manual = bpy.context.scene
     manual.name = 'Saved manual'
+    manual.wfrl_manual_pitch_rate_deg_s = 0.0
     manual.wfrl_manual_turbines[0].yaw_deg = 17
     manual.wfrl_manual_turbines[0].pitch_deg = 13
     poses = manual_control.pose_snapshot(manual)

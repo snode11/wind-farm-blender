@@ -251,9 +251,15 @@ class WFRL_OT_BoxAction(bpy.types.Operator):
     bl_label='调整盒体安装'
     action:StringProperty()
 
+    @classmethod
+    def poll(cls, context):
+        return _ACTIVE is not None and _ACTIVE.scene == context.scene
+
     def execute(self,context):
         op=_ACTIVE
-        if not op:return {'CANCELLED'}
+        if not op or op.scene != context.scene:
+            self.report({'WARNING'}, '请在正在安装盒体的场景中操作')
+            return {'CANCELLED'}
         if self.action=='CANCEL':shutdown()
         elif self.action=='CONFIRM':
             try:op.transaction.finish(confirm=True)

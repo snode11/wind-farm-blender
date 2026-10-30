@@ -167,10 +167,10 @@ class WFRL_OT_ManualAction(bpy.types.Operator):
     bl_label = '风机手动控制'
     bl_options = {'REGISTER', 'UNDO'}
 
-    action: bpy.props.EnumProperty(items=(('START', '运行', '按当前 RPM 运行'),
-                                         ('PAUSE', '暂停', '暂停运动并保留 RPM'),
-                                         ('STOP', '停转', '将 RPM 设为 0 并暂停'),
-                                         ('RESET', '复位', '恢复默认姿态与 9 RPM，保持暂停')))
+    action: bpy.props.EnumProperty(items=(('START', '运行', '按当前 RPM 运行，叶片变桨到 0°'),
+                                         ('PAUSE', '暂停', '暂停运动并保留 RPM，叶片顺桨到 90°'),
+                                         ('STOP', '停转', '将 RPM 设为 0 并暂停，叶片顺桨到 90°'),
+                                         ('RESET', '复位', '恢复默认朝向、叶轮角度与 9 RPM，叶片立即顺桨 90°，保持暂停')))
 
     @classmethod
     def poll(cls, context):
@@ -220,15 +220,13 @@ class WFRL_OT_ManualAction(bpy.types.Operator):
                 if self.action == 'STOP':
                     entry.rpm = 0.0
                 elif self.action == 'RESET':
-                    entry.yaw_deg = entry.pitch_deg = entry.azimuth_deg = 0.0
+                    entry.yaw_deg = entry.azimuth_deg = 0.0
                     entry.rpm = control.DEFAULT_RPM
-                    entry.individual_pitch = False
-                    for index in range(1, 4):
-                        setattr(entry, f'pitch_b{index}_deg', 0.0)
-                    control._settle_pitch(entry)
-                control._sync_pitch(scene, entry, now, running=self.action == 'START')
                 entry.running = (self.action == 'START' and entry.rpm > 0
                                  and control._scene_key(scene) in control.visible_scenes())
+                if self.action != 'START' or entry.running:
+                    control._command_pitch(entry, control.RUN_PITCH_DEG if entry.running else control.FEATHER_PITCH_DEG,
+                                           now=now, settle=self.action == 'RESET')
             finally:
                 control._updating = False
             clock.configure(now, rpm=entry.rpm, running=entry.running, azimuth_deg=entry.azimuth_deg)
@@ -239,7 +237,7 @@ class WFRL_OT_ManualAction(bpy.types.Operator):
             control._pause_status(scene, 'USER')
         control.sync_batch(scene)
         control._redraw(scene)
-        if self.action == 'START':
+        if self.action == 'START' or any(control.pitch_ramping(entry) for entry in entries):
             control._wake_timer()
         return {'FINISHED'}
 

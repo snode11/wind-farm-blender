@@ -47,6 +47,14 @@ class EncodingRecoveryTests(unittest.TestCase):
         self.assertEqual(media.encode_video(self.root, 25, resume=True), original)
         self.assertEqual(self.calls, 1)
 
+    def test_expected_master_identity_is_checked_before_starting_the_codec(self):
+        expected = {path.name: media.sha256(path) for path in (self.root / 'master_frames').iterdir()}
+        (self.root / 'master_frames/000001.png').write_bytes(b'NON-MEDIA changed frame')
+        with self.assertRaises(ValueError):
+            media.encode_video(self.root, 25, expected_master_sha256=expected)
+        self.assertEqual(self.calls, 0)
+        self.assertFalse((self.root / 'video.mp4').exists())
+
     def test_recovery_after_output_commit_before_final_report(self):
         original = media._write_json_atomic
         def interrupted(path, value):

@@ -102,6 +102,23 @@ class MasterRecoveryTests(unittest.TestCase):
         self.assertEqual(before, {p.name: media.sha256(p) for p in (self.root / 'master_frames').iterdir()})
         self.assertEqual(Path(self.job['output_mp4']).read_bytes(), b'NON-MEDIA encoded placeholder')
 
+    def test_retry_does_not_hash_png_masters_twice_in_one_worker(self):
+        with patch.object(media, 'sha256', wraps=media.sha256) as digest:
+            self.finish()
+        frames = [Path(call.args[0]).name for call in digest.call_args_list
+                  if Path(call.args[0]).parent.resolve() == (self.root / 'master_frames').resolve()]
+        self.assertEqual(sorted(frames), ['000000.png', '000001.png', '000002.png'])
+
+    def test_prevalidated_master_does_not_allow_job_metadata_to_change(self):
+        master = video.validate_master(self.path)
+        changed = dict(self.job, hold_s=.08)
+        jobs.write_json(self.path, changed)
+        before = (self.root / 'status.json').read_bytes()
+        with self.assertRaises(ValueError):
+            video._finish(self.path, lambda *_args, **_kwargs: None, _master=master)
+        self.assertEqual((self.root / 'status.json').read_bytes(), before)
+        self.assertFalse(Path(self.job['output_mp4']).exists())
+
     def test_owned_interrupted_staging_is_cleaned_but_foreign_staging_is_preserved(self):
         stage = self.root / '.wfrl-video-fixture'
         stage.write_bytes(b'NON-MEDIA partial publication')
@@ -578,6 +595,24 @@ class SceneRecoveryTests(unittest.TestCase):
         self.ui.cancel(self.scene)
         self.assertEqual(self.wait_final_status()['state'], 'CANCELLED')
         self.assertFalse(self.ui._JOBS)
+
+    def test_external_new_attempt_can_be_cancelled_after_a_cached_failure(self):
+        jobs.start(self.path, command=[sys.executable, '-B', '-c', 'raise SystemExit(9)'])
+        self.assertEqual(jobs.wait(self.path, timeout=5)['state'], 'FAILED')
+        self.ui._after_load(None)
+        old = self.wait_final_status()
+        self.assertEqual(old['state'], 'FAILED')
+        jobs.start(self.path, command=[sys.executable, '-B', '-c', 'import time;time.sleep(20)'])
+        current = jobs.query(self.path)
+        self.assertTrue(current['active'])
+        self.assertNotEqual(current['attempt_id'], old['attempt_id'])
+        request = self.ui.cancel(self.scene)
+        self.assertTrue(request.get('cancel_requested'))
+        self.assertFalse(request['final'])
+        final = self.wait_final_status()
+        self.assertEqual(final['state'], 'CANCELLED')
+        self.assertEqual(final['attempt_id'], current['attempt_id'])
+        self.assertEqual(jobs.query(self.path)['state'], 'CANCELLED')
 
     def test_publish_preflight_failure_precedes_snapshot_or_background_launch(self):
         from wfrl.camera_video import publication

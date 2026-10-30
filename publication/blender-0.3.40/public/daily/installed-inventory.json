@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "package_path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "verified_files": 195,
+  "mismatches": [],
+  "unexpected_files": [],
+  "ignored": [
+    "__pycache__",
+    "*.pyc"
+  ],
+  "archive_sha256": "f7907be0bd6737f0b0d8ddde8b856c151b6ebc7392ee1c796fc9252b806f018b",
+  "inventory": "publication/blender-0.3.40/public/validated/package/wfrl_blender-0.3.40.inventory.json",
+  "module": "bl_ext.user_default.wfrl_blender"
+}

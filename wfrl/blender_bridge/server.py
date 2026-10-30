@@ -2,6 +2,7 @@
 from collections import deque
 from copy import deepcopy
 import ipaddress
+import select
 import socket
 import time
 import uuid
@@ -137,6 +138,8 @@ class BridgeServer:
             return
         item = self.pending[0]
         if item['kind'] in {'training_stats', 'snapshot'} and item['offset'] == 0:
+            if not select.select([], [self.client], [], 0)[1]:
+                return
             # Always derive from the original ages: would-block retries must not
             # compound elapsed queue time. Once bytes leave, framing is immutable.
             elapsed = max(0., time.monotonic() - item['queued_monotonic'])

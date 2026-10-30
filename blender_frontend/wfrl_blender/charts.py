@@ -204,11 +204,15 @@ def record_curve(message, *, scene=None):
     history = history_for(scene)
     raw_history_for(scene).ingest(message)
     p = message['payload']; record = p['data']
+    validity = record['validity']
+    if (validity == 'valid' and
+            record.get('source_age_seconds', 0) >= record.get('stale_after_seconds', 2)):
+        validity = 'stale'
     history.revision += 1
     values = history.series.setdefault((p['turbine_id'] or FARM, p['channel']), deque(maxlen=600))
     for stamp, value in record['value'] or []:
-        values.append(Point(p['step'], stamp, value if record['validity'] == 'valid' else None,
-                            record['unit'], record['fidelity'], record['validity'], deepcopy(record['provenance'])))
+        values.append(Point(p['step'], stamp, value if validity == 'valid' else None,
+                            record['unit'], record['fidelity'], validity, deepcopy(record['provenance'])))
 
 
 def record_farm(time_s, poses, manifest, extra=None, *, scene=None):
@@ -280,6 +284,7 @@ class _PlotData:
     timebase: str
     channel: str
     selected: str
+    title: str = ''
 
 
 class _PlotResources:
@@ -356,7 +361,7 @@ def _plot_commands(data, scale, panel_width, blf):
     top = bottom + height + (rows * 20 + 34) * scale
     line([(x,y),(x+panel_width,y),(x+panel_width,top),(x,y),(x+panel_width,top),(x,top)],
          (.025,.041,.061,.96), kind='TRIS')
-    title = {**LABELS, **STAT_LABELS}[data.channel] + ' / ' + (', '.join(data.units) or '—')
+    title = data.title or ({**LABELS, **STAT_LABELS}[data.channel] + ' / ' + (', '.join(data.units) or '—'))
     label(x + 12 * scale, top - 20 * scale, title)
     if data.bounds is None or len(data.units) != 1:
         label(x + 12 * scale, bottom + height / 2,
@@ -423,13 +428,14 @@ def _forget_resources(key):
 
 
 def _prune_plot_resources(context):
+    from .imbalance import plot_enabled
     if not _resource_cache:
         return
     live = set()
     for window in context.window_manager.windows:
         screen, scene = window.screen, window.scene
         if (screen is None or scene is None or scene.get('wfrl_scene_kind') == 'manual'
-                or not getattr(scene, 'wfrl_chart_visible', False)):
+                or not (getattr(scene, 'wfrl_chart_visible', False) or plot_enabled(scene))):
             continue
         for area in screen.areas:
             if area.type != 'VIEW_3D':
@@ -493,7 +499,9 @@ def draw_plot():
     if scene is None or region is None or region.type != 'WINDOW' or context.window is None:
         return
     _prune_plot_resources(context)
-    if scene.get('wfrl_scene_kind') == 'manual' or not getattr(scene, 'wfrl_chart_visible', False):
+    from . import imbalance
+    response_plot = imbalance.plot_enabled(scene)
+    if scene.get('wfrl_scene_kind') == 'manual' or not (getattr(scene, 'wfrl_chart_visible', False) or response_plot):
         return
     scale = max(1., context.preferences.system.ui_scale)
     region_width = region.width
@@ -503,7 +511,11 @@ def draw_plot():
     if panel_width < 280 * scale or region.height < 300 * scale:
         _forget_resources(_owner_key(_owner(context)))
         return
-    data = _plot_data(scene.wfrl_chart_channel, getattr(scene, 'wfrl_selected_turbine', 'ALL'), scene)
+    data = (imbalance.plot_data(scene) if response_plot else
+            _plot_data(scene.wfrl_chart_channel, getattr(scene, 'wfrl_selected_turbine', 'ALL'), scene))
+    if data is None:
+        _forget_resources(_owner_key(_owner(context)))
+        return
     resources = _plot_resources(context, data, scale, panel_width, gpu, blf, batch_for_shader)
     if resources is None:
         return

@@ -8,6 +8,29 @@ import pytest
 from wfrl_blender import custom_camera_preview as preview
 
 
+def test_preview_keeps_its_render_key_when_only_another_scene_changes(monkeypatch):
+    from wfrl_blender import custom_camera_capture
+
+    scene = NS(frame_current=1, frame_subframe=0., as_pointer=lambda: 901)
+    other = NS(frame_current=1, frame_subframe=0., as_pointer=lambda: 902)
+    context = NS(scene=scene, window=NS(as_pointer=lambda: 10), area=NS(as_pointer=lambda: 20),
+                 view_layer=NS(as_pointer=lambda: 30))
+    monkeypatch.setattr(preview, '_DRAWING', False)
+    monkeypatch.setattr(preview, 'render_profile', lambda *_: {})
+    monkeypatch.setattr(preview, 'playback_preview', lambda _: False)
+    monkeypatch.setattr(custom_camera_capture, 'current_time', lambda _: 0.)
+    monkeypatch.setitem(sys.modules, preview.__package__ + '.panels.custom_cameras',
+                        NS(session_identity=lambda owner: owner.as_pointer()))
+    before = preview.provenance(context, [], 640)
+    preview.changed(other, None)
+    assert preview.provenance(context, [], 640) == before
+    preview.changed(scene, None)
+    updated = preview.provenance(context, [], 640)
+    assert updated != before
+    preview.changed(None)
+    assert preview.provenance(context, [], 640) != updated
+
+
 def test_preview_quality_tracks_the_scene_owning_playback(monkeypatch):
     from wfrl_blender import playback
     owner = NS(as_pointer=lambda: 1)

@@ -215,7 +215,7 @@ def on_load(_):
                     scene.frame_set(frame, subframe=subframe)
                     continue
                 load(scene, bpy.path.abspath(path), demo, restoring=True)
-                scene.frame_set(frame)
+                scene.frame_set(frame, subframe=subframe)
             except (ValueError, OSError, ImportError, KeyError, TypeError, ReferenceError) as exc:
                 clear(scene, '回放数据未就绪：' + str(exc))
 

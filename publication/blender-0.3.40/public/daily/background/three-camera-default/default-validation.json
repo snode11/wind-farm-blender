@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.user_default.wfrl_blender",
+  "addon_path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "preset_path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/assets/cameras/t1-three-camera-default.json",
+  "checks": [
+    "ordinary load and reload use bundled supported pose and exact optics",
+    "geometry-only load has no rig",
+    "initial history empty",
+    "legacy C4 rejected",
+    "tilted housing rigid move",
+    "per-camera edit persists over frames",
+    "undo restores supported default",
+    "invalid move unchanged",
+    "atomic publish rollback",
+    "explicit reset restores box and C1-C3 without changing frame, subframe or navigation",
+    "reset undo restores prior box and C2 optics",
+    "repeated default reset is a no-op",
+    "reset blocks drafts, capture, box placement and pending backend pause",
+    "invalid default and failed publication leave layout and history unchanged",
+    "explicit reload resets user edits to bundled default",
+    "tip trails and deflection aids disabled"
+  ]
+}

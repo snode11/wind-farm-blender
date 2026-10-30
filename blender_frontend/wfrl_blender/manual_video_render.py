@@ -144,7 +144,9 @@ def seal_master(job_path):
     path = Path(job_path).parent / 'master.json'
     if os.path.lexists(path):
         raise FileExistsError(path)
-    _write_json(path, _master_contract(job_path))
+    record = _master_contract(job_path)
+    _write_json(path, record)
+    return record
 
 
 def validate_master(job_path):
@@ -228,13 +230,21 @@ def delivery_result(job_path):
     return {}
 
 
-def _finish(job_path, status):
+def _finish(job_path, status, *, _master=None):
     from wfrl.camera_video.media import encode_video, sha256, owned_process_options
     from wfrl.camera_video.publication import preflight
     from .manual_video_job import load_job
     path, job = load_job(job_path)
     root, output = path.parent, Path(job['output_mp4'])
-    master = validate_master(path)
+    if _master is None:
+        master = validate_master(path)
+    else:
+        _regular(root / 'master.json')
+        if (json.loads((root / 'master.json').read_text()) != _master
+                or _master.get('job_id') != job['job_id']
+                or _master.get('job_sha256') != sha256(path)):
+            raise ValueError('母版或作业身份在编码事务中改变')
+        master = _master
     cleanup_publication(path)
     count = master['frame_count']
     if not os.path.lexists(output):
@@ -245,7 +255,8 @@ def _finish(job_path, status):
     if not os.path.lexists(root / 'video.mp4'):
         preflight(root / 'video.mp4')
     status('ENCODING', completed_frames=count, total_frames=count)
-    report = encode_video(root, job['fps'], ffmpeg=job['ffmpeg'], ffprobe=job['ffprobe'], resume=True)
+    report = encode_video(root, job['fps'], ffmpeg=job['ffmpeg'], ffprobe=job['ffprobe'], resume=True,
+                          expected_master_sha256=master['master_sha256'])
     if (report['width'], report['height'], report['frame_count']) != (job['width'], job['height'], count):
         raise ValueError('编码视频的尺寸或帧数不符合请求')
     status('VERIFYING', completed_frames=count, total_frames=count)
@@ -313,10 +324,10 @@ def _status_writer(path, job):
 def resume_job(job_path):
     """Retry encoding, validation and publication without starting Blender or rendering."""
     with _worker_guard(job_path) as (path, job):
-        validate_master(path)  # Rejected inputs must not change any existing result state.
+        master = validate_master(path)  # Rejected inputs must not change any existing result state.
         status = _status_writer(path, job)
         try:
-            return _finish(path, status)
+            return _finish(path, status, _master=master)
         except BaseException as exc:
             status('FAILED', error=f'{type(exc).__name__}: {exc}')
             raise
@@ -522,8 +533,8 @@ def _render_job(job_path, job):
                 completed = index + 1
                 status('RENDERING')
             os.fsync(handle.fileno())
-        seal_master(job_path)
-        return _finish(job_path, status)
+        master_record = seal_master(job_path)
+        return _finish(job_path, status, _master=master_record)
     except BaseException as exc:
         status('FAILED', error=f'{type(exc).__name__}: {exc}')
         raise

@@ -1,0 +1,558 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "files_checked": 110,
+  "mismatches": [],
+  "checks": [
+    {
+      "source": "__init__.py",
+      "cache": "__pycache__/__init__.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "animation.py",
+      "cache": "__pycache__/animation.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "animation_render.py",
+      "cache": "__pycache__/animation_render.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "animation_render_ui.py",
+      "cache": "__pycache__/animation_render_ui.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "atmosphere.py",
+      "cache": "__pycache__/atmosphere.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "backend_inflow.py",
+      "cache": "__pycache__/backend_inflow.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "blade_recon_data.py",
+      "cache": "__pycache__/blade_recon_data.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "blade_recon_review.py",
+      "cache": "__pycache__/blade_recon_review.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "blade_root_display.py",
+      "cache": "__pycache__/blade_root_display.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "camera_projection.py",
+      "cache": "__pycache__/camera_projection.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "cameras.py",
+      "cache": "__pycache__/cameras.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "charts.py",
+      "cache": "__pycache__/charts.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "cinematic.py",
+      "cache": "__pycache__/cinematic.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "clearance_replay.py",
+      "cache": "__pycache__/clearance_replay.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "clearance_visual.py",
+      "cache": "__pycache__/clearance_visual.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "custom_camera_capture.py",
+      "cache": "__pycache__/custom_camera_capture.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "custom_camera_diagnostics.py",
+      "cache": "__pycache__/custom_camera_diagnostics.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "custom_camera_history.py",
+      "cache": "__pycache__/custom_camera_history.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "custom_camera_preview.py",
+      "cache": "__pycache__/custom_camera_preview.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "custom_cameras.py",
+      "cache": "__pycache__/custom_cameras.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "deflection.py",
+      "cache": "__pycache__/deflection.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "diagnostics.py",
+      "cache": "__pycache__/diagnostics.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "farm_flex.py",
+      "cache": "__pycache__/farm_flex.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "frontend_diagnostics.py",
+      "cache": "__pycache__/frontend_diagnostics.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "history.py",
+      "cache": "__pycache__/history.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "home_state.py",
+      "cache": "__pycache__/home_state.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "installation_schematic.py",
+      "cache": "__pycache__/installation_schematic.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "landscape.py",
+      "cache": "__pycache__/landscape.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "live_scene.py",
+      "cache": "__pycache__/live_scene.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "manual_control.py",
+      "cache": "__pycache__/manual_control.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "manual_down.py",
+      "cache": "__pycache__/manual_down.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "manual_geometry.py",
+      "cache": "__pycache__/manual_geometry.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "manual_motion.py",
+      "cache": "__pycache__/manual_motion.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "manual_operators.py",
+      "cache": "__pycache__/manual_operators.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "manual_pose.py",
+      "cache": "__pycache__/manual_pose.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "manual_rna.py",
+      "cache": "__pycache__/manual_rna.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "manual_scene.py",
+      "cache": "__pycache__/manual_scene.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "manual_scene_links.py",
+      "cache": "__pycache__/manual_scene_links.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "manual_video.py",
+      "cache": "__pycache__/manual_video.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "materials.py",
+      "cache": "__pycache__/materials.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "mechanical_details.py",
+      "cache": "__pycache__/mechanical_details.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "nacelle_camera.py",
+      "cache": "__pycache__/nacelle_camera.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "native_camera_views.py",
+      "cache": "__pycache__/native_camera_views.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "performance.py",
+      "cache": "__pycache__/performance.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "playback.py",
+      "cache": "__pycache__/playback.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "prebend.py",
+      "cache": "__pycache__/prebend.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "preferences.py",
+      "cache": "__pycache__/preferences.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "presentation.py",
+      "cache": "__pycache__/presentation.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "protocol.py",
+      "cache": "__pycache__/protocol.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "radar_feedback.py",
+      "cache": "__pycache__/radar_feedback.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "repair_marks.py",
+      "cache": "__pycache__/repair_marks.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "runtime.py",
+      "cache": "__pycache__/runtime.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "scene_builder.py",
+      "cache": "__pycache__/scene_builder.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "scene_model.py",
+      "cache": "__pycache__/scene_model.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "sensors.py",
+      "cache": "__pycache__/sensors.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "split_mappo_texture.py",
+      "cache": "__pycache__/split_mappo_texture.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "split_reconstruction.py",
+      "cache": "__pycache__/split_reconstruction.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "split_reconstruction_timing.py",
+      "cache": "__pycache__/split_reconstruction_timing.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "split_reconstruction_ui.py",
+      "cache": "__pycache__/split_reconstruction_ui.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "split_surface_texture.py",
+      "cache": "__pycache__/split_surface_texture.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "split_turbine_context.py",
+      "cache": "__pycache__/split_turbine_context.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "stacked_camera_rig.py",
+      "cache": "__pycache__/stacked_camera_rig.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "state.py",
+      "cache": "__pycache__/state.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "tip_tracking.py",
+      "cache": "__pycache__/tip_tracking.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "tower_motion.py",
+      "cache": "__pycache__/tower_motion.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "training.py",
+      "cache": "__pycache__/training.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "turbine_geometry.py",
+      "cache": "__pycache__/turbine_geometry.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "video_output.py",
+      "cache": "__pycache__/video_output.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "wake.py",
+      "cache": "__pycache__/wake.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "workspace.py",
+      "cache": "__pycache__/workspace.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "_vendor/__init__.py",
+      "cache": "_vendor/__pycache__/__init__.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "_vendor/blade_recon/__init__.py",
+      "cache": "_vendor/blade_recon/__pycache__/__init__.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "_vendor/blade_recon/model.py",
+      "cache": "_vendor/blade_recon/__pycache__/model.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "_vendor/lidar/__init__.py",
+      "cache": "_vendor/lidar/__pycache__/__init__.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "_vendor/lidar/dual_beam_replay.py",
+      "cache": "_vendor/lidar/__pycache__/dual_beam_replay.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "_vendor/lidar/evidence.py",
+      "cache": "_vendor/lidar/__pycache__/evidence.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "_vendor/lidar/replay.py",
+      "cache": "_vendor/lidar/__pycache__/replay.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "nrel_defects/__init__.py",
+      "cache": "nrel_defects/__pycache__/__init__.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "nrel_defects/defect_geometry.py",
+      "cache": "nrel_defects/__pycache__/defect_geometry.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "nrel_defects/defect_schema.py",
+      "cache": "nrel_defects/__pycache__/defect_schema.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "nrel_defects/defect_shapes.py",
+      "cache": "nrel_defects/__pycache__/defect_shapes.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "nrel_defects/defect_store.py",
+      "cache": "nrel_defects/__pycache__/defect_store.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "nrel_defects/editor.py",
+      "cache": "nrel_defects/__pycache__/editor.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "nrel_defects/reference_surface.py",
+      "cache": "nrel_defects/__pycache__/reference_surface.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "operators/__init__.py",
+      "cache": "operators/__pycache__/__init__.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "operators/connection.py",
+      "cache": "operators/__pycache__/connection.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "operators/history_export.py",
+      "cache": "operators/__pycache__/history_export.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "operators/run.py",
+      "cache": "operators/__pycache__/run.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "operators/workflow.py",
+      "cache": "operators/__pycache__/workflow.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/__init__.py",
+      "cache": "panels/__pycache__/__init__.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/blade_recon.py",
+      "cache": "panels/__pycache__/blade_recon.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/channels.py",
+      "cache": "panels/__pycache__/channels.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/clearance.py",
+      "cache": "panels/__pycache__/clearance.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/custom_camera_output.py",
+      "cache": "panels/__pycache__/custom_camera_output.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/custom_cameras.py",
+      "cache": "panels/__pycache__/custom_cameras.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/demo.py",
+      "cache": "panels/__pycache__/demo.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/diagnostics.py",
+      "cache": "panels/__pycache__/diagnostics.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/farm_replay.py",
+      "cache": "panels/__pycache__/farm_replay.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/gimbal.py",
+      "cache": "panels/__pycache__/gimbal.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/home.py",
+      "cache": "panels/__pycache__/home.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/manual_control.py",
+      "cache": "panels/__pycache__/manual_control.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/presentation.py",
+      "cache": "panels/__pycache__/presentation.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/run.py",
+      "cache": "panels/__pycache__/run.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/safety.py",
+      "cache": "panels/__pycache__/safety.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/scene.py",
+      "cache": "panels/__pycache__/scene.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/stacked_camera_rig.py",
+      "cache": "panels/__pycache__/stacked_camera_rig.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/status.py",
+      "cache": "panels/__pycache__/status.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/telemetry.py",
+      "cache": "panels/__pycache__/telemetry.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/training.py",
+      "cache": "panels/__pycache__/training.cpython-313.pyc",
+      "matches_current_source": true
+    },
+    {
+      "source": "panels/video_output.py",
+      "cache": "panels/__pycache__/video_output.cpython-313.pyc",
+      "matches_current_source": true
+    }
+  ]
+}

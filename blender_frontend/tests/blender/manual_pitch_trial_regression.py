@@ -91,6 +91,7 @@ try:
             mesh.vertices.foreach_get('co', actual)
             np.testing.assert_allclose(actual.reshape(-1, 3), expected_vertices, atol=4e-6)
             assert mesh['wfrl_manual_blade_model'] == 'rootkink'
+    scene.wfrl_manual_pitch_rate_deg_s = 0
     t1 = entries(scene)['T1']
     pending = scene.wfrl_manual_trial
     clock = [100.0]
@@ -111,6 +112,9 @@ try:
             obj.rotation_mode = 'XYZ'
             obj.rotation_euler = original
         assert bpy.ops.wfrl.manual_action(action='START') == {'FINISHED'}
+        t1.individual_pitch = True
+        for index, pitch in enumerate((3, 7, 11), 1):
+            setattr(t1, f'pitch_b{index}_deg', pitch)
         clock[0] += .5
         t1.blade2_object.rotation_euler.z -= math.radians(10)
         assert_native_rotation_rejected(scene)
@@ -182,6 +186,7 @@ try:
             setattr(pending, f'select_b{index}', index == 2)
         before = control.pose_snapshot(scene)
         assert bpy.ops.wfrl.manual_action(action='START') == {'FINISHED'}
+        t1.pitch_deg = 12
         clock[0] += .5
         trial_op('CONFIRM')
         close(t1.azimuth_deg, 68)

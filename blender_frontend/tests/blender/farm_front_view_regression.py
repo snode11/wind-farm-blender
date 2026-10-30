@@ -26,6 +26,8 @@ class ViewButtons:
         self.buttons = {}
     def row(self, **kwargs):
         return self
+    def column(self, **kwargs):
+        return self
     def operator(self, operator, *, text, **kwargs):
         props = SimpleNamespace()
         if operator == 'wfrl.farm_flex_view':
@@ -33,6 +35,8 @@ class ViewButtons:
         return props
     def prop(self, *args, **kwargs):
         pass
+    def prop_enum(self, owner, name, value, **kwargs):
+        assert value in owner.bl_rna.properties[name].enum_items
     def label(self, **kwargs):
         pass
     def panel(self, *args, **kwargs):

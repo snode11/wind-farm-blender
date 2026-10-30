@@ -18,6 +18,7 @@ from .training_progress import TrainingProgressReader
 from .workflow import configured_scene, validate_run_options
 
 from .snapshot_adapter import SnapshotAdapter
+from .messages import encode_message
 
 
 FORMAL_VALUE_OPTIONS = {
@@ -465,7 +466,13 @@ class BackendSession:
                     raise ValueError('Backend still active')
                 if name == 'scene.load':
                     candidate = self._load(args.get('scene', args.get('scene_path')))
-                    self.scene = configured_scene(candidate, args.get('scene_overrides', {}))
+                    candidate = configured_scene(candidate, args.get('scene_overrides', {}))
+                    payload = dict(self._state_payload(), run_status='READY', run_id=None,
+                                   state_revision=self.state_revision + 1, reason=None,
+                                   channel_states={}, scene=candidate.to_dict())
+                    encode_message(dict(protocol_version=1, type='lifecycle', session_id=self.session_id,
+                                        sequence=0, payload=payload))
+                    self.scene = candidate
                 self._channel_states.clear()
                 self.clear_observations()
                 self._overflowed = False
