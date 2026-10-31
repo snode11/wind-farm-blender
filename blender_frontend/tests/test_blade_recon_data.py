@@ -38,6 +38,21 @@ def sample_camera():
 
 
 class ReconDataTests(unittest.TestCase):
+    def test_unsupported_healthy_model_identity_is_rejected_at_all_readers(self):
+        for field, value in [('healthy_template', {}), ('healthy_template_sha256', 'abc')]:
+            data = sample_data()
+            data['turbine'][field] = value
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as directory:
+                with self.assertRaisesRegex(ValueError, 'unsupported.*healthy'):
+                    ReconSequence.from_data(data)
+                path = Path(directory) / 'recon.json'
+                path.write_text(json.dumps(data))
+                for sidecar in [None, {'files': {path.name: {'sha256': 'unmatched'}}}]:
+                    if sidecar is not None:
+                        path.with_name('manifest.json').write_text(json.dumps(sidecar))
+                    with self.assertRaisesRegex(ValueError, 'unsupported.*healthy'):
+                        ReconSequence(path)
+
     def test_reading_keeps_source_times_and_boolean_observations(self):
         data = sample_data()
         sequence = ReconSequence.from_data(data)

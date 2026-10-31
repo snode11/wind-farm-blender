@@ -11,7 +11,7 @@ SceneView 只管**画**，不碰 Qt 事件循环、不碰 MPI：
     view.update(frame, measure, dt=0.033) # 每帧调一次
 
 通道开关走 `set_channel(topic, on)`：它同时管**可见性**和**采样**。只藏 actor
-不停采样的话，关掉一路重的通道（lidar 视线插值、camera 离屏渲染）省不下任何
+不停采样的话，关掉一路重的通道（lidar 合成采样、camera 离屏渲染）省不下任何
 计算，"订阅"就退化成了一个显示复选框。
 """
 from __future__ import annotations
@@ -257,17 +257,14 @@ class SceneView:
         self.plotter.render()
 
     def clear_manual(self, topic: Optional[str] = None, i: Optional[int] = None):
-        """解锁：给了 (topic,i) 解一个，给了 topic 解该通道全部，都不给全解。
+        """解锁：topic/i 分别筛选通道和机组，均未提供时全部解锁。
 
         解锁只是让 on_frame 重新接管，不主动改回姿态 —— 下一帧仿真快照到了自然
         覆盖；没有训练在跑时就停在手动摆好的位置。
         """
-        if topic is None:
-            self._manual.clear()
-        else:
-            for k in [k for k in self._manual
-                      if k[0] == topic and (i is None or k[1] == int(i))]:
-                self._manual.pop(k, None)
+        for k in [k for k in self._manual
+                  if (topic is None or k[0] == topic) and (i is None or k[1] == int(i))]:
+            self._manual.pop(k, None)
 
     def is_manual(self, topic: str, i: int) -> bool:
         return (topic, int(i)) in self._manual
@@ -467,7 +464,7 @@ class SceneView:
 
     def _solve_loop(self):
         """求解线程：只碰 `self.fi` 与纯 numpy 几何，绝不碰 actor 或 mesh。"""
-        from wfrl.viz.animate import deform_solve
+        from wfrl.viz.animate import deform_solve, measurement_pitch_to_geometry
         from wfrl.viz.field import extract_wake_plane
         while not self._solve_stop.is_set():
             self._solve_evt.wait(0.2)
@@ -502,7 +499,7 @@ class SceneView:
                     res = [deform_solve(turb, mf[i],
                                         None if me is None else me[i],
                                         scale=self.flex_scale,
-                                        pitch_deg=float(pitch[i]))
+                                        pitch_deg=measurement_pitch_to_geometry(pitch[i]))
                            for i, turb in enumerate(self.turbines)]
                     with self._solve_lock:
                         self._deform_out = res
@@ -510,14 +507,17 @@ class SceneView:
                     print(f"[view] 柔性变形求解失败（保持上一帧）: {e!r}",
                           flush=True)
 
-    def close(self):
-        """停掉求解线程。窗口关闭时调；不调也只是多一个 daemon 线程。"""
+    def close(self, timeout=0.0):
+        """Request shutdown; retain a live solve worker until exit is confirmed."""
         self._solve_stop.set()
         self._solve_evt.set()
         t = self._solve_thread
         if t is not None and t.is_alive():
-            t.join(5.0)
+            t.join(timeout)
+        if t is not None and t.is_alive():
+            return False
         self._solve_thread = None
+        return True
 
     def _ws0(self):
         return float(np.ravel(self.fi.floris.flow_field.wind_speeds)[0])

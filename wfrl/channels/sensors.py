@@ -75,16 +75,12 @@ class ActuatorSensor(Sensor):
 class NacelleLidar(Sensor):
     """机舱前视激光雷达：沿若干视线在轮毂前方采来流。
 
-    这是风机上真装的东西（前馈测风，提前几秒看到来流），不是编的模态。数据来源
-    分两种，都不是合成：
-      - 有湍流盒时：从 .bts 的三维风场按视线端点插值 —— 真实湍流结构
-      - 无湍流盒时：均匀来流 + 按距离衰减的相干噪声，退化为常数场
-
-    有湍流盒才有前馈价值；没有的话它只是把已知的 HWindSpeed 报一遍，UI 会标注。
+    合成示意场使用轮毂均值、幂律切变和确定性正弦脉动。BTS 仅提供
+    u_hub/TI 统计量；未实现三维 BTS 样本插值，不作为实测或前馈验证。
     """
     type_name = "lidar"
-    fidelity = Fidelity.DERIVED
-    provenance = "从 InflowWind 的 .bts 湍流盒沿视线插值；无湍流盒时退化为均匀来流"
+    fidelity = Fidelity.SYNTH
+    provenance = "合成示意：轮毂均值/切变/正弦脉动；可用 BTS 统计量，不读取三维风场"
     rate_hz = 1.0
     scalar_bar_title = "lidar u (m/s)"
 
@@ -138,7 +134,9 @@ class NacelleLidar(Sensor):
         u = u0 * shear * (1.0 + ti * seedfield)
         return {"lidar": {"points": pts, "u": u, "u_hub": u0,
                           "ranges": np.array(self.RANGES),
-                          "has_turbulence": bts is not None}}
+                          "has_turbulence": False, "source_kind": "SYNTHETIC",
+                          "bts_statistics_used": bts is not None,
+                          "bts_spatial_interpolation": False}}
 
     # --- 3D 表现：点云，颜色 = 视线风速 -----------------------------------
     # 点位要过 `to_display`：采样用物理坐标（轮毂 90 m），但画面上机组按
@@ -377,8 +375,13 @@ class NacelleCamera(Sensor):
         """
         ti = self.indices[i]
         t = self.scene.turbines[ti]
-        yaw = float(np.ravel((ctx or {}).get("yaw", [0.0]))[0]
-                    if isinstance(ctx, dict) and "yaw" in ctx else 0.0)
+        yaws = np.asarray((ctx or {}).get("yaw", [0.0]), dtype=float).ravel()
+        if yaws.size == self.scene.n:
+            yaw = float(yaws[ti])
+        elif yaws.size == 1:
+            yaw = float(yaws[0])
+        else:
+            raise ValueError('camera yaw must contain the full farm or one presliced turbine')
         yaw_cam = np.deg2rad(yaw + self._p("yaw_off"))
         # 机舱轴水平单位向量：+axis 指机舱尾/下风向；转子/迎风在 −axis（上风向）。
         axis = np.array([np.cos(yaw_cam), np.sin(yaw_cam), 0.0])

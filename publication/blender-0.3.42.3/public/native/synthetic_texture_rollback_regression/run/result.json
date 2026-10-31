@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "phase": "run",
+  "reasons": [],
+  "returncode": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "duration_s": 3.684938875027001,
+  "source_changed": false,
+  "execution": {
+    "status": "PASS",
+    "final": true,
+    "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/synthetic_texture_rollback_regression.py",
+    "background": true,
+    "blender": "5.2.1 LTS",
+    "startup_dirty": false,
+    "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+    "returned_normally": true,
+    "post_script_dirty": false
+  },
+  "script_result": {
+    "status": "PASS",
+    "checks": [
+      "synthetic_material",
+      "synthetic_mesh",
+      "synthetic_activation",
+      "surface_pack",
+      "surface_mesh",
+      "surface_apply",
+      "cleanup_retry",
+      "surface_cleanup_retry",
+      "synthetic_retry_success"
+    ],
+    "blender": "5.2.1 LTS",
+    "module": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/split_surface_texture.py",
+    "scope": "Native datablocks and predecoded RGB helper; no rendered pixel or scientific acceptance"
+  },
+  "log": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/synthetic_texture_rollback_regression/run/blender.log",
+  "report": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/synthetic_texture_rollback_regression/artifacts/result.json"
+}

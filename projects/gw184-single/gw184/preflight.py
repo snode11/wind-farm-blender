@@ -109,13 +109,14 @@ def defect_projection(rig, record, angle, pitch):
 def projection_checks(rig):
     from .scene import camera_metadata
     metadata=camera_metadata(rig)
+    width,height=metadata['resolution']
     for camera,record in zip(rig['cameras'],metadata['cameras']):
         for point in (Vector((0,0,130)),Vector((1,2,170)),Vector((-3,-2,200))):
             ndc=world_to_camera_view(rig['scene'],camera,point)
             inv=camera.matrix_world.inverted() @ point;K=record['K']
             x=K[0][0]*inv.x/-inv.z+K[0][2];y=K[1][1]*-inv.y/-inv.z+K[1][2]
-            assert abs(x-(ndc.x*3840-.5))<.005
-            assert abs(y-((1-ndc.y)*2160-.5))<.005
+            assert abs(x-(ndc.x*width-.5))<.005
+            assert abs(y-((1-ndc.y)*height-.5))<.005
     return 'PASS: independent pinhole projection agrees with Blender within 0.005 px'
 
 

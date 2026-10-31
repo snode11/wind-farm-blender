@@ -1,0 +1,91 @@
+{
+  "status": "PASS",
+  "phase": "run",
+  "reasons": [],
+  "returncode": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "duration_s": 25.433436915976927,
+  "source_changed": false,
+  "execution": {
+    "status": "PASS",
+    "final": true,
+    "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/defect_commit_cleanup_regression.py",
+    "background": true,
+    "blender": "5.2.1 LTS",
+    "startup_dirty": false,
+    "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+    "returned_normally": true,
+    "post_script_dirty": false
+  },
+  "script_result": {
+    "status": "PASS",
+    "blender": "5.2.1 LTS",
+    "module_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+    "checks": {
+      "NREL": [
+        {
+          "operation": "commit",
+          "version": 1,
+          "document_and_ui_consistent": true,
+          "history_consistent": true,
+          "disposal_retried": true
+        },
+        {
+          "operation": "restore",
+          "version": 2,
+          "document_and_ui_consistent": true,
+          "history_consistent": true,
+          "disposal_retried": true
+        },
+        {
+          "operation": "undo",
+          "version": 4,
+          "document_and_ui_consistent": true,
+          "history_consistent": true,
+          "disposal_retried": true
+        },
+        {
+          "operation": "redo",
+          "version": 7,
+          "document_and_ui_consistent": true,
+          "history_consistent": true,
+          "disposal_retried": true
+        }
+      ],
+      "NREL_normal_detach_after_pending_cleanup": true,
+      "GW184": [
+        {
+          "operation": "commit",
+          "version": 2,
+          "document_and_ui_consistent": true,
+          "history_consistent": true,
+          "disposal_retried": true
+        },
+        {
+          "operation": "restore",
+          "version": 3,
+          "document_and_ui_consistent": true,
+          "history_consistent": true,
+          "disposal_retried": true
+        },
+        {
+          "operation": "undo",
+          "version": 5,
+          "document_and_ui_consistent": true,
+          "history_consistent": true,
+          "disposal_retried": true
+        },
+        {
+          "operation": "redo",
+          "version": 8,
+          "document_and_ui_consistent": true,
+          "history_consistent": true,
+          "disposal_retried": true
+        }
+      ]
+    }
+  },
+  "log": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/defect_commit_cleanup_regression/run/blender.log",
+  "report": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/defect_commit_cleanup_regression/artifacts/result.json"
+}

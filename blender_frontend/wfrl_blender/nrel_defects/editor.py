@@ -551,6 +551,7 @@ def detach(scene=None,*,restore=True):
             attempt(lambda: scan.finish_scan(None, True, restore_time=restore, resume_playback=False))
         s.draft = s.edit_state = None
         attempt(s.clear_helpers)
+        attempt(lambda: s.store.retry_disposals(strict=True))
         for manager in s.geometry.managers.values():
             attempt(lambda manager=manager: manager.close(restore=restore))
         # Geometry managers own restoration. Closing must not reactivate a live
@@ -728,6 +729,7 @@ def action_unavailable(s, p, action):
 
 
 ACTION_MESSAGES = {
+    'RETRY_CLEANUP': '旧缺陷资源已释放',
     'OPEN': '编辑器已打开；选择类型并新建，或选择已有缺陷',
     'CLOSE': '编辑器已关闭',
     'NEW': '正在新建；调整参数后预览，再应用修改',
@@ -848,7 +850,9 @@ class NREL_OT_defect_action(bpy.types.Operator):
             if self.action == 'CLOSE':
                 detach(context.scene); context.scene['wfrl_nrel_defect_enabled']=False
                 p.status = ACTION_MESSAGES['CLOSE']; return {'FINISHED'}
-            if self.action in ('NEW', 'EDIT'):
+            if self.action == 'RETRY_CLEANUP':
+                s.store.retry_disposals(strict=True)
+            elif self.action in ('NEW', 'EDIT'):
                 d = s.begin(None if self.action == 'NEW' else p.selected, p.kind)
                 p.selected = s.draft_index
                 props_from_defect(p, d)
@@ -1131,6 +1135,10 @@ class NREL_PT_defects(bpy.types.Panel):
             helper.enabled = not s.busy and s.healthy_payload is None
             helper.prop(p, 'show_helpers')
             buttons(view, [('CAMERA1', 'C1'), ('CAMERA2', 'C2'), ('CAMERA3', 'C3')])
+
+        if s.store.pending_disposals:
+            layout.label(text='缺陷已应用；旧资源待释放', icon='ERROR')
+            buttons(layout, [('RETRY_CLEANUP', '重试资源释放')])
 
         config = section('config', '配置文件')
         if config is not None:

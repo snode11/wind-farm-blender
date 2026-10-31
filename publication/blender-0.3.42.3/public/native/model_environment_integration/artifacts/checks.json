@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "detail_vertices_per_blade": {
+    "nrel5mw:OVERVIEW": 4417,
+    "nrel5mw:BALANCED": 8065,
+    "nrel5mw:CLOSEUP": 15361,
+    "rootkink:OVERVIEW": 4417,
+    "rootkink:BALANCED": 8065,
+    "rootkink:CLOSEUP": 15361
+  },
+  "independent_materials_and_meshes": true,
+  "independent_flexible_meshes": true,
+  "replay_root_fittings_follow_model": true,
+  "replay_root_rollback_and_edited_shared_protection": true,
+  "source_scene_copy_does_not_claim_manual": true,
+  "saved_scene_link_restore": true,
+  "down_export_clone_closeup_source_overview": true,
+  "source_pose_cameras_environment_preserved": true,
+  "saved_reopen": true,
+  "formal_assets_unchanged": 68,
+  "scope": "Background source integration; no FPS, physical input or scientific acceptance"
+}

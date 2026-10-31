@@ -367,39 +367,34 @@ def register():
     home_cleanup = home.unregister_properties
     x100_cleanup = x100_runtime.unregister
     def cleanup():
-        x100_cleanup()
-        home_cleanup()
-        animation_render_ui.unregister()
-        manual_down_cleanup()
-        manual_cleanup()
-        diagnostics_cleanup()
-        defect_editor.unregister_properties()
-        split_ui_cleanup()
-        split_cleanup()
-        blade_recon_cleanup()
-        custom_cameras_cleanup()
-        runtime_cleanup()
-        video_output.unregister()
-        history_export_cleanup()
-        gimbal_cleanup()
-        clearance.unregister_properties()
-        clearance_replay.unregister()
-        capture_cleanup()
-        charts_cleanup()
-        workflow_cleanup()
-        unregister_overlay()
-        playback_cleanup()
+        errors = []
+        def attempt(callback):
+            try:
+                callback()
+            except Exception as exc:
+                errors.append(exc)
+        for callback in (x100_cleanup, home_cleanup, animation_render_ui.unregister,
+                         manual_down_cleanup, manual_cleanup, diagnostics_cleanup,
+                         defect_editor.unregister_properties, split_ui_cleanup,
+                         split_cleanup, blade_recon_cleanup, custom_cameras_cleanup,
+                         runtime_cleanup, video_output.unregister, history_export_cleanup,
+                         gimbal_cleanup, clearance.unregister_properties,
+                         clearance_replay.unregister, capture_cleanup, charts_cleanup,
+                         workflow_cleanup, unregister_overlay, playback_cleanup):
+            attempt(callback)
         if bpy.app.timers.is_registered(timer_cancel):
-            bpy.app.timers.unregister(timer_cancel)
+            attempt(lambda: bpy.app.timers.unregister(timer_cancel))
         for handlers, function in registered_handlers:
             if function in handlers:
                 handlers.remove(function)
         for name in registered_properties:
             if hasattr(bpy.types.Scene, name):
-                delattr(bpy.types.Scene, name)
+                attempt(lambda name=name: delattr(bpy.types.Scene, name))
         for cls in reversed(registered_classes):
             if cls.is_registered:
-                bpy.utils.unregister_class(cls)
+                attempt(lambda cls=cls: bpy.utils.unregister_class(cls))
+        if errors:
+            raise RuntimeError('WFRL cleanup failed: ' + '; '.join(map(str, errors)))
     bpy._wfrl_registered_cleanup = cleanup
 
 

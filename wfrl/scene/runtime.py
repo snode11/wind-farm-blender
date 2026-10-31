@@ -9,7 +9,7 @@
 `frame` 完成。这样同一份场景既能开窗看，也能无头训练。
 
 通道开关（`enable`/`disable`）落在这里而不是 UI 里：关掉一路通道意味着**该传感器
-不再采样**，省下的是真实计算（lidar 的视线插值、camera 的离屏渲染），不只是不画。
+不再采样**，省下的是真实计算（lidar 的合成采样、camera 的离屏渲染），不只是不画。
 """
 from __future__ import annotations
 

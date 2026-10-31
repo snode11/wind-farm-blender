@@ -21,6 +21,7 @@ n 个 agent）"的简洁 API，并在一轮结束后回读全场真实测量：
 """
 import collections
 import os
+from numbers import Real
 
 import numpy as np
 
@@ -67,6 +68,23 @@ YAW_RATE = 0.3             # 偏航电机速率 (°/s)，与 mdp.ACTUATORS_RATE[
 
 # 一次训练里删不掉的算例目录（Windows 句柄没释放）。下一次 purge 时一并重试。
 _PENDING_PURGE = []
+
+
+def _power_scalar(value):
+    """Decode one real power reading; invalid or missing samples remain NaN."""
+    if np.ma.is_masked(value):
+        return float("nan")
+    try:
+        raw = np.asarray(value, dtype=object)
+        if raw.shape not in ((), (1,)):
+            return float("nan")
+        scalar = raw.item()
+        if isinstance(scalar, (bool, np.bool_, np.timedelta64)) or not isinstance(scalar, Real):
+            return float("nan")
+        result = float(scalar)
+        return result if np.isfinite(result) else float("nan")
+    except (TypeError, ValueError, OverflowError):
+        return float("nan")
 
 
 def check_mpi_launcher():
@@ -342,8 +360,7 @@ class FastFarmDriver:
             ws[i] = float(np.ravel(obs.get("wind_speed", [np.nan]))[0])
             wd[i] = float(np.ravel(obs.get("wind_direction", [np.nan]))[0])
             pitch[i] = float(np.ravel(obs.get("pitch", [np.nan]))[0])
-            power[i] = float(np.ravel(info.get("power", [0.0]))[0]) \
-                if "power" in info else 0.0
+            power[i] = _power_scalar(info.get("power"))
             # load 是**六元组**（见下方 root_moments），reward 用的是它的 mean|·|，
             # 这里保留标量以兼容既有调用方，逐叶片值另开两个键。
             if "load" in info:
@@ -497,7 +514,7 @@ class FastFarmDriver:
         """
         import shutil
         import time
-        if self.case_dir:
+        if getattr(self, "case_dir", None):
             _PENDING_PURGE.append(self.case_dir)
         left = []
         for d in _PENDING_PURGE:

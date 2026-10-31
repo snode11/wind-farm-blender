@@ -1,6 +1,8 @@
 # Lidar replay formats
 
-The replay 1.0 contract below describes the supported B2 / normal-close path; the dual-beam overlay uses its own contract. The public NREL / WFRL installation ZIP is **0.3.28** (tag **v0.3.28**), and the current project source is on the **wind-farm-rl-all-work** branch. The daily installation is **0.3.28**; its 181 files match the public upload source package. Installed regressions and fresh-process checks apply only to that payload and their recorded scope. See [daily installation verification](../../publication/daily-installation.json). See [release state and validation scope](../../docs/blender/发布状态与验证范围.md) for package identities. Software delivery does not establish research acceptance.
+The replay 1.0 contract below describes the supported B2 / normal-close path; the dual-beam overlay uses its own contract. The public NREL / WFRL installation ZIP is **0.3.42.3** (tag **v0.3.42.3**, manifest **0.3.42+3**). Project source is available on `main` and `wind-farm-rl-all-work`. The daily installation remains **0.3.42.2** and has its own [installation identity](../../publication/daily-installation.json). Validation applies only to the recorded payload and scope; see [release state and validation scope](../../docs/blender/发布状态与验证范围.md). Software delivery does not establish research acceptance.
+
+Replay 1.0 的 `mae_m` 派生统计允许最多 `1e-12 m` 的绝对求和舍入差异，以支持 Python 浮点 `sum` 算法差异；该规则同时用于最终统计和各前缀统计。其他统计字段、计数、测量、告警、时刻、身份和文件 SHA 严格核对，显示值来自重算。该容差不表示物理精度。
 
 ## Dual-beam review v1
 

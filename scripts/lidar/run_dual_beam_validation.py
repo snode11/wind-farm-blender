@@ -387,21 +387,32 @@ def execute(run, *, poll_seconds=1., budget_bytes=1_000_000_000, budget_root=Non
         archiver.write_inventory(frame_audit=audit, status='COMPLETE')
         status.update(status='COMPLETE', frame_audit=audit)
         config['status'] = 'SOLVER_COMPLETE'
-    except Exception as exc:
-        if process is not None:
-            terminate_process(process)
-            status['exit_code'] = process.returncode
+    except BaseException as exc:
+        outcome = 'CANCELLED' if isinstance(exc, KeyboardInterrupt) else 'FAILED'
+        status['status'] = outcome
         status['error'] = f'{type(exc).__name__}: {exc}'
-        config['status'] = 'FAILED'
-        # Retain every finished file even on a solver or budget failure.
-        try:
-            archiver.scan()
-            archiver.scan()
-        except Exception as archive_error:
-            status['archive_error'] = f'{type(archive_error).__name__}: {archive_error}'
-        archiver.write_inventory(status='FAILED')
+        config['status'] = outcome
         raise
     finally:
+        status['cleanup_confirmed'] = process is None
+        if process is not None:
+            status['owned_pid'] = process.pid
+            try:
+                terminate_process(process)
+            except Exception as cleanup_error:
+                status['cleanup_error'] = f'{type(cleanup_error).__name__}: {cleanup_error}'
+            status['exit_code'] = process.poll()
+            status['cleanup_confirmed'] = status['exit_code'] is not None
+            if not status['cleanup_confirmed']:
+                config['status'] = status['status'] + '_CLEANUP_UNCONFIRMED'
+        if status['status'] in ('FAILED', 'CANCELLED'):
+            try:
+                if status['cleanup_confirmed']:
+                    archiver.scan()
+                    archiver.scan()
+                archiver.write_inventory(status=config['status'])
+            except Exception as archive_error:
+                status['archive_error'] = f'{type(archive_error).__name__}: {archive_error}'
         status.update(elapsed_wall_s=time.monotonic() - started,
                       retained_budget_root_bytes=directory_bytes(root),
                       compressed_surface_count=len(archiver.surfaces))

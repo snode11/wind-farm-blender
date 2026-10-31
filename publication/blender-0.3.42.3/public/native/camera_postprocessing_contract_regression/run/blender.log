@@ -1,0 +1,18 @@
+00:03.300  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/camera_postprocessing_contract_regression/artifacts/camera-source.png'
+00:03.437  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/camera_postprocessing_contract_regression/artifacts/side-output/Unsaved.exr'
+00:03.438  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/camera_postprocessing_contract_regression/artifacts/compositor-control.png'
+00:03.457  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/camera_postprocessing_contract_regression/artifacts/vse-control.png'
+00:03.618  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/camera_postprocessing_contract_regression/artifacts/SCENE.png'
+00:03.696  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/camera_postprocessing_contract_regression/artifacts/WORKBENCH.png'
+00:04.234  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/camera_postprocessing_contract_regression/artifacts/paired/damaged-WFRL_Camera_T1_Custom_1.png'
+00:04.326  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/camera_postprocessing_contract_regression/artifacts/paired/damaged-WFRL_Camera_T1_Custom_2.png'
+00:04.409  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/camera_postprocessing_contract_regression/artifacts/paired/damaged-WFRL_Camera_T1_Custom_3.png'
+00:04.584  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/camera_postprocessing_contract_regression/artifacts/paired/healthy-WFRL_Camera_T1_Custom_1.png'
+00:04.662  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/camera_postprocessing_contract_regression/artifacts/paired/healthy-WFRL_Camera_T1_Custom_2.png'
+00:04.736  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/camera_postprocessing_contract_regression/artifacts/paired/healthy-WFRL_Camera_T1_Custom_3.png'
+Info: Saved as "source.blend"
+CAMERA_POSTPROCESSING_CONTRACT_PASS {"status": "PASS", "module_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py", "blender": "5.2.1 LTS", "checks": {"Down_SCENE": "camera pixels bypass VSE/compositor; source restored", "Down_WORKBENCH": "camera pixels bypass VSE/compositor; source restored", "NREL_paired_PNG": "six native camera images; damaged C1 agrees with direct raw camera render", "NREL_failure_restoration": true, "source_bytes_and_FileOutput_files_preserved": true}, "scope": "Native small PNG render pixels; no full video, daily installation or device capture"}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

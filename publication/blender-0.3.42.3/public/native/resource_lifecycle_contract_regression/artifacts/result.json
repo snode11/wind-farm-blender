@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "module_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "checks": {
+    "preset_copies_actual_shared_world_once": true,
+    "builder_preserves_other_scene_world_nodes": true,
+    "gw184_projection_3840_1920_320": [
+      {
+        "resolution": [
+          3840,
+          2160
+        ],
+        "result": "PASS: independent pinhole projection agrees with Blender within 0.005 px"
+      },
+      {
+        "resolution": [
+          1920,
+          1080
+        ],
+        "result": "PASS: independent pinhole projection agrees with Blender within 0.005 px"
+      },
+      {
+        "resolution": [
+          320,
+          180
+        ],
+        "result": "PASS: independent pinhole projection agrees with Blender within 0.005 px"
+      }
+    ],
+    "deleted_scene_object_curve_and_repeated_clearance_unload": true,
+    "real_error_propagates_after_following_cleanup_and_retry": true,
+    "native_file_load_drops_trail_references": true
+  }
+}

@@ -164,6 +164,9 @@ def _array(value, shape, label: str, nonnegative: bool = False) -> np.ndarray:
 def _config(data) -> model.TurbineConfig:
     if not isinstance(data, dict):
         raise ValueError('turbine must be an object')
+    unsupported = {'healthy_template', 'healthy_template_sha256'} & data.keys()
+    if unsupported:
+        raise ValueError(f'unsupported healthy loft model fields: {sorted(unsupported)}')
     values = model.TurbineConfig().to_dict()
     for key in values:
         if key not in data:

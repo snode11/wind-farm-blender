@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "pid": 3787,
+  "filepath": "/Users/eason/.codex/visualizations/2026/10/31/01a190f3-9b63-7c72-a34a-a48b6dd703a7/installation-recovery/user-scene-recovery.blend",
+  "is_dirty": true,
+  "addon_module": "bl_ext.user_default.wfrl_blender",
+  "addon_path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "manifest_version": "0.3.42+2",
+  "operator_rna": "WFRL_OT_x100_output",
+  "scene": "Scene",
+  "scene_frame": 1,
+  "scene_objects": 506,
+  "data_objects": 510,
+  "windows": [
+    {
+      "scene": "Scene",
+      "workspace": "WFRL Workspace",
+      "screen": "Layout",
+      "areas": [
+        "PROPERTIES",
+        "OUTLINER",
+        "DOPESHEET_EDITOR",
+        "CONSOLE"
+      ]
+    }
+  ],
+  "session_active": true,
+  "session_frame_present": true
+}

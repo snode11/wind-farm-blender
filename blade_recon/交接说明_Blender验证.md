@@ -13,7 +13,7 @@
 从算法目录调用现有环境和兼容查看入口：
 
 ```bash
-cd 'PROJECT_ROOT/blade_recon'
+cd '/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon'
 .venv-trial/bin/python -B evaluate.py \
   --recon out/trial-20261004/synth20/recon.json \
   --truth data/synth20/truth.json --skip 50

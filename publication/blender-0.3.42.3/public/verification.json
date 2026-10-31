@@ -1,0 +1,101 @@
+{
+  "status": "PASS_WITH_RECORDED_ENVIRONMENT_RECHECKS",
+  "version": "0.3.42.3",
+  "extension_version": "0.3.42+3",
+  "platform": "macOS",
+  "blender": "5.2.1 LTS",
+  "host": {
+    "unique_passed": 1699,
+    "skipped": 7,
+    "full_run": "checks/host.xml",
+    "dependency_recheck": "checks/host-dependencies.xml",
+    "environment": "Python 3.15.2; nested system-site-packages environments receive dependencies through isolated PYTHONUSERBASE",
+    "initial_environment_failures": 2
+  },
+  "numerical": {
+    "unique_passed": 425,
+    "full_run": "checks/numerical-separated.xml",
+    "studio_recheck": "checks/studio-confirmation.xml",
+    "environment": "Python 3.11.16, PyTorch 2.13.0, OpenCV 4.11.0, Qt offscreen",
+    "initial_timing_failures": 1,
+    "timing_note": "First Qt status-bar font initialization exceeded the 0.2-second timing check; all five Studio stop tests passed on isolated rerun.",
+    "collection_attempts": {
+      "missing_opencv": "Initial test environment lacked OpenCV; isolated environment supplied OpenCV 4.11.0.",
+      "combined_module_collision": "checks/numerical.xml; legacy reconstruction suites subsequently run separately"
+    }
+  },
+  "reconstruction": {
+    "passed": 7,
+    "history": "checks/recon-history.xml",
+    "shared_files": "checks/recon-shared.xml",
+    "module_isolation": "Legacy blade_recon and blade_recon0.2 tests run in separate processes to avoid top-level module name collisions."
+  },
+  "native_source": {
+    "status": "PASS",
+    "passed": 12,
+    "result": "native/result.json"
+  },
+  "isolated_package": {
+    "status": "PASS",
+    "result": "validated/package-validation.json",
+    "file_count": 216,
+    "repeated_build": "PASS_BYTE_IDENTICAL"
+  },
+  "junit_counts": {
+    "host-dependencies.xml": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "host.xml": {
+      "tests": 6674,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 7
+    },
+    "numerical-separated.xml": {
+      "tests": 446,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "numerical.xml": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 1,
+      "skipped": 0
+    },
+    "recon-history.xml": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "recon-shared.xml": {
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "studio-confirmation.xml": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "daily_installation_updated": false,
+  "daily_installation": "publication/daily-installation.json",
+  "remote_asset_download_verification": false,
+  "not_run": [
+    "visible UI and point-cloud-window GPU/RGB for this payload",
+    "physical mouse/keyboard",
+    "full video/FPS",
+    "long-term runtime/memory",
+    "other platforms",
+    "real X100",
+    "solver/MPI/training",
+    "scientific acceptance"
+  ]
+}

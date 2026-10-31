@@ -1,0 +1,7 @@
+{
+  "schema": "wfrl.blade_defects.v1",
+  "reference_geometry_id": "nrel5mw-display-reference",
+  "reference_geometry_sha256": "9efd814e6f7923b8d789bf3463e3c4e36638bcad864ad40077ac159be173ad3f",
+  "parameterization_version": "nrel-display-healthy-triangles-v1",
+  "defects": []
+}

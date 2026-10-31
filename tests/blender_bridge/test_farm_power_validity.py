@@ -67,6 +67,41 @@ def _round_trip(payload, kind="snapshot"):
     return message["payload"]
 
 
+@pytest.mark.parametrize("raw,expected", [
+    ({}, None), ({"power": None}, None), ({"power": []}, None),
+    ({"power": [True]}, None), ({"power": [2., 999.]}, None),
+    ({"power": [[2.]]}, None), ({"power": ["2"]}, None),
+    ({"power": [float('nan')]}, None), ({"power": [float('inf')]}, None),
+    ({"power": np.ma.array([2.], mask=[True])}, None),
+    ({"power": [0.]}, 0.), ({"power": 0}, 0.),
+    ({"power": np.array([2.], dtype=np.float32)}, 2.),
+])
+def test_raw_infos_remain_valid_or_invalid_through_driver_runtime_and_wire(raw, expected):
+    from wfrl.fastfarm_driver import FastFarmDriver
+    driver = FastFarmDriver.__new__(FastFarmDriver)
+    driver.n, driver.agents, driver._idx = 2, ['a', 'b'], {'a': 0, 'b': 1}
+    driver.env = SimpleNamespace(infos={'a': {'power': [3.]}, 'b': raw},
+        observe=lambda agent: {}, mdp=SimpleNamespace(ACTUATORS_RATE={}))
+    driver.controls, driver.yaw_duty_sliding = [], False
+    driver.done, driver._steps = False, 0
+    driver._raw_measure = lambda channel: None
+    driver._duty = lambda: {'a': {}, 'b': {}}
+    measure = driver._read(0.)
+    scene = _scene()
+    scene.sensors = [SensorSpec('power')]
+    runtime = SceneRuntime(scene)
+    frame = runtime._emit(measure)
+    payload = _round_trip(SnapshotAdapter(scene, 'power-test').encode(_snapshot(runtime, frame)))
+    reading = payload['turbines'][1]['channels']['power']
+    assert reading['value'] == expected
+    assert reading['validity'] == ('invalid' if expected is None else 'valid')
+    assert payload['farm']['power']['value'] == (None if expected is None else 3. + expected)
+    if expected is None:
+        assert np.isnan(frame['power'][1])
+    else:
+        assert frame['power'][1] == expected
+
+
 @pytest.mark.parametrize("measure", INVALID_MEASUREMENTS)
 def test_incomplete_farm_power_is_invalid_through_wire_protocol(measure):
     runtime = SceneRuntime(_scene())

@@ -147,7 +147,8 @@ def draw(layout, context):
         layout.operator('wfrl.x100_record', text='结束记录' if session.fanout else '开始记录')
         layout.label(text='仅记录实际采样帧；非完整 30 Hz 导出')
         if session.fanout:
-            layout.label(text='记录：' + session.fanout.recorder.state)
+            layout.label(text='记录：' + ('停止待确认，请重试结束记录' if session.recording_stopping
+                                       else session.fanout.recorder.state))
     error = scene.get('wfrl_x100_error')
     if error:
         box = layout.box()

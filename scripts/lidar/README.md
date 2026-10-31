@@ -14,6 +14,8 @@ TLS 候选使用显式 `postprocess_dual_beam.py --method hub-tls.v1`；未覆�
 
 残差与来源诊断使用 `diagnose_dual_beam_tls_residuals.py --package <TLS包> --baseline <旧法包> --output <新目录>`，对全部有效对进行评分后的方向/长度反事实分解、真实首交拓扑及表面偏移诊断，真值仅限诊断。`audit_dual_beam_observability.py --source <v3源包> --calibration <标定> --output <新目录>` 仅读取独立零载参考和固定标量，执行预声明解析 TEST 形状的首交/Jacobian/零空间探针，未验证形状先验时认证输出为 UNKNOWN。`verify_dual_beam_source_provenance.py --source <v3源包> --output <新目录>` 检查保存原始文件哈希、原始输出与侧车的一致性，缺失动态 VTP 单列证据缺口；可用 `--provenance-root <原路径结构的原始证据根目录>` 移机复核。三者均不启动求解器、不据此切换默认；[见残差与来源研究说明](../../docs/lidar/双束TLS候选实施与验证总报告.md)。
 
+父进程取消时，runner 在 `finally` 中对本次创建的子进程有界 terminate/wait，必要时 kill/wait；`KeyboardInterrupt` 继续传播，状态记为 `CANCELLED`。`cleanup_confirmed` 与退出码单独记录清理确认，未确认时保留 PID 和错误，配置标为 `*_CLEANUP_UNCONFIRMED`。该清理不操作无关进程。
+
 独立求解入口 `run_dual_beam_validation.py --output <新目录> --reference <独立零载参考>` **启动独立单机 OpenFAST 求解**，复制完整输入并保留所有动态 VTP 的无损 XZ、原字节哈希、退出状态和共享数据预算；只能在物理求解任务内使用。`export_dual_beam_validation_source.py <run> <reference> <新源目录> --start <s> --end <s>` 核对完整原始时钟和零载参考，将真实 40/80 Hz VTP 导出为源几何，保持原 2 mm / 5 mm 接口容差。它不生成旧 B2 测量，也不启动求解器。`compare_dual_beam_time_refinement.py` 严格核对两运行仅 DT/DT_Out/VTK_fps 不同，分开保留共同保存时刻、全部细网格新增时刻、未知与经过最低值；两级敏感性不等于数值收敛或性能验收。已执行的 12 m/s / 9 rpm 工程工况、[留存来源和复算入口见独立验证研究说明](../../docs/lidar/双束TLS候选实施与验证总报告.md)。独立验证工况属于研究证据；公开安装包内置原开发片段的旧法和 TLS 结果，独立验证工况不替换该内置源。
 
 当前布局为 S1/S2/S3 = 10°/12°/14°；S1 报警独立于双束有效性，旧 B2 回放仍可使用。40 Hz 保存记录不能替代设备原始采样或现场延迟验证。同一开发片段 400 对的旧法 / TLS MAE 分别为 4.268685 / 0.776096 m，两种方法仍为 REVIEW_ONLY / PENDING_ACCEPTANCE。[格式合同][(../../wfrl/lidar/REPLAY_FORMAT.md#dual-beam-review-v1)和发布范围](../../docs/blender/发布状态与验证范围.md)分别说明数据与交付状态。

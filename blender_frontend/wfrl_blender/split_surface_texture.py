@@ -17,6 +17,7 @@ INDEX = 'split_texture_index'
 DETAIL = 'split_texture_detail'
 OFFSET = (10000., 0., 0.)
 _SESSIONS = {}
+_PENDING_IMPORTS = {}
 POINTS = {
     'BRIGHT': ('亮斑', 59.3, .60),
     'HORIZONTAL': ('横细线', 57.0, .65),
@@ -47,9 +48,11 @@ def owned(scene):
     return [obj for obj in scene.objects if obj.name.startswith(PREFIX)]
 
 
-def _embed(scene, key, raw):
+def _embed(scene, key, raw, *, register=None):
     import bpy
     text = bpy.data.texts.new(PREFIX + scene.name + '.' + key)
+    if register is not None:
+        register('texts', text, owned_fake_user=True)
     text.write(raw)
     text.use_fake_user = True
     text['split_texture_owned'] = True
@@ -109,11 +112,11 @@ def _restore(scene):
     return value
 
 
-def _activate(scene, value, *, new=False):
+def _activate(scene, value, *, new=False, register=None):
     from . import split_texture_settings as settings
     def commit():
         import bpy
-        apply(scene, value=value)
+        apply(scene, value=value, register=register)
         if new and bpy.context.scene == scene:
             bpy.context.view_layer.update()
         return value
@@ -126,6 +129,13 @@ def ensure(scene):
     import numpy as np
     from . import blade_recon_review as review
     from .blade_recon_data import ReconSequence, TexturePackage, detail_recon_path, detail_texture_path
+    from .split_mappo_texture import _ImportResources
+    pending = _PENDING_IMPORTS.get(scene.as_pointer())
+    if pending is not None:
+        errors = pending.rollback() if pending.belongs_to(scene) else []
+        if errors:
+            raise RuntimeError('合成纹理资源回收未确认，请重试') from errors[0]
+        _PENDING_IMPORTS.pop(scene.as_pointer(), None)
     if scene.get(MARKER):
         value = _SESSIONS.get(scene.as_pointer()) or _restore(scene)
         return _activate(scene, value)
@@ -140,11 +150,24 @@ def ensure(scene):
         low, high = np.minimum(low, xyz.min(axis=1)), np.maximum(high, xyz.max(axis=1))
     faces = sequence.rotor.tpl.faces()
     allocated = []
+    resources = _ImportResources(scene)
+    from . import split_texture_settings as settings
+    display = settings.capture(scene)
+    def plain(value):
+        if hasattr(value, 'to_dict'):
+            return {key: plain(item) for key, item in value.to_dict().items()}
+        if hasattr(value, 'to_list'):
+            return value.to_list()
+        return value
+    def properties():
+        return {key: plain(scene[key]) for key in scene.keys()
+                if key.startswith('split_texture_') or key == 'blade_recon_inspection_scope'}
+    saved = properties()
     try:
         for index in range(3):
             material = review._texture_material(PREFIX + f'Material.B{index+1}',
-                                               textures.images[index], textures.data['atlas'])
-            obj = review._mesh(scene, PREFIX + f'B{index+1}', vertices[index].reshape(-1, 3), faces, material)
+                                               textures.images[index], textures.data['atlas'], register=resources.register)
+            obj = review._mesh(scene, PREFIX + f'B{index+1}', vertices[index].reshape(-1, 3), faces, material, register=resources.register)
             allocated.append(obj)
             obj.location = OFFSET
             obj['split_texture_owned'] = True
@@ -153,13 +176,13 @@ def ensure(scene):
             obj.data.color_attributes.new(name='evidence', type='FLOAT_COLOR', domain='POINT')
             review._add_uv(obj, sequence.rotor, faces)
         target = np.array(OFFSET) + sequence.rotor.hub
-        cam = review._camera(scene, CAMERA, target + (300., 0., 0.), target)
+        cam = review._camera(scene, CAMERA, target + (300., 0., 0.), target, register=resources.register)
         allocated.append(cam)
         cam['split_texture_owned'] = True
         cam.data.type = 'ORTHO'
         cam.data.ortho_scale = sequence.rotor.cfg.tip_radius_m * 2.35
-        _embed(scene, 'recon', raw)
-        _embed(scene, 'texture', json.dumps(textures.manifest, ensure_ascii=False, sort_keys=True))
+        _embed(scene, 'recon', raw, register=resources.register)
+        _embed(scene, 'texture', json.dumps(textures.manifest, ensure_ascii=False, sort_keys=True), register=resources.register)
         scene['split_texture_source_label'] = sequence.source_label
         scene['split_texture_blade_names'] = [obj.name for obj in allocated[:3]]
         scene['split_texture_camera_name'] = cam.name
@@ -176,16 +199,22 @@ def ensure(scene):
         scene[MARKER] = True
         value = dict(sequence=sequence, blades=allocated[:3], index=None)
         _SESSIONS[scene.as_pointer()] = value
-        return _activate(scene, value, new=True)
-    except Exception:
-        for obj in allocated:
-            bpy.data.objects.remove(obj, do_unlink=True)
-        scene.pop(MARKER, None)
+        return _activate(scene, value, new=True, register=resources.register)
+    except Exception as error:
+        settings._write(scene, display)
+        for key in properties().keys() - saved.keys():
+            scene.pop(key, None)
+        for key, value in saved.items():
+            scene[key] = value
+        errors = resources.rollback()
+        if errors:
+            _PENDING_IMPORTS[scene.as_pointer()] = resources
+            error.add_note('合成纹理资源回收未确认；下次导入重试：' + str(errors[0]))
         _SESSIONS.pop(scene.as_pointer(), None)
         raise
 
 
-def apply(scene, *, value=None):
+def apply(scene, *, value=None, register=None):
     import numpy as np
     from . import blade_recon_review as review, blade_recon_inspection as inspection
     value = value or _SESSIONS.get(scene.as_pointer()) or _restore(scene)
@@ -202,7 +231,7 @@ def apply(scene, *, value=None):
             obj.data.color_attributes['evidence'].data.foreach_set('color', colors.astype(np.float32).reshape(-1))
             obj.data.update()
         value['index'] = index
-    inspection.update(scene, value['blades'], sequence.rotor)
+    inspection.update(scene, value['blades'], sequence.rotor, register=register)
     return value
 
 
@@ -253,3 +282,6 @@ def focus(context, area, point=None):
 
 def clear_runtime():
     _SESSIONS.clear()
+    for key, resources in list(_PENDING_IMPORTS.items()):
+        if not resources.rollback():
+            _PENDING_IMPORTS.pop(key, None)

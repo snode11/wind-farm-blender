@@ -47,6 +47,8 @@ def run(job_path):
         for name, settings in job.get('render_settings', {}).items():
             target = scene.render.image_settings if name == 'image_settings' else getattr(scene, name)
             for key, value in settings.items():
+                if name == 'image_settings' and key == 'color_depth':
+                    value = service.png_color_depth(value)
                 setattr(target, key, value)
         scene.frame_start, scene.frame_end, scene.frame_step = (
             job['frame_start'], job['frame_end'], job['frame_step'])

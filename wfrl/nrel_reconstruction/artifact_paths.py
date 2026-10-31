@@ -36,12 +36,14 @@ REVIEW_FILES = {
 
 
 def repository_root(start: str | os.PathLike | None = None) -> Path:
-    """Find the enclosing checkout without relying on a script's depth."""
+    """Find an enclosing checkout or source archive containing project tools."""
     candidate = Path(start if start is not None else __file__).resolve()
     if candidate.is_file():
         candidate = candidate.parent
     for parent in (candidate, *candidate.parents):
-        if (parent / ".git").exists() and (parent / "wfrl").is_dir():
+        if ((parent / "wfrl").is_dir()
+                and ((parent / ".git").exists()
+                     or ((parent / "pyproject.toml").is_file() and (parent / "scripts").is_dir()))):
             return parent
     raise FileNotFoundError(f"Cannot find WFRL repository above {candidate}")
 

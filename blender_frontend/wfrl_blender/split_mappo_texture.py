@@ -69,14 +69,14 @@ class _ImportResources:
         except ReferenceError:
             scene, allowed = None, set()
         errors = []
-        for kind in ('objects', 'meshes', 'cameras', 'shape_keys', 'materials', 'node_groups', 'images', 'actions', 'texts'):
+        for kind in ('objects', 'meshes', 'cameras', 'shape_keys', 'materials', 'node_groups', 'images', 'actions', 'texts', 'worlds'):
             for pointer, (group, block, owned_fake_user) in reversed(list(self.records.items())):
                 if group != kind:
                     continue
                 try:
                     if kind == 'objects':
                         if (block.use_fake_user or any(owner != scene for owner in block.users_scene)
-                                or any(user.as_pointer() not in allowed for user in
+                                or any(user != block and user.as_pointer() not in allowed for user in
                                        bpy.data.user_map(subset={block}).get(block, ()))):
                             continue
                         bpy.data.objects.remove(block, do_unlink=True)

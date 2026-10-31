@@ -60,6 +60,22 @@ class Regression:
 
 
 REGRESSIONS = (
+    Regression('synthetic_texture_rollback_regression.py', 'SYNTHETIC_TEXTURE_ROLLBACK_PASS', 'result.json',
+               package='synthetic', scope='Native synthetic/surface allocation rollback, packed RGB and retryable resource ownership.'),
+    Regression('resource_lifecycle_contract_regression.py', 'RESOURCE_LIFECYCLE_CONTRACT_PASS', 'result.json',
+               scope='Shared Worlds, deleted RNA cleanup, native load and GW184 multi-resolution projection.'),
+    Regression('defect_commit_cleanup_regression.py', 'DEFECT_COMMIT_CLEANUP_PASS', 'result.json', timeout_s=300,
+               scope='Native NREL/GW184 editor commit, restore, undo/redo and retryable disposal.'),
+    Regression('camera_postprocessing_contract_regression.py', 'CAMERA_POSTPROCESSING_CONTRACT_PASS', 'result.json',
+               scope='Small native camera PNG pixels, VSE/compositor/FileOutput isolation and restoration.'),
+    Regression('radar_recording_stop_regression.py', 'RADAR_RECORDING_STOP_PASS', 'result.json',
+               scope='Real local recorder join timeout, retained ownership, unload and retry; no hardware.'),
+    Regression('nrel_editor_resource_regression.py', 'NREL_EDITOR_RESOURCE_PASS', 'checks.json',
+               scope='Native helper deletion, normal editor detach and retryable resource cleanup.'),
+    Regression('manual_down_copy_regression.py', 'MANUAL_DOWN_COPY_PASS', 'checks.json',
+               scope='Manual Down camera ownership in independent scene copies and native saved files.'),
+    Regression('model_environment_integration.py', 'MODEL_ENVIRONMENT_INTEGRATION_PASS', 'checks.json', timeout_s=300,
+               scope='Model and World isolation across manual scenes, replay, export copies and native saved files.'),
     Regression('camera_failure_recovery_regression.py', 'CAMERA_FAILURE_RECOVERY_PASS', 'result.json',
                package='synthetic'),
     Regression('custom_camera_retirement_regression.py', 'CUSTOM_CAMERA_RETIREMENT',

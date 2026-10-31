@@ -145,7 +145,7 @@ class ChannelPanel(QtWidgets.QWidget):
             wl.setContentsMargins(0, 0, 0, 0)
             self.table.setCellWidget(r, 2, w)
         self.hint.setText(
-            "取消订阅 = 该传感器**停止采样**（省下 lidar 视线插值、camera 离屏"
+            "取消订阅 = 该传感器**停止采样**（省下 lidar 合成采样、camera 离屏"
             "渲染等真实计算），不只是不画。")
 
 
@@ -850,6 +850,12 @@ class StudioWindow(QtWidgets.QMainWindow):
                  tick_ms: int = 120, render_ms: int = 33, wake: bool = True):
         super().__init__()
         self.scene = scene
+        self._stopping = False
+        self._stop_error = None
+        self._close_pending = False
+        self._stop_timer = QtCore.QTimer(self)
+        self._stop_timer.setInterval(50)
+        self._stop_timer.timeout.connect(self._poll_stop)
         self.setWindowTitle(
             f"WFRL Studio — {scene.name}  [{scene.backend} · "
             f"{scene.n} 台 · {'湍流盒' if scene.turbulence else '均匀来流'}]")
@@ -1188,6 +1194,11 @@ class StudioWindow(QtWidgets.QMainWindow):
 
     # ---- 按钮 ----------------------------------------------------------
     def _start(self):
+        if self._stopping or self.trainer.running or self.trainer.runtime is not None:
+            return
+        self._stop_error = None
+        self._close_pending = False
+        self.trainer.error = None
         self.trainer.start()
         self.train_panel.set_running(True)
         self.statusBar().showMessage("启动 FAST.Farm（spawn 约 25 s）…")
@@ -1198,13 +1209,31 @@ class StudioWindow(QtWidgets.QMainWindow):
         self.train_panel.btn_pause.setText("▶ 继续" if self._paused else "⏸ 暂停")
 
     def _stop(self):
-        # stop() 要等 driver 排空迭代预算（几十秒），压在按钮回调里界面会假死。
-        # 先把定时器停掉再等，避免这期间还去读一个正在收尾的 runtime。
+        if self._stopping:
+            return
+        self._stopping = True
+        self._stop_started = time.monotonic()
         self.statusBar().showMessage("停止中：排空 FAST.Farm 迭代预算…")
-        QtWidgets.QApplication.processEvents()
-        self.trainer.stop()
-        self.train_panel.set_running(False)
-        self.statusBar().showMessage("已停止")
+        self.trainer.stop(timeout=0)
+        self._stop_timer.start()
+
+    def _poll_stop(self):
+        if self.trainer.running:
+            if time.monotonic() - self._stop_started >= 120:
+                self.statusBar().showMessage("停止未确认：工作线程仍在收尾")
+            return
+        if self._stopping:
+            self.trainer.stop(timeout=0)
+            self._stopping = False
+            self._stop_error = (self.trainer.error or '后端资源仍由 Trainer 持有') if self.trainer.runtime is not None else None
+            self.train_panel.set_running(False)
+            self.train_panel.btn_start.setEnabled(not bool(self._stop_error))
+            self.statusBar().showMessage("停止未确认：" + str(self._stop_error) if self._stop_error
+                                        else ("已停止（训练异常，见控制台）" if self.trainer.error else "已停止"))
+        if self._close_pending and not self._stop_error:
+            self.close()
+        elif not self._stopping:
+            self._stop_timer.stop()
 
     def _toggle_channel(self, topic, on):
         rt = self.trainer.runtime
@@ -1217,6 +1246,8 @@ class StudioWindow(QtWidgets.QMainWindow):
     # ---- 定时器 --------------------------------------------------------
     def _tick(self):
         """控制步节奏：取快照 → 面板 + 机组位姿。不做渲染。"""
+        if self._stopping or self._stop_error:
+            return
         tr = self.trainer
         snap = tr.latest()
         if snap is None:
@@ -1262,10 +1293,25 @@ class StudioWindow(QtWidgets.QMainWindow):
             self.plotter.interactor.repaint()
 
     def closeEvent(self, ev):
+        self._close_pending = True
+        if self.trainer.running or self._stopping:
+            self._stop()
+            ev.ignore()
+            return
+        if self.trainer.runtime is not None:
+            self._stop_error = self.trainer.error or '后端资源仍由 Trainer 持有'
+            self.statusBar().showMessage('停止未确认：' + str(self._stop_error))
+            ev.ignore()
+            return
+        if not self.view.close(timeout=0):
+            self._stop_timer.start()
+            self.statusBar().showMessage("停止中：等待显示求解线程退出…")
+            ev.ignore()
+            return
+        self._stop_timer.stop()
         self.timer.stop()
         self.rtimer.stop()
-        self.view.close()
-        self.trainer.stop()
+        self.trainer.stop(timeout=0)
         super().closeEvent(ev)
 
 

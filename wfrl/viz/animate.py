@@ -245,6 +245,11 @@ def _pick(arr, i):
     return None if not np.isfinite(x) else x
 
 
+def measurement_pitch_to_geometry(pitch_deg):
+    """Convert positive measured feather pitch to the blade-local rotation."""
+    return -float(pitch_deg)
+
+
 def update_turbine(turb, yaw_deg, spin_deg, pitch_deg=0.0,
                    m_flap=None, m_edge=None, flex_scale=1.0):
     """塔筒不动；机舱随 yaw；叶片再叠方位角自转与桨距，并按弯矩柔性变形。
@@ -262,10 +267,8 @@ def update_turbine(turb, yaw_deg, spin_deg, pitch_deg=0.0,
         turb["rotor"].user_matrix = M_yaw @ M_spin
         return
 
-    # 顺桨方向：+pitch 让叶片前缘转向上风向（feather）。原来 +_rot_z(pitch) 把
-    # 前缘转向了下风向 —— 90° 全顺桨时看着是反的。绕展向轴取负号即纠正。
-    # 变形/扫塔净空用同一个角度，一起取负保持自洽。
-    pitch_use = -float(pitch_deg)
+    # 正测量桨距表示顺桨；显示矩阵、柔性求解与净空使用同一局部旋转角。
+    pitch_use = measurement_pitch_to_geometry(pitch_deg)
     if m_flap is not None or m_edge is not None:
         deform_blades(turb, m_flap, m_edge, scale=flex_scale,
                       pitch_deg=pitch_use)

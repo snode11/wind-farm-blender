@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "phase": "run",
+  "reasons": [],
+  "returncode": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "duration_s": 5.686337500112131,
+  "source_changed": false,
+  "execution": {
+    "status": "PASS",
+    "final": true,
+    "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/camera_postprocessing_contract_regression.py",
+    "background": true,
+    "blender": "5.2.1 LTS",
+    "startup_dirty": false,
+    "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+    "returned_normally": true,
+    "post_script_dirty": false
+  },
+  "script_result": {
+    "status": "PASS",
+    "module_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+    "blender": "5.2.1 LTS",
+    "checks": {
+      "Down_SCENE": "camera pixels bypass VSE/compositor; source restored",
+      "Down_WORKBENCH": "camera pixels bypass VSE/compositor; source restored",
+      "NREL_paired_PNG": "six native camera images; damaged C1 agrees with direct raw camera render",
+      "NREL_failure_restoration": true,
+      "source_bytes_and_FileOutput_files_preserved": true
+    },
+    "scope": "Native small PNG render pixels; no full video, daily installation or device capture"
+  },
+  "log": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/camera_postprocessing_contract_regression/run/blender.log",
+  "report": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/camera_postprocessing_contract_regression/artifacts/result.json"
+}

@@ -6,7 +6,7 @@
 
 | 功能 | 主要模块／仓库入口 | 专题 |
 | --- | --- | --- |
-| Down 视频与后台作业 | `manual_down.py`、`manual_video*.py`；仓库 `scripts/blender/manage_manual_video.py`、`wfrl/camera_video/` | [视频操作与依赖](../../../../docs/blender/风机手动控制.md#导出变桨视频) |
+| Down 视频与后台作业 | `manual_down.py`、`manual_video*.py`；仓库 `scripts/blender/manage_manual_video.py`、`wfrl/camera_video/` | [视频操作与依赖](../../../../docs/blender/手动场景研究接口.md#导出变桨视频) |
 | 普通 PNG 后台动画 | `animation_render.py`、`animation_render_ui.py`、`animation_render_worker.py` | [实现与边界](../../../../blender_frontend/README.md#52-统一侧栏与固定时间轴)、[验证入口](verification.md) |
 
 ## 普通 PNG 动画

@@ -495,7 +495,8 @@ def _configure_environment(collection, scene=None):
     bpy = _bpy()
     from mathutils import Vector
 
-    world = bpy.context.scene.world or bpy.data.worlds.new("WFRL.World")
+    from .atmosphere import private_world
+    world = private_world(bpy.context.scene) or bpy.data.worlds.new("WFRL.World")
     bpy.context.scene.world = world
     world.use_nodes = True
     background = next((item for item in world.node_tree.nodes if item.type == "BACKGROUND"), None)

@@ -37,7 +37,18 @@ OBS_KEYS = ["yaw", "wind_speed", "wind_direction"]
 def FastFarmDriver(*args, **kwargs):
     """Load the physics dependency only when a real sampler is constructed."""
     from wfrl.fastfarm_driver import FastFarmDriver as driver_type
-    return driver_type(*args, **kwargs)
+    driver = driver_type.__new__(driver_type)
+    driver.case_dir = None
+    try:
+        driver.__init__(*args, **kwargs)
+    except BaseException as exc:
+        try:
+            driver.close(strict=True, purge=True)
+        except BaseException as cleanup_error:
+            cleanup_error.driver = driver
+            raise cleanup_error from exc
+        raise
+    return driver
 
 
 # ---------------------------------------------------------------------------
@@ -104,11 +115,22 @@ class FastFarmSampler:
         self.episode = int(start_episode) - 1
         self.n_spawns = 0
         self.drv = None
-        self._spawn()
-        self.obs_dim = len(self.obs_keys) + (1 if self.obs_duty else 0)
-        self.act_dim = 1
-        self.act_low, self.act_high = self.drv.act_low, self.drv.act_high
-        self.state_dim = self.n * self.obs_dim
+        try:
+            self._spawn()
+            self.obs_dim = len(self.obs_keys) + (1 if self.obs_duty else 0)
+            self.act_dim = 1
+            self.act_low, self.act_high = self.drv.act_low, self.drv.act_high
+            self.state_dim = self.n * self.obs_dim
+        except BaseException as exc:
+            self._cleanup_failed_spawn(exc)
+            raise
+
+    def _cleanup_failed_spawn(self, cause):
+        try:
+            self._close_driver()
+        except BaseException as cleanup_error:
+            cleanup_error.sampler = self
+            raise cleanup_error from cause
 
     # ------------------------------------------------------------------
     def _pack(self, m):
@@ -192,7 +214,11 @@ class FastFarmSampler:
         self._close_driver()
         if state is not None:
             restore_shaper(self.shaper, state, validate=False)
-        return self._spawn()
+        try:
+            return self._spawn()
+        except BaseException as exc:
+            self._cleanup_failed_spawn(exc)
+            raise
 
     def close(self):
         self._close_driver()
@@ -200,10 +226,11 @@ class FastFarmSampler:
     def _close_driver(self):
         # scene 模式经 SceneRuntime.close（它会 purge 算例目录）；否则直接关 driver
         if getattr(self, "_rt", None) is not None:
-            self._rt.close(purge=self.purge)
+            self._rt.close(purge=self.purge, strict=True)
             self._rt = None
         elif self.drv is not None:
-            self.drv.close(purge=self.purge)
+            self.drv.close(purge=self.purge, strict=True)
+        self.drv = None
 
 
 # ---------------------------------------------------------------------------
@@ -240,8 +267,8 @@ def experiment_config(env_id, iters, n_steps, **kwargs):
     speed = config.pop("wind_speed")
     config["wind_sched"] = (config["wind_sched"] or
                             (f"pin:{speed:g}" if speed is not None else "none")).strip()
-    # FAST.Farm ignores direction; the effective value is explicit in provenance.
-    config["wind_direction"] = None
+    if "floris" not in env_id.lower():
+        config["wind_direction"] = None
     head, _, argument = config["wind_sched"].partition(":")
     head = head.lower()
     if head == "pin":
@@ -256,12 +283,25 @@ def experiment_config(env_id, iters, n_steps, **kwargs):
         from wfrl.scene.schema import load_scene
         config["scene"] = load_scene(config["scene"]).to_dict()
         config["wind_sched"] = "scene"
+        config["wind_direction"] = None
     for key in ("iters", "n_steps", "n_epochs", "mb_steps"):
         if config[key] <= 0:
             raise ValueError(f"{key} must be positive")
     if config["episode_steps"] < 0 or config["warmup_steps"] < 0:
         raise ValueError("episode_steps and warmup_steps must be nonnegative")
     return canonical(config)
+
+
+def training_wind_schedule(config):
+    """Use the same backend and explicit direction as experiment identity."""
+    if config["scene"] is not None:
+        return lambda episode: (None, None)
+    backend = "floris" if "floris" in config["env_id"].lower() else "fastfarm"
+    schedule = windcond.make_wind_schedule(config["wind_sched"], seed=config["seed"], backend=backend)
+    direction = config["wind_direction"]
+    if direction is None:
+        return schedule
+    return lambda episode: (schedule(episode)[0], direction)
 
 
 def source_input_identity(scene=None):
@@ -382,23 +422,23 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
     total_steps = iters * n_steps
 
     # 来流调度由归一化后的有效配置定义。
-    schedule = (windcond.make_wind_schedule(wind_sched, seed=seed) if scene is None
-                else lambda episode: (None, None))
+    schedule = training_wind_schedule(config)
     shaper = make_shaper(reward, reference=reward_ref, alpha=reward_alpha)
     if recovery is not None:
         restore_shaper(shaper, recovery["reward_shaper"])
         restore_rng(recovery["rng"])
 
-    smp = FastFarmSampler(env_id, episode_steps=episode_steps,
-                          warmup_steps=warmup_steps,
-                          total_steps=(iters - ckpt["iteration"]) * n_steps if ckpt else total_steps,
-                          load_coef=load_coef, reward_shaper=shaper,
-                          wind_schedule=schedule, purge=purge,
-                          obs_duty=obs_duty, duty_penalty=duty_penalty,
-                          scene_path=scene, progress=progress,
-                          start_episode=recovery["next_episode"] if recovery else 0)
+    smp = None
     sampler_closed = False
     try:
+        smp = FastFarmSampler(env_id, episode_steps=episode_steps,
+                              warmup_steps=warmup_steps,
+                              total_steps=(iters - ckpt["iteration"]) * n_steps if ckpt else total_steps,
+                              load_coef=load_coef, reward_shaper=shaper,
+                              wind_schedule=schedule, purge=purge,
+                              obs_duty=obs_duty, duty_penalty=duty_penalty,
+                              scene_path=scene, progress=progress,
+                              start_episode=recovery["next_episode"] if recovery else 0)
         n = smp.n
         bounds = {"yaw": (smp.act_low, smp.act_high)}
         if action_contract is None:
@@ -570,7 +610,8 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
                     new_logp = dist.log_prob(act_t).sum(-1)      # (T,n)
                     ratio = (new_logp - logp_t).exp()
                     A = adv_t.unsqueeze(-1).expand_as(ratio)
-                    A = (A - A.mean()) / (A.std() + 1e-8)
+                    std = A.std() if A.numel() > 1 else A.new_zeros(())
+                    A = (A - A.mean()) / (std + 1e-8)
                     pg = -torch.min(ratio * A,
                                     torch.clamp(ratio, 1 - clip, 1 + clip) * A).mean()
                     ent = dist.entropy().sum(-1).mean()
@@ -592,7 +633,8 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
                         new_logp = dist.log_prob(act_t[mb]).sum(-1)
                         ratio = (new_logp - logp_t[mb]).exp()
                         A = adv_t[mb].unsqueeze(-1).expand_as(ratio)
-                        A = (A - A.mean()) / (A.std() + 1e-8)
+                        std = A.std() if A.numel() > 1 else A.new_zeros(())
+                        A = (A - A.mean()) / (std + 1e-8)
                         pg = -torch.min(ratio * A,
                                         torch.clamp(ratio, 1 - clip, 1 + clip) * A).mean()
                         ent = dist.entropy().sum(-1).mean()
@@ -660,10 +702,12 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
             progress.progress("done", iters)
         return hist
     finally:
-        if not sampler_closed:
-            smp.close()
-        if progress is not None:
-            progress.close()
+        try:
+            if smp is not None and not sampler_closed:
+                smp.close()
+        finally:
+            if progress is not None:
+                progress.close()
 
 
 def _dump_hist(hist, env_id, tag):

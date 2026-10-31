@@ -656,6 +656,7 @@ def _drop_scene(scene):
 def _configure_video(scene, camera, fps, frames, engine, filepath, *, size=VIDEO_SIZE, samples=None):
     render = scene.render
     scene.camera = camera
+    render.use_compositing = render.use_sequencer = False
     if engine == 'WORKBENCH':
         render.engine = 'BLENDER_WORKBENCH'
     if engine == 'SCENE':
@@ -667,7 +668,6 @@ def _configure_video(scene, camera, fps, frames, engine, filepath, *, size=VIDEO
         # export uses the plain sRGB transform without dithering or compositing.
         scene.view_settings.view_transform, scene.view_settings.look = 'Standard', 'None'
         render.dither_intensity = 0
-        render.use_compositing = render.use_sequencer = False
         scene.eevee.taa_samples = 1
         scene.display.render_aa = 'FXAA'
     render.resolution_x, render.resolution_y = size

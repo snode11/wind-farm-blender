@@ -1,0 +1,21 @@
+test_capture_blocks_installation_and_removal (__main__.RadarEdges.test_capture_blocks_installation_and_removal) ... ok
+test_capture_temporary_times_do_not_enter_geometry_observations (__main__.RadarEdges.test_capture_temporary_times_do_not_enter_geometry_observations) ... ok
+test_fov_preserves_view_layer_choices_between_updates_and_toggles (__main__.RadarEdges.test_fov_preserves_view_layer_choices_between_updates_and_toggles) ... ok
+test_index_step_visits_frames_with_equal_presentation_times (__main__.RadarEdges.test_index_step_visits_frames_with_equal_presentation_times) ... ok
+test_live_receiver_continues_during_camera_capture (__main__.RadarEdges.test_live_receiver_continues_during_camera_capture) ... ok
+test_native_mount_edit_clears_observation_without_resetting_pose (__main__.RadarEdges.test_native_mount_edit_clears_observation_without_resetting_pose) ... ok
+test_native_root_edit_clears_observation_without_overwriting_edit (__main__.RadarEdges.test_native_root_edit_clears_observation_without_overwriting_edit) ... ok
+test_paused_source_rebind_clears_observation (__main__.RadarEdges.test_paused_source_rebind_clears_observation) ... ok
+test_recolor_uses_current_observation_without_resampling (__main__.RadarEdges.test_recolor_uses_current_observation_without_resampling) ... ok
+test_restoring_valid_source_clears_stale_diagnostic (__main__.RadarEdges.test_restoring_valid_source_clears_stale_diagnostic) ... ok
+test_shared_objects_are_unlinked_only_from_closing_scene (__main__.RadarEdges.test_shared_objects_are_unlinked_only_from_closing_scene) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.706s
+
+OK
+X100_EDGES_PASS
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

@@ -99,6 +99,9 @@ def editor_runtime(monkeypatch):
     session = namespace['EditorSession'].__new__(namespace['EditorSession'])
 
     class Store:
+        def retry_disposals(self, *, strict=False):
+            return True
+
         @property
         def document(self):
             return deepcopy({'defects': [{'id': 'existing'}]})

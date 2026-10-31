@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "tests": 11,
+  "failures": 0,
+  "errors": 0,
+  "addon_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+  "core_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/radar_x100/schema.py"
+}

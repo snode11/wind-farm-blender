@@ -48,6 +48,7 @@ scene.render.fps = 24
 scene.view_settings.exposure = 1.25
 scene.render.image_settings.file_format = 'OPEN_EXR'
 scene.render.image_settings.color_depth = '32'
+scene['wfrl_scene_kind'] = 'manual'
 scene.frame_start, scene.frame_end, scene.frame_step = 2, 6, 2
 scene.frame_set(4)
 source = (bpy.data.filepath, scene.frame_current, scene.frame_subframe, scene.camera,
@@ -71,6 +72,22 @@ for row in manifest['frames']:
     pixels = (directory / row['file']).read_bytes()
     assert pixels.startswith(b'\x89PNG\r\n\x1a\n')
     assert pixels[24] == 16
+
+# A stored job may retain a higher-precision source depth at the worker boundary.
+from unittest.mock import patch
+settings = ui._render_settings(scene)
+settings['image_settings']['color_depth'] = '32'
+scene.frame_start = scene.frame_end = 4
+with patch.object(ui, '_render_settings', return_value=settings):
+    legacy_depth = ui.start(bpy.context, output)
+deadline = time.monotonic() + 90
+while service.job.active and time.monotonic() < deadline:
+    ui._poll()
+    time.sleep(.1)
+assert service.job.state == 'COMPLETE', (service.job.state, service.job.error)
+legacy_manifest = json.loads((legacy_depth / 'manifest.json').read_text())
+assert (legacy_depth / legacy_manifest['frames'][0]['file']).read_bytes()[24] == 16
+scene.pop('wfrl_scene_kind')
 
 scene.frame_start, scene.frame_end, scene.frame_step = 1, 500, 1
 cancelled = ui.start(bpy.context, output)

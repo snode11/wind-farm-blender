@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "configuration_files_preserved": 6,
+  "addon_preference_fields_preserved": 11,
+  "preferences_digest": "efb977eb717288635218bb981502217457d376b41b49fb2a3dbf91ec06a97be5",
+  "files": {
+    "recent-files.txt": {
+      "sha256": "7d929bccbc3e5ed3e078e0661a82103ea767325c62f8ea64ca2f747270a08f01",
+      "bytes": 3371
+    },
+    "platform_support.txt": {
+      "sha256": "4dbce3526384ef82878d01e1d704b953f67248b1f3354282fc9ae6285b750426",
+      "bytes": 39
+    },
+    "startup.blend": {
+      "sha256": "064d7a57df06e1b35e543e3e85ab87df108a07969790c0aea87c9b7c2e6b1a46",
+      "bytes": 512317
+    },
+    "userpref.blend": {
+      "sha256": "e06ff65baae263c0c4c7b231b78fa0265ab0eaf6e9eb3121f9410cd664beaf51",
+      "bytes": 182219
+    },
+    "bookmarks.txt": {
+      "sha256": "6c0eaa3807004f17929904ddd775b51c4974d317409a9c59ede492db01abd752",
+      "bytes": 700
+    },
+    "recent-searches.txt": {
+      "sha256": "f57d26a947e656261b1cdd0d41c3782993828f18bc8d3c4063f6b1e4ed0d2057",
+      "bytes": 93
+    }
+  }
+}

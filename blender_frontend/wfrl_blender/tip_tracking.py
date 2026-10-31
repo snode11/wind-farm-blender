@@ -180,19 +180,36 @@ class TipTrail:
         self._set_visible(True)
 
     def _set_visible(self, visible):
+        try:
+            layers = getattr(self.scene, 'view_layers', None)
+            layers = list(layers) if layers is not None else [None]
+        except ReferenceError:
+            layers = []
         for obj in self.objects.values():
-            obj.hide_set(not visible)
-            obj.hide_render = not visible
+            try:
+                for layer in layers:
+                    if layer is None:
+                        obj.hide_set(not visible)
+                    elif obj.name in layer.objects:
+                        obj.hide_set(not visible, view_layer=layer)
+                obj.hide_render = not visible
+            except ReferenceError:
+                pass
 
     def _clear_curve(self, obj):
-        obj.data.splines.clear()
+        data = obj.data
+        if data is not None:
+            data.splines.clear()
 
     def clear(self, reason='manual'):
         for bid, obj in self.objects.items():
             self.points[bid].clear()
             self.times[bid].clear()
             self.completed[bid].clear()
-            self._clear_curve(obj)
+            try:
+                self._clear_curve(obj)
+            except ReferenceError:
+                pass
             self._geometry_revision[bid] = 0
             self._drawn[bid] = None
         self.last_frame = None
@@ -200,13 +217,19 @@ class TipTrail:
         self.last_angle = None
         self.turn_angle = 0.0
         self.compare_since = None
-        self.scene['wfrl_tip_trail_clear_reason'] = str(reason)
+        try:
+            self.scene['wfrl_tip_trail_clear_reason'] = str(reason)
+        except ReferenceError:
+            pass
 
     def disable(self, reason='disabled'):
         self.enabled = False
         self.clear(reason)
         self._set_visible(False)
-        self.scene['wfrl_tip_trail_enabled'] = False
+        try:
+            self.scene['wfrl_tip_trail_enabled'] = False
+        except ReferenceError:
+            pass
 
     def enable(self):
         if self.enabled:
@@ -400,10 +423,18 @@ def register():
 
 def unregister():
     import bpy
+    errors = []
     for trail in list(_ACTIVE.values()):
-        trail.disable('addon_unload')
+        try:
+            trail.disable('addon_unload')
+        except ReferenceError:
+            pass
+        except Exception as exc:
+            errors.append(exc)
     _ACTIVE.clear()
     if on_load_pre in bpy.app.handlers.load_pre:
         bpy.app.handlers.load_pre.remove(on_load_pre)
     if update in bpy.app.handlers.frame_change_post:
         bpy.app.handlers.frame_change_post.remove(update)
+    if errors:
+        raise RuntimeError('Tip trail cleanup failed: ' + '; '.join(map(str, errors)))

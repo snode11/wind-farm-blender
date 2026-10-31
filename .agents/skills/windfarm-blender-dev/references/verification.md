@@ -8,7 +8,7 @@
 - 兼容版本读 `blender_manifest.toml`，实际来源读 `addon.__file__`／`frontend_diagnostics.py`，载荷核对 `build-info.json`、SHA-256 与 inventory；版本号或源码同步不证明一致。
 - 替换安装后重启 Blender，[日常安装身份](../../../../publication/daily-installation.json)单独核对。
 - 扩展源码、资源、规范协议或内置读取器进入安装版时重建 ZIP；skill、说明及项目侧后端改动不自动要求打包。
-- 构建时生成的 `protocol.py`、`_vendor/lidar/` 分别来自仓库 `wfrl/blender_bridge/messages.py`、`wfrl/lidar/`；修改规范源，不手改生成副本或替换冻结模型绕过校验。
+- 构建时生成的 `protocol.py`、`_vendor/lidar/`、`_vendor/radar_x100/` 分别来自仓库 `wfrl/blender_bridge/messages.py`、`wfrl/lidar/`、`wfrl/radar_x100/`；X100 模块清单由仓库 `scripts/blender/build_extension.py` 的 `RADAR_MODULES` 定义，逐模块摘要写入 `build-info.json` 的 `radar_core_sha256`。修改规范源，不手改生成副本或替换冻结模型绕过校验。
 
 后台、脚本窗口与真实鼠标／键盘分别报告，PASS 须匹配载荷、环境和输入。定时器注册、正常启动或单张截图不能替代脚本的最终结果。
 
@@ -37,12 +37,14 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定
 | 相机启用、布局、缺陷编辑器及缺陷窗口脚本 | `WFRL_ADDON_MODULE`，无期望目录断言，另核对来源；布局的 `WFRL_ADDON_ROOT` 仅控制搜索路径。 |
 | `manual_down_copy_regression.py`、三份源码视频脚本、`farm_flex_workload_regression.py`、`custom_camera_edit_binding_regression.py`、`nrel_defect_ui_state_regression.py` | 仅源码；安装模块变量不能改变验证层。 |
 | `live_contracts_regression.py` | 仅源码，直接导入工作区扩展；使用独立工厂启动后台进程，安装模块变量不能改变验证层。未纳入 `run_regressions.py`，按上文 `--python` 入口直接运行。 |
+| `radar_x100_regression.py`、`radar_x100_edges.py`、`radar_x100_history_regression.py`、`radar_x100_window.py` | `WFRL_ADDON_MODULE` + `WFRL_EXPECTED_ADDON_ROOT`；安装时另核对实际加载的 `radar_x100.core` 及规范数据模块路径。`radar_x100_regression.py` 的安装模式断言未导入工作区 `wfrl.radar_x100`，并核对 `radar_core_sha256`。 |
 
 特殊前置条件：
 
 - `WFRL_TEST_OUTPUT` 的文件／目录合同逐份核对，已有目录可能覆盖报告。缺陷保存／重开复用专用目录，第二个进程设 `WFRL_NREL_DEFECT_PHASE=reopen`。手动撤销／恢复依赖工厂 `Cube`，`WFRL_MANUAL_EMPTY_ONLY=1` 会缩小隔离检查范围。
 - `farm_flex_workload_regression.py` 要求源码、后台工厂启动与空白注册，仅输出 `FARM_FLEX_WORKLOAD_REGRESSION_PASS`，无需输出目录。
 - `live_contracts_regression.py` 必须指定尚不存在的 `WFRL_TEST_OUTPUT` 目录，由脚本创建并写入 `result.json`；检查正常退出、`LIVE_CONTRACTS_PASS` 与报告，不复用正式场景或已保存结果目录。
+- 四份 X100 脚本均要求尚不存在的 `WFRL_TEST_OUTPUT` 目录并写入 `result.json`。三份后台脚本可由 `run_regressions.py` 选择，分别检查 `X100_NATIVE_PASS`、`X100_EDGES_PASS`、`X100_HISTORY_PASS` 及正常退出；窗口脚本未纳入该运行器，使用干净可见进程，检查最终报告及 `X100_WINDOW_PASS`。它在完成后保留窗口，不把定时器注册或启动成功当作完成，也不把脚本操作当作真实键鼠验证。
 - 共享结构后台检查可用 `WFRL_SPLIT_INPUT` 指定场景副本；`reconstruction_workflow_window.py` 要求干净可见进程、安装模块及精确目录。`WFRL_EXPECTED_GEOMETRY_SHA256` 从已确认资产及 inventory 取得，不能照抄失败现场摘要绕过校验。
 - `scripts/blender/check_nrel_nacelle_camera.py` 支持 `WFRL_ADDON_MODULE`／`WFRL_EXPECTED_ADDON_ROOT`，参数 `-- --output <新目录>`，生成 PNG、场景及参数。双束使用匹配内置包或 `WFRL_DUAL_PACKAGE`；窗口以 `WFRL_BUILTIN_METHOD=TLS` 选候选，同时核对方法、源摘要、S1 与双束。
 
@@ -68,7 +70,7 @@ python3 scripts/blender/run_playback_benchmark.py --blender <Blender可执行文
 - `native_camera_reopen_regression.py` 覆盖单路末帧→关闭→三路重开／重播及延迟恢复；安装模式须传模块与期望目录，不借其他路径推定通过。`performance.py` 只计 CPU 回调，嵌套耗时不相加；平均 FPS、缓存计数或短时诊断不替代完整片段验收。
 - 播放报告保留 `observation_s`、`intentional_pause_s`、`running_observation_s` 和暂停区间；停滞判断扣除已确认的静止主动暂停，FPS 分母仍是完整墙钟时长。峰值 RSS 按平台换算（Darwin 字节、Linux KiB），与峰值差分别报告，不把峰值差称为当前内存增长或无泄漏证明。
 
-日常安装以[安装身份](../../../../publication/daily-installation.json)为准；相同 manifest 版本不代表与公开附件相同。日常构建的 ZIP、inventory 和 SHA-256 由安装记录的 `source_archive` 标识；公开 ZIP 保留于 [package](../../../../publication/blender-0.3.42.1/public/validated/package/)。运行来源及配置保护见安装记录中的证据链接。后台身份／注册、可见窗口和完整播放结论分别读取，其他候选载荷的性能记录不得转记到当前安装。
+日常安装以[安装身份](../../../../publication/daily-installation.json)为准；相同 manifest 版本不代表与公开附件相同。日常构建的 ZIP、inventory 和 SHA-256 由安装记录的 `source_archive` 标识；公开 ZIP 保留于 [package](../../../../publication/blender-0.3.42.3/public/validated/package/)。运行来源及配置保护见安装记录中的证据链接。后台身份／注册、可见窗口和完整播放结论分别读取，其他候选载荷的性能记录不得转记到当前安装。
 
 保留产物与已清理范围见[安装记录的产物可用性](../../../../publication/daily-installation.json)。原始日志和 JSON 中的临时路径保留测量时来源，不改写成当前路径；留存 `environment.json` 不表示隔离 profile 仍存在。使用安装验证或性能入口前核对 profile，缺失时须建立并验证匹配的新隔离环境，不能把历史目录当作可运行配置。
 

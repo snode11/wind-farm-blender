@@ -29,6 +29,7 @@ class Session:
         self.scene, self.mode = scene, scene.wfrl_x100_source
         self.key, self.frame, self.gpu_batch, self.client = None, None, None, None
         self.mount, self.fov, self.fanout = None, None, None
+        self.recording_stopping = self.closing = False
         self.fov_gpu_batch = None
         self.render_color = None
         self.display_valid, self.record_start, self.record_last = False, None, None
@@ -75,7 +76,7 @@ class Session:
         self.display_valid = frame is not None and frame.completeness == 'COMPLETE'
         self.gpu_batch = view.batch(frame, self.scene.wfrl_x100_color) if self.display_valid and not bpy.app.background else None
         self.render_color = self.scene.wfrl_x100_color
-        if self.fanout and frame is not None and frame.identity != self.record_last:
+        if self.fanout and not self.recording_stopping and frame is not None and frame.identity != self.record_last:
             source_time = frame.time.source_time_s
             # Unknown physical time uses a separate local recording clock.
             stamp = time.monotonic() if self.mode == 'LIVE' or source_time is None else source_time
@@ -185,6 +186,8 @@ class Session:
         self.update()
 
     def start_recording(self, path):
+        if self.closing:
+            raise ValueError('关闭尚未确认，请先重试关闭')
         if self.fanout is not None:
             raise ValueError('记录已启动')
         if self.mode == 'LIVE':
@@ -197,12 +200,16 @@ class Session:
 
     def stop_recording(self):
         if self.fanout:
-            fanout, self.fanout = self.fanout, None
+            fanout = self.fanout
+            self.recording_stopping = True
             fanout.close()
+            self.fanout = None
+            self.recording_stopping = False
             if fanout.recorder.state == 'FAILED':
                 raise RuntimeError(fanout.recorder.error)
 
     def close(self, *, remove=True):
+        self.closing = True
         if self.client:
             self.client.close()
         try:
@@ -224,13 +231,20 @@ def _guard_installation():
 
 def stop(scene, *, remove=True):
     _guard_installation()
-    session = _SESSIONS.pop(scene.as_pointer(), None)
-    scene.wfrl_x100_enabled = False
-    scene['wfrl_x100_status'] = '已关闭'
+    key = scene.as_pointer()
+    session = _SESSIONS.get(key)
     if session:
-        session.close(remove=remove)
+        try:
+            session.close(remove=remove)
+        except Exception as exc:
+            scene['wfrl_x100_status'] = '关闭未完成，请重试关闭'
+            scene['wfrl_x100_error'] = str(exc)
+            raise
+        _SESSIONS.pop(key, None)
     elif remove:
         view.remove_objects(scene)
+    scene.wfrl_x100_enabled = False
+    scene['wfrl_x100_status'] = '已关闭'
 
 
 def start(scene, *, restoring=False):
@@ -257,10 +271,13 @@ def tick():
     alive = {scene.as_pointer(): scene for scene in bpy.data.scenes}
     for key, session in list(_SESSIONS.items()):
         if key not in alive:
-            _SESSIONS.pop(key)
-            _RESTORE_ATTEMPTED.discard(key)
+            worker = getattr(session.fanout, 'worker', None)
+            if session.closing and worker is not None and worker.is_alive():
+                continue
             try:
                 session.close(remove=False)
+                _SESSIONS.pop(key, None)
+                _RESTORE_ATTEMPTED.discard(key)
             except Exception as exc:
                 print('X100 deleted scene record close failed:', str(exc))
             finally:
@@ -274,6 +291,8 @@ def tick():
                 scene['wfrl_x100_error'] = '恢复失败：' + str(exc)
         session = _SESSIONS.get(key)
         if session is None:
+            continue
+        if session.closing:
             continue
         try:
             session.update()
@@ -296,12 +315,12 @@ def tick():
 def on_load_pre(_unused):
     from . import output
     output.close_all()
-    for session in list(_SESSIONS.values()):
+    for key, session in list(_SESSIONS.items()):
         try:
             session.close(remove=False)
+            _SESSIONS.pop(key, None)
         except Exception as exc:
             print('X100 record close failed:', str(exc))
-    _SESSIONS.clear()
     _RESTORE_ATTEMPTED.clear()
 
 
@@ -328,14 +347,16 @@ def unregister():
     from ..panels import radar_x100
     from . import output
     output.close_all()
+    errors = []
     try:
-        for session in list(_SESSIONS.values()):
+        for key, session in list(_SESSIONS.items()):
             try:
                 session.close()
+                _SESSIONS.pop(key, None)
             except Exception as exc:
+                errors.append(exc)
                 print('X100 cleanup failed:', str(exc))
     finally:
-        _SESSIONS.clear()
         _RESTORE_ATTEMPTED.clear()
         if bpy.app.timers.is_registered(tick):
             bpy.app.timers.unregister(tick)
@@ -347,3 +368,5 @@ def unregister():
             bpy.app.handlers.load_post.remove(output.on_load_post)
         view.unregister()
         radar_x100.unregister_properties()
+    if errors:
+        raise RuntimeError('X100 close unconfirmed: ' + '; '.join(map(str, errors)))

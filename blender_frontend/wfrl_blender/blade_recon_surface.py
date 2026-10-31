@@ -19,6 +19,7 @@ import numpy as np
 from .blade_recon_data import ReconSequence,MODEL_SHA256
 
 SESSIONS={}
+_PENDING_IMPORTS={}
 
 
 def active(scene):
@@ -39,8 +40,9 @@ def _rgb_reader(path):
         bpy.data.images.remove(image)
 
 
-def _embed(scene,key,raw,prefix):
+def _embed(scene,key,raw,prefix,*,register=None):
     text=bpy.data.texts.new(prefix+'.'+key)
+    if register is not None: register('texts',text,owned_fake_user=True)
     text.write(raw)
     text.use_fake_user=True
     scene['surface_'+key+'_text']=text.name
@@ -57,8 +59,9 @@ def _embedded(scene,key):
     return json.loads(raw)
 
 
-def _material(name,image=None,color=(1.,.55,.10,1.)):
+def _material(name,image=None,color=(1.,.55,.10,1.),*,register=None):
     material=bpy.data.materials.new(name)
+    if register is not None: register('materials',material)
     material.use_nodes=True
     material.diffuse_color=color
     nodes=material.node_tree.nodes
@@ -77,8 +80,9 @@ def _material(name,image=None,color=(1.,.55,.10,1.)):
     return material
 
 
-def _mesh(scene,name,vertices,rotor,texture_material,unknown_material,blade):
+def _mesh(scene,name,vertices,rotor,texture_material,unknown_material,blade,*,register=None):
     data=bpy.data.meshes.new(name)
+    if register is not None: register('meshes',data)
     faces=rotor.tpl.faces()
     data.from_pydata(vertices.reshape(-1,3).tolist(),[],faces.tolist())
     data.materials.append(texture_material)
@@ -97,6 +101,7 @@ def _mesh(scene,name,vertices,rotor,texture_material,unknown_material,blade):
             polygon.material_index=1
     data.update()
     obj=bpy.data.objects.new(name,data)
+    if register is not None: register('objects',obj)
     scene.collection.objects.link(obj)
     obj['surface_role']='estimate'
     obj['surface_blade_id']=blade
@@ -112,11 +117,13 @@ def _mesh(scene,name,vertices,rotor,texture_material,unknown_material,blade):
     return obj
 
 
-def _camera(scene,name,position,target):
+def _camera(scene,name,position,target,*,register=None):
     data=bpy.data.cameras.new(name)
+    if register is not None: register('cameras',data)
     data.lens=45
     data.clip_end=3000
     obj=bpy.data.objects.new(name,data)
+    if register is not None: register('objects',obj)
     from .cameras import clear_camera_mask
     clear_camera_mask(obj)
     scene.collection.objects.link(obj)
@@ -126,8 +133,20 @@ def _camera(scene,name,position,target):
     return obj
 
 
+def _retry_pending():
+    for key, pending in list(_PENDING_IMPORTS.items()):
+        errors = pending.rollback()
+        if errors:
+            raise RuntimeError('Surface resource cleanup unconfirmed; retry required') from errors[0]
+        try: bpy.data.scenes.remove(pending.scene)
+        except ReferenceError: pass
+        _PENDING_IMPORTS.pop(key, None)
+
+
 def load_surface(context,surface_path):
     """Validate before scene creation; never auto-load adjacent truth data."""
+    from .split_mappo_texture import _ImportResources
+    _retry_pending()
     from blade_recon.surface_io import load_surface_package
     path=Path(surface_path).expanduser().resolve()
     package=load_surface_package(path,image_reader=_rgb_reader)
@@ -139,6 +158,7 @@ def load_surface(context,surface_path):
     previous=context.scene
     prefix='WFRL.Surface.'+uuid.uuid4().hex[:8]
     scene=bpy.data.scenes.new('叶片表面重建')
+    resources=_ImportResources(scene)
     try:
         scene['wfrl_scene_kind']='blade_recon_surface'
         scene['surface_source_path']=str(path)
@@ -147,8 +167,8 @@ def load_surface(context,surface_path):
         scene['surface_recon_sha256']=metadata['recon_sha256']
         scene['surface_appearance_scope']=metadata['appearance_scope']
         scene['surface_legend']='captured input RGB; orange unknown; purple conflict; appearance is not geometry accuracy'
-        _embed(scene,'recon',json.dumps(package['recon_data'],ensure_ascii=False,allow_nan=False),prefix)
-        _embed(scene,'sidecar',json.dumps(metadata,ensure_ascii=False,allow_nan=False),prefix)
+        _embed(scene,'recon',json.dumps(package['recon_data'],ensure_ascii=False,allow_nan=False),prefix,register=resources.register)
+        _embed(scene,'sidecar',json.dumps(metadata,ensure_ascii=False,allow_nan=False),prefix,register=resources.register)
         scene.frame_start=1
         scene.frame_end=len(sequence.states)
         scene.render.fps=max(1,min(32767,round(sequence.fps)))
@@ -161,21 +181,24 @@ def load_surface(context,surface_path):
         scene.view_settings.exposure=0
         scene.view_settings.gamma=1
         scene.unit_settings.system='METRIC'
-        scene.world=bpy.data.worlds.new(prefix+'.World')
+        world=bpy.data.worlds.new(prefix+'.World')
+        resources.register('worlds',world)
+        scene.world=world
         scene.world.color=(.025,.035,.055)
-        unknown=_material(prefix+'.Unknown')
+        unknown=_material(prefix+'.Unknown',register=resources.register)
         vertices,_=sequence.geometry(0)
         blades=[]
         for blade,record in enumerate(metadata['textures']):
             image=bpy.data.images.load(str(path.parent/record['path']),check_existing=False)
+            resources.register('images',image)
             image.colorspace_settings.name='sRGB'
             image.pack()
             image['surface_texture_sha256']=record['sha256']
-            material=_material(prefix+f'.B{blade+1}.CapturedRGB',image)
-            blades.append(_mesh(scene,prefix+f'.B{blade+1}',vertices[blade],sequence.rotor,material,unknown,blade))
+            material=_material(prefix+f'.B{blade+1}.CapturedRGB',image,register=resources.register)
+            blades.append(_mesh(scene,prefix+f'.B{blade+1}',vertices[blade],sequence.rotor,material,unknown,blade,register=resources.register))
         hub=sequence.rotor.hub
         radius=sequence.rotor.cfg.tip_radius_m
-        scene.camera=_camera(scene,prefix+'.Overview',hub+np.array([radius*4,-radius*2,radius*.25]),hub)
+        scene.camera=_camera(scene,prefix+'.Overview',hub+np.array([radius*4,-radius*2,radius*.25]),hub,register=resources.register)
         SESSIONS[scene.as_pointer()]=dict(sequence=sequence,blades=blades,pending=True,index=None)
         if context.window:
             context.window.scene=scene
@@ -190,11 +213,20 @@ def load_surface(context,surface_path):
                     space.overlay.show_floor=False
                     space.overlay.show_axis_x=space.overlay.show_axis_y=False
         return scene
-    except Exception:
+    except Exception as error:
         if context.window and context.window.scene==scene:
             context.window.scene=previous
         SESSIONS.pop(scene.as_pointer(),None)
-        bpy.data.scenes.remove(scene)
+        scene.camera=None
+        scene.world=None
+        for key in list(scene.keys()):
+            if key.startswith('surface_') or key == 'wfrl_scene_kind': scene.pop(key,None)
+        errors=resources.rollback()
+        if errors:
+            _PENDING_IMPORTS[scene.as_pointer()]=resources
+            error.add_note('Surface resource cleanup unconfirmed; next load retries: '+str(errors[0]))
+        else:
+            bpy.data.scenes.remove(scene)
         raise
 
 
@@ -250,6 +282,7 @@ def _frame(scene,*_):
 @persistent
 def _loaded(_):
     SESSIONS.clear()
+    _retry_pending()
     for scene in bpy.data.scenes:
         if active(scene):
             scene['surface_error']='restoring captured RGB appearance'

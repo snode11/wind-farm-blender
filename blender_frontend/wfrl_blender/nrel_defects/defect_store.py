@@ -37,6 +37,8 @@ class DefectStore:
         self._prepare = prepare or (lambda document: None)
         self._activate = activate or (lambda resource, document, version: None)
         self._dispose = dispose or (lambda resource: None)
+        self._pending_disposals = []
+        self.cleanup_errors = ()
         self._owner = uuid.uuid4().hex
         self._document = validate_document(document if document is not None else new_document(surface), surface)
         self._version = 0; self._undo = []; self._redo = []
@@ -56,6 +58,24 @@ class DefectStore:
     def can_undo(self): return bool(self._undo)
     @property
     def can_redo(self): return bool(self._redo)
+
+    @property
+    def pending_disposals(self): return tuple(self._pending_disposals)
+
+    def retry_disposals(self, *, strict=False):
+        """Release superseded resources without undoing a committed edit."""
+        pending, errors = [], []
+        for resource in self._pending_disposals:
+            try:
+                self._dispose(resource)
+            except Exception as exc:
+                pending.append(resource)
+                errors.append(str(exc))
+        self._pending_disposals = pending
+        self.cleanup_errors = tuple(errors)
+        if errors and strict:
+            raise RuntimeError('Committed defect resources await cleanup: ' + '; '.join(errors))
+        return not pending
 
     def prepare(self, candidate):
         document = validate_document(candidate, self.surface)
@@ -95,13 +115,14 @@ class DefectStore:
             raise
         self._document = deepcopy(token.document); self._resource = token.resource
         self._version += 1; token.consumed = True
-        if old_resource is not self._resource: self._dispose(old_resource)
+        if old_resource is not self._resource: self._pending_disposals.append(old_resource)
         return self._version
 
     def commit(self, token):
         previous = self.document
         result = self._replace(token)
         self._undo.append(previous); self._redo.clear()
+        self.retry_disposals()
         return result
 
     def restore(self, document):
@@ -136,6 +157,7 @@ class DefectStore:
             if not token.consumed: self.cancel(token)
             raise
         source.pop(); target.append(previous)
+        self.retry_disposals()
         return True
 
     def undo(self): return self._restore(self._undo, self._redo)

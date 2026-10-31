@@ -32,9 +32,8 @@ class Camera:
         Xc = self.to_cam(X)
         z = Xc[..., 2]
         with np.errstate(divide='ignore', invalid='ignore'):
-            u = self.K[0, 0] * Xc[..., 0] / z + self.K[0, 2]
-            v = self.K[1, 1] * Xc[..., 1] / z + self.K[1, 2]
-        uv = np.stack([u, v], -1)
+            p = Xc @ self.K.T
+            uv = p[..., :2] / p[..., 2:3]
         uv[z <= 0.05] = np.nan
         return uv, z
 
@@ -43,9 +42,9 @@ class Camera:
         W2, H2 = 2 * round(self.W * s / 2), 2 * round(self.H * s / 2)
         sx, sy = W2 / self.W, H2 / self.H
         K = self.K.copy()
-        K[0, 0] *= sx; K[1, 1] *= sy
-        K[0, 2] = (K[0, 2] + 0.5) * sx - 0.5
-        K[1, 2] = (K[1, 2] + 0.5) * sy - 0.5
+        resize = np.array([[sx, 0, (sx - 1) / 2],
+                           [0, sy, (sy - 1) / 2], [0, 0, 1]])
+        K = resize @ K
         T = np.eye(4); T[:3, :3] = self.R; T[:3, 3] = self.t
         return Camera(self.name, W2, H2, K, T)
 

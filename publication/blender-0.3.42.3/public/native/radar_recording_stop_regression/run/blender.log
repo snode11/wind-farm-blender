@@ -1,0 +1,6 @@
+X100 record close failed: Recording worker has not stopped; recording remains incomplete
+X100 cleanup failed: Recording worker has not stopped; recording remains incomplete
+RADAR_RECORDING_STOP_PASS {"status": "PASS", "module_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py", "blender": "5.2.1 LTS", "checks": [{"action": "stop", "retained_ownership": true, "retried": true, "complete_after_worker_exit": true}, {"action": "load_pre", "retained_ownership": true, "retried": true, "complete_after_worker_exit": true}, {"action": "unregister", "retained_ownership": true, "retried": true, "complete_after_worker_exit": true}]}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

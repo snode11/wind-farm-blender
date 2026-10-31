@@ -89,6 +89,20 @@ def frame_index(payload, label, n_sections=None):
     return result
 
 
+
+def frame_times(payload, label):
+    """Validate supplied seconds independently of frame IDs and nominal FPS."""
+    result = {}
+    for frame in payload['frames']:
+        if 't' not in frame:
+            continue
+        value = frame['t']
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not np.isfinite(value):
+            raise ValueError(label + ' frame %d t must be finite seconds' % frame['frame'])
+        result[frame['frame']] = float(value)
+    return result
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--recon', required=True)
@@ -116,12 +130,17 @@ def main():
             raise ValueError('model identity mismatch: same-model-state scoring requires identical independent turbine configurations; cross-model correspondence is unsupported')
         rf = frame_index(R, 'reconstruction', rec_cfg.n_sections)
         tf = frame_index(T, 'truth')
+        rt = frame_times(R, 'reconstruction')
+        tt = frame_times(T, 'truth')
         selected = R['frames'][args.skip:]
         if not selected:
             raise ValueError('no reconstruction frames remain after skip')
         for frame in selected:
             if frame['frame'] not in tf:
                 raise ValueError('missing truth frame: ' + str(frame['frame']))
+            index = frame['frame']
+            if index in rt and index in tt and not np.isclose(rt[index], tt[index], rtol=0, atol=1e-9):
+                raise ValueError('time identity mismatch for frame: ' + str(index))
     except ValueError as exc:
         ap.error(str(exc))
     rotor = Rotor(rec_cfg)
@@ -159,6 +178,8 @@ def main():
                 if len(x) else 'n=   0')
 
     print('评分模式 same-model-state（独立且相同的固定模型）')
+    verified = sum(f['frame'] in rt and f['frame'] in tt for f in selected)
+    print('时间配对：显式时间已验证 %d 帧；帧身份配对、时间未验证 %d 帧' % (verified, len(selected) - verified))
     print('评分帧数 %d（跳过前 %d 帧）' % (len(psi_e), args.skip))
     print('方位角误差(°)            ', st(psi_e))
     for k, name in (('pitch', '桨距误差(°)'), ('flap', '挥舞幅值误差(m)'), ('edge', '摆振幅值误差(m)')):

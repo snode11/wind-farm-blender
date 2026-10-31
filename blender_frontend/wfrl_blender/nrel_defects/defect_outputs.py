@@ -81,6 +81,7 @@ def capture_images(editor,directory):
         render.image_settings.color_depth,render.use_file_extension,scene.frame_current,scene.frame_subframe,
         render.resolution_x,render.resolution_y,render.resolution_percentage)
     saved_border = (render.use_border, render.use_crop_to_border)
+    saved_postprocessing = (render.use_compositing, render.use_sequencer)
     blur=hasattr(render,'use_motion_blur')
     old_blur=render.use_motion_blur if blur else None
     frame_time=float(scene['defect_time_s'])
@@ -88,6 +89,7 @@ def capture_images(editor,directory):
         render.image_settings.file_format='PNG';render.image_settings.color_mode='RGBA';render.image_settings.color_depth='8';render.use_file_extension=True
         render.use_border = False
         render.use_crop_to_border = False
+        render.use_compositing = render.use_sequencer = False
         if blur: render.use_motion_blur=False
         empty=editor.store.document
         for defect in empty['defects']: defect['enabled']=False
@@ -102,7 +104,7 @@ def capture_images(editor,directory):
                     render.resolution_percentage = 100
                     path=run['output']/(role+'-'+camera.name.replace('.','_')+'.png')
                     render.filepath=str(path)
-                    bpy.ops.render.render(write_still=True)
+                    bpy.ops.render.render(write_still=True, scene=scene.name)
                     run['manifest']['images'].append(dict(role=role,camera_id=camera.name,time_s=frame_time,
                         path=path.name,sha256=digest(path),resolution=[render.resolution_x,render.resolution_y]))
         finally:
@@ -118,6 +120,7 @@ def capture_images(editor,directory):
     finally:
         scene.camera,render.filepath,render.image_settings.file_format,render.image_settings.color_mode,render.image_settings.color_depth,render.use_file_extension,frame,subframe,render.resolution_x,render.resolution_y,render.resolution_percentage=saved
         render.use_border, render.use_crop_to_border = saved_border
+        render.use_compositing, render.use_sequencer = saved_postprocessing
         if blur: render.use_motion_blur=old_blur
         scene.frame_set(frame,subframe=subframe)
         editor.set_time(frame_time)

@@ -1,0 +1,58 @@
+{
+  "status": "PASS",
+  "phase": "run",
+  "reasons": [],
+  "returncode": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "duration_s": 1.076386792003177,
+  "source_changed": false,
+  "execution": {
+    "status": "PASS",
+    "final": true,
+    "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/resource_lifecycle_contract_regression.py",
+    "background": true,
+    "blender": "5.2.1 LTS",
+    "startup_dirty": false,
+    "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+    "returned_normally": true,
+    "post_script_dirty": false
+  },
+  "script_result": {
+    "status": "PASS",
+    "module_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+    "blender": "5.2.1 LTS",
+    "checks": {
+      "preset_copies_actual_shared_world_once": true,
+      "builder_preserves_other_scene_world_nodes": true,
+      "gw184_projection_3840_1920_320": [
+        {
+          "resolution": [
+            3840,
+            2160
+          ],
+          "result": "PASS: independent pinhole projection agrees with Blender within 0.005 px"
+        },
+        {
+          "resolution": [
+            1920,
+            1080
+          ],
+          "result": "PASS: independent pinhole projection agrees with Blender within 0.005 px"
+        },
+        {
+          "resolution": [
+            320,
+            180
+          ],
+          "result": "PASS: independent pinhole projection agrees with Blender within 0.005 px"
+        }
+      ],
+      "deleted_scene_object_curve_and_repeated_clearance_unload": true,
+      "real_error_propagates_after_following_cleanup_and_retry": true,
+      "native_file_load_drops_trail_references": true
+    }
+  },
+  "log": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/resource_lifecycle_contract_regression/run/blender.log",
+  "report": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/resource_lifecycle_contract_regression/artifacts/result.json"
+}

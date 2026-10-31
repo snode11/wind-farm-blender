@@ -306,18 +306,26 @@ def unregister():
     import sys
     global _END_REQUEST
     _END_REQUEST = None
+    errors = []
+    def attempt(callback):
+        try:
+            callback()
+        except Exception as exc:
+            errors.append(exc)
     from . import radar_feedback
-    radar_feedback.unregister()
+    attempt(radar_feedback.unregister)
     farm = sys.modules.get(__package__ + '.farm_flex')
     if farm is not None:
-        farm.clear_package_cache()
-        farm.detach()
+        attempt(farm.clear_package_cache)
+        attempt(farm.detach)
     from . import tip_tracking
-    tip_tracking.unregister()
+    attempt(tip_tracking.unregister)
     _READERS.clear()
     if bpy.app.timers.is_registered(_stop_finished_playback):
-        bpy.app.timers.unregister(_stop_finished_playback)
+        attempt(lambda: bpy.app.timers.unregister(_stop_finished_playback))
     for name, callback in _HANDLERS:
         handlers = getattr(bpy.app.handlers, name)
         if callback in handlers:
             handlers.remove(callback)
+    if errors:
+        raise RuntimeError('Clearance replay cleanup failed: ' + '; '.join(map(str, errors)))

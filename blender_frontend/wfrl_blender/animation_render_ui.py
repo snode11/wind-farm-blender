@@ -93,9 +93,8 @@ def _render_settings(scene):
     settings = {name: {key: getattr(target, key) for key in keys if hasattr(target, key)}
                 for name, (target, keys) in groups.items()}
     image = settings['image_settings']
-    if (scene.get('wfrl_scene_kind') != 'manual' and 'color_depth' in image
-            and image['color_depth'] != '8'):
-        image['color_depth'] = '16'
+    if 'color_depth' in image:
+        image['color_depth'] = service.png_color_depth(image['color_depth'])
     return settings
 
 

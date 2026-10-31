@@ -53,6 +53,34 @@ class ScoringContractTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn('评分帧数 1', result.stdout)
             self.assertIn('均值 0.000  P95 0.000  最大 0.000', result.stdout)
+            self.assertIn('时间未验证 1 帧', result.stdout)
+
+    def test_explicit_offset_clock_is_independent_of_nominal_fps(self):
+        recon, truth = self.payloads()
+        recon['fps'], truth['fps'] = 10., 25.
+        for payload in (recon, truth):
+            payload['frames'][0]['t'] = 117.125
+            for index, stamp in ((37, 118.375), (48, 118.625)):
+                frame = copy.deepcopy(payload['frames'][0])
+                frame.update(frame=index, t=stamp)
+                payload['frames'].append(frame)
+        for result in self.run_scorers(recon, truth):
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn('显式时间已验证 3 帧', result.stdout)
+
+    def test_conflicting_or_nonfinite_explicit_time_is_rejected(self):
+        for value in (117., float('nan'), float('inf'), None, True, '0'):
+            recon, truth = self.payloads()
+            recon['frames'][0]['t'] = value
+            truth['frames'][0]['t'] = 0.
+            self.assert_rejected(recon, truth, 'time identity mismatch' if value == 117. else 't must be finite')
+
+    def test_one_sided_legacy_time_is_explicitly_unverified(self):
+        recon, truth = self.payloads()
+        recon['frames'][0]['t'] = 117.
+        for result in self.run_scorers(recon, truth):
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn('时间未验证 1 帧', result.stdout)
 
     def test_same_model_cyclic_blade_alignment_preserves_zero_error(self):
         recon, truth = self.payloads()

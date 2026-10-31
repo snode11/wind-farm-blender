@@ -195,7 +195,7 @@ def test_png_snapshot_uses_supported_depth_without_mutating_source(depth, expect
     assert image.color_depth == depth
 
 
-def test_png_snapshot_preserves_protected_manual_settings():
+def test_manual_png_snapshot_normalizes_depth_without_changing_source():
     from wfrl_blender.animation_render_ui import _render_settings
 
     class Scene(dict):
@@ -205,4 +205,5 @@ def test_png_snapshot_preserves_protected_manual_settings():
     scene.render = NS(image_settings=NS(color_mode='RGBA', color_depth='32', compression=15))
     scene.display_settings = scene.view_settings = scene.eevee = NS()
 
-    assert _render_settings(scene)['image_settings']['color_depth'] == '32'
+    assert _render_settings(scene)['image_settings']['color_depth'] == '16'
+    assert scene.render.image_settings.color_depth == '32'

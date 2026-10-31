@@ -49,6 +49,16 @@ def write_json(path, value):
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8")
 
 
+def preserve_json(path, value):
+    """Keep an existing diagnostic's bytes; differing evidence needs a new output."""
+    path = Path(path)
+    if path.exists():
+        if read_json(path) != value:
+            raise ValueError('existing diagnostic differs; use a new output: ' + str(path))
+        return
+    write_json(path, value)
+
+
 def preserve_copy(source, target, hardlink=False):
     """A rerun accepts only identical prepared files; never rewrites a source."""
     source, target = Path(source), Path(target)
@@ -241,7 +251,9 @@ def package(args, out):
         "geometry_precision_status": "NOT_ACCEPTED", "color_policy": "RGB converted to gray by unchanged texture engine; original render is Workbench material color",
         "temporal_policy": "one fixed appearance atlas per blade from 601 timestamps; geometry moves/deforms at saved 10Hz samples",
         "unknown_policy": "never sampled texels retain alpha=0; no invented fill", "fusion": texture["params"],
-        "visual_inspection": "actual normalized atlas and original RGB viewed; spanwise stripes, seams and tip-region collage/misprojection visible; appearance accuracy not accepted",
+        "visual_inspection": {"status": "NOT_REVIEWED",
+            "atlas_sha256": {"blade%d_tex.png" % b: digest(out / "texture" / ("blade%d_tex.png" % b)) for b in (1, 2, 3)},
+            "source_integrity_sha256": digest(out / "source_integrity.json")},
         "limits": ["rendered simulation images, not field camera measurements", "geometry mismatch and incomplete viewpoints can misplace appearance", "normalized gray appearance is not calibrated material reflectance", "no independent same-source texture truth or field-quality acceptance"]}
     if contributions is not None:
         quality["sampling_diagnostics"] = contributions
@@ -273,7 +285,7 @@ def package(args, out):
                     "source": "supported atlas patch chosen for viewing; no defect inference"})
     inspection.sort(key=lambda p: (p["display_rank"], -p["patch_gray_std"]))
     quality["inspection_points"] = inspection
-    write_json(out / "texture_quality.json", quality)
+    preserve_json(out / "texture_quality.json", quality)
     files = ["recon.json", "texture/texture.json"] + ["texture/blade%d_tex.png" % b for b in (1, 2, 3)]
     file_sources = {name: out / name for name in files}
     for name in files:
@@ -283,9 +295,7 @@ def package(args, out):
         files.append("reference/" + name)
         file_sources["reference/" + name] = source
     for name in ("model_compatibility.json", "texture_quality.json"):
-        # These are this script's generated diagnostics, so package-only may
-        # update its own evidence after an instrumented identical texture pass.
-        shutil.copyfile(out / name, asset / name)
+        preserve_copy(out / name, asset / name)
         files.append(name)
         file_sources[name] = out / name
     manifest = {"schema": "wfrl.blade-recon-provenance.v1", "source_classification": "SAME_SOURCE_SIMULATION",
@@ -305,8 +315,8 @@ def package(args, out):
                   "relationship_to_mappo": "same original simulated physical timestamps; t = simulation time - 117"},
         "texture_policy": quality, "geometry_precision_status": "NOT_ACCEPTED",
         "legend": "green/orange denote silhouette constraint support; both colors are algorithm estimates", "inspection_points": inspection}
-    write_json(asset / "manifest.json", manifest)
-    write_json(out / "asset_manifest.json", manifest)
+    preserve_json(asset / "manifest.json", manifest)
+    preserve_json(out / "asset_manifest.json", manifest)
     print(json.dumps({"asset": str(asset), "quality": stats, "files": len(files)}, ensure_ascii=False), flush=True)
 
 

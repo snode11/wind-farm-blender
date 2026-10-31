@@ -35,6 +35,17 @@ def get_preset(name: str) -> AtmospherePreset:
     return PRESETS[key]
 
 
+def private_world(scene):
+    """Copy a World only when another Scene actually references it."""
+    world = getattr(scene, "world", None)
+    if world is not None:
+        import bpy
+        if any(other != scene and other.world == world for other in bpy.data.scenes):
+            world = world.copy()
+            scene.world = world
+    return world
+
+
 def apply_preset(scene, name: str = "clear", *, enabled: bool = True, quality: str = "realtime",
                  image_loader=None) -> AtmospherePreset:
     """Apply a preset to Blender scene nodes when Blender is available."""
@@ -45,7 +56,7 @@ def apply_preset(scene, name: str = "clear", *, enabled: bool = True, quality: s
     scene["wfrl_atmosphere_enabled"] = bool(enabled)
     scene["wfrl_atmosphere_quality"] = quality
     scene["wfrl_atmosphere_fog_density"] = preset.fog_density if enabled else 0.0
-    world = getattr(scene, "world", None)
+    world = private_world(scene)
     if world is not None and getattr(world, "use_nodes", False):
         nodes = world.node_tree.nodes
         links = world.node_tree.links

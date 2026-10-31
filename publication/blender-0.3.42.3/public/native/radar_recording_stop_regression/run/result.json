@@ -1,0 +1,48 @@
+{
+  "status": "PASS",
+  "phase": "run",
+  "reasons": [],
+  "returncode": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "duration_s": 5.8793716670479625,
+  "source_changed": false,
+  "execution": {
+    "status": "PASS",
+    "final": true,
+    "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/radar_recording_stop_regression.py",
+    "background": true,
+    "blender": "5.2.1 LTS",
+    "startup_dirty": false,
+    "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+    "returned_normally": true,
+    "post_script_dirty": false
+  },
+  "script_result": {
+    "status": "PASS",
+    "module_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+    "blender": "5.2.1 LTS",
+    "checks": [
+      {
+        "action": "stop",
+        "retained_ownership": true,
+        "retried": true,
+        "complete_after_worker_exit": true
+      },
+      {
+        "action": "load_pre",
+        "retained_ownership": true,
+        "retried": true,
+        "complete_after_worker_exit": true
+      },
+      {
+        "action": "unregister",
+        "retained_ownership": true,
+        "retried": true,
+        "complete_after_worker_exit": true
+      }
+    ]
+  },
+  "log": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/radar_recording_stop_regression/run/blender.log",
+  "report": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/radar_recording_stop_regression/artifacts/result.json"
+}

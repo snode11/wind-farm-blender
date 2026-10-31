@@ -1,6 +1,6 @@
 ---
 name: windfarm-blender-dev
-description: Use when developing, debugging, testing, or documenting Wind Farm Blender's native frontend, cameras, replay, Blender bridge integration, or extension packaging and installation.
+description: Use when developing, debugging, testing, or documenting Wind Farm Blender's native frontend, cameras, replay, X100 radar, Blender bridge integration, or extension packaging and installation.
 ---
 
 # Windfarm Blender 开发
@@ -16,7 +16,8 @@ description: Use when developing, debugging, testing, or documenting Wind Farm B
 | 文案、操作说明、项目文档或 skill | 本文及对应说明；[静态校验](references/verification.md#纯文档与-skill) | frontmatter、链接、路径及要求一致性 |
 | WFRL 首页、手动姿态、柔性运动、播放、场景资源或性能 | [场景、运动与回放](references/scene-playback.md) | 受影响的宿主／原生检查；完整播放或性能按任务另验 |
 | Down、机舱／三相机、预览采集、重建纹理或缺陷 | [相机、资源与重建](references/cameras-reconstruction.md) | 几何／状态、原生窗口和 GPU 采集分别判断 |
-| 雷达、曲线、单位、尾流、Bridge 或连接恢复 | [测量、后端与协议](references/measurement-backend.md) | 生产／消费合同、场景归属、有效性及生命周期 |
+| X100 点云、PLY、记录回放或本地实时输入 | [X100 来源与采集](references/measurement-backend.md#x100-来源与采集) | 来源／时钟、记录完整性、场景归属及相机隔离；实机与 GPU 分别验证 |
+| 理想激光／双束净空、曲线、单位、尾流、Bridge 或连接恢复 | [测量、后端与协议](references/measurement-backend.md) | 生产／消费合同、场景归属、有效性及生命周期 |
 | PNG 后台动画、Down 视频或冻结试验作业 | [视频与后台渲染](references/video-jobs.md) | 输出、最终状态、进程收尾、真实媒体及所需恢复范围 |
 | 扩展构建、安装核对或正式播放测量 | [维护与验证入口](references/verification.md) | 明确源码／ZIP／安装对象，选择匹配的环境和证据 |
 

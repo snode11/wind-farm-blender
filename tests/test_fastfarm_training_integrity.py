@@ -53,7 +53,7 @@ def test_effective_config_normalizes_defaults_and_wind_alias():
         "fake", 2, 4, wind_sched="pin:8", warmup_steps=8, n_epochs=10)
 
 
-def fake_training(monkeypatch, tmp_path, episode_steps=3):
+def fake_training(monkeypatch, tmp_path, episode_steps=3, count=2):
     created = []
 
     class Sampler:
@@ -63,6 +63,7 @@ def fake_training(monkeypatch, tmp_path, episode_steps=3):
         obs_duty = False; duty_penalty = 0.
 
         def __init__(self, *args, **kwargs):
+            self.n, self.state_dim = count, count * 3
             self.shaper = kwargs["reward_shaper"]
             self.requested_total_steps = kwargs["total_steps"]
             self.episode = kwargs.get("start_episode", 0)
@@ -75,12 +76,12 @@ def fake_training(monkeypatch, tmp_path, episode_steps=3):
             created.append(self)
 
         def obs(self):
-            return np.full((2, 3), self.episode + self._t / 10, np.float32)
+            return np.full((self.n, 3), self.episode + self._t / 10, np.float32)
 
         def step(self, action):
             self._t += 1
             reward = self.shaper(float(self.episode + self._t + 1))
-            return self.obs(), reward, self._t >= self.ep_steps, dict(power=[2., 4.])
+            return self.obs(), reward, self._t >= self.ep_steps, dict(power=[2. * (i + 1) for i in range(self.n)])
 
         def new_episode(self):
             self.episode += 1
@@ -96,6 +97,32 @@ def fake_training(monkeypatch, tmp_path, episode_steps=3):
     monkeypatch.setattr(trainer, "_plot_curves", lambda *args: None)
     monkeypatch.setattr(trainer, "source_input_identity", lambda *args, **kwargs: "source-fixture")
     return created
+
+
+@pytest.mark.parametrize('recurrent,steps,constant', [(True, 1, False), (False, 1, False),
+                                                   (False, 65, False), (False, 4, True)])
+def test_single_agent_learning_and_tail_batch_have_finite_losses_and_gradients(monkeypatch, tmp_path, recurrent, steps, constant):
+    fake_training(monkeypatch, tmp_path, episode_steps=100, count=1)
+    if constant:
+        gae = trainer.compute_gae_trunc
+        def constant_advantage(*args, **kwargs):
+            advantage, returns = gae(*args, **kwargs)
+            return np.ones_like(advantage), returns
+        monkeypatch.setattr(trainer, 'compute_gae_trunc', constant_advantage)
+    original = torch.optim.Adam.step
+    updates = []
+    def checked_step(optimizer, *args, **kwargs):
+        for group in optimizer.param_groups:
+            for p in group['params']:
+                assert p.grad is not None and torch.isfinite(p.grad).all()
+        updates.append(True)
+        return original(optimizer, *args, **kwargs)
+    monkeypatch.setattr(torch.optim.Adam, 'step', checked_step)
+    hist = trainer.train('fake', 1, steps, n_epochs=1, warmup_steps=0, recurrent=recurrent)
+    assert updates
+    assert np.isfinite(hist['pg']).all() and np.isfinite(hist['vloss']).all()
+    checkpoint = torch.load(hist['run']['checkpoint'], map_location='cpu', weights_only=False)
+    assert all(torch.isfinite(v).all() for key in ('actor', 'critic') for v in checkpoint[key].values())
 
 
 def test_full_artifacts_are_distinct_and_completed_budget_is_verified(monkeypatch, tmp_path):

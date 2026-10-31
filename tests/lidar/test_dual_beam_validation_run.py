@@ -170,6 +170,50 @@ def test_fake_solver_complete_full_clock(tmp_path, inputs):
     assert not list((run / 'FarmInputs/vtk').glob('*.vtp'))
 
 
+def test_parent_only_interrupt_confirms_owned_child_exit(tmp_path, inputs, monkeypatch):
+    import subprocess
+    exe = inputs[2]
+    exe.write_text(f'#!{sys.executable}\nimport time\ntime.sleep(30)\n')
+    run = prepare(tmp_path, inputs)
+    owned = []
+    real_popen = subprocess.Popen
+    def launch(*args, **kwargs):
+        child = real_popen(*args, **kwargs); owned.append(child); return child
+    def interrupt(_): raise KeyboardInterrupt('parent only')
+    monkeypatch.setattr(runner.subprocess, 'Popen', launch)
+    from types import SimpleNamespace
+    monkeypatch.setattr(runner, 'time', SimpleNamespace(monotonic=runner.time.monotonic, sleep=interrupt))
+    try:
+        with pytest.raises(KeyboardInterrupt): runner.execute(run, poll_seconds=.01)
+        assert owned[0].poll() is not None
+        status = json.loads((run/'exit-status.json').read_text())
+        assert status['status'] == 'CANCELLED'
+        assert status['cleanup_confirmed'] is True
+        assert status['exit_code'] is not None
+        assert json.loads((run/'run-config.json').read_text())['status'] == 'CANCELLED'
+    finally:
+        if owned and owned[0].poll() is None:
+            owned[0].kill(); owned[0].wait(timeout=5)
+
+
+def test_failure_stops_child_before_archiving_retained_evidence(tmp_path, inputs, monkeypatch):
+    import subprocess
+    from types import SimpleNamespace
+    inputs[2].write_text(f'#!{sys.executable}\nimport time\ntime.sleep(30)\n')
+    run=prepare(tmp_path,inputs);owned=[];alive=[]
+    real_popen=subprocess.Popen
+    def launch(*args,**kwargs):
+        child=real_popen(*args,**kwargs);owned.append(child);return child
+    def fail(_):raise RuntimeError('poll failure')
+    def scan(_):alive.append(owned[0].poll() is None)
+    monkeypatch.setattr(runner.subprocess,'Popen',launch)
+    monkeypatch.setattr(runner,'time',SimpleNamespace(monotonic=runner.time.monotonic,sleep=fail))
+    monkeypatch.setattr(runner.SurfaceArchiver,'scan',scan)
+    with pytest.raises(RuntimeError,match='poll failure'):runner.execute(run,poll_seconds=.01)
+    assert alive and not any(alive)
+    assert owned[0].poll() is not None
+
+
 def test_fake_failure_retains_complete_and_partial_evidence(tmp_path, inputs):
     write_solver(inputs[2], fail=True)
     run = prepare(tmp_path, inputs)

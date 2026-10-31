@@ -1,5 +1,6 @@
 """Directory consolidation resolves frozen records without old aliases."""
 import hashlib
+import importlib.util
 from pathlib import Path
 
 import pytest
@@ -21,6 +22,24 @@ def test_repository_search_handles_nested_stage_scripts(checkout):
     script.parent.mkdir(parents=True)
     script.write_text('')
     assert repository_root(script) == checkout
+
+
+def test_source_archive_paths_without_git_keep_relocation_and_external_paths(tmp_path, monkeypatch):
+    archive = tmp_path / 'source'
+    module_path = archive / 'wfrl/nrel_reconstruction/artifact_paths.py'
+    module_path.parent.mkdir(parents=True)
+    module_path.write_bytes(Path(__import__('wfrl.nrel_reconstruction.artifact_paths', fromlist=['x']).__file__).read_bytes())
+    (archive / 'pyproject.toml').write_text('[project]\nname="wfrl"\n')
+    (archive / 'scripts').mkdir()
+    spec = importlib.util.spec_from_file_location('archive_artifact_paths', module_path)
+    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+    monkeypatch.chdir(tmp_path)
+    assert module.repository_root() == archive
+    assert module.relocated_path('scripts/tool.py') == archive / 'scripts/tool.py'
+    assert module.relocated_path('/external/data/input.json') == Path('/external/data/input.json')
+    expected = archive / NREL_DIRECTORY / 'stages/02-second-run/x.json'
+    assert module.relocated_path('/old/outputs/nrel-video-single-blade/20261002-second/x.json') == expected
+    assert not (archive / '.git').exists()
 
 
 @pytest.mark.parametrize('recorded', [

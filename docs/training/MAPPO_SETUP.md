@@ -44,6 +44,8 @@ Replay 在后端启动、预热和控制步边界响应暂停与停止。最终�
 
 无版本动作合同的模型只接受可识别的保存格式：Studio 的 `scene`、`controls`、`critic` 组合对应 `tanh_scale`；CLI 的完整 `env_id`、`obs_duty`、`recurrent`、`duty_penalty` 组合对应 yaw 的 `clip`。该兼容路径使用固定控制边界，并须与实际运行时一致；缺失、冲突或无法判定的元数据明确报错。没有保存场景的 CLI 模型不能仅凭现有字段证明完整布局、机型和时间步长匹配。
 
+研究探针 `FlexPolicy` 只接受可识别的 `Dec_Turb3_Row1_Fastfarm` legacy yaw-only、非循环、无 duty 观测模型；固定动作边界为 ±5°、变换为 `clip`。它复用合同校验，并拒绝保存 `scene` 的模型及未知版本，不拓展普通 Replay 的模型适用域。
+
 ### 回合结束与时间截断
 
 SB3 包装器在自动重置前保存各机组的完整 `terminal_observation`，包括派生观测字段；只有截断且没有真正终止时才设置 `TimeLimit.truncated=True`，供 SB3 用终点观测计算价值自举。共用风场要求机组同步结束，不能在部分机组结束后把其复位状态当作普通下一步。
@@ -53,6 +55,14 @@ SB3 包装器在自动重置前保存各机组的完整 `terminal_observation`�
 ### FAST.Farm 实验身份与 GRU
 
 `train_fastfarm.py` 使用完整有效配置和源码／实际输入的内容身份确定 `experiment_id`，每次执行另有独立 `run_id`。配置包含训练预算、预热、回合、奖励及其参数、PPO 参数、观测、风况、种子和循环 critic 设置；源码身份覆盖项目训练代码、WFCRL、求解器／模板／风文件及运行依赖。产物名由可读标签、实验摘要和运行 UUID 组成，已有检查点和历史文件不会被静默覆盖。
+
+正式 CLI 的 sampler 在初始化、预热或观测打包失败后关闭已获取的 driver；换回合须确认严格关闭成功。关闭失败保留 driver／runtime 归属并阻止下一回合，初始化清理失败的异常携带 `driver` 或 `sampler` 引用。PPO 的团队优势标准化对单元素使用零标准差，适用于单机单步和单元素尾批。
+
+自定义 Scene YAML 的 `dt` 使用有限正整数秒，小数步长在创建 case 前拒绝，case、runtime 与 limiter 使用同一步长。非 Scene 的 `--backend floris` 路径保留显式 `--wind-direction`，并在风况调度与实验身份中使用它；未指定方向时，`preset:veer` 等预设可提供 FLORIS 风向。FAST.Farm 的方向请求仍不生效，Bridge Formal 仍只接受 FAST.Farm。
+
+Studio 停止与窗口关闭通过定时轮询等待训练和显示求解线程退出；资源归属未确认时保留窗口并阻止重新启动。正测量顺桨角在显示、柔性几何与净空中采用一致的局部旋转符号。转矩修正同时满足单步与累计边界；当前值距 VS 包线过远时逐步接近，事件记录实际可提交的 float32 增量，不保证一步进入包线。缺失、布尔、非实数或非有限功率保留为 NaN，不补零。
+
+Studio 的 `NacelleLidar` 为合成示意：轮毂均值、幂律切变和确定性正弦脉动，可读取 BTS 的均值／TI 统计量，尚未实现三维 BTS 插值。输出标识 `source_kind=SYNTHETIC`、`bts_spatial_interpolation=False`；不作为实测或前馈收益证据。
 
 `run_stage3.py` 仅复用配置、来源、完成预算、终态、历史和完整检查点全部对应的独立完成任务；检查点字节须匹配历史中的摘要。空文件、部分训练、缺少身份的既有结果及恢复训练段都不能被视为新的完整实验已完成。改变有效配置会形成不同实验身份，可用 `--dry-run` 检查待运行组合而不启动求解。
 

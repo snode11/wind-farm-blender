@@ -13,6 +13,46 @@ from .evidence import CONTRACT, ASSESSMENT, validate_numerical_evidence
 SCHEMA_VERSION = '1.0'
 FILES = ('motion.json', 'measurements.json', 'cumulative.json', 'statistics.json', 'report.md')
 
+# Only MAE depends on the Python-version-specific floating sum algorithm.
+MAE_ROUNDOFF_M = 1e-12
+
+
+def _exact_equal(actual, saved):
+    if type(actual) is not type(saved):
+        return False
+    if isinstance(actual, dict):
+        return actual.keys() == saved.keys() and all(_exact_equal(v, saved[k]) for k, v in actual.items())
+    if isinstance(actual, list):
+        return len(actual) == len(saved) and all(_exact_equal(a, b) for a, b in zip(actual, saved))
+    return actual == saved
+
+
+def _statistics_equal(actual, saved):
+    """Permit at most 1e-12 m absolute MAE roundoff; all other fields are exact."""
+    if not isinstance(saved, dict) or actual.keys() != saved.keys():
+        return False
+    for field, value in actual.items():
+        recorded = saved[field]
+        if field == 'mae_m' and type(value) is float and type(recorded) is float:
+            if not math.isfinite(recorded) or abs(value - recorded) > MAE_ROUNDOFF_M:
+                return False
+        elif not _exact_equal(value, recorded):
+            return False
+    return True
+
+
+def _cumulative_equal(actual, saved):
+    if not isinstance(saved, list) or len(actual) != len(saved):
+        return False
+    for row, stored in zip(actual, saved):
+        if not isinstance(stored, dict) or row.keys() != stored.keys():
+            return False
+        for field, value in row.items():
+            equal = _statistics_equal if field == 'statistics' else _exact_equal
+            if not equal(value, stored[field]):
+                return False
+    return True
+
 
 def _require(condition, message):
     if not condition:
@@ -219,7 +259,8 @@ class ReplayPackage:
                     payload[name] = json.loads(raw)
             _validate(manifest, payload['motion.json'], payload['measurements.json'])
             cumulative, statistics = precompute(payload['measurements.json'], payload['motion.json'], manifest['replay'])
-            _require(cumulative == payload['cumulative.json'] and statistics == payload['statistics.json'], 'inconsistent precomputed statistics/state')
+            _require(_cumulative_equal(cumulative, payload['cumulative.json'])
+                     and _statistics_equal(statistics, payload['statistics.json']), 'inconsistent precomputed statistics/state')
             return cls(manifest, payload['motion.json'], payload['measurements.json'], cumulative, statistics)
         except (OSError, KeyError, TypeError, AttributeError, IndexError, OverflowError, json.JSONDecodeError) as exc:
             raise ValueError(f'回放数据未就绪: {exc}') from exc
