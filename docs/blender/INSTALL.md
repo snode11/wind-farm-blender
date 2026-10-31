@@ -1,6 +1,6 @@
 # NREL / WFRL Blender 安装
 
-工作区扩展 manifest 版本为 **0.3.42+1**；公开发布源码使用 [`v0.3.42.1` 标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.42.1)，公开扩展附件为 **0.3.42.1**。工作区构建按实际检出提交、未提交改动与产物 inventory 识别；本机日常安装为独立的 **0.3.41 本地源码构建**，实际身份见[安装记录](../../publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
+工作区扩展 manifest 版本为 **0.3.42+1**；公开发布源码使用 [`v0.3.42.1` 标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.42.1)，公开扩展附件为 **0.3.42.1**。工作区构建按实际检出提交、未提交改动与产物 inventory 识别；本机日常安装为**0.3.42.1 公开同载荷**，实际身份见[安装记录](../../publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
 
 适用于 Blender **5.2+** 的 NREL 公开扩展 **0.3.42.1**，包含 NREL／rootkink 叶片外形选择、T1/T2/T3 Down、独立风机手动控制、完整风机几何／同源纹理、精细支撑结构、三相机默认复位、柔性回放、六类合成缺陷、双束／TLS。GW184 **0.4.0** 使用[独立包](GW184三相机与缺陷编辑器.md)。
 

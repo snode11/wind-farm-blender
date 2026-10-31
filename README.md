@@ -21,7 +21,7 @@ GitHub 默认分支为 [`main`](https://github.com/snode11/wind-farm-blender/tre
 | 对象 | 版本 | 身份依据 |
 | --- | --- | --- |
 | NREL 公开安装包 | **0.3.42.1** | [wfrl_blender-0.3.42+1.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.1/wfrl_blender-0.3.42+1.zip)；214 个文件；[交付身份](publication/blender-0.3.42.1.json) |
-| 开发机日常安装 | **0.3.41** | 独立载荷，按安装记录核对；214 个文件、107 个新进程模块已核对；[安装身份](publication/daily-installation.json) |
+| 开发机日常安装 | **0.3.42.1** | 与公开包同一载荷；214 个文件、107 个新进程模块已核对；[安装身份](publication/daily-installation.json) |
 <!-- release-identity:end -->
 
 身份、[发布核对](docs/blender/发布状态与验证范围.md#软件验证的适用对象)与[当前安装核对](publication/daily-installation.json)的适用范围见[发布状态与验证范围](docs/blender/发布状态与验证范围.md)。同一版本号不证明内容相同；升级后完全重启 Blender。
@@ -87,7 +87,7 @@ GW184 使用[独立包操作说明](docs/blender/GW184三相机与缺陷编辑�
 
 源码检查的命令、依赖、跳过条件与记录范围见[分发说明](docs/PUBLICATION.md#证据身份与限制)及其对应源码快照；各项结果只适用于记录的源码与输入，不作为当前公开 ZIP 或日常安装的重复验收。
 
-公开 ZIP 的文件、源码标签和下载地址见[交付身份](publication/blender-0.3.42.1.json)；文件数、字节数和 SHA-256 按交付记录核对。1565 项工作区宿主用例通过，4 项跳过（按 pytest 收集用例计数）；ZIP 逐文件、隔离安装、持久启用、新进程来源、默认三相机与投影后台检查通过；源码归档与扩展 ZIP 分别按交付摘要核对。当前公开包的窗口、真实输入、完整视频、稳定 FPS、长期运行、其他平台、真实后端训练和科学精度未复验。[日常安装记录](publication/daily-installation.json)单独标识 0.3.41 本地构建的 214 个文件、107 个新进程模块及配置保护。
+公开 ZIP 的文件、源码标签和下载地址见[交付身份](publication/blender-0.3.42.1.json)；文件数、字节数和 SHA-256 按交付记录核对。1565 项工作区宿主用例通过，4 项跳过（按 pytest 收集用例计数）；ZIP 逐文件、隔离安装、持久启用、新进程来源、默认三相机与投影后台检查通过；源码归档与扩展 ZIP 分别按交付摘要核对。当前公开包的窗口、真实输入、完整视频、稳定 FPS、长期运行、其他平台、真实后端训练和科学精度未复验。[日常安装记录](publication/daily-installation.json)标识与公开包相同的 214 文件载荷；新进程模块、配置保护与原生后台合同通过，窗口与 GPU RGB 未复验。
 
 同源纹理是 **SAME_SOURCE_SIMULATION**：601 个 10 Hz 保存样本对应 117–177 s，60 Hz 时间轴每 6 帧保持一个样本；独立 `synth_tex` 是另一来源的 120 样本、0–11.9 s。放大与增强不会补出未观测表面。两者的几何／纹理仍为 **NOT_ACCEPTED**，图集模糊、条带、接缝和叶尖错贴限制保留。
 

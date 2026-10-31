@@ -70,7 +70,7 @@ python3 scripts/blender/run_playback_benchmark.py --blender <Blender可执行文
 
 日常安装以[安装身份](../../../../publication/daily-installation.json)为准；相同 manifest 版本不代表与公开附件相同。日常构建的 ZIP、inventory 和 SHA-256 由安装记录的 `source_archive` 标识；公开 ZIP 保留于 [package](../../../../publication/blender-0.3.42.1/public/validated/package/)。运行来源及配置保护见安装记录中的证据链接。后台身份／注册、可见窗口和完整播放结论分别读取，其他候选载荷的性能记录不得转记到当前安装。
 
-保留产物与已清理范围见[清理记录](../../../../publication/daily-installation-cleanup.json)。原始日志和 JSON 中的临时路径保留测量时来源，不改写成当前路径；留存 `environment.json` 不表示隔离 profile 仍存在。使用安装验证或性能入口前核对 profile，缺失时须建立并验证匹配的新隔离环境，不能把历史目录当作可运行配置。
+保留产物与已清理范围见[安装记录的产物可用性](../../../../publication/daily-installation.json)。原始日志和 JSON 中的临时路径保留测量时来源，不改写成当前路径；留存 `environment.json` 不表示隔离 profile 仍存在。使用安装验证或性能入口前核对 profile，缺失时须建立并验证匹配的新隔离环境，不能把历史目录当作可运行配置。
 
 ## 纯文档与 skill
 

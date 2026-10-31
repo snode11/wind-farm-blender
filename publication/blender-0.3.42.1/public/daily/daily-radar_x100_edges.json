@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "tests": 11,
+  "failures": 0,
+  "errors": 0,
+  "addon_path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "core_path": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/_vendor/radar_x100/schema.py"
+}

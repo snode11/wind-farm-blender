@@ -11,7 +11,7 @@
 | 公开安装包 | [NREL 0.3.42.1](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.42.1)；载荷见[交付身份](../publication/blender-0.3.42.1.json)；WFRL 主入口、录制安全收尾、视口隔离、可取消后台 PNG 渲染、叶片外形选择、T1/T2/T3 Down 及独立风机手动控制、姿态预设、相对微调、三机概览、姿态 JSON、完整风机几何／同源纹理切换、三机柔性回放、默认三相机复位、六类合成缺陷，以及相机清理、稳定刷新、采集与播放保护。 |
 | 本地工作区 | **0.3.42.1**；WFRL 主入口、场景／占用／后端状态、手动保护反馈、相机编辑预览与按需重绘、同刻几何及曲线缓存；包含录制安全收尾、视口隔离、后台 PNG、叶根装配、固定显示精度和环境几何预算。公开附件与日常安装分别核对。 |
 | 项目源码 | [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)；包含当前实现、测试与研究工具。公开扩展的匹配源码使用 `v0.3.42.1` 标签；当前分支与公开 ZIP、日常安装载荷分别识别。 |
-| 本地日常安装 | `bl_ext.user_default.wfrl_blender`，0.3.41 本地源码构建，未公开发布；文件核对、新进程模块来源、启用、窗口交互与配置保护见[身份摘要](../README.md#当前身份与安装来源)和[安装核对](../publication/daily-installation.json)。 |
+| 本地日常安装 | `bl_ext.user_default.wfrl_blender`，0.3.42.1 公开同载荷；文件核对、新进程模块来源、启用、后台合同与配置保护见[身份摘要](../README.md#当前身份与安装来源)和[安装核对](../publication/daily-installation.json)。 |
 | GW184 | [0.4.0 独立运行包](../docs/blender/GW184三相机与缺陷编辑器.md)；184 m 尺寸合成刚性模型、固定三相机和六类缺陷。模型与配置不能直接替代 NREL。 |
 
 公开 ZIP 的隔离安装与相机后台检查见[包验证](../publication/blender-0.3.42.1/public/validated/package-validation.json)。源码的完整片段、20 轮相机开关及 GPU 采集证据见[功能检查](../outputs/manual-camera-checks-dc5mz864/summary.json)，各项来源与范围独立，不代表当前安装包的完整视频、稳定 FPS 或科学精度验收。

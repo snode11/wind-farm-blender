@@ -10,7 +10,7 @@ WFRL Blender 是风场仿真的三维观察与操作工作台，提供结构与�
 | --- | --- |
 | 公开 NREL 扩展 | **0.3.42.1**；[专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.1/wfrl_blender-0.3.42+1.zip)，手动 Install from Disk 并重启；包身份与验证范围见[发布状态](发布状态与验证范围.md) |
 | 项目源码 | [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)；当前前端、后端、研究、测试及文档，与既有公开 ZIP 和日常安装分别识别 |
-| 发布源码 | `v0.3.42.1` 源码标签及匹配归档；扩展 ZIP 可由该归档独立重建；软件合同与证据见[源码验证](发布状态与验证范围.md#源码软件合同与验证)，日常安装使用独立的 0.3.41 本地源码构建 |
+| 发布源码 | `v0.3.42.1` 源码标签及匹配归档；扩展 ZIP 可由该归档独立重建；软件合同与证据见[源码验证](发布状态与验证范围.md#源码软件合同与验证)，日常安装使用0.3.42.1 公开同载荷 |
 | 开发机日常安装 | 实际模块 `bl_ext.user_default.wfrl_blender`；当前版本、文件身份与验证范围见[统一发布状态](发布状态与验证范围.md)和[安装核对](../../publication/daily-installation.json) |
 | GW184 | **0.4.0 独立运行 ZIP**，合成刚性模型、固定三相机与六类缺陷；完整解压运行，配置不与 NREL 混用 |
 
