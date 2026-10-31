@@ -1,0 +1,73 @@
+name: Release assets
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release source tag
+        required: true
+        type: string
+      source_sha256:
+        description: Expected SHA-256 of the full git archive ZIP
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-assets-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ inputs.tag }}
+      EXPECTED_SOURCE_SHA256: ${{ inputs.source_sha256 }}
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ inputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.11'
+      - name: Build and verify fixed release payloads
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+
+          tag = os.environ['RELEASE_TAG']
+          expected_source = os.environ['EXPECTED_SOURCE_SHA256']
+          assert re.fullmatch(r'v\d+\.\d+\.\d+(?:\.\d+)?', tag), tag
+          assert re.fullmatch(r'[0-9a-f]{64}', expected_source)
+          version = tag[1:]
+          identity = json.loads(Path(f'publication/blender-{version}.json').read_text())
+          assert identity['source']['tag'] == tag
+          out = Path(os.environ['RUNNER_TEMP']) / 'release-payloads'
+          out.mkdir()
+          subprocess.run(['python', 'scripts/blender/build_extension.py', '--output', str(out)], check=True)
+          extension = out / identity['archive']['name']
+          assert hashlib.sha256(extension.read_bytes()).hexdigest() == identity['archive']['sha256'], 'Extension bytes differ from verified payload'
+          source = out / identity['source']['archive_name']
+          subprocess.run(['git', 'archive', '--format=zip', f'--prefix=wind-farm-blender-{version}/', '-o', str(source), 'HEAD'], check=True)
+          assert hashlib.sha256(source.read_bytes()).hexdigest() == expected_source, 'Source archive differs from fixed identity'
+          with Path(os.environ['GITHUB_ENV']).open('a') as env:
+              env.write(f'EXTENSION_ARCHIVE={extension}\nSOURCE_ARCHIVE={source}\n')
+          PY
+      - name: Upload matching archives to existing draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = true
+          gh release upload "$RELEASE_TAG" "$EXTENSION_ARCHIVE" "$SOURCE_ARCHIVE" --repo "$GITHUB_REPOSITORY"
