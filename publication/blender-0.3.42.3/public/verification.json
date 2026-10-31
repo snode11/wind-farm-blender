@@ -93,7 +93,7 @@
     "physical mouse/keyboard",
     "full video/FPS",
     "long-term runtime/memory",
-    "other platforms",
+    "Windows and platform acceptance beyond Linux background CI",
     "real X100",
     "solver/MPI/training",
     "scientific acceptance"
@@ -113,5 +113,21 @@
     "release_identity_summary": "PASS",
     "code_whitespace": "PASS_WITH_CRLF_EOL",
     "raw_junit_whitespace_preserved": true
+  },
+  "ci": {
+    "status": "PASS",
+    "run_url": "https://github.com/snode11/wind-farm-blender/actions/runs/41196871436",
+    "source_commit": "019355bbf3bb243f98bfb95cd59b9e830b64c3cf",
+    "platform": "Ubuntu 24.04",
+    "python": [
+      "3.11",
+      "3.12"
+    ],
+    "host": "PASS",
+    "cpu_numerical": "PASS",
+    "blender": "5.2.1 Linux x64",
+    "native_source": "PASS",
+    "isolated_package": "PASS",
+    "visible_ui": "NOT_RUN"
   }
 }

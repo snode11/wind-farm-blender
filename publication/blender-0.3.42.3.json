@@ -35,7 +35,8 @@
     "numerical_unique_passed": 425,
     "reconstruction_passed": 7,
     "native_source_passed": 12,
-    "runner_upload": "https://github.com/snode11/wind-farm-blender/actions/runs/41196898474"
+    "runner_upload": "https://github.com/snode11/wind-farm-blender/actions/runs/41196898474",
+    "tag_checks": "https://github.com/snode11/wind-farm-blender/actions/runs/41196871436"
   },
   "remote_asset_download_verification": false
 }
