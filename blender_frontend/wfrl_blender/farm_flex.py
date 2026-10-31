@@ -209,6 +209,7 @@ def _parse_package(path, manifest):
     from .tower_motion import read_tower
     tower_data=read_tower(path,manifest,times)
     contents=json.loads((path/'data.json').read_text())
+    _validate_replay_contents(manifest, contents)
     motion_poses=[]
     for index,tid in enumerate(manifest['turbine_ids']):
         payload=contents[tid]
@@ -231,6 +232,84 @@ def _parse_package(path, manifest):
     poses = np.stack(motion_poses, axis=1)
     _readonly_arrays((times, transforms, poses, tower_data, reference))
     return _ParsedPackage(times, transforms, poses, contents, tower_data, reference)
+
+
+def _validate_replay_contents(manifest, contents):
+    """Validate review observations and derive B2 state without READY evidence rules."""
+    try:
+        from ._vendor.lidar import replay
+    except ImportError:
+        from wfrl.lidar import replay
+    require, finite, vector = replay._require, replay._finite, replay._vector
+    try:
+        replay._scan([manifest, contents])
+        require(isinstance(contents, dict) and set(contents) == set(manifest['turbine_ids']),
+                'Farm replay turbines differ from geometry')
+        settings = manifest.get('replay', {})
+        require(all(finite(settings.get(key)) for key in
+                    ('threshold_m', 'hysteresis_m', 'max_hold_s', 'passage_margin')),
+                'Invalid farm replay settings')
+        require(settings['hysteresis_m'] >= 0 and settings['max_hold_s'] > 0
+                and settings['passage_margin'] >= 1, 'Invalid farm replay timing/hysteresis')
+        start, end = manifest['segment']['start_s'], manifest['segment']['end_s']
+        for tid, payload in contents.items():
+            motion, measurements = payload['motion'], payload['measurements']
+            require(isinstance(motion, list) and bool(motion)
+                    and isinstance(measurements, list), 'Invalid farm replay records: ' + tid)
+            motion_times = replay._ordered(motion, 'farm motion')
+            require(motion_times[0] == start and motion_times[-1] == end
+                    and all(a < b for a, b in zip(motion_times, motion_times[1:])),
+                    'Farm motion must cover segment with unique times: ' + tid)
+            for row in motion:
+                require(all(finite(row.get(key)) for key in
+                            ('azimuth_deg', 'yaw_deg', 'rotor_speed_rpm'))
+                        and isinstance(row.get('pitch_deg'), list) and len(row['pitch_deg']) == 3
+                        and all(finite(p) for p in row['pitch_deg']), 'Invalid farm motion pose: ' + tid)
+                for key in ('nacelle_position_m', 'nacelle_orientation_deg'):
+                    require(key not in row or vector(row[key]), 'Invalid farm nacelle pose: ' + tid)
+            replay._ordered(measurements, 'farm measurements')
+            identities = set()
+            for row in measurements:
+                require(start <= row['time_s'] <= end and type(row.get('blade_id')) is int
+                        and row['blade_id'] in (1, 2, 3), 'Invalid farm measurement time/blade: ' + tid)
+                identity = (row['time_s'], row['blade_id'])
+                require(identity not in identities, 'Duplicate farm measurement: ' + tid)
+                identities.add(identity)
+                require(type(row.get('expected')) is bool
+                        and isinstance(row.get('passage_id'), str) and bool(row['passage_id']),
+                        'Missing farm evaluation grid/passage: ' + tid)
+                for name in ('B1', 'B2', 'B3'):
+                    beam = row['beams'][name]
+                    require(type(beam.get('valid')) is bool, 'Invalid farm beam validity: ' + tid)
+                    if beam['valid']:
+                        require(row['expected'] and finite(row.get('truth_m'))
+                                and all(finite(beam.get(key)) for key in
+                                        ('slant_range_m', 'estimate_m', 'error_m'))
+                                and beam['slant_range_m'] >= 0,
+                                'Invalid valid farm measurement: ' + tid)
+                        require(math.isclose(beam['error_m'], beam['estimate_m'] - row['truth_m'],
+                                             rel_tol=0., abs_tol=1e-9),
+                                'Inconsistent farm signed error: ' + tid)
+                        require(vector(beam.get('hit_point_m'))
+                                and vector(row.get('truth_tip_point_m'))
+                                and vector(row.get('truth_wall_point_m')),
+                                'Missing farm geometry audit endpoints: ' + tid)
+                        tip, wall = row['truth_tip_point_m'], row['truth_wall_point_m']
+                        require(math.isclose(tip[2], wall[2], rel_tol=0., abs_tol=1e-7)
+                                and math.isclose(math.dist(tip, wall), abs(row['truth_m']),
+                                                 rel_tol=0., abs_tol=1e-6),
+                                'Inconsistent farm truth endpoints: ' + tid)
+                    else:
+                        require(bool(beam.get('reason')) and beam.get('estimate_m') is None
+                                and beam.get('error_m') is None, 'Invalid farm beam null contract: ' + tid)
+            cumulative, statistics = replay.precompute(measurements, motion, settings)
+            equal = dual_beam_api()._prefix_states_equal
+            require(equal(cumulative, payload['cumulative'])
+                    and equal([dict(statistics=statistics)], [dict(statistics=payload['statistics'])]),
+                    'Inconsistent farm precomputed statistics/state: ' + tid)
+            payload['cumulative'], payload['statistics'] = cumulative, statistics
+    except (KeyError, TypeError, AttributeError, IndexError, OverflowError) as exc:
+        raise ValueError('Invalid farm replay data: ' + str(exc)) from exc
 
 
 def read_package(path):

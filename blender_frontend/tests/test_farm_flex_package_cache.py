@@ -9,6 +9,7 @@ from unittest.mock import Mock
 
 import numpy as np
 import pytest
+from wfrl.lidar.replay import precompute
 
 from wfrl_blender import clearance_replay, farm_flex, tip_tracking
 
@@ -35,19 +36,21 @@ def packages(tmp_path):
         np.savez(path / 'tower-motion.npz', times=times, heights=[0., 87.6],
                  transforms=tower, nacelle=nacelle)
         contents = {}
+        replay = dict(threshold_m=7., hysteresis_m=.1, max_hold_s=5., passage_margin=1.25)
         layout = [[0., 0., 0.], [504., 0., 0.], [1008., 0., 0.]]
         for k, tid in enumerate(('T1', 'T2', 'T3')):
             motion = [dict(time_s=t, yaw_deg=0., azimuth_deg=0., rotor_speed_rpm=0.,
                            pitch_deg=[0., 0., 0.], nacelle_transform=nacelle[i, k].tolist(),
                            nacelle_position_m=(np.array(layout[k]) + [0., 0., 87.6]).tolist())
                       for i, t in enumerate(times)]
+            cumulative, statistics = precompute([], motion, replay)
             contents[tid] = dict(motion=motion, measurements=[],
-                cumulative=[dict(time_s=t, measurement=None, status='waiting', statistics={})
-                            for t in times])
+                                 cumulative=cumulative, statistics=statistics)
         (path / 'data.json').write_text(json.dumps(contents))
         (path / 'source-surfaces.json').write_text('{}')
         manifest = dict(schema='wfrl.farm-flex-review.v2', status='REVIEW_ONLY',
                         turbine_ids=list(contents), layout_m=layout,
+                        replay=replay,
                         tower_model='elastodyn-flexible', segment=dict(start_s=0., end_s=2.),
                         files={p.name: hashlib.sha256(p.read_bytes()).hexdigest()
                                for p in path.iterdir()})

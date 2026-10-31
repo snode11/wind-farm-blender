@@ -149,9 +149,11 @@ def clock_capture(tmp_path, monkeypatch):
     class Scene(dict):
         frame_current = 10
         frame_subframe = .25
+        frame_start = 1
 
     job = capture.Capture.__new__(capture.Capture)
-    job.scene = Scene(wfrl_clearance_time_s=9.25)
+    job.scene = Scene(wfrl_clearance_time_s=9.25, wfrl_clearance_timebase_fps=60.)
+    job.scene.render = NS(fps=24, fps_base=1.)
     job.window = NS(screen=NS(is_animation_playing=False))
     job.closed = job.in_group = job.cancel_requested = False
     job._writer = job._pending_records = None
@@ -159,6 +161,10 @@ def clock_capture(tmp_path, monkeypatch):
     job.index, job.times = 1, [0., 1., 2.]
     job.path, job.manifest, job.render_target = tmp_path, {'status': 'incomplete'}, None
     job.sequence, job.playing = True, True
+    job.farm_sequence = True
+    job.time_mapping = (1, 60., 0.)
+    job.reader = NS(start_s=0.)
+    job.view_layer = NS(update=lambda: None)
     job.frame, job.subframe, job.time = 1, .5, .5
     job.expected_frame = (10, .25)
     job.original_time_property = .5
@@ -169,6 +175,7 @@ def clock_capture(tmp_path, monkeypatch):
 
     def evaluate(frame, subframe, time_s):
         job.scene.frame_current, job.scene.frame_subframe = frame, subframe
+        job.expected_frame = (frame, subframe)
         job.scene['wfrl_clearance_time_s'] = time_s
         calls.append(('evaluate', frame, subframe, time_s))
 
@@ -213,12 +220,23 @@ def test_guard_reuses_one_fresh_layout_and_detects_subsequent_mutation(clock_cap
     assert len(layouts) == 2
 
 
-@pytest.mark.parametrize('intervention', ['frame', 'subframe', 'playback'])
-def test_external_clock_change_aborts_capture_without_restoring_over_user_state(clock_capture, intervention):
+@pytest.mark.parametrize('playing', [False, True])
+@pytest.mark.parametrize('intervention', ['frame', 'subframe', 'playback', 'frame_start', 'timebase',
+                                        'removed_timebase', 'invalid_timebase', 'source_start'])
+def test_external_clock_change_aborts_capture_without_restoring_over_user_state(clock_capture, intervention, playing):
     job, calls, generation = clock_capture
+    job.playing = playing
     job.guard()
     if intervention == 'playback':
         generation[0] += 2
+    elif intervention == 'frame_start':
+        job.scene.frame_start = 301
+    elif intervention in {'timebase', 'invalid_timebase'}:
+        job.scene['wfrl_clearance_timebase_fps'] = 30. if intervention == 'timebase' else 'invalid'
+    elif intervention == 'removed_timebase':
+        del job.scene['wfrl_clearance_timebase_fps']
+    elif intervention == 'source_start':
+        job.reader.start_s = 117.
     else:
         setattr(job.scene, 'frame_current' if intervention == 'frame' else 'frame_subframe', 20 if intervention == 'frame' else .75)
         job.scene['wfrl_clearance_time_s'] = 19.75
@@ -232,18 +250,173 @@ def test_external_clock_change_aborts_capture_without_restoring_over_user_state(
     assert job.manifest['status'] == 'incomplete'
 
 
+@pytest.mark.parametrize('playing', [False, True])
 @pytest.mark.parametrize('success', [False, True])
-def test_capture_restores_unchanged_clock_on_completion_or_cancel(clock_capture, success):
+def test_capture_restores_unchanged_clock_on_completion_or_cancel(clock_capture, success, playing):
     job, calls, _generation = clock_capture
+    job.playing = playing
     if success:
         job.finish(success=True)
     else:
         job.request_cancel()
-    assert calls == [('play', False), ('evaluate', 1, .5, .5), ('play', True)]
+    assert calls == [('play', False), ('evaluate', 1, .5, .5), ('play', playing)]
     assert (job.scene.frame_current, job.scene.frame_subframe) == (1, .5)
     assert job.scene['wfrl_clearance_time_s'] == .5
     assert job.closed and not capture.active()
     assert job.manifest['status'] == ('complete' if success else 'incomplete')
+
+
+def test_sequence_clock_guard_preserves_the_existing_static_capture_scope(clock_capture):
+    job, _calls, _generation = clock_capture
+    job.farm_sequence = False
+    job.scene.frame_start = 301
+    job.scene['wfrl_clearance_timebase_fps'] = 30.
+    assert job._clock_unchanged()
+
+
+def test_sequence_explicit_timebase_keeps_render_fps_independent(clock_capture):
+    job, _calls, _generation = clock_capture
+    job.scene.render.fps, job.scene.render.fps_base = 30, 1.001
+    job.guard()
+
+
+@pytest.mark.parametrize('field,value', [('fps', 30), ('fps_base', 1.001)])
+def test_sequence_guards_render_fps_when_it_defines_the_default_timebase(clock_capture, field, value):
+    job, calls, _generation = clock_capture
+    del job.scene['wfrl_clearance_timebase_fps']
+    job.scene.render.fps = 60
+    job.guard()
+    setattr(job.scene.render, field, value)
+    with pytest.raises(RuntimeError, match='采集时刻'):
+        job.guard()
+    job.finish(error='采集时刻被外部操作改变，采集未完成')
+    assert calls == [] and job.closed and job.manifest['status'] == 'incomplete'
+    assert getattr(job.scene.render, field) == value
+
+
+@pytest.fixture
+def layer_capture(clock_capture, monkeypatch):
+    job, calls, generation = clock_capture
+    layer = NS(name='CaptureLayer', update=lambda: None)
+    other_layer = NS(name='OtherLayer', update=lambda: None)
+    area = NS(type='VIEW_3D')
+    job.scene.view_layers = [layer, other_layer]
+    job.view_layer, job.area = layer, area
+    job.window.scene, job.window.view_layer = job.scene, layer
+    job.window.screen.areas = [area]
+    job.identity = ('capture-session',)
+    monkeypatch.setitem(sys.modules, 'bpy', NS(context=NS(window_manager=NS(windows=[job.window]))))
+    monkeypatch.setitem(sys.modules, core.__package__ + '.panels.custom_cameras',
+                        NS(installation_block_reason=lambda _scene: '',
+                           session_identity=lambda _scene: ('capture-session',)))
+    monkeypatch.setattr(job, 'same_session', capture.Capture.same_session.__get__(job))
+    context = NS(scene=job.scene, window=job.window, area=area, view_layer=layer)
+    return job, calls, generation, context, other_layer
+
+
+@pytest.mark.parametrize('intervention', ['switch_layer', 'delete_layer', 'close_window', 'switch_scene'])
+def test_sequence_render_ownership_change_keeps_completed_frames_and_user_selection(layer_capture, intervention):
+    job, calls, _generation, _context, other_layer = layer_capture
+    committed = job.path / 'frames.jsonl'
+    committed.write_text('{"sample_index": 0}\n')
+    job.manifest['completed_samples'] = 1
+    job.guard()
+    if intervention == 'switch_layer':
+        job.window.view_layer = other_layer
+    elif intervention == 'delete_layer':
+        job.scene.view_layers.remove(job.view_layer)
+    elif intervention == 'close_window':
+        sys.modules['bpy'].context.window_manager.windows.clear()
+    else:
+        job.window.scene = NS(name='OtherScene')
+    selection = (job.window.scene, job.window.view_layer, tuple(job.scene.view_layers))
+    with pytest.raises(RuntimeError, match='场景、窗口'):
+        job.guard()
+    job.finish(error='采集上下文已变化')
+    assert (job.window.scene, job.window.view_layer, tuple(job.scene.view_layers)) == selection
+    assert calls == [] and job.closed and not capture.active()
+    assert committed.read_text() == '{"sample_index": 0}\n'
+    assert job.manifest['completed_samples'] == 1 and job.manifest['status'] == 'incomplete'
+
+
+@pytest.mark.parametrize('intervention', ['window', 'scene', 'layer', 'area'])
+def test_sequence_rejects_a_different_render_context_before_evaluation(layer_capture, monkeypatch, intervention):
+    job, calls, _generation, context, other_layer = layer_capture
+    if intervention == 'window':
+        context.window = NS(scene=job.scene, view_layer=job.view_layer)
+    elif intervention == 'scene':
+        context.scene = NS(name='OtherScene')
+    elif intervention == 'layer':
+        context.view_layer = other_layer
+    else:
+        context.area = NS(type='VIEW_3D', name='OtherArea')
+    def unexpected(*_args, **_kwargs):
+        raise AssertionError('a foreign render context reached GPU drawing')
+    monkeypatch.setattr(preview, 'render_group', unexpected)
+    with pytest.raises(RuntimeError, match='上下文'):
+        job.step(context)
+    assert calls == [] and job.closed and not capture.active()
+    assert job.manifest['status'] == 'incomplete'
+
+
+@pytest.mark.parametrize('intervention', ['window_layer', 'context_layer', 'frame_start', 'timebase'])
+def test_sequence_discards_images_when_rendering_changes_context_or_mapping(layer_capture, monkeypatch, intervention):
+    job, calls, _generation, context, other_layer = layer_capture
+    matrix = tuple(tuple(float(i == j) for j in range(4)) for i in range(4))
+    image = preview.CameraImage.__new__(preview.CameraImage)
+    image.width = image.height = 1
+    image.view = image.world = image.projection = matrix
+    image.params = core.CameraParameters((1., 2., 3.))
+    image.state_hash, image.texture, image.pixels = 'geometry-state', None, bytes(4)
+    job.cameras, job.capture_id, job.source = [{'wfrl_custom_slot': 1}], 'capture-id', {}
+    job.manifest.update(active_camera_ids=['C1'], completed_samples=1)
+    committed = job.path / 'frames.jsonl'
+    committed.write_text('{"sample_index": 0}\n')
+
+    def render(_context, _cameras, **_kwargs):
+        if intervention == 'window_layer':
+            job.window.view_layer = other_layer
+        elif intervention == 'context_layer':
+            context.view_layer = other_layer
+        elif intervention == 'frame_start':
+            job.scene.frame_start = 301
+        else:
+            job.scene['wfrl_clearance_timebase_fps'] = 30.
+        return {1: image}
+
+    monkeypatch.setattr(preview, 'render_group', render)
+    with pytest.raises(RuntimeError, match='已变化|外部操作改变'):
+        job.step(context)
+    assert calls == [('evaluate', 61, 0., 1.)]
+    assert image.rgba() is None and job._writer is None
+    assert committed.read_text() == '{"sample_index": 0}\n'
+    assert not (job.path / 'C1/frame_000001.png').exists()
+    assert job.manifest['completed_samples'] == 1 and job.manifest['status'] == 'incomplete'
+    assert job.closed and not capture.active()
+
+
+@pytest.mark.parametrize('intervention', ['frame_start', 'timebase', 'layer'])
+def test_sequence_restoration_detects_external_edits_before_resuming(layer_capture, monkeypatch, intervention):
+    job, calls, _generation, _context, other_layer = layer_capture
+    evaluate = job.evaluate
+
+    def edited_restore(*args):
+        evaluate(*args)
+        if intervention == 'frame_start':
+            job.scene.frame_start = 301
+        elif intervention == 'timebase':
+            job.scene['wfrl_clearance_timebase_fps'] = 30.
+        else:
+            job.window.view_layer = other_layer
+        job.scene['wfrl_clearance_time_s'] = 77.
+
+    monkeypatch.setattr(job, 'evaluate', edited_restore)
+    job.finish(success=True)
+    assert calls == [('play', False), ('evaluate', 1, .5, .5)]
+    assert job.scene['wfrl_clearance_time_s'] == 77.
+    assert job.manifest['status'] == 'incomplete'
+    assert '已变化' in job.error
+    assert job.closed and not capture.active()
 
 
 def test_capture_restores_own_frame_change_when_geometry_evaluation_fails(clock_capture, monkeypatch):
@@ -276,7 +449,7 @@ def test_capture_restores_own_frame_change_when_geometry_evaluation_fails(clock_
     assert job.manifest['status'] == 'incomplete'
 
 
-@pytest.mark.parametrize('intervention', ['cancel', 'seek', 'write_failure', 'shutdown'])
+@pytest.mark.parametrize('intervention', ['cancel', 'seek', 'frame_start', 'timebase', 'write_failure', 'shutdown'])
 def test_pending_png_yields_and_never_commits_an_invalid_group(clock_capture, monkeypatch, intervention):
     job, calls, _generation = clock_capture
     entered, release = threading.Event(), threading.Event()
@@ -303,11 +476,16 @@ def test_pending_png_yields_and_never_commits_an_invalid_group(clock_capture, mo
             job.request_cancel()
             assert not job.closed and capture.active()
             assert job.step(None) is False
-        elif intervention == 'seek':
-            job.scene.frame_current = 20
+        elif intervention in {'seek', 'frame_start', 'timebase'}:
+            if intervention == 'seek':
+                job.scene.frame_current = 20
+            elif intervention == 'frame_start':
+                job.scene.frame_start = 301
+            else:
+                job.scene['wfrl_clearance_timebase_fps'] = 30.
             with pytest.raises(RuntimeError, match='采集时刻'):
                 job.step(None)
-            assert job.scene.frame_current == 20 and calls == []
+            assert job.scene.frame_current == (20 if intervention == 'seek' else 10) and calls == []
         elif intervention == 'shutdown':
             capture.shutdown(restore=False)
             assert job.closed and writer.cancelled.is_set() and calls == []

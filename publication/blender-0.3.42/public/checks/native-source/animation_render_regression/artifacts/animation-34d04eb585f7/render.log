@@ -1,0 +1,9 @@
+00:00.010  color_management | Using OCIO=/Applications/Blender.app/Contents/Resources/5.2/datafiles/colormanagement/config.ocio
+00:00.360  blend            | Read blend: "/project/publication/blender-0.3.42/public/checks/native-source/animation_render_regression/artifacts/animation-34d04eb585f7/scene.blend"
+00:01.462  render           | Saved: '/project/publication/blender-0.3.42/public/checks/native-source/animation_render_regression/artifacts/animation-34d04eb585f7/frames/frame_0001.png'
+00:01.571  render           | Saved: '/project/publication/blender-0.3.42/public/checks/native-source/animation_render_regression/artifacts/animation-34d04eb585f7/frames/frame_0301.png'
+00:01.663  render           | Saved: '/project/publication/blender-0.3.42/public/checks/native-source/animation_render_regression/artifacts/animation-34d04eb585f7/frames/frame_0601.png'
+Warning: Library file, loading empty scene
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

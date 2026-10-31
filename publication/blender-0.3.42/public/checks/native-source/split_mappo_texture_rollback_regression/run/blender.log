@@ -1,0 +1,10 @@
+FARM_FLEX_READY
+/project/blender_frontend/tests/blender/split_mappo_texture_rollback_regression.py:149: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  user_material.use_nodes = True
+00:14.487  blend            | Read blend: "/project/publication/blender-0.3.42/public/checks/native-source/split_mappo_texture_rollback_regression/artifacts/portable.blend"
+Info: Saved as "portable.blend"
+SPLIT_MAPPO_TEXTURE_ROLLBACK_PASS
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

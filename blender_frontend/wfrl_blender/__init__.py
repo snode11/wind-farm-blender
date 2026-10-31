@@ -225,9 +225,10 @@ def _classes():
     from .panels import scene, channels, run, safety, presentation, training, gimbal, clearance, farm_replay, video_output, custom_cameras, blade_recon, home
     from .nrel_defects.editor import CLASSES as DEFECT_CLASSES
     from .panels.manual_control import CLASSES as MANUAL_CLASSES
+    from .panels.radar_x100 import CLASSES as X100_CLASSES
     return (PREFERENCE_CLASSES + CLASSES + CONNECTION_CLASSES + RUN_CLASSES + STATUS_CLASSES + TELEMETRY_CLASSES
             + WORKFLOW_CLASSES + HISTORY_EXPORT_CLASSES + scene.CLASSES + channels.CLASSES + run.CLASSES
-            + safety.CLASSES + presentation.CLASSES + training.CLASSES + gimbal.CLASSES + clearance.CLASSES + farm_replay.CLASSES + video_output.CLASSES + custom_cameras.CLASSES + blade_recon.CLASSES + DEFECT_CLASSES + MANUAL_CLASSES + home.CLASSES)
+            + safety.CLASSES + presentation.CLASSES + training.CLASSES + gimbal.CLASSES + clearance.CLASSES + farm_replay.CLASSES + video_output.CLASSES + custom_cameras.CLASSES + blade_recon.CLASSES + DEFECT_CLASSES + MANUAL_CLASSES + home.CLASSES + X100_CLASSES)
 
 
 def register():
@@ -342,6 +343,8 @@ def register():
     from . import manual_control, manual_down
     manual_control.register()
     manual_down.register()
+    from .radar_x100 import runtime as x100_runtime
+    x100_runtime.register()
     registered_classes = _classes()
     registered_handlers = ((bpy.app.handlers.load_post, _on_load),)
     registered_properties = tuple(definitions)
@@ -362,7 +365,9 @@ def register():
     manual_cleanup = manual_control.unregister
     manual_down_cleanup = manual_down.unregister
     home_cleanup = home.unregister_properties
+    x100_cleanup = x100_runtime.unregister
     def cleanup():
+        x100_cleanup()
         home_cleanup()
         animation_render_ui.unregister()
         manual_down_cleanup()

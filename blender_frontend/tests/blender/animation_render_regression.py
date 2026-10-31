@@ -46,10 +46,13 @@ scene.render.resolution_percentage = 100
 scene.eevee.taa_render_samples = 1
 scene.render.fps = 24
 scene.view_settings.exposure = 1.25
+scene.render.image_settings.file_format = 'OPEN_EXR'
+scene.render.image_settings.color_depth = '32'
 scene.frame_start, scene.frame_end, scene.frame_step = 2, 6, 2
 scene.frame_set(4)
 source = (bpy.data.filepath, scene.frame_current, scene.frame_subframe, scene.camera,
-          scene.render.filepath, scene.render.resolution_x, scene.render.image_settings.file_format)
+          scene.render.filepath, scene.render.resolution_x, scene.render.image_settings.file_format,
+          scene.render.image_settings.color_depth)
 directory = ui.start(bpy.context, output)
 assert service.job.active
 deadline = time.monotonic() + 90
@@ -59,12 +62,15 @@ while service.job.active and time.monotonic() < deadline:
 assert service.job.state == 'COMPLETE', (service.job.state, service.job.error, directory)
 assert service.job.completed_frames == 3
 assert source == (bpy.data.filepath, scene.frame_current, scene.frame_subframe, scene.camera,
-                  scene.render.filepath, scene.render.resolution_x, scene.render.image_settings.file_format)
+                  scene.render.filepath, scene.render.resolution_x, scene.render.image_settings.file_format,
+                  scene.render.image_settings.color_depth)
 manifest = json.loads((directory / 'manifest.json').read_text())
 assert len(manifest['frames']) == 3
 assert [row['frame'] for row in manifest['frames']] == [2, 4, 6]
 for row in manifest['frames']:
-    assert (directory / row['file']).read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
+    pixels = (directory / row['file']).read_bytes()
+    assert pixels.startswith(b'\x89PNG\r\n\x1a\n')
+    assert pixels[24] == 16
 
 scene.frame_start, scene.frame_end, scene.frame_step = 1, 500, 1
 cancelled = ui.start(bpy.context, output)

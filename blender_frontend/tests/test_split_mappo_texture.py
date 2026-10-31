@@ -3,6 +3,8 @@ import copy
 import hashlib
 import json
 import sys
+from pathlib import Path
+import tempfile
 from types import SimpleNamespace as NS
 import unittest
 from unittest.mock import patch
@@ -133,6 +135,15 @@ class SameSourceTextureTests(unittest.TestCase):
         self.assertFalse(texture.active(scene))
         self.assertTrue(synthetic.active(scene))
         self.assertIs(split.texture_adapter(scene), synthetic)
+
+    def test_availability_requires_delivered_payload_and_matching_source(self):
+        matching = {'wfrl_farm_manifest_sha256': texture.SOURCE_HASH}
+        self.assertTrue(texture.available(matching))
+        self.assertFalse(texture.available(None))
+        self.assertFalse(texture.available({}))
+        self.assertFalse(texture.available({'wfrl_farm_manifest_sha256': 'another source'}))
+        with tempfile.TemporaryDirectory() as directory, patch.object(texture, 'package_path', return_value=Path(directory)):
+            self.assertFalse(texture.available(matching))
 
     def test_manual_navigation_releases_surface_tracking_without_changing_view(self):
         class Scene(dict):
@@ -431,6 +442,74 @@ class CachedTextureRuntimeTests(unittest.TestCase):
                 patch.object(texture, '_ensure_structure', return_value=[]):
             self.assertIs(texture._runtime(self.scene), restored)
         restore.assert_called_once_with(self.scene)
+
+
+class ImportResourceRetryTests(unittest.TestCase):
+    class Scene(dict):
+        def __init__(self, uid=700):
+            super().__init__({texture.MARKER: True})
+            self.session_uid = uid
+            self.collection = NS(children_recursive=[], as_pointer=lambda: 702)
+
+        def as_pointer(self):
+            return 701
+
+    def tearDown(self):
+        texture._PENDING_IMPORTS.clear()
+
+    def test_failed_removal_is_retried_before_import_and_keeps_original_failure(self):
+        scene = self.Scene()
+        mesh = NS(as_pointer=lambda: 703, users=0, use_fake_user=False, shape_keys=None)
+        resources = texture._ImportResources(scene)
+        resources.register('meshes', mesh)
+        failures = [True]
+        removed = []
+        def remove(block):
+            if failures:
+                failures.pop()
+                raise RuntimeError('native removal unavailable')
+            removed.append(block)
+        fake = NS(data=NS(meshes=NS(remove=remove)))
+        texture._PENDING_IMPORTS[scene.as_pointer()] = resources
+        with patch.dict(sys.modules, bpy=fake), \
+                patch.object(sys.modules[texture.__package__], 'blade_recon_review', NS(), create=True):
+            with self.assertRaisesRegex(RuntimeError, '资源回收失败') as failure:
+                texture.ensure(scene)
+            self.assertEqual(str(failure.exception.__cause__), 'native removal unavailable')
+            self.assertIs(texture._PENDING_IMPORTS[scene.as_pointer()], resources)
+            self.assertEqual(removed, [])
+            value = dict(structure=[])
+            with patch.object(texture, '_runtime', return_value=value), \
+                    patch.object(texture, '_ensure_structure', return_value=[]), \
+                    patch.object(texture, '_activate', return_value=value):
+                self.assertIs(texture.ensure(scene), value)
+        self.assertEqual(removed, [mesh])
+        self.assertNotIn(scene.as_pointer(), texture._PENDING_IMPORTS)
+
+    def test_scene_pointer_reuse_does_not_retry_another_scene_ledger(self):
+        old, current = self.Scene(700), self.Scene(800)
+        resources = texture._ImportResources(old)
+        texture._PENDING_IMPORTS[current.as_pointer()] = resources
+        value = dict(structure=[])
+        with patch.dict(sys.modules, bpy=NS()), \
+                patch.object(sys.modules[texture.__package__], 'blade_recon_review', NS(), create=True), \
+                patch.object(resources, 'rollback', side_effect=AssertionError('stale scene rollback')), \
+                patch.object(texture, '_runtime', return_value=value), \
+                patch.object(texture, '_ensure_structure', return_value=[]), \
+                patch.object(texture, '_activate', return_value=value):
+            self.assertIs(texture.ensure(current), value)
+        self.assertNotIn(current.as_pointer(), texture._PENDING_IMPORTS)
+
+    def test_clear_runtime_retries_pending_owned_resources(self):
+        scene = self.Scene()
+        resources = texture._ImportResources(scene)
+        texture._PENDING_IMPORTS[scene.as_pointer()] = resources
+        with patch.object(resources, 'rollback', side_effect=[[RuntimeError('temporary')], []]) as rollback:
+            texture.clear_runtime()
+            self.assertIs(texture._PENDING_IMPORTS[scene.as_pointer()], resources)
+            texture.clear_runtime()
+        self.assertEqual(rollback.call_count, 2)
+        self.assertNotIn(scene.as_pointer(), texture._PENDING_IMPORTS)
 
 
 if __name__ == '__main__':

@@ -32,7 +32,7 @@
 | 范围 | 宿主入口 | 原生入口 |
 | --- | --- | --- |
 | 视频作业与媒体 | `test_manual_video_render.py`、`test_manual_video_job.py`；仓库 `tests/test_camera_video_media_recovery.py`、`tests/test_camera_video_publication.py` | 见下文视频验证边界；便捷视频取消另查可见渲染。 |
-| 普通后台动画渲染 | `test_animation_render.py` | 后台 `animation_render_regression.py` 验证短 PNG、取消、源状态和 MAPPO 运动；不代替完整片段或 FPS 验收。 |
+| 普通后台动画渲染 | `test_animation_render.py` | 后台 `animation_render_regression.py` 验证 32 位 EXR 来源到 16 位 PNG、短动画、取消、源设置保留和 MAPPO 运动；不代替完整片段或 FPS 验收。 |
 
 ## 视频验证边界
 

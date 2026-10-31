@@ -224,6 +224,11 @@ class Capture:
         self.reader = self.farm.readers['T1'] if self.farm else clearance_replay.reader_for(self.scene)
         self.times = [self.time] if times is None else list(times)
         self.sequence = times is not None
+        self.farm_sequence = (self.sequence and self.farm is not None
+                              and self.scene.get('wfrl_scene_kind') != 'manual')
+        self.view_layer = context.view_layer if self.farm_sequence else None
+        self.time_mapping = self._time_mapping() if self.farm_sequence else None
+        self._context_invalidated = False
         self.render_target = preview.RenderTargetPool() if self.sequence else None
         if not self.times:
             raise ValueError('时间清单为空')
@@ -290,16 +295,51 @@ class Capture:
         from .panels.custom_cameras import session_identity
         try:
             import bpy
-            return (self.window in list(bpy.context.window_manager.windows)
+            same = (self.window in list(bpy.context.window_manager.windows)
                 and self.window.scene == self.scene and self.area in list(self.window.screen.areas)
                 and self.area.type == 'VIEW_3D' and session_identity(self.scene) == self.identity)
+            if same and getattr(self, 'farm_sequence', False):
+                same = (not getattr(self, '_context_invalidated', False)
+                        and self.view_layer in list(self.scene.view_layers)
+                        and self.window.view_layer == self.view_layer)
+            return same
         except (ReferenceError,RuntimeError):
+            return False
+
+    def _require_render_context(self, context):
+        if not getattr(self, 'farm_sequence', False):
+            return
+        try:
+            matches = (context.window == self.window and context.scene == self.scene
+                       and context.area == self.area and context.view_layer == self.view_layer)
+        except (AttributeError, ReferenceError, RuntimeError):
+            matches = False
+        if not matches:
+            self._context_invalidated = True
+            raise RuntimeError('采集绘制上下文已变化，采集未完成')
+
+    def _time_mapping(self):
+        timebase = float(self.scene['wfrl_clearance_timebase_fps']
+                         if 'wfrl_clearance_timebase_fps' in self.scene
+                         else self.scene.render.fps / self.scene.render.fps_base)
+        source_start = float(self.reader.start_s)
+        if not math.isfinite(timebase) or timebase <= 0 or not math.isfinite(source_start):
+            raise ValueError('无效的采集时间映射')
+        return self.scene.frame_start, timebase, source_start
+
+    def _time_mapping_unchanged(self):
+        if not getattr(self, 'farm_sequence', False):
+            return True
+        try:
+            return self._time_mapping() == self.time_mapping
+        except (AttributeError, ReferenceError, RuntimeError, TypeError, ValueError):
             return False
 
     def guard(self):
         from .panels.custom_cameras import installation_block_reason
         if not self.same_session():
-            raise RuntimeError('场景、窗口或回放会话已变化，采集未完成')
+            detail = '、视图层' if getattr(self, 'farm_sequence', False) else ''
+            raise RuntimeError(f'场景、窗口{detail}或回放会话已变化，采集未完成')
         reason=installation_block_reason(self.scene)
         if reason:raise RuntimeError(reason)
         if not self._clock_unchanged():
@@ -322,6 +362,7 @@ class Capture:
         playing = ((owner is None or owner == self.scene)
                    and self.window.screen.is_animation_playing)
         return (not playing and playback.generation() == self.playback_generation
+                and self._time_mapping_unchanged()
                 and (self.scene.frame_current, self.scene.frame_subframe) == self.expected_frame)
 
     def evaluate(self, frame, subframe, sim_time):
@@ -332,7 +373,8 @@ class Capture:
             self.scene.frame_set(frame,subframe=subframe)
             self.expected_frame = (self.scene.frame_current, self.scene.frame_subframe)
             self.farm.update(self.scene,sim_time_s=sim_time,record_telemetry=False,update_comparison=False)
-            bpy.context.view_layer.update()
+            layer = self.view_layer if getattr(self, 'farm_sequence', False) else bpy.context.view_layer
+            layer.update()
 
     def request_cancel(self):
         if self.closed or self.cancel_requested:
@@ -364,16 +406,23 @@ class Capture:
     def _step_group(self, context):
         if self._writer is not None:
             return self._poll_write()
+        self._require_render_context(context)
         self.guard()
         at=self.times[self.index]
         if self.sequence:
-            timebase=float(self.scene.get('wfrl_clearance_timebase_fps',60.))
-            mapped=self.scene.frame_start+(at-self.reader.start_s)*timebase
+            if getattr(self, 'farm_sequence', False):
+                start,timebase,source_start = self.time_mapping
+                mapped=start+(at-source_start)*timebase
+            else:
+                timebase=float(self.scene.get('wfrl_clearance_timebase_fps',60.))
+                mapped=self.scene.frame_start+(at-self.reader.start_s)*timebase
             self.evaluate(math.floor(mapped),mapped-math.floor(mapped),at)
         self.guard()
+        self._require_render_context(context)
         images=preview.render_group(context,self.cameras,target=self.render_target,create_texture=False)
         try:
             self.guard()
+            self._require_render_context(context)
             records=[]
             packets=[]
             for camera in self.cameras:
@@ -454,10 +503,16 @@ class Capture:
                 self._play(False)
                 if self.sequence:
                     self.evaluate(self.frame,self.subframe,self.time)
-                if self.original_time_property is None:
-                    if 'wfrl_clearance_time_s' in self.scene:del self.scene['wfrl_clearance_time_s']
-                else:self.scene['wfrl_clearance_time_s']=self.original_time_property
-                self._play(self.playing)
+                owned = (not getattr(self, 'farm_sequence', False)
+                         or (self.same_session() and self._clock_unchanged()))
+                if owned:
+                    if self.original_time_property is None:
+                        if 'wfrl_clearance_time_s' in self.scene:del self.scene['wfrl_clearance_time_s']
+                    else:self.scene['wfrl_clearance_time_s']=self.original_time_property
+                    self._play(self.playing)
+                else:
+                    success = False
+                    error = (error + '；' if error else '') + '恢复期间场景或采集时刻已变化，采集未完成'
         except Exception as exc:
             success=False;error=f'{error} 恢复失败：{exc}'
         finally:

@@ -82,6 +82,70 @@ def test_live_updates_continue_when_active_scene_is_manual(live_owner):
     assert 'wfrl_telemetry_time_s' not in live_owner.other
 
 
+@pytest.mark.parametrize('previous', [[], [['lidar', 'lidar', 'EXPORTED', False, 'source']]])
+def test_snapshot_updates_actual_channel_table_after_lifecycle(live_owner, monkeypatch, previous):
+    monkeypatch.setattr(runtime, 'channel_table', list(previous))
+    monkeypatch.setattr(runtime, 'channel_states', {'lidar': True})
+    runtime._state.run_id = 'current'
+    payload = live_owner.messages[0]['payload']
+    payload.update(run_id='current', channel_table=[['lidar', 'lidar', 'EXPORTED', True, 'source']])
+
+    runtime.tick()
+
+    assert runtime._state.connection == 'CONNECTED'
+    assert runtime.kinematics.snapshot['step'] == 99
+    assert runtime.channel_table == [['lidar', 'lidar', 'EXPORTED', True, 'source']]
+    assert runtime.channel_states == {'lidar': True}
+
+
+@pytest.mark.parametrize('table', [None, []])
+def test_snapshot_channel_table_absence_and_empty_have_distinct_meanings(live_owner, monkeypatch, table):
+    monkeypatch.setattr(runtime, 'channel_table', [['lidar', 'lidar', 'EXPORTED', True, 'source']])
+    if table is not None:
+        live_owner.messages[0]['payload']['channel_table'] = table
+
+    runtime.tick()
+
+    assert runtime.channel_table == ([] if table == [] else [['lidar', 'lidar', 'EXPORTED', True, 'source']])
+
+
+def test_old_run_snapshot_cannot_replace_actual_channel_table(live_owner, monkeypatch):
+    monkeypatch.setattr(runtime, 'channel_table', [['lidar', 'lidar', 'EXPORTED', True, 'source']])
+    runtime._state.run_id = 'current'
+    live_owner.messages[0]['payload'].update(run_id='old', channel_table=[])
+
+    runtime.tick()
+
+    assert runtime.channel_table == [['lidar', 'lidar', 'EXPORTED', True, 'source']]
+    assert runtime.kinematics.snapshot is None
+
+
+@pytest.mark.parametrize('table', [[['lidar']], 'lidar', {'lidar': True},
+    [['lidar', 'lidar', 'EXPORTED', 'false', 'source']],
+    [['lidar', 'lidar', 'EXPORTED', True, 'source'], ['bad']]])
+def test_invalid_snapshot_channel_table_disconnects_without_publishing_partial_rows(live_owner, monkeypatch, table):
+    from wfrl.blender_bridge.messages import validate_message
+    original = [['lidar', 'lidar', 'EXPORTED', False, 'source']]
+    monkeypatch.setattr(runtime, 'channel_table', list(original))
+    message = live_owner.messages[0]
+    message.update(protocol_version=1, session_id='s')
+    message['payload']['channel_table'] = table
+    validate_message(message)
+
+    runtime.tick()
+
+    assert runtime._state.connection == 'DISCONNECTED'
+    assert 'channel table' in runtime._state.error.lower()
+    assert runtime.channel_table == original
+
+
+def test_null_snapshot_channel_table_clears_rows(live_owner, monkeypatch):
+    monkeypatch.setattr(runtime, 'channel_table', [['lidar', 'lidar', 'EXPORTED', True, 'source']])
+    live_owner.messages[0]['payload']['channel_table'] = None
+    runtime.tick()
+    assert runtime.channel_table == []
+
+
 class WakeObject(dict):
     hide_render = False
     hidden = False

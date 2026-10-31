@@ -78,6 +78,7 @@ def start(context, directory):
 
 
 def _render_settings(scene):
+    """Freeze output quality, using 16-bit PNG for higher precision sources."""
     groups = {
         'render': (scene.render, ('engine', 'resolution_x', 'resolution_y', 'resolution_percentage',
             'pixel_aspect_x', 'pixel_aspect_y', 'fps', 'fps_base', 'film_transparent', 'use_motion_blur',
@@ -89,8 +90,13 @@ def _render_settings(scene):
     }
     if hasattr(scene, 'cycles'):
         groups['cycles'] = (scene.cycles, ('samples', 'use_denoising'))
-    return {name: {key: getattr(target, key) for key in keys if hasattr(target, key)}
-            for name, (target, keys) in groups.items()}
+    settings = {name: {key: getattr(target, key) for key in keys if hasattr(target, key)}
+                for name, (target, keys) in groups.items()}
+    image = settings['image_settings']
+    if (scene.get('wfrl_scene_kind') != 'manual' and 'color_depth' in image
+            and image['color_depth'] != '8'):
+        image['color_depth'] = '16'
+    return settings
 
 
 def draw(layout, context):

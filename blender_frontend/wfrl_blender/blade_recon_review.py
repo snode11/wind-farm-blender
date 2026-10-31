@@ -155,8 +155,10 @@ def return_to_original(context):
     return dict(scene=original.name, restored_views=restored)
 
 
-def _material(name, color, evidence=False):
+def _material(name, color, evidence=False, *, register=None):
     mat = bpy.data.materials.new(name)
+    if register is not None:
+        register('materials', mat)
     mat['blade_recon_owned'] = True
     mat.diffuse_color = color
     mat.use_nodes = True
@@ -170,13 +172,15 @@ def _material(name, color, evidence=False):
     return mat
 
 
-def _texture_material(name, png, atlas):
-    mat = _material(name, GREEN, evidence=True)
+def _texture_material(name, png, atlas, *, register=None):
+    mat = _material(name, GREEN, evidence=True, register=register)
     mat['blade_recon_owned'] = True
     nt = mat.node_tree
     bsdf = nt.nodes.get('Principled BSDF')
     vcol = next(n for n in nt.nodes if n.bl_idname == 'ShaderNodeVertexColor')
     image = bpy.data.images.load(str(png), check_existing=False)
+    if register is not None:
+        register('images', image)
     image['blade_recon_owned'] = True
     if tuple(image.size) != (atlas['W'], atlas['H']) or image.channels != 4:
         bpy.data.images.remove(image)
@@ -315,12 +319,16 @@ def bake_portable(scene):
     scene.frame_set(scene.frame_current)
 
 
-def _mesh(scene, name, vertices, faces, material):
+def _mesh(scene, name, vertices, faces, material, *, register=None):
     data = bpy.data.meshes.new(name)
+    if register is not None:
+        register('meshes', data)
     data.from_pydata(np.asarray(vertices).tolist(), [], [tuple(face) for face in faces])
     data.materials.append(material)
     data.update()
     obj = bpy.data.objects.new(name, data)
+    if register is not None:
+        register('objects', obj)
     scene.collection.objects.link(obj)
     obj.hide_select = True
     obj['blade_recon_owned'] = True
@@ -361,11 +369,15 @@ def _context_geometry(scene, rotor, prefix):
               rotor.cfg.hub_radius_m, rotor.cfg.hub_radius_m, mat)
 
 
-def _camera(scene, name, position, target):
+def _camera(scene, name, position, target, *, register=None):
     data = bpy.data.cameras.new(name)
+    if register is not None:
+        register('cameras', data)
     data.lens = 35
     data.clip_end = 3000
     obj = bpy.data.objects.new(name, data)
+    if register is not None:
+        register('objects', obj)
     from .cameras import clear_camera_mask
     clear_camera_mask(obj)
     scene.collection.objects.link(obj)

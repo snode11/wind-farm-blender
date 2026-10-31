@@ -1,0 +1,292 @@
+{
+  "schema": "wfrl.public-evidence-copy.v1",
+  "scope": "Machine-specific path and hostname normalization only; measured values, statuses and payload identities are preserved. Original records remain local.",
+  "profile": "Validation profile paths identify the measured runtime; profiles, generated scenes, images and synthetic recordings are not part of the Git source distribution.",
+  "files": [
+    {
+      "path": "publication/blender-0.3.42/public/checks/bridge.xml",
+      "original_sha256": "4b72db5b3c1582650a80f3da59756b307079f5e634d0489dd21929e6c899c086",
+      "public_sha256": "a13397e307ada05e1b038bbc3f97f706cf6d3d278dba7e989516facfba8fc8c7"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/host.log",
+      "original_sha256": "5a5831f249794922847dffa51eb892de9a08de19e687b0875242a0782a6920c8",
+      "public_sha256": "a3ef51a025d874db0547eb892bdce3a20fae5d725b02fff76cc25b05c66794d4"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/host.xml",
+      "original_sha256": "1b81f56ba1106db1d577910a755742106b16cea2059096108babed6e326d7e07",
+      "public_sha256": "97ed2c5f799314af95c03c3c064afa6ef8202ac3196274e2c6b2b00ddc5d74c9"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/installed-radar/radar_x100_edges/result.json",
+      "original_sha256": "0c7be57af59b952ea7209e1ca18cd6debac3487669b7e10b7288586398fa7746",
+      "public_sha256": "3493417f03e4f4af761d9afd2c52d858f68c62220b4182ce5e9737989d48655a"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/installed-radar/radar_x100_regression.log",
+      "original_sha256": "9b3029d3765e999465a8dbb42647753cc14bfe9d936d09508abbd6ee4f6a266a",
+      "public_sha256": "c0b032018866e30018de41b2526ef4b61f5abbc0dc95dc2a87e4432d09f6441f"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/installed-radar/radar_x100_regression/result.json",
+      "original_sha256": "942ea1c8dcb4d4e82a2c7e8acc86eada97c0f2db609555d3defc6c4a868b9150",
+      "public_sha256": "e47f424e8e52fcffced613a64c91416a6bb6bd6aadf831ede75cb0cd3a8650e6"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/animation_render_regression/artifacts/animation-34d04eb585f7/render.log",
+      "original_sha256": "9daf349d3b03ebef1cb77224b59eb3b192475b3f5230970966e5aa163a44c72f",
+      "public_sha256": "4ea87f0fb15ab2b5d24ce89f8f72fca82dde929031eaea6b9b324207a9c027fa"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/animation_render_regression/artifacts/animation-441c76d22123/render.log",
+      "original_sha256": "534d06d155df28072db5d736fdef70e5ddf07d24c7ece6cb5c0e3239b840e4f8",
+      "public_sha256": "6e09c390d30b481c89fbacfdc84240d80967f87ee8f3c29bf8d7cafbdd91137a"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/animation_render_regression/artifacts/result.json",
+      "original_sha256": "c39208f28f80dd6882041b6b2b7efc8d0918cb11a5d5c8dae467f19adb2b6404",
+      "public_sha256": "1694221419ae507313aaa5273938c79199f450217197164a73b7a2b169c6c626"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/animation_render_regression/run/blender.log",
+      "original_sha256": "b29c8a2648f42cd4fb31587adc8e0b6c068323cd5cc98ead8cb0384251250519",
+      "public_sha256": "8d675ad4ea9d92ccd065572bf1d952f7c6b8c327a1e0efd5fc5e459e887b1f13"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/animation_render_regression/run/execution.json",
+      "original_sha256": "f1ca70a4eedea87978f65c915a1f3b7b2beb67aa4d406db40344c14eea98e912",
+      "public_sha256": "158760c89f0d16138d72123dd4ef5ccd116d475c2cf9de2dfecd4dc2b6d9dd36"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/animation_render_regression/run/result.json",
+      "original_sha256": "b2d9cef54df30473694a4484d552c65c34b9af78be0f3be4ad6561dac1457fac",
+      "public_sha256": "3841f6515c5cb8a404abeda69e08773cabb32784293af2fafc8cd43164b9ecdb"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/result.json",
+      "original_sha256": "873c272cf16d78e12f5d7537c4001b812687552f0154c3703af7e5723f62a949",
+      "public_sha256": "d67432b7d1eb48d62b0cb578357797fd09c63471cf62d368ca366e77632e5326"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/run/execution.json",
+      "original_sha256": "e795df96ace33a2ec103ca09165d8f53ff866c65f6724c98dd0dee2911f67e4e",
+      "public_sha256": "8f8ad0ebc9c94f62230773731989fab58b168daa5e6d06a6b616ac7df5e4d439"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/run/result.json",
+      "original_sha256": "887431e66361ae8129b981f225bb6dd80e2ec1849b94cd6749c09c62919dfee2",
+      "public_sha256": "f44b657b1d3354ed8042e0d85bc24bedcf241c1a34bf856b9b512f0eebfdb911"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/farm_reopen_settings_regression/artifacts/result.json",
+      "original_sha256": "b84bf9b19ee9eed28b8cbf8eef82a99d86a3505d3f60a7bddd9624d46182013a",
+      "public_sha256": "b144fbe79c0ccff969b1c68449bc1137b2caf9502287c5994d12cac8c0d80fc7"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/farm_reopen_settings_regression/run/blender.log",
+      "original_sha256": "6ec5fc225b883652eb9dcd02b24ea92d1685759704b70ce4d55b88cce4644a86",
+      "public_sha256": "c98f4e39987cf920f3d9df4ca68aa24db02620d0cea56565fb2c3695e67512e7"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/farm_reopen_settings_regression/run/execution.json",
+      "original_sha256": "5415dbdc08f56ab4ff22c922e12a47b9fc25194436bdc637bdbf4f9f418abe84",
+      "public_sha256": "6d03615f6b35c8acf581ac29cdb6f1f17e51ec57d0cedb7c5fd97caa8b2169dd"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/farm_reopen_settings_regression/run/result.json",
+      "original_sha256": "ad5039a5e663f5f0e6f7361466c579b666f5ec9b0bf6ddb41de3b8cf6cdd552f",
+      "public_sha256": "97107dd37cf10b33ae6d1abcca9f507bbac45fcab691bd10a9dcb2f823ee0b23"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/manual_control_regression/artifacts/checks.json",
+      "original_sha256": "f73b969dbad2753c47669c7327d9c4d5014cebef19af1d9e72e1c55283e41a50",
+      "public_sha256": "d66302395920e58afc813d9f00ec24d9c08ce116c258225be305722d369f58d8"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/manual_control_regression/run/blender.log",
+      "original_sha256": "bc3e5fa742c38af3e6c9b557f40a96a65aef8fd5a4e4e939b91203c6514852ef",
+      "public_sha256": "52a463de69d90ddab5469fa45be827a5720ca04f401261508bc5d02a273aeae5"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/manual_control_regression/run/execution.json",
+      "original_sha256": "75b99c4346643467f1705eb462af4c5e876907e2c496f54d6b148fb6f677de5b",
+      "public_sha256": "511e821b8ffbd27d17adb8d2e5725e39bf618d87a5593cb0afe84551452dddae"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/manual_control_regression/run/result.json",
+      "original_sha256": "f647df2418654cfe702fdfe738ac71feeda1f72cc45936f602394547e376bb09",
+      "public_sha256": "a92f6a2573a1f4abf1b9c5b67723652eff86da23cb539eefe309328e8e983422"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/manual_control_state_regression/artifacts/checks.json",
+      "original_sha256": "a15cca188d85e8a297b758804d3b4cc72fa1d0dbd103b63e521c482a4df73788",
+      "public_sha256": "e8aa5053767cc4082fa58a02e31ff2584b51311e7087a72ded468cd4bf2ae5f4"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/manual_control_state_regression/run/blender.log",
+      "original_sha256": "7ca6f4de64392b2dc641f7226143b1431dad888a6bf477ab718c76f981e42649",
+      "public_sha256": "94a02f51ca1960320b222c6a28cd7220469d1ad7e33a11e9ba94ce29f96b591b"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/manual_control_state_regression/run/execution.json",
+      "original_sha256": "424431a271468e79ac005164aa4fafea9b39da0f73630a1afc962bda5650ced0",
+      "public_sha256": "878e73ff132a5da76672c531b573e3ba91ab120e6b95d855284b97b115bbbe4a"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/manual_control_state_regression/run/result.json",
+      "original_sha256": "c91fd9861fbfd5733b2f0650dd665688b3733fe0b9c35e518508d03bc8b5410e",
+      "public_sha256": "fee27c7b7db7bb7ade4ef63293e8fc77c22d753ce999e8d2151545269a32b2e3"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/manual_rate_pitch_regression/artifacts/result.json",
+      "original_sha256": "bcb1b5979fda2ab43cd214481680771d4876200e1c4c64fec6bd4cb83e430704",
+      "public_sha256": "2feda2ef26e3dbd3361c9b47a8cd270c3de4079f269d11476c07faac671e8872"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/manual_rate_pitch_regression/run/execution.json",
+      "original_sha256": "c3b1760a269f0364c1eb47683fba4489936939738cdce48c20780342de9e9c6e",
+      "public_sha256": "a1ec3400b30902e42c9241666f20ed1a5391e513f8f9fe6c642ad6fb06b3b691"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/manual_rate_pitch_regression/run/result.json",
+      "original_sha256": "1328721a2bd10dc24626e5729592d9b4930c2f96574c807763dcc3686767587f",
+      "public_sha256": "53782523d25e2df79001cb1cc48ec5e237b62a93b37e8685c3b69815b78767ee"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/result.json",
+      "original_sha256": "55aa8332c75062eeb51d88123bc19abf25a8453f0c1ac646d15cdee9f08ee45c",
+      "public_sha256": "c4a393bdf603144fca25d2f6304dbfa0e69fbe94d68a017f5dd7cfd6ea71ce7f"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/scene_playback_lifecycle_regression/artifacts/checks.json",
+      "original_sha256": "e0301128c798912b1084f69383df90aa3a886e926c55d4946dc7e3225be8ba3a",
+      "public_sha256": "1ffc09dd4df531e96031cc1055bc0c267277c36a3fbd6acbe2fa3fa4eeb9c564"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/scene_playback_lifecycle_regression/run/blender.log",
+      "original_sha256": "69f1afc64cd766ea7538c82af27e8c94a793a35063cad4cb134bb2c79b71795b",
+      "public_sha256": "b721b3774b5d14484ecf7cb0fa37ea4a6dccf701456ca82df95b029845c6e936"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/scene_playback_lifecycle_regression/run/execution.json",
+      "original_sha256": "b705ed6a2ff256ba4fda080440afc99136928719c23aba8d27256310197cc0b6",
+      "public_sha256": "35571488724f43721e3fd4e374f5f493f85c8c9376c071f991c9b3c9346cce5e"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/scene_playback_lifecycle_regression/run/result.json",
+      "original_sha256": "f4e3543da463ea69fc9feb83760187ca1d50d9e270386f775e4ed707a7d6b4c4",
+      "public_sha256": "6185b8a15b93536bbf40dad47e806723186defea17c3d8dd6ad6cac4983a1b92"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/split_mappo_texture_rollback_regression/artifacts/result.json",
+      "original_sha256": "4b4bea49f138b624b18efc5e76e3155af509334158ab998336a53dcacb3ff952",
+      "public_sha256": "eec84c977c5b779b28eecdec3da21932555226a35e17cca231531bc9e2e2a47a"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/split_mappo_texture_rollback_regression/run/blender.log",
+      "original_sha256": "8097fdcf917eaccbc88b6d4efaefc9337e811d0a7ea44867deee729b4393d238",
+      "public_sha256": "2f5152de0117972d69ea81f5f75d4627eddd026f11c40f32220826eee928156d"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/split_mappo_texture_rollback_regression/run/execution.json",
+      "original_sha256": "784ec915d351ab0de83a3e66d7aa97b7c69f15f3dcdb2839ac0e9389754f5e0a",
+      "public_sha256": "cf702b3e664aa7515c73dfb520049a32ea2261ea848dab794ab90787d09e0c5e"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/checks/native-source/split_mappo_texture_rollback_regression/run/result.json",
+      "original_sha256": "ca67d2e256447f9199641f5fa7c512d775962cc75c16a7c1ce2b5d7f70ac0f4d",
+      "public_sha256": "ead71ff8ae5dd609628e9f2d432dfe8304cc434ccfbc99f745d3377cd78c0d1b"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/validated/environment.json",
+      "original_sha256": "0ca65d1c8dddfa4fd6f61b0ec92abd0e6223e9bde378a1abe685638d2cb9faff",
+      "public_sha256": "01b5542e2cdf8e7c57da2eb5233c85176b88d15712b68ecb8ce225728fd47cb1"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/validated/logs/module-probe.log",
+      "original_sha256": "0bfd97a2986e25415564af85839eab763e9b6f937791c2ee0df9d87c9177f90a",
+      "public_sha256": "1cbf404e0ee5f168c19ef2ea84cbe8730eec4c90bd45e544f7e1f772e5a025bd"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/validated/logs/native-projection.log",
+      "original_sha256": "68d66ccd53370117b84e75a30c5a64fdcdd39a0bbb3aae92baa028c33c1001c1",
+      "public_sha256": "41ef262ee79aaa4c3b34dcd803a3f5dad708f8c1fb56ba6ebeffa17ef7c8231a"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/validated/logs/repo-probe.log",
+      "original_sha256": "e797568a23d3a011807942f31884a7a49ac595b703938eca57037ac58e2dff99",
+      "public_sha256": "a85f779c84a6327ce972534780b05209204aa912fb8f941863411ea38f7e7a1a"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/validated/logs/three-camera-default.log",
+      "original_sha256": "6dc4801c97273f91d4404a88738da6893219132d4b5ccc185d3174887c883bd8",
+      "public_sha256": "a7cf6892afccf0d81478cb990107c53d71bf001d59e986b0b5080a629b1be0d5"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/validated/module-probe.json",
+      "original_sha256": "bb336fefcfb1e60449d80217903e4461c421f015492e86e5e885f5328b481cd4",
+      "public_sha256": "7a8a914dc6ea3fff26e5f2c004f0dee70c292a3921cd1a21c9c1c8e641a58ace"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/validated/package-validation.json",
+      "original_sha256": "8c8524a241285c841fa893bdaea36fea4c28dc8c8de5b49ec7f3d81f778a5733",
+      "public_sha256": "c9b4679a88d5c86174415d9ee28737937d5aba5ed52fba51712ff077fc6bfc03"
+    },
+    {
+      "path": "publication/blender-0.3.42/public/validated/repo-probe.json",
+      "original_sha256": "9c428e601ac52480646a8c477d5e06db39f8e8707169abb136a037332ff7bcb4",
+      "public_sha256": "b2cb6abd3597478ba5fcec004c4a625f31f1ad0b34ca2b77c345573999393fc6"
+    },
+    {
+      "path": "publication/daily-installation-cleanup.json",
+      "original_sha256": "c5decf8ddcc4f414b1af0e45491e0e381e7e0f7cf787744ce8404414267acdf7",
+      "public_sha256": "62eb93ae557c527736b3fe015fdc501ab8fc87bcc65fe68d4d1ff9d246aad8e9"
+    },
+    {
+      "path": "publication/daily-installation-x100/records/channel-load.json",
+      "original_sha256": "0ca2d7ad1946eefafb5189fb2ba7d1f8ca0e1875f093aee2e7228ec6f9d79d80",
+      "public_sha256": "642840babe3bf6bc8865cd36122f9b01bec3db0d952c0197239f5370048614b0"
+    },
+    {
+      "path": "publication/daily-installation-x100/records/daily-gpu.json",
+      "original_sha256": "b4ae1bcffe8fb4d56de90511ae3cb825d2a084b79562938c3ceb28f97f859418",
+      "public_sha256": "be563cdcb288d4ef4536e897ad63027d56c1d79f59f51cbdecf14e5f5b55e7a7"
+    },
+    {
+      "path": "publication/daily-installation-x100/records/daily-runtime.json",
+      "original_sha256": "0d0375376a4fc3d1e8a52a33c34f60e5a307cbe2c4cd4f5ebe018567b1346939",
+      "public_sha256": "b13ef81449a0802163bc8edac3466d5a88ad34337a9c997cd0c5ebc89116b916"
+    },
+    {
+      "path": "publication/daily-installation-x100/records/gpu-window.json",
+      "original_sha256": "db3158f3dcd8403a54bda3e7fe72b80a424a8def0a473da5985493ac5c7853c0",
+      "public_sha256": "cc4edc950b77a5f06fd621cb265da97a9c06ff211b1d0390b406b83af695bf4a"
+    },
+    {
+      "path": "publication/daily-installation-x100/records/installed-inventory.json",
+      "original_sha256": "d58b4406237784f8613f576c1b386a96b729388596f8e55d56790355c94ffb41",
+      "public_sha256": "17862d9b34381b71e4d419142d61fce9f80042b7e8a3c43d1f7931ed9b0eaf65"
+    },
+    {
+      "path": "publication/daily-installation-x100/records/isolated-package.json",
+      "original_sha256": "3559442a03ae24a59a60e0898fa9977462e0233e0c9815d0d2122a775db0c0b0",
+      "public_sha256": "5ebe713348d0a5e7bdefd9ece4b0a0e5a4ae56e397ec7538aac3b31040089268"
+    },
+    {
+      "path": "publication/daily-installation-x100/records/native-boundaries.json",
+      "original_sha256": "835a2b9816a7099858d1238b39a477984124154276d9c91ca3b32167aaa0182f",
+      "public_sha256": "4ea9bf0f3f3c30d2d5cc52fa905afb040c411639ee84ce40d53b0e35d9ce6170"
+    },
+    {
+      "path": "publication/daily-installation-x100/records/native-contract.json",
+      "original_sha256": "8ed82442d60636c06a9d0277f912ce554ba5d49b1014c7367075f720ba52714a",
+      "public_sha256": "1dd06647433776ac92b4aca7aa89479c6674180ec68caf791de14a0fc6a2d002"
+    },
+    {
+      "path": "publication/daily-installation.json",
+      "original_sha256": "c308766255b17b2716790e7962ed258f7d75976b64cc85caef78a1cc03e18c2a",
+      "public_sha256": "c53cf28a427440b766db13d858a9ab36e82383d2ec3c7b944c08de84f364c5c9"
+    }
+  ]
+}

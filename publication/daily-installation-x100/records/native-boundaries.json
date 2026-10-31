@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "tests": 10,
+  "failures": 0,
+  "errors": 0,
+  "addon_path": "/project/outputs/radar-x100/reviewed/profile/extensions/wfrl_blender/__init__.py",
+  "core_path": "/project/outputs/radar-x100/reviewed/profile/extensions/wfrl_blender/_vendor/radar_x100/schema.py"
+}

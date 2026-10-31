@@ -1,0 +1,7 @@
+00:02.500  blend            | Read blend: "/project/publication/blender-0.3.42/public/checks/installed-radar/radar_x100_regression/x100-saved.blend"
+Info: Saved as "x100-saved.blend"
+X100_NATIVE_PASS {"readonly_time_sampling": true, "same_time_mount_max_error": 3.2016340725249393e-06, "simulation_points": 26, "alternate_mounts": true, "raw_camera_hash_and_visibility": true, "native_file_play_pause_restart_and_seek_operators": true, "replay_forward_backward_end_origin_and_ownership": true, "linked_scene_cleanup_preserves_original_collection_objects": true, "save_reopen_restores_configuration_and_paused_sample": true, "resource_cleanup": true, "deleted_owner_no_reassignment_or_orphan_objects": true, "addon_path": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/__init__.py", "core_path": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/_vendor/radar_x100/schema.py", "status": "PASS"}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

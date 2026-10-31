@@ -218,7 +218,7 @@ def test_geometry_cache_reuses_coordinates_but_tracks_native_edits_and_scope(mon
     monkeypatch.setitem(sys.modules, 'bpy', NS(app=NS(handlers=NS(depsgraph_update_post=handlers))))
     matrix = [[float(i == j) for j in range(4)] for i in range(4)]
     mesh = NS(as_pointer=lambda: 20, bl_rna=NS(identifier='Mesh'))
-    obj = NS(name='WFRL.Turbine.T1.Blade', type='MESH', as_pointer=lambda: 10,
+    obj = NS(name='WFRL.Turbine.T1.Blade', type='MESH', as_pointer=lambda: 10, get=lambda key: None,
              data=mesh, matrix_world=matrix, bl_rna=NS(identifier='Object'))
     obj.evaluated_get = lambda _: obj
     scene = NS(as_pointer=lambda: 1, frame_current=1, frame_subframe=0., objects=[obj])

@@ -182,6 +182,24 @@ def on_load_pre(_):
     farm_flex.clear_package_cache()
 
 
+def _farm_timeline_state(scene):
+    """Retain the saved simulation mapping separately from output playback FPS."""
+    fields = ('frame_start', 'frame_end', 'frame_step', 'sync_mode', 'use_preview_range',
+              'frame_preview_start', 'frame_preview_end')
+    return (scene.render.fps, scene.render.fps_base,
+            scene.get('wfrl_clearance_timebase_fps'),
+            {name: getattr(scene, name) for name in fields})
+
+
+def _restore_farm_timeline(scene, saved):
+    fps, base, timebase, fields = saved
+    scene.render.fps, scene.render.fps_base = fps, base
+    for name, value in fields.items():
+        setattr(scene, name, value)
+    if type(timebase) in (int, float) and math.isfinite(timebase) and timebase > 0:
+        scene['wfrl_clearance_timebase_fps'] = timebase
+
+
 def on_load(_):
     global _END_REQUEST
     _END_REQUEST = None
@@ -208,7 +226,11 @@ def on_load(_):
                     # observation turbine so a T2/T3 camera never shows T1's
                     # cards after reopening the file.
                     turbine = scene.get('wfrl_clearance_turbine', 'T1')
-                    preview = farm_flex.attach(scene, candidate)
+                    timeline = _farm_timeline_state(scene)
+                    try:
+                        preview = farm_flex.attach(scene, candidate)
+                    finally:
+                        _restore_farm_timeline(scene, timeline)
                     if turbine in preview.readers:
                         scene['wfrl_clearance_turbine'] = turbine
                         _READERS[scene.as_pointer()] = preview.readers[turbine]

@@ -79,7 +79,8 @@ def render_profile(scene, fast=False):
             'curve_mapping': ([[list(point.location) for point in curve.points] for curve in scene.view_settings.curve_mapping.curves]
                 if scene.view_settings.use_curve_mapping else None),
             'excluded_annotations': ['WFRL.Label.*', 'WFRL.Grid.*', 'WFRL.Inflow.*', 'WFRL.Deflection.*',
-                'WFRL.Wake*', '*.TipTrail.*', '*.ClearanceRadar.Beam*', '*.SensorFrustum', 'WFRL.Fixture.T1.LidarRay*'],
+                'WFRL.Wake*', '*.TipTrail.*', '*.ClearanceRadar.Beam*', '*.SensorFrustum', 'WFRL.Fixture.T1.LidarRay*',
+                'wfrl_x100_role=annotation; X100 GPU points'],
             'image_encoding': 'RGBA8 display-transformed once; top-left rows; PNG sRGB'}
 
 
@@ -116,7 +117,8 @@ def without_annotations(scene, view_layer):
             name = obj.name
             annotation = (name.startswith(('WFRL.Label.', 'WFRL.Grid.', 'WFRL.Inflow.',
                 'WFRL.Deflection.', 'WFRL.Wake', 'WFRL.Fixture.T1.LidarRay'))
-                or '.TipTrail.' in name or '.ClearanceRadar.Beam' in name or name.endswith('.SensorFrustum'))
+                or '.TipTrail.' in name or '.ClearanceRadar.Beam' in name or name.endswith('.SensorFrustum')
+                or obj.get('wfrl_x100_role') == 'annotation')
             if annotation and not obj.hide_get(view_layer=view_layer):
                 obj.hide_set(True, view_layer=view_layer)
                 changed_objects.append(obj)
@@ -376,7 +378,9 @@ def _simulation_state_hash(scene, depsgraph, cache=None):
     import struct
     digest = hashlib.sha256()
     for obj in sorted(scene.objects, key=lambda item: item.name):
-        if not obj.name.startswith(('WFRL.Turbine.', 'WFRL.Camera.T1.Custom.')):
+        if obj.get('wfrl_x100_role') == 'annotation' or not (
+                obj.name.startswith(('WFRL.Turbine.', 'WFRL.Camera.T1.Custom.'))
+                or obj.get('wfrl_x100_role') == 'physical'):
             continue
         evaluated = obj.evaluated_get(depsgraph)
         digest.update(obj.name.encode())
@@ -385,7 +389,9 @@ def _simulation_state_hash(scene, depsgraph, cache=None):
             digest.update(cache.coordinates(obj, evaluated) if cache else _mesh_coordinates(evaluated))
     if cache is not None:
         alive = {(obj.as_pointer(), obj.data.as_pointer()) for obj in scene.objects
-                 if obj.name.startswith(('WFRL.Turbine.', 'WFRL.Camera.T1.Custom.')) and obj.type == 'MESH'}
+                 if (obj.name.startswith(('WFRL.Turbine.', 'WFRL.Camera.T1.Custom.'))
+                     or obj.get('wfrl_x100_role') == 'physical')
+                 and obj.get('wfrl_x100_role') != 'annotation' and obj.type == 'MESH'}
         cache.meshes = {key: value for key, value in cache.meshes.items() if key in alive}
     return digest.hexdigest()
 

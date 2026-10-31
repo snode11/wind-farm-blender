@@ -140,7 +140,9 @@ class WFRL_OT_SplitReconSameSource(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene is not None and _core().available(context.scene)
+        from . import split_mappo_texture
+        return (context.scene is not None and _core().available(context.scene)
+                and split_mappo_texture.available(context.scene))
 
     def execute(self, context):
         try:
@@ -178,7 +180,12 @@ class WFRL_OT_SplitReconSwitchMode(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene is not None and _core().enabled(context.scene)
+        from . import split_mappo_texture
+        scene = context.scene
+        core = _core()
+        return (scene is not None and core.enabled(scene)
+                and (core.texture_adapter(scene).active(scene)
+                     or split_mappo_texture.available(scene)))
 
     def execute(self, context):
         try:
@@ -286,6 +293,8 @@ def draw_controls(layout, context):
         box.operator('wfrl.split_recon_switch_mode',
             text='切换到几何重建' if synchronized else '切换到同源纹理对照',
             icon='MOD_MIRROR' if synchronized else 'SHADING_TEXTURE')
+        if not synchronized and not split_mappo_texture.available(scene):
+            box.label(text='当前来源没有匹配的同源纹理结果', icon='INFO')
     else:
         # Retain compatibility for already saved independent samples without
         # adding an independent-source entry to this geometry workflow.

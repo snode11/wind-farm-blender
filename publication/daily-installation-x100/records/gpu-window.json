@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "addon_path": "/project/outputs/radar-x100/reviewed/profile/extensions/wfrl_blender/__init__.py",
+  "core_path": "/project/outputs/radar-x100/reviewed/profile/extensions/wfrl_blender/_vendor/radar_x100/schema.py",
+  "raw_rgba_sha256": "6ce16060e5239f183b5c6a6ce38b635506453bb9712e05aebe7046c8f85d9af9",
+  "raw_state_sha256": "cecca0e4ff8692090d90c4f6f6672fbb039b9f3047e3199bcd24602e281a7e52",
+  "resolution": [
+    320,
+    185
+  ],
+  "auxiliary_update_preserves_raw_pixels_state_visibility_clock_and_optics": true,
+  "simulation_points": 45,
+  "source": "GEOMETRY_SIMULATION",
+  "actual_raw_capture_complete": true,
+  "installation_guard_during_capture": true,
+  "raw_capture_path": "/project/outputs/radar-x100/reviewed/gpu-window/capture_20261031_105429_32bd27fb95"
+}

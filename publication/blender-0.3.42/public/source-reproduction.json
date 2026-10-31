@@ -1,0 +1,13 @@
+{
+  "status": "PASS_BYTE_IDENTICAL",
+  "source_tag": "v0.3.42",
+  "input_manifest": "publication/blender-0.3.42/public/build-inputs.json",
+  "build_input_files": 213,
+  "build_input_sha256": "cc8bac9648a28cce202b75ecf023e8edcd20af9ea21d710e7e42100d04618761",
+  "independent_export_inputs": "PASS",
+  "independent_build_archive_sha256": "30b888681eebce0642aa4b3e967f11a0a71341b7140165ed71fb0d43cd14ec2b",
+  "public_archive_sha256": "30b888681eebce0642aa4b3e967f11a0a71341b7140165ed71fb0d43cd14ec2b",
+  "scope": "An independent Git-tree export with the same canonical builder and complete build inputs produced a byte-identical extension. The release tag retains these inputs. Source archive byte identity and tagged commit are recorded by the Release delivery manifest.",
+  "archive_inventory": "PASS",
+  "measured_snapshot_tree": "11ac4e339963065d4ef1bec499b2882e9de5307b"
+}

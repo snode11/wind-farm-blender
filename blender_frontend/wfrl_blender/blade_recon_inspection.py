@@ -22,11 +22,13 @@ def _linear(value):
     return value / 12.92 if value <= .04045 else ((value + .055) / 1.055) ** 2.4
 
 
-def _group():
+def _group(*, register=None):
     existing = bpy.data.node_groups.get(GROUP_NAME)
     if existing is not None and existing.get('blade_recon_inspection_version') == VERSION:
         return existing
     group = bpy.data.node_groups.new(GROUP_NAME, 'ShaderNodeTree')
+    if register is not None:
+        register('node_groups', group)
     group['blade_recon_inspection_version'] = VERSION
     group['blade_recon_owned'] = True
     group['inspection_scope'] = 'manual UV region; appearance only; not defect detection'
@@ -130,7 +132,7 @@ def _group():
     return group
 
 
-def ensure_material(mat):
+def ensure_material(mat, *, register=None):
     """Upgrade a v0.2 material and return its independent inspection node.
 
     Returns None for geometry-only materials.  TexMix's factor and color1 links,
@@ -149,7 +151,7 @@ def ensure_material(mat):
         node.label = '手动区域 / 外观增强（非缺陷识别）'
         node.location = (texture.location.x + 250, texture.location.y - 250)
     if node.node_tree is None or node.node_tree.get('blade_recon_inspection_version') != VERSION:
-        node.node_tree = _group()
+        node.node_tree = _group(register=register)
     source = texture.outputs['Color']
     if not any(link.from_socket == source for link in node.inputs['Texture'].links):
         links.new(source, node.inputs['Texture'])
@@ -181,7 +183,7 @@ def _perimeter(rotor, radius):
     return max(.01, float(np.interp(radius, rotor.tpl.r, lengths)))
 
 
-def update(scene, blades, rotor):
+def update(scene, blades, rotor, *, register=None):
     """Apply display properties only; safe to call after every saved sample."""
     selected, radius, tau, size = _coordinates(scene, rotor)
     span = float(rotor.tpl.r[-1] - rotor.tpl.r[0])
@@ -204,7 +206,7 @@ def update(scene, blades, rotor):
     }
     for index, obj in enumerate(blades):
         for mat in obj.data.materials:
-            node = ensure_material(mat)
+            node = ensure_material(mat, register=register)
             if node is None:
                 continue
             for name, value in values.items():

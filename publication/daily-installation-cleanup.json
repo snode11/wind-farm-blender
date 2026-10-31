@@ -1,46 +1,1268 @@
 {
-  "schema": "wfrl.recoverable-cleanup.v1",
+  "schema": "wfrl.frontend-intermediate-cleanup.v1",
   "status": "PASS",
-  "scope": "Frontend verification profiles, duplicate build archives, test scene copies, intermediate screenshots, project-owned test scratch and regenerable caches.",
-  "trash_roots": [
-    "/Users/eason/.Trash/WFRL-frontend-cleanup-5311474275",
-    "/Users/eason/.Trash/WFRL-install-cleanup-8aacd7a00a",
-    "/Users/eason/.Trash/WFRL-native-optimization-826fa72371",
-    "/Users/eason/.Trash/WFRL-release-0.3.40-38889658e6"
+  "removal": "permanent",
+  "removed_roots": [
+    {
+      "path": "/private/tmp/wfrl-x100-native-a",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 0,
+      "bytes": 0,
+      "images": 0
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-installed-a",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 354,
+      "bytes": 254262052,
+      "images": 12
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-edges-fov",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 1,
+      "bytes": 253,
+      "images": 0
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-baseline",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 1151,
+      "bytes": 837074498,
+      "images": 36
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-edges-cache",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 1,
+      "bytes": 253,
+      "images": 0
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-edges-all",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 6,
+      "bytes": 3058,
+      "images": 0
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-edges-green",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 6,
+      "bytes": 3057,
+      "images": 0
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-edges-red-valid",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 6,
+      "bytes": 3057,
+      "images": 0
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-native-b",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 17,
+      "bytes": 20443,
+      "images": 0
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-edges-red",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 6,
+      "bytes": 3057,
+      "images": 0
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-native-c",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 17,
+      "bytes": 20443,
+      "images": 0
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-native-d",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 17,
+      "bytes": 6252434,
+      "images": 0
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-edges-capture-clock-red",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 1,
+      "bytes": 253,
+      "images": 0
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-host-final.txt",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 1,
+      "bytes": 1341,
+      "images": 0
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-native-final-source",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 18,
+      "bytes": 6256716,
+      "images": 0
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-edges-status-red",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 1,
+      "bytes": 253,
+      "images": 0
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-edges-cursor",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 6,
+      "bytes": 3057,
+      "images": 0
+    },
+    {
+      "path": "/private/tmp/wfrl-x100-edges-capture",
+      "reason": "x100_temporary_builds_and_validation",
+      "files": 1,
+      "bytes": 253,
+      "images": 0
+    },
+    {
+      "path": "/home/user/.Trash/wfrl-frontend-intermediates-be8c942c0470",
+      "reason": "previously_identified_frontend_intermediates_in_trash",
+      "files": 8157,
+      "bytes": 637925746,
+      "images": 28
+    },
+    {
+      "path": "/home/user/.Trash/wfrl-daily-0.3.40-intermediates-77086ece71",
+      "reason": "previously_identified_frontend_intermediates_in_trash",
+      "files": 193,
+      "bytes": 59483700,
+      "images": 5
+    },
+    {
+      "path": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/X100-Isolated-Validation_24795_autosave.blend",
+      "reason": "task_owned_blender_autosave",
+      "files": 1,
+      "bytes": 6224935,
+      "images": 0
+    },
+    {
+      "path": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/X100-Isolated-Validation_15345_autosave.blend",
+      "reason": "task_owned_blender_autosave",
+      "files": 1,
+      "bytes": 6227125,
+      "images": 0
+    },
+    {
+      "path": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/X100-Isolated-Validation_12857_autosave.blend",
+      "reason": "task_owned_blender_autosave",
+      "files": 1,
+      "bytes": 6227004,
+      "images": 0
+    },
+    {
+      "path": "/project/outputs/radar-x100",
+      "reason": "x100_builds_validation_profiles_synthetic_recordings_scenes_and_images",
+      "files": 1707,
+      "bytes": 862103586,
+      "images": 54
+    },
+    {
+      "path": "/project/wfrl/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 2,
+      "bytes": 2514,
+      "images": 0
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/passage-quarter-speed.mp4",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 5138364,
+      "images": 0
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/comparison-candidates-preview.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 479311,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/farm-down-nacelle-view/Farm_Down.blend",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 12119383,
+      "images": 0
+    },
+    {
+      "path": "/project/outputs/down-reference-view/reference.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2067040,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/down-reference-view/Rootkink_Down.blend",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 12126578,
+      "images": 0
+    },
+    {
+      "path": "/project/outputs/t1-down-shoulder-view/T1_Down_后缘肩部.blend",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 12123062,
+      "images": 0
+    },
+    {
+      "path": "/project/blender_frontend/wfrl_blender/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 73,
+      "bytes": 1756812,
+      "images": 0
+    },
+    {
+      "path": "/project/blender_frontend/tests/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 1,
+      "bytes": 7884,
+      "images": 0
+    },
+    {
+      "path": "/project/scripts/blender/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 1,
+      "bytes": 25655,
+      "images": 0
+    },
+    {
+      "path": "/project/wfrl/radar_x100/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 7,
+      "bytes": 74546,
+      "images": 0
+    },
+    {
+      "path": "/project/wfrl/lidar/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 3,
+      "bytes": 60144,
+      "images": 0
+    },
+    {
+      "path": "/project/wfrl/blender_bridge/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 1,
+      "bytes": 28804,
+      "images": 0
+    },
+    {
+      "path": "/home/user/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes",
+      "reason": "superseded_local_frontend_installation_work",
+      "files": 149,
+      "bytes": 102840550,
+      "images": 40
+    },
+    {
+      "path": "/home/user/.codex/visualizations/2026/10/30/01a18aa9-0657-74e0-b24d-d62eef0cff44/frontend-fixes",
+      "reason": "superseded_local_frontend_installation_work",
+      "files": 70,
+      "bytes": 205912133,
+      "images": 1
+    },
+    {
+      "path": "/home/user/Library/Application Support/Blender/5.2/extensions/user_default/.wfrl_blender-x100-rollback",
+      "reason": "temporary_installation_rollback_after_successful_validation",
+      "files": 300,
+      "bytes": 154295460,
+      "images": 12
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/video-export-check/linear-transform.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 253,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/visible-window.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 953574,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/nrel-nacelle-baseline.blend",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 12132479,
+      "images": 0
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/nrel-nacelle-baseline-restored.blend",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 12123916,
+      "images": 0
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/spatial/relations-preview.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 122619,
+      "images": 1
+    },
+    {
+      "path": "/project/blender_frontend/wfrl_blender/nrel_defects/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 7,
+      "bytes": 245406,
+      "images": 0
+    },
+    {
+      "path": "/project/blender_frontend/wfrl_blender/operators/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 5,
+      "bytes": 22640,
+      "images": 0
+    },
+    {
+      "path": "/project/blender_frontend/wfrl_blender/panels/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 23,
+      "bytes": 400686,
+      "images": 0
+    },
+    {
+      "path": "/project/blender_frontend/wfrl_blender/radar_x100/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 5,
+      "bytes": 58170,
+      "images": 0
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0006.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2794770,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0012.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2850035,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0013.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2817187,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0007.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2834313,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0011.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2889016,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0005.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2763842,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0004.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2743614,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0010.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2910161,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0028.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2617920,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0014.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2801320,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0000.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2510731,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0001.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2580583,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0015.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2792227,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0029.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2583084,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0003.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2706767,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0017.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2826093,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0016.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2799495,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0002.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2658272,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0027.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2612091,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0026.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2620362,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0030.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2498687,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0024.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2598404,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0018.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2866571,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0019.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2901527,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0025.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2607993,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0009.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2904686,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0021.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2832582,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0020.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2891845,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0008.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2873475,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0022.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2732865,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/final-baseline/frames/0023.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 2635551,
+      "images": 1
+    },
+    {
+      "path": "/project/blender_frontend/wfrl_blender/_vendor/blade_recon/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 2,
+      "bytes": 16779,
+      "images": 0
+    },
+    {
+      "path": "/home/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 71,
+      "bytes": 1754739,
+      "images": 0
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/video-export-check/masters/master_frames/000001.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 108577,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/video-export-check/masters/master_frames/000000.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 108738,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/nrel-nacelle-camera/video-export-check/interrupted-commit/master_frames/000000.png",
+      "reason": "generated_frontend_test_image_scene_video_or_duplicate_build",
+      "files": 1,
+      "bytes": 108738,
+      "images": 1
+    },
+    {
+      "path": "/home/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/nrel_defects/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 7,
+      "bytes": 245546,
+      "images": 0
+    },
+    {
+      "path": "/home/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/operators/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 5,
+      "bytes": 22740,
+      "images": 0
+    },
+    {
+      "path": "/home/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/_vendor/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 1,
+      "bytes": 206,
+      "images": 0
+    },
+    {
+      "path": "/home/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/panels/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 23,
+      "bytes": 401116,
+      "images": 0
+    },
+    {
+      "path": "/home/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/radar_x100/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 5,
+      "bytes": 58270,
+      "images": 0
+    },
+    {
+      "path": "/home/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/_vendor/blade_recon/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 2,
+      "bytes": 16819,
+      "images": 0
+    },
+    {
+      "path": "/home/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/_vendor/radar_x100/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 7,
+      "bytes": 74917,
+      "images": 0
+    },
+    {
+      "path": "/home/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/_vendor/lidar/__pycache__",
+      "reason": "regenerable_python_or_test_cache",
+      "files": 4,
+      "bytes": 60515,
+      "images": 0
+    },
+    {
+      "path": "/project/outputs/blade-texture-split-fix-20261007-b01/fresh-window/texture-split-reviewed.blend",
+      "reason": "frontend regression or review media",
+      "files": 1,
+      "bytes": 53201027,
+      "images": 0
+    },
+    {
+      "path": "/project/outputs/blade-texture-split-fix-20261007-b01/launcher-visible/texture-inspection.blend",
+      "reason": "frontend regression or review media",
+      "files": 1,
+      "bytes": 2816721,
+      "images": 0
+    },
+    {
+      "path": "/project/outputs/gw184-single/resume-regression-v2/videos",
+      "reason": "frontend regression or review media",
+      "files": 3,
+      "bytes": 12129,
+      "images": 0
+    },
+    {
+      "path": "/project/outputs/gw184-single/resume-regression-v3/videos",
+      "reason": "frontend regression or review media",
+      "files": 3,
+      "bytes": 12129,
+      "images": 0
+    },
+    {
+      "path": "/project/outputs/gw184-single/review/mp4-check.png",
+      "reason": "frontend regression or review media",
+      "files": 1,
+      "bytes": 659874,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt01/paused-after-real-play.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4735747,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt01/same-source-current-reentry.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4767277,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt01/same-source-detail.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4751337,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt01/same-source-full-rotor.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4110710,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt01/same-source-native-reopen.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4756514,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt02/original-geometry.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 3166156,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt02/paused-after-real-play.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4738141,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt02/same-source-current-reentry.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4779038,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt02/same-source-detail.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4774229,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt02/same-source-full-rotor.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4119772,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/daily-window/attempt02/same-source-native-reopen.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4755590,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt01/paused-after-real-play.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4743068,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt01/same-source-detail.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4727132,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt02/paused-after-real-play.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4290212,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt02/same-source-detail.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4735694,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt03/paused-after-real-play.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4716537,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt03/same-source-current-reentry.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4818911,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt03/same-source-detail.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4736385,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt03/same-source-full-rotor.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4118896,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt03/same-source-native-reopen.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4762416,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt04/original-geometry.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 3167297,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt04/paused-after-real-play.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4726972,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt04/same-source-current-reentry.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4787464,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt04/same-source-detail.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4744446,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt04/same-source-full-rotor.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4121691,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/isolated-window/attempt04/same-source-native-reopen.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4763330,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/self-check/native-edge/attempt01/cycle0-mappo-after-synthetic.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4642528,
+      "images": 1
+    },
+    {
+      "path": "/project/outputs/mappo-same-source-texture-20261007-a01/self-check/native-edge/attempt01/cycle3-mappo-after-synthetic.png",
+      "reason": "frontend texture validation screenshot",
+      "files": 1,
+      "bytes": 4631311,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.30/package/wfrl-validation-0.3.30.zip",
+      "reason": "obsolete validation archive or unpublished source candidate",
+      "files": 1,
+      "bytes": 8317221,
+      "images": 0
+    },
+    {
+      "path": "/project/publication/blender-0.3.38/lidar-evidence/close-playback.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 4572725,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.38/lidar-evidence/normal-playback.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 4553280,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.38/source-evidence/native-source/animation_render_regression/artifacts/animation-a9710ca35da7/frames/frame_0002.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 1352,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.38/source-evidence/native-source/animation_render_regression/artifacts/animation-a9710ca35da7/frames/frame_0004.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 1352,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.38/source-evidence/native-source/animation_render_regression/artifacts/animation-a9710ca35da7/frames/frame_0006.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 1352,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.38/source-evidence/native-source/animation_render_regression/artifacts/animation-db98a02ae1f3/frames/frame_0001.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 10959,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.38/source-evidence/native-source/animation_render_regression/artifacts/animation-db98a02ae1f3/frames/frame_0301.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 11209,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.38/source-evidence/native-source/animation_render_regression/artifacts/animation-db98a02ae1f3/frames/frame_0601.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 10874,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-385f991f29d3/frames/frame_0002.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 1342,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-385f991f29d3/frames/frame_0004.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 1342,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-385f991f29d3/frames/frame_0006.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 1342,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-385f991f29d3/scene.blend",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 74854,
+      "images": 0
+    },
+    {
+      "path": "/project/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-437e182cd15f/scene.blend",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 6297458,
+      "images": 0
+    },
+    {
+      "path": "/project/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-b62aaaab95f9/frames/frame_0001.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 10949,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-b62aaaab95f9/frames/frame_0301.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 11199,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-b62aaaab95f9/frames/frame_0601.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 10864,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-b62aaaab95f9/scene.blend",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 6296702,
+      "images": 0
+    },
+    {
+      "path": "/project/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-f09c3b0e7344/scene.blend",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 75055,
+      "images": 0
+    },
+    {
+      "path": "/project/publication/blender-0.3.39/short-video/T1-Down-9RPM-1080p25.mp4",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 199344,
+      "images": 0
+    },
+    {
+      "path": "/project/publication/blender-0.3.40/checks/enabled-window/focused-single-solid.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 197833,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.40/checks/enabled-window/triple-c2-disabled.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 1049665,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.40/checks/proxy-window/camera-calibrated.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 301653,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.40/checks/proxy-window/camera-reopened.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 329418,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.40/delivery/wind-farm-blender-source-0.3.40.zip",
+      "reason": "obsolete validation archive or unpublished source candidate",
+      "files": 1,
+      "bytes": 176306798,
+      "images": 0
+    },
+    {
+      "path": "/project/publication/blender-0.3.40/public/daily/ui/cameras-reference-frame1.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 1221040,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.40/public/daily/ui/manual-paused.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 5103010,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.40/public/daily/ui/replay-home-frame1.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 5240885,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.40/public/daily/windows/frontend-sessions/recording-1793256107774587000/000000.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 2350667,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.40/public/daily/windows/frontend-sessions/recording-1793256108798814000/000000.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 147232,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/blender-0.3.40/validated/package",
+      "reason": "obsolete unpublished local candidate package",
+      "files": 3,
+      "bytes": 99186673,
+      "images": 0
+    },
+    {
+      "path": "/project/publication/daily-installation-current/package",
+      "reason": "obsolete unpublished local candidate package",
+      "files": 3,
+      "bytes": 99186283,
+      "images": 0
+    },
+    {
+      "path": "/project/publication/frontend-current/checks/camera-window/down.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 6100652,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/frontend-current/checks/camera-window/three-cameras.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 1234494,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/frontend-current/checks/farm-split-source/down-front.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 5650066,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/frontend-current/checks/reconstruction-window/final-same-source-enhanced-complete.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 4087245,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/frontend-current/package",
+      "reason": "obsolete unpublished local candidate package",
+      "files": 3,
+      "bytes": 99186548,
+      "images": 0
+    },
+    {
+      "path": "/project/publication/frontend-optimization/checks/enabled-window-final/focused-single-solid.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 197665,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/frontend-optimization/checks/enabled-window-final/triple-c2-disabled.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 1049665,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/frontend-optimization/checks/proxy-window-final/camera-calibrated.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 308164,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/frontend-optimization/checks/proxy-window-final/camera-reopened.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 329418,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/frontend-optimization/checks/proxy-window/attempt-2/camera-after-pose.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 293044,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/frontend-optimization/checks/proxy-window/attempt-2/camera-initial.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 264823,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/frontend-optimization/checks/proxy-window/camera-after-pose.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 293044,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/frontend-optimization/checks/proxy-window/camera-initial.png",
+      "reason": "frontend validation media; numeric result records retained",
+      "files": 1,
+      "bytes": 264823,
+      "images": 1
+    },
+    {
+      "path": "/project/publication/frontend-optimization/validated/package",
+      "reason": "obsolete unpublished local candidate package",
+      "files": 3,
+      "bytes": 99186674,
+      "images": 0
+    },
+    {
+      "path": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-171",
+      "reason": "task-owned pytest temporary fixtures",
+      "files": 30,
+      "bytes": 9771,
+      "images": 0
+    },
+    {
+      "path": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-172",
+      "reason": "task-owned pytest temporary fixtures",
+      "files": 105,
+      "bytes": 19775,
+      "images": 8
+    },
+    {
+      "path": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-173",
+      "reason": "task-owned pytest temporary fixtures",
+      "files": 105,
+      "bytes": 19773,
+      "images": 8
+    },
+    {
+      "path": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-current",
+      "reason": "task-owned pytest temporary pointer",
+      "files": 0,
+      "bytes": 0,
+      "images": 0
+    },
+    {
+      "path": "/home/user/.codex/visualizations/2026/10/31/01a18f9f-d14d-7ac0-b5d9-a0e69ee06754/daily-install-work",
+      "reason": "completed installation probes, temporary configuration backup, capture and cleanup plans",
+      "files": 23,
+      "bytes": 944967,
+      "images": 1
+    }
   ],
-  "items_moved": 120,
-  "files_moved": 11338,
-  "bytes_moved": 3181818992,
-  "inventories": [
-    "/Users/eason/.Trash/WFRL-frontend-cleanup-5311474275/removed-items.json",
-    "/Users/eason/.Trash/WFRL-install-cleanup-8aacd7a00a/removed-items.json",
-    "/Users/eason/.Trash/WFRL-native-optimization-826fa72371/removed-items.json",
-    "/Users/eason/.Trash/WFRL-release-0.3.40-38889658e6/removed-items.json"
-  ],
-  "restore_tools": [
-    "/Users/eason/.Trash/WFRL-frontend-cleanup-5311474275/restore.py",
-    "/Users/eason/.Trash/WFRL-install-cleanup-8aacd7a00a/restore.py",
-    "/Users/eason/.Trash/WFRL-native-optimization-826fa72371/restore.py",
-    "/Users/eason/.Trash/WFRL-release-0.3.40-38889658e6/restore.py"
-  ],
-  "permanent_deletion": false,
-  "preserved_installation": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
-  "preserved_package": "publication/blender-0.3.40/validated/package/wfrl_blender-0.3.40.zip",
-  "rollback_backup": "/Users/eason/.codex/backups/wfrl-release-0.3.40",
-  "protected_profile_files_checked": 6,
+  "files_removed": 12843,
+  "bytes_removed": 4129161550,
+  "images_removed": 308,
+  "failed_paths": [],
+  "preserved_archive": "/project/publication/daily-installation-x100/package/wfrl_blender-0.3.41.zip",
+  "preserved_installation": "/home/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "source_files_preserved": 289,
+  "source_and_formal_resources_preserved": true,
   "git_head_preserved": true,
   "git_index_preserved": true,
-  "formal_research_inputs_results_and_frozen_methods_preserved": true,
-  "formal_presentations_preserved": true,
-  "unrelated_test_temporaries_excluded": true,
-  "isolated_runtime_profiles_remaining": false,
-  "workspace_cache_and_common_temporary_file_scan": "PASS_RELEASE_OWNED_SCOPE",
-  "installation_and_asset_integrity": "PASS",
-  "restoration_dry_run": {
-    "status": "DRY_RUN_PASS",
-    "items": 120,
-    "overwrite_protection": true
-  },
-  "source_asset_files_checked": 66,
-  "current_cleanup": "publication/blender-0.3.40/cleanup.json"
+  "configuration_files_preserved": 6,
+  "images_retained_for_current_installation": false,
+  "isolated_profiles_retained": false,
+  "limits": "Only identified generated frontend artifacts, task-owned temporary paths and known prior frontend cleanup trash were removed. Scientific data, source reference images and published resources are retained.",
+  "catalogued_resource_files_checked": 33091,
+  "catalogued_resources_preserved": true,
+  "temporary_task_workspace_removed": true,
+  "temporary_task_paths_remaining": [],
+  "cache_directories_remaining": [],
+  "installed_archive_match_after_cleanup": true,
+  "configuration_hashes_match_after_cleanup": true,
+  "installed_files_verified_after_cleanup": 214
 }

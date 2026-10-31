@@ -1,0 +1,358 @@
+{
+  "schema_version": "wfrl.frontend-isolated-package.v1",
+  "status": "PASS",
+  "output": "/project/publication/blender-0.3.42/public/validated",
+  "module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "commands": [
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--command",
+        "extension",
+        "repo-add",
+        "wfrl_frontend",
+        "--name",
+        "WFRL Frontend Isolated Validation",
+        "--directory",
+        "/project/publication/blender-0.3.42/public/validated/profile/extensions",
+        "--clear-all"
+      ],
+      "returncode": 0,
+      "log": "/project/publication/blender-0.3.42/public/validated/logs/repo-add.log",
+      "required_markers": [],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.9796541250543669,
+      "status": "EXIT_ZERO_REQUIRES_PROBE"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/project/scripts/blender/validate_frontend_package.py",
+        "--",
+        "--inside-probe",
+        "repo",
+        "--repository",
+        "/project/publication/blender-0.3.42/public/validated/profile/extensions",
+        "--output",
+        "/project/publication/blender-0.3.42/public/validated/repo-probe.json"
+      ],
+      "returncode": 0,
+      "log": "/project/publication/blender-0.3.42/public/validated/logs/repo-probe.log",
+      "required_markers": [
+        "FRONTEND_REPOSITORY_PROBE_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.4928697079885751,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--command",
+        "extension",
+        "install-file",
+        "-r",
+        "wfrl_frontend",
+        "--enable",
+        "/project/publication/blender-0.3.42/public/validated/package/wfrl_blender-0.3.42.zip"
+      ],
+      "returncode": 0,
+      "log": "/project/publication/blender-0.3.42/public/validated/logs/install-file.log",
+      "required_markers": [
+        "Installed \"wfrl_blender\""
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 1.0563126669730991,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/project/scripts/blender/validate_frontend_package.py",
+        "--",
+        "--inside-probe",
+        "module",
+        "--repository",
+        "/project/publication/blender-0.3.42/public/validated/profile/extensions",
+        "--output",
+        "/project/publication/blender-0.3.42/public/validated/module-probe.json"
+      ],
+      "returncode": 0,
+      "log": "/project/publication/blender-0.3.42/public/validated/logs/module-probe.log",
+      "required_markers": [
+        "FRONTEND_INSTALLED_MODULE_PROBE_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.55302929203026,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/project/blender_frontend/tests/blender/three_camera_default_regression.py"
+      ],
+      "returncode": 0,
+      "log": "/project/publication/blender-0.3.42/public/validated/logs/three-camera-default.log",
+      "required_markers": [
+        "THREE_CAMERA_DEFAULT_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [
+        {
+          "kind": "blender_exit_memory_diagnostic",
+          "message": "Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB",
+          "blocks": 350,
+          "reported_mb": 0.02594,
+          "bytes": 27200,
+          "bytes_note": "Reported MB converted by 1024^2 and rounded; limited by log precision"
+        }
+      ],
+      "elapsed_s": 6.977158415946178,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/Applications/Blender.app/Contents/MacOS/Blender",
+        "--background",
+        "--python-exit-code",
+        "1",
+        "--python",
+        "/project/blender_frontend/tests/blender/native_camera_projection_regression.py"
+      ],
+      "returncode": 0,
+      "log": "/project/publication/blender-0.3.42/public/validated/logs/native-projection.log",
+      "required_markers": [
+        "NATIVE_PROJECTION_PASS"
+      ],
+      "error_markers": [],
+      "warnings": [],
+      "elapsed_s": 0.5579346671001986,
+      "status": "PASS"
+    }
+  ],
+  "checks": {
+    "archive_inventory": "PASS",
+    "repository_probe": {
+      "status": "PASS",
+      "repository": "/project/publication/blender-0.3.42/public/validated/profile/extensions",
+      "repo_module": "wfrl_frontend",
+      "blender": "5.2.1 LTS",
+      "background": true
+    },
+    "installed_inventory": {
+      "status": "PASS",
+      "package_path": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender",
+      "verified_files": 214,
+      "mismatches": [],
+      "unexpected_files": [],
+      "ignored": [
+        "__pycache__",
+        "*.pyc"
+      ]
+    },
+    "module_probe": {
+      "status": "PASS",
+      "repository": "/project/publication/blender-0.3.42/public/validated/profile/extensions",
+      "repo_module": "wfrl_frontend",
+      "blender": "5.2.1 LTS",
+      "background": true,
+      "module": "bl_ext.wfrl_frontend.wfrl_blender",
+      "addon_path": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/__init__.py",
+      "imported_modules": {
+        "bl_ext.wfrl_frontend.wfrl_blender.camera_projection": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/camera_projection.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nacelle_camera": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/nacelle_camera.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.turbine_geometry": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/turbine_geometry.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.cameras": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/cameras.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.materials": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/materials.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.scene_model": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/scene_model.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.scene_builder": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/scene_builder.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.workspace": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/workspace.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.atmosphere": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/atmosphere.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.protocol": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/protocol.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.wake": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/wake.py",
+        "bl_ext.wfrl_frontend.wfrl_blender": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.state": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/state.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.animation": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/animation.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.training": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/training.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.live_scene": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/live_scene.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.performance": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/performance.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.runtime": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/runtime.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.deflection": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/deflection.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.demo": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/demo.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.preferences": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/preferences.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.home_state": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/home_state.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.diagnostics": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/diagnostics.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.diagnostics": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/diagnostics.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.status": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/status.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/operators/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators.connection": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/operators/connection.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators.run": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/operators/run.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.history": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/history.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.charts": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/charts.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators.history_export": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/operators/history_export.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.telemetry": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/telemetry.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.operators.workflow": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/operators/workflow.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.scene": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/scene.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.channels": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/channels.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.run": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/run.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.safety": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/safety.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.presentation": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/presentation.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.presentation": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/presentation.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.training": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/training.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.gimbal": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/gimbal.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.clearance_replay": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/clearance_replay.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.clearance": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/clearance.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.farm_flex": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/farm_flex.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.ui_helpers": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/ui_helpers.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.farm_replay": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/farm_replay.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.video_output": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/video_output.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.video_output": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/video_output.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_cameras": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/custom_cameras.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_history": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/custom_camera_history.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_diagnostics": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/custom_camera_diagnostics.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_preview": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/custom_camera_preview.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.playback": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/playback.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_capture": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/custom_camera_capture.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.custom_camera_output": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/custom_camera_output.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.installation_schematic": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/installation_schematic.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.native_camera_views": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/native_camera_views.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.stacked_camera_rig": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/stacked_camera_rig.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.stacked_camera_rig": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/stacked_camera_rig.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.custom_cameras": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/custom_cameras.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/_vendor/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor.blade_recon": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/_vendor/blade_recon/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor.blade_recon.model": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/_vendor/blade_recon/model.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.blade_recon_data": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/blade_recon_data.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.blade_recon_review": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/blade_recon_review.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.blade_recon": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/blade_recon.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.home": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/home.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/nrel_defects/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.defect_shapes": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/nrel_defects/defect_shapes.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.reference_surface": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/nrel_defects/reference_surface.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.defect_schema": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/nrel_defects/defect_schema.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.defect_store": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/nrel_defects/defect_store.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.defect_geometry": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/nrel_defects/defect_geometry.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.nrel_defects.editor": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/nrel_defects/editor.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.manual_motion": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/manual_motion.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.manual_pose": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/manual_pose.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.manual_control": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/manual_control.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.manual_control": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/manual_control.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.panels.radar_x100": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/panels/radar_x100.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.animation_render": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/animation_render.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.animation_render_ui": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/animation_render_ui.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.tip_tracking": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/tip_tracking.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.split_reconstruction": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/split_reconstruction.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.split_reconstruction_timing": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/split_reconstruction_timing.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.split_reconstruction_ui": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/split_reconstruction_ui.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.split_mappo_texture": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/split_mappo_texture.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.frontend_diagnostics": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/frontend_diagnostics.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.manual_down": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/manual_down.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.manual_operators": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/manual_operators.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.manual_rna": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/manual_rna.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.manual_geometry": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/manual_geometry.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.manual_scene_links": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/manual_scene_links.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.manual_video": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/manual_video.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.radar_x100": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/radar_x100/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor.radar_x100": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/_vendor/radar_x100/__init__.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor.radar_x100.schema": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/_vendor/radar_x100/schema.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor.radar_x100.ply": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/_vendor/radar_x100/ply.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor.radar_x100.recording": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/_vendor/radar_x100/recording.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor.radar_x100.simulation": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/_vendor/radar_x100/simulation.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor.radar_x100.channel": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/_vendor/radar_x100/channel.py",
+        "bl_ext.wfrl_frontend.wfrl_blender._vendor.radar_x100.acquisition": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/_vendor/radar_x100/acquisition.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.radar_x100.core": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/radar_x100/core.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.radar_x100.view": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/radar_x100/view.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.radar_x100.runtime": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/radar_x100/runtime.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.repair_marks": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/repair_marks.py",
+        "bl_ext.wfrl_frontend.wfrl_blender.blade_root_display": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/blade_root_display.py"
+      },
+      "installed_operator_registered": true
+    },
+    "three-camera-default": {
+      "status": "PASS",
+      "module": "bl_ext.wfrl_frontend.wfrl_blender",
+      "addon_path": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/__init__.py",
+      "blender": "5.2.1 LTS",
+      "preset_path": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/assets/cameras/t1-three-camera-default.json",
+      "checks": [
+        "ordinary load and reload use bundled supported pose and exact optics",
+        "geometry-only load has no rig",
+        "initial history empty",
+        "legacy C4 rejected",
+        "tilted housing rigid move",
+        "per-camera edit persists over frames",
+        "undo restores supported default",
+        "invalid move unchanged",
+        "atomic publish rollback",
+        "explicit reset restores box and C1-C3 without changing frame, subframe or navigation",
+        "reset undo restores prior box and C2 optics",
+        "repeated default reset is a no-op",
+        "reset blocks drafts, capture, box placement and pending backend pause",
+        "invalid default and failed publication leave layout and history unchanged",
+        "explicit reload resets user edits to bundled default",
+        "tip trails and deflection aids disabled"
+      ]
+    },
+    "native-projection": {
+      "status": "PASS",
+      "module": "bl_ext.wfrl_frontend.wfrl_blender",
+      "addon_path": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/__init__.py",
+      "blender": "5.2.1 LTS",
+      "background": true,
+      "checks": [
+        "24 aspect/FOV combinations against Blender camera projection"
+      ]
+    },
+    "installed_inventory_after_regressions": {
+      "status": "PASS",
+      "package_path": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender",
+      "verified_files": 214,
+      "mismatches": [],
+      "unexpected_files": [],
+      "ignored": [
+        "__pycache__",
+        "*.pyc"
+      ]
+    }
+  },
+  "build_only": false,
+  "scope": "isolated ZIP integrity and background regression; visible UI and presentation unverified",
+  "package": {
+    "archive": "/project/publication/blender-0.3.42/public/validated/package/wfrl_blender-0.3.42.zip",
+    "sha256": "30b888681eebce0642aa4b3e967f11a0a71341b7140165ed71fb0d43cd14ec2b",
+    "checksum": "/project/publication/blender-0.3.42/public/validated/package/wfrl_blender-0.3.42.zip.sha256",
+    "inventory": "/project/publication/blender-0.3.42/public/validated/package/wfrl_blender-0.3.42.inventory.json",
+    "package_id": "wfrl_blender",
+    "version": "0.3.42",
+    "file_count": 214
+  },
+  "environment": {
+    "BLENDER_USER_CONFIG": "/project/publication/blender-0.3.42/public/validated/profile/config",
+    "BLENDER_USER_SCRIPTS": "/project/publication/blender-0.3.42/public/validated/profile/scripts",
+    "BLENDER_USER_DATAFILES": "/project/publication/blender-0.3.42/public/validated/profile/datafiles",
+    "WFRL_ADDON_MODULE": "bl_ext.wfrl_frontend.wfrl_blender"
+  },
+  "repository": "/project/publication/blender-0.3.42/public/validated/profile/extensions",
+  "addon_path": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/__init__.py",
+  "installation": "PASS",
+  "background_regressions": "PASS",
+  "visible_ui": "NOT_RUN",
+  "actual_presentation": "NOT_RUN"
+}

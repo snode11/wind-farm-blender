@@ -55,5 +55,6 @@
 | 场景与播放归属 | `test_scene_mesh_lifecycle.py`、`test_scene_playback_lifecycle.py`、`test_native_camera_playback.py` | 后台 `scene_playback_lifecycle_regression.py`、`replay_history_regression.py`；窗口 `native_camera_reopen_regression.py`、`native_camera_playback_regression.py`。 |
 | 窗口录制、视口隔离与刷新 | `test_recording_runtime.py`、`test_live_viewport_isolation.py`、`test_runtime_redraw.py` | 窗口 `frontend_sessions_window.py` 验证真实截图、场景删除、窗口关闭、播放标签和其他视口保护。 |
 | 柔性运动与工作集 | `test_tip_deflection.py`、`test_farm_flex_workload.py`、`test_farm_telemetry_arrays.py`、`test_performance.py` | 后台 `farm_flex_regression.py`、`tip_deflection_regression.py`、`farm_flex_workload_regression.py`；另查受影响的对照、缺陷及视频消费者，构图另验窗口。 |
-| 源包解析缓存与完整性 | `test_farm_flex_package_cache.py` | 宿主检查基础／双束／TLS 同源复用、只读数组、独立结果与读取器、同大小／mtime 篡改拒绝、LRU 上限及文件／扩展生命周期；不证明视口性能。 |
+| 源包解析缓存与完整性 | `test_farm_flex_package_cache.py`；仓库 `tests/test_farm_flex_package.py` | 宿主检查基础 B2 原始观测与累计结果一致性、合法空观测、基础／双束／TLS 同源复用、只读数组、独立结果与读取器、同大小／mtime 篡改拒绝、LRU 上限及文件／扩展生命周期；不证明视口性能。 |
+| 柔性回放保存恢复 | `test_scene_playback_lifecycle.py` | 后台 `farm_reopen_settings_regression.py` 保存重开并核对时间映射、输出／预览设置、机组和包身份；`WFRL_REOPEN_VARIANT=farm/dual/tls` 选择来源，要求新 `WFRL_TEST_OUTPUT`。 |
 | 播放测量与内存口径 | `test_playback_benchmark.py`、`test_performance.py` | 按[完整播放入口](verification.md#构建安装与完整播放)取得实际绘制证据；主动暂停与停滞分别统计，摘要入口为仓库 `scripts/blender/summarize_frontend_validation.py`。平台 RSS 换算检查不代替内存泄漏测量。 |

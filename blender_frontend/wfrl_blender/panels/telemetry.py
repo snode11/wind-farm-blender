@@ -31,7 +31,12 @@ class WFRL_PT_live_telemetry(bpy.types.Panel):
         row.operator('wfrl.export_history', icon='EXPORT')
         layout.label(text=scene.get('wfrl_history_export_status', 'History export ready'))
         state = runtime.kinematics
-        data = state.snapshot
+        try:
+            owner = runtime.backend_scene()
+        except (ValueError, ReferenceError):
+            owner = None
+        owned = owner is not None and owner == scene
+        data = state.snapshot if owned else None
         if not data:
             layout.label(text='WAITING / no backend snapshot')
         else:
@@ -57,8 +62,9 @@ class WFRL_PT_live_telemetry(bpy.types.Panel):
                     box.label(text=f"{record['fidelity']} / {validity}")
                     draw_diagnostic(box, f'{label} / {name}', record['error'] or 'Channel source details',
                                     provenance=record['provenance'], error=bool(record['error']))
-        layout.label(text=f'Safety events retained: {len(runtime.safety_events)}')
-        for event in list(runtime.safety_events)[-5:]:
+        events = list(runtime.safety_events) if owned else []
+        layout.label(text=f'Safety events retained: {len(events)}')
+        for event in events[-5:]:
             draw_diagnostic(layout, 'Safety event', event['payload'])
 
 

@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "phase": "run",
+  "reasons": [],
+  "returncode": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "duration_s": 6.205953707918525,
+  "source_changed": false,
+  "execution": {
+    "status": "PASS",
+    "final": true,
+    "script": "/project/blender_frontend/tests/blender/animation_render_regression.py",
+    "background": true,
+    "blender": "5.2.1 LTS",
+    "startup_dirty": false,
+    "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+    "returned_normally": true,
+    "post_script_dirty": false
+  },
+  "script_result": {
+    "status": "PASS",
+    "blender": "5.2.1 LTS",
+    "module": "/project/blender_frontend/wfrl_blender/__init__.py",
+    "complete_frames": 3,
+    "source_preserved": true,
+    "cancellation": true,
+    "output": "/project/publication/blender-0.3.42/public/checks/native-source/animation_render_regression/artifacts/animation-441c76d22123",
+    "cancelled": "/project/publication/blender-0.3.42/public/checks/native-source/animation_render_regression/artifacts/animation-ceefb6e6d270",
+    "mappo_output": "/project/publication/blender-0.3.42/public/checks/native-source/animation_render_regression/artifacts/animation-34d04eb585f7",
+    "recorded_motion_frames": [
+      1,
+      301,
+      601
+    ],
+    "compositor_output_guard": true,
+    "original_camera_quality_snapshot": true
+  },
+  "log": "/project/publication/blender-0.3.42/public/checks/native-source/animation_render_regression/run/blender.log",
+  "report": "/project/publication/blender-0.3.42/public/checks/native-source/animation_render_regression/artifacts/result.json"
+}

@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "final": true,
+  "script": "/project/blender_frontend/tests/blender/farm_capture_transaction_regression.py",
+  "background": true,
+  "blender": "5.2.1 LTS",
+  "startup_dirty": false,
+  "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+  "returned_normally": true,
+  "post_script_dirty": false
+}

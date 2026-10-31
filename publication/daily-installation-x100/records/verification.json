@@ -1,0 +1,28 @@
+{
+  "schema": "wfrl.local-extension-verification.v1",
+  "status": "PASS",
+  "archive_sha256": "cac67e1f02cf5da573b6e02bbf9fdd28af3b71786faa8f3d121fb157f36a0d8d",
+  "installed_files": 214,
+  "source_host_tests": {
+    "passed": 121,
+    "warnings": 3
+  },
+  "isolated_native_edge_tests": 10,
+  "isolated_contract_report": "native-contract.json",
+  "isolated_edge_report": "native-boundaries.json",
+  "isolated_gpu_report": "gpu-window.json",
+  "software_channel_report": "channel-load.json",
+  "daily_runtime_report": "daily-runtime.json",
+  "daily_gpu_report": "daily-gpu.json",
+  "daily_ui_report": "daily-ui.json",
+  "configuration_report": "configuration.json",
+  "controls_report": "control-files.json",
+  "images_retained": false,
+  "synthetic_recordings_retained": false,
+  "isolated_runtime_profiles_available": false,
+  "limits": [
+    "Real X100 PLY and vendor UDP/SDK compatibility not verified",
+    "No hardware accuracy or safety acceptance",
+    "No long-running FPS claim"
+  ]
+}

@@ -364,3 +364,52 @@ def test_standalone_replay_restores_saved_fractional_frame(monkeypatch):
     monkeypatch.setattr(clearance_replay, 'load', load)
     clearance_replay.on_load(None)
     assert (scene.frame_current, scene.frame_subframe) == (61, .375)
+
+
+def test_farm_file_reopen_preserves_saved_clock_output_and_preview(monkeypatch, tmp_path):
+    from wfrl_blender import runtime
+
+    class SavedScene(dict):
+        render = SimpleNamespace(fps=24, fps_base=1.001)
+        frame_start, frame_end, frame_step = 11, 101, 2
+        frame_preview_start, frame_preview_end = 21, 81
+        frame_current, frame_subframe = 40, .25
+        sync_mode, use_preview_range = 'NONE', True
+
+        def as_pointer(self):
+            return id(self)
+
+        def frame_set(self, frame, *, subframe=0.):
+            self.frame_current, self.frame_subframe = frame, subframe
+
+    scene = SavedScene(wfrl_scene_kind='clearance_replay', wfrl_clearance_demo='near_tower',
+                       wfrl_farm_flex_path=str(tmp_path), wfrl_clearance_timebase_fps=90.,
+                       wfrl_clearance_turbine='T2')
+    readers = {tid: SimpleNamespace(start_s=117., end_s=177., at=lambda t: dict(time_s=t))
+               for tid in ('T1', 'T2', 'T3')}
+    active = SimpleNamespace(readers=readers)
+    monkeypatch.setitem(sys.modules, 'bpy', SimpleNamespace(data=SimpleNamespace(scenes=[scene])))
+    monkeypatch.setattr(runtime, 'enter_result_replay', lambda **_kw: None)
+    monkeypatch.setattr(farm_flex, 'active_for', lambda target: active if target is scene else None)
+    monkeypatch.setattr(clearance_replay, '_READERS', {})
+
+    def attach(target, path):
+        assert target is scene and path == tmp_path
+        target.render.fps, target.render.fps_base = 60, 1.
+        target.frame_start, target.frame_end = 1, 3601
+        target.sync_mode, target.use_preview_range = 'FRAME_DROP', False
+        target['wfrl_clearance_timebase_fps'] = 60.
+        target['wfrl_clearance_turbine'] = 'T1'
+        return active
+
+    monkeypatch.setattr(farm_flex, 'attach', attach)
+    clearance_replay.on_load(None)
+    assert (scene.render.fps, scene.render.fps_base) == (24, 1.001)
+    assert (scene.frame_start, scene.frame_end, scene.frame_step) == (11, 101, 2)
+    assert (scene.frame_preview_start, scene.frame_preview_end) == (21, 81)
+    assert (scene.sync_mode, scene.use_preview_range) == ('NONE', True)
+    assert (scene.frame_current, scene.frame_subframe) == (40, .25)
+    assert scene['wfrl_clearance_timebase_fps'] == 90.
+    assert scene['wfrl_clearance_turbine'] == 'T2'
+    assert clearance_replay.reader_for(scene) is readers['T2']
+    assert clearance_replay.sample(scene)['time_s'] == 117.325

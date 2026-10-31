@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "scope": "tests/blender_bridge excluding episode_worker, farm_power_validity, training_progress and trainer_stop",
+  "python": "3.15.2",
+  "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+  "source_tag": "v0.3.42",
+  "counts": {
+    "collected_cases": 116,
+    "passed": 113,
+    "skipped": 3,
+    "failures": 0,
+    "errors": 0,
+    "passed_subtests": 43
+  },
+  "duration_s": 2.918,
+  "skipped": [
+    {
+      "test": "tests.blender_bridge.test_tip_replay::test_recorded_geometry_matches_saved_truth_and_wire",
+      "reason": "Original FAST.Farm native VTP geometry is not installed (4323 required files missing); offline package assertions remain separate"
+    },
+    {
+      "test": "tests.blender_bridge.test_tip_replay::test_bad_geometry_rejected",
+      "reason": "Original FAST.Farm native VTP geometry is not installed (4323 required files missing); offline package assertions remain separate"
+    },
+    {
+      "test": "tests.blender_bridge.test_tip_replay::test_real_bridge_pause_step_and_stop",
+      "reason": "Original FAST.Farm native VTP geometry is not installed (4323 required files missing); offline package assertions remain separate"
+    }
+  ],
+  "counting": "Collected pytest cases and subtests are reported separately; JUnit tests includes both."
+}

@@ -26,14 +26,109 @@ REFERENCE_OFFSET = (0., 10000., 0.)
 STRUCTURE = ('Tower', 'Nacelle', 'Hub')
 SOURCE_HASH = 'd3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde'
 _SESSIONS = {}
+_PENDING_IMPORTS = {}
 POINTS = {
     'SUPPORTED': ('中段观察点', 2, 47.225, .8216145833333334, 3.),
     'TIP': ('叶尖观察点', 3, 59.975, .77734375, 2.),
 }
 
 
+class _ImportResources:
+    """Release only explicitly registered allocations without external users."""
+
+    def __init__(self, scene):
+        self.scene = scene
+        self.scene_uid = getattr(scene, 'session_uid', scene.as_pointer())
+        self.records = {}
+
+    def belongs_to(self, scene):
+        try:
+            return (self.scene == scene and getattr(self.scene, 'session_uid', self.scene.as_pointer()) == self.scene_uid
+                    and getattr(scene, 'session_uid', scene.as_pointer()) == self.scene_uid)
+        except ReferenceError:
+            return False
+
+    def register(self, kind, block, *, owned_fake_user=False):
+        if block is not None:
+            self.records.setdefault(block.as_pointer(), (kind, block, owned_fake_user))
+
+    def shape_resources(self, obj):
+        keys = obj.data.shape_keys
+        if keys is not None:
+            self.register('shape_keys', keys)
+            if keys.animation_data is not None:
+                self.register('actions', keys.animation_data.action)
+
+    def rollback(self):
+        import bpy
+        scene = self.scene
+        try:
+            collections = {item.as_pointer() for item in
+                           (scene.collection, *scene.collection.children_recursive)}
+            allowed = collections | {scene.as_pointer()}
+        except ReferenceError:
+            scene, allowed = None, set()
+        errors = []
+        for kind in ('objects', 'meshes', 'cameras', 'shape_keys', 'materials', 'node_groups', 'images', 'actions', 'texts'):
+            for pointer, (group, block, owned_fake_user) in reversed(list(self.records.items())):
+                if group != kind:
+                    continue
+                try:
+                    if kind == 'objects':
+                        if (block.use_fake_user or any(owner != scene for owner in block.users_scene)
+                                or any(user.as_pointer() not in allowed for user in
+                                       bpy.data.user_map(subset={block}).get(block, ()))):
+                            continue
+                        bpy.data.objects.remove(block, do_unlink=True)
+                    else:
+                        users = block.users - int(block.use_fake_user and owned_fake_user)
+                        if users or (block.use_fake_user and not owned_fake_user):
+                            continue
+                        if kind == 'meshes' and block.shape_keys is not None:
+                            keys = block.shape_keys
+                            if (keys.use_fake_user or keys.users > 1 or any(user != block for user in
+                                    bpy.data.user_map(subset={keys}).get(keys, ()))):
+                                continue
+                        if owned_fake_user:
+                            block.use_fake_user = False
+                        getattr(bpy.data, kind).remove(block)
+                    self.records.pop(pointer, None)
+                except ReferenceError:
+                    self.records.pop(pointer, None)
+                except Exception as error:
+                    errors.append(error)
+        return errors
+
+
+def _import_properties(scene):
+    keys = {key for key in scene.keys() if key.startswith('split_mappo_texture_')}
+    keys.update('split_reconstruction_' + key for key in
+                ('start_s', 'timeline_fps', 'stride', 'samples', 'frame_start'))
+    keys.add('blade_recon_inspection_scope')
+    def plain(value):
+        if hasattr(value, 'to_dict'):
+            return {key: plain(item) for key, item in value.to_dict().items()}
+        if hasattr(value, 'to_list'):
+            return value.to_list()
+        return value
+    return {key: plain(scene[key]) for key in keys if key in scene}
+
+
+def _restore_import_properties(scene, saved):
+    for key in _import_properties(scene).keys() - saved.keys():
+        scene.pop(key, None)
+    for key, value in saved.items():
+        scene[key] = value
+
+
 def package_path():
     return Path(__file__).resolve().parent / 'assets' / 'blade_recon_mappo_tex'
+
+
+def available(scene):
+    """Offer the saved adapter only for its source and a delivered payload."""
+    return bool(scene is not None and scene.get('wfrl_farm_manifest_sha256') == SOURCE_HASH
+                and (package_path() / 'manifest.json').is_file())
 
 
 def active(scene):
@@ -150,15 +245,20 @@ def _source_signature(root):
     return tuple(result)
 
 
-def _create_camera(scene, review, target, ortho_scale):
+def _create_camera(scene, review, target, ortho_scale, *, register=None):
     """Start with the canonical comparison camera when it is available."""
     source = scene.objects.get('SplitRecon.Camera')
     if source is None:
-        cam = review._camera(scene, CAMERA, target+(300., 0., 0.), target)
+        cam = review._camera(scene, CAMERA, target+(300., 0., 0.), target, register=register)
         cam.data.type, cam.data.ortho_scale = 'ORTHO', ortho_scale
     else:
         cam = source.copy()
-        cam.data = source.data.copy()
+        if register is not None:
+            register('objects', cam)
+        data = source.data.copy()
+        if register is not None:
+            register('cameras', data)
+        cam.data = data
         cam.name = CAMERA
         cam.parent = None
         cam.animation_data_clear()
@@ -171,9 +271,11 @@ def _create_camera(scene, review, target, ortho_scale):
     return cam
 
 
-def _embed(scene, key, raw):
+def _embed(scene, key, raw, *, register=None):
     import bpy
     text = bpy.data.texts.new(PREFIX + scene.name + '.' + key)
+    if register is not None:
+        register('texts', text, owned_fake_user=True)
     text.write(raw)
     text.use_fake_user = True
     text['split_mappo_texture_owned'] = True
@@ -306,12 +408,15 @@ def _display_defaults(provenance):
         wfrl_recon_inspect_size=float(point.get('size_m', 8.)), wfrl_recon_inspect_box=True)
 
 
-def _activate(scene, value, *, new=False):
+def _activate(scene, value, *, new=False, register=None):
     from . import split_texture_settings as settings
     def commit():
         import bpy
         _release_tracking(scene, value)
-        apply(scene, value=value)
+        if register is None:
+            apply(scene, value=value)
+        else:
+            apply(scene, value=value, register=register)
         if new and bpy.context.scene == scene:
             bpy.context.view_layer.update()
         return value
@@ -323,11 +428,22 @@ def ensure(scene):
     import bpy
     from . import blade_recon_review as review
     from .blade_recon_data import ReconSequence, TexturePackage
+    pending = _PENDING_IMPORTS.get(scene.as_pointer())
+    if pending is not None and not pending.belongs_to(scene):
+        _PENDING_IMPORTS.pop(scene.as_pointer(), None)
+        pending = None
+    if pending is not None:
+        errors = pending.rollback()
+        if errors:
+            raise RuntimeError('同源纹理资源回收失败，请重试') from errors[0]
+        _PENDING_IMPORTS.pop(scene.as_pointer(), None)
     if scene.get(MARKER):
         value = _runtime(scene)
         value['structure'] = _ensure_structure(scene)
         return _activate(scene, value)
     root = package_path()
+    if not (root / 'manifest.json').is_file():
+        raise ValueError('当前 MAPPO 交付包没有匹配的同源纹理结果')
     provenance_raw = (root/'manifest.json').read_text(encoding='utf-8')
     provenance = json.loads(provenance_raw)
     source_root = _validate_source(scene, provenance)
@@ -344,11 +460,15 @@ def ensure(scene):
     raw = sequence.path.read_text(encoding='utf-8')
     faces = sequence.rotor.tpl.faces()
     allocated = []
+    resources = _ImportResources(scene)
+    properties = _import_properties(scene)
     try:
         vertices, _ = sequence.geometry(0)
         for b in range(3):
-            mat = review._texture_material(PREFIX+f'Material.B{b+1}', textures.images[b], textures.data['atlas'])
-            obj = review._mesh(scene, PREFIX+f'B{b+1}', vertices[b].reshape(-1, 3), faces, mat)
+            mat = review._texture_material(PREFIX+f'Material.B{b+1}', textures.images[b], textures.data['atlas'],
+                                          register=resources.register)
+            obj = review._mesh(scene, PREFIX+f'B{b+1}', vertices[b].reshape(-1, 3), faces, mat,
+                               register=resources.register)
             allocated.append(obj)
             obj.location = OFFSET
             obj['split_mappo_texture_owned'] = True
@@ -356,7 +476,10 @@ def ensure(scene):
             obj['split_mappo_texture_blade'] = b
             obj.data.color_attributes.new(name='evidence', type='FLOAT_COLOR', domain='POINT')
             review._add_uv(obj, sequence.rotor, faces)
-            obj.shape_key_add(name='Sample0000', from_mix=False)
+            try:
+                obj.shape_key_add(name='Sample0000', from_mix=False)
+            finally:
+                resources.shape_resources(obj)
             obj.data.shape_keys.use_relative = False
         low, high = np.full((3, 3), np.inf), np.full((3, 3), -np.inf)
         for i in range(601):
@@ -369,7 +492,10 @@ def ensure(scene):
                 key.interpolation = 'KEY_LINEAR'
                 keys = obj.data.shape_keys
                 keys.eval_time = key.frame
-                keys.keyframe_insert(data_path='eval_time', frame=spec.frame_start + spec.stride*i)
+                try:
+                    keys.keyframe_insert(data_path='eval_time', frame=spec.frame_start + spec.stride*i)
+                finally:
+                    resources.shape_resources(obj)
         for b, obj in enumerate(allocated):
             keys = obj.data.shape_keys
             for layer in keys.animation_data.action.layers:
@@ -382,15 +508,20 @@ def ensure(scene):
                                 point.interpolation = 'CONSTANT'
             obj['split_texture_bounds'] = low[b].tolist() + high[b].tolist()
             obj['split_mappo_texture_native_samples'] = 601
+        previous_objects = {obj.as_pointer() for obj in bpy.data.objects}
         structure = _ensure_structure(scene)
+        for obj in structure:
+            if obj.as_pointer() not in previous_objects:
+                resources.register('objects', obj)
         allocated.extend(structure)
         target = np.array(OFFSET) + sequence.rotor.hub
-        cam = _create_camera(scene, review, target, sequence.rotor.cfg.tip_radius_m*2.35)
+        cam = _create_camera(scene, review, target, sequence.rotor.cfg.tip_radius_m*2.35,
+                             register=resources.register)
         allocated.append(cam)
-        _embed(scene, 'recon', raw)
-        _embed(scene, 'texture', json.dumps(textures.manifest, ensure_ascii=False, sort_keys=True))
-        _embed(scene, 'texture_source', (textures.path/'texture.json').read_text(encoding='utf-8'))
-        _embed(scene, 'provenance', provenance_raw)
+        _embed(scene, 'recon', raw, register=resources.register)
+        _embed(scene, 'texture', json.dumps(textures.manifest, ensure_ascii=False, sort_keys=True), register=resources.register)
+        _embed(scene, 'texture_source', (textures.path/'texture.json').read_text(encoding='utf-8'), register=resources.register)
+        _embed(scene, 'provenance', provenance_raw, register=resources.register)
         scene['split_mappo_texture_source_label'] = sequence.source_label
         scene['split_mappo_texture_blade_names'] = [obj.name for obj in allocated[:3]]
         scene['split_mappo_texture_camera_name'] = cam.name
@@ -406,22 +537,20 @@ def ensure(scene):
                      source_root=source_root, source_signature=_source_signature(source_root))
         value['binding'] = _runtime_signature(scene)
         _SESSIONS[scene.as_pointer()] = value
-        return _activate(scene, value, new=True)
-    except Exception:
+        return _activate(scene, value, new=True, register=resources.register)
+    except Exception as error:
         from . import split_turbine_context
         split_turbine_context.release(scene, 'split_mappo_texture_structure_names')
-        for obj in allocated:
-            bpy.data.objects.remove(obj, do_unlink=True)
-        scene.pop(MARKER, None)
-        scene.pop('split_mappo_texture_structure_names', None)
-        scene.pop('split_mappo_texture_structure_names_offset', None)
-        scene.pop('split_mappo_texture_structure_names_notice', None)
-        scene.pop('split_mappo_texture_structure_notice', None)
+        _restore_import_properties(scene, properties)
+        errors = resources.rollback()
+        if errors:
+            _PENDING_IMPORTS[scene.as_pointer()] = resources
+            error.add_note('同源纹理资源回收尚未完成；下次导入会重试：' + str(errors[0]))
         _SESSIONS.pop(scene.as_pointer(), None)
         raise
 
 
-def apply(scene, *, value=None):
+def apply(scene, *, value=None, register=None):
     from . import blade_recon_review as review, blade_recon_inspection as inspection
     value = value or _SESSIONS.get(scene.as_pointer()) or _restore(scene)
     _validate_source(scene, value['provenance'], check_files=False)
@@ -440,7 +569,10 @@ def apply(scene, *, value=None):
         value['index'] = index
     if scene.get(INDEX) != index:
         scene[INDEX] = index
-    inspection.update(scene, value['blades'], sequence.rotor)
+    if register is None:
+        inspection.update(scene, value['blades'], sequence.rotor)
+    else:
+        inspection.update(scene, value['blades'], sequence.rotor, register=register)
     return value
 
 
@@ -591,3 +723,6 @@ def frame_changed(scene, depsgraph=None):
 
 def clear_runtime():
     _SESSIONS.clear()
+    for key, resources in list(_PENDING_IMPORTS.items()):
+        if not resources.rollback():
+            _PENDING_IMPORTS.pop(key, None)

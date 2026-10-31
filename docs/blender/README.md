@@ -1,10 +1,10 @@
 # Blender 文档分类
 
-当前项目源码版本为 **0.3.41**，对应 [`v0.3.41` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.41)。公开扩展附件为 **0.3.41**；本机日常安装为独立的 **0.3.40 本地源码构建**，实际身份见[安装记录](../../publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
+当前项目源码版本为 **0.3.42**，对应 [`v0.3.42` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.42)。公开扩展附件为 **0.3.42**；本机日常安装为独立的 **0.3.41 本地源码构建**，实际身份见[安装记录](../../publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
 
-公开 NREL 安装版为 **0.3.41**，使用[专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.41/wfrl_blender-0.3.41.zip)；项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **0.3.40 本地源码构建，共 201 文件**；实际模块来源及验证范围见[安装核对](../../publication/daily-installation.json)。公开附件身份见[交付身份](../../publication/blender-0.3.41.json)，GW184 为 **0.4.0 独立运行包**。证据范围见[发布状态](发布状态与验证范围.md)。[返回总索引](../README.md)。
+公开 NREL 安装版为 **0.3.42**，使用[专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42/wfrl_blender-0.3.42.zip)；项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装为 **0.3.41 本地源码构建，共 214 文件**；实际模块来源及验证范围见[安装核对](../../publication/daily-installation.json)。公开附件身份见[交付身份](../../publication/blender-0.3.42.json)，GW184 为 **0.4.0 独立运行包**。证据范围见[发布状态](发布状态与验证范围.md)。[返回总索引](../README.md)。
 
-0.3.41 发布源码与扩展的连接恢复、后台渲染、回合曲线和相机保护合同见[源码软件合同与验证](发布状态与验证范围.md#源码软件合同与验证)，详细合同见[维护说明](../../blender_frontend/README.md)。日常安装使用独立的 0.3.40 本地源码构建。
+0.3.42 发布源码与扩展的连接恢复、后台渲染、回合曲线和相机保护合同见[源码软件合同与验证](发布状态与验证范围.md#源码软件合同与验证)，详细合同见[维护说明](../../blender_frontend/README.md)。日常安装使用独立的 0.3.41 本地源码构建。
 
 ## 当前操作和功能
 
@@ -24,7 +24,7 @@
 
 | 文档 | 阅读范围 |
 | --- | --- |
-| [0.3.41](../../publication/blender-0.3.41.json) | 当前公开 ZIP、标签源码、宿主回归、源码复建与隔离安装相机后台检查；窗口未复验。 |
+| [0.3.42](../../publication/blender-0.3.42.json) | 当前公开 ZIP、标签源码、宿主与原生后台回归、源码复建、隔离安装相机及 X100 检查；窗口未复验。 |
 | [0.3.22](../../publication/blender-0.3.22.json) | 该版 ZIP、源码提交、文件身份与适用验证范围。 |
 | [0.3.21](../../publication/blender-0.3.21.json) | 该版 ZIP、173 文件身份与对应软件证据。 |
 | [0.3.20+1](releases/0.3.20+1发布核对.md) | 该版三相机默认复位载荷、173 文件 ZIP；载荷测试／安装版按钮验证与最终包格式及字节一致性分层记录。 |

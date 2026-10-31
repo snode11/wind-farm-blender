@@ -1,0 +1,19 @@
+test_constraint_stop_keeps_last_materialized_pose_resumable (__main__.ManualRatePitchTests.test_constraint_stop_keeps_last_materialized_pose_resumable) ... ok
+test_frozen_trial_uses_its_own_clock_and_remains_pauseable (__main__.ManualRatePitchTests.test_frozen_trial_uses_its_own_clock_and_remains_pauseable) ... ok
+test_model_switch_preserves_pose_and_freezes_during_trial (__main__.ManualRatePitchTests.test_model_switch_preserves_pose_and_freezes_during_trial) ... ok
+test_pause_feathers_and_start_retargets_without_jump (__main__.ManualRatePitchTests.test_pause_feathers_and_start_retargets_without_jump) ... ok
+test_pitch_can_resume_without_starting_zero_rpm_rotor (__main__.ManualRatePitchTests.test_pitch_can_resume_without_starting_zero_rpm_rotor) ... ok
+test_pose_snapshot_uses_actual_pitch_and_load_settles (__main__.ManualRatePitchTests.test_pose_snapshot_uses_actual_pitch_and_load_settles) ... ok
+test_rate_change_cannot_write_a_shared_blade (__main__.ManualRatePitchTests.test_rate_change_cannot_write_a_shared_blade) ... ok
+test_rate_change_preserves_native_rotation_conflict (__main__.ManualRatePitchTests.test_rate_change_preserves_native_rotation_conflict) ... ok
+test_retarget_uses_actual_pitch_and_does_not_jump (__main__.ManualRatePitchTests.test_retarget_uses_actual_pitch_and_does_not_jump) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.638s
+
+OK
+WFRL manual blade model: 请先结束 T1 冻结试验，再切换叶片外形
+MANUAL_RATE_PITCH_PASS
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

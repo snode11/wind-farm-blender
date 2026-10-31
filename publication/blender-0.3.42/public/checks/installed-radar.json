@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "archive_sha256": "30b888681eebce0642aa4b3e967f11a0a71341b7140165ed71fb0d43cd14ec2b",
+  "checks": [
+    {
+      "script": "radar_x100_regression.py",
+      "status": "PASS",
+      "elapsed_s": 3.64833912497852,
+      "report": "publication/blender-0.3.42/public/checks/installed-radar/radar_x100_regression/result.json"
+    },
+    {
+      "script": "radar_x100_edges.py",
+      "status": "PASS",
+      "elapsed_s": 2.9517666249303147,
+      "report": "publication/blender-0.3.42/public/checks/installed-radar/radar_x100_edges/result.json"
+    }
+  ]
+}

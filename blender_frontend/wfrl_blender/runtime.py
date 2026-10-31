@@ -378,6 +378,19 @@ def backend_scene():
     return scene
 
 
+def _set_channel_table(value):
+    """Publish complete sensor rows only after validating the whole table."""
+    rows = [] if value is None else value
+    if not isinstance(rows, (list, tuple)) or any(
+            not isinstance(row, (list, tuple)) or len(row) != 5
+            or any(not isinstance(item, str) or not item.strip() for item in row[:3])
+            or type(row[3]) is not bool for row in rows):
+        raise ValueError('Invalid backend channel table')
+    checked = [list(row) for row in rows]
+    channel_table.clear()
+    channel_table.extend(checked)
+
+
 def _build_backend_scene(dto):
     global _backend_scene
     import bpy
@@ -495,7 +508,7 @@ def _tick():
                     if 'channel_states' in payload:
                         channel_states.clear(); channel_states.update(payload['channel_states'] or {})
                     if 'channel_table' in payload:
-                        channel_table.clear(); channel_table.extend(payload['channel_table'] or [])
+                        _set_channel_table(payload['channel_table'])
                 if message['type'] == 'hello_ack':
                     _pending_command = None
                     _pending_lifecycle_sequence = None
@@ -532,6 +545,8 @@ def _tick():
                 elif message['type'] == 'snapshot':
                     if _state.run_id is not None and payload.get('run_id', _state.run_id) != _state.run_id:
                         continue
+                    if 'channel_table' in payload:
+                        _set_channel_table(payload['channel_table'])
                     from . import charts
                     charts.record_snapshot(message, scene=_backend_scene)
                     latest_snapshot = message

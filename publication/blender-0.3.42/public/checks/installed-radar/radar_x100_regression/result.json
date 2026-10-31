@@ -1,0 +1,16 @@
+{
+  "readonly_time_sampling": true,
+  "same_time_mount_max_error": 3.2016340725249393e-06,
+  "simulation_points": 26,
+  "alternate_mounts": true,
+  "raw_camera_hash_and_visibility": true,
+  "native_file_play_pause_restart_and_seek_operators": true,
+  "replay_forward_backward_end_origin_and_ownership": true,
+  "linked_scene_cleanup_preserves_original_collection_objects": true,
+  "save_reopen_restores_configuration_and_paused_sample": true,
+  "resource_cleanup": true,
+  "deleted_owner_no_reassignment_or_orphan_objects": true,
+  "addon_path": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/__init__.py",
+  "core_path": "/project/publication/blender-0.3.42/public/validated/profile/extensions/wfrl_blender/_vendor/radar_x100/schema.py",
+  "status": "PASS"
+}

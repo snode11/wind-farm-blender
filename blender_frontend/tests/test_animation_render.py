@@ -173,3 +173,36 @@ def test_compositor_file_outputs_are_rejected_recursively_before_render():
     output.mute = False
     scene.render.use_compositing = False
     module.validate_output_nodes(scene)
+
+
+@pytest.mark.parametrize(('depth', 'expected'), [('8', '8'), ('10', '16'), ('12', '16'), ('16', '16'), ('32', '16')])
+def test_png_snapshot_uses_supported_depth_without_mutating_source(depth, expected):
+    from wfrl_blender.animation_render_ui import _render_settings
+
+    class Scene(dict):
+        pass
+
+    scene = Scene()
+    image = NS(color_mode='RGBA', color_depth=depth, compression=15)
+    scene.render = NS(image_settings=image)
+    scene.display_settings = NS()
+    scene.view_settings = NS()
+    scene.eevee = NS()
+
+    settings = _render_settings(scene)
+
+    assert settings['image_settings'] == dict(color_mode='RGBA', color_depth=expected, compression=15)
+    assert image.color_depth == depth
+
+
+def test_png_snapshot_preserves_protected_manual_settings():
+    from wfrl_blender.animation_render_ui import _render_settings
+
+    class Scene(dict):
+        pass
+
+    scene = Scene(wfrl_scene_kind='manual')
+    scene.render = NS(image_settings=NS(color_mode='RGBA', color_depth='32', compression=15))
+    scene.display_settings = scene.view_settings = scene.eevee = NS()
+
+    assert _render_settings(scene)['image_settings']['color_depth'] == '32'

@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import shutil
 import sys
 import tempfile
 import unittest
@@ -25,6 +26,56 @@ def load_builder():
     return module
 
 class PackageTests(unittest.TestCase):
+    def test_optional_texture_payload_still_rejects_partial_or_wrong_source(self):
+        builder = load_builder()
+        payloads = builder._payloads()
+        prefix = 'assets/blade_recon_mappo_tex/'
+        absent = [(name, data) for name, data in payloads if not name.startswith(prefix)]
+        builder._validate_mappo_texture_payloads(absent, required=False)
+        with self.assertRaisesRegex(ValueError, 'incomplete'):
+            builder._validate_mappo_texture_payloads(absent)
+        with self.assertRaisesRegex(ValueError, 'incomplete'):
+            builder._validate_mappo_texture_payloads(absent + [(prefix + 'recon.json', b'{}')], required=False)
+        wrong_source = [(name, data + b'changed' if name == 'assets/mappo/geometry.npz' else data)
+                        for name, data in payloads]
+        with self.assertRaisesRegex(ValueError, 'another source package'):
+            builder._validate_mappo_texture_payloads(wrong_source, required=False)
+
+    def test_custom_geometry_bundle_omits_unavailable_source_results(self):
+        from scripts.blender.build_farm_flex_delivery import bundle
+        from scripts.blender.validate_frontend_package import verify_archive, verify_installed
+        builder = load_builder()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            package = root / 'custom-farm'
+            shutil.copytree(builder.PACKAGE_SOURCE / 'assets/mappo', package)
+            manifest = json.loads((package / 'manifest.json').read_text())
+            manifest['source_label'] = 'Independent accepted-controller review package'
+            (package / 'manifest.json').write_text(json.dumps(manifest, sort_keys=True))
+            destination = root / 'delivery'
+            bundle(package, destination)
+            archive = next((destination / 'runtime-archive').glob('*.zip'))
+            inventory = verify_archive(archive, archive.with_suffix('.inventory.json'))
+            verify_installed(destination / 'blender_frontend/wfrl_blender', inventory)
+            with zipfile.ZipFile(archive) as zipped:
+                names = zipped.namelist()
+                self.assertEqual(zipped.read('assets/mappo/manifest.json'),
+                                 (package / 'manifest.json').read_bytes())
+                self.assertFalse(any(name.startswith(('assets/blade_recon_mappo_tex/',
+                    'assets/blade_response/', 'assets/dual_beam/', 'assets/dual_beam_tls/')) for name in names))
+                self.assertIn('assets/blade_recon_synth_tex/manifest.json', names)
+                self.assertEqual(zipped.read('manual_control.py'),
+                                 (builder.PACKAGE_SOURCE / 'manual_control.py').read_bytes())
+
+    def test_explicit_canonical_farm_keeps_all_matching_source_results(self):
+        builder = load_builder()
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            default = builder.build(output / 'default')
+            explicit = builder.build(output / 'explicit',
+                farm_package=builder.PACKAGE_SOURCE / 'assets/mappo')
+            self.assertEqual(default.archive.read_bytes(), explicit.archive.read_bytes())
+
     def test_build_is_reproducible_and_manifest_matches_archive(self):
         builder = load_builder()
         with tempfile.TemporaryDirectory() as directory:

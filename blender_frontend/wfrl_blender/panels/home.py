@@ -199,6 +199,11 @@ class WFRL_PT_Home(bpy.types.Panel):
                 draw(controls, scene, show_playback=not shared_playback)
             else:
                 draw_load(layout, context, busy=busy)
+        elif page == 'X100':
+            from .radar_x100 import draw
+            controls = layout.column()
+            controls.enabled = not busy
+            draw(controls, context)
         elif page == 'CAMERA':
             if scene.get('wfrl_scene_kind') == 'manual':
                 layout.label(text='在“手动”页调整机组姿态。', icon='INFO')
@@ -235,6 +240,7 @@ def register_properties():
     bpy.types.WindowManager.wfrl_home_page = bpy.props.EnumProperty(
         name='工作台', items=(('REPLAY', '回放', '加载并查看保存的仿真结果'),
                               ('CAMERA', '相机', '观察、安装与编辑相机'),
+                              ('X100', 'X100 雷达', '几何仿真、文件回放与独立实时通道'),
                               ('MANUAL', '手动', '独立的刚性运动与姿态控制'),
                               ('EXPORT', '导出', '保存已采样数据、相机图像与布局'),
                               ('BACKEND', '后端', '连接、配置与运行真实后端')),
