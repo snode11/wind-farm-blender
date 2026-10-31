@@ -2,10 +2,13 @@
 from __future__ import annotations
 
 import atexit
+import ctypes
+import errno
 import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -149,6 +152,32 @@ class Stream:
         self.state, self.message = 'STOPPED', 'RTSP 已停止'
 
 
+def _commit_export(source, destination):
+    """Publish complete bytes under an exclusive target name on the same filesystem."""
+    if os.name == 'nt':
+        os.rename(source, destination)
+        return
+    libc = ctypes.CDLL(None, use_errno=True)
+    function = None
+    if sys.platform == 'darwin' and hasattr(libc, 'renamex_np'):
+        function = libc.renamex_np
+        function.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint]
+        args = (os.fsencode(source), os.fsencode(destination), 0x00000004)
+    elif sys.platform.startswith('linux') and hasattr(libc, 'renameat2'):
+        function = libc.renameat2
+        function.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint]
+        args = (-100, os.fsencode(source), -100, os.fsencode(destination), 1)
+    if function is not None:
+        function.restype = ctypes.c_int
+        if function(*args) == 0:
+            return
+        code = ctypes.get_errno()
+        if code not in {errno.ENOSYS, errno.EINVAL, errno.ENOTSUP, errno.EOPNOTSUPP}:
+            raise OSError(code, os.strerror(code), str(destination))
+    os.link(source, destination, follow_symlinks=False)
+    source.unlink()
+
+
 class Export:
     def __init__(self):
         self.thread = None
@@ -187,10 +216,12 @@ class Export:
         self.thread.start()
 
     def _copy(self, source, target):
-        owned = False
+        staging, identity = None, None
         try:
-            with source.open('rb') as incoming, target.open('xb') as outgoing:
-                owned = True
+            with source.open('rb') as incoming, tempfile.NamedTemporaryFile(
+                    prefix='.wfrl-video-export-', dir=target.parent, delete=False) as outgoing:
+                staging = Path(outgoing.name)
+                identity = os.fstat(outgoing.fileno())
                 if (self._source_identity is not None and
                         self._identity(os.fstat(incoming.fileno())) != self._source_identity):
                     raise ValueError('源视频在导出期间发生变化，请等待源文件写入完成后重试')
@@ -199,6 +230,8 @@ class Export:
                         raise InterruptedError('导出已取消')
                     outgoing.write(block)
                     self.done_bytes += len(block)
+                outgoing.flush()
+                os.fsync(outgoing.fileno())
                 if self._source_identity is not None and (
                         self._identity(os.fstat(incoming.fileno())) != self._source_identity
                         or self._identity(source.stat()) != self._source_identity
@@ -206,13 +239,20 @@ class Export:
                     raise ValueError('源视频在导出期间发生变化，请等待源文件写入完成后重试')
             if self.cancelled.is_set():
                 raise InterruptedError('导出已取消')
+            _commit_export(staging, target)
             self.output_path = str(target)
             self.message = '已导出：' + str(target)
         except Exception as exc:
-            if owned:
-                target.unlink(missing_ok=True)
             self.error = str(exc)
             self.message = self.error
+        finally:
+            if staging is not None:
+                try:
+                    current = staging.lstat()
+                    if identity is not None and (current.st_dev, current.st_ino) == (identity.st_dev, identity.st_ino):
+                        staging.unlink()
+                except FileNotFoundError:
+                    pass
 
     def stop(self):
         self.cancelled.set()

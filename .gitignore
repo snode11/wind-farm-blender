@@ -58,3 +58,8 @@ example*.png
 .venv/
 .venv-trial/
 .claude/settings.local.json
+
+# 配套源码归档通过 GitHub Release 分发。
+/publication/blender-0.3.42.1/public/delivery/*.zip
+
+/publication/blender-0.3.42.1/public/validated/package/*.zip

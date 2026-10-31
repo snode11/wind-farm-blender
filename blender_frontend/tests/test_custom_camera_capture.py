@@ -449,6 +449,46 @@ def test_capture_restores_own_frame_change_when_geometry_evaluation_fails(clock_
     assert job.manifest['status'] == 'incomplete'
 
 
+@pytest.mark.parametrize('during_restore', [False, True])
+@pytest.mark.parametrize('jump', [(121, 0.), (61, .75)])
+def test_frame_set_callback_change_aborts_without_overwriting_external_clock(
+        clock_capture, monkeypatch, jump, during_restore):
+    from contextlib import nullcontext
+    job, calls, _generation = clock_capture
+    job.scene.frame_set = lambda frame, *, subframe: (
+        setattr(job.scene, 'frame_current', jump[0]), setattr(job.scene, 'frame_subframe', jump[1]))
+    job.farm = NS(update=lambda *args, **kwargs: None)
+    monkeypatch.setattr(job, 'evaluate', capture.Capture.evaluate.__get__(job))
+    monkeypatch.setattr(capture, 'readonly_frame_handlers', nullcontext)
+    monkeypatch.setitem(sys.modules, 'bpy', NS(context=NS(view_layer=job.view_layer)))
+    if during_restore:
+        job.finish(success=True)
+    else:
+        monkeypatch.setattr(job, '_step_group', lambda _context: job.evaluate(61, .25, 1.))
+        with pytest.raises(RuntimeError, match='时刻'):
+            job.step(None)
+    assert job.closed and job.manifest['status'] == 'incomplete'
+    assert (job.scene.frame_current, job.scene.frame_subframe) == jump
+    assert not any(playing for operation, playing in calls if operation == 'play')
+    assert job.scene['wfrl_clearance_time_s'] == 9.25
+
+
+def test_frame_set_accepts_rna_float32_subframe_rounding(clock_capture, monkeypatch):
+    import struct
+    from contextlib import nullcontext
+    job, _calls, _generation = clock_capture
+    def frame_set(frame, *, subframe):
+        job.scene.frame_current = frame
+        job.scene.frame_subframe = struct.unpack('f', struct.pack('f', subframe))[0]
+    job.scene.frame_set = frame_set
+    job.farm = NS(update=lambda scene, **kwargs: scene.__setitem__('wfrl_clearance_time_s', kwargs['sim_time_s']))
+    monkeypatch.setattr(capture, 'readonly_frame_handlers', nullcontext)
+    monkeypatch.setitem(sys.modules, 'bpy', NS(context=NS(view_layer=job.view_layer)))
+    capture.Capture.evaluate(job, 61, 1 / 3, 1.)
+    assert job._clock_unchanged()
+    assert job.scene['wfrl_clearance_time_s'] == 1.
+
+
 @pytest.mark.parametrize('intervention', ['cancel', 'seek', 'frame_start', 'timebase', 'write_failure', 'shutdown'])
 def test_pending_png_yields_and_never_commits_an_invalid_group(clock_capture, monkeypatch, intervention):
     job, calls, _generation = clock_capture

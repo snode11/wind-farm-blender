@@ -249,6 +249,7 @@ class Capture:
         self.original_time_property = self.scene.get('wfrl_clearance_time_s')
         self.profile = preview.render_profile(self.scene)
         self.expected_frame = (self.frame,self.subframe)
+        self._clock_invalidated = False
         self.source = {'source_package_id': str(self.farm.path) if self.farm and hasattr(self.farm,'path') else self.scene.get('wfrl_farm_flex_path'),
             'manifest_hash': self.scene.get('wfrl_farm_manifest_sha256'),
             'geometry_signature': self.layout['model_signature'],
@@ -361,7 +362,8 @@ class Capture:
         owner = playback.owner_scene()
         playing = ((owner is None or owner == self.scene)
                    and self.window.screen.is_animation_playing)
-        return (not playing and playback.generation() == self.playback_generation
+        return (not getattr(self, '_clock_invalidated', False)
+                and not playing and playback.generation() == self.playback_generation
                 and self._time_mapping_unchanged()
                 and (self.scene.frame_current, self.scene.frame_subframe) == self.expected_frame)
 
@@ -371,7 +373,11 @@ class Capture:
         import bpy
         with readonly_frame_handlers():
             self.scene.frame_set(frame,subframe=subframe)
-            self.expected_frame = (self.scene.frame_current, self.scene.frame_subframe)
+            actual = (self.scene.frame_current, self.scene.frame_subframe)
+            if not math.isclose(sum(actual), frame + subframe, rel_tol=0., abs_tol=1e-7):
+                self._clock_invalidated = True
+                raise RuntimeError('采集求值时刻被外部回调改变，采集未完成')
+            self.expected_frame = actual
             self.farm.update(self.scene,sim_time_s=sim_time,record_telemetry=False,update_comparison=False)
             layer = self.view_layer if getattr(self, 'farm_sequence', False) else bpy.context.view_layer
             layer.update()

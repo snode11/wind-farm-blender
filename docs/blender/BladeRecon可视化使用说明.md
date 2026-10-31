@@ -1,8 +1,8 @@
 # Blade Recon 叶片三维重建可视化
 
-当前项目源码版本为 **0.3.42**，对应 [`v0.3.42` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.42)。公开扩展附件为 **0.3.42**；本机日常安装为独立的 **0.3.41 本地源码构建**，实际身份见[安装记录](../../publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
+发布版本为 **0.3.42.1**（GitHub 标签 `v0.3.42.1`，Blender manifest 为 `0.3.42+1`）。安装与公开载荷身份以 `publication/daily-installation.json` 和发布交付记录为准。
 
-适用于 Blender 5.2+ 的公开 NREL **0.3.42**。从[专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42/wfrl_blender-0.3.42.zip)安装并重启；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装的当前版本、实际来源与验证范围见[统一发布状态](发布状态与验证范围.md)和[安装核对](../../publication/daily-installation.json)。外部研究求解器不随扩展打包。
+适用于 Blender 5.2+ 的公开 NREL **0.3.42.1**。从[专用 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.1/wfrl_blender-0.3.42+1.zip)安装并重启；当前源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。开发机日常安装的当前版本、实际来源与验证范围见[统一发布状态](发布状态与验证范围.md)和[安装核对](../../publication/daily-installation.json)。外部研究求解器不随扩展打包。
 
 几何与纹理保持 **NOT_ACCEPTED**，叶尖显示门槛按[工作区源码与安装载荷](发布状态与验证范围.md#研究与物理边界)分别判定。外部材料点候选 Patch 2/8、Crack 7/8、跨相机 RGB 0/264，仍为 FAILED_GATE / NOT_ACCEPTED，same_material_error_m 与 primary_gains 均 null；该[研究结果](../../blade_recon0.2/docs/材料点对应实验报告_2026-10-11.md)未替换正式 601 样本与图集。
 
@@ -25,7 +25,7 @@
 
 ## 规范几何示例
 
-1. 使用 Blender 5.2+，在 Preferences → Get Extensions → Install from Disk 安装启用 [0.3.42 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.42) 的扩展附件 `wfrl_blender-0.3.42.zip`，升级后重启 Blender。
+1. 使用 Blender 5.2+，在 Preferences → Get Extensions → Install from Disk 安装启用 [0.3.42.1 发布页](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.42.1) 的扩展附件 `wfrl_blender-0.3.42+1.zip`，升级后重启 Blender。
 2. 三维视图按 **N → MAPPO → 打开几何重建示例…**。当前文件未保存时由 Blender 原生对话框提示保存；打开的是安装目录内 `assets/examples/mappo_reconstruction_split.blend`，原几何示例和同源 MAPPO 纹理均含 601 个保存样本，与独立合成纹理的 120 样本分开。当前分屏用 **切换到同源纹理对照／切换到几何重建**双向切换；退出后用 **返回重建对照**恢复当前模式。建议另存到自己的文件，避免覆盖安装目录里的示例。
 3. 两侧均显示完整风机，播放／暂停共用时间轴。直接用时间轴寻址，侧栏只保留模式切换、同源中段／叶尖观察点、原始／增强显示及退出；旧样本步进、完整取景与恢复布局工具继续保留在底层。两侧可自由缩放和绕转，窗口缩放可恢复可用区域，左侧相机切换保留右侧独立视图。
 4. **退出对照**保留数据和当前时间，可重新进入。另存自己的 `.blend` 后，启用匹配扩展即可原生重开恢复。

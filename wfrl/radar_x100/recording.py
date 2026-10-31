@@ -98,6 +98,8 @@ class Recorder:
         if self.state != 'RECORDING':
             return
         try:
+            if not self.rows:
+                raise ValueError('Recording contains no frames')
             self.index.close()
             self.state = 'COMPLETE'
             self._manifest()

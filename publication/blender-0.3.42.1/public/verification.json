@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "version": "0.3.42.1",
+  "extension_version": "0.3.42+1",
+  "host": {
+    "passed": 1565,
+    "skipped": 4,
+    "subtests_passed": 4923
+  },
+  "bridge": {
+    "passed": 113,
+    "skipped": 3,
+    "subtests_passed": 43
+  },
+  "native_source_scripts": 7,
+  "installed_scripts": 4,
+  "isolated_package": "PASS",
+  "not_run": [
+    "visible UI",
+    "physical input",
+    "GPU RGB",
+    "full video/FPS",
+    "other platforms",
+    "real device/training",
+    "scientific acceptance"
+  ]
+}

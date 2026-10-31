@@ -30,8 +30,14 @@ def remove_objects(scene):
     for obj in list(scene.objects):
         if obj.get('wfrl_x100_owner') != owner:
             continue
-        # A linked object in another scene belongs to that saved scene as well.
-        if len(obj.users_scene) > 1:
+        if len(obj.users_scene) > 1 or obj.use_fake_user:
+            local = (scene.collection, *scene.collection.children_recursive)
+            others = [other for other in obj.users_scene if other != scene]
+            for collection in list(obj.users_collection):
+                shared = any(collection == other.collection or collection in tuple(other.collection.children_recursive)
+                             for other in others)
+                if collection in local and not shared:
+                    collection.objects.unlink(obj)
             continue
         data = obj.data
         bpy.data.objects.remove(obj, do_unlink=True)
@@ -41,6 +47,17 @@ def remove_objects(scene):
     for collection in list(scene.collection.children):
         if collection.get('wfrl_x100_owner') == owner and not collection.objects and collection.users == 1:
             bpy.data.collections.remove(collection)
+
+
+def existing_installation(scene, owner):
+    objects = [obj for obj in scene.objects if obj.get('wfrl_x100_owner') == owner]
+    mounts = [obj for obj in objects if obj.type == 'EMPTY']
+    fields = [obj for obj in objects if obj.get('wfrl_x100_role') == 'annotation']
+    housings = [obj for obj in objects if obj.get('wfrl_x100_role') == 'physical']
+    if (len(objects) != 3 or len(mounts) != 1 or len(fields) != 1 or len(housings) != 1
+            or fields[0].parent != mounts[0] or housings[0].parent != mounts[0]):
+        raise ValueError('保存的 X100 安装缺失或归属不明确；请检查后重新应用配置')
+    return mounts[0], fields[0]
 
 
 def install(scene, owner, sensor_matrix, *, show_fov=True):

@@ -9,6 +9,7 @@ from . import view
 
 _SESSIONS = {}
 _RESTORE_ATTEMPTED = set()
+_RESET_HANDLERS = ('load_pre', 'undo_pre', 'redo_pre')
 
 
 def session_for(scene):
@@ -22,7 +23,7 @@ def session_for(scene):
 
 
 class Session:
-    def __init__(self, scene):
+    def __init__(self, scene, *, restoring=False):
         from .. import farm_flex
         from .scene import SceneSampler, installation_matrix
         self.scene, self.mode = scene, scene.wfrl_x100_source
@@ -35,7 +36,8 @@ class Session:
         self.replay_cursor = None
         self.owner = scene.get('wfrl_x100_owner') or str(uuid.uuid4())
         scene['wfrl_x100_owner'] = self.owner
-        view.remove_objects(scene)
+        if not restoring:
+            view.remove_objects(scene)
         if self.mode == 'SIMULATION':
             flex = farm_flex.active_for(scene)
             if flex is None or not farm_flex.is_active(scene):
@@ -43,14 +45,17 @@ class Session:
             self.sampler = SceneSampler(flex, mount=scene.wfrl_x100_mount,
                 mount_from_sensor=installation_matrix(scene.wfrl_x100_location, scene.wfrl_x100_rotation))
             t = max(self.sampler.interval[0], min(self.sampler.interval[1], float(scene.get('wfrl_clearance_time_s', 0))))
-            self.mount, self.fov = view.install(scene, self.owner,
-                self.sampler.mount_world_at(t) @ self.sampler.mount_from_sensor, show_fov=scene.wfrl_x100_fov)
-            from mathutils import Matrix
-            yaw = scene.objects['WFRL.Turbine.T1.YawRoot']
-            self.mount.parent = yaw if scene.wfrl_x100_mount == 'NACELLE' else (
-                yaw.parent if scene.wfrl_x100_mount == 'TOWER_BASE' else None)
-            self.mount.matrix_parent_inverse = Matrix.Identity(4)
-            self.mount.matrix_basis = Matrix(self.sampler.mount_from_sensor.tolist())
+            if restoring:
+                self.mount, self.fov = view.existing_installation(scene, self.owner)
+            else:
+                self.mount, self.fov = view.install(scene, self.owner,
+                    self.sampler.mount_world_at(t) @ self.sampler.mount_from_sensor, show_fov=scene.wfrl_x100_fov)
+                from mathutils import Matrix
+                yaw = scene.objects['WFRL.Turbine.T1.YawRoot']
+                self.mount.parent = yaw if scene.wfrl_x100_mount == 'NACELLE' else (
+                    yaw.parent if scene.wfrl_x100_mount == 'TOWER_BASE' else None)
+                self.mount.matrix_parent_inverse = Matrix.Identity(4)
+                self.mount.matrix_basis = Matrix(self.sampler.mount_from_sensor.tolist())
             self.fov_shown = scene.wfrl_x100_fov
             self.fov_hidden = ({layer.as_pointer(): (layer, False) for layer in scene.view_layers}
                                if not self.fov_shown else {})
@@ -217,23 +222,23 @@ def _guard_installation():
         raise ValueError('请先结束或取消相机采集，再应用或关闭 X100 安装')
 
 
-def stop(scene):
+def stop(scene, *, remove=True):
     _guard_installation()
     session = _SESSIONS.pop(scene.as_pointer(), None)
     scene.wfrl_x100_enabled = False
     scene['wfrl_x100_status'] = '已关闭'
     if session:
-        session.close()
-    else:
+        session.close(remove=remove)
+    elif remove:
         view.remove_objects(scene)
 
 
-def start(scene):
+def start(scene, *, restoring=False):
     _guard_installation()
-    stop(scene)
+    stop(scene, remove=not restoring)
     session = None
     try:
-        session = Session(scene)
+        session = Session(scene, restoring=restoring)
         session.update()
         _SESSIONS[scene.as_pointer()] = session
         scene.wfrl_x100_enabled = True
@@ -241,8 +246,8 @@ def start(scene):
         return session
     except Exception:
         if session:
-            session.close()
-        else:
+            session.close(remove=not restoring)
+        elif not restoring:
             view.remove_objects(scene)
         raise
 
@@ -264,7 +269,7 @@ def tick():
         if key not in _SESSIONS and scene.wfrl_x100_enabled and key not in _RESTORE_ATTEMPTED:
             _RESTORE_ATTEMPTED.add(key)
             try:
-                start(scene)
+                start(scene, restoring=True)
             except Exception as exc:
                 scene['wfrl_x100_error'] = '恢复失败：' + str(exc)
         session = _SESSIONS.get(key)
@@ -303,7 +308,11 @@ def register():
     from bpy.app.handlers import persistent
     from ..panels import radar_x100
     radar_x100.register_properties()
-    bpy.app.handlers.load_pre.append(persistent(on_load_pre))
+    handler = persistent(on_load_pre)
+    for name in _RESET_HANDLERS:
+        handlers = getattr(bpy.app.handlers, name)
+        if handler not in handlers:
+            handlers.append(handler)
     bpy.app.timers.register(tick, persistent=True)
     view.register()
 
@@ -322,7 +331,9 @@ def unregister():
         _RESTORE_ATTEMPTED.clear()
         if bpy.app.timers.is_registered(tick):
             bpy.app.timers.unregister(tick)
-        while on_load_pre in bpy.app.handlers.load_pre:
-            bpy.app.handlers.load_pre.remove(on_load_pre)
+        for name in _RESET_HANDLERS:
+            handlers = getattr(bpy.app.handlers, name)
+            while on_load_pre in handlers:
+                handlers.remove(on_load_pre)
         view.unregister()
         radar_x100.unregister_properties()

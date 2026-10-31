@@ -57,7 +57,7 @@ class Assembler:
             self.completed[stream_key] = max(frame.sequence, self.completed.get(stream_key, -1))
             self.counters['corrupt'] += 1
             return None
-        if key[3] <= self.completed.get(stream_key, -1):
+        if key not in self.pending and key[3] <= self.completed.get(stream_key, -1):
             self.counters['duplicate'] += 1
             return None
         if (type(count) is not int or type(index) is not int or not 1 <= count <= 256 or not 0 <= index < count
@@ -74,13 +74,13 @@ class Assembler:
         state = self.pending[key]
         if state['count'] != count or state['metadata'] != frame.metadata():
             del self.pending[key]
-            self.completed[stream_key] = frame.sequence
+            self.completed[stream_key] = max(frame.sequence, self.completed.get(stream_key, -1))
             self.counters['corrupt'] += 1
             return None
         if index in state['parts']:
             if state['parts'][index].tobytes() != fragment.points.tobytes():
                 del self.pending[key]
-                self.completed[stream_key] = frame.sequence
+                self.completed[stream_key] = max(frame.sequence, self.completed.get(stream_key, -1))
                 self.counters['corrupt'] += 1
             else:
                 self.counters['duplicate'] += 1
@@ -89,13 +89,13 @@ class Assembler:
         state['terminal'] |= fragment.terminal
         if sum(map(len, state['parts'].values())) > MAX_POINTS:
             del self.pending[key]
-            self.completed[stream_key] = frame.sequence
+            self.completed[stream_key] = max(frame.sequence, self.completed.get(stream_key, -1))
             self.counters['corrupt'] += 1
             return None
         if len(state['parts']) != count or not state['terminal']:
             return None
         del self.pending[key]
-        self.completed[stream_key] = frame.sequence
+        self.completed[stream_key] = max(frame.sequence, self.completed.get(stream_key, -1))
         try:
             return replace(frame, points=np.concatenate([state['parts'][i] for i in range(count)]),
                            completeness='COMPLETE')
@@ -140,6 +140,9 @@ class Fanout:
         key = frame.sensor_id, frame.stream
         if key in self.latest:
             self.display_drops += 1
+            previous = self.latest[key]
+            if previous.session_id == frame.session_id and previous.sequence >= frame.sequence:
+                return
         if key not in self.latest and len(self.latest) >= 8:
             self.latest.pop(next(iter(self.latest)))
             self.display_drops += 1

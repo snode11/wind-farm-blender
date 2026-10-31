@@ -31,7 +31,8 @@ def state(scene):
                 frame_preview_start=scene.frame_preview_start,
                 frame_preview_end=scene.frame_preview_end,
                 frame_current=scene.frame_current, frame_subframe=scene.frame_subframe,
-                timebase=scene['wfrl_clearance_timebase_fps'],
+                timebase=scene.get('wfrl_clearance_timebase_fps'),
+                has_timebase='wfrl_clearance_timebase_fps' in scene,
                 turbine=scene['wfrl_clearance_turbine'],
                 sample=replay.sample(scene))
 
@@ -47,9 +48,11 @@ scene.frame_start, scene.frame_end, scene.frame_step = 11, 101, 2
 scene.sync_mode, scene.use_preview_range = 'NONE', True
 scene.frame_preview_start, scene.frame_preview_end = 21, 81
 scene['wfrl_clearance_timebase_fps'] = 90.
+if os.environ.get('WFRL_REOPEN_TIMEBASE') == 'render':
+    del scene['wfrl_clearance_timebase_fps']
 scene.frame_set(40, subframe=.25)
 before = state(scene)
-assert before['sample']['time_s'] == 117.325
+assert abs(before['sample']['time_s'] - (118.21996875 if not before['has_timebase'] else 117.325)) < 1e-9
 assert replay.reader_for(scene) is farm.active_for(scene).readers[selected]
 saved = output / 'saved.blend'
 assert bpy.ops.wm.save_as_mainfile(filepath=str(saved)) == {'FINISHED'}

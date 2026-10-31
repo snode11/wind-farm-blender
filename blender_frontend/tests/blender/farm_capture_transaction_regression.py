@@ -212,6 +212,44 @@ try:
                                'status': manifest['status'], 'completed_samples': manifest['completed_samples'],
                                'playback_requests': requests, 'evaluations': evaluations[start:],
                                'capture_directory': str(job.path)})
+    for during_restore in (False, True):
+        for jump_subframe in (False, True):
+            prepared()
+            original_playing = True
+            with bpy.context.temp_override(window=window, area=area, region=region):
+                job = capture.Capture(bpy.context, output, [119.5, 120.])
+                first_sample(job, bpy.context)
+                fired = [False]
+                target_frame = 451 if during_restore else 481
+                external_frame = target_frame if jump_subframe else 501
+                external_subframe = .75 if jump_subframe else 0.
+                def external_seek(changed_scene, *_args):
+                    if changed_scene == scene and not fired[0] and scene.frame_current == target_frame:
+                        fired[0] = True
+                        scene.frame_set(external_frame, subframe=external_subframe)
+                bpy.app.handlers.frame_change_post.append(external_seek)
+                try:
+                    deadline = time.monotonic() + 5
+                    while not job.closed:
+                        assert time.monotonic() < deadline
+                        try:
+                            job.step(bpy.context)
+                        except RuntimeError:
+                            assert job.closed
+                        time.sleep(.001)
+                finally:
+                    bpy.app.handlers.frame_change_post.remove(external_seek)
+                assert fired[0]
+                assert (scene.frame_current, scene.frame_subframe) == (external_frame, external_subframe)
+                manifest = json.loads((job.path / 'manifest.json').read_text())
+                assert manifest['status'] == 'incomplete'
+                assert manifest['completed_samples'] == (2 if during_restore else 1)
+                requests = [playing for identity, playing in player_requests if identity == job.capture_id]
+                assert requests == ([False, False] if during_restore else [False])
+                assert len((job.path / 'frames.jsonl').read_text().splitlines()) == (2 if during_restore else 1)
+                checks.append(dict(action='native_frame_callback', during_restore=during_restore,
+                                   subframe_only=jump_subframe, status=manifest['status'],
+                                   completed_samples=manifest['completed_samples']))
 finally:
     if capture.active():
         capture.shutdown(restore=False)

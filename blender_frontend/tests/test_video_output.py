@@ -1,11 +1,13 @@
 """Real export and RTSP lifecycle checks for the Blender video controller."""
 import hashlib
+import ctypes
 import importlib.util
 import os
 from pathlib import Path
 import shutil
 import socket
 import subprocess
+import sys
 import threading
 import time
 from unittest.mock import Mock
@@ -115,6 +117,61 @@ def test_cancel_removes_partial_export(tmp_path, monkeypatch):
     assert job.error
     assert not target.exists()
     assert source.read_bytes() == b'x' * 100
+
+
+@pytest.mark.parametrize('cancel', [False, True])
+def test_external_destination_during_copy_is_preserved_and_never_reported_success(tmp_path, monkeypatch, cancel):
+    source, target = tmp_path / 'source.mp4', tmp_path / 'output.mp4'
+    source.write_bytes(b'original video')
+    entered, release = threading.Event(), threading.Event()
+    original_open = Path.open
+    class HeldReader:
+        def __enter__(self):
+            self.stream = original_open(source, 'rb')
+            return self
+        def __exit__(self, *args):
+            self.stream.close()
+        def fileno(self):
+            return self.stream.fileno()
+        def read(self, count):
+            entered.set()
+            assert release.wait(5)
+            return self.stream.read(count)
+    def held_open(path, *args, **kwargs):
+        return HeldReader() if path == source and args == ('rb',) else original_open(path, *args, **kwargs)
+    monkeypatch.setattr(Path, 'open', held_open)
+    job = video_output.Export()
+    job.start(source, target)
+    try:
+        assert entered.wait(5)
+        replacement = tmp_path / 'replacement.mp4'
+        replacement.write_bytes(b'preserve external video')
+        os.replace(replacement, target)
+        if cancel:
+            job.cancelled.set()
+    finally:
+        release.set()
+        wait_export(job)
+    assert target.read_bytes() == b'preserve external video'
+    assert job.error and not job.output_path
+    assert sorted(p.name for p in tmp_path.iterdir()) == ['output.mp4', 'source.mp4']
+
+
+@pytest.mark.skipif(sys.platform not in {'darwin', 'linux'}, reason='Native exclusive rename required')
+def test_export_can_commit_on_filesystems_without_hard_links(tmp_path, monkeypatch):
+    function = 'renamex_np' if sys.platform == 'darwin' else 'renameat2'
+    if not hasattr(ctypes.CDLL(None), function):
+        pytest.skip('Native exclusive rename unavailable')
+    source, target = tmp_path / 'source.mp4', tmp_path / 'output.mp4'
+    source.write_bytes(b'complete video')
+    def unsupported(*args, **kwargs):
+        raise OSError('Filesystem does not support hard links')
+    monkeypatch.setattr(video_output.os, 'link', unsupported)
+    job = video_output.Export()
+    job.start(source, target)
+    wait_export(job)
+    assert not job.error
+    assert target.read_bytes() == b'complete video'
 
 
 @pytest.mark.parametrize('changed_size', [0, 50, 200])

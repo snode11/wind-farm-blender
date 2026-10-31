@@ -187,16 +187,20 @@ def _farm_timeline_state(scene):
     fields = ('frame_start', 'frame_end', 'frame_step', 'sync_mode', 'use_preview_range',
               'frame_preview_start', 'frame_preview_end')
     return (scene.render.fps, scene.render.fps_base,
+            'wfrl_clearance_timebase_fps' in scene,
             scene.get('wfrl_clearance_timebase_fps'),
             {name: getattr(scene, name) for name in fields})
 
 
 def _restore_farm_timeline(scene, saved):
-    fps, base, timebase, fields = saved
+    fps, base, has_timebase, timebase, fields = saved
     scene.render.fps, scene.render.fps_base = fps, base
     for name, value in fields.items():
         setattr(scene, name, value)
-    if type(timebase) in (int, float) and math.isfinite(timebase) and timebase > 0:
+    if not has_timebase:
+        if 'wfrl_clearance_timebase_fps' in scene:
+            del scene['wfrl_clearance_timebase_fps']
+    elif type(timebase) in (int, float) and math.isfinite(timebase) and timebase > 0:
         scene['wfrl_clearance_timebase_fps'] = timebase
 
 

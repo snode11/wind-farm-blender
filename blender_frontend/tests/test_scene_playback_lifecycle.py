@@ -366,7 +366,12 @@ def test_standalone_replay_restores_saved_fractional_frame(monkeypatch):
     assert (scene.frame_current, scene.frame_subframe) == (61, .375)
 
 
-def test_farm_file_reopen_preserves_saved_clock_output_and_preview(monkeypatch, tmp_path):
+@pytest.mark.parametrize('timebase,fps,base,expected', [
+    (90., 30, 1., 117.325), (60., 30, 1., 117.4875), (None, 30, 1., 117.975),
+    (90., 24, 1.001, 117.325), (60., 24, 1.001, 117.4875), (None, 24, 1.001, 118.21996875),
+])
+def test_farm_file_reopen_preserves_saved_clock_output_and_preview(
+        monkeypatch, tmp_path, timebase, fps, base, expected):
     from wfrl_blender import runtime
 
     class SavedScene(dict):
@@ -383,15 +388,19 @@ def test_farm_file_reopen_preserves_saved_clock_output_and_preview(monkeypatch, 
             self.frame_current, self.frame_subframe = frame, subframe
 
     scene = SavedScene(wfrl_scene_kind='clearance_replay', wfrl_clearance_demo='near_tower',
-                       wfrl_farm_flex_path=str(tmp_path), wfrl_clearance_timebase_fps=90.,
+                       wfrl_farm_flex_path=str(tmp_path),
                        wfrl_clearance_turbine='T2')
+    scene.render = SimpleNamespace(fps=fps, fps_base=base)
+    if timebase is not None:
+        scene['wfrl_clearance_timebase_fps'] = timebase
     readers = {tid: SimpleNamespace(start_s=117., end_s=177., at=lambda t: dict(time_s=t))
                for tid in ('T1', 'T2', 'T3')}
     active = SimpleNamespace(readers=readers)
     monkeypatch.setitem(sys.modules, 'bpy', SimpleNamespace(data=SimpleNamespace(scenes=[scene])))
     monkeypatch.setattr(runtime, 'enter_result_replay', lambda **_kw: None)
     monkeypatch.setattr(farm_flex, 'active_for', lambda target: active if target is scene else None)
-    monkeypatch.setattr(clearance_replay, '_READERS', {})
+    monkeypatch.setattr(clearance_replay, '_READERS', {scene.as_pointer(): readers['T2']})
+    assert clearance_replay.sample(scene)['time_s'] == expected
 
     def attach(target, path):
         assert target is scene and path == tmp_path
@@ -404,12 +413,12 @@ def test_farm_file_reopen_preserves_saved_clock_output_and_preview(monkeypatch, 
 
     monkeypatch.setattr(farm_flex, 'attach', attach)
     clearance_replay.on_load(None)
-    assert (scene.render.fps, scene.render.fps_base) == (24, 1.001)
+    assert (scene.render.fps, scene.render.fps_base) == (fps, base)
     assert (scene.frame_start, scene.frame_end, scene.frame_step) == (11, 101, 2)
     assert (scene.frame_preview_start, scene.frame_preview_end) == (21, 81)
     assert (scene.sync_mode, scene.use_preview_range) == ('NONE', True)
     assert (scene.frame_current, scene.frame_subframe) == (40, .25)
-    assert scene['wfrl_clearance_timebase_fps'] == 90.
+    assert scene.get('wfrl_clearance_timebase_fps') == timebase
     assert scene['wfrl_clearance_turbine'] == 'T2'
     assert clearance_replay.reader_for(scene) is readers['T2']
-    assert clearance_replay.sample(scene)['time_s'] == 117.325
+    assert clearance_replay.sample(scene)['time_s'] == expected

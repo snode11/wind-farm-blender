@@ -1,0 +1,340 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "module": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/validated/profile/extensions/wfrl_blender/__init__.py",
+  "scope": "real RNA ownership and capture transaction; replay, image and playback adapters; no GPU proof",
+  "checks": [
+    {
+      "action": "success",
+      "original_playing": false,
+      "status": "complete",
+      "completed_samples": 2,
+      "playback_requests": [
+        false,
+        false,
+        false
+      ],
+      "evaluations": [
+        119.5,
+        120.0,
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_57eb428929"
+    },
+    {
+      "action": "cancel",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false,
+        false,
+        false
+      ],
+      "evaluations": [
+        119.5,
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_8b696209e3"
+    },
+    {
+      "action": "frame_start",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_f458c0dd30"
+    },
+    {
+      "action": "timebase",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_1cb9ee244f"
+    },
+    {
+      "action": "removed_timebase",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_cd87a8fbdf"
+    },
+    {
+      "action": "layer",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_bb657e151e"
+    },
+    {
+      "action": "delete_layer",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_f6496a41a2"
+    },
+    {
+      "action": "scene",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_aa4ea7fb18"
+    },
+    {
+      "action": "foreign_context",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_ee2dbc9473"
+    },
+    {
+      "action": "render_layer",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5,
+        120.0
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_b3f3d4b6e2"
+    },
+    {
+      "action": "render_timebase",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5,
+        120.0
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_1771627447"
+    },
+    {
+      "action": "success",
+      "original_playing": true,
+      "status": "complete",
+      "completed_samples": 2,
+      "playback_requests": [
+        false,
+        false,
+        true
+      ],
+      "evaluations": [
+        119.5,
+        120.0,
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_abf4a469d4"
+    },
+    {
+      "action": "cancel",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false,
+        false,
+        true
+      ],
+      "evaluations": [
+        119.5,
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_fb7f56f9da"
+    },
+    {
+      "action": "frame_start",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_6ec8f2f05c"
+    },
+    {
+      "action": "timebase",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_6063ea0b7f"
+    },
+    {
+      "action": "removed_timebase",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_c80f0bc6d7"
+    },
+    {
+      "action": "layer",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_6007c686e6"
+    },
+    {
+      "action": "delete_layer",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_5977968819"
+    },
+    {
+      "action": "scene",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_c8e955f570"
+    },
+    {
+      "action": "foreign_context",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_6adca50c7b"
+    },
+    {
+      "action": "render_layer",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5,
+        120.0
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_66634ba5b5"
+    },
+    {
+      "action": "render_timebase",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5,
+        120.0
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/installed-farm_capture_transaction_regression/capture_20261031_130713_a49cdf050a"
+    },
+    {
+      "action": "native_frame_callback",
+      "during_restore": false,
+      "subframe_only": false,
+      "status": "incomplete",
+      "completed_samples": 1
+    },
+    {
+      "action": "native_frame_callback",
+      "during_restore": false,
+      "subframe_only": true,
+      "status": "incomplete",
+      "completed_samples": 1
+    },
+    {
+      "action": "native_frame_callback",
+      "during_restore": true,
+      "subframe_only": false,
+      "status": "incomplete",
+      "completed_samples": 2
+    },
+    {
+      "action": "native_frame_callback",
+      "during_restore": true,
+      "subframe_only": true,
+      "status": "incomplete",
+      "completed_samples": 2
+    }
+  ]
+}

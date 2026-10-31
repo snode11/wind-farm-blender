@@ -1,6 +1,6 @@
 # 跨平台协作开发
 
-当前项目源码版本为 **0.3.42**，对应 [`v0.3.42` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.42)。公开扩展附件为 **0.3.42**；本机日常安装为独立的 **0.3.41 本地源码构建**，实际身份见[安装记录](../../publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
+发布版本为 **0.3.42.1**（GitHub 标签 `v0.3.42.1`，Blender manifest 为 `0.3.42+1`）。安装与公开载荷身份以 `publication/daily-installation.json` 和发布交付记录为准。
 
 ## 仓库与分支
 

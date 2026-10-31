@@ -188,6 +188,23 @@ class RadarEdges(unittest.TestCase):
             self.assertEqual(bpy.ops.wfrl.x100_step(direction=direction), {'FINISHED'})
             self.assertEqual(self.session.frame.sequence, expected_sequence)
 
+    def test_shared_objects_are_unlinked_only_from_closing_scene(self):
+        other = bpy.data.scenes.new('X100.ObjectLinks')
+        objects = [obj for obj in self.scene.objects if obj.get('wfrl_x100_owner') == self.session.owner]
+        try:
+            for obj in objects:
+                other.collection.objects.link(obj)
+            radar.stop(self.scene)
+            self.assertFalse(any(obj in tuple(self.scene.objects) for obj in objects))
+            self.assertTrue(all(obj in tuple(other.objects) for obj in objects))
+            self.session = radar.start(self.scene)
+            self.assertEqual(sum(obj.get('wfrl_x100_owner') == self.session.owner for obj in self.scene.objects), 3)
+            radar.stop(self.scene)
+            self.assertTrue(all(obj in tuple(other.objects) for obj in objects))
+        finally:
+            bpy.data.scenes.remove(other)
+            radar.view.remove_orphans(self.session.owner)
+
 
 selected = os.environ.get('WFRL_X100_EDGE_TESTS', '').split(',')
 suite = (unittest.TestSuite(RadarEdges(name) for name in selected) if selected[0]

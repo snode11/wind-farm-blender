@@ -15,6 +15,9 @@ connection_recovery_regression.py
 animation_render_regression.py
 animation_replay_restore_regression.py
 farm_reopen_settings_regression.py
+radar_x100_regression.py
+radar_x100_edges.py
+radar_x100_history_regression.py
 farm_capture_transaction_regression.py
 split_mappo_texture_rollback_regression.py
 custom_camera_capture_regression.py
