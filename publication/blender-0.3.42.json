@@ -22,7 +22,18 @@
     "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42/wind-farm-blender-source-0.3.42.zip",
     "source_reproduction": "publication/blender-0.3.42/public/source-reproduction.json",
     "source_rebuild_verification": "PASS_BYTE_IDENTICAL",
-    "archive_identity": "The Release delivery manifest records the tagged commit, source archive SHA-256 and byte count."
+    "archive_identity": "The Release delivery manifest records the tagged commit, source archive SHA-256 and byte count.",
+    "commit": "5b4bf5976cc594f557d52844b8bf85fd5a8ce3e5",
+    "tree": "42fad4f56447ae0581bf93ee88ba2b4d6021acda",
+    "archive_sha256": "c49750f1caa44c251ab40694834d476f3b0edc752eb3e2b14395a381726b9690",
+    "archive_bytes": 190996785,
+    "source_archive_verification": {
+      "status": "PASS_BYTE_IDENTICAL",
+      "commit": "5b4bf5976cc594f557d52844b8bf85fd5a8ce3e5",
+      "canonical_inputs_checked": 213,
+      "zip_crc": "PASS",
+      "rebuilt_archive_sha256": "30b888681eebce0642aa4b3e967f11a0a71341b7140165ed71fb0d43cd14ec2b"
+    }
   },
   "validation": {
     "verification": "publication/blender-0.3.42/public/verification.json",

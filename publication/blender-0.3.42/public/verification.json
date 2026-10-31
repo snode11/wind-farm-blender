@@ -107,5 +107,6 @@
     "real X100 files or device",
     "scientific acceptance",
     "remote asset download verification"
-  ]
+  ],
+  "source_commit": "5b4bf5976cc594f557d52844b8bf85fd5a8ce3e5"
 }
