@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "addon_path": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.2/public/validated/profile/extensions/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "background": true,
+  "checks": [
+    "24 aspect/FOV combinations against Blender camera projection"
+  ]
+}

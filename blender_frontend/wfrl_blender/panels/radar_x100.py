@@ -1,6 +1,7 @@
 """X100 controls for source identity, installation, replay and recording health."""
 import bpy
 import time
+from ..radar_x100.output import WFRL_OT_X100Output
 
 
 class WFRL_OT_X100Apply(bpy.types.Operator):
@@ -121,6 +122,10 @@ def draw(layout, context):
     row.operator('wfrl.x100_apply')
     row.operator('wfrl.x100_close')
     layout.prop(scene, 'wfrl_x100_color')
+    layout.operator('wfrl.x100_output', icon='WINDOW')
+    output_error = scene.get('wfrl_x100_output_error')
+    if output_error:
+        layout.label(text='点云窗口：' + output_error[:70], icon='ERROR')
     layout.label(text=scene.get('wfrl_x100_status', '未启动'))
     if session and session.frame:
         frame = session.frame
@@ -193,4 +198,4 @@ def unregister_properties():
             delattr(bpy.types.Scene, 'wfrl_x100_' + name)
 
 
-CLASSES = (WFRL_OT_X100Apply, WFRL_OT_X100Close, WFRL_OT_X100Step, WFRL_OT_X100Play, WFRL_OT_X100Record)
+CLASSES = (WFRL_OT_X100Apply, WFRL_OT_X100Close, WFRL_OT_X100Step, WFRL_OT_X100Play, WFRL_OT_X100Record, WFRL_OT_X100Output)

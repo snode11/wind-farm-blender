@@ -1,0 +1,17 @@
+{
+  "pid": 96652,
+  "returncode": 0,
+  "timed_out": false,
+  "elapsed_s": 14.89,
+  "command": [
+    "/Applications/Blender.app/Contents/MacOS/Blender",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "blender_frontend/tests/blender/radar_x100_output_window.py",
+    "--python",
+    "/Users/eason/.codex/visualizations/2026/10/31/01a190f3-9b63-7c72-a34a-a48b6dd703a7/source-window/window-completion.py"
+  ],
+  "tmpdir": "/Users/eason/.codex/visualizations/2026/10/31/01a190f3-9b63-7c72-a34a-a48b6dd703a7/source-window/installed-window-screenshot-scratch/tmp/",
+  "environment_json": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.2/public/validated/environment.json"
+}

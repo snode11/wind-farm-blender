@@ -1,0 +1,17 @@
+{
+  "test_status": "PASS",
+  "addon_path": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.2/public/validated/profile/extensions/wfrl_blender/__init__.py",
+  "core_path": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.2/public/validated/profile/extensions/wfrl_blender/radar_x100/core.py",
+  "gpu_backend": "METAL",
+  "gpu_renderer": "Metal API",
+  "gpu_vendor": "Apple M5 Pro",
+  "gpu_version": "1.2",
+  "window_count": 1,
+  "draw_count": 0,
+  "draw_error": "",
+  "view": "SENSOR",
+  "color": "VELOCITY",
+  "screenshot_result": [
+    "FINISHED"
+  ]
+}

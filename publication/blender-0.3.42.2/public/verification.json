@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "version": "0.3.42.2",
+  "extension_version": "0.3.42+2",
+  "platform": "macOS",
+  "blender": "5.2.1 LTS",
+  "gpu": "Apple M5 Pro / Metal",
+  "host": {
+    "status": "PASS_ALL_CASES_ACROSS_RECORDED_ENVIRONMENTS",
+    "unique_passed": 1573,
+    "skipped": 4,
+    "full_run": "checks/host-compatible.xml",
+    "full_run_passed": 1571,
+    "full_run_environment_failures": 2,
+    "dependency_recheck": "checks/host-dependency-confirmation.xml",
+    "dependency_recheck_passed": 2,
+    "subtests_passed": 4923,
+    "environment_note": "Python 3.15.2; nested system-site-packages environments receive dependencies via isolated PYTHONUSERBASE. Python 3.11 initial run lacks macOS waitid support; initial failure evidence retained in checks/host.xml."
+  },
+  "isolated_package": "validated/package-validation.json",
+  "installed_radar": "installed-radar.json",
+  "source_window": "window/window-graceful/result.json",
+  "installed_window": "window/installed-window-screenshot/result.json",
+  "source_lifecycle": "window/lifecycle/result.json",
+  "input": "SCRIPTED_OPERATORS_AND_STATE",
+  "gpu_rgb": "PASS_FOR_SCRIPTED_SCENE_AND_CAMERA",
+  "exit_memory_diagnostic": {
+    "blocks": 525,
+    "reported_mb": 0.038147,
+    "scope": "normal-exit window test logs; not a long-term memory measurement"
+  },
+  "not_run": [
+    "physical mouse/keyboard",
+    "full video/FPS",
+    "long-term runtime/memory",
+    "other platforms",
+    "real X100 device",
+    "solver/training",
+    "scientific acceptance"
+  ],
+  "daily_installation_updated": false,
+  "source_reproduction": "source-reproduction.json",
+  "test_isolation": {
+    "existing_user_blender_scene": "NOT_OPERATED",
+    "shared_quit_blend": "First lifecycle process wrote the system temporary quit.blend; previous recovery bytes unavailable. Subsequent visible processes used isolated TMPDIR."
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "schema": "wfrl.extension-release.v1",
+  "version": "0.3.42.2",
+  "extension_version": "0.3.42+2",
+  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.42.2",
+  "archive": {
+    "name": "wfrl_blender-0.3.42+2.zip",
+    "path": "publication/blender-0.3.42.2/public/validated/package/wfrl_blender-0.3.42+2.zip",
+    "bytes": 99262918,
+    "file_count": 216,
+    "sha256": "9b8c8bf6c8644f66a9f1a38255f87d6a317591d7daa1ef74d48a9362fa4ad336",
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.2/wfrl_blender-0.3.42+2.zip",
+    "inventory_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.2/wfrl_blender-0.3.42+2.inventory.json",
+    "checksum_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.2/wfrl_blender-0.3.42+2.zip.sha256"
+  },
+  "source": {
+    "repository": "https://github.com/snode11/wind-farm-blender",
+    "branch": "wind-farm-rl-all-work",
+    "synchronized_branch": "main",
+    "tag": "v0.3.42.2",
+    "archive_name": "wind-farm-blender-source-0.3.42.2.zip",
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.2/wind-farm-blender-source-0.3.42.2.zip",
+    "source_reproduction": "publication/blender-0.3.42.2/public/source-reproduction.json",
+    "source_rebuild_verification": "PASS_BYTE_IDENTICAL"
+  },
+  "validation": {
+    "verification": "publication/blender-0.3.42.2/public/verification.json",
+    "package_validation": "publication/blender-0.3.42.2/public/validated/package-validation.json",
+    "installed_radar": "publication/blender-0.3.42.2/public/installed-radar.json",
+    "daily_installation": "publication/daily-installation.json",
+    "host_unique_passed": 1573,
+    "host_skipped": 4
+  },
+  "remote_asset_download_verification": false
+}

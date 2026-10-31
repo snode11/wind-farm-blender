@@ -1,0 +1,7 @@
+00:01.851  blend            | Read blend: "/Users/eason/.codex/visualizations/2026/10/31/01a190f3-9b63-7c72-a34a-a48b6dd703a7/source-window/lifecycle/output-open.blend"
+Info: Saved as "output-open.blend"
+Info: 此场景的雷达点云窗口已经打开
+X100_OUTPUT_LIFECYCLE_PASS {"status": "PASS", "addon_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py", "blender": "5.2.1 LTS", "checks": {"save_keeps_current_output_and_frame": true, "windows_after_load": 2, "saved_output_removed": true, "unrelated_image_editor_preserved": true, "source_frame_preserved": true, "output_resources_released": true, "reopen_draws_existing_frame_without_duplicate_window": true, "unregister_releases_observer_only": true}}
+00:02.945  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit

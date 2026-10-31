@@ -20,7 +20,7 @@
   "user_preferences_preserved": true,
   "addon_preferences_preserved": true,
   "public_release": true,
-  "same_as_public_archive": true,
+  "same_as_public_archive": false,
   "matches_source_archive": true,
   "source_commit": "a994fc715d2bb3dad47e109cbe0c4c48ce063a26",
   "native_background_status": "PASS_FRESH_DAILY_PROFILE",
@@ -37,5 +37,7 @@
     "result_records": true,
     "isolated_runtime_profiles": false
   },
-  "window_left_open": false
+  "window_left_open": false,
+  "public_archive_comparison_version": "0.3.42.2",
+  "installed_release_version": "0.3.42.1"
 }

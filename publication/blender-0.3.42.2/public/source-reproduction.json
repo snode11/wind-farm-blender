@@ -1,0 +1,9 @@
+{
+  "status": "PASS_BYTE_IDENTICAL",
+  "source_tag": "v0.3.42.2",
+  "selected_source_tree": "ae8512272292844db42bb4b063f4be9c6e6a82b1",
+  "archive_sha256": "9b8c8bf6c8644f66a9f1a38255f87d6a317591d7daa1ef74d48a9362fa4ad336",
+  "archive_bytes": 99262918,
+  "source_selection": "Git index exported paths: scripts/blender/build_extension.py, blender_frontend/wfrl_blender, wfrl",
+  "scope": "Extension code and canonical build inputs; publication metadata excluded from payload identity"
+}

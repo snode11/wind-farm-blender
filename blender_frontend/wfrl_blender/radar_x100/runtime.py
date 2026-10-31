@@ -294,6 +294,8 @@ def tick():
 
 
 def on_load_pre(_unused):
+    from . import output
+    output.close_all()
     for session in list(_SESSIONS.values()):
         try:
             session.close(remove=False)
@@ -307,12 +309,16 @@ def register():
     import bpy
     from bpy.app.handlers import persistent
     from ..panels import radar_x100
+    from . import output
     radar_x100.register_properties()
     handler = persistent(on_load_pre)
     for name in _RESET_HANDLERS:
         handlers = getattr(bpy.app.handlers, name)
         if handler not in handlers:
             handlers.append(handler)
+    loaded = persistent(output.on_load_post)
+    if loaded not in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.append(loaded)
     bpy.app.timers.register(tick, persistent=True)
     view.register()
 
@@ -320,6 +326,8 @@ def register():
 def unregister():
     import bpy
     from ..panels import radar_x100
+    from . import output
+    output.close_all()
     try:
         for session in list(_SESSIONS.values()):
             try:
@@ -335,5 +343,7 @@ def unregister():
             handlers = getattr(bpy.app.handlers, name)
             while on_load_pre in handlers:
                 handlers.remove(on_load_pre)
+        while output.on_load_post in bpy.app.handlers.load_post:
+            bpy.app.handlers.load_post.remove(output.on_load_post)
         view.unregister()
         radar_x100.unregister_properties()

@@ -109,25 +109,11 @@ def install(scene, owner, sensor_matrix, *, show_fov=True):
 def batch(frame, color_by):
     import gpu
     from gpu_extras.batch import batch_for_shader
-    xyz = frame.xyz[frame.finite_mask]
-    transform = frame.spatial.get('world_from_sensor')
-    if transform is not None and frame.spatial.get('alignment') in {'SIMULATION', 'STATIC_CALIBRATION', 'VERIFIED'}:
-        matrix = np.asarray(transform)
-        xyz = xyz @ matrix[:3, :3].T + matrix[:3, 3]
-    if color_by == 'RANGE':
-        values = np.linalg.norm(frame.xyz[frame.finite_mask], axis=1)
-    elif color_by == 'HEIGHT':
-        values = xyz[:, 2]
-    elif color_by == 'VELOCITY':
-        values = frame.radial_velocity_m_s[frame.finite_mask] if frame.radial_velocity_m_s is not None else np.full(len(xyz), np.nan)
-    else:
-        values = frame.points[color_by.lower()][frame.finite_mask]
-    finite = np.isfinite(values)
-    colors = np.tile([.5, .5, .5, 1.], (len(xyz), 1)).astype(np.float32)
-    if finite.any():
-        lo, hi = float(values[finite].min()), float(values[finite].max())
-        scaled = (values[finite] - lo) / max(hi - lo, 1e-9)
-        colors[finite, :3] = np.column_stack((scaled, 1 - np.abs(2 * scaled - 1), 1 - scaled))
+    from .display import world_xyz, point_style
+    xyz = world_xyz(frame)
+    if not len(xyz):
+        return None
+    colors, _, _ = point_style(frame, color_by)
     shader = gpu.shader.from_builtin('POINT_FLAT_COLOR')
     return shader, batch_for_shader(shader, 'POINTS', {'pos': xyz.astype(np.float32), 'color': colors})
 
