@@ -70,4 +70,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           test "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = true
-          gh release upload "$RELEASE_TAG" "$EXTENSION_ARCHIVE" "$SOURCE_ARCHIVE" --repo "$GITHUB_REPOSITORY"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+
+          base = ['--repo', os.environ['GITHUB_REPOSITORY']]
+          tag = os.environ['RELEASE_TAG']
+          assets = json.loads(subprocess.check_output(['gh', 'release', 'view', tag, *base, '--json', 'assets']))['assets']
+          uploaded = {item['name'] for item in assets if item['state'] == 'uploaded'}
+          pending = [os.environ[key] for key in ('EXTENSION_ARCHIVE', 'SOURCE_ARCHIVE') if Path(os.environ[key]).name not in uploaded]
+          if pending:
+              subprocess.run(['gh', 'release', 'upload', tag, *pending, *base], check=True)
+          PY
