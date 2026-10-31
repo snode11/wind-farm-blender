@@ -97,5 +97,21 @@
     "real X100",
     "solver/MPI/training",
     "scientific acceptance"
-  ]
+  ],
+  "runner_upload": {
+    "status": "PASS",
+    "run_url": "https://github.com/snode11/wind-farm-blender/actions/runs/41196898474",
+    "source_commit": "019355bbf3bb243f98bfb95cd59b9e830b64c3cf",
+    "extension_rebuild": "PASS_BYTE_IDENTICAL",
+    "source_archive_sha256": "377cd8b4f62b81b3325ab3c22839ce7d32acd5e94f77c5dd49d0a00a58addb31",
+    "source_archive_bytes": 191853963,
+    "remote_asset_download_verification": false
+  },
+  "static_document_checks": {
+    "modified_markdown_files_checked": 30,
+    "new_missing_relative_targets": 0,
+    "release_identity_summary": "PASS",
+    "code_whitespace": "PASS_WITH_CRLF_EOL",
+    "raw_junit_whitespace_preserved": true
+  }
 }
