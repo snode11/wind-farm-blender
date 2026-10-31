@@ -7,8 +7,8 @@ on:
         description: Existing release source tag
         required: true
         type: string
-      source_sha256:
-        description: Expected SHA-256 of the full git archive ZIP
+      source_commit:
+        description: Expected commit of the fixed release source
         required: true
         type: string
 
@@ -27,7 +27,7 @@ jobs:
       contents: write
     env:
       RELEASE_TAG: ${{ inputs.tag }}
-      EXPECTED_SOURCE_SHA256: ${{ inputs.source_sha256 }}
+      EXPECTED_SOURCE_COMMIT: ${{ inputs.source_commit }}
       PYTHONDONTWRITEBYTECODE: '1'
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
@@ -48,9 +48,10 @@ jobs:
           import subprocess
 
           tag = os.environ['RELEASE_TAG']
-          expected_source = os.environ['EXPECTED_SOURCE_SHA256']
+          expected_source = os.environ['EXPECTED_SOURCE_COMMIT']
           assert re.fullmatch(r'v\d+\.\d+\.\d+(?:\.\d+)?', tag), tag
-          assert re.fullmatch(r'[0-9a-f]{64}', expected_source)
+          assert re.fullmatch(r'[0-9a-f]{40}', expected_source)
+          assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == expected_source
           version = tag[1:]
           identity = json.loads(Path(f'publication/blender-{version}.json').read_text())
           assert identity['source']['tag'] == tag
@@ -61,9 +62,14 @@ jobs:
           assert hashlib.sha256(extension.read_bytes()).hexdigest() == identity['archive']['sha256'], 'Extension bytes differ from verified payload'
           source = out / identity['source']['archive_name']
           subprocess.run(['git', 'archive', '--format=zip', f'--prefix=wind-farm-blender-{version}/', '-o', str(source), 'HEAD'], check=True)
-          assert hashlib.sha256(source.read_bytes()).hexdigest() == expected_source, 'Source archive differs from fixed identity'
+          source_digest = hashlib.sha256(source.read_bytes()).hexdigest()
+          source.with_suffix('.zip.sha256').write_text(f'{source_digest}  {source.name}\n')
+          identity['source'].update(commit=expected_source, archive_sha256=source_digest, archive_bytes=source.stat().st_size, archive_generator='GitHub Actions git archive')
+          delivery = out / f'wfrl-delivery-{version}.json'
+          delivery.write_text(json.dumps(identity, ensure_ascii=False, indent=2) + '\n')
+          print('SOURCE_ARCHIVE_IDENTITY', json.dumps(identity['source']))
           with Path(os.environ['GITHUB_ENV']).open('a') as env:
-              env.write(f'EXTENSION_ARCHIVE={extension}\nSOURCE_ARCHIVE={source}\n')
+              env.write(f'EXTENSION_ARCHIVE={extension}\nSOURCE_ARCHIVE={source}\nDELIVERY_RECORD={delivery}\n')
           PY
       - name: Upload matching archives to existing draft
         env:
@@ -80,7 +86,11 @@ jobs:
           tag = os.environ['RELEASE_TAG']
           assets = json.loads(subprocess.check_output(['gh', 'release', 'view', tag, *base, '--json', 'assets']))['assets']
           uploaded = {item['name'] for item in assets if item['state'] == 'uploaded'}
-          pending = [os.environ[key] for key in ('EXTENSION_ARCHIVE', 'SOURCE_ARCHIVE') if Path(os.environ[key]).name not in uploaded]
-          if pending:
-              subprocess.run(['gh', 'release', 'upload', tag, *pending, *base], check=True)
+          extension = Path(os.environ['EXTENSION_ARCHIVE'])
+          source = Path(os.environ['SOURCE_ARCHIVE'])
+          if extension.name not in uploaded:
+              subprocess.run(['gh', 'release', 'upload', tag, str(extension), *base], check=True)
+          if source.name not in uploaded:
+              subprocess.run(['gh', 'release', 'upload', tag, str(source), *base], check=True)
+              subprocess.run(['gh', 'release', 'upload', tag, str(source.with_suffix('.zip.sha256')), os.environ['DELIVERY_RECORD'], *base, '--clobber'], check=True)
           PY
