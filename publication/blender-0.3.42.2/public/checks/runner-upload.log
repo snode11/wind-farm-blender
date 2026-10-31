@@ -1,0 +1,286 @@
+upload	Set up job	﻿2026-10-31T08:19:37.2026357Z Current runner version: '2.338.2'
+upload	Set up job	2026-10-31T08:19:37.2053352Z ##[group]Runner Image Provisioner
+upload	Set up job	2026-10-31T08:19:37.2054245Z Hosted Compute Agent
+upload	Set up job	2026-10-31T08:19:37.2054830Z Version: 20261021.618
+upload	Set up job	2026-10-31T08:19:37.2055553Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+upload	Set up job	2026-10-31T08:19:37.2056296Z Build Date: 2026-10-21T00:45:21Z
+upload	Set up job	2026-10-31T08:19:37.2057121Z Worker ID: {7e05868d-e68c-4d2d-86cf-61915a327ebe}
+upload	Set up job	2026-10-31T08:19:37.2057854Z Region: northcentralus
+upload	Set up job	2026-10-31T08:19:37.2058419Z Cloud: Azure
+upload	Set up job	2026-10-31T08:19:37.2059022Z ##[endgroup]
+upload	Set up job	2026-10-31T08:19:37.2060795Z ##[group]Operating System
+upload	Set up job	2026-10-31T08:19:37.2061576Z Ubuntu
+upload	Set up job	2026-10-31T08:19:37.2062143Z 24.04.5
+upload	Set up job	2026-10-31T08:19:37.2062667Z LTS
+upload	Set up job	2026-10-31T08:19:37.2063227Z ##[endgroup]
+upload	Set up job	2026-10-31T08:19:37.2063786Z ##[group]Runner Image
+upload	Set up job	2026-10-31T08:19:37.2064526Z Image: ubuntu-24.04
+upload	Set up job	2026-10-31T08:19:37.2065123Z Version: 20261025.353.1
+upload	Set up job	2026-10-31T08:19:37.2066216Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261025.353/images/ubuntu/Ubuntu2404-Readme.md
+upload	Set up job	2026-10-31T08:19:37.2068108Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261025.353
+upload	Set up job	2026-10-31T08:19:37.2069451Z ##[endgroup]
+upload	Set up job	2026-10-31T08:19:37.2070645Z ##[group]GITHUB_TOKEN Permissions
+upload	Set up job	2026-10-31T08:19:37.2073006Z Contents: write
+upload	Set up job	2026-10-31T08:19:37.2073675Z Metadata: read
+upload	Set up job	2026-10-31T08:19:37.2074280Z ##[endgroup]
+upload	Set up job	2026-10-31T08:19:37.2076449Z Secret source: Actions
+upload	Set up job	2026-10-31T08:19:37.2077461Z Cache mode: write
+upload	Set up job	2026-10-31T08:19:37.2078811Z Prepare workflow directory
+upload	Set up job	2026-10-31T08:19:37.2627457Z Prepare all required actions
+upload	Set up job	2026-10-31T08:19:37.2676759Z Getting action download info
+upload	Set up job	2026-10-31T08:19:37.5002758Z Download action repository 'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+upload	Set up job	2026-10-31T08:19:37.6193923Z Download action repository 'actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1' (SHA:ece7cb06caefa5fff74198d8649806c4678c61a1)
+upload	Set up job	2026-10-31T08:19:37.8036117Z Complete job name: upload
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	﻿2026-10-31T08:19:37.8885867Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8886976Z with:
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8887413Z   ref: v0.3.42.2
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8887888Z   persist-credentials: false
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8888426Z   repository: snode11/wind-farm-blender
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8892899Z   token: ***
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8893345Z   ssh-strict: true
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8893783Z   ssh-user: git
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8894200Z   clean: true
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8894641Z   sparse-checkout-cone-mode: true
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8895180Z   fetch-depth: 1
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8895610Z   fetch-tags: false
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8896051Z   show-progress: true
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8896494Z   lfs: false
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8896900Z   submodules: false
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8897353Z   set-safe-directory: true
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8897852Z   allow-unsafe-pr-checkout: false
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8898660Z env:
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8899087Z   RELEASE_TAG: v0.3.42.2
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8899925Z   EXPECTED_SOURCE_COMMIT: 12117bb01484e87a4546518456deb095fa1b690d
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8900670Z   PYTHONDONTWRITEBYTECODE: 1
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:37.8901167Z ##[endgroup]
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.1518336Z Syncing repository: snode11/wind-farm-blender
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.1521807Z ##[group]Getting Git version info
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.1523550Z Working directory is '/home/runner/work/wind-farm-blender/wind-farm-blender'
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.1526004Z [command]/usr/bin/git version
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.1575180Z git version 2.56.0
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.1599416Z ##[endgroup]
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.1617902Z Temporarily overriding HOME='/home/runner/work/_temp/e4fe3825-403e-4dfd-a91a-2a54b7b6656b' before making global git config changes
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.1620817Z Adding repository directory to the temporary git global config as a safe directory
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.1624825Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/wind-farm-blender/wind-farm-blender
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.1764701Z Deleting the contents of '/home/runner/work/wind-farm-blender/wind-farm-blender'
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.1767720Z ##[group]Determining repository object format
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3850009Z ##[endgroup]
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3851742Z ##[group]Initializing the repository
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3854579Z [command]/usr/bin/git init /home/runner/work/wind-farm-blender/wind-farm-blender
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3974646Z hint: Using 'master' as the name for the initial branch. This default branch name
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3976592Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3978183Z hint: to use in all of your new repositories, which will suppress this warning,
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3979035Z hint: call:
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3979913Z hint:
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3980958Z hint: 	git config --global init.defaultBranch <name>
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3981703Z hint:
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3982484Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3983870Z hint: 'development'. The just-created branch can be renamed via this command:
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3985398Z hint:
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3986184Z hint: 	git branch -m <name>
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3987108Z hint:
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3988225Z hint: Disable this message with "git config set advice.defaultBranchName false"
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.3990955Z Initialized empty Git repository in /home/runner/work/wind-farm-blender/wind-farm-blender/.git/
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.4001548Z [command]/usr/bin/git remote add origin https://github.com/snode11/wind-farm-blender
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.4069036Z ##[endgroup]
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.4070671Z ##[group]Disabling automatic garbage collection
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.4075075Z [command]/usr/bin/git config --local gc.auto 0
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.4127788Z ##[endgroup]
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.4129884Z ##[group]Setting up auth
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.4131473Z Removing SSH command configuration
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.4139111Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.4194331Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.4575760Z Removing HTTP extra header
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.4583766Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.4634473Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.4878871Z Removing includeIf entries pointing to credentials config files
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.4885235Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.4932657Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.5182406Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-f8395eea-3333-4280-b5dd-037894d4107e.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.5241913Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/wind-farm-blender/wind-farm-blender/.git.path /home/runner/work/_temp/git-credentials-f8395eea-3333-4280-b5dd-037894d4107e.config
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.5286554Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/wind-farm-blender/wind-farm-blender/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-f8395eea-3333-4280-b5dd-037894d4107e.config
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.5332614Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-f8395eea-3333-4280-b5dd-037894d4107e.config
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.5378394Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-f8395eea-3333-4280-b5dd-037894d4107e.config
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.5421206Z ##[endgroup]
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.5422612Z ##[group]Fetching the repository
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:38.5429685Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +refs/heads/v0.3.42.2*:refs/remotes/origin/v0.3.42.2* +refs/tags/v0.3.42.2*:refs/tags/v0.3.42.2*
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:41.8595711Z From https://github.com/snode11/wind-farm-blender
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:41.8597764Z  * [new tag]         v0.3.42.2  -> v0.3.42.2
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:41.8604623Z ##[endgroup]
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:41.8605756Z ##[group]Determining the checkout info
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:41.8612773Z [command]/usr/bin/git branch --list --remote origin/v0.3.42.2
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:41.8664253Z [command]/usr/bin/git tag --list v0.3.42.2
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:41.8708754Z v0.3.42.2
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:41.8718922Z ##[endgroup]
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:41.8730142Z [command]/usr/bin/git sparse-checkout disable
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:41.8791440Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:41.8841193Z ##[group]Checking out the ref
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:41.8845360Z [command]/usr/bin/git checkout --progress --force refs/tags/v0.3.42.2
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7764908Z Note: switching to 'refs/tags/v0.3.42.2'.
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7765556Z 
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7766080Z You are in 'detached HEAD' state. You can look around, make experimental
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7767201Z changes and commit them, and you can discard any commits you make in this
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7768681Z state without impacting any branches by switching back to a branch.
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7769841Z 
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7770425Z If you want to create a new branch to retain commits you create, you may
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7772196Z do so (now or later) by using -c with the switch command. Example:
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7773058Z 
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7773533Z   git switch -c <new-branch-name>
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7773975Z 
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7774168Z Or undo this operation with:
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7774533Z 
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7774684Z   git switch -
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7775335Z 
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7775733Z Turn off this advice by setting config variable advice.detachedHead to false
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7776301Z 
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7776772Z HEAD is now at 12117bb Release Blender 0.3.42.2 with independent X100 point cloud window
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7836090Z ##[endgroup]
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7903423Z [command]/usr/bin/git log -1 --format=%H
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7944694Z 12117bb01484e87a4546518456deb095fa1b690d
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7953392Z ##[group]Removing auth
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7953756Z Removing SSH command configuration
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.7960381Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8008833Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8264303Z Removing HTTP extra header
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8269920Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8322411Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8579868Z Removing includeIf entries pointing to credentials config files
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8584898Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8627607Z includeif.gitdir:/home/runner/work/wind-farm-blender/wind-farm-blender/.git.path
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8628817Z includeif.gitdir:/home/runner/work/wind-farm-blender/wind-farm-blender/.git/worktrees/*.path
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8630111Z includeif.gitdir:/github/workspace/.git.path
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8630795Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8638081Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/wind-farm-blender/wind-farm-blender/.git.path
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8683526Z /home/runner/work/_temp/git-credentials-f8395eea-3333-4280-b5dd-037894d4107e.config
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8693916Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/wind-farm-blender/wind-farm-blender/.git.path /home/runner/work/_temp/git-credentials-f8395eea-3333-4280-b5dd-037894d4107e.config
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8741977Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/wind-farm-blender/wind-farm-blender/.git/worktrees/*.path
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8780517Z /home/runner/work/_temp/git-credentials-f8395eea-3333-4280-b5dd-037894d4107e.config
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8797797Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/wind-farm-blender/wind-farm-blender/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-f8395eea-3333-4280-b5dd-037894d4107e.config
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8846489Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8882667Z /github/runner_temp/git-credentials-f8395eea-3333-4280-b5dd-037894d4107e.config
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8891885Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-f8395eea-3333-4280-b5dd-037894d4107e.config
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8937920Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8973911Z /github/runner_temp/git-credentials-f8395eea-3333-4280-b5dd-037894d4107e.config
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.8982063Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-f8395eea-3333-4280-b5dd-037894d4107e.config
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.9033151Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.9282394Z Removing credentials config '/home/runner/work/_temp/git-credentials-f8395eea-3333-4280-b5dd-037894d4107e.config'
+upload	Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:19:42.9293375Z ##[endgroup]
+upload	Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	﻿2026-10-31T08:19:42.9590001Z ##[group]Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+upload	Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	2026-10-31T08:19:42.9590484Z with:
+upload	Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	2026-10-31T08:19:42.9590708Z   python-version: 3.11
+upload	Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	2026-10-31T08:19:42.9590948Z   check-latest: false
+upload	Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	2026-10-31T08:19:42.9593639Z   token: ***
+upload	Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	2026-10-31T08:19:42.9593858Z   update-environment: true
+upload	Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	2026-10-31T08:19:42.9594115Z   allow-prereleases: false
+upload	Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	2026-10-31T08:19:42.9594344Z   freethreaded: false
+upload	Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	2026-10-31T08:19:42.9594553Z env:
+upload	Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	2026-10-31T08:19:42.9594744Z   RELEASE_TAG: v0.3.42.2
+upload	Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	2026-10-31T08:19:42.9595051Z   EXPECTED_SOURCE_COMMIT: 12117bb01484e87a4546518456deb095fa1b690d
+upload	Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	2026-10-31T08:19:42.9595413Z   PYTHONDONTWRITEBYTECODE: 1
+upload	Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	2026-10-31T08:19:42.9595652Z ##[endgroup]
+upload	Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	2026-10-31T08:19:43.0962444Z ##[group]Installed versions
+upload	Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	2026-10-31T08:19:43.1059873Z Successfully set up CPython (3.11.17)
+upload	Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	2026-10-31T08:19:43.1060850Z ##[endgroup]
+upload	Build and verify fixed release payloads	﻿2026-10-31T08:19:43.1250755Z ##[group]Run python - <<'PY'
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1251345Z ^[[36;1mpython - <<'PY'^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1251759Z ^[[36;1mimport hashlib^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1252129Z ^[[36;1mimport json^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1252468Z ^[[36;1mimport os^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1252825Z ^[[36;1mfrom pathlib import Path^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1253250Z ^[[36;1mimport re^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1253597Z ^[[36;1mimport subprocess^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1253962Z ^[[36;1m^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1254288Z ^[[36;1mtag = os.environ['RELEASE_TAG']^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1254908Z ^[[36;1mexpected_source = os.environ['EXPECTED_SOURCE_COMMIT']^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1255647Z ^[[36;1massert re.fullmatch(r'v\d+\.\d+\.\d+(?:\.\d+)?', tag), tag^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1256337Z ^[[36;1massert re.fullmatch(r'[0-9a-f]{40}', expected_source)^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1257258Z ^[[36;1massert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == expected_source^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1258306Z ^[[36;1mversion = tag[1:]^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1258991Z ^[[36;1midentity = json.loads(Path(f'publication/blender-{version}.json').read_text())^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1260003Z ^[[36;1massert identity['source']['tag'] == tag^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1260632Z ^[[36;1mout = Path(os.environ['RUNNER_TEMP']) / 'release-payloads'^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1261210Z ^[[36;1mout.mkdir()^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1261940Z ^[[36;1msubprocess.run(['python', 'scripts/blender/build_extension.py', '--output', str(out)], check=True)^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1262850Z ^[[36;1mextension = out / identity['archive']['name']^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1263948Z ^[[36;1massert hashlib.sha256(extension.read_bytes()).hexdigest() == identity['archive']['sha256'], 'Extension bytes differ from verified payload'^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1265091Z ^[[36;1msource = out / identity['source']['archive_name']^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1266156Z ^[[36;1msubprocess.run(['git', 'archive', '--format=zip', f'--prefix=wind-farm-blender-{version}/', '-o', str(source), 'HEAD'], check=True)^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1267342Z ^[[36;1msource_digest = hashlib.sha256(source.read_bytes()).hexdigest()^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1268232Z ^[[36;1msource.with_suffix('.zip.sha256').write_text(f'{source_digest}  {source.name}\n')^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1269931Z ^[[36;1midentity['source'].update(commit=expected_source, archive_sha256=source_digest, archive_bytes=source.stat().st_size, archive_generator='GitHub Actions git archive')^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1271263Z ^[[36;1mdelivery = out / f'wfrl-delivery-{version}.json'^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1272050Z ^[[36;1mdelivery.write_text(json.dumps(identity, ensure_ascii=False, indent=2) + '\n')^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1272953Z ^[[36;1mprint('SOURCE_ARCHIVE_IDENTITY', json.dumps(identity['source']))^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1273702Z ^[[36;1mwith Path(os.environ['GITHUB_ENV']).open('a') as env:^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1274648Z ^[[36;1m    env.write(f'EXTENSION_ARCHIVE={extension}\nSOURCE_ARCHIVE={source}\nDELIVERY_RECORD={delivery}\n')^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1275495Z ^[[36;1mPY^[[0m
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1325273Z shell: /usr/bin/bash -e {0}
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1325716Z env:
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1326031Z   RELEASE_TAG: v0.3.42.2
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1326546Z   EXPECTED_SOURCE_COMMIT: 12117bb01484e87a4546518456deb095fa1b690d
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1327211Z   PYTHONDONTWRITEBYTECODE: 1
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1327762Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1328556Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1329642Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1330405Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1331142Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1331893Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+upload	Build and verify fixed release payloads	2026-10-31T08:19:43.1332532Z ##[endgroup]
+upload	Build and verify fixed release payloads	2026-10-31T08:19:48.8063597Z /home/runner/work/_temp/release-payloads/wfrl_blender-0.3.42+2.zip
+upload	Build and verify fixed release payloads	2026-10-31T08:19:48.8064257Z /home/runner/work/_temp/release-payloads/wfrl_blender-0.3.42+2.zip.sha256
+upload	Build and verify fixed release payloads	2026-10-31T08:19:48.8065184Z /home/runner/work/_temp/release-payloads/wfrl_blender-0.3.42+2.inventory.json
+upload	Build and verify fixed release payloads	2026-10-31T08:19:48.8065767Z sha256=9b8c8bf6c8644f66a9f1a38255f87d6a317591d7daa1ef74d48a9362fa4ad336
+upload	Build and verify fixed release payloads	2026-10-31T08:19:56.0000143Z SOURCE_ARCHIVE_IDENTITY {"repository": "https://github.com/snode11/wind-farm-blender", "branch": "wind-farm-rl-all-work", "synchronized_branch": "main", "tag": "v0.3.42.2", "archive_name": "wind-farm-blender-source-0.3.42.2.zip", "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.2/wind-farm-blender-source-0.3.42.2.zip", "source_reproduction": "publication/blender-0.3.42.2/public/source-reproduction.json", "source_rebuild_verification": "PASS_BYTE_IDENTICAL", "commit": "12117bb01484e87a4546518456deb095fa1b690d", "archive_sha256": "b84279fef3b4bb69da115647f67cdf604bfc1478cbed6aee2510fc9683eea8eb", "archive_bytes": 191469379, "archive_generator": "GitHub Actions git archive"}
+upload	Upload matching archives to existing draft	﻿2026-10-31T08:19:56.0098870Z ##[group]Run test "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = true
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0100028Z ^[[36;1mtest "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = true^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0100736Z ^[[36;1mpython - <<'PY'^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0100969Z ^[[36;1mimport json^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0101178Z ^[[36;1mimport os^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0101397Z ^[[36;1mfrom pathlib import Path^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0101658Z ^[[36;1mimport subprocess^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0101889Z ^[[36;1m^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0102140Z ^[[36;1mbase = ['--repo', os.environ['GITHUB_REPOSITORY']]^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0102481Z ^[[36;1mtag = os.environ['RELEASE_TAG']^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0103010Z ^[[36;1massets = json.loads(subprocess.check_output(['gh', 'release', 'view', tag, *base, '--json', 'assets']))['assets']^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0103645Z ^[[36;1muploaded = {item['name'] for item in assets if item['state'] == 'uploaded'}^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0104163Z ^[[36;1mextension = Path(os.environ['EXTENSION_ARCHIVE'])^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0104526Z ^[[36;1msource = Path(os.environ['SOURCE_ARCHIVE'])^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0104846Z ^[[36;1mif extension.name not in uploaded:^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0105274Z ^[[36;1m    subprocess.run(['gh', 'release', 'upload', tag, str(extension), *base], check=True)^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0105707Z ^[[36;1mif source.name not in uploaded:^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0106116Z ^[[36;1m    subprocess.run(['gh', 'release', 'upload', tag, str(source), *base], check=True)^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0106876Z ^[[36;1m    subprocess.run(['gh', 'release', 'upload', tag, str(source.with_suffix('.zip.sha256')), os.environ['DELIVERY_RECORD'], *base, '--clobber'], check=True)^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0107495Z ^[[36;1mPY^[[0m
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0129740Z shell: /usr/bin/bash -e {0}
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0130009Z env:
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0130207Z   RELEASE_TAG: v0.3.42.2
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0130533Z   EXPECTED_SOURCE_COMMIT: 12117bb01484e87a4546518456deb095fa1b690d
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0130900Z   PYTHONDONTWRITEBYTECODE: 1
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0131229Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0131689Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0132114Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0132494Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0132875Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0133257Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0133732Z   EXTENSION_ARCHIVE: /home/runner/work/_temp/release-payloads/wfrl_blender-0.3.42+2.zip
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0134340Z   SOURCE_ARCHIVE: /home/runner/work/_temp/release-payloads/wind-farm-blender-source-0.3.42.2.zip
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0134956Z   DELIVERY_RECORD: /home/runner/work/_temp/release-payloads/wfrl-delivery-0.3.42.2.json
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0137958Z   GH_TOKEN: ***
+upload	Upload matching archives to existing draft	2026-10-31T08:19:56.0138177Z ##[endgroup]
+upload	Post Run actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1	﻿2026-10-31T08:20:03.8040193Z Post job cleanup.
+upload	Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	﻿2026-10-31T08:20:03.9488024Z Post job cleanup.
+upload	Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:20:04.0403680Z [command]/usr/bin/git version
+upload	Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:20:04.0456845Z git version 2.56.0
+upload	Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:20:04.0538002Z Temporarily overriding HOME='/home/runner/work/_temp/0b416d89-37f3-40e7-9dcc-f1d80f010772' before making global git config changes
+upload	Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:20:04.0539992Z Adding repository directory to the temporary git global config as a safe directory
+upload	Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:20:04.0545220Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/wind-farm-blender/wind-farm-blender
+upload	Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:20:04.0595753Z Removing SSH command configuration
+upload	Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:20:04.0605283Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+upload	Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:20:04.0653319Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+upload	Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:20:04.0934431Z Removing HTTP extra header
+upload	Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:20:04.0940789Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+upload	Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:20:04.1015235Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+upload	Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:20:04.1379832Z Removing includeIf entries pointing to credentials config files
+upload	Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:20:04.1388271Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+upload	Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803	2026-10-31T08:20:04.1436173Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+upload	Complete job	﻿2026-10-31T08:20:04.1868170Z Cleaning up orphan processes

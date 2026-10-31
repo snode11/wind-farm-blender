@@ -21,7 +21,11 @@
     "archive_name": "wind-farm-blender-source-0.3.42.2.zip",
     "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.2/wind-farm-blender-source-0.3.42.2.zip",
     "source_reproduction": "publication/blender-0.3.42.2/public/source-reproduction.json",
-    "source_rebuild_verification": "PASS_BYTE_IDENTICAL"
+    "source_rebuild_verification": "PASS_BYTE_IDENTICAL",
+    "commit": "12117bb01484e87a4546518456deb095fa1b690d",
+    "archive_sha256": "b84279fef3b4bb69da115647f67cdf604bfc1478cbed6aee2510fc9683eea8eb",
+    "archive_bytes": 191469379,
+    "archive_generator": "GitHub Actions git archive"
   },
   "validation": {
     "verification": "publication/blender-0.3.42.2/public/verification.json",
@@ -29,7 +33,8 @@
     "installed_radar": "publication/blender-0.3.42.2/public/installed-radar.json",
     "daily_installation": "publication/daily-installation.json",
     "host_unique_passed": 1573,
-    "host_skipped": 4
+    "host_skipped": 4,
+    "runner_upload": "https://github.com/snode11/wind-farm-blender/actions/runs/41184131834"
   },
   "remote_asset_download_verification": false
 }

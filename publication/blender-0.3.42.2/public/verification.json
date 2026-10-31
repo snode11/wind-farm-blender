@@ -43,5 +43,14 @@
   "test_isolation": {
     "existing_user_blender_scene": "NOT_OPERATED",
     "shared_quit_blend": "First lifecycle process wrote the system temporary quit.blend; previous recovery bytes unavailable. Subsequent visible processes used isolated TMPDIR."
+  },
+  "runner_upload": {
+    "status": "PASS",
+    "run_url": "https://github.com/snode11/wind-farm-blender/actions/runs/41184131834",
+    "source_commit": "12117bb01484e87a4546518456deb095fa1b690d",
+    "extension_rebuild": "PASS_BYTE_IDENTICAL",
+    "source_archive_sha256": "b84279fef3b4bb69da115647f67cdf604bfc1478cbed6aee2510fc9683eea8eb",
+    "source_archive_bytes": 191469379,
+    "remote_asset_download_verification": false
   }
 }
