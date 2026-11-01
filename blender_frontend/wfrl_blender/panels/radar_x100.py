@@ -34,6 +34,27 @@ class WFRL_OT_X100Close(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class WFRL_OT_X100MountPreset(bpy.types.Operator):
+    bl_idname = 'wfrl.x100_mount_preset'
+    bl_label = '切换雷达安装位置'
+    bl_description = '切换同一台雷达的位置与朝向，并重新采样当前时刻的点云'
+    preset: bpy.props.EnumProperty(items=(
+        ('ORIGINAL', '原安装位置', '机舱侧下方，朝下观察'),
+        ('NACELLE_SIDE', '机舱侧面', '机舱负 Y 侧壁，朝侧方叶片区域观察')))
+
+    def execute(self, context):
+        from ..radar_x100.runtime import apply_mount_preset
+        try:
+            busy = _busy(context.scene)
+            if busy:
+                raise ValueError(busy + '，暂时不能切换雷达安装位置')
+            apply_mount_preset(context.scene, self.preset)
+        except Exception as exc:
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        return {'FINISHED'}
+
+
 class WFRL_OT_X100Step(bpy.types.Operator):
     bl_idname = 'wfrl.x100_step'
     bl_label = '文件帧跳转'
@@ -90,75 +111,252 @@ class WFRL_OT_X100Record(bpy.types.Operator):
         return {'FINISHED'}
 
 
-def draw(layout, context):
-    from ..radar_x100.runtime import session_for
-    scene, session = context.scene, session_for(context.scene)
-    layout.prop(scene, 'wfrl_x100_source')
-    if scene.wfrl_x100_source == 'SIMULATION':
-        layout.label(text='T1 · 保存运动 · 几何遮挡近似')
-        layout.prop(scene, 'wfrl_x100_mount')
-        layout.prop(scene, 'wfrl_x100_location')
-        layout.prop(scene, 'wfrl_x100_rotation')
-        layout.prop(scene, 'wfrl_x100_candidates')
-        layout.prop(scene, 'wfrl_x100_fov')
-        layout.label(text='安装坐标：+X 前、+Y 左、+Z 上')
-        layout.label(text='外壳近似；相位中心未知；无 RCS/SNR 模型')
-    elif scene.wfrl_x100_source == 'REPLAY':
-        layout.prop(scene, 'wfrl_x100_path')
-        layout.label(text='单帧 PLY 或含 manifest 的显式索引目录')
-        layout.prop(scene, 'wfrl_x100_replay_s')
-        row = layout.row(align=True)
-        row.operator('wfrl.x100_step', text='上一帧').direction = -1
-        row.operator('wfrl.x100_play', text='播放 / 暂停')
-        row.operator('wfrl.x100_step', text='下一帧').direction = 1
-        layout.label(text='实测未知轴/时间：原始点云，未与风机同步')
+def _busy(scene):
+    from .home import busy_reason
+    return busy_reason(scene)
+
+
+def _narrow(context):
+    width = getattr(context.region, 'width', 320)
+    return width < 240 * context.preferences.system.ui_scale
+
+
+def _property(layout, scene, name, *, narrow):
+    if narrow:
+        field = layout.column(align=True)
+        field.use_property_split = False
+        field.label(text=scene.bl_rna.properties[name].name)
+        field.prop(scene, name, text='')
     else:
-        layout.prop(scene, 'wfrl_x100_port')
-        layout.prop(scene, 'wfrl_x100_stream')
-        layout.prop(scene, 'wfrl_x100_stale_s')
-        layout.label(text='仅连接 127.0.0.1 独立采集端')
-        layout.label(text='厂家 UDP 解码需要匹配固件的协议或 SDK')
-    row = layout.row(align=True)
-    row.operator('wfrl.x100_apply')
-    row.operator('wfrl.x100_close')
-    layout.prop(scene, 'wfrl_x100_color')
-    layout.operator('wfrl.x100_output', icon='WINDOW')
-    output_error = scene.get('wfrl_x100_output_error')
-    if output_error:
-        layout.label(text='点云窗口：' + output_error[:70], icon='ERROR')
-    layout.label(text=scene.get('wfrl_x100_status', '未启动'))
-    if session and session.frame:
-        frame = session.frame
-        layout.label(text=f'{frame.source_kind} / {frame.stream} / #{frame.sequence}')
-        layout.label(text=f'{frame.validity} · {len(frame.points)} 点 · 非有限坐标 {int((~frame.finite_mask).sum())}')
-        layout.label(text=f'时间质量：{frame.time.quality} / {frame.time.timestamp_reference}')
-        layout.label(text=(f'源时间：{frame.time.source_time_s:.3f} s'
-                           if frame.time.source_time_s is not None else '源时间：未知'))
-        layout.label(text='时钟域：' + frame.time.clock_domain[:50])
-        if frame.radial_velocity_m_s is None and scene.wfrl_x100_color == 'VELOCITY':
-            layout.label(text='此来源没有径向速度；灰色表示未知', icon='INFO')
-    if session and session.client:
-        for name, stream in session.client.state.streams.items():
-            age = time.monotonic() - stream.received_monotonic
-            layout.label(text=f'{name} {session.client.state.status(name)} · 年龄 {age:.2f}s')
-            layout.label(text=f'显示替换 {stream.display_drops} · 重复 {stream.duplicates} · 序号缺口 {stream.gaps}')
-    if session and session.mode != 'LIVE':
-        layout.prop(scene, 'wfrl_x100_record_path')
-        layout.operator('wfrl.x100_record', text='结束记录' if session.fanout else '开始记录')
-        layout.label(text='仅记录实际采样帧；非完整 30 Hz 导出')
-        if session.fanout:
-            layout.label(text='记录：' + ('停止待确认，请重试结束记录' if session.recording_stopping
-                                       else session.fanout.recorder.state))
-    error = scene.get('wfrl_x100_error')
-    if error:
-        box = layout.box()
-        box.alert = True
-        for start in range(0, len(error), 46):
-            box.label(text=error[start:start + 46])
+        layout.prop(scene, name)
 
 
-PROPERTIES = ('source', 'mount', 'location', 'rotation', 'candidates', 'fov', 'path', 'replay_s',
-              'port', 'stream', 'stale_s', 'color', 'record_path', 'enabled')
+def _notes(layout, key, lines, *, context):
+    from .ui_helpers import message
+    header, body = layout.panel(key, default_closed=True)
+    header.label(text='说明' if _narrow(context) else '说明与限制', icon='INFO')
+    if body is not None:
+        for line in lines:
+            message(body, line, 'NONE', context=context)
+
+
+class _X100Panel:
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'X100'
+
+
+class WFRL_PT_X100(_X100Panel, bpy.types.Panel):
+    bl_label = 'X100 雷达'
+    bl_idname = 'WFRL_PT_x100'
+
+    def draw(self, context):
+        from ..radar_x100.runtime import session_for
+        from .ui_helpers import message
+        layout, scene = self.layout, context.scene
+        session, busy = session_for(scene), _busy(scene)
+        if busy:
+            message(layout, busy + ' · 雷达设置暂时锁定', 'LOCKED', context=context)
+        controls = layout.column()
+        controls.enabled = not busy
+        narrow = _narrow(context)
+        sources = controls.column(align=True) if narrow else controls.row()
+        sources.prop(scene, 'wfrl_x100_source', expand=True)
+        row = controls.column(align=True) if narrow else controls.row(align=True)
+        row.scale_y = 1.2
+        row.operator('wfrl.x100_apply', text='应用配置', icon='PLAY')
+        row.operator('wfrl.x100_close', icon='X')
+        status = layout.box().column(align=True)
+        message(status, scene.get('wfrl_x100_status', '未启动'),
+                'RADIOBUT_ON' if session else 'RADIOBUT_OFF', context=context)
+        if session and session.frame:
+            frame = session.frame
+            message(status, f'#{frame.sequence} · {frame.validity} · {len(frame.points)} 点',
+                    'NONE', context=context)
+        error = scene.get('wfrl_x100_error')
+        if error:
+            box = layout.box()
+            box.alert = True
+            message(box, error, 'ERROR', context=context)
+
+
+class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
+    bl_label = '配置'
+    bl_idname = 'WFRL_PT_x100_setup'
+    bl_parent_id = 'WFRL_PT_x100'
+
+    def draw_header(self, context):
+        self.layout.label(text='', icon={'SIMULATION': 'OBJECT_ORIGIN', 'REPLAY': 'FILE_FOLDER',
+                                         'LIVE': 'LINKED'}[context.scene.wfrl_x100_source])
+
+    def draw(self, context):
+        scene = context.scene
+        layout = self.layout
+        layout.enabled = not _busy(scene)
+        narrow = _narrow(context)
+        layout.use_property_split, layout.use_property_decorate = not narrow, False
+        if scene.wfrl_x100_source == 'SIMULATION':
+            from ..radar_x100.runtime import session_for
+            session = session_for(scene)
+            presets = layout.column(align=True)
+            presets.use_property_split = False
+            presets.label(text='安装位置（同一台雷达）')
+            buttons = presets.column(align=True) if narrow else presets.row(align=True)
+            buttons.enabled = not session or (session.mode == 'SIMULATION'
+                                              and not (session.fanout or session.closing))
+            buttons.operator('wfrl.x100_mount_preset', text='原安装位置').preset = 'ORIGINAL'
+            buttons.operator('wfrl.x100_mount_preset', text='机舱侧面').preset = 'NACELLE_SIDE'
+            if session and session.fanout:
+                presets.label(text='结束记录后可切换安装位置', icon='LOCKED')
+            elif session and session.mode != 'SIMULATION':
+                presets.label(text='请先应用几何仿真配置', icon='INFO')
+            layout.separator()
+            _property(layout, scene, 'wfrl_x100_mount', narrow=narrow)
+            for name in ('wfrl_x100_location', 'wfrl_x100_rotation'):
+                vector = layout.column(align=True)
+                vector.use_property_split = False
+                vector.label(text=scene.bl_rna.properties[name].name)
+                for index, axis in enumerate('XYZ'):
+                    vector.prop(scene, name, index=index, text=axis)
+            layout.separator()
+            _property(layout, scene, 'wfrl_x100_candidates', narrow=narrow)
+            fov = layout.column(align=True)
+            fov.use_property_split = False
+            fov.prop(scene, 'wfrl_x100_fov')
+            fov.label(text='显示长度：60 m')
+            _notes(layout, 'wfrl_x100_simulation_notes', (
+                'T1 · 保存运动 · 几何遮挡近似',
+                '安装坐标：+X 前、+Y 左、+Z 上',
+                '外壳近似；相位中心未知；无 RCS/SNR 模型'), context=context)
+        elif scene.wfrl_x100_source == 'REPLAY':
+            _property(layout, scene, 'wfrl_x100_path', narrow=narrow)
+            _property(layout, scene, 'wfrl_x100_ply_source', narrow=narrow)
+            layout.separator()
+            _property(layout, scene, 'wfrl_x100_replay_s', narrow=narrow)
+            if narrow:
+                layout.operator('wfrl.x100_play', text='播放 / 暂停', icon='PLAY')
+            row = layout.row(align=True)
+            row.use_property_split = False
+            row.operator('wfrl.x100_step', text='', icon='FRAME_PREV').direction = -1
+            if not narrow:
+                row.operator('wfrl.x100_play', text='播放 / 暂停', icon='PLAY')
+            row.operator('wfrl.x100_step', text='', icon='FRAME_NEXT').direction = 1
+            _notes(layout, 'wfrl_x100_replay_notes', (
+                '单帧 PLY 或含 manifest 的显式索引目录',
+                '仅单帧需要声明来源；记录目录保留原始来源',
+                '实测未知轴/时间：原始点云，未与风机同步'), context=context)
+        else:
+            _property(layout, scene, 'wfrl_x100_port', narrow=narrow)
+            _property(layout, scene, 'wfrl_x100_stream', narrow=narrow)
+            _property(layout, scene, 'wfrl_x100_stale_s', narrow=narrow)
+            _notes(layout, 'wfrl_x100_live_notes', (
+                '仅连接 127.0.0.1 独立采集端',
+                '厂家 UDP 解码需要匹配固件的协议或 SDK'), context=context)
+
+
+class WFRL_PT_X100Display(_X100Panel, bpy.types.Panel):
+    bl_label = '显示'
+    bl_idname = 'WFRL_PT_x100_display'
+    bl_parent_id = 'WFRL_PT_x100'
+
+    def draw(self, context):
+        from ..radar_x100.runtime import session_for
+        from .ui_helpers import message
+        scene, session = context.scene, session_for(context.scene)
+        layout = self.layout
+        layout.enabled = not _busy(scene)
+        narrow = _narrow(context)
+        layout.use_property_split, layout.use_property_decorate = not narrow, False
+        _property(layout, scene, 'wfrl_x100_color', narrow=narrow)
+        if scene.wfrl_x100_color == 'VELOCITY':
+            _property(layout, scene, 'wfrl_x100_color_scale', narrow=narrow)
+            if scene.wfrl_x100_color_scale == 'FIXED':
+                _property(layout, scene, 'wfrl_x100_velocity_limit', narrow=narrow)
+        if (session and session.frame and session.frame.radial_velocity_m_s is None
+                and scene.wfrl_x100_color == 'VELOCITY'):
+            message(layout, '此来源没有径向速度；灰色表示未知', context=context)
+        layout.operator('wfrl.x100_output', text='打开点云窗口', icon='WINDOW')
+        output_error = scene.get('wfrl_x100_output_error')
+        if output_error:
+            message(layout, '点云窗口：' + output_error, 'ERROR', context=context)
+
+
+class WFRL_PT_X100Frame(_X100Panel, bpy.types.Panel):
+    bl_label = '帧与数据流'
+    bl_idname = 'WFRL_PT_x100_frame'
+    bl_parent_id = 'WFRL_PT_x100'
+    bl_options = {'DEFAULT_CLOSED'}
+
+    @classmethod
+    def poll(cls, context):
+        from ..radar_x100.runtime import session_for
+        session = session_for(context.scene)
+        return bool(session and (session.frame or session.client))
+
+    def draw(self, context):
+        from ..radar_x100.runtime import session_for
+        from ..radar_x100.display import source_label
+        session = session_for(context.scene)
+        layout = self.layout.column(align=True)
+        if session.frame:
+            frame = session.frame
+            layout.label(text=f'{source_label(frame)} / {frame.stream} / #{frame.sequence}')
+            layout.label(text=f'{frame.validity} · {len(frame.points)} 点 · 非有限坐标 {int((~frame.finite_mask).sum())}')
+            layout.label(text=f'时间质量：{frame.time.quality} / {frame.time.timestamp_reference}')
+            layout.label(text=(f'源时间：{frame.time.source_time_s:.3f} s'
+                               if frame.time.source_time_s is not None else '源时间：未知'))
+            layout.label(text='时钟域：' + frame.time.clock_domain[:50])
+        if session.client:
+            for name, stream in session.client.state.streams.items():
+                age = time.monotonic() - stream.received_monotonic
+                box = self.layout.box().column(align=True)
+                box.label(text=f'{name} {session.client.state.status(name)} · 年龄 {age:.2f}s')
+                box.label(text=f'显示替换 {stream.display_drops} · 重复 {stream.duplicates} · 序号缺口 {stream.gaps}')
+
+
+class WFRL_PT_X100Record(_X100Panel, bpy.types.Panel):
+    bl_label = '记录'
+    bl_idname = 'WFRL_PT_x100_record'
+    bl_parent_id = 'WFRL_PT_x100'
+    bl_options = {'DEFAULT_CLOSED'}
+
+    @classmethod
+    def poll(cls, context):
+        from ..radar_x100.runtime import session_for
+        session = session_for(context.scene)
+        return bool((session and session.mode != 'LIVE') or context.scene.get('wfrl_x100_record_state'))
+
+    def draw_header(self, context):
+        from ..radar_x100.runtime import session_for
+        session = session_for(context.scene)
+        self.layout.label(text='', icon='REC' if session and session.fanout else 'NONE')
+
+    def draw(self, context):
+        from ..radar_x100.runtime import session_for
+        from .ui_helpers import message
+        scene, session = context.scene, session_for(context.scene)
+        layout = self.layout
+        layout.enabled = not _busy(scene)
+        narrow = _narrow(context)
+        layout.use_property_split, layout.use_property_decorate = not narrow, False
+        controls = layout.column()
+        controls.enabled = bool(session and session.mode != 'LIVE' and not session.closing)
+        _property(controls, scene, 'wfrl_x100_record_path', narrow=narrow)
+        active = session is not None and session.fanout is not None
+        controls.operator('wfrl.x100_record', text='结束记录' if active else '开始记录',
+                          icon='CANCEL' if active else 'REC')
+        if active and session.recording_stopping:
+            message(layout, '停止待确认，请重试结束记录', 'ERROR', context=context)
+        state = session.fanout.recorder.state if active else scene.get('wfrl_x100_record_state')
+        if state:
+            message(layout, ('记录：' if active else '上次记录：') + state, context=context)
+        if scene.get('wfrl_x100_record_error'):
+            message(layout, scene['wfrl_x100_record_error'], 'ERROR', context=context)
+        layout.label(text='仅记录实际采样帧；非完整 30 Hz 导出', icon='INFO')
+
+
+PROPERTIES = ('source', 'mount', 'location', 'rotation', 'candidates', 'fov', 'path', 'ply_source', 'replay_s',
+              'port', 'stream', 'stale_s', 'color', 'color_scale', 'velocity_limit', 'record_path', 'enabled')
 
 
 def replay_seek(scene, context=None):
@@ -169,24 +367,40 @@ def replay_seek(scene, context=None):
         session.replay_cursor = None
 
 
+def ply_path_changed(scene, context=None):
+    scene.wfrl_x100_ply_source = 'UNDECLARED'
+
+
 def register_properties():
+    from ..radar_x100.scene import ORIGINAL_LOCATION, ORIGINAL_ROTATION
     p = bpy.props
     definitions = dict(
         source=p.EnumProperty(name='数据源', items=(('SIMULATION','几何仿真','保存运动的几何观测'),
             ('REPLAY','文件回放','实测或仿真文件保留原始来源'),('LIVE','实时输入','独立本地雷达通道'))),
         mount=p.EnumProperty(name='挂载', items=(('NACELLE','T1 机舱','跟随同源机舱'),
             ('TOWER_BASE','T1 塔基','相对塔基固定'),('WORLD','世界固定','世界坐标'))),
-        location=p.FloatVectorProperty(name='安装位置 (m)', default=(-3.5, -1.7, -2.0), size=3),
-        rotation=p.FloatVectorProperty(name='安装旋转 (度 XYZ)', default=(0, 82.5, 180), size=3),
-        candidates=p.IntProperty(name='材料采样预算', default=512, min=1, max=4096),
-        fov=p.BoolProperty(name='名义视场（显示长度 60 m）', default=True),
-        path=p.StringProperty(name='PLY / 记录目录', subtype='FILE_PATH'),
+        location=p.FloatVectorProperty(name='安装位置 (m)', default=ORIGINAL_LOCATION, size=3),
+        rotation=p.FloatVectorProperty(name='安装旋转 (°)', description='安装坐标系的 XYZ 欧拉角，单位为度（°）',
+            default=ORIGINAL_ROTATION, size=3),
+        candidates=p.IntProperty(name='采样预算', description='材料表面的候选采样点预算', default=512, min=1, max=4096),
+        fov=p.BoolProperty(name='名义视场', description='名义视场示意，显示长度为 60 m，不代表探测结果或量程', default=True),
+        path=p.StringProperty(name='PLY / 记录目录', subtype='FILE_PATH', update=ply_path_changed),
+        ply_source=p.EnumProperty(name='单帧 PLY 来源', default='UNDECLARED', items=(
+            ('UNDECLARED', '请选择来源', 'PLY 本身不包含来源信息，需根据实际生成方式声明'),
+            ('GEOMETRY_SIMULATION', '几何仿真', '来自几何仿真的单帧文件'),
+            ('MEASURED_REPLAY', '实测文件', '用户声明来自设备测量，不代表已经验证设备兼容或标定'),
+            ('TEST', '测试数据', '合成测试输入，不作为实测'))),
         replay_s=p.FloatProperty(name='回放时间 (s)', default=0, min=0, update=replay_seek),
         port=p.IntProperty(name='本地端口', default=9877, min=1024, max=65535),
         stream=p.EnumProperty(name='显示流', items=tuple((v,v,'独立流') for v in ('UNKNOWN','NEAR','FAR','COMBINED','TRACK','GEOMETRY'))),
         stale_s=p.FloatProperty(name='过期阈值 (s)', default=.5, min=.01),
         color=p.EnumProperty(name='着色', items=tuple((key,label,'未知量显示灰色') for key,label in
             (('RANGE','距离'),('HEIGHT','高度'),('RCS','RCS'),('SNR','SNR'),('MS','动静'),('VELOCITY','径向速度')))),
+        color_scale=p.EnumProperty(name='速度色标', default='FIXED', items=(
+            ('FIXED', '固定对称', '固定以零为中心的显示范围，超出范围的数值使用端点颜色'),
+            ('FRAME', '当前帧', '按当前帧的最小值与最大值显示'))),
+        velocity_limit=p.FloatProperty(name='速度色标 ± (m/s)', default=10., min=.001,
+            description='仅用于显示的速度范围，不代表硬件速度限制'),
         record_path=p.StringProperty(name='新记录目录', subtype='DIR_PATH'),
         enabled=p.BoolProperty(default=False))
     for key, definition in definitions.items():
@@ -199,4 +413,5 @@ def unregister_properties():
             delattr(bpy.types.Scene, 'wfrl_x100_' + name)
 
 
-CLASSES = (WFRL_OT_X100Apply, WFRL_OT_X100Close, WFRL_OT_X100Step, WFRL_OT_X100Play, WFRL_OT_X100Record, WFRL_OT_X100Output)
+CLASSES = (WFRL_OT_X100Apply, WFRL_OT_X100Close, WFRL_OT_X100MountPreset, WFRL_OT_X100Step, WFRL_OT_X100Play, WFRL_OT_X100Record, WFRL_OT_X100Output,
+           WFRL_PT_X100, WFRL_PT_X100Setup, WFRL_PT_X100Display, WFRL_PT_X100Frame, WFRL_PT_X100Record)

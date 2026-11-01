@@ -48,7 +48,7 @@ def main():
             t = args.start + sequence/args.fps
             frame = api.simulation.simulate(sampler.sample,t,sensor_id='X100-T1',session_id=session,
                 sequence=sequence,interval_s=sampler.interval,candidate_budget=args.candidates,
-                visibility=scene_api.bvh_visibility)
+                visibility=sampler.visibility, material_at=sampler.material_sample)
             frame.provenance['calibration_id'] = sampler.calibration_id
             sink.append(frame,t-args.start)
         sink.close()

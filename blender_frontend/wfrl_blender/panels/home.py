@@ -8,9 +8,28 @@ from .. import clearance_replay, runtime
 from ..home_state import backend_status, scene_status
 
 
+def busy_reason(scene):
+    """Name the camera or recording task that locks workbench controls, or return ''."""
+    from .. import custom_camera_capture
+    from . import custom_cameras, stacked_camera_rig, presentation
+    if custom_camera_capture.active():
+        return ('相机采集中' if custom_camera_capture._ACTIVE.scene == scene
+                else '其他场景正在采集相机图像')
+    if stacked_camera_rig._ACTIVE:
+        return ('相机盒体安装中' if stacked_camera_rig._ACTIVE.scene == scene
+                else '其他场景正在安装相机盒体')
+    if custom_cameras._ACTIVE and custom_cameras._ACTIVE.stage not in custom_cameras._VIEWING:
+        return ('相机草稿编辑中' if custom_cameras._ACTIVE.scene == scene
+                else '其他场景正在编辑相机草稿')
+    if presentation._ACTIVE is not None:
+        return ('窗口录制中 · Esc 停止' if presentation._ACTIVE._scene == scene
+                else '其他场景正在录制窗口')
+    return ''
+
+
 def snapshot(context):
     from .. import custom_camera_capture, manual_control, native_camera_views, playback
-    from . import custom_cameras, stacked_camera_rig, presentation
+    from . import custom_cameras, stacked_camera_rig
     scene = context.scene
     ready = clearance_replay.reader_for(scene) is not None
     kind = scene.get('wfrl_scene_kind', '')
@@ -18,19 +37,7 @@ def snapshot(context):
     saved_status = scene.get('wfrl_clearance_status', '')
     if not ready and kind != 'manual' and saved_status not in {'', 'READY', 'REVIEW_ONLY'}:
         load_error = load_error or saved_status
-    busy = ''
-    if custom_camera_capture.active():
-        busy = ('相机采集中' if custom_camera_capture._ACTIVE.scene == scene
-                else '其他场景正在采集相机图像')
-    elif stacked_camera_rig._ACTIVE:
-        busy = ('相机盒体安装中' if stacked_camera_rig._ACTIVE.scene == scene
-                else '其他场景正在安装相机盒体')
-    elif custom_cameras._ACTIVE and custom_cameras._ACTIVE.stage not in custom_cameras._VIEWING:
-        busy = ('相机草稿编辑中' if custom_cameras._ACTIVE.scene == scene
-                else '其他场景正在编辑相机草稿')
-    elif presentation._ACTIVE is not None:
-        busy = ('窗口录制中 · Esc 停止' if presentation._ACTIVE._scene == scene
-                else '其他场景正在录制窗口')
+    busy = busy_reason(scene)
     manual_error = getattr(scene, 'wfrl_manual_error', '') if kind == 'manual' else ''
     running = kind == 'manual' and any(
         (entry.running and entry.rpm > 0)
@@ -199,11 +206,6 @@ class WFRL_PT_Home(bpy.types.Panel):
                 draw(controls, scene, show_playback=not shared_playback)
             else:
                 draw_load(layout, context, busy=busy)
-        elif page == 'X100':
-            from .radar_x100 import draw
-            controls = layout.column()
-            controls.enabled = not busy
-            draw(controls, context)
         elif page == 'CAMERA':
             if scene.get('wfrl_scene_kind') == 'manual':
                 layout.label(text='在“手动”页调整机组姿态。', icon='INFO')
@@ -240,7 +242,6 @@ def register_properties():
     bpy.types.WindowManager.wfrl_home_page = bpy.props.EnumProperty(
         name='工作台', items=(('REPLAY', '回放', '加载并查看保存的仿真结果'),
                               ('CAMERA', '相机', '观察、安装与编辑相机'),
-                              ('X100', 'X100 雷达', '几何仿真、文件回放与独立实时通道'),
                               ('MANUAL', '手动', '独立的刚性运动与姿态控制'),
                               ('EXPORT', '导出', '保存已采样数据、相机图像与布局'),
                               ('BACKEND', '后端', '连接、配置与运行真实后端')),

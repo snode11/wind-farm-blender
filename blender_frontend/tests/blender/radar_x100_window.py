@@ -20,6 +20,7 @@ radar = importlib.import_module(MODULE+'.radar_x100.runtime')
 api = importlib.import_module(MODULE+'.radar_x100.core')
 scene_api = importlib.import_module(MODULE+'.radar_x100.scene')
 camera = importlib.import_module(MODULE+'.custom_cameras')
+sidebar = importlib.import_module(MODULE+'.cameras')
 preview = importlib.import_module(MODULE+'.custom_camera_preview')
 capture = importlib.import_module(MODULE+'.custom_camera_capture')
 OUT = Path(os.environ['WFRL_TEST_OUTPUT'])
@@ -52,8 +53,8 @@ def run():
             session = radar.start(scene)
             area = next(a for a in bpy.context.screen.areas if a.type == 'VIEW_3D')
             region = next(r for r in area.regions if r.type == 'WINDOW')
-            bpy.context.window_manager.wfrl_home_page = 'X100'
             area.spaces.active.show_region_ui = True
+            sidebar.select_sidebar_category(area, 'X100')
             area.spaces.active.region_3d.view_location = (-3,0,60)
             area.spaces.active.region_3d.view_distance = 130
             area.spaces.active.region_3d.view_rotation = Vector((160,-210,100)).to_track_quat('Z','Y')

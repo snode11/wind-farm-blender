@@ -1,0 +1,175 @@
+"""One X100 switches between original and side mounts without changing scene time."""
+from pathlib import Path
+import importlib
+import json
+import os
+import sys
+from types import SimpleNamespace
+
+import bpy
+import numpy as np
+
+ROOT = Path(__file__).resolve().parents[3]
+MODULE = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')
+if MODULE == 'wfrl_blender':
+    sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
+addon = importlib.import_module(MODULE)
+if MODULE == 'wfrl_blender':
+    addon.register()
+expected = os.environ.get('WFRL_EXPECTED_ADDON_ROOT')
+if expected:
+    assert Path(addon.__file__).resolve().parent == Path(expected).resolve()
+farm = importlib.import_module(MODULE + '.farm_flex')
+radar = importlib.import_module(MODULE + '.radar_x100.runtime')
+scene_api = importlib.import_module(MODULE + '.radar_x100.scene')
+capture = importlib.import_module(MODULE + '.custom_camera_capture')
+OUT = Path(os.environ['WFRL_TEST_OUTPUT'])
+OUT.mkdir(parents=True, exist_ok=False)
+
+addon.load_demo_scene(farm.default_package())
+scene = bpy.context.scene
+scene.wfrl_x100_candidates = 512
+frame = 1 + scene['wfrl_clearance_timebase_fps']
+scene.frame_set(int(frame), subframe=frame - int(frame))
+clock = (scene.frame_current, scene.frame_subframe, scene.get('wfrl_clearance_time_s'))
+assert bpy.ops.wfrl.x100_mount_preset(preset='ORIGINAL') == {'FINISHED'}
+original = radar.session_for(scene)
+original_points = original.frame.points.tobytes()
+original_calibration = original.sampler.calibration_id
+original_frame, original_source = original.frame, original.source_session
+original_mount = original.mount
+assert bpy.ops.wfrl.x100_mount_preset(preset='ORIGINAL') == {'FINISHED'}
+assert radar.session_for(scene) is original
+assert original.frame is original_frame and original.source_session == original_source
+np.testing.assert_allclose(scene.wfrl_x100_location, scene_api.ORIGINAL_LOCATION, atol=1e-6)
+np.testing.assert_allclose(scene.wfrl_x100_rotation, scene_api.ORIGINAL_ROTATION)
+assert bpy.ops.wfrl.x100_mount_preset(preset='NACELLE_SIDE') == {'FINISHED'}
+side = radar.session_for(scene)
+assert side.mount is original_mount and side.sampler.calibration_id != original_calibration
+assert side.source_session != original_source
+assert side.frame.source_kind == 'GEOMETRY_SIMULATION' and len(side.frame.points) > 0
+assert side.frame.time.source_time_s == clock[2]
+assert (scene.frame_current, scene.frame_subframe, scene.get('wfrl_clearance_time_s')) == clock
+forward = side.sampler.mount_from_sensor[:3, 0]
+assert forward[1] < -.95 and abs(forward[2]) < 1e-6
+surface = (side.sampler.shell_vertices @ side.sampler.shell_local[:3, :3].T
+           + side.sampler.shell_local[:3, 3])
+assert scene.wfrl_x100_location[1] < surface[:, 1].min()
+assert abs(scene.wfrl_x100_location[2] - surface[:, 2].mean()) < .01
+assert len([o for o in scene.objects if o.get('wfrl_x100_role') == 'physical']) == 1
+side_location, side_rotation = tuple(scene.wfrl_x100_location), tuple(scene.wfrl_x100_rotation)
+side_points = len(side.frame.points)
+
+side.fanout = object()
+try:
+    try:
+        radar.apply_mount_preset(scene, 'ORIGINAL')
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('Active recording must reject a calibration switch')
+    assert radar.session_for(scene) is side and tuple(scene.wfrl_x100_location) == side_location
+finally:
+    side.fanout = None
+saved_capture = capture._ACTIVE
+capture._ACTIVE = SimpleNamespace(scene=scene, closed=False)
+try:
+    try:
+        radar.apply_mount_preset(scene, 'ORIGINAL')
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('Camera capture must reject an installation switch')
+    assert radar.session_for(scene) is side and tuple(scene.wfrl_x100_location) == side_location
+finally:
+    capture._ACTIVE = saved_capture
+
+assert bpy.ops.wfrl.x100_mount_preset(preset='ORIGINAL') == {'FINISHED'}
+restored = radar.session_for(scene)
+assert restored.frame.points.tobytes() == original_points
+assert restored.sampler.calibration_id == original_calibration
+assert len([o for o in scene.objects if o.get('wfrl_x100_role') == 'physical']) == 1
+assert (scene.frame_current, scene.frame_subframe, scene.get('wfrl_clearance_time_s')) == clock
+
+draft = (4.0, 5.0, 6.0)
+scene.wfrl_x100_location = draft
+active_frame, active_sampler, active_source = restored.frame, restored.sampler, restored.source_session
+active_matrix = restored.mount.matrix_basis.copy()
+simulate = radar.simulation.simulate
+def fail_sampling(*args, **kwargs):
+    raise RuntimeError('Injected sampling failure')
+radar.simulation.simulate = fail_sampling
+try:
+    try:
+        radar.apply_mount_preset(scene, 'NACELLE_SIDE')
+    except RuntimeError as exc:
+        assert str(exc) == 'Injected sampling failure'
+    else:
+        raise AssertionError('Failed sampling must reject the installation switch')
+finally:
+    radar.simulation.simulate = simulate
+assert radar.session_for(scene) is restored
+assert restored.frame is active_frame and restored.sampler is active_sampler
+assert restored.source_session == active_source and restored.display_valid
+np.testing.assert_array_equal(np.array(restored.mount.matrix_basis), np.array(active_matrix))
+assert tuple(scene.wfrl_x100_location) == draft
+
+shared = bpy.data.scenes.new('X100.SharedInstallation')
+collection = next(c for c in scene.collection.children if c.get('wfrl_x100_owner') == restored.owner)
+shared.collection.children.link(collection)
+try:
+    try:
+        radar.apply_mount_preset(scene, 'NACELLE_SIDE')
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('A switch must not move another scene\'s linked installation')
+    assert restored.frame is active_frame and restored.sampler is active_sampler
+finally:
+    bpy.data.scenes.remove(shared)
+
+housing = next(o for o in scene.objects if o.get('wfrl_x100_role') == 'physical')
+housing.hide_render = True
+housing.select_set(True)
+side.fov.hide_set(True, view_layer=scene.view_layers[0])
+assert bpy.ops.wfrl.x100_mount_preset(preset='NACELLE_SIDE') == {'FINISHED'}
+assert restored.mount is original_mount
+assert housing.hide_render and housing.select_get()
+assert restored.fov.hide_get(view_layer=scene.view_layers[0])
+assert tuple(scene.wfrl_x100_location) == side_location
+assert tuple(scene.wfrl_x100_rotation) == side_rotation
+points = radar.session_for(scene).frame.points.tobytes()
+assert bpy.ops.wm.save_as_mainfile(filepath=str(OUT / 'mount-presets.blend')) == {'FINISHED'}
+assert bpy.ops.wm.open_mainfile(filepath=str(OUT / 'mount-presets.blend')) == {'FINISHED'}
+scene = bpy.context.scene
+radar.tick()
+assert radar.session_for(scene).frame.points.tobytes() == points, scene.get('wfrl_x100_error')
+assert bpy.ops.wfrl.x100_mount_preset(preset='ORIGINAL') == {'FINISHED'}
+assert radar.session_for(scene).frame.points.tobytes() == original_points
+original_count = len(radar.session_for(scene).frame.points)
+sink = radar.recording.Recorder(OUT / 'source-replay')
+sink.append(radar.session_for(scene).frame, 0.)
+sink.close()
+radar.stop(scene)
+scene.wfrl_x100_source, scene.wfrl_x100_path = 'REPLAY', str(OUT / 'source-replay')
+replay = radar.start(scene)
+scene.wfrl_x100_source = 'SIMULATION'
+try:
+    radar.apply_mount_preset(scene, 'NACELLE_SIDE')
+except ValueError:
+    pass
+else:
+    raise AssertionError('Unapplied source selection must not replace the replay session')
+assert radar.session_for(scene) is replay and replay.frame is not None
+scene.wfrl_x100_source = 'REPLAY'
+
+result = dict(status='PASS', addon=addon.__file__, source_time_s=clock[2],
+              original_points=original_count, side_points=side_points,
+              side_location_m=side_location, side_rotation_deg=side_rotation,
+              single_sensor_roundtrip=True, clock_unchanged=True, recording_guard=True,
+              camera_capture_guard=True, saved_side_reopens_and_switches_back=True,
+              repeated_preset_preserves_frame_identity=True, failure_preserves_active_and_draft=True,
+              linked_installation_guard=True, selection_and_visibility_preserved=True,
+              unapplied_source_preserves_replay=True)
+(OUT / 'result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2))
+print('X100_MOUNT_PRESETS_PASS', json.dumps(result), flush=True)

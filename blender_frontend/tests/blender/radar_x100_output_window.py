@@ -6,6 +6,7 @@ import importlib
 import json
 import os
 import sys
+import time
 import traceback
 import numpy as np
 import bpy
@@ -21,10 +22,74 @@ radar = importlib.import_module(MODULE+'.radar_x100.runtime')
 output = importlib.import_module(MODULE+'.radar_x100.output')
 api = importlib.import_module(MODULE+'.radar_x100.core')
 camera = importlib.import_module(MODULE+'.custom_cameras')
+sidebar = importlib.import_module(MODULE+'.cameras')
 preview = importlib.import_module(MODULE+'.custom_camera_preview')
 OUT = Path(os.environ['WFRL_TEST_OUTPUT'])
 OUT.mkdir(parents=True, exist_ok=False)
 STATE = dict(step=0, checks={})
+DRAW_TIMEOUT_S = 10.
+
+
+def frame_state(frame):
+    return (dict(object_id=id(frame), identity=frame.identity, validity=frame.validity,
+                 completeness=frame.completeness, points=len(frame.points)) if frame is not None else None)
+
+
+def draw_state():
+    scene, item = STATE['scene'], STATE['item']
+    session = radar.session_for(scene)
+    window, area = item.alive()
+    return dict(step=STATE['step'], monotonic=time.monotonic(),
+        source=frame_state(session.frame) if session else None,
+        display_valid=session.display_valid if session else False,
+        consumed=frame_state(item.frame), draw_count=item.draw_count,
+        source_error=scene.get('wfrl_x100_error', ''), output_error=item.error,
+        scene_output_error=scene.get('wfrl_x100_output_error', ''),
+        window_alive=window is not None, area_alive=area is not None,
+        window_owns_scene=window is not None and window.scene == scene,
+        view=item.view, color=item.color, projected_points=len(item.xy))
+
+
+def log_draw(event, snapshot):
+    with (OUT/'draw-sync.jsonl').open('a') as stream:
+        stream.write(json.dumps(dict(event=event, **snapshot)) + '\n')
+
+
+def await_draw(step):
+    STATE['step'] = step
+    session = radar.session_for(STATE['scene'])
+    STATE['await_draw'] = dict(start=time.monotonic(), draw_count=STATE['item'].draw_count,
+        session=session, frame=session.frame if session else None)
+    log_draw('await', draw_state())
+    return .05
+
+
+def draw_ready():
+    """Yield to Blender until a new draw consumes the expected frame, or fail with diagnostics."""
+    pending = STATE.get('await_draw')
+    if pending is None:
+        return True
+    snapshot = draw_state()
+    log_draw('poll', snapshot)
+    detail = json.dumps(snapshot)
+    assert not snapshot['source_error'], detail
+    assert not snapshot['output_error'] and not snapshot['scene_output_error'], detail
+    assert snapshot['window_alive'] and snapshot['area_alive'] and snapshot['window_owns_scene'], detail
+    session = radar.session_for(STATE['scene'])
+    assert session is pending['session'], 'Source session changed while awaiting draw: ' + detail
+    if session is not None:
+        assert session.display_valid and session.frame is pending['frame'], 'Source frame changed or invalid: ' + detail
+    item = STATE['item']
+    if item.draw_count > pending['draw_count'] and item.frame is pending['frame']:
+        log_draw('ready', snapshot)
+        del STATE['await_draw']
+        return True
+    assert snapshot['monotonic'] - pending['start'] < DRAW_TIMEOUT_S, (
+        f'Timed out after {DRAW_TIMEOUT_S:g}s awaiting a new draw of the same frame; '
+        f'baseline_draw_count={pending["draw_count"]}; expected={frame_state(pending["frame"])}; ' + detail)
+    _, area = item.alive()
+    area.tag_redraw()
+    return False
 
 
 def image_hash(context, cam):
@@ -65,6 +130,8 @@ def unchanged():
 
 def run():
     try:
+        if not draw_ready():
+            return .05
         checks = STATE['checks']
         if STATE['step'] == 0:
             expected = os.environ.get('WFRL_EXPECTED_ADDON_ROOT')
@@ -80,7 +147,7 @@ def run():
             area = next(a for a in window.screen.areas if a.type == 'VIEW_3D')
             region = next(r for r in area.regions if r.type == 'WINDOW')
             area.spaces.active.show_region_ui = True
-            bpy.context.window_manager.wfrl_home_page = 'X100'
+            sidebar.select_sidebar_category(area, 'X100')
             geometry = camera._geometry(scene)[0]
             point, normal, *_ = geometry[-1].find_nearest(Vector((0, -10, .2)))
             cam = camera.begin_draft(scene, 1)
@@ -100,8 +167,7 @@ def run():
                 mount=np.array(session.mount.matrix_world), optics=asdict(camera.parameters(STATE['cam'])),
                 layout=[(a.as_pointer(), a.type) for a in STATE['window'].screen.areas], rgb=rgb)
             STATE['item'] = open_output()
-            STATE['step'] = 2
-            return 2.
+            return await_draw(2)
         item, session, scene = STATE['item'], STATE['session'], STATE['scene']
         if STATE['step'] == 2:
             assert not item.error, item.error
@@ -119,8 +185,7 @@ def run():
             item.reset('TOP')
             item.color = 'VELOCITY'
             item.zoom, item.pan = 1.5, (1., -2.)
-            STATE['step'] = 3
-            return 1.
+            return await_draw(3)
         if STATE['step'] == 3:
             assert not item.error and item.view == 'TOP'
             assert item.frame is session.frame
@@ -131,8 +196,7 @@ def run():
             farm.active_for(scene).update(scene, sim_time_s=t, record_telemetry=False)
             session.update()
             assert session.frame is not STATE['frame']
-            STATE['step'] = 4
-            return 1.
+            return await_draw(4)
         if STATE['step'] == 4:
             assert item.frame is session.frame and not item.error
             checks['follows_existing_saved_motion_frame'] = True
@@ -149,20 +213,17 @@ def run():
             radar.stop(scene)
             scene.wfrl_x100_source, scene.wfrl_x100_path = 'REPLAY', str(OUT/'replay')
             STATE['session'] = radar.start(scene)
-            STATE['step'] = 5
-            return 1.
+            return await_draw(5)
         if STATE['step'] == 5:
             assert item.frame is session.frame and item.frame.source_kind == 'GEOMETRY_SIMULATION'
             session.seek_frame(1)
-            STATE['step'] = 6
-            return 1.
+            return await_draw(6)
         if STATE['step'] == 6:
             assert item.frame is session.frame and item.frame.validity == 'VALID_EMPTY'
             assert not len(item.xy) and not item.error
             session.seek_frame(2)
             item.reset('SENSOR')
-            STATE['step'] = 7
-            return 1.
+            return await_draw(7)
         if STATE['step'] == 7:
             assert item.frame is session.frame and item.frame.source_kind == 'TEST'
             assert item.view == 'FRONT' and item.limits is None and item.unknown == len(item.frame.points)
@@ -170,16 +231,14 @@ def run():
             checks.update(file_replay_preserves_source=True, valid_empty_clears_points=True,
                 raw_axes_not_guessed=True, missing_velocity_gray=True)
             radar.stop(scene)
-            STATE['step'] = 8
-            return 1.
+            return await_draw(8)
         if STATE['step'] == 8:
             assert item.frame is None and not len(item.xy) and not item.error
             checks['stopped_source_clears_output'] = True
             output.close(item)
             assert not output._WINDOWS and output._HANDLE is None
             STATE['item'] = open_output()
-            STATE['step'] = 9
-            return 1.
+            return await_draw(9)
         if STATE['step'] == 9:
             assert item.draw_count > 0 and item.frame is None and not item.error
             checks['close_and_reopen_without_source_mutation'] = True
@@ -187,7 +246,7 @@ def run():
             with bpy.context.temp_override(window=STATE['window']):
                 STATE['window'].scene = other
             STATE['step'] = 10
-            return 1.
+            return .05
         if STATE['step'] == 10:
             assert item.scene == scene and item.frame is None
             assert output.for_scene(STATE['window'].scene) is None
@@ -202,6 +261,9 @@ def run():
             STATE['session'] = radar.start(scene)
             item = open_output()
             item.color = 'VELOCITY'
+            STATE['item'] = item
+            return await_draw(11)
+        if STATE['step'] == 11:
             bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'X100-Output-Validation.blend'))
             result = dict(status='PASS', addon_path=addon.__file__, checks=checks,
                 raw_rgba_sha256=STATE['rgb'][0], raw_state_sha256=STATE['rgb'][1],
@@ -210,7 +272,14 @@ def run():
             print('X100_OUTPUT_WINDOW_PASS', json.dumps(result), flush=True)
             return None
     except Exception:
-        (OUT/'result.json').write_text(json.dumps(dict(status='ERROR', error=traceback.format_exc()), indent=2))
+        result = dict(status='ERROR', error=traceback.format_exc(), checks=STATE['checks'])
+        if 'item' in STATE:
+            try:
+                result['draw_state'] = draw_state()
+                log_draw('error', result['draw_state'])
+            except Exception:
+                result['diagnostic_error'] = traceback.format_exc()
+        (OUT/'result.json').write_text(json.dumps(result, indent=2))
         traceback.print_exc()
         return None
 

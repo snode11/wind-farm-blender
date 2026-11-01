@@ -16,10 +16,11 @@ description: Use when developing, debugging, testing, or documenting Wind Farm B
 | 文案、操作说明、项目文档或 skill | 本文及对应说明；[静态校验](references/verification.md#纯文档与-skill) | frontmatter、链接、路径及要求一致性 |
 | WFRL 首页、手动姿态、柔性运动、播放、场景资源或性能 | [场景、运动与回放](references/scene-playback.md) | 受影响的宿主／原生检查；完整播放或性能按任务另验 |
 | Down、机舱／三相机、预览采集、重建纹理或缺陷 | [相机、资源与重建](references/cameras-reconstruction.md) | 几何／状态、原生窗口和 GPU 采集分别判断 |
-| X100 点云、PLY、记录回放或本地实时输入 | [X100 来源与采集](references/measurement-backend.md#x100-来源与采集) | 来源／时钟、记录完整性、场景归属及相机隔离；实机与 GPU 分别验证 |
+| X100 安装、点云、记录回放、本地实时输入或显示性能 | [X100 来源与采集](references/measurement-backend.md#x100-来源与采集) | 安装／来源／时钟、记录终态、场景归属及相机隔离；GPU、CPU 耗时、完整播放与实机分别验证 |
 | 理想激光／双束净空、曲线、单位、尾流、Bridge 或连接恢复 | [测量、后端与协议](references/measurement-backend.md) | 生产／消费合同、场景归属、有效性及生命周期 |
 | PNG 后台动画、Down 视频或冻结试验作业 | [视频与后台渲染](references/video-jobs.md) | 输出、最终状态、进程收尾、真实媒体及所需恢复范围 |
-| 扩展构建、安装核对或正式播放测量 | [维护与验证入口](references/verification.md) | 明确源码／ZIP／安装对象，选择匹配的环境和证据 |
+| 扩展打包、文档同步或普通发布 | [普通发布](references/verification.md#普通发布) | 内容与版本一致；需要 ZIP 时构建一次；确认交付命令成功 |
+| 指定安装核对、专项回归或正式播放测量 | [维护与验证入口](references/verification.md) | 明确源码／ZIP／安装对象，按指定范围选择环境和证据 |
 
 `wfcrl-env-me` 环境或策略算法任务按其工作目录和规则处理；本 skill 只覆盖它与 Blender 的接入。网页风场实验室按[独立方案](../../../docs/proposal/platform/风场网页实验室_第一版方案与分工汇总.md)处理，不默认套用原生面板或扩展流程。
 
@@ -29,7 +30,8 @@ description: Use when developing, debugging, testing, or documenting Wind Farm B
 - 区分工作区源码、构建 ZIP、公开附件与实际安装；按所测对象确认模块来源和载荷身份。版本号、源码同步或其他载荷的通过记录不代替当前对象核对，具体入口见[运行来源](references/verification.md#运行来源)。
 - 场景与消费者保留各自归属，运动、读数和统计按对应时钟工作；数据缺失、无效或过期时保留其状态。手动运动、合成外形与缺陷、显示增强的能力按专题说明，不推定物理变化、新观测或实体安全效果。
 - 软件合同、后台脚本、可见窗口、真实输入、安装载荷、完整媒体、科学精度与现场效果分别判定。源采样、显示时间轴和实际 FPS 分开；`POST_PIXEL` 只证明视口绘制，理想射线与瞬时成像不证明硬件采样、曝光或保护延迟。
-- 按[验证入口](references/verification.md)完成与任务匹配的检查，报告实际对象、环境、结果及未覆盖范围。纯文档与 skill 只做静态检查；扩展载荷需要更新时才选择构建／安装流程。
+- 功能开发与修复按[验证入口](references/verification.md)选择与改动直接相关的必要检查，报告实际对象、环境、结果及未覆盖范围。纯文档与 skill 只做静态检查；普通发布遵守 [AGENTS.md 的默认范围](../../../AGENTS.md#普通发布的默认范围)，不因源码修改或缺少新版验证记录追加回归、隔离安装或 CI 等待。
+- 需要查看、点击或输入应用／浏览器界面时，遵循适用的 Computer Use 默认委派规则；可用的专用工具、连接器或 API 优先。
 
 ## 要求与资料来源
 

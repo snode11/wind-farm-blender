@@ -63,6 +63,7 @@ def run():
             path = OUT / 'input.ply'
             path.write_bytes(api.ply.encode_ply(points))
             scene.wfrl_x100_source, scene.wfrl_x100_path = 'REPLAY', str(path)
+            scene.wfrl_x100_ply_source = 'TEST'
             radar.start(scene)
             before = {w.as_pointer() for w in bpy.context.window_manager.windows}
             bpy.ops.wm.window_new()

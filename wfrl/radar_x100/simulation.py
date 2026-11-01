@@ -38,6 +38,25 @@ class SceneSample:
             object.__setattr__(self, name, value)
 
 
+@dataclass(frozen=True)
+class MaterialSample:
+    time_s: float
+    source_id: str
+    geometry_id: str
+    points: np.ndarray
+    world_from_sensor: np.ndarray
+
+    def __post_init__(self):
+        points = np.array(self.points, dtype=np.float64, copy=True)
+        matrix = rigid_matrix(self.world_from_sensor)
+        if (points.ndim != 2 or points.shape[1] != 3 or not np.isfinite(points).all()
+                or not np.isfinite(self.time_s)):
+            raise ValueError('Invalid material sample')
+        points.flags.writeable = matrix.flags.writeable = False
+        object.__setattr__(self, 'points', points)
+        object.__setattr__(self, 'world_from_sensor', matrix)
+
+
 def in_fov(xyz):
     ranges = np.linalg.norm(xyz, axis=1)
     azimuth = np.arctan2(xyz[:, 1], xyz[:, 0])
@@ -73,7 +92,8 @@ def visible_triangles(sample, targets, tolerance_m=.002):
 
 
 def simulate(sample_at, time_s, *, sensor_id, session_id, sequence, interval_s,
-             seed=100, candidate_budget=512, difference_s=.001, visibility=None):
+             seed=100, candidate_budget=512, difference_s=.001, visibility=None,
+             material_at=None):
     """Use the same material centroids and moving sensor origin for velocity."""
     if not 1 <= candidate_budget <= MAX_POINTS or difference_s <= 0:
         raise ValueError('Invalid simulation budget or difference step')
@@ -81,11 +101,6 @@ def simulate(sample_at, time_s, *, sensor_id, session_id, sequence, interval_s,
     lo, hi = max(interval_s[0], time_s - difference_s), min(interval_s[1], time_s + difference_s)
     if hi <= lo:
         raise ValueError('No velocity difference interval')
-    before, after = sample_at(lo), sample_at(hi)
-    for other in (before, after):
-        if (other.source_id != sample.source_id or other.geometry_id != sample.geometry_id
-                or not np.array_equal(sample.triangles, other.triangles)):
-            raise ValueError('Material topology or source changed during sampling')
     rng = np.random.default_rng(seed)
     ids = np.sort(rng.choice(len(sample.triangles), min(candidate_budget, len(sample.triangles)), replace=False))
     def material_points(snapshot):
@@ -97,14 +112,29 @@ def simulate(sample_at, time_s, *, sensor_id, session_id, sequence, interval_s,
     visible = np.zeros(len(world), dtype=bool)
     visible[keep] = (visibility or visible_triangles)(sample, world[keep])
     mask = keep & visible
-    relative_velocity = ((material_points(after) - material_points(before))
+    if material_at is None:
+        before, after = sample_at(lo), sample_at(hi)
+        for other in (before, after):
+            if (other.source_id != sample.source_id or other.geometry_id != sample.geometry_id
+                    or not np.array_equal(sample.triangles, other.triangles)):
+                raise ValueError('Material topology or source changed during sampling')
+        before_points, after_points = material_points(before)[mask], material_points(after)[mask]
+    else:
+        selected = ids[mask]
+        before, after = material_at(lo, selected), material_at(hi, selected)
+        for other, stamp in ((before, lo), (after, hi)):
+            if (other.source_id != sample.source_id or other.geometry_id != sample.geometry_id
+                    or other.time_s != stamp or other.points.shape != (len(selected), 3)):
+                raise ValueError('Material sample identity, time or count changed during sampling')
+        before_points, after_points = before.points, after.points
+    relative_velocity = ((after_points - before_points)
                          - (after.world_from_sensor[:3, 3] - before.world_from_sensor[:3, 3])) / (hi - lo)
-    los = world - transform[:3, 3]
+    los = world[mask] - transform[:3, 3]
     radial = np.einsum('ij,ij->i', relative_velocity, los / np.maximum(np.linalg.norm(los, axis=1)[:, None], 1e-12))
     points = np.zeros(int(mask.sum()), dtype=POINT_DTYPE)
     for axis, name in enumerate(('x', 'y', 'z')):
         points[name] = xyz[mask, axis]
-    points['ms'] = (np.abs(radial[mask]) > 1e-6).astype(np.uint8)
+    points['ms'] = (np.abs(radial) > 1e-6).astype(np.uint8)
     for name in ('mag', 'rcs', 'snr'):
         points[name] = np.nan
     return RadarFrame(sensor_id, session_id, sequence, 'GEOMETRY_SIMULATION', 'GEOMETRY', points,
@@ -118,4 +148,4 @@ def simulate(sample_at, time_s, *, sensor_id, session_id, sequence, interval_s,
             occlusion_model='two-sided geometric first hit; tolerance 0.002 m',
             difference_interval_s=[lo, hi], velocity_sign='positive receding',
             unknown_attributes=['mag', 'rcs', 'snr', 'vendor_label'], label_semantics='NOT_GENERATED'),
-        radial_velocity_m_s=radial[mask], material_ids=tuple(int(i) for i in ids[mask]))
+        radial_velocity_m_s=radial, material_ids=tuple(int(i) for i in ids[mask]))

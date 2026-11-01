@@ -1,0 +1,23 @@
+{
+  "schema": "wfrl.release-verification.v1",
+  "version": "0.3.42.4",
+  "extension_version": "0.3.42+4",
+  "archive_sha256": "0693818cb2ef856afbec2c56143053dfd9e23ee4358d41f376abcea077452f61",
+  "build": {
+    "status": "PASS",
+    "environment": "macOS / local Python",
+    "build_count": 1,
+    "archive": "publication/blender-0.3.42.4/package/wfrl_blender-0.3.42+4.zip",
+    "file_count": 216,
+    "bytes": 99272103,
+    "inventory": "publication/blender-0.3.42.4/package/wfrl_blender-0.3.42+4.inventory.json",
+    "checksum": "publication/blender-0.3.42.4/package/wfrl_blender-0.3.42+4.zip.sha256"
+  },
+  "scope": "Ordinary release: content/version consistency, one local build, source push and attachment delivery.",
+  "tests": "NOT_RUN",
+  "isolated_installation": "NOT_RUN",
+  "window_gpu": "NOT_RUN",
+  "performance": "NOT_RUN",
+  "scientific_accuracy": "NOT_RUN",
+  "daily_installation": "publication/daily-installation.json"
+}

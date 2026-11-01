@@ -58,6 +58,8 @@ def main():
         fanout.close()
         print(json.dumps(dict(display_replacements=fanout.display_drops,
             recording_state=sink.state if sink else 'DISABLED', recording_error=sink.error if sink else None)), flush=True)
+    if sink is not None and sink.state != 'COMPLETE':
+        raise RuntimeError('Radar recording failed: ' + str(sink.error or sink.state))
 
 
 if __name__ == '__main__':

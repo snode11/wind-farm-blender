@@ -15,6 +15,13 @@ def frame(xyz=((10, 2, 3), (20, -4, 6)), **kwargs):
     return RadarFrame('sensor', 'session', 0, 'TEST', 'UNKNOWN', points, **kwargs)
 
 
+def test_declared_file_origins_remain_distinguishable_from_generated_observations():
+    generated = replace(frame(), source_kind='GEOMETRY_SIMULATION')
+    declared = replace(generated, provenance={'source_declaration': 'EXPLICIT'})
+    assert display.source_label(generated) == 'GEOMETRY_SIMULATION'
+    assert display.source_label(declared) == 'GEOMETRY_SIMULATION · 显式声明'
+
+
 def test_sensor_projection_uses_declared_axes_and_only_forward_points():
     data = frame(((10, 10, 0), (10, -10, 10), (-1, 0, 0), (0, 0, 1)))
     before = data.points.tobytes()
@@ -56,7 +63,7 @@ def test_unknown_velocity_and_rcs_stay_gray_and_have_no_invented_limits():
         assert limits is None and unknown == 2
         np.testing.assert_array_equal(colors, [[.5, .5, .5, 1]]*2)
     velocity = replace(data, radial_velocity_m_s=np.array([-2, 4]))
-    colors, limits, unknown = display.point_style(velocity, 'VELOCITY')
+    colors, limits, unknown = display.point_style(velocity, 'VELOCITY', color_scale='FRAME')
     assert limits == (-2, 4) and unknown == 0
     np.testing.assert_array_equal(colors, [[0, 0, 1, 1], [1, 0, 0, 1]])
 
@@ -82,3 +89,46 @@ def test_fit_and_zoom_preserve_aspect_and_pan_is_display_only():
     zoomed = display.fit_canvas(bounds, rectangle, zoom=2, pan=(1, -2))
     assert zoomed[0] == 2*scale
     assert display.ticks(-1, 1).tolist() == [-1, -.5, 0, .5, 1]
+
+
+def test_category_and_fixed_velocity_colors_are_comparable_across_frames():
+    data = frame()
+    colors = []
+    for value in (0, 1):
+        points = data.points.copy()
+        points['ms'] = value
+        styled, limits, unknown = display.point_style(replace(data, points=points), 'MS')
+        assert limits == (0, 1) and unknown == 0
+        colors.append(styled[0])
+    np.testing.assert_array_equal(colors, [[0, 0, 1, 1], [1, 0, 0, 1]])
+    first = replace(data, radial_velocity_m_s=np.array([-2., 4.]))
+    second = replace(data, radial_velocity_m_s=np.array([-2., 100.]))
+    a, limits, _ = display.point_style(first, 'VELOCITY', velocity_limit=10.)
+    b, other_limits, _ = display.point_style(second, 'VELOCITY', velocity_limit=10.)
+    assert limits == other_limits == (-10., 10.)
+    np.testing.assert_array_equal(a[0], b[0])
+    np.testing.assert_array_equal(b[1], [1, 0, 0, 1])
+    neutral = replace(data, radial_velocity_m_s=np.zeros(2))
+    np.testing.assert_array_equal(display.point_style(neutral, 'VELOCITY')[0], [[.5, 1, .5, 1]]*2)
+
+
+@pytest.mark.parametrize('width', [360, 640, 800, 1280])
+def test_narrow_canvas_wraps_readable_controls_without_overlap(width):
+    layout = display.canvas_layout(width, 650, 1., velocity=True)
+    assert layout['scale'] == 1.
+    rectangles = [rect for _, _, rect in layout['buttons']]
+    for x, y, w, h in rectangles:
+        assert 0 <= x and x+w <= width and 0 <= y and y+h <= 650
+        assert h >= 28
+    for i, (x, y, w, h) in enumerate(rectangles):
+        for xx, yy, ww, hh in rectangles[i+1:]:
+            assert x+w <= xx or xx+ww <= x or y+h <= yy or yy+hh <= y
+    x, y, w, h = layout['rectangle']
+    assert w > 0 and h > 0 and y+h < layout['info_top']-40
+
+
+@pytest.mark.parametrize('height', [480, 600, 656])
+def test_high_ui_scale_preserves_narrow_plot_space(height):
+    layout = display.canvas_layout(640, height, 2., velocity=True)
+    assert layout['scale'] >= 1.
+    assert layout['rectangle'][3] >= 140

@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
 import wfrl_blender as addon
 from wfrl_blender import clearance_replay, farm_flex, charts
-from wfrl_blender.panels import home, custom_cameras
+from wfrl_blender.panels import home, custom_cameras, radar_x100
 
 
 class Layout:
@@ -82,6 +82,9 @@ def draw_pages(*, ready=False, busy=False):
 
 addon.register()
 assert bpy.types.WFRL_PT_home.bl_category == 'WFRL'
+assert bpy.types.WFRL_PT_x100.bl_category == 'X100'
+assert 'X100' not in {item.identifier for item in
+                      bpy.context.window_manager.bl_rna.properties['wfrl_home_page'].enum_items}
 assert home.snapshot(bpy.context)[0].title == '未加载 WFRL 场景'
 draw_pages()
 addon.load_demo_scene()
@@ -108,6 +111,10 @@ assert home.snapshot(bpy.context)[1] == '相机草稿编辑中'
 pages = draw_pages(ready=True, busy=True)
 assert ('wfrl_custom_pitch', True) in pages['CAMERA'].properties
 assert ('wfrl_custom_fov', True) in pages['CAMERA'].properties
+x100 = Layout()
+radar_x100.WFRL_PT_X100.draw(SimpleNamespace(layout=x100), bpy.context)
+assert ('wfrl_x100_source', False) in x100.properties
+assert [enabled for name, enabled, _ in x100.actions if name == 'wfrl.x100_apply'] == [False]
 custom_cameras._ACTIVE = None
 transaction.cancel()
 assert before == (scene.frame_current, scene.frame_subframe)
@@ -127,4 +134,5 @@ assert home.snapshot(bpy.context)[0].title == '离线回放 · 就绪'
 addon.unregister()
 assert not hasattr(bpy.types.WindowManager, 'wfrl_home_page')
 assert not hasattr(bpy.types, 'WFRL_PT_home')
+assert not hasattr(bpy.types, 'WFRL_PT_x100')
 print('HOME_ENTRY_SMOKE_PASS', flush=True)

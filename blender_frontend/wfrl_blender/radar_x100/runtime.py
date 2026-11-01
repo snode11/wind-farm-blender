@@ -5,7 +5,7 @@ import time
 import uuid
 import numpy as np
 from .core import schema, simulation, ply, recording, channel, acquisition
-from . import view
+from . import display, view
 
 _SESSIONS = {}
 _RESTORE_ATTEMPTED = set()
@@ -20,6 +20,29 @@ def session_for(scene):
         return session if session is not None and session.scene == scene else None
     except ReferenceError:
         return None
+
+
+def _simulation_time(scene, sampler):
+    t = float(scene.get('wfrl_clearance_time_s', sampler.interval[0]))
+    sequence = max(0, int(math.floor((t - sampler.interval[0]) * 30 + 1e-7)))
+    return sequence, min(sampler.interval[1], sampler.interval[0] + sequence / 30)
+
+
+def _simulation_frame(scene, sampler, source_session, sequence, source_t):
+    frame = simulation.simulate(sampler.sample, source_t, sensor_id='X100-T1',
+        session_id=source_session, sequence=sequence, interval_s=sampler.interval,
+        candidate_budget=scene.wfrl_x100_candidates, visibility=sampler.visibility,
+        material_at=sampler.material_sample)
+    frame.provenance['calibration_id'] = sampler.calibration_id
+    return frame
+
+
+def _validate_mount_drivers(mount):
+    node = mount
+    while node is not None:
+        if node.constraints or node.animation_data or node.parent_type != 'OBJECT':
+            raise ValueError('X100 安装或父级存在约束或动画驱动；请检查后重新应用标定配置')
+        node = node.parent
 
 
 class Session:
@@ -63,19 +86,23 @@ class Session:
         elif self.mode == 'REPLAY':
             import bpy
             path = Path(bpy.path.abspath(scene.wfrl_x100_path)).expanduser()
+            self.replay_path = path
             self.replay = recording.Replay(path) if path.is_dir() else None
+            if self.replay is None and scene.wfrl_x100_ply_source == 'UNDECLARED':
+                raise ValueError('请选择单帧 PLY 的来源；文件本身不含来源信息')
             self.static_frame = None if self.replay else ply.ply_frame(path, sensor_id='X100',
-                session_id=self.source_session, sequence=0)
+                session_id=self.source_session, sequence=0, source_kind=scene.wfrl_x100_ply_source)
         else:
             self.client = channel.LocalClient(scene.wfrl_x100_port, stale_after_s=scene.wfrl_x100_stale_s)
-        scene['wfrl_x100_error'] = ''
+        scene['wfrl_x100_error'] = scene.get('wfrl_x100_record_error', '')
 
     def _display(self, frame):
         import bpy
         self.frame = frame
         self.display_valid = frame is not None and frame.completeness == 'COMPLETE'
-        self.gpu_batch = view.batch(frame, self.scene.wfrl_x100_color) if self.display_valid and not bpy.app.background else None
-        self.render_color = self.scene.wfrl_x100_color
+        style = display.style_key(self.scene)
+        self.gpu_batch = view.batch(frame, style[0], color_scale=style[1], velocity_limit=style[2]) if self.display_valid and not bpy.app.background else None
+        self.render_color = style
         if self.fanout and not self.recording_stopping and frame is not None and frame.identity != self.record_last:
             source_time = frame.time.source_time_s
             # Unknown physical time uses a separate local recording clock.
@@ -88,13 +115,14 @@ class Session:
     def update(self):
         from .. import farm_flex
         scene = self.scene
-        scene['wfrl_x100_error'] = ''
+        scene['wfrl_x100_error'] = scene.get('wfrl_x100_record_error', '')
         if self.mode != scene.wfrl_x100_source:
             raise ValueError('来源配置已改变，请应用配置')
         if self.mode == 'SIMULATION':
             if farm_flex.active_for(scene) is not self.sampler.flex:
                 raise ValueError('风场几何来源已改变，请应用 X100 配置')
             self.sampler.validate()
+            _validate_mount_drivers(self.mount)
             yaw = scene.objects.get('WFRL.Turbine.T1.YawRoot')
             expected_parent = yaw if self.sampler.mount == 'NACELLE' else (
                 yaw.parent if self.sampler.mount == 'TOWER_BASE' else None)
@@ -105,22 +133,21 @@ class Session:
             if custom_camera_capture.active() and custom_camera_capture._ACTIVE.scene == scene:
                 scene['wfrl_x100_status'] = '几何仿真 · 相机采集期间保留采集前的观测帧'
                 return
-            t = float(scene.get('wfrl_clearance_time_s', self.sampler.interval[0]))
             # Radar samples use a declared 30 Hz source grid independent of drawing cadence.
-            sequence = max(0, int(math.floor((t - self.sampler.interval[0]) * 30 + 1e-7)))
-            source_t = min(self.sampler.interval[1], self.sampler.interval[0] + sequence / 30)
+            sequence, source_t = _simulation_time(scene, self.sampler)
             key = sequence
             if key != self.key:
-                from .scene import bvh_visibility
-                frame = simulation.simulate(self.sampler.sample, source_t, sensor_id='X100-T1',
-                    session_id=self.source_session, sequence=sequence, interval_s=self.sampler.interval,
-                    candidate_budget=scene.wfrl_x100_candidates, visibility=bvh_visibility)
-                frame.provenance['calibration_id'] = self.sampler.calibration_id
+                frame = _simulation_frame(scene, self.sampler, self.source_session, sequence, source_t)
                 self._display(frame)
                 self.key = key
             self._update_fov_visibility()
             scene['wfrl_x100_status'] = '几何仿真 · 30 Hz 瞬时采样假设'
         elif self.mode == 'REPLAY':
+            import bpy
+            if Path(bpy.path.abspath(scene.wfrl_x100_path)).expanduser() != self.replay_path:
+                raise ValueError('回放路径已改变，请应用 X100 配置')
+            if self.static_frame is not None and scene.wfrl_x100_ply_source != self.static_frame.source_kind:
+                raise ValueError('单帧 PLY 来源声明已改变，请应用 X100 配置')
             if getattr(self, 'playing', False) and self.replay:
                 self.replay_cursor = None
                 self._advancing_replay = True
@@ -155,7 +182,7 @@ class Session:
                 self.gpu_batch = None
             if self.client.error:
                 scene['wfrl_x100_error'] = self.client.error
-        if self.frame is not None and self.render_color != scene.wfrl_x100_color:
+        if self.frame is not None and self.render_color != display.style_key(scene):
             self._display(self.frame)
 
     def _update_fov_visibility(self):
@@ -195,14 +222,31 @@ class Session:
         self.record_start = self.record_last = None
         self.fanout = acquisition.Fanout(recording.Recorder(path, description=dict(
             source_mode=self.mode, timing='source time when available; otherwise local recording monotonic')))
+        self.scene['wfrl_x100_record_error'] = ''
+        self.recording_health()
         if self.frame is not None:
             self._display(self.frame)
+
+    def recording_health(self):
+        if self.fanout is not None:
+            try:
+                if not self.scene.as_pointer():
+                    return
+            except ReferenceError:
+                return
+            recorder = self.fanout.recorder
+            self.scene['wfrl_x100_record_state'] = recorder.state
+            self.scene['wfrl_x100_record_directory'] = str(recorder.path)
+            self.scene['wfrl_x100_record_frames'] = recorder.rows
+            if recorder.state == 'FAILED':
+                self.scene['wfrl_x100_record_error'] = '记录失败：' + str(recorder.error)
 
     def stop_recording(self):
         if self.fanout:
             fanout = self.fanout
             self.recording_stopping = True
             fanout.close()
+            self.recording_health()
             self.fanout = None
             self.recording_stopping = False
             if fanout.recorder.state == 'FAILED':
@@ -227,6 +271,94 @@ def _guard_installation():
     from .. import custom_camera_capture
     if custom_camera_capture.active():
         raise ValueError('请先结束或取消相机采集，再应用或关闭 X100 安装')
+
+
+def apply_mount_preset(scene, preset):
+    """Switch one sensor's calibration and resample at the existing scene time."""
+    import bpy
+    from mathutils import Matrix
+    from .. import farm_flex
+    from .scene import (SceneSampler, ORIGINAL_LOCATION, ORIGINAL_ROTATION,
+                        nacelle_side_installation, installation_matrix)
+    _guard_installation()
+    if scene.wfrl_x100_source != 'SIMULATION':
+        raise ValueError('安装位置切换仅用于几何仿真')
+    if preset not in {'ORIGINAL', 'NACELLE_SIDE'}:
+        raise ValueError('未知雷达安装位置：' + str(preset))
+    current = session_for(scene)
+    if current is not None and (current.fanout or current.closing):
+        raise ValueError('请先结束记录或完成关闭，再切换雷达安装位置')
+    if current is not None and current.mode != 'SIMULATION':
+        raise ValueError('请先应用几何仿真配置，再切换雷达安装位置')
+    flex = farm_flex.active_for(scene)
+    if flex is None or not farm_flex.is_active(scene):
+        raise ValueError('请先加载本场景的风场柔性回放')
+    sampler = None
+    if current is not None:
+        _validate_mount_drivers(current.mount)
+        mount, fov = view.existing_installation(scene, current.owner)
+        if mount != current.mount or fov != current.fov:
+            raise ValueError('雷达安装对象已改变，请重新应用配置')
+        if any(len(obj.users_scene) > 1 for obj in scene.objects
+               if obj.get('wfrl_x100_owner') == current.owner):
+            raise ValueError('雷达安装与其他场景共享，请先应用配置以建立独立安装')
+        if current.sampler.flex is flex:
+            try:
+                current.sampler.validate()
+                sampler = current.sampler
+            except (ValueError, ReferenceError):
+                pass
+    if sampler is None:
+        sampler = SceneSampler(flex, mount_from_sensor=np.eye(4))
+    if preset == 'ORIGINAL':
+        location, rotation = ORIGINAL_LOCATION, ORIGINAL_ROTATION
+    else:
+        location, rotation = nacelle_side_installation(sampler)
+    location = tuple(float(np.float32(value)) for value in location)
+    rotation = tuple(float(np.float32(value)) for value in rotation)
+    sampler = sampler.with_installation('NACELLE', installation_matrix(location, rotation))
+    yaw = scene.objects['WFRL.Turbine.T1.YawRoot']
+    if (current is not None and current.display_valid and current.frame is not None
+            and current.sampler.calibration_id == sampler.calibration_id
+            and current.sampler.geometry_id == sampler.geometry_id
+            and current.frame.provenance.get('candidate_budget') == scene.wfrl_x100_candidates
+            and current.mount.parent == yaw
+            and np.allclose(np.array(current.mount.matrix_parent_inverse) @ np.array(current.mount.matrix_basis),
+                            sampler.mount_from_sensor, atol=1e-5, rtol=0)):
+        current.update()
+        scene.wfrl_x100_mount = 'NACELLE'
+        scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
+        return current
+
+    source_session = str(uuid.uuid4())
+    sequence, source_t = _simulation_time(scene, sampler)
+    frame = _simulation_frame(scene, sampler, source_session, sequence, source_t)
+    style = display.style_key(scene)
+    batch = view.batch(frame, style[0], color_scale=style[1], velocity_limit=style[2]) if not bpy.app.background else None
+    previous = (scene.wfrl_x100_mount, tuple(scene.wfrl_x100_location),
+                tuple(scene.wfrl_x100_rotation))
+    if current is not None:
+        previous_mount = (current.mount.parent, current.mount.matrix_parent_inverse.copy(),
+                          current.mount.matrix_basis.copy())
+    try:
+        scene.wfrl_x100_mount = 'NACELLE'
+        scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
+        if current is None:
+            return start(scene)
+        current.mount.parent = yaw
+        current.mount.matrix_parent_inverse = Matrix.Identity(4)
+        current.mount.matrix_basis = Matrix(sampler.mount_from_sensor.tolist())
+    except Exception:
+        scene.wfrl_x100_mount, scene.wfrl_x100_location, scene.wfrl_x100_rotation = previous
+        if current is not None:
+            current.mount.parent, current.mount.matrix_parent_inverse, current.mount.matrix_basis = previous_mount
+        raise
+    current.sampler, current.source_session, current.key = sampler, source_session, sequence
+    current.frame, current.gpu_batch, current.display_valid = frame, batch, True
+    current.render_color = style
+    scene['wfrl_x100_error'] = scene.get('wfrl_x100_record_error', '')
+    scene['wfrl_x100_status'] = '几何仿真 · 30 Hz 瞬时采样假设'
+    return current
 
 
 def stop(scene, *, remove=True):
@@ -296,6 +428,7 @@ def tick():
             continue
         try:
             session.update()
+            session.recording_health()
             if session.fanout and session.fanout.recorder.state == 'FAILED':
                 scene['wfrl_x100_error'] = '记录失败：' + str(session.fanout.recorder.error)
         except Exception as exc:

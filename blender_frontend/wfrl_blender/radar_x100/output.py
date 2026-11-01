@@ -17,6 +17,7 @@ class OutputWindow:
         self.scene = scene
         self.window_id, self.area_id = window.as_pointer(), area.as_pointer()
         self.view, self.color = 'SENSOR', scene.wfrl_x100_color
+        self.color_scale = getattr(scene, 'wfrl_x100_color_scale', 'FIXED')
         self.zoom, self.pan, self.bounds = 1., (0., 0.), None
         self.drag = None
         self.buttons = []
@@ -51,7 +52,8 @@ class OutputWindow:
         if frame is not None and frame.spatial['frame'] != display.SENSOR_AXES and self.view == 'SENSOR':
             self.view = 'FRONT'
         # Keep a strong frame reference so object-id reuse cannot revive a stale GPU batch.
-        key = (id(frame), self.color, self.view)
+        velocity_limit = getattr(self.scene, 'wfrl_x100_velocity_limit', 10.)
+        key = (id(frame), self.color, self.view, self.color_scale, velocity_limit)
         if key != self.data_key:
             self.frame = frame
             source = (frame.sensor_id, frame.session_id, frame.stream, frame.spatial['frame']) if frame else None
@@ -61,7 +63,8 @@ class OutputWindow:
                     self.view = 'FRONT'
                 self.source_key = source
             if frame is not None:
-                self.colors, self.limits, self.unknown = display.point_style(frame, self.color)
+                self.colors, self.limits, self.unknown = display.point_style(frame, self.color,
+                    color_scale=self.color_scale, velocity_limit=velocity_limit)
                 self.xy, keep = display.project(frame.xyz[frame.finite_mask], self.view)
                 self.colors = self.colors[keep]
                 if self.bounds is None and len(self.xy):
@@ -69,7 +72,8 @@ class OutputWindow:
             else:
                 self.xy, self.colors = np.empty((0, 2)), np.empty((0, 4))
                 self.limits, self.unknown = None, 0
-            self.data_key, self.batch_key, self.point_batch = (id(frame), self.color, self.view), None, None
+            self.data_key = (id(frame), self.color, self.view, self.color_scale, velocity_limit)
+            self.batch_key, self.point_batch = None, None
         return session, frame
 
     def draw(self):
@@ -77,8 +81,9 @@ class OutputWindow:
         import gpu
         from gpu_extras.batch import batch_for_shader
         region = bpy.context.region
-        scale = min(bpy.context.preferences.system.ui_scale, region.width / 760, region.height / 460)
-        self.scale = max(.4, scale)
+        layout = display.canvas_layout(region.width, region.height,
+            bpy.context.preferences.system.ui_scale, velocity=self.color == 'VELOCITY')
+        self.scale = layout['scale']
         s = self.scale
         width, height = region.width, region.height
         uniform = gpu.shader.from_builtin('UNIFORM_COLOR')
@@ -103,47 +108,46 @@ class OutputWindow:
 
         session, frame = self.consume()
         box(0, 0, width, height, (.018, .026, .04, 1))
-        text('X100  雷达点云输出', 20*s, height-30*s, 19, (.9, .95, 1, 1))
+        text('X100  雷达点云输出', 16*s, height-28*s, 19, (.9, .95, 1, 1), width-32*s)
         status = self.scene.get('wfrl_x100_error') or self.scene.get('wfrl_x100_status', '')
-        text('当前帧 · 无历史累积 · ' + status, 270*s, height-29*s, 12, max_width=width-290*s)
+        text('当前帧 · 无历史累积 · ' + status, 16*s, height-50*s, 12, max_width=width-32*s)
         self.buttons = []
-        x, y = 20*s, height-67*s
-        actions = [(v, display.VIEW_LABELS[v]) for v in display.VIEWS] + [('RESET', '复位'), ('COLOR', '着色'), ('CLOSE', '关闭窗口')]
-        for action, label in actions:
-            w = (92 if action == 'CLOSE' else 74)*s
+        for action, label, (x, y, w, h) in layout['buttons']:
+            if action == 'SCALE':
+                label = '固定色标' if self.color_scale == 'FIXED' else '逐帧色标'
             active = action == self.view
-            box(x, y, w, 25*s, (.09, .3, .43, 1) if active else (.065, .095, .135, 1))
+            box(x, y, w, h, (.09, .3, .43, 1) if active else (.065, .095, .135, 1))
             text(label, x+10*s, y+7*s, 12)
-            self.buttons.append((action, (x, y, w, 25*s)))
-            x += w+6*s
+            self.buttons.append((action, (x, y, w, h)))
+        info_top = layout['info_top']
         if frame is not None:
-            text(f'{frame.source_kind}  /  {frame.stream}  /  #{frame.sequence}  ·  {frame.validity}',
-                 20*s, height-89*s, 12, max_width=width-40*s)
+            text(f'{display.source_label(frame)}  /  {frame.stream}  /  #{frame.sequence}  ·  {frame.validity}',
+                 16*s, info_top, 12, max_width=width-32*s)
             stamp = f'{frame.time.source_time_s:.3f} s' if frame.time.source_time_s is not None else '未知'
             text(f'源时间 {stamp}  ·  {len(frame.points)} 点  ·  可绘制 {len(self.xy)} 点  ·  {frame.time.quality}',
-                 20*s, height-109*s, 12, max_width=width-40*s)
+                 16*s, info_top-20*s, 12, max_width=width-32*s)
         else:
             status = self.scene.get('wfrl_x100_error') or self.scene.get('wfrl_x100_status', 'X100 未启动')
             if session is not None and session.frame is not None:
                 status = session.frame.validity + ' · ' + status
-            text('暂无有效点云 · ' + status, 20*s, height-96*s, 13, (1, .68, .35, 1), width-40*s)
+            text('暂无有效点云 · ' + status, 16*s, info_top, 13, (1, .68, .35, 1), width-32*s)
         sensor_axes = frame is not None and frame.spatial['frame'] == display.SENSOR_AXES
         coords = '+X 前 / +Y 左 / +Z 上' if sensor_axes else '原始坐标轴 · 未确认方向'
         text(coords + (' · 传感器角度投影' if self.view == 'SENSOR' else ' · 正交投影 (m)'),
-             20*s, height-130*s, 11, max_width=width-40*s)
-        rect = (76*s, 112*s, max(1, width-112*s), max(1, height-270*s))
+             16*s, info_top-40*s, 11, max_width=width-32*s)
+        rect = layout['rectangle']
         left, bottom, pw, ph = rect
         bounds = self.bounds or display.fit_bounds([], self.view)
         factor, tx, ty = display.fit_canvas(bounds, rect, self.zoom, self.pan)
         self.factor = factor
         xlo, xhi = (left-tx)/factor, (left+pw-tx)/factor
         ylo, yhi = (bottom-ty)/factor, (bottom+ph-ty)/factor
-        for tick in display.ticks(xlo, xhi):
+        for tick in display.ticks(xlo, xhi, target=max(1, min(6, int(pw/(76*s))))):
             px = tx+tick*factor
             shape(((px, bottom), (px, bottom+ph)), (.09, .14, .2, 1))
             label = -tick if self.view in {'SENSOR', 'FRONT', 'TOP'} else tick
             text(f'{label:g}', px-10*s, bottom-21*s, 10)
-        for tick in display.ticks(ylo, yhi):
+        for tick in display.ticks(ylo, yhi, target=max(1, min(6, int(ph/(26*s))))):
             py = ty+tick*factor
             shape(((left, py), (left+pw, py)), (.09, .14, .2, 1))
             text(f'{tick:g}', 22*s, py-4*s, 10)
@@ -183,15 +187,21 @@ class OutputWindow:
             text(label + ' · 未知（灰色）', 20*s, 44*s, 12)
         else:
             lo, hi = self.limits
-            text(f'{label}  {lo:.3g} ～ {hi:.3g}  ·  当前帧色标  ·  未知 {self.unknown}', 20*s, 44*s, 12)
+            scale_label = ('固定分类 0 / 1' if self.color == 'MS' else
+                '固定对称 · 超限用端点色' if self.color == 'VELOCITY' and self.color_scale == 'FIXED' else '当前帧色标')
+            text(f'{label}  {lo:.3g} ～ {hi:.3g}  ·  {scale_label}  ·  未知 {self.unknown}',
+                 16*s, 55*s, 12, max_width=width-32*s)
             for i in range(40):
                 v = i/39
-                box(width-190*s+i*4*s, 43*s, 4*s, 10*s, (v, 1-abs(2*v-1), 1-v, 1))
-        text('滚轮缩放 · 中键拖动平移 · 1–4 切视图 · F 复位 · C 着色 · Esc 关闭', 20*s, 20*s, 11, max_width=width-40*s)
+                if self.color == 'MS':
+                    v = float(v >= .5)
+                box(16*s+i*4*s, 36*s, 4*s, 8*s, (v, 1-abs(2*v-1), 1-v, 1))
+        hints = '滚轮缩放 · 中键平移 · F 复位 · Esc 关闭' if layout['compact'] else '滚轮缩放 · 中键平移 · 1–4 切视图 · F 复位 · C 着色 · V 色标 · Esc 关闭'
+        text(hints, 16*s, 16*s, 11, max_width=width-32*s)
         if frame is not None and self.color == 'VELOCITY':
             sign = frame.provenance.get('velocity_sign', 'UNKNOWN')
             text('速度正值远离传感器' if sign == 'positive receding' else '速度符号沿用来源（未确认）',
-                 20*s, 65*s, 10)
+                 16*s, 76*s, 11, max_width=width-32*s)
         self.draw_count += 1
 
 
@@ -357,6 +367,8 @@ class WFRL_OT_X100Output(bpy.types.Operator):
                         return {'FINISHED'}
                     if action == 'COLOR':
                         item.cycle_color()
+                    elif action == 'SCALE':
+                        item.color_scale = 'FRAME' if item.color_scale == 'FIXED' else 'FIXED'
                     else:
                         item.reset(action if action in display.VIEWS else None)
                     area.tag_redraw()
@@ -369,6 +381,8 @@ class WFRL_OT_X100Output(bpy.types.Operator):
                 item.reset()
             elif event.type == 'C':
                 item.cycle_color()
+            elif event.type == 'V' and item.color == 'VELOCITY':
+                item.color_scale = 'FRAME' if item.color_scale == 'FIXED' else 'FIXED'
             elif event.type in {'WHEELUPMOUSE', 'WHEELDOWNMOUSE'}:
                 item.zoom = max(.1, min(100., item.zoom*(1.2 if event.type == 'WHEELUPMOUSE' else 1/1.2)))
             elif event.type == 'MIDDLEMOUSE':

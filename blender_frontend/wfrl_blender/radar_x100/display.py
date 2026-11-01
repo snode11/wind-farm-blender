@@ -10,6 +10,11 @@ VIEW_LABELS = dict(SENSOR='传感器', FRONT='正视', TOP='俯视', SIDE='侧�
 SENSOR_AXES = 'SENSOR_X_FORWARD_Y_LEFT_Z_UP'
 
 
+def source_label(frame):
+    suffix = ' · 显式声明' if frame.provenance.get('source_declaration') == 'EXPLICIT' else ''
+    return frame.source_kind + suffix
+
+
 def world_xyz(frame):
     xyz = frame.xyz[frame.finite_mask]
     transform = frame.spatial.get('world_from_sensor')
@@ -19,8 +24,15 @@ def world_xyz(frame):
     return xyz
 
 
-def point_style(frame, color_by):
-    """Match the scene overlay; limits describe this frame, unknown values are gray."""
+def style_key(scene):
+    return (scene.wfrl_x100_color, getattr(scene, 'wfrl_x100_color_scale', 'FIXED'),
+            getattr(scene, 'wfrl_x100_velocity_limit', 10.))
+
+
+def point_style(frame, color_by, *, color_scale='FIXED', velocity_limit=10.):
+    """Use stable categories and optional symmetric velocity limits; unknown values are gray."""
+    if color_scale not in {'FIXED', 'FRAME'} or not math.isfinite(velocity_limit) or velocity_limit <= 0:
+        raise ValueError('Invalid point color scale')
     mask = frame.finite_mask
     if color_by == 'RANGE':
         values = np.linalg.norm(frame.xyz[mask], axis=1)
@@ -35,10 +47,35 @@ def point_style(frame, color_by):
     limits = None
     if finite.any():
         lo, hi = float(values[finite].min()), float(values[finite].max())
-        scaled = (values[finite] - lo) / max(hi - lo, 1e-9)
+        if color_by == 'MS':
+            lo, hi = 0., 1.
+        elif color_by == 'VELOCITY' and color_scale == 'FIXED':
+            lo, hi = -velocity_limit, velocity_limit
+        scaled = np.clip((values[finite] - lo) / max(hi - lo, 1e-9), 0, 1)
         colors[finite, :3] = np.column_stack((scaled, 1 - np.abs(2 * scaled - 1), 1 - scaled))
         limits = lo, hi
     return colors, limits, int((~finite).sum())
+
+
+def canvas_layout(width, height, ui_scale, *, velocity=False):
+    """Keep readable text while wrapping controls into the available canvas width."""
+    scale = max(1., min(float(ui_scale), 1.5, width/900., height/650.))
+    w, h = width / scale, height / scale
+    actions = [(v, VIEW_LABELS[v]) for v in VIEWS] + [('RESET', '复位'), ('COLOR', '着色')]
+    if velocity:
+        actions.append(('SCALE', '色标'))
+    actions.append(('CLOSE', '关闭'))
+    x, top, rows, buttons = 16., h-92., 1, []
+    for action, label in actions:
+        if x+70 > w-16 and x > 16:
+            x, top, rows = 16., top-34., rows+1
+        buttons.append((action, label, tuple(v*scale for v in (x, top, 70., 28.))))
+        x += 76.
+    info_top = top-24.
+    bottom = 130.
+    rectangle = tuple(v*scale for v in (64., bottom, max(1., w-84.), max(1., info_top-76.-bottom)))
+    return dict(scale=scale, buttons=buttons, info_top=info_top*scale,
+                rectangle=rectangle, compact=w < 600, rows=rows)
 
 
 def project(xyz, view):

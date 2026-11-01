@@ -70,10 +70,11 @@ def encode_ply(points):
     return '\n'.join(header).encode('ascii') + points.tobytes()
 
 
-def ply_frame(path, *, sensor_id, session_id, sequence, time=None, source_kind='MEASURED_REPLAY', stream='UNKNOWN', raw_bytes=None):
+def ply_frame(path, *, sensor_id, session_id, sequence, source_kind, time=None, stream='UNKNOWN', raw_bytes=None):
     path = Path(path)
     raw = read_ply_bytes(path) if raw_bytes is None else raw_bytes
     return RadarFrame(sensor_id, session_id, sequence, source_kind, stream, decode_ply(raw),
                       time or FrameTime(), provenance=dict(parser='x100-ply.v1', file=path.name,
+                      source_declaration='EXPLICIT',
                       sha256=hashlib.sha256(raw).hexdigest(), label_semantics='UNKNOWN',
                       absent=['radial_velocity', 'frame_number', 'timestamp', 'track_id']))

@@ -50,6 +50,31 @@ def test_ply_rejects_unknown_ms_but_preserves_unknown_labels():
         ply.decode_ply(ply.encode_ply(points))
 
 
+def test_standalone_ply_requires_source_kind_instead_of_assuming_measurement(tmp_path):
+    path = tmp_path / 'simulation.ply'
+    path.write_bytes(ply.encode_ply(frame().points))
+    with pytest.raises(TypeError, match='source_kind'):
+        ply.ply_frame(path, sensor_id='X100', session_id='file', sequence=0)
+
+
+@pytest.mark.parametrize('source', ['GEOMETRY_SIMULATION', 'MEASURED_REPLAY', 'TEST'])
+def test_ply_source_declaration_survives_recording_without_inventing_time(tmp_path, source):
+    path = tmp_path / 'points.ply'
+    path.write_bytes(ply.encode_ply(frame().points))
+    observation = ply.ply_frame(path, sensor_id='X100', session_id='file', sequence=0,
+                                source_kind=source)
+    assert observation.source_kind == source
+    assert observation.provenance.get('source_declaration') == 'EXPLICIT'
+    sink = recording.Recorder(tmp_path / 'declared')
+    sink.append(observation, 0.)
+    sink.close()
+    stored = recording.Replay(sink.path).frame(0)
+    assert stored.source_kind == source
+    assert stored.provenance.get('source_declaration') == 'EXPLICIT'
+    assert stored.time.source_time_s is None
+    assert stored.spatial['alignment'] == 'UNALIGNED'
+
+
 def test_record_replay_identity_empty_velocity_seek_and_integrity(tmp_path):
     path = tmp_path / 'recording'
     sink = recording.Recorder(path)
@@ -123,6 +148,26 @@ def test_simulation_same_material_velocity_fov_occlusion_and_determinism():
     boundary = np.array([[np.cos(el)*np.cos(az), np.cos(el)*np.sin(az), np.sin(el)]])
     assert simulation.in_fov(boundary * 10)[0]
     assert not simulation.in_fov(np.array([[-1,0,0],[.1,0,0],[397,0,0]])).any()
+
+
+def test_subset_material_sampling_preserves_observation_and_relative_velocity():
+    kwargs = dict(sensor_id='X100', session_id='sim', sequence=30, interval_s=(0, 2), candidate_budget=2)
+    calls = []
+    def material(t, ids):
+        sample = moving_scene(t)
+        calls.append(tuple(ids))
+        return simulation.MaterialSample(t, sample.source_id, sample.geometry_id,
+            sample.vertices[sample.triangles[ids]].mean(axis=1), sample.world_from_sensor)
+    expected = simulation.simulate(moving_scene, 1, **kwargs)
+    actual = simulation.simulate(moving_scene, 1, material_at=material, **kwargs)
+    assert actual.points.tobytes() == expected.points.tobytes()
+    assert actual.material_ids == expected.material_ids == (0,)
+    assert calls == [(0,), (0,)]
+    np.testing.assert_array_equal(actual.radial_velocity_m_s, expected.radial_velocity_m_s)
+    def changed(t, ids):
+        return replace(material(t, ids), geometry_id='different')
+    with pytest.raises(ValueError, match='identity'):
+        simulation.simulate(moving_scene, 1, material_at=changed, **kwargs)
 
 
 def test_channel_atomic_fragmented_packets_identity_restart_and_independent_expiry():
