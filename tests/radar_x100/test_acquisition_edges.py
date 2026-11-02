@@ -139,3 +139,51 @@ def test_single_valid_empty_observation_can_close_and_replay(tmp_path):
     sink.close()
     assert sink.state == 'COMPLETE'
     assert recording.Replay(sink.path).frame(0).validity == 'VALID_EMPTY'
+
+
+@pytest.mark.parametrize('count,point_count', [(1, 1), (2, 1), (1, 0), (2, 0)])
+def test_duplicate_fragment_can_supply_terminal_evidence(count, point_count):
+    source = replace(observation(), points=np.zeros(point_count, dtype=schema.POINT_DTYPE))
+    assembler = acquisition.Assembler()
+    for index in range(count):
+        assert assembler.push(acquisition.Fragment(source, index, count, source.points), now=0.) is None
+    result = assembler.push(acquisition.Fragment(source, 0, count, source.points, terminal=True), now=.01)
+    assert result is not None and len(result.points) == count * point_count
+    assert result.completeness == 'COMPLETE' and not assembler.pending
+    assert assembler.push(acquisition.Fragment(source, 0, count, source.points, terminal=True), now=.02) is None
+    assert assembler.counters == dict(duplicate=2, timeout=0, corrupt=0, overflow=0)
+
+
+def test_duplicate_false_does_not_revoke_terminal_evidence():
+    source = observation()
+    assembler = acquisition.Assembler()
+    assert assembler.push(acquisition.Fragment(source, 0, 2, source.points, terminal=True), now=0.) is None
+    assert assembler.push(acquisition.Fragment(source, 0, 2, source.points), now=.01) is None
+    assert assembler.push(acquisition.Fragment(source, 1, 2, source.points), now=.02) is not None
+
+
+@pytest.mark.parametrize('retirement', ['conflict', 'timeout', 'CORRUPT'])
+def test_terminal_upgrade_cannot_revive_retired_frame(retirement):
+    source = observation()
+    assembler = acquisition.Assembler()
+    assert assembler.push(acquisition.Fragment(source, 0, 1, source.points), now=0.) is None
+    if retirement == 'timeout':
+        assembler.expire(.3)
+    else:
+        points = source.points.copy()
+        points['x'] = 20
+        template = replace(source, completeness='CORRUPT') if retirement == 'CORRUPT' else source
+        assert assembler.push(acquisition.Fragment(template, 0, 1, points, terminal=True), now=.01) is None
+    assert assembler.push(acquisition.Fragment(source, 0, 1, source.points, terminal=True), now=.31) is None
+    assert not assembler.pending
+    assert assembler.counters['timeout' if retirement == 'timeout' else 'corrupt'] == 1
+
+
+@pytest.mark.parametrize('terminal', [1, 'true', None])
+def test_nonboolean_duplicate_cannot_supply_terminal_evidence(terminal):
+    source = observation()
+    assembler = acquisition.Assembler()
+    assert assembler.push(acquisition.Fragment(source, 0, 1, source.points), now=0.) is None
+    assert assembler.push(acquisition.Fragment(source, 0, 1, source.points, terminal=terminal), now=.01) is None
+    assert assembler.counters['corrupt'] == 1
+    assert assembler.push(acquisition.Fragment(source, 0, 1, source.points, terminal=True), now=.02) is not None

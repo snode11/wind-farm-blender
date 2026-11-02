@@ -75,16 +75,16 @@ class RotorClock:
         return self.azimuth_deg
 
     def configure(self, now, *, rpm=None, running=None, azimuth_deg=None):
+        now = _finite(now, 'Time')
+        value = self.rpm if rpm is None else _finite(rpm, 'RPM')
+        angle = None if azimuth_deg is None else _finite(azimuth_deg, 'Azimuth') % 360.0
+        checked_running = self.running if running is None else bool(running)
+        if value < 0:
+            raise ValueError('RPM must be nonnegative')
         self.sample(now)
-        if rpm is not None:
-            value = _finite(rpm, 'RPM')
-            if value < 0:
-                raise ValueError('RPM must be nonnegative')
-            self.rpm = value
-        if running is not None:
-            self.running = bool(running)
-        if azimuth_deg is not None:
-            self.azimuth_deg = _finite(azimuth_deg, 'Azimuth') % 360.0
+        self.rpm, self.running = value, checked_running
+        if angle is not None:
+            self.azimuth_deg = angle
         return self.azimuth_deg
 
 

@@ -41,7 +41,7 @@ def decode_ply(raw):
     if lines[3:] != ['property ' + t + ' ' + n for t, n in PROPERTIES]:
         raise ValueError('Unsupported PLY field order or types')
     payload = raw[stream.tell():]
-    if len(payload) != count * 26:
+    if len(payload) != count * POINT_DTYPE.itemsize:
         raise ValueError('PLY payload length mismatch')
     points = np.frombuffer(payload, dtype=POINT_DTYPE).copy()
     if np.any((points['ms'] != 0) & (points['ms'] != 1)):
@@ -50,7 +50,7 @@ def decode_ply(raw):
 
 
 def read_ply_bytes(path):
-    limit = MAX_HEADER + MAX_POINTS * 26
+    limit = MAX_HEADER + MAX_POINTS * POINT_DTYPE.itemsize
     with Path(path).open('rb') as stream:
         raw = stream.read(limit + 1)
     if len(raw) > limit:

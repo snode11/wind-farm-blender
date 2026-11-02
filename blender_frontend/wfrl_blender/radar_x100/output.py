@@ -2,6 +2,7 @@
 import bpy
 import numpy as np
 from . import display
+from .core import analysis, schema
 
 _WINDOWS = {}
 _HANDLE = None
@@ -17,6 +18,11 @@ class OutputWindow:
         self.scene = scene
         self.window_id, self.area_id = window.as_pointer(), area.as_pointer()
         self.view, self.color = 'SENSOR', scene.wfrl_x100_color
+        self.roi = ((-100.,-100.,-150.),(100.,100.,50.))
+        self.distance_limit = 10.
+        self.show_reference = False
+        self.original_indices = np.empty(0,dtype=np.int64)
+        self.reference_lines = []
         self.color_scale = getattr(scene, 'wfrl_x100_color_scale', 'FIXED')
         self.zoom, self.pan, self.bounds = 1., (0., 0.), None
         self.drag = None
@@ -28,6 +34,13 @@ class OutputWindow:
         self.scale = 1.
         self.draw_count = 0
         self.error = ''
+        self.auxiliary = display.CanvasCache()
+        self.uniform_shader = None
+
+    def release_gpu(self):
+        self.auxiliary.clear()
+        self.uniform_shader = None
+        self.point_batch, self.batch_key = None, None
 
     def alive(self):
         window = next((w for w in bpy.context.window_manager.windows if w.as_pointer() == self.window_id), None)
@@ -53,7 +66,11 @@ class OutputWindow:
             self.view = 'FRONT'
         # Keep a strong frame reference so object-id reuse cannot revive a stale GPU batch.
         velocity_limit = getattr(self.scene, 'wfrl_x100_velocity_limit', 10.)
-        key = (id(frame), self.color, self.view, self.color_scale, velocity_limit)
+        analysis_identity = session.analysis_key if session and self.view == 'NACELLE' else None
+        key = (getattr(session,'generation',None), frame.identity if frame else None,
+            frame.time.clock_domain if frame else None, frame.time.source_time_s if frame else None,
+            getattr(session,'frame_index',None), id(frame), self.color, self.view,
+            self.color_scale, velocity_limit, analysis_identity, self.distance_limit)
         if key != self.data_key:
             self.frame = frame
             source = (frame.sensor_id, frame.session_id, frame.stream, frame.spatial['frame']) if frame else None
@@ -65,14 +82,34 @@ class OutputWindow:
             if frame is not None:
                 self.colors, self.limits, self.unknown = display.point_style(frame, self.color,
                     color_scale=self.color_scale, velocity_limit=velocity_limit)
-                self.xy, keep = display.project(frame.xyz[frame.finite_mask], self.view)
-                self.colors = self.colors[keep]
-                if self.bounds is None and len(self.xy):
-                    self.bounds = display.fit_bounds(self.xy, self.view)
+                self.original_indices = np.flatnonzero(frame.finite_mask)
+                if self.view == 'NACELLE':
+                    result = session.analysis_result
+                    if result is None:
+                        self.xy, self.colors = np.empty((0,2)), np.empty((0,4))
+                        self.limits = None
+                        self.original_indices = np.empty(0,dtype=np.int64)
+                    else:
+                        self.xy = result['points'][frame.finite_mask][:,(0,2)]
+                        colors, self.saturated = analysis.distance_colors(result['distance'], self.distance_limit)
+                        self.colors = colors[frame.finite_mask]
+                        self.limits, self.unknown = (0.,self.distance_limit), int(np.isnan(result['distance']).sum())
+                else:
+                    self.xy, keep = display.project(frame.xyz[frame.finite_mask], self.view)
+                    self.colors = self.colors[keep]
+                    self.original_indices = self.original_indices[keep]
+                if self.bounds is None:
+                    extent = self.xy
+                    if self.view == 'NACELLE' and session.context is not None:
+                        tower = analysis.local(session.context.vertices,session.context.world_from_analysis)[:,(0,2)]
+                        extent = np.concatenate((extent,tower))
+                    if len(extent):
+                        self.bounds = display.fit_bounds(extent,self.view)
             else:
+                self.original_indices = np.empty(0,dtype=np.int64)
                 self.xy, self.colors = np.empty((0, 2)), np.empty((0, 4))
                 self.limits, self.unknown = None, 0
-            self.data_key = (id(frame), self.color, self.view, self.color_scale, velocity_limit)
+            self.data_key = key
             self.batch_key, self.point_batch = None, None
         return session, frame
 
@@ -86,15 +123,27 @@ class OutputWindow:
         self.scale = layout['scale']
         s = self.scale
         width, height = region.width, region.height
-        uniform = gpu.shader.from_builtin('UNIFORM_COLOR')
+        context = bpy.context
+        drawing_context = (context.window.as_pointer(), context.window.screen.as_pointer(),
+                           context.area.as_pointer(), region.as_pointer())
+        if self.auxiliary.bind(drawing_context):
+            self.uniform_shader = None
+            self.point_batch, self.batch_key = None, None
+        if self.uniform_shader is None:
+            self.uniform_shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+        uniform = self.uniform_shader
 
         def shape(points, color, primitive='LINES'):
-            uniform.bind()
-            uniform.uniform_float('color', color)
-            batch_for_shader(uniform, primitive, {'pos': points}).draw(uniform)
+            return batch_for_shader(uniform, primitive, {'pos': points}), color
 
         def box(x, y, w, h, color):
-            shape(((x, y), (x+w, y), (x+w, y+h), (x, y+h)), color, 'TRI_FAN')
+            return shape(((x, y), (x+w, y), (x+w, y+h), (x, y+h)), color, 'TRI_FAN')
+
+        def draw_shapes(shapes):
+            uniform.bind()
+            for batch, color in shapes:
+                uniform.uniform_float('color', color)
+                batch.draw(uniform)
 
         def text(value, x, y, size=13, color=(.76, .83, .9, 1), max_width=None):
             blf.size(0, size*s)
@@ -107,7 +156,11 @@ class OutputWindow:
             blf.draw(0, value)
 
         session, frame = self.consume()
-        box(0, 0, width, height, (.018, .026, .04, 1))
+        def chrome():
+            return [box(0, 0, width, height, (.018, .026, .04, 1)),
+                *(box(x, y, w, h, (.09, .3, .43, 1) if action == self.view else (.065, .095, .135, 1))
+                  for action, _, (x, y, w, h) in layout['buttons'])]
+        draw_shapes(self.auxiliary.get('chrome', (width, height, s, self.view, self.color == 'VELOCITY'), chrome))
         text('X100  雷达点云输出', 16*s, height-28*s, 19, (.9, .95, 1, 1), width-32*s)
         status = self.scene.get('wfrl_x100_error') or self.scene.get('wfrl_x100_status', '')
         text('当前帧 · 无历史累积 · ' + status, 16*s, height-50*s, 12, max_width=width-32*s)
@@ -115,8 +168,6 @@ class OutputWindow:
         for action, label, (x, y, w, h) in layout['buttons']:
             if action == 'SCALE':
                 label = '固定色标' if self.color_scale == 'FIXED' else '逐帧色标'
-            active = action == self.view
-            box(x, y, w, h, (.09, .3, .43, 1) if active else (.065, .095, .135, 1))
             text(label, x+10*s, y+7*s, 12)
             self.buttons.append((action, (x, y, w, h)))
         info_top = layout['info_top']
@@ -133,45 +184,72 @@ class OutputWindow:
             text('暂无有效点云 · ' + status, 16*s, info_top, 13, (1, .68, .35, 1), width-32*s)
         sensor_axes = frame is not None and frame.spatial['frame'] == display.SENSOR_AXES
         coords = '+X 前 / +Y 左 / +Z 上' if sensor_axes else '原始坐标轴 · 未确认方向'
+        if self.view == 'NACELLE':
+            result = session.analysis_result if session else None
+            detail = (session.analysis_error if session else '无会话') if result is None else f"ROI {result['selected']} / 有效 {result['valid']} / 饱和 {getattr(self,'saturated',0)}"
+            coords = '局部Z非重力 · '+detail+' · R 参考'+('开' if self.show_reference else '关')
         text(coords + (' · 传感器角度投影' if self.view == 'SENSOR' else ' · 正交投影 (m)'),
              16*s, info_top-40*s, 11, max_width=width-32*s)
         rect = layout['rectangle']
         left, bottom, pw, ph = rect
         bounds = self.bounds or display.fit_bounds([], self.view)
-        factor, tx, ty = display.fit_canvas(bounds, rect, self.zoom, self.pan)
+        def grid():
+            transform, shapes, labels = display.grid_geometry(self.view, bounds, rect, self.zoom, self.pan, s)
+            return transform, [shape(points, color) for points, color in shapes if len(points)], labels
+        (factor, tx, ty), shapes, labels = self.auxiliary.get('grid',
+            (tuple(rect), s, self.view, bounds, self.zoom, self.pan), grid)
+        draw_shapes(shapes)
+        for label, x, y in labels:
+            text(label, x, y, 10)
         self.factor = factor
-        xlo, xhi = (left-tx)/factor, (left+pw-tx)/factor
-        ylo, yhi = (bottom-ty)/factor, (bottom+ph-ty)/factor
-        for tick in display.ticks(xlo, xhi, target=max(1, min(6, int(pw/(76*s))))):
-            px = tx+tick*factor
-            shape(((px, bottom), (px, bottom+ph)), (.09, .14, .2, 1))
-            label = -tick if self.view in {'SENSOR', 'FRONT', 'TOP'} else tick
-            text(f'{label:g}', px-10*s, bottom-21*s, 10)
-        for tick in display.ticks(ylo, yhi, target=max(1, min(6, int(ph/(26*s))))):
-            py = ty+tick*factor
-            shape(((left, py), (left+pw, py)), (.09, .14, .2, 1))
-            text(f'{tick:g}', 22*s, py-4*s, 10)
-        if left <= tx <= left+pw:
-            shape(((tx, bottom), (tx, bottom+ph)), (.2, .34, .43, 1))
-        if bottom <= ty <= bottom+ph:
-            shape(((left, ty), (left+pw, ty)), (.2, .34, .43, 1))
-        shape(((left, bottom), (left+pw, bottom), (left+pw, bottom), (left+pw, bottom+ph),
-               (left+pw, bottom+ph), (left, bottom+ph), (left, bottom+ph), (left, bottom)), (.22, .3, .39, 1))
         horizontal = '方位角 (°，+Y 左)' if self.view == 'SENSOR' else ('X (m)' if self.view == 'SIDE' else 'Y (m，左为正)' if sensor_axes else 'Y (m)')
         vertical = '俯仰角 (°)' if self.view == 'SENSOR' else ('X (m)' if self.view == 'TOP' else 'Z (m)')
+        if self.view == 'NACELLE':
+            horizontal, vertical = '机舱局部 X (m)', '机舱局部 Z (m)'
         text(horizontal, left+pw/2-65*s, bottom-43*s, 11)
         text(vertical, left, bottom+ph+10*s, 11)
-        cache_key = (self.data_key, width, height, self.zoom, self.pan, bounds)
+        cache_key = (self.data_key, tuple(rect), s, self.zoom, self.pan, bounds)
         if self.batch_key != cache_key:
             pixels = self.xy*factor + (tx, ty)
             visible = ((pixels[:, 0] >= left+3*s) & (pixels[:, 0] <= left+pw-3*s)
                        & (pixels[:, 1] >= bottom+3*s) & (pixels[:, 1] <= bottom+ph-3*s))
+            self.visible_indices = self.original_indices[visible]
             self.point_batch = None
             if visible.any():
                 shader = gpu.shader.from_builtin('POINT_FLAT_COLOR')
                 self.point_batch = (shader, batch_for_shader(shader, 'POINTS',
                     {'pos': pixels[visible].astype(np.float32), 'color': self.colors[visible]}))
             self.batch_key = cache_key
+        if self.view == 'NACELLE' and session and session.context is not None:
+            def reference_shapes():
+                context = session.context
+                vertices = analysis.local(context.vertices,context.world_from_analysis)[:,(0,2)]
+                faces = context.triangles
+                edges = np.concatenate((faces[:,(0,1)],faces[:,(1,2)],faces[:,(2,0)]))
+                shapes=[shape(vertices[edges].reshape(-1,2)*factor+(tx,ty),(.3,.65,.55,.3))]
+                sensor = analysis.local(analysis.transform(np.array([[0,0,0],[15,0,0]]),context.world_from_sensor),context.world_from_analysis)
+                shapes.append(shape(sensor[:,(0,2)]*factor+(tx,ty),(1.,.7,.15,1)))
+                rays=[]
+                for az in (-schema.PROFILE['azimuth_deg'],schema.PROFILE['azimuth_deg']):
+                    for el in (-schema.PROFILE['elevation_deg'],schema.PROFILE['elevation_deg']):
+                        a,e=np.radians([az,el]); length=schema.DISPLAY_DEFAULTS['fov_length_m']
+                        end=[length*np.cos(e)*np.cos(a),length*np.cos(e)*np.sin(a),length*np.sin(e)]
+                        pair=analysis.local(analysis.transform(np.array([[0,0,0],end]),context.world_from_sensor),context.world_from_analysis)
+                        rays.extend(pair[:,(0,2)]*factor+(tx,ty))
+                shapes.append(shape(rays,(.15,.65,1,.5)))
+                if self.show_reference:
+                    for curve in getattr(session,'reference_curves',()):
+                        xy=analysis.local(curve,context.world_from_analysis)[:,(0,2)]*factor+(tx,ty)
+                        shapes.append(shape(xy,(.85,.6,.9,.8),'LINE_STRIP'))
+                return shapes
+            gpu.state.scissor_set(int(left),int(bottom),int(pw),int(ph))
+            gpu.state.scissor_test_set(True)
+            try:
+                draw_shapes(self.auxiliary.get('analysis',
+                    (session.context.identity,tuple(rect),self.zoom,self.pan,bounds,
+                     self.show_reference,session.reference_key),reference_shapes))
+            finally:
+                gpu.state.scissor_test_set(False)
         if self.point_batch:
             shader, batch = self.point_batch
             shader.bind()
@@ -180,23 +258,27 @@ class OutputWindow:
         if frame is None or not len(self.xy):
             message = '有效空帧 · 当前检测点数为 0' if frame is not None and not len(frame.points) else '当前视图没有可绘制点' if frame is not None else '等待当前雷达帧'
             text(message, left+20*s, bottom+ph/2, 15, (.95, .7, .4, 1))
-        label = display.COLOR_LABELS[self.color]
-        if self.color == 'HEIGHT' and frame is not None:
+        label = '仿真塔筒侧壁距离 (m)' if self.view == 'NACELLE' else display.COLOR_LABELS[self.color]
+        if self.view != 'NACELLE' and self.color == 'HEIGHT' and frame is not None:
             label = '世界高度 (m)' if frame.spatial.get('world_from_sensor') is not None and frame.spatial.get('alignment') in {'SIMULATION', 'STATIC_CALIBRATION', 'VERIFIED'} else '原始 Z (m)'
         if self.limits is None:
             text(label + ' · 未知（灰色）', 20*s, 44*s, 12)
         else:
             lo, hi = self.limits
-            scale_label = ('固定分类 0 / 1' if self.color == 'MS' else
+            scale_label = ('固定研究色标 · 非安全阈值' if self.view == 'NACELLE' else '固定分类 0 / 1' if self.color == 'MS' else
                 '固定对称 · 超限用端点色' if self.color == 'VELOCITY' and self.color_scale == 'FIXED' else '当前帧色标')
             text(f'{label}  {lo:.3g} ～ {hi:.3g}  ·  {scale_label}  ·  未知 {self.unknown}',
                  16*s, 55*s, 12, max_width=width-32*s)
-            for i in range(40):
-                v = i/39
-                if self.color == 'MS':
-                    v = float(v >= .5)
-                box(16*s+i*4*s, 36*s, 4*s, 8*s, (v, 1-abs(2*v-1), 1-v, 1))
-        hints = '滚轮缩放 · 中键平移 · F 复位 · Esc 关闭' if layout['compact'] else '滚轮缩放 · 中键平移 · 1–4 切视图 · F 复位 · C 着色 · V 色标 · Esc 关闭'
+        def legend():
+            shapes = []
+            if self.limits is not None:
+                for i in range(40):
+                    v = float(i/39 >= .5) if self.color == 'MS' else i/39
+                    color = tuple(analysis.distance_colors([v*self.distance_limit],self.distance_limit)[0][0]) if self.view == 'NACELLE' else (v,1-abs(2*v-1),1-v,1)
+                    shapes.append(box(16*s+i*4*s, 36*s, 4*s, 8*s, color))
+            return shapes
+        draw_shapes(self.auxiliary.get('legend', (s, self.view, self.color, self.color_scale, self.limits), legend))
+        hints = '滚轮缩放 · 中键平移 · F 复位 · Esc 关闭' if layout['compact'] else '滚轮缩放 · 中键平移 · 1–5 切视图 · F 复位 · C 着色 · V 色标 · Esc 关闭'
         text(hints, 16*s, 16*s, 11, max_width=width-32*s)
         if frame is not None and self.color == 'VELOCITY':
             sign = frame.provenance.get('velocity_sign', 'UNKNOWN')
@@ -222,6 +304,7 @@ def _draw():
         if item.scene.get('wfrl_x100_output_error'):
             item.scene['wfrl_x100_output_error'] = ''
     except Exception as exc:
+        item.release_gpu()
         if item.error != str(exc):
             print('X100 output draw failed:', str(exc))
         item.error = str(exc)
@@ -237,7 +320,10 @@ def close(item, *, close_window=True):
     if not _WINDOWS and _HANDLE is not None:
         bpy.types.SpaceImageEditor.draw_handler_remove(_HANDLE, 'WINDOW')
         _HANDLE = None
-    item.point_batch, item.frame = None, None
+    item.release_gpu()
+    item.frame = None
+    item.xy, item.colors = np.empty((0, 2)), np.empty((0, 4))
+    item.data_key = item.source_key = None
     window, _ = item.alive()
     if window is not None and close_window:
         with bpy.context.temp_override(window=window):
@@ -278,7 +364,27 @@ def tick():
         if window is None or area is None or area.type != 'IMAGE_EDITOR' or not valid_scene or window.scene != item.scene:
             close(item)
         else:
-            area.tag_redraw()
+            from .runtime import session_for
+            session = session_for(item.scene)
+            if session and item.view == 'NACELLE':
+                item.roi = (tuple(item.scene.wfrl_x100_analysis_roi_min),tuple(item.scene.wfrl_x100_analysis_roi_max))
+                item.distance_limit = item.scene.wfrl_x100_analysis_limit
+                session.derive_analysis(item.roi)
+                session.prepare_reference(item.show_reference)
+            signature = (getattr(session,'generation',None),getattr(session,'key',None),
+                id(session.frame) if session else None,
+                getattr(session,'frame_index',None),getattr(session,'display_valid',False),
+                getattr(session,'analysis_key',None),getattr(session,'analysis_error',''),
+                getattr(session,'reference_key',None),getattr(session,'reference_error',''),
+                getattr(session,'render_error',''), item.error,
+                item.scene.get('wfrl_x100_status',''),item.scene.get('wfrl_x100_error',''),
+                item.scene.get('wfrl_x100_record_state',''),item.scene.get('wfrl_x100_record_error',''),
+                item.scene.get('wfrl_x100_record_frames',0),item.view,item.color,item.color_scale,
+                item.distance_limit,item.show_reference,item.zoom,item.pan,area.width,area.height,
+                display.style_key(item.scene))
+            if signature != getattr(item,'redraw_signature',None):
+                item.redraw_signature = signature
+                area.tag_redraw()
     return 1/30 if _WINDOWS else None
 
 
@@ -374,9 +480,11 @@ class WFRL_OT_X100Output(bpy.types.Operator):
                     area.tag_redraw()
                     return {'RUNNING_MODAL'}
         if event.value == 'PRESS':
-            views = dict(ONE='SENSOR', TWO='FRONT', THREE='TOP', FOUR='SIDE')
+            views = dict(ONE='SENSOR', TWO='FRONT', THREE='TOP', FOUR='SIDE', FIVE='NACELLE')
             if event.type in views:
                 item.reset(views[event.type])
+            elif event.type == 'R':
+                item.show_reference = not item.show_reference
             elif event.type in {'F', 'HOME'}:
                 item.reset()
             elif event.type == 'C':

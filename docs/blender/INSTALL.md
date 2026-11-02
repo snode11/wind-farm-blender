@@ -1,20 +1,22 @@
 # NREL / WFRL Blender 安装
 
-工作区扩展 manifest 版本为 **0.3.42+4**；公开发布源码使用 [`v0.3.42.4` 标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.42.4)，公开扩展附件为 **0.3.42.4**。工作区构建按实际检出提交、未提交改动与产物 inventory 识别；本机日常安装为 **0.3.42.3 本地工作区构建**，实际身份见[安装记录](../../publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
+工作区扩展 manifest 版本为 **0.3.42+4**；公开发布源码使用 [`v0.3.42.4` 标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.42.4)，公开扩展附件为 **0.3.42.4**。工作区构建按实际检出提交、未提交改动与产物 inventory 识别；本机日常安装为 **0.3.42.4 独立载荷安装**，实际身份见[安装记录](../../publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
 
 适用于 Blender **5.2+** 的 NREL 公开扩展 **0.3.42.4**，包含 NREL／rootkink 叶片外形选择、T1/T2/T3 Down、独立风机手动控制、完整风机几何／同源纹理、精细支撑结构、三相机默认复位、柔性回放、六类合成缺陷、双束／TLS。GW184 **0.4.0** 使用[独立包](GW184三相机与缺陷编辑器.md)。
 
 日常安装的版本、实际模块来源、启用状态、配置保护与验证范围以[安装记录](../../publication/daily-installation.json)为准；各载荷的 GPU、窗口、输入和性能结论分别识别。
 
-日常安装所用 ZIP、inventory 与 SHA-256 按[安装身份](../../publication/daily-installation.json)核对，当前归档路径见安装记录的 `source_archive`。公开 ZIP 保存在 [package](../../publication/blender-0.3.42.4/package/)。必要核对记录由安装身份索引；中间场景、图片、重复构建、临时 profile 和回退副本不作为运行依赖保留。
+日常安装的归档摘要与文件数量按[安装身份](../../publication/daily-installation.json)核对；本地不保留匹配安装归档，当前公开 ZIP 与安装载荷分别识别。公开 ZIP 保存在 [package](../../publication/blender-0.3.42.4/package/)。必要核对记录由安装身份索引；中间场景、图片、重复构建、临时 profile 和回退副本不作为运行依赖保留。
 
-本机本地构建在 **N → X100** 提供雷达入口，包含双安装位、安装驱动失效检查、记录终态、响应式点云窗口及固定／逐帧速度色标；公开 0.3.42.4 使用相同的 **N → X100** 入口。本机载荷的 GPU／原始 RGB 和 CPU 对照按安装记录核对，用法见[X100 雷达](X100雷达.md)。
+本机安装在 **N → X100** 提供雷达入口，包含双安装位、安装驱动失效检查、记录终态、响应式点云窗口及固定／逐帧速度色标；公开 0.3.42.4 使用相同的 **N → X100** 入口。本机载荷的文件身份、后台注册与配置保留按安装记录核对，用法见[X100 雷达](X100雷达.md)。
 
 ## 发布身份与验证
 
-当前公开安装包为 [v0.3.42.4](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.42.4) 的 **[wfrl_blender-0.3.42+4.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.4/wfrl_blender-0.3.42+4.zip)**，manifest 版本 `0.3.42+4`，共 216 文件、99,272,103 字节，SHA-256 为 `0693818cb2ef856afbec2c56143053dfd9e23ee4358d41f376abcea077452f61`。Release 提供 ZIP、SHA-256、inventory、配套源码和交付清单。本版完成一次本地构建；宿主／原生回归、隔离安装、窗口／GPU、性能及科学精度检查均未运行，范围见[发布验证记录](../../publication/blender-0.3.42.4/verification.json)。日常安装另按[安装身份](../../publication/daily-installation.json)核对。
+当前公开安装包为 [v0.3.42.4](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.42.4) 的 **[wfrl_blender-0.3.42+4.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.4/wfrl_blender-0.3.42+4.zip)**，manifest 版本 `0.3.42+4`，共 218 文件、99,282,967 字节，SHA-256 为 `dd4d752c5b0174f36f34bc45b8541904837056417845e483d6769177fda671f5`。Release 提供 ZIP、SHA-256、inventory、配套源码和交付清单。本版完成一次本地构建；宿主／原生回归、隔离安装、窗口／GPU、性能及科学精度检查均未运行，范围见[发布验证记录](../../publication/blender-0.3.42.4/verification.json)。日常安装另按[安装身份](../../publication/daily-installation.json)核对。
 
 当前项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。GitHub 自动 Source code 不作为扩展安装包；构建结果须以实际 ZIP 和 inventory 核对。最终包和验证范围见[发布状态](发布状态与验证范围.md)；叶尖显示门槛按源码全时间轴和本地安装抽样分别记录，几何／纹理、材料点和雷达的研究接受边界分别保留。
+
+工作区的机舱 XZ 分析、侧壁距离、零载荷参考、离线覆盖及配套优化尚未进入上述公开包或本机安装；相同 manifest 版本不能证明载荷相同。使用已安装扩展时不能据工作区说明预期按键 5／R 的分析功能。源码行为与验证范围见[X100 说明](X100雷达.md)和[工作区验证](发布状态与验证范围.md#x100-工作区源码验证)。
 
 ## 安装与升级
 

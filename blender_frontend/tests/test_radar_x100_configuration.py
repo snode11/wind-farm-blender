@@ -1,0 +1,57 @@
+"""Only source-bound settings require applying; display and next-sample settings stay independent."""
+from types import SimpleNamespace
+import pytest
+from wfrl_blender.radar_x100 import configuration
+
+
+def scene(mode):
+    values = dict(source=mode, mount='NACELLE', location=(1.,2.,3.), rotation=(0.,90.,0.),
+        path='//radar.ply', ply_source='TEST', port=9877, stale_s=.5, stream='NEAR',
+        candidates=512, color='RANGE', color_scale='FIXED', velocity_limit=10., fov=True,
+        replay_s=0., record_path='/tmp/record')
+    return SimpleNamespace(**{'wfrl_x100_'+key: value for key, value in values.items()})
+
+
+def abspath(path):
+    return path.replace('//', '/scene/')
+
+
+@pytest.mark.parametrize('mode', configuration.SOURCE_LABELS)
+def test_immediate_and_next_sample_settings_do_not_report_pending_configuration(mode):
+    s = scene(mode)
+    applied = configuration.capture(s, abspath=abspath, single_ply=mode == 'REPLAY')
+    for key, value in dict(stream='FAR', candidates=4096, color='SNR', color_scale='FRAME',
+            velocity_limit=20., fov=False, replay_s=1., record_path='/tmp/new-record').items():
+        setattr(s, 'wfrl_x100_'+key, value)
+        assert configuration.pending(s, applied, abspath=abspath) == ()
+    assert applied['source'] == mode and configuration.summary(applied)
+
+
+@pytest.mark.parametrize('mode,field,value,label', [
+    ('SIMULATION','mount','WORLD','挂载'), ('SIMULATION','location',(1.,2.,4.),'安装位置'),
+    ('SIMULATION','rotation',(0.,91.,0.),'安装旋转'), ('REPLAY','path','//other.ply','回放路径'),
+    ('REPLAY','ply_source','MEASURED_REPLAY','单帧 PLY 来源'), ('LIVE','port',9878,'本地端口'),
+    ('LIVE','stale_s',1.,'过期阈值')])
+def test_pending_relevant_source_settings_clear_when_reverted_or_applied(mode, field, value, label):
+    s = scene(mode)
+    applied = configuration.capture(s, abspath=abspath, single_ply=mode == 'REPLAY')
+    before = getattr(s, 'wfrl_x100_'+field)
+    setattr(s, 'wfrl_x100_'+field, value)
+    assert configuration.pending(s, applied, abspath=abspath) == (label,)
+    current = configuration.capture(s, abspath=abspath, single_ply=mode == 'REPLAY')
+    assert configuration.pending(s, current, abspath=abspath) == ()
+    setattr(s, 'wfrl_x100_'+field, before)
+    assert configuration.pending(s, applied, abspath=abspath) == ()
+
+
+def test_recording_directories_ignore_single_ply_declarations_and_other_source_fields():
+    s = scene('REPLAY')
+    applied = configuration.capture(s, abspath=abspath)
+    s.wfrl_x100_ply_source = 'UNDECLARED'
+    s.wfrl_x100_location = (9.,8.,7.)
+    s.wfrl_x100_port = 12345
+    assert configuration.pending(s, applied, abspath=abspath) == ()
+    s.wfrl_x100_path = '/scene/radar.ply'
+    assert configuration.pending(s, applied, abspath=abspath) == ()
+    s.wfrl_x100_source = 'LIVE'
+    assert configuration.pending(s, applied, abspath=abspath) == ('数据源',)

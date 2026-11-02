@@ -5,6 +5,7 @@ A group is replaced only after every enabled camera at that state has succeeded.
 """
 from contextlib import contextmanager
 from dataclasses import asdict
+from . import performance
 import time
 import math
 
@@ -258,6 +259,7 @@ class CameraImage:
         self.pixels = None
         self._lease = None
 
+    @performance.timed("camera.snapshot_readback")
     def snapshot(self, offscreen, *, create_texture=True):
         """Keep a leased GPU image, or read independent RGBA for capture."""
         import gpu
@@ -396,6 +398,7 @@ def _simulation_state_hash(scene, depsgraph, cache=None):
     return digest.hexdigest()
 
 
+@performance.timed("camera.simulation_state_hash")
 def simulation_state_hash(scene, depsgraph):
     """Read evaluated geometry and transforms, including same-frame native edits.
 
@@ -404,6 +407,7 @@ def simulation_state_hash(scene, depsgraph):
     return _simulation_state_hash(scene, depsgraph)
 
 
+@performance.timed("camera.render_group")
 def render_group(context, cameras, long_edge=None, target=None, fast=False, *, create_texture=True):
     """Draw one frozen state into owned/leased textures or capture-only RGBA."""
     global _DRAWING

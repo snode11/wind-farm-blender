@@ -3,8 +3,10 @@ import hashlib
 import json
 import math
 from copy import copy
+from contextlib import contextmanager
 import numpy as np
-from .core import simulation, schema
+from .core import simulation, schema, analysis
+from .. import performance
 
 ORIGINAL_LOCATION = (-3.5, -1.7, -2.0)
 ORIGINAL_ROTATION = (0.0, 82.5, 180.0)
@@ -47,6 +49,7 @@ class SceneSampler:
     def __init__(self, flex, *, turbine_id='T1', mount='NACELLE', mount_from_sensor=None):
         from ..turbine_geometry import geometry_data
         self.flex, self.turbine_id, self.mount = flex, turbine_id, mount
+        self.scene = flex.scene
         self.k = list(flex.readers).index(turbine_id)
         self.interval = (float(flex.times[0]), float(flex.times[-1]))
         self.mount_from_sensor = simulation.rigid_matrix(mount_from_sensor)
@@ -66,6 +69,8 @@ class SceneSampler:
         self.model = flex.model
         self.rest_bindings = tuple((row[0].as_pointer(), id(row[1])) for row in self.blades)
         self.towers = [row for row in flex.towers if row[-1] == self.k]
+        self.tower_bindings = tuple((row[0].as_pointer(), *(id(value) for value in row[1:-1]))
+                                   for row in self.towers)
         shell = flex.scene.objects[f'WFRL.Turbine.{turbine_id}.Nacelle']
         if (shell.constraints or shell.animation_data or shell.parent != yaw
                 or shell.mode != 'OBJECT' or shell.modifiers or shell.data.shape_keys is not None):
@@ -82,9 +87,25 @@ class SceneSampler:
                 self.parts.append((obj.name, self._triangles(obj.data)))
         else:
             tower = flex.scene.objects[f'WFRL.Turbine.{turbine_id}.Tower']
+            self.tower = tower
             self.rigid_tower = (np.array([v.co[:] for v in tower.data.vertices]), np.array(tower.matrix_world))
             self.parts.append((tower.name, self._triangles(tower.data)))
         self.parts.append((shell.name, self._triangles(shell.data)))
+        surfaces = [row[0] for row in (*self.blades, *self.towers)] + [shell]
+        if not self.towers:
+            surfaces.append(self.tower)
+        dynamic = {yaw.as_pointer(), *(row[0].as_pointer() for row in self.blades),
+                   flex.scene.objects[f'WFRL.Turbine.{turbine_id}.Rotor'].as_pointer()}
+        self.object_bindings = {}
+        self.mesh_bindings = []
+        for obj in surfaces:
+            self.mesh_bindings.append((obj, obj.data, self._topology(obj.data), len(obj.data.vertices)))
+            node = obj
+            while node is not None and node.as_pointer() not in self.object_bindings:
+                self.object_bindings[node.as_pointer()] = (node, node.name, node.parent,
+                    np.array(node.matrix_parent_inverse),
+                    None if node.as_pointer() in dynamic else np.array(node.matrix_basis))
+                node = node.parent
         rest_parts = [row[1].tobytes() for row in self.blades] + [
             self.shell_vertices.tobytes(), self.shell_local.tobytes(), self.root_world.tobytes()]
         rest_parts.extend(row[1].tobytes() for row in self.towers)
@@ -104,8 +125,11 @@ class SceneSampler:
         self.triangles.flags.writeable = False
         self.triangle_offsets = np.cumsum([0, *(len(faces) for _, faces in self.parts)])
         self._material_ids, self._material_plan = None, None
+        self.latest_sample = None
+        self._sampling_validated = False
         self._visibility_cache = {}
         self.calibration_id = _calibration_identity(mount, self.mount_from_sensor)
+        self.validate()
 
     def with_installation(self, mount, matrix):
         """Share the geometry snapshot with an independent installation calibration."""
@@ -160,16 +184,34 @@ class SceneSampler:
             local[:3, 3] = tr[:, :3] @ np.array([0, 0, self.height]) + tr[:, 3]
         return self.root_world @ local
 
+    @performance.timed("x100.validate")
     def validate(self):
         flex = self.flex
-        if not flex.enabled or flex.scene.objects.get(self.blades[0][0].name) != self.blades[0][0]:
+        if (not flex.enabled or flex.scene != self.scene
+                or flex.scene.get('wfrl_farm_manifest_sha256') != self.source_id):
             raise ValueError('X100 scene source was released')
         if flex.model != self.model or tuple((row[0].as_pointer(), id(row[1]))
                 for row in flex.blades if row[5] == self.k) != self.rest_bindings:
             raise ValueError('X100 material bindings changed; apply the installation again')
+        if tuple((row[0].as_pointer(), *(id(value) for value in row[1:-1]))
+                 for row in flex.towers if row[-1] == self.k) != self.tower_bindings:
+            raise ValueError('X100 tower material bindings changed; apply the installation again')
+        for obj, name, parent, inverse, basis in self.object_bindings.values():
+            if (self.scene.objects.get(name) != obj or obj.parent != parent
+                    or obj.parent_type != 'OBJECT' or obj.constraints or obj.animation_data
+                    or not np.array_equal(np.array(obj.matrix_parent_inverse), inverse)
+                    or (basis is not None and not np.array_equal(np.array(obj.matrix_basis), basis))):
+                raise ValueError(f'X100 source object or parent binding changed: {name}; apply the installation again')
+        for obj, mesh, topology, count in self.mesh_bindings:
+            if (obj.data != mesh or len(mesh.vertices) != count
+                    or any(not np.array_equal(actual, expected)
+                           for actual, expected in zip(self._topology(mesh), topology))):
+                raise ValueError(f'X100 source mesh binding changed: {obj.name}; apply the installation again')
         if (self.root.parent is not None or self.root.constraints or self.root.animation_data
                 or not np.array_equal(np.array(self.root.matrix_basis), self.root_basis)):
             raise ValueError('X100 source layout changed; restore the recorded layout and apply again')
+        if not self.towers and not np.array_equal(self._vertices(self.tower.data), self.rigid_tower[0]):
+            raise ValueError('X100 static tower changed; apply the installation again')
         shell = self.shell
         if (flex.scene.objects.get(shell.name) != shell or shell.data != self.shell_mesh
                 or shell.parent != self.shell_parent or shell.constraints or shell.animation_data
@@ -192,9 +234,12 @@ class SceneSampler:
         if self.towers and part < len(self.towers):
             i = int(np.clip(np.searchsorted(flex.times, time_s, side='right') - 1, 0, len(flex.times) - 2))
             alpha = float((time_s - flex.times[i]) / (flex.times[i + 1] - flex.times[i]))
-            transforms = flex.tower_motion['transforms'][i] * (1 - alpha) + flex.tower_motion['transforms'][i + 1] * alpha
+            before = np.asarray(flex.tower_motion['transforms'][i],dtype=np.float64)
+            after = np.asarray(flex.tower_motion['transforms'][i+1],dtype=np.float64)
+            transforms = before * (1-alpha) + after * alpha
             obj, rest, index, weight, k = self.towers[part]
-            rest, index, weight = selected(rest), selected(index), selected(weight)
+            rest, index, weight = (np.asarray(selected(rest),dtype=np.float64),selected(index),
+                                   np.asarray(selected(weight),dtype=np.float64))
             low, high = transforms[k, index], transforms[k, index + 1]
             a = np.einsum('nij,nj->ni', low[:, :, :3], rest) + low[:, :, 3]
             b = np.einsum('nij,nj->ni', high[:, :, :3], rest) + high[:, :, 3]
@@ -208,17 +253,35 @@ class SceneSampler:
         shell_matrix = yaw @ self.shell_local
         return selected(self.shell_vertices) @ shell_matrix[:3, :3].T + shell_matrix[:3, 3]
 
+    @contextmanager
+    def sampling_transaction(self):
+        """Reuse a binding check only during one synchronous read-only observation."""
+        previous = self._sampling_validated
+        if not previous:
+            self.validate()
+        self._sampling_validated = True
+        try:
+            yield
+        finally:
+            self._sampling_validated = previous
+
+    def _validate_sampling(self):
+        if not self._sampling_validated:
+            self.validate()
+
     def sample(self, time_s):
-        self.validate()
+        self._validate_sampling()
         vertices = [self._part_vertices(part, time_s) for part in range(len(self.parts))]
-        return simulation.SceneSample(float(time_s), self.source_id, self.geometry_id,
+        sample = simulation.SceneSample(float(time_s), self.source_id, self.geometry_id,
             np.concatenate(vertices), self.triangles, self.mount_world_at(time_s) @ self.mount_from_sensor,
             'T1 saved blade presentation surfaces, flexible tower and nacelle shell; other structures/environment excluded')
+        self.latest_sample = sample
+        return sample
 
 
     def material_sample(self, time_s, triangle_ids):
         """Sample the same triangle centroids using only their bound rest vertices."""
-        self.validate()
+        self._validate_sampling()
         ids = np.asarray(triangle_ids, dtype=np.int32)
         if ids.ndim != 1 or np.any(ids < 0) or np.any(ids >= len(self.triangles)):
             raise ValueError('Invalid material triangle identity')
@@ -244,6 +307,99 @@ class SceneSampler:
             self._visibility_cache.update(key=key, tree=BVHTree.FromPolygons(
                 sample.vertices.tolist(), sample.triangles.tolist(), all_triangles=True))
         return bvh_visibility(sample, targets, tree=self._visibility_cache['tree'])
+
+
+    def analysis_context(self, frame, identity):
+        """Extract only tower geometry and allowed transforms from the central sample."""
+        from ..turbine_geometry import tower_side_polygon_ids
+        sample = self.latest_sample
+        if (sample is None or sample.time_s != frame.time.source_time_s
+                or sample.source_id != frame.provenance.get('source_id')
+                or sample.geometry_id != frame.provenance.get('geometry_id')
+                or not np.array_equal(sample.world_from_sensor, frame.spatial['world_from_sensor'])):
+            raise ValueError('No matching central geometry snapshot')
+        objects = [row[0] for row in self.towers] if self.towers else [self.tower]
+        ids = []
+        for part, obj in enumerate(objects, start=len(self.blades)):
+            sides = tower_side_polygon_ids(obj.data)
+            obj.data.calc_loop_triangles()
+            ids.extend(self.triangle_offsets[part] + i
+                       for i, tri in enumerate(obj.data.loop_triangles) if tri.polygon_index in sides)
+        faces = sample.triangles[ids]
+        used, inverse = np.unique(faces, return_inverse=True)
+        return analysis.Context(identity, self.mount_world_at(sample.time_s, mount='NACELLE'),
+            sample.world_from_sensor, sample.vertices[used], inverse.reshape(-1,3))
+
+
+def _closest_on_face(p, a, b, c):
+    """Float64 Voronoi-region refinement of the BVH-selected triangle."""
+    ab, ac, ap = b-a, c-a, p-a
+    d1, d2 = np.dot(ab,ap), np.dot(ac,ap)
+    if d1 <= 0 and d2 <= 0:
+        return a
+    bp = p-b
+    d3, d4 = np.dot(ab,bp), np.dot(ac,bp)
+    if d3 >= 0 and d4 <= d3:
+        return b
+    vc = d1*d4-d3*d2
+    if vc <= 0 and d1 >= 0 and d3 <= 0:
+        return a + (d1/(d1-d3))*ab
+    cp = p-c
+    d5, d6 = np.dot(ab,cp), np.dot(ac,cp)
+    if d6 >= 0 and d5 <= d6:
+        return c
+    vb = d5*d2-d1*d6
+    if vb <= 0 and d2 >= 0 and d6 <= 0:
+        return a + (d2/(d2-d6))*ac
+    va = d3*d6-d5*d4
+    if va <= 0 and d4-d3 >= 0 and d5-d6 >= 0:
+        return b + ((d4-d3)/((d4-d3)+(d5-d6)))*(c-b)
+    inverse = 1/(va+vb+vc)
+    return a + ab*(vb*inverse) + ac*(vc*inverse)
+
+
+class SideWallQuery:
+    """Dedicated anchored BVH; never constructed or queried by draw callbacks."""
+    def __init__(self, context):
+        from mathutils.bvhtree import BVHTree
+        self.context = context
+        self.anchor = context.vertices.mean(axis=0)
+        self.tree = BVHTree.FromPolygons((context.vertices-self.anchor).tolist(),
+                                       context.triangles.tolist(), all_triangles=True)
+
+    def query(self, sensor_points, roi):
+        from mathutils import Vector
+        context = self.context
+        world = analysis.transform(sensor_points, context.world_from_sensor)
+        points = analysis.local(world, context.world_from_analysis)
+        n = len(points)
+        finite = np.isfinite(points).all(axis=1)
+        lo, hi = np.asarray(roi[0]), np.asarray(roi[1])
+        if not np.isfinite([lo,hi]).all() or np.any(lo>=hi):
+            raise ValueError('Invalid analysis ROI bounds')
+        selected = finite & (points>=lo).all(axis=1) & (points<=hi).all(axis=1)
+        distance = np.full(n,np.nan)
+        nearest = np.full((n,3),np.nan)
+        triangle = np.full(n,-1,dtype=np.int32)
+        status = np.full(n,'OUTSIDE_ROI',dtype='U16')
+        status[~finite]='NONFINITE'
+        for i in np.flatnonzero(selected):
+            q, _, face, _ = self.tree.find_nearest(Vector(world[i]-self.anchor))
+            if q is None:
+                status[i]='QUERY_FAILED'
+                continue
+            vertices = context.vertices[context.triangles[face]]-self.anchor
+            anchored = _closest_on_face(world[i]-self.anchor,*vertices)
+            distance[i]=np.linalg.norm((world[i]-self.anchor)-anchored)
+            nearest[i]=anchored+self.anchor
+            triangle[i]=face
+            status[i]='VALID'
+        return dict(indices=analysis.readonly(np.arange(n),np.int64),
+            points=analysis.readonly(points), distance=analysis.readonly(distance),
+            nearest=analysis.readonly(nearest), triangle=analysis.readonly(triangle,np.int32),
+            status=analysis.readonly(status,'U16'), selected=int(selected.sum()),
+            finite=int(finite.sum()), valid=int(np.isfinite(distance).sum()),
+            quantiles_m=tuple(float(x) for x in np.quantile(distance[np.isfinite(distance)],[0,.1,.5,.9,1])) if np.isfinite(distance).any() else None)
 
 
 def bvh_visibility(sample, targets, *, tree=None):

@@ -79,14 +79,7 @@ class WFRL_OT_X100Play(bpy.types.Operator):
         from ..radar_x100.runtime import session_for
         session = session_for(context.scene)
         if session and session.mode == 'REPLAY' and session.replay:
-            start_playing = not getattr(session, 'playing', False)
-            session.playing = False
-            if start_playing:
-                session.replay_cursor = None
-                if context.scene.wfrl_x100_replay_s >= session.replay.duration_s:
-                    context.scene.wfrl_x100_replay_s = session.replay.times[0]
-                session.play_anchor = time.monotonic() - context.scene.wfrl_x100_replay_s
-                session.playing = True
+            session.toggle_playback()
         return {'FINISHED'}
 
 
@@ -167,12 +160,26 @@ class WFRL_PT_X100(_X100Panel, bpy.types.Panel):
         row.operator('wfrl.x100_apply', text='应用配置', icon='PLAY')
         row.operator('wfrl.x100_close', icon='X')
         status = layout.box().column(align=True)
+        if session:
+            from ..radar_x100.configuration import summary
+            for line in summary(session.applied_config):
+                message(status, line, 'NONE', context=context)
+            pending = session.pending_configuration()
+            if pending:
+                message(status, '未应用：' + '、'.join(pending), 'INFO', context=context)
+                message(status, '点击“应用配置”后生效', 'NONE', context=context)
         message(status, scene.get('wfrl_x100_status', '未启动'),
                 'RADIOBUT_ON' if session else 'RADIOBUT_OFF', context=context)
         if session and session.frame:
             frame = session.frame
+            from ..radar_x100.configuration import FRAME_SOURCE_LABELS
+            declared = ' · 用户声明' if frame.provenance.get('source_declaration') == 'EXPLICIT' else ''
+            message(status, '观测来源：' + FRAME_SOURCE_LABELS[frame.source_kind] + declared, 'NONE', context=context)
             message(status, f'#{frame.sequence} · {frame.validity} · {len(frame.points)} 点',
                     'NONE', context=context)
+            budget = frame.provenance.get('candidate_budget') if session.mode == 'SIMULATION' else None
+            if budget is not None and budget != scene.wfrl_x100_candidates:
+                message(status, f'当前帧预算 {budget}；编辑值在下一新样本生效', 'INFO', context=context)
         error = scene.get('wfrl_x100_error')
         if error:
             box = layout.box()
@@ -191,11 +198,13 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
 
     def draw(self, context):
         scene = context.scene
+        from .ui_helpers import message
         layout = self.layout
         layout.enabled = not _busy(scene)
         narrow = _narrow(context)
         layout.use_property_split, layout.use_property_decorate = not narrow, False
         if scene.wfrl_x100_source == 'SIMULATION':
+            from ..radar_x100.core import schema
             from ..radar_x100.runtime import session_for
             session = session_for(scene)
             presets = layout.column(align=True)
@@ -211,6 +220,7 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
             elif session and session.mode != 'SIMULATION':
                 presets.label(text='请先应用几何仿真配置', icon='INFO')
             layout.separator()
+            message(layout, '挂载与安装参数：应用后生效', 'INFO', context=context)
             _property(layout, scene, 'wfrl_x100_mount', narrow=narrow)
             for name in ('wfrl_x100_location', 'wfrl_x100_rotation'):
                 vector = layout.column(align=True)
@@ -220,15 +230,17 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
                     vector.prop(scene, name, index=index, text=axis)
             layout.separator()
             _property(layout, scene, 'wfrl_x100_candidates', narrow=narrow)
+            layout.label(text='预算：下一新样本生效', icon='INFO')
             fov = layout.column(align=True)
             fov.use_property_split = False
             fov.prop(scene, 'wfrl_x100_fov')
-            fov.label(text='显示长度：60 m')
+            message(fov, f"显示长度：{schema.DISPLAY_DEFAULTS['fov_length_m']:g} m · 即时显示", 'NONE', context=context)
             _notes(layout, 'wfrl_x100_simulation_notes', (
                 'T1 · 保存运动 · 几何遮挡近似',
                 '安装坐标：+X 前、+Y 左、+Z 上',
                 '外壳近似；相位中心未知；无 RCS/SNR 模型'), context=context)
         elif scene.wfrl_x100_source == 'REPLAY':
+            message(layout, '路径与单帧声明：应用后生效', 'INFO', context=context)
             _property(layout, scene, 'wfrl_x100_path', narrow=narrow)
             _property(layout, scene, 'wfrl_x100_ply_source', narrow=narrow)
             layout.separator()
@@ -246,8 +258,10 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
                 '仅单帧需要声明来源；记录目录保留原始来源',
                 '实测未知轴/时间：原始点云，未与风机同步'), context=context)
         else:
+            message(layout, '端口与过期阈值：应用后生效', 'INFO', context=context)
             _property(layout, scene, 'wfrl_x100_port', narrow=narrow)
             _property(layout, scene, 'wfrl_x100_stream', narrow=narrow)
+            layout.label(text='显示流：即时选择', icon='INFO')
             _property(layout, scene, 'wfrl_x100_stale_s', narrow=narrow)
             _notes(layout, 'wfrl_x100_live_notes', (
                 '仅连接 127.0.0.1 独立采集端',
@@ -267,6 +281,7 @@ class WFRL_PT_X100Display(_X100Panel, bpy.types.Panel):
         layout.enabled = not _busy(scene)
         narrow = _narrow(context)
         layout.use_property_split, layout.use_property_decorate = not narrow, False
+        message(layout, '显示设置即时生效', 'INFO', context=context)
         _property(layout, scene, 'wfrl_x100_color', narrow=narrow)
         if scene.wfrl_x100_color == 'VELOCITY':
             _property(layout, scene, 'wfrl_x100_color_scale', narrow=narrow)
@@ -279,6 +294,25 @@ class WFRL_PT_X100Display(_X100Panel, bpy.types.Panel):
         output_error = scene.get('wfrl_x100_output_error')
         if output_error:
             message(layout, '点云窗口：' + output_error, 'ERROR', context=context)
+
+        layout.separator()
+        layout.label(text='机舱XZ：点至同刻塔筒侧壁三维距离')
+        layout.prop(scene, 'wfrl_x100_analysis_roi_min')
+        layout.prop(scene, 'wfrl_x100_analysis_roi_max')
+        layout.prop(scene, 'wfrl_x100_analysis_limit')
+        layout.label(text='窗口按 5 分析 / R 零载荷参考；目标未关联')
+        if session:
+            if session.analysis_error:
+                message(layout, '分析：'+session.analysis_error, context=context)
+            result=session.analysis_result
+            if result is not None:
+                layout.label(text=f"原始 {len(result['indices'])} / 有限 {result['finite']} / ROI {result['selected']} / 有效 {result['valid']}")
+                q=result['quantiles_m']
+                layout.label(text=('距离分位数：N/A' if q is None else
+                    '距离 min / p10 / p50 / p90 / max (m)：'+ ' / '.join(f'{v:.3g}' for v in q)))
+            if session.render_error:
+                message(layout, 'GPU：'+session.render_error, context=context)
+
 
 
 class WFRL_PT_X100Frame(_X100Panel, bpy.types.Panel):
@@ -347,6 +381,8 @@ class WFRL_PT_X100Record(_X100Panel, bpy.types.Panel):
                           icon='CANCEL' if active else 'REC')
         if active and session.recording_stopping:
             message(layout, '停止待确认，请重试结束记录', 'ERROR', context=context)
+        if active:
+            message(layout, '正在记录到：' + str(session.fanout.recorder.path), 'NONE', context=context)
         state = session.fanout.recorder.state if active else scene.get('wfrl_x100_record_state')
         if state:
             message(layout, ('记录：' if active else '上次记录：') + state, context=context)
@@ -356,7 +392,7 @@ class WFRL_PT_X100Record(_X100Panel, bpy.types.Panel):
 
 
 PROPERTIES = ('source', 'mount', 'location', 'rotation', 'candidates', 'fov', 'path', 'ply_source', 'replay_s',
-              'port', 'stream', 'stale_s', 'color', 'color_scale', 'velocity_limit', 'record_path', 'enabled')
+              'port', 'stream', 'stale_s', 'color', 'color_scale', 'velocity_limit', 'record_path', 'enabled', 'analysis_roi_min', 'analysis_roi_max', 'analysis_limit')
 
 
 def replay_seek(scene, context=None):
@@ -365,6 +401,7 @@ def replay_seek(scene, context=None):
     if session is not None and not getattr(session, '_advancing_replay', False):
         session.playing = False
         session.replay_cursor = None
+        session.replay_time_s = float(scene.wfrl_x100_replay_s)
 
 
 def ply_path_changed(scene, context=None):
@@ -373,6 +410,7 @@ def ply_path_changed(scene, context=None):
 
 def register_properties():
     from ..radar_x100.scene import ORIGINAL_LOCATION, ORIGINAL_ROTATION
+    from ..radar_x100.core import schema
     p = bpy.props
     definitions = dict(
         source=p.EnumProperty(name='数据源', items=(('SIMULATION','几何仿真','保存运动的几何观测'),
@@ -382,8 +420,8 @@ def register_properties():
         location=p.FloatVectorProperty(name='安装位置 (m)', default=ORIGINAL_LOCATION, size=3),
         rotation=p.FloatVectorProperty(name='安装旋转 (°)', description='安装坐标系的 XYZ 欧拉角，单位为度（°）',
             default=ORIGINAL_ROTATION, size=3),
-        candidates=p.IntProperty(name='采样预算', description='材料表面的候选采样点预算', default=512, min=1, max=4096),
-        fov=p.BoolProperty(name='名义视场', description='名义视场示意，显示长度为 60 m，不代表探测结果或量程', default=True),
+        candidates=p.IntProperty(name='采样预算', description='下一新样本读取的材料表面候选预算；不等于输出点数', default=512, min=1, max=schema.PROFILE['max_points']),
+        fov=p.BoolProperty(name='名义视场', description=f"即时显示名义视场，长度 {schema.DISPLAY_DEFAULTS['fov_length_m']:g} m，不代表探测结果或量程", default=True),
         path=p.StringProperty(name='PLY / 记录目录', subtype='FILE_PATH', update=ply_path_changed),
         ply_source=p.EnumProperty(name='单帧 PLY 来源', default='UNDECLARED', items=(
             ('UNDECLARED', '请选择来源', 'PLY 本身不包含来源信息，需根据实际生成方式声明'),
@@ -401,7 +439,11 @@ def register_properties():
             ('FRAME', '当前帧', '按当前帧的最小值与最大值显示'))),
         velocity_limit=p.FloatProperty(name='速度色标 ± (m/s)', default=10., min=.001,
             description='仅用于显示的速度范围，不代表硬件速度限制'),
-        record_path=p.StringProperty(name='新记录目录', subtype='DIR_PATH'),
+        record_path=p.StringProperty(name='新记录目录', description='开始下一次记录时使用；已有记录继续写入其原目录', subtype='DIR_PATH'),
+        analysis_roi_min=p.FloatVectorProperty(name='机舱 ROI 最小 (m)',size=3,default=(-100,-100,-150)),
+        analysis_roi_max=p.FloatVectorProperty(name='机舱 ROI 最大 (m)',size=3,default=(100,100,50)),
+        analysis_limit=p.FloatProperty(name='塔距色标上限 (m)',default=10,min=.001,
+            description='研究显示配置，不是安全阈值'),
         enabled=p.BoolProperty(default=False))
     for key, definition in definitions.items():
         setattr(bpy.types.Scene, 'wfrl_x100_' + key, definition)

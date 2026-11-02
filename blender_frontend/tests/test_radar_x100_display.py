@@ -132,3 +132,59 @@ def test_high_ui_scale_preserves_narrow_plot_space(height):
     layout = display.canvas_layout(640, height, 2., velocity=True)
     assert layout['scale'] >= 1.
     assert layout['rectangle'][3] >= 140
+
+
+def test_nominal_sensor_bounds_include_only_the_explicit_display_margin():
+    from wfrl_blender.radar_x100.core import schema
+    az, el = schema.PROFILE['azimuth_deg'], schema.PROFILE['elevation_deg']
+    mx, my = schema.DISPLAY_DEFAULTS['sensor_margin_deg']
+    assert display.fit_bounds([], 'SENSOR') == (-az-mx, -el-my, 2*(az+mx), 2*(el+my))
+    assert schema.DISPLAY_DEFAULTS['fov_length_m'] != schema.PROFILE['range_m'][1]
+
+
+def test_auxiliary_cache_replaces_layers_and_releases_context_values():
+    cache = display.CanvasCache()
+    assert cache.bind(('window-a', 'area-a'))
+    value = object()
+    assert cache.get('grid', ('bounds-a',), lambda: value) is value
+    assert cache.get('grid', ('bounds-a',), lambda: pytest.fail('rebuild on hit')) is value
+    for i in range(1000):
+        cache.get('grid', (i,), object)
+    cache.get('chrome', 0, object)
+    cache.get('legend', 0, object)
+    assert len(cache.items) == 3 and cache.items['grid'][0] == (999,)
+    assert not cache.bind(('window-a', 'area-a')) and len(cache.items) == 3
+    assert cache.bind(('window-b', 'area-a')) and not cache.items
+    cache.get('grid', 1, object)
+    cache.clear()
+    assert not cache.items and cache.context is None
+    with pytest.raises(ValueError):
+        cache.get('history', 0, object)
+
+
+def test_failed_auxiliary_build_is_retried_and_does_not_cache_a_partial_result():
+    cache = display.CanvasCache()
+    cache.get('grid', 0, object)
+    def fail():
+        raise RuntimeError('context unavailable')
+    with pytest.raises(RuntimeError):
+        cache.get('grid', 1, fail)
+    assert cache.items['grid'][0] == 0
+    value = object()
+    assert cache.get('grid', 1, lambda: value) is value
+
+
+@pytest.mark.parametrize('view', display.VIEWS)
+@pytest.mark.parametrize('width,height,ui_scale', [(360,480,1), (640,600,2), (1280,800,1.5)])
+def test_grid_auxiliaries_fit_the_actual_canvas_transform(view, width, height, ui_scale):
+    layout = display.canvas_layout(width, height, ui_scale, velocity=True)
+    rect, scale = layout['rectangle'], layout['scale']
+    bounds = display.fit_bounds([[1, 3], [20, -5]], view)
+    transform, shapes, labels = display.grid_geometry(view, bounds, rect, 2., (1., -2.), scale)
+    assert transform == display.fit_canvas(bounds, rect, 2., (1., -2.))
+    left, bottom, pw, ph = rect
+    for points, _ in shapes:
+        for x, y in points:
+            assert left-1e-8 <= x <= left+pw+1e-8
+            assert bottom-1e-8 <= y <= bottom+ph+1e-8
+    assert labels and all(np.isfinite((x, y)).all() for _, x, y in labels)

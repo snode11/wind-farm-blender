@@ -48,6 +48,7 @@ jobs:
       - name: Frontend and release contracts
         run: >-
           python -m pytest blender_frontend/tests tests/test_release_identity.py
+          tests/test_release_assets_retry.py
           tests/radar_x100 tests/test_farm_flex_package.py
           -q -p no:cacheprovider --junitxml=ci-results/frontend.xml
       - name: Bridge protocol and lifecycle contracts

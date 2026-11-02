@@ -171,3 +171,14 @@ def tower_mesh(ring_points=64):
                  diameter * 0.5 * math.sin(2 * math.pi * i / ring_points), elevation)
                 for elevation, diameter in stations for i in range(ring_points)]
     return vertices, _ring_faces(len(stations), ring_points)
+
+
+def tower_side_polygon_ids(mesh, ring_points=64):
+    """Match the canonical ring construction before mapping side polygons to triangles."""
+    stations = geometry_data()['tower_stations']
+    expected = _ring_faces(len(stations), ring_points)
+    actual = [tuple(p.vertices) for p in mesh.polygons]
+    if actual != expected:
+        raise ValueError('Tower has no verified construction-region mapping')
+    return frozenset(ring * ring_points + j
+                     for ring in range(len(stations)-1) for j in range(ring_points))

@@ -1,13 +1,48 @@
 """Read-only point styling and sensor-coordinate projections for X100 displays."""
 import math
 import numpy as np
+from .core import schema
 
-VIEWS = ('SENSOR', 'FRONT', 'TOP', 'SIDE')
+VIEWS = ('SENSOR', 'FRONT', 'TOP', 'SIDE', 'NACELLE')
 COLORS = ('RANGE', 'VELOCITY', 'HEIGHT', 'RCS', 'SNR', 'MS')
 COLOR_LABELS = dict(RANGE='距离 (m)', VELOCITY='径向速度 (m/s)', HEIGHT='高度 (m)',
                     RCS='RCS（原始值）', SNR='SNR（原始值）', MS='动静（原始值）')
-VIEW_LABELS = dict(SENSOR='传感器', FRONT='正视', TOP='俯视', SIDE='侧视')
+VIEW_LABELS = dict(SENSOR='传感器', FRONT='正视', TOP='俯视', SIDE='侧视', NACELLE='机舱XZ')
 SENSOR_AXES = 'SENSOR_X_FORWARD_Y_LEFT_Z_UP'
+
+
+class CanvasCache:
+    """One current value per auxiliary layer and drawing context; no frame history."""
+    SLOTS = ('chrome', 'grid', 'legend', 'analysis')
+
+    def __init__(self):
+        self.context = None
+        self.items = {}
+        self.builds = dict.fromkeys(self.SLOTS, 0)
+        self.hits = dict.fromkeys(self.SLOTS, 0)
+
+    def bind(self, context):
+        if context == self.context:
+            return False
+        self.clear()
+        self.context = context
+        return True
+
+    def get(self, slot, key, build):
+        if slot not in self.SLOTS:
+            raise ValueError('Unknown auxiliary canvas layer')
+        cached = self.items.get(slot)
+        if cached is not None and cached[0] == key:
+            self.hits[slot] += 1
+            return cached[1]
+        value = build()
+        self.items[slot] = key, value
+        self.builds[slot] += 1
+        return value
+
+    def clear(self):
+        self.items.clear()
+        self.context = None
 
 
 def source_label(frame):
@@ -72,7 +107,7 @@ def canvas_layout(width, height, ui_scale, *, velocity=False):
         buttons.append((action, label, tuple(v*scale for v in (x, top, 70., 28.))))
         x += 76.
     info_top = top-24.
-    bottom = 130.
+    bottom = 110.
     rectangle = tuple(v*scale for v in (64., bottom, max(1., w-84.), max(1., info_top-76.-bottom)))
     return dict(scale=scale, buttons=buttons, info_top=info_top*scale,
                 rectangle=rectangle, compact=w < 600, rows=rows)
@@ -92,17 +127,19 @@ def project(xyz, view):
         return np.column_stack((-xyz[:, 1], xyz[:, 2])), keep
     if view == 'TOP':
         return np.column_stack((-xyz[:, 1], xyz[:, 0])), keep
-    if view == 'SIDE':
+    if view in {'SIDE', 'NACELLE'}:
         return xyz[:, (0, 2)], keep
     raise ValueError('Unknown X100 display view: ' + str(view))
 
 
 def fit_bounds(points, view):
     if view == 'SENSOR':
-        return (-66., -26., 132., 52.)
+        azimuth = schema.PROFILE['azimuth_deg'] + schema.DISPLAY_DEFAULTS['sensor_margin_deg'][0]
+        elevation = schema.PROFILE['elevation_deg'] + schema.DISPLAY_DEFAULTS['sensor_margin_deg'][1]
+        return (-azimuth, -elevation, 2*azimuth, 2*elevation)
     points = np.concatenate((np.asarray(points).reshape(-1, 2), np.zeros((1, 2))))
     lo, hi = points.min(axis=0), points.max(axis=0)
-    span = np.maximum(hi - lo, 2.) * 1.15
+    span = np.maximum(hi - lo, schema.DISPLAY_DEFAULTS['orthographic_min_span_m']) * schema.DISPLAY_DEFAULTS['orthographic_margin']
     center = (hi + lo) / 2
     return tuple(center - span / 2) + tuple(span)
 
@@ -112,6 +149,32 @@ def fit_canvas(bounds, rectangle, zoom=1., pan=(0., 0.)):
     bx, by, bw, bh = bounds
     factor = min(width / bw, height / bh) * zoom
     return factor, x + width / 2 - ((bx + bw / 2) + pan[0]) * factor, y + height / 2 - ((by + bh / 2) + pan[1]) * factor
+
+
+def grid_geometry(view, bounds, rectangle, zoom, pan, scale):
+    """Pixel-space grid, axes, border and tick labels for a single canvas transform."""
+    left, bottom, width, height = rectangle
+    factor, tx, ty = fit_canvas(bounds, rectangle, zoom, pan)
+    xlo, xhi = (left-tx)/factor, (left+width-tx)/factor
+    ylo, yhi = (bottom-ty)/factor, (bottom+height-ty)/factor
+    lines, axes, labels = [], [], []
+    for tick in ticks(xlo, xhi, target=max(1, min(6, int(width/(76*scale))))):
+        px = tx+tick*factor
+        lines.extend(((px, bottom), (px, bottom+height)))
+        label = -tick if view in {'SENSOR', 'FRONT', 'TOP'} else tick
+        labels.append((f'{label:g}', px-10*scale, bottom-21*scale))
+    for tick in ticks(ylo, yhi, target=max(1, min(6, int(height/(26*scale))))):
+        py = ty+tick*factor
+        lines.extend(((left, py), (left+width, py)))
+        labels.append((f'{tick:g}', 22*scale, py-4*scale))
+    if left <= tx <= left+width:
+        axes.extend(((tx, bottom), (tx, bottom+height)))
+    if bottom <= ty <= bottom+height:
+        axes.extend(((left, ty), (left+width, ty)))
+    border = ((left, bottom), (left+width, bottom), (left+width, bottom), (left+width, bottom+height),
+              (left+width, bottom+height), (left, bottom+height), (left, bottom+height), (left, bottom))
+    return ((factor, tx, ty), ((lines, (.09, .14, .2, 1)),
+            (axes, (.2, .34, .43, 1)), (border, (.22, .3, .39, 1))), labels)
 
 
 def ticks(lo, hi, target=6):

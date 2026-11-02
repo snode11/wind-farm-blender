@@ -7,6 +7,7 @@ remains available. Files stay incomplete until every group and source guard pass
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
+from . import performance
 import hashlib
 import json
 import math
@@ -53,6 +54,7 @@ def write_json(path, payload):
     temp.replace(path)
 
 
+@performance.timed("camera.write_png")
 def write_png(path, width, height, rgba_bottom_up):
     """Display transform already applied by GPU. Only row reversal, no gamma pass."""
     if len(rgba_bottom_up) != width * height * 4:

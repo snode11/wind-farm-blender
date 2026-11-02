@@ -1,4 +1,4 @@
-"""Visible save/load checks for transient X100 windows and unrelated editors."""
+"""Visible load, undo/redo and unload checks for transient X100 GPU caches and unrelated editors."""
 from pathlib import Path
 import importlib
 import json
@@ -53,6 +53,7 @@ def run():
             expected = Path(os.environ['WFRL_EXPECTED_ADDON_ROOT']).resolve()
             assert Path(addon.__file__).resolve().parent == expected
             addon.register()
+            bpy.context.preferences.edit.use_global_undo = True
             scene = bpy.context.scene
             scene.name = 'X100 Output Lifecycle'
             scene.frame_set(17)
@@ -77,6 +78,7 @@ def run():
         elif step == 1:
             item = STATE['item']
             assert item.draw_count > 0 and item.frame is radar.session_for(source().scene).frame and not item.error
+            assert len(item.auxiliary.items) == 3 and item.uniform_shader is not None
             assert len(bpy.context.window_manager.windows) == 3
             with bpy.context.temp_override(window=source()):
                 bpy.ops.wm.save_as_mainfile(filepath=str(OUT / 'output-open.blend'))
@@ -89,6 +91,8 @@ def run():
             checks['windows_after_load'] = len(windows)
             assert len(windows) == 2, 'Saved X100 canvas must not return as an extra blank window'
             assert not output._WINDOWS and output._HANDLE is None
+            assert not STATE['item'].auxiliary.items and STATE['item'].uniform_shader is None
+            assert STATE['item'].point_batch is None and STATE['item'].frame is None
             assert not bpy.app.timers.is_registered(output.tick)
             user = next(w for w in windows if w != source())
             assert any(a.type == 'IMAGE_EDITOR' and a.spaces.active.image is not None
@@ -107,7 +111,36 @@ def run():
             assert open_output()[0] == {'FINISHED'}
             assert len(bpy.context.window_manager.windows) == 3
             checks['reopen_draws_existing_frame_without_duplicate_window'] = True
+            with bpy.context.temp_override(window=source()):
+                bpy.ops.ed.undo_push(message='X100 output source')
+                source().scene['x100_output_history_probe'] = True
+                bpy.ops.ed.undo_push(message='Unrelated property')
+                assert bpy.ops.ed.undo() == {'FINISHED'}
+            assert not output._WINDOWS and not item.auxiliary.items and item.frame is None
+            assert item.uniform_shader is None and item.point_batch is None
+            assert len(bpy.context.window_manager.windows) == 2
+            radar.tick()
+            result, STATE['item'] = open_output()
+            assert result == {'RUNNING_MODAL'}
+            checks['undo_releases_cached_gpu_references'] = True
+        elif step == 4:
+            item = STATE['item']
+            assert item.draw_count > 0 and not item.error and len(item.auxiliary.items) == 3
+            with bpy.context.temp_override(window=source()):
+                assert bpy.ops.ed.redo() == {'FINISHED'}
+            assert not output._WINDOWS and not item.auxiliary.items and item.frame is None
+            assert item.uniform_shader is None and item.point_batch is None
+            assert len(bpy.context.window_manager.windows) == 2
+            radar.tick()
+            result, STATE['item'] = open_output()
+            assert result == {'RUNNING_MODAL'}
+            checks['redo_releases_cached_gpu_references'] = True
+        elif step == 5:
+            item = STATE['item']
+            assert item.draw_count > 0 and not item.error and len(item.auxiliary.items) == 3
+            assert item.frame is radar.session_for(source().scene).frame
             addon.unregister()
+            assert not item.auxiliary.items and item.uniform_shader is None and item.point_batch is None
             assert len(bpy.context.window_manager.windows) == 2
             assert not output._WINDOWS and output._HANDLE is None
             assert not bpy.app.timers.is_registered(output.tick)

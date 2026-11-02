@@ -72,7 +72,8 @@ def install(scene, owner, sensor_matrix, *, show_fov=True):
     collection.objects.link(mount)
     mount.matrix_world = Matrix(sensor_matrix.tolist())
     mesh = bpy.data.meshes.new('WFRL.X100.Housing')
-    mesh.from_pydata([(x * .020, y * .0475, z * .060) for x, y, z in
+    height, width, depth = schema.PROFILE['dimensions_hwd_m']
+    mesh.from_pydata([(x * depth/2, y * width/2, z * height/2) for x, y, z in
                      ((-1,-1,-1),(-1,-1,1),(-1,1,-1),(-1,1,1),(1,-1,-1),(1,-1,1),(1,1,-1),(1,1,1))],
                     [], [(0,4,6,2),(1,3,7,5),(0,1,5,4),(2,6,7,3),(0,2,3,1),(4,5,7,6)])
     housing = bpy.data.objects.new('WFRL.X100.Housing', mesh)
@@ -80,20 +81,25 @@ def install(scene, owner, sensor_matrix, *, show_fov=True):
     housing.parent = mount
     housing['wfrl_x100_owner'] = owner
     housing['wfrl_x100_role'] = 'physical'
-    housing['geometry_source'] = 'X100 nominal 120x95x40 mm envelope; approximate axes, no manufacturer CAD'
+    housing['geometry_source'] = (f'X100 nominal {height*1000:g}x{width*1000:g}x{depth*1000:g} mm envelope; '
+                                  'approximate axes, no manufacturer CAD')
     material = bpy.data.materials.get('WFRL.X100.Housing') or bpy.data.materials.new('WFRL.X100.Housing')
     material.diffuse_color = (.045, .06, .075, 1)
     mesh.materials.append(material)
     points, edges = [(0., 0., 0.)], []
-    for elevation in (-22, 22):
+    rows = []
+    azimuth_limit, elevation_limit = schema.PROFILE['azimuth_deg'], schema.PROFILE['elevation_deg']
+    length = schema.DISPLAY_DEFAULTS['fov_length_m']
+    for elevation in (-elevation_limit, elevation_limit):
         row = []
-        for azimuth in np.linspace(-60, 60, 25):
+        for azimuth in np.linspace(-azimuth_limit, azimuth_limit, 25):
             az, el = math.radians(azimuth), math.radians(elevation)
             row.append(len(points))
-            points.append((60 * math.cos(el) * math.cos(az), 60 * math.cos(el) * math.sin(az), 60 * math.sin(el)))
+            points.append((length * math.cos(el) * math.cos(az), length * math.cos(el) * math.sin(az), length * math.sin(el)))
         edges.extend(zip(row, row[1:]))
         edges.extend([(0, row[0]), (0, row[-1])])
-    edges.extend([(1, 26), (25, 50)])
+        rows.append(row)
+    edges.extend([(rows[0][0], rows[1][0]), (rows[0][-1], rows[1][-1])])
     mesh = bpy.data.meshes.new('WFRL.X100.FOV')
     mesh.from_pydata(points, edges, [])
     fov = bpy.data.objects.new('WFRL.X100.FOV', mesh)
@@ -141,12 +147,13 @@ def draw():
     try:
         gpu.state.depth_test_set('LESS_EQUAL')
         gpu.state.blend_set('ALPHA')
-        if session.fov is not None and bpy.context.scene.wfrl_x100_fov and session.fov.visible_get(view_layer=bpy.context.view_layer):
+        if session.frame is not None and session.frame.spatial.get('world_from_sensor') is not None and session.fov is not None and bpy.context.scene.wfrl_x100_fov and session.fov.visible_get(view_layer=bpy.context.view_layer):
             if session.fov_gpu_batch is None:
                 session.fov_gpu_batch = fov_batch(session.fov)
             shader, field_batch = session.fov_gpu_batch
             with gpu.matrix.push_pop():
-                gpu.matrix.multiply_matrix(session.fov.matrix_world)
+                from mathutils import Matrix
+                gpu.matrix.multiply_matrix(Matrix(session.frame.spatial['world_from_sensor']))
                 shader.bind()
                 shader.uniform_float('color', (.05, .7, 1., .85))
                 field_batch.draw(shader)
@@ -155,6 +162,9 @@ def draw():
             shader.bind()
             shader.uniform_float('size', 4.)
             point_batch.draw(shader)
+    except Exception as exc:
+        session.gpu_batch = session.fov_gpu_batch = None
+        session.render_error = str(exc)
     finally:
         gpu.state.depth_test_set(depth)
         gpu.state.blend_set(blend)

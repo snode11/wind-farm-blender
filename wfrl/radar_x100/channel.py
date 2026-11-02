@@ -10,7 +10,8 @@ from .schema import SCHEMA, POINT_DTYPE, MAX_POINTS, MAX_METADATA, SOURCES, json
 
 HEADER = struct.Struct('<4sII')
 MAGIC = b'X1F1'
-MAX_PAYLOAD = MAX_POINTS * 30
+VELOCITY_BYTES = np.dtype('<f4').itemsize
+MAX_PAYLOAD = MAX_POINTS * (POINT_DTYPE.itemsize + VELOCITY_BYTES)
 MAX_PACKET = HEADER.size + MAX_METADATA + MAX_PAYLOAD
 
 
@@ -26,12 +27,21 @@ def hello(frame):
                        session_id=frame.session_id, source_kind=frame.source_kind))
 
 
-def encode_frame(frame):
+def encode_frame(frame, *, received_monotonic=None):
     payload = frame.points.tobytes()
     if frame.radial_velocity_m_s is not None:
         payload += frame.radial_velocity_m_s.tobytes()
-    return packet(dict(type='FRAME', count=len(frame.points),
-                       velocity=frame.radial_velocity_m_s is not None, frame=frame.metadata()), payload)
+    metadata = dict(type='FRAME', count=len(frame.points),
+                    velocity=frame.radial_velocity_m_s is not None, frame=frame.metadata())
+    if received_monotonic is not None:
+        metadata['received_monotonic'] = received_monotonic
+    return packet(metadata, payload)
+
+
+@dataclass(frozen=True)
+class ReceivedFrame:
+    frame: object
+    received_monotonic: float
 
 
 class PacketReader:
@@ -64,11 +74,17 @@ class PacketReader:
             raise ValueError('Unknown radar message')
         count, velocity = metadata['count'], metadata['velocity']
         if (type(count) is not int or not 0 <= count <= MAX_POINTS or type(velocity) is not bool
-                or len(payload) != count * (30 if velocity else 26)):
+                or len(payload) != count * (POINT_DTYPE.itemsize + (VELOCITY_BYTES if velocity else 0))):
             raise ValueError('Radar array length mismatch')
-        points = np.frombuffer(payload[:count * 26], dtype=POINT_DTYPE)
-        speeds = np.frombuffer(payload[count * 26:], dtype='<f4') if velocity else None
-        return frame_from_metadata(metadata['frame'], points, speeds)
+        points = np.frombuffer(payload[:count * POINT_DTYPE.itemsize], dtype=POINT_DTYPE)
+        speeds = np.frombuffer(payload[count * POINT_DTYPE.itemsize:], dtype='<f4') if velocity else None
+        frame = frame_from_metadata(metadata['frame'], points, speeds)
+        if 'received_monotonic' in metadata:
+            stamp = metadata['received_monotonic']
+            if isinstance(stamp, bool) or not isinstance(stamp, (int, float)) or not math.isfinite(stamp):
+                raise ValueError('Invalid local receipt time')
+            return ReceivedFrame(frame, stamp)
+        return frame
 
 
 @dataclass
@@ -147,7 +163,10 @@ class LocalClient:
                             raise ValueError('Repeated radar handshake; reconnect required')
                         self.state.handshake(message)
                     else:
-                        self.state.accept(message)
+                        if isinstance(message, ReceivedFrame):
+                            self.state.accept(message.frame, received_monotonic=message.received_monotonic)
+                        else:
+                            self.state.accept(message)
                         frames += 1
                     continue
                 try:

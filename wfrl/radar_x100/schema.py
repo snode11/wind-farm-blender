@@ -15,6 +15,9 @@ POINT_DTYPE = np.dtype([(n, t) for n, t in (
 PROFILE = dict(id='ctsai-x100-datasheet-v1', dimensions_hwd_m=[.120, .095, .040],
                azimuth_deg=60., elevation_deg=22., range_m=[.2, 396.], max_points=MAX_POINTS,
                source='CTSAI X100 数据手册 CN V1.0; nominal specifications, not measured')
+# Display extents are independent of the nominal detection limits in PROFILE.
+DISPLAY_DEFAULTS = dict(fov_length_m=60., sensor_margin_deg=(6., 4.),
+                        orthographic_margin=1.15, orthographic_min_span_m=2.)
 SOURCES = {'GEOMETRY_SIMULATION', 'MEASURED_REPLAY', 'MEASURED_LIVE', 'TEST'}
 STREAMS = {'GEOMETRY', 'UNKNOWN', 'NEAR', 'FAR', 'COMBINED', 'TRACK'}
 

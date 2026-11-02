@@ -7,6 +7,17 @@ import math
 import os
 import sys
 import uuid
+from fractions import Fraction
+
+
+def sample_times(start, end, fps):
+    """Enumerate the decimal source grid without including a point beyond end."""
+    first, last, rate = (Fraction(str(value)) for value in (start, end, fps))
+    for sequence in range(int((last - first) * rate) + 1):
+        stamp = float(first + sequence / rate)
+        if not start <= stamp <= end:
+            raise ValueError('Export grid outside requested source interval')
+        yield stamp
 
 
 def main():
@@ -44,8 +55,7 @@ def main():
         source_grid_fps=args.fps, interval_s=[args.start,args.end], calibration_id=sampler.calibration_id))
     session = str(uuid.uuid4())
     try:
-        for sequence in range(int(math.floor((args.end-args.start)*args.fps + 1e-7))+1):
-            t = args.start + sequence/args.fps
+        for sequence, t in enumerate(sample_times(args.start, args.end, args.fps)):
             frame = api.simulation.simulate(sampler.sample,t,sensor_id='X100-T1',session_id=session,
                 sequence=sequence,interval_s=sampler.interval,candidate_budget=args.candidates,
                 visibility=sampler.visibility, material_at=sampler.material_sample)

@@ -11,21 +11,23 @@
 
 公开扩展提供 **N → X100 → 显示 → 打开点云窗口**，独立显示最新点云，支持四种视图、缩放平移与属性着色；导航不改变观测、风机运动或相机 RGB。操作和限制见 [X100 雷达](docs/blender/X100雷达.md)。
 
+工作区源码另提供机舱局部 XZ、同帧塔筒侧壁距离诊断、可选零载荷参考和显式离线双安装位覆盖报告。当前是一台 X100 切换朝下原安装位／机舱侧面两个预设，不是两台同时采样。分析与配套优化包含于公开扩展，尚未升级本机安装；操作见[X100 分析](docs/blender/X100雷达.md#机舱局部分析工作区源码)，源码证据见[验证范围](docs/blender/发布状态与验证范围.md#x100-工作区源码验证)。
+
 ## 当前身份与安装来源
 
 GitHub 默认分支为 [`main`](https://github.com/snode11/wind-farm-blender/tree/main)；完整项目源码分支为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)，包含前端、后端、重建研究、测试和配套文档。NREL 的 [v0.3.42.4 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.42.4) 提供专用扩展 ZIP；安装使用 `wfrl_blender-0.3.42+4.zip`，发布源码使用 `v0.3.42.4` 标签。源码提交、构建 ZIP 与本机安装分别识别，GitHub 自动 Source code 用于源码查看与构建。
 
 开发机日常扩展模块为 `bl_ext.user_default.wfrl_blender`。公开包、日常安装的版本与载荷分别取自下列身份记录；源码工作区的模块职责见[实现与维护](blender_frontend/README.md)。项目启动器、重建求解器和构建工具使用项目源码。
 
-公开扩展与本机本地构建的 X100 入口为 **N → X100**，支持同一台雷达的原安装位／机舱侧面切换、固定动静颜色与可切换速度色标、窄窗口显示和记录终态提示。安装对象或父级的约束、动画使标定失效时撤回观测；采样优化保留相同材料点与差分定义。操作见[X100 说明](docs/blender/X100雷达.md)，本机 GPU／RGB、边界与 CPU 对照的证据范围见[安装记录](publication/daily-installation.json)。
+公开扩展与本机安装的 X100 入口为 **N → X100**，支持同一台雷达的原安装位／机舱侧面切换、固定动静颜色与可切换速度色标、窄窗口显示和记录终态提示。安装对象或父级的约束、动画使标定失效时撤回观测；采样优化保留相同材料点与差分定义。操作见[X100 说明](docs/blender/X100雷达.md)，本机文件身份、后台注册与配置保留范围见[安装记录](publication/daily-installation.json)。
 
 0.3.42.4 项目源码提供[停止重试与本机进程监管](blender_frontend/README.md#55-实时连接与控制生命周期)、[实验配对／价值归一化／GRU／续训](docs/training/MAPPO_SETUP.md#fastfarm-实验身份与-gru)及[同模型评分](blade_recon0.2/README.md#评分模型与样本身份)。扩展 ZIP 包含命令水位恢复、相机采集事务结果、后台视频取消和相机几何缓存；Bridge、训练、评分和启动器通过完整源码归档提供。载荷按 `build-info.json`、inventory 和[交付身份](publication/blender-0.3.42.4.json)核对。
 
 <!-- release-identity:start -->
 | 对象 | 版本 | 身份依据 |
 | --- | --- | --- |
-| NREL 公开安装包 | **0.3.42.4** | [wfrl_blender-0.3.42+4.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.4/wfrl_blender-0.3.42+4.zip)；216 个文件；[交付身份](publication/blender-0.3.42.4.json) |
-| 开发机日常安装 | **0.3.42.3** | 独立载荷，按安装记录核对；216 个文件、125 个新进程模块已核对；[安装身份](publication/daily-installation.json) |
+| NREL 公开安装包 | **0.3.42.4** | [wfrl_blender-0.3.42+4.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.4/wfrl_blender-0.3.42+4.zip)；218 个文件；[交付身份](publication/blender-0.3.42.4.json) |
+| 开发机日常安装 | **0.3.42.4** | 独立载荷，按安装记录核对；216 个文件、110 个新进程模块已核对；[安装身份](publication/daily-installation.json) |
 <!-- release-identity:end -->
 
 身份、[发布核对](docs/blender/发布状态与验证范围.md#软件验证的适用对象)与[当前安装核对](publication/daily-installation.json)的适用范围见[发布状态与验证范围](docs/blender/发布状态与验证范围.md)。同一版本号不证明内容相同；升级后完全重启 Blender。

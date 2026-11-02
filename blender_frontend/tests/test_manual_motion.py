@@ -152,3 +152,14 @@ class PitchTrialTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+class RotorAtomicTests(unittest.TestCase):
+    def test_compound_invalid_configuration_preserves_every_field(self):
+        from dataclasses import asdict
+        clock=RotorClock(10,9,True,0)
+        before=asdict(clock)
+        with self.assertRaises(ValueError):
+            clock.configure(1,rpm=12,running=False,azimuth_deg=float('nan'))
+        self.assertEqual(asdict(clock),before)
+        self.assertEqual(clock.configure(1,rpm=12),64)
+        self.assertEqual(clock.sample(2),136)

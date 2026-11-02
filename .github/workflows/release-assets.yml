@@ -88,9 +88,10 @@ jobs:
           uploaded = {item['name'] for item in assets if item['state'] == 'uploaded'}
           extension = Path(os.environ['EXTENSION_ARCHIVE'])
           source = Path(os.environ['SOURCE_ARCHIVE'])
-          if extension.name not in uploaded:
-              subprocess.run(['gh', 'release', 'upload', tag, str(extension), *base], check=True)
-          if source.name not in uploaded:
-              subprocess.run(['gh', 'release', 'upload', tag, str(source), *base], check=True)
-              subprocess.run(['gh', 'release', 'upload', tag, str(source.with_suffix('.zip.sha256')), os.environ['DELIVERY_RECORD'], *base, '--clobber'], check=True)
+          attachments = ((extension, False), (source, False),
+                         (source.with_suffix('.zip.sha256'), True), (Path(os.environ['DELIVERY_RECORD']), True))
+          for attachment, replace in attachments:
+              if attachment.name not in uploaded:
+                  subprocess.run(['gh', 'release', 'upload', tag, str(attachment), *base,
+                                  *(['--clobber'] if replace else [])], check=True)
           PY

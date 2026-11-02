@@ -43,21 +43,24 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定
 | 相机启用、布局、缺陷编辑器及缺陷窗口脚本 | `WFRL_ADDON_MODULE`，无期望目录断言，另核对来源；布局的 `WFRL_ADDON_ROOT` 仅控制搜索路径。 |
 | `manual_down_copy_regression.py`、三份源码视频脚本、`farm_flex_workload_regression.py`、`custom_camera_edit_binding_regression.py`、`nrel_defect_ui_state_regression.py` | 仅源码；安装模块变量不能改变验证层。 |
 | `live_contracts_regression.py` | 仅源码，直接导入工作区扩展；使用独立工厂启动后台进程，安装模块变量不能改变验证层。未纳入 `run_regressions.py`，按上文 `--python` 入口直接运行。 |
-| `radar_x100_regression.py`、`radar_x100_edges.py`、`radar_x100_history_regression.py`、`radar_x100_window.py` | `WFRL_ADDON_MODULE` + `WFRL_EXPECTED_ADDON_ROOT`；安装时另核对实际加载的 `radar_x100.core` 及规范数据模块路径。`radar_x100_regression.py` 的安装模式断言未导入工作区 `wfrl.radar_x100`，并核对 `radar_core_sha256`。 |
+| `radar_x100_regression.py`、`radar_x100_edges.py`、`radar_x100_history_regression.py`、`radar_x100_binding_replay.py`、`radar_x100_window.py` | `WFRL_ADDON_MODULE` + `WFRL_EXPECTED_ADDON_ROOT`；安装时另核对实际加载的 `radar_x100.core` 及规范数据模块路径。`radar_x100_regression.py` 的安装模式断言未导入工作区 `wfrl.radar_x100`，并核对 `radar_core_sha256`。 |
 | `radar_x100_mount_presets.py` | 支持 `WFRL_ADDON_MODULE` + `WFRL_EXPECTED_ADDON_ROOT`；后台核对单台雷达的双安装位、相同源时刻、重复选择、采样失败、记录／相机互斥及保存重开。 |
 | `radar_x100_output_window.py` | 支持 `WFRL_ADDON_MODULE` + `WFRL_EXPECTED_ADDON_ROOT`；核对独立点云窗口的实际绘制、消费帧与原始 RGB 隔离。 |
 | `radar_x100_output_lifecycle.py` | 仅源码，直接导入工作区扩展；必须指定 `WFRL_EXPECTED_ADDON_ROOT`，安装模块变量不能改变验证层。 |
+| `radar_x100_configuration.py` | 仅源码后台，必须指定 `WFRL_EXPECTED_ADDON_ROOT`；核对名义外壳／视场、真实 RNA、已应用配置与编辑差异、显示即时生效和下一新样本预算。 |
 
 特殊前置条件：
 
 - `WFRL_TEST_OUTPUT` 的文件／目录合同逐份核对，已有目录可能覆盖报告。缺陷保存／重开复用专用目录，第二个进程设 `WFRL_NREL_DEFECT_PHASE=reopen`。手动撤销／恢复依赖工厂 `Cube`，`WFRL_MANUAL_EMPTY_ONLY=1` 会缩小隔离检查范围。
 - `farm_flex_workload_regression.py` 要求源码、后台工厂启动与空白注册，仅输出 `FARM_FLEX_WORKLOAD_REGRESSION_PASS`，无需输出目录。
 - `live_contracts_regression.py` 必须指定尚不存在的 `WFRL_TEST_OUTPUT` 目录，由脚本创建并写入 `result.json`；检查正常退出、`LIVE_CONTRACTS_PASS` 与报告，不复用正式场景或已保存结果目录。
-- 四份 X100 脚本均要求尚不存在的 `WFRL_TEST_OUTPUT` 目录并写入 `result.json`。三份后台脚本可由 `run_regressions.py` 选择，分别检查 `X100_NATIVE_PASS`、`X100_EDGES_PASS`、`X100_HISTORY_PASS` 及正常退出；窗口脚本未纳入该运行器，使用干净可见进程，检查最终报告及 `X100_WINDOW_PASS`。它在完成后保留窗口，不把定时器注册或启动成功当作完成，也不把脚本操作当作真实键鼠验证。
+- X100 主合同、边界、历史和雷达窗口脚本均要求尚不存在的 `WFRL_TEST_OUTPUT` 目录并写入 `result.json`。三份后台脚本可由 `run_regressions.py` 选择，分别检查 `X100_NATIVE_PASS`、`X100_EDGES_PASS`、`X100_HISTORY_PASS` 及正常退出；窗口脚本未纳入该运行器，使用干净可见进程，检查最终报告及 `X100_WINDOW_PASS`。它在完成后保留窗口，不把定时器注册或启动成功当作完成，也不把脚本操作当作真实键鼠验证。
 
+- `radar_x100_binding_replay.py` 按后台脚本入口直接运行，使用尚不存在的 `WFRL_TEST_OUTPUT` 目录；检查对象／场景／父链绑定、合法动态姿态、真实 RNA 量化、片尾／重播、独立呈现时钟、同时间索引和倒序重录失败，要求 `result.json`、`X100_BINDING_REPLAY_PASS` 与正常退出。该脚本未列入 `run_regressions.py`，不证明 GPU、真实界面输入或设备通过。
 - `radar_x100_mount_presets.py` 直接按后台脚本入口运行，使用尚不存在的 `WFRL_TEST_OUTPUT` 目录，检查 `result.json`、`X100_MOUNT_PRESETS_PASS` 与正常退出；未列入 `run_regressions.py`，不把环境变量或启动成功当作安装验证。
 - X100 色标与窄窗先查宿主投影、稳定分类颜色、固定速度范围和布局边界，再按受影响范围运行可见输出窗口检查；字号／刻度的实际布局、真实鼠标操作和完整播放分别报告。材料子集优化须对照完整几何的点数组、材料身份与速度，短时 CPU 计时只报告其更新范围。
-- 两份独立点云窗口脚本均要求干净可见进程及尚不存在的 `WFRL_TEST_OUTPUT` 目录，均未纳入 `run_regressions.py`。`radar_x100_output_window.py` 写入 `result.json` 与逐次绘制诊断 `draw-sync.jsonl`，检查最终报告及 `X100_OUTPUT_WINDOW_PASS`，完成后保留窗口；`radar_x100_output_lifecycle.py` 核对保存重开、其他 Image Editor 保留、重复打开和卸载释放，检查报告、`X100_OUTPUT_LIFECYCLE_PASS` 及正常退出。脚本操作不代替真实键鼠或完整片段性能验证。
+- `radar_x100_configuration.py` 使用尚不存在的 `WFRL_TEST_OUTPUT` 目录，要求 `result.json`、`X100_CONFIGURATION_PASS` 与正常退出；核对安装快捷按钮同步应用状态、单帧来源／目录来源和实时连接未热切换。宿主的 `test_radar_x100_configuration.py` 与 `test_radar_x100_display.py` 分别检查配置比较和有界辅助层缓存；它们不代替 GPU 绘制、真实输入或持续性能。
+- 两份独立点云窗口脚本均要求干净可见进程及尚不存在的 `WFRL_TEST_OUTPUT` 目录，均未纳入 `run_regressions.py`。`radar_x100_output_window.py` 写入 `result.json` 与逐次绘制诊断 `draw-sync.jsonl`，检查最终报告及 `X100_OUTPUT_WINDOW_PASS`，完成后保留窗口；`radar_x100_output_lifecycle.py` 核对保存重开、撤销／重做、其他 Image Editor 保留、重复打开及卸载时 GPU 缓存释放，检查报告、`X100_OUTPUT_LIFECYCLE_PASS` 及正常退出。脚本操作不代替真实键鼠或完整片段性能验证。
 - 共享结构后台检查可用 `WFRL_SPLIT_INPUT` 指定场景副本；`reconstruction_workflow_window.py` 要求干净可见进程、安装模块及精确目录。`WFRL_EXPECTED_GEOMETRY_SHA256` 从已确认资产及 inventory 取得，不能照抄失败现场摘要绕过校验。
 - `scripts/blender/check_nrel_nacelle_camera.py` 支持 `WFRL_ADDON_MODULE`／`WFRL_EXPECTED_ADDON_ROOT`，参数 `-- --output <新目录>`，生成 PNG、场景及参数。双束使用匹配内置包或 `WFRL_DUAL_PACKAGE`；窗口以 `WFRL_BUILTIN_METHOD=TLS` 选候选，同时核对方法、源摘要、S1 与双束。
 
@@ -96,6 +99,10 @@ python3 scripts/blender/run_playback_benchmark.py --blender <Blender可执行文
 日常安装以[安装身份](../../../../publication/daily-installation.json)为准；相同 manifest 版本不代表与公开附件相同。日常构建的 ZIP、inventory 和 SHA-256 由安装记录的 `source_archive` 标识；公开 ZIP 的位置按[发布身份](../../../../docs/blender/发布状态与验证范围.md)及其交付记录定位。运行来源及配置保护见安装记录中的证据链接。后台身份／注册、可见窗口和完整播放结论分别读取，其他候选载荷的性能记录不得转记到当前安装。
 
 保留产物与已清理范围见[安装记录的产物可用性](../../../../publication/daily-installation.json)。原始日志和 JSON 中的临时路径保留测量时来源，不改写成当前路径；留存 `environment.json` 不表示隔离 profile 仍存在。使用安装验证或性能入口前核对 profile，缺失时须建立并验证匹配的新隔离环境，不能把历史目录当作可运行配置。
+
+## X100 同帧分析
+
+`tests/radar_x100/test_analysis.py` 验证独立 NumPy 三角最近点、无效值、色标与经过分段；`blender_frontend/tests/blender/radar_x100_analysis.py` 用源码后台核对侧壁封口排除、BVH 基准、只读上下文、冻结 ROI、真值隔离、提交回滚、刚塔回退及同步取样配对对照，要求新 `WFRL_TEST_OUTPUT`；该脚本按直接 `--python` 入口运行，不推定已纳入CI或回归运行器。窗口／GPU、加载／undo／redo 和原始 RGB 分别按上述窗口及生命周期入口验收，不由后台测试推定。离线 `scripts/radar_x100/coverage.py` 的完整30 Hz报告是指定研究配置的有限目标覆盖，不证明实机净空或安全合格。当前本地证据与四项独立优化的测量边界见[工作区验证](../../../../docs/blender/发布状态与验证范围.md#x100-工作区源码验证)；报告内临时路径只标识测量来源，不要求恢复已清理的测试场景或探针。
 
 ## 纯文档与 skill
 

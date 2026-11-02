@@ -61,6 +61,7 @@ class Assembler:
             self.counters['duplicate'] += 1
             return None
         if (type(count) is not int or type(index) is not int or not 1 <= count <= 256 or not 0 <= index < count
+                or type(fragment.terminal) is not bool
                 or fragment.points.dtype != POINT_DTYPE or fragment.points.ndim != 1
                 or frame.radial_velocity_m_s is not None or len(fragment.points) > MAX_POINTS):
             self.counters['corrupt'] += 1
@@ -82,10 +83,11 @@ class Assembler:
                 del self.pending[key]
                 self.completed[stream_key] = max(frame.sequence, self.completed.get(stream_key, -1))
                 self.counters['corrupt'] += 1
+                return None
             else:
                 self.counters['duplicate'] += 1
-            return None
-        state['parts'][index] = fragment.points.copy()
+        else:
+            state['parts'][index] = fragment.points.copy()
         state['terminal'] |= fragment.terminal
         if sum(map(len, state['parts'].values())) > MAX_POINTS:
             del self.pending[key]
@@ -112,6 +114,7 @@ class Fanout:
         self.recorder = recorder
         self.queue = queue.Queue(maxsize=record_capacity)
         self.latest, self.display_drops, self.record_failures = {}, 0, 0
+        self.latest_received = {}
         self.accepting = True
         self.lock, self.stopping = threading.Lock(), threading.Event()
         self.worker = threading.Thread(target=self._record, name='x100-record', daemon=True)
@@ -132,25 +135,40 @@ class Fanout:
                                     'are not guaranteed; overflow identity ' + repr(frame.identity))
                     self.stopping.set()
 
-    def submit_display(self, frame):
+    def submit_display(self, frame, *, received_monotonic=None, restoring=False):
         with self.lock:
-            self._submit_display(frame)
+            self._submit_display(frame, received_monotonic=received_monotonic, restoring=restoring)
 
-    def _submit_display(self, frame):
+    def _submit_display(self, frame, *, received_monotonic=None, restoring=False):
         key = frame.sensor_id, frame.stream
         if key in self.latest:
             self.display_drops += 1
             previous = self.latest[key]
+            if restoring and previous.session_id != frame.session_id:
+                return
             if previous.session_id == frame.session_id and previous.sequence >= frame.sequence:
                 return
         if key not in self.latest and len(self.latest) >= 8:
-            self.latest.pop(next(iter(self.latest)))
+            if restoring:
+                self.display_drops += 1
+                return
+            evicted = next(iter(self.latest))
+            self.latest.pop(evicted)
+            self.latest_received.pop(evicted)
             self.display_drops += 1
         self.latest[key] = frame
+        self.latest_received[key] = time.monotonic() if received_monotonic is None else received_monotonic
 
     def take_latest(self):
+        observation = self.take_latest_with_time()
+        return observation[0] if observation is not None else None
+
+    def take_latest_with_time(self):
         with self.lock:
-            return self.latest.pop(next(iter(self.latest))) if self.latest else None
+            if not self.latest:
+                return None
+            key = next(iter(self.latest))
+            return self.latest.pop(key), self.latest_received.pop(key)
 
     def _record(self):
         while not self.stopping.is_set() or not self.queue.empty():
@@ -200,6 +218,7 @@ class LocalPublisher:
 
     def _serve(self):
         from .channel import hello, encode_frame
+        import select
         import socket
         while not self.stopping.is_set():
             try:
@@ -211,23 +230,31 @@ class LocalPublisher:
             with client:
                 client.settimeout(.2)
                 peer = None
+                observation = None
                 try:
                     while not self.stopping.is_set():
-                        frame = self.fanout.take_latest()
-                        if frame is None:
-                            self.stopping.wait(.005)
+                        ready, _, _ = select.select([client, self.server], [], [], .005)
+                        # A new explicit connection takes over the single display slot.
+                        if self.server in ready or client in ready:
+                            break
+                        observation = self.fanout.take_latest_with_time()
+                        if observation is None:
                             continue
+                        frame, received = observation
                         identity = frame.sensor_id, frame.session_id, frame.source_kind
                         if peer is None:
                             client.sendall(hello(frame))
                             peer = identity
                         elif peer != identity:
-                            self.fanout.submit_display(frame)
                             break
-                        client.sendall(encode_frame(frame))
+                        client.sendall(encode_frame(frame, received_monotonic=received))
                         self.sent += 1
-                except OSError:
+                        observation = None
+                except (OSError, ValueError):
                     self.errors += 1
+                finally:
+                    if observation is not None:
+                        self.fanout.submit_display(observation[0], received_monotonic=observation[1], restoring=True)
 
     def close(self):
         self.stopping.set()

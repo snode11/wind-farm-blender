@@ -1,6 +1,6 @@
 {
   "archive": "wfrl_blender-0.3.42+4.zip",
-  "archive_sha256": "0693818cb2ef856afbec2c56143053dfd9e23ee4358d41f376abcea077452f61",
+  "archive_sha256": "dd4d752c5b0174f36f34bc45b8541904837056417845e483d6769177fda671f5",
   "files": [
     {
       "path": "__init__.py",
@@ -54,18 +54,23 @@
     },
     {
       "path": "_vendor/radar_x100/acquisition.py",
-      "sha256": "c69880bd23ffdcdf90faea378fc8b7b7750a60072cfd62becc7d1c9ce27cec55",
-      "size": 10134
+      "sha256": "339e55c015fe00129e8bcdfa0cfa5a2e4d18fee8888c2cc482e0b48276b161e3",
+      "size": 11578
+    },
+    {
+      "path": "_vendor/radar_x100/analysis.py",
+      "sha256": "15070cb4f4c34fabb88d35808df0a5a51b0ea08a47b8d34f999659e265f1711a",
+      "size": 3769
     },
     {
       "path": "_vendor/radar_x100/channel.py",
-      "sha256": "19dd66484918be706db28aa3eca6300d4c1bcb8c31fe6fa70911b446273c4434",
-      "size": 7130
+      "sha256": "f80b43f827eecd64ea4b9b9e314ae77983fb359e87eea9d5b7b4036f0342bac8",
+      "size": 8064
     },
     {
       "path": "_vendor/radar_x100/ply.py",
-      "sha256": "810bf55b0d409f075abc6888e6e2c5103c4f93dce1815090f6f2ce7dc64ee90d",
-      "size": 3328
+      "sha256": "6e751cfe73cf124db525f7cb32e97f2affc51f13062139f2090bd6c0f6413ccc",
+      "size": 3364
     },
     {
       "path": "_vendor/radar_x100/recording.py",
@@ -74,8 +79,8 @@
     },
     {
       "path": "_vendor/radar_x100/schema.py",
-      "sha256": "3d963097be473dba5e66ddbcf65fd930fef83ae047bd0cba122e485f71a8f93e",
-      "size": 8253
+      "sha256": "6d031438d6a2ea30948fcbfb95d90b05a8b497d113ef79ba9d48aabd8beb08e5",
+      "size": 8479
     },
     {
       "path": "_vendor/radar_x100/simulation.py",
@@ -489,8 +494,8 @@
     },
     {
       "path": "build-info.json",
-      "sha256": "3f3859f81ea463d8637be56641aabbbc85880bcd1314b5691962e636ff5d741f",
-      "size": 815
+      "sha256": "a32e852c27a0ba276aa64746f8452cc0aae6cc882bfbeee80f77fc77c509c3a5",
+      "size": 902
     },
     {
       "path": "camera_projection.py",
@@ -529,8 +534,8 @@
     },
     {
       "path": "custom_camera_capture.py",
-      "sha256": "a3a5518462f30eaf0d941636f6d5540b70e38ddd2948276169a97c7655574191",
-      "size": 26733
+      "sha256": "d46f84a6b0c0c82498d21fef7b144693bb790d91ee08ee40d69d21ab718d76d2",
+      "size": 26798
     },
     {
       "path": "custom_camera_diagnostics.py",
@@ -544,8 +549,8 @@
     },
     {
       "path": "custom_camera_preview.py",
-      "sha256": "0428a2dbd2f5beaf7dd52559aeefa833a434d05e87844661cda1d84573c2dde9",
-      "size": 36442
+      "sha256": "b8e252f7fc8add38fed8bdc89fab0a6007925db5ccc666c7f1612dfa36da847b",
+      "size": 36612
     },
     {
       "path": "custom_cameras.py",
@@ -629,8 +634,8 @@
     },
     {
       "path": "manual_motion.py",
-      "sha256": "b8d6cd05240ad881d13fd121ddffc871c792a50fc810283703e5f88c8a0d356e",
-      "size": 5982
+      "sha256": "a7f95470e64706a978a45b7ad135e812513e9784d76548a5a1dcfef4e97aa31d",
+      "size": 6086
     },
     {
       "path": "manual_operators.py",
@@ -849,8 +854,8 @@
     },
     {
       "path": "panels/radar_x100.py",
-      "sha256": "0ffd245524ece08fc307454043a4520b88d7fd1c5fa3e41c26110fe9a737a2be",
-      "size": 20008
+      "sha256": "f6c1d43d438ca92be6c23eecc602708f56b344265e408602fdc31a64d3d581f1",
+      "size": 23255
     },
     {
       "path": "panels/run.py",
@@ -943,34 +948,39 @@
       "size": 62
     },
     {
+      "path": "radar_x100/configuration.py",
+      "sha256": "5e5587938e60978ebecc340411d33fb217c9328623ca4480e64ca49c978a298c",
+      "size": 2314
+    },
+    {
       "path": "radar_x100/core.py",
-      "sha256": "297226931073e4217b48994d8096afeea98092b49e2eba220660db3fd0f2d705",
-      "size": 352
+      "sha256": "4f559015b8f7dc33eeb22fd9aef74d16306b9b22e63b44727f58a8cd0e030301",
+      "size": 372
     },
     {
       "path": "radar_x100/display.py",
-      "sha256": "8d138ad0bea63d81e06ae754ce8423ecd30beb7264081a55da6ad6760600e6c1",
-      "size": 5285
+      "sha256": "eb85eedea7ee33650b2a8e52d4ce2f9d31b3349e70e43f356224c1016d7bcd45",
+      "size": 8106
     },
     {
       "path": "radar_x100/output.py",
-      "sha256": "9b39f8aae770fdf3990121486a32af220d3ab9f971e956dcb54b87c617f58f23",
-      "size": 19359
+      "sha256": "5397e616c07d59c7211b5c80c2194fe375b20629fb9bc9ce2f27f79c7ad7504f",
+      "size": 26502
     },
     {
       "path": "radar_x100/runtime.py",
-      "sha256": "bb989141a29ef6f7187f60034e4273f8d1855ccbfa96e251416e620ac0a6f04d",
-      "size": 23404
+      "sha256": "68073d846465e54f71f9ff6ed8806938024ae04ce0b328b4aa2589350bb9639d",
+      "size": 30339
     },
     {
       "path": "radar_x100/scene.py",
-      "sha256": "5da112806362e52f9f036446d15ae53c71ee6b0a362036fcca7a71299378bdfa",
-      "size": 14611
+      "sha256": "7d0a4fdc5311577225614c461cb74b9db56c429dd68fd1b7f238cdabae79588d",
+      "size": 22639
     },
     {
       "path": "radar_x100/view.py",
-      "sha256": "8320a178a3afab8c98470cbc179db6783fc0b8c07aad085edf4df6017cf8064d",
-      "size": 7579
+      "sha256": "3add6581352e2ee02a9b551fcd5b85f47fb62e8a9d782bc435da3f516d5b82bf",
+      "size": 8303
     },
     {
       "path": "repair_marks.py",
@@ -1064,8 +1074,8 @@
     },
     {
       "path": "turbine_geometry.py",
-      "sha256": "8f62c1f96873e198b978d9d3aca84c43223d5c79ce47bb59ef9e75d07940f29c",
-      "size": 7749
+      "sha256": "0149075f63e199ad7b9b85cb1a695ccc1f77c1a4eab9bc863912cdedaadec5ac",
+      "size": 8286
     },
     {
       "path": "video_output.py",
