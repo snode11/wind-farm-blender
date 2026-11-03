@@ -37,7 +37,8 @@ def test_suite_has_unique_scripts_and_explicit_window_contracts():
     assert all((runner.TEST_ROOT / item.script).is_file() for item in selected)
     assert {item.script for item in selected if item.mode == 'visible'} == {
         'shared_context_switch_regression.py', 'native_camera_playback_regression.py',
-        'nrel_editor_playback_regression.py', 'frontend_sessions_window.py'}
+        'nrel_editor_playback_regression.py', 'frontend_sessions_window.py',
+        'radar_x100_estimation_window.py'}
     assert spec('animation_render_regression').package == 'synthetic_then_builtin_mappo'
     assert spec('animation_render_regression').report == 'result.json'
     assert spec('nrel_defect_editor_regression').phases == ('save', 'reopen')
@@ -64,6 +65,18 @@ def test_ci_selection_can_only_run_registered_background_checks():
     selected = runner.select_tests(names)
     assert selected
     assert all(item.mode == 'background' for item in selected)
+
+
+def test_x100_ci_checks_require_native_reports_and_completion_markers():
+    names = (ROOT / 'configs/ci-native-tests.txt').read_text().split()
+    selected = {item.script: item for item in runner.select_tests(names)}
+    for name in ('radar_x100_analysis.py', 'radar_x100_mount_presets.py',
+                 'radar_x100_configuration.py', 'radar_x100_binding_replay.py'):
+        item = selected[name]
+        assert item.mode == 'background'
+        assert evaluate(item, report={'status': 'PASS'}) == ('PASS', [])
+        assert evaluate(item, report=None)[0] == 'FAIL'
+        assert evaluate(item, report={'status': 'PASS'}, marker='')[0] == 'FAIL'
 
 
 @pytest.mark.parametrize('name', ['shared_context_switch_regression', 'native_camera_playback_regression',

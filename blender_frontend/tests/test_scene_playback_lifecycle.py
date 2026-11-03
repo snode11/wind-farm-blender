@@ -422,3 +422,19 @@ def test_farm_file_reopen_preserves_saved_clock_output_and_preview(
     assert scene['wfrl_clearance_turbine'] == 'T2'
     assert clearance_replay.reader_for(scene) is readers['T2']
     assert clearance_replay.sample(scene)['time_s'] == expected
+
+
+def test_bad_candidate_preserves_same_scene_runtime_reader_and_time(runtimes, monkeypatch):
+    a = Scene('A')
+    runtime = farm_flex.attach(a, 'good')
+    a['wfrl_clearance_time_s'] = 123.
+    reader = clearance_replay.reader_for(a)
+    objects = dict(a.objects)
+    def fail(path):
+        raise ValueError('candidate integrity mismatch')
+    monkeypatch.setattr(farm_flex, '_load_package', fail)
+    with pytest.raises(ValueError, match='candidate integrity'):
+        farm_flex.attach(a, 'bad')
+    assert farm_flex.active_for(a) is runtime and runtime.enabled
+    assert clearance_replay.reader_for(a) is reader
+    assert a['wfrl_clearance_time_s'] == 123. and a.objects == objects

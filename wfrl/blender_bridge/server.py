@@ -91,7 +91,7 @@ class BridgeServer:
 
     def _retain_reliable_pending(self):
         retained = [(item['kind'], item['payload']) for item in self.pending
-                    if item['kind'] in {'lifecycle', 'safety_event', 'error'} and item.get('retain', True)]
+                    if item['kind'] in {'lifecycle', 'safety_event', 'error'} and item['retain']]
         if retained:
             self.backlog = deque(retained + list(self.backlog))
         self.pending.clear()
@@ -162,8 +162,7 @@ class BridgeServer:
 
     def poll(self):
         if self.closed: return
-        if hasattr(self.session, 'tick'):
-            self.session.tick()
+        self.session.tick()
         # A client may close and reconnect before the next 10 ms poll. Reap
         # its EOF before accepting, or the stale owner rejects the resume.
         # MSG_PEEK leaves any live owner's queued commands untouched.
@@ -218,24 +217,17 @@ class BridgeServer:
                             # lifecycle or safety events from the previous one.
                             self.backlog.clear()
                             self.session.poll()
-                            if hasattr(self.session, 'clear_observations'):
-                                self.session.clear_observations()
+                            self.session.clear_observations()
                             self.session.session_id = uuid.uuid4().hex
                             self.guard = SessionSequenceGuard(self.session.session_id)
                             self.sequence = 0
                         self.negotiated_capabilities = frozenset(message['payload']['capabilities']) & {TRAINING_STATS_CAPABILITY}
-                        if hasattr(self.session, 'synchronization_state'):
-                            state = self.session.synchronization_state()
-                        else:
-                            # Unversioned producers keep strict transition handling;
-                            # the transport cannot infer a safe history watermark.
-                            state = dict(capabilities=self.session.capabilities, run_status=self.session.status,
-                                         mode=self.session.mode, run_id=getattr(self.session, 'run_id', None))
+                        state = self.session.synchronization_state()
                         self._send('hello_ack', dict(state, selected_version=1, resumed=resume is not None,
                                                     last_command_sequence=self.guard.last_sequence))
                         self.ready = True
                         self.session_claimed = True
-                        if resume is not None and hasattr(self.session, 'replay_latest'):
+                        if resume is not None:
                             self.session.replay_latest()
                     else:
                         self.guard.accept(message)

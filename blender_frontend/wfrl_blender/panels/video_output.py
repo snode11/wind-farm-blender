@@ -14,12 +14,21 @@ def _source(context):
     return bpy.path.abspath(preferences.camera_video_file) if preferences and preferences.camera_video_file else ''
 
 
+_LAST_STATUS = None
+
+
 def _tick():
+    global _LAST_STATUS
     service.stream.poll()
+    current = service.status_for()
+    changed = current != _LAST_STATUS
+    _LAST_STATUS = current
     for window in bpy.context.window_manager.windows:
         for area in window.screen.areas:
-            if area.type == 'VIEW_3D':
-                area.tag_redraw()
+            if changed and area.type == 'VIEW_3D':
+                for region in area.regions:
+                    if region.type == 'UI':
+                        region.tag_redraw()
     return .25 if service.stream.active or service.export.active else None
 
 

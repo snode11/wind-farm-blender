@@ -237,6 +237,15 @@ class DualBeamReader:
             if ((pair['valid'] and not (type(estimate) in (int, float) and math.isfinite(estimate)))
                     or (not pair['valid'] and estimate is not None)):
                 raise ValueError('Invalid dual-beam estimate/null contract')
+            evaluation = row['evaluation']
+            reference, error = (evaluation.get(key) for key in
+                                ('clearance_reference_m', 'clearance_error_m'))
+            if any(value is not None and (type(value) not in (int, float)
+                    or not math.isfinite(value)) for value in (reference, error)):
+                raise ValueError('Invalid dual-beam evaluation finite/null contract')
+            if error is not None and (not pair['valid'] or reference is None
+                    or not math.isclose(error, estimate - reference, rel_tol=0., abs_tol=1e-9)):
+                raise ValueError('Dual-beam evaluation error differs from estimate minus reference')
             for obs in row['observations'].values():
                 if obs['time_s'] != row['time_s']:
                     raise ValueError('Dual-beam observations are not simultaneous')

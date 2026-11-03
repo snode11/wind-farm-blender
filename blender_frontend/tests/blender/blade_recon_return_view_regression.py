@@ -53,6 +53,7 @@ try:
     if not hasattr(bpy.types.Scene, 'wfrl_recon_texture_mode'):
         addon.register()
     review = importlib.import_module(MODULE + '.blade_recon_review')
+    review.register(standalone=True)
     inspection = importlib.import_module(MODULE + '.blade_recon_inspection')
     if MODE == 'create':
         original = bpy.context.scene
@@ -91,7 +92,7 @@ try:
             value = review.session(scene)
             baseline = digest(value['blades'])
             assert review.toggle_texture_mode(scene) == 'FALSE_COLOR'
-            assert bpy.ops.wfrl.blade_recon_texture_toggle() == {'FINISHED'}
+            review.toggle_texture_mode(bpy.context.scene)
             assert scene.wfrl_recon_texture_mode == 'ORIGINAL'
             assert digest(value['blades']) == baseline
             checks['one_click_modes_preserve_geometry_uv_evidence_packed_images'] = True
@@ -110,7 +111,7 @@ try:
             result = review.inspect_view(bpy.context)
             assert result['views'] == len(before['areas'])
             assert review.snapshot_viewports(bpy.context) != before
-            assert bpy.ops.wfrl.blade_recon_return() == {'FINISHED'}
+            review.return_to_original(bpy.context)
             assert bpy.context.scene == original
             assert review.snapshot_viewports(bpy.context) == before
             assert original.frame_current == 37 and original.frame_end == 100

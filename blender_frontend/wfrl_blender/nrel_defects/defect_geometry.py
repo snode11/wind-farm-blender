@@ -221,6 +221,8 @@ class DefectGeometry:
         if self.turbine_id not in surface.turbine_ids or len(rig['blades']) != 3:
             raise ValueError('A NREL defect geometry manager needs one registered three-blade turbine')
         self._closed = False
+        self._active = None
+        self._healthy = {}
         self._baseline = {}
         referenced = {index for face in surface.faces for index in face}
         if len(surface.vertices)-1 not in referenced:
@@ -236,6 +238,7 @@ class DefectGeometry:
             if len(blade.data.polygons) != len(surface.faces):
                 raise ValueError('Visible NREL blade topology differs from its healthy reference')
             baseline = bpy.data.meshes.new(f'NREL.Editor.{self.turbine_id}.Baseline.Blade{i}')
+            self._baseline[i] = baseline
             baseline.from_pydata(surface.vertices, [], surface.faces)
             for material in blade.data.materials:
                 baseline.materials.append(material)
@@ -248,6 +251,7 @@ class DefectGeometry:
             baseline.update()
             self._baseline[i] = baseline
             mesh = bpy.data.meshes.new('NREL.ImmutableHealthyReference')
+            self._healthy[i] = mesh
             mesh.from_pydata(surface.vertices, [], surface.triangles)
             mesh.update()
             uv = mesh.uv_layers.new(name=REFERENCE_UV)
@@ -727,7 +731,7 @@ class DefectGeometry:
             self.rig['defect_document'] = previous['document']
             self._active = previous
             raise
-        if previous.get('document') is None:
+        if previous.get('document') is None and not getattr(self, '_defer_initial_dispose', False):
             # Initial scene-builder data belongs to this fresh rig. The store's
             # constructor has no superseded resource to dispose, so release only
             # these now-unused datablocks here. Shared data (users > 0) survives.

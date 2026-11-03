@@ -29,6 +29,7 @@ OUT = Path(os.environ.get('WFRL_TEST_OUTPUT', '/tmp/wfrl-blade-recon-regression'
 OUT.mkdir(parents=True, exist_ok=True)
 addon = importlib.import_module(MODULE)
 review = importlib.import_module(MODULE + '.blade_recon_review')
+review.register(standalone=True)
 reader = importlib.import_module(MODULE + '.blade_recon_data')
 panel = importlib.import_module(MODULE + '.panels.blade_recon')
 
@@ -161,9 +162,9 @@ try:
     assert panel.WFRL_PT_BladeRecon.bl_category == '叶片三维重建'
     assert panel.WFRL_PT_BladeRecon.bl_space_type == 'VIEW_3D'
     assert panel.WFRL_PT_BladeRecon.bl_region_type == 'UI'
-    checks['registered_independent_chinese_sidebar_category'] = True
+    checks['registered_complete_turbine_sidebar_category'] = True
 
-    assert bpy.ops.wfrl.blade_recon_load(sample=True) == {'FINISHED'}
+    review.load(bpy.context)
     scene = bpy.context.scene
     sample_scene_name = scene.name
     assert scene.name != original_name and review.active(scene)
@@ -185,24 +186,26 @@ try:
     checks['sample_200_frames_direct_model_geometry_colors_and_backward_seek'] = True
     checks['truth_toggle_and_source_frame_geometry'] = True
 
-    assert bpy.ops.wfrl.blade_recon_step(delta=1) == {'FINISHED'}
+    scene.frame_set(min(scene.frame_current+1, scene.frame_end)); review.apply(scene)
     assert scene.frame_current == 52
     check_geometry(scene, 52)
-    assert bpy.ops.wfrl.blade_recon_step(delta=-1) == {'FINISHED'}
+    scene.frame_set(max(scene.frame_current-1, scene.frame_start)); review.apply(scene)
     assert scene.frame_current == 51
-    assert bpy.ops.wfrl.blade_recon_step(first=True) == {'FINISHED'}
+    scene.frame_set(scene.frame_start); review.apply(scene)
     assert scene.frame_current == 1
-    assert bpy.ops.wfrl.blade_recon_step(delta=-1) == {'FINISHED'} and scene.frame_current == 1
+    scene.frame_set(max(scene.frame_current-1, scene.frame_start)); review.apply(scene)
+    assert scene.frame_current == 1
     scene.frame_set(200)
     review._tick()
-    assert bpy.ops.wfrl.blade_recon_step(delta=1) == {'FINISHED'} and scene.frame_current == 200
+    scene.frame_set(min(scene.frame_current+1, scene.frame_end)); review.apply(scene)
+    assert scene.frame_current == 200
     for view in ('FRONT', 'SIDE', 'OVERVIEW'):
-        assert bpy.ops.wfrl.blade_recon_view(view=view) == {'FINISHED'}
+        review.set_view(bpy.context, view)
         assert scene.camera['blade_recon_view'] == view and scene.frame_current == 200
         viewports = [area.spaces.active for area in bpy.context.screen.areas if area.type == 'VIEW_3D']
         assert viewports, 'No VIEW_3D space available to verify the review view'
         assert all(space.region_3d.view_perspective == 'PERSP' for space in viewports), view
-    checks['native_step_boundary_and_view_operators'] = True
+    checks['research_sample_boundary_and_views'] = True
     checks['borderless_review_views'] = True
 
     camera_errors = []
@@ -220,7 +223,7 @@ try:
     check_preserved(original_name, sentinel_name, original_snapshot)
     checks['original_scene_sentinel_and_unrelated_handler_preserved'] = True
 
-    assert bpy.ops.wfrl.blade_recon_return() == {'FINISHED'}
+    review.return_to_original(bpy.context)
     assert bpy.context.scene.name == original_name
     scene_names, object_names = set(bpy.data.scenes.keys()), set(bpy.data.objects.keys())
     malformed_dir = OUT / 'malformed'

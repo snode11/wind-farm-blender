@@ -55,6 +55,31 @@ class WFRL_OT_X100MountPreset(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class WFRL_OT_X100SearchApply(bpy.types.Operator):
+    bl_idname = 'wfrl.x100_search_apply'
+    bl_label = '应用搜索推荐安装'
+    bl_description = '核对来源后应用离线搜索结果，保留当前场景时刻'
+
+    def execute(self, context):
+        import json
+        from pathlib import Path
+        from ..radar_x100.runtime import apply_mount_preset
+        try:
+            busy = _busy(context.scene)
+            if busy:
+                raise ValueError(busy)
+            path = Path(bpy.path.abspath(context.scene.wfrl_x100_search_path))
+            with path.open('rb') as stream:
+                raw = stream.read(16 * 1024 * 1024 + 1)
+            if len(raw) > 16 * 1024 * 1024:
+                raise ValueError('安装搜索报告超过大小上限')
+            apply_mount_preset(context.scene, 'SEARCH', search_report=json.loads(raw))
+        except Exception as exc:
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        return {'FINISHED'}
+
+
 class WFRL_OT_X100Step(bpy.types.Operator):
     bl_idname = 'wfrl.x100_step'
     bl_label = '文件帧跳转'
@@ -230,7 +255,14 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
                     vector.prop(scene, name, index=index, text=axis)
             layout.separator()
             _property(layout, scene, 'wfrl_x100_candidates', narrow=narrow)
-            layout.label(text='预算：下一新样本生效', icon='INFO')
+            message(layout, '按表面积采样；预算在下一新样本生效', 'INFO', context=context)
+            header, search = layout.panel('wfrl_x100_installation_search', default_closed=True)
+            header.label(text='安装覆盖搜索')
+            if search is not None:
+                _property(search, scene, 'wfrl_x100_search_path', narrow=narrow)
+                search.operator('wfrl.x100_search_apply', icon='IMPORT')
+                message(search, '读取完整源网格的搜索报告；仅适用于同一几何来源', context=context)
+                message(search, '仅应用安装姿态；采样预算保留当前设置', context=context)
             fov = layout.column(align=True)
             fov.use_property_split = False
             fov.prop(scene, 'wfrl_x100_fov')
@@ -315,6 +347,40 @@ class WFRL_PT_X100Display(_X100Panel, bpy.types.Panel):
 
 
 
+class WFRL_PT_X100Blades(_X100Panel, bpy.types.Panel):
+    bl_label = '叶片关联与估计'
+    bl_idname = 'WFRL_PT_x100_blades'
+    bl_parent_id = 'WFRL_PT_x100'
+
+    def draw(self, context):
+        from ..radar_x100.runtime import session_for
+        from .ui_helpers import message
+        scene, layout = context.scene, self.layout
+        layout.prop(scene, 'wfrl_x100_blade_tracking')
+        session = session_for(scene)
+        message(layout, '研究模型：已知根部姿态与名义叶尖半径；机舱XZ显示拟合段', context=context)
+        if not session or not scene.wfrl_x100_blade_tracking:
+            return
+        if session.blade_error:
+            message(layout, session.blade_error, 'INFO', context=context)
+        result = session.blade_result
+        if result is None:
+            return
+        labels = dict(INSUFFICIENT_POINTS='点数不足', INSUFFICIENT_SPAN='覆盖长度不足',
+            INSUFFICIENT_BINS='跨度分布不足', ILL_CONDITIONED='拟合不稳定',
+            EXTRAPOLATION_TOO_FAR='外推过远', UNSTABLE_FIT='拟合误差过大', SUPPORTED='观测支持')
+        for row in result['blades']:
+            box = layout.box().column(align=True)
+            box.label(text=f"B{row['blade']} · {labels[row['status']]} · {row['points']} 点")
+            if row['tip_world'] is not None:
+                value = row.get('estimated_clearance_m')
+                box.label(text='模型估计塔距：' + (f'{value:.3f} m' if value is not None else '未知'))
+                box.label(text=f"连续 {row['consecutive_frames']} 帧 · 拟合残差 {row['fit_residual_m']:.3f} m")
+            if row['extrapolation_m'] is not None:
+                box.label(text=f"叶长方向外推 {row['extrapolation_m']:.2f} m")
+        message(layout, '拟合离散度不代表实机精度；缺测时不沿用旧净空', context=context)
+
+
 class WFRL_PT_X100Frame(_X100Panel, bpy.types.Panel):
     bl_label = '帧与数据流'
     bl_idname = 'WFRL_PT_x100_frame'
@@ -374,13 +440,14 @@ class WFRL_PT_X100Record(_X100Panel, bpy.types.Panel):
         narrow = _narrow(context)
         layout.use_property_split, layout.use_property_decorate = not narrow, False
         controls = layout.column()
-        controls.enabled = bool(session and session.mode != 'LIVE' and not session.closing)
+        controls.enabled = bool(session and session.mode != 'LIVE'
+                                and not (session.closing or session.recording_stopping))
         _property(controls, scene, 'wfrl_x100_record_path', narrow=narrow)
         active = session is not None and session.fanout is not None
         controls.operator('wfrl.x100_record', text='结束记录' if active else '开始记录',
                           icon='CANCEL' if active else 'REC')
         if active and session.recording_stopping:
-            message(layout, '停止待确认，请重试结束记录', 'ERROR', context=context)
+            message(layout, '正在结束记录，等待写盘完成', 'TIME', context=context)
         if active:
             message(layout, '正在记录到：' + str(session.fanout.recorder.path), 'NONE', context=context)
         state = session.fanout.recorder.state if active else scene.get('wfrl_x100_record_state')
@@ -392,7 +459,7 @@ class WFRL_PT_X100Record(_X100Panel, bpy.types.Panel):
 
 
 PROPERTIES = ('source', 'mount', 'location', 'rotation', 'candidates', 'fov', 'path', 'ply_source', 'replay_s',
-              'port', 'stream', 'stale_s', 'color', 'color_scale', 'velocity_limit', 'record_path', 'enabled', 'analysis_roi_min', 'analysis_roi_max', 'analysis_limit')
+              'port', 'stream', 'stale_s', 'color', 'color_scale', 'velocity_limit', 'record_path', 'enabled', 'analysis_roi_min', 'analysis_roi_max', 'analysis_limit', 'search_path', 'blade_tracking')
 
 
 def replay_seek(scene, context=None):
@@ -444,6 +511,9 @@ def register_properties():
         analysis_roi_max=p.FloatVectorProperty(name='机舱 ROI 最大 (m)',size=3,default=(100,100,50)),
         analysis_limit=p.FloatProperty(name='塔距色标上限 (m)',default=10,min=.001,
             description='研究显示配置，不是安全阈值'),
+        search_path=p.StringProperty(name='安装搜索报告', subtype='FILE_PATH'),
+        blade_tracking=p.BoolProperty(name='启用叶片关联与估计', default=True,
+            description='从观测拟合叶片段；点数、覆盖或外推条件不满足时不输出叶尖估计'),
         enabled=p.BoolProperty(default=False))
     for key, definition in definitions.items():
         setattr(bpy.types.Scene, 'wfrl_x100_' + key, definition)
@@ -455,5 +525,5 @@ def unregister_properties():
             delattr(bpy.types.Scene, 'wfrl_x100_' + name)
 
 
-CLASSES = (WFRL_OT_X100Apply, WFRL_OT_X100Close, WFRL_OT_X100MountPreset, WFRL_OT_X100Step, WFRL_OT_X100Play, WFRL_OT_X100Record, WFRL_OT_X100Output,
-           WFRL_PT_X100, WFRL_PT_X100Setup, WFRL_PT_X100Display, WFRL_PT_X100Frame, WFRL_PT_X100Record)
+CLASSES = (WFRL_OT_X100Apply, WFRL_OT_X100Close, WFRL_OT_X100MountPreset, WFRL_OT_X100SearchApply, WFRL_OT_X100Step, WFRL_OT_X100Play, WFRL_OT_X100Record, WFRL_OT_X100Output,
+           WFRL_PT_X100, WFRL_PT_X100Setup, WFRL_PT_X100Display, WFRL_PT_X100Blades, WFRL_PT_X100Frame, WFRL_PT_X100Record)

@@ -10,7 +10,9 @@ from wfrl_blender.scene_model import SceneDTO
 
 
 class Scene(dict):
-    pass
+    wfrl_selected_turbine = 'ALL'
+    wfrl_cinematic_reference = 'T1'
+    wfrl_show_wake = True
 
 
 def area():

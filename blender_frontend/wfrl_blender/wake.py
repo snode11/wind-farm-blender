@@ -346,6 +346,7 @@ def apply_disxy_frame(frame: WakeFrame, *, scene=None, collection_name: str = "W
     if collection is None:
         raise WakePayloadError(f"missing Blender collection: {collection_name}")
     vertices, faces = grid_mesh(frame)
+    shape = list(frame.shape)
     obj = scene.objects.get("WFRL.WakeDisXY")
     if obj is None and bpy.data.objects.get("WFRL.WakeDisXY") is not None:
         raise WakePayloadError('DisXY object belongs to another scene')
@@ -362,13 +363,15 @@ def apply_disxy_frame(frame: WakeFrame, *, scene=None, collection_name: str = "W
             pass
     else:
         mesh = obj.data
-        if len(mesh.vertices) != len(vertices) or len(mesh.polygons) != len(faces):
+        if (list(obj.get('wfrl_disxy_shape', ())) != shape
+                or len(mesh.vertices) != len(vertices) or len(mesh.polygons) != len(faces)):
             mesh.clear_geometry()
             mesh.from_pydata(vertices, [], faces)
         else:
             for vertex, coordinate in zip(mesh.vertices, vertices):
                 vertex.co = coordinate
         mesh.update()
+    obj["wfrl_disxy_shape"] = shape
     obj["fidelity"] = frame.fidelity
     obj["provenance"] = frame.provenance
     obj["wake_kind"] = "FAST.Farm DisXY"

@@ -103,6 +103,7 @@ session.mode='SIMULATION'
 # Rigid fallback uses the same construction mapping and tower binding arity stays five.
 assert all(len(row)==5 for row in session.sampler.flex.towers)
 # Bounded paired comparison with independent cache preparation for each path.
+scene.wfrl_x100_blade_tracking=False
 from time import perf_counter
 from wfrl.radar_x100 import simulation
 samples={'baseline':[],'transaction':[]}
@@ -134,6 +135,21 @@ except RuntimeError: pass
 assert not sampler._sampling_validated
 session.key=None
 session.update()
+# Cached independent inputs must produce the same curves as a fresh verified read.
+scene['wfrl_clearance_time_s']=sampler.interval[0]+.4
+before=performance.snapshot()['timings']['x100.validate']['calls']
+session.update()
+session.prepare_reference(True)
+assert performance.snapshot()['timings']['x100.validate']['calls']-before==2
+for offset in (0.,.1,.2):
+    scene['wfrl_clearance_time_s']=sampler.interval[0]+offset
+    session.update()
+    session.prepare_reference(True)
+    cached=[curve.copy() for curve in session.reference_curves]
+    assert len(cached)==3,session.reference_error
+    session.reference_source_key=session.reference_key=None
+    session.prepare_reference(True)
+    for a,b in zip(cached,session.reference_curves):np.testing.assert_array_equal(a,b)
 # An unbound same-time scene cannot consume another scene's frame or context.
 other_scene=scene.copy()
 try:
@@ -156,9 +172,23 @@ f=simulation.simulate(rigid_sampler.sample,t,sensor_id='rigid',session_id='test'
     material_at=rigid_sampler.material_sample)
 c=rigid_sampler.analysis_context(f,('rigid',f.identity,t))
 assert len(c.triangles)==expected
+# A separate result layer shares the same verified independent reference contract.
+runtime.stop(scene)
+addon.load_demo_scene(farm_flex.default_dual_package(),camera_rig=False)
+scene=bpy.context.scene
+scene.wfrl_x100_candidates=64
+sidecar=runtime.start(scene)
+for offset in (0.,.1,.2):
+    scene['wfrl_clearance_time_s']=sidecar.sampler.interval[0]+offset
+    sidecar.update();sidecar.prepare_reference(True)
+    cached=[curve.copy() for curve in sidecar.reference_curves]
+    sidecar.reference_source_key=sidecar.reference_key=None
+    sidecar.prepare_reference(True)
+    assert len(cached)==3,sidecar.reference_error
+    for a,b in zip(cached,sidecar.reference_curves):np.testing.assert_array_equal(a,b)
 report=dict(status='PASS',core=analysis.__file__,blender=bpy.app.version_string,
     nearest_points_tested=len(ids),side_triangles=expected,checks=['snapshot','numpy_oracle','truth_isolation',
-    'frozen_roi','caps_excluded','optional_analysis_failure','commit_rollback','rewind','historical_context_absent'],
+    'frozen_roi','caps_excluded','optional_analysis_failure','commit_rollback','rewind','historical_context_absent','ordinary_and_sidecar_reference_cache_equivalence'],
     timings=performance.snapshot(),sampling_comparison_s=samples,rigid_fallback=True,two_scene_unbound_isolation=True,anchored_world_stability=True,mixed_unknown_retained=True)
 (OUT/'result.json').write_text(json.dumps(report,indent=2))
 print('X100_ANALYSIS_PASS',json.dumps(report))

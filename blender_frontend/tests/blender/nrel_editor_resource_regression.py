@@ -29,12 +29,54 @@ if MODULE == 'wfrl_blender':
 addon.load_demo_scene()
 scene = bpy.context.scene
 bpy.ops.wfrl.farm_flex_view(turbine='all')
+from unittest.mock import patch
+initial_checks = []
+for boundary in ('constructor', 'activate', 'rebind', 'helpers', 'list'):
+    flex = importlib.import_module(MODULE+'.farm_flex').active_for(scene)
+    before = [(obj, obj.data) for obj, *_ in flex.blades]
+    bindings = list(flex.blades)
+    metadata = {k:scene[k] for k in scene.keys() if k.startswith(('defect_', 'wfrl_nrel_defect'))}
+    counts = len(bpy.data.meshes), len(bpy.data.objects)
+    mesh_names = set(bpy.data.meshes.keys())
+    calls = [0]
+    if boundary in ('constructor', 'activate'):
+        method = '__init__' if boundary == 'constructor' else 'activate'
+        original = getattr(geometry.DefectGeometry, method)
+        def injected(*a, **kw):
+            calls[0] += 1
+            result = original(*a, **kw)
+            if calls[0] == 2: raise RuntimeError('initial '+boundary)
+            return result
+        target, name = geometry.DefectGeometry, method
+    elif boundary == 'rebind':
+        original = flex.rebind_blade
+        def injected(*a, **kw):
+            calls[0] += 1
+            if calls[0] == 4: raise RuntimeError('initial rebind')
+            return original(*a, **kw)
+        target, name = flex, 'rebind_blade'
+    else:
+        target, name = (editor.EditorSession, 'update_helpers') if boundary=='helpers' else (editor, 'sync_defect_list')
+        original = getattr(target, name)
+        def injected(*a, **kw):
+            original(*a, **kw)
+            raise RuntimeError('initial '+boundary)
+    with patch.object(target, name, injected):
+        try: editor.ensure(scene)
+        except RuntimeError: pass
+        else: raise AssertionError('Initial failure was accepted: '+boundary)
+    assert editor.session() is None and not editor._INITIALIZING, boundary
+    assert all(obj.data == mesh for obj, mesh in before), boundary
+    assert all(a[1] is b[1] for a,b in zip(bindings,flex.blades)), boundary
+    assert {k:scene[k] for k in scene.keys() if k.startswith(('defect_', 'wfrl_nrel_defect'))} == metadata
+    assert (len(bpy.data.meshes),len(bpy.data.objects)) == counts, (boundary, counts, (len(bpy.data.meshes),len(bpy.data.objects)), set(bpy.data.meshes.keys())-mesh_names, mesh_names-set(bpy.data.meshes.keys()))
+    initial_checks.append(boundary)
 s = editor.ensure(scene)
 document = s.store.document
 document['defects'] = [schema.new_defect(s.surface, 'fine_crack')]
 s.store.restore(document)
 committed = deepcopy(s.store.document)
-checks = {}
+checks = {'initial_transactions': initial_checks}
 
 helper = s.helpers[0]
 removed_mesh = helper.data

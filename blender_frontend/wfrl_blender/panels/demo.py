@@ -17,7 +17,8 @@ class WFRL_OT_LoadDemo(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         from .. import runtime
-        return runtime.configuration_editable()
+        from ..home_state import can_start
+        return runtime.configuration_editable() and can_start('replace_scene', context.scene)[0]
 
     def execute(self, context):
         from .. import load_demo_scene
@@ -98,7 +99,8 @@ class WFRL_OT_LoadDualBeam(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         from .. import runtime
-        return runtime.configuration_editable()
+        from ..home_state import can_start
+        return runtime.configuration_editable() and can_start('replace_scene', context.scene)[0]
 
     def invoke(self, context, event):
         if self.choose_file or not (self.builtin_package() / 'manifest.json').is_file():
@@ -107,20 +109,21 @@ class WFRL_OT_LoadDualBeam(bpy.types.Operator):
         return self.execute(context)
 
     def execute(self, context):
-        from .. import load_demo_scene, farm_flex, clearance_replay
+        from .. import load_demo_scene, farm_flex
         path = Path(self.filepath).parent if self.filepath else self.builtin_package()
         try:
-            _, overlay = farm_flex.dual_beam_api().resolve_package(path)
+            package = farm_flex.preflight(path)
+            overlay = package.overlay
             if overlay is None:
                 raise ValueError('请选择双束数据包的 manifest.json')
             if not self.filepath:
                 expected = 'hub-tls.v1' if self.builtin_method == 'TLS' else 'hub-axis.v1'
                 if overlay['config'].get('reconstruction_method', 'hub-axis.v1') != expected:
                     raise ValueError('内置双束数据包的方法与入口不一致：' + expected)
-            load_demo_scene(path)
+            load_demo_scene(path, _package=package)
             context.scene.wfrl_farm_panel_page = 'RADAR'
         except (ValueError, OSError, KeyError, TypeError, ImportError) as exc:
-            clearance_replay.clear(context.scene, '双束数据未就绪：' + str(exc))
+            context.scene['wfrl_home_load_error'] = '双束候选包加载失败：' + str(exc)
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}
         return {'FINISHED'}

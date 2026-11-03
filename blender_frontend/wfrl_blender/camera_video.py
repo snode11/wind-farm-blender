@@ -14,6 +14,12 @@ import time
 import numpy as np
 
 
+def render_sample():
+    """Render one exposure subsample using the current native scene settings."""
+    import bpy
+    return bpy.ops.render.render(write_still=True)
+
+
 def sha256(path):
     digest = hashlib.sha256()
     with Path(path).open('rb') as handle:
@@ -411,7 +417,12 @@ def _render_package(args):
             scene.render.image_settings.color_depth = '32'
             scene.render.filepath = str(temporary_exr)
             stage = time.monotonic()
-            bpy.ops.render.render(write_still=True)
+            temporary_exr.unlink(missing_ok=True)
+            result = render_sample()
+            if result != {'FINISHED'}:
+                raise RuntimeError('Exposure sample render did not finish: ' + str(result))
+            if not temporary_exr.is_file() or temporary_exr.stat().st_size == 0:
+                raise RuntimeError('Exposure sample render produced no fresh EXR')
             timings['render_write'] += time.monotonic() - stage
             stage = time.monotonic()
             linear = bpy.data.images.load(str(temporary_exr), check_existing=False)

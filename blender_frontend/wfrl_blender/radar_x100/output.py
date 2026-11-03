@@ -23,7 +23,7 @@ class OutputWindow:
         self.show_reference = False
         self.original_indices = np.empty(0,dtype=np.int64)
         self.reference_lines = []
-        self.color_scale = getattr(scene, 'wfrl_x100_color_scale', 'FIXED')
+        self.color_scale = scene.wfrl_x100_color_scale
         self.zoom, self.pan, self.bounds = 1., (0., 0.), None
         self.drag = None
         self.buttons = []
@@ -32,14 +32,19 @@ class OutputWindow:
         self.limits, self.unknown, self.point_batch = None, 0, None
         self.frame = None
         self.scale = 1.
+        self.factor = 1.
+        self.saturated = 0
+        self.redraw_signature = None
         self.draw_count = 0
         self.error = ''
         self.auxiliary = display.CanvasCache()
         self.uniform_shader = None
+        self.stroke_shader = None
 
     def release_gpu(self):
         self.auxiliary.clear()
         self.uniform_shader = None
+        self.stroke_shader = None
         self.point_batch, self.batch_key = None, None
 
     def alive(self):
@@ -55,6 +60,10 @@ class OutputWindow:
         self.bounds, self.zoom, self.pan = None, 1., (0., 0.)
         self.data_key = self.batch_key = None
 
+    @property
+    def effective_color(self):
+        return 'DISTANCE' if self.view == 'NACELLE' else self.color
+
     def cycle_color(self):
         self.color = display.COLORS[(display.COLORS.index(self.color) + 1) % len(display.COLORS)]
 
@@ -65,11 +74,11 @@ class OutputWindow:
         if frame is not None and frame.spatial['frame'] != display.SENSOR_AXES and self.view == 'SENSOR':
             self.view = 'FRONT'
         # Keep a strong frame reference so object-id reuse cannot revive a stale GPU batch.
-        velocity_limit = getattr(self.scene, 'wfrl_x100_velocity_limit', 10.)
+        velocity_limit = self.scene.wfrl_x100_velocity_limit
         analysis_identity = session.analysis_key if session and self.view == 'NACELLE' else None
-        key = (getattr(session,'generation',None), frame.identity if frame else None,
+        key = (session.generation if session else None, frame.identity if frame else None,
             frame.time.clock_domain if frame else None, frame.time.source_time_s if frame else None,
-            getattr(session,'frame_index',None), id(frame), self.color, self.view,
+            session.frame_index if session else None, id(frame), self.color, self.view,
             self.color_scale, velocity_limit, analysis_identity, self.distance_limit)
         if key != self.data_key:
             self.frame = frame
@@ -119,7 +128,7 @@ class OutputWindow:
         from gpu_extras.batch import batch_for_shader
         region = bpy.context.region
         layout = display.canvas_layout(region.width, region.height,
-            bpy.context.preferences.system.ui_scale, velocity=self.color == 'VELOCITY')
+            bpy.context.preferences.system.ui_scale, velocity=self.effective_color == 'VELOCITY')
         self.scale = layout['scale']
         s = self.scale
         width, height = region.width, region.height
@@ -128,22 +137,27 @@ class OutputWindow:
                            context.area.as_pointer(), region.as_pointer())
         if self.auxiliary.bind(drawing_context):
             self.uniform_shader = None
+            self.stroke_shader = None
             self.point_batch, self.batch_key = None, None
         if self.uniform_shader is None:
             self.uniform_shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+        if self.stroke_shader is None:
+            self.stroke_shader = gpu.shader.from_builtin('POLYLINE_UNIFORM_COLOR')
         uniform = self.uniform_shader
 
-        def shape(points, color, primitive='LINES'):
-            return batch_for_shader(uniform, primitive, {'pos': points}), color
+        def shape(points, color, primitive='LINES', shader=None):
+            return batch_for_shader(shader or uniform, primitive,
+                                    {'pos': np.ascontiguousarray(points, dtype=np.float32)}), color
 
         def box(x, y, w, h, color):
             return shape(((x, y), (x+w, y), (x+w, y+h), (x, y+h)), color, 'TRI_FAN')
 
-        def draw_shapes(shapes):
-            uniform.bind()
+        def draw_shapes(shapes, shader=None):
+            shader = shader or uniform
+            shader.bind()
             for batch, color in shapes:
-                uniform.uniform_float('color', color)
-                batch.draw(uniform)
+                shader.uniform_float('color', color)
+                batch.draw(shader)
 
         def text(value, x, y, size=13, color=(.76, .83, .9, 1), max_width=None):
             blf.size(0, size*s)
@@ -160,7 +174,7 @@ class OutputWindow:
             return [box(0, 0, width, height, (.018, .026, .04, 1)),
                 *(box(x, y, w, h, (.09, .3, .43, 1) if action == self.view else (.065, .095, .135, 1))
                   for action, _, (x, y, w, h) in layout['buttons'])]
-        draw_shapes(self.auxiliary.get('chrome', (width, height, s, self.view, self.color == 'VELOCITY'), chrome))
+        draw_shapes(self.auxiliary.get('chrome', (width, height, s, self.view, self.effective_color == 'VELOCITY'), chrome))
         text('X100  雷达点云输出', 16*s, height-28*s, 19, (.9, .95, 1, 1), width-32*s)
         status = self.scene.get('wfrl_x100_error') or self.scene.get('wfrl_x100_status', '')
         text('当前帧 · 无历史累积 · ' + status, 16*s, height-50*s, 12, max_width=width-32*s)
@@ -186,7 +200,7 @@ class OutputWindow:
         coords = '+X 前 / +Y 左 / +Z 上' if sensor_axes else '原始坐标轴 · 未确认方向'
         if self.view == 'NACELLE':
             result = session.analysis_result if session else None
-            detail = (session.analysis_error if session else '无会话') if result is None else f"ROI {result['selected']} / 有效 {result['valid']} / 饱和 {getattr(self,'saturated',0)}"
+            detail = (session.analysis_error if session else '无会话') if result is None else f"ROI {result['selected']} / 有效 {result['valid']} / 饱和 {self.saturated}"
             coords = '局部Z非重力 · '+detail+' · R 参考'+('开' if self.show_reference else '关')
         text(coords + (' · 传感器角度投影' if self.view == 'SENSOR' else ' · 正交投影 (m)'),
              16*s, info_top-40*s, 11, max_width=width-32*s)
@@ -220,6 +234,7 @@ class OutputWindow:
                 self.point_batch = (shader, batch_for_shader(shader, 'POINTS',
                     {'pos': pixels[visible].astype(np.float32), 'color': self.colors[visible]}))
             self.batch_key = cache_key
+        blade_shapes = []
         if self.view == 'NACELLE' and session and session.context is not None:
             def reference_shapes():
                 context = session.context
@@ -238,16 +253,30 @@ class OutputWindow:
                         rays.extend(pair[:,(0,2)]*factor+(tx,ty))
                 shapes.append(shape(rays,(.15,.65,1,.5)))
                 if self.show_reference:
-                    for curve in getattr(session,'reference_curves',()):
+                    for curve in session.reference_curves:
                         xy=analysis.local(curve,context.world_from_analysis)[:,(0,2)]*factor+(tx,ty)
                         shapes.append(shape(xy,(.85,.6,.9,.8),'LINE_STRIP'))
-                return shapes
+                estimates = []
+                if session.blade_result:
+                    colors = ((1., .45, .2, 1.), (.2, .8, 1., 1.), (.95, .85, .2, 1.))
+                    for row in session.blade_result['blades']:
+                        color = colors[row['blade'] - 1]
+                        if row['curve_world']:
+                            xy = analysis.local(row['curve_world'], context.world_from_analysis)[:, (0, 2)] * factor + (tx, ty)
+                            estimates.append(shape(xy, color, 'LINE_STRIP', self.stroke_shader))
+                        if row['tip_world']:
+                            xy = analysis.local([row['tip_world']], context.world_from_analysis)[0, (0, 2)] * factor + (tx, ty)
+                            cross = xy + np.array([[-7, 0], [7, 0], [0, -7], [0, 7]]) * s
+                            estimates.append(shape(cross, color, shader=self.stroke_shader))
+                return shapes, estimates
             gpu.state.scissor_set(int(left),int(bottom),int(pw),int(ph))
             gpu.state.scissor_test_set(True)
             try:
-                draw_shapes(self.auxiliary.get('analysis',
+                reference, blade_shapes = self.auxiliary.get('analysis',
                     (session.context.identity,tuple(rect),self.zoom,self.pan,bounds,
-                     self.show_reference,session.reference_key),reference_shapes))
+                     self.show_reference,session.reference_key,session.blade_key,
+                     bool(session.blade_result)),reference_shapes)
+                draw_shapes(reference)
             finally:
                 gpu.state.scissor_test_set(False)
         if self.point_batch:
@@ -255,6 +284,16 @@ class OutputWindow:
             shader.bind()
             shader.uniform_float('size', 4.5*s)
             batch.draw(shader)
+        if blade_shapes:
+            gpu.state.scissor_set(int(left), int(bottom), int(pw), int(ph))
+            gpu.state.scissor_test_set(True)
+            try:
+                self.stroke_shader.bind()
+                self.stroke_shader.uniform_float('viewportSize', gpu.state.viewport_get()[2:])
+                self.stroke_shader.uniform_float('lineWidth', max(2., 2.5*s))
+                draw_shapes(blade_shapes, self.stroke_shader)
+            finally:
+                gpu.state.scissor_test_set(False)
         if frame is None or not len(self.xy):
             message = '有效空帧 · 当前检测点数为 0' if frame is not None and not len(frame.points) else '当前视图没有可绘制点' if frame is not None else '等待当前雷达帧'
             text(message, left+20*s, bottom+ph/2, 15, (.95, .7, .4, 1))
@@ -273,14 +312,17 @@ class OutputWindow:
             shapes = []
             if self.limits is not None:
                 for i in range(40):
-                    v = float(i/39 >= .5) if self.color == 'MS' else i/39
+                    v = float(i/39 >= .5) if self.effective_color == 'MS' else i/39
                     color = tuple(analysis.distance_colors([v*self.distance_limit],self.distance_limit)[0][0]) if self.view == 'NACELLE' else (v,1-abs(2*v-1),1-v,1)
                     shapes.append(box(16*s+i*4*s, 36*s, 4*s, 8*s, color))
             return shapes
         draw_shapes(self.auxiliary.get('legend', (s, self.view, self.color, self.color_scale, self.limits), legend))
         hints = '滚轮缩放 · 中键平移 · F 复位 · Esc 关闭' if layout['compact'] else '滚轮缩放 · 中键平移 · 1–5 切视图 · F 复位 · C 着色 · V 色标 · Esc 关闭'
         text(hints, 16*s, 16*s, 11, max_width=width-32*s)
-        if frame is not None and self.color == 'VELOCITY':
+        if self.view == 'NACELLE' and session and session.blade_result:
+            text('叶片拟合：橙 B1 / 蓝 B2 / 黄 B3 · 十字为模型叶尖',
+                 16*s, 76*s, 11, max_width=width-32*s)
+        if frame is not None and self.effective_color == 'VELOCITY':
             sign = frame.provenance.get('velocity_sign', 'UNKNOWN')
             text('速度正值远离传感器' if sign == 'positive receding' else '速度符号沿用来源（未确认）',
                  16*s, 76*s, 11, max_width=width-32*s)
@@ -371,18 +413,18 @@ def tick():
                 item.distance_limit = item.scene.wfrl_x100_analysis_limit
                 session.derive_analysis(item.roi)
                 session.prepare_reference(item.show_reference)
-            signature = (getattr(session,'generation',None),getattr(session,'key',None),
-                id(session.frame) if session else None,
-                getattr(session,'frame_index',None),getattr(session,'display_valid',False),
-                getattr(session,'analysis_key',None),getattr(session,'analysis_error',''),
-                getattr(session,'reference_key',None),getattr(session,'reference_error',''),
-                getattr(session,'render_error',''), item.error,
+            session_signature = None if session is None else (
+                session.generation, session.key, id(session.frame), session.frame_index,
+                session.display_valid, session.analysis_key, session.analysis_error,
+                session.reference_key, session.reference_error, session.render_error,
+                session.blade_key, session.blade_error, bool(session.blade_result))
+            signature = (session_signature, item.error,
                 item.scene.get('wfrl_x100_status',''),item.scene.get('wfrl_x100_error',''),
                 item.scene.get('wfrl_x100_record_state',''),item.scene.get('wfrl_x100_record_error',''),
                 item.scene.get('wfrl_x100_record_frames',0),item.view,item.color,item.color_scale,
                 item.distance_limit,item.show_reference,item.zoom,item.pan,area.width,area.height,
                 display.style_key(item.scene))
-            if signature != getattr(item,'redraw_signature',None):
+            if signature != item.redraw_signature:
                 item.redraw_signature = signature
                 area.tag_redraw()
     return 1/30 if _WINDOWS else None
@@ -499,7 +541,7 @@ class WFRL_OT_X100Output(bpy.types.Operator):
             item.drag = None
         if event.type == 'MOUSEMOVE' and item.drag:
             x, y, pan = item.drag
-            item.pan = (pan[0]-(mx-x)/getattr(item, 'factor', 1.), pan[1]-(my-y)/getattr(item, 'factor', 1.))
+            item.pan = (pan[0]-(mx-x)/item.factor, pan[1]-(my-y)/item.factor)
         area.tag_redraw()
         # This canvas owns navigation; image-editor shortcuts cannot alter the source scene.
         return {'RUNNING_MODAL'}

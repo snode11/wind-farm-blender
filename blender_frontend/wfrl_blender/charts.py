@@ -245,8 +245,13 @@ def record_farm(time_s, poses, manifest, extra=None, *, scene=None):
                                                source_sha256=deepcopy(value['source_sha256']))
         turbines.append(dict(turbine_id=tid, channels=channels))
     farm = {}
-    if all('power' in turbine['channels'] for turbine in turbines):
-        farm['power'] = record(sum(t['channels']['power']['value'] for t in turbines), 'MW')
+    powers = [t['channels'].get('power') for t in turbines]
+    scales = {'W': 1e-6, 'kW': 1e-3, 'MW': 1.}
+    if powers and all(p is not None and p['unit'] in scales for p in powers):
+        farm['power'] = record(sum(p['value'] * scales[p['unit']] for p in powers), 'MW')
+        farm['power']['provenance']['inputs'] = [
+            dict(turbine_id=t['turbine_id'], value=p['value'], unit=p['unit'],
+                 provenance=deepcopy(p['provenance'])) for t, p in zip(turbines, powers)]
     message = dict(type='snapshot', session_id='mappo-results', sequence=sequence,
         payload=dict(mode='replay', run_id=run_id, step=round(time_s * 1000),
                      timestamp=dict(value=time_s, timebase='simulation_seconds'),
@@ -435,7 +440,7 @@ def _prune_plot_resources(context):
     for window in context.window_manager.windows:
         screen, scene = window.screen, window.scene
         if (screen is None or scene is None or scene.get('wfrl_scene_kind') == 'manual'
-                or not (getattr(scene, 'wfrl_chart_visible', False) or plot_enabled(scene))):
+                or not (scene.wfrl_chart_visible or plot_enabled(scene))):
             continue
         for area in screen.areas:
             if area.type != 'VIEW_3D':
@@ -501,7 +506,7 @@ def draw_plot():
     _prune_plot_resources(context)
     from . import imbalance
     response_plot = imbalance.plot_enabled(scene)
-    if scene.get('wfrl_scene_kind') == 'manual' or not (getattr(scene, 'wfrl_chart_visible', False) or response_plot):
+    if scene.get('wfrl_scene_kind') == 'manual' or not (scene.wfrl_chart_visible or response_plot):
         return
     scale = max(1., context.preferences.system.ui_scale)
     region_width = region.width
@@ -512,7 +517,7 @@ def draw_plot():
         _forget_resources(_owner_key(_owner(context)))
         return
     data = (imbalance.plot_data(scene) if response_plot else
-            _plot_data(scene.wfrl_chart_channel, getattr(scene, 'wfrl_selected_turbine', 'ALL'), scene))
+            _plot_data(scene.wfrl_chart_channel, scene.wfrl_selected_turbine, scene))
     if data is None:
         _forget_resources(_owner_key(_owner(context)))
         return

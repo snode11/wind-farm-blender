@@ -4,6 +4,7 @@ import importlib
 import json
 import os
 import sys
+import time
 
 import bpy
 
@@ -58,6 +59,11 @@ try:
         assert current.sampler.calibration_id == calibration
         assert current.fanout is None, 'History must not resume a recorder on a replaced source'
         assert sum(obj.get('wfrl_x100_owner') == current.owner for obj in scene.objects) == 3
+    deadline = time.perf_counter() + 3
+    while session.fanout is not None:
+        radar.tick()
+        assert time.perf_counter() < deadline, 'History recording did not finish'
+        time.sleep(.005)
     assert recorder.state == 'COMPLETE'
     assert not session.fanout
     current.fov.hide_set(True, view_layer=scene.view_layers[0])

@@ -144,14 +144,17 @@ class Scene(dict):
 @pytest.fixture
 def replay(monkeypatch):
     from wfrl_blender import nrel_defects, split_turbine_context
-    from wfrl_blender.turbine_geometry import geometry_data
+    from wfrl_blender.turbine_geometry import DEFAULT_MODEL, geometry_data
 
     scene = Scene(wfrl_clearance_time_s=0.)
     scene.frame_current, scene.frame_subframe = 1, 0.
     scene.wfrl_show_wake, scene.camera = False, None
+    scene.wfrl_channel_telemetry = True
     scene.wfrl_deflection_visible, scene.wfrl_deflection_blade = False, 1
     scene.objects = {}
     active = object.__new__(farm_flex.FarmFlex)
+    active.export_turbines = active._update_geometry = None
+    active.frame_error, active.model = '', DEFAULT_MODEL
     active.scene, active.enabled, active._world_matrices = scene, True, None
     active.visible_turbines, active.readers = {0, 1, 2}, {'T1': object(), 'T2': object(), 'T3': object()}
     active.times, active.poses = np.array([0., 1.]), np.zeros((2, 3, 6))

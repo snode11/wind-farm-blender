@@ -181,6 +181,8 @@ def _commit_export(source, destination):
 class Export:
     def __init__(self):
         self.thread = None
+        self.state = 'IDLE'
+        self._state_lock = threading.Lock()
         self.cancelled = threading.Event()
         self.done_bytes = self.total_bytes = 0
         self.message = '导出所选视频为 MP4'
@@ -209,7 +211,7 @@ class Export:
         identity = self._identity(source.stat())
         self.cancelled.clear()
         self.done_bytes, self.total_bytes = 0, identity[2]
-        self.message, self.error = '正在导出 MP4…', ''
+        self.message, self.error, self.state = '正在导出 MP4…', '', 'RUNNING'
         self.source_path, self.output_path = str(source), ''
         self._source_identity = identity
         self.thread = threading.Thread(target=self._copy, args=(source, target), daemon=True)
@@ -217,6 +219,7 @@ class Export:
 
     def _copy(self, source, target):
         staging, identity = None, None
+        terminal = 'FAILED'
         try:
             with source.open('rb') as incoming, tempfile.NamedTemporaryFile(
                     prefix='.wfrl-video-export-', dir=target.parent, delete=False) as outgoing:
@@ -242,6 +245,10 @@ class Export:
             _commit_export(staging, target)
             self.output_path = str(target)
             self.message = '已导出：' + str(target)
+            terminal = 'SUCCEEDED'
+        except InterruptedError:
+            terminal = 'CANCELLED'
+            self.message, self.error = '导出已取消', ''
         except Exception as exc:
             self.error = str(exc)
             self.message = self.error
@@ -253,15 +260,25 @@ class Export:
                         staging.unlink()
                 except FileNotFoundError:
                     pass
+                except OSError as exc:
+                    self.error = str(exc)
+                    self.message = '暂存清理失败：' + str(exc)
+                    terminal = 'FAILED'
+            with self._state_lock:
+                self.state = terminal
 
-    def stop(self):
-        self.cancelled.set()
-        if self.thread:
-            self.thread.join()
+    def stop(self, timeout=.05):
+        with self._state_lock:
+            if self.active and self.state not in {'SUCCEEDED', 'FAILED', 'CANCELLED'}:
+                self.cancelled.set()
+                self.state, self.message = 'CANCELLING', '取消已请求，等待文件 I/O 结束'
+        if self.active:
+            self.thread.join(timeout=max(0., timeout))
+        return not self.active
 
 
-stream = Stream()
-export = Export()
+stream = globals().get('stream') or Stream()
+export = globals().get('export') or Export()
 
 
 def shutdown():
@@ -270,3 +287,10 @@ def shutdown():
 
 
 atexit.register(shutdown)
+
+
+def status_for(scene=None):
+    """Immutable values for global file-copy and streaming consumers."""
+    return (export.state, export.active, export.done_bytes, export.total_bytes,
+            export.error, export.output_path, export.message,
+            stream.state, stream.active, stream.message, stream.url)

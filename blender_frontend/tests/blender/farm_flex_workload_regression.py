@@ -177,6 +177,47 @@ for key in tuple(scene.keys()):
         del scene[key]
 split_turbine_context.clear_runtime(scene)
 
+# Topology preflight covers the last consumer before any frame writes.
+from unittest.mock import patch
+from wfrl_blender import clearance_replay, charts
+active.visible_turbines={0,1,2}
+for position in (0,-1):
+    obj=active.blades[position][0]
+    original=obj.data
+    broken=bpy.data.meshes.new('InvalidReplayTopology')
+    broken.from_pydata([(0.,0.,0.)],[],[])
+    obj.data=broken
+    before={row[0].name:coordinates(row[0]).copy() for row in active.blades}
+    stamp=scene['wfrl_clearance_time_s']
+    history=charts.raw_history_for(scene).snapshot()
+    try: active.update(scene,sim_time_s=stamp+.01)
+    except ValueError as exc: assert 'topology' in str(exc)
+    else: raise AssertionError('Invalid topology accepted')
+    assert scene['wfrl_clearance_time_s']==stamp and not scene['wfrl_flex_frame_valid']
+    assert clearance_replay.reader_for(scene) is None and not farm_flex.is_active(scene)
+    assert charts.raw_history_for(scene).snapshot()==history
+    for row in active.blades: np.testing.assert_array_equal(coordinates(row[0]),before[row[0].name])
+    obj.data=original;bpy.data.meshes.remove(broken)
+    active.frame_error=''
+    clearance_replay._READERS[scene.as_pointer()]=active.readers['T1']
+    active.update(scene,sim_time_s=stamp,record_telemetry=False)
+# RNA failures after preflight withdraw the entire frame's readiness and telemetry.
+original_write=farm_flex._write_coordinates
+last=active.blades[-1][0]
+def failed_write(obj,*args,**kwargs):
+    if obj==last: raise RuntimeError('injected late Mesh write')
+    return original_write(obj,*args,**kwargs)
+stamp=scene['wfrl_clearance_time_s'];history=charts.raw_history_for(scene).snapshot()
+active.visible_turbines={0,1,2}
+with patch.object(farm_flex,'_write_coordinates',failed_write):
+    try: active.update(scene,sim_time_s=stamp+.01)
+    except RuntimeError: pass
+    else: raise AssertionError('Late write did not fail')
+assert not scene['wfrl_flex_frame_valid'] and clearance_replay.reader_for(scene) is None
+assert scene['wfrl_clearance_time_s']==stamp and charts.raw_history_for(scene).snapshot()==history
+active.frame_error='';clearance_replay._READERS[scene.as_pointer()]=active.readers['T1']
+active.update(scene,sim_time_s=stamp,record_telemetry=False)
+
 # The isolated single-turbine exporter removes the other physical turbines.
 active.export_turbines = {1}
 active.visible_turbines = {0, 1, 2}

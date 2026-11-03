@@ -111,13 +111,12 @@ class WFRL_OT_SplitReconStep(bpy.types.Operator):
 
 class WFRL_OT_SplitReconEnter(bpy.types.Operator):
     bl_idname = 'wfrl.split_recon_enter'
-    bl_label = '独立合成纹理样例'
-    bl_description = '左侧保留 MAPPO，右侧直接检查指定合成样例的表面纹理；两者来源与时钟独立'
+    bl_label = '返回完整风机重建对照'
+    bl_description = '恢复完整风机的几何或同源纹理对照布局与当前时间'
     bl_options = {'REGISTER'}
 
-    mode: EnumProperty(items=(('TEXTURE', '纹理对照', '在当前场景载入独立合成纹理样例'),
-                              ('CURRENT', '当前对照', '保留当前几何或纹理数据，仅恢复对照布局')),
-                       default='TEXTURE', options={'HIDDEN'})
+    mode: EnumProperty(items=(('CURRENT', '当前对照', '恢复完整风机几何或同源纹理对照'),),
+                       default='CURRENT', options={'HIDDEN'})
 
     @classmethod
     def poll(cls, context):
@@ -125,7 +124,7 @@ class WFRL_OT_SplitReconEnter(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            _core().enter(context, use_texture=True if self.mode == 'TEXTURE' else None)
+            _core().enter(context)
         except (ValueError, RuntimeError) as exc:
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}
@@ -288,17 +287,12 @@ def draw_controls(layout, context):
         return
     from . import split_mappo_texture
     synchronized = split_mappo_texture.active(scene)
-    if synchronized or not textured:
-        box.label(text='当前模式：' + ('同源纹理对照' if synchronized else '几何重建'))
-        box.operator('wfrl.split_recon_switch_mode',
-            text='切换到几何重建' if synchronized else '切换到同源纹理对照',
-            icon='MOD_MIRROR' if synchronized else 'SHADING_TEXTURE')
-        if not synchronized and not split_mappo_texture.available(scene):
-            box.label(text='当前来源没有匹配的同源纹理结果', icon='INFO')
-    else:
-        # Retain compatibility for already saved independent samples without
-        # adding an independent-source entry to this geometry workflow.
-        box.label(text='当前模式：独立合成纹理')
+    box.label(text='当前模式：' + ('同源纹理对照' if synchronized else '几何重建'))
+    box.operator('wfrl.split_recon_switch_mode',
+        text='切换到几何重建' if synchronized else '切换到同源纹理对照',
+        icon='MOD_MIRROR' if synchronized else 'SHADING_TEXTURE')
+    if not synchronized and not split_mappo_texture.available(scene):
+        box.label(text='当前来源没有匹配的同源纹理结果', icon='INFO')
     if synchronized:
         row = box.row(align=True)
         for point in ('SUPPORTED', 'TIP'):
@@ -323,16 +317,15 @@ def _draw_header(self, context):
         return
     right = _core().is_reconstruction_view(scene, space)
     self.layout.separator()
-    from . import split_surface_texture, split_mappo_texture
-    title = ('同源纹理 · 同步回放' if split_mappo_texture.active(scene) else
-             '细节表面纹理 · 合成样例' if split_surface_texture.active(scene) else '三维重建回放')
+    from . import split_mappo_texture
+    title = '同源纹理 · 同步回放' if split_mappo_texture.active(scene) else '三维重建回放'
     self.layout.label(text=title
                            if right else 'MAPPO Demo')
 
 
 def _hud_lines(scene):
     """Return bottom-left readouts owned by the reconstruction viewport."""
-    from . import split_surface_texture, split_mappo_texture
+    from . import split_mappo_texture
     lines = []
     if split_mappo_texture.active(scene):
         try:
@@ -352,19 +345,6 @@ def _hud_lines(scene):
                       '绿：截面受图像约束   橙：模型推断 · 均为估计',
                       '塔筒 / 轮毂为模拟展示',
                       '无观测处保留约束色 · 重建精度未验收'))
-        return lines
-    if split_surface_texture.active(scene):
-        try:
-            value = split_surface_texture.information(scene)
-            if value is None:
-                lines.append('正在恢复表面纹理…')
-            else:
-                lines.append(f"合成纹理 {value['time_s']:.3f} s · 样本 {value['index']+1}/{value['samples']}")
-            lines.append('独立样例与时钟 · 非 MAPPO 同源重建')
-            lines.append('原始纹理' if scene.wfrl_recon_texture_mode == 'ORIGINAL' else '对比增强：亮青 / 暗洋红')
-        except ValueError:
-            lines.append('表面纹理数据恢复失败')
-        lines.append('手动纹理位置 · 外观显示 / 精度未验收')
         return lines
     try:
         spec, value = _timing(scene)

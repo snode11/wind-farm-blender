@@ -8,7 +8,7 @@
 
 从仓库根目录使用 `python3 blade_recon0.2/run.py --check-env`；该入口调用已有外部算法环境，不安装依赖。Blender内置Python只负责显示。日常安装扩展、工作区源码、构建ZIP和独立原生文件须分别记录路径、版本和载荷身份。
 
-打开纹理重建样例.command（本地文件：`scripts/blender/打开纹理重建样例.command`）通过日常安装扩展打开已有120帧合成纹理样例；该样例不等于内置601样本同源MAPPO纹理资源。自己的结果可由独立“叶片三维重建”面板导入，或运行：
+日常前端的“叶片三维重建”页使用完整风机几何／同源纹理对照。自己的算法结果由研究脚本显式指定输入：
 
 ```bash
 /Applications/Blender.app/Contents/MacOS/Blender \

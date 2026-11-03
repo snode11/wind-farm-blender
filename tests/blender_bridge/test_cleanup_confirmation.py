@@ -49,7 +49,7 @@ def client_for(monkeypatch, frames):
 @pytest.mark.parametrize('worker_alive', [True, False])
 def test_failed_backend_state_requires_actual_cleanup_in_launcher(monkeypatch, worker_alive):
     session = BackendSession()
-    session._trainer = SimpleNamespace(running=worker_alive, stop=lambda timeout: None)
+    session._trainer = SimpleNamespace(runtime=None, error=None, running=worker_alive, stop=lambda timeout: None)
     session.lifecycle('FAILED', 'Controlled backend failure')
     state = session.synchronization_state()
     assert state['worker_alive'] is worker_alive
@@ -61,7 +61,7 @@ def test_failed_backend_state_requires_actual_cleanup_in_launcher(monkeypatch, w
 
 def test_cleanup_completion_retains_failed_result_and_publishes_new_revision(monkeypatch):
     session = BackendSession()
-    trainer = SimpleNamespace(running=True, stop=lambda timeout: None)
+    trainer = SimpleNamespace(runtime=None, error=None, running=True, stop=lambda timeout: None)
     session._trainer = trainer
     session.lifecycle('RUNNING')
     session.stop(0)
@@ -86,7 +86,7 @@ def test_cleanup_completion_retains_failed_result_and_publishes_new_revision(mon
 @pytest.mark.parametrize('refresh', ['poll', 'synchronization_state'])
 def test_cleanup_revision_retains_failure_reason_until_explicit_replacement_or_reset(refresh):
     session = BackendSession()
-    session._trainer = SimpleNamespace(running=True)
+    session._trainer = SimpleNamespace(runtime=None, error=None, running=True)
     diagnosis = 'Stop timeout: formal backend was force terminated'
     session.lifecycle('FAILED', diagnosis)
     session.poll()
@@ -138,7 +138,7 @@ def test_dead_worker_does_not_confirm_cleanup_while_drain_is_still_running():
         session._trainer.running = False
         entered.set()
         release.wait(2)
-    session._trainer = SimpleNamespace(running=True, stop=stop)
+    session._trainer = SimpleNamespace(runtime=None, error=None, running=True, stop=stop)
     session.lifecycle('FAILED', 'Controlled backend failure')
     session.stop(0)
     try:
@@ -165,7 +165,7 @@ def test_protocol_rejects_invalid_cleanup_proof(changes):
 
 def test_bridge_shutdown_keeps_supervising_until_failed_worker_is_clean(monkeypatch):
     session = BackendSession()
-    session._trainer = SimpleNamespace(running=True, stop=lambda timeout: None)
+    session._trainer = SimpleNamespace(runtime=None, error=None, running=True, stop=lambda timeout: None)
     session.lifecycle('FAILED', 'Controlled backend failure')
     polls = []
     closed = []

@@ -1,4 +1,4 @@
-"""Part 3 integration: registration, reload, timers and offline fallback."""
+"""Native registration, reload, partial acquisition rollback and offline results."""
 from pathlib import Path
 import importlib
 import sys
@@ -10,10 +10,17 @@ import wfrl_blender
 
 
 def main():
-    # Fails before Part3 implementation: no status panel/runtime exists.
     wfrl_blender.register()
-    assert hasattr(bpy.types, 'WFRL_PT_connection'), 'Part 3 connection panel missing'
+    assert hasattr(bpy.types, 'WFRL_PT_connection'), 'Connection panel missing'
     from wfrl_blender import runtime
+    from wfrl_blender import blade_recon_review, split_reconstruction_ui
+    assert not bpy.app.timers.is_registered(blade_recon_review._tick)
+    assert blade_recon_review._loaded not in bpy.app.handlers.load_post
+    assert blade_recon_review._frame not in bpy.app.handlers.frame_change_post
+    assert blade_recon_review.HUD_HANDLE is None
+    identifiers = {cls.bl_idname for cls in wfrl_blender._classes() if hasattr(cls, 'bl_idname')}
+    assert 'wfrl.blade_recon_load' not in identifiers
+    assert bpy.ops.wfrl.split_recon_enter.get_rna_type().properties['mode'].default == 'CURRENT'
     assert bpy.app.timers.is_registered(runtime.tick)
     for _ in range(3):
         wfrl_blender.register()
@@ -35,23 +42,38 @@ def main():
     assert bpy.app.timers.is_registered(runtime.tick)
     # No configured backend dependencies: local controls remain usable.
     wfrl_blender.load_demo_scene()
-    assert runtime.get_state().connection == 'LOCAL DEMO'
-    assert bpy.ops.wfrl.demo_start.poll()
-    bpy.ops.wfrl.demo_start()
-    assert not bpy.ops.wfrl.demo_start.poll(), 'Duplicate start must be disabled'
-    bpy.ops.wfrl.demo_pause()
-    assert not bpy.ops.wfrl.load_demo.poll(), 'Active paused scene must be protected'
-    bpy.ops.wfrl.demo_step()
-    bpy.ops.wfrl.demo_resume()
-    bpy.ops.wfrl.demo_stop()
-    assert bpy.context.scene.get('wfrl_run_status') == 'STOPPED'
-    assert bpy.ops.wfrl.load_demo.poll()
-    assert not ({'torch', 'mpi4py', 'floris', 'wfrl'} & sys.modules.keys())
+    assert runtime.get_state().connection == 'OFFLINE RESULTS'
+    from wfrl_blender import farm_flex, clearance_replay
+    scene=bpy.context.scene
+    assert farm_flex.is_active(scene) and bpy.ops.wfrl.farm_transport.poll()
+    stamp=clearance_replay.sample(scene)['time_s']
+    bpy.ops.wfrl.farm_transport(action='STEP')
+    assert clearance_replay.sample(scene)['time_s']>stamp
+    bpy.ops.wfrl.farm_transport(action='RESET')
+    assert scene.frame_current==scene.frame_start
+    assert not ({'torch','mpi4py','floris'} & sys.modules.keys())
     wfrl_blender.unregister()
     wfrl_blender.unregister()
     assert not bpy.app.timers.is_registered(runtime.tick)
     assert not hasattr(bpy.types, 'WFRL_PT_connection')
     assert not hasattr(bpy.types.Scene, 'wfrl_manual_yaw')
-    print('WFRL_PART3_LIFECYCLE_SMOKE=PASS')
+    from unittest.mock import patch
+    from wfrl_blender.panels import home
+    from wfrl_blender.radar_x100 import runtime as x100
+    for target,name in ((home,'register_properties'),(runtime,'register'),(x100,'register')):
+        original=getattr(target,name)
+        def fail(*a,**kw):
+            original(*a,**kw)
+            raise RuntimeError('partial register')
+        with patch.object(target,name,fail):
+            try: wfrl_blender.register()
+            except RuntimeError: pass
+            else: raise AssertionError('Partial registration accepted')
+        assert not bpy.app.timers.is_registered(runtime.tick)
+        assert not hasattr(bpy.types,'WFRL_PT_connection')
+        assert not hasattr(bpy.types.Scene,'wfrl_channel_telemetry')
+        assert not hasattr(bpy.types.WindowManager,'wfrl_home_page')
+        wfrl_blender.register();wfrl_blender.unregister()
+    print('WFRL_EXTENSION_LIFECYCLE_SMOKE=PASS')
 
 if __name__ == '__main__': main()

@@ -6,7 +6,9 @@ import json
 import os
 import sys
 import time
+import threading
 import unittest
+from unittest.mock import patch
 import numpy as np
 import bpy
 
@@ -29,6 +31,13 @@ OUT.mkdir(parents=True, exist_ok=False)
 addon.load_demo_scene(farm.default_package())
 
 
+def finish_recording(session):
+    deadline = time.perf_counter() + 3
+    while not session.stop_recording():
+        assert time.perf_counter() < deadline, 'Recording did not finish'
+        time.sleep(.005)
+
+
 class RadarEdges(unittest.TestCase):
     def setUp(self):
         capture._ACTIVE = None
@@ -45,6 +54,24 @@ class RadarEdges(unittest.TestCase):
     def tearDown(self):
         capture._ACTIVE = None
         radar.stop(self.scene)
+
+    def test_same_frame_gpu_retry_does_not_resample_or_record(self):
+        # Real Blender source state with a controlled GPU constructor adapter.
+        frame=self.session.frame
+        samples, records=[],[]
+        original=radar._simulation_frame
+        with patch.object(radar,'_simulation_frame',side_effect=lambda *a,**kw: samples.append(True) or original(*a,**kw)), \
+             patch.object(self.session,'_record_frame',side_effect=lambda frame:records.append(frame)), \
+             patch.object(radar.view,'batch',side_effect=[RuntimeError('GPU once'),('shader','batch')]), \
+             patch.dict(sys.modules, {'bpy': SimpleNamespace(app=SimpleNamespace(background=False))}):
+            self.session._display(frame,record=False)
+            self.assertIsNone(self.session.gpu_batch)
+            self.session.gpu_retry_at=0.
+            self.session.retry_display()
+            self.assertEqual(self.session.gpu_batch,('shader','batch'))
+        self.assertIs(self.session.frame,frame)
+        self.assertFalse(samples or records)
+
 
     def test_capture_blocks_installation_and_removal(self):
         capture._ACTIVE = SimpleNamespace(closed=False, scene=self.scene)
@@ -189,6 +216,9 @@ class RadarEdges(unittest.TestCase):
         while self.session.fanout.recorder.state == 'RECORDING' and time.monotonic() < deadline:
             time.sleep(.005)
         self.assertEqual(self.session.fanout.recorder.state, 'FAILED')
+        self.session.fanout.request_close()
+        self.session.fanout.worker.join(timeout=3)
+        self.assertFalse(self.session.fanout.worker.is_alive())
         with self.assertRaises(RuntimeError):
             bpy.ops.wfrl.x100_record()
         for _ in range(3):
@@ -197,7 +227,7 @@ class RadarEdges(unittest.TestCase):
         self.assertEqual(self.scene['wfrl_x100_record_state'], 'FAILED')
         self.assertTrue((OUT / 'backward-recording/INCOMPLETE').exists())
         self.session.start_recording(OUT / 'new-recording')
-        self.session.stop_recording()
+        finish_recording(self.session)
         radar.tick()
         self.assertFalse(self.scene['wfrl_x100_error'])
         self.assertEqual(self.scene['wfrl_x100_record_state'], 'COMPLETE')
@@ -211,18 +241,60 @@ class RadarEdges(unittest.TestCase):
         session = radar.Session.__new__(radar.Session)
         session.scene, session.fanout, session.owner = scene, fanout, 'deleted-recording-owner'
         session.recording_stopping = session.closing = False
+        session.close_remove, session.restore_after_close = True, False
         session.client = session.frame = session.gpu_batch = session.fov_gpu_batch = None
         session.display_valid = False
         radar._SESSIONS[key] = session
         bpy.data.scenes.remove(scene)
         try:
-            radar.tick()
+            deadline = time.perf_counter() + 3
+            while key in radar._SESSIONS:
+                radar.tick()
+                self.assertLess(time.perf_counter(), deadline)
+                time.sleep(.005)
             self.assertNotIn(key, radar._SESSIONS)
             self.assertFalse(fanout.worker.is_alive())
             self.assertEqual(sink.state, 'COMPLETE')
         finally:
             fanout.close()
             radar._SESSIONS.pop(key, None)
+
+    def test_busy_recording_closes_through_history_and_unregistration_without_waiting(self):
+        for action in ('history', 'unregister'):
+            with self.subTest(action=action):
+                session = radar.session_for(self.scene)
+                entered, release = threading.Event(), threading.Event()
+                append = api.recording.Recorder.append
+                def held_append(sink, frame, t):
+                    entered.set()
+                    assert release.wait(5)
+                    return append(sink, frame, t)
+                with patch.object(api.recording.Recorder, 'append', held_append):
+                    session.start_recording(OUT / ('busy-' + action))
+                    fanout = session.fanout
+                    try:
+                        self.assertTrue(entered.wait(3))
+                        with patch.object(fanout.worker, 'join', side_effect=AssertionError('Blocking join')):
+                            radar.on_load_pre(None) if action == 'history' else radar.unregister()
+                            radar.tick()
+                        self.assertIs(session.fanout, fanout)
+                        self.assertTrue(fanout.worker.is_alive())
+                        self.assertTrue(bpy.app.timers.is_registered(radar.tick))
+                    finally:
+                        release.set()
+                        fanout.worker.join(timeout=3)
+                        radar.tick()
+                        if action == 'unregister':
+                            radar.register()
+                    self.assertEqual(fanout.recorder.state, 'COMPLETE')
+                    self.assertIsNone(session.fanout)
+                if action == 'history':
+                    restored = radar.session_for(self.scene)
+                    self.assertIsNot(restored, session)
+                    self.assertTrue(restored.display_valid)
+                    self.assertIsNone(restored.fanout)
+                else:
+                    self.assertIsNone(radar.session_for(self.scene))
 
     def test_material_subset_matches_full_geometry_for_mounts_and_source_endpoints(self):
         scene_api = importlib.import_module(MODULE+'.radar_x100.scene')

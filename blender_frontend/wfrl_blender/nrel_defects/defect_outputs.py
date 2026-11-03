@@ -17,6 +17,19 @@ def write_json(path,value):
 def digest(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def camera_metadata(editor, camera):
+    from dataclasses import asdict
+    from .. import custom_cameras
+    from .defect_visibility import _camera_descriptor
+    descriptor = _camera_descriptor(camera, editor.scene, resolution=editor.camera_resolution(camera))
+    return dict(name=camera.name, slot=camera.get('wfrl_custom_slot'),
+        parameters=asdict(custom_cameras.parameters(camera)),
+        matrix_world=descriptor['matrix_world'], K=descriptor['K'], P=descriptor['P'],
+        lens_mm=camera.data.lens, sensor_width_mm=camera.data.sensor_width,
+        sensor_height_mm=camera.data.sensor_height,
+        resolution=[descriptor['width'], descriptor['height']])
+
+
 def create_run(editor,directory,*,mode='G',mapping=None):
     if editor.draft is not None or editor.healthy_payload is not None: raise ValueError('请先结束编辑或健康对照')
     editor.verify_cameras()
@@ -34,9 +47,7 @@ def create_run(editor,directory,*,mode='G',mapping=None):
         defects_sha256=digest(output/'defects.json'),reference_surface=editor.surface.metadata(),
         replay_manifest_sha256=editor.scene.get('wfrl_farm_manifest_sha256'),
         source_motion=dict(start_s=start,end_s=end,source_sampling_hz=1/float(editor.flex.times[1]-editor.flex.times[0]),timeline_hz=60.),
-        frame_mapping=mapping.to_dict(),cameras=[dict(name=c.name,matrix_world=[list(r) for r in c.matrix_world],
-        lens_mm=c.data.lens,sensor_width_mm=c.data.sensor_width,sensor_height_mm=c.data.sensor_height,
-        resolution=list(editor.camera_resolution(c))) for c in editor.cameras()],
+        frame_mapping=mapping.to_dict(),cameras=[camera_metadata(editor, c) for c in editor.cameras()],
         measurements=editor.payload['measurements'],effects=dict(physics_coupled=False,sensor_noise=False,distortion=False,motion_blur=False),
         products={name:dict(state='NOT_GENERATED') for name in ('visibility','visible_intervals','camera_raw','healthy')},images=[],
         limitations=['Synthetic visual morphology and user dimensions, no physical damage coupling.',
@@ -80,6 +91,7 @@ def capture_images(editor,directory):
     saved=(scene.camera,render.filepath,render.image_settings.file_format,render.image_settings.color_mode,
         render.image_settings.color_depth,render.use_file_extension,scene.frame_current,scene.frame_subframe,
         render.resolution_x,render.resolution_y,render.resolution_percentage)
+    saved_pixels = (render.pixel_aspect_x, render.pixel_aspect_y)
     saved_border = (render.use_border, render.use_crop_to_border)
     saved_postprocessing = (render.use_compositing, render.use_sequencer)
     blur=hasattr(render,'use_motion_blur')
@@ -102,11 +114,21 @@ def capture_images(editor,directory):
                     editor.verify_cameras();scene.camera=camera
                     render.resolution_x,render.resolution_y = editor.camera_resolution(camera)
                     render.resolution_percentage = 100
+                    from .. import custom_cameras, camera_projection
+                    from .defect_visibility import _camera_descriptor
+                    params = custom_cameras.parameters(camera)
+                    render.pixel_aspect_x, render.pixel_aspect_y = camera_projection.pixel_scales(
+                        params.fov, params.vfov, render.resolution_x, render.resolution_y)
+                    descriptor = _camera_descriptor(camera, scene, resolution=(render.resolution_x, render.resolution_y))
                     path=run['output']/(role+'-'+camera.name.replace('.','_')+'.png')
                     render.filepath=str(path)
-                    bpy.ops.render.render(write_still=True, scene=scene.name)
+                    result = bpy.ops.render.render(write_still=True, scene=scene.name)
+                    if result != {'FINISHED'}:
+                        raise RuntimeError('Camera raw render did not finish: ' + str(result))
                     run['manifest']['images'].append(dict(role=role,camera_id=camera.name,time_s=frame_time,
-                        path=path.name,sha256=digest(path),resolution=[render.resolution_x,render.resolution_y]))
+                        path=path.name,sha256=digest(path),resolution=[render.resolution_x,render.resolution_y],
+                        K=descriptor['K'], P=descriptor['P'], matrix_world=descriptor['matrix_world'],
+                        pixel_aspect=[render.pixel_aspect_x, render.pixel_aspect_y]))
         finally:
             editor.geometry.activate(editor.payload);editor.geometry.dispose(healthy)
         run['manifest']['state']='A_IMAGES_GENERATED; NOT_REVIEWED'
@@ -119,6 +141,7 @@ def capture_images(editor,directory):
         raise
     finally:
         scene.camera,render.filepath,render.image_settings.file_format,render.image_settings.color_mode,render.image_settings.color_depth,render.use_file_extension,frame,subframe,render.resolution_x,render.resolution_y,render.resolution_percentage=saved
+        render.pixel_aspect_x, render.pixel_aspect_y = saved_pixels
         render.use_border, render.use_crop_to_border = saved_border
         render.use_compositing, render.use_sequencer = saved_postprocessing
         if blur: render.use_motion_blur=old_blur

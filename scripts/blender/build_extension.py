@@ -22,11 +22,13 @@ PROTOCOL_SOURCE = ROOT / "wfrl" / "blender_bridge" / "messages.py"
 LIDAR_REPLAY_SOURCE = ROOT / "wfrl" / "lidar" / "replay.py"
 LIDAR_EVIDENCE_SOURCE = ROOT / "wfrl" / "lidar" / "evidence.py"
 RADAR_SOURCE = ROOT / 'wfrl' / 'radar_x100'
-RADAR_MODULES = ('__init__.py', 'schema.py', 'ply.py', 'recording.py', 'simulation.py', 'analysis.py', 'channel.py', 'acquisition.py')
+RADAR_MODULES = ('__init__.py', 'schema.py', 'ply.py', 'recording.py', 'simulation.py', 'sampling.py', 'installation.py', 'tracking.py', 'analysis.py', 'channel.py', 'acquisition.py')
 DIST = ROOT / "dist"
 ZIP_TIMESTAMP = (2020, 1, 1, 0, 0, 0)
 EXCLUDED_NAMES = {".DS_Store"}
 EXCLUDED_PARTS = {"__pycache__", ".pytest_cache"}
+RESEARCH_ONLY_PAYLOADS = ('split_surface_texture.py', 'assets/blade_recon_synth20/',
+                          'assets/blade_recon_synth_tex/')
 SAME_SOURCE_MAPPO_MANIFEST_SHA256 = 'd3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde'
 
 
@@ -104,7 +106,8 @@ def _payloads() -> list[tuple[str, bytes]]:
         relative = path.relative_to(PACKAGE_SOURCE)
         if (not path.is_file() or path.name in EXCLUDED_NAMES
                 or any(part in EXCLUDED_PARTS for part in relative.parts)
-                or path.suffix == ".pyc"):
+                or path.suffix == ".pyc"
+                or relative.as_posix().startswith(RESEARCH_ONLY_PAYLOADS)):
             continue
         if relative.as_posix() in {"protocol.py", "build-info.json"} or relative.parts[:2] == ('_vendor', 'radar_x100'):
             continue
@@ -350,7 +353,6 @@ def build(output_dir: Path = DIST, *, farm_package: Path | None = None,
         payloads.sort()
     _validate_farm_payloads(payloads)
     _validate_blade_response_payloads(payloads)
-    _validate_blade_texture_payloads(payloads)
     _validate_mappo_texture_payloads(payloads, required=not custom_source)
     for package, asset_dir, method in ((dual_package, 'dual_beam', 'hub-axis.v1'),
                                       (dual_tls_package, 'dual_beam_tls', 'hub-tls.v1')):

@@ -54,13 +54,15 @@ def reconstruction_camera(scene):
 
 
 def texture_adapter(scene):
-    """Keep same-source playback and independent synthetic inspection distinct."""
-    from . import split_mappo_texture, split_surface_texture
-    return split_mappo_texture if split_mappo_texture.active(scene) else split_surface_texture
+    """Use the complete turbine and the saved MAPPO source clock."""
+    from . import split_mappo_texture
+    return split_mappo_texture
 
 
 def enabled(scene):
-    return available(scene) and bool(scene.get('split_review_enabled', _legacy_available(scene)))
+    return (available(scene) and scene.get('split_texture_current_source') != 'SYNTHETIC'
+            and not (scene.get('split_texture_review') and not scene.get('split_texture_current_source'))
+            and bool(scene.get('split_review_enabled', _legacy_available(scene))))
 
 
 def is_reconstruction_view(scene, space):
@@ -623,10 +625,10 @@ def enter(context, reset_layout=True, use_texture=None, use_same_source=False):
 
     A saved geometry example keeps its original right-hand data when returning
     or repairing its layout. False explicitly selects that geometry; True
-    selects synthetic texture, while use_same_source selects MAPPO texture.
+    and use_same_source select the matching MAPPO texture result.
     """
     import bpy
-    from . import cameras, split_surface_texture, split_mappo_texture, split_texture_settings
+    from . import cameras, split_mappo_texture, split_texture_settings
     scene, window = context.scene, context.window
     if scene.get('wfrl_blade_model', 'nrel5mw') != 'nrel5mw':
         raise ValueError('重建对照需要 NREL 叶片外形，请先切回 NREL 5MW')
@@ -644,13 +646,11 @@ def enter(context, reset_layout=True, use_texture=None, use_same_source=False):
     previous_session = _SESSIONS.get(_key(window))
     try:
         with split_texture_settings.rollback_on_error(scene):
-            if use_same_source:
+            if use_same_source or use_texture is True:
                 split_mappo_texture.ensure(scene)
                 # The explicit synchronization entry starts with the full rotor;
                 # CURRENT restores the user's chosen full/detail view instead.
                 scene[split_mappo_texture.DETAIL] = False
-            elif use_texture is True:
-                split_surface_texture.ensure(scene)
             elif use_texture is False:
                 if not _legacy_available(scene):
                     raise ValueError('请先打开几何重建示例')
@@ -664,6 +664,8 @@ def enter(context, reset_layout=True, use_texture=None, use_same_source=False):
                 texture = texture_adapter(scene)
                 if texture.active(scene) or not _legacy_available(scene):
                     texture.ensure(scene)
+                else:
+                    scene[split_texture_settings.CURRENT] = 'GEOMETRY'
             texture = texture_adapter(scene)
             current_pair = _pair(scene, window.screen)
             right_navigation = None
@@ -682,7 +684,7 @@ def enter(context, reset_layout=True, use_texture=None, use_same_source=False):
                        frame=scene.frame_current, subframe=scene.frame_subframe,
                        right_navigation=right_navigation,
                        explicit=True, detail=bool(texture.active(scene) and
-                                                 scene.get(texture.DETAIL, texture is split_surface_texture)))
+                                                 scene.get(texture.DETAIL, False)))
             scene['split_review_status'] = 'PREPARING'
             _SESSIONS.pop(_key(window), None)
             _JOBS[_key(window)] = job
@@ -877,10 +879,7 @@ def _tick():
                 continue
             texture = texture_adapter(scene)
             if texture.active(scene):
-                if scene.get('split_texture_current_source') == 'MAPPO':
-                    texture.refresh(scene)
-                else:
-                    texture.ensure(scene)
+                texture.refresh(scene)
             areas = _pair(scene, window.screen)
             if areas is None:
                 # An unrelated workspace remains untouched. Enter is the explicit
@@ -932,12 +931,11 @@ def _ensure_timer():
 
 
 def _load_pre(_unused):
-    from . import cameras, split_surface_texture, split_mappo_texture, split_turbine_context
+    from . import cameras, split_mappo_texture, split_turbine_context
     cameras.cancel_view_layout()
     _SESSIONS.clear()
     _JOBS.clear()
     _BOUNDS.clear()
-    split_surface_texture.clear_runtime()
     split_mappo_texture.clear_runtime()
     split_turbine_context.clear_runtime()
 

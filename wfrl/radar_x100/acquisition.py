@@ -116,6 +116,7 @@ class Fanout:
         self.latest, self.display_drops, self.record_failures = {}, 0, 0
         self.latest_received = {}
         self.accepting = True
+        self.failure = None
         self.lock, self.stopping = threading.Lock(), threading.Event()
         self.worker = threading.Thread(target=self._record, name='x100-record', daemon=True)
         self.worker.start()
@@ -172,7 +173,7 @@ class Fanout:
 
     def _record(self):
         while not self.stopping.is_set() or not self.queue.empty():
-            if hasattr(self, 'failure') and self.recorder is not None:
+            if self.failure is not None and self.recorder is not None:
                 self.recorder.fail(self.failure)
             try:
                 frame, replay_time = self.queue.get(timeout=.05)
@@ -184,7 +185,7 @@ class Fanout:
                 except Exception:
                     self.record_failures += 1
         if self.recorder is not None:
-            if hasattr(self, 'failure'):
+            if self.failure is not None:
                 self.recorder.fail(self.failure)
             else:
                 try:
@@ -192,10 +193,13 @@ class Fanout:
                 except Exception:
                     self.record_failures += 1
 
-    def close(self):
+    def request_close(self):
         with self.lock:
             self.accepting = False
             self.stopping.set()
+
+    def close(self):
+        self.request_close()
         self.worker.join(timeout=5)
         if self.worker.is_alive():
             raise TimeoutError('Recording worker has not stopped; recording remains incomplete')

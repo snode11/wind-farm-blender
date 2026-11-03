@@ -1218,3 +1218,12 @@ from ..native_camera_views import CLASSES as NATIVE_CLASSES
 from .stacked_camera_rig import CLASSES as BOX_CLASSES
 
 CLASSES=BOX_CLASSES + NATIVE_CLASSES + OUTPUT_CLASSES + (WFRL_OT_CustomCamera,WFRL_OT_CustomAction,WFRL_OT_CustomCoordinates,WFRL_PT_CustomCameras)
+
+
+def status_for(scene):
+    from ..home_state import TaskStatus
+    job = _ACTIVE
+    if job is None:
+        return TaskStatus('camera')
+    return TaskStatus('camera', True, job.scene == scene, job.stage,
+                      job.scene.name, getattr(job, 'error', ''), '')

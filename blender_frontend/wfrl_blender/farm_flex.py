@@ -103,6 +103,7 @@ class _LoadedPackage:
     tower_motion: dict | None
     reference: dict | None
     verified_source: _VerifiedSource | None = None
+    comparison: dict | None = None
 
     @property
     def playback(self):
@@ -187,9 +188,13 @@ def _load_package(path):
     while len(_PACKAGE_CACHE) > _PACKAGE_CACHE_SIZE:
         _PACKAGE_CACHE.popitem(last=False)
     tower_data = None if parsed.tower_motion is None else dict(parsed.tower_motion)
+    _read_telemetry(path, manifest, parsed.times, readers, _source=verified_source)
+    from .deflection import read_comparison
+    comparison = read_comparison(path, manifest, parsed.times, parsed.poses,
+        rigid_poses=parsed.poses, tower_motion=tower_data, blade_reference=parsed.reference)
     return _LoadedPackage(manifest, parsed.times, parsed.transforms, parsed.poses,
                           readers, path, result_path, overlay, tower_data,
-                          deepcopy(parsed.reference), verified_source)
+                          deepcopy(parsed.reference), verified_source, comparison)
 
 
 def _parse_package(path, manifest):
@@ -315,6 +320,17 @@ def _validate_replay_contents(manifest, contents):
 def read_package(path):
     """Return validated manifest, clock, transforms, poses and replay readers."""
     return _load_package(path).playback
+
+
+def validate_candidate(path, package):
+    if (not isinstance(package, _LoadedPackage)
+            or package.result_path != Path(path).resolve()):
+        raise ValueError('Validated package does not match the requested result path')
+
+
+def preflight(path):
+    """Fully validate a candidate without changing any scene or reader."""
+    return _load_package(path)
 
 
 def _read_telemetry(path, manifest, times, readers, *, _source=None):
@@ -492,13 +508,15 @@ class _MeshBindings:
 class FarmFlex:
     def __init__(self,scene,path,*,_package=None):
         self._meshes = _MeshBindings()
+        self.comparison = None
+        self.export_turbines = None
+        self.frame_error = ''
         try:
             self._bind(scene, path, _package=_package)
         except Exception:
-            comparison = getattr(self, 'comparison', None)
             try:
-                if comparison is not None:
-                    comparison.close()
+                if self.comparison is not None:
+                    self.comparison.close()
             finally:
                 self._meshes.rollback()
             raise
@@ -519,12 +537,8 @@ class FarmFlex:
         self.reference = package.reference
         self.towers = []
         self.fittings = []
-        from .deflection import read_comparison, ComparisonView
-        comparison_data = read_comparison(path, self.manifest, self.times, self.poses,
-                                          rigid_poses=self.poses,
-                                          tower_motion=self.tower_motion,
-                                          blade_reference=self.reference)
-        self.comparison = None
+        from .deflection import ComparisonView
+        comparison_data = package.comparison
         verified_source = package.verified_source
         self.telemetry = _read_telemetry(path, self.manifest, self.times, self.readers,
                                          _source=verified_source)
@@ -703,7 +717,7 @@ class FarmFlex:
                     pass
 
     def record_telemetry(self, scene, pose=None):
-        if not getattr(scene, 'wfrl_channel_telemetry', True):
+        if not scene.wfrl_channel_telemetry:
             return
         from . import clearance_replay, charts
         value = clearance_replay.sample(scene)
@@ -753,7 +767,7 @@ class FarmFlex:
 
     def _world_cache(self):
         import bpy
-        exported = getattr(self, 'export_turbines', None)
+        exported = self.export_turbines
         key = (self.scene.frame_current, self.scene.frame_subframe,
                self.scene == bpy.context.scene,
                frozenset(self.visible_turbines),
@@ -817,7 +831,7 @@ class FarmFlex:
 
     def mesh_turbines(self):
         """Turbines whose blade meshes are consumed by the view or export."""
-        exported = getattr(self, 'export_turbines', None)
+        exported = self.export_turbines
         return frozenset(self.visible_turbines if exported is None else exported)
 
     def _interpolate_blade(self, row, lo, hi, i, alpha, pose, nacelle):
@@ -881,11 +895,11 @@ class FarmFlex:
             _array_state(support['nacelle'][i:i+2]))
         comparison = self.comparison
         scalars = None if comparison is None else tuple(sorted(comparison.data['scalars'].items()))
-        exported = getattr(self, 'export_turbines', None)
+        exported = self.export_turbines
         key = (_rna_identity(self.scene), id(reader),
                tuple((name, id(value)) for name, value in self.readers.items()),
                self.scene.get('wfrl_farm_flex_path'), self.scene.get('wfrl_farm_manifest_sha256'),
-               self.scene.get('wfrl_blade_model'), getattr(self, 'model', None),
+               self.scene.get('wfrl_blade_model'), self.model,
                t, i, alpha, id(self.times), id(self.transforms), id(self.poses),
                _array_state(self.times[i:i+2]), _array_state(self.transforms[i:i+2]),
                _array_state(self.poses[i:i+2]), support_key,
@@ -895,7 +909,7 @@ class FarmFlex:
                      for obj, rest, index, weight, k in self.towers),
                frozenset(self.visible_turbines),
                None if exported is None else frozenset(exported))
-        cached = getattr(self, '_update_geometry', None)
+        cached = self._update_geometry
         if cached is not None and cached[0] == key:
             performance.count('flex.update_cache_hit')
             return cached[1]
@@ -938,8 +952,58 @@ class FarmFlex:
         while len(self.cache)>3:self.cache.pop(next(iter(self.cache)))
         return result
 
+    def _preflight_frame(self, scene, mesh_turbines, support_turbines):
+        for obj, rest, _world, _index, _weight, k, _blade, _offset in self.blades:
+            if k not in mesh_turbines:
+                continue
+            if scene.objects.get(obj.name) != obj or len(obj.data.vertices) != len(rest):
+                raise ValueError('Replay mesh topology no longer matches its binding: ' + obj.name)
+            if getattr(obj.data, 'is_editmode', False):
+                raise ValueError('Replay mesh is in edit mode: ' + obj.name)
+        for obj, rest, _index, _weight, k in self.towers:
+            if k in support_turbines and (scene.objects.get(obj.name) != obj
+                    or len(obj.data.vertices) != len(rest)):
+                raise ValueError('Replay mesh topology no longer matches its binding: ' + obj.name)
+        for k, tid in enumerate(self.readers):
+            if self.export_turbines is not None and k not in self.export_turbines:
+                continue
+            for suffix in ('YawRoot', 'Rotor', 'Blade1', 'Blade2', 'Blade3'):
+                obj = scene.objects[f'WFRL.Turbine.{tid}.{suffix}']
+                tuple(getattr(obj.rotation_euler, axis) for axis in ('x', 'y', 'z'))
+        for obj, k, _z, _rest in self.fittings:
+            if k in support_turbines and scene.objects.get(obj.name) != obj:
+                raise ValueError('Replay support binding is unavailable: ' + obj.name)
+
     @performance.timed("flex.update")
     def update(self,scene, *, sim_time_s=None, record_telemetry=True, update_comparison=True):
+        if scene != self.scene or not self.enabled:
+            return
+        if self.frame_error:
+            raise ValueError('Replay frame unavailable; reload the package: ' + self.frame_error)
+        previous_time = scene.get('wfrl_clearance_time_s')
+        try:
+            self._update_frame(scene, sim_time_s=sim_time_s,
+                               record_telemetry=record_telemetry, update_comparison=update_comparison)
+        except (ValueError, RuntimeError, ReferenceError, KeyError, IndexError, TypeError) as exc:
+            from . import clearance_replay, _cancel_playback
+            self.frame_error = str(exc)
+            clearance_replay._READERS.pop(scene.as_pointer(), None)
+            self._update_geometry = None
+            scene['wfrl_flex_frame_valid'] = False
+            scene['wfrl_home_load_error'] = '回放帧无效，请重新加载结果：' + str(exc)
+            if previous_time is None:
+                scene.pop('wfrl_clearance_time_s', None)
+            else:
+                scene['wfrl_clearance_time_s'] = previous_time
+            for cleanup in (lambda: _cancel_playback(scene),
+                            lambda: clearance_replay.clear(scene, '回放帧无效：' + str(exc))):
+                try:
+                    cleanup()
+                except Exception as cleanup_error:
+                    scene['wfrl_home_load_error'] += '; 清理待确认：' + str(cleanup_error)
+            raise
+
+    def _update_frame(self,scene, *, sim_time_s=None, record_telemetry=True, update_comparison=True):
         from . import clearance_replay
         if scene!=self.scene or not self.enabled:return
         self._world_matrices = None
@@ -963,19 +1027,17 @@ class FarmFlex:
         support_turbines = set(mesh_turbines)
         # Reconstruction can first share T1's support while playback is paused.
         # Keep that source current even before a shared group has been created.
-        if getattr(self, 'export_turbines', None) is None:
+        if self.export_turbines is None:
             support_turbines.add(0)
         performance.count("flex.participating_turbines", len(mesh_turbines))
+        self._preflight_frame(scene, mesh_turbines, support_turbines)
         sample = self._geometry_sample(reader, t, i, alpha)
         lower, upper, pose = sample['lower'], sample['upper'], sample['pose']
-        if record_telemetry:
-            self.record_telemetry(scene, pose)
-        scene['wfrl_clearance_time_s']=float(t)
         if scene.wfrl_show_wake:
             from . import wake
             wake.update_proxy_objects(scene, phase=float(t)*.9)
         for k,tid in enumerate(self.readers):
-            if getattr(self, 'export_turbines', None) is not None and k not in self.export_turbines:
+            if self.export_turbines is not None and k not in self.export_turbines:
                 continue
             scene.objects[f'WFRL.Turbine.{tid}.YawRoot'].rotation_euler.z=math.radians(float(pose[k,0]))
             scene.objects[f'WFRL.Turbine.{tid}.Rotor'].rotation_euler.x=math.radians(float(pose[k,1]))
@@ -987,7 +1049,7 @@ class FarmFlex:
             support = self.tower_motion
             tower, nacelle = sample['tower'], sample['nacelle']
             for k,tid in enumerate(self.readers):
-                if getattr(self, 'export_turbines', None) is not None and k not in self.export_turbines:
+                if self.export_turbines is not None and k not in self.export_turbines:
                     continue
                 obj=scene.objects[f'WFRL.Turbine.{tid}.YawRoot']
                 obj.rotation_euler=Matrix(nacelle[k,:,:3].tolist()).to_euler()
@@ -1044,20 +1106,24 @@ class FarmFlex:
             if written:
                 performance.count('flex.blade_updates')
                 performance.count('flex.vertices_written', len(local))
-        if update_comparison and self.comparison is not None and getattr(self, 'export_turbines', None) is None:
+        if update_comparison and self.comparison is not None and self.export_turbines is None:
             self.comparison.update(scene, i, alpha, t)
+        scene['wfrl_clearance_time_s'] = float(t)
         from .nrel_defects import editor
         editor.after_update(scene, t)
         # Reuse the current source structures only after their pose and flexible
         # tower mesh have been committed. Reconstruction samples remain separate.
         from . import split_turbine_context
         split_turbine_context.sync(scene)
+        scene['wfrl_flex_frame_valid'] = True
+        if record_telemetry:
+            self.record_telemetry(scene, pose)
 
 
 def update(scene,depsgraph=None):
     global _ACTIVE
     active = active_for(scene)
-    if active is not None:
+    if active is not None and not active.frame_error:
         _ACTIVE = active
         active.update(scene)
 
@@ -1131,14 +1197,14 @@ def attach(scene,path,*,_package=None):
     import bpy
     from . import tip_tracking
     global _ACTIVE
+    replacing = False
     try:
         # Validate before releasing the old scene runtime. In particular a
         # FULL_COPY scene contains renamed objects and must not detach an
         # already-restored scene when those required bindings are absent.
         package = _load_package(path) if _package is None else _package
-        if _package is not None and (not isinstance(package, _LoadedPackage)
-                or package.result_path != Path(path).resolve()):
-            raise ValueError('Validated package does not match the requested result path')
+        if _package is not None:
+            validate_candidate(path, package)
         manifest = package.manifest
         required = [f'WFRL.Turbine.{tid}.{suffix}'
                     for tid in manifest['turbine_ids']
@@ -1156,6 +1222,7 @@ def attach(scene,path,*,_package=None):
                 continue
             if other.scene != scene and any(obj in scene.objects.values() for obj, *_ in other.blades):
                 raise ValueError('FarmFlex objects are already driven by scene: ' + other.scene.name)
+        replacing = True
         detach(scene, restore=False)
         from . import charts
         charts.clear(scene=scene)
@@ -1164,9 +1231,11 @@ def attach(scene,path,*,_package=None):
         _ACTIVE = active
     except Exception:
         from . import clearance_replay
-        detach(scene)
-        scene['wfrl_flex_active'] = False
-        clearance_replay.clear(scene,'三机形变包未就绪：加载失败')
+        if replacing:
+            detach(scene, restore=False)
+        if replacing or active_for(scene) is None:
+            scene['wfrl_flex_active'] = False
+            clearance_replay.clear(scene,'三机形变包未就绪：加载失败')
         raise
     # Tip sampling must follow mesh deformation at the same simulation time.
     if update in bpy.app.handlers.frame_change_post:bpy.app.handlers.frame_change_post.remove(update)

@@ -10,6 +10,7 @@ from . import configuration, display, view
 _SESSIONS = {}
 _RESTORE_ATTEMPTED = set()
 _RESET_HANDLERS = ('load_pre', 'undo_pre', 'redo_pre')
+_SHUTTING_DOWN = False
 
 
 def session_for(scene):
@@ -33,7 +34,8 @@ def _simulation_frame(scene, sampler, source_session, sequence, source_t):
         frame = simulation.simulate(sampler.sample, source_t, sensor_id='X100-T1',
             session_id=source_session, sequence=sequence, interval_s=sampler.interval,
             candidate_budget=scene.wfrl_x100_candidates, visibility=sampler.visibility,
-            material_at=sampler.material_sample)
+            material_at=sampler.material_sample,
+            sampling_plan=sampler.sampling_plan(scene.wfrl_x100_candidates))
     frame.provenance['calibration_id'] = sampler.calibration_id
     return frame
 
@@ -54,7 +56,10 @@ class Session:
         self.key, self.frame, self.gpu_batch, self.client = None, None, None, None
         self.mount, self.fov, self.fanout = None, None, None
         self.recording_stopping = self.closing = False
+        self.close_remove = True
+        self.restore_after_close = False
         self._gpu_required = True
+        self.gpu_retry_at = 0.
         self.fov_gpu_batch = None
         self.render_color = None
         self.display_valid, self.record_start, self.record_last = False, None, None
@@ -63,10 +68,20 @@ class Session:
         self.context = self.analysis_result = self.side_query = None
         self.reference_curves = ()
         self.reference_key = None
+        self.reference_source_key = None
+        self.reference_source = None
         self.analysis_key = None
+        self.analysis_retry_key = None
+        self.analysis_retry_at = 0.
         self.analysis_error = ''
         self.render_error = ''
         self.reference_error = ''
+        from .core import tracking
+        self.blade_tracker = tracking.BladeTracker()
+        self.blade_result = None
+        self.blade_key = None
+        self.blade_error = ''
+        self.playing = False
         self.replay_cursor = None
         self.replay_time_s = float(scene.wfrl_x100_replay_s)
         self.frame_index = self.record_last_index = None
@@ -123,6 +138,8 @@ class Session:
         self.reference_curves = ()
         self.reference_key = None
         self.analysis_key = None
+        self.analysis_retry_key = None
+        self.analysis_retry_at = 0.
         self.analysis_error = ''
         self.reference_error = ''
         if frame is None or self.mode != 'SIMULATION':
@@ -154,10 +171,18 @@ class Session:
             from ..turbine_geometry import geometry_data
             sampler, flex = self.sampler, self.sampler.flex
             sampler.validate()
-            source, _ = farm_flex.dual_beam_api().resolve_package(farm_flex.saved_package(self.scene))
-            reference = prebend.read_reference(source, flex.manifest)
-            if reference is None or schema.digest(reference) != schema.digest(flex.reference):
-                raise ValueError('当前来源无核对通过的独立零载荷参考')
+            source_key = (id(flex), schema.digest(flex.reference), sampler.source_id,
+                          sampler.geometry_id, str(farm_flex.saved_package(self.scene)))
+            if source_key != self.reference_source_key:
+                source, _ = farm_flex.dual_beam_api().resolve_package(farm_flex.saved_package(self.scene))
+                reference = prebend.read_reference(source, flex.manifest)
+                if reference is None or schema.digest(reference) != schema.digest(flex.reference):
+                    self.reference_source_key = self.reference_source = None
+                    raise ValueError('当前来源无核对通过的独立零载荷参考')
+                from copy import deepcopy
+                self.reference_source = deepcopy(reference)
+                self.reference_source_key = source_key
+            reference = self.reference_source
             t = self.frame.time.source_time_s
             i = int(np.clip(np.searchsorted(flex.times,t,side='right')-1,0,len(flex.times)-2))
             alpha = (t-flex.times[i])/(flex.times[i+1]-flex.times[i])
@@ -179,25 +204,36 @@ class Session:
         key = self.context.identity, tuple(map(tuple, roi))
         if key == self.analysis_key:
             return
-        self.analysis_key = key
+        if (key == self.analysis_retry_key
+                and time.monotonic() < self.analysis_retry_at):
+            return
+        self.analysis_key = None
         self.analysis_result = None
         try:
             from .scene import SideWallQuery
             if self.side_query is None:
                 self.side_query = SideWallQuery(self.context)
             self.analysis_result = self.side_query.query(self.frame.xyz, roi)
+            self.analysis_key = key
+            self.analysis_retry_key = None
             self.analysis_error = ''
         except Exception as exc:
             self.side_query = None
+            self.analysis_retry_key = key
+            self.analysis_retry_at = time.monotonic() + .25
             self.analysis_error = str(exc)
 
-    def _display(self, frame, *, required_gpu=False):
+    def _display(self, frame, *, required_gpu=False, record=True):
         import bpy
         if frame is not self.frame:
             self.pair_context(frame)
         self.frame = frame
+        if frame is None:
+            self.blade_tracker.reset()
+            self.blade_result = self.blade_key = None
         self.display_valid = frame is not None and frame.completeness == 'COMPLETE'
         style = display.style_key(self.scene)
+        self.gpu_retry_at = time.monotonic() + .25
         try:
             self.gpu_batch = view.batch(frame, style[0], color_scale=style[1], velocity_limit=style[2]) if self.display_valid and not bpy.app.background else None
             self.render_error = ''
@@ -207,7 +243,7 @@ class Session:
             if required_gpu:
                 raise
         self.render_color = style
-        if self.fanout and not self.recording_stopping and frame is not None:
+        if record and self.fanout and not self.recording_stopping and frame is not None:
             try:
                 self._record_frame(frame)
             except Exception as exc:
@@ -245,7 +281,12 @@ class Session:
         if self.mode == 'SIMULATION':
             if farm_flex.active_for(scene) is not self.sampler.flex:
                 raise ValueError('风场几何来源已改变，请应用 X100 配置')
-            self.sampler.validate()
+            from .. import custom_camera_capture
+            capturing = custom_camera_capture.active() and custom_camera_capture._ACTIVE.scene == scene
+            sequence, source_t = _simulation_time(scene, self.sampler)
+            # A new sampling transaction validates once; frozen frames still validate every tick.
+            if capturing or sequence == self.key:
+                self.sampler.validate()
             _validate_mount_drivers(self.mount)
             mount, fov = view.existing_installation(scene, self.owner)
             yaw = scene.objects.get('WFRL.Turbine.T1.YawRoot')
@@ -256,12 +297,10 @@ class Session:
                     or not np.array_equal(np.array(self.mount.matrix_parent_inverse), np.eye(4))
                     or not np.allclose(actual, self.sampler.mount_from_sensor, atol=1e-5, rtol=0)):
                 raise ValueError('X100 实体安装被原生编辑；请重新应用标定配置')
-            from .. import custom_camera_capture
-            if custom_camera_capture.active() and custom_camera_capture._ACTIVE.scene == scene:
+            if capturing:
                 scene['wfrl_x100_status'] = '几何仿真 · 相机采集期间保留采集前的观测帧'
                 return
             # Radar samples use a declared 30 Hz source grid independent of drawing cadence.
-            sequence, source_t = _simulation_time(scene, self.sampler)
             key = sequence
             if key != self.key:
                 frame = _simulation_frame(scene, self.sampler, self.source_session, sequence, source_t)
@@ -275,7 +314,7 @@ class Session:
                 raise ValueError('回放路径已改变，请应用 X100 配置')
             if self.static_frame is not None and scene.wfrl_x100_ply_source != self.static_frame.source_kind:
                 raise ValueError('单帧 PLY 来源声明已改变，请应用 X100 配置')
-            if getattr(self, 'playing', False) and self.replay:
+            if self.playing and self.replay:
                 elapsed = time.monotonic() - self.play_anchor
                 ended = elapsed >= self.replay.duration_s
                 self._set_replay_position(min(self.replay.duration_s, elapsed),
@@ -308,8 +347,57 @@ class Session:
                 self.gpu_batch = None
             if self.client.error:
                 scene['wfrl_x100_error'] = self.client.error
-        if self.frame is not None and self.render_color != display.style_key(scene):
-            self._display(self.frame)
+        self.retry_display()
+        self.derive_blades()
+
+    def derive_blades(self):
+        """Optional inference errors leave the original observation and recording intact."""
+        if not getattr(self.scene, 'wfrl_x100_blade_tracking', False):
+            self.blade_result = self.blade_key = None
+            self.blade_error = ''
+            self.blade_tracker.reset()
+            return
+        if self.mode != 'SIMULATION' or self.context is None or self.frame is None or not self.display_valid:
+            self.blade_result = self.blade_key = None
+            self.blade_tracker.reset()
+            self.blade_error = '需要同帧塔面、根部姿态和已对齐点云'
+            return
+        if self.blade_key == self.context.identity:
+            return
+        self.blade_result = None
+        self.blade_key = self.context.identity
+        try:
+            from .core import analysis
+            from .scene import SideWallQuery
+            if self.side_query is None:
+                self.side_query = SideWallQuery(self.context)
+            background = self.side_query.query(self.frame.xyz, ((-1e6,)*3, (1e6,)*3))
+            world = analysis.transform(self.frame.xyz, self.context.world_from_sensor)
+            priors = self.sampler.blade_priors(self.frame.time.source_time_s)
+            result = self.blade_tracker.update(world, priors, background['distance'],
+                time_s=self.frame.time.source_time_s,
+                identity=(self.generation, self.source_session, self.sampler.calibration_id),
+                frame_key=self.frame.identity)
+            for row in result['blades']:
+                row['estimated_clearance_m'] = None
+                if row['tip_world'] is not None:
+                    point = analysis.local([row['tip_world']], self.context.world_from_sensor)
+                    distance = self.side_query.query(point, ((-1e6,)*3, (1e6,)*3))['distance'][0]
+                    if np.isfinite(distance):
+                        row['estimated_clearance_m'] = float(distance)
+            self.blade_result, self.blade_error = result, ''
+        except Exception as exc:
+            self.blade_tracker.reset()
+            self.blade_error = str(exc)
+
+    def retry_display(self):
+        """Rebuild only display resources for a still-valid original frame."""
+        import bpy
+        if self.frame is not None and self.display_valid and (
+                self.render_color != display.style_key(self.scene)
+                or (self.gpu_batch is None and not bpy.app.background
+                    and time.monotonic() >= self.gpu_retry_at)):
+            self._display(self.frame, record=False)
 
     def _update_fov_visibility(self):
         show = self.scene.wfrl_x100_fov
@@ -341,7 +429,7 @@ class Session:
             self._advancing_replay = False
 
     def toggle_playback(self):
-        if getattr(self, 'playing', False):
+        if self.playing:
             self.update()
             self.playing = False
             return
@@ -390,19 +478,24 @@ class Session:
         if self.fanout:
             fanout = self.fanout
             self.recording_stopping = True
-            fanout.close()
+            fanout.request_close()
+            self.recording_health()
+            if fanout.worker.is_alive():
+                return False
             self.recording_health()
             self.fanout = None
             self.recording_stopping = False
             if fanout.recorder.state == 'FAILED':
                 raise RuntimeError(fanout.recorder.error)
+        return True
 
     def close(self, *, remove=True):
         self.closing = True
+        self.close_remove = remove
         if self.client:
             self.client.close()
         try:
-            self.stop_recording()
+            return self.stop_recording()
         finally:
             self.frame, self.gpu_batch, self.fov_gpu_batch, self.display_valid = None, None, None, False
             self.context = self.analysis_result = self.side_query = None
@@ -419,7 +512,7 @@ def _guard_installation():
         raise ValueError('请先结束或取消相机采集，再应用或关闭 X100 安装')
 
 
-def apply_mount_preset(scene, preset):
+def apply_mount_preset(scene, preset, *, search_report=None):
     """Switch one sensor's calibration and resample at the existing scene time."""
     import bpy
     from mathutils import Matrix
@@ -429,7 +522,7 @@ def apply_mount_preset(scene, preset):
     _guard_installation()
     if scene.wfrl_x100_source != 'SIMULATION':
         raise ValueError('安装位置切换仅用于几何仿真')
-    if preset not in {'ORIGINAL', 'NACELLE_SIDE'}:
+    if preset not in {'ORIGINAL', 'NACELLE_SIDE', 'SEARCH'}:
         raise ValueError('未知雷达安装位置：' + str(preset))
     current = session_for(scene)
     if current is not None and (current.fanout or current.closing):
@@ -456,7 +549,10 @@ def apply_mount_preset(scene, preset):
                 pass
     if sampler is None:
         sampler = SceneSampler(flex, mount_from_sensor=np.eye(4))
-    if preset == 'ORIGINAL':
+    if preset == 'SEARCH':
+        from .core import installation
+        location, rotation = installation.selected_installation(search_report, sampler.source_id, sampler.geometry_id)
+    elif preset == 'ORIGINAL':
         location, rotation = ORIGINAL_LOCATION, ORIGINAL_ROTATION
     else:
         location, rotation = nacelle_side_installation(sampler)
@@ -500,6 +596,7 @@ def apply_mount_preset(scene, preset):
         current.render_color = style
         current.capture_configuration()
         current.pair_context(frame)
+        current.derive_blades()
     except Exception:
         scene.wfrl_x100_mount, scene.wfrl_x100_location, scene.wfrl_x100_rotation = previous
         if current is not None:
@@ -518,21 +615,37 @@ def stop(scene, *, remove=True):
     session = _SESSIONS.get(key)
     if session:
         try:
-            session.close(remove=remove)
+            if not session.close(remove=remove):
+                scene['wfrl_x100_status'] = '正在关闭，等待记录写盘结束'
+                return False
         except Exception as exc:
             scene['wfrl_x100_status'] = '关闭未完成，请重试关闭'
             scene['wfrl_x100_error'] = str(exc)
             raise
-        _SESSIONS.pop(key, None)
+        _release_session(key, scene)
     elif remove:
         view.remove_objects(scene)
     scene.wfrl_x100_enabled = False
     scene['wfrl_x100_status'] = '已关闭'
+    return True
+
+
+def _release_session(key, scene=None):
+    _SESSIONS.pop(key, None)
+    _RESTORE_ATTEMPTED.discard(key)
+    if scene is not None:
+        try:
+            if hasattr(scene, 'wfrl_x100_enabled'):
+                scene.wfrl_x100_enabled = False
+            scene['wfrl_x100_status'] = '已关闭'
+        except ReferenceError:
+            pass
 
 
 def start(scene, *, restoring=False):
     _guard_installation()
-    stop(scene, remove=not restoring)
+    if not stop(scene, remove=not restoring):
+        raise ValueError('记录关闭中，请等待写盘完成后再应用配置')
     session = None
     try:
         session = Session(scene, restoring=restoring)
@@ -554,18 +667,26 @@ def tick():
     import bpy
     alive = {scene.as_pointer(): scene for scene in bpy.data.scenes}
     for key, session in list(_SESSIONS.items()):
-        if key not in alive:
-            worker = getattr(session.fanout, 'worker', None)
-            if session.closing and worker is not None and worker.is_alive():
-                continue
+        scene = alive.get(key)
+        try:
+            if session.scene != scene:
+                scene = None
+        except ReferenceError:
+            scene = None
+        if scene is None or session.closing:
             try:
-                session.close(remove=False)
-                _SESSIONS.pop(key, None)
-                _RESTORE_ATTEMPTED.discard(key)
+                if session.close(remove=scene is not None and session.close_remove):
+                    _release_session(key, None if session.restore_after_close else scene)
             except Exception as exc:
-                print('X100 deleted scene record close failed:', str(exc))
+                if scene is not None:
+                    scene['wfrl_x100_error'] = str(exc)
+                else:
+                    print('X100 record close failed:', str(exc))
             finally:
-                view.remove_orphans(session.owner)
+                if scene is None:
+                    view.remove_orphans(session.owner)
+    if _SHUTTING_DOWN:
+        return 1 / 30 if _SESSIONS else None
     for key, scene in alive.items():
         if key not in _SESSIONS and scene.wfrl_x100_enabled and key not in _RESTORE_ATTEMPTED:
             _RESTORE_ATTEMPTED.add(key)
@@ -578,6 +699,11 @@ def tick():
             continue
         if session.closing:
             continue
+        if session.recording_stopping:
+            try:
+                session.stop_recording()
+            except Exception as exc:
+                scene['wfrl_x100_record_error'] = '记录失败：' + str(exc)
         try:
             session.update()
             session.recording_health()
@@ -602,14 +728,17 @@ def on_load_pre(_unused):
     output.close_all()
     for key, session in list(_SESSIONS.items()):
         try:
-            session.close(remove=False)
-            _SESSIONS.pop(key, None)
+            session.restore_after_close = True
+            if session.close(remove=False):
+                _SESSIONS.pop(key, None)
         except Exception as exc:
             print('X100 record close failed:', str(exc))
     _RESTORE_ATTEMPTED.clear()
 
 
 def register():
+    global _SHUTTING_DOWN
+    _SHUTTING_DOWN = False
     import bpy
     from bpy.app.handlers import persistent
     from ..panels import radar_x100
@@ -623,11 +752,14 @@ def register():
     loaded = persistent(output.on_load_post)
     if loaded not in bpy.app.handlers.load_post:
         bpy.app.handlers.load_post.append(loaded)
-    bpy.app.timers.register(tick, persistent=True)
+    if not bpy.app.timers.is_registered(tick):
+        bpy.app.timers.register(tick, persistent=True)
     view.register()
 
 
 def unregister():
+    global _SHUTTING_DOWN
+    _SHUTTING_DOWN = True
     import bpy
     from ..panels import radar_x100
     from . import output
@@ -636,14 +768,15 @@ def unregister():
     try:
         for key, session in list(_SESSIONS.items()):
             try:
-                session.close()
-                _SESSIONS.pop(key, None)
+                session.restore_after_close = False
+                if session.close():
+                    _release_session(key, session.scene)
             except Exception as exc:
                 errors.append(exc)
                 print('X100 cleanup failed:', str(exc))
     finally:
         _RESTORE_ATTEMPTED.clear()
-        if bpy.app.timers.is_registered(tick):
+        if not _SESSIONS and bpy.app.timers.is_registered(tick):
             bpy.app.timers.unregister(tick)
         for name in _RESET_HANDLERS:
             handlers = getattr(bpy.app.handlers, name)
@@ -655,3 +788,14 @@ def unregister():
         radar_x100.unregister_properties()
     if errors:
         raise RuntimeError('X100 close unconfirmed: ' + '; '.join(map(str, errors)))
+
+
+def status_for(scene):
+    from ..home_state import TaskStatus
+    session = session_for(scene)
+    if session is None:
+        return TaskStatus('x100', error=scene.get('wfrl_x100_error', ''))
+    stage = 'CLOSING' if session.closing else 'CANCELLING' if session.recording_stopping else session.mode
+    progress = '' if session.frame is None else f'原帧 #{session.frame.sequence}'
+    return TaskStatus('x100', True, True, stage, scene.name,
+                      session.render_error or scene.get('wfrl_x100_error', ''), progress)

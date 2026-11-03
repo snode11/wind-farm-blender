@@ -46,3 +46,42 @@ def backend_status(ui):
            'PAUSED': '已暂停', 'DRAINING': '正在安全停止', 'STOPPED': '已停止',
            'FAILED': '失败'}.get(ui.run_status, ui.run_status)
     return f'后端：{connection} · {run}'
+
+
+@dataclass(frozen=True)
+class TaskStatus:
+    kind: str
+    active: bool = False
+    owned: bool = False
+    stage: str = ''
+    scene_name: str = ''
+    error: str = ''
+    progress: str = ''
+    output: str = ''
+
+
+def foreground_tasks(scene):
+    from . import custom_camera_capture
+    from .panels import custom_cameras, stacked_camera_rig, presentation
+    return tuple(module.status_for(scene) for module in
+                 (custom_camera_capture, stacked_camera_rig, custom_cameras, presentation))
+
+
+def can_start(action, scene):
+    """Read resource conflicts for foreground actions; independent exports can coexist."""
+    if action not in {'replace_scene', 'playback', 'camera_edit', 'camera_capture', 'radar_mount'}:
+        return True, ''
+    labels = {'capture': '相机采集中', 'mount': '相机盒体安装中',
+              'camera': '相机草稿编辑中', 'recording': '窗口录制中 · Esc 停止'}
+    for task in foreground_tasks(scene):
+        if task.active and not (task.kind == 'camera' and task.stage in {'WATCH', 'LAYOUT'}):
+            return False, labels[task.kind] if task.owned else '其他场景：' + labels[task.kind]
+    return True, ''
+
+
+def stage_label(stage):
+    return {'CAPTURING':'采集中','CANCELLING':'取消待确认','CLOSING':'关闭待确认',
+            'PLACING':'安装中','RECORDING':'录制中','AIM':'草稿待确认',
+            'WATCH':'观察中','LAYOUT':'布局观察中','SUCCEEDED':'完成',
+            'FAILED':'失败','CANCELLED':'已取消','SIMULATION':'几何仿真',
+            'REPLAY':'文件回放','LIVE':'本地实时输入','RUNNING':'运行中'}.get(stage,stage)

@@ -87,6 +87,7 @@ def main():
     rng=np.random.default_rng(args.seed)
     catalogs=[]
     actual_targets=[]
+    plan = sampler.sampling_plan(args.candidates, args.seed)
     groups=[]
     for part, row in enumerate(sampler.blades):
         rest=row[1]; faces=sampler.parts[part][1]; spans=rest[faces].mean(axis=1)[:,2]
@@ -97,7 +98,11 @@ def main():
             chosen=rng.choice(eligible,min(len(eligible),args.targets_per_group),replace=False)
             counts.append(len(chosen));selected.extend(chosen.tolist())
         catalogs.append(np.unique(selected)+sampler.triangle_offsets[part])
-        actual_targets.append(np.flatnonzero(span>=min(args.distal_span))+sampler.triangle_offsets[part])
+        begin, end = sampler.triangle_offsets[part:part+2]
+        points = np.flatnonzero((plan.triangle_ids >= begin) & (plan.triangle_ids < end))
+        material_span = np.einsum('ni,ni->n', rest[faces[plan.triangle_ids[points]-begin],2], plan.barycentric[points])
+        material_span = (material_span-rest[:,2].min()) / np.ptp(rest[:,2])
+        actual_targets.append(points[material_span >= min(args.distal_span)])
         groups.append(dict(blade=part+1,requested_per_group=args.targets_per_group,actual_per_group=counts,unique=len(catalogs[-1])))
     measurements={name:[] for name in samplers}
     sensor_counts={name:[] for name in samplers}
@@ -107,13 +112,13 @@ def main():
             try:
                 frame=simulation.simulate(current.sample,float(t),sensor_id='X100-T1',session_id='coverage',
                     sequence=sequence,interval_s=sampler.interval,candidate_budget=args.candidates,seed=args.seed,
-                    visibility=current.visibility,material_at=current.material_sample)
+                    visibility=current.visibility,material_at=current.material_sample, sampling_plan=plan)
                 sample=current.latest_sample
                 sensor_world=simulation.rigid_matrix(frame.spatial['world_from_sensor'])
                 world=frame.xyz.astype(float)@sensor_world[:3,:3].T+sensor_world[:3,3]
                 base=(world-sampler.root_world[:3,3])@sampler.root_world[:3,:3]
                 inside=(base>=roi_lo).all(axis=1)&(base<=roi_hi).all(axis=1)
-                output_ids=np.asarray(frame.material_ids)
+                output_ids=np.asarray(frame.provenance['material_point_indices'])
                 rows=[]
                 for catalog, output_catalog in zip(catalogs,actual_targets):
                     target=sample.vertices[sample.triangles[catalog]].mean(axis=1)
@@ -135,7 +140,8 @@ def main():
     report=dict(profile=vars(args)|{'output':str(args.output),'package':str(args.package)},
         source_id=sampler.source_id,geometry_id=sampler.geometry_id,source_grid_hz=30,
         source_frames=len(times),target_groups=groups,total_unique_targets=sum(map(len,catalogs)),
-        target_method='fixed outer-surface triangle centroids; finite discrete approximation',
+        target_method='finite centroid reference catalog; independent area-sampled observed material coordinates',
+        sampling_method=plan.method,sampling_plan_id=plan.identity,
         truth_boundary='evaluation only; no online analysis inputs or target associations',
         tip_identifiability='NOT_EVALUATED',safety_acceptance='NOT_EVALUATED',installations={})
     for name, rows in measurements.items():

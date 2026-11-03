@@ -5,6 +5,7 @@ or comparison trails. One image group is encoded at a time while the event loop
 remains available. Files stay incomplete until every group and source guard pass.
 """
 from contextlib import contextmanager
+from collections import OrderedDict
 from datetime import datetime
 from pathlib import Path
 from . import performance
@@ -24,6 +25,7 @@ from . import camera_projection as projection, custom_cameras as core
 from . import custom_camera_preview as preview, playback
 
 _ACTIVE = None
+_TERMINALS = OrderedDict()
 _WRITERS = globals().get('_WRITERS', weakref.WeakSet())
 
 
@@ -200,6 +202,10 @@ class Capture:
         import bpy
         from .panels.custom_cameras import session_identity, installation_block_reason, _ACTIVE as controller
         from . import farm_flex, clearance_replay
+        from .home_state import can_start
+        allowed, reason = can_start('camera_capture', context.scene)
+        if not allowed:
+            raise ValueError(reason)
         require_preflight(context, times)
         if controller and controller.stage not in {'WATCH','LAYOUT'}:
             raise ValueError('请先确认或取消相机草稿')
@@ -391,13 +397,13 @@ class Capture:
         self.cancel_accepted_at = time.perf_counter()
         diagnostics.record('cancel_accepted', completed=self.index, in_group=self.in_group)
         if not self.in_group:
-            self.finish(error='用户取消：已停止')
+            self.finish()
 
     def step(self, context):
         if self.closed:
             return True
         if self.cancel_requested and not self.in_group:
-            self.finish(error='用户取消：已停止')
+            self.finish()
             return True
         self.in_group = True
         try:
@@ -409,7 +415,7 @@ class Capture:
             if self._writer is None:
                 self.in_group = False
                 if self.cancel_requested and not self.closed:
-                    self.finish(error='用户取消：已停止')
+                    self.finish()
 
     def _step_group(self, context):
         if self._writer is not None:
@@ -488,7 +494,7 @@ class Capture:
         self.manifest['completed_samples'] = self.index
         write_json(self.path/'manifest.json',self.manifest)
         if self.cancel_requested:
-            self.finish(error='用户取消：已停止')
+            self.finish()
             return True
         if self.index==len(self.times):
             self.finish(success=True)
@@ -541,13 +547,44 @@ class Capture:
             if getattr(self,'ui_operator',None):
                 self.ui_operator.remove_timer()
             if _ACTIVE is self:_ACTIVE=None
-            self.error=error
+            self.error=error or ('用户取消：已停止' if self.cancel_requested else '')
             self.manifest['status']='complete' if success and same else 'incomplete'
-            self.manifest['error']=error or (None if success else 'cancelled / invalid session')
+            self.manifest['error']=self.error or (None if success else 'cancelled / invalid session')
             write_json(self.path/'manifest.json',self.manifest)
+            if same:
+                from .home_state import TaskStatus
+                stage = 'SUCCEEDED' if success else 'CANCELLED' if self.cancel_requested and not error else 'FAILED'
+                try:
+                    key, name = self.scene.as_pointer(), self.scene.name
+                except (AttributeError, ReferenceError):
+                    pass
+                else:
+                    _TERMINALS[key] = (self.scene, TaskStatus(
+                        'capture', False, True, stage, name, error, output=str(self.path)))
+                    _TERMINALS.move_to_end(key)
+                    while len(_TERMINALS) > 8:
+                        _TERMINALS.popitem(last=False)
 
 
 def shutdown(restore=True):
     if active():_ACTIVE.finish(error='场景重载 / 功能关闭',restore=restore)
+    _TERMINALS.clear()
     for writer in tuple(_WRITERS):
         writer.cancel()
+
+
+def status_for(scene):
+    from .home_state import TaskStatus
+    job = _ACTIVE
+    if job is None or job.closed:
+        previous = _TERMINALS.get(scene.as_pointer())
+        if previous is not None:
+            try:
+                if previous[0] == scene:
+                    return previous[1]
+            except ReferenceError:
+                _TERMINALS.pop(scene.as_pointer(), None)
+        return TaskStatus('capture')
+    return TaskStatus('capture', True, job.scene == scene,
+                      'CANCELLING' if job.cancel_requested else 'CAPTURING',
+                      job.scene.name, getattr(job, 'error', ''), progress(), str(job.path))

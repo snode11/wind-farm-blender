@@ -87,8 +87,7 @@ class Recorder:
         if self.state != 'RECORDING':
             return
         self.state, self.error = 'FAILED', str(reason)
-        if hasattr(self, 'index'):
-            self.index.close()
+        self.index.close()
         try:
             self._manifest()
         except OSError:

@@ -8,16 +8,27 @@ from wfrl_blender.wake import WakeFrameBuffer
 from wfrl_blender.training import TrainingDashboard
 
 
+class Scene(dict):
+    wfrl_show_wake = True
+
+    def __init__(self):
+        super().__init__()
+        self.objects = {}
+
+    def as_pointer(self):
+        return id(self)
+
+
 @pytest.fixture
 def local_runtime(monkeypatch):
     draws = []
     area = SimpleNamespace(type='VIEW_3D', tag_redraw=lambda: draws.append(1))
     screen = SimpleNamespace(areas=[area], is_animation_playing=False)
-    scene = {}
+    scene = Scene()
     bpy = SimpleNamespace(data=SimpleNamespace(objects={}), context=SimpleNamespace(scene=scene,
         window_manager=SimpleNamespace(windows=[SimpleNamespace(scene=scene, screen=screen)])))
     clock = [0.]
-    job = SimpleNamespace(status='WRITING', poll=lambda: None)
+    job = SimpleNamespace(error=None, path=None, status='WRITING', poll=lambda: None)
     monkeypatch.setitem(sys.modules, 'bpy', bpy)
     for name, value in dict(_client=None, _health=None, _last_tick=None, _last_async_display_state=None,
                             _last_display_state=None, _backend_scene=None,
@@ -114,7 +125,7 @@ def test_native_playback_does_not_add_idle_timer_redraws(local_runtime, connecti
 @pytest.mark.parametrize('connection', ['LOCAL DEMO', 'OFFLINE RESULTS', 'CONNECTED'])
 def test_idle_backend_client_redraws_once(local_runtime, monkeypatch, connection):
     runtime._state.connection = connection
-    monkeypatch.setattr(runtime, '_client', SimpleNamespace(
+    monkeypatch.setattr(runtime, '_client', SimpleNamespace(session_id=None, progress='Connected', negotiated_capabilities=frozenset(),
         poll=lambda: [], last_error='', status='CONNECTED'))
     assert runtime.tick() == .05
     assert runtime.tick() == .05
@@ -134,7 +145,7 @@ def backend(local_runtime, monkeypatch, status='PAUSED'):
     runtime._state.connection = 'CONNECTED'
     runtime._state.run_status = status
     monkeypatch.setattr(runtime, '_backend_scene', local_runtime.scene, raising=False)
-    monkeypatch.setattr(runtime, '_client', SimpleNamespace(
+    monkeypatch.setattr(runtime, '_client', SimpleNamespace(session_id=None, progress='Connected', negotiated_capabilities=frozenset(),
         poll=lambda: [], last_error='', status='CONNECTED'))
     record = dict(value=1., unit='MW', fidelity='DIRECT', validity='valid',
                   source_age_seconds=0., stale_after_seconds=2.)
@@ -185,7 +196,7 @@ def test_training_age_and_expiry_remain_visible_without_poll_rate_redraw(local_r
     dashboard.ingest(message(), negotiated=True)
     monkeypatch.setattr(runtime, 'training_dashboard', dashboard)
     runtime._state.connection = 'CONNECTED'
-    monkeypatch.setattr(runtime, '_client', SimpleNamespace(poll=lambda: [], last_error='',
+    monkeypatch.setattr(runtime, '_client', SimpleNamespace(session_id=None, progress='Connected', poll=lambda: [], last_error='',
         status='CONNECTED', negotiated_capabilities={'training_stats_v1'}))
     runtime.tick()
     local_runtime.clock[0] = .05

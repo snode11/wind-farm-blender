@@ -11,14 +11,15 @@ from wfrl_blender.state import FrontendState
 @pytest.fixture
 def timer(monkeypatch):
     state = FrontendState(connection='CONNECTED', run_status='DRAINING', session_id='s')
-    client = SimpleNamespace(session_id='s', last_error='', status='CONNECTED',
+    client = SimpleNamespace(progress='Connected', negotiated_capabilities=frozenset(), session_id='s', last_error='', status='CONNECTED',
                              poll=Mock(return_value=[]), close=Mock())
-    motion = SimpleNamespace(snapshot=None, advance=Mock(), apply_objects=Mock())
-    job = SimpleNamespace(status='WRITING', poll=Mock())
+    motion = SimpleNamespace(snapshot=None, rotor_angles={}, advance=Mock(), apply_objects=Mock())
+    job = SimpleNamespace(error=None, path=None, status='WRITING', poll=Mock())
     health = SimpleNamespace(poll=Mock(return_value=[]))
     area = SimpleNamespace(type='VIEW_3D', tag_redraw=Mock())
-    bpy = SimpleNamespace(data=SimpleNamespace(objects={}), context=SimpleNamespace(scene={},
-        window_manager=SimpleNamespace(windows=[SimpleNamespace(screen=SimpleNamespace(
+    scene = SimpleNamespace(objects={}, get=lambda *_args: None)
+    bpy = SimpleNamespace(data=SimpleNamespace(objects={}), context=SimpleNamespace(scene=scene,
+        window_manager=SimpleNamespace(windows=[SimpleNamespace(scene=scene, screen=SimpleNamespace(
             areas=[area], is_animation_playing=True))])))
     monkeypatch.setitem(sys.modules, 'bpy', bpy)
     for name, value in dict(_state=state, _client=client, kinematics=motion, _health=health,

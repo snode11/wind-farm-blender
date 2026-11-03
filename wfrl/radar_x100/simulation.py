@@ -1,7 +1,8 @@
-"""Deterministic triangle-centroid observations with geometric first-hit occlusion."""
+"""Fixed surface-material observations with geometric first-hit occlusion."""
 from dataclasses import dataclass
 import numpy as np
 from .schema import RadarFrame, FrameTime, POINT_DTYPE, PROFILE, MAX_POINTS, digest
+from .sampling import make_plan, AREA_ALGORITHM
 
 
 def rigid_matrix(value):
@@ -93,19 +94,22 @@ def visible_triangles(sample, targets, tolerance_m=.002):
 
 def simulate(sample_at, time_s, *, sensor_id, session_id, sequence, interval_s,
              seed=100, candidate_budget=512, difference_s=.001, visibility=None,
-             material_at=None):
-    """Use the same material centroids and moving sensor origin for velocity."""
+             material_at=None, sampling_plan=None, sampling_mode='AREA'):
+    """Transport fixed barycentric coordinates for positions and relative velocity."""
     if not 1 <= candidate_budget <= MAX_POINTS or difference_s <= 0:
         raise ValueError('Invalid simulation budget or difference step')
+    plan = sampling_plan
+    if plan is None:
+        plan = make_plan(sample_at(interval_s[0]), candidate_budget, seed, sampling_mode)
+    if (plan.method != sampling_mode or plan.seed != seed or plan.budget != candidate_budget
+            or plan.reference_time_s != interval_s[0]):
+        raise ValueError('Sampling plan does not match the requested profile')
     sample = sample_at(time_s)
     lo, hi = max(interval_s[0], time_s - difference_s), min(interval_s[1], time_s + difference_s)
     if hi <= lo:
         raise ValueError('No velocity difference interval')
-    rng = np.random.default_rng(seed)
-    ids = np.sort(rng.choice(len(sample.triangles), min(candidate_budget, len(sample.triangles)), replace=False))
-    def material_points(snapshot):
-        return snapshot.vertices[snapshot.triangles[ids]].mean(axis=1)
-    world = material_points(sample)
+    ids = plan.triangle_ids
+    world = plan.points(sample)
     transform = sample.world_from_sensor
     xyz = (world - transform[:3, 3]) @ transform[:3, :3]
     keep = in_fov(xyz)
@@ -118,10 +122,11 @@ def simulate(sample_at, time_s, *, sensor_id, session_id, sequence, interval_s,
             if (other.source_id != sample.source_id or other.geometry_id != sample.geometry_id
                     or not np.array_equal(sample.triangles, other.triangles)):
                 raise ValueError('Material topology or source changed during sampling')
-        before_points, after_points = material_points(before)[mask], material_points(after)[mask]
+        before_points, after_points = plan.points(before)[mask], plan.points(after)[mask]
     else:
         selected = ids[mask]
-        before, after = material_at(lo, selected), material_at(hi, selected)
+        options = dict(barycentric=plan.barycentric[mask]) if plan.method == 'AREA' else {}
+        before, after = material_at(lo, selected, **options), material_at(hi, selected, **options)
         for other, stamp in ((before, lo), (after, hi)):
             if (other.source_id != sample.source_id or other.geometry_id != sample.geometry_id
                     or other.time_s != stamp or other.points.shape != (len(selected), 3)):
@@ -142,7 +147,9 @@ def simulate(sample_at, time_s, *, sensor_id, session_id, sequence, interval_s,
         spatial=dict(frame='SENSOR_X_FORWARD_Y_LEFT_Z_UP', units='m', compensation='NONE',
                      alignment='SIMULATION', world_from_sensor=transform.tolist()),
         provenance=dict(profile=PROFILE, source_id=sample.source_id, geometry_id=sample.geometry_id,
-            instantaneous=True, material_sampling='fixed triangle centroids', seed=seed,
+            instantaneous=True, material_sampling=plan.method, sampling_plan_id=plan.identity,
+            sampling_algorithm=AREA_ALGORITHM if plan.method == 'AREA' else 'triangle-centroid.v1',
+            reference_time_s=plan.reference_time_s, material_point_indices=np.flatnonzero(mask).tolist(), seed=seed,
             candidate_budget=candidate_budget, candidates_in_fov=int(keep.sum()),
             occluded=int((keep & ~visible).sum()), occlusion_scope=sample.occlusion_scope,
             occlusion_model='two-sided geometric first hit; tolerance 0.002 m',

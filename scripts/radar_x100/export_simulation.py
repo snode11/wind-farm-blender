@@ -58,7 +58,8 @@ def main():
         for sequence, t in enumerate(sample_times(args.start, args.end, args.fps)):
             frame = api.simulation.simulate(sampler.sample,t,sensor_id='X100-T1',session_id=session,
                 sequence=sequence,interval_s=sampler.interval,candidate_budget=args.candidates,
-                visibility=sampler.visibility, material_at=sampler.material_sample)
+                visibility=sampler.visibility, material_at=sampler.material_sample,
+                sampling_plan=sampler.sampling_plan(args.candidates))
             frame.provenance['calibration_id'] = sampler.calibration_id
             sink.append(frame,t-args.start)
         sink.close()

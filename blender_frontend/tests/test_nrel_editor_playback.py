@@ -92,7 +92,7 @@ def editor_runtime(monkeypatch):
                                    and node.name in {'bound_session_valid', 'finish_scan'}]))
     sessions = {}
     namespace = dict(__package__='wfrl_blender.nrel_defects', bpy=bpy, time=time,
-                     _SESSIONS=sessions, sync_defect_list=lambda *_args: None,
+                     _SESSIONS=sessions, _INITIALIZING={}, sync_defect_list=lambda *_args: None,
                      new_defect=lambda *_a, **_kw: {'id': 'new'})
     exec(compile(ast.fix_missing_locations(ast.Module(body=nodes, type_ignores=[])),
                  str(source), 'exec'), namespace)

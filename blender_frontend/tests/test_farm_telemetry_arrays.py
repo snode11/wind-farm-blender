@@ -9,6 +9,13 @@ import pytest
 from wfrl_blender import farm_flex
 
 
+class Scene(dict):
+    wfrl_channel_telemetry = True
+
+    def as_pointer(self):
+        return id(self)
+
+
 @pytest.fixture
 def telemetry(tmp_path):
     times = np.array([0., 1., 2.])
@@ -125,7 +132,7 @@ def test_recording_reuses_arrays_when_seeking(telemetry, monkeypatch):
         return interpolate(t, xp, fp)
 
     monkeypatch.setattr(farm_flex.np, 'interp', observe_interpolation)
-    scene = {}
+    scene = Scene()
     for _ in range(2):
         replay.record_telemetry(scene, np.zeros((1, 6)))
     arrays = [record['values'] for record in replay.telemetry['turbines']['T1'].values()]
@@ -188,3 +195,37 @@ def test_package_loading_still_rejects_telemetry_checksum_mismatch(tmp_path, mon
     monkeypatch.setattr(farm_flex, 'dual_beam_api', lambda: api)
     with pytest.raises(ValueError, match='Farm package integrity mismatch: telemetry.json'):
         farm_flex._load_package(tmp_path)
+
+
+@pytest.mark.parametrize(('units', 'values', 'expected'), [
+    (['kW'], [4.], .004), (['MW', 'kW'], [1., 500.], 1.5),
+    (['W'], [4000.], .004), (['hp'], [4.], None), (['MW', None], [1., 0.], None)])
+def test_real_read_interpolation_chart_and_export_power_units(tmp_path, monkeypatch, units, values, expected):
+    from wfrl_blender import charts, clearance_replay, history
+    scene = Scene()
+    times = np.array([0., 1.])
+    ids = [f'T{i+1}' for i in range(len(units))]
+    manifest = dict(status='REVIEW_ONLY', turbine_ids=ids, files={'geometry.npz': 'geometry', 'telemetry.json': 'telemetry'})
+    payload = dict(schema='wfrl.farm-telemetry.v1', geometry_sha256='geometry', times=times.tolist(),
+        turbines={tid: {} if unit is None else {'power':dict(values=[value,value],unit=unit,source_channel='GenPwr')}
+                  for tid,unit,value in zip(ids,units,values)}, sources={tid:{'sha256':'source-'+tid} for tid in ids})
+    (tmp_path/'telemetry.json').write_text(json.dumps(payload))
+    active = object.__new__(farm_flex.FarmFlex)
+    active.telemetry = farm_flex._read_telemetry(tmp_path, manifest, times, ids)
+    active.times, active.manifest, active.readers, active.last_telemetry_frame = times, manifest, dict.fromkeys(ids), None
+    monkeypatch.setattr(clearance_replay, 'sample', lambda s: {'time_s':.5})
+    active.record_telemetry(scene, np.zeros((len(ids),6)))
+    point = charts.history_for(scene).points(charts.FARM, 'power')[-1]
+    assert point.value == pytest.approx(expected) if expected is not None else point.value is None
+    doc = history.export_document(charts.raw_history_for(scene).snapshot())
+    powers = {row['records'][-1]['turbine_id']: row['records'][-1]['data']
+              for row in doc['series'] if row['key'][-1] == 'power'}
+    for tid,unit in zip(ids,units):
+        if unit is not None:
+            assert powers[tid]['unit'] == unit
+            assert powers[tid]['provenance']['source_sha256'] == 'source-'+tid
+    if expected is not None:
+        assert powers[None]['unit'] == 'MW' and powers[None]['value'] == pytest.approx(expected)
+        assert [row['unit'] for row in powers[None]['provenance']['inputs']] == units
+    else:
+        assert None not in powers

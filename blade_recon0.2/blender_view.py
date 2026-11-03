@@ -54,6 +54,8 @@ def main():
     if not hasattr(bpy.types.Scene, 'wfrl_recon_show_texture'):
         addon.register()
     review = importlib.import_module(module + '.blade_recon_review')
+    if args.no_bake and 'standalone' in inspect.signature(review.register).parameters:
+        review.register(standalone=True)
     scene = review.load(bpy.context, args.recon, truth_path=args.truth,
                         cameras_path=args.cameras, texture_path=args.texture)
     if not args.no_bake:

@@ -346,6 +346,7 @@ class WFRL_OT_ManualPoseExport(_ManualPoseTarget, bpy.types.Operator, ExportHelp
             valid, reason = control.validate_scene(context.scene)
             if not valid:
                 raise ValueError(reason)
+            control.validate_pose_export(context.scene)
             payload = manual_pose.encode_poses(control.pose_snapshot(context.scene))
             path = Path(bpy.path.abspath(self.filepath))
             if not path.name or path.is_dir():

@@ -62,41 +62,26 @@ def _inside_blender(output: Path, source_root: Path) -> None:
     )
     assert all(path.is_file() and path.stat().st_size for path in required_assets)
 
-    assert bpy.ops.wfrl.load_demo() == {"FINISHED"}
-    assert bpy.ops.wfrl.demo_start() == {"FINISHED"}
-    assert bpy.ops.wfrl.demo_pause() == {"FINISHED"}
+    assert bpy.ops.wfrl.load_demo() == {'FINISHED'}
+    farm = import_module(addon.__package__ + '.farm_flex')
+    replay = import_module(addon.__package__ + '.clearance_replay')
     scene = bpy.context.scene
-    # Verify the installed package, including lazy first-use gimbal creation.
-    assert all(not camera.show_passepartout for camera in bpy.data.cameras)
-    area = next(a for a in bpy.context.screen.areas if a.type == 'VIEW_3D')
-    with bpy.context.temp_override(area=area):
-        for turbine in ('T1', 'T2', 'T3'):
-            name = f'WFRL.Camera.{turbine}.Gimbal'
-            assert bpy.ops.wfrl.select_camera(camera_name=name) == {'FINISHED'}
-            assert area.spaces.active.camera.name == name
-            assert scene.wfrl_gimbal_turbine == turbine
+    assert farm.is_active(scene)
+    stamp = replay.sample(scene)['time_s']
+    assert bpy.ops.wfrl.farm_transport(action='STEP') == {'FINISHED'}
+    assert replay.sample(scene)['time_s'] > stamp
+    assert bpy.ops.wfrl.farm_transport(action='STOP') == {'FINISHED'}
+    runtime = import_module(addon.__package__ + '.runtime')
+    assert runtime.get_state().connection == 'OFFLINE RESULTS'
+    assert runtime.configuration_editable()
+    for area in bpy.context.screen.areas:
+        if area.type == 'VIEW_3D':
             assert not scene.camera.data.show_passepartout
-            for view in ('World', 'Top', 'Side'):
-                name = 'WFRL.Camera.' + view
-                assert bpy.ops.wfrl.select_camera(camera_name=name) == {'FINISHED'}
-                assert area.spaces.active.camera.name == name
-                assert not area.spaces.active.use_local_camera
-    scene.wfrl_manual_enabled = True
-    scene.wfrl_manual_yaw = 12.0
-    assert scene["wfrl_run_status"] == "PAUSED"
-    assert not bpy.ops.wfrl.load_demo.poll()
-    runtime = import_module(addon.__package__ + ".runtime")
-    assert not runtime.configuration_editable()
-    try:
-        runtime.select_mode("interactive_training")
-    except ValueError:
-        pass
-    else:
-        raise AssertionError("active demo did not lock mode changes")
+    assert not ({'torch', 'mpi4py', 'floris'} & sys.modules.keys())
 
     charts = import_module(addon.__package__ + ".charts")
     export_path = output.with_name("package-history-export.json")
-    charts.export_job.start(export_path, charts.raw_history.snapshot())
+    charts.export_job.start(export_path, charts.raw_history_for(scene).snapshot())
     deadline = time.monotonic() + 10
     while charts.export_job.poll() == "WRITING" and time.monotonic() < deadline:
         time.sleep(0.02)
@@ -118,7 +103,7 @@ def _inside_blender(output: Path, source_root: Path) -> None:
                          "screenshot_operator", "recording_operator"],
         "assets": [{"path": str(path.relative_to(installed_path.parent)), "size": path.stat().st_size}
                    for path in required_assets],
-        "locks": {"load_demo_during_pause": True, "mode_change_during_pause": True},
+        "offline_results": {"ready": True, "backend_required": False},
         "history_export": str(export_path),
         "status": "PASS",
     }

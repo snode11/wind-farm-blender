@@ -269,3 +269,29 @@ def test_event_times_remain_exact_with_statistics_roundoff_exception():
     overlay['results']['T1']['events'][0]['hit_times_s'][0] += 1e-15
     with pytest.raises(ValueError, match='precomputed'):
         DualBeamReader(legacy, overlay, 'T1')
+
+
+@pytest.mark.parametrize(('reference', 'error'), [(19., 0.), (True, 1.), (19., False),
+    (float('nan'), None), (19., float('inf')), (None, 1.), ('19', 1.)])
+def test_source_evaluation_is_checked_even_with_matching_regenerated_prefix(reference, error):
+    _, legacy, overlay = make_reader()
+    rows = overlay['results']['T1']['samples']
+    row = next(row for row in rows if row['reconstruction']['valid'])
+    row['evaluation'].update(clearance_reference_m=reference, clearance_error_m=error)
+    # Arithmetic is independent of the saved aggregate; regenerate from the bad row.
+    from wfrl.lidar.dual_beam_replay import precompute
+    if type(error) in (int, float) and type(reference) in (int, float) and np.isfinite(error):
+        cumulative, events = precompute(rows, overlay['config'])
+        overlay['results']['T1'].update(cumulative=cumulative, events=events)
+    with pytest.raises(ValueError, match='evaluation'):
+        DualBeamReader(legacy, overlay, 'T1')
+
+
+def test_optional_evaluation_can_remain_missing():
+    _, legacy, overlay = make_reader()
+    for row in overlay['results']['T1']['samples']:
+        row['evaluation'].update(clearance_reference_m=None, clearance_error_m=None)
+    from wfrl.lidar.dual_beam_replay import precompute
+    cumulative, events = precompute(overlay['results']['T1']['samples'], overlay['config'])
+    overlay['results']['T1'].update(cumulative=cumulative, events=events)
+    assert DualBeamReader(legacy, overlay, 'T1').at(1.05)['statistics']['error_samples'] == 0

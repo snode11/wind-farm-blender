@@ -74,7 +74,8 @@ def test_channel_subscriptions_require_real_topic_and_boolean():
     session = BackendSession()
     request = {'command': 'channel.set', 'arguments': {'topic': 'lidar', 'enabled': False}}
     with pytest.raises(ValueError): session.command(request)
-    session._trainer = SimpleNamespace(runtime=SimpleNamespace(topics=lambda: ['lidar']))
+    session._trainer = SimpleNamespace(error=None, running=False, runtime=SimpleNamespace(
+        topics=lambda: ['lidar'], channel_table=lambda: []))
     session.command(request)
     assert session._channel_states == {'lidar': False}
     request['arguments']['enabled'] = 'false'
@@ -83,7 +84,7 @@ def test_channel_subscriptions_require_real_topic_and_boolean():
 
 def test_channel_table_uses_protocol_fidelity_names():
     session = BackendSession()
-    session._trainer = SimpleNamespace(runtime=SimpleNamespace(channel_table=lambda: [
+    session._trainer = SimpleNamespace(running=False, error=None, runtime=SimpleNamespace(channel_table=lambda: [
         ('direct', 'DirectSensor', '直读', True, 'simulator'),
         ('derived', 'DerivedSensor', '导出', True, 'formula'),
         ('synth', 'SynthSensor', '合成', False, 'fixture'),

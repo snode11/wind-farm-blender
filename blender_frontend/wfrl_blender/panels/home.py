@@ -5,26 +5,12 @@ import unicodedata
 import bpy
 
 from .. import clearance_replay, runtime
-from ..home_state import backend_status, scene_status
+from ..home_state import backend_status, scene_status, foreground_tasks, can_start, stage_label
 
 
 def busy_reason(scene):
     """Name the camera or recording task that locks workbench controls, or return ''."""
-    from .. import custom_camera_capture
-    from . import custom_cameras, stacked_camera_rig, presentation
-    if custom_camera_capture.active():
-        return ('相机采集中' if custom_camera_capture._ACTIVE.scene == scene
-                else '其他场景正在采集相机图像')
-    if stacked_camera_rig._ACTIVE:
-        return ('相机盒体安装中' if stacked_camera_rig._ACTIVE.scene == scene
-                else '其他场景正在安装相机盒体')
-    if custom_cameras._ACTIVE and custom_cameras._ACTIVE.stage not in custom_cameras._VIEWING:
-        return ('相机草稿编辑中' if custom_cameras._ACTIVE.scene == scene
-                else '其他场景正在编辑相机草稿')
-    if presentation._ACTIVE is not None:
-        return ('窗口录制中 · Esc 停止' if presentation._ACTIVE._scene == scene
-                else '其他场景正在录制窗口')
-    return ''
+    return can_start('replace_scene', scene)[1]
 
 
 def snapshot(context):
@@ -52,15 +38,10 @@ def snapshot(context):
                        ('wfrl_manual_geometry_error', '手动外形'),
                        ('wfrl_view_layout_error', '视图布局')):
         issues.append((title, scene.get(key, '')))
-    op = custom_cameras._ACTIVE
-    if op is not None and op.scene == scene:
-        issues.append(('相机编辑', getattr(op, 'error', '')))
-    placement = stacked_camera_rig._ACTIVE
-    if placement is not None and placement.scene == scene:
-        issues.append(('相机盒体', placement.transaction.error))
-    capture = custom_camera_capture._ACTIVE
-    if capture is not None and capture.scene == scene:
-        issues.append(('相机采集', getattr(capture, 'error', '')))
+    for task in foreground_tasks(scene):
+        if task.owned and task.error:
+            issues.append(({'camera': '相机编辑', 'mount': '相机盒体',
+                            'capture': '相机采集', 'recording': '窗口录制'}[task.kind], task.error))
     for key, title in (('wfrl_history_export_status', '历史导出'),
                        ('wfrl_capture_status', '窗口录制')):
         detail = scene.get(key, '')
@@ -112,13 +93,60 @@ def draw_status(layout, context):
         from .. import custom_camera_capture
         if custom_camera_capture.active():
             message(layout, custom_camera_capture.progress())
-            if custom_camera_capture._ACTIVE.scene == context.scene:
+            if custom_camera_capture.status_for(context.scene).owned:
                 layout.operator('wfrl.custom_capture_cancel', text='取消相机采集', icon='CANCEL')
         elif '相机' in busy:
             layout.label(text='在“相机”页确认或取消编辑。', icon='INFO')
+    draw_tasks(layout, context)
     from .. import animation_render_ui
     animation_render_ui.draw(layout, context)
     return busy
+
+
+def draw_tasks(layout, context):
+    from pathlib import Path
+    from .. import farm_flex, playback, video_output
+    from ..radar_x100 import runtime as x100
+    scene = context.scene
+    box = layout.box()
+    box.label(text='当前任务 · ' + scene.name)
+    owner = playback.owner_scene()
+    box.label(text='播放器：' + (owner.name if owner is not None else '未占用'))
+    active = farm_flex.active_for(scene)
+    if active is not None and farm_flex.is_active(scene):
+        method = active.manifest.get('dual_beam_calibration', {}).get('reconstruction_method', 'B2')
+        value = clearance_replay.sample(scene)
+        box.label(text=Path(scene.get('wfrl_farm_flex_path', '')).name + ' · ' + method)
+        box.label(text=f"仿真时刻 {value['time_s']:.3f} s · REVIEW_ONLY")
+    from .. import custom_cameras
+    count = sum(custom_cameras.get_camera(scene, slot) is not None for slot in (1, 2, 3))
+    if count:
+        box.label(text=f'已应用相机：{count} / 3')
+    for task in foreground_tasks(scene):
+        if task.active or (task.owned and task.stage):
+            label = {'camera': '相机', 'mount': '盒体', 'capture': '采集', 'recording': '录制'}[task.kind]
+            message(box, label + ' · ' + stage_label(task.stage) + (' · 本场景' if task.owned else ' · ' + task.scene_name))
+            if task.progress:
+                message(box, task.progress)
+            if task.output:
+                message(box, '输出：' + task.output)
+    radar = x100.status_for(scene)
+    if radar.active or radar.error:
+        message(box, 'X100 · ' + stage_label(radar.stage) + (' · ' + radar.progress if radar.progress else ''))
+        if radar.error:
+            message(box, radar.error, 'ERROR')
+    box.operator('wm.call_panel', text='查看 X100 任务 · N → X100', icon='PREFERENCES').name = 'WFRL_PT_x100'
+    research = scene.get('split_texture_current_source', '')
+    if scene.get('wfrl_nrel_defect_enabled') or scene.get('split_texture_review') or research:
+        message(box, '研究显示 · 未验收；重建对照使用同源保存样本')
+        box.operator('wm.call_panel', text='查看重建 / 纹理任务').name = 'WFRL_PT_blade_recon'
+        if scene.get('wfrl_nrel_defect_enabled'):
+            box.operator('wm.call_panel', text='返回缺陷任务').name = 'NREL_PT_defects'
+    copy = video_output.status_for(scene)
+    if copy[0] != 'IDLE':
+        message(box, 'MP4 复制 · ' + stage_label(copy[0]) + ' · ' + copy[6])
+    if copy[8] or copy[7] == 'ERROR':
+        message(box, 'RTSP · ' + copy[9])
 
 
 def draw_load(layout, context, *, busy=''):
@@ -142,6 +170,13 @@ def draw_export(layout, context, *, busy=''):
     if scene.get('wfrl_scene_kind') == 'manual':
         layout.label(text='保存刚性姿态；不包含仿真结果', icon='INFO')
         layout.operator('wfrl.manual_pose_export', text='保存三机姿态 JSON…', icon='EXPORT')
+        layout.label(text='当前刚性姿态 → JSON；暂停后的原生冲突须先恢复。')
+        layout.operator('wfrl.manual_down_view', text='观察所选风机 Down', icon='CAMERA_DATA')
+        layout.operator('wfrl.manual_down_video', text='Down 姿态序列 → MP4 + JSON…', icon='RENDER_ANIMATION')
+        message(layout, '使用所选风机的姿态与转速；取消仅影响本次输出。视口渲染期间界面暂停响应。')
+        from .. import manual_video
+        manual_video.draw(layout, scene)
+        message(layout, '冻结试验配置 → 后台 MP4；取消等待监管终态，不改变已确认试验。')
         return
     if clearance_replay.reader_for(scene) is None and scene.get('wfrl_scene_kind') != 'live':
         layout.label(text='请先在“回放”页加载数据。', icon='INFO')
@@ -163,7 +198,9 @@ def draw_export(layout, context, *, busy=''):
     animation = window.column()
     animation.enabled = not busy
     animation.operator('wfrl.render_animation', text='后台导出动画 PNG…', icon='RENDER_ANIMATION')
-    window.label(text='动画使用当前场景相机和帧范围。')
+    window.label(text='场景相机与帧范围 → 后台 PNG；取消保留已完成帧。')
+    from . import video_output
+    video_output.draw(layout, context)
 
 
 class WFRL_PT_Home(bpy.types.Panel):

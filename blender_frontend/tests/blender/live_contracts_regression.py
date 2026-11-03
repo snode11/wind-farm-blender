@@ -75,6 +75,16 @@ frame = wake.validate_wake_payload(wake_payload)
 obj = wake.apply_disxy_frame(frame, scene=owner)
 assert obj in owner.objects.values() and obj not in other.objects.values()
 assert not obj.hide_render
+# Equal vertex/face counts also require the same two-dimensional connectivity.
+from dataclasses import replace
+wide=replace(frame,shape=(2,3),values=(1.,2.,3.,4.,5.,6.),x=(0.,1.,2.),y=(0.,1.))
+for candidate in (wide,replace(wide,shape=(3,2),x=(0.,1.),y=(0.,1.,2.))):
+    obj=wake.apply_disxy_frame(candidate,scene=owner)
+    assert [tuple(p.vertices) for p in obj.data.polygons]==list(wake.grid_mesh(candidate)[1])
+mesh=obj.data
+obj=wake.apply_disxy_frame(candidate,scene=owner)
+assert obj.data==mesh and list(obj['wfrl_disxy_shape'])==[3,2]
+wake.apply_disxy_frame(frame,scene=owner)
 runtime.latest_wake = wake.validate_wake_payload(wake_payload, received_monotonic=time.monotonic()-6.)
 runtime.tick()
 assert obj['validity'] == 'stale' and obj.hide_render

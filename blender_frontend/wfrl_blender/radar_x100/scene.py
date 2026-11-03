@@ -125,6 +125,7 @@ class SceneSampler:
         self.triangles.flags.writeable = False
         self.triangle_offsets = np.cumsum([0, *(len(faces) for _, faces in self.parts)])
         self._material_ids, self._material_plan = None, None
+        self._sampling_plans = {}
         self.latest_sample = None
         self._sampling_validated = False
         self._visibility_cache = {}
@@ -187,7 +188,7 @@ class SceneSampler:
     @performance.timed("x100.validate")
     def validate(self):
         flex = self.flex
-        if (not flex.enabled or flex.scene != self.scene
+        if (not flex.enabled or getattr(flex, 'frame_error', '') or flex.scene != self.scene
                 or flex.scene.get('wfrl_farm_manifest_sha256') != self.source_id):
             raise ValueError('X100 scene source was released')
         if flex.model != self.model or tuple((row[0].as_pointer(), id(row[1]))
@@ -279,8 +280,17 @@ class SceneSampler:
         return sample
 
 
-    def material_sample(self, time_s, triangle_ids):
-        """Sample the same triangle centroids using only their bound rest vertices."""
+    def sampling_plan(self, budget=512, seed=100, method='AREA'):
+        from .core import sampling
+        key = budget, seed, method
+        if key not in self._sampling_plans:
+            self._sampling_plans[key] = sampling.make_plan(self.sample(self.interval[0]), budget, seed, method)
+            if len(self._sampling_plans) > 16:
+                self._sampling_plans.pop(next(iter(self._sampling_plans)))
+        return self._sampling_plans[key]
+
+    def material_sample(self, time_s, triangle_ids, *, barycentric=None):
+        """Transport fixed material coordinates using only their bound rest vertices."""
         self._validate_sampling()
         ids = np.asarray(triangle_ids, dtype=np.int32)
         if ids.ndim != 1 or np.any(ids < 0) or np.any(ids >= len(self.triangles)):
@@ -295,8 +305,13 @@ class SceneSampler:
                     plan.append((part, destinations, vertices, inverse.reshape(-1, 3)))
             self._material_ids, self._material_plan = ids.copy(), plan
         points = np.empty((len(ids), 3), dtype=np.float64)
+        weights = np.full((len(ids), 3), 1 / 3) if barycentric is None else np.asarray(barycentric, dtype=float)
+        if (weights.shape != (len(ids), 3) or not np.isfinite(weights).all()
+                or np.any(weights < 0) or not np.allclose(weights.sum(axis=1), 1)):
+            raise ValueError('Invalid material barycentric coordinates')
         for part, destinations, indices, faces in self._material_plan:
-            points[destinations] = self._part_vertices(part, time_s, indices)[faces].mean(axis=1)
+            points[destinations] = np.einsum('nij,ni->nj',
+                self._part_vertices(part, time_s, indices)[faces], weights[destinations])
         return simulation.MaterialSample(float(time_s), self.source_id, self.geometry_id, points,
                                          self.mount_world_at(time_s) @ self.mount_from_sensor)
 
@@ -329,6 +344,27 @@ class SceneSampler:
         used, inverse = np.unique(faces, return_inverse=True)
         return analysis.Context(identity, self.mount_world_at(sample.time_s, mount='NACELLE'),
             sample.world_from_sensor, sample.vertices[used], inverse.reshape(-1,3))
+
+    def blade_priors(self, time_s):
+        """Only nominal span and same-source constrained root poses enter inference."""
+        from ..deflection import interpolated_beamdyn_root_frame
+        from ..turbine_geometry import geometry_data
+        from .core import tracking
+        self.validate()
+        if not self.interval[0] <= time_s <= self.interval[1]:
+            raise ValueError('Blade prior time is outside the bound source')
+        flex, scalars = self.flex, geometry_data()['scalars']
+        i = int(np.clip(np.searchsorted(flex.times, time_s, side='right') - 1, 0, len(flex.times) - 2))
+        alpha = (time_s - flex.times[i]) / (flex.times[i+1] - flex.times[i])
+        priors = []
+        for blade in range(3):
+            hub, axes = interpolated_beamdyn_root_frame(scalars, blade+1,
+                flex.transforms[i, self.k, blade, 0], flex.transforms[i+1, self.k, blade, 0], alpha)
+            matrix = np.eye(4)
+            matrix[:3, :3] = axes
+            matrix[:3, 3] = hub + self.root_world[:3, 3]
+            priors.append(tracking.BladePrior(blade+1, matrix, float(scalars['TipRad'])))
+        return priors
 
 
 def _closest_on_face(p, a, b, c):

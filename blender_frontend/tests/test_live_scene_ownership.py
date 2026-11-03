@@ -14,6 +14,8 @@ from test_animation_math import snapshot
 
 
 class Scene(dict):
+    wfrl_show_wake = True
+
     def __init__(self, name):
         super().__init__(name=name, wfrl_scene_kind='live')
         self.objects = {}
@@ -24,7 +26,7 @@ def live_owner(monkeypatch):
     owner, other = Scene('owner'), Scene('other')
     data = snapshot()
     messages = [dict(type='snapshot', sequence=1, payload=data)]
-    client = NS(poll=lambda: list(messages), last_error='', status='CONNECTED',
+    client = NS(negotiated_capabilities=frozenset(), poll=lambda: list(messages), last_error='', status='CONNECTED',
                 session_id='s', port=8765, progress='Connected',
                 connect=lambda: setattr(client, 'progress', 'Connecting'),
                 close=lambda: setattr(client, 'status', 'DISCONNECTED'))
@@ -39,7 +41,7 @@ def live_owner(monkeypatch):
                                  run_status='PAUSED', confirmed=True, session_id='s'),
             kinematics=KinematicState(), wake_buffer=WakeFrameBuffer(), latest_wake=None).items():
         monkeypatch.setattr(runtime, key, value)
-    monkeypatch.setattr(charts, 'export_job', NS(status='IDLE', poll=lambda: None))
+    monkeypatch.setattr(charts, 'export_job', NS(error=None, path=None, status='IDLE', poll=lambda: None))
     monkeypatch.setattr(cinematic, 'update', lambda *_args: None)
     return NS(owner=owner, other=other, bpy=bpy, client=client, messages=messages)
 

@@ -322,6 +322,8 @@ class GeometryCache:
         self.handler_list = None
         self.mesh_reads = 0
         self.cache_hits = 0
+        self.fingerprint_key = self.fingerprint_value = None
+        self.fingerprint_geometry = ()
 
     def updated(self, scene, depsgraph):
         if self.scope is None or (scene.as_pointer(), depsgraph.as_pointer()) != self.scope[:2]:
@@ -373,29 +375,46 @@ class GeometryCache:
             self.handler_list.remove(self.updated)
         self.handler_list = self.scope = None
         self.meshes.clear()
+        self.fingerprint_key = self.fingerprint_value = None
+        self.fingerprint_geometry = ()
 
 
 def _simulation_state_hash(scene, depsgraph, cache=None):
     import hashlib
     import struct
-    digest = hashlib.sha256()
+    parts, keys, geometry = [], [], []
+    alive = set()
     for obj in sorted(scene.objects, key=lambda item: item.name):
         if obj.get('wfrl_x100_role') == 'annotation' or not (
                 obj.name.startswith(('WFRL.Turbine.', 'WFRL.Camera.T1.Custom.'))
                 or obj.get('wfrl_x100_role') == 'physical'):
             continue
         evaluated = obj.evaluated_get(depsgraph)
-        digest.update(obj.name.encode())
-        digest.update(struct.pack('16d', *(v for row in evaluated.matrix_world for v in row)))
+        matrix = struct.pack('16d', *(v for row in evaluated.matrix_world for v in row))
+        coordinates = b''
         if obj.type == 'MESH':
-            digest.update(cache.coordinates(obj, evaluated) if cache else _mesh_coordinates(evaluated))
+            coordinates = cache.coordinates(obj, evaluated) if cache else _mesh_coordinates(evaluated)
+            alive.add((obj.as_pointer(), obj.data.as_pointer()))
+        parts.append((obj.name.encode(), matrix, coordinates))
+        if cache is not None:
+            keys.append((obj.as_pointer(), obj.name, matrix, id(coordinates)))
+            geometry.append(coordinates)
     if cache is not None:
-        alive = {(obj.as_pointer(), obj.data.as_pointer()) for obj in scene.objects
-                 if (obj.name.startswith(('WFRL.Turbine.', 'WFRL.Camera.T1.Custom.'))
-                     or obj.get('wfrl_x100_role') == 'physical')
-                 and obj.get('wfrl_x100_role') != 'annotation' and obj.type == 'MESH'}
         cache.meshes = {key: value for key, value in cache.meshes.items() if key in alive}
-    return digest.hexdigest()
+        key = tuple(keys)
+        if key == cache.fingerprint_key:
+            return cache.fingerprint_value
+    digest = hashlib.sha256()
+    for name, matrix, coordinates in parts:
+        digest.update(name)
+        digest.update(matrix)
+        digest.update(coordinates)
+    result = digest.hexdigest()
+    if cache is not None:
+        cache.fingerprint_key, cache.fingerprint_value = key, result
+        # Strong immutable byte references prevent address reuse after invalidation.
+        cache.fingerprint_geometry = tuple(geometry)
+    return result
 
 
 @performance.timed("camera.simulation_state_hash")

@@ -1,5 +1,6 @@
 """NREL six-morphology editor bound to the native recorded flexible replay."""
 import copy
+from dataclasses import asdict
 import json
 import math
 import time
@@ -16,6 +17,7 @@ from .defect_store import DefectStore
 from .defect_geometry import DefectGeometry
 
 _SESSIONS = {}
+_INITIALIZING = {}
 _UPDATING = False
 DOCUMENT_KEY = 'wfrl_nrel_defect_document'
 
@@ -34,11 +36,20 @@ class GeometrySet:
     def __init__(self, editor):
         self.editor = editor
         self.managers = {}
+        self.active = None
+        self.pending = []
+        self.original_payloads = {}
+        self.originals = [(row[0], row[0].data) for row in editor.flex.blades]
+        self.flex_blades = list(editor.flex.blades)
+        self.flex_groups = dict(editor.flex.groups)
         for tid in editor.surface.turbine_ids:
             rig = dict(scene=editor.scene, collection=editor.rig['collection'],
                        blades=[editor.blade(tid,b) for b in (1,2,3)], turbine_id=tid)
-            self.managers[tid] = DefectGeometry(rig, editor.surface)
-        self.active = None
+            manager = DefectGeometry.__new__(DefectGeometry)
+            self.managers[tid] = manager
+            manager._defer_initial_dispose = True
+            DefectGeometry.__init__(manager, rig, editor.surface)
+            self.original_payloads[tid] = manager.active
 
     @property
     def boolean_calls(self):
@@ -46,6 +57,7 @@ class GeometrySet:
 
     def prepare(self, document):
         payload = dict(document=copy.deepcopy(document), turbines={}, rest={}, supports=[], measurements=[])
+        self.pending.append(payload)
         try:
             for tid, manager in self.managers.items():
                 child = manager.prepare(document)
@@ -82,14 +94,101 @@ class GeometrySet:
             raise
         return previous
 
+    def rollback_initial(self):
+        errors = []
+        for obj, mesh in self.originals:
+            try:
+                obj.data = mesh
+            except Exception as exc:
+                errors.append(exc)
+        if errors:
+            raise RuntimeError('Initial blade restoration failed: ' + '; '.join(map(str, errors)))
+        self.editor.flex.blades[:] = self.flex_blades
+        self.editor.flex.groups = dict(self.flex_groups)
+        self.editor.flex.cache.clear()
+        self.editor.flex._update_geometry = self.editor.flex._world_matrices = None
+        self.active = None
+        for manager in self.managers.values():
+            manager._active = None
+        for payload in list(self.pending):
+            try:
+                self.dispose(payload)
+            except Exception as exc:
+                errors.append(exc)
+        for manager in self.managers.values():
+            try:
+                manager.close(restore=False)
+            except Exception as exc:
+                errors.append(exc)
+        if errors:
+            raise RuntimeError('Initial resources await cleanup: ' + '; '.join(map(str, errors)))
+
+    def finish_initial(self):
+        for manager in self.managers.values():
+            manager._defer_initial_dispose = False
+        self.pending.clear()
+        self.retry_originals()
+
+    def retry_originals(self, *, strict=False):
+        errors = []
+        for tid, payload in list(self.original_payloads.items()):
+            try:
+                self.managers[tid].dispose(payload)
+            except Exception as exc:
+                errors.append(exc)
+                continue
+            self.original_payloads.pop(tid, None)
+        if errors and strict:
+            raise RuntimeError('Original defect resources await cleanup: ' + '; '.join(map(str, errors)))
+
     def dispose(self, payload):
         if payload is None or payload is self.active: return
+        if any(child is getattr(self.managers[tid], '_active', None)
+               for tid, child in payload.get('turbines', {}).items()):
+            return
         for tid, child in payload.get('turbines',{}).items():
             self.managers[tid].dispose(child)
+        self.pending[:] = [item for item in self.pending if item is not payload]
 
 
 class EditorSession:
     def __init__(self, scene, document=None):
+        self.scene = scene
+        self._initial_properties = {key: scene[key] for key in scene.keys()
+            if key.startswith(('defect_', 'wfrl_nrel_defect'))}
+        props = scene.wfrl_nrel_defects
+        self._initial_rows = [(item.defect_id, item.name, item.enabled) for item in props.defect_items]
+        self._initial_rna = {key: getattr(props, key) for key in ('selected', 'time_s', 'scan_start')}
+        _INITIALIZING[scene.as_pointer()] = self
+        try:
+            self._initialize(scene, document)
+            self.geometry.finish_initial()
+        except Exception:
+            self.rollback_initial()
+            raise
+        _INITIALIZING.pop(scene.as_pointer(), None)
+        _SESSIONS[scene.as_pointer()] = self
+
+    def rollback_initial(self):
+        if hasattr(self, 'helpers'):
+            self.clear_helpers()
+        if hasattr(self, 'geometry'):
+            self.geometry.rollback_initial()
+        for key in list(self.scene.keys()):
+            if key.startswith(('defect_', 'wfrl_nrel_defect')) and key not in self._initial_properties:
+                del self.scene[key]
+        for key, value in self._initial_properties.items():
+            self.scene[key] = value
+        props = self.scene.wfrl_nrel_defects
+        props.defect_items.clear()
+        for defect_id, name, enabled in self._initial_rows:
+            item = props.defect_items.add()
+            item.defect_id, item.name, item.enabled = defect_id, name, enabled
+        for key, value in self._initial_rna.items():
+            setattr(props, key, value)
+        _INITIALIZING.pop(self.scene.as_pointer(), None)
+
+    def _initialize(self, scene, document=None):
         from .. import farm_flex, clearance_replay
         if not farm_flex.is_active(scene):
             raise ValueError('请先加载 NREL 5MW MAPPO 柔性回放')
@@ -111,13 +210,13 @@ class EditorSession:
         self.edit_state = None; self.helpers = []; self.helper_rest = {}; self.commit_times = []
         self.helper_meshes = []; self.closing = False
         self.busy = False; self.healthy_payload = None; self.save_state = None
-        self.geometry = GeometrySet(self)
+        self.geometry = GeometrySet.__new__(GeometrySet)
+        GeometrySet.__init__(self.geometry, self)
         self.repair_source = scene.objects.get('WFRL.RepairReference.T1.B1')
         self.repair_rest = self.baseline.get('WFRL.Turbine.T1.Blade1')
         self.camera_signature = None
         self.store = DefectStore(self.surface, document=document, prepare=self.geometry.prepare,
             activate=self._activate, dispose=self.geometry.dispose)
-        _SESSIONS[scene.as_pointer()] = self
         self.scene['wfrl_nrel_defect_enabled'] = True
         self.scene['defect_time_s'] = clearance_replay.sample(scene)['time_s']
         self.update_helpers()
@@ -145,12 +244,14 @@ class EditorSession:
         return camera_projection.resolution(p.fov,p.vfov,p.output_long_edge_px)
 
     def fixed_camera_signature(self):
+        from .. import custom_cameras
         return [(c.name, c.parent.name if c.parent else None,
             tuple(tuple(row) for row in c.matrix_basis),
             tuple(tuple(row) for row in c.matrix_parent_inverse),
             c.data.type,c.data.lens,c.data.sensor_width,c.data.sensor_height,
             c.data.sensor_fit,c.data.shift_x,c.data.shift_y,c.data.clip_start,c.data.clip_end,
-            self.camera_resolution(c)) for c in self.cameras()]
+            self.camera_resolution(c), c.get('wfrl_custom_slot'),
+            asdict(custom_cameras.parameters(c))) for c in self.cameras()]
 
     def verify_cameras(self):
         from .. import custom_cameras
@@ -504,13 +605,17 @@ class EditorSession:
                 descriptor = descriptors[camera.name]
                 row=analyze_support(world,descriptor,ray,cancel=cancel)
                 row.update(turbine_id=support['turbine_id'],run_id=run_id,state_version=self.store.version if state_version is None else state_version,
-                    camera_id=camera.name,frame_index=frame_index,time_s=t,mode='G',camera_world_matrix=[list(r) for r in camera.matrix_world],
+                    camera_id=camera.name,frame_index=frame_index,time_s=t,mode='G',camera_world_matrix=descriptor['matrix_world'],
+                    K=descriptor['K'], P=descriptor['P'],
                     resolution=[descriptor['width'],descriptor['height']])
                 rows.append(row)
         return rows
 
 
 def ensure(scene):
+    pending = _INITIALIZING.get(scene.as_pointer())
+    if pending is not None:
+        pending.rollback_initial()
     found=_SESSIONS.get(scene.as_pointer())
     if found:
         if not getattr(found, 'closing', False): return found
@@ -537,6 +642,12 @@ def restore_saved(scene):
 
 def detach(scene=None,*,restore=True):
     errors = []
+    for pending in list(_INITIALIZING.values()):
+        if scene is None or pending.scene == scene:
+            try:
+                pending.rollback_initial()
+            except Exception as exc:
+                errors.append(exc)
     for key,s in list(_SESSIONS.items()):
         if scene is not None and s.scene != scene: continue
         s.closing = True
@@ -551,6 +662,8 @@ def detach(scene=None,*,restore=True):
             attempt(lambda: scan.finish_scan(None, True, restore_time=restore, resume_playback=False))
         s.draft = s.edit_state = None
         attempt(s.clear_helpers)
+        if hasattr(s.geometry, 'retry_originals'):
+            attempt(lambda: s.geometry.retry_originals(strict=True))
         attempt(lambda: s.store.retry_disposals(strict=True))
         for manager in s.geometry.managers.values():
             attempt(lambda manager=manager: manager.close(restore=restore))

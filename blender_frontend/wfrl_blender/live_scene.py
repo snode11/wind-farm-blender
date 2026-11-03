@@ -29,13 +29,12 @@ def build_live_scene(scene):
     display_scene = bpy.context.scene
     if display_scene.get("wfrl_scene_kind") == "manual":
         raise ValueError("手动场景不接受后端场景数据")
-    selected = getattr(display_scene, "wfrl_selected_turbine", "")
+    selected = display_scene.wfrl_selected_turbine
     _cancel_playback(display_scene)
     build_scene(scene)
     ids = [t.turbine_id for t in scene.turbines]
-    if hasattr(display_scene, "wfrl_selected_turbine"):
-        display_scene.wfrl_selected_turbine = selected if selected in ids else ids[0]
-    if getattr(display_scene, "wfrl_cinematic_reference", "") not in ids:
+    display_scene.wfrl_selected_turbine = selected if selected in ids else ids[0]
+    if display_scene.wfrl_cinematic_reference not in ids:
         display_scene.wfrl_cinematic_reference = ids[0]
     build_cameras(scene)
     from . import atmosphere
@@ -55,7 +54,7 @@ def build_live_scene(scene):
         if obj.name.startswith('WFRL.Turbine.'):
             obj.animation_data_clear()
         if obj.name.startswith('WFRL.WakeProxy.'):
-            visible = getattr(display_scene, 'wfrl_show_wake', True) and not obj.name.endswith('.Volume')
+            visible = display_scene.wfrl_show_wake and not obj.name.endswith('.Volume')
             obj.hide_render = not visible
             obj.hide_set(not visible)
             obj['fidelity'] = 'SYNTH'
@@ -72,7 +71,7 @@ def animate_illustrative_wake(scene, dt, *, running):
     """Wall-clock decoration only; never advance a backend or its timestamps."""
     if scene is None or scene.get('wfrl_scene_kind') != 'live' or not running:
         return
-    if not getattr(scene, 'wfrl_show_wake', True):
+    if not scene.wfrl_show_wake:
         return
     from .wake import update_proxy_objects
     from . import backend_inflow

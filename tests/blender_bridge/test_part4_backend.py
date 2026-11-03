@@ -14,7 +14,7 @@ from wfrl.blender_bridge.server import BridgeServer
 from wfrl.blender_bridge.messages import encode_message, FrameDecoder
 
 
-def scene(): return NS(turbines=[NS(id='A'), NS(id='B')], dt=3, backend='fastfarm')
+def scene(): return NS(turbines=[NS(id='A'), NS(id='B')], dt=3, backend='fastfarm', to_dict=lambda: None)
 def snap(step=1): return NS(step=step, ctx={}, measure=dict(yaw=np.array([1., 2.]), pitch=np.array([3., 4.]), rotor_speed=np.array([np.nan, 8.]), power=np.array([2., 3.])), farm_power=5., reward=np.float32(.5), events=[])
 def envelope(kind, payload, sid='s', seq=1): return dict(protocol_version=1,type=kind,payload=payload,session_id=sid,sequence=seq)
 
@@ -40,6 +40,10 @@ def test_adapter_preserves_missing_invalid_units_ids_fidelity():
 class FakeTrainer:
     def __init__(self, scene, on_snapshot, **kwargs):
         self.callback=on_snapshot; self.stop_event=threading.Event(); self.error=None
+        self.runtime = self._thread = None
+    @property
+    def running(self):
+        return self._thread is not None and self._thread.is_alive()
     def start(self):
         def run():
             for i in range(1000):
@@ -157,7 +161,7 @@ def test_failed_status_survives_repeated_stop_until_reset():
     worker.start(); worker.join()
     session.status = 'RUNNING'
     session._thread = worker
-    session._trainer = NS(error='boom')
+    session._trainer = NS(runtime=None, running=False, error='boom')
     session.poll()
     assert session.status == 'FAILED'
     session.stop()
@@ -172,7 +176,7 @@ def test_stop_after_natural_exit_emits_draining_before_stopped():
     worker.start(); worker.join()
     session.status = 'RUNNING'
     session._thread = worker
-    session._trainer = NS(error=None)
+    session._trainer = NS(runtime=None, running=False, error=None)
     session.stop()
     statuses = [payload['run_status'] for kind, payload in session.poll()
                 if kind == 'lifecycle']
@@ -446,7 +450,7 @@ def test_completed_reader_does_not_hide_live_owned_descendants():
     session = BackendSession(scene(), trainer_factory=FakeTrainer)
     reader = threading.Thread(target=lambda: None)
     reader.start(); reader.join()
-    trainer = NS(error=None, running=True)
+    trainer = NS(runtime=None, error=None, running=True)
     trainer.stop = lambda timeout: setattr(trainer, 'running', False)
     session._trainer, session._thread = trainer, reader
     session.status = 'RUNNING'

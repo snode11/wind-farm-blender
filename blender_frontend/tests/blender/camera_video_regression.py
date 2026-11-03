@@ -116,6 +116,18 @@ try:
     assert tuple(image.size) == (160, 102)
 finally:
     bpy.data.images.remove(image)
+# Existing valid EXR bytes must never satisfy a cancelled new subsample.
+from unittest.mock import patch
+stale=output/'masters/.exposure_sample.exr'
+stale.write_bytes(b'previous completed exposure')
+with patch.object(video, 'render_sample', return_value={'CANCELLED'}):
+    args.max_frames=None
+    try: video.render_package(args)
+    except RuntimeError as error: assert 'did not finish' in str(error)
+    else: raise AssertionError('Cancelled exposure accepted')
+assert not stale.exists()
+assert '1' not in json.loads((output/'masters/checks/render_frames.json').read_text())
+assert not (output/'masters/master_frames/000001.png').exists()
 args.max_frames = None
 second = video.render_package(args)
 assert second['status'] == 'complete' and second['rendered_this_run'] == 1

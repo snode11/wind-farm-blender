@@ -108,6 +108,28 @@ class OrdinaryRotorConflicts(unittest.TestCase):
         self.assertAlmostEqual(self.t1.rotor_object.rotation_euler.x, .25)
         self.assertEqual(self.t1.azimuth_deg, 0.0)
 
+    def test_paused_pose_export_rejects_native_rotation_constraint_and_driver(self):
+        target=OUT/'paused-pose.json'
+        target.write_text('preserved existing export')
+        for kind in ('rotation','constraint','driver'):
+            control._apply_poses(scene, {'T1':control.pose_snapshot(scene)['T1']}, pause=True, ramp=False)
+            if kind=='rotation': self.t1.rotor_object.rotation_euler.x += .2
+            elif kind=='constraint': self.t1.yaw_object.constraints.new('COPY_ROTATION')
+            else: self.t1.blade1_object.driver_add('rotation_euler',2)
+            try:
+                try: result=bpy.ops.wfrl.manual_pose_export(filepath=str(target))
+                except RuntimeError: result={'CANCELLED'}
+                self.assertEqual(result,{'CANCELLED'})
+                self.assertEqual(target.read_text(),'preserved existing export')
+            finally:
+                self.t1.yaw_object.constraints.clear()
+                self.t1.blade1_object.animation_data_clear()
+                # Generic validation remains usable for restoring the controlled pose.
+                self.assertTrue(control.validate_scene(scene)[0])
+                control._apply_poses(scene, {'T1':control.pose_snapshot(scene)['T1']}, pause=True, ramp=False)
+        self.assertEqual(bpy.ops.wfrl.manual_pose_export(filepath=str(target)),{'FINISHED'})
+        self.assertEqual(json.loads(target.read_text())['schema'],'wfrl.manual-pose.v1')
+
 
 result = unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(OrdinaryRotorConflicts))
 (OUT / 'checks.json').write_text(json.dumps(dict(

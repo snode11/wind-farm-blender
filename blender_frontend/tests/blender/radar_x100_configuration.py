@@ -4,6 +4,7 @@ import importlib
 import json
 import os
 import sys
+import time
 import numpy as np
 import bpy
 
@@ -90,7 +91,11 @@ try:
     session.start_recording(OUT/'recording')
     scene.wfrl_x100_record_path = str(OUT/'next-recording')
     assert not session.pending_configuration() and session.fanout.recorder.path == OUT/'recording'
-    session.stop_recording(); radar.stop(scene)
+    deadline = time.perf_counter()+3
+    while not session.stop_recording():
+        assert time.perf_counter()<deadline, 'Recording did not finish'
+        time.sleep(.005)
+    radar.stop(scene)
     scene.wfrl_x100_path = str(OUT/'recording')
     session = radar.start(scene)
     assert 'ply_source' not in session.applied_config

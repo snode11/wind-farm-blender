@@ -19,7 +19,7 @@ from wfrl.blender_bridge.training_progress import interactive_progress
 
 def scene():
     return SimpleNamespace(turbines=[SimpleNamespace(id='A'), SimpleNamespace(id='B')],
-                           dt=3., backend='fastfarm')
+                           dt=3., backend='fastfarm', to_dict=lambda: None)
 
 
 @pytest.mark.parametrize('field', ['dt', 'x', 'y', 'sensor'])
@@ -83,6 +83,11 @@ class GatedTrainer:
         self.work = queue.Queue()
         self.stop_event = threading.Event()
         self.error = None
+        self.runtime = self._thread = None
+
+    @property
+    def running(self):
+        return self._thread is not None and self._thread.is_alive()
 
     def start(self):
         def run():

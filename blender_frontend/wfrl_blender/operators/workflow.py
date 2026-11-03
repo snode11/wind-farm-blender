@@ -45,7 +45,7 @@ def launch_options(context, mode):
     if mode == 'interactive_training':
         options['episode_steps'] = settings.episode_steps
     if mode == 'replay':
-        if not settings.checkpoint: raise ValueError('Choose a compatible checkpoint for Replay')
+        if not settings.checkpoint: raise ValueError('Choose a compatible checkpoint for backend policy evaluation')
         options.update(ckpt_path=bpy.path.abspath(settings.checkpoint), replay_steps=settings.replay_steps,
                        warmup_steps=settings.warmup_steps, seed=settings.seed)
     elif mode == 'formal_training' and settings.checkpoint:

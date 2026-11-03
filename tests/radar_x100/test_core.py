@@ -136,7 +136,7 @@ def moving_scene(t):
 
 
 def test_simulation_same_material_velocity_fov_occlusion_and_determinism():
-    kwargs = dict(sensor_id='X100', session_id='sim', sequence=30, interval_s=(0,2), candidate_budget=2)
+    kwargs = dict(sensor_id='X100', session_id='sim', sequence=30, interval_s=(0,2), candidate_budget=2, sampling_mode='CENTROID')
     result = simulation.simulate(moving_scene, 1, **kwargs)
     assert len(result.points) == 1 and result.material_ids == (0,)
     assert result.points['x'][0] == pytest.approx(12)
@@ -151,7 +151,7 @@ def test_simulation_same_material_velocity_fov_occlusion_and_determinism():
 
 
 def test_subset_material_sampling_preserves_observation_and_relative_velocity():
-    kwargs = dict(sensor_id='X100', session_id='sim', sequence=30, interval_s=(0, 2), candidate_budget=2)
+    kwargs = dict(sensor_id='X100', session_id='sim', sequence=30, interval_s=(0, 2), candidate_budget=2, sampling_mode='CENTROID')
     calls = []
     def material(t, ids):
         sample = moving_scene(t)

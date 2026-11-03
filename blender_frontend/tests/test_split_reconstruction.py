@@ -54,11 +54,11 @@ def test_loaded_mappo_offers_texture_entry_without_legacy_split_geometry():
 
 
 def test_texture_camera_owns_right_view_and_legacy_camera_is_retained():
-    from wfrl_blender import split_surface_texture
-    scene = Scene(split_texture_review=True)
+    from wfrl_blender import split_mappo_texture
+    scene = Scene(split_mappo_texture_review=True, split_texture_current_source='MAPPO')
     legacy = scene.objects['SplitRecon.Camera']
     texture = object()
-    scene.objects[split_surface_texture.CAMERA] = texture
+    scene.objects[split_mappo_texture.CAMERA] = texture
     assert split.reconstruction_camera(scene) is texture
     assert split.is_reconstruction_view(scene, NS(type='VIEW_3D', camera=texture))
     assert not split.is_reconstruction_view(scene, NS(type='VIEW_3D', camera=legacy))
@@ -93,7 +93,7 @@ def _entry_context(monkeypatch, scene):
 
 
 def test_returning_to_saved_geometry_does_not_replace_it_with_texture(monkeypatch):
-    from wfrl_blender import split_surface_texture as surface
+    from wfrl_blender import split_mappo_texture as surface
     scene = Scene(split_review_enabled=False)
     context, layouts = _entry_context(monkeypatch, scene)
     legacy_camera = scene.objects['SplitRecon.Camera']
@@ -135,7 +135,7 @@ def test_explicit_geometry_entry_deactivates_retained_same_source_and_keeps_its_
 
 
 def test_explicit_texture_entry_upgrades_geometry_and_keeps_legacy_objects(monkeypatch):
-    from wfrl_blender import split_surface_texture as surface
+    from wfrl_blender import split_mappo_texture as surface
     scene = Scene()
     context, layouts = _entry_context(monkeypatch, scene)
     legacy_camera = scene.objects['SplitRecon.Camera']
@@ -144,6 +144,7 @@ def test_explicit_texture_entry_upgrades_geometry_and_keeps_legacy_objects(monke
     def ensure_texture(target):
         restored.append(target)
         target[surface.MARKER] = True
+        target['split_texture_current_source'] = 'MAPPO'
         target.objects[surface.CAMERA] = NS(name=surface.CAMERA)
 
     monkeypatch.setattr(surface, 'ensure', ensure_texture)
@@ -155,8 +156,8 @@ def test_explicit_texture_entry_upgrades_geometry_and_keeps_legacy_objects(monke
 
 
 def test_returning_to_retained_texture_restores_its_saved_sample(monkeypatch):
-    from wfrl_blender import split_surface_texture as surface
-    scene = Scene(split_texture_review=True, split_texture_index=47,
+    from wfrl_blender import split_mappo_texture as surface
+    scene = Scene(split_mappo_texture_review=True, split_texture_current_source='MAPPO', saved_sample=47,
                   split_review_enabled=False)
     context, layouts = _entry_context(monkeypatch, scene)
     scene.objects[surface.CAMERA] = NS(name=surface.CAMERA)
@@ -164,13 +165,13 @@ def test_returning_to_retained_texture_restores_its_saved_sample(monkeypatch):
     monkeypatch.setattr(surface, 'ensure', lambda target: restored.append(target))
     assert split.enter(context)
     assert restored == [scene]
-    assert scene[surface.INDEX] == 47
+    assert scene['saved_sample'] == 47
     assert split.reconstruction_camera(scene) is scene.objects[surface.CAMERA]
     assert layouts == [('DUAL', ('WFRL.Camera.T1.FrontQuarter', surface.CAMERA))]
 
 
 def test_loaded_mappo_enters_texture_when_no_saved_geometry_exists(monkeypatch):
-    from wfrl_blender import split_surface_texture as surface
+    from wfrl_blender import split_mappo_texture as surface
     scene = Scene(wfrl_farm_flex_path='__WFRL_BUNDLED_MAPPO__')
     scene.pop('split_reconstruction_review')
     scene.objects = {'WFRL.Turbine.T1.Rotor': object()}
@@ -180,29 +181,13 @@ def test_loaded_mappo_enters_texture_when_no_saved_geometry_exists(monkeypatch):
     def ensure_texture(target):
         restored.append(target)
         target[surface.MARKER] = True
+        target['split_texture_current_source'] = 'MAPPO'
         target.objects[surface.CAMERA] = NS(name=surface.CAMERA)
 
     monkeypatch.setattr(surface, 'ensure', ensure_texture)
     assert split.enter(context)
     assert restored == [scene]
     assert layouts == [('DUAL', ('WFRL.Camera.T1.FrontQuarter', surface.CAMERA))]
-
-
-def test_texture_draw_information_never_restores_or_writes_ids(monkeypatch):
-    from wfrl_blender import split_surface_texture as surface
-    scene = NS(as_pointer=lambda: 30)
-    def forbidden(_scene):
-        raise AssertionError('draw information attempted restoration or an ID write')
-    monkeypatch.setattr(surface, 'ensure', forbidden)
-    monkeypatch.setattr(surface, 'apply', forbidden)
-    monkeypatch.setattr(surface, '_SESSIONS', {})
-    assert surface.information(scene) is None
-    sequence = NS(states=[None]*120, times=np.arange(120)/10,
-                  source_frames=np.arange(120), fps=10., source_label='SYNTHETIC')
-    surface._SESSIONS[30] = dict(sequence=sequence, index=16)
-    info = surface.information(scene)
-    assert info['index'] == 16 and info['time_s'] == 1.6 and info['samples'] == 120
-    assert info['source_frame'] == 16
 
 
 def test_pair_requires_existing_correctly_positioned_roles():
@@ -600,3 +585,14 @@ if __name__ == '__main__':
         with ExitStack() as stack:
             test(**{'monkeypatch': Patches(stack)} if 'monkeypatch' in inspect.signature(test).parameters else {})
     print(f'{len(tests)} split lifecycle/ownership tests passed')
+
+
+def test_independent_synthetic_saved_scene_is_not_automatically_resumed():
+    from wfrl_blender import split_mappo_texture
+    scene = Scene(split_texture_review=True, split_review_enabled=True)
+    assert not split.enabled(scene)
+    scene['split_texture_current_source'] = 'SYNTHETIC'
+    assert not split.enabled(scene)
+    assert split.texture_adapter(scene) is split_mappo_texture
+    scene['split_texture_current_source'] = 'GEOMETRY'
+    assert split.enabled(scene)

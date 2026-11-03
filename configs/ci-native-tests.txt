@@ -18,6 +18,10 @@ farm_reopen_settings_regression.py
 radar_x100_regression.py
 radar_x100_edges.py
 radar_x100_history_regression.py
+radar_x100_analysis.py
+radar_x100_mount_presets.py
+radar_x100_configuration.py
+radar_x100_binding_replay.py
 farm_capture_transaction_regression.py
 split_mappo_texture_rollback_regression.py
 custom_camera_capture_regression.py

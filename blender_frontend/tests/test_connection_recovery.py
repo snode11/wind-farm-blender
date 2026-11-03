@@ -26,6 +26,11 @@ class ControlledTrainer:
         self.work = queue.Queue()
         self.stopped = threading.Event()
         self.error = None
+        self.runtime = self._thread = None
+
+    @property
+    def running(self):
+        return self._thread is not None and self._thread.is_alive()
 
     def start(self):
         def work():
@@ -256,7 +261,7 @@ def test_new_backend_operator_requires_confirmation_and_invokes_a_dialog(fronten
     action.confirm_forget = False
     assert action.execute(None) == {'CANCELLED'}
     assert not connected and reports
-    context = SimpleNamespace(window_manager=SimpleNamespace(
+    context = SimpleNamespace(scene=None, window_manager=SimpleNamespace(
         invoke_props_dialog=lambda operator, **kw: dialogs.append(operator) or {'RUNNING_MODAL'}))
     action.confirm_forget = True
     assert action.invoke(context, None) == {'RUNNING_MODAL'}

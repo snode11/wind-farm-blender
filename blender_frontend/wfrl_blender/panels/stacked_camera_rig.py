@@ -274,3 +274,12 @@ class WFRL_OT_BoxAction(bpy.types.Operator):
 
 
 CLASSES=(WFRL_OT_BoxPosition,WFRL_OT_BoxResetDefault,WFRL_OT_BoxPick,WFRL_OT_BoxAction)
+
+
+def status_for(scene):
+    from ..home_state import TaskStatus
+    job = _ACTIVE
+    if job is None:
+        return TaskStatus('mount')
+    return TaskStatus('mount', True, job.scene == scene, 'PLACING',
+                      job.scene.name, getattr(job.transaction, 'error', ''), '')

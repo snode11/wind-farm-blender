@@ -5,6 +5,7 @@ import importlib
 import json
 import os
 import sys
+import time
 import unittest
 import numpy as np
 import bpy
@@ -26,6 +27,13 @@ OUT = Path(os.environ['WFRL_TEST_OUTPUT'])
 OUT.mkdir(parents=True, exist_ok=False)
 addon.load_demo_scene(farm.default_package())
 measurements = {}
+
+
+def finish_recording(session):
+    deadline = time.perf_counter() + 3
+    while not session.stop_recording():
+        assert time.perf_counter() < deadline, 'Recording did not finish'
+        time.sleep(.005)
 
 
 class BindingContracts(unittest.TestCase):
@@ -201,7 +209,7 @@ class ReplayContracts(unittest.TestCase):
                 session.start_recording(path)
                 session.seek_frame(1)
                 session.seek_frame(2)
-                session.stop_recording()
+                finish_recording(session)
                 replay = api.recording.Replay(path)
                 self.assertEqual(replay.times, [t-5. for t in session.replay.times])
                 for index in range(3):
@@ -217,7 +225,7 @@ class ReplayContracts(unittest.TestCase):
         for index in (1, 2):
             session.seek_frame(index)
             self.assertEqual(session.selected_replay_index(), index)
-        session.stop_recording()
+        finish_recording(session)
         self.assertEqual(api.recording.Replay(path).times, [0., 0., 5.1-5.])
 
     def test_active_backward_seek_fails_recording_including_equal_time_rows(self):
@@ -229,7 +237,7 @@ class ReplayContracts(unittest.TestCase):
                 session.start_recording(path)
                 session.seek_frame(0)
                 with self.assertRaisesRegex(RuntimeError, 'backward'):
-                    session.stop_recording()
+                    finish_recording(session)
                 manifest = json.loads((path/'manifest.json').read_text())
                 self.assertEqual(manifest['state'], 'FAILED')
                 self.assertTrue((path/'INCOMPLETE').exists())
@@ -295,12 +303,12 @@ class ReplayContracts(unittest.TestCase):
             session.seek_frame(2)
             self.assertEqual(session.frame.sequence, 2)
         with self.assertRaisesRegex(RuntimeError, 'backward'):
-            session.stop_recording()
+            finish_recording(session)
         session.seek_frame(2)
         second = OUT/'endpoint-indices-output'
         session.start_recording(second)
         session.seek_frame(3)
-        session.stop_recording()
+        finish_recording(session)
         replay = api.recording.Replay(second)
         self.assertEqual(replay.times, [0., 0.])
         self.assertEqual([replay.frame(i).sequence for i in range(2)], [2, 3])

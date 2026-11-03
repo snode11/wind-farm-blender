@@ -98,9 +98,22 @@ def test_mesh_rebinding_and_source_edits_invalidate_pure_geometry(replay):
     assert not np.array_equal(obj.data.vertices[0].co, previous)
 
 
-def test_native_topology_change_fails_without_partial_mesh_write(replay):
+@pytest.mark.parametrize('position', [0, -1])
+def test_native_topology_change_fails_without_partial_mesh_write(replay, monkeypatch, position):
     active, scene, _ = replay
     run(active, scene)
-    active.blades[0][0].data.vertices.pop()
+    import wfrl_blender
+    from wfrl_blender import clearance_replay
+    monkeypatch.setattr(wfrl_blender, '_cancel_playback', Mock())
+    monkeypatch.setattr(clearance_replay, 'clear', lambda scene, reason: scene.update(wfrl_flex_active=False))
+    telemetry = Mock()
+    monkeypatch.setattr(active, 'record_telemetry', telemetry)
+    active.blades[position][0].data.vertices.pop()
+    before = [[v.co.copy() for v in row[0].data.vertices] for row in active.blades]
     with pytest.raises(ValueError, match='topology no longer matches'):
-        run(active, scene)
+        active.update(scene, sim_time_s=.75)
+    assert scene['wfrl_clearance_time_s'] == .5
+    assert not scene['wfrl_flex_frame_valid'] and active.frame_error
+    assert telemetry.call_count == 0
+    for row, coords in zip(active.blades, before):
+        np.testing.assert_array_equal([v.co for v in row[0].data.vertices], coords)

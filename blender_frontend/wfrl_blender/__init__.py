@@ -231,20 +231,61 @@ def _classes():
             + safety.CLASSES + presentation.CLASSES + training.CLASSES + gimbal.CLASSES + clearance.CLASSES + farm_replay.CLASSES + video_output.CLASSES + custom_cameras.CLASSES + blade_recon.CLASSES + DEFECT_CLASSES + MANUAL_CLASSES + home.CLASSES + X100_CLASSES)
 
 
+def _cancel_managed_playback():
+    from . import playback, farm_flex, clearance_replay
+    owner = playback.owner_scene()
+    if owner is not None and (farm_flex.active_for(owner) is not None
+            or clearance_replay.reader_for(owner) is not None
+            or owner.get('wfrl_scene_kind') == 'manual'):
+        _cancel_playback(owner)
+
+
 def register():
+    import bpy
+    previous = getattr(bpy, '_wfrl_registered_cleanup', None)
+    if previous:
+        previous()
+    resources = []
+    def cleanup():
+        errors, pending = [], []
+        try:
+            _cancel_managed_playback()
+        except Exception as exc:
+            errors.append(exc)
+        for callback in reversed(resources):
+            try:
+                callback()
+            except Exception as exc:
+                pending.append(callback)
+                errors.append(exc)
+        resources[:] = reversed(pending)
+        if errors:
+            raise RuntimeError('WFRL cleanup failed: ' + '; '.join(map(str, errors)))
+    def acquire(release, action):
+        resources.append(release)
+        action()
+    bpy._wfrl_registered_cleanup = cleanup
+    try:
+        _register_resources(acquire)
+    except Exception as exc:
+        try:
+            cleanup()
+        except Exception as cleanup_error:
+            raise RuntimeError(str(exc) + '; ' + str(cleanup_error)) from exc
+        raise
+
+
+def _register_resources(acquire):
     import bpy
     from bpy.app.handlers import persistent
     from . import runtime
     from .deflection import refresh as refresh_deflection
-    # Preserve cleanup callbacks outside reloadable module globals.
-    previous = getattr(bpy, '_wfrl_registered_cleanup', None)
-    if previous:
-        previous()
     for cls in _classes():
         if not cls.is_registered:
-            bpy.utils.register_class(cls)
+            acquire(lambda cls=cls: bpy.utils.unregister_class(cls) if cls.is_registered else None,
+                    lambda cls=cls: bpy.utils.register_class(cls))
     from .panels import home
-    home.register_properties()
+    acquire(home.unregister_properties, lambda: home.register_properties())
     definitions = {
         "wfrl_diagnostics_sampling": bpy.props.BoolProperty(name="视口播放帧率", default=False),
         "wfrl_farm_panel_page": bpy.props.EnumProperty(
@@ -295,108 +336,58 @@ def register():
     }
     for name, prop in definitions.items():
         if not hasattr(bpy.types.Scene, name):
-            setattr(bpy.types.Scene, name, prop)
+            acquire(lambda name=name: delattr(bpy.types.Scene, name) if hasattr(bpy.types.Scene, name) else None,
+                    lambda name=name, prop=prop: setattr(bpy.types.Scene, name, prop))
     for handlers, function in ((bpy.app.handlers.load_post, _on_load),):
         persistent(function)
         if function not in handlers:
-            handlers.append(function)
+            acquire(lambda handlers=handlers, function=function: handlers.remove(function) if function in handlers else None,
+                    lambda: handlers.append(function))
     # Blender installs extensions under _RestrictData; scene setup belongs to Load Demo.
     if hasattr(bpy.data, "workspaces"):
         ensure_workspace()
     if hasattr(bpy.data, "scenes"):
         for scene in bpy.data.scenes:
             cameras.clear_viewport_masks(scene)
-    from .presentation import register_overlay
-    register_overlay()
+    from .presentation import register_overlay, unregister_overlay
+    acquire(unregister_overlay, register_overlay)
     from . import charts
     from .operators import workflow
     from .panels import presentation as capture_panel
-    workflow.register_properties()
-    capture_panel.register_properties()
+    acquire(workflow.unregister_properties, lambda: workflow.register_properties())
+    acquire(capture_panel.unregister_properties, lambda: capture_panel.register_properties())
     from . import animation_render_ui
-    animation_render_ui.register()
+    acquire(animation_render_ui.unregister, lambda: animation_render_ui.register())
     from .panels import video_output
-    video_output.register()
+    acquire(video_output.unregister, lambda: video_output.register())
     from .panels import gimbal
-    gimbal.register_properties()
+    acquire(gimbal.unregister_properties, lambda: gimbal.register_properties())
     from .panels import custom_cameras
-    custom_cameras.register_properties()
+    acquire(custom_cameras.unregister_properties, lambda: custom_cameras.register_properties())
     from .panels import clearance
     from . import clearance_replay
     from . import playback
-    playback.register()
-    clearance.register_properties()
-    clearance_replay.register()
-    charts.register()
-    from .operators.history_export import register_timer as history_export_register
-    history_export_register()
-    runtime.register()
+    acquire(playback.unregister, lambda: playback.register())
+    acquire(clearance.unregister_properties, lambda: clearance.register_properties())
+    acquire(clearance_replay.unregister, lambda: clearance_replay.register())
+    acquire(charts.unregister, lambda: charts.register())
+    from .operators.history_export import register_timer as history_export_register, unregister_timer as history_export_unregister
+    acquire(history_export_unregister, history_export_register)
+    acquire(runtime.shutdown, lambda: runtime.register())
     from . import blade_recon_review
-    blade_recon_review.register()
+    acquire(blade_recon_review.unregister, lambda: blade_recon_review.register())
     from . import split_reconstruction, split_reconstruction_ui
-    split_reconstruction.register()
-    split_reconstruction_ui.register()
+    acquire(split_reconstruction.unregister, lambda: split_reconstruction.register())
+    acquire(split_reconstruction_ui.unregister, lambda: split_reconstruction_ui.register())
     from .nrel_defects import editor as defect_editor
-    defect_editor.register_properties()
+    acquire(defect_editor.unregister_properties, lambda: defect_editor.register_properties())
     from . import frontend_diagnostics
-    frontend_diagnostics.register()
+    acquire(frontend_diagnostics.unregister, lambda: frontend_diagnostics.register())
     from . import manual_control, manual_down
-    manual_control.register()
-    manual_down.register()
+    acquire(manual_control.unregister, lambda: manual_control.register())
+    acquire(manual_down.unregister, lambda: manual_down.register())
     from .radar_x100 import runtime as x100_runtime
-    x100_runtime.register()
-    registered_classes = _classes()
-    registered_handlers = ((bpy.app.handlers.load_post, _on_load),)
-    registered_properties = tuple(definitions)
-    from .presentation import unregister_overlay
-    from .operators.history_export import unregister_timer as history_export_cleanup
-    timer_cancel = _cancel_playback
-    runtime_cleanup = runtime.shutdown
-    workflow_cleanup = workflow.unregister_properties
-    capture_cleanup = capture_panel.unregister_properties
-    charts_cleanup = charts.unregister
-    gimbal_cleanup = gimbal.unregister_properties
-    custom_cameras_cleanup = custom_cameras.unregister_properties
-    blade_recon_cleanup = blade_recon_review.unregister
-    split_cleanup = split_reconstruction.unregister
-    split_ui_cleanup = split_reconstruction_ui.unregister
-    diagnostics_cleanup = frontend_diagnostics.unregister
-    playback_cleanup = playback.unregister
-    manual_cleanup = manual_control.unregister
-    manual_down_cleanup = manual_down.unregister
-    home_cleanup = home.unregister_properties
-    x100_cleanup = x100_runtime.unregister
-    def cleanup():
-        errors = []
-        def attempt(callback):
-            try:
-                callback()
-            except Exception as exc:
-                errors.append(exc)
-        for callback in (x100_cleanup, home_cleanup, animation_render_ui.unregister,
-                         manual_down_cleanup, manual_cleanup, diagnostics_cleanup,
-                         defect_editor.unregister_properties, split_ui_cleanup,
-                         split_cleanup, blade_recon_cleanup, custom_cameras_cleanup,
-                         runtime_cleanup, video_output.unregister, history_export_cleanup,
-                         gimbal_cleanup, clearance.unregister_properties,
-                         clearance_replay.unregister, capture_cleanup, charts_cleanup,
-                         workflow_cleanup, unregister_overlay, playback_cleanup):
-            attempt(callback)
-        if bpy.app.timers.is_registered(timer_cancel):
-            attempt(lambda: bpy.app.timers.unregister(timer_cancel))
-        for handlers, function in registered_handlers:
-            if function in handlers:
-                handlers.remove(function)
-        for name in registered_properties:
-            if hasattr(bpy.types.Scene, name):
-                attempt(lambda name=name: delattr(bpy.types.Scene, name))
-        for cls in reversed(registered_classes):
-            if cls.is_registered:
-                attempt(lambda cls=cls: bpy.utils.unregister_class(cls))
-        if errors:
-            raise RuntimeError('WFRL cleanup failed: ' + '; '.join(map(str, errors)))
-    bpy._wfrl_registered_cleanup = cleanup
-
+    acquire(x100_runtime.unregister, lambda: x100_runtime.register())
 
 def unregister():
     import bpy
@@ -418,7 +409,6 @@ def unregister():
         blade_recon_review.unregister()
     from .presentation import unregister_overlay
     unregister_overlay()
-    _cancel_playback(all_scenes=True)
     if bpy.app.timers.is_registered(_cancel_playback):
         bpy.app.timers.unregister(_cancel_playback)
     for handlers, function in ((bpy.app.handlers.load_post, _on_load),):
@@ -456,12 +446,12 @@ def build_demo_geometry():
     return collection
 
 
-def load_demo_scene(path=None, *, camera_rig=True):
+def load_demo_scene(path=None, *, camera_rig=True, _package=None):
     """Load recorded results and retain a visible error until a successful load."""
     import bpy
     scene = bpy.context.scene
     try:
-        collection = _load_demo_scene(path, camera_rig=camera_rig)
+        collection = _load_demo_scene(path, camera_rig=camera_rig, _package=_package)
     except Exception as exc:
         scene['wfrl_home_load_error'] = str(exc)
         raise
@@ -469,20 +459,27 @@ def load_demo_scene(path=None, *, camera_rig=True):
     return collection
 
 
-def _load_demo_scene(path=None, *, camera_rig=True):
+def _load_demo_scene(path=None, *, camera_rig=True, _package=None):
     import bpy
     if bpy.context.scene.get("wfrl_scene_kind") == "manual":
         raise ValueError("请先返回原场景，再加载 MAPPO")
     from . import runtime, farm_flex
     if not runtime.configuration_editable():
         raise ValueError('Stop the active backend before loading MAPPO')
+    from .home_state import can_start
+    allowed, reason = can_start('replace_scene', bpy.context.scene)
+    if not allowed:
+        raise ValueError(reason)
     validate_scene_build()
+    path = path or farm_flex.default_package()
+    package = farm_flex.preflight(path) if _package is None else _package
+    farm_flex.validate_candidate(path, package)
     _cancel_playback(bpy.context.scene)
     runtime.enter_result_replay()
     collection = build_demo_geometry()
     scene = bpy.context.scene
     try:
-        farm_flex.attach(scene, path or farm_flex.default_package())
+        farm_flex.attach(scene, path, _package=package)
         from .panels.farm_replay import build_review_cameras
         build_review_cameras(scene)
         scene.wfrl_flex_show_tip_trails = False

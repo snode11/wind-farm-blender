@@ -60,8 +60,8 @@ def world_xyz(frame):
 
 
 def style_key(scene):
-    return (scene.wfrl_x100_color, getattr(scene, 'wfrl_x100_color_scale', 'FIXED'),
-            getattr(scene, 'wfrl_x100_velocity_limit', 10.))
+    return (scene.wfrl_x100_color, scene.wfrl_x100_color_scale,
+            scene.wfrl_x100_velocity_limit)
 
 
 def point_style(frame, color_by, *, color_scale='FIXED', velocity_limit=10.):

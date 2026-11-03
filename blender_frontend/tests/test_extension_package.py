@@ -29,6 +29,10 @@ class PackageTests(unittest.TestCase):
     def test_optional_texture_payload_still_rejects_partial_or_wrong_source(self):
         builder = load_builder()
         payloads = builder._payloads()
+        names = {name for name, _ in payloads}
+        self.assertFalse(any(name.startswith(builder.RESEARCH_ONLY_PAYLOADS) for name in names))
+        self.assertIn('assets/blade_recon_mappo_tex/manifest.json', names)
+        self.assertIn('assets/examples/mappo_reconstruction_split.blend', names)
         prefix = 'assets/blade_recon_mappo_tex/'
         absent = [(name, data) for name, data in payloads if not name.startswith(prefix)]
         builder._validate_mappo_texture_payloads(absent, required=False)
@@ -63,7 +67,7 @@ class PackageTests(unittest.TestCase):
                                  (package / 'manifest.json').read_bytes())
                 self.assertFalse(any(name.startswith(('assets/blade_recon_mappo_tex/',
                     'assets/blade_response/', 'assets/dual_beam/', 'assets/dual_beam_tls/')) for name in names))
-                self.assertIn('assets/blade_recon_synth_tex/manifest.json', names)
+                self.assertFalse(any(name.startswith(builder.RESEARCH_ONLY_PAYLOADS) for name in names))
                 self.assertEqual(zipped.read('manual_control.py'),
                                  (builder.PACKAGE_SOURCE / 'manual_control.py').read_bytes())
 

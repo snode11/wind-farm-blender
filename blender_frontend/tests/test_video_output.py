@@ -114,7 +114,7 @@ def test_cancel_removes_partial_export(tmp_path, monkeypatch):
     job = video_output.Export()
     job.cancelled.set()
     job._copy(source, target)
-    assert job.error
+    assert job.state == 'CANCELLED' and not job.error
     assert not target.exists()
     assert source.read_bytes() == b'x' * 100
 
@@ -153,7 +153,7 @@ def test_external_destination_during_copy_is_preserved_and_never_reported_succes
         release.set()
         wait_export(job)
     assert target.read_bytes() == b'preserve external video'
-    assert job.error and not job.output_path
+    assert (job.state == 'CANCELLED' if cancel else bool(job.error)) and not job.output_path
     assert sorted(p.name for p in tmp_path.iterdir()) == ['output.mp4', 'source.mp4']
 
 
@@ -255,3 +255,46 @@ def test_stream_decode_failure_cleanup_restart_and_busy_port(tmp_path):
             assert busy.getsockname()[1] == port
     finally:
         stream.stop()
+
+
+@pytest.mark.parametrize('block_at', ['read', 'fsync'])
+def test_stop_is_bounded_and_keeps_worker_and_staging_until_io_finishes(tmp_path, monkeypatch, block_at):
+    source, target = tmp_path / 'source.mp4', tmp_path / 'output.mp4'
+    source.write_bytes(b'owned video')
+    entered, release = threading.Event(), threading.Event()
+    original_open, original_fsync = Path.open, video_output.os.fsync
+    class HeldReader:
+        def __enter__(self):
+            self.stream = original_open(source, 'rb')
+            return self
+        def __exit__(self, *args): self.stream.close()
+        def fileno(self): return self.stream.fileno()
+        def read(self, count):
+            entered.set()
+            assert release.wait(5)
+            return self.stream.read(count)
+    if block_at == 'read':
+        monkeypatch.setattr(Path, 'open', lambda p, *a, **kw:
+            HeldReader() if p == source and a == ('rb',) else original_open(p, *a, **kw))
+    else:
+        def fsync(fd):
+            entered.set()
+            assert release.wait(5)
+            original_fsync(fd)
+        monkeypatch.setattr(video_output.os, 'fsync', fsync)
+    job = video_output.Export()
+    job.start(source, target)
+    try:
+        assert entered.wait(5)
+        worker = job.thread
+        begun = time.monotonic()
+        assert not job.stop()
+        assert time.monotonic() - begun < .5
+        assert job.state == 'CANCELLING' and job.thread is worker and job.active
+        assert list(tmp_path.glob('.wfrl-video-export-*'))
+        with pytest.raises(RuntimeError): job.start(source, target)
+    finally:
+        release.set()
+        wait_export(job)
+    assert job.state == 'CANCELLED' and not job.error and not target.exists()
+    assert not list(tmp_path.glob('.wfrl-video-export-*'))

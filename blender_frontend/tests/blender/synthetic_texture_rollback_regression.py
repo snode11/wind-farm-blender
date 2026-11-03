@@ -86,5 +86,47 @@ assert not surface._PENDING_IMPORTS and inventory()==before
 checks.append('surface_cleanup_retry')
 value=synthetic.ensure(scene);assert value['index'] is not None
 checks.append('synthetic_retry_success')
+import hashlib
+from wfrl_blender import split_reconstruction
+bpy.context.preferences.edit.use_global_undo=True
+scene_name=scene.name
+index=scene[synthetic.INDEX]
+def packed(scene):
+    return [hashlib.sha256(obj.data.materials[0].node_tree.nodes['SurfaceTexture'].image.packed_file.data).hexdigest()
+            for obj in synthetic.objects(scene)]
+evidence=packed(scene)
+class WFRL_OT_SyntheticHistoryFixture(bpy.types.Operator):
+    bl_idname='wfrl.test_synthetic_history'
+    bl_label='Synthetic ID replacement'
+    bl_options={'REGISTER','UNDO'}
+    def execute(self,context):
+        obj=synthetic.objects(context.scene)[0]
+        obj.data=obj.data.copy()
+        obj.data.materials[0]=obj.data.materials[0].copy()
+        obj.data.vertices[0].co.z += .1
+        return {'FINISHED'}
+bpy.utils.register_class(WFRL_OT_SyntheticHistoryFixture)
+baseline_names=(synthetic.objects(scene)[0].data.name,synthetic.objects(scene)[0].data.materials[0].name)
+bpy.ops.ed.undo_push(message='Synthetic sample')
+assert bpy.ops.wfrl.test_synthetic_history('EXEC_DEFAULT',True)=={'FINISHED'}
+candidate_names=(synthetic.objects(scene)[0].data.name,synthetic.objects(scene)[0].data.materials[0].name)
+assert candidate_names!=baseline_names
+assert bpy.ops.ed.undo()=={'FINISHED'}
+scene=bpy.data.scenes[scene_name]
+assert (synthetic.objects(scene)[0].data.name,synthetic.objects(scene)[0].data.materials[0].name)==baseline_names
+assert scene.as_pointer() not in synthetic._SESSIONS
+assert scene[synthetic.INDEX]==index
+restored=synthetic.ensure(scene)
+assert all(a==b for a,b in zip(restored['blades'],synthetic.objects(scene)))
+assert restored['index']==index and packed(scene)==evidence
+assert bpy.ops.ed.redo()=={'FINISHED'}
+scene=bpy.data.scenes[scene_name]
+assert (synthetic.objects(scene)[0].data.name,synthetic.objects(scene)[0].data.materials[0].name)==candidate_names
+assert scene.as_pointer() not in synthetic._SESSIONS
+restored=synthetic.ensure(scene)
+assert restored['index']==index and packed(scene)==evidence
+checks.append('synthetic_native_undo_redo_bindings_and_RGBA')
+bpy.utils.unregister_class(WFRL_OT_SyntheticHistoryFixture)
+
 result=dict(status='PASS',checks=checks,blender=bpy.app.version_string,module=synthetic.__file__,scope='Native datablocks and predecoded RGB helper; no rendered pixel or scientific acceptance')
 (OUTPUT/'result.json').write_text(json.dumps(result,indent=2));print('SYNTHETIC_TEXTURE_ROLLBACK_PASS')

@@ -1,8 +1,8 @@
-"""Blender adapter for saved Blade Recon geometry and optional v0.2 textures.
+"""Shared geometry/material helpers and explicit algorithm research imports.
 
-Each import creates an independent scene. Frame callbacks only request updates;
-mesh/color changes are committed by a main-thread timer. Embedded JSON restores
-playback on file load without trusting executable Text blocks or old file paths.
+Normal extension registration only installs display properties used by the
+complete-turbine comparison. Research scripts opt into standalone callbacks,
+which restore embedded inputs and commit mesh changes on the main thread.
 """
 import hashlib
 import json
@@ -769,7 +769,8 @@ def _hud():
         blf.draw(0,text)
 
 
-def register():
+def register(*, standalone=False):
+    """Register shared display properties; research playback is explicit."""
     global HUD_HANDLE
     definitions = {
         'wfrl_recon_truth_path': bpy.props.StringProperty(name='真值 JSON（可选）',subtype='FILE_PATH'),
@@ -796,6 +797,8 @@ def register():
     }
     for name, prop in definitions.items():
         setattr(bpy.types.Scene,name,prop)
+    if not standalone:
+        return
     for handlers, handler in ((bpy.app.handlers.frame_change_post,_frame),(bpy.app.handlers.load_post,_loaded)):
         if handler not in handlers:
             handlers.append(handler)

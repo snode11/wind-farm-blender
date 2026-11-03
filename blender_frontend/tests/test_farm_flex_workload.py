@@ -10,6 +10,7 @@ from wfrl_blender import farm_flex, performance
 @pytest.fixture
 def replay():
     active = object.__new__(farm_flex.FarmFlex)
+    active.export_turbines = None
     active.cache, active.groups, active.reference_matrices = {}, {}, {}
     active.visible_turbines = {1}
     active.blades = []

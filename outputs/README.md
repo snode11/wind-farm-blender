@@ -11,11 +11,13 @@
 | MAPPO 同源重建 | [`blade-recon-mappo-two-camera-20261004-a02/`](blade-recon-mappo-two-camera-20261004-a02/) 与 `mappo-same-source-texture-20261007-a01/`（资源包目录）：保存的采集输入、重建及纹理再生成数据 |
 | NREL 单叶片与动态研究 | [`nrel-video-single-blade/`](nrel-video-single-blade/) 与 [`nrel-video-dynamic/`](nrel-video-dynamic/)：原始采集、标注、冻结代码、数值结果及研究查看器 |
 | 雷达研究 | [`dual-beam-tls-20261002/`](dual-beam-tls-20261002/)：保存源、候选算法结果、原始数值证据及独立验证 |
+| X100 同帧分析 | [`x100-analysis/`](x100-analysis/)：关键源码摘要、几何与窗口／RGB／生命周期／历史检查、显式双安装预设覆盖；本地工作区证据，范围见[源码验证](../docs/blender/发布状态与验证范围.md#x100-工作区源码验证)，不代表公开包、日常安装或实机验收 |
+| X100 观测研究 | [`x100-observation-research/`](x100-observation-research/)：`search-supported.json` 为有限安装搜索，`search-area.json` 为512／1024预算对照，`blade-evaluation-supported.json` 为独立叶片评价；`source-checks/`、`import-check/`、`window-geometry/` 保留最终报告、日志、源码摘要及画布图像。适用对象见[研究验证](../docs/blender/发布状态与验证范围.md#x100-观测研究工作区验证) |
 | 机舱相机 | `nrel-nacelle-camera/`（本地证据目录，使用入口见[机舱相机](../docs/blender/NREL机舱相机.md)）：相机取景、原始渲染、诊断、对照页面与隔离安装包 |
 | GW184 试片 | `gw184-single/review/index.html`（本地查看页，来源及使用见[项目说明](../projects/gw184-single/README.md)）：试片、参数、参考帧与几何检查；下载入口使用 `delivery/GW184-trials.zip` |
 | 前端验证 | [`frontend-reliability-20261011-a01/`](frontend-reliability-20261011-a01/)、`reconstruction-*`、`blender-validation/`、`release-*` 等：按包身份解释的软件检查、截图和日志 |
 | 当前公开扩展 | [安装与下载](../docs/blender/INSTALL.md)、[发布身份与验证范围](../docs/blender/发布状态与验证范围.md)；使用对应版本的专用 ZIP、inventory 和 SHA-256 |
-| 日常工作区构建 | [安装核对](../publication/daily-installation.json)、[后台运行验证](../publication/daily-installation-current/records/runtime.json)；归档位置由安装记录的 `source_archive` 标识，日常工作区构建按独立载荷核对 |
+| 日常安装 | [安装核对](../publication/daily-installation.json)；公开 0.3.42.4 同一载荷的文件身份、启用和后台注册按安装记录核对，正式归档由 `source_archive` 标识；临时配置、回退副本及检查脚本不保留 |
 
 目录名中的编号和日期属于现有资源定位符，不代表当前软件开发顺序。根目录的部分别名是符号链接，不是另一份数据。
 
@@ -31,6 +33,7 @@
 - 当前入口不读取的回退源码展开副本存于正式源码归档和可恢复清理区；实验实际读取的冻结快照保留在各自数据包中。恢复位置与保留范围见[清理清单](../publication/daily-installation-cleanup.json)。
 - 独立演示场景、采集清单及其配套图像、视频母版按完整资源保留。配置备份、临时会话快照和未被有效入口引用的中间预览须排除运行依赖后才可清理；用途不明的文件保留。
 - 验证记录中的历史工作路径用于标识运行来源，不保证临时副本仍可作为入口使用。当前操作入口以[前端使用说明](../前端readme.md)和[前端实现说明](../blender_frontend/README.md)为准。
+- X100 观测研究的临时测试场景、合成输入和隔离配置不随证据留存；重复验证由脚本在新目录生成，不修改保留的原始报告或把临时路径改写为当前入口。
 
 ## 机舱相机安装资源
 

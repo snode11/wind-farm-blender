@@ -107,6 +107,7 @@ class BackendSession:
         self._progress_dir = None
         self._progress_events = _EventBuffer(max_events)
         self.scene = scene
+        self.fake = False
         self.mode = 'demo'
         self.status = 'READY'
         self._lifecycle_reason = None
@@ -179,8 +180,8 @@ class BackendSession:
             self._last_stats.clear()
 
     def channel_table(self):
-        runtime = getattr(self._trainer, "runtime", None)
-        if runtime is None or not hasattr(runtime, "channel_table"): return []
+        runtime = self._trainer.runtime if self._trainer is not None else None
+        if runtime is None: return []
         fidelity_map = {
             "DIRECT": "DIRECT", "直读": "DIRECT",
             "DERIVED": "EXPORTED", "导出": "EXPORTED",
@@ -217,7 +218,7 @@ class BackendSession:
         return dict(run_status=self.status, mode=self.mode, run_id=self.run_id,
                     state_revision=self.state_revision, capabilities=self.capabilities,
                     cleanup_confirmed=self.cleanup_confirmed, worker_alive=self.worker_alive,
-                    scene=self.scene.to_dict() if hasattr(self.scene, 'to_dict') else None,
+                    scene=self.scene.to_dict() if self.scene is not None else None,
                     channel_states=dict(self._channel_states), channel_table=self.channel_table())
 
     def synchronization_state(self):
@@ -265,7 +266,7 @@ class BackendSession:
                     finished = self._process.poll() is not None
                 if finished:
                     self._collect_progress(final=True)
-                    error = getattr(self._trainer, 'error', None)
+                    error = self._trainer.error if self._trainer is not None else None
                     if self._process is not None and self._process.returncode: error = f'Formal process exited {self._process.returncode}'
                     if self.alive():
                         error = error or 'Backend controller exited while child processes remained'
@@ -332,7 +333,7 @@ class BackendSession:
             if self._stop_worker is not None and self._stop_worker.is_alive():
                 raise ValueError('Backend cleanup is still finishing')
             if mode not in ('demo', 'interactive_training', 'formal_training', 'replay'): raise ValueError('Unknown mode')
-            if getattr(self, 'fake', False) and mode != 'demo': raise ValueError('Fake backend supports SYNTH demo only')
+            if self.fake and mode != 'demo': raise ValueError('Fake backend supports SYNTH demo only')
             options = dict(options)
             path = options.pop('scene', options.pop('scene_path', None))
             candidate = self._load(path) if path else self.scene
@@ -352,7 +353,7 @@ class BackendSession:
             try:
                 if mode == 'formal_training':
                     if not path: raise ValueError('Formal training requires options.scene path')
-                    if getattr(self.scene, 'backend', None) != 'fastfarm':
+                    if self.scene.backend != 'fastfarm':
                         raise ValueError('Formal training requires FAST.Farm')
                     if overrides:
                         from wfrl.scene.schema import dump_scene
@@ -378,7 +379,7 @@ class BackendSession:
                         from .tip_replay import RecordedTipTrainer
                         factory = RecordedTipTrainer
                     if factory is None:
-                        if getattr(self.scene, 'backend', None) == 'floris':
+                        if self.scene.backend == 'floris':
                             if mode != 'demo': raise ValueError('FLORIS supports backend demo only; existing Trainer requires FAST.Farm')
                             from .floris_session import FlorisDemoSession
                             factory = FlorisDemoSession
@@ -398,17 +399,18 @@ class BackendSession:
                         try:
                             with self._condition:
                                 if self._stopping: return
-                                runtime = getattr(self._trainer, 'runtime', None)
+                                runtime = self._trainer.runtime
                                 if runtime is not None:
                                     for topic, enabled in self._channel_states.items():
                                         runtime.set_enabled(topic, enabled)
-                                payload = snapshot.payload if hasattr(snapshot, "wire_events") else adapter.encode(snapshot)
+                                wire_snapshot = hasattr(snapshot, 'wire_events')
+                                payload = snapshot.payload if wire_snapshot else adapter.encode(snapshot)
                                 payload['run_id'] = self.run_id
                                 payload['channel_table'] = self.channel_table()
                                 self.emit('snapshot', payload)
                                 if mode == 'interactive_training':
                                     from .training_progress import interactive_progress
-                                    progress = (snapshot.training if hasattr(snapshot, 'wire_events') else
+                                    progress = (snapshot.training if wire_snapshot else
                                                 interactive_progress(snapshot, self.run_id, len(self.scene.turbines)))
                                     if progress:
                                         progress['run_id'] = self.run_id
@@ -422,7 +424,7 @@ class BackendSession:
                                     last_control_step = payload['step']
                                 if control_boundary and self._paused and self.status == 'RUNNING':
                                     self.lifecycle('PAUSED')
-                                events = snapshot.wire_events if hasattr(snapshot, "wire_events") else adapter.safety_events(snapshot)
+                                events = snapshot.wire_events if wire_snapshot else adapter.safety_events(snapshot)
                                 for event in events: self.emit('safety_event', event)
                                 while control_boundary and self._paused and not self._stopping and self._permits == 0:
                                     self._condition.wait()
@@ -455,7 +457,7 @@ class BackendSession:
             if name == 'session.sync': return self.lifecycle(self.status)
             if name == 'channel.set':
                 topic, enabled = args.get('topic'), args.get('enabled')
-                runtime = getattr(self._trainer, 'runtime', None)
+                runtime = self._trainer.runtime if self._trainer is not None else None
                 if type(enabled) is not bool or runtime is None or topic not in runtime.topics():
                     raise ValueError('Channel subscription requires an available SceneRuntime topic and boolean enabled')
                 self._channel_states[topic] = enabled
@@ -489,7 +491,7 @@ class BackendSession:
             raise ValueError('Command not valid in current state')
 
     def alive(self):
-        if getattr(self._trainer, "running", False): return True
+        if self._trainer is not None and self._trainer.running: return True
         if self._thread is not None and self._thread.is_alive(): return True
         if self._formal_processes is not None:
             return self._formal_processes.alive()

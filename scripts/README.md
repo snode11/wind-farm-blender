@@ -6,7 +6,7 @@
 | --- | --- |
 | `blender/` | Blender 启动、扩展构建、相机与缺陷工具、视频作业及原生回归运行器 |
 | `train/`、`analysis/` | 训练、匹配评估及保存数据分析；[算法与输入合同](../docs/training/MAPPO_SETUP.md) |
-| `radar_x100/` | X100 严格PLY导入、记录发布、完整源网格导出及显式离线双预设覆盖；[数据合同](../wfrl/radar_x100/README.md)、[覆盖参数与运行命令](../docs/blender/X100雷达.md#离线安装覆盖研究)；不启动训练或求解器 |
+| `radar_x100/` | X100 严格 PLY 导入、本地发布、记录、完整源网格导出及双预设覆盖；`optimize_mount.py` 搜索有限安装集合，`evaluate_blades.py` 独立评价因果叶片估计。见[数据合同](../wfrl/radar_x100/README.md)、[双预设覆盖](../docs/blender/X100雷达.md#离线安装覆盖研究)和[安装搜索／叶片评价命令](../docs/blender/X100观测研究.md)；读取已有运动，不启动训练或求解器 |
 | `lidar/` | 雷达结果包、数值诊断与来源检查；[计算入口](lidar/README.md) |
 | `reconstruction/`、`nrel_*.py` | 叶片重建与独立动态研究；[研究对象与状态](../research/README.md) |
 | `experiments/` | 明确对象的物理实验、约束探针及 Qt/VTK 诊断；需要的窗口、MPI 和输入由各脚本声明 |
@@ -23,7 +23,7 @@
 scripts/blender/run_wfrl_macos.sh --help
 scripts/macos/run_desktop.sh --help
 python3 scripts/blender/run_regressions.py --list
-python3 scripts/ci/check_release_identity.py --release publication/blender-0.3.41.json
+python3 scripts/ci/check_release_identity.py --release publication/blender-0.3.42.5.json
 ```
 
 `experiments/verify_desktop_contracts.py` 检查 RViz 的来流、地形、中文标签、双视图与源码结构；默认包含可见窗口检查，`--online` 还会运行 FAST.Farm。它依赖完整桌面环境，不能当作无窗口宿主测试执行。

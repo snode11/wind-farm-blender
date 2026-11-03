@@ -282,3 +282,12 @@ def unregister_properties():
     for name in ('wfrl_capture_directory', 'wfrl_capture_fps', 'wfrl_capture_duration'):
         if hasattr(bpy.types.Scene, name):
             delattr(bpy.types.Scene, name)
+
+
+def status_for(scene):
+    from ..home_state import TaskStatus
+    job = _ACTIVE
+    if job is None:
+        return TaskStatus('recording')
+    return TaskStatus('recording', True, job._scene == scene, 'RECORDING',
+                      job._scene.name, '', '')

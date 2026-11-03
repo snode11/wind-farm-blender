@@ -713,6 +713,12 @@ def mixed_fields(scene):
                    for entry in entries[1:])]
 
 
+def validate_pose_export(scene):
+    """Reject snapshots that disagree with any native controlled pose."""
+    for entry in scene.wfrl_manual_turbines:
+        _validate_controlled_rotation(entry)
+
+
 def pose_snapshot(scene, *, now=None, actual_pitch=True):
     """Capture all turbine parameters at one wall-clock instant."""
     now = time.monotonic() if now is None else now

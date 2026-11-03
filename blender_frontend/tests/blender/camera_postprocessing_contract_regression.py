@@ -29,6 +29,9 @@ source.render.engine = 'BLENDER_EEVEE'
 source.eevee.taa_render_samples = 1
 source.render.resolution_x, source.render.resolution_y = 48, 32
 source.render.resolution_percentage = 100
+from wfrl_blender import custom_cameras, camera_projection
+params=custom_cameras.parameters(s.cameras()[0])
+source.render.pixel_aspect_x,source.render.pixel_aspect_y=camera_projection.pixel_scales(params.fov,params.vfov,48,32)
 source.render.image_settings.file_format = 'PNG'
 source.render.image_settings.color_mode = 'RGBA'
 source.render.image_settings.color_depth = '8'
@@ -57,7 +60,7 @@ def settings():
             r.image_settings.file_format, r.image_settings.color_mode, r.image_settings.color_depth,
             r.resolution_x, r.resolution_y, r.resolution_percentage, r.use_border,
             r.use_crop_to_border, r.use_motion_blur, source.frame_current, source.frame_subframe,
-            source.compositing_node_group)
+            source.compositing_node_group, r.pixel_aspect_x, r.pixel_aspect_y)
 
 source.render.use_compositing = source.render.use_sequencer = False
 raw = render(source, OUT / 'camera-source.png')
@@ -85,6 +88,7 @@ source.render.use_sequencer = True
 vse = render(source, OUT / 'vse-control.png')
 assert np.mean(vse[:, 1]) > .9 and np.mean(vse[:, 0]) < .1 and np.mean(vse[:, 2]) < .1
 source.render.use_compositing = True
+source.render.pixel_aspect_x,source.render.pixel_aspect_y=1.7,.8
 before = settings()
 side_files = {str(p.relative_to(OUT)): hashlib.sha256(p.read_bytes()).hexdigest()
               for p in (OUT / 'side-output').rglob('*') if p.is_file()}
@@ -104,7 +108,13 @@ for engine in ('SCENE', 'WORKBENCH'):
     captured = render(work, OUT / (engine + '.png'))
     assert not np.allclose(captured, composited) and not np.allclose(captured, vse)
     if engine == 'SCENE':
-        np.testing.assert_allclose(captured, raw, atol=1/255, rtol=0)
+        # Down's square-pixel export has its own optical contract.
+        reference=source.copy()
+        reference.render.pixel_aspect_x=reference.render.pixel_aspect_y=1.
+        reference.render.use_compositing=reference.render.use_sequencer=False
+        expected_down=render(reference,OUT/'Down-direct-raw.png')
+        np.testing.assert_allclose(captured, expected_down, atol=1/255, rtol=0)
+        bpy.data.scenes.remove(reference)
     bpy.data.scenes.remove(work)
     assert settings() == before
     checks['Down_' + engine] = 'camera pixels bypass VSE/compositor; source restored'

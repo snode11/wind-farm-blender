@@ -29,6 +29,7 @@ class FlorisDemoSession:
         self.env_id, self.max_steps = env_id, int(max_steps)
         self.yaw_delta, self.frame_interval = float(yaw_delta), float(frame_interval)
         self._driver_factory = driver_factory
+        self.runtime = None
         self._thread = None
         self._stop = threading.Event()
         self._paused = threading.Event()

@@ -220,6 +220,24 @@ def test_guard_reuses_one_fresh_layout_and_detects_subsequent_mutation(clock_cap
     assert len(layouts) == 2
 
 
+@pytest.mark.parametrize('restore_failure', [False, True])
+def test_user_cancel_has_its_own_terminal_state(clock_capture, monkeypatch, restore_failure):
+    job, _calls, _generation = clock_capture
+    job.scene.name = 'capture-owner'
+    job.scene.as_pointer = lambda: id(job.scene)
+    monkeypatch.setattr(capture, '_TERMINALS', capture.OrderedDict())
+    if restore_failure:
+        def fail_restore(*args):
+            raise RuntimeError('restore failed')
+        monkeypatch.setattr(job, 'evaluate', fail_restore)
+    job.request_cancel()
+    status = capture.status_for(job.scene)
+    assert job.closed and not capture.active()
+    assert status.stage == ('FAILED' if restore_failure else 'CANCELLED')
+    assert bool(status.error) == restore_failure
+    assert json.loads((job.path / 'manifest.json').read_text())['status'] == 'incomplete'
+
+
 @pytest.mark.parametrize('playing', [False, True])
 @pytest.mark.parametrize('intervention', ['frame', 'subframe', 'playback', 'frame_start', 'timebase',
                                         'removed_timebase', 'invalid_timebase', 'source_start'])

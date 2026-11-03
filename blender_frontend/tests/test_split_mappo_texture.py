@@ -134,7 +134,7 @@ class SameSourceTextureTests(unittest.TestCase):
         scene['split_texture_current_source'] = 'SYNTHETIC'
         self.assertFalse(texture.active(scene))
         self.assertTrue(synthetic.active(scene))
-        self.assertIs(split.texture_adapter(scene), synthetic)
+        self.assertIs(split.texture_adapter(scene), texture)
 
     def test_availability_requires_delivered_payload_and_matching_source(self):
         matching = {'wfrl_farm_manifest_sha256': texture.SOURCE_HASH}

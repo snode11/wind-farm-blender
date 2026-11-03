@@ -19,7 +19,7 @@ SPEC.loader.exec_module(launcher)
 def test_stop_can_retry_then_resume_from_another_controller():
     session = BackendSession()
     stops = []
-    trainer = SimpleNamespace(running=True)
+    trainer = SimpleNamespace(runtime=None, error=None, running=True)
 
     def stop(timeout):
         stops.append(timeout)

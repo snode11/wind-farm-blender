@@ -55,3 +55,22 @@ def test_load_failure_survives_for_display_and_success_clears_it(monkeypatch):
     monkeypatch.setattr(wfrl_blender, '_load_demo_scene', lambda *_args, **_kwargs: loaded)
     assert wfrl_blender.load_demo_scene('valid') is loaded
     assert 'wfrl_home_load_error' not in scene
+
+
+@pytest.mark.parametrize(('task', 'reason'), [
+    ('capture', '相机采集中'), ('mount', '相机盒体安装中'), ('camera', '相机草稿编辑中'),
+    ('recording', '窗口录制中')])
+def test_action_queries_share_scene_ownership_and_allow_independent_exports(monkeypatch, task, reason):
+    from wfrl_blender import home_state
+    monkeypatch.setattr(home_state, 'foreground_tasks', lambda scene:
+        (home_state.TaskStatus(task, True, False, 'CANCELLING'),))
+    allowed, detail = home_state.can_start('replace_scene', object())
+    assert not allowed and reason in detail and '其他场景' in detail
+    assert home_state.can_start('copy_mp4', object()) == (True, '')
+
+
+def test_observation_session_does_not_block_unrelated_work(monkeypatch):
+    from wfrl_blender import home_state
+    monkeypatch.setattr(home_state, 'foreground_tasks', lambda scene:
+        (home_state.TaskStatus('camera', True, True, 'WATCH'),))
+    assert home_state.can_start('playback', object()) == (True, '')
