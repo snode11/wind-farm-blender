@@ -252,6 +252,9 @@ def _validate_message(message):
         _training_stats(p)
     elif kind == 'error':
         _require(_text(p.get('code')) and _text(p.get('message')) and type(p.get('fatal')) is bool, 'Invalid error payload')
+        if 'command_sequence' in p:
+            _require(p['code'] == 'COMMAND_REJECTED' and _integer(p['command_sequence']),
+                     'Invalid rejected command sequence')
     return message
 
 

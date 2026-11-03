@@ -48,6 +48,27 @@ def validate_output_nodes(scene):
     visit(scene.compositing_node_group)
 
 
+def png_output_views(scene):
+    """Return the PNG packing mode and any individually written views."""
+    render = scene.render
+    if not render.use_multiview:
+        return 'INDIVIDUAL', ()
+    stereo = render.views_format == 'STEREO_3D'
+    views = tuple(view for view in render.views
+                  if view.use and (not stereo or view.name in {'left', 'right'}))
+    if not views:
+        raise ValueError('多视图渲染至少需要一个启用的视图')
+    if render.image_settings.views_format == 'STEREO_3D':
+        if not stereo or {view.name for view in views} != {'left', 'right'}:
+            raise ValueError('合成立体 PNG 需要启用左右双眼的立体渲染')
+        return 'STEREO_3D', ()
+    suffixes = [view.file_suffix for view in views]
+    if (len({suffix.casefold() for suffix in suffixes}) != len(suffixes)
+            or any('/' in suffix or '\\' in suffix for suffix in suffixes)):
+        raise ValueError('每个启用的渲染视图需要唯一的文件名后缀，且后缀不能含路径分隔符')
+    return 'INDIVIDUAL', tuple(view.name for view in views)
+
+
 class RenderJob:
     def __init__(self):
         self.process = None

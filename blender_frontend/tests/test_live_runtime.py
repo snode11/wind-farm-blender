@@ -49,7 +49,7 @@ class LiveRuntimeTests(unittest.TestCase):
                 def send(message):
                     sent.append(message)
                     session.command(message['payload'])
-                client = SimpleNamespace(negotiated_capabilities=frozenset(), session_id=session.session_id, _last_outbound=2,
+                client = SimpleNamespace(negotiated_capabilities=frozenset(), session_id=session.session_id, next_sequence=3,
                     last_error='', status='CONNECTED', progress='Connected', send=send,
                     poll=lambda: list(messages), close=lambda: None)
                 ui = FrontendState()
@@ -96,7 +96,7 @@ class LiveRuntimeTests(unittest.TestCase):
         sent = []
         messages = []
         client = SimpleNamespace(negotiated_capabilities=frozenset(),
-            session_id='s', _last_outbound=2, last_error='', status='CONNECTED',
+            session_id='s', last_error='', status='CONNECTED',
             progress='Connected', next_sequence=3,
             poll=lambda: list(messages), send=sent.append, close=lambda: None,
         )
@@ -123,7 +123,11 @@ class LiveRuntimeTests(unittest.TestCase):
             runtime.send_workflow_command('channel.set', {'topic': 'lidar', 'enabled': False})
             self.assertEqual(runtime._pending_command, 'channel.set')
             self.assertEqual(sent[0]['sequence'], 3)
-            messages.append(lifecycle)
+            messages.append(dict(type='error', session_id='s', sequence=3,
+                                 payload=dict(code='OFFLINE_DIAGNOSTIC', message='retained diagnostic', fatal=False)))
+            runtime.tick()
+            self.assertEqual(runtime._pending_command, 'channel.set')
+            messages[:] = [lifecycle]
             runtime.tick()
             self.assertEqual(runtime.channel_table,
                              [['lidar', 'lidar', 'EXPORTED', False, 'source']])
@@ -133,7 +137,7 @@ class LiveRuntimeTests(unittest.TestCase):
     def test_controls_wait_for_lifecycle_and_preserve_safety(self):
         messages = []
         sent = []
-        client = SimpleNamespace(negotiated_capabilities=frozenset(), session_id='s', _last_outbound=3, last_error='', status='CONNECTED',
+        client = SimpleNamespace(negotiated_capabilities=frozenset(), session_id='s', next_sequence=4, last_error='', status='CONNECTED',
                                  poll=lambda: list(messages), send=sent.append, close=lambda: None, progress='Connected')
         ui = FrontendState(mode='interactive_training', connection='CONNECTED', session_id='s', capabilities={'pause'})
         bpy = SimpleNamespace(context=SimpleNamespace(scene=None, window_manager=SimpleNamespace(windows=[])),
@@ -170,7 +174,7 @@ class LiveRuntimeTests(unittest.TestCase):
         ack = {'type': 'hello_ack', 'session_id': 'new', 'payload': {
             'run_status': 'READY', 'mode': 'demo', 'capabilities': []}}
         sent = []
-        client = SimpleNamespace(negotiated_capabilities=frozenset(), session_id='new', _last_outbound=0, last_error='', status='CONNECTED',
+        client = SimpleNamespace(negotiated_capabilities=frozenset(), session_id='new', next_sequence=1, last_error='', status='CONNECTED',
                                  poll=lambda: [ack], send=sent.append, progress='Connected')
         ui = FrontendState(mode='formal_training', connection='DISCONNECTED')
         bpy = SimpleNamespace(context=SimpleNamespace(scene=None, window_manager=SimpleNamespace(windows=[])),

@@ -89,6 +89,34 @@ legacy_manifest = json.loads((legacy_depth / 'manifest.json').read_text())
 assert (legacy_depth / legacy_manifest['frames'][0]['file']).read_bytes()[24] == 16
 scene.pop('wfrl_scene_kind')
 
+scene.render.use_multiview = True
+scene.render.image_settings.file_format = 'PNG'
+scene.render.image_settings.views_format = 'INDIVIDUAL'
+stereo = ui.start(bpy.context, output)
+deadline = time.monotonic() + 90
+while service.job.active and time.monotonic() < deadline:
+    ui._poll()
+    time.sleep(.1)
+assert service.job.state == 'COMPLETE', (service.job.state, service.job.error)
+stereo_manifest = json.loads((stereo / 'manifest.json').read_text())
+assert stereo_manifest['views'] == ['left', 'right']
+assert stereo_manifest['frames'] == [dict(frame=4, views={'left': 'frames/frame_0004_L.png',
+                                                       'right': 'frames/frame_0004_R.png'})]
+for file in stereo_manifest['frames'][0]['views'].values():
+    assert (stereo / file).read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
+
+scene.render.image_settings.views_format = 'STEREO_3D'
+packed = ui.start(bpy.context, output)
+deadline = time.monotonic() + 90
+while service.job.active and time.monotonic() < deadline:
+    ui._poll()
+    time.sleep(.1)
+assert service.job.state == 'COMPLETE', (service.job.state, service.job.error)
+packed_manifest = json.loads((packed / 'manifest.json').read_text())
+assert packed_manifest['frames'] == [dict(frame=4, file='frames/frame_0004.png')]
+assert (packed / packed_manifest['frames'][0]['file']).read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
+scene.render.use_multiview = False
+
 scene.frame_start, scene.frame_end, scene.frame_step = 1, 500, 1
 cancelled = ui.start(bpy.context, output)
 started = time.monotonic()
@@ -145,7 +173,7 @@ finally:
     native._ACTIVE = None
     session.set_quality(session.preview_quality)
 result = dict(status='PASS', blender=bpy.app.version_string, module=addon.__file__,
-              complete_frames=3, source_preserved=True, cancellation=True,
+              complete_frames=3, source_preserved=True, cancellation=True, stereo_output=True,
               output=str(directory), cancelled=str(cancelled), mappo_output=str(mappo),
               recorded_motion_frames=[1, 301, 601], compositor_output_guard=True,
               original_camera_quality_snapshot=True)

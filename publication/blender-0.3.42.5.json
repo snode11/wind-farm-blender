@@ -5,10 +5,10 @@
   "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.42.5",
   "archive": {
     "name": "wfrl_blender-0.3.42+5.zip",
-    "path": "publication/blender-0.3.42.5/package/wfrl_blender-0.3.42+5.zip",
-    "bytes": 97019147,
+    "path": "publication/blender-0.3.42.5/release-package/wfrl_blender-0.3.42+5.zip",
+    "bytes": 97022100,
     "file_count": 207,
-    "sha256": "079514c45c754e56da3528afebda23ee1b0dbeed9debe9fc7df1a79580074d38",
+    "sha256": "c27c1c1a09791000841c751e7c47a8da5125c013c5c28696a664ca8e38a28fd4",
     "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.5/wfrl_blender-0.3.42+5.zip",
     "inventory_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.5/wfrl_blender-0.3.42+5.inventory.json",
     "checksum_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.5/wfrl_blender-0.3.42+5.zip.sha256"

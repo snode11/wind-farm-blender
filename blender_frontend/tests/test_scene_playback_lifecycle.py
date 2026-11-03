@@ -55,6 +55,7 @@ def runtimes(monkeypatch):
             self.blades = [(scene.objects['WFRL.Turbine.T1.Blade1'],)]
             self.cache, self.comparison, self.updates = {}, None, []
             self.restored = False
+            self.frame_error = ''
             clearance_replay._READERS[scene.as_pointer()] = self.readers['T1']
 
         def update(self, scene):

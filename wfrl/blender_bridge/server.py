@@ -238,7 +238,8 @@ class BridgeServer:
                                 raise ValueError('Bridge shutdown is pending; only cleanup and synchronization commands are available')
                             self.session.command(message['payload'])
                         except (ValueError, TypeError, OSError) as exc:
-                            payload = dict(code='COMMAND_REJECTED', message=str(exc), fatal=False)
+                            payload = dict(code='COMMAND_REJECTED', message=str(exc), fatal=False,
+                                           command_sequence=message['sequence'])
                             try:
                                 self._send('error', payload)
                             except (ProtocolError, ValueError, TypeError):

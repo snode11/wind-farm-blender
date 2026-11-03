@@ -6,7 +6,7 @@
 
 实际发布 ZIP 的检查为 47 项宿主测试通过、1 项因没有历史修改前源码目录跳过；macOS Blender 5.2.1 LTS 的 126 项六类型后台检查通过，36 条三相机 G 记录，真实渲染器调用为零。解压包的 macOS 启动器及独立窗口检查通过，确认六类型、固定相机、编辑面板、时间及近景切换和包内模块来源；不是已安装扩展、完整片段性能或实机损伤验证。Windows 启动器只有静态检查，Windows/Linux 实机尚未验证。发布范围见 [发布状态与验证范围](../../docs/blender/发布状态与验证范围.md)，六类型源码验证结果保存在工作区 `outputs/blade-defects/four-types-20260930/验证记录.md`。
 
-以下实现文件、配置、参考来源与测试位于 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 分支，当前源码与既有 0.4.0 运行 ZIP 分别识别；自动 Source code 归档不能替代该 ZIP。所有相对脚本命令从完整解压包根目录，或已按[资源说明](../../docs/PUBLICATION.md)恢复所需文件的源码工作区根目录执行。证据路径仅在相应文件已恢复时可复查，不作为独立公开下载链接。
+以下实现文件、配置、参考来源与测试位于 [`main`](https://github.com/snode11/wind-farm-blender/tree/main) 分支，当前源码与既有 0.4.0 运行 ZIP 分别识别；自动 Source code 归档不能替代该 ZIP。所有相对脚本命令从完整解压包根目录，或已按[资源说明](../../docs/PUBLICATION.md)恢复所需文件的源码工作区根目录执行。证据路径仅在相应文件已恢复时可复查，不作为独立公开下载链接。
 
 源码随 Git 提供几何构建所需的两份 DTU 原始参考输入；官方来源、固定摘要及缺失或损坏后的恢复方式见[来源说明](sources/README.md)。当前源码与下述既有 0.4.0 ZIP 按各自载荷和验证身份判断。
 

@@ -2,7 +2,7 @@
 
 发布版本为 **0.3.42.5**（GitHub 标签 `v0.3.42.5`，Blender manifest 为 `0.3.42+5`）。安装与公开载荷身份以 `publication/daily-installation.json` 和发布交付记录为准。
 
-项目入口为 [snode11/wind-farm-blender](https://github.com/snode11/wind-farm-blender)，当前源码分支为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)。[项目资源 Release](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1) 提供大型保存数据、研究证据、便携依赖源码与演示材料；它不是新版 Blender 扩展。现有公开扩展 ZIP、日常安装和源码的身份见[发布状态与验证范围](blender/发布状态与验证范围.md)。
+项目入口为 [snode11/wind-farm-blender](https://github.com/snode11/wind-farm-blender)，当前源码分支为 [`main`](https://github.com/snode11/wind-farm-blender/tree/main)。[项目资源 Release](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1) 提供大型保存数据、研究证据、便携依赖源码与演示材料；它不是新版 Blender 扩展。现有公开扩展 ZIP、日常安装和源码的身份见[发布状态与验证范围](blender/发布状态与验证范围.md)。
 
 ## 文件用途与取得方式
 
@@ -20,14 +20,14 @@
 | 三相机重建与同源纹理 | `blade-reconstruction`、`same-source` 资源包含合成输入、保存重建及纹理再生成所需数据；扩展日常运行直接使用正式载荷 |
 | 表面材料点与雷达研究 | `blade-surface`、`lidar-research` 资源包保留正负结果、原始观测、数值数组与独立评分；合成真值与求解输入保持各自角色 |
 | 相机视频运行输入 | `camera-video` 提供演示视频与保存清单；`runtime-inputs` 提供帧映射、相机几何数组与 MediaMTX 配置；完整包的输入限制见下文 |
-| 0.3.42.5 扩展与源码 | [v0.3.42.5 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.42.5) 提供 [wfrl_blender-0.3.42+5.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.5/wfrl_blender-0.3.42+5.zip)、inventory、SHA-256、标签源码归档及交付清单；207 文件、97,019,147 字节，身份见[交付身份](../publication/blender-0.3.42.5.json)。本版完成一次本地构建，回归、隔离安装与窗口检查未运行，范围见[发布验证记录](../publication/blender-0.3.42.5/verification.json)；真实输入、完整媒体、FPS 和科学精度分别验证。日常安装按其独立身份使用 |
+| 0.3.42.5 扩展与源码 | [v0.3.42.5 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.42.5) 提供 [wfrl_blender-0.3.42+5.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.5/wfrl_blender-0.3.42+5.zip)、inventory、SHA-256、标签源码归档及交付清单；207 文件、97,022,100 字节，身份见[交付身份](../publication/blender-0.3.42.5.json)。本版完成一次本地构建，回归、隔离安装与窗口检查未运行，范围见[发布验证记录](../publication/blender-0.3.42.5/verification.json)；真实输入、完整媒体、FPS 和科学精度分别验证。日常安装按其独立身份使用 |
 | 软件验证与展示 | Git 保留小型判定、来源与测试输入；`frontend-evidence` 资源包提供所选可见窗口证据。演示视频和两份正式演示文稿独立提供 |
 
-本机 X100 安装使用 0.3.42.4 公开包安装，归档路径及摘要由[日常安装记录](../publication/daily-installation.json)标识；本地保留正式扩展 ZIP、inventory 和 SHA-256。安装记录保留文件身份、新进程后台注册及配置和场景保留结论；本地不保留安装报告和恢复备份。该安装载荷的功能回归、窗口／GPU、性能和科学精度检查未运行。
+本机 X100 使用安装记录所列的 0.3.42.5 载荷，归档路径及摘要由[日常安装记录](../publication/daily-installation.json)标识；本地保留正式扩展 ZIP、inventory 和 SHA-256。安装记录保留文件身份、新进程后台注册、六项配置的核对结果与恢复备份位置。该安装载荷的功能回归、窗口／GPU、性能和科学精度检查未运行。
 
-公开 0.3.42.5 扩展包含 X100 机舱 XZ／侧壁距离、零载荷参考和配套优化；离线双预设覆盖工具通过源码归档提供，本机安装使用 0.3.42.4。当前本地证据保留在[outputs/x100-analysis](../outputs/x100-analysis/)，关键源码摘要、几何基准、当前GPU／RGB、窗口合同／生命周期、场景历史和覆盖报告的适用范围见[源码验证](blender/发布状态与验证范围.md#x100-工作区源码验证)。该目录按本地输出规则忽略，不能据本地存在推定已进入Git或资源Release；临时测试场景、探针、重复报告和可再生缓存不属于运行依赖。
+公开 0.3.42.5 扩展包含 X100 机舱 XZ／侧壁距离、零载荷参考和配套优化；离线双预设覆盖工具通过源码归档提供，本机安装使用 0.3.42.5。当前本地证据保留在[outputs/x100-analysis](../outputs/x100-analysis/)，关键源码摘要、几何基准、当前GPU／RGB、窗口合同／生命周期、场景历史和覆盖报告的适用范围见[源码验证](blender/发布状态与验证范围.md#x100-工作区源码验证)。该目录按本地输出规则忽略，不能据本地存在推定已进入Git或资源Release；临时测试场景、探针、重复报告和可再生缓存不属于运行依赖。
 
-工作区的 X100 面积材料采样、有限安装搜索与叶片关联／连续估计由 0.3.42.5 扩展及配套源码提供，日常安装使用 0.3.42.4。用法见[观测研究](blender/X100观测研究.md)，对应的安装搜索、预算对照、独立误差评价、后台及画布证据保留在[outputs/x100-observation-research](../outputs/x100-observation-research/)。该目录同样由 Git 忽略，本地保留不代表已上传到资源 Release。报告、日志、源码摘要与最终图像属于验证依据，临时场景、合成输入及隔离配置不作为分发或复验依赖。
+工作区的 X100 面积材料采样、有限安装搜索与叶片关联／连续估计由 0.3.42.5 扩展及配套源码提供，日常安装使用 0.3.42.5。用法见[观测研究](blender/X100观测研究.md)，对应的安装搜索、预算对照、独立误差评价、后台及画布证据保留在[outputs/x100-observation-research](../outputs/x100-observation-research/)。该目录同样由 Git 忽略，本地保留不代表已上传到资源 Release。报告、日志、源码摘要与最终图像属于验证依据，临时场景、合成输入及隔离配置不作为分发或复验依赖。
 
 公开完整源码归档为 [wind-farm-blender-source-0.3.42.5.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.5/wind-farm-blender-source-0.3.42.5.zip)，对应 [`v0.3.42.5` 源码标签](https://github.com/snode11/wind-farm-blender/tree/v0.3.42.5)；附件身份见[交付清单](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.5/wfrl-delivery-0.3.42.5.json)。归档包含该发布源码快照、操作与实现文档及已列入分发的轻量证据，覆盖所列前后端源码、独立雷达正式运行输入与匹配证据；扩展从固定源码构建的摘要与源码归档身份见[交付身份](../publication/blender-0.3.42.5.json)。归档保留 v0.3.42.5 标签内的文档快照；公开附件与安装验证的当前状态以 main 分支的说明及交付身份为准。附件下载复验为 NOT_RUN。大型资源继续使用[资源 Release](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1)，路径、字节数与 SHA-256 见 [resources.json](../publication/resources.json)。同专题的编号附件是独立归档，须全部取得后才具备清单声明的完整输入；附件名称不改变项目相对路径。恢复冻结实验时最后解压 `zz-frozen-code-originals.tar.gz`，保留原字节脚本与摘要合同，显式适配调用环境。
 
@@ -36,7 +36,7 @@
 克隆源码分支，在仓库根目录执行以下命令，逐个恢复需要的资源附件：
 
 ```sh
-git clone --branch wind-farm-rl-all-work https://github.com/snode11/wind-farm-blender.git
+git clone --branch main https://github.com/snode11/wind-farm-blender.git
 cd wind-farm-blender
 tar -xzf /path/to/resource-part.tar.gz
 ```

@@ -11,7 +11,7 @@ def _publish():
     global _LAST_DISPLAY
     import bpy
     current = service.job
-    display = (current.state, current.completed_frames, current.total_frames, current.error)
+    display = (current.state, current.completed_frames, current.total_frames, current.error, current.message)
     if display == _LAST_DISPLAY:
         return
     _LAST_DISPLAY = display
@@ -50,6 +50,7 @@ def start(context, directory):
     if service.job.active:
         raise ValueError('已有动画正在后台渲染，请等待完成或取消')
     service.validate_output_nodes(scene)
+    service.png_output_views(scene)
     from . import custom_camera_capture
     if custom_camera_capture.active():
         raise ValueError('请先完成或取消相机图像采集')

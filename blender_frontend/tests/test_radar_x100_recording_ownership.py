@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 from wfrl_blender.radar_x100 import runtime
-from wfrl.radar_x100 import acquisition, recording, schema
+from wfrl.radar_x100 import acquisition, recording, schema, tracking
 
 
 class Scene(dict):
@@ -39,6 +39,7 @@ def test_recording_stop_yields_until_worker_exits_and_prevents_restart(monkeypat
     s.closing = s.recording_stopping = False
     s.close_remove, s.restore_after_close = True, False
     s.client = s.frame = s.gpu_batch = s.fov_gpu_batch = None
+    s.blade_tracker = tracking.BladeTracker()
     s.display_valid = False
     s.owner = 'recording-owner'
     s.update = lambda: None

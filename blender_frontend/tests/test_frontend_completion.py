@@ -2,6 +2,7 @@
 import json
 import os
 from pathlib import Path
+import site
 import socket
 import subprocess
 import sys
@@ -152,7 +153,7 @@ Path(os.environ['FIXTURE_IDENTITY_DIR'], str(os.getpid()) + '.json').write_text(
 ''')
     result = acceptance_processes(tmp_path / 'acceptance', report={'passed': True}, python=python,
         backend_python=selected if explicit_python else None,
-        extra_env={'PYTHONPATH': os.pathsep.join([str(identities), str(ROOT)]),
+        extra_env={'PYTHONPATH': os.pathsep.join([str(identities), str(ROOT), *site.getsitepackages()]),
                    'FIXTURE_IDENTITY_DIR': str(identities)})
     assert result.returncode == 0, result.stdout + result.stderr
     records = [json.loads(path.read_text()) for path in identities.glob('*.json')]

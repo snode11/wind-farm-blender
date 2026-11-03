@@ -375,10 +375,11 @@ class WFRL_PT_X100Blades(_X100Panel, bpy.types.Panel):
             if row['tip_world'] is not None:
                 value = row.get('estimated_clearance_m')
                 box.label(text='模型估计塔距：' + (f'{value:.3f} m' if value is not None else '未知'))
-                box.label(text=f"连续 {row['consecutive_frames']} 帧 · 拟合残差 {row['fit_residual_m']:.3f} m")
+                box.label(text=f"连续有效估计 {row['consecutive_frames']} 次 · 拟合残差 {row['fit_residual_m']:.3f} m")
             if row['extrapolation_m'] is not None:
                 box.label(text=f"叶长方向外推 {row['extrapolation_m']:.2f} m")
         message(layout, '拟合离散度不代表实机精度；缺测时不沿用旧净空', context=context)
+        message(layout, '估计序列允许相邻有效估计间有短间隔，计数不代表逐帧覆盖', context=context)
 
 
 class WFRL_PT_X100Frame(_X100Panel, bpy.types.Panel):

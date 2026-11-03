@@ -63,11 +63,16 @@ class Session:
     session_id = 'session'
     status = 'READY'
     mode = 'demo'
+    run_id = None
     capabilities = ['pause', 'training_stats_v1']
     def __init__(self): self.events = []
     def poll(self):
         events, self.events = self.events, []
         return events
+    def synchronization_state(self):
+        return dict(run_status=self.status, mode=self.mode, capabilities=self.capabilities, run_id=self.run_id)
+    def tick(self): pass
+    def replay_latest(self): pass
     def alive(self): return True
     def stop(self): pass
     def command(self, payload): pass

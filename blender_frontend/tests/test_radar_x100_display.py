@@ -1,8 +1,10 @@
 """Display projections retain point identity, coordinates and missing attributes."""
 from dataclasses import replace
+import sys
+from types import SimpleNamespace
 import numpy as np
 import pytest
-from wfrl_blender.radar_x100 import display
+from wfrl_blender.radar_x100 import display, runtime
 from wfrl.radar_x100.schema import RadarFrame, POINT_DTYPE
 
 
@@ -77,6 +79,33 @@ def test_nonfinite_coordinates_and_valid_empty_frames_do_not_retain_points():
         assert xy.shape == (0, 2) and keep.shape == (0,)
         assert all(np.isfinite(display.fit_bounds(xy, view)))
     assert display.point_style(empty, 'RANGE')[1] is None
+
+
+@pytest.mark.parametrize('points', [np.zeros(0, dtype=POINT_DTYPE), frame(((np.nan, 2, 3),)).points])
+def test_no_drawable_points_cache_success_and_rebuild_only_on_style_change(monkeypatch, points):
+    data = replace(frame(), points=points)
+    session = runtime.Session.__new__(runtime.Session)
+    session.frame = data
+    session.scene = SimpleNamespace(wfrl_x100_color='RANGE', wfrl_x100_color_scale='FIXED',
+        wfrl_x100_velocity_limit=10.)
+    monkeypatch.setitem(sys.modules, 'bpy', SimpleNamespace(app=SimpleNamespace(background=False)))
+    clock, calls = [0.], []
+    batch = runtime.view.batch
+
+    def build(*args, **kwargs):
+        calls.append(args[1])
+        return batch(*args, **kwargs)
+
+    monkeypatch.setattr(runtime.view, 'batch', build)
+    monkeypatch.setattr(runtime.time, 'monotonic', lambda: clock[0])
+    session._display(data, record=False)
+    assert session.display_valid and session.gpu_batch is None and not session.render_error
+    clock[0] = 1.
+    session.retry_display()
+    assert calls == ['RANGE']
+    session.scene.wfrl_x100_color = 'HEIGHT'
+    session.retry_display()
+    assert calls == ['RANGE', 'HEIGHT']
 
 
 def test_fit_and_zoom_preserve_aspect_and_pan_is_display_only():

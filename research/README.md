@@ -1,6 +1,6 @@
 # 研究模块与结果
 
-研究源码位于 [wind-farm-rl-all-work](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 分支。运行输入、冻结结果与研究证据按[源码与资源分发说明](../docs/PUBLICATION.md)及 [project-resources-v1](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1) 取得。算法实现、仿真显示、软件回归与科学验收分别判断。
+研究源码位于 [main](https://github.com/snode11/wind-farm-blender/tree/main) 分支。运行输入、冻结结果与研究证据按[源码与资源分发说明](../docs/PUBLICATION.md)及 [project-resources-v1](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1) 取得。算法实现、仿真显示、软件回归与科学验收分别判断。
 
 | 研究对象 | 规范入口 | 当前结论 |
 | --- | --- | --- |

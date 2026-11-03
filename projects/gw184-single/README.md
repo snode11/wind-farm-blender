@@ -16,7 +16,7 @@
 
 模型为 184 m 参考直径、90 m 叶片、3 m 静态预弯的合成刚性几何：借用 DTU 10MW 的弦长、厚度、扭角分布和固定 FFA 翼型，不是制造商 CAD，也不是放大后的 NREL 柔性模型。六类缺陷不耦合结构或气动求解。
 
-当前实现源码、配置、参考来源与测试位于 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 分支；大资源和研究证据按[分发说明](../../docs/PUBLICATION.md)恢复。当前源码与既有 0.4.0 独立运行 ZIP 分别识别，GitHub 自动 Source code 归档不是该运行 ZIP。下文脚本命令从完整运行包根目录，或已恢复所需资源的源码工作区根目录执行。
+当前实现源码、配置、参考来源与测试位于 [`main`](https://github.com/snode11/wind-farm-blender/tree/main) 分支；大资源和研究证据按[分发说明](../../docs/PUBLICATION.md)恢复。当前源码与既有 0.4.0 独立运行 ZIP 分别识别，GitHub 自动 Source code 归档不是该运行 ZIP。下文脚本命令从完整运行包根目录，或已恢复所需资源的源码工作区根目录执行。
 
 当前参数和证据边界见 [requirements.md](requirements.md)。工作区原三视频管线检查保存在 `outputs/gw184-single/preflight-20260929/ready/`，汇总为工作区文件 `outputs/gw184-single/preflight-20260929/检查说明.md`，证据是否提供及其恢复路径以[资源清单](../../docs/PUBLICATION.md)为准；未恢复的工作区路径不能当作可访问的公开附件。`review/`、`scene-v1/` 和零预弯短片不代表当前模型；现有 preflight 的源码签名与当前实现不匹配；运行视频管线前须重新生成无渲染检查。
 

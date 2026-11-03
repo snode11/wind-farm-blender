@@ -48,12 +48,12 @@ def test_tracking_smooths_local_deflection_without_rotor_lag_and_never_fills_mis
     points, priors = observations()
     first = tracker.update(points, priors, np.ones(len(points)), time_s=1, identity='source-a', frame_key=0)
     points, priors = observations(.2, .1)
-    second = tracker.update(points, priors, np.ones(len(points)), time_s=1+1/30, identity='source-a', frame_key=1)
+    second = tracker.update(points, priors, np.ones(len(points)), time_s=1+2/30, identity='source-a', frame_key=2)
     row = second['blades'][0]
     assert row['consecutive_frames'] == 2 and 1.8 < row['tip_local'][0] < 1.9
     np.testing.assert_allclose(row['tip_world'], priors[0].world_from_blade[:3, :3] @ row['tip_local'])
-    assert tracker.update(points, priors, np.ones(len(points)), time_s=1+1/30, identity='source-a', frame_key=1) is second
-    empty = tracker.update(np.empty((0,3)), priors, [], time_s=1+2/30, identity='source-a', frame_key=2)
+    assert tracker.update(points, priors, np.ones(len(points)), time_s=1+2/30, identity='source-a', frame_key=2) is second
+    empty = tracker.update(np.empty((0,3)), priors, [], time_s=1+3/30, identity='source-a', frame_key=3)
     assert all(r['tip_world'] is None for r in empty['blades'])
     for stamp, identity in ((.5, 'source-a'), (2, 'source-a'), (2+1/30, 'source-b')):
         result = tracker.update(points, priors, np.ones(len(points)), time_s=stamp, identity=identity, frame_key=3)

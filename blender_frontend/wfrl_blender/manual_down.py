@@ -34,6 +34,7 @@ _TURBINES = (('T1', 'T1', 'T1 风机'), ('T2', 'T2', 'T2 风机'), ('T3', 'T3', 
 VIEWPORT_ENGINES = {'VIEWPORT_MATERIAL': 'MATERIAL', 'VIEWPORT_SOLID': 'SOLID'}
 ENGINES = {'SCENE', 'WORKBENCH', *VIEWPORT_ENGINES}
 _EXPORT = {}
+_PUBLISHING = {}
 _LAST = {}
 _MODEL_UPDATING = False
 
@@ -426,8 +427,10 @@ def apply_frame(scene, plan, time_s, *, labels=True):
 
 def active(scene):
     key = scene.as_pointer()
-    return any(export_key == key or job.get('source_key') == key
-               for export_key, job in _EXPORT.items())
+    pending = _PUBLISHING.get(key)
+    return (pending is not None and pending[0] == scene
+            or any(export_key == key or job.get('source_key') == key
+                   for export_key, job in _EXPORT.items()))
 
 
 def _frame_handler(scene, _depsgraph=None):
@@ -674,7 +677,7 @@ def _configure_video(scene, camera, fps, frames, engine, filepath, *, size=VIDEO
     render.resolution_percentage = 100
     render.pixel_aspect_x = render.pixel_aspect_y = 1
     render.fps, render.fps_base = fps, 1.0
-    scene.frame_start, scene.frame_end = 1, frames
+    scene.frame_start, scene.frame_end, scene.frame_step = 1, frames, 1
     render.image_settings.media_type = 'VIDEO'
     render.image_settings.file_format = 'FFMPEG'
     render.image_settings.color_mode = 'RGB'
@@ -811,8 +814,59 @@ def _restore_view(space, saved):
         pass
 
 
-def _finish(scene, *, completed):
-    """Verify and publish complete media, then release the isolated render scene."""
+def _finalize_files(temp, target, metadata, size, ffprobe, ffmpeg):
+    """Verify and publish the isolated render using only plain data and files."""
+    try:
+        produced = sorted(Path(temp).glob('*.mp4'))
+        if len(produced) != 1:
+            raise RuntimeError('导出必须生成唯一的 MP4')
+        verification = _verify_video(produced[0], metadata['frames'], metadata['fps'],
+                                     size, ffprobe, ffmpeg)
+        _publish_pair(produced[0], Path(target), dict(metadata, verification=verification))
+    except Exception as exc:
+        return dict(state='FAILED', error=str(exc), temporary=temp)
+    try:
+        shutil.rmtree(temp)
+    except OSError as exc:
+        return dict(state='COMPLETE', path=target, warning=str(exc), temporary=temp)
+    return dict(state='COMPLETE', path=target)
+
+
+def _publish_async(source, source_key, files):
+    result = queue.SimpleQueue()
+    pending = (source, result)
+
+    def poll():
+        if _PUBLISHING.get(source_key) is not pending:
+            return None
+        try:
+            status = result.get_nowait()
+        except queue.Empty:
+            return .2
+        del _PUBLISHING[source_key]
+        try:
+            if source.as_pointer() == source_key:
+                _LAST[source_key] = status
+        except ReferenceError:
+            pass
+        if status['state'] == 'FAILED':
+            print(f'WFRL Down video: {status["error"]}；恢复文件保留于 {status["temporary"]}')
+        return None
+
+    def publish():
+        result.put(_finalize_files(*files))
+
+    _PUBLISHING[source_key] = pending
+    try:
+        bpy.app.timers.register(poll, first_interval=.1, persistent=True)
+        threading.Thread(target=publish, name='wfrl-down-publish', daemon=True).start()
+    except Exception:
+        del _PUBLISHING[source_key]
+        raise
+
+
+def _finish(scene, *, completed, asynchronous=False):
+    """Release the isolated render scene and settle the media publication."""
     job = _EXPORT.pop(scene.as_pointer(), None)
     if job is None:
         return None
@@ -821,23 +875,22 @@ def _finish(scene, *, completed):
         try:
             source_key = job['source'].as_pointer()
         except ReferenceError:
-            source_key = None
+            pass
     try:
         if not completed:
             _LAST[source_key] = dict(state='CANCELLED', temporary=job['temp'])
             return None
         if job.get('failure'):
             raise RuntimeError('逐帧姿态应用失败：' + job['failure'])
-        produced = sorted(Path(job['temp']).glob('*.mp4'))
-        if len(produced) != 1:
-            raise RuntimeError('导出必须生成唯一的 MP4')
-        verification = _verify_video(produced[0], job['plan']['frames'], job['plan']['fps'],
-                                     job['size'], job['ffprobe'], job['ffmpeg'])
-        job['sidecar']['verification'] = verification
-        _publish_pair(produced[0], Path(job['target']), job['sidecar'])
-        _LAST[source_key] = dict(state='COMPLETE', path=job['target'])
-        shutil.rmtree(job['temp'])
-        return job['target']
+        files = (job['temp'], job['target'], job['sidecar'], job['size'], job['ffprobe'], job['ffmpeg'])
+        if asynchronous:
+            _publish_async(job['source'], source_key, files)
+            return None
+        status = _finalize_files(*files)
+        if status['state'] == 'FAILED':
+            raise RuntimeError(status['error'])
+        _LAST[source_key] = status
+        return status['path']
     except BaseException as exc:
         _LAST[source_key] = dict(state='FAILED', error=str(exc), temporary=job['temp'])
         raise RuntimeError(f'{exc}；恢复文件保留于 {job["temp"]}') from exc
@@ -857,11 +910,15 @@ def _finish(scene, *, completed):
 
 def _defer_finish(scene, completed):
     key = scene.as_pointer()
+    job = _EXPORT.get(key)
+    if job is None or job.get('finishing'):
+        return
+    job['finishing'] = True
+
     def finish():
-        job = _EXPORT.get(key)
-        if job is not None:
+        if _EXPORT.get(key) is job:
             try:
-                _finish(job['scene'], completed=completed)
+                _finish(job['scene'], completed=completed and not job['cancelled'], asynchronous=True)
             except Exception as exc:
                 print('WFRL Down video:', exc)
     bpy.app.timers.register(finish, first_interval=.1)
@@ -931,7 +988,7 @@ def export_down_video(scene, turbine, filepath, *, duration_s=10.0, fps=25, fram
     plan = _plan(scene, fps, frames, from_start, turbine, poses)
     manual_control.pause_scene(scene, now=now)
     view = _view_area(context or bpy.context) if viewport else None
-    blocking = True if viewport else (bpy.app.background if blocking is None else bool(blocking))
+    blocking = (viewport or bpy.app.background) if blocking is None else bool(blocking)
     temp = tempfile.mkdtemp(prefix='wfrl-down-')
     clone = None
     try:
@@ -965,7 +1022,7 @@ def export_down_video(scene, turbine, filepath, *, duration_s=10.0, fps=25, fram
                 _draw_offscreen(clone, job, view, camera, ffmpeg, os.path.join(temp, 'down.mp4'))
             finally:
                 window.scene = source_window_scene
-            return _finish(clone, completed=True)
+            return _finish(clone, completed=True, asynchronous=not blocking)
         if blocking:
             result = bpy.ops.render.render(animation=True, scene=clone.name)
             if result != {'FINISHED'} or job['cancelled']:
@@ -973,7 +1030,9 @@ def export_down_video(scene, turbine, filepath, *, duration_s=10.0, fps=25, fram
                 raise InterruptedError(f'导出已取消；临时文件保留于 {temp}')
             return _finish(clone, completed=True)
         result = bpy.ops.render.render('INVOKE_DEFAULT', animation=True, scene=clone.name)
-        if result not in ({'RUNNING_MODAL'}, {'FINISHED'}):
+        if result == {'FINISHED'}:
+            _defer_finish(clone, not job['cancelled'])
+        elif result != {'RUNNING_MODAL'}:
             raise RuntimeError('无法启动渲染')
         return None
     except BaseException:
@@ -1105,7 +1164,7 @@ class WFRL_OT_ManualDownVideo(bpy.types.Operator, ExportHelper):
             written = export_down_video(
                 context.scene, self.turbine, self.filepath, frames=self._frames(), fps=self.fps,
                 engine=self.engine, from_start=self.from_start, size=VIDEO_SIZES[self.resolution],
-                samples=self.eevee_samples, labels=self.labels, context=context)
+                samples=self.eevee_samples, labels=self.labels, context=context, blocking=bpy.app.background)
         except (ValueError, OSError, RuntimeError, ReferenceError, AttributeError) as exc:
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}

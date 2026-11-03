@@ -96,10 +96,11 @@ class WFRL_OT_VideoStop(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return service.stream.active
+        return service.stream.active and service.stream.state != 'STOPPING'
 
     def execute(self, context):
         service.stream.stop()
+        _watch()
         return {'FINISHED'}
 
 
@@ -136,7 +137,9 @@ def draw(layout, context):
     row = export.column(align=True)
     row.scale_y = 1.3
     row.operator('wfrl.video_export', text='导出所选 MP4…', icon='EXPORT')
-    if service.export.active:
+    if service.export.active and service.export.state != 'RUNNING':
+        message(export, service.export.message, context=context)
+    elif service.export.active:
         factor = min(1., service.export.done_bytes / max(1, service.export.total_bytes))
         export.progress(factor=factor, type='BAR', text=f'复制进度 {factor:.0%}')
         export.label(text=f'{service.export.done_bytes / 1048576:.1f} / {service.export.total_bytes / 1048576:.1f} MiB')
@@ -144,7 +147,7 @@ def draw(layout, context):
         diagnostic(export, 'MP4 导出失败', service.export.error, error=True, context=context)
     elif service.export.output_path:
         export.label(text='MP4 导出完成', icon='CHECKMARK')
-        message(export, '输出：' + service.export.output_path, context=context)
+        message(export, service.export.message, context=context)
         output_directory(export, service.export.output_path)
     else:
         message(export, service.export.message, context=context)

@@ -1,10 +1,12 @@
 """Explicit indexed PLY recordings with integrity and incomplete markers."""
 from bisect import bisect_right
+from contextlib import suppress
 from pathlib import Path
 import hashlib
 import json
 import math
 import os
+import uuid
 import numpy as np
 from .schema import json_bytes, frame_from_metadata
 from .ply import encode_ply, decode_ply, read_ply_bytes
@@ -13,12 +15,18 @@ MAX_INDEX_BYTES = 64 * 1024 * 1024
 
 
 def _atomic(path, raw):
-    temporary = path.with_name(path.name + '.partial')
-    with temporary.open('xb') as stream:
-        stream.write(raw)
-        stream.flush()
-        os.fsync(stream.fileno())
-    os.replace(temporary, path)
+    temporary = path.with_name(f'{path.name}.{uuid.uuid4().hex}.partial')
+    stream = temporary.open('xb')
+    try:
+        with stream:
+            stream.write(raw)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    except BaseException:
+        with suppress(OSError):
+            temporary.unlink()
+        raise
 
 
 def _safe(root, name):
@@ -87,11 +95,10 @@ class Recorder:
         if self.state != 'RECORDING':
             return
         self.state, self.error = 'FAILED', str(reason)
-        self.index.close()
-        try:
+        with suppress(OSError):
+            self.index.close()
+        with suppress(OSError):
             self._manifest()
-        except OSError:
-            pass
 
     def close(self):
         if self.state != 'RECORDING':

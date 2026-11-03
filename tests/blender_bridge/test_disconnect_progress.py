@@ -554,7 +554,8 @@ def test_command_rejection_overflow_is_retained_and_delivered_after_resume():
         server.client = SlowSocket(server.client, allowance=0)
         session.lifecycle('READY', 'retained acknowledgement')
         server.poll()
-        rejection = dict(code='COMMAND_REJECTED', message='Command not valid in current state', fatal=False)
+        rejection = dict(code='COMMAND_REJECTED', message='Command not valid in current state',
+                         fatal=False, command_sequence=peer.command_sequence + 1)
         frame_size = len(encode_message(dict(protocol_version=1, type='error',
                          session_id=session.session_id, sequence=server.sequence + 1, payload=rejection)))
         assert frame_size < server.max_queue_bytes < server.pending_bytes + frame_size

@@ -47,17 +47,18 @@ def summarize(counts, passages, minimum_points=3):
                 longest = max(longest, gap)
             rows.append(dict(blade=blade + 1, start_s=passage['start_s'], end_s=passage['end_s'],
                 N=n, supported=int(support.sum()), unknown=missing,
+                evaluation='N/A' if not n else 'UNKNOWN' if missing else 'EVALUATED',
                 fraction=float(support.sum() / n) if n else None, longest_gap_frames=longest))
             total += n
             hits += int(support.sum())
             unknown += missing
         blades.append(dict(blade=blade + 1, N=total, supported=hits, unknown=unknown,
             fraction=hits / total if total else None))
-    eligible = all(b['N'] and not b['unknown'] for b in blades)
+    eligible = all(b['N'] and not b['unknown'] for b in blades) and all(p['N'] for p in rows)
     return dict(status='EVALUATED' if eligible else 'INSUFFICIENT_OR_UNKNOWN',
         blades=blades, passages=rows,
         worst_blade_fraction=min(b['fraction'] for b in blades) if eligible else None,
-        worst_passage_fraction=min(p['fraction'] for p in rows if p['N']) if eligible else None,
+        worst_passage_fraction=min(p['fraction'] for p in rows) if eligible else None,
         longest_gap_frames=max((p['longest_gap_frames'] for p in rows), default=None))
 
 
@@ -65,7 +66,11 @@ def rank(results):
     scored = []
     for candidate in results:
         profiles = candidate['profiles']
-        eligible = bool(profiles) and all(p['coverage']['status'] == 'EVALUATED' for p in profiles)
+        eligible = bool(profiles) and all(
+            p['coverage']['status'] == 'EVALUATED'
+            and p['coverage'].get('passages')
+            and all(row['N'] > 0 for row in p['coverage']['passages'])
+            for p in profiles)
         score = None
         if eligible:
             score = (min(p['coverage']['worst_blade_fraction'] for p in profiles),

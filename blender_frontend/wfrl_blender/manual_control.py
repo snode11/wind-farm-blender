@@ -656,6 +656,18 @@ def _update_entry(entry, context, field):
         _wake_timer()
 
 
+def guard_pose_value(entry, value, previous, _is_set):
+    """Keep the stored input when native evaluation overrides the manual pose."""
+    if _updating or not is_manual(entry.id_data):
+        return value
+    try:
+        _validate_native_controls(getattr(entry, name) for name in _POINTER_FIELDS)
+    except (ValueError, AttributeError, ReferenceError) as exc:
+        _protect_scene(entry.id_data, exc, turbine=entry.turbine_id)
+        return previous
+    return value
+
+
 def _update(field):
     def changed(entry, context):
         _update_entry(entry, context, field)
@@ -676,8 +688,16 @@ def _batch_update(field):
         if trial_active(scene):
             sync_batch(scene)
             return
+        entries = scene.wfrl_manual_turbines
+        try:
+            for entry in entries:
+                _validate_native_controls(getattr(entry, name) for name in _POINTER_FIELDS)
+        except (ValueError, AttributeError, ReferenceError) as exc:
+            _protect_scene(scene, exc, turbine=entry.turbine_id)
+            sync_batch(scene)
+            return
         value = getattr(batch, field)
-        for entry in scene.wfrl_manual_turbines:
+        for entry in entries:
             if field == 'individual_pitch' and entry.individual_pitch == value:
                 continue
             setattr(entry, field, value)
@@ -764,12 +784,12 @@ def _apply_poses(scene, poses, *, pause=True, now=None, ramp=False, preserve_pit
         raise ValueError('请先结束 T1 变桨试验，再调整或载入 T1 姿态')
     checked = {tid: manual_pose.pose_values(values) for tid, values in poses.items()}
     now = time.monotonic() if now is None else now
+    for tid in checked:
+        _validate_native_controls(getattr(entries[tid], field) for field in _POINTER_FIELDS)
     protected = bool(scene.wfrl_manual_error)
     if protected:
         pause_scene(scene, now=now, apply=False)
         pause = True
-        for tid in checked:
-            _validate_native_controls(getattr(entries[tid], field) for field in _POINTER_FIELDS)
     previous = _updating
     _updating = True
     try:

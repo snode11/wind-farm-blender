@@ -13,7 +13,7 @@
 
 公开扩展与本机安装包含同帧塔筒侧壁距离诊断和可选零载荷参考；双安装位覆盖工具由配套源码提供。当前是一台 X100 切换朝下原安装位／机舱侧面两个预设。操作见[X100 分析](docs/blender/X100雷达.md#机舱局部分析工作区源码)，各载荷的检查范围见[验证范围](docs/blender/发布状态与验证范围.md#x100-工作区源码验证)。
 
-工作区源码还提供按表面积固定材料点采样、有限安装集合搜索和有拒绝条件的叶片关联／连续叶尖估计，由 0.3.42.5 扩展及配套源码提供，日常安装使用 0.3.42.4。估计使用同帧塔面、声明的根部姿态和名义叶尖半径，原始点云与模型结果分别显示；同源几何评价的叶尖位置误差仍为米级。操作、预算及限制见[X100 观测研究](docs/blender/X100观测研究.md)，保存结果见[研究验证](docs/blender/发布状态与验证范围.md#x100-观测研究工作区验证)。
+工作区源码还提供按表面积固定材料点采样、有限安装集合搜索和有拒绝条件的叶片关联／连续叶尖估计，由 0.3.42.5 扩展及配套源码提供，日常安装使用 0.3.42.5。估计使用同帧塔面、声明的根部姿态和名义叶尖半径，原始点云与模型结果分别显示；同源几何评价的叶尖位置误差仍为米级。操作、预算及限制见[X100 观测研究](docs/blender/X100观测研究.md)，保存结果见[研究验证](docs/blender/发布状态与验证范围.md#x100-观测研究工作区验证)。
 
 ## 当前身份与安装来源
 
@@ -29,7 +29,7 @@ GitHub 默认分支为 [`main`](https://github.com/snode11/wind-farm-blender/tre
 | 对象 | 版本 | 身份依据 |
 | --- | --- | --- |
 | NREL 公开安装包 | **0.3.42.5** | [wfrl_blender-0.3.42+5.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.5/wfrl_blender-0.3.42+5.zip)；207 个文件；[交付身份](publication/blender-0.3.42.5.json) |
-| 开发机日常安装 | **0.3.42.4** | 独立载荷，按安装记录核对；218 个文件、112 个新进程模块已核对；[安装身份](publication/daily-installation.json) |
+| 开发机日常安装 | **0.3.42.5** | 独立载荷，按安装记录核对；207 个文件、115 个新进程模块已核对；[安装身份](publication/daily-installation.json) |
 <!-- release-identity:end -->
 
 身份、[发布核对](docs/blender/发布状态与验证范围.md#软件验证的适用对象)与[当前安装核对](publication/daily-installation.json)的适用范围见[发布状态与验证范围](docs/blender/发布状态与验证范围.md)。同一版本号不证明内容相同；升级后完全重启 Blender。
@@ -78,7 +78,7 @@ GW184 使用[独立包操作说明](docs/blender/GW184三相机与缺陷编辑�
 
 完整项目的 Python 环境统一使用根目录 [requirements.txt](requirements.txt)，文件顶部提供 macOS 简要安装命令。使用匹配架构的 Miniforge，由 conda 安装 Python 3.11、OpenMPI 与 OpenFAST 3.5.3（含原生 FAST.Farm）；恢复 WFCRL 资源后安装 Python 依赖，动态后端还需本机编译两个控制器。下载、编译与短仿真检查见[完整环境配置](docs/setup/setup_local.md#2-macos-完整-python-环境)。
 
-当前源码、测试、研究工具与文档使用 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 分支。运行资源与证据分别随 Git 或 [project-resources-v1](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1) 提供，具体位置及取得方式见[分发说明](docs/PUBLICATION.md)。NREL 离线扩展构建所需正式载荷随 Git 提供；其他入口按需恢复对应资源。
+当前源码、测试、研究工具与文档使用 [`main`](https://github.com/snode11/wind-farm-blender/tree/main) 分支。运行资源与证据分别随 Git 或 [project-resources-v1](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1) 提供，具体位置及取得方式见[分发说明](docs/PUBLICATION.md)。NREL 离线扩展构建所需正式载荷随 Git 提供；其他入口按需恢复对应资源。
 
 | 用途 | 必须保留的内容 |
 | --- | --- |

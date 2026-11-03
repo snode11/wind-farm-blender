@@ -104,11 +104,11 @@ python3 scripts/blender/run_playback_benchmark.py --blender <Blender可执行文
 
 ## X100 同帧分析
 
-`tests/radar_x100/test_analysis.py` 验证独立 NumPy 三角最近点、无效值、色标与经过分段；`blender_frontend/tests/blender/radar_x100_analysis.py` 用源码后台核对侧壁封口排除、BVH 基准、只读上下文、冻结 ROI、真值隔离、提交回滚、刚塔回退及同步取样配对对照，要求新 `WFRL_TEST_OUTPUT`、`X100_ANALYSIS_PASS`、最终 `result.json` 及正常退出。该脚本可由 `run_regressions.py` 选择；它与安装预设、配置、绑定回放及主合同、边界、历史共七项后台检查列于[CI 原生选择](../../../../configs/ci-native-tests.txt)。窗口／GPU、加载／undo／redo 和原始 RGB 分别按上述窗口及生命周期入口验收，不由后台测试推定。离线 `scripts/radar_x100/coverage.py` 的完整30 Hz报告是指定研究配置的有限目标覆盖，不证明实机净空或安全合格。当前本地证据与四项独立优化的测量边界见[工作区验证](../../../../docs/blender/发布状态与验证范围.md#x100-工作区源码验证)；报告内临时路径只标识测量来源，不要求恢复已清理的测试场景或探针。
+`tests/radar_x100/test_analysis.py` 验证独立 NumPy 三角最近点、无效值、色标与经过分段；`blender_frontend/tests/blender/radar_x100_analysis.py` 用源码后台核对侧壁封口排除、BVH 基准、只读上下文、冻结 ROI、真值隔离、提交回滚、刚塔回退及同步取样配对对照，要求新 `WFRL_TEST_OUTPUT`、`X100_ANALYSIS_PASS`、最终 `result.json` 及正常退出。该脚本可由 `run_regressions.py` 选择；它与安装预设、配置、绑定回放、主合同、边界、历史及观测合同后台检查列于[CI 原生选择](../../../../configs/ci-native-tests.txt)。窗口／GPU、加载／undo／redo 和原始 RGB 分别按上述窗口及生命周期入口验收，不由后台测试推定。离线 `scripts/radar_x100/coverage.py` 的完整30 Hz报告是指定研究配置的有限目标覆盖，不证明实机净空或安全合格。当前本地证据与四项独立优化的测量边界见[工作区验证](../../../../docs/blender/发布状态与验证范围.md#x100-工作区源码验证)；报告内临时路径只标识测量来源，不要求恢复已清理的测试场景或探针。
 
 ## X100 观测研究
 
-仓库 `tests/radar_x100/test_sampling.py`、`test_installation.py`、`test_tracking.py` 分别核对面积度量与材料速度、最差覆盖与未知项、解析曲线与因果撤回。`radar_x100_observations.py` 和 `radar_x100_estimation_window.py` 已由运行器登记，但未列入 `configs/ci-native-tests.txt`；按行为单独选择后台合同或可见画布，不因运行普通文档／发布任务而自动触发：
+仓库 `tests/radar_x100/test_sampling.py`、`test_installation.py`、`test_tracking.py` 分别核对面积度量与材料速度、最差覆盖与未知项、解析曲线与因果撤回。`radar_x100_observations.py` 和 `radar_x100_estimation_window.py` 均由运行器登记。后台观测合同列于 [CI 原生选择](../../../../configs/ci-native-tests.txt)，可见画布按需独立检查。普通文档／发布任务沿用各自默认范围。
 
 ```bash
 python scripts/blender/run_regressions.py --tests radar_x100_observations.py \
@@ -121,6 +121,6 @@ python scripts/blender/run_regressions.py --tests radar_x100_estimation_window.p
 
 ## 纯文档与 skill
 
-只核对 frontmatter、链接／锚点、表格、模块／测试路径、参数及要求一致性；无需 Blender、渲染、求解或打包，只报告实际静态检查。
+只核对 frontmatter、链接／锚点、表格、模块／测试路径、参数及要求一致性；无需 Blender、渲染、求解或打包，只报告实际静态检查。 同步当前状态时，按交付记录与日常安装记录核对版本、归档摘要和文件数，并用当前代码、测试及配置核对接口。已保存的测量和验证结论按原对象引用。
 
 修改 skill 的任务分类或专题组织时，用[任务场景](../evals/scenarios.json)作只读检索与决策检查：给出相关入口、验证方式和证据边界，按其中标准判断。场景描述是评估输入，不授权实际导出、安装、训练或发布；场景判断通过不代表产品功能或科学实验通过。评估输出保存在临时目录，不进入项目说明。

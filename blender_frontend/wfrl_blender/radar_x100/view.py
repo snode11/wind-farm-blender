@@ -1,5 +1,6 @@
 """One GPU point batch per scene; physical housing remains in raw RGB."""
 import math
+import time
 import numpy as np
 from .core import schema
 
@@ -113,12 +114,12 @@ def install(scene, owner, sensor_matrix, *, show_fov=True):
 
 
 def batch(frame, color_by, *, color_scale='FIXED', velocity_limit=10.):
-    import gpu
-    from gpu_extras.batch import batch_for_shader
     from .display import world_xyz, point_style
     xyz = world_xyz(frame)
     if not len(xyz):
         return None
+    import gpu
+    from gpu_extras.batch import batch_for_shader
     colors, _, _ = point_style(frame, color_by, color_scale=color_scale, velocity_limit=velocity_limit)
     shader = gpu.shader.from_builtin('POINT_FLAT_COLOR')
     return shader, batch_for_shader(shader, 'POINTS', {'pos': xyz.astype(np.float32), 'color': colors})
@@ -163,8 +164,13 @@ def draw():
             shader.uniform_float('size', 4.)
             point_batch.draw(shader)
     except Exception as exc:
+        if session.gpu_batch is not None:
+            session.gpu_retry_at = time.monotonic() + .25
         session.gpu_batch = session.fov_gpu_batch = None
         session.render_error = str(exc)
+    else:
+        if session.gpu_retry_at is None:
+            session.render_error = ''
     finally:
         gpu.state.depth_test_set(depth)
         gpu.state.blend_set(blend)

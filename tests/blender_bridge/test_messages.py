@@ -49,6 +49,16 @@ class CodecTests(unittest.TestCase):
             with self.assertRaises(ProtocolError):
                 FrameDecoder().feed(struct.pack('!I', length))
 
+    def test_rejected_command_sequence_is_optional_and_validated(self):
+        error = msg('error', code='COMMAND_REJECTED', message='Invalid command', fatal=False)
+        self.assertEqual(FrameDecoder().feed(encode_message(error)), [error])
+        error['payload']['command_sequence'] = 1
+        self.assertEqual(FrameDecoder().feed(encode_message(error)), [error])
+        for sequence in (True, None, '1', -1, 2**53):
+            error['payload']['command_sequence'] = sequence
+            with self.subTest(sequence=sequence), self.assertRaises(ProtocolError):
+                encode_message(error)
+
     def test_envelope(self):
         for key in ['protocol_version', 'type', 'session_id', 'sequence', 'payload']:
             bad = msg(); del bad[key]

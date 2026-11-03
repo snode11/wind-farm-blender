@@ -1,6 +1,6 @@
 # PPO、参数共享 IPPO 与集中式 MAPPO 环境配置
 
-本文按项目 Python 源码区分算法与训练入口，源码入口使用 `wind-farm-rl-all-work` 分支。Blender 公开安装包与开发机日常安装分别按[发布状态与验证范围](../blender/发布状态与验证范围.md)识别；项目后端与训练工具不随扩展 ZIP 安装。离线演示无需训练环境，[入口见演示指令单](../demos/演示指令单.md)。
+本文按项目 Python 源码区分算法与训练入口，源码入口使用 `main` 分支。Blender 公开安装包与开发机日常安装分别按[发布状态与验证范围](../blender/发布状态与验证范围.md)识别；项目后端与训练工具不随扩展 ZIP 安装。离线演示无需训练环境，[入口见演示指令单](../demos/演示指令单.md)。
 
 ## 1. 先选实际算法
 
@@ -74,7 +74,7 @@ Studio 的 `NacelleLidar` 为合成示意：轮毂均值、幂律切变和确定
 
 ## 2. 依赖与安装
 
-仓库的 `wfcrl-env/requirements-floris-local.txt` 保留 Windows + Python 3.11 的历史兼容组合：FLORIS 3.5、Gymnasium 0.29.1、PettingZoo 1.24.3、NumPy 1.26.4、SB3 2.3.2，以及训练和 GUI 依赖。根 [pyproject.toml](../../pyproject.toml) 将 PyYAML 声明为核心依赖；普通安装、editable 安装和 wheel 均提供内置机型 YAML。`train` / `gui` / `all` 是功能附加组，训练仍需匹配的 WFCRL 环境，FAST.Farm 路径另需外部求解器与控制器，不能用普通 Python 包或 Blender ZIP 代替。[安装范围见本地配置](../setup/setup_local.md#2-python-环境floris-与算法开发)。
+仓库的 `wfcrl-env/requirements-floris-local.txt` 保留 Windows + Python 3.11 的历史兼容组合：FLORIS 3.5、Gymnasium 0.29.1、PettingZoo 1.24.3、NumPy 1.26.4、SB3 2.3.2，以及训练和 GUI 依赖。根 [pyproject.toml](../../pyproject.toml) 将 PyYAML 声明为核心依赖；普通安装、editable 安装和 wheel 均提供内置机型 YAML。`train` / `gui` / `all` 是功能附加组，训练仍需匹配的 WFCRL 环境，FAST.Farm 路径另需外部求解器与控制器，不能用普通 Python 包或 Blender ZIP 代替。[安装范围见本地配置](../setup/setup_local.md#2-macos-完整-python-环境)。
 
 在独立 Python 3.11 环境、仓库根目录执行以下安装模板：
 

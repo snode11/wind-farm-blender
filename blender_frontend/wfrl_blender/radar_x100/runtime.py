@@ -59,7 +59,7 @@ class Session:
         self.close_remove = True
         self.restore_after_close = False
         self._gpu_required = True
-        self.gpu_retry_at = 0.
+        self.gpu_retry_at = None
         self.fov_gpu_batch = None
         self.render_color = None
         self.display_valid, self.record_start, self.record_last = False, None, None
@@ -80,6 +80,7 @@ class Session:
         self.blade_tracker = tracking.BladeTracker()
         self.blade_result = None
         self.blade_key = None
+        self.blade_retry_at = 0.
         self.blade_error = ''
         self.playing = False
         self.replay_cursor = None
@@ -135,6 +136,9 @@ class Session:
 
     def pair_context(self, frame):
         self.context = self.analysis_result = self.side_query = None
+        self.blade_result = self.blade_key = None
+        self.blade_retry_at = 0.
+        self.blade_error = ''
         self.reference_curves = ()
         self.reference_key = None
         self.analysis_key = None
@@ -229,16 +233,16 @@ class Session:
             self.pair_context(frame)
         self.frame = frame
         if frame is None:
-            self.blade_tracker.reset()
-            self.blade_result = self.blade_key = None
+            self._reset_blades()
         self.display_valid = frame is not None and frame.completeness == 'COMPLETE'
         style = display.style_key(self.scene)
-        self.gpu_retry_at = time.monotonic() + .25
         try:
             self.gpu_batch = view.batch(frame, style[0], color_scale=style[1], velocity_limit=style[2]) if self.display_valid and not bpy.app.background else None
+            self.gpu_retry_at = None
             self.render_error = ''
         except Exception as exc:
             self.gpu_batch = None
+            self.gpu_retry_at = time.monotonic() + .25
             self.render_error = str(exc)
             if required_gpu:
                 raise
@@ -350,22 +354,24 @@ class Session:
         self.retry_display()
         self.derive_blades()
 
+    def _reset_blades(self):
+        self.blade_result = self.blade_key = None
+        self.blade_retry_at = 0.
+        self.blade_error = ''
+        self.blade_tracker.reset()
+
     def derive_blades(self):
         """Optional inference errors leave the original observation and recording intact."""
         if not getattr(self.scene, 'wfrl_x100_blade_tracking', False):
-            self.blade_result = self.blade_key = None
-            self.blade_error = ''
-            self.blade_tracker.reset()
+            self._reset_blades()
             return
         if self.mode != 'SIMULATION' or self.context is None or self.frame is None or not self.display_valid:
-            self.blade_result = self.blade_key = None
-            self.blade_tracker.reset()
+            self._reset_blades()
             self.blade_error = '需要同帧塔面、根部姿态和已对齐点云'
             return
-        if self.blade_key == self.context.identity:
+        if self.blade_key == self.context.identity or time.monotonic() < self.blade_retry_at:
             return
         self.blade_result = None
-        self.blade_key = self.context.identity
         try:
             from .core import analysis
             from .scene import SideWallQuery
@@ -386,8 +392,12 @@ class Session:
                     if np.isfinite(distance):
                         row['estimated_clearance_m'] = float(distance)
             self.blade_result, self.blade_error = result, ''
+            self.blade_key = self.context.identity
+            self.blade_retry_at = 0.
         except Exception as exc:
             self.blade_tracker.reset()
+            self.side_query = None
+            self.blade_retry_at = time.monotonic() + .25
             self.blade_error = str(exc)
 
     def retry_display(self):
@@ -395,7 +405,7 @@ class Session:
         import bpy
         if self.frame is not None and self.display_valid and (
                 self.render_color != display.style_key(self.scene)
-                or (self.gpu_batch is None and not bpy.app.background
+                or (self.gpu_retry_at is not None and not bpy.app.background
                     and time.monotonic() >= self.gpu_retry_at)):
             self._display(self.frame, record=False)
 
@@ -499,6 +509,7 @@ class Session:
         finally:
             self.frame, self.gpu_batch, self.fov_gpu_batch, self.display_valid = None, None, None, False
             self.context = self.analysis_result = self.side_query = None
+            self._reset_blades()
             if remove:
                 try:
                     view.remove_objects(self.scene)
@@ -593,6 +604,8 @@ def apply_mount_preset(scene, preset, *, search_report=None):
         current.mount.matrix_basis = Matrix(sampler.mount_from_sensor.tolist())
         current.sampler, current.source_session, current.key = sampler, source_session, sequence
         current.frame, current.gpu_batch, current.display_valid = frame, batch, True
+        current.gpu_retry_at = None
+        current.render_error = ''
         current.render_color = style
         current.capture_configuration()
         current.pair_context(frame)

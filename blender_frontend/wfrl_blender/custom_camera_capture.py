@@ -431,22 +431,20 @@ class Capture:
                 timebase=float(self.scene.get('wfrl_clearance_timebase_fps',60.))
                 mapped=self.scene.frame_start+(at-self.reader.start_s)*timebase
             self.evaluate(math.floor(mapped),mapped-math.floor(mapped),at)
-        self.guard()
-        self._require_render_context(context)
+            self.guard()
+            self._require_render_context(context)
         images=preview.render_group(context,self.cameras,target=self.render_target,create_texture=False)
         try:
             self.guard()
             self._require_render_context(context)
             records=[]
             packets=[]
+            motion = self.reader.at(at).get('motion') if self.reader is not None and at is not None else None
             for camera in self.cameras:
                 slot=int(camera['wfrl_custom_slot']);image=images[slot];p=image.params
                 relative=f'C{slot}/frame_{self.index:06d}.png'
                 packets.append((self.path/relative, image.width, image.height, bytes(image.rgba())))
                 scales=projection.pixel_scales(p.fov,p.vfov,image.width,image.height)
-                motion=None
-                if self.reader is not None and at is not None:
-                    motion=self.reader.at(at).get('motion')
                 record={'capture_id':self.capture_id,'sample_index':self.index,'time_s':at,
                     'time_missing_reason':None if at is not None else 'static scene; no simulation clock',
                     'scene_frame':self.scene.frame_current,'scene_subframe':self.scene.frame_subframe,
@@ -470,7 +468,6 @@ class Capture:
                     'image_encoding':self.profile['image_encoding'],
                     'image_relative_path':relative,'capture_status':'complete'}
                 records.append(record)
-            self.guard()
             self._pending_records = records
             self._writer = ImageWriter(packets)
         finally:
@@ -492,7 +489,10 @@ class Capture:
             stream.write(''.join(json.dumps(r,ensure_ascii=False,allow_nan=False)+'\n' for r in records))
         self.index += 1
         self.manifest['completed_samples'] = self.index
-        write_json(self.path/'manifest.json',self.manifest)
+        # The frame index tracks every group. Sparse checkpoints bound rewrites
+        # of the full schedule, and finish always writes the exact final count.
+        if (self.index & (self.index - 1)) == 0:
+            write_json(self.path/'manifest.json',self.manifest)
         if self.cancel_requested:
             self.finish()
             return True

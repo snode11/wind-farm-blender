@@ -243,6 +243,7 @@ class RadarEdges(unittest.TestCase):
         session.recording_stopping = session.closing = False
         session.close_remove, session.restore_after_close = True, False
         session.client = session.frame = session.gpu_batch = session.fov_gpu_batch = None
+        session.blade_tracker = api.tracking.BladeTracker()
         session.display_valid = False
         radar._SESSIONS[key] = session
         bpy.data.scenes.remove(scene)

@@ -125,7 +125,11 @@ def fit_blades(world_points, priors, background_distance_m, config=FitConfig()):
 
 
 class BladeTracker:
-    """Causal smoothing in blade coordinates; rejected frames never reuse old tips."""
+    """Causal smoothing in blade coordinates; rejected frames never reuse old tips.
+
+    consecutive_frames counts successive supported estimates within max_gap_s.
+    It does not measure source-grid coverage between estimates.
+    """
     def __init__(self, config=FitConfig()):
         self.config = config
         self.reset()

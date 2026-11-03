@@ -8,7 +8,7 @@
 
 通过 **N → MAPPO → 打开几何重建示例…** 在同一分屏切换几何／同源纹理，也可查看三机柔性回放、三相机和 NREL 缺陷编辑器。601 样本同源纹理与独立 120 样本合成资源使用不同来源和时钟；独立合成工具不在统一重建侧栏显示。随包查看无需 conda、Bridge、FAST.Farm 或网络。
 
-项目源码可从 `main` 或 `wind-farm-rl-all-work` 取得，本页 macOS 安装命令使用 `main`；GitHub 自动 Source code 不作为扩展安装包。日常安装的版本、逐文件身份和适用验证见[日常安装核对](../../publication/daily-installation.json)；源码和公开发布不会自动更新实际安装。操作见[前端说明](../../前端readme.md)。软件检查不代表重建精度、现场净空精度或稳定 60 FPS 验收。
+项目源码可从 `main` 取得，本页 macOS 安装命令使用 `main`；GitHub 自动 Source code 不作为扩展安装包。日常安装的版本、逐文件身份和适用验证见[日常安装核对](../../publication/daily-installation.json)；源码和公开发布不会自动更新实际安装。操作见[前端说明](../../前端readme.md)。软件检查不代表重建精度、现场净空精度或稳定 60 FPS 验收。
 
 ## 2. macOS 完整 Python 环境
 

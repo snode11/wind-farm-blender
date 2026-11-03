@@ -261,14 +261,19 @@ def test_runtime_reuses_one_validated_package(monkeypatch, cold_package_cache, e
     def comparison(path, *args, **kwargs):
         calls['comparison_paths'].append(path)
         calls['comparison_inputs'].append(kwargs)
-        original_comparison(path, *args, **kwargs)
+        return original_comparison(path, *args, **kwargs)
+
+    def create_mesh(name):
+        assert name == 'WFRL.FarmFlex.SourceLoft'
         raise BeforeMeshBinding
 
     def construct(scene, path, **kwargs):
         runtime_type.__init__(runtime, scene, path, **kwargs)
         return runtime
 
-    monkeypatch.setitem(sys.modules, 'bpy', SimpleNamespace())
+    bpy = SimpleNamespace(data=SimpleNamespace(meshes=SimpleNamespace(new=create_mesh)))
+    monkeypatch.setitem(sys.modules, 'bpy', bpy)
+    monkeypatch.setattr(farm_flex, '_update_scene_transforms', lambda scene: None)
     monkeypatch.setattr(np, 'load', load_archive)
     monkeypatch.setattr(farm_flex.dual_beam_api(), 'resolve_package', resolve)
     monkeypatch.setattr(prebend, 'read_reference', reference)
@@ -280,9 +285,12 @@ def test_runtime_reuses_one_validated_package(monkeypatch, cold_package_cache, e
     monkeypatch.setattr(clearance_replay, 'clear', lambda scene, reason: None)
 
     class Scene(dict):
-        objects = {f'WFRL.Turbine.{tid}.{suffix}': object()
+        objects = {f'WFRL.Turbine.{tid}.{suffix}': SimpleNamespace(rotation_euler=SimpleNamespace())
                    for tid in ('T1', 'T2', 'T3')
                    for suffix in ('YawRoot', 'Rotor', 'Tower', 'Blade1', 'Blade2', 'Blade3')}
+
+        def as_pointer(self):
+            return id(self)
 
     scene = Scene()
     with pytest.raises(BeforeMeshBinding):
@@ -301,7 +309,7 @@ def test_runtime_reuses_one_validated_package(monkeypatch, cold_package_cache, e
     for key, values in runtime.tower_motion.items():
         assert values is calls['towers'][0][key]
         assert not values.flags.writeable
-    assert calls['comparison_inputs'][0]['blade_reference'] is runtime.reference
+    assert calls['comparison_inputs'][0]['blade_reference'] is calls['references'][0]
     assert calls['comparison_inputs'][0]['tower_motion'] is runtime.tower_motion
     assert calls['comparison_paths'] == [calls['resolved'][0][0]]
     if entrypoint == 'attach':

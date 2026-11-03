@@ -2,6 +2,7 @@
 import numpy as np
 import pytest
 from wfrl.radar_x100 import installation
+from scripts.radar_x100.coverage import passages, runs
 
 
 def windows():
@@ -40,6 +41,37 @@ def test_unknown_breaks_known_gaps_and_empty_passages_are_not_perfect():
     result = installation.summarize(values, windows())
     assert result['longest_gap_frames'] == 5 and result['worst_blade_fraction'] is None
     assert installation.summarize(values, [[],[],[]])['worst_blade_fraction'] is None
+
+
+def test_complete_passage_without_grid_samples_disqualifies_search_and_legacy_import():
+    values = np.full((10, 3), 4)
+    encountered = windows()
+    encountered[0].extend(passages(np.array([1., 1.1]), np.array([170., 190.]), 1.))
+    result = installation.summarize(values, encountered)
+    empty = result['passages'][1]
+    assert (empty['N'], empty['fraction'], empty['evaluation']) == (0, None, 'N/A')
+    assert result['status'] == 'INSUFFICIENT_OR_UNKNOWN' and result['worst_passage_fraction'] is None
+
+    legacy = candidate('winner', values)
+    coverage = legacy['profiles'][0]['coverage']
+    for row in coverage['passages']:
+        row.pop('evaluation')
+    report = dict(schema=installation.SCHEMA, source_id='source', geometry_id='geometry',
+        sampling_method='AREA', sampling_algorithm=installation.AREA_ALGORITHM,
+        winner_id=legacy['id'], candidates=[legacy])
+    assert installation.selected_installation(report, 'source', 'geometry')
+    coverage['passages'].append({key: value for key, value in empty.items() if key != 'evaluation'})
+    with pytest.raises(ValueError, match='覆盖完整'):
+        installation.selected_installation(report, 'source', 'geometry')
+
+
+@pytest.mark.parametrize('mask,visible,gap', [
+    ([None, False, False], 0, 2),
+    ([True, True, None, True, True, False, None, False, False, False], 2, 3),
+    ([None, None], 0, 0),
+])
+def test_unknown_ends_a_run_and_next_known_frame_starts_another(mask, visible, gap):
+    assert runs(mask) == dict(longest_visible_frames=visible, longest_gap_frames=gap)
 
 
 def test_installation_grid_deduplicates_presets_and_rejects_nonfinite():

@@ -57,7 +57,8 @@ def test_capture_step_requests_pixels_without_texture_and_exports_state(tmp_path
     job.profile = {'color_management': {'gamma': 1}, 'image_encoding': 'RGBA8 display-transformed once; PNG sRGB'}
     job.manifest = {'active_camera_ids': ['C3'], 'status': 'incomplete'}
     context, calls, finishes, evaluations = object(), [], [], []
-    monkeypatch.setattr(job, 'guard', lambda: None)
+    guards = []
+    monkeypatch.setattr(job, 'guard', lambda: guards.append(None))
     monkeypatch.setattr(job, 'evaluate', lambda *args: evaluations.append(args))
     monkeypatch.setattr(job, 'finish', lambda **kwargs: finishes.append(kwargs))
     def render(render_context, cameras, **kwargs):
@@ -66,6 +67,7 @@ def test_capture_step_requests_pixels_without_texture_and_exports_state(tmp_path
         return {3: image}
     monkeypatch.setattr(preview, 'render_group', render)
     assert job.step(context) is False
+    assert len(guards) == (3 if sequence else 2)
     deadline = time.monotonic() + 5
     while not job.step(context):
         assert time.monotonic() < deadline, 'PNG capture did not complete'
@@ -569,6 +571,26 @@ def test_pending_png_yields_and_never_commits_an_invalid_group(clock_capture, mo
         release.set()
         writer.thread.join(3)
         assert not writer.thread.is_alive()
+
+
+def test_capture_checkpoints_keep_complete_index_and_exact_terminal_count(clock_capture):
+    job, _calls, _generation = clock_capture
+    job.index = 0
+    job.times = [0., 1., 2., 3., 4.]
+    job.manifest['requested_times_s'] = job.times
+    ready = threading.Event()
+    ready.set()
+    disk_counts = []
+    for index in range(len(job.times)):
+        job._writer = NS(done=ready, error=None, cancelled=threading.Event())
+        job._pending_records = [{'sample_index': index}]
+        job.in_group = True
+        job.step(None)
+        disk_counts.append(json.loads((job.path / 'manifest.json').read_text())['completed_samples'])
+    assert disk_counts == [1, 2, 2, 4, 5]
+    assert job.manifest['status'] == 'complete'
+    assert [json.loads(line)['sample_index'] for line in
+            (job.path / 'frames.jsonl').read_text().splitlines()] == list(range(5))
 
 
 def test_unfinished_png_cannot_be_published_as_a_complete_capture(clock_capture, monkeypatch):

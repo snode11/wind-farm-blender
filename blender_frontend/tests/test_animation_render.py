@@ -207,3 +207,25 @@ def test_manual_png_snapshot_normalizes_depth_without_changing_source():
 
     assert _render_settings(scene)['image_settings']['color_depth'] == '16'
     assert scene.render.image_settings.color_depth == '32'
+
+
+
+def test_png_preflight_checks_enabled_view_suffixes_and_packed_eyes():
+    from wfrl_blender.animation_render import png_output_views
+
+    left = NS(name='left', use=True, file_suffix='_L')
+    right = NS(name='right', use=True, file_suffix='_R')
+    image = NS(views_format='INDIVIDUAL')
+    render = NS(use_multiview=True, views_format='STEREO_3D', views=[left, right], image_settings=image)
+    scene = NS(render=render)
+    assert png_output_views(scene) == ('INDIVIDUAL', ('left', 'right'))
+    right.file_suffix = '_l'
+    with pytest.raises(ValueError, match='唯一'):
+        png_output_views(scene)
+    right.use = False
+    assert png_output_views(scene) == ('INDIVIDUAL', ('left',))
+    image.views_format = 'STEREO_3D'
+    with pytest.raises(ValueError, match='左右双眼'):
+        png_output_views(scene)
+    right.use = True
+    assert png_output_views(scene) == ('STEREO_3D', ())

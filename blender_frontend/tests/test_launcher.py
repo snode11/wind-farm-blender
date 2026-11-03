@@ -468,7 +468,7 @@ def test_failed_live_backend_never_authorizes_bridge_exit_or_credential_removal(
         tmp_path, monkeypatch, owned_launch):
     from wfrl.blender_bridge.backend_session import BackendSession
     session = BackendSession()
-    session._trainer = SimpleNamespace(running=True, stop=lambda timeout: None)
+    session._trainer = SimpleNamespace(running=True, runtime=None, stop=lambda timeout: None)
     session.lifecycle('FAILED', 'Controlled worker failure')
     bridge, session_files = owned_launch(session_id=session.session_id)
     client = socket_client([protocol_frame('hello_ack', session_id=session.session_id,

@@ -9,18 +9,17 @@ import numpy as np
 
 
 def runs(mask):
-    groups=[]
+    longest = {True: 0, False: 0}
+    previous, length = None, 0
     for value in mask:
         if value is None:
-            groups.append([None,0])
+            previous, length = None, 0
             continue
-        if value:
-            if not groups or groups[-1][0] is False: groups.append([True,0])
-        else:
-            if not groups or groups[-1][0] is True: groups.append([False,0])
-        groups[-1][1]+=1
-    return dict(longest_visible_frames=max([n for v,n in groups if v]+[0]),
-                longest_gap_frames=max([n for v,n in groups if v is False]+[0]))
+        visible = bool(value)
+        length = length + 1 if visible is previous else 1
+        longest[visible] = max(longest[visible], length)
+        previous = visible
+    return dict(longest_visible_frames=longest[True], longest_gap_frames=longest[False])
 
 
 def passages(times, angles, half_window):
@@ -170,7 +169,8 @@ def main():
                     nominal_angle_window_deg=[passage.get('center_deg',180)-args.half_window_deg,passage.get('center_deg',180)+args.half_window_deg],
                     visible_fraction=sum(V)/N if N else None,output_fraction=sum(O)/N if N else None,
                     conditional_output_given_reference_visible=sum(o and v for o,v in zip(O,V))/sum(V) if sum(V) else None,
-                    conditional_denominator=sum(V),evaluation='UNKNOWN' if N>len(known) else 'EVALUATED',
+                    conditional_denominator=sum(V),
+                    evaluation='N/A' if not N else 'UNKNOWN' if N>len(known) else 'EVALUATED',
                     output_runs=runs([value if isinstance(rows[i],list) else None for i,value in zip(indices,O)]),
                     visibility_runs=runs([value if isinstance(rows[i],list) else None for i,value in zip(indices,V)]),angle_bins=bins))
         report['installations'][name]=dict(calibration_id=samplers[name].calibration_id,

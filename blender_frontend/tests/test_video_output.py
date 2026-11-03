@@ -27,6 +27,14 @@ def wait_export(job):
     assert not job.active
 
 
+def wait_stream(stream, predicate=lambda job: not job.active):
+    deadline = time.monotonic() + 5
+    while not predicate(stream) and time.monotonic() < deadline:
+        stream.poll()
+        time.sleep(.01)
+    assert predicate(stream), stream.message
+
+
 @pytest.mark.skipif(not hasattr(os, 'pread'), reason='os.pread required')
 @pytest.mark.parametrize('size', [128, 16384])
 def test_log_tail_preserves_shared_file_offset(tmp_path, size):
@@ -85,6 +93,7 @@ def test_stream_without_pread_keeps_polling_and_releases_owned_processes(tmp_pat
         assert video_output._tail(stream.logs[1]) == 'frame=1\nframe=2\n'
     finally:
         stream.stop()
+        wait_stream(stream)
     assert len(processes) == 2
     for process in processes:
         process.terminate.assert_called_once_with()
@@ -238,11 +247,13 @@ def test_stream_decode_failure_cleanup_restart_and_busy_port(tmp_path):
         directory = Path(stream.directory.name)
         publisher.kill(); publisher.wait(timeout=5)
         stream.poll()
+        wait_stream(stream)
         assert stream.state == 'ERROR' and not stream.active
         assert server.poll() is not None and not directory.exists()
         start()
         server, publisher = stream.server, stream.publisher
         stream.stop()
+        wait_stream(stream)
         assert server.poll() is not None and publisher.poll() is not None
         assert stream.directory is None
         with socket.socket() as busy:
@@ -254,7 +265,7 @@ def test_stream_decode_failure_cleanup_restart_and_busy_port(tmp_path):
             assert not stream.active and stream.state == 'ERROR'
             assert busy.getsockname()[1] == port
     finally:
-        stream.stop()
+        stream.close()
 
 
 @pytest.mark.parametrize('block_at', ['read', 'fsync'])
@@ -298,3 +309,89 @@ def test_stop_is_bounded_and_keeps_worker_and_staging_until_io_finishes(tmp_path
         wait_export(job)
     assert job.state == 'CANCELLED' and not job.error and not target.exists()
     assert not list(tmp_path.glob('.wfrl-video-export-*'))
+
+
+
+def test_stream_stop_is_nonblocking_and_releases_server_when_publisher_times_out():
+    stream = video_output.Stream()
+    server, publisher = stream.server, stream.publisher = Mock(), Mock()
+    entered, release = threading.Event(), threading.Event()
+    server.poll.return_value = publisher.poll.return_value = None
+    server.terminate.side_effect = lambda: setattr(server.poll, 'return_value', 0)
+
+    def wait_for_publisher(timeout):
+        entered.set()
+        assert release.wait(5)
+        raise subprocess.TimeoutExpired('ffmpeg', timeout)
+
+    publisher.wait.side_effect = wait_for_publisher
+    try:
+        stream.stop()
+        assert entered.wait(5)
+        assert stream.state == 'STOPPING' and stream.active
+        server.terminate.assert_called_once_with()
+    finally:
+        release.set()
+    wait_stream(stream, lambda job: job.state == 'ERROR')
+    publisher.kill.assert_called_once_with()
+    assert stream.active and stream.publisher is publisher
+    publisher.poll.return_value = 0
+    wait_stream(stream)
+
+
+def test_export_stop_cannot_cancel_an_already_claimed_commit(tmp_path, monkeypatch):
+    source, target = tmp_path / 'source.mp4', tmp_path / 'output.mp4'
+    source.write_bytes(b'complete video')
+    entered, release = threading.Event(), threading.Event()
+    commit = video_output._commit_export
+
+    def held_commit(staging, target):
+        entered.set()
+        assert release.wait(5)
+        commit(staging, target)
+
+    monkeypatch.setattr(video_output, '_commit_export', held_commit)
+    job = video_output.Export()
+    job.start(source, target)
+    try:
+        assert entered.wait(5)
+        assert not job.stop(timeout=0)
+        assert job.state == 'COMMITTING' and not job.output_path and not target.exists()
+    finally:
+        release.set()
+        wait_export(job)
+    assert job.state == 'SUCCEEDED' and job.output_path == str(target)
+    assert job.message == '已导出：' + str(target)
+    assert target.read_bytes() == source.read_bytes()
+
+
+@pytest.mark.skipif(os.name != 'posix', reason='POSIX can unlink an open staging file')
+def test_normal_process_exit_unlinks_owned_export_with_blocked_fsync(tmp_path):
+    source, target = tmp_path / 'source.mp4', tmp_path / 'output.mp4'
+    source.write_bytes(b'complete video')
+    script = """
+import importlib.util, os, sys, threading
+spec = importlib.util.spec_from_file_location('video_output', sys.argv[1])
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+entered = threading.Event()
+def held_fsync(_fd):
+    entered.set()
+    threading.Event().wait()
+module.os.fsync = held_fsync
+module.export.start(sys.argv[2], sys.argv[3])
+assert entered.wait(5)
+"""
+    subprocess.run([sys.executable, '-c', script, str(MODULE), str(source), str(target)],
+                   check=True, timeout=10)
+    assert not target.exists()
+    assert not list(tmp_path.glob('.wfrl-video-export-*'))
+
+
+def test_export_does_not_follow_a_dangling_destination_symlink(tmp_path):
+    source, target = tmp_path / 'source.mp4', tmp_path / 'output.mp4'
+    source.write_bytes(b'complete video')
+    target.symlink_to(tmp_path / 'missing.mp4')
+    with pytest.raises(FileExistsError):
+        video_output.Export().start(source, target)
+    assert target.is_symlink() and not (tmp_path / 'missing.mp4').exists()

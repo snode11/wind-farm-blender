@@ -108,6 +108,32 @@ class OrdinaryRotorConflicts(unittest.TestCase):
         self.assertAlmostEqual(self.t1.rotor_object.rotation_euler.x, .25)
         self.assertEqual(self.t1.azimuth_deg, 0.0)
 
+    def test_pose_preset_validates_all_selected_entries_before_writing(self):
+        scene.wfrl_manual_target = 'ALL'
+        self.entries['T2'].rotor_object.constraints.new('LIMIT_ROTATION')
+        before = tuple(entry.azimuth_deg for entry in self.entries.values())
+        try:
+            result = bpy.ops.wfrl.manual_pose_preset(preset='BLADE_DOWN')
+        except RuntimeError:
+            result = {'CANCELLED'}
+        self.assertEqual(result, {'CANCELLED'})
+        self.assertEqual(tuple(entry.azimuth_deg for entry in self.entries.values()), before)
+        self.entries['T2'].rotor_object.constraints.clear()
+        self.t1.rotor_object.rotation_euler.x = .25
+        self.assertEqual(bpy.ops.wfrl.manual_pose_preset(preset='BLADE_DOWN'), {'FINISHED'})
+        self.assertEqual(tuple(entry.azimuth_deg for entry in self.entries.values()), (180.,) * 3)
+
+    def test_direct_and_batch_values_reject_native_overrides(self):
+        self.t1.yaw_object.constraints.new('LIMIT_ROTATION')
+        before = tuple(entry.yaw_deg for entry in self.entries.values())
+        self.t1.yaw_deg = 35.
+        self.assertEqual(self.t1.yaw_deg, before[0])
+        self.assertIn('约束', scene.wfrl_manual_error)
+        scene.wfrl_manual_target = 'ALL'
+        scene.wfrl_manual_batch.yaw_deg = 50.
+        self.assertEqual(tuple(entry.yaw_deg for entry in self.entries.values()), before)
+        self.assertEqual(scene.wfrl_manual_batch.yaw_deg, before[0])
+
     def test_paused_pose_export_rejects_native_rotation_constraint_and_driver(self):
         target=OUT/'paused-pose.json'
         target.write_text('preserved existing export')

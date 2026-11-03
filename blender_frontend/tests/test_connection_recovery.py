@@ -77,7 +77,8 @@ def frontend(monkeypatch):
                           data=SimpleNamespace(objects={}))
     monkeypatch.setitem(sys.modules, 'bpy', bpy)
     replacements = dict(_client=None, _state=FrontendState(mode='interactive_training', connection='DISCONNECTED'),
-                        _desired_mode='interactive_training', _pending_command=None, _pending_step=None,
+                        _desired_mode='interactive_training', _pending_command=None, _pending_command_sequence=None,
+                        _pending_step=None,
                         _pending_lifecycle_sequence=None, _last_tick=None, _health=None, _live_scene=None,
                         _backend_scene=None, _last_display_state=None, _last_async_display_state=None,
                         kinematics=KinematicState(), training_dashboard=TrainingDashboard(), safety_events=deque(maxlen=256),
@@ -144,6 +145,71 @@ def test_resumed_producer_history_does_not_disconnect_or_regress_state(frontend,
     finally:
         server.close()
         wait_for(lambda: not session.alive())
+
+
+@pytest.mark.parametrize('legacy', [False, True])
+def test_retained_rejection_cannot_release_command_sent_after_resume(frontend, monkeypatch, legacy):
+    session = BackendSession(farm())
+    server = BridgeServer(port=0, session=session)
+    flush = server._flush
+    blocked = False
+
+    def flush_unless_blocked():
+        if not blocked or server.pending[0]['kind'] == 'hello_ack':
+            flush()
+
+    monkeypatch.setattr(server, '_flush', flush_unless_blocked)
+    if legacy:
+        send = server._send
+
+        def send_legacy(kind, payload, **kwargs):
+            if kind == 'error' and 'command_sequence' in payload:
+                payload = dict(payload)
+                payload.pop('command_sequence')
+            return send(kind, payload, **kwargs)
+
+        monkeypatch.setattr(server, '_send', send_legacy)
+
+    def reject_channel_command():
+        sequence = runtime._client.next_sequence
+        runtime.send_workflow_command('channel.set', {'topic': 'missing', 'enabled': True})
+        return sequence
+
+    try:
+        runtime.connect(server.port)
+        pump(server, lambda: runtime.get_state().connection == 'CONNECTED')
+        blocked = True
+        first_sequence = reject_channel_command()
+        pump(server, lambda: bool(server.pending))
+        first_rejection = server.pending[0]['payload']
+        assert first_rejection.get('command_sequence') == (None if legacy else first_sequence)
+        runtime.disconnect()
+        wait_for(lambda: server.poll() or server.client is None)
+        runtime.connect(server.port)
+        pump(server, lambda: runtime.get_state().connection == 'CONNECTED')
+        assert not runtime.backend_events
+        second_sequence = reject_channel_command()
+        assert second_sequence > first_sequence
+        # Read only the retained rejection before the server processes the new command.
+        blocked = False
+        server.poll()
+        wait_for(lambda: runtime.tick() and bool(runtime.backend_events))
+        ui = runtime.get_state()
+        assert runtime.backend_events[-1]['payload'] == first_rejection
+        assert runtime._pending_command == 'channel.set'
+        if legacy:
+            assert (ui.connection, ui.confirmed) == ('DISCONNECTED', False)
+            assert 'reconnect to confirm backend state' in ui.error
+            runtime.connect(server.port)
+            pump(server, lambda: ui.connection == 'CONNECTED')
+            assert runtime._pending_command is None
+        else:
+            assert (ui.connection, ui.confirmed, ui.error) == ('CONNECTED', True, '')
+            pump(server, lambda: runtime._pending_command is None)
+            assert runtime.backend_events[-1]['payload']['command_sequence'] == second_sequence
+            assert 'available SceneRuntime topic' in ui.error
+    finally:
+        server.close()
 
 
 def test_resume_history_cannot_restore_an_obsolete_run_or_scene(frontend):

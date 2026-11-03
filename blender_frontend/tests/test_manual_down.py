@@ -4,21 +4,24 @@ from fractions import Fraction
 import json
 import math
 import os
+import queue
 from pathlib import Path
 import shutil
 from types import SimpleNamespace
 import subprocess
 import tempfile
+import threading
 import pytest
 
 SOURCE = Path(__file__).resolve().parents[1] / 'wfrl_blender/manual_down.py'
 
 
 def helpers():
-    names = {'pose_at', '_output_paths', '_publish_pair', '_verify_video', '_plan', '_frame_handler'}
+    names = {'pose_at', '_output_paths', '_publish_pair', '_verify_video', '_plan', '_frame_handler',
+             '_publish_async', '_finalize_files'}
     tree = ast.parse(SOURCE.read_text())
     namespace = dict(Path=Path, Fraction=Fraction, json=json, math=math, os=os,
-                     shutil=shutil, tempfile=tempfile, subprocess=subprocess)
+                     shutil=shutil, tempfile=tempfile, subprocess=subprocess, queue=queue, threading=threading)
     from wfrl_blender.manual_motion import pitch_at
     namespace['pitch_at'] = pitch_at
     exec(compile(ast.Module(body=[node for node in tree.body if isinstance(node, ast.FunctionDef)
@@ -146,3 +149,53 @@ def test_cancelled_or_failed_frame_handler_avoids_removed_control_rna(state):
         raise AssertionError('Terminal job accessed pose controls')
     namespace['apply_frame'] = forbidden
     namespace['_frame_handler'](scene)
+
+
+
+@pytest.mark.parametrize('verification_fails', [False, True])
+def test_down_async_finish_verifies_and_publishes_off_the_main_thread(tmp_path, verification_fails):
+    namespace = helpers()
+    timers, published = [], []
+    source = SimpleNamespace(as_pointer=lambda: 7)
+    namespace.update(_PUBLISHING={}, _LAST={}, bpy=SimpleNamespace(app=SimpleNamespace(
+        timers=SimpleNamespace(register=lambda callback, **_: timers.append(callback)))))
+    temporary = tmp_path / 'temporary'
+    temporary.mkdir()
+    master = temporary / 'down.mp4'
+    master.touch()
+    target = tmp_path / 'out.mp4'
+    entered, release = threading.Event(), threading.Event()
+    main_thread = threading.get_ident()
+
+    def verify(path, frames, fps, size, ffprobe, ffmpeg):
+        assert threading.get_ident() != main_thread and path == master
+        entered.set()
+        assert release.wait(5)
+        if verification_fails:
+            raise ValueError('verification rejected')
+        return {'full_decode': True}
+
+    def publish(path, destination, metadata):
+        assert threading.get_ident() != main_thread
+        published.append((path, destination, metadata))
+
+    namespace.update(_verify_video=verify, _publish_pair=publish)
+    namespace['_publish_async'](source, 7, (str(temporary), str(target), dict(frames=1, fps=25),
+                                           (64, 36), 'probe', 'codec'))
+    try:
+        assert entered.wait(5)
+        assert timers[0]() == .2 and not namespace['_LAST']
+    finally:
+        release.set()
+    pending = namespace['_PUBLISHING'][7][1]
+    status = pending.get(timeout=5)
+    pending.put(status)
+    assert timers[0]() is None and not namespace['_PUBLISHING']
+    assert namespace['_LAST'][7] == status
+    if verification_fails:
+        assert status == dict(state='FAILED', error='verification rejected', temporary=str(temporary))
+        assert not published and master.exists()
+    else:
+        assert status == dict(state='COMPLETE', path=str(target))
+        assert published[0][1:] == (target, dict(frames=1, fps=25, verification={'full_decode': True}))
+        assert not temporary.exists()

@@ -71,6 +71,7 @@ try:
         receivers.append(count)
     server, publisher = service.stream.server, service.stream.publisher
     assert bpy.ops.wfrl.video_stop() == {'FINISHED'}
+    wait_until(lambda: not service.stream.active)
     assert server.poll() is not None and publisher.poll() is not None
     assert not service.stream.active
     assert scene.camera == camera and scene.frame_current == frame and scene.camera.matrix_world == matrix
@@ -79,6 +80,7 @@ try:
     assert service.stream.state == 'RUNNING'
     server, publisher = service.stream.server, service.stream.publisher
     panel._before_load(None)
+    wait_until(lambda: not service.stream.active)
     assert server.poll() is not None and publisher.poll() is not None
     # Registration includes the original frontend and the new output page.
     for name in ('wfrl.farm_flex_view', 'wfrl.clearance_playback', 'wfrl.gimbal_preset',

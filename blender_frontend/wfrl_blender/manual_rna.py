@@ -5,29 +5,29 @@ from . import manual_control as control, manual_operators
 
 
 
-def _properties(update_factory):
+def _properties(update_factory, *, set_transform=None):
     return {
         'yaw_deg': bpy.props.FloatProperty(name='机舱朝向 °', default=0.0, min=-180.0, max=180.0,
-                                           precision=1, update=update_factory('yaw_deg')),
+                                           precision=1, set_transform=set_transform, update=update_factory('yaw_deg')),
         'pitch_deg': bpy.props.FloatProperty(name='集体桨距 °', default=control.FEATHER_PITCH_DEG, min=-30.0, max=90.0,
                                              description='统一设置三片叶片桨距，覆盖各片独立桨距',
-                                             precision=1, update=update_factory('pitch_deg')),
+                                             precision=1, set_transform=set_transform, update=update_factory('pitch_deg')),
         'rpm': bpy.props.FloatProperty(name='转速 RPM', default=control.DEFAULT_RPM, min=0.0, max=30.0,
-                                       precision=2, update=update_factory('rpm')),
+                                       precision=2, set_transform=set_transform, update=update_factory('rpm')),
         'azimuth_deg': bpy.props.FloatProperty(name='叶轮角度 °', default=0.0, min=0.0, max=360.0,
-                                               precision=1, update=update_factory('azimuth_deg')),
+                                               precision=1, set_transform=set_transform, update=update_factory('azimuth_deg')),
         'individual_pitch': bpy.props.BoolProperty(name='分别调整三片叶片', default=False,
-                                                   update=update_factory('individual_pitch')),
+                                                   set_transform=set_transform, update=update_factory('individual_pitch')),
         **{f'pitch_b{i}_deg': bpy.props.FloatProperty(name=f'叶片 {i} 桨距 °', default=control.FEATHER_PITCH_DEG,
                                                       min=-30.0, max=90.0, precision=1,
-                                                      update=update_factory(f'pitch_b{i}_deg'))
+                                                      set_transform=set_transform, update=update_factory(f'pitch_b{i}_deg'))
            for i in range(1, 4)},
     }
 
 
 class WFRL_ManualTurbine(bpy.types.PropertyGroup):
     __annotations__ = {
-        **_properties(control._update),
+        **_properties(control._update, set_transform=control.guard_pose_value),
         'turbine_id': bpy.props.StringProperty(),
         **{f'pitch_actual_b{i}_deg': bpy.props.FloatProperty(default=control.FEATHER_PITCH_DEG) for i in range(1, 4)},
         **{f'pitch_start_b{i}_deg': bpy.props.FloatProperty(default=control.FEATHER_PITCH_DEG) for i in range(1, 4)},

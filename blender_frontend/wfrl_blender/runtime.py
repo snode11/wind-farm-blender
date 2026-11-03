@@ -26,6 +26,7 @@ _desired_mode = globals().get('_desired_mode', _state.mode)
 _live_scene = None
 _pending_step = None
 _pending_command = None
+_pending_command_sequence = None
 _pending_lifecycle_sequence = None
 _last_tick = None
 _last_async_display_state = None
@@ -38,6 +39,11 @@ latest_wake = globals().get('latest_wake')
 workflow_scene = {}
 channel_states = {}
 channel_table = list(globals().get('channel_table', []))
+
+
+def _clear_pending_command():
+    global _pending_command, _pending_command_sequence, _pending_step, _pending_lifecycle_sequence
+    _pending_command = _pending_command_sequence = _pending_step = _pending_lifecycle_sequence = None
 
 
 def get_state():
@@ -67,7 +73,7 @@ def configuration_editable(scene=None):
 
 
 def select_mode(mode):
-    global _state, _client, kinematics, _pending_command, _pending_lifecycle_sequence, _desired_mode, _live_scene, latest_wake, _backend_scene
+    global _state, _client, kinematics, _desired_mode, _live_scene, latest_wake, _backend_scene
     from .state import MODES
     if mode not in MODES or not configuration_editable():
         raise ValueError('Stop the active session before changing mode')
@@ -85,8 +91,7 @@ def select_mode(mode):
     _backend_scene = None
     wake_buffer.pop_latest()
     latest_wake = None
-    _pending_command = None
-    _pending_lifecycle_sequence = None
+    _clear_pending_command()
     safety_events.clear()
     backend_events.clear()
     from . import charts
@@ -155,8 +160,7 @@ def connect(port):
 
 
 def disconnect(force=False):
-    global kinematics, _live_scene, _last_tick, _pending_command, _pending_step
-    global _pending_lifecycle_sequence, latest_wake, _backend_scene
+    global kinematics, _live_scene, _last_tick, latest_wake, _backend_scene
     if _client:
         _client.close()
     _clear_backend_wake('stale')
@@ -169,7 +173,7 @@ def disconnect(force=False):
         _live_scene = None
         _backend_scene = None
         _last_tick = None
-        _pending_command = _pending_step = _pending_lifecycle_sequence = None
+        _clear_pending_command()
         wake_buffer.pop_latest()
         latest_wake = None
 
@@ -181,7 +185,7 @@ def can_connect_new_backend():
 
 def connect_new_backend(port, *, confirmed=False):
     """Require explicit consent to abandon local ownership of an unknown backend."""
-    global _client, _state, kinematics, _pending_command, _pending_step, _pending_lifecycle_sequence
+    global _client, _state, kinematics
     global _live_scene, _backend_scene, latest_wake
     if confirmed is not True:
         raise ValueError('Explicit confirmation is required; forgetting this connection does not stop the previous backend')
@@ -198,7 +202,7 @@ def connect_new_backend(port, *, confirmed=False):
     _client = replacement
     _state = FrontendState(mode=_desired_mode, connection='DISCONNECTED', confirmed=False)
     kinematics = KinematicState()
-    _pending_command = _pending_step = _pending_lifecycle_sequence = None
+    _clear_pending_command()
     _live_scene = _backend_scene = None
     wake_buffer.pop_latest()
     latest_wake = None
@@ -214,7 +218,7 @@ def connect_new_backend(port, *, confirmed=False):
 
 
 def enter_local_demo():
-    global _client, _state, kinematics, _pending_command, _pending_lifecycle_sequence, _live_scene, _desired_mode, latest_wake, _backend_scene
+    global _client, _state, kinematics, _live_scene, _desired_mode, latest_wake, _backend_scene
     if has_backend_session() and not configuration_editable():
         raise ValueError('Confirm the previous backend state before entering local Demo')
     _clear_backend_wake()
@@ -224,8 +228,7 @@ def enter_local_demo():
     _state = FrontendState(mode='demo', connection='LOCAL DEMO')
     _desired_mode = 'demo'
     kinematics = KinematicState()
-    _pending_command = None
-    _pending_lifecycle_sequence = None
+    _clear_pending_command()
     _live_scene = None
     _backend_scene = None
     wake_buffer.pop_latest()
@@ -273,25 +276,27 @@ def allows_command(action):
 
 
 def send_command(action, arguments=None):
-    global _pending_command, _pending_step, _pending_lifecycle_sequence
+    global _pending_command, _pending_command_sequence, _pending_step, _pending_lifecycle_sequence
     if not allows_command(action):
         raise ValueError('Control unavailable until backend state is confirmed')
     arguments = dict(arguments or {})
     if action == 'start':
         arguments['mode'] = _desired_mode
+    sequence = _client.next_sequence
     _client.send({'protocol_version': 1, 'type': 'command',
-                  'session_id': _client.session_id, 'sequence': _client._last_outbound + 1,
+                  'session_id': _client.session_id, 'sequence': sequence,
                   'payload': {'command': 'run.' + action, 'arguments': arguments or {}}})
     if _client.last_error:
         raise ValueError(_client.last_error)
     _pending_command = action
+    _pending_command_sequence = sequence
     _pending_step = kinematics.snapshot["step"] if kinematics.snapshot else -1
     _pending_lifecycle_sequence = None
 
 
 def send_workflow_command(name, arguments):
     """Enqueue configuration; only backend acknowledgements update displayed state."""
-    global _pending_command
+    global _pending_command, _pending_command_sequence
     if name not in {'scene.load', 'channel.set'}:
         raise ValueError('Unknown workflow command')
     ui = get_state()
@@ -299,12 +304,14 @@ def send_workflow_command(name, arguments):
         raise ValueError('Wait for a confirmed backend connection')
     if name == 'scene.load' and not configuration_editable():
         raise ValueError('Stop the active session before changing configuration')
+    sequence = _client.next_sequence
     _client.send({'protocol_version': 1, 'type': 'command',
-                  'session_id': _client.session_id, 'sequence': _client.next_sequence,
+                  'session_id': _client.session_id, 'sequence': sequence,
                   'payload': {'command': name, 'arguments': dict(arguments)}})
     if _client.last_error:
         raise ValueError(_client.last_error)
     _pending_command = name
+    _pending_command_sequence = sequence
 
 
 @performance.timed("runtime.tick")
@@ -450,7 +457,7 @@ def _display_state():
 
 def _tick():
     """Timer work is bounded by transport budgets; health polls only queued results."""
-    global _pending_command, _pending_lifecycle_sequence, _last_tick, kinematics, _live_scene, _desired_mode, latest_wake
+    global _pending_lifecycle_sequence, _last_tick, kinematics, _live_scene, _desired_mode, latest_wake
     global _last_async_display_state, _last_display_state, _backend_scene
     import bpy
     performance.count("runtime.timer_calls")
@@ -512,8 +519,7 @@ def _tick():
                     if 'channel_table' in payload:
                         _set_channel_table(payload['channel_table'])
                 if message['type'] == 'hello_ack':
-                    _pending_command = None
-                    _pending_lifecycle_sequence = None
+                    _clear_pending_command()
                     if _state.session_id != message['session_id']:
                         kinematics = KinematicState()
                         safety_events.clear()
@@ -531,8 +537,7 @@ def _tick():
                         pass
                     elif (_pending_command not in {'pause', 'step'} or
                             payload['run_status'] in {'DRAINING', 'STOPPED', 'FAILED'}):
-                        _pending_command = None
-                        _pending_lifecycle_sequence = None
+                        _clear_pending_command()
                     elif payload['run_status'] == 'PAUSED':
                         _pending_lifecycle_sequence = message['sequence']
                     if payload['run_status'] in {'STARTING', 'RUNNING', 'PAUSED', 'DRAINING'}:
@@ -559,9 +564,20 @@ def _tick():
                 elif message['type'] == 'safety_event':
                     safety_events.append(message)
                 elif message['type'] == 'error':
-                    _pending_command = None
-                    _pending_lifecycle_sequence = None
-                    _state.error = payload.get('message', 'Bridge error')
+                    error = payload.get('message', 'Bridge error')
+                    if payload.get('code') == 'COMMAND_REJECTED' and not payload.get('fatal'):
+                        sequence = payload.get('command_sequence')
+                        if sequence is None:
+                            if _pending_command:
+                                disconnect()
+                                _state.error = 'Unmatched command rejection; reconnect to confirm backend state'
+                                latest_snapshot = None
+                                break
+                            continue
+                        if not _pending_command or sequence != _pending_command_sequence:
+                            continue
+                        _clear_pending_command()
+                    _state.error = error
             if latest_snapshot:
                 payload = latest_snapshot['payload']
                 scene = snapshot_scene(payload)
@@ -595,8 +611,7 @@ def _tick():
                 step_confirmed = (_pending_command == 'step' and crossed_lifecycle and
                                   payload['step'] > _pending_step)
                 if pause_confirmed or step_confirmed:
-                    _pending_command = None
-                    _pending_lifecycle_sequence = None
+                    _clear_pending_command()
             wake_frame = wake_buffer.pop_latest()
             if wake_frame is not None:
                 latest_wake = wake_frame

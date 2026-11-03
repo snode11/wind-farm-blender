@@ -56,4 +56,4 @@ C2 在假定舱顶上方 0.8 m；共有盒体有实体背板、侧板、底板�
 
 零预弯试片不验证当前带预弯和缺陷的模型。完整三路 MP4 尚未生成，等待用户明确开始渲染。现有视频 preflight 的源码签名与当前实现不匹配；后续运行原视频管线须按 [项目说明](README.md)重新生成无渲染检查，不复用旧签名。
 
-本文中的 `sources/`、几何、相机和时间线文件位于 `projects/gw184-single/`。当前源码与测试见 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 分支，正式输入和证据按[资源分发说明](../../docs/PUBLICATION.md)恢复。当前分支源码、既有 0.4.0 运行 ZIP 与保存的检查记录分别识别；自动 Source code 归档不能替代该运行 ZIP，未列入分发清单的 `outputs/` 路径不代表公开附件。
+本文中的 `sources/`、几何、相机和时间线文件位于 `projects/gw184-single/`。当前源码与测试见 [`main`](https://github.com/snode11/wind-farm-blender/tree/main) 分支，正式输入和证据按[资源分发说明](../../docs/PUBLICATION.md)恢复。当前分支源码、既有 0.4.0 运行 ZIP 与保存的检查记录分别识别；自动 Source code 归档不能替代该运行 ZIP，未列入分发清单的 `outputs/` 路径不代表公开附件。

@@ -44,7 +44,7 @@ def signature(scene):
             item['materials'] = [(mat.name, tuple(mat.diffuse_color)) for mat in data.materials if mat]
         rows[obj.name] = item
     return dict(objects=rows, camera=scene.camera.name if scene.camera else None,
-                frame=[scene.frame_current, scene.frame_subframe],
+                frame=[scene.frame_current, scene.frame_subframe, scene.frame_step],
                 render=[scene.render.engine, scene.render.resolution_x, scene.render.resolution_y,
                         scene.render.fps, scene.render.fps_base, scene.render.filepath])
 
@@ -132,6 +132,7 @@ poses = control.pose_snapshot(scene)
 plan = down._plan(scene, 25, 3, True, 'T2', poses)
 assert all(item['rpm'] == (11 if item['turbine'] == 'T2' else 0) for item in plan['turbines'])
 pre_count = len(bpy.data.scenes)
+scene.frame_step = 2
 before = signature(scene)
 for mode in ('WORKBENCH', 'SCENE'):
     target = output/(mode.lower()+'.mp4')
