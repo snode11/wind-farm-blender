@@ -162,4 +162,4 @@ checks['scene_invalidation']=True
 out=Path(os.environ.get('WFRL_TEST_OUTPUT','/tmp/wfrl-v3-native'));out.mkdir(parents=True,exist_ok=True)
 (out/'result.json').write_text(json.dumps({'blender':bpy.app.version_string,'checks':checks},indent=2))
 addon.unregister()
-print('CUSTOM_CAMERA_V3_NATIVE_PASS',len(checks),flush=True)
+print('CUSTOM_CAMERA_HISTORY_PASS',len(checks),flush=True)

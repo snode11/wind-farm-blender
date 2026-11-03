@@ -157,3 +157,4 @@ summary = dict(status='PASS', module=str(Path(addon.__file__).resolve()),
 (OUT / 'checks.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2))
 addon.unregister()
 print(json.dumps(summary, ensure_ascii=False), flush=True)
+print('MANUAL_CONTROL_UNDO_PASS', flush=True)

@@ -26,7 +26,7 @@ try:
     target = (root.matrix_world.translation - camera.location).normalized()
     assert direction.dot(target) > .99999
     assert not presentation.WFRL_OT_CaptureRecording.poll(bpy.context)
-    print('PART6_PRESENTATION_SMOKE_OK')
+    print('CAMERA_TARGETING_SMOKE=PASS')
 finally:
     presentation.unregister_properties()
     for cls in reversed(presentation.CLASSES):

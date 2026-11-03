@@ -28,5 +28,5 @@ try:
     m=bmesh.new();m.from_mesh(s.objects['WFRL.Turbine.WT01.Spinner'].data)
     assert all(e.is_manifold and e.is_contiguous for e in m.edges)
     assert m.calc_volume(signed=True)>0;m.free()
-    print('FRONTEND_OPTIMIZATION_SMOKE=PASS',len(grass.data.vertices))
+    print('SCENE_RESOURCE_BUDGET_SMOKE=PASS',len(grass.data.vertices))
 finally:wfrl_blender.unregister()

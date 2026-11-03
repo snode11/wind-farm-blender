@@ -1,4 +1,4 @@
-"""Part 5 Blender smoke: visual layers, topology reuse and metadata."""
+"""Atmosphere presets, ground cover layout, sensor fixture metadata and proxy animation reuse."""
 from pathlib import Path
 import sys
 
@@ -55,7 +55,7 @@ def main():
     assert scene["wfrl_atmosphere_enabled"] is False
     cameras.select_camera(scene, "WFRL.Camera.T1.Sensor", fov_deg=75.0, focus="T1")
     assert scene.camera.name == "WFRL.Camera.T1.Sensor"
-    print("WFRL_PART5_VISUAL_SMOKE=PASS")
+    print("WFRL_SCENE_VISUAL_LAYERS_SMOKE=PASS")
     print(f"Proxy objects stable at {before}; DisXY mesh datablock reused")
 
 
