@@ -8,6 +8,7 @@ from wfrl_blender.scene_model import SceneDTO
 wfrl_blender.register()
 wfrl_blender.load_demo_scene()
 s=bpy.context.scene
+s.wfrl_show_wake=True  # MAPPO replay starts with the wake layer off
 s.wfrl_wake_display='CINEMATIC'
 def counts():
     return {'mode':s.wfrl_wake_display,'cinematic_visible':sum(not o.hide_render for o in s.objects if o.name.startswith('WFRL.Cinematic.')),'green_visible':sum(not o.hide_render for o in s.objects if o.name.startswith('WFRL.WakeProxy.') and not o.name.endswith('.Volume'))}

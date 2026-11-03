@@ -80,6 +80,8 @@ REGRESSIONS = (
                scope='Native helper deletion, normal editor detach and retryable resource cleanup.'),
     Regression('manual_down_copy_regression.py', 'MANUAL_DOWN_COPY_PASS', 'checks.json',
                scope='Manual Down camera ownership in independent scene copies and native saved files.'),
+    Regression('camera_export_contract_regression.py', 'CAMERA_EXPORT_CONTRACT_PASS', 'result.json',
+               scope='Down marker isolation, actual-camera publication gates, decoded video and excluded annotations.'),
     Regression('model_environment_integration.py', 'MODEL_ENVIRONMENT_INTEGRATION_PASS', 'checks.json', timeout_s=300,
                scope='Model and World isolation across manual scenes, replay, export copies and native saved files.'),
     Regression('camera_failure_recovery_regression.py', 'CAMERA_FAILURE_RECOVERY_PASS', 'result.json',
@@ -191,6 +193,12 @@ REGRESSIONS = (
                package='builtin_split_example',
                scope='Scripted native-window model switches, rollback and save/reopen.'),
     Regression('tower_fittings_regression.py', 'TOWER_FITTINGS_PASS', 'checks.json', 'file'),
+    Regression('connection_smoke.py', 'WFRL_CONNECTION_SMOKE=PASS', None,
+               scope='Native runtime over a loopback TCP peer: handshake lock, disconnect, reload and refused-port fallback.'),
+    Regression('wake_placement_smoke.py', 'WFRL_WAKE_PLACEMENT=PASS', None,
+               scope='Illustrative wake proxies at the yaw-root hub frame, above ground, downstream, and display toggles.'),
+    Regression('cinematic_live_regression.py', 'CINEMATIC_LIVE_REGRESSION=PASS', None,
+               scope='Cinematic wake layer survives a live-scene rebuild with the scientific proxies hidden.'),
 )
 
 

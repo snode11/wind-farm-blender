@@ -35,8 +35,10 @@ for frame in (1, 301, 601):
                 spline = obj.data.splines[0]
                 assert spline.use_cyclic_u
                 points = [obj.matrix_world @ p.co.xyz for p in spline.points]
-                center = sum(points, Vector()) / len(points)
-                assert abs(center.z - hub.z) <= 2.01
+                # Rings follow the yaw root, which tilts with tower-top flex in MAPPO replay.
+                center = yaw.matrix_world.inverted() @ (sum(points, Vector()) / len(points))
+                local_hub = yaw.matrix_world.inverted() @ hub
+                assert abs(center.z - local_hub.z) <= 2.01, (tid, obj.name, center.z, local_hub.z)
                 assert min(p.z for p in points) > 10
             pulses = [o for o in scene.objects if o.name.startswith(f'WFRL.WakeProxy.{tid}.Pulse')]
             assert len(pulses) == wake.PROXY_PULSE_COUNT

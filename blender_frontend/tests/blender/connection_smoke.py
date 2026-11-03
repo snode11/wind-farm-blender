@@ -58,7 +58,7 @@ def main():
     until(lambda: bool(runtime.get_state().error))
     assert runtime.configuration_editable(), 'First refusal must not trap user outside Demo'
     runtime.select_mode('demo')
-    assert runtime.get_state().connection == 'LOCAL DEMO'
+    assert runtime.get_state().connection == 'OFFLINE RESULTS'
     server = socket.socket(); server.bind(('127.0.0.1', 0)); server.listen()
     runtime.select_mode('replay'); runtime.connect(server.getsockname()[1])
     peer, _ = server.accept(); runtime.tick()
@@ -66,6 +66,6 @@ def main():
     assert runtime.configuration_editable(), 'Disable before first ack must allow local fallback'
     runtime.select_mode('demo'); peer.close(); server.close()
     wfrl_blender.unregister()
-    print('WFRL_PART3_CONNECTION_SMOKE=PASS')
+    print('WFRL_CONNECTION_SMOKE=PASS')
 
 if __name__ == '__main__': main()
