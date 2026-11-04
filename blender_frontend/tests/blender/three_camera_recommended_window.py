@@ -3,6 +3,7 @@ from pathlib import Path
 import json
 import os
 import sys
+import time
 import traceback
 import bpy
 from mathutils import Vector, Matrix
@@ -16,6 +17,15 @@ core = importlib.import_module(MODULE + '.custom_cameras')
 native = importlib.import_module(MODULE + '.native_camera_views')
 capture = importlib.import_module(MODULE + '.custom_camera_capture')
 OUT = Path(os.environ['WFRL_TEST_OUTPUT']); OUT.mkdir(parents=True, exist_ok=True)
+
+
+def complete(job, context, timeout=30.):
+    """Step a capture until its asynchronous image write commits."""
+    deadline = time.monotonic() + timeout
+    while not job.step(context):
+        assert time.monotonic() < deadline, 'capture did not finish'
+        time.sleep(.01)
+    return True
 state = {'phase': 0}
 DEFAULT_ONLY = os.environ.get('WFRL_CHECK_DEFAULT_ONLY') == '1'
 
@@ -71,7 +81,7 @@ def tick():
             with bpy.context.temp_override(area=state['area'], region=state['region']):
                 job = capture.Capture(bpy.context, OUT)
                 try:
-                    assert job.step(bpy.context)
+                    assert complete(job, bpy.context)
                 except Exception as exc:
                     job.finish(error=str(exc)); raise
                 assert job.manifest['status'] == 'complete', job.manifest

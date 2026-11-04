@@ -17,6 +17,15 @@ ROOT=Path(__file__).resolve().parents[3]
 sys.path[:0]=[str(ROOT/'blender_frontend'),str(ROOT)]
 from wfrl_blender import custom_cameras as core, custom_camera_preview as preview
 from wfrl_blender import custom_camera_capture as capture, camera_projection as projection
+
+
+def complete(job, context, timeout=30.):
+    """Step a capture until its asynchronous image write commits."""
+    deadline = time.monotonic() + timeout
+    while not job.step(context):
+        assert time.monotonic() < deadline, 'capture did not finish'
+        time.sleep(.01)
+    return True
 from wfrl_blender.panels import custom_cameras as panel
 import wfrl_blender as addon
 OUT=Path(os.environ.get('WFRL_TEST_OUTPUT','/tmp/wfrl-three-camera-window'));OUT.mkdir(parents=True,exist_ok=True)
@@ -179,7 +188,7 @@ def tick():
                 bpy.ops.screen.animation_play()
                 transaction=capture.Capture(bpy.context,OUT)
                 assert not window.screen.is_animation_playing
-                assert transaction.step(bpy.context)
+                assert complete(transaction,bpy.context)
                 assert window.screen.is_animation_playing
                 bpy.ops.screen.animation_cancel(restore_frame=False)
                 STATE['before_path']=str(transaction.path)
@@ -193,7 +202,7 @@ def tick():
                 # Alter layout, export at identical sample, then restore exact layout.
                 cam=core.get_camera(scene,1);params=core.parameters(cam)
                 core.apply_parameters(cam,replace(params,yaw=170,fov=100))
-                after=capture.Capture(bpy.context,OUT);assert after.step(bpy.context)
+                after=capture.Capture(bpy.context,OUT);assert complete(after,bpy.context)
                 STATE['after_path']=str(after.path)
                 after_rows=[json.loads(r) for r in (after.path/'frames.jsonl').read_text().splitlines()]
                 assert {max(r['image_width'],r['image_height']) for r in after_rows}=={1920}
@@ -202,7 +211,7 @@ def tick():
                 # Higher resolution is a separate export, not a changed control
                 # in the before/after layout comparison.
                 core.apply_parameters(cam,replace(core.parameters(cam),output_long_edge_px=2560))
-                high=capture.Capture(bpy.context,OUT);assert high.step(bpy.context)
+                high=capture.Capture(bpy.context,OUT);assert complete(high,bpy.context)
                 STATE['high_resolution_path']=str(high.path)
                 high_rows=[json.loads(r) for r in (high.path/'frames.jsonl').read_text().splitlines()]
                 assert max(high_rows[0]['image_width'],high_rows[0]['image_height'])==2560

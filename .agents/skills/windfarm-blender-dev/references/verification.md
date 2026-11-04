@@ -50,6 +50,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定
 | `radar_x100_configuration.py` | 仅源码后台，必须指定 `WFRL_EXPECTED_ADDON_ROOT`；核对名义外壳／视场、真实 RNA、已应用配置与编辑差异、显示即时生效和下一新样本预算。 |
 | `radar_x100_observations.py` | 仅源码后台，直接导入工作区模块；核对面积采样、材料标签隔离、同源安装导入、未知报告拒绝、回退及估计撤回。 |
 | `radar_x100_estimation_window.py` | 仅源码可见进程，直接导入工作区模块；读回拟合线／叶尖区域的真实GPU像素，检查关闭、恢复及原始帧和时刻保留。脚本控制不代替外部键鼠。 |
+| `mappo_full_view_default_window.py`、`mappo_same_source_navigation_window.py`、`mappo_same_source_texture_window.py`、`mappo_same_source_texture_reopen.py`、`split_texture_sidebar_window.py`、`split_reconstruction_window.py`、`split_reconstruction_entries_window.py` | 仅安装模块：`WFRL_ADDON_MODULE` 须为 `bl_ext.*`，源码模块被拒绝，因此未纳入 `run_regressions.py`。`mappo_same_source_texture_reopen.py` 为后台进程，其余为可见进程；导航与纹理窗口用 `WFRL_EXPECTED_GEOMETRY_SHA256` 校验几何，其余用 `WFRL_EXPECTED_ADDON_ROOT` 校验期望目录。 |
 
 特殊前置条件：
 

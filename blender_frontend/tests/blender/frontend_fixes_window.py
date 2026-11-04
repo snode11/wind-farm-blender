@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import sys
 from time import monotonic
+import tomllib
 import traceback
 
 import bpy
@@ -55,8 +56,9 @@ def tick():
             if STATE['phase'] == 1:
                 info = diagnostics.snapshot(bpy.context)
                 assert info['module'] == MODULE
-                assert info['version'] == '0.3.18', info
-                assert info['packaged'] == bool(os.environ.get('WFRL_EXPECTED_ADDON_ROOT')), info
+                manifest = Path(addon.__file__).resolve().parent / 'blender_manifest.toml'
+                assert info['version'] == tomllib.loads(manifest.read_text(encoding='utf-8'))['version'], info
+                assert info['packaged'] == (MODULE != 'wfrl_blender'), info
                 assert info['source_hz'] == 40 and info['timeline_hz'] == 60, info
                 assert info['viewport_fps'] is not None and info['viewport_fps'] > 0, info
                 assert bpy.ops.wfrl.farm_transport(action='STEP') == {'FINISHED'}

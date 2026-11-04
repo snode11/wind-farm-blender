@@ -57,6 +57,7 @@ class Regression:
     phases: tuple[str, ...] = ('run',)
     scope: str = 'Native background data checks; visible interaction not verified.'
     expected_exceptions: tuple[tuple[str, int], ...] = ()
+    environment: tuple[tuple[str, str], ...] = ()
 
 
 REGRESSIONS = (
@@ -269,6 +270,50 @@ REGRESSIONS = (
                scope='Cached terrain queries match mesh ray casts.'),
     Regression('training_stats_smoke.py', 'WFRL_TRAINING_STATS_SMOKE=PASS', None,
                scope='Formal-training statistics presentation.'),
+    Regression('box_surface_install_regression.py', 'BOX_SURFACE_INSTALL_PASS', 'validation.json',
+               scope='Nacelle support contact, standoff and rigid optics of the camera box.'),
+    Regression('box_swivel_regression.py', 'BOX_SWIVEL_PASS', 'swivel-validation.json',
+               scope='Support base stays fixed while the housing and cameras swivel.'),
+    Regression('hub_mount_regression.py', 'HUB_MOUNT_REGRESSION=PASS', None,
+               scope='NREL hub height and sensor/camera/wake mount rigs.'),
+    Regression('mappo_demo_regression.py', 'MAPPO_COMPLETE_DEMO_PASS', None,
+               scope='MAPPO demo transport, telemetry, saved replay and preflight rejection of a missing package.'),
+    Regression('mappo_same_source_texture_regression.py', 'MAPPO_SAME_SOURCE_TEXTURE_NATIVE_PASS', 'native-validation.json',
+               scope='601-sample MAPPO same-source texture data checks.'),
+    Regression('repair_marks_regression.py', 'DEFAULT_B1_REPAIR_PASS', 'validation.json',
+               scope='Default repair mark, rigid/flexible attachment and load lifecycle.'),
+    Regression('box_surface_install_window.py', 'BOX_SURFACE_WINDOW_PASS', 'window-validation.json', mode='visible',
+               scope='Scripted native-window camera box installation.'),
+    Regression('camera_gpu_calibration.py', 'GPU_CALIBRATION_PASS', 'result.json', mode='visible',
+               scope='Actual GPU corner, colour and roll calibration.'),
+    Regression('chart_render_cache_window.py', 'CHART_RENDER_CACHE_WINDOW_PASS', 'result.json', mode='visible',
+               scope='Native chart render cache and window ownership.'),
+    Regression('custom_camera_exit_regression.py', 'CUSTOM_CAMERA_EXIT_PASS', 'result.json', mode='visible',
+               scope='Leaving the custom-camera overlay restores the scene and timeline.'),
+    Regression('custom_camera_preview_performance.py', 'CUSTOM_CAMERA_PREVIEW_PERFORMANCE_PASS', 'result.json', mode='visible',
+               scope='Preview GPU ownership and geometry invalidation; timings are not FPS acceptance.'),
+    Regression('demo_presentation_regression.py', 'DEMO_PRESENTATION_PASS', 'result.json', mode='visible',
+               scope='Equal-column layout, capture quality isolation and restoration.'),
+    Regression('farm_split_view_window.py', 'FARM_SPLIT_PASS', 'result.json', mode='visible',
+               scope='Synchronized T1 side-by-side views.'),
+    Regression('frontend_fixes_window.py', 'FRONTEND_FIXES_WINDOW_PASS', 'window-checks.json', mode='visible',
+               scope='Diagnostics identity and transport isolation from another playing window.'),
+    Regression('manual_down_viewport_regression.py', 'MANUAL_DOWN_VIEWPORT', 'result.json', mode='visible',
+               scope='GPU Down export preserves the source and restores the viewport.'),
+    Regression('manual_playback_window.py', 'MANUAL_PLAYBACK_WINDOW_PASS', 'checks.json', mode='visible',
+               scope='Native player ownership across manual-scene round trips; mouse input not verified.'),
+    Regression('manual_video_window_regression.py', 'MANUAL_VIDEO_WINDOW_PASS', 'checks.json', mode='visible',
+               scope='Manual video progress, completed output and cancellation in a native window.'),
+    Regression('native_camera_views_regression.py', 'NATIVE_PASS', 'check.json', mode='visible',
+               scope='Native camera view areas advance and draw during playback.'),
+    Regression('overlay_draw_smoke.py', 'OVERLAY_DRAW_PASS', 'result.json', mode='visible',
+               scope='Chart and presentation POST_PIXEL callbacks draw without GPU errors.'),
+    Regression('stacked_cameras_window.py', 'STACKED_WINDOW_PASS', 'window-validation.json', mode='visible', environment=(('WFRL_TEST_QUIT', '1'),),
+               scope='Three-camera capture and housing inspection in a native window.'),
+    Regression('three_camera_recommended_window.py', 'RECOMMENDED_WINDOW_PASS', 'window-validation.json', mode='visible', environment=(('WFRL_TEST_QUIT', '1'), ('WFRL_CHECK_DEFAULT_ONLY', '1')),
+               scope='Bundled default three-camera layout captured and shown in native views.'),
+    Regression('three_cameras_window_regression.py', 'THREE_CAMERAS_WINDOW_PASS', 'result.json', mode='visible',
+               scope='Three-camera GPU views, export, replay and lifecycle; external input not verified.'),
 )
 
 
@@ -468,6 +513,7 @@ def run_invocation(spec, phase, args, case, scratch, bootstrap):
     run.mkdir()
     output = case / ('checks.json' if spec.output_kind == 'file' else 'artifacts')
     environment = isolated_environment(scratch, output, phase)
+    environment.update(spec.environment)
     script = TEST_ROOT / spec.script
     execution_path = run / 'execution.json'
     report_path = (output if spec.output_kind == 'file' else output / spec.report.format(phase=phase)) if spec.report else None

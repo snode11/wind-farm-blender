@@ -22,19 +22,7 @@ ENTRY_DOCUMENTS = (
 )
 # Scripts awaiting registration, documentation or removal. Entries only leave this set.
 UNTRIAGED = frozenset({
-    'box_surface_install_regression.py', 'box_surface_install_window.py', 'box_swivel_regression.py',
-    'camera_gpu_calibration.py', 'chart_render_cache_window.py', 'custom_camera_exit_regression.py',
-    'custom_camera_preview_performance.py', 'custom_camera_redraw_window.py', 'custom_camera_v3_window.py',
-    'custom_cameras_window_regression.py', 'demo_presentation_regression.py', 'farm_split_view_window.py',
-    'frontend_fixes_window.py', 'gimbal_controls_smoke.py', 'hub_mount_regression.py',
-    'launcher_mode_regression.py', 'manual_down_viewport_regression.py', 'manual_playback_window.py',
-    'manual_repair_mouse_window.py', 'manual_video_window_regression.py', 'mappo_demo_regression.py',
-    'mappo_full_view_default_window.py', 'mappo_same_source_navigation_window.py',
-    'mappo_same_source_texture_regression.py', 'mappo_same_source_texture_reopen.py',
-    'mappo_same_source_texture_window.py', 'native_camera_views_regression.py', 'overlay_draw_smoke.py',
-    'repair_marks_regression.py', 'split_reconstruction_entries_window.py', 'split_reconstruction_window.py',
-    'split_texture_sidebar_window.py', 'stacked_cameras_window.py', 'three_camera_recommended_window.py',
-    'three_cameras_window_regression.py',
+    'launcher_mode_regression.py',
 })
 
 

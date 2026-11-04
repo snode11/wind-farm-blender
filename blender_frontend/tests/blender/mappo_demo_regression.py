@@ -99,12 +99,14 @@ with tempfile.TemporaryDirectory() as directory:
     assert scene.wfrl_farm_panel_page == 'RADAR'
     assert runtime.get_state().connection == 'OFFLINE RESULTS'
     assert bpy.ops.wfrl.farm_flex_view(turbine='T3') == {'FINISHED'}
-    # Missing packages clear the old reader and recover via the bundled demo.
+    # Preflight rejects a missing package before the current replay is touched.
+    reader = clearance_replay.reader_for(scene)
+    power = charts.history_for(bpy.context.scene).points('T1','power')
     try: wfrl_blender.load_demo_scene(Path(directory)/'missing')
     except OSError: pass
     else: raise AssertionError('Missing package was accepted')
-    assert clearance_replay.reader_for(scene) is None
-    assert charts.history_for(bpy.context.scene).points('T1','power') == ()
+    assert reader is not None and clearance_replay.reader_for(scene) is reader
+    assert charts.history_for(bpy.context.scene).points('T1','power') == power
     assert bpy.ops.wfrl.load_demo() == {'FINISHED'}
     assert farm_flex.is_active(scene)
     assert not any(o.name.endswith('.001') and 'FarmFlexOverview' in o.name for o in scene.objects)

@@ -38,7 +38,14 @@ def test_suite_has_unique_scripts_and_explicit_window_contracts():
     assert {item.script for item in selected if item.mode == 'visible'} == {
         'shared_context_switch_regression.py', 'native_camera_playback_regression.py',
         'nrel_editor_playback_regression.py', 'frontend_sessions_window.py',
-        'radar_x100_estimation_window.py'}
+        'radar_x100_estimation_window.py', 'box_surface_install_window.py', 'camera_gpu_calibration.py',
+        'chart_render_cache_window.py', 'custom_camera_exit_regression.py',
+        'custom_camera_preview_performance.py', 'demo_presentation_regression.py', 'farm_split_view_window.py',
+        'frontend_fixes_window.py', 'manual_down_viewport_regression.py', 'manual_playback_window.py',
+        'manual_video_window_regression.py', 'native_camera_views_regression.py', 'overlay_draw_smoke.py',
+        'stacked_cameras_window.py', 'three_camera_recommended_window.py', 'three_cameras_window_regression.py'}
+    assert dict(spec('three_camera_recommended_window').environment) == {
+        'WFRL_TEST_QUIT': '1', 'WFRL_CHECK_DEFAULT_ONLY': '1'}
     assert spec('animation_render_regression').package == 'synthetic_then_builtin_mappo'
     assert spec('animation_render_regression').report == 'result.json'
     assert spec('nrel_defect_editor_regression').phases == ('save', 'reopen')

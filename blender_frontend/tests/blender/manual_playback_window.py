@@ -103,6 +103,7 @@ def capture():
                   scope='Actual native window and scripted operators; does not claim mouse input or sidebar selection')
     (OUT / 'checks.json').write_text(json.dumps(report, indent=2))
     print(json.dumps(report), flush=True)
+    print('MANUAL_PLAYBACK_WINDOW_PASS', flush=True)
     bpy.ops.wm.quit_blender()
     return None
 
