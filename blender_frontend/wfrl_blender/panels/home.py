@@ -14,8 +14,7 @@ def busy_reason(scene):
 
 
 def snapshot(context):
-    from .. import custom_camera_capture, manual_control, native_camera_views, playback
-    from . import custom_cameras, stacked_camera_rig
+    from .. import manual_control, native_camera_views, playback
     scene = context.scene
     ready = clearance_replay.reader_for(scene) is not None
     kind = scene.get('wfrl_scene_kind', '')

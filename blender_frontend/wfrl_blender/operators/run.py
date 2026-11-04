@@ -1,7 +1,6 @@
 """Enqueue controls; the backend alone confirms lifecycle transitions."""
 import bpy
 from .. import runtime
-from ..preferences import get_preferences
 
 
 class WFRL_OT_BackendRun(bpy.types.Operator):

@@ -6,7 +6,6 @@ from pathlib import Path
 import re
 import uuid
 
-from .reference_surface import DIMENSION_TOLERANCE_M
 from .defect_shapes import PATCH_KINDS, lightning_crater
 
 SCHEMA = 'wfrl.blade_defects.v1'

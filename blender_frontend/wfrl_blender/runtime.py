@@ -590,7 +590,6 @@ def _tick():
                 if scene_obj is not None:
                     scene_data = payload.get('scene') or {}
                     scene_obj['wfrl_backend'] = scene_data.get('backend', 'backend')
-                    inflow = scene_data.get('inflow') or {}
                     from . import backend_inflow, cinematic
                     backend_inflow.record(scene_obj, payload)
                     cinematic.update(scene_obj, 0.0)

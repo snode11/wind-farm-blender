@@ -9,7 +9,6 @@ from collections import OrderedDict
 from datetime import datetime
 from pathlib import Path
 from . import performance
-import hashlib
 import json
 import math
 import struct
@@ -199,7 +198,6 @@ def readonly_frame_handlers():
 class Capture:
     def __init__(self, context, directory, times=None):
         global _ACTIVE
-        import bpy
         from .panels.custom_cameras import session_identity, installation_block_reason, _ACTIVE as controller
         from . import farm_flex, clearance_replay
         from .home_state import can_start

@@ -432,7 +432,6 @@ def simulation_state_hash(scene, depsgraph):
 def render_group(context, cameras, long_edge=None, target=None, fast=False, *, create_texture=True):
     """Draw one frozen state into owned/leased textures or capture-only RGBA."""
     global _DRAWING
-    import bpy
     if _DRAWING:
         raise RuntimeError('相机离屏绘制不可重入')
     if context.scene.display_settings.display_device != 'sRGB':

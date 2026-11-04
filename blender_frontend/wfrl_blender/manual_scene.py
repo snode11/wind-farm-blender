@@ -161,7 +161,6 @@ def down_view(context):
         raise ValueError(reason)
     entry = next(item for item in scene.wfrl_manual_turbines if item.turbine_id == 'T1')
     manual_control._validate_native_controls((entry.yaw_object,))
-    owner = scene['wfrl_manual_owner']
     camera = manual_down.ensure_down_camera(scene, 'T1')
     manual_control._validate_native_controls((camera,))
     cameras.down_gimbal(camera)

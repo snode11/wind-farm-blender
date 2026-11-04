@@ -93,7 +93,6 @@ def _turbine_items(scene, context):
 
 
 def _update_selection(scene, context):
-    import bpy
     obj = scene.objects.get(f"WFRL.Turbine.{scene.wfrl_selected_turbine}.Nacelle")
     if obj is not None and context and context.view_layer:
         for selected in context.selected_objects:
@@ -390,37 +389,14 @@ def _register_resources(acquire):
     acquire(x100_runtime.unregister, lambda: x100_runtime.register())
 
 def unregister():
+    """Release everything register() acquired; a failed release stays retryable."""
     import bpy
-    from .panels import home
     from .cameras import cancel_view_layout
     cancel_view_layout()
-    previous = getattr(bpy, '_wfrl_registered_cleanup', None)
-    if previous:
-        previous()
+    cleanup = getattr(bpy, '_wfrl_registered_cleanup', None)
+    if cleanup:
+        cleanup()
         del bpy._wfrl_registered_cleanup
-    else:
-        from . import playback
-        playback.unregister()
-        from . import frontend_diagnostics
-        frontend_diagnostics.unregister()
-        from . import blade_recon_review, split_reconstruction, split_reconstruction_ui
-        split_reconstruction_ui.unregister()
-        split_reconstruction.unregister()
-        blade_recon_review.unregister()
-    from .presentation import unregister_overlay
-    unregister_overlay()
-    if bpy.app.timers.is_registered(_cancel_playback):
-        bpy.app.timers.unregister(_cancel_playback)
-    for handlers, function in ((bpy.app.handlers.load_post, _on_load),):
-        if function in handlers:
-            handlers.remove(function)
-    for cls in reversed(_classes()):
-        if cls.is_registered:
-            bpy.utils.unregister_class(cls)
-    home.unregister_properties()
-    for name in ("wfrl_selected_turbine", "wfrl_fixture_state", "wfrl_show_wake", "wfrl_wake_display", "wfrl_show_lidar", "wfrl_show_disxy", "wfrl_show_atmosphere", "wfrl_atmosphere_preset", "wfrl_wake_quality", "wfrl_camera_view", "wfrl_channel_telemetry", "wfrl_manual_enabled", "wfrl_manual_yaw", "wfrl_manual_pitch"):
-        if hasattr(bpy.types.Scene, name):
-            delattr(bpy.types.Scene, name)
 
 
 def build_demo_geometry():

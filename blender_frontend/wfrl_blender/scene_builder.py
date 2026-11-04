@@ -519,12 +519,6 @@ def _configure_environment(collection, scene=None):
         obj.location = location
         obj.rotation_euler = (Vector((500.0, 30.0, 65.0)) - obj.location).to_track_quat("-Z", "Y").to_euler()
         _link(collection, obj)
-    from .atmosphere import build_sky_features
-    if scene is not None and scene.turbines:
-        center = (sum(t.x_m for t in scene.turbines) / len(scene.turbines),
-                  sum(t.y_m for t in scene.turbines) / len(scene.turbines), 68.0)
-    else:
-        center = (500.0, 30.0, 68.0)
     # Natural world sky supplies the background; no camera-facing solid cloud props.
     _apply_surface_lighting(bpy.context.scene)
 

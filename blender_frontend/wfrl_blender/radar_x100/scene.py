@@ -1,6 +1,5 @@
 """Read-only T1 surface and mount sampling from one saved FarmFlex source."""
 import hashlib
-import json
 import math
 from copy import copy
 from contextlib import contextmanager

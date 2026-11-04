@@ -8,7 +8,7 @@ import uuid
 from contextlib import contextmanager
 import bpy
 from bpy.app.handlers import persistent
-from . import custom_cameras as core, camera_projection as projection
+from . import custom_cameras as core
 from . import installation_schematic as schematic
 
 _ACTIVE = None

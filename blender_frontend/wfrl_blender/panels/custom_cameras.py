@@ -955,7 +955,6 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
         if not core.is_available(scene):
             layout.label(text='请先加载包含 T1 的演示场景',icon='INFO')
             return
-        from .custom_camera_output import draw_output
         from .. import custom_camera_capture, native_camera_views
         native_error = native_camera_views.last_error(scene)
         if native_error:

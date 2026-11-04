@@ -153,7 +153,6 @@ def terrain_shader(material, *, image_loader=None):
     links.new(depth.outputs[0],haze.inputs[0]); links.new(tint.outputs[0],haze.inputs[1])
     links.new(haze.outputs[0],bsdf.inputs['Base Color'])
     rough=image_node('rough',True); links.new(rough.outputs[0],bsdf.inputs['Roughness'])
-    normal=image_node('nor_gl',True)
     norm=nodes.new('ShaderNodeBump'); norm.inputs['Distance'].default_value=.3; norm.inputs['Strength'].default_value=.32
     links.new(rough.outputs[0],norm.inputs['Height']); links.new(norm.outputs[0],bsdf.inputs['Normal'])
     links.new(bsdf.outputs[0],out.inputs['Surface'])

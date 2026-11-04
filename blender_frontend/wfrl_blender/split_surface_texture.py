@@ -125,7 +125,6 @@ def _activate(scene, value, *, new=False, register=None):
 
 def ensure(scene):
     """Load the designated, matching package once; never replace saved inputs."""
-    import bpy
     import numpy as np
     from . import blade_recon_review as review
     from .blade_recon_data import ReconSequence, TexturePackage, detail_recon_path, detail_texture_path

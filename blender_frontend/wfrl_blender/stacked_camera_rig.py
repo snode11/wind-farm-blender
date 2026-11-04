@@ -107,7 +107,6 @@ def blade_geometry(scene):
 
 def _housing(scene, cameras, config):
     import bpy
-    from mathutils import Vector
     from .scene_builder import _primitive_mesh
     root = scene.objects[core.ROOT_NAME]
     collection = root.users_collection[0]
