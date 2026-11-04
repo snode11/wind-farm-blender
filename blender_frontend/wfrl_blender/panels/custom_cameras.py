@@ -476,11 +476,8 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
         return x+width-42*ui, y+height-89*ui, 18*ui
 
     def inside(self, event):
-        for r in self.area.regions:
-            if r.type != 'WINDOW' and r.width > 1 and r.x <= event.mouse_x < r.x+r.width and r.y <= event.mouse_y < r.y+r.height:
-                return False
-        r = self.region
-        return r.x <= event.mouse_x < r.x+r.width and r.y <= event.mouse_y < r.y+r.height
+        from .. import viewport
+        return viewport.in_window_region(self.area, event)
 
     def change(self, dx=0, dy=0, zoom=0):
         if not (dx or dy or zoom):

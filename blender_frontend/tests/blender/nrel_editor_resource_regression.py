@@ -92,6 +92,26 @@ s.healthy(0)
 assert len(s.helpers) == 1
 assert bpy.data.meshes.get(removed_name) != removed_mesh
 checks['healthy_toggle_recreates_from_committed_document'] = True
+rejected = []
+real_activate = s.geometry.activate
+def failing_activate(payload, *args, **kwargs):
+    if payload is not s.payload:
+        rejected.append(payload)
+        raise RuntimeError('injected healthy activation failure')
+    return real_activate(payload, *args, **kwargs)
+s.geometry.activate = failing_activate
+try:
+    try:
+        s.healthy(0)
+    except RuntimeError as exc:
+        assert 'injected healthy activation failure' in str(exc), exc
+    else:
+        raise AssertionError('healthy activation failure was not reported')
+finally:
+    del s.geometry.activate
+assert len(rejected) == 1 and s.healthy_payload is None and s.geometry.active is s.payload
+assert all(item is not rejected[0] for item in s.geometry.pending)
+checks['healthy_activation_failure_keeps_committed_state'] = True
 
 s.begin(0)
 s.draft['defects'][0]['shape']['length_m'] *= 1.1

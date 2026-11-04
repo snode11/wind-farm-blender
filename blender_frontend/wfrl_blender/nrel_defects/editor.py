@@ -520,7 +520,7 @@ class EditorSession:
 
     def load(self,path):
         if self.draft is not None: raise ValueError('请先确认或取消编辑')
-        self.store.restore(validate_document(json.loads(Path(path).read_text()),self.surface))
+        self.store.restore(validate_document(json.loads(Path(path).read_text(encoding='utf-8')),self.surface))
 
     def healthy(self,index):
         if self.draft is not None: raise ValueError('请先确认或取消编辑')
@@ -531,8 +531,17 @@ class EditorSession:
         target=doc['defects'][index]
         for d in doc['defects']:
             if (d['turbine_id'],d['blade_id'])==(target['turbine_id'],target['blade_id']): d['enabled']=False
-        self.healthy_payload=self.geometry.prepare(doc)
-        self.geometry.activate(self.healthy_payload)
+        payload=self.geometry.prepare(doc)
+        try:
+            self.geometry.activate(payload)
+        except BaseException as exc:
+            # The committed geometry stays shown; release the unused comparison.
+            try:
+                self.geometry.dispose(payload)
+            except Exception as cleanup:
+                raise RuntimeError(f'{exc}；健康对照资源清理失败：{cleanup}') from exc
+            raise
+        self.healthy_payload=payload
         for helper in self.live_helpers(): helper.hide_viewport=True
 
     def locate_ray(self,origin,direction,blade_id,turbine_id=None):
@@ -1050,10 +1059,15 @@ class NREL_OT_defect_pick(bpy.types.Operator):
         context.workspace.status_text_set(None)
 
     def modal(self, context, event):
-        if event.type in {'ESC', 'RIGHTMOUSE'}:
+        from .. import viewport
+        s = session(context)
+        if event.type in {'ESC', 'RIGHTMOUSE'} or s is None or s.draft is None:
             context.workspace.status_text_set(None)
             return {'CANCELLED'}
-        if event.type in self._NAVIGATION_EVENTS:
+        # Press, release and hover outside the invoking view's drawing region
+        # belong to the sidebar, header or another area; only its drawing
+        # region picks.
+        if event.type in self._NAVIGATION_EVENTS or not viewport.in_window_region(context.area, event):
             return {'PASS_THROUGH'}
         if event.type == 'LEFTMOUSE' and event.value == 'PRESS':
             from bpy_extras import view3d_utils
@@ -1064,7 +1078,7 @@ class NREL_OT_defect_pick(bpy.types.Operator):
             direction = view3d_utils.region_2d_to_vector_3d(region, r3d, coord)
             try:
                 p = context.scene.wfrl_nrel_defects
-                a = session(context).locate_ray(origin, direction, p.blade_id,p.turbine_id)
+                a = s.locate_ray(origin, direction, p.blade_id, p.turbine_id)
                 p.span, p.u, p.side = a['s_m'], a['u'], a['surface_side']
                 p.status = '位置已选定；点击“更新预览”检查效果'
                 context.workspace.status_text_set(None)
@@ -1321,7 +1335,7 @@ class NREL_OT_defect_scan(bpy.types.Operator):
             if math.isclose(frames,nearest,rel_tol=1e-7,abs_tol=1e-7):
                 duration = nearest/60.
             self.mapping = FrameMapping(p.scan_start,duration,60.,60.,float(s.flex.times[0]))
-            if p.scan_start < s.flex.times[0] or p.scan_start+p.scan_duration > s.flex.times[-1]+1e-9:
+            if p.scan_start < s.flex.times[0] or p.scan_start+duration > s.flex.times[-1]+1e-9:
                 raise ValueError('扫描超出时间线')
             self.scan_session, self.scan_scene = s, s.scene
             self.scene_key = s.scene.as_pointer()

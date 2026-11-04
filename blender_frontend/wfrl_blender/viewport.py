@@ -29,3 +29,21 @@ def tag_redraw(scenes=None, *, area_types=VIEW_3D):
 
 def _key(scene):
     return scene.as_pointer() if hasattr(scene, 'as_pointer') else id(scene)
+
+
+def in_window_region(area, event):
+    """Whether a window-space event lies in the area's drawing region.
+
+    Overlapping sidebars, toolbars and headers belong to their own regions, so a
+    modal operator returns those clicks to the interface instead of using them.
+    """
+    def contains(region):
+        return (region.x <= event.mouse_x < region.x + region.width
+                and region.y <= event.mouse_y < region.y + region.height)
+    drawing = None
+    for region in area.regions:
+        if region.type == 'WINDOW':
+            drawing = region
+        elif region.width > 1 and contains(region):
+            return False
+    return drawing is not None and contains(drawing)

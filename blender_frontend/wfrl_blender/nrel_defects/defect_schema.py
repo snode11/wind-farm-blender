@@ -204,7 +204,7 @@ def validate_document(document, surface):
 
 
 def load_document(path, surface):
-    return validate_document(json.loads(Path(path).read_text()), surface)
+    return validate_document(json.loads(Path(path).read_text(encoding='utf-8')), surface)
 
 
 def save_document(path, document, surface):
@@ -215,7 +215,7 @@ def save_document(path, document, surface):
     path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
     fd, temp = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
     try:
-        with os.fdopen(fd, 'w') as stream:
+        with os.fdopen(fd, 'w', encoding='utf-8') as stream:
             json.dump(data, stream, ensure_ascii=False, indent=2, allow_nan=False); stream.write('\n')
         os.replace(temp, path)
     finally:
