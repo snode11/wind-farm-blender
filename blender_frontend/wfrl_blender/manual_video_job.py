@@ -18,7 +18,6 @@ import socket
 import stat
 import subprocess
 import sys
-import tempfile
 import threading
 import time
 import types
@@ -27,23 +26,6 @@ import uuid
 
 TERMINAL = {'COMPLETE', 'FAILED', 'CANCELLED'}
 LEASE_SCHEMA = 'wfrl.manual-video-lease.v1'
-
-
-def write_json(path, value):
-    path = Path(path)
-    temporary = None
-    try:
-        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', prefix='.status-',
-                                         dir=path.parent, delete=False) as handle:
-            temporary = Path(handle.name)
-            json.dump(value, handle, ensure_ascii=False, indent=2, allow_nan=False)
-            handle.write('\n')
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.replace(temporary, path)
-    finally:
-        if temporary is not None:
-            temporary.unlink(missing_ok=True)
 
 
 def read_json(path):
@@ -232,6 +214,12 @@ def _sibling(name):
         package.__path__ = [str(Path(__file__).resolve().parent)]
         sys.modules[namespace] = package
     return importlib.import_module(namespace + '.' + name)
+
+
+if __package__:
+    from .atomic_json import write_json
+else:
+    write_json = _sibling('atomic_json').write_json
 
 
 def start(job_path, *, python=None, lease=None, retry=False, command=None, preflight_check=None,

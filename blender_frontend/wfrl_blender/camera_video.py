@@ -13,6 +13,8 @@ from pathlib import Path
 import time
 import numpy as np
 
+from .atomic_json import write_json
+
 
 def render_sample():
     """Render one exposure subsample using the current native scene settings."""
@@ -26,13 +28,6 @@ def sha256(path):
         for block in iter(lambda: handle.read(1024 * 1024), b''):
             digest.update(block)
     return digest.hexdigest()
-
-
-def write_json(path, value):
-    path = Path(path)
-    temporary = path.with_suffix(path.suffix + '.tmp')
-    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + '\n')
-    temporary.replace(path)
 
 
 def frame_times(start_s, end_s, fps, exposure_s):

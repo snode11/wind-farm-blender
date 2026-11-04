@@ -22,6 +22,7 @@ from . import custom_camera_diagnostics as diagnostics
 
 from . import camera_projection as projection, custom_cameras as core
 from . import custom_camera_preview as preview, playback
+from .atomic_json import write_json
 
 _ACTIVE = None
 _TERMINALS = OrderedDict()
@@ -46,13 +47,6 @@ def progress():
     if job.index < total:
         text += '；目标 ' + preview.clock_text(job.times[job.index], job.frame, job.subframe)
     return text + ('；取消请求已接受，将在当前组完成后停止' if job.cancel_requested else '；Esc / 取消将在当前组完成后生效')
-
-
-def write_json(path, payload):
-    path = Path(path)
-    temp = path.with_suffix(path.suffix + '.tmp')
-    temp.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False)+'\n', encoding='utf-8')
-    temp.replace(path)
 
 
 @performance.timed("camera.write_png")

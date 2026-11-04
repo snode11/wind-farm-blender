@@ -8,9 +8,19 @@ import math
 import os
 from pathlib import Path
 import subprocess
-import tempfile
 import time
 from types import SimpleNamespace
+
+if __package__:
+    from .atomic_json import write_json as _write_json
+else:
+    import importlib.util
+
+    _json_spec = importlib.util.spec_from_file_location(
+        '_wfrl_atomic_json', Path(__file__).with_name('atomic_json.py'))
+    _json_module = importlib.util.module_from_spec(_json_spec)
+    _json_spec.loader.exec_module(_json_module)
+    _write_json = _json_module.write_json
 
 
 def frame_count(duration_s, hold_s, fps):
@@ -24,21 +34,6 @@ def frame_count(duration_s, hold_s, fps):
     if count < 1 or not math.isclose(count, round(count), rel_tol=2**-24, abs_tol=1e-5):
         raise ValueError('视频总时长必须对应完整帧数')
     return round(count)
-
-
-def _write_json(path, value):
-    temporary = None
-    try:
-        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', prefix='.status-',
-                                         dir=path.parent, delete=False) as handle:
-            temporary = Path(handle.name)
-            json.dump(value, handle, ensure_ascii=False, indent=2, allow_nan=False)
-            handle.flush()
-            os.fsync(handle.fileno())
-        temporary.replace(path)
-    finally:
-        if temporary is not None:
-            temporary.unlink(missing_ok=True)
 
 
 def _absolute_file(value, label):

@@ -7,21 +7,12 @@ import subprocess
 import time
 import uuid
 
+from .atomic_json import write_json
+
 
 def png_color_depth(value):
     """PNG jobs retain 8-bit sources and use 16 bits for higher precision."""
     return '8' if str(value) == '8' else '16'
-
-
-def write_json(path, value):
-    path = Path(path)
-    temporary = path.with_name(path.name + '.tmp')
-    try:
-        temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False),
-                             encoding='utf-8')
-        temporary.replace(path)
-    finally:
-        temporary.unlink(missing_ok=True)
 
 
 def validate_output_nodes(scene):

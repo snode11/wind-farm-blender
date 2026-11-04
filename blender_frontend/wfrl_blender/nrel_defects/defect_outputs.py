@@ -1,17 +1,14 @@
 """NREL defect evidence outputs; editing and G diagnostics never render."""
 import csv
 import hashlib
-import json
 from pathlib import Path
 import bpy
+from ..atomic_json import write_json as _write_json
 from .defect_timeline import FrameMapping
 
 
 def write_json(path,value):
-    path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
-    temp=path.with_suffix(path.suffix+'.tmp')
-    temp.write_text(json.dumps(value,ensure_ascii=False,indent=2,allow_nan=False)+'\n')
-    temp.replace(path)
+    _write_json(path, value, mkdir=True)
 
 
 def digest(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest()
