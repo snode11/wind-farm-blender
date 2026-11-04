@@ -1,4 +1,5 @@
 import os
+import shlex
 import sys
 import time
 from pathlib import Path
@@ -44,8 +45,13 @@ def test_python_version_and_mpi_actual_execution(tmp_path):
 
 def test_timeout_reaps_real_process(tmp_path):
     pid_file = tmp_path / 'pid'
-    tool = executable(tmp_path, f'import os,time\nopen({str(pid_file)!r},"w").write(str(os.getpid()))\ntime.sleep(60)\n')
-    checker = HealthChecker(timeout=1.0)
+    # A shell probe records its pid within milliseconds, far inside the timeout
+    # even on a loaded host; exec keeps that pid for the sleep.
+    tool = tmp_path / 'probe tool'
+    tool.write_text(f'#!/bin/sh\necho $$ > {shlex.quote(str(pid_file))}\nexec sleep 60\n')
+    tool.chmod(0o755)
+    tool = str(tool)
+    checker = HealthChecker(timeout=2.0)
     checker.start(HealthConfig(mpi_path=tool))
     results = collect(checker)
     assert results['mpi'].status == 'TIMEOUT'

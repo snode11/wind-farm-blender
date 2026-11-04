@@ -437,9 +437,12 @@ def _runner_args(tmp_path, code):
     executable = tmp_path/'fake-blender'
     executable.write_text(f'#!{sys.executable}\n'+code)
     executable.chmod(0o755)
+    # The fake Blender exits as soon as it has written its output; generous
+    # limits keep interpreter start-up on a loaded host from tripping the
+    # watchdog. The hung-process test sets its own short limit.
     return NS(output=str(tmp_path/'new-output'), blender=str(executable), path='triple',
         layout='STRIP', seconds=100., profile=False, addon_root=None, addon_module=None,
-        fault=None, width=820, height=473, startup_timeout=1., process_timeout=2.)
+        fault=None, width=820, height=473, startup_timeout=30., process_timeout=60.)
 
 
 @pytest.mark.parametrize('status,exitcode', [('PASS', 0), ('INCOMPLETE', 1), ('FAIL', 1)])
