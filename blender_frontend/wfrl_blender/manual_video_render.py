@@ -98,7 +98,7 @@ def _master_contract(job_path):
     files['snapshot'] = _absolute_file(job['snapshot'], '场景快照')
     for path in files.values():
         _regular(path)
-    experiment = json.loads(files['experiment.json'].read_text())
+    experiment = json.loads(files['experiment.json'].read_text(encoding='utf-8'))
     if (experiment['configuration'] != json.loads(job['configuration'])
             or experiment['frame_count'] != count or experiment['fps'] != job['fps']
             or experiment['resolution'] != [job['width'], job['height']]
@@ -116,7 +116,7 @@ def _master_contract(job_path):
         _regular(master / name)
         if (master / name).stat().st_size == 0:
             raise ValueError('母版帧不能为空')
-    with files['frames.csv'].open(newline='') as handle:
+    with files['frames.csv'].open(newline='', encoding='utf-8') as handle:
         rows = list(csv.DictReader(handle))
     if len(rows) != count:
         raise ValueError('姿态表帧数与作业不匹配')
@@ -148,7 +148,7 @@ def validate_master(job_path):
     """Accept only a complete, identical owned master and deterministic pose table."""
     path = Path(job_path).parent / 'master.json'
     _regular(path)
-    record = json.loads(path.read_text())
+    record = json.loads(path.read_text(encoding='utf-8'))
     if record != _master_contract(job_path):
         raise ValueError('母版哈希、来源或编码参数不匹配；拒绝编码重试')
     return record
@@ -161,7 +161,7 @@ def _owned_publication(root, job, digest):
         return False
     receipt_path = root / 'publication.json'
     _regular(receipt_path)
-    receipt = json.loads(receipt_path.read_text())
+    receipt = json.loads(receipt_path.read_text(encoding='utf-8'))
     _regular(output)
     identity = output.stat()
     if (receipt != dict(job_id=job['job_id'], output_mp4=str(output), video_sha256=digest,
@@ -181,7 +181,7 @@ def cleanup_publication(job_path):
     if not receipt_path.exists():
         return
     _regular(receipt_path)
-    receipt = json.loads(receipt_path.read_text())
+    receipt = json.loads(receipt_path.read_text(encoding='utf-8'))
     if (receipt.get('job_id') != job['job_id'] or receipt.get('output_mp4') != job['output_mp4']
             or receipt.get('master_sha256') != sha256(path.parent / 'master.json')):
         raise ValueError('发布暂存所有权不匹配；保留文件')
@@ -208,8 +208,8 @@ def delivery_result(job_path):
         _regular(root / 'master.json')
         _regular(root / 'checks/manual-video.json')
         _regular(root / 'video.mp4')
-        master = json.loads((root / 'master.json').read_text())
-        checks = json.loads((root / 'checks/manual-video.json').read_text())
+        master = json.loads((root / 'master.json').read_text(encoding='utf-8'))
+        checks = json.loads((root / 'checks/manual-video.json').read_text(encoding='utf-8'))
         count = frame_count(_spec(job).duration_s, job['hold_s'], job['fps'])
         digest = sha256(root / 'video.mp4')
         if (master.get('job_id') != job['job_id'] or master.get('job_sha256') != sha256(path)
@@ -235,7 +235,7 @@ def _finish(job_path, status, *, _master=None):
         master = validate_master(path)
     else:
         _regular(root / 'master.json')
-        if (json.loads((root / 'master.json').read_text()) != _master
+        if (json.loads((root / 'master.json').read_text(encoding='utf-8')) != _master
                 or _master.get('job_id') != job['job_id']
                 or _master.get('job_sha256') != sha256(path)):
             raise ValueError('母版或作业身份在编码事务中改变')
@@ -512,7 +512,7 @@ def _render_job(job_path, job):
         master.mkdir()
         fields = ('frame_id', 'video_pts', 'time_s', 'rpm', 'azimuth_deg',
                   'pitch_b1_deg', 'pitch_b2_deg', 'pitch_b3_deg', 'segment')
-        with (root / 'frames.csv').open('x', newline='') as handle:
+        with (root / 'frames.csv').open('x', newline='', encoding='utf-8') as handle:
             writer = csv.writer(handle)
             writer.writerow(fields)
             status('RENDERING')

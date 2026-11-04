@@ -35,7 +35,7 @@ def model_label(model=DEFAULT_MODEL):
 @lru_cache(maxsize=len(MODELS))
 def geometry_data(model=DEFAULT_MODEL):
     asset = MODELS.get(model, MODELS[DEFAULT_MODEL])[0]
-    return json.loads((Path(__file__).parent / asset).read_text())
+    return json.loads((Path(__file__).parent / asset).read_text(encoding='utf-8'))
 
 
 def hub_position():

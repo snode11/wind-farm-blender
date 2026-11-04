@@ -358,14 +358,14 @@ def _render_package(args):
     checks = output / 'checks'; checks.mkdir(exist_ok=True)
     render_manifest = output / 'render_manifest.json'
     if render_manifest.exists():
-        if json.loads(render_manifest.read_text())['config_sha256'] != fingerprint:
+        if json.loads(render_manifest.read_text(encoding='utf-8'))['config_sha256'] != fingerprint:
             raise ValueError('Resume configuration mismatch; use a new output directory')
     elif any(frames.iterdir()):
         raise ValueError('Existing frames without matching render manifest; refusing mixed frames')
     write_json(render_manifest, {**config, 'config_sha256': fingerprint})
     write_json(output / 'camera.json', camera_config)
     record_path = checks / 'render_frames.json'
-    records = json.loads(record_path.read_text()) if record_path.exists() else {}
+    records = json.loads(record_path.read_text(encoding='utf-8')) if record_path.exists() else {}
     for key in list(records):
         if not key.isdigit() or not 0 <= int(key) < len(centers):
             raise ValueError('Frame record outside configured range')

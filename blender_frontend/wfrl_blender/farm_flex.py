@@ -216,7 +216,7 @@ def _parse_package(path, manifest):
         raise ValueError('BeamDyn package requires mapped deflection data')
     from .tower_motion import read_tower
     tower_data=read_tower(path,manifest,times)
-    contents=json.loads((path/'data.json').read_text())
+    contents=json.loads((path/'data.json').read_text(encoding='utf-8'))
     _validate_replay_contents(manifest, contents)
     motion_poses=[]
     for index,tid in enumerate(manifest['turbine_ids']):
@@ -343,7 +343,7 @@ def _read_telemetry(path, manifest, times, readers, *, _source=None):
     if _source is not None and _source.path != Path(path).resolve():
         raise ValueError('verified source belongs to another package')
     extra = (_source.telemetry if _source is not None else
-             json.loads((Path(path) / 'telemetry.json').read_text()))
+             json.loads((Path(path) / 'telemetry.json').read_text(encoding='utf-8')))
     if extra is None:
         return None
     if (extra['schema'] != 'wfrl.farm-telemetry.v1'

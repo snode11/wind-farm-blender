@@ -61,7 +61,7 @@ def update_run(run): write_json(run['output']/'run_manifest.json',run['manifest'
 def save_records(run,rows):
     write_json(run['output']/'visibility.json',rows)
     fields=['turbine_id','blade_id','defect_id','revision','support_id','support_kind','primary','camera_id','time_s','frame_index','status','in_frame_fraction','visible_fraction_in_frame','visible_area_px2']
-    with (run['output']/'projection_stats.csv').open('w',newline='') as stream:
+    with (run['output']/'projection_stats.csv').open('w',newline='',encoding='utf-8') as stream:
         writer=csv.DictWriter(stream,fieldnames=fields,extrasaction='ignore');writer.writeheader();writer.writerows(rows)
     run['manifest']['products']['visibility']=dict(state='GENERATED',records=len(rows),sha256=digest(run['output']/'visibility.json'))
 
@@ -78,7 +78,7 @@ def save_review(editor,run):
         '状态：'+run['manifest']['state'],'','六类合成视觉形态；使用当前 NREL 健康参考面与已有柔性回放。',
         '尺寸与深度检查为静态健康参考下的生成器校验，不代表现场损伤测量。',
         'G 是理想几何投影/遮挡诊断，不能据此认定可辨识。A 图外观尚未审核。',
-        '缺陷未进入 OpenFAST 刚度、载荷或既有雷达数据；查看时保留原数据来源。','']))
+        '缺陷未进入 OpenFAST 刚度、载荷或既有雷达数据；查看时保留原数据来源。','']),encoding='utf-8')
 
 
 def capture_images(editor,directory):
