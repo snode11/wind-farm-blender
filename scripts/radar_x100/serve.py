@@ -14,7 +14,7 @@ from wfrl.radar_x100 import acquisition, recording, schema
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     source = parser.add_mutually_exclusive_group(required=True)
-    source.add_argument('--adapter', help='Trusted local module:factory returning an iterator of decoded RadarFrame')
+    source.add_argument('--adapter', help='Trusted local module:factory yielding decoded RadarFrame and explicit SessionStart events')
     source.add_argument('--replay', type=Path, help='Software channel check; preserves recorded origin, not live hardware')
     parser.add_argument('--port', type=int, default=9877)
     parser.add_argument('--record', type=Path, help='New durable recording directory')
@@ -43,8 +43,13 @@ def main():
             module, factory = args.adapter.split(':', 1)
             iterator = getattr(importlib.import_module(module), factory)()
         for frame in iterator:
+            if isinstance(frame, acquisition.SessionStart):
+                fanout.begin_session(frame.sensor_id, frame.session_id, frame.source_kind)
+                continue
             if not isinstance(frame, schema.RadarFrame):
-                raise TypeError('Adapter must yield canonical RadarFrame instances')
+                raise TypeError('Adapter must yield canonical RadarFrame or SessionStart instances')
+            if args.replay:
+                fanout.begin_session(frame.sensor_id, frame.session_id, frame.source_kind)
             fanout.submit(frame, time.monotonic() - start)
         time.sleep(.25)
     except KeyboardInterrupt:

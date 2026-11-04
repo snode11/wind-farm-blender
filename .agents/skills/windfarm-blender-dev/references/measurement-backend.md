@@ -78,7 +78,7 @@
 - 连接新后端身份需显式确认，不能据此认定旧作业已停止。
 - `hello_ack.last_command_sequence` 同步后端命令水位，停止重试与其他控制器接管保持严格递增。 工作区 Bridge 的非致命 `COMMAND_REJECTED` 携带 `command_sequence`；仅匹配当前待确认命令的拒绝可解除等待，迟到的旧拒绝不影响新命令。待确认期间收到无序号拒绝时断开并要求重新同步。
 - Formal 本机进程监管保留后代身份及继承的运行标识，跨进程组或父进程退出不代替清理完成。
-- 启动器停止未确认时持续监管并保留恢复身份，确认进程退出才删除；`stop-session` 只确认非运行，不确认进程退出。
+- 启动器按 PID／创建时间和运行标识监管全部本机所属进程，父进程退出或身份读取失败不证明清理完成；只有 EMPTY_CONFIRMED 才删除归属与 Bridge 会话记录。Bridge 独立声明固定端点、活进程和当前协议会话，bootstrap 不写停止凭据；界面换连接不改变启动器归属。`stop-session` 核对这些身份后只确认非运行，不确认进程退出。
 - 全场功率要求同一步全部预期机组及合计有限；Interactive 与 Formal Training／SB3 分别核对。
 - MPI 清除继承作业身份、保留显式传输配置，macOS 设置仅作缺省；后端修改后重启 Bridge。
 - 项目启动器加载安装扩展；仓库 `scripts/blender/run_wfrl_macos.sh` 已包含 `launch`，直接运行 `scripts/blender/wfrl_launcher.py` 才加此子命令。

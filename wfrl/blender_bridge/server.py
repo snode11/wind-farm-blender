@@ -15,7 +15,8 @@ class _SendQueueFull(ProtocolError):
 
 
 class BridgeServer:
-    def __init__(self, host='127.0.0.1', port=8765, session=None, handshake_timeout=5., max_queue_bytes=2*1024*1024):
+    def __init__(self, host='127.0.0.1', port=8765, session=None, handshake_timeout=5., max_queue_bytes=2*1024*1024,
+                 *, session_binding=None):
         address = ipaddress.ip_address(host)
         if not address.is_loopback: raise ValueError('Bridge binds only loopback IP literals')
         self.session = session or BackendSession()
@@ -38,6 +39,13 @@ class BridgeServer:
         self.session_claimed = False
         self.closed = False
         self.shutdown_requested = False
+        self.host, self.session_binding = host, session_binding
+        if session_binding is not None:
+            try:
+                session_binding.publish(host, self.port, self.session.session_id)
+            except BaseException:
+                self.listener.close()
+                raise
 
     def _observation_key(self, kind, payload):
         return kind, payload.get('record_kind') if kind == 'training_stats' else None
@@ -223,6 +231,8 @@ class BridgeServer:
                             self.sequence = 0
                         self.negotiated_capabilities = frozenset(message['payload']['capabilities']) & {TRAINING_STATS_CAPABILITY}
                         state = self.session.synchronization_state()
+                        if self.session_binding is not None:
+                            self.session_binding.publish(self.host, self.port, self.session.session_id)
                         self._send('hello_ack', dict(state, selected_version=1, resumed=resume is not None,
                                                     last_command_sequence=self.guard.last_sequence))
                         self.ready = True

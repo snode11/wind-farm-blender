@@ -545,6 +545,47 @@ def _verify_video(path, frames, fps, size, ffprobe, ffmpeg):
     return dict(frame_count=frames, fps=fps, resolution=list(size), full_decode=True)
 
 
+def _camera_optics(camera, scene):
+    data, render = camera.data, scene.render
+    return dict(lens_mm=data.lens, sensor_width_mm=data.sensor_width,
+                vertical_fov_deg=math.degrees(2*math.atan(data.sensor_width/(2*data.lens)*
+                    render.resolution_y/render.resolution_x)),
+                horizontal_fov_deg=math.degrees(data.angle_x), yaw_deg=camera['gimbal_yaw'],
+                pitch_deg=camera['gimbal_pitch'], roll_deg=camera['gimbal_roll'], lens_distortion='none')
+
+
+def _check_export_camera(scene, job, *, frame=None, depsgraph=None):
+    """Validate the fixed camera before accepting a rendered frame or publishing."""
+    camera = job['camera']
+    if (scene != job['scene'] or scene.camera != camera or camera.data != job['camera_data']
+            or scene.objects.get(camera.name) != camera
+            or camera.get('wfrl_manual_owner') != scene.get('wfrl_manual_owner')):
+        raise ValueError('Down 导出相机身份或场景归属不一致')
+    if depsgraph is None:
+        with bpy.context.temp_override(scene=scene, view_layer=scene.view_layers[0]):
+            depsgraph = bpy.context.evaluated_depsgraph_get()
+    actual = _camera_optics(camera.evaluated_get(depsgraph), scene)
+    expected = job['camera_optics']
+    if (job['sidecar']['optics'] != expected or any(
+            actual[key] != value if isinstance(value, str) else
+            not math.isclose(actual[key], value, rel_tol=1e-7, abs_tol=1e-7)
+            for key, value in expected.items())):
+        raise ValueError('Down 导出实际光学参数与 JSON 不一致')
+    if frame is not None:
+        if type(frame) is not int or not 1 <= frame <= job['plan']['frames']:
+            raise ValueError('Down 导出相机检查帧超出输出范围')
+        job['camera_frames'].add(frame)
+
+
+def _render_camera(scene, _unused=None):
+    job = _EXPORT.get(scene.as_pointer())
+    if job is not None and not job.get('failure'):
+        try:
+            _check_export_camera(scene, job, frame=scene.frame_current)
+        except Exception as exc:
+            job['failure'] = str(exc)
+
+
 def _sidecar(plan, turbine, camera, scene, video_name, *, render_mode=None, labels=False):
     rows = []
     for frame in range(plan['frames']):
@@ -554,16 +595,12 @@ def _sidecar(plan, turbine, camera, scene, video_name, *, render_mode=None, labe
             azimuth, pitches = pose_at(item, time_s)
             row[item['turbine']] = dict(azimuth_deg=azimuth, pitch_deg=pitches)
         rows.append(row)
-    data, render = camera.data, scene.render
+    render = scene.render
     return dict(schema='wfrl.manual-down-video.v1', video=video_name, camera=f'{turbine} Down',
                 resolution=[render.resolution_x, render.resolution_y], fps=plan['fps'], frames=plan['frames'],
                 duration_s=plan['frames']/plan['fps'], render_mode=render_mode,
                 render_engine=render.engine, blade_model=scene.wfrl_manual_blade_shape, blade_labels=labels,
-                optics=dict(lens_mm=data.lens, sensor_width_mm=data.sensor_width,
-                            vertical_fov_deg=math.degrees(2*math.atan(data.sensor_width/(2*data.lens)*
-                                render.resolution_y/render.resolution_x)),
-                            horizontal_fov_deg=math.degrees(data.angle_x), yaw_deg=camera['gimbal_yaw'],
-                            pitch_deg=camera['gimbal_pitch'], roll_deg=camera['gimbal_roll'], lens_distortion='none'),
+                optics=_camera_optics(camera, scene),
                 turbines=plan['turbines'], samples=rows,
                 scope='Rigid manual motion at k/fps; only selected turbine moves, others retain actual poses. '
                       'No aerodynamic, flexible-motion or field-validation result. Blade labels are annotations.')
@@ -580,6 +617,8 @@ def _clone_scene(source):
     previous = manual_control._updating
     manual_control._updating = True
     try:
+        for marker in clone.timeline_markers:
+            marker.camera = None
         for collection in list(clone.collection.children):
             clone.collection.children.unlink(collection)
         for obj in list(clone.collection.objects):
@@ -739,6 +778,7 @@ def _draw_offscreen(scene, job, view, camera, ffmpeg, output):
                 view_matrix = camera.evaluated_get(depsgraph).matrix_world.inverted()
                 offscreen.draw_view3d(scene, layer, space, region, view_matrix, projection,
                                       do_color_management=True)
+                _check_export_camera(scene, job, frame=frame + 1, depsgraph=depsgraph)
                 pixels = offscreen.texture_color.read()
                 pixels.dimensions = width * height * 4
                 frames.put(np.asarray(pixels, dtype=np.uint8).tobytes())
@@ -877,11 +917,16 @@ def _finish(scene, *, completed, asynchronous=False):
         except ReferenceError:
             pass
     try:
+        if job.get('failure'):
+            raise RuntimeError('逐帧导出检查失败：' + job['failure'])
         if not completed:
             _LAST[source_key] = dict(state='CANCELLED', temporary=job['temp'])
             return None
-        if job.get('failure'):
-            raise RuntimeError('逐帧姿态应用失败：' + job['failure'])
+        _check_export_camera(scene, job)
+        if job['camera_frames'] != set(range(1, job['plan']['frames'] + 1)):
+            raise RuntimeError('Down 导出相机检查未覆盖全部输出帧')
+        from copy import deepcopy
+        job['sidecar'] = deepcopy(job['sidecar'])
         files = (job['temp'], job['target'], job['sidecar'], job['size'], job['ffprobe'], job['ffmpeg'])
         if asynchronous:
             _publish_async(job['source'], source_key, files)
@@ -902,6 +947,7 @@ def _finish(scene, *, completed, asynchronous=False):
         _drop_scene(scene)
         if not _EXPORT:
             for handlers, function in ((bpy.app.handlers.frame_change_pre, _frame_handler),
+                                       (bpy.app.handlers.render_post, _render_camera),
                                        (bpy.app.handlers.render_complete, _render_complete),
                                        (bpy.app.handlers.render_cancel, _render_cancel)):
                 if function in handlers:
@@ -1002,15 +1048,19 @@ def export_down_video(scene, turbine, filepath, *, duration_s=10.0, fps=25, fram
                    ffmpeg=ffmpeg, ffprobe=ffprobe, cancelled=False)
         job['sidecar'] = _sidecar(plan, turbine, camera, clone, target.name,
                                   render_mode=engine, labels=shown)
+        job.update(camera=camera, camera_data=camera.data,
+                   camera_optics=dict(job['sidecar']['optics']), camera_frames=set())
         with (Path(temp)/'down.json').open('x', encoding='utf-8') as handle:
             json.dump(job['sidecar'], handle, ensure_ascii=False, indent=1, allow_nan=False)
         _EXPORT[clone.as_pointer()] = job
         for handlers, function in ((bpy.app.handlers.frame_change_pre, _frame_handler),
+                                   (bpy.app.handlers.render_post, _render_camera),
                                    (bpy.app.handlers.render_complete, _render_complete),
                                    (bpy.app.handlers.render_cancel, _render_cancel)):
             if function not in handlers:
                 handlers.append(function)
         clone.frame_set(1)
+        _check_export_camera(clone, job)
         if viewport:
             window, area, region = view
             job['view'] = _prepare_view(area, camera, VIEWPORT_ENGINES[engine])
@@ -1197,7 +1247,10 @@ def unregister():
         if bpy.app.is_job_running('RENDER') and not job['blocking']:
             job['cancelled'] = True
         else:
-            _finish(job['scene'], completed=False)
+            try:
+                _finish(job['scene'], completed=False)
+            except RuntimeError as exc:
+                print('WFRL Down video:', exc)
     _STATIONS.clear()
     for name in ('wfrl_manual_blade_shape', 'wfrl_manual_blade_labels'):
         if hasattr(bpy.types.Scene, name):

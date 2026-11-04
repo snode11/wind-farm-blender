@@ -67,3 +67,6 @@ example*.png
 # 扩展与源码归档通过匹配 Release 附件提供。
 /publication/blender-0.3.42.3/public/validated/package/*.zip
 /publication/blender-0.3.42.3/public/delivery/*.zip
+/publication/blender-0.3.42.4/package/*.zip
+/publication/blender-0.3.42.5/package/*.zip
+/publication/blender-0.3.42.5/release-package/*.zip

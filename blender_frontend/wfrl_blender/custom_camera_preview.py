@@ -115,6 +115,8 @@ def without_annotations(scene, view_layer):
     changed_objects = []
     try:
         for obj in scene.objects:
+            if view_layer.objects.get(obj.name) != obj:
+                continue
             name = obj.name
             annotation = (name.startswith(('WFRL.Label.', 'WFRL.Grid.', 'WFRL.Inflow.',
                 'WFRL.Deflection.', 'WFRL.Wake', 'WFRL.Fixture.T1.LidarRay'))

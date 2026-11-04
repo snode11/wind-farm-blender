@@ -112,6 +112,8 @@ def test_retry_never_overwrites_a_newer_pending_observation(new):
         old = frame(1)
         fanout.submit_display(old, received_monotonic=1.)
         held = fanout.take_latest_with_time()
+        if new.session_id != old.session_id:
+            fanout.begin_session(new.sensor_id, new.session_id, new.source_kind)
         fanout.submit_display(new, received_monotonic=2.)
         fanout.submit_display(held[0], received_monotonic=held[1], restoring=True)
         actual, stamp = fanout.take_latest_with_time()
@@ -128,6 +130,7 @@ def test_session_change_requires_an_explicit_new_connection():
     try:
         fanout.submit(frame(0), 0.)
         poll_until(a, lambda: a.state.streams.get('NEAR') is not None)
+        fanout.begin_session('X100', 'new-session', 'TEST')
         fanout.submit(frame(0, session='new-session'), .1)
         poll_until(a, lambda: a.closed)
         b = channel.LocalClient(publisher.port)

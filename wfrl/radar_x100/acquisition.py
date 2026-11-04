@@ -16,6 +16,14 @@ class Fragment:
     terminal: bool = False
 
 
+@dataclass(frozen=True)
+class SessionStart:
+    """Trusted producer declaration of a sensor's current acquisition session."""
+    sensor_id: str
+    session_id: str
+    source_kind: str
+
+
 class Assembler:
     """Adapter-supplied fragment counts and explicit terminal evidence; no vendor wire assumptions."""
     def __init__(self, *, timeout_s=.2, max_pending=16):
@@ -108,13 +116,17 @@ class Assembler:
 
 class Fanout:
     """Display replacement never discards an accepted recording job."""
-    def __init__(self, recorder=None, *, record_capacity=32):
+    def __init__(self, recorder=None, *, record_capacity=32, display_capacity=64):
         if not 1 <= record_capacity <= 1024:
             raise ValueError('Invalid recording queue budget')
+        if type(display_capacity) is not int or not 1 <= display_capacity <= 1024:
+            raise ValueError('Invalid display identity budget')
         self.recorder = recorder
         self.queue = queue.Queue(maxsize=record_capacity)
         self.latest, self.display_drops, self.record_failures = {}, 0, 0
         self.latest_received = {}
+        self.display_capacity = display_capacity
+        self.watermarks, self.sources, self.active_sources, self.deliveries = {}, {}, {}, {}
         self.accepting = True
         self.failure = None
         self.lock, self.stopping = threading.Lock(), threading.Event()
@@ -136,40 +148,104 @@ class Fanout:
                                     'are not guaranteed; overflow identity ' + repr(frame.identity))
                     self.stopping.set()
 
-    def submit_display(self, frame, *, received_monotonic=None, restoring=False):
+    def begin_session(self, sensor_id, session_id, source_kind):
+        """Admit a producer session without reviving retired identities or clearing watermarks."""
         with self.lock:
-            self._submit_display(frame, received_monotonic=received_monotonic, restoring=restoring)
+            return self._begin_session((sensor_id, session_id, source_kind))
 
-    def _submit_display(self, frame, *, received_monotonic=None, restoring=False):
+    def _begin_session(self, identity):
+        if not self.accepting or any(not isinstance(value, str) or not value for value in identity):
+            return False
+        sensor = identity[0]
+        if identity in self.sources:
+            return self.active_sources.get(sensor) == identity
+        if len(self.sources) >= self.display_capacity:
+            return False
+        self.sources[identity] = object()
+        self.active_sources[sensor] = identity
+        for key in tuple(self.latest):
+            if key[0] == sensor:
+                self.latest.pop(key)
+                self.latest_received.pop(key)
+                self.display_drops += 1
+        for key in tuple(self.deliveries):
+            if key[0] == sensor:
+                self.deliveries.pop(key)
+        return True
+
+    def submit_display(self, frame, *, received_monotonic=None, restoring=False, restore_token=None):
+        with self.lock:
+            return self._submit_display(frame, received_monotonic=received_monotonic,
+                                        restoring=restoring, restore_token=restore_token)
+
+    def _submit_display(self, frame, *, received_monotonic=None, restoring=False, restore_token=None):
         key = frame.sensor_id, frame.stream
+        source = frame.sensor_id, frame.session_id, frame.source_kind
+        identity = (*source, frame.stream)
+        if not self.accepting:
+            return False
+        if restoring:
+            delivery = self.deliveries.get(key)
+            if delivery is None or restore_token is not delivery[2]:
+                self.display_drops += 1
+                return False
+            self.deliveries.pop(key)
+            if (delivery[0] is not frame or self.active_sources.get(frame.sensor_id) != source
+                    or self.watermarks.get(identity) != frame.sequence or key in self.latest
+                    or len(self.latest) >= 8):
+                self.display_drops += 1
+                return False
+            self.latest[key], self.latest_received[key] = frame, delivery[1]
+            return True
+        if frame.sensor_id not in self.active_sources:
+            self._begin_session(source)
+        if (self.active_sources.get(frame.sensor_id) != source
+                or (identity not in self.watermarks and len(self.watermarks) >= self.display_capacity)
+                or frame.sequence <= self.watermarks.get(identity, -1)):
+            self.display_drops += 1
+            return False
+        self.watermarks[identity] = frame.sequence
+        self.deliveries.pop(key, None)
         if key in self.latest:
             self.display_drops += 1
-            previous = self.latest[key]
-            if restoring and previous.session_id != frame.session_id:
-                return
-            if previous.session_id == frame.session_id and previous.sequence >= frame.sequence:
-                return
         if key not in self.latest and len(self.latest) >= 8:
-            if restoring:
-                self.display_drops += 1
-                return
             evicted = next(iter(self.latest))
             self.latest.pop(evicted)
             self.latest_received.pop(evicted)
             self.display_drops += 1
         self.latest[key] = frame
         self.latest_received[key] = time.monotonic() if received_monotonic is None else received_monotonic
+        return True
 
     def take_latest(self):
         observation = self.take_latest_with_time()
         return observation[0] if observation is not None else None
 
     def take_latest_with_time(self):
+        """Consume a display frame as (frame, received_monotonic), or None."""
         with self.lock:
             if not self.latest:
                 return None
             key = next(iter(self.latest))
-            return self.latest.pop(key), self.latest_received.pop(key)
+            frame, received = self.latest.pop(key), self.latest_received.pop(key)
+            return frame, received
+
+    def begin_delivery(self):
+        """Reserve (frame, received_monotonic, token) for sending or restoring."""
+        with self.lock:
+            if not self.latest:
+                return None
+            key = next(iter(self.latest))
+            frame, received = self.latest.pop(key), self.latest_received.pop(key)
+            delivery = frame, received, object()
+            self.deliveries[key] = delivery
+            return delivery
+
+    def finish_delivery(self, delivery):
+        with self.lock:
+            key = delivery[0].sensor_id, delivery[0].stream
+            if self.deliveries.get(key) is delivery:
+                self.deliveries.pop(key)
 
     def _record(self):
         while not self.stopping.is_set() or not self.queue.empty():
@@ -241,10 +317,10 @@ class LocalPublisher:
                         # A new explicit connection takes over the single display slot.
                         if self.server in ready or client in ready:
                             break
-                        observation = self.fanout.take_latest_with_time()
+                        observation = self.fanout.begin_delivery()
                         if observation is None:
                             continue
-                        frame, received = observation
+                        frame, received, _token = observation
                         identity = frame.sensor_id, frame.session_id, frame.source_kind
                         if peer is None:
                             client.sendall(hello(frame))
@@ -253,12 +329,14 @@ class LocalPublisher:
                             break
                         client.sendall(encode_frame(frame, received_monotonic=received))
                         self.sent += 1
+                        self.fanout.finish_delivery(observation)
                         observation = None
                 except (OSError, ValueError):
                     self.errors += 1
                 finally:
                     if observation is not None:
-                        self.fanout.submit_display(observation[0], received_monotonic=observation[1], restoring=True)
+                        self.fanout.submit_display(observation[0], received_monotonic=observation[1],
+                                                   restoring=True, restore_token=observation[2])
 
     def close(self):
         self.stopping.set()

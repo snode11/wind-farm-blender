@@ -8,7 +8,7 @@
 - [场景生命周期](scene-lifecycle.json)、[相机槽位](camera-slots.json)、[原生与评估相机状态](camera-guard.json)。
 - [安装版叶尖抽样](tip-installed.json)、[保留原断言失败的日志](tip-installed.log)、[独立 7,203 点源运输诊断](tip-source-diagnostic.json)。
 - [来源及转换清单](provenance.json)：原记录摘要、公开文件摘要和被省略字段。
-- [发布源码复建及回归](source-publication-validation.json)、[源码宿主日志](source-host-final.log)：与发布前 117 项回归分别记录，不累加。
+- [发布源码复建及回归](source-publication-validation.json)、[宿主结果汇总](host-final.json)：与发布前 117 项回归分别记录，不累加。
 
 发布前记录与本次源码复建／相关宿主回归分别保留，没有重新做全部原生窗口验收。数值、状态、阈值、来源哈希及 PNG／状态比较哈希原样保留。绝对路径被替换为 `<ISOLATED_ADDON>`、`<DAILY_ADDON>`、`<LOCAL_REPO>`、`<LOCAL_EVIDENCE>`、`<TEMP_SCENE>`，定义见来源清单；新增宿主日志使用 `<RELEASE_CHECKOUT>` 表示发布隔离目录。它们是实际运行来源的说明，既不是仓库链接，也不是可直接执行的命令。
 

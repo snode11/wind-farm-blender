@@ -43,6 +43,93 @@ mixed=scene_api.SideWallQuery(context).query(np.concatenate((sensor_tower,[[np.n
 assert len(mixed['indices'])==3 and mixed['status'][0]=='VALID' and mixed['distance'][0]<2e-5
 assert mixed['status'][1]=='NONFINITE' and np.isnan(mixed['distance'][1])
 
+# Same-frame consumers reuse successful nearest queries, preserving each ROI's output.
+class CountedTree:
+    def __init__(self, tree, *, fail_first=False):
+        self.tree, self.calls, self.fail_first = tree, 0, fail_first
+    def find_nearest(self, point):
+        self.calls += 1
+        if self.fail_first and self.calls == 1:
+            return None, None, None, None
+        return self.tree.find_nearest(point)
+
+query_points=np.concatenate((session.frame.xyz[:32],sensor_tower,[[np.nan,0,0],[2e6,0,0]]))
+wide=((-1e7,-1e7,-1e7),(1e7,1e7,1e7))
+rois=(roi,wide,roi,wide)
+oracle=scene_api.SideWallQuery(context)
+expected_queries=[oracle.query(query_points,bounds) for bounds in rois]
+cached_query=scene_api.SideWallQuery(context)
+cached_query.tree=CountedTree(cached_query.tree)
+for bounds,reference in zip(rois,expected_queries):
+    actual=cached_query.query(query_points,bounds,frame_key=('source',0))
+    for key in reference: np.testing.assert_equal(actual[key],reference[key])
+selected=expected_queries[1]['selected']
+assert cached_query.tree.calls==selected
+stored_cache=cached_query._frame_cache
+cached_query.query(sensor_tower,wide)
+assert cached_query._frame_cache is stored_cache
+cached_query.query(query_points,wide,frame_key=('source',0))
+assert cached_query.tree.calls==selected+1
+cached_query.query(query_points,wide,frame_key=('source',1))
+assert cached_query.tree.calls==2*selected+1
+changed_points=query_points.copy();changed_points[0,0]+=.25
+changed=cached_query.query(changed_points,wide,frame_key=('source',1))
+assert cached_query.tree.calls==3*selected+1
+for key,value in oracle.query(changed_points,wide).items():
+    np.testing.assert_equal(changed[key],value)
+retry=scene_api.SideWallQuery(context)
+retry.tree=CountedTree(retry.tree,fail_first=True)
+failed_query=retry.query(query_points,wide,frame_key=0)
+assert np.count_nonzero(failed_query['status']=='QUERY_FAILED')==1
+retried=retry.query(query_points,wide,frame_key=0)
+assert retry.tree.calls==selected+1
+for key,value in expected_queries[1].items(): np.testing.assert_equal(retried[key],value)
+from time import perf_counter
+query_samples={'uncached':[],'shared':[]}
+query_calls={}
+for repeat in range(5):
+    for mode in (('uncached','shared') if repeat%2==0 else ('shared','uncached')):
+        query=scene_api.SideWallQuery(context);query.tree=CountedTree(query.tree)
+        started=perf_counter()
+        for bounds in rois:
+            query.query(query_points,bounds,frame_key=0 if mode=='shared' else None)
+        query_samples[mode].append(perf_counter()-started)
+        query_calls[mode]=query.tree.calls
+assert query_calls['shared']==selected<query_calls['uncached']
+
+# Installation poses share one immutable geometry copy across independent seeds.
+from wfrl.radar_x100 import simulation
+sampler=session.sampler
+plans={seed:sampler.sampling_plan(64,seed) for seed in (100,101,102)}
+copy_samples={'per_seed':[],'per_pose':[]}
+copy_counts={'per_seed':0,'per_pose':0}
+for offset in (0.,.1):
+    sample=sampler.sample(sampler.interval[0]+offset)
+    vertices,triangles=sample.vertices.tobytes(),sample.triangles.tobytes()
+    for delta in (0.,.5):
+        sensor=sample.world_from_sensor.copy();sensor[0,3]+=delta
+        outputs={}
+        for mode in ('per_seed','per_pose'):
+            rows=[]
+            if mode=='per_pose':
+                started=perf_counter();observed=replace(sample,world_from_sensor=sensor)
+                copy_samples[mode].append(perf_counter()-started);copy_counts[mode]+=1
+            for seed,plan in plans.items():
+                if mode=='per_seed':
+                    started=perf_counter();observed=replace(sample,world_from_sensor=sensor)
+                    copy_samples[mode].append(perf_counter()-started);copy_counts[mode]+=1
+                assert not observed.vertices.flags.writeable and not observed.triangles.flags.writeable
+                world_points=plan.points(sample)
+                xyz=(world_points-sensor[:3,3])@sensor[:3,:3]
+                gate=simulation.in_fov(xyz);mask=np.zeros(len(xyz),dtype=bool)
+                mask[gate]=sampler.visibility(observed,world_points[gate])
+                rows.append((xyz,gate,mask))
+            outputs[mode]=rows
+        for a,b in zip(outputs['per_seed'],outputs['per_pose']):
+            for left,right in zip(a,b): np.testing.assert_array_equal(left,right)
+        assert sample.vertices.tobytes()==vertices and sample.triangles.tobytes()==triangles
+assert copy_counts=={'per_seed':12,'per_pose':4}
+
 frame=session.frame
 before=frame.points.tobytes()
 # No truth field is consumed by the online query.
@@ -189,7 +276,11 @@ for offset in (0.,.1,.2):
 report=dict(status='PASS',core=analysis.__file__,blender=bpy.app.version_string,
     nearest_points_tested=len(ids),side_triangles=expected,checks=['snapshot','numpy_oracle','truth_isolation',
     'frozen_roi','caps_excluded','optional_analysis_failure','commit_rollback','rewind','historical_context_absent','ordinary_and_sidecar_reference_cache_equivalence'],
-    timings=performance.snapshot(),sampling_comparison_s=samples,rigid_fallback=True,two_scene_unbound_isolation=True,anchored_world_stability=True,mixed_unknown_retained=True)
+    timings=performance.snapshot(),sampling_comparison_s=samples,rigid_fallback=True,two_scene_unbound_isolation=True,anchored_world_stability=True,mixed_unknown_retained=True,
+    shared_queries=dict(equivalent=True,roi_changes=True,failed_query_retry=True,frame_and_points_invalidation=True,
+                        points=len(query_points),consumers=len(rois),calls=query_calls,timings_s=query_samples),
+    installation_copy=dict(equivalent=True,seeds=len(plans),poses=2,source_times=2,copies=copy_counts,
+                           geometry_bytes=sample.vertices.nbytes+sample.triangles.nbytes,copy_timings_s=copy_samples))
 (OUT/'result.json').write_text(json.dumps(report,indent=2))
 print('X100_ANALYSIS_PASS',json.dumps(report))
 addon.unregister()

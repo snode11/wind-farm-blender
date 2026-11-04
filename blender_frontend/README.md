@@ -11,7 +11,7 @@
 | 公开安装包 | [NREL 0.3.42.5](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.42.5)；载荷见[交付身份](../publication/blender-0.3.42.5.json)；WFRL 主入口、录制安全收尾、视口隔离、可取消后台 PNG 渲染、叶片外形选择、T1/T2/T3 Down 及独立风机手动控制、姿态预设、相对微调、三机概览、姿态 JSON、完整风机几何／同源纹理切换、三机柔性回放、默认三相机复位、六类合成缺陷，以及相机清理、稳定刷新、采集与播放保护。 |
 | 本地工作区 | manifest **0.3.42+5**，按实际源码识别；X100面积材料采样、有限安装搜索和叶片关联／连续估计由 0.3.42.5 扩展及配套源码提供，日常安装使用 0.3.42.5；机舱分析、同帧侧壁距离和零载荷参考包含于公开扩展。另有WFRL主入口、场景／占用／后端状态、手动保护反馈、相机编辑预览与按需重绘、同刻几何及曲线缓存、录制安全收尾、视口隔离、后台PNG、叶根装配、固定显示精度和环境几何预算。公开附件与日常安装分别核对。 |
 | 项目源码 | [`main`](https://github.com/snode11/wind-farm-blender/tree/main)；包含当前实现、测试与研究工具。公开扩展的匹配源码使用 `v0.3.42.5` 标签；当前分支与公开 ZIP、日常安装载荷分别识别。 |
-| 本地日常安装 | `bl_ext.user_default.wfrl_blender`，0.3.42.5 独立载荷（见安装记录）；文件核对、新进程模块来源、启用、X100 叶片面板与报告导入注册及配置保留见[身份摘要](../README.md#当前身份与安装来源)和[安装核对](../publication/daily-installation.json)。 |
+| 本地日常安装 | `bl_ext.user_default.wfrl_blender`，0.3.42.5 公开 ZIP 载荷（见安装记录）；文件核对、新进程模块来源、启用、X100 叶片面板与报告导入注册及配置保留见[身份摘要](../README.md#当前身份与安装来源)和[安装核对](../publication/daily-installation.json)。 |
 | GW184 | [0.4.0 独立运行包](../docs/blender/GW184三相机与缺陷编辑器.md)；184 m 尺寸合成刚性模型、固定三相机和六类缺陷。模型与配置不能直接替代 NREL。 |
 
 公开 ZIP 完成一次本地构建，验证范围见[发布验证记录](../publication/blender-0.3.42.5/verification.json)。本版未运行回归、隔离安装或窗口／GPU 检查；已有源码与日常安装证据按原始载荷使用，不代表当前公开 ZIP 的验证结果。
@@ -29,6 +29,8 @@
 工作区的 `sampling.py` 使用参考面积、随机平移Halton序列与固定重心坐标生成材料点，算法身份为 `shifted-halton.v1`；`SceneSampler.sampling_plan()` 缓存与来源绑定的计划，小预算保留大预算前缀。`installation.py` 和离线 `optimize_mount.py` 提供有限安装集合的完整过叶覆盖搜索；`WFRL_OT_X100SearchApply` 读取报告，由 `selected_installation()` 重算排序并核对来源、几何、采样算法、错误及有效推荐，沿用安装事务，保留当前采样预算。`tracking.py` 根据点云、同刻塔面、根部方向和名义叶尖径向坐标做叶片走廊关联、稳健局部拟合和因果平滑；Blender先验以轮毂为原点、局部Z末端取 `TipRad`，不读取材料标签或变形叶尖。估计拒绝状态、模型塔距与拟合段由独立面板／机舱XZ绘制，原始帧及侧壁诊断仍保留所有点。详细入口与限制见[观测研究](../docs/blender/X100观测研究.md)。
 
 `Session.derive_blades()` 在主线程会话更新中按新配对上下文派生，不依赖观察窗口；关闭估计开关清除结果和因果历史。缺测、来源失效或不支持的来源撤回模型结果，派生异常保留合法原始帧。安装、采样和估计的规范模块分别由构建清单 `RADAR_MODULES` 纳入 `_vendor/radar_x100/`，0.3.42.5 公开扩展包含这三个模块。
+
+工作区 `SideWallQuery` 在同一上下文、帧身份与点数组内共享成功的塔面最近点查询，供叶片跟踪和距离诊断复用。ROI 分别生成有效性与统计，扩大 ROI 只补算未查询点；失败点可重试，换帧或点数组变化使缓存失效，派生叶尖查询独立。离线安装搜索在同一源时刻和候选安装位只构造一份只读 `SceneSample`，供多个种子复用；采样计划、可见性和推荐规则不变。
 
 `SceneSampler.material_sample()` 为速度差分只计算所选材料顶点，静态拓扑与同刻遮挡树按绑定复用；安装对象及父级存在约束或动画时撤回观测，记录失败终态保留在所属场景。
 
@@ -70,7 +72,7 @@
 
 - `panels/home.py` 与 `home_state.py`：WFRL 主入口、只读任务摘要、播放器归属、当前结果／时刻、已应用相机与草稿／观察／采集状态，以及独立后端状态；各模块 `status_for(scene)` 与 `can_start(action, scene)` 共享前台资源冲突判断，独立文件复制不使用全局 busy 锁。主页提供 X100／研究任务跳转和手动 Down／冻结试验视频入口；复用回放、相机、手动和导出面板的现有操作器，不管理运动时钟。导航保存在 WindowManager，进入／返回独立手动场景时保留所选页面；卸载移除导航属性。
 - `manual_scene.py`、`manual_control.py`、`manual_operators.py`、`manual_rna.py`、`manual_motion.py`、`manual_pose.py` 与 `panels/manual_control.py`：独立刚性场景、墙钟积分、姿态预设、按机组当前值微调、三机概览及严格姿态 JSON。`manual_control.py` 管理场景状态、运动时钟、姿态同步与恢复回调；`manual_operators.py` 提供 Blender 命令及姿态文件操作；`manual_rna.py` 定义属性组并管理属性、操作器、定时器与处理器的注册和释放，入口为 `manual_control.register()`／`unregister()`。`manual_pose.py` 只使用标准库，定义 `wfrl.manual-pose.v1` 和角度边界；操作器先校验所选机组再写入参数、对象与时钟，导入后暂停。文件保存不暂停运行，运动相位以同一墙钟时刻采样；[操作说明](../docs/blender/风机手动控制.md)。
-- `manual_down.py`：三机独立 Down、按稳定归属复用的叶片编号和便捷 MP4／JSON 导出。独立场景副本只驱动所选机组；真实帧数、尺寸、帧率、时间戳和完整解码通过后拒绝覆盖地提交。视口渲染依赖可见窗口，最终渲染使用原生渲染作业；工作区的可见窗口导出在渲染后异步验证与提交媒体，后台同步调用返回最终结果。此入口不接管冻结试验的后台监管和母版重试。
+- `manual_down.py`：三机独立 Down、按稳定归属复用的叶片编号和便捷 MP4／JSON 导出。独立场景副本只驱动所选机组，并清除副本时间线标记的相机绑定，保留源场景标记。每帧及提交前核对实际相机、数据归属与声明光学参数；任一帧不匹配或未覆盖全部输出帧均保留 FAILED，不能发布 MP4／JSON。非阻塞原生渲染中的 `render_post` 相机校验失败会保留首个错误，等待渲染完成或用户取消后报告 FAILED、释放副本并保留临时文件；不会自动提前取消，剩余帧仍可能消耗渲染时间。该回调没有可依赖的安全提前取消接口，不通过关闭渲染窗口或模拟按键中断作业。真实帧数、尺寸、帧率、时间戳和完整解码通过后拒绝覆盖地提交。视口渲染依赖可见窗口，最终渲染使用原生渲染作业；工作区的可见窗口导出在渲染后异步验证与提交媒体，后台同步调用返回最终结果。此入口不接管冻结试验的后台监管和母版重试。
 - `manual_geometry.py`：刚性叶片固定总览／标准／近景采样、配套叶根收口和同场景静态网格复用；构造归属、几何指纹、材质槽和消费者共同限制复用，绑定失败整体回滚。塔筒及柔性叶片不参与静态去重；用户编辑、链接、fake-user、shape-key 和跨场景资源受保护。Down 入口和视频副本使用近景，普通显示档位不影响回放与测量。
 - `blade_root_display.py`：回放外形对应的叶根展示附件事务。叶片切换失败时恢复接头，保留原材质及用户数据；不改写运动、载荷或测量资源。
 - `manual_scene_links.py`：原场景以稳定的手动归属标识查找其独立场景，手动场景以 Scene 指针保存返回目标，避免双向 Scene ID 引用形成依赖环。名称改变不影响查找；复制的原场景不能认领另一原场景的手动模型，归属不明确时不返回目标。加载和撤销恢复时规范存储关联；缺少标识的保存文件仅通过唯一返回关系恢复关联，显式解除的关联保持断开。
@@ -181,15 +183,17 @@ scripts/blender/run_wfrl_macos.sh \
 
 启动器预检环境并启动自己拥有的 Bridge；Blender 加载**已安装扩展**，停在 MAPPO 的 T1 侧前方首帧。默认状态为 **OFFLINE RESULTS**，Bridge 在 `127.0.0.1:8765` 待用，不自动连接或开始运行。这条入口需要完整后端环境；只看离线演示时直接打开扩展并点击“加载 MAPPO · 60 秒”，或用便携入口，无需 Python 后端、MPI、FAST.Farm 和网络。
 
-`--python` 和 `WFRL_PYTHON` 选择的解释器入口保留符号链接路径，使虚拟环境的依赖与解释器配置在预检和 Bridge 子进程中生效。
+`--python` 和 `WFRL_PYTHON` 选择的解释器入口保留符号链接路径，使虚拟环境的依赖与解释器配置在预检和 Bridge 子进程中生效。`WFRL_LAUNCHER_PYTHON` 单独指定启动器解释器，缺省为 `python3`；启动器与后端解释器都需要项目核心依赖 `psutil>=5.9,<8`，缺失时预检拒绝启动。可将两者设为同一个已安装项目依赖的环境。
 
 0.3.42.5 安装版会同时建立推荐三相机配置，默认关闭叶尖轨迹和挠度辅助物。主视图仍先显示 T1 总览，进入 **View → 三相机 → 三路对照** 查看。仅更新仓库 README 不会改变已运行的 Blender 扩展。
 
 需要后端时，进入 **Item → WFRL / CONNECTION → 后端连接（高级）**，选择 Replay 或 Interactive，再点 Connect / Reconnect。Item 不可见时先选中一片叶片。启动脚本在握手确认后发送 `scene.load`，自动加载命令指定的 YAML；确认 **CONNECTED / READY** 后，到 **WFRL / 后端运行** 设置参数并点击 Start Replay / Start Training。Replay 需兼容 checkpoint，例如项目中的 `results/checkpoints/mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt`。
 
-切换模式会断开前端，需要重新连接。运行结束先 Stop 并等待后端清理确认，再选择 MAPPO · 60 秒返回离线回放。关闭该命令启动的 Blender 后，有扩展会话身份时，启动器恢复会话并请求 `run.stop`。匹配的工作区 Bridge 分别报告任务状态、`cleanup_confirmed` 和 `worker_alive`；只有明确确认清理完成且没有存活任务，才请求清理自己拥有的 Bridge。`FAILED` 本身不证明任务已退出。EOF、超时、致命错误或无效响应均视为停止未确认，启动器继续前台监管与重试，并保留会话文件。没有记录到会话身份时，先以不发停止命令的握手确认 Bridge 空闲；活动、身份不明或无响应的服务不进入进程清理。Bridge 确认退出后才删除会话文件。普通 Blender 窗口不运行此 bootstrap，连接已有 Bridge 后需手动 Load & Validate Scene。
+切换模式会断开前端，需要重新连接。运行结束先 Stop 并等待后端清理确认，再选择 MAPPO · 60 秒返回离线回放。工作区启动器使用固定运行标识、端点及 PID／创建时间记录进程归属；所属 Bridge 独立写入相邻的 `.bridge.json`，声明当前协议会话与递增代次。前端 bootstrap 不写这些凭据，界面连接到其他 Bridge 不改变启动器归属。启动前和请求停止前核对活进程、运行标识及端点；合法会话轮换只在同一 Bridge 实例内接受。
 
-监管被中断或异常退出时，终端打印保留的会话文件、端口和 `stop-session --session-file <路径> --port <端口>` 恢复命令。该命令只通过协议请求匹配会话停止，不按磁盘 PID 发信号；空会话文件只允许空闲握手。成功只确认协议所声明的清理完成，不证明 Bridge 进程退出，因此恢复命令仍保留会话文件。启动器使用所选后端 Python 的 YAML 解析器识别场景后端，拒绝未知名称，并保留 Python 虚拟环境解释器的符号链接入口。
+关闭该命令启动的 Blender 后，启动器使用所属 Bridge 发布的身份恢复会话并请求 `run.stop`。匹配的 Bridge 分别报告任务状态、`cleanup_confirmed` 和 `worker_alive`；只有明确确认清理完成且没有存活任务，才请求清理自己拥有的进程。`FAILED`、父进程退出或进程组变化均不证明全部后代已退出。监管覆盖已知后代与继承运行标识的本机孤儿进程；扫描用 POSIX UID 或 Windows 用户名排除其他用户，无关进程身份或环境不可读不构成运行归属。已记录身份仍无法核实时保留不确定状态，`alive()` 对 `LIVE` 和 `UNKNOWN` 均为真，只有 `EMPTY_CONFIRMED` 才删除两份恢复文件。启动器遇到 `UNKNOWN` 结束前台监管、保留记录并以非零退出；确认仍有所属活进程时，EOF、超时或无法校验的 Bridge 绑定继续重试，同一停止失败状态只提示一次。普通 Blender 窗口不运行此 bootstrap，连接已有 Bridge 后需手动 Load & Validate Scene。
+
+监管未确认清空而退出时，终端打印保留的归属文件、端口和 `stop-session --session-file <路径> --port <端口>` 恢复命令。该命令核对结构化记录的固定端点和活进程身份，拒绝冲突端口或其他实例的凭据；只通过协议请求匹配会话停止，不按磁盘 PID 发信号。协议成功仅确认后端非运行，仍保留恢复文件。Bridge 已退出或无法确认协议停止时，恢复检查用 `known_processes` 和根进程的 PID／创建时间重新核对已观察身份，并扫描继承运行标识的孤儿进程；PID 已复用不认领新进程。全部确认清空时返回成功并删除两份记录，仍有活进程或归属不确定时分别报告 `LIVE`／`UNKNOWN`、保留记录并返回非零；记录中缺失或无效的身份不能证明清空。兼容的纯文本会话文件不提供上述结构化进程归属校验；空文本文件只允许空闲握手。启动器使用所选后端 Python 的 YAML 解析器识别场景后端，拒绝未知名称。
 
 停止确认以握手的当前状态及其 `state_revision` 为边界，覆盖的历史终态不能触发进程清理；带版本握手后的新生命周期版本须有效且递增。清理结束时允许任务结果仍为 `FAILED`，但须发送更高版本的清理证明。没有清理字段的兼容服务仅接受当前握手、或高于握手版本且递增的当前生命周期中的 `READY`／`STOPPED` 作为非运行状态，不能把 `FAILED` 当作停止证明；无版本历史终态也不能代替当前握手。Bridge 接到退出请求后保留停止与同步协议，拒绝新任务，直到清理得到确认。
 
@@ -405,6 +409,8 @@ python3 scripts/analysis/export_blade_response.py \
 
 受控相机 PNG 输出绕过源场景的 VSE 和合成器，结束或失败后恢复其设置；后台动画仍按 File Output 前置检查执行。手动 Down 与缺陷相机使用各自归属场景，不借用活动场景的后处理结果。子进程使用任务专属配置目录；UI 和后台均递归检查合成器节点组，拒绝含未静音 File Output 节点的作业，防止场景中的额外文件输出绕过任务目录和拒绝覆盖保护。
 
+临时隐藏相机标注只操作目标 View Layer 中实际包含的对象；被排除集合中的对象保持原状。采集完成或异常后恢复各对象原有隐藏状态。
+
 时间读取复用 [clearance_replay.py](wfrl_blender/clearance_replay.py) 与结果包的 ReplayReader：
 
 ```text
@@ -470,7 +476,7 @@ S2/S3 按同一保存时刻、同一叶片的有效命中配对，S1 有效叶�
 
 ### 5.5 实时连接与控制生命周期
 
-项目侧 [wfrl_launcher.py](../scripts/blender/wfrl_launcher.py) 负责环境预检、Bridge 生命周期与 Blender 进程；[wfrl_blender_bootstrap.py](../scripts/blender/wfrl_blender_bootstrap.py) 导入 `bl_ext.user_default.wfrl_blender`，写入路径配置、加载默认 MAPPO，并在用户主动连接后记录会话及加载 YAML。
+项目侧 [wfrl_launcher.py](../scripts/blender/wfrl_launcher.py) 负责环境预检、所属 Bridge 进程树与 Blender 生命周期；[launcher_state.py](../wfrl/blender_bridge/launcher_state.py) 隔离启动器归属记录与 Bridge 会话声明。[wfrl_blender_bootstrap.py](../scripts/blender/wfrl_blender_bootstrap.py) 导入 `bl_ext.user_default.wfrl_blender`，写入路径配置、加载默认 MAPPO，并在用户主动连接后加载 YAML，不改写进程归属或停止凭据。
 
 扩展 [runtime.py](wfrl_blender/runtime.py) 和 [transport.py](wfrl_blender/transport.py) 维护连接、协议状态与回传。[panels/status.py](wfrl_blender/panels/status.py) 管连接与诊断，[panels/run.py](wfrl_blender/panels/run.py) 是唯一后端运行按钮入口。CONNECTED 表示握手；实际运行还需 READY 后显式 Start，并观察 RUNNING 与不断更新的真实快照。
 

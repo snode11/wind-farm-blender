@@ -18,7 +18,7 @@ def adapter(tmp_path):
     module = tmp_path / 'serve_adapter.py'
     module.write_text('''
 import numpy as np
-from wfrl.radar_x100 import recording, schema
+from wfrl.radar_x100 import acquisition, recording, schema
 
 def empty():
     return iter(())
@@ -38,6 +38,14 @@ def disk_failure():
 
 def acquisition_failure():
     raise ValueError('injected adapter failure')
+
+def session_events():
+    yield acquisition.SessionStart('X100','cli-test','TEST')
+    yield from one()
+    yield acquisition.SessionStart('X100','restarted','TEST')
+    yield schema.RadarFrame('X100','restarted',0,'TEST','UNKNOWN',
+                           np.zeros(0,dtype=schema.POINT_DTYPE))
+    yield from one()
 ''')
     return tmp_path
 
@@ -75,6 +83,15 @@ def test_valid_empty_frame_is_a_successful_recording(adapter):
     assert summary['recording_error'] is None
     assert not (destination / 'INCOMPLETE').exists()
     assert recording.Replay(destination).frame(0).validity == 'VALID_EMPTY'
+
+
+def test_session_events_are_control_only_and_late_frames_still_record(adapter):
+    result, summary, destination = run_serve(adapter, 'session_events')
+    assert result.returncode == 0, result.stderr
+    assert summary['recording_state'] == 'COMPLETE'
+    replay = recording.Replay(destination)
+    assert len(replay.rows) == 3
+    assert [replay.frame(i).session_id for i in range(3)] == ['cli-test','restarted','cli-test']
 
 
 def test_display_only_empty_adapter_can_exit_successfully(adapter):

@@ -90,9 +90,9 @@ M 系列 Mac 的文件类型应包含 `arm64`，Intel 为 `x86_64`。短仿真�
 scripts/blender/run_wfrl_macos.sh --help
 ```
 
-它委托 `scripts/blender/wfrl_launcher.py launch`，使用实际配置的解释器和已安装扩展；修改仓库源码不会自动更新已安装扩展。不能将“离线示例能播放”推定为 Bridge 或 FAST.Farm 环境可用。
+它委托 `scripts/blender/wfrl_launcher.py launch`，使用实际配置的解释器和已安装扩展；修改仓库源码不会自动更新已安装扩展。`WFRL_LAUNCHER_PYTHON` 指定启动器 Python，`--python`／`WFRL_PYTHON` 指定 Bridge Python，两者均需项目核心依赖 psutil；可共同指向已安装项目依赖的环境。不能将“离线示例能播放”推定为 Bridge 或 FAST.Farm 环境可用。
 
-当前工作区启动器保留虚拟环境解释器路径，使用所选后端 Python 解析 YAML 并统一后端预检与 MPI 配置判定。停止未确认时继续监管并保留会话凭据；普通重连保留原身份，认领新后端须显式确认且不停止旧任务。连接恢复的 `state_revision` 语义需要匹配的前端与 Bridge；源码合同见[维护说明](../../blender_frontend/README.md#55-实时连接与控制生命周期)，公开源码与日常工作区构建的适用范围分别见[源码验证](../blender/发布状态与验证范围.md#源码软件合同与验证)和[日常安装身份](../../publication/daily-installation.json)。
+当前工作区启动器保留虚拟环境解释器路径，使用所选后端 Python 解析 YAML 并统一后端预检与 MPI 配置判定。监管按 PID／创建时间和继承的运行标识覆盖本机后代，父进程退出不结束监管；身份不可读时保留 UNKNOWN 与两份恢复文件。Bridge 独立声明当前会话，界面换连接不改写启动器归属；`stop-session` 使用记录的固定端点并校验活进程身份。普通重连保留原身份，认领新后端须显式确认且不停止旧任务。连接恢复的 `state_revision` 语义需要匹配的前端与 Bridge；源码合同见[维护说明](../../blender_frontend/README.md#55-实时连接与控制生命周期)，公开源码与日常工作区构建的适用范围分别见[源码验证](../blender/发布状态与验证范围.md#源码软件合同与验证)和[日常安装身份](../../publication/daily-installation.json)。
 
 ## 4. 旧 Studio / RViz 桌面入口
 

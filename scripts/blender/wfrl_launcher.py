@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import shlex
 import shutil
+import signal
 import socket
 import subprocess
 import sys
@@ -16,6 +17,17 @@ import struct
 
 ROOT = Path(__file__).resolve().parents[2]
 BOOTSTRAP = Path(__file__).with_name("wfrl_blender_bootstrap.py")
+
+
+def ownership_modules():
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    try:
+        from wfrl.blender_bridge import launcher_state
+        from wfrl.blender_bridge.formal_process import OwnedProcesses
+    except ImportError as exc:
+        raise RuntimeError(f"Launcher Python {sys.executable} requires the project's psutil dependency") from exc
+    return launcher_state, OwnedProcesses
 
 
 def log(message: str) -> None:
@@ -223,6 +235,7 @@ print(json.dumps(backend))
 def preflight(args: argparse.Namespace, *, require_backend: bool) -> dict[str, object]:
     report: dict[str, object] = {"ok": False, "backend": "SYNTH fixture" if args.fake else "configured backend"}
     try:
+        ownership_modules()
         blender = resolve_executable(args.blender, "Blender")
         python = resolve_executable(args.python, "Python")
         project = Path(args.project_dir).expanduser().resolve()
@@ -243,7 +256,7 @@ def preflight(args: argparse.Namespace, *, require_backend: bool) -> dict[str, o
                 raise RuntimeError("; ".join(missing))
             report["mpi"] = resolve_executable(args.mpi, "MPI")
             report["fastfarm"] = resolve_executable(args.fastfarm, "FAST.Farm")
-        check = {
+        check = "import psutil; from wfrl.blender_bridge.launcher_state import SessionBinding; " + {
             "fake": "import wfrl.blender_bridge; from wfrl.blender_bridge.fake_backend import FakeTrainer",
             "floris": "from wfrl.blender_bridge.floris_session import FlorisDemoSession",
             "fastfarm": "from wfrl.studio.trainer import Trainer",
@@ -267,8 +280,13 @@ def launch(args: argparse.Namespace) -> int:
     if not report["ok"]:
         raise RuntimeError(str(report["error"]))
     bridge: subprocess.Popen | None = None
+    state_api, process_class = ownership_modules()
+    owned = process_class(env_key=state_api.RUN_TOKEN)
     env = os.environ.copy()
-    descriptor, session_path = tempfile.mkstemp(prefix="wfrl-session-", suffix=".txt")
+    for key in (state_api.RUN_TOKEN, state_api.BINDING_FILE, 'WFRL_PROCESS_RUN_TOKEN',
+                'WFRL_FORMAL_RUN_TOKEN', 'WFRL_SESSION_FILE'):
+        env.pop(key, None)
+    descriptor, session_path = tempfile.mkstemp(prefix="wfrl-session-", suffix=".json")
     os.close(descriptor)
     session_file = Path(session_path)
     mpi_path = str(report.get("mpi", args.mpi))
@@ -276,13 +294,20 @@ def launch(args: argparse.Namespace) -> int:
     env.update(WFRL_PROJECT_DIR=str(report["project_dir"]), WFRL_BACKEND_PYTHON=str(report["python"]),
                WFRL_SCENE=str(report["scene"]), WFRL_PORT=str(args.port), WFRL_MPI=mpi_path,
                WFRL_FASTFARM=fastfarm_path, WFCRL_FASTFARM_EXECUTABLE=fastfarm_path,
-               WFCRL_MPIEXEC=mpi_path, WFRL_SESSION_FILE=str(session_file),
+               WFCRL_MPIEXEC=mpi_path,
                PYTHONDONTWRITEBYTECODE="1")
+    bridge_env = dict(env, **{state_api.BINDING_FILE: str(state_api.binding_path(session_file))})
+    owner = dict(schema=state_api.OWNER_SCHEMA, run_token=owned.token, host='127.0.0.1',
+                 port=args.port, root=None, known_processes=[], process_status='UNKNOWN',
+                 protocol_stop_confirmed=False)
+    state_api.atomic_write(session_file, owner)
     bridge_args = [str(report["python"]), "-m", "wfrl.blender_bridge", "--host", "127.0.0.1",
                    "--port", str(args.port), "--scene", str(report["scene"])]
     if args.fake:
         bridge_args.append("--fake")
     result = 1
+    stop_confirmed = stopped_by_launcher = False
+    confirmed_session = None
     try:
         command = bridge_args
         if not args.fake and report["backend"] == "fastfarm":
@@ -292,53 +317,78 @@ def launch(args: argparse.Namespace) -> int:
             command = [mpi, "-n", "1", *bridge_args]
         log("Starting Bridge: " + " ".join(command))
         creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0
-        bridge = subprocess.Popen(command, cwd=report["project_dir"], env=env, creationflags=creationflags)
+        bridge = owned.start(command, cwd=report["project_dir"], env=bridge_env, creationflags=creationflags)
+        if owned.root is not None:
+            owner['root'] = dict(pid=owned.root.pid, create_time=owned.root.create_time())
+        owner['known_processes'] = owned.identities()
+        state_api.atomic_write(session_file, owner)
         wait_for_bridge(bridge, args.port, args.startup_timeout)
+        deadline = time.monotonic() + args.startup_timeout
+        while state_api.read_binding(session_file, owner, owns=owned.owns) is None:
+            if bridge.poll() is not None or time.monotonic() >= deadline:
+                raise RuntimeError('Owned Bridge did not publish a verifiable session binding')
+            time.sleep(.05)
         blender_args = [str(report["blender"]), "--python-exit-code", "12", "--python", str(BOOTSTRAP)]
         log(f"Starting Blender with MAPPO replay; owned Bridge PID {bridge.pid} ready on port {args.port}")
         result = subprocess.run(blender_args, cwd=report["project_dir"], env=env).returncode
     finally:
+        status = None
         try:
-            session_id = session_file.read_text().strip() if session_file.exists() else ""
-            stop_confirmed = False
-            stopped_by_launcher = False
-            while bridge and bridge.poll() is None:
-                if not stop_confirmed:
-                    if session_id:
-                        log("Requesting run.stop through the resumed extension session")
-                        stop_confirmed = request_protocol_stop(args.port, session_id, 180)
-                    else:
-                        log("Checking for an inactive Bridge session before process cleanup")
-                        idle_session_id = confirm_idle_bridge(args.port, 5.0)
-                        if idle_session_id:
-                            session_file.write_text(idle_session_id, encoding="utf-8")
-                            session_id = idle_session_id
-                            stop_confirmed = True
-                    if not stop_confirmed:
-                        print("[WFRL] ERROR: backend stop was not confirmed; retrying while "
-                              "this launcher remains in the foreground", file=sys.stderr, flush=True)
-                if bridge.poll() is not None:
+            stop_warning = None
+            while bridge:
+                status = owned.status()
+                if status in {'EMPTY_CONFIRMED', 'UNKNOWN'}:
                     break
+                owner.update(process_status=status, known_processes=owned.identities(),
+                             protocol_stop_confirmed=stop_confirmed)
+                state_api.atomic_write(session_file, owner)
+                binding = state_api.read_binding(session_file, owner, owns=owned.owns)
+                if binding is not None and binding['session_id'] != confirmed_session:
+                    stop_confirmed = False
+                if not stop_confirmed:
+                    if binding is not None:
+                        log("Requesting run.stop through the resumed extension session")
+                        stop_confirmed = request_protocol_stop(args.port, binding['session_id'], 180)
+                        if stop_confirmed:
+                            confirmed_session = binding['session_id']
+                    if not stop_confirmed:
+                        warning = binding['session_id'] if binding is not None else 'unverified binding'
+                        if warning != stop_warning:
+                            print("[WFRL] ERROR: backend stop was not confirmed; retrying while "
+                                  "this launcher remains in the foreground", file=sys.stderr, flush=True)
+                        stop_warning = warning
                 if stop_confirmed:
+                    stop_warning = None
+                    status = owned.status()
+                    if status == 'UNKNOWN':
+                        break
                     stopped_by_launcher = True
                     stop_owned(bridge, "Bridge")
-                else:
-                    try:
-                        bridge.wait(timeout=1.0)
-                    except subprocess.TimeoutExpired:
-                        pass
-            if bridge and bridge.poll() and not stopped_by_launcher:
+                    owned.signal(signal.SIGTERM)
+                status = owned.status()
+                if status == 'UNKNOWN':
+                    break
+                if status != 'EMPTY_CONFIRMED':
+                    time.sleep(1.0)
+            if bridge and (not stop_confirmed or (bridge.poll() and not stopped_by_launcher)):
                 result = 1
         finally:
-            if bridge is None or bridge.poll() is not None:
+            if status != 'UNKNOWN':
+                status = owned.status()
+            if status == 'EMPTY_CONFIRMED':
                 session_file.unlink(missing_ok=True)
+                state_api.binding_path(session_file).unlink(missing_ok=True)
             else:
+                result = 1
+                owner.update(process_status=status, known_processes=owned.identities(),
+                             protocol_stop_confirmed=stop_confirmed)
+                state_api.atomic_write(session_file, owner)
                 recovery = [sys.executable, str(Path(__file__).absolute()), "stop-session",
                             "--session-file", str(session_file), "--port", str(args.port)]
                 command = subprocess.list2cmdline(recovery) if os.name == "nt" else shlex.join(recovery)
-                print(f"[WFRL] ERROR: Bridge PID {bridge.pid} exit is unconfirmed. "
+                print(f"[WFRL] ERROR: owned backend process cleanup is {status}. "
                       f"Session credentials retained at {session_file}.\n"
-                      f"[WFRL] Recover by requesting a protocol stop: {command}",
+                      f"[WFRL] Recover by checking the retained session: {command}",
                       file=sys.stderr, flush=True)
     return result
 
@@ -347,10 +397,45 @@ def stop_session(args: argparse.Namespace) -> int:
     """Confirm inactivity using retained credentials or an idle-only handshake."""
     session_file = Path(args.session_file).expanduser().absolute()
     session_id = session_file.read_text(encoding="utf-8").strip()
+    if session_id.startswith('{'):
+        state_api, process_class = ownership_modules()
+        try:
+            owner = json.loads(session_id)
+            if (owner['schema'] != state_api.OWNER_SCHEMA or owner['host'] != '127.0.0.1'
+                    or type(owner['port']) is not int or not 1024 <= owner['port'] <= 65535
+                    or (args.port is not None and args.port != owner['port'])):
+                raise ValueError('Owner endpoint mismatch')
+        except (ValueError, KeyError, TypeError) as exc:
+            raise RuntimeError('Invalid launcher ownership record or conflicting --port') from exc
+        binding = state_api.read_binding(session_file, owner)
+        confirmed = binding is not None and request_protocol_stop(owner['port'], binding['session_id'], args.timeout)
+        if confirmed:
+            log(f'Owned session is confirmed inactive; process exit remains unverified. Record retained at {session_file}')
+            return 0
+        try:
+            identities = list(owner['known_processes'])
+            if owner.get('root') is not None:
+                identities.append(owner['root'])
+            owned = process_class.recover(identities, token=owner['run_token'], env_key=state_api.RUN_TOKEN)
+            status = owned.status()
+            owner.update(process_status=status, known_processes=owned.identities())
+            state_api.atomic_write(session_file, owner)
+        except (ValueError, KeyError, TypeError):
+            status = 'UNKNOWN'
+        if status == 'EMPTY_CONFIRMED':
+            session_file.unlink(missing_ok=True)
+            state_api.binding_path(session_file).unlink(missing_ok=True)
+            log('Owned process cleanup is EMPTY_CONFIRMED; session records removed')
+            return 0
+        print(f'[WFRL] ERROR: owned process cleanup is {status}; Bridge stop is unconfirmed. '
+              f'Record retained at {session_file}',
+              file=sys.stderr, flush=True)
+        return 1
+    port = args.port if args.port is not None else 8765
     if session_id:
-        confirmed = request_protocol_stop(args.port, session_id, args.timeout)
+        confirmed = request_protocol_stop(port, session_id, args.timeout)
     else:
-        idle_session_id = confirm_idle_bridge(args.port, args.timeout)
+        idle_session_id = confirm_idle_bridge(port, args.timeout)
         confirmed = idle_session_id is not None
         if idle_session_id:
             session_file.write_text(idle_session_id, encoding="utf-8")
@@ -358,7 +443,7 @@ def stop_session(args: argparse.Namespace) -> int:
         log(f"Session is confirmed inactive. Credentials retained at {session_file}; "
             "Bridge process exit is unverified.")
         return 0
-    print(f"[WFRL] ERROR: session stop is unconfirmed on port {args.port}; "
+    print(f"[WFRL] ERROR: session stop is unconfirmed on port {port}; "
           f"credentials retained at {session_file}. Retry the same command when the owned Bridge is reachable.",
           file=sys.stderr, flush=True)
     return 1
@@ -389,11 +474,11 @@ def main(argv: list[str] | None = None) -> int:
     verify_parser.set_defaults(handler=verify)
     stop_parser = commands.add_parser("stop-session", help="request a stop using retained session credentials")
     stop_parser.add_argument("--session-file", required=True)
-    stop_parser.add_argument("--port", type=int, default=8765)
+    stop_parser.add_argument("--port", type=int)
     stop_parser.add_argument("--timeout", type=float, default=180.0)
     stop_parser.set_defaults(handler=stop_session)
     args = parser.parse_args(argv)
-    if not 1024 <= args.port <= 65535:
+    if args.port is not None and not 1024 <= args.port <= 65535:
         parser.error("--port must be between 1024 and 65535")
     if args.command == "stop-session" and args.timeout <= 0:
         parser.error("--timeout must be positive")

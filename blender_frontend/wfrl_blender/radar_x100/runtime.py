@@ -217,7 +217,7 @@ class Session:
             from .scene import SideWallQuery
             if self.side_query is None:
                 self.side_query = SideWallQuery(self.context)
-            self.analysis_result = self.side_query.query(self.frame.xyz, roi)
+            self.analysis_result = self.side_query.query(self.frame.xyz, roi, frame_key=self.frame.identity)
             self.analysis_key = key
             self.analysis_retry_key = None
             self.analysis_error = ''
@@ -377,7 +377,8 @@ class Session:
             from .scene import SideWallQuery
             if self.side_query is None:
                 self.side_query = SideWallQuery(self.context)
-            background = self.side_query.query(self.frame.xyz, ((-1e6,)*3, (1e6,)*3))
+            background = self.side_query.query(self.frame.xyz, ((-1e6,)*3, (1e6,)*3),
+                                               frame_key=self.frame.identity)
             world = analysis.transform(self.frame.xyz, self.context.world_from_sensor)
             priors = self.sampler.blade_priors(self.frame.time.source_time_s)
             result = self.blade_tracker.update(world, priors, background['distance'],

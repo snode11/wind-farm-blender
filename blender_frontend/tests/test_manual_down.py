@@ -18,7 +18,7 @@ SOURCE = Path(__file__).resolve().parents[1] / 'wfrl_blender/manual_down.py'
 
 def helpers():
     names = {'pose_at', '_output_paths', '_publish_pair', '_verify_video', '_plan', '_frame_handler',
-             '_publish_async', '_finalize_files'}
+             '_publish_async', '_finalize_files', '_finish'}
     tree = ast.parse(SOURCE.read_text())
     namespace = dict(Path=Path, Fraction=Fraction, json=json, math=math, os=os,
                      shutil=shutil, tempfile=tempfile, subprocess=subprocess, queue=queue, threading=threading)
@@ -27,6 +27,40 @@ def helpers():
     exec(compile(ast.Module(body=[node for node in tree.body if isinstance(node, ast.FunctionDef)
                                  and node.name in names], type_ignores=[]), str(SOURCE), 'exec'), namespace)
     return namespace
+
+
+@pytest.mark.parametrize('asynchronous', [False, True])
+@pytest.mark.parametrize('completed', [False, True])
+def test_camera_failure_wins_over_cancel_and_blocks_both_publication_paths(asynchronous, completed):
+    namespace = helpers()
+    scene = SimpleNamespace(as_pointer=lambda: 8)
+    job = dict(source_key=7, failure='camera mismatch', temp='/private-media')
+    called = []
+    namespace.update(_EXPORT={8:job}, _LAST={}, _drop_scene=lambda scene: called.append('drop'),
+        _publish_async=lambda *args: called.append('publish'), _finalize_files=lambda *args: called.append('publish'),
+        _render_camera=None, _render_complete=None, _render_cancel=None,
+        bpy=SimpleNamespace(app=SimpleNamespace(handlers=SimpleNamespace(
+            frame_change_pre=[], render_post=[], render_complete=[], render_cancel=[]))))
+    with pytest.raises(RuntimeError, match='camera mismatch'):
+        namespace['_finish'](scene,completed=completed,asynchronous=asynchronous)
+    assert called == ['drop'] and namespace['_LAST'][7]['state'] == 'FAILED'
+
+
+@pytest.mark.parametrize('asynchronous', [False, True])
+def test_camera_frame_coverage_is_required_before_publishing(asynchronous):
+    namespace = helpers()
+    scene = SimpleNamespace(as_pointer=lambda: 8)
+    job = dict(source_key=7, temp='/private-media', plan={'frames':2}, camera_frames={2})
+    called = []
+    namespace.update(_EXPORT={8:job},_LAST={},_drop_scene=lambda scene:called.append('drop'),
+        _check_export_camera=lambda *args:None, _publish_async=lambda *args:called.append('publish'),
+        _finalize_files=lambda *args:called.append('publish'), _render_camera=None,
+        _render_complete=None,_render_cancel=None,
+        bpy=SimpleNamespace(app=SimpleNamespace(handlers=SimpleNamespace(
+            frame_change_pre=[],render_post=[],render_complete=[],render_cancel=[]))))
+    with pytest.raises(RuntimeError,match='全部输出帧'):
+        namespace['_finish'](scene,completed=True,asynchronous=asynchronous)
+    assert called == ['drop'] and namespace['_LAST'][7]['state'] == 'FAILED'
 
 
 def test_pose_clamps_pitch_and_wraps_rotor():

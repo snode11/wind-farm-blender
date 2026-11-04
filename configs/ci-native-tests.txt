@@ -19,6 +19,7 @@ radar_x100_regression.py
 radar_x100_edges.py
 radar_x100_history_regression.py
 radar_x100_analysis.py
+camera_export_contract_regression.py
 radar_x100_mount_presets.py
 radar_x100_configuration.py
 radar_x100_binding_replay.py

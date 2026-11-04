@@ -40,8 +40,7 @@
     "scientific_acceptance": "NOT_RUN"
   },
   "daily_installation": {
-    "updated_by_publication": false,
-    "saved_version": "0.3.28",
+    "version": "0.3.30",
     "saved_identity": "publication/daily-installation.json"
   },
   "remote_asset_download_verification": false,

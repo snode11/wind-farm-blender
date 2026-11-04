@@ -402,8 +402,9 @@ class SideWallQuery:
         self.anchor = context.vertices.mean(axis=0)
         self.tree = BVHTree.FromPolygons((context.vertices-self.anchor).tolist(),
                                        context.triangles.tolist(), all_triangles=True)
+        self._frame_cache = None
 
-    def query(self, sensor_points, roi):
+    def query(self, sensor_points, roi, *, frame_key=None):
         from mathutils import Vector
         context = self.context
         world = analysis.transform(sensor_points, context.world_from_sensor)
@@ -419,7 +420,20 @@ class SideWallQuery:
         triangle = np.full(n,-1,dtype=np.int32)
         status = np.full(n,'OUTSIDE_ROI',dtype='U16')
         status[~finite]='NONFINITE'
-        for i in np.flatnonzero(selected):
+        cache = None
+        if frame_key is not None:
+            key = context.identity, frame_key
+            if (self._frame_cache is None or self._frame_cache[0] != key
+                    or not np.array_equal(self._frame_cache[1], sensor_points, equal_nan=True)):
+                self._frame_cache = (key, analysis.readonly(sensor_points), np.zeros(n, dtype=bool),
+                                     distance.copy(), nearest.copy(), triangle.copy())
+            cache = self._frame_cache
+            reused = selected & cache[2]
+            distance[reused], nearest[reused], triangle[reused] = (
+                cache[3][reused], cache[4][reused], cache[5][reused])
+            status[reused] = 'VALID'
+        missing = selected if cache is None else selected & ~cache[2]
+        for i in np.flatnonzero(missing):
             q, _, face, _ = self.tree.find_nearest(Vector(world[i]-self.anchor))
             if q is None:
                 status[i]='QUERY_FAILED'
@@ -430,6 +444,10 @@ class SideWallQuery:
             nearest[i]=anchored+self.anchor
             triangle[i]=face
             status[i]='VALID'
+        if cache is not None:
+            valid = missing & (status == 'VALID')
+            cache[2][valid] = True
+            cache[3][valid], cache[4][valid], cache[5][valid] = distance[valid], nearest[valid], triangle[valid]
         return dict(indices=analysis.readonly(np.arange(n),np.int64),
             points=analysis.readonly(points), distance=analysis.readonly(distance),
             nearest=analysis.readonly(nearest), triangle=analysis.readonly(triangle,np.int32),

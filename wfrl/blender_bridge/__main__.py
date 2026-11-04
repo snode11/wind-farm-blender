@@ -4,6 +4,7 @@ import signal
 import time
 from .backend_session import BackendSession
 from .server import BridgeServer
+from .launcher_state import SessionBinding
 
 
 def main():
@@ -19,7 +20,8 @@ def main():
         session.trainer_factory = FakeTrainer
         session.fake = True
     if args.scene: session.scene = session._load(args.scene)
-    server = BridgeServer(args.host, args.port, session)
+    server = BridgeServer(args.host, args.port, session,
+                          session_binding=SessionBinding.from_environment(args.host, args.port))
     def request_shutdown(_signum, _frame):
         server.shutdown_requested = True
     for name in ('SIGTERM', 'SIGHUP'):

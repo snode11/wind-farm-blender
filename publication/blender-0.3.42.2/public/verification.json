@@ -52,5 +52,14 @@
     "source_archive_sha256": "b84279fef3b4bb69da115647f67cdf604bfc1478cbed6aee2510fc9683eea8eb",
     "source_archive_bytes": 191469379,
     "remote_asset_download_verification": false
+  },
+  "artifact_availability": {
+    "extension_zip": true,
+    "formal_result_records": true,
+    "isolated_validation_profile": false,
+    "temporary_source_export": false,
+    "generated_test_scenes": false,
+    "source_archive": "GitHub Release",
+    "cleanup": "cleanup.json"
   }
 }

@@ -132,7 +132,7 @@ jobs:
       - name: Install Blender runtime libraries
         run: |
           sudo apt-get update
-          sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libxxf86vm1
+          sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libxxf86vm1 ffmpeg
       - name: Install verified Blender archive
         working-directory: ${{ runner.temp }}
         run: |

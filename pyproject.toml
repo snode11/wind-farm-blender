@@ -9,7 +9,7 @@ description = "Multi-agent RL for wind farm wake-steering control on the WFCRL b
 requires-python = ">=3.11"
 
 # 运行依赖按功能分组，避免在不需要训练或 GUI 的环境中强制安装大型组件。
-dependencies = ["PyYAML>=6.0.1,<7"]
+dependencies = ["PyYAML>=6.0.1,<7", "psutil>=5.9,<8"]
 
 [project.optional-dependencies]
 camera-video = [
@@ -28,7 +28,6 @@ tip-preview = [
 ]
 train = [
     "torch>=2.2,<3",
-    "psutil>=5.9,<8",
     "stable-baselines3==2.3.2",
     "tensorboard>=2.14",
 ]
@@ -40,7 +39,6 @@ gui = [
 ]
 all = [
     "torch>=2.2,<3",
-    "psutil>=5.9,<8",
     "stable-baselines3==2.3.2",
     "tensorboard>=2.14",
     "pyvista>=0.43",

@@ -1,5 +1,6 @@
 """Compare constrained installation candidates using complete source-grid passages."""
 import argparse
+from dataclasses import replace
 import hashlib
 import json
 from pathlib import Path
@@ -76,13 +77,12 @@ def main():
                 world = {seed: plan.points(sample) for seed, plan in plans.items()}
                 for c, pose in enumerate(poses):
                     sensor = nacelle @ pose
+                    observed = replace(sample, world_from_sensor=sensor)
                     for seed, plan in plans.items():
                         xyz = (world[seed] - sensor[:3, 3]) @ sensor[:3, :3]
                         gate = simulation.in_fov(xyz)
                         mask = np.zeros(len(xyz), dtype=bool)
                         # The same geometry BVH is reused by every pose at this source time.
-                        from dataclasses import replace
-                        observed = replace(sample, world_from_sensor=sensor)
                         mask[gate] = sampler.visibility(observed, world[seed][gate])
                         for p, (profile_seed, budget) in enumerate(profiles):
                             if seed != profile_seed:

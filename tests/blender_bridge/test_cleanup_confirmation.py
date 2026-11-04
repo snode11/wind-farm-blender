@@ -172,8 +172,8 @@ def test_bridge_shutdown_keeps_supervising_until_failed_worker_is_clean(monkeypa
     class Server:
         port = 18765
         closed = False
-        def __init__(self, *args):
-            pass
+        def __init__(self, *args, session_binding=None):
+            assert session_binding is None
         def poll(self):
             polls.append(session.alive())
             if len(polls) == 1:
@@ -206,8 +206,8 @@ def test_main_closes_command_gate_before_poll_dispatch_after_shutdown_signal(mon
         port = 18765
         closed = False
         shutdown_requested = False
-        def __init__(self, *args):
-            pass
+        def __init__(self, *args, session_binding=None):
+            assert session_binding is None
         def poll(self):
             polls.append(self.shutdown_requested)
             if signal_timing == 'poll':

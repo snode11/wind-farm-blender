@@ -26,6 +26,10 @@ jobs = importlib.import_module(PACKAGE + '.manual_video_job')
 video = importlib.import_module(PACKAGE + '.manual_video_render')
 from wfrl.camera_video import media
 
+requires_supervision = unittest.skipUnless(
+    os.name == 'posix' and all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')),
+    'Process supervision requires POSIX waitid(WNOWAIT) support')
+
 
 def make_job(root):
     root.mkdir(exist_ok=True)
@@ -71,6 +75,7 @@ def make_master(path, job):
     jobs.write_json(root / 'status.json', dict(state='FAILED', job_id=job['job_id'], final=True))
 
 
+@requires_supervision
 class MasterRecoveryTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix='manual-master-test-')
@@ -283,6 +288,7 @@ elif '-show_entries' in args:
         self.assertFalse(Path(self.job['output_mp4']).exists())
 
 
+@requires_supervision
 class SupervisionTests(unittest.TestCase):
     def setUp(self):
         jobs.require_supervision()
@@ -520,6 +526,7 @@ class SupervisionTests(unittest.TestCase):
             jobs.Lease(path, self.job['job_id'])
 
 
+@requires_supervision
 class SceneRecoveryTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix='manual-scene-test-')
