@@ -1,6 +1,7 @@
 """Recording shutdown yields to the event loop and retains its worker ownership."""
 import threading
 import sys
+import time
 from types import SimpleNamespace
 
 import numpy as np
@@ -73,3 +74,27 @@ def test_recording_stop_yields_until_worker_exits_and_prevents_restart(monkeypat
         assert s.fanout is None and not s.recording_stopping
         runtime.stop(scene)
     assert sink.state == 'COMPLETE' and recording.Replay(sink.path).frame(0).sequence == 0
+
+
+def test_simulation_recording_stops_with_reason_when_timeline_moves_backward(tmp_path):
+    def frame(sequence, t):
+        return schema.RadarFrame('X100-T1', 'sim', sequence, 'GEOMETRY_SIMULATION', 'GEOMETRY',
+            np.zeros(1, dtype=schema.POINT_DTYPE),
+            time=schema.FrameTime('SIMULATION:src', t, (t, t), 'INSTANT', 'SIMULATION'))
+    s = runtime.Session.__new__(runtime.Session)
+    s.mode, s.frame_index = 'SIMULATION', None
+    s.record_start = s.record_last = s.record_last_index = s.record_last_stamp = None
+    s.fanout = acquisition.Fanout(recording.Recorder(tmp_path / 'record'))
+    for sequence, t in ((150, 5.), (151, 5. + 1 / 30)):
+        s._record_frame(frame(sequence, t))
+    # A failure discards queued rows that are not yet durable, so let accepted frames land first.
+    deadline = time.monotonic() + 5
+    while s.fanout.recorder.rows < 2 and time.monotonic() < deadline:
+        time.sleep(.01)
+    s._record_frame(frame(0, 0.))  # playback wraps to the start
+    s.fanout.request_close()
+    s.fanout.worker.join(5)
+    recorder = s.fanout.recorder
+    assert recorder.state == 'FAILED' and recorder.rows == 2
+    assert '仿真时间在记录期间回退' in recorder.error
+    assert (tmp_path / 'record/INCOMPLETE').exists()

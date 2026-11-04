@@ -85,7 +85,7 @@ class Session:
         self.playing = False
         self.replay_cursor = None
         self.replay_time_s = float(scene.wfrl_x100_replay_s)
-        self.frame_index = self.record_last_index = None
+        self.frame_index = self.record_last_index = self.record_last_stamp = None
         self.owner = scene.get('wfrl_x100_owner') or str(uuid.uuid4())
         scene['wfrl_x100_owner'] = self.owner
         if not restoring:
@@ -270,11 +270,17 @@ class Session:
             source_time = frame.time.source_time_s
             # Unknown physical time uses a separate local recording clock.
             stamp = time.monotonic() if self.mode == 'LIVE' or source_time is None else source_time
+            # The scene timeline can loop or be scrubbed while recorded times must not decrease.
+            if self.record_last_stamp is not None and stamp < self.record_last_stamp:
+                self.fanout.failure = '仿真时间在记录期间回退（时间轴循环或回拖）；请开始新的记录'
+                self.fanout.stopping.set()
+                return
         if self.record_start is None:
             self.record_start = stamp
         self.fanout.submit(frame, stamp - self.record_start)
         self.record_last = key
         self.record_last_index = self.frame_index if indexed else None
+        self.record_last_stamp = stamp
 
     def update(self):
         from .. import farm_flex
@@ -462,7 +468,7 @@ class Session:
             raise ValueError('记录已启动')
         if self.mode == 'LIVE':
             raise ValueError('实时完整记录由外部采集端执行；Blender 最新帧不作为完整采集记录')
-        self.record_start = self.record_last = self.record_last_index = None
+        self.record_start = self.record_last = self.record_last_index = self.record_last_stamp = None
         self.fanout = acquisition.Fanout(recording.Recorder(path, description=dict(
             source_mode=self.mode, timing=('original indexed presentation time' if self.mode == 'REPLAY' and self.replay
                 else 'source time when available; otherwise local recording monotonic'))))
