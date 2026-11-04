@@ -1,16 +1,16 @@
 {
   "schema": "wfrl.daily-installation.v1",
   "status": "PASS",
-  "version": "0.3.42.5",
-  "extension_version": "0.3.42+5",
+  "version": "0.3.42.6",
+  "extension_version": "0.3.42+6",
   "installation_kind": "PUBLIC_RELEASE_ARCHIVE",
   "module": "bl_ext.user_default.wfrl_blender",
   "module_file": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
   "blender": "5.2.1 LTS",
   "platform": "macOS",
-  "source_archive": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.5/release-package/wfrl_blender-0.3.42+5.zip",
-  "archive_sha256": "c27c1c1a09791000841c751e7c47a8da5125c013c5c28696a664ca8e38a28fd4",
-  "installed_files_checked": 207,
+  "source_archive": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.6/package/wfrl_blender-0.3.42+6.zip",
+  "archive_sha256": "411c4a453aa60ee7470198386f0e1cc796eec816166280378cddabdccd81a597",
+  "installed_files_checked": 206,
   "loaded_module_files_checked": 115,
   "file_mismatches": 0,
   "enablement_persisted": true,
@@ -18,20 +18,22 @@
   "user_preferences_preserved": true,
   "configuration_files_preserved": 6,
   "public_release": true,
-  "same_as_public_archive": false,
+  "same_as_public_archive": true,
   "matches_source_archive": true,
   "fresh_process_import": "PASS",
   "native_background_status": "PASS_REGISTRATION_ONLY",
   "native_window_status": "NOT_RUN",
   "physical_input_status": "NOT_RUN",
-  "evidence": {},
-  "backups": {
-    "previous_extension_and_config": "/Users/eason/Library/Application Support/WFRL/Backups/pre-fixed-0.3.42.5.u8qvddxj"
+  "evidence": {
+    "installation": "publication/blender-0.3.42.6/installation.json"
   },
-  "limits": "Installed inventory matches the 0.3.42.5 public ZIP. A fresh Blender background process with a copy of the existing preferences confirmed persistent enablement, X100 blade panel registration, installed module digests, and corrected PNG, manual controls, Down video and Bridge entry points. Original configuration files were unchanged. Functional regression, visible windows/GPU, performance, device input and scientific accuracy were not tested.",
+  "backups": {
+    "previous_extension_and_config": "/Users/eason/Library/Application Support/WFRL/Backups/pre-install-0.3.42.6.ktiwaofe"
+  },
+  "limits": "Installed inventory matches the 0.3.42.6 public release payload. A fresh Blender background process using the existing user preferences confirmed persistent enablement, installed module origins and digests, X100 panels and the installation-report operator. All six original configuration files were unchanged. Functional regression, visible windows/GPU, performance, device input and scientific accuracy were not tested.",
   "artifact_availability": {
     "final_archive": true,
-    "result_records": false,
+    "result_records": true,
     "scene": true,
     "recovery_backups": true,
     "temporary_test_scenes": false,
@@ -44,5 +46,5 @@
   "existing_processes_preserved": [],
   "restart_required_for_existing_processes": false,
   "local_source_archive_available": true,
-  "source_archive_download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.5/wfrl_blender-0.3.42+5.zip"
+  "source_archive_download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.6/wfrl_blender-0.3.42+6.zip"
 }
