@@ -12,6 +12,7 @@ from wfrl.radar_x100 import acquisition, recording, schema, tracking
 
 class Scene(dict):
     wfrl_x100_enabled = True
+    wfrl_x100_fov = True
     def as_pointer(self): return id(self)
 
 

@@ -8,6 +8,7 @@ from .core import schema, simulation, ply, recording, channel, acquisition
 from . import configuration, display, view
 
 _SESSIONS = {}
+_DRAWN = {}
 _RESTORE_ATTEMPTED = set()
 _RESET_HANDLERS = ('load_pre', 'undo_pre', 'redo_pre')
 _SHUTTING_DOWN = False
@@ -247,7 +248,11 @@ class Session:
             if required_gpu:
                 raise
         self.render_color = style
-        if record and self.fanout and not self.recording_stopping and frame is not None:
+        if record:
+            self._record_current(frame)
+
+    def _record_current(self, frame):
+        if self.fanout and not self.recording_stopping and frame is not None:
             try:
                 self._record_frame(frame)
             except Exception as exc:
@@ -447,8 +452,11 @@ class Session:
 
     def toggle_playback(self):
         if self.playing:
-            self.update()
-            self.playing = False
+            # Pausing snaps to the elapsed position; a failed update must still pause.
+            try:
+                self.update()
+            finally:
+                self.playing = False
             return
         if self.replay_time_s >= self.replay.duration_s:
             self._set_replay_position(self.replay.times[0])
@@ -474,8 +482,8 @@ class Session:
                 else 'source time when available; otherwise local recording monotonic'))))
         self.scene['wfrl_x100_record_error'] = ''
         self.recording_health()
-        if self.frame is not None:
-            self._display(self.frame)
+        # The displayed frame is already current; record it without rebuilding display resources.
+        self._record_current(self.frame)
 
     def recording_health(self):
         if self.fanout is not None:
@@ -590,22 +598,28 @@ def apply_mount_preset(scene, preset, *, search_report=None):
         current.capture_configuration()
         return current
 
+    previous = (scene.wfrl_x100_mount, tuple(scene.wfrl_x100_location),
+                tuple(scene.wfrl_x100_rotation))
+    if current is None:
+        # A new session samples its own first frame; only the scene settings need rollback.
+        try:
+            scene.wfrl_x100_mount = 'NACELLE'
+            scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
+            return start(scene)
+        except Exception:
+            scene.wfrl_x100_mount, scene.wfrl_x100_location, scene.wfrl_x100_rotation = previous
+            raise
     source_session = str(uuid.uuid4())
     sequence, source_t = _simulation_time(scene, sampler)
     frame = _simulation_frame(scene, sampler, source_session, sequence, source_t)
     style = display.style_key(scene)
     batch = view.batch(frame, style[0], color_scale=style[1], velocity_limit=style[2]) if not bpy.app.background else None
-    previous = (scene.wfrl_x100_mount, tuple(scene.wfrl_x100_location),
-                tuple(scene.wfrl_x100_rotation))
-    if current is not None:
-        previous_mount = (current.mount.parent, current.mount.matrix_parent_inverse.copy(),
-                          current.mount.matrix_basis.copy())
-    saved_session = dict(current.__dict__) if current is not None else None
+    previous_mount = (current.mount.parent, current.mount.matrix_parent_inverse.copy(),
+                      current.mount.matrix_basis.copy())
+    saved_session = dict(current.__dict__)
     try:
         scene.wfrl_x100_mount = 'NACELLE'
         scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
-        if current is None:
-            return start(scene)
         current.mount.parent = yaw
         current.mount.matrix_parent_inverse = Matrix.Identity(4)
         current.mount.matrix_basis = Matrix(sampler.mount_from_sensor.tolist())
@@ -619,10 +633,9 @@ def apply_mount_preset(scene, preset, *, search_report=None):
         current.derive_blades()
     except Exception:
         scene.wfrl_x100_mount, scene.wfrl_x100_location, scene.wfrl_x100_rotation = previous
-        if current is not None:
-            current.mount.parent, current.mount.matrix_parent_inverse, current.mount.matrix_basis = previous_mount
-            current.__dict__.clear()
-            current.__dict__.update(saved_session)
+        current.mount.parent, current.mount.matrix_parent_inverse, current.mount.matrix_basis = previous_mount
+        current.__dict__.clear()
+        current.__dict__.update(saved_session)
         raise
     scene['wfrl_x100_error'] = scene.get('wfrl_x100_record_error', '')
     scene['wfrl_x100_status'] = '几何仿真 · 30 Hz 瞬时采样假设'
@@ -736,11 +749,40 @@ def tick():
             if session.fanout:
                 session.fanout.failure = 'Radar source failed: ' + str(exc)
                 session.fanout.stopping.set()
-    for window in bpy.context.window_manager.windows:
-        for area in window.screen.areas:
-            if area.type == 'VIEW_3D' and session_for(window.scene) is not None:
-                area.tag_redraw()
+    _redraw_changed_overlays(alive)
     return 1 / 30
+
+
+def _overlay_state(scene):
+    session = _SESSIONS.get(scene.as_pointer())
+    if session is None or session.closing:
+        return None
+    return (session, session.frame, session.gpu_batch, session.display_valid, scene.wfrl_x100_fov)
+
+
+def _redraw_changed_overlays(alive):
+    """Tag 3D views only when the scene's drawn radar overlay inputs changed."""
+    import bpy
+    changed = set()
+    for key in set(_DRAWN) | set(_SESSIONS):
+        scene = alive.get(key)
+        state = None if scene is None else _overlay_state(scene)
+        previous = _DRAWN.get(key)
+        # Identity comparison: frames are dataclasses whose equality would compare arrays.
+        if (state is None) != (previous is None) or (
+                state is not None and any(a is not b for a, b in zip(state, previous))):
+            changed.add(key)
+        if state is None:
+            _DRAWN.pop(key, None)
+        else:
+            _DRAWN[key] = state
+    if not changed:
+        return
+    for window in bpy.context.window_manager.windows:
+        if window.scene.as_pointer() in changed:
+            for area in window.screen.areas:
+                if area.type == 'VIEW_3D':
+                    area.tag_redraw()
 
 
 def on_load_pre(_unused):
@@ -754,6 +796,7 @@ def on_load_pre(_unused):
         except Exception as exc:
             print('X100 record close failed:', str(exc))
     _RESTORE_ATTEMPTED.clear()
+    _DRAWN.clear()
 
 
 def register():
@@ -796,6 +839,7 @@ def unregister():
                 print('X100 cleanup failed:', str(exc))
     finally:
         _RESTORE_ATTEMPTED.clear()
+        _DRAWN.clear()
         if not _SESSIONS and bpy.app.timers.is_registered(tick):
             bpy.app.timers.unregister(tick)
         for name in _RESET_HANDLERS:

@@ -92,7 +92,7 @@ class WFRL_OT_X100Step(bpy.types.Operator):
             session.playing = False
             index = session.selected_replay_index()
             index = max(0, min(len(session.replay.rows) - 1, index + self.direction))
-            session.seek_frame(index)
+            return _replay_action(self, context, lambda: session.seek_frame(index))
         return {'FINISHED'}
 
 
@@ -104,8 +104,19 @@ class WFRL_OT_X100Play(bpy.types.Operator):
         from ..radar_x100.runtime import session_for
         session = session_for(context.scene)
         if session and session.mode == 'REPLAY' and session.replay:
-            session.toggle_playback()
+            return _replay_action(self, context, session.toggle_playback)
         return {'FINISHED'}
+
+
+def _replay_action(operator, context, action):
+    """Unapplied replay edits surface as panel errors instead of operator tracebacks."""
+    try:
+        action()
+    except Exception as exc:
+        context.scene['wfrl_x100_error'] = str(exc)
+        operator.report({'ERROR'}, str(exc))
+        return {'CANCELLED'}
+    return {'FINISHED'}
 
 
 class WFRL_OT_X100Record(bpy.types.Operator):

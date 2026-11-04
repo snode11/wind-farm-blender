@@ -227,7 +227,6 @@ class OutputWindow:
             pixels = self.xy*factor + (tx, ty)
             visible = ((pixels[:, 0] >= left+3*s) & (pixels[:, 0] <= left+pw-3*s)
                        & (pixels[:, 1] >= bottom+3*s) & (pixels[:, 1] <= bottom+ph-3*s))
-            self.visible_indices = self.original_indices[visible]
             self.point_batch = None
             if visible.any():
                 shader = gpu.shader.from_builtin('POINT_FLAT_COLOR')
@@ -531,7 +530,7 @@ class WFRL_OT_X100Output(bpy.types.Operator):
                 item.reset()
             elif event.type == 'C':
                 item.cycle_color()
-            elif event.type == 'V' and item.color == 'VELOCITY':
+            elif event.type == 'V' and item.effective_color == 'VELOCITY':
                 item.color_scale = 'FRAME' if item.color_scale == 'FIXED' else 'FIXED'
             elif event.type in {'WHEELUPMOUSE', 'WHEELDOWNMOUSE'}:
                 item.zoom = max(.1, min(100., item.zoom*(1.2 if event.type == 'WHEELUPMOUSE' else 1/1.2)))

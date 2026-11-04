@@ -24,7 +24,7 @@
 
 ## X100 雷达
 
-公开0.3.42.6扩展、工作区源码与本机安装在独立侧栏标签 **N → X100** 提供 X100 入口（`WFRL_PT_X100` 及配置、显示、帧与数据流、记录子面板）；工作区还注册 `WFRL_PT_X100Blades` 和安装报告导入操作器。几何仿真的“原安装位置／机舱侧面”按钮通过 `runtime.apply_mount_preset()` 切换同一台传感器的安装标定，使用当前量化源时刻准备新观测；重复有效预设复用原帧，预算编辑仍在下一新样本生效；侧面位置由 `scene.nacelle_side_installation()` 按静态侧壁确定。切换预先准备观测与 GPU 数据，成功后提交对象变换、配置与会话身份；必需GPU准备失败或提交失败回滚，可选分析失败独立标记不可用；复用有效的几何快照和安装对象，保留对象选择与可见性，失败保留旧观测与未应用参数。X100 支持 T1 同源只读几何采样、名义视场与点云、严格 PLY 读取、显式索引记录／回放及独立本地实时通道。规范实现位于 `wfrl/radar_x100/`，构建按清单复制到 `_vendor/radar_x100/` 并保存源码摘要；Blender 适配位于 `radar_x100/` 与 `panels/radar_x100.py`。来源身份、各流时钟与完整性独立于现有理想激光／双束净空。
+公开0.3.42.6扩展、工作区源码与本机安装在独立侧栏标签 **N → X100** 提供 X100 入口（`WFRL_PT_X100` 及配置、显示、帧与数据流、记录子面板）；工作区还注册 `WFRL_PT_X100Blades` 和安装报告导入操作器。几何仿真的“原安装位置／机舱侧面”按钮通过 `runtime.apply_mount_preset()` 切换同一台传感器的安装标定，使用当前量化源时刻准备新观测；重复有效预设复用原帧，预算编辑仍在下一新样本生效；侧面位置由 `scene.nacelle_side_installation()` 按静态侧壁确定。已有会话时切换预先准备观测与 GPU 数据，成功后提交对象变换、配置与会话身份；无会话时写入安装参数后直接启动会话，由其采样首帧，失败回滚参数；必需GPU准备失败或提交失败回滚，可选分析失败独立标记不可用；复用有效的几何快照和安装对象，保留对象选择与可见性，失败保留旧观测与未应用参数。X100 支持 T1 同源只读几何采样、名义视场与点云、严格 PLY 读取、显式索引记录／回放及独立本地实时通道。规范实现位于 `wfrl/radar_x100/`，构建按清单复制到 `_vendor/radar_x100/` 并保存源码摘要；Blender 适配位于 `radar_x100/` 与 `panels/radar_x100.py`。来源身份、各流时钟与完整性独立于现有理想激光／双束净空。
 
 工作区的 `sampling.py` 使用参考面积、随机平移Halton序列与固定重心坐标生成材料点，算法身份为 `shifted-halton.v1`；`SceneSampler.sampling_plan()` 缓存与来源绑定的计划，小预算保留大预算前缀。`installation.py` 和离线 `optimize_mount.py` 提供有限安装集合的完整过叶覆盖搜索；`WFRL_OT_X100SearchApply` 读取报告，由 `selected_installation()` 重算排序并核对来源、几何、采样算法、错误及有效推荐，沿用安装事务，保留当前采样预算。`tracking.py` 根据点云、同刻塔面、根部方向和名义叶尖径向坐标做叶片走廊关联、稳健局部拟合和因果平滑；Blender先验以轮毂为原点、局部Z末端取 `TipRad`，不读取材料标签或变形叶尖。估计拒绝状态、模型塔距与拟合段由独立面板／机舱XZ绘制，原始帧及侧壁诊断仍保留所有点。详细入口与限制见[观测研究](../docs/blender/X100观测研究.md)。
 
@@ -52,7 +52,7 @@
 
 工作区源码的 `wfrl/radar_x100/analysis.py` 保持纯 NumPy 数学边界；`SceneSampler.analysis_context()` 只提取中心取样的塔面及允许的变换，`SideWallQuery` 使用共同锚点后的专用 BVH 选面，再以 float64 Voronoi 区域计算精化最近点。`Session` 以运行代、会话、来源、帧、时钟、回放索引及标定身份配对上下文；分析、原始帧、显示和记录分层失效。`output.tick()` 登记当前窗口需求并派生，`draw()/consume()` 不采样、不建立或查询 BVH。核心导入和构建 vendor 清单包含 analysis，不手改生成副本。在线接口不读取真实材料、叶片身份或变形叶尖。侧壁区域由 `tower_side_polygon_ids()` 核对构造语义，按 loop triangle 的 polygon_index 映射，排除封口；保持 tower_mesh 二元组和 FarmFlex 塔五元组，覆盖刚塔回退。原始／有限／投影／像素裁剪索引逐层保留，不按塔距删点。分析上下文和结果不进入原始记录，旧记录无上下文时不借当前Scene补历史。
 
-`SceneSampler.sampling_transaction()` 仅在一次同步观测中复用绑定校验，finally 释放；tick 的原生编辑校验及独立 sample 调用保留。窗口轮询继续接收状态、LIVE 过期和录制健康，按帧、样式及错误签名请求重绘；3D 主视口仍按原运行时刷新。`RotorClock.configure()` 先校验整组参数再按旧 RPM 积分并提交。相机 `render_group`、状态摘要、snapshot/readback 及 PNG 写入提供默认关闭的 `performance` 聚合 CPU 计时，不改变画幅、RGB、取消或终态；嵌套计时不能相加或解释成 FPS。操作与覆盖报告见 [X100 雷达](../docs/blender/X100雷达.md#机舱局部分析工作区源码)。
+`SceneSampler.sampling_transaction()` 仅在一次同步观测中复用绑定校验，finally 释放；tick 的原生编辑校验及独立 sample 调用保留；面拓扑经连续角点属性 `.corner_vert` 读取，属性缺失时退回 `loops.vertex_index`。窗口轮询继续接收状态、LIVE 过期和录制健康，按帧、样式及错误签名请求重绘；`runtime.tick()` 只在所属场景的观测帧、点云批次、显示有效性或视场开关按对象身份变化，以及会话关闭时请求该场景 3D 视口重绘。`RotorClock.configure()` 先校验整组参数再按旧 RPM 积分并提交。相机 `render_group`、状态摘要、snapshot/readback 及 PNG 写入提供默认关闭的 `performance` 聚合 CPU 计时，不改变画幅、RGB、取消或终态；嵌套计时不能相加或解释成 FPS。操作与覆盖报告见 [X100 雷达](../docs/blender/X100雷达.md#机舱局部分析工作区源码)。
 
 工作区源码的新几何帧由采样事务执行一次完整来源校验；暂停帧和相机采集期间保留每次轮询的校验，独立零载荷参考仍单独校验来源。同帧距离分析只缓存成功结果，临时失败在同一冻结帧上每隔至少 0.25 秒重试；ROI 改变可立即重新计算。失败清除距离结果并保留原始帧，不重采样、不改写记录。
 

@@ -155,7 +155,13 @@ class SceneSampler:
     def _topology(mesh):
         loops = np.empty(len(mesh.loops), dtype=np.int32)
         sizes = np.empty(len(mesh.polygons), dtype=np.int32)
-        mesh.loops.foreach_get('vertex_index', loops)
+        # The per-tick binding check reads face corners through the contiguous corner-vertex
+        # attribute; it holds the same values as loops.vertex_index at a fraction of the cost.
+        corners = mesh.attributes.get('.corner_vert')
+        if corners is not None and corners.domain == 'CORNER' and corners.data_type == 'INT':
+            corners.data.foreach_get('value', loops)
+        else:
+            mesh.loops.foreach_get('vertex_index', loops)
         mesh.polygons.foreach_get('loop_total', sizes)
         return loops, sizes
 
