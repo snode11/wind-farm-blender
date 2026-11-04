@@ -29,6 +29,8 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定
 <Blender可执行文件> --background --factory-startup --python-exit-code 1 --python <支持源码后台的脚本路径>
 ```
 
+手动视频监管用例（`blender_frontend/tests/test_manual_video_job.py`）需要解释器提供 `os.waitid`；macOS 上 Python 3.13 起才提供，较旧的解释器会跳过这些用例而不报失败，选择宿主解释器时分别报告。
+
 窗口脚本不加 `--background`；安装检查保留所需 profile，不照搬工厂启动。使用独立进程、配置、场景副本和新输出目录，保护用户脏场景及规范资产。
 
 仓库 `scripts/blender/run_regressions.py --list` 查看已纳入脚本的模式、输入、输出与超时；用 `--tests` 选择脚本、`--output` 指定新目录、`--scratch-root` 指定临时目录父路径。它串行运行源码，不打包或安装。PASS 要求来源、稳定摘要、正常退出、完成标记及最终结果；定时器注册返回不算完成，未运行、跳过、超时及失败分别保留。
