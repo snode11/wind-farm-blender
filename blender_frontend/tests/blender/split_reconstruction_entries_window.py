@@ -160,7 +160,7 @@ def tick():
             assert scene.get('split_reconstruction_review') and not surface.active(scene)
             assert scene['split_reconstruction_samples'] == 601
             state['geometry_signature'] = geometry_signature()
-            ui._pause_all_playback(bpy.context)
+            ui._pause_scene_playback(bpy.context)
             scene.frame_set(52)
             state['checks'].append('Packaged example starts as original 601-sample geometry, with distinct installed entry labels')
             split.enter(bpy.context)

@@ -38,7 +38,7 @@ def _age_text(value):
     return f'{value:.1f}'.rstrip('0').rstrip('.')
 
 
-def _pause_all_playback(context):
+def _pause_scene_playback(context):
     from . import playback
     playback.cancel(context.scene)
 
@@ -92,7 +92,7 @@ class WFRL_OT_SplitReconStep(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            _pause_all_playback(context)
+            _pause_scene_playback(context)
             texture = _core().texture_adapter(context.scene)
             if texture.active(context.scene):
                 texture.step(context.scene, self.direction)
@@ -253,7 +253,7 @@ class WFRL_OT_SplitReconInspect(bpy.types.Operator):
             pair = _core()._pair(context.scene, context.window.screen)
             if pair is None or _core()._key(context.window) in _core()._JOBS:
                 raise ValueError('请等待对照布局就绪')
-            _pause_all_playback(context)
+            _pause_scene_playback(context)
             _core().texture_adapter(context.scene).focus(context, pair[1], None if self.point == 'CURRENT' else self.point)
             _redraw(context)
         except (ValueError, RuntimeError) as exc:
