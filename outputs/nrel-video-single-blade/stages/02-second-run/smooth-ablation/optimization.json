@@ -1,0 +1,1792 @@
+{
+  "config": {
+    "model_interpolation": "bspline",
+    "resolutions": [
+      [
+        160,
+        90
+      ],
+      [
+        320,
+        180
+      ]
+    ],
+    "iterations_per_stage": [
+      20,
+      6
+    ],
+    "learning_rate": 0.035,
+    "image_weight": 1.0,
+    "foreground_distance_weight": 0.15,
+    "relative_change_weight": 0.03,
+    "smoothness_weight": 0.1,
+    "sigma_px": 0.65,
+    "span_samples": 25,
+    "ring_samples": 12,
+    "control_stations": 7,
+    "face_chunk": 48,
+    "batch_size": 1,
+    "device": "cpu",
+    "seed": 20261002,
+    "threads": 4
+  },
+  "backend_check": {
+    "backend": "torch_cpu_soft_triangle_union",
+    "torch_version": "2.13.0",
+    "actual_backward": true,
+    "finite_difference_epsilon": 1e-05,
+    "analytic_gradient": 0.1332905472683157,
+    "finite_difference_gradient": 0.1332905473272472,
+    "relative_error": 4.421281159965695e-10,
+    "passed": true
+  },
+  "control_contract": "same initial parameters / regularization / Adam / stages / budgets; image weight alone zero",
+  "comparison_provenance": {
+    "same_initial_parameters": true,
+    "same_optimizer": true,
+    "same_stage_schedule": true,
+    "same_regularization": true,
+    "same_budget": true,
+    "only_image_weights_differ": true,
+    "prior_only_image_weight": 0.0,
+    "final_image_weight": 1.0
+  },
+  "fit_observations": [
+    {
+      "camera_id": "C1",
+      "frame_id": 42,
+      "split": "fit"
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 43,
+      "split": "fit"
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 44,
+      "split": "heldout"
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 45,
+      "split": "heldout"
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 42,
+      "split": "fit"
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 43,
+      "split": "fit"
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 44,
+      "split": "heldout"
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 45,
+      "split": "heldout"
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 42,
+      "split": "fit"
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 43,
+      "split": "fit"
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 44,
+      "split": "heldout"
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 45,
+      "split": "heldout"
+    }
+  ],
+  "prior_only_history": [
+    {
+      "stage": 0,
+      "iteration": 0,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0081731250975281
+    },
+    {
+      "stage": 0,
+      "iteration": 1,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00048008293379098177
+    },
+    {
+      "stage": 0,
+      "iteration": 2,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0003537079319357872
+    },
+    {
+      "stage": 0,
+      "iteration": 3,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00039141601882874966
+    },
+    {
+      "stage": 0,
+      "iteration": 4,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00037825002800673246
+    },
+    {
+      "stage": 0,
+      "iteration": 5,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0005034999921917915
+    },
+    {
+      "stage": 0,
+      "iteration": 6,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0003089170204475522
+    },
+    {
+      "stage": 0,
+      "iteration": 7,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00025066593661904335
+    },
+    {
+      "stage": 0,
+      "iteration": 8,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00022258399985730648
+    },
+    {
+      "stage": 0,
+      "iteration": 9,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00021366693545132875
+    },
+    {
+      "stage": 0,
+      "iteration": 10,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00021091592498123646
+    },
+    {
+      "stage": 0,
+      "iteration": 11,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0002091249916702509
+    },
+    {
+      "stage": 0,
+      "iteration": 12,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020958390086889267
+    },
+    {
+      "stage": 0,
+      "iteration": 13,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020520796533674002
+    },
+    {
+      "stage": 0,
+      "iteration": 14,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0002079999540001154
+    },
+    {
+      "stage": 0,
+      "iteration": 15,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020687503274530172
+    },
+    {
+      "stage": 0,
+      "iteration": 16,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020454195328056812
+    },
+    {
+      "stage": 0,
+      "iteration": 17,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00019854109268635511
+    },
+    {
+      "stage": 0,
+      "iteration": 18,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020954199135303497
+    },
+    {
+      "stage": 0,
+      "iteration": 19,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00020158407278358936
+    },
+    {
+      "stage": 1,
+      "iteration": 0,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0004926249384880066
+    },
+    {
+      "stage": 1,
+      "iteration": 1,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00025050004478543997
+    },
+    {
+      "stage": 1,
+      "iteration": 2,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.000240708002820611
+    },
+    {
+      "stage": 1,
+      "iteration": 3,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0002152909291908145
+    },
+    {
+      "stage": 1,
+      "iteration": 4,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.00021633401047438383
+    },
+    {
+      "stage": 1,
+      "iteration": 5,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.0,
+      "regularization_loss": 0.0,
+      "total_loss": 0.0,
+      "elapsed_s": 0.0002009999006986618
+    }
+  ],
+  "video_history": [
+    {
+      "stage": 0,
+      "iteration": 0,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.3307614102959633,
+      "regularization_loss": 0.0,
+      "total_loss": 0.3307614102959633,
+      "elapsed_s": 2.2596997920190915
+    },
+    {
+      "stage": 0,
+      "iteration": 1,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.19619948882609606,
+      "regularization_loss": 0.0005860380479134619,
+      "total_loss": 0.19678552687400952,
+      "elapsed_s": 2.112444333964959
+    },
+    {
+      "stage": 0,
+      "iteration": 2,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.19549630023539066,
+      "regularization_loss": 0.0017177301924675703,
+      "total_loss": 0.19721403042785823,
+      "elapsed_s": 2.00767254200764
+    },
+    {
+      "stage": 0,
+      "iteration": 3,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.19599714875221252,
+      "regularization_loss": 0.0034011458046734333,
+      "total_loss": 0.19939829455688596,
+      "elapsed_s": 2.0463132919976488
+    },
+    {
+      "stage": 0,
+      "iteration": 4,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.20699944905936718,
+      "regularization_loss": 0.004637370351701975,
+      "total_loss": 0.21163681941106915,
+      "elapsed_s": 2.0492642499739304
+    },
+    {
+      "stage": 0,
+      "iteration": 5,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.19317626859992743,
+      "regularization_loss": 0.004841210320591927,
+      "total_loss": 0.19801747892051935,
+      "elapsed_s": 1.92982837499585
+    },
+    {
+      "stage": 0,
+      "iteration": 6,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.17252172157168388,
+      "regularization_loss": 0.004848099779337645,
+      "total_loss": 0.17736982135102153,
+      "elapsed_s": 2.029654333018698
+    },
+    {
+      "stage": 0,
+      "iteration": 7,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.1589079829864204,
+      "regularization_loss": 0.004843330942094326,
+      "total_loss": 0.16375131392851472,
+      "elapsed_s": 1.9406022500479594
+    },
+    {
+      "stage": 0,
+      "iteration": 8,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.1322945966385305,
+      "regularization_loss": 0.005786923225969076,
+      "total_loss": 0.13808151986449957,
+      "elapsed_s": 2.085713207954541
+    },
+    {
+      "stage": 0,
+      "iteration": 9,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.11217935988679528,
+      "regularization_loss": 0.007111073937267065,
+      "total_loss": 0.11929043382406235,
+      "elapsed_s": 2.100877624936402
+    },
+    {
+      "stage": 0,
+      "iteration": 10,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.09834646619856358,
+      "regularization_loss": 0.008566111326217651,
+      "total_loss": 0.10691257752478123,
+      "elapsed_s": 2.0732627919642255
+    },
+    {
+      "stage": 0,
+      "iteration": 11,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.089394545648247,
+      "regularization_loss": 0.010012907907366753,
+      "total_loss": 0.09940745355561376,
+      "elapsed_s": 2.044779457966797
+    },
+    {
+      "stage": 0,
+      "iteration": 12,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.08215128630399704,
+      "regularization_loss": 0.011375583708286285,
+      "total_loss": 0.09352687001228333,
+      "elapsed_s": 1.9885130830807611
+    },
+    {
+      "stage": 0,
+      "iteration": 13,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.07526966743171215,
+      "regularization_loss": 0.01261269859969616,
+      "total_loss": 0.08788236603140831,
+      "elapsed_s": 1.9932645839871839
+    },
+    {
+      "stage": 0,
+      "iteration": 14,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.069675617152825,
+      "regularization_loss": 0.013673404231667519,
+      "total_loss": 0.08334902138449252,
+      "elapsed_s": 1.921707957983017
+    },
+    {
+      "stage": 0,
+      "iteration": 15,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.06715800706297159,
+      "regularization_loss": 0.014551613479852676,
+      "total_loss": 0.08170962054282427,
+      "elapsed_s": 1.897871833993122
+    },
+    {
+      "stage": 0,
+      "iteration": 16,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.06759693054482341,
+      "regularization_loss": 0.015250204131007195,
+      "total_loss": 0.0828471346758306,
+      "elapsed_s": 1.9991374999517575
+    },
+    {
+      "stage": 0,
+      "iteration": 17,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.06929496861994267,
+      "regularization_loss": 0.015768688172101974,
+      "total_loss": 0.08506365679204464,
+      "elapsed_s": 1.8602616250282153
+    },
+    {
+      "stage": 0,
+      "iteration": 18,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.0711210398003459,
+      "regularization_loss": 0.016112614423036575,
+      "total_loss": 0.08723365422338247,
+      "elapsed_s": 1.9065132500836626
+    },
+    {
+      "stage": 0,
+      "iteration": 19,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss": 0.07200141344219446,
+      "regularization_loss": 0.01624172553420067,
+      "total_loss": 0.08824313897639513,
+      "elapsed_s": 1.8912412909558043
+    },
+    {
+      "stage": 1,
+      "iteration": 0,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.06517911842092872,
+      "regularization_loss": 0.01614982634782791,
+      "total_loss": 0.08132894476875663,
+      "elapsed_s": 5.736282916972414
+    },
+    {
+      "stage": 1,
+      "iteration": 1,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.06385905179195106,
+      "regularization_loss": 0.015871841460466385,
+      "total_loss": 0.07973089325241745,
+      "elapsed_s": 5.536384750041179
+    },
+    {
+      "stage": 1,
+      "iteration": 2,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.06306232698261738,
+      "regularization_loss": 0.015436295419931412,
+      "total_loss": 0.07849862240254879,
+      "elapsed_s": 5.663377415970899
+    },
+    {
+      "stage": 1,
+      "iteration": 3,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.06267147453036159,
+      "regularization_loss": 0.01487643551081419,
+      "total_loss": 0.07754791004117578,
+      "elapsed_s": 5.596299417084083
+    },
+    {
+      "stage": 1,
+      "iteration": 4,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.06172164448071271,
+      "regularization_loss": 0.014230050146579742,
+      "total_loss": 0.07595169462729245,
+      "elapsed_s": 6.078149499953724
+    },
+    {
+      "stage": 1,
+      "iteration": 5,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss": 0.06001789832953364,
+      "regularization_loss": 0.013532611541450024,
+      "total_loss": 0.07355050987098366,
+      "elapsed_s": 5.90120224992279
+    }
+  ],
+  "residuals": {
+    "initial_template": [
+      {
+        "camera_id": "C1",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 21539,
+        "background_pixels": 4040,
+        "uncertain_pixels": 32021,
+        "image_loss": 0.23288163542747498,
+        "terms": {
+          "foreground": 0.19475650787353516,
+          "background": 0.01908695325255394,
+          "foreground_distance": 0.1269211322069168
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C1",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 21334,
+        "background_pixels": 4103,
+        "uncertain_pixels": 32163,
+        "image_loss": 0.5514165759086609,
+        "terms": {
+          "foreground": 0.15835122764110565,
+          "background": 0.3819822371006012,
+          "foreground_distance": 0.07388734817504883
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C1",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 19888,
+        "background_pixels": 5497,
+        "uncertain_pixels": 32215,
+        "image_loss": 0.6887157559394836,
+        "terms": {
+          "foreground": 0.10812846571207047,
+          "background": 0.577093243598938,
+          "foreground_distance": 0.023293642327189445
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C1",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 18004,
+        "background_pixels": 7375,
+        "uncertain_pixels": 32221,
+        "image_loss": 0.5963484644889832,
+        "terms": {
+          "foreground": 0.029777122661471367,
+          "background": 0.5664305686950684,
+          "foreground_distance": 0.0009384407312609255
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 29019,
+        "background_pixels": 27598,
+        "uncertain_pixels": 983,
+        "image_loss": 0.18584668636322021,
+        "terms": {
+          "foreground": 0.14235639572143555,
+          "background": 0.029584966599941254,
+          "foreground_distance": 0.09270211309194565
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 32847,
+        "background_pixels": 23701,
+        "uncertain_pixels": 1052,
+        "image_loss": 0.17997081577777863,
+        "terms": {
+          "foreground": 0.09115920960903168,
+          "background": 0.08487296104431152,
+          "foreground_distance": 0.02625766582787037
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 30976,
+        "background_pixels": 25479,
+        "uncertain_pixels": 1145,
+        "image_loss": 0.2190568894147873,
+        "terms": {
+          "foreground": 0.03721610829234123,
+          "background": 0.1813640147447586,
+          "foreground_distance": 0.0031784246675670147
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 24935,
+        "background_pixels": 31556,
+        "uncertain_pixels": 1109,
+        "image_loss": 0.2047957330942154,
+        "terms": {
+          "foreground": 0.007947387173771858,
+          "background": 0.1967872530221939,
+          "foreground_distance": 0.00040733738569542766
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 2218,
+        "background_pixels": 54752,
+        "uncertain_pixels": 630,
+        "image_loss": 0.7982351779937744,
+        "terms": {
+          "foreground": 0.7465019822120667,
+          "background": 0.000720397976692766,
+          "foreground_distance": 0.3400854468345642
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 18847,
+        "background_pixels": 37901,
+        "uncertain_pixels": 852,
+        "image_loss": 0.16796040534973145,
+        "terms": {
+          "foreground": 0.14481189846992493,
+          "background": 0.017179394140839577,
+          "foreground_distance": 0.03979404643177986
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 18368,
+        "background_pixels": 38251,
+        "uncertain_pixels": 981,
+        "image_loss": 0.1666194647550583,
+        "terms": {
+          "foreground": 0.016252629458904266,
+          "background": 0.15026509761810303,
+          "foreground_distance": 0.0006781686679460108
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 1769,
+        "background_pixels": 55133,
+        "uncertain_pixels": 698,
+        "image_loss": 0.06581881642341614,
+        "terms": {
+          "foreground": 0.00014927750453352928,
+          "background": 0.06566953659057617,
+          "foreground_distance": 0.0
+        },
+        "missing_terms": []
+      }
+    ],
+    "prior_only": [
+      {
+        "camera_id": "C1",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 21539,
+        "background_pixels": 4040,
+        "uncertain_pixels": 32021,
+        "image_loss": 0.23288163542747498,
+        "terms": {
+          "foreground": 0.19475650787353516,
+          "background": 0.01908695325255394,
+          "foreground_distance": 0.1269211322069168
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C1",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 21334,
+        "background_pixels": 4103,
+        "uncertain_pixels": 32163,
+        "image_loss": 0.5514165759086609,
+        "terms": {
+          "foreground": 0.15835122764110565,
+          "background": 0.3819822371006012,
+          "foreground_distance": 0.07388734817504883
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C1",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 19888,
+        "background_pixels": 5497,
+        "uncertain_pixels": 32215,
+        "image_loss": 0.6887157559394836,
+        "terms": {
+          "foreground": 0.10812846571207047,
+          "background": 0.577093243598938,
+          "foreground_distance": 0.023293642327189445
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C1",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 18004,
+        "background_pixels": 7375,
+        "uncertain_pixels": 32221,
+        "image_loss": 0.5963484644889832,
+        "terms": {
+          "foreground": 0.029777122661471367,
+          "background": 0.5664305686950684,
+          "foreground_distance": 0.0009384407312609255
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 29019,
+        "background_pixels": 27598,
+        "uncertain_pixels": 983,
+        "image_loss": 0.18584668636322021,
+        "terms": {
+          "foreground": 0.14235639572143555,
+          "background": 0.029584966599941254,
+          "foreground_distance": 0.09270211309194565
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 32847,
+        "background_pixels": 23701,
+        "uncertain_pixels": 1052,
+        "image_loss": 0.17997081577777863,
+        "terms": {
+          "foreground": 0.09115920960903168,
+          "background": 0.08487296104431152,
+          "foreground_distance": 0.02625766582787037
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 30976,
+        "background_pixels": 25479,
+        "uncertain_pixels": 1145,
+        "image_loss": 0.2190568894147873,
+        "terms": {
+          "foreground": 0.03721610829234123,
+          "background": 0.1813640147447586,
+          "foreground_distance": 0.0031784246675670147
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 24935,
+        "background_pixels": 31556,
+        "uncertain_pixels": 1109,
+        "image_loss": 0.2047957330942154,
+        "terms": {
+          "foreground": 0.007947387173771858,
+          "background": 0.1967872530221939,
+          "foreground_distance": 0.00040733738569542766
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 2218,
+        "background_pixels": 54752,
+        "uncertain_pixels": 630,
+        "image_loss": 0.7982351779937744,
+        "terms": {
+          "foreground": 0.7465019822120667,
+          "background": 0.000720397976692766,
+          "foreground_distance": 0.3400854468345642
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 18847,
+        "background_pixels": 37901,
+        "uncertain_pixels": 852,
+        "image_loss": 0.16796040534973145,
+        "terms": {
+          "foreground": 0.14481189846992493,
+          "background": 0.017179394140839577,
+          "foreground_distance": 0.03979404643177986
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 18368,
+        "background_pixels": 38251,
+        "uncertain_pixels": 981,
+        "image_loss": 0.1666194647550583,
+        "terms": {
+          "foreground": 0.016252629458904266,
+          "background": 0.15026509761810303,
+          "foreground_distance": 0.0006781686679460108
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 1769,
+        "background_pixels": 55133,
+        "uncertain_pixels": 698,
+        "image_loss": 0.06581881642341614,
+        "terms": {
+          "foreground": 0.00014927750453352928,
+          "background": 0.06566953659057617,
+          "foreground_distance": 0.0
+        },
+        "missing_terms": []
+      }
+    ],
+    "T1_B1": [
+      {
+        "camera_id": "C1",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 21539,
+        "background_pixels": 4040,
+        "uncertain_pixels": 32021,
+        "image_loss": 0.07843663543462753,
+        "terms": {
+          "foreground": 0.07220403850078583,
+          "background": 0.005426486954092979,
+          "foreground_distance": 0.005374033935368061
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C1",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 21334,
+        "background_pixels": 4103,
+        "uncertain_pixels": 32163,
+        "image_loss": 0.07815863937139511,
+        "terms": {
+          "foreground": 0.06868843734264374,
+          "background": 0.008258095011115074,
+          "foreground_distance": 0.008080702275037766
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C1",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 19888,
+        "background_pixels": 5497,
+        "uncertain_pixels": 32215,
+        "image_loss": 0.11198599636554718,
+        "terms": {
+          "foreground": 0.06727619469165802,
+          "background": 0.043564848601818085,
+          "foreground_distance": 0.007633025757968426
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C1",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 18004,
+        "background_pixels": 7375,
+        "uncertain_pixels": 32221,
+        "image_loss": 0.13821494579315186,
+        "terms": {
+          "foreground": 0.06978090852499008,
+          "background": 0.06730962544679642,
+          "foreground_distance": 0.007496053818613291
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 29019,
+        "background_pixels": 27598,
+        "uncertain_pixels": 983,
+        "image_loss": 0.024926966056227684,
+        "terms": {
+          "foreground": 0.012723054736852646,
+          "background": 0.012132937088608742,
+          "foreground_distance": 0.0004731578810606152
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 32847,
+        "background_pixels": 23701,
+        "uncertain_pixels": 1052,
+        "image_loss": 0.1049637645483017,
+        "terms": {
+          "foreground": 0.08785184472799301,
+          "background": 0.015019875951111317,
+          "foreground_distance": 0.01394694298505783
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 30976,
+        "background_pixels": 25479,
+        "uncertain_pixels": 1145,
+        "image_loss": 0.16649405658245087,
+        "terms": {
+          "foreground": 0.1447782814502716,
+          "background": 0.014478123746812344,
+          "foreground_distance": 0.04825107753276825
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 24935,
+        "background_pixels": 31556,
+        "uncertain_pixels": 1109,
+        "image_loss": 0.18649399280548096,
+        "terms": {
+          "foreground": 0.1669807732105255,
+          "background": 0.011176004074513912,
+          "foreground_distance": 0.05558141693472862
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 2218,
+        "background_pixels": 54752,
+        "uncertain_pixels": 630,
+        "image_loss": 0.008220501244068146,
+        "terms": {
+          "foreground": 0.00014290625404100865,
+          "background": 0.008077595382928848,
+          "foreground_distance": 0.0
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 18847,
+        "background_pixels": 37901,
+        "uncertain_pixels": 852,
+        "image_loss": 0.05065111443400383,
+        "terms": {
+          "foreground": 0.03420543298125267,
+          "background": 0.016084931790828705,
+          "foreground_distance": 0.002404988743364811
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 18368,
+        "background_pixels": 38251,
+        "uncertain_pixels": 981,
+        "image_loss": 0.08497226238250732,
+        "terms": {
+          "foreground": 0.0734666958451271,
+          "background": 0.010206528007984161,
+          "foreground_distance": 0.008660254999995232
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 1769,
+        "background_pixels": 55133,
+        "uncertain_pixels": 698,
+        "image_loss": 0.40872302651405334,
+        "terms": {
+          "foreground": 0.4008783996105194,
+          "background": 0.0006501410971395671,
+          "foreground_distance": 0.047963179647922516
+        },
+        "missing_terms": []
+      }
+    ]
+  },
+  "heldout_residuals": {
+    "initial_template": [
+      {
+        "camera_id": "C1",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 19888,
+        "background_pixels": 5497,
+        "uncertain_pixels": 32215,
+        "image_loss": 0.6887157559394836,
+        "terms": {
+          "foreground": 0.10812846571207047,
+          "background": 0.577093243598938,
+          "foreground_distance": 0.023293642327189445
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C1",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 18004,
+        "background_pixels": 7375,
+        "uncertain_pixels": 32221,
+        "image_loss": 0.5963484644889832,
+        "terms": {
+          "foreground": 0.029777122661471367,
+          "background": 0.5664305686950684,
+          "foreground_distance": 0.0009384407312609255
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 30976,
+        "background_pixels": 25479,
+        "uncertain_pixels": 1145,
+        "image_loss": 0.2190568894147873,
+        "terms": {
+          "foreground": 0.03721610829234123,
+          "background": 0.1813640147447586,
+          "foreground_distance": 0.0031784246675670147
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 24935,
+        "background_pixels": 31556,
+        "uncertain_pixels": 1109,
+        "image_loss": 0.2047957330942154,
+        "terms": {
+          "foreground": 0.007947387173771858,
+          "background": 0.1967872530221939,
+          "foreground_distance": 0.00040733738569542766
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 18368,
+        "background_pixels": 38251,
+        "uncertain_pixels": 981,
+        "image_loss": 0.1666194647550583,
+        "terms": {
+          "foreground": 0.016252629458904266,
+          "background": 0.15026509761810303,
+          "foreground_distance": 0.0006781686679460108
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 1769,
+        "background_pixels": 55133,
+        "uncertain_pixels": 698,
+        "image_loss": 0.06581881642341614,
+        "terms": {
+          "foreground": 0.00014927750453352928,
+          "background": 0.06566953659057617,
+          "foreground_distance": 0.0
+        },
+        "missing_terms": []
+      }
+    ],
+    "prior_only": [
+      {
+        "camera_id": "C1",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 19888,
+        "background_pixels": 5497,
+        "uncertain_pixels": 32215,
+        "image_loss": 0.6887157559394836,
+        "terms": {
+          "foreground": 0.10812846571207047,
+          "background": 0.577093243598938,
+          "foreground_distance": 0.023293642327189445
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C1",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 18004,
+        "background_pixels": 7375,
+        "uncertain_pixels": 32221,
+        "image_loss": 0.5963484644889832,
+        "terms": {
+          "foreground": 0.029777122661471367,
+          "background": 0.5664305686950684,
+          "foreground_distance": 0.0009384407312609255
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 30976,
+        "background_pixels": 25479,
+        "uncertain_pixels": 1145,
+        "image_loss": 0.2190568894147873,
+        "terms": {
+          "foreground": 0.03721610829234123,
+          "background": 0.1813640147447586,
+          "foreground_distance": 0.0031784246675670147
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 24935,
+        "background_pixels": 31556,
+        "uncertain_pixels": 1109,
+        "image_loss": 0.2047957330942154,
+        "terms": {
+          "foreground": 0.007947387173771858,
+          "background": 0.1967872530221939,
+          "foreground_distance": 0.00040733738569542766
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 18368,
+        "background_pixels": 38251,
+        "uncertain_pixels": 981,
+        "image_loss": 0.1666194647550583,
+        "terms": {
+          "foreground": 0.016252629458904266,
+          "background": 0.15026509761810303,
+          "foreground_distance": 0.0006781686679460108
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 1769,
+        "background_pixels": 55133,
+        "uncertain_pixels": 698,
+        "image_loss": 0.06581881642341614,
+        "terms": {
+          "foreground": 0.00014927750453352928,
+          "background": 0.06566953659057617,
+          "foreground_distance": 0.0
+        },
+        "missing_terms": []
+      }
+    ],
+    "T1_B1": [
+      {
+        "camera_id": "C1",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 19888,
+        "background_pixels": 5497,
+        "uncertain_pixels": 32215,
+        "image_loss": 0.11198599636554718,
+        "terms": {
+          "foreground": 0.06727619469165802,
+          "background": 0.043564848601818085,
+          "foreground_distance": 0.007633025757968426
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C1",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 18004,
+        "background_pixels": 7375,
+        "uncertain_pixels": 32221,
+        "image_loss": 0.13821494579315186,
+        "terms": {
+          "foreground": 0.06978090852499008,
+          "background": 0.06730962544679642,
+          "foreground_distance": 0.007496053818613291
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 30976,
+        "background_pixels": 25479,
+        "uncertain_pixels": 1145,
+        "image_loss": 0.16649405658245087,
+        "terms": {
+          "foreground": 0.1447782814502716,
+          "background": 0.014478123746812344,
+          "foreground_distance": 0.04825107753276825
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 24935,
+        "background_pixels": 31556,
+        "uncertain_pixels": 1109,
+        "image_loss": 0.18649399280548096,
+        "terms": {
+          "foreground": 0.1669807732105255,
+          "background": 0.011176004074513912,
+          "foreground_distance": 0.05558141693472862
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 44,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 18368,
+        "background_pixels": 38251,
+        "uncertain_pixels": 981,
+        "image_loss": 0.08497226238250732,
+        "terms": {
+          "foreground": 0.0734666958451271,
+          "background": 0.010206528007984161,
+          "foreground_distance": 0.008660254999995232
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 45,
+        "split": "heldout",
+        "resolution": [
+          320,
+          180
+        ],
+        "foreground_pixels": 1769,
+        "background_pixels": 55133,
+        "uncertain_pixels": 698,
+        "image_loss": 0.40872302651405334,
+        "terms": {
+          "foreground": 0.4008783996105194,
+          "background": 0.0006501410971395671,
+          "foreground_distance": 0.047963179647922516
+        },
+        "missing_terms": []
+      }
+    ]
+  },
+  "heldout_status": "AVAILABLE",
+  "limitations": [
+    "silhouette constraints only",
+    "thickness/twist/backside fixed priors",
+    "near-reference static shape; no free per-frame deformation"
+  ]
+}

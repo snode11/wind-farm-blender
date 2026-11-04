@@ -1,0 +1,2 @@
+# Frozen experiment records retain byte-identical content across checkouts.
+outputs/nrel-video-single-blade/** -text

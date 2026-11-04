@@ -1,0 +1,10 @@
+[
+  {
+    "path": "outputs/nrel-video-single-blade/20261002-second/evaluation-only/isolation-marker.txt",
+    "denied": true
+  },
+  {
+    "path": "blender_frontend/wfrl_blender/farm_flex.py",
+    "denied": true
+  }
+]

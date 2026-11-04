@@ -1,0 +1,22 @@
+{
+  "test_command": "/opt/anaconda3/envs/wfrl-mac/bin/python -m pytest -q tests/test_nrel_dataset.py tests/test_nrel_optimizer.py tests/test_nrel_evaluate.py",
+  "observed_result": "44 passed in 2.21s",
+  "passed": 44,
+  "failed": 0,
+  "blender_capture": "actual visible Blender 5.2.1 window; source modules verified",
+  "formal_video_decode": "all 300 frames; actual PTS/dimensions and selected RGB hashes passed",
+  "gradient_check": {
+    "backend": "torch_cpu_soft_triangle_union",
+    "torch_version": "2.13.0",
+    "actual_backward": true,
+    "finite_difference_epsilon": 1e-05,
+    "analytic_gradient": 0.1332905472683157,
+    "finite_difference_gradient": 0.1332905473272472,
+    "relative_error": 4.421281159965695e-10,
+    "passed": true
+  },
+  "truth_same_state": "verified against formal capture frame43 before export",
+  "truth_isolation": "real reads denied under macOS sandbox",
+  "model_hashes": "initial==prior_only, final differs; all artifacts present and hashed",
+  "preview": "self-contained HTML browser interaction checked by preview worker; static PNG inspected"
+}

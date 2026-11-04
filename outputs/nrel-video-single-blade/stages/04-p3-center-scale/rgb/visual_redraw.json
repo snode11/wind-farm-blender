@@ -1,0 +1,22 @@
+{
+  "purpose": "Improve color legend and add correctly centered local root crops; no numerical re-audit or segmentation.",
+  "source_sha256": {
+    "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/root_rgb_audit.py": "251873e08cc4d11c831818c7add311d00f048a21bd099b2e52092b083e0536b2",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261003-p3-center-scale/rgb/redraw_review.py": "be56c60566f9d64e5abc1e87f70d8dd42607252a1fee99883a279665b66a4e8e"
+  },
+  "overlay_format": "Top-left original native pixel field is 1920x1080; 125-pixel bottom caption appended without image resampling.",
+  "legend": {
+    "bright_green": "eligible model root silhouette",
+    "violet": "model root silhouette excluded by saved independent contour domain",
+    "cyan": "saved RGB observed boundary",
+    "amber": "saved review exclusion domain",
+    "green_dashed": "full z=6.15 and12.30 cut",
+    "blue_dashed": "full z=9.225 cut",
+    "red_tip": "original RGB blade paint, not an audit classification"
+  },
+  "inputs_unchanged": true,
+  "numeric_report_sha256_before_source_provenance_update": "53eeded23889abb3356c388d37df1171a60d28065a79e199022c1aaaa18e8a4e",
+  "numeric_report_sha256_after_source_provenance_update": "37340d34fc1106ba3c88c7f1e850badd540b1ca87c13e891da2f2cdb77dcb55c",
+  "numerical_payload_sha256_excluding_source_provenance": "6fe4d39f18affd0ece6394a9cfdd0b1cf77776d8dd6b47a97e0e66339df95e8b",
+  "numerical_values_unchanged": true
+}

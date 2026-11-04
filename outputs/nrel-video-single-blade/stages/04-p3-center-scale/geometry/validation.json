@@ -1,0 +1,32 @@
+{
+  "tests": {
+    "command": "/opt/anaconda3/envs/wfrl-mac/bin/python -m pytest -q tests/test_nrel_center_scale_audit.py tests/test_nrel_parameter_audit.py tests/test_nrel_contour.py tests/test_nrel_model_v2.py",
+    "result": "37 passed in 0.96s",
+    "new_tests": 11
+  },
+  "actual_configurations": 984,
+  "csv_expected_rows": 2952,
+  "array_archive_keys": 5904,
+  "geometry_maxima": {
+    "vertex_A_minus_base_equals_B_plus_C_minus_2base_max_error_m": 1.1920928955078125e-07,
+    "B_geometric_ring_center_max_error_m": 8.475035429000854e-08,
+    "C_centered_ring_vertices_max_error_m": 9.809931134086014e-08,
+    "C_pairwise_ring_distance_max_error_m": 1.3327634551529854e-07,
+    "B_isotropic_centered_ring_scale_max_error_m": 6.064576303366209e-07,
+    "A_ring_center_vs_analytic_shift_max_error_m": 8.006463758647442e-08,
+    "root_vertices_max_error_m": 0.0,
+    "tip_vertices_max_error_m": 0.0,
+    "outside_control_support_max_error_m": 0.0,
+    "z_coordinates_max_error_m": 0.0
+  },
+  "production_loss_baseline_checks": 24,
+  "production_loss_max_abs_error": 4.470348358154297e-08,
+  "previous_P2_reproduction": {
+    "matching_configurations": 312,
+    "max_raw_O2C_difference_native_px": 0.0,
+    "max_frozen_observed_z_difference_m": 0.0,
+    "max_bidirectional_robust_loss_difference": 0.0
+  },
+  "protocol_signature_verified": true,
+  "frozen_input_source_unchanged": true
+}

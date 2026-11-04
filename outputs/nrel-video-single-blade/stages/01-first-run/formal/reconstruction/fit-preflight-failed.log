@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/nrel_single_blade.py", line 91, in <module>
+    main()
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/nrel_single_blade.py", line 82, in main
+    result=fit_bundle(a.input,a.observations,a.output,a.config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/nrel_single_blade.py", line 14, in fit_bundle
+    from wfrl.nrel_reconstruction.dataset import load_bundle, iter_rgb, write_json
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/__init__.py", line 16, in <module>
+    from wfrl import paths  # noqa: F401  —— import 本包即保证输出目录存在
+    ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/paths.py", line 24, in <module>
+    os.makedirs(_d, exist_ok=True)
+  File "<frozen os>", line 225, in makedirs
+FileExistsError: [Errno 17] File exists: '/Users/eason/Desktop/wfcrl/wind farm RL/results'

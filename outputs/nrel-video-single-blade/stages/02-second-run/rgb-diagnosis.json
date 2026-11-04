@@ -1,0 +1,891 @@
+{
+  "schema": "nrel-rgb-diagnosis.v2-development",
+  "status": "RGB_ONLY_DIAGNOSTIC_COMPLETE_NO_GEOMETRY_SCORE",
+  "target": "T1/B1",
+  "t_ref_sim_time_s": 122.175,
+  "data_boundary": {
+    "allowed_first_result_subtrees": [
+      "model_state.json",
+      "optimization.json",
+      "observations/",
+      "projection-checks/"
+    ],
+    "evaluation_only_read": false,
+    "exact_scene_model_read": false,
+    "first_result_ply_read": false,
+    "geometry_score_run": false,
+    "current_code_review": [
+      "observations.py",
+      "optimize.py"
+    ],
+    "read_file_sha256": {
+      "model_state.json": "803cb59d266f5df8356fe5baec5ec457aab43c7bad9a702635e8403a12502aff",
+      "optimization.json": "4b202928cb52f1a7442c4535ff397d7a8c979685077eecdef179a7493cfb229a",
+      "observations/observations.json": "605244e8fc31af1ab21aea884ad32ab91fd57ee94f83f810772bf46a5d200ea5",
+      "observations/annotations.json": "6e8ec85ad681f1ffc677475ebac3a89af8cddeed007e396942456c4b909328c1",
+      "projection-checks/projection_checks.json": "abc55b422b0a153727901a7ceccb7e4fb8bb12ccfbe27c04fa4091b3f15d87a9",
+      "projection-checks/projection_checks.jpg": "e731d4a98b4ec97925ddaf82e73db685876a63e8d251321e3a2341fc36021f80",
+      "observations/C1_000042_FBU.png": "288d5a52564942a764bc319a07c4aad7523cc89d6e157bd1e483081c72256174",
+      "observations/C1_000043_FBU.png": "3857c63017c0179014562cbf0997a1c80a634db3e72a488d762e370dd3696c8b",
+      "observations/C1_000044_FBU.png": "25142a78498b685ee7d6b498b81b3f05a83b04315c81d749093a153b034f001f",
+      "observations/C1_000045_FBU.png": "14e3b4c8e2271c1f2f8170c1e5b4182b436a4837bad55e1f6504f09da1aab662",
+      "observations/C2_000042_FBU.png": "cfedf938d7a291f620d06a970572f2fba9d33185103d066532b109b341d30984",
+      "observations/C2_000043_FBU.png": "d860932286b68c7f729bc475bb2268f616ffc2a167df9d636b53476d9222de62",
+      "observations/C2_000044_FBU.png": "ebf2bef045aa40b2558d0c2bb5b8aef3be79706fad3f5826c4cd4cd4fb206695",
+      "observations/C2_000045_FBU.png": "05c79571400bd553def9da832b6ab54a5c61679d84607f05ce61ad214d1a4e48",
+      "observations/C3_000042_FBU.png": "a100c87c632c7a5486ec7f9a4999c4e89b5a8d786465e42d3da2406c113659d7",
+      "observations/C3_000043_FBU.png": "660b21c6fe911e06f3a86b015c14883bf0c905fc9d08dee0468e1cb3e9f635d7",
+      "observations/C3_000044_FBU.png": "18ad3559a4153f19128bba6deba8962994252f1d86c613f44bb3b33604e655cf",
+      "observations/C3_000045_FBU.png": "ab282447a927d8f9c9921d6de0dd7111efade23e44c8e39a239645b5d9c70222"
+    }
+  },
+  "first_run_residuals_by_camera": {
+    "initial_template": {
+      "C1": {
+        "fit": {
+          "frame_ids": [
+            42,
+            43
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.39214910566806793,
+          "foreground_mean": 0.1765538677573204,
+          "background_mean": 0.20053459517657757,
+          "foreground_distance_mean": 0.10040424019098282,
+          "uncertain_pixel_fraction_mean": 0.5571527777777778
+        },
+        "heldout": {
+          "frame_ids": [
+            44,
+            45
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.6425321102142334,
+          "foreground_mean": 0.06895279418677092,
+          "background_mean": 0.5717619061470032,
+          "foreground_distance_mean": 0.012116041529225186,
+          "uncertain_pixel_fraction_mean": 0.5593402777777778
+        }
+      },
+      "C2": {
+        "fit": {
+          "frame_ids": [
+            42,
+            43
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.18290875107049942,
+          "foreground_mean": 0.11675780266523361,
+          "background_mean": 0.05722896382212639,
+          "foreground_distance_mean": 0.05947988945990801,
+          "uncertain_pixel_fraction_mean": 0.017664930555555555
+        },
+        "heldout": {
+          "frame_ids": [
+            44,
+            45
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.21192631125450134,
+          "foreground_mean": 0.022581747733056545,
+          "background_mean": 0.18907563388347626,
+          "foreground_distance_mean": 0.0017928810266312212,
+          "uncertain_pixel_fraction_mean": 0.01956597222222222
+        }
+      },
+      "C3": {
+        "fit": {
+          "frame_ids": [
+            42,
+            43
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.48309779167175293,
+          "foreground_mean": 0.4456569403409958,
+          "background_mean": 0.008949896058766171,
+          "foreground_distance_mean": 0.18993974663317204,
+          "uncertain_pixel_fraction_mean": 0.012864583333333332
+        },
+        "heldout": {
+          "frame_ids": [
+            44,
+            45
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.11621914058923721,
+          "foreground_mean": 0.008200953481718898,
+          "background_mean": 0.1079673171043396,
+          "foreground_distance_mean": 0.0003390843339730054,
+          "uncertain_pixel_fraction_mean": 0.014574652777777778
+        }
+      }
+    },
+    "prior_only": {
+      "C1": {
+        "fit": {
+          "frame_ids": [
+            42,
+            43
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.39214910566806793,
+          "foreground_mean": 0.1765538677573204,
+          "background_mean": 0.20053459517657757,
+          "foreground_distance_mean": 0.10040424019098282,
+          "uncertain_pixel_fraction_mean": 0.5571527777777778
+        },
+        "heldout": {
+          "frame_ids": [
+            44,
+            45
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.6425321102142334,
+          "foreground_mean": 0.06895279418677092,
+          "background_mean": 0.5717619061470032,
+          "foreground_distance_mean": 0.012116041529225186,
+          "uncertain_pixel_fraction_mean": 0.5593402777777778
+        }
+      },
+      "C2": {
+        "fit": {
+          "frame_ids": [
+            42,
+            43
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.18290875107049942,
+          "foreground_mean": 0.11675780266523361,
+          "background_mean": 0.05722896382212639,
+          "foreground_distance_mean": 0.05947988945990801,
+          "uncertain_pixel_fraction_mean": 0.017664930555555555
+        },
+        "heldout": {
+          "frame_ids": [
+            44,
+            45
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.21192631125450134,
+          "foreground_mean": 0.022581747733056545,
+          "background_mean": 0.18907563388347626,
+          "foreground_distance_mean": 0.0017928810266312212,
+          "uncertain_pixel_fraction_mean": 0.01956597222222222
+        }
+      },
+      "C3": {
+        "fit": {
+          "frame_ids": [
+            42,
+            43
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.48309779167175293,
+          "foreground_mean": 0.4456569403409958,
+          "background_mean": 0.008949896058766171,
+          "foreground_distance_mean": 0.18993974663317204,
+          "uncertain_pixel_fraction_mean": 0.012864583333333332
+        },
+        "heldout": {
+          "frame_ids": [
+            44,
+            45
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.11621914058923721,
+          "foreground_mean": 0.008200953481718898,
+          "background_mean": 0.1079673171043396,
+          "foreground_distance_mean": 0.0003390843339730054,
+          "uncertain_pixel_fraction_mean": 0.014574652777777778
+        }
+      }
+    },
+    "T1_B1": {
+      "C1": {
+        "fit": {
+          "frame_ids": [
+            42,
+            43
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.1545211486518383,
+          "foreground_mean": 0.08778545632958412,
+          "background_mean": 0.06514356238767505,
+          "foreground_distance_mean": 0.01061418280005455,
+          "uncertain_pixel_fraction_mean": 0.5571527777777778
+        },
+        "heldout": {
+          "frame_ids": [
+            44,
+            45
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.27639229595661163,
+          "foreground_mean": 0.03877852484583855,
+          "background_mean": 0.23709093034267426,
+          "foreground_distance_mean": 0.003485505934804678,
+          "uncertain_pixel_fraction_mean": 0.5593402777777778
+        }
+      },
+      "C2": {
+        "fit": {
+          "frame_ids": [
+            42,
+            43
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.07761221379041672,
+          "foreground_mean": 0.04554269555956125,
+          "background_mean": 0.03113623335957527,
+          "foreground_distance_mean": 0.006221911200555041,
+          "uncertain_pixel_fraction_mean": 0.017664930555555555
+        },
+        "heldout": {
+          "frame_ids": [
+            44,
+            45
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.1775517240166664,
+          "foreground_mean": 0.1417207270860672,
+          "background_mean": 0.026533689349889755,
+          "foreground_distance_mean": 0.06198205053806305,
+          "uncertain_pixel_fraction_mean": 0.01956597222222222
+        }
+      },
+      "C3": {
+        "fit": {
+          "frame_ids": [
+            42,
+            43
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.05916691292077303,
+          "foreground_mean": 0.027986372821033,
+          "background_mean": 0.030692570842802525,
+          "foreground_distance_mean": 0.0032531186152482405,
+          "uncertain_pixel_fraction_mean": 0.012864583333333332
+        },
+        "heldout": {
+          "frame_ids": [
+            44,
+            45
+          ],
+          "resolution": [
+            320,
+            180
+          ],
+          "image_loss_mean": 0.0404463317245245,
+          "foreground_mean": 0.002603661567263771,
+          "background_mean": 0.037834606133401394,
+          "foreground_distance_mean": 5.375581167754717e-05,
+          "uncertain_pixel_fraction_mean": 0.014574652777777778
+        }
+      }
+    }
+  },
+  "final_vs_initial_rgb_changes": [
+    {
+      "camera_id": "C1",
+      "split": "fit",
+      "image_loss_relative_change": -0.6059632766761127,
+      "foreground_delta": -0.08876841142773628,
+      "background_delta": -0.13539103278890252
+    },
+    {
+      "camera_id": "C1",
+      "split": "heldout",
+      "image_loss_relative_change": -0.5698389363537695,
+      "foreground_delta": -0.03017426934093237,
+      "background_delta": -0.3346709758043289
+    },
+    {
+      "camera_id": "C2",
+      "split": "fit",
+      "image_loss_relative_change": -0.5756779632675844,
+      "foreground_delta": -0.07121510710567236,
+      "background_delta": -0.026092730462551117
+    },
+    {
+      "camera_id": "C2",
+      "split": "heldout",
+      "image_loss_relative_change": -0.16220065849470977,
+      "foreground_delta": 0.11913897935301065,
+      "background_delta": -0.1625419445335865
+    },
+    {
+      "camera_id": "C3",
+      "split": "fit",
+      "image_loss_relative_change": -0.877526012453862,
+      "foreground_delta": -0.4176705675199628,
+      "background_delta": 0.021742674784036353
+    },
+    {
+      "camera_id": "C3",
+      "split": "heldout",
+      "image_loss_relative_change": -0.6519821819412925,
+      "foreground_delta": -0.005597291914455127,
+      "background_delta": -0.0701327109709382
+    }
+  ],
+  "hard_projection_inspection": [
+    {
+      "camera_id": "C1",
+      "frame_id": 43,
+      "split": "fit",
+      "resolution": [
+        480,
+        270
+      ],
+      "foreground_coverage_initial": 0.8131952515357795,
+      "foreground_coverage_final": 0.8875767889755936,
+      "background_spill_initial": 0.37920653693151274,
+      "background_spill_final": 0.11052574991936351,
+      "masked_iou_initial": 0.7577304635377385,
+      "masked_iou_final": 0.8690360074778509,
+      "projected_area_ratio_final_to_initial": 0.9848821441966475
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 44,
+      "split": "heldout",
+      "resolution": [
+        480,
+        270
+      ],
+      "foreground_coverage_initial": 0.8615555555555555,
+      "foreground_coverage_final": 0.9396,
+      "background_spill_initial": 0.5662996649114409,
+      "background_spill_final": 0.21764799744694432,
+      "masked_iou_initial": 0.7441744404775615,
+      "masked_iou_final": 0.8858950720750922,
+      "projected_area_ratio_final_to_initial": 0.9921622401847575
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 45,
+      "split": "heldout",
+      "resolution": [
+        480,
+        270
+      ],
+      "foreground_coverage_initial": 0.9371326410658307,
+      "foreground_coverage_final": 0.9421287225705329,
+      "background_spill_initial": 0.5512378005236849,
+      "background_spill_final": 0.24767912401809092,
+      "masked_iou_initial": 0.7638486874937619,
+      "masked_iou_final": 0.8549806640885451,
+      "projected_area_ratio_final_to_initial": 1.0023484046794138
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 43,
+      "split": "fit",
+      "resolution": [
+        480,
+        270
+      ],
+      "foreground_coverage_initial": 0.8877234610510422,
+      "foreground_coverage_final": 0.9015153557850459,
+      "background_spill_initial": 0.07123663490989722,
+      "background_spill_final": 0.013548302234248454,
+      "masked_iou_initial": 0.844558455717309,
+      "masked_iou_final": 0.8928366379598104,
+      "projected_area_ratio_final_to_initial": 0.9671470149783489
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 44,
+      "split": "heldout",
+      "resolution": [
+        480,
+        270
+      ],
+      "foreground_coverage_initial": 0.9486779602815772,
+      "foreground_coverage_final": 0.8463915755737423,
+      "background_spill_initial": 0.16964596836016446,
+      "background_spill_final": 0.012317931563175134,
+      "masked_iou_initial": 0.8326740257946226,
+      "masked_iou_final": 0.8379155512117735,
+      "projected_area_ratio_final_to_initial": 0.7840547938097524
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 45,
+      "split": "heldout",
+      "resolution": [
+        480,
+        270
+      ],
+      "foreground_coverage_initial": 0.9839190628328008,
+      "foreground_coverage_final": 0.8354100106496273,
+      "background_spill_initial": 0.18498572814578382,
+      "background_spill_final": 0.00868966099073384,
+      "masked_iou_initial": 0.7976574191320364,
+      "masked_iou_final": 0.8263457284314758,
+      "projected_area_ratio_final_to_initial": 0.6940559942569993
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 43,
+      "split": "fit",
+      "resolution": [
+        480,
+        270
+      ],
+      "foreground_coverage_initial": 0.8327547382248076,
+      "foreground_coverage_final": 0.9354240945768437,
+      "background_spill_initial": 0.013260539599242255,
+      "background_spill_final": 0.035486945369400745,
+      "masked_iou_initial": 0.8113073881944286,
+      "masked_iou_final": 0.8736198738170347,
+      "projected_area_ratio_final_to_initial": 1.171714185902776
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 44,
+      "split": "heldout",
+      "resolution": [
+        480,
+        270
+      ],
+      "foreground_coverage_initial": 0.9720704018491321,
+      "foreground_coverage_final": 0.9844942575783112,
+      "background_spill_initial": 0.1443204385241618,
+      "background_spill_final": 0.04594283856132486,
+      "masked_iou_initial": 0.7482023721275018,
+      "masked_iou_final": 0.8988766514981644,
+      "projected_area_ratio_final_to_initial": 0.8506906257572651
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 45,
+      "split": "heldout",
+      "resolution": [
+        480,
+        270
+      ],
+      "foreground_coverage_initial": 1.0,
+      "foreground_coverage_final": 1.0,
+      "background_spill_initial": 0.06413775287792434,
+      "background_spill_final": 0.02171561425319276,
+      "masked_iou_initial": 0.3385780885780886,
+      "masked_iou_final": 0.601894331804055,
+      "projected_area_ratio_final_to_initial": 0.57225156024964
+    }
+  ],
+  "legacy_boundary_definition_checks": [
+    {
+      "camera_id": "C1",
+      "frame_id": 42,
+      "split": "fit",
+      "image_size_wh": [
+        1920,
+        1080
+      ],
+      "F_pixels": 775293,
+      "B_pixels": 145023,
+      "U_pixels": 1153284,
+      "direct_F_B_boundary_points": 0,
+      "foreground_boundary_adjacent_U_points": 3819,
+      "standard_FBU_boundary_metric_status": "NULL_NO_TRUSTED_OBSERVED_BOUNDARY",
+      "observed_to_candidate_mean_px": null,
+      "candidate_to_observed_mean_px": null,
+      "null_reason": "Legacy F/B/U separates foreground and background with an uncertainty ring; no trusted F-B adjacency. Actual hard candidate boundary masks are not among this diagnostic input."
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 43,
+      "split": "fit",
+      "image_size_wh": [
+        1920,
+        1080
+      ],
+      "F_pixels": 769029,
+      "B_pixels": 148876,
+      "U_pixels": 1155695,
+      "direct_F_B_boundary_points": 0,
+      "foreground_boundary_adjacent_U_points": 3797,
+      "standard_FBU_boundary_metric_status": "NULL_NO_TRUSTED_OBSERVED_BOUNDARY",
+      "observed_to_candidate_mean_px": null,
+      "candidate_to_observed_mean_px": null,
+      "null_reason": "Legacy F/B/U separates foreground and background with an uncertainty ring; no trusted F-B adjacency. Actual hard candidate boundary masks are not among this diagnostic input."
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 44,
+      "split": "heldout",
+      "image_size_wh": [
+        1920,
+        1080
+      ],
+      "F_pixels": 717691,
+      "B_pixels": 200274,
+      "U_pixels": 1155635,
+      "direct_F_B_boundary_points": 0,
+      "foreground_boundary_adjacent_U_points": 3775,
+      "standard_FBU_boundary_metric_status": "NULL_NO_TRUSTED_OBSERVED_BOUNDARY",
+      "observed_to_candidate_mean_px": null,
+      "candidate_to_observed_mean_px": null,
+      "null_reason": "Legacy F/B/U separates foreground and background with an uncertainty ring; no trusted F-B adjacency. Actual hard candidate boundary masks are not among this diagnostic input."
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 45,
+      "split": "heldout",
+      "image_size_wh": [
+        1920,
+        1080
+      ],
+      "F_pixels": 650561,
+      "B_pixels": 268467,
+      "U_pixels": 1154572,
+      "direct_F_B_boundary_points": 0,
+      "foreground_boundary_adjacent_U_points": 3717,
+      "standard_FBU_boundary_metric_status": "NULL_NO_TRUSTED_OBSERVED_BOUNDARY",
+      "observed_to_candidate_mean_px": null,
+      "candidate_to_observed_mean_px": null,
+      "null_reason": "Legacy F/B/U separates foreground and background with an uncertainty ring; no trusted F-B adjacency. Actual hard candidate boundary masks are not among this diagnostic input."
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 42,
+      "split": "fit",
+      "image_size_wh": [
+        1920,
+        1080
+      ],
+      "F_pixels": 1049356,
+      "B_pixels": 993325,
+      "U_pixels": 30919,
+      "direct_F_B_boundary_points": 0,
+      "foreground_boundary_adjacent_U_points": 4477,
+      "standard_FBU_boundary_metric_status": "NULL_NO_TRUSTED_OBSERVED_BOUNDARY",
+      "observed_to_candidate_mean_px": null,
+      "candidate_to_observed_mean_px": null,
+      "null_reason": "Legacy F/B/U separates foreground and background with an uncertainty ring; no trusted F-B adjacency. Actual hard candidate boundary masks are not among this diagnostic input."
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 43,
+      "split": "fit",
+      "image_size_wh": [
+        1920,
+        1080
+      ],
+      "F_pixels": 1187213,
+      "B_pixels": 854939,
+      "U_pixels": 31448,
+      "direct_F_B_boundary_points": 0,
+      "foreground_boundary_adjacent_U_points": 4415,
+      "standard_FBU_boundary_metric_status": "NULL_NO_TRUSTED_OBSERVED_BOUNDARY",
+      "observed_to_candidate_mean_px": null,
+      "candidate_to_observed_mean_px": null,
+      "null_reason": "Legacy F/B/U separates foreground and background with an uncertainty ring; no trusted F-B adjacency. Actual hard candidate boundary masks are not among this diagnostic input."
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 44,
+      "split": "heldout",
+      "image_size_wh": [
+        1920,
+        1080
+      ],
+      "F_pixels": 1119281,
+      "B_pixels": 921714,
+      "U_pixels": 32605,
+      "direct_F_B_boundary_points": 0,
+      "foreground_boundary_adjacent_U_points": 4273,
+      "standard_FBU_boundary_metric_status": "NULL_NO_TRUSTED_OBSERVED_BOUNDARY",
+      "observed_to_candidate_mean_px": null,
+      "candidate_to_observed_mean_px": null,
+      "null_reason": "Legacy F/B/U separates foreground and background with an uncertainty ring; no trusted F-B adjacency. Actual hard candidate boundary masks are not among this diagnostic input."
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 45,
+      "split": "heldout",
+      "image_size_wh": [
+        1920,
+        1080
+      ],
+      "F_pixels": 902608,
+      "B_pixels": 1140943,
+      "U_pixels": 30049,
+      "direct_F_B_boundary_points": 0,
+      "foreground_boundary_adjacent_U_points": 4003,
+      "standard_FBU_boundary_metric_status": "NULL_NO_TRUSTED_OBSERVED_BOUNDARY",
+      "observed_to_candidate_mean_px": null,
+      "candidate_to_observed_mean_px": null,
+      "null_reason": "Legacy F/B/U separates foreground and background with an uncertainty ring; no trusted F-B adjacency. Actual hard candidate boundary masks are not among this diagnostic input."
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 42,
+      "split": "fit",
+      "image_size_wh": [
+        1920,
+        1080
+      ],
+      "F_pixels": 81437,
+      "B_pixels": 1970100,
+      "U_pixels": 22063,
+      "direct_F_B_boundary_points": 0,
+      "foreground_boundary_adjacent_U_points": 1518,
+      "standard_FBU_boundary_metric_status": "NULL_NO_TRUSTED_OBSERVED_BOUNDARY",
+      "observed_to_candidate_mean_px": null,
+      "candidate_to_observed_mean_px": null,
+      "null_reason": "Legacy F/B/U separates foreground and background with an uncertainty ring; no trusted F-B adjacency. Actual hard candidate boundary masks are not among this diagnostic input."
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 43,
+      "split": "fit",
+      "image_size_wh": [
+        1920,
+        1080
+      ],
+      "F_pixels": 682144,
+      "B_pixels": 1364059,
+      "U_pixels": 27397,
+      "direct_F_B_boundary_points": 0,
+      "foreground_boundary_adjacent_U_points": 3335,
+      "standard_FBU_boundary_metric_status": "NULL_NO_TRUSTED_OBSERVED_BOUNDARY",
+      "observed_to_candidate_mean_px": null,
+      "candidate_to_observed_mean_px": null,
+      "null_reason": "Legacy F/B/U separates foreground and background with an uncertainty ring; no trusted F-B adjacency. Actual hard candidate boundary masks are not among this diagnostic input."
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 44,
+      "split": "heldout",
+      "image_size_wh": [
+        1920,
+        1080
+      ],
+      "F_pixels": 665463,
+      "B_pixels": 1381033,
+      "U_pixels": 27104,
+      "direct_F_B_boundary_points": 0,
+      "foreground_boundary_adjacent_U_points": 3220,
+      "standard_FBU_boundary_metric_status": "NULL_NO_TRUSTED_OBSERVED_BOUNDARY",
+      "observed_to_candidate_mean_px": null,
+      "candidate_to_observed_mean_px": null,
+      "null_reason": "Legacy F/B/U separates foreground and background with an uncertainty ring; no trusted F-B adjacency. Actual hard candidate boundary masks are not among this diagnostic input."
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 45,
+      "split": "heldout",
+      "image_size_wh": [
+        1920,
+        1080
+      ],
+      "F_pixels": 65528,
+      "B_pixels": 1986716,
+      "U_pixels": 21356,
+      "direct_F_B_boundary_points": 0,
+      "foreground_boundary_adjacent_U_points": 1280,
+      "standard_FBU_boundary_metric_status": "NULL_NO_TRUSTED_OBSERVED_BOUNDARY",
+      "observed_to_candidate_mean_px": null,
+      "candidate_to_observed_mean_px": null,
+      "null_reason": "Legacy F/B/U separates foreground and background with an uncertainty ring; no trusted F-B adjacency. Actual hard candidate boundary masks are not among this diagnostic input."
+    }
+  ],
+  "shape_parameter_diagnostics": {
+    "source": "first reconstruction/model_state.json only; not exact scene geometry",
+    "control_z_m": [
+      0.0,
+      10.25,
+      20.5,
+      30.75,
+      41.0,
+      51.25,
+      61.5
+    ],
+    "chord_scale_relative_to_independent_template": [
+      1.1939158722815837,
+      0.9464126860562863,
+      0.9068898911154771,
+      0.9798551108970763,
+      0.9654879723693082,
+      0.9480339844328616,
+      0.965494680280962
+    ],
+    "chord_change_percent": [
+      19.391587228158368,
+      -5.358731394371374,
+      -9.311010888452287,
+      -2.014488910292367,
+      -3.4512027630691833,
+      -5.196601556713842,
+      -3.450531971903803
+    ],
+    "center_offsets_m": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        -0.6392022371292114,
+        -1.5576391220092773
+      ],
+      [
+        -0.3959996998310089,
+        -0.4907703101634979
+      ],
+      [
+        0.688981294631958,
+        -0.37666767835617065
+      ],
+      [
+        -0.6038331985473633,
+        0.04192391782999039
+      ],
+      [
+        0.07662598788738251,
+        -0.74614417552948
+      ],
+      [
+        -0.07360327243804932,
+        -1.0437967777252197
+      ]
+    ],
+    "max_offset_norm_m": 1.6836921138868652,
+    "max_centerline_discrete_curvature_per_m": 0.02635457031081059,
+    "x_offset_slope_sign_changes": 4,
+    "root_offset_anchored": true,
+    "span_fixed_m": 61.5,
+    "fixed_prior_fields": [
+      "section_thickness",
+      "section_twist",
+      "hidden_surface",
+      "61.5_m_span"
+    ],
+    "initial_and_prior_parameters_identical": true
+  },
+  "depth_evidence": {
+    "camera_centre_separation_at_t_ref_m": {
+      "C1-C2": 0.0800015686352389,
+      "C2-C3": 0.07999746748800665,
+      "C1-C3": 0.15999903539443164
+    },
+    "reliable_rgb_correspondence_tracks": 0,
+    "conclusion": "Silhouettes of different span regions plus ideal rigid poses constrain projection; 0.08/0.16m centre separations and zero correspondence tracks do not establish axial depth or backside recovery. Centreline depth and chord remain coupled."
+  },
+  "heldout_policy": {
+    "original_fit_frame_ids": [
+      42,
+      43
+    ],
+    "original_heldout_frame_ids": [
+      44,
+      45
+    ],
+    "v2_role": "already-seen development validation; not blind",
+    "reason": "Frames 44/45 and their RGB overlays/residuals have already been inspected. Their exclusion from the first fitting loss is preserved, but subsequent design or parameter choices make reuse development validation.",
+    "blind_claim_allowed": false,
+    "if_independent_validation_is_needed": "Freeze configuration before selecting an untouched RGB frame/time split; do not choose it by score or truth."
+  },
+  "findings": [
+    {
+      "id": "C1_U_DOMAIN",
+      "evidence": "C1 about55.7% of fit pixels are U; left25%, top23% and bottom17% boxes suppress actual occluders/cropping. U has no negative loss.",
+      "conclusion": "No evidence that U itself acts as background and forces shortening. It leaves root/depth/hidden portions underconstrained; incorrect or over-broad exclusion could hide errors.",
+      "state": "OBSERVED_MASK_STRUCTURE_AND_INFERENCE"
+    },
+    {
+      "id": "CHORD_SHRINKAGE",
+      "evidence": "Six of seven chord-control log scales are negative; maximum reduction is about9.31% at z20.5m, while root expands about19.39%.",
+      "conclusion": "Chord shrinkage is a measured parameter change relative to the independent template, not proof of incorrect physical chord. Its specific cause cannot be attributed to C1 U from this run; centreline, background-fit pressure, coarse template and static-window mismatch are competing explanations.",
+      "state": "PARAMETER_CHANGE_OBSERVED_CAUSE_UNRESOLVED"
+    },
+    {
+      "id": "C2_MISSED_FOREGROUND",
+      "evidence": "Seen validation44/45 C2 foreground mean rises0.02258 to0.14172 while background mean drops0.18908 to0.02653; hard coverage44 falls0.94868 to0.84639 and45 falls0.98392 to0.83541.",
+      "conclusion": "Total loss/IoU improvement masks missed visible foreground on these seen validation frames. Keep foreground coverage and background spill separate in v2 acceptance.",
+      "state": "RGB_RESIDUAL_OBSERVED"
+    },
+    {
+      "id": "CONTOUR_IS_NOT_FBU_RING",
+      "evidence": "Morphological uncertainty rings separate F/B; direct F-B boundary point counts measured per image.",
+      "conclusion": "Do not score the eroded F edge or bridge U as actual RGB contour. Root is adding a separate visible RGB contour with explicit occlusion/cropping domain.",
+      "state": "INTERFACE_REQUIREMENT"
+    },
+    {
+      "id": "CONTROL_ZIGZAG",
+      "evidence": "Centre offsets alternate in x along seven controls; x slope sign-change count and discrete curvature are recorded above.",
+      "conclusion": "Validate a smoother low-dimensional centreline and dimension-aware curvature/parameter bounds using RGB development data. A smoother model is still a prior and must have an identical prior-only control.",
+      "state": "PARAMETER_ROUGHNESS_DIAGNOSTIC"
+    }
+  ],
+  "v2_metric_freeze_proposal": {
+    "reference_state": "same frozen t_ref122.175s and metre blade-root frame unless RGB review gives documented reason to change",
+    "fit_and_validation_roles": "freeze exact camera/frame list before each run; frames44/45 explicitly seen-development validation",
+    "rgb_contour": "raw RGB threshold/largest reviewed component contour separately saved; exclude actual occluder boxes and frame edges with frozen domain; preserve +/-3px RGB edge uncertainty; no truth contours",
+    "contour_metrics": "per camera/frame bidirectional mean/P95 sampled boundary distance in reporting px; retain point counts and excluded counts; legacy FBU metrics null when no true F-B adjacency",
+    "rasterization": "freeze hard threshold, pixel-centre convention and resize half-pixel mapping; native1920x1080 reporting scale; compare same configuration and domain for initial/prior/final",
+    "region_metrics": "foreground coverage, background spill and IoU separately; do not accept an IoU win that hides visible foreground loss",
+    "controls": "same independent template, initial parameters, smooth parameterization, constraints, stages, regularization, optimizer and budgets; prior_only image terms all zero",
+    "smooth_shape_checks": [
+      "positive finite chord/thickness and fixed span",
+      "anchored root and reference-state displacement",
+      "dense span sampling checks on centreline first/second derivatives and chord changes",
+      "no section inversion/self crossing using output geometry only",
+      "gradient finite-difference test after parameterization or regularizer change"
+    ],
+    "truth_policy": "do not read evaluation-only until configuration/window/model and v2 result are frozen; later score once independently, do not retune using score"
+  },
+  "geometry_conclusion": "NOT_ASSESSED_THIS_DIAGNOSTIC"
+}

@@ -1,0 +1,28 @@
+{
+  "resolutions": [
+    [
+      160,
+      90
+    ],
+    [
+      320,
+      180
+    ],
+    [
+      640,
+      360
+    ]
+  ],
+  "iterations_per_stage": [
+    40,
+    40,
+    20
+  ],
+  "batch_size": 1,
+  "learning_rate": 0.012,
+  "image_weight": 1.0,
+  "seed": 20261002,
+  "threads": 4,
+  "model_interpolation": "bspline",
+  "image_objective": "projected_contour"
+}

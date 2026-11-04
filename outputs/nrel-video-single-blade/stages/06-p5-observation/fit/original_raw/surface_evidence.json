@@ -1,0 +1,33 @@
+{
+  "target": "T1/B1",
+  "units": "m",
+  "coordinate_frame": "blade_root_local",
+  "regions": [
+    {
+      "name": "root",
+      "span_bounds_m": [
+        0,
+        20.5
+      ],
+      "status": "prior_only"
+    },
+    {
+      "name": "middle",
+      "span_bounds_m": [
+        20.5,
+        41
+      ],
+      "status": "prior_only"
+    },
+    {
+      "name": "tip",
+      "span_bounds_m": [
+        41,
+        61.5
+      ],
+      "status": "prior_only"
+    }
+  ],
+  "full_surface_recovery": false,
+  "backside_and_thickness": "prior_only"
+}

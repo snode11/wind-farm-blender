@@ -1,0 +1,19 @@
+{
+  "status": "PASSED",
+  "synthetic_tests": "7 passed in 0.26s",
+  "pytest_command": "/opt/anaconda3/envs/wfrl-mac/bin/python -m pytest -q tests/test_nrel_surface_audit.py",
+  "surface_rows": 64368,
+  "contour_rows": 98523,
+  "contour_within_uncertainty_samples": 13186,
+  "contour_active_residual_samples": 51142,
+  "all_input_signatures_rechecked": true,
+  "surface_weights_sum_to_model_area_per_view": true,
+  "eligibility_deadband_active_partition_checked": true,
+  "section_visible_never_visible_partitions_checked": true,
+  "frozen_closed_mesh_winding_checked": "894 edges, each two incident faces with opposite oriented winding",
+  "truth_read": false,
+  "new_optimization": false,
+  "source_sha256": "67e227620cdaf876a5fc527a9e956fc81b93f7b086ebee5f1c5d182ffe7d257a",
+  "tests_sha256": "82f090b43e552c0b648190410ecfd3437efdba94dc2f6a2b4f945100da1deae4",
+  "final_semantic_clarification": "Historical section_thickness metadata denotes fixed thickness-to-chord ratio; absolute thickness follows chord. Independent audit rerun after clarification, all signatures rechecked."
+}

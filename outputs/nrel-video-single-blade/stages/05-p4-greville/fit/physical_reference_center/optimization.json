@@ -1,0 +1,3660 @@
+{
+  "config": {
+    "model_interpolation": "bspline",
+    "image_objective": "projected_contour",
+    "resolutions": [
+      [
+        160,
+        90
+      ],
+      [
+        320,
+        180
+      ],
+      [
+        640,
+        360
+      ]
+    ],
+    "iterations_per_stage": [
+      40,
+      40,
+      20
+    ],
+    "learning_rate": 0.012,
+    "image_weight": 1.0,
+    "foreground_distance_weight": 0.15,
+    "relative_change_weight": 0.03,
+    "smoothness_weight": 0.1,
+    "sigma_px": 0.65,
+    "span_samples": 25,
+    "ring_samples": 12,
+    "control_stations": 7,
+    "face_chunk": 48,
+    "batch_size": 1,
+    "device": "cpu",
+    "seed": 20261002,
+    "threads": 4
+  },
+  "coordinate_branch": "physical_reference_center",
+  "prior_only_history": [
+    {
+      "stage": 0,
+      "iteration": 0,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 1,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 2,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 3,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 4,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 5,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 6,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 7,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 8,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 9,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 10,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 11,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 12,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 13,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 14,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 15,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 16,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 17,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 18,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 19,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 20,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 21,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 22,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 23,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 24,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 25,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 26,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 27,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 28,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 29,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 30,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 31,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 32,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 33,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 34,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 35,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 36,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 37,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 38,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 0,
+      "iteration": 39,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 0,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 1,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 2,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 3,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 4,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 5,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 6,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 7,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 8,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 9,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 10,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 11,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 12,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 13,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 14,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 15,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 16,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 17,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 18,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 19,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 20,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 21,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 22,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 23,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 24,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 25,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 26,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 27,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 28,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 29,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 30,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 31,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 32,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 33,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 34,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 35,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 36,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 37,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 38,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 1,
+      "iteration": 39,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 0,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 1,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 2,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 3,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 4,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 5,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 6,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 7,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 8,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 9,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 10,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 11,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 12,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 13,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 14,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 15,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 16,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 17,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 18,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    },
+    {
+      "stage": 2,
+      "iteration": 19,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.0,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.0,
+      "gradient_norm_pre_clip": 0.0,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 5.0,
+      "chord_log_bound_margin": 0.3499999940395355
+    }
+  ],
+  "video_history": [
+    {
+      "stage": 0,
+      "iteration": 0,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.8649521097540855,
+      "regularization_pre_step": 0.0,
+      "total_loss_pre_step": 0.8649521097540855,
+      "gradient_norm_pre_clip": 3.719015598297119,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.940000057220459,
+      "chord_log_bound_margin": 0.3458001911640167
+    },
+    {
+      "stage": 0,
+      "iteration": 1,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.7473271191120148,
+      "regularization_pre_step": 1.5693880413891748e-05,
+      "total_loss_pre_step": 0.7473428129924287,
+      "gradient_norm_pre_clip": 3.2427492141723633,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.879956245422363,
+      "chord_log_bound_margin": 0.3415980041027069
+    },
+    {
+      "stage": 0,
+      "iteration": 2,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.6264409683644772,
+      "regularization_pre_step": 5.384493852034211e-05,
+      "total_loss_pre_step": 0.6264948133029975,
+      "gradient_norm_pre_clip": 3.386714220046997,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.819847583770752,
+      "chord_log_bound_margin": 0.3373910188674927
+    },
+    {
+      "stage": 0,
+      "iteration": 3,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.5161874946206808,
+      "regularization_pre_step": 0.00011906220606761053,
+      "total_loss_pre_step": 0.5163065568267484,
+      "gradient_norm_pre_clip": 3.197528839111328,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.759739875793457,
+      "chord_log_bound_margin": 0.3331753611564636
+    },
+    {
+      "stage": 0,
+      "iteration": 4,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.4213426548521966,
+      "regularization_pre_step": 0.0002086843887809664,
+      "total_loss_pre_step": 0.42155133924097754,
+      "gradient_norm_pre_clip": 1.6237051486968994,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.699965476989746,
+      "chord_log_bound_margin": 0.32895317673683167
+    },
+    {
+      "stage": 0,
+      "iteration": 5,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.38975534052588046,
+      "regularization_pre_step": 0.0003068691585212946,
+      "total_loss_pre_step": 0.39006220968440175,
+      "gradient_norm_pre_clip": 1.1104085445404053,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.641090393066406,
+      "chord_log_bound_margin": 0.3247293531894684
+    },
+    {
+      "stage": 0,
+      "iteration": 6,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.40349319763481617,
+      "regularization_pre_step": 0.00040243571856990457,
+      "total_loss_pre_step": 0.4038956333533861,
+      "gradient_norm_pre_clip": 2.203712224960327,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.583646297454834,
+      "chord_log_bound_margin": 0.32050514221191406
+    },
+    {
+      "stage": 0,
+      "iteration": 7,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.3976354021579027,
+      "regularization_pre_step": 0.0004965956322848797,
+      "total_loss_pre_step": 0.3981319977901876,
+      "gradient_norm_pre_clip": 2.302295684814453,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.528289794921875,
+      "chord_log_bound_margin": 0.3162899613380432
+    },
+    {
+      "stage": 0,
+      "iteration": 8,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.3999830652028322,
+      "regularization_pre_step": 0.0005951027269475162,
+      "total_loss_pre_step": 0.40057816792977974,
+      "gradient_norm_pre_clip": 2.4389688968658447,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.475953102111816,
+      "chord_log_bound_margin": 0.3120952844619751
+    },
+    {
+      "stage": 0,
+      "iteration": 9,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.3914729841053486,
+      "regularization_pre_step": 0.0007021162309683859,
+      "total_loss_pre_step": 0.392175100336317,
+      "gradient_norm_pre_clip": 2.4794275760650635,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.427196025848389,
+      "chord_log_bound_margin": 0.30793458223342896
+    },
+    {
+      "stage": 0,
+      "iteration": 10,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.37415785901248455,
+      "regularization_pre_step": 0.0008177518029697239,
+      "total_loss_pre_step": 0.3749756108154543,
+      "gradient_norm_pre_clip": 2.489976167678833,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.382420063018799,
+      "chord_log_bound_margin": 0.30381935834884644
+    },
+    {
+      "stage": 0,
+      "iteration": 11,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.3497373331338167,
+      "regularization_pre_step": 0.0009412127546966076,
+      "total_loss_pre_step": 0.3506785458885133,
+      "gradient_norm_pre_clip": 2.447197675704956,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.342062473297119,
+      "chord_log_bound_margin": 0.29976776242256165
+    },
+    {
+      "stage": 0,
+      "iteration": 12,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.32092983182519674,
+      "regularization_pre_step": 0.0010699753183871508,
+      "total_loss_pre_step": 0.3219998071435839,
+      "gradient_norm_pre_clip": 2.2834553718566895,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.306095123291016,
+      "chord_log_bound_margin": 0.2957872450351715
+    },
+    {
+      "stage": 0,
+      "iteration": 13,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.2876869086176157,
+      "regularization_pre_step": 0.001202185871079564,
+      "total_loss_pre_step": 0.28888909448869526,
+      "gradient_norm_pre_clip": 1.7235175371170044,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.274473190307617,
+      "chord_log_bound_margin": 0.2918895483016968
+    },
+    {
+      "stage": 0,
+      "iteration": 14,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.2677100030705333,
+      "regularization_pre_step": 0.0013360254233703017,
+      "total_loss_pre_step": 0.2690460284939036,
+      "gradient_norm_pre_clip": 0.9170359969139099,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.2473955154418945,
+      "chord_log_bound_margin": 0.2880840301513672
+    },
+    {
+      "stage": 0,
+      "iteration": 15,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.25675500312354416,
+      "regularization_pre_step": 0.0014654587721452117,
+      "total_loss_pre_step": 0.25822046189568937,
+      "gradient_norm_pre_clip": 0.7472747564315796,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.224615573883057,
+      "chord_log_bound_margin": 0.28438621759414673
+    },
+    {
+      "stage": 0,
+      "iteration": 16,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.25655336817726493,
+      "regularization_pre_step": 0.0015857061371207237,
+      "total_loss_pre_step": 0.25813907431438565,
+      "gradient_norm_pre_clip": 1.3291120529174805,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.205460548400879,
+      "chord_log_bound_margin": 0.28078579902648926
+    },
+    {
+      "stage": 0,
+      "iteration": 17,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.2591381799429655,
+      "regularization_pre_step": 0.0016936586471274495,
+      "total_loss_pre_step": 0.26083183859009296,
+      "gradient_norm_pre_clip": 1.9475098848342896,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.189260482788086,
+      "chord_log_bound_margin": 0.27727216482162476
+    },
+    {
+      "stage": 0,
+      "iteration": 18,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.259408226236701,
+      "regularization_pre_step": 0.0017855684272944927,
+      "total_loss_pre_step": 0.2611937946639955,
+      "gradient_norm_pre_clip": 2.1418938636779785,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.1753716468811035,
+      "chord_log_bound_margin": 0.27383285760879517
+    },
+    {
+      "stage": 0,
+      "iteration": 19,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.25532807409763336,
+      "regularization_pre_step": 0.0018634707666933537,
+      "total_loss_pre_step": 0.2571915448643267,
+      "gradient_norm_pre_clip": 2.1825480461120605,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.163135528564453,
+      "chord_log_bound_margin": 0.2704588770866394
+    },
+    {
+      "stage": 0,
+      "iteration": 20,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.2447179313749075,
+      "regularization_pre_step": 0.001929807709529996,
+      "total_loss_pre_step": 0.2466477390844375,
+      "gradient_norm_pre_clip": 2.1484534740448,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.151956081390381,
+      "chord_log_bound_margin": 0.26713627576828003
+    },
+    {
+      "stage": 0,
+      "iteration": 21,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.23184214206412435,
+      "regularization_pre_step": 0.001987950410693884,
+      "total_loss_pre_step": 0.23383009247481823,
+      "gradient_norm_pre_clip": 2.026357889175415,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.141230583190918,
+      "chord_log_bound_margin": 0.2638494074344635
+    },
+    {
+      "stage": 0,
+      "iteration": 22,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.21537620248273015,
+      "regularization_pre_step": 0.0020413966849446297,
+      "total_loss_pre_step": 0.21741759916767478,
+      "gradient_norm_pre_clip": 1.551637887954712,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.130450248718262,
+      "chord_log_bound_margin": 0.2605876922607422
+    },
+    {
+      "stage": 0,
+      "iteration": 23,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.20167723717167974,
+      "regularization_pre_step": 0.0020947768352925777,
+      "total_loss_pre_step": 0.2037720140069723,
+      "gradient_norm_pre_clip": 0.9231008887290955,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.119243144989014,
+      "chord_log_bound_margin": 0.25734707713127136
+    },
+    {
+      "stage": 0,
+      "iteration": 24,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.19490913761546835,
+      "regularization_pre_step": 0.0021525491029024124,
+      "total_loss_pre_step": 0.19706168671837077,
+      "gradient_norm_pre_clip": 0.36673906445503235,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.107458591461182,
+      "chord_log_bound_margin": 0.2541218400001526
+    },
+    {
+      "stage": 0,
+      "iteration": 25,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.19055321488485788,
+      "regularization_pre_step": 0.002217925386503339,
+      "total_loss_pre_step": 0.19277114027136122,
+      "gradient_norm_pre_clip": 0.33890584111213684,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.0948615074157715,
+      "chord_log_bound_margin": 0.2509123682975769
+    },
+    {
+      "stage": 0,
+      "iteration": 26,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.18678405258106068,
+      "regularization_pre_step": 0.002293827012181282,
+      "total_loss_pre_step": 0.18907787959324196,
+      "gradient_norm_pre_clip": 0.5743287205696106,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.081207752227783,
+      "chord_log_bound_margin": 0.2477220892906189
+    },
+    {
+      "stage": 0,
+      "iteration": 27,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.18556810403242707,
+      "regularization_pre_step": 0.0023815054446458817,
+      "total_loss_pre_step": 0.18794960947707295,
+      "gradient_norm_pre_clip": 0.9167050719261169,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.0663652420043945,
+      "chord_log_bound_margin": 0.24454382061958313
+    },
+    {
+      "stage": 0,
+      "iteration": 28,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.18345483136363328,
+      "regularization_pre_step": 0.0024816286750137806,
+      "total_loss_pre_step": 0.18593646003864706,
+      "gradient_norm_pre_clip": 1.1340399980545044,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.050205230712891,
+      "chord_log_bound_margin": 0.24138271808624268
+    },
+    {
+      "stage": 0,
+      "iteration": 29,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.1796954048331827,
+      "regularization_pre_step": 0.0025942977517843246,
+      "total_loss_pre_step": 0.18228970258496702,
+      "gradient_norm_pre_clip": 1.1905007362365723,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.032623767852783,
+      "chord_log_bound_margin": 0.23824456334114075
+    },
+    {
+      "stage": 0,
+      "iteration": 30,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.17664923262782395,
+      "regularization_pre_step": 0.0027193031273782253,
+      "total_loss_pre_step": 0.17936853575520217,
+      "gradient_norm_pre_clip": 1.0992978811264038,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 4.013609409332275,
+      "chord_log_bound_margin": 0.23512938618659973
+    },
+    {
+      "stage": 0,
+      "iteration": 31,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.17083754646591842,
+      "regularization_pre_step": 0.002855354454368353,
+      "total_loss_pre_step": 0.17369290092028677,
+      "gradient_norm_pre_clip": 0.8847556710243225,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.9930946826934814,
+      "chord_log_bound_margin": 0.2320452481508255
+    },
+    {
+      "stage": 0,
+      "iteration": 32,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.15768317657057196,
+      "regularization_pre_step": 0.003001372329890728,
+      "total_loss_pre_step": 0.1606845489004627,
+      "gradient_norm_pre_clip": 0.6148049235343933,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.970871925354004,
+      "chord_log_bound_margin": 0.22910568118095398
+    },
+    {
+      "stage": 0,
+      "iteration": 33,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.15469925594516098,
+      "regularization_pre_step": 0.003156473161652684,
+      "total_loss_pre_step": 0.15785572910681367,
+      "gradient_norm_pre_clip": 0.3649487793445587,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.9471471309661865,
+      "chord_log_bound_margin": 0.22629766166210175
+    },
+    {
+      "stage": 0,
+      "iteration": 34,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.15160641350666992,
+      "regularization_pre_step": 0.0033185079228132963,
+      "total_loss_pre_step": 0.15492492142948322,
+      "gradient_norm_pre_clip": 0.24935682117938995,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.9221489429473877,
+      "chord_log_bound_margin": 0.22362808883190155
+    },
+    {
+      "stage": 0,
+      "iteration": 35,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.14906043658265844,
+      "regularization_pre_step": 0.003485098946839571,
+      "total_loss_pre_step": 0.152545535529498,
+      "gradient_norm_pre_clip": 0.3268107771873474,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.8962883949279785,
+      "chord_log_bound_margin": 0.2210758924484253
+    },
+    {
+      "stage": 0,
+      "iteration": 36,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.14851884613744915,
+      "regularization_pre_step": 0.0036535554099828005,
+      "total_loss_pre_step": 0.15217240154743195,
+      "gradient_norm_pre_clip": 0.4202696979045868,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.870028495788574,
+      "chord_log_bound_margin": 0.21867333352565765
+    },
+    {
+      "stage": 0,
+      "iteration": 37,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.14656505978200585,
+      "regularization_pre_step": 0.0038210160564631224,
+      "total_loss_pre_step": 0.15038607583846897,
+      "gradient_norm_pre_clip": 0.5003151297569275,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.8439550399780273,
+      "chord_log_bound_margin": 0.21643200516700745
+    },
+    {
+      "stage": 0,
+      "iteration": 38,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.14480265020392835,
+      "regularization_pre_step": 0.003985345363616943,
+      "total_loss_pre_step": 0.1487879955675453,
+      "gradient_norm_pre_clip": 0.5537678003311157,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.8188226222991943,
+      "chord_log_bound_margin": 0.21431607007980347
+    },
+    {
+      "stage": 0,
+      "iteration": 39,
+      "resolution": [
+        160,
+        90
+      ],
+      "image_loss_pre_step": 0.1435771161923185,
+      "regularization_pre_step": 0.004144205711781979,
+      "total_loss_pre_step": 0.14772132190410048,
+      "gradient_norm_pre_clip": 0.547359049320221,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.7953858375549316,
+      "chord_log_bound_margin": 0.21236944198608398
+    },
+    {
+      "stage": 1,
+      "iteration": 0,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.3010557214729488,
+      "regularization_pre_step": 0.004295053891837597,
+      "total_loss_pre_step": 0.3053507753647864,
+      "gradient_norm_pre_clip": 1.826840877532959,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.777679443359375,
+      "chord_log_bound_margin": 0.2105017751455307
+    },
+    {
+      "stage": 1,
+      "iteration": 1,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.2794266699347645,
+      "regularization_pre_step": 0.004419935401529074,
+      "total_loss_pre_step": 0.2838466053362936,
+      "gradient_norm_pre_clip": 1.2593274116516113,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.766777515411377,
+      "chord_log_bound_margin": 0.20874916017055511
+    },
+    {
+      "stage": 1,
+      "iteration": 2,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.27069118339568377,
+      "regularization_pre_step": 0.004518492147326469,
+      "total_loss_pre_step": 0.27520967554301023,
+      "gradient_norm_pre_clip": 0.76272052526474,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.7624995708465576,
+      "chord_log_bound_margin": 0.20707213878631592
+    },
+    {
+      "stage": 1,
+      "iteration": 3,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.2673403637018055,
+      "regularization_pre_step": 0.00459862407296896,
+      "total_loss_pre_step": 0.27193898777477443,
+      "gradient_norm_pre_clip": 1.022687554359436,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.7633259296417236,
+      "chord_log_bound_margin": 0.20545637607574463
+    },
+    {
+      "stage": 1,
+      "iteration": 4,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.2735046148300171,
+      "regularization_pre_step": 0.004668653942644596,
+      "total_loss_pre_step": 0.2781732687726617,
+      "gradient_norm_pre_clip": 1.5348074436187744,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.766498565673828,
+      "chord_log_bound_margin": 0.20387007296085358
+    },
+    {
+      "stage": 1,
+      "iteration": 5,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.2800457440316677,
+      "regularization_pre_step": 0.004738568793982267,
+      "total_loss_pre_step": 0.28478431282565,
+      "gradient_norm_pre_clip": 1.3312389850616455,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.7682175636291504,
+      "chord_log_bound_margin": 0.20223288238048553
+    },
+    {
+      "stage": 1,
+      "iteration": 6,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.28165260306559503,
+      "regularization_pre_step": 0.004818870685994625,
+      "total_loss_pre_step": 0.28647147375158966,
+      "gradient_norm_pre_clip": 0.7356110215187073,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.7649621963500977,
+      "chord_log_bound_margin": 0.20049802958965302
+    },
+    {
+      "stage": 1,
+      "iteration": 7,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.2821640272741206,
+      "regularization_pre_step": 0.004918668419122696,
+      "total_loss_pre_step": 0.2870826956932433,
+      "gradient_norm_pre_clip": 0.8731335997581482,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.7552947998046875,
+      "chord_log_bound_margin": 0.19866017997264862
+    },
+    {
+      "stage": 1,
+      "iteration": 8,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.2736178310588002,
+      "regularization_pre_step": 0.005038384348154068,
+      "total_loss_pre_step": 0.2786562154069543,
+      "gradient_norm_pre_clip": 1.113750696182251,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.7400548458099365,
+      "chord_log_bound_margin": 0.1967553198337555
+    },
+    {
+      "stage": 1,
+      "iteration": 9,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.2580420980521012,
+      "regularization_pre_step": 0.005172736011445522,
+      "total_loss_pre_step": 0.26321483406354673,
+      "gradient_norm_pre_clip": 0.9378936886787415,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.7216415405273438,
+      "chord_log_bound_margin": 0.19485071301460266
+    },
+    {
+      "stage": 1,
+      "iteration": 10,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.2438687164685689,
+      "regularization_pre_step": 0.005312872119247913,
+      "total_loss_pre_step": 0.2491815885878168,
+      "gradient_norm_pre_clip": 0.5641626715660095,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.703594207763672,
+      "chord_log_bound_margin": 0.19301559031009674
+    },
+    {
+      "stage": 1,
+      "iteration": 11,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.23062887754349504,
+      "regularization_pre_step": 0.005447768606245518,
+      "total_loss_pre_step": 0.23607664614974055,
+      "gradient_norm_pre_clip": 0.3827020525932312,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.6887545585632324,
+      "chord_log_bound_margin": 0.19133147597312927
+    },
+    {
+      "stage": 1,
+      "iteration": 12,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.2275804758828599,
+      "regularization_pre_step": 0.0055715711787343025,
+      "total_loss_pre_step": 0.2331520470615942,
+      "gradient_norm_pre_clip": 0.6419373154640198,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.6790900230407715,
+      "chord_log_bound_margin": 0.18981456756591797
+    },
+    {
+      "stage": 1,
+      "iteration": 13,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.2214100602432154,
+      "regularization_pre_step": 0.005681692156940699,
+      "total_loss_pre_step": 0.2270917524001561,
+      "gradient_norm_pre_clip": 0.8166856169700623,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.674262046813965,
+      "chord_log_bound_margin": 0.1884692907333374
+    },
+    {
+      "stage": 1,
+      "iteration": 14,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.2236208880203776,
+      "regularization_pre_step": 0.005782763008028269,
+      "total_loss_pre_step": 0.22940365102840587,
+      "gradient_norm_pre_clip": 0.7085369229316711,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.6724753379821777,
+      "chord_log_bound_margin": 0.18725715577602386
+    },
+    {
+      "stage": 1,
+      "iteration": 15,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.21944945526774973,
+      "regularization_pre_step": 0.005880862474441528,
+      "total_loss_pre_step": 0.22533031774219126,
+      "gradient_norm_pre_clip": 0.34995222091674805,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.670466661453247,
+      "chord_log_bound_margin": 0.18612466752529144
+    },
+    {
+      "stage": 1,
+      "iteration": 16,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.22550375628634356,
+      "regularization_pre_step": 0.005983548704534769,
+      "total_loss_pre_step": 0.23148730499087833,
+      "gradient_norm_pre_clip": 0.2926366329193115,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.6648881435394287,
+      "chord_log_bound_margin": 0.18499994277954102
+    },
+    {
+      "stage": 1,
+      "iteration": 17,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.22788700310047716,
+      "regularization_pre_step": 0.006097183562815189,
+      "total_loss_pre_step": 0.23398418666329235,
+      "gradient_norm_pre_clip": 0.5636008977890015,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.653679370880127,
+      "chord_log_bound_margin": 0.1838497370481491
+    },
+    {
+      "stage": 1,
+      "iteration": 18,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.2256238646514248,
+      "regularization_pre_step": 0.006224137265235186,
+      "total_loss_pre_step": 0.23184800191666,
+      "gradient_norm_pre_clip": 0.6265819072723389,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.636584520339966,
+      "chord_log_bound_margin": 0.18266157805919647
+    },
+    {
+      "stage": 1,
+      "iteration": 19,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.22097973176278174,
+      "regularization_pre_step": 0.006361336912959814,
+      "total_loss_pre_step": 0.22734106867574155,
+      "gradient_norm_pre_clip": 0.48588481545448303,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.6149306297302246,
+      "chord_log_bound_margin": 0.1814676821231842
+    },
+    {
+      "stage": 1,
+      "iteration": 20,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.20914098134380765,
+      "regularization_pre_step": 0.006502334028482437,
+      "total_loss_pre_step": 0.2156433153722901,
+      "gradient_norm_pre_clip": 0.31341591477394104,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.5911738872528076,
+      "chord_log_bound_margin": 0.18032413721084595
+    },
+    {
+      "stage": 1,
+      "iteration": 21,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.19708569283830002,
+      "regularization_pre_step": 0.006639157421886921,
+      "total_loss_pre_step": 0.20372485026018694,
+      "gradient_norm_pre_clip": 0.40037602186203003,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.5683135986328125,
+      "chord_log_bound_margin": 0.17927755415439606
+    },
+    {
+      "stage": 1,
+      "iteration": 22,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.1927584875957109,
+      "regularization_pre_step": 0.00676294881850481,
+      "total_loss_pre_step": 0.1995214364142157,
+      "gradient_norm_pre_clip": 0.49208617210388184,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.5485568046569824,
+      "chord_log_bound_margin": 0.1783500462770462
+    },
+    {
+      "stage": 1,
+      "iteration": 23,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.18561827510711737,
+      "regularization_pre_step": 0.006868942175060511,
+      "total_loss_pre_step": 0.19248721728217788,
+      "gradient_norm_pre_clip": 0.41533970832824707,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.532700300216675,
+      "chord_log_bound_margin": 0.17755615711212158
+    },
+    {
+      "stage": 1,
+      "iteration": 24,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.17918790227849968,
+      "regularization_pre_step": 0.006956412922590971,
+      "total_loss_pre_step": 0.18614431520109065,
+      "gradient_norm_pre_clip": 0.3156944215297699,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.520087718963623,
+      "chord_log_bound_margin": 0.17698444426059723
+    },
+    {
+      "stage": 1,
+      "iteration": 25,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.17719614392262883,
+      "regularization_pre_step": 0.007027752697467804,
+      "total_loss_pre_step": 0.18422389662009664,
+      "gradient_norm_pre_clip": 0.35134100914001465,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.5094242095947266,
+      "chord_log_bound_margin": 0.17649739980697632
+    },
+    {
+      "stage": 1,
+      "iteration": 26,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.1771174166642595,
+      "regularization_pre_step": 0.007086568046361208,
+      "total_loss_pre_step": 0.18420398471062072,
+      "gradient_norm_pre_clip": 0.39753302931785583,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.499340295791626,
+      "chord_log_bound_margin": 0.17605815827846527
+    },
+    {
+      "stage": 1,
+      "iteration": 27,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.1760591618658509,
+      "regularization_pre_step": 0.007136144675314426,
+      "total_loss_pre_step": 0.18319530654116534,
+      "gradient_norm_pre_clip": 0.3469352126121521,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.4882850646972656,
+      "chord_log_bound_margin": 0.1757611185312271
+    },
+    {
+      "stage": 1,
+      "iteration": 28,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.1746779565291945,
+      "regularization_pre_step": 0.00718204490840435,
+      "total_loss_pre_step": 0.18186000143759884,
+      "gradient_norm_pre_clip": 0.20401908457279205,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.475865364074707,
+      "chord_log_bound_margin": 0.17547307908535004
+    },
+    {
+      "stage": 1,
+      "iteration": 29,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.17459637759020552,
+      "regularization_pre_step": 0.007226599380373955,
+      "total_loss_pre_step": 0.18182297697057948,
+      "gradient_norm_pre_clip": 0.25829601287841797,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.4621782302856445,
+      "chord_log_bound_margin": 0.17518460750579834
+    },
+    {
+      "stage": 1,
+      "iteration": 30,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.17111000954173505,
+      "regularization_pre_step": 0.007270581088960171,
+      "total_loss_pre_step": 0.17838059063069522,
+      "gradient_norm_pre_clip": 0.401377409696579,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.4479119777679443,
+      "chord_log_bound_margin": 0.17502517998218536
+    },
+    {
+      "stage": 1,
+      "iteration": 31,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.16607521858531982,
+      "regularization_pre_step": 0.007313471287488937,
+      "total_loss_pre_step": 0.17338868987280875,
+      "gradient_norm_pre_clip": 0.4033493399620056,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.433972120285034,
+      "chord_log_bound_margin": 0.1749921292066574
+    },
+    {
+      "stage": 1,
+      "iteration": 32,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.1640746264893096,
+      "regularization_pre_step": 0.00735258124768734,
+      "total_loss_pre_step": 0.17142720773699693,
+      "gradient_norm_pre_clip": 0.24960742890834808,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.420987129211426,
+      "chord_log_bound_margin": 0.17509353160858154
+    },
+    {
+      "stage": 1,
+      "iteration": 33,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.15767862579377834,
+      "regularization_pre_step": 0.007385760545730591,
+      "total_loss_pre_step": 0.16506438633950893,
+      "gradient_norm_pre_clip": 0.08018696308135986,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.4093875885009766,
+      "chord_log_bound_margin": 0.17531424760818481
+    },
+    {
+      "stage": 1,
+      "iteration": 34,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.1574671762646176,
+      "regularization_pre_step": 0.007411106023937464,
+      "total_loss_pre_step": 0.16487828228855506,
+      "gradient_norm_pre_clip": 0.23451344668865204,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.3995628356933594,
+      "chord_log_bound_margin": 0.1756369173526764
+    },
+    {
+      "stage": 1,
+      "iteration": 35,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.15716083791630808,
+      "regularization_pre_step": 0.007426290772855282,
+      "total_loss_pre_step": 0.16458712868916336,
+      "gradient_norm_pre_clip": 0.3255912959575653,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.3915393352508545,
+      "chord_log_bound_margin": 0.17605185508728027
+    },
+    {
+      "stage": 1,
+      "iteration": 36,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.1556846693274565,
+      "regularization_pre_step": 0.007430951111018658,
+      "total_loss_pre_step": 0.16311562043847516,
+      "gradient_norm_pre_clip": 0.2963258624076843,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.3848612308502197,
+      "chord_log_bound_margin": 0.1765616536140442
+    },
+    {
+      "stage": 1,
+      "iteration": 37,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.15500085006351583,
+      "regularization_pre_step": 0.007428132928907871,
+      "total_loss_pre_step": 0.1624289829924237,
+      "gradient_norm_pre_clip": 0.17342449724674225,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.379171848297119,
+      "chord_log_bound_margin": 0.17715591192245483
+    },
+    {
+      "stage": 1,
+      "iteration": 38,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.1578582581860246,
+      "regularization_pre_step": 0.007420589216053486,
+      "total_loss_pre_step": 0.1652788474020781,
+      "gradient_norm_pre_clip": 0.07425078004598618,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.374058485031128,
+      "chord_log_bound_margin": 0.17781998217105865
+    },
+    {
+      "stage": 1,
+      "iteration": 39,
+      "resolution": [
+        320,
+        180
+      ],
+      "image_loss_pre_step": 0.1596532776602544,
+      "regularization_pre_step": 0.007411564700305462,
+      "total_loss_pre_step": 0.16706484236055985,
+      "gradient_norm_pre_clip": 0.19952814280986786,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.3700687885284424,
+      "chord_log_bound_margin": 0.1782621443271637
+    },
+    {
+      "stage": 2,
+      "iteration": 0,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.380541239050217,
+      "regularization_pre_step": 0.007396427448838949,
+      "total_loss_pre_step": 0.3879376664990559,
+      "gradient_norm_pre_clip": 1.2815321683883667,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.371204137802124,
+      "chord_log_bound_margin": 0.17820753157138824
+    },
+    {
+      "stage": 2,
+      "iteration": 1,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.38625948067056015,
+      "regularization_pre_step": 0.007364742457866669,
+      "total_loss_pre_step": 0.3936242231284268,
+      "gradient_norm_pre_clip": 0.9329689145088196,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.369415521621704,
+      "chord_log_bound_margin": 0.1776290088891983
+    },
+    {
+      "stage": 2,
+      "iteration": 2,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.3867418267764151,
+      "regularization_pre_step": 0.007330452091991901,
+      "total_loss_pre_step": 0.394072278868407,
+      "gradient_norm_pre_clip": 1.2334855794906616,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.3614859580993652,
+      "chord_log_bound_margin": 0.1769486665725708
+    },
+    {
+      "stage": 2,
+      "iteration": 3,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.3795052242348902,
+      "regularization_pre_step": 0.007308145519345999,
+      "total_loss_pre_step": 0.3868133697542362,
+      "gradient_norm_pre_clip": 0.5446145534515381,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.3517203330993652,
+      "chord_log_bound_margin": 0.17621593177318573
+    },
+    {
+      "stage": 2,
+      "iteration": 4,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.37318726792000234,
+      "regularization_pre_step": 0.007299615535885096,
+      "total_loss_pre_step": 0.38048688345588744,
+      "gradient_norm_pre_clip": 1.2201807498931885,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.344336986541748,
+      "chord_log_bound_margin": 0.1754879653453827
+    },
+    {
+      "stage": 2,
+      "iteration": 5,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.3727899210061878,
+      "regularization_pre_step": 0.007297239266335964,
+      "total_loss_pre_step": 0.38008716027252376,
+      "gradient_norm_pre_clip": 0.44431665539741516,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.3381118774414062,
+      "chord_log_bound_margin": 0.17475049197673798
+    },
+    {
+      "stage": 2,
+      "iteration": 6,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.3731597735895775,
+      "regularization_pre_step": 0.007298952899873257,
+      "total_loss_pre_step": 0.3804587264894508,
+      "gradient_norm_pre_clip": 1.0341486930847168,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.330963611602783,
+      "chord_log_bound_margin": 0.1739618331193924
+    },
+    {
+      "stage": 2,
+      "iteration": 7,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.3655350633780472,
+      "regularization_pre_step": 0.007304670754820108,
+      "total_loss_pre_step": 0.3728397341328673,
+      "gradient_norm_pre_clip": 0.2150728702545166,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.3221490383148193,
+      "chord_log_bound_margin": 0.1731565147638321
+    },
+    {
+      "stage": 2,
+      "iteration": 8,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.3596896725939587,
+      "regularization_pre_step": 0.00731953838840127,
+      "total_loss_pre_step": 0.36700921098235995,
+      "gradient_norm_pre_clip": 1.0063453912734985,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.3125107288360596,
+      "chord_log_bound_margin": 0.17208442091941833
+    },
+    {
+      "stage": 2,
+      "iteration": 9,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.35285887139616534,
+      "regularization_pre_step": 0.00734701007604599,
+      "total_loss_pre_step": 0.36020588147221133,
+      "gradient_norm_pre_clip": 0.30811792612075806,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.301419734954834,
+      "chord_log_bound_margin": 0.17082083225250244
+    },
+    {
+      "stage": 2,
+      "iteration": 10,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.3466249189223163,
+      "regularization_pre_step": 0.007393070496618748,
+      "total_loss_pre_step": 0.35401798941893503,
+      "gradient_norm_pre_clip": 0.7853487730026245,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.2882778644561768,
+      "chord_log_bound_margin": 0.169410839676857
+    },
+    {
+      "stage": 2,
+      "iteration": 11,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.3317451340262778,
+      "regularization_pre_step": 0.007454951759427786,
+      "total_loss_pre_step": 0.3392000857857056,
+      "gradient_norm_pre_clip": 0.4720815122127533,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.2750039100646973,
+      "chord_log_bound_margin": 0.1679309457540512
+    },
+    {
+      "stage": 2,
+      "iteration": 12,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.3254524155636318,
+      "regularization_pre_step": 0.007530377246439457,
+      "total_loss_pre_step": 0.33298279281007126,
+      "gradient_norm_pre_clip": 0.7174208760261536,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.2641801834106445,
+      "chord_log_bound_margin": 0.16642679274082184
+    },
+    {
+      "stage": 2,
+      "iteration": 13,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.31865922635188326,
+      "regularization_pre_step": 0.007614482659846544,
+      "total_loss_pre_step": 0.3262737090117298,
+      "gradient_norm_pre_clip": 0.4966884255409241,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.2534446716308594,
+      "chord_log_bound_margin": 0.1649148166179657
+    },
+    {
+      "stage": 2,
+      "iteration": 14,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.3114945103880018,
+      "regularization_pre_step": 0.00770551385357976,
+      "total_loss_pre_step": 0.31920002424158156,
+      "gradient_norm_pre_clip": 0.6088305115699768,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.2392055988311768,
+      "chord_log_bound_margin": 0.16341716051101685
+    },
+    {
+      "stage": 2,
+      "iteration": 15,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.2985709147178568,
+      "regularization_pre_step": 0.007801383268088102,
+      "total_loss_pre_step": 0.3063722979859449,
+      "gradient_norm_pre_clip": 0.544853687286377,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.222372531890869,
+      "chord_log_bound_margin": 0.16195015609264374
+    },
+    {
+      "stage": 2,
+      "iteration": 16,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.29002268164185807,
+      "regularization_pre_step": 0.00789968017488718,
+      "total_loss_pre_step": 0.29792236181674525,
+      "gradient_norm_pre_clip": 0.45853009819984436,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.205894947052002,
+      "chord_log_bound_margin": 0.16053079068660736
+    },
+    {
+      "stage": 2,
+      "iteration": 17,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.28948656318243593,
+      "regularization_pre_step": 0.007997948676347733,
+      "total_loss_pre_step": 0.29748451185878366,
+      "gradient_norm_pre_clip": 0.5088677406311035,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.1910455226898193,
+      "chord_log_bound_margin": 0.15917342901229858
+    },
+    {
+      "stage": 2,
+      "iteration": 18,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.2857681714813225,
+      "regularization_pre_step": 0.008095184341073036,
+      "total_loss_pre_step": 0.29386335582239553,
+      "gradient_norm_pre_clip": 0.37546977400779724,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.1765122413635254,
+      "chord_log_bound_margin": 0.15786603093147278
+    },
+    {
+      "stage": 2,
+      "iteration": 19,
+      "resolution": [
+        640,
+        360
+      ],
+      "image_loss_pre_step": 0.2849701275699772,
+      "regularization_pre_step": 0.0081907007843256,
+      "total_loss_pre_step": 0.2931608283543028,
+      "gradient_norm_pre_clip": 0.4671401381492615,
+      "feasibility_halvings": 0,
+      "center_bound_margin_m": 3.160978078842163,
+      "chord_log_bound_margin": 0.1565956026315689
+    }
+  ],
+  "fit_residuals": {
+    "initial_template": [
+      {
+        "camera_id": "C1",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 86147,
+        "background_pixels": 16020,
+        "uncertain_pixels": 128233,
+        "image_loss": 4.280049800872803,
+        "terms": {
+          "silhouette_edge_count": 70.0,
+          "candidate_samples_before_mask": 1567.0,
+          "candidate_samples_after_mask": 561.0,
+          "candidate_samples_after_visibility": 561.0,
+          "candidate_count": 300.0,
+          "candidate_segment_count": 10.0,
+          "candidate_mask_rejected": 1006.0,
+          "candidate_self_hidden_rejected": 0.0,
+          "candidate_sampling_truncated": 1.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 4.704017162322998,
+          "observed_to_candidate": 3.8560824394226074,
+          "candidate_to_observed_mean_px": 49.040164947509766,
+          "observed_to_candidate_mean_px": 40.560821533203125,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C1",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 85478,
+        "background_pixels": 16591,
+        "uncertain_pixels": 128331,
+        "image_loss": 6.302347183227539,
+        "terms": {
+          "silhouette_edge_count": 65.0,
+          "candidate_samples_before_mask": 1506.0,
+          "candidate_samples_after_mask": 645.0,
+          "candidate_samples_after_visibility": 645.0,
+          "candidate_count": 300.0,
+          "candidate_segment_count": 14.0,
+          "candidate_mask_rejected": 861.0,
+          "candidate_self_hidden_rejected": 0.0,
+          "candidate_sampling_truncated": 1.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 5.72913932800293,
+          "observed_to_candidate": 6.875555038452148,
+          "candidate_to_observed_mean_px": 59.2913932800293,
+          "observed_to_candidate_mean_px": 70.75556182861328,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 116856,
+        "background_pixels": 110374,
+        "uncertain_pixels": 3170,
+        "image_loss": 2.613950252532959,
+        "terms": {
+          "silhouette_edge_count": 67.0,
+          "candidate_samples_before_mask": 804.0,
+          "candidate_samples_after_mask": 789.0,
+          "candidate_samples_after_visibility": 789.0,
+          "candidate_count": 300.0,
+          "candidate_segment_count": 41.0,
+          "candidate_mask_rejected": 15.0,
+          "candidate_self_hidden_rejected": 0.0,
+          "candidate_sampling_truncated": 1.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 2.518549919128418,
+          "observed_to_candidate": 2.7093505859375,
+          "candidate_to_observed_mean_px": 27.17523193359375,
+          "observed_to_candidate_mean_px": 29.08372688293457,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 132150,
+        "background_pixels": 95001,
+        "uncertain_pixels": 3249,
+        "image_loss": 2.3877649307250977,
+        "terms": {
+          "silhouette_edge_count": 61.0,
+          "candidate_samples_before_mask": 925.0,
+          "candidate_samples_after_mask": 916.0,
+          "candidate_samples_after_visibility": 916.0,
+          "candidate_count": 300.0,
+          "candidate_segment_count": 44.0,
+          "candidate_mask_rejected": 9.0,
+          "candidate_self_hidden_rejected": 0.0,
+          "candidate_sampling_truncated": 1.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 2.4919755458831787,
+          "observed_to_candidate": 2.2835543155670166,
+          "candidate_to_observed_mean_px": 26.912342071533203,
+          "observed_to_candidate_mean_px": 24.8261775970459,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 9146,
+        "background_pixels": 218904,
+        "uncertain_pixels": 2350,
+        "image_loss": 4.60148811340332,
+        "terms": {
+          "silhouette_edge_count": 65.0,
+          "candidate_samples_before_mask": 122.0,
+          "candidate_samples_after_mask": 111.0,
+          "candidate_samples_after_visibility": 111.0,
+          "candidate_count": 111.0,
+          "candidate_segment_count": 3.0,
+          "candidate_mask_rejected": 11.0,
+          "candidate_self_hidden_rejected": 0.0,
+          "candidate_sampling_truncated": 0.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 4.047715187072754,
+          "observed_to_candidate": 5.155261039733887,
+          "candidate_to_observed_mean_px": 42.47715377807617,
+          "observed_to_candidate_mean_px": 53.55260467529297,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 75996,
+        "background_pixels": 151560,
+        "uncertain_pixels": 2844,
+        "image_loss": 2.6413350105285645,
+        "terms": {
+          "silhouette_edge_count": 61.0,
+          "candidate_samples_before_mask": 542.0,
+          "candidate_samples_after_mask": 536.0,
+          "candidate_samples_after_visibility": 536.0,
+          "candidate_count": 300.0,
+          "candidate_segment_count": 21.0,
+          "candidate_mask_rejected": 6.0,
+          "candidate_self_hidden_rejected": 0.0,
+          "candidate_sampling_truncated": 1.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 2.533186435699463,
+          "observed_to_candidate": 2.749483823776245,
+          "candidate_to_observed_mean_px": 27.317916870117188,
+          "observed_to_candidate_mean_px": 29.480905532836914,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      }
+    ],
+    "prior_only": [
+      {
+        "camera_id": "C1",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 86147,
+        "background_pixels": 16020,
+        "uncertain_pixels": 128233,
+        "image_loss": 4.280049800872803,
+        "terms": {
+          "silhouette_edge_count": 70.0,
+          "candidate_samples_before_mask": 1567.0,
+          "candidate_samples_after_mask": 561.0,
+          "candidate_samples_after_visibility": 561.0,
+          "candidate_count": 300.0,
+          "candidate_segment_count": 10.0,
+          "candidate_mask_rejected": 1006.0,
+          "candidate_self_hidden_rejected": 0.0,
+          "candidate_sampling_truncated": 1.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 4.704017162322998,
+          "observed_to_candidate": 3.8560824394226074,
+          "candidate_to_observed_mean_px": 49.040164947509766,
+          "observed_to_candidate_mean_px": 40.560821533203125,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C1",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 85478,
+        "background_pixels": 16591,
+        "uncertain_pixels": 128331,
+        "image_loss": 6.302347183227539,
+        "terms": {
+          "silhouette_edge_count": 65.0,
+          "candidate_samples_before_mask": 1506.0,
+          "candidate_samples_after_mask": 645.0,
+          "candidate_samples_after_visibility": 645.0,
+          "candidate_count": 300.0,
+          "candidate_segment_count": 14.0,
+          "candidate_mask_rejected": 861.0,
+          "candidate_self_hidden_rejected": 0.0,
+          "candidate_sampling_truncated": 1.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 5.72913932800293,
+          "observed_to_candidate": 6.875555038452148,
+          "candidate_to_observed_mean_px": 59.2913932800293,
+          "observed_to_candidate_mean_px": 70.75556182861328,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 116856,
+        "background_pixels": 110374,
+        "uncertain_pixels": 3170,
+        "image_loss": 2.613950252532959,
+        "terms": {
+          "silhouette_edge_count": 67.0,
+          "candidate_samples_before_mask": 804.0,
+          "candidate_samples_after_mask": 789.0,
+          "candidate_samples_after_visibility": 789.0,
+          "candidate_count": 300.0,
+          "candidate_segment_count": 41.0,
+          "candidate_mask_rejected": 15.0,
+          "candidate_self_hidden_rejected": 0.0,
+          "candidate_sampling_truncated": 1.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 2.518549919128418,
+          "observed_to_candidate": 2.7093505859375,
+          "candidate_to_observed_mean_px": 27.17523193359375,
+          "observed_to_candidate_mean_px": 29.08372688293457,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 132150,
+        "background_pixels": 95001,
+        "uncertain_pixels": 3249,
+        "image_loss": 2.3877649307250977,
+        "terms": {
+          "silhouette_edge_count": 61.0,
+          "candidate_samples_before_mask": 925.0,
+          "candidate_samples_after_mask": 916.0,
+          "candidate_samples_after_visibility": 916.0,
+          "candidate_count": 300.0,
+          "candidate_segment_count": 44.0,
+          "candidate_mask_rejected": 9.0,
+          "candidate_self_hidden_rejected": 0.0,
+          "candidate_sampling_truncated": 1.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 2.4919755458831787,
+          "observed_to_candidate": 2.2835543155670166,
+          "candidate_to_observed_mean_px": 26.912342071533203,
+          "observed_to_candidate_mean_px": 24.8261775970459,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 9146,
+        "background_pixels": 218904,
+        "uncertain_pixels": 2350,
+        "image_loss": 4.60148811340332,
+        "terms": {
+          "silhouette_edge_count": 65.0,
+          "candidate_samples_before_mask": 122.0,
+          "candidate_samples_after_mask": 111.0,
+          "candidate_samples_after_visibility": 111.0,
+          "candidate_count": 111.0,
+          "candidate_segment_count": 3.0,
+          "candidate_mask_rejected": 11.0,
+          "candidate_self_hidden_rejected": 0.0,
+          "candidate_sampling_truncated": 0.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 4.047715187072754,
+          "observed_to_candidate": 5.155261039733887,
+          "candidate_to_observed_mean_px": 42.47715377807617,
+          "observed_to_candidate_mean_px": 53.55260467529297,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 75996,
+        "background_pixels": 151560,
+        "uncertain_pixels": 2844,
+        "image_loss": 2.6413350105285645,
+        "terms": {
+          "silhouette_edge_count": 61.0,
+          "candidate_samples_before_mask": 542.0,
+          "candidate_samples_after_mask": 536.0,
+          "candidate_samples_after_visibility": 536.0,
+          "candidate_count": 300.0,
+          "candidate_segment_count": 21.0,
+          "candidate_mask_rejected": 6.0,
+          "candidate_self_hidden_rejected": 0.0,
+          "candidate_sampling_truncated": 1.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 2.533186435699463,
+          "observed_to_candidate": 2.749483823776245,
+          "candidate_to_observed_mean_px": 27.317916870117188,
+          "observed_to_candidate_mean_px": 29.480905532836914,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      }
+    ],
+    "T1_B1": [
+      {
+        "camera_id": "C1",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 86147,
+        "background_pixels": 16020,
+        "uncertain_pixels": 128233,
+        "image_loss": 0.9881407022476196,
+        "terms": {
+          "silhouette_edge_count": 64.0,
+          "candidate_samples_before_mask": 1420.0,
+          "candidate_samples_after_mask": 585.0,
+          "candidate_samples_after_visibility": 585.0,
+          "candidate_count": 300.0,
+          "candidate_segment_count": 12.0,
+          "candidate_mask_rejected": 835.0,
+          "candidate_self_hidden_rejected": 0.0,
+          "candidate_sampling_truncated": 1.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 1.8682399988174438,
+          "observed_to_candidate": 0.10804145783185959,
+          "candidate_to_observed_mean_px": 20.03789710998535,
+          "observed_to_candidate_mean_px": 2.2494349479675293,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C1",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 85478,
+        "background_pixels": 16591,
+        "uncertain_pixels": 128331,
+        "image_loss": 0.5983012914657593,
+        "terms": {
+          "silhouette_edge_count": 64.0,
+          "candidate_samples_before_mask": 1465.0,
+          "candidate_samples_after_mask": 676.0,
+          "candidate_samples_after_visibility": 613.0,
+          "candidate_count": 300.0,
+          "candidate_segment_count": 17.0,
+          "candidate_mask_rejected": 789.0,
+          "candidate_self_hidden_rejected": 63.0,
+          "candidate_sampling_truncated": 1.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 0.13787463307380676,
+          "observed_to_candidate": 1.0587279796600342,
+          "candidate_to_observed_mean_px": 2.7450122833251953,
+          "observed_to_candidate_mean_px": 12.047792434692383,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 116856,
+        "background_pixels": 110374,
+        "uncertain_pixels": 3170,
+        "image_loss": 0.05206242948770523,
+        "terms": {
+          "silhouette_edge_count": 64.0,
+          "candidate_samples_before_mask": 944.0,
+          "candidate_samples_after_mask": 933.0,
+          "candidate_samples_after_visibility": 861.0,
+          "candidate_count": 300.0,
+          "candidate_segment_count": 41.0,
+          "candidate_mask_rejected": 11.0,
+          "candidate_self_hidden_rejected": 72.0,
+          "candidate_sampling_truncated": 1.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 0.050140175968408585,
+          "observed_to_candidate": 0.05398467928171158,
+          "candidate_to_observed_mean_px": 1.776242733001709,
+          "observed_to_candidate_mean_px": 1.7613238096237183,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C2",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 132150,
+        "background_pixels": 95001,
+        "uncertain_pixels": 3249,
+        "image_loss": 0.054484568536281586,
+        "terms": {
+          "silhouette_edge_count": 64.0,
+          "candidate_samples_before_mask": 908.0,
+          "candidate_samples_after_mask": 893.0,
+          "candidate_samples_after_visibility": 893.0,
+          "candidate_count": 300.0,
+          "candidate_segment_count": 44.0,
+          "candidate_mask_rejected": 15.0,
+          "candidate_self_hidden_rejected": 0.0,
+          "candidate_sampling_truncated": 1.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 0.05531677231192589,
+          "observed_to_candidate": 0.053652361035346985,
+          "candidate_to_observed_mean_px": 1.8528727293014526,
+          "observed_to_candidate_mean_px": 1.7846392393112183,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 42,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 9146,
+        "background_pixels": 218904,
+        "uncertain_pixels": 2350,
+        "image_loss": 0.003891175612807274,
+        "terms": {
+          "silhouette_edge_count": 64.0,
+          "candidate_samples_before_mask": 236.0,
+          "candidate_samples_after_mask": 226.0,
+          "candidate_samples_after_visibility": 226.0,
+          "candidate_count": 226.0,
+          "candidate_segment_count": 5.0,
+          "candidate_mask_rejected": 10.0,
+          "candidate_self_hidden_rejected": 0.0,
+          "candidate_sampling_truncated": 0.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 0.0022618507500737906,
+          "observed_to_candidate": 0.0055205002427101135,
+          "candidate_to_observed_mean_px": 0.9695073962211609,
+          "observed_to_candidate_mean_px": 1.055411458015442,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      },
+      {
+        "camera_id": "C3",
+        "frame_id": 43,
+        "split": "fit",
+        "resolution": [
+          640,
+          360
+        ],
+        "foreground_pixels": 75996,
+        "background_pixels": 151560,
+        "uncertain_pixels": 2844,
+        "image_loss": 0.008688928559422493,
+        "terms": {
+          "silhouette_edge_count": 64.0,
+          "candidate_samples_before_mask": 591.0,
+          "candidate_samples_after_mask": 582.0,
+          "candidate_samples_after_visibility": 582.0,
+          "candidate_count": 300.0,
+          "candidate_segment_count": 24.0,
+          "candidate_mask_rejected": 9.0,
+          "candidate_self_hidden_rejected": 0.0,
+          "candidate_sampling_truncated": 1.0,
+          "candidate_segments_truncated": 0.0,
+          "independent_candidate_mask": 1.0,
+          "observed_count": 600.0,
+          "candidate_to_observed": 0.008673117496073246,
+          "observed_to_candidate": 0.008704740554094315,
+          "candidate_to_observed_mean_px": 1.250913143157959,
+          "observed_to_candidate_mean_px": 1.2221472263336182,
+          "contour_terms_available": 1.0
+        },
+        "missing_terms": []
+      }
+    ]
+  },
+  "final_640_total_objective": 0.29254984855651855,
+  "comparison_provenance": {
+    "same_initial_parameters": true,
+    "same_optimizer": true,
+    "same_stage_schedule": true,
+    "same_regularization": true,
+    "same_budget": true,
+    "only_image_weights_differ": true,
+    "prior_only_image_weight": 0.0,
+    "final_image_weight": 1.0
+  },
+  "provenance_scope": "Within each coordinate branch: video versus prior-only. Across branches optimizer coordinates differ.",
+  "nonblind_status": "NOT_EVALUATED_BEFORE_MODEL_FREEZE",
+  "nonblind_preverification": "All 12 historical observations and RGB hashes prevalidated by existing fit_bundle; only 6 fit observations enter objective or gradients."
+}

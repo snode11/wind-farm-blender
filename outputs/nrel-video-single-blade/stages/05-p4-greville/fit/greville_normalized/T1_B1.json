@@ -1,0 +1,151 @@
+{
+  "t_ref_sim_time_s": 122.175,
+  "frame_id": 43,
+  "selection_basis": "Actual MP4 RGB: B1 body visible in C1/C2 and painted tip contour clear in C3; identity checked with declared ideal B1 rigid pose. No truth geometry used.",
+  "fit_frame_ids": [
+    42,
+    43
+  ],
+  "heldout_frame_ids": [
+    44,
+    45
+  ],
+  "target": "T1/B1",
+  "coordinate_frame": "blade_root_local",
+  "units": "m",
+  "surface_scope": "entire_evaluated_blade_surface",
+  "reference_shape": "static_near_t_ref",
+  "deformation_assistance": "none",
+  "template_kind": "independent_coarse_rounded_section_prior",
+  "source": "https://www.nrel.gov/docs/fy09osti/38060.pdf",
+  "source_scope": "public span and coarse Table 3-1 chord/twist dimensions",
+  "excluded_sources": [
+    "scene_reference_mesh",
+    "SourceLoft",
+    "exact_airfoil_coordinates",
+    "replay_deformation"
+  ],
+  "axes": {
+    "x": "downstream/thickness",
+    "y": "chordwise",
+    "z": "radial/span"
+  },
+  "span_m": 61.5,
+  "control_z_m": [
+    0.0,
+    5.125,
+    15.375,
+    30.75,
+    46.125,
+    56.375,
+    61.5
+  ],
+  "center_offsets_m": [
+    [
+      0.0,
+      0.0
+    ],
+    [
+      -0.26326149702072144,
+      -1.9671930074691772
+    ],
+    [
+      -0.4850725531578064,
+      -0.3195360004901886
+    ],
+    [
+      -0.024646608158946037,
+      -0.7251263856887817
+    ],
+    [
+      -0.05280505120754242,
+      -0.3826788663864136
+    ],
+    [
+      0.026320936158299446,
+      -0.6696588397026062
+    ],
+    [
+      -0.17386913299560547,
+      -0.43685585260391235
+    ]
+  ],
+  "control_chord_log_scale": [
+    0.18504126369953156,
+    0.0651453286409378,
+    0.04918628931045532,
+    -0.016484608873724937,
+    -0.03707657754421234,
+    -0.03173993527889252,
+    -0.022511357441544533
+  ],
+  "fixed_priors": [
+    "section_thickness",
+    "section_twist",
+    "hidden_surface",
+    "61.5_m_span"
+  ],
+  "approximation": "rounded elliptical sections; 0.8 m tip endpoint prior; no exact NREL airfoil surface",
+  "span_samples": 25,
+  "ring_samples": 12,
+  "interpolation": "bspline",
+  "interpolation_degree": 3,
+  "basis_knots_m": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    15.375,
+    30.75,
+    46.125,
+    61.5,
+    61.5,
+    61.5,
+    61.5
+  ],
+  "control_parameter_role": "B-spline control-polygon coefficients; control_z reports Greville abscissae",
+  "interpolation_scope": "optimized centreline offsets and chord log-ratios; fixed template dimensions unchanged",
+  "field_continuity": "C2 at simple interior knots",
+  "initial_template_policy": "identical public coarse initial template; smooth only optimized offsets and chord log-ratios",
+  "regularization_policy": "unchanged original formulas on inverse-mapped reference-axis coefficients and ell",
+  "parameterization": "reversible_greville_geometric_centers_v1",
+  "optimization_coordinates": {
+    "greville_raw": "(G_g[1:] - D_g(0)[1:]) / 5 m; independent dimensionless samples",
+    "chord_raw": "original raw coordinates; ell = 0.35*tanh(chord_raw)",
+    "root": "dependent G_g[0]=D_g(ell)[0]; original C[0]=0"
+  },
+  "greville_geometric_centers_m": [
+    [
+      -0.24526137113571167,
+      1.036881923675537
+    ],
+    [
+      -0.46532440185546875,
+      -0.09218424558639526
+    ],
+    [
+      -0.5853808522224426,
+      0.3782426714897156
+    ],
+    [
+      -0.2119099199771881,
+      0.3221275210380554
+    ],
+    [
+      -0.05879005044698715,
+      0.17173945903778076
+    ],
+    [
+      -0.04920683428645134,
+      -0.06939643621444702
+    ],
+    [
+      -0.17386913299560547,
+      -0.2413078397512436
+    ]
+  ],
+  "greville_extension": "analytic cubic basis; fixed chord/twist linearly interpolated from original rings",
+  "constraint_policy": "original open boxes after inverse map; coupled in Greville coordinates; no clamping",
+  "model_family_policy": "original mesh basis and fixed-prior buffers copied exactly; no independent center spline",
+  "model_name": "T1_B1"
+}

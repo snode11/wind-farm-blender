@@ -1,0 +1,115 @@
+{
+  "target": "T1/B1",
+  "units": "m",
+  "coordinate_frame": "blade_root_local",
+  "regions": [
+    {
+      "name": "root",
+      "span_bounds_m": [
+        0,
+        20.5
+      ],
+      "status": "prior_only",
+      "source_frames": [
+        {
+          "camera_id": "C1",
+          "frame_id": 42
+        },
+        {
+          "camera_id": "C1",
+          "frame_id": 43
+        },
+        {
+          "camera_id": "C2",
+          "frame_id": 42
+        },
+        {
+          "camera_id": "C2",
+          "frame_id": 43
+        },
+        {
+          "camera_id": "C3",
+          "frame_id": 42
+        },
+        {
+          "camera_id": "C3",
+          "frame_id": 43
+        }
+      ],
+      "note": "possible silhouette influence; surface visibility coverage not yet independently established"
+    },
+    {
+      "name": "middle",
+      "span_bounds_m": [
+        20.5,
+        41.0
+      ],
+      "status": "prior_only",
+      "source_frames": [
+        {
+          "camera_id": "C1",
+          "frame_id": 42
+        },
+        {
+          "camera_id": "C1",
+          "frame_id": 43
+        },
+        {
+          "camera_id": "C2",
+          "frame_id": 42
+        },
+        {
+          "camera_id": "C2",
+          "frame_id": 43
+        },
+        {
+          "camera_id": "C3",
+          "frame_id": 42
+        },
+        {
+          "camera_id": "C3",
+          "frame_id": 43
+        }
+      ],
+      "note": "possible silhouette influence; surface visibility coverage not yet independently established"
+    },
+    {
+      "name": "tip",
+      "span_bounds_m": [
+        41.0,
+        61.5
+      ],
+      "status": "prior_only",
+      "source_frames": [
+        {
+          "camera_id": "C1",
+          "frame_id": 42
+        },
+        {
+          "camera_id": "C1",
+          "frame_id": 43
+        },
+        {
+          "camera_id": "C2",
+          "frame_id": 42
+        },
+        {
+          "camera_id": "C2",
+          "frame_id": 43
+        },
+        {
+          "camera_id": "C3",
+          "frame_id": 42
+        },
+        {
+          "camera_id": "C3",
+          "frame_id": 43
+        }
+      ],
+      "note": "possible silhouette influence; surface visibility coverage not yet independently established"
+    }
+  ],
+  "constraints": "RGB F/B/U silhouettes; U and outside-image have no negative loss",
+  "backside_and_thickness": "prior_only",
+  "full_surface_recovery": false
+}

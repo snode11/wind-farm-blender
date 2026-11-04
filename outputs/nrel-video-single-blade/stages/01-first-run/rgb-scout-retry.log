@@ -1,0 +1,15 @@
+NREL_CAPTURE_BEGIN /Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/rgb-scout/capture_20261002_213032_45a2336dfd 9
+NREL_CAPTURE_PROGRESS 1 9
+NREL_CAPTURE_PROGRESS 2 9
+NREL_CAPTURE_PROGRESS 3 9
+NREL_CAPTURE_PROGRESS 4 9
+NREL_CAPTURE_PROGRESS 5 9
+NREL_CAPTURE_PROGRESS 6 9
+NREL_CAPTURE_PROGRESS 7 9
+NREL_CAPTURE_PROGRESS 8 9
+NREL_CAPTURE_PROGRESS 9 9
+NREL_CAPTURE_COMPLETE {"status": "complete", "error": "", "groups": 9, "images": 27, "capture_path": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-first/rgb-scout/capture_20261002_213032_45a2336dfd", "elapsed_s": 15.440823375014588, "projection_checks": [{"camera_id": "C1", "max_pixel_error": 1.8331451766013172e-12, "time_s": 117.0}, {"camera_id": "C2", "max_pixel_error": 2.7314430955661836e-12, "time_s": 117.0}, {"camera_id": "C3", "max_pixel_error": 1.232073727909786e-11, "time_s": 117.0}, {"camera_id": "C1", "max_pixel_error": 1.482295011829285e-12, "time_s": 118.0}, {"camera_id": "C2", "max_pixel_error": 4.373619972664379e-12, "time_s": 118.0}, {"camera_id": "C3", "max_pixel_error": 9.011037870537915e-12, "time_s": 118.0}, {"camera_id": "C1", "max_pixel_error": 1.0725194820289065e-12, "time_s": 119.0}, {"camera_id": "C2", "max_pixel_error": 3.531618987610515e-12, "time_s": 119.0}, {"camera_id": "C3", "max_pixel_error": 1.187854055510246e-11, "time_s": 119.0}]}
+00:23.143  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

@@ -1,0 +1,29 @@
+{"original_raw": {"video_fit_wall_s": 27.18162933399435, "shared_prior_only_wall_s": 0.3541897920658812, "steps": 100, "image_forward_backward_evaluations": 600, "final_objective_under_training_observation_version": {"image_loss_mean": 0.2856580821486811, "regularization": 0.008115739561617374, "total_objective": 0.2937738217102985}}}
+{"revised_boundary": {"video_fit_wall_s": 26.162339458009228, "shared_prior_only_wall_s": 0.3541897920658812, "steps": 100, "image_forward_backward_evaluations": 600, "final_objective_under_training_observation_version": {"image_loss_mean": 0.3016775579502185, "regularization": 0.00870573054999113, "total_objective": 0.31038328850020963}}}
+{
+  "status": "P5_OBSERVATION_MODELS_FROZEN",
+  "branches": {
+    "original_raw": {
+      "video_fit_wall_s": 27.18162933399435,
+      "shared_prior_only_wall_s": 0.3541897920658812,
+      "steps": 100,
+      "image_forward_backward_evaluations": 600,
+      "final_objective_under_training_observation_version": {
+        "image_loss_mean": 0.2856580821486811,
+        "regularization": 0.008115739561617374,
+        "total_objective": 0.2937738217102985
+      }
+    },
+    "revised_boundary": {
+      "video_fit_wall_s": 26.162339458009228,
+      "shared_prior_only_wall_s": 0.3541897920658812,
+      "steps": 100,
+      "image_forward_backward_evaluations": 600,
+      "final_objective_under_training_observation_version": {
+        "image_loss_mean": 0.3016775579502185,
+        "regularization": 0.00870573054999113,
+        "total_objective": 0.31038328850020963
+      }
+    }
+  }
+}

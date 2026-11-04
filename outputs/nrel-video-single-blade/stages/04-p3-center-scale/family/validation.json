@@ -1,0 +1,24 @@
+{
+  "status": "PASSED",
+  "command": "/opt/anaconda3/envs/wfrl-mac/bin/python -m pytest -q tests/test_nrel_center_scale_family_audit.py tests/test_nrel_model_v2.py",
+  "result": "17 passed in 0.93s",
+  "new_tests": 11,
+  "existing_model_tests": 6,
+  "final_results": "verified/",
+  "source_recorded_before_final_run": true,
+  "source_unchanged_during_final_run": true,
+  "inputs_unchanged": true,
+  "case_count": 8,
+  "ring_rows": 200,
+  "new_fit_executed": false,
+  "truth_read": false,
+  "files_sha256": {
+    "wfrl/nrel_reconstruction/center_scale_family_audit.py": "2d4ce49c1bee1333fd7ec27a061e1488b6bbb3cbc8a710b6559fe711dcaf1d3b",
+    "tests/test_nrel_center_scale_family_audit.py": "eebdd19bbf8205bc857bfc982dc758f98e24646243792fbce38df757a80279f0",
+    "outputs/nrel-video-single-blade/20261003-p3-center-scale/family/protocol.json": "d9af4d684108bf17b08001afd6650996f8b4db355a215e419c01e0ea3050a96c",
+    "outputs/nrel-video-single-blade/20261003-p3-center-scale/family/protocol_addendum.json": "08ff958101f99d81526e10830abf2f30547a0e55bbc1d9a3377c2a383596b0dc",
+    "outputs/nrel-video-single-blade/20261003-p3-center-scale/family/verified/family_audit.json": "17b6e51f89b0f852996335f72ad5c82ea4e01afc97d9d437883132bcbb367bea",
+    "outputs/nrel-video-single-blade/20261003-p3-center-scale/family/verified/ring_residuals.csv": "2699be57ec8b9b99af25c08e8d9a0e3b59a2d8218a2138672b343ec333ba1329",
+    "outputs/nrel-video-single-blade/20261003-p3-center-scale/family/verified/run_record.json": "f6a11516f535e2e361f3ff192def924f33b3e800915fa8ec4f6097ca3242b74d"
+  }
+}

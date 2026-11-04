@@ -1,0 +1,441 @@
+{
+  "contact_sheet": "/Users/eason/Desktop/wfcrl/wind farm RL/outputs/nrel-video-single-blade/20261002-second/reconstruction/projection-checks/projection_checks.jpg",
+  "rasterizer": "hard_cpu_triangle_union_at_pixel_centres",
+  "inputs": "optimizer PLY + RGB-derived FBU + declared calibration/root motion; no truth",
+  "resize": "half_pixel_intrinsic_resize",
+  "statistics": [
+    {
+      "camera_id": "C1",
+      "frame_id": 42,
+      "split": "fit",
+      "sim_time_s": 122.125,
+      "resolution": [
+        480,
+        270
+      ],
+      "labels_source_size": [
+        1920,
+        1080
+      ],
+      "rgb_saved_size": [
+        480,
+        270
+      ],
+      "initial_template": {
+        "foreground_coverage_fraction": 0.776006936559384,
+        "background_spill_fraction": 0.021147032772364925,
+        "masked_iou": 0.7729590787579683,
+        "foreground_pixels": 48439,
+        "background_pixels": 9032,
+        "uncertain_pixels": 72129,
+        "projected_pixels_in_image": 68425
+      },
+      "T1_B1": {
+        "foreground_coverage_fraction": 0.9697764198269989,
+        "background_spill_fraction": 0.0014393268379096545,
+        "masked_iou": 0.969516222240568,
+        "foreground_pixels": 48439,
+        "background_pixels": 9032,
+        "uncertain_pixels": 72129,
+        "projected_pixels_in_image": 72512
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 43,
+      "split": "fit",
+      "sim_time_s": 122.175,
+      "resolution": [
+        480,
+        270
+      ],
+      "labels_source_size": [
+        1920,
+        1080
+      ],
+      "rgb_saved_size": [
+        480,
+        270
+      ],
+      "initial_template": {
+        "foreground_coverage_fraction": 0.8131952515357795,
+        "background_spill_fraction": 0.37920653693151274,
+        "masked_iou": 0.7577304635377385,
+        "foreground_pixels": 48184,
+        "background_pixels": 9301,
+        "uncertain_pixels": 72115,
+        "projected_pixels_in_image": 69322
+      },
+      "T1_B1": {
+        "foreground_coverage_fraction": 0.9934418064087664,
+        "background_spill_fraction": 0.09633372755617675,
+        "masked_iou": 0.9753056234718827,
+        "foreground_pixels": 48184,
+        "background_pixels": 9301,
+        "uncertain_pixels": 72115,
+        "projected_pixels_in_image": 72713
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 44,
+      "split": "heldout",
+      "sim_time_s": 122.225,
+      "resolution": [
+        480,
+        270
+      ],
+      "labels_source_size": [
+        1920,
+        1080
+      ],
+      "rgb_saved_size": [
+        480,
+        270
+      ],
+      "initial_template": {
+        "foreground_coverage_fraction": 0.8615555555555555,
+        "background_spill_fraction": 0.5662996649114409,
+        "masked_iou": 0.7441744404775615,
+        "foreground_pixels": 45000,
+        "background_pixels": 12534,
+        "uncertain_pixels": 72066,
+        "projected_pixels_in_image": 69280
+      },
+      "T1_B1": {
+        "foreground_coverage_fraction": 0.9939555555555556,
+        "background_spill_fraction": 0.17344822083931705,
+        "masked_iou": 0.9481494043328952,
+        "foreground_pixels": 45000,
+        "background_pixels": 12534,
+        "uncertain_pixels": 72066,
+        "projected_pixels_in_image": 72958
+      }
+    },
+    {
+      "camera_id": "C1",
+      "frame_id": 45,
+      "split": "heldout",
+      "sim_time_s": 122.275,
+      "resolution": [
+        480,
+        270
+      ],
+      "labels_source_size": [
+        1920,
+        1080
+      ],
+      "rgb_saved_size": [
+        480,
+        270
+      ],
+      "initial_template": {
+        "foreground_coverage_fraction": 0.9371326410658307,
+        "background_spill_fraction": 0.5512378005236849,
+        "masked_iou": 0.7638486874937619,
+        "foreground_pixels": 40832,
+        "background_pixels": 16804,
+        "uncertain_pixels": 71964,
+        "projected_pixels_in_image": 68983
+      },
+      "T1_B1": {
+        "foreground_coverage_fraction": 0.9937793887147336,
+        "background_spill_fraction": 0.19298976434182338,
+        "masked_iou": 0.9206579693703913,
+        "foreground_pixels": 40832,
+        "background_pixels": 16804,
+        "uncertain_pixels": 71964,
+        "projected_pixels_in_image": 73268
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 42,
+      "split": "fit",
+      "sim_time_s": 122.125,
+      "resolution": [
+        480,
+        270
+      ],
+      "labels_source_size": [
+        1920,
+        1080
+      ],
+      "rgb_saved_size": [
+        480,
+        270
+      ],
+      "initial_template": {
+        "foreground_coverage_fraction": 0.8351474130308851,
+        "background_spill_fraction": 0.02129035386928337,
+        "masked_iou": 0.8187103041171636,
+        "foreground_pixels": 65598,
+        "background_pixels": 61859,
+        "uncertain_pixels": 2143,
+        "projected_pixels_in_image": 56793
+      },
+      "T1_B1": {
+        "foreground_coverage_fraction": 0.9942376291960121,
+        "background_spill_fraction": 0.0023117088863382853,
+        "masked_iou": 0.9920749608311403,
+        "foreground_pixels": 65598,
+        "background_pixels": 61859,
+        "uncertain_pixels": 2143,
+        "projected_pixels_in_image": 66199
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 43,
+      "split": "fit",
+      "sim_time_s": 122.175,
+      "resolution": [
+        480,
+        270
+      ],
+      "labels_source_size": [
+        1920,
+        1080
+      ],
+      "rgb_saved_size": [
+        480,
+        270
+      ],
+      "initial_template": {
+        "foreground_coverage_fraction": 0.8877234610510422,
+        "background_spill_fraction": 0.07123663490989722,
+        "masked_iou": 0.844558455717309,
+        "foreground_pixels": 74174,
+        "background_pixels": 53217,
+        "uncertain_pixels": 2209,
+        "projected_pixels_in_image": 70435
+      },
+      "T1_B1": {
+        "foreground_coverage_fraction": 0.9945937929732791,
+        "background_spill_fraction": 0.0032696318845481707,
+        "masked_iou": 0.9922660999623393,
+        "foreground_pixels": 74174,
+        "background_pixels": 53217,
+        "uncertain_pixels": 2209,
+        "projected_pixels_in_image": 74766
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 44,
+      "split": "heldout",
+      "sim_time_s": 122.225,
+      "resolution": [
+        480,
+        270
+      ],
+      "labels_source_size": [
+        1920,
+        1080
+      ],
+      "rgb_saved_size": [
+        480,
+        270
+      ],
+      "initial_template": {
+        "foreground_coverage_fraction": 0.9486779602815772,
+        "background_spill_fraction": 0.16964596836016446,
+        "masked_iou": 0.8326740257946226,
+        "foreground_pixels": 69892,
+        "background_pixels": 57396,
+        "uncertain_pixels": 2312,
+        "projected_pixels_in_image": 77089
+      },
+      "T1_B1": {
+        "foreground_coverage_fraction": 0.9782378526870028,
+        "background_spill_fraction": 0.001271865635235905,
+        "masked_iou": 0.9772171800185807,
+        "foreground_pixels": 69892,
+        "background_pixels": 57396,
+        "uncertain_pixels": 2312,
+        "projected_pixels_in_image": 69071
+      }
+    },
+    {
+      "camera_id": "C2",
+      "frame_id": 45,
+      "split": "heldout",
+      "sim_time_s": 122.275,
+      "resolution": [
+        480,
+        270
+      ],
+      "labels_source_size": [
+        1920,
+        1080
+      ],
+      "rgb_saved_size": [
+        480,
+        270
+      ],
+      "initial_template": {
+        "foreground_coverage_fraction": 0.9839190628328008,
+        "background_spill_fraction": 0.18498572814578382,
+        "masked_iou": 0.7976574191320364,
+        "foreground_pixels": 56340,
+        "background_pixels": 71119,
+        "uncertain_pixels": 2141,
+        "projected_pixels_in_image": 69650
+      },
+      "T1_B1": {
+        "foreground_coverage_fraction": 0.9801029463968761,
+        "background_spill_fraction": 0.00106863144869866,
+        "masked_iou": 0.9787826148610324,
+        "foreground_pixels": 56340,
+        "background_pixels": 71119,
+        "uncertain_pixels": 2141,
+        "projected_pixels_in_image": 56010
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 42,
+      "split": "fit",
+      "sim_time_s": 122.125,
+      "resolution": [
+        480,
+        270
+      ],
+      "labels_source_size": [
+        1920,
+        1080
+      ],
+      "rgb_saved_size": [
+        480,
+        270
+      ],
+      "initial_template": {
+        "foreground_coverage_fraction": 0.21980392156862746,
+        "background_spill_fraction": 0.0,
+        "masked_iou": 0.21980392156862746,
+        "foreground_pixels": 5100,
+        "background_pixels": 122804,
+        "uncertain_pixels": 1696,
+        "projected_pixels_in_image": 1232
+      },
+      "T1_B1": {
+        "foreground_coverage_fraction": 0.9952941176470588,
+        "background_spill_fraction": 0.00011400280121168692,
+        "masked_iou": 0.9925694172858819,
+        "foreground_pixels": 5100,
+        "background_pixels": 122804,
+        "uncertain_pixels": 1696,
+        "projected_pixels_in_image": 5419
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 43,
+      "split": "fit",
+      "sim_time_s": 122.175,
+      "resolution": [
+        480,
+        270
+      ],
+      "labels_source_size": [
+        1920,
+        1080
+      ],
+      "rgb_saved_size": [
+        480,
+        270
+      ],
+      "initial_template": {
+        "foreground_coverage_fraction": 0.8327547382248076,
+        "background_spill_fraction": 0.013260539599242255,
+        "masked_iou": 0.8113073881944286,
+        "foreground_pixels": 42632,
+        "background_pixels": 84989,
+        "uncertain_pixels": 1979,
+        "projected_pixels_in_image": 37213
+      },
+      "T1_B1": {
+        "foreground_coverage_fraction": 0.9978185400638019,
+        "background_spill_fraction": 0.000764804857099154,
+        "masked_iou": 0.9962995058200811,
+        "foreground_pixels": 42632,
+        "background_pixels": 84989,
+        "uncertain_pixels": 1979,
+        "projected_pixels_in_image": 43311
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 44,
+      "split": "heldout",
+      "sim_time_s": 122.225,
+      "resolution": [
+        480,
+        270
+      ],
+      "labels_source_size": [
+        1920,
+        1080
+      ],
+      "rgb_saved_size": [
+        480,
+        270
+      ],
+      "initial_template": {
+        "foreground_coverage_fraction": 0.9720704018491321,
+        "background_spill_fraction": 0.1443204385241618,
+        "masked_iou": 0.7482023721275018,
+        "foreground_pixels": 41533,
+        "background_pixels": 86107,
+        "uncertain_pixels": 1960,
+        "projected_pixels_in_image": 53647
+      },
+      "T1_B1": {
+        "foreground_coverage_fraction": 0.9823032287578553,
+        "background_spill_fraction": 0.001521362955392709,
+        "masked_iou": 0.9792146697388633,
+        "foreground_pixels": 41533,
+        "background_pixels": 86107,
+        "uncertain_pixels": 1960,
+        "projected_pixels_in_image": 41544
+      }
+    },
+    {
+      "camera_id": "C3",
+      "frame_id": 45,
+      "split": "heldout",
+      "sim_time_s": 122.275,
+      "resolution": [
+        480,
+        270
+      ],
+      "labels_source_size": [
+        1920,
+        1080
+      ],
+      "rgb_saved_size": [
+        480,
+        270
+      ],
+      "initial_template": {
+        "foreground_coverage_fraction": 1.0,
+        "background_spill_fraction": 0.06413775287792434,
+        "masked_iou": 0.3385780885780886,
+        "foreground_pixels": 4067,
+        "background_pixels": 123874,
+        "uncertain_pixels": 1659,
+        "projected_pixels_in_image": 12498
+      },
+      "T1_B1": {
+        "foreground_coverage_fraction": 0.8436193754610278,
+        "background_spill_fraction": 0.0,
+        "masked_iou": 0.8436193754610278,
+        "foreground_pixels": 4067,
+        "background_pixels": 123874,
+        "uncertain_pixels": 1659,
+        "projected_pixels_in_image": 3613
+      }
+    }
+  ],
+  "limits": "hard low-resolution silhouettes are inspection metrics, not geometry scores; U excluded; frame clipping unconstrained"
+}

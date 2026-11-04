@@ -1,0 +1,133 @@
+{
+  "scope": "Exact code at successful tests and actual fitting launch; no video/truth asset duplication",
+  "files": {
+    "wfrl/nrel_reconstruction/pack.py": {
+      "sha256": "d0f13a95ebe1b7050e96a644ae6207137ec0cd75219c514b6ac40c2e6ebdaaa1",
+      "bytes": 8627
+    },
+    "wfrl/nrel_reconstruction/optimize.py": {
+      "sha256": "ea601be6e8fd6c7bba90d8befd5a1135e603fde76b7dba01cb1b0d114199bd58",
+      "bytes": 21182
+    },
+    "wfrl/nrel_reconstruction/greville_model.py": {
+      "sha256": "9d2816050a0c842aa509dd1bc561dc11146d93d4006bd36324bd8934860cfe98",
+      "bytes": 9856
+    },
+    "wfrl/nrel_reconstruction/preview.py": {
+      "sha256": "9604b6cf45e8087037a0a02eceb5972f5af1acab7f78370583007a34074fff19",
+      "bytes": 14516
+    },
+    "wfrl/nrel_reconstruction/root_rgb_audit.py": {
+      "sha256": "251873e08cc4d11c831818c7add311d00f048a21bd099b2e52092b083e0536b2",
+      "bytes": 23444
+    },
+    "wfrl/nrel_reconstruction/center_scale_audit.py": {
+      "sha256": "b950cb08450f6f3c07ca6cdd1131216d21c18ebbfffb01c785fcdfc30ecf7fd8",
+      "bytes": 26378
+    },
+    "wfrl/nrel_reconstruction/surface_audit.py": {
+      "sha256": "67e227620cdaf876a5fc527a9e956fc81b93f7b086ebee5f1c5d182ffe7d257a",
+      "bytes": 32795
+    },
+    "wfrl/nrel_reconstruction/parameter_audit.py": {
+      "sha256": "3b2970e4c40833cbaa5bc030fa244cabeab5b828c963893abfd33138239906b1",
+      "bytes": 32921
+    },
+    "wfrl/nrel_reconstruction/center_scale_family_audit.py": {
+      "sha256": "2d4ce49c1bee1333fd7ec27a061e1488b6bbb3cbc8a710b6559fe711dcaf1d3b",
+      "bytes": 16196
+    },
+    "wfrl/nrel_reconstruction/compare_rgb.py": {
+      "sha256": "066de556c0ac6559eb893440abb52a461cdd9f74d8149fe3cf5c8491ae3996e4",
+      "bytes": 13368
+    },
+    "wfrl/nrel_reconstruction/renderer.py": {
+      "sha256": "d6b73643c08a71a895e0a2f78cb163ff117b6c9c24983835ae2e7279f4133e44",
+      "bytes": 7061
+    },
+    "wfrl/nrel_reconstruction/diagnostics.py": {
+      "sha256": "1d7b36e13709458dd6e9fb3c36c6afaf4d95f04167ef5c3fcee33072964e8789",
+      "bytes": 11037
+    },
+    "wfrl/nrel_reconstruction/observations.py": {
+      "sha256": "79259788568cd6346428305e22cf136a52ce503e341f05bb94cd72e26718cd69",
+      "bytes": 7979
+    },
+    "wfrl/nrel_reconstruction/__init__.py": {
+      "sha256": "83c282017ec14cf9db2f8d4fa48ecbad1cce427e1c1a958ea3ee91552028c5ef",
+      "bytes": 224
+    },
+    "wfrl/nrel_reconstruction/model.py": {
+      "sha256": "47165adb7a8f8d75f4d23a4632c1afd690370edf9d665736782fba4ac7f632ad",
+      "bytes": 12048
+    },
+    "wfrl/nrel_reconstruction/dataset.py": {
+      "sha256": "eee0806230801b9cffe49ba153f00ea1f4f79897eca91b107f9f67e4554f66fe",
+      "bytes": 13292
+    },
+    "wfrl/nrel_reconstruction/area_audit.py": {
+      "sha256": "03865d040121824de12143395fcaf9e1bb6f6320e1e594f35ec7e3aaa04c265b",
+      "bytes": 22191
+    },
+    "wfrl/nrel_reconstruction/evaluate.py": {
+      "sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70",
+      "bytes": 37881
+    },
+    "wfrl/nrel_reconstruction/greville_experiment.py": {
+      "sha256": "a2e4139df6b369440b84293ac8e5211a95a5a6b60ddb7d9213d88334807c2574",
+      "bytes": 17895
+    },
+    "wfrl/nrel_reconstruction/contour.py": {
+      "sha256": "275ea6e78e3d185d081d79e341d8293bc9ea2ce3583d48d1c27810455ddfbb80",
+      "bytes": 15348
+    },
+    "wfrl/nrel_reconstruction/observation_experiment.py": {
+      "sha256": "965509d678745484c5b67a343b9e59e7d90e0d6a9e8a8e3e24e1847cc6a69577",
+      "bytes": 30041
+    },
+    "wfrl/nrel_reconstruction/boundary_metrics.py": {
+      "sha256": "3461135548db8a0619ea08df7b3fa7412788fca3aabcf409a2199054c35a2d1e",
+      "bytes": 8162
+    },
+    "scripts/nrel_single_blade.py": {
+      "sha256": "863b8fda6541e63b24da945d840c43ebbe848ccf0a6edef7aa69449b0c87c4ed",
+      "bytes": 10319
+    },
+    "wfrl/camera_video/media.py": {
+      "sha256": "fdea4421e6fda67e211fe665313ea6a21187439fca659239bc51026f1375556b",
+      "bytes": 9370
+    },
+    "tests/test_nrel_observation_experiment.py": {
+      "sha256": "e937ef0be095bcc6a39fcc736fb18346d9c136e096cf48d9a599d80447f57c26",
+      "bytes": 12671
+    },
+    "tests/test_nrel_p5_annotation.py": {
+      "sha256": "cb7c75beb23fb10141863c2b0cf017f870d02cad98a312ca1ed61a1fe5548210",
+      "bytes": 2674
+    },
+    "tests/test_nrel_optimize_v2.py": {
+      "sha256": "3f101896a2613d2413656737d0c688373b2561776f0ab7314b6b8d825b979090",
+      "bytes": 2196
+    },
+    "tests/test_nrel_observations_v2.py": {
+      "sha256": "645da8d2c79dd3e7d7cecad532000ec1d40c417fb2a5a6adefcd7c27aca49e59",
+      "bytes": 12372
+    },
+    "tests/test_nrel_contour.py": {
+      "sha256": "0482245433daaa0d66f11cc051b6cf7ea5b5714b278c4cbe48ac720ef50716c6",
+      "bytes": 5792
+    },
+    "tests/test_nrel_model_v2.py": {
+      "sha256": "85e78b976e9ba98809013b8303edf3515b1d441b6fbd76af54e944102bd30bc4",
+      "bytes": 4784
+    },
+    "tests/test_nrel_dataset.py": {
+      "sha256": "ca7aff3afea7383fb6b4fef365113f3ab839ee775c959f60ce7a34f60ebc9600",
+      "bytes": 12330
+    },
+    "tests/test_nrel_evaluate.py": {
+      "sha256": "60a925bc1cb05ed711e2015cd2f3cfe7cbf19840297e0bba7b530a0060d37419",
+      "bytes": 8109
+    }
+  }
+}

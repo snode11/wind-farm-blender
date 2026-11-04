@@ -1,0 +1,7 @@
+{
+  "status": "complete",
+  "t_ref_sim_time_s": 122.175,
+  "truth_output": "outputs/nrel-video-single-blade/20261002-first/formal/evaluation-only/truth-at-tref",
+  "module_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+  "elapsed_s": 2.1014302079565823
+}
