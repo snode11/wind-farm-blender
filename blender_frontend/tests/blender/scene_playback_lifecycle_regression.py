@@ -14,12 +14,11 @@ if ADDON_MODULE == 'wfrl_blender':
 addon = importlib.import_module(ADDON_MODULE)
 farm_flex = importlib.import_module(ADDON_MODULE + '.farm_flex')
 clearance_replay = importlib.import_module(ADDON_MODULE + '.clearance_replay')
-expected_root = os.environ.get('WFRL_EXPECTED_ADDON_ROOT')
-if expected_root:
-    assert Path(addon.__file__).resolve().parent == Path(expected_root).resolve()
+sys.path.append(str(Path(__file__).resolve().parent))
+import _native
+_native.check_addon_root(addon)
 
-OUT = Path(os.environ['WFRL_TEST_OUTPUT'])
-OUT.mkdir(parents=True, exist_ok=True)
+OUT = _native.output_directory(new=False)
 addon.register()
 addon.load_demo_scene(camera_rig=False)
 scene_a = bpy.context.scene

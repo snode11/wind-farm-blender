@@ -9,15 +9,14 @@ from unittest.mock import patch
 import bpy
 
 ROOT = Path(__file__).resolve().parents[3]
-MODULE = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')
-if MODULE == 'wfrl_blender':
-    sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
+sys.path.append(str(Path(__file__).resolve().parent))
+import _native
+MODULE = _native.addon_module()
 addon = importlib.import_module(MODULE)
 control = importlib.import_module(MODULE + '.manual_control')
 assert Path(addon.__file__).resolve().parent == Path(os.environ.get(
     'WFRL_EXPECTED_ADDON_ROOT', ROOT / 'blender_frontend/wfrl_blender')).resolve()
-OUT = Path(os.environ['WFRL_TEST_OUTPUT'])
-OUT.mkdir(parents=True, exist_ok=False)
+OUT = _native.output_directory()
 
 
 def state(*, paused=True):

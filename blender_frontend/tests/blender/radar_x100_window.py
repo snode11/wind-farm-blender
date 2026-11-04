@@ -11,9 +11,9 @@ import bpy
 from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[3]
-MODULE = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')
-if MODULE == 'wfrl_blender':
-    sys.path[:0] = [str(ROOT/'blender_frontend'), str(ROOT)]
+sys.path.append(str(Path(__file__).resolve().parent))
+import _native
+MODULE = _native.addon_module()
 addon = importlib.import_module(MODULE)
 farm = importlib.import_module(MODULE+'.farm_flex')
 radar = importlib.import_module(MODULE+'.radar_x100.runtime')
@@ -23,8 +23,7 @@ camera = importlib.import_module(MODULE+'.custom_cameras')
 sidebar = importlib.import_module(MODULE+'.cameras')
 preview = importlib.import_module(MODULE+'.custom_camera_preview')
 capture = importlib.import_module(MODULE+'.custom_camera_capture')
-OUT = Path(os.environ['WFRL_TEST_OUTPUT'])
-OUT.mkdir(parents=True, exist_ok=False)
+OUT = _native.output_directory()
 STATE = {'step':0}
 
 

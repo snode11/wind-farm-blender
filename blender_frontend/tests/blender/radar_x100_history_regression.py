@@ -9,9 +9,9 @@ import time
 import bpy
 
 ROOT = Path(__file__).resolve().parents[3]
-MODULE = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')
-if MODULE == 'wfrl_blender':
-    sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
+sys.path.append(str(Path(__file__).resolve().parent))
+import _native
+MODULE = _native.addon_module()
 addon = importlib.import_module(MODULE)
 farm = importlib.import_module(MODULE + '.farm_flex')
 radar = importlib.import_module(MODULE + '.radar_x100.runtime')
@@ -19,9 +19,7 @@ output = Path(os.environ['WFRL_TEST_OUTPUT'])
 output.mkdir(parents=True, exist_ok=False)
 if MODULE == 'wfrl_blender':
     addon.register()
-expected = os.environ.get('WFRL_EXPECTED_ADDON_ROOT')
-if expected:
-    assert Path(addon.__file__).resolve().parent == Path(expected).resolve()
+_native.check_addon_root(addon)
 
 checks = []
 try:

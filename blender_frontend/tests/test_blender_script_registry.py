@@ -27,7 +27,8 @@ UNTRIAGED = frozenset({
 
 
 def native_scripts():
-    return {path.name for path in runner.TEST_ROOT.glob('*.py')}
+    """Runnable scripts; underscore modules such as ``_native.py`` are shared helpers."""
+    return {path.name for path in runner.TEST_ROOT.glob('*.py') if not path.name.startswith('_')}
 
 
 def registered_scripts():

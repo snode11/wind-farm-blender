@@ -11,9 +11,9 @@ import numpy as np
 import bpy
 
 ROOT = Path(__file__).resolve().parents[3]
-MODULE = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')
-if MODULE == 'wfrl_blender':
-    sys.path[:0] = [str(ROOT/'blender_frontend'), str(ROOT)]
+sys.path.append(str(Path(__file__).resolve().parent))
+import _native
+MODULE = _native.addon_module()
 addon = importlib.import_module(MODULE)
 if MODULE == 'wfrl_blender':
     addon.register()
@@ -23,8 +23,7 @@ if expected:
 radar = importlib.import_module(MODULE+'.radar_x100.runtime')
 api = importlib.import_module(MODULE+'.radar_x100.core')
 farm = importlib.import_module(MODULE+'.farm_flex')
-OUT = Path(os.environ['WFRL_TEST_OUTPUT'])
-OUT.mkdir(parents=True, exist_ok=False)
+OUT = _native.output_directory()
 addon.load_demo_scene(farm.default_package())
 measurements = {}
 

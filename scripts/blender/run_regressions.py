@@ -363,7 +363,8 @@ def read_json(path):
 
 
 def source_hashes(script):
-    paths = sorted(ADDON_ROOT.rglob('*.py')) + [script, ROOT / 'scripts/blender/open_farm_flex.py', Path(__file__)]
+    paths = sorted(ADDON_ROOT.rglob('*.py')) + [script, TEST_ROOT / '_native.py',
+                                                ROOT / 'scripts/blender/open_farm_flex.py', Path(__file__)]
     return {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest() for path in paths}
 
 

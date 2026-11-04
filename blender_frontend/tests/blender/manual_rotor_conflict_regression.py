@@ -1,7 +1,6 @@
 """Ordinary rotor motion preserves native edits and rejects competing controls."""
 import importlib
 import json
-import os
 from pathlib import Path
 import sys
 import unittest
@@ -10,16 +9,13 @@ from unittest.mock import patch
 import bpy
 
 ROOT = Path(__file__).resolve().parents[3]
-MODULE = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')
-if MODULE == 'wfrl_blender':
-    sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
+sys.path.append(str(Path(__file__).resolve().parent))
+import _native
+MODULE = _native.addon_module()
 addon = importlib.import_module(MODULE)
 control = importlib.import_module(MODULE + '.manual_control')
-expected = os.environ.get('WFRL_EXPECTED_ADDON_ROOT')
-if expected:
-    assert Path(addon.__file__).resolve().parent == Path(expected).resolve()
-OUT = Path(os.environ['WFRL_TEST_OUTPUT'])
-OUT.mkdir(parents=True, exist_ok=False)
+_native.check_addon_root(addon)
+OUT = _native.output_directory()
 addon.register()
 assert bpy.ops.wfrl.manual_enter() == {'FINISHED'}
 scene = bpy.context.scene
