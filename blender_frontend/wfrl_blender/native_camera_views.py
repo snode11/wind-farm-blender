@@ -52,10 +52,8 @@ def _remember_error(scene, message, *, append=False):
         if append and previous:
             message = previous if message in previous else previous + '；' + message
         scene[_ERROR_PROPERTY] = message
-        for window in bpy.context.window_manager.windows:
-            if window.scene == scene:
-                for area in window.screen.areas:
-                    area.tag_redraw()
+        from . import viewport
+        viewport.tag_redraw((scene,), area_types=None)
     except ReferenceError:
         # The owning scene may itself have been removed or replaced.
         pass

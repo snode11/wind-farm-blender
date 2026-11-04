@@ -266,10 +266,8 @@ def apply(scene):
     scene['surface_applied_source_frame']=int(sequence.source_frames[index])
     scene['surface_applied_time']=float(sequence.times[index])
     scene['surface_error']=''
-    for window in bpy.context.window_manager.windows:
-        if window.scene==scene:
-            for area in window.screen.areas:
-                area.tag_redraw()
+    from . import viewport
+    viewport.tag_redraw((scene,), area_types=None)
 
 
 @persistent

@@ -762,7 +762,6 @@ def _overlay_state(scene):
 
 def _redraw_changed_overlays(alive):
     """Tag 3D views only when the scene's drawn radar overlay inputs changed."""
-    import bpy
     changed = set()
     for key in set(_DRAWN) | set(_SESSIONS):
         scene = alive.get(key)
@@ -778,11 +777,8 @@ def _redraw_changed_overlays(alive):
             _DRAWN[key] = state
     if not changed:
         return
-    for window in bpy.context.window_manager.windows:
-        if window.scene.as_pointer() in changed:
-            for area in window.screen.areas:
-                if area.type == 'VIEW_3D':
-                    area.tag_redraw()
+    from .. import viewport
+    viewport.tag_redraw(scene for key, scene in alive.items() if key in changed)
 
 
 def on_load_pre(_unused):

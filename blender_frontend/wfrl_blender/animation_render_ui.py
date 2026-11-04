@@ -9,7 +9,6 @@ _LAST_DISPLAY = None
 
 def _publish():
     global _LAST_DISPLAY
-    import bpy
     current = service.job
     display = (current.state, current.completed_frames, current.total_frames, current.error, current.message)
     if display == _LAST_DISPLAY:
@@ -19,11 +18,8 @@ def _publish():
         if _SOURCE_SCENE is not None:
             _SOURCE_SCENE['wfrl_animation_render_status'] = current.message
             _SOURCE_SCENE['wfrl_animation_render_directory'] = str(current.directory or '')
-            for window in bpy.context.window_manager.windows:
-                if window.scene == _SOURCE_SCENE:
-                    for area in window.screen.areas:
-                        if area.type == 'VIEW_3D':
-                            area.tag_redraw()
+            from . import viewport
+            viewport.tag_redraw((_SOURCE_SCENE,))
     except ReferenceError:
         pass
 

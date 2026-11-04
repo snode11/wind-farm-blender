@@ -624,10 +624,8 @@ def apply(scene):
         obj.hide_set(not scene.wfrl_recon_show_cameras, view_layer=scene.view_layers[0])
     value.update(index=index, pending=False)
     scene['blade_recon_error'] = ''
-    for window in bpy.context.window_manager.windows:
-        if window.scene == scene:
-            for area in window.screen.areas:
-                area.tag_redraw()
+    from . import viewport
+    viewport.tag_redraw((scene,), area_types=None)
 
 
 def _toggle(scene, context):
