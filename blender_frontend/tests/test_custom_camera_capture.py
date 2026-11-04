@@ -15,6 +15,13 @@ from wfrl_blender import custom_cameras as core
 from wfrl_blender.custom_camera_capture import write_png,write_json
 
 
+def _flattened_data(image):
+    get_flattened_data = getattr(image, 'get_flattened_data', None)
+    if get_flattened_data is not None:
+        return get_flattened_data()
+    return image.getdata()
+
+
 def test_png_preserves_display_bytes_and_flips_only_rows(tmp_path):
     # GPU rows start at lower left, PNG rows at upper left. Explicit asymmetric
     # colour/alpha fixture detects gamma reapplication, channels and orientation.
@@ -23,7 +30,7 @@ def test_png_preserves_display_bytes_and_flips_only_rows(tmp_path):
     target=tmp_path/'image.png'
     write_png(target,2,2,bottom+top)
     with Image.open(target) as image:
-        assert list(image.getdata())==[(255,0,0,255),(0,255,0,255),(0,0,255,255),(17,91,143,128)]
+        assert list(_flattened_data(image))==[(255,0,0,255),(0,255,0,255),(0,0,255,255),(17,91,143,128)]
     with pytest.raises(FileExistsError):write_png(target,2,2,bottom+top)
     with pytest.raises(ValueError):write_png(tmp_path/'bad.png',3,3,bottom)
 
@@ -77,7 +84,7 @@ def test_capture_step_requests_pixels_without_texture_and_exports_state(tmp_path
     assert evaluations == ([(76, 0., 1.25)] if sequence else [])
     assert image.texture is None and image.rgba() is None
     with Image.open(tmp_path/'C3/frame_000000.png') as png:
-        assert list(png.getdata()) == [(255, 0, 0, 255), (0, 255, 0, 255),
+        assert list(_flattened_data(png)) == [(255, 0, 0, 255), (0, 255, 0, 255),
                                        (0, 0, 255, 255), (17, 91, 143, 128)]
     record = json.loads((tmp_path/'frames.jsonl').read_text())
     assert record['simulation_state_hash'] == 'geometry-state'
