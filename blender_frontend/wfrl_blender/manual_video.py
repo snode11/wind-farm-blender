@@ -312,7 +312,9 @@ def _python_binary():
             return str(Path(value).resolve())
         except (OSError, subprocess.SubprocessError):
             continue
-    raise ValueError('未找到支持 flock 和 waitid(WNOWAIT) 的独立 Python 3.11+；'
+    # Name the probed capabilities rather than a version: macOS provides
+    # os.waitid only from Python 3.13, while Linux provides it on 3.11.
+    raise ValueError('未找到支持 fcntl.flock 和 os.waitid(WNOWAIT) 的独立 Python 解释器；'
                      '可用 WFRL_VIDEO_PYTHON 指定监管解释器')
 
 
@@ -421,10 +423,8 @@ def _poll():
         _RESOLVING.pop(job_path, None)
         _QUERIES.forget(job_path)
     if changed:
-        for window in bpy.context.window_manager.windows:
-            for area in window.screen.areas:
-                if area.type == 'VIEW_3D':
-                    area.tag_redraw()
+        from . import viewport
+        viewport.tag_redraw()
     return .5 if _JOBS or _RESOLVING else None
 
 

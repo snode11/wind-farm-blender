@@ -177,8 +177,8 @@ def prepare_scene(args):
     else:
         addon.load_demo_scene(args.package)
         scene = bpy.context.scene
-    active = farm_flex._ACTIVE
-    if args.turbine not in active.readers:
+    active = farm_flex.active_for(scene)
+    if active is None or args.turbine not in active.readers:
         raise ValueError('Turbine absent from source package')
     camera = scene.objects.get(args.camera) if args.camera else cameras.ensure_nacelle_gimbal(scene, args.turbine)
     if camera is None or camera.type != 'CAMERA' or camera.parent != scene.objects.get(f'WFRL.Turbine.{args.turbine}.YawRoot'):

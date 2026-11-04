@@ -505,14 +505,11 @@ def _redraw(scene):
             listener(scene)
         except (AttributeError, ReferenceError, RuntimeError, KeyError, ValueError) as exc:
             print('WFRL manual pose listener:', exc)
-    for window in getattr(bpy.context.window_manager, 'windows', ()):
-        try:
-            if window.scene == scene and window.screen is not None:
-                for area in window.screen.areas:
-                    if area.type == 'VIEW_3D':
-                        area.tag_redraw()
-        except (AttributeError, ReferenceError):
-            continue
+    from . import viewport
+    try:
+        viewport.tag_redraw((scene,))
+    except (AttributeError, ReferenceError):
+        pass
 
 
 def apply_scene(scene):

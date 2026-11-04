@@ -11,8 +11,9 @@ import numpy as np
 from . import performance
 
 _ACTIVE=None
-# Each scene owns its deformation runtime. _ACTIVE remains the last explicitly
-# selected instance for existing panel integrations; callbacks use active_for.
+# Each scene owns its deformation runtime; frontend code resolves it with
+# active_for(scene). _ACTIVE only names the most recently attached runtime for
+# single-scene scripts and tests.
 _ACTIVES={}
 _PACKAGE_CACHE = OrderedDict()
 _PACKAGE_CACHE_SIZE = 2
@@ -70,15 +71,17 @@ def active_for(scene):
     return None
 
 
-def is_active(scene):
+def ready_for(scene):
+    """Return the scene's runtime when its replay reader is bound, else None."""
     from . import clearance_replay
-    global _ACTIVE
     active = active_for(scene)
-    ready = (active is not None
-             and clearance_replay.reader_for(scene) in active.readers.values())
-    if ready:
-        _ACTIVE = active
-    return ready
+    if active is not None and clearance_replay.reader_for(scene) in active.readers.values():
+        return active
+    return None
+
+
+def is_active(scene):
+    return ready_for(scene) is not None
 
 
 @dataclass(frozen=True)
@@ -985,7 +988,7 @@ class FarmFlex:
             self._update_frame(scene, sim_time_s=sim_time_s,
                                record_telemetry=record_telemetry, update_comparison=update_comparison)
         except (ValueError, RuntimeError, ReferenceError, KeyError, IndexError, TypeError) as exc:
-            from . import clearance_replay, _cancel_playback
+            from . import clearance_replay, playback
             self.frame_error = str(exc)
             clearance_replay._READERS.pop(scene.as_pointer(), None)
             self._update_geometry = None
@@ -995,7 +998,7 @@ class FarmFlex:
                 scene.pop('wfrl_clearance_time_s', None)
             else:
                 scene['wfrl_clearance_time_s'] = previous_time
-            for cleanup in (lambda: _cancel_playback(scene),
+            for cleanup in (lambda: playback.cancel(scene),
                             lambda: clearance_replay.clear(scene, '回放帧无效：' + str(exc))):
                 try:
                     cleanup()
@@ -1121,10 +1124,8 @@ class FarmFlex:
 
 
 def update(scene,depsgraph=None):
-    global _ACTIVE
     active = active_for(scene)
     if active is not None and not active.frame_error:
-        _ACTIVE = active
         active.update(scene)
 
 

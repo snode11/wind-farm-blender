@@ -142,12 +142,12 @@ def restore_viewports(context, snapshot):
 
 
 def return_to_original(context):
-    from . import _cancel_playback
+    from . import playback
     scene = context.scene
     original = bpy.data.scenes.get(scene.get('blade_recon_return_scene', ''))
     if original is None:
         raise ValueError('原场景已不存在')
-    _cancel_playback(scene)
+    playback.cancel(scene)
     raw = scene.get(RETURN_VIEWPORTS)
     snapshot = json.loads(raw) if raw else {}
     context.window.scene = original
@@ -566,8 +566,8 @@ def load(context, path=None, truth_path=None, cameras_path=None, texture_path=No
             cam['blade_recon_view'] = name
         SESSIONS[scene.as_pointer()] = dict(sequence=sequence, blades=blades, ghosts=ghosts,
                                           cameras=cameras, pending=True, index=None)
-        from . import _cancel_playback
-        _cancel_playback(previous_scene)
+        from . import playback
+        playback.cancel(previous_scene)
         if context.window:
             context.window.scene = scene
         scene.wfrl_recon_truth_path = str(Path(truth_path).resolve()) if truth_path else ''

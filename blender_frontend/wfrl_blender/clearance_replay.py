@@ -7,7 +7,7 @@ _END_REQUEST = None
 
 def _stop_finished_playback():
     """A queued end callback must not stop a newly selected/restarted clip."""
-    from . import playback, _cancel_playback
+    from . import playback
     global _END_REQUEST
     request, _END_REQUEST = _END_REQUEST, None
     if request is None:
@@ -15,7 +15,7 @@ def _stop_finished_playback():
     scene, generation, reader = request
     if (playback.generation() == generation and playback.is_playing(scene)
             and reader_for(scene) is reader and scene.frame_current >= scene.frame_end):
-        _cancel_playback(scene)
+        playback.cancel(scene)
 
 
 def _queue_finished_playback(scene):
@@ -71,10 +71,10 @@ def sample(scene):
 def load(scene, path, demo, *, restoring=False):
     if scene.get("wfrl_scene_kind") == "manual":
         raise ValueError("请先返回原场景，再加载净空回放")
-    from . import runtime, _cancel_playback
+    from . import runtime, playback
     if not (restoring and runtime.has_backend_session()) and not runtime.configuration_editable(scene):
         raise ValueError('Stop the active backend before loading results')
-    _cancel_playback(scene)
+    playback.cancel(scene)
     clear(scene)
     try:
         from ._vendor.lidar.replay import ReplayPackage, ReplayReader
@@ -248,13 +248,13 @@ def on_load(_):
 
 def on_history_pre(_):
     """Release replay references before native undo/redo replaces Blender IDs."""
-    from . import farm_flex, playback, tip_tracking, native_camera_views, _cancel_playback
+    from . import farm_flex, playback, tip_tracking, native_camera_views
     global _END_REQUEST
     _END_REQUEST = None
     native_camera_views.on_history_pre(_)
     owner = playback.owner_scene()
     if owner is not None and reader_for(owner) is not None:
-        _cancel_playback(owner)
+        playback.cancel(owner)
     farm_flex.detach(restore=False)
     tip_tracking.on_load_pre(_)
     _READERS.clear()

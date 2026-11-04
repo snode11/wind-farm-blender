@@ -76,8 +76,9 @@ def draw_radar(layout, scene, value):
         details.label(text='灯色随上次有效读数保留，过期转灰')
         details.label(text=f'光束亮起保留 {PULSE_SECONDS:.1f} 仿真秒，仅为提示')
         details.label(text='误差 = 估计 − 真值；正值为高估')
-        if farm_flex.is_active(scene) and farm_flex._ACTIVE.tower_motion is not None:
-            details.label(text='真值：叶尖表面至同高度塔壁' if farm_flex._ACTIVE.reference is not None else '真值：同高度的变形塔筒截面距离')
+        flex = farm_flex.ready_for(scene)
+        if flex is not None and flex.tower_motion is not None:
+            details.label(text='真值：叶尖表面至同高度塔壁' if flex.reference is not None else '真值：同高度的变形塔筒截面距离')
             details.label(text='固定标定估计未补偿塔架弯曲')
         if value:
             stats = value['statistics']
@@ -161,7 +162,7 @@ def draw_split_views(layout, context):
 def draw_turbine_views(layout, scene):
     """Keep Down views and two directions on the same mounted camera."""
     row = layout.row(align=True)
-    for tid in farm_flex._ACTIVE.readers:
+    for tid in farm_flex.active_for(scene).readers:
         op = row.operator('wfrl.farm_flex_view', text=tid + ' Down')
         op.turbine = tid
         op.angle = 'DOWN'
@@ -184,6 +185,7 @@ def draw_turbine_views(layout, scene):
 
 def draw_tools(layout, context):
     scene = context.scene
+    flex = farm_flex.active_for(scene)
     views = section(layout, 'wfrl_farm_tools_views', '机组、视角与云台')
     if views is not None:
         draw_views(views, context)
@@ -193,7 +195,7 @@ def draw_tools(layout, context):
         telemetry.prop(scene, 'wfrl_channel_telemetry', text='采样遥测与曲线')
         from .. import charts
         chart_history = charts.history_for(scene)
-        for tid in farm_flex._ACTIVE.readers:
+        for tid in flex.readers:
             card = telemetry.box()
             card.label(text=tid)
             for key in ('yaw', 'pitch', 'rotor_speed', 'power', 'torque', 'load'):
@@ -233,7 +235,7 @@ def draw_tools(layout, context):
         animation_render_ui.draw(presentation, context)
     data = section(layout, 'wfrl_farm_data', '数据来源与重新加载')
     if data is not None:
-        if farm_flex._ACTIVE.manifest.get('interface_only'):
+        if flex.manifest.get('interface_only'):
             data.label(text='OpenFAST · 单机接口验证 · REVIEW_ONLY')
             data.label(text='8 m/s 恒定风 · 规定 9 rpm')
         else:
@@ -243,7 +245,7 @@ def draw_tools(layout, context):
         data.label(text='轨迹为形变网格叶尖位置，非相机测量')
         data.label(text="红 / 绿 / 蓝：叶片 1 / 2 / 3")
         data.label(text="相邻两圈定格对比 2 秒后淡出")
-        if farm_flex._ACTIVE.manifest.get('measurement_mode') == 'dual_beam':
+        if flex.manifest.get('measurement_mode') == 'dual_beam':
             data.label(text=dual_method_label(clearance_replay.sample(scene)))
             data.label(text='S2/S3 同刻同叶片配对 · S1 独立报警')
         else:
@@ -266,17 +268,18 @@ def draw(layout, context, *, show_playback=True):
     value = clearance_replay.sample(scene)
     reader = clearance_replay.reader_for(scene)
     layout.use_property_decorate = False
-    if farm_flex._ACTIVE.model != 'nrel5mw':
+    flex = farm_flex.active_for(scene)
+    if flex.model != 'nrel5mw':
         message(layout, '合成叶形；运动、载荷与雷达读数来自 NREL 基线', context=context)
     if scene.get('wfrl_blade_model_error'):
         diagnostic(layout, '叶片外形', scene['wfrl_blade_model_error'], error=True, context=context)
-    if farm_flex._ACTIVE.manifest.get('measurement_mode') == 'dual_beam':
+    if flex.manifest.get('measurement_mode') == 'dual_beam':
         message(layout, dual_method_label(value), context=context)
         installation_status = (value or {}).get('installation_status')
         message(layout, ('双束重建 · ' + selected_installation_label(getattr(reader, 'config', {}))
                          if installation_status == 'SIMULATION_SELECTED'
                          else '双束诊断 · 安装与性能待验收'), context=context)
-    elif farm_flex._ACTIVE.manifest.get('acceptance_status', '').startswith('FAILED'):
+    elif flex.manifest.get('acceptance_status', '').startswith('FAILED'):
         layout.label(text='测量覆盖未达演示目标', icon='ERROR')
     if show_playback:
         draw_playback(layout, context, value, reader)
@@ -289,10 +292,10 @@ def draw(layout, context, *, show_playback=True):
             draw_split_views(views, context)
         model = section(layout, 'wfrl_farm_model_details', '叶片外形与模型来源')
         if model is not None:
-            if farm_flex._ACTIVE.reference is not None:
+            if flex.reference is not None:
                 from ..turbine_geometry import model_label
-                model.label(text='单机预弯接口验证' if farm_flex._ACTIVE.manifest.get('interface_only')
-                            else model_label(farm_flex._ACTIVE.model) + ' · BeamDyn')
+                model.label(text='单机预弯接口验证' if flex.manifest.get('interface_only')
+                            else model_label(flex.model) + ' · BeamDyn')
             model.prop(scene, 'wfrl_blade_model', text='叶片外形')
     tabs = layout.column(align=True)
     for pages in (('DEFLECTION', 'RADAR', 'IMBALANCE'), ('VIDEO', 'TOOLS')):
@@ -318,7 +321,7 @@ def draw(layout, context, *, show_playback=True):
 
 def build_review_cameras(scene):
     from ..cameras import ensure_nacelle_gimbal
-    for tid in farm_flex._ACTIVE.readers:
+    for tid in farm_flex.active_for(scene).readers:
         ensure_nacelle_gimbal(scene, tid)
     from mathutils import Vector
     tip = bpy.data.objects.new('WFRL.Camera.T1.TipComparison', bpy.data.cameras.new('T1TipComparison'))
@@ -357,7 +360,7 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
 
     def execute(self,context):
         scene=context.scene
-        preview=farm_flex._ACTIVE
+        preview=farm_flex.active_for(scene)
         from .. import tip_tracking
         from ..cameras import ensure_gimbal, ensure_nacelle_gimbal, down_gimbal, fill_camera_view
         from ..cameras import nacelle_side_view, restore_nacelle_view
@@ -485,9 +488,9 @@ class WFRL_OT_FarmTransport(bpy.types.Operator):
         return farm_flex.is_active(context.scene)
 
     def execute(self, context):
-        from .. import _cancel_playback, tip_tracking
+        from .. import tip_tracking, playback
         scene = context.scene
-        _cancel_playback(scene)
+        playback.cancel(scene)
         if self.action == 'STEP':
             scene.frame_set(min(scene.frame_end, scene.frame_current + 1))
         elif self.action == 'RESET':
@@ -503,7 +506,8 @@ class WFRL_OT_DeflectionView(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return farm_flex.is_active(context.scene) and farm_flex._ACTIVE.comparison is not None
+        flex = farm_flex.ready_for(context.scene)
+        return flex is not None and flex.comparison is not None
 
     def execute(self, context):
         from ..cameras import fill_camera_view
@@ -512,7 +516,7 @@ class WFRL_OT_DeflectionView(bpy.types.Operator):
         scene.camera = scene.objects['WFRL.Camera.T1.TipComparison']
         scene['wfrl_camera'] = scene.camera.name
         scene.wfrl_deflection_visible = True
-        farm_flex._ACTIVE.update(scene)
+        farm_flex.active_for(scene).update(scene)
         from ..cameras import demo_view_areas
         for area in demo_view_areas(scene):
             area.spaces.active.use_local_camera = False

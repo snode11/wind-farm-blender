@@ -102,9 +102,8 @@ def test_mesh_rebinding_and_source_edits_invalidate_pure_geometry(replay):
 def test_native_topology_change_fails_without_partial_mesh_write(replay, monkeypatch, position):
     active, scene, _ = replay
     run(active, scene)
-    import wfrl_blender
-    from wfrl_blender import clearance_replay
-    monkeypatch.setattr(wfrl_blender, '_cancel_playback', Mock())
+    from wfrl_blender import clearance_replay, playback
+    monkeypatch.setattr(playback, 'cancel', Mock())
     monkeypatch.setattr(clearance_replay, 'clear', lambda scene, reason: scene.update(wfrl_flex_active=False))
     telemetry = Mock()
     monkeypatch.setattr(active, 'record_telemetry', telemetry)

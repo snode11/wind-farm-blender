@@ -29,7 +29,7 @@ def test_backend_build_only_configures_its_main_viewports(monkeypatch):
     bpy = NS(context=NS(scene=scene, window_manager=NS(windows=windows)),
              data=NS(screens=[screen, other_screen], objects=[]))
     monkeypatch.setitem(sys.modules, 'bpy', bpy)
-    monkeypatch.setattr(addon, '_cancel_playback', lambda *_args: None)
+    monkeypatch.setattr(addon.playback, 'cancel', lambda *_args: None)
     monkeypatch.setattr(addon, '_update_layers', lambda *_args: None)
     monkeypatch.setattr(scene_builder, 'build_scene', lambda *_args: None)
     monkeypatch.setattr(cameras, 'build_cameras', lambda *_args: None)

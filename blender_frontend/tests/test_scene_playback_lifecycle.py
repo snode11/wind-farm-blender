@@ -74,8 +74,9 @@ def test_multiple_independent_scenes_keep_own_runtime_and_handler(runtimes):
     runtime_b = farm_flex.attach(b, 'package')
     assert farm_flex.active_for(a) is runtime_a
     assert farm_flex.active_for(b) is runtime_b
-    assert farm_flex.is_active(a) and farm_flex._ACTIVE is runtime_a
-    assert farm_flex.is_active(b) and farm_flex._ACTIVE is runtime_b
+    assert farm_flex.ready_for(a) is runtime_a and farm_flex.ready_for(b) is runtime_b
+    # Querying one scene never redirects lookups for another.
+    assert farm_flex.is_active(b) and farm_flex.ready_for(a) is runtime_a
     a.frame_set(121)
     b.frame_set(241)
     assert runtime_a.updates == [a, a]

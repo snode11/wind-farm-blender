@@ -91,17 +91,21 @@ def blade_geometry(scene):
     import bpy
     import numpy as np
     from . import farm_flex
-    if not farm_flex.is_active(scene):
+    active = farm_flex.ready_for(scene)
+    if active is None:
         raise ValueError('请先加载正式 FarmFlex 叶片回放')
     bpy.context.view_layer.update()
-    obj, rest, *_ = next(row for row in farm_flex._ACTIVE.blades
+    obj, rest, *_ = next(row for row in active.blades
                         if row[0].name == 'WFRL.Turbine.T1.Blade1')
     coords = np.empty(len(obj.data.vertices)*3, dtype=np.float32)
     obj.data.vertices.foreach_get('co', coords)
     matrix = np.asarray(scene.objects[core.ROOT_NAME].matrix_world.inverted() @ obj.matrix_world)
     points = coords.reshape(-1, 3) @ matrix[:3, :3].T + matrix[:3, 3]
     spans = rest[:, 2] - 1.5
-    used = np.unique([i for face in obj.data.polygons for i in face.vertices])
+    # Every face vertex is a face corner, so the corner indices name the used vertices.
+    corners = np.empty(len(obj.data.loops), dtype=np.int32)
+    obj.data.loops.foreach_get('vertex_index', corners)
+    used = np.unique(corners)
     return obj, points, spans, used
 
 

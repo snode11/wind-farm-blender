@@ -514,13 +514,8 @@ def _set_error(scene, exc):
 
 def _redraw_scene(scene):
     """Publish lifecycle status changes without waiting for user interaction."""
-    import bpy
-    manager = getattr(getattr(bpy, 'context', None), 'window_manager', None)
-    for window in getattr(manager, 'windows', ()):
-        if window.scene == scene:
-            for area in window.screen.areas:
-                if area.type == 'VIEW_3D':
-                    area.tag_redraw()
+    from . import viewport
+    viewport.tag_redraw((scene,))
 
 
 def _display_origin(scene):

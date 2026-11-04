@@ -386,7 +386,7 @@ class EditorSession:
         finally: _UPDATING=False
 
     def begin(self, index=None, kind='fine_crack'):
-        from .. import playback, _cancel_playback
+        from .. import playback
         if self.draft is not None or self.healthy_payload is not None or self.busy:
             raise ValueError('请先完成当前编辑、扫描或健康对照')
         draft = self.store.document
@@ -403,7 +403,7 @@ class EditorSession:
             window = playback.owner_window()
             if window is None or window.scene != self.scene:
                 raise RuntimeError('无法确定当前场景的播放窗口')
-            _cancel_playback(self.scene)
+            playback.cancel(self.scene)
             if playback.is_playing(self.scene):
                 raise RuntimeError('无法暂停当前场景播放')
         self.edit_state=(float(self.scene['defect_time_s']),window)
@@ -1302,7 +1302,7 @@ class NREL_OT_defect_scan(bpy.types.Operator):
     def invoke(self, context, event):
         from .defect_timeline import FrameMapping
         from .defect_outputs import create_run
-        from .. import playback, _cancel_playback
+        from .. import playback
         self.scan_session = None
         self.timer = self.run = None
         self.finished = False
@@ -1332,7 +1332,7 @@ class NREL_OT_defect_scan(bpy.types.Operator):
             self.run = create_run(s, bpy.path.abspath(p.output_path), mapping=self.mapping)
             s.freeze_time = self.saved_time
             if playback.is_playing(s.scene):
-                _cancel_playback(s.scene)
+                playback.cancel(s.scene)
                 if playback.is_playing(s.scene):
                     raise RuntimeError('无法暂停当前场景播放')
                 self.playing = True

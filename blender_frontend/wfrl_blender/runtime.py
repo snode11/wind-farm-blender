@@ -101,8 +101,8 @@ def select_mode(mode):
     channel_states.clear()
     channel_table.clear()
     if mode != 'demo':
-        from . import _cancel_playback
-        _cancel_playback(scene)
+        from . import playback
+        playback.cancel(scene)
         for obj in collection.all_objects if collection is not None else ():
             if scene.objects.get(obj.name) != obj:
                 continue
@@ -347,15 +347,9 @@ def tick():
 
 def _redraw_viewports(*, scenes=None):
     import bpy
+    from . import viewport
     targets = tuple(scenes) if scenes is not None else (bpy.context.scene,)
-    for window in bpy.context.window_manager.windows:
-        scene = window.scene
-        if not any(scene == target for target in targets):
-            continue
-        for area in window.screen.areas:
-            if area.type == 'VIEW_3D':
-                performance.count("runtime.redraw_requests")
-                area.tag_redraw()
+    performance.count("runtime.redraw_requests", viewport.tag_redraw(targets))
 
 
 def _async_display_state(job, context):

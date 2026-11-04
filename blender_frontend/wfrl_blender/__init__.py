@@ -15,24 +15,9 @@ _BLADE_MODEL_ITEMS = tuple((key, label, '选择回放叶片外形', index)
 
 
 def _cancel_playback(scene=None, *, all_scenes=False):
-    """Cancel the native player only when the target scene actually owns it."""
-    import bpy
-    if bpy.app.background:
-        return
+    """Script entry for playback.cancel(); frontend modules call playback directly."""
     from . import playback
-    if scene is None and not all_scenes:
-        scene = bpy.context.scene
-    if not playback.any_playing() or (not all_scenes and not playback.is_playing(scene)):
-        return
-    # Blender has one global native playback timer. A single cancel pauses all
-    # views of its owner scene; repeating it per window cannot identify ownership.
-    window = playback.owner_window()
-    if window is None:
-        window = next(iter(bpy.context.window_manager.windows), None)
-    if window is not None:
-        with bpy.context.temp_override(window=window, screen=window.screen):
-            if playback.any_playing() and (all_scenes or playback.is_playing(scene)):
-                bpy.ops.screen.animation_cancel(restore_frame=False)
+    playback.cancel(scene, all_scenes=all_scenes)
 
 
 def _update_layers(scene, context=None):
@@ -109,8 +94,9 @@ def _update_manual(scene, context=None):
 def _update_demo_status(scene, depsgraph=None):
     # Selection callbacks refresh charts without introducing a second clock.
     from . import farm_flex
-    if farm_flex.is_active(scene):
-        farm_flex._ACTIVE.record_telemetry(scene)
+    active = farm_flex.ready_for(scene)
+    if active is not None:
+        active.record_telemetry(scene)
 
 
 def _get_blade_model(scene):
@@ -236,7 +222,7 @@ def _cancel_managed_playback():
     if owner is not None and (farm_flex.active_for(owner) is not None
             or clearance_replay.reader_for(owner) is not None
             or owner.get('wfrl_scene_kind') == 'manual'):
-        _cancel_playback(owner)
+        playback.cancel(owner)
 
 
 def register():
@@ -439,7 +425,7 @@ def _load_demo_scene(path=None, *, camera_rig=True, _package=None):
     import bpy
     if bpy.context.scene.get("wfrl_scene_kind") == "manual":
         raise ValueError("请先返回原场景，再加载 MAPPO")
-    from . import runtime, farm_flex
+    from . import runtime, farm_flex, playback
     if not runtime.configuration_editable():
         raise ValueError('Stop the active backend before loading MAPPO')
     from .home_state import can_start
@@ -450,7 +436,7 @@ def _load_demo_scene(path=None, *, camera_rig=True, _package=None):
     path = path or farm_flex.default_package()
     package = farm_flex.preflight(path) if _package is None else _package
     farm_flex.validate_candidate(path, package)
-    _cancel_playback(bpy.context.scene)
+    playback.cancel(bpy.context.scene)
     runtime.enter_result_replay()
     collection = build_demo_geometry()
     scene = bpy.context.scene

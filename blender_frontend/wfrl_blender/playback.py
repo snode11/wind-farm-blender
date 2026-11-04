@@ -75,6 +75,26 @@ def owner_window():
     return next((window for window in windows if window.scene == scene), None)
 
 
+def cancel(scene=None, *, all_scenes=False):
+    """Cancel the native player only when the target scene actually owns it."""
+    import bpy
+    if bpy.app.background:
+        return
+    if scene is None and not all_scenes:
+        scene = bpy.context.scene
+    if not any_playing() or (not all_scenes and not is_playing(scene)):
+        return
+    # Blender has one global native playback timer. A single cancel pauses all
+    # views of its owner scene; repeating it per window cannot identify ownership.
+    window = owner_window()
+    if window is None:
+        window = next(iter(bpy.context.window_manager.windows), None)
+    if window is not None:
+        with bpy.context.temp_override(window=window, screen=window.screen):
+            if any_playing() and (all_scenes or is_playing(scene)):
+                bpy.ops.screen.animation_cancel(restore_frame=False)
+
+
 def register():
     import bpy
     from bpy.app.handlers import persistent

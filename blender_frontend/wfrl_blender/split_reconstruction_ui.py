@@ -39,15 +39,13 @@ def _age_text(value):
 
 
 def _pause_all_playback(context):
-    from . import _cancel_playback
-    _cancel_playback(context.scene)
+    from . import playback
+    playback.cancel(context.scene)
 
 
 def _redraw(context):
-    for window in context.window_manager.windows:
-        for area in window.screen.areas:
-            if area.type in {'VIEW_3D', 'DOPESHEET_EDITOR'}:
-                area.tag_redraw()
+    from . import viewport
+    viewport.tag_redraw(area_types={'VIEW_3D', 'DOPESHEET_EDITOR'})
 
 
 class WFRL_OT_SplitReconOpenExample(bpy.types.Operator):

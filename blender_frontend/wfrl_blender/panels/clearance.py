@@ -22,8 +22,8 @@ class WFRL_OT_ClearanceClip(bpy.types.Operator):
                 raise ValueError('请在“数据配置”中选择所选片段的数据包目录')
             clearance_replay.load(scene, bpy.path.abspath(path), self.demo)
         except (ValueError, OSError, ImportError, KeyError, TypeError) as exc:
-            from .. import _cancel_playback
-            _cancel_playback(scene)
+            from .. import playback
+            playback.cancel(scene)
             clearance_replay.clear(scene, '回放数据未就绪：' + str(exc))
             scene.wfrl_clearance_show_config = True
             self.report({'ERROR'}, str(exc))
@@ -78,11 +78,11 @@ class WFRL_OT_ClearanceRestart(bpy.types.Operator):
         return clearance_replay.reader_for(context.scene) is not None
 
     def execute(self, context):
-        from .. import _cancel_playback, playback
+        from .. import playback
         if playback.any_playing() and not playback.is_playing(context.scene):
             self.report({'WARNING'}, '另一场景正在使用 Blender 播放器，请先暂停该场景')
             return {'CANCELLED'}
-        _cancel_playback(context.scene)
+        playback.cancel(context.scene)
         from .. import tip_tracking
         tip_tracking.reset(context.scene, 'restart')
         context.scene.frame_set(context.scene.frame_start)

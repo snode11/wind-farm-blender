@@ -23,14 +23,14 @@ def snapshot_scene(payload):
 
 def build_live_scene(scene):
     import bpy
-    from . import _cancel_playback
+    from . import playback
     from .scene_builder import build_scene
     from .cameras import build_cameras
     display_scene = bpy.context.scene
     if display_scene.get("wfrl_scene_kind") == "manual":
         raise ValueError("手动场景不接受后端场景数据")
     selected = display_scene.wfrl_selected_turbine
-    _cancel_playback(display_scene)
+    playback.cancel(display_scene)
     build_scene(scene)
     ids = [t.turbine_id for t in scene.turbines]
     display_scene.wfrl_selected_turbine = selected if selected in ids else ids[0]

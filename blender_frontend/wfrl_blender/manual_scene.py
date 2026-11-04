@@ -412,7 +412,7 @@ def create(context):
 
 
 def enter(context):
-    from . import manual_control, playback, _cancel_playback
+    from . import manual_control, playback
     reason = entry_error(context)
     if reason:
         raise ValueError(reason)
@@ -439,7 +439,7 @@ def enter(context):
     _remember_view(context)
     playing = playback.is_playing(source)
     if playing:
-        _cancel_playback(source)
+        playback.cancel(source)
     try:
         scene = source.wfrl_manual_scene
         if scene is None or not is_manual(scene):
