@@ -21,9 +21,7 @@ ENTRY_DOCUMENTS = (
     *(path for path in (ROOT / 'scripts/blender').glob('*.py') if path.name != 'run_regressions.py'),
 )
 # Scripts awaiting registration, documentation or removal. Entries only leave this set.
-UNTRIAGED = frozenset({
-    'launcher_mode_regression.py',
-})
+UNTRIAGED = frozenset()
 
 
 def native_scripts():

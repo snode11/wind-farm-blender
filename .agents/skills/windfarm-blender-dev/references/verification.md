@@ -58,6 +58,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定
 
 - `WFRL_TEST_OUTPUT` 的文件／目录合同逐份核对，已有目录可能覆盖报告。缺陷保存／重开复用专用目录，第二个进程设 `WFRL_NREL_DEFECT_PHASE=reopen`。手动撤销／恢复依赖工厂 `Cube`，`WFRL_MANUAL_EMPTY_ONLY=1` 会缩小隔离检查范围。
 - `farm_flex_workload_regression.py` 要求源码、后台工厂启动与空白注册，仅输出 `FARM_FLEX_WORKLOAD_REGRESSION_PASS`，无需输出目录。
+- `launcher_mode_regression.py` 只检查已安装的 `bl_ext.user_default.wfrl_blender`（经 `scripts/blender/wfrl_blender_bootstrap.py` 加载），未纳入 `run_regressions.py`。先在仓库根目录启动空闲 Bridge，例如 `python -m wfrl.blender_bridge --host 127.0.0.1 --port <端口> --scene scenes/turb3_demo.yaml --fake`，再按启动器设置 `WFRL_PROJECT_DIR`、`WFRL_BACKEND_PYTHON`、`WFRL_SCENE`、`WFRL_PORT` 并以后台进程运行；检查 `LAUNCHER_MAPPO_BACKEND_MODE_PASS` 与正常退出。脚本经真实传输完成回放／交互训练两种连接及返回 MAPPO，不启动求解或训练；`--fake` 后端不代表 FAST.Farm 场景。
 - `live_contracts_regression.py` 必须指定尚不存在的 `WFRL_TEST_OUTPUT` 目录，由脚本创建并写入 `result.json`；检查正常退出、`LIVE_CONTRACTS_PASS` 与报告，不复用正式场景或已保存结果目录。
 - X100 主合同、边界、历史和雷达窗口脚本均要求尚不存在的 `WFRL_TEST_OUTPUT` 目录并写入 `result.json`。主合同、边界与历史后台脚本可由 `run_regressions.py` 选择，分别检查 `X100_NATIVE_PASS`、`X100_EDGES_PASS`、`X100_HISTORY_PASS` 及正常退出；窗口脚本未纳入该运行器，使用干净可见进程，检查最终报告及 `X100_WINDOW_PASS`。它在完成后保留窗口，不把定时器注册或启动成功当作完成，也不把脚本操作当作真实键鼠验证。
 
