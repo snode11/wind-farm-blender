@@ -18,7 +18,7 @@
   "user_preferences_preserved": true,
   "configuration_files_preserved": 6,
   "public_release": true,
-  "same_as_public_archive": true,
+  "same_as_public_archive": false,
   "matches_source_archive": true,
   "fresh_process_import": "PASS",
   "native_background_status": "PASS_REGISTRATION_ONLY",
@@ -28,7 +28,7 @@
   "backups": {
     "previous_extension_and_config": "/Users/eason/Library/Application Support/WFRL/Backups/pre-fixed-0.3.42.5.u8qvddxj"
   },
-  "limits": "Installed inventory matches the public ZIP. A fresh Blender background process with a copy of the existing preferences confirmed persistent enablement, X100 blade panel registration, installed module digests, and corrected PNG, manual controls, Down video and Bridge entry points. Original configuration files were unchanged. Functional regression, visible windows/GPU, performance, device input and scientific accuracy were not tested.",
+  "limits": "Installed inventory matches the 0.3.42.5 public ZIP. A fresh Blender background process with a copy of the existing preferences confirmed persistent enablement, X100 blade panel registration, installed module digests, and corrected PNG, manual controls, Down video and Bridge entry points. Original configuration files were unchanged. Functional regression, visible windows/GPU, performance, device input and scientific accuracy were not tested.",
   "artifact_availability": {
     "final_archive": true,
     "result_records": false,
