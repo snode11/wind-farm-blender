@@ -1,0 +1,184 @@
+{
+  "scope": "Original unmodified blender_view.py; real original recon output; standalone factory-startup; no rendering",
+  "blender_version": "5.2.1 LTS",
+  "recon_path": "/Users/eason/Desktop/wfcrl/blade_recon/out/trial-20261004/synth20/recon.json",
+  "recon_frames": 200,
+  "frames": [
+    {
+      "scene_frame": 1,
+      "original_frame": 0,
+      "blades": [
+        {
+          "blade": 1,
+          "vertices": 1280,
+          "faces": 2526,
+          "max_abs_vertex_error_m": 7.626924514170241e-06,
+          "max_abs_truth_error_m": 7.6220700293561094e-06,
+          "max_abs_color_error": 0.002011609077453569,
+          "expected_green_vertices": 0,
+          "actual_green_vertices": 0,
+          "expected_orange_vertices": 1280,
+          "actual_orange_vertices": 1280
+        },
+        {
+          "blade": 2,
+          "vertices": 1280,
+          "faces": 2526,
+          "max_abs_vertex_error_m": 3.8068412493430515e-06,
+          "max_abs_truth_error_m": 3.80753689910307e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "expected_green_vertices": 1024,
+          "actual_green_vertices": 1024,
+          "expected_orange_vertices": 256,
+          "actual_orange_vertices": 256
+        },
+        {
+          "blade": 3,
+          "vertices": 1280,
+          "faces": 2526,
+          "max_abs_vertex_error_m": 3.8114267795208434e-06,
+          "max_abs_truth_error_m": 3.812832019889356e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "expected_green_vertices": 1056,
+          "actual_green_vertices": 1056,
+          "expected_orange_vertices": 224,
+          "actual_orange_vertices": 224
+        }
+      ]
+    },
+    {
+      "scene_frame": 51,
+      "original_frame": 50,
+      "blades": [
+        {
+          "blade": 1,
+          "vertices": 1280,
+          "faces": 2526,
+          "max_abs_vertex_error_m": 7.611621555270176e-06,
+          "max_abs_truth_error_m": 7.624060799571453e-06,
+          "max_abs_color_error": 0.002011609077453569,
+          "expected_green_vertices": 0,
+          "actual_green_vertices": 0,
+          "expected_orange_vertices": 1280,
+          "actual_orange_vertices": 1280
+        },
+        {
+          "blade": 2,
+          "vertices": 1280,
+          "faces": 2526,
+          "max_abs_vertex_error_m": 3.8072836332503357e-06,
+          "max_abs_truth_error_m": 3.8100153716413843e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "expected_green_vertices": 1024,
+          "actual_green_vertices": 1024,
+          "expected_orange_vertices": 256,
+          "actual_orange_vertices": 256
+        },
+        {
+          "blade": 3,
+          "vertices": 1280,
+          "faces": 2526,
+          "max_abs_vertex_error_m": 3.8131955477638257e-06,
+          "max_abs_truth_error_m": 3.8142160718734885e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "expected_green_vertices": 1056,
+          "actual_green_vertices": 1056,
+          "expected_orange_vertices": 224,
+          "actual_orange_vertices": 224
+        }
+      ]
+    },
+    {
+      "scene_frame": 101,
+      "original_frame": 100,
+      "blades": [
+        {
+          "blade": 1,
+          "vertices": 1280,
+          "faces": 2526,
+          "max_abs_vertex_error_m": 7.618617587468179e-06,
+          "max_abs_truth_error_m": 7.628693055039548e-06,
+          "max_abs_color_error": 0.002011609077453569,
+          "expected_green_vertices": 0,
+          "actual_green_vertices": 0,
+          "expected_orange_vertices": 1280,
+          "actual_orange_vertices": 1280
+        },
+        {
+          "blade": 2,
+          "vertices": 1280,
+          "faces": 2526,
+          "max_abs_vertex_error_m": 3.7941228470117494e-06,
+          "max_abs_truth_error_m": 3.8079946023117373e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "expected_green_vertices": 1024,
+          "actual_green_vertices": 1024,
+          "expected_orange_vertices": 256,
+          "actual_orange_vertices": 256
+        },
+        {
+          "blade": 3,
+          "vertices": 1280,
+          "faces": 2526,
+          "max_abs_vertex_error_m": 3.811525701280516e-06,
+          "max_abs_truth_error_m": 3.8143793545941662e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "expected_green_vertices": 992,
+          "actual_green_vertices": 992,
+          "expected_orange_vertices": 288,
+          "actual_orange_vertices": 288
+        }
+      ]
+    },
+    {
+      "scene_frame": 200,
+      "original_frame": 199,
+      "blades": [
+        {
+          "blade": 1,
+          "vertices": 1280,
+          "faces": 2526,
+          "max_abs_vertex_error_m": 7.624457651900229e-06,
+          "max_abs_truth_error_m": 7.613138592432733e-06,
+          "max_abs_color_error": 0.002011609077453569,
+          "expected_green_vertices": 0,
+          "actual_green_vertices": 0,
+          "expected_orange_vertices": 1280,
+          "actual_orange_vertices": 1280
+        },
+        {
+          "blade": 2,
+          "vertices": 1280,
+          "faces": 2526,
+          "max_abs_vertex_error_m": 3.814118599620997e-06,
+          "max_abs_truth_error_m": 3.8134975000048144e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "expected_green_vertices": 1056,
+          "actual_green_vertices": 1056,
+          "expected_orange_vertices": 224,
+          "actual_orange_vertices": 224
+        },
+        {
+          "blade": 3,
+          "vertices": 1280,
+          "faces": 2526,
+          "max_abs_vertex_error_m": 3.8122432499676506e-06,
+          "max_abs_truth_error_m": 3.812815464243613e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "expected_green_vertices": 1024,
+          "actual_green_vertices": 1024,
+          "expected_orange_vertices": 256,
+          "actual_orange_vertices": 256
+        }
+      ]
+    }
+  ],
+  "checks": {
+    "real_geometry_matches_forward": true,
+    "truth_ghost_matches_original_frame": true,
+    "observed_section_colors_match": true
+  },
+  "saved_blend": "/Users/eason/Desktop/wfcrl/blade_recon/out/trial-20261004/blender/synth20_original_view_validation.blend",
+  "saved_frame": 1,
+  "handler_persistence_note": "frame_change_pre update function exists in the running process only, not stored by this .blend. Run original blender_view.py with --recon/--truth/--cameras to recreate playback; opening this .blend alone provides the saved frame 1 snapshot."
+}

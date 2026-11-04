@@ -1,0 +1,71 @@
+{
+ "blade_shift": 0,
+ "defects": [
+  {
+   "id": "D1",
+   "name": "弦向裂纹 60×1.5 cm",
+   "blade_true": 1,
+   "blade_recon": 1,
+   "cover": 1.0,
+   "contrast_keep": 0.215,
+   "err_span_m": -0.049,
+   "err_chord_m": -0.008,
+   "res_span_cm": 7.0
+  },
+  {
+   "id": "D2",
+   "name": "展向裂纹 60×1.5 cm",
+   "blade_true": 1,
+   "blade_recon": 1,
+   "cover": 1.0,
+   "contrast_keep": 0.262,
+   "err_span_m": 0.062,
+   "err_chord_m": -0.032,
+   "res_span_cm": 6.1
+  },
+  {
+   "id": "D3",
+   "name": "修补块 40×30 cm(新漆，偏亮)",
+   "blade_true": 1,
+   "blade_recon": 1,
+   "cover": 1.0,
+   "contrast_keep": 0.689,
+   "err_span_m": -0.058,
+   "err_chord_m": -0.048,
+   "res_span_cm": 7.6
+  },
+  {
+   "id": "D4",
+   "name": "鼓包 50×50 cm 高 2 cm(只改变明暗)",
+   "blade_true": 1,
+   "blade_recon": 1,
+   "cover": 1.0,
+   "contrast_keep": null,
+   "err_span_m": null,
+   "err_chord_m": null,
+   "res_span_cm": 6.6
+  },
+  {
+   "id": "D5",
+   "name": "前缘腐蚀 4 m",
+   "blade_true": 1,
+   "blade_recon": 1,
+   "cover": 0.253,
+   "contrast_keep": 0.024,
+   "err_span_m": null,
+   "err_chord_m": null,
+   "res_span_cm": 7.6
+  },
+  {
+   "id": "D6",
+   "name": "修补块 50×40 cm(偏暗)",
+   "blade_true": 2,
+   "blade_recon": 2,
+   "cover": 1.0,
+   "contrast_keep": 0.428,
+   "err_span_m": 0.238,
+   "err_chord_m": -0.076,
+   "res_span_cm": 6.1
+  }
+ ]
+}

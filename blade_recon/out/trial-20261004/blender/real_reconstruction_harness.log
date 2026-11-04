@@ -1,0 +1,16 @@
+/Users/eason/Desktop/wfcrl/blade_recon/blender_view.py:50: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m.use_nodes = True
+[blade_recon] 已加载 200 帧；绿色=图像观测，橙色=模型推断
+Info: Saved as "synth20_original_view_validation.blend"
+{
+  "checks": {
+    "real_geometry_matches_forward": true,
+    "truth_ghost_matches_original_frame": true,
+    "observed_section_colors_match": true
+  },
+  "max_abs_vertex_error_m": 7.626924514170241e-06,
+  "saved_blend": "/Users/eason/Desktop/wfcrl/blade_recon/out/trial-20261004/blender/synth20_original_view_validation.blend"
+}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

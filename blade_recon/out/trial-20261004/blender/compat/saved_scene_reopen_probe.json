@@ -1,0 +1,9 @@
+{
+  "saved_scene": "/Users/eason/Desktop/wfcrl/blade_recon/out/trial-20261004/blender/compat/synth20_compat_view_validation.blend",
+  "saved_frame": 1,
+  "loaded_handler_count": 0,
+  "loaded_handlers": [],
+  "frame51_vs_saved_frame1_max_vertex_change_m": 0.0,
+  "active_camera": "C2",
+  "conclusion": "Opening saved .blend does not restore the script frame handler. Re-run the compatibility wrapper for playback."
+}

@@ -1,0 +1,23 @@
+/Users/eason/Desktop/wfcrl/blade_recon/blender_view.py:50: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m.use_nodes = True
+[blade_recon] 已加载 200 帧；绿色=图像观测，橙色=模型推断
+[blade_recon compat] Camera matrix uses mathutils.Matrix; scene resolution matches camera JSON. Original fx-only K approximation retained.
+[blade_recon] wrote /Users/eason/Desktop/wfcrl/blade_recon/out/trial-20261004/blender/compat/cameras_roundtrip_compat.json
+Info: Saved as "synth20_compat_view_validation.blend"
+{
+  "checks": {
+    "real_geometry_matches_forward": true,
+    "truth_ghost_matches_original_frame": true,
+    "observed_section_colors_match": true,
+    "camera_extrinsics_match_after_frame_and_depsgraph_update": true,
+    "camera_output_dimensions_match": true,
+    "camera_intrinsics_exact_match": false,
+    "original_export_extrinsics_roundtrip": true,
+    "original_export_intrinsics_exact_roundtrip": false
+  },
+  "max_abs_vertex_error_m": 7.626924514170241e-06,
+  "saved_blend": "/Users/eason/Desktop/wfcrl/blade_recon/out/trial-20261004/blender/compat/synth20_compat_view_validation.blend"
+}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

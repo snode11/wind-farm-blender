@@ -1,0 +1,25 @@
+/Users/eason/Desktop/wfcrl/blade_recon/blender_view.py:50: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m.use_nodes = True
+[blade_recon] 已加载 5 帧；绿色=图像观测，橙色=模型推断
+[blade_recon] wrote /Users/eason/Desktop/wfcrl/blade_recon/out/trial-20261004/blender/cameras_roundtrip_original_native.json
+[blade_recon] wrote /Users/eason/Desktop/wfcrl/blade_recon/out/trial-20261004/blender/cameras_roundtrip_original_resolution_only.json
+[blade_recon] wrote /Users/eason/Desktop/wfcrl/blade_recon/out/trial-20261004/blender/cameras_roundtrip_original_pixel_aspect.json
+{
+  "checks": {
+    "mesh_creation": true,
+    "geometry_matches_forward_model": true,
+    "frame_change_moves_vertices": true,
+    "colors_follow_observed_sections": true,
+    "camera_extrinsics_match_input": false,
+    "camera_native_intrinsics_match_input": false,
+    "camera_intrinsics_match_after_resolution_only": false,
+    "original_export_extrinsics_roundtrip": false,
+    "diagnostic_workaround_restores_K": true,
+    "original_export_retains_asymmetric_focal_lengths": false
+  },
+  "geometry_max_error_m": 7.6249395135619125e-06,
+  "results_path": "/Users/eason/Desktop/wfcrl/blade_recon/out/trial-20261004/blender/compatibility_results.json"
+}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

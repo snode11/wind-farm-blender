@@ -1,0 +1,332 @@
+{
+  "name": "flex-mappo-wind-v1",
+  "source_case": "/Users/eason/Desktop/wfcrl/wind farm RL/__simul__/fastfarm/FastFarm__604s__3T_1789056088.7327092",
+  "wind_mps": 14.0,
+  "duration_s": 240.0,
+  "fps": 80,
+  "dt_s": 0.00625,
+  "span_refined": false,
+  "controller": "prescribed constant 9 rpm; fixed pitch 0 deg; no ServoDyn; no policy checkpoint",
+  "blade_dofs": [
+    "FlapDOF1",
+    "FlapDOF2",
+    "EdgeDOF"
+  ],
+  "tower": "rigid",
+  "startup_discard_s": 18,
+  "inputs": [
+    {
+      "path": "5MW_Baseline/AD.dat",
+      "sha256": "05744e9ae621af471ac350b8f2c1d91a08066426fcdafe1ee4707885c3970738"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/Cylinder1.dat",
+      "sha256": "ebaabc1d2befd769cde8cb28a75be0d2b73585f2a27960a3dc34cfbd05f60a2c"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/Cylinder1_coords.txt",
+      "sha256": "3a3a40c1eee741786357bab6fb49ae37b925dcf47a16aec083e8712c5b3bb595"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/Cylinder2.dat",
+      "sha256": "4be751a2b80057410c15ba2bc3ed799642dcd5cf12b544345aa61bc6777a1f64"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/Cylinder2_coords.txt",
+      "sha256": "57928cf1f02057e34f45b00c71fc2468d7fc4d63605047a62907e25dee4637e0"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU21_A17.dat",
+      "sha256": "2ad661a5f04e87285b8c7f79e9e0b67765ce0f876a9597f604935eb6c47fa2f6"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU21_A17_coords.txt",
+      "sha256": "b4d6350614b0fbbd6262ec340c78ee8eb0562ddfc8cf6bdf222228e739392ca4"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU25_A17.dat",
+      "sha256": "52fcce2a8fd1159f38cdd1a8bfd365f79e3060e66ea91d5ab8fbce1f16ec20a7"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU25_A17_coords.txt",
+      "sha256": "08e7d345ef3e066f059f1fcf5f9b779e6a7e455ff2f6944931b227916d7730e7"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU30_A17.dat",
+      "sha256": "e9d0f18b62a5361c0d45e401d4d22fd5d02f34dc2243a96a7b0f5e2a4b24c163"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU30_A17_coords.txt",
+      "sha256": "fb63e89e1c53c3278cd420a5ab36402a4d609850f1869f4013848a041e7a5c93"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU35_A17.dat",
+      "sha256": "701cff83e01a187209ff788a3fc4bfb9b8592546462a5aec2f0df54701d05763"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU35_A17_coords.txt",
+      "sha256": "cdbb3d2d5735b0fd6be7a9c4b4439ba2ac6e78c3652657ef4090739c2dc0877a"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU40_A17.dat",
+      "sha256": "002e2176cf03eda520b160d5a46ce0f5f42125f892c9d0e1fd3c40424d249324"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU40_A17_coords.txt",
+      "sha256": "5008c9aa91ada47cad7badd9330ba36c72010bdbf0450852cf5ed81c92cf6579"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/NACA64_A17.dat",
+      "sha256": "acfbf90a0aa479f560911d89b31ec20d02284496a74ecfc9b8ad0534c5d472b9"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/NACA64_A17_coords.txt",
+      "sha256": "c91942a4843516ab7f1b17a34162d21dbc400fbb4011b60f83a83acf08c8bdec"
+    },
+    {
+      "path": "5MW_Baseline/NRELOffshrBsline5MW_AeroDyn_blade.dat",
+      "sha256": "e22829920eb2b6323f0bb3b666c7e2ed9b69b01c684d682363ba16e086fce758"
+    },
+    {
+      "path": "5MW_Baseline/NRELOffshrBsline5MW_Blade.dat",
+      "sha256": "5bbcaa305218c95fdd4581a3d765346c55c0f845f7afe078336cc455fcb6d1e3"
+    },
+    {
+      "path": "5MW_Baseline/NRELOffshrBsline5MW_Onshore_ElastoDyn_Tower.dat",
+      "sha256": "82ca67bea8bfbc85892b5f78db5e921c9aa0e69f34af4ae657c0b7e63301dc8f"
+    },
+    {
+      "path": "FarmInputs/Case.fstf",
+      "sha256": "4c4c3d40e22ce394efe7cb2d3f0811918976887f1cadfec8ad65ecb7d2bdfd79"
+    },
+    {
+      "path": "FarmInputs/FFTest_WT1.fst",
+      "sha256": "1efc2a662d800972db381b559013f6da197803537ec65daf4f33ff36b93389ba"
+    },
+    {
+      "path": "FarmInputs/FFTest_WT2.fst",
+      "sha256": "bbcc716a40155cc6cd0c47ec6be39361aa2f0c4c99652c8db4fb774aad769c78"
+    },
+    {
+      "path": "FarmInputs/FFTest_WT3.fst",
+      "sha256": "39e1dcd07929b30f8fb1ecef7ce3b94f413949641d1fc8fe38363a33c0aa2092"
+    },
+    {
+      "path": "FarmInputs/InflowWind.dat",
+      "sha256": "0229b37c9be7ac7750efa7fbe75c2c044d4eded87885929bbbd1e318ad536681"
+    },
+    {
+      "path": "FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat",
+      "sha256": "d0823a1206711deb5246aa26c0132cdb4c41ab7fca4fd070cf60d71ce3d12024"
+    },
+    {
+      "path": "FarmInputs/NRELOffshrBsline5MW_Onshore_ServoDyn_WT1.dat",
+      "sha256": "b512fc6976a595e853043bf68e545dc5ea6fc5d072a86a6581e313abd5253fa8"
+    },
+    {
+      "path": "FarmInputs/NRELOffshrBsline5MW_Onshore_ServoDyn_WT2.dat",
+      "sha256": "3e014fd769ddb7bad24ad214549c106334e9e08cb9e718ad82b14fa6ce8f65cd"
+    },
+    {
+      "path": "FarmInputs/NRELOffshrBsline5MW_Onshore_ServoDyn_WT3.dat",
+      "sha256": "9ac9ce9e1752ad1a4b38e01d1a4a87693fca2a233884e5e9550e8f3f996092ab"
+    },
+    {
+      "path": "FarmInputs/random-gust.bts",
+      "sha256": "3c9bd8102fbe768ce9cc1de48f9da678619dfbf4da7f0b2aa7c7c9cd21495106"
+    },
+    {
+      "path": "FarmInputs/random.bts",
+      "sha256": "50a60455d9f6733e9b17128ca78a689a9ebd41ca5cb2d8bef7c24d02482bf913"
+    },
+    {
+      "path": "FarmInputs/random.inp",
+      "sha256": "4919f93347bf824bef1ee3c767b7c2c183026e7b040a874580593e9b66ccafe6"
+    },
+    {
+      "path": "FarmInputs/random.sum",
+      "sha256": "48f407d7aa50322ad64483fd4dac0b4fbef694cecb9a438b5bf1d8b77bed9671"
+    }
+  ],
+  "wind_profile": {
+    "kind": "TurbSim_IECKAI_plus_seeded_gusts",
+    "mean_wind_mps": 14.0,
+    "target_ti": 0.18,
+    "seed": 20260915,
+    "gust_seed": 20260916,
+    "events": [
+      {
+        "start_s": 19.29640780420095,
+        "duration_s": 2.9959687092733294,
+        "increment_mps": 5.005307567924615
+      },
+      {
+        "start_s": 26.602255396998267,
+        "duration_s": 2.5061717725149277,
+        "increment_mps": 5.332446170696544
+      },
+      {
+        "start_s": 32.786668551093456,
+        "duration_s": 3.4570364840732717,
+        "increment_mps": 5.037324475486226
+      },
+      {
+        "start_s": 41.97883392499314,
+        "duration_s": 2.5479747791738676,
+        "increment_mps": 5.179921064071471
+      },
+      {
+        "start_s": 51.21789513151647,
+        "duration_s": 3.962573621567723,
+        "increment_mps": 4.446027576604722
+      },
+      {
+        "start_s": 60.34809114038988,
+        "duration_s": 2.673564185729174,
+        "increment_mps": 5.315200545381094
+      },
+      {
+        "start_s": 68.83339738935953,
+        "duration_s": 2.5102769369066262,
+        "increment_mps": 5.37396074535918
+      },
+      {
+        "start_s": 76.18801755938838,
+        "duration_s": 2.5924773845376827,
+        "increment_mps": 4.10801415509172
+      },
+      {
+        "start_s": 84.69084143408816,
+        "duration_s": 2.390360965440432,
+        "increment_mps": 5.1156410831789465
+      },
+      {
+        "start_s": 93.99483277203751,
+        "duration_s": 2.995020831220137,
+        "increment_mps": 5.39069578513535
+      },
+      {
+        "start_s": 101.29843985246812,
+        "duration_s": 2.0726571591709866,
+        "increment_mps": 4.425851978413754
+      },
+      {
+        "start_s": 107.5745224369515,
+        "duration_s": 4.449078040060828,
+        "increment_mps": 4.942382049948762
+      },
+      {
+        "start_s": 115.08205679896717,
+        "duration_s": 2.9145026427793903,
+        "increment_mps": 5.663788333830588
+      },
+      {
+        "start_s": 123.2328815564222,
+        "duration_s": 2.2505556007260648,
+        "increment_mps": 4.116951421414233
+      },
+      {
+        "start_s": 130.0133871237079,
+        "duration_s": 3.5930671792014097,
+        "increment_mps": 5.620932898957853
+      },
+      {
+        "start_s": 139.242164624993,
+        "duration_s": 3.2418196739704888,
+        "increment_mps": 5.896955264298868
+      },
+      {
+        "start_s": 146.6426027202566,
+        "duration_s": 3.422331964808565,
+        "increment_mps": 5.298637105070203
+      },
+      {
+        "start_s": 155.1086271202205,
+        "duration_s": 4.091829961687308,
+        "increment_mps": 5.088198813721857
+      },
+      {
+        "start_s": 163.44405562647555,
+        "duration_s": 2.343876039423079,
+        "increment_mps": 5.096298849590197
+      },
+      {
+        "start_s": 171.24293446334954,
+        "duration_s": 3.655710860839582,
+        "increment_mps": 4.655622271081403
+      },
+      {
+        "start_s": 178.38140283348704,
+        "duration_s": 4.997778782501444,
+        "increment_mps": 5.951562053572714
+      },
+      {
+        "start_s": 187.3370942895366,
+        "duration_s": 2.8407099943004654,
+        "increment_mps": 4.0491493875106075
+      },
+      {
+        "start_s": 195.38993371214048,
+        "duration_s": 3.563554073825432,
+        "increment_mps": 4.827430486361674
+      },
+      {
+        "start_s": 205.07005207294688,
+        "duration_s": 3.0680965593219,
+        "increment_mps": 4.709595017521462
+      },
+      {
+        "start_s": 211.67437075272827,
+        "duration_s": 2.5066866513963926,
+        "increment_mps": 5.324078745444542
+      },
+      {
+        "start_s": 217.39744180998957,
+        "duration_s": 3.9585163476268246,
+        "increment_mps": 5.474302800214545
+      },
+      {
+        "start_s": 224.59911184425576,
+        "duration_s": 2.0537808779590185,
+        "increment_mps": 5.733133846661104
+      },
+      {
+        "start_s": 229.74126189439292,
+        "duration_s": 4.593390911558268,
+        "increment_mps": 5.966961223779435
+      }
+    ],
+    "gust_increment_range_mps": [
+      4,
+      6
+    ],
+    "gust_peak_envelope_mps": [
+      18,
+      20
+    ],
+    "gust_duration_range_s": [
+      2,
+      5
+    ],
+    "background_hub_mean_mps": 13.998684086091894,
+    "background_hub_ti": 0.18001692048352566,
+    "background_scale_factor": 1.074901464832635,
+    "bts_quantization_max_mps": 0.0006263199496885363,
+    "bts_time_offset_at_x0_s": 7.678014206774868,
+    "full_field_speed_range_mps": [
+      -7.206097986373317,
+      33.83978543317735
+    ],
+    "clip_hub_statistics": {
+      "mean_mps": 15.226633568806383,
+      "ti_including_gusts": 0.21634439809747374,
+      "min_mps": 7.166255600812717,
+      "max_mps": 26.291877648929724
+    },
+    "grid_spacing_m": [
+      10,
+      10
+    ],
+    "evidence_boundary": "stochastic Kaimal background plus prescribed seeded coherent pulses; no IEC certification, field measurement or MAPPO; fixed rpm and pitch; gust envelope is not instantaneous cap"
+  }
+}

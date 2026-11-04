@@ -1,0 +1,41 @@
+{
+  "schema": "wfrl.extension-release.v1",
+  "version": "0.3.42.5",
+  "extension_version": "0.3.42+5",
+  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.42.5",
+  "archive": {
+    "name": "wfrl_blender-0.3.42+5.zip",
+    "path": "publication/blender-0.3.42.5/release-package/wfrl_blender-0.3.42+5.zip",
+    "bytes": 97022100,
+    "file_count": 207,
+    "sha256": "c27c1c1a09791000841c751e7c47a8da5125c013c5c28696a664ca8e38a28fd4",
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.5/wfrl_blender-0.3.42+5.zip",
+    "inventory_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.5/wfrl_blender-0.3.42+5.inventory.json",
+    "checksum_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.5/wfrl_blender-0.3.42+5.zip.sha256"
+  },
+  "source": {
+    "repository": "https://github.com/snode11/wind-farm-blender",
+    "branch": "main",
+    "synchronized_branch": "main",
+    "tag": "v0.3.42.5",
+    "archive_name": "wind-farm-blender-source-0.3.42.5.zip",
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.5/wind-farm-blender-source-0.3.42.5.zip",
+    "identity_record_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.5/wfrl-delivery-0.3.42.5.json",
+    "archive_generator": "git archive of release tag",
+    "commit": "7c127c5140d25637b0be4435e008e234960419e1",
+    "archive_sha256": "77a382af1ee47d856769a8bfb2d202876c9598b3780946cdfdb2067759494913",
+    "archive_bytes": 192011149
+  },
+  "validation": {
+    "verification": "publication/blender-0.3.42.5/verification.json",
+    "daily_installation": "publication/daily-installation.json",
+    "scope": "ordinary release: content/version consistency and one local extension build",
+    "package_build": "PASS",
+    "tests": "NOT_RUN",
+    "isolated_installation": "NOT_RUN",
+    "window_gpu": "NOT_RUN",
+    "performance": "NOT_RUN",
+    "scientific_accuracy": "NOT_RUN"
+  },
+  "remote_asset_download_verification": false
+}

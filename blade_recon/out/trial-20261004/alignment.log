@@ -1,0 +1,5 @@
+C1：模型轮廓 256 点入画，到图像轮廓距离 中位 0.0 px，P90 0.6 px
+C2：画面里没有分割出叶片
+C3：模型轮廓 262 点入画，到图像轮廓距离 中位 0.0 px，P90 0.6 px
+判读：中位距离 < 2 px 为对齐良好；> 10 px 多半是坐标系、转向或方位角零点有误。
+叠加图 → /Users/eason/Desktop/wfcrl/blade_recon/out/trial-20261004/check_alignment.png （红/绿/蓝 = 叶片 1/2/3）

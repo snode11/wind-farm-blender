@@ -1,0 +1,6 @@
+{
+  "status": "PREPARED_ONLY",
+  "exit_code": null,
+  "executable": "/opt/anaconda3/envs/wfrl-mac/bin/FAST.Farm",
+  "sha256": "bed9651e19daf8ee6402100ff22b90867b756d96b72495ef9ee90df677a88d3f"
+}
