@@ -998,8 +998,9 @@ class FarmFlex:
                 scene.pop('wfrl_clearance_time_s', None)
             else:
                 scene['wfrl_clearance_time_s'] = previous_time
+            reason = '回放帧无效：' + str(exc)
             for cleanup in (lambda: playback.cancel(scene),
-                            lambda: clearance_replay.clear(scene, '回放帧无效：' + str(exc))):
+                            lambda: clearance_replay.clear(scene, reason)):
                 try:
                     cleanup()
                 except Exception as cleanup_error:

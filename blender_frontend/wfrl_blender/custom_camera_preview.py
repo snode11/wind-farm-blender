@@ -19,8 +19,10 @@ _ALL_SCENES_REVISION = 0
 _SCENE_REVISIONS = {}
 _RENDERERS = set()
 _CHANGE_CALLBACKS = globals().get('_CHANGE_CALLBACKS', set())
-if 'changed' in globals():
-    _CHANGE_CALLBACKS.add(changed)
+# A module reload keeps the previous callback registered until it is removed.
+_previous_changed = globals().get('changed')
+if _previous_changed is not None:
+    _CHANGE_CALLBACKS.add(_previous_changed)
 
 
 def changed(scene=None, *_args):
