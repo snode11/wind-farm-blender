@@ -63,6 +63,7 @@
 - 快照与曲线按规范协议校验 `rotor_speed=rpm`、`yaw=deg`、`pitch=deg`、`power=MW`，无效记录也须带正确单位；不静默改标签。
 - DisXY 按源年龄加本地单调时钟判定过期，非有效、断开、换 run／身份／模式时撤回旧图；显式不匹配当前 `run_id` 的尾流被忽略，无 run 标识的兼容消息不能据此区分旧运行。
 - 失效隐藏保留渲染及各 View Layer 的用户隐藏状态；过期期间显式 DisXY 开关决定恢复后的显示选择，其他图层开关不得覆盖它。
+- DisXY 材质加载失败不阻断网格创建与后续更新，错误写入运行状态 `error`，不改变连接或尾流有效性；同类失败只打印一次 traceback，由 `test_wake_payload.py` 覆盖。
 
 字段、单位及跨层转换以仓库 `wfrl/blender_bridge/messages.py`、[结果合同](../../../../wfrl/lidar/REPLAY_FORMAT.md)及相应生产／消费测试为准；坐标与变换按项目接口核对。外部风场模型的定义不能直接作为本项目接口约定。
 

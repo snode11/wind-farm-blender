@@ -480,7 +480,7 @@ S2/S3 按同一保存时刻、同一叶片的有效命中配对，S1 有效叶�
 
 扩展 [runtime.py](wfrl_blender/runtime.py) 和 [transport.py](wfrl_blender/transport.py) 维护连接、协议状态与回传。[panels/status.py](wfrl_blender/panels/status.py) 管连接与诊断，[panels/run.py](wfrl_blender/panels/run.py) 是唯一后端运行按钮入口。CONNECTED 表示握手；实际运行还需 READY 后显式 Start，并观察 RUNNING 与不断更新的真实快照。
 
-工作区规范协议对 snapshot 和 curve 的 `rotor_speed`、`yaw`／`pitch`、`power` 分别要求 `rpm`、`deg`、`MW`，有效或无效记录的单位不匹配均直接拒绝，不原值换标签。尾流保留源年龄与单调接收时间，按协议的 5 秒阈值判定过期；无效、等待、过期、断连及任务切换撤销旧 DisXY 有效显示，携带不匹配 `run_id` 的迟到尾流不覆盖当前数据，无 run 标识的兼容消息不能据此区分旧运行。新有效样本恢复显示时保留用户可见性设置，包括过期期间的 DisXY 显示开关选择及各 View Layer 的原有隐藏状态；切换其他图层开关不改写这些设置，场景侧栏也不能重新显示无效结果。
+工作区规范协议对 snapshot 和 curve 的 `rotor_speed`、`yaw`／`pitch`、`power` 分别要求 `rpm`、`deg`、`MW`，有效或无效记录的单位不匹配均直接拒绝，不原值换标签。尾流保留源年龄与单调接收时间，按协议的 5 秒阈值判定过期；无效、等待、过期、断连及任务切换撤销旧 DisXY 有效显示，携带不匹配 `run_id` 的迟到尾流不覆盖当前数据，无 run 标识的兼容消息不能据此区分旧运行。新有效样本恢复显示时保留用户可见性设置，包括过期期间的 DisXY 显示开关选择及各 View Layer 的原有隐藏状态；切换其他图层开关不改写这些设置，场景侧栏也不能重新显示无效结果。首次创建 DisXY 网格时尾流材质加载失败不阻断显示：网格照常创建并随后续样本更新，错误写入运行状态的 `error`，连接与尾流有效性不变；同一异常类型与消息只打印一次 traceback。
 
 同一 Blender 进程打开其他 `.blend` 时，已认领的后端会话保留客户端、会话身份及协议序号，连接标为断开且未确认；旧场景的姿态缓存和待确认命令清空。保存的离线回放可以独立恢复几何、读数和位置，不据此认定后端已停止。显式重连使用保留的会话恢复握手，确认前禁用后端运行和配置操作。这些恢复凭据只在当前 Blender 进程内保留，不写入 `.blend`，不保证退出 Blender 后恢复活动后端。
 
@@ -517,6 +517,8 @@ Interactive 的 **Episode steps** 对应 `episode_steps`：`0` 保持单长回�
 `verify_frontend_completion.py` 在 `WFRL_ACCEPT_OUTPUT` 根目录下创建独立 `run-*` 子目录，并把该绝对路径传给验收脚本。成功只依据该次运行生成的 `report.json` 与前后端退出结果，已有目录中的其他报告与日志保留。常规源码回归使用 `scripts/blender/run_regressions.py` 的新目录、源码身份、完成标记和最终结果校验。
 
 维护修改应作用于规范源；`protocol.py` 来自 `wfrl/blender_bridge/messages.py`，内置 `_vendor/lidar/` 读取器来自 `wfrl/lidar/`。不要手改生成副本或替换冻结模型及正式资产来消除校验失败。
+
+扩展源码（`_vendor/` 与 `assets/` 除外）的文本读写显式使用 `encoding='utf-8'`，包括 `read_text`、`write_text` 和文本模式 `open`，不依赖平台默认编码；宿主测试 `test_text_io_encoding.py` 以 AST 扫描强制该约定，二进制读写及 `os.open` 不在范围内。JSON 结果与状态文件统一通过 [atomic_json.py](wfrl_blender/atomic_json.py) 的 `write_json(path, value, *, mkdir=False)` 写入：在目标目录创建临时文件，按 UTF-8、`ensure_ascii=False`、`indent=2`、`allow_nan=False` 和末尾换行写出，`flush` 与 `fsync` 后以 `os.replace` 替换，任一失败删除临时文件；仅需要创建父目录的调用方传 `mkdir=True`。`manual_video_job.py` 与 `manual_video_render.py` 作为独立脚本运行时按同目录文件加载该模块，不导入扩展包入口。
 
 ```bash
 python3 scripts/blender/build_extension.py --output <新目录>
