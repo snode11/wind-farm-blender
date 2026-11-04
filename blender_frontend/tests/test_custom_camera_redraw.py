@@ -1,18 +1,11 @@
 """Exercise the production modal/overlay code with counted host-side adapters."""
-import ast
 from contextlib import nullcontext
 from dataclasses import replace
-import math
-from pathlib import Path
-import sys
-from types import ModuleType, SimpleNamespace as NS
+from types import SimpleNamespace as NS
 
 import pytest
 
-from wfrl_blender import camera_projection as projection, custom_cameras as core
-
-
-SOURCE = Path(__file__).parents[1] / 'wfrl_blender/panels/custom_cameras.py'
+from wfrl_blender import custom_cameras as core
 
 
 class Camera(dict):
@@ -50,16 +43,8 @@ class Preview:
 
 
 @pytest.fixture
-def rig(monkeypatch):
-    tree = ast.parse(SOURCE.read_text())
-    functions = {'_timer_advanced', '_display_state', '_redraw_if_changed',
-                 'fields_changed', 'distance_changed'}
-    body = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in functions]
-    operator = next(n for n in tree.body if isinstance(n, ast.ClassDef)
-                    and n.name == 'WFRL_OT_CustomCamera')
-    operator.bases = []
-    operator.body = [n for n in operator.body if not isinstance(n, ast.AnnAssign)]
-    body.append(operator)
+def rig(frontend_module, stub_module, monkeypatch):
+    panel = frontend_module('wfrl_blender.panels.custom_cameras')
     state = NS(now=0., redraws=0, writes=0, pauses=0, valid=True, capture=False,
                restored=0, removed_timers=[], events=[], picked=None)
     camera = Camera(params=core.CameraParameters((1., 2., 3.)), custom_label='C1')
@@ -80,11 +65,7 @@ def rig(monkeypatch):
     context = NS(window=window, scene=scene, preferences=NS(system=system),
                  temp_override=lambda **_kwargs: nullcontext())
     bpy = NS(context=context, types=NS(SpaceView3D=NS(draw_handler_remove=lambda *_: None)))
-    capture = ModuleType('wfrl_blender.custom_camera_capture')
-    capture.active = lambda: state.capture
-    monkeypatch.setitem(sys.modules, capture.__name__, capture)
-    import wfrl_blender
-    monkeypatch.setattr(wfrl_blender, 'custom_camera_capture', capture, raising=False)
+    stub_module('wfrl_blender.custom_camera_capture', active=lambda: state.capture)
 
     def apply(cam, params, **_kwargs):
         state.writes += 1
@@ -97,14 +78,13 @@ def rig(monkeypatch):
              set_distance=lambda *_args: None)
     preview = NS(action_buttons=lambda *_: [], contains=lambda *_: False,
                  available_rectangle=lambda *_: (0, 0, 800, 800), close_button=lambda *_: ())
-    namespace = dict(__package__='wfrl_blender.panels', core=api, preview=preview,
-                     projection=projection, bpy=bpy, math=math, replace=replace,
-                     time=NS(monotonic=lambda: state.now), _VIEWING={'WATCH', 'LAYOUT'},
-                     _SYNCING=False, session_identity=lambda _scene: state.valid,
-                     sync_fields=lambda *_args: None,
-                     diagnostics=NS(record=lambda *args, **kwargs: state.events.append((args, kwargs))))
-    exec(compile(ast.Module(body=body, type_ignores=[]), str(SOURCE), 'exec'), namespace)
-    op = namespace['WFRL_OT_CustomCamera']()
+    for name, value in dict(core=api, preview=preview, bpy=bpy,
+                            time=NS(monotonic=lambda: state.now), _SYNCING=False,
+                            session_identity=lambda _scene: state.valid,
+                            sync_fields=lambda *_args: None,
+                            diagnostics=NS(record=lambda *args, **kwargs: state.events.append((args, kwargs)))).items():
+        monkeypatch.setattr(panel, name, value)
+    op = panel.WFRL_OT_CustomCamera()
     op.__dict__.update(scene=scene, area=area, region=region, window=window, wm=wm,
                        camera=camera, slot=1, stage='WATCH', closed=False, ready=True, error='',
                        drag=None, stick=(0, 0), hover=None, candidates=[], press=None,
@@ -112,7 +92,7 @@ def rig(monkeypatch):
                        timer=NS(time_duration=0.), handle=object(), session=None)
     op.external_snapshot = NS(restore=lambda: setattr(state, 'restored', state.restored + 1))
     op.pick = lambda *_: state.picked
-    namespace['_ACTIVE'] = op
+    monkeypatch.setattr(panel, '_ACTIVE', op)
 
     def event(kind, value='PRESS', **kwargs):
         return NS(type=kind, value=value, mouse_x=100, mouse_y=100,
@@ -130,7 +110,7 @@ def rig(monkeypatch):
                         _play=lambda _playing: setattr(state, 'pauses', state.pauses + 1))
         op.session.cancel = lambda **_kwargs: setattr(op.session, 'closed', True)
 
-    return NS(op=op, state=state, context=context, namespace=namespace,
+    return NS(op=op, state=state, context=context, namespace=panel, monkeypatch=monkeypatch,
               tick=tick, event=event, edit=edit, camera=camera, api=api)
 
 
@@ -187,9 +167,9 @@ def test_other_timer_events_cannot_multiply_preview_or_joystick_ticks(rig):
 def test_visible_changes_redraw_once(rig, change):
     rig.tick()
     change(rig)
-    assert rig.namespace['_redraw_if_changed'](rig.op) or rig.tick() == {'PASS_THROUGH'}
+    assert rig.namespace._redraw_if_changed(rig.op) or rig.tick() == {'PASS_THROUGH'}
     assert rig.state.redraws == 2
-    assert not rig.namespace['_redraw_if_changed'](rig.op)
+    assert not rig.namespace._redraw_if_changed(rig.op)
 
 
 def test_clock_change_is_detected_after_preview_observation(rig):
@@ -252,12 +232,12 @@ def test_numeric_and_distance_errors_redraw_in_the_callback(rig):
     def invalid(*_args):
         raise ValueError('invalid numeric value')
 
-    rig.namespace['_parameters'] = invalid
-    rig.namespace['fields_changed'](rig.op.wm, rig.context)
+    rig.monkeypatch.setattr(rig.namespace, '_parameters', invalid)
+    rig.namespace.fields_changed(rig.op.wm, rig.context)
     assert not rig.op.ready and rig.op.error == 'invalid numeric value'
     assert rig.state.redraws == 2
     rig.api.set_distance = lambda *_args: None
-    rig.namespace['distance_changed'](rig.op.wm, rig.context)
+    rig.namespace.distance_changed(rig.op.wm, rig.context)
     assert rig.op.ready and not rig.op.error and rig.state.redraws == 3
 
 

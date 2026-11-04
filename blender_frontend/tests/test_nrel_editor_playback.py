@@ -1,5 +1,4 @@
 """Editor transactions preserve Blender's single-player scene and window owner."""
-import ast
 from contextlib import contextmanager
 from copy import deepcopy
 from pathlib import Path
@@ -23,7 +22,8 @@ class Scene(dict):
 
 
 @pytest.fixture
-def editor_runtime(monkeypatch):
+def editor_runtime(frontend_module, monkeypatch):
+    editor = frontend_module('wfrl_blender.nrel_defects.editor')
     scene, other = Scene('Editor A'), Scene('Player B')
     window = NS(scene=scene, screen=NS(is_animation_playing=False))
     foreign = NS(scene=other, screen=NS(is_animation_playing=False))
@@ -80,23 +80,12 @@ def editor_runtime(monkeypatch):
              ops=NS(screen=NS(animation_play=play, animation_cancel=cancel)))
     monkeypatch.setitem(sys.modules, 'bpy', bpy)
     playback.on_load_pre()
-    source = Path(__file__).parents[1] / 'wfrl_blender/nrel_defects/editor.py'
-    tree = ast.parse(source.read_text())
-    nodes = [node for node in tree.body
-             if isinstance(node, ast.ClassDef) and node.name == 'EditorSession'
-             or isinstance(node, ast.FunctionDef) and node.name == 'detach']
-    scan = next(node for node in tree.body
-                if isinstance(node, ast.ClassDef) and node.name == 'NREL_OT_defect_scan')
-    nodes.append(ast.ClassDef(name='Scan', bases=[], keywords=[], decorator_list=[],
-                             body=[node for node in scan.body if isinstance(node, ast.FunctionDef)
-                                   and node.name in {'bound_session_valid', 'finish_scan'}]))
     sessions = {}
-    namespace = dict(__package__='wfrl_blender.nrel_defects', bpy=bpy, time=time,
-                     _SESSIONS=sessions, _INITIALIZING={}, sync_defect_list=lambda *_args: None,
-                     new_defect=lambda *_a, **_kw: {'id': 'new'})
-    exec(compile(ast.fix_missing_locations(ast.Module(body=nodes, type_ignores=[])),
-                 str(source), 'exec'), namespace)
-    session = namespace['EditorSession'].__new__(namespace['EditorSession'])
+    for name, value in dict(bpy=bpy, _SESSIONS=sessions, _INITIALIZING={},
+                            sync_defect_list=lambda *_args: None,
+                            new_defect=lambda *_a, **_kw: {'id': 'new'}).items():
+        monkeypatch.setattr(editor, name, value)
+    session = editor.EditorSession.__new__(editor.EditorSession)
 
     class Store:
         def retry_disposals(self, *, strict=False):
@@ -127,7 +116,7 @@ def editor_runtime(monkeypatch):
     sessions[scene.as_pointer()] = session
     yield NS(session=session, scene=scene, other=other, window=window, foreign=foreign,
              context=context, windows=windows, bpy=bpy, calls=calls, set_player=set_player,
-             restored=restored, namespace=namespace)
+             restored=restored, namespace=editor)
     playback.on_load_pre()
 
 
@@ -178,7 +167,7 @@ def test_finish_never_resumes_through_stale_owner(editor_runtime, change):
     elif change == 'scene_switched':
         r.window.scene = r.other
     else:
-        r.namespace['_SESSIONS'][r.scene.as_pointer()] = object()
+        r.namespace._SESSIONS[r.scene.as_pointer()] = object()
     r.session.finish(False)
     assert r.calls == [('cancel', r.scene)]
     assert not playback.any_playing()
@@ -190,7 +179,7 @@ def test_failed_draft_preparation_does_not_pause_playback(editor_runtime):
     r.set_player(r.scene)
     def fail(*_a, **_kw):
         raise ValueError('invalid defect')
-    r.namespace['new_defect'] = fail
+    r.namespace.new_defect = fail
     with pytest.raises(ValueError, match='invalid defect'):
         r.session.begin()
     assert r.calls == [] and playback.is_playing(r.scene)
@@ -203,7 +192,7 @@ def test_failed_begin_restores_paused_owner_and_clears_transaction(editor_runtim
     def sync(_session, document, _selected):
         if len(document['defects']) > 1:
             raise RuntimeError('list failure')
-    r.namespace['sync_defect_list'] = sync
+    r.namespace.sync_defect_list = sync
     with pytest.raises(RuntimeError, match='list failure'):
         r.session.begin()
     assert r.calls == [('cancel', r.scene), ('play', r.scene)]
@@ -247,7 +236,7 @@ def test_detach_discards_resume_token_without_starting_any_player(editor_runtime
     r.session.begin()
     r.session.helpers = []
     r.session.geometry = NS(managers={})
-    r.namespace['detach'](r.scene, restore=False)
+    r.namespace.detach(r.scene, restore=False)
     r.session.finish(False)
     assert r.session.draft is r.session.edit_state is None
     assert r.calls == [('cancel', r.scene)]
@@ -264,15 +253,14 @@ def test_failed_pause_does_not_start_an_edit(editor_runtime):
 
 
 @pytest.mark.parametrize('foreign_player', [False, True])
-def test_scan_resume_handles_native_window_collection_and_owner(editor_runtime, monkeypatch, foreign_player):
+def test_scan_resume_handles_native_window_collection_and_owner(editor_runtime, stub_module, foreign_player):
     r = editor_runtime
     r.set_player(r.other if foreign_player else None, live=foreign_player)
-    monkeypatch.setitem(sys.modules, 'wfrl_blender.nrel_defects.defect_outputs', NS(
+    stub_module('wfrl_blender.nrel_defects.defect_outputs',
         save_records=lambda *_args: None, write_json=lambda *_args: None,
-        update_run=lambda *_args: None, save_review=lambda *_args: None))
-    monkeypatch.setitem(sys.modules, 'wfrl_blender.nrel_defects.defect_timeline', NS(
-        summarize_intervals=lambda *_args: []))
-    scan = r.namespace['Scan']()
+        update_run=lambda *_args: None, save_review=lambda *_args: None)
+    stub_module('wfrl_blender.nrel_defects.defect_timeline', summarize_intervals=lambda *_args: [])
+    scan = r.namespace.NREL_OT_defect_scan()
     scan.finished = False
     scan.scan_session, scan.scan_scene = r.session, r.scene
     scan.scene_key = r.scene.as_pointer()
@@ -306,14 +294,14 @@ def test_detach_retries_failure_after_closing_other_managers(editor_runtime):
     failed = Manager('T1', True)
     r.session.geometry = NS(managers={'T1': failed, 'T2': Manager('T2'), 'T3': Manager('T3')})
     with pytest.raises(RuntimeError, match='injected release failure'):
-        r.namespace['detach'](r.scene, restore=False)
+        r.namespace.detach(r.scene, restore=False)
     assert calls == ['T1', 'T2', 'T3']
-    assert r.namespace['_SESSIONS'][r.scene.as_pointer()] is r.session
+    assert r.namespace._SESSIONS[r.scene.as_pointer()] is r.session
     assert r.session.closing
     failed.fail = False
-    r.namespace['detach'](r.scene, restore=False)
-    assert r.scene.as_pointer() not in r.namespace['_SESSIONS']
-    r.namespace['detach'](r.scene, restore=False)
+    r.namespace.detach(r.scene, restore=False)
+    assert r.scene.as_pointer() not in r.namespace._SESSIONS
+    r.namespace.detach(r.scene, restore=False)
 
 
 def test_helper_cleanup_keeps_failed_owned_mesh_and_ignores_deleted_object(editor_runtime):

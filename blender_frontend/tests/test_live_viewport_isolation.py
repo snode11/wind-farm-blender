@@ -1,6 +1,4 @@
 """Live scene presentation preserves unrelated and independently owned views."""
-import ast
-from pathlib import Path
 import sys
 from types import SimpleNamespace as NS
 
@@ -52,18 +50,10 @@ def test_backend_build_only_configures_its_main_viewports(monkeypatch):
         assert preserved.spaces.active.clip_end == 500
 
 
-def playback_control():
-    source = Path(__file__).parents[1] / 'wfrl_blender/panels/clearance.py'
-    node = next(n for n in ast.parse(source.read_text()).body
-                if isinstance(n, ast.FunctionDef) and n.name == 'playback_control')
-    namespace = {'__package__': 'wfrl_blender.panels'}
-    exec(compile(ast.Module(body=[node], type_ignores=[]), str(source), 'exec'), namespace)
-    return namespace['playback_control']
-
-
-def test_playback_label_uses_scene_owner_instead_of_global_screen_flag(monkeypatch):
+def test_playback_label_uses_scene_owner_instead_of_global_screen_flag(frontend_module, monkeypatch):
+    playback_control = frontend_module('wfrl_blender.panels.clearance').playback_control
     scene = NS(frame_current=10, frame_end=100)
     monkeypatch.setattr(playback, 'is_playing', lambda _scene: False)
-    assert playback_control()(scene, NS(is_animation_playing=True)) == ('播放', 'PLAY', '已暂停')
+    assert playback_control(scene, NS(is_animation_playing=True)) == ('播放', 'PLAY', '已暂停')
     monkeypatch.setattr(playback, 'is_playing', lambda _scene: True)
-    assert playback_control()(scene, NS(is_animation_playing=True)) == ('暂停', 'PAUSE', '正在播放')
+    assert playback_control(scene, NS(is_animation_playing=True)) == ('暂停', 'PAUSE', '正在播放')

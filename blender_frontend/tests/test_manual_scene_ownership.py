@@ -1,12 +1,8 @@
 """Manual ownership checks retain identity without traversing unrelated objects."""
-import ast
-from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
-
-SOURCE = Path(__file__).resolve().parents[1] / 'wfrl_blender/manual_control.py'
 
 
 class Object:
@@ -44,17 +40,14 @@ class Scene:
 
 
 @pytest.fixture
-def ownership():
-    tree = ast.parse(SOURCE.read_text())
-    body = [node for node in tree.body if isinstance(node, ast.FunctionDef)
-            and node.name == 'other_scene_objects']
+def ownership(frontend_module, monkeypatch):
+    control = frontend_module('wfrl_blender.manual_control')
     scenes = []
     def user_map(*, subset, value_types):
         return {obj: set(obj.users_collection) | set(obj.reference_users) for obj in subset}
 
-    namespace = {'bpy': SimpleNamespace(data=SimpleNamespace(scenes=scenes, user_map=user_map))}
-    exec(compile(ast.Module(body=body, type_ignores=[]), str(SOURCE), 'exec'), namespace)
-    return namespace['other_scene_objects'], scenes
+    monkeypatch.setattr(control, 'bpy', SimpleNamespace(data=SimpleNamespace(scenes=scenes, user_map=user_map)))
+    return control.other_scene_objects, scenes
 
 
 def test_filtered_query_avoids_foreign_object_iteration(ownership):
