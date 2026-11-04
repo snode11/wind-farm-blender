@@ -258,11 +258,26 @@ def main():
             bpy.app.handlers.save_pre.remove(saved)
         bpy.ops.wm.open_mainfile(filepath=str(baseline))
         assert all(core.get_camera(bpy.context.scene, slot) is None for slot in (1, 2))
+
+        # A file saved during an edit contains the unconfirmed draft. Loading it
+        # discards that draft and its lens, so later edits are not blocked.
+        session = EditSession(bpy.context.scene, 1)
+        session.begin()
+        mid_edit = Path(directory) / "mid-edit.blend"
+        bpy.ops.wm.save_as_mainfile(filepath=str(mid_edit))
+        session.cancel(restore=False)
+        bpy.ops.wm.open_mainfile(filepath=str(mid_edit))
+        scene = bpy.context.scene
+        assert not any(obj.get('wfrl_custom_draft') for obj in scene.objects)
+        assert not any(data.name.startswith(core.camera_name(1) + '.Draft') for data in bpy.data.cameras)
+        assert core.get_camera(scene, 1) is None
+        core.cancel_draft(core.begin_draft(scene, 1))
     result = dict(status="PASS", blender=bpy.app.version_string, two_slots=True,
         transformed_surface=True, attachment_rejected=True, outside_validation=True,
         parent_motion_once=True, draft_cancel=True, session_cancel=True,
         session_replacement_cleanup=True, failed_confirm_correctable=True, live_backend_guard=True,
         parameter_roundtrip=True, original_file_unchanged=True, reopening_starts_empty=True,
+        saved_draft_discarded_on_load=True,
         default_camera_unchanged=True, output_camera_and_resolution_unchanged=True)
     if os.environ.get("WFRL_TEST_OUTPUT"):
         out = Path(os.environ["WFRL_TEST_OUTPUT"])

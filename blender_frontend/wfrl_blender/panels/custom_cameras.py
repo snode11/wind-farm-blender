@@ -1134,12 +1134,26 @@ def lifecycle_watchdog():
     return .25
 
 
+def discard_saved_drafts(scene):
+    """Remove drafts that no edit session owns, such as one saved mid-edit.
+
+    A saved draft is an unconfirmed change. Left in place, it would block every
+    later edit, clear, undo and capture of this scene.
+    """
+    session = getattr(_ACTIVE, 'session', None)
+    owned = session.draft if session is not None and not session.closed else None
+    for obj in list(scene.objects):
+        if obj.get('wfrl_custom_draft') and obj != owned:
+            core.cancel_draft(obj)
+
+
 @persistent
 def migrate_loaded(_unused=None):
     preview.register_change_handler()
     if not bpy.app.timers.is_registered(lifecycle_watchdog):
         bpy.app.timers.register(lifecycle_watchdog, first_interval=.25)
     for scene in bpy.data.scenes:
+        discard_saved_drafts(scene)
         if core.is_available(scene):
             core.migrate_scene(scene)
 
