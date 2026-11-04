@@ -1,5 +1,10 @@
 import math
+import sys
 import unittest
+from dataclasses import replace
+from types import SimpleNamespace as NS
+from unittest.mock import Mock
+
 import pytest
 
 from wfrl_blender.wake import (WakeFrameBuffer, WakePayloadError, grid_mesh,
@@ -36,6 +41,91 @@ def channel(value, *, fidelity="SYNTH", provenance=None):
         "provenance": provenance or {"formula": "deterministic test"},
         "source_age_seconds": 0.0, "stale_after_seconds": 5.0,
     }
+
+
+def test_disxy_material_failure_keeps_mesh_and_reports_error_once(monkeypatch, capsys):
+    from wfrl_blender import materials, runtime, wake
+    from wfrl_blender.state import FrontendState
+
+    class Scene(dict):
+        pass
+
+    class WakeObject(dict):
+        hide_render = False
+        hidden = False
+
+        def __init__(self, name, mesh):
+            super().__init__()
+            self.name, self.data = name, mesh
+
+        def hide_get(self):
+            return self.hidden
+
+        def hide_set(self, hidden):
+            self.hidden = hidden
+
+    def new_mesh(name):
+        mesh = NS(name=name, materials=[], update=Mock())
+
+        def from_pydata(vertices, edges, faces):
+            mesh.vertices = [NS(co=co) for co in vertices]
+            mesh.polygons = list(faces)
+
+        mesh.from_pydata = Mock(side_effect=from_pydata)
+        return mesh
+
+    scene = Scene()
+    scene.objects = {}
+    link = Mock(side_effect=lambda obj: scene.objects.__setitem__(obj.name, obj))
+    scene.collection = NS(name='WFRL_Scene', children_recursive=[], objects=NS(link=link))
+    bpy = NS(context=NS(scene=scene), data=NS(
+        meshes=NS(new=Mock(side_effect=new_mesh)),
+        objects=NS(get=scene.objects.get, new=Mock(side_effect=WakeObject))))
+    monkeypatch.setitem(sys.modules, 'bpy', bpy)
+    state = FrontendState(mode='replay', connection='CONNECTED', run_status='RUNNING')
+    monkeypatch.setattr(runtime, '_state', state)
+    monkeypatch.setattr(wake, '_material_failures', set())
+    monkeypatch.setattr(wake.time, 'monotonic', lambda: 10.)
+    get_material = Mock()
+    monkeypatch.setattr(materials, 'get_material', get_material)
+    frame = validate_wake_payload({'encoding': 'json', 'turbine_ids': ['T1'],
+        'data': channel({'kind': 'disxy', 'shape': [2, 2], 'values': [1, 2, 3, 4],
+                         'x': [0, 1], 'y': [0, 1]})}, sequence=1, received_monotonic=10.)
+    vertices, faces = grid_mesh(frame)
+
+    for error, expected_tracebacks in (
+            (RuntimeError('wake shader unavailable'), 1),
+            (RuntimeError('wake shader unavailable'), 0),
+            (ValueError('wake shader unavailable'), 1),
+            (RuntimeError('wake shader node missing'), 1)):
+        scene.objects.clear()
+        state.error = ''
+        get_material.reset_mock()
+        get_material.side_effect = error
+
+        obj = wake.apply_disxy_frame(frame, scene=scene)
+
+        assert obj is scene.objects['WFRL.WakeDisXY']
+        link.assert_called_with(obj)
+        bpy.data.objects.new.assert_called_with('WFRL.WakeDisXY', obj.data)
+        obj.data.from_pydata.assert_called_once_with(vertices, [], faces)
+        assert obj.data.materials == []
+        assert state.error == f'DisXY wake material failed: {error}'
+        assert state.connection == 'CONNECTED' and state.confirmed
+        assert scene['wfrl_disxy_validity'] == obj['validity'] == 'valid'
+        assert not obj.hidden and not obj.hide_render
+
+        for sequence in (2, 3):
+            assert wake.apply_disxy_frame(replace(frame, sequence=sequence), scene=scene) is obj
+            assert obj['sequence'] == sequence
+        get_material.assert_called_once_with('wake')
+        assert state.error == f'DisXY wake material failed: {error}'
+        stderr = capsys.readouterr().err
+        assert stderr.count('Traceback (most recent call last):') == expected_tracebacks
+        if expected_tracebacks:
+            assert f'{type(error).__name__}: {error}' in stderr
+        else:
+            assert stderr == ''
 
 
 class WakePayloadTests(unittest.TestCase):

@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import math
 import time
+import traceback
 from typing import Any, Iterable, Mapping
 from .protocol import STALE_AFTER_SECONDS
 
@@ -16,6 +17,7 @@ from .protocol import STALE_AFTER_SECONDS
 MAX_WAKE_POINTS = 250_000
 VALID_FIDELITY = frozenset(("SYNTH", "DIRECT", "EXPORTED"))
 VALID_KINDS = frozenset(("floris_proxy", "disxy"))
+_material_failures = set()
 
 
 class WakePayloadError(ValueError):
@@ -359,8 +361,16 @@ def apply_disxy_frame(frame: WakeFrame, *, scene=None, collection_name: str = "W
         try:
             from .materials import get_material
             obj.data.materials.append(get_material("wake"))
-        except Exception:
-            pass
+        except Exception as exc:
+            from . import runtime
+            runtime.get_state().error = f'DisXY wake material failed: {exc}'
+            failure = (type(exc), str(exc))
+            if failure not in _material_failures:
+                _material_failures.add(failure)
+                try:
+                    traceback.print_exc()
+                except Exception:
+                    pass
     else:
         mesh = obj.data
         if (list(obj.get('wfrl_disxy_shape', ())) != shape
