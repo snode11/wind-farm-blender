@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
-from typing import Iterable, Mapping
+from typing import Iterable
 
 
 class SensorPayloadError(ValueError):
@@ -101,17 +101,3 @@ def frustum_vertices(origin: Iterable[float], forward: Iterable[float], up: Iter
         corners.extend(tuple(center[i] + sx * right[i] * half + sy * u[i] * half for i in range(3))
                        for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1)))
     return tuple(corners)
-
-
-def validate_sensor_payload(payload: Mapping[str, object]) -> dict:
-    if not isinstance(payload, Mapping):
-        raise SensorPayloadError("sensor payload must be an object")
-    fidelity = str(payload.get("fidelity", "SYNTH")).upper()
-    if fidelity not in {"SYNTH", "DIRECT", "DERIVED", "EXPORTED"}:
-        raise SensorPayloadError("invalid sensor fidelity")
-    provenance = payload.get("provenance")
-    if not isinstance(provenance, str) or not provenance.strip():
-        raise SensorPayloadError("sensor provenance is required")
-    return {"sensor": str(payload.get("sensor", "unknown")),
-            "fidelity": fidelity, "provenance": provenance,
-            "validity": str(payload.get("validity", "valid"))}

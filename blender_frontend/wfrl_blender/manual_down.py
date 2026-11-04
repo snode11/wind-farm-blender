@@ -444,16 +444,6 @@ def _frame_handler(scene, _depsgraph=None):
             raise
 
 
-def gpu_renderer():
-    if bpy.app.background:
-        return 'background'
-    try:
-        import gpu
-        return gpu.platform.renderer_get()
-    except (RuntimeError, AttributeError):
-        return 'unknown'
-
-
 def ffmpeg_executable(context=None):
     prefs = get_preferences(context)
     configured = bpy.path.abspath(prefs.video_ffmpeg) if prefs and prefs.video_ffmpeg else ''

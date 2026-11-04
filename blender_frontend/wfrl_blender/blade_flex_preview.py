@@ -111,21 +111,6 @@ def _set_trail_points(obj, points):
         obj.update_tag(refresh={'DATA'})
 
 
-def set_tip_trails(scene, enabled, *, reset=False):
-    """Show or hide the per-blade tip trajectories in the active scene."""
-    enabled = bool(enabled)
-    scene['wfrl_flex_tip_trails'] = enabled
-    if not enabled:
-        collection = __import__('bpy').data.collections.get(_TRAIL_COLLECTION)
-        if collection:
-            collection.hide_viewport = True
-            collection.hide_render = True
-        return
-    if _ACTIVE is None or _ACTIVE.scene != scene or not _ACTIVE.enabled:
-        return
-    _ACTIVE.ensure_trails(reset=reset)
-
-
 def is_active(scene):
     from . import clearance_replay
     try:
