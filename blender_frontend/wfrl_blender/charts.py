@@ -203,7 +203,8 @@ def record_training(message, *, scene=None):
 def record_curve(message, *, scene=None):
     history = history_for(scene)
     raw_history_for(scene).ingest(message)
-    p = message['payload']; record = p['data']
+    p = message['payload']
+    record = p['data']
     validity = record['validity']
     if (validity == 'valid' and
             record.get('source_age_seconds', 0) >= record.get('stale_after_seconds', 2)):

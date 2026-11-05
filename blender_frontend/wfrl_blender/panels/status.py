@@ -27,7 +27,8 @@ class WFRL_PT_connection(bpy.types.Panel):
         if runtime.progress(): layout.label(text=runtime.progress())
         # Errors stay visible even when advanced connection controls are folded.
         if ui.error:
-            box = layout.box(); box.alert = True
+            box = layout.box()
+            box.alert = True
             draw_diagnostic(box, 'Backend connection error', ui.error, component='connection', error=True)
         if offline_results:
             header, body = layout.panel('wfrl_replay_backend_connection', default_closed=True)
@@ -39,7 +40,8 @@ class WFRL_PT_connection(bpy.types.Panel):
             controls = layout
         for mode, title in [('demo', 'MAPPO · 60 秒'), ('interactive_training', 'Interactive'),
                             ('formal_training', 'Formal Training'), ('replay', 'Replay')]:
-            row = controls.row(); row.enabled = runtime.configuration_editable()
+            row = controls.row()
+            row.enabled = runtime.configuration_editable()
             row.operator('wfrl.connection_mode', text=title, depress=runtime.desired_mode() == mode).mode = mode
         if ui.connection == 'LOCAL DEMO':
             controls.operator('wfrl.bridge_connect', text='连接后端 Demo')
@@ -67,7 +69,8 @@ class WFRL_PT_connection(bpy.types.Panel):
         layout = body
         prefs = get_preferences(context)
         if prefs:
-            col = layout.column(); col.enabled = runtime.configuration_editable()
+            col = layout.column()
+            col.enabled = runtime.configuration_editable()
             for key in ('project_dir', 'backend_python', 'mpi_path', 'fastfarm_path', 'default_scene', 'port'):
                 col.prop(prefs, key)
         else:

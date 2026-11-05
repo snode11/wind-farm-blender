@@ -135,19 +135,23 @@ def wake_volume_material():
     split = nodes.new('ShaderNodeSeparateXYZ')
     links.new(coord.outputs['Generated'], split.inputs[0])
     def math_node(op, a, b=0):
-        n = nodes.new('ShaderNodeMath'); n.operation = op
+        n = nodes.new('ShaderNodeMath')
+        n.operation = op
         for index, value in enumerate((a,b)):
             if isinstance(value, (float,int)): n.inputs[index].default_value = value
             else: links.new(value, n.inputs[index])
         return n.outputs[0]
     x,y,z = split.outputs['X'], split.outputs['Y'], split.outputs['Z']
-    yy = math_node('SUBTRACT', y, .5); zz = math_node('SUBTRACT', z, .5)
+    yy = math_node('SUBTRACT', y, .5)
+    zz = math_node('SUBTRACT', z, .5)
     radial = math_node('SQRT', math_node('ADD', math_node('MULTIPLY', yy, yy), math_node('MULTIPLY', zz, zz)))
     radius = math_node('ADD', .30, math_node('MULTIPLY', x, .19))
     falloff = math_node('MAXIMUM', math_node('SUBTRACT', 1., math_node('DIVIDE', radial, radius)), 0.)
     falloff = math_node('POWER', falloff, 1.4)
     axial = math_node('MULTIPLY', math_node('MINIMUM', math_node('MULTIPLY', x, 14.), 1.), math_node('POWER', math_node('SUBTRACT', 1., x), .8))
-    noise = nodes.new('ShaderNodeTexNoise'); noise.inputs['Scale'].default_value = 5.; noise.inputs['Detail'].default_value = 2.
+    noise = nodes.new('ShaderNodeTexNoise')
+    noise.inputs['Scale'].default_value = 5.
+    noise.inputs['Detail'].default_value = 2.
     links.new(coord.outputs['Generated'], noise.inputs['Vector'])
     density = math_node('MULTIPLY', math_node('MULTIPLY', falloff, axial), math_node('MULTIPLY', noise.outputs['Fac'], .026))
     links.new(density, volume.inputs['Density'])
@@ -174,13 +178,19 @@ def flow_material(material, *, pulse=False, cinematic=False):
     fade.inputs['To Min'].default_value = .72 if cinematic else (1.0 if pulse else .55)
     fade.inputs['To Max'].default_value = 0
     links.new(split.outputs['X'],fade.inputs['Value'])
-    inlet = nodes.new('ShaderNodeMapRange'); inlet.clamp=True
-    inlet.inputs['From Min'].default_value=12; inlet.inputs['From Max'].default_value=24
+    inlet = nodes.new('ShaderNodeMapRange')
+    inlet.clamp=True
+    inlet.inputs['From Min'].default_value=12
+    inlet.inputs['From Max'].default_value=24
     links.new(split.outputs['X'],inlet.inputs['Value'])
-    weight=nodes.new('ShaderNodeMath');weight.operation='MULTIPLY'
-    links.new(fade.outputs[0],weight.inputs[0]);links.new(inlet.outputs[0],weight.inputs[1])
+    weight=nodes.new('ShaderNodeMath')
+    weight.operation='MULTIPLY'
+    links.new(fade.outputs[0],weight.inputs[0])
+    links.new(inlet.outputs[0],weight.inputs[1])
     mix=nodes.new('ShaderNodeMixShader')
-    links.new(weight.outputs[0],mix.inputs[0]);links.new(transparent.outputs[0],mix.inputs[1]);links.new(emission.outputs[0],mix.inputs[2])
+    links.new(weight.outputs[0],mix.inputs[0])
+    links.new(transparent.outputs[0],mix.inputs[1])
+    links.new(emission.outputs[0],mix.inputs[2])
     links.new(mix.outputs[0],output.inputs['Surface'])
     material.surface_render_method='DITHERED'
     return material

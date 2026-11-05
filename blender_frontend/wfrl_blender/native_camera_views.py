@@ -100,7 +100,8 @@ def frame_gate(scene, entry, region, space):
     target = (left+margin, bottom+margin, max(1,width-2*margin),
               max(1,height-28*scale-2*margin))
     rv=space.region_3d
-    rv.view_camera_offset=(0,0);rv.view_camera_zoom=0
+    rv.view_camera_offset=(0,0)
+    rv.view_camera_zoom=0
     rv.update()
     bounds=gate_bounds(scene,entry,region,rv)
     if not bounds or min(bounds[2:]) <= 0:return
@@ -417,11 +418,13 @@ class NativeSession:
                     entry['proxy_data'] = data
                     data.sensor_fit='HORIZONTAL'
                     # Keep lens in Blender's valid range even at extreme FOV.
-                    data.lens=min(5000.,max(1.,18./outer));data.sensor_width=2*data.lens*outer
+                    data.lens=min(5000.,max(1.,18./outer))
+                    data.sensor_width=2*data.lens*outer
                     if abs(data.sensor_width-2*data.lens*outer)>1e-4:
                         bpy.data.cameras.remove(data)
                         raise ValueError('当前视场超出原生相机范围，请使用精确预览')
-                    data.clip_start=params.clip_near_m;data.clip_end=params.clip_far_m
+                    data.clip_start=params.clip_near_m
+                    data.clip_end=params.clip_far_m
                     data.show_passepartout=False
                     data.passepartout_alpha=0.
                     proxy=bpy.data.objects.new(f'T1.Native.C{slot}',data)
@@ -429,13 +432,15 @@ class NativeSession:
                     entry['proxy'] = proxy
                     self.scene.collection.objects.link(proxy)
                     proxy.hide_render=True
-                    constraint=proxy.constraints.new('COPY_TRANSFORMS');constraint.target=camera
+                    constraint=proxy.constraints.new('COPY_TRANSFORMS')
+                    constraint.target=camera
                     entry.update(proxy=proxy,proxy_data=data,fx=fx,fy=fy)
                 entry['key']=key
             region=next((r for r in area.regions if r.type=='WINDOW'),None)
             view_key=(key, region.width, region.height) if region else None
             if entry['proxy'] and (not space.use_local_camera or space.camera != entry['proxy']):
-                space.use_local_camera=True;space.camera=entry['proxy']
+                space.use_local_camera=True
+                space.camera=entry['proxy']
                 # Removing an active local camera can switch Blender to PERSP.
                 if camera_view:
                     space.region_3d.view_perspective='CAMERA'
@@ -524,7 +529,8 @@ class NativeSession:
         shader=gpu.shader.from_builtin('UNIFORM_COLOR')
         def rect(x,y,w,h):
             if w<=0 or h<=0:return
-            shader.bind();shader.uniform_float('color',(.015,.02,.025,1))
+            shader.bind()
+            shader.uniform_float('color',(.015,.02,.025,1))
             batch_for_shader(shader,'TRI_FAN',{'pos':[(x,y),(x+w,y),(x+w,y+h),(x,y+h)]}).draw(shader)
         proxy=entry['proxy']
         if not proxy:rect(0,0,region.width,region.height)
@@ -535,20 +541,24 @@ class NativeSession:
         title_top=bottom+height
         rect(0,title_top-28*scale,region.width,28*scale)
         font=0
-        blf.size(font,15*scale);blf.color(font,.88,.94,1,1)
-        blf.position(font,10*scale,title_top-21*scale,0);blf.draw(font,label)
+        blf.size(font,15*scale)
+        blf.color(font,.88,.94,1,1)
+        blf.position(font,10*scale,title_top-21*scale,0)
+        blf.draw(font,label)
         if entry is self.entries[0]:
             label_width,_=blf.dimensions(font,label)
             time_s=self.scene.get('wfrl_clearance_time_s')
             clock=f'共同 {time_s:.2f} s' if time_s is not None else f'共同帧 {self.scene.frame_current}'
             clock += ' · 播放' if playback.is_playing(self.scene) else ' · 暂停'
-            blf.size(font,11*scale);blf.color(font,.65,.73,.81,1)
+            blf.size(font,11*scale)
+            blf.color(font,.65,.73,.81,1)
             width,_=blf.dimensions(font,clock)
             available=max(1,region.width-label_width-30*scale)
             if width>available:
                 blf.size(font,11*scale*available/width)
                 width,_=blf.dimensions(font,clock)
-            blf.position(font,region.width-width-10*scale,title_top-20*scale,0);blf.draw(font,clock)
+            blf.position(font,region.width-width-10*scale,title_top-20*scale,0)
+            blf.draw(font,clock)
 
     def playback_context(self):
         """Own user playback in a surviving source area, including its region."""
@@ -693,10 +703,14 @@ class NativeSession:
         region=bpy.context.region
         scale=min(bpy.context.preferences.system.ui_scale,region.width/400,region.height/230)
         shader=gpu.shader.from_builtin('UNIFORM_COLOR')
-        shader.bind();shader.uniform_float('color',(.018,.025,.034,1.))
+        shader.bind()
+        shader.uniform_float('color',(.018,.025,.034,1.))
         batch_for_shader(shader,'TRI_FAN',{'pos':[(0,0),(region.width,0),(region.width,region.height),(0,region.height)]}).draw(shader)
         def text(value,x,y,size=13,color=(.78,.85,.92,1.)):
-            blf.size(0,size*scale);blf.color(0,*color);blf.position(0,x,y,0);blf.draw(0,value)
+            blf.size(0,size*scale)
+            blf.color(0,*color)
+            blf.position(0,x,y,0)
+            blf.draw(0,value)
         text('安装位置示意 · 静态',16*scale,region.height-28*scale,18)
         if self.diagram_stale or self.diagram is None:
             text('旧图已失效 · '+(self.diagram_error or '正在更新当前安装配置'),16*scale,region.height-57*scale,12,(1.,.66,.3,1.))
@@ -715,13 +729,15 @@ class NativeSession:
                 for _,triangle,color in self.diagram['triangles']:
                     points=schematic.clipped_polygon([(p[0]*factor+tx,p[1]*factor+ty) for p in triangle],rect)
                     for i in range(1,len(points)-1):
-                        vertices.extend((points[0],points[i],points[i+1]));colors.extend((color,)*3)
+                        vertices.extend((points[0],points[i],points[i+1]))
+                        colors.extend((color,)*3)
             colored=gpu.shader.from_builtin('FLAT_COLOR')
             batch=batch_for_shader(colored,'TRIS',{'pos':vertices,'color':colors}) if vertices else None
             self.diagram_batches=(batch_key,colored,batch,transforms)
         _,colored,batch,transforms=self.diagram_batches
         if batch:
-            colored.bind();batch.draw(colored)
+            colored.bind()
+            batch.draw(colored)
         text('机舱与安装位置',panels[0][0],region.height-70*scale,11)
         text('盒体 / 支架局部',panels[1][0],region.height-70*scale,11)
         factor,tx,ty=transforms[1]
@@ -801,9 +817,11 @@ def header(self,context):
             op.slot=entry['slot']
         elif len(_ACTIVE.slots)==1:
             op=row.operator('wfrl.native_camera_view',text='返回三路',icon='FULLSCREEN_EXIT')
-            op.mode='TRIPLE';op.layout=_ACTIVE.layout
+            op.mode='TRIPLE'
+            op.layout=_ACTIVE.layout
         op=row.operator('wfrl.native_camera_view',text='2×2' if _ACTIVE.layout=='STRIP' else '三列')
-        op.mode='TRIPLE';op.layout='GRID' if _ACTIVE.layout=='STRIP' else 'STRIP'
+        op.mode='TRIPLE'
+        op.layout='GRID' if _ACTIVE.layout=='STRIP' else 'STRIP'
         if len(_ACTIVE.slots)>1:
             row.operator('wfrl.native_camera_quality',text='流畅' if _ACTIVE.fast else '高清')
         row.operator('wfrl.native_camera_exit',text='',icon='X')
@@ -826,7 +844,8 @@ class WFRL_OT_NativeCamera(bpy.types.Operator):
         from .panels import custom_cameras as panel
         from . import custom_camera_capture
         if custom_camera_capture.active() or (panel._ACTIVE and panel._ACTIVE.stage not in panel._VIEWING):
-            self.report({'WARNING'},'请先完成采集或确认相机草稿');return {'CANCELLED'}
+            self.report({'WARNING'},'请先完成采集或确认相机草稿')
+            return {'CANCELLED'}
         if not core.is_available(context.scene):return {'CANCELLED'}
         slot=context.window_manager.wfrl_custom_slot
         if self.mode=='WATCH' and not core.get_camera(context.scene,slot):return {'CANCELLED'}
@@ -840,7 +859,8 @@ class WFRL_OT_NativeCamera(bpy.types.Operator):
                 return {'FINISHED'}
             except (ValueError, RuntimeError) as exc:
                 _remember_error(context.scene, f'切换相机观察失败：{exc}')
-                self.report({'ERROR'},str(exc));return {'CANCELLED'}
+                self.report({'ERROR'},str(exc))
+                return {'CANCELLED'}
         shutdown()
         if _ACTIVE:
             self.report({'ERROR'}, last_error(context.scene) or '相机窗口正在恢复，请稍后重开')
@@ -856,7 +876,8 @@ class WFRL_OT_NativeCamera(bpy.types.Operator):
             _remember_error(context.scene, f'打开相机观察失败：{exc}')
             if session is not None:
                 shutdown()
-            self.report({'ERROR'},str(exc));return {'CANCELLED'}
+            self.report({'ERROR'},str(exc))
+            return {'CANCELLED'}
 
 
 class WFRL_OT_NativeFocus(bpy.types.Operator):
@@ -875,7 +896,8 @@ class WFRL_OT_NativeFocus(bpy.types.Operator):
             return {'FINISHED'}
         except (ValueError,RuntimeError) as exc:
             _remember_error(context.scene, f'切换相机观察失败：{exc}')
-            self.report({'ERROR'},str(exc));return {'CANCELLED'}
+            self.report({'ERROR'},str(exc))
+            return {'CANCELLED'}
 
 
 class WFRL_OT_NativePlay(bpy.types.Operator):
@@ -926,7 +948,8 @@ class WFRL_OT_NativeExit(bpy.types.Operator):
     bl_idname='wfrl.native_camera_exit'
     bl_label='退出原生相机观察'
     def execute(self,context):
-        shutdown();return {'FINISHED'}
+        shutdown()
+        return {'FINISHED'}
 
 
 def register():

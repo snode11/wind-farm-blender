@@ -285,16 +285,23 @@ def _make_turbine(collection, turbine, *, object_prefix=None,
     hub.location = (-0.35, 0.0, 0.0)
     _finish(hub, smooth=True)
     # Rounded spinner closes to one pole within a 3.2 m illustrative axial envelope.
-    verts=[];faces=[];segments=64;rings=24
+    verts=[]
+    faces=[]
+    segments=64
+    rings=24
     for i in range(rings):
         angle=math.pi*i/(2*rings)
-        x=.15-3.2*math.sin(angle);r=2.15*math.cos(angle)
+        x=.15-3.2*math.sin(angle)
+        r=2.15*math.cos(angle)
         verts.extend((x,r*math.cos(math.tau*j/segments),r*math.sin(math.tau*j/segments)) for j in range(segments))
     for i in range(rings-1):
-        a=i*segments;b=a+segments
+        a=i*segments
+        b=a+segments
         faces.extend((a+j,b+j,b+(j+1)%segments,a+(j+1)%segments) for j in range(segments))
     faces.append(tuple(range(segments)))
-    pole=len(verts);verts.append((-3.05,0,0));a=(rings-1)*segments
+    pole=len(verts)
+    verts.append((-3.05,0,0))
+    a=(rings-1)*segments
     faces.extend((a+j,pole,a+(j+1)%segments) for j in range(segments))
     spinner = _mesh_object(collection,prefix + ".Spinner",verts,faces,material("hub"))
     spinner.parent = rotor

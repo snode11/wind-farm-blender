@@ -68,7 +68,8 @@ def _tail(handle):
             data = reader.read(8192)
     text = data.decode('utf-8', errors='replace')
     if size > 1024 * 1024:
-        handle.seek(0); handle.truncate()
+        handle.seek(0)
+        handle.truncate()
     return text
 
 

@@ -41,7 +41,9 @@ class DefectStore:
         self.cleanup_errors = ()
         self._owner = uuid.uuid4().hex
         self._document = validate_document(document if document is not None else new_document(surface), surface)
-        self._version = 0; self._undo = []; self._redo = []
+        self._version = 0
+        self._undo = []
+        self._redo = []
         self._resource = self._prepare(deepcopy(self._document))
         try: self._activate(self._resource, deepcopy(self._document), self._version)
         except Exception:
@@ -84,7 +86,8 @@ class DefectStore:
             previous = old.get(defect['id'])
             if previous is not None:
                 before, after = deepcopy(previous), deepcopy(defect)
-                before.pop('revision'); after.pop('revision')
+                before.pop('revision')
+                after.pop('revision')
                 if before != after and defect['revision'] <= previous['revision']:
                     raise ValueError('Modified defect must retain id and increase revision')
                 if defect['revision'] < previous['revision']:
@@ -113,15 +116,18 @@ class DefectStore:
             except Exception as rollback_error:
                 if hasattr(error, 'add_note'): error.add_note(f'Activation rollback also failed: {rollback_error}')
             raise
-        self._document = deepcopy(token.document); self._resource = token.resource
-        self._version += 1; token.consumed = True
+        self._document = deepcopy(token.document)
+        self._resource = token.resource
+        self._version += 1
+        token.consumed = True
         if old_resource is not self._resource: self._pending_disposals.append(old_resource)
         return self._version
 
     def commit(self, token):
         previous = self.document
         result = self._replace(token)
-        self._undo.append(previous); self._redo.clear()
+        self._undo.append(previous)
+        self._redo.clear()
         self.retry_disposals()
         return result
 
@@ -144,7 +150,8 @@ class DefectStore:
         # Stale candidates still own disposable resources and may be cancelled.
         if not isinstance(token, PreparedState) or token.owner != self._owner or token.consumed:
             raise ValueError('Invalid or consumed transaction')
-        self._dispose(token.resource); token.consumed = True
+        self._dispose(token.resource)
+        token.consumed = True
 
     def _restore(self, source, target):
         if not source: return False
@@ -156,7 +163,8 @@ class DefectStore:
         except Exception:
             if not token.consumed: self.cancel(token)
             raise
-        source.pop(); target.append(previous)
+        source.pop()
+        target.append(previous)
         self.retry_disposals()
         return True
 

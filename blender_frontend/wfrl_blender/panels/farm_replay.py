@@ -125,9 +125,11 @@ def draw_views(layout, context):
     draw_turbine_views(layout, scene)
     row = layout.row(align=True)
     op = row.operator('wfrl.farm_flex_view', text='T1 侧前方')
-    op.turbine = 'T1'; op.angle = 'FRONT'
+    op.turbine = 'T1'
+    op.angle = 'FRONT'
     op = row.operator('wfrl.farm_flex_view', text='风场全景')
-    op.turbine = 'all'; op.angle = 'DOWN'
+    op.turbine = 'all'
+    op.angle = 'DOWN'
     row = layout.row(align=True)
     row.operator('wfrl.clearance_view', text='测量区侧视').view = 'MEASUREMENT'
     row.operator('wfrl.clearance_view', text='雷达特写').view = 'RADAR'
@@ -255,7 +257,8 @@ def draw_tools(layout, context):
         data.operator('wfrl.load_demo', text='重新加载当前结果', icon='FILE_REFRESH').package_path = scene['wfrl_farm_flex_path']
         data.operator('wfrl.load_dual_beam', text='打开外部双束数据包', icon='FILE_FOLDER').choose_file = True
         data.operator('wfrl.clearance_restart', text='从头重播', icon='REW')
-        path = data.column(); path.enabled = False
+        path = data.column()
+        path.enabled = False
         path.prop(scene, '["wfrl_farm_flex_path"]', text='数据目录')
     diagnostics = section(layout, 'wfrl_farm_diagnostics', '版本、来源与播放诊断')
     if diagnostics is not None:
@@ -326,15 +329,19 @@ def build_review_cameras(scene):
     from mathutils import Vector
     tip = bpy.data.objects.new('WFRL.Camera.T1.TipComparison', bpy.data.cameras.new('T1TipComparison'))
     bpy.data.collections['WFRL_Scene'].objects.link(tip)
-    tip.data.type = 'ORTHO'; tip.data.ortho_scale = 28
-    tip.data.clip_start = .1; tip.data.clip_end = 3000
+    tip.data.type = 'ORTHO'
+    tip.data.ortho_scale = 28
+    tip.data.clip_start = .1
+    tip.data.clip_end = 3000
     tip.data.show_passepartout = False
     camera=bpy.data.objects.new('WFRL.Camera.FarmFlexOverview',bpy.data.cameras.new('FarmFlexOverview'))
     bpy.data.collections['WFRL_Scene'].objects.link(camera)
     camera.location=(-450,-1250,520)
     camera.rotation_euler=(Vector((504,0,65))-camera.location).to_track_quat('-Z','Y').to_euler()
-    camera.data.type='ORTHO';camera.data.ortho_scale=1500
-    camera.data.clip_start=.1;camera.data.clip_end=30000
+    camera.data.type='ORTHO'
+    camera.data.ortho_scale=1500
+    camera.data.clip_start=.1
+    camera.data.clip_end=30000
     camera.data.show_passepartout=False
     
     
@@ -343,8 +350,10 @@ def build_review_cameras(scene):
     bpy.data.collections['WFRL_Scene'].objects.link(front_camera)
     front_camera.location=(-245,-140,125)
     front_camera.rotation_euler=(Vector((-5,0,90))-front_camera.location).to_track_quat('-Z','Y').to_euler()
-    front_camera.data.type='ORTHO';front_camera.data.ortho_scale=270
-    front_camera.data.clip_start=.1;front_camera.data.clip_end=3000
+    front_camera.data.type='ORTHO'
+    front_camera.data.ortho_scale=270
+    front_camera.data.clip_start=.1
+    front_camera.data.clip_end=3000
     front_camera.data.show_passepartout=False
     
     
@@ -401,8 +410,10 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
                 else:
                     restore_nacelle_view(camera)
             else:
-                camera=ensure_gimbal(scene,self.turbine);down_gimbal(camera)
-        scene.camera=camera;scene['wfrl_camera']=camera.name
+                camera=ensure_gimbal(scene,self.turbine)
+                down_gimbal(camera)
+        scene.camera=camera
+        scene['wfrl_camera']=camera.name
         from ..nacelle_camera import select_output
         select_output(scene, camera)
         from ..cameras import demo_view_areas
@@ -459,7 +470,10 @@ class WFRL_OT_FarmSplitView(bpy.types.Operator):
 class WFRL_PT_FarmFlex(bpy.types.Panel):
     bl_label='三机 MAPPO 回放'
     bl_idname='WFRL_PT_FarmFlex'
-    bl_space_type='VIEW_3D';bl_region_type='UI';bl_category='MAPPO';bl_order=-300
+    bl_space_type='VIEW_3D'
+    bl_region_type='UI'
+    bl_category='MAPPO'
+    bl_order=-300
 
     @classmethod
     def poll(cls, context):

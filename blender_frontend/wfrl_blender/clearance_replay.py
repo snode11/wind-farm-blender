@@ -152,7 +152,8 @@ def update(scene, depsgraph=None):
         return
     from .clearance_visual import update_beams
     from .radar_feedback import beam_activity
-    tid = scene['wfrl_clearance_turbine']; motion = value['motion']
+    tid = scene['wfrl_clearance_turbine']
+    motion = value['motion']
     prefix = f'WFRL.Turbine.{tid}'
     yaw = scene.objects.get(prefix + '.YawRoot')
     rotor = scene.objects.get(prefix + '.Rotor')

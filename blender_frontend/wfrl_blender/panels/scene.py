@@ -17,7 +17,8 @@ class WFRL_PT_WorkflowScene(bpy.types.Panel):
 
     def draw(self, context):
         layout, settings = self.layout, context.scene.wfrl_workflow
-        col = layout.column(); col.enabled = runtime.configuration_editable()
+        col = layout.column()
+        col.enabled = runtime.configuration_editable()
         col.prop(settings, 'override_scene')
         if settings.override_scene:
             for key in ('backend', 'wind_speed', 'wind_direction', 'turbulence', 'terrain', 'controls'):

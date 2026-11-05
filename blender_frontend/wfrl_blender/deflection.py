@@ -213,7 +213,8 @@ class ComparisonView:
             curve.bevel_depth = .055
             curve.bevel_resolution = 2
             curve.materials.append(self.materials[key])
-            spline = curve.splines.new('POLY'); spline.points.add(1)
+            spline = curve.splines.new('POLY')
+            spline.points.add(1)
             obj = bpy.data.objects.new('WFRL.Deflection.T1.' + key, curve)
             self.collection.objects.link(obj)
             self.lines[key] = obj
@@ -326,9 +327,12 @@ class ComparisonView:
                 width = blf.dimensions(0, label)[0] + 10 * scale
                 quad = [(x-4*scale, y-4*scale), (x+width, y-4*scale),
                         (x+width, y+15*scale), (x-4*scale, y+15*scale)]
-                shader.bind(); shader.uniform_float('color', (.015, .025, .04, .82))
+                shader.bind()
+                shader.uniform_float('color', (.015, .025, .04, .82))
                 batch_for_shader(shader, 'TRIS', {'pos': quad}, indices=((0,1,2),(0,2,3))).draw(shader)
-                blf.color(0, *COLORS[key]); blf.position(0, x, y, 0); blf.draw(0, label)
+                blf.color(0, *COLORS[key])
+                blf.position(0, x, y, 0)
+                blf.draw(0, label)
         finally:
             gpu.state.blend_set('NONE')
 
@@ -337,7 +341,8 @@ class ComparisonView:
         if self.handle is not None:
             bpy.types.SpaceView3D.draw_handler_remove(self.handle, 'WINDOW')
             self.handle = None
-        self.labels = []; self.rows.clear()
+        self.labels = []
+        self.rows.clear()
         for obj in self.objects:
             try:
                 data = obj.data
@@ -367,7 +372,8 @@ def draw_panel(layout, scene):
     views = box.row(align=True)
     views.operator('wfrl.deflection_view', text='叶尖', icon='VIEWZOOM')
     op = views.operator('wfrl.farm_flex_view', text='叶轮')
-    op.turbine = 'T1'; op.angle = 'FRONT'
+    op.turbine = 'T1'
+    op.angle = 'FRONT'
     views.operator('wfrl.farm_flex_view', text='Down').turbine = 'T1'
     layers = box.row(align=True)
     layers.prop(scene, 'wfrl_deflection_visible', text='虚影 / 分量', toggle=True)
@@ -380,7 +386,8 @@ def draw_panel(layout, scene):
     grid = box.row(align=True)
     for title, values in [('方向', (['根系 x', '根系 y', '根系 z'] if len(row['simulation']) == 3 else ['面外', '面内'])), ('仿真 / m', row['simulation']),
                           ('坐标差 / m', row['components'][:len(row['simulation'])]), ('偏差 / mm', row['error'] * 1000)]:
-        column = grid.column(align=True); column.label(text=title)
+        column = grid.column(align=True)
+        column.label(text=title)
         for value in values:
             column.label(text=value if isinstance(value, str) else f'{value:+.4f}')
     box.label(text=f"总位移   {row['distance']:.4f} m")

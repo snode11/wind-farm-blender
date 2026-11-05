@@ -433,7 +433,9 @@ class Capture:
             packets=[]
             motion = self.reader.at(at).get('motion') if self.reader is not None and at is not None else None
             for camera in self.cameras:
-                slot=int(camera['wfrl_custom_slot']);image=images[slot];p=image.params
+                slot=int(camera['wfrl_custom_slot'])
+                image=images[slot]
+                p=image.params
                 relative=f'C{slot}/frame_{self.index:06d}.png'
                 packets.append((self.path/relative, image.width, image.height, bytes(image.rgba())))
                 scales=projection.pixel_scales(p.fov,p.vfov,image.width,image.height)
@@ -520,7 +522,8 @@ class Capture:
                     success = False
                     error = (error + '；' if error else '') + '恢复期间场景或采集时刻已变化，采集未完成'
         except Exception as exc:
-            success=False;error=f'{error} 恢复失败：{exc}'
+            success=False
+            error=f'{error} 恢复失败：{exc}'
         finally:
             if self._writer is not None:
                 self._writer.cancel()

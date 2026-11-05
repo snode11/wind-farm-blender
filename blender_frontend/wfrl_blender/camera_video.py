@@ -354,8 +354,10 @@ def _render_package(args):
     if output == package.resolve() or package.resolve() in output.parents:
         raise ValueError('Export must not write into the source result package')
     output.mkdir(parents=True, exist_ok=True)
-    frames = output / 'master_frames'; frames.mkdir(exist_ok=True)
-    checks = output / 'checks'; checks.mkdir(exist_ok=True)
+    frames = output / 'master_frames'
+    frames.mkdir(exist_ok=True)
+    checks = output / 'checks'
+    checks.mkdir(exist_ok=True)
     render_manifest = output / 'render_manifest.json'
     if render_manifest.exists():
         if json.loads(render_manifest.read_text(encoding='utf-8'))['config_sha256'] != fingerprint:

@@ -48,7 +48,8 @@ class WFRL_PT_live_telemetry(bpy.types.Panel):
                       if selected == 'ALL' or t['turbine_id'] == selected]
             groups.append(('Farm', data['farm']))
             for label, records in groups:
-                box = layout.box(); box.label(text=label)
+                box = layout.box()
+                box.label(text=label)
                 for name, record in records.items():
                     validity = state.validity(record, runtime.get_state().connection == 'CONNECTED')
                     value = record['value']

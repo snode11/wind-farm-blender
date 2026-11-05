@@ -503,7 +503,8 @@ def _apply_session_metadata(payload, batch):
         from . import charts
         charts.clear(_state.run_id, scene=_backend_scene)
     if 'scene' in payload:
-        workflow_scene.clear(); workflow_scene.update(payload['scene'] or {})
+        workflow_scene.clear()
+        workflow_scene.update(payload['scene'] or {})
         # scene.load is acknowledged before the first training snapshot. Build
         # the authored wind farm immediately so the viewport does not remain on
         # Blender's default cube.
@@ -514,7 +515,8 @@ def _apply_session_metadata(payload, batch):
                 _build_backend_scene(loaded_scene)
             _live_scene = loaded_scene
     if 'channel_states' in payload:
-        channel_states.clear(); channel_states.update(payload['channel_states'] or {})
+        channel_states.clear()
+        channel_states.update(payload['channel_states'] or {})
     if 'channel_table' in payload:
         _set_channel_table(payload['channel_table'])
 

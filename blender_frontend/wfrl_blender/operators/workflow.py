@@ -68,7 +68,8 @@ class WFRL_OT_LoadConfiguredScene(bpy.types.Operator):
             runtime.send_workflow_command('scene.load', {'scene': bpy.path.abspath(prefs.default_scene),
                 'scene_overrides': scene_overrides(context.scene.wfrl_workflow)})
         except ValueError as exc:
-            self.report({'ERROR'}, str(exc)); return {'CANCELLED'}
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
         return {'FINISHED'}
 
 
@@ -82,7 +83,8 @@ class WFRL_OT_SetChannel(bpy.types.Operator):
             runtime.send_workflow_command('channel.set', {'topic': context.scene.wfrl_workflow.topic,
                                                          'enabled': self.enabled})
         except ValueError as exc:
-            self.report({'ERROR'}, str(exc)); return {'CANCELLED'}
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
         return {'FINISHED'}
 
 

@@ -170,9 +170,14 @@ def _housing(scene, cameras, config):
         faces = []
         for a, b in ((0, n), (2*n, 3*n), (0, 2*n), (n, 3*n)):
             faces += [(a+i, a+(i+1)%n, b+(i+1)%n, b+i) for i in range(n)]
-        mesh = bpy.data.meshes.new(PREFIX+'.WindowMesh'); mesh.from_pydata(verts, [], faces); mesh.update()
-        seal = bpy.data.objects.new(PREFIX+f'.Window{slot}', mesh); collection.objects.link(seal)
-        seal.parent = assembly; seal.data.materials.append(materials['Seal']); seal['stacked_rig_physical'] = True
+        mesh = bpy.data.meshes.new(PREFIX+'.WindowMesh')
+        mesh.from_pydata(verts, [], faces)
+        mesh.update()
+        seal = bpy.data.objects.new(PREFIX+f'.Window{slot}', mesh)
+        collection.objects.link(seal)
+        seal.parent = assembly
+        seal.data.materials.append(materials['Seal'])
+        seal['stacked_rig_physical'] = True
         # Fill the front panel all the way to each aperture; only optical holes stay open.
         inner = [(x*1.10, zz*1.10) for x, zz in ring]
         outer = []
@@ -184,8 +189,10 @@ def _housing(scene, cameras, config):
                              [(i, (i+1)%n, n+(i+1)%n, n+i) for i in range(n)])
         panelmesh.update()
         panel = bpy.data.objects.new(PREFIX+f'.FrontPanel{slot}', panelmesh)
-        collection.objects.link(panel); panel.parent = assembly
-        panel.data.materials.append(materials['Body']); panel['stacked_rig_physical'] = True
+        collection.objects.link(panel)
+        panel.parent = assembly
+        panel.data.materials.append(materials['Body'])
+        panel['stacked_rig_physical'] = True
         # Body and lens backing remain behind the optical centre, including near clip.
         for name, offset, size, material in (
                 (f'Module{slot}', .029, (.028, .028, .028), 'Module'),

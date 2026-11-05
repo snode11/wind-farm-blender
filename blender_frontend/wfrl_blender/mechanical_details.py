@@ -85,7 +85,8 @@ def add_mechanical_details(collection, root, yaw, rotor, prefix, scalars, shell,
         return obj
 
     def box(name, center, half, parent, material='hub', bevel=.025):
-        x,y,z=center; a,b,c=half
+        x,y,z=center
+        a,b,c=half
         vertices=[(x+sx*a,y+sy*b,z+sz*c) for sx,sy,sz in
                   ((-1,-1,-1),(1,-1,-1),(1,1,-1),(-1,1,-1),
                    (-1,-1,1),(1,-1,1),(1,1,1),(-1,1,1))]
@@ -93,11 +94,15 @@ def add_mechanical_details(collection, root, yaw, rotor, prefix, scalars, shell,
                                   (1,2,6,5),(2,3,7,6),(3,0,4,7)],parent,material,bevel)
 
     def ring(name, radius, thickness, z, parent, material='hub'):
-        vertices=[];faces=[];n=64;m=8
+        vertices=[]
+        faces=[]
+        n=64
+        m=8
         for i in range(n):
             a=math.tau*i/n
             for j in range(m):
-                b=math.tau*j/m;r=radius+thickness*math.cos(b)
+                b=math.tau*j/m
+                r=radius+thickness*math.cos(b)
                 vertices.append((r*math.cos(a),r*math.sin(a),z+thickness*math.sin(b)))
         for i in range(n):
             for j in range(m):
@@ -125,7 +130,8 @@ def add_mechanical_details(collection, root, yaw, rotor, prefix, scalars, shell,
     stations=geometry_data()['tower_stations']
     for z in (28.,56.):
         i=next(i for i in range(len(stations)-1) if stations[i][0]<=z<=stations[i+1][0])
-        za,da=stations[i];zb,db=stations[i+1]
+        za,da=stations[i]
+        zb,db=stations[i+1]
         ring(f'TowerWeld{int(z)}',.5*(da+(db-da)*(z-za)/(zb-za)),.018,z,root,'tower')
     seal = ring('YawSeal',1.89,.008,scalars['TowerHt']+.13,root,'rubber')
     recess_yaw_seal(seal, scalars['TowerHt'])

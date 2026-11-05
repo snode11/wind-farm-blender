@@ -203,8 +203,11 @@ def _load_package(path):
 def _parse_package(path, manifest):
     """Parse and validate geometry, motion and independent support/reference data."""
     with np.load(path/'geometry.npz',allow_pickle=False) as data:
-        times=data['times'].copy();transforms=data['transforms'].copy();poses=data['poses'].copy()
-    n=len(times); turbines=len(manifest['turbine_ids'])
+        times=data['times'].copy()
+        transforms=data['transforms'].copy()
+        poses=data['poses'].copy()
+    n=len(times)
+    turbines=len(manifest['turbine_ids'])
     if (n<2 or times.ndim!=1 or not np.isfinite(times).all() or np.any(np.diff(times)<=0)
             or transforms.shape!=(n,turbines,3,19,3,4) or poses.shape!=(n,turbines,6)
             or not np.isfinite(transforms).all() or not np.isfinite(poses).all()
@@ -551,7 +554,11 @@ class FarmFlex:
             self.imbalance = load_for_source(path, _source=verified_source)
         except (OSError, ValueError) as error:
             self.imbalance_error = str(error)
-        self.scene=scene;self.blades=[];self.groups={};self.cache={};self.enabled=True
+        self.scene=scene
+        self.blades=[]
+        self.groups={}
+        self.cache={}
+        self.enabled=True
         self.reference_matrices = {}
         self.visible_turbines=set(range(len(self.readers)))
         for tid in self.readers:
@@ -598,7 +605,8 @@ class FarmFlex:
                         modifier.show_viewport=False
                         modifier.show_render=False
                 rest=np.empty(len(obj.data.vertices)*3,np.float32)
-                obj.data.vertices.foreach_get('co',rest);rest=rest.reshape(-1,3).copy()
+                obj.data.vertices.foreach_get('co',rest)
+                rest=rest.reshape(-1,3).copy()
                 matrix=np.array(obj.matrix_world)
                 self.reference_matrices[obj.name] = matrix.copy()
                 world=(rest@matrix[:3,:3].T+matrix[:3,3]-offset).astype(np.float32)
@@ -673,8 +681,10 @@ class FarmFlex:
             origin[2] -= geometry_data()['scalars']['TowerHt']
             for tid in self.readers:
                 ensure_radar(scene, tid, origin, calibration['beam_directions'])
-        scene.render.fps=60;scene.render.fps_base=1
-        scene.frame_start=1;scene.frame_end=1+round((self.times[-1]-self.times[0])*60)
+        scene.render.fps=60
+        scene.render.fps_base=1
+        scene.frame_start=1
+        scene.frame_end=1+round((self.times[-1]-self.times[0])*60)
         scene.sync_mode='FRAME_DROP'
         scene.use_preview_range=False
         self.last_telemetry_frame=None
@@ -706,16 +716,21 @@ class FarmFlex:
         self._update_geometry = None
         for obj,rest,*_ in self.towers:
             try:
-                obj.data.vertices.foreach_set('co',rest.ravel());obj.data.update()
+                obj.data.vertices.foreach_set('co',rest.ravel())
+                obj.data.update()
             except ReferenceError: pass
         for obj,k,z,rest_location in self.fittings:
-            try: obj.location=rest_location;obj.rotation_euler=(0,0,0)
+            try:
+                obj.location=rest_location
+                obj.rotation_euler=(0,0,0)
             except ReferenceError: pass
         if self.tower_motion is not None:
             for tid in self.readers:
                 try:
                     obj=self.scene.objects.get(f'WFRL.Turbine.{tid}.YawRoot')
-                    if obj: obj.location=(0,0,87.6);obj.rotation_euler=(0,0,0)
+                    if obj:
+                        obj.location=(0,0,87.6)
+                        obj.rotation_euler=(0,0,0)
                 except ReferenceError:
                     pass
 
@@ -1014,7 +1029,8 @@ class FarmFlex:
         reader=clearance_replay.reader_for(scene)
         if reader not in self.readers.values():
             for obj,rest,*_ in self.blades:
-                obj.data.vertices.foreach_set('co',rest.ravel());obj.data.update()
+                obj.data.vertices.foreach_set('co',rest.ravel())
+                obj.data.update()
             self.restore_support()
             self.enabled=False
             scene['wfrl_flex_active']=False

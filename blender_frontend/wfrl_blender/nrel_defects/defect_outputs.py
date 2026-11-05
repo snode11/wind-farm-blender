@@ -51,7 +51,8 @@ def create_run(editor,directory,*,mode='G',mapping=None):
             'Existing saved radar measurements describe their original simulation geometry.',
             'G visibility does not establish image discernibility or measured damage accuracy.'])
     run=dict(output=output,manifest=manifest,mapping=mapping)
-    update_run(run);save_review(editor,run)
+    update_run(run)
+    save_review(editor,run)
     return run
 
 
@@ -62,14 +63,18 @@ def save_records(run,rows):
     write_json(run['output']/'visibility.json',rows)
     fields=['turbine_id','blade_id','defect_id','revision','support_id','support_kind','primary','camera_id','time_s','frame_index','status','in_frame_fraction','visible_fraction_in_frame','visible_area_px2']
     with (run['output']/'projection_stats.csv').open('w',newline='',encoding='utf-8') as stream:
-        writer=csv.DictWriter(stream,fieldnames=fields,extrasaction='ignore');writer.writeheader();writer.writerows(rows)
+        writer=csv.DictWriter(stream,fieldnames=fields,extrasaction='ignore')
+        writer.writeheader()
+        writer.writerows(rows)
     run['manifest']['products']['visibility']=dict(state='GENERATED',records=len(rows),sha256=digest(run['output']/'visibility.json'))
 
 
 def save_analysis(editor,run):
     rows=editor.analyze(run_id=run['manifest']['run_id'])
-    save_records(run,rows);run['manifest']['state']='G_CURRENT_COMPLETE'
-    update_run(run);save_review(editor,run)
+    save_records(run,rows)
+    run['manifest']['state']='G_CURRENT_COMPLETE'
+    update_run(run)
+    save_review(editor,run)
     return rows
 
 
@@ -84,7 +89,8 @@ def save_review(editor,run):
 def capture_images(editor,directory):
     """Explicit UI/CLI action: paired instantaneous lossless PNGs at current time."""
     run=create_run(editor,directory,mode='A')
-    scene=editor.scene;render=scene.render
+    scene=editor.scene
+    render=scene.render
     saved=(scene.camera,render.filepath,render.image_settings.file_format,render.image_settings.color_mode,
         render.image_settings.color_depth,render.use_file_extension,scene.frame_current,scene.frame_subframe,
         render.resolution_x,render.resolution_y,render.resolution_percentage)
@@ -95,7 +101,10 @@ def capture_images(editor,directory):
     old_blur=render.use_motion_blur if blur else None
     frame_time=float(scene['defect_time_s'])
     try:
-        render.image_settings.file_format='PNG';render.image_settings.color_mode='RGBA';render.image_settings.color_depth='8';render.use_file_extension=True
+        render.image_settings.file_format='PNG'
+        render.image_settings.color_mode='RGBA'
+        render.image_settings.color_depth='8'
+        render.use_file_extension=True
         render.use_border = False
         render.use_crop_to_border = False
         render.use_compositing = render.use_sequencer = False
@@ -108,7 +117,8 @@ def capture_images(editor,directory):
                 editor.geometry.activate(payload)
                 editor.set_time(frame_time)
                 for camera in editor.cameras():
-                    editor.verify_cameras();scene.camera=camera
+                    editor.verify_cameras()
+                    scene.camera=camera
                     render.resolution_x,render.resolution_y = editor.camera_resolution(camera)
                     render.resolution_percentage = 100
                     from .. import custom_cameras, camera_projection
@@ -127,14 +137,17 @@ def capture_images(editor,directory):
                         K=descriptor['K'], P=descriptor['P'], matrix_world=descriptor['matrix_world'],
                         pixel_aspect=[render.pixel_aspect_x, render.pixel_aspect_y]))
         finally:
-            editor.geometry.activate(editor.payload);editor.geometry.dispose(healthy)
+            editor.geometry.activate(editor.payload)
+            editor.geometry.dispose(healthy)
         run['manifest']['state']='A_IMAGES_GENERATED; NOT_REVIEWED'
         for key in ('camera_raw','healthy'): run['manifest']['products'][key]=dict(state='GENERATED')
-        update_run(run);save_review(editor,run)
+        update_run(run)
+        save_review(editor,run)
     except BaseException as exc:
         run['manifest']['state']='A_FAILED'
         run['manifest']['error']=str(exc)
-        update_run(run);save_review(editor,run)
+        update_run(run)
+        save_review(editor,run)
         raise
     finally:
         scene.camera,render.filepath,render.image_settings.file_format,render.image_settings.color_mode,render.image_settings.color_depth,render.use_file_extension,frame,subframe,render.resolution_x,render.resolution_y,render.resolution_percentage=saved

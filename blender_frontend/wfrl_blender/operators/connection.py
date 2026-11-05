@@ -15,7 +15,8 @@ class WFRL_OT_Mode(bpy.types.Operator):
         try:
             runtime.select_mode(self.mode)
         except ValueError as exc:
-            self.report({'ERROR'}, str(exc)); return {'CANCELLED'}
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
         return {'FINISHED'}
 
 
@@ -35,7 +36,8 @@ class WFRL_OT_Connect(bpy.types.Operator):
         try:
             runtime.connect(prefs.port if prefs else 8765)
         except ValueError as exc:
-            self.report({'ERROR'}, str(exc)); return {'CANCELLED'}
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
         return {'FINISHED'}
 
 
@@ -44,7 +46,8 @@ class WFRL_OT_Disconnect(bpy.types.Operator):
     bl_label = 'Disconnect'
 
     def execute(self, context):
-        runtime.disconnect(); return {'FINISHED'}
+        runtime.disconnect()
+        return {'FINISHED'}
 
 
 class WFRL_OT_ConnectNewBackend(bpy.types.Operator):
@@ -76,7 +79,8 @@ class WFRL_OT_ConnectNewBackend(bpy.types.Operator):
         try:
             runtime.connect_new_backend(prefs.port if prefs else 8765, confirmed=self.confirm_forget)
         except ValueError as exc:
-            self.report({'ERROR'}, str(exc)); return {'CANCELLED'}
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
         return {'FINISHED'}
 
 

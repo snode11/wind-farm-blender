@@ -711,7 +711,8 @@ class Preview:
         shader = gpu.shader.from_builtin('UNIFORM_COLOR')
         def fill(rectangle, color):
             left, bottom, width, height = rectangle
-            shader.bind(); shader.uniform_float('color', color)
+            shader.bind()
+            shader.uniform_float('color', color)
             batch_for_shader(shader, 'TRI_FAN', {'pos': [(left,bottom),(left+width,bottom),
                 (left+width,bottom+height),(left,bottom+height)]}).draw(shader)
         def text(value, left, bottom, width, size=12, color=(.83,.87,.93,1)):
@@ -722,7 +723,9 @@ class Preview:
                 while value and blf.dimensions(0, value + '…')[0] > width:
                     value = value[:-1]
                 value += '…'
-            blf.color(0, *color); blf.position(0, left, bottom, 0); blf.draw(0, value)
+            blf.color(0, *color)
+            blf.position(0, left, bottom, 0)
+            blf.draw(0, value)
         fill(rect, (.018,.022,.03,1))
         self.observe(context, cameras)
         current = self.request
@@ -806,13 +809,16 @@ def draw_controls(context, state, editing=False, confirmable=False, reason='', e
     shader = gpu.shader.from_builtin('UNIFORM_COLOR')
     def fill(box, color):
         a,b,w,h = box
-        shader.bind(); shader.uniform_float('color', color)
+        shader.bind()
+        shader.uniform_float('color', color)
         batch_for_shader(shader, 'TRI_FAN', {'pos': [(a,b),(a+w,b),(a+w,b+h),(a,b+h)]}).draw(shader)
     def text(value, a, b, max_width, color=(.9,.94,1,1), size=11):
         blf.size(0, size*ui)
         while value and blf.dimensions(0, value)[0] > max_width:
             value = value[:-2] + '…' if len(value) > 2 else ''
-        blf.color(0,*color); blf.position(0,a,b,0); blf.draw(0,value)
+        blf.color(0,*color)
+        blf.position(0,a,b,0)
+        blf.draw(0,value)
     if external:
         fill((x, y+height-154*ui, width, 154*ui), (.025,.035,.05,1))
         for index, line in enumerate(state.split('；')):

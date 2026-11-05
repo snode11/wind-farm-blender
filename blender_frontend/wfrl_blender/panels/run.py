@@ -21,7 +21,8 @@ class WFRL_PT_WorkflowRun(bpy.types.Panel):
     def draw(self, context):
         layout, settings = self.layout, context.scene.wfrl_workflow
         mode = runtime.desired_mode()
-        col = layout.column(); col.enabled = runtime.configuration_editable()
+        col = layout.column()
+        col.enabled = runtime.configuration_editable()
         if mode in {'interactive_training', 'formal_training'}:
             for key in ('iters', 'n_steps', 'warmup_steps', 'seed'): col.prop(settings, key)
         if mode == 'interactive_training':
@@ -34,7 +35,8 @@ class WFRL_PT_WorkflowRun(bpy.types.Panel):
             layout.label(text='Existing train_fastfarm.py / process status')
             layout.label(text='Live telemetry unavailable from formal CLI', icon='INFO')
         for action in ('start', 'pause', 'resume', 'step', 'stop', 'reset'):
-            row = layout.row(); row.enabled = runtime.allows_command(action)
+            row = layout.row()
+            row.enabled = runtime.allows_command(action)
             row.operator('wfrl.backend_run', text=START_LABELS[mode] if action == 'start' else action.title()).action = action
         layout.label(text='Real yaw / pitch / torque: backend policy only')
         layout.label(text='Trainer has no manual command override API', icon='INFO')
