@@ -14,6 +14,7 @@ def run(job_path):
     addon_root = Path(job['addon_root'])
     project = addon_root.parent.parent
     if (project / 'wfrl/lidar/replay.py').is_file():
+        sys.dont_write_bytecode = True
         sys.path.insert(0, str(project))
     spec = importlib.util.spec_from_file_location('_wfrl_animation_worker',
         addon_root / '__init__.py', submodule_search_locations=[str(addon_root)])

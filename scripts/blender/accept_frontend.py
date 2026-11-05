@@ -9,6 +9,8 @@ import traceback
 
 import bpy
 import addon_utils
+
+sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[2]
 OUT = Path(os.environ.get('WFRL_ACCEPT_OUTPUT', ROOT / 'evidence' / 'frontend_completion'))
 OUT.mkdir(parents=True, exist_ok=True)

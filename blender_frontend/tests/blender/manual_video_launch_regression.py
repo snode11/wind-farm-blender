@@ -22,6 +22,7 @@ full = os.environ.get('WFRL_VIDEO_FULL_SAMPLE') == '1'
 addon.register()
 assert bpy.ops.wfrl.manual_enter() == {'FINISHED'}
 scene = bpy.context.scene
+scene.wfrl_manual_pitch_rate_deg_s = 0.0
 t1 = control._t1(scene)
 t1.rpm, t1.azimuth_deg = 9, 148
 scene.wfrl_manual_trial.duration_s = 8 if full else .08

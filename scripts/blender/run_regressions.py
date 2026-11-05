@@ -35,6 +35,9 @@ import tempfile
 import time
 
 
+if __name__ == '__main__':
+    sys.dont_write_bytecode = True
+
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -107,6 +110,9 @@ REGRESSIONS = (
     Regression('manual_video_generator_preflight_regression.py', 'MANUAL_VIDEO_GENERATOR_PREFLIGHT_PASS',
                'result.json', package='builtin_rootkink',
                scope='Native generator preparation and frozen trial; no rendering or media output.'),
+    Regression('manual_video_launch_regression.py', 'MANUAL_VIDEO_LAUNCH_PASS',
+               timeout_s=660, package='builtin_rootkink',
+               scope='Native supervised short MP4 export, source scene isolation and cancellation.'),
     Regression('manual_pose_undo_regression.py', 'MANUAL_POSE_UNDO_PASS'),
     Regression('manual_scene_recovery_regression.py', 'MANUAL_SCENE_RECOVERY_PASS', timeout_s=600),
     Regression('manual_scene_link_compatibility_regression.py', 'MANUAL_SCENE_LINK_COMPATIBILITY_PASS'),
