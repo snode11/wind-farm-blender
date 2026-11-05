@@ -14,7 +14,6 @@ import traceback
 ROOT = Path(__file__).resolve().parents[3]
 sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
 import bpy
-from mathutils import Vector
 import wfrl_blender as addon
 from wfrl_blender import clearance_replay as playback
 from wfrl_blender.panels.gimbal import WFRL_PT_Gimbal, camera_world_angles
@@ -200,7 +199,7 @@ def tick():
             transition('capture_error')
         elif phase == 'capture_error':
             capture('missing-package-recovery')
-            scene.wfrl_clearance_normal_path = str(ROOT / DELIVERY['packages']['normal'])
+            scene.wfrl_clearance_normal_path = str(ROOT / 'results/lidar/packages/normal')
             assert bpy.ops.wfrl.clearance_clip(demo='normal') == {'FINISHED'}
             assert not scene.wfrl_clearance_show_config and scene.frame_current == 1
             addon._cancel_playback()

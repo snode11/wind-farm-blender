@@ -50,7 +50,7 @@ def summarize(window, external):
     result['external_numeric_raw']=rows
     cancel_start=next(start for action,start,end in raw['actions'] if action=='capture_cancel_direct')/1000-offset
     manifest=next(json.loads(p.read_text(encoding='utf-8')) for p in external.glob('capture_*/manifest.json')
-        if (m:=json.loads(p.read_text(encoding='utf-8'))).get('cancel_accepted_at',0)>=cancel_start)
+        if json.loads(p.read_text(encoding='utf-8')).get('cancel_accepted_at',0)>=cancel_start)
     result['external_cancel']={'n':1,'completed_groups':manifest['completed_samples'],
         'external_to_accept_s':manifest['cancel_accepted_at']-cancel_start,
         'accept_to_stop_s':manifest['cancel_stopped_at']-manifest['cancel_accepted_at'],

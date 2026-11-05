@@ -79,7 +79,7 @@ for screen in bpy.data.screens:
 
 
 def tick():
-    global last_log, last_step, pause_step, run_id, session_id, export_attempt
+    global last_log, last_step, pause_step, run_id, session_id
     try:
         now = time.monotonic()
         ui = runtime.get_state()

@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))))
 
 from wfrl.scene.schema import Scene, SensorSpec, Turbine        # noqa: E402
-from wfrl.studio.trainer import Snapshot, Trainer               # noqa: E402
+from wfrl.studio.trainer import Trainer               # noqa: E402
 
 FAILS = []
 

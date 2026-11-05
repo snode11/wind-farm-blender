@@ -41,7 +41,8 @@ def _inside_blender(output: Path, source_root: Path) -> None:
         ("panels.scene", "WFRL_PT_WorkflowScene"),
         ("panels.safety", "WFRL_PT_WorkflowSafety"),
         ("panels.telemetry", "WFRL_PT_live_telemetry"),
-        ("panels.demo", "WFRL_PT_Manual"),
+        ("panels.home", "WFRL_PT_Home"),
+        ("panels.manual_control", "WFRL_PT_ManualControl"),
     )
     missing_types = [class_name for module_name, class_name in required_panels
                      if not getattr(import_module(addon.__package__ + "." + module_name), class_name).is_registered]

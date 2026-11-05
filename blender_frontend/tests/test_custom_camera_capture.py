@@ -1,7 +1,6 @@
 from pathlib import Path
 from contextlib import nullcontext
 import importlib.util
-import io
 import json
 import sys
 import threading

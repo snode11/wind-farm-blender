@@ -26,7 +26,6 @@ scene_a.name = 'A_MAPPO'
 scene_a.use_fake_user = True
 scene_a.frame_set(121)
 from unittest.mock import patch
-import shutil
 source=farm_flex.default_package()
 def signature():
     active=farm_flex.active_for(scene_a)

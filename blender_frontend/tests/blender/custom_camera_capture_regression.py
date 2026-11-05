@@ -1,5 +1,4 @@
 """Native camera/config guards; no GPU or installed-extension claim."""
-from dataclasses import replace
 import hashlib
 import json
 import importlib

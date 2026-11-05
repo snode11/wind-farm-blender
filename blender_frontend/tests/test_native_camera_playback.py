@@ -5,7 +5,7 @@ import sys
 import pytest
 
 from wfrl_blender import playback
-from test_native_camera_lifecycle import Scene, area, runtime
+from test_native_camera_lifecycle import Scene, area, runtime  # noqa: F401 -- pytest discovers the runtime fixture by name.
 
 
 @pytest.fixture

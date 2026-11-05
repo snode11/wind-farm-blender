@@ -2,7 +2,6 @@ import os
 import shlex
 import sys
 import time
-from pathlib import Path
 
 from wfrl_blender.health import HealthChecker, HealthConfig
 

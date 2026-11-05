@@ -4,7 +4,6 @@ from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace as NS
 import sys
-import time
 
 import pytest
 from wfrl_blender import playback

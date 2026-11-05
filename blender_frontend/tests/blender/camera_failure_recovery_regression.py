@@ -1,10 +1,8 @@
 """Camera draft cancellation and nacelle construction with real Blender IDs."""
-import importlib
 import json
 import os
 from pathlib import Path
 import sys
-from types import SimpleNamespace
 from unittest.mock import patch
 
 import bpy

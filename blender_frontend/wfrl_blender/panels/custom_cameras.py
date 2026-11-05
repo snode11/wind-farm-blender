@@ -744,7 +744,6 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
                         circle(*p,4,(.2,1,1,1))
                         label(p.x+8,p.y-18,'镜头中心')
             if self.stage in {'LAYOUT', 'PLACE', 'INPUT'}:
-                from bpy_extras.view3d_utils import location_3d_to_region_2d
                 cameras = [core.get_camera(self.scene, slot) for slot in core.SLOTS]
                 if self.stage != 'LAYOUT':
                     cameras[self.slot-1] = self.camera if self.ready else None

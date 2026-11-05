@@ -146,7 +146,6 @@ def run_qt(seconds):
 
 def run_thread(seconds):
     """无 Qt 基线：同一个 Trainer，主线程只 sleep 轮询。"""
-    import threading                                          # noqa: F401
     from wfrl.studio.trainer import Trainer
 
     tr = Trainer(scene(), iters=2, n_steps=8, warmup_steps=2,

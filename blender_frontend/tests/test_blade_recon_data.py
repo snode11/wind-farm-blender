@@ -1,7 +1,6 @@
 """Saved boss-model geometry, frame alignment, and invalid-input regressions."""
 from __future__ import annotations
 
-import copy
 import hashlib
 import importlib.util
 import json

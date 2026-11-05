@@ -4,4 +4,4 @@ try:
 except ModuleNotFoundError as exc:
     if '._vendor.radar_x100' not in exc.name:
         raise
-    from wfrl.radar_x100 import schema, ply, recording, simulation, channel, acquisition, analysis, sampling, installation, tracking
+    from wfrl.radar_x100 import schema, ply, recording, simulation, channel, acquisition, analysis, sampling, installation, tracking  # noqa: F401 -- Re-export the canonical modules for frontend consumers.

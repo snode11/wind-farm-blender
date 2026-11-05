@@ -1,7 +1,5 @@
 """Independent projection/union examples and the NREL absolute clock."""
 import importlib
-import sys
-from pathlib import Path
 import unittest
 from test_nrel_defects import ALIAS
 visibility=importlib.import_module(ALIAS+'.nrel_defects.defect_visibility')

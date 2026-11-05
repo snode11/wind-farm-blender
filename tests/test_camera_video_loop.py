@@ -7,7 +7,7 @@ import csv
 import json
 import numpy as np
 import pytest
-from test_camera_video_media import encoded_package
+from test_camera_video_media import encoded_package  # noqa: F401 -- pytest discovers this fixture by name.
 from wfrl.camera_video import loop, package
 from wfrl.camera_video.media import sha256, read_frames
 

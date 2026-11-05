@@ -20,7 +20,7 @@ class GeneratedReviewTests(unittest.TestCase):
         self.assertEqual(annotation['visual_review']['rgb_sha256'],hashlib.sha256(rgb.tobytes()).hexdigest())
 
     def test_new_atlas_package_has_unreviewed_current_file_hashes(self):
-        try: import cv2
+        try: import cv2  # noqa: F401 -- ImportError selects the OpenCV capability skip.
         except ImportError: self.skipTest('OpenCV packaging environment required')
         path=Path(__file__).resolve().parents[1]/'scripts/reconstruction/prepare_mappo_same_source_texture.py'
         spec=importlib.util.spec_from_file_location('review_package_test',path)

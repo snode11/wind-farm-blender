@@ -15,7 +15,7 @@ pytest.importorskip("torch")
 
 from wfrl.nrel_reconstruction import dataset, optimize
 from wfrl.nrel_reconstruction.observations import segment_rgb
-from test_nrel_dataset import bundle  # Reuse the signed allowlist fixture.
+from test_nrel_dataset import bundle  # noqa: F401 -- pytest discovers the signed allowlist fixture by name.
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "nrel_single_blade.py"

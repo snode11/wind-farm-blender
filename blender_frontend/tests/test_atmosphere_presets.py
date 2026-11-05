@@ -1,5 +1,4 @@
 import unittest
-from types import SimpleNamespace
 
 from wfrl_blender.atmosphere import PRESETS, apply_preset, get_preset
 from wfrl_blender.overlays import overlay_lines

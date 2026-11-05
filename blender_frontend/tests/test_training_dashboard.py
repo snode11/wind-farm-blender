@@ -1,4 +1,3 @@
-from copy import deepcopy
 import pytest
 from wfrl_blender.training import TrainingDashboard
 from wfrl_blender.protocol import ProtocolError

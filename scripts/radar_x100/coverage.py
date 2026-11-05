@@ -1,10 +1,8 @@
 """Offline two-installation finite-target coverage on the complete declared 30 Hz grid."""
 from pathlib import Path
 import argparse
-import importlib
 import json
 import sys
-import uuid
 import numpy as np
 
 

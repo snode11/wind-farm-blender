@@ -3,7 +3,6 @@
 WFRL_TEST_OUTPUT controls isolated evidence files. No source .blend is saved.
 """
 import json
-import math
 import os
 from pathlib import Path
 import sys

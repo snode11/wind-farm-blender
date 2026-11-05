@@ -1,8 +1,6 @@
 """Owned background render processes, progress and cancellation without Blender."""
 import importlib
 import json
-import os
-from pathlib import Path
 import sys
 import time
 from types import SimpleNamespace as NS

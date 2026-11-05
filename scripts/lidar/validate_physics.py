@@ -24,7 +24,7 @@ def analytic_evidence():
 def compare(base,refined,kind):
     base=Path(base);refined=Path(refined);bc=json.loads((base/'run_config.json').read_text());rc=json.loads((refined/'run_config.json').read_text())
     measurements=json.loads((base/'processed.json').read_text())['measurements'];fs={b:sorted((refined/'FarmInputs/vtk').glob(f'Case.T1.Blade{b}Surface.*.vtp')) for b in range(1,4)}
-    differences=[];errors=[];ranges=[]
+    differences=[];ranges=[]
     for r in measurements:
         i=round(r['time_s']*rc['fps']);pts,tris=read_surface(fs[r['blade_id']][i]);tip=tip_reference(pts,37 if rc['span_refined'] else 19);truth,_=truth_clearance(tip)
         differences.append(abs(truth-r['truth_m']))

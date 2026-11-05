@@ -264,7 +264,7 @@ def test_completion_requires_untampered_belonging_artifacts(monkeypatch, tmp_pat
     from wfrl.training_integrity import find_completed_run
     fake_training(monkeypatch, tmp_path)
     args = dict(env_id="fake", iters=1, n_steps=4, n_epochs=1)
-    hist = trainer.train(**args)
+    trainer.train(**args)
     config = trainer.experiment_config(**args)
     path = find_completed_run(tmp_path / "runs", config, "source-fixture")
     assert path

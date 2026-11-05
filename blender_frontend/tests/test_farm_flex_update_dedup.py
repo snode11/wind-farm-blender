@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from wfrl_blender import farm_flex, performance, split_turbine_context
-from test_farm_flex_world_matrices import Vertices, mathutils_module, replay
+from test_farm_flex_world_matrices import Vertices, mathutils_module, replay  # noqa: F401 -- pytest discovers both fixtures by name.
 
 
 @pytest.fixture(autouse=True)

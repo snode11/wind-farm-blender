@@ -758,7 +758,7 @@ def progress():
 
 
 def shutdown():
-    global _client, _health, _last_tick, _last_async_display_state, _last_display_state, _backend_scene
+    global _health, _last_tick, _last_async_display_state, _last_display_state, _backend_scene
     _last_tick = None
     _last_async_display_state = None
     _last_display_state = None

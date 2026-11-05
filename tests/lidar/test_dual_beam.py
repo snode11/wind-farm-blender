@@ -1,5 +1,4 @@
 """Independent analytic geometry, invalid pairs, occlusion and S1 semantics."""
-from copy import deepcopy
 import inspect
 import math
 

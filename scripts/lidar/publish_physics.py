@@ -1,6 +1,6 @@
 """Publish only completed solver cases with explicit saved validation evidence."""
 from pathlib import Path
-import sys,json,hashlib,math
+import sys,json,hashlib
 import numpy as np
 ROOT=Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT))
 from wfrl.lidar.physics import Calibration,background_first_hit

@@ -10,7 +10,6 @@
   3. 单帧字节数 × 帧数 = 一个回合的磁盘代价
   4. 开切面后 Sim/CPU 掉多少（I/O 开销值不值）
 """
-import glob
 import os
 import time
 

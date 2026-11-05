@@ -1,7 +1,6 @@
 """Render the actual replay and verify inner-tip camera/paint invariants."""
 from pathlib import Path
 import json
-import math
 import os
 import runpy
 import bpy

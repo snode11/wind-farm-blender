@@ -1,6 +1,5 @@
 """Exercise the installed check runner with synthetic profiles and process results."""
 import importlib.util
-import json
 from pathlib import Path
 import re
 import sys

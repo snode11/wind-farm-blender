@@ -25,7 +25,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))))
 
-from wfrl.scene import SceneRuntime, load_scene                     # noqa: E402
+from wfrl.scene import SceneRuntime                     # noqa: E402
 from wfrl.scene.schema import Scene, SensorSpec, Turbine            # noqa: E402
 
 FAILS = []

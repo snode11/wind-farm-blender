@@ -1,7 +1,6 @@
 """Search supported T1 mounts using the existing recorded blade geometry."""
 from pathlib import Path
 import json
-import math
 import os
 import sys
 from dataclasses import asdict

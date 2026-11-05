@@ -5,7 +5,6 @@ original movies and frozen four-frame estimates share a controlled main-thread
 player. Frame handlers only request work; they never change geometry.
 """
 import importlib.util
-import json
 import math
 import os
 from pathlib import Path

@@ -1,5 +1,4 @@
 """Real export and RTSP lifecycle checks for the Blender video controller."""
-import hashlib
 import ctypes
 import importlib.util
 import os

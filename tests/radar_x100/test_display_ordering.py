@@ -1,5 +1,4 @@
 """Display continuity survives slot consumption while recordings keep arrival order."""
-from dataclasses import replace
 import time
 import numpy as np
 from wfrl.radar_x100 import acquisition, channel, recording, schema

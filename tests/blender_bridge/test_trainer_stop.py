@@ -1,5 +1,4 @@
 import threading
-from types import SimpleNamespace
 
 from wfrl.studio.trainer import Trainer
 

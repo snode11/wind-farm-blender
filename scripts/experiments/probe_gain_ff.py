@@ -45,7 +45,6 @@ def run_one(d_deg, scene=None):
         xs = drv.xcoords
         step = lambda push: drv.step(push)                       # noqa: E731
         read_m = lambda m: (m["power"], m["yaw"])                # noqa: E731
-        warmup_done = False
     else:
         sc = load_scene(scene)
         rt = SceneRuntime(sc, max_steps=budget, warmup_steps=WARMUP)
@@ -55,7 +54,6 @@ def run_one(d_deg, scene=None):
         step = lambda push: rt.step(yaw_delta=push)              # noqa: E731
         read_m = lambda fr: (rt.last_measure["power"],           # noqa: E731
                              rt.last_measure["yaw"])
-        warmup_done = True
         drv = rt
     up = np.where(xs <= xs.min() + 1.0)[0]      # 上游机组（x 最小）
     if scene is None:

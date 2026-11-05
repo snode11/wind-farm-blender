@@ -255,7 +255,7 @@ def test_repeated_object_and_data_failures_keep_independent_pending_resources(ru
 
 
 def test_pending_data_is_preserved_while_shared_and_retried_when_unused(runtime):
-    old, data = runtime.old[1], runtime.old[1].data
+    data = runtime.old[1].data
     runtime.cameras.failures[data] = 1
     core._publish(runtime.scene, runtime.replacement)
     shared = runtime.create(0, installed=False, data=data)

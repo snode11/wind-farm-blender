@@ -3,7 +3,6 @@ import hashlib
 import builtins
 import json
 import lzma
-from pathlib import Path
 import sys
 
 import pytest

@@ -57,7 +57,6 @@ class Placement:
 
 
 def shutdown(restore=True):
-    global _ACTIVE
     op = _ACTIVE
     if op:
         try:

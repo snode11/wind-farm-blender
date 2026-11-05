@@ -1,6 +1,5 @@
 """Committed defect history remains consistent while disposal is retryable."""
 from copy import deepcopy
-import importlib
 from pathlib import Path
 import sys
 

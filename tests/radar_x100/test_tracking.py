@@ -46,7 +46,7 @@ def test_background_ambiguity_missing_points_and_long_extrapolation_reject():
 def test_tracking_smooths_local_deflection_without_rotor_lag_and_never_fills_misses():
     tracker = BladeTracker()
     points, priors = observations()
-    first = tracker.update(points, priors, np.ones(len(points)), time_s=1, identity='source-a', frame_key=0)
+    tracker.update(points, priors, np.ones(len(points)), time_s=1, identity='source-a', frame_key=0)
     points, priors = observations(.2, .1)
     second = tracker.update(points, priors, np.ones(len(points)), time_s=1+2/30, identity='source-a', frame_key=2)
     row = second['blades'][0]

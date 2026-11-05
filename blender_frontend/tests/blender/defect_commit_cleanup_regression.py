@@ -1,11 +1,8 @@
 """Native NREL/GW184 editor commits and history survive deferred mesh disposal."""
-from copy import deepcopy
-import importlib
 import json
 import os
 from pathlib import Path
 import sys
-from types import SimpleNamespace
 
 import bpy
 

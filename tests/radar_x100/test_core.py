@@ -1,6 +1,5 @@
 """Binary, time, geometry and acquisition contracts independent of Blender."""
 from dataclasses import asdict, replace
-import hashlib
 import json
 import struct
 import threading

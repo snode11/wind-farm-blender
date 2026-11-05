@@ -5,7 +5,6 @@ It opens ephemeral loopback-only ports and cleans up every child process.
 """
 import json
 import os
-from pathlib import Path
 import socket
 import subprocess
 import threading
@@ -16,7 +15,7 @@ from urllib.request import urlopen
 import pytest
 
 from wfrl.camera_video.stream import AccessUnits, MappingServer, mediamtx_config, packetize, publish, receive, vcl_hash
-from test_camera_video_media import encoded_package
+from test_camera_video_media import encoded_package  # noqa: F401 -- pytest discovers this fixture by name.
 
 
 def _port():

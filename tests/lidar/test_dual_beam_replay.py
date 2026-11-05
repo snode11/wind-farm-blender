@@ -1,12 +1,11 @@
 """Stateless seeking, held groups and corruption checks for the new contract."""
 from copy import deepcopy
 from types import SimpleNamespace
-import json
 from pathlib import Path
 
 import numpy as np
 import pytest
-from wfrl.lidar.dual_beam import observe, PairLimits
+from wfrl.lidar.dual_beam import observe
 from wfrl.lidar.dual_beam_replay import DualBeamReader, METHOD_ALGORITHM_VERSIONS, precompute
 from wfrl.lidar.replay import ReplayReader
 from wfrl.camera_video.data import SourceGeometry

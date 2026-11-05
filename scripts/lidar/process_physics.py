@@ -1,6 +1,6 @@
 """Consume persistent solver surfaces, save reviewable measurements (not READY)."""
 from pathlib import Path
-import argparse, json, math, sys, hashlib
+import argparse, json, sys, hashlib
 import numpy as np
 ROOT=Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT))
 from wfrl.lidar.physics import Calibration,read_surface,tip_reference,truth_clearance,first_hit,simplified_estimate,collision_excluded,background_first_hit

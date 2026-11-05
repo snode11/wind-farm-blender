@@ -25,7 +25,6 @@ from types import SimpleNamespace
 
 import bpy
 from bpy_extras.view3d_utils import location_3d_to_region_2d
-from mathutils import Vector
 
 HERE = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location('same_source_validation_helpers',

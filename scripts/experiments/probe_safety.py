@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))))
 
 from wfrl.safety import (ACTUATOR_RATE, DUTY_LIMIT, RATED_RPM,   # noqa: E402
-                         RATED_TORQUE, RPM_ALARM, TORQUE_ENV_HI,
+                         RATED_TORQUE, TORQUE_ENV_HI,
                          TORQUE_ENV_LO, baseline_gen_torque, SafetyLimiter)
 from wfrl.scene.schema import Scene, Turbine                     # noqa: E402
 

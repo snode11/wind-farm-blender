@@ -1,12 +1,10 @@
 """Native World ownership, deleted RNA cleanup and GW184 projection contracts."""
-import importlib
 import json
 import os
 from pathlib import Path
 import sys
 
 import bpy
-from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT), str(ROOT / 'projects/gw184-single')]
