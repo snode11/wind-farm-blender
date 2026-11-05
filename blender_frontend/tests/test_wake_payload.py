@@ -42,6 +42,40 @@ def channel(value, *, fidelity="SYNTH", provenance=None):
     }
 
 
+@pytest.mark.parametrize(('shape', 'dimensions'), [
+    pytest.param([2.9, 3.7], (2, 3), id='fractional'),
+    pytest.param(['2', '3'], (2, 3), id='strings'),
+    pytest.param([True, 6], (1, 6), id='boolean'),
+    pytest.param([None, 6], (1, 6), id='none'),
+    pytest.param([0, 6], (0, 6), id='zero'),
+])
+def test_wake_shape_rejects_invalid_dimensions(shape, dimensions):
+    ny, nx = dimensions
+    payload = {'encoding': 'json', 'turbine_ids': ['T1'], 'data': channel({
+        'kind': 'disxy', 'shape': shape, 'values': [1.0] * (ny * nx),
+        'x': list(range(nx)), 'y': list(range(ny)),
+    })}
+    with pytest.raises(WakePayloadError):
+        validate_wake_payload(payload)
+
+
+@pytest.mark.parametrize('shape', [
+    pytest.param([2, 3], id='integers'),
+    pytest.param([2.0, 3.0], id='integral-floats'),
+])
+def test_wake_shape_accepts_integer_dimensions(shape):
+    payload = {'encoding': 'json', 'turbine_ids': ['T1'], 'data': channel({
+        'kind': 'disxy', 'shape': shape, 'values': [1.0] * 6,
+        'x': [0, 1, 2], 'y': [0, 1],
+    })}
+    frame = validate_wake_payload(payload)
+    assert frame.shape == (2, 3)
+    assert all(type(item) is int for item in frame.shape)
+    vertices, faces = grid_mesh(frame)
+    assert len(vertices) == 6
+    assert len(faces) == 2
+
+
 def test_disxy_material_failure_keeps_mesh_and_reports_error_once(monkeypatch, capsys):
     from wfrl_blender import materials, runtime, wake
     from wfrl_blender.state import FrontendState

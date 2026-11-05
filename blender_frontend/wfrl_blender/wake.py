@@ -155,10 +155,10 @@ def validate_wake_payload(payload: Mapping[str, Any], *, sequence: int = 0,
             shape_value = grid.get("shape")
     if not isinstance(shape_value, (list, tuple)) or not shape_value:
         raise WakePayloadError("wake shape is required")
-    try:
-        shape = tuple(int(item) for item in shape_value)
-    except (TypeError, ValueError) as exc:
-        raise WakePayloadError("wake shape must contain positive integers") from exc
+    if any(not (type(item) is int or (type(item) is float and item.is_integer()))
+           for item in shape_value):
+        raise WakePayloadError("wake shape must contain positive integers")
+    shape = tuple(int(item) for item in shape_value)
     if any(item <= 0 for item in shape) or math.prod(shape) != len(values_tuple):
         raise WakePayloadError("wake shape does not match values")
     if len(values_tuple) > MAX_WAKE_POINTS:
