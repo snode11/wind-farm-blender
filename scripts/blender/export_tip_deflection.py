@@ -27,8 +27,14 @@ def export(package, case, geometry_asset):
     names, units = lines[6].split(), lines[7].split()
     raw = np.loadtxt(output, skiprows=8)
     columns = dict(zip(names, raw.T))
-    indices = np.searchsorted(columns['Time'], times)
-    if not np.allclose(columns['Time'][indices], times, atol=1e-8, rtol=0):
+    source_times = columns['Time']
+    indices = np.searchsorted(source_times, times)
+    out_of_range = (times < source_times[0]) | (indices >= len(source_times))
+    if np.any(out_of_range):
+        raise ValueError(
+            f'Requested time {times[out_of_range][0]} s is outside available source time '
+            f'range [{source_times[0]}, {source_times[-1]}] s')
+    if not np.allclose(source_times[indices], times, atol=1e-8, rtol=0):
         raise ValueError('Source time mismatch')
     telemetry = json.loads((package / 'telemetry.json').read_text(encoding='utf-8'))
     if sha(output) != telemetry['sources']['T1']['sha256']:
