@@ -54,7 +54,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定
 | `radar_x100_configuration.py` | 仅源码后台，必须指定 `WFRL_EXPECTED_ADDON_ROOT`；核对名义外壳／视场、真实 RNA、已应用配置与编辑差异、显示即时生效和下一新样本预算。 |
 | `radar_x100_observations.py` | 仅源码后台，直接导入工作区模块；核对面积采样、材料标签隔离、同源安装导入、未知报告拒绝、回退及估计撤回。 |
 | `radar_x100_estimation_window.py` | 仅源码可见进程，直接导入工作区模块；读回拟合线／叶尖区域的真实GPU像素，检查关闭、恢复及原始帧和时刻保留。脚本控制不代替外部键鼠。 |
-| `mappo_full_view_default_window.py`、`mappo_same_source_navigation_window.py`、`mappo_same_source_texture_window.py`、`mappo_same_source_texture_reopen.py`、`split_texture_sidebar_window.py`、`split_reconstruction_window.py`、`split_reconstruction_entries_window.py` | 仅安装模块：`WFRL_ADDON_MODULE` 须为 `bl_ext.*`，源码模块被拒绝，因此未纳入 `run_regressions.py`。`mappo_same_source_texture_reopen.py` 为后台进程，其余为可见进程；导航与纹理窗口用 `WFRL_EXPECTED_GEOMETRY_SHA256` 校验几何，其余用 `WFRL_EXPECTED_ADDON_ROOT` 校验期望目录。 |
+| `mappo_full_view_default_window.py`、`mappo_same_source_navigation_window.py`、`mappo_same_source_texture_window.py`、`mappo_same_source_texture_reopen.py`、`split_texture_sidebar_window.py` | 仅安装模块：`WFRL_ADDON_MODULE` 须为 `bl_ext.*`，源码模块被拒绝，因此未纳入 `run_regressions.py`。研究用 `split_surface_texture` 不进入安装包，安装运行断言该模块不存在；表面检视只设置一次静止近景，期望 `DETAIL` 为假。`mappo_same_source_texture_reopen.py` 为后台进程，其余为可见进程；导航与纹理窗口用 `WFRL_EXPECTED_GEOMETRY_SHA256` 校验几何，其余用 `WFRL_EXPECTED_ADDON_ROOT` 校验期望目录。 |
 
 特殊前置条件：
 
@@ -70,6 +70,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定
 - `radar_x100_configuration.py` 可由 `run_regressions.py` 选择，使用尚不存在的 `WFRL_TEST_OUTPUT` 目录，要求 `result.json`、`X100_CONFIGURATION_PASS` 与正常退出；核对安装快捷按钮同步应用状态、单帧来源／目录来源和实时连接未热切换。宿主的 `test_radar_x100_configuration.py`、`test_radar_x100_display.py`、`test_radar_x100_analysis_runtime.py` 与 `test_radar_x100_recording_ownership.py` 分别检查配置比较、有界辅助层缓存、冻结帧分析重试和非阻塞写盘归属；它们不代替 GPU 绘制、真实输入或持续性能。
 - 两份独立点云窗口脚本均要求干净可见进程及尚不存在的 `WFRL_TEST_OUTPUT` 目录，均未纳入 `run_regressions.py`。`radar_x100_output_window.py` 写入 `result.json` 与逐次绘制诊断 `draw-sync.jsonl`，检查最终报告及 `X100_OUTPUT_WINDOW_PASS`，完成后保留窗口；`radar_x100_output_lifecycle.py` 核对保存重开、撤销／重做、其他 Image Editor 保留、重复打开及卸载时 GPU 缓存释放，检查报告、`X100_OUTPUT_LIFECYCLE_PASS` 及正常退出。脚本操作不代替真实键鼠或完整片段性能验证。
 - 共享结构后台检查可用 `WFRL_SPLIT_INPUT` 指定场景副本；`reconstruction_workflow_window.py` 要求干净可见进程、安装模块及精确目录。`WFRL_EXPECTED_GEOMETRY_SHA256` 从已确认资产及 inventory 取得，不能照抄失败现场摘要绕过校验。
+- 统一工作流窗口覆盖两侧完整风机、可用画布宽度、即时相机隔离、几何对象与形态键身份、工作区往返、几何模式样本步进及 CURRENT／退出恢复。右侧相机退出后的枢轴距转子中心须不超过 5 m；静止检视分别检查点击时的目标入框，以及播放、寻址和侧栏变化后的视角保持。
 - `scripts/blender/check_nrel_nacelle_camera.py` 支持 `WFRL_ADDON_MODULE`／`WFRL_EXPECTED_ADDON_ROOT`，参数 `-- --output <新目录>`，生成 PNG、场景及参数。双束使用匹配内置包或 `WFRL_DUAL_PACKAGE`；窗口以 `WFRL_BUILTIN_METHOD=TLS` 选候选，同时核对方法、源摘要、S1 与双束。
 
 视频脚本的媒体、完整样片及跨进程恢复覆盖见[视频验证边界](video-jobs.md#视频验证边界)。
