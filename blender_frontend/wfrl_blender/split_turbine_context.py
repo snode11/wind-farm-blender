@@ -119,6 +119,18 @@ def _model_inverse(yaw, matrices):
     return (_world_from_basis(yaw, matrices) @ flip).inverted()
 
 
+def rotor_center(scene, *, offset):
+    """Return the source rotor origin in the shared structure's display frame."""
+    from mathutils import Matrix
+    yaw = scene.objects.get(SOURCE_PREFIX + 'YawRoot')
+    rotor = scene.objects.get(SOURCE_PREFIX + 'Rotor')
+    if yaw is None or rotor is None:
+        raise ValueError('左侧 T1 叶轮或机舱坐标缺失')
+    matrices = {}
+    display_from_world = Matrix.Translation(offset) @ _model_inverse(yaw, matrices)
+    return (display_from_world @ _world_from_basis(rotor, matrices)).translation.copy()
+
+
 def _legacy_valid(obj, part, prefix):
     if obj.type != 'MESH' or obj.name != prefix + part:
         return False

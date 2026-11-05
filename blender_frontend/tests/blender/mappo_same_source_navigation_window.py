@@ -178,7 +178,7 @@ def observe_play(label, expected_view, *, manual=False):
     assert current['left'] != record['start']['left'], ('Left source stopped', record, current)
     assert current['right'] != record['start']['right'], ('Right reconstruction stopped', record, current)
     if manual:
-        assert not validation.scene.get(validation.same.DETAIL), 'Manual navigation must release detail tracking'
+        assert not validation.scene.get(validation.same.DETAIL), 'Manual navigation must stay independent of playback'
     record['observed'].append(dict(motion=current, clock=validation.frame(current['frame'], seek=False),
                                    right_view=unchanged(expected_view)))
     if len(record['observed']) < 2:
@@ -201,9 +201,7 @@ def manual_full_rotor_view():
     rv.view_perspective = 'PERSP'
     rv.update()
     area.tag_redraw()
-    # Deliberately leave DETAIL true. Only the implementation may release it
-    # when playback observes navigation that differs from its own last view.
-    assert validation.scene.get(validation.same.DETAIL)
+    assert not validation.scene.get(validation.same.DETAIL)
     return right_view()
 
 
@@ -304,7 +302,7 @@ def tick():
             validation.frame(52)
             operator('split_recon_inspect', point='CURRENT')
         elif stage == 5:
-            assert validation.scene.get(validation.same.DETAIL)
+            assert not validation.scene.get(validation.same.DETAIL)
             capture('explicit-detail-before-navigation')
             target, _normal, _up = validation.same._tracked_surface(validation.scene, validation.value)
             state['detail_native_orbit'] = dict(before=right_view(), target_m=list(target),
@@ -320,24 +318,23 @@ def tick():
             assert not helpers.np.allclose(actual['rotation'], record['before']['rotation'], atol=1e-5, rtol=0), record
             record['target_after'] = surface_target_pixels(record['target_m'])
             record['after'] = actual
-            # Re-seek the same native frame to observe the navigation ownership
-            # change without moving the selected surface out of the closeup.
+            # Re-seek without moving the selected surface out of the closeup.
             record['clock'] = validation.frame(validation.scene.frame_current)
-            assert not validation.scene.get(validation.same.DETAIL), 'Native detail orbit must release tracking'
+            assert not validation.scene.get(validation.same.DETAIL)
             unchanged(actual)
-            record['target_after_release'] = surface_target_pixels(record['target_m'])
-            capture('detail-native-orbit-released')
-            state['checks'].append('One native orbit from explicit detail keeps its surface target visible and releases automatic tracking')
+            record['target_after_seek'] = surface_target_pixels(record['target_m'])
+            capture('detail-native-orbit-after-seek')
+            state['checks'].append('Native orbit from stationary detail keeps its surface target visible; a same-frame seek preserves navigation')
             operator('split_recon_inspect', point='CURRENT')
         elif stage == 7:
-            assert validation.scene.get(validation.same.DETAIL)
+            assert not validation.scene.get(validation.same.DETAIL)
             state['manual_view'] = manual_full_rotor_view()
             play_start('manual_resume')
         elif stage == 8:
             if not observe_play('manual_resume', state['manual_view'], manual=True):
                 return .2
             capture('manual-full-rotor-after-resume', full=True)
-            state['checks'].append('Pause, detail focus, manual orbit/zoom, and user resume release tracking and preserve all right navigation')
+            state['checks'].append('Pause, one-shot focus, manual orbit/zoom and user resume preserve all right navigation without tracking')
         elif stage == 9:
             assert validation.motion_signature() == state['manual_resume']['pause']
             for frame in (901, 52):

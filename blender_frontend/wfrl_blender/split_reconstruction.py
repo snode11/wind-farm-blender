@@ -118,12 +118,12 @@ def _navigation(space):
     return dict(view_perspective=rv.view_perspective,
                 view_rotation=rv.view_rotation.copy(), view_location=rv.view_location.copy(),
                 view_distance=rv.view_distance, view_camera_zoom=rv.view_camera_zoom,
-                view_camera_offset=tuple(rv.view_camera_offset))
+                view_camera_offset=tuple(rv.view_camera_offset), lens=space.lens)
 
 
 def _restore_navigation(space, values, *, free=False):
     for key, value in values.items():
-        setattr(space.region_3d, key, value)
+        setattr(space if key == 'lens' else space.region_3d, key, value)
     if free:
         space.region_3d.view_perspective = 'PERSP'
 
@@ -330,7 +330,7 @@ def _project(area, points):
     return min(xs), min(ys), max(xs), max(ys)
 
 
-def _fit_camera(area, points):
+def _fit_camera(area, points, *, orbit_center):
     """Fit via viewport pan/zoom; only the private display camera may widen."""
     import bpy
     rv = area.spaces.active.region_3d
@@ -339,12 +339,9 @@ def _fit_camera(area, points):
     camera = area.spaces.active.camera
     if camera and (camera.name == 'SplitRecon.Camera' or camera.get('split_mappo_texture_owned')):
         from mathutils import Vector
-        target = [(min(p[i] for p in points) + max(p[i] for p in points)) / 2
-                  for i in range(3)]
-        target = Vector(target)
-        # Native orbit exits CAMERA using the region's stored pivot. The pane
-        # was split from MAPPO, whose pivot is 10 km from this isolated rotor.
-        # Seed its free navigation as well as its visible camera framing.
+        target = Vector(orbit_center)
+        # Native camera exit restores this free-view pivot. Keep it on the
+        # displayed rotor while fitting the complete turbine with all points.
         rv.view_perspective = 'PERSP'
         rv.view_location = target
         rv.view_rotation = camera.matrix_world.to_quaternion()
@@ -467,11 +464,14 @@ def _fit_free(area, points):
 
 def _fit_pair(window, areas, *, explicit=False):
     import bpy
+    from . import split_turbine_context
     with bpy.context.temp_override(window=window, area=areas[0], region=_region(areas[0])):
         if explicit:
             _fit_free(areas[0], _points(window.scene, areas[0], reconstruction=False))
         # Automatic resize fitting never changes a manually orbited right view.
-        _fit_camera(areas[1], _points(window.scene, areas[1], reconstruction=True))
+        _fit_camera(areas[1], _points(window.scene, areas[1], reconstruction=True),
+                    orbit_center=split_turbine_context.rotor_center(
+                        window.scene, offset=_display_origin(window.scene)))
 
 
 def _layout_factor(areas):
@@ -557,7 +557,6 @@ def switch_mode(context):
     origin = _display_origin(scene)
     navigation = _navigation(areas[1].spaces.active)
     left_navigation = _navigation(areas[0].spaces.active)
-    lens = areas[1].spaces.active.lens
     old_right_navigation = _navigation(areas[1].spaces.active)
     membership = [(obj, obj.local_view_get(areas[1].spaces.active)) for obj in scene.objects
                   if hasattr(obj, 'local_view_get')]
@@ -583,7 +582,6 @@ def switch_mode(context):
                 _configure(window, areas)
             _restore_navigation(areas[0].spaces.active, left_navigation)
             _restore_navigation(areas[1].spaces.active, navigation)
-            areas[1].spaces.active.lens = lens
             _remember(window, areas)
             scene['split_review_status'] = 'READY'
             _redraw_scene(scene)
@@ -593,7 +591,6 @@ def switch_mode(context):
             for name, value in target_state[1].items():
                 setattr(target_camera.data, name, value)
         areas[1].spaces.active.camera = source_camera
-        areas[1].spaces.active.lens = lens
         _restore_navigation(areas[0].spaces.active, left_navigation)
         _restore_navigation(areas[1].spaces.active, old_right_navigation)
         for obj, included in membership:
@@ -925,6 +922,18 @@ def _ensure_timer():
         bpy.app.timers.register(_tick, first_interval=.1, persistent=True)
 
 
+def _clear_research_texture_runtime():
+    """The research-only synthetic texture module is absent from installed packages.
+
+    Workspace sessions that imported it hold Blender ID references, which file
+    loads and undo/redo invalidate exactly like the same-source texture runtime.
+    """
+    import sys
+    module = sys.modules.get(__package__ + '.split_surface_texture')
+    if module is not None:
+        module.clear_runtime()
+
+
 def _load_pre(_unused):
     from . import cameras, split_mappo_texture, split_turbine_context
     cameras.cancel_view_layout()
@@ -932,6 +941,7 @@ def _load_pre(_unused):
     _JOBS.clear()
     _BOUNDS.clear()
     split_mappo_texture.clear_runtime()
+    _clear_research_texture_runtime()
     split_turbine_context.clear_runtime()
 
 
@@ -961,6 +971,7 @@ def _history_post(_unused):
     _JOBS.clear()
     _BOUNDS.clear()
     split_mappo_texture.clear_runtime()
+    _clear_research_texture_runtime()
     split_turbine_context.clear_runtime()
     _ensure_timer()
 

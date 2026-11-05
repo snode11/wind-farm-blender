@@ -393,6 +393,7 @@ def _mode_context(monkeypatch, perspective='PERSP'):
     scene.objects[same.CAMERA] = texture
     left, right = area(1, source), area(2, legacy, 404)
     left.spaces.active.region_3d = navigation((7., 9., 90.))
+    left.spaces.active.lens = 45.
     right.spaces.active.region_3d = navigation((3., 10004., 88.))
     right.spaces.active.lens = 61.
     screen = NS(areas=[left, right], is_animation_playing=True, as_pointer=lambda: 20)
@@ -417,7 +418,7 @@ def _mode_context(monkeypatch, perspective='PERSP'):
 def _assert_navigation_equal(actual, expected):
     for name in ('view_rotation', 'view_location', 'view_camera_offset'):
         np.testing.assert_allclose(actual[name], expected[name], atol=1e-10)
-    for name in ('view_perspective', 'view_distance', 'view_camera_zoom'):
+    for name in ('view_perspective', 'view_distance', 'view_camera_zoom', 'lens'):
         assert actual[name] == expected[name]
 
 
@@ -531,6 +532,27 @@ def test_return_after_exit_queues_saved_right_navigation_and_current_clock(monke
     assert scene['split_texture_current_source'] == 'MAPPO'
 
 
+def test_saved_return_navigation_restores_lens_on_recreated_viewport(monkeypatch):
+    import json
+    context, left, right, _legacy, _texture = _mode_context(monkeypatch, 'ORTHO')
+    before = split._navigation(right.spaces.active)
+    context.scene['split_review_return_navigation'] = json.dumps({
+        key: value if isinstance(value, (str, float, int)) else list(value)
+        for key, value in before.items()})
+    restored = split._saved_return_navigation(context.scene)
+    assert left.spaces.active.lens != right.spaces.active.lens
+    split._restore_navigation(left.spaces.active, restored)
+    _assert_navigation_equal(split._navigation(left.spaces.active), before)
+
+
+def test_legacy_return_navigation_without_lens_keeps_existing_optics(monkeypatch):
+    context, _left, right, _legacy, _texture = _mode_context(monkeypatch)
+    before = split._navigation(right.spaces.active)
+    legacy = {key: value for key, value in before.items() if key != 'lens'}
+    split._restore_navigation(right.spaces.active, legacy)
+    _assert_navigation_equal(split._navigation(right.spaces.active), before)
+
+
 def test_stable_same_source_timer_refreshes_without_reactivating_settings(monkeypatch):
     scene = Scene(split_texture_current_source='MAPPO', split_mappo_texture_review=True)
     window = NS(scene=scene, screen=NS(areas=[], as_pointer=lambda: 20), as_pointer=lambda: 10)
@@ -561,6 +583,29 @@ def test_history_boundary_clears_data_bindings_and_jobs_without_losing_view_sess
     split._history_post(None)
     assert split._SESSIONS == state and not split._JOBS and not split._BOUNDS
     assert not same._SESSIONS and not context._SESSIONS
+
+
+
+def test_load_and_history_clear_imported_research_texture_sessions(monkeypatch):
+    from wfrl_blender import cameras
+    cleared = []
+    research = NS(clear_runtime=lambda: cleared.append(1))
+    monkeypatch.setitem(sys.modules, split.__package__ + '.split_surface_texture', research)
+    monkeypatch.setattr(cameras, 'cancel_view_layout', lambda: None)
+    monkeypatch.setattr(split, '_ensure_timer', lambda: None)
+    split._load_pre(None)
+    split._history_post(None)
+    assert cleared == [1, 1]
+
+
+def test_load_and_history_never_import_absent_research_texture_module(monkeypatch):
+    from wfrl_blender import cameras
+    # None in sys.modules makes any import attempt raise, as in an installed package.
+    monkeypatch.setitem(sys.modules, split.__package__ + '.split_surface_texture', None)
+    monkeypatch.setattr(cameras, 'cancel_view_layout', lambda: None)
+    monkeypatch.setattr(split, '_ensure_timer', lambda: None)
+    split._load_pre(None)
+    split._history_post(None)
 
 
 if __name__ == '__main__':
