@@ -1,11 +1,74 @@
 """Atomic JSON and text formatting, publication, cleanup and parent-directory contracts."""
+import os
 from pathlib import Path
+import stat
 import subprocess
 import sys
 
 import pytest
 
 from wfrl_blender import atomic_json
+
+
+@pytest.mark.skipif(os.name != 'posix', reason='POSIX permission bits require a POSIX filesystem')
+@pytest.mark.parametrize('mask,expected_mode', [(0o022, 0o644), (0o077, 0o600)],
+                         ids=['umask-022', 'umask-077'])
+@pytest.mark.parametrize('writer,value', [
+    (atomic_json.write_json, {'label': '叶片'}),
+    (atomic_json.write_text, '叶片姿态'),
+], ids=['json', 'text'])
+def test_new_file_permissions_follow_umask(tmp_path, writer, value, mask, expected_mode):
+    target = tmp_path / 'status.json'
+    previous_umask = os.umask(mask)
+    try:
+        writer(target, value)
+        assert stat.S_IMODE(target.stat().st_mode) == expected_mode
+        assert list(tmp_path.iterdir()) == [target]
+    finally:
+        os.umask(previous_umask)
+
+
+@pytest.mark.skipif(os.name != 'posix', reason='POSIX permission bits require a POSIX filesystem')
+@pytest.mark.parametrize('writer,value', [
+    (atomic_json.write_json, {'label': '叶片'}),
+    (atomic_json.write_text, '叶片姿态'),
+], ids=['json', 'text'])
+def test_overwrite_preserves_existing_file_permissions(tmp_path, writer, value):
+    target = tmp_path / 'status.json'
+    target.write_bytes(b'previous content')
+    target.chmod(0o640)
+    previous_umask = os.umask(0o077)
+    try:
+        writer(target, value)
+        assert stat.S_IMODE(target.stat().st_mode) == 0o640
+        assert list(tmp_path.iterdir()) == [target]
+    finally:
+        os.umask(previous_umask)
+
+
+@pytest.mark.parametrize('operation', [
+    'fdopen',
+    pytest.param('fchmod', marks=pytest.mark.skipif(
+        not hasattr(os, 'fchmod'), reason='File-descriptor permissions are unavailable')),
+])
+def test_temporary_setup_failure_closes_descriptor_and_cleans_file(tmp_path, monkeypatch, operation):
+    target = tmp_path / 'status.json'
+    target.write_bytes(b'previous content')
+    descriptors = []
+
+    def fail(descriptor, *args, **kwargs):
+        descriptors.append(descriptor)
+        raise OSError('injected temporary setup failure')
+
+    monkeypatch.setattr(atomic_json.os, operation, fail)
+    with pytest.raises(OSError, match='injected temporary setup failure'):
+        atomic_json.write_json(target, {'label': '叶片'})
+
+    descriptor, = descriptors
+    with pytest.raises(OSError):
+        os.fstat(descriptor)
+    assert target.read_bytes() == b'previous content'
+    assert list(tmp_path.iterdir()) == [target]
 
 
 @pytest.mark.parametrize('writer,value,expected', [
