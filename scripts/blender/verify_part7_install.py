@@ -57,7 +57,6 @@ def _inside_blender(output: Path, source_root: Path) -> None:
         asset_root / "landscape" / "SOURCES.md",
         asset_root / "landscape" / "kloofendal_48d_partly_cloudy_puresky_2k.hdr",
         asset_root / "landscape" / "rocky_terrain_02_diff_2k.jpg",
-        asset_root / "landscape" / "rocky_terrain_02_nor_gl_2k.jpg",
         asset_root / "landscape" / "rocky_terrain_02_rough_2k.jpg",
     )
     assert all(path.is_file() and path.stat().st_size for path in required_assets)

@@ -126,7 +126,7 @@ def terrain_shader(material, *, image_loader=None):
     mix.inputs[0].default_value=.30
     links.new(ramp.outputs['Color'], mix.inputs[1])
     links.new(fine.outputs['Fac'], mix.inputs[2])
-    # Photographic color/roughness/normal maps, tiled in meters with macro variation.
+    # Photographic color and roughness, tiled in meters with macro variation.
     import bpy
     from pathlib import Path
     asset = Path(__file__).parent / 'assets' / 'landscape'

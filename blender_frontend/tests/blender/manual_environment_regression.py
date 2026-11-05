@@ -57,7 +57,8 @@ terrain = ground.data.materials[0]
 assert terrain.name.startswith(prefix) and terrain.node_tree.nodes.get('WFRL.Terrain.Habitat')
 images = {n.image for tree in (manual.world.node_tree, terrain.node_tree)
           for n in tree.nodes if hasattr(n, 'image') and n.image}
-assert len(images) == 4
+# Sky HDR plus terrain diffuse and roughness; roughness also drives the bump.
+assert len(images) == 3
 assert all(i.name.startswith(prefix) and i.packed_file for i in images)
 assert not any(i.as_pointer() in before['images'] for i in images)
 assert source_snapshot(source) == before, 'Manual environment changed source assets'
