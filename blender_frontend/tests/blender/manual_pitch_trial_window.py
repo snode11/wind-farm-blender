@@ -18,6 +18,7 @@ MODULE = _native.addon_module()
 addon = importlib.import_module(MODULE)
 control, panel, clearance = [importlib.import_module(MODULE + '.' + name)
     for name in ('manual_control', 'panels.manual_control', 'clearance_replay')]
+atomic_json = importlib.import_module(MODULE + '.atomic_json')
 assert not bpy.app.background
 assert Path(addon.__file__).resolve().parent == Path(os.environ.get(
     'WFRL_EXPECTED_ADDON_ROOT', ROOT / 'blender_frontend/wfrl_blender')).resolve()
@@ -52,7 +53,15 @@ def snapshot(scene):
 def capture(name):
     path = OUT / (name + '.png')
     assert bpy.ops.screen.screenshot(filepath=str(path)) == {'FINISHED'}
+    assert path.is_file() and path.stat().st_size > 1000
     scene, entry = STATE['manual'], STATE['t1']
+    _start, spec = control.trial_configuration(scene)
+    expected = spec.pose_at(scene.wfrl_manual_trial.elapsed_s)
+    assert abs((entry.azimuth_deg - expected.azimuth_deg + 180.0) % 360.0 - 180.0) < .001
+    assert abs(math.degrees(entry.rotor_object.rotation_euler.x) - entry.azimuth_deg) < .001
+    for index, (actual, target) in enumerate(zip(control.effective_pitches(entry), expected.pitches_deg), 1):
+        assert abs(actual - target) < .001, (actual, target)
+        assert abs(math.degrees(getattr(entry, f'blade{index}_object').rotation_euler.z) + actual) < .001
     STATE['captures'].append(dict(file=str(path), time_s=scene.wfrl_manual_trial.elapsed_s,
                                   azimuth_deg=entry.azimuth_deg,
                                   pitches=list(control.effective_pitches(entry)),
@@ -91,10 +100,13 @@ def observe():
                 scene = bpy.context.scene
                 assert scene['wfrl_manual_blade_model'] == 'rootkink'
                 t1 = next(e for e in scene.wfrl_manual_turbines if e.turbine_id == 'T1')
+                scene.wfrl_manual_pitch_rate_deg_s = 0.0
                 t1.rpm, t1.azimuth_deg = 9, 148
                 t1.individual_pitch = True
                 for index, pitch in enumerate((0, 5, 10), 1):
                     setattr(t1, f'pitch_b{index}_deg', pitch)
+                assert control.effective_pitches(t1) == (0, 5, 10)
+                scene.wfrl_manual_pitch_rate_deg_s = 5.0
                 pending = scene.wfrl_manual_trial
                 for index, target in enumerate((30, -15, 45), 1):
                     setattr(pending, f'select_b{index}', True)
@@ -102,7 +114,7 @@ def observe():
                 pending.duration_s = 8
                 assert bpy.ops.wfrl.manual_down() == {'FINISHED'}
                 sidebar = next(r for r in area.regions if r.type == 'UI')
-                sidebar.active_panel_category = '风机控制'
+                sidebar.active_panel_category = panel.WFRL_PT_ManualControl.bl_category
                 area.spaces.active.show_region_ui = True
                 STATE.update(manual=scene, t1=t1, source_held=snapshot(STATE['source']))
                 return delay('confirm', 1.5)
@@ -110,8 +122,11 @@ def observe():
             pending = scene.wfrl_manual_trial
             assert not STATE['draw_errors'], STATE['draw_errors']
             if STATE['step'] == 'confirm':
+                assert control.effective_pitches(t1) == (0, 5, 10)
                 op('CONFIRM')
-                STATE['step'] = 'early'
+                _start, spec = control.trial_configuration(scene)
+                assert spec.start_pitches == (0, 5, 10), spec.start_pitches
+                STATE.update(step='early', frozen_start_pitches=list(spec.start_pitches))
                 return .025
             if STATE['step'] in {'early', 'late'}:
                 threshold = .6 if STATE['step'] == 'early' else 7.267
@@ -134,7 +149,7 @@ def observe():
                 op('RESET')
                 assert not t1.running and pending.elapsed_s == 0
                 assert abs(t1.azimuth_deg - 148) < 1e-4
-                assert control.effective_pitches(t1) == (0, 5, 10)
+                assert control.effective_pitches(t1) == (0, 5, 10), control.effective_pitches(t1)
                 op('START')
                 return delay('reset_running', .5)
             if STATE['step'] == 'reset_running':
@@ -163,7 +178,7 @@ def observe():
             op('END')
             assert bpy.ops.wfrl.manual_down() == {'FINISHED'}
             area.spaces.active.show_region_ui = True
-            next(r for r in area.regions if r.type == 'UI').active_panel_category = '风机控制'
+            next(r for r in area.regions if r.type == 'UI').active_panel_category = panel.WFRL_PT_ManualControl.bl_category
             assert STATE['draws'] > 0
             report = dict(status='PASS', addon_module=MODULE, addon_file=addon.__file__,
                           blade_model=scene['wfrl_manual_blade_model'],
@@ -172,11 +187,12 @@ def observe():
                                                       'cameras.py', 'panels/manual_control.py')},
                           blender_version=bpy.app.version_string, manual_panel_draws=STATE['draws'],
                           real_timer_shared_motion=True, pause_resume_and_reset=True,
+                          frozen_start_pitches=STATE['frozen_start_pitches'],
                           down_same_geometry=True, camera_switch_preserves_time=True,
                           original_demo_pause_return_resume=True, captures=STATE['captures'],
                           original_camera_zoom_offset_restored=True,
                           boundary='Source visible window and scripted operators; no mouse-input, output, FPS or physical validation')
-            (OUT / 'checks.json').write_text(json.dumps(report, indent=2))
+            atomic_json.write_json(OUT / 'checks.json', report)
             print('MANUAL_PITCH_WINDOW_PASS ' + json.dumps(report), flush=True)
             panel.WFRL_PT_ManualControl.draw = original_draw
             if os.environ.get('WFRL_QUIT_AFTER_TEST', '1') == '1':
@@ -187,8 +203,8 @@ def observe():
                       addon_file=addon.__file__, draw_errors=STATE['draw_errors'],
                       context_mode=bpy.context.mode,
                       active_object_mode=bpy.context.object.mode if bpy.context.object else None)
-        (OUT / 'checks.json').write_text(json.dumps(report, indent=2))
-        print(json.dumps(report), flush=True)
+        atomic_json.write_json(OUT / 'checks.json', report)
+        print('MANUAL_PITCH_WINDOW_FAIL ' + json.dumps(report), flush=True)
         if os.environ.get('WFRL_QUIT_AFTER_TEST', '1') == '1':
             bpy.ops.wm.quit_blender()
         return None
