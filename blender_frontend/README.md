@@ -518,6 +518,8 @@ Interactive 的 **Episode steps** 对应 `episode_steps`：`0` 保持单长回�
 
 测试或检查流程启动的工作区源码 Blender 子进程在加载工作区模块前设置 `sys.dont_write_bytecode = True`，由宿主守卫测试 [test_blender_subprocess_bytecode.py](tests/test_blender_subprocess_bytecode.py) 检查。
 
+名称守卫 [test_static_names.py](tests/test_static_names.py) 依赖 pyflakes，CI 通过 [requirements-ci.txt](../requirements-ci.txt) 安装它，`CI=true` 时缺少该依赖会使测试失败。本地未设置 `CI` 且未安装 pyflakes 时该测试跳过；从 Git 根目录运行 `python -m pip install -r requirements-ci.txt` 安装依赖后，用 `PYTHONPATH=blender_frontend:. PYTHONDONTWRITEBYTECODE=1 python -m pytest blender_frontend/tests/test_static_names.py -q -p no:cacheprovider` 单独运行。
+
 维护修改应作用于规范源；`protocol.py` 来自 `wfrl/blender_bridge/messages.py`，内置 `_vendor/lidar/` 读取器来自 `wfrl/lidar/`。不要手改生成副本或替换冻结模型及正式资产来消除校验失败。
 
 扩展源码（`_vendor/` 与 `assets/` 除外）的文件系统文本读写显式使用 `encoding='utf-8'`，包括 `Path.read_text`、`Path.write_text` 和文本模式 `open`，不依赖平台默认编码；宿主测试 `test_text_io_encoding.py` 以 AST 扫描强制该约定，二进制读写及 `os.open` 不在范围内。JSON 结果与状态文件统一通过 [atomic_json.py](wfrl_blender/atomic_json.py) 的 `write_json(path, value, *, mkdir=False)` 写入：按 UTF-8、`ensure_ascii=False`、`indent=2`、`allow_nan=False` 和末尾换行写出。已编码的姿态 JSON 等文本使用同模块的 `write_text(path, text, *, mkdir=False)`，按 UTF-8 保留原字符串，不追加或转换换行；调用方可将其导入为 `write_atomic_text`，与文件系统文本 API 区分。两个接口共用目标目录内的随机临时文件、`flush`、`fsync`、`os.replace` 与失败清理逻辑；临时文件以 `os.open(..., 0o666)` 创建，新文件权限按进程 umask 确定，与普通文本写入一致，覆盖已有普通文件时保留其权限位，不修改进程 umask；需要保密的作业文件由其所在的 0700 目录限制访问；仅需要创建父目录的调用方传 `mkdir=True`。`manual_video_job.py` 与 `manual_video_render.py` 作为独立脚本运行时按同目录文件加载该模块，不导入扩展包入口。

@@ -1,5 +1,6 @@
 """High-confidence name checks for frontend code, scripts and tests."""
 import ast
+import os
 from pathlib import Path
 import symtable
 import unittest
@@ -82,6 +83,9 @@ class StaticNameTests(unittest.TestCase):
             from pyflakes.checker import Checker
             from pyflakes.messages import UndefinedExport, UndefinedLocal, UndefinedName
         except ImportError:
+            if os.environ.get('CI') == 'true':
+                self.fail('pyflakes is not installed; CI=true requires it. '
+                          'Install with: python -m pip install -r requirements-ci.txt')
             self.skipTest('pyflakes is not installed')
 
         failures = []
