@@ -51,7 +51,7 @@ payload = dict(scene=scene_data, step=1, timestamp=dict(value=2., timebase='simu
 messages = [dict(type='snapshot', sequence=1, payload=payload)]
 client = SimpleNamespace(poll=lambda: [messages.pop(0)] if messages else [],
                          last_error='', status='CONNECTED', session_id='native-test',
-                         progress='Connected', port=8765)
+                         progress='Connected', port=8765, negotiated_capabilities=frozenset())
 client.close = lambda: setattr(client, 'status', 'DISCONNECTED')
 client.connect = lambda: setattr(client, 'progress', 'Connecting')
 runtime._client = client

@@ -21,6 +21,7 @@ import json
 import math
 import os
 from pathlib import Path
+import sys
 import time
 import traceback
 from types import SimpleNamespace
@@ -29,6 +30,9 @@ import bpy
 from bpy_extras.view3d_utils import location_3d_to_region_2d
 from mathutils import Vector
 import numpy as np
+
+sys.path.append(str(Path(__file__).resolve().parent))
+import _native
 
 
 MODULE = os.environ['WFRL_ADDON_MODULE']
@@ -58,10 +62,11 @@ def load_modules():
     modules = SimpleNamespace(addon=addon, root=root, **{
         name: importlib.import_module(MODULE + '.' + filename)
         for name, filename in dict(core='split_reconstruction', same='split_mappo_texture',
-            synth='split_surface_texture', timing='split_reconstruction_timing',
+            timing='split_reconstruction_timing',
             farm='farm_flex', clearance='clearance_replay', cameras='cameras',
             ui='split_reconstruction_ui', preview='custom_camera_preview',
             panel='panels.farm_replay').items()})
+    _native.assert_research_texture_absent(MODULE)
     return modules
 
 
@@ -120,11 +125,10 @@ def pair(expected=None):
     assert len(areas) == 2, len(areas)
     left, right = [a.spaces.active for a in areas]
     assert modules.core.enabled(scene) and scene.get('split_review_status') == 'READY'
-    assert not modules.synth.active(scene), 'Independent synth_tex is outside this workflow'
     assert left.local_view is None and right.local_view is not None
     assert right.use_local_camera and right.camera == modules.core.reconstruction_camera(scene)
     assert not right.camera.data.show_passepartout
-    assert left.shading.type == 'MATERIAL'
+    assert left.shading.type == 'MATERIAL' and left.shading.use_scene_world
     assert right.shading.type == ('MATERIAL' if actual == 'MAPPO' else 'SOLID')
     objects = right_objects()
     names_key = ('split_mappo_texture_structure_names' if actual == 'MAPPO'
@@ -251,7 +255,12 @@ def clock():
 def complete_framing():
     result = []
     graph = bpy.context.evaluated_depsgraph_get()
-    for area, objects in zip(pair(), (source_objects(), right_objects())):
+    areas = pair()
+    source = [obj for obj in bpy.context.scene.objects if obj.type == 'MESH'
+              and obj.name.startswith('WFRL.Turbine.T1.')
+              and obj.visible_get(viewport=areas[0].spaces.active)]
+    assert source
+    for area, objects in zip(areas, (source, right_objects())):
         space, window = area.spaces.active, region(area)
         space.region_3d.update()
         x, y, width, height = modules.preview.available_rectangle(area, window)
@@ -271,14 +280,15 @@ def complete_framing():
 
 
 class RecordedLayout:
-    def __init__(self):
+    def __init__(self, *, open_panels=()):
         self.labels, self.operators, self.properties = [], [], []
+        self.open_panels = set(open_panels)
 
     def __getattr__(self, _name):
         return lambda *_args, **_kwargs: self
 
-    def panel(self, *_args, **_kwargs):
-        return self, None
+    def panel(self, key, **_kwargs):
+        return self, self if key in self.open_panels else None
 
     def label(self, **kwargs):
         self.labels.append(kwargs.get('text', ''))
@@ -366,6 +376,115 @@ def immutable():
         result['textures'][obj.name] = dict(packed_sha256=hashlib.sha256(image.packed_file.data).hexdigest(),
                                             uv_sha256=hashlib.sha256(uv.tobytes()).hexdigest(), size=list(image.size))
     return result
+
+
+def geometry_identity():
+    scene = bpy.context.scene
+    return {obj.name: dict(object=obj.as_pointer(), mesh=obj.data.as_pointer(),
+        keys=obj.data.shape_keys.as_pointer(), vertices=len(obj.data.vertices),
+        interpolation=[key.interpolation for key in obj.data.shape_keys.key_blocks])
+        for obj in (scene.objects['SplitRecon.B' + str(i)] for i in (1, 2, 3))}
+
+
+def return_controls():
+    layout = RecordedLayout(open_panels={'wfrl_farm_quick_views'})
+    modules.panel.WFRL_PT_FarmFlex.draw(SimpleNamespace(layout=layout), bpy.context)
+    entries = [vars(entry) for entry in layout.operators]
+    returns = [e for e in entries if e['name'] == 'wfrl.split_recon_enter']
+    assert len(returns) == 1 and returns[0].get('mode') == 'CURRENT', entries
+    assert returns[0]['text'] == '返回重建对照', returns
+    assert bpy.ops.wfrl.split_recon_open_example.get_rna_type().name == '打开几何重建示例…'
+    return entries
+
+
+def geometry_contracts():
+    """Exercise geometry-only layout, camera, time and native workspace contracts."""
+    scene = bpy.context.scene
+    step = state.get('geometry_contract', 'initial')
+    if step == 'initial':
+        areas = pair('GEOMETRY')
+        state['geometry_identity'] = geometry_identity()
+        widths = [modules.preview.available_rectangle(a, region(a))[2] for a in areas]
+        assert abs(widths[0] - widths[1]) <= 24 * bpy.context.preferences.system.ui_scale, widths
+        state['usable_pane_widths'] = widths
+        scene.frame_set(52)
+        for direction, expected in ((1, 55), (-1, 49)):
+            operator('split_recon_step', direction=direction)
+            assert scene.frame_current == expected
+            clock()
+        scene.frame_set(52)
+        right = areas[1].spaces.active
+        expected = navigation(areas[1])
+        commands = [('farm_flex_view', dict(turbine='T1', angle=angle))
+                    for angle in ('DOWN', 'NACELLE', 'FRONT')]
+        commands += [('deflection_view', {}),
+                     ('select_camera', dict(camera_name='WFRL.Camera.T1.FrontQuarter'))]
+        for name, kwargs in commands:
+            operator(name, **kwargs)
+            assert right.use_local_camera and navigation(areas[1]) == expected, (name, kwargs)
+        state['immediate_left_camera_isolation'] = commands
+        state['geometry_workspace'] = bpy.context.window.workspace.name
+        other = next(w for w in bpy.data.workspaces if w != bpy.context.window.workspace)
+        bpy.context.window.workspace = other
+        state['geometry_contract'] = 'return-workspace'
+    elif step == 'return-workspace':
+        bpy.context.window.workspace = bpy.data.workspaces[state['geometry_workspace']]
+        state['geometry_contract'] = 'workspace-restored'
+    elif step == 'workspace-restored':
+        pair('GEOMETRY')
+        assert scene.frame_current == 52
+        assert geometry_identity() == state['geometry_identity']
+        operator('split_recon_fit')
+        state['geometry_contract'] = 'fitted'
+    elif step == 'fitted':
+        original = scene.frame_current
+        samples = []
+        try:
+            for frame in (1, 52, 901, 1801, 2701, 3601):
+                scene.frame_set(frame)
+                bpy.context.view_layer.update()
+                samples.append(dict(frame=frame, panes=complete_framing()))
+        finally:
+            scene.frame_set(original)
+        state['geometry_full_timeline_framing'] = samples
+        state['geometry_contract'] = 'camera-exited'
+        return native('view_camera')
+    elif step == 'camera-exited':
+        right = navigation(pair('GEOMETRY')[1])
+        center = Vector(display_origin()) + Vector((5., 0., 90.))
+        error = (Vector(right['location']) - center).length
+        assert error <= 5., (right, list(center), error)
+        state['geometry_native_camera_exit'] = dict(navigation=right, pivot_error_m=error)
+        operator('split_recon_fit')
+        state['geometry_contract'] = 'before-current'
+    elif step == 'before-current':
+        state['geometry_current_navigation'] = navigation_pair()
+        operator('split_recon_enter', mode='CURRENT')
+        state['geometry_contract'] = 'current-restored'
+    elif step == 'current-restored':
+        pair('GEOMETRY')
+        assert scene.frame_current == 52
+        unchanged(state['geometry_current_navigation'])
+        operator('split_recon_exit')
+        state['geometry_contract'] = 'exited'
+    elif step == 'exited':
+        assert not modules.core.enabled(scene) and len(views()) == 1
+        assert scene.frame_current == 52 and not modules.same.active(scene)
+        state['geometry_return_controls'] = return_controls()
+        operator('split_recon_enter', mode='CURRENT')
+        state['geometry_contract'] = 'reentered'
+    elif step == 'reentered':
+        pair('GEOMETRY')
+        assert scene.frame_current == 52
+        assert geometry_identity() == state['geometry_identity']
+        assert navigation(pair()[1])['camera'] == state['geometry_current_navigation'][1]['camera']
+        state['checks'].append('Geometry sample step, immediate camera isolation, usable widths, six-frame complete framing, workspace roundtrip, CURRENT and exit/reentry retain native geometry and shared time')
+        state['geometry_contract'] = 'complete'
+        return None
+    else:
+        assert step == 'complete', step
+        return None
+    return .5
 
 
 def capture(name, *, full=False):
@@ -489,11 +608,13 @@ def tick():
         assert not bpy.app.background and bpy.context.window is not None
         assert time.monotonic() < state['deadline'], ('timeout', state['stage'])
         stage = state['stage']
-        if modules and stage != 0:
+        if modules and stage != 0 and state.get('geometry_contract') != 'return-workspace':
             scene = bpy.context.scene
             assert not str(scene.get('split_review_status', '')).startswith('ERROR'), scene.get('split_review_status')
             if modules.cameras._LAYOUT_JOB is not None or modules.core._JOBS or scene.get('split_review_status') == 'PREPARING':
                 return .25
+            if 'geometry_identity' in state:
+                assert geometry_identity() == state['geometry_identity']
         if stage == 0:
             load_modules()
             assert not bpy.data.is_dirty, 'Start a clean dedicated window; native unsaved protection must not be bypassed'
@@ -510,8 +631,11 @@ def tick():
             if modules.cameras._LAYOUT_JOB is not None or modules.core._JOBS:
                 return .25
             assert Path(bpy.data.filepath).resolve() == Path(state['input']['canonical'])
-            pair('GEOMETRY')
             assert modules.farm.is_active(bpy.context.scene)
+            delay = geometry_contracts()
+            if delay is not None:
+                return delay
+            pair('GEOMETRY')
             capture('geometry-unified-entry', full=True)
             state['checks'].append('Unified installed entry opens unchanged canonical geometry; both panes contain tower, nacelle, hub and three blades')
             bpy.context.scene.frame_set(52)
@@ -554,7 +678,7 @@ def tick():
             before = navigation(pair()[1])
             center = Vector(modules.same.OFFSET) + Vector(modules.same.ensure(bpy.context.scene)['sequence'].rotor.hub)
             error = (Vector(before['location']) - center).length
-            assert error < 80., ('Right orbit center belongs to another turbine', error, before)
+            assert error <= 5., ('Right orbit center is not near the rotor hub', error, before)
             orbit = state.setdefault('native-back-orbit', dict(steps=[], center=list(center)))
             orbit['steps'].append(dict(navigation=before, pivot_error_m=error, framing=complete_framing()))
             if len(orbit['steps']) <= 12:
@@ -661,6 +785,7 @@ def tick():
             assert bpy.context.scene.frame_current == state['exit_clock']['frame']
             assert modules.same.active(bpy.context.scene)
             assert bpy.context.scene.wfrl_recon_texture_mode == state['exit_texture_mode']
+            state['same_source_return_controls'] = return_controls()
             operator('split_recon_enter', mode='CURRENT')
         elif stage == 22:
             pair('MAPPO')
@@ -680,6 +805,7 @@ def tick():
         elif stage == 26:
             state['stage'] = 27
             modules = None
+            state.pop('geometry_identity')
             bpy.ops.wm.open_mainfile(filepath=state['saved-same-source-local']['path'], load_ui=True, use_scripts=False)
             return 3.
         elif stage == 27:
@@ -687,6 +813,7 @@ def tick():
             if modules.cameras._LAYOUT_JOB is not None or modules.core._JOBS:
                 return .25
             check_reopen('saved-same-source-local')
+            state['geometry_identity'] = geometry_identity()
             state['checks'].append('Native save/reopen restores same-source mode, enhanced setting, time, packed data and manually orbited local view without an implicit fit')
             operator('split_recon_switch_mode')
         elif stage == 28:
@@ -695,6 +822,7 @@ def tick():
         elif stage == 29:
             state['stage'] = 30
             modules = None
+            state.pop('geometry_identity')
             bpy.ops.wm.open_mainfile(filepath=state['saved-geometry-local']['path'], load_ui=True, use_scripts=False)
             return 3.
         elif stage == 30:
@@ -702,6 +830,7 @@ def tick():
             if modules.cameras._LAYOUT_JOB is not None or modules.core._JOBS:
                 return .25
             check_reopen('saved-geometry-local')
+            state['geometry_identity'] = geometry_identity()
             state['checks'].append('Native save/reopen also restores geometry mode and navigation without replacing the current mode')
             operator('split_recon_switch_mode')
         elif stage == 31:

@@ -12,6 +12,15 @@ import sys
 ROOT = Path(__file__).resolve().parents[3]
 
 
+def assert_research_texture_absent(module):
+    """Reject a research module in an installation without executing its code."""
+    import importlib.util
+    assert module.startswith('bl_ext.'), 'Expected an installed extension module'
+    name = module + '.split_surface_texture'
+    assert importlib.util.find_spec(name) is None, (
+        'Installed package must not ship research-only split_surface_texture')
+
+
 def addon_module():
     """Return the add-on module name; the source default puts the workspace on ``sys.path``."""
     module = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')

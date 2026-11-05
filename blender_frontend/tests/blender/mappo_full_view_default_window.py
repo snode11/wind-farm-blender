@@ -123,14 +123,15 @@ def check(condition, message):
     assert condition, message
 
 
-def assert_view(row, detail):
-    check(row['status'] == 'READY' and row['detail'] is detail,
-          state['stage'] + ': READY and requested detail flag')
-    check(row['perspective'] == ('ORTHO' if detail else 'CAMERA'),
+def assert_view(row, closeup):
+    # Surface inspection positions one stationary close-up; it never enables tracking.
+    check(row['status'] == 'READY' and row['detail'] is False,
+          state['stage'] + ': READY without surface tracking')
+    check(row['perspective'] == ('ORTHO' if closeup else 'CAMERA'),
           state['stage'] + ': requested native view perspective')
     check(not row['sidebar'] and row['sidebar_width'] <= 8,
           state['stage'] + ': right sidebar hidden')
-    if not detail:
+    if not closeup:
         bounds, (width, height) = row['full_rotor_bounds'], row['viewport']
         check(bounds is not None and 0 <= bounds[0] < bounds[2] <= width
               and 0 <= bounds[1] < bounds[3] <= height,
@@ -214,9 +215,9 @@ def tick():
             state.setdefault('settle_until', time.monotonic() + .6)
             if time.monotonic() < state['settle_until']:
                 return INTERVAL
-            detail = stage in {'wait-explicit-detail', 'wait-current-detail'}
+            closeup = stage in {'wait-explicit-detail', 'wait-current-detail'}
             row = capture(stage)
-            assert_view(row, detail)
+            assert_view(row, closeup)
             if stage == 'wait-default-full':
                 state['play_start'] = row
                 state['play_sample_start'] = len(state['samples'])

@@ -76,7 +76,7 @@ REGRESSIONS = (
     Regression('camera_postprocessing_contract_regression.py', 'CAMERA_POSTPROCESSING_CONTRACT_PASS', 'result.json',
                scope='Small native camera PNG pixels, VSE/compositor/FileOutput isolation and restoration.'),
     Regression('radar_recording_stop_regression.py', 'RADAR_RECORDING_STOP_PASS', 'result.json',
-               scope='Real local recorder join timeout, retained ownership, unload and retry; no hardware.'),
+               scope='Nonblocking local recorder stop, retained ownership, unload and drain completion; no hardware.'),
     Regression('nrel_editor_resource_regression.py', 'NREL_EDITOR_RESOURCE_PASS', 'checks.json',
                scope='Native helper deletion, normal editor detach and retryable resource cleanup.'),
     Regression('manual_down_copy_regression.py', 'MANUAL_DOWN_COPY_PASS', 'checks.json',
