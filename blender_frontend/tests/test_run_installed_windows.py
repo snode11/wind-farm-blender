@@ -1,0 +1,214 @@
+"""Exercise the installed check runner with synthetic profiles and process results."""
+import importlib.util
+import json
+from pathlib import Path
+import re
+import sys
+
+import pytest
+
+
+ROOT = Path(__file__).resolve().parents[2]
+SPEC = importlib.util.spec_from_file_location('wfrl_installed_window_runner',
+                                              ROOT / 'scripts/blender/run_installed_windows.py')
+runner = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = runner
+SPEC.loader.exec_module(runner)
+
+TEXTURE = 'mappo_same_source_texture_window.py'
+REOPEN = 'mappo_same_source_texture_reopen.py'
+
+
+@pytest.fixture
+def profile_dir(tmp_path):
+    directory = tmp_path / 'installed'
+    resources = directory / 'profile'
+    environment = {'WFRL_ADDON_MODULE': runner.MODULE}
+    for key, name in runner.PROFILE_DIRS.items():
+        path = resources / name
+        path.mkdir(parents=True)
+        environment[key] = str(path)
+    (resources / 'config/userpref.blend').touch()
+    addon = resources / 'extensions/wfrl_blender'
+    (addon / runner.EXAMPLE).parent.mkdir(parents=True)
+    (addon / runner.EXAMPLE).write_bytes(b'geometry fixture')
+    (addon / '__init__.py').touch()
+    (addon / 'blender_manifest.toml').touch()
+    runner.write_json(directory / 'environment.json', environment)
+    return directory
+
+
+def test_environment_uses_profile_and_independent_scene_copies(profile_dir, tmp_path, monkeypatch):
+    profile = runner.load_profile(profile_dir)
+    for key in ('BLENDER_USER_CONFIG', 'BLENDER_USER_EXTENSIONS', 'WFRL_ADDON_ROOT',
+                'WFRL_ORIGINAL_RECON', 'WFRL_EXPECTED_GEOMETRY_SHA256', 'WFRL_SPLIT_SAVE',
+                'WFRL_SIDEBAR_EXPECT_OLD', 'PYTHONPATH'):
+        monkeypatch.setenv(key, 'inherited override')
+    default, workflow = runner.select_tests(['mappo_full_view_default_window', 'reconstruction_workflow_window'])
+    copies = []
+    for check in (default, workflow):
+        case = tmp_path / Path(check.script).stem
+        case.mkdir()
+        command, env, report = runner.prepare_case(check, Path(sys.executable), profile, case, None)
+        for key, value in profile.overrides().items():
+            assert env[key] == value
+        assert env['WFRL_EXPECTED_ADDON_ROOT'] == str(profile.addon_root)
+        assert env['WFRL_TEST_OUTPUT'] == str(report.parent)
+        assert env['WFRL_QUIT_AFTER_TEST'] == '1'
+        assert env['PYTHONDONTWRITEBYTECODE'] == '1'
+        assert 'inherited override' not in env.values()
+        assert '--background' not in command and '--factory-startup' not in command
+        assert '--disable-autoexec' in command
+        assert command[command.index('--python-expr') + 1] == 'import sys; sys.dont_write_bytecode=True'
+        scene = Path(env['WFRL_SPLIT_INPUT'])
+        assert (str(scene) in command) is (check == default)
+        assert scene.parent == case
+        assert scene.read_bytes() == (profile.addon_root / runner.EXAMPLE).read_bytes()
+        copies.append(scene)
+    assert not copies[0].samefile(copies[1])
+    assert not copies[0].samefile(profile.addon_root / runner.EXAMPLE)
+
+
+@pytest.mark.parametrize('source', ['profile', 'config', 'config_link', 'module'])
+def test_daily_installation_is_rejected_before_output_or_launch(source, profile_dir, tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(Path, 'home', lambda: tmp_path / 'home')
+    daily = Path.home() / 'Library/Application Support/Blender/5.2/config'
+    daily.mkdir(parents=True)
+    environment = profile_dir / 'environment.json'
+    overrides = runner.read_object(environment)
+    selected = profile_dir
+    if source == 'profile':
+        selected = daily
+    elif source == 'config':
+        overrides['BLENDER_USER_CONFIG'] = str(daily)
+    elif source == 'config_link':
+        link = profile_dir / 'config-link'
+        link.symlink_to(daily, target_is_directory=True)
+        overrides['BLENDER_USER_CONFIG'] = str(link)
+    else:
+        overrides['WFRL_ADDON_MODULE'] = 'bl_ext.user_default.wfrl_blender'
+    runner.write_json(environment, overrides)
+    monkeypatch.setattr(runner, 'run_process', lambda *args: pytest.fail('Launched Blender for a daily profile'))
+    output = tmp_path / 'results'
+    with pytest.raises(SystemExit) as error:
+        runner.main(['--installed-profile', str(selected), '--output', str(output)])
+    assert error.value.code == 2
+    assert 'Refusing daily Blender' in capsys.readouterr().err
+    assert not output.exists()
+
+
+def test_profile_with_a_removed_resource_directory_is_rejected(profile_dir):
+    (profile_dir / 'profile/datafiles').rmdir()
+    with pytest.raises(ValueError, match='directory is missing: BLENDER_USER_DATAFILES'):
+        runner.load_profile(profile_dir)
+
+
+def test_validator_launch_sets_isolated_extension_cache(tmp_path):
+    resources = tmp_path / "profile with 'quotes'"
+    blender = tmp_path / 'fake blender'
+    blender.write_text('#!/bin/sh\nprintf "%s\\n" "$BLENDER_USER_RESOURCES" "$BLENDER_USER_EXTENSIONS" "$@"\n',
+                       encoding='utf-8')
+    blender.chmod(0o700)
+    scratch = tmp_path / 'scratch'
+    env = runner.isolated_environment(scratch, {'BLENDER_USER_EXTENSIONS': '/daily'})
+    launcher = runner.validator_launcher(blender, resources, scratch)
+    log = tmp_path / 'validator-blender.log'
+    result = runner.run_process([str(launcher), '--background'], env, log, 5)
+    assert result.returncode == 0
+    assert log.read_text(encoding='utf-8').splitlines() == [
+        str(resources), str(resources / 'extensions'), *runner.BLENDER_FLAGS, '--background',
+    ]
+
+
+@pytest.mark.parametrize(('exit_code', 'timed_out', 'report', 'marker', 'status'), [
+    (0, False, {'status': 'PASS'}, 'complete', 'PASS'),
+    (1, False, {'status': 'PASS'}, 'complete', 'FAIL'),
+    (0, True, {'status': 'PASS'}, 'complete', 'FAIL'),
+    (0, False, None, 'complete', 'FAIL'),
+    (0, False, {'status': 'FAIL'}, 'complete', 'FAIL'),
+    (0, False, {'status': 'RUNNING'}, 'complete', 'FAIL'),
+    (0, False, {'status': 'PASS', 'final': False}, 'complete', 'FAIL'),
+    (0, False, {'status': 'PASS'}, 'embedded', 'FAIL'),
+    (0, False, {'status': 'SKIP', 'reason': 'Unavailable'}, 'embedded', 'SKIP'),
+])
+def test_verdict_requires_normal_exit_final_report_and_marker(exit_code, timed_out, report, marker, status):
+    check = runner.CHECKS[0]
+    log = f'{check.marker} /tmp/report.json\n' if marker == 'complete' else f'Waiting for {check.marker}\n'
+    result, reasons = runner.evaluate(check, runner.ProcessResult(exit_code, timed_out), report, log)
+    assert result == status
+    assert bool(reasons) is (status != 'PASS')
+
+
+@pytest.mark.parametrize('texture_status', ['PASS', 'FAIL', None])
+def test_reopen_dependency_order_and_verdict(texture_status, profile_dir, tmp_path, monkeypatch):
+    started = []
+
+    def fake_process(command, env, log, timeout):
+        name = Path(command[-1]).name
+        started.append(name)
+        check, = runner.select_tests([name])
+        report = Path(env['WFRL_TEST_OUTPUT']) / check.report
+        if name == TEXTURE:
+            assert '--background' not in command
+            data = {'status': texture_status}
+            if texture_status == 'PASS':
+                saved = Path(env['WFRL_SPLIT_SAVE'])
+                saved.parent.mkdir()
+                saved.write_bytes(b'saved scene')
+                data['saved'] = str(saved)
+            runner.write_json(report, data, mkdir=True)
+        else:
+            assert '--background' in command and '--factory-startup' not in command
+            baseline = runner.read_object(Path(env['WFRL_EXPECTED_WINDOW_REPORT']))
+            assert baseline['status'] == 'PASS'
+            assert baseline['saved'] == env['WFRL_SPLIT_INPUT'] == command[command.index('--python') - 1]
+            assert Path(baseline['saved']).read_bytes() == b'saved scene'
+            runner.write_json(report, {'status': 'PASS'}, mkdir=True)
+        log.write_text('\n'.join([f'line {i}' for i in range(43)] + [check.marker]) + '\n', encoding='utf-8')
+        return runner.ProcessResult(0)
+
+    monkeypatch.setattr(runner, 'run_process', fake_process)
+    output = tmp_path / 'result'
+    names = [REOPEN, TEXTURE] if texture_status else [REOPEN]
+    code = runner.main(['--blender', sys.executable, '--installed-profile', str(profile_dir),
+                        '--output', str(output), '--tests', *names])
+    records = runner.read_object(output / 'result.json')['tests']
+    assert records[-1]['mode'] == 'background'
+    if texture_status == 'PASS':
+        assert started == [TEXTURE, REOPEN]
+        assert [item['status'] for item in records] == ['PASS', 'PASS']
+        assert code == 0
+    else:
+        assert started == ([TEXTURE] if texture_status else [])
+        assert records[-1]['status'] == 'NOT_RUN'
+        assert TEXTURE in records[-1]['reasons'][0]
+        assert code == (1 if texture_status else 2)
+        if texture_status:
+            assert records[0]['status'] == 'FAIL'
+            assert len(records[0]['log_tail']) == 40
+            assert records[0]['log_tail'][0] == 'line 4'
+    for row in records:
+        launch = runner.read_object(output / Path(row['script']).stem / 'launch.json')
+        assert launch['mode'] == row['mode']
+
+
+def test_list_prints_modes_and_dependency_without_running(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(runner, 'run_process', lambda *args: pytest.fail('--list launched a process'))
+    output = tmp_path / 'result'
+    assert runner.main(['--list', '--output', str(output), '--tests', REOPEN, TEXTURE]) == 0
+    assert capsys.readouterr().out.splitlines() == [
+        'Installation: workspace', f'{TEXTURE} [visible]', f'{REOPEN} [background] (requires PASS from {TEXTURE})',
+    ]
+    assert not output.exists()
+
+
+def test_configured_modes_match_installed_module_documentation():
+    verification = ROOT / '.agents/skills/windfarm-blender-dev/references/verification.md'
+    row = next(line for line in verification.read_text(encoding='utf-8').splitlines() if '| 仅安装模块' in line)
+    documented = {}
+    for group in row.split('|')[1].split('；'):
+        mode, = re.findall(r'`(visible|background)`', group)
+        documented.update((script, mode) for script in re.findall(r'`(\w+\.py)`', group))
+    assert documented == {check.script: check.mode for check in runner.CHECKS}
+    assert {script for script, mode in documented.items() if mode == 'background'} == {REOPEN}
+    assert len(documented) == 6

@@ -23,10 +23,23 @@
 scripts/blender/run_wfrl_macos.sh --help
 scripts/macos/run_desktop.sh --help
 python3 scripts/blender/run_regressions.py --list
+python3 scripts/blender/run_installed_windows.py --list
 python3 scripts/ci/check_release_identity.py --release publication/blender-0.3.42.6.json
 ```
 
 `experiments/verify_desktop_contracts.py` 检查 RViz 的来流、地形、中文标签、双视图与源码结构；默认包含可见窗口检查，`--online` 还会运行 FAST.Farm。它依赖完整桌面环境，不能当作无窗口宿主测试执行。
+
+## 隔离安装窗口验收
+
+```bash
+python3 scripts/blender/run_installed_windows.py --blender <Blender可执行文件> --output <新目录>
+```
+
+默认从工作区构建 ZIP，将隔离安装及包验证结果放在 `--output/package`。可用 `--zip <路径>` 安装指定 ZIP，或用 `--installed-profile <隔离验证目录>` 复用自包含的隔离安装。该目录须有 `environment.json`，并保留配置与扩展文件。扩展兼容性缓存也写入隔离 profile，运行器拒绝日常安装与配置。
+
+五项窗口检查串行启动，请在运行期间保持 Blender 窗口无人工操作。独立重开在后台读取纹理窗口保存的场景与 PASS 报告。`--tests` 接受脚本文件名或不带 `.py` 的名称，单选重开会记为 `NOT_RUN`。
+
+`result.json` 汇总脚本模式、状态和失败原因，每项的 `launch.json` 记录命令与隔离环境。全部所选项 PASS 时退出码为 `0`，有失败为 `1`，其余为 `2`。
 
 ## 输出与输入
 
