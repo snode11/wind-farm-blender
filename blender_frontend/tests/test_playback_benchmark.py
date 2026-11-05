@@ -497,13 +497,15 @@ def test_near_end_seek_or_paused_reset_is_not_expected_playback_wrap(flag, value
     assert evaluate_playback(**data)['status'] == 'FAIL'
 
 
-def test_installed_profile_runner_preserves_repository_preferences(tmp_path):
+@pytest.mark.parametrize('stored_roots', ['legacy', 'explicit', 'resources_only', 'extensions_only'])
+def test_installed_profile_runner_preserves_repository_preferences(tmp_path, monkeypatch, stored_roots):
     import json
     from pathlib import Path
     args = _runner_args(tmp_path,
         "import os,json\nfrom pathlib import Path\n"
         "p=Path(os.environ['WFRL_TEST_OUTPUT'])\n"
-        "(p/'result.json').write_text(json.dumps({'status': 'PASS', 'termination': {'reason': 'finished'}}))\n"
+        "(p/'result.json').write_text(json.dumps({'status': 'PASS', 'termination': {'reason': 'finished'}, "
+        "'environment': {k: v for k, v in os.environ.items() if k.startswith('BLENDER_USER_')}}))\n"
         "print('BENCHMARK_RESULT PASS result.json')\n")
     profile = tmp_path/'isolated'
     profile.mkdir()
@@ -512,6 +514,17 @@ def test_installed_profile_runner_preserves_repository_preferences(tmp_path):
         directory = profile/name.lower()
         directory.mkdir()
         environment['BLENDER_USER_'+name] = str(directory)
+    resources = profile / 'resource-root' if stored_roots in ('explicit', 'resources_only') else profile
+    extensions = (profile / 'extension-repository' if stored_roots in ('explicit', 'extensions_only')
+                  else resources / 'extensions')
+    resources.mkdir(exist_ok=True)
+    extensions.mkdir()
+    if stored_roots in ('explicit', 'resources_only'):
+        environment['BLENDER_USER_RESOURCES'] = str(resources)
+    if stored_roots in ('explicit', 'extensions_only'):
+        environment['BLENDER_USER_EXTENSIONS'] = str(extensions)
+    monkeypatch.setenv('BLENDER_USER_RESOURCES', '/inherited/daily')
+    monkeypatch.setenv('BLENDER_USER_EXTENSIONS', '/inherited/daily/extensions')
     (profile/'environment.json').write_text(json.dumps(environment))
     args.installed_profile = str(profile)
     args.width = args.height = None
@@ -520,6 +533,43 @@ def test_installed_profile_runner_preserves_repository_preferences(tmp_path):
     assert '--factory-startup' not in launch['command']
     assert '--window-geometry' not in launch['command']
     assert launch['addon_module'] == 'bl_ext.wfrl_frontend.wfrl_blender'
+    child = json.loads((Path(args.output)/'result.json').read_text())['environment']
+    assert child['BLENDER_USER_RESOURCES'] == str(resources)
+    assert child['BLENDER_USER_EXTENSIONS'] == str(extensions)
+    assert all(child[key] == value for key, value in environment.items() if key.startswith('BLENDER_USER_'))
+    assert json.loads((profile/'environment.json').read_text()) == environment
+
+
+@pytest.mark.parametrize('explicit_roots', [False, True])
+def test_no_factory_startup_isolates_an_inherited_profile(tmp_path, monkeypatch, explicit_roots):
+    import json
+    import os
+    from pathlib import Path
+    args = _runner_args(tmp_path,
+        "import os,json\nfrom pathlib import Path\n"
+        "p=Path(os.environ['WFRL_TEST_OUTPUT'])\n"
+        "(p/'result.json').write_text(json.dumps({'status': 'PASS', 'termination': {'reason': 'finished'}, "
+        "'environment': {k: v for k, v in os.environ.items() if k.startswith('BLENDER_USER_')}}))\n"
+        "print('BENCHMARK_RESULT PASS result.json')\n")
+    profile = tmp_path / 'profile'
+    (profile / 'config').mkdir(parents=True)
+    monkeypatch.setenv('BLENDER_USER_CONFIG', str(profile / 'config'))
+    resources = tmp_path / 'explicit-resources' if explicit_roots else profile
+    extensions = tmp_path / 'explicit-extensions' if explicit_roots else profile / 'extensions'
+    for key, value in (('BLENDER_USER_RESOURCES', resources), ('BLENDER_USER_EXTENSIONS', extensions)):
+        if explicit_roots:
+            value.mkdir()
+            monkeypatch.setenv(key, str(value))
+        else:
+            monkeypatch.delenv(key, raising=False)
+    args.no_factory_startup = True
+    assert _runner().run(args) == 0
+    output = Path(args.output)
+    child = json.loads((output / 'result.json').read_text())['environment']
+    assert child['BLENDER_USER_RESOURCES'] == str(resources)
+    assert child['BLENDER_USER_EXTENSIONS'] == str(extensions)
+    assert '--factory-startup' not in json.loads((output / 'launch.json').read_text())['command']
+    assert ('BLENDER_USER_RESOURCES' in os.environ) is explicit_roots
 
 
 @pytest.mark.parametrize('explicit_status,termination,expected', [

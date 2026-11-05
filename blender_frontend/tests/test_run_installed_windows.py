@@ -40,7 +40,7 @@ def profile_dir(tmp_path):
 
 def test_environment_uses_profile_and_independent_scene_copies(profile_dir, tmp_path, monkeypatch):
     profile = runner.load_profile(profile_dir)
-    for key in ('BLENDER_USER_CONFIG', 'BLENDER_USER_EXTENSIONS', 'WFRL_ADDON_ROOT',
+    for key in ('BLENDER_USER_CONFIG', 'BLENDER_USER_RESOURCES', 'BLENDER_USER_EXTENSIONS', 'WFRL_ADDON_ROOT',
                 'WFRL_ORIGINAL_RECON', 'WFRL_EXPECTED_GEOMETRY_SHA256', 'WFRL_SPLIT_SAVE',
                 'WFRL_SIDEBAR_EXPECT_OLD', 'PYTHONPATH'):
         monkeypatch.setenv(key, 'inherited override')
@@ -50,8 +50,10 @@ def test_environment_uses_profile_and_independent_scene_copies(profile_dir, tmp_
         case = tmp_path / Path(check.script).stem
         case.mkdir()
         command, env, report = runner.prepare_case(check, Path(sys.executable), profile, case, None)
-        for key, value in profile.overrides().items():
+        for key, value in profile.environment.items():
             assert env[key] == value
+        assert env['BLENDER_USER_RESOURCES'] == str(profile_dir / 'profile')
+        assert env['BLENDER_USER_EXTENSIONS'] == str(profile_dir / 'profile/extensions')
         assert env['WFRL_EXPECTED_ADDON_ROOT'] == str(profile.addon_root)
         assert env['WFRL_TEST_OUTPUT'] == str(report.parent)
         assert env['WFRL_QUIT_AFTER_TEST'] == '1'
@@ -69,7 +71,7 @@ def test_environment_uses_profile_and_independent_scene_copies(profile_dir, tmp_
     assert not copies[0].samefile(profile.addon_root / runner.EXAMPLE)
 
 
-@pytest.mark.parametrize('source', ['profile', 'config', 'config_link', 'module'])
+@pytest.mark.parametrize('source', ['profile', 'config', 'config_link', 'module', 'resources', 'extensions'])
 def test_daily_installation_is_rejected_before_output_or_launch(source, profile_dir, tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(Path, 'home', lambda: tmp_path / 'home')
     daily = Path.home() / 'Library/Application Support/Blender/5.2/config'
@@ -85,6 +87,8 @@ def test_daily_installation_is_rejected_before_output_or_launch(source, profile_
         link = profile_dir / 'config-link'
         link.symlink_to(daily, target_is_directory=True)
         overrides['BLENDER_USER_CONFIG'] = str(link)
+    elif source in ('resources', 'extensions'):
+        overrides['BLENDER_USER_' + source.upper()] = str(daily)
     else:
         overrides['WFRL_ADDON_MODULE'] = 'bl_ext.user_default.wfrl_blender'
     runner.write_json(environment, overrides)
@@ -103,21 +107,45 @@ def test_profile_with_a_removed_resource_directory_is_rejected(profile_dir):
         runner.load_profile(profile_dir)
 
 
-def test_validator_launch_sets_isolated_extension_cache(tmp_path):
-    resources = tmp_path / "profile with 'quotes'"
-    blender = tmp_path / 'fake blender'
-    blender.write_text('#!/bin/sh\nprintf "%s\\n" "$BLENDER_USER_RESOURCES" "$BLENDER_USER_EXTENSIONS" "$@"\n',
-                       encoding='utf-8')
-    blender.chmod(0o700)
-    scratch = tmp_path / 'scratch'
-    env = runner.isolated_environment(scratch, {'BLENDER_USER_EXTENSIONS': '/daily'})
-    launcher = runner.validator_launcher(blender, resources, scratch)
-    log = tmp_path / 'validator-blender.log'
-    result = runner.run_process([str(launcher), '--background'], env, log, 5)
-    assert result.returncode == 0
-    assert log.read_text(encoding='utf-8').splitlines() == [
-        str(resources), str(resources / 'extensions'), *runner.BLENDER_FLAGS, '--background',
-    ]
+def test_validator_is_called_directly_without_a_launcher(tmp_path, monkeypatch):
+    blender = tmp_path / "Blender with 'quotes'"
+    calls = []
+    monkeypatch.setattr(runner, 'setup_command', lambda *args, **kwargs: calls.append((args, kwargs)))
+    monkeypatch.setattr(runner, 'load_profile', lambda directory: directory)
+    assert runner.prepare_installation(blender, tmp_path) == tmp_path / 'package'
+    (args, kwargs), = calls
+    assert args[0] == [sys.executable, '-B', str(runner.VALIDATOR), '--blender', str(blender),
+                       '--output', str(tmp_path / 'package')]
+    assert args[3] == 'FRONTEND_PACKAGE_VALIDATION_PASS'
+    assert kwargs['timeout_s'] == 1800
+    assert list((tmp_path / 'install-tmp').iterdir()) == []
+    assert not hasattr(runner, 'validator_launcher')
+
+
+def test_profile_preserves_explicit_resource_and_extension_paths(profile_dir):
+    environment = runner.read_object(profile_dir / 'environment.json')
+    resources = profile_dir / 'resources'
+    resources.mkdir()
+    extensions = resources / 'custom-extensions'
+    (profile_dir / 'profile/extensions').rename(extensions)
+    environment.update(BLENDER_USER_RESOURCES=str(resources), BLENDER_USER_EXTENSIONS=str(extensions))
+    runner.write_json(profile_dir / 'environment.json', environment)
+    profile = runner.load_profile(profile_dir)
+    assert profile.environment == environment
+    assert profile.addon_root == extensions / runner.ADDON_ID
+
+
+def test_zip_install_saves_and_passes_the_same_isolated_environment(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(runner, 'setup_command', lambda command, env, *args, **kwargs: calls.append(dict(env)))
+    monkeypatch.setattr(runner, 'load_profile', lambda directory: directory)
+    runner.prepare_installation(Path('/fake/Blender'), tmp_path, tmp_path / 'fixture.zip')
+    environment = runner.read_object(tmp_path / 'package/environment.json')
+    assert environment['BLENDER_USER_RESOURCES'] == str(tmp_path / 'package/profile')
+    assert environment['BLENDER_USER_EXTENSIONS'] == str(tmp_path / 'package/profile/extensions')
+    assert len(calls) == 3
+    for env in calls:
+        assert all(env[key] == value for key, value in environment.items())
 
 
 @pytest.mark.parametrize(('exit_code', 'timed_out', 'report', 'marker', 'status'), [

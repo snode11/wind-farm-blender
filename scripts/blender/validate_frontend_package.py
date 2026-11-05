@@ -187,6 +187,7 @@ def validate(args):
         env = {key: value for key, value in os.environ.items()
                if not key.startswith('BLENDER_USER_') and key not in {'PYTHONPATH', 'WFRL_ADDON_ROOT', 'WFRL_ADDON_PATH', 'WFRL_ADDON_MODULE', 'WFRL_TEST_OUTPUT'}}
         overrides = {key: str(value) for key, value in directories.items()}
+        overrides.update(BLENDER_USER_RESOURCES=str(profile), BLENDER_USER_EXTENSIONS=str(repository))
         overrides['WFRL_ADDON_MODULE'] = MODULE
         env.update(overrides)
         (output/'environment.json').write_text(json.dumps(overrides, indent=2), encoding='utf-8')
@@ -197,7 +198,9 @@ def validate(args):
             if test_output:
                 test_output.mkdir(parents=True)
                 child_env['WFRL_TEST_OUTPUT'] = str(test_output)
-            row = run_command([str(args.blender), *values], env=child_env, output=output,
+            row = run_command([str(args.blender), '--disable-autoexec', '--python-exit-code', '1',
+                               '--python-expr', 'import sys; sys.dont_write_bytecode=True', *values],
+                              env=child_env, output=output,
                               name=name, required_markers=markers, timeout=args.timeout)
             result['commands'].append(row)
             save()

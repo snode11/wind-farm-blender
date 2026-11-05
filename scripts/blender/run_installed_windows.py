@@ -9,7 +9,6 @@ import json
 import os
 from pathlib import Path
 import runpy
-import shlex
 import shutil
 import signal
 import subprocess
@@ -69,11 +68,6 @@ class Profile:
     environment: dict[str, str]
     addon_root: Path
 
-    def overrides(self):
-        return dict(self.environment,
-                    BLENDER_USER_RESOURCES=str(Path(self.environment['BLENDER_USER_CONFIG']).parent),
-                    BLENDER_USER_EXTENSIONS=str(self.addon_root.parent))
-
 
 @dataclass(frozen=True)
 class ProcessResult:
@@ -121,7 +115,9 @@ def isolated_path(value, *, within=None):
 def load_profile(directory):
     directory = isolated_path(directory)
     environment = read_object(isolated_path(directory / 'environment.json', within=directory))
-    if set(environment) != PROFILE_DIRS.keys() | {'WFRL_ADDON_MODULE'} or any(
+    required = PROFILE_DIRS.keys() | {'WFRL_ADDON_MODULE'}
+    roots = {'BLENDER_USER_RESOURCES', 'BLENDER_USER_EXTENSIONS'}
+    if not required <= environment.keys() <= required | roots or any(
             not isinstance(value, str) or not value for value in environment.values()):
         raise ValueError('Invalid isolated installation environment.json')
     module = environment['WFRL_ADDON_MODULE']
@@ -131,7 +127,9 @@ def load_profile(directory):
     if (len(namespace) != 3 or namespace[0] != 'bl_ext' or namespace[2] != ADDON_ID
             or not namespace[1].isidentifier()):
         raise ValueError(f'Invalid installed extension module: {module}')
-    for key in PROFILE_DIRS:
+    environment.setdefault('BLENDER_USER_RESOURCES', str(Path(environment['BLENDER_USER_CONFIG']).expanduser().resolve().parent))
+    environment.setdefault('BLENDER_USER_EXTENSIONS', str(Path(environment['BLENDER_USER_RESOURCES']) / 'extensions'))
+    for key in (*PROFILE_DIRS, 'BLENDER_USER_RESOURCES', 'BLENDER_USER_EXTENSIONS'):
         value = Path(environment[key]).expanduser()
         if not value.is_absolute():
             raise ValueError(f'Installed profile path must be absolute: {key}')
@@ -140,7 +138,7 @@ def load_profile(directory):
             raise ValueError(f'Installed profile directory is missing: {key} ({path})')
         environment[key] = str(path)
     config = Path(environment['BLENDER_USER_CONFIG'])
-    repo = isolated_path(config.parent / 'extensions', within=directory)
+    repo = Path(environment['BLENDER_USER_EXTENSIONS'])
     addon = isolated_path(repo / ADDON_ID, within=repo)
     for root, relative in ((config, 'userpref.blend'), (addon, '__init__.py'),
                            (addon, 'blender_manifest.toml'), (addon, EXAMPLE)):
@@ -203,30 +201,13 @@ def setup_command(command, env, log, marker=None, *, timeout_s=240):
         raise RuntimeError(f'Installation step failed (exit {process.returncode}). See {log}')
 
 
-def validator_launcher(blender, resources, scratch):
-    """Pin the extension cache for Blender subprocesses started by the validator."""
-    # The validator sets config, scripts and datafiles separately and clears
-    # inherited BLENDER_USER_* overrides. The cache uses the extensions path.
-    launcher = scratch / 'blender'
-    launcher.write_text(
-        '#!/bin/sh\n'
-        f'export BLENDER_USER_RESOURCES={shlex.quote(str(resources))}\n'
-        f'export BLENDER_USER_EXTENSIONS={shlex.quote(str(resources / "extensions"))}\n'
-        f'exec {shlex.join([str(blender), *BLENDER_FLAGS])} "$@"\n',
-        encoding='utf-8',
-    )
-    launcher.chmod(0o700)
-    return launcher
-
-
 def prepare_installation(blender, output, archive=None):
     directory = output / 'package'
     resources = directory / 'profile'
     scratch = output / 'install-tmp'
     env = isolated_environment(scratch)
     if archive is None:
-        launcher = validator_launcher(blender, resources, scratch)
-        setup_command([sys.executable, '-B', str(VALIDATOR), '--blender', str(launcher),
+        setup_command([sys.executable, '-B', str(VALIDATOR), '--blender', str(blender),
                        '--output', str(directory)], env, output / 'package.log',
                       'FRONTEND_PACKAGE_VALIDATION_PASS', timeout_s=1800)
     else:
@@ -234,9 +215,9 @@ def prepare_installation(blender, output, archive=None):
         repository = resources / 'extensions'
         for path in (*map(Path, overrides.values()), repository):
             path.mkdir(parents=True)
+        overrides.update(BLENDER_USER_RESOURCES=str(resources), BLENDER_USER_EXTENSIONS=str(repository))
         overrides['WFRL_ADDON_MODULE'] = MODULE
-        profile = Profile(directory, overrides, repository / ADDON_ID)
-        env.update(profile.overrides())
+        env.update(overrides)
         command = [str(blender), *BLENDER_FLAGS]
         setup_command([*command, '--command', 'extension', 'repo-add', REPOSITORY_ID,
                        '--name', 'WFRL Isolated Window Checks', '--directory', str(repository), '--clear-all'],
@@ -255,7 +236,7 @@ def prepare_installation(blender, output, archive=None):
 def prepare_case(check, blender, profile, case, prerequisite):
     output = case / 'artifacts'
     env = isolated_environment(case / 'tmp')
-    env.update(profile.overrides(), WFRL_EXPECTED_ADDON_ROOT=str(profile.addon_root),
+    env.update(profile.environment, WFRL_EXPECTED_ADDON_ROOT=str(profile.addon_root),
                WFRL_TEST_OUTPUT=str(output), WFRL_QUIT_AFTER_TEST='1')
     if prerequisite is None:
         scene = case / EXAMPLE.name

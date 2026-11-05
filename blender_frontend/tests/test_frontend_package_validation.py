@@ -4,6 +4,7 @@ import importlib.util
 import json
 from pathlib import Path
 import sys
+from types import SimpleNamespace
 from zipfile import ZipFile
 
 import pytest
@@ -131,3 +132,81 @@ def test_other_memory_errors_are_not_filtered(tmp_path):
     with pytest.raises(RuntimeError, match='error_markers'):
         validator().run_command([sys.executable, '-c', f'print({text!r})'], env={}, output=tmp_path,
                                 name='other-error', required_markers=['ACTUAL_PASS'])
+
+
+def test_validation_isolates_all_blender_children_and_saved_environment(package, tmp_path, monkeypatch):
+    archive, inventory_path, inventory, _ = package
+    inventory.update(package_id='wfrl_blender', version='1.0.0')
+    inventory_path.write_text(json.dumps(inventory), encoding='utf-8')
+    checksum = tmp_path / 'fixture.sha256'
+    checksum.write_text(f'{inventory["archive_sha256"]}  {archive.name}\n', encoding='utf-8')
+    built = SimpleNamespace(archive=archive, inventory=inventory_path, checksum=checksum,
+                            sha256=inventory['archive_sha256'])
+    monkeypatch.setitem(sys.modules, 'build_extension', SimpleNamespace(build=lambda *args, **kwargs: built))
+    for key in ('BLENDER_USER_CONFIG', 'BLENDER_USER_RESOURCES', 'BLENDER_USER_EXTENSIONS'):
+        monkeypatch.setenv(key, '/inherited/daily')
+    module = validator()
+    output = tmp_path / 'validation'
+    resources = output / 'profile'
+    repository = resources / 'extensions'
+    addon = repository / 'wfrl_blender'
+    calls = []
+
+    def fake_command(command, *, env, name, **kwargs):
+        assert command[0] == '/fake/Blender'
+        assert '--disable-autoexec' in command
+        assert command[command.index('--python-expr') + 1] == 'import sys; sys.dont_write_bytecode=True'
+        assert env['BLENDER_USER_RESOURCES'] == str(resources)
+        assert env['BLENDER_USER_EXTENSIONS'] == str(repository)
+        assert env['BLENDER_USER_CONFIG'] == str(resources / 'config')
+        assert '/inherited/daily' not in env.values()
+        calls.append(name)
+        data = dict(status='PASS', module=module.MODULE, addon_path=str(addon / '__init__.py'))
+        if name.endswith('-probe'):
+            path = Path(command[command.index('--output') + 1])
+            path.write_text(json.dumps(data), encoding='utf-8')
+        elif name == 'install-file':
+            with ZipFile(archive) as zipped:
+                zipped.extractall(addon)
+        elif name in ('three-camera-default', 'native-projection'):
+            filename = 'default-validation.json' if name == 'three-camera-default' else 'native-projection-validation.json'
+            (Path(env['WFRL_TEST_OUTPUT']) / filename).write_text(json.dumps(data), encoding='utf-8')
+        return dict(status='PASS')
+
+    monkeypatch.setattr(module, 'run_command', fake_command)
+    assert module.validate(SimpleNamespace(output=output, blender='/fake/Blender', build_only=False, timeout=1)) == 0
+    assert calls == ['repo-add', 'repo-probe', 'install-file', 'module-probe', 'three-camera-default', 'native-projection']
+    environment = json.loads((output / 'environment.json').read_text(encoding='utf-8'))
+    assert environment['BLENDER_USER_RESOURCES'] == str(resources)
+    assert environment['BLENDER_USER_EXTENSIONS'] == str(repository)
+    assert json.loads((output / 'package-validation.json').read_text(encoding='utf-8'))['environment'] == environment
+
+
+def test_part7_install_isolates_every_blender_child(tmp_path, monkeypatch):
+    source = Path(__file__).resolve().parents[2] / 'scripts/blender/verify_part7_install.py'
+    spec = importlib.util.spec_from_file_location('part7_install_validator', source)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    built = SimpleNamespace(archive=tmp_path / 'fixture.zip')
+    monkeypatch.setitem(sys.modules, 'build_extension', SimpleNamespace(build=lambda: built))
+    monkeypatch.setattr(module, 'EVIDENCE', tmp_path / 'evidence')
+    monkeypatch.setenv('BLENDER_USER_RESOURCES', '/inherited/daily')
+    monkeypatch.setenv('BLENDER_USER_EXTENSIONS', '/inherited/daily/extensions')
+    calls = []
+
+    class Probed(Exception):
+        pass
+
+    def fake_run(command, env, log):
+        resources = Path(env['BLENDER_USER_CONFIG']).parent
+        assert env['BLENDER_USER_RESOURCES'] == str(resources)
+        assert env['BLENDER_USER_EXTENSIONS'] == str(resources / 'extensions')
+        assert (resources / 'extensions').is_dir()
+        calls.append(command)
+        if '--inside' in command:
+            raise Probed
+
+    monkeypatch.setattr(module, '_run', fake_run)
+    with pytest.raises(Probed):
+        module.verify()
+    assert len(calls) == 3

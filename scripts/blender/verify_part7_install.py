@@ -137,7 +137,8 @@ def verify(blender: Path = BLENDER) -> None:
         env = dict(os.environ)
         env.pop("PYTHONPATH", None)
         env.update(BLENDER_USER_CONFIG=str(config), BLENDER_USER_SCRIPTS=str(scripts),
-                   BLENDER_USER_DATAFILES=str(datafiles))
+                   BLENDER_USER_DATAFILES=str(datafiles), BLENDER_USER_RESOURCES=str(profile),
+                   BLENDER_USER_EXTENSIONS=str(repository))
         _run([str(blender), "--command", "extension", "repo-add", "wfrl_part7",
               "--name", "WFRL Part 7 Fresh Install", "--directory", str(repository),
               "--clear-all"], env, log)
