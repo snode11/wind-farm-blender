@@ -60,6 +60,62 @@ def test_short_recording_has_initial_frame_and_accepts_real_timer_shape(recordin
     manager.event_timer_remove.assert_called_once()
 
 
+def test_timer_jitter_preserves_capture_grid(recording, tmp_path):
+    clock, screenshot = [0.0], Mock(return_value={'FINISHED'})
+    cls, namespace = recording(clock, screenshot)
+    recorder = cls()
+    recorder.report = Mock()
+    scene = Scene()
+    scene.directory = tmp_path
+    scene.wfrl_capture_fps = 10
+    scene.wfrl_capture_duration = 2.0
+    manager = SimpleNamespace(event_timer_add=Mock(return_value=object()),
+                              event_timer_remove=Mock(), modal_handler_add=Mock())
+    context = recording_context(scene, manager)
+    assert recorder.execute(context) == {'RUNNING_MODAL'}
+    jitter = [.0005, .003, .001, .004, .002]
+    for k in range(1, 22):
+        clock[0] = k * .1 + jitter[k % len(jitter)]
+        if recorder.modal(context, SimpleNamespace(type='TIMER')) == {'FINISHED'}:
+            break
+    else:
+        pytest.fail('Recording did not finish at its duration')
+
+    manifest = json.loads((recorder._directory / 'manifest.json').read_text())
+    assert manifest['status'] == 'COMPLETE'
+    assert len(manifest['frames']) == 20
+    elapsed = [frame['elapsed_s'] for frame in manifest['frames']]
+    assert all(previous < current for previous, current in zip(elapsed, elapsed[1:]))
+    assert elapsed == pytest.approx([0.0] + [
+        k * .1 + jitter[k % len(jitter)] for k in range(1, 20)])
+    assert namespace._ACTIVE is None
+
+
+def test_late_timer_skips_missed_grid_points_without_catch_up(recording, tmp_path):
+    clock, screenshot = [0.0], Mock(return_value={'FINISHED'})
+    cls, namespace = recording(clock, screenshot)
+    recorder = cls()
+    recorder.report = Mock()
+    scene = Scene()
+    scene.directory = tmp_path
+    scene.wfrl_capture_fps = 10
+    scene.wfrl_capture_duration = 1.0
+    manager = SimpleNamespace(event_timer_add=Mock(return_value=object()),
+                              event_timer_remove=Mock(), modal_handler_add=Mock())
+    context = recording_context(scene, manager)
+    assert recorder.execute(context) == {'RUNNING_MODAL'}
+    assert screenshot.call_count == 1
+    for timestamp, count in [(.1, 2), (.35, 3), (.35, 3), (.399, 3), (.401, 4)]:
+        clock[0] = timestamp
+        assert recorder.modal(context, SimpleNamespace(type='TIMER')) == {'PASS_THROUGH'}
+        assert screenshot.call_count == count
+
+    recorder.cancel(context)
+    manifest = json.loads((recorder._directory / 'manifest.json').read_text())
+    assert [frame['elapsed_s'] for frame in manifest['frames']] == [0.0, .1, .35, .401]
+    assert namespace._ACTIVE is None
+
+
 @pytest.mark.parametrize('value', [float('nan'), float('inf'), float('-inf')])
 @pytest.mark.parametrize('field', ['elapsed_s', 'duration_s', 'requested_fps'])
 def test_nonfinite_manifest_keeps_destination_and_releases_recording(recording, tmp_path, field, value):

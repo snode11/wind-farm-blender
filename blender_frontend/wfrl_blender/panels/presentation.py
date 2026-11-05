@@ -137,7 +137,11 @@ class WFRL_OT_CaptureRecording(WindowRequired, bpy.types.Operator):
             return {'PASS_THROUGH'}
         try:
             self._capture(elapsed)
-            self._next_capture = now + self._interval
+            # Keep the deadline on the start-time grid, strictly after this event.
+            next_tick = int(elapsed / self._interval) + 1
+            self._next_capture = self._started + next_tick * self._interval
+            if self._next_capture <= now:
+                self._next_capture = self._started + (next_tick + 1) * self._interval
         except Exception as exc:
             self._finish('FAILED', str(exc))
             self.report({'ERROR'}, str(exc))
