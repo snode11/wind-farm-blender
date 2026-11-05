@@ -174,6 +174,33 @@ class OutputWindow:
             return [box(0, 0, width, height, (.018, .026, .04, 1)),
                 *(box(x, y, w, h, (.09, .3, .43, 1) if action == self.view else (.065, .095, .135, 1))
                   for action, _, (x, y, w, h) in layout['buttons'])]
+        self._draw_background(width, height, s, layout, chrome, draw_shapes, text)
+        sensor_axes = self._draw_frame_information(session, frame, layout, width, s, text)
+        rect = layout['rectangle']
+        left, bottom, pw, ph = rect
+        bounds = self.bounds or display.fit_bounds([], self.view)
+        def grid():
+            transform, shapes, labels = display.grid_geometry(self.view, bounds, rect, self.zoom, self.pan, s)
+            return transform, [shape(points, color) for points, color in shapes if len(points)], labels
+        (factor, tx, ty), shapes, labels = self.auxiliary.get('grid',
+            (tuple(rect), s, self.view, bounds, self.zoom, self.pan), grid)
+        self._draw_grid_axes(shapes, labels, factor, sensor_axes, left, bottom, pw, ph, s, draw_shapes, text)
+        self._prepare_point_batch(rect, s, bounds, factor, tx, ty, left, bottom, pw, ph, gpu, batch_for_shader)
+        blade_shapes = []
+        if self.view == 'NACELLE' and session and session.context is not None:
+            def reference_shapes():
+                return self._reference_shapes(session, factor, tx, ty, s, shape)
+            blade_shapes = self._draw_reference(
+                gpu, left, bottom, pw, ph, session, rect, bounds, reference_shapes, draw_shapes)
+        self._draw_points_and_estimates(blade_shapes, gpu, left, bottom, pw, ph, s, draw_shapes)
+        self._draw_canvas_labels(frame, left, bottom, ph, width, s, text)
+        def legend():
+            return self._legend_shapes(s, box)
+        draw_shapes(self.auxiliary.get('legend', (s, self.view, self.color, self.color_scale, self.limits), legend))
+        self._draw_status_text(session, frame, layout, width, s, text)
+        self.draw_count += 1
+
+    def _draw_background(self, width, height, s, layout, chrome, draw_shapes, text):
         draw_shapes(self.auxiliary.get('chrome', (width, height, s, self.view, self.effective_color == 'VELOCITY'), chrome))
         text('X100  雷达点云输出', 16*s, height-28*s, 19, (.9, .95, 1, 1), width-32*s)
         status = self.scene.get('wfrl_x100_error') or self.scene.get('wfrl_x100_status', '')
@@ -184,6 +211,8 @@ class OutputWindow:
                 label = '固定色标' if self.color_scale == 'FIXED' else '逐帧色标'
             text(label, x+10*s, y+7*s, 12)
             self.buttons.append((action, (x, y, w, h)))
+
+    def _draw_frame_information(self, session, frame, layout, width, s, text):
         info_top = layout['info_top']
         if frame is not None:
             text(f'{display.source_label(frame)}  /  {frame.stream}  /  #{frame.sequence}  ·  {frame.validity}',
@@ -204,14 +233,9 @@ class OutputWindow:
             coords = '局部Z非重力 · '+detail+' · R 参考'+('开' if self.show_reference else '关')
         text(coords + (' · 传感器角度投影' if self.view == 'SENSOR' else ' · 正交投影 (m)'),
              16*s, info_top-40*s, 11, max_width=width-32*s)
-        rect = layout['rectangle']
-        left, bottom, pw, ph = rect
-        bounds = self.bounds or display.fit_bounds([], self.view)
-        def grid():
-            transform, shapes, labels = display.grid_geometry(self.view, bounds, rect, self.zoom, self.pan, s)
-            return transform, [shape(points, color) for points, color in shapes if len(points)], labels
-        (factor, tx, ty), shapes, labels = self.auxiliary.get('grid',
-            (tuple(rect), s, self.view, bounds, self.zoom, self.pan), grid)
+        return sensor_axes
+
+    def _draw_grid_axes(self, shapes, labels, factor, sensor_axes, left, bottom, pw, ph, s, draw_shapes, text):
         draw_shapes(shapes)
         for label, x, y in labels:
             text(label, x, y, 10)
@@ -222,6 +246,8 @@ class OutputWindow:
             horizontal, vertical = '机舱局部 X (m)', '机舱局部 Z (m)'
         text(horizontal, left+pw/2-65*s, bottom-43*s, 11)
         text(vertical, left, bottom+ph+10*s, 11)
+
+    def _prepare_point_batch(self, rect, s, bounds, factor, tx, ty, left, bottom, pw, ph, gpu, batch_for_shader):
         cache_key = (self.data_key, tuple(rect), s, self.zoom, self.pan, bounds)
         if self.batch_key != cache_key:
             pixels = self.xy*factor + (tx, ty)
@@ -233,51 +259,56 @@ class OutputWindow:
                 self.point_batch = (shader, batch_for_shader(shader, 'POINTS',
                     {'pos': pixels[visible].astype(np.float32), 'color': self.colors[visible]}))
             self.batch_key = cache_key
-        blade_shapes = []
-        if self.view == 'NACELLE' and session and session.context is not None:
-            def reference_shapes():
-                context = session.context
-                vertices = analysis.local(context.vertices,context.world_from_analysis)[:,(0,2)]
-                faces = context.triangles
-                edges = np.concatenate((faces[:,(0,1)],faces[:,(1,2)],faces[:,(2,0)]))
-                shapes=[shape(vertices[edges].reshape(-1,2)*factor+(tx,ty),(.3,.65,.55,.3))]
-                sensor = analysis.local(analysis.transform(np.array([[0,0,0],[15,0,0]]),context.world_from_sensor),context.world_from_analysis)
-                shapes.append(shape(sensor[:,(0,2)]*factor+(tx,ty),(1.,.7,.15,1)))
-                rays=[]
-                for az in (-schema.PROFILE['azimuth_deg'],schema.PROFILE['azimuth_deg']):
-                    for el in (-schema.PROFILE['elevation_deg'],schema.PROFILE['elevation_deg']):
-                        a,e=np.radians([az,el]); length=schema.DISPLAY_DEFAULTS['fov_length_m']
-                        end=[length*np.cos(e)*np.cos(a),length*np.cos(e)*np.sin(a),length*np.sin(e)]
-                        pair=analysis.local(analysis.transform(np.array([[0,0,0],end]),context.world_from_sensor),context.world_from_analysis)
-                        rays.extend(pair[:,(0,2)]*factor+(tx,ty))
-                shapes.append(shape(rays,(.15,.65,1,.5)))
-                if self.show_reference:
-                    for curve in session.reference_curves:
-                        xy=analysis.local(curve,context.world_from_analysis)[:,(0,2)]*factor+(tx,ty)
-                        shapes.append(shape(xy,(.85,.6,.9,.8),'LINE_STRIP'))
-                estimates = []
-                if session.blade_result:
-                    colors = ((1., .45, .2, 1.), (.2, .8, 1., 1.), (.95, .85, .2, 1.))
-                    for row in session.blade_result['blades']:
-                        color = colors[row['blade'] - 1]
-                        if row['curve_world']:
-                            xy = analysis.local(row['curve_world'], context.world_from_analysis)[:, (0, 2)] * factor + (tx, ty)
-                            estimates.append(shape(xy, color, 'LINE_STRIP', self.stroke_shader))
-                        if row['tip_world']:
-                            xy = analysis.local([row['tip_world']], context.world_from_analysis)[0, (0, 2)] * factor + (tx, ty)
-                            cross = xy + np.array([[-7, 0], [7, 0], [0, -7], [0, 7]]) * s
-                            estimates.append(shape(cross, color, shader=self.stroke_shader))
-                return shapes, estimates
-            gpu.state.scissor_set(int(left),int(bottom),int(pw),int(ph))
-            gpu.state.scissor_test_set(True)
-            try:
-                reference, blade_shapes = self.auxiliary.get('analysis',
-                    (session.context.identity,tuple(rect),self.zoom,self.pan,bounds,
-                     self.show_reference,session.reference_key,session.blade_key,
-                     bool(session.blade_result)),reference_shapes)
-                draw_shapes(reference)
-            finally:
-                gpu.state.scissor_test_set(False)
+
+    def _reference_shapes(self, session, factor, tx, ty, s, shape):
+        context = session.context
+        vertices = analysis.local(context.vertices,context.world_from_analysis)[:,(0,2)]
+        faces = context.triangles
+        edges = np.concatenate((faces[:,(0,1)],faces[:,(1,2)],faces[:,(2,0)]))
+        shapes=[shape(vertices[edges].reshape(-1,2)*factor+(tx,ty),(.3,.65,.55,.3))]
+        sensor = analysis.local(analysis.transform(np.array([[0,0,0],[15,0,0]]),context.world_from_sensor),context.world_from_analysis)
+        shapes.append(shape(sensor[:,(0,2)]*factor+(tx,ty),(1.,.7,.15,1)))
+        rays=[]
+        for az in (-schema.PROFILE['azimuth_deg'],schema.PROFILE['azimuth_deg']):
+            for el in (-schema.PROFILE['elevation_deg'],schema.PROFILE['elevation_deg']):
+                a,e=np.radians([az,el])
+                length=schema.DISPLAY_DEFAULTS['fov_length_m']
+                end=[length*np.cos(e)*np.cos(a),length*np.cos(e)*np.sin(a),length*np.sin(e)]
+                pair=analysis.local(analysis.transform(np.array([[0,0,0],end]),context.world_from_sensor),context.world_from_analysis)
+                rays.extend(pair[:,(0,2)]*factor+(tx,ty))
+        shapes.append(shape(rays,(.15,.65,1,.5)))
+        if self.show_reference:
+            for curve in session.reference_curves:
+                xy=analysis.local(curve,context.world_from_analysis)[:,(0,2)]*factor+(tx,ty)
+                shapes.append(shape(xy,(.85,.6,.9,.8),'LINE_STRIP'))
+        estimates = []
+        if session.blade_result:
+            colors = ((1., .45, .2, 1.), (.2, .8, 1., 1.), (.95, .85, .2, 1.))
+            for row in session.blade_result['blades']:
+                color = colors[row['blade'] - 1]
+                if row['curve_world']:
+                    xy = analysis.local(row['curve_world'], context.world_from_analysis)[:, (0, 2)] * factor + (tx, ty)
+                    estimates.append(shape(xy, color, 'LINE_STRIP', self.stroke_shader))
+                if row['tip_world']:
+                    xy = analysis.local([row['tip_world']], context.world_from_analysis)[0, (0, 2)] * factor + (tx, ty)
+                    cross = xy + np.array([[-7, 0], [7, 0], [0, -7], [0, 7]]) * s
+                    estimates.append(shape(cross, color, shader=self.stroke_shader))
+        return shapes, estimates
+
+    def _draw_reference(self, gpu, left, bottom, pw, ph, session, rect, bounds, reference_shapes, draw_shapes):
+        gpu.state.scissor_set(int(left),int(bottom),int(pw),int(ph))
+        gpu.state.scissor_test_set(True)
+        try:
+            reference, blade_shapes = self.auxiliary.get('analysis',
+                (session.context.identity,tuple(rect),self.zoom,self.pan,bounds,
+                 self.show_reference,session.reference_key,session.blade_key,
+                 bool(session.blade_result)),reference_shapes)
+            draw_shapes(reference)
+        finally:
+            gpu.state.scissor_test_set(False)
+        return blade_shapes
+
+    def _draw_points_and_estimates(self, blade_shapes, gpu, left, bottom, pw, ph, s, draw_shapes):
         if self.point_batch:
             shader, batch = self.point_batch
             shader.bind()
@@ -293,6 +324,8 @@ class OutputWindow:
                 draw_shapes(blade_shapes, self.stroke_shader)
             finally:
                 gpu.state.scissor_test_set(False)
+
+    def _draw_canvas_labels(self, frame, left, bottom, ph, width, s, text):
         if frame is None or not len(self.xy):
             message = '有效空帧 · 当前检测点数为 0' if frame is not None and not len(frame.points) else '当前视图没有可绘制点' if frame is not None else '等待当前雷达帧'
             text(message, left+20*s, bottom+ph/2, 15, (.95, .7, .4, 1))
@@ -307,15 +340,17 @@ class OutputWindow:
                 '固定对称 · 超限用端点色' if self.color == 'VELOCITY' and self.color_scale == 'FIXED' else '当前帧色标')
             text(f'{label}  {lo:.3g} ～ {hi:.3g}  ·  {scale_label}  ·  未知 {self.unknown}',
                  16*s, 55*s, 12, max_width=width-32*s)
-        def legend():
-            shapes = []
-            if self.limits is not None:
-                for i in range(40):
-                    v = float(i/39 >= .5) if self.effective_color == 'MS' else i/39
-                    color = tuple(analysis.distance_colors([v*self.distance_limit],self.distance_limit)[0][0]) if self.view == 'NACELLE' else (v,1-abs(2*v-1),1-v,1)
-                    shapes.append(box(16*s+i*4*s, 36*s, 4*s, 8*s, color))
-            return shapes
-        draw_shapes(self.auxiliary.get('legend', (s, self.view, self.color, self.color_scale, self.limits), legend))
+
+    def _legend_shapes(self, s, box):
+        shapes = []
+        if self.limits is not None:
+            for i in range(40):
+                v = float(i/39 >= .5) if self.effective_color == 'MS' else i/39
+                color = tuple(analysis.distance_colors([v*self.distance_limit],self.distance_limit)[0][0]) if self.view == 'NACELLE' else (v,1-abs(2*v-1),1-v,1)
+                shapes.append(box(16*s+i*4*s, 36*s, 4*s, 8*s, color))
+        return shapes
+
+    def _draw_status_text(self, session, frame, layout, width, s, text):
         hints = '滚轮缩放 · 中键平移 · F 复位 · Esc 关闭' if layout['compact'] else '滚轮缩放 · 中键平移 · 1–5 切视图 · F 复位 · C 着色 · V 色标 · Esc 关闭'
         text(hints, 16*s, 16*s, 11, max_width=width-32*s)
         if self.view == 'NACELLE' and session and session.blade_result:
@@ -325,7 +360,6 @@ class OutputWindow:
             sign = frame.provenance.get('velocity_sign', 'UNKNOWN')
             text('速度正值远离传感器' if sign == 'positive receding' else '速度符号沿用来源（未确认）',
                  16*s, 76*s, 11, max_width=width-32*s)
-        self.draw_count += 1
 
 
 def _draw():

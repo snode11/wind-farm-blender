@@ -695,12 +695,17 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
         shader = gpu.shader.from_builtin('UNIFORM_COLOR')
         def lines(points, color):
             batch = batch_for_shader(shader, 'LINES', {'pos': points})
-            shader.bind(); shader.uniform_float('color', color); batch.draw(shader)
+            shader.bind()
+            shader.uniform_float('color', color)
+            batch.draw(shader)
         def circle(x,y,r,color):
             points = [(x+r*math.cos(i*math.tau/48), y+r*math.sin(i*math.tau/48)) for i in range(49)]
             lines([p for a,b in zip(points,points[1:]) for p in (a,b)], color)
         def label(x,y,text,color=(1,1,1,1)):
-            blf.size(0,13 * max(1., bpy.context.preferences.system.ui_scale)); blf.color(0,*color); blf.position(0,x,y,0); blf.draw(0,text)
+            blf.size(0,13 * max(1., bpy.context.preferences.system.ui_scale))
+            blf.color(0,*color)
+            blf.position(0,x,y,0)
+            blf.draw(0,text)
         def project(local):
             parent = self.scene.objects.get('WFRL.Turbine.T1.YawRoot')
             return location_3d_to_region_2d(self.region,self.area.spaces.active.region_3d,parent.matrix_world @ Vector(local))
@@ -718,7 +723,8 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
                     for axis,text,color in [((3,0,0),'+X 尾部',(1,.3,.3,1)),((0,3,0),'+Y 右侧',(.3,1,.3,1)),((0,0,3),'+Z 上方',(.3,.6,1,1))]:
                         end = project(axis)
                         if end:
-                            lines([origin,end],color); label(*end,text,color)
+                            lines([origin,end],color)
+                            label(*end,text,color)
                 anchors = list(self.candidates)
                 if self.hover:
                     anchors.append(self.hover)
@@ -734,7 +740,9 @@ class WFRL_OT_CustomCamera(Available, bpy.types.Operator):
                         label(p.x+10,p.y+10, '锚点 '+str(i+1) if self.candidates else '安装落点')
                 if self.ready and self.camera:
                     p = project(core.parameters(self.camera).location)
-                    if p: circle(*p,4,(.2,1,1,1)); label(p.x+8,p.y-18,'镜头中心')
+                    if p:
+                        circle(*p,4,(.2,1,1,1))
+                        label(p.x+8,p.y-18,'镜头中心')
             if self.stage in {'LAYOUT', 'PLACE', 'INPUT'}:
                 from bpy_extras.view3d_utils import location_3d_to_region_2d
                 cameras = [core.get_camera(self.scene, slot) for slot in core.SLOTS]
@@ -832,7 +840,8 @@ class WFRL_OT_CustomAction(bpy.types.Operator):
                 if wm.wfrl_custom_mount_mode == 'RESEARCH':
                     core.apply_research(scene, op.camera, params, wm.wfrl_custom_research_confirmed)
                     op.ready,op.error,op.stage = True,'','AIM'
-                    sync_fields(wm,op.camera);op.show_camera()
+                    sync_fields(wm,op.camera)
+                    op.show_camera()
                     return {'FINISHED'}
                 # Validation must run before any draft transform changes.
                 anchors = core.validate_position(scene,params.location)
@@ -843,13 +852,15 @@ class WFRL_OT_CustomAction(bpy.types.Operator):
                 else:
                     core.apply_parameters(op.camera,params,anchor=anchors[0])
                     op.ready,op.error,op.stage = True,'','AIM'
-                    sync_fields(wm,op.camera); op.show_camera()
+                    sync_fields(wm,op.camera)
+                    op.show_camera()
             elif self.action == 'ANCHOR' and editing:
                 anchor = op.candidates[self.index]
                 core.apply_parameters(op.camera,_parameters(wm),anchor=anchor)
                 op.candidates=[]
                 op.ready,op.error,op.stage=True,'','AIM'
-                sync_fields(wm,op.camera); op.show_camera()
+                sync_fields(wm,op.camera)
+                op.show_camera()
             elif self.action in {'NEXT','CONFIRM'} and editing:
                 if not op.ready or (self.action == 'CONFIRM' and op.stage != 'AIM'):
                     raise ValueError(op.error or '请先确定有效安装位置并进入方向阶段')
@@ -894,6 +905,17 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
     bl_idname = 'WFRL_PT_custom_cameras'
     bl_space_type,bl_region_type,bl_category = 'VIEW_3D','UI','View'
     def draw(self,context):
+        state = WFRL_PT_CustomCameras._draw_selection(self, context)
+        if state is None:
+            return
+        layout, wm, scene, op, editing, stacked, message, diagnostic, draw_installation = state
+        WFRL_PT_CustomCameras._draw_observation(self, layout, scene, op, editing, stacked, draw_installation)
+        block_reason, camera, action = WFRL_PT_CustomCameras._draw_camera_controls(self,
+            context, layout, wm, scene, op, editing, stacked, message, diagnostic)
+        WFRL_PT_CustomCameras._draw_parameters(self, context, layout, wm, op, editing, stacked, camera, action, message, diagnostic)
+        WFRL_PT_CustomCameras._draw_history(self, context, layout, editing, block_reason, message)
+
+    def _draw_selection(self, context):
         from .ui_helpers import message, diagnostic
         from . import stacked_camera_rig as box_panel
         layout,wm,scene = self.layout,context.window_manager,context.scene
@@ -909,41 +931,13 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
             return
 
         def draw_installation(box):
-            box.enabled = not editing
-            if placement:
-                box.label(text='点击机舱表面，支架安装端贴合')
-                box.label(text='盒体位于支架外端，保留离舱间距')
-                box.label(text='可重复选点；中键转动观察视角')
-                box.prop(wm,'wfrl_box_spin',text='贴面旋转 (°)')
-                row=box.row(align=True)
-                row.operator('wfrl.stacked_box_action',text='↶ 15°').action='LEFT'
-                row.operator('wfrl.stacked_box_action',text='↷ 15°').action='RIGHT'
-                box.label(text='Shift + 滚轮也可旋转整个盒体')
-                box.prop(wm,'wfrl_box_aim',text='盒体转向 (°)')
-                box.label(text='支架保持贴合，盒体在外端水平转向')
-                row=box.row(align=True)
-                row.operator('wfrl.stacked_box_action',text='盒体 ↶ 15°').action='AIM_LEFT'
-                row.operator('wfrl.stacked_box_action',text='盒体 ↷ 15°').action='AIM_RIGHT'
-                row=box.row(align=True)
-                confirm=row.row();confirm.enabled=placement.transaction.ready and not placement.transaction.error
-                confirm.operator('wfrl.stacked_box_action',text='确认安装',icon='CHECKMARK').action='CONFIRM'
-                row.operator('wfrl.stacked_box_action',text='取消',icon='X').action='CANCEL'
-                if placement.transaction.error:
-                    diagnostic(box, '相机盒体安装', placement.transaction.error, error=True, context=context)
-                return
-            box.operator('wfrl.stacked_box_pick', text='贴合安装 / 调整整个盒体', icon='PIVOT_CURSOR')
-            box.operator('wfrl.stacked_box_reset_default', text='恢复默认三相机', icon='LOOP_BACK')
-            box.label(text='选位置、调方向、确认，在同一步完成')
-            header, body = box.panel('wfrl_box_advanced',default_closed=True)
-            header.label(text='高级设置 · 自由坐标')
-            if body is not None:
-                body.label(text='自由调整会解除表面贴合')
-                body.operator('wfrl.stacked_box_position', text='整体 XYZ / 水平转向')
+            WFRL_PT_CustomCameras._draw_installation(self, box, editing, placement, wm, diagnostic, context)
         if stacked and placement:
             draw_installation(layout.box())
             return
         layout.label(text='相机观察', icon='CAMERA_DATA')
-        row = layout.row(align=True); row.enabled = not editing
+        row = layout.row(align=True)
+        row.enabled = not editing
         for slot in core.SLOTS:
             installed = core.get_camera(scene, slot)
             button=row.operator('wfrl.custom_camera_action',text=f'C{slot}',
@@ -966,15 +960,53 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
             layout.label(text='撤销不可用：请先结束采集', icon='INFO')
             layout.operator('wfrl.custom_capture_cancel', text='取消采集')
             return
+        return layout, wm, scene, op, editing, stacked, message, diagnostic, draw_installation
+
+    def _draw_installation(self, box, editing, placement, wm, diagnostic, context):
+        box.enabled = not editing
+        if placement:
+            box.label(text='点击机舱表面，支架安装端贴合')
+            box.label(text='盒体位于支架外端，保留离舱间距')
+            box.label(text='可重复选点；中键转动观察视角')
+            box.prop(wm,'wfrl_box_spin',text='贴面旋转 (°)')
+            row=box.row(align=True)
+            row.operator('wfrl.stacked_box_action',text='↶ 15°').action='LEFT'
+            row.operator('wfrl.stacked_box_action',text='↷ 15°').action='RIGHT'
+            box.label(text='Shift + 滚轮也可旋转整个盒体')
+            box.prop(wm,'wfrl_box_aim',text='盒体转向 (°)')
+            box.label(text='支架保持贴合，盒体在外端水平转向')
+            row=box.row(align=True)
+            row.operator('wfrl.stacked_box_action',text='盒体 ↶ 15°').action='AIM_LEFT'
+            row.operator('wfrl.stacked_box_action',text='盒体 ↷ 15°').action='AIM_RIGHT'
+            row=box.row(align=True)
+            confirm=row.row()
+            confirm.enabled=placement.transaction.ready and not placement.transaction.error
+            confirm.operator('wfrl.stacked_box_action',text='确认安装',icon='CHECKMARK').action='CONFIRM'
+            row.operator('wfrl.stacked_box_action',text='取消',icon='X').action='CANCEL'
+            if placement.transaction.error:
+                diagnostic(box, '相机盒体安装', placement.transaction.error, error=True, context=context)
+            return
+        box.operator('wfrl.stacked_box_pick', text='贴合安装 / 调整整个盒体', icon='PIVOT_CURSOR')
+        box.operator('wfrl.stacked_box_reset_default', text='恢复默认三相机', icon='LOOP_BACK')
+        box.label(text='选位置、调方向、确认，在同一步完成')
+        header, body = box.panel('wfrl_box_advanced',default_closed=True)
+        header.label(text='高级设置 · 自由坐标')
+        if body is not None:
+            body.label(text='自由调整会解除表面贴合')
+            body.operator('wfrl.stacked_box_position', text='整体 XYZ / 水平转向')
+
+    def _draw_observation(self, layout, scene, op, editing, stacked, draw_installation):
         if editing:
             layout.label(text='撤销不可用：请先确认或取消草稿', icon='INFO')
         if not editing:
             views=layout.row(align=True)
             views.operator('wfrl.native_camera_view',text='查看单路',icon='VIEW_CAMERA').mode='WATCH'
             native_button=views.operator('wfrl.native_camera_view',text='2×2 展示')
-            native_button.mode='TRIPLE';native_button.layout='GRID'
+            native_button.mode='TRIPLE'
+            native_button.layout='GRID'
             native_button=views.operator('wfrl.native_camera_view',text='三列对照')
-            native_button.mode='TRIPLE';native_button.layout='STRIP'
+            native_button.mode='TRIPLE'
+            native_button.layout='STRIP'
             layout.operator('wfrl.custom_camera',text='查看外部安装布局').mode='LAYOUT'
             if scene.get('wfrl_stacked_camera_rig'):
                 layout.label(text='共用盒体 · C1 / C2 / C3 随盒体排列')
@@ -985,6 +1017,8 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
             header.label(text='盒体安装与复位')
             if body is not None:
                 draw_installation(body)
+
+    def _draw_camera_controls(self, context, layout, wm, scene, op, editing, stacked, message, diagnostic):
         block_reason = installation_block_reason(scene)
         if block_reason and not editing:
             message(layout, block_reason, context=context)
@@ -1014,15 +1048,19 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
                     b.action,b.index='ANCHOR',i
             elif op.stage=='PLACE':
                 layout.prop(wm,'wfrl_custom_distance',text='离壳距离 (m)')
-                row=layout.row();row.enabled=op.ready
+                row=layout.row()
+                row.enabled=op.ready
                 action('下一步：调整方向','NEXT',row)
             elif not stacked:
                 action('上一步：安装位置','BACK')
             row=layout.row(align=True)
-            confirm=row.row();confirm.enabled=op.ready and op.stage=='AIM'
-            action('确认修改','CONFIRM',confirm);action('取消修改','CANCEL',row)
+            confirm=row.row()
+            confirm.enabled=op.ready and op.stage=='AIM'
+            action('确认修改','CONFIRM',confirm)
+            action('取消修改','CANCEL',row)
             if op.error:
-                box=layout.box();box.alert=True
+                box=layout.box()
+                box.alert=True
                 diagnostic(box, '相机编辑', op.error, error=True, context=context)
         elif camera:
             if not stacked:
@@ -1034,6 +1072,9 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
             layout.label(text='各槽位分别选点、分别保存',icon='INFO')
             layout.operator('wfrl.custom_camera',text=f'为 C{wm.wfrl_custom_slot} 选安装位置',icon='PIVOT_CURSOR').mode='PLACE'
             layout.operator('wfrl.custom_camera',text='输入 XYZ 位置 / 参数',icon='DRIVER_DISTANCE').mode='INPUT'
+        return block_reason, camera, action
+
+    def _draw_parameters(self, context, layout, wm, op, editing, stacked, camera, action, message, diagnostic):
         if editing:
             box = layout.box()
             box.label(text='安装参数 · 相对 T1 机舱')
@@ -1043,7 +1084,8 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
         if editing:
             for key,label in [('x','镜头 X (m)'),('y','镜头 Y (m)'),('z','镜头 Z (m)'),('pitch','俯仰角 (°)'),('yaw','水平角 (°)'),('roll','画面旋转角 (°)'),('fov','HFOV (°)'),('vfov','VFOV (°)')]:
                 if stacked and key in {'x','y','z'}:continue
-                row=box.row();row.enabled=not (op.stage=='AIM' and key in {'x','y','z'})
+                row=box.row()
+                row.enabled=not (op.stage=='AIM' and key in {'x','y','z'})
                 row.prop(wm,'wfrl_custom_'+key,text=label)
         elif box is not None and camera:
             box.label(text='安装参数 · 相对 T1 机舱')
@@ -1078,9 +1120,12 @@ class WFRL_PT_CustomCameras(bpy.types.Panel):
             row=box.row(align=True)
             row.prop(wm,'wfrl_custom_show_axis',text='光轴')
             row.prop(wm,'wfrl_custom_show_frustum',text='视锥')
-            row=box.row();row.enabled=camera is not None and (not editing or op.ready)
+            row=box.row()
+            row.enabled=camera is not None and (not editing or op.ready)
             action('复制参数','COPY',row)
             box.operator('wfrl.custom_camera_coordinates',text='坐标说明')
+
+    def _draw_history(self, context, layout, editing, block_reason, message):
         undo_row = layout.row()
         undo_row.enabled = not editing and not block_reason and bool(history.HISTORY.entries)
         undo_row.operator('wfrl.custom_camera_action', text='撤销上次相机修改', icon='LOOP_BACK').action='UNDO'
