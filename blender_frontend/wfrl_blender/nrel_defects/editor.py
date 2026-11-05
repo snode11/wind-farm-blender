@@ -206,10 +206,19 @@ class EditorSession:
         self.rig = dict(scene=scene, collection=obj.users_collection[0], editor=self,
             motion=dict(fps=60., start_s=float(self.flex.times[0]), end_s=float(self.flex.times[-1])),
             geometry=self.surface.metadata())
-        self.payload = None; self.records = None; self.preview = None; self.draft = None
-        self.edit_state = None; self.helpers = []; self.helper_rest = {}; self.commit_times = []
-        self.helper_meshes = []; self.closing = False
-        self.busy = False; self.healthy_payload = None; self.save_state = None
+        self.payload = None
+        self.records = None
+        self.preview = None
+        self.draft = None
+        self.edit_state = None
+        self.helpers = []
+        self.helper_rest = {}
+        self.commit_times = []
+        self.helper_meshes = []
+        self.closing = False
+        self.busy = False
+        self.healthy_payload = None
+        self.save_state = None
         self.geometry = GeometrySet.__new__(GeometrySet)
         GeometrySet.__init__(self.geometry, self)
         self.repair_source = scene.objects.get('WFRL.RepairReference.T1.B1')
@@ -275,7 +284,8 @@ class EditorSession:
 
     def _activate(self, payload, document, version):
         self.geometry.activate(payload,document,version)
-        self.payload = payload; self.records = None
+        self.payload = payload
+        self.records = None
         self.scene[DOCUMENT_KEY] = json.dumps(document, allow_nan=False)
         self.scene['defect_state_version'] = version
         self.scene['defect_analysis_status'] = 'NOT_EVALUATED'
@@ -330,14 +340,19 @@ class EditorSession:
         def add(points, edges, d, role):
             mesh = bpy.data.meshes.new('NREL.Defect.Helper')
             self.helper_meshes.append(mesh)
-            mesh.from_pydata(points,edges,[]); mesh.update()
+            mesh.from_pydata(points,edges,[])
+            mesh.update()
             obj = bpy.data.objects.new('NREL.Defect.Helper.'+d['id'],mesh)
             self.helpers.append(obj)
             self.rig['collection'].objects.link(obj)
             obj.parent = self.blade(d['turbine_id'],d['blade_id'])
-            obj.hide_render = True; obj.show_in_front = True
-            obj['nrel_defect_role'] = 'editor_marker'; obj['turbine_id'] = d['turbine_id']; obj['blade_id'] = d['blade_id']
-            obj['defect_id'] = d['id']; obj['outline'] = role
+            obj.hide_render = True
+            obj.show_in_front = True
+            obj['nrel_defect_role'] = 'editor_marker'
+            obj['turbine_id'] = d['turbine_id']
+            obj['blade_id'] = d['blade_id']
+            obj['defect_id'] = d['id']
+            obj['outline'] = role
             obj.hide_viewport = not props.show_helpers or self.healthy_payload is not None
             self.helper_rest[obj.name] = np.array(points)
         for d in document['defects']:
@@ -356,14 +371,16 @@ class EditorSession:
             if len(obj.data.vertices) != len(rest):
                 continue
             coords = self.flex.deform_points(obj.parent,rest,t)
-            obj.data.vertices.foreach_set('co',coords.astype(np.float32).ravel()); obj.data.update()
+            obj.data.vertices.foreach_set('co',coords.astype(np.float32).ravel())
+            obj.data.update()
         try:
             repair_live = self.repair_source is not None and self.repair_source.as_pointer()
         except ReferenceError:
             repair_live = False
         if repair_live and self.repair_source.data is not None and len(self.repair_source.data.vertices)==len(self.repair_rest):
             coords = self.flex.deform_points(self.blade('T1',1),self.repair_rest,t)
-            self.repair_source.data.vertices.foreach_set('co',coords.astype(np.float32).ravel());self.repair_source.data.update()
+            self.repair_source.data.vertices.foreach_set('co',coords.astype(np.float32).ravel())
+            self.repair_source.data.update()
 
     def set_time(self, t):
         global _UPDATING
@@ -381,7 +398,8 @@ class EditorSession:
                 self.flex.update(self.scene,sim_time_s=t,record_telemetry=False)
             finally:
                 self.flex.visible_turbines = visible
-            self.scene['defect_time_s']=t; self.records=None
+            self.scene['defect_time_s']=t
+            self.records=None
             self.scene['defect_analysis_status']='NOT_EVALUATED'
         finally: _UPDATING=False
 
@@ -448,7 +466,8 @@ class EditorSession:
     def discard_preview(self):
         if self.preview is not None:
             self.geometry.activate(self.payload)
-            self.store.cancel(self.preview); self.preview=None
+            self.store.cancel(self.preview)
+            self.preview=None
             self.update_helpers(self.store.document)
 
     def preview_draft(self):
@@ -461,7 +480,8 @@ class EditorSession:
         if self.draft is None: return
         self.discard_preview()
         if commit:
-            started=time.perf_counter();self.commit_document(self.draft)
+            started=time.perf_counter()
+            self.commit_document(self.draft)
             self.commit_times.append(time.perf_counter()-started)
         selected_id = self.draft['defects'][self.draft_index]['id'] if commit else self.edit_selection
         self.draft=None
@@ -508,10 +528,14 @@ class EditorSession:
         if not 0<=index<len(doc['defects']): raise ValueError('请选择已有缺陷')
         item=doc['defects'][index]
         if operation=='DELETE': del doc['defects'][index]
-        elif operation=='TOGGLE': item['enabled']=not item['enabled'];item['revision']+=1
+        elif operation=='TOGGLE':
+            item['enabled']=not item['enabled']
+            item['revision']+=1
         elif operation=='COPY':
             import uuid
-            copied=copy.deepcopy(item);copied.update(id='D'+uuid.uuid4().hex,revision=1,enabled=False);doc['defects'].append(copied)
+            copied=copy.deepcopy(item)
+            copied.update(id='D'+uuid.uuid4().hex,revision=1,enabled=False)
+            doc['defects'].append(copied)
         self.commit_document(doc)
 
     def save(self,path):
@@ -525,8 +549,12 @@ class EditorSession:
     def healthy(self,index):
         if self.draft is not None: raise ValueError('请先确认或取消编辑')
         if self.healthy_payload is not None:
-            old=self.healthy_payload;self.geometry.activate(self.payload);self.healthy_payload=None
-            self.geometry.dispose(old);self.update_helpers();return
+            old=self.healthy_payload
+            self.geometry.activate(self.payload)
+            self.healthy_payload=None
+            self.geometry.dispose(old)
+            self.update_helpers()
+            return
         doc=self.store.document
         target=doc['defects'][index]
         for d in doc['defects']:
@@ -559,15 +587,22 @@ class EditorSession:
     def closeup(self,index,oblique=False):
         d=(defect_from_props(self, self.scene.wfrl_nrel_defects) if self.draft is not None
            else self.store.document['defects'][index])
-        frame=self.surface.frame(d['anchor']);blade=self.blade(d['turbine_id'],d['blade_id'])
-        p=Vector(frame['point']);n=Vector(frame['normal']);e=Vector(frame['e_t'])
+        frame=self.surface.frame(d['anchor'])
+        blade=self.blade(d['turbine_id'],d['blade_id'])
+        p=Vector(frame['point'])
+        n=Vector(frame['normal'])
+        e=Vector(frame['e_t'])
         mapped=self.flex.deform_points(blade,[p,p+n*.01,p+e*.01],self.scene['defect_time_s'],world=True)
-        target=Vector(mapped[0]);direction=Vector(mapped[1]-mapped[0]).normalized()
+        target=Vector(mapped[0])
+        direction=Vector(mapped[1]-mapped[0]).normalized()
         if oblique: direction+=Vector(mapped[2]-mapped[0]).normalized()*.7
         for area in bpy.context.screen.areas if bpy.context.screen else []:
             if area.type=='VIEW_3D':
-                r=area.spaces.active.region_3d;r.view_perspective='PERSP';r.view_location=target
-                r.view_rotation=(-direction).to_track_quat('-Z','Y');r.view_distance=max(.35,3*d['shape']['length_m'])
+                r=area.spaces.active.region_3d
+                r.view_perspective='PERSP'
+                r.view_location=target
+                r.view_rotation=(-direction).to_track_quat('-Z','Y')
+                r.view_distance=max(.35,3*d['shape']['length_m'])
                 area.spaces.active.overlay.show_overlays=True
                 area.spaces.active.shading.type='MATERIAL'
 
@@ -580,7 +615,8 @@ class EditorSession:
         normals=[]
         for original,triangle,normal in zip(support['triangles_local'],result['triangles_world'],support['normals_local']):
             a,b,c=np.asarray(triangle,dtype=float)
-            n=np.cross(b-a,c-a);length=np.linalg.norm(n)
+            n=np.cross(b-a,c-a)
+            length=np.linalg.norm(n)
             if length>0: n=n/length
             oa,ob,oc=np.asarray(original,dtype=float)
             if np.dot(np.cross(ob-oa,oc-oa),normal)<0: n=-n
@@ -594,7 +630,8 @@ class EditorSession:
         from .defect_visibility import analyze_support,scene_tree,_camera_descriptor,AnalysisCancelled
         self.verify_cameras()
         t=float(self.scene['defect_time_s']) if t is None else t
-        self.set_time(t);tree=scene_tree(self.rig)
+        self.set_time(t)
+        tree=scene_tree(self.rig)
         def ray(origin,direction,maximum):
             return tree.ray_cast(Vector(origin),Vector(direction),maximum)[3] if tree else None
         rows=[]
@@ -636,8 +673,10 @@ def ensure(scene):
 def after_update(scene,t):
     found=_SESSIONS.get(scene.as_pointer())
     if found and not getattr(found, 'closing', False):
-        found.update_attachments(t);scene['defect_time_s']=float(t)
-        found.records=None;scene['defect_analysis_status']='NOT_EVALUATED'
+        found.update_attachments(t)
+        scene['defect_time_s']=float(t)
+        found.records=None
+        scene['defect_analysis_status']='NOT_EVALUATED'
 
 
 def restore_saved(scene):
@@ -968,10 +1007,14 @@ class NREL_OT_defect_action(bpy.types.Operator):
             if reason:
                 raise ValueError(reason)
             if self.action == 'OPEN':
-                ensure(context.scene); p.status = ACTION_MESSAGES['OPEN']; return {'FINISHED'}
+                ensure(context.scene)
+                p.status = ACTION_MESSAGES['OPEN']
+                return {'FINISHED'}
             if self.action == 'CLOSE':
-                detach(context.scene); context.scene['wfrl_nrel_defect_enabled']=False
-                p.status = ACTION_MESSAGES['CLOSE']; return {'FINISHED'}
+                detach(context.scene)
+                context.scene['wfrl_nrel_defect_enabled']=False
+                p.status = ACTION_MESSAGES['CLOSE']
+                return {'FINISHED'}
             if self.action == 'RETRY_CLEANUP':
                 s.store.retry_disposals(strict=True)
             elif self.action in ('NEW', 'EDIT'):
@@ -1169,22 +1212,35 @@ class NREL_PT_defects(bpy.types.Panel):
     def draw(self, context):
         s, p, layout = session(context), context.scene.wfrl_nrel_defects, self.layout
         if s is None:
-            layout.operator('wfrl.nrel_defect_action',text='启动缺陷编辑器').action='OPEN'
-            status_box(layout, p, context)
+            self._draw_inactive(layout, p, context)
             return
 
-        def buttons(parent, items):
-            row = parent.row(align=True)
-            for code, label in items:
-                cell = row.row(align=True)
-                cell.enabled = not action_unavailable(s, p, code)
-                cell.operator('wfrl.nrel_defect_action', text=label).action = code
+        self._draw_session_status(layout, s, p, context)
+        self._draw_defect_list(layout, s, p)
+        self._draw_view(layout, s, p)
+        self._draw_pending_disposals(layout, s, p)
+        self._draw_config(layout, s, p, context)
+        self._draw_analysis(layout, s, p, context)
+        self._draw_notes(layout, context)
+        self._draw_buttons(layout, [('CLOSE', '关闭编辑器')], s, p)
 
-        def section(key, title, closed=True):
-            header, body = layout.panel('nrel_defects_' + key, default_closed=closed)
-            header.label(text=title)
-            return body
+    def _draw_buttons(self, parent, items, s, p):
+        row = parent.row(align=True)
+        for code, label in items:
+            cell = row.row(align=True)
+            cell.enabled = not action_unavailable(s, p, code)
+            cell.operator('wfrl.nrel_defect_action', text=label).action = code
 
+    def _section(self, layout, key, title, closed=True):
+        header, body = layout.panel('nrel_defects_' + key, default_closed=closed)
+        header.label(text=title)
+        return body
+
+    def _draw_inactive(self, layout, p, context):
+        layout.operator('wfrl.nrel_defect_action',text='启动缺陷编辑器').action='OPEN'
+        status_box(layout, p, context)
+
+    def _draw_session_status(self, layout, s, p, context):
         layout.label(text='合成视觉缺陷 · 未耦合物理', icon='INFO')
         if s.busy:
             layout.label(text='扫描中 · 按 Esc 取消', icon='TIME')
@@ -1196,8 +1252,8 @@ class NREL_PT_defects(bpy.types.Panel):
             layout.label(text='待编辑 · 选择缺陷或新建', icon='GREASEPENCIL')
 
         actions = layout.column(align=True)
-        buttons(actions, [('PREVIEW', '更新预览')])
-        buttons(actions, [('CONFIRM', '应用修改'), ('CANCEL', '取消编辑')])
+        self._draw_buttons(actions, [('PREVIEW', '更新预览')], s, p)
+        self._draw_buttons(actions, [('CONFIRM', '应用修改'), ('CANCEL', '取消编辑')], s, p)
         if s.draft is not None:
             if preview_is_current(s, p):
                 layout.label(text='参数与当前显示一致', icon='CHECKMARK')
@@ -1207,6 +1263,7 @@ class NREL_PT_defects(bpy.types.Panel):
             layout.label(text=' ')
         status_box(layout, p, context)
 
+    def _draw_defect_list(self, layout, s, p):
         listing = layout.column()
         listing.label(text=f'缺陷列表 · {len(p.defect_items)} 项')
         if p.defect_items:
@@ -1218,68 +1275,75 @@ class NREL_PT_defects(bpy.types.Panel):
 
         if s.draft is None:
             selected = s.store.document['defects'][p.selected] if 0 <= p.selected < len(p.defect_items) else None
-            buttons(listing, [('EDIT', '编辑选中缺陷'), ('TOGGLE', '停用' if selected and selected['enabled'] else '启用')])
-            buttons(listing, [('COPY', '复制（默认停用）'), ('DELETE', '删除')])
-            buttons(listing, [('UNDO', '撤销'), ('REDO', '重做')])
+            self._draw_buttons(listing, [('EDIT', '编辑选中缺陷'), ('TOGGLE', '停用' if selected and selected['enabled'] else '启用')], s, p)
+            self._draw_buttons(listing, [('COPY', '复制（默认停用）'), ('DELETE', '删除')], s, p)
+            self._draw_buttons(listing, [('UNDO', '撤销'), ('REDO', '重做')], s, p)
             create = layout.box()
             create.enabled = not action_unavailable(s, p, 'NEW')
             create.label(text='新建缺陷')
             row = create.row(align=True)
             row.prop(p, 'turbine_id', text='')
             row.prop(p, 'kind', text='')
-            buttons(create, [('NEW', '新建所选类型')])
+            self._draw_buttons(create, [('NEW', '新建所选类型')], s, p)
         else:
-            kind = s.draft['defects'][s.draft_index]['morphology']
-            preset = PRESETS[kind]
-            edit = layout.column()
-            edit.use_property_split = True
-            edit.use_property_decorate = False
-            edit.label(text='编辑 · ' + KIND_LABELS[kind])
-            for name in ('enabled', 'turbine_id', 'blade_id', 'side'):
-                edit.prop(p, name)
-            edit.operator('wfrl.nrel_defect_pick', text='在所选叶片上点选位置', icon='EYEDROPPER')
-            for name in ('span', 'u', 'length', 'width'):
-                edit.prop(p, name)
-            if preset['representation'] != 'appearance':
-                edit.prop(p, 'depth')
-            else:
-                edit.label(text='材质外观缺陷，无几何深度')
-            advanced = section('shape', '高级形态参数')
-            if advanced is not None:
-                advanced.use_property_split = True
-                advanced.use_property_decorate = False
-                advanced.prop(p, 'theta')
-                for name in ('edge_roughness', 'crater_fraction'):
-                    if name in preset:
-                        advanced.prop(p, name)
-                advanced.prop(p, 'seed')
+            self._draw_draft(layout, s, p)
 
-        view = section('view', '观察效果', closed=False)
+    def _draw_draft(self, layout, s, p):
+        kind = s.draft['defects'][s.draft_index]['morphology']
+        preset = PRESETS[kind]
+        edit = layout.column()
+        edit.use_property_split = True
+        edit.use_property_decorate = False
+        edit.label(text='编辑 · ' + KIND_LABELS[kind])
+        for name in ('enabled', 'turbine_id', 'blade_id', 'side'):
+            edit.prop(p, name)
+        edit.operator('wfrl.nrel_defect_pick', text='在所选叶片上点选位置', icon='EYEDROPPER')
+        for name in ('span', 'u', 'length', 'width'):
+            edit.prop(p, name)
+        if preset['representation'] != 'appearance':
+            edit.prop(p, 'depth')
+        else:
+            edit.label(text='材质外观缺陷，无几何深度')
+        advanced = self._section(layout, 'shape', '高级形态参数')
+        if advanced is not None:
+            advanced.use_property_split = True
+            advanced.use_property_decorate = False
+            advanced.prop(p, 'theta')
+            for name in ('edge_roughness', 'crater_fraction'):
+                if name in preset:
+                    advanced.prop(p, name)
+            advanced.prop(p, 'seed')
+
+    def _draw_view(self, layout, s, p):
+        view = self._section(layout, 'view', '观察效果', closed=False)
         if view is not None:
-            buttons(view, [('CLOSEUP', '正面近景'), ('OBLIQUE', '斜侧近景')])
-            buttons(view, [('HEALTHY', '返回缺陷效果' if s.healthy_payload is not None else '对比健康叶片')])
+            self._draw_buttons(view, [('CLOSEUP', '正面近景'), ('OBLIQUE', '斜侧近景')], s, p)
+            self._draw_buttons(view, [('HEALTHY', '返回缺陷效果' if s.healthy_payload is not None else '对比健康叶片')], s, p)
             helper = view.row()
             helper.enabled = not s.busy and s.healthy_payload is None
             helper.prop(p, 'show_helpers')
-            buttons(view, [('CAMERA1', 'C1'), ('CAMERA2', 'C2'), ('CAMERA3', 'C3')])
+            self._draw_buttons(view, [('CAMERA1', 'C1'), ('CAMERA2', 'C2'), ('CAMERA3', 'C3')], s, p)
 
+    def _draw_pending_disposals(self, layout, s, p):
         if s.store.pending_disposals:
             layout.label(text='缺陷已应用；旧资源待释放', icon='ERROR')
-            buttons(layout, [('RETRY_CLEANUP', '重试资源释放')])
+            self._draw_buttons(layout, [('RETRY_CLEANUP', '重试资源释放')], s, p)
 
-        config = section('config', '配置文件')
+    def _draw_config(self, layout, s, p, context):
+        config = self._section(layout, 'config', '配置文件')
         if config is not None:
             config.enabled = not action_unavailable(s, p, 'SAVE')
             config.prop(p, 'config_path', text='JSON 文件')
-            buttons(config, [('SAVE', '保存配置'), ('LOAD', '加载配置')])
+            self._draw_buttons(config, [('SAVE', '保存配置'), ('LOAD', '加载配置')], s, p)
             wrapped_label(config, '保存已应用的缺陷参数，不会渲染图片', context)
 
-        analysis = section('analysis', '几何分析与导出（G / A）')
+    def _draw_analysis(self, layout, s, p, context):
+        analysis = self._section(layout, 'analysis', '几何分析与导出（G / A）')
         if analysis is not None:
             analysis.enabled = not action_unavailable(s, p, 'ANALYZE')
             wrapped_label(analysis, 'G 仅分析投影与遮挡，不代表图片中可辨识', context)
             analysis.prop(p, 'time_s')
-            buttons(analysis, [('TIME', '定位时刻'), ('ANALYZE', '分析当前帧（G）')])
+            self._draw_buttons(analysis, [('TIME', '定位时刻'), ('ANALYZE', '分析当前帧（G）')], s, p)
             status = str(context.scene.get('defect_analysis_status', 'NOT_EVALUATED'))
             wrapped_label(analysis, {'NOT_EVALUATED': '当前帧尚未分析', 'EVALUATED': '当前帧已分析'}.get(status, status), context)
             for row in s.records or []:
@@ -1290,23 +1354,23 @@ class NREL_PT_defects(bpy.types.Panel):
                         wrapped_label(analysis, f"投影宽 {width['min']:.3f}–{width['max']:.3f} px；非辨识结论", context)
             analysis.separator()
             analysis.prop(p, 'output_path')
-            buttons(analysis, [('EXPORT_G', '导出当前帧分析资料（G）')])
+            self._draw_buttons(analysis, [('EXPORT_G', '导出当前帧分析资料（G）')], s, p)
             analysis.prop(p, 'scan_start')
             analysis.prop(p, 'scan_duration')
             scan = analysis.row()
             scan.enabled = not action_unavailable(s, p, 'SCAN')
             scan.operator('wfrl.nrel_defect_scan', text='逐帧扫描（Esc 取消）')
-            buttons(analysis, [('EXPORT_A', '渲染三相机对照图片（A）')])
+            self._draw_buttons(analysis, [('EXPORT_A', '渲染三相机对照图片（A）')], s, p)
             wrapped_label(analysis, '每次导出或扫描请选择新的空目录', context)
 
-        notes = section('notes', '使用说明与限制')
+    def _draw_notes(self, layout, context):
+        notes = self._section(layout, 'notes', '使用说明与限制')
         if notes is not None:
             for note in ('勾选图标表示启用，空框表示停用；列表高亮表示当前选择。',
                          '辅助轮廓不等于真实外观；请使用材质预览检查。',
                          '缺陷跟随柔性回放；雷达读数仍来自原仿真几何。',
                          '合成缺陷未耦合物理，材质外观尚未审核。'):
                 wrapped_label(notes, note, context)
-        buttons(layout, [('CLOSE', '关闭编辑器')])
 
 
 class NREL_OT_defect_scan(bpy.types.Operator):

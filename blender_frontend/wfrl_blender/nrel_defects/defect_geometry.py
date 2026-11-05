@@ -126,17 +126,20 @@ def _mask_group(support, owned_groups):
     local.vector_type = 'POINT'
     local.convert_from, local.convert_to = 'WORLD', 'OBJECT'
     links.new(geometry.outputs['Position'], local.inputs['Vector'])
-    uv = nodes.new('ShaderNodeUVMap'); uv.uv_map = REFERENCE_UV
+    uv = nodes.new('ShaderNodeUVMap')
+    uv.uv_map = REFERENCE_UV
 
     def vector(op, a, b):
-        node = nodes.new('ShaderNodeVectorMath'); node.operation = op
+        node = nodes.new('ShaderNodeVectorMath')
+        node.operation = op
         for index, value in enumerate((a, b)):
             if hasattr(value, 'node'): links.new(value, node.inputs[index])
             else: node.inputs[index].default_value = value
         return node.outputs['Value' if op == 'DOT_PRODUCT' else 'Vector']
 
     def scalar(op, a, b):
-        node = nodes.new('ShaderNodeMath'); node.operation = op
+        node = nodes.new('ShaderNodeMath')
+        node.operation = op
         for index, value in enumerate((a, b)):
             if hasattr(value, 'node'): links.new(value, node.inputs[index])
             else: node.inputs[index].default_value = value
@@ -175,8 +178,10 @@ def _mask_group(support, owned_groups):
 
 def _mask_material(base, supports, name, owned_materials, owned_groups):
     """Layer independently colored analytic masks on healthy-surface material."""
-    mat = base.copy(); owned_materials.append(mat)
-    mat.name = name; mat.use_nodes = True
+    mat = base.copy()
+    owned_materials.append(mat)
+    mat.name = name
+    mat.use_nodes = True
     nodes, links = mat.node_tree.nodes, mat.node_tree.links
     shader = nodes.get('Principled BSDF')
     if shader is None: raise ValueError('Healthy blade material has no Principled BSDF')
@@ -187,14 +192,16 @@ def _mask_material(base, supports, name, owned_materials, owned_groups):
         style = support['support_definition'].get('appearance', {})
         color = style.get('color', STYLES['fine_crack'][0])
         roughness = style.get('roughness', STYLES['fine_crack'][1])
-        mix = nodes.new('ShaderNodeMixRGB'); mix.blend_type = 'MIX'
+        mix = nodes.new('ShaderNodeMixRGB')
+        mix.blend_type = 'MIX'
         if shader.inputs['Base Color'].is_linked:
             links.new(shader.inputs['Base Color'].links[0].from_socket, mix.inputs[1])
         else: mix.inputs[1].default_value = tuple(shader.inputs['Base Color'].default_value)
         mix.inputs[2].default_value = (*color, 1.)
         links.new(mask.outputs['Mask'], mix.inputs[0])
         links.new(mix.outputs[0], shader.inputs['Base Color'])
-        rough = nodes.new('ShaderNodeMixRGB'); rough.blend_type = 'MIX'
+        rough = nodes.new('ShaderNodeMixRGB')
+        rough.blend_type = 'MIX'
         if shader.inputs['Roughness'].is_linked:
             links.new(shader.inputs['Roughness'].links[0].from_socket, rough.inputs[1])
         else:
@@ -375,7 +382,8 @@ class DefectGeometry:
                 for piece in pieces:
                     pb = bounds(piece)
                     if pb[1] <= hb[0] or hb[1] <= pb[0] or pb[3] <= hb[2] or hb[3] <= pb[2]:
-                        remaining.append(piece); continue
+                        remaining.append(piece)
+                        continue
                     inside = piece
                     for a,b in zip(hole, hole[1:]+hole[:1]):
                         outside = halfplane(inside, a, b, -orientation)
@@ -566,7 +574,8 @@ class DefectGeometry:
                 points = [Vector(self.surface.point(anchor_at(factor*j/8))) for j in range(9)]
                 actual_sides.append(sum((b-a).length for a,b in zip(points,points[1:])))
             width = sum(actual_sides)
-            values.append(width); errors.append(abs(width-shape['widths_m'][index]))
+            values.append(width)
+            errors.append(abs(width-shape['widths_m'][index]))
         if max(errors) > SIZE_TOLERANCE_M:
             raise ValueError(f"{defect['id']}: actual mouth width exceeds frozen dimension tolerance")
         return dict(actual_mouth_widths_m=values, actual_mouth_width_indices=indices,
