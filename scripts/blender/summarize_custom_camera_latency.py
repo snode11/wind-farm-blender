@@ -28,14 +28,14 @@ def stages(events, received):
 
 def summarize(window, external):
     window,external=Path(window),Path(external)
-    events=json.loads((window/'trace.json').read_text())
+    events=json.loads((window/'trace.json').read_text(encoding='utf-8'))
     numeric=[row for e in events if e['kind']=='t1' and e.get('input')=='numeric'
              if (row:=stages(events,e)) is not None]
     result={'scripted_numeric_raw':numeric,
             'scripted_numeric_summary':{k:stats([row[k] for row in numeric]) for k in numeric[0]} if numeric else {},
-            'window_result':json.loads((window/'result.json').read_text())}
-    raw=json.loads((external/'external-input.json').read_text())
-    events=json.loads((external/'external-trace.json').read_text())
+            'window_result':json.loads((window/'result.json').read_text(encoding='utf-8'))}
+    raw=json.loads((external/'external-input.json').read_text(encoding='utf-8'))
+    events=json.loads((external/'external-trace.json').read_text(encoding='utf-8'))
     clock=raw['clock_mapping'];offset=clock['unix_s']-clock['monotonic_s']
     rows=[]
     for action,start,end in raw['actions']:
@@ -49,8 +49,8 @@ def summarize(window, external):
                              external_to_callback_s=t1['at']-t0+timing['handler_to_callback_s']))
     result['external_numeric_raw']=rows
     cancel_start=next(start for action,start,end in raw['actions'] if action=='capture_cancel_direct')/1000-offset
-    manifest=next(json.loads(p.read_text()) for p in external.glob('capture_*/manifest.json')
-        if (m:=json.loads(p.read_text())).get('cancel_accepted_at',0)>=cancel_start)
+    manifest=next(json.loads(p.read_text(encoding='utf-8')) for p in external.glob('capture_*/manifest.json')
+        if (m:=json.loads(p.read_text(encoding='utf-8'))).get('cancel_accepted_at',0)>=cancel_start)
     result['external_cancel']={'n':1,'completed_groups':manifest['completed_samples'],
         'external_to_accept_s':manifest['cancel_accepted_at']-cancel_start,
         'accept_to_stop_s':manifest['cancel_stopped_at']-manifest['cancel_accepted_at'],
@@ -67,5 +67,5 @@ if __name__=='__main__':
     parser.add_argument('window');parser.add_argument('external');parser.add_argument('--output',required=True)
     args=parser.parse_args()
     payload=summarize(args.window,args.external)
-    Path(args.output).write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n')
+    Path(args.output).write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n', encoding='utf-8')
     print(json.dumps(payload['scripted_numeric_summary'],indent=2))

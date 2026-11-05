@@ -13,7 +13,7 @@ ROOT=Path(__file__).resolve().parents[2]
 
 def bundle(package,destination):
     package,destination=Path(package),Path(destination)
-    manifest=json.loads((package/'manifest.json').read_text())
+    manifest=json.loads((package/'manifest.json').read_text(encoding='utf-8'))
     if manifest.get('diagnostic_only') or not all(c['passed'] for c in manifest['controller_validation']):
         raise ValueError('Cannot deliver a diagnostic or unaccepted controller package')
     destination.mkdir(parents=True,exist_ok=False)
@@ -29,7 +29,7 @@ def bundle(package,destination):
 set -eu
 SCRIPT_DIR="$(cd -- "$(dirname -- "$0")" && pwd)"
 exec /Applications/Blender.app/Contents/MacOS/Blender --factory-startup --python "$SCRIPT_DIR/scripts/blender/open_farm_flex.py"
-''')
+''', encoding='utf-8')
     command.chmod(0o755)
     (destination/'使用说明.md').write_text('''# 三机 MAPPO 叶片回放 · 开发验收版
 
@@ -52,9 +52,9 @@ T1 Down、T1 侧前方和全景之间切换保留当前轨迹及播放进度；�
 11 rpm 目标的降额基线控制器负责转矩、变桨。下游机组受尾流影响可能低于目标转速。
 显示实体保留真实形变量，平滑展示网格和红色叶尖涂装为可视化外形。
 尚不具备时间步长/展向细化的正式数值精度证据，不用于现场精度、控制收益或安全认证。
-''')
+''', encoding='utf-8')
     if manifest.get('tower_model') == 'elastodyn-flexible':
-        with (destination/'使用说明.md').open('a') as notes:
+        with (destination/'使用说明.md').open('a', encoding='utf-8') as notes:
             notes.write('''
 ## 本次塔架柔性重算
 
@@ -90,11 +90,11 @@ B2 估计沿用固定标定公式，未加入塔架弯曲补偿；7 m 是演示�
 
 这是独立便携目录，不替换全局安装或旧基线数据；运行不需要求解器、训练环境或网络。
 本次未对外发布。macOS 的后台/窗口证据不代表 Windows 实机验收、稳定 60 FPS、现场精度或安全认证。
-''')
+''', encoding='utf-8')
     inventory={str(p.relative_to(destination)):hashlib.sha256(p.read_bytes()).hexdigest()
                for p in destination.rglob('*') if p.is_file()}
     (destination/'inventory.json').write_text(json.dumps(dict(status='REVIEW_ONLY',
-        runtime_sha256=built.sha256,files=inventory),indent=2))
+        runtime_sha256=built.sha256,files=inventory),indent=2), encoding='utf-8')
     print(destination.resolve(),flush=True)
 
 

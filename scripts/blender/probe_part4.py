@@ -101,7 +101,7 @@ def main():
     args = parser.parse_args()
     result = probe(args.port, json.loads(args.options), args.timeout, args.mode)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + '\n')
+    args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + '\n', encoding='utf-8')
     print(json.dumps({'passed': result['passed'], 'messages': len(result['messages']),
                       'error': result.get('error'), 'evidence': str(args.output)}))
     return 0 if result['passed'] else 1

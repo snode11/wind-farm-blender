@@ -90,7 +90,7 @@ def verify(mode, output):
         report.update(records=records, lifecycle=lifecycle, final_status=session.status,
                       backend_alive=session.alive())
         output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(json.dumps(report, indent=2, allow_nan=False) + '\n')
+        output.write_text(json.dumps(report, indent=2, allow_nan=False) + '\n', encoding='utf-8')
     print(json.dumps({k: report[k] for k in ('mode', 'passed', 'final_status', 'backend_alive')}), flush=True)
     return report['passed']
 

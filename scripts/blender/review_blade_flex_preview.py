@@ -67,7 +67,7 @@ scene.camera=camera
 scene.render.filepath=str(OUT/'overview.png');bpy.ops.render.render(write_still=True)
 (OUT/'verification.json').write_text(json.dumps(dict(records=records,
     mean_update_ms=float(np.mean(samples)*1000),p95_update_ms=float(np.percentile(samples,95)*1000),
-    note='Background update timing excludes viewport drawing; not a measured 60 FPS claim.'),indent=2))
+    note='Background update timing excludes viewport drawing; not a measured 60 FPS claim.'),indent=2), encoding='utf-8')
 if os.environ.get('WFRL_FLEX_VIDEO')=='1':
     folder=OUT/'frames';folder.mkdir(exist_ok=True)
     # Six seconds, exactly 60 fps; retain the source playback clock.

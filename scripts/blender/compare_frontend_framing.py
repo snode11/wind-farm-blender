@@ -381,5 +381,5 @@ if __name__ == "__main__":
         main()
     except Exception:
         OUT.mkdir(parents=True, exist_ok=True)
-        (OUT / "error.txt").write_text(traceback.format_exc())
+        (OUT / "error.txt").write_text(traceback.format_exc(), encoding='utf-8')
         raise

@@ -14,6 +14,6 @@ def start():
     bpy.app.timers.register(check,first_interval=2)
 def check():
     for f in out.glob('recording-*/manifest.json'):
-        d=json.loads(f.read_text()); print('CAPTURE_RESULT',d['status'],len(d['frames']),str(f),flush=True)
+        d=json.loads(f.read_text(encoding='utf-8')); print('CAPTURE_RESULT',d['status'],len(d['frames']),str(f),flush=True)
     bpy.ops.wm.quit_blender()
 bpy.app.timers.register(start,first_interval=2)

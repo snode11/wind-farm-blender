@@ -46,5 +46,5 @@ for i in range(540):
 (OUT/'verification.json').write_text(json.dumps(dict(records=records,frames=540,fps=60,duration_s=9,
     source_run='down-random-gust-v3',colors=['orange','blue','red'],
     trails='progressive from video start; bounded at 540 points per blade',
-    endpoint_matches_flexible_mesh=True),indent=2))
+    endpoint_matches_flexible_mesh=True),indent=2), encoding='utf-8')
 print('DOWN_GUST_TRAILS_VIDEO_PASS',flush=True)

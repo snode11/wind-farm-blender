@@ -143,13 +143,13 @@ def run(args):
         source_identity = None
         reference_records = None
         if args.reference_capture:
-            source_identity = json.loads((args.reference_capture/'runtime_identity.json').read_text())
+            source_identity = json.loads((args.reference_capture/'runtime_identity.json').read_text(encoding='utf-8'))
             for path, expected in source_identity['module_sources'].items():
                 if sha256(path) != expected:
                     raise RuntimeError('Source module changed since RGB capture: '+path)
             if sha256(Path(scene['wfrl_farm_flex_path'])/'manifest.json') != source_identity['source_manifest_sha256']:
                 raise RuntimeError('Source package changed since RGB capture')
-            reference_records = [json.loads(line) for line in (args.reference_capture/'frames.jsonl').read_text().splitlines()]
+            reference_records = [json.loads(line) for line in (args.reference_capture/'frames.jsonl').read_text(encoding='utf-8').splitlines()]
             reference_records = [r for r in reference_records if math.isclose(r['time_s'],at,abs_tol=1e-9)]
             if len(reference_records) != 3:
                 raise RuntimeError('t_ref must match one complete RGB three-camera group')
@@ -175,7 +175,7 @@ def run(args):
                      f'element face {len(faces)}','property list uchar int vertex_indices','end_header']
             lines.extend(' '.join(f'{x:.9g}' for x in verts[v]) for v in used)
             lines.extend('3 '+' '.join(str(remap[v]) for v in face) for face in faces)
-            (target/'T1_B1_truth.ply').write_text('\n'.join(lines)+'\n')
+            (target/'T1_B1_truth.ply').write_text('\n'.join(lines)+'\n', encoding='utf-8')
             capture.write_json(target/'truth_manifest.json', {
                 'schema':'wfrl.evaluation-surface.v1','target':'T1/B1','t_ref_sim_time_s':at,
                 'coordinate_frame':'blade_root_local','units':'m','span_axis':'z','span_bounds_m':[0.,61.5],

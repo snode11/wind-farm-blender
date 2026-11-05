@@ -41,7 +41,7 @@ wfrl_blender._cancel_playback()
 from wfrl_blender import clearance_replay
 delivery_path = ROOT / 'dist/lidar-delivery.json'
 try:
-    delivery = json.loads(delivery_path.read_text())
+    delivery = json.loads(delivery_path.read_text(encoding='utf-8'))
     scene = bpy.context.scene
     scene.wfrl_clearance_normal_path = str(ROOT / delivery['packages']['normal'])
     scene.wfrl_clearance_near_tower_path = str(ROOT / delivery['packages']['close'])

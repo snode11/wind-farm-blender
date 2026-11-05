@@ -73,5 +73,5 @@ scene.render.filepath = str(OUT / 'night.png')
 bpy.ops.render.render(write_still=True)
 (OUT / 'review.json').write_text(json.dumps({'status': 'PASS', 'camera_location': list(location),
     'paint_band_groups': groups, 'unchanged_vertices': len(vertices), 'frames': records,
-    'note': 'Actual offline replay poses; illustrative camera mounting and low-light paint'}, indent=2))
+    'note': 'Actual offline replay poses; illustrative camera mounting and low-light paint'}, indent=2), encoding='utf-8')
 print('BLADE_TIP_REVIEW_PASS')

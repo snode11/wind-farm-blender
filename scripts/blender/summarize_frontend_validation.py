@@ -7,7 +7,7 @@ from pathlib import Path
 def summarize(root):
     runs = []
     for path in sorted(root.glob('*/result.json')):
-        data = json.loads(path.read_text())
+        data = json.loads(path.read_text(encoding='utf-8'))
         if data.get('schema_version') != 2 or 'path' not in data:
             continue
         run = {key: data.get(key) for key in ('status', 'path', 'layout', 'termination',
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     result = summarize(args.directory)
     destination = args.directory/'playback-summary.json'
-    destination.write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n')
+    destination.write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     for run in result['runs']:
         print(run['directory'], run['status'], [
             {slot: round(row['full_segment_draw_fps'], 2) if row['full_segment_draw_fps'] is not None else None

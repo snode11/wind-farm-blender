@@ -43,7 +43,7 @@ def run(args):
     installed_profile = getattr(args, 'installed_profile', None)
     if installed_profile:
         profile_file = Path(installed_profile).expanduser().resolve()/'environment.json'
-        profile_env = json.loads(profile_file.read_text())
+        profile_env = json.loads(profile_file.read_text(encoding='utf-8'))
         required = {'BLENDER_USER_CONFIG', 'BLENDER_USER_SCRIPTS', 'BLENDER_USER_DATAFILES', 'WFRL_ADDON_MODULE'}
         if set(profile_env) != required or not profile_env['WFRL_ADDON_MODULE'].startswith('bl_ext.'):
             raise ValueError('Invalid isolated installation environment.json')
@@ -78,13 +78,13 @@ def run(args):
     phase = None
     phase_seen = started
     watchdog_reason = None
-    with log_path.open('w') as log:
+    with log_path.open('w', encoding='utf-8') as log:
         child = subprocess.Popen(command, env=env, stdout=log, stderr=subprocess.STDOUT)
         try:
             while child.poll() is None:
                 result_path = output/'result.json'
                 try:
-                    data = json.loads(result_path.read_text())
+                    data = json.loads(result_path.read_text(encoding='utf-8'))
                 except (OSError, json.JSONDecodeError):
                     data = None
                 if data is not None:
@@ -116,17 +116,17 @@ def run(args):
                 except subprocess.TimeoutExpired:
                     child.kill()
                     child.wait()
-    (output/'launch.json').write_text(launch)
+    (output/'launch.json').write_text(launch, encoding='utf-8')
     result_path = output/'result.json'
     try:
-        data = json.loads(result_path.read_text())
+        data = json.loads(result_path.read_text(encoding='utf-8'))
     except (OSError, json.JSONDecodeError):
         data = last_data or {'schema_version': 2, 'results': []}
-    log_check = inspect_process_log(log_path.read_text(errors='replace'),
+    log_check = inspect_process_log(log_path.read_text(errors='replace', encoding='utf-8'),
                                    data.get('status') if data.get('termination') else None)
     if watchdog_reason:
         if result_path.exists():
-            (output/'interrupted-result.json').write_text(result_path.read_text())
+            (output/'interrupted-result.json').write_text(result_path.read_text(encoding='utf-8'), encoding='utf-8')
         data.update(status='ABORTED' if watchdog_reason == 'active_stop' else 'INCOMPLETE',
                     termination={'reason': watchdog_reason},
                     external_watchdog={'elapsed_s': time.monotonic()-started,
@@ -136,14 +136,14 @@ def run(args):
                     process_returncode=child.returncode)
     if log_check['error_markers'] or (not watchdog_reason and log_check['missing_markers']):
         if result_path.exists():
-            (output/'driver-result.json').write_text(result_path.read_text())
+            (output/'driver-result.json').write_text(result_path.read_text(encoding='utf-8'), encoding='utf-8')
         data.update(status='ERROR', termination={'reason': 'process_log_validation_failed'},
                     error={'source': 'process_log', 'path': str(log_path),
                            'error_markers': log_check['error_markers'],
                            'missing_markers': log_check['missing_markers']})
     data['process_log_validation'] = log_check
     data.update(process_returncode=child.returncode, process_log=str(log_path))
-    result_path.write_text(json.dumps(data, indent=2))
+    result_path.write_text(json.dumps(data, indent=2), encoding='utf-8')
     print(f"{data['status']}: {result_path}")
     return 0 if data['status'] == 'PASS' else 1
 

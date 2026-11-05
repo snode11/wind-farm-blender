@@ -66,7 +66,7 @@ output.parent.mkdir(parents=True, exist_ok=True)
 job_path = manual_video.launch(scene, output)
 record = dict(
     schema='wfrl.manual-pitch-delivery.v1',
-    output_mp4=str(output), job_path=str(job_path), job_id=json.loads(job_path.read_text())['job_id'],
+    output_mp4=str(output), job_path=str(job_path), job_id=json.loads(job_path.read_text(encoding='utf-8'))['job_id'],
     addon_file=addon.__file__,
     blade_model='rootkink', checked_blades=9, maximum_mesh_coordinate_error_m=maximum_error,
     geometry_sha256=hashlib.sha256((Path(addon.__file__).parent / 'assets/rootkink_geometry.json').read_bytes()).hexdigest(),
@@ -75,7 +75,7 @@ record = dict(
     resolution=[1920, 1080], fps=25, camera='T1 Down',
     start_pitches_deg=[0, 0, 0], target_pitches_deg=[20, 0, 0],
 )
-(job_path.parent / 'delivery.json').write_text(json.dumps(record, ensure_ascii=False, indent=2) + '\n')
+(job_path.parent / 'delivery.json').write_text(json.dumps(record, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 print('WFRL_MANUAL_PITCH_DELIVERY ' + json.dumps(record, ensure_ascii=False), flush=True)
 if not args.detach:
     try:

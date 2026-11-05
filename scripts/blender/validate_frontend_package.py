@@ -43,7 +43,7 @@ def safe_relative(name):
 
 
 def verify_archive(archive, inventory):
-    data = json.loads(Path(inventory).read_text())
+    data = json.loads(Path(inventory).read_text(encoding='utf-8'))
     actual = sha256(archive)
     if actual != data['archive_sha256']:
         raise ValueError('Archive SHA-256 differs from inventory')
@@ -165,7 +165,7 @@ def validate(args):
         from build_extension import build
         built = build(output/'package', dual_package=getattr(args, 'dual_package', None))
         inventory = verify_archive(built.archive, built.inventory)
-        checksum = built.checksum.read_text().strip().split()
+        checksum = built.checksum.read_text(encoding='utf-8').strip().split()
         assert checksum == [built.sha256, built.archive.name], 'checksum sidecar mismatch'
         result['package'] = {'archive': str(built.archive), 'sha256': built.sha256,
             'checksum': str(built.checksum), 'inventory': str(built.inventory),
@@ -189,7 +189,7 @@ def validate(args):
         overrides = {key: str(value) for key, value in directories.items()}
         overrides['WFRL_ADDON_MODULE'] = MODULE
         env.update(overrides)
-        (output/'environment.json').write_text(json.dumps(overrides, indent=2))
+        (output/'environment.json').write_text(json.dumps(overrides, indent=2), encoding='utf-8')
         result['environment'] = overrides
         result['repository'] = str(repository)
         def command(name, values, markers=(), test_output=None):
@@ -206,7 +206,7 @@ def validate(args):
             command(f'{kind}-probe', ['--background', '--python-exit-code', '1',
                 '--python', str(Path(__file__).resolve()), '--', '--inside-probe', kind,
                 '--repository', str(repository), '--output', str(probe_path)], [marker])
-            data = json.loads(probe_path.read_text())
+            data = json.loads(probe_path.read_text(encoding='utf-8'))
             assert data['status'] == 'PASS'
             return data
         command('repo-add', ['--command', 'extension', 'repo-add', REPOSITORY_ID,
@@ -226,7 +226,7 @@ def validate(args):
             destination = output/'regressions'/name
             command(name, ['--background', '--python-exit-code', '1', '--python',
                 str(ROOT/'blender_frontend/tests/blender'/filename)], [marker], destination)
-            data = json.loads((destination/datafile).read_text())
+            data = json.loads((destination/datafile).read_text(encoding='utf-8'))
             assert data['status'] == 'PASS' and data['module'] == MODULE, data
             assert Path(data['addon_path']).resolve().is_relative_to(installed), data['addon_path']
             result['checks'][name] = data

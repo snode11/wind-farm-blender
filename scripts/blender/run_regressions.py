@@ -555,7 +555,7 @@ def run_invocation(spec, phase, args, case, scratch, bootstrap):
     execution = read_json(execution_path)
     report = read_json(report_path) if report_path else None
     status, reasons = evaluate(spec, phase, returncode, timed_out, execution, report,
-                               (run / 'blender.log').read_text(errors='replace'), before != after)
+                               (run / 'blender.log').read_text(errors='replace', encoding='utf-8'), before != after)
     if interrupted or launch_error:
         status = 'FAIL'
         reasons.append('Interrupted by caller' if interrupted else launch_error)
@@ -588,7 +588,7 @@ def main(argv=None):
     if args.tests and args.test_list:
         parser.error('Use --tests or --test-list, not both')
     try:
-        selected = select_tests(args.test_list.read_text().split() if args.test_list else args.tests)
+        selected = select_tests(args.test_list.read_text(encoding='utf-8').split() if args.test_list else args.tests)
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
     packages = package_inputs()

@@ -47,8 +47,8 @@ if args.output:
     layout_path = args.output/'three-stacked-cameras.json'
     if layout_path.exists() or (args.output/'three-stacked-cameras.blend').exists():
         raise FileExistsError('使用新的输出目录，避免覆盖已有布局或场景')
-    layout_path.write_text(json.dumps(core.layout_dict(scene), ensure_ascii=False, indent=2))
-    (args.output/'housing-assumptions.json').write_text(assembly['assumptions_json'])
+    layout_path.write_text(json.dumps(core.layout_dict(scene), ensure_ascii=False, indent=2), encoding='utf-8')
+    (args.output/'housing-assumptions.json').write_text(assembly['assumptions_json'], encoding='utf-8')
     bpy.ops.wm.save_as_mainfile(filepath=str(args.output/'three-stacked-cameras.blend'))
 if args.capture:
     if bpy.app.background or args.output is None:

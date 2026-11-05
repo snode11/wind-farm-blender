@@ -19,7 +19,7 @@ import wfrl_blender
 from wfrl_blender.live_scene import build_live_scene
 from wfrl_blender.scene_model import SceneDTO
 wfrl_blender.register()
-scene = SceneDTO.from_mapping(json.loads((OUT/'profile-scene.json').read_text()))
+scene = SceneDTO.from_mapping(json.loads((OUT/'profile-scene.json').read_text(encoding='utf-8')))
 profile = cProfile.Profile()
 start = time.monotonic()
 profile.runcall(build_live_scene, scene)
@@ -33,6 +33,6 @@ for (filename,line,name),(primitive,total,own,cumulative,callers) in pstats.Stat
 report=dict(background=bpy.app.background, total_seconds=elapsed,objects=len(bpy.data.objects),
             scope='synchronous scene construction; excludes first rendered frame and solver',
             functions=sorted(rows,key=lambda row:row['cumulative_seconds'],reverse=True)[:40])
-(OUT/'startup-profile.json').write_text(json.dumps(report,indent=2))
+(OUT/'startup-profile.json').write_text(json.dumps(report,indent=2), encoding='utf-8')
 print('STARTUP_PROFILE',elapsed,flush=True)
 wfrl_blender.unregister()

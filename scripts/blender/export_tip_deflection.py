@@ -15,7 +15,7 @@ def sha(path):
 
 def export(package, case, geometry_asset):
     package, case, geometry_asset = Path(package), Path(case), Path(geometry_asset)
-    manifest = json.loads((package / 'manifest.json').read_text())
+    manifest = json.loads((package / 'manifest.json').read_text(encoding='utf-8'))
     for name, digest in manifest['files'].items():
         if sha(package / name) != digest:
             raise ValueError('Package integrity mismatch: ' + name)
@@ -23,19 +23,19 @@ def export(package, case, geometry_asset):
         times, poses = archive['times'], archive['poses']
     farm = case / 'FarmInputs'
     output = farm / 'Case.T1.out'
-    lines = output.read_text().splitlines()
+    lines = output.read_text(encoding='utf-8').splitlines()
     names, units = lines[6].split(), lines[7].split()
     raw = np.loadtxt(output, skiprows=8)
     columns = dict(zip(names, raw.T))
     indices = np.searchsorted(columns['Time'], times)
     if not np.allclose(columns['Time'][indices], times, atol=1e-8, rtol=0):
         raise ValueError('Source time mismatch')
-    telemetry = json.loads((package / 'telemetry.json').read_text())
+    telemetry = json.loads((package / 'telemetry.json').read_text(encoding='utf-8'))
     if sha(output) != telemetry['sources']['T1']['sha256']:
         raise ValueError('Output does not belong to this farm package')
     ed = farm / 'NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat'
     inputs = {}
-    for line in ed.read_text().splitlines():
+    for line in ed.read_text(encoding='utf-8').splitlines():
         words = line.split()
         if len(words) > 1: inputs[words[1]] = words[0]
     flexible = manifest.get('tower_model') == 'elastodyn-flexible'
@@ -50,7 +50,7 @@ def export(package, case, geometry_asset):
             raise ValueError('Initial surface is not the supported rest frame: ' + key)
     if float(inputs['NumBl']) != 3:
         raise ValueError('Expected three blades')
-    scalars = json.loads(geometry_asset.read_text())['scalars']
+    scalars = json.loads(geometry_asset.read_text(encoding='utf-8'))['scalars']
     for key in ('TipRad', 'HubRad', 'OverHang', 'TowerHt', 'Twr2Shft', 'ShftTilt', 'PreCone(1)'):
         if float(inputs[key]) != scalars[key]:
             raise ValueError('Display geometry and solver disagree: ' + key)
@@ -93,9 +93,9 @@ def export(package, case, geometry_asset):
             method='Rigid reference uses independent solver nacelle surface rigid transform plus azimuth/pitch; compare in transported unpitched coned axes.',
             scope='Flexible ElastoDyn tower; fixed platform; independently recorded actual blade pitch; same-run saved surface transforms. Interpolated frames are not solver samples.')
     target = package / 'deflection-t1.json'
-    target.write_text(json.dumps(payload, ensure_ascii=False, separators=(',', ':'), allow_nan=False) + '\n')
+    target.write_text(json.dumps(payload, ensure_ascii=False, separators=(',', ':'), allow_nan=False) + '\n', encoding='utf-8')
     manifest['files'][target.name] = sha(target)
-    (package / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+    (package / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
     return payload
 
 

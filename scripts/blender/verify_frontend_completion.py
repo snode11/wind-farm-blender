@@ -38,7 +38,7 @@ children = []
 started = time.monotonic()
 result = {'output_dir': str(OUT)}
 try:
-    with (OUT/'backend.log').open('w') as log, (OUT/'blender.log').open('w') as frontlog:
+    with (OUT/'backend.log').open('w', encoding='utf-8') as log, (OUT/'blender.log').open('w', encoding='utf-8') as frontlog:
         bridge = subprocess.Popen([backend_python,'-m','wfrl.blender_bridge','--port','8881'],
             cwd=ROOT,env=env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
         children.append(bridge)
@@ -69,9 +69,9 @@ finally:
                 os.killpg(process.pid,signal.SIGKILL);process.wait()
     result['elapsed_seconds'] = time.monotonic()-started
     result['owned_launchers_exited'] = all(p.poll() is not None for p in children)
-    (OUT/'supervision.json').write_text(json.dumps(result,indent=2))
+    (OUT/'supervision.json').write_text(json.dumps(result,indent=2), encoding='utf-8')
     print(result,flush=True)
 
 report_path = OUT/'report.json'
-passed = report_path.exists() and json.loads(report_path.read_text()).get('passed')
+passed = report_path.exists() and json.loads(report_path.read_text(encoding='utf-8')).get('passed')
 raise SystemExit(0 if passed and result.get('frontend_exit') == 0 and result.get('bridge_exit') == 0 else 1)

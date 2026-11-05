@@ -57,7 +57,7 @@ def main(argv=None):
         # The source .blend on disk is never overwritten.
         bpy.ops.wm.read_factory_settings(use_empty=True)
     register()
-    doc = json.loads(args.config.read_text()) if args.config else restored_doc
+    doc = json.loads(args.config.read_text(encoding='utf-8')) if args.config else restored_doc
     editor = EditorSession(doc, presets=args.presets, all_presets=args.all_presets)
     args.time_s = restored_time if args.time_s is None else args.time_s
     editor.set_time(args.time_s)
