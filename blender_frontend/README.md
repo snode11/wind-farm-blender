@@ -399,7 +399,7 @@ python3 scripts/analysis/export_blade_response.py \
 
 播放按钮和编辑预览使用 `playback.is_playing(scene)` 判断所属场景，不用 Screen 的全局播放标志推定归属。工作区后端连接绑定明确场景，遥测、来流、姿态、尾流和重绘均使用该归属；重建使用对应场景上下文，显隐操作指定所属 View Layer。切换活动场景不转移数据；每次轮询前检查归属，即使没有新消息，归属被删除或失效时也会断开并保持后端状态未确认，不自动认领其他场景。显式重连可绑定当前选中的非手动场景，保留后端会话身份与协议序号，并等待同步后重建。后端场景只配置本场景的主视口，保留其他场景、独立相机观察与重建视口的显示设置。
 
-`panels/presentation.py` 的窗口 PNG 录制绑定发起窗口和场景。场景失效、窗口关闭、切换源场景、文件重载、撤销／重做和功能卸载均结束录制；已生成帧保留，清单标明取消或失败。清理不依赖源 RNA 仍可访问，重复结束不重复移除计时器。
+`panels/presentation.py` 的窗口 PNG 录制绑定发起窗口和场景。场景失效、窗口关闭、切换源场景、文件重载、撤销／重做和功能卸载均结束录制；已生成帧保留，清单标明取消或失败。清理不依赖源 RNA 仍可访问，重复结束不重复移除计时器。采样截止时刻固定在录制起点加整数倍采样间隔的网格上，每次截图后取严格晚于当前事件的下一格点；计时器送达抖动不导致漏采，迟到事件跳过已错过的格点、不补拍，清单保存每帧的实际采样时间。
 
 `animation_render.py` 管理当前进程拥有的后台动画渲染，`animation_render_ui.py` 管理所属场景的状态和取消，`animation_render_worker.py` 在独立 Blender 进程读取冻结场景。输出位于用户选择目录下的唯一子目录，包含 PNG、场景副本、作业配置、清单和诊断输出；源相机、时间轴及渲染设置不被后台任务改写。父进程确认子进程退出后重读最终清单，联合正常退出、匹配的作业身份、`COMPLETE` 状态和完整帧数判定完成；取消和失败保留已生成帧。 工作区对分文件多视图逐帧确认每个启用视图的文件；合成立体 PNG 要求左右眼均启用。文件重载、撤销／重做或扩展卸载取消当前任务，不提供跨进程恢复。此入口输出当前场景相机的 PNG，不代替冻结变桨试验的 MP4 导出和监管。
 
@@ -480,7 +480,7 @@ S2/S3 按同一保存时刻、同一叶片的有效命中配对，S1 有效叶�
 
 扩展 [runtime.py](wfrl_blender/runtime.py) 和 [transport.py](wfrl_blender/transport.py) 维护连接、协议状态与回传。[panels/status.py](wfrl_blender/panels/status.py) 管连接与诊断，[panels/run.py](wfrl_blender/panels/run.py) 是唯一后端运行按钮入口。CONNECTED 表示握手；实际运行还需 READY 后显式 Start，并观察 RUNNING 与不断更新的真实快照。
 
-工作区规范协议对 snapshot 和 curve 的 `rotor_speed`、`yaw`／`pitch`、`power` 分别要求 `rpm`、`deg`、`MW`，有效或无效记录的单位不匹配均直接拒绝，不原值换标签。尾流保留源年龄与单调接收时间，按协议的 5 秒阈值判定过期；无效、等待、过期、断连及任务切换撤销旧 DisXY 有效显示，携带不匹配 `run_id` 的迟到尾流不覆盖当前数据，无 run 标识的兼容消息不能据此区分旧运行。新有效样本恢复显示时保留用户可见性设置，包括过期期间的 DisXY 显示开关选择及各 View Layer 的原有隐藏状态；切换其他图层开关不改写这些设置，场景侧栏也不能重新显示无效结果。首次创建 DisXY 网格时尾流材质加载失败不阻断显示：网格照常创建并随后续样本更新，错误写入运行状态的 `error`，连接与尾流有效性不变；同一异常类型与消息只打印一次 traceback。
+工作区规范协议对 snapshot 和 curve 的 `rotor_speed`、`yaw`／`pitch`、`power` 分别要求 `rpm`、`deg`、`MW`，有效或无效记录的单位不匹配均直接拒绝，不原值换标签。尾流保留源年龄与单调接收时间，按协议的 5 秒阈值判定过期；无效、等待、过期、断连及任务切换撤销旧 DisXY 有效显示，携带不匹配 `run_id` 的迟到尾流不覆盖当前数据，无 run 标识的兼容消息不能据此区分旧运行。DisXY `shape` 的每一维须为正整数（接受整数值浮点数），小数、字符串与布尔值直接拒绝，不截断换算；各维乘积须等于 `values` 数量。新有效样本恢复显示时保留用户可见性设置，包括过期期间的 DisXY 显示开关选择及各 View Layer 的原有隐藏状态；切换其他图层开关不改写这些设置，场景侧栏也不能重新显示无效结果。首次创建 DisXY 网格时尾流材质加载失败不阻断显示：网格照常创建并随后续样本更新，错误写入运行状态的 `error`，连接与尾流有效性不变；同一异常类型与消息只打印一次 traceback。
 
 同一 Blender 进程打开其他 `.blend` 时，已认领的后端会话保留客户端、会话身份及协议序号，连接标为断开且未确认；旧场景的姿态缓存和待确认命令清空。保存的离线回放可以独立恢复几何、读数和位置，不据此认定后端已停止。显式重连使用保留的会话恢复握手，确认前禁用后端运行和配置操作。这些恢复凭据只在当前 Blender 进程内保留，不写入 `.blend`，不保证退出 Blender 后恢复活动后端。
 
@@ -518,7 +518,7 @@ Interactive 的 **Episode steps** 对应 `episode_steps`：`0` 保持单长回�
 
 维护修改应作用于规范源；`protocol.py` 来自 `wfrl/blender_bridge/messages.py`，内置 `_vendor/lidar/` 读取器来自 `wfrl/lidar/`。不要手改生成副本或替换冻结模型及正式资产来消除校验失败。
 
-扩展源码（`_vendor/` 与 `assets/` 除外）的文件系统文本读写显式使用 `encoding='utf-8'`，包括 `Path.read_text`、`Path.write_text` 和文本模式 `open`，不依赖平台默认编码；宿主测试 `test_text_io_encoding.py` 以 AST 扫描强制该约定，二进制读写及 `os.open` 不在范围内。JSON 结果与状态文件统一通过 [atomic_json.py](wfrl_blender/atomic_json.py) 的 `write_json(path, value, *, mkdir=False)` 写入：按 UTF-8、`ensure_ascii=False`、`indent=2`、`allow_nan=False` 和末尾换行写出。已编码的姿态 JSON 等文本使用同模块的 `write_text(path, text, *, mkdir=False)`，按 UTF-8 保留原字符串，不追加或转换换行；调用方可将其导入为 `write_atomic_text`，与文件系统文本 API 区分。两个接口共用目标目录内的随机临时文件、`flush`、`fsync`、`os.replace` 与失败清理逻辑；仅需要创建父目录的调用方传 `mkdir=True`。`manual_video_job.py` 与 `manual_video_render.py` 作为独立脚本运行时按同目录文件加载该模块，不导入扩展包入口。
+扩展源码（`_vendor/` 与 `assets/` 除外）的文件系统文本读写显式使用 `encoding='utf-8'`，包括 `Path.read_text`、`Path.write_text` 和文本模式 `open`，不依赖平台默认编码；宿主测试 `test_text_io_encoding.py` 以 AST 扫描强制该约定，二进制读写及 `os.open` 不在范围内。JSON 结果与状态文件统一通过 [atomic_json.py](wfrl_blender/atomic_json.py) 的 `write_json(path, value, *, mkdir=False)` 写入：按 UTF-8、`ensure_ascii=False`、`indent=2`、`allow_nan=False` 和末尾换行写出。已编码的姿态 JSON 等文本使用同模块的 `write_text(path, text, *, mkdir=False)`，按 UTF-8 保留原字符串，不追加或转换换行；调用方可将其导入为 `write_atomic_text`，与文件系统文本 API 区分。两个接口共用目标目录内的随机临时文件、`flush`、`fsync`、`os.replace` 与失败清理逻辑；临时文件以 `os.open(..., 0o666)` 创建，新文件权限按进程 umask 确定，与普通文本写入一致，覆盖已有普通文件时保留其权限位，不修改进程 umask；需要保密的作业文件由其所在的 0700 目录限制访问；仅需要创建父目录的调用方传 `mkdir=True`。`manual_video_job.py` 与 `manual_video_render.py` 作为独立脚本运行时按同目录文件加载该模块，不导入扩展包入口。
 
 ```bash
 python3 scripts/blender/build_extension.py --output <新目录>
