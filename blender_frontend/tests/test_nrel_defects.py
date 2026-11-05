@@ -84,7 +84,6 @@ class NrelDefectContractTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary)/'nested'/'defects.json'
             self.assertEqual(schema.save_document(path, doc, self.surface), path)
-            self.assertEqual(schema.load_document(path, self.surface), doc)
             self.assertEqual(json.loads(path.read_text()), doc)
 
     def test_reference_hash_and_gw184_parameterization_mismatch_are_rejected(self):

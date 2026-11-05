@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 import math
 import time
 import traceback
-from typing import Any, Iterable, Mapping
+from typing import Any, Mapping
 from .protocol import STALE_AFTER_SECONDS
 
 
@@ -178,32 +178,6 @@ def validate_wake_payload(payload: Mapping[str, Any], *, sequence: int = 0,
                      tuple(ids), timestamp, values_tuple, shape, x, y, z, vectors, **timing)
 
 
-def proxy_ring_points(hub: Iterable[float], rotor_radius: float, wind_direction_deg: float,
-                      phase: float, *, rings: int = 26, segments: int = 40,
-                      length_diameters: float = 2.5, expansion: float = 0.7) -> tuple[tuple[float, float, float], ...]:
-    """Return a deterministic expanding ring tube for a SYNTH proxy."""
-    if rings <= 0 or segments < 3:
-        raise ValueError("rings must be positive and segments must be at least 3")
-    hx, hy, hz = (_finite(v, "hub coordinate") for v in hub)
-    radius = _finite(rotor_radius, "rotor_radius")
-    if radius <= 0:
-        raise ValueError("rotor_radius must be positive")
-    angle = math.radians(float(wind_direction_deg) - 270.0)
-    dx, dy = math.cos(angle), math.sin(angle)
-    ex, ey = dy, -dx
-    length = length_diameters * 2.0 * radius
-    result = []
-    for ring in range(rings):
-        frac = (ring / rings + float(phase)) % 1.0
-        ring_radius = radius * (1.0 + expansion * frac)
-        for segment in range(segments):
-            theta = math.tau * segment / segments
-            result.append((hx + frac * length * dx + ring_radius * math.sin(theta) * ex,
-                           hy + frac * length * dy + ring_radius * math.sin(theta) * ey,
-                           hz + ring_radius * math.cos(theta)))
-    return tuple(result)
-
-
 def grid_mesh(frame: WakeFrame) -> tuple[tuple[tuple[float, float, float], ...], tuple[tuple[int, ...], ...]]:
     """Convert a DisXY frame to vertices and quad faces without numpy/Blender."""
     if frame.kind != "disxy" or len(frame.shape) != 2:
@@ -240,11 +214,6 @@ class WakeFrameBuffer:
     def pop_latest(self) -> WakeFrame | None:
         frame, self._frame = self._frame, None
         return frame
-
-    @property
-    def pending(self) -> int:
-        return int(self._frame is not None)
-
 
 PROXY_LINE_COUNT = 16
 PROXY_RING_COUNT = 22

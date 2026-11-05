@@ -657,12 +657,6 @@ def _tracking_view(area):
                 rotation=tuple(rv.view_rotation), distance=float(rv.view_distance))
 
 
-def _same_tracking_view(left, right):
-    return (left['perspective'] == right['perspective'] and
-            all(np.allclose(left[key], right[key], rtol=0, atol=1e-5)
-                for key in ('location', 'rotation', 'distance')))
-
-
 def _release_tracking(scene, value=None):
     """Migrate older saved closeups to user-owned, stationary navigation."""
     scene[DETAIL] = False

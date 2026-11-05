@@ -1,23 +1,12 @@
 """Sensor geometry and provenance helpers used by the Blender presentation."""
 from __future__ import annotations
 
-from dataclasses import dataclass
 import math
 from typing import Iterable
 
 
 class SensorPayloadError(ValueError):
     pass
-
-
-@dataclass(frozen=True)
-class LidarRay:
-    origin: tuple[float, float, float]
-    direction: tuple[float, float, float]
-    range_m: float
-    endpoint: tuple[float, float, float]
-    fidelity: str = "DERIVED"
-    provenance: str = "Nacelle lidar beam geometry"
 
 
 def _vec(values: Iterable[float], label: str) -> tuple[float, float, float]:
@@ -36,44 +25,6 @@ def normalize(vector: Iterable[float], label: str = "vector") -> tuple[float, fl
     if length <= 1e-12:
         raise SensorPayloadError(f"{label} must not be zero")
     return tuple(item / length for item in result)
-
-
-def lidar_rays(origin: Iterable[float], forward: Iterable[float], ranges: Iterable[float],
-               *, half_angle_deg: float = 15.0) -> tuple[LidarRay, ...]:
-    """Make a center beam plus a deterministic four-beam cone."""
-    o = _vec(origin, "origin")
-    f = normalize(forward, "forward")
-    try:
-        ranges_tuple = tuple(float(value) for value in ranges)
-    except (TypeError, ValueError) as exc:
-        raise SensorPayloadError("ranges must be positive finite values") from exc
-    if not ranges_tuple or any(not math.isfinite(value) or value <= 0 for value in ranges_tuple):
-        raise SensorPayloadError("ranges must be positive finite values")
-    try:
-        half_angle = math.radians(float(half_angle_deg))
-    except (TypeError, ValueError) as exc:
-        raise SensorPayloadError("half_angle_deg must be between 0 and 90") from exc
-    if not 0 < half_angle < math.pi / 2:
-        raise SensorPayloadError("half_angle_deg must be between 0 and 90")
-    # Choose a stable perpendicular basis even for a near-vertical beam.
-    helper = (0.0, 0.0, 1.0) if abs(f[2]) < 0.9 else (0.0, 1.0, 0.0)
-    side = normalize((f[1] * helper[2] - f[2] * helper[1],
-                      f[2] * helper[0] - f[0] * helper[2],
-                      f[0] * helper[1] - f[1] * helper[0]), "beam side")
-    up = (side[1] * f[2] - side[2] * f[1],
-          side[2] * f[0] - side[0] * f[2],
-          side[0] * f[1] - side[1] * f[0])
-    directions = [f]
-    for index in range(4):
-        theta = math.tau * index / 4.0
-        lateral = tuple(math.cos(theta) * side[i] + math.sin(theta) * up[i] for i in range(3))
-        direction = normalize(tuple(math.cos(half_angle) * f[i] + math.sin(half_angle) * lateral[i] for i in range(3)), "beam direction")
-        directions.append(direction)
-    return tuple(
-        LidarRay(o, direction, distance,
-                 tuple(o[i] + direction[i] * distance for i in range(3)))
-        for distance in ranges_tuple for direction in directions
-    )
 
 
 def frustum_vertices(origin: Iterable[float], forward: Iterable[float], up: Iterable[float],

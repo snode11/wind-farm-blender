@@ -1,4 +1,3 @@
-import math
 import sys
 import unittest
 from dataclasses import replace
@@ -8,7 +7,7 @@ from unittest.mock import Mock
 import pytest
 
 from wfrl_blender.wake import (WakeFrameBuffer, WakePayloadError, grid_mesh,
-                               proxy_ring_points, validate_wake_payload)
+                               validate_wake_payload)
 
 
 def test_wake_age_uses_source_age_and_local_monotonic_time():
@@ -166,13 +165,6 @@ class WakePayloadTests(unittest.TestCase):
             "data": channel({"shape": [1], "values": [7]})}, sequence=3)
         self.assertTrue(buf.push(frame)); self.assertTrue(buf.push(newer))
         self.assertEqual(buf.pop_latest().sequence, 3)
-        self.assertEqual(buf.pending, 0)
-
-    def test_proxy_points_are_finite_and_ring_count_is_stable(self):
-        points = proxy_ring_points((0, 0, 90), 63, 270, 0.25, rings=4, segments=8)
-        self.assertEqual(len(points), 32)
-        self.assertTrue(all(math.isfinite(value) for point in points for value in point))
-
 
 if __name__ == "__main__":
     unittest.main()

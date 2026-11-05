@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from wfrl_blender.nacelle_visibility import (
-    CameraFrustum, clip_surface, evaluate_visibility, first_hit_matches_target,
+    CameraFrustum, clip_surface, evaluate_visibility,
     sample_span_bands,
 )
 
@@ -94,20 +94,14 @@ def test_partial_band_coverage_does_not_claim_full_span_continuity():
     assert report.all_bands_sampled_visible
 
 
-def test_first_hit_occluder_and_no_hit_remain_distinct_from_frustum_coverage():
+def test_occlusion_remains_distinct_from_frustum_coverage():
     bands = sample_span_bands(clip_surface(*strip(), camera()), (0, 1, 2))
 
-    def ray_cast(sample):
-        # A real nearer surface covering the lower half of this blade.
-        hit = sample.point * .5 if sample.point[1] < 0 else sample.point
-        return first_hit_matches_target(sample, hit)
-
-    report = evaluate_visibility(bands, ray_cast)
+    report = evaluate_visibility(bands, lambda sample: sample.point[1] >= 0)
     assert report.all_span_in_frustum
     assert report.bands[0].visible_count == 0
     assert report.bands[1].visible_count == report.bands[1].sample_count
     assert not report.all_bands_sampled_visible
-    assert not first_hit_matches_target(bands[0].samples[0], None)
 
 
 def test_constant_span_root_cap_is_not_a_lateral_strip():

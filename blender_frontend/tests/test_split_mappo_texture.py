@@ -168,12 +168,6 @@ class SameSourceTextureTests(unittest.TestCase):
                     self.assertEqual(texture._tracking_view(area), edited)
                     self.assertFalse(value['tracked_views'])
 
-    def test_surface_tracking_tolerates_native_float_roundoff(self):
-        original = dict(perspective='ORTHO', location=(10001., 2., 3.),
-                        rotation=(1., 0., 0., 0.), distance=2.7)
-        self.assertTrue(texture._same_tracking_view(original, dict(original, distance=2.70000001)))
-
-
 class CompleteTurbineDisplayTests(unittest.TestCase):
     class Matrix:
         def __init__(self, translation):

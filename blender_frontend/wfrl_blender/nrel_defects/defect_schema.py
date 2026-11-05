@@ -1,6 +1,5 @@
 """Strict, JSON-safe visual defect contract bound to the NREL display loft."""
 from copy import deepcopy
-import json
 import math
 from pathlib import Path
 import re
@@ -202,10 +201,6 @@ def validate_document(document, surface):
                     raise ValueError(f'OVERLAPPING_DEFECTS: {other["id"]} and {item["id"]}')
             active.append((item, polygon))
     return doc
-
-
-def load_document(path, surface):
-    return validate_document(json.loads(Path(path).read_text(encoding='utf-8')), surface)
 
 
 def save_document(path, document, surface):

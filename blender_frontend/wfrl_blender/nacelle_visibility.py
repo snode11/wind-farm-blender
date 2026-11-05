@@ -345,24 +345,6 @@ def sample_span_bands(clipped: SurfaceClip, span_edges, *, samples_across=3, sam
     return tuple(bands)
 
 
-def first_hit_matches_target(sample: RaySample, hit_point, *, absolute_tolerance=1e-4,
-                             relative_tolerance=1e-6):
-    """Compare a scene ray's first hit with its sampled blade surface target.
-
-    ``None`` means no hit. Tolerance scales with optical target depth and does
-    not permit a nearer root cap, nacelle, tower or other blade to count as the
-    target. The caller must cast from the camera eye toward ``sample.point``.
-    """
-    if hit_point is None:
-        return False
-    if min(absolute_tolerance, relative_tolerance) < 0 or not all(
-            math.isfinite(value) for value in (absolute_tolerance, relative_tolerance)):
-        raise ValueError("hit tolerances must be finite and nonnegative")
-    point = _array(hit_point, (3,), "hit_point")
-    tolerance = absolute_tolerance + relative_tolerance * sample.camera_point[2]
-    return bool(np.linalg.norm(point - sample.point) <= tolerance)
-
-
 def evaluate_visibility(bands, first_hit_visible: Callable[[RaySample], bool]):
     """Evaluate bounded targets with the caller's real scene first-hit test."""
     return VisibilityReport(tuple(BandVisibility(band, tuple(bool(first_hit_visible(sample))
