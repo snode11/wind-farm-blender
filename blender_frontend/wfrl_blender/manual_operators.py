@@ -1,13 +1,12 @@
 """Blender operators for manual turbine motion, trials and pose files."""
-import os
 from pathlib import Path
-import tempfile
 import time
 
 import bpy
 from bpy_extras.io_utils import ExportHelper, ImportHelper
 
 from . import manual_control as control, manual_pose
+from .atomic_json import write_text as write_atomic_text
 
 
 
@@ -341,7 +340,6 @@ class WFRL_OT_ManualPoseExport(_ManualPoseTarget, bpy.types.Operator, ExportHelp
     filter_glob: bpy.props.StringProperty(default='*.json', options={'HIDDEN'})
 
     def execute(self, context):
-        temporary = None
         try:
             valid, reason = control.validate_scene(context.scene)
             if not valid:
@@ -351,17 +349,10 @@ class WFRL_OT_ManualPoseExport(_ManualPoseTarget, bpy.types.Operator, ExportHelp
             path = Path(bpy.path.abspath(self.filepath))
             if not path.name or path.is_dir():
                 raise ValueError('请选择JSON文件位置')
-            with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=path.parent,
-                                             prefix='.' + path.name, suffix='.tmp', delete=False) as stream:
-                temporary = Path(stream.name)
-                stream.write(payload)
-            os.replace(temporary, path)
+            write_atomic_text(path, payload)
         except (OSError, ValueError, ReferenceError, AttributeError) as exc:
             self.report({'ERROR'}, f'无法保存姿态：{exc}')
             return {'CANCELLED'}
-        finally:
-            if temporary is not None:
-                temporary.unlink(missing_ok=True)
         self.report({'INFO'}, '三机姿态已保存')
         return {'FINISHED'}
 

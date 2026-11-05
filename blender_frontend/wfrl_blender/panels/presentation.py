@@ -1,10 +1,10 @@
 """Camera configuration and wall-clock screen capture for all runtime modes."""
-import json
 import time
 from pathlib import Path
 
 import bpy
 
+from ..atomic_json import write_json
 from ..presentation import recording_schedule, set_presentation_mode
 
 _ACTIVE = None
@@ -177,22 +177,15 @@ class WFRL_OT_CaptureRecording(WindowRequired, bpy.types.Operator):
         except (ReferenceError, RuntimeError):
             pass
         label = f'{status} / {self._index} PNG frames / {self._directory}'
-        temporary = self._directory / 'manifest.json.tmp'
         try:
-            temporary.write_text(json.dumps({
+            write_json(self._directory / 'manifest.json', {
                 'status': status, 'requested_fps': self._fps, 'duration_s': self._duration,
                 'error': error or None,
                 'format': 'PNG window sequence', 'clock': 'wall-clock',
                 'note': 'Actual capture timestamps retained; slow captures drop samples, never control steps.',
-                'frames': self._frames}, indent=2), encoding='utf-8')
-            temporary.replace(self._directory / 'manifest.json')
-        except OSError as exc:
+                'frames': self._frames})
+        except (OSError, ValueError) as exc:
             label = f'Manifest write failed: {exc}'
-        finally:
-            try:
-                temporary.unlink(missing_ok=True)
-            except OSError:
-                pass
         try:
             self._scene['wfrl_capture_status'] = label
         except ReferenceError:

@@ -1,12 +1,10 @@
 """Bounded raw observations and asynchronous JSON export; never imports bpy."""
 from collections import deque
 from copy import deepcopy
-from pathlib import Path
-import json
-import os
-import tempfile
 import threading
 import time
+
+from .atomic_json import write_json
 
 
 class HistoryWindow:
@@ -119,21 +117,7 @@ class ExportJob:
         def write():
             try:
                 document = export_document(snapshot)
-                target = Path(path)
-                temporary = None
-                try:
-                    with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8',
-                            dir=target.parent, prefix=f'.{target.name}.', suffix='.tmp',
-                            delete=False) as output:
-                        temporary = Path(output.name)
-                        json.dump(document, output, ensure_ascii=False, allow_nan=False, indent=2)
-                        output.write('\n')
-                        output.flush()
-                        os.fsync(output.fileno())
-                    temporary.replace(target)
-                finally:
-                    if temporary is not None:
-                        temporary.unlink(missing_ok=True)
+                write_json(path, document)
                 self._result = ('COMPLETE', None)
             except Exception as exc:
                 self._result = ('FAILED', f'{type(exc).__name__}: {exc}')

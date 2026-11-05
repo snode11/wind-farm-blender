@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 import uuid
 
+from ..atomic_json import write_json
 from .defect_shapes import PATCH_KINDS, lightning_crater
 
 SCHEMA = 'wfrl.blade_defects.v1'
@@ -209,15 +210,7 @@ def load_document(path, surface):
 
 def save_document(path, document, surface):
     """Atomic replacement after full validation; does not initiate rendering."""
-    import os
-    import tempfile
     data = validate_document(document, surface)
-    path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
-    fd, temp = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
-    try:
-        with os.fdopen(fd, 'w', encoding='utf-8') as stream:
-            json.dump(data, stream, ensure_ascii=False, indent=2, allow_nan=False); stream.write('\n')
-        os.replace(temp, path)
-    finally:
-        if os.path.exists(temp): os.unlink(temp)
+    path = Path(path)
+    write_json(path, data, mkdir=True)
     return path

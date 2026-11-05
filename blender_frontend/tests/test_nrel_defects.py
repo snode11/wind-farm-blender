@@ -82,8 +82,8 @@ class NrelDefectContractTests(unittest.TestCase):
         self.assertEqual({d['turbine_id'] for d in doc['defects']}, {'T1', 'T2', 'T3'})
         self.assertTrue(all(d['effects']['physics_coupled'] is False for d in rows))
         with tempfile.TemporaryDirectory() as temporary:
-            path = Path(temporary)/'defects.json'
-            schema.save_document(path, doc, self.surface)
+            path = Path(temporary)/'nested'/'defects.json'
+            self.assertEqual(schema.save_document(path, doc, self.surface), path)
             self.assertEqual(schema.load_document(path, self.surface), doc)
             self.assertEqual(json.loads(path.read_text()), doc)
 
@@ -125,6 +125,10 @@ class NrelDefectContractTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 schema.save_document(path, bad, self.surface)
             self.assertEqual(path.read_bytes(), before)
+            missing = Path(temporary)/'missing'/'defects.json'
+            with self.assertRaises(ValueError):
+                schema.save_document(missing, bad, self.surface)
+            self.assertFalse(missing.parent.exists())
 
     def test_cancel_undo_redo_and_stale_analysis_keep_whole_documents(self):
         initial = self.document(self.defect())

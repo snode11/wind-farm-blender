@@ -46,13 +46,49 @@ def test_short_recording_has_initial_frame_and_accepts_real_timer_shape(recordin
     context = recording_context(scene, manager)
     assert recorder.execute(context) == {'RUNNING_MODAL'}
     assert screenshot.call_count == 1
+    unrelated = recorder._directory / 'manifest.json.tmp'
+    unrelated.write_bytes(b'unrelated file')
     clock[0] = 1.01
     assert recorder.modal(context, SimpleNamespace(type='TIMER')) == {'FINISHED'}
     manifest = json.loads((recorder._directory / 'manifest.json').read_text())
     assert manifest['status'] == 'COMPLETE'
     assert len(manifest['frames']) == 1
     assert scene.frame_current == 7
+    assert unrelated.read_bytes() == b'unrelated file'
+    assert set(recorder._directory.iterdir()) == {unrelated, recorder._directory / 'manifest.json'}
     assert namespace._ACTIVE is None
+    manager.event_timer_remove.assert_called_once()
+
+
+@pytest.mark.parametrize('value', [float('nan'), float('inf'), float('-inf')])
+@pytest.mark.parametrize('field', ['elapsed_s', 'duration_s', 'requested_fps'])
+def test_nonfinite_manifest_keeps_destination_and_releases_recording(recording, tmp_path, field, value):
+    cls, namespace = recording([0.], Mock(return_value={'FINISHED'}))
+    recorder = cls()
+    recorder.report = Mock()
+    scene = Scene()
+    scene.directory = tmp_path
+    manager = SimpleNamespace(event_timer_add=Mock(return_value=object()),
+                              event_timer_remove=Mock(), modal_handler_add=Mock())
+    context = recording_context(scene, manager)
+    assert recorder.execute(context) == {'RUNNING_MODAL'}
+    target = recorder._directory / 'manifest.json'
+    previous = b'{"status": "saved"}\n'
+    target.write_bytes(previous)
+    if field == 'elapsed_s':
+        recorder._frames[0]['elapsed_s'] = value
+    elif field == 'duration_s':
+        recorder._duration = value
+    else:
+        recorder._fps = value
+
+    recorder.cancel(context)
+
+    assert scene['wfrl_capture_status'].startswith('Manifest write failed: ')
+    assert target.read_bytes() == previous
+    assert list(recorder._directory.iterdir()) == [target]
+    assert namespace._ACTIVE is None
+    assert recorder._closed
     manager.event_timer_remove.assert_called_once()
 
 

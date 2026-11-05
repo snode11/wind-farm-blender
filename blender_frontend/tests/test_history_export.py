@@ -1,6 +1,7 @@
 import json
 from copy import deepcopy
 import pytest
+from wfrl_blender import atomic_json
 from wfrl_blender.history import HistoryWindow, export_document, ExportJob
 
 
@@ -97,7 +98,6 @@ def test_owned_snapshot_records_preserve_export_and_snapshot_isolation():
 @pytest.mark.parametrize('existing', [False, True])
 @pytest.mark.parametrize('failure', ['serialization', 'write'])
 def test_failed_export_keeps_destination_unchanged(tmp_path, monkeypatch, existing, failure):
-    import wfrl_blender.history as module
     target = tmp_path / 'history.json'
     previous = b'{"run_id": "saved-run"}\n'
     if existing:
@@ -109,7 +109,7 @@ def test_failed_export_keeps_destination_unchanged(tmp_path, monkeypatch, existi
         def fail_write(document, output, **kwargs):
             output.write('{"partial":')
             raise OSError('injected write failure')
-        monkeypatch.setattr(module.json, 'dump', fail_write)
+        monkeypatch.setattr(atomic_json.json, 'dump', fail_write)
     job = ExportJob()
     job.start(target, snapshot)
     job.thread.join(2)
@@ -121,9 +121,8 @@ def test_failed_export_keeps_destination_unchanged(tmp_path, monkeypatch, existi
 
 def test_existing_export_is_replaced_only_after_complete_write(tmp_path, monkeypatch):
     import threading
-    import wfrl_blender.history as module
     entered, release = threading.Event(), threading.Event()
-    original = module.json.dump
+    original = atomic_json.json.dump
     target = tmp_path / 'history.json'
     previous = b'{"run_id": "saved-run"}\n'
     target.write_bytes(previous)
@@ -135,7 +134,7 @@ def test_existing_export_is_replaced_only_after_complete_write(tmp_path, monkeyp
         assert release.wait(2)
         return original(document, output, **kwargs)
 
-    monkeypatch.setattr(module.json, 'dump', slow_write)
+    monkeypatch.setattr(atomic_json.json, 'dump', slow_write)
     job = ExportJob()
     job.start(target, HistoryWindow().snapshot())
     try:

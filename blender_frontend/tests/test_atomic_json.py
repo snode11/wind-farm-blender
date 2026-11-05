@@ -1,4 +1,4 @@
-"""Atomic JSON formatting, publication, cleanup and parent-directory contracts."""
+"""Atomic JSON and text formatting, publication, cleanup and parent-directory contracts."""
 from pathlib import Path
 import subprocess
 import sys
@@ -8,12 +8,16 @@ import pytest
 from wfrl_blender import atomic_json
 
 
-def test_write_json_flushes_and_syncs_before_atomic_replacement(tmp_path, monkeypatch):
+@pytest.mark.parametrize('writer,value,expected', [
+    (atomic_json.write_json, {'label': '叶片', 'value': 2}, '{\n  "label": "叶片",\n  "value": 2\n}\n'),
+    (atomic_json.write_text, '叶片\r\n原样文本\n尾行', '叶片\r\n原样文本\n尾行'),
+], ids=['json', 'text'])
+def test_writer_flushes_and_syncs_before_atomic_replacement(tmp_path, monkeypatch, writer, value, expected):
     target = tmp_path / 'status.json'
     target.write_bytes(b'previous content')
     unrelated = tmp_path / 'status.json.tmp'
     unrelated.write_bytes(b'unrelated file')
-    expected = '{\n  "label": "叶片",\n  "value": 2\n}\n'.encode('utf-8')
+    expected = expected.encode('utf-8')
     events = []
     fsync, replace = atomic_json.os.fsync, atomic_json.os.replace
 
@@ -33,7 +37,7 @@ def test_write_json_flushes_and_syncs_before_atomic_replacement(tmp_path, monkey
 
     monkeypatch.setattr(atomic_json.os, 'fsync', synced)
     monkeypatch.setattr(atomic_json.os, 'replace', replaced)
-    atomic_json.write_json(str(target), {'label': '叶片', 'value': 2})
+    writer(str(target), value)
 
     assert target.read_bytes() == expected
     assert events == ['fsync', 'replace']
@@ -56,7 +60,11 @@ def test_nan_rejection_cleans_temporary_file_and_preserves_destination(tmp_path,
 
 
 @pytest.mark.parametrize('operation', ['fsync', 'replace'])
-def test_io_failure_cleans_temporary_file_and_preserves_destination(tmp_path, monkeypatch, operation):
+@pytest.mark.parametrize('writer,value', [
+    (atomic_json.write_json, {'value': 2}),
+    (atomic_json.write_text, '叶片姿态'),
+], ids=['json', 'text'])
+def test_io_failure_cleans_temporary_file_and_preserves_destination(tmp_path, monkeypatch, operation, writer, value):
     target = tmp_path / 'status.json'
     target.write_bytes(b'previous content')
 
@@ -65,18 +73,22 @@ def test_io_failure_cleans_temporary_file_and_preserves_destination(tmp_path, mo
 
     monkeypatch.setattr(atomic_json.os, operation, fail)
     with pytest.raises(OSError, match='injected I/O failure'):
-        atomic_json.write_json(target, {'value': 2})
+        writer(target, value)
 
     assert target.read_bytes() == b'previous content'
     assert set(tmp_path.iterdir()) == {target}
 
 
 @pytest.mark.parametrize('options', [{}, {'mkdir': False}])
-def test_write_json_does_not_create_parents_by_default(tmp_path, options):
+@pytest.mark.parametrize('writer,value', [
+    (atomic_json.write_json, {}),
+    (atomic_json.write_text, ''),
+], ids=['json', 'text'])
+def test_writer_does_not_create_parents_by_default(tmp_path, options, writer, value):
     target = tmp_path / 'missing' / 'nested' / 'status.json'
 
     with pytest.raises(FileNotFoundError):
-        atomic_json.write_json(target, {}, **options)
+        writer(target, value, **options)
 
     assert list(tmp_path.iterdir()) == []
 
@@ -88,6 +100,40 @@ def test_mkdir_creates_parents_and_accepts_existing_directory(tmp_path):
     atomic_json.write_json(target, {'value': 2}, mkdir=True)
 
     assert target.read_bytes() == b'{\n  "value": 2\n}\n'
+    assert list(target.parent.iterdir()) == [target]
+
+
+@pytest.mark.parametrize('text', ['', '叶片', ' \t叶片\r\n尾行\r\n\n', '首行\r尾行', '{"姿态": 1}'])
+def test_write_text_preserves_exact_utf8_bytes(tmp_path, text):
+    target = tmp_path / 'poses.json'
+
+    atomic_json.write_text(target, text)
+
+    assert target.read_bytes() == text.encode('utf-8')
+    assert list(tmp_path.iterdir()) == [target]
+
+
+@pytest.mark.parametrize('existing', [False, True])
+def test_text_encoding_failure_cleans_temporary_file_and_preserves_destination(tmp_path, existing):
+    target = tmp_path / 'poses.json'
+    if existing:
+        target.write_bytes(b'previous content')
+
+    with pytest.raises(UnicodeEncodeError):
+        atomic_json.write_text(target, 'unencodable surrogate: \ud800')
+
+    assert set(tmp_path.iterdir()) == ({target} if existing else set())
+    if existing:
+        assert target.read_bytes() == b'previous content'
+
+
+def test_write_text_mkdir_creates_parents_and_accepts_existing_directory(tmp_path):
+    target = tmp_path / 'missing' / 'nested' / 'poses.json'
+
+    atomic_json.write_text(target, 'first', mkdir=True)
+    atomic_json.write_text(target, '叶片姿态', mkdir=True)
+
+    assert target.read_bytes() == '叶片姿态'.encode('utf-8')
     assert list(target.parent.iterdir()) == [target]
 
 
