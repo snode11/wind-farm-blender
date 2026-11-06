@@ -90,7 +90,7 @@ Bridge 后端 macOS/MPI 启动环境清除继承的 MPI 作业身份，保留显
 | 风场环境与物理驱动 | `wfcrl-env/`、`wfrl/fastfarm_driver.py` | WFCRL 环境提供观测、动作和奖励接口；驱动连接 FLORIS 稳态模型或 FAST.Farm 动态仿真。两后端的时间尺度及支持的控制量需分别核对。 |
 | 场景与运行约束 | `scenes/`、`wfrl/scene/schema.py`、`wfrl/scene/runtime.py`、`wfrl/safety.py` | YAML 定义机组、来流、控制和数据通道；运行层推进场景，安全层记录指令被拒绝或限制的原因。这里的规则不是实机保护认证。 |
 | 强化学习 | `scripts/train/`、`wfrl/mappo_central.py`、`wfrl/mappo_sb3.py`、`wfrl/rewards.py` | 训练入口、采样与策略更新、观测归一化、奖励口径和检查点。集中式 critic 的 MAPPO 与参数共享 PPO 是不同实现路径，不能只看脚本中 MAPPO 的名称就混为同一种算法。 |
-| 训练及推理执行 | `wfrl/studio/trainer.py`、`scripts/train/train_fastfarm.py` | 已有 Trainer 提供策略推理及交互训练执行逻辑；正式训练由 CLI 路径启动。复用名为 studio 的模块不表示 Blender 采用旧 Studio 界面。 |
+| 训练及推理执行 | `wfrl/studio/trainer.py`、`scripts/train/train_fastfarm.py` | 已有 Trainer 提供策略推理及交互训练执行逻辑；正式训练由 CLI 路径启动。`wfrl.studio` 只导出 `Trainer` 与 `Snapshot`，不包含桌面窗口。 |
 | Bridge 通信与会话 | `wfrl/blender_bridge/server.py`、`backend_session.py`、`workflow.py`、`isolated_trainer.py`、`trainer_worker.py`、`snapshot_adapter.py` | 校验场景与运行参数，管理工作进程、状态和停止流程，将后端结果转换为前端遥测。正式训练使用进度通道，不能假定每个模式都有同样的逐步遥测和暂停能力。 |
 | Blender 主扩展 | `blender_frontend/wfrl_blender/` | `runtime.py` 与 `transport.py` 处理状态及通信；`scene_builder.py` 建立场景；`farm_flex.py` 驱动离线柔性数据；`panels/` 提供操作入口；相机、原图采集、曲线及视频模块负责展示与输出。 |
 | 雷达计算与交付 | `wfrl/lidar/`、`scripts/lidar/`、`configs/lidar/` | 理想首交测距、净空估计、独立评估、S1 事件、DP 字段语义处理、数据打包及校验。DP 字段解码器不是硬件总线驱动。 |
@@ -654,7 +654,7 @@ G 的 `VISIBLE/PARTIAL`、投影宽度和候选最佳帧是理想投影与遮挡
 | “S1 报警等于双束净空低于阈值” | S1 有效叶片首交独立报警，与 S2/S3 是否成功无关。 |
 | “94/94 次经过有配对就是净空达标” | 覆盖与精度分开；当前双束仍存在米级净空误差。 |
 | “已有 full 导出选项就是全长视频已交付” | GW184 具备全程导出能力，但完整三路 320 秒长片仍未生成。 |
-| “旧 Studio 的功能都属于当前 Blender” | 旧 VTK/Studio、当前 Blender 主扩展和独立项目要分别核对。 |
+| “存在后端接口即可认定前端可用” | 后端合同、Blender 窗口、安装载荷与实际输入须分别核对。 |
 | “源码更新后安装版自动更新” | 源码、扩展安装目录和独立运行入口彼此不同，需要明确构建与安装流程。 |
 | “缺陷编辑器可用就完成缺陷重建” | 编辑器制作合成显示；轮廓几何求解、RGB 外观、局部深度恢复和健康判断有各自输入及验收门。 |
 

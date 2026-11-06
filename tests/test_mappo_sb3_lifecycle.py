@@ -340,16 +340,10 @@ def _run_secondary_entry(entry):
         from scripts.analysis.compare_eval import eval_ippo
 
         return eval_ippo(2)
-    from wfrl.viz.animate import load_model_and_env
-
-    model, venv = load_model_and_env()
-    try:
-        model.predict(venv.reset(), deterministic=True)
-    finally:
-        venv.close()
+    raise ValueError(f"Unknown evaluation entry: {entry}")
 
 
-@pytest.mark.parametrize("entry", ["comparison", "animation"])
+@pytest.mark.parametrize("entry", ["comparison"])
 @pytest.mark.parametrize("missing", ["model", "normalization"])
 def test_secondary_entry_requires_both_artifacts_before_environment(isolated, entry, missing):
     _save_pair(tagged=True)
@@ -361,7 +355,7 @@ def test_secondary_entry_requires_both_artifacts_before_environment(isolated, en
     assert not isolated
 
 
-@pytest.mark.parametrize("entry", ["comparison", "animation"])
+@pytest.mark.parametrize("entry", ["comparison"])
 def test_secondary_entry_rejects_mismatched_pair_and_closes_environment(isolated, entry):
     _save_pair(tagged=True, mutate_norm=lambda v: setattr(v, "_wfrl_checkpoint_id", "pair-b"))
     isolated.clear()
@@ -371,7 +365,7 @@ def test_secondary_entry_rejects_mismatched_pair_and_closes_environment(isolated
     assert isolated[0].close_calls == 1
 
 
-@pytest.mark.parametrize("entry", ["comparison", "animation"])
+@pytest.mark.parametrize("entry", ["comparison"])
 def test_secondary_entry_uses_saved_frozen_statistics(monkeypatch, isolated, entry):
     _save_pair(tagged=True)
     isolated.clear()

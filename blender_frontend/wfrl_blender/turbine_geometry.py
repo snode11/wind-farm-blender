@@ -1,6 +1,6 @@
 """Selectable blade display meshes from packaged geometry and Python stdlib.
 
-The loft follows wfrl/viz/geometry.py: reference-point aligned airfoil sections,
+The loft uses reference-point aligned airfoil sections,
 structural twist, and interpolation of the 19 AeroDyn stations. Local blade
 coordinates are x axial/downstream, y chordwise, z radial. No backend imports.
 """

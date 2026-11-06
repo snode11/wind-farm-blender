@@ -10,7 +10,7 @@
 | --- | --- |
 | 当前功能与限制 | [Blender 功能总览](blender/Blender前端功能总览与规划.md)、[发布状态与验证范围](blender/发布状态与验证范围.md) |
 | 自动检查与本地复用 | [Python 合同、Blender 后台与发布身份检查](development/自动检查.md) |
-| 脚本与桌面策略评估 | [脚本索引](../scripts/README.md)、[Studio checkpoint 评估](demos/Studio策略评估.md) |
+| 脚本与策略评估 | [脚本索引](../scripts/README.md)、[Blender checkpoint 评估](demos/Blender策略评估.md) |
 | 安装和用户操作 | [安装说明](blender/INSTALL.md)、[前端说明](../前端readme.md)、[用户手册](blender/用户使用手册.md) |
 | 独立风机手动控制 | [控件、运行与保存规则](blender/风机手动控制.md) |
 | X100 毫米波雷达 | [单台双预设、机舱 XZ、塔距诊断与离线覆盖](blender/X100雷达.md)、[工作区面积采样、安装搜索与叶片估计](blender/X100观测研究.md)、[数据与采集接口](../wfrl/radar_x100/README.md)、[融合要求](proposal/radar/CTSAI_X100_Blender融合方案.md) |

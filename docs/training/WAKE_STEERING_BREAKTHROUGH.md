@@ -77,9 +77,9 @@ shaped = (raw_reward - reference) / reference
 
 - [动态训练入口](../../scripts/train/train_fastfarm.py)：训练与同路径零动作基线，支持回合、预热、奖励、种子和场景配置。
 - [确定性评估](../../scripts/experiments/rollout_ckpt.py)：从匹配 checkpoint 重新推进后端，输出数值轨迹。
-- [Studio Trainer](../../wfrl/studio/trainer.py)：`_replay_policy` 加载权重并重新执行物理仿真；不读取历史 NPZ。界面的 FLORIS proxy 尾流不能当作 FAST.Farm 动态尾流真值。
+- [后端 Trainer](../../wfrl/studio/trainer.py)：`_replay_policy` 加载权重并重新执行物理仿真；不读取历史 NPZ。稳态 FLORIS 参考不能当作 FAST.Farm 动态尾流真值。
 - [算法与依赖分流](MAPPO_SETUP.md)、[本地配置](../setup/setup_local.md)：当前源码入口与平台要求。
-- [Studio 策略评估](../demos/Studio策略评估.md)：macOS 与 Windows 命令模板、模型兼容条件及可见窗口边界。
+- [Blender 策略评估](../demos/Blender策略评估.md)：Replay 面板、模型兼容条件及实时后端边界。
 - 当前 Blender [演示](../demos/演示指令单.md)：使用扩展内置保存结果离线观看；它与本实验效果分别判定。
 
 完整复现需要匹配的权重、基线、策略 rollout、训练历史及配置来源，并进行独立评价。

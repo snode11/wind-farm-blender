@@ -18,7 +18,7 @@
 
 ### Interactive 的采样与更新
 
-Bridge 在 POSIX 平台通过 [IsolatedTrainer](../../wfrl/blender_bridge/isolated_trainer.py) 启动 MPI worker，worker 调用 [Studio Trainer](../../wfrl/studio/trainer.py)；其他平台的现有分支直接调用同一 Trainer，平台运行状态须单独验证。该路径复用共享 `Actor`、集中式 `Critic` 和观测统计结构：actor 读取本机观测，critic 读取全场拼接观测，每个控制步使用一个团队奖励及相应标量优势。Formal Training 运行 `scripts/train/train_fastfarm.py`，不使用这里的 Interactive 更新循环；SB3 路线的采样、归一化和更新由其自身实现负责。
+Bridge 在 POSIX 平台通过 [IsolatedTrainer](../../wfrl/blender_bridge/isolated_trainer.py) 启动 MPI worker，worker 调用 [后端 Trainer](../../wfrl/studio/trainer.py)；其他平台的现有分支直接调用同一 Trainer，平台运行状态须单独验证。该路径复用共享 `Actor`、集中式 `Critic` 和观测统计结构：actor 读取本机观测，critic 读取全场拼接观测，每个控制步使用一个团队奖励及相应标量优势。Formal Training 运行 `scripts/train/train_fastfarm.py`，不使用这里的 Interactive 更新循环；SB3 路线的采样、归一化和更新由其自身实现负责。
 
 Interactive 记录未经过 `tanh` 和动作约束层的高斯采样动作。采样与更新均只沿动作维汇总 log-prob，缓存形状为 `(steps, agents)`。每个机组分别计算 `ratio = exp(new_logp - old_logp)` 并进行 PPO 裁剪；多控制量先组成该机组的联合动作概率，不逐分量独立裁剪，也不把所有机组的概率合并为一个 ratio。团队优势广播到 `(batch, agents)` 后统一标准化，单元素时使用零标准差以避免非有限值；代理目标对时间步和机组取均值。熵项对高斯分布的动作维求和，再对时间步与机组取均值。
 
@@ -38,11 +38,11 @@ Interactive 的 `episode_steps` 指每回合用于训练的控制步数，默认
 
 项目使用 [PolicyActionContract](../../wfrl/policy_actions.py) 描述高斯网络输出到控制增量的变换。checkpoint 的 `action_contract` 包含 `version=1`、有序 `controls`、`transform`、逐通道 `low` 和 `high`。`tanh_scale` 要求对称边界，计算 `tanh(raw) * high`；`clip` 将原始输出裁剪到保存的上下界。变换结果随后进入约束层，PPO 缓存仍保留原始高斯动作及其 log-prob。
 
-Studio / Interactive 使用 `tanh_scale`，包括仅控制 yaw 或单个非 yaw 控制量的场景；Replay 从 checkpoint 读取同一合同，不按动作维度猜测变换。`train_fastfarm.py` 的高斯 yaw 策略使用 `clip`，其 checkpoint 与命令行 rollout 保持相同规则。控制顺序、动作和观测维度、归一化统计、机组数量及运行时边界须一致；保存了场景的模型还校验后端、机型、时间步长与机组布局。
+Interactive Trainer 使用 `tanh_scale`，包括仅控制 yaw 或单个非 yaw 控制量的场景；Replay 从 checkpoint 读取同一合同，不按动作维度猜测变换。`train_fastfarm.py` 的高斯 yaw 策略使用 `clip`，其 checkpoint 与命令行 rollout 保持相同规则。控制顺序、动作和观测维度、归一化统计、机组数量及运行时边界须一致；保存了场景的模型还校验后端、机型、时间步长与机组布局。
 
 Replay 在后端启动、预热和控制步边界响应暂停与停止。最终快照的 `step` 使用实际完成的策略控制步数，预热不计入；只有达到请求的 `replay_steps` 才将 `iters_done` 置为 `1`。取消或后端提前结束保留实际计数。
 
-无版本动作合同的模型只接受可识别的保存格式：Studio 的 `scene`、`controls`、`critic` 组合对应 `tanh_scale`；CLI 的完整 `env_id`、`obs_duty`、`recurrent`、`duty_penalty` 组合对应 yaw 的 `clip`。该兼容路径使用固定控制边界，并须与实际运行时一致；缺失、冲突或无法判定的元数据明确报错。没有保存场景的 CLI 模型不能仅凭现有字段证明完整布局、机型和时间步长匹配。
+无版本动作合同的模型只接受可识别的保存格式：Trainer 的 `scene`、`controls`、`critic` 组合对应 `tanh_scale`；CLI 的完整 `env_id`、`obs_duty`、`recurrent`、`duty_penalty` 组合对应 yaw 的 `clip`。该兼容路径使用固定控制边界，并须与实际运行时一致；缺失、冲突或无法判定的元数据明确报错。没有保存场景的 CLI 模型不能仅凭现有字段证明完整布局、机型和时间步长匹配。
 
 研究探针 `FlexPolicy` 只接受可识别的 `Dec_Turb3_Row1_Fastfarm` legacy yaw-only、非循环、无 duty 观测模型；固定动作边界为 ±5°、变换为 `clip`。它复用合同校验，并拒绝保存 `scene` 的模型及未知版本，不拓展普通 Replay 的模型适用域。
 
@@ -60,9 +60,9 @@ SB3 包装器在自动重置前保存各机组的完整 `terminal_observation`�
 
 自定义 Scene YAML 的 `dt` 使用有限正整数秒，小数步长在创建 case 前拒绝，case、runtime 与 limiter 使用同一步长。非 Scene 的 `--backend floris` 路径保留显式 `--wind-direction`，并在风况调度与实验身份中使用它；未指定方向时，`preset:veer` 等预设可提供 FLORIS 风向。FAST.Farm 的显式 `--wind-direction` 也经配置、调度和采样器传到底层校验：270°及其等价值匹配固定坐标，其他未支持方向拒绝，不执行任意坐标旋转。Bridge Formal 仍只接受 FAST.Farm。
 
-Studio 停止与窗口关闭通过定时轮询等待训练和显示求解线程退出；资源归属未确认时保留窗口并阻止重新启动。正测量顺桨角在显示、柔性几何与净空中采用一致的局部旋转符号。转矩修正同时满足单步与累计边界；当前值距 VS 包线过远时逐步接近，事件记录实际可提交的 float32 增量，不保证一步进入包线。缺失、布尔、非实数或非有限功率保留为 NaN，不补零。
+Blender Bridge 停止时等待训练线程或隔离 worker 清理完成；资源归属未确认时保留错误状态并阻止重新启动。转矩修正同时满足单步与累计边界；当前值距 VS 包线过远时逐步接近，事件记录实际可提交的 float32 增量，不保证一步进入包线。缺失、布尔、非实数或非有限功率保留为 NaN，不补零。
 
-Studio 的 `NacelleLidar` 为合成示意：轮毂均值、幂律切变和确定性正弦脉动，可读取 BTS 的均值／TI 统计量，尚未实现三维 BTS 插值。输出标识 `source_kind=SYNTHETIC`、`bts_spatial_interpolation=False`；不作为实测或前馈收益证据。
+场景传感器 `NacelleLidar` 为合成示意：轮毂均值、幂律切变和确定性正弦脉动，可读取 BTS 的均值／TI 统计量，尚未实现三维 BTS 插值。输出标识 `source_kind=SYNTHETIC`、`bts_spatial_interpolation=False`；不作为实测或前馈收益证据。
 
 `run_stage3.py` 仅复用配置、来源、完成预算、终态、历史和完整检查点全部对应的独立完成任务；检查点字节须匹配历史中的摘要。空文件、部分训练、缺少身份的既有结果及恢复训练段都不能被视为新的完整实验已完成。改变有效配置会形成不同实验身份，可用 `--dry-run` 检查待运行组合而不启动求解。
 
@@ -132,7 +132,7 @@ FAST.Farm MAPPO 的 `--resume-from` 使用明确的 `new_episode_segment`：从�
 
 SB3 IPPO 的 `--eval-only` 自动加载模型与归一化文件，缺少任一文件或校验不兼容时明确失败。评估固定 `training=False`、`norm_reward=False`，冻结观测统计并报告原始奖励。`--resume` 恢复模型、观测及奖励统计和累计步数，设置 `training=True`、`norm_reward=True`；`--timesteps` 表示追加的 agent transitions，实际仍按完整 rollout 取整。
 
-算法对比入口 `scripts/analysis/compare_eval.py` 的 IPPO 分支和 `wfrl/viz/animate.py` 的策略动画通过 `load_evaluation_pair()` 加载同一模型／归一化配对，使用冻结统计和原始奖励；缺文件或配对不匹配时停止。该函数返回的环境由调用方关闭，加载失败时函数负责关闭已创建的环境。
+算法对比入口 `scripts/analysis/compare_eval.py` 的 IPPO 分支通过 `load_evaluation_pair()` 加载同一模型／归一化配对，使用冻结统计和原始奖励；缺文件或配对不匹配时停止。该函数返回的环境由调用方关闭，加载失败时函数负责关闭已创建的环境。
 
 SB3 IPPO、多模态 IPPO、单智能体 PPO 与 HornsRev2 PPO 的最终保存均给模型和归一化文件写入相同配对标识，加载时校验标识、观测／动作空间、有限统计量和折扣因子。无配对标识的现有文件可以按兼容性校验加载，但仅凭空间和统计形状不能证明二者来自同次训练，仍须核对来源。
 

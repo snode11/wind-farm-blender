@@ -40,6 +40,8 @@ GitHub 默认分支为 [`main`](https://github.com/snode11/wind-farm-blender/tre
 
 公开 0.3.42.7 前端按网格与数值消费者选择形变计算范围，保留隐藏 T1 的结构叶尖测量和共享塔架运动，并复用已校验遥测数组。后端的完整功率校验、断连期间的生命周期推进与进度合并、Interactive 联合动作 PPO 使用项目 Python 源码，说明见[前端与后端接口](blender_frontend/README.md#55-实时连接与控制生命周期)及[训练配置](docs/training/MAPPO_SETUP.md)。普通 Python 包的机型资源与依赖见[本地配置](docs/setup/setup_local.md#2-macos-完整-python-环境)。
 
+当前交互前端为 Blender；后端 `wfrl.studio` 提供 `Trainer` 与 `Snapshot`，通过 Bridge 运行策略与训练。checkpoint 操作见[Blender 策略评估](docs/demos/Blender策略评估.md)。
+
 ## 当前源码主要能力
 
 - **风机手动控制**：**N → 风机控制 → 创建 / 进入手动场景** 提供 T1/T2/T3 或全部风机的朝向、统一／分别变桨、RPM、叶轮角度与运行／暂停／停转，支持朝下／侧向／顺桨预设、相对角度微调、三机参数概览、JSON 姿态保存／选择性载入及撤销重做。批量启用分别变桨保留已启用机组的独立桨距。使用独立刚性场景和环境，保留原 demo；不产生功率、载荷、尾流或测量结果。[操作说明](docs/blender/风机手动控制.md)。

@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))))
 
 from wfrl.scene.schema import load_scene                          # noqa: E402
-from wfrl.viz.field import get_floris                             # noqa: E402
+from wfrl.floris_field import get_floris                             # noqa: E402
 
 
 def farm_power(fi, yaws_deg):

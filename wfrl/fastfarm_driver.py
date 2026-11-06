@@ -193,7 +193,7 @@ class FastFarmDriver:
                 float(np.ravel(aspace[c].high)[0]))
             for c in self.controls
         }
-        # 向后兼容：老调用方（rviz_app / train_fastfarm）拿的是 yaw 的标量边界
+        # train_fastfarm 使用 yaw 的标量边界，其他控制量按 act_bounds 读取。
         self.act_low, self.act_high = self.act_bounds.get(
             "yaw", (-5.0, 5.0))
 

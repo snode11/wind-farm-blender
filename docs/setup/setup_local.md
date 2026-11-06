@@ -1,6 +1,6 @@
 # 本地环境配置与入口分流
 
-完整项目的 Python 安装入口为根目录 [requirements.txt](../../requirements.txt)，覆盖 WFCRL、FLORIS、FAST.Farm Python 接口、训练、Qt/VTK 桌面界面、相机视频与重建工具。本说明同时提供系统组件、资源恢复和启动要求；依赖解析成功不等于目标机器上的求解器、训练和窗口运行已经验证。
+完整项目的 Python 安装入口为根目录 [requirements.txt](../../requirements.txt)，覆盖 WFCRL、FLORIS、FAST.Farm Python 接口、训练、Blender 后端接口、相机视频与重建工具。本说明同时提供系统组件、资源恢复和启动要求；依赖解析成功不等于目标机器上的求解器、训练和窗口运行已经验证。
 
 ## 1. Blender 离线演示
 
@@ -18,7 +18,7 @@
 
 ```bash
 conda create -n wfrl-full -c conda-forge python=3.11 pip git openmpi "mpi4py>=3.1.5,<5" \
-  openfast=3.5.3 "cmake<4" c-compiler cxx-compiler fortran-compiler python.app ffmpeg
+  openfast=3.5.3 "cmake<4" c-compiler cxx-compiler fortran-compiler ffmpeg
 conda activate wfrl-full
 git clone --branch main https://github.com/snode11/wind-farm-blender.git
 cd wind-farm-blender
@@ -94,19 +94,7 @@ scripts/blender/run_wfrl_macos.sh --help
 
 当前工作区启动器保留虚拟环境解释器路径，使用所选后端 Python 解析 YAML 并统一后端预检与 MPI 配置判定。监管按 PID／创建时间和继承的运行标识覆盖本机后代，父进程退出不结束监管；身份不可读时保留 UNKNOWN 与两份恢复文件。Bridge 独立声明当前会话，界面换连接不改写启动器归属；`stop-session` 使用记录的固定端点并校验活进程身份。普通重连保留原身份，认领新后端须显式确认且不停止旧任务。连接恢复的 `state_revision` 语义需要匹配的前端与 Bridge；源码合同见[维护说明](../../blender_frontend/README.md#55-实时连接与控制生命周期)，公开源码与日常工作区构建的适用范围分别见[源码验证](../blender/发布状态与验证范围.md#源码软件合同与验证)和[日常安装身份](../../publication/daily-installation.json)。
 
-## 4. 旧 Studio / RViz 桌面入口
-
-这些是仍保留的 Python Qt/VTK 路线，与当前 Blender 离线流程不同。macOS 原生窗口需要 `pythonw`；仓库启动器同时检查 `pythonw` 和 `mpiexec`：
-
-```bash
-conda install -c conda-forge python.app
-scripts/macos/run_desktop.sh studio --scene scenes/turb3_row.yaml
-scripts/macos/run_desktop.sh rviz --backend floris
-```
-
-这些是源码入口模板，窗口可用性须在目标环境验证。FAST.Farm 模式或 Studio `--replay` 会重新推进物理仿真；后者从 checkpoint 执行确定性策略，不是读取已经保存的数值轨迹。Windows PowerShell [用法见演示指令单](../demos/演示指令单.md)；使用前须替换仓库路径和解释器路径，运行耗时与结果以实际配置和保留证据为准。
-
-## 5. 兼容配置与输入约束
+## 4. 兼容配置与输入约束
 
 命令中的仓库路径、conda 解释器与 MPI 路径须指向实际机器配置。遇到 `UnicodeDecodeError 'gbk'` 时，须检查实际进程退出码和日志，不能仅凭错误文本判断任务成功。
 

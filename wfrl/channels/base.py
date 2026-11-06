@@ -1,13 +1,4 @@
-"""传感器基类与注册表。
-
-一个 Sensor 要回答四个问题：
-  1. 它挂在哪（`poses`，用于在 3D 里画它自己）
-  2. 它多久出一次数（`rate_hz`，低于控制步频的要按步数抽稀）
-  3. 它的数据从哪来、可信到什么程度（`sample()` + `fidelity`）
-  4. 它在 3D 里长什么样（`make_actors` / `update_actors`）
-
-第 4 条是可选的：功率这类没有几何表现的传感器只发数、不加 actor。
-"""
+"""传感器基类与注册表：定义位姿、采样率、数据来源、保真度和场景约束。"""
 from __future__ import annotations
 
 import enum
@@ -18,15 +9,10 @@ import numpy as np
 
 
 class Fidelity(enum.Enum):
-    """数据的物理可信度。UI 用它上色，汇报用它分节。"""
+    """数据的物理可信度，用于区分仿真直读、派生量与合成量。"""
     DIRECT = "直读"      # 仿真器真算出来的
     DERIVED = "导出"     # 由直读量/湍流盒按明确公式推的
     SYNTH = "合成"       # 我们造的模型，未经验证
-
-    @property
-    def color(self):
-        return {"直读": (60, 140, 70), "导出": (20, 80, 140),
-                "合成": (170, 110, 30)}[self.value]
 
 
 class Sensor:
@@ -40,9 +26,6 @@ class Sensor:
     rate_hz: Optional[float] = None
     #: 需要仿真侧提供哪些量才能工作。缺了就在 validate 阶段报错，而不是运行时 KeyError
     requires: tuple = ()
-    #: 若 make_actors 建了带色带的 mesh，写上色带标题 —— 通道关掉时色带要跟着收。
-    #: 留一条"lidar u (m/s)"的色带在画面上，等于宣称那一路还在采。
-    scalar_bar_title: Optional[str] = None
 
     def __init__(self, scene, spec, indices: List[int]):
         self.scene = scene
@@ -108,36 +91,6 @@ class Sensor:
             self._last = {t: {"error": repr(e)} for t in self.topics}
         return self._last
 
-    # ---- 渲染（可选）-----------------------------------------------------
-    def to_display(self, pts, ctx) -> np.ndarray:
-        """物理坐标 (m,k,3) → 画面坐标 (m*k,3)。
-
-        机组在 3D 里按 TURB_SCALE 放大画（整场跨数千米、机组只有百米量级，1:1
-        就是几根针）。传感器几何不跟着同一个变换的话，轮毂真值 90 m 会画在
-        塔筒半腰上 —— 画面上的轮毂在 450 m —— 前视雷达就悬在地面附近，指着
-        没有转子的地方。
-
-        变换与 `viz/animate._build_real` 一致：**绕各自机组的塔基等比放大**，
-        所以 xy 相对机位放大、z 相对地面放大。`m` 必须与 `self.indices` 对齐。
-        采样数据本身仍是物理量，只有画出来的这一份被缩放。
-        """
-        p = np.asarray(pts, dtype=float)
-        s = float(ctx.get("_turb_scale", 1.0) or 1.0)
-        if p.ndim == 2:                      # 已经是点列，无从对齐机组 ⇒ 只缩 z
-            out = p.copy()
-            out[:, 2] *= s
-            return out
-        anchor = np.array([[self.scene.turbines[i].x,
-                            self.scene.turbines[i].y, 0.0]
-                           for i in self.indices])[:, None, :]
-        return (anchor + s * (p - anchor)).reshape(-1, 3)
-
-    def make_actors(self, plotter, ctx):
-        """在 3D 场景里建自己的 actor。返回 actor 列表，无几何表现则返回 []。"""
-        return []
-
-    def update_actors(self, actors, data, ctx):
-        """新数据到达时更新 actor。默认什么都不做。"""
 
     @classmethod
     def validate(cls, scene, spec):

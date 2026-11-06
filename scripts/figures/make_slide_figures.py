@@ -34,7 +34,7 @@ plt.rcParams.update({
 # ---------------------------------------------------------------------------
 def _floris():
     from wfcrl import environments as envs
-    from wfrl.viz.field import get_floris
+    from wfrl.floris_field import get_floris
     return get_floris(envs.make(ENV_ID))
 
 
@@ -72,7 +72,7 @@ def _load_proxy(fi, angles, n_pts=9):
 
 # ---------------------------------------------------------------------------
 def fig_wake_steering():
-    from wfrl.viz.field import extract_wake_plane
+    from wfrl.floris_field import extract_wake_plane
     cases = [("Greedy: all yaws = 0°", [0.0, 0.0, 0.0]),
              ("Wake steering: yaws = (25°, 15°, 0°)", [25.0, 15.0, 0.0])]
     fig, axes = plt.subplots(2, 1, figsize=(9.5, 5.6), sharex=True, sharey=True,

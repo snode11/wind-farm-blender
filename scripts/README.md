@@ -10,8 +10,7 @@
 | `radar_x100/` | X100 严格 PLY 导入、本地发布、记录、完整源网格导出及双预设覆盖；`optimize_mount.py` 搜索有限安装集合，`evaluate_blades.py` 独立评价因果叶片估计。见[数据合同](../wfrl/radar_x100/README.md)、[双预设覆盖](../docs/blender/X100雷达.md#离线安装覆盖研究)和[安装搜索／叶片评价命令](../docs/blender/X100观测研究.md)；读取已有运动，不启动训练或求解器 |
 | `lidar/` | 雷达结果包、数值诊断与来源检查；[计算入口](lidar/README.md) |
 | `reconstruction/`、`nrel_*.py` | 叶片重建与独立动态研究；[研究对象与状态](../research/README.md) |
-| `experiments/` | 明确对象的物理实验、约束探针及 Qt/VTK 诊断；需要的窗口、MPI 和输入由各脚本声明 |
-| `macos/run_desktop.sh` | macOS Studio／RViz 桌面启动器；[Studio 策略评估](../docs/demos/Studio策略评估.md) |
+| `experiments/` | 明确对象的物理实验、数值检查与约束探针；MPI 和输入由各脚本声明 |
 | `camera_video.py` | 已有相机视频包的检查、播放与服务入口；[视频包合同实现](../wfrl/camera_video/package.py) |
 | `ci/` | 发布身份摘要检查；[自动检查](../docs/development/自动检查.md) |
 | `figures/` | 研究图表生成，使用各脚本指定的数据源 |
@@ -22,13 +21,12 @@
 
 ```bash
 scripts/blender/run_wfrl_macos.sh --help
-scripts/macos/run_desktop.sh --help
 python3 scripts/blender/run_regressions.py --list
 python3 scripts/blender/run_installed_windows.py --list
 python3 scripts/ci/check_release_identity.py --release publication/blender-0.3.42.7.json
 ```
 
-`experiments/verify_desktop_contracts.py` 检查 RViz 的来流、地形、中文标签、双视图与源码结构；默认包含可见窗口检查，`--online` 还会运行 FAST.Farm。它依赖完整桌面环境，不能当作无窗口宿主测试执行。
+后端 checkpoint 评估通过 Blender Replay 操作，配置与模型合同见[Blender 策略评估](../docs/demos/Blender策略评估.md)。宿主测试与原生检查按[自动检查](../docs/development/自动检查.md)选择。
 
 ## 隔离安装窗口验收
 

@@ -6,8 +6,8 @@
   · 元数据 / 气弹几何来源指针
 
 复杂的气弹几何（叶片截面 / 翼型 / 塔筒锥度 / 振型）不在机型文件里重复：它本就
-躺在 FAST.Farm 模板里，由 geometry_source 指向、交给 viz/geometry.py 解析。机型
-文件只补模板没有的"外壳外形"和"挂机点位"。
+躺在 FAST.Farm 模板里，由 geometry_source 指向。传感器安装尺寸由
+`wfrl.turbines.dimensions` 读取；机型文件补充外壳外形和挂机点位。
 
 设计边界：本层只进渲染与相机位姿，**不进物理求解**。物理侧的 hub_height/rotor_d
 仍由 scene/schema.py 常量与 FAST.Farm 模板决定，和这份文件无关（与 RL 训练解耦）。

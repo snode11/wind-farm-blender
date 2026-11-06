@@ -53,16 +53,15 @@ MPI 统计在接口 running 状态下按接收交换累计，保留无效样本�
 
 `statistics.turbine_hub` 是 DISCON 轮毂风速，不是背景纵向风速、转子面积均值或独立自由来流。`downstream_wake_affected` 选择固定坐标中 X 大于最前机组的机组，统计包含湍流、阵风、尾流和瞬态，不能单独分离尾流亏损。`statistics.farm_inflow` 与运行统计核对请求自由入流的结论仍为 **unavailable**；独立场内入流探针**待实现**。驱动用于功率归一化的 BTS 参考风速来自完整文件轮毂层均值，也不是本回合场内入流采样。
 
-## 训练、探针与 rviz 入口
+## 训练、场景与探针入口
 
 | 入口 | 当前处理 |
 | --- | --- |
 | [train_fastfarm.py](../../scripts/train/train_fastfarm.py) | `--wind-direction` 经 `experiment_config()`、`training_wind_schedule()` 和 `FastFarmSampler` 保留并传到底层；有场景时经过 `SceneRuntime.reset()`，方向请求独立于场景显示方向。无场景时拒绝 `--wind-sched preset:turb`，BTS由 `--scene` 的 `inflow.turbulence` 指定。非场景采样器仍拒绝BTS与标量风速调度并用 |
 | [probe_flex_policy.py](../../scripts/lidar/probe_flex_policy.py) | `--wind` 与 `--turbulence` 是 argparse 互斥参数；选择 BTS 时调用无标量参数的重置，报告的 `wind_mps` 为 null。稳态默认风速14 m/s |
-| [rviz_app.py](../../wfrl/viz/rviz_app.py) | 先用可选的 `--wind` 预设覆盖风速／BTS选项，再检查有效参数；FAST.Farm 模式下 `--turb` 和 `--wind-speed` 并存时报错，`FastFarmSource` 构造也拒绝该冲突。BTS 路径不转发标量风速 |
 
 训练在 `upstream_request.training` 保存原始 `wind_speed`、`wind_direction`、`wind_sched` 及用途。风速按入口标为 `overridden_by_scene`、`overridden_by_schedule` 或 `solver_request`；方向标为 `solver_request`。显式CLI方向优先于风速调度所带方向，未提供时保留调度方向；场景模式未显式提供方向则不从场景显示值补入。训练CLI的非场景、稳态场景和BTS场景均沿该求解请求链传递方向，由底层决定接受或拒绝。
 
-**要求与入口限制：**不支持的显式风况应可追溯并明确拒绝。训练和场景入口已区分上下文与实际请求；rviz使用的 [windcond.py](../../wfrl/windcond.py) 在非FLORIS模式仍将预设方向清为 `None` 并打印忽略提示，`FastFarmSource` 本身不接收风向参数，rviz预设还会覆盖原始风速／BTS选项。rviz入口的原始方向和被覆盖冲突尚不能保证到达 `WindRequestError`，这部分请求保留与一致拒绝**待实现**，不能解释为已支持相应请求。
+**要求与入口限制：**不支持的显式风况应可追溯并明确拒绝。训练和场景入口分别保存上层上下文与实际请求；场景显示方向不能视为求解器已应用方向。任意风向旋转与独立场内入流探针仍待实现。
 
 静态行为依据还包括 [风况合同测试](../../tests/test_fastfarm_wind_conditions.py) 与 [训练完整性测试](../../tests/test_fastfarm_training_integrity.py)。测试夹具核对输入身份、拒绝、记录和统计口径，不代表真实求解、风向旋转或场内探针已通过验收。

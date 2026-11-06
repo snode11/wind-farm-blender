@@ -82,7 +82,6 @@ class NacelleLidar(Sensor):
     fidelity = Fidelity.SYNTH
     provenance = "合成示意：轮毂均值/切变/正弦脉动；可用 BTS 统计量，不读取三维风场"
     rate_hz = 1.0
-    scalar_bar_title = "lidar u (m/s)"
 
     N_BEAM = 5                 # 视线数（真机 4~50 束，取 5 够画且够快）
     RANGES = (50.0, 100.0, 160.0)   # 各测距门 (m)，前馈提前量 = range / u
@@ -137,29 +136,6 @@ class NacelleLidar(Sensor):
                           "has_turbulence": False, "source_kind": "SYNTHETIC",
                           "bts_statistics_used": bts is not None,
                           "bts_spatial_interpolation": False}}
-
-    # --- 3D 表现：点云，颜色 = 视线风速 -----------------------------------
-    # 点位要过 `to_display`：采样用物理坐标（轮毂 90 m），但画面上机组按
-    # TURB_SCALE 放大，不跟着变换就会悬在塔筒半腰指着空处。
-    def make_actors(self, plotter, ctx):
-        import pyvista as pv
-        d = (self._last or self.sample(ctx))["lidar"]
-        cloud = pv.PolyData(self.to_display(d["points"], ctx))
-        cloud["u"] = np.asarray(d["u"]).ravel()
-        act = plotter.add_mesh(cloud, scalars="u", cmap="turbo",
-                               render_points_as_spheres=True, point_size=11,
-                               scalar_bar_args={"title": self.scalar_bar_title})
-        return [(act, cloud)]
-
-    def update_actors(self, actors, data, ctx):
-        if not actors or not data:
-            return
-        d = data.get("lidar")
-        if not isinstance(d, dict) or "points" not in d:
-            return
-        _, cloud = actors[0]
-        cloud.points = self.to_display(d["points"], ctx)
-        cloud["u"] = np.asarray(d["u"]).ravel()
 
 
 @registry.register
@@ -257,14 +233,11 @@ class NacelleCamera(Sensor):
     """
     type_name = "camera"
     fidelity = Fidelity.SYNTH
-    provenance = ("机舱相机的安装位姿与视野，纯几何；不出图像数据"
-                  "（视野即单风机窗口的实时视口）")
-    scalar_bar_title = None
+    provenance = "机舱相机的安装位姿与视野，纯几何；不出图像数据"
 
-    # NREL 5MW 真值（与 geometry/animate 同源），camera_pose 用真实尺度。
-    # 从 geometry 载入，包含 Twr2Shft，保证挂点与渲染中的 90 m 轮毂一致。
+    # 从 ElastoDyn 读取真实尺寸，轮毂高度包含 Twr2Shft 与轴倾抬升。
     try:
-        from wfrl.viz.geometry import load_turbine_geometry as _ltg
+        from wfrl.turbines.dimensions import load_turbine_dimensions as _ltg
         _GEO = _ltg()
         HUB_H = float(_GEO.hub_height)          # ≈90.0
         TIP_R = float(_GEO.tip_rad)             # 63
@@ -428,7 +401,7 @@ class NacelleCamera(Sensor):
                         "pitch": self._p("pitch")})
         return {"camera": out}
 
-    # --- 3D 表现：视锥线框（四棱锥）------------------------------------
+    # 视锥数值几何用于视野覆盖检查。
     def _frustum_points(self, ctx, i, scale):
         """视锥顶点 + 底面四角的世界坐标 (5,3)：顶点=相机，底面按 fov 张开。"""
         pos, focal, up, fov = self.camera_pose(ctx, i, scale=scale)
@@ -443,31 +416,6 @@ class NacelleCamera(Sensor):
         for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1)):
             corners.append(focal + sx * half * right + sy * half * upv)
         return np.array([pos] + corners)
-
-    def make_actors(self, plotter, ctx):
-        import pyvista as pv
-        s = float((ctx or {}).get("_turb_scale", 1.0) or 1.0)
-        actors = []
-        for i in range(len(self.indices)):
-            pts = self._frustum_points(ctx, i, scale=s)
-            # 四条棱（顶点→四角）+ 底面方框
-            lines = []
-            for c in range(1, 5):
-                lines += [2, 0, c]
-            for c in range(1, 5):
-                lines += [2, c, 1 + c % 4]
-            poly = pv.PolyData(pts, lines=np.array(lines))
-            act = plotter.add_mesh(poly, color=(1.0, 0.6, 0.1), line_width=2,
-                                   opacity=0.7, render_lines_as_tubes=True,
-                                   lighting=False)
-            actors.append((act, poly))
-        return actors
-
-    def update_actors(self, actors, data, ctx):
-        s = float((ctx or {}).get("_turb_scale", 1.0) or 1.0)
-        for i, (_act, poly) in enumerate(actors):
-            if i < len(self.indices):
-                poly.points = self._frustum_points(ctx, i, scale=s)
 
 
 @registry.register

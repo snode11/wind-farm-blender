@@ -1,27 +1,17 @@
-"""后台训练线程：MAPPO 跑在工作线程，UI 只收快照。
+"""后台 MAPPO 训练、策略评估与合成演示，向 Blender Bridge 发布纯值快照。
 
-约束是硬的：FAST.Farm 一个控制步 2~3 s 墙钟。压在 Qt 的事件循环里，界面就是
-每 3 秒动一下 —— 拖不动视角、点不了按钮。所以采样与优化整个搬到工作线程，
-主线程只做两件事：读最近一帧、按真实流逝时间插值转子相位。
+采样和优化在工作线程运行；消费者通过 latest() 或 on_snapshot 读取结果，
+不访问 driver。锁只保护最新快照的交接，不执行仿真或渲染。
 
-线程边界只有一处，必须守住：**主线程不碰 driver，工作线程不碰 actor**。
-PyVista 的 actor 绑在创建它的 render window 上，跨线程改 `user_matrix` 是未定义
-行为（表现为偶发白屏或崩在 vtkOpenGLPolyDataMapper）。所以工作线程写 `_latest`
-（纯 numpy/dict），主线程取走再去改画面。一把锁保护交接，锁里只做浅拷贝，不做
-任何渲染或仿真。
-
-用法（不依赖 Qt，可无头跑）：
-
+用法：
     tr = Trainer(scene, iters=10, n_steps=64)
     tr.start()
     while tr.running:
-        snap = tr.latest()          # None 表示还没出第一帧
-        ...
-    tr.stop()                       # 幂等；会等 driver 排空迭代预算
+        snap = tr.latest()
+    tr.stop()
 
-复用 `mappo_central.py` 的 `Actor`、`Critic` 和 `RunningMeanStd` 结构。
-共享 actor 读取本机观测，集中式 critic 读取全场拼接观测；PPO 对每台机组的
-联合动作概率计算裁剪代理目标。
+复用 mappo_central 的 Actor、Critic 和 RunningMeanStd。共享 actor 读取本机
+观测，集中式 critic 读取全场拼接观测；PPO 对每台机组的联合动作概率裁剪。
 """
 from __future__ import annotations
 
@@ -50,7 +40,7 @@ def _frame_farm_power(frame):
 
 @dataclass
 class Snapshot:
-    """工作线程 → 主线程的一帧。全部是值，不含任何 VTK/torch 对象。"""
+    """工作线程 → 主线程的一帧。全部是值，不含渲染对象或 torch 张量。"""
     step: int = 0
     iters_done: int = 0
     frame: Dict[str, Any] = field(default_factory=dict)
@@ -333,7 +323,7 @@ class Trainer:
         """演示模式：脚本化视觉动画，精确复现时序。
 
         完全不走 FAST.Farm（它无法保证转速在恰好 N 秒到达 8rpm，且 spawn 要 1min），
-        直接驱动 measure 与 3D 可视化。每 120ms 一帧（与 StudioWindow._tick 同步），
+        直接生成 measure 与快照，每 120ms 一帧，
         逐帧插值 yaw/pitch/rpm/power，严格按秒数执行用户给定的序列。
 
         序列：
