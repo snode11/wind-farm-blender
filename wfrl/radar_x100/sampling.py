@@ -34,7 +34,11 @@ class MaterialPlan:
     area_weights_m2: np.ndarray
 
     def __post_init__(self):
-        ids = np.array(self.triangle_ids, dtype=np.int32, copy=True)
+        ids = np.asarray(self.triangle_ids)
+        if (ids.ndim != 1 or ids.dtype.kind not in 'iu' or np.any(ids < 0)
+                or np.any(ids > np.iinfo(np.int32).max)):
+            raise ValueError('Invalid material triangle indices')
+        ids = np.array(ids, dtype=np.int32, copy=True)
         weights = np.array(self.barycentric, dtype=np.float64, copy=True)
         area_weights = np.array(self.area_weights_m2, dtype=np.float64, copy=True)
         if (ids.ndim != 1 or not 1 <= len(ids) <= MAX_INTEGRATION_SAMPLES or np.any(ids < 0)

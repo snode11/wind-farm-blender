@@ -1,4 +1,5 @@
 """Display continuity survives slot consumption while recordings keep arrival order."""
+import select
 import time
 import numpy as np
 from wfrl.radar_x100 import acquisition, channel, recording, schema
@@ -12,10 +13,13 @@ def frame(sequence, sensor='X100', session='boot'):
 def poll_until(client, predicate):
     deadline = time.monotonic() + 3
     while not predicate():
-        client.poll()
+        client.poll(time_budget_s=1.)
         assert client.error is None
-        assert time.monotonic() < deadline
-        time.sleep(.005)
+        if predicate():
+            return
+        remaining = deadline - time.monotonic()
+        assert remaining > 0 and not client.closed
+        assert select.select([client.socket], [], [], remaining)[0]
 
 
 def test_consumed_watermark_survives_reconnect_and_preserves_recording(tmp_path):
@@ -29,9 +33,7 @@ def test_consumed_watermark_survives_reconnect_and_preserves_recording(tmp_path)
         first.close()
         second = channel.LocalClient(publisher.port)
         fanout.submit(frame(0), .1)
-        for _ in range(20):
-            second.poll()
-            time.sleep(.005)
+        assert fanout.take_latest() is None
         assert second.state.streams.get('NEAR') is None
         fanout.submit(frame(2), .2)
         poll_until(second, lambda: second.state.streams.get('NEAR') is not None)

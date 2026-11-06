@@ -187,3 +187,138 @@ def test_nonboolean_duplicate_cannot_supply_terminal_evidence(terminal):
     assert assembler.push(acquisition.Fragment(source, 0, 1, source.points, terminal=terminal), now=.01) is None
     assert assembler.counters['corrupt'] == 1
     assert assembler.push(acquisition.Fragment(source, 0, 1, source.points, terminal=True), now=.02) is not None
+
+
+def test_assembly_timeout_boundary_retires_frame():
+    source = observation()
+    assembler = acquisition.Assembler(timeout_s=.25)
+    assert assembler.push(acquisition.Fragment(source, 0, 2, source.points), now=0.) is None
+    assert assembler.push(acquisition.Fragment(source, 1, 2, source.points, True), now=.25) is None
+    assert not assembler.pending
+    assert assembler.counters == dict(duplicate=1, timeout=1, corrupt=0, overflow=0)
+
+
+@pytest.mark.parametrize('capacity', [True, 1.5])
+def test_queue_and_assembler_capacities_require_integers(capacity):
+    with pytest.raises(ValueError, match='budget'):
+        acquisition.Assembler(max_pending=capacity)
+    with pytest.raises(ValueError, match='budget'):
+        acquisition.Fanout(record_capacity=capacity)
+
+
+@pytest.mark.parametrize('now', [float('nan'), float('inf')])
+def test_assembly_rejects_nonfinite_time_without_retaining_fragments(now):
+    source = observation()
+    assembler = acquisition.Assembler()
+    with pytest.raises(ValueError, match='time'):
+        assembler.push(acquisition.Fragment(source, 0, 2, source.points), now=now)
+    assert not assembler.pending and not assembler.sessions
+
+
+def test_worker_append_exception_fails_recording_and_preserves_display(tmp_path):
+    sink = recording.Recorder(tmp_path / 'worker-error')
+    sink.append(observation(), 0.)
+    entered, release = threading.Event(), threading.Event()
+
+    def broken_append(frame, stamp):
+        entered.set()
+        assert release.wait(2)
+        raise OSError('injected append failure')
+
+    sink.append = broken_append
+    fanout = acquisition.Fanout(sink)
+    try:
+        fanout.submit(observation(1), .1)
+        assert entered.wait(2)
+        fanout.submit(observation(2), .2)
+        release.set()
+        fanout.worker.join(2)
+        assert not fanout.worker.is_alive()
+        assert sink.state == 'FAILED' and sink.rows == 1
+        assert fanout.failure == sink.error == 'injected append failure'
+        assert fanout.record_failures == 1 and fanout.queue.empty()
+        assert fanout.queue.unfinished_tasks == 0
+        assert (sink.path / 'INCOMPLETE').exists()
+        with pytest.raises(ValueError, match='incomplete'):
+            recording.Replay(sink.path)
+        fanout.submit(observation(3), .3)
+        assert fanout.take_latest().sequence == 3
+    finally:
+        release.set()
+        fanout.close()
+
+
+def test_worker_close_exception_preserves_failure_reason(tmp_path):
+    sink = recording.Recorder(tmp_path / 'close-error')
+    sink.append(observation(), 0.)
+
+    def broken_close():
+        raise OSError('injected close failure')
+
+    sink.close = broken_close
+    fanout = acquisition.Fanout(sink)
+    fanout.close()
+    fanout.close()
+    assert not fanout.worker.is_alive()
+    assert sink.state == 'FAILED'
+    assert sink.error == fanout.failure == 'injected close failure'
+    assert (sink.path / 'INCOMPLETE').exists()
+
+
+def test_request_close_drains_accepted_queue_and_rejects_new_submissions(tmp_path):
+    sink = recording.Recorder(tmp_path / 'drain')
+    entered, release = threading.Event(), threading.Event()
+    append = sink.append
+
+    def held_append(frame, stamp):
+        entered.set()
+        assert release.wait(2)
+        append(frame, stamp)
+
+    sink.append = held_append
+    fanout = acquisition.Fanout(sink)
+    try:
+        fanout.submit(observation(0), 0.)
+        assert entered.wait(2)
+        fanout.submit(observation(1), .1)
+        held = fanout.begin_delivery()
+        fanout.request_close()
+        with pytest.raises(RuntimeError, match='closing'):
+            fanout.submit(observation(2), .2)
+        assert not fanout.submit_display(held[0], restoring=True, restore_token=held[2])
+        assert fanout.begin_delivery() is None and fanout.take_latest() is None
+        assert not fanout.deliveries and not fanout.latest_received
+    finally:
+        release.set()
+        fanout.close()
+    replay = recording.Replay(sink.path)
+    assert [replay.frame(i).sequence for i in range(2)] == [0, 1]
+    assert fanout.queue.unfinished_tasks == 0
+
+
+def test_display_submission_is_independent_of_producer_mutation():
+    fanout = acquisition.Fanout()
+    try:
+        source = observation()
+        assert fanout.submit_display(source)
+        source.provenance['calibration']['id'] = 'changed'
+        source.points.flags.writeable = True
+        source.points['x'] = 99
+        stored = fanout.take_latest()
+        assert stored.provenance['calibration']['id'] == 'original'
+        assert stored.points['x'][0] == 10
+    finally:
+        fanout.close()
+
+
+@pytest.mark.parametrize('stamp', [float('nan'), float('inf'), True])
+def test_invalid_display_time_does_not_consume_sequence(stamp):
+    fanout = acquisition.Fanout()
+    try:
+        source = observation()
+        with pytest.raises(ValueError, match='receipt time'):
+            fanout.submit_display(source, received_monotonic=stamp)
+        assert not fanout.watermarks and not fanout.latest
+        assert fanout.submit_display(source, received_monotonic=1.)
+    finally:
+        fanout.close()

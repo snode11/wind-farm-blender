@@ -112,7 +112,8 @@ class ClockMapping:
         lo, hi = self.valid_interval_s
         if (not all(math.isfinite(x) for x in (self.scale, self.offset_s, lo, hi, self.error_s))
                 or self.scale <= 0 or lo > hi or self.error_s < 0
-                or not all((self.identity, self.source_domain, self.target_domain, self.basis))):
+                or any(not isinstance(value, str) or not value
+                       for value in (self.identity, self.source_domain, self.target_domain, self.basis))):
             raise ValueError('Invalid clock mapping')
 
     def map(self, source_time_s, *, target_domain, tolerance_s):
@@ -120,7 +121,10 @@ class ClockMapping:
                 or target_domain != self.target_domain or tolerance_s < self.error_s
                 or not self.valid_interval_s[0] <= source_time_s <= self.valid_interval_s[1]):
             raise ValueError('Clock mapping is outside its domain, interval or error tolerance')
-        return self.scale * source_time_s + self.offset_s
+        mapped = self.scale * source_time_s + self.offset_s
+        if not math.isfinite(mapped):
+            raise ValueError('Nonfinite mapped time')
+        return mapped
 
 
 @dataclass(frozen=True)
@@ -133,11 +137,13 @@ class FrameTime:
     mapping: dict | None = None
 
     def __post_init__(self):
-        if not self.clock_domain or self.timestamp_reference not in {'START', 'CENTER', 'END', 'INSTANT', 'UNKNOWN'}:
+        if (not isinstance(self.clock_domain, str) or not self.clock_domain
+                or self.timestamp_reference not in {'START', 'CENTER', 'END', 'INSTANT', 'UNKNOWN'}):
             raise ValueError('Invalid time reference')
         if self.quality not in {'UNKNOWN', 'SOURCE', 'FPS_DERIVED', 'SIMULATION'}:
             raise ValueError('Invalid time quality')
-        if self.source_time_s is not None and not math.isfinite(self.source_time_s):
+        if self.source_time_s is not None and (
+                isinstance(self.source_time_s, bool) or not math.isfinite(self.source_time_s)):
             raise ValueError('Nonfinite source time')
         if self.acquisition_interval_s is not None:
             object.__setattr__(self, 'acquisition_interval_s', tuple(self.acquisition_interval_s))
@@ -175,6 +181,7 @@ class RadarFrame:
         if (self.schema != SCHEMA or any(not isinstance(value, str) or not 1 <= len(value) <= 256
                 for value in (self.sensor_id, self.session_id))
                 or type(self.sequence) is not int or self.sequence < 0
+                or any(not isinstance(value, str) for value in (self.source_kind, self.stream, self.completeness))
                 or self.source_kind not in SOURCES or self.stream not in STREAMS
                 or self.completeness not in {'COMPLETE', 'INCOMPLETE', 'CORRUPT'}):
             raise ValueError('Invalid frame identity or completeness')
@@ -204,9 +211,12 @@ class RadarFrame:
             object.__setattr__(self, 'model_diagnostics', ModelDiagnostics(diagnostics.model_id, diagnostics.values))
         for name in ('spatial', 'provenance'):
             value = copy.deepcopy(getattr(self, name))
+            if not isinstance(value, dict):
+                raise ValueError('Invalid radar ' + name + ' metadata')
             json_bytes(value)
             object.__setattr__(self, name, value)
-        if self.spatial.get('units') != 'm' or not self.spatial.get('frame'):
+        if (self.spatial.get('units') != 'm' or not isinstance(self.spatial.get('frame'), str)
+                or not self.spatial['frame']):
             raise ValueError('Radar coordinates must declare frame and meter units')
         transform = self.spatial.get('world_from_sensor')
         if transform is not None:
@@ -253,8 +263,13 @@ class RadarFrame:
 
 
 def frame_from_metadata(metadata, points, velocity=None):
+    if not isinstance(metadata, dict) or metadata.get('schema') != SCHEMA:
+        raise ValueError('Invalid or unsupported radar frame schema')
     fields = dict(metadata)
-    fields['time'] = FrameTime(**fields['time'])
-    if fields.get('model_diagnostics') is not None:
-        fields['model_diagnostics'] = ModelDiagnostics.from_metadata(fields['model_diagnostics'])
-    return RadarFrame(**fields, points=points, radial_velocity_m_s=velocity)
+    try:
+        fields['time'] = FrameTime(**fields['time'])
+        if fields.get('model_diagnostics') is not None:
+            fields['model_diagnostics'] = ModelDiagnostics.from_metadata(fields['model_diagnostics'])
+        return RadarFrame(**fields, points=points, radial_velocity_m_s=velocity)
+    except (KeyError, TypeError, OverflowError) as exc:
+        raise ValueError('Invalid radar frame metadata') from exc

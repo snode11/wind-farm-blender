@@ -15,6 +15,19 @@ MAX_PAYLOAD = MAX_POINTS * (POINT_DTYPE.itemsize + VELOCITY_BYTES)
 MAX_PACKET = HEADER.size + MAX_METADATA + MAX_PAYLOAD
 
 
+def _metadata_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError('Duplicate radar metadata field: ' + key)
+        result[key] = value
+    return result
+
+
+def _nonfinite_constant(value):
+    raise ValueError('Nonfinite radar metadata constant: ' + value)
+
+
 def packet(metadata, payload=b''):
     raw = json_bytes(metadata)
     if len(raw) > MAX_METADATA or len(payload) > MAX_PAYLOAD:
@@ -62,23 +75,31 @@ class PacketReader:
         total = HEADER.size + meta_size + data_size
         if len(self.buffer) < total:
             return None
-        metadata = json.loads(bytes(self.buffer[HEADER.size:HEADER.size + meta_size]))
+        try:
+            metadata = json.loads(bytes(self.buffer[HEADER.size:HEADER.size + meta_size]),
+                                  object_pairs_hook=_metadata_object, parse_constant=_nonfinite_constant)
+        except (UnicodeError, RecursionError) as exc:
+            raise ValueError('Invalid radar metadata encoding') from exc
         payload = bytes(self.buffer[HEADER.size + meta_size:total])
         del self.buffer[:total]
-        if metadata['type'] == 'HELLO':
-            if (payload or metadata['schema'] != SCHEMA or metadata['source_kind'] not in SOURCES
-                    or not metadata['session_id'] or not metadata['sensor_id']):
+        if not isinstance(metadata, dict):
+            raise ValueError('Radar metadata must be an object')
+        if metadata.get('type') == 'HELLO':
+            if (payload or metadata.get('schema') != SCHEMA
+                    or not isinstance(metadata.get('source_kind'), str) or metadata['source_kind'] not in SOURCES
+                    or any(not isinstance(metadata.get(key), str) or not 1 <= len(metadata[key]) <= 256
+                           for key in ('session_id', 'sensor_id'))):
                 raise ValueError('Invalid radar handshake')
             return metadata
-        if metadata['type'] != 'FRAME':
+        if metadata.get('type') != 'FRAME':
             raise ValueError('Unknown radar message')
-        count, velocity = metadata['count'], metadata['velocity']
+        count, velocity = metadata.get('count'), metadata.get('velocity')
         if (type(count) is not int or not 0 <= count <= MAX_POINTS or type(velocity) is not bool
                 or len(payload) != count * (POINT_DTYPE.itemsize + (VELOCITY_BYTES if velocity else 0))):
             raise ValueError('Radar array length mismatch')
         points = np.frombuffer(payload[:count * POINT_DTYPE.itemsize], dtype=POINT_DTYPE)
         speeds = np.frombuffer(payload[count * POINT_DTYPE.itemsize:], dtype='<f4') if velocity else None
-        frame = frame_from_metadata(metadata['frame'], points, speeds)
+        frame = frame_from_metadata(metadata.get('frame'), points, speeds)
         if 'received_monotonic' in metadata:
             stamp = metadata['received_monotonic']
             if isinstance(stamp, bool) or not isinstance(stamp, (int, float)) or not math.isfinite(stamp):
@@ -144,11 +165,15 @@ class LiveState:
 class LocalClient:
     """Blender's main thread performs bounded nonblocking polls; no bpy worker."""
     def __init__(self, port, *, stale_after_s=.5):
-        self.socket = socket.socket()
-        self.socket.setblocking(False)
-        self.socket.connect_ex(('127.0.0.1', port))
         self.reader, self.state = PacketReader(), LiveState(stale_after_s)
         self.error, self.started, self.closed = None, time.monotonic(), False
+        self.socket = socket.socket()
+        try:
+            self.socket.setblocking(False)
+            self.socket.connect_ex(('127.0.0.1', port))
+        except BaseException:
+            self.socket.close()
+            raise
 
     def poll(self, *, byte_budget=256 * 1024, frame_budget=8, time_budget_s=.004):
         if self.closed:
@@ -178,6 +203,8 @@ class LocalClient:
                         break
                     raise
                 if not raw:
+                    if self.reader.buffer:
+                        raise ValueError('Truncated radar packet at disconnect')
                     self.close()
                     break
                 received += len(raw)

@@ -1,4 +1,5 @@
 """Area measure, mesh subdivision, fixed material motion and nested budgets."""
+from dataclasses import replace
 import numpy as np
 import pytest
 from wfrl.radar_x100 import sampling, simulation
@@ -72,3 +73,10 @@ def test_area_weights_conserve_reference_measure_independently_of_mesh_and_budge
     np.testing.assert_allclose(small.area_weights_m2, large.area_weights_m2[:4096] * 2)
     with pytest.raises(ValueError, match='budget'):
         sampling.make_plan(surface(), sampling.MAX_INTEGRATION_SAMPLES + 1)
+
+
+@pytest.mark.parametrize('indices', [[.5], [2**32], [-2**32], [True]])
+def test_material_triangle_indices_cannot_be_silently_coerced(indices):
+    plan = sampling.make_plan(surface(), 1)
+    with pytest.raises(ValueError, match='triangle indices'):
+        replace(plan, triangle_ids=indices)

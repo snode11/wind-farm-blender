@@ -60,6 +60,7 @@ class Recorder:
         if self.state != 'RECORDING':
             raise RuntimeError('Recorder is not recording')
         try:
+            frame = frame.snapshot()
             if (not math.isfinite(replay_time_s) or replay_time_s < 0
                     or (self.last_time is not None and replay_time_s < self.last_time)):
                 raise ValueError('Recording times must be finite and nondecreasing')

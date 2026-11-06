@@ -14,7 +14,9 @@ def decode_ply(raw):
     stream = io.BytesIO(raw)
     lines = []
     while stream.tell() < MAX_HEADER:
-        line = stream.readline()
+        line = stream.readline(MAX_HEADER - stream.tell() + 1)
+        if stream.tell() > MAX_HEADER:
+            raise ValueError('PLY header exceeds budget')
         if not line or not line.endswith(b'\n'):
             raise ValueError('Truncated PLY header')
         try:

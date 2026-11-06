@@ -71,3 +71,19 @@ def test_failed_final_manifest_replace_records_failure_without_reusing_staging(t
     assert (sink.state, saved['state'], saved['error'], saved['frames']) == ('FAILED', 'FAILED', str(failure), 1)
     with pytest.raises(ValueError, match='incomplete'):
         recording.Replay(sink.path)
+
+
+def test_mutated_frame_cannot_create_unreadable_complete_recording(tmp_path):
+    sink = recording.Recorder(tmp_path / 'mutated')
+    source = observation(10)
+    source.spatial['world_from_sensor'] = [[0]]
+    with pytest.raises(ValueError, match='world transform'):
+        sink.append(source, 0.)
+    sink.close()
+    sink.close()
+    assert sink.state == 'FAILED' and sink.rows == 0
+    assert sink.index.closed
+    assert not list((sink.path / 'frames').iterdir())
+    assert (sink.path / 'INCOMPLETE').exists()
+    with pytest.raises(ValueError, match='incomplete'):
+        recording.Replay(sink.path)

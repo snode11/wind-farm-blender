@@ -1,5 +1,6 @@
 """External acquisition boundaries for decoded frames, with separate recording and display budgets."""
 from dataclasses import dataclass, replace
+import math
 import queue
 import threading
 import time
@@ -27,8 +28,8 @@ class SessionStart:
 class Assembler:
     """Adapter-supplied fragment counts and explicit terminal evidence; no vendor wire assumptions."""
     def __init__(self, *, timeout_s=.2, max_pending=16):
-        import math
-        if not math.isfinite(timeout_s) or timeout_s <= 0 or not 1 <= max_pending <= 1024:
+        if (not math.isfinite(timeout_s) or timeout_s <= 0
+                or type(max_pending) is not int or not 1 <= max_pending <= 1024):
             raise ValueError('Invalid assembler budget')
         self.timeout_s, self.max_pending = timeout_s, max_pending
         self.pending, self.completed = {}, {}
@@ -43,8 +44,10 @@ class Assembler:
         self.completed = {key: value for key, value in self.completed.items() if key[0] != sensor_id}
 
     def expire(self, now):
+        if not math.isfinite(now):
+            raise ValueError('Invalid assembler time')
         for key, value in list(self.pending.items()):
-            if now - value['started'] > self.timeout_s:
+            if now - value['started'] >= self.timeout_s:
                 del self.pending[key]
                 self.completed[key[:3]] = max(key[3], self.completed.get(key[:3], -1))
                 self.counters['timeout'] += 1
@@ -117,7 +120,7 @@ class Assembler:
 class Fanout:
     """Display replacement never discards an accepted recording job."""
     def __init__(self, recorder=None, *, record_capacity=32, display_capacity=64):
-        if not 1 <= record_capacity <= 1024:
+        if type(record_capacity) is not int or not 1 <= record_capacity <= 1024:
             raise ValueError('Invalid recording queue budget')
         if type(display_capacity) is not int or not 1 <= display_capacity <= 1024:
             raise ValueError('Invalid display identity budget')
@@ -174,6 +177,8 @@ class Fanout:
         return True
 
     def submit_display(self, frame, *, received_monotonic=None, restoring=False, restore_token=None):
+        if not restoring:
+            frame = frame.snapshot()
         with self.lock:
             return self._submit_display(frame, received_monotonic=received_monotonic,
                                         restoring=restoring, restore_token=restore_token)
@@ -197,6 +202,10 @@ class Fanout:
                 return False
             self.latest[key], self.latest_received[key] = frame, delivery[1]
             return True
+        if received_monotonic is not None and (
+                isinstance(received_monotonic, bool) or not isinstance(received_monotonic, (int, float))
+                or not math.isfinite(received_monotonic)):
+            raise ValueError('Invalid local receipt time')
         if frame.sensor_id not in self.active_sources:
             self._begin_session(source)
         if (self.active_sources.get(frame.sensor_id) != source
@@ -248,31 +257,50 @@ class Fanout:
                 self.deliveries.pop(key)
 
     def _record(self):
-        while not self.stopping.is_set() or not self.queue.empty():
-            if self.failure is not None and self.recorder is not None:
-                self.recorder.fail(self.failure)
-            try:
-                frame, replay_time = self.queue.get(timeout=.05)
-            except queue.Empty:
-                continue
-            if self.recorder is not None and self.recorder.state == 'RECORDING':
+        try:
+            while not self.stopping.is_set() or not self.queue.empty():
+                if self.failure is not None:
+                    break
                 try:
-                    self.recorder.append(frame, replay_time)
-                except Exception:
-                    self.record_failures += 1
-        if self.recorder is not None:
-            if self.failure is not None:
-                self.recorder.fail(self.failure)
-            else:
+                    frame, replay_time = self.queue.get(timeout=.05)
+                except queue.Empty:
+                    continue
                 try:
+                    if self.recorder is not None and self.recorder.state == 'RECORDING':
+                        self.recorder.append(frame, replay_time)
+                finally:
+                    self.queue.task_done()
+            if self.recorder is not None:
+                if self.failure is not None:
+                    self.recorder.fail(self.failure)
+                else:
                     self.recorder.close()
-                except Exception:
-                    self.record_failures += 1
+        except Exception as exc:
+            with self.lock:
+                self.record_failures += 1
+                self.failure = self.failure or str(exc) or repr(exc)
+                self.stopping.set()
+            if self.recorder is not None:
+                try:
+                    self.recorder.fail(self.failure)
+                except Exception as cleanup_error:
+                    self.failure += '; recording failure cleanup: ' + str(cleanup_error)
+        finally:
+            self.stopping.set()
+            while True:
+                try:
+                    self.queue.get_nowait()
+                except queue.Empty:
+                    break
+                self.queue.task_done()
 
     def request_close(self):
         with self.lock:
             self.accepting = False
             self.stopping.set()
+            self.latest.clear()
+            self.latest_received.clear()
+            self.deliveries.clear()
 
     def close(self):
         self.request_close()
@@ -287,14 +315,19 @@ class LocalPublisher:
         import socket
         self.fanout, self.errors, self.sent = fanout, 0, 0
         self.stopping = threading.Event()
+        self.client, self.client_lock = None, threading.Lock()
         self.server = socket.socket()
-        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.server.bind(('127.0.0.1', port))
-        self.port = self.server.getsockname()[1]
-        self.server.listen(1)
-        self.server.settimeout(.1)
-        self.worker = threading.Thread(target=self._serve, name='x100-display', daemon=True)
-        self.worker.start()
+        try:
+            self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.server.bind(('127.0.0.1', port))
+            self.port = self.server.getsockname()[1]
+            self.server.listen(1)
+            self.server.settimeout(.1)
+            self.worker = threading.Thread(target=self._serve, name='x100-display', daemon=True)
+            self.worker.start()
+        except BaseException:
+            self.server.close()
+            raise
 
     def _serve(self):
         from .channel import hello, encode_frame
@@ -306,12 +339,19 @@ class LocalPublisher:
             except socket.timeout:
                 continue
             except OSError:
+                if not self.stopping.is_set():
+                    self.errors += 1
                 break
+            with self.client_lock:
+                if self.stopping.is_set():
+                    client.close()
+                    break
+                self.client = client
             with client:
-                client.settimeout(.2)
                 peer = None
                 observation = None
                 try:
+                    client.settimeout(.2)
                     while not self.stopping.is_set():
                         ready, _, _ = select.select([client, self.server], [], [], .005)
                         # A new explicit connection takes over the single display slot.
@@ -332,13 +372,25 @@ class LocalPublisher:
                         self.fanout.finish_delivery(observation)
                         observation = None
                 except (OSError, ValueError):
-                    self.errors += 1
+                    if not self.stopping.is_set():
+                        self.errors += 1
                 finally:
+                    with self.client_lock:
+                        self.client = None
                     if observation is not None:
                         self.fanout.submit_display(observation[0], received_monotonic=observation[1],
                                                    restoring=True, restore_token=observation[2])
 
     def close(self):
+        import socket
         self.stopping.set()
+        with self.client_lock:
+            if self.client is not None:
+                try:
+                    self.client.shutdown(socket.SHUT_RDWR)
+                except OSError:
+                    pass
         self.server.close()
         self.worker.join(timeout=2)
+        if self.worker.is_alive():
+            raise TimeoutError('Local publisher worker has not stopped')

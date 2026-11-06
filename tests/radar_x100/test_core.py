@@ -1,6 +1,7 @@
 """Binary, time, geometry and acquisition contracts independent of Blender."""
 from dataclasses import asdict, replace
 import json
+import select
 import struct
 import threading
 import time
@@ -275,16 +276,23 @@ def test_actual_local_socket_full_frame_and_disconnect():
         fanout.submit(frame(4, count=4096), 0)
         deadline = time.monotonic() + 3
         while client.state.status('NEAR') == 'WAITING' or client.state.peer is None:
-            client.poll()
-            assert time.monotonic() < deadline
-            time.sleep(.005)
+            client.poll(time_budget_s=1.)
+            if client.state.peer is not None and client.state.status('NEAR') != 'WAITING':
+                break
+            remaining = deadline - time.monotonic()
+            assert remaining > 0 and not client.closed
+            assert select.select([client.socket], [], [], remaining)[0]
         assert client.state.streams['NEAR'].frame.sequence == 4
         assert len(client.state.streams['NEAR'].frame.points) == 4096
         publisher.close()
+        deadline = time.monotonic() + 3
         while client.state.connected:
-            client.poll()
-            assert time.monotonic() < deadline
-            time.sleep(.005)
+            client.poll(time_budget_s=1.)
+            if not client.state.connected:
+                break
+            remaining = deadline - time.monotonic()
+            assert remaining > 0
+            assert select.select([client.socket], [], [], remaining)[0]
         assert client.state.status('NEAR') == 'DISCONNECTED'
     finally:
         client.close()
@@ -295,7 +303,6 @@ def test_actual_local_socket_full_frame_and_disconnect():
 def test_input_failure_without_recording_stops_worker_cleanly():
     fanout = acquisition.Fanout()
     fanout.failure = 'Adapter input failed'
-    time.sleep(.06)
     fanout.close()
     assert not fanout.worker.is_alive() and fanout.record_failures == 0
 
