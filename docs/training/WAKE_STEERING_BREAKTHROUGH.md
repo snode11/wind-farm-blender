@@ -6,6 +6,8 @@
 
 原记录报告 seed 0 的确定性策略：T1 末 50 步平均偏航约 33.86°，T2/T3 约 0.03° / 0.06°；末 50 步全场功率 3.281 MW，对照零偏航基线 3.116 MW，按这些四舍五入数字计算约 +5.3%。
 
+按提交 `d6979f49` 中的 rollout 计算，末 50 步 T1 偏航均值约 33.86°、全场功率均值约 3.281 MW，与上述记录一致；T2、T3 偏航均值约为 1.86° 和 −1.63°，与上述记录不一致，差异原因待核实。
+
 **数字需复核：**这两项功率相减是 +0.165 MW，即 +165 kW；原记录写的“+178 kW”与之不一致。没有原始匹配对照数据时，不将 +178 kW 或更精确的增益作为已核验值。
 
 | 项目 | 工作区证据状态 |
@@ -13,10 +15,17 @@
 | `scenes/turb3_stagger.yaml` | 存在；三机错列，4D 纵向间距、逐机横向偏移 31.5 m，8 m/s、270°，controls 为 yaw |
 | `scripts/train/train_fastfarm.py`、`wfrl/rewards.py` | 存在；集中式 MAPPO 与 reference 奖励实现可静态检查 |
 | 实验启动配置 | [v0.3.41 脚本快照](https://github.com/snode11/wind-farm-blender/tree/v0.3.41/scripts/demo)保留原命令；它们引用的权重与结果未分发 |
-| `results/runs/stagE400ref_rollout.npz` | 当前缺失，不能重新计算报告的末 50 步统计 |
-| `results/runs/fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_reference_E400_none_stagE400ref_hist.json` | 当前缺失 |
+| `results/runs/stagE400ref_rollout.npz` | 本地缺失；同一文件见提交 `d6979f49` 的同路径 |
+| `results/runs/fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_reference_E400_none_stagE400ref_hist.json` | 本地缺失；同一文件见提交 `d6979f49` 的同路径 |
 | `results/checkpoints/..._stagE400ref.pt`、`..._stagE400ref_s1.pt` | 当前没有找到；历史脚本引用不等于权重仍保留 |
 | seed 1 / seed 2、跨风速、跨风向、不同湍流 | 当前未确认完成；不能沿用“正在验证”描述现行运行状态 |
+
+从仓库根目录取回文件，目标目录 `results/runs/` 需已存在。
+
+```sh
+git show d6979f49:results/runs/stagE400ref_rollout.npz > results/runs/stagE400ref_rollout.npz
+git show d6979f49:results/runs/fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_reference_E400_none_stagE400ref_hist.json > results/runs/fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_reference_E400_none_stagE400ref_hist.json
+```
 
 当前保留的 `results/checkpoints/mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt` 是另一配置；内置 MAPPO 柔性包也记录该 level/E128 策略。它不能补作 stagE400ref 的效果证据。
 
@@ -32,7 +41,7 @@ reward_ref: 1.7017
 duty_penalty: 0.0
 ```
 
-原记录还报告：训练末轮均值功率约 3.064 MW，确定性 rollout 末 50 步约 3.281 MW；探索标准差约 0.57。当前原始历史与轨迹缺失，上述数字保留为历史报告值，未重新验证。
+原记录还报告：训练末轮均值功率约 3.064 MW，确定性 rollout 末 50 步约 3.281 MW；探索标准差约 0.57。上述数字保留为历史报告值。提交 `d6979f49` 中训练历史的末轮 `power_mw` 为 3.064 MW，与训练末轮均值功率一致；该历史未记录探索标准差，0.57 尚未复核。
 
 对照必须匹配初始化、来流、预热、控制步与统计窗口。脚本当前的 `--policy zero` 使用同一采样/统计路径；不能仅拿另一脚本、另一窗口的 3.116 MW 与不同运行直接配对。
 
@@ -52,7 +61,7 @@ shaped = (raw_reward - reference) / reference
 
 ## 4. 当前复现与演示入口
 
-训练与评估使用下列模块，并显式指定匹配的场景、权重和输出路径。`stagE400ref` 的权重与结果当前缺失，报告中的耗时与收益不能作为新运行的保证；checkpoint 名称与实验身份以训练入口的实际输出为准。
+训练与评估使用下列模块，并显式指定匹配的场景、权重和输出路径。`stagE400ref` 的匹配权重当前未找到。报告中的耗时与收益不能作为新运行的保证。checkpoint 名称与实验身份以训练入口的实际输出为准。
 
 - [动态训练入口](../../scripts/train/train_fastfarm.py)：训练与同路径零动作基线，支持回合、预热、奖励、种子和场景配置。
 - [确定性评估](../../scripts/experiments/rollout_ckpt.py)：从匹配 checkpoint 重新推进后端，输出数值轨迹。
@@ -61,7 +70,7 @@ shaped = (raw_reward - reference) / reference
 - [Studio 策略评估](../demos/Studio策略评估.md)：macOS 与 Windows 命令模板、模型兼容条件及可见窗口边界。
 - 当前 Blender [演示](../demos/演示指令单.md)：使用扩展内置保存结果离线观看；它与本实验效果分别判定。
 
-恢复完整复现需要找到或重新生成匹配的权重、基线、策略 rollout、训练历史及配置来源，随后再重新评分。复现需要匹配完整输入与独立评价。
+完整复现需要匹配的权重、基线、策略 rollout、训练历史及配置来源，并进行独立评价。
 
 ## 5. 尚未完成的研究问题
 

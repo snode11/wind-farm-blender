@@ -267,7 +267,7 @@ Bridge 后端 macOS/MPI 启动环境清除继承的 MPI 作业身份，保留显
 - 两侧共享场景和时间轴；可调整分隔宽度并恢复单屏。
 - 切换视角不更改雷达标定、已保存运动或控制策略。
 
-**验证状态：** 2026-09-28 的源码版和本机已安装扩展均已有窗口回归 PASS，覆盖 Down + 侧前方、机舱 + 侧前方、重复点击复用分屏、播放中切换、恢复单屏及暂停状态保留。证据为 `outputs/t1-split-20260928/source-final/result.json`、`installed/result.json` 和 `live-result.json`。这些是该轮 Blender 5.2.1 LTS 窗口与状态检查，不代表跨平台或后续所有版本均已重新执行同一回归。
+**验证状态：** 2026-09-28 的源码版和本机已安装扩展均已有窗口回归 PASS，覆盖 Down + 侧前方、机舱 + 侧前方、重复点击复用分屏、播放中切换、恢复单屏及暂停状态保留。证据为 `outputs/t1-split-20260928/source-final/result.json`、`installed/result.json` 和 `live-result.json`，本地缺失、无副本。这些是该轮 Blender 5.2.1 LTS 窗口与状态检查，不代表跨平台或后续所有版本均已重新执行同一回归。
 
 #### 规范几何示例
 

@@ -9,7 +9,7 @@
 | 检查 | 结果与实际范围 |
 | --- | --- |
 | 宿主机 | 12 项通过：六形态、两侧参考定位、三机配置、事务失败回滚、撤销重做、严格参考身份、重叠判断、投影面积并集和绝对时间映射。 |
-| 源码后台 | attempt07（本地目录：`outputs/blender-validation/nrel-defects-20261005/attempt07`） 的保存与新进程重开均通过。检查六形态、九片叶片、预览取消/确认、UI 编辑操作、健康对照、启停、JSON 加载失败保持原状态、任意时刻/末帧/反向寻址、支持区域与辅助轮廓跟随、末尾两类叶尖索引、源数据摘要与雷达读取器不变；寻址期间 Boolean 调用为零。 |
+| 源码后台 | attempt07 的保存与新进程重开均通过。检查六形态、九片叶片、预览取消/确认、UI 编辑操作、健康对照、启停、JSON 加载失败保持原状态、任意时刻/末帧/反向寻址、支持区域与辅助轮廓跟随、末尾两类叶尖索引、源数据摘要与雷达读取器不变；寻址期间 Boolean 调用为零。证据本地缺失，见 `project-resources-v1` 的 `frontend-evidence-01.tar.gz`。成员路径为 `outputs/blender-validation/nrel-defects-20261005/attempt07/defects.json`、`outputs/blender-validation/nrel-defects-20261005/attempt07/reopen-checks.json` 和 `outputs/blender-validation/nrel-defects-20261005/attempt07/save-checks.json`。 |
 | 开发 ZIP | [package04 验证](../../../outputs/blender-validation/nrel-defects-20261005/package04/package-validation.json) 通过 ZIP 清单与隔离安装字节检查、扩展命名空间确认、默认三相机与原生投影回归。145 个文件。 |
 | 安装目录中的编辑器 | [save-checks.json](../../../outputs/blender-validation/nrel-defects-20261005/package04/regressions/nrel-defects/save-checks.json) 与 [reopen-checks.json](../../../outputs/blender-validation/nrel-defects-20261005/package04/regressions/nrel-defects/reopen-checks.json) 均通过，模块实际来自 `package04/profile/extensions/wfrl_blender/`。 |
 | A 失败恢复 | [独立几何检查](../../../outputs/blender-validation/nrel-defects-20261005/a-geometry-probe/geometry-checks.json) 通过：主动抛错后九片叶片的网格身份、全部坐标、材质槽与调用前完全相同，场景设置和时刻恢复，没有调用渲染器。 |
@@ -22,7 +22,7 @@
 
 双击打开NREL缺陷编辑器.command（本地文件：`scripts/blender/打开NREL缺陷编辑器.command`），然后进入 MAPPO 侧栏的「NREL 5MW · 叶片缺陷」。完整操作见NREL [缺陷编辑器](../NREL缺陷编辑器.md)。
 
-正式发布包：wfrl_blender-0.3.16.zip（本地文件：`outputs/blender-validation/nrel-defects-release-0.3.16-20261005/package/wfrl_blender-0.3.16.zip`），已发布至 [0.3.16 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.16)。SHA-256：`d7a95e3942e60ccc95d5c97052f478eeafab6df0f2a7f4daa7a2fd5a8fec1ba2`。145 个文件中，除 manifest 版本号外的 144 个文件与移植最终开发包一致，见[包内容核对](../../../outputs/blender-validation/nrel-defects-release-0.3.16-20261005/package-identity.json)；新包隔离安装的[保存与重开检查](../../../outputs/blender-validation/nrel-defects-release-0.3.16-20261005/release-editor-validation.json)均通过。该证据不表示当前日常安装仍使用 0.3.16。
+正式发布包（原路径 `outputs/blender-validation/nrel-defects-release-0.3.16-20261005/package/wfrl_blender-0.3.16.zip`）本地缺失，见 [0.3.16 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.16)（标签 `v0.3.16`）的 `wfrl_blender-0.3.16.zip`。SHA-256：`d7a95e3942e60ccc95d5c97052f478eeafab6df0f2a7f4daa7a2fd5a8fec1ba2`。145 个文件中，除 manifest 版本号外的 144 个文件与移植最终开发包一致，见[包内容核对](../../../outputs/blender-validation/nrel-defects-release-0.3.16-20261005/package-identity.json)；新包隔离安装的[保存与重开检查](../../../outputs/blender-validation/nrel-defects-release-0.3.16-20261005/release-editor-validation.json)均通过。该证据不表示当前日常安装仍使用 0.3.16。
 
 表内 `package04` 标识独立开发测试载荷，其 SHA-256 为 `035255e16af50ec66bd9f76091e9e8eb56eaab26b1fff00905dc6102ee6ca20b`，与公开 0.3.15 附件不同。JSON 和日志的原运行路径标识当时环境，不表示临时安装目录当前存在。
 
