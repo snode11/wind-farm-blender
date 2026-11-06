@@ -26,15 +26,18 @@ def _ridge_geometry(layer, distance, base_height, detail):
     """Sample a continuous ridge with an exact central crest and flat feet."""
     nx, ncross = (1000, 32) if detail == 'full' else (500, 16)
     vertices, faces = [], []
+    profile_samples = []
+    for i in range(nx + 1):
+        x = -26000 + i * 56000 / nx
+        profile = base_height + 55 * math.sin(x * .0013 + layer * 1.8)
+        profile += 25 * math.sin(x * .003 + layer)
+        profile += (12 / layer) * math.sin(x * .008 + layer * 2)
+        profile_samples.append((x, profile))
     for j in range(ncross + 1):
         cross = j / ncross
         y = distance + (cross - .5) * 1800
         envelope = math.sin(math.pi * cross) ** 2
-        for i in range(nx + 1):
-            x = -26000 + i * 56000 / nx
-            profile = base_height + 55 * math.sin(x * .0013 + layer * 1.8)
-            profile += 25 * math.sin(x * .003 + layer)
-            profile += (12 / layer) * math.sin(x * .008 + layer * 2)
+        for x, profile in profile_samples:
             vertices.append((x, y, -35 + envelope * profile))
     for j in range(ncross):
         for i in range(nx):
@@ -359,8 +362,7 @@ def _landscape_mesh(collection, name, verts, faces, material, *, smooth=True):
     collection.objects.link(obj)
     data.materials.append(material)
     obj['fidelity']='SYNTH'
-    for face in data.polygons:
-        face.use_smooth=smooth
+    data.polygons.foreach_set('use_smooth', [smooth] * len(data.polygons))
     return obj
 
 
@@ -567,21 +569,25 @@ def _build_ground_cover(collection, rng, surface, lush_centers, dry_centers):
             ry=radius*rng.uniform(.45,.82)
             segments=64
             rings=12
+            cos_rotation, sin_rotation = math.cos(rotation), math.sin(rotation)
             center_index=len(verts)
             layer_offset=.06+.001*patch_index
             verts.append((cx,cy,surface(cx,cy)+layer_offset))
             weights.append(1.0)
             phase=rng.random()*math.tau
+            edge_samples = []
+            for step in range(segments):
+                angle=math.tau*step/segments
+                edge=1+.13*math.sin(3*angle+phase)+.065*math.sin(7*angle-phase)
+                edge_samples.append((rx*edge, ry*edge, math.cos(angle), math.sin(angle)))
             for ring in range(1,rings+1):
                 fraction=ring/rings
                 ring_weight=1.0-_smoothstep(0.0,1.0,fraction)
-                for step in range(segments):
-                    angle=math.tau*step/segments
-                    edge=1+.13*math.sin(3*angle+phase)+.065*math.sin(7*angle-phase)
-                    px=rx*edge*fraction*math.cos(angle)
-                    py=ry*edge*fraction*math.sin(angle)
-                    x=cx+px*math.cos(rotation)-py*math.sin(rotation)
-                    y=cy+px*math.sin(rotation)+py*math.cos(rotation)
+                for ex, ey, cos_angle, sin_angle in edge_samples:
+                    px=ex*fraction*cos_angle
+                    py=ey*fraction*sin_angle
+                    x=cx+px*cos_rotation-py*sin_rotation
+                    y=cy+px*sin_rotation+py*cos_rotation
                     verts.append((x,y,surface(x,y)+layer_offset))
                     weights.append(ring_weight)
             for step in range(segments):
@@ -597,11 +603,9 @@ def _build_ground_cover(collection, rng, surface, lush_centers, dry_centers):
         obj=_landscape_mesh(collection, name,verts,faces,materials[0],smooth=True)
         for mat in materials[1:]:
             obj.data.materials.append(mat)
-        for poly,index in zip(obj.data.polygons,material_indices):
-            poly.material_index=index
+        obj.data.polygons.foreach_set('material_index', material_indices)
         colors=obj.data.color_attributes.new(name='WFRL.PatchWeight',type='FLOAT_COLOR',domain='POINT')
-        for item,value in zip(colors.data,weights):
-            item.color=(value,value,value,1)
+        colors.data.foreach_set('color', [component for value in weights for component in (value,value,value,1)])
         obj.visible_shadow=False
         obj['distribution_rule']='irregular clusters; road clearance; elevation-weighted'
         obj['cluster_count']=len(specs)
@@ -727,16 +731,17 @@ def _build_grass_tufts(collection, rng, surface, lush_centers, dry_centers, gras
             h=height_m*rng.uniform(.55,1.0)
             lean=h*rng.uniform(.25,.6)
             w=width*rng.uniform(.28,.48)
-            ox,oy=math.cos(a)*width*.5,math.sin(a)*width*.5
+            cos_angle, sin_angle = math.cos(a), math.sin(a)
+            ox,oy=cos_angle*width*.5,sin_angle*width*.5
             k=len(grass_verts)
             for t in ((0., .5) if near else (0.,)):
                 bend=lean*t*t
                 half=w*(1-t)*.5
-                cx=x+ox+math.cos(a)*bend
-                cy=y+oy+math.sin(a)*bend
-                grass_verts.extend(((cx-math.sin(a)*half,cy+math.cos(a)*half,z+h*t),
-                                    (cx+math.sin(a)*half,cy-math.cos(a)*half,z+h*t)))
-            grass_verts.append((x+ox+math.cos(a)*lean,y+oy+math.sin(a)*lean,z+h))
+                cx=x+ox+cos_angle*bend
+                cy=y+oy+sin_angle*bend
+                grass_verts.extend(((cx-sin_angle*half,cy+cos_angle*half,z+h*t),
+                                    (cx+sin_angle*half,cy-cos_angle*half,z+h*t)))
+            grass_verts.append((x+ox+cos_angle*lean,y+oy+sin_angle*lean,z+h))
             if near:
                 grass_faces.extend(((k,k+1,k+3,k+2),(k+2,k+3,k+4)))
                 grass_material_indices.extend((material_index,material_index))
@@ -766,8 +771,7 @@ def _build_grass_tufts(collection, rng, surface, lush_centers, dry_centers, gras
     grass=_landscape_mesh(collection, 'WFRL.Landscape.GrassTufts',grass_verts,grass_faces,dark_grass,smooth=False)
     for mat in (lush_grass,meadow_grass,dry_grass):
         grass.data.materials.append(mat)
-    for poly,index in zip(grass.data.polygons,grass_material_indices):
-        poly.material_index=index
+    grass.data.polygons.foreach_set('material_index', grass_material_indices)
     grass['distribution_rule']='Gaussian clusters; sparse within 58m of road; denser below 11m elevation'
     grass['cluster_count']=len(lush_centers)+len(dry_centers)
     grass['tuft_count']=tuft_count

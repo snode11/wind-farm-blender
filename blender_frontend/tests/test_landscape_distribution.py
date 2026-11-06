@@ -1,6 +1,7 @@
-"""Pure distribution rules for the Part 5 procedural grassland."""
+"""Distribution, geometry and resource rules for procedural grassland."""
 
 import hashlib
+import json
 import random
 import struct
 import sys
@@ -51,6 +52,77 @@ def test_vegetation_placement_and_following_rng_draws():
         assert digest.hexdigest() == expected
     tail = struct.pack('<32d', *(rng.random() for _ in range(32)))
     assert hashlib.sha256(tail).hexdigest() == 'f7beb6b3b41386295efd35110725c7fa718f879289b147fc6daeed1a377e6c49'
+
+
+class _MeshColumn(list):
+    def foreach_set(self, field, values):
+        width = 4 if field == 'color' else 1
+        assert len(values) == len(self) * width
+        for index, item in enumerate(self):
+            value = tuple(values[index*width:(index+1)*width]) if width > 1 else values[index]
+            setattr(item, field, value)
+
+
+def _capture_ground_meshes(monkeypatch):
+    meshes = []
+
+    def mesh(collection, name, vertices, faces, material, *, smooth=True):
+        colors = _MeshColumn(SimpleNamespace(color=(0, 0, 0, 0)) for _ in vertices)
+
+        def color_attribute(**kwargs):
+            assert kwargs == dict(name='WFRL.PatchWeight', type='FLOAT_COLOR', domain='POINT')
+            return SimpleNamespace(data=colors)
+
+        obj = _Block(name, data=SimpleNamespace(
+            materials=[material],
+            polygons=_MeshColumn(SimpleNamespace(material_index=0) for _ in faces),
+            color_attributes=SimpleNamespace(new=color_attribute)))
+        meshes.append((obj, vertices, faces, colors, smooth))
+        return obj
+
+    monkeypatch.setattr(landscape, '_landscape_mesh', mesh)
+    monkeypatch.setattr(landscape, '_landscape_material', lambda name, color: name)
+    monkeypatch.setattr(landscape, '_landscape_patch_material', lambda name, color: name)
+    return meshes
+
+
+def _ground_mesh_signature(meshes, rng):
+    digest = hashlib.sha256()
+    counts = []
+    for obj, vertices, faces, colors, smooth in meshes:
+        counts.append((len(vertices), len(faces)))
+        digest.update(json.dumps([obj.name, obj.data.materials, dict(obj)], sort_keys=True).encode())
+        for vertex in vertices:
+            digest.update(struct.pack('<3f', *vertex))
+        for face, polygon in zip(faces, obj.data.polygons):
+            digest.update(struct.pack('<2I?', len(face), polygon.material_index, smooth))
+            digest.update(struct.pack('<' + 'I' * len(face), *face))
+        for color in colors:
+            digest.update(struct.pack('<4f', *color.color))
+    digest.update(struct.pack('<32d', *(rng.random() for _ in range(32))))
+    return counts, digest.hexdigest()
+
+
+@pytest.mark.parametrize('kind,expected_counts,expected_digest', [
+    ('cover', [(4614, 4608), (1538, 1536)],
+     '93975bac50e3a474a964973eda4427b8d9e64fb21daba47f2e38f321477a08ad'),
+    ('balanced', [(11436, 4425)],
+     '91db8b10cc939569fd7965a9b18540204aee013179caa573ce80a848bf5a489a'),
+    ('full', [(12930, 5172)],
+     '61a6ec93e7c57aff55355866ce70b38226d92cac78e587177f0b853d2cfe8efd'),
+])
+def test_ground_geometry_materials_weights_and_rng(monkeypatch, kind, expected_counts, expected_digest):
+    meshes = _capture_ground_meshes(monkeypatch)
+    rng = random.Random(4207)
+    lush = ((10., 70., -4., 24.), (504., -170., 13., 28.), (1100., 640., 0., 32.))
+    dry = ((-300., 150., 16., 22.), (740., -710., 18., 36.))
+    surface = lambda x, y: x*.006+y*.004
+    if kind == 'cover':
+        landscape._build_ground_cover(None, rng, surface, lush, dry)
+    else:
+        landscape._build_grass_tufts(None, rng, surface, lush, dry,
+                                     ('dark', 'lush', 'meadow', 'dry'), kind)
+    assert _ground_mesh_signature(meshes, rng) == (expected_counts, expected_digest)
 
 
 class _Block(dict):
