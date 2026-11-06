@@ -385,3 +385,248 @@ def test_all_source_support_without_passage_evidence_cannot_be_imported():
         sampling_algorithm=installation.AREA_ALGORITHM, winner_id=row['id'], candidates=[row])
     with pytest.raises(ValueError, match='缺少叶片经过检测证据'):
         installation.selected_installation(report, 'source', 'geometry')
+
+
+def search_report(row):
+    return dict(schema=installation.SCHEMA, source_id='source', geometry_id='geometry', sampling_method='AREA',
+                sampling_algorithm=installation.AREA_ALGORITHM, winner_id=row['id'], candidates=[row])
+
+
+def test_containment_includes_vertices_edges_and_faces_in_either_winding():
+    vertices = np.array([[0., 0, 0], [2, 0, 0], [0, 2, 0], [0, 0, 2]])
+    faces = np.array([[0, 2, 1], [0, 1, 3], [0, 3, 2], [1, 2, 3]])
+    for triangles in (faces, faces[:, ::-1]):
+        for point in ([0., 0, 0], [1., 0, 0], [.5, .5, 0], [.3, .3, .3]):
+            assert installation.point_inside_closed_mesh(point, vertices, triangles)
+        assert not installation.point_inside_closed_mesh([.5, .5, -1e-7], vertices, triangles)
+
+
+def test_containment_rejects_open_and_inconsistently_oriented_shells():
+    vertices = np.array([[0., 0, 0], [2, 0, 0], [0, 2, 0], [0, 0, 2]])
+    faces = np.array([[0, 2, 1], [0, 1, 3], [0, 3, 2], [1, 2, 3]])
+    inconsistent = faces.copy()
+    inconsistent[0] = inconsistent[0, ::-1]
+    for triangles in (faces[:-1], inconsistent):
+        with pytest.raises(ValueError, match='closed, consistently oriented'):
+            installation.point_inside_closed_mesh([.3, .3, .3], vertices, triangles)
+
+
+def test_zero_width_clipping_retains_segments_and_points_for_clearance():
+    triangle = np.array([[-1., -1, 0], [1, -1, 0], [0, 1, 0]])
+    query = np.full((1, 3, 3), [0., 0, 2])
+    with np.errstate(all='raise'):
+        for bound, distance in ((0., 2.), (1., np.sqrt(6.))):
+            clipped = installation.clip_triangle(triangle, triangle[:, :1], [bound], [bound])
+            assert clipped
+            assert installation.mesh_clearance(query, clipped) == pytest.approx(distance)
+            assert installation.mesh_clearance(clipped, query) == pytest.approx(distance)
+    assert installation.clip_triangle(triangle, triangle[:, :1], [2.], [3.]) == []
+
+
+def test_degenerate_clearance_handles_crossing_parallel_segments_and_face_interior():
+    segment = np.array([[[-1., 0, 1], [1, 0, 1], [1, 0, 1]]])
+    crossing = np.array([[[0., -1, 0], [0, 1, 2], [0, 1, 2]]])
+    parallel = segment + [0, 2, 0]
+    face = np.array([[[-5., -5, 0], [5, -5, 0], [0, 5, 0]]])
+    with np.errstate(all='raise'):
+        for other, distance in ((crossing, 0.), (parallel, 2.), (face, 1.)):
+            assert installation.mesh_clearance(segment, other) == pytest.approx(distance)
+            assert installation.mesh_clearance(other, segment) == pytest.approx(distance)
+
+
+@pytest.mark.parametrize('bounds', [SHELL * np.nan, SHELL[::-1]])
+def test_front_assessment_rejects_invalid_shell_bounds(bounds):
+    with pytest.raises(ValueError, match='shell geometry'):
+        installation.assess_front_mount(pose([-3.5, -1.7, -2.], 82.5, 180), bounds, -5.)
+
+
+def test_nonfinite_or_incomplete_motion_rows_remain_unknown():
+    clear = dict(clearance_m=.2, inside=False)
+    rows = [clear, dict(clearance_m=np.nan, inside=False), dict(clearance_m=np.inf, inside=False),
+            dict(clearance_m=.2, inside=None), {}]
+    result = installation.summarize_motion(rows)
+    assert (result['status'], result['known_frames'], result['unknown_frames']) == ('UNKNOWN', 1, 4)
+    assert result['minimum_clearance_m'] == .2
+    assert installation.summarize_motion(rows + [dict(clearance_m=-.1, inside=False)])['status'] == 'REJECTED'
+
+
+def test_equivalent_euler_candidates_keep_baseline_identity_and_reuse_angle_iterators():
+    baseline = ('preset', [0., 0., 0.], [0., 90., 180.])
+    alias = ('alias', [0., 0., 0.], [25., 90., 205.])
+    rows = installation.candidates([('same', [0., 0., 0.]), ('other', [1., 0., 0.])],
+                                   iter([0., 360.]), iter([90.]), iter([180., 540.]), [baseline, alias])
+    assert len(rows) == 2
+    assert rows[0]['location_name'] == 'preset'
+    assert rows[0]['id'] == installation.digest((tuple(baseline[1]), tuple(baseline[2])))[:16]
+    assert rows[0]['rotation_deg'] == tuple(baseline[2])
+    assert rows[1]['location_m'] == (1., 0., 0.)
+
+
+@pytest.mark.parametrize('indices', [[-1], [10], [0, 0], [1, 0], [.9], [[0]]])
+def test_geometric_passages_reject_invalid_indices(indices):
+    encountered = windows()
+    encountered[0][0]['indices'] = indices
+    with pytest.raises(ValueError, match='Passage indices'):
+        installation.summarize(np.full((10, 3), 4), encountered)
+
+
+def detection_grid():
+    times = .007 + np.arange(12) / 30
+    records = [dict(target_associated_points=np.int64(2), tower_distance_error_m=.1, source_time_s=float(t))
+               for t in times]
+    windows = [[dict(status='COMPLETE', indices=list(range(4*b, 4*b+4)), start_s=times[4*b],
+                    end_s=times[4*b+3], nadir_time_s=times[4*b+1] + 1/60)] for b in range(3)]
+    nadirs = [[dict(records[4*b+1], source_time_s=windows[b][0]['nadir_time_s'])] for b in range(3)]
+    return times, records, windows, nadirs
+
+
+@pytest.mark.parametrize('factor', [.5, 2.])
+def test_detection_grid_rejects_cadence_inconsistent_with_grid_hz(factor):
+    times, records, windows, nadirs = detection_grid()
+    times *= factor
+    for blade in windows:
+        blade[0]['start_s'] *= factor
+        blade[0]['end_s'] *= factor
+    with pytest.raises(ValueError, match='grid_hz|every grid sample'):
+        installation.summarize_passage_detections(times, records, windows, nadirs)
+
+
+@pytest.mark.parametrize('omitted', [0, 1, 3])
+def test_complete_passages_cannot_omit_first_interior_or_last_grid_frames(omitted):
+    times, records, passage_windows, nadirs = detection_grid()
+    for i in (0, 1, 3):
+        records[i]['target_associated_points'] = 0
+    result = installation.summarize_passage_detections(times, records, passage_windows, nadirs)
+    assert result['passages'][0]['longest_known_miss_run_frames'] == 2
+    assert result['longest_known_miss_duration_s'] == 2/30
+    passage_windows[0][0]['indices'].remove(omitted)
+    with pytest.raises(ValueError, match='every grid sample'):
+        installation.summarize_passage_detections(times, records, passage_windows, nadirs)
+    encountered = windows()
+    encountered[0][0]['indices'] = [0, 2, 3]
+    with pytest.raises(ValueError, match='every grid sample'):
+        installation.summarize(np.full((10, 3), 4), encountered)
+
+
+def test_numpy_detection_counts_preserve_nadir_support_fraction():
+    result = installation.summarize_passage_detections(*detection_grid())
+    assert result['nadir_support_fraction'] == 1. and result['continuous_support']
+
+
+@pytest.mark.parametrize('problem', ['missing_time', 'wrong_time', 'missing_count', 'nan_count', 'nan_error'])
+def test_invalid_nadir_or_detection_values_cannot_establish_known_support(problem):
+    times, records, windows, nadirs = detection_grid()
+    if problem == 'missing_time':
+        windows[0][0].pop('nadir_time_s')
+    elif problem == 'wrong_time':
+        nadirs[0][0]['source_time_s'] += 1/30
+    elif problem == 'missing_count':
+        nadirs[0][0].pop('target_associated_points')
+    elif problem == 'nan_count':
+        records[0]['target_associated_points'] = np.nan
+    else:
+        records[0]['tower_distance_error_m'] = np.nan
+    result = installation.summarize_passage_detections(times, records, windows, nadirs)
+    assert result['status'] == 'INSUFFICIENT_OR_UNKNOWN'
+    assert not result['continuous_support'] and result['worst_blade_fraction'] is None
+
+
+@pytest.mark.parametrize('key,value', [
+    ('worst_passage_fraction', np.nan), ('longest_known_miss_duration_s', np.nan),
+    ('nadir_support_fraction', np.nan), ('worst_blade_fraction', np.nan),
+    ('tower_error_rmse_m', np.nan), ('points_per_frame_mean', np.inf),
+    ('nadir_support_fraction', 'missing'), ('points_per_frame_mean', None),
+    ('tower_error_rmse_m', -1.), ('worst_passage_fraction', 1.1),
+])
+def test_rank_and_import_reject_missing_nonfinite_or_out_of_range_metrics(key, value):
+    valid = candidate('valid', np.full((10, 3), 4))
+    invalid = candidate('invalid', np.full((10, 3), 4))
+    support = invalid['detection_profiles'][0]['passage_detection_support']
+    if value == 'missing':
+        support.pop(key)
+    else:
+        support[key] = value
+    for rows in ([valid, invalid], [invalid, valid]):
+        ranked = installation.rank(rows)
+        assert [row['id'] for row in ranked] == ['valid', 'invalid']
+        assert ranked[-1]['score'] is None
+    with pytest.raises(ValueError, match=key):
+        installation.selected_installation(search_report(invalid), 'source', 'geometry')
+
+
+def test_nonfinite_geometric_tie_break_is_unknown_and_order_is_deterministic():
+    from itertools import permutations
+    a, z = (candidate(name, np.full((10, 3), 4)) for name in ('a', 'z'))
+    z['profiles'][0]['geometric_coverage']['worst_blade_fraction'] = np.nan
+    for rows in permutations([a, z]):
+        ranked = installation.rank(rows)
+        assert [row['id'] for row in ranked] == ['a', 'z']
+        assert ranked[-1]['geometric_score'] is None and ranked[-1]['score'] is not None
+    z['profiles'][0]['geometric_coverage']['worst_blade_fraction'] = 1.
+    for rows in permutations([a, z]):
+        assert [row['id'] for row in installation.rank(rows)] == ['z', 'a']
+
+
+@pytest.mark.parametrize('problem', ['nan_aggregate', 'unknown_aggregate', 'missing_geometry', 'missing_detection'])
+def test_rank_uses_the_same_aggregate_and_geometry_requirements_as_import(problem):
+    row = candidate('winner', np.full((10, 3), 4))
+    profile = row['detection_profiles'][0]
+    if problem == 'nan_aggregate':
+        profile['simulated_detection_support']['support_fraction'] = np.nan
+    elif problem == 'unknown_aggregate':
+        profile['simulated_detection_support']['status'] = 'INSUFFICIENT_OR_UNKNOWN'
+    elif problem == 'missing_geometry':
+        row['profiles'] = None
+    else:
+        profile.pop('simulated_detection_support')
+    assert installation.rank([row])[0]['score'] is None
+    with pytest.raises(ValueError, match='证据|支持率'):
+        installation.selected_installation(search_report(row), 'source', 'geometry')
+
+
+@pytest.mark.parametrize('problem', ['missing_location', 'missing_rotation', 'matrix', 'nan_angles'])
+def test_selected_installation_names_missing_or_invalid_pose_parameters(problem):
+    row = candidate('winner', np.full((10, 3), 4))
+    if problem == 'missing_location':
+        row.pop('location_m')
+    elif problem == 'missing_rotation':
+        row.pop('rotation_deg')
+    elif problem == 'matrix':
+        row['location_m'] = np.eye(3).tolist()
+        row['rotation_deg'] = [[1., 1., 0.], [0., 1., 0.], [0., 0., 1.]]
+    else:
+        row['rotation_deg'][0] = np.nan
+    assert installation.rank([row])[0]['score'] is None
+    with pytest.raises(ValueError, match='安装参数.*location_m、rotation_deg'):
+        installation.selected_installation(search_report(row), 'source', 'geometry')
+
+
+@pytest.mark.parametrize('field', ['source_id', 'geometry_id', 'sampling_algorithm', 'shell_geometry', 'mechanical'])
+def test_report_identity_rejections_name_the_mismatched_field(field):
+    row = candidate('winner', np.full((10, 3), 4))
+    report = search_report(row)
+    if field == 'mechanical':
+        row[field]['geometry_id'] = 'different'
+    elif field == 'shell_geometry':
+        report[field] = dict(geometry_id='different')
+    else:
+        report[field] = 'different'
+    with pytest.raises(ValueError, match=field):
+        installation.selected_installation(report, 'source', 'geometry')
+
+
+@pytest.mark.parametrize('declaration', [dict(evaluation_scope='FIRST_COMPLETE_PASSAGES_SCREENING_ONLY'),
+                                      dict(passages_per_blade=1)])
+def test_screening_report_cannot_import_a_claimed_winner(declaration):
+    report = search_report(candidate('winner', np.full((10, 3), 4))) | declaration
+    with pytest.raises(ValueError, match='部分经过筛选'):
+        installation.selected_installation(report, 'source', 'geometry')
+
+
+def test_duplicate_candidate_ids_are_rejected_before_ranking_or_import():
+    rows = [candidate('winner', np.full((10, 3), count)) for count in (4, 5)]
+    with pytest.raises(ValueError, match='unique'):
+        installation.rank(rows)
+    report = search_report(rows[0]) | dict(candidates=rows)
+    with pytest.raises(ValueError, match='id 缺失或重复'):
+        installation.selected_installation(report, 'source', 'geometry')

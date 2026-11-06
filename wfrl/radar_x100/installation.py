@@ -10,6 +10,11 @@ PASSAGE_METRIC = 'DISTAL_ROI_PASSAGE_DETECTIONS.v1'
 DEFAULT_ROI = (-15., -15., -70., -2.5, 15., -40.)
 
 
+def _finite_number(value, lower=-np.inf, upper=np.inf):
+    return (isinstance(value, (int, float, np.integer, np.floating))
+            and not isinstance(value, (bool, np.bool_)) and np.isfinite(value) and lower <= value <= upper)
+
+
 def downward_rotation(longitudinal_deg, lateral_deg, rotor_sign=-1.):
     """XYZ Euler angles for longitudinal and lateral tilts of the down-facing aperture."""
     if (not np.isfinite([longitudinal_deg, lateral_deg, rotor_sign]).all()
@@ -30,6 +35,13 @@ def downward_rotation(longitudinal_deg, lateral_deg, rotor_sign=-1.):
 
 def clip_triangle(triangle, values, lower, upper):
     """Clip a triangle by linearly interpolated scalar coordinates, retaining boundary points."""
+    triangle, values = np.asarray(triangle, float), np.asarray(values, float)
+    lower, upper = np.asarray(lower, float), np.asarray(upper, float)
+    if (triangle.shape != (3, 3) or values.ndim != 2 or values.shape[0] != 3
+            or lower.shape != (values.shape[1],) or upper.shape != lower.shape
+            or not all(np.isfinite(x).all() for x in (triangle, values, lower, upper))
+            or np.any(lower > upper)):
+        raise ValueError('Expected finite triangle coordinates and ordered clipping bounds')
     polygon = np.column_stack((triangle, values))
     for axis, (lo, hi) in enumerate(zip(lower, upper), start=3):
         for bound, sign in ((lo, 1), (hi, -1)):
@@ -40,21 +52,22 @@ def clip_triangle(triangle, values, lower, upper):
                     output.append(a)
                 if (da >= 0) != (db >= 0):
                     output.append(a + da / (da - db) * (b - a))
-            if len(output) < 3:
+            if not output:
                 return []
             polygon = np.asarray(output)
+    if len(polygon) < 3:
+        polygon = np.concatenate((polygon, np.repeat(polygon[-1:], 3 - len(polygon), axis=0)))
     return [polygon[[0, i, i + 1], :3] for i in range(1, len(polygon) - 1)]
 
 
 def mesh_clearance(first, second):
-    """Minimum distance between finite triangle surfaces, including edge and face interiors."""
-    from .analysis import closest_reference
+    """Minimum surface distance; degenerate triangles retain their segments and points."""
     a, b = np.asarray(first, float), np.asarray(second, float)
     if not len(a) or not len(b):
         return None
     if any(x.ndim != 3 or x.shape[1:] != (3, 3) or not np.isfinite(x).all() for x in (a, b)):
         raise ValueError('Expected finite triangle surfaces')
-    best = float(closest_reference(a[0, :1], b.reshape(-1, 3), np.arange(b.size // 3).reshape(-1, 3))[0][0]) ** 2
+    best = float(np.min(np.sum((b - a[0, 0]) ** 2, axis=2)))
     blo, bhi = b.min(axis=1), b.max(axis=1)
     for start in range(0, len(a), 64):
         block = a[start:start + 64]
@@ -69,16 +82,17 @@ def mesh_clearance(first, second):
             normal = np.cross(u, v)
             nn = np.einsum('ij,ij->i', normal, normal)
             uu, uv, vv = (np.einsum('ij,ij->i', x, y) for x, y in ((u, u), (u, v), (v, v)))
-            denom = uu * vv - uv * uv
+            valid = nn > 0
+            denom = np.where(valid, nn, 1.)
             for k in range(3):
                 p, q = source[:, k], source[:, (k + 1) % 3]
                 signed = np.einsum('ij,ij->i', p - target[:, 0], normal)
-                projected = p - normal * (signed / nn)[:, None]
-                for point, distance in ((projected, signed ** 2 / nn),):
+                projected = p - normal * (signed / denom)[:, None]
+                for point, distance in ((projected, signed ** 2 / denom),):
                     w = point - target[:, 0]
                     wu, wv = np.einsum('ij,ij->i', w, u), np.einsum('ij,ij->i', w, v)
                     beta, gamma = (wu * vv - wv * uv) / denom, (wv * uu - wu * uv) / denom
-                    inside = (beta >= -1e-10) & (gamma >= -1e-10) & (beta + gamma <= 1 + 1e-10)
+                    inside = valid & (beta >= -1e-10) & (gamma >= -1e-10) & (beta + gamma <= 1 + 1e-10)
                     if inside.any():
                         best = min(best, float(distance[inside].min()))
                 step = np.einsum('ij,ij->i', q - p, normal)
@@ -88,7 +102,7 @@ def mesh_clearance(first, second):
                 w = point - target[:, 0]
                 wu, wv = np.einsum('ij,ij->i', w, u), np.einsum('ij,ij->i', w, v)
                 beta, gamma = (wu * vv - wv * uv) / denom, (wv * uu - wu * uv) / denom
-                if np.any(on_segment & (beta >= 0) & (gamma >= 0) & (beta + gamma <= 1)):
+                if np.any(valid & on_segment & (beta >= 0) & (gamma >= 0) & (beta + gamma <= 1)):
                     return 0.
         for k, l in itertools.product(range(3), repeat=2):
             p, q = left[:, k], right[:, l]
@@ -96,15 +110,20 @@ def mesh_clearance(first, second):
             w = p - q
             aa, bb, cc, dd, ee = (np.einsum('ij,ij->i', x, y)
                 for x, y in ((u, u), (u, v), (v, v), (u, w), (v, w)))
+            # Endpoint projections also cover parallel segments and zero-length edges.
+            for endpoint, edge, length in ((w, v, cc), (w + u, v, cc), (-w, u, aa), (v - w, u, aa)):
+                t = np.clip(np.divide(np.einsum('ij,ij->i', endpoint, edge), length,
+                                      out=np.zeros(len(length)), where=length > 0), 0., 1.)
+                delta = endpoint - t[:, None] * edge
+                best = min(best, float(np.einsum('ij,ij->i', delta, delta).min()))
             denom = aa * cc - bb * bb
-            s = np.clip(np.divide(bb * ee - cc * dd, denom, out=np.zeros(len(denom)),
-                                  where=denom > 1e-14), 0., 1.)
-            t = (bb * s + ee) / cc
-            s = np.where(t < 0, np.clip(-dd / aa, 0., 1.),
-                         np.where(t > 1, np.clip((bb - dd) / aa, 0., 1.), s))
-            t = np.clip(t, 0., 1.)
-            delta = w + s[:, None] * u - t[:, None] * v
-            best = min(best, float(np.einsum('ij,ij->i', delta, delta).min()))
+            nonparallel = denom > np.finfo(float).eps * aa * cc
+            s = np.divide(bb * ee - cc * dd, denom, out=np.zeros(len(denom)), where=nonparallel)
+            t = np.divide(aa * ee - bb * dd, denom, out=np.zeros(len(denom)), where=nonparallel)
+            interior = nonparallel & (s >= 0) & (s <= 1) & (t >= 0) & (t <= 1)
+            if interior.any():
+                delta = w + s[:, None] * u - t[:, None] * v
+                best = min(best, float(np.einsum('ij,ij->i', delta, delta)[interior].min()))
     return float(np.sqrt(max(0., best)))
 
 
@@ -159,11 +178,18 @@ def housing_half_extents():
     return np.array([d, w, h]) / 2
 
 
+def _shell_bounds(value):
+    bounds = np.asarray(value, float)
+    if bounds.shape != (2, 3) or not np.isfinite(bounds).all() or np.any(bounds[0] >= bounds[1]):
+        raise ValueError('Invalid shell geometry bounds')
+    return bounds
+
+
 def assess_front_mount(matrix, shell_bounds, rotor_x):
     """Front means the rotor-facing half of the bound shell, not the front end plate."""
     from .simulation import rigid_matrix
     matrix = rigid_matrix(matrix)
-    lo, hi = np.asarray(shell_bounds, float)
+    lo, hi = _shell_bounds(shell_bounds)
     center_x = (lo[0] + hi[0]) / 2
     sign = np.sign(rotor_x - center_x)
     if not sign or not np.isfinite(rotor_x):
@@ -189,9 +215,8 @@ def static_constraints(matrix, shell_bounds, shell_distance_m, *, policy=None):
     from .simulation import rigid_matrix
     policy = policy or MechanicalPolicy()
     matrix = rigid_matrix(matrix)
-    bounds = np.asarray(shell_bounds, float)
-    if (bounds.shape != (2, 3) or not np.isfinite(bounds).all() or np.any(bounds[0] >= bounds[1])
-            or not np.isfinite(shell_distance_m) or shell_distance_m < 0):
+    bounds = _shell_bounds(shell_bounds)
+    if not _finite_number(shell_distance_m, 0):
         raise ValueError('Invalid shell geometry or surface distance')
     lo, hi = bounds
     position, forward = matrix[:3, 3], matrix[:3, 0]
@@ -219,8 +244,23 @@ def static_constraints(matrix, shell_bounds, shell_distance_m, *, policy=None):
 
 
 def point_inside_closed_mesh(point, vertices, triangles):
-    """Solid-angle containment; closed, consistently oriented source parts required."""
-    faces = np.asarray(vertices)[triangles] - point
+    """Inclusive solid-angle containment; reject open or inconsistently oriented parts."""
+    from .analysis import closest_reference, validate_surface
+    point, vertices, triangles = np.asarray(point, float), np.asarray(vertices, float), np.asarray(triangles)
+    if (point.shape != (3,) or not np.isfinite(point).all()
+            or not np.issubdtype(triangles.dtype, np.integer)):
+        raise ValueError('Expected a finite point and integer mesh indices')
+    validate_surface(vertices, triangles)
+    edges = np.concatenate((triangles[:, [0, 1]], triangles[:, [1, 2]], triangles[:, [2, 0]]))
+    _, inverse, counts = np.unique(np.sort(edges, axis=1), axis=0, return_inverse=True, return_counts=True)
+    orientation = np.bincount(inverse, weights=np.where(edges[:, 0] < edges[:, 1], 1, -1))
+    if (np.any(counts != 2) or np.any(orientation != 0)
+            or len(np.unique(np.sort(triangles, axis=1), axis=0)) != len(triangles)):
+        raise ValueError('Containment requires a closed, consistently oriented mesh')
+    faces = vertices[triangles] - point
+    tolerance = 64 * np.finfo(float).eps * max(1., float(np.ptp(vertices[triangles].reshape(-1, 3), axis=0).max()))
+    if closest_reference([point], vertices, triangles)[0][0] <= tolerance:
+        return True
     lengths = np.linalg.norm(faces, axis=2)
     numerator = np.einsum('ij,ij->i', faces[:, 0], np.cross(faces[:, 1], faces[:, 2]))
     denominator = (np.prod(lengths, axis=1)
@@ -233,7 +273,8 @@ def point_inside_closed_mesh(point, vertices, triangles):
 def summarize_motion(rows, *, policy=None):
     """Every expected source time contributes a clearance or an explicit unknown."""
     policy = policy or MechanicalPolicy()
-    known = [row for row in rows if row is not None]
+    known = [row for row in rows if isinstance(row, dict) and _finite_number(row.get('clearance_m'))
+             and isinstance(row.get('inside'), (bool, np.bool_))]
     unknown = len(rows) - len(known)
     failed = sum(row['clearance_m'] < policy.motion_clearance_m or row['inside'] for row in known)
     return dict(status='REJECTED' if failed else 'UNKNOWN' if unknown or not rows else 'PASS_RESEARCH',
@@ -256,22 +297,49 @@ def roi_mask(frame, world_from_analysis, roi):
     return (local >= bounds['lower_m']).all(axis=1) & (local <= bounds['upper_m']).all(axis=1)
 
 
+def _installation_parameters(location, rotation):
+    try:
+        parameters = np.asarray([location, rotation], dtype=float)
+    except (TypeError, ValueError) as exc:
+        raise ValueError('Installation needs finite position and XYZ angles') from exc
+    if parameters.shape != (2, 3) or not np.isfinite(parameters).all():
+        raise ValueError('Installation needs finite position and XYZ angles')
+    return tuple(parameters[0].tolist()), tuple(parameters[1].tolist())
+
+
+def _rotation_matrix(rotation):
+    roll, pitch, yaw = np.radians(np.remainder(rotation, 360.))
+    cr, sr, cp, sp, cy, sy = np.cos(roll), np.sin(roll), np.cos(pitch), np.sin(pitch), np.cos(yaw), np.sin(yaw)
+    return np.array([[cy*cp, cy*sp*sr-sy*cr, cy*sp*cr+sy*sr],
+                     [sy*cp, sy*sp*sr+cy*cr, sy*sp*cr-cy*sr], [-sp, cp*sr, cp*cr]])
+
+
 def candidates(locations, rolls, pitches, yaws, baselines=()):
+    """Unique rigid poses with baseline precedence; retain the first pose's ID and angles."""
     result, seen = [], set()
+    rolls, pitches, yaws = tuple(rolls), tuple(pitches), tuple(yaws)
     for name, location, rotation in itertools.chain(baselines,
-            ((name, location, angles) for name, location in locations
-             for angles in itertools.product(rolls, pitches, yaws))):
-        location, rotation = tuple(map(float, location)), tuple(map(float, rotation))
-        if len(location) != 3 or len(rotation) != 3 or not np.isfinite([location, rotation]).all():
-            raise ValueError('Installation needs finite position and XYZ angles')
-        key = location, rotation
+            ((name, location, rotation) for name, location in locations
+             for rotation in itertools.product(rolls, pitches, yaws))):
+        location, rotation = _installation_parameters(location, rotation)
+        key = location, tuple(_rotation_matrix(rotation).round(12).flat)
         if key in seen:
             continue
         seen.add(key)
-        result.append(dict(id=digest(key)[:16], location_m=location, rotation_deg=rotation, location_name=name))
-    if not result or len(result) > 256:
+        result.append(dict(id=digest((location, rotation))[:16], location_m=location, rotation_deg=rotation, location_name=name))
+        if len(result) > 256:
+            raise ValueError('Installation search must contain 1..256 candidates')
+    if not result:
         raise ValueError('Installation search must contain 1..256 candidates')
     return result
+
+
+def _passage_indices(indices, size):
+    ids = np.asarray(indices)
+    if (ids.ndim != 1 or (ids.size and not np.issubdtype(ids.dtype, np.integer))
+            or np.any(ids < 0) or np.any(ids >= size) or np.any(ids[1:] <= ids[:-1])):
+        raise ValueError('Passage indices must address the explicit grid in order')
+    return ids.astype(int)
 
 
 def summarize(counts, passages, minimum_points=3):
@@ -287,7 +355,9 @@ def summarize(counts, passages, minimum_points=3):
         for passage in passages[blade]:
             if passage['status'] != 'COMPLETE':
                 continue
-            ids = np.asarray(passage['indices'], dtype=int)
+            ids = _passage_indices(passage['indices'], len(counts))
+            if np.any(np.diff(ids) != 1):
+                raise ValueError('Complete geometric passages must contain every grid sample')
             values = counts[ids, blade]
             n = len(values)
             missing = int(np.sum(values < 0))
@@ -317,11 +387,16 @@ def summarize(counts, passages, minimum_points=3):
         longest_gap_frames=max((p['longest_gap_frames'] for p in rows), default=None))
 
 
+def _detection_count(row):
+    value = row.get('target_associated_points') if isinstance(row, dict) else None
+    return int(value) if _finite_number(value, 0) and value == np.floor(value) else None
+
+
 def summarize_passage_detections(times, frames, passages, nadir_frames, *, min_points=1, grid_hz=30.):
     """Score only complete blade passages; unknown frames never become zero detections.
 
-    A known miss occupies one source-grid period. Runs stop at passage boundaries,
-    nonadjacent times or unknown frames. Nadir observations use the exact interpolated
+    A known miss occupies one source-grid period. Complete passages contain every
+    grid sample; runs stop at passage boundaries or unknown frames. Nadir observations use the exact interpolated
     crossing time, independently of the regular grid. Tower errors use supported frames.
     """
     times = np.asarray(times, float)
@@ -329,6 +404,10 @@ def summarize_passage_detections(times, frames, passages, nadir_frames, *, min_p
             or len(times) != len(frames) or len(passages) != 3 or len(nadir_frames) != 3
             or type(min_points) is not int or min_points < 1 or not np.isfinite(grid_hz) or grid_hz <= 0):
         raise ValueError('Invalid passage detection grid')
+    ticks = (times - times[0]) * grid_hz if len(times) else times
+    if (not np.allclose(ticks, np.rint(ticks), atol=1e-6, rtol=0)
+            or np.any(np.diff(ticks) < 1 - 1e-6)):
+        raise ValueError('Passage times must align with grid_hz')
     rows, blades, all_errors = [], [], []
     for blade, windows in enumerate(passages):
         if len(windows) != len(nadir_frames[blade]):
@@ -336,24 +415,30 @@ def summarize_passage_detections(times, frames, passages, nadir_frames, *, min_p
         for window, nadir in zip(windows, nadir_frames[blade]):
             if window['status'] != 'COMPLETE':
                 continue
-            ids = np.asarray(window['indices'], int)
-            if np.any(ids < 0) or np.any(ids >= len(times)) or np.any(np.diff(ids) <= 0):
-                raise ValueError('Passage indices must address the explicit grid in order')
+            ids = _passage_indices(window['indices'], len(times))
+            if len(ids) and (not _finite_number(window.get('start_s')) or not _finite_number(window.get('end_s'))
+                    or not np.allclose(times[ids[[0, -1]]], [window['start_s'], window['end_s']], atol=1e-8, rtol=0)
+                    or not np.allclose(np.diff(times[ids]) * grid_hz, 1., atol=1e-6, rtol=0)):
+                raise ValueError('Complete detection passages must contain every grid sample from start_s to end_s')
             values = [frames[i] if frames[i] is None or 'blade_truth' not in frames[i]
                       else frames[i] | frames[i]['blade_truth'].get(str(blade + 1), {}) for i in ids]
-            counts = [row['target_associated_points'] if row is not None else None for row in values]
+            counts = [_detection_count(row) for row in values]
             known = [n for n in counts if n is not None]
             supported = sum(n >= min_points for n in known)
             run = longest = 0
-            for k, count in enumerate(counts):
-                if k and times[ids[k]] - times[ids[k - 1]] > 1 / grid_hz + 1e-8:
-                    run = 0
+            for count in counts:
                 run = run + 1 if count is not None and count < min_points else 0
                 longest = max(longest, run)
-            errors = [row['tower_distance_error_m'] for row in values if row is not None
-                      and row['target_associated_points'] >= min_points and row.get('tower_distance_error_m') is not None]
+            supported_rows = [row for row, count in zip(values, counts) if count is not None and count >= min_points]
+            errors = [row['tower_distance_error_m'] for row in supported_rows
+                      if _finite_number(row.get('tower_distance_error_m'))]
             all_errors.extend(errors)
-            nadir_support = None if nadir is None else nadir['target_associated_points'] >= min_points
+            nadir_count, nadir_time = _detection_count(nadir), window.get('nadir_time_s')
+            nadir_support = bool(nadir_count >= min_points) if nadir_count is not None and _finite_number(nadir_time) else None
+            if nadir is not None and 'source_time_s' in nadir and (
+                    not _finite_number(nadir['source_time_s']) or not _finite_number(nadir_time)
+                    or not np.isclose(nadir['source_time_s'], nadir_time, atol=1e-8, rtol=0)):
+                nadir_support = None
             rows.append(dict(blade=blade + 1, start_s=window['start_s'], end_s=window['end_s'],
                 N=len(ids), known_frames=len(known), unknown_frames=len(ids) - len(known), supported_frames=supported,
                 support_fraction=supported / len(ids) if len(ids) and len(known) == len(ids) else None,
@@ -364,9 +449,9 @@ def summarize_passage_detections(times, frames, passages, nadir_frames, *, min_p
                 longest_known_miss_run_frames=longest, longest_known_miss_duration_s=longest / grid_hz,
                 nadir_time_s=window.get('nadir_time_s'), nadir_supported=nadir_support, nadir_frame=nadir,
                 tower_error_frames=len(errors), tower_error_missing_supported_frames=sum(
-                    row is not None and row['target_associated_points'] >= min_points
-                    and row.get('tower_distance_error_m') is None
-                    and row.get('tower_distance_truth_status') != 'NO_DISTAL_SURFACE_IN_ROI' for row in values),
+                    not _finite_number(row.get('tower_distance_error_m'))
+                    and (row.get('tower_distance_truth_status') != 'NO_DISTAL_SURFACE_IN_ROI'
+                         or row.get('tower_distance_error_m') is not None) for row in supported_rows),
                 tower_error_not_applicable_frames=sum(row is not None
                     and row.get('tower_distance_truth_status') == 'NO_DISTAL_SURFACE_IN_ROI' for row in values),
                 tower_error_bias_m=float(np.mean(errors)) if errors else None,
@@ -379,7 +464,7 @@ def summarize_passage_detections(times, frames, passages, nadir_frames, *, min_p
     known = bool(rows) and all(row['N'] and not row['unknown_frames'] and row['nadir_supported'] is not None
                              and not row['tower_error_missing_supported_frames'] for row in rows)
     known = known and all(blade['N'] for blade in blades)
-    counts = [row['target_associated_points'] for row in frames if row is not None]
+    counts = [count for row in frames if (count := _detection_count(row)) is not None]
     return dict(metric=PASSAGE_METRIC, status='KNOWN' if known else 'INSUFFICIENT_OR_UNKNOWN',
         min_points=min_points, grid_hz=grid_hz, passages=rows, blades=blades,
         expected_frames=sum(row['N'] for row in rows), unknown_frames=sum(row['unknown_frames'] for row in rows),
@@ -394,19 +479,75 @@ def summarize_passage_detections(times, frames, passages, nadir_frames, *, min_p
         tower_distance_definition='minimum non-false-alarm ROI point distance to same-time tower side mesh minus minimum clipped distal blade surface distance; no target identity inferred')
 
 
+def _mapping(value):
+    return value if isinstance(value, dict) else {}
+
+
+def _profiles(candidate, key):
+    values = candidate.get(key, [])
+    return [_mapping(value) for value in values] if isinstance(values, (list, tuple)) else []
+
+
+def _candidate_problems(candidate):
+    """Shared eligibility for ranking and report import; geometric scores are auxiliary."""
+    problems = []
+    mechanics = _mapping(candidate.get('mechanical'))
+    for label, status in (('机械约束', mechanics.get('status')),
+                          ('运动净空', _mapping(mechanics.get('motion_clearance')).get('status'))):
+        if status is None:
+            problems.append('缺少' + label + '证据')
+        elif status != 'PASS_RESEARCH':
+            problems.append(label + '证据未通过研究筛选')
+    detection_profiles = _profiles(candidate, 'detection_profiles')
+    supports = [_mapping(profile.get('simulated_detection_support')) for profile in detection_profiles]
+    if not supports or any(row.get('status') is None or 'support_fraction' not in row for row in supports):
+        problems.append('缺少检测证据（simulated_detection_support 的 status 和 support_fraction）')
+    elif any(row['status'] != 'KNOWN' for row in supports):
+        problems.append('检测证据不完整或含未知帧')
+    elif any(row['support_fraction'] is None or _finite_number(row['support_fraction'], upper=0) for row in supports):
+        problems.append('缺少支持率大于 0 的检测证据')
+    elif any(not _finite_number(row['support_fraction'], 0, 1) for row in supports):
+        problems.append('检测支持率无效（support_fraction 必须为 0..1 的有限值）')
+    if any(profile.get('errors') for profile in detection_profiles):
+        problems.append('检测证据含错误帧')
+    profiles = _profiles(candidate, 'profiles')
+    if not profiles or any(not isinstance(p.get('geometric_coverage'), dict) for p in profiles):
+        problems.append('缺少 v2 几何覆盖证据（geometric_coverage）')
+    passage_supports = [_mapping(p.get('passage_detection_support')) for p in detection_profiles]
+    if passage_supports and any(p.get('metric') != PASSAGE_METRIC for p in passage_supports):
+        problems.append('缺少叶片经过检测证据（passage_detection_support）')
+    elif passage_supports and any(p.get('status') != 'KNOWN' for p in passage_supports):
+        problems.append('叶片经过检测证据不完整或含未知帧')
+    elif passage_supports:
+        bounds = dict(worst_passage_fraction=1., longest_known_miss_duration_s=np.inf,
+                      nadir_support_fraction=1., worst_blade_fraction=1., tower_error_rmse_m=np.inf,
+                      points_per_frame_mean=np.inf)
+        invalid = [key for key, upper in bounds.items()
+                   if any(not _finite_number(p.get(key), 0, upper) for p in passage_supports)]
+        if invalid:
+            problems.append('叶片经过检测指标缺失或无效（' + '、'.join(invalid) + '）')
+        elif any(p['worst_blade_fraction'] <= 0 for p in passage_supports):
+            problems.append('缺少每片叶片支持率大于 0 的检测证据')
+    if 'location_m' not in candidate or 'rotation_deg' not in candidate:
+        problems.append('缺少安装参数（location_m、rotation_deg）')
+    else:
+        try:
+            _installation_parameters(candidate['location_m'], candidate['rotation_deg'])
+        except ValueError:
+            problems.append('安装参数无效（location_m、rotation_deg 必须各含三个有限数值，rotation_deg 为 XYZ 欧拉角）')
+    return problems
+
+
 def rank(results):
+    results = list(results)
+    ids = [candidate.get('id') if isinstance(candidate, dict) else None for candidate in results]
+    if any(not isinstance(value, str) or not value for value in ids) or len(set(ids)) != len(ids):
+        raise ValueError('Candidate IDs must be unique nonempty strings')
     scored = []
     for candidate in results:
-        profiles = candidate.get('profiles', [])
-        mechanics = candidate.get('mechanical', {})
-        detection_profiles = candidate.get('detection_profiles', [])
-        eligible = (mechanics.get('status') == 'PASS_RESEARCH'
-            and mechanics.get('motion_clearance', {}).get('status') == 'PASS_RESEARCH'
-            and bool(detection_profiles) and all(
-                p.get('passage_detection_support', {}).get('metric') == PASSAGE_METRIC
-                and p['passage_detection_support']['status'] == 'KNOWN'
-                and p['passage_detection_support']['worst_blade_fraction'] > 0
-                and p['passage_detection_support']['tower_error_rmse_m'] is not None for p in detection_profiles))
+        profiles = _profiles(candidate, 'profiles')
+        detection_profiles = _profiles(candidate, 'detection_profiles')
+        eligible = not _candidate_problems(candidate)
         score = None
         detection_score = None
         if eligible:
@@ -418,8 +559,8 @@ def rank(results):
                 -max(p['tower_error_rmse_m'] for p in supports),
                 min(p['points_per_frame_mean'] for p in supports))
             detection_score = score[0]
-        geometry = [p.get('geometric_coverage', {}).get('worst_blade_fraction') for p in profiles]
-        geometric_score = min(geometry) if geometry and all(v is not None for v in geometry) else None
+        geometry = [_mapping(p.get('geometric_coverage')).get('worst_blade_fraction') for p in profiles]
+        geometric_score = min(geometry) if geometry and all(_finite_number(v, 0, 1) for v in geometry) else None
         scored.append(candidate | dict(score=score, detection_score=detection_score, geometric_score=geometric_score))
     return sorted(scored, key=lambda c: (c['score'] is not None, c['score'] or (),
                                         c['geometric_score'] if c['geometric_score'] is not None else -1., c['id']), reverse=True)
@@ -427,42 +568,36 @@ def rank(results):
 
 def selected_installation(report, source_id, geometry_id):
     regenerate = '；请重新运行 scripts/radar_x100/optimize_mount.py 生成 v2 报告'
-    if report.get('schema') != SCHEMA:
+    if not isinstance(report, dict) or report.get('schema') != SCHEMA:
         raise ValueError('安装搜索报告版本不受支持，仅接受 x100-installation-search.v2' + regenerate)
-    if (report.get('source_id') != source_id
-            or report.get('geometry_id') != geometry_id or report.get('sampling_method') != 'AREA'
-            or report.get('sampling_algorithm') != AREA_ALGORITHM):
-        raise ValueError('安装搜索结果与当前几何来源不匹配')
+    for key, expected in (('source_id', source_id), ('geometry_id', geometry_id)):
+        if not isinstance(expected, str) or not expected or report.get(key) != expected:
+            raise ValueError('安装搜索结果与当前几何来源不匹配：' + key)
+    if report.get('sampling_method') != 'AREA' or report.get('sampling_algorithm') != AREA_ALGORITHM:
+        raise ValueError('安装搜索报告的 sampling_method 或 sampling_algorithm 不受支持' + regenerate)
+    if (report.get('evaluation_scope', 'ALL_COMPLETE_PASSAGES') != 'ALL_COMPLETE_PASSAGES'
+            or report.get('passages_per_blade', 0) != 0):
+        raise ValueError('安装搜索仅含部分经过筛选，未覆盖全部完整经过' + regenerate)
+    shell = _mapping(report.get('shell_geometry'))
+    if 'geometry_id' in shell and shell['geometry_id'] != geometry_id:
+        raise ValueError('安装搜索报告的 shell_geometry.geometry_id 与当前几何来源不匹配')
     winner = report.get('winner_id')
     if report.get('errors'):
         raise ValueError('安装搜索含未知帧，不能应用推荐安装')
     candidates = report.get('candidates', [])
+    if not isinstance(candidates, (list, tuple)) or any(not isinstance(row, dict) for row in candidates):
+        raise ValueError('安装搜索报告的 candidates 格式无效' + regenerate)
+    ids = [row.get('id') for row in candidates]
+    if any(not isinstance(value, str) or not value for value in ids) or len(set(ids)) != len(ids):
+        raise ValueError('安装搜索候选 id 缺失或重复' + regenerate)
+    for row in candidates:
+        mechanics = _mapping(row.get('mechanical'))
+        if 'geometry_id' in mechanics and mechanics['geometry_id'] != geometry_id:
+            raise ValueError('安装搜索候选 ' + row['id'] + ' 的 mechanical.geometry_id 与当前几何来源不匹配')
     selected = next((row for row in candidates if row.get('id') == winner), None)
     if selected is None:
         raise ValueError('安装搜索报告未指定有效的推荐候选' + regenerate)
-    problems = []
-    mechanics = selected.get('mechanical', {})
-    for label, status in (('机械约束', mechanics.get('status')),
-                          ('运动净空', mechanics.get('motion_clearance', {}).get('status'))):
-        if status is None:
-            problems.append('缺少' + label + '证据')
-        elif status != 'PASS_RESEARCH':
-            problems.append(label + '证据未通过研究筛选')
-    supports = [profile.get('simulated_detection_support', {})
-                for profile in selected.get('detection_profiles', [])]
-    if not supports or any(row.get('status') is None or 'support_fraction' not in row for row in supports):
-        problems.append('缺少检测证据（simulated_detection_support 的 status 和 support_fraction）')
-    elif any(row['status'] != 'KNOWN' for row in supports):
-        problems.append('检测证据不完整或含未知帧')
-    elif any(row['support_fraction'] is None or row['support_fraction'] <= 0 for row in supports):
-        problems.append('缺少支持率大于 0 的检测证据')
-    if not selected.get('profiles') or any('geometric_coverage' not in p for p in selected['profiles']):
-        problems.append('缺少 v2 几何覆盖证据（geometric_coverage）')
-    passage_supports = [p.get('passage_detection_support', {}) for p in selected.get('detection_profiles', [])]
-    if passage_supports and any(p.get('metric') != PASSAGE_METRIC for p in passage_supports):
-        problems.append('缺少叶片经过检测证据（passage_detection_support）')
-    elif passage_supports and any(p.get('status') != 'KNOWN' for p in passage_supports):
-        problems.append('叶片经过检测证据不完整或含未知帧')
+    problems = _candidate_problems(selected)
     if problems:
         raise ValueError('安装搜索推荐不可应用：' + '；'.join(problems) + regenerate)
     rows = rank(candidates)
@@ -471,6 +606,4 @@ def selected_installation(report, source_id, geometry_id):
     if rows[0]['score'] is None:
         raise ValueError('推荐安装未通过叶片经过检测校验：需要完整、已知的检测、正下方时刻和塔距误差证据' + regenerate)
     location, rotation = rows[0]['location_m'], rows[0]['rotation_deg']
-    if len(location) != 3 or len(rotation) != 3 or not np.isfinite([location, rotation]).all():
-        raise ValueError('搜索结果包含无效安装参数')
     return location, rotation
