@@ -551,6 +551,13 @@ ZIP 包括 MAPPO 源、旧法和 TLS 结果层、规范示例、NREL 缺陷编�
 
 完整播放需要每路推进与终段证据；超时、缺绘制、错误和意外回跳不能判为通过。`POST_PIXEL` 是视口绘制回调，不是显示器扫描输出。近两秒采样、GPU 事务复用、固定 60 Hz 时间轴和暂停时稳定刷新均不能替代完整片段 FPS。
 
+### Windows 支持范围
+
+- 冻结试验视频的新建、重试和监管只支持具备 `flock` 和 `waitid(WNOWAIT)` 的 POSIX 环境。见 [`launch()`](wfrl_blender/manual_video.py#L344)、[`start()`](wfrl_blender/manual_video_job.py#L232)、[`supervise()`](wfrl_blender/manual_video_job.py#L319) 和 [`require_supervision()`](wfrl_blender/manual_video_job.py#L35)。
+- Down 的 MP4 与 JSON 成对发布、扩展构建产物发布均依赖硬链接，目标卷需支持硬链接。见 [`_publish_pair()`](wfrl_blender/manual_down.py#L481) 和 [`_publish_outputs()`](../scripts/blender/build_extension.py#L55)。
+- `.command` 和 macOS shell 入口只适用于 macOS。见 [`.command` 入口示例](../scripts/blender/打开净空雷达演示.command#L4)、[`run_wfrl_macos.sh`](../scripts/blender/run_wfrl_macos.sh#L1) 和 [`verify_macos.sh`](../scripts/blender/verify_macos.sh#L1)。
+- Windows 上的前端宿主测试在 `windows-host` 任务中非阻塞运行。见 [Windows 前端宿主检查](../docs/development/自动检查.md#windows-前端宿主检查)和[工作流任务](../.github/workflows/checks.yml#L165)。
+
 ## Blade Recon 与重建对照
 
 外部 `blade_recon0.2` 提供研究算法，扩展只读取已保存结果，不在查看时拟合。材料点候选独立结果为 Patch **2/8**、Crack **7/8**（87.5% < 90%）、跨相机 RGB **0/264**，真实同材料点三维误差 `null`，保持 `FAILED_GATE / NOT_ACCEPTED`。数据与限制见[材料点对应研究](../blade_recon0.2/docs/材料点对应实验报告_2026-10-11.md)；该研究没有替换扩展正式 601 样本资产。

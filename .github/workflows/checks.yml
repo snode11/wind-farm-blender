@@ -161,3 +161,40 @@ jobs:
           path: ci-results/
           if-no-files-found: error
           retention-days: 14
+
+  windows-host:
+    name: Windows Python 3.12 frontend contracts
+    runs-on: windows-latest
+    timeout-minutes: 25
+    continue-on-error: true
+    env:
+      PYTHONPATH: 'blender_frontend;.'
+      CI: 'true'
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Preserve repository line endings
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-ci.txt
+      - name: Install contract-test dependencies
+        run: python -m pip install -r requirements-ci.txt
+      - name: Frontend host contracts
+        run: >-
+          python -m pytest blender_frontend/tests --ignore=blender_frontend/tests/blender
+          -q -p no:cacheprovider -rs --junitxml=ci-results/windows.xml
+      - name: Retain Windows test results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: windows-python-3.12-frontend-contracts
+          path: ci-results/windows.xml
+          if-no-files-found: error
+          retention-days: 14
