@@ -372,12 +372,13 @@ def _camera_descriptor(camera, scene, *, resolution=None):
     else:
         width = round(scene.render.resolution_x * scene.render.resolution_percentage / 100)
         height = round(scene.render.resolution_y * scene.render.resolution_percentage / 100)
-        frame = camera.data.view_frame(scene=scene)
-        xs, ys = [v.x / -v.z for v in frame], [v.y / -v.z for v in frame]
-        fx, fy = width / (max(xs) - min(xs)), height / (max(ys) - min(ys))
-        K = ((fx, 0., -0.5 - min(xs) * fx), (0., fy, -0.5 + max(ys) * fy), (0., 0., 1.))
         P = tuple(tuple(row) for row in camera.calc_matrix_camera(deps, x=width, y=height,
             scale_x=scene.render.pixel_aspect_x, scale_y=scene.render.pixel_aspect_y))
+        # NDC maps to pixel centres with borders at -.5 and size-.5.
+        # Blender looks along -Z; image Y points down, so shift signs differ.
+        K = ((P[0][0] * width / 2, 0., (1 - P[0][2]) * width / 2 - .5),
+             (0., P[1][1] * height / 2, (1 + P[1][2]) * height / 2 - .5),
+             (0., 0., 1.))
         near, far = camera.data.clip_start, camera.data.clip_end
     rotation = world.to_3x3()
     from mathutils import Vector
