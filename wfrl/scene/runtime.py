@@ -64,7 +64,8 @@ class SceneRuntime:
                 if any(self.enabled.get(t, False) for t in s.topics)]
 
     # ---- 生命周期 --------------------------------------------------------
-    def reset(self) -> Dict[str, Any]:
+    def reset(self, *, wind_direction=None, upstream_request=None) -> Dict[str, Any]:
+        """场景风向仅用于显示；wind_direction 是独立的显式求解请求。"""
         from wfrl.fastfarm_driver import FastFarmDriver
         if self.scene.backend != "fastfarm":
             raise NotImplementedError(
@@ -74,9 +75,17 @@ class SceneRuntime:
         # 直接注入 —— 场景层的意义正在于此。
         self.driver = FastFarmDriver.__new__(FastFarmDriver)
         self._build_driver()
+        upstream_request = dict(upstream_request or {})
+        upstream_request["scene"] = {
+            "wind_speed": self.scene.wind_speed,
+            "wind_direction": self.scene.wind_direction,
+            "wind_time_series": self.scene.turbulence,
+            "wind_speed_role": "overridden_by_bts" if self.scene.turbulence else "solver_request",
+            "wind_direction_role": "display_only",
+        }
         m = self.driver.reset(
             wind_speed=None if self.scene.turbulence else self.scene.wind_speed,
-            wind_direction=None)
+            wind_direction=wind_direction, upstream_request=upstream_request)
         self.u_inf = float(getattr(self.driver, "u_inf", np.nan))
         self.done = False
         self._t = 0

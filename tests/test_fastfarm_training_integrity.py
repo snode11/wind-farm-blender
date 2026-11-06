@@ -53,6 +53,45 @@ def test_effective_config_normalizes_defaults_and_wind_alias():
         "fake", 2, 4, wind_sched="pin:8", warmup_steps=8, n_epochs=10)
 
 
+def test_bts_schedule_preset_is_rejected_before_training_setup(monkeypatch):
+    monkeypatch.setattr(trainer, "source_input_identity", lambda *a: pytest.fail("must reject before setup"))
+    monkeypatch.setattr(trainer, "FastFarmSampler", lambda *a, **kw: pytest.fail("must not construct backend"))
+    with pytest.raises(ValueError, match="BTS.*--wind-sched"):
+        trainer.train("Dec_Turb3_Row1_Fastfarm", 1, 1, wind_sched="preset:turb")
+
+
+def test_bts_sampler_rejects_scalar_schedule_before_any_episode(monkeypatch):
+    monkeypatch.setattr(trainer, "FastFarmDriver", lambda *a, **kw: pytest.fail("must not construct backend"))
+    with pytest.raises(ValueError, match="BTS.*wind_time_series"):
+        trainer.FastFarmSampler("fake", 1, wind_time_series="wind.bts",
+                                wind_schedule=lambda episode: (None, None) if episode == 0 else (8., None))
+
+
+def test_bts_sampler_never_passes_scalar_wind_at_reset(monkeypatch):
+    from types import SimpleNamespace
+    created, resets, closed = [], [], []
+
+    def driver_factory(*args, **kwargs):
+        created.append(kwargs)
+
+        def reset(**options):
+            resets.append(options)
+            return dict(yaw=np.zeros(1), wind_speed=np.array([8.]), wind_direction=np.array([270.]))
+
+        return SimpleNamespace(n=1, act_low=-5., act_high=5., u_inf=8., reset=reset,
+                               close=lambda **kwargs: closed.append(kwargs))
+
+    monkeypatch.setattr(trainer, "FastFarmDriver", driver_factory)
+    sampler = trainer.FastFarmSampler("fake", 1, warmup_steps=0, wind_time_series="wind.bts")
+    try:
+        sampler.new_episode()
+        assert resets == [{}, {}]
+        assert all(item["wind_time_series"] == "wind.bts" for item in created)
+    finally:
+        sampler.close()
+    assert len(closed) == 2
+
+
 def fake_training(monkeypatch, tmp_path, episode_steps=3, count=2):
     created = []
 

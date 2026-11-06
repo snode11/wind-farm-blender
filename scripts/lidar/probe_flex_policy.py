@@ -23,9 +23,12 @@ def main():
     p.add_argument('--checkpoint', type=Path, default=ROOT/'results/checkpoints/mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt')
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--steps', type=int, default=3)
-    p.add_argument('--wind', type=float, default=14)
+    wind_input = p.add_mutually_exclusive_group()
+    wind_input.add_argument('--wind', type=float, default=14,
+                            help='Steady wind speed in m/s; mutually exclusive with --turbulence')
     p.add_argument('--controller', type=Path)
-    p.add_argument('--turbulence', type=Path)
+    wind_input.add_argument('--turbulence', type=Path,
+                            help='BTS input; wind speed is determined by the file')
     p.add_argument('--warmup-steps', type=int, default=0)
     p.add_argument('--surfaces', action='store_true')
     p.add_argument('--prebend', action='store_true', help='Use validated quadratic BeamDyn derivative and separate unloaded reference')
@@ -44,7 +47,9 @@ def main():
     policy = FlexPolicy(args.checkpoint)
     args.output.mkdir(parents=True, exist_ok=False)
     report = dict(status='RUNNING', policy=policy.metadata, records=[],
-                  wind_mps=args.wind, boundary='steady-wind control probe; not random-gust acceptance')
+                  wind_mps=None if args.turbulence else args.wind,
+                  boundary=('BTS wind input; not random-gust acceptance' if args.turbulence else
+                            'steady-wind control probe; not random-gust acceptance'))
     driver = None
     try:
         driver = FastFarmDriver(max_steps=args.steps+args.warmup_steps+2, controls=('yaw',),
@@ -119,7 +124,7 @@ def main():
                                   for f in farm.glob('*.fst')}
         # MPI abort can terminate Python before finally; preserve inputs first.
         (args.output/'probe.json').write_text(json.dumps(report, indent=2, allow_nan=False))
-        m = driver.reset(wind_speed=args.wind)
+        m = driver.reset() if args.turbulence else driver.reset(wind_speed=args.wind)
         for _ in range(args.warmup_steps):
             m = driver.step(np.zeros(3))
         report['boundary'] = ('random full-field wind, policy-controlled yaw, native pitch/torque; '

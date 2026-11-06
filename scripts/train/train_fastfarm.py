@@ -88,10 +88,14 @@ class FastFarmSampler:
                  obs_keys=OBS_KEYS, load_coef=1.0, reward_shaper=None,
                  wind_schedule=None, wind_time_series=None, purge=True,
                  obs_duty=False, duty_penalty=0.0, scene_path=None, progress=None,
-                 start_episode=0):
+                 start_episode=0, upstream_request=None):
+        if scene_path is None and wind_time_series is not None and wind_schedule is not None:
+            raise ValueError("BTS 来流由 wind_time_series 文件决定；请移除 wind_schedule，"
+                             "BTS 模式不接受标量风速调度")
         self.progress = progress
         self.env_id = env_id
         self.scene_path = scene_path
+        self.upstream_request = copy.deepcopy(upstream_request)
         self._rt = None
         self.ep_steps = int(episode_steps)
         self.warmup = int(warmup_steps)
@@ -151,6 +155,8 @@ class FastFarmSampler:
         if self.progress is not None: self.progress.progress("warmup")
         self.episode += 1
         ws, wd = self.wind_schedule(self.episode)
+        reset_options = ({"upstream_request": self.upstream_request}
+                         if self.upstream_request is not None else {})
         kw = {}
         if self.wind_time_series is not None:
             kw["wind_time_series"] = self.wind_time_series
@@ -165,7 +171,9 @@ class FastFarmSampler:
                                     warmup_steps=self.warmup,
                                     load_coef=self.load_coef,
                                     reward_shaper=self.shaper)
-            self._rt.reset()                     # 内部含 warmup
+            if wd is not None:
+                reset_options["wind_direction"] = wd
+            self._rt.reset(**reset_options)      # 内部含 warmup
             self.drv = self._rt.driver
             self.n = sc.n
             m = self._rt.last_measure
@@ -174,7 +182,8 @@ class FastFarmSampler:
                                       load_coef=self.load_coef,
                                       reward_shaper=self.shaper, **kw)
             self.n = self.drv.n
-            m = self.drv.reset(wind_speed=ws, wind_direction=wd)
+            m = (self.drv.reset(**reset_options) if self.wind_time_series is not None
+                 else self.drv.reset(wind_speed=ws, wind_direction=wd, **reset_options))
             for _ in range(self.warmup):             # 建立瞬态：空转、丢弃
                 m = self.drv.step(np.zeros(self.n))
         self._m = m
@@ -266,15 +275,14 @@ def experiment_config(env_id, iters, n_steps, **kwargs):
         config.pop(key)
     speed = config.pop("wind_speed")
     config["wind_sched"] = (config["wind_sched"] or
-                            (f"pin:{speed:g}" if speed is not None else "none")).strip()
-    if "floris" not in env_id.lower():
-        config["wind_direction"] = None
+                            (f"pin:{float(speed)!r}" if speed is not None else "none")).strip()
     head, _, argument = config["wind_sched"].partition(":")
     head = head.lower()
     if head == "pin":
-        config["wind_sched"] = f"pin:{float(argument):g}"
+        config["wind_sched"] = "pin:" + repr(float(argument)).removesuffix(".0")
     elif head == "cycle":
-        config["wind_sched"] = "cycle:" + ",".join(f"{float(x):g}" for x in argument.split(",") if x.strip())
+        config["wind_sched"] = "cycle:" + ",".join(
+            repr(float(x)).removesuffix(".0") for x in argument.split(",") if x.strip())
     elif head == "weibull":
         config["wind_sched"] = f"weibull:{int(argument) if argument else int(config['seed'])}"
     else:
@@ -283,7 +291,9 @@ def experiment_config(env_id, iters, n_steps, **kwargs):
         from wfrl.scene.schema import load_scene
         config["scene"] = load_scene(config["scene"]).to_dict()
         config["wind_sched"] = "scene"
-        config["wind_direction"] = None
+    elif head == "preset" and windcond.PRESETS.get(argument, {}).get("turb") is not None:
+        raise ValueError("BTS 预设不能通过 --wind-sched 加载；"
+                         "请使用 --scene 并在场景的 inflow.turbulence 中指定 BTS 文件")
     for key in ("iters", "n_steps", "n_epochs", "mb_steps"):
         if config[key] <= 0:
             raise ValueError(f"{key} must be positive")
@@ -293,12 +303,12 @@ def experiment_config(env_id, iters, n_steps, **kwargs):
 
 
 def training_wind_schedule(config):
-    """Use the same backend and explicit direction as experiment identity."""
-    if config["scene"] is not None:
-        return lambda episode: (None, None)
-    backend = "floris" if "floris" in config["env_id"].lower() else "fastfarm"
-    schedule = windcond.make_wind_schedule(config["wind_sched"], seed=config["seed"], backend=backend)
+    """Preserve solver requests; the driver decides whether they can be applied."""
     direction = config["wind_direction"]
+    if config["scene"] is not None:
+        return lambda episode: (None, direction)
+    # FLORIS 模式保留预设的原始风向；FAST.Farm 的应用与拒绝由底层接口负责。
+    schedule = windcond.make_wind_schedule(config["wind_sched"], seed=config["seed"], backend="floris")
     if direction is None:
         return schedule
     return lambda episode: (schedule(episode)[0], direction)
@@ -359,6 +369,12 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
           obs_duty=False, duty_penalty=0.0, scene=None,
           save_interval=0, resume_from=None, training_progress=None, run_id=None):
     config = experiment_config(**{key: value for key, value in locals().items()})
+    upstream_request = {"training": {
+        "wind_speed": wind_speed, "wind_direction": wind_direction, "wind_sched": wind_sched,
+        "wind_speed_role": ("overridden_by_scene" if scene is not None else
+                            "overridden_by_schedule" if wind_sched else "solver_request"),
+        "wind_direction_role": "solver_request",
+    }}
     wind_sched = config["wind_sched"]
     recovery = None
     policy_scene = None
@@ -438,7 +454,8 @@ def train(env_id, iters, n_steps, n_epochs=10, mb_steps=64,
                               wind_schedule=schedule, purge=purge,
                               obs_duty=obs_duty, duty_penalty=duty_penalty,
                               scene_path=scene, progress=progress,
-                              start_episode=recovery["next_episode"] if recovery else 0)
+                              start_episode=recovery["next_episode"] if recovery else 0,
+                              upstream_request=upstream_request)
         n = smp.n
         bounds = {"yaw": (smp.act_low, smp.act_high)}
         if action_contract is None:
@@ -772,8 +789,8 @@ def main():
                          "做后端/网络对照时**必须**给，否则比的是两次风况抽签"
                          "(功率 ~ u^3，实测单后端内部即可有 2.4x 跨度)")
     ap.add_argument("--wind-direction", type=float, default=None,
-                    help="钉死来流方向(°)。FAST.Farm 侧无法设定,会被忽略;"
-                         "因此跨后端对照请统一用 270(沿 +x,与机列同向)")
+                    help="请求求解器来流方向(°)，独立于场景显示方向。FAST.Farm 仅接受"
+                         "与固定坐标一致的 270°（模 360），不旋转；其他方向记录为未应用并拒绝")
 
     # ---- 回合结构 ----
     ap.add_argument("--episode-steps", type=int, default=128,

@@ -154,18 +154,35 @@ def test_torque_state_events_and_driver_submission_agree(rpm, torque, requested_
                 assert '尚未进入包线' in envelope[-1].detail
 
 
+@pytest.mark.parametrize('backend', ['Floris', 'Fastfarm'])
 @pytest.mark.parametrize('direction', [240., 270.])
-def test_floris_direction_reaches_schedule_and_experiment_identity(direction):
-    config = train.experiment_config('Dec_Turb3_Row1_Floris', 1, 1, wind_speed=8., wind_direction=direction)
+def test_direction_reaches_schedule_and_experiment_identity(backend, direction):
+    env_id = f'Dec_Turb3_Row1_{backend}'
+    config = train.experiment_config(env_id, 1, 1, wind_speed=8., wind_direction=direction)
     assert config['wind_direction'] == direction
     assert train.training_wind_schedule(config)(0) == (8., direction)
-    other = train.experiment_config('Dec_Turb3_Row1_Floris', 1, 1, wind_speed=8., wind_direction=direction + 1)
+    other = train.experiment_config(env_id, 1, 1, wind_speed=8., wind_direction=direction + 1)
     assert config != other
 
 
-def test_backend_specific_preset_and_fastfarm_direction_limit():
+def test_preset_and_fastfarm_direction_reach_backend_validation():
     floris = train.experiment_config('Dec_Turb3_Row1_Floris', 1, 1, wind_sched='preset:veer')
     assert train.training_wind_schedule(floris)(0) == (8., 240.)
     fastfarm = train.experiment_config('Dec_Turb3_Row1_Fastfarm', 1, 1, wind_speed=8., wind_direction=240.)
-    assert fastfarm['wind_direction'] is None
-    assert train.training_wind_schedule(fastfarm)(0) == (8., None)
+    assert fastfarm['wind_direction'] == 240.
+    assert train.training_wind_schedule(fastfarm)(0) == (8., 240.)
+    preset = train.experiment_config('Dec_Turb3_Row1_Fastfarm', 1, 1, wind_sched='preset:veer')
+    assert train.training_wind_schedule(preset)(0) == (8., 240.)
+
+
+@pytest.mark.parametrize('options', [
+    {'wind_speed': 8.123456789},
+    {'wind_sched': 'pin:8.123456789'},
+    {'wind_sched': 'cycle:8.123456789,11.987654321'},
+])
+def test_training_schedule_preserves_requested_speed_precision(options):
+    config = train.experiment_config('Dec_Turb3_Row1_Fastfarm', 1, 1, **options)
+    schedule = train.training_wind_schedule(config)
+    assert schedule(0) == (8.123456789, None)
+    if options.get('wind_sched', '').startswith('cycle:'):
+        assert schedule(1) == (11.987654321, None)
