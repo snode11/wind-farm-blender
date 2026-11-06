@@ -28,7 +28,7 @@ TLS 候选使用显式 `postprocess_dual_beam.py --method hub-tls.v1`；未覆�
 
 使用 `/opt/anaconda3/envs/wfrl-mac/bin/python`；求解器位于同环境 `bin/FAST.Farm`，版本 3.5.3。后处理需要 NumPy；设置 `OPENBLAS_NUM_THREADS=1` 避免几何小矩阵调用启动大量线程。无需策略 checkpoint 或训练。规定转速 9 rpm、变桨 0°、无 ServoDyn；这是固定转速工况，不是运行策略的性能结论。
 
-在仓库根目录执行以下命令。示例用新运行名保护已交付数据；正常工况用 8 m/s，较小净空工况用 12 m/s，其他配置一致。`--source-case` 可显式指定完整原始算例目录；默认来源见 `run_physics.py`，当前是保留的 NREL 5MW 历史算例。源目录不会修改。
+在仓库根目录执行以下命令。示例用新运行名保护已交付数据；正常工况用 8 m/s，较小净空工况用 12 m/s，其他配置一致。`--source-case` 可显式指定完整原始算例目录；默认来源见 `run_physics.py`，当前是保留的 NREL 5MW 历史算例。源目录不会修改。示例命令运行后会在 `results/lidar/raw/` 下生成新运行目录，在 `results/lidar/packages/` 下生成新结果包，这些产物不随仓库分发。
 
 ```sh
 export OPENBLAS_NUM_THREADS=1
