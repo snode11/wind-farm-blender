@@ -140,7 +140,12 @@ def test_other_memory_errors_are_not_filtered(tmp_path):
                                 name='other-error', required_markers=['ACTUAL_PASS'])
 
 
-def test_validation_isolates_all_blender_children_and_saved_environment(package, tmp_path, monkeypatch):
+@pytest.mark.parametrize(('failing_test', 'invalid_field'), [(None, None)] + [
+    (name, field) for name in ('radar-x100-detection-mode', 'radar-x100-clearance')
+    for field in ('status', 'module', 'addon_path')
+])
+def test_validation_checks_installed_regressions_in_isolation(
+        package, tmp_path, monkeypatch, failing_test, invalid_field):
     archive, inventory_path, inventory, _ = package
     inventory.update(package_id='wfrl_blender', version='1.0.0')
     inventory_path.write_text(json.dumps(inventory), encoding='utf-8')
@@ -149,14 +154,22 @@ def test_validation_isolates_all_blender_children_and_saved_environment(package,
     built = SimpleNamespace(archive=archive, inventory=inventory_path, checksum=checksum,
                             sha256=inventory['archive_sha256'])
     monkeypatch.setitem(sys.modules, 'build_extension', SimpleNamespace(build=lambda *args, **kwargs: built))
-    for key in ('BLENDER_USER_CONFIG', 'BLENDER_USER_RESOURCES', 'BLENDER_USER_EXTENSIONS'):
+    for key in ('BLENDER_USER_CONFIG', 'BLENDER_USER_RESOURCES', 'BLENDER_USER_EXTENSIONS',
+                'WFRL_EXPECTED_ADDON_ROOT'):
         monkeypatch.setenv(key, '/inherited/daily')
+    monkeypatch.setenv('PYTHONPATH', '/inherited/workspace')
     module = validator()
     output = tmp_path / 'validation'
     resources = output / 'profile'
     repository = resources / 'extensions'
     addon = repository / 'wfrl_blender'
     calls = []
+    regressions = {
+        'three-camera-default': ('three_camera_default_regression.py', 'THREE_CAMERA_DEFAULT_PASS', 'default-validation.json'),
+        'native-projection': ('native_camera_projection_regression.py', 'NATIVE_PROJECTION_PASS', 'native-projection-validation.json'),
+        'radar-x100-detection-mode': ('radar_x100_detection_mode.py', 'X100_DETECTION_MODE_PASS', 'result.json'),
+        'radar-x100-clearance': ('radar_x100_clearance.py', 'X100_CLEARANCE_PASS', 'result.json'),
+    }
 
     def fake_command(command, *, env, name, **kwargs):
         assert command[0] == '/fake/Blender'
@@ -165,6 +178,9 @@ def test_validation_isolates_all_blender_children_and_saved_environment(package,
         assert env['BLENDER_USER_RESOURCES'] == str(resources)
         assert env['BLENDER_USER_EXTENSIONS'] == str(repository)
         assert env['BLENDER_USER_CONFIG'] == str(resources / 'config')
+        assert env['WFRL_ADDON_MODULE'] == module.MODULE
+        assert env['WFRL_EXPECTED_ADDON_ROOT'] == str(addon)
+        assert 'PYTHONPATH' not in env
         assert '/inherited/daily' not in env.values()
         calls.append(name)
         data = dict(status='PASS', module=module.MODULE, addon_path=str(addon / '__init__.py'))
@@ -174,18 +190,94 @@ def test_validation_isolates_all_blender_children_and_saved_environment(package,
         elif name == 'install-file':
             with ZipFile(archive) as zipped:
                 zipped.extractall(addon)
-        elif name in ('three-camera-default', 'native-projection'):
-            filename = 'default-validation.json' if name == 'three-camera-default' else 'native-projection-validation.json'
-            (Path(env['WFRL_TEST_OUTPUT']) / filename).write_text(json.dumps(data), encoding='utf-8')
+        elif name in regressions:
+            script, marker, filename = regressions[name]
+            assert '--background' in command
+            assert Path(command[command.index('--python') + 1]).name == script
+            assert kwargs['required_markers'] == [marker]
+            destination = Path(env['WFRL_TEST_OUTPUT'])
+            assert not destination.exists()
+            destination.mkdir(parents=True)
+            if name == failing_test:
+                data[invalid_field] = {'status': 'FAIL', 'module': 'wfrl_blender',
+                    'addon_path': str(module.ROOT / 'blender_frontend/wfrl_blender/__init__.py')}[invalid_field]
+            (destination / filename).write_text(json.dumps(data), encoding='utf-8')
         return dict(status='PASS')
 
     monkeypatch.setattr(module, 'run_command', fake_command)
-    assert module.validate(SimpleNamespace(output=output, blender='/fake/Blender', build_only=False, timeout=1)) == 0
-    assert calls == ['repo-add', 'repo-probe', 'install-file', 'module-probe', 'three-camera-default', 'native-projection']
+    code = module.validate(SimpleNamespace(output=output, blender='/fake/Blender', build_only=False, timeout=1))
+    result = json.loads((output / 'package-validation.json').read_text(encoding='utf-8'))
+    expected_calls = ['repo-add', 'repo-probe', 'install-file', 'module-probe', *regressions]
+    if failing_test:
+        assert code == 1 and result['status'] == 'ERROR'
+        assert 'AssertionError' in result['error']
+        assert failing_test not in result['checks']
+        assert calls == expected_calls[:expected_calls.index(failing_test) + 1]
+    else:
+        assert code == 0 and result['status'] == 'PASS'
+        assert calls == expected_calls
+        for name in regressions:
+            assert result['checks'][name]['status'] == 'PASS'
+            assert result['checks'][name]['module'] == module.MODULE
+            assert Path(result['checks'][name]['addon_path']).parent == addon
     environment = json.loads((output / 'environment.json').read_text(encoding='utf-8'))
     assert environment['BLENDER_USER_RESOURCES'] == str(resources)
     assert environment['BLENDER_USER_EXTENSIONS'] == str(repository)
-    assert json.loads((output / 'package-validation.json').read_text(encoding='utf-8'))['environment'] == environment
+    assert environment['WFRL_EXPECTED_ADDON_ROOT'] == str(addon)
+    assert result['environment'] == environment
+
+
+@pytest.fixture
+def installed_provenance(tmp_path, monkeypatch):
+    source = Path(__file__).parent / 'blender' / '_native.py'
+    spec = importlib.util.spec_from_file_location('native_package_helpers', source)
+    helpers = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(helpers)
+    package = tmp_path / 'installed'
+    addon = SimpleNamespace(__name__='bl_ext.wfrl_frontend.wfrl_blender',
+                            __file__=str(package / '__init__.py'))
+    modules = {addon.__name__: addon}
+    for name in ('detection', 'clearance'):
+        modules[addon.__name__ + '._vendor.radar_x100.' + name] = SimpleNamespace(
+            __file__=str(package / '_vendor/radar_x100' / (name + '.py')))
+    monkeypatch.setattr(helpers, 'sys', SimpleNamespace(modules=modules))
+    return helpers.installed_provenance, addon, modules
+
+
+def test_installed_provenance_reports_vendor_modules_and_bundled_data(installed_provenance):
+    report, addon, modules = installed_provenance
+    data = Path(addon.__file__).parent / 'assets/mappo'
+    result = report(addon, farm_package=data)
+    assert result['imported_modules'] == {name: module.__file__ for name, module in modules.items()}
+    assert result['data_paths'] == {'farm_package': str(data)}
+
+
+@pytest.mark.parametrize('name', ['wfrl', 'wfrl.radar_x100.detection',
+                                  'wfrl_blender', 'wfrl_blender.radar_x100.runtime'])
+def test_installed_provenance_rejects_workspace_modules(installed_provenance, name):
+    report, addon, modules = installed_provenance
+    modules[name] = SimpleNamespace()
+    with pytest.raises(AssertionError, match='workspace module'):
+        report(addon)
+
+
+@pytest.mark.parametrize('kind', ['module', 'data'])
+def test_installed_provenance_rejects_paths_outside_package(installed_provenance, tmp_path, kind):
+    report, addon, modules = installed_provenance
+    data = Path(addon.__file__).parent / 'assets/mappo'
+    if kind == 'module':
+        modules[addon.__name__ + '._vendor.radar_x100.detection'].__file__ = str(tmp_path / 'detection.py')
+    else:
+        data = tmp_path / 'workspace/assets/mappo'
+    with pytest.raises(AssertionError):
+        report(addon, farm_package=data)
+
+
+def test_installed_provenance_does_not_restrict_source_mode(installed_provenance, tmp_path):
+    report, addon, modules = installed_provenance
+    addon.__name__ = 'wfrl_blender'
+    modules['wfrl.radar_x100.detection'] = SimpleNamespace()
+    assert report(addon, farm_package=tmp_path / 'source') == {}
 
 
 def test_part7_install_isolates_every_blender_child(tmp_path, monkeypatch):

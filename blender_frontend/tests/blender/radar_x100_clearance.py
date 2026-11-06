@@ -75,7 +75,8 @@ def finish_recording(session):
 
 
 try:
-    addon.load_demo_scene(farm.default_package())
+    source_package = farm.default_package()
+    addon.load_demo_scene(source_package)
     scene = bpy.context.scene
     scene.wfrl_x100_observation_mode = 'DETECTIONS'
     scene.wfrl_x100_echo_classes = True
@@ -201,6 +202,8 @@ finally:
     addon.unregister()
 
 result = dict(status='PASS', checks=checks, sequences=sequences, sample_estimates=archived,
-              addon=addon.__file__, estimator=clearance.estimator.__file__)
+              module=addon.__name__, addon_path=addon.__file__,
+              addon=addon.__file__, estimator=clearance.estimator.__file__,
+              **_native.installed_provenance(addon, farm_package=source_package))
 atomic_json.write_json(OUT / 'result.json', result)
 print('X100_CLEARANCE_PASS', json.dumps(dict(checks=checks, sequences=sequences)), flush=True)

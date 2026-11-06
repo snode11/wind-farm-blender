@@ -190,6 +190,7 @@ def validate(args):
             ('BLENDER_USER_CONFIG', 'config'), ('BLENDER_USER_SCRIPTS', 'scripts'),
             ('BLENDER_USER_DATAFILES', 'datafiles'))}
         repository = profile/'extensions'
+        installed = repository/inventory['package_id']
         for directory in (*directories.values(), repository):
             directory.mkdir(parents=True)
         env = {key: value for key, value in os.environ.items()
@@ -197,6 +198,7 @@ def validate(args):
         overrides = {key: str(value) for key, value in directories.items()}
         overrides.update(BLENDER_USER_RESOURCES=str(profile), BLENDER_USER_EXTENSIONS=str(repository))
         overrides['WFRL_ADDON_MODULE'] = MODULE
+        overrides['WFRL_EXPECTED_ADDON_ROOT'] = str(installed)
         env.update(overrides)
         (output/'environment.json').write_text(json.dumps(overrides, indent=2), encoding='utf-8')
         result['environment'] = overrides
@@ -204,7 +206,7 @@ def validate(args):
         def command(name, values, markers=(), test_output=None):
             child_env = dict(env)
             if test_output:
-                test_output.mkdir(parents=True)
+                test_output.parent.mkdir(parents=True, exist_ok=True)
                 child_env['WFRL_TEST_OUTPUT'] = str(test_output)
             row = run_command([str(args.blender), '--disable-autoexec', '--python-exit-code', '1',
                                '--python-expr', 'import sys; sys.dont_write_bytecode=True', *values],
@@ -225,13 +227,14 @@ def validate(args):
         result['checks']['repository_probe'] = probe('repo', 'FRONTEND_REPOSITORY_PROBE_PASS')
         command('install-file', ['--command', 'extension', 'install-file', '-r', REPOSITORY_ID,
                 '--enable', str(built.archive)], [f'Installed "{inventory["package_id"]}"'])
-        installed = repository/inventory['package_id']
         result['checks']['installed_inventory'] = verify_installed(installed, inventory)
         result['checks']['module_probe'] = probe('module', 'FRONTEND_INSTALLED_MODULE_PROBE_PASS')
         result['addon_path'] = result['checks']['module_probe']['addon_path']
         tests = (
             ('three-camera-default', 'three_camera_default_regression.py', 'THREE_CAMERA_DEFAULT_PASS', 'default-validation.json'),
             ('native-projection', 'native_camera_projection_regression.py', 'NATIVE_PROJECTION_PASS', 'native-projection-validation.json'),
+            ('radar-x100-detection-mode', 'radar_x100_detection_mode.py', 'X100_DETECTION_MODE_PASS', 'result.json'),
+            ('radar-x100-clearance', 'radar_x100_clearance.py', 'X100_CLEARANCE_PASS', 'result.json'),
         )
         for name, filename, marker, datafile in tests:
             destination = output/'regressions'/name

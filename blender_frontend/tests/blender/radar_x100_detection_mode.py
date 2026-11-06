@@ -49,7 +49,8 @@ def assert_detection(session):
 
 
 try:
-    addon.load_demo_scene(farm.default_package())
+    source_package = farm.default_package()
+    addon.load_demo_scene(source_package)
     scene = bpy.context.scene
     assert scene.wfrl_x100_observation_mode == 'GEOMETRY'
     property_definition = scene.bl_rna.properties['wfrl_x100_observation_mode']
@@ -173,6 +174,8 @@ finally:
     addon.unregister()
 
 result = dict(status='PASS', checks=checks, sequences=sequences, detection_counts=counts,
-              addon=addon.__file__, core=radar.simulation.__file__)
+              module=addon.__name__, addon_path=addon.__file__,
+              addon=addon.__file__, core=radar.simulation.__file__,
+              **_native.installed_provenance(addon, farm_package=source_package))
 atomic_json.write_json(OUT / 'result.json', result)
 print('X100_DETECTION_MODE_PASS', json.dumps(result), flush=True)

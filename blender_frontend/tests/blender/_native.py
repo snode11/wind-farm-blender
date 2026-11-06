@@ -36,6 +36,27 @@ def check_addon_root(addon):
         assert Path(addon.__file__).resolve().parent == Path(expected).resolve(), addon.__file__
 
 
+def installed_provenance(addon, **data_paths):
+    """Report installed module/data paths and reject workspace dependencies."""
+    if not addon.__name__.startswith('bl_ext.'):
+        return {}
+    package = Path(addon.__file__).resolve().parent
+    imported = {}
+    for name, module in tuple(sys.modules.items()):
+        assert name not in ('wfrl', 'wfrl_blender') and not name.startswith(('wfrl.', 'wfrl_blender.')), (
+            'Installed regression imported workspace module: ' + name)
+        if name == addon.__name__ or name.startswith(addon.__name__ + '.'):
+            filename = getattr(module, '__file__', None)
+            if filename:
+                path = Path(filename).resolve()
+                assert path.is_relative_to(package), (name, path)
+                imported[name] = str(path)
+    paths = {name: str(Path(path).resolve()) for name, path in data_paths.items()}
+    for name, path in paths.items():
+        assert Path(path).is_relative_to(package), (name, path)
+    return dict(imported_modules=imported, data_paths=paths)
+
+
 def output_directory(*, new=True, resolve=False):
     """Create and return ``WFRL_TEST_OUTPUT``; ``new`` rejects a directory that already exists."""
     output = Path(os.environ['WFRL_TEST_OUTPUT'])
