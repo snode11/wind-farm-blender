@@ -15,6 +15,64 @@ def section(layout, key, title):
     return body
 
 
+class _BladeResponseLayout:
+    """Use physical component labels with the shared response panel and saved enum IDs."""
+    def __init__(self, layout):
+        self.layout = layout
+
+    def __getattr__(self, name):
+        method = getattr(self.layout, name)
+        if name in {'box', 'row', 'column'}:
+            return lambda *args, **kwargs: type(self)(method(*args, **kwargs))
+        if name == 'panel':
+            return lambda *args, **kwargs: tuple(type(self)(part) if part is not None else None
+                                               for part in method(*args, **kwargs))
+        return method
+
+    def prop(self, data, name, **kwargs):
+        if name != 'wfrl_imbalance_metric':
+            return self.layout.prop(data, name, **kwargs)
+        from ..imbalance import METRICS
+        column = self.layout.column(align=True)
+        for key, (label, _unit, _factor) in METRICS.items():
+            column.prop_enum(data, name, key, text=label)
+
+
+def draw_blade_mechanics(layout, scene):
+    from ..imbalance import ROOT_FORCES, latest_turn
+    layout.label(text='弹性扭转：未提供数值', icon='INFO')
+    details = section(layout, 'wfrl_blade_mechanics', '叶根力、坐标与扭转定义')
+    if details is None:
+        return
+    for text in ('叶根载荷使用 BeamDyn B1/B2/B3RootF*r、RootM*r；INVALID 通道不作为有效零值。',
+                 'r 系固定于运动叶根，等同 IEC 叶片 b 系，随叶片刚体运动和变桨转动；z 从根指向尖。',
+                 'RootMzr 为叶根扭矩：绕 r 系展向 z 轴的力矩，不是材料应力或扭转应变。',
+                 'TipRDxr/yr/zr 为无量纲 Wiener–Milenković 旋转参数，单个分量不能乘 180/π 当作扭角。',
+                 'BeamDyn v3.5.3 的 TipRD 相对未变形截面定向，已扣除参考预扭及随叶根的刚体运动和变桨。',
+                 '预弯与变形叶片的局部展向不等同 r 系 z 轴；叶尖旋转矩阵不能唯一分离沿叶片的弹性扭转。',
+                 '当前数据未提供展向截面旋转或扭转应变；轴角投影和 Euler 角仅是定向分量，不作为弹性扭转角（°）。'):
+        message(details, text)
+    active = farm_flex.active_for(scene)
+    data = getattr(active, 'imbalance', None)
+    row = data['turbines'].get(scene.wfrl_imbalance_turbine) if data else None
+    if row is None or not all(key in row['metrics'] for key in ROOT_FORCES):
+        details.label(text='当前分析包未提供叶根力统计', icon='INFO')
+        return
+    value = clearance_replay.sample(scene)
+    turn = latest_turn(row, value['time_s']) if value else None
+    details.label(text='叶根力 · 同一三叶相位对齐统计')
+    details.label(text='全片段汇总 · 包含当前位置之后的数据', icon='INFO')
+    for key, (label, unit, factor) in ROOT_FORCES.items():
+        metric = row['metrics'][key]
+        card = details.box()
+        card.label(text=label)
+        card.label(text=f'三叶均值曲线差异：{metric["rms_spread"] * factor:.4f} {unit}')
+        for blade, (mean, offset) in enumerate(zip(metric['blade_means'], metric['blade_offsets']), 1):
+            card.label(text=f'B{blade} 均值 {mean * factor:+.4f} / 偏差 {offset * factor:+.4f} {unit}')
+        card.label(text=(f'最近完整转差异：{turn["metrics"][key]["rms_spread"] * factor:.4f} {unit}'
+                         if turn else '尚无完整三叶对齐转'))
+
+
 def draw_radar(layout, scene, value):
     modes = layout.row(align=True)
     modes.operator('wfrl.load_dual_beam', text='双束净空 / S1')
@@ -314,7 +372,8 @@ def draw(layout, context, *, show_playback=True):
         draw_radar(layout, scene, value)
     elif scene.wfrl_farm_panel_page == 'IMBALANCE':
         from . import imbalance
-        imbalance.draw(layout, scene)
+        imbalance.draw(_BladeResponseLayout(layout), scene)
+        draw_blade_mechanics(layout, scene)
     elif scene.wfrl_farm_panel_page == 'VIDEO':
         from . import video_output
         video_output.draw(layout, context)

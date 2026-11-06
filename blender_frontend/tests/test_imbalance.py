@@ -214,5 +214,229 @@ def test_export_is_reproducible_from_saved_sources():
         else:
             assert actual == saved
 
+    imbalance.validate(data, json.loads((SOURCE / 'manifest.json').read_bytes()), telemetry)
+    for row in data['turbines'].values():
+        assert set(row['metrics']) == set(imbalance.METRICS) | set(imbalance.ROOT_FORCES)
+        for key in imbalance.ROOT_FORCES:
+            assert row['metrics'][key]['unit'] == 'N'
     compare(data, expected)
     assert hashes == json.loads((ANALYSIS / 'manifest.json').read_bytes())['source_hashes']
+
+
+@pytest.mark.parametrize('tid', ['T1', 'T2', 'T3'])
+def test_builtin_nine_metrics_have_complete_turns_and_raw_source_identity(tid):
+    data = imbalance.load_for_source(SOURCE)
+    row = data['turbines'][tid]
+    keys = set(imbalance.METRICS) | set(imbalance.ROOT_FORCES)
+    assert len(keys) == 9 and set(row['metrics']) == keys
+    assert row['source']['saved_samples'] == 2401
+    assert all(set(turn['metrics']) == keys for turn in row['turns'])
+    telemetry = json.loads((SOURCE / 'telemetry.json').read_bytes())
+    source = telemetry['sources'][tid]
+    archive = ROOT / 'outputs/dual-beam-tls-20261002/stages/02-diagnostics/raw-evidence' / source['path']
+    if archive.exists():
+        assert producer.digest(archive) == source['sha256'] == row['source']['sha256']
+
+
+def test_six_metric_package_still_loads_without_inventing_root_forces():
+    data = json.loads((ANALYSIS / 'results.json').read_bytes())
+    for row in data['turbines'].values():
+        for key in imbalance.ROOT_FORCES:
+            row['metrics'].pop(key)
+            for turn in row['turns']:
+                turn['metrics'].pop(key)
+    imbalance.validate(data, json.loads((SOURCE / 'manifest.json').read_bytes()),
+                       json.loads((SOURCE / 'telemetry.json').read_bytes()))
+    assert all(set(row['metrics']) == set(imbalance.METRICS) for row in data['turbines'].values())
+
+
+def _synthetic_replay(path, *, fault=None, rotation=0.):
+    path.mkdir()
+    times = np.arange(0., 16.25, .25)
+    azimuth = times * 90.
+    columns = {'Time': times, 'Azimuth': azimuth % 360}
+    units = {'Time': '(s)', 'Azimuth': '(deg)'}
+    tips = np.empty((len(times), 3, 3))
+    for blade, offset in enumerate((1., 2., 4.), 1):
+        for axis, factor in zip('xyz', (1., 2., 3.)):
+            for suffix, unit, value in ((f'RootF{axis}r', '(N)', 1000. * offset * factor),
+                                        (f'RootM{axis}r', '(N-m)', 10000. * offset * factor),
+                                        (f'TipTD{axis}r', '(m)', .1 * offset * factor),
+                                        (f'TipRD{axis}r', '(-)', rotation * offset * factor)):
+                name = f'B{blade}{suffix}'
+                columns[name] = np.full(len(times), value)
+                units[name] = unit
+            tips[:, blade - 1, 'xyz'.index(axis)] = .1 * offset * factor
+        for suffix in ('RootMyc', 'RootMxc', 'OoPDefl', 'IPDefl'):
+            name = f'{suffix}{blade}'
+            columns[name] = np.zeros(len(times))
+            units[name] = 'INVALID'
+    if fault is not None:
+        name, kind = fault
+        if kind == 'missing':
+            columns.pop(name)
+            units.pop(name)
+        elif kind in ('nan', 'inf'):
+            columns[name][5] = float(kind)
+        else:
+            units[name] = kind
+            columns[name][:] = 0.
+    output = path / 'synthetic.out'
+    output.write_text('\n' * 6 + '\t'.join(columns) + '\n' + '\t'.join(units.values()) + '\n'
+                      + '\n'.join('\t'.join(str(value) for value in values)
+                                  for values in zip(*columns.values())) + '\n', encoding='utf-8')
+    replay = {'T1': {'motion': [dict(time_s=float(t), azimuth_deg=float(a)) for t, a in zip(times, azimuth)]}}
+    telemetry = {'sources': {'T1': dict(path=str(output), sha256=producer.digest(output))}}
+    for name, data in (('data.json', replay), ('telemetry.json', telemetry),
+                       ('deflection-t1.json', {'simulation': tips.tolist()})):
+        (path / name).write_text(json.dumps(data), encoding='utf-8')
+    (path / 'geometry.npz').write_bytes(b'synthetic geometry identity')
+    manifest = dict(structural_module='BeamDyn', schema='wfrl.farm-flex-review.v3', turbine_ids=['T1'],
+                    source_fps=4., segment=dict(start_s=0., end_s=16.),
+                    files={name: producer.digest(path / name) for name in
+                           ('data.json', 'geometry.npz', 'telemetry.json', 'deflection-t1.json')})
+    (path / 'manifest.json').write_text(json.dumps(manifest), encoding='utf-8')
+    return path, manifest, telemetry
+
+
+def test_invalid_elastodyn_values_are_absent_not_zero(tmp_path):
+    package, _manifest, _telemetry = _synthetic_replay(tmp_path / 'source')
+    columns, units = producer.read_output(package / 'synthetic.out')
+    assert units['RootMyc1'] == 'INVALID'
+    assert 'RootMyc1' not in columns
+    assert 'OoPDefl2' not in columns
+    np.testing.assert_array_equal(columns['B1RootMyr'], 20000.)
+    output = tmp_path / 'invalid-text.out'
+    output.write_text('\n' * 6 + 'Time\tRootMyc1\n(s)\tINVALID\n0\tunavailable\n', encoding='utf-8')
+    columns, units = producer.read_output(output)
+    assert set(columns) == {'Time'}
+    assert units['RootMyc1'] == 'INVALID'
+
+
+@pytest.mark.parametrize('name, fault', [
+    ('B1RootFxr', 'INVALID'), ('B2RootMyr', 'INVALID'),
+    ('B3RootMzr', '(INVALID)'), ('B1RootFyr', '(kN)'), ('B2RootMxr', '(kN-m)'),
+    ('B2RootFzr', 'missing'), ('B1RootMyr', 'missing'),
+    ('B3RootFxr', 'nan'), ('B3RootMzr', 'inf'),
+])
+def test_export_rejects_unusable_beamdyn_channels_without_elastodyn_fallback(tmp_path, name, fault):
+    package, _manifest, _telemetry = _synthetic_replay(tmp_path / 'source', fault=(name, fault))
+    with pytest.raises(ValueError, match='BeamDyn channel'):
+        producer.export(package, ROOT, tmp_path / 'analysis')
+    assert not (tmp_path / 'analysis').exists()
+
+
+def test_valid_zero_is_kept_with_its_beamdyn_identity(tmp_path):
+    package, _manifest, _telemetry = _synthetic_replay(tmp_path / 'source', fault=('B1RootMzr', '(N-m)'))
+    result, _hashes = producer.build(package, ROOT)
+    metric = result['turbines']['T1']['metrics']['root_Mz']
+    assert metric['blade_means'] == pytest.approx([0., 60000., 120000.])
+    assert metric['rms_spread'] > 0
+
+
+def test_root_forces_share_phase_statistics_and_package_validation(tmp_path, monkeypatch):
+    package, _manifest, _telemetry = _synthetic_replay(tmp_path / 'source')
+    output = tmp_path / 'analysis'
+    exported = producer.export(package, ROOT, output)
+    data = imbalance.read_package(output, package)
+    assert data == exported
+    row = data['turbines']['T1']
+    assert len(row['turns']) == 3
+    for key, factor in zip(imbalance.ROOT_FORCES, (1., 2., 3.)):
+        means = np.array([1000., 2000., 4000.]) * factor
+        metric = row['metrics'][key]
+        assert metric['unit'] == 'N'
+        assert metric['blade_means'] == pytest.approx(means)
+        assert metric['blade_offsets'] == pytest.approx(means - means.mean())
+        assert metric['rms_spread'] == pytest.approx(means.std())
+        np.testing.assert_allclose(metric['phase_mean'], np.repeat(means[:, None], 72, axis=1))
+        for turn in row['turns']:
+            assert turn['metrics'][key]['blade_means'] == pytest.approx(means)
+            assert turn['metrics'][key]['rms_spread'] == pytest.approx(means.std())
+    active = SimpleNamespace(imbalance=data, imbalance_plots={})
+    monkeypatch.setattr(farm_flex, 'active_for', lambda scene: active)
+    plot = imbalance.plot_data(SimpleNamespace(wfrl_imbalance_turbine='T1', wfrl_imbalance_metric='root_Fx'))
+    assert plot.units == ('kN',)
+    assert plot.series[0][1][0][0][1] == pytest.approx(1.)
+
+
+@pytest.mark.parametrize('fault', ['unit', 'nan', 'partial', 'turn', 'rotation'])
+def test_root_force_and_rotation_semantics_are_validated(tmp_path, fault):
+    package, manifest, telemetry = _synthetic_replay(tmp_path / 'source')
+    data, _hashes = producer.build(package, ROOT)
+    row = data['turbines']['T1']
+    if fault == 'unit': row['metrics']['root_Fx']['unit'] = 'INVALID'
+    if fault == 'nan': row['metrics']['root_Fy']['phase_mean'][0][0] = float('nan')
+    if fault == 'partial': row['metrics'].pop('root_Fz')
+    if fault == 'turn': row['turns'][0]['metrics'].pop('root_Fx')
+    if fault == 'rotation': row['metrics']['elastic_twist_deg'] = row['metrics']['tip_z']
+    with pytest.raises(ValueError):
+        imbalance.validate(data, manifest, telemetry)
+
+
+def test_rotation_parameters_never_become_elastic_twist(tmp_path):
+    still, _manifest, _telemetry = _synthetic_replay(tmp_path / 'still')
+    rotated, _manifest, _telemetry = _synthetic_replay(tmp_path / 'rotated', rotation=4. * np.tan(np.pi / 8.))
+    first, _hashes = producer.build(still, ROOT)
+    second, _hashes = producer.build(rotated, ROOT)
+    a, b = first['turbines']['T1'], second['turbines']['T1']
+    assert a['metrics'] == b['metrics']
+    assert a['turns'] == b['turns']
+    assert set(b['metrics']) == set(imbalance.METRICS) | set(imbalance.ROOT_FORCES)
+
+
+class _ResponseLayout:
+    def __init__(self):
+        self.labels, self.choices, self.properties = [], [], []
+
+    def row(self, **kwargs): return self
+    def column(self, **kwargs): return self
+    def box(self): return self
+    def panel(self, *args, **kwargs): return self, self
+    def label(self, *, text='', **kwargs): self.labels.append(text)
+    def prop(self, data, name, **kwargs): self.properties.append(name)
+    def prop_enum(self, data, name, value, *, text='', **kwargs): self.choices.append((name, value, text))
+
+
+@pytest.mark.parametrize('forces', [False, True])
+def test_response_panel_labels_coordinates_and_unavailable_twist(tmp_path, frontend_module, monkeypatch, forces):
+    panel = frontend_module('wfrl_blender.panels.farm_replay')
+    shared_panel = frontend_module('wfrl_blender.panels.imbalance')
+    if forces:
+        package, _manifest, _telemetry = _synthetic_replay(tmp_path / 'source')
+        data, _hashes = producer.build(package, ROOT)
+    else:
+        data = imbalance.load_for_source(SOURCE)
+        for row in data['turbines'].values():
+            for key in imbalance.ROOT_FORCES:
+                row['metrics'].pop(key)
+                for turn in row['turns']:
+                    turn['metrics'].pop(key)
+    active = SimpleNamespace(imbalance=data)
+    scene = SimpleNamespace(wfrl_imbalance_turbine='T1', wfrl_imbalance_metric='root_Mz')
+    monkeypatch.setattr(farm_flex, 'active_for', lambda owner: active if owner is scene else None)
+    monkeypatch.setattr(panel.clearance_replay, 'sample', lambda owner: {'time_s': 16.})
+    for target in (panel, shared_panel):
+        monkeypatch.setattr(target, 'message', lambda layout, text, **kwargs: layout.label(text=text))
+    layout = _ResponseLayout()
+    shared_panel.draw(panel._BladeResponseLayout(layout), scene)
+    panel.draw_blade_mechanics(layout, scene)
+    assert 'wfrl_imbalance_metric' not in layout.properties
+    assert ('wfrl_imbalance_metric', 'root_Mz', '叶根扭矩 Mz（r系）') in layout.choices
+    text = '\n'.join(layout.labels)
+    assert '叶根弯矩 Mz' not in text
+    assert 'RootMzr 为叶根扭矩' in text and 'IEC 叶片 b 系' in text
+    assert '弹性扭转：未提供数值' in layout.labels
+    assert 'Wiener–Milenković' in text and '已扣除参考预扭' in text
+    assert '局部展向不等同 r 系 z 轴' in text and '不能唯一分离' in text
+    assert '当前数据未提供展向截面旋转或扭转应变' in text
+    assert '不作为弹性扭转角（°）' in text
+    assert '刚体转动、变桨、预扭和弯曲引起的转动尚未分离' not in text
+    if forces:
+        assert 'B1 均值 +1.0000 / 偏差 -1.3333 kN' in layout.labels
+        assert any(label.startswith('最近完整转差异：') for label in layout.labels)
+    else:
+        assert '当前分析包未提供叶根力统计' in layout.labels
+        assert not any(label.endswith(' kN') for label in layout.labels)
+        scene.wfrl_imbalance_metric = 'root_Fx'
+        assert imbalance.plot_data(scene) is None

@@ -19,12 +19,42 @@ CHANNELS = {
     'root_Mx': ('RootMxr', '(N-m)', 'N m'),
     'root_My': ('RootMyr', '(N-m)', 'N m'),
     'root_Mz': ('RootMzr', '(N-m)', 'N m'),
+    'root_Fx': ('RootFxr', '(N)', 'N'),
+    'root_Fy': ('RootFyr', '(N)', 'N'),
+    'root_Fz': ('RootFzr', '(N)', 'N'),
 }
 METHOD = 'common-turn-phase-mean.v1'
 
 
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def read_output(path):
+    """Keep invalid channel units for diagnostics, without exposing their values."""
+    with Path(path).open(encoding='utf-8') as stream:
+        header = [next(stream) for _ in range(8)]
+    channels, units = header[6].split(), header[7].split()
+    if not channels or len(channels) != len(units) or len(set(channels)) != len(channels):
+        raise ValueError('Invalid OpenFAST channel header')
+    valid = [i for i, unit in enumerate(units) if unit.upper().strip('()') != 'INVALID']
+    if not valid:
+        raise ValueError('No valid OpenFAST channels')
+    raw = np.loadtxt(path, skiprows=8, usecols=valid, ndmin=2, encoding='utf-8')
+    return {channels[i]: raw[:, j] for j, i in enumerate(valid)}, dict(zip(channels, units))
+
+
+def beamdyn_values(columns, units, suffix, expected_unit, use):
+    """Require all three BeamDyn components; ElastoDyn channels are not substitutes."""
+    names = [f'B{b}{suffix}' for b in (1, 2, 3)]
+    for name in names:
+        unit = units.get(name)
+        if unit != expected_unit or name not in columns:
+            raise ValueError(f'Invalid or missing BeamDyn channel: {name} (unit {unit!r}; expected {expected_unit})')
+    values = np.column_stack([columns[name][use] for name in names])
+    if not np.isfinite(values).all():
+        raise ValueError('Non-finite BeamDyn channel samples: ' + suffix)
+    return values
 
 
 def phase_sample(azimuth, values, spacing=5.):
@@ -78,12 +108,7 @@ def build(package, repo):
         path = path if path.is_absolute() else repo / path
         if digest(path) != source['sha256']:
             raise ValueError('Raw output integrity mismatch: ' + tid)
-        with path.open() as stream:
-            header = [next(stream) for _ in range(8)]
-        channels, units = header[6].split(), header[7].split()
-        raw = np.loadtxt(path, skiprows=8)
-        columns = {name: raw[:, i] for i, name in enumerate(channels)}
-        units = dict(zip(channels, units))
+        columns, units = read_output(path)
         if units.get('Time') != '(s)' or units.get('Azimuth') != '(deg)':
             raise ValueError('Invalid time or azimuth units')
         use = (columns['Time'] >= start) & (columns['Time'] <= end)
@@ -97,10 +122,7 @@ def build(package, repo):
             raise ValueError('Raw output and replay clocks/azimuth differ: ' + tid)
         metrics, turns, tips = {}, [], []
         for key, (suffix, expected_unit, unit) in CHANNELS.items():
-            names = [f'B{b}{suffix}' for b in (1, 2, 3)]
-            if any(units.get(name) != expected_unit for name in names):
-                raise ValueError('Missing BeamDyn channel or incorrect unit: ' + suffix)
-            values = np.column_stack([columns[name][use] for name in names])
+            values = beamdyn_values(columns, units, suffix, expected_unit, use)
             cycles, grid, sampled = phase_sample(azimuth, values)
             if key.startswith('tip_'):
                 tips.append(values)

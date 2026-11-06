@@ -10,9 +10,14 @@ METRICS = {
     'tip_x': ('叶尖根系 x', 'm', 1.),
     'tip_y': ('叶尖根系 y', 'm', 1.),
     'tip_z': ('叶尖根系 z', 'm', 1.),
-    'root_Mx': ('叶根弯矩 Mx', 'kN·m', .001),
-    'root_My': ('叶根弯矩 My', 'kN·m', .001),
-    'root_Mz': ('叶根弯矩 Mz', 'kN·m', .001),
+    'root_Mx': ('叶根弯矩 Mx（r系）', 'kN·m', .001),
+    'root_My': ('叶根弯矩 My（r系）', 'kN·m', .001),
+    'root_Mz': ('叶根扭矩 Mz（r系）', 'kN·m', .001),
+}
+ROOT_FORCES = {
+    'root_Fx': ('叶根力 Fx（r系）', 'kN', .001),
+    'root_Fy': ('叶根力 Fy（r系）', 'kN', .001),
+    'root_Fz': ('叶根力 Fz（r系）', 'kN', .001),
 }
 SOURCE_FILES = {'manifest.json', 'data.json', 'geometry.npz', 'telemetry.json', 'deflection-t1.json'}
 
@@ -77,10 +82,12 @@ def validate(data, source_manifest, telemetry):
         _require(set(row['physical']) == {'mass', 'aerodynamic'}, 'physical result types')
         for kind, physical in row['physical'].items():
             _physical(physical, kind)
-        _require(set(row['metrics']) == set(METRICS), 'metric coverage')
+        keys = set(row['metrics'])
+        _require(keys in (set(METRICS), set(METRICS) | set(ROOT_FORCES)), 'metric coverage')
         for key, metric in row['metrics'].items():
             _stats(metric)
-            _require(metric.get('unit') == ('m' if key.startswith('tip_') else 'N m'), 'metric unit: ' + key)
+            unit = 'm' if key.startswith('tip_') else 'N' if key in ROOT_FORCES else 'N m'
+            _require(metric.get('unit') == unit, 'metric unit: ' + key)
             curves = metric.get('phase_mean')
             _require(isinstance(curves, list) and len(curves) == 3
                      and all(_vector(curve, 72) for curve in curves), 'phase curves')
@@ -99,7 +106,7 @@ def validate(data, source_manifest, telemetry):
             if previous:
                 _require(turn['cycle_index'] == previous['cycle_index'] + 1
                          and turn['start_s'] > previous['start_s'] and turn['end_s'] > previous['end_s'], 'turn order')
-            _require(set(turn['metrics']) == set(METRICS), 'turn metrics')
+            _require(set(turn['metrics']) == keys, 'turn metrics')
             for metric in turn['metrics'].values():
                 _stats(metric)
             previous = turn
@@ -173,11 +180,12 @@ def plot_data(scene):
     active = farm_flex.active_for(scene)
     data = getattr(active, 'imbalance', None)
     tid, metric = scene.wfrl_imbalance_turbine, scene.wfrl_imbalance_metric
-    if data is None or tid not in data['turbines']:
+    if (data is None or tid not in data['turbines']
+            or metric not in data['turbines'][tid]['metrics']):
         return None
     cache = active.imbalance_plots
     if (tid, metric) not in cache:
-        label, unit, factor = METRICS[metric]
+        label, unit, factor = (METRICS | ROOT_FORCES)[metric]
         curves = data['turbines'][tid]['metrics'][metric]['phase_mean']
         values = [x * factor for curve in curves for x in curve]
         start, end = data['segment_s']

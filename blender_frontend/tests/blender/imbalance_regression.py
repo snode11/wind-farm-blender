@@ -1,6 +1,5 @@
 """Native offline analysis, shared navigation, result-layer and seek checks."""
 import importlib
-import json
 import math
 import os
 from pathlib import Path
@@ -60,6 +59,10 @@ active = farm.active_for(scene)
 assert not active.imbalance_error and len(active.imbalance['turbines']) == 3
 for tid in ('T1', 'T2', 'T3'):
     scene.wfrl_imbalance_turbine = tid
+    row = active.imbalance['turbines'][tid]
+    assert set(row['metrics']) == set(analysis.METRICS) | set(analysis.ROOT_FORCES)
+    assert len(row['metrics']) == 9
+    assert all(set(turn['metrics']) == set(row['metrics']) for turn in row['turns'])
     for metric in analysis.METRICS:
         scene.wfrl_imbalance_metric = metric
         layout = Layout()
@@ -67,6 +70,13 @@ for tid in ('T1', 'T2', 'T3'):
         assert '质量不平衡' in layout.labels and '气动不平衡' in layout.labels
         assert layout.labels.count('当前数据包未提供') == 2
         assert '三叶响应对比 · 离线统计' in layout.labels
+        assert '弹性扭转：未提供数值' in layout.labels
+        assert '当前分析包未提供叶根力统计' not in layout.labels
+        for key, (label, unit, factor) in analysis.ROOT_FORCES.items():
+            assert label in layout.labels
+            mean = row['metrics'][key]['blade_means'][0] * factor
+            offset = row['metrics'][key]['blade_offsets'][0] * factor
+            assert f'B1 均值 {mean:+.4f} / 偏差 {offset:+.4f} {unit}' in layout.labels
         assert analysis.plot_data(scene).series[0][0] == 'B1'
 scene.wfrl_imbalance_turbine = 'T1'
 scene.wfrl_imbalance_metric = 'tip_x'
@@ -78,6 +88,12 @@ for time_s, available in ((117., False), (150., True), (177., True), (117., Fals
     before = scene.frame_current_final
     layout = Layout()
     panel.draw(layout, bpy.context)
+    for key, (_label, unit, factor) in analysis.ROOT_FORCES.items():
+        turn = analysis.latest_turn(row, replay.sample(scene)['time_s'])
+        if available:
+            assert f'最近完整转差异：{turn["metrics"][key]["rms_spread"] * factor:.4f} {unit}' in layout.labels
+        else:
+            assert not any(label.startswith('最近完整转差异：') for label in layout.labels)
     bpy.context.window_manager.wfrl_home_page = 'REPLAY'
     home.WFRL_PT_Home.draw(SimpleNamespace(layout=Layout()), bpy.context)
     assert scene.frame_current_final == before
@@ -107,13 +123,14 @@ assert farm.active_for(other) is None
 assert analysis.plot_data(other) is None
 bpy.data.scenes.remove(other)
 result = dict(status='PASS', module=module, addon_path=str(Path(addon.__file__).resolve().parent),
-              turbines=['T1', 'T2', 'T3'], components=6,
+              turbines=['T1', 'T2', 'T3'], components=9, elastic_twist='unavailable',
               source_modes=['B2', 'hub-axis.v1', 'hub-tls.v1'],
               scope='Native RNA, layout adapter and replay seeks; visible layout requires a window check.')
 if os.environ.get('WFRL_TEST_OUTPUT'):
     path = Path(os.environ['WFRL_TEST_OUTPUT'])
     path.mkdir(parents=True, exist_ok=False)
-    (path / 'result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
+    atomic_json = importlib.import_module(module + '.atomic_json')
+    atomic_json.write_json(path / 'result.json', result)
 addon.unregister()
 assert not hasattr(bpy.types.Scene, 'wfrl_imbalance_metric')
 print('IMBALANCE_REGRESSION_PASS', flush=True)
