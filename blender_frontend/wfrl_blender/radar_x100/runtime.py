@@ -6,6 +6,7 @@ import uuid
 import numpy as np
 from .core import schema, simulation, ply, recording, channel, acquisition
 from . import clearance, configuration, display, view
+from . import observations, mount_presets, session_recording, estimation
 
 _SESSIONS = {}
 _DRAWN = {}
@@ -25,37 +26,15 @@ def session_for(scene):
 
 
 def _simulation_time(scene, sampler):
-    t = float(scene.get('wfrl_clearance_time_s', sampler.interval[0]))
-    sequence = max(0, int(math.floor((t - sampler.interval[0]) * 30 + 1e-7)))
-    return sequence, min(sampler.interval[1], sampler.interval[0] + sequence / 30)
+    return observations._simulation_time(scene, sampler)
 
 
 def _simulation_frame(scene, sampler, source_session, sequence, source_t, *, observation_mode='GEOMETRY'):
-    with sampler.sampling_transaction():
-        arguments = dict(sensor_id='X100-T1',
-            session_id=source_session, sequence=sequence, interval_s=sampler.interval,
-            visibility=sampler.visibility, material_at=sampler.material_sample)
-        if observation_mode == 'DETECTIONS':
-            budget = configuration.DETECTION_INTEGRATION_BUDGET
-            frame = simulation.simulate_detections(sampler.sample, source_t, **arguments,
-                integration_budget=budget, sampling_plan=sampler.sampling_plan(budget))
-        elif observation_mode == 'GEOMETRY':
-            budget = scene.wfrl_x100_candidates
-            frame = simulation.simulate(sampler.sample, source_t, **arguments,
-                candidate_budget=budget, sampling_plan=sampler.sampling_plan(budget))
-        else:
-            raise ValueError('未知 X100 观测模式：' + str(observation_mode))
-    if frame is not None:
-        frame.provenance['calibration_id'] = sampler.calibration_id
-    return frame
+    return observations._simulation_frame(scene, sampler, source_session, sequence, source_t, observation_mode=observation_mode)
 
 
 def _validate_mount_drivers(mount):
-    node = mount
-    while node is not None:
-        if node.constraints or node.animation_data or node.parent_type != 'OBJECT':
-            raise ValueError('X100 安装或父级存在约束或动画驱动；请检查后重新应用标定配置')
-        node = node.parent
+    return mount_presets._validate_mount_drivers(mount)
 
 
 class Session:
@@ -140,469 +119,76 @@ class Session:
         scene['wfrl_x100_error'] = scene.get('wfrl_x100_record_error', '')
 
     def capture_configuration(self):
-        import bpy
-        self.applied_config = configuration.capture(self.scene, abspath=bpy.path.abspath,
-            single_ply=self.mode == 'REPLAY' and self.static_frame is not None)
-        if self.mode == 'SIMULATION':
-            self.applied_config['observation_mode'] = self.observation_mode
+        return observations.capture_configuration(self)
 
     def pending_configuration(self):
-        import bpy
-        return configuration.pending(self.scene, self.applied_config, abspath=bpy.path.abspath)
+        return observations.pending_configuration(self)
 
     def pair_context(self, frame):
-        self.context = self.analysis_result = self.side_query = None
-        self.blade_result = self.blade_key = None
-        self.blade_retry_at = 0.
-        self.blade_error = ''
-        self.reference_curves = ()
-        self.reference_key = None
-        self.analysis_key = None
-        self.analysis_retry_key = None
-        self.analysis_retry_at = 0.
-        self.analysis_error = ''
-        self.reference_error = ''
-        if frame is None or self.mode != 'SIMULATION':
-            self.analysis_error = '无可靠同帧分析上下文'
-            return
-        identity = (self.generation, self.source_session, frame.identity, frame.source_kind,
-            frame.time.clock_domain, frame.time.source_time_s, self.frame_index,
-            self.sampler.source_id, self.sampler.geometry_id, self.sampler.calibration_id)
-        try:
-            self.context = self.sampler.analysis_context(frame, identity)
-            self.sampler.latest_sample = None
-        except Exception as exc:
-            self.analysis_error = str(exc)
+        return estimation.pair_context(self, frame)
 
     def prepare_reference(self, requested):
-        if not requested or self.context is None:
-            self.reference_error = ''
-            self.reference_curves = ()
-            self.reference_key = None
-            return
-        if self.reference_key == self.context.identity:
-            return
-        self.reference_key = self.context.identity
-        self.reference_curves = ()
-        try:
-            from .core import analysis
-            from .. import farm_flex, prebend
-            from ..deflection import interpolated_beamdyn_root_frame
-            from ..turbine_geometry import geometry_data
-            sampler, flex = self.sampler, self.sampler.flex
-            sampler.validate()
-            source_key = (id(flex), schema.digest(flex.reference), sampler.source_id,
-                          sampler.geometry_id, str(farm_flex.saved_package(self.scene)))
-            if source_key != self.reference_source_key:
-                source, _ = farm_flex.dual_beam_api().resolve_package(farm_flex.saved_package(self.scene))
-                reference = prebend.read_reference(source, flex.manifest)
-                if reference is None or schema.digest(reference) != schema.digest(flex.reference):
-                    self.reference_source_key = self.reference_source = None
-                    raise ValueError('当前来源无核对通过的独立零载荷参考')
-                from copy import deepcopy
-                self.reference_source = deepcopy(reference)
-                self.reference_source_key = source_key
-            reference = self.reference_source
-            t = self.frame.time.source_time_s
-            i = int(np.clip(np.searchsorted(flex.times,t,side='right')-1,0,len(flex.times)-2))
-            alpha = (t-flex.times[i])/(flex.times[i+1]-flex.times[i])
-            curve = np.array(reference['curve'],float)[:,:3]
-            curve[:,2] += geometry_data()['scalars']['HubRad']
-            curves=[]
-            for b in range(3):
-                hub, axes = interpolated_beamdyn_root_frame(geometry_data()['scalars'],b+1,
-                    flex.transforms[i,sampler.k,b,0],flex.transforms[i+1,sampler.k,b,0],alpha)
-                curves.append(analysis.readonly(curve @ axes.T+hub+sampler.root_world[:3,3]))
-            self.reference_curves = tuple(curves)
-            self.reference_error = '独立零载荷49点参考曲线，非观测'
-        except Exception as exc:
-            self.reference_error = str(exc)
+        return estimation.prepare_reference(self, requested)
 
     def derive_analysis(self, roi):
-        if self.context is None:
-            return
-        key = self.context.identity, tuple(map(tuple, roi))
-        if key == self.analysis_key:
-            return
-        if (key == self.analysis_retry_key
-                and time.monotonic() < self.analysis_retry_at):
-            return
-        self.analysis_key = None
-        self.analysis_result = None
-        try:
-            from .scene import SideWallQuery
-            if self.side_query is None:
-                self.side_query = SideWallQuery(self.context)
-            self.analysis_result = self.side_query.query(self.frame.xyz, roi, frame_key=self.frame.identity)
-            self.analysis_key = key
-            self.analysis_retry_key = None
-            self.analysis_error = ''
-        except Exception as exc:
-            self.side_query = None
-            self.analysis_retry_key = key
-            self.analysis_retry_at = time.monotonic() + .25
-            self.analysis_error = str(exc)
+        return estimation.derive_analysis(self, roi)
 
     def _display(self, frame, *, required_gpu=False, record=True):
-        import bpy
-        if frame is not self.frame:
-            self.pair_context(frame)
-        self.frame = frame
-        if frame is None:
-            self._reset_blades()
-        self.display_valid = frame is not None and frame.completeness == 'COMPLETE'
-        if frame is not None and display.observation_mode(frame) == 'DETECTIONS':
-            self.derive_blades()
-        style = display.style_key(self.scene, frame)
-        classification = self.classification()
-        try:
-            self.gpu_batch = view.batch(frame, style[0], color_scale=style[1], velocity_limit=style[2],
-                classification=classification) if self.display_valid and not bpy.app.background else None
-            self.gpu_retry_at = None
-            self.render_error = ''
-        except Exception as exc:
-            self.gpu_batch = None
-            self.gpu_retry_at = time.monotonic() + .25
-            self.render_error = str(exc)
-            if required_gpu:
-                raise
-        self.render_color = style
-        self.render_classification = classification
-        if record:
-            self._record_current(frame)
+        return observations._display(self, frame, required_gpu=required_gpu, record=record)
 
     def _record_current(self, frame):
-        if self.fanout and not self.recording_stopping and frame is not None:
-            try:
-                self._record_frame(frame)
-            except Exception as exc:
-                self.scene['wfrl_x100_record_error'] = str(exc)
-                self.fanout.failure = str(exc)
-                self.fanout.stopping.set()
+        return session_recording._record_current(self, frame)
 
     def _record_frame(self, frame):
-        indexed = self.mode == 'REPLAY' and self.replay is not None
-        key = self.frame_index if indexed else frame.identity
-        if key == self.record_last:
-            return
-        if indexed:
-            if self.record_last_index is not None and self.frame_index < self.record_last_index:
-                self.fanout.failure = 'Replay moved backward during recording; start a new recording'
-                self.fanout.stopping.set()
-                return
-            stamp = self.replay.times[self.frame_index]
-        else:
-            source_time = frame.time.source_time_s
-            # Unknown physical time uses a separate local recording clock.
-            stamp = time.monotonic() if self.mode == 'LIVE' or source_time is None else source_time
-            # The scene timeline can loop or be scrubbed while recorded times must not decrease.
-            if self.record_last_stamp is not None and stamp < self.record_last_stamp:
-                self.fanout.failure = '仿真时间在记录期间回退（时间轴循环或回拖）；请开始新的记录'
-                self.fanout.stopping.set()
-                return
-        if self.record_start is None:
-            self.record_start = stamp
-        queued = frame
-        if display.observation_mode(frame) == 'DETECTIONS':
-            enabled = getattr(self.scene, 'wfrl_x100_blade_tracking', False)
-            matched = getattr(self, 'blade_key', None) == self._clearance_frame_key(frame)
-            result = getattr(self, 'blade_result', None) if enabled and matched else None
-            error = (getattr(self, 'blade_error', '') if self.frame is frame else '无对应帧估计') if enabled else '估计未启用'
-            queued = clearance.RecordedFrame(frame, result, error)
-        self.fanout.submit(queued, stamp - self.record_start)
-        self.record_last = key
-        self.record_last_index = self.frame_index if indexed else None
-        self.record_last_stamp = stamp
+        return session_recording._record_frame(self, frame)
 
     def update(self):
-        from .. import farm_flex
-        scene = self.scene
-        scene['wfrl_x100_error'] = scene.get('wfrl_x100_record_error', '')
-        if self.mode != scene.wfrl_x100_source:
-            raise ValueError('来源配置已改变，请应用配置')
-        if self.mode == 'SIMULATION':
-            if farm_flex.active_for(scene) is not self.sampler.flex:
-                raise ValueError('风场几何来源已改变，请应用 X100 配置')
-            from .. import custom_camera_capture
-            capturing = custom_camera_capture.active() and custom_camera_capture._ACTIVE.scene == scene
-            sequence, source_t = _simulation_time(scene, self.sampler)
-            # A new sampling transaction validates once; frozen frames still validate every tick.
-            if capturing or sequence == self.key:
-                self.sampler.validate()
-            _validate_mount_drivers(self.mount)
-            mount, fov = view.existing_installation(scene, self.owner)
-            yaw = scene.objects.get('WFRL.Turbine.T1.YawRoot')
-            expected_parent = yaw if self.sampler.mount == 'NACELLE' else (
-                yaw.parent if self.sampler.mount == 'TOWER_BASE' else None)
-            actual = np.array(self.mount.matrix_parent_inverse) @ np.array(self.mount.matrix_basis)
-            if (mount != self.mount or fov != self.fov or self.mount.parent != expected_parent
-                    or not np.array_equal(np.array(self.mount.matrix_parent_inverse), np.eye(4))
-                    or not np.allclose(actual, self.sampler.mount_from_sensor, atol=1e-5, rtol=0)):
-                raise ValueError('X100 实体安装被原生编辑；请重新应用标定配置')
-            if capturing:
-                scene['wfrl_x100_status'] = configuration.OBSERVATION_LABELS[self.observation_mode] + ' · 相机采集期间保留采集前的观测帧'
-                return
-            # Radar samples use a declared 30 Hz source grid independent of drawing cadence.
-            key = sequence
-            if key != self.key:
-                frame = _simulation_frame(scene, self.sampler, self.source_session, sequence, source_t,
-                    observation_mode=self.observation_mode)
-                self._display(frame, required_gpu=self._gpu_required)
-                self.key = key
-            self._update_fov_visibility()
-            scene['wfrl_x100_status'] = configuration.OBSERVATION_LABELS[self.observation_mode] + ' · 30 Hz 瞬时采样假设'
-        elif self.mode == 'REPLAY':
-            import bpy
-            if Path(bpy.path.abspath(scene.wfrl_x100_path)).expanduser() != self.replay_path:
-                raise ValueError('回放路径已改变，请应用 X100 配置')
-            if self.static_frame is not None and scene.wfrl_x100_ply_source != self.static_frame.source_kind:
-                raise ValueError('单帧 PLY 来源声明已改变，请应用 X100 配置')
-            if self.playing and self.replay:
-                elapsed = time.monotonic() - self.play_anchor
-                ended = elapsed >= self.replay.duration_s
-                self._set_replay_position(min(self.replay.duration_s, elapsed),
-                    index=len(self.replay.rows) - 1 if ended else None)
-                if ended:
-                    self.playing = False
-            index = self.selected_replay_index() if self.replay else 0
-            key = index
-            if self.key != key:
-                self.frame_index = index if self.replay and index >= 0 else None
-                self._display(self.replay.frame(index) if self.replay and index >= 0 else self.static_frame)
-                self.key = key
-            scene['wfrl_x100_status'] = ('文件回放 · 独立时间轴 · 未与风机同步' if self.replay
-                                         else '单帧 PLY · 时间与坐标轴未确认')
-        else:
-            self.client.poll()
-            state = self.client.state
-            selected = scene.wfrl_x100_stream
-            status = state.status(selected)
-            state.take(selected)
-            stream = state.streams.get(selected)
-            candidate = stream.frame if stream else None
-            key = (selected, candidate.identity if candidate else None, status)
-            if key != self.key:
-                self._display(candidate if status in {'VALID', 'VALID_EMPTY'} else None)
-                self.key = key
-            self.display_valid = status in {'VALID', 'VALID_EMPTY'} and self.frame is not None
-            scene['wfrl_x100_status'] = '本地实时通道 · ' + status
-            if not self.display_valid:
-                self.gpu_batch = None
-            if self.client.error:
-                scene['wfrl_x100_error'] = self.client.error
-        self.derive_blades()
-        self.retry_display()
+        return observations.update(self)
 
     def _reset_blades(self):
-        self.blade_result = self.blade_key = None
-        self.blade_retry_at = 0.
-        self.blade_error = ''
-        self.blade_tracker.reset()
-        if getattr(self, 'clearance_tracker', None) is not None:
-            self.clearance_tracker.reset()
+        return estimation._reset_blades(self)
 
     def derive_blades(self):
         """Optional inference errors leave the original observation and recording intact."""
-        if not getattr(self.scene, 'wfrl_x100_blade_tracking', False):
-            self._reset_blades()
-            return
-        if self.frame is not None and display.observation_mode(self.frame) == 'DETECTIONS':
-            self.derive_clearance()
-            return
-        if self.mode != 'SIMULATION' or self.context is None or self.frame is None or not self.display_valid:
-            self._reset_blades()
-            self.blade_error = '需要同帧塔面、根部姿态和已对齐点云'
-            return
-        if self.blade_key == self.context.identity or time.monotonic() < self.blade_retry_at:
-            return
-        self.blade_result = None
-        try:
-            from .core import analysis
-            from .scene import SideWallQuery
-            if self.side_query is None:
-                self.side_query = SideWallQuery(self.context)
-            background = self.side_query.query(self.frame.xyz, ((-1e6,)*3, (1e6,)*3),
-                                               frame_key=self.frame.identity)
-            world = analysis.transform(self.frame.xyz, self.context.world_from_sensor)
-            priors = self.sampler.blade_priors(self.frame.time.source_time_s)
-            result = self.blade_tracker.update(world, priors, background['distance'],
-                time_s=self.frame.time.source_time_s,
-                identity=(self.generation, self.source_session, self.sampler.calibration_id),
-                frame_key=self.frame.identity)
-            for row in result['blades']:
-                row['estimated_clearance_m'] = None
-                if row['tip_world'] is not None:
-                    point = analysis.local([row['tip_world']], self.context.world_from_sensor)
-                    distance = self.side_query.query(point, ((-1e6,)*3, (1e6,)*3))['distance'][0]
-                    if np.isfinite(distance):
-                        row['estimated_clearance_m'] = float(distance)
-            self.blade_result, self.blade_error = result, ''
-            self.blade_key = self.context.identity
-            self.blade_retry_at = 0.
-        except Exception as exc:
-            self.blade_tracker.reset()
-            self.side_query = None
-            self.blade_retry_at = time.monotonic() + .25
-            self.blade_error = str(exc)
+        return estimation.derive_blades(self)
 
     def _clearance_frame_key(self, frame):
-        return (getattr(self, 'generation', None), frame.identity, frame.source_kind, frame.time.clock_domain,
-                frame.time.source_time_s, self.frame_index)
+        return estimation._clearance_frame_key(self, frame)
 
     def derive_clearance(self):
         """Infer from allowed same-frame inputs, or display a verified recorded result."""
-        frame = self.frame
-        key = self._clearance_frame_key(frame)
-        if not self.display_valid:
-            self._reset_blades()
-            self.blade_error = '当前检测帧无效'
-            return
-        if self.blade_key == key or time.monotonic() < self.blade_retry_at:
-            return
-        self.blade_result = None
-        try:
-            if self.mode == 'REPLAY' and self.replay is not None and self.frame_index is not None:
-                self.blade_result, self.blade_error = clearance.read_recorded(self.replay, self.frame_index, frame)
-            elif self.mode == 'SIMULATION' and self.context is not None:
-                from .core import analysis
-                from .scene import SideWallQuery
-                source = (id(self.sampler.flex), self.sampler.geometry_id)
-                if getattr(self, 'clearance_source', None) != source:
-                    self.clearance_tracker = clearance.estimator.ClearanceTracker(clearance.unloaded_shapes(self.sampler))
-                    self.clearance_source = source
-                if self.side_query is None:
-                    self.side_query = SideWallQuery(self.context)
-                def tower_query(world):
-                    result = self.side_query.query(analysis.local(world, self.context.world_from_sensor),
-                                                  ((-1e6,)*3, (1e6,)*3))
-                    return result['distance'], result['nearest']
-                result = self.clearance_tracker.update(
-                    analysis.transform(frame.xyz, self.context.world_from_sensor), frame.radial_velocity_m_s,
-                    self.sampler.blade_priors(frame.time.source_time_s), self.context.vertices, self.context.triangles,
-                    time_s=frame.time.source_time_s,
-                    identity=(self.generation, frame.identity[:3], frame.source_kind, frame.time.clock_domain,
-                              self.sampler.source_id, self.sampler.geometry_id, self.sampler.calibration_id),
-                    frame_key=frame.identity, tower_query=tower_query, **clearance.observation_inputs(frame))
-                self.blade_result, self.blade_error = clearance.display_result(result), ''
-            else:
-                self._reset_blades()
-                self.blade_error = '缺少同帧塔面、根部姿态与未加载叶片形状先验'
-            self.blade_key, self.blade_retry_at = key, 0.
-        except Exception as exc:
-            if getattr(self, 'clearance_tracker', None) is not None:
-                self.clearance_tracker.reset()
-            self.side_query = None
-            self.blade_retry_at = time.monotonic() + .25
-            self.blade_error = str(exc)
+        return estimation.derive_clearance(self)
 
     def classification(self):
-        result = getattr(self, 'blade_result', None)
-        return (result['labels'] if self.frame is not None and self.display_valid
-                and display.observation_mode(self.frame) == 'DETECTIONS' and result is not None else None)
+        return estimation.classification(self)
 
     def retry_display(self):
         """Rebuild only display resources for a still-valid original frame."""
-        import bpy
-        if self.frame is not None and self.display_valid and (
-                self.render_color != display.style_key(self.scene, self.frame)
-                or (display.style_key(self.scene, self.frame)[0] == 'ECHO_CLASS'
-                    and getattr(self, 'render_classification', None) is not self.classification())
-                or (self.gpu_retry_at is not None and not bpy.app.background
-                    and time.monotonic() >= self.gpu_retry_at)):
-            self._display(self.frame, record=False)
+        return observations.retry_display(self)
 
     def _update_fov_visibility(self):
-        show = self.scene.wfrl_x100_fov
-        layers = {layer.as_pointer(): layer for layer in self.scene.view_layers}
-        if show and not self.fov_shown:
-            for key, (layer, hidden) in self.fov_hidden.items():
-                if key in layers and self.fov.hide_get(view_layer=layers[key]):
-                    self.fov.hide_set(hidden, view_layer=layers[key])
-            self.fov_hidden.clear()
-        elif not show:
-            for key, layer in layers.items():
-                if key not in self.fov_hidden:
-                    hidden = self.fov.hide_get(view_layer=layer)
-                    self.fov_hidden[key] = layer, hidden
-                    if not hidden:
-                        self.fov.hide_set(True, view_layer=layer)
-        self.fov_shown = show
+        return observations._update_fov_visibility(self)
 
     def selected_replay_index(self):
-        return (self.replay.index_at(self.replay_time_s)
-                if self.replay_cursor is None else self.replay_cursor)
+        return session_recording.selected_replay_index(self)
 
     def _set_replay_position(self, time_s, *, index=None):
-        self.replay_time_s, self.replay_cursor = time_s, index
-        self._advancing_replay = True
-        try:
-            self.scene.wfrl_x100_replay_s = time_s
-        finally:
-            self._advancing_replay = False
+        return session_recording._set_replay_position(self, time_s, index=index)
 
     def toggle_playback(self):
-        if self.playing:
-            # Pausing snaps to the elapsed position; a failed update must still pause.
-            try:
-                self.update()
-            finally:
-                self.playing = False
-            return
-        if self.replay_time_s >= self.replay.duration_s:
-            self._set_replay_position(self.replay.times[0])
-        self.replay_cursor = None
-        self.play_anchor = time.monotonic() - self.replay_time_s
-        self.playing = True
+        return session_recording.toggle_playback(self)
 
     def seek_frame(self, index):
-        self.playing = False
-        self._set_replay_position(self.replay.times[index], index=index)
-        self.update()
+        return session_recording.seek_frame(self, index)
 
     def start_recording(self, path):
-        if self.closing:
-            raise ValueError('关闭尚未确认，请先重试关闭')
-        if self.fanout is not None:
-            raise ValueError('记录已启动')
-        if self.mode == 'LIVE':
-            raise ValueError('实时完整记录由外部采集端执行；Blender 最新帧不作为完整采集记录')
-        self.record_start = self.record_last = self.record_last_index = self.record_last_stamp = None
-        self.fanout = acquisition.Fanout(clearance.Recorder(path, description=dict(
-            source_mode=self.mode, timing=('original indexed presentation time' if self.mode == 'REPLAY' and self.replay
-                else 'source time when available; otherwise local recording monotonic'))))
-        self.scene['wfrl_x100_record_error'] = ''
-        self.recording_health()
-        # The displayed frame is already current; record it without rebuilding display resources.
-        self._record_current(self.frame)
+        return session_recording.start_recording(self, path)
 
     def recording_health(self):
-        if self.fanout is not None:
-            try:
-                if not self.scene.as_pointer():
-                    return
-            except ReferenceError:
-                return
-            recorder = self.fanout.recorder
-            self.scene['wfrl_x100_record_state'] = recorder.state
-            self.scene['wfrl_x100_record_directory'] = str(recorder.path)
-            self.scene['wfrl_x100_record_frames'] = recorder.rows
-            if recorder.state == 'FAILED':
-                self.scene['wfrl_x100_record_error'] = '记录失败：' + str(recorder.error)
+        return session_recording.recording_health(self)
 
     def stop_recording(self):
-        if self.fanout:
-            fanout = self.fanout
-            self.recording_stopping = True
-            fanout.request_close()
-            self.recording_health()
-            if fanout.worker.is_alive():
-                return False
-            self.recording_health()
-            self.fanout = None
-            self.recording_stopping = False
-            if fanout.recorder.state == 'FAILED':
-                raise RuntimeError(fanout.recorder.error)
-        return True
+        return session_recording.stop_recording(self)
 
     def close(self, *, remove=True):
         self.closing = True
@@ -623,118 +209,12 @@ class Session:
 
 
 def _guard_installation():
-    from .. import custom_camera_capture
-    if custom_camera_capture.active():
-        raise ValueError('请先结束或取消相机采集，再应用或关闭 X100 安装')
+    return mount_presets._guard_installation()
 
 
 def apply_mount_preset(scene, preset, *, search_report=None):
     """Switch one sensor's calibration and resample at the existing scene time."""
-    import bpy
-    from mathutils import Matrix
-    from .. import farm_flex
-    from .scene import (SceneSampler, ORIGINAL_LOCATION, ORIGINAL_ROTATION,
-                        nacelle_side_installation, installation_matrix)
-    _guard_installation()
-    if scene.wfrl_x100_source != 'SIMULATION':
-        raise ValueError('安装位置切换仅用于仿真')
-    if preset not in {'ORIGINAL', 'NACELLE_SIDE', 'SEARCH'}:
-        raise ValueError('未知雷达安装位置：' + str(preset))
-    current = session_for(scene)
-    if current is not None and (current.fanout or current.closing):
-        raise ValueError('请先结束记录或完成关闭，再切换雷达安装位置')
-    if current is not None and current.mode != 'SIMULATION':
-        raise ValueError('请先应用仿真配置，再切换雷达安装位置')
-    flex = farm_flex.active_for(scene)
-    if flex is None or not farm_flex.is_active(scene):
-        raise ValueError('请先加载本场景的风场柔性回放')
-    sampler = None
-    if current is not None:
-        _validate_mount_drivers(current.mount)
-        mount, fov = view.existing_installation(scene, current.owner)
-        if mount != current.mount or fov != current.fov:
-            raise ValueError('雷达安装对象已改变，请重新应用配置')
-        if any(len(obj.users_scene) > 1 for obj in scene.objects
-               if obj.get('wfrl_x100_owner') == current.owner):
-            raise ValueError('雷达安装与其他场景共享，请先应用配置以建立独立安装')
-        if current.sampler.flex is flex:
-            try:
-                current.sampler.validate()
-                sampler = current.sampler
-            except (ValueError, ReferenceError):
-                pass
-    if sampler is None:
-        sampler = SceneSampler(flex, mount_from_sensor=np.eye(4))
-    if preset == 'SEARCH':
-        from .core import installation
-        location, rotation = installation.selected_installation(search_report, sampler.source_id, sampler.geometry_id)
-    elif preset == 'ORIGINAL':
-        location, rotation = ORIGINAL_LOCATION, ORIGINAL_ROTATION
-    else:
-        location, rotation = nacelle_side_installation(sampler)
-    location = tuple(float(np.float32(value)) for value in location)
-    rotation = tuple(float(np.float32(value)) for value in rotation)
-    sampler = sampler.with_installation('NACELLE', installation_matrix(location, rotation))
-    yaw = scene.objects['WFRL.Turbine.T1.YawRoot']
-    if (current is not None and current.display_valid and current.frame is not None
-            and current.sampler.calibration_id == sampler.calibration_id
-            and current.sampler.geometry_id == sampler.geometry_id
-            and current.mount.parent == yaw
-            and np.allclose(np.array(current.mount.matrix_parent_inverse) @ np.array(current.mount.matrix_basis),
-                            sampler.mount_from_sensor, atol=1e-5, rtol=0)):
-        current.update()
-        scene.wfrl_x100_mount = 'NACELLE'
-        scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
-        current.capture_configuration()
-        return current
-
-    previous = (scene.wfrl_x100_mount, tuple(scene.wfrl_x100_location),
-                tuple(scene.wfrl_x100_rotation))
-    if current is None:
-        # A new session samples its own first frame; only the scene settings need rollback.
-        try:
-            scene.wfrl_x100_mount = 'NACELLE'
-            scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
-            return start(scene)
-        except Exception:
-            scene.wfrl_x100_mount, scene.wfrl_x100_location, scene.wfrl_x100_rotation = previous
-            raise
-    source_session = str(uuid.uuid4())
-    sequence, source_t = _simulation_time(scene, sampler)
-    frame = _simulation_frame(scene, sampler, source_session, sequence, source_t,
-        observation_mode=current.observation_mode)
-    if frame is None:
-        raise ValueError('当前时刻没有可用的 X100 观测')
-    style = display.style_key(scene, frame)
-    batch = view.batch(frame, style[0], color_scale=style[1], velocity_limit=style[2]) if not bpy.app.background else None
-    previous_mount = (current.mount.parent, current.mount.matrix_parent_inverse.copy(),
-                      current.mount.matrix_basis.copy())
-    saved_session = dict(current.__dict__)
-    try:
-        scene.wfrl_x100_mount = 'NACELLE'
-        scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
-        current.mount.parent = yaw
-        current.mount.matrix_parent_inverse = Matrix.Identity(4)
-        current.mount.matrix_basis = Matrix(sampler.mount_from_sensor.tolist())
-        current.sampler, current.source_session, current.key = sampler, source_session, sequence
-        current.frame, current.gpu_batch, current.display_valid = frame, batch, True
-        current.gpu_retry_at = None
-        current.render_error = ''
-        current.render_color = style
-        current.capture_configuration()
-        current.pair_context(frame)
-        current.derive_blades()
-        if style[0] == 'ECHO_CLASS':
-            current._display(frame, required_gpu=True, record=False)
-    except Exception:
-        scene.wfrl_x100_mount, scene.wfrl_x100_location, scene.wfrl_x100_rotation = previous
-        current.mount.parent, current.mount.matrix_parent_inverse, current.mount.matrix_basis = previous_mount
-        current.__dict__.clear()
-        current.__dict__.update(saved_session)
-        raise
-    scene['wfrl_x100_error'] = scene.get('wfrl_x100_record_error', '')
-    scene['wfrl_x100_status'] = configuration.OBSERVATION_LABELS[current.observation_mode] + ' · 30 Hz 瞬时采样假设'
-    return current
+    return mount_presets.apply_mount_preset(scene, preset, search_report=search_report)
 
 
 def stop(scene, *, remove=True):
