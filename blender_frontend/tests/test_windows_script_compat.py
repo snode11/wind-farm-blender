@@ -250,6 +250,50 @@ def test_windows_launcher_stops_owned_process_with_ctrl_break(monkeypatch):
     assert process.calls == [('send_signal', signal.CTRL_BREAK_EVENT), ('wait', 5)]
 
 
+@pytest.mark.parametrize('platform', ['nt', 'posix'])
+@pytest.mark.parametrize('backend', ['fake', 'floris', 'fastfarm'])
+def test_launcher_creation_flags_reach_popen_before_shutdown(tmp_path, monkeypatch, platform, backend):
+    state_api, process_class = launcher.ownership_modules()
+    owned = process_class(env_key=state_api.RUN_TOKEN)
+    bridge = FakePopen(12345)
+    root = Mock(pid=bridge.pid)
+    root.create_time.return_value = 42.0
+    popen = Mock(return_value=bridge)
+    monkeypatch.setattr(formal_process, 'subprocess', SimpleNamespace(Popen=popen))
+    monkeypatch.setattr(formal_process, 'psutil', SimpleNamespace(
+        Process=lambda pid: root, NoSuchProcess=psutil.NoSuchProcess))
+    monkeypatch.setattr(owned, 'status', lambda: 'LIVE' if bridge.poll() is None else 'EMPTY_CONFIRMED')
+    monkeypatch.setattr(owned, 'identities', lambda: [{'pid': bridge.pid, 'create_time': 42.0}])
+    monkeypatch.setattr(owned, 'signal', Mock())
+    monkeypatch.setattr(launcher, 'ownership_modules', lambda: (state_api, lambda **kwargs: owned))
+    monkeypatch.setattr(state_api, 'read_binding', lambda *args, **kwargs: {'session_id': 'owned-session'})
+    monkeypatch.setattr(launcher, 'request_protocol_stop', lambda *args: True)
+    monkeypatch.setattr(launcher, 'wait_for_bridge', lambda *args: None)
+    monkeypatch.setattr(launcher, 'os', SimpleNamespace(name=platform, environ=os.environ, close=os.close))
+    monkeypatch.setattr(launcher, 'signal', SimpleNamespace(CTRL_BREAK_EVENT=1, SIGTERM=signal.SIGTERM))
+    monkeypatch.setattr(launcher, 'subprocess', SimpleNamespace(
+        CREATE_NEW_PROCESS_GROUP=0x200, TimeoutExpired=subprocess.TimeoutExpired,
+        run=Mock(return_value=SimpleNamespace(returncode=0))))
+    report = dict(ok=True, backend=backend, python=sys.executable, project_dir=str(tmp_path),
+                  scene=str(tmp_path / 'scene.yaml'), blender='blender', mpi='mpiexec', fastfarm='fastfarm')
+    monkeypatch.setattr(launcher, 'preflight', lambda *args, **kwargs: report)
+    args = Namespace(fake=backend == 'fake', mpi='', fastfarm='', port=18765, startup_timeout=5)
+
+    assert launcher.launch(args) == 0
+
+    command = popen.call_args.args[0]
+    prefix = ['mpiexec', '-n', '1'] if backend == 'fastfarm' else []
+    assert command[:len(prefix) + 3] == [*prefix, sys.executable, '-m', 'wfrl.blender_bridge']
+    options = popen.call_args.kwargs
+    assert options['creationflags'] == (0x200 if platform == 'nt' else 0)
+    # No CREATE_NEW_CONSOLE, CREATE_NO_WINDOW or DETACHED_PROCESS may sever console inheritance.
+    assert set(options) == {'cwd', 'env', 'start_new_session', 'creationflags'}
+    assert options['start_new_session'] is True  # POSIX-only; ignored by Windows Popen.
+    assert options['env'][state_api.RUN_TOKEN] == owned.token
+    expected_signal = ('send_signal', 1) if platform == 'nt' else ('terminate',)
+    assert bridge.calls == [expected_signal, ('wait', 180.0)]
+
+
 BAD_DIAGNOSTIC = '路径：场景'.encode('utf-8') + b'\xff\n'
 DECODED_DIAGNOSTIC = '路径：场景\ufffd'
 
@@ -354,15 +398,25 @@ def test_camera_layout_output_uses_system_tempdir(tmp_path, monkeypatch, overrid
         gettempdir.assert_not_called()
 
 
+@pytest.mark.parametrize('bridge_exit', [0, 1, 0xC000013A])
 @pytest.mark.parametrize(('changes', 'passed'), [
-    pytest.param({}, True, id='nonzero-bridge-exit'),
+    pytest.param({}, True, id='confirmed-cleanup'),
     pytest.param({'bridge_exit': None}, False, id='bridge-still-running'),
     pytest.param({'owned_launchers_exited': False}, False, id='launcher-still-running'),
     pytest.param({'owned_process_cleanup': 'UNKNOWN'}, False, id='cleanup-unconfirmed'),
+    pytest.param({'owned_process_cleanup': 'LIVE'}, False, id='descendant-still-running'),
 ])
-def test_windows_completion_asserts_owned_process_cleanup(monkeypatch, changes, passed):
+def test_windows_completion_asserts_owned_process_cleanup(monkeypatch, bridge_exit, changes, passed):
     monkeypatch.setattr(completion_tests, 'os', SimpleNamespace(name='nt'))
-    supervision = {'bridge_exit': 1, 'owned_launchers_exited': True,
+    supervision = {'bridge_exit': bridge_exit, 'owned_launchers_exited': True,
                    'owned_process_cleanup': 'EMPTY_CONFIRMED', **changes}
     with nullcontext() if passed else pytest.raises(AssertionError):
+        completion_tests.assert_bridge_cleanup(supervision)
+
+
+@pytest.mark.parametrize('bridge_exit', [0, 1, None])
+def test_posix_completion_assertion_still_requires_zero_bridge_exit(monkeypatch, bridge_exit):
+    monkeypatch.setattr(completion_tests, 'os', SimpleNamespace(name='posix'))
+    supervision = {'bridge_exit': bridge_exit, 'owned_launchers_exited': True}
+    with nullcontext() if bridge_exit == 0 else pytest.raises(AssertionError):
         completion_tests.assert_bridge_cleanup(supervision)

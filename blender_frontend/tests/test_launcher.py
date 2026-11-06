@@ -4,6 +4,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import signal
 import socket
 import struct
 import subprocess
@@ -31,6 +32,21 @@ def base_args(tmp_path: Path, blender: Path | None = None) -> list[str]:
     blender = blender or write_python_tool(tmp_path / "blender", "raise SystemExit(0)")
     return ["--blender", str(blender), "--python", sys.executable,
             "--project-dir", str(ROOT), "--scene", str(ROOT / "scenes" / "turb3_demo.yaml")]
+
+
+@pytest.fixture(scope='module')
+def shared_console():
+    """Console-control integration tests need a console inherited by their children."""
+    if os.name == 'nt':
+        import ctypes
+        from ctypes import wintypes
+
+        kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+        kernel.GetConsoleProcessList.argtypes = (ctypes.POINTER(wintypes.DWORD), wintypes.DWORD)
+        kernel.GetConsoleProcessList.restype = wintypes.DWORD
+        if not kernel.GetConsoleProcessList((wintypes.DWORD * 1)(), 1):
+            pytest.skip('CTRL_BREAK_EVENT integration requires a shared Windows console; '
+                        'this test host has no attached console')
 
 
 def test_verify_fake_reports_fixture_ready(tmp_path, capsys):
@@ -102,7 +118,7 @@ def test_occupied_port_is_rejected_without_attaching(tmp_path, capsys):
     assert "refusing to attach to an unowned process" in capsys.readouterr().out
 
 
-def test_launch_fake_cleans_up_owned_bridge(tmp_path, python_tool):
+def test_launch_fake_cleans_up_owned_bridge(tmp_path, python_tool, shared_console):
     marker = tmp_path / "blender-ran"
     blender = python_tool(tmp_path / "blender", f"from pathlib import Path\nPath({str(marker)!r}).write_text('ok')")
     code = launcher.main(["launch", *base_args(tmp_path, blender), "--fake",
@@ -315,6 +331,49 @@ def saved_session(path):
     return json.loads(binding.read_text())['session_id'] if binding.exists() else ''
 
 
+@pytest.fixture
+def retry_clock(monkeypatch):
+    """Advance launcher backoff without changing subprocess or ownership clocks."""
+    now = 0.0
+
+    def advance(seconds):
+        nonlocal now
+        now += seconds
+
+    clock = SimpleNamespace(monotonic=lambda: now, sleep=Mock(side_effect=advance))
+    monkeypatch.setattr(launcher, 'time', clock)
+    return clock
+
+
+def test_launch_delivers_shutdown_signal_to_owned_child(tmp_path, monkeypatch, owned_launch, shared_console):
+    ready, stopped = tmp_path / 'ready', tmp_path / 'stopped'
+    bridge, files = owned_launch(
+        'from pathlib import Path\nimport os, signal, time\n'
+        'def stop(signum, _frame):\n'
+        f'    Path({str(stopped)!r}).write_text(str(signum), encoding="ascii")\n'
+        '    raise SystemExit(0)\n'
+        'signal.signal(signal.SIGBREAK if os.name == "nt" else signal.SIGTERM, stop)\n'
+        f'Path({str(ready)!r}).touch()\n'
+        'while True: time.sleep(.01)\n')
+
+    def confirm_ready(*args):
+        deadline = time.monotonic() + 5
+        while not ready.exists():
+            assert bridge.poll() is None
+            assert time.monotonic() < deadline, 'Signal handler was not ready'
+            time.sleep(.01)
+        return True
+
+    monkeypatch.setattr(launcher, 'request_protocol_stop', confirm_ready)
+    stop_owned = launcher.stop_owned
+    monkeypatch.setattr(launcher, 'stop_owned', lambda process, label: stop_owned(process, label, timeout=5))
+    assert launcher.main(['launch', *base_args(tmp_path), '--fake']) == 0
+    expected = signal.SIGBREAK if os.name == 'nt' else signal.SIGTERM
+    assert int(stopped.read_text(encoding='ascii')) == expected
+    assert bridge.poll() == 0
+    assert not files[0].exists()
+
+
 def test_launch_keeps_supervising_detached_child_after_parent_exits(tmp_path, monkeypatch, owned_launch):
     child_pid, release_parent, release_child = [tmp_path/name for name in ('child.pid','parent.exit','child.exit')]
     child_code = (f'from pathlib import Path; import os,time\n'
@@ -408,7 +467,8 @@ def test_unknown_process_inventory_retains_records_after_root_exit(tmp_path, mon
 
 
 @pytest.mark.parametrize("declaration", ["fastfarm", "'fastfarm'", '"fastfarm"'])
-def test_fastfarm_yaml_always_launches_bridge_under_mpi(tmp_path, monkeypatch, owned_launch, declaration):
+def test_fastfarm_yaml_always_launches_bridge_under_mpi(
+        tmp_path, monkeypatch, owned_launch, shared_console, declaration):
     project = tmp_path / "project"
     trainer = project / "wfrl" / "studio" / "trainer.py"
     trainer.parent.mkdir(parents=True)
@@ -438,7 +498,8 @@ def test_fastfarm_yaml_always_launches_bridge_under_mpi(tmp_path, monkeypatch, o
     assert bridge.poll() is not None
 
 
-def test_launch_retries_unconfirmed_stop_before_terminating_owned_bridge(tmp_path, monkeypatch, owned_launch, capsys):
+def test_launch_retries_unconfirmed_stop_before_terminating_owned_bridge(
+        tmp_path, monkeypatch, owned_launch, shared_console, capsys, retry_clock):
     bridge, session_files = owned_launch()
     attempts = []
     stop_owned = launcher.stop_owned
@@ -457,6 +518,7 @@ def test_launch_retries_unconfirmed_stop_before_terminating_owned_bridge(tmp_pat
     monkeypatch.setattr(launcher, "stop_owned", terminate_after_confirmation)
     assert launcher.main(["launch", *base_args(tmp_path), "--fake"]) == 0
     assert attempts == [8765, 8765]
+    retry_clock.sleep.assert_called_once_with(1.0)
     assert bridge.poll() is not None
     assert not session_files[0].exists()
     assert "backend stop was not confirmed" in capsys.readouterr().err
@@ -470,7 +532,8 @@ def socket_client(events):
     return client
 
 
-def test_launch_legacy_stop_never_signals_before_authoritative_retry(tmp_path, monkeypatch, owned_launch):
+def test_launch_legacy_stop_never_signals_before_authoritative_retry(
+        tmp_path, monkeypatch, owned_launch, shared_console, retry_clock):
     bridge, session_files = owned_launch()
     initial = socket_client([protocol_frame("hello_ack", "RUNNING"),
                              protocol_frame("lifecycle", "STOPPED", sequence=2), b""])
@@ -488,13 +551,14 @@ def test_launch_legacy_stop_never_signals_before_authoritative_retry(tmp_path, m
     assert launcher.main(["launch", *base_args(tmp_path), "--fake"]) == 0
     assert initial.sendall.call_count == 2
     assert retry.sendall.call_count == 1
+    retry_clock.sleep.assert_called_once_with(1.0)
     assert bridge.poll() is not None
     assert not session_files[0].exists()
 
 
 @pytest.mark.parametrize("status", ["READY", "STOPPED", "FAILED"])
 def test_launch_confirms_bridge_published_session_without_frontend_identity(
-        tmp_path, monkeypatch, owned_launch, status):
+        tmp_path, monkeypatch, owned_launch, shared_console, status):
     bridge, session_files = owned_launch(session_id="idle-session")
     client = socket_client([protocol_frame("hello_ack", status, session_id="idle-session")])
     monkeypatch.setattr(launcher.socket, "create_connection", Mock(return_value=client))
@@ -623,7 +687,7 @@ def test_launch_observes_natural_bridge_exit_during_stop_retry(tmp_path, monkeyp
 
 @pytest.mark.parametrize("failure", [KeyboardInterrupt(), RuntimeError("protocol failure")])
 def test_launch_retains_recovery_credentials_when_supervision_is_interrupted(
-        tmp_path, monkeypatch, owned_launch, capsys, failure):
+        tmp_path, monkeypatch, owned_launch, capsys, failure, retry_clock):
     bridge, session_files = owned_launch()
     protocol_stop = Mock(side_effect=[False, failure])
     monkeypatch.setattr(launcher, "request_protocol_stop", protocol_stop)
@@ -636,6 +700,7 @@ def test_launch_retains_recovery_credentials_when_supervision_is_interrupted(
     else:
         assert launcher.main(command) == 1
     assert protocol_stop.call_count == 2
+    retry_clock.sleep.assert_called_once_with(1.0)
     stop_owned.assert_not_called()
     assert bridge.poll() is None
     assert saved_session(session_files[0]) == "owned-session"
@@ -646,7 +711,7 @@ def test_launch_retains_recovery_credentials_when_supervision_is_interrupted(
 
 
 def test_failed_live_backend_never_authorizes_bridge_exit_or_credential_removal(
-        tmp_path, monkeypatch, owned_launch):
+        tmp_path, monkeypatch, owned_launch, retry_clock):
     from wfrl.blender_bridge.backend_session import BackendSession
     session = BackendSession()
     session._trainer = SimpleNamespace(running=True, runtime=None, stop=lambda timeout: None)
@@ -663,6 +728,7 @@ def test_failed_live_backend_never_authorizes_bridge_exit_or_credential_removal(
     assert bridge.poll() is None
     assert saved_session(session_files[0]) == session.session_id
     assert client.sendall.call_count == 2
+    retry_clock.sleep.assert_called_once_with(1.0)
     stop_owned.assert_not_called()
 
 

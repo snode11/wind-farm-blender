@@ -150,7 +150,7 @@ def test_each_acceptance_uses_new_output_and_preserves_existing_evidence(tmp_pat
         invocation = json.loads((current / 'invocation.json').read_text())
         assert Path(invocation['output']) == current
         assert invocation['argv'][-1] == str(ROOT / 'scripts/blender/accept_frontend.py')
-        assert json.loads((current / 'supervision.json').read_text())['owned_launchers_exited']
+        assert_bridge_cleanup(json.loads((current / 'supervision.json').read_text()))
 
 
 def test_relative_acceptance_output_reaches_the_current_run(tmp_path, acceptance_processes):
@@ -159,6 +159,7 @@ def test_relative_acceptance_output_reaches_the_current_run(tmp_path, acceptance
     current, = run_outputs(tmp_path / 'acceptance')
     invocation = json.loads((current / 'invocation.json').read_text())
     assert Path(invocation['output']) == current.absolute()
+    assert_bridge_cleanup(json.loads((current / 'supervision.json').read_text()))
 
 
 @pytest.mark.parametrize('explicit_python', [False, True])
@@ -186,6 +187,8 @@ Path(os.environ['FIXTURE_IDENTITY_DIR'], str(os.getpid()) + '.json').write_text(
         extra_env={'PYTHONPATH': os.pathsep.join([str(identities), str(ROOT), *site.getsitepackages()]),
                    'FIXTURE_IDENTITY_DIR': str(identities)})
     assert result.returncode == 0, result.stdout + result.stderr
+    current, = run_outputs(tmp_path / 'acceptance')
+    assert_bridge_cleanup(json.loads((current / 'supervision.json').read_text()))
     records = [json.loads(path.read_text()) for path in identities.glob('*.json')]
     backend, = [record for record in records if record['argv'][1:3] == ['-m', 'wfrl.blender_bridge']]
     assert Path(backend['prefix']) == environment

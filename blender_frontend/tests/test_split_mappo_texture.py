@@ -18,7 +18,7 @@ from wfrl_blender.blade_recon_data import ReconSequence
 class SameSourceTextureTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.provenance = json.loads((texture.package_path()/'manifest.json').read_text())
+        cls.provenance = json.loads((texture.package_path()/'manifest.json').read_text(encoding='utf-8'))
         cls.sequence = ReconSequence(texture.package_path()/'recon.json')
 
     def test_delivered_clock_preserves_601_actual_sample_ids(self):

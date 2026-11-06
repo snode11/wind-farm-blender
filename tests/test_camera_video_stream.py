@@ -9,13 +9,14 @@ import socket
 import subprocess
 import threading
 import time
+from types import SimpleNamespace
 from urllib.error import HTTPError
 from urllib.request import urlopen
 
 import pytest
 
 from wfrl.camera_video.stream import AccessUnits, MappingServer, mediamtx_config, packetize, publish, receive, vcl_hash
-from test_camera_video_media import encoded_package  # noqa: F401 -- pytest discovers this fixture by name.
+from test_camera_video_media import encoded_package, encoded_template  # noqa: F401 -- pytest fixture dependencies.
 
 
 def _port():
@@ -129,6 +130,17 @@ def test_sender_report_counts_actual_packets_and_payloads(encoded_package, monke
     import struct
     from wfrl.camera_video import stream
     sent = []
+    now = 0.0
+    waits = []
+
+    def advance(seconds):
+        nonlocal now
+        assert seconds > 0
+        waits.append(seconds)
+        now += seconds
+
+    monkeypatch.setattr(stream, 'time', SimpleNamespace(
+        monotonic=lambda: now, time=lambda: 1700000000.0 + now, sleep=advance))
     class Connection:
         def __init__(self, url):
             pass
@@ -152,6 +164,11 @@ def test_sender_report_counts_actual_packets_and_payloads(encoded_package, monke
             reports += 1
     assert reports == 2
     rows = [json.loads(line) for line in log.read_text().splitlines()]
+    assert len(rows) == 40
+    assert len(waits) == 40
+    assert waits == pytest.approx([1 / 20] * 40)
+    assert [r['actual_send_elapsed_s'] for r in rows] == pytest.approx([i / 20 for i in range(40)])
+    assert now == pytest.approx(2.0)
     assert all(r['actual_send_elapsed_s'] >= r['media_timestamp'] / 90000 for r in rows)
     assert all(r['pacing_lag_s'] >= 0 for r in rows)
     assert rows[-1]['actual_send_elapsed_s'] >= rows[0]['actual_send_elapsed_s']

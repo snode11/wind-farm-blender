@@ -154,6 +154,7 @@ def replay(monkeypatch):
     scene.objects = {}
     active = object.__new__(farm_flex.FarmFlex)
     active.export_turbines = active._update_geometry = None
+    active._deformation_batches = None
     active.frame_error, active.model = '', DEFAULT_MODEL
     active.scene, active.enabled, active._world_matrices = scene, True, None
     active.visible_turbines, active.readers = {0, 1, 2}, {'T1': object(), 'T2': object(), 'T3': object()}
@@ -273,4 +274,5 @@ def test_detach_discards_world_cache(replay):
     active.comparison = None
     farm_flex.detach(scene, restore=False)
     assert active._world_matrices is None and not active.enabled
+    assert active._deformation_batches is None
     assert calls == []

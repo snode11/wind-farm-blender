@@ -168,6 +168,10 @@ def test_real_reader_rejects_asynchronous_rows_before_isolation_recomputation():
     for row in data['samples']:
         row.update(sample_kind='source', expected_blade_id=1, passage_id='b1',
                    s1_observation_state='triggered')
+        pair = row['reconstruction']
+        row['evaluation']['clearance_error_m'] = (
+            pair['clearance_estimate'] - row['evaluation']['clearance_reference_m']
+            if pair['valid'] else None)
     data['cumulative'], data['events'] = precompute(data['samples'], config)
     overlay = dict(config=config,
                    manifest=dict(reconstruction_method='hub-tls.v1', algorithm_version=version),

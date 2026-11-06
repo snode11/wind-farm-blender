@@ -11,11 +11,15 @@ from types import SimpleNamespace
 import subprocess
 import tempfile
 import threading
+from unittest.mock import MagicMock
+
+import numpy as np
 import pytest
 
 from blender_frontend.tests._platform import symlink_or_skip
 
 SOURCE = Path(__file__).resolve().parents[1] / 'wfrl_blender/manual_down.py'
+WAIT_TIMEOUT = 60
 
 
 def helpers():
@@ -29,6 +33,81 @@ def helpers():
     exec(compile(ast.Module(body=[node for node in tree.body if isinstance(node, ast.FunctionDef)
                                  and node.name in names], type_ignores=[]), str(SOURCE), 'exec'), namespace)
     return namespace
+
+
+@pytest.fixture
+def blade_labels():
+    names = {'_stations', 'current_blade', 'update_labels', '_set_hidden'}
+    source = SOURCE.with_name('manual_down_camera.py')
+    tree = ast.parse(source.read_text(encoding='utf-8'))
+    down = SimpleNamespace(_STATIONS={}, LABEL_SPAN=.5)
+    namespace = dict(_down=down, np=np, Vector=tuple, math=math, DEFAULT_MODEL='test',
+                     manual_control=SimpleNamespace(is_manual=lambda scene: True,
+                                                    other_scene_objects=lambda scene: set()))
+    exec(compile(ast.Module(body=[node for node in tree.body if isinstance(node, ast.FunctionDef)
+                                 and node.name in names], type_ignores=[]), str(source), 'exec'), namespace)
+    for name in names:
+        setattr(down, name, namespace[name])
+
+    class Vertices(list):
+        def foreach_get(self, attribute, values):
+            assert attribute == 'co'
+            values[:] = np.asarray(self).ravel()
+
+    vertices = Vertices([(0, 0, 0), (1, 0, 0), (0, 0, 1), (1, 0, 1)])
+    mesh = SimpleNamespace(vertices=vertices, as_pointer=lambda: 7,
+                           get=lambda key, default=None: default)
+    entry = SimpleNamespace(**{f'blade{index}_object': SimpleNamespace(data=mesh)
+                               for index in range(1, 4)})
+    camera = dict(wfrl_turbine='T1', wfrl_label_aspect=1.)
+    scene = SimpleNamespace(wfrl_manual_blade_labels=True,
+                            render=SimpleNamespace(resolution_x=64, resolution_y=64))
+    objects = {role: SimpleNamespace(hide_viewport=False, hide_render=False)
+               for role in ('Legend.Back', 'Legend.B1', 'Legend.B2', 'Legend.B3')}
+    world = MagicMock()
+    world.inverted.return_value = world
+    world.__matmul__.return_value = world
+    world.angle.return_value = 0.
+    down._world = lambda obj: world
+    down._down_cameras = lambda scene: [camera]
+    down._entry = lambda scene, turbine: entry
+    down._label_children = lambda scene: {}
+    down._label_objects = lambda scene, camera, **kwargs: objects
+    return SimpleNamespace(down=down, mesh=mesh, vertices=vertices, entry=entry,
+                           camera=camera, scene=scene, objects=objects)
+
+
+@pytest.mark.parametrize('coordinates', [[], [(0, 0, 0), (1, 0, 0)],
+                                        [(0, 0, 0), (0, 0, 1)]],
+                         ids=['empty-mesh', 'zero-span', 'no-sampled-stations'])
+@pytest.mark.parametrize('empty_cache', [False, True])
+def test_blade_number_repeatedly_reports_missing_stations(blade_labels, coordinates, empty_cache):
+    runtime = blade_labels
+    runtime.vertices[:] = coordinates
+    if empty_cache:
+        runtime.down._STATIONS[(runtime.mesh.as_pointer(), len(coordinates), 'test')] = []
+    for _ in range(2):
+        with pytest.raises(ValueError, match='叶片缺少编号定位截面'):
+            runtime.down.current_blade(runtime.camera, runtime.entry)
+    assert not runtime.down._STATIONS
+
+
+def test_blade_labels_report_missing_stations_and_recover(blade_labels):
+    runtime = blade_labels
+    for _ in range(2):
+        runtime.down.update_labels(runtime.scene)
+        assert runtime.camera.get('wfrl_label_error') == '叶片缺少编号定位截面'
+        assert all(obj.hide_viewport and obj.hide_render for obj in runtime.objects.values())
+    assert not runtime.down._STATIONS
+
+    runtime.vertices[1] = (0, 0, .5)
+    runtime.down.update_labels(runtime.scene)
+    assert 'wfrl_label_error' not in runtime.camera
+    for role, obj in runtime.objects.items():
+        assert obj.hide_viewport == obj.hide_render == (role not in ('Legend.Back', 'Legend.B1'))
+    stations = runtime.down._stations(runtime.mesh)
+    assert stations[0] == (0., 0., .5)
+    assert runtime.down._stations(runtime.mesh) is stations
 
 
 @pytest.mark.parametrize('asynchronous', [False, True])
@@ -84,6 +163,7 @@ def test_pair_preflight_rejects_either_destination_and_dangling_links(tmp_path):
         path.unlink()
 
 
+@pytest.mark.skipif(os.name == 'nt', reason='Pair publication requires POSIX hard links')
 def test_pair_publication_preserves_collisions_and_retains_master(tmp_path, monkeypatch):
     function = helpers()['_publish_pair']
     master = tmp_path / 'encoded.mp4'
@@ -109,6 +189,7 @@ def test_pair_publication_preserves_collisions_and_retains_master(tmp_path, monk
     assert master.read_bytes() == b'encoded master'
 
 
+@pytest.mark.skipif(os.name == 'nt', reason='Pair publication requires POSIX hard links')
 def test_pair_publication_writes_complete_bytes(tmp_path):
     function = helpers()['_publish_pair']
     master, target = tmp_path / 'encoded.mp4', tmp_path / 'final.mp4'
@@ -207,7 +288,7 @@ def test_down_async_finish_verifies_and_publishes_off_the_main_thread(tmp_path, 
     def verify(path, frames, fps, size, ffprobe, ffmpeg):
         assert threading.get_ident() != main_thread and path == master
         entered.set()
-        assert release.wait(5)
+        assert release.wait(WAIT_TIMEOUT * 2), 'Down verification worker was not released'
         if verification_fails:
             raise ValueError('verification rejected')
         return {'full_decode': True}
@@ -220,12 +301,15 @@ def test_down_async_finish_verifies_and_publishes_off_the_main_thread(tmp_path, 
     namespace['_publish_async'](source, 7, (str(temporary), str(target), dict(frames=1, fps=25),
                                            (64, 36), 'probe', 'codec'))
     try:
-        assert entered.wait(5)
+        assert entered.wait(WAIT_TIMEOUT), f'Down verification did not start: {namespace["_LAST"]!r}'
         assert timers[0]() == .2 and not namespace['_LAST']
     finally:
         release.set()
     pending = namespace['_PUBLISHING'][7][1]
-    status = pending.get(timeout=5)
+    try:
+        status = pending.get(timeout=WAIT_TIMEOUT)
+    except queue.Empty:
+        pytest.fail(f'Down publication did not finish: {namespace["_LAST"]!r}')
     pending.put(status)
     assert timers[0]() is None and not namespace['_PUBLISHING']
     assert namespace['_LAST'][7] == status

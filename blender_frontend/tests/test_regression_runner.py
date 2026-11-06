@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 import os
 import subprocess
+import threading
 import time
 from dataclasses import replace
 from types import SimpleNamespace
@@ -17,6 +18,7 @@ SPEC = importlib.util.spec_from_file_location('wfrl_regression_runner', ROOT / '
 runner = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = runner
 SPEC.loader.exec_module(runner)
+WAIT_TIMEOUT = 60
 
 
 def spec(name):
@@ -299,33 +301,52 @@ def test_stop_without_sigkill_rejects_unconfirmed_cleanup(monkeypatch):
 
 @pytest.mark.skipif(os.name != 'posix', reason='POSIX process-session regression')
 @pytest.mark.parametrize('parent_mode', ['exit_on_term', 'ignore_term', 'already_exited'])
-def test_stop_reaps_owned_descendants_after_launcher_exit(tmp_path, parent_mode):
+def test_stop_reaps_owned_descendants_after_launcher_exit(tmp_path, parent_mode, monkeypatch):
     import psutil
 
     child_script = tmp_path / 'child.py'
     ready = tmp_path / 'child.pid'
-    child_script.write_text('import os,signal,sys,time\nfrom pathlib import Path\n'
+    child_script.write_text('import os,signal,sys,threading\nfrom pathlib import Path\n'
         'signal.signal(signal.SIGTERM,signal.SIG_IGN)\n'
-        'Path(sys.argv[1]).write_text(str(os.getpid()))\ntime.sleep(120)\n')
+        'ready=Path(sys.argv[1]); temporary=ready.with_suffix(".tmp")\n'
+        'temporary.write_text(str(os.getpid()), encoding="ascii"); temporary.replace(ready)\n'
+        'threading.Event().wait()\n', encoding='utf-8')
     parent_script = tmp_path / 'parent.py'
-    parent_script.write_text('import subprocess,sys,time,signal\n'
+    parent_script.write_text('import subprocess,sys,threading,signal\n'
         'if sys.argv[3] == "ignore_term": signal.signal(signal.SIGTERM,signal.SIG_IGN)\n'
         'subprocess.Popen([sys.executable,sys.argv[1],sys.argv[2]])\n'
-        'if sys.argv[3] != "already_exited": time.sleep(120)\n')
+        'if sys.argv[3] != "already_exited": threading.Event().wait()\n', encoding='utf-8')
     owner = runner.OwnedProcesses(env_key='WFRL_TEST_REGRESSION_TOKEN')
-    unrelated = subprocess.Popen([sys.executable, '-c', 'import time;time.sleep(120)'])
+    unrelated = subprocess.Popen([sys.executable, '-c', 'import threading;threading.Event().wait()'])
     process = owner.start([sys.executable, str(parent_script), str(child_script), str(ready), parent_mode],
                           cwd=tmp_path, env=os.environ)
     child = None
     try:
-        deadline = time.monotonic() + 5
+        deadline = time.monotonic() + WAIT_TIMEOUT
         while not ready.exists():
-            assert time.monotonic() < deadline
-            time.sleep(.01)
-        child = psutil.Process(int(ready.read_text()))
+            assert time.monotonic() < deadline, (
+                f'Child readiness timed out: parent_mode={parent_mode}, parent_exit={process.poll()}, path={ready}')
+            threading.Event().wait(.01)
+        child = psutil.Process(int(ready.read_text(encoding='ascii')))
         if parent_mode == 'already_exited':
-            process.wait(timeout=5)
-        runner.stop_process(process, owner, grace=.5)
+            process.wait(timeout=WAIT_TIMEOUT)
+        signalled, clock = [None], [0.]
+        original_signal = owner.signal
+
+        def signal_owner(signum):
+            original_signal(signum)
+            signalled[0] = signum
+
+        def monotonic():
+            # Expire the ignored TERM grace; KILL and reaping keep a real time budget.
+            if signalled[0] == runner.signal.SIGTERM:
+                clock[0] += WAIT_TIMEOUT
+                return clock[0]
+            return time.monotonic()
+
+        monkeypatch.setattr(owner, 'signal', signal_owner)
+        monkeypatch.setattr(runner, 'time', SimpleNamespace(monotonic=monotonic, sleep=time.sleep))
+        runner.stop_process(process, owner, grace=WAIT_TIMEOUT)
         assert process.returncode is not None
         assert not owner.alive()
         assert not child.is_running() or child.status() == psutil.STATUS_ZOMBIE
@@ -336,6 +357,6 @@ def test_stop_reaps_owned_descendants_after_launcher_exit(tmp_path, parent_mode)
             except psutil.NoSuchProcess: pass
         if process.poll() is None:
             process.kill()
-        process.wait(timeout=5)
+        process.wait(timeout=WAIT_TIMEOUT)
         unrelated.terminate()
-        unrelated.wait(timeout=5)
+        unrelated.wait(timeout=WAIT_TIMEOUT)

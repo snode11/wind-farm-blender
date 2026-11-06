@@ -74,7 +74,8 @@ def test_full_segment_export_preserves_each_field_validity_and_world_witnesses(s
     assert metadata['source_sha256']['geometry.npz'] == source.manifest['files']['geometry.npz']
     with (tmp_path/'frames.csv').open() as f:
         rows = list(csv.DictReader(f))
-    with np.load(tmp_path/'frame_geometry.npz', allow_pickle=False) as a:
+    with np.load(tmp_path/'frame_geometry.npz', allow_pickle=False) as archive:
+        a = {name: archive[name] for name in archive.files}
         assert a['camera_transform_valid'].all()
         assert np.count_nonzero(a['clearance_valid']) > 1200
         assert not a['clearance_valid'].all()

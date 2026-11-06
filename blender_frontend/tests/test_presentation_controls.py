@@ -60,7 +60,6 @@ class PresentationControlsTests(unittest.TestCase):
 
 def test_readonly_sidebar_does_not_leave_native_layout_pending(monkeypatch):
     import sys
-    import time
     from wfrl_blender import cameras
 
     class Sidebar:
@@ -81,7 +80,8 @@ def test_readonly_sidebar_does_not_leave_native_layout_pending(monkeypatch):
     scene.objects = {'camera': camera}
     window = SimpleNamespace(scene=scene, screen=screen)
     job = dict(window=window, scene=scene, screen=screen, count=1, layout='SINGLE',
-               camera_names=('camera',), regions_ready=True, deadline=time.monotonic()+10)
+               camera_names=('camera',), regions_ready=True, deadline=10.)
+    monkeypatch.setitem(sys.modules, 'time', SimpleNamespace(monotonic=lambda: 0.))
     monkeypatch.setitem(sys.modules, 'bpy', SimpleNamespace())
     monkeypatch.setattr(cameras, '_LAYOUT_JOB', job)
     monkeypatch.setattr(cameras, 'fill_camera_view', lambda *_: None)

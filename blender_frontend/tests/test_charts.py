@@ -154,6 +154,88 @@ def test_farm_records_detach_inputs_and_keep_history_metadata_independent(monkey
         assert raw['timestamp'] == {'value': 1.25, 'timebase': 'simulation_seconds'}
 
 
+@pytest.mark.parametrize('scene_bound', [False, True])
+@pytest.mark.parametrize('nested', [False, True])
+def test_farm_metadata_changes_preserve_prior_frames_and_aggregate_inputs(monkeypatch, scene_bound, nested):
+    from copy import deepcopy
+    from wfrl_blender import charts
+    from wfrl_blender.history import HistoryWindow
+
+    monkeypatch.setattr(charts, 'history', ChartHistory())
+    monkeypatch.setattr(charts, 'raw_history', HistoryWindow())
+    monkeypatch.setattr(charts, '_scene_histories', {})
+    monkeypatch.setattr(charts, '_local_sequence', 0)
+    scene = object() if scene_bound else None
+    manifest = dict(status='REVIEW_ONLY', turbine_ids=['T1'], files={'geometry.npz': 'geometry'},
+                    source={'files': ['farm.out']} if nested else 'FAST.Farm')
+    extra = {'T1': {'power': dict(value=2., unit='MW', source_sha256='power-source',
+                                source_channel=['GenPwr'] if nested else 'GenPwr')}}
+    pose = [(1., 0., 8., 3., 4., 5.)]
+    charts.record_farm(1., pose, manifest, extra, scene=scene)
+    raw = charts.raw_history_for(scene)
+    plotted = charts.history_for(scene)
+    first_raw = raw.series[('snapshot', None, 'T1', 'power')][0]['data']
+    first_farm = raw.series[('snapshot', None, None, 'power')][0]['data']
+    expected = deepcopy(first_raw['provenance'])
+
+    manifest['files']['geometry.npz'] = 'replacement'
+    extra['T1']['power']['source_sha256'] = 'replacement-power'
+    extra['T1']['power']['unit'] = 'kW'
+    if nested:
+        manifest['source']['files'].append('other.out')
+        extra['T1']['power']['source_channel'].append('OtherPwr')
+    charts.record_farm(2., pose, manifest, extra, scene=scene)
+    assert first_raw['provenance'] == expected
+    assert plotted.points('T1', 'power')[0].provenance == expected
+    latest = plotted.points('T1', 'power')[-1]
+    assert latest.provenance['geometry_sha256'] == 'replacement'
+    assert latest.provenance['source_sha256'] == 'replacement-power'
+    assert latest.unit == 'kW'
+    assert plotted.points(FARM, 'power')[-1].value == .002
+    if nested:
+        assert latest.provenance['source']['files'] == ['farm.out', 'other.out']
+        assert latest.provenance['source_channel'] == ['GenPwr', 'OtherPwr']
+
+    farm_point = plotted.points(FARM, 'power')[0]
+    aggregate_input = first_farm['provenance']['inputs'][0]['provenance']
+    point_input = farm_point.provenance['inputs'][0]['provenance']
+    assert aggregate_input == point_input == expected
+    aggregate_input['status'] = 'aggregate-only'
+    point_input['status'] = 'plot-only'
+    if nested:
+        aggregate_input['source']['files'].append('aggregate-only')
+        point_input['source']['files'].append('plot-only')
+    assert first_raw['provenance'] == expected
+    assert plotted.points('T1', 'power')[0].provenance == expected
+    assert aggregate_input['status'] != point_input['status']
+
+
+def test_history_metadata_copy_preserves_aliases_cycles_and_custom_copy_behavior():
+    class Source(str):
+        def __deepcopy__(self, memo):
+            result = type(self)(self)
+            result.files = list(self.files)
+            return result
+
+    source = Source('FAST.Farm')
+    source.files = ['farm.out']
+    shared = ['GenPwr']
+    provenance = dict(source=source, left=shared, right=shared)
+    provenance['self'] = provenance
+    message = snapshot()
+    message['payload']['turbines'][0]['channels']['power']['provenance'] = provenance
+    history = ChartHistory()
+    history.ingest(message)
+    copied = history.points('T1', 'power')[0].provenance
+    shared.append('changed')
+    source.files.append('changed')
+    assert copied is not provenance
+    assert copied['self'] is copied
+    assert copied['left'] is copied['right']
+    assert copied['left'] == ['GenPwr']
+    assert copied['source'].files == ['farm.out']
+
+
 def test_scene_history_draw_and_export_never_read_another_scene():
     from wfrl_blender import charts
     class Scene:
