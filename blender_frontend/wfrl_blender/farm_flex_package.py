@@ -180,6 +180,8 @@ def _file_bytes(path, name):
 
 def _capture_package(path):
     """Hash all files; retain only bytes or JSON needed by this load's consumers."""
+    if not (path / 'manifest.json').exists():
+        raise FileNotFoundError('Farm package manifest not found: ' + str(path / 'manifest.json'))
     raw = _file_bytes(path, 'manifest.json')
     manifest = _json(raw, 'manifest.json')
     if not isinstance(manifest, dict) or not isinstance(manifest.get('files'), dict):

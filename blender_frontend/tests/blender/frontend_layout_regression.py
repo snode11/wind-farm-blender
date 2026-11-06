@@ -21,6 +21,7 @@ sys.path[:0] = [os.environ.get('WFRL_ADDON_ROOT', str(ROOT/'blender_frontend')),
 MODULE = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')
 addon = importlib.import_module(MODULE)
 native = importlib.import_module(MODULE+'.native_camera_views')
+projection = importlib.import_module(MODULE+'.camera_projection')
 core = importlib.import_module(MODULE+'.custom_cameras')
 preview = importlib.import_module(MODULE+'.custom_camera_preview')
 capture = importlib.import_module(MODULE+'.custom_camera_capture')
@@ -105,7 +106,7 @@ def record_layout(name):
         assert x+width <= left+available_width+2, (name, entry['slot'], 'cropped right', bounds)
         assert y+height <= title_bottom+2, (name, entry['slot'], 'title overlaps image', bounds, title_bottom)
         params = core.parameters(core.get_camera(scene, entry['slot']))
-        expected = native.projection.aspect(params.fov, params.vfov)
+        expected = projection.aspect(params.fov, params.vfov)
         assert abs(width/height-expected) < 2e-4, (name, bounds, expected)
         rows.append({'slot': entry['slot'], 'area': [area.x, area.y, area.width, area.height],
                      'region': [region.width, region.height], 'gate': list(bounds),
