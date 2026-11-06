@@ -1,11 +1,29 @@
 """Farm replay scene bindings, mesh ownership and handler lifecycle."""
-import hashlib
 import math
 
 import numpy as np
 
 from . import farm_flex as _farm
 from . import performance
+
+
+def _validate_scene_manifest(manifest, *, overlay=None):
+    """Check the metadata used to place turbines and their measurement rigs."""
+    try:
+        layout = np.asarray(manifest['layout_m'])
+        if (layout.shape != (len(manifest['turbine_ids']), 3) or layout.dtype.kind not in 'fiu'
+                or not np.isfinite(layout).all()):
+            raise ValueError('Invalid farm turbine layout_m')
+        if overlay is None:
+            calibration = manifest['calibration']
+            for key, shape in (('origin_m', (3,)), ('beam_directions', (3, 3))):
+                values = np.asarray(calibration[key])
+                if values.shape != shape or values.dtype.kind not in 'fiu' or not np.isfinite(values).all():
+                    raise ValueError('Invalid farm calibration: ' + key)
+            if np.any(np.linalg.norm(calibration['beam_directions'], axis=1) == 0):
+                raise ValueError('Invalid farm calibration: zero beam direction')
+    except (KeyError, TypeError) as exc:
+        raise ValueError('Missing or invalid farm scene metadata: ' + str(exc)) from exc
 
 
 def active_for(scene):
@@ -118,6 +136,8 @@ class _SceneBinding:
         self._update_geometry = None
         self._deformation_batches = None
         package = _farm._load_package(path) if _package is None else _package
+        _farm.validate_candidate(path, package)
+        _validate_scene_manifest(package.manifest, overlay=package.overlay)
         self.manifest,self.times,self.transforms,self.poses,self.readers=package.playback
         result_path = package.result_path
         path, overlay = package.source_path, package.overlay
@@ -247,7 +267,7 @@ class _SceneBinding:
             scene['wfrl_flex_provenance'] = self.manifest['provenance_label']
         scene['wfrl_tip_reference_note']=scene['wfrl_flex_provenance']
         scene['wfrl_farm_flex_path']=str(result_path)
-        scene['wfrl_farm_manifest_sha256']=hashlib.sha256((result_path/'manifest.json').read_bytes()).hexdigest()
+        scene['wfrl_farm_manifest_sha256']=package.result_manifest_sha256
         from .clearance_visual import ensure_radar
         if overlay is not None:
             config = overlay['config']
@@ -377,6 +397,8 @@ def attach(scene,path,*,_package=None):
         if _package is not None:
             _farm.validate_candidate(path, package)
         manifest = package.manifest
+        if isinstance(package, _farm._LoadedPackage):
+            _validate_scene_manifest(manifest, overlay=package.overlay)
         required = [f'WFRL.Turbine.{tid}.{suffix}'
                     for tid in manifest['turbine_ids']
                     for suffix in ('YawRoot', 'Rotor', 'Tower', 'Blade1', 'Blade2', 'Blade3')]
@@ -394,20 +416,22 @@ def attach(scene,path,*,_package=None):
             if other.scene != scene and any(obj in scene.objects.values() for obj, *_ in other.blades):
                 raise ValueError('FarmFlex objects are already driven by scene: ' + other.scene.name)
         replacing = True
-        _farm.detach(scene, restore=False)
+        _farm.detach(scene, restore=True)
         from . import charts
         charts.clear(scene=scene)
         active=_farm.FarmFlex(scene,path,_package=package)
         _farm._ACTIVES[scene.as_pointer()] = active
         _farm._ACTIVE = active
-    except Exception:
+    except Exception as exc:
         from . import clearance_replay
+        scene['wfrl_home_load_error'] = '形变包加载失败：' + str(exc)
         if replacing:
             _farm.detach(scene, restore=False)
         if replacing or _farm.active_for(scene) is None:
             scene['wfrl_flex_active'] = False
-            clearance_replay.clear(scene,'三机形变包未就绪：加载失败')
+            clearance_replay.clear(scene,'三机形变包未就绪：' + str(exc))
         raise
+    scene.pop('wfrl_home_load_error', None)
     # Tip sampling must follow mesh deformation at the same simulation time.
     if _farm.update in bpy.app.handlers.frame_change_post:bpy.app.handlers.frame_change_post.remove(_farm.update)
     if tip_tracking.update in bpy.app.handlers.frame_change_post:

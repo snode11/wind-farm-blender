@@ -20,11 +20,28 @@ def _read_telemetry(path, manifest, times, readers, *, _source=None):
             or not np.array_equal(extra['times'], times)
             or set(extra['turbines']) != set(readers)):
         raise ValueError('Telemetry and geometry do not match')
-    for channels in extra['turbines'].values():
-        for record in channels.values():
+    sources = extra.get('sources')
+    if not isinstance(sources, dict) or set(sources) != set(readers):
+        raise ValueError('Telemetry source identities do not match turbines')
+    for tid, channels in extra['turbines'].items():
+        source = sources[tid]
+        if (not isinstance(source, dict) or not isinstance(source.get('sha256'), str)
+                or not source['sha256'].strip()):
+            raise ValueError('Missing telemetry source digest: ' + tid)
+        if not isinstance(channels, dict):
+            raise ValueError('Invalid telemetry channels: ' + tid)
+        for name, record in channels.items():
+            if (not name.strip() or not isinstance(record, dict)
+                    or any(not isinstance(record.get(key), str) or not record[key].strip()
+                           for key in ('unit', 'source_channel'))):
+                raise ValueError('Missing telemetry unit/source_channel: ' + tid + '/' + name)
             values = np.asarray(record['values'])
+            if values.dtype.kind not in 'fiu':
+                raise TypeError('Invalid telemetry numeric samples: ' + tid + '/' + name)
             if values.shape != times.shape or not np.isfinite(values).all():
                 raise ValueError('Invalid telemetry samples')
+            if any(isinstance(value, (bool, np.bool_)) for value in record['values']):
+                raise TypeError('Invalid telemetry numeric samples: ' + tid + '/' + name)
             record['values'] = np.asarray(values, dtype=float)
     return extra
 
@@ -38,8 +55,10 @@ def record_telemetry(self, scene, pose=None):
         return
     t = value['time_s']
     if pose is None:
-        pose = np.array([[np.interp(t, self.times, self.poses[:, k, j])
-                          for j in range(6)] for k in range(len(self.readers))])
+        from .farm_flex_geometry import _interpolate_poses
+        i = int(np.clip(np.searchsorted(self.times, t, side='right') - 1, 0, len(self.times) - 2))
+        alpha = float(np.clip((t - self.times[i]) / (self.times[i + 1] - self.times[i]), 0, 1))
+        pose = _interpolate_poses(self.poses[i], self.poses[i + 1], alpha)
     if self.last_telemetry_frame is not None and t < self.last_telemetry_frame:
         charts.clear(scene=scene)
     extra = {}

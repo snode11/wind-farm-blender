@@ -116,3 +116,71 @@ def test_native_topology_change_fails_without_partial_mesh_write(replay, monkeyp
     assert telemetry.call_count == 0
     for row, coords in zip(active.blades, before):
         np.testing.assert_array_equal([v.co for v in row[0].data.vertices], coords)
+
+
+def test_yaw_wrap_matches_reader_geometry_comparison_and_telemetry(replay, monkeypatch):
+    from wfrl.lidar.replay import ReplayReader
+    from wfrl_blender import charts, clearance_replay, deflection
+
+    active, scene, _ = replay
+    active.poses[:, :, 0] = [[179.], [-179.]]
+    active.comparison.data['poses'][:, 0] = [179., -179.]
+    reader = ReplayReader(SimpleNamespace(
+        manifest={'segment': {'start_s': 0., 'end_s': 1.}}, measurements=[], cumulative=[],
+        motion=[dict(time_s=t, yaw_deg=yaw, azimuth_deg=0., rotor_speed_rpm=0., pitch_deg=[0.] * 3)
+                for t, yaw in ((0., 179.), (1., -179.))]))
+    active.readers['T1'] = reader
+    run(active, scene)
+    expected = reader.at(.5)['motion']['yaw_deg']
+    assert expected == 180.
+    assert scene.objects['WFRL.Turbine.T1.YawRoot'].rotation_euler.z == pytest.approx(np.pi)
+    row = active.comparison.rows[1]
+    hub, axes, _ = deflection.rigid_frame(active.comparison.data['scalars'], [expected, 0., 0., 0., 0., 0.], 1)
+    np.testing.assert_allclose(row['reference'], hub + axes[:, 2] * active.comparison.data['scalars']['TipRad'])
+    active.last_telemetry_frame, active.telemetry, active.manifest = None, None, {}
+    scene.wfrl_channel_telemetry = True
+    monkeypatch.setattr(clearance_replay, 'sample', lambda _: reader.at(.5))
+    recorded = []
+    monkeypatch.setattr(charts, 'record_farm', lambda t, pose, *args, **kw: recorded.append(pose.copy()))
+    active.record_telemetry(scene)
+    assert recorded[0][0, 0] == expected
+
+
+def test_pause_seek_and_restart_reproduce_endpoint_and_interpolated_geometry(replay):
+    active, scene, _ = replay
+    expected = {}
+    for time in (0., .5, 1., 1., 0., .5):
+        run(active, scene, time=time)
+        values = np.array([[v.co.copy() for v in row[0].data.vertices] for row in active.blades])
+        if time in expected:
+            np.testing.assert_array_equal(values, expected[time])
+        else:
+            expected[time] = values
+        assert scene['wfrl_clearance_time_s'] == time
+        assert all(row['time'] == time for row in active.comparison.rows.values())
+
+
+def test_binding_failure_restores_old_deformation_and_reports_cause(replay, monkeypatch):
+    from wfrl_blender import clearance_replay
+
+    active, scene, _ = replay
+    run(active, scene)
+    for tid in active.readers:
+        scene.objects[f'WFRL.Turbine.{tid}.Tower'] = object()
+    monkeypatch.setattr(active.comparison, 'close', Mock())
+    monkeypatch.setattr(farm_flex, '_load_package', lambda _: SimpleNamespace(
+        manifest={'turbine_ids': list(active.readers)}))
+    monkeypatch.setattr(clearance_replay, 'clear', lambda scene, reason: scene.update(wfrl_clearance_status=reason))
+
+    def fail_binding(*args, **kwargs):
+        raise ValueError('mesh binding unavailable')
+
+    monkeypatch.setattr(farm_flex, 'FarmFlex', fail_binding)
+    with pytest.raises(ValueError, match='mesh binding unavailable'):
+        farm_flex.attach(scene, 'candidate')
+    assert not active.enabled and farm_flex.active_for(scene) is None
+    assert not scene['wfrl_flex_active']
+    assert 'mesh binding unavailable' in scene['wfrl_home_load_error']
+    assert 'mesh binding unavailable' in scene['wfrl_clearance_status']
+    for obj, rest, *_ in active.blades:
+        np.testing.assert_array_equal([v.co for v in obj.data.vertices], rest)

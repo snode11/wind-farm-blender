@@ -7,6 +7,16 @@ from . import farm_flex as _farm
 from . import performance
 
 
+def _interpolate_poses(a, b, alpha):
+    """Match the reader's shortest yaw arc while retaining unwrapped rotor phase."""
+    pose = a * (1-alpha) + b * alpha
+    if 0 < alpha < 1:
+        delta = b[..., 0] - a[..., 0]
+        wrapped = (delta >= 180) | (delta < -180)
+        pose[..., 0] = np.where(wrapped, a[..., 0] + alpha * ((delta + 180) % 360 - 180), pose[..., 0])
+    return pose
+
+
 def _readonly_arrays(value):
     if isinstance(value, np.ndarray):
         value.setflags(write=False)
@@ -206,7 +216,7 @@ class _Geometry:
         if self.reference is not None and 1e-8 < alpha < 1-1e-8:
             from .deflection import rigid_frame
             from .tower_motion import interpolate_transform
-            pose = self.poses[i]*(1-alpha)+self.poses[i+1]*alpha
+            pose = _interpolate_poses(self.poses[i], self.poses[i+1], alpha)
             nacelle = interpolate_transform(self.tower_motion['nacelle'][i],self.tower_motion['nacelle'][i+1],alpha)
             scalars = self.comparison.data['scalars']
             h0,_,a0 = rigid_frame(scalars,self.poses[i,k],b+1,self.tower_motion['nacelle'][i,k])
@@ -259,7 +269,7 @@ class _Geometry:
         """Transport a hidden T1 tip with the mesh's bound rest and precision."""
         from mathutils import Vector
         row = next(row for row in self.blades if row[5:7] == (0, blade-1))
-        pose = self.poses[i]*(1-alpha)+self.poses[i+1]*alpha
+        pose = _interpolate_poses(self.poses[i], self.poses[i+1], alpha)
         nacelle = None
         if self.reference is not None and 1e-8 < alpha < 1-1e-8:
             from .tower_motion import interpolate_transform
@@ -308,7 +318,7 @@ class _Geometry:
         performance.count('flex.update_cache_miss')
         sample = dict(lower=self.deformed_at(i, _bindings=blades),
                       upper=self.deformed_at(i+1, _bindings=blades),
-                      pose=self.poses[i]*(1-alpha)+self.poses[i+1]*alpha,
+                      pose=_interpolate_poses(self.poses[i], self.poses[i+1], alpha),
                       blades={}, towers={})
         if support is not None:
             from .tower_motion import interpolate_transform

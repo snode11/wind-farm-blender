@@ -81,7 +81,7 @@ def compare(actual, reference, axes, simulation):
 
 
 def read_comparison(path, manifest, times, poses, *, rigid_poses=None,
-                    tower_motion=None, blade_reference=None):
+                    tower_motion=None, blade_reference=None, _verified=None):
     """Optional sidecar: absent means unavailable; malformed must fail closed.
 
     Supplied rigid poses and support/reference data must be from a validated
@@ -90,11 +90,17 @@ def read_comparison(path, manifest, times, poses, *, rigid_poses=None,
     name = 'deflection-t1.json'
     if name not in manifest['files']:
         return None
-    path = Path(path)
-    raw = (path / name).read_bytes()
-    if hashlib.sha256(raw).hexdigest() != manifest['files'][name]:
-        raise ValueError('T1 deflection integrity mismatch')
-    data = json.loads(raw)
+    if _verified is None:
+        path = Path(path)
+        raw = (path / name).read_bytes()
+        if hashlib.sha256(raw).hexdigest() != manifest['files'][name]:
+            raise ValueError('T1 deflection integrity mismatch')
+        data = json.loads(raw)
+    else:
+        if (path is not _verified or _verified.files[name].sha256 != manifest['files'][name]):
+            raise ValueError('T1 deflection verified source mismatch')
+        path = _verified.path
+        data = _verified.files[name].data
     beamdyn = data['schema'] == 'wfrl.tip-deflection.t1.v3'
     reference = ('BeamDyn structural tip; independent unloaded prebend' if beamdyn else 'ElastoDyn structural tip; local (0,0,TipRad)')
     frame = 'BeamDyn pitched root xyz' if beamdyn else 'ElastoDyn unpitched coned xc,yc,zc'
@@ -107,8 +113,11 @@ def read_comparison(path, manifest, times, poses, *, rigid_poses=None,
             or not np.array_equal(data['times'], times)):
         raise ValueError('T1 deflection and geometry do not match')
     for key, shape in [('poses', (len(times), 6)), ('simulation', (len(times), 3, 3 if beamdyn else 2))]:
-        data[key] = np.asarray(data[key], dtype=float)
-        if data[key].shape != shape or not np.isfinite(data[key]).all():
+        samples = np.asarray(data[key], dtype=object)
+        if samples.shape != shape or any(type(value) not in (int, float) for value in samples.flat):
+            raise ValueError('Invalid T1 deflection samples: ' + key)
+        data[key] = samples.astype(float)
+        if not np.isfinite(data[key]).all():
             raise ValueError('Invalid T1 deflection samples: ' + key)
     if not np.allclose(data['poses'], poses[:, 0], atol=.002, rtol=0):
         raise ValueError('T1 deflection rigid poses differ')
@@ -248,7 +257,8 @@ class ComparisonView:
         simulation = data['simulation'][i] * (1 - alpha) + data['simulation'][i + 1] * alpha
         nacelle = None
         if 'tip_local_m' not in data:
-            pose = data['poses'][i] * (1 - alpha) + data['poses'][i + 1] * alpha
+            from .farm_flex_geometry import _interpolate_poses
+            pose = _interpolate_poses(data['poses'][i], data['poses'][i + 1], alpha)
             if 'nacelle' in data:
                 from .tower_motion import interpolate_transform
                 nacelle = interpolate_transform(data['nacelle'][i], data['nacelle'][i+1], alpha)
