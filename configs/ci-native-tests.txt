@@ -35,3 +35,13 @@ mode_scene_ownership_regression.py
 video_compositor_regression.py
 scene_playback_lifecycle_regression.py
 clearance_replay_smoke.py
+blade_model_regression.py
+clearance_edit_mode_regression.py
+custom_camera_edit_binding_regression.py
+landscape_geometry_regression.py
+live_contracts_regression.py
+manual_geometry_compatibility_regression.py
+manual_model_regression.py
+nacelle_camera_intrinsics_regression.py
+nacelle_camera_regression.py
+nrel_defect_ui_state_regression.py

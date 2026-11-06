@@ -667,6 +667,30 @@ def test_environment_cannot_silently_replace_caller_speed(case):
     assert not case.spawns
 
 
+@pytest.mark.parametrize("caller", [True, np.bool_(True)])
+def test_boolean_caller_speed_is_not_equal_to_forwarded_number(case, caller):
+    case.itf.set_wind_request_context({"wind_speed": caller})
+    with pytest.raises(interface.WindRequestError) as rejected:
+        case.itf.init(wind_speed=1.)
+    assert saved(rejected.value.record)["application"]["wind_speed"]["status"] == "not_applied"
+    assert not case.spawns
+
+
+@pytest.mark.parametrize("wind_type", [1, 3])
+@pytest.mark.parametrize("duration", [0., -1., float("nan"), float("inf"), True, "6"])
+def test_invalid_episode_duration_rejected_before_inputs_change(case, wind_type, duration):
+    case.edit(case.inflow, WindType=wind_type)
+    before = case.inflow.read_bytes()
+    case.itf.set_wind_request_context({"wind_speed": 11. if wind_type == 1 else None},
+                                      episode_duration_s=duration)
+    with pytest.raises(interface.WindRequestError) as rejected:
+        case.itf.init(wind_speed=11. if wind_type == 1 else None)
+    record = saved(rejected.value.record)
+    assert record["application"]["episode_duration_s"]["status"] == "not_applied"
+    assert case.inflow.read_bytes() == before
+    assert not case.spawns
+
+
 def test_driver_audit_survives_generated_case_purge(case, monkeypatch):
     driver = make_driver(case)
     record = driver.reset(wind_speed=11.)["wind_conditions"]
