@@ -194,8 +194,7 @@ def test_part7_install_isolates_every_blender_child(tmp_path, monkeypatch):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     built = SimpleNamespace(archive=tmp_path / 'fixture.zip')
-    monkeypatch.setitem(sys.modules, 'build_extension', SimpleNamespace(build=lambda: built))
-    monkeypatch.setattr(module, 'EVIDENCE', tmp_path / 'evidence')
+    monkeypatch.setitem(sys.modules, 'build_extension', SimpleNamespace(build=lambda output_dir: built))
     monkeypatch.setenv('BLENDER_USER_RESOURCES', '/inherited/daily')
     monkeypatch.setenv('BLENDER_USER_EXTENSIONS', '/inherited/daily/extensions')
     calls = []
@@ -203,7 +202,7 @@ def test_part7_install_isolates_every_blender_child(tmp_path, monkeypatch):
     class Probed(Exception):
         pass
 
-    def fake_run(command, env, log):
+    def fake_run(command, env, log, *, cwd):
         resources = Path(env['BLENDER_USER_CONFIG']).parent
         assert env['BLENDER_USER_RESOURCES'] == str(resources)
         assert env['BLENDER_USER_EXTENSIONS'] == str(resources / 'extensions')
@@ -214,5 +213,5 @@ def test_part7_install_isolates_every_blender_child(tmp_path, monkeypatch):
 
     monkeypatch.setattr(module, '_run', fake_run)
     with pytest.raises(Probed):
-        module.verify()
+        module.verify(evidence_dir=tmp_path / 'evidence')
     assert len(calls) == 3
