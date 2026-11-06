@@ -42,11 +42,13 @@ def layout_dict(scene):
             'image_height_px': _core.projection.resolution(p.fov, p.vfov, p.output_long_edge_px)[1]})
     from . import stacked_camera_rig as rig
     rig_pose = rig.pose(scene)
-    return {**({'rig_pose': rig_pose} if rig_pose is not None else {}),
+    layout = {**({'rig_pose': rig_pose} if rig_pose is not None else {}),
         'schema_version': _core.SCHEMA_VERSION, 'coordinate_frame': _core.COORDINATE_VERSION,
         'orientation_convention': 'yaw +X toward +Y; pitch up; roll camera +Z; degrees',
         'model_signature': _core.model_signature(scene), 'resolution_policy': 'FOV_PRIORITY_LONG_EDGE',
         'cameras': cameras}
+    _core.json.dumps(layout, allow_nan=False)
+    return layout
 
 
 def layout_hash(layout):
@@ -58,6 +60,7 @@ def validate_layout(scene, payload):
         raise ValueError('不支持的布局 schema，须为 v2')
     if payload.get('coordinate_frame') != _core.COORDINATE_VERSION:
         raise ValueError('布局坐标版本不匹配，未进行位置换算')
+    _core.json.dumps(payload, allow_nan=False)
     if payload.get('model_signature') != _core.model_signature(scene):
         raise ValueError('布局模型签名不匹配，未进行位置换算')
     records = payload.get('cameras')
@@ -89,6 +92,13 @@ def validate_layout(scene, payload):
             if record.get('mount_validation_status') != 'surface_validated':
                 raise ValueError('表面安装校验状态无效')
             surface = _core.SurfaceAnchor(**record['anchor'])
+            _core.validate_distance(surface.distance)
+            if len(surface.point) != 3 or len(surface.normal) != 3 or not _core._finite((*surface.point, *surface.normal)):
+                raise ValueError('安装锚点必须为有限三维数值')
+            if not surface.surface_name or abs(sum(v * v for v in surface.normal) - 1) > 1e-4:
+                raise ValueError('安装锚点须包含合法外壳与单位外法线')
+            if max(abs(params.location[i] - surface.point[i] - surface.normal[i] * surface.distance) for i in range(3)) > 5e-5:
+                raise ValueError('镜头中心与安装锚点、法线和离壳距离不一致')
             candidates = _core.validate_position(scene, params.location)
             if not any(a.surface_name == surface.surface_name and abs(a.distance - surface.distance) < 5e-5
                 and sum((a.point[i] - surface.point[i]) ** 2 for i in range(3)) < 1e-7

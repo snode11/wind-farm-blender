@@ -23,11 +23,15 @@ def _surface_geometry(scene, depsgraph=None, *, with_normals=False):
         try:
             mesh.calc_loop_triangles()
             vertices = [transform @ v.co for v in mesh.vertices]
+            if any(not _core._finite(vertex) for vertex in vertices):
+                raise ValueError('安装表面顶点必须为有限三维数值')
             faces = [tuple(t.vertices) for t in mesh.loop_triangles]
             normals = None
             if with_normals:
                 normal_matrix = transform.to_3x3().inverted().transposed()
                 normals = [(normal_matrix @ t.normal).normalized() for t in mesh.loop_triangles]
+                if any(not _core._finite(normal) for normal in normals):
+                    raise ValueError('安装表面法线必须为有限三维数值')
             result.append((name, vertices, faces, normals))
         finally:
             evaluated.to_mesh_clear()
@@ -124,7 +128,7 @@ def raycast_surface(scene, origin_world, direction_world, depsgraph=None):
 def model_signature(scene, depsgraph=None):
     geometry = _core._surface_geometry(scene, depsgraph)
     payload = [(name, [tuple(round(float(v), 4) for v in vertex) for vertex in vertices], faces) for name, vertices, faces, _normals in geometry]
-    return 'sha256:' + _core.hashlib.sha256(_core.json.dumps(payload, separators=(',', ':')).encode()).hexdigest()[:20]
+    return 'sha256:' + _core.hashlib.sha256(_core.json.dumps(payload, separators=(',', ':'), allow_nan=False).encode()).hexdigest()[:20]
 
 
 def surface_names(scene):

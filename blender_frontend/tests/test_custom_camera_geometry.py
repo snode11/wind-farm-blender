@@ -106,6 +106,26 @@ def test_evaluated_mesh_is_cleared_when_extraction_fails(evaluated_shell, collis
     assert calls['mesh'] == calls['clear'] == 1
 
 
+@pytest.mark.parametrize('collision', [False, True])
+@pytest.mark.parametrize('value', [float('nan'), float('inf')])
+def test_nonfinite_mount_vertices_never_reach_fingerprint_or_bvh(evaluated_shell, collision, value):
+    scene, mesh, _evaluated, calls = evaluated_shell
+    mesh.vertices[0].co = Vector((value, 0., 0.))
+    with pytest.raises(ValueError, match='顶点.*有限'):
+        (core._geometry if collision else core.model_signature)(scene)
+    assert calls['mesh'] == calls['clear'] == 1
+    assert calls['bvh'] == 0
+
+
+def test_nonfinite_mount_normals_are_rejected_before_bvh(evaluated_shell):
+    scene, mesh, _evaluated, calls = evaluated_shell
+    mesh.loop_triangles = [NS(vertices=(0, 1, 2), normal=Vector((0., 0., float('nan'))))]
+    with pytest.raises(ValueError, match='法线.*有限'):
+        core._geometry(scene)
+    assert calls['mesh'] == calls['clear'] == 1
+    assert calls['bvh'] == 0
+
+
 @pytest.mark.parametrize('confirmed', [False, True])
 def test_empty_mount_surface_rejects_research_without_polluting_layout(evaluated_shell, monkeypatch, confirmed):
     scene, mesh, _evaluated, _calls = evaluated_shell

@@ -15,9 +15,18 @@ def _restore_view(space, state):
 
 
 def fit_gate(hfov, vfov, scene_aspect, *, math):
+    from . import camera_projection as projection
+    projection.validate(hfov, vfov)
+    projection.finite(scene_aspect)
+    if scene_aspect <= 0:
+        raise ValueError('场景画幅比例须为正')
     x, y = math.tan(math.radians(hfov / 2)), math.tan(math.radians(vfov / 2))
     outer_x = max(x, y * scene_aspect)
-    return outer_x, x / outer_x, y / (outer_x / scene_aspect)
+    fx, fy = x / outer_x, y / (outer_x / scene_aspect)
+    projection.finite(outer_x, fx, fy)
+    if min(fx, fy) <= 0:
+        raise ValueError('场景画幅比例超出可表示的投影范围')
+    return outer_x, fx, fy
 
 
 def gate_bounds(scene, entry, region, rv):

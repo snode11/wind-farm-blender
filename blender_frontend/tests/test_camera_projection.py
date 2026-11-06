@@ -58,6 +58,52 @@ def test_resources_and_time_list():
     with pytest.raises(ValueError):p.sample_times(3,4,0)
 
 
+@pytest.mark.parametrize('size', [0, -1, True, 12.5, math.nan, math.inf])
+@pytest.mark.parametrize('dimensions', ['width', 'height'])
+def test_invalid_pixel_dimensions_cannot_produce_intrinsics_or_scales(size, dimensions):
+    width, height = (size, 480) if dimensions == 'width' else (640, size)
+    for calculate in (p.intrinsics, p.pixel_scales):
+        with pytest.raises(ValueError, match='正整数像素'):
+            calculate(90, 60, width, height)
+
+
+def test_finite_inputs_cannot_emit_nonfinite_projection_geometry():
+    with pytest.raises(ValueError, match='有限'):
+        p.projection(90, 60, far=1e308)
+    with pytest.raises(ValueError, match='有限'):
+        p.frustum_corners(170, 170, 1e308)
+    with pytest.raises(ValueError, match='有限'):
+        p.intrinsics(1, 1, 10**308, 480)
+
+
+def test_pixel_ray_roundtrip_and_homogeneous_front_plane_boundary():
+    for hfov, vfov in ((90, 60), (40, 110)):
+        width, height = p.resolution(hfov, vfov, 640)
+        inverse_k = np.linalg.inv(p.intrinsics(hfov, vfov, width, height))
+        matrix = np.array(p.projection(hfov, vfov, .005, 1000.))
+        for u, v in ((0., 0.), (width-1., height-1.), (123.25, 87.75), (-.5, height-.5)):
+            cv_ray = inverse_k @ (u, v, 1.)
+            camera_ray = cv_ray * (1., -1., -1.)
+            clip = matrix @ (*camera_ray, 1.)
+            pixel = ((clip[0]/clip[3]+1)*width/2-.5,
+                     (1-clip[1]/clip[3])*height/2-.5)
+            assert pixel == pytest.approx((u, v), abs=1e-10)
+        for z in (0., 1.):
+            clip = matrix @ (0., 0., z, 1.)
+            assert clip[3] <= 0
+            assert not (-clip[3] <= clip[2] <= clip[3])
+
+
+@pytest.mark.parametrize('hfov,vfov,scene_aspect', [
+    (0., 60., 1.), (90., math.nan, 1.), (90., 60., 0.),
+    (90., 60., -1.), (90., 60., math.inf), (90., 60., 1e-320),
+])
+def test_native_gate_rejects_invalid_or_unrepresentable_fov_and_aspect(hfov, vfov, scene_aspect):
+    from wfrl_blender.native_camera_projection import fit_gate
+    with pytest.raises(ValueError):
+        fit_gate(hfov, vfov, scene_aspect, math=math)
+
+
 @pytest.mark.parametrize('hfov,vfov,budget,expected', [
     (90, 4, 320, (444, 16)), (4, 90, 320, (16, 444)),
     (90, 4, 640, (640, 22)), (75, p.DEFAULT_VFOV, 320, (320, 180)),
