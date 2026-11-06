@@ -105,10 +105,13 @@ def refresh_turbine_surfaces(objects, *, object_prefix='WFRL.Turbine.', material
     """Rebind named generated fittings using the selected material factory."""
     import bpy
     material_for = material_factory or get_material
+    # Reuse configured materials only within this refresh; the next call reads
+    # the current factory, palette and Blender data again.
+    materials = {}
     if material_factory is None:
         for name in SURFACES:
             if bpy.data.materials.get('WFRL.' + name):
-                get_material(name)
+                materials[name] = get_material(name)
     for obj in objects:
         if obj.type != 'MESH' or not obj.name.startswith(object_prefix):
             continue
@@ -116,7 +119,9 @@ def refresh_turbine_surfaces(objects, *, object_prefix='WFRL.Turbine.', material
             continue  # Radar material slots are maintained by ensure_radar.
         kind = turbine_surface_kind(obj.name)
         if kind and obj.data.materials:
-            obj.data.materials[0] = material_for(kind)
+            if kind not in materials:
+                materials[kind] = material_for(kind)
+            obj.data.materials[0] = materials[kind]
 
 
 def wake_volume_material():

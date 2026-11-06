@@ -377,6 +377,8 @@ def _make_wake(collection, scene):
     bpy = _bpy()
     hub_z = hub_position()[2]
     tower_height = geometry_data()["scalars"]["TowerHt"]
+    line_material = get_material('wake_line')
+    pulse_material = get_material('wake_pulse')
     for turbine in scene.turbines:
         volume = _primitive(collection, "cube", f"WFRL.WakeProxy.{turbine.turbine_id}.Volume",
                             (turbine.x_m + 245, turbine.y_m, hub_z), (240, 100, 100), wake_volume_material())
@@ -400,7 +402,7 @@ def _make_wake(collection, scene):
             spline.points.add(47)
             for point, co in zip(spline.points, proxy_line_points(index, 48, 0.0)):
                 point.co = co
-            curve.materials.append(get_material('wake_line'))
+            curve.materials.append(line_material)
             obj = bpy.data.objects.new(f"WFRL.WakeProxy.{turbine.turbine_id}.Line{index}", curve)
             _link(collection, obj)
             obj['fidelity'] = 'SYNTH'
@@ -420,7 +422,7 @@ def _make_wake(collection, scene):
             spline.use_cyclic_u = True
             for point, co in zip(spline.points, proxy_ring_points_local(index, 96, 0)):
                 point.co = co
-            curve.materials.append(get_material('wake_line'))
+            curve.materials.append(line_material)
             obj = bpy.data.objects.new(f"WFRL.WakeProxy.{turbine.turbine_id}.Ring{index}", curve)
             _link(collection, obj)
             obj.parent = volume.parent
@@ -438,7 +440,7 @@ def _make_wake(collection, scene):
             for j, (point, co) in enumerate(zip(spline.points, proxy_pulse_points(index, 10, 0))):
                 point.co = co
                 point.radius = .15 + .85 * math.sin(math.pi * j / 18)
-            curve.materials.append(get_material('wake_pulse'))
+            curve.materials.append(pulse_material)
             obj = bpy.data.objects.new(f"WFRL.WakeProxy.{turbine.turbine_id}.Pulse{index}", curve)
             _link(collection, obj)
             obj.parent = volume.parent

@@ -24,6 +24,7 @@ def _update_layers(scene, context=None):
     from . import cinematic
     cinematic.set_visibility(scene)
     wake.update_proxy_objects(scene, phase=float(scene.get("wfrl_proxy_phase", 0.0)) if scene.get("wfrl_scene_kind") == "live" else float(scene.get('wfrl_clearance_time_s', 0.0)) * .9)
+    materials = {}
     for obj in scene.objects:
         visible = None
         if obj.name.startswith("WFRL.WakeProxy."):
@@ -31,8 +32,11 @@ def _update_layers(scene, context=None):
             if visible:
                 from .materials import get_material
                 if hasattr(obj.data, "materials"):
+                    kind = "wake_pulse" if ".Pulse" in obj.name else "wake_line"
+                    if kind not in materials:
+                        materials[kind] = get_material(kind)
                     obj.data.materials.clear()
-                    obj.data.materials.append(get_material("wake_pulse" if ".Pulse" in obj.name else "wake_line"))
+                    obj.data.materials.append(materials[kind])
                 if hasattr(obj.data, "bevel_depth"):
                     obj.data.bevel_depth = .48 if ".Pulse" in obj.name else .11
         elif obj.name.startswith("WFRL.Fixture.T1.Lidar") or obj.name == "WFRL.Fixture.T1.SensorFrustum":
