@@ -102,3 +102,85 @@ assert not attempted, attempted
     result = subprocess.run([sys.executable, "-c", source], cwd=root, env=environment,
                             text=True, capture_output=True, timeout=30)
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def plane_interface(columns):
+    class PlaneData:
+        def __len__(self):
+            return len(columns["x1"])
+
+        def __getitem__(self, key):
+            return NS(values=np.asarray(columns[key]))
+
+    return NS(calculate_horizontal_plane=lambda **kwargs: NS(df=PlaneData()))
+
+
+def test_rectangular_shuffled_wake_plane_keeps_coordinate_velocity_pairs():
+    columns = {"x1": [2., 0., 1., 2., 1., 0.], "x2": [4., 0., 4., 0., 0., 4.],
+               "u": [24., 0., 14., 20., 10., np.nan]}
+    x, y, z, u = extract_wake_plane(plane_interface(columns), 90., [[[0.]]])
+    assert x.shape == y.shape == z.shape == u.shape == (3, 2, 1)
+    np.testing.assert_array_equal(x[:, :, 0], [[0., 0.], [1., 1.], [2., 2.]])
+    np.testing.assert_array_equal(y[:, :, 0], [[0., 4.], [0., 4.], [0., 4.]])
+    np.testing.assert_allclose(u[:, :, 0], [[0., np.nan], [10., 14.], [20., 24.]], equal_nan=True)
+
+
+@pytest.mark.parametrize("columns", [
+    {"x1": [0.], "x2": [0.]},
+    {"x1": [], "x2": [], "u": []},
+    {"x1": [0., 1.], "x2": [0.], "u": [8., 8.]},
+    {"x1": [0., 1., 0.], "x2": [0., 0., 1.], "u": [8., 8., 8.]},
+    {"x1": [0., 1., 0., 0.], "x2": [0., 0., 1., 1.], "u": [8., 8., 8., 8.]},
+    {"x1": [np.nan], "x2": [0.], "u": [8.]},
+])
+def test_malformed_plane_is_rejected_as_value_error(columns):
+    with pytest.raises(ValueError, match="FLORIS"):
+        extract_wake_plane(plane_interface(columns), 90., [[[0.]]])
+
+
+def test_floris_lookup_handles_deep_wrappers_and_rejects_cycles_or_missing_fields():
+    fi = object()
+    env = NS(mdp=NS(interface=NS(fi=fi)))
+    for _ in range(8):
+        env = NS(env=env)
+    assert get_floris(env) is fi
+    for missing in (NS(), NS(mdp=NS()), NS(mdp=NS(interface=NS(fi=None)))):
+        with pytest.raises(ValueError, match="FLORIS"):
+            get_floris(missing)
+    cycle = NS()
+    cycle.env = cycle
+    with pytest.raises(ValueError, match="FLORIS"):
+        get_floris(cycle)
+
+
+def test_invalid_height_and_missing_yaw_fail_before_plane_calculation():
+    fi = NS(calculate_horizontal_plane=lambda **kwargs: pytest.fail("invalid input reached FLORIS"))
+    for height in (np.nan, np.inf, True, [], "90"):
+        with pytest.raises(ValueError, match="hub_h"):
+            extract_wake_plane(fi, height, [[[0.]]])
+    with pytest.raises(ValueError, match="yaw_angles"):
+        extract_wake_plane(fi, 90.)
+
+
+def test_dimension_parser_ignores_numbers_in_comments_and_other_fields(tmp_path):
+    write_dimensions(tmp_path)
+    path = tmp_path / "FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat"
+    source = path.read_text(encoding="latin-1")
+    prefix = "# 7 missing TipRad\n# TipRad reference\n! TipRad reference\n9 OtherField - TipRad reference\n"
+    path.write_text(prefix + source, encoding="latin-1")
+    assert load_turbine_dimensions(tmp_path).tip_rad == 63.
+    path.write_text(prefix + source.replace("63.0 TipRad\n", ""), encoding="latin-1")
+    with pytest.raises(ValueError, match="TipRad"):
+        load_turbine_dimensions(tmp_path)
+
+
+@pytest.mark.parametrize("original,replacement", [("63.0 TipRad", "1e999 TipRad"),
+    ("63.0 TipRad", "invalid63 TipRad"), ("1.5 HubRad", "-1 HubRad"),
+    ("63.0 TipRad", "1 TipRad"), ("87.6 TowerHt", "0 TowerHt"),
+    ("-5.0 ShftTilt", "nan ShftTilt")])
+def test_dimension_parser_rejects_nonfinite_tokens_and_impossible_sizes(tmp_path, original, replacement):
+    write_dimensions(tmp_path)
+    path = tmp_path / "FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat"
+    path.write_text(path.read_text(encoding="latin-1").replace(original, replacement), encoding="latin-1")
+    with pytest.raises(ValueError):
+        load_turbine_dimensions(tmp_path)

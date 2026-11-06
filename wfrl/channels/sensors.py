@@ -7,14 +7,25 @@ from __future__ import annotations
 
 import numpy as np
 
-from wfrl.channels.base import Fidelity, Sensor, SceneErrorProxy, registry
+from collections.abc import Mapping
+
+from wfrl.channels.base import Fidelity, Sensor, SceneErrorProxy, finite_parameter, registry
 
 
-def _get(ctx, key, n):
+def _get(ctx, key, n, width=None):
+    if not isinstance(ctx, Mapping):
+        raise ValueError("传感器上下文必须为映射")
+    shape = (n,) if width is None else (n, width)
     v = ctx.get(key)
     if v is None:
-        return np.full(n, np.nan)
-    return np.asarray(v, dtype=float).ravel()
+        return np.full(shape, np.nan)
+    try:
+        values = np.asarray(v, dtype=float)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError(f"{key} 必须为形状 {shape} 的数值数组") from exc
+    if values.shape != shape:
+        raise ValueError(f"{key} 形状须为 {shape}，收到 {values.shape}")
+    return values
 
 
 # ---------------------------------------------------------------------------
@@ -35,7 +46,7 @@ class BladeLoadSensor(Sensor):
     type_name = "bladeload"
     fidelity = Fidelity.DIRECT
     provenance = ("叶根挥舞/摆振弯矩，avrSWAP(30-32,69-71) 经 DISCON.F90:363-368 "
-                  "回传，mdp.py:283 除 1e7")
+                  "回传，driver 将 mdp 的归一化量还原为 N·m")
     requires = ("aeroelastic",)
 
     @property
@@ -44,10 +55,8 @@ class BladeLoadSensor(Sensor):
 
     def sample(self, ctx):
         n = self.scene.n
-        mf = ctx.get("m_flap")
-        me = ctx.get("m_edge")
-        mf = np.full((n, 3), np.nan) if mf is None else np.asarray(mf, float)
-        me = np.full((n, 3), np.nan) if me is None else np.asarray(me, float)
+        mf = _get(ctx, "m_flap", n, 3)
+        me = _get(ctx, "m_edge", n, 3)
         return {"m_flap": mf[self.indices], "m_edge": me[self.indices]}
 
 
@@ -105,11 +114,16 @@ class NacelleLidar(Sensor):
         """所有测量点的世界坐标 (m, N_BEAM*len(RANGES), 3)。"""
         origins = self.poses(ctx)
         dirs = self._beam_dirs()
+        yaw = np.zeros(self.scene.n) if ctx.get("yaw") is None else _get(ctx, "yaw", self.scene.n)
         pts = []
-        for o in origins:
-            p = [o + d * r for r in self.RANGES for d in dirs]
+        for o, ti in zip(origins, self.indices):
+            angle = np.deg2rad(yaw[ti])
+            c, s = np.cos(angle), np.sin(angle)
+            rotation = np.array([[c, -s, 0.], [s, c, 0.], [0., 0., 1.]])
+            beams = dirs @ rotation.T
+            p = [o + d * r for r in self.RANGES for d in beams]
             pts.append(np.array(p))
-        return np.array(pts)
+        return np.asarray(pts).reshape(len(origins), len(self.RANGES) * self.N_BEAM, 3)
 
     def sample(self, ctx):
         pts = self.endpoints(ctx)
@@ -121,7 +135,7 @@ class NacelleLidar(Sensor):
             ti = float(bts.ti) / 100.0
         else:
             ti = 0.0
-        # 视线速度：轮毂层均值 + 高度切变 + 随距离去相干的湍流脉动。
+        # 测量点的合成纵向风速：轮毂层均值 + 高度切变 + 确定性脉动。
         # 切变用 IEC 的幂律 alpha=0.14。脉动幅度按 TI，用点坐标做确定性哈希，
         # 保证同一位置每步给出连续变化而不是白噪声闪烁。
         z = pts[..., 2]
@@ -167,7 +181,7 @@ class RotorSpeedSensor(Sensor):
 class VibrationSensor(Sensor):
     type_name = "vibration"
     fidelity = Fidelity.DERIVED
-    provenance = "由叶根弯矩序列取 1P/3P 谱线与 RMS；不是加速度计实测"
+    provenance = "三叶片挥舞弯矩均值的滑窗 RMS 与峰峰值，单位 N·m；不是加速度计实测"
     rate_hz = 2.0
 
     WINDOW = 32
@@ -178,16 +192,12 @@ class VibrationSensor(Sensor):
 
     def sample(self, ctx):
         n = self.scene.n
-        mf = ctx.get("m_flap")
-        if mf is None:
-            cur = np.full(n, np.nan)
-        else:
-            values = np.asarray(mf, float)
-            valid = np.isfinite(values)
-            count = valid.sum(axis=1)
-            cur = np.divide(
-                np.where(valid, values, 0.0).sum(axis=1), count,
-                out=np.full(n, np.nan), where=count > 0)
+        values = _get(ctx, "m_flap", n, 3)
+        valid = np.isfinite(values)
+        count = valid.sum(axis=1)
+        cur = np.divide(
+            np.where(valid, values, 0.0).sum(axis=1), count,
+            out=np.full(n, np.nan), where=count > 0)
         self._hist.append(cur)
         if len(self._hist) > self.WINDOW:
             self._hist.pop(0)
@@ -223,8 +233,8 @@ class NacelleCamera(Sensor):
 
     params（都可选，给默认）：
       mount   nacelle_down / nacelle_front / hub / custom —— 挂载点相对轮毂的偏移语义
-      fov     视场角°（默认 40；窄=长焦=视野窄看局部，宽=短焦=看整叶）
-      pitch   俯仰角°（默认 -30，负=向下俯视叶片）
+      fov     视场角°（默认 90；窄=长焦=视野窄看局部，宽=短焦=看整叶）
+      pitch   俯仰角°（默认 -80，负=向下俯视叶片）
       yaw_off 相对机舱轴的偏航°（默认 0）
       range   视锥画多远，单位转子半径（默认 1.5）
       offset  仅 mount=custom：[dx_down, dy_lat, dz_vert] 机舱系三维偏移(m，相对
@@ -253,6 +263,8 @@ class NacelleCamera(Sensor):
 
     DEFAULTS = dict(mount="nacelle_down", fov=90.0, pitch=-80.0,
                     yaw_off=0.0, range=1.5)
+    allowed_params = ("mount", "fov", "pitch", "yaw_off", "range", "offset",
+                      "dx_down", "dy_lat", "dz_vert")
 
     @property
     def topics(self):
@@ -268,11 +280,19 @@ class NacelleCamera(Sensor):
         if m not in cls._MOUNTS:
             raise SceneErrorProxy(
                 f"camera.mount={m!r} 未知，可选 {cls._MOUNTS}")
+        values = {key: finite_parameter(p.get(key, cls.DEFAULTS[key]), f"camera.{key}")
+                  for key in ("fov", "pitch", "yaw_off", "range")}
+        if not 0 < values["fov"] < 180:
+            raise SceneErrorProxy("camera.fov 须在 (0, 180) 度内")
+        if not -90 <= values["pitch"] <= 90:
+            raise SceneErrorProxy("camera.pitch 须在 [-90, 90] 度内")
+        if values["range"] <= 0:
+            raise SceneErrorProxy("camera.range 须大于 0")
         if m == "custom":
             off = p.get("offset")
             if off is not None:
                 try:
-                    vals = [float(v) for v in off]
+                    vals = [finite_parameter(v, "camera.offset") for v in off]
                 except (TypeError, ValueError) as e:
                     raise SceneErrorProxy(
                         f"camera.offset 必须是数字列表 [dx_down,dy_lat,dz_vert]，"
@@ -282,11 +302,7 @@ class NacelleCamera(Sensor):
                         f"camera.offset 长度须为 1~3，收到 {len(vals)}")
             for k in ("dx_down", "dy_lat", "dz_vert"):
                 if k in p:
-                    try:
-                        float(p[k])
-                    except (TypeError, ValueError) as e:
-                        raise SceneErrorProxy(
-                            f"camera.{k} 必须是数字，收到 {p[k]!r}") from e
+                    finite_parameter(p[k], f"camera.{k}")
 
     def _p(self, key):
         return self.params.get(key, self.DEFAULTS[key])
@@ -348,13 +364,18 @@ class NacelleCamera(Sensor):
         """
         ti = self.indices[i]
         t = self.scene.turbines[ti]
-        yaws = np.asarray((ctx or {}).get("yaw", [0.0]), dtype=float).ravel()
-        if yaws.size == self.scene.n:
+        try:
+            yaws = np.asarray((ctx or {}).get("yaw", [0.0]), dtype=float)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise ValueError("camera yaw must be numeric") from exc
+        if yaws.shape == (self.scene.n,):
             yaw = float(yaws[ti])
-        elif yaws.size == 1:
-            yaw = float(yaws[0])
+        elif yaws.shape in ((), (1,)):
+            yaw = float(yaws.item())
         else:
             raise ValueError('camera yaw must contain the full farm or one presliced turbine')
+        if not np.isfinite(yaw):
+            raise ValueError("camera yaw must be finite")
         yaw_cam = np.deg2rad(yaw + self._p("yaw_off"))
         # 机舱轴水平单位向量：+axis 指机舱尾/下风向；转子/迎风在 −axis（上风向）。
         axis = np.array([np.cos(yaw_cam), np.sin(yaw_cam), 0.0])
@@ -432,12 +453,14 @@ class AcousticSensor(Sensor):
 
     def sample(self, ctx):
         n = self.scene.n
-        mf = ctx.get("m_flap")
-        if mf is None:
-            health = np.full(n, np.nan)
-        else:
-            m = np.asarray(mf, float)
-            # 三片叶载荷越不平衡，越可能有单叶异常（结冰/裂纹）
-            spread = np.nanstd(m, axis=1) / (np.abs(np.nanmean(m, axis=1)) + 1e-9)
-            health = np.clip(1.0 - 4.0 * spread, 0.0, 1.0)
+        m = _get(ctx, "m_flap", n, 3)
+        valid = np.isfinite(m)
+        count = valid.sum(axis=1)
+        mean = np.divide(np.where(valid, m, 0.).sum(axis=1), count,
+                         out=np.full(n, np.nan), where=count > 0)
+        variance = np.divide(np.where(valid, (m - mean[:, None]) ** 2, 0.).sum(axis=1),
+                             count, out=np.full(n, np.nan), where=count > 0)
+        # 三片叶载荷越不平衡，合成健康分数越低；无有效载荷时保持 NaN。
+        spread = np.sqrt(variance) / (np.abs(mean) + 1e-9)
+        health = np.clip(1.0 - 4.0 * spread, 0.0, 1.0)
         return {"acoustic": health[self.indices]}

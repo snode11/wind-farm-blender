@@ -3,9 +3,24 @@ from __future__ import annotations
 
 import enum
 import math
+from collections.abc import Mapping
+from numbers import Integral, Real
 from typing import Any, Dict, List, Optional
 
 import numpy as np
+
+
+def finite_parameter(value, name):
+    """将配置中的有限实数转为 float，拒绝布尔与非数值。"""
+    if isinstance(value, (bool, np.bool_)) or not isinstance(value, Real):
+        raise SceneErrorProxy(f"{name} 必须是有限数值")
+    try:
+        result = float(value)
+    except (ValueError, OverflowError) as exc:
+        raise SceneErrorProxy(f"{name} 必须是有限数值") from exc
+    if not math.isfinite(result):
+        raise SceneErrorProxy(f"{name} 必须是有限数值")
+    return result
 
 
 class Fidelity(enum.Enum):
@@ -26,12 +41,20 @@ class Sensor:
     rate_hz: Optional[float] = None
     #: 需要仿真侧提供哪些量才能工作。缺了就在 validate 阶段报错，而不是运行时 KeyError
     requires: tuple = ()
+    allowed_params: tuple = ()
 
     def __init__(self, scene, spec, indices: List[int]):
+        self.validate(scene, spec)
         self.scene = scene
         self.spec = spec
-        self.indices = list(indices)
-        self.params = dict(spec.params)
+        try:
+            self.indices = list(indices)
+        except TypeError as exc:
+            raise SceneErrorProxy("传感器机组索引必须为整数列表") from exc
+        if any(isinstance(i, (bool, np.bool_)) or not isinstance(i, Integral)
+               or not 0 <= i < scene.n for i in self.indices):
+            raise SceneErrorProxy("传感器机组索引超出场景范围或不是整数")
+        self.params = dict(spec.params or {})
         self._k = 0                      # 控制步计数，用于抽稀
         self._last = None
 
@@ -56,17 +79,25 @@ class Sensor:
         得 1 步、向上取整也得 1 步，且下限 1 保证传感器不会比控制步更快。
         比控制步慢的传感器（周期 > 1 步）才真正被抽稀。
         """
-        self._k += 1
         if self.rate_hz is None:
+            self._k += 1
             return True
-        period = max(1, int(math.ceil(1.0 / (self.rate_hz * self.scene.dt))))
+        rate = finite_parameter(self.rate_hz, f"{self.type_name}.rate_hz")
+        dt = finite_parameter(self.scene.dt, "dt")
+        if rate <= 0 or dt <= 0:
+            raise SceneErrorProxy("rate_hz 和 dt 必须大于 0")
+        interval = (1.0 / rate) / dt
+        if not math.isfinite(interval):
+            raise SceneErrorProxy("采样周期超出有限控制步范围")
+        period = max(1, int(math.ceil(interval)))
         self.period_steps = period
+        self._k += 1
         return (self._k - 1) % period == 0
 
     def poses(self, ctx) -> np.ndarray:
         """传感器自身的世界坐标 (m,3)，默认挂在轮毂。"""
         xy = np.array([[self.scene.turbines[i].x, self.scene.turbines[i].y]
-                       for i in self.indices], dtype=float)
+                       for i in self.indices], dtype=float).reshape(-1, 2)
         z = np.full((len(self.indices), 1), self.scene.hub_height)
         return np.hstack([xy, z])
 
@@ -95,6 +126,17 @@ class Sensor:
     @classmethod
     def validate(cls, scene, spec):
         """场景加载期的静态检查。默认检查 requires 能不能被后端满足。"""
+        params = spec.params
+        if params is not None and not isinstance(params, Mapping):
+            raise SceneErrorProxy(f"{cls.type_name}.params 必须为映射")
+        unknown = set(params or {}) - set(cls.allowed_params)
+        if unknown:
+            raise SceneErrorProxy(f"{cls.type_name}.params 不支持参数 {sorted(map(str, unknown))}")
+        if cls.rate_hz is not None:
+            rate = finite_parameter(cls.rate_hz, f"{cls.type_name}.rate_hz")
+            dt = finite_parameter(scene.dt, "dt")
+            if rate <= 0 or dt <= 0:
+                raise SceneErrorProxy("rate_hz 和 dt 必须大于 0")
         if scene.backend == "floris" and "aeroelastic" in cls.requires:
             raise SceneErrorProxy(
                 f"传感器 {cls.type_name} 需要气弹后端，当前 backend=floris")
@@ -118,8 +160,8 @@ class SensorRegistry:
         return set(self._types)
 
     def get(self, name) -> type:
-        if name not in self._types:
-            raise KeyError(f"未注册的传感器: {name}")
+        if not isinstance(name, str) or name not in self._types:
+            raise SceneErrorProxy(f"未注册的传感器: {name!r}")
         return self._types[name]
 
     def build(self, scene) -> List[Sensor]:

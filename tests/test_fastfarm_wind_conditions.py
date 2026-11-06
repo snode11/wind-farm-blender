@@ -193,7 +193,8 @@ def test_aligned_direction_matches_fixed_coordinates_without_rotating_inputs(cas
     assert saved(record) == record
 
 
-@pytest.mark.parametrize("direction", [True, "270", 0., float("nan"), float("inf")])
+@pytest.mark.parametrize("direction", [True, np.bool_(False), "270", 0., 269.9999999,
+                                      float("nan"), float("inf"), -float("inf")])
 def test_invalid_direction_is_explicitly_unapplied(case, direction):
     with pytest.raises(interface.WindRequestError) as rejected:
         case.itf.init(wind_direction=direction)

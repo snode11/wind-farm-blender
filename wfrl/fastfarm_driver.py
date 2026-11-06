@@ -262,10 +262,19 @@ class FastFarmDriver:
         else:
             if wind_parameters or background_bts is not None or bts_role != "unspecified":
                 raise ValueError("未应用：此后端不支持这些风况或 BTS 来源参数")
-            if wind_speed is not None:
-                options["wind_speed"] = float(wind_speed)
-            if wind_direction is not None:
-                options["wind_direction"] = float(wind_direction)
+            for name, value in (("wind_speed", wind_speed),
+                                ("wind_direction", wind_direction)):
+                if value is None:
+                    continue
+                if isinstance(value, (bool, np.bool_)) or not isinstance(value, Real):
+                    raise ValueError(f"{name} 必须是有限数值")
+                try:
+                    value = float(value)
+                except (ValueError, OverflowError) as exc:
+                    raise ValueError(f"{name} 必须是有限数值") from exc
+                if not np.isfinite(value) or (name == "wind_speed" and value <= 0):
+                    raise ValueError(f"{name} 必须是有限数值，风速须大于 0")
+                options[name] = value
         previous_record = getattr(itf, "wind_record", None)
         reset_error = None
         try:
@@ -453,13 +462,30 @@ class FastFarmDriver:
     # ------------------------------------------------------------------
     def _clip(self, name, delta):
         """把某个控制量的增量补齐成 (n,) 并裁到它自己的动作边界。"""
-        lo, hi = self.act_bounds[name]
+        try:
+            bounds = np.asarray(self.act_bounds[name], dtype=float)
+        except (KeyError, TypeError, ValueError, OverflowError) as exc:
+            raise ValueError(f"{name} 缺少有效动作边界") from exc
+        if bounds.shape != (2,) or not np.isfinite(bounds).all() or bounds[0] > bounds[1]:
+            raise ValueError(f"{name} 动作边界须为有序的有限上下界")
+        lo, hi = bounds
         if delta is None:
             return np.zeros(self.n, dtype=np.float32)
-        d = np.asarray(delta, dtype=np.float32).ravel()
+        try:
+            raw = np.asarray(delta)
+            if raw.dtype.kind not in "iuf":
+                raise ValueError(f"{name} 动作必须为数值")
+            d = np.asarray(raw, dtype=float)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise ValueError(f"{name} 动作必须为数值") from exc
+        if d.shape not in ((), (1,), (self.n,), (self.n, 1)):
+            raise ValueError(f"{name} 动作须为标量或 {self.n} 台机组的向量，收到 {d.shape}")
+        if not np.isfinite(d).all():
+            raise ValueError(f"{name} 动作必须为有限数值")
+        d = d.ravel()
         if d.size == 1:
             d = np.repeat(d, self.n)
-        return np.clip(d, lo, hi)
+        return np.clip(d, lo, hi).astype(np.float32)
 
     def step(self, yaw_delta=None, pitch_delta=None, torque_delta=None):
         """推进一个控制步，各增量按各自动作边界裁剪；未激活的控制量忽略。
