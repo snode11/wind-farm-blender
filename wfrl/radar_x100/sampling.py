@@ -2,9 +2,11 @@
 from dataclasses import dataclass
 import hashlib
 import numpy as np
-from .schema import MAX_POINTS, digest
+from .schema import digest
 
 AREA_ALGORITHM = 'shifted-halton.v1'
+# This is a numerical resource bound, independent of the device report capacity.
+MAX_INTEGRATION_SAMPLES = 1_000_000
 
 
 def _radical_inverse(indices, base):
@@ -29,17 +31,22 @@ class MaterialPlan:
     budget: int
     method: str
     identity: str
+    area_weights_m2: np.ndarray
 
     def __post_init__(self):
         ids = np.array(self.triangle_ids, dtype=np.int32, copy=True)
         weights = np.array(self.barycentric, dtype=np.float64, copy=True)
-        if (ids.ndim != 1 or not 1 <= len(ids) <= MAX_POINTS or np.any(ids < 0)
+        area_weights = np.array(self.area_weights_m2, dtype=np.float64, copy=True)
+        if (ids.ndim != 1 or not 1 <= len(ids) <= MAX_INTEGRATION_SAMPLES or np.any(ids < 0)
                 or weights.shape != (len(ids), 3) or not np.isfinite(weights).all()
-                or np.any(weights < 0) or not np.allclose(weights.sum(axis=1), 1)):
+                or np.any(weights < 0) or not np.allclose(weights.sum(axis=1), 1)
+                or area_weights.shape != (len(ids),) or not np.isfinite(area_weights).all()
+                or np.any(area_weights < 0)):
             raise ValueError('Invalid fixed material sampling plan')
-        ids.flags.writeable = weights.flags.writeable = False
+        ids.flags.writeable = weights.flags.writeable = area_weights.flags.writeable = False
         object.__setattr__(self, 'triangle_ids', ids)
         object.__setattr__(self, 'barycentric', weights)
+        object.__setattr__(self, 'area_weights_m2', area_weights)
 
     def points(self, sample):
         if (sample.source_id != self.source_id or sample.geometry_id != self.geometry_id
@@ -49,12 +56,13 @@ class MaterialPlan:
 
 
 def make_plan(reference, budget=512, seed=100, method='AREA'):
-    if type(budget) is not int or not 1 <= budget <= MAX_POINTS or type(seed) is not int or seed < 0:
+    if (type(budget) is not int or not 1 <= budget <= MAX_INTEGRATION_SAMPLES
+            or type(seed) is not int or seed < 0):
         raise ValueError('Invalid material sampling budget or seed')
     rng = np.random.default_rng(seed)
+    faces = reference.vertices[reference.triangles]
+    area = np.linalg.norm(np.cross(faces[:, 1] - faces[:, 0], faces[:, 2] - faces[:, 0]), axis=1) * .5
     if method == 'AREA':
-        faces = reference.vertices[reference.triangles]
-        area = np.linalg.norm(np.cross(faces[:, 1] - faces[:, 0], faces[:, 2] - faces[:, 0]), axis=1) * .5
         if not np.isfinite(area).all() or area.sum() <= 0:
             raise ValueError('Reference surface has no finite positive area')
         # Shifted low-discrepancy coordinates retain identical prefixes across budgets.
@@ -63,13 +71,17 @@ def make_plan(reference, budget=512, seed=100, method='AREA'):
         ids = np.searchsorted(np.cumsum(area) / area.sum(), uniform[:, 0], side='right')
         root = np.sqrt(uniform[:, 1])
         weights = np.column_stack((1 - root, root * (1 - uniform[:, 2]), root * uniform[:, 2]))
+        area_weights = np.full(budget, area.sum() / budget)
     elif method == 'CENTROID':
         ids = np.sort(rng.choice(len(reference.triangles), min(budget, len(reference.triangles)), replace=False))
         weights = np.full((len(ids), 3), 1 / 3)
+        area_weights = area[ids] * len(area) / len(ids)
     else:
         raise ValueError('Unknown material sampling method')
     identity = digest(dict(source=reference.source_id, geometry=reference.geometry_id,
         reference_time_s=reference.time_s, method=method, algorithm=AREA_ALGORITHM if method == 'AREA' else 'triangle-centroid.v1', seed=seed, budget=budget,
+        area_measure='reference surface m^2',
+        area_weights_sha256=hashlib.sha256(area_weights.astype('<f8').tobytes()).hexdigest(),
         coordinates_sha256=hashlib.sha256(ids.astype('<i4').tobytes() + weights.astype('<f8').tobytes()).hexdigest()))
     return MaterialPlan(reference.source_id, reference.geometry_id, reference.time_s,
-                        ids, weights, seed, budget, method, identity)
+                        ids, weights, seed, budget, method, identity, area_weights)

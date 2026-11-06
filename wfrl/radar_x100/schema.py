@@ -1,5 +1,7 @@
 """Versioned radar frames; unknown physical attributes remain absent."""
 from dataclasses import dataclass, field
+import base64
+import binascii
 import copy
 import hashlib
 import json
@@ -18,8 +20,15 @@ PROFILE = dict(id='ctsai-x100-datasheet-v1', dimensions_hwd_m=[.120, .095, .040]
 # Display extents are independent of the nominal detection limits in PROFILE.
 DISPLAY_DEFAULTS = dict(fov_length_m=60., sensor_margin_deg=(6., 4.),
                         orthographic_margin=1.15, orthographic_min_span_m=2.)
-SOURCES = {'GEOMETRY_SIMULATION', 'MEASURED_REPLAY', 'MEASURED_LIVE', 'TEST'}
-STREAMS = {'GEOMETRY', 'UNKNOWN', 'NEAR', 'FAR', 'COMBINED', 'TRACK'}
+SOURCES = {'GEOMETRY_SIMULATION', 'ENGINEERING_SIMULATION', 'MEASURED_REPLAY', 'MEASURED_LIVE', 'TEST'}
+STREAMS = {'GEOMETRY', 'DETECTIONS', 'UNKNOWN', 'NEAR', 'FAR', 'COMBINED', 'TRACK'}
+MODEL_DIAGNOSTIC_SCHEMA = 'x100-model-diagnostics.v1'
+MODEL_DIAGNOSTIC_DTYPE = np.dtype([
+    ('model_power_w', '<f8'), ('model_observed_power_w', '<f8'),
+    ('model_snr_linear', '<f8'), ('model_rcs_m2', '<f8'),
+    ('integration_samples', '<u4'), ('false_alarm', 'u1')])
+MODEL_DIAGNOSTIC_UNITS = dict(model_power_w='W', model_observed_power_w='W',
+    model_snr_linear='1', model_rcs_m2='m^2', integration_samples='count', false_alarm='boolean')
 
 
 def json_bytes(value):
@@ -29,6 +38,62 @@ def json_bytes(value):
 
 def digest(value):
     return hashlib.sha256(json_bytes(value)).hexdigest()
+
+
+@dataclass(frozen=True)
+class ModelDiagnostics:
+    """Synthetic per-detection diagnostics, separate from every vendor field.
+
+    The compact lossless encoding fits 4096 rows inside the existing metadata
+    budget and travels with recordings and the local channel. Truth flags and
+    integration counts are evaluation data, not target or material identities.
+    """
+    model_id: str
+    values: np.ndarray
+
+    def __post_init__(self):
+        values = np.array(self.values, copy=True)
+        if (not isinstance(self.model_id, str) or not 1 <= len(self.model_id) <= 256
+                or values.dtype != MODEL_DIAGNOSTIC_DTYPE or values.ndim != 1
+                or len(values) > MAX_POINTS):
+            raise ValueError('Invalid model diagnostics')
+        for name in MODEL_DIAGNOSTIC_DTYPE.names[:4]:
+            if not np.isfinite(values[name]).all() or np.any(values[name] < 0):
+                raise ValueError('Model diagnostics require finite nonnegative physical values')
+        if np.any(values['false_alarm'] > 1):
+            raise ValueError('Invalid model false-alarm flag')
+        empty = values['false_alarm'] == 1
+        if (np.any(values['integration_samples'][empty] != 0)
+                or any(np.any(values[name][empty] != 0)
+                       for name in ('model_power_w', 'model_snr_linear', 'model_rcs_m2'))):
+            raise ValueError('Noise-only detections cannot carry target response')
+        values.flags.writeable = False
+        object.__setattr__(self, 'values', values)
+
+    def metadata(self):
+        return dict(schema=MODEL_DIAGNOSTIC_SCHEMA, model_id=self.model_id,
+                    units=dict(MODEL_DIAGNOSTIC_UNITS), encoding='base64-le-packed.v1',
+                    count=len(self.values), data=base64.b64encode(self.values.tobytes()).decode('ascii'))
+
+    @classmethod
+    def from_metadata(cls, value):
+        if not isinstance(value, dict):
+            raise ValueError('Invalid model diagnostic metadata')
+        count = value.get('count')
+        if (value.get('schema') != MODEL_DIAGNOSTIC_SCHEMA
+                or value.get('encoding') != 'base64-le-packed.v1'
+                or value.get('units') != MODEL_DIAGNOSTIC_UNITS
+                or type(count) is not int or not 0 <= count <= MAX_POINTS
+                or not isinstance(value.get('data'), str)
+                or len(value['data']) != 4 * ((count * MODEL_DIAGNOSTIC_DTYPE.itemsize + 2) // 3)):
+            raise ValueError('Invalid model diagnostic metadata')
+        try:
+            raw = base64.b64decode(value['data'], validate=True)
+        except (ValueError, binascii.Error) as exc:
+            raise ValueError('Invalid model diagnostic encoding') from exc
+        if len(raw) != count * MODEL_DIAGNOSTIC_DTYPE.itemsize:
+            raise ValueError('Model diagnostic array length mismatch')
+        return cls(value['model_id'], np.frombuffer(raw, dtype=MODEL_DIAGNOSTIC_DTYPE))
 
 
 @dataclass(frozen=True)
@@ -104,6 +169,7 @@ class RadarFrame:
     radial_velocity_m_s: np.ndarray | None = None
     material_ids: tuple | None = None
     schema: str = SCHEMA
+    model_diagnostics: ModelDiagnostics | None = None
 
     def __post_init__(self):
         if (self.schema != SCHEMA or any(not isinstance(value, str) or not 1 <= len(value) <= 256
@@ -129,6 +195,13 @@ class RadarFrame:
             if len(self.material_ids) != len(points):
                 raise ValueError('Material identity count mismatch')
             object.__setattr__(self, 'material_ids', tuple(self.material_ids))
+        if self.model_diagnostics is not None:
+            diagnostics = self.model_diagnostics
+            if (not isinstance(diagnostics, ModelDiagnostics)
+                    or len(diagnostics.values) != len(points)
+                    or self.source_kind not in {'ENGINEERING_SIMULATION', 'TEST'}):
+                raise ValueError('Model diagnostics require matching synthetic detection points')
+            object.__setattr__(self, 'model_diagnostics', ModelDiagnostics(diagnostics.model_id, diagnostics.values))
         for name in ('spatial', 'provenance'):
             value = copy.deepcopy(getattr(self, name))
             json_bytes(value)
@@ -166,11 +239,14 @@ class RadarFrame:
 
     def metadata(self):
         from dataclasses import asdict
-        return dict(schema=self.schema, sensor_id=self.sensor_id, session_id=self.session_id,
+        result = dict(schema=self.schema, sensor_id=self.sensor_id, session_id=self.session_id,
                     sequence=self.sequence, source_kind=self.source_kind, stream=self.stream,
                     time=asdict(self.time), completeness=self.completeness,
                     spatial=copy.deepcopy(self.spatial), provenance=copy.deepcopy(self.provenance),
                     material_ids=copy.deepcopy(self.material_ids))
+        if self.model_diagnostics is not None:
+            result['model_diagnostics'] = self.model_diagnostics.metadata()
+        return result
 
     def snapshot(self):
         return frame_from_metadata(self.metadata(), self.points, self.radial_velocity_m_s)
@@ -179,4 +255,6 @@ class RadarFrame:
 def frame_from_metadata(metadata, points, velocity=None):
     fields = dict(metadata)
     fields['time'] = FrameTime(**fields['time'])
+    if fields.get('model_diagnostics') is not None:
+        fields['model_diagnostics'] = ModelDiagnostics.from_metadata(fields['model_diagnostics'])
     return RadarFrame(**fields, points=points, radial_velocity_m_s=velocity)

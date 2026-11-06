@@ -15,9 +15,11 @@ def for_scene(scene):
 
 class OutputWindow:
     def __init__(self, scene, window, area):
+        from .runtime import session_for
+        session = session_for(scene) if hasattr(scene, 'as_pointer') else None
         self.scene = scene
         self.window_id, self.area_id = window.as_pointer(), area.as_pointer()
-        self.view, self.color = 'SENSOR', scene.wfrl_x100_color
+        self.view, self.color = 'SENSOR', display.style_key(scene, session.frame if session else None)[0]
         self.roi = ((-100.,-100.,-150.),(100.,100.,50.))
         self.distance_limit = 10.
         self.show_reference = False
@@ -62,15 +64,18 @@ class OutputWindow:
 
     @property
     def effective_color(self):
-        return 'DISTANCE' if self.view == 'NACELLE' else self.color
+        return 'DISTANCE' if self.view == 'NACELLE' and self.color != 'ECHO_CLASS' else self.color
 
     def cycle_color(self):
-        self.color = display.COLORS[(display.COLORS.index(self.color) + 1) % len(display.COLORS)]
+        choices = display.COLORS if self.frame is not None and display.observation_mode(self.frame) == 'DETECTIONS' else display.COLORS[:-1]
+        self.color = choices[(choices.index(self.color) + 1) % len(choices)] if self.color in choices else choices[0]
 
     def consume(self):
         from .runtime import session_for
         session = session_for(self.scene)
         frame = session.frame if session and session.display_valid else None
+        if frame is not None and display.observation_mode(frame) != 'DETECTIONS' and self.color == 'ECHO_CLASS':
+            self.color = 'RANGE'
         if frame is not None and frame.spatial['frame'] != display.SENSOR_AXES and self.view == 'SENSOR':
             self.view = 'FRONT'
         # Keep a strong frame reference so object-id reuse cannot revive a stale GPU batch.
@@ -79,7 +84,8 @@ class OutputWindow:
         key = (session.generation if session else None, frame.identity if frame else None,
             frame.time.clock_domain if frame else None, frame.time.source_time_s if frame else None,
             session.frame_index if session else None, id(frame), self.color, self.view,
-            self.color_scale, velocity_limit, analysis_identity, self.distance_limit)
+            self.color_scale, velocity_limit, analysis_identity, self.distance_limit,
+            id(getattr(session, 'blade_result', None)) if self.color == 'ECHO_CLASS' else None)
         if key != self.data_key:
             self.frame = frame
             source = (frame.sensor_id, frame.session_id, frame.stream, frame.spatial['frame']) if frame else None
@@ -90,7 +96,8 @@ class OutputWindow:
                 self.source_key = source
             if frame is not None:
                 self.colors, self.limits, self.unknown = display.point_style(frame, self.color,
-                    color_scale=self.color_scale, velocity_limit=velocity_limit)
+                    color_scale=self.color_scale, velocity_limit=velocity_limit,
+                    classification=(getattr(session, 'blade_result', None) or {}).get('labels'))
                 self.original_indices = np.flatnonzero(frame.finite_mask)
                 if self.view == 'NACELLE':
                     result = session.analysis_result
@@ -100,9 +107,10 @@ class OutputWindow:
                         self.original_indices = np.empty(0,dtype=np.int64)
                     else:
                         self.xy = result['points'][frame.finite_mask][:,(0,2)]
-                        colors, self.saturated = analysis.distance_colors(result['distance'], self.distance_limit)
-                        self.colors = colors[frame.finite_mask]
-                        self.limits, self.unknown = (0.,self.distance_limit), int(np.isnan(result['distance']).sum())
+                        if self.color != 'ECHO_CLASS':
+                            colors, self.saturated = analysis.distance_colors(result['distance'], self.distance_limit)
+                            self.colors = colors[frame.finite_mask]
+                            self.limits, self.unknown = (0.,self.distance_limit), int(np.isnan(result['distance']).sum())
                 else:
                     self.xy, keep = display.project(frame.xyz[frame.finite_mask], self.view)
                     self.colors = self.colors[keep]
@@ -127,8 +135,10 @@ class OutputWindow:
         import gpu
         from gpu_extras.batch import batch_for_shader
         region = bpy.context.region
+        session, frame = self.consume()
         layout = display.canvas_layout(region.width, region.height,
-            bpy.context.preferences.system.ui_scale, velocity=self.effective_color == 'VELOCITY')
+            bpy.context.preferences.system.ui_scale, velocity=self.effective_color == 'VELOCITY',
+            observation_rows=len(display.observation_lines(frame)) if frame is not None else 0)
         self.scale = layout['scale']
         s = self.scale
         width, height = region.width, region.height
@@ -169,7 +179,6 @@ class OutputWindow:
             blf.position(0, x, y, 0)
             blf.draw(0, value)
 
-        session, frame = self.consume()
         def chrome():
             return [box(0, 0, width, height, (.018, .026, .04, 1)),
                 *(box(x, y, w, h, (.09, .3, .43, 1) if action == self.view else (.065, .095, .135, 1))
@@ -220,6 +229,8 @@ class OutputWindow:
             stamp = f'{frame.time.source_time_s:.3f} s' if frame.time.source_time_s is not None else '未知'
             text(f'源时间 {stamp}  ·  {len(frame.points)} 点  ·  可绘制 {len(self.xy)} 点  ·  {frame.time.quality}',
                  16*s, info_top-20*s, 12, max_width=width-32*s)
+            for index, line in enumerate(display.observation_lines(frame)):
+                text(line, 16*s, info_top-(60+20*index)*s, 11, max_width=width-32*s)
         else:
             status = self.scene.get('wfrl_x100_error') or self.scene.get('wfrl_x100_status', 'X100 未启动')
             if session is not None and session.frame is not None:
@@ -286,7 +297,7 @@ class OutputWindow:
             colors = ((1., .45, .2, 1.), (.2, .8, 1., 1.), (.95, .85, .2, 1.))
             for row in session.blade_result['blades']:
                 color = colors[row['blade'] - 1]
-                if row['curve_world']:
+                if row.get('curve_world'):
                     xy = analysis.local(row['curve_world'], context.world_from_analysis)[:, (0, 2)] * factor + (tx, ty)
                     estimates.append(shape(xy, color, 'LINE_STRIP', self.stroke_shader))
                 if row['tip_world']:
@@ -327,9 +338,13 @@ class OutputWindow:
 
     def _draw_canvas_labels(self, frame, left, bottom, ph, width, s, text):
         if frame is None or not len(self.xy):
-            message = '有效空帧 · 当前检测点数为 0' if frame is not None and not len(frame.points) else '当前视图没有可绘制点' if frame is not None else '等待当前雷达帧'
+            message = '有效空帧 · 当前点数为 0' if frame is not None and not len(frame.points) else '当前视图没有可绘制点' if frame is not None else '等待当前雷达帧'
             text(message, left+20*s, bottom+ph/2, 15, (.95, .7, .4, 1))
-        label = '仿真塔筒侧壁距离 (m)' if self.view == 'NACELLE' else display.COLOR_LABELS[self.color]
+        label = '仿真塔筒侧壁距离 (m)' if self.effective_color == 'DISTANCE' else display.COLOR_LABELS[self.color]
+        if self.effective_color == 'ECHO_CLASS':
+            text(label + ' · ' + (display.ECHO_LEGEND if self.limits is not None else '分类不可用（灰色）'),
+                 16*s, 55*s, 12, max_width=width-32*s)
+            return
         if self.view != 'NACELLE' and self.color == 'HEIGHT' and frame is not None:
             label = '世界高度 (m)' if frame.spatial.get('world_from_sensor') is not None and frame.spatial.get('alignment') in {'SIMULATION', 'STATIC_CALIBRATION', 'VERIFIED'} else '原始 Z (m)'
         if self.limits is None:
@@ -343,6 +358,9 @@ class OutputWindow:
 
     def _legend_shapes(self, s, box):
         shapes = []
+        if self.effective_color == 'ECHO_CLASS':
+            return [box((16+i*48)*s, 36*s, 40*s, 8*s, color)
+                    for i, color in enumerate((display.ECHO_COLORS[1], display.ECHO_COLORS[2], display.ECHO_COLORS[0]))] if self.limits is not None else []
         if self.limits is not None:
             for i in range(40):
                 v = float(i/39 >= .5) if self.effective_color == 'MS' else i/39
@@ -354,7 +372,8 @@ class OutputWindow:
         hints = '滚轮缩放 · 中键平移 · F 复位 · Esc 关闭' if layout['compact'] else '滚轮缩放 · 中键平移 · 1–5 切视图 · F 复位 · C 着色 · V 色标 · Esc 关闭'
         text(hints, 16*s, 16*s, 11, max_width=width-32*s)
         if self.view == 'NACELLE' and session and session.blade_result:
-            text('叶片拟合：橙 B1 / 蓝 B2 / 黄 B3 · 十字为模型叶尖',
+            text(('工程模型叶尖估计 · UNCALIBRATED' if frame is not None and display.observation_mode(frame) == 'DETECTIONS'
+                  else '叶片拟合：橙 B1 / 蓝 B2 / 黄 B3 · 十字为模型叶尖'),
                  16*s, 76*s, 11, max_width=width-32*s)
         if frame is not None and self.effective_color == 'VELOCITY':
             sign = frame.provenance.get('velocity_sign', 'UNKNOWN')

@@ -5,7 +5,7 @@ import time
 import uuid
 import numpy as np
 from .core import schema, simulation, ply, recording, channel, acquisition
-from . import configuration, display, view
+from . import clearance, configuration, display, view
 
 _SESSIONS = {}
 _DRAWN = {}
@@ -30,14 +30,23 @@ def _simulation_time(scene, sampler):
     return sequence, min(sampler.interval[1], sampler.interval[0] + sequence / 30)
 
 
-def _simulation_frame(scene, sampler, source_session, sequence, source_t):
+def _simulation_frame(scene, sampler, source_session, sequence, source_t, *, observation_mode='GEOMETRY'):
     with sampler.sampling_transaction():
-        frame = simulation.simulate(sampler.sample, source_t, sensor_id='X100-T1',
+        arguments = dict(sensor_id='X100-T1',
             session_id=source_session, sequence=sequence, interval_s=sampler.interval,
-            candidate_budget=scene.wfrl_x100_candidates, visibility=sampler.visibility,
-            material_at=sampler.material_sample,
-            sampling_plan=sampler.sampling_plan(scene.wfrl_x100_candidates))
-    frame.provenance['calibration_id'] = sampler.calibration_id
+            visibility=sampler.visibility, material_at=sampler.material_sample)
+        if observation_mode == 'DETECTIONS':
+            budget = configuration.DETECTION_INTEGRATION_BUDGET
+            frame = simulation.simulate_detections(sampler.sample, source_t, **arguments,
+                integration_budget=budget, sampling_plan=sampler.sampling_plan(budget))
+        elif observation_mode == 'GEOMETRY':
+            budget = scene.wfrl_x100_candidates
+            frame = simulation.simulate(sampler.sample, source_t, **arguments,
+                candidate_budget=budget, sampling_plan=sampler.sampling_plan(budget))
+        else:
+            raise ValueError('未知 X100 观测模式：' + str(observation_mode))
+    if frame is not None:
+        frame.provenance['calibration_id'] = sampler.calibration_id
     return frame
 
 
@@ -54,6 +63,7 @@ class Session:
         from .. import farm_flex
         from .scene import SceneSampler, installation_matrix
         self.scene, self.mode = scene, scene.wfrl_x100_source
+        self.observation_mode = scene.wfrl_x100_observation_mode
         self.key, self.frame, self.gpu_batch, self.client = None, None, None, None
         self.mount, self.fov, self.fanout = None, None, None
         self.recording_stopping = self.closing = False
@@ -83,6 +93,9 @@ class Session:
         self.blade_key = None
         self.blade_retry_at = 0.
         self.blade_error = ''
+        self.clearance_tracker = None
+        self.clearance_source = None
+        self.render_classification = None
         self.playing = False
         self.replay_cursor = None
         self.replay_time_s = float(scene.wfrl_x100_replay_s)
@@ -94,7 +107,7 @@ class Session:
         if self.mode == 'SIMULATION':
             flex = farm_flex.active_for(scene)
             if flex is None or not farm_flex.is_active(scene):
-                raise ValueError('几何仿真需要本场景已加载的风场柔性回放')
+                raise ValueError('仿真需要本场景已加载的风场柔性回放')
             self.sampler = SceneSampler(flex, mount=scene.wfrl_x100_mount,
                 mount_from_sensor=installation_matrix(scene.wfrl_x100_location, scene.wfrl_x100_rotation))
             t = max(self.sampler.interval[0], min(self.sampler.interval[1], float(scene.get('wfrl_clearance_time_s', 0))))
@@ -130,6 +143,8 @@ class Session:
         import bpy
         self.applied_config = configuration.capture(self.scene, abspath=bpy.path.abspath,
             single_ply=self.mode == 'REPLAY' and self.static_frame is not None)
+        if self.mode == 'SIMULATION':
+            self.applied_config['observation_mode'] = self.observation_mode
 
     def pending_configuration(self):
         import bpy
@@ -236,9 +251,13 @@ class Session:
         if frame is None:
             self._reset_blades()
         self.display_valid = frame is not None and frame.completeness == 'COMPLETE'
-        style = display.style_key(self.scene)
+        if frame is not None and display.observation_mode(frame) == 'DETECTIONS':
+            self.derive_blades()
+        style = display.style_key(self.scene, frame)
+        classification = self.classification()
         try:
-            self.gpu_batch = view.batch(frame, style[0], color_scale=style[1], velocity_limit=style[2]) if self.display_valid and not bpy.app.background else None
+            self.gpu_batch = view.batch(frame, style[0], color_scale=style[1], velocity_limit=style[2],
+                classification=classification) if self.display_valid and not bpy.app.background else None
             self.gpu_retry_at = None
             self.render_error = ''
         except Exception as exc:
@@ -248,6 +267,7 @@ class Session:
             if required_gpu:
                 raise
         self.render_color = style
+        self.render_classification = classification
         if record:
             self._record_current(frame)
 
@@ -282,7 +302,14 @@ class Session:
                 return
         if self.record_start is None:
             self.record_start = stamp
-        self.fanout.submit(frame, stamp - self.record_start)
+        queued = frame
+        if display.observation_mode(frame) == 'DETECTIONS':
+            enabled = getattr(self.scene, 'wfrl_x100_blade_tracking', False)
+            matched = getattr(self, 'blade_key', None) == self._clearance_frame_key(frame)
+            result = getattr(self, 'blade_result', None) if enabled and matched else None
+            error = (getattr(self, 'blade_error', '') if self.frame is frame else '无对应帧估计') if enabled else '估计未启用'
+            queued = clearance.RecordedFrame(frame, result, error)
+        self.fanout.submit(queued, stamp - self.record_start)
         self.record_last = key
         self.record_last_index = self.frame_index if indexed else None
         self.record_last_stamp = stamp
@@ -313,16 +340,17 @@ class Session:
                     or not np.allclose(actual, self.sampler.mount_from_sensor, atol=1e-5, rtol=0)):
                 raise ValueError('X100 实体安装被原生编辑；请重新应用标定配置')
             if capturing:
-                scene['wfrl_x100_status'] = '几何仿真 · 相机采集期间保留采集前的观测帧'
+                scene['wfrl_x100_status'] = configuration.OBSERVATION_LABELS[self.observation_mode] + ' · 相机采集期间保留采集前的观测帧'
                 return
             # Radar samples use a declared 30 Hz source grid independent of drawing cadence.
             key = sequence
             if key != self.key:
-                frame = _simulation_frame(scene, self.sampler, self.source_session, sequence, source_t)
+                frame = _simulation_frame(scene, self.sampler, self.source_session, sequence, source_t,
+                    observation_mode=self.observation_mode)
                 self._display(frame, required_gpu=self._gpu_required)
                 self.key = key
             self._update_fov_visibility()
-            scene['wfrl_x100_status'] = '几何仿真 · 30 Hz 瞬时采样假设'
+            scene['wfrl_x100_status'] = configuration.OBSERVATION_LABELS[self.observation_mode] + ' · 30 Hz 瞬时采样假设'
         elif self.mode == 'REPLAY':
             import bpy
             if Path(bpy.path.abspath(scene.wfrl_x100_path)).expanduser() != self.replay_path:
@@ -362,19 +390,24 @@ class Session:
                 self.gpu_batch = None
             if self.client.error:
                 scene['wfrl_x100_error'] = self.client.error
-        self.retry_display()
         self.derive_blades()
+        self.retry_display()
 
     def _reset_blades(self):
         self.blade_result = self.blade_key = None
         self.blade_retry_at = 0.
         self.blade_error = ''
         self.blade_tracker.reset()
+        if getattr(self, 'clearance_tracker', None) is not None:
+            self.clearance_tracker.reset()
 
     def derive_blades(self):
         """Optional inference errors leave the original observation and recording intact."""
         if not getattr(self.scene, 'wfrl_x100_blade_tracking', False):
             self._reset_blades()
+            return
+        if self.frame is not None and display.observation_mode(self.frame) == 'DETECTIONS':
+            self.derive_clearance()
             return
         if self.mode != 'SIMULATION' or self.context is None or self.frame is None or not self.display_valid:
             self._reset_blades()
@@ -412,11 +445,68 @@ class Session:
             self.blade_retry_at = time.monotonic() + .25
             self.blade_error = str(exc)
 
+    def _clearance_frame_key(self, frame):
+        return (getattr(self, 'generation', None), frame.identity, frame.source_kind, frame.time.clock_domain,
+                frame.time.source_time_s, self.frame_index)
+
+    def derive_clearance(self):
+        """Infer from allowed same-frame inputs, or display a verified recorded result."""
+        frame = self.frame
+        key = self._clearance_frame_key(frame)
+        if not self.display_valid:
+            self._reset_blades()
+            self.blade_error = '当前检测帧无效'
+            return
+        if self.blade_key == key or time.monotonic() < self.blade_retry_at:
+            return
+        self.blade_result = None
+        try:
+            if self.mode == 'REPLAY' and self.replay is not None and self.frame_index is not None:
+                self.blade_result, self.blade_error = clearance.read_recorded(self.replay, self.frame_index, frame)
+            elif self.mode == 'SIMULATION' and self.context is not None:
+                from .core import analysis
+                from .scene import SideWallQuery
+                source = (id(self.sampler.flex), self.sampler.geometry_id)
+                if getattr(self, 'clearance_source', None) != source:
+                    self.clearance_tracker = clearance.estimator.ClearanceTracker(clearance.unloaded_shapes(self.sampler))
+                    self.clearance_source = source
+                if self.side_query is None:
+                    self.side_query = SideWallQuery(self.context)
+                def tower_query(world):
+                    result = self.side_query.query(analysis.local(world, self.context.world_from_sensor),
+                                                  ((-1e6,)*3, (1e6,)*3))
+                    return result['distance'], result['nearest']
+                result = self.clearance_tracker.update(
+                    analysis.transform(frame.xyz, self.context.world_from_sensor), frame.radial_velocity_m_s,
+                    self.sampler.blade_priors(frame.time.source_time_s), self.context.vertices, self.context.triangles,
+                    time_s=frame.time.source_time_s,
+                    identity=(self.generation, frame.identity[:3], frame.source_kind, frame.time.clock_domain,
+                              self.sampler.source_id, self.sampler.geometry_id, self.sampler.calibration_id),
+                    frame_key=frame.identity, tower_query=tower_query, **clearance.observation_inputs(frame))
+                self.blade_result, self.blade_error = clearance.display_result(result), ''
+            else:
+                self._reset_blades()
+                self.blade_error = '缺少同帧塔面、根部姿态与未加载叶片形状先验'
+            self.blade_key, self.blade_retry_at = key, 0.
+        except Exception as exc:
+            if getattr(self, 'clearance_tracker', None) is not None:
+                self.clearance_tracker.reset()
+            self.side_query = None
+            self.blade_retry_at = time.monotonic() + .25
+            self.blade_error = str(exc)
+
+    def classification(self):
+        result = getattr(self, 'blade_result', None)
+        return (result['labels'] if self.frame is not None and self.display_valid
+                and display.observation_mode(self.frame) == 'DETECTIONS' and result is not None else None)
+
     def retry_display(self):
         """Rebuild only display resources for a still-valid original frame."""
         import bpy
         if self.frame is not None and self.display_valid and (
-                self.render_color != display.style_key(self.scene)
+                self.render_color != display.style_key(self.scene, self.frame)
+                or (display.style_key(self.scene, self.frame)[0] == 'ECHO_CLASS'
+                    and getattr(self, 'render_classification', None) is not self.classification())
                 or (self.gpu_retry_at is not None and not bpy.app.background
                     and time.monotonic() >= self.gpu_retry_at)):
             self._display(self.frame, record=False)
@@ -477,7 +567,7 @@ class Session:
         if self.mode == 'LIVE':
             raise ValueError('实时完整记录由外部采集端执行；Blender 最新帧不作为完整采集记录')
         self.record_start = self.record_last = self.record_last_index = self.record_last_stamp = None
-        self.fanout = acquisition.Fanout(recording.Recorder(path, description=dict(
+        self.fanout = acquisition.Fanout(clearance.Recorder(path, description=dict(
             source_mode=self.mode, timing=('original indexed presentation time' if self.mode == 'REPLAY' and self.replay
                 else 'source time when available; otherwise local recording monotonic'))))
         self.scene['wfrl_x100_record_error'] = ''
@@ -547,14 +637,14 @@ def apply_mount_preset(scene, preset, *, search_report=None):
                         nacelle_side_installation, installation_matrix)
     _guard_installation()
     if scene.wfrl_x100_source != 'SIMULATION':
-        raise ValueError('安装位置切换仅用于几何仿真')
+        raise ValueError('安装位置切换仅用于仿真')
     if preset not in {'ORIGINAL', 'NACELLE_SIDE', 'SEARCH'}:
         raise ValueError('未知雷达安装位置：' + str(preset))
     current = session_for(scene)
     if current is not None and (current.fanout or current.closing):
         raise ValueError('请先结束记录或完成关闭，再切换雷达安装位置')
     if current is not None and current.mode != 'SIMULATION':
-        raise ValueError('请先应用几何仿真配置，再切换雷达安装位置')
+        raise ValueError('请先应用仿真配置，再切换雷达安装位置')
     flex = farm_flex.active_for(scene)
     if flex is None or not farm_flex.is_active(scene):
         raise ValueError('请先加载本场景的风场柔性回放')
@@ -611,8 +701,11 @@ def apply_mount_preset(scene, preset, *, search_report=None):
             raise
     source_session = str(uuid.uuid4())
     sequence, source_t = _simulation_time(scene, sampler)
-    frame = _simulation_frame(scene, sampler, source_session, sequence, source_t)
-    style = display.style_key(scene)
+    frame = _simulation_frame(scene, sampler, source_session, sequence, source_t,
+        observation_mode=current.observation_mode)
+    if frame is None:
+        raise ValueError('当前时刻没有可用的 X100 观测')
+    style = display.style_key(scene, frame)
     batch = view.batch(frame, style[0], color_scale=style[1], velocity_limit=style[2]) if not bpy.app.background else None
     previous_mount = (current.mount.parent, current.mount.matrix_parent_inverse.copy(),
                       current.mount.matrix_basis.copy())
@@ -631,6 +724,8 @@ def apply_mount_preset(scene, preset, *, search_report=None):
         current.capture_configuration()
         current.pair_context(frame)
         current.derive_blades()
+        if style[0] == 'ECHO_CLASS':
+            current._display(frame, required_gpu=True, record=False)
     except Exception:
         scene.wfrl_x100_mount, scene.wfrl_x100_location, scene.wfrl_x100_rotation = previous
         current.mount.parent, current.mount.matrix_parent_inverse, current.mount.matrix_basis = previous_mount
@@ -638,7 +733,7 @@ def apply_mount_preset(scene, preset, *, search_report=None):
         current.__dict__.update(saved_session)
         raise
     scene['wfrl_x100_error'] = scene.get('wfrl_x100_record_error', '')
-    scene['wfrl_x100_status'] = '几何仿真 · 30 Hz 瞬时采样假设'
+    scene['wfrl_x100_status'] = configuration.OBSERVATION_LABELS[current.observation_mode] + ' · 30 Hz 瞬时采样假设'
     return current
 
 
@@ -757,7 +852,8 @@ def _overlay_state(scene):
     session = _SESSIONS.get(scene.as_pointer())
     if session is None or session.closing:
         return None
-    return (session, session.frame, session.gpu_batch, session.display_valid, scene.wfrl_x100_fov)
+    return (session, session.frame, session.gpu_batch, session.display_valid, scene.wfrl_x100_fov,
+            getattr(session, 'blade_result', None), getattr(session, 'blade_error', ''))
 
 
 def _redraw_changed_overlays(alive):

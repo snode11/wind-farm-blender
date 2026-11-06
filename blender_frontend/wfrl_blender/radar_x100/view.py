@@ -113,14 +113,15 @@ def install(scene, owner, sensor_matrix, *, show_fov=True):
     return mount, fov
 
 
-def batch(frame, color_by, *, color_scale='FIXED', velocity_limit=10.):
+def batch(frame, color_by, *, color_scale='FIXED', velocity_limit=10., classification=None):
     from .display import world_xyz, point_style
     xyz = world_xyz(frame)
     if not len(xyz):
         return None
     import gpu
     from gpu_extras.batch import batch_for_shader
-    colors, _, _ = point_style(frame, color_by, color_scale=color_scale, velocity_limit=velocity_limit)
+    colors, _, _ = point_style(frame, color_by, color_scale=color_scale, velocity_limit=velocity_limit,
+                               classification=classification)
     shader = gpu.shader.from_builtin('POINT_FLAT_COLOR')
     return shader, batch_for_shader(shader, 'POINTS', {'pos': xyz.astype(np.float32), 'color': colors})
 

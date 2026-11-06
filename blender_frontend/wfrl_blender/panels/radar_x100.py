@@ -209,10 +209,13 @@ class WFRL_PT_X100(_X100Panel, bpy.types.Panel):
         if session and session.frame:
             frame = session.frame
             from ..radar_x100.configuration import FRAME_SOURCE_LABELS
+            from ..radar_x100.display import observation_lines
             declared = ' · 用户声明' if frame.provenance.get('source_declaration') == 'EXPLICIT' else ''
             message(status, '观测来源：' + FRAME_SOURCE_LABELS[frame.source_kind] + declared, 'NONE', context=context)
             message(status, f'#{frame.sequence} · {frame.validity} · {len(frame.points)} 点',
                     'NONE', context=context)
+            for line in observation_lines(frame):
+                message(status, line, 'NONE', context=context)
             budget = frame.provenance.get('candidate_budget') if session.mode == 'SIMULATION' else None
             if budget is not None and budget != scene.wfrl_x100_candidates:
                 message(status, f'当前帧预算 {budget}；编辑值在下一新样本生效', 'INFO', context=context)
@@ -241,8 +244,11 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
         layout.use_property_split, layout.use_property_decorate = not narrow, False
         if scene.wfrl_x100_source == 'SIMULATION':
             from ..radar_x100.core import schema
+            from ..radar_x100.configuration import DETECTION_INTEGRATION_BUDGET
             from ..radar_x100.runtime import session_for
             session = session_for(scene)
+            _property(layout, scene, 'wfrl_x100_observation_mode', narrow=narrow)
+            message(layout, '观测模式：应用配置后生效', 'INFO', context=context)
             presets = layout.column(align=True)
             presets.use_property_split = False
             presets.label(text='安装位置（同一台雷达）')
@@ -254,7 +260,7 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
             if session and session.fanout:
                 presets.label(text='结束记录后可切换安装位置', icon='LOCKED')
             elif session and session.mode != 'SIMULATION':
-                presets.label(text='请先应用几何仿真配置', icon='INFO')
+                presets.label(text='请先应用仿真配置', icon='INFO')
             layout.separator()
             message(layout, '挂载与安装参数：应用后生效', 'INFO', context=context)
             _property(layout, scene, 'wfrl_x100_mount', narrow=narrow)
@@ -265,8 +271,12 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
                 for index, axis in enumerate('XYZ'):
                     vector.prop(scene, name, index=index, text=axis)
             layout.separator()
-            _property(layout, scene, 'wfrl_x100_candidates', narrow=narrow)
-            message(layout, '按表面积采样；预算在下一新样本生效', 'INFO', context=context)
+            if scene.wfrl_x100_observation_mode == 'GEOMETRY':
+                _property(layout, scene, 'wfrl_x100_candidates', narrow=narrow)
+                message(layout, '按表面积采样；预算在下一新样本生效', 'INFO', context=context)
+            else:
+                message(layout, f"面积积分 {DETECTION_INTEGRATION_BUDGET} · 输出上限 {schema.PROFILE['max_points']}", context=context)
+                message(layout, '工程检测参数未标定；不代表设备实测', 'INFO', context=context)
             header, search = layout.panel('wfrl_x100_installation_search', default_closed=True)
             header.label(text='安装覆盖搜索')
             if search is not None:
@@ -279,9 +289,11 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
             fov.prop(scene, 'wfrl_x100_fov')
             message(fov, f"显示长度：{schema.DISPLAY_DEFAULTS['fov_length_m']:g} m · 即时显示", 'NONE', context=context)
             _notes(layout, 'wfrl_x100_simulation_notes', (
-                'T1 · 保存运动 · 几何遮挡近似',
+                'T1 · 保存运动 · 同源几何与遮挡',
                 '安装坐标：+X 前、+Y 左、+Z 上',
-                '外壳近似；相位中心未知；无 RCS/SNR 模型'), context=context)
+                '外壳近似；相位中心未知',
+                'GEOMETRY 为几何可见性；DETECTIONS 为未标定工程检测',
+                '模型 SNR 为线性比；厂家原始 RCS/SNR 未知'), context=context)
         elif scene.wfrl_x100_source == 'REPLAY':
             message(layout, '路径与单帧声明：应用后生效', 'INFO', context=context)
             _property(layout, scene, 'wfrl_x100_path', narrow=narrow)
@@ -325,7 +337,17 @@ class WFRL_PT_X100Display(_X100Panel, bpy.types.Panel):
         narrow = _narrow(context)
         layout.use_property_split, layout.use_property_decorate = not narrow, False
         message(layout, '显示设置即时生效', 'INFO', context=context)
-        _property(layout, scene, 'wfrl_x100_color', narrow=narrow)
+        from ..radar_x100 import display
+        detection = session and session.frame is not None and display.observation_mode(session.frame) == 'DETECTIONS'
+        if detection:
+            layout.prop(scene, 'wfrl_x100_echo_classes')
+            if scene.wfrl_x100_echo_classes:
+                message(layout, display.ECHO_LEGEND, context=context)
+                if session.classification() is None:
+                    message(layout, '此帧分类不可用；灰色表示未知', context=context)
+        colors = layout.column()
+        colors.enabled = not (detection and scene.wfrl_x100_echo_classes)
+        _property(colors, scene, 'wfrl_x100_color', narrow=narrow)
         if scene.wfrl_x100_color == 'VELOCITY':
             _property(layout, scene, 'wfrl_x100_color_scale', narrow=narrow)
             if scene.wfrl_x100_color_scale == 'FIXED':
@@ -333,6 +355,10 @@ class WFRL_PT_X100Display(_X100Panel, bpy.types.Panel):
         if (session and session.frame and session.frame.radial_velocity_m_s is None
                 and scene.wfrl_x100_color == 'VELOCITY'):
             message(layout, '此来源没有径向速度；灰色表示未知', context=context)
+        if scene.wfrl_x100_color == 'MODEL_SNR':
+            message(layout, '工程模型 SNR（线性比）；不等于厂家原始 SNR', context=context)
+            if session and session.frame and session.frame.model_diagnostics is None:
+                message(layout, '此帧没有模型诊断；灰色表示未知', context=context)
         layout.operator('wfrl.x100_output', text='打开点云窗口', icon='WINDOW')
         output_error = scene.get('wfrl_x100_output_error')
         if output_error:
@@ -369,6 +395,20 @@ class WFRL_PT_X100Blades(_X100Panel, bpy.types.Panel):
         scene, layout = context.scene, self.layout
         layout.prop(scene, 'wfrl_x100_blade_tracking')
         session = session_for(scene)
+        from ..radar_x100 import clearance, display
+        detection = session and ((session.frame is not None and display.observation_mode(session.frame) == 'DETECTIONS')
+            or (session.mode == 'SIMULATION' and session.observation_mode == 'DETECTIONS'))
+        if detection:
+            message(layout, clearance.NOTICE, context=context)
+            message(layout, clearance.PRIORS, context=context)
+            result = session.blade_result if scene.wfrl_x100_blade_tracking and session.display_valid else None
+            error = session.blade_error if scene.wfrl_x100_blade_tracking else '估计未启用'
+            for line in clearance.lines(result, error):
+                message(layout, line, context=context)
+            if session.mode == 'REPLAY' and result is not None:
+                message(layout, '显示此原帧录制的派生估计', context=context)
+            message(layout, '95% 为近似模型区间，未经实测校准；缺测不沿用旧估计', context=context)
+            return
         message(layout, '研究模型：已知根部姿态与名义叶尖半径；机舱XZ显示拟合段', context=context)
         if not session or not scene.wfrl_x100_blade_tracking:
             return
@@ -412,7 +452,10 @@ class WFRL_PT_X100Frame(_X100Panel, bpy.types.Panel):
         layout = self.layout.column(align=True)
         if session.frame:
             frame = session.frame
+            from ..radar_x100.display import observation_lines
             layout.label(text=f'{source_label(frame)} / {frame.stream} / #{frame.sequence}')
+            for line in observation_lines(frame):
+                layout.label(text=line)
             layout.label(text=f'{frame.validity} · {len(frame.points)} 点 · 非有限坐标 {int((~frame.finite_mask).sum())}')
             layout.label(text=f'时间质量：{frame.time.quality} / {frame.time.timestamp_reference}')
             layout.label(text=(f'源时间：{frame.time.source_time_s:.3f} s'
@@ -470,8 +513,8 @@ class WFRL_PT_X100Record(_X100Panel, bpy.types.Panel):
         layout.label(text='仅记录实际采样帧；非完整 30 Hz 导出', icon='INFO')
 
 
-PROPERTIES = ('source', 'mount', 'location', 'rotation', 'candidates', 'fov', 'path', 'ply_source', 'replay_s',
-              'port', 'stream', 'stale_s', 'color', 'color_scale', 'velocity_limit', 'record_path', 'enabled', 'analysis_roi_min', 'analysis_roi_max', 'analysis_limit', 'search_path', 'blade_tracking')
+PROPERTIES = ('source', 'observation_mode', 'mount', 'location', 'rotation', 'candidates', 'fov', 'path', 'ply_source', 'replay_s',
+              'port', 'stream', 'stale_s', 'color', 'echo_classes', 'color_scale', 'velocity_limit', 'record_path', 'enabled', 'analysis_roi_min', 'analysis_roi_max', 'analysis_limit', 'search_path', 'blade_tracking')
 
 
 def replay_seek(scene, context=None):
@@ -492,8 +535,11 @@ def register_properties():
     from ..radar_x100.core import schema
     p = bpy.props
     definitions = dict(
-        source=p.EnumProperty(name='数据源', items=(('SIMULATION','几何仿真','保存运动的几何观测'),
+        source=p.EnumProperty(name='数据源', items=(('SIMULATION','仿真','保存运动的几何可见性或工程检测'),
             ('REPLAY','文件回放','实测或仿真文件保留原始来源'),('LIVE','实时输入','独立本地雷达通道'))),
+        observation_mode=p.EnumProperty(name='观测模式', default='GEOMETRY', items=(
+            ('GEOMETRY', 'GEOMETRY · 几何可见性', '材料表面采样与遮挡，不模拟工程检测链'),
+            ('DETECTIONS', 'DETECTIONS · 工程检测', '未标定工程模型：功率、噪声、漏检与虚警；应用配置后生效'))),
         mount=p.EnumProperty(name='挂载', items=(('NACELLE','T1 机舱','跟随同源机舱'),
             ('TOWER_BASE','T1 塔基','相对塔基固定'),('WORLD','世界固定','世界坐标'))),
         location=p.FloatVectorProperty(name='安装位置 (m)', default=ORIGINAL_LOCATION, size=3),
@@ -506,13 +552,16 @@ def register_properties():
             ('UNDECLARED', '请选择来源', 'PLY 本身不包含来源信息，需根据实际生成方式声明'),
             ('GEOMETRY_SIMULATION', '几何仿真', '来自几何仿真的单帧文件'),
             ('MEASURED_REPLAY', '实测文件', '用户声明来自设备测量，不代表已经验证设备兼容或标定'),
-            ('TEST', '测试数据', '合成测试输入，不作为实测'))),
+            ('TEST', '测试数据', '合成测试输入，不作为实测'),
+            ('ENGINEERING_SIMULATION', '工程检测仿真', '工程检测单帧；PLY 不保留模型诊断与标定状态'))),
         replay_s=p.FloatProperty(name='回放时间 (s)', default=0, min=0, update=replay_seek),
         port=p.IntProperty(name='本地端口', default=9877, min=1024, max=65535),
-        stream=p.EnumProperty(name='显示流', items=tuple((v,v,'独立流') for v in ('UNKNOWN','NEAR','FAR','COMBINED','TRACK','GEOMETRY'))),
+        stream=p.EnumProperty(name='显示流', items=tuple((v,v,'独立流') for v in ('UNKNOWN','NEAR','FAR','COMBINED','TRACK','GEOMETRY','DETECTIONS'))),
         stale_s=p.FloatProperty(name='过期阈值 (s)', default=.5, min=.01),
         color=p.EnumProperty(name='着色', items=tuple((key,label,'未知量显示灰色') for key,label in
-            (('RANGE','距离'),('HEIGHT','高度'),('RCS','RCS'),('SNR','SNR'),('MS','动静'),('VELOCITY','径向速度')))),
+            (('RANGE','距离'),('HEIGHT','高度'),('RCS','RCS'),('SNR','SNR'),('MS','动静'),('VELOCITY','径向速度'),('MODEL_SNR','模型 SNR（线性比）')))),
+        echo_classes=p.BoolProperty(name='按叶片 / 塔架 / 其他着色', default=False,
+            description='仅 DETECTIONS 使用工程模型的回波分类；不使用材料标签或虚警真值'),
         color_scale=p.EnumProperty(name='速度色标', default='FIXED', items=(
             ('FIXED', '固定对称', '固定以零为中心的显示范围，超出范围的数值使用端点颜色'),
             ('FRAME', '当前帧', '按当前帧的最小值与最大值显示'))),

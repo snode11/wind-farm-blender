@@ -4,7 +4,7 @@ import math
 from copy import copy
 from contextlib import contextmanager
 import numpy as np
-from .core import simulation, schema, analysis
+from .core import simulation, schema, analysis, installation
 from .. import performance
 
 ORIGINAL_LOCATION = (-3.5, -1.7, -2.0)
@@ -39,8 +39,59 @@ def nacelle_side_installation(sampler):
     point, normal, _, _ = tree.ray_cast(origin, Vector((0.0, 1.0, 0.0)))
     if point is None or normal.y > -0.8:
         raise ValueError('当前机舱没有可用的侧壁安装面，请检查静态外壳')
-    location = point + normal * 0.04
-    return tuple(location), (0.0, 0.0, -100.0)
+    rotation = (0.0, 0.0, -100.0)
+    axes = installation_matrix((0., 0., 0.), rotation)[:3, :3]
+    radius = np.abs(np.asarray(normal) @ axes) @ installation.housing_half_extents()
+    location = point + normal * (radius + 2 * installation.MechanicalPolicy().service_clearance_m)
+    return tuple(location), rotation
+
+
+def installation_catalog(sampler, *, policy=None, lateral_offsets=(0., 1., 2.),
+                         tilts=((0., 0.), (10., 0.), (14., 0.), (20., 0.),
+                                (14., -10.), (14., 10.), (0., -20.), (0., 20.))):
+    """Peer front/rear controls and finite exterior offsets with two-axis aperture tilts."""
+    from ..turbine_geometry import hub_position
+    policy = policy or installation.MechanicalPolicy()
+    sampler.validate()
+    vertices = sampler.shell_vertices @ sampler.shell_local[:3, :3].T + sampler.shell_local[:3, 3]
+    bounds = np.array([vertices.min(axis=0), vertices.max(axis=0)])
+    original = installation.assess_front_mount(installation_matrix(ORIGINAL_LOCATION, ORIGINAL_ROTATION),
+                                              bounds, hub_position()[0])
+    side_location, side_rotation = nacelle_side_installation(sampler)
+    rear_x = (bounds[1, 0] - policy.rear_inset_m if original['rotor_side'] == 'NEGATIVE_X'
+              else bounds[0, 0] + policy.rear_inset_m)
+    center_y = float((bounds[0, 1] + bounds[1, 1]) / 2)
+    underside_z = float(bounds[0, 2] - policy.underside_drop_m)
+    front_location = (ORIGINAL_LOCATION[0], center_y, underside_z)
+    rear_location = (float(rear_x), center_y, underside_z)
+    offsets = sorted({sign * float(offset) for offset in lateral_offsets for sign in (-1, 1)})
+    if not offsets or not np.isfinite(offsets).all() or max(map(abs, offsets)) > 2:
+        raise ValueError('Lateral research offsets must be within 2 m of the centerline')
+    rotor_sign = -1. if original['rotor_side'] == 'NEGATIVE_X' else 1.
+    search = []
+    front_inner = (float((front_location[0] + bounds[:, 0].mean()) / 2), center_y, underside_z)
+    for name, anchor in (('FRONT', front_location), ('FRONT_INNER', front_inner), ('REAR', rear_location)):
+        for offset in offsets:
+            for drop in (policy.underside_drop_m / 2, policy.underside_drop_m):
+                for pitch, lateral in tilts:
+                    location = (anchor[0], center_y + offset, float(bounds[0, 2] - drop))
+                    rotation = installation.downward_rotation(pitch, lateral, rotor_sign)
+                    search.append((f'{name}_Y{offset:+g}_DROP{drop:g}_TILT{pitch:g}_{lateral:+g}', location, rotation))
+    return dict(original_assessment=original, baselines=[
+        ('ORIGINAL', ORIGINAL_LOCATION, ORIGINAL_ROTATION),
+        ('NACELLE_FRONT_DOWN', front_location, ORIGINAL_ROTATION),
+        ('NACELLE_SIDE', side_location, side_rotation),
+        ('NACELLE_REAR_DOWN', rear_location, (0., 90., 180.))], search_candidates=search,
+        peer_placement_references=[dict(
+            document='ZKQH-MECP.0001-中科启航-雷视融合净空监测系统产品说明书-归档版.pdf', pages=[7, 12],
+            placement='front co-located with camera or rear hoisting opening; source uses 140 as dividing value',
+            use='placement controls only; no peer dimensions or mounting approval transferred'), dict(
+            document='中科启航 - 大型风电机组一体化安全解决方案202601.pdf', pages=[20],
+            placement='rear; illustrated normal approximately 14 degrees from vertical in 2D',
+            use='14-degree search seed; image estimate, not a measured mounting requirement')],
+        shell_geometry=dict(bounds_m=bounds.tolist(), geometry_id=sampler.geometry_id,
+            source='bound Nacelle mesh; scene_builder._rounded_nacelle_mesh and packaged geometry shell',
+            status='PRESENTATION_GEOMETRY_NOT_MANUFACTURER_CAD'))
 
 
 class SceneSampler:
@@ -128,6 +179,7 @@ class SceneSampler:
         self.latest_sample = None
         self._sampling_validated = False
         self._visibility_cache = {}
+        self._mechanical_cache = {}
         self.calibration_id = _calibration_identity(mount, self.mount_from_sensor)
         self.validate()
 
@@ -328,6 +380,50 @@ class SceneSampler:
                 sample.vertices.tolist(), sample.triangles.tolist(), all_triangles=True))
         return bvh_visibility(sample, targets, tree=self._visibility_cache['tree'])
 
+    def installation_constraints(self, matrix, *, policy=None):
+        """Check exterior installation space against the unchanged bound shell."""
+        self.validate()
+        vertices = self.shell_vertices @ self.shell_local[:3, :3].T + self.shell_local[:3, 3]
+        distance, _, _ = analysis.closest_reference([matrix[:3, 3]], vertices, self.parts[-1][1])
+        result = installation.static_constraints(matrix, [vertices.min(axis=0), vertices.max(axis=0)],
+                                                  distance[0], policy=policy)
+        result['geometry_id'] = self.geometry_id
+        return result
+
+    def motion_clearances(self, sample, matrices, *, policy=None):
+        """Conservative housing/service spheres versus same-time blade and tower meshes."""
+        from mathutils import Vector
+        from mathutils.bvhtree import BVHTree
+        policy = policy or installation.MechanicalPolicy()
+        if sample.source_id != self.source_id or sample.geometry_id != self.geometry_id:
+            raise ValueError('Mechanical sample is not from the bound source')
+        key = sample.geometry_id, sample.time_s
+        cache = self._mechanical_cache
+        if cache.get('key') != key:
+            nacelle = self.mount_world_at(sample.time_s, mount='NACELLE')
+            vertices = (sample.vertices - nacelle[:3, 3]) @ nacelle[:3, :3]
+            moving_faces = sample.triangles[:self.triangle_offsets[-2]]
+            parts = []
+            for start, end in zip(self.triangle_offsets[:-2], self.triangle_offsets[1:-1]):
+                faces = sample.triangles[start:end]
+                points = vertices[faces].reshape(-1, 3)
+                parts.append((faces, points.min(axis=0), points.max(axis=0)))
+            cache.update(key=key, vertices=vertices, parts=parts,
+                tree=BVHTree.FromPolygons(vertices.tolist(), moving_faces.tolist(), all_triangles=True))
+        radius = float(np.linalg.norm(installation.housing_half_extents()) + policy.service_clearance_m)
+        rows = []
+        for matrix in matrices:
+            origin = simulation.rigid_matrix(matrix)[:3, 3]
+            _, _, _, distance = cache['tree'].find_nearest(Vector(origin))
+            if distance is None:
+                rows.append(None)
+                continue
+            inside = any(np.all(origin >= lo) and np.all(origin <= hi)
+                and installation.point_inside_closed_mesh(origin, cache['vertices'], faces)
+                for faces, lo, hi in cache['parts'])
+            rows.append(dict(source_time_s=sample.time_s, clearance_m=float(distance - radius), inside=inside))
+        return rows
+
 
     def analysis_context(self, frame, identity):
         """Extract only tower geometry and allowed transforms from the central sample."""
@@ -349,6 +445,31 @@ class SceneSampler:
         used, inverse = np.unique(faces, return_inverse=True)
         return analysis.Context(identity, self.mount_world_at(sample.time_s, mount='NACELLE'),
             sample.world_from_sensor, sample.vertices[used], inverse.reshape(-1,3))
+
+    def passage_truth(self, sample, blade, distal_span, roi, context):
+        """Offline geometric clearance of the ROI-clipped distal blade surface to tower sides."""
+        if (sample.source_id != self.source_id or sample.geometry_id != self.geometry_id
+                or blade not in (0, 1, 2) or not 0 < distal_span < 1):
+            raise ValueError('Invalid passage truth source or blade')
+        rest = self.blades[blade][1]
+        faces = self.parts[blade][1]
+        lo, hi = self.triangle_offsets[blade:blade + 2]
+        world = sample.vertices[sample.triangles[lo:hi]]
+        local = analysis.local(world, context.world_from_analysis)
+        span = (rest[faces, 2] - rest[:, 2].min()) / np.ptp(rest[:, 2])
+        eligible = ((span.max(axis=1) >= distal_span)
+            & (local.max(axis=1) >= roi[:3]).all(axis=1)
+            & (local.min(axis=1) <= roi[3:]).all(axis=1))
+        clipped = []
+        for triangle, coordinates, normalized in zip(world[eligible], local[eligible], span[eligible]):
+            clipped.extend(installation.clip_triangle(triangle, np.column_stack((coordinates, normalized)),
+                                                       [*roi[:3], distal_span], [*roi[3:], 1.]))
+        if not clipped:
+            return None
+        triangles = np.asarray(clipped)
+        triangles = triangles[np.linalg.norm(np.cross(triangles[:, 1] - triangles[:, 0],
+                                                       triangles[:, 2] - triangles[:, 0]), axis=1) > 1e-10]
+        return installation.mesh_clearance(triangles, context.vertices[context.triangles])
 
     def blade_priors(self, time_s):
         """Only nominal span and same-source constrained root poses enter inference."""

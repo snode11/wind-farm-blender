@@ -57,3 +57,18 @@ def test_degenerate_reference_is_rejected():
     s.vertices[:] = 0
     with pytest.raises(ValueError, match='area'):
         sampling.make_plan(s)
+
+
+def test_area_weights_conserve_reference_measure_independently_of_mesh_and_budget():
+    for mesh in (1, 3, 12):
+        for budget in (128, 4096, 16384):
+            plan = sampling.make_plan(surface(mesh), budget)
+            assert plan.area_weights_m2.sum() == pytest.approx(2.)
+            assert np.all(plan.area_weights_m2 == pytest.approx(2 / budget))
+            assert not plan.area_weights_m2.flags.writeable
+    small = sampling.make_plan(surface(), 4096)
+    large = sampling.make_plan(surface(), 8192)
+    np.testing.assert_array_equal(small.barycentric, large.barycentric[:4096])
+    np.testing.assert_allclose(small.area_weights_m2, large.area_weights_m2[:4096] * 2)
+    with pytest.raises(ValueError, match='budget'):
+        sampling.make_plan(surface(), sampling.MAX_INTEGRATION_SAMPLES + 1)
