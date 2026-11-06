@@ -333,7 +333,7 @@ record = dict(status='RUNNING', final=False, script=script,
               background=bpy.app.background, blender=bpy.app.version_string,
               startup_dirty=bpy.data.is_dirty)
 def save():
-    Path(destination).write_text(json.dumps(record, indent=2) + '\\n')
+    Path(destination).write_text(json.dumps(record, indent=2) + '\\n', encoding='utf-8')
 save()
 try:
     assert bpy.app.background == (mode == 'background'), 'Unexpected execution mode'

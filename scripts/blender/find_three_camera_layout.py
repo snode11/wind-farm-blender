@@ -3,6 +3,7 @@ from pathlib import Path
 import json
 import os
 import sys
+import tempfile
 from dataclasses import asdict
 import bpy
 import numpy as np
@@ -12,7 +13,9 @@ sys.path[:0]=[str(ROOT/'blender_frontend'),str(ROOT)]
 import wfrl_blender as addon
 from wfrl_blender import stacked_camera_rig as rig, custom_cameras as core
 from wfrl_blender import camera_projection as projection, custom_camera_preview as preview
-OUT=Path(os.environ.get('WFRL_TEST_OUTPUT','/tmp/wfrl-three-camera-search'))
+output_dir = os.environ.get('WFRL_TEST_OUTPUT')
+OUT = (Path(output_dir) if output_dir is not None
+       else Path(tempfile.gettempdir()) / 'wfrl-three-camera-search')
 OUT.mkdir(parents=True,exist_ok=True)
 INTERVALS=((0.,18.),(14.,38.),(34.,61.5))
 addon.register();addon.load_demo_scene()

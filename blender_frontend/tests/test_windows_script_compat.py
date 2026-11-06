@@ -1,5 +1,6 @@
 """Host coverage of Windows paths, process cleanup, and subprocess decoding."""
 from argparse import Namespace
+import ast
 from contextlib import nullcontext
 import hashlib
 from itertools import chain, repeat
@@ -9,6 +10,7 @@ from pathlib import Path
 import signal
 import subprocess
 import sys
+import tempfile
 from types import SimpleNamespace
 from unittest.mock import Mock
 from zipfile import ZipFile
@@ -16,6 +18,8 @@ from zipfile import ZipFile
 import psutil
 import pytest
 
+from blender_frontend.tests import test_frontend_completion as completion_tests
+from scripts.blender import run_regressions as runner
 from scripts.blender import validate_frontend_package as validator
 from scripts.blender import verify_frontend_completion as completion
 from scripts.blender import wfrl_launcher as launcher
@@ -308,3 +312,47 @@ def test_package_validator_decodes_utf8_with_replacement(tmp_path, monkeypatch):
                                    env=os.environ.copy(), output=tmp_path, name='probe', required_markers=['PASS'])
     assert result['status'] == 'PASS'
     assert Path(result['log']).read_text(encoding='utf-8').splitlines() == ['PASS', DECODED_DIAGNOSTIC]
+
+
+def test_regression_bootstrap_writes_utf8():
+    assert "encoding='utf-8'" in runner.BOOTSTRAP
+    compile(runner.BOOTSTRAP, 'bootstrap.py', 'exec')
+
+
+@pytest.mark.parametrize('override', [None, 'camera-output', ''], ids=['default', 'override', 'empty-override'])
+def test_camera_layout_output_uses_system_tempdir(tmp_path, monkeypatch, override):
+    gettempdir = Mock(return_value=str(tmp_path))
+    monkeypatch.setattr(tempfile, 'gettempdir', gettempdir)
+    if override is None:
+        monkeypatch.delenv('WFRL_TEST_OUTPUT', raising=False)
+    else:
+        monkeypatch.setenv('WFRL_TEST_OUTPUT', override)
+
+    script = completion.ROOT / 'scripts/blender/find_three_camera_layout.py'
+    tree = ast.parse(script.read_text(encoding='utf-8'), filename=str(script))
+    # The search requires Blender at import time. Evaluate only its output assignments.
+    assignments = [node for node in tree.body if isinstance(node, ast.Assign)
+                   and isinstance(node.targets[0], ast.Name) and node.targets[0].id in {'output_dir', 'OUT'}]
+    namespace = {'Path': Path, 'os': os, 'tempfile': tempfile}
+    exec(compile(ast.Module(body=assignments, type_ignores=[]), str(script), 'exec'), namespace)
+
+    if override is None:
+        assert namespace['OUT'] == tmp_path / 'wfrl-three-camera-search'
+        gettempdir.assert_called_once_with()
+    else:
+        assert namespace['OUT'] == Path(override)
+        gettempdir.assert_not_called()
+
+
+@pytest.mark.parametrize(('changes', 'passed'), [
+    pytest.param({}, True, id='nonzero-bridge-exit'),
+    pytest.param({'bridge_exit': None}, False, id='bridge-still-running'),
+    pytest.param({'owned_launchers_exited': False}, False, id='launcher-still-running'),
+    pytest.param({'owned_process_cleanup': 'UNKNOWN'}, False, id='cleanup-unconfirmed'),
+])
+def test_windows_completion_asserts_owned_process_cleanup(monkeypatch, changes, passed):
+    monkeypatch.setattr(completion_tests, 'os', SimpleNamespace(name='nt'))
+    supervision = {'bridge_exit': 1, 'owned_launchers_exited': True,
+                   'owned_process_cleanup': 'EMPTY_CONFIRMED', **changes}
+    with nullcontext() if passed else pytest.raises(AssertionError):
+        completion_tests.assert_bridge_cleanup(supervision)

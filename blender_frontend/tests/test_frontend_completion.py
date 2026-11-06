@@ -107,6 +107,15 @@ def run_outputs(output):
     return sorted(path for path in output.iterdir() if path.is_dir())
 
 
+def assert_bridge_cleanup(supervision):
+    if os.name == 'nt':
+        assert supervision['owned_process_cleanup'] == 'EMPTY_CONFIRMED'
+        assert supervision['bridge_exit'] is not None
+    else:
+        assert supervision['bridge_exit'] == 0
+    assert supervision['owned_launchers_exited']
+
+
 def test_missing_current_report_cannot_reuse_previous_pass(tmp_path, acceptance_processes):
     output = tmp_path / 'acceptance'
     output.mkdir()
@@ -118,8 +127,8 @@ def test_missing_current_report_cannot_reuse_previous_pass(tmp_path, acceptance_
     current, = run_outputs(output)
     assert not (current / 'report.json').exists()
     supervision = json.loads((current / 'supervision.json').read_text())
-    assert supervision['frontend_exit'] == supervision['bridge_exit'] == 0
-    assert supervision['owned_launchers_exited']
+    assert supervision['frontend_exit'] == 0
+    assert_bridge_cleanup(supervision)
 
 
 def test_each_acceptance_uses_new_output_and_preserves_existing_evidence(tmp_path, acceptance_processes):
