@@ -2,6 +2,7 @@
 from collections import deque
 from copy import deepcopy
 import ipaddress
+import math
 import select
 import socket
 import time
@@ -19,6 +20,13 @@ class BridgeServer:
                  *, session_binding=None):
         address = ipaddress.ip_address(host)
         if not address.is_loopback: raise ValueError('Bridge binds only loopback IP literals')
+        try:
+            valid_timeout = (type(handshake_timeout) in (int, float)
+                             and math.isfinite(handshake_timeout) and handshake_timeout >= 0)
+        except OverflowError:
+            valid_timeout = False
+        if not valid_timeout:
+            raise ValueError('handshake_timeout must be finite and nonnegative')
         self.session = session or BackendSession()
         self.listener = socket.socket(socket.AF_INET6 if address.version == 6 else socket.AF_INET, socket.SOCK_STREAM)
         self.listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -52,7 +60,7 @@ class BridgeServer:
     def _observation_key(self, kind, payload):
         return kind, payload.get('record_kind') if kind == 'training_stats' else None
 
-    def _drop_replaceable(self, kind, payload):
+    def _drop_replaceable(self, kind, payload, frame_bytes=0):
         key = self._observation_key(kind, payload)
         identifies_run = kind == 'lifecycle' and 'run_id' in payload
         if identifies_run:
@@ -63,11 +71,13 @@ class BridgeServer:
             if item['offset'] or item['kind'] not in {'snapshot', 'training_stats'}:
                 continue
             same = self._observation_key(item['kind'], item['payload']) == key
-            prioritize = kind in {'lifecycle', 'safety_event', 'error'} and item['kind'] == 'snapshot'
+            prioritize = (kind in {'lifecycle', 'safety_event', 'error'} and
+                          (item['kind'] == 'snapshot' or self.pending_bytes + frame_bytes > self.max_queue_bytes))
             obsolete = identifies_run and item['payload'].get('run_id') != payload['run_id']
             if same or prioritize or obsolete:
                 if prioritize and not obsolete:
-                    self._deferred[('snapshot', None)] = item['payload'], item['queued_monotonic']
+                    observation_key = self._observation_key(item['kind'], item['payload'])
+                    self._deferred[observation_key] = item['payload'], item['queued_monotonic']
                 self.pending.remove(item)
                 self.pending_bytes -= len(item['frame'])
 
@@ -81,13 +91,13 @@ class BridgeServer:
             payload = dict(payload, capabilities=self._connection_capabilities(payload['capabilities']))
         if kind in {'training_stats', 'snapshot'}:
             payload = deepcopy(payload)
-        # Partially sent frames are immutable; unsent observations can coalesce.
-        self._drop_replaceable(kind, payload)
-        key = self._observation_key(kind, payload)
-        self._deferred.pop(key, None)
         self.sequence += 1
         data = encode_message(dict(protocol_version=1, type=kind, session_id=self.session.session_id,
                                    sequence=self.sequence, payload=payload))
+        # Partially sent frames are immutable; unsent observations can coalesce.
+        self._drop_replaceable(kind, payload, len(data))
+        key = self._observation_key(kind, payload)
+        self._deferred.pop(key, None)
         if self.pending_bytes + len(data) > self.max_queue_bytes:
             if kind in {'snapshot', 'training_stats'}:
                 self._deferred[key] = payload, time.monotonic()
@@ -158,7 +168,12 @@ class BridgeServer:
                 session_id=self.session.session_id, sequence=item['sequence'], payload=payload))
             pending_bytes = self.pending_bytes + len(frame) - len(item['frame'])
             if pending_bytes > self.max_queue_bytes:
-                raise _SendQueueFull('Server send queue overflow')
+                self.pending.popleft()
+                self.pending_bytes -= len(item['frame'])
+                key = self._observation_key(item['kind'], item['payload'])
+                if key not in self._deferred or self._deferred[key][1] <= item['queued_monotonic']:
+                    self._deferred[key] = item['payload'], item['queued_monotonic']
+                return
             self.pending_bytes = pending_bytes
             item['frame'] = frame
         chunk = item['frame'][item['offset']:item['offset'] + 65536]
@@ -283,8 +298,10 @@ class BridgeServer:
         if self._waiting_client is not None:
             self._waiting_client.close()
             self._waiting_client = None
-        self.session.stop()
-        self.listener.close()
+        try:
+            self.session.stop()
+        finally:
+            self.listener.close()
 
 
 Server = BridgeServer

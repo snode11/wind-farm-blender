@@ -97,10 +97,11 @@ class FlorisDemoSession:
                 if self._stop.wait(self.frame_interval):
                     break
         except Exception as exc:
-            self.error = str(exc)
+            self.error = str(exc) or type(exc).__name__
         finally:
             if driver is not None:
                 try:
                     driver.close(drain_cap=0)
                 except Exception as exc:
-                    self.error = 'FLORIS cleanup failed: ' + str(exc)
+                    cleanup = 'FLORIS cleanup failed: ' + (str(exc) or type(exc).__name__)
+                    self.error = self.error + '; ' + cleanup if self.error else cleanup

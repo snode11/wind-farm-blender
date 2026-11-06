@@ -2,6 +2,7 @@
 from collections import deque
 from copy import deepcopy
 from pathlib import Path
+import math
 import os
 import signal
 import shutil
@@ -132,6 +133,7 @@ class BackendSession:
         self._stop_worker = None
         self._channel_states = {}
         self._formal_scene_dir = None
+        self._finalizing = False
         self.cleanup_confirmed = True
         self.worker_alive = False
 
@@ -198,21 +200,50 @@ class BackendSession:
             self._lifecycle_reason = reason
             self._refresh_cleanup_state()
             self.state_revision += 1
-            self.emit('lifecycle', dict(self._state_payload(), reason=reason))
+            self.emit('lifecycle', dict(self._state_payload(), reason=self._lifecycle_reason))
+
+    def _failure_reason(self, reason):
+        message = str(reason) or type(reason).__name__
+        if self.status == 'FAILED' and self._lifecycle_reason:
+            if message in self._lifecycle_reason:
+                return self._lifecycle_reason
+            return self._lifecycle_reason + '; ' + message
+        return message
+
+    def _fail(self, reason):
+        with self._condition:
+            self.lifecycle('FAILED', self._failure_reason(reason))
+
+    def _backend_error(self):
+        error = self._trainer.error if self._trainer is not None else None
+        if self._process is not None and self._process.poll() is not None and self._process.returncode:
+            error = error or f'Formal process exited {self._process.returncode}'
+        return error
 
     def _refresh_cleanup_state(self):
+        before = self.cleanup_confirmed, self.worker_alive, self.status, self._lifecycle_reason
         alive = self.alive()
         inactive = self.status in {'READY', 'STOPPED', 'FAILED'}
         draining = self._stop_worker is not None and self._stop_worker.is_alive()
-        if inactive and not alive and not draining:
-            self._collect_progress(final=True)
-            if self._formal_scene_dir is not None:
-                self._formal_scene_dir.cleanup()
-                self._formal_scene_dir = None
-        confirmed = inactive and not alive and not draining
-        changed = (self.cleanup_confirmed, self.worker_alive) != (confirmed, alive)
+        cleanup_ok = True
+        if inactive and not alive and not draining and not self._finalizing:
+            self._finalizing = True
+            try:
+                self._collect_progress(final=True)
+                if self._formal_scene_dir is not None:
+                    self._formal_scene_dir.cleanup()
+                    self._formal_scene_dir = None
+            except Exception as exc:
+                cleanup_ok = False
+                self._lifecycle_reason = self._failure_reason('Cleanup failed: ' + (str(exc) or type(exc).__name__))
+                self.status = 'FAILED'
+            finally:
+                self._finalizing = False
+        confirmed = (inactive and not alive and not draining and not self._finalizing and cleanup_ok
+                     and self._progress_reader is None and self._progress_dir is None
+                     and self._formal_scene_dir is None)
         self.cleanup_confirmed, self.worker_alive = confirmed, alive
-        return changed
+        return before != (confirmed, alive, self.status, self._lifecycle_reason)
 
     def _state_payload(self):
         return dict(run_status=self.status, mode=self.mode, run_id=self.run_id,
@@ -265,12 +296,10 @@ class BackendSession:
                 if self._process is not None:
                     finished = self._process.poll() is not None
                 if finished:
-                    self._collect_progress(final=True)
-                    error = self._trainer.error if self._trainer is not None else None
-                    if self._process is not None and self._process.returncode: error = f'Formal process exited {self._process.returncode}'
+                    error = self._backend_error()
                     if self.alive():
                         error = error or 'Backend controller exited while child processes remained'
-                        self.lifecycle('FAILED', error)
+                        self._fail(error)
                         self.stop(0)
                     else:
                         if not error: self.lifecycle('DRAINING')
@@ -330,7 +359,9 @@ class BackendSession:
     def start(self, mode, options):
         with self._condition:
             if self.status not in ('READY', 'STOPPED'): raise ValueError('Session is active or failure unresolved')
-            if self._stop_worker is not None and self._stop_worker.is_alive():
+            if self.alive() or (self._stop_worker is not None and self._stop_worker.is_alive()):
+                raise ValueError('Backend cleanup is still finishing')
+            if not self.synchronization_state()['cleanup_confirmed']:
                 raise ValueError('Backend cleanup is still finishing')
             if mode not in ('demo', 'interactive_training', 'formal_training', 'replay'): raise ValueError('Unknown mode')
             if self.fake and mode != 'demo': raise ValueError('Fake backend supports SYNTH demo only')
@@ -433,28 +464,34 @@ class BackendSession:
                                     for topic, enabled in self._channel_states.items():
                                         runtime.set_enabled(topic, enabled)
                         except Exception as exc:
-                            self.lifecycle('FAILED', str(exc))
+                            self._fail(exc)
                             self.stop(0)
                     self._trainer = factory(self.scene, demo=mode == 'demo', replay=mode == 'replay',
                                             on_snapshot=snapshot_callback, **options)
                     self._trainer.start()
                     self._thread = self._trainer._thread
-                self.lifecycle('RUNNING')
+                if self.status == 'STARTING' and not self._stopping:
+                    self.lifecycle('RUNNING')
             except Exception as exc:
-                self._collect_progress(final=True)
-                self.lifecycle('FAILED', str(exc))
-                if self.alive(): self.stop(0)
-                if self._formal_scene_dir is not None and not self.alive():
-                    self._formal_scene_dir.cleanup()
-                    self._formal_scene_dir = None
+                try:
+                    self._fail(exc)
+                except Exception as failure:
+                    exc.add_note('Failure reporting failed: ' + str(failure))
+                try:
+                    if self.alive(): self.stop(0)
+                except Exception as cleanup:
+                    exc.add_note('Cleanup request failed: ' + str(cleanup))
                 raise
 
     def command(self, command):
         name, args = command['command'], command.get('arguments', {})
         with self._condition:
-            if name == 'run.start': return self.start(args.get('mode', self.mode), args.get('options', {}))
             if name == 'run.stop': return self.stop(float(args.get('timeout_seconds', 120)))
             if name == 'session.sync': return self.lifecycle(self.status)
+            if (self.status == 'DRAINING' or (self._stop_worker is not None and self._stop_worker.is_alive())
+                    or (self._stopping and self.alive())):
+                raise ValueError('Backend cleanup is still finishing')
+            if name == 'run.start': return self.start(args.get('mode', self.mode), args.get('options', {}))
             if name == 'channel.set':
                 topic, enabled = args.get('topic'), args.get('enabled')
                 runtime = self._trainer.runtime if self._trainer is not None else None
@@ -466,6 +503,8 @@ class BackendSession:
                 if (self.status not in ('READY', 'STOPPED', 'FAILED') or self.alive()
                         or (self._stop_worker is not None and self._stop_worker.is_alive())):
                     raise ValueError('Backend still active')
+                if not self.synchronization_state()['cleanup_confirmed']:
+                    raise ValueError('Backend cleanup is still finishing')
                 if name == 'scene.load':
                     candidate = self._load(args.get('scene', args.get('scene_path')))
                     candidate = configured_scene(candidate, args.get('scene_overrides', {}))
@@ -521,24 +560,37 @@ class BackendSession:
             pass
 
     def stop(self, timeout_seconds=120):
-        if timeout_seconds < 0: raise ValueError('Stop timeout must be nonnegative')
+        try:
+            valid_timeout = (type(timeout_seconds) in (int, float) and math.isfinite(timeout_seconds)
+                             and 0 <= timeout_seconds <= threading.TIMEOUT_MAX)
+        except OverflowError:
+            valid_timeout = False
+        if not valid_timeout:
+            raise ValueError('Stop timeout must be finite, nonnegative and within threading.TIMEOUT_MAX')
         with self._condition:
             if self._stop_worker is not None and self._stop_worker.is_alive(): return
+            if self.status in {'STARTING', 'RUNNING', 'PAUSED', 'DRAINING'}:
+                error = self._backend_error()
+                if error:
+                    self._fail(error)
             if not self.alive():
-                self._collect_progress(final=True)
                 if self.status == 'FAILED':
                     self.synchronization_state()
                     return
                 if self.status in ('STARTING', 'RUNNING', 'PAUSED'):
                     self.lifecycle('DRAINING')
                 if self.status == 'DRAINING': self.lifecycle('STOPPED')
+                else: self.synchronization_state()
                 return
             self._stopping = True
             self._condition.notify_all()
             if self.status != 'FAILED': self.lifecycle('DRAINING')
             def drain():
                 try:
-                    if self._trainer is not None: self._trainer.stop(timeout=timeout_seconds)
+                    if self._trainer is not None:
+                        self._trainer.stop(timeout=timeout_seconds)
+                        if self._trainer.error:
+                            self._fail(self._trainer.error)
                     if self._process is not None:
                         # Formal ownership includes identified children in independent groups.
                         self._signal_process_group(signal.SIGINT)
@@ -550,14 +602,12 @@ class BackendSession:
                                 self._signal_process_group(signal.SIGKILL)
                                 stopped = self._wait_until_stopped(self.kill_grace_seconds)
                             if stopped:
-                                with self._condition: self._collect_progress(final=True)
-                                self.lifecycle('FAILED', 'Stop timeout: formal backend was force terminated')
+                                self._fail('Stop timeout: formal backend was force terminated')
                                 return
                     if self.alive():
-                        self.lifecycle('FAILED', 'Stop timeout: backend cleanup unconfirmed; restart blocked')
+                        self._fail('Stop timeout: backend cleanup unconfirmed; restart blocked')
                     else:
-                        with self._condition: self._collect_progress(final=True)
                         self.lifecycle('FAILED' if self.status == 'FAILED' else 'STOPPED')
-                except Exception as exc: self.lifecycle('FAILED', 'Cleanup failed: ' + str(exc))
+                except Exception as exc: self._fail('Cleanup failed: ' + (str(exc) or type(exc).__name__))
             self._stop_worker = threading.Thread(target=drain, name='wfrl-bridge-drain', daemon=True)
             self._stop_worker.start()
