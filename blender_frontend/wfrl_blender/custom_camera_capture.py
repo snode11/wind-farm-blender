@@ -37,6 +37,8 @@ def progress():
     if not active():
         return ''
     job = _ACTIVE
+    if getattr(job, '_finish_result', None) is not None:
+        return '正在结束图像写入…'
     total = len(job.times)
     text = f'已完成 {job.index}/{total} 组'
     if job.in_group:
@@ -190,6 +192,16 @@ def readonly_frame_handlers():
 
 
 class Capture:
+    @property
+    def closed(self):
+        if getattr(self, '_finish_result', None) is not None:
+            self._publish_finish()
+        return self._closed
+
+    @closed.setter
+    def closed(self, value):
+        self._closed = value
+
     def __init__(self, context, directory, times=None):
         global _ACTIVE
         from .panels.custom_cameras import session_identity, installation_block_reason, _ACTIVE as controller
@@ -394,6 +406,8 @@ class Capture:
     def step(self, context):
         if self.closed:
             return True
+        if getattr(self, '_finish_result', None) is not None:
+            return False
         if self.cancel_requested and not self.in_group:
             self.finish()
             return True
@@ -471,7 +485,7 @@ class Capture:
     def _poll_write(self):
         self.guard()
         writer = self._writer
-        if not writer.done.is_set():
+        if writer.thread.is_alive():
             return False
         self._writer = None
         records, self._pending_records = self._pending_records, None
@@ -496,8 +510,7 @@ class Capture:
         return False
 
     def finish(self,success=False,error='',restore=True):
-        global _ACTIVE
-        if self.closed:return
+        if self.closed or getattr(self, '_finish_result', None) is not None:return
         same=self.same_session()
         try:
             if success and self._writer is not None:
@@ -527,38 +540,48 @@ class Capture:
         finally:
             if self._writer is not None:
                 self._writer.cancel()
-                self._writer = self._pending_records = None
             self.in_group = False
             if self.render_target is not None:
                 self.render_target.free()
                 self.manifest['gpu_target_usage'] = self.render_target.usage()
-            self.closed=True
-            if self.cancel_requested:
-                self.cancel_stopped_at = time.perf_counter()
-                diagnostics.record('cancel_stopped', completed=self.index)
-                self.manifest['cancel_accepted_at'] = self.cancel_accepted_at
-                self.manifest['cancel_stopped_at'] = self.cancel_stopped_at
-                self.manifest['cancel_accept_to_stop_s'] = self.cancel_stopped_at - self.cancel_accepted_at
             if getattr(self,'ui_operator',None):
                 self.ui_operator.remove_timer()
-            if _ACTIVE is self:_ACTIVE=None
-            self.error=error or ('用户取消：已停止' if self.cancel_requested else '')
-            self.manifest['status']='complete' if success and same else 'incomplete'
-            self.manifest['error']=self.error or (None if success else 'cancelled / invalid session')
-            write_json(self.path/'manifest.json',self.manifest)
-            if same:
-                from .home_state import TaskStatus
-                stage = 'SUCCEEDED' if success else 'CANCELLED' if self.cancel_requested and not error else 'FAILED'
-                try:
-                    key, name = self.scene.as_pointer(), self.scene.name
-                except (AttributeError, ReferenceError):
-                    pass
-                else:
-                    _TERMINALS[key] = (self.scene, TaskStatus(
-                        'capture', False, True, stage, name, error, output=str(self.path)))
-                    _TERMINALS.move_to_end(key)
-                    while len(_TERMINALS) > 8:
-                        _TERMINALS.popitem(last=False)
+            self.error=error
+            self._finish_result = success, same, error
+            self._publish_finish()
+
+    def _publish_finish(self):
+        global _ACTIVE
+        if self._writer is not None and self._writer.thread.is_alive():
+            return
+        success, same, error = self._finish_result
+        self._finish_result = None
+        self._writer = self._pending_records = None
+        self.closed = True
+        if self.cancel_requested:
+            self.cancel_stopped_at = time.perf_counter()
+            diagnostics.record('cancel_stopped', completed=self.index)
+            self.manifest['cancel_accepted_at'] = self.cancel_accepted_at
+            self.manifest['cancel_stopped_at'] = self.cancel_stopped_at
+            self.manifest['cancel_accept_to_stop_s'] = self.cancel_stopped_at - self.cancel_accepted_at
+        if _ACTIVE is self:_ACTIVE=None
+        self.error=error or ('用户取消：已停止' if self.cancel_requested else '')
+        self.manifest['status']='complete' if success and same else 'incomplete'
+        self.manifest['error']=self.error or (None if success else 'cancelled / invalid session')
+        write_json(self.path/'manifest.json',self.manifest)
+        if same and self.same_session():
+            from .home_state import TaskStatus
+            stage = 'SUCCEEDED' if success else 'CANCELLED' if self.cancel_requested and not error else 'FAILED'
+            try:
+                key, name = self.scene.as_pointer(), self.scene.name
+            except (AttributeError, ReferenceError):
+                pass
+            else:
+                _TERMINALS[key] = (self.scene, TaskStatus(
+                    'capture', False, True, stage, name, error, output=str(self.path)))
+                _TERMINALS.move_to_end(key)
+                while len(_TERMINALS) > 8:
+                    _TERMINALS.popitem(last=False)
 
 
 def shutdown(restore=True):
@@ -581,5 +604,6 @@ def status_for(scene):
                 _TERMINALS.pop(scene.as_pointer(), None)
         return TaskStatus('capture')
     return TaskStatus('capture', True, job.scene == scene,
+                      'FINALIZING' if getattr(job, '_finish_result', None) is not None else
                       'CANCELLING' if job.cancel_requested else 'CAPTURING',
                       job.scene.name, getattr(job, 'error', ''), progress(), str(job.path))

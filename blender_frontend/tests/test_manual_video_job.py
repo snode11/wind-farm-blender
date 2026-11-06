@@ -1,5 +1,6 @@
 """Isolated job supervision and master recovery using non-media placeholder bytes."""
 import csv
+from contextlib import ExitStack
 import importlib
 import importlib.util
 import json
@@ -16,6 +17,8 @@ import unittest
 from unittest.mock import patch
 import uuid
 
+import psutil
+
 from blender_frontend.tests._platform import symlink_or_skip, write_python_tool
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -31,6 +34,40 @@ from wfrl.camera_video import media
 requires_supervision = unittest.skipUnless(
     os.name == 'posix' and all(hasattr(os, key) for key in ('waitid', 'WNOWAIT', 'P_PID')),
     'Process supervision requires POSIX waitid(WNOWAIT) support')
+WAIT_TIMEOUT = 60
+IDLE_WORKER = 'import threading; threading.Event().wait()\n'
+
+
+def job_diagnostics(path):
+    details = []
+    for name in ('status.json', 'worker-status.json', 'process.json', 'process.log', 'supervisor.log'):
+        file = path.parent / name
+        if file.exists():
+            details.append(f'{name}: {file.read_text(encoding="utf-8", errors="replace")[-4000:]}')
+    return '\n'.join(details)
+
+
+def wait_condition(path, predicate, description):
+    deadline = time.monotonic() + WAIT_TIMEOUT
+    while True:
+        result = predicate()
+        if result:
+            return result
+        if time.monotonic() >= deadline:
+            raise AssertionError(f'{description}\n{job_diagnostics(path)}')
+        threading.Event().wait(.02)
+
+
+def wait_job(path):
+    try:
+        return jobs.wait(path, timeout=WAIT_TIMEOUT)
+    except TimeoutError as exc:
+        raise AssertionError(f'Video job did not finish\n{job_diagnostics(path)}') from exc
+
+
+def assert_stopped(process):
+    assert not process.is_running() or process.status() == psutil.STATUS_ZOMBIE, (
+        f'Owned child is still running: pid={process.pid}')
 
 
 def make_job(root):
@@ -291,10 +328,10 @@ elif '-show_entries' in args:
         (self.root / 'fail-encode.fixture').touch()
         command = [sys.executable, '-B', str(ROOT / 'scripts/blender/manage_manual_video.py'),
                    'retry', '--job', str(self.path)]
-        failed = subprocess.run(command, capture_output=True, text=True, timeout=15)
+        failed = subprocess.run(command, capture_output=True, text=True, timeout=WAIT_TIMEOUT * 2)
         self.assertEqual(failed.returncode, 1, failed.stderr)
         self.assertEqual(jobs.query(self.path)['state'], 'FAILED')
-        recovered = subprocess.run(command, capture_output=True, text=True, timeout=15)
+        recovered = subprocess.run(command, capture_output=True, text=True, timeout=WAIT_TIMEOUT * 2)
         self.assertEqual(recovered.returncode, 0, recovered.stderr + recovered.stdout)
         self.assertEqual(jobs.query(self.path)['state'], 'COMPLETE')
         self.assertEqual(before, {p.name: media.sha256(p) for p in (self.root / 'master_frames').iterdir()})
@@ -376,6 +413,257 @@ elif '-show_entries' in args:
         self.assertFalse(Path(self.job['output_mp4']).exists())
 
 
+@unittest.skipUnless(os.name == 'posix', 'Lease requires POSIX flock')
+class SupervisorFinalizationTests(unittest.TestCase):
+    def setUp(self):
+        self.enterContext(patch.object(jobs, 'require_supervision'))
+        self.temp = tempfile.TemporaryDirectory(prefix='manual-finalization-test-')
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name).resolve()
+        self.path, self.job = make_job(self.root)
+
+    def supervise(self, *, state='FAILED', error=None, after_release=None, after_finish=None):
+        attempt = uuid.uuid4().hex
+        status = self.root / 'status.json'
+        output = jobs.output_lock(self.job['output_mp4'])
+        supervision = self.root / 'supervision.lock'
+        jobs.write_json(status, dict(job_id=self.job['job_id'], attempt_id=attempt,
+                                    state='PREPARING', active=True, final=False))
+        services, observed, released, handlers = [], [], [], {}
+        write_json, close = jobs.write_json, os.close
+
+        def thread(**kwargs):
+            worker = threading.Thread(**kwargs)
+            if kwargs['target'].__name__ == 'serve':
+                services.append(worker)
+            return worker
+
+        def spawn(command, **kwargs):
+            if command == ['worker']:
+                if error is not None:
+                    raise error
+                if state == 'CANCELLED':
+                    handlers[jobs.signal.SIGTERM]()
+            return types.SimpleNamespace(pid=12345, wait=lambda: 0)
+
+        def publish(path, record):
+            write_json(path, record)
+            if path == status and record.get('final') and not observed:
+                observed.append(jobs.read_json(status))
+                # Retry at the exact publication boundary, before the writer can continue.
+                with jobs.Lease(output, self.job['job_id']), jobs.Lease(supervision, self.job['job_id']):
+                    self.assertTrue(services)
+                    self.assertFalse(any(worker.is_alive() for worker in services))
+
+        with ExitStack() as stack:
+            leases = [stack.enter_context(jobs.Lease(lock, self.job['job_id']))
+                      for lock in (output, supervision)]
+            output_fd, supervision_fd = [lease.fd for lease in leases]
+            # The launcher's inherited copies may outlive the supervisor's own descriptors.
+            for lease in leases:
+                stack.callback(close, os.dup(lease.fd))
+
+            def release(fd):
+                close(fd)
+                if fd not in (output_fd, supervision_fd) or fd in released:
+                    return
+                leases[0 if fd == output_fd else 1].fd = None
+                released.append(fd)
+                if observed:
+                    return
+                current = jobs.read_json(status)
+                self.assertFalse(current['active'])
+                self.assertFalse(current['final'])
+                self.assertFalse(any(worker.is_alive() for worker in services))
+                if fd == output_fd:
+                    with jobs.Lease(output, 'another job'):
+                        self.assertFalse(jobs._saved_status(self.path, self.job)['active'])
+                        self.assertFalse(jobs.read_json(status)['active'])
+                    if after_release is not None:
+                        after_release()
+
+            renderer = types.SimpleNamespace(cleanup_publication=lambda path: None,
+                       delivery_result=lambda path: {'state': 'COMPLETE'} if state == 'COMPLETE' else None)
+            stack.enter_context(patch.object(jobs, 'os', types.SimpleNamespace(**{**vars(os), 'close': release})))
+            stack.enter_context(patch.object(jobs, 'threading', types.SimpleNamespace(
+                **{**vars(threading), 'Thread': thread})))
+            stack.enter_context(patch.object(jobs.signal, 'signal', side_effect=lambda sig, fn: handlers.update({sig: fn})))
+            stack.enter_context(patch.object(jobs.subprocess, 'Popen', side_effect=spawn))
+            stack.enter_context(patch.object(jobs, '_exited', return_value=True))
+            stack.enter_context(patch.object(jobs, '_stop_group', return_value=0))
+            stack.enter_context(patch.object(jobs, '_sibling', return_value=renderer))
+            stack.enter_context(patch.object(jobs, 'write_json', side_effect=publish))
+            if after_finish is not None:
+                stack.callback(after_finish)
+            if error is None:
+                jobs.supervise(self.path, attempt, output_fd, supervision_fd, ['worker'])
+            else:
+                with self.assertRaises(type(error)) as caught:
+                    jobs.supervise(self.path, attempt, output_fd, supervision_fd, ['worker'])
+                self.assertIs(caught.exception, error)
+        self.assertEqual(released, [supervision_fd, output_fd])
+        self.assertEqual(len(observed), 1)
+        self.assertEqual(observed[0]['state'], state)
+        self.assertFalse(observed[0]['active'])
+        return observed[0]
+
+    def test_final_status_allows_immediate_retry_with_real_locks(self):
+        for state in ('FAILED', 'COMPLETE', 'CANCELLED'):
+            with self.subTest(state=state):
+                self.supervise(state=state)
+
+    def test_base_exception_final_status_allows_immediate_retry_with_real_locks(self):
+        record = self.supervise(error=KeyboardInterrupt('interrupted supervisor'))
+        self.assertEqual(record['error'], 'KeyboardInterrupt: interrupted supervisor')
+
+    def test_spawn_failure_final_status_allows_immediate_retry_with_real_locks(self):
+        import fcntl
+        for supplied_lease in (False, True):
+            with self.subTest(supplied_lease=supplied_lease), ExitStack() as stack:
+                status = self.root / 'status.json'
+                output = jobs.output_lock(self.job['output_mp4'])
+                supervision = self.root / 'supervision.lock'
+                lease = stack.enter_context(jobs.Lease(output, self.job['job_id'])) if supplied_lease else None
+                failure = OSError('simulated unavailable interpreter')
+                logs, observed, retried, errors = [], [], [], []
+                retry_thread = None
+                entering_publication = threading.Event()
+                write_json, flock = jobs.write_json, fcntl.flock
+
+                def spawn(command, **kwargs):
+                    logs.append(kwargs['stdout'])
+                    if len(logs) == 1:
+                        raise failure
+                    return types.SimpleNamespace(wait=lambda: 0)
+
+                def track_flock(fd, operation):
+                    if threading.current_thread() is retry_thread and operation == fcntl.LOCK_EX:
+                        entering_publication.set()
+                    return flock(fd, operation)
+
+                def retry():
+                    try:
+                        jobs.start(self.path, command=['retry'], preflight_check=lambda path: None)
+                        retried.append(jobs.read_json(status))
+                    except BaseException as exc:
+                        errors.append(exc)
+
+                def publish(path, record):
+                    nonlocal retry_thread
+                    write_json(path, record)
+                    if path == status and record.get('final'):
+                        observed.append(jobs.read_json(status))
+                        self.assertTrue(logs[0].closed, 'Supervisor log is still open at final status')
+                        # Probe both real leases before the failed start can continue its cleanup.
+                        with jobs.Lease(output, self.job['job_id']), jobs.Lease(supervision, self.job['job_id']):
+                            self.assertTrue(jobs.lease_busy(self.root / 'status.lock'))
+                        retry_thread = threading.Thread(target=retry)
+                        retry_thread.start()
+                        self.assertTrue(entering_publication.wait(WAIT_TIMEOUT),
+                                        'Retry did not enter the status handoff')
+
+                stack.enter_context(patch.object(jobs.subprocess, 'Popen', side_effect=spawn))
+                stack.enter_context(patch.object(fcntl, 'flock', side_effect=track_flock))
+                stack.enter_context(patch.object(jobs, 'write_json', side_effect=publish))
+                stack.enter_context(patch.object(jobs, '_rpc', side_effect=lambda *args: jobs.read_json(status)))
+                stack.enter_context(patch.object(jobs.time, 'sleep', side_effect=AssertionError('No retry sleeps')))
+                try:
+                    with self.assertRaises(OSError) as caught:
+                        jobs.start(self.path, lease=lease, command=['worker'], preflight_check=lambda path: None)
+                    self.assertIs(caught.exception, failure)
+                finally:
+                    if retry_thread is not None:
+                        retry_thread.join(WAIT_TIMEOUT)
+                        self.assertFalse(retry_thread.is_alive(), 'Retry did not finish the status handoff')
+                self.assertEqual(errors, [])
+                self.assertEqual(len(observed), 1)
+                self.assertEqual(observed[0]['state'], 'FAILED')
+                self.assertFalse(observed[0]['active'])
+                self.assertIn(str(failure), observed[0]['error'])
+                self.assertEqual(len(retried), 1)
+                self.assertNotEqual(retried[0]['attempt_id'], observed[0]['attempt_id'])
+                self.assertEqual(retried[0]['state'], 'PREPARING')
+                self.assertFalse(retried[0]['final'])
+                self.assertEqual(jobs.read_json(status), retried[0])
+                self.assertEqual(len(logs), 2)
+                self.assertTrue(all(log.closed for log in logs))
+                if lease is not None:
+                    self.assertIsNone(lease.fd)
+
+    def test_retry_during_release_cannot_overwrite_or_be_overwritten_by_final_status(self):
+        import fcntl
+        entering_publication = threading.Event()
+        retried, errors = [], []
+        retry_thread = None
+        flock = fcntl.flock
+
+        def track_flock(fd, operation):
+            if threading.current_thread() is retry_thread and operation == fcntl.LOCK_EX:
+                entering_publication.set()
+            return flock(fd, operation)
+
+        def retry():
+            try:
+                jobs.start(self.path, command=['retry'], preflight_check=lambda path: None)
+                retried.append(jobs.read_json(self.root / 'status.json'))
+            except BaseException as exc:
+                errors.append(exc)
+
+        def after_release():
+            nonlocal retry_thread
+            retry_thread = threading.Thread(target=retry)
+            retry_thread.start()
+            self.assertTrue(entering_publication.wait(WAIT_TIMEOUT), 'Retry did not enter the status handoff')
+
+        def after_finish():
+            if retry_thread is not None:
+                retry_thread.join(WAIT_TIMEOUT)
+                self.assertFalse(retry_thread.is_alive(), 'Retry did not finish the status handoff')
+
+        with patch.object(fcntl, 'flock', side_effect=track_flock), \
+             patch.object(jobs, '_rpc', side_effect=lambda *args: jobs.read_json(self.root / 'status.json')):
+            old = self.supervise(after_release=after_release, after_finish=after_finish)
+        self.assertEqual(errors, [])
+        self.assertEqual(len(retried), 1)
+        self.assertNotEqual(retried[0]['attempt_id'], old['attempt_id'])
+        self.assertEqual(retried[0]['state'], 'PREPARING')
+        self.assertFalse(retried[0]['final'])
+
+    def test_query_during_release_waits_for_final_status_instead_of_reporting_lost(self):
+        import fcntl
+        entering_publication = threading.Event()
+        queried, errors = [], []
+        reader = None
+        flock = fcntl.flock
+
+        def track_flock(fd, operation):
+            if threading.current_thread() is reader and operation == fcntl.LOCK_SH:
+                entering_publication.set()
+            return flock(fd, operation)
+
+        def query():
+            try:
+                queried.append(jobs.query(self.path))
+            except BaseException as exc:
+                errors.append(exc)
+
+        def after_release():
+            nonlocal reader
+            reader = threading.Thread(target=query)
+            reader.start()
+            self.assertTrue(entering_publication.wait(WAIT_TIMEOUT), 'Query did not enter the status handoff')
+
+        def after_finish():
+            if reader is not None:
+                reader.join(WAIT_TIMEOUT)
+                self.assertFalse(reader.is_alive(), 'Query did not finish the status handoff')
+
+        with patch.object(fcntl, 'flock', side_effect=track_flock):
+            final = self.supervise(after_release=after_release, after_finish=after_finish)
+        self.assertEqual(errors, [])
+        self.assertEqual(queried, [final])
+
+
 @requires_supervision
 class SupervisionTests(unittest.TestCase):
     def setUp(self):
@@ -392,44 +680,45 @@ class SupervisionTests(unittest.TestCase):
 
     def start(self, body):
         script = self.root / 'worker.fixture.py'
-        script.write_text(body)
+        script.write_text(body, encoding='utf-8')
         jobs.start(self.path, command=[sys.executable, '-B', str(script)])
+        self.ready('process.json')
 
     def ready(self, name='ready'):
-        deadline = time.monotonic() + 8
-        while not (self.root / name).exists():
-            if time.monotonic() > deadline:
-                self.fail('isolated worker did not become ready')
-            time.sleep(.02)
+        wait_condition(self.path, lambda: (self.root / name).exists(),
+                       f'Isolated worker did not publish {name}')
 
     def test_fresh_controller_recovers_and_cancels_all_children(self):
         child = self.root / 'child.fixture.py'
-        child.write_text("import signal,time,os\nfrom pathlib import Path\n"
+        child.write_text("import signal,threading,os\nfrom pathlib import Path\n"
                          "signal.signal(signal.SIGTERM,signal.SIG_IGN)\n"
-                         f"p=Path({str(self.root / 'heartbeat')!r})\n"
-                         "while True:\n p.write_text(str(time.monotonic()));time.sleep(.02)\n")
-        self.start("import subprocess,sys,time,signal\nfrom pathlib import Path\n"
+                         f"p=Path({str(self.root / 'child.pid')!r})\n"
+                         "temporary=p.with_suffix('.tmp')\n"
+                         "temporary.write_text(str(os.getpid()), encoding='ascii');temporary.replace(p)\n"
+                         "threading.Event().wait()\n", encoding='utf-8')
+        self.start("import subprocess,sys,threading,signal\nfrom pathlib import Path\n"
                    "signal.signal(signal.SIGTERM,signal.SIG_IGN)\n"
                    f"subprocess.Popen([sys.executable,'-B',{str(child)!r}])\n"
-                   f"Path({str(self.root / 'ready')!r}).touch()\nwhile True:time.sleep(.1)\n")
-        self.ready('heartbeat')
+                   f"Path({str(self.root / 'ready')!r}).touch()\nthreading.Event().wait()\n")
+        self.ready('child.pid')
+        child_process = psutil.Process(int((self.root / 'child.pid').read_text(encoding='ascii')))
         process_record = jobs.read_json(self.root / 'process.json')
         process_record['pid'] = os.getpid()
         jobs.write_json(self.root / 'process.json', process_record)
         command = [sys.executable, '-B', str(ROOT / 'scripts/blender/manage_manual_video.py')]
-        record = subprocess.run(command + ['status', '--job', str(self.path)], capture_output=True, text=True, check=True)
+        record = subprocess.run(command + ['status', '--job', str(self.path)], capture_output=True,
+                                text=True, check=True, timeout=WAIT_TIMEOUT)
         self.assertTrue(json.loads(record.stdout)['active'])
-        result = subprocess.run(command + ['cancel', '--job', str(self.path)], capture_output=True, text=True)
+        result = subprocess.run(command + ['cancel', '--job', str(self.path)], capture_output=True,
+                                text=True, timeout=WAIT_TIMEOUT)
         self.assertEqual(result.returncode, 130, result.stderr)
         self.assertEqual(json.loads(result.stdout)['state'], 'CANCELLED')
-        content = (self.root / 'heartbeat').read_bytes()
-        time.sleep(.1)
-        self.assertEqual(content, (self.root / 'heartbeat').read_bytes())
+        assert_stopped(child_process)
         self.assertFalse(jobs.query(self.path)['active'])
         self.assertEqual(jobs.cancel(self.path)['state'], 'CANCELLED')
 
     def test_same_output_is_exclusively_reserved_across_jobs(self):
-        self.start('import time\ntime.sleep(20)\n')
+        self.start(IDLE_WORKER)
         other_path, other = make_job(self.root / 'other')
         other['output_mp4'] = self.job['output_mp4']
         jobs.write_json(other_path, other)
@@ -439,30 +728,28 @@ class SupervisionTests(unittest.TestCase):
 
     def test_process_exit_without_completion_is_failure_and_cli_wait_fails(self):
         self.start('raise SystemExit(7)\n')
-        result = jobs.wait(self.path, timeout=10)
+        result = wait_job(self.path)
         self.assertEqual(result['state'], 'FAILED')
         self.assertEqual(result['exit_code'], 7)
         proc = subprocess.run([sys.executable, '-B', str(ROOT / 'scripts/blender/manage_manual_video.py'),
-                               'wait', '--job', str(self.path)], capture_output=True, text=True)
+                               'wait', '--job', str(self.path)], capture_output=True, text=True,
+                              timeout=WAIT_TIMEOUT)
         self.assertEqual(proc.returncode, 1, proc.stderr)
 
     def test_cancel_after_failed_root_exit_does_not_relabel_failure(self):
         self.start('raise SystemExit(7)\n')
-        deadline = time.monotonic() + 5
-        while time.monotonic() < deadline:
-            record = jobs.query(self.path)
-            if record['state'] in {'FINALIZING', 'FAILED'}:
-                break
-            time.sleep(.01)
+        wait_condition(self.path, lambda: jobs.query(self.path)['state'] in {'FINALIZING', 'FAILED'},
+                       'Root failure was not observed before cancel')
         self.assertEqual(jobs.cancel(self.path)['state'], 'FAILED')
 
     def test_verified_complete_job_and_cancel_exit_race_keep_success(self):
-        self.start("import os,json,time,hashlib\nfrom pathlib import Path\n"
+        self.start("import os,json,threading,hashlib\nfrom pathlib import Path\n"
                    f"root=Path({str(self.root)!r})\njob=json.loads((root/'job.json').read_text())\n"
                    "(root/'output.mp4').write_bytes(b'NON-MEDIA success placeholder')\n"
                    "record=dict(job_id=job['job_id'],attempt_id=os.environ['WFRL_MANUAL_ATTEMPT'],state='COMPLETE',"
                    "video_sha256=hashlib.sha256((root/'output.mp4').read_bytes()).hexdigest())\n"
-                   "(root/'worker-status.json').write_text(json.dumps(record))\n(root/'ready').touch()\ntime.sleep(.4)\n")
+                   "(root/'worker-status.json').write_text(json.dumps(record), encoding='utf-8')\n"
+                   "(root/'ready').touch()\nthreading.Event().wait()\n")
         self.ready()
         result = jobs.cancel(self.path)
         self.assertEqual(result['state'], 'COMPLETE')
@@ -473,7 +760,7 @@ class SupervisionTests(unittest.TestCase):
 
     def test_cancel_after_verified_commit_before_worker_status_preserves_completion(self):
         make_master(self.path, self.job)
-        self.start("import os,json,time,hashlib\nfrom pathlib import Path\n"
+        self.start("import os,json,threading,hashlib\nfrom pathlib import Path\n"
                    "from wfrl.camera_video.publication import publish\n"
                    f"root=Path({str(self.root)!r})\njob=json.loads((root/'job.json').read_text())\n"
                    "video=root/'video.mp4'\nvideo.write_bytes(b'NON-MEDIA committed placeholder')\n"
@@ -488,7 +775,7 @@ class SupervisionTests(unittest.TestCase):
                    "publish(video,Path(job['output_mp4']),on_stage=receipt)\n"
                    "(root/'worker-status.json').write_text(json.dumps(dict(job_id=job['job_id'],"
                    "attempt_id=os.environ['WFRL_MANUAL_ATTEMPT'],state='PUBLISHING')))\n"
-                   "(root/'ready').touch()\ntime.sleep(20)\n")
+                   "(root/'ready').touch()\nthreading.Event().wait()\n")
         self.ready()
         self.assertEqual(jobs.cancel(self.path)['state'], 'COMPLETE')
 
@@ -500,7 +787,7 @@ class SupervisionTests(unittest.TestCase):
         self.assertFalse(jobs.query(self.path)['active'])
 
     def test_unreachable_or_wrong_authenticated_endpoint_is_lost_without_signals(self):
-        self.start('import time\ntime.sleep(20)\n')
+        self.start(IDLE_WORKER)
         real_rpc = jobs._rpc
         with patch.object(jobs, '_rpc', side_effect=ConnectionRefusedError), \
              patch.object(os, 'killpg', side_effect=AssertionError('client must never signal a saved PID')):
@@ -544,7 +831,8 @@ class SupervisionTests(unittest.TestCase):
             thread.start()
             with self.assertRaises(ValueError):
                 jobs._rpc(self.path, self.job, 'cancel')
-            thread.join(timeout=2)
+            thread.join(timeout=WAIT_TIMEOUT)
+            self.assertFalse(thread.is_alive(), 'Impersonating endpoint did not finish its response')
 
     def test_output_aliases_share_a_lease(self):
         alias = self.root / 'alias'
@@ -554,39 +842,51 @@ class SupervisionTests(unittest.TestCase):
 
     def test_codec_lease_survives_an_abrupt_render_parent_exit(self):
         child = self.root / 'codec.fixture.py'
+        release = self.root / 'release-codec'
         child.write_text("import time\nfrom pathlib import Path\n"
-                         f"Path({str(self.root / 'ready')!r}).touch()\ntime.sleep(.7)\n")
+                         f"Path({str(self.root / 'ready')!r}).touch()\n"
+                         f"release=Path({str(release)!r})\n"
+                         "while not release.exists():time.sleep(.01)\n", encoding='utf-8')
         parent = self.root / 'render.fixture.py'
         parent.write_text("import os,sys,threading,time\nfrom pathlib import Path\n"
                           "from wfrl.camera_video.media import _run\n"
                           f"threading.Thread(target=_run,args=([sys.executable,'-B',{str(child)!r}],),daemon=True).start()\n"
                           f"p=Path({str(self.root / 'ready')!r})\n"
-                          "while not p.exists():time.sleep(.01)\nos._exit(0)\n")
-        with jobs.Lease(jobs.output_lock(self.job['output_mp4']), self.job['job_id']) as lease:
-            environment = dict(os.environ, WFRL_MANUAL_OUTPUT_FD=str(lease.fd), WFRL_MANUAL_ATTEMPT='fixture')
-            process = subprocess.Popen([sys.executable, '-B', str(parent)], env=environment, pass_fds=(lease.fd,))
-            process.wait(timeout=5)
-        self.assertTrue(jobs.query(self.path)['active'])
-        deadline = time.monotonic() + 5
-        while jobs.query(self.path)['active'] and time.monotonic() < deadline:
-            time.sleep(.02)
-        self.assertFalse(jobs.query(self.path)['active'])
+                          "while not p.exists():time.sleep(.01)\nos._exit(0)\n", encoding='utf-8')
+        process = None
+        try:
+            with jobs.Lease(jobs.output_lock(self.job['output_mp4']), self.job['job_id']) as lease:
+                environment = dict(os.environ, WFRL_MANUAL_OUTPUT_FD=str(lease.fd), WFRL_MANUAL_ATTEMPT='fixture')
+                process = subprocess.Popen([sys.executable, '-B', str(parent)], env=environment, pass_fds=(lease.fd,))
+                process.wait(timeout=WAIT_TIMEOUT)
+            self.assertTrue(jobs.query(self.path)['active'])
+        finally:
+            release.touch()
+            if process is not None:
+                if process.poll() is None:
+                    process.kill()
+                process.wait(timeout=WAIT_TIMEOUT)
+            wait_condition(self.path, lambda: not jobs.query(self.path)['active'],
+                           'Codec did not release the inherited output lease')
 
     def test_exited_root_still_cleans_lingering_children_before_reaping(self):
         child = self.root / 'child.fixture.py'
-        child.write_text("import signal,time\nfrom pathlib import Path\n"
+        child.write_text("import signal,threading,os\nfrom pathlib import Path\n"
                          "signal.signal(signal.SIGTERM,signal.SIG_IGN)\n"
-                         f"p=Path({str(self.root / 'heartbeat')!r})\n"
-                         "while True:\n p.write_text(str(time.monotonic()));time.sleep(.02)\n")
+                         f"p=Path({str(self.root / 'child.pid')!r})\n"
+                         "temporary=p.with_suffix('.tmp')\n"
+                         "temporary.write_text(str(os.getpid()), encoding='ascii');temporary.replace(p)\n"
+                         "threading.Event().wait()\n", encoding='utf-8')
         self.start("import subprocess,sys,time\nfrom pathlib import Path\n"
                    f"subprocess.Popen([sys.executable,'-B',{str(child)!r}])\n"
-                   f"p=Path({str(self.root / 'heartbeat')!r})\n"
+                   f"p=Path({str(self.root / 'release-root')!r})\n"
                    "while not p.exists():time.sleep(.01)\n")
-        result = jobs.wait(self.path, timeout=10)
+        self.ready('child.pid')
+        child_process = psutil.Process(int((self.root / 'child.pid').read_text(encoding='ascii')))
+        (self.root / 'release-root').touch()
+        result = wait_job(self.path)
         self.assertEqual(result['state'], 'FAILED')
-        content = (self.root / 'heartbeat').read_bytes()
-        time.sleep(.1)
-        self.assertEqual(content, (self.root / 'heartbeat').read_bytes())
+        assert_stopped(child_process)
 
     @unittest.skipUnless(os.name == 'posix', 'Lease requires POSIX flock')
     def test_empty_lock_file_can_be_claimed_under_exclusive_flock(self):
@@ -660,19 +960,22 @@ class SceneRecoveryTests(unittest.TestCase):
         if jobs.lease_busy(self.root / 'supervision.lock'):
             jobs.cancel(self.path)
         for worker in cancellations:
-            worker.join(3)
+            worker.join(WAIT_TIMEOUT)
+            self.assertFalse(worker.is_alive(), f'Cancel worker did not exit\n{job_diagnostics(self.path)}')
         self.temp.cleanup()
 
     def wait_final_status(self):
         queries = self.ui._QUERIES
         with queries._condition:
             self.assertTrue(queries._condition.wait_for(
-                lambda: bool((queries.snapshot(str(self.path))[0] or {}).get('final')), timeout=5))
+                lambda: bool((queries.snapshot(str(self.path))[0] or {}).get('final')), timeout=WAIT_TIMEOUT),
+                f'Scene query did not reach a final status: {queries.snapshot(str(self.path))!r}\n'
+                f'{job_diagnostics(self.path)}')
         self.ui._poll()
         return self.ui.status(self.scene)
 
     def test_fresh_scene_controller_restores_supervision_and_cancel(self):
-        jobs.start(self.path, command=[sys.executable, '-B', '-c', 'import time;time.sleep(20)'])
+        jobs.start(self.path, command=[sys.executable, '-B', '-c', IDLE_WORKER])
         self.assertFalse(self.ui._JOBS)
         self.assertFalse(self.ui._SCENE_JOBS)
         self.ui._after_load(None)
@@ -685,7 +988,7 @@ class SceneRecoveryTests(unittest.TestCase):
         self.assertEqual(self.wait_final_status()['state'], 'CANCELLED')
 
     def test_terminal_status_does_not_reactivate_poll_tracking(self):
-        jobs.start(self.path, command=[sys.executable, '-B', '-c', 'import time;time.sleep(20)'])
+        jobs.start(self.path, command=[sys.executable, '-B', '-c', IDLE_WORKER])
         self.ui._after_load(None)
         self.ui.cancel(self.scene)
         self.assertEqual(self.wait_final_status()['state'], 'CANCELLED')
@@ -693,11 +996,11 @@ class SceneRecoveryTests(unittest.TestCase):
 
     def test_external_new_attempt_can_be_cancelled_after_a_cached_failure(self):
         jobs.start(self.path, command=[sys.executable, '-B', '-c', 'raise SystemExit(9)'])
-        self.assertEqual(jobs.wait(self.path, timeout=5)['state'], 'FAILED')
+        self.assertEqual(wait_job(self.path)['state'], 'FAILED')
         self.ui._after_load(None)
         old = self.wait_final_status()
         self.assertEqual(old['state'], 'FAILED')
-        jobs.start(self.path, command=[sys.executable, '-B', '-c', 'import time;time.sleep(20)'])
+        jobs.start(self.path, command=[sys.executable, '-B', '-c', IDLE_WORKER])
         current = jobs.query(self.path)
         self.assertTrue(current['active'])
         self.assertNotEqual(current['attempt_id'], old['attempt_id'])

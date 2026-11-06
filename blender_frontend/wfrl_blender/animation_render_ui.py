@@ -37,12 +37,33 @@ def _poll():
     return .25 if service.job.active else None
 
 
+def _recover(scene):
+    global _SOURCE_SCENE, _LAST_DISPLAY
+    import bpy
+    if service.job.active or scene is _SOURCE_SCENE:
+        return
+    directory = scene.get('wfrl_animation_render_directory')
+    if directory and service.job.recover(directory):
+        _SOURCE_SCENE, _LAST_DISPLAY = scene, None
+        _publish()
+        if service.job.active and not bpy.app.timers.is_registered(_poll):
+            bpy.app.timers.register(_poll, first_interval=.1)
+
+
+def restore(_unused=None):
+    import bpy
+    scene = bpy.context.scene
+    if scene is not None:
+        _recover(scene)
+
+
 def start(context, directory):
     global _SOURCE_SCENE, _LAST_DISPLAY
     import bpy
     scene = context.scene
     if scene.camera is None:
         raise ValueError('请先选择用于渲染的场景相机')
+    _recover(scene)
     if service.job.active:
         raise ValueError('已有动画正在后台渲染，请等待完成或取消')
     service.validate_output_nodes(scene)
@@ -65,6 +86,8 @@ def start(context, directory):
     except Exception:
         if service.job.directory != previous_directory:
             _SOURCE_SCENE, _LAST_DISPLAY = scene, None
+            if service.job.active and not bpy.app.timers.is_registered(_poll):
+                bpy.app.timers.register(_poll, first_interval=.1)
             _publish()
         raise
     _SOURCE_SCENE, _LAST_DISPLAY = scene, None
@@ -120,24 +143,33 @@ def close(_unused=None):
     global _SOURCE_SCENE
     import bpy
     service.job.close()
-    _publish()
-    _SOURCE_SCENE = None
     if bpy.app.timers.is_registered(_poll):
         bpy.app.timers.unregister(_poll)
+    _publish()
+    _SOURCE_SCENE = None
 
 
 def register():
     import bpy
     from bpy.app.handlers import persistent
     persistent(close)
+    persistent(restore)
     for handlers in (bpy.app.handlers.load_pre, bpy.app.handlers.undo_pre, bpy.app.handlers.redo_pre):
         if close not in handlers:
             handlers.append(close)
+    if restore not in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.append(restore)
+    if not bpy.app.timers.is_registered(restore):
+        bpy.app.timers.register(restore, first_interval=.1)
 
 
 def unregister():
     import bpy
     close()
+    if bpy.app.timers.is_registered(restore):
+        bpy.app.timers.unregister(restore)
+    if restore in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.remove(restore)
     for handlers in (bpy.app.handlers.load_pre, bpy.app.handlers.undo_pre, bpy.app.handlers.redo_pre):
         if close in handlers:
             handlers.remove(close)

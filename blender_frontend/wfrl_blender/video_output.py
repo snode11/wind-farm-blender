@@ -82,10 +82,29 @@ class Stream:
         self.message = 'RTSP 未启动'
         self.url = ''
         self._stop_thread = None
+        self._stop_result = None
+
+    def _settle_stop(self):
+        if self._stop_result is not None and (
+                self._stop_thread is None or not self._stop_thread.is_alive()):
+            self._state, self.message = self._stop_result
+            self._stop_result = None
+
+    @property
+    def state(self):
+        self._settle_stop()
+        return self._state
+
+    @state.setter
+    def state(self, value):
+        self._state = value
 
     @property
     def active(self):
-        return self.state == 'STOPPING' or self.server is not None or self.publisher is not None
+        self._settle_stop()
+        return (self._state == 'STOPPING'
+                or (self._stop_thread is not None and self._stop_thread.is_alive())
+                or self.server is not None or self.publisher is not None)
 
     def start(self, video, ffmpeg='', mediamtx='', port=8554, lan=False):
         if self.active:
@@ -169,13 +188,13 @@ class Stream:
             if not processes:
                 break
         if processes:
-            self.state, self.message = 'ERROR', error + ' RTSP 进程未退出，仍保留进程控制。'
+            self._stop_result = 'ERROR', error + ' RTSP 进程未退出，仍保留进程控制。'
             return
         try:
             self._release()
         except OSError as exc:
             error = f'{error} RTSP 临时文件清理失败：{exc}'.strip()
-        self.state, self.message = ('ERROR', error) if error else ('STOPPED', 'RTSP 已停止')
+        self._stop_result = ('ERROR', error) if error else ('STOPPED', 'RTSP 已停止')
 
     def _release(self):
         for log in self.logs:
@@ -193,6 +212,7 @@ class Stream:
             self._stop_thread.join(timeout=4.1)
         elif self.active:
             self._stop_processes('')
+        self._settle_stop()
 
 
 def _commit_export(source, destination):
@@ -233,15 +253,36 @@ class Export:
         self._source_identity = None
         self._staging = None
         self._exit_janitor = None
+        self._result = None
 
     @staticmethod
     def _identity(stat):
         identity = stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns
         return identity if os.name == 'nt' else (*identity, stat.st_ctime_ns)
 
+    def _workers_active(self):
+        return any(worker is not None and worker.is_alive()
+                   for worker in (self.thread, self._exit_janitor))
+
+    def _settle(self):
+        with self._state_lock:
+            if self._result is not None and not self._workers_active():
+                self._state, self.message, self.error, self.output_path = self._result
+                self._result = None
+
+    @property
+    def state(self):
+        self._settle()
+        return self._state
+
+    @state.setter
+    def state(self, value):
+        self._state = value
+
     @property
     def active(self):
-        return self.thread is not None and self.thread.is_alive()
+        self._settle()
+        return self._workers_active()
 
     def start(self, video, output):
         if self.active:
@@ -332,7 +373,7 @@ class Export:
                     terminal, error = 'FAILED', f'暂存清理失败：{exc}'
                     message = error
             with self._state_lock:
-                self.state, self.message, self.error, self.output_path = terminal, message, error, output
+                self._result = terminal, message, error, output
             if stage is not None:
                 stage['ready'].set()
 
@@ -372,17 +413,17 @@ class Export:
     def stop(self, timeout=.05):
         with self._state_lock:
             worker = self.thread
-            if self.active and self.state == 'RUNNING':
+            if self._workers_active() and self._state == 'RUNNING':
                 self.cancelled.set()
                 self.state, self.message = 'CANCELLING', '取消已请求，等待文件 I/O 结束'
         if worker is not None:
             worker.join(timeout=max(0., timeout))
-        return worker is None or not worker.is_alive()
+        return not self.active
 
     def close(self):
         self.stop(timeout=0)
         with self._state_lock:
-            if self.state != 'CANCELLING' or self._exit_janitor is None:
+            if self._state != 'CANCELLING' or self._exit_janitor is None:
                 return
             self._staging['exit'] = True
             self._staging['ready'].set()
@@ -390,8 +431,9 @@ class Export:
         janitor.join(timeout=.2)
 
     def status(self):
+        self._settle()
         with self._state_lock:
-            return (self.state, self.active, self.done_bytes, self.total_bytes,
+            return (self._state, self._workers_active(), self.done_bytes, self.total_bytes,
                     self.error, self.output_path, self.message)
 
 

@@ -41,7 +41,7 @@ try:
     else:
         raise AssertionError('Animation completed without restoring its standalone replay')
     manifest = json.loads((OUT / 'manifest.json').read_text())
-    assert manifest['state'] == 'FAILED'
+    assert manifest['state'] == 'FAILING'
     assert manifest['completed_frames'] == 0
     assert not (OUT / 'frames').exists()
     result = dict(status='PASS', source=str(ROOT / 'blender_frontend/wfrl_blender'),

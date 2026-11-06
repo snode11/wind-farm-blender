@@ -1,6 +1,7 @@
 """Render a frozen scene in an independent Blender process."""
 import importlib.util
 import json
+import os
 from pathlib import Path
 import sys
 import traceback
@@ -24,7 +25,8 @@ def run(job_path):
     from importlib import import_module
     service = import_module(spec.name + '.animation_render')
     record = dict(schema='wfrl.animation-render.v1', job_id=job['job_id'], state='RUNNING',
-                  completed_frames=0, total_frames=job['total_frames'])
+                  completed_frames=0, total_frames=job['total_frames'], worker_pid=os.getpid(),
+                  worker_identity=service._pid_identity(os.getpid()))
     manifest = root / 'manifest.json'
     written = {}
     try:
@@ -101,10 +103,10 @@ def run(job_path):
                 bpy.app.handlers.render_write.remove(frame_written)
         if result != {'FINISHED'} or len(written) != len(frames):
             raise RuntimeError('动画渲染未完成全部声明帧')
-        record.update(state='COMPLETE', frames=[written[frame] for frame in frames])
+        record.update(state='RENDERED', frames=[written[frame] for frame in frames])
         service.write_json(manifest, record)
     except Exception as exc:
-        record.update(state='FAILED', error=f'{type(exc).__name__}: {exc}')
+        record.update(state='FAILING', error=f'{type(exc).__name__}: {exc}')
         service.write_json(manifest, record)
         raise
 

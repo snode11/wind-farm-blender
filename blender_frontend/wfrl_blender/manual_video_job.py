@@ -52,7 +52,7 @@ def output_lock(value):
 
 class Lease:
     """An advisory lease whose inode stays in place across owners and restarts."""
-    def __init__(self, path, owner):
+    def __init__(self, path, owner, *, blocking=False):
         require_supervision()
         import fcntl
         self.path, self.fd = Path(path), None
@@ -67,7 +67,7 @@ class Lease:
             if not stat.S_ISREG(os.fstat(fd).st_mode):
                 raise ValueError(f'不是普通作业锁文件：{self.path}')
             try:
-                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl.flock(fd, fcntl.LOCK_EX | (0 if blocking else fcntl.LOCK_NB))
             except BlockingIOError as exc:
                 raise ValueError(f'已有作业占用：{self.path}') from exc
             existing = os.read(fd, 65536)
@@ -94,6 +94,15 @@ class Lease:
 
     def __exit__(self, *unused):
         self.close()
+
+
+def _release_inherited_lease(fd):
+    """Release the shared lease even if the launching controller still has a copy."""
+    import fcntl
+    try:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+    finally:
+        os.close(fd)
 
 
 def lease_busy(path, *, owner=None):
@@ -169,23 +178,41 @@ def query(job_path):
     try:
         return _rpc(path, job, 'status')
     except (OSError, ValueError, KeyError):
-        try:
-            record = read_json(path.parent / 'status.json')
-        except (OSError, ValueError):
-            record = {}
-        if not isinstance(record, dict):
-            record = {}
-        if record.get('job_id') == job['job_id'] and record.get('final') and record.get('state') in TERMINAL:
-            return dict(record, active=False)
-        busy = False
-        error = '无法联系已验证的监管进程；运行状态未知，不能安全按 PID 取消'
+        descriptor = None
         if os.name == 'posix':
-            busy = lease_busy(path.parent / 'supervision.lock', owner=job['job_id']) or lease_busy(
-                output_lock(job['output_mp4']), owner=job['job_id'])
-        else:
-            error = '当前平台不支持冻结视频监管；无法联系已验证的监管进程，作业状态未知'
-        return dict(record, state='LOST', job_id=job['job_id'], active=busy, final=False,
-                    error=error)
+            import fcntl
+            try:
+                descriptor = os.open(path.parent / 'status.lock', os.O_RDONLY | os.O_NOFOLLOW)
+            except FileNotFoundError:
+                pass
+        try:
+            if descriptor is not None:
+                # A stopped endpoint can be handing off its terminal status, rather than lost.
+                fcntl.flock(descriptor, fcntl.LOCK_SH)
+            return _saved_status(path, job)
+        finally:
+            if descriptor is not None:
+                os.close(descriptor)
+
+
+def _saved_status(path, job):
+    try:
+        record = read_json(path.parent / 'status.json')
+    except (OSError, ValueError):
+        record = {}
+    if not isinstance(record, dict):
+        record = {}
+    if record.get('job_id') == job['job_id'] and record.get('final') and record.get('state') in TERMINAL:
+        return dict(record, active=False)
+    busy = False
+    error = '无法联系已验证的监管进程；运行状态未知，不能安全按 PID 取消'
+    if os.name == 'posix':
+        busy = lease_busy(path.parent / 'supervision.lock', owner=job['job_id']) or lease_busy(
+            output_lock(job['output_mp4']), owner=job['job_id'])
+    else:
+        error = '当前平台不支持冻结视频监管；无法联系已验证的监管进程，作业状态未知'
+    return dict(record, state='LOST', job_id=job['job_id'], active=busy, final=False,
+                error=error)
 
 
 def wait(job_path, *, timeout=None):
@@ -234,14 +261,15 @@ def start(job_path, *, python=None, lease=None, retry=False, command=None, prefl
     """Start an independently queryable supervisor; inherited leases close startup gaps."""
     require_supervision()
     path, job = load_job(job_path)
-    if query(path).get('state') == 'COMPLETE':
-        raise ValueError('已成功的作业不会重新执行或改写状态')
+    publication = Lease(path.parent / 'status.lock', job['job_id'], blocking=True)
     own_lease = lease is None
-    lease = lease or Lease(output_lock(job['output_mp4']), job['job_id'])
     supervision = None
     try:
+        if _saved_status(path, job).get('state') == 'COMPLETE':
+            raise ValueError('已成功的作业不会重新执行或改写状态')
+        lease = lease or Lease(output_lock(job['output_mp4']), job['job_id'])
         supervision = Lease(path.parent / 'supervision.lock', job['job_id'])
-        if query(path).get('state') == 'COMPLETE':
+        if _saved_status(path, job).get('state') == 'COMPLETE':
             raise ValueError('已成功的作业不会重新执行或改写状态')
         if retry:
             _sibling('manual_video_render').validate_master(path)
@@ -268,9 +296,12 @@ def start(job_path, *, python=None, lease=None, retry=False, command=None, prefl
                 process = subprocess.Popen(argv, stdout=log, stderr=subprocess.STDOUT, env=environment,
                                            pass_fds=(lease.fd, supervision.fd), start_new_session=True)
         except OSError as exc:
+            supervision.close()
+            lease.close()
             write_json(path.parent / 'status.json', dict(job_id=job['job_id'], attempt_id=attempt,
                        state='FAILED', final=True, active=False, error=f'无法启动监管进程：{exc}'))
             raise
+        publication.close()
         threading.Thread(target=process.wait, daemon=True).start()
         deadline = time.monotonic() + 10
         while time.monotonic() < deadline:
@@ -288,8 +319,9 @@ def start(job_path, *, python=None, lease=None, retry=False, command=None, prefl
     finally:
         if supervision is not None:
             supervision.close()
-        if own_lease:
+        if own_lease and lease is not None:
             lease.close()
+        publication.close()
 
 
 def _exited(process):
@@ -331,6 +363,8 @@ def supervise(path, attempt, output_fd, supervision_fd, command):
     lifecycle_lock = threading.Lock()
     stop_server = threading.Event()
     serving = None
+    server = None
+    terminal_ready = False
 
     def request_cancel(*unused):
         nonlocal cancelled
@@ -340,107 +374,121 @@ def supervise(path, attempt, output_fd, supervision_fd, command):
     signal.signal(signal.SIGINT, request_cancel)
     signal.signal(signal.SIGCHLD, signal.SIG_DFL)
     try:
-        with socket.socket() as server:
-            server.bind(('127.0.0.1', 0))
-            server.listen(8)
-            server.settimeout(.1)
-            write_json(path.parent / 'control.json', dict(job_id=job['job_id'], attempt_id=attempt,
-                       port=server.getsockname()[1], supervisor_pid=os.getpid()))
+        server = socket.socket()
+        server.bind(('127.0.0.1', 0))
+        server.listen(8)
+        server.settimeout(.1)
+        write_json(path.parent / 'control.json', dict(job_id=job['job_id'], attempt_id=attempt,
+                   port=server.getsockname()[1], supervisor_pid=os.getpid()))
 
-            def serve():
-                nonlocal cancelled
-                while not stop_server.is_set():
-                    try:
-                        connection, address = server.accept()
-                    except socket.timeout:
-                        continue
-                    except OSError:
-                        return
-                    with connection:
-                        connection.settimeout(.5)
-                        try:
-                            with connection.makefile('rb') as handle:
-                                request = json.loads(handle.readline(4096))
-                            if not isinstance(request, dict) or request.get('action') not in {'status', 'cancel'}:
-                                continue
-                            signature = request.pop('signature', '')
-                            if (request.get('job_id') != job['job_id'] or request.get('attempt_id') != attempt
-                                    or not hmac.compare_digest(signature, _signature(job, request))):
-                                continue
-                            if request.get('action') == 'cancel':
-                                with lifecycle_lock:
-                                    if accepting_cancel and (process is None or not _exited(process)):
-                                        cancelled = True
-                            response = dict(record, request_nonce=request['nonce'])
-                            response['signature'] = _signature(job, response)
-                            connection.sendall(json.dumps(response).encode() + b'\n')
-                        except (OSError, ValueError, KeyError, TypeError):
-                            continue
-
-            serving = threading.Thread(target=serve, daemon=True)
-            serving.start()
-            environment = dict(os.environ, PYTHONDONTWRITEBYTECODE='1',
-                               WFRL_MANUAL_ATTEMPT=attempt, WFRL_MANUAL_OUTPUT_FD=str(output_fd))
-            environment['BLENDER_USER_CONFIG'] = str(path.parent / 'blender_config')
-            with (path.parent / 'process.log').open('ab') as log:
-                process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, env=environment,
-                                           pass_fds=(output_fd,), start_new_session=True)
-            write_json(path.parent / 'process.json', dict(job_id=job['job_id'], attempt_id=attempt,
-                       pid=process.pid, supervisor_pid=os.getpid(), command=command))
-            while True:
+        def serve():
+            nonlocal cancelled
+            while not stop_server.is_set():
                 try:
-                    progress = read_json(path.parent / 'worker-status.json')
-                    if progress.get('attempt_id') == attempt and progress.get('job_id') == job['job_id']:
-                        record.update(progress)
-                except (OSError, ValueError):
-                    pass
-                record.update(active=True, final=False)
-                with lifecycle_lock:
-                    if _exited(process) or cancelled:
-                        accepting_cancel = False
-                        break
-                write_json(path.parent / 'status.json', record)
-                time.sleep(.05)
-            record['state'] = 'CANCELLING' if cancelled else 'FINALIZING'
-            code = _stop_group(process)
-            process = None
+                    connection, address = server.accept()
+                except socket.timeout:
+                    continue
+                except OSError:
+                    return
+                with connection:
+                    connection.settimeout(.5)
+                    try:
+                        with connection.makefile('rb') as handle:
+                            request = json.loads(handle.readline(4096))
+                        if not isinstance(request, dict) or request.get('action') not in {'status', 'cancel'}:
+                            continue
+                        signature = request.pop('signature', '')
+                        if (request.get('job_id') != job['job_id'] or request.get('attempt_id') != attempt
+                                or not hmac.compare_digest(signature, _signature(job, request))):
+                            continue
+                        if request.get('action') == 'cancel':
+                            with lifecycle_lock:
+                                if accepting_cancel and (process is None or not _exited(process)):
+                                    cancelled = True
+                        response = dict(record, request_nonce=request['nonce'])
+                        response['signature'] = _signature(job, response)
+                        connection.sendall(json.dumps(response).encode() + b'\n')
+                    except (OSError, ValueError, KeyError, TypeError):
+                        continue
+
+        serving = threading.Thread(target=serve, daemon=True)
+        serving.start()
+        environment = dict(os.environ, PYTHONDONTWRITEBYTECODE='1',
+                           WFRL_MANUAL_ATTEMPT=attempt, WFRL_MANUAL_OUTPUT_FD=str(output_fd))
+        environment['BLENDER_USER_CONFIG'] = str(path.parent / 'blender_config')
+        with (path.parent / 'process.log').open('ab') as log:
+            process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, env=environment,
+                                       pass_fds=(output_fd,), start_new_session=True)
+        write_json(path.parent / 'process.json', dict(job_id=job['job_id'], attempt_id=attempt,
+                   pid=process.pid, supervisor_pid=os.getpid(), command=command))
+        while True:
             try:
                 progress = read_json(path.parent / 'worker-status.json')
                 if progress.get('attempt_id') == attempt and progress.get('job_id') == job['job_id']:
                     record.update(progress)
             except (OSError, ValueError):
                 pass
-            renderer = _sibling('manual_video_render')
-            renderer.cleanup_publication(path)
-            from wfrl.camera_video.media import sha256
-            output = Path(job['output_mp4'])
-            committed = (record.get('state') == 'COMPLETE' and not output.is_symlink() and output.is_file()
-                         and sha256(output) == record.get('video_sha256'))
-            delivery = renderer.delivery_result(path)
-            if delivery:
-                record.update(delivery)
-            if delivery or (committed and (code == 0 or cancelled)):
-                record['state'] = 'COMPLETE'
-                record.pop('error', None)
-            elif cancelled:
-                record['state'] = 'CANCELLED'
-            else:
-                record.update(state='FAILED', error=record.get('error') or
-                              f'导出进程退出（{code}），未确认完整交付；详情见 process.log')
-            record.update(exit_code=code, active=False, final=True)
+            record.update(active=True, final=False)
+            with lifecycle_lock:
+                if _exited(process) or cancelled:
+                    accepting_cancel = False
+                    break
             write_json(path.parent / 'status.json', record)
+            time.sleep(.05)
+        record['state'] = 'CANCELLING' if cancelled else 'FINALIZING'
+        code = _stop_group(process)
+        process = None
+        try:
+            progress = read_json(path.parent / 'worker-status.json')
+            if progress.get('attempt_id') == attempt and progress.get('job_id') == job['job_id']:
+                record.update(progress)
+        except (OSError, ValueError):
+            pass
+        renderer = _sibling('manual_video_render')
+        renderer.cleanup_publication(path)
+        from wfrl.camera_video.media import sha256
+        output = Path(job['output_mp4'])
+        committed = (record.get('state') == 'COMPLETE' and not output.is_symlink() and output.is_file()
+                     and sha256(output) == record.get('video_sha256'))
+        delivery = renderer.delivery_result(path)
+        if delivery:
+            record.update(delivery)
+        if delivery or (committed and (code == 0 or cancelled)):
+            record['state'] = 'COMPLETE'
+            record.pop('error', None)
+        elif cancelled:
+            record['state'] = 'CANCELLED'
+        else:
+            record.update(state='FAILED', error=record.get('error') or
+                          f'导出进程退出（{code}），未确认完整交付；详情见 process.log')
+        record['exit_code'] = code
+        terminal_ready = True
     except BaseException as exc:
         if process is not None:
             _stop_group(process)
-        record.update(state='FAILED', error=f'{type(exc).__name__}: {exc}', active=False, final=True)
-        write_json(path.parent / 'status.json', record)
+        record.update(state='FAILED', error=f'{type(exc).__name__}: {exc}')
+        terminal_ready = True
         raise
     finally:
-        stop_server.set()
-        if serving is not None:
-            serving.join(timeout=1)
-        os.close(output_fd)
-        os.close(supervision_fd)
+        # Serialize the handoff with start() so an older result cannot replace a new attempt.
+        with Lease(path.parent / 'status.lock', job['job_id'], blocking=True):
+            try:
+                stop_server.set()
+                if server is not None:
+                    server.close()
+                if serving is not None and serving.ident is not None:
+                    serving.join()
+                # Withdraw activity while both leases still belong to this attempt.
+                record.update(active=False, final=False)
+                write_json(path.parent / 'status.json', record)
+            finally:
+                try:
+                    _release_inherited_lease(supervision_fd)
+                finally:
+                    _release_inherited_lease(output_fd)
+            if terminal_ready:
+                record['final'] = True
+                write_json(path.parent / 'status.json', record)
 
 
 def main(argv=None):

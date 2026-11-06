@@ -4,7 +4,6 @@ import importlib.util
 import json
 import sys
 import threading
-import time
 from types import SimpleNamespace as NS
 import pytest
 from PIL import Image
@@ -12,6 +11,8 @@ from wfrl_blender import custom_camera_capture as capture
 from wfrl_blender import custom_camera_preview as preview
 from wfrl_blender import custom_cameras as core
 from wfrl_blender.custom_camera_capture import write_png,write_json
+
+WAIT_TIMEOUT = 60
 
 
 def _flattened_data(image):
@@ -38,7 +39,7 @@ def test_manifest_rejects_nan_and_preserves_committed_version(tmp_path):
     target=tmp_path/'manifest.json'
     write_json(target,{'status':'incomplete'})
     with pytest.raises(ValueError):write_json(target,{'time_s':float('nan')})
-    assert json.loads(target.read_text())=={'status':'incomplete'}
+    assert json.loads(target.read_text(encoding='utf-8'))=={'status':'incomplete'}
 
 
 @pytest.mark.parametrize('sequence', [False, True])
@@ -74,10 +75,15 @@ def test_capture_step_requests_pixels_without_texture_and_exports_state(tmp_path
     monkeypatch.setattr(preview, 'render_group', render)
     assert job.step(context) is False
     assert len(guards) == (3 if sequence else 2)
-    deadline = time.monotonic() + 5
-    while not job.step(context):
-        assert time.monotonic() < deadline, 'PNG capture did not complete'
-        threading.Event().wait(.001)
+    writer = job._writer
+    try:
+        assert writer.done.wait(WAIT_TIMEOUT), f'PNG capture did not complete: {writer.error!r}'
+        writer.thread.join(WAIT_TIMEOUT)
+        assert not writer.thread.is_alive()
+        assert job.step(context)
+    finally:
+        writer.thread.join(WAIT_TIMEOUT)
+        assert not writer.thread.is_alive(), f'PNG worker did not exit: {writer.error!r}'
     assert calls == [(context, job.cameras, {'target': job.render_target, 'create_texture': False})]
     assert finishes == [{'success': True}] and not job.in_group
     assert evaluations == ([(76, 0., 1.25)] if sequence else [])
@@ -85,12 +91,12 @@ def test_capture_step_requests_pixels_without_texture_and_exports_state(tmp_path
     with Image.open(tmp_path/'C3/frame_000000.png') as png:
         assert list(_flattened_data(png)) == [(255, 0, 0, 255), (0, 255, 0, 255),
                                        (0, 0, 255, 255), (17, 91, 143, 128)]
-    record = json.loads((tmp_path/'frames.jsonl').read_text())
+    record = json.loads((tmp_path/'frames.jsonl').read_text(encoding='utf-8'))
     assert record['simulation_state_hash'] == 'geometry-state'
     assert record['camera_id'] == 'C3' and record['time_s'] == 1.25
     assert record['T_world_from_camera_blender'] == [list(row) for row in matrix]
     assert record['color_management'] == {'gamma': 1}
-    assert json.loads((tmp_path/'manifest.json').read_text())['completed_samples'] == 1
+    assert json.loads((tmp_path/'manifest.json').read_text(encoding='utf-8'))['completed_samples'] == 1
 
 
 @pytest.mark.parametrize('termination', ['success', 'cancel', 'exception', 'invalid_session'])
@@ -125,7 +131,7 @@ def test_capture_closes_gpu_resources_for_every_termination(tmp_path, terminatio
     else:
         job.finish(success=termination == 'success')
     assert job.closed and not capture.active() and freed == [True]
-    manifest = json.loads((tmp_path/'manifest.json').read_text())
+    manifest = json.loads((tmp_path/'manifest.json').read_text(encoding='utf-8'))
     assert manifest['gpu_target_usage']['active_targets'] == 0
     assert manifest['gpu_target_usage']['releases'] == 1
     assert manifest['status'] == ('complete' if termination == 'success' else 'incomplete')
@@ -243,7 +249,7 @@ def test_user_cancel_has_its_own_terminal_state(clock_capture, monkeypatch, rest
     assert job.closed and not capture.active()
     assert status.stage == ('FAILED' if restore_failure else 'CANCELLED')
     assert bool(status.error) == restore_failure
-    assert json.loads((job.path / 'manifest.json').read_text())['status'] == 'incomplete'
+    assert json.loads((job.path / 'manifest.json').read_text(encoding='utf-8'))['status'] == 'incomplete'
 
 
 @pytest.mark.parametrize('playing', [False, True])
@@ -361,7 +367,7 @@ def test_sequence_render_ownership_change_keeps_completed_frames_and_user_select
     job.finish(error='采集上下文已变化')
     assert (job.window.scene, job.window.view_layer, tuple(job.scene.view_layers)) == selection
     assert calls == [] and job.closed and not capture.active()
-    assert committed.read_text() == '{"sample_index": 0}\n'
+    assert committed.read_text(encoding='utf-8') == '{"sample_index": 0}\n'
     assert job.manifest['completed_samples'] == 1 and job.manifest['status'] == 'incomplete'
 
 
@@ -415,7 +421,7 @@ def test_sequence_discards_images_when_rendering_changes_context_or_mapping(laye
         job.step(context)
     assert calls == [('evaluate', 61, 0., 1.)]
     assert image.rgba() is None and job._writer is None
-    assert committed.read_text() == '{"sample_index": 0}\n'
+    assert committed.read_text(encoding='utf-8') == '{"sample_index": 0}\n'
     assert not (job.path / 'C1/frame_000001.png').exists()
     assert job.manifest['completed_samples'] == 1 and job.manifest['status'] == 'incomplete'
     assert job.closed and not capture.active()
@@ -525,7 +531,7 @@ def test_pending_png_yields_and_never_commits_an_invalid_group(clock_capture, mo
     def blocked_write(*args):
         assert threading.current_thread() is not threading.main_thread()
         entered.set()
-        assert release.wait(3), 'PNG worker was not released'
+        assert release.wait(WAIT_TIMEOUT * 2), 'PNG worker was not released'
         if intervention == 'write_failure':
             raise OSError('injected PNG disk failure')
         original_write(*args)
@@ -535,7 +541,7 @@ def test_pending_png_yields_and_never_commits_an_invalid_group(clock_capture, mo
     job._writer, job._pending_records = writer, [{'camera_id': 'C1', 'sample_index': 1}]
     job.in_group = True
     try:
-        assert entered.wait(1)
+        assert entered.wait(WAIT_TIMEOUT), f'PNG worker did not enter write: {writer.error!r}'
         assert job.step(None) is False
         assert job.index == 1 and not (job.path / 'frames.jsonl').exists()
         if intervention == 'cancel':
@@ -554,9 +560,11 @@ def test_pending_png_yields_and_never_commits_an_invalid_group(clock_capture, mo
             assert job.scene.frame_current == (20 if intervention == 'seek' else 10) and calls == []
         elif intervention == 'shutdown':
             capture.shutdown(restore=False)
-            assert job.closed and writer.cancelled.is_set() and calls == []
+            assert not job.closed and capture.active() and writer.cancelled.is_set() and calls == []
         release.set()
-        assert writer.done.wait(3)
+        assert writer.done.wait(WAIT_TIMEOUT), f'PNG worker did not finish: {writer.error!r}'
+        writer.thread.join(WAIT_TIMEOUT)
+        assert not writer.thread.is_alive()
         if intervention == 'write_failure':
             with pytest.raises(OSError, match='PNG disk failure'):
                 job.step(None)
@@ -564,7 +572,7 @@ def test_pending_png_yields_and_never_commits_an_invalid_group(clock_capture, mo
             assert job.step(None)
             assert calls == [('play', False), ('evaluate', 1, .5, .5), ('play', True)]
         assert job.closed and not capture.active()
-        manifest = json.loads((job.path / 'manifest.json').read_text())
+        manifest = json.loads((job.path / 'manifest.json').read_text(encoding='utf-8'))
         assert manifest['status'] == 'incomplete'
         assert job.index == (2 if intervention == 'cancel' else 1)
         if intervention == 'cancel':
@@ -575,8 +583,8 @@ def test_pending_png_yields_and_never_commits_an_invalid_group(clock_capture, mo
             assert not (job.path / 'frames.jsonl').exists()
     finally:
         release.set()
-        writer.thread.join(3)
-        assert not writer.thread.is_alive()
+        writer.thread.join(WAIT_TIMEOUT)
+        assert not writer.thread.is_alive(), f'PNG worker did not exit: {writer.error!r}'
 
 
 def test_capture_checkpoints_keep_complete_index_and_exact_terminal_count(clock_capture):
@@ -588,15 +596,16 @@ def test_capture_checkpoints_keep_complete_index_and_exact_terminal_count(clock_
     ready.set()
     disk_counts = []
     for index in range(len(job.times)):
-        job._writer = NS(done=ready, error=None, cancelled=threading.Event())
+        job._writer = NS(done=ready, error=None, cancelled=threading.Event(),
+                         thread=NS(is_alive=lambda: False))
         job._pending_records = [{'sample_index': index}]
         job.in_group = True
         job.step(None)
-        disk_counts.append(json.loads((job.path / 'manifest.json').read_text())['completed_samples'])
+        disk_counts.append(json.loads((job.path / 'manifest.json').read_text(encoding='utf-8'))['completed_samples'])
     assert disk_counts == [1, 2, 2, 4, 5]
     assert job.manifest['status'] == 'complete'
     assert [json.loads(line)['sample_index'] for line in
-            (job.path / 'frames.jsonl').read_text().splitlines()] == list(range(5))
+            (job.path / 'frames.jsonl').read_text(encoding='utf-8').splitlines()] == list(range(5))
 
 
 def test_unfinished_png_cannot_be_published_as_a_complete_capture(clock_capture, monkeypatch):
@@ -605,19 +614,20 @@ def test_unfinished_png_cannot_be_published_as_a_complete_capture(clock_capture,
 
     def blocked_write(*_args):
         entered.set()
-        assert release.wait(3)
+        assert release.wait(WAIT_TIMEOUT * 2), 'PNG worker was not released'
 
     monkeypatch.setattr(capture, 'write_png', blocked_write)
     writer = capture.ImageWriter([(job.path / 'C1/frame_000001.png', 1, 1, bytes(4))])
     job._writer, job._pending_records, job.in_group = writer, [], True
     try:
-        assert entered.wait(1)
+        assert entered.wait(WAIT_TIMEOUT), f'PNG worker did not enter write: {writer.error!r}'
         job.finish(success=True)
         assert job.manifest['status'] == 'incomplete'
         assert '写入' in job.error
     finally:
         release.set()
-        writer.thread.join(3)
+        writer.thread.join(WAIT_TIMEOUT)
+        assert not writer.thread.is_alive(), f'PNG worker did not exit: {writer.error!r}'
 
 
 @pytest.mark.parametrize('already_closed', [False, True])
@@ -658,5 +668,61 @@ def test_capture_operator_reports_the_committed_transaction_result(clock_capture
     assert result == ({'CANCELLED'} if restore_failure else {'FINISHED'})
     assert reports and reports[-1][0] == ({'ERROR'} if restore_failure else {'INFO'})
     assert ('injected restore failure' in reports[-1][1]) is restore_failure
-    assert json.loads((job.path / 'manifest.json').read_text())['status'] == (
+    assert json.loads((job.path / 'manifest.json').read_text(encoding='utf-8'))['status'] == (
         'incomplete' if restore_failure else 'complete')
+
+
+@pytest.mark.parametrize('termination', ['success', 'write_failure', 'cancel', 'error', 'shutdown'])
+def test_capture_terminal_waits_for_png_thread_exit(clock_capture, monkeypatch, termination):
+    job, _calls, _generation = clock_capture
+    job.scene.name = 'capture-owner'
+    job.scene.as_pointer = lambda: id(job.scene)
+    job.index = len(job.times) - 1
+    monkeypatch.setattr(capture, '_TERMINALS', capture.OrderedDict())
+    entered, release = threading.Event(), threading.Event()
+    original_write = capture.ImageWriter._write
+
+    def held_write(writer):
+        original_write(writer)
+        entered.set()
+        assert release.wait(WAIT_TIMEOUT), 'PNG thread exit was not released'
+
+    if termination == 'write_failure':
+        def fail_write(*args):
+            raise OSError('injected PNG failure')
+        monkeypatch.setattr(capture, 'write_png', fail_write)
+    monkeypatch.setattr(capture.ImageWriter, '_write', held_write)
+    target = job.path / 'C1/frame_000002.png'
+    writer = capture.ImageWriter([(target, 1, 1, bytes(4))])
+    job._writer, job._pending_records, job.in_group = writer, [{'sample_index': 2}], True
+    try:
+        assert entered.wait(WAIT_TIMEOUT)
+        assert writer.done.is_set() and writer.thread.is_alive()
+        if termination == 'error':
+            job.finish(error='invalid capture')
+        elif termination == 'shutdown':
+            capture.shutdown(restore=False)
+        else:
+            if termination == 'cancel':
+                job.request_cancel()
+            assert job.step(None) is False
+        assert not job.closed and capture.active()
+        status = capture.status_for(job.scene)
+        assert status.active and status.stage not in {'SUCCEEDED', 'FAILED', 'CANCELLED'}
+        assert job.manifest['status'] == 'incomplete'
+    finally:
+        release.set()
+        writer.thread.join(WAIT_TIMEOUT)
+        assert not writer.thread.is_alive()
+    if termination == 'write_failure':
+        with pytest.raises(OSError, match='injected PNG failure'):
+            job.step(None)
+    elif termination in {'success', 'cancel'}:
+        assert job.step(None)
+    assert job.closed and not capture.active()
+    status = capture.status_for(job.scene)
+    assert not status.active
+    assert status.stage == ('SUCCEEDED' if termination == 'success' else
+                            'CANCELLED' if termination == 'cancel' else 'FAILED')
+    saved = json.loads((job.path / 'manifest.json').read_text(encoding='utf-8'))
+    assert saved['status'] == ('complete' if termination == 'success' else 'incomplete')
