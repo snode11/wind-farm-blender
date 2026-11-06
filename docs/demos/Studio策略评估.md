@@ -6,7 +6,7 @@ Studio 的 `--replay` 加载 checkpoint，以确定性动作 `dist.mean` 推进�
 
 实现为 `wfrl/studio/trainer.py:_replay_policy()`，命令行入口为 `wfrl/studio/app.py`。运行前核对场景、机组顺序、checkpoint 的 `obs_keys`、`obs_dim`、`act_dim`、控制量及训练归一化统计。相同确定性动作选择不自动保证与另一脚本的场景、控制器、预热、约束、采样和统计窗口完全一致。
 
-`stagE400ref` checkpoint、原 rollout 和训练历史当前缺失。保留的 level/E128 权重属于另一配置；不能用它补作原实验的收益证据。[固定来流实验](../training/WAKE_STEERING_BREAKTHROUGH.md)说明报告值与复现限制。新运行的耗时、偏航角和功率以实际输出为准。
+`stagE400ref` 的 seed 0 最终 checkpoint、迭代权重、原 rollout 和训练历史均可从本地提交 `d6979f49` 恢复；seed 1 权重仍未找到。文件可恢复不表示运行目录已具备它们，也不补足匹配零偏航基线或跨种子验证。保留的 level/E128 权重属于另一配置，不能补作原实验的收益证据。[固定来流实验](../training/WAKE_STEERING_BREAKTHROUGH.md)提供恢复入口、报告值与复现限制。新运行的耗时、偏航角和功率以实际输出为准。
 
 ## 命令模板
 

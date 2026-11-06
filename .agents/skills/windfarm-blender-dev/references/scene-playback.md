@@ -34,6 +34,15 @@
 
 外形切换、共享重建结构或纹理消费者受影响时，同时读取[相机、资源与重建](cameras-reconstruction.md)。实时连接的场景归属见[测量与后端](measurement-backend.md#实时场景归属)。
 
+## 叶片载荷与三叶响应
+
+- `imbalance.py` 读取独立分析层，接受六项位移／力矩或完整九项（包含根部力）指标。`panels/farm_replay.py` 仅在包中存在时显示 Fx/Fy/Fz 全片段和最近完整转统计，缺项显示不可用；当前工作区内置资产已包含九项：叶尖xyz、根部Mx/My/Mz与Fx/Fy/Fz；其他来源和安装载荷另核对。
+- 根部力／力矩标签标注随叶根和变桨运动的 r 系，RootMzr 为叶根扭矩。TipRDxr/yr/zr 是 Wiener–Milenković 旋转参数，不直接换算为扭角；1 m预弯使局部展向方向变化，现有端点通道不能唯一分离弯曲与弹性扭转；当前NNodeOuts=0，未提供数值。
+- 仓库 `scripts/analysis/export_blade_response.py` 排除 INVALID 数值列并保留单位诊断；必需 BeamDyn 通道缺失、单位错误或非有限时拒绝，不回退 ElastoDyn 或填零。
+- 展向内力待实现：当前对应输入 NNodeOuts=0，需独立算例配置 NNodeOuts、OutNd 和 OutList 节点通道并重新求解；显示截面不代替载荷输出。细节见[离线不平衡分析](../../../../blender_frontend/README.md#离线不平衡分析)，宿主检查入口为 `blender_frontend/tests/test_imbalance.py`（仓库路径）。
+- 弹性扭转待实现：独立算例配置非零NNodeOuts、有效OutNd及节点三向位移／旋转OutList，保留根部姿态和预弯／预扭参考并重新求解，验证坐标运输与弯曲／扭转分离；仅输出节点载荷不足以得到扭角。
+- 仓库 `scripts/analysis/blade_del.py` 已提供研究用根部Mx/My DEL，四点雨流、残余半循环、默认m=10、等效1 Hz且不作均值修正；回放117～177 s的4 Hz相对40 Hz差异约2.5%以内，每3 s一个点偏低约10%～34%，不可推广到全记录或认证级疲劳。方法、窗口及限制见[叶片响应与研究DEL](../../../../docs/development/叶片响应与研究DEL.md)。
+
 ## 可观察的验收
 
 涉及运动或时钟的修改，按受影响行为选择起点、推进、暂停／恢复、寻址及结束等时刻，记录场景、对象、源帧／时间和实际状态；单帧正确不证明完整播放或生命周期正确。性能测量的时长、主动暂停、FPS 和 RSS 口径见[构建、安装与完整播放](verification.md#构建安装与完整播放)。

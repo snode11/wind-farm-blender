@@ -9,9 +9,9 @@
 | 对象 | 身份与范围 |
 | --- | --- |
 | 公开安装包 | [NREL 0.3.42.7](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.42.7)；载荷见[交付身份](../publication/blender-0.3.42.7.json)；WFRL 主入口、录制安全收尾、视口隔离、可取消后台 PNG 渲染、叶片外形选择、T1/T2/T3 Down 及独立风机手动控制、姿态预设、相对微调、三机概览、姿态 JSON、完整风机几何／同源纹理切换、三机柔性回放、默认三相机复位、六类合成缺陷，以及相机清理、稳定刷新、采集与播放保护。 |
-| 本地工作区 | manifest **0.3.42+7**，按实际源码识别；X100面积材料采样、有限安装搜索和叶片关联／连续估计由 0.3.42.7 扩展及配套源码提供，日常安装使用 0.3.42.6；机舱分析、同帧侧壁距离和零载荷参考包含于公开扩展。另有WFRL主入口、场景／占用／后端状态、手动保护反馈、相机编辑预览与按需重绘、同刻几何及曲线缓存、录制安全收尾、视口隔离、后台PNG、叶根装配、固定显示精度和环境几何预算。公开附件与日常安装分别核对。 |
+| 本地工作区 | manifest **0.3.42+7**，按实际源码识别；X100面积材料采样、有限安装搜索和叶片关联／连续估计由 0.3.42.7 扩展及配套源码提供，日常安装使用 0.3.42.7；机舱分析、同帧侧壁距离和零载荷参考包含于公开扩展。另有WFRL主入口、场景／占用／后端状态、手动保护反馈、相机编辑预览与按需重绘、同刻几何及曲线缓存、录制安全收尾、视口隔离、后台PNG、叶根装配、固定显示精度和环境几何预算。公开附件与日常安装分别核对。 |
 | 项目源码 | [`main`](https://github.com/snode11/wind-farm-blender/tree/main)；包含当前实现、测试与研究工具。公开扩展的匹配源码使用 `v0.3.42.7` 标签；当前分支与公开 ZIP、日常安装载荷分别识别。 |
-| 本地日常安装 | `bl_ext.user_default.wfrl_blender`，0.3.42.6 公开 ZIP 载荷（见安装记录）；文件核对、新进程模块来源、启用、X100 叶片面板与报告导入注册及配置保留见[身份摘要](../README.md#当前身份与安装来源)和[安装核对](../publication/daily-installation.json)。 |
+| 本地日常安装 | `bl_ext.user_default.wfrl_blender`，0.3.42.7 公开 ZIP 载荷（见安装记录）；文件核对、新进程模块来源、启用、X100 叶片面板与报告导入注册及配置保留见[身份摘要](../README.md#当前身份与安装来源)和[安装核对](../publication/daily-installation.json)。 |
 | GW184 | [0.4.0 独立运行包](../docs/blender/GW184三相机与缺陷编辑器.md)；184 m 尺寸合成刚性模型、固定三相机和六类缺陷。模型与配置不能直接替代 NREL。 |
 
 公开 ZIP 完成一次本地构建，验证范围见[发布验证记录](../publication/blender-0.3.42.7/verification.json)。本版未运行回归、隔离安装或窗口／GPU 检查；已有源码与日常安装证据按原始载荷使用，不代表当前公开 ZIP 的验证结果。
@@ -24,13 +24,15 @@
 
 ## X100 雷达
 
+工作区仿真通过 `wfrl_x100_observation_mode` 选择默认GEOMETRY或DETECTIONS，编辑后应用。GEOMETRY显示确定性几何点；DETECTIONS显示经过四维聚类、噪声和门限的工程检测点，可能缺测或出现虚警，检测帧不带 `material_ids`，状态明确保留UNCALIBRATED。源码检测模式使用16384积分预算和最多4096输出点；当前构建清单未包含 `detection.py`，扩展交付仍待落实。模式、默认值和安装评价见[观测模式](../docs/blender/X100雷达.md#观测模式工作区源码)及[本地候选结果](../docs/blender/X100观测研究.md#当前最佳候选与本地证据)。
+
 公开0.3.42.7扩展、工作区源码与本机安装在独立侧栏标签 **N → X100** 提供 X100 入口（`WFRL_PT_X100` 及配置、显示、帧与数据流、记录子面板）；工作区还注册 `WFRL_PT_X100Blades` 和安装报告导入操作器。几何仿真的“原安装位置／机舱侧面”按钮通过 `runtime.apply_mount_preset()` 切换同一台传感器的安装标定，使用当前量化源时刻准备新观测；重复有效预设复用原帧，预算编辑仍在下一新样本生效；侧面位置由 `scene.nacelle_side_installation()` 按静态侧壁确定。已有会话时切换预先准备观测与 GPU 数据，成功后提交对象变换、配置与会话身份；无会话时写入安装参数后直接启动会话，由其采样首帧，失败回滚参数；必需GPU准备失败或提交失败回滚，可选分析失败独立标记不可用；复用有效的几何快照和安装对象，保留对象选择与可见性，失败保留旧观测与未应用参数。X100 支持 T1 同源只读几何采样、名义视场与点云、严格 PLY 读取、显式索引记录／回放及独立本地实时通道。规范实现位于 `wfrl/radar_x100/`，构建按清单复制到 `_vendor/radar_x100/` 并保存源码摘要；Blender 适配位于 `radar_x100/` 与 `panels/radar_x100.py`。来源身份、各流时钟与完整性独立于现有理想激光／双束净空。
 
 工作区的 `sampling.py` 使用参考面积、随机平移Halton序列与固定重心坐标生成材料点，算法身份为 `shifted-halton.v1`；`SceneSampler.sampling_plan()` 缓存与来源绑定的计划，小预算保留大预算前缀。`installation.py` 和离线 `optimize_mount.py` 提供有限安装集合的完整过叶覆盖搜索；`WFRL_OT_X100SearchApply` 读取报告，由 `selected_installation()` 重算排序并核对来源、几何、采样算法、错误及有效推荐，沿用安装事务，保留当前采样预算。`tracking.py` 根据点云、同刻塔面、根部方向和名义叶尖径向坐标做叶片走廊关联、稳健局部拟合和因果平滑；Blender先验以轮毂为原点、局部Z末端取 `TipRad`，不读取材料标签或变形叶尖。估计拒绝状态、模型塔距与拟合段由独立面板／机舱XZ绘制，原始帧及侧壁诊断仍保留所有点。详细入口与限制见[观测研究](../docs/blender/X100观测研究.md)。
 
 `Session.derive_blades()` 在主线程会话更新中按新配对上下文派生，不依赖观察窗口；关闭估计开关清除结果和因果历史。缺测、来源失效或不支持的来源撤回模型结果，派生异常保留合法原始帧。安装、采样和估计的规范模块分别由构建清单 `RADAR_MODULES` 纳入 `_vendor/radar_x100/`，0.3.42.7 公开扩展包含这三个模块。
 
-工作区 `SideWallQuery` 在同一上下文、帧身份与点数组内共享成功的塔面最近点查询，供叶片跟踪和距离诊断复用。ROI 分别生成有效性与统计，扩大 ROI 只补算未查询点；失败点可重试，换帧或点数组变化使缓存失效，派生叶尖查询独立。离线安装搜索在同一源时刻和候选安装位只构造一份只读 `SceneSample`，供多个种子复用；采样计划、可见性和推荐规则不变。
+工作区 `SideWallQuery` 在同一上下文、帧身份与点数组内共享成功的塔面最近点查询，供叶片跟踪和距离诊断复用。ROI 分别生成有效性与统计，扩大 ROI 只补算未查询点；失败点可重试，换帧或点数组变化使缓存失效，派生叶尖查询独立。离线安装搜索在同一源时刻和候选安装位复用只读 `SceneSample` 与遮挡几何，分别保留各采样配置；面积权重身份、机械筛选、两类观测指标及推荐规则见[X100 安装覆盖搜索](../docs/blender/X100观测研究.md#安装覆盖搜索)。
 
 `SceneSampler.material_sample()` 为速度差分只计算所选材料顶点，静态拓扑与同刻遮挡树按绑定复用；安装对象及父级存在约束或动画时撤回观测，记录失败终态保留在所属场景。
 
@@ -46,7 +48,7 @@
 
 工作区的 `radar_x100/output.py` 提供按场景绑定的独立点云窗口，使用 Image Editor 的专用 GPU 画布读取现有会话最新帧；`radar_x100/display.py` 与场景叠加共用只读属性着色，提供传感器角度投影及米制正交视图。窗口不创建相机或场景实体、不驱动观测或运动、不积累历史帧；导航状态与点云批次属于观察窗口。工作区与本机安装的窄窗通过控件换行保持字号，动静属性使用固定分类色，速度支持固定对称或逐帧色标；窗口色标选择只影响观察。关闭观察不关闭雷达会话，文件加载、撤销／重做与卸载释放窗口、绘制句柄和轮询资源。该窗口包含于 0.3.42.7 公开扩展；本机日常安装按其独立记录识别。
 
-工作区源码的 `display.CanvasCache` 为每个观察窗口保留背景／按钮、网格／边框、色带和机舱参考四个当前辅助层。`output.OutputWindow` 按实际尺寸、UI scale、视图、bounds、缩放／平移和色带依赖重建，GPU 引用限于所属绘制上下文；上下文归属改变或绘制异常清除缓存，关闭及加载／历史／卸载生命周期释放引用。动态点云、未知状态和文字独立更新；点云裁剪缓存也包含实际画布矩形和 UI scale。该缓存和配置提示包含于公开扩展，本机安装使用 0.3.42.6。
+工作区源码的 `display.CanvasCache` 为每个观察窗口保留背景／按钮、网格／边框、色带和机舱参考四个当前辅助层。`output.OutputWindow` 按实际尺寸、UI scale、视图、bounds、缩放／平移和色带依赖重建，GPU 引用限于所属绘制上下文；上下文归属改变或绘制异常清除缓存，关闭及加载／历史／卸载生命周期释放引用。动态点云、未知状态和文字独立更新；点云裁剪缓存也包含实际画布矩形和 UI scale。该缓存和配置提示包含于公开扩展，本机安装使用 0.3.42.7。
 
 几何采样、文件回放与本地通道基础能力包含于源码和本机日常安装，公开附件按其独立载荷核对。真实 PLY 对照、厂家 UDP／SDK 解码、实机标定、航迹与相机投影仍待外部资料及独立验证；不提供现场精度或安全保护结论。操作见 [X100 雷达](../docs/blender/X100雷达.md)，合同与采集入口见[规范数据核心](../wfrl/radar_x100/README.md)。
 
@@ -125,7 +127,22 @@
 
 扩展注册使用逆序资源账本，子模块取得资源前登记对应清理，部分注册失败仍执行所有逆操作并汇总错误；失败清理保留重试。卸载在释放播放器归属前只取消 WFRL 管理的实际播放场景，普通场景的原生播放不受影响。
 
-已有 MP4 的复制任务区分 RUNNING、CANCELLING、SUCCEEDED、CANCELLED 和 FAILED。取消、加载与卸载只作有界等待；仍存活的线程、取消事件和私有暂存文件保留任务归属，退出前拒绝新复制。只有目标提交完成才成功；取消不会删除已提交目标。视频状态变化仅请求相关 UI 区域重绘，稳定状态不反复请求完整视口绘制。
+### 作业终态与恢复
+
+完成输出或记录错误不等于资源已经释放。正常完成、失败和取消均应先完成自有进程／线程及暂存资源收尾，再发布最终状态；收尾期间继续保留作业占用。
+
+| 作业 | 中间状态与最终结果 |
+| --- | --- |
+| 冻结试验视频 | `FINALIZING` 表示渲染主进程已结束、正在收尾及确认交付；取消使用 `CANCELLING`。监管端停止所属进程组、核对媒体交付，再关闭控制端点、等待服务线程退出并释放监管／输出租约，最后写 `final=true`。`status.lock` 串行化终态发布与下一attempt，查询等待交接完成，避免误报LOST或旧终态覆盖新作业 |
+| 普通PNG动画 | worker只写 `RENDERED`（声明帧已写完）或 `FAILING`（已记录错误，进程尚待退出）。控制端等待其退出后写 `COMPLETE`／`FAILED`／`CANCELLED`；成功须正常退出、帧数齐全且进度有效。FAILING保留失败原因，不因随后取消改为成功或取消 |
+| 相机抓帧 | 请求结束后先恢复允许恢复的场景状态、释放GPU目标和UI计时器；PNG写入线程尚存活时保持 `FINALIZING` 与占用。线程实际退出后才释放写入器、写最终complete／incomplete清单及准确组数，按仍匹配的场景会话发布界面结果；done事件不能代替线程退出 |
+| 已有MP4导出／RTSP | MP4复制、私有暂存清理线程全部退出后，才公开 `SUCCEEDED`／`CANCELLED`／`FAILED` 和最终路径；提交期间为 `COMMITTING`。RTSP在 `STOPPING` 中等待自有FFmpeg／MediaMTX及停止线程收尾，再公开STOPPED或错误；若进程未退出，保留句柄与active占用，ERROR不构成清理完成证明 |
+
+普通动画恢复从场景保存的目录读取匹配job身份、帧数和状态。已有终态可恢复显示；残留RUNNING／FAILING／RENDERED若记录的进程仍存活或身份不可确认，进入 `RECOVERING` 并保留占用，只读轮询，不按保存PID认领控制或发送取消信号。进程确认退出后读取可信终态；若只剩中间状态则写FAILED，不能凭RENDERED或文件数补认成功。它不续渲染缺失帧。视频监管恢复继续使用作业凭据、attempt和租约；无可验证端点且无匹配 `final=true` 终态时为LOST，不把残留FINALIZING直接当失败、取消或成功。
+
+**要求与实现差异：**上述“先释放租约再发布终态”在 [manual_video_job.py](wfrl_blender/manual_video_job.py) 的监管收尾路径已实现；`start()` 启动监管子进程失败的分支仍先写 `FAILED / final=true`，再在finally释放其持有的租约。这一异常分支的发布顺序仍待修正，不能把全路径均满足该要求写成已完成。
+
+取消、加载与卸载对MP4复制只作有界等待；线程、取消事件和私有暂存仍保留归属，退出前拒绝新复制，取消不删除已提交目标。相机抓帧和文件复制不提供跨Blender进程续作业；同进程的未退出资源仍按上述占用规则处理。视频状态变化仅请求相关UI区域重绘，稳定状态不反复请求完整视口绘制。
 
 Synthetic 撤销／重做清除 Python 数据绑定和样本缓存，按恢复后的 Object／Mesh／材质和 packed RGBA 重新绑定；独立样本游标、分屏导航和其他场景状态分别保留。
 
@@ -345,7 +362,7 @@ origin + 0.95 × TipRad × normalize(direction)
 
 隐藏 T1 整叶时，挠度比较仍按同一插值与坐标计算采样三个结构叶尖，保持与可见 T1 的读数一致。普通回放还更新所选机组与 T1 的塔筒及挂载结构，包含仅选择 T2/T3、暂停时首次创建重建共享结构的情况；共享结构在源姿态与塔筒更新后同步。单机视频导出显式限定所选机组，不强制保留 T1 比较或结构。隐藏整叶不等于停止这些数值与结构消费方。这里保留物理变形幅度，展示网格的采样密度不等于求解器网格密度。
 
-本节描述当前工作区与公开 0.3.42.7 的实现。跨加载的源解析缓存、按消费方选择工作集、单次加载内遥测数组复用及计时入口包含于公开包；ZIP、隔离安装和日常安装分别按其摘要与记录使用。源码脚本窗口覆盖播放归属和资源生命周期；日常安装使用安装记录所列的 0.3.42.6 载荷，检查范围见[安装身份](../publication/daily-installation.json)。包验证工具只运行后台检查，当前安装与公开包均未运行独立点云窗口的 GPU／RGB 检查。工作量计数与数值一致性不证明视口 FPS。
+本节描述当前工作区与公开 0.3.42.7 的实现。跨加载的源解析缓存、按消费方选择工作集、单次加载内遥测数组复用及计时入口包含于公开包；ZIP、隔离安装和日常安装分别按其摘要与记录使用。源码脚本窗口覆盖播放归属和资源生命周期；日常安装使用安装记录所列的 0.3.42.7 载荷，检查范围见[安装身份](../publication/daily-installation.json)。包验证工具只运行后台检查，当前安装与公开包均未运行独立点云窗口的 GPU／RGB 检查。工作量计数与数值一致性不证明视口 FPS。
 
 [tip_tracking.py](wfrl_blender/tip_tracking.py) 从变形网格的叶尖位置记录轨迹，叶片 1／2／3 分别为红／绿／蓝，相邻两圈定格对比 2 个仿真秒后淡出。轨迹不是相机测量；同机切镜头保留轨迹，换机、寻址、重播时按生命周期重置。MAPPO 默认关闭轨迹，需要时主动打开。
 
@@ -381,7 +398,17 @@ v3 净空真值定义为叶片末截面表面到同一全局高度移动塔筒�
 
 [imbalance.py](wfrl_blender/imbalance.py) 读取独立的 `wfrl.blade-response-package.v1` 结果层。`manifest.json` 用 `source_hashes` 绑定原回放的 manifest、geometry、data、telemetry、deflection-t1；`files` 保存 `results.json` 的 SHA-256。原仿真包及其 manifest 不改写。优先读取源目录内的 `blade-response/`；未声明本地分析时，只有与内置来源完全匹配的包才使用 `assets/blade_response/`。B2、双束和 TLS 的同源回放复用该结果。分析加载失败只撤回分析读数，保留其他有效回放功能。
 
-结果 schema 为 `wfrl.blade-response.v1`，方法为 `common-turn-phase-mean.v1`。逐叶实际方位角加 0/120/240°，取三叶都完整覆盖的共同转次，在 5° 中点网格线性插值，按转等权平均。`rms_spread` 为三叶均值曲线相对共同均值曲线的 RMS；`blade_offsets` 为各叶均值相对三叶均值的有符号差。叶尖单位 m，叶根原始弯矩 N m，界面换算为 kN·m。已完成转的读取按三叶所需时间窗口的最大结束时刻判断，向后寻址直接重新选择，不累计或保留未来转次。全片段汇总及均值曲线明确标注其离线范围。
+结果 schema 为 `wfrl.blade-response.v1`，方法为 `common-turn-phase-mean.v1`。逐叶实际方位角加 0/120/240°，取三叶都完整覆盖的共同转次，在 5° 中点网格线性插值，按转等权平均。`rms_spread` 为三叶均值曲线相对共同均值曲线的 RMS；`blade_offsets` 为各叶均值相对三叶均值的有符号差。叶尖单位 m；叶根力矩原始单位 N m，界面换算为 kN·m；根部力原始单位 N，界面换算为 kN。已完成转的读取按三叶所需时间窗口的最大结束时刻判断，向后寻址直接重新选择，不累计或保留未来转次。全片段汇总及均值曲线明确标注其离线范围。
+
+工作区导出器为三叶 `B1/B2/B3RootFxr/Fyr/Fzr` 生成 `root_Fx/root_Fy/root_Fz`，与位移／力矩共用相位对齐、全片段和逐转统计。读取器接受六项位移／力矩指标，或这六项加完整三项根部力；不接受缺项的根部力组，各转必须与所属机组的指标集合一致。`panels/farm_replay.py` 的 `draw_blade_mechanics()` 在“叶根力、坐标与扭转定义”中显示三叶均值、偏差、均值曲线差异和最近完整转差异；不含根部力的分析包显示“当前分析包未提供叶根力统计”，不会自动生成或补零。当前工作区 `assets/blade_response/results.json` 的T1／T2／T3均已包含九项：`tip_x/tip_y/tip_z`、`root_Mx/root_My/root_Mz`、`root_Fx/root_Fy/root_Fz`；不据此推定其他来源或既有安装载荷也含九项。
+
+载荷标签标注 **r 系**：固定于运动叶根，随刚体运动和变桨转动，z 从根指向尖。`RootMxr/RootMyr` 为叶根弯矩分量，`RootMzr` 标为**叶根扭矩**，表示绕展向 z 轴的力矩，不是材料应力或扭转应变。`TipRDxr/yr/zr` 是无量纲 Wiener–Milenković 旋转参数，不能将单个分量乘 `180/π` 当成扭角；当前参考叶片具有1 m预弯，局部切线和受载弯曲方向随展向变化；端点通道不能唯一确定沿程截面转动场或分离刚体转动、变桨、预扭与弯曲引起的转动，面板明确显示“弹性扭转：未提供数值”。
+
+导出器的 `read_output()` 保留所有通道单位用于诊断，但不加载单位标为 `INVALID` 的列；`beamdyn_values()` 要求三叶 BeamDyn 通道全部存在、单位准确且样本有限。必需通道无效／缺失时导出失败，不回退 ElastoDyn，也不填有效零值；单位正确的真实零值保留。
+
+**展向内力：待实现。**当前回放对应 BeamDyn 输入的 `NNodeOuts=0`，`OutList` 仅声明根部力／力矩与叶尖位移／旋转参数。生成展向结果需要在独立算例把 `NNodeOuts` 设为所需有效节点数、在 `OutNd` 选择节点、在 `OutList` 明确相应节点内力／力矩通道，并重新求解、保存单位与坐标、验证映射。仅填写 `OutNd` 而保持 `NNodeOuts=0` 不产生节点输出；显示网格截面数也不等于结构载荷输出数。输出配置及独立验证要求见[雷达、风况与载荷方案](../docs/proposal/radar/毫米波雷达与FASTFarm修改建议.md)。
+
+弹性扭转的节点位移／旋转输出、参考坐标运输及独立验证仍待实现，需要设置非零 `NNodeOuts`、有效 `OutNd` 和相应 `OutList` 后重新求解。具体要求与研究用DEL见[叶片响应、弹性扭转与研究用DEL](../docs/development/叶片响应与研究DEL.md)。`scripts/analysis/blade_del.py` 已提供根部Mx／My的四点雨流和研究DEL，默认m=10、不作均值修正；它不自动进入面板，也不构成认证级疲劳评估。
 
 `physical.mass` 与 `physical.aerodynamic` 分别使用 `available`／`unavailable`；不可用记录不携带数值。可用记录要求 `source_kind`（`simulation_reference` 或 `estimate`）和 `provenance`。质量记录使用 `magnitude_kg_m`、可选 `phase_deg` 及对应 `phase_reference`、`blades`；气动记录使用 `parameter`（`aerodynamic_twist_offset` 或 `pitch_zero_offset`）和三叶 `blade_offsets_deg`。当前内置记录均不可用；现有三叶响应差异没有分离风况、转速、变桨等影响，不识别两类物理故障或定义报警阈值。
 
@@ -401,7 +428,7 @@ python3 scripts/analysis/export_blade_response.py \
 
 `panels/presentation.py` 的窗口 PNG 录制绑定发起窗口和场景。场景失效、窗口关闭、切换源场景、文件重载、撤销／重做和功能卸载均结束录制；已生成帧保留，清单标明取消或失败。清理不依赖源 RNA 仍可访问，重复结束不重复移除计时器。采样截止时刻固定在录制起点加整数倍采样间隔的网格上，每次截图后取严格晚于当前事件的下一格点；计时器送达抖动不导致漏采，迟到事件跳过已错过的格点、不补拍，清单保存每帧的实际采样时间。
 
-`animation_render.py` 管理当前进程拥有的后台动画渲染，`animation_render_ui.py` 管理所属场景的状态和取消，`animation_render_worker.py` 在独立 Blender 进程读取冻结场景。输出位于用户选择目录下的唯一子目录，包含 PNG、场景副本、作业配置、清单和诊断输出；源相机、时间轴及渲染设置不被后台任务改写。父进程确认子进程退出后重读最终清单，联合正常退出、匹配的作业身份、`COMPLETE` 状态和完整帧数判定完成；取消和失败保留已生成帧。 工作区对分文件多视图逐帧确认每个启用视图的文件；合成立体 PNG 要求左右眼均启用。文件重载、撤销／重做或扩展卸载取消当前任务，不提供跨进程恢复。此入口输出当前场景相机的 PNG，不代替冻结变桨试验的 MP4 导出和监管。
+`animation_render.py` 管理当前进程拥有的后台动画渲染，`animation_render_ui.py` 管理所属场景的状态和取消，`animation_render_worker.py` 在独立 Blender 进程读取冻结场景。输出位于用户选择目录下的唯一子目录，包含 PNG、场景副本、作业配置、清单和诊断输出；源相机、时间轴及渲染设置不被后台任务改写。父进程等待子进程退出后重读进度，联合正常退出、匹配的作业身份、`RENDERED`／`COMPLETE` 状态和完整帧数判定完成，再发布最终清单；取消和失败保留已生成帧。 工作区对分文件多视图逐帧确认每个启用视图的文件；合成立体 PNG 要求左右眼均启用。文件重载、撤销／重做或扩展卸载取消当前进程拥有的任务；重开时可恢复匹配的终态或以RECOVERING只读等待残留进程，不续渲染缺失帧。残留FAILING／RENDERED不会被当作已完成，处理规则见[作业终态与恢复](#作业终态与恢复)。此入口输出当前场景相机的 PNG，不代替冻结变桨试验的 MP4 导出和监管。
 
 后台动画恢复任何 `clearance_replay` 场景后，均须取得该 Scene 的有效读取器；柔性回放还须恢复其场景运行时。独立净空包缺失、不可读或校验失败时，在写入动画帧之前失败，不能把未恢复的数据驱动画面认作完整输出。
 
@@ -486,7 +513,11 @@ S2/S3 按同一保存时刻、同一叶片的有效命中配对，S1 有效叶�
 
 工作区源码的 **连接新后端身份…** 仅在已断开且保留旧身份时可用。用户须在确认框勾选放弃旧连接；此操作只清除本地恢复身份，不停止旧后端或将其状态标为已停止。最近的旧会话、作业与最后状态保存在诊断中，仍标为未确认。普通 Connect / Reconnect 继续恢复原身份；`UNKNOWN_SESSION`／`RESUME_REQUIRED` 握手拒绝不会自动认领新会话。
 
-0.3.42.7 扩展包含前端连接、协议和运行状态处理；后端服务器、训练启动器和 MPI 环境不随扩展 ZIP 安装。后端 [backend_session.py](../wfrl/blender_bridge/backend_session.py) 只在新的控制步边界处理暂停和单步，预热或重复第 0 步的进度通知不能重复消耗单步许可。[server.py](../wfrl/blender_bridge/server.py) 在接收新连接前回收已有连接的 EOF，允许断开后立即重连，同时保留活动客户端独占。
+0.3.42.7 扩展包含前端连接、协议和运行状态处理；后端服务器、训练启动器和 MPI 环境不随扩展 ZIP 安装。后端 [backend_session.py](../wfrl/blender_bridge/backend_session.py) 只在新的控制步边界处理暂停和单步，预热或重复第 0 步的进度通知不能重复消耗单步许可。[server.py](../wfrl/blender_bridge/server.py) 的 `BridgeServer._accept_client()` 在旧连接仍占用时接收一个新连接到等待槽，不读取其握手或命令；旧连接读到 EOF 或出错断开后，等待连接才能取得归属并开始握手。
+
+等待与握手共用从接收新连接起计算的 `handshake_timeout`，默认5秒，不在取得归属时重新计时。旧连接一直存活时，到期关闭等待连接，旧连接继续工作。旧连接缓冲中的完整命令仍由 `poll()` 正常读取，并经 `SessionSequenceGuard.accept()` 检查会话与递增序号；恢复握手的 `hello_ack.last_command_sequence` 反映已处理水位，重复命令不能绕过检查。关闭服务器同时释放活动连接和等待连接。相关合同见 [test_reconnect.py](../tests/blender_bridge/test_reconnect.py)。
+
+[Bridge 启动入口](../wfrl/blender_bridge/__main__.py) 在平台提供时注册 SIGTERM、SIGHUP 和 SIGBREAK；Windows 的 SIGBREAK 进入同一优雅关闭流程：标记关闭、请求停止一次、继续轮询协议及清理状态，直到 `cleanup_confirmed=True` 且 `worker_alive=False` 才关闭服务器，并等待停止线程结束。关闭等待期间只接受 `run.stop` 与 `session.sync`，其他命令明确拒绝；信号合同见 [test_main_signals.py](../tests/blender_bridge/test_main_signals.py)。
 
 当前后端源码的 `BridgeServer.poll()` 即使没有客户端也调用 `BackendSession.tick()`，继续读取训练进度、检测退出与失败并清理已结束会话的临时资源。快照保留最新状态，训练统计可以按类型合并；`lifecycle`、`safety_event` 和 `error` 使用独立有界可靠队列，不被统计挤出。可靠队列真实溢出时报告 `EVENT_OVERFLOW`、进入 `FAILED` 并停止会话，不静默丢弃。重连恢复当前状态、各类最新统计及仍保留的可靠事件，并计入等待期间的数据年龄；不承诺补回每个观察样本或完整观察历史。
 
@@ -554,14 +585,16 @@ ZIP 包括 MAPPO 源、旧法和 TLS 结果层、规范示例、NREL 缺陷编�
 ### Windows 支持范围
 
 - 冻结试验视频的新建、重试和监管只支持具备 `flock` 和 `waitid(WNOWAIT)` 的 POSIX 环境。见 [`launch()`](wfrl_blender/manual_video.py#L344)、[`start()`](wfrl_blender/manual_video_job.py#L232)、[`supervise()`](wfrl_blender/manual_video_job.py#L319) 和 [`require_supervision()`](wfrl_blender/manual_video_job.py#L35)。
-- Down 的 MP4 与 JSON 成对发布、扩展构建产物发布均依赖硬链接，目标卷需支持硬链接。见 [`_publish_pair()`](wfrl_blender/manual_down.py#L481) 和 [`_publish_outputs()`](../scripts/blender/build_extension.py#L55)。
+- Down 的 MP4 与 JSON 成对发布、扩展构建产物发布均依赖硬链接及相应排他提交语义，目标卷需支持。见 [`_publish_pair()`](wfrl_blender/manual_down.py#L481) 和 [`_publish_outputs()`](../scripts/blender/build_extension.py#L55)。`test_manual_down.py`、`test_extension_output.py`、`test_extension_package.py` 中依赖该发布语义的用例在 `os.name == 'nt'` 时跳过；这不表示 Windows 发布链路已验证，其他宿主用例仍运行。
 - `.command` 和 macOS shell 入口只适用于 macOS。见 [`.command` 入口示例](../scripts/blender/打开净空雷达演示.command#L4)、[`run_wfrl_macos.sh`](../scripts/blender/run_wfrl_macos.sh#L1) 和 [`verify_macos.sh`](../scripts/blender/verify_macos.sh#L1)。
 - 非 POSIX 平台查询已有冻结作业时不检查本地监管租约；监管端点不可达且没有匹配终态时报告 `LOST`、`active=False`，不阻挡 Down 导出，也不改写磁盘记录。
 - 已有 MP4 导出在 Windows 上按设备、inode、大小和 mtime 判定源文件身份，不比较 ctime；POSIX 另比较 ctime，以发现保留 mtime 的内容修改。
-- Launcher 在 Windows 上以 `CREATE_NEW_PROCESS_GROUP` 启动并发送 `signal.CTRL_BREAK_EVENT` 请求停止，接收进程须与发送者共享控制台。
+- Launcher 在 Windows 上以 `CREATE_NEW_PROCESS_GROUP` 启动并发送 `signal.CTRL_BREAK_EVENT` 请求停止，接收进程须与发送者共享控制台。Bridge 的 `__main__` 注册 SIGBREAK 并等待后端清理确认；前后端联合验收仍以进程退出和 `EMPTY_CONFIRMED` 为准，不能仅凭信号发送成功或某个退出码判断清理完成。
 - [.gitattributes](../.gitattributes) 对 `wfrl_blender/assets/` 与 `wfrl_blender/_vendor/` 关闭换行转换，保证检出字节与完整性摘要一致。
 - 宿主测试的 venv 路径、Python 工具夹具和符号链接辅助位于 [tests/_platform.py](tests/_platform.py)；无法创建符号链接时相关用例跳过并附原因。
 - Windows 上的前端宿主测试在 `windows-host` 任务中非阻塞运行。见 [Windows 前端宿主检查](../docs/development/自动检查.md#windows-前端宿主检查)和[工作流任务](../.github/workflows/checks.yml#L165)。
+
+上述为本地实现与测试选择的支持范围，不表示 Windows 原生 Blender、GPU、真实媒体或 FAST.Farm／MPI 已完成联合验收。仓库根测试的统一入口与平台跳过范围见[自动检查](../docs/development/自动检查.md)。
 
 ## Blade Recon 与重建对照
 

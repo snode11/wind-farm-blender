@@ -14,7 +14,8 @@
 
 - 普通 PNG 动画使用独立场景副本、独立 Blender 进程及任务配置目录，按冻结的场景相机、帧范围／步长和原画质输出到唯一目录；取消、失败保留已生成帧，正常退出和完整帧数共同确认完成。分文件多视图逐帧核对所有启用视图。
 - 相机流畅预览预算不进入快照；合成器独立文件输出节点须禁用，UI 与后台递归核对。
-- 源场景重载、撤销／重做及扩展卸载取消任务；此入口不承诺跨进程恢复，也不代替冻结试验 MP4 监管。
+- worker写 `RENDERED` 表示帧已写完、`FAILING` 表示失败已记录；两者均非终态。控制端等进程退出后才确认COMPLETE／FAILED／CANCELLED，失败原因不被迟到取消覆盖。
+- 源场景重载、撤销／重做及卸载取消自有任务；恢复时核对保存目录的job身份、计数和状态。残留RUNNING／FAILING／RENDERED对应进程仍存活或身份未知时为RECOVERING，保留占用，只读查询、不按磁盘PID发信号；退出后缺可信终态则FAILED，不凭RENDERED补认成功，不续渲染。
 
 ## Down 与冻结试验视频
 
@@ -23,13 +24,17 @@
 - 冻结试验监管需完整工作区、FFmpeg／FFprobe 及支持 `flock / waitid(WNOWAIT)` 的 macOS／Linux Python 3.11+（`WFRL_VIDEO_PYTHON`）。
 - 扩展 ZIP 不含配套脚本及 `wfrl.camera_video`，安装入口通过偏好 `project_dir` 选工作区。
 - 注册容忍受限数据访问，场景可用后恢复；按身份、凭据及锁恢复，复制场景不认领原作业，取消不信任磁盘 PID。
+- `FINALIZING` 是进程结束后的收尾／交付确认，取消为CANCELLING。正常监管路径先收尾进程组、控制端点和服务线程，释放监管／输出租约，再写最终状态；status.lock串行化下一attempt与终态发布，查询等待交接。`start()` 启动监管子进程失败仍先写final失败再释放租约，顺序修正待实现，不能概括为所有分支均满足要求。
 - 仅 `final=true` 的 `COMPLETE / FAILED / CANCELLED` 是最终结果；`LOST` 不等于失败或取消，`--detach` 只确认启动。非 POSIX 平台查询时不检查本地租约，不可达且无匹配终态的作业报告 `LOST`、`active=False`。
 - `retry` 只从匹配完整母版重做编码、验证与发布，不恢复未渲染帧；保留目标预检及失败母版，只清理自有暂存，不改写成功状态。
 
 ## 已有 MP4 与 RTSP
 
 - 工作区将 MP4 复制到目标目录内私有暂存，验证源身份及字节数后排他提交。源身份比较设备、inode、大小与 mtime，POSIX 另比较 ctime，Windows 不比较 ctime。复制阶段可请求取消；等待 I/O 时保留任务占用，提交开始后等待最终结果。清理只处理仍能确认归属的暂存条目。
-- RTSP 通过 FFmpeg 与 MediaMTX 循环推送已选 MP4。工作区异步停止两项自有进程；收尾期间显示 `STOPPING` 并禁止重启，未退出时保留进程控制和错误状态。
+- MP4导出等复制线程及暂存清理线程实际退出后才公开最终状态和路径，完成标记不代替线程退出；取消、加载与卸载仍保留未退出资源的占用。
+- RTSP通过FFmpeg与MediaMTX循环推送已选MP4。收尾期间为STOPPING，等待自有进程及停止线程退出才公开停止结果；未退出的进程仍保留句柄与active占用，错误状态不是清理完成证明。
+
+四类作业的共同约束、相机抓帧FINALIZING及恢复限制见[作业终态与恢复](../../../../blender_frontend/README.md#作业终态与恢复)。
 
 ## 按行为选检查
 
@@ -42,6 +47,8 @@
 | 已有 MP4 与 RTSP | `test_video_output.py` | 安装版 `video_output_regression.py` 核对字节一致、真实 RTSP 收流与解码、停止及文件加载。需要 `WFRL_TEST_OUTPUT`、`WFRL_VIDEO_SOURCE`、`WFRL_FFMPEG`、`WFRL_MEDIAMTX`。 |
 
 ## 视频验证边界
+
+`test_manual_video_job.py` 的本地运行解释器要求Python≥3.13并安装psutil和pytest，另须具备POSIX监管接口；具体命令见[手动视频监管测试](../../../../docs/development/自动检查.md#手动视频监管测试)。这与视频工具本身的Python最低版本分开。
 
 源码视频脚本使用独立后台工厂启动和新目录；真实媒体需 FFmpeg／FFprobe，监管依赖见上文“Down 与冻结试验视频”。
 

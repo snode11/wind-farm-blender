@@ -6,6 +6,7 @@
 | --- | --- |
 | `blender/` | Blender 启动、扩展构建、相机与缺陷工具、视频作业及原生回归运行器 |
 | `train/`、`analysis/` | 训练、匹配评估及保存数据分析；[算法与输入合同](../docs/training/MAPPO_SETUP.md) |
+| `analysis/export_blade_response.py`、`analysis/blade_del.py` | 从已有BeamDyn输出生成九项响应统计或研究用根部弯矩DEL；[通道、扭转限制与DEL方法](../docs/development/叶片响应与研究DEL.md)，不启动求解器 |
 | `radar_x100/` | X100 严格 PLY 导入、本地发布、记录、完整源网格导出及双预设覆盖；`optimize_mount.py` 搜索有限安装集合，`evaluate_blades.py` 独立评价因果叶片估计。见[数据合同](../wfrl/radar_x100/README.md)、[双预设覆盖](../docs/blender/X100雷达.md#离线安装覆盖研究)和[安装搜索／叶片评价命令](../docs/blender/X100观测研究.md)；读取已有运动，不启动训练或求解器 |
 | `lidar/` | 雷达结果包、数值诊断与来源检查；[计算入口](lidar/README.md) |
 | `reconstruction/`、`nrel_*.py` | 叶片重建与独立动态研究；[研究对象与状态](../research/README.md) |

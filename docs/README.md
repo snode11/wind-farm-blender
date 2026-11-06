@@ -17,9 +17,10 @@
 | 实现与维护 | [前端维护说明](../blender_frontend/README.md)、[Blender 文档索引](blender/README.md) |
 | 待实施要求与验收 | [前端更新计划](../前端更新计划.md) |
 | 叶片重建算法 | [Blade Recon 0.2](../blade_recon0.2/README.md)、[材料点对应研究](../blade_recon0.2/docs/材料点对应实验报告_2026-10-11.md) |
+| 叶片响应与载荷研究 | [九项响应、弹性扭转输出要求及研究用DEL](development/叶片响应与研究DEL.md) |
 | 表面与动态研究 | [表面研究入口](../research/blade-surface/README.md)、[动态研究模块](../wfrl/nrel_reconstruction/README.md) |
 | 雷达合同与计算 | [数据合同](../wfrl/lidar/REPLAY_FORMAT.md)、[雷达算法](../wfrl/lidar/README.md)、[TLS 研究](lidar/双束TLS候选实施与验证总报告.md) |
-| 训练与环境 | [训练入口](training/MAPPO_SETUP.md)、[参数共享 IPPO](training/IPPO_TRAINING_EXPLAINED.md)、[环境设置](setup/setup_local.md) |
+| 训练与环境 | [训练入口](training/MAPPO_SETUP.md)、[FAST.Farm 风况请求、输入与统计](training/FASTFarm风况.md)、[参数共享 IPPO](training/IPPO_TRAINING_EXPLAINED.md)、[环境设置](setup/setup_local.md) |
 | 网页实验室 | [预览、异步计算与结果接口分工](proposal/platform/风场网页实验室_第一版方案与分工汇总.md)；待实现与目标 Ubuntu 环境验证 |
 | 研究要求 | [研究方案分类](proposal/README.md) |
 
@@ -30,8 +31,8 @@
 | NREL 公开安装包 | **0.3.42.7**；安装使用 [v0.3.42.7 专用扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.7/wfrl_blender-0.3.42%2B7.zip)，包身份与适用验证见[交付身份](../publication/blender-0.3.42.7.json)。 |
 | 项目源码 | [`main`](https://github.com/snode11/wind-farm-blender/tree/main) 包含当前前端、后端、研究、测试与文档；源码分支不等于既有公开安装包或日常安装载荷；本地工作区提交的检查范围见[工作区源码验证](blender/发布状态与验证范围.md#工作区源码验证提交-bb470611)。 |
 | 发布源码 | `v0.3.42.7` 源码标签及匹配归档；扩展 ZIP 可由该归档独立重建；软件合同、保存证据及适用范围见[源码软件合同与验证](blender/发布状态与验证范围.md#源码软件合同与验证)。 |
-| 本地日常安装 | **0.3.42.6 公开 ZIP 载荷**，实际模块 `bl_ext.user_default.wfrl_blender`；206 个文件与本地安装归档匹配。115 个新后台进程模块来源、持久启用、X100 叶片面板与报告导入注册及配置保护见[日常安装核对](../publication/daily-installation.json)。 |
-| X100 观测研究工作区 | 面积材料采样、有限安装搜索和有拒绝条件的叶片估计；由 0.3.42.7 扩展及配套源码提供，日常安装使用 0.3.42.6。同源几何数值结果与原生画布像素分别见[研究验证](blender/发布状态与验证范围.md#x100-观测研究工作区验证)，不代表实机精度。 |
+| 本地日常安装 | **0.3.42.7 公开 ZIP 载荷**，实际模块 `bl_ext.user_default.wfrl_blender`；207 个文件与本地安装归档匹配。116 个新后台进程模块来源、持久启用、X100 叶片面板与报告导入注册及配置保护见[日常安装核对](../publication/daily-installation.json)。 |
+| X100 观测研究工作区 | 面积材料采样、有限安装搜索和有拒绝条件的叶片估计；由 0.3.42.7 扩展及配套源码提供，日常安装使用 0.3.42.7。同源几何数值结果与原生画布像素分别见[研究验证](blender/发布状态与验证范围.md#x100-观测研究工作区验证)，不代表实机精度。 |
 | GW184 | **0.4.0 独立解压运行包**，模型、配置和 NREL 扩展分别使用。 |
 | 材料点研究 | Patch **2/8**、Crack **7/8**、跨相机 RGB **0/264**；真实同材料点三维误差 `null`，`FAILED_GATE / NOT_ACCEPTED`；未替换正式 601 样本资产。 |
 | 其他研究门槛 | 叶尖显示精度的源码全时间轴与本地 0.3.36 安装版抽样分别见[验证范围](blender/发布状态与验证范围.md#研究与物理边界)；材料点研究保持 FAILED_GATE，雷达 REVIEW_ONLY / PENDING_ACCEPTANCE，表面 P2b FAILED_GATE / REVIEW_ONLY、主增益 null、局部恢复 NOT_RUN，独立动态原型 DY1 NOT PASSED。 |

@@ -1,6 +1,6 @@
 # NREL 5MW 三摄离线视频与单叶片三维重建验证方案
 
-本方案规定“离线视频到单叶片三维”流程的两项交付：**三路离线视频**与**由视频计算得到的一片叶片三维模型及独立评分**。输入隔离、投影和评分约定参照 [NREL 三摄研究方案](reconstruction/NREL5MW_固定三摄叶片三维重建与表面缺陷首轮诊断方案_v1.1.md)；软件安装版本与算法验收分别判断。
+本方案规定“离线视频到单叶片三维”流程的两项交付：**三路离线视频**与**由视频计算得到的一片叶片三维模型及独立评分**。输入隔离、投影和评分按本文约定执行；软件安装版本与算法验收分别判断。
 
 现有冻结结果为 **`PIPELINE_COMPLETE_PARTIAL_GEOMETRY` / `NOT_YET_ESTABLISHED`**：正式三路视频各 5 秒、100 帧，输出 T1/B1 在 `t_ref=122.175 s` 的近似表面；全局距离改善，但部分分区和截面退化，表面覆盖率未建立。依据为[运行 manifest](../../outputs/nrel-video-single-blade/stages/01-first-run/manifest.json)与[结果、评分和限制](../../outputs/nrel-video-single-blade/stages/01-first-run/README.md)。这些结果不代表完整叶片或工程精度验收。
 
@@ -235,6 +235,5 @@ F、B 的损失分别按有效像素数归一化，缺少某类时略过其项�
 - [NREL 0.3.13 发布核对](../blender/releases/0.3.13发布核对.md)、[默认 T1 三相机说明](../blender/T1三相机使用说明.md)：对应软件载荷与默认布局的来源及边界，不代表当前实验通过几何验收。
 - [三摄采集](../../blender_frontend/wfrl_blender/custom_camera_capture.py)、[相机定义](../../blender_frontend/wfrl_blender/custom_cameras.py)、[投影定义](../../blender_frontend/wfrl_blender/camera_projection.py)、[柔性回放](../../blender_frontend/wfrl_blender/farm_flex.py)：显式采样、同刻状态、标定与成像能力的静态依据。
 - [单相机 CLI](../../scripts/camera_video.py)、[后台视频渲染](../../scripts/blender/render_camera_video.py)、[视频编码/检查](../../wfrl/camera_video/media.py)、[视频数据](../../wfrl/camera_video/data.py)：入口兼容、规格选项、编码布局和数据隔离的静态依据。
-- [NREL 三摄研究方案](reconstruction/NREL5MW_固定三摄叶片三维重建与表面缺陷首轮诊断方案_v1.1.md)第 3.2、3.4、6.1、7.1、8 节：真值隔离、CV 投影、输出状态、显式模板和评分；本组交付范围以本文为准。
 
 两项交付的具体结果以文首链接的原始运行证据为准。软件发布、原图采集能力或 TLS 净空数值不能替代视频与重建的完成证据；流程完成也不能替代几何精度验收。

@@ -58,7 +58,7 @@ SB3 包装器在自动重置前保存各机组的完整 `terminal_observation`�
 
 正式 CLI 的 sampler 在初始化、预热或观测打包失败后关闭已获取的 driver；换回合须确认严格关闭成功。关闭失败保留 driver／runtime 归属并阻止下一回合，初始化清理失败的异常携带 `driver` 或 `sampler` 引用。PPO 的团队优势标准化对单元素使用零标准差，适用于单机单步和单元素尾批。
 
-自定义 Scene YAML 的 `dt` 使用有限正整数秒，小数步长在创建 case 前拒绝，case、runtime 与 limiter 使用同一步长。非 Scene 的 `--backend floris` 路径保留显式 `--wind-direction`，并在风况调度与实验身份中使用它；未指定方向时，`preset:veer` 等预设可提供 FLORIS 风向。FAST.Farm 的方向请求仍不生效，Bridge Formal 仍只接受 FAST.Farm。
+自定义 Scene YAML 的 `dt` 使用有限正整数秒，小数步长在创建 case 前拒绝，case、runtime 与 limiter 使用同一步长。非 Scene 的 `--backend floris` 路径保留显式 `--wind-direction`，并在风况调度与实验身份中使用它；未指定方向时，`preset:veer` 等预设可提供 FLORIS 风向。FAST.Farm 的显式 `--wind-direction` 也经配置、调度和采样器传到底层校验：270°及其等价值匹配固定坐标，其他未支持方向拒绝，不执行任意坐标旋转。Bridge Formal 仍只接受 FAST.Farm。
 
 Studio 停止与窗口关闭通过定时轮询等待训练和显示求解线程退出；资源归属未确认时保留窗口并阻止重新启动。正测量顺桨角在显示、柔性几何与净空中采用一致的局部旋转符号。转矩修正同时满足单步与累计边界；当前值距 VS 包线过远时逐步接近，事件记录实际可提交的 float32 增量，不保证一步进入包线。缺失、布尔、非实数或非有限功率保留为 NaN，不补零。
 
@@ -71,6 +71,12 @@ Studio 的 `NacelleLidar` 为合成示意：轮毂均值、幂律切变和确定
 `--recurrent` 只作用于集中式 critic。采样逐步维护隐藏状态，rollout 边界保留并 detach，回合起点清零；训练使用该 rollout 起点的隐藏状态及逐步回合起点标记。截断的 bootstrap 使用重置前观测和同一历史条件，但不提前消耗下一控制步的隐藏状态。数值一致性不代表 GRU 对前馈网络的控制收益已得到物理训练验证。
 
 观测统计在当前动作执行后纳入当前原始观测，再计算下一状态的 bootstrap；连续步的 bootstrap 与下一次决策估值使用同一份统计。截断处仍使用 reset 前观测，GAE 递推在回合边界停止。
+
+## FAST.Farm 风况合同
+
+工作区驱动返回 `wind_conditions`，分别保存调用方请求、实际解析／回读的输入和文件／运行采样统计。`upstream_request.scene` 保留场景显示风向，`requested` 保留实际求解请求；显示方向不自动传作求解方向，显式训练请求则保留并传递。稳态风可指定有限正风速；BTS 不接受标量风速覆盖；显式270°仅记为 `MATCHES_FIXED_COORDINATES`，不执行坐标旋转。未支持的风况到达接口时以 `WindRequestError` 明确拒绝。BTS 超出时长目前记录警告，场内独立入流统计为 `unavailable`。
+
+`--wind-sched preset:turb` 在无场景配置时被拒绝，BTS 训练通过 `--scene` 的 `inflow.turbulence` 指定。原始方向在部分入口中未保留，不能将入口规范化等同于接口拒绝。完整字段、保存位置、入口冲突及待实现限制见[FAST.Farm 风况](FASTFarm风况.md)。
 
 ## 2. 依赖与安装
 

@@ -33,7 +33,9 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定
 
 宿主夹具的平台差异集中在 `blender_frontend/tests/_platform.py`：venv 解释器路径、Python 工具脚本及符号链接创建（无法创建时跳过并附原因）。Windows 分支在 macOS 上以模拟测试覆盖，Windows 实机结果以 `windows-host` 任务为准，见[自动检查](../../../../docs/development/自动检查.md#windows-前端宿主检查)。
 
-手动视频监管用例（`blender_frontend/tests/test_manual_video_job.py`）需要解释器提供 `os.waitid`；macOS 上 Python 3.13 起才提供，较旧的解释器会跳过这些用例而不报失败，选择宿主解释器时分别报告。这些用例在临时目录启动子进程，`PYTHONPATH` 须写成绝对路径，例如 `PYTHONPATH="$PWD/blender_frontend:$PWD"`。
+`test_manual_down.py`、`test_extension_output.py`、`test_extension_package.py` 中依赖 POSIX 硬链接发布的用例在 Windows 显式跳过，不作为发布支持证据。根测试可从仓库执行 `python -m pytest tests -q -p no:cacheprovider`；激光采样文件为 `tests/lidar/test_lidar_sampling.py`，与 X100 的 `tests/radar_x100/test_sampling.py` 不冲突。依赖、PYTHONPATH和平台跳过按[根目录测试入口](../../../../docs/development/自动检查.md#根目录测试入口)处理；纯文档任务仍只做静态检查。
+
+手动视频监管用例（`blender_frontend/tests/test_manual_video_job.py`）在模块级导入 `psutil`，缺少该依赖会在测试收集时失败，平台 skip 不能代替依赖安装。本地运行所用宿主解释器须同时满足 **Python ≥3.13 且已安装 psutil 和 pytest**，并提供 `os.waitid`、`os.WNOWAIT` 和 `os.P_PID`；依赖齐全但缺少 POSIX 监管接口时，相关用例跳过，选择宿主解释器时分别报告。所选解释器与依赖预检命令见[手动视频监管测试](../../../../docs/development/自动检查.md#手动视频监管测试)。这些用例在临时目录启动子进程，`PYTHONPATH` 须写成绝对路径，例如 `PYTHONPATH="$PWD/blender_frontend:$PWD"`。
 
 窗口脚本不加 `--background`；安装检查保留所需 profile，不照搬工厂启动。使用独立进程、配置、场景副本和新输出目录，保护用户脏场景及规范资产。
 
@@ -117,13 +119,17 @@ python3 scripts/blender/run_playback_benchmark.py --blender <Blender可执行文
 
 保留产物与已清理范围见[安装记录的产物可用性](../../../../publication/daily-installation.json)。原始日志和 JSON 中的临时路径保留测量时来源，不改写成当前路径；留存 `environment.json` 不表示隔离 profile 仍存在。使用安装验证或性能入口前核对 profile，缺失时须建立并验证匹配的新隔离环境，不能把历史目录当作可运行配置。
 
+## X100 观测模式
+
+仓库 `blender_frontend/tests/blender/radar_x100_detection_mode.py` 已登记于 `scripts/blender/run_regressions.py`，使用独立源码后台、新输出目录，要求 `X100_DETECTION_MODE_PASS`、最终 `result.json` 和正常退出。核对默认GEOMETRY、DETECTIONS显式应用、预算隔离、无material_ids、记录／回放和保存重开，不验证GPU像素或实机。构建清单未包含detection.py，源码检查不证明扩展交付。
+
 ## X100 同帧分析
 
 `tests/radar_x100/test_analysis.py` 验证独立 NumPy 三角最近点、无效值、色标与经过分段；`blender_frontend/tests/blender/radar_x100_analysis.py` 用源码后台核对侧壁封口排除、BVH 基准、只读上下文、冻结 ROI、真值隔离、提交回滚、刚塔回退及同步取样配对对照，要求新 `WFRL_TEST_OUTPUT`、`X100_ANALYSIS_PASS`、最终 `result.json` 及正常退出。该脚本可由 `run_regressions.py` 选择；它与安装预设、配置、绑定回放、主合同、边界、历史及观测合同后台检查列于[CI 原生选择](../../../../configs/ci-native-tests.txt)。窗口／GPU、加载／undo／redo 和原始 RGB 分别按上述窗口及生命周期入口验收，不由后台测试推定。离线 `scripts/radar_x100/coverage.py` 的完整30 Hz报告是指定研究配置的有限目标覆盖，不证明实机净空或安全合格。当前本地证据与四项独立优化的测量边界见[工作区验证](../../../../docs/blender/发布状态与验证范围.md#x100-工作区源码验证)；报告内临时路径只标识测量来源，不要求恢复已清理的测试场景或探针。
 
 ## X100 观测研究
 
-仓库 `tests/radar_x100/test_sampling.py`、`test_installation.py`、`test_tracking.py` 分别核对面积度量与材料速度、最差覆盖与未知项、解析曲线与因果撤回。`radar_x100_observations.py` 和 `radar_x100_estimation_window.py` 均由运行器登记。后台观测合同列于 [CI 原生选择](../../../../configs/ci-native-tests.txt)，可见画布按需独立检查。普通文档／发布任务沿用各自默认范围。
+仓库 `tests/radar_x100/test_sampling.py`、`test_installation.py`、`test_tracking.py` 分别核对面积度量／权重身份与材料速度、机械筛选／两类支持指标／v2报告拒绝、解析曲线与因果撤回；同目录 `test_detection_physics.py`、`test_detection.py` 和 `test_simulation_detection.py` 核对方向图归一化、kT0·B·NF噪声、假设灵敏度锚点、四维分辨率／误差、面积积分与独立输出预算。宿主 `test_radar_x100_detections.py` 核对模式生产和显示合同。`radar_x100_observations.py` 和 `radar_x100_estimation_window.py` 均由运行器登记。后台观测合同列于 [CI 原生选择](../../../../configs/ci-native-tests.txt)，可见画布按需独立检查。普通文档／发布任务沿用各自默认范围。
 
 ```bash
 python scripts/blender/run_regressions.py --tests radar_x100_observations.py \
