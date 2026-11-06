@@ -1,7 +1,9 @@
 """Analytic blade observations, target ambiguity and causal failure boundaries."""
 from dataclasses import replace
 import numpy as np
+import pytest
 from wfrl.radar_x100.tracking import BladePrior, BladeTracker, fit_blades
+from wfrl.radar_x100.tracking import smooth_positions
 
 
 def observations(angle=0., offset=0.):
@@ -67,3 +69,34 @@ def test_nonfinite_and_no_span_do_not_produce_an_estimate():
     result = fit_blades(points, priors, np.ones(len(points)))
     assert all(row['tip_world'] is None for row in result['blades'])
     assert result['invalid'] == 240
+
+
+def test_position_velocity_smoother_recovers_motion_and_missing_prefix_without_double_counting():
+    times = np.arange(20)/30
+    velocity = np.array([.7, -.2, .1])
+    truth = [1., 2., 60.] + times[:, None]*velocity
+    missing = {0, 1, 8, 9, 17, 18, 19}
+    points = [None if i in missing else p for i, p in enumerate(truth)]
+    covariances = [None if p is None else np.eye(3)*1e-5 for p in points]
+    states, covariance = smooth_positions(times, points, covariances,
+        acceleration_noise_m2_s3=.01)
+    np.testing.assert_allclose(states[:, :3], truth, atol=.002)
+    np.testing.assert_allclose(states[:, 3:], np.broadcast_to(velocity, (20, 3)), atol=.01)
+    assert np.linalg.eigvalsh(covariance).min() > 0
+    assert covariance[19, 0, 0] > covariance[18, 0, 0] > covariance[17, 0, 0]
+    single = smooth_positions([0.], [[1., 2., 3.]], [np.eye(3)*.3])
+    np.testing.assert_array_equal(single[1][0, :3, :3], np.eye(3)*.3)
+    assert smooth_positions([0., 1.], [None, None], [None, None]) is None
+
+
+@pytest.mark.parametrize('times,positions,covariances', [
+    ([0., 0.], [None, None], [None, None]),
+    ([1., 0.], [None, None], [None, None]),
+    ([np.nan], [None], [None]),
+    ([0.], [[1., 2., 3.]], [None]),
+    ([0.], [[1., 2., 3.]], [np.diag([1., 1., -1.])]),
+    ([0.], [[1., np.nan, 3.]], [np.eye(3)]),
+])
+def test_position_smoother_rejects_bad_clock_and_covariance(times, positions, covariances):
+    with pytest.raises(ValueError):
+        smooth_positions(times, positions, covariances)

@@ -19,6 +19,77 @@ class BladePrior:
         object.__setattr__(self, 'world_from_blade', matrix)
 
 
+def smooth_positions(times_s, positions, covariances, *, acceleration_noise_m2_s3=1.,
+                     initial_velocity_std_m_s=3.):
+    """Offline constant-velocity Kalman/RTS smoother in a declared moving frame.
+
+    Missing measurements are None pairs. States are [position, velocity];
+    continuous white acceleration has spectral density in m²/s³. No sample
+    is used twice, including the first measurement and leading predictions.
+    Rotation belongs to the supplied frame poses, not to the local velocity.
+    An entirely unobserved sequence returns None.
+    """
+    times = np.asarray(times_s, float)
+    if (times.ndim != 1 or len(times) != len(positions) or len(times) != len(covariances)
+            or not np.isfinite(times).all() or np.any(np.diff(times) <= 0)
+            or not np.isfinite([acceleration_noise_m2_s3, initial_velocity_std_m_s]).all()
+            or min(acceleration_noise_m2_s3, initial_velocity_std_m_s) <= 0):
+        raise ValueError('Invalid temporal observations or motion uncertainty')
+    observed = []
+    for i, (point, covariance) in enumerate(zip(positions, covariances)):
+        if point is None and covariance is None:
+            continue
+        point, covariance = np.asarray(point, float), np.asarray(covariance, float)
+        if (point.shape != (3,) or covariance.shape != (3, 3)
+                or not np.isfinite(point).all() or not np.isfinite(covariance).all()
+                or not np.allclose(covariance, covariance.T)
+                or np.linalg.eigvalsh(covariance).min() <= 0):
+            raise ValueError('Position observations need positive definite covariance')
+        observed.append(i)
+    if not observed:
+        return None
+
+    def transition(dt):
+        matrix = np.eye(6)
+        matrix[:3, 3:] = np.eye(3)*dt
+        duration = abs(dt)
+        noise = acceleration_noise_m2_s3 * np.kron(
+            [[duration**3/3, dt*duration/2], [dt*duration/2, duration]], np.eye(3))
+        return matrix, noise
+
+    count, first = len(times), observed[0]
+    means = np.zeros((count, 6))
+    covariance = np.zeros((count, 6, 6))
+    predicted, predicted_covariance = means.copy(), covariance.copy()
+    means[first, :3] = positions[first]
+    covariance[first, :3, :3] = covariances[first]
+    covariance[first, 3:, 3:] = np.eye(3)*initial_velocity_std_m_s**2
+    for i in range(first+1, count):
+        matrix, noise = transition(times[i]-times[i-1])
+        predicted[i] = matrix@means[i-1]
+        predicted_covariance[i] = matrix@covariance[i-1]@matrix.T + noise
+        means[i], covariance[i] = predicted[i], predicted_covariance[i]
+        if positions[i] is not None:
+            observation_covariance = np.asarray(covariances[i])
+            gain = np.linalg.solve(covariance[i, :3, :3]+observation_covariance,
+                                   covariance[i, :3, :]).T
+            means[i] += gain@(np.asarray(positions[i])-means[i, :3])
+            residual = np.eye(6)
+            residual[:, :3] -= gain
+            covariance[i] = residual@covariance[i]@residual.T + gain@observation_covariance@gain.T
+    for i in range(count-2, first-1, -1):
+        matrix, _ = transition(times[i+1]-times[i])
+        gain = np.linalg.solve(predicted_covariance[i+1], matrix@covariance[i]).T
+        means[i] += gain@(means[i+1]-predicted[i+1])
+        covariance[i] += gain@(covariance[i+1]-predicted_covariance[i+1])@gain.T
+    for i in range(first-1, -1, -1):
+        matrix, noise = transition(times[i]-times[first])
+        means[i] = matrix@means[first]
+        covariance[i] = matrix@covariance[first]@matrix.T + noise
+    covariance = (covariance+covariance.transpose(0, 2, 1))/2
+    return means, covariance
+
+
 @dataclass(frozen=True)
 class FitConfig:
     minimum_points: int = 8

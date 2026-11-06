@@ -1,5 +1,6 @@
 """Analytic shape recovery, Doppler ambiguity, uncertainty and causal validity."""
 from dataclasses import replace
+from copy import deepcopy
 import numpy as np
 import pytest
 from wfrl.radar_x100 import clearance
@@ -178,3 +179,116 @@ def test_input_contracts_reject_mismatched_priors_and_bad_uncertainty():
     with pytest.raises(ValueError):
         tracker.update(points, np.zeros(len(points)), priors, vertices, triangles,
             time_s=1., identity='a', frame_key=1)
+
+
+def passage_fixture(missing=()):
+    times = np.arange(24)/30
+    rows, priors = [], []
+    for i, t in enumerate(times):
+        angle = 2.*t
+        c, s = np.cos(angle), np.sin(angle)
+        matrix = np.eye(4)
+        matrix[:3, :3] = [[c, 0, s], [0, 1, 0], [-s, 0, c]]
+        prior = BladePrior(1, matrix, 60.)
+        priors.append(prior)
+        tip = np.array([1.+.4*t, 0., 60.])
+        world = matrix[:3, :3]@tip
+        rows.append(dict(blade=1, status='INSUFFICIENT_POINTS' if i in missing else 'SUPPORTED',
+            points=0 if i in missing else 40, indices=[], consecutive_frames=0,
+            tip_local=None if i in missing else tip,
+            tip_world=None if i in missing else world,
+            tip_covariance_local_m2=None if i in missing else np.eye(3)*1e-5,
+            clearance_m=None if i in missing else world[0]+80.,
+            clearance_std_m=None if i in missing else .2,
+            clearance_interval95_m=None if i in missing else [world[0]+79.6, world[0]+80.4],
+            coefficients=None))
+    def query(points):
+        points = np.array(points)
+        nearest = points.copy()
+        nearest[:, 0] = -80.
+        return points[:, 0]+80., nearest
+    return times, rows, priors, [([], [])]*len(times), [query]*len(times)
+
+
+def test_passage_smoothing_fills_both_directions_in_rotating_coordinates_and_grows_uncertainty():
+    times, rows, priors, surfaces, queries = passage_fixture({0, 1, 7, 8, 22, 23})
+    before = deepcopy(rows)
+    result = clearance.track_clearance_passage(rows, priors, surfaces, times_s=times, tower_queries=queries)
+    for i, (row, prior, stamp) in enumerate(zip(result, priors, times)):
+        world = prior.world_from_blade[:3, :3]@np.array([1.+.4*stamp, 0., 60.])
+        np.testing.assert_allclose(row['tip_world'], world, atol=.002)
+        assert row['clearance_m'] == pytest.approx(world[0]+80., abs=.002)
+        assert row['clearance_std_m'] >= .2
+        assert row['clearance_interval95_m'][0] < world[0]+80. < row['clearance_interval95_m'][1]
+        if i in {0, 1, 7, 8, 22, 23}:
+            np.testing.assert_allclose(row['tip_velocity_local_m_s'], [.4, 0, 0], atol=.01)
+            assert row['status'] == row['estimate_kind'] == 'TRACKING_EXTRAPOLATED'
+            assert row['estimate_label'] == '跟踪外推'
+            assert row['single_frame_status'] == 'INSUFFICIENT_POINTS'
+        else:
+            for key in before[i]:
+                np.testing.assert_equal(row[key], before[i][key])
+        for key in before[i]:
+            np.testing.assert_equal(rows[i][key], before[i][key])
+    assert result[23]['clearance_std_m'] > result[22]['clearance_std_m'] > result[21]['clearance_std_m']
+    assert result[0]['tracking_past_age_s'] is None
+    assert result[0]['tracking_future_age_s'] == pytest.approx(2/30)
+    assert result[23]['tracking_future_age_s'] is None
+
+
+def test_passage_prediction_time_and_uncertainty_limits_leave_numbers_unavailable():
+    times, rows, priors, surfaces, queries = passage_fixture(set(range(12, 24)))
+    config = replace(clearance.PassageTrackingConfig(), maximum_prediction_s=.1)
+    result = clearance.track_clearance_passage(rows, priors, surfaces, times_s=times,
+        tower_queries=queries, config=config)
+    assert result[14]['status'] == 'TRACKING_EXTRAPOLATED'
+    for row in result[15:]:
+        assert row['tracking_reason'] == 'PREDICTION_TOO_FAR'
+        assert row['tip_world'] is row['clearance_m'] is row['clearance_interval95_m'] is None
+    uncertain = replace(config, maximum_clearance_std_m=.201)
+    result = clearance.track_clearance_passage(rows, priors, surfaces, times_s=times,
+        tower_queries=queries, config=uncertain)
+    assert result[12]['tracking_reason'] == 'UNCERTAIN'
+    assert result[12]['tracking_clearance_std_m'] > uncertain.maximum_clearance_std_m
+    assert result[12]['clearance_m'] is None
+
+
+@pytest.mark.parametrize('boundary', ['gap', 'reverse', 'duplicate'])
+def test_passage_motion_never_crosses_clock_boundaries_or_invents_unanchored_estimates(boundary):
+    times, rows, priors, surfaces, queries = passage_fixture(set(range(10, 24)))
+    if boundary == 'gap':
+        times[10:] += 1.
+    elif boundary == 'reverse':
+        times[10:] -= 1.
+    else:
+        times[10:] -= 1/30
+        times[10] = times[9]
+    result = clearance.track_clearance_passage(rows, priors, surfaces, times_s=times, tower_queries=queries)
+    assert all(r['clearance_m'] is None and r['tracking_reason'] == 'INSUFFICIENT_OBSERVATIONS' for r in result[10:])
+    unobserved = clearance.track_clearance_passage(rows[10:], priors[10:], surfaces[10:],
+        times_s=times[10:], tower_queries=queries[10:])
+    assert all(r['clearance_m'] is None for r in unobserved)
+
+
+def test_passage_input_contract_and_motion_parameters():
+    times, rows, priors, surfaces, queries = passage_fixture()
+    priors[1] = replace(priors[1], blade=2)
+    with pytest.raises(ValueError, match='paired'):
+        clearance.track_clearance_passage(rows, priors, surfaces, times_s=times, tower_queries=queries)
+    for changes in (dict(maximum_prediction_s=0.), dict(prediction_std_m_s=np.nan), dict(minimum_observations=2.5)):
+        with pytest.raises(ValueError):
+            replace(clearance.PassageTrackingConfig(), **changes)
+
+
+def test_prediction_uses_only_local_anchors_and_accepts_optional_raw_fit_fields():
+    times, rows, priors, surfaces, queries = passage_fixture({12})
+    original = clearance.track_clearance_passage(rows, priors, surfaces, times_s=times, tower_queries=queries)
+    changed = deepcopy(rows)
+    for row in changed:
+        row['tip_local_observed'] = row['tip_covariance_local_observed_m2'] = None
+    changed[0]['tip_local'] += [100., 100., 0.]
+    changed[-1]['tip_local'] -= [100., 100., 0.]
+    result = clearance.track_clearance_passage(changed, priors, surfaces, times_s=times, tower_queries=queries)
+    np.testing.assert_array_equal(result[12]['tip_world'], original[12]['tip_world'])
+    assert result[12]['clearance_m'] == original[12]['clearance_m']
+    assert result[12]['tracking_observations'] < len(rows)-1

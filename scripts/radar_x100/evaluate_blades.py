@@ -1,4 +1,4 @@
-"""Evaluate causal radar estimates against independent saved structural-tip motion."""
+"""Evaluate single-frame support and passage tracking against independent truth."""
 import argparse
 import gzip
 import hashlib
@@ -261,7 +261,9 @@ def evaluate_detection_observations(data):
     shapes = {int(b): clearance.BladeShape(**{k: v for k, v in s.items() if k != 'rest_sha256'})
               for b, s in data['shapes'].items()}
     tracker = clearance.ClearanceTracker(shapes)
-    rows, predicted_all, truth_all, predicted_roi, truth_roi = [], [], [], [], []
+    tracking_config = clearance.PassageTrackingConfig()
+    inferred, frame_priors, groups = [], [], []
+    group_key = None
     for index, record in enumerate(data['frames']):
         priors = [tracking.BladePrior(**p) for p in record['priors']]
         result = tracker.update(record['world_points'], record['radial_velocity_m_s'], priors,
@@ -269,7 +271,27 @@ def evaluate_detection_observations(data):
             identity=(data['source_id'], data['geometry_id'], data['installation']['id']), frame_key=record['source_index'],
             observed_power_w=record['observed_power_w'], observed_snr_linear=record['observed_snr_linear'],
             position_std_m=record['position_std_m'])
-        # Truth is accessed only after inference, and cannot update the tracker.
+        inferred.append(result)
+        frame_priors.append(next(p for p in priors if p.blade == record['blade']))
+        key = record['blade'], record['passage']
+        if key != group_key:
+            groups.append([])
+            group_key = key
+        groups[-1].append(index)
+        if index % 100 == 0:
+            print(f'X100_CLEARANCE_ESTIMATION {index+1}/{len(data["frames"])}', flush=True)
+    tracked = [None]*len(inferred)
+    for indices in groups:
+        records = [data['frames'][i] for i in indices]
+        estimates = [inferred[i]['blades'][frame_priors[i].blade-1] for i in indices]
+        smoothed = clearance.track_clearance_passage(estimates, [frame_priors[i] for i in indices],
+            [(r['tower_vertices'], r['tower_triangles']) for r in records],
+            times_s=[r['time_s'] for r in records], config=tracking_config)
+        for i, row in zip(indices, smoothed):
+            tracked[i] = row
+    rows, predicted_all, truth_all, predicted_roi, truth_roi = [], [], [], [], []
+    for record, result, prior, tracked_row in zip(data['frames'], inferred, frame_priors, tracked):
+        # Both inference paths finish before any evaluation truth is accessed.
         truth = record['truth']
         predicted = result['labels']
         labels, roi = np.asarray(truth['labels']), np.asarray(record['roi_mask'], bool)
@@ -278,10 +300,15 @@ def evaluate_detection_observations(data):
         row = result['blades'][record['blade']-1]
         baseline, reference = truth['baseline_clearance_m'], truth['distal_surface_clearance_m']
         estimate = row['clearance_m']
-        fitted_surface = (_surface_clearance(row, priors[record['blade']-1], shapes[record['blade']],
+        fitted_surface = (_surface_clearance(row, prior, shapes[record['blade']],
             data['meshes'][str(record['blade'])], record, data) if estimate is not None else None)
+        tracked_value = tracked_row['clearance_m']
         rows.append(dict(time_s=record['time_s'], source_index=record['source_index'], blade=record['blade'],
             passage=record['passage'], estimate=row, separation=separation_metrics(labels, predicted),
+            tracked_estimate=tracked_row,
+            tracked_tip_clearance_error_m=tracked_value-truth['tip_clearance_m'] if tracked_value is not None else None,
+            tracked_tip_position_error_m=float(np.linalg.norm(np.asarray(tracked_row['tip_world'])-truth['tip_world'])) if tracked_value is not None else None,
+            tracked_interval95_contains_truth=(tracked_row['clearance_interval95_m'][0] <= truth['tip_clearance_m'] <= tracked_row['clearance_interval95_m'][1]) if tracked_value is not None else None,
             point_labels=predicted, blade_assignment=result['blade_assignment'],
             tip_truth_world=truth['tip_world'], tip_truth_clearance_m=truth['tip_clearance_m'],
             baseline_clearance_m=baseline, distal_surface_truth_m=reference, fitted_surface_clearance_m=fitted_surface,
@@ -291,15 +318,25 @@ def evaluate_detection_observations(data):
             baseline_surface_error_m=baseline-reference if baseline is not None and reference is not None else None,
             fitted_surface_error_m=fitted_surface-reference if fitted_surface is not None and reference is not None else None,
             interval95_contains_truth=(row['clearance_interval95_m'][0] <= truth['tip_clearance_m'] <= row['clearance_interval95_m'][1]) if estimate is not None else None))
-        if index % 100 == 0:
-            print(f'X100_CLEARANCE_ESTIMATION {index+1}/{len(data["frames"])}', flush=True)
     def summarize(selected):
         n = len(selected)
         common = [r for r in selected if r['baseline_tip_error_m'] is not None and r['tip_clearance_error_m'] is not None]
         surface_common = [r for r in selected if r['baseline_surface_error_m'] is not None and r['fitted_surface_error_m'] is not None]
         supported = [r for r in selected if r['interval95_contains_truth'] is not None]
+        tracked_supported = [r for r in selected if r['tracked_interval95_contains_truth'] is not None]
+        extrapolated = [r for r in selected if r['tracked_estimate']['estimate_kind'] == 'TRACKING_EXTRAPOLATED']
+        tracking_common = [r for r in selected if r['tip_clearance_error_m'] is not None and r['tracked_tip_clearance_error_m'] is not None]
         return dict(N=n, baseline_tip=error_metrics([r['baseline_tip_error_m'] for r in selected], n),
             estimated_tip=error_metrics([r['tip_clearance_error_m'] for r in selected], n),
+            single_frame=error_metrics([r['tip_clearance_error_m'] for r in selected], n),
+            tracked_tip=error_metrics([r['tracked_tip_clearance_error_m'] for r in selected], n),
+            tracking_extrapolated_tip=error_metrics([r['tracked_tip_clearance_error_m'] for r in extrapolated], n),
+            tracking_missing_candidates=sum(r['tip_clearance_error_m'] is None for r in selected),
+            common_tracking_frames=dict(single_frame=error_metrics([r['tip_clearance_error_m'] for r in tracking_common], len(tracking_common)),
+                tracked=error_metrics([r['tracked_tip_clearance_error_m'] for r in tracking_common], len(tracking_common))),
+            tracked_tip_position=error_metrics([r['tracked_tip_position_error_m'] for r in selected], n),
+            tracked_interval95_coverage=float(np.mean([r['tracked_interval95_contains_truth'] for r in tracked_supported])) if tracked_supported else None,
+            tracking_status_counts=dict(Counter(r['tracked_estimate']['status'] for r in selected)),
             tip_position=error_metrics([r['tip_position_error_m'] for r in selected], n),
             baseline_surface=error_metrics([r['baseline_surface_error_m'] for r in selected], n),
             fitted_surface=error_metrics([r['fitted_surface_error_m'] for r in selected], n),
@@ -315,7 +352,7 @@ def evaluate_detection_observations(data):
         **{k: v for k, v in data.items() if k not in ('frames', 'shapes', 'meshes', 'schema')},
         inference_code_identity={str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in code_paths},
         shape_priors={b: {k: v for k, v in shape.items() if k in ('source', 'rest_sha256', 'tip_local_m')} for b, shape in data['shapes'].items()},
-        inference_config=asdict(tracker.config), overall=summarize(rows),
+        inference_config=asdict(tracker.config), tracking_config=asdict(tracking_config), overall=summarize(rows),
         blades=[dict(blade=b, **summarize([r for r in rows if r['blade'] == b])) for b in (1, 2, 3)],
         passage_metrics=[dict(blade=b, passage=p, **summarize([r for r in rows if r['blade'] == b and r['passage'] == p]))
             for b, windows in enumerate(data['passage_windows'], 1) for p in range(len(windows))],
@@ -326,6 +363,10 @@ def evaluate_detection_observations(data):
             inference_domain='All engineering detections; root-coordinate distal fit. ROI is only the legacy output metric.',
             truth='Evaluation only: >=90% material-class power per reconstructed resolution cell; mixed cells unresolved; noise-only OTHER',
             quality='Observed detector power and observed power/noise ratio only; true signal SNR/power and false_alarm excluded from inference',
+            single_frame='Existing current-frame fit/support gate and causal filtering; identical denominator and estimator to the single-frame-supported baseline',
+            tracked_tip='Supported single-frame values retained; missing frames use a local-window position/velocity Kalman/RTS smoother per passage in declared root coordinates; current root poses constrain rotor motion',
+            tracking_extrapolated_tip='Only frames lacking a valid single-frame estimate; includes interpolation/backward prediction, explicitly labelled 跟踪外推; fraction denominator is all passage frames',
+            tracking_age='Seconds to nearest supported observation; bounded time and growing model uncertainty; no cross-passage or unanchored prediction',
             uncertainty='Approximate uncalibrated 95% intervals, empirical coverage reported; no hardware or safety claim'), frames=rows)
 
 
@@ -340,11 +381,17 @@ def detection_main(args):
             raise ValueError('Unsupported observation cache')
     else:
         data = collect_detection_observations(args)
+    observation_identity = None
+    if args.observations:
+        observation_identity = dict(path=str(args.observations.resolve()),
+            sha256=hashlib.sha256(args.observations.read_bytes()).hexdigest())
     if args.save_observations:
         args.save_observations.parent.mkdir(parents=True, exist_ok=True)
         with gzip.open(args.save_observations, 'xt', encoding='utf-8') as stream:
             json.dump(data, stream, default=_json_value, allow_nan=False)
     report = evaluate_detection_observations(data)
+    if observation_identity is not None:
+        report['observation_cache'] = observation_identity
     # Convert NumPy values before the common atomic writer checks strict JSON.
     report = json.loads(json.dumps(report, default=_json_value, allow_nan=False))
     atomic_json.write_json(args.output, report, mkdir=True)

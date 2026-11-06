@@ -9,6 +9,7 @@ from dataclasses import dataclass
 import math
 import numpy as np
 from . import analysis
+from .tracking import smooth_positions
 
 
 OTHER, BLADE, TOWER = 0, 1, 2
@@ -65,6 +66,33 @@ class ClearanceConfig:
                 or any(type(getattr(self, name)) is not int for name in
                        ('minimum_neighbours', 'minimum_fit_points', 'minimum_fit_bins', 'fit_bins'))):
             raise ValueError('Invalid clearance research parameters')
+
+
+@dataclass(frozen=True)
+class PassageTrackingConfig:
+    """Offline motion/coverage limits; uncertainty is uncalibrated, in SI units.
+
+    Predictions need at least minimum_observations within a local window of
+    the same continuous passage. maximum_prediction_s is distance to the
+    nearest measured anchor, including backward predictions from future
+    frames. Missing-frame model uncertainty grows with that distance and is
+    not reduced by smoothing. The clearance uncertainty cap applies only to
+    predictions; accepted single-frame measurements keep their own validity.
+    """
+    acceleration_noise_m2_s3: float = 1.
+    initial_velocity_std_m_s: float = 3.
+    model_std_m: float = .20
+    prediction_std_m_s: float = 1.
+    smoothing_window_s: float = .20
+    maximum_prediction_s: float = .20
+    maximum_clearance_std_m: float = .45
+    max_gap_s: float = .12
+    minimum_observations: int = 3
+
+    def __post_init__(self):
+        if (not np.isfinite(list(vars(self).values())).all() or min(vars(self).values()) <= 0
+                or type(self.minimum_observations) is not int or self.minimum_observations < 2):
+            raise ValueError('Invalid passage tracking parameters')
 
 
 @dataclass(frozen=True)
@@ -341,6 +369,8 @@ class ClearanceTracker:
                 else:
                     row.update(tip_local=tip, tip_world=world, clearance_m=d, clearance_std_m=std,
                         clearance_interval95_m=[max(0., d-1.96*std), d+1.96*std],
+                        tip_local_observed=row['tip_local'].copy(),
+                        tip_covariance_local_observed_m2=row['tip_covariance_local_m2'].copy(),
                         tip_covariance_local_m2=covariance, consecutive_frames=count)
                     tracks[prior.blade] = dict(tip=tip.copy(), covariance=covariance.copy(), count=count,
                                               coefficients=row['coefficients'].copy())
@@ -350,3 +380,111 @@ class ClearanceTracker:
         self.tracks = tracks
         self.identity, self.time, self.frame_key, self.result = identity, time_s, frame_key, result
         return result
+
+
+def track_clearance_passage(estimates, priors, tower_surfaces, *, times_s,
+                            config=PassageTrackingConfig(), tower_queries=None):
+    """Smooth one blade passage without truth, point labels or loaded geometry.
+
+    estimates are inference rows, priors are same-time BladePrior objects and
+    tower_surfaces are (vertices, triangles) pairs. The caller must isolate
+    source identity and passage. Clock reversals and missing source-grid
+    intervals split the sequence again; observations never cross those cuts.
+    Current root poses carry the rotor motion prior, so the local position/
+    velocity state models bending rather than approximating rotation by a
+    world-space straight line. Clearance is queried on the same-time tower.
+
+    Supported single-frame estimates are retained exactly. Each missing
+    target uses a bounded local observation window so changing bending
+    velocity is not replaced by a passage-wide linear trend. Raw single-frame
+    fits are used when available, before the causal filter correlates them.
+    Existing causal update() behaviour is independent of this offline API.
+    Missing-frame results have status/estimate_kind TRACKING_EXTRAPOLATED,
+    including interpolation from future observations, and cannot be mistaken
+    for a fresh detection. An unavailable prediction leaves a missing frame
+    without numbers. Input rows are not mutated.
+    """
+    times = np.asarray(times_s, float)
+    count = len(estimates)
+    if (times.shape != (count,) or not np.isfinite(times).all()
+            or len(priors) != count or len(tower_surfaces) != count
+            or tower_queries is not None and len(tower_queries) != count
+            or len({p.blade for p in priors}) > 1
+            or any(r['blade'] != p.blade for r, p in zip(estimates, priors))):
+        raise ValueError('Passage tracking requires paired times, blade poses and tower surfaces')
+    rows = [dict(row, single_frame_status=row['status'],
+                 estimate_kind='SINGLE_FRAME' if row['clearance_m'] is not None else 'UNAVAILABLE',
+                 tracking_mode='OFFLINE_SMOOTHER', tracking_extrapolation_s=None,
+                 tracking_past_age_s=None, tracking_future_age_s=None,
+                 tracking_clearance_std_m=None) for row in estimates]
+    cuts = np.r_[0, np.flatnonzero((np.diff(times) <= 0) | (np.diff(times) > config.max_gap_s))+1, count]
+    for start, stop in zip(cuts[:-1], cuts[1:]):
+        anchors = [i for i in range(start, stop)
+                   if estimates[i]['status'] == 'SUPPORTED' and estimates[i]['clearance_m'] is not None]
+        if len(anchors) < config.minimum_observations:
+            for row in rows[start:stop]:
+                row['tracking_reason'] = 'INSUFFICIENT_OBSERVATIONS'
+            continue
+        anchor_times = times[anchors]
+        for i in range(start, stop):
+            row = rows[i]
+            missing = i not in anchors
+            if not missing:
+                row.update(tracking_extrapolation_s=0., tracking_past_age_s=0.,
+                           tracking_future_age_s=0., tracking_reason=None)
+                continue
+            past, future = anchor_times[anchor_times <= times[i]], anchor_times[anchor_times >= times[i]]
+            age = float(np.min(np.abs(anchor_times-times[i])))
+            row.update(tracking_extrapolation_s=age,
+                       tracking_past_age_s=float(times[i]-past[-1]) if len(past) else None,
+                       tracking_future_age_s=float(future[0]-times[i]) if len(future) else None)
+            if age > config.maximum_prediction_s + 1e-10:
+                row['tracking_reason'] = 'PREDICTION_TOO_FAR'
+                continue
+            lower = min(max(times[i]-config.smoothing_window_s/2, anchor_times[0]),
+                        max(anchor_times[0], anchor_times[-1]-config.smoothing_window_s))
+            selected = [a for a in anchors if lower-1e-10 <= times[a] <= lower+config.smoothing_window_s+1e-10]
+            row['tracking_observations'] = len(selected)
+            if len(selected) < config.minimum_observations:
+                row['tracking_reason'] = 'INSUFFICIENT_OBSERVATIONS'
+                continue
+            indices = sorted(set(selected + [i]))
+            positions, covariances = [], []
+            for a in indices:
+                observed = estimates[a]
+                raw_tip = observed.get('tip_local_observed')
+                raw_covariance = observed.get('tip_covariance_local_observed_m2')
+                use_raw = raw_tip is not None and raw_covariance is not None
+                positions.append((raw_tip if use_raw else observed['tip_local']) if a in selected else None)
+                covariances.append((raw_covariance if use_raw else observed['tip_covariance_local_m2'])
+                                   if a in selected else None)
+            states, state_covariances = smooth_positions(times[indices], positions, covariances,
+                acceleration_noise_m2_s3=config.acceleration_noise_m2_s3,
+                initial_velocity_std_m_s=config.initial_velocity_std_m_s)
+            target = indices.index(i)
+            tip = states[target, :3].copy()
+            covariance = state_covariances[target, :3, :3].copy()
+            # A shared shape bias and unobserved motion are not independent
+            # repeated measurements and must survive the smoother's averaging.
+            covariance += np.eye(3)*(config.model_std_m**2 + (config.prediction_std_m_s*age)**2)
+            matrix = priors[i].world_from_blade
+            world = matrix[:3, :3]@tip + matrix[:3, 3]
+            if tower_queries is None:
+                distance, nearest = analysis.closest_reference([world], *tower_surfaces[i])[:2]
+            else:
+                distance, nearest = tower_queries[i](np.array([world]))
+            d = float(distance[0])
+            normal = matrix[:3, :3].T@(world-nearest[0])/max(d, 1e-12)
+            std = float(np.sqrt(max(0., normal@covariance@normal))) if d > 1e-12 else float(np.sqrt(np.linalg.eigvalsh(covariance).max()))
+            row['tracking_clearance_std_m'] = std if math.isfinite(std) else None
+            if not np.isfinite([d, std]).all() or d < 0 or std > config.maximum_clearance_std_m:
+                row['tracking_reason'] = 'UNCERTAIN'
+                continue
+            row.update(status='TRACKING_EXTRAPOLATED',
+                estimate_kind='TRACKING_EXTRAPOLATED',
+                estimate_label='跟踪外推', tracking_reason=None,
+                tip_local=tip, tip_world=world, tip_covariance_local_m2=covariance,
+                tip_velocity_local_m_s=states[target, 3:6].copy(),
+                clearance_m=d, clearance_std_m=std,
+                clearance_interval95_m=[max(0., d-1.96*std), d+1.96*std])
+    return rows
