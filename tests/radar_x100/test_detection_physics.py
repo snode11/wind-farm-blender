@@ -154,6 +154,39 @@ def test_dense_surface_chain_cannot_bridge_resolvable_targets_and_order_is_repea
     assert forward.model_diagnostics.values.tobytes() == backward.model_diagnostics.values.tobytes()
 
 
+@pytest.mark.parametrize('count', [0, 1, 64, 512])
+@pytest.mark.parametrize('widths', [[1., 1., 1., 1.], [.2, .017, .035, .1]])
+def test_resolution_hash_matches_complete_neighbour_scan(count, widths):
+    rng = np.random.default_rng(2026)
+    normalized = rng.uniform(-3., 3., (count, 4))
+    if count >= 64:
+        # Exact boundaries, duplicates and dense chains exercise all four hash axes.
+        normalized[:16] = np.arange(16)[:, None] * .6 - 4.
+        normalized[16:24] = 0.
+        for axis in range(4):
+            normalized[24 + 3*axis:27 + 3*axis] = 0.
+            normalized[24 + 3*axis:27 + 3*axis, axis] = [
+                np.nextafter(-1., -np.inf), -1., np.nextafter(-1., np.inf)]
+    coordinates = normalized * widths
+    normalized = coordinates / widths
+    expected = np.full(count, -1, dtype=np.int64)
+    clusters = 0
+    for index in np.lexsort(normalized[:, ::-1].T):
+        if expected[index] >= 0:
+            continue
+        candidates = np.flatnonzero((expected < 0)
+            & (np.abs(normalized - normalized[index]) <= 1).all(axis=1))
+        minimum = normalized[candidates].min(axis=0)
+        members = candidates[(normalized[candidates] - minimum <= 1).all(axis=1)]
+        expected[members] = clusters
+        clusters += 1
+    before = coordinates.copy()
+    labels, actual_count = detection._resolution_clusters(coordinates, widths)
+    assert actual_count == clusters
+    np.testing.assert_array_equal(labels, expected)
+    np.testing.assert_array_equal(coordinates, before)
+
+
 def test_datasheet_accuracy_is_two_sigma_assumption_and_errors_are_nonzero():
     cfg = detection.DetectionConfig(false_alarms_enabled=False)
     sigmas = np.array([cfg.range_std_m, cfg.azimuth_std_deg, cfg.elevation_std_deg, cfg.radial_velocity_std_m_s])

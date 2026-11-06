@@ -233,7 +233,7 @@ def _resolution_clusters(coordinates, widths):
     normalized = coordinates / widths
     bins = np.floor(normalized).astype(np.int64)
     buckets = {}
-    for index, key in enumerate(map(tuple, bins)):
+    for index, key in enumerate(map(tuple, bins.tolist())):
         buckets.setdefault(key, []).append(index)
     buckets = {key: np.asarray(indices) for key, indices in buckets.items()}
     labels = np.full(len(coordinates), -1, dtype=np.int64)
@@ -243,9 +243,10 @@ def _resolution_clusters(coordinates, widths):
     for index in order:
         if labels[index] >= 0:
             continue
-        key = bins[index]
-        neighbors = [buckets[k] for offset in offsets
-                     if (k := tuple(key + offset)) in buckets]
+        x, y, z, v = bins[index].tolist()
+        # Scalar hash keys preserve offset order without allocating an array per neighbor.
+        neighbors = [bucket for dx, dy, dz, dv in offsets
+                     if (bucket := buckets.get((x + dx, y + dy, z + dz, v + dv))) is not None]
         candidates = np.concatenate(neighbors)
         candidates = candidates[(labels[candidates] < 0)
             & (np.abs(normalized[candidates] - normalized[index]) <= 1).all(axis=1)]
