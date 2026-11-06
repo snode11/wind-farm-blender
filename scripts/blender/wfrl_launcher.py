@@ -35,7 +35,8 @@ def log(message: str) -> None:
 
 
 def resolve_executable(value: str, label: str) -> str:
-    candidate = shutil.which(value) if not Path(value).is_absolute() else value
+    expanded = os.path.expanduser(value)
+    candidate = expanded if Path(expanded).is_absolute() else shutil.which(expanded)
     if not candidate or not Path(candidate).is_file():
         raise RuntimeError(f"{label} executable was not found: {value}")
     return str(Path(candidate).absolute())
@@ -224,7 +225,7 @@ if backend not in {"fastfarm", "floris"}:
 print(json.dumps(backend))
 """
     parsed = subprocess.run([python, "-c", reader, str(scene)], cwd=project,
-                            capture_output=True, text=True, timeout=15)
+                            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=15)
     if parsed.returncode:
         detail = (parsed.stderr or parsed.stdout).strip().splitlines()
         raise RuntimeError("backend Python cannot parse scene YAML" +
@@ -263,7 +264,7 @@ def preflight(args: argparse.Namespace, *, require_backend: bool) -> dict[str, o
         }[backend]
         import_check = subprocess.run(
             [python, "-c", check], cwd=project,
-            capture_output=True, text=True, timeout=15,
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=15,
         )
         if import_check.returncode:
             detail = (import_check.stderr or import_check.stdout).strip().splitlines()

@@ -25,6 +25,9 @@ REPOSITORY_ID = 'wfrl_frontend'
 MODULE = 'bl_ext.wfrl_frontend.wfrl_blender'
 EXIT_MEMORY_WARNING = re.compile(r'^Error: Not freed memory blocks: (?P<blocks>\d+), total unfreed memory (?P<mb>\d+(?:\.\d+)?) MB[ \t]*$', re.MULTILINE)
 ERROR_PATTERN = re.compile(r'Traceback \(most recent call last\)|(?:^|\n)(?:Error:|ERROR[ :]|FATAL[ :])|Segmentation fault|EXCEPTION_ACCESS_VIOLATION')
+WINDOWS_DEVICE_NAMES = {'con', 'prn', 'aux', 'nul'} | {
+    f'{prefix}{number}' for prefix in ('com', 'lpt') for number in range(1, 10)
+}
 
 
 def sha256(path):
@@ -37,8 +40,13 @@ def sha256(path):
 
 def safe_relative(name):
     relative = PurePosixPath(name)
-    if relative.is_absolute() or '..' in relative.parts or not relative.parts or '\\' in name:
+    if (relative.is_absolute() or '..' in relative.parts or not relative.parts
+            or any(character in name for character in '\\<>:"|?*')):
         raise ValueError(f'Unsafe inventory path: {name}')
+    for part in name.split('/'):
+        stem = part.partition('.')[0].rstrip(' ').casefold()
+        if part.endswith((' ', '.')) or stem in WINDOWS_DEVICE_NAMES:
+            raise ValueError(f'Unsafe inventory path: {name}')
     return relative
 
 
@@ -48,7 +56,7 @@ def verify_archive(archive, inventory):
     if actual != data['archive_sha256']:
         raise ValueError('Archive SHA-256 differs from inventory')
     expected = {row['path']: row for row in data['files']}
-    if len(expected) != len(data['files']):
+    if len({name.casefold() for name in expected}) != len(data['files']):
         raise ValueError('Duplicate inventory path')
     with ZipFile(archive) as zipped:
         if sorted(zipped.namelist()) != sorted(expected):
@@ -86,7 +94,7 @@ def run_command(command, *, env, output, name, required_markers=(), timeout=240.
     log = output/'logs'/f'{name}.log'
     log.parent.mkdir(exist_ok=True)
     try:
-        completed = subprocess.run(command, cwd=output, env=env, text=True,
+        completed = subprocess.run(command, cwd=output, env=env, text=True, encoding='utf-8', errors='replace',
                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=timeout)
         content, code = completed.stdout, completed.returncode
     except subprocess.TimeoutExpired as exc:

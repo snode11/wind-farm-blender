@@ -518,7 +518,8 @@ def _verify_video(path, frames, fps, size, ffprobe, ffmpeg):
     command = [ffprobe, '-v', 'error', '-select_streams', 'v:0', '-show_streams', '-show_frames',
                '-show_entries', 'stream=codec_name,width,height,avg_frame_rate:frame=best_effort_timestamp_time',
                '-of', 'json', str(path)]
-    result = json.loads(subprocess.run(command, check=True, capture_output=True, text=True).stdout)
+    result = json.loads(subprocess.run(command, check=True, capture_output=True, text=True,
+                                       encoding='utf-8', errors='replace').stdout)
     streams, decoded = result.get('streams', []), result.get('frames', [])
     if len(streams) != 1 or len(decoded) != frames:
         raise ValueError('实际解码帧数与请求不一致')
@@ -531,7 +532,8 @@ def _verify_video(path, frames, fps, size, ffprobe, ffmpeg):
         if not math.isfinite(timestamp) or abs(timestamp - index/fps) > 1e-5:
             raise ValueError('实际帧时间戳与 k/fps 不一致')
     subprocess.run([ffmpeg, '-v', 'error', '-xerror', '-nostdin', '-i', str(path),
-                    '-map', '0:v:0', '-f', 'null', '-'], check=True, capture_output=True, text=True)
+                    '-map', '0:v:0', '-f', 'null', '-'], check=True, capture_output=True, text=True,
+                   encoding='utf-8', errors='replace')
     return dict(frame_count=frames, fps=fps, resolution=list(size), full_decode=True)
 
 
