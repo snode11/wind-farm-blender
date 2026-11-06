@@ -18,7 +18,7 @@
   "user_preferences_preserved": true,
   "configuration_files_preserved": 6,
   "public_release": true,
-  "same_as_public_archive": true,
+  "same_as_public_archive": false,
   "matches_source_archive": true,
   "fresh_process_import": "PASS",
   "native_background_status": "PASS_REGISTRATION_ONLY",

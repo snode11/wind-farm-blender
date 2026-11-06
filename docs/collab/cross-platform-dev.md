@@ -1,6 +1,6 @@
 # 跨平台协作开发
 
-发布版本为 **0.3.42.6**（GitHub 标签 `v0.3.42.6`，Blender manifest 为 `0.3.42+6`）。安装与公开载荷身份以 `publication/daily-installation.json` 和发布交付记录为准。
+发布版本为 **0.3.42.7**（GitHub 标签 `v0.3.42.7`，Blender manifest 为 `0.3.42+7`）。安装与公开载荷身份以 `publication/daily-installation.json` 和发布交付记录为准。
 
 ## 仓库与分支
 

@@ -24,7 +24,7 @@ scripts/blender/run_wfrl_macos.sh --help
 scripts/macos/run_desktop.sh --help
 python3 scripts/blender/run_regressions.py --list
 python3 scripts/blender/run_installed_windows.py --list
-python3 scripts/ci/check_release_identity.py --release publication/blender-0.3.42.6.json
+python3 scripts/ci/check_release_identity.py --release publication/blender-0.3.42.7.json
 ```
 
 `experiments/verify_desktop_contracts.py` 检查 RViz 的来流、地形、中文标签、双视图与源码结构；默认包含可见窗口检查，`--online` 还会运行 FAST.Farm。它依赖完整桌面环境，不能当作无窗口宿主测试执行。

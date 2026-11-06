@@ -72,3 +72,5 @@ example*.png
 /publication/blender-0.3.42.5/release-package/*.zip
 /publication/blender-0.3.42.6/package/*.zip
 /publication/blender-0.3.42.6/delivery/
+/publication/blender-0.3.42.7/package/*.zip
+/publication/blender-0.3.42.7/delivery/
