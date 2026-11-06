@@ -374,11 +374,21 @@ class SceneSampler:
 
     def visibility(self, sample, targets):
         from mathutils.bvhtree import BVHTree
-        key = sample.geometry_id, sample.time_s
-        if self._visibility_cache.get('key') != key:
-            self._visibility_cache.update(key=key, tree=BVHTree.FromPolygons(
-                sample.vertices.tolist(), sample.triangles.tolist(), all_triangles=True))
-        return bvh_visibility(sample, targets, tree=self._visibility_cache['tree'])
+        # Sampling validates native object transforms and mesh bindings. Tree
+        # identity includes source, geometry, time and immutable world vertex/face
+        # contents, so same-time transforms or mesh edits invalidate the tree.
+        # Polygon conversion is reusable only for identical triangle contents.
+        # Sensor pose and observation configuration affect the uncached ray queries,
+        # not the world-space tree shared by installation snapshots.
+        key = sample.source_id, sample.geometry_id, sample.time_s
+        cache = self._visibility_cache
+        same_topology = ('triangles' in cache and np.array_equal(cache['triangles'], sample.triangles))
+        polygons = cache['polygons'] if same_topology else sample.triangles.tolist()
+        if (cache.get('key') != key or not same_topology
+                or not np.array_equal(cache['vertices'], sample.vertices)):
+            cache.update(key=key, vertices=sample.vertices, triangles=sample.triangles, polygons=polygons,
+                tree=BVHTree.FromPolygons(sample.vertices.tolist(), polygons, all_triangles=True))
+        return bvh_visibility(sample, targets, tree=cache['tree'])
 
     def installation_constraints(self, matrix, *, policy=None):
         """Check exterior installation space against the unchanged bound shell."""
@@ -520,6 +530,37 @@ def _closest_on_face(p, a, b, c):
     return a + ab*(vb*inverse) + ac*(vc*inverse)
 
 
+def _closest_on_faces(points, faces):
+    """Float64 Voronoi refinement for paired points and BVH-selected triangles."""
+    a, b, c = faces[:, 0], faces[:, 1], faces[:, 2]
+    ab, ac = b-a, c-a
+    ap, bp, cp = points-a, points-b, points-c
+    d1, d2, d3, d4, d5, d6 = (np.einsum('ij,ij->i', x, y)
+        for x, y in ((ab, ap), (ac, ap), (ab, bp), (ac, bp), (ab, cp), (ac, cp)))
+    vc, vb, va = d1*d4-d3*d2, d5*d2-d1*d6, d3*d6-d5*d4
+    result = np.empty_like(points)
+    remaining = np.ones(len(points), dtype=bool)
+
+    def take(mask, value):
+        selected = remaining & mask
+        result[selected] = value[selected]
+        remaining[selected] = False
+
+    def ratio(numerator, denominator):
+        return np.divide(numerator, denominator, out=np.zeros_like(numerator), where=denominator != 0)
+
+    take((d1 <= 0) & (d2 <= 0), a)
+    take((d3 >= 0) & (d4 <= d3), b)
+    take((vc <= 0) & (d1 >= 0) & (d3 <= 0), a + ratio(d1, d1-d3)[:, None]*ab)
+    take((d6 >= 0) & (d5 <= d6), c)
+    take((vb <= 0) & (d2 >= 0) & (d6 <= 0), a + ratio(d2, d2-d6)[:, None]*ac)
+    take((va <= 0) & (d4-d3 >= 0) & (d5-d6 >= 0),
+         b + ratio(d4-d3, (d4-d3)+(d5-d6))[:, None]*(c-b))
+    inverse = ratio(np.ones(len(points)), va+vb+vc)
+    take(remaining, a + ab*(vb*inverse)[:, None] + ac*(vc*inverse)[:, None])
+    return result
+
+
 class SideWallQuery:
     """Dedicated anchored BVH; never constructed or queried by draw callbacks."""
     def __init__(self, context):
@@ -559,17 +600,23 @@ class SideWallQuery:
                 cache[3][reused], cache[4][reused], cache[5][reused])
             status[reused] = 'VALID'
         missing = selected if cache is None else selected & ~cache[2]
-        for i in np.flatnonzero(missing):
-            q, _, face, _ = self.tree.find_nearest(Vector(world[i]-self.anchor))
+        indices = np.flatnonzero(missing)
+        for i, point in zip(indices, (world[indices]-self.anchor).tolist()):
+            q, _, face, _ = self.tree.find_nearest(Vector(point))
             if q is None:
                 status[i]='QUERY_FAILED'
                 continue
-            vertices = context.vertices[context.triangles[face]]-self.anchor
-            anchored = _closest_on_face(world[i]-self.anchor,*vertices)
-            distance[i]=np.linalg.norm((world[i]-self.anchor)-anchored)
-            nearest[i]=anchored+self.anchor
             triangle[i]=face
             status[i]='VALID'
+        valid_indices = indices[status[indices] == 'VALID']
+        vertices = context.vertices[context.triangles[triangle[valid_indices]]]-self.anchor
+        points_on_faces = world[valid_indices]-self.anchor
+        if len(valid_indices) == 1:
+            anchored = np.array([_closest_on_face(points_on_faces[0], *vertices[0])])
+        else:
+            anchored = _closest_on_faces(points_on_faces, vertices)
+        distance[valid_indices] = np.linalg.norm(points_on_faces-anchored, axis=1)
+        nearest[valid_indices] = anchored+self.anchor
         if cache is not None:
             valid = missing & (status == 'VALID')
             cache[2][valid] = True
@@ -589,8 +636,12 @@ def bvh_visibility(sample, targets, *, tree=None):
         tree = BVHTree.FromPolygons(sample.vertices.tolist(), sample.triangles.tolist(), all_triangles=True)
     origin = Vector(sample.world_from_sensor[:3, 3])
     result = []
-    for point in targets:
-        delta = Vector(point) - origin
-        location, normal, index, distance = tree.ray_cast(origin, delta.normalized(), max(0., delta.length - .002))
+    ray_cast = tree.ray_cast
+    for point in np.asarray(targets).tolist():
+        delta = Vector(point)
+        delta -= origin
+        length = delta.length
+        delta.normalize()
+        location, normal, index, distance = ray_cast(origin, delta, max(0., length - .002))
         result.append(location is None)
     return np.array(result, dtype=bool)

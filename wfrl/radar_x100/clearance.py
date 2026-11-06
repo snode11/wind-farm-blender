@@ -161,10 +161,12 @@ def _surface_residual(points, shape, coefficients):
     target = points[:, :2] - basis @ coefficients
     a = shape.sections(z)
     edge = np.roll(a, -1, axis=1) - a
-    squared = np.sum(edge*edge, axis=2)
-    fraction = np.clip(np.sum((target[:, None]-a)*edge, axis=2) / np.maximum(squared, 1e-16), 0, 1)
+    squared = np.einsum('ijk,ijk->ij', edge, edge)
+    fraction = np.clip(np.einsum('ijk,ijk->ij', target[:, None]-a, edge)
+                       / np.maximum(squared, 1e-16), 0, 1)
     closest = a + edge*fraction[:, :, None]
-    j = np.sum((target[:, None]-closest)**2, axis=2).argmin(axis=1)
+    offsets = target[:, None]-closest
+    j = np.einsum('ijk,ijk->ij', offsets, offsets).argmin(axis=1)
     k = np.arange(len(points))
     delta = target - closest[k, j]
     normal = np.column_stack((-edge[k, j, 1], edge[k, j, 0])) / np.maximum(np.sqrt(squared[k, j, None]), 1e-12)
@@ -220,7 +222,8 @@ def separate_echoes(world_points, radial_velocity_m_s, tower_distance_m, priors,
         supported = np.zeros(len(indices), bool)
         for start in range(0, len(indices), 256):
             part = indices[start:start+256]
-            close = np.sum((xyz[part, None]-xyz[indices])**2, axis=2) <= config.neighbour_radius_m**2
+            offsets = xyz[part, None]-xyz[indices]
+            close = np.einsum('ijk,ijk->ij', offsets, offsets) <= config.neighbour_radius_m**2
             close &= np.abs(velocity[part, None]-velocity[indices]) <= config.neighbour_speed_m_s
             supported[start:start+len(part)] = close.sum(axis=1) >= config.minimum_neighbours
         if previous and prior.blade in previous and shapes is not None and len(indices):
