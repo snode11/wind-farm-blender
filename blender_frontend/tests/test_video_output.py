@@ -9,6 +9,7 @@ import subprocess
 import sys
 import threading
 import time
+from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
@@ -180,6 +181,67 @@ def test_export_can_commit_on_filesystems_without_hard_links(tmp_path, monkeypat
     wait_export(job)
     assert not job.error
     assert target.read_bytes() == b'complete video'
+
+
+@pytest.mark.parametrize('platform', ['nt', 'posix'])
+@pytest.mark.parametrize('field', ['st_dev', 'st_ino', 'st_size', 'st_mtime_ns', 'st_ctime_ns'])
+def test_export_stat_fstat_identity_difference(tmp_path, monkeypatch, platform, field):
+    source, target = tmp_path / 'source.mp4', tmp_path / 'output.mp4'
+    content = b'unchanged video bytes'
+    source.write_bytes(content)
+    original = source.stat()
+    fstat = os.fstat
+    source_checks = []
+
+    def changed_stat(fd):
+        info = fstat(fd)
+        if (info.st_dev, info.st_ino) == (original.st_dev, original.st_ino):
+            source_checks.append(fd)
+            fields = {name: getattr(info, name) for name in
+                      ('st_dev', 'st_ino', 'st_size', 'st_mtime_ns', 'st_ctime_ns', 'st_mode')}
+            fields[field] += 1
+            return SimpleNamespace(**fields)
+        return info
+
+    monkeypatch.setattr(video_output, 'os', SimpleNamespace(**{
+        **vars(os), 'name': platform, 'fstat': changed_stat}))
+    job = video_output.Export()
+    job._source_identity = job._identity(original)
+    job.total_bytes = len(content)
+
+    job._copy(source, target)
+
+    assert source_checks
+    assert source.read_bytes() == content
+    if platform == 'nt' and field == 'st_ctime_ns':
+        assert job.state == 'SUCCEEDED' and not job.error
+        assert target.read_bytes() == content
+        assert job.done_bytes == job.total_bytes
+        assert set(tmp_path.iterdir()) == {source, target}
+    else:
+        assert job.state == 'FAILED' and '源视频在导出期间发生变化' in job.error
+        assert set(tmp_path.iterdir()) == {source}
+
+
+@pytest.mark.skipif(os.name != 'posix', reason='POSIX content-change ctime semantics')
+def test_posix_export_rejects_content_change_with_restored_mtime(tmp_path):
+    source, target = tmp_path / 'source.mp4', tmp_path / 'output.mp4'
+    source.write_bytes(b'x' * 100)
+    original = source.stat()
+    job = video_output.Export()
+    job._source_identity = job._identity(original)
+    job.total_bytes = original.st_size
+    source.write_bytes(b'y' * 100)
+    os.utime(source, ns=(original.st_atime_ns, original.st_mtime_ns))
+    changed = source.stat()
+    assert changed.st_size == original.st_size and changed.st_mtime_ns == original.st_mtime_ns
+    assert changed.st_ctime_ns != original.st_ctime_ns
+
+    job._copy(source, target)
+
+    assert job.state == 'FAILED' and '源视频在导出期间发生变化' in job.error
+    assert source.read_bytes() == b'y' * 100
+    assert set(tmp_path.iterdir()) == {source}
 
 
 @pytest.mark.parametrize('changed_size', [0, 50, 200])

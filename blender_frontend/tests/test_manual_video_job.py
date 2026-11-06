@@ -75,6 +75,93 @@ def make_master(path, job):
     jobs.write_json(root / 'status.json', dict(state='FAILED', job_id=job['job_id'], final=True))
 
 
+class JobQueryPlatformTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix='manual-query-test-')
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.path, self.job = make_job(self.root)
+
+    def platform(self, name):
+        return patch.object(jobs, 'os', types.SimpleNamespace(**{**vars(os), 'name': name}))
+
+    def test_windows_lease_is_inactive_without_fcntl(self):
+        with self.platform('nt'), patch.dict(sys.modules, {'fcntl': None}), \
+             patch.object(jobs.os, 'open', side_effect=AssertionError('No Windows flock probe')):
+            self.assertFalse(jobs.lease_busy(self.root / 'supervision.lock', owner=self.job['job_id']))
+
+    def test_windows_unreachable_job_is_lost_and_inactive(self):
+        status = self.root / 'status.json'
+        records = [None, dict(job_id=self.job['job_id'], state='RENDERING', active=True),
+                   dict(job_id='0' * 32, state='COMPLETE', active=True, final=True)]
+        for record in records:
+            with self.subTest(record=record):
+                if record is not None:
+                    jobs.write_json(status, record)
+                before = status.read_bytes() if status.exists() else None
+                with self.platform('nt'), patch.dict(sys.modules, {'fcntl': None}), \
+                     patch.object(jobs, 'lease_busy', side_effect=AssertionError('No POSIX lease query')), \
+                     patch.object(jobs, 'output_lock', side_effect=AssertionError('No output lock lookup')):
+                    result = jobs.query(self.path)
+                    self.assertEqual(result['state'], 'LOST')
+                    self.assertEqual(result['job_id'], self.job['job_id'])
+                    self.assertFalse(result['active'])
+                    self.assertFalse(result['final'])
+                    self.assertIn('当前平台不支持冻结视频监管', result['error'])
+                    self.assertEqual(jobs.wait(self.path), result)
+                    with self.assertRaises(ValueError):
+                        jobs.cancel(self.path)
+                self.assertEqual(status.read_bytes() if status.exists() else None, before)
+
+    def test_windows_query_preserves_matching_terminal_records(self):
+        for state in jobs.TERMINAL:
+            with self.subTest(state=state):
+                record = dict(job_id=self.job['job_id'], state=state, active=True, final=True)
+                jobs.write_json(self.root / 'status.json', record)
+                with self.platform('nt'), patch.dict(sys.modules, {'fcntl': None}):
+                    self.assertEqual(jobs.query(self.path), dict(record, active=False))
+
+    def test_windows_query_preserves_authenticated_live_status(self):
+        record = dict(job_id=self.job['job_id'], state='RENDERING', active=True, final=False)
+        with self.platform('nt'), patch.dict(sys.modules, {'fcntl': None}), \
+             patch.object(jobs, '_rpc', return_value=record) as rpc:
+            self.assertEqual(jobs.query(self.path), record)
+        rpc.assert_called_once_with(self.path.resolve(), self.job, 'status')
+
+    def test_windows_start_and_retry_still_require_posix_supervision(self):
+        with self.platform('nt'), patch.dict(sys.modules, {'fcntl': None}), \
+             patch.object(jobs, 'load_job', side_effect=AssertionError('Must reject before reading job')):
+            for retry in (False, True):
+                with self.subTest(retry=retry), self.assertRaisesRegex(ValueError, 'macOS / Linux'):
+                    jobs.start(self.path, retry=retry)
+
+    def test_posix_query_preserves_lease_occupancy(self):
+        for occupancies in ([True], [False, True], [False, False]):
+            with self.subTest(occupancies=occupancies), self.platform('posix'), \
+                 patch.object(jobs, 'lease_busy', side_effect=occupancies) as busy:
+                record = jobs.query(self.path)
+                self.assertEqual(record['state'], 'LOST')
+                self.assertEqual(record['active'], any(occupancies))
+                self.assertFalse(record['final'])
+                self.assertIn('不能安全按 PID 取消', record['error'])
+                self.assertEqual(busy.call_count, len(occupancies))
+                self.assertTrue(all(call.kwargs == {'owner': self.job['job_id']}
+                                    for call in busy.call_args_list))
+
+    @unittest.skipUnless(os.name == 'posix', 'Lease probing requires POSIX flock')
+    def test_posix_lease_reports_matching_owner_and_releases_lock(self):
+        import fcntl
+        lock = self.root / 'supervision.lock'
+        self.assertFalse(jobs.lease_busy(lock))
+        jobs.write_json(lock, dict(schema=jobs.LEASE_SCHEMA, owner=self.job['job_id']))
+        with lock.open('rb+') as handle:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            self.assertTrue(jobs.lease_busy(lock))
+            self.assertTrue(jobs.lease_busy(lock, owner=self.job['job_id']))
+            self.assertFalse(jobs.lease_busy(lock, owner='other-job'))
+        self.assertFalse(jobs.lease_busy(lock))
+
+
 @requires_supervision
 class MasterRecoveryTests(unittest.TestCase):
     def setUp(self):

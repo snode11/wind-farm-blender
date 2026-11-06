@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 import stat
+import time
 import uuid
 
 
@@ -53,7 +54,15 @@ def _write_atomic(path, write, *, mkdir):
                 # Writes can clear set-ID bits; restore them before syncing.
                 os.fchmod(handle.fileno(), mode)
             os.fsync(handle.fileno())
-        os.replace(temporary, path)
+        retry_delays = (0.05, 0.1, 0.2, 0.4) if os.name == 'nt' else ()
+        for attempt in range(len(retry_delays) + 1):
+            try:
+                os.replace(temporary, path)
+                break
+            except PermissionError:
+                if attempt == len(retry_delays):
+                    raise
+                time.sleep(retry_delays[attempt])
     finally:
         try:
             if descriptor is not None:

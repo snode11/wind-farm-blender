@@ -97,6 +97,8 @@ class Lease:
 
 
 def lease_busy(path, *, owner=None):
+    if os.name != 'posix':
+        return False
     import fcntl
     try:
         fd = os.open(path, os.O_RDWR | os.O_NOFOLLOW)
@@ -175,10 +177,15 @@ def query(job_path):
             record = {}
         if record.get('job_id') == job['job_id'] and record.get('final') and record.get('state') in TERMINAL:
             return dict(record, active=False)
-        busy = lease_busy(path.parent / 'supervision.lock', owner=job['job_id']) or lease_busy(
-            output_lock(job['output_mp4']), owner=job['job_id'])
+        busy = False
+        error = '无法联系已验证的监管进程；运行状态未知，不能安全按 PID 取消'
+        if os.name == 'posix':
+            busy = lease_busy(path.parent / 'supervision.lock', owner=job['job_id']) or lease_busy(
+                output_lock(job['output_mp4']), owner=job['job_id'])
+        else:
+            error = '当前平台不支持冻结视频监管；无法联系已验证的监管进程，作业状态未知'
         return dict(record, state='LOST', job_id=job['job_id'], active=busy, final=False,
-                    error='无法联系已验证的监管进程；运行状态未知，不能安全按 PID 取消')
+                    error=error)
 
 
 def wait(job_path, *, timeout=None):

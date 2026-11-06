@@ -504,8 +504,11 @@ def evaluate(spec, phase, returncode, timed_out, execution, report, log, source_
 
 def stop_process(process, owner, *, grace=8.):
     """Reap the launcher only after all identified descendants have stopped."""
-    for signum in (signal.SIGTERM, signal.SIGKILL):
-        owner.signal(signum)
+    for signum in (signal.SIGTERM, getattr(signal, 'SIGKILL', None)):
+        if signum is None:
+            process.kill()
+        else:
+            owner.signal(signum)
         deadline = time.monotonic() + grace
         while owner.alive() and time.monotonic() < deadline:
             time.sleep(.02)

@@ -236,7 +236,8 @@ class Export:
 
     @staticmethod
     def _identity(stat):
-        return stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns
+        identity = stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns
+        return identity if os.name == 'nt' else (*identity, stat.st_ctime_ns)
 
     @property
     def active(self):

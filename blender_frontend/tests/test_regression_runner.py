@@ -6,6 +6,8 @@ import os
 import subprocess
 import time
 from dataclasses import replace
+from types import SimpleNamespace
+from unittest.mock import Mock, call
 
 import pytest
 
@@ -247,6 +249,52 @@ def test_real_exception_group_and_chained_tracebacks_fail(nested):
     parsed = runner.traceback_exceptions(diagnostic)
     assert 'RuntimeError: first callback' in parsed and 'ValueError: second callback' in parsed
     assert any('ExceptionGroup:' in item for item in parsed)
+
+
+@pytest.mark.parametrize('has_sigkill', [False, True], ids=['windows', 'posix'])
+@pytest.mark.parametrize('term_stops', [False, True], ids=['force-required', 'term-sufficient'])
+def test_stop_process_uses_available_force_termination(monkeypatch, has_sigkill, term_stops):
+    signals = SimpleNamespace(SIGTERM=15, SIGKILL=9)
+    monkeypatch.setattr(runner, 'signal', signals)
+    if not has_sigkill:
+        monkeypatch.delattr(signals, 'SIGKILL')
+    alive = True
+
+    def signal_owned(signum):
+        nonlocal alive
+        if term_stops or signum == 9:
+            alive = False
+
+    def kill():
+        nonlocal alive
+        alive = False
+
+    owner = Mock()
+    owner.signal.side_effect = signal_owned
+    owner.alive.side_effect = lambda: alive
+    process = Mock()
+    process.kill.side_effect = kill
+
+    runner.stop_process(process, owner, grace=0)
+
+    assert owner.signal.call_args_list == ([call(15), call(9)]
+                                          if has_sigkill and not term_stops else [call(15)])
+    assert process.kill.call_count == int(not has_sigkill and not term_stops)
+    process.wait.assert_called_once_with(timeout=0)
+    assert not alive
+
+
+def test_stop_without_sigkill_rejects_unconfirmed_cleanup(monkeypatch):
+    monkeypatch.setattr(runner, 'signal', SimpleNamespace(SIGTERM=15))
+    owner, process = Mock(), Mock()
+    owner.alive.return_value = True
+
+    with pytest.raises(RuntimeError, match='cleanup unconfirmed'):
+        runner.stop_process(process, owner, grace=0)
+
+    owner.signal.assert_called_once_with(15)
+    process.kill.assert_called_once_with()
+    process.wait.assert_not_called()
 
 
 @pytest.mark.skipif(os.name != 'posix', reason='POSIX process-session regression')

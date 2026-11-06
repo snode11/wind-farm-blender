@@ -159,7 +159,15 @@ def isolated_environment(scratch, inherited=None):
 
 
 def stop_process(process, *, grace=5.):
-    """Signal the whole session even if its leader exits before its children."""
+    """Stop the child, including its POSIX session after the leader exits."""
+    if os.name == 'nt':
+        process.terminate()
+        try:
+            process.wait(timeout=grace)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=grace)
+        return
     try:
         os.killpg(process.pid, signal.SIGTERM)
         deadline = time.monotonic() + grace
@@ -174,9 +182,11 @@ def stop_process(process, *, grace=5.):
 
 
 def run_process(command, env, log_path, timeout_s):
+    process_options = ({'creationflags': subprocess.CREATE_NEW_PROCESS_GROUP}
+                       if os.name == 'nt' else {'start_new_session': True})
     with log_path.open('xb') as log:
         process = subprocess.Popen(command, cwd=log_path.parent, env=env, stdout=log,
-                                   stderr=subprocess.STDOUT, start_new_session=True)
+                                   stderr=subprocess.STDOUT, **process_options)
         try:
             return ProcessResult(process.wait(timeout=timeout_s))
         except subprocess.TimeoutExpired:

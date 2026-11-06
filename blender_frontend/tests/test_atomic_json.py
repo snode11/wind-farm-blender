@@ -4,6 +4,8 @@ from pathlib import Path
 import stat
 import subprocess
 import sys
+from types import SimpleNamespace
+from unittest.mock import Mock
 
 import pytest
 
@@ -138,6 +140,71 @@ def test_io_failure_cleans_temporary_file_and_preserves_destination(tmp_path, mo
     with pytest.raises(OSError, match='injected I/O failure'):
         writer(target, value)
 
+    assert target.read_bytes() == b'previous content'
+    assert set(tmp_path.iterdir()) == {target}
+
+
+@pytest.mark.parametrize('failures', [0, 1, 4])
+@pytest.mark.parametrize('writer,value,expected', [
+    (atomic_json.write_json, {'label': '叶片'}, '{\n  "label": "叶片"\n}\n'),
+    (atomic_json.write_text, '叶片\r\n姿态', '叶片\r\n姿态'),
+], ids=['json', 'text'])
+def test_windows_replace_retries_permission_errors(tmp_path, monkeypatch, writer, value, expected, failures):
+    target = tmp_path / 'status.json'
+    target.write_bytes(b'previous content')
+    attempts, sleeps = [], []
+    replace = os.replace
+    fsync = Mock(wraps=os.fsync)
+
+    def replace_after_release(source, destination):
+        attempts.append((source, destination))
+        assert source.read_bytes() == expected.encode('utf-8')
+        assert target.read_bytes() == b'previous content'
+        assert fsync.call_count == 1
+        if len(attempts) <= failures:
+            raise PermissionError('destination is temporarily open')
+        replace(source, destination)
+
+    monkeypatch.setattr(atomic_json, 'os', SimpleNamespace(**{
+        **vars(os), 'name': 'nt', 'replace': replace_after_release, 'fsync': fsync}))
+    monkeypatch.setattr(atomic_json.time, 'sleep', sleeps.append)
+
+    writer(target, value)
+
+    assert len(attempts) == failures + 1
+    assert all(attempt == attempts[0] for attempt in attempts)
+    assert len(sleeps) == failures and sum(sleeps) < 1
+    assert all(0 < delay <= .4 for delay in sleeps)
+    assert target.read_bytes() == expected.encode('utf-8')
+    assert set(tmp_path.iterdir()) == {target}
+
+
+@pytest.mark.parametrize('platform,error_type,attempt_count', [
+    ('nt', PermissionError, 5),
+    ('nt', OSError, 1),
+    ('posix', PermissionError, 1),
+], ids=['windows-permission-exhausted', 'windows-other-io-error', 'posix-no-retry'])
+@pytest.mark.parametrize('writer,value', [
+    (atomic_json.write_json, {'label': '叶片'}),
+    (atomic_json.write_text, '叶片姿态'),
+], ids=['json', 'text'])
+def test_replace_failure_preserves_exception_and_cleans_temporary(
+        tmp_path, monkeypatch, platform, error_type, attempt_count, writer, value):
+    target = tmp_path / 'status.json'
+    target.write_bytes(b'previous content')
+    errors = [error_type(f'injected replacement failure {index}') for index in range(attempt_count)]
+    replace = Mock(side_effect=errors)
+    sleeps = []
+    monkeypatch.setattr(atomic_json, 'os', SimpleNamespace(**{
+        **vars(os), 'name': platform, 'replace': replace}))
+    monkeypatch.setattr(atomic_json.time, 'sleep', sleeps.append)
+
+    with pytest.raises(error_type) as caught:
+        writer(target, value)
+
+    assert caught.value is errors[-1]
+    assert replace.call_count == attempt_count
+    assert len(sleeps) == attempt_count - 1 and sum(sleeps) < 1
     assert target.read_bytes() == b'previous content'
     assert set(tmp_path.iterdir()) == {target}
 

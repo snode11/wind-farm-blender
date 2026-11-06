@@ -3,6 +3,8 @@ import importlib.util
 from pathlib import Path
 import re
 import sys
+from types import SimpleNamespace
+from unittest.mock import Mock, call
 
 import pytest
 
@@ -16,6 +18,73 @@ SPEC.loader.exec_module(runner)
 
 TEXTURE = 'mappo_same_source_texture_window.py'
 REOPEN = 'mappo_same_source_texture_reopen.py'
+
+
+@pytest.mark.parametrize('platform', ['nt', 'posix'])
+@pytest.mark.parametrize('outcome', ['success', 'timeout', 'interrupt'])
+def test_run_process_uses_platform_process_group(tmp_path, monkeypatch, platform, outcome):
+    monkeypatch.setattr(runner, 'os', SimpleNamespace(name=platform))
+    monkeypatch.setattr(runner.subprocess, 'CREATE_NEW_PROCESS_GROUP', 512, raising=False)
+    process = Mock(returncode=0 if outcome == 'success' else -1)
+    process.wait.return_value = process.returncode
+    if outcome == 'timeout':
+        process.wait.side_effect = runner.subprocess.TimeoutExpired('fixture', 7)
+    elif outcome == 'interrupt':
+        process.wait.side_effect = KeyboardInterrupt
+    popen = Mock(return_value=process)
+    stop = Mock()
+    monkeypatch.setattr(runner.subprocess, 'Popen', popen)
+    monkeypatch.setattr(runner, 'stop_process', stop)
+
+    result = runner.run_process(['fixture'], {'FIXTURE': '1'}, tmp_path / 'process.log', 7)
+
+    args, options = popen.call_args
+    assert args == (['fixture'],)
+    assert options['cwd'] == tmp_path and options['env'] == {'FIXTURE': '1'}
+    if platform == 'nt':
+        assert options['creationflags'] == 512
+        assert 'start_new_session' not in options
+    else:
+        assert options['start_new_session'] is True
+        assert 'creationflags' not in options
+    assert result == runner.ProcessResult(process.returncode, timed_out=outcome == 'timeout',
+                                          interrupted=outcome == 'interrupt')
+    process.wait.assert_called_once_with(timeout=7)
+    if outcome == 'success':
+        stop.assert_not_called()
+    else:
+        stop.assert_called_once_with(process)
+
+
+@pytest.mark.parametrize('force_required', [False, True])
+def test_windows_stop_terminates_then_kills_without_posix_apis(monkeypatch, force_required):
+    monkeypatch.setattr(runner, 'os', SimpleNamespace(name='nt'))
+    monkeypatch.setattr(runner, 'signal', SimpleNamespace(SIGTERM=15))
+    process = Mock()
+    process.wait.side_effect = ([runner.subprocess.TimeoutExpired('fixture', .5), -1]
+                               if force_required else [0])
+
+    runner.stop_process(process, grace=.5)
+
+    process.terminate.assert_called_once_with()
+    assert process.kill.call_count == int(force_required)
+    assert process.wait.call_args_list == [call(timeout=.5)] * (1 + int(force_required))
+
+
+@pytest.mark.parametrize('group_exists', [False, True])
+def test_posix_stop_signals_session_after_leader_exit(monkeypatch, group_exists):
+    killpg = Mock(side_effect=None if group_exists else ProcessLookupError)
+    monkeypatch.setattr(runner, 'os', SimpleNamespace(name='posix', killpg=killpg))
+    monkeypatch.setattr(runner, 'signal', SimpleNamespace(SIGTERM=15, SIGKILL=9))
+    process = Mock(pid=321, returncode=0)
+
+    runner.stop_process(process, grace=0)
+
+    assert killpg.call_args_list == ([call(321, 15), call(321, 9)]
+                                     if group_exists else [call(321, 15)])
+    process.terminate.assert_not_called()
+    process.kill.assert_not_called()
+    process.wait.assert_called_once_with(timeout=0)
 
 
 @pytest.fixture
