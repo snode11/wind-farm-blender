@@ -25,6 +25,8 @@ class BridgeServer:
         self.listener.bind((host, port)); self.listener.listen(1); self.listener.setblocking(False)
         self.port = self.listener.getsockname()[1]
         self.client = None
+        self._waiting_client = None
+        self._waiting_deadline = 0.
         self.sequence = 0
         self.guard = SessionSequenceGuard(self.session.session_id)
         self.handshake_timeout = handshake_timeout
@@ -168,28 +170,29 @@ class BridgeServer:
         if item['offset'] == len(item['frame']):
             self.pending.popleft()
 
+    def _accept_client(self):
+        """Hold one contender without reading it until the current owner disconnects."""
+        if self._waiting_client is not None and time.monotonic() >= self._waiting_deadline:
+            self._waiting_client.close()
+            self._waiting_client = None
+        if self._waiting_client is None:
+            try:
+                conn, _ = self.listener.accept()
+            except BlockingIOError:
+                return
+            conn.setblocking(False)
+            self._waiting_client = conn
+            self._waiting_deadline = time.monotonic() + self.handshake_timeout
+        if self.client is None:
+            self.client, self._waiting_client = self._waiting_client, None
+            self.decoder = FrameDecoder(); self._incoming = []
+            # Waiting for ownership and completing hello share one deadline.
+            self.deadline = self._waiting_deadline
+
     def poll(self):
         if self.closed: return
         self.session.tick()
-        # A client may close and reconnect before the next 10 ms poll. Reap
-        # its EOF before accepting, or the stale owner rejects the resume.
-        # MSG_PEEK leaves any live owner's queued commands untouched.
-        if self.client is not None:
-            try:
-                if self.client.recv(1, socket.MSG_PEEK) == b'':
-                    self._disconnect()
-            except BlockingIOError:
-                pass
-            except OSError:
-                self._disconnect()
-        try:
-            conn, _ = self.listener.accept()
-            if self.client is not None: conn.close()
-            else:
-                self.client = conn; conn.setblocking(False)
-                self.decoder = FrameDecoder(); self._incoming = []
-                self.deadline = time.monotonic() + self.handshake_timeout
-        except BlockingIOError: pass
+        self._accept_client()
         if self.client is None: return
         try:
             if not self.ready and time.monotonic() >= self.deadline: raise ProtocolError('Handshake timeout')
@@ -276,7 +279,11 @@ class BridgeServer:
 
     def close(self):
         if self.closed: return
-        self.closed = True; self._disconnect(); self.session.stop()
+        self.closed = True; self._disconnect()
+        if self._waiting_client is not None:
+            self._waiting_client.close()
+            self._waiting_client = None
+        self.session.stop()
         self.listener.close()
 
 

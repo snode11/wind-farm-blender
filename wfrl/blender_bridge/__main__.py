@@ -24,7 +24,7 @@ def main():
                           session_binding=SessionBinding.from_environment(args.host, args.port))
     def request_shutdown(_signum, _frame):
         server.shutdown_requested = True
-    for name in ('SIGTERM', 'SIGHUP'):
+    for name in ('SIGTERM', 'SIGHUP', 'SIGBREAK'):
         if hasattr(signal, name):
             signal.signal(getattr(signal, name), request_shutdown)
     print(f'WFRL Bridge listening on {args.host}:{server.port}', flush=True)
