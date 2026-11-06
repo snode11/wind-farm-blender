@@ -104,3 +104,37 @@ def test_evaluated_mesh_is_cleared_when_extraction_fails(evaluated_shell, collis
     with pytest.raises(RuntimeError, match='invalid evaluated mesh'):
         (core._geometry if collision else core.model_signature)(scene)
     assert calls['mesh'] == calls['clear'] == 1
+
+
+@pytest.mark.parametrize('confirmed', [False, True])
+def test_empty_mount_surface_rejects_research_without_polluting_layout(evaluated_shell, monkeypatch, confirmed):
+    scene, mesh, _evaluated, _calls = evaluated_shell
+    mesh.vertices.clear()
+    mesh.loop_triangles.clear()
+    tree = NS(find_nearest=lambda _point: (None, None, None, None))
+    monkeypatch.setitem(sys.modules, 'mathutils.bvhtree',
+                        NS(BVHTree=NS(FromPolygons=lambda *_args, **_kwargs: tree)))
+    params = core.CameraParameters(location=(0., 0., 1.1))
+    camera = {'custom_schema_version': core.SCHEMA_VERSION,
+              'custom_mount_mode': 'RESEARCH',
+              'custom_mount_validation': 'research_outside',
+              'custom_research_confirmed': True,
+              'custom_nearest_distance': .1,
+              'custom_mount_warning': '研发坐标：支架与安装未认证'}
+    monkeypatch.setattr(core, 'get_camera', lambda _scene, slot: camera if slot == 1 else None)
+    monkeypatch.setattr(core, 'parameters', lambda _camera: params)
+    applied = []
+    monkeypatch.setattr(core, 'apply_parameters', lambda _camera, value: applied.append(value))
+    before = core.layout_dict(scene)
+    before_camera = dict(camera)
+
+    with pytest.raises(ValueError, match='安装校验失败.*安装表面.*无法计算最近距离'):
+        core.apply_research(scene, camera, params, confirmed=confirmed)
+
+    assert applied == []
+    assert camera == before_camera
+    layout = core.layout_dict(scene)
+    assert layout == before
+    restored = json.loads(json.dumps(layout, allow_nan=False))
+    assert restored['cameras'][0]['nearest_distance_m'] == .1
+    assert core.layout_hash(layout) == core.layout_hash(restored) == core.layout_hash(before)

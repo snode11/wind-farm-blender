@@ -167,6 +167,8 @@ def validate_research_position(scene, location, confirmed=False):
         near, _normal, _face, distance = tree.find_nearest(point)
         if near is not None:
             nearest_distance = min(nearest_distance, distance)
+    if not _core.math.isfinite(nearest_distance):
+        raise ValueError('安装校验失败：安装表面没有可用几何，无法计算最近距离')
     if nearest_distance < _core.MIN_DISTANCE - 1e-6:
         raise ValueError('镜头距外壳不足 0.02 m，不通过裁剪隐藏壳体')
     if not confirmed and (not verified or nearest_distance > _core.MAX_DISTANCE):
