@@ -389,6 +389,7 @@ def attach(scene,path,*,_package=None):
     import bpy
     from . import tip_tracking
     replacing = False
+    retained = _farm._MeshBindings()
     try:
         # Validate before releasing the old scene runtime. In particular a
         # FULL_COPY scene contains renamed objects and must not detach an
@@ -415,6 +416,19 @@ def attach(scene,path,*,_package=None):
                 continue
             if other.scene != scene and any(obj in scene.objects.values() for obj, *_ in other.blades):
                 raise ValueError('FarmFlex objects are already driven by scene: ' + other.scene.name)
+        previous = _farm.active_for(scene)
+        if previous is not None:
+            # Restoring the outgoing pose must not write into externally shared
+            # or deliberately retained meshes. The private copies belong to this
+            # replacement and can be released after binding or rolled back.
+            for obj, *_ in (*previous.blades, *previous.towers):
+                mesh = obj.data
+                if mesh.users > 1 or mesh.use_fake_user or mesh.shape_keys is not None or mesh.library:
+                    private = retained.own(mesh.copy())
+                    private.use_fake_user = False
+                    retained.replace(obj, private)
+                    if private.shape_keys is not None:
+                        obj.shape_key_clear()
         replacing = True
         _farm.detach(scene, restore=True)
         from . import charts
@@ -423,6 +437,7 @@ def attach(scene,path,*,_package=None):
         _farm._ACTIVES[scene.as_pointer()] = active
         _farm._ACTIVE = active
     except Exception as exc:
+        retained.rollback()
         from . import clearance_replay
         scene['wfrl_home_load_error'] = '形变包加载失败：' + str(exc)
         if replacing:
@@ -431,6 +446,7 @@ def attach(scene,path,*,_package=None):
             scene['wfrl_flex_active'] = False
             clearance_replay.clear(scene,'三机形变包未就绪：' + str(exc))
         raise
+    retained.commit()
     scene.pop('wfrl_home_load_error', None)
     # Tip sampling must follow mesh deformation at the same simulation time.
     if _farm.update in bpy.app.handlers.frame_change_post:bpy.app.handlers.frame_change_post.remove(_farm.update)

@@ -119,6 +119,118 @@ def test_linked_scene_cannot_drive_same_objects_with_second_clock(runtimes):
     assert not farm_flex.is_active(linked)
 
 
+@pytest.mark.parametrize('part', ['Blade1', 'Tower'])
+@pytest.mark.parametrize('retention', ['external', 'fake_user', 'shape_keys', 'library', 'private'])
+@pytest.mark.parametrize('binding_fails', [False, True])
+def test_replacement_restores_private_pose_without_mutating_retained_mesh(
+        runtimes, monkeypatch, part, retention, binding_fails):
+    import numpy as np
+
+    bpy, Runtime = runtimes
+    meshes = []
+
+    class Mesh(dict):
+        __eq__ = object.__eq__
+        __hash__ = object.__hash__
+
+        def __init__(self, coordinates):
+            super().__init__(wfrl_farm_flex_owned=True)
+            self.coordinates = np.array(coordinates, dtype=float)
+            self.users = 0
+            self.removed = False
+            self.use_fake_user = False
+            self.shape_keys = self.library = None
+            self.vertices = SimpleNamespace(foreach_set=self.write)
+            meshes.append(self)
+
+        def write(self, attribute, values):
+            assert attribute == 'co'
+            self.coordinates[:] = values
+
+        def update(self):
+            pass
+
+        def get(self, key, default=None):
+            if self.removed:
+                raise ReferenceError('Removed mesh')
+            return super().get(key, default)
+
+        def copy(self):
+            mesh = Mesh(self.coordinates)
+            mesh.use_fake_user, mesh.shape_keys = self.use_fake_user, self.shape_keys
+            return mesh
+
+    class Object:
+        def __init__(self, mesh):
+            self._data = None
+            self.data = mesh
+
+        @property
+        def data(self):
+            return self._data
+
+        @data.setter
+        def data(self, mesh):
+            if self._data is not None:
+                self._data.users -= 1
+            self._data = mesh
+            mesh.users += 1
+
+        def shape_key_clear(self):
+            self.data.shape_keys = None
+
+    def remove(mesh):
+        assert mesh.users == 0
+        meshes.remove(mesh)
+        mesh.removed = True
+
+    bpy.data = SimpleNamespace(meshes=SimpleNamespace(remove=remove))
+    scene = Scene('Replacement owner')
+    posed, rest = [2., 3., 4.], np.array([0., 0., 1.])
+    original = Mesh(posed)
+    obj = Object(original)
+    external = Object(original) if retention == 'external' else None
+    original.use_fake_user = retention == 'fake_user'
+    original.shape_keys = object() if retention == 'shape_keys' else None
+    original.library = object() if retention == 'library' else None
+    scene.objects['WFRL.Turbine.T1.' + part] = obj
+    active = farm_flex.attach(scene, 'first')
+    active.blades = [(obj, rest)] if part == 'Blade1' else []
+    active.towers = [(obj, rest)] if part == 'Tower' else []
+    active.restore_support = lambda: [o.data.write('co', r) for o, r in active.towers]
+    protected = retention != 'private'
+
+    def bind(target, path, *, _package):
+        assert path == 'replacement'
+        np.testing.assert_array_equal(obj.data.coordinates, rest)
+        if protected:
+            assert obj.data is not original
+            np.testing.assert_array_equal(original.coordinates, posed)
+        if binding_fails:
+            raise ValueError('Replacement binding failed')
+        bindings = farm_flex._MeshBindings()
+        bindings.replace(obj, bindings.own(Mesh([5., 6., 7.])))
+        bindings.commit()
+        return Runtime(target, path, _package=_package)
+
+    monkeypatch.setattr(farm_flex, 'FarmFlex', bind)
+    if binding_fails:
+        with pytest.raises(ValueError, match='Replacement binding failed'):
+            farm_flex.attach(scene, 'replacement')
+        assert obj.data is original
+        assert farm_flex.active_for(scene) is None
+    else:
+        assert farm_flex.attach(scene, 'replacement').enabled
+        np.testing.assert_array_equal(obj.data.coordinates, [5., 6., 7.])
+    if protected:
+        np.testing.assert_array_equal(original.coordinates, posed)
+        assert original in meshes
+    if external is not None:
+        assert external.data is original
+    assert bool(original.shape_keys) == (retention == 'shape_keys')
+    assert all(mesh is original or mesh is obj.data for mesh in meshes)
+
+
 def test_deleted_scene_runtime_can_be_detached_by_stored_key(runtimes):
     class RemovedScene(Scene):
         removed = False

@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
 import bpy
 import wfrl_blender as addon
-from wfrl_blender import clearance_replay as playback, runtime
+from wfrl_blender import clearance_replay as playback, farm_flex, runtime
 from wfrl_blender.panels import clearance
 from bpy_extras.object_utils import world_to_camera_view
 from mathutils import Vector
@@ -40,19 +40,24 @@ scene.wfrl_clearance_progress = -10
 assert scene.frame_current == scene.frame_start and scene.wfrl_clearance_progress == 0
 scene.wfrl_clearance_progress = 50
 midpoint = playback.sample(scene)
-assert midpoint['time_s'] == 27 and scene.frame_current == 226
+assert midpoint['time_s'] == 27
+assert scene.frame_current == scene.frame_start + round(9 * scene['wfrl_clearance_timebase_fps'])
 fps = scene.render.fps
 scene.render.fps = 50
 assert scene.wfrl_clearance_progress == 50 and playback.sample(scene) == midpoint
 scene.render.fps = fps
-scene.frame_set(1000)
+scene.frame_set(scene.frame_end + 100)
 assert scene.frame_current == scene.frame_end
 scene.frame_set(-100)
 assert scene.frame_current == scene.frame_start
 scene.frame_set(201)
 assert playback.sample(scene) == before
-assert clearance.playback_control(scene, SimpleNamespace(is_animation_playing=True)) == ('暂停', 'PAUSE', '正在播放')
-assert clearance.playback_control(scene, SimpleNamespace(is_animation_playing=False)) == ('播放', 'PLAY', '已暂停')
+# The control follows this scene's ownership of the Blender player, not a screen flag.
+from wfrl_blender import playback as player
+with patch.object(player, 'is_playing', return_value=True):
+    assert clearance.playback_control(scene, SimpleNamespace()) == ('暂停', 'PAUSE', '正在播放')
+with patch.object(player, 'is_playing', return_value=False):
+    assert clearance.playback_control(scene, SimpleNamespace()) == ('播放', 'PLAY', '已暂停')
 assert bpy.ops.wfrl.clearance_view(view='WORLD') == {'FINISHED'}
 assert scene.camera.name == 'WFRL.Camera.World'
 assert playback.sample(scene) == before and scene['wfrl_scene_kind'] == 'clearance_replay'
@@ -133,7 +138,8 @@ for demo, count, ratio in (('normal', 25, '35.2%'), ('near_tower', 33, '46.5%'))
     scene.frame_set(scene.frame_end)
     ended = Layout()
     clearance.draw(ended, scene)
-    assert '本段已结束 · 18.00 / 18.00 s' in ended.labels
+    assert '仿真时刻 36.000 s · 本段已结束' in ended.labels
+    assert '片段进度 18.0 / 18.0 秒' in ended.labels
     assert f'B2 有效样本：{count} / 71' in ended.labels
     assert f'预期样本中有效：{ratio}' in ended.labels
     assert '经过 8 次 · 整次漏测 0 次' in ended.labels
@@ -146,6 +152,8 @@ for demo, count, ratio in (('normal', 25, '35.2%'), ('near_tower', 33, '46.5%'))
 # B2 sample that retains the preceding triplet. This is a test-only fixture.
 reader = runpy.run_path(str(ROOT / 'tests/lidar/test_replay.py'))['ReplayTests']().fixture()
 scene.wfrl_clearance_show_details = scene.wfrl_clearance_show_config = False
+# The synthetic reader's fresh observation is 30 ms old on a 25 Hz timeline.
+scene['wfrl_clearance_timebase_fps'] = 25.
 def labels_at(t):
     result = Layout()
     with patch.object(playback, 'sample', return_value=reader.at(t)):
@@ -184,9 +192,10 @@ old = runtime._state
 runtime._state = SimpleNamespace(connection='CONNECTED', allows=lambda action: False)
 assert not clearance.WFRL_OT_ClearanceClip.poll(bpy.context)
 runtime._state = old
-# Going back to the normal demo rebuilds only by the existing explicit action.
+# The explicit demo entry restores the bundled MAPPO replay and its reader.
 addon.load_demo_scene()
-assert playback.reader_for(scene) is None and scene['wfrl_scene_kind'] == 'demo'
+assert farm_flex.is_active(scene) and scene['wfrl_scene_kind'] == 'clearance_replay'
+assert playback.reader_for(scene) in farm_flex.active_for(scene).readers.values()
 assert bpy.ops.wfrl.clearance_clip(demo='normal') == {'FINISHED'}
 assert playback.sample(scene)['time_s'] == 18
 addon.unregister()

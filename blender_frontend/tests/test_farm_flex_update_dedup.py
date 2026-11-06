@@ -165,6 +165,10 @@ def test_binding_failure_restores_old_deformation_and_reports_cause(replay, monk
 
     active, scene, _ = replay
     run(active, scene)
+    for obj, *_ in (*active.blades, *active.towers):
+        obj.data.users = 1
+        obj.data.use_fake_user = False
+        obj.data.shape_keys = obj.data.library = None
     for tid in active.readers:
         scene.objects[f'WFRL.Turbine.{tid}.Tower'] = object()
     monkeypatch.setattr(active.comparison, 'close', Mock())

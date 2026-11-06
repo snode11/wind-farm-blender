@@ -64,7 +64,8 @@ def error_recovery():
         playback.load(scene, str(original), 'normal')
         reader = playback.reader_for(scene)
         record = next(r for r in reader.package.measurements if r['beams']['B2']['valid'])
-        scene.frame_set(1 + math.ceil((record['time_s'] - reader.start_s) * 25))
+        timebase = scene['wfrl_clearance_timebase_fps']
+        scene.frame_set(scene.frame_start + math.ceil((record['time_s'] - reader.start_s) * timebase))
         assert playback.sample(scene)['measurement'] is not None
         scene.wfrl_clearance_normal_path = str(candidate)
         messages = []
