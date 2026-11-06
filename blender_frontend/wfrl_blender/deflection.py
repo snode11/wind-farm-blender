@@ -17,9 +17,9 @@ def rotation(axis, degrees):
     # recent NumPy versions. Keep computation independent of storage dtype.
     a = np.radians(float(degrees))
     c, s = np.cos(a), np.sin(a)
-    return (np.array(((1, 0, 0), (0, c, -s), (0, s, c))),
-            np.array(((c, 0, s), (0, 1, 0), (-s, 0, c))),
-            np.array(((c, -s, 0), (s, c, 0), (0, 0, 1))))[axis]
+    return np.array((((1, 0, 0), (0, c, -s), (0, s, c)),
+                     ((c, 0, s), (0, 1, 0), (-s, 0, c)),
+                     ((c, -s, 0), (s, c, 0), (0, 0, 1)))[axis])
 
 
 def rigid_frame(scalars, pose, blade, nacelle=None):
@@ -245,15 +245,15 @@ class ComparisonView:
         from mathutils import Vector
         phase_started = performance.begin()
         data = self.data
-        pose = data['poses'][i] * (1 - alpha) + data['poses'][i + 1] * alpha
         simulation = data['simulation'][i] * (1 - alpha) + data['simulation'][i + 1] * alpha
         nacelle = None
-        if 'nacelle' in data:
-            from .tower_motion import interpolate_transform
-            nacelle = interpolate_transform(data['nacelle'][i], data['nacelle'][i+1], alpha)
+        if 'tip_local_m' not in data:
+            pose = data['poses'][i] * (1 - alpha) + data['poses'][i + 1] * alpha
+            if 'nacelle' in data:
+                from .tower_motion import interpolate_transform
+                nacelle = interpolate_transform(data['nacelle'][i], data['nacelle'][i+1], alpha)
         for b in (1, 2, 3):
             obj = self.owner.blades[b - 1][0]
-            hub, axes, pitched = rigid_frame(data['scalars'], pose, b, nacelle)
             if 'tip_local_m' in data:
                 hub, axes = interpolated_beamdyn_root_frame(
                     data['scalars'], b, self.owner.transforms[i, 0, b - 1, 0],
@@ -261,6 +261,7 @@ class ComparisonView:
                 pitched = axes
                 reference = hub + pitched @ data['tip_local_m']
             else:
+                hub, axes, pitched = rigid_frame(data['scalars'], pose, b, nacelle)
                 reference = hub + axes[:, 2] * data['scalars']['TipRad']
             # -2 is the structural reference vertex, -1 remains the cosmetic apex.
             actual = (self.owner.world_matrix(obj) @ obj.data.vertices[-2].co

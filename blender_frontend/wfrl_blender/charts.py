@@ -15,6 +15,18 @@ CHANNELS = ('power', 'reward', 'yaw', 'pitch', 'pitch_command', 'torque', 'rotor
 LABELS = dict(power='Power', reward='Reward', yaw='Yaw', pitch='Pitch measured',
               pitch_command='Pitch command', torque='Torque', rotor_speed='RPM', load='Load')
 FARM = '__farm__'
+_ATOMIC_METADATA_TYPES = frozenset((str, int, float, bool, type(None)))
+
+
+def _copy_metadata(value):
+    """Detach metadata, shallow-copying only dictionaries of immutable atoms."""
+    if type(value) in _ATOMIC_METADATA_TYPES:
+        return value
+    if type(value) is dict and all(type(key) in _ATOMIC_METADATA_TYPES and
+                                  type(item) in _ATOMIC_METADATA_TYPES
+                                  for key, item in value.items()):
+        return value.copy()
+    return deepcopy(value)
 
 
 @dataclass(frozen=True)
@@ -78,9 +90,12 @@ class ChartHistory:
                     validity = 'stale'
                 point = Point(step, payload['timestamp']['value'], value if validity == 'valid' else None,
                               record.get('unit', ''), record.get('fidelity', 'UNKNOWN'), validity,
-                              deepcopy(record.get('provenance', {})),
+                              _copy_metadata(record.get('provenance', {})),
                               episode)
-                values = self.series.setdefault((tid, channel), deque(maxlen=self.capacity))
+                key = (tid, channel)
+                values = self.series.get(key)
+                if values is None:
+                    values = self.series[key] = deque(maxlen=self.capacity)
                 if values and values[-1].step == step and values[-1].episode == point.episode:
                     if values[-1] != point:
                         values[-1] = point
@@ -222,17 +237,19 @@ def record_farm(time_s, poses, manifest, extra=None, *, scene=None):
     if scene is None:
         _local_sequence += 1
         sequence, run_id = _local_sequence, _local_run_id
+        chart, raw = history, raw_history
     else:
         state = _scene_history(scene)
         state.sequence += 1
         sequence, run_id = state.sequence, state.run_id
+        chart, raw = state.history, state.raw
     provenance = {'source': manifest.get('source','FAST.Farm'), 'status': manifest['status'],
                   'policy_sha256': manifest.get('policy', {}).get('sha256'),
                   'geometry_sha256': manifest['files']['geometry.npz'],
                   'pitch': 'mean of three measured blade pitches'}
     flat_provenance = all(type(value) in (str, int, float, bool, type(None)) for value in provenance.values())
     def record(value, unit):
-        return dict(value=float(value), unit=deepcopy(unit), validity='valid', error=None,
+        return dict(value=float(value), unit=_copy_metadata(unit), validity='valid', error=None,
                     fidelity='FAST.Farm', source_age_seconds=0., stale_after_seconds=2.,
                     provenance=provenance.copy() if flat_provenance else deepcopy(provenance))
     turbines = []
@@ -242,8 +259,8 @@ def record_farm(time_s, poses, manifest, extra=None, *, scene=None):
                     'rotor_speed': record(pose[2], 'rpm')}
         for name, value in (extra or {}).get(tid, {}).items():
             channels[name] = record(value['value'], value['unit'])
-            channels[name]['provenance'].update(source_channel=deepcopy(value['source_channel']),
-                                               source_sha256=deepcopy(value['source_sha256']))
+            channels[name]['provenance'].update(source_channel=_copy_metadata(value['source_channel']),
+                                               source_sha256=_copy_metadata(value['source_sha256']))
         turbines.append(dict(turbine_id=tid, channels=channels))
     farm = {}
     powers = [t['channels'].get('power') for t in turbines]
@@ -252,13 +269,13 @@ def record_farm(time_s, poses, manifest, extra=None, *, scene=None):
         farm['power'] = record(sum(p['value'] * scales[p['unit']] for p in powers), 'MW')
         farm['power']['provenance']['inputs'] = [
             dict(turbine_id=t['turbine_id'], value=p['value'], unit=p['unit'],
-                 provenance=deepcopy(p['provenance'])) for t, p in zip(turbines, powers)]
+                 provenance=_copy_metadata(p['provenance'])) for t, p in zip(turbines, powers)]
     message = dict(type='snapshot', session_id='mappo-results', sequence=sequence,
         payload=dict(mode='replay', run_id=run_id, step=round(time_s * 1000),
                      timestamp=dict(value=time_s, timebase='simulation_seconds'),
                      turbines=turbines, farm=farm))
-    raw_history_for(scene).ingest(message, copy_records=False)
-    return history_for(scene).ingest(message)
+    raw.ingest(message, copy_records=False)
+    return chart.ingest(message)
 
 
 _handle = None
