@@ -1,7 +1,10 @@
 """NREL defect actions, viewport picking and modal visibility scans."""
 import math
+import logging
 import time
 import bpy
+
+_LOG = logging.getLogger(__name__)
 
 
 def action_unavailable(s, p, action):
@@ -169,7 +172,10 @@ class NREL_OT_defect_action(bpy.types.Operator):
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}
         finally:
-            _editor.redraw_editor(context)
+            try:
+                _editor.redraw_editor(context)
+            except (ReferenceError, RuntimeError):
+                _LOG.warning('Defect action viewport redraw failed', exc_info=True)
 
 
 class NREL_OT_defect_pick(bpy.types.Operator):
@@ -331,7 +337,7 @@ class NREL_OT_defect_scan(bpy.types.Operator):
             try:
                 self.scan_wm.event_timer_remove(timer)
             except (ReferenceError, RuntimeError):
-                pass
+                _LOG.warning('Defect scan timer could not be removed', exc_info=True)
         valid = self.bound_session_valid()
         restored = False
         if restore_time and valid:
@@ -355,7 +361,7 @@ class NREL_OT_defect_scan(bpy.types.Operator):
                         if can_resume():
                             _editor.bpy.ops.screen.animation_play()
             except (ReferenceError, RuntimeError):
-                pass
+                _LOG.warning('Defect scan playback could not resume', exc_info=True)
         complete = not cancelled and error is None and self.index == self.mapping.frame_count
         try:
             save_records(self.run, self.rows)
@@ -374,7 +380,7 @@ class NREL_OT_defect_scan(bpy.types.Operator):
             try:
                 update_run(self.run)
             except Exception:
-                pass
+                _LOG.exception('Defect scan failure manifest could not be written')
         if valid:
             try:
                 self.scan_scene.wfrl_nrel_defects.status = f'扫描 {self.index}/{self.mapping.frame_count} 帧；' + self.run['manifest']['state']

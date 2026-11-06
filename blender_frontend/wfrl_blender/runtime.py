@@ -5,9 +5,12 @@ from .training import TrainingDashboard
 from .live_scene import snapshot_scene, build_live_scene
 from .wake import WakeFrameBuffer, validate_wake_payload, apply_disxy_frame, set_disxy_validity
 from collections import deque
+import logging
 import time
 import traceback
 from . import performance
+
+_LOG = logging.getLogger(__name__)
 
 # Blender reloads submodules too. Tear down the old timer before rebinding its
 # name, while retaining the last session identity and uncertainty for reconnect.
@@ -330,18 +333,21 @@ def tick():
             _tick_failures.add(failure)
             try:
                 traceback.print_exc()
-            except Exception:
-                pass
+            except (OSError, ValueError) as diagnostic:
+                _state.error += f'; traceback unavailable: {diagnostic}'
         try:
             if _client is not None:
                 _client.close()
+        except Exception:
+            _LOG.exception('Runtime polling failure: transport cleanup failed')
+        try:
             _clear_backend_wake('stale')
         except Exception:
-            pass
+            _LOG.exception('Runtime polling failure: wake invalidation failed')
         try:
             _redraw_viewports()
         except Exception:
-            pass
+            _LOG.exception('Runtime polling failure: viewport redraw failed')
         return 0.05
 
 
@@ -698,8 +704,11 @@ def _tick():
             elif _client.status == 'DISCONNECTED' and _state.connection == 'CONNECTED':
                 _state.disconnect('Connection lost; backend state is unconfirmed')
         except (ValueError, KeyError, TypeError, RuntimeError) as exc:
-            _client.close()
             _state.disconnect(f'Invalid backend data or scene: {exc}')
+            try:
+                _client.close()
+            except Exception:
+                _LOG.exception('Invalid backend data: transport cleanup failed')
     display_scene = None
     if _state.connection != 'LOCAL DEMO':
         connected = _state.connection == 'CONNECTED' and _state.confirmed

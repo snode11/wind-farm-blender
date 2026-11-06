@@ -1,5 +1,6 @@
 """Editor geometry resources, flexible attachments and camera projection."""
 import copy
+import logging
 from dataclasses import asdict
 import numpy as np
 from mathutils import Vector
@@ -7,6 +8,8 @@ from mathutils.bvhtree import BVHTree
 from .defect_schema import new_document
 from .defect_shapes import lightning_crater
 from .defect_geometry import DefectGeometry
+
+_LOG = logging.getLogger(__name__)
 
 
 class GeometrySet:
@@ -48,7 +51,10 @@ class GeometrySet:
                         payload[field].append(dict(item, turbine_id=tid))
             return payload
         except Exception:
-            self.dispose(payload)
+            try:
+                self.dispose(payload)
+            except Exception:
+                _LOG.exception('Defect geometry preparation failed; candidate cleanup also failed')
             raise
 
     def activate(self, payload, document=None, version=None):
@@ -62,12 +68,15 @@ class GeometrySet:
             self.editor.flex.update(self.editor.scene, record_telemetry=False)
         except Exception:
             if previous is not None:
-                for tid, manager in self.managers.items():
-                    manager.activate(previous['turbines'][tid])
-                    for bid in (1,2,3):
-                        self.editor.flex.rebind_blade(self.editor.blade(tid,bid), previous['rest'][(tid,bid)])
-                self.active = previous
-                self.editor.flex.update(self.editor.scene, record_telemetry=False)
+                try:
+                    for tid, manager in self.managers.items():
+                        manager.activate(previous['turbines'][tid])
+                        for bid in (1,2,3):
+                            self.editor.flex.rebind_blade(self.editor.blade(tid,bid), previous['rest'][(tid,bid)])
+                    self.active = previous
+                    self.editor.flex.update(self.editor.scene, record_telemetry=False)
+                except Exception:
+                    _LOG.exception('Defect geometry activation failed; rollback also failed')
             raise
         return previous
 
@@ -76,7 +85,7 @@ class GeometrySet:
         for obj, mesh in self.originals:
             try:
                 obj.data = mesh
-            except Exception as exc:
+            except (ReferenceError, RuntimeError, TypeError) as exc:
                 errors.append(exc)
         if errors:
             raise RuntimeError('Initial blade restoration failed: ' + '; '.join(map(str, errors)))
@@ -111,8 +120,9 @@ class GeometrySet:
         for tid, payload in list(self.original_payloads.items()):
             try:
                 self.managers[tid].dispose(payload)
-            except Exception as exc:
+            except RuntimeError as exc:
                 errors.append(exc)
+                _LOG.warning('Original defect resources await cleanup for %s', tid, exc_info=True)
                 continue
             self.original_payloads.pop(tid, None)
         if errors and strict:
@@ -193,7 +203,7 @@ class EditorGeometry:
                 _editor.bpy.data.objects.remove(obj, do_unlink=True)
             except ReferenceError:
                 pass
-            except Exception as exc:
+            except RuntimeError as exc:
                 errors.append(exc)
                 pending.append(obj)
         self.helpers = pending
@@ -206,7 +216,7 @@ class EditorGeometry:
                     pending_meshes.append(mesh)
             except ReferenceError:
                 pass
-            except Exception as exc:
+            except RuntimeError as exc:
                 errors.append(exc)
                 pending_meshes.append(mesh)
         self.helper_meshes = pending_meshes

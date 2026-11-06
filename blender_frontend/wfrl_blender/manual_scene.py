@@ -1,7 +1,10 @@
 """Owned rigid wind-farm scenes, separate from recorded and backend scenes."""
 import json
+import logging
 import math
 import uuid
+
+_LOG = logging.getLogger(__name__)
 
 _VIEWS = {}
 _RESUME = {}
@@ -84,6 +87,7 @@ def _restore_view(context, saved_scene=None):
                 saved['camera'] = context.scene.objects.get(saved['camera']) if saved['camera'] else None
                 snapshots.append((area, area.spaces.active, saved))
         except (ValueError, TypeError, KeyError):
+            _LOG.warning('Saved manual return view is invalid', exc_info=True)
             snapshots = []
     for area, space, saved in snapshots:
         try:
@@ -111,6 +115,7 @@ def _restore_view(context, saved_scene=None):
             space.show_region_ui = saved['sidebar']
             area.tag_redraw()
         except (ReferenceError, RuntimeError):
+            _LOG.warning('Manual return view could not be restored', exc_info=True)
             continue
 
 
@@ -316,17 +321,20 @@ def _ensure_surface_roles(scene):
         refresh_turbine_surfaces(targets, object_prefix=owner + '.Turbine.', material_factory=material)
         scene['wfrl_manual_surface_roles_revision'] = 1
     except BaseException:
-        for obj, mesh in originals.items():
-            obj.data = mesh
-        for mesh, material in slots.items():
-            if mesh.library is None:
-                mesh.materials[0] = material
-        for mesh in copies.values():
-            if mesh.users == 0:
-                bpy.data.meshes.remove(mesh)
-        for material in materials.values():
-            if material.users == 0:
-                bpy.data.materials.remove(material)
+        try:
+            for obj, mesh in originals.items():
+                obj.data = mesh
+            for mesh, material in slots.items():
+                if mesh.library is None:
+                    mesh.materials[0] = material
+            for mesh in copies.values():
+                if mesh.users == 0:
+                    bpy.data.meshes.remove(mesh)
+            for material in materials.values():
+                if material.users == 0:
+                    bpy.data.materials.remove(material)
+        except Exception:
+            _LOG.exception('Manual surface setup failed; rollback also failed')
         raise
 
 
@@ -406,8 +414,14 @@ def create(context):
         context.view_layer.update()
         return scene
     except Exception:
-        context.window.scene = source
-        _discard(scene, collection, prefix)
+        try:
+            context.window.scene = source
+        except (ReferenceError, RuntimeError):
+            _LOG.exception('Manual scene construction failed; source scene could not be restored')
+        try:
+            _discard(scene, collection, prefix)
+        except Exception:
+            _LOG.exception('Manual scene construction failed; resource cleanup also failed')
         raise
 
 
@@ -434,7 +448,10 @@ def enter(context):
             focus(context)
             return scene
         except Exception:
-            context.window.scene = source
+            try:
+                context.window.scene = source
+            except (ReferenceError, RuntimeError):
+                _LOG.exception('Manual scene recovery failed; source scene could not be restored')
             raise
     _remember_view(context)
     playing = playback.is_playing(source)
@@ -459,11 +476,15 @@ def enter(context):
         focus(context)
         return scene
     except Exception:
-        context.window.scene = source
-        _restore_view(context)
-        if playing and not playback.any_playing():
-            import bpy
-            bpy.ops.screen.animation_play()
+        try:
+            _RESUME.pop(context.window.as_pointer(), None)
+            context.window.scene = source
+            _restore_view(context)
+            if playing and not playback.any_playing():
+                import bpy
+                bpy.ops.screen.animation_play()
+        except Exception:
+            _LOG.exception('Manual scene entry failed; view or playback restoration also failed')
         raise
 
 

@@ -3,9 +3,12 @@ from copy import deepcopy
 from dataclasses import dataclass
 import hashlib
 import json
+import logging
 import uuid
 
 from .defect_schema import new_document, validate_document
+
+_LOG = logging.getLogger(__name__)
 
 
 @dataclass
@@ -47,7 +50,10 @@ class DefectStore:
         self._resource = self._prepare(deepcopy(self._document))
         try: self._activate(self._resource, deepcopy(self._document), self._version)
         except Exception:
-            self._dispose(self._resource)
+            try:
+                self._dispose(self._resource)
+            except Exception:
+                _LOG.exception('Initial defect activation failed; resource cleanup also failed')
             raise
 
     @property
@@ -143,7 +149,7 @@ class DefectStore:
         token = PreparedState(candidate, resource, self._version, self._owner)
         try: return self.commit(token)
         except Exception:
-            if not token.consumed: self.cancel(token)
+            self._cancel_after_error(token)
             raise
 
     def cancel(self, token):
@@ -153,6 +159,18 @@ class DefectStore:
         self._dispose(token.resource)
         token.consumed = True
 
+    def _cancel_after_error(self, token):
+        """Keep failed candidate disposal retryable without replacing the primary error."""
+        if token.consumed:
+            return
+        try:
+            self.cancel(token)
+        except Exception as exc:
+            self._pending_disposals.append(token.resource)
+            self.cleanup_errors += (str(exc),)
+            token.consumed = True
+            _LOG.exception('Defect transaction failed; candidate cleanup awaits retry')
+
     def _restore(self, source, target):
         if not source: return False
         document = validate_document(source[-1], self.surface)
@@ -161,7 +179,7 @@ class DefectStore:
         previous = self.document
         try: self._replace(token)
         except Exception:
-            if not token.consumed: self.cancel(token)
+            self._cancel_after_error(token)
             raise
         source.pop()
         target.append(previous)

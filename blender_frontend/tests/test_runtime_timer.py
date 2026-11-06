@@ -117,3 +117,40 @@ def test_known_message_error_keeps_existing_diagnostic(timer):
     assert runtime.tick() == .05
     assert timer.state.error.startswith('Invalid backend data or scene: ')
     timer.client.close.assert_called_once_with()
+
+
+def test_transport_cleanup_failure_still_invalidates_wake(timer, monkeypatch, caplog):
+    timer.steps['export'].side_effect = KeyError('broken export state')
+    timer.client.close.side_effect = RuntimeError('close failed')
+    clear = Mock()
+    monkeypatch.setattr(runtime, '_clear_backend_wake', clear)
+    assert runtime.tick() == .05
+    clear.assert_called_once_with('stale')
+    assert 'broken export state' in timer.state.error
+    assert 'transport cleanup failed' in caplog.text and 'close failed' in caplog.text
+
+
+def test_invalid_backend_error_survives_transport_cleanup_failure(timer, caplog):
+    timer.client.poll.side_effect = ValueError('corrupt backend frame')
+    timer.client.close.side_effect = RuntimeError('close failed')
+    assert runtime.tick() == .05
+    assert timer.state.error == 'Invalid backend data or scene: corrupt backend frame'
+    assert 'transport cleanup failed' in caplog.text
+
+
+@pytest.mark.parametrize('error_type', [OSError, ValueError])
+def test_unwritable_traceback_is_recorded_in_timer_state(timer, monkeypatch, error_type):
+    timer.steps['export'].side_effect = TypeError('invalid export state')
+    monkeypatch.setattr(runtime.traceback, 'print_exc', Mock(side_effect=error_type('stderr closed')))
+    assert runtime.tick() == .05
+    assert 'invalid export state' in timer.state.error
+    assert 'traceback unavailable: stderr closed' in timer.state.error
+
+
+@pytest.mark.parametrize('target', ['_clear_backend_wake', '_redraw_viewports'])
+def test_timer_cleanup_failure_is_logged_without_replacing_primary(timer, monkeypatch, caplog, target):
+    timer.steps['export'].side_effect = TypeError('invalid export state')
+    monkeypatch.setattr(runtime, target, Mock(side_effect=KeyError('broken cleanup state')))
+    assert runtime.tick() == .05
+    assert 'invalid export state' in timer.state.error
+    assert 'broken cleanup state' in caplog.text

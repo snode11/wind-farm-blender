@@ -2,7 +2,10 @@
 from __future__ import annotations
 
 import math
+import logging
 from dataclasses import dataclass
+
+_LOG = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -392,10 +395,13 @@ def cancel_view_layout():
     _LAYOUT_JOB = None
     try:
         import bpy
+    except ImportError:
+        return
+    try:
         if bpy.app.timers.is_registered(_layout_timer):
             bpy.app.timers.unregister(_layout_timer)
-    except (ImportError, RuntimeError):
-        pass
+    except RuntimeError:
+        _LOG.warning('View layout timer could not be removed', exc_info=True)
 
 
 _DOWN_GIMBAL_NAMES = frozenset(f'WFRL.Camera.{turbine}.Gimbal'
@@ -471,33 +477,37 @@ def ensure_gimbal(scene, turbine, *, yaw_object=None, name=None, owner=None):
             raise ValueError('Multiple Down cameras belong to this turbine scene')
         camera = next(iter(candidates), None)
     created = camera is None
-    if camera is None:
-        camera = bpy.data.objects.new(name, bpy.data.cameras.new(name + '.Data'))
-        root.users_collection[0].objects.link(camera)
-    elif (camera.type != 'CAMERA' or (owner is not None and
+    if camera is not None and (camera.type != 'CAMERA' or (owner is not None and
           (camera.get('wfrl_manual_owner') != owner or camera.parent != root
            or camera.data.get('wfrl_manual_owner') != owner or camera.data.users != 1
            or camera.as_pointer() in other_scene_objects(scene)))):
         raise ValueError('Down camera does not belong to this turbine scene')
-    camera['wfrl_down_camera'] = True
-    if owner is not None:
-        camera['wfrl_manual_owner'] = owner
-        camera.data['wfrl_manual_owner'] = owner
-    revision = DOWN_MOUNT_REVISION
+    data = None
     try:
-        if camera.get('wfrl_gimbal_mount_revision', 0) < revision:
+        if created:
+            data = bpy.data.cameras.new(name + '.Data')
+            camera = bpy.data.objects.new(name, data)
+            root.users_collection[0].objects.link(camera)
+        camera['wfrl_down_camera'] = True
+        if owner is not None:
+            camera['wfrl_manual_owner'] = owner
+            camera.data['wfrl_manual_owner'] = owner
+        if camera.get('wfrl_gimbal_mount_revision', 0) < DOWN_MOUNT_REVISION:
             camera.parent = root
             camera.matrix_parent_inverse.identity()
             camera.data.clip_start, camera.data.clip_end = .05, 30000
             camera.data.display_size = .5
             reset_gimbal(camera)
-            camera['wfrl_gimbal_mount_revision'] = revision
+            camera['wfrl_gimbal_mount_revision'] = DOWN_MOUNT_REVISION
     except Exception:
         if created:
-            data = camera.data
-            bpy.data.objects.remove(camera, do_unlink=True)
-            if data.users == 0:
-                bpy.data.cameras.remove(data)
+            try:
+                if camera is not None:
+                    bpy.data.objects.remove(camera, do_unlink=True)
+                if data is not None and data.users == 0:
+                    bpy.data.cameras.remove(data)
+            except Exception:
+                _LOG.exception('Down camera initialization failed; resource cleanup also failed')
         raise
     clear_camera_mask(camera)
     return camera
@@ -674,10 +684,13 @@ def ensure_nacelle_gimbal(scene, turbine):
         reset_nacelle_gimbal(camera)
         camera['wfrl_nacelle_initialized'] = True
     except Exception:
-        if camera is not None:
-            bpy.data.objects.remove(camera, do_unlink=True)
-        if data.users == 0:
-            bpy.data.cameras.remove(data)
+        try:
+            if camera is not None:
+                bpy.data.objects.remove(camera, do_unlink=True)
+            if data.users == 0:
+                bpy.data.cameras.remove(data)
+        except Exception:
+            _LOG.exception('Nacelle camera initialization failed; resource cleanup also failed')
         raise
     return camera
 

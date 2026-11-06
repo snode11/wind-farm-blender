@@ -1,8 +1,11 @@
 """Committed defect configuration and Blender save/reopen callbacks."""
 import json
+import logging
 from pathlib import Path
 from bpy.app.handlers import persistent
 from .defect_schema import validate_document, save_document
+
+_LOG = logging.getLogger(__name__)
 
 
 class EditorPersistence:
@@ -55,8 +58,12 @@ def restore_saved(scene):
     if scene.get('wfrl_nrel_defect_enabled') and scene.get(_editor.DOCUMENT_KEY):
         try: _editor.ensure(scene)
         except Exception as exc:
-            scene['defect_analysis_status']='RESTORE_FAILED: '+str(exc)
-            scene.wfrl_nrel_defects.status=str(exc)
+            _LOG.exception('Saved defect configuration could not be restored')
+            try:
+                scene['defect_analysis_status']='RESTORE_FAILED: '+str(exc)
+                scene.wfrl_nrel_defects.status=str(exc)
+            except (AttributeError, ReferenceError):
+                _LOG.exception('Defect restore failure could not be displayed')
             raise
 
 
@@ -71,7 +78,11 @@ def save_pre(_unused):
                 scan.finish_scan(None, True, resume_playback=False)
             s.suspend_for_save()
     except Exception:
-        _editor.restore_after_save()
+        _LOG.exception('Defect editor save preparation failed')
+        try:
+            _editor.restore_after_save()
+        except Exception:
+            _LOG.exception('Defect editor save preparation rollback also failed')
         raise
 
 
@@ -82,8 +93,12 @@ def restore_after_save(saved=False):
         try:
             s.resume_after_save(saved)
         except Exception as exc:
-            s.scene.wfrl_nrel_defects.status = '保存后恢复编辑状态失败：'+str(exc)
             errors.append(exc)
+            _LOG.exception('Defect editor state could not be restored after save')
+            try:
+                s.scene.wfrl_nrel_defects.status = '保存后恢复编辑状态失败：'+str(exc)
+            except (AttributeError, ReferenceError):
+                _LOG.exception('Defect save recovery failure could not be displayed')
     if errors:
         raise errors[0]
 

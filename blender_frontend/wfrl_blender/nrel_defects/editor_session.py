@@ -1,6 +1,7 @@
 """Defect edit transactions, session lifetime and RNA data synchronization."""
 import copy
 import json
+import logging
 import math
 import time
 import numpy as np
@@ -9,6 +10,8 @@ from .defect_schema import KIND_LABELS, PRESETS, validate_document
 from .defect_store import DefectStore
 from .editor_geometry import EditorGeometry
 from .editor_persistence import EditorPersistence
+
+_LOG = logging.getLogger(__name__)
 
 
 class EditorSession(EditorGeometry, EditorPersistence):
@@ -26,7 +29,10 @@ class EditorSession(EditorGeometry, EditorPersistence):
             self._initialize(scene, document)
             self.geometry.finish_initial()
         except Exception:
-            self.rollback_initial()
+            try:
+                self.rollback_initial()
+            except Exception:
+                _LOG.exception('Defect editor initialization failed; rollback awaits retry')
             raise
         _editor._INITIALIZING.pop(scene.as_pointer(), None)
         _editor._SESSIONS[scene.as_pointer()] = self
@@ -103,7 +109,7 @@ class EditorSession(EditorGeometry, EditorPersistence):
         token = self.store.prepare(document)
         try: return self.store.commit(token)
         except BaseException:
-            if not token.consumed: self.store.cancel(token)
+            self.store._cancel_after_error(token)
             raise
 
     def _activate(self, payload, document, version):
@@ -169,8 +175,12 @@ class EditorSession(EditorGeometry, EditorPersistence):
             self.draft = None
             try:
                 _editor.sync_defect_list(self, self.store.document, self.edit_selection)
-            finally:
+            except Exception:
+                _LOG.exception('Defect edit failed; list restoration also failed')
+            try:
                 self._restore_edit_state()
+            except Exception:
+                _LOG.exception('Defect edit failed; playback restoration also failed')
             raise
 
     def _restore_edit_state(self):
@@ -198,7 +208,7 @@ class EditorSession(EditorGeometry, EditorPersistence):
                     if can_resume():
                         _editor.bpy.ops.screen.animation_play()
         except (ReferenceError, RuntimeError):
-            pass
+            _LOG.warning('Defect edit playback could not resume', exc_info=True)
 
     def discard_preview(self):
         if self.preview is not None:
@@ -225,7 +235,13 @@ class EditorSession(EditorGeometry, EditorPersistence):
         self.draft=None
         try:
             _editor.sync_defect_list(self, self.store.document, selected_id)
-        finally:
+        except BaseException:
+            try:
+                self._restore_edit_state()
+            except Exception:
+                _LOG.exception('Defect list synchronization failed; playback restoration also failed')
+            raise
+        else:
             self._restore_edit_state()
 
     def mutate(self, operation, index):
@@ -260,12 +276,12 @@ class EditorSession(EditorGeometry, EditorPersistence):
         payload=self.geometry.prepare(doc)
         try:
             self.geometry.activate(payload)
-        except BaseException as exc:
+        except BaseException:
             # The committed geometry stays shown; release the unused comparison.
             try:
                 self.geometry.dispose(payload)
-            except Exception as cleanup:
-                raise RuntimeError(f'{exc}；健康对照资源清理失败：{cleanup}') from exc
+            except Exception:
+                _LOG.exception('Healthy comparison failed; resource cleanup also failed')
             raise
         self.healthy_payload=payload
         for helper in self.live_helpers(): helper.hide_viewport=True
