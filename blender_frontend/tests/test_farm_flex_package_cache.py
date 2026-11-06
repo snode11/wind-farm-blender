@@ -9,6 +9,7 @@ from unittest.mock import Mock
 
 import numpy as np
 import pytest
+from blender_frontend.tests._platform import symlink_or_skip
 from wfrl.lidar.replay import precompute
 
 from wfrl_blender import clearance_replay, farm_flex, tip_tracking
@@ -114,7 +115,7 @@ def test_resolved_path_is_part_of_cache_identity(packages, parses):
     a, b = packages('a'), packages('b')
     first, other = farm_flex._load_package(a), farm_flex._load_package(b)
     alias = a.parent / 'alias'
-    alias.symlink_to(a, target_is_directory=True)
+    symlink_or_skip(alias, a, target_is_directory=True)
     aliased = farm_flex._load_package(alias)
     assert parses.call_count == 2
     assert first.times is aliased.times and first.times is not other.times

@@ -16,6 +16,8 @@ import unittest
 from unittest.mock import patch
 import uuid
 
+from blender_frontend.tests._platform import symlink_or_skip, write_python_tool
+
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 PACKAGE = '_manual_video_test_helpers'
@@ -260,7 +262,7 @@ class MasterRecoveryTests(unittest.TestCase):
 
     def test_supervised_cli_retry_waits_for_simulated_codec_failure_and_recovery(self):
         executable = Path(self.job['ffmpeg'])
-        executable.write_text(f'#!{sys.executable}\n' + '''import json,sys
+        write_python_tool(executable, '''import json,sys
 from pathlib import Path
 args=sys.argv[1:]
 complete=b'NON-MEDIA simulated codec placeholder'
@@ -282,8 +284,7 @@ elif '-show_frames' in args:
     print(json.dumps(dict(streams=[stream],frames=[dict(pts=i,key_frame=int(i==0),pict_type='I' if i==0 else 'P') for i in range(3)])))
 elif '-show_entries' in args:
     print(json.dumps(dict(format=dict(duration=.12),streams=[dict(duration=.12)])))
-''')
-        executable.chmod(0o700)
+''', mode=0o700)
         (self.root / 'master.json').unlink()
         video.seal_master(self.path)
         before = {p.name: media.sha256(p) for p in (self.root / 'master_frames').iterdir()}
@@ -319,7 +320,7 @@ elif '-show_entries' in args:
             self.finish()
         self.assertEqual(output.read_bytes(), b'other owner')
         output.unlink()
-        output.symlink_to(self.root / 'absent')
+        symlink_or_skip(output, self.root / 'absent')
         with self.assertRaises((ValueError, FileExistsError)):
             self.finish()
         self.assertTrue(output.is_symlink())
@@ -343,7 +344,7 @@ elif '-show_entries' in args:
     def test_frame_symlink_rejected(self):
         frame = self.root / 'master_frames/000001.png'
         frame.unlink()
-        frame.symlink_to(self.root / 'snapshot.fixture')
+        symlink_or_skip(frame, self.root / 'snapshot.fixture')
         self.assert_rejected_without_mutation()
 
     def test_changed_configuration_source_camera_snapshot_and_encoder_rejected(self):
@@ -547,7 +548,7 @@ class SupervisionTests(unittest.TestCase):
 
     def test_output_aliases_share_a_lease(self):
         alias = self.root / 'alias'
-        alias.symlink_to(self.root, target_is_directory=True)
+        symlink_or_skip(alias, self.root, target_is_directory=True)
         self.assertEqual(jobs.output_lock(self.job['output_mp4']), jobs.output_lock(alias / 'output.mp4'))
         self.assertEqual(jobs.output_lock(self.root / 'OUTPUT.mp4'), jobs.output_lock(self.root / 'output.mp4'))
 
@@ -608,7 +609,7 @@ class SupervisionTests(unittest.TestCase):
                 jobs.Lease(path, self.job['job_id'])
             self.assertEqual(path.read_bytes(), content)
         path.unlink()
-        path.symlink_to(self.root / 'snapshot.fixture')
+        symlink_or_skip(path, self.root / 'snapshot.fixture')
         with self.assertRaises(OSError):
             jobs.Lease(path, self.job['job_id'])
 

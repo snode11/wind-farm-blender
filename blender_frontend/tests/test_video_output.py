@@ -14,6 +14,8 @@ from unittest.mock import Mock
 
 import pytest
 
+from blender_frontend.tests._platform import symlink_or_skip
+
 MODULE = Path(__file__).resolve().parents[1] / 'wfrl_blender/video_output.py'
 spec = importlib.util.spec_from_file_location('video_output_service', MODULE)
 video_output = importlib.util.module_from_spec(spec)
@@ -452,7 +454,7 @@ assert entered.wait(5)
 def test_export_does_not_follow_a_dangling_destination_symlink(tmp_path):
     source, target = tmp_path / 'source.mp4', tmp_path / 'output.mp4'
     source.write_bytes(b'complete video')
-    target.symlink_to(tmp_path / 'missing.mp4')
+    symlink_or_skip(target, tmp_path / 'missing.mp4')
     with pytest.raises(FileExistsError):
         video_output.Export().start(source, target)
     assert target.is_symlink() and not (tmp_path / 'missing.mp4').exists()

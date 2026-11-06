@@ -272,7 +272,7 @@ def _driver_functions(*names):
     import ast
     from pathlib import Path
     path = Path(__file__).parent/'blender'/'demo_playback_benchmark.py'
-    parsed = ast.parse(path.read_text())
+    parsed = ast.parse(path.read_text(encoding='utf-8'))
     return compile(ast.Module(body=[node for node in parsed.body
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name in names],
         type_ignores=[]), str(path), 'exec')
@@ -431,25 +431,26 @@ def _runner():
     return module
 
 
-def _runner_args(tmp_path, code):
-    import sys
+@pytest.fixture
+def runner_args(tmp_path, python_tool):
     from types import SimpleNamespace as NS
-    executable = tmp_path/'fake-blender'
-    executable.write_text(f'#!{sys.executable}\n'+code)
-    executable.chmod(0o755)
-    # The fake Blender exits as soon as it has written its output; generous
-    # limits keep interpreter start-up on a loaded host from tripping the
-    # watchdog. The hung-process test sets its own short limit.
-    return NS(output=str(tmp_path/'new-output'), blender=str(executable), path='triple',
-        layout='STRIP', seconds=100., profile=False, addon_root=None, addon_module=None,
-        fault=None, width=820, height=473, startup_timeout=30., process_timeout=60.)
+
+    def make(code):
+        executable = python_tool(tmp_path / 'fake-blender', code)
+        # Allow interpreter startup on a loaded host. The hung-process fixture
+        # sets its own short watchdog limit.
+        return NS(output=str(tmp_path/'new-output'), blender=str(executable), path='triple',
+            layout='STRIP', seconds=100., profile=False, addon_root=None, addon_module=None,
+            fault=None, width=820, height=473, startup_timeout=30., process_timeout=60.)
+
+    return make
 
 
 @pytest.mark.parametrize('status,exitcode', [('PASS', 0), ('INCOMPLETE', 1), ('FAIL', 1)])
-def test_launcher_requires_a_fresh_terminal_json_not_just_process_exit(tmp_path, status, exitcode):
+def test_launcher_requires_a_fresh_terminal_json_not_just_process_exit(runner_args, status, exitcode):
     import json
     from pathlib import Path
-    args = _runner_args(tmp_path,
+    args = runner_args(
         "import os,json\nfrom pathlib import Path\n"
         "p=Path(os.environ['WFRL_TEST_OUTPUT'])\n"
         f"(p/'result.json').write_text(json.dumps({{'status': '{status}', 'termination': {{'reason': 'finished'}}}}))\n"
@@ -460,20 +461,20 @@ def test_launcher_requires_a_fresh_terminal_json_not_just_process_exit(tmp_path,
     assert result['process_returncode'] == 0
 
 
-def test_launcher_normal_exit_without_result_is_error(tmp_path):
+def test_launcher_normal_exit_without_result_is_error(runner_args):
     import json
     from pathlib import Path
-    args = _runner_args(tmp_path, 'pass\n')
+    args = runner_args('pass\n')
     assert _runner().run(args) == 1
     result = json.loads((Path(args.output)/'result.json').read_text())
     assert result['status'] == 'ERROR'
     assert result['termination']['reason'] == 'process_exit_without_verified_result'
 
 
-def test_external_watchdog_records_a_hung_process_as_incomplete(tmp_path):
+def test_external_watchdog_records_a_hung_process_as_incomplete(runner_args):
     import json
     from pathlib import Path
-    args = _runner_args(tmp_path, 'import time\ntime.sleep(10)\n')
+    args = runner_args('import time\ntime.sleep(10)\n')
     args.process_timeout = .01
     assert _runner().run(args) == 1
     result = json.loads((Path(args.output)/'result.json').read_text())
@@ -481,9 +482,9 @@ def test_external_watchdog_records_a_hung_process_as_incomplete(tmp_path):
     assert result['termination']['reason'] == 'external_process_timeout'
 
 
-def test_launcher_rejects_a_preexisting_result_directory(tmp_path):
+def test_launcher_rejects_a_preexisting_result_directory(runner_args):
     from pathlib import Path
-    args = _runner_args(tmp_path, 'pass\n')
+    args = runner_args('pass\n')
     Path(args.output).mkdir()
     (Path(args.output)/'result.json').write_text('{"status":"PASS"}')
     with pytest.raises(ValueError, match='new or empty'):
@@ -498,10 +499,10 @@ def test_near_end_seek_or_paused_reset_is_not_expected_playback_wrap(flag, value
 
 
 @pytest.mark.parametrize('stored_roots', ['legacy', 'explicit', 'resources_only', 'extensions_only'])
-def test_installed_profile_runner_preserves_repository_preferences(tmp_path, monkeypatch, stored_roots):
+def test_installed_profile_runner_preserves_repository_preferences(tmp_path, monkeypatch, runner_args, stored_roots):
     import json
     from pathlib import Path
-    args = _runner_args(tmp_path,
+    args = runner_args(
         "import os,json\nfrom pathlib import Path\n"
         "p=Path(os.environ['WFRL_TEST_OUTPUT'])\n"
         "(p/'result.json').write_text(json.dumps({'status': 'PASS', 'termination': {'reason': 'finished'}, "
@@ -541,11 +542,11 @@ def test_installed_profile_runner_preserves_repository_preferences(tmp_path, mon
 
 
 @pytest.mark.parametrize('explicit_roots', [False, True])
-def test_no_factory_startup_isolates_an_inherited_profile(tmp_path, monkeypatch, explicit_roots):
+def test_no_factory_startup_isolates_an_inherited_profile(tmp_path, monkeypatch, runner_args, explicit_roots):
     import json
     import os
     from pathlib import Path
-    args = _runner_args(tmp_path,
+    args = runner_args(
         "import os,json\nfrom pathlib import Path\n"
         "p=Path(os.environ['WFRL_TEST_OUTPUT'])\n"
         "(p/'result.json').write_text(json.dumps({'status': 'PASS', 'termination': {'reason': 'finished'}, "
@@ -602,10 +603,10 @@ def test_progress_status_requires_explicit_final_verdict_and_termination(tmp_pat
     'Error: drawing failed',
     'Error: Not freed memory blocks: invalid, total unfreed memory 1 MB',
 ])
-def test_launcher_rejects_ui_errors_despite_clean_exit_and_pass_json(tmp_path, diagnostic):
+def test_launcher_rejects_ui_errors_despite_clean_exit_and_pass_json(runner_args, diagnostic):
     import json
     from pathlib import Path
-    args = _runner_args(tmp_path,
+    args = runner_args(
         "import os,json\nfrom pathlib import Path\n"
         "p=Path(os.environ['WFRL_TEST_OUTPUT'])\n"
         "(p/'result.json').write_text(json.dumps({'status': 'PASS', 'termination': {'reason': 'finished'}}))\n"
@@ -620,10 +621,10 @@ def test_launcher_rejects_ui_errors_despite_clean_exit_and_pass_json(tmp_path, d
     assert original == {'status': 'PASS', 'termination': {'reason': 'finished'}}
 
 
-def test_launcher_requires_final_log_marker_even_with_pass_json(tmp_path):
+def test_launcher_requires_final_log_marker_even_with_pass_json(runner_args):
     import json
     from pathlib import Path
-    args = _runner_args(tmp_path,
+    args = runner_args(
         "import os,json\nfrom pathlib import Path\n"
         "p=Path(os.environ['WFRL_TEST_OUTPUT'])\n"
         "(p/'result.json').write_text(json.dumps({'status': 'PASS', 'termination': {'reason': 'finished'}}))\n")

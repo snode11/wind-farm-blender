@@ -13,13 +13,15 @@ import tempfile
 import threading
 import pytest
 
+from blender_frontend.tests._platform import symlink_or_skip
+
 SOURCE = Path(__file__).resolve().parents[1] / 'wfrl_blender/manual_down.py'
 
 
 def helpers():
     names = {'pose_at', '_output_paths', '_publish_pair', '_verify_video', '_plan', '_frame_handler',
              '_publish_async', '_finalize_files', '_finish'}
-    tree = ast.parse(SOURCE.read_text())
+    tree = ast.parse(SOURCE.read_text(encoding='utf-8'))
     namespace = dict(Path=Path, Fraction=Fraction, json=json, math=math, os=os,
                      shutil=shutil, tempfile=tempfile, subprocess=subprocess, queue=queue, threading=threading)
     from wfrl_blender.manual_motion import pitch_at
@@ -76,7 +78,7 @@ def test_pair_preflight_rejects_either_destination_and_dangling_links(tmp_path):
     target = tmp_path / 'down.mp4'
     assert function(str(target)) == (target, target.with_suffix('.json'))
     for path in (target, target.with_suffix('.json')):
-        path.symlink_to(tmp_path / 'missing')
+        symlink_or_skip(path, tmp_path / 'missing')
         with pytest.raises(FileExistsError):
             function(str(target))
         path.unlink()
@@ -116,8 +118,9 @@ def test_pair_publication_writes_complete_bytes(tmp_path):
     assert json.loads(target.with_suffix('.json').read_text()) == {'samples': [1, 2]}
 
 
-def test_verification_requires_actual_count_size_fps_and_full_decode(monkeypatch):
+def test_verification_requires_actual_count_size_fps_and_full_decode(monkeypatch, tmp_path):
     function = helpers()['_verify_video']
+    master = tmp_path / 'master.mp4'
     result = dict(streams=[dict(codec_name='h264', width=64, height=36, avg_frame_rate='25/1')],
                   frames=[dict(best_effort_timestamp_time='0.0'), dict(best_effort_timestamp_time='0.04')])
     commands = []
@@ -125,17 +128,17 @@ def test_verification_requires_actual_count_size_fps_and_full_decode(monkeypatch
         commands.append(command)
         return SimpleNamespace(stdout=json.dumps(result) if command[0] == 'probe' else '', returncode=0)
     monkeypatch.setattr(subprocess, 'run', run)
-    assert function(Path('/tmp/master.mp4'), 2, 25, (64, 36), 'probe', 'codec')['frame_count'] == 2
+    assert function(master, 2, 25, (64, 36), 'probe', 'codec')['frame_count'] == 2
     assert commands[-1][0] == 'codec' and '-xerror' in commands[-1]
     for field, value in [('width', 62), ('height', 34), ('avg_frame_rate', '24/1')]:
         old = result['streams'][0][field]
         result['streams'][0][field] = value
         with pytest.raises(ValueError):
-            function(Path('/tmp/master.mp4'), 2, 25, (64, 36), 'probe', 'codec')
+            function(master, 2, 25, (64, 36), 'probe', 'codec')
         result['streams'][0][field] = old
     result['frames'].pop()
     with pytest.raises(ValueError):
-        function(Path('/tmp/master.mp4'), 2, 25, (64, 36), 'probe', 'codec')
+        function(master, 2, 25, (64, 36), 'probe', 'codec')
 
 
 def test_plan_animates_only_selected_turbine_from_actual_snapshot():
@@ -154,7 +157,7 @@ def test_plan_animates_only_selected_turbine_from_actual_snapshot():
             assert item['rpm'] == 0 and item['pitch_start_deg'] == item['pitch_target_deg'] == [2, 3, 4]
 
 
-def test_plan_current_pose_start_and_full_decode_failure(monkeypatch):
+def test_plan_current_pose_start_and_full_decode_failure(monkeypatch, tmp_path):
     namespace = helpers()
     entry = SimpleNamespace(turbine_id='T1', rpm=8)
     namespace['manual_control'] = SimpleNamespace(target_pitch=lambda entry, index: 30)
@@ -171,7 +174,7 @@ def test_plan_current_pose_start_and_full_decode_failure(monkeypatch):
         return SimpleNamespace(stdout=json.dumps(result))
     monkeypatch.setattr(subprocess, 'run', fail_decode)
     with pytest.raises(subprocess.CalledProcessError):
-        namespace['_verify_video'](Path('/tmp/corrupt.mp4'), 1, 25, (64,36), 'probe', 'codec')
+        namespace['_verify_video'](tmp_path / 'corrupt.mp4', 1, 25, (64,36), 'probe', 'codec')
 
 
 @pytest.mark.parametrize('state', [{'cancelled': True}, {'failure': 'native render failed'}])

@@ -8,6 +8,7 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
+from blender_frontend.tests._platform import symlink_or_skip
 from wfrl_blender import farm_flex, imbalance
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -127,7 +128,7 @@ def test_new_load_rejects_changed_analysis_source_even_with_same_size_and_mtime(
             if file.name == 'telemetry.json':
                 (tmp_path / file.name).write_bytes(file.read_bytes())
             else:
-                (tmp_path / file.name).symlink_to(file)
+                symlink_or_skip(tmp_path / file.name, file)
     package = farm_flex._load_package(tmp_path)
     assert imbalance.load_for_source(tmp_path, _source=package.verified_source) is not None
     target = tmp_path / 'telemetry.json'

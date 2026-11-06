@@ -12,6 +12,8 @@ import unittest
 from unittest.mock import patch
 from zipfile import ZipFile
 
+from blender_frontend.tests._platform import symlink_or_skip
+
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILDER_PATH = ROOT / 'scripts' / 'blender' / 'build_extension.py'
@@ -60,16 +62,17 @@ class OutputTests(unittest.TestCase):
     def test_broken_output_symlinks_are_conflicts(self):
         builder = load_builder()
         for index in range(3):
-            with self.subTest(index=index), tempfile.TemporaryDirectory() as directory:
+            with tempfile.TemporaryDirectory() as directory:
                 output = Path(directory)
                 paths = output_paths(builder, output)
-                paths[index].symlink_to('missing-target')
-                with patch.object(builder, '_payloads', side_effect=AssertionError('payload read')):
-                    with self.assertRaises(FileExistsError):
-                        builder.build(output)
-                self.assertTrue(paths[index].is_symlink())
-                self.assertFalse(paths[index].exists())
-                self.assertEqual(list(output.iterdir()), [paths[index]])
+                symlink_or_skip(paths[index], 'missing-target')
+                with self.subTest(index=index):
+                    with patch.object(builder, '_payloads', side_effect=AssertionError('payload read')):
+                        with self.assertRaises(FileExistsError):
+                            builder.build(output)
+                    self.assertTrue(paths[index].is_symlink())
+                    self.assertFalse(paths[index].exists())
+                    self.assertEqual(list(output.iterdir()), [paths[index]])
 
     def test_explicit_overwrite_publishes_a_valid_package(self):
         builder = load_builder()
@@ -112,7 +115,7 @@ class OutputTests(unittest.TestCase):
             staging = output / '.staging'
             staging.mkdir()
             for path in paths:
-                path.symlink_to(target)
+                symlink_or_skip(path, target)
                 (staging / path.name).write_bytes(b'new output')
             builder._publish_outputs(staging, paths, overwrite=True)
             self.assertEqual(target.read_bytes(), b'keep target')

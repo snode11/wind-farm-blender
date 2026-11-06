@@ -8,6 +8,8 @@ from unittest.mock import Mock, call
 
 import pytest
 
+from blender_frontend.tests._platform import symlink_or_skip
+
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location('wfrl_installed_window_runner',
@@ -153,7 +155,7 @@ def test_daily_installation_is_rejected_before_output_or_launch(source, profile_
         overrides['BLENDER_USER_CONFIG'] = str(daily)
     elif source == 'config_link':
         link = profile_dir / 'config-link'
-        link.symlink_to(daily, target_is_directory=True)
+        symlink_or_skip(link, daily, target_is_directory=True)
         overrides['BLENDER_USER_CONFIG'] = str(link)
     elif source in ('resources', 'extensions'):
         overrides['BLENDER_USER_' + source.upper()] = str(daily)

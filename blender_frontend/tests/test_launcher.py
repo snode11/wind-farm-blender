@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 from pathlib import Path
 import socket
-import stat
 import struct
 import subprocess
 import sys
@@ -15,6 +15,7 @@ import venv
 import psutil
 
 import pytest
+from blender_frontend.tests._platform import symlink_or_skip, venv_python, write_python_tool
 from wfrl.blender_bridge import launcher_state
 
 
@@ -26,14 +27,8 @@ sys.modules[SPEC.name] = launcher
 SPEC.loader.exec_module(launcher)
 
 
-def executable(path: Path, body: str) -> Path:
-    path.write_text(f"#!{sys.executable}\n{body}\n")
-    path.chmod(path.stat().st_mode | stat.S_IXUSR)
-    return path
-
-
 def base_args(tmp_path: Path, blender: Path | None = None) -> list[str]:
-    blender = blender or executable(tmp_path / "blender", "raise SystemExit(0)")
+    blender = blender or write_python_tool(tmp_path / "blender", "raise SystemExit(0)")
     return ["--blender", str(blender), "--python", sys.executable,
             "--project-dir", str(ROOT), "--scene", str(ROOT / "scenes" / "turb3_demo.yaml")]
 
@@ -47,17 +42,16 @@ def test_verify_fake_reports_fixture_ready(tmp_path, capsys):
 
 
 def test_python_executable_keeps_virtual_environment_entry(tmp_path):
-    environment = tmp_path / 'venv' / 'bin'
-    environment.mkdir(parents=True)
-    python = environment / 'python'
-    python.symlink_to(sys.executable)
+    python = venv_python(tmp_path / 'venv')
+    python.parent.mkdir(parents=True)
+    symlink_or_skip(python, sys.executable)
     assert launcher.resolve_executable(str(python), 'Python') == str(python.absolute())
 
 
 def test_selected_python_executes_inside_its_virtual_environment(tmp_path):
     environment = tmp_path / "venv"
-    venv.EnvBuilder(with_pip=False, symlinks=True).create(environment)
-    selected = launcher.resolve_executable(str(environment / "bin" / "python"), "Python")
+    venv.EnvBuilder(with_pip=False, symlinks=os.name == 'posix').create(environment)
+    selected = launcher.resolve_executable(str(venv_python(environment)), "Python")
     check = subprocess.run([selected, "-c", "import sys; print(sys.prefix)"],
                            capture_output=True, text=True, check=True)
     assert Path(check.stdout.strip()) == environment
@@ -108,9 +102,9 @@ def test_occupied_port_is_rejected_without_attaching(tmp_path, capsys):
     assert "refusing to attach to an unowned process" in capsys.readouterr().out
 
 
-def test_launch_fake_cleans_up_owned_bridge(tmp_path):
+def test_launch_fake_cleans_up_owned_bridge(tmp_path, python_tool):
     marker = tmp_path / "blender-ran"
-    blender = executable(tmp_path / "blender", f"from pathlib import Path\nPath({str(marker)!r}).write_text('ok')")
+    blender = python_tool(tmp_path / "blender", f"from pathlib import Path\nPath({str(marker)!r}).write_text('ok')")
     code = launcher.main(["launch", *base_args(tmp_path, blender), "--fake",
                           "--port", "18765", "--startup-timeout", "5"])
     assert code == 0
@@ -427,9 +421,9 @@ def test_fastfarm_yaml_always_launches_bridge_under_mpi(tmp_path, monkeypatch, o
     (bridge_package / 'launcher_state.py').write_text('class SessionBinding: pass\n')
     scene = project / "scene.yaml"
     scene.write_text(f"backend: {declaration}\n")
-    mpi = executable(tmp_path / "mpi", "raise SystemExit(99)")
-    fastfarm = executable(tmp_path / "fastfarm", "raise SystemExit(99)")
-    blender = executable(tmp_path / "blender", "raise SystemExit(99)")
+    mpi = write_python_tool(tmp_path / "mpi", "raise SystemExit(99)")
+    fastfarm = write_python_tool(tmp_path / "fastfarm", "raise SystemExit(99)")
+    blender = write_python_tool(tmp_path / "blender", "raise SystemExit(99)")
     args = SimpleNamespace(blender=str(blender), python=sys.executable, project_dir=str(project),
         scene=str(scene), fake=False, mpi=str(mpi), fastfarm=str(fastfarm), port=18766, startup_timeout=5)
     report = launcher.preflight(args, require_backend=True)

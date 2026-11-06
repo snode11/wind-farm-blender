@@ -1,10 +1,29 @@
 """Host-test fixtures for Blender-facing frontend modules."""
 import importlib
+import os
+import subprocess
 import sys
 import types
 from unittest.mock import MagicMock
 
 import pytest
+
+from blender_frontend.tests._platform import python_tool_popen, write_python_tool
+
+
+@pytest.fixture
+def python_tool(monkeypatch):
+    scripts = set()
+    if os.name == 'nt':
+        monkeypatch.setattr(subprocess, 'Popen', python_tool_popen(scripts))
+
+    def create(path, body, *, mode=0o755):
+        script = write_python_tool(path, body, mode=mode)
+        scripts.add(script)
+        return script
+
+    return create
+
 
 # Real empty classes, so operator, panel and property-group classes define normally.
 BASE_TYPES = ('Operator', 'Panel', 'PropertyGroup', 'UIList', 'Menu', 'Header',

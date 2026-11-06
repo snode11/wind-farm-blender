@@ -1,6 +1,5 @@
 from wfrl_blender.diagnostics import report, recovery_hint
 from wfrl_blender.health import HealthChecker
-from test_health import executable
 
 
 def test_full_report_preserves_tail_unicode_and_source():
@@ -18,14 +17,14 @@ def test_recovery_hints():
     assert recovery_hint('python', 'READY') == ''
 
 
-def test_probe_preserves_error_after_old_limit(tmp_path):
-    tool = executable(tmp_path, "import sys\nprint('x' * 4000 + 'ROOT CAUSE')\nsys.exit(1)\n")
-    result = HealthChecker()._probe('mpi', tool)
+def test_probe_preserves_error_after_old_limit(tmp_path, python_tool):
+    tool = python_tool(tmp_path / 'probe tool', "import sys\nprint('x' * 4000 + 'ROOT CAUSE')\nsys.exit(1)\n")
+    result = HealthChecker()._probe('mpi', str(tool))
     assert result.status == 'ERROR'
     assert result.detail.endswith('ROOT CAUSE')
 
 
-def test_probe_marks_output_limit(tmp_path):
-    tool = executable(tmp_path, "print('x' * 70000)\n")
-    result = HealthChecker()._probe('mpi', tool)
+def test_probe_marks_output_limit(tmp_path, python_tool):
+    tool = python_tool(tmp_path / 'probe tool', "print('x' * 70000)\n")
+    result = HealthChecker()._probe('mpi', str(tool))
     assert 'remaining output omitted' in result.detail

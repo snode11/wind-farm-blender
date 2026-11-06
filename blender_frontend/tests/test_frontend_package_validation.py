@@ -2,12 +2,18 @@
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import sys
 from types import SimpleNamespace
 from zipfile import ZipFile
 
 import pytest
+
+from blender_frontend.tests._platform import symlink_or_skip
+
+
+COMMAND_ENV = {'SystemRoot': os.environ['SystemRoot']} if os.name == 'nt' and 'SystemRoot' in os.environ else {}
 
 
 def validator():
@@ -74,7 +80,7 @@ def test_installed_mismatch_or_extra_source_cannot_pass(package, change, tmp_pat
         copy = tmp_path/'outside.py'
         copy.write_bytes(target.read_bytes())
         target.unlink()
-        target.symlink_to(copy)
+        symlink_or_skip(target, copy)
     with pytest.raises(ValueError):
         validator().verify_installed(installed, inventory)
 
@@ -95,31 +101,31 @@ def test_unsafe_inventory_paths_are_rejected(name):
 
 def test_zero_exit_without_required_pass_marker_is_rejected(tmp_path):
     with pytest.raises(RuntimeError, match='missing_markers'):
-        validator().run_command([sys.executable, '-c', 'print("not verified")'], env={}, output=tmp_path,
+        validator().run_command([sys.executable, '-c', 'print("not verified")'], env=COMMAND_ENV, output=tmp_path,
                                 name='missing', required_markers=['ACTUAL_PASS'])
     assert (tmp_path/'logs/missing.log').exists()
 
 
 def test_error_log_overrides_even_an_existing_pass_marker(tmp_path):
     with pytest.raises(RuntimeError, match='error_markers'):
-        validator().run_command([sys.executable, '-c', 'print("ACTUAL_PASS\\nError: failure")'], env={}, output=tmp_path,
+        validator().run_command([sys.executable, '-c', 'print("ACTUAL_PASS\\nError: failure")'], env=COMMAND_ENV, output=tmp_path,
                                 name='error', required_markers=['ACTUAL_PASS'])
 
 
 def test_required_marker_and_clean_exit_pass(tmp_path):
-    result = validator().run_command([sys.executable, '-c', 'print("ACTUAL_PASS")'], env={}, output=tmp_path,
+    result = validator().run_command([sys.executable, '-c', 'print("ACTUAL_PASS")'], env=COMMAND_ENV, output=tmp_path,
                                      name='pass', required_markers=['ACTUAL_PASS'])
     assert result['status'] == 'PASS'
 
 
 def test_repo_add_without_stable_stdout_marker_requires_followup_probe(tmp_path):
-    result = validator().run_command([sys.executable, '-c', 'pass'], env={}, output=tmp_path, name='repo-add')
+    result = validator().run_command([sys.executable, '-c', 'pass'], env=COMMAND_ENV, output=tmp_path, name='repo-add')
     assert result['status'] == 'EXIT_ZERO_REQUIRES_PROBE'
 
 
 def test_exact_known_exit_memory_diagnostic_is_recorded_as_warning(tmp_path):
     text = 'ACTUAL_PASS\nError: Not freed memory blocks: 350, total unfreed memory 0.025940 MB'
-    result = validator().run_command([sys.executable, '-c', f'print({text!r})'], env={}, output=tmp_path,
+    result = validator().run_command([sys.executable, '-c', f'print({text!r})'], env=COMMAND_ENV, output=tmp_path,
                                      name='memory-warning', required_markers=['ACTUAL_PASS'])
     assert result['status'] == 'PASS'
     assert result['warnings'][0]['blocks'] == 350
@@ -130,7 +136,7 @@ def test_exact_known_exit_memory_diagnostic_is_recorded_as_warning(tmp_path):
 def test_other_memory_errors_are_not_filtered(tmp_path):
     text = 'ACTUAL_PASS\nError: Not freed memory blocks: invalid data'
     with pytest.raises(RuntimeError, match='error_markers'):
-        validator().run_command([sys.executable, '-c', f'print({text!r})'], env={}, output=tmp_path,
+        validator().run_command([sys.executable, '-c', f'print({text!r})'], env=COMMAND_ENV, output=tmp_path,
                                 name='other-error', required_markers=['ACTUAL_PASS'])
 
 

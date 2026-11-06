@@ -1,7 +1,6 @@
 """Owned background render processes, progress and cancellation without Blender."""
 import importlib
 import json
-import sys
 import time
 from types import SimpleNamespace as NS
 
@@ -9,11 +8,10 @@ import pytest
 
 
 @pytest.fixture
-def renderer(tmp_path):
-    executable = tmp_path / 'blender-fixture'
-    executable.write_text('#!' + sys.executable + '\n' + '''import json,os,sys,time
+def renderer(tmp_path, python_tool):
+    executable = python_tool(tmp_path / 'blender-fixture', '''import json,os,sys,time
 from pathlib import Path
-path=Path(sys.argv[-1]); job=json.loads(path.read_text()); root=path.parent
+path=Path(sys.argv[-1]); job=json.loads(path.read_text(encoding='utf-8')); root=path.parent
 (root/'runtime-profile.json').write_text(json.dumps(dict(config=os.environ.get('BLENDER_USER_CONFIG'))))
 mode=os.environ.get('WFRL_TEST_RENDER_MODE','complete')
 total=len(range(job['frame_start'],job['frame_end']+1,job['frame_step']))
@@ -25,8 +23,7 @@ if mode=='wait': time.sleep(30)
 record.update(state='COMPLETE',completed_frames=total if mode!='partial' else 1)
 write()
 raise SystemExit(9 if mode=='fail' else 0)
-''')
-    executable.chmod(0o700)
+''', mode=0o700)
     addon = tmp_path / 'addon'
     addon.mkdir()
     (addon / '__init__.py').write_text('')
@@ -65,7 +62,7 @@ def test_background_job_finishes_in_its_own_output_folder(tmp_path, renderer):
     assert job.completed_frames == job.total_frames == 3
     assert existing.read_bytes() == b'user data'
     assert job.directory.parent == target
-    assert json.loads((job.directory / 'job.json').read_text())['scene_name'] == 'source'
+    assert json.loads((job.directory / 'job.json').read_text(encoding='utf-8'))['scene_name'] == 'source'
     assert json.loads((job.directory / 'manifest.json').read_text())['state'] == 'COMPLETE'
     profile = json.loads((job.directory / 'runtime-profile.json').read_text())['config']
     assert str(job.directory) in str(profile)

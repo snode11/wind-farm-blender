@@ -10,15 +10,29 @@ import venv
 
 import pytest
 
+from blender_frontend.tests._platform import symlink_or_skip, venv_python, write_python_tool
+
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / 'scripts/blender/verify_frontend_completion.py'
 
 
-def executable(path, body):
-    path.write_text(f'#!{sys.executable}\n{body}\n')
-    path.chmod(0o755)
-    return path
+# The supervisor is itself a child process. Install the fixture launcher there
+# so its Popen handles refer to the Python processes it supervises.
+WINDOWS_DRIVER = '''
+import runpy
+import subprocess
+import sys
+from pathlib import Path
+
+root, source, python, *scripts = sys.argv[1:]
+sys.path[:0] = [str(Path(source).parent), root]
+from blender_frontend.tests._platform import python_tool_popen
+
+subprocess.Popen = python_tool_popen({Path(script) for script in scripts}, python=python)
+sys.argv = [source]
+runpy.run_path(source, run_name='__main__')
+'''
 
 
 @pytest.fixture
@@ -29,7 +43,7 @@ def acceptance_processes(tmp_path):
             probe.bind(('127.0.0.1', 8881))
         except OSError:
             pytest.skip('acceptance port 8881 is in use')
-    backend = executable(tmp_path / 'fixture-backend', '''
+    backend = write_python_tool(tmp_path / 'fixture-backend', '''
 import signal
 import socket
 import sys
@@ -38,6 +52,8 @@ def stop(*args):
     raise SystemExit(0)
 
 signal.signal(signal.SIGTERM, stop)
+if hasattr(signal, 'SIGBREAK'):
+    signal.signal(signal.SIGBREAK, stop)
 port = int(sys.argv[sys.argv.index('--port') + 1])
 with socket.socket() as listener:
     listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -47,7 +63,7 @@ with socket.socket() as listener:
         client, address = listener.accept()
         client.close()
 ''')
-    frontend = executable(tmp_path / 'fixture-blender', '''
+    frontend = write_python_tool(tmp_path / 'fixture-blender', '''
 import json
 import os
 from pathlib import Path
@@ -61,7 +77,7 @@ output.mkdir(parents=True, exist_ok=True)
 if 'FIXTURE_FRONTEND_REPORT' in os.environ:
     (output / 'report.json').write_text(os.environ['FIXTURE_FRONTEND_REPORT'])
 ''')
-    inert = executable(tmp_path / 'inert-tool', 'raise SystemExit(99)')
+    inert = write_python_tool(tmp_path / 'inert-tool', 'raise SystemExit(99)')
 
     def run(output, *, report=None, python=sys.executable, backend_python=backend, extra_env=None):
         env = os.environ.copy()
@@ -76,7 +92,12 @@ if 'FIXTURE_FRONTEND_REPORT' in os.environ:
         if report is not None:
             env['FIXTURE_FRONTEND_REPORT'] = json.dumps(report)
         env.update(extra_env or {})
-        return subprocess.run([str(python), str(SOURCE)], cwd=tmp_path, env=env,
+        command = [str(python), str(SOURCE)]
+        if os.name == 'nt':
+            env['PATHEXT'] = env.get('PATHEXT', '.COM;.EXE;.BAT;.CMD') + os.pathsep + '.PY'
+            command = [str(python), '-c', WINDOWS_DRIVER, str(ROOT), str(SOURCE), sys.executable,
+                       str(backend), str(frontend), str(inert)]
+        return subprocess.run(command, cwd=tmp_path, env=env,
                               capture_output=True, text=True, timeout=30)
 
     return run
@@ -134,12 +155,12 @@ def test_relative_acceptance_output_reaches_the_current_run(tmp_path, acceptance
 @pytest.mark.parametrize('explicit_python', [False, True])
 def test_supervisor_executes_backend_in_selected_virtual_environment(tmp_path, acceptance_processes, explicit_python):
     environment = tmp_path / 'venv'
-    venv.EnvBuilder(with_pip=False, system_site_packages=True, symlinks=True).create(environment)
-    python = environment / 'bin/python'
+    venv.EnvBuilder(with_pip=False, system_site_packages=True, symlinks=os.name == 'posix').create(environment)
+    python = venv_python(environment)
     selected = python
     if explicit_python:
-        selected = environment / 'bin/backend-python'
-        selected.symlink_to(python)
+        selected = python.with_name(f'backend-{python.name}')
+        symlink_or_skip(selected, python)
     identities = tmp_path / 'identities'
     identities.mkdir()
     (identities / 'sitecustomize.py').write_text('''
