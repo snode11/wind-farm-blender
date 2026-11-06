@@ -212,7 +212,7 @@ def _cell_grid(config):
     upper = np.array([PROFILE['range_m'][1], angles[0], angles[1], config.velocity_max_m_s])
     widths = np.array([config.merge_range_m, math.radians(config.merge_azimuth_deg),
                        math.radians(config.merge_elevation_deg), config.merge_velocity_m_s])
-    dimensions = np.ceil((upper - lower) / widths)
+    dimensions = np.maximum(1., np.ceil((upper - lower) / widths))
     if not np.isfinite(dimensions).all() or np.prod(dimensions) > MAX_RESOLUTION_CELLS:
         raise ValueError('Resolution-cell search exceeds numerical resource budget')
     return lower, upper, widths, dimensions.astype(np.int64)
@@ -323,7 +323,11 @@ def surface_rcs(area_weights_m2, incidence_cosine, *, config=None):
             or not np.isfinite(incidence).all() or np.any(area < 0)
             or np.any(incidence < 0) or np.any(incidence > 1 + 1e-12)):
         raise ValueError('Invalid reference area or incidence')
-    return area * config.surface_rcs_density * np.minimum(incidence, 1) ** config.incidence_exponent
+    with np.errstate(over='ignore', invalid='ignore'):
+        rcs = area * config.surface_rcs_density * np.minimum(incidence, 1) ** config.incidence_exponent
+    if not np.isfinite(rcs).all():
+        raise ValueError('Nonfinite surface RCS')
+    return rcs
 
 
 def received_power_w(range_m, rcs_m2, *, config=None, azimuth_deg=0., elevation_deg=0.):
@@ -343,10 +347,13 @@ def received_power_w(range_m, rcs_m2, *, config=None, azimuth_deg=0., elevation_
     if config.antenna_pattern == 'GAUSSIAN':
         pattern = np.exp(-math.log(2) * ((az / config.azimuth_half_power_deg) ** 2
                                         + (el / config.elevation_half_power_deg) ** 2))
-    power = (config.transmit_power_w * config.tx_gain_linear * config.rx_gain_linear
-             * config.wavelength_m ** 2 * rcs * pattern ** 2
-             * 10 ** (-2 * config.attenuation_db_per_m * r / 10)
-             / ((4 * math.pi) ** 3 * r ** 4 * config.system_loss_linear))
+    with np.errstate(over='ignore', invalid='ignore', divide='ignore'):
+        power = np.divide(
+            config.transmit_power_w * config.tx_gain_linear * config.rx_gain_linear
+            * config.wavelength_m ** 2 * rcs * pattern ** 2
+            * 10 ** (-2 * config.attenuation_db_per_m * r / 10),
+            (4 * math.pi) ** 3 * r ** 4 * config.system_loss_linear,
+            out=np.zeros_like(r), where=rcs > 0)
     if not np.isfinite(power).all():
         raise ValueError('Nonfinite received power')
     return power
@@ -365,6 +372,9 @@ def _xyz(polar):
 
 def _top_exponential(rng, count, keep):
     """Largest keep of count unit exponentials, without allocating count rows."""
+    if type(count) is not int or type(keep) is not int or min(count, keep) < 0:
+        raise ValueError('Exponential sample counts must be nonnegative integers')
+    keep = min(keep, count)
     if not keep:
         return np.empty(0)
     uniform = np.maximum(rng.random(keep), np.finfo(float).tiny)
@@ -493,6 +503,9 @@ def generate_detections(xyz_m, radial_velocity_m_s, effective_rcs_m2, *,
     for name in ('mag', 'rcs', 'snr'):
         points[name] = np.nan
     points['ms'] = (np.abs(speeds[accepted]) > 1e-6).astype(np.uint8)
+    probability_any = float(1 - np.prod(1 - pd))
+    if probability_any == 0. and np.any(pd > 0):
+        probability_any = float(-np.expm1(np.log1p(-pd).sum()))
     provenance['detection_statistics'] = dict(
         input_scatterers=len(xyz), outside_hardware_profile=int((~inside).sum()),
         outside_velocity_profile=int((~velocity_inside).sum()),
@@ -501,7 +514,7 @@ def generate_detections(xyz_m, radial_velocity_m_s, effective_rcs_m2, *,
         search_cells=total_cells, total_model_power_w=float(total_power.sum()),
         total_model_rcs_m2=float(total_rcs.sum()),
         expected_target_detections_before_output_filters=float(pd.sum()),
-        probability_any_target_before_output_filters=float(1 - np.prod(1 - pd)),
+        probability_any_target_before_output_filters=probability_any,
         false_alarm_probability_per_cell=pfa,
         expected_false_alarms_before_output_filters=float(empty_search_cells * pfa),
         threshold_misses=int((~above).sum()), dropout_misses=int((above & ~retained).sum()),
@@ -531,11 +544,15 @@ def detection_statistics(frame: RadarFrame | None, *, point_mask=None):
     if mask.dtype != np.dtype(bool) or mask.shape != (len(frame.points),):
         raise ValueError('Detection point mask must be a matching boolean array')
     values = frame.model_diagnostics.values[mask]
+    with np.errstate(over='ignore'):
+        power = float(values['model_power_w'].sum())
+        rcs = float(values['model_rcs_m2'].sum())
+    if not np.isfinite([power, rcs]).all():
+        raise ValueError('Nonfinite detection statistic totals')
     return dict(status='KNOWN', frame_validity=frame.validity, reported_points=len(values),
         target_associated_points=int((values['false_alarm'] == 0).sum()),
         false_alarm_points=int(values['false_alarm'].sum()),
-        selected_model_power_w=float(values['model_power_w'].sum()),
-        selected_model_rcs_m2=float(values['model_rcs_m2'].sum()),
+        selected_model_power_w=power, selected_model_rcs_m2=rcs,
         frame_model_statistics=copy.deepcopy(frame.provenance.get('detection_statistics')))
 
 

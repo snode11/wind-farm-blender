@@ -2,7 +2,7 @@
 from dataclasses import replace
 import numpy as np
 import pytest
-from wfrl.radar_x100.tracking import BladePrior, BladeTracker, fit_blades
+from wfrl.radar_x100.tracking import BladePrior, BladeTracker, FitConfig, fit_blades
 from wfrl.radar_x100.tracking import smooth_positions
 
 
@@ -100,3 +100,43 @@ def test_position_velocity_smoother_recovers_motion_and_missing_prefix_without_d
 def test_position_smoother_rejects_bad_clock_and_covariance(times, positions, covariances):
     with pytest.raises(ValueError):
         smooth_positions(times, positions, covariances)
+
+
+def test_subunit_covariance_cannot_hide_material_asymmetry_in_absolute_tolerance():
+    covariance = np.array([[1e-12, 1e-9, 0.], [0., 1e-12, 0.], [0., 0., 1e-12]])
+    with pytest.raises(ValueError, match='covariance'):
+        smooth_positions([0.], [[1., 2., 3.]], [covariance])
+
+
+def test_tiny_time_steps_and_near_singular_covariance_remain_finite_or_are_rejected():
+    times = np.arange(4)*1e-15
+    positions = [[0., 0., 0.], None, [1e-15, 0., 0.], [2e-15, 0., 0.]]
+    covariance = np.diag([1e-12, 1e-8, 1e-6])
+    means, covariances = smooth_positions(times, positions, [covariance, None, covariance, covariance])
+    assert np.isfinite(means).all() and np.isfinite(covariances).all()
+    np.linalg.cholesky(covariances)
+    singular = np.eye(3)*1e-100
+    with pytest.raises(np.linalg.LinAlgError):
+        smooth_positions(times, positions, [singular, None, singular, singular])
+
+
+def test_final_only_observation_keeps_its_covariance_and_back_predicts_without_double_counting():
+    position, covariance = np.array([1., 2., 3.]), np.diag([.1, .2, .3])
+    means, covariances = smooth_positions([0., .1, .2], [None, None, position], [None, None, covariance])
+    np.testing.assert_array_equal(means[:, :3], np.broadcast_to(position, (3, 3)))
+    np.testing.assert_array_equal(means[:, 3:], np.zeros((3, 3)))
+    np.testing.assert_array_equal(covariances[-1, :3, :3], covariance)
+    assert covariances[0, 0, 0] > covariances[1, 0, 0] > covariances[2, 0, 0]
+    np.linalg.cholesky(covariances)
+
+
+@pytest.mark.parametrize('kwargs', [dict(bins=10.5), dict(minimum_bins=4.5), dict(minimum_points=8.5)])
+def test_fit_counts_reject_fractional_values_before_fitting(kwargs):
+    with pytest.raises(ValueError, match='fitting'):
+        FitConfig(**kwargs)
+
+
+@pytest.mark.parametrize('blade', [True, 1.0])
+def test_blade_identity_requires_an_integer_identifier(blade):
+    with pytest.raises(ValueError, match='prior'):
+        BladePrior(blade, np.eye(4), 60.)

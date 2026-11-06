@@ -265,7 +265,7 @@ def _fit(points, sigma, shape, config):
         weights = robust / np.maximum(sigma, .03)**2
         weighted = design*np.sqrt(weights[:, None])
         condition = float(np.linalg.cond(weighted))
-        row['condition'] = condition
+        row['condition'] = condition if math.isfinite(condition) else None
         if not np.isfinite(condition) or condition > config.maximum_condition:
             return row | dict(status='ILL_CONDITIONED')
         step, _, rank, _ = np.linalg.lstsq(weighted, residual*np.sqrt(weights), rcond=None)
@@ -361,9 +361,13 @@ class ClearanceTracker:
                 world = matrix[:3, :3]@tip + matrix[:3, 3]
                 distance, nearest = query(np.array([world]))
                 d = float(distance[0])
-                normal = (world-nearest[0])/max(d, 1e-12)
-                normal_local = matrix[:3, :3].T@normal
-                std = float(np.sqrt(max(0., normal_local@covariance@normal_local))) if d > 1e-12 else float(np.sqrt(np.linalg.eigvalsh(covariance).max()))
+                std = math.inf
+                if math.isfinite(d) and d >= 0 and np.isfinite(nearest[0]).all():
+                    normal = (world-nearest[0])/max(d, 1e-12)
+                    normal_local = matrix[:3, :3].T@normal
+                    variance = normal_local@covariance@normal_local if d > 1e-12 else np.linalg.eigvalsh(covariance).max()
+                    if math.isfinite(variance):
+                        std = float(np.sqrt(max(0., variance)))
                 if not np.isfinite([d, std]).all() or std > self.config.maximum_clearance_std_m:
                     row.update(status='UNCERTAIN', tip_local=None, coefficients=None, tip_covariance_local_m2=None)
                 else:
@@ -458,9 +462,13 @@ def track_clearance_passage(estimates, priors, tower_surfaces, *, times_s,
                 positions.append((raw_tip if use_raw else observed['tip_local']) if a in selected else None)
                 covariances.append((raw_covariance if use_raw else observed['tip_covariance_local_m2'])
                                    if a in selected else None)
-            states, state_covariances = smooth_positions(times[indices], positions, covariances,
-                acceleration_noise_m2_s3=config.acceleration_noise_m2_s3,
-                initial_velocity_std_m_s=config.initial_velocity_std_m_s)
+            try:
+                states, state_covariances = smooth_positions(times[indices], positions, covariances,
+                    acceleration_noise_m2_s3=config.acceleration_noise_m2_s3,
+                    initial_velocity_std_m_s=config.initial_velocity_std_m_s)
+            except np.linalg.LinAlgError:
+                row['tracking_reason'] = 'UNCERTAIN'
+                continue
             target = indices.index(i)
             tip = states[target, :3].copy()
             covariance = state_covariances[target, :3, :3].copy()
@@ -474,8 +482,12 @@ def track_clearance_passage(estimates, priors, tower_surfaces, *, times_s,
             else:
                 distance, nearest = tower_queries[i](np.array([world]))
             d = float(distance[0])
-            normal = matrix[:3, :3].T@(world-nearest[0])/max(d, 1e-12)
-            std = float(np.sqrt(max(0., normal@covariance@normal))) if d > 1e-12 else float(np.sqrt(np.linalg.eigvalsh(covariance).max()))
+            std = math.inf
+            if math.isfinite(d) and d >= 0 and np.isfinite(nearest[0]).all():
+                normal = matrix[:3, :3].T@(world-nearest[0])/max(d, 1e-12)
+                variance = normal@covariance@normal if d > 1e-12 else np.linalg.eigvalsh(covariance).max()
+                if math.isfinite(variance):
+                    std = float(np.sqrt(max(0., variance)))
             row['tracking_clearance_std_m'] = std if math.isfinite(std) else None
             if not np.isfinite([d, std]).all() or d < 0 or std > config.maximum_clearance_std_m:
                 row['tracking_reason'] = 'UNCERTAIN'

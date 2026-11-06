@@ -13,7 +13,8 @@ class BladePrior:
 
     def __post_init__(self):
         matrix = rigid_matrix(self.world_from_blade)
-        if self.blade not in (1, 2, 3) or not math.isfinite(self.tip_span_m) or self.tip_span_m <= 0:
+        if (type(self.blade) is not int or self.blade not in (1, 2, 3)
+                or not math.isfinite(self.tip_span_m) or self.tip_span_m <= 0):
             raise ValueError('Invalid blade pose/span prior')
         matrix.flags.writeable = False
         object.__setattr__(self, 'world_from_blade', matrix)
@@ -27,7 +28,8 @@ def smooth_positions(times_s, positions, covariances, *, acceleration_noise_m2_s
     continuous white acceleration has spectral density in m²/s³. No sample
     is used twice, including the first measurement and leading predictions.
     Rotation belongs to the supplied frame poses, not to the local velocity.
-    An entirely unobserved sequence returns None.
+    An entirely unobserved sequence returns None. Numerically singular state
+    uncertainty raises LinAlgError rather than returning invalid covariance.
     """
     times = np.asarray(times_s, float)
     if (times.ndim != 1 or len(times) != len(positions) or len(times) != len(covariances)
@@ -42,7 +44,8 @@ def smooth_positions(times_s, positions, covariances, *, acceleration_noise_m2_s
         point, covariance = np.asarray(point, float), np.asarray(covariance, float)
         if (point.shape != (3,) or covariance.shape != (3, 3)
                 or not np.isfinite(point).all() or not np.isfinite(covariance).all()
-                or not np.allclose(covariance, covariance.T)
+                or not np.allclose(covariance, covariance.T, rtol=1e-7,
+                                   atol=1e-12*np.max(np.abs(covariance)))
                 or np.linalg.eigvalsh(covariance).min() <= 0):
             raise ValueError('Position observations need positive definite covariance')
         observed.append(i)
@@ -87,6 +90,9 @@ def smooth_positions(times_s, positions, covariances, *, acceleration_noise_m2_s
         means[i] = matrix@means[first]
         covariance[i] = matrix@covariance[first]@matrix.T + noise
     covariance = (covariance+covariance.transpose(0, 2, 1))/2
+    if not np.isfinite(means).all() or not np.isfinite(covariance).all():
+        raise np.linalg.LinAlgError('Nonfinite smoothed state or covariance')
+    np.linalg.cholesky(covariance)
     return means, covariance
 
 
@@ -108,6 +114,8 @@ class FitConfig:
     def __post_init__(self):
         values = tuple(vars(self).values())
         if (not np.isfinite(values).all() or min(values) <= 0 or self.minimum_points < 4
+                or any(type(getattr(self, name)) is not int for name in
+                       ('minimum_points', 'minimum_bins', 'bins'))
                 or not 3 <= self.minimum_bins <= self.bins or self.bins > 100
                 or not 0 < self.distal_start_fraction < 1 or not 0 < self.minimum_span_fraction < 1
                 or not 0 < self.max_extrapolation_fraction < .5):

@@ -103,3 +103,15 @@ def test_scene_time_mismatch_is_rejected_instead_of_relabeling_saved_motion(bad_
         return replace(sample, time_s=t + .01) if t == bad_time else sample
     with pytest.raises(ValueError, match='time'):
         simulation.simulate_detections(source, 1., config=cfg(), **kwargs())
+
+
+def test_fully_occluded_surface_retains_a_known_empty_detection_frame():
+    frame = simulation.simulate_detections(scene, 1., integration_budget=16, config=cfg(),
+        visibility=lambda sample, targets: np.zeros(len(targets), dtype=bool), **kwargs())
+    assert frame.validity == 'VALID_EMPTY'
+    assert frame.provenance['occluded'] == 16
+    assert frame.provenance['visible_reference_area_m2'] == 0.
+    stats = detection.detection_statistics(frame)
+    assert stats['status'] == 'KNOWN' and stats['reported_points'] == 0
+    assert stats['frame_model_statistics']['input_scatterers'] == 0
+    assert stats['selected_model_power_w'] == stats['selected_model_rcs_m2'] == 0.
