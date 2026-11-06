@@ -74,7 +74,7 @@ Blender 工作区源码核对来源 Scene、材料对象与网格身份、关键
 
 [simulation.py](simulation.py) 的 `simulate_detections()` 在同源几何、硬件角域／量程和首交遮挡之后调用 [detection.py](detection.py) 的 `generate_detections()`，输出 `ENGINEERING_SIMULATION / DETECTIONS`。模型身份为 `x100-incoherent-detection.v2`，默认 `calibration_status=UNCALIBRATED`。Blender 工作区的 `wfrl_x100_observation_mode` 提供 `GEOMETRY`（默认）与 `DETECTIONS`，点击“应用配置”才切换生产路径。前者显示视场／遮挡筛选后的材料表面点，后者显示经过功率、噪声、分辨率聚类和门限的工程检测点；操作与显示见[观测模式](../../docs/blender/X100雷达.md#观测模式工作区源码)。两者都不是设备实测。
 
-**交付限制：**当前 [扩展构建清单](../../scripts/blender/build_extension.py) 的 `RADAR_MODULES` 未包含 `detection.py`。工作区界面已接入模式切换，但工程检测模块的扩展打包交付待实现，不能据源码界面推定公开包或日常安装具有可运行的检测链。
+**交付限制：**工作区 [扩展构建清单](../../scripts/blender/build_extension.py) 的 `RADAR_MODULES` 已包含 `detection.py` 与 `clearance.py`，隔离安装验证在安装后的扩展上运行 DETECTIONS 与净空检查。已发布的 0.3.42.7 扩展早于这一清单，不包含工程检测链；新的扩展发布前，不能据工作区源码推定公开包或日常安装具有可运行的检测链。
 
 模型假设如下：
 

@@ -7,7 +7,7 @@
 | `blender/` | Blender 启动、扩展构建、相机与缺陷工具、视频作业及原生回归运行器 |
 | `train/`、`analysis/` | 训练、匹配评估及保存数据分析；[算法与输入合同](../docs/training/MAPPO_SETUP.md) |
 | `analysis/export_blade_response.py`、`analysis/blade_del.py` | 从已有BeamDyn输出生成九项响应统计或研究用根部弯矩DEL；[通道、扭转限制与DEL方法](../docs/development/叶片响应与研究DEL.md)，不启动求解器 |
-| `radar_x100/` | X100 严格 PLY 导入、本地发布、记录、完整源网格导出及双预设覆盖；`optimize_mount.py` 搜索有限安装集合，`evaluate_blades.py` 独立评价因果叶片估计。见[数据合同](../wfrl/radar_x100/README.md)、[双预设覆盖](../docs/blender/X100雷达.md#离线安装覆盖研究)和[安装搜索／叶片评价命令](../docs/blender/X100观测研究.md)；读取已有运动，不启动训练或求解器 |
+| `radar_x100/` | X100 严格 PLY 导入、本地发布、记录、完整源网格导出及双预设覆盖；`optimize_mount.py` 搜索有限安装集合，`evaluate_blades.py` 评价几何因果估计，`--detections` 分别报告单帧支持与离线经过跟踪。见[数据合同](../wfrl/radar_x100/README.md)、[双预设覆盖](../docs/blender/X100雷达.md#离线安装覆盖研究)和[安装搜索／叶片评价命令](../docs/blender/X100观测研究.md)；读取已有运动，不启动训练或求解器 |
 | `lidar/` | 雷达结果包、数值诊断与来源检查；[计算入口](lidar/README.md) |
 | `reconstruction/`、`nrel_*.py` | 叶片重建与独立动态研究；[研究对象与状态](../research/README.md) |
 | `experiments/` | 明确对象的物理实验、数值检查与约束探针；MPI 和输入由各脚本声明 |
@@ -27,6 +27,14 @@ python3 scripts/ci/check_release_identity.py --release publication/blender-0.3.4
 ```
 
 后端 checkpoint 评估通过 Blender Replay 操作，配置与模型合同见[Blender 策略评估](../docs/demos/Blender策略评估.md)。宿主测试与原生检查按[自动检查](../docs/development/自动检查.md)选择。
+
+## 隔离安装包验证
+
+```bash
+python3 scripts/blender/validate_frontend_package.py --blender <Blender可执行文件> --output <新目录>
+```
+
+工具构建 ZIP 并在独立 profile 中安装，以 `bl_ext.wfrl_frontend.wfrl_blender` 运行默认三相机、原生投影、X100 DETECTIONS 模式与净空四项后台检查。核对安装 inventory、模块名及加载路径；雷达检查还核对已导入的扩展模块和数据路径都位于安装包内，拒绝工作区回退。每项须正常退出并留下完成标记及 PASS 报告，汇总保存为 `package-validation.json`；窗口／GPU、实机和性能不在该入口范围内。此工具只在明确需要安装验证时运行，不是普通文档同步或发布的默认步骤。
 
 ## 隔离安装窗口验收
 

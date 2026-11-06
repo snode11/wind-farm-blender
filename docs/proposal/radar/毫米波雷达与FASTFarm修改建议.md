@@ -6,7 +6,7 @@
 
 | 对象 | 实际入口 | 当前实现 | 待实现与限制 |
 | --- | --- | --- | --- |
-| 雷达观测 | [simulation.py](../../../wfrl/radar_x100/simulation.py)、[detection.py](../../../wfrl/radar_x100/detection.py)、[sampling.py](../../../wfrl/radar_x100/sampling.py)、[schema.py](../../../wfrl/radar_x100/schema.py) | `simulate()` 提供几何对照；`simulate_detections()` 使用带参考面积权重的非相干工程检测模型，输出独立模型诊断 | 默认 UNCALIBRATED；工作区前端可选 GEOMETRY／DETECTIONS，检测模块尚未纳入扩展构建清单；实机标定、厂家字段映射、波形／chirp 处理待实现 |
+| 雷达观测 | [simulation.py](../../../wfrl/radar_x100/simulation.py)、[detection.py](../../../wfrl/radar_x100/detection.py)、[sampling.py](../../../wfrl/radar_x100/sampling.py)、[schema.py](../../../wfrl/radar_x100/schema.py) | `simulate()` 提供几何对照；`simulate_detections()` 使用带参考面积权重的非相干工程检测模型，输出独立模型诊断；前端可选GEOMETRY／DETECTIONS，检测与净空核心纳入构建清单 | 默认 UNCALIBRATED；实际发布／安装验证按载荷记录；实机标定、厂家字段映射、波形／chirp处理待实现 |
 | 安装与评价 | [scene.py](../../../blender_frontend/wfrl_blender/radar_x100/scene.py)、[installation.py](../../../wfrl/radar_x100/installation.py)、[optimize_mount.py](../../../scripts/radar_x100/optimize_mount.py)、[coverage.py](../../../scripts/radar_x100/coverage.py) | 有限位姿候选、机械与离散运动筛选；以完整叶片经过期间的检测为主排序，几何覆盖为辅；严格导入 v2 报告 | 厂家支架／开孔／线缆 CAD、相位中心、连续运动净空及实机安装验证待实现或取得依据 |
 | 风况 | [fastfarm_driver.py](../../../wfrl/fastfarm_driver.py)、[interface.py](../../../wfcrl-env/wfcrl/interface.py) | 场景显示上下文与实际求解请求分开保存；请求、实际输入、统计三层记录；训练风向传到底层；BTS 内容／时长核对与固定方向匹配 | 任意风向旋转与独立场内入流探针待实现 |
 | 叶片响应 | [export_blade_response.py](../../../scripts/analysis/export_blade_response.py)、[imbalance.py](../../../blender_frontend/wfrl_blender/imbalance.py)、[farm_replay.py](../../../blender_frontend/wfrl_blender/panels/farm_replay.py) | 三叶位移、根部力／力矩的相位对齐统计；r 系标签；无效通道拒绝；明确不提供弹性扭转数值 | 弹性扭转分离、展向内力、材料应力和认证级疲劳评价待实现；已有研究用根部弯矩 DEL，不能由显示截面补造结构通道 |
@@ -27,11 +27,15 @@
 
 采样计划保存 `area_weights_m2`，身份摘要包含面积度量与权重字节摘要，因此权重改变时 `sampling_plan_id` 改变。相同种子的材料坐标可保留预算前缀，积分权重及计划身份仍按实际预算核对。
 
-**待实现：**真实输入／模式对应的方向图、波形、时序、噪声与有效散射参数标定，厂家字段映射和真实检测概率验证。现有工程模型保留几何对照，不能代替这些证据。工作区交互入口的 `wfrl_x100_observation_mode` 已支持默认GEOMETRY和显式DETECTIONS，编辑后须应用：前者显示确定性几何点，后者显示含聚类、噪声、门限、漏检和虚警的工程检测点，并保留UNCALIBRATED状态，检测帧没有 `material_ids`。扩展交付仍待落实：当前 [构建清单](../../../scripts/blender/build_extension.py) 的 `RADAR_MODULES` 未包含 `detection.py`，不能据源码可切换模式宣称安装包已提供检测能力。
+数值边界不改变模型标定：零RCS保持零功率，极小非零检测概率保留，分辨单元范围非零时至少计一个单元；RCS、接收功率或诊断合计溢出拒绝，不写成有效无穷值。材料三角面索引须为合法整数，拟合计数与叶片编号不以小数或布尔值替代。
+
+**待实现：**真实输入／模式对应的方向图、波形、时序、噪声与有效散射参数标定，厂家字段映射和真实检测概率验证。现有工程模型保留几何对照，不能代替这些证据。工作区交互入口的 `wfrl_x100_observation_mode` 已支持默认GEOMETRY和显式DETECTIONS，编辑后须应用：前者显示确定性几何点，后者显示含聚类、噪声、门限、漏检和虚警的工程检测点，并保留UNCALIBRATED状态，检测帧没有 `material_ids`。当前 [构建清单](../../../scripts/blender/build_extension.py) 的 `RADAR_MODULES` 包含 `detection.py` 和 `clearance.py`，隔离包验证核对这两条功能路径及包内模块／数据来源；工具覆盖不作为公开ZIP或日常安装已通过的结论。
 
 ## 安装、视场与评价
 
 `x100-installation-search.v2` 独立保存硬件 profile、软件 ROI、机械参数及依据、每个候选的机械证据、几何覆盖与模拟检测支持。旧格式和缺少必要证据的报告被拒绝，并提示重新运行 `scripts/radar_x100/optimize_mount.py`；不能只改报告 schema 字符串使其可用。
+
+排序和导入共用检测指标校验，缺失、非有限、越界或未知检测证据不计分；来源／几何冲突、重复候选ID、无效位姿及仅筛选部分经过的报告拒绝并指明字段。闭合网格的包含判定计入边界，开放或绕序不一致的网格拒绝；缺失或非有限运动净空保持UNKNOWN。经过网格须匹配声明频率并保留全部索引，正下方采样的时间、点数和适用误差须有效。
 
 硬件名义方位 ±60°、俯仰 ±22°、量程0.2～396 m、外壳120×95×40 mm及最多4096输出点来自代码保存的 CTSAI X100 数据手册 CN V1.0 出处；硬件角域不代表天线增益均匀。软件 ROI 默认是机舱局部 `(-15,-15,-70)` 至 `(-2.5,15,-40) m`，只筛评价点，不裁掉检测积分域；同行80 GHz设备的范围不覆盖 X100。
 
@@ -44,6 +48,12 @@
 当前本地v2复核的最佳候选为 `FRONT_INNER_Y-0_DROP0.25_TILT14_-10`，位置／XYZ欧拉角及完整指标见[当前最佳候选与本地证据](../../blender/X100观测研究.md#当前最佳候选与本地证据)。该结果仅为声明候选集合中的最佳：33次经过、895个评价帧中支持622帧（69.50%），最长连续漏检约0.167 s，正下方33/33次支持，塔距RMSE约1.237 m。证据在未纳入Git的 `outputs/x100-observation-research/installation-v2/`；原v1几何报告保留其范围，不能支持检测排序。由于仍有检测空帧、连续支持不成立且模型未标定，前端默认保持GEOMETRY。
 
 **待实现：**实体安装设计与连续运动检查、实机安装标定，以及独立盲区和实机质量诊断验证。原始点、模型拟合、零载荷参考、估计与评价真值必须保持各自身份；缺测不得补造完整叶片。
+
+## 检测净空与经过跟踪
+
+`clearance.ClearanceTracker.update()` 在观测位置、径向速度、观测功率／噪声比、声明误差、同刻塔面、根部姿态与未加载叶片形状先验上进行因果估计；真值只供独立评价。当前帧拒绝时不输出旧净空，退化拟合、负塔距、非有限最近点或过大不确定度均保持不可用。
+
+离线 `track_clearance_passage()` 在每片叶片的同一经过内运行局部位置／速度Kalman／RTS平滑，保留受支持单帧值；缺测结果含未来锚点插值，统一标“跟踪外推”／`TRACKING_EXTRAPOLATED`。默认局部窗0.20 s、至少3个锚点，距最近锚点超过0.20 s或净空标准差超过0.45 m不出数；时间后退、重复或间隔超过0.12 s时分段，数值奇异不补值。`evaluate_blades.py --detections` 分别报告单帧支持、含跟踪的估计和仅跟踪外推，以全部经过帧为比例分母；这不改变前端因果更新，也不证明设备检测率或实机精度。命令和输入边界见[观测研究](../../blender/X100观测研究.md#独立评价)。
 
 ## FAST.Farm 风况
 

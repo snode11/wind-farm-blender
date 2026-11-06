@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | WFRL 主入口与状态 | `panels/home.py`、`home_state.py`；复用回放／相机／手动／导出／后端操作器，保留原页签 | [操作入口](../../../../前端readme.md#wfrl-主入口)、[验证入口](verification.md) |
 | 手动场景、姿态与变桨 | `manual_scene.py`、`manual_control.py`、`manual_operators.py`、`manual_rna.py`、`manual_motion.py`、`manual_pose.py`；仓库 `scripts/blender/open_manual_control.py` | [手动控制](../../../../docs/blender/风机手动控制.md) |
-| 柔性运动、外形与测量 | `farm_flex.py`、`turbine_geometry.py`、`deflection.py` | [实现说明](../../../../blender_frontend/README.md) |
+| 柔性运动、外形与测量 | `farm_flex.py`、`farm_flex_package.py`、`farm_flex_scene.py`、`farm_flex_geometry.py`、`farm_flex_telemetry.py`、`turbine_geometry.py`、`deflection.py` | [实现说明](../../../../blender_frontend/README.md) |
 | 场景、播放归属与性能 | `runtime.py`、`scene_builder.py`、`playback.py`、`playback_benchmark.py`、`performance.py` | [验证入口](verification.md) |
 
 ## 手动场景与姿态
@@ -26,11 +26,12 @@
 - 回放姿态、读数、S1 与统计共用仿真时钟；寻址／重播不重复累计或暴露未来事件，插值不补测量。
 - 场景共享网格时拒绝第二时钟；`playback.py` 管理进程内唯一原生 player，切场景、关窗及延迟恢复不得抢占其他播放。
 - 重建拒绝占用其他场景的风场资源；重开文件保留已认领后端会话身份，等待重连同步。
-- 恢复失败保持未就绪。
+- 场景保存结果包 manifest 摘要，恢复时即使原路径仍存在也核对该身份；路径失效时仅寻找同摘要内置包，恢复失败保持未就绪。候选预检失败保留当前回放；进入替换前还原旧包施加的叶片／支撑形变，替换后的绑定失败撤回就绪状态并显示具体原因。
 - 可见性优化保留隐藏 T1 测量、塔筒／共享结构、缺陷与导出消费者；同刻切视图补齐工作集，缓存区分来源、源帧与工作集，重绑／换模型失效。
-- `farm_flex._load_package()` 每次加载完整校验源与结果层摘要，再按解析后的源路径及源 manifest 摘要复用解析数据；LRU 最多保留两个源，大小／mtime 不代替哈希。
+- `farm_flex._load_package()` 委托 `farm_flex_package.py`，每次加载完整校验源与结果层摘要，解析使用同次已校验的字节；再按解析后的源路径及源 manifest 摘要复用解析数据。LRU 最多保留两个源，大小／mtime 不代替哈希。JSON 拒绝重复键及非有限数；文件清单拒绝绝对路径、父目录逃逸和指向包外的符号链接。双束结果层可显式引用同源包，并独立核对其完整清单与摘要。
 - 基础、双束和 TLS 共享只读几何、运动及塔架数组，各次读取器、结果层身份与输出样本独立；`read_package()` 保留五元组接口。
-- 遥测数组只在该次加载内复用，不跨加载共享；文件加载与扩展生命周期清除源缓存。
+- 预检还核对场景布局、基础三束安装元数据；若提供遥测，须核对几何／时间轴身份，包含每台机组的来源摘要，以及每个通道的非空单位、源通道和有限数值。遥测数组只在该次加载内复用，不跨加载共享；文件加载与扩展生命周期清除源缓存。
+- 偏航跨越 ±180° 时，几何、结构叶尖和遥测共用最短弧插值；转子方位保留展开角度，不按偏航规则折返。
 
 外形切换、共享重建结构或纹理消费者受影响时，同时读取[相机、资源与重建](cameras-reconstruction.md)。实时连接的场景归属见[测量与后端](measurement-backend.md#实时场景归属)。
 

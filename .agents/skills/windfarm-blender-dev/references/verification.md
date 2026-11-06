@@ -57,6 +57,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定
 | `radar_x100_output_lifecycle.py` | 仅源码，直接导入工作区扩展；必须指定 `WFRL_EXPECTED_ADDON_ROOT`，安装模块变量不能改变验证层。 |
 | `radar_x100_configuration.py` | 仅源码后台，必须指定 `WFRL_EXPECTED_ADDON_ROOT`；核对名义外壳／视场、真实 RNA、已应用配置与编辑差异、显示即时生效和下一新样本预算。 |
 | `radar_x100_observations.py` | 仅源码后台，直接导入工作区模块；核对面积采样、材料标签隔离、同源安装导入、未知报告拒绝、回退及估计撤回。 |
+| `radar_x100_detection_mode.py`、`radar_x100_clearance.py` | 支持 `WFRL_ADDON_MODULE` + `WFRL_EXPECTED_ADDON_ROOT`；安装模式核对模块名、加载路径、已导入的扩展模块及数据路径都在安装包内，拒绝导入工作区 `wfrl`／`wfrl_blender`。 |
 | `radar_x100_estimation_window.py` | 仅源码可见进程，直接导入工作区模块；读回拟合线／叶尖区域的真实GPU像素，检查关闭、恢复及原始帧和时刻保留。脚本控制不代替外部键鼠。 |
 | 可见窗口（`visible`）`mappo_full_view_default_window.py`、`mappo_same_source_navigation_window.py`、`mappo_same_source_texture_window.py`、`split_texture_sidebar_window.py`、`reconstruction_workflow_window.py`；后台（`background`）`mappo_same_source_texture_reopen.py` | 仅安装模块。使用 `python3 scripts/blender/run_installed_windows.py --output <新目录>` 建立隔离安装并串行验证。可用 `--installed-profile <隔离验证目录>` 复用仍有效的安装，或用 `--zip <路径>` 安装指定 ZIP。`--list` 列出模式与依赖，`--tests` 选择脚本。各窗口使用独立输出与场景副本；统一工作流从干净窗口调用操作符打开隔离安装中的示例。后台重开读取纹理窗口保存的场景和 PASS 报告。运行器拒绝日常配置及 `bl_ext.user_default`，以退出码、最终报告和完成标记共同判定 PASS。 |
 
@@ -97,6 +98,8 @@ python3 scripts/blender/build_extension.py --output <新目录>
 python3 scripts/blender/validate_frontend_package.py --output <新目录> --blender <Blender可执行文件>
 ```
 
+该工具在隔离 profile 中安装构建 ZIP，以 `bl_ext.wfrl_frontend.wfrl_blender` 运行默认三相机、原生投影、X100 DETECTIONS 模式与净空四项后台检查。雷达两项通过 `_native.installed_provenance()` 核对已导入的扩展模块和数据路径，禁止工作区回退；每项均要求正确模块、包内加载路径、完成标记、PASS 报告及正常退出。这是工具覆盖范围，实际通过结论须读取对应运行结果，不包含可见窗口／GPU或实机验收。
+
 后台安装烟测从工作区构建 ZIP，在全新 profile 中安装启用并核对模块来自隔离扩展目录及主要面板注册；`--evidence-dir` 默认 `evidence/part7`，验证任务使用新目录：
 
 ```bash
@@ -121,7 +124,7 @@ python3 scripts/blender/run_playback_benchmark.py --blender <Blender可执行文
 
 ## X100 观测模式
 
-仓库 `blender_frontend/tests/blender/radar_x100_detection_mode.py` 已登记于 `scripts/blender/run_regressions.py`，使用独立源码后台、新输出目录，要求 `X100_DETECTION_MODE_PASS`、最终 `result.json` 和正常退出。核对默认GEOMETRY、DETECTIONS显式应用、预算隔离、无material_ids、记录／回放和保存重开，不验证GPU像素或实机。构建清单未包含detection.py，源码检查不证明扩展交付。
+仓库 `blender_frontend/tests/blender/radar_x100_detection_mode.py` 已登记于 `scripts/blender/run_regressions.py`，可选源码或指定安装模块，使用独立后台、新输出目录，要求 `X100_DETECTION_MODE_PASS`、最终 `result.json` 和正常退出。核对默认GEOMETRY、DETECTIONS显式应用、预算隔离、无material_ids、记录／回放和保存重开。`radar_x100_clearance.py` 核对检测分类、净空派生、失败撤回及逐帧估计记录回放，完成标记为 `X100_CLEARANCE_PASS`。当前构建清单包含 `detection.py` 和 `clearance.py`；两项也由隔离包验证入口运行，实际验证对象按模块及路径识别，不验证GPU像素或实机。
 
 ## X100 同帧分析
 
