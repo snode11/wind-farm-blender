@@ -41,6 +41,14 @@ python3 scripts/blender/run_installed_windows.py --blender <Blender可执行文�
 
 `result.json` 汇总脚本模式、状态和失败原因，每项的 `launch.json` 记录命令与隔离环境。全部所选项 PASS 时退出码为 `0`，有失败为 `1`，其余为 `2`。
 
+## 安装烟测
+
+```bash
+python3 scripts/blender/verify_part7_install.py --blender <Blender可执行文件> --evidence-dir <新目录>
+```
+
+从工作区构建 ZIP，在 `--evidence-dir` 下的临时目录中用全新 profile 安装并后台启用，核对模块来自隔离扩展目录及主要面板已注册。`--evidence-dir` 默认 `evidence/part7`；`package-install.json` 记录 ZIP 文件名与 SHA-256，`package-checksum.sha256`、`package-inventory.json`、`package-history-export.json` 和日志保存在同一目录，构建与 profile 临时目录在退出时删除。
+
 ## 输出与输入
 
 `outputs/`、`results/verify/` 和 `ci-results/` 的新文件按本地运行产物忽略。Git 已跟踪的正式输入和证据仍受版本管理；确需纳入的新证据须逐项核对来源、依赖和体积后用 `git add -f -- <具体文件>` 选择，避免整目录加入。

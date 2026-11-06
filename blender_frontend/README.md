@@ -514,7 +514,7 @@ Interactive 的 **Episode steps** 对应 `episode_steps`：`0` 保持单长回�
 
 ## 修改、安装与验证
 
-`verify_frontend_completion.py` 在 `WFRL_ACCEPT_OUTPUT` 根目录下创建独立 `run-*` 子目录，并把该绝对路径传给验收脚本。成功只依据该次运行生成的 `report.json` 与前后端退出结果，已有目录中的其他报告与日志保留。常规源码回归使用 `scripts/blender/run_regressions.py` 的新目录、源码身份、完成标记和最终结果校验。
+`verify_frontend_completion.py` 在 `WFRL_ACCEPT_OUTPUT` 根目录下创建独立 `run-*` 子目录，并把该绝对路径传给验收脚本。成功只依据该次运行生成的 `report.json` 与前后端退出结果，已有目录中的其他报告与日志保留。POSIX 要求 Bridge 退出码为 0；Windows 停止 Bridge 时退出码可能非零，改为要求启动进程均已退出，且按本次输出路径认领的进程清理状态为 `EMPTY_CONFIRMED`。常规源码回归使用 `scripts/blender/run_regressions.py` 的新目录、源码身份、完成标记和最终结果校验。
 
 测试或检查流程启动的工作区源码 Blender 子进程在加载工作区模块前设置 `sys.dont_write_bytecode = True`，由宿主守卫测试 [test_blender_subprocess_bytecode.py](tests/test_blender_subprocess_bytecode.py) 检查。
 
@@ -522,14 +522,14 @@ Interactive 的 **Episode steps** 对应 `episode_steps`：`0` 保持单长回�
 
 维护修改应作用于规范源；`protocol.py` 来自 `wfrl/blender_bridge/messages.py`，内置 `_vendor/lidar/` 读取器来自 `wfrl/lidar/`。不要手改生成副本或替换冻结模型及正式资产来消除校验失败。
 
-扩展源码（`_vendor/` 与 `assets/` 除外）的文件系统文本读写显式使用 `encoding='utf-8'`，包括 `Path.read_text`、`Path.write_text` 和文本模式 `open`，不依赖平台默认编码；宿主测试 `test_text_io_encoding.py` 以 AST 扫描强制该约定，二进制读写及 `os.open` 不在范围内。JSON 结果与状态文件统一通过 [atomic_json.py](wfrl_blender/atomic_json.py) 的 `write_json(path, value, *, mkdir=False)` 写入：按 UTF-8、`ensure_ascii=False`、`indent=2`、`allow_nan=False` 和末尾换行写出。已编码的姿态 JSON 等文本使用同模块的 `write_text(path, text, *, mkdir=False)`，按 UTF-8 保留原字符串，不追加或转换换行；调用方可将其导入为 `write_atomic_text`，与文件系统文本 API 区分。两个接口共用目标目录内的随机临时文件、`flush`、`fsync`、`os.replace` 与失败清理逻辑；临时文件以 `os.open(..., 0o666)` 创建，新文件权限按进程 umask 确定，与普通文本写入一致，覆盖已有普通文件时保留其权限位，不修改进程 umask；需要保密的作业文件由其所在的 0700 目录限制访问；仅需要创建父目录的调用方传 `mkdir=True`。`manual_video_job.py` 与 `manual_video_render.py` 作为独立脚本运行时按同目录文件加载该模块，不导入扩展包入口。
+扩展源码（`_vendor/` 与 `assets/` 除外）的文件系统文本读写显式使用 `encoding='utf-8'`，包括 `Path.read_text`、`Path.write_text` 和文本模式 `open`，不依赖平台默认编码；宿主测试 `test_text_io_encoding.py` 以 AST 扫描强制该约定，二进制读写及 `os.open` 不在范围内。JSON 结果与状态文件统一通过 [atomic_json.py](wfrl_blender/atomic_json.py) 的 `write_json(path, value, *, mkdir=False)` 写入：按 UTF-8、`ensure_ascii=False`、`indent=2`、`allow_nan=False` 和末尾换行写出。已编码的姿态 JSON 等文本使用同模块的 `write_text(path, text, *, mkdir=False)`，按 UTF-8 保留原字符串，不追加或转换换行；调用方可将其导入为 `write_atomic_text`，与文件系统文本 API 区分。两个接口共用目标目录内的随机临时文件、`flush`、`fsync`、`os.replace` 与失败清理逻辑；Windows 上目标文件被其他句柄占用而 `os.replace` 抛出 `PermissionError` 时，按 0.05／0.1／0.2／0.4 s 退避最多再试 4 次，仍失败则抛出原异常并删除临时文件，POSIX 不重试；临时文件以 `os.open(..., 0o666)` 创建，新文件权限按进程 umask 确定，与普通文本写入一致，覆盖已有普通文件时保留其权限位，不修改进程 umask；需要保密的作业文件由其所在的 0700 目录限制访问；仅需要创建父目录的调用方传 `mkdir=True`。`manual_video_job.py` 与 `manual_video_render.py` 作为独立脚本运行时按同目录文件加载该模块，不导入扩展包入口。
 
 ```bash
 python3 scripts/blender/build_extension.py --output <新目录>
 python3 scripts/blender/validate_frontend_package.py --output <新目录> --blender <Blender可执行文件>
 ```
 
-构建生成 ZIP、SHA-256 与逐文件 inventory，默认拒绝任一同名产物已存在的输出，包括断符号链接。使用新目录保留各包身份；明确需要替换时使用 `build_extension.py --output <目录> --overwrite`。文件在同一文件系统的临时目录中完成后逐个发布，ZIP 最后发布；普通发布异常恢复原产物，恢复冲突保留备份并报告位置，不保证断电或进程强制终止时三文件整体原子性。验证工具默认构建、隔离安装并执行后台检查；`--build-only` 仍会构建 ZIP。纯文档任务仅检查格式、引用、身份与要求一致性。
+构建生成 ZIP、SHA-256 与逐文件 inventory，默认拒绝任一同名产物已存在的输出，包括断符号链接。使用新目录保留各包身份；明确需要替换时使用 `build_extension.py --output <目录> --overwrite`。文件在同一文件系统的临时目录中完成后逐个发布，ZIP 最后发布；普通发布异常恢复原产物，恢复冲突保留备份并报告位置，不保证断电或进程强制终止时三文件整体原子性。验证工具默认构建、隔离安装并执行后台检查；`--build-only` 仍会构建 ZIP。包验证在所有平台拒绝 inventory 中的绝对路径、`..`、反斜杠、驱动器前缀、`<>:"|?*`、以空格或点结尾的路径分量及 Windows 保留名（`CON`、`PRN`、`AUX`、`NUL`、`COM1`–`COM9`、`LPT1`–`LPT9`，不分大小写与扩展名），并按 `casefold()` 判定重名。纯文档任务仅检查格式、引用、身份与要求一致性。
 
 `build_farm_flex_delivery.py` 的自定义风场交付按源 manifest 身份选择结果载荷：规范源保留匹配的叶片响应、同源纹理及默认双束／TLS；其他来源不继承这些固定源结果。显式提供的双束结果仍须与自定义源完整匹配。同源纹理入口只有在场景源身份匹配且载荷存在时可用，已经激活的纹理仍可退出到几何模式；省略结果不表示其精度通过。
 
@@ -556,6 +556,11 @@ ZIP 包括 MAPPO 源、旧法和 TLS 结果层、规范示例、NREL 缺陷编�
 - 冻结试验视频的新建、重试和监管只支持具备 `flock` 和 `waitid(WNOWAIT)` 的 POSIX 环境。见 [`launch()`](wfrl_blender/manual_video.py#L344)、[`start()`](wfrl_blender/manual_video_job.py#L232)、[`supervise()`](wfrl_blender/manual_video_job.py#L319) 和 [`require_supervision()`](wfrl_blender/manual_video_job.py#L35)。
 - Down 的 MP4 与 JSON 成对发布、扩展构建产物发布均依赖硬链接，目标卷需支持硬链接。见 [`_publish_pair()`](wfrl_blender/manual_down.py#L481) 和 [`_publish_outputs()`](../scripts/blender/build_extension.py#L55)。
 - `.command` 和 macOS shell 入口只适用于 macOS。见 [`.command` 入口示例](../scripts/blender/打开净空雷达演示.command#L4)、[`run_wfrl_macos.sh`](../scripts/blender/run_wfrl_macos.sh#L1) 和 [`verify_macos.sh`](../scripts/blender/verify_macos.sh#L1)。
+- 非 POSIX 平台查询已有冻结作业时不检查本地监管租约；监管端点不可达且没有匹配终态时报告 `LOST`、`active=False`，不阻挡 Down 导出，也不改写磁盘记录。
+- 已有 MP4 导出在 Windows 上按设备、inode、大小和 mtime 判定源文件身份，不比较 ctime；POSIX 另比较 ctime，以发现保留 mtime 的内容修改。
+- Launcher 在 Windows 上以 `CREATE_NEW_PROCESS_GROUP` 启动并发送 `signal.CTRL_BREAK_EVENT` 请求停止，接收进程须与发送者共享控制台。
+- [.gitattributes](../.gitattributes) 对 `wfrl_blender/assets/` 与 `wfrl_blender/_vendor/` 关闭换行转换，保证检出字节与完整性摘要一致。
+- 宿主测试的 venv 路径、Python 工具夹具和符号链接辅助位于 [tests/_platform.py](tests/_platform.py)；无法创建符号链接时相关用例跳过并附原因。
 - Windows 上的前端宿主测试在 `windows-host` 任务中非阻塞运行。见 [Windows 前端宿主检查](../docs/development/自动检查.md#windows-前端宿主检查)和[工作流任务](../.github/workflows/checks.yml#L165)。
 
 ## Blade Recon 与重建对照
@@ -572,7 +577,7 @@ ZIP 包括 MAPPO 源、旧法和 TLS 结果层、规范示例、NREL 缺陷编�
 
 当前源码的 `split_mappo_texture.refresh()` 复用已校验的对象与结构绑定；来源对象、网格、保存清单或摘要变化时完整校验，文件加载、撤销与重做清缓存。只在矩阵、网格或全局可见性变化时写入，不重复激活显示设置或扫描全部场景。研究用 `split_surface_texture.py` 只存在于工作区，不进入安装包；它已被导入时，`split_reconstruction` 的文件加载与撤销／重做处理同样清除其运行时会话，使其从恢复后的 ID 重新读取，未导入时不加载该模块。
 
-中段／叶尖观察点只定位一次，手动缩放、平移、绕转后继续播放保留用户视图。原始／增强显式切换回两侧整机；模式切换保留时刻、播放状态和有效视角。保存重开恢复当前模式、显示、时间与视角，不重放按钮取景动作。侧栏只提供完整风机几何与同源纹理。
+中段／叶尖观察点只定位一次，手动缩放、平移、绕转后继续播放保留用户视图。右侧处于相机视图时，窗口或侧栏尺寸变化稳定后自动适配取景；播放期间暂缓，暂停后按最后一次布局执行一次，透视／正交自由视图不受自动适配影响，完整取景等显式操作照常执行。原始／增强显式切换回两侧整机；模式切换保留时刻、播放状态和有效视角。保存重开恢复当前模式、显示、时间与视角，不重放按钮取景动作。侧栏只提供完整风机几何与同源纹理。
 
 便携场景保存 `__WFRL_BUNDLED_MAPPO__` 与 manifest SHA-256，依据实际安装目录匹配 `assets/mappo/`，含 packed 天空／地表图，无 linked libraries。失效路径只恢复相同来源；不匹配则清空并报错，不改成任意默认包。打开入口保留 Blender 原生未保存确认，验证使用副本，不覆盖规范场景。
 

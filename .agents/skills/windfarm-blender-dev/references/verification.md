@@ -31,7 +31,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定
 
 源码约定守卫随宿主测试运行：`test_text_io_encoding.py` 要求扩展源码的文本读写显式 UTF-8，`test_blender_script_registry.py` 要求 `blender_frontend/tests/blender/` 下的每个原生脚本（下划线开头的共享模块除外）已登记到 `run_regressions.py`，或在本目录专题、`docs/blender/`、`wfrl/lidar/README.md` 或 `scripts/blender/` 驱动脚本中写明手动入口。修改相应源码或新增原生脚本时一并运行。
 
-手动视频监管用例（`blender_frontend/tests/test_manual_video_job.py`）需要解释器提供 `os.waitid`；macOS 上 Python 3.13 起才提供，较旧的解释器会跳过这些用例而不报失败，选择宿主解释器时分别报告。
+手动视频监管用例（`blender_frontend/tests/test_manual_video_job.py`）需要解释器提供 `os.waitid`；macOS 上 Python 3.13 起才提供，较旧的解释器会跳过这些用例而不报失败，选择宿主解释器时分别报告。这些用例在临时目录启动子进程，`PYTHONPATH` 须写成绝对路径，例如 `PYTHONPATH="$PWD/blender_frontend:$PWD"`。
 
 窗口脚本不加 `--background`；安装检查保留所需 profile，不照搬工厂启动。使用独立进程、配置、场景副本和新输出目录，保护用户脏场景及规范资产。
 
