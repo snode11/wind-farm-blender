@@ -17,6 +17,7 @@ import json
 import math
 import os
 from pathlib import Path
+import sys
 import time
 import traceback
 
@@ -25,6 +26,9 @@ from bpy_extras.view3d_utils import location_3d_to_region_2d
 from mathutils import Quaternion, Vector
 
 HERE = Path(__file__).resolve().parent
+sys.path.append(str(HERE))
+from mappo_full_view_default_window import assert_navigation, rotation_angle
+
 spec = importlib.util.spec_from_file_location(
     'same_source_navigation_helpers', HERE / 'mappo_same_source_texture_regression.py')
 helpers = importlib.util.module_from_spec(spec)
@@ -49,6 +53,12 @@ def operator(name, **kwargs):
     assert result == {'FINISHED'}, (name, result)
 
 
+def assert_right_navigation(condition, field, baseline, current, **details):
+    if not condition:
+        assert_navigation(False, state, validation.split, views(), 1,
+                          field, baseline, current, **details)
+
+
 def pair():
     scene = validation.scene
     areas = views()
@@ -57,7 +67,11 @@ def pair():
     assert validation.split.enabled(scene) and scene.get('split_review_status') == 'READY'
     assert validation.same.active(scene) and not validation.synthetic.active(scene)
     assert left.local_view is None and right.local_view is not None
-    assert right.use_local_camera and right.camera == validation.same.camera(scene)
+    assert_right_navigation(right.use_local_camera, 'use_local_camera', True, right.use_local_camera)
+    expected_camera = validation.same.camera(scene)
+    assert_right_navigation(right.camera == expected_camera, 'camera',
+                            expected_camera.name if expected_camera else None,
+                            right.camera.name if right.camera else None)
     assert right.shading.type == left.shading.type == 'MATERIAL'
     for obj in validation.same.objects(scene):
         assert obj.local_view_get(right), obj.name
@@ -81,10 +95,15 @@ def right_view():
 def unchanged(expected):
     actual = right_view()
     for key in ('perspective', 'camera', 'lock_object', 'lock_cursor', 'lock_camera'):
-        assert actual[key] == expected[key], (key, expected, actual)
+        assert_right_navigation(actual[key] == expected[key], key, expected[key], actual[key])
     for key in ('location', 'rotation', 'distance', 'camera_zoom', 'camera_offset', 'lens'):
-        assert helpers.np.allclose(actual[key], expected[key], atol=1e-5, rtol=0), (
-            key, expected, actual)
+        if key == 'rotation':
+            angle = rotation_angle(expected[key], actual[key])
+            assert_right_navigation(angle is not None and angle <= 1e-5, key, expected[key], actual[key],
+                                    angle_rad=angle, tolerance_rad=1e-5)
+        else:
+            assert_right_navigation(helpers.np.allclose(actual[key], expected[key], atol=1e-5, rtol=0),
+                                    key, expected[key], actual[key], tolerance=1e-5)
     return actual
 
 
@@ -106,7 +125,8 @@ def native_orbit():
 def native_camera_exit():
     """Leave CAMERA through Blender's own toggle without modifying navigation."""
     area = pair()[1]
-    assert area.spaces.active.region_3d.view_perspective == 'CAMERA', right_view()
+    perspective = area.spaces.active.region_3d.view_perspective
+    assert_right_navigation(perspective == 'CAMERA', 'perspective', 'CAMERA', perspective)
     region = next(region for region in area.regions if region.type == 'WINDOW')
     with bpy.context.temp_override(area=area, region=region):
         result = bpy.ops.view3d.view_camera()
@@ -258,23 +278,29 @@ def tick():
             return native_camera_exit()
         elif stage == 14:
             actual = right_view()
-            center_error = (Vector(actual['location']) - rotor_center()).length
+            center = rotor_center()
+            center_error = (Vector(actual['location']) - center).length
             state['default_camera_exit'] = dict(operator='view3d.view_camera',
                 before=state['entry_view'], after=actual, center_error_m=center_error)
             # Capture even an incorrect inherited pivot so a failed baseline
             # retains the actual native window after the camera toggle.
             capture('native-camera-exit-free-view')
-            assert center_error <= 5., ('Native camera exit inherited the wrong rotor pivot', center_error, actual)
-            assert actual['perspective'] in {'PERSP', 'ORTHO'}, actual
+            assert_right_navigation(center_error <= 5., 'location', list(center), actual['location'],
+                                    error_m=center_error, tolerance_m=5.)
+            assert_right_navigation(actual['perspective'] in {'PERSP', 'ORTHO'}, 'perspective',
+                                    ['PERSP', 'ORTHO'], actual['perspective'])
             state['default_camera_exit']['full_rotor_pixels'] = full_rotor_pixels()
             state['checks'].append('Native camera exit retains the right rotor hub pivot and all three visible blades')
             state['stage'] = 2
             return native_orbit()
         elif stage == 2:
             actual = right_view()
-            center_error = (Vector(actual['location']) - rotor_center()).length
-            assert center_error <= 5., ('Default native orbit pivot is not at the right rotor', center_error, actual)
-            assert actual['perspective'] in {'PERSP', 'ORTHO'}, actual
+            center = rotor_center()
+            center_error = (Vector(actual['location']) - center).length
+            assert_right_navigation(center_error <= 5., 'location', list(center), actual['location'],
+                                    error_m=center_error, tolerance_m=5.)
+            assert_right_navigation(actual['perspective'] in {'PERSP', 'ORTHO'}, 'perspective',
+                                    ['PERSP', 'ORTHO'], actual['perspective'])
             assert not validation.scene.get(validation.same.DETAIL)
             orbit = state['default_native_orbit']
             orbit['steps'].append(dict(angle_degrees=15 * (len(orbit['steps']) + 1), right_view=actual,
@@ -286,7 +312,8 @@ def tick():
             front = validation.same.camera(validation.scene).matrix_world.to_quaternion() @ Vector((0., 0., -1.))
             back = Quaternion(actual['rotation']) @ Vector((0., 0., -1.))
             orbit['front_back_direction_dot'] = front.normalized().dot(back.normalized())
-            assert orbit['front_back_direction_dot'] <= -.98, orbit
+            direction_dot = orbit['front_back_direction_dot']
+            assert_right_navigation(direction_dot <= -.98, 'front_back_direction_dot', -.98, direction_dot)
             state['orbit_view'] = actual
             capture('native-orbit-back-full-rotor', full=True)
             state['checks'].append('Twelve native 15 degree orbit steps reach the back with all three blades visible and the pivot near the right rotor hub')
@@ -313,9 +340,14 @@ def tick():
         elif stage == 6:
             record = state['detail_native_orbit']
             actual = right_view()
-            assert helpers.np.allclose(actual['location'], record['before']['location'], atol=1e-5, rtol=0), record
-            assert abs(actual['distance'] - record['before']['distance']) <= 1e-5, record
-            assert not helpers.np.allclose(actual['rotation'], record['before']['rotation'], atol=1e-5, rtol=0), record
+            before = record['before']
+            assert_right_navigation(helpers.np.allclose(actual['location'], before['location'], atol=1e-5, rtol=0),
+                                    'location', before['location'], actual['location'], tolerance=1e-5)
+            assert_right_navigation(abs(actual['distance'] - before['distance']) <= 1e-5,
+                                    'distance', before['distance'], actual['distance'], tolerance=1e-5)
+            angle = rotation_angle(before['rotation'], actual['rotation'])
+            assert_right_navigation(angle is not None and angle > 1e-5, 'rotation', before['rotation'],
+                                    actual['rotation'], angle_rad=angle, minimum_angle_rad=1e-5)
             record['target_after'] = surface_target_pixels(record['target_m'])
             record['after'] = actual
             # Re-seek without moving the selected surface out of the closeup.

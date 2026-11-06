@@ -281,6 +281,201 @@ def test_resize_fit_is_debounced_and_camera_changes_do_not_trigger_repair(monkey
     assert fitted == []
 
 
+def _resize_fit_window(monkeypatch, *, playing):
+    from wfrl_blender import cameras, playback
+
+    class Vector(np.ndarray):
+        @property
+        def length(self):
+            return np.linalg.norm(self)
+
+    class Matrix(np.ndarray):
+        @classmethod
+        def Translation(cls, offset):
+            matrix = np.eye(4).view(cls)
+            matrix.translation = offset
+            return matrix
+
+        @classmethod
+        def Diagonal(cls, diagonal):
+            return np.diag(diagonal).view(cls)
+
+        @property
+        def translation(self):
+            return self[:3, 3].view(Vector)
+
+        @translation.setter
+        def translation(self, value):
+            self[:3, 3] = value
+
+        def inverted(self):
+            return np.linalg.inv(self).view(Matrix)
+
+        def __matmul__(self, other):
+            if isinstance(other, Vector):
+                return (np.asarray(self)[:3, :3] @ np.asarray(other) + self.translation).view(Vector)
+            return (np.asarray(self) @ np.asarray(other)).view(Matrix)
+
+    class Objects(dict):
+        def __iter__(self):
+            return iter(self.values())
+
+    scene = Scene(split_review_status='READY')
+    scene.objects = Objects()
+    for blade in range(1, 4):
+        name = f'SplitRecon.B{blade}'
+        scene.objects[name] = NS(name=name, type='MESH', data=NS(shape_keys=None),
+            matrix_world=Matrix.Translation((0., 10000., 0.)),
+            bound_box=split._corners((-60., -2., -75.), (60., 2., 75.)))
+    for pointer, part in enumerate(('YawRoot', 'Rotor'), start=31):
+        name = 'WFRL.Turbine.T1.' + part
+        scene.objects[name] = NS(name=name, type='EMPTY', parent=None,
+            as_pointer=lambda pointer=pointer: pointer, matrix_basis=Matrix.Translation((0., 0., 90.)))
+    camera = NS(name='SplitRecon.Camera', type='CAMERA', data=NS(type='ORTHO', ortho_scale=186.),
+                matrix_world=NS(translation=np.array((200., 10020., 125.)).view(Vector),
+                                to_quaternion=lambda: np.array((1., 0., 0., 0.))))
+    scene.objects[camera.name] = camera
+    left, right = area(1, object()), area(2, camera, 404)
+    for pane in (left, right):
+        pane.regions = [NS(type='WINDOW', x=pane.x, y=0, width=pane.width, height=pane.height)]
+        pane.tag_redraw = lambda: None
+        space = pane.spaces.active
+        space.lens = 61.
+        space.show_region_ui = space.show_region_toolbar = False
+        space.region_3d = NS(view_perspective='PERSP' if pane is left else 'CAMERA',
+                             view_rotation=np.array((.5, .5, .5, .5)),
+                             view_location=np.array((3., 10004., 88.)), view_distance=23.,
+                             view_camera_zoom=104., view_camera_offset=(.23, -.11),
+                             update=lambda: None)
+    screen = NS(areas=[left, right], as_pointer=lambda: 20, is_animation_playing=playing)
+    window = NS(scene=scene, screen=screen, as_pointer=lambda: 10)
+    context = NS(scene=scene, window=window, window_manager=NS(windows=[window]),
+                 preferences=NS(system=NS(ui_scale=1., use_region_overlap=True), view=NS(smooth_view=200)),
+                 view_layer=NS(update=lambda: None), evaluated_depsgraph_get=lambda: None,
+                 temp_override=lambda **_kw: nullcontext())
+    fits = []
+
+    def view_camera():
+        right.spaces.active.region_3d.view_perspective = 'CAMERA'
+        fits.append(split._signature((left, right)))
+        return {'FINISHED'}
+
+    def project(pane, _points):
+        dx, dy = pane.spaces.active.region_3d.view_camera_offset
+        return 140. + 100 * dx, 120. + 100 * dy, 320. + 100 * dx, 480. + 100 * dy
+
+    bpy = NS(context=context, ops=NS(view3d=NS(view_camera=view_camera)),
+             app=NS(background=False, timers=NS(is_registered=lambda _callback: True)))
+    monkeypatch.setitem(sys.modules, 'bpy', bpy)
+    monkeypatch.setitem(sys.modules, 'mathutils', NS(
+        Vector=lambda values: np.asarray(values, dtype=float).view(Vector), Matrix=Matrix))
+    monkeypatch.setattr(cameras, '_LAYOUT_JOB', None)
+    monkeypatch.setattr(playback, '_OWNER_SCENE', scene)
+    monkeypatch.setattr(split, '_REGISTERED', True)
+    monkeypatch.setattr(split, '_JOBS', {})
+    monkeypatch.setattr(split, '_SESSIONS', {})
+    monkeypatch.setattr(split, '_project', project)
+    now = [1.]
+    monkeypatch.setattr(split.time, 'monotonic', lambda: now[0])
+
+    def tick(elapsed=0.):
+        now[0] += elapsed
+        assert split._tick() == split._INTERVAL
+
+    def resize_right(width):
+        right.width = right.regions[0].width = width
+        tick()
+
+    split._remember(window, (left, right))
+    return NS(context=context, left=left, right=right, fits=fits, tick=tick, resize_right=resize_right,
+              key=split._key(window), screen=screen)
+
+
+def test_playing_resize_defers_fit_without_moving_camera(monkeypatch):
+    window = _resize_fit_window(monkeypatch, playing=True)
+    right = window.right.spaces.active
+    before = split._navigation(right)
+    window.resize_right(320)
+    for _ in range(4):
+        window.tick(.5)
+
+    _assert_navigation_equal(split._navigation(right), before)
+    assert not window.fits
+    assert split._SESSIONS[window.key]['fit_deferred']
+    assert window.key not in split._JOBS
+
+
+def test_pause_fits_only_the_latest_deferred_layout(monkeypatch):
+    window = _resize_fit_window(monkeypatch, playing=False)
+    window.resize_right(360)
+    window.tick(.5)
+    window.tick(.5)
+    assert split._JOBS[window.key]['stage'] == 'refit'
+    before = split._navigation(window.right.spaces.active)
+    first_fit, = window.fits
+
+    window.screen.is_animation_playing = True
+    window.tick(.5)
+    assert window.key not in split._JOBS
+    assert split._SESSIONS[window.key]['fit_deferred']
+    window.resize_right(320)
+    window.tick(20.)
+    window.resize_right(280)
+    window.right.regions.append(NS(type='UI', x=580, width=80))
+    window.right.spaces.active.show_region_ui = True
+    window.tick(.5)
+    window.tick(.5)
+    latest = split._signature((window.left, window.right))
+    assert latest != first_fit
+    assert window.fits == [first_fit]
+    _assert_navigation_equal(split._navigation(window.right.spaces.active), before)
+    assert split._SESSIONS[window.key]['signature'] == latest
+
+    window.screen.is_animation_playing = False
+    for _ in range(5):
+        window.tick(.5)
+    assert window.fits == [first_fit, latest]
+    assert split._SESSIONS[window.key]['signature'] == latest
+    assert split._SESSIONS[window.key]['changed'] is None
+    assert window.key not in split._JOBS
+    assert window.context.scene['split_review_status'] == 'READY'
+
+
+def test_paused_resize_keeps_debounce_and_refit(monkeypatch):
+    window = _resize_fit_window(monkeypatch, playing=False)
+    left_before = split._navigation(window.left.spaces.active)
+    window.resize_right(320)
+    window.tick(.25)
+    assert not window.fits and window.key not in split._JOBS
+    window.tick(.25)
+    assert split._JOBS[window.key]['explicit'] is False
+    assert not window.fits
+    for _ in range(3):
+        window.tick(.5)
+    signature = split._signature((window.left, window.right))
+    assert window.fits == [signature, signature]
+    _assert_navigation_equal(split._navigation(window.left.spaces.active), left_before)
+    assert window.key not in split._JOBS
+    assert window.context.scene['split_review_status'] == 'READY'
+
+
+def test_explicit_fit_runs_while_playing_with_deferred_resize(monkeypatch):
+    window = _resize_fit_window(monkeypatch, playing=True)
+    window.resize_right(320)
+    window.tick(.5)
+    assert split._SESSIONS[window.key]['fit_deferred']
+
+    assert split.fit(window.context)
+    for _ in range(4):
+        window.tick(.5)
+    signature = split._signature((window.left, window.right))
+    assert window.fits == [signature, signature]
+    assert window.screen.is_animation_playing
+    assert window.key not in split._JOBS
+    assert not split._SESSIONS[window.key].get('fit_deferred')
+    assert window.context.scene['split_review_status'] == 'READY'
+
+
 def test_automatic_fit_waits_for_two_redraws_and_never_resets_left(monkeypatch):
     from wfrl_blender import cameras
     scene = Scene()

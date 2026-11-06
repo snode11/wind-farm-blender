@@ -506,6 +506,15 @@ def _remember(window, areas):
                                   areas=tuple(a.as_pointer() for a in areas))
 
 
+def _defer_resize_fit(scene, state):
+    # A pending resize leaves the active job slot available to view operators.
+    state['fit_deferred'] = True
+    if (scene.get('split_review_status') == 'PREPARING' and
+            not any(job['scene'] == scene for job in _JOBS.values())):
+        scene['split_review_status'] = 'READY'
+        _redraw_scene(scene)
+
+
 def _set_error(scene, exc):
     scene['split_review_status'] = 'ERROR: ' + str(exc)
     _redraw_scene(scene)
@@ -784,7 +793,7 @@ def exit_mode(context):
 
 def _advance_jobs(now):
     import bpy
-    from . import cameras
+    from . import cameras, playback
     for key, job in list(_JOBS.items()):
         scene = job['scene']
         try:
@@ -792,6 +801,16 @@ def _advance_jobs(now):
             if window.screen != job['screen'] or window.scene != scene:
                 del _JOBS[key]
                 continue
+            if job.get('explicit') is False and playback.is_playing(scene):
+                # Playback can start between the timer callbacks of an active fit.
+                pair = _pair(scene, window.screen)
+                if (job['stage'] != 'ready' or pair is None or
+                        job['signature'] != _signature(pair)):
+                    del _JOBS[key]
+                    state = _SESSIONS[key]
+                    state['changed'] = now
+                    _defer_resize_fit(scene, state)
+                    continue
             if now > job['deadline']:
                 raise ValueError('分屏布局超时，请再次点击恢复布局')
             if cameras._LAYOUT_JOB is not None:
@@ -825,6 +844,12 @@ def _advance_jobs(now):
                 job['stage'], job['settle'] = 'fit', now + _DEBOUNCE
                 continue
             if job['stage'] in {'fit', 'refit'}:
+                if 'deferred_signature' in job:
+                    signature = _signature(areas)
+                    if signature != job['deferred_signature']:
+                        job['deferred_signature'], job['settle'] = signature, now + _DEBOUNCE
+                        continue
+                    del job['deferred_signature']
                 _sidebar_category(areas[0])
                 _fit_pair(window, areas, explicit=job.get('explicit', True))
                 if job.get('explicit', True):
@@ -860,6 +885,7 @@ def _advance_jobs(now):
 
 def _tick():
     import bpy
+    from . import playback
     if not _REGISTERED:
         return None
     now = time.monotonic()
@@ -902,11 +928,20 @@ def _tick():
             signature = _signature(areas)
             if signature != state['signature']:
                 state['signature'], state['changed'] = signature, now
-                scene['split_review_status'] = 'PREPARING'
-            elif state['changed'] is not None and now - state['changed'] >= _DEBOUNCE:
-                _JOBS[key] = dict(window=window, scene=scene, screen=window.screen,
-                    stage='fit', settle=now, deadline=now + 15, explicit=False)
+            if state['changed'] is None:
+                continue
+            if playback.is_playing(scene):
+                _defer_resize_fit(scene, state)
+                continue
+            if now - state['changed'] >= _DEBOUNCE:
+                job = dict(window=window, scene=scene, screen=window.screen,
+                           stage='fit', settle=now, deadline=now + 15, explicit=False)
+                if state.pop('fit_deferred', False):
+                    # The existing view and latest layout have already settled.
+                    job.update(stage='refit', deferred_signature=signature)
+                _JOBS[key] = job
                 state['changed'] = None
+            if scene.get('split_review_status') != 'PREPARING':
                 scene['split_review_status'] = 'PREPARING'
         except (ReferenceError, RuntimeError, ValueError, TypeError, AttributeError, StopIteration) as exc:
             try:

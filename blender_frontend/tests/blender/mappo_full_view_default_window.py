@@ -17,6 +17,7 @@ from __future__ import annotations
 import hashlib
 import importlib
 import json
+import math
 import os
 from pathlib import Path
 import time
@@ -26,15 +27,44 @@ import bpy
 
 
 ROOT = Path(__file__).resolve().parents[3]
-OUT = Path(os.environ['WFRL_TEST_OUTPUT']).expanduser().resolve()
-OUT.mkdir(parents=True, exist_ok=True)
-REPORT = OUT / 'full-view-window-validation.json'
-assert not REPORT.exists(), 'Use a new WFRL_TEST_OUTPUT directory'
-MODULE = os.environ.get('WFRL_ADDON_MODULE', 'bl_ext.user_default.wfrl_blender')
 INTERVAL = .1
-state = dict(stage='initialize', started=time.monotonic(),
-             deadline=time.monotonic() + 180, samples=[], captures=[], checks=[])
-addon = split = same = cameras = farm = None
+
+
+def rotation_angle(baseline, current):
+    """Shortest angle in radians between two quaternion orientations."""
+    baseline_norm, current_norm = math.hypot(*baseline), math.hypot(*current)
+    if not all(math.isfinite(norm) and norm > 0 for norm in (baseline_norm, current_norm)):
+        return None
+    baseline = tuple(value / baseline_norm for value in baseline)
+    current = tuple(value / current_norm for value in current)
+    chord = min(math.dist(baseline, current), math.dist(baseline, (-value for value in current)))
+    return 4. * math.asin(min(1., chord / 2.))
+
+
+def navigation_context(core, areas, index):
+    window = bpy.context.window
+    key = core._key(window)
+    job = core._JOBS.get(key)
+    session = core._SESSIONS.get(key, {})
+    area = areas[index]
+    viewport = core._region(area)
+    return dict(side=('left', 'right')[index], frame=window.scene.frame_current,
+        playing=window.screen.is_animation_playing, area_size=[area.width, area.height],
+        region_size=[viewport.width, viewport.height] if viewport else None,
+        layout_signature=core._signature(areas),
+        fit_job=dict(status=window.scene.get('split_review_status'),
+            active={field: job[field] for field in
+                    ('stage', 'explicit', 'settle', 'deadline', 'signature', 'deferred_signature')
+                    if field in job} if job else None,
+            pending=session.get('changed') is not None, deferred=bool(session.get('fit_deferred')),
+            signature=session.get('signature'), changed_at=session.get('changed')))
+
+
+def assert_navigation(condition, report_state, core, areas, index, field, baseline, current, **details):
+    if not condition:
+        report_state['navigation_failure'] = dict(navigation_context(core, areas, index),
+            field=field, baseline=baseline, current=current, **details)
+    assert condition, report_state['navigation_failure']
 
 
 def pair():
@@ -102,6 +132,7 @@ def sample():
                          camera_zoom=round(float(rv.view_camera_zoom), 6),
                          camera_offset=rounded(rv.view_camera_offset),
                          camera_matrix=[rounded(row) for row in space.camera.matrix_world]),
+               navigation_context=navigation_context(split, (left, right), 1),
                left_pose=[pose(scene.objects[f'WFRL.Turbine.T1.Blade{bid}'], graph) for bid in (1, 2, 3)],
                right_pose=[pose(obj, graph) for obj in same.objects(scene)],
                texture_information=same.information(scene))
@@ -123,14 +154,35 @@ def check(condition, message):
     assert condition, message
 
 
+def check_samples(rows, baseline, message, *, view=False):
+    for row in rows:
+        values = row['view'] if view else row
+        for field, expected in baseline.items():
+            actual = values[field]
+            details = {}
+            if field == 'rotation':
+                angle = rotation_angle(expected, actual)
+                matches = angle == 0.
+                details.update(angle_rad=angle, tolerance_rad=0.)
+            elif field == 'sidebar_width':
+                matches = actual <= expected
+            else:
+                matches = actual == expected
+            if not matches:
+                state['navigation_failure'] = dict(row['navigation_context'], field=field,
+                    baseline=expected, current=actual, **details)
+                check(False, message)
+    check(True, message)
+
+
 def assert_view(row, closeup):
     # Surface inspection positions one stationary close-up; it never enables tracking.
     check(row['status'] == 'READY' and row['detail'] is False,
           state['stage'] + ': READY without surface tracking')
-    check(row['perspective'] == ('ORTHO' if closeup else 'CAMERA'),
-          state['stage'] + ': requested native view perspective')
-    check(not row['sidebar'] and row['sidebar_width'] <= 8,
-          state['stage'] + ': right sidebar hidden')
+    check_samples((row,), dict(perspective='ORTHO' if closeup else 'CAMERA'),
+                  state['stage'] + ': requested native view perspective')
+    check_samples((row,), dict(sidebar=False, sidebar_width=8),
+                  state['stage'] + ': right sidebar hidden')
     if not closeup:
         bounds, (width, height) = row['full_rotor_bounds'], row['viewport']
         check(bounds is not None and 0 <= bounds[0] < bounds[2] <= width
@@ -211,9 +263,12 @@ def tick():
             return INTERVAL
         if stage.startswith('wait-'):
             if not ready():
+                state.pop('settle_until', None)
                 return INTERVAL
-            state.setdefault('settle_until', time.monotonic() + .6)
-            if time.monotonic() < state['settle_until']:
+            now = time.monotonic()
+            if 'settle_until' not in state:
+                state['settle_until'] = now + .6
+            if now < state['settle_until']:
                 return INTERVAL
             closeup = stage in {'wait-explicit-detail', 'wait-current-detail'}
             row = capture(stage)
@@ -248,10 +303,9 @@ def tick():
             rows = state['samples'][state['play_sample_start']:]
             start = state['play_start']
             state['play_end'] = row
-            check(all(item['view'] == start['view'] for item in rows), 'Full-view camera and navigation stay fixed during playback')
-            check(all(not item['detail'] and item['perspective'] == 'CAMERA'
-                      and not item['sidebar'] and item['sidebar_width'] <= 8 for item in rows),
-                  'All sampled playback states retain full view and a hidden right sidebar')
+            check_samples(rows, start['view'], 'Full-view camera and navigation stay fixed during playback', view=True)
+            check_samples(rows, dict(detail=False, perspective='CAMERA', sidebar=False, sidebar_width=8),
+                          'All sampled playback states retain full view and a hidden right sidebar')
             check(row['frame'] > start['frame'] and row['sample'] > start['sample']
                   and row['left_pose'] != start['left_pose'] and row['right_pose'] != start['right_pose'],
                   'Native playback advances both MAPPO blades and held same-source texture geometry')
@@ -264,9 +318,10 @@ def tick():
             if time.monotonic() < state['until']:
                 return INTERVAL
             start = state['pause_start']
+            check_samples((row,), start['view'], 'Native pause holds the view', view=True)
             check(not row['playing'] and all(row[key] == start[key]
-                  for key in ('frame', 'sample', 'left_pose', 'right_pose', 'view')),
-                  'Native pause holds both sides and the view')
+                  for key in ('frame', 'sample', 'left_pose', 'right_pose')),
+                  'Native pause holds both sides')
             operator('split_recon_inspect', point='CURRENT')
             wait_for('wait-explicit-detail')
         else:
@@ -278,4 +333,13 @@ def tick():
         return finish(error)
 
 
-bpy.app.timers.register(tick, first_interval=3.)
+if __name__ == '__main__':
+    OUT = Path(os.environ['WFRL_TEST_OUTPUT']).expanduser().resolve()
+    OUT.mkdir(parents=True, exist_ok=True)
+    REPORT = OUT / 'full-view-window-validation.json'
+    assert not REPORT.exists(), 'Use a new WFRL_TEST_OUTPUT directory'
+    MODULE = os.environ.get('WFRL_ADDON_MODULE', 'bl_ext.user_default.wfrl_blender')
+    state = dict(stage='initialize', started=time.monotonic(),
+                 deadline=time.monotonic() + 180, samples=[], captures=[], checks=[])
+    addon = split = same = cameras = farm = None
+    bpy.app.timers.register(tick, first_interval=3.)

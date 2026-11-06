@@ -33,6 +33,7 @@ import numpy as np
 
 sys.path.append(str(Path(__file__).resolve().parent))
 import _native
+from mappo_full_view_default_window import assert_navigation, rotation_angle
 
 
 MODULE = os.environ['WFRL_ADDON_MODULE']
@@ -116,6 +117,11 @@ def source_objects():
     return blades + structures
 
 
+def check_navigation(condition, areas, index, field, baseline, current, **details):
+    assert_navigation(condition, state, modules.core, areas, index,
+                      field, baseline, current, **details)
+
+
 def pair(expected=None):
     scene = bpy.context.scene
     actual = mode()
@@ -126,7 +132,11 @@ def pair(expected=None):
     left, right = [a.spaces.active for a in areas]
     assert modules.core.enabled(scene) and scene.get('split_review_status') == 'READY'
     assert left.local_view is None and right.local_view is not None
-    assert right.use_local_camera and right.camera == modules.core.reconstruction_camera(scene)
+    check_navigation(right.use_local_camera, areas, 1, 'use_local_camera', True, right.use_local_camera)
+    expected_camera = modules.core.reconstruction_camera(scene)
+    check_navigation(right.camera == expected_camera, areas, 1, 'camera',
+                     expected_camera.name if expected_camera else None,
+                     right.camera.name if right.camera else None)
     assert not right.camera.data.show_passepartout
     assert left.shading.type == 'MATERIAL' and left.shading.use_scene_world
     assert right.shading.type == ('MATERIAL' if actual == 'MAPPO' else 'SOLID')
@@ -176,17 +186,24 @@ def display_origin():
 
 
 def unchanged(expected, *, cameras=True, right_offset=None, mode_transfer=False):
-    actual = navigation_pair()
+    areas = pair()
+    actual = [navigation(area) for area in areas]
     for index, (original, after) in enumerate(zip(expected, actual)):
         before = dict(original)
         if index == 1 and right_offset is not None:
             before['location'] = list(Vector(original['location']) + Vector(right_offset))
         for key in ('perspective', 'lock_object', 'lock_cursor', 'lock_camera'):
-            assert after[key] == before[key], (key, before, after)
+            check_navigation(after[key] == before[key], areas, index, key, before[key], after[key])
         if cameras:
-            assert after['camera'] == before['camera'], (before, after)
+            check_navigation(after['camera'] == before['camera'], areas, index,
+                             'camera', before['camera'], after['camera'])
         for key in ('location', 'rotation', 'distance', 'camera_zoom', 'camera_offset', 'lens'):
             tolerance = 1e-5
+            if key == 'rotation':
+                angle = rotation_angle(before[key], after[key])
+                check_navigation(angle is not None and angle <= tolerance, areas, index,
+                                 key, before[key], after[key], angle_rad=angle, tolerance_rad=tolerance)
+                continue
             if key == 'location' and index == 1 and (mode_transfer or right_offset is not None):
                 # RegionView3D navigation is native float32. Translating to the
                 # other display origin and back can lose one ULP at 10 km.
@@ -202,7 +219,8 @@ def unchanged(expected, *, cameras=True, right_offset=None, mode_transfer=False)
                     stage=state['stage'], error_m=error, tolerance_m=tolerance,
                     native_float32_origin_ulp_m=ulp, scope='NAVIGATION_ONLY_ORIGIN_TRANSLATION',
                     expected=before['location'], actual=after['location']))
-            assert np.allclose(after[key], before[key], atol=tolerance, rtol=0), (key, before, after, tolerance)
+            check_navigation(np.allclose(after[key], before[key], atol=tolerance, rtol=0),
+                             areas, index, key, before[key], after[key], tolerance=tolerance)
     return actual
 
 
@@ -421,7 +439,18 @@ def geometry_contracts():
                      ('select_camera', dict(camera_name='WFRL.Camera.T1.FrontQuarter'))]
         for name, kwargs in commands:
             operator(name, **kwargs)
-            assert right.use_local_camera and navigation(areas[1]) == expected, (name, kwargs)
+            check_navigation(right.use_local_camera, areas, 1, 'use_local_camera',
+                             True, right.use_local_camera, operator=name, arguments=kwargs)
+            actual = navigation(areas[1])
+            for field, baseline in expected.items():
+                current = actual[field]
+                if field == 'rotation':
+                    angle = rotation_angle(baseline, current)
+                    check_navigation(angle == 0., areas, 1, field, baseline, current,
+                                     angle_rad=angle, tolerance_rad=0., operator=name, arguments=kwargs)
+                else:
+                    check_navigation(current == baseline, areas, 1, field, baseline, current,
+                                     operator=name, arguments=kwargs)
         state['immediate_left_camera_isolation'] = commands
         state['geometry_workspace'] = bpy.context.window.workspace.name
         other = next(w for w in bpy.data.workspaces if w != bpy.context.window.workspace)
@@ -450,10 +479,12 @@ def geometry_contracts():
         state['geometry_contract'] = 'camera-exited'
         return native('view_camera')
     elif step == 'camera-exited':
-        right = navigation(pair('GEOMETRY')[1])
+        areas = pair('GEOMETRY')
+        right = navigation(areas[1])
         center = Vector(display_origin()) + Vector((5., 0., 90.))
         error = (Vector(right['location']) - center).length
-        assert error <= 5., (right, list(center), error)
+        check_navigation(error <= 5., areas, 1, 'location', list(center), right['location'],
+                         error_m=error, tolerance_m=5.)
         state['geometry_native_camera_exit'] = dict(navigation=right, pivot_error_m=error)
         operator('split_recon_fit')
         state['geometry_contract'] = 'before-current'
@@ -474,10 +505,12 @@ def geometry_contracts():
         operator('split_recon_enter', mode='CURRENT')
         state['geometry_contract'] = 'reentered'
     elif step == 'reentered':
-        pair('GEOMETRY')
+        areas = pair('GEOMETRY')
         assert scene.frame_current == 52
         assert geometry_identity() == state['geometry_identity']
-        assert navigation(pair()[1])['camera'] == state['geometry_current_navigation'][1]['camera']
+        actual = navigation(areas[1])['camera']
+        baseline = state['geometry_current_navigation'][1]['camera']
+        check_navigation(actual == baseline, areas, 1, 'camera', baseline, actual)
         state['checks'].append('Geometry sample step, immediate camera isolation, usable widths, six-frame complete framing, workspace roundtrip, CURRENT and exit/reentry retain native geometry and shared time')
         state['geometry_contract'] = 'complete'
         return None
@@ -537,12 +570,16 @@ def preset(point):
     assert not bpy.context.scene.get(modules.same.DETAIL)
     value = modules.same.ensure(bpy.context.scene)
     target, normal, _up = modules.same._tracked_surface(bpy.context.scene, value)
-    area = pair('MAPPO')[1]
+    areas = pair('MAPPO')
+    area = areas[1]
     area.spaces.active.region_3d.update()
     projected = location_3d_to_region_2d(region(area), area.spaces.active.region_3d, target)
     assert projected is not None and 8 < projected.x < region(area).width - 8
     assert 8 < projected.y < region(area).height - 8
-    assert (area.spaces.active.region_3d.view_location - target).length < .01
+    location = area.spaces.active.region_3d.view_location
+    error = (location - target).length
+    check_navigation(error < .01, areas, 1, 'location', list(target), list(location),
+                     error_m=error, tolerance_m=.01)
     state['preset_' + point] = dict(point=list(target), normal=list(normal), pixels=list(projected),
                                     automatic_follow=False, defect_identification=False)
 
@@ -675,10 +712,12 @@ def tick():
                 return native('view_camera')
             return .35
         elif stage == 5:
-            before = navigation(pair()[1])
+            areas = pair()
+            before = navigation(areas[1])
             center = Vector(modules.same.OFFSET) + Vector(modules.same.ensure(bpy.context.scene)['sequence'].rotor.hub)
             error = (Vector(before['location']) - center).length
-            assert error <= 5., ('Right orbit center is not near the rotor hub', error, before)
+            check_navigation(error <= 5., areas, 1, 'location', list(center), before['location'],
+                             error_m=error, tolerance_m=5.)
             orbit = state.setdefault('native-back-orbit', dict(steps=[], center=list(center)))
             orbit['steps'].append(dict(navigation=before, pivot_error_m=error, framing=complete_framing()))
             if len(orbit['steps']) <= 12:
@@ -688,7 +727,8 @@ def tick():
             from mathutils import Quaternion
             back = Quaternion(before['rotation']) @ Vector((0., 0., -1.))
             orbit['front_back_direction_dot'] = front.normalized().dot(back.normalized())
-            assert orbit['front_back_direction_dot'] < -.98, orbit
+            direction_dot = orbit['front_back_direction_dot']
+            check_navigation(direction_dot < -.98, areas, 1, 'front_back_direction_dot', -.98, direction_dot)
             state['stage'] = 6
             return native('zoom', delta=3)
         elif stage == 6:
