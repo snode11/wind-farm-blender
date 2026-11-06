@@ -181,7 +181,7 @@ def stop_owned(process: subprocess.Popen | None, label: str, timeout: float = 18
         return True
     log(f"Requesting graceful stop of owned {label} process (PID {process.pid})")
     if os.name == "nt":
-        process.send_signal(subprocess.CTRL_BREAK_EVENT)
+        process.send_signal(signal.CTRL_BREAK_EVENT)
     else:
         process.terminate()
     try:

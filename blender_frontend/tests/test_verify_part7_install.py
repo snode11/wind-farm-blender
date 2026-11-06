@@ -103,12 +103,16 @@ def test_install_cli_confines_writes_and_deletion(tmp_path, monkeypatch, custom)
     report = json.loads((evidence_dir / "package-install.json").read_text(encoding="utf-8"))
     assert report["status"] == "PASS"
     assert report["extension_version"] == "1.2.3"
+    assert report["archive"] == "wfrl_blender-1.2.3.zip"
     assert report["archive_sha256"] == "a" * 64
     assert report["fresh_profile"] is True
-    for key in ("checksum_file", "inventory_file", "history_export"):
-        path = Path(report[key])
-        assert path.parent == evidence_dir
-        assert path.is_file()
+    for key, filename in (
+        ("checksum_file", "package-checksum.sha256"),
+        ("inventory_file", "package-inventory.json"),
+        ("history_export", "package-history-export.json"),
+    ):
+        assert report[key] == filename
+        assert (evidence_dir / report[key]).is_file()
 
 
 def test_install_cli_rejects_missing_smoke_output(tmp_path, monkeypatch):

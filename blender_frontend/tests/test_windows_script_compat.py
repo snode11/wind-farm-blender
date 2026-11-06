@@ -240,6 +240,16 @@ def test_launcher_expands_home_and_preserves_command_lookup(tmp_path, monkeypatc
     which.assert_called_once_with('backend')
 
 
+def test_windows_launcher_stops_owned_process_with_ctrl_break(monkeypatch):
+    process = FakePopen(1)
+    monkeypatch.setattr(launcher, 'os', SimpleNamespace(name='nt'))
+    monkeypatch.setattr(signal, 'CTRL_BREAK_EVENT', object(), raising=False)
+    monkeypatch.setattr(launcher, 'subprocess', SimpleNamespace(TimeoutExpired=subprocess.TimeoutExpired))
+
+    assert launcher.stop_owned(process, 'Bridge', timeout=5)
+    assert process.calls == [('send_signal', signal.CTRL_BREAK_EVENT), ('wait', 5)]
+
+
 BAD_DIAGNOSTIC = '路径：场景'.encode('utf-8') + b'\xff\n'
 DECODED_DIAGNOSTIC = '路径：场景\ufffd'
 

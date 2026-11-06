@@ -176,9 +176,9 @@ def verify(blender: Path = BLENDER, *, evidence_dir: Path = EVIDENCE) -> None:
                                  for path in repository.rglob("*") if path.is_file())
         evidence = json.loads(staged_install.read_text(encoding="utf-8"))
         evidence.update(
-            archive=str(result.archive), archive_sha256=result.sha256,
+            archive=result.archive.name, archive_sha256=result.sha256,
             extension_version=json.loads(result.inventory.read_text(encoding="utf-8"))["version"],
-            checksum_file=str(checksum), inventory_file=str(inventory), history_export=str(history),
+            checksum_file=checksum.name, inventory_file=inventory.name, history_export=history.name,
             installed_file_count=len(installed_files),
             installed_inventory_sha256=hashlib.sha256("\n".join(installed_files).encode()).hexdigest(),
             fresh_profile=True,
