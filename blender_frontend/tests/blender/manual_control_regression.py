@@ -380,6 +380,8 @@ def run_demo_regression():
     entries(manual)['T2'].individual_pitch = True
     entries(manual)['T2'].pitch_b2_deg = 22.0
     action('START')
+    # Saved files hold the rigid model; compare against it without the live structural motion.
+    manual.wfrl_manual_structural_motion = False
     saved_parameters = parameters(manual)
     saved_geometry = snapshot(manual, 'WFRLManual.', identities=False)
     manual_name, source_name = manual.name, source.name

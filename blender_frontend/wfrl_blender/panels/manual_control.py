@@ -1,7 +1,9 @@
 """A dedicated sidebar for independent rigid turbine motion."""
+import os
+
 import bpy
 
-from .. import manual_control
+from .. import live_stream_view, manual_control
 
 
 class WFRL_PT_ManualControl(bpy.types.Panel):
@@ -68,6 +70,13 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
                 draw_property(pose, f'pitch_b{index}_deg', slider=True)
         elif any(entry.individual_pitch for entry in entries):
             pose.label(text='桨距模式不同，可选择单台编辑', icon='INFO')
+        pose.prop(scene, 'wfrl_manual_pitch_rate_deg_s')
+        pose.prop(scene, 'wfrl_manual_structural_motion')
+        pose.prop(scene, 'wfrl_manual_camera_shake')
+        for entry in entries:
+            if manual_control.pitch_ramping(entry):
+                actual = ' / '.join(f'{getattr(entry, f"pitch_actual_b{i}_deg"):.1f}°' for i in range(1, 4))
+                pose.label(text=f'{entry.turbine_id} 变桨中  {actual}', icon='TIME')
         angle = layout.column()
         angle.enabled = not any(entry.running and entry.rpm > 0 for entry in entries)
         draw_property(angle, 'azimuth_deg', slider=True)
@@ -103,6 +112,40 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
             entry = entries[0]
             state = '运行中' if entry.running and entry.rpm > 0 else '已暂停'
             layout.label(text=f'{entry.turbine_id}  {state}  ·  {entry.rpm:.2f} RPM')
+        header, body = layout.panel('wfrl_manual_down', default_closed=False)
+        header.label(text='Down 相机')
+        if body:
+            body.prop(scene, 'wfrl_manual_blade_model')
+            body.prop(scene, 'wfrl_manual_blade_labels')
+            row = body.row(align=True)
+            for turbine in ('T1', 'T2', 'T3'):
+                op = row.operator('wfrl.manual_down_view', text=f'{turbine} Down')
+                op.turbine, op.side = turbine, 'CENTER'
+            for turbine in ('T1', 'T2', 'T3'):
+                row2 = body.row(align=True)
+                op_l = row2.operator('wfrl.manual_down_view', text=f'{turbine} 左侧')
+                op_l.turbine, op_l.side = turbine, 'LEFT'
+                op_r = row2.operator('wfrl.manual_down_view', text=f'{turbine} 右侧')
+                op_r.turbine, op_r.side = turbine, 'RIGHT'
+            body.operator('wfrl.manual_down_video', text='导出 Down 视频 MP4…', icon='RENDER_ANIMATION')
+            body.operator('wfrl.manual_triple_down_video', text='导出三路 Down 视频 MP4…', icon='CAMERA_STEREO')
+            body.label(text='按当前转速与变桨速度逐帧渲染，附逐帧 JSON')
+            last = scene.get('wfrl_manual_last_video')
+            if last:
+                body.label(text='已导出 ' + os.path.basename(last), icon='CHECKMARK')
+        header, body = layout.panel('wfrl_manual_live_stream', default_closed=False)
+        header.label(text='现场视频')
+        if body:
+            wm = context.window_manager
+            body.prop(wm, 'wfrl_live_url', text='')
+            body.prop(wm, 'wfrl_live_size')
+            turbine = scene.wfrl_manual_target if scene.wfrl_manual_target != 'ALL' else 'T1'
+            row = body.row(align=True)
+            row.operator('wfrl.live_stream_start', text=f'分屏播放 · 左 {turbine} Down 仿真',
+                         icon='SEQ_PREVIEW').turbine = turbine
+            row.operator('wfrl.live_stream_stop', text='', icon='X')
+            for icon, text in live_stream_view.status():
+                body.label(text=text, icon=icon)
         header, body = layout.panel('wfrl_manual_pose_files', default_closed=False)
         header.label(text='姿态文件')
         if body:

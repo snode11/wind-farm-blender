@@ -36,9 +36,10 @@ print([m.__file__ for n, m in sys.modules.items() if n.endswith('wfrl_blender')]
 | 目录或模块 | 职责 |
 | --- | --- |
 | `blender_frontend/wfrl_blender/` | Blender 扩展及随包资源 |
-| `manual_control.py`、`manual_operators.py`、`manual_rna.py` | 手动状态、操作器及属性注册 |
-| `panels/manual_control.py` | 风机控制与 WFRL 手动页共用的基本面板 |
-| `manual_down.py`、`manual_video.py` | Down 与独立视频研究接口 |
+| `manual_control.py`、`manual_scene.py`、`manual_scene_links.py`、`manual_motion.py`、`manual_pose.py` | 手动状态、操作器、属性注册、独立场景及其关联、运动与姿态文件 |
+| `panels/manual_control.py` | 风机控制与 WFRL 手动页共用的面板 |
+| `manual_down.py`、`manual_dynamics.py` | 手动 Down 相机、叶片外形、示意性结构运动与 Down MP4／JSON 导出 |
+| `live_stream.py`、`live_stream_view.py` | 现场视频拉流与分屏显示 |
 | `farm_flex.py` | 柔性数据包读取、身份验证与场景运行时 |
 | `wfrl/lidar/` | 规范雷达计算、数据包与读取器源码 |
 | `scripts/blender/` | 构建、检查及研究脚本 |
@@ -49,7 +50,7 @@ FAST.Farm 结果须满足[前端实现与数据合同](../../blender_frontend/RE
 
 ## 风机控制与研究边界
 
-基本风机控制面板、按钮和自动顺桨行为按[手动控制说明](../blender/风机手动控制.md)维护。该栏目不绘制 Down、冻结试验、视频或显示精度控件；研究入口见[手动场景研究接口](../blender/手动场景研究接口.md)。
+风机控制面板的参数、自动顺桨与变桨速度、Down 相机与视频导出、现场视频分屏及姿态文件按[手动控制说明](../blender/风机手动控制.md)维护。手动运动为刚性示意，叶片摆动与塔架运动是示意信号，不生成功率、载荷或测量结果。
 
 ## 验证
 

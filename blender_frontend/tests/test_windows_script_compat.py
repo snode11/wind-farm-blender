@@ -310,29 +310,6 @@ def run_utf8(command, **kwargs):
     return subprocess.run(command, **kwargs)
 
 
-def test_down_ffprobe_and_ffmpeg_decode_utf8_with_replacement(frontend_module, stub_module, tmp_path, monkeypatch):
-    stub_module('bpy_extras.io_utils', ExportHelper=type('ExportHelper', (), {}))
-    down = frontend_module('wfrl_blender.manual_down')
-    metadata = {'streams': [{'codec_name': 'h264', 'width': 64, 'height': 36, 'avg_frame_rate': '25/1'}],
-                'frames': [{'best_effort_timestamp_time': '0.0'}]}
-    outputs = {
-        'ffprobe': byte_output(json.dumps(metadata).encode('utf-8'), stderr=BAD_DIAGNOSTIC),
-        'ffmpeg': byte_output(stderr=BAD_DIAGNOSTIC),
-    }
-    calls = []
-
-    def run(command, **kwargs):
-        completed = run_utf8(outputs[command[0]], **kwargs)
-        assert completed.stderr.strip() == DECODED_DIAGNOSTIC
-        calls.append(command[0])
-        return completed
-
-    monkeypatch.setattr(down, 'subprocess', SimpleNamespace(run=run))
-    result = down._verify_video(tmp_path / '视频.mp4', 1, 25, (64, 36), 'ffprobe', 'ffmpeg')
-    assert result == {'frame_count': 1, 'fps': 25, 'resolution': [64, 36], 'full_decode': True}
-    assert calls == ['ffprobe', 'ffmpeg']
-
-
 def test_launcher_python_probes_decode_utf8_with_replacement(tmp_path, monkeypatch):
     scene = tmp_path / '场景.yaml'
     scene.write_text('backend: floris\n', encoding='utf-8')

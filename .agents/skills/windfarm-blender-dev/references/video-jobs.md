@@ -1,12 +1,13 @@
 # 视频与后台渲染
 
-用于普通 PNG 后台动画、Down 便捷视频、T1 冻结试验视频及已有 MP4 导出／RTSP 推流。模块路径以 `blender_frontend/wfrl_blender/` 为基准，“仓库”路径从 Git 根目录解析。
+用于普通 PNG 后台动画、手动场景 Down 单路／三路视频、现场视频分屏及已有 MP4 导出／RTSP 推流。模块路径以 `blender_frontend/wfrl_blender/` 为基准，“仓库”路径从 Git 根目录解析。
 
 ## 模块与合同入口
 
 | 功能 | 主要模块／仓库入口 | 专题 |
 | --- | --- | --- |
-| Down 视频与后台作业 | `manual_down.py`、`manual_video*.py`；仓库 `scripts/blender/manage_manual_video.py`、`wfrl/camera_video/` | [视频操作与依赖](../../../../docs/blender/手动场景研究接口.md#导出变桨视频) |
+| 手动 Down 视频 | `manual_down.py`、`manual_dynamics.py` | [视频操作与依赖](../../../../docs/blender/风机手动控制.md#down-相机与视频导出) |
+| 现场视频分屏 | `live_stream.py`、`live_stream_view.py` | [现场视频分屏](../../../../docs/blender/风机手动控制.md#现场视频分屏) |
 | 普通 PNG 后台动画 | `animation_render.py`、`animation_render_ui.py`、`animation_render_worker.py` | [实现与边界](../../../../blender_frontend/README.md#52-统一侧栏与固定时间轴)、[验证入口](verification.md) |
 | 已有 MP4 导出与 RTSP | `video_output.py`、`panels/video_output.py` | [操作说明](../../../../前端readme.md#视频输出) |
 
@@ -17,17 +18,16 @@
 - worker写 `RENDERED` 表示帧已写完、`FAILING` 表示失败已记录；两者均非终态。控制端等进程退出后才确认COMPLETE／FAILED／CANCELLED，失败原因不被迟到取消覆盖。
 - 源场景重载、撤销／重做及卸载取消自有任务；恢复时核对保存目录的job身份、计数和状态。残留RUNNING／FAILING／RENDERED对应进程仍存活或身份未知时为RECOVERING，保留占用，只读查询、不按磁盘PID发信号；退出后缺可信终态则FAILED，不凭RENDERED补认成功，不续渲染。
 
-## Down 与冻结试验视频
+## 手动 Down 视频
 
-- Down 便捷视频只驱动所选机组，源场景暂停，独立副本逐帧渲染；冻结试验视频使用最近确认配置，按 `t=k/fps` 生成整数帧，不依赖预览。 工作区的可见窗口便捷导出在后台线程验证和提交媒体，渲染返回与 MP4／JSON 最终结果分别确认。
-- 均用独立场景，其余机组保持快照，后台副本停用墙钟；严格媒体验证和 MP4／JSON 拒绝覆盖提交不可省略，短片不替代完整视频或监管验证。
-- 冻结试验监管需完整工作区、FFmpeg／FFprobe 及支持 `flock / waitid(WNOWAIT)` 的 macOS／Linux Python 3.11+（`WFRL_VIDEO_PYTHON`）。
-- 扩展 ZIP 不含配套脚本及 `wfrl.camera_video`，安装入口通过偏好 `project_dir` 选工作区。
-- 注册容忍受限数据访问，场景可用后恢复；按身份、凭据及锁恢复，复制场景不认领原作业，取消不信任磁盘 PID。
-- `FINALIZING` 是进程结束后的收尾／交付确认，取消为CANCELLING。正常监管路径先收尾进程组、控制端点和服务线程，释放监管／输出租约，再写最终状态；status.lock串行化下一attempt与终态发布，查询等待交接。`start()` 启动监管子进程失败时同样先释放监管／输出租约，再写final失败。
-- 面板只对监管确认活动的attempt固定取消目标：`cancel(job, attempt_id)` 的端点读取、请求、响应核对、异常回查和等待都绑定该身份；目标已被新重试替换时不取消新重试，返回带 `cancel_target_replaced` 的当前记录。旧终态、查询中或LOST缓存不固定身份，由作业层取首次查询到的当前attempt。
-- 仅 `final=true` 的 `COMPLETE / FAILED / CANCELLED` 是最终结果；`LOST` 不等于失败或取消，`--detach` 只确认启动。非 POSIX 平台查询时不检查本地租约，不可达且无匹配终态的作业报告 `LOST`、`active=False`。
-- `retry` 只从匹配完整母版重做编码、验证与发布，不恢复未渲染帧；保留目标预检及失败母版，只清理自有暂存，不改写成功状态。
+- `wfrl.manual_down_video` 与 `wfrl.manual_triple_down_video` 在手动场景本身渲染：导出前暂停全部风机，按导出开始时的叶轮角度、RPM、起点／设定桨距与变桨速度生成逐帧计划，`apply_frame()` 直接写入转子与叶片变换，不改动机组属性；完成或失败后 `_finish()` 恢复场景、视图、实际桨距与输出设置并删除临时目录。
+- 视口方式（`VIEWPORT_MATERIAL`／`VIEWPORT_SOLID`）需要窗口中的 3D 视图并同步阻塞；找到 FFmpeg 时离屏绘制并经管道交给 libx264，否则走 Blender 内置编码。`SCENE`（EEVEE）与 `WORKBENCH` 使用原生渲染，窗口中可取消，后台同步渲染。三路导出只支持视口方式且要求 FFmpeg。
+- MP4 先写入临时目录，再以 `shutil.move` 移到目标路径并写出同名逐帧 JSON（三路导出只在中心路旁写 JSON）；不做排他提交或成片解码校验。
+- 导出期间场景标记 `wfrl_manual_exporting`，`tick()` 与编号监听跳过该场景；视口结构运动与相机抖动暂停，导出按自身时钟重新生成。
+
+## 现场视频分屏
+
+- `live_stream.py` 不导入 Blender，以 FFmpeg 子进程把流解码为固定尺寸 RGBA，只保留最新一帧，断流每 3 s 重连；`live_stream_view.py` 拆分当前 3D 视图并以绘制回调显示帧。每个进程一个会话，停止、关闭右侧区域、加载文件或停用扩展时结束 FFmpeg 并释放纹理。启动需要 3D 视图，后台模式下不执行分屏。
 
 ## 已有 MP4 与 RTSP
 
@@ -43,24 +43,12 @@
 
 | 范围 | 宿主入口 | 原生入口 |
 | --- | --- | --- |
-| 视频作业与媒体 | `test_manual_video_render.py`、`test_manual_video_job.py`；仓库 `tests/test_camera_video_media_recovery.py`、`tests/test_camera_video_publication.py` | 见下文视频验证边界；便捷视频取消另查可见渲染。 |
+| 手动 Down 视频与现场视频 | `test_manual_motion.py`、`test_live_stream.py` | 后台 `manual_down_video_regression.py`、`manual_dynamics_regression.py`、`triple_down_rig_regression.py`、`live_stream_register.py`；窗口 `manual_down_video_window.py`（手动运行）。分屏画面需在交互窗口中检查。 |
 | 普通后台动画渲染 | `test_animation_render.py` | 后台 `animation_render_regression.py` 验证 32 位 EXR 来源到 16 位 PNG、短动画、取消、源设置保留和 MAPPO 运动；不代替完整片段或 FPS 验收。 |
 | 已有 MP4 与 RTSP | `test_video_output.py` | 安装版 `video_output_regression.py` 核对字节一致、真实 RTSP 收流与解码、停止及文件加载。需要 `WFRL_TEST_OUTPUT`、`WFRL_VIDEO_SOURCE`、`WFRL_FFMPEG`、`WFRL_MEDIAMTX`。 |
 
 ## 视频验证边界
 
-`test_manual_video_job.py` 的本地运行解释器要求Python≥3.13并安装psutil和pytest，另须具备POSIX监管接口；具体命令见[手动视频监管测试](../../../../docs/development/自动检查.md#手动视频监管测试)。这与视频工具本身的Python最低版本分开。
-
-源码视频脚本使用独立后台工厂启动和新目录；真实媒体需 FFmpeg／FFprobe，监管依赖见上文“Down 与冻结试验视频”。
-
-| 入口 | 覆盖与限制 |
-| --- | --- |
-| 宿主视频测试 | 模拟编解码器与占位文件核对监管、重试及发布事务，不证明真实 Blender、媒体或跨文件系统通过。 |
-| `manual_video_render_regression.py` | 短片逐帧姿态、Down、未选叶片／T2/T3 保持及真实编解码；`WFRL_TEST_WIDTH / WFRL_TEST_HEIGHT / WFRL_TEST_SAMPLES` 调诊断成本。 |
-| `manual_video_launch_regression.py` | 操作器、独立监管／渲染、冻结配置、源场景、成片及取消；`WFRL_VIDEO_FULL_SAMPLE=1` 才生成完整样片。 |
-| `manual_video_lifecycle_regression.py` | 撤销、复制隔离、保存重开、内存清空、注册恢复、取消及失败；仅同一源 Blender 进程内重开。 |
-| `manual_video_installed_regression.py` | 安装 profile 下设 `WFRL_VIDEO_RECOVERY_MODE=create / recover`，两个新进程复用同一 `WFRL_TEST_OUTPUT`；指定 `WFRL_VIDEO_PYTHON`、安装模块与期望目录。非媒体子进程仅验证项目定位、恢复和取消，不渲染或编解码。 |
-
-短片、完整样片、交付视频与源 Blender 新进程恢复分别验收；预览不覆盖导出文件选择器，姿态数量或 `--detach` 不证明成片。核对最终状态、输出及进程退出。
+手动 Down 视频脚本使用新的 `WFRL_TEST_OUTPUT` 目录，支持 `WFRL_ADDON_MODULE` 与 `WFRL_EXPECTED_ADDON_ROOT`。后台脚本覆盖 Workbench／后台路径与逐帧 JSON，视口离屏快速路径、三路同步写出和现场视频分屏需在可见窗口中检查；短片不替代长时导出耗时或显卡降频下的性能判定。
 
 通用运行来源、脚本前置条件和安装模式见[验证入口](verification.md)。

@@ -33,9 +33,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定
 
 宿主夹具的平台差异集中在 `blender_frontend/tests/_platform.py`：venv 解释器路径、Python 工具脚本及符号链接创建（无法创建时跳过并附原因）。Windows 分支在 macOS 上以模拟测试覆盖，Windows 实机结果以 `windows-host` 任务为准，见[自动检查](../../../../docs/development/自动检查.md#windows-前端宿主检查)。
 
-`test_manual_down.py`、`test_extension_output.py`、`test_extension_package.py` 中依赖 POSIX 硬链接发布的用例在 Windows 显式跳过，不作为发布支持证据。根测试可从仓库执行 `python -m pytest tests -q -p no:cacheprovider`；激光采样文件为 `tests/lidar/test_lidar_sampling.py`，与 X100 的 `tests/radar_x100/test_sampling.py` 不冲突。依赖、PYTHONPATH和平台跳过按[根目录测试入口](../../../../docs/development/自动检查.md#根目录测试入口)处理；纯文档任务仍只做静态检查。
-
-手动视频监管用例（`blender_frontend/tests/test_manual_video_job.py`）在模块级导入 `psutil`，缺少该依赖会在测试收集时失败，平台 skip 不能代替依赖安装。本地运行所用宿主解释器须同时满足 **Python ≥3.13 且已安装 psutil 和 pytest**，并提供 `os.waitid`、`os.WNOWAIT` 和 `os.P_PID`；依赖齐全但缺少 POSIX 监管接口时，相关用例跳过，选择宿主解释器时分别报告。所选解释器与依赖预检命令见[手动视频监管测试](../../../../docs/development/自动检查.md#手动视频监管测试)。这些用例在临时目录启动子进程，`PYTHONPATH` 须写成绝对路径，例如 `PYTHONPATH="$PWD/blender_frontend:$PWD"`。
+`test_extension_output.py`、`test_extension_package.py` 中依赖 POSIX 硬链接发布的用例在 Windows 显式跳过，不作为发布支持证据。根测试可从仓库执行 `python -m pytest tests -q -p no:cacheprovider`；激光采样文件为 `tests/lidar/test_lidar_sampling.py`，与 X100 的 `tests/radar_x100/test_sampling.py` 不冲突。依赖、PYTHONPATH和平台跳过按[根目录测试入口](../../../../docs/development/自动检查.md#根目录测试入口)处理；纯文档任务仍只做静态检查。
 
 窗口脚本不加 `--background`；安装检查保留所需 profile，不照搬工厂启动。使用独立进程、配置、场景副本和新输出目录，保护用户脏场景及规范资产。
 
@@ -49,7 +47,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定
 | `farm_down_mount_regression.py`、`t1_down_mount_regression.py`、`nacelle_camera_regression.py` | `WFRL_TEST_RUNTIME` + `WFRL_EXPECTED_ADDON_ROOT`。 |
 | `blade_model_regression.py`、`blade_model_window.py` | `WFRL_TEST_ADDON_MODULE` + `WFRL_EXPECTED_ADDON_DIR`。 |
 | 相机启用、布局、缺陷编辑器及缺陷窗口脚本 | `WFRL_ADDON_MODULE`，无期望目录断言，另核对来源；布局的 `WFRL_ADDON_ROOT` 仅控制搜索路径。 |
-| `manual_down_copy_regression.py`、三份源码视频脚本、`farm_flex_workload_regression.py`、`custom_camera_edit_binding_regression.py`、`nrel_defect_ui_state_regression.py` | 仅源码；安装模块变量不能改变验证层。 |
+| `farm_flex_workload_regression.py`、`custom_camera_edit_binding_regression.py`、`nrel_defect_ui_state_regression.py` | 仅源码；安装模块变量不能改变验证层。 |
 | `live_contracts_regression.py` | 仅源码，直接导入工作区扩展；使用独立工厂启动后台进程，安装模块变量不能改变验证层。未纳入 `run_regressions.py`，按上文 `--python` 入口直接运行。 |
 | `radar_x100_regression.py`、`radar_x100_edges.py`、`radar_x100_history_regression.py`、`radar_x100_binding_replay.py`、`radar_x100_window.py` | `WFRL_ADDON_MODULE` + `WFRL_EXPECTED_ADDON_ROOT`；安装时另核对实际加载的 `radar_x100.core` 及规范数据模块路径。`radar_x100_regression.py` 的安装模式断言未导入工作区 `wfrl.radar_x100`，并核对 `radar_core_sha256`。 |
 | `radar_x100_mount_presets.py` | 支持 `WFRL_ADDON_MODULE` + `WFRL_EXPECTED_ADDON_ROOT`；后台核对单台雷达的双安装位、相同源时刻、重复选择、采样失败、记录／相机互斥及保存重开。 |

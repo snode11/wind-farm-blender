@@ -372,9 +372,10 @@ def _register_resources(acquire):
     acquire(defect_editor.unregister_properties, lambda: defect_editor.register_properties())
     from . import frontend_diagnostics
     acquire(frontend_diagnostics.unregister, lambda: frontend_diagnostics.register())
-    from . import manual_control, manual_down
+    from . import manual_control, manual_down, live_stream_view
     acquire(manual_control.unregister, lambda: manual_control.register())
     acquire(manual_down.unregister, lambda: manual_down.register())
+    acquire(live_stream_view.unregister, lambda: live_stream_view.register())
     from .radar_x100 import runtime as x100_runtime
     acquire(x100_runtime.unregister, lambda: x100_runtime.register())
 

@@ -9,7 +9,7 @@
 | 对象 | 身份与范围 |
 | --- | --- |
 | 公开安装包 | [NREL 0.3.42.8](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.42.8)；载荷见[交付身份](../publication/blender-0.3.42.8.json)；WFRL 主入口、录制安全收尾、视口隔离、可取消后台 PNG 渲染、叶片外形选择、T1/T2/T3 Down 及独立风机手动控制、姿态预设、相对微调、三机概览、姿态 JSON、完整风机几何／同源纹理切换、三机柔性回放、默认三相机复位、六类合成缺陷，以及相机清理、稳定刷新、采集与播放保护。 |
-| 本地工作区 | manifest **0.3.42+8**，按实际源码识别；X100面积材料采样、有限安装搜索和叶片关联／连续估计由 0.3.42.8 扩展及配套源码提供，日常安装为同一 0.3.42.8 公开载荷；机舱分析、同帧侧壁距离和零载荷参考包含于公开扩展。另有WFRL主入口、场景／占用／后端状态、手动保护反馈、相机编辑预览与按需重绘、同刻几何及曲线缓存、录制安全收尾、视口隔离、后台PNG、叶根装配、固定显示精度和环境几何预算。公开附件与日常安装分别核对。 |
+| 本地工作区 | manifest **0.3.42+8**，按实际源码识别；X100面积材料采样、有限安装搜索和叶片关联／连续估计由 0.3.42.8 扩展及配套源码提供，日常安装为同一 0.3.42.8 公开载荷；机舱分析、同帧侧壁距离和零载荷参考包含于公开扩展。另有WFRL主入口、场景／占用／后端状态、相机编辑预览与按需重绘、同刻几何及曲线缓存、录制安全收尾、视口隔离、后台PNG、叶根装配和环境几何预算；手动场景含限速变桨、Down 单路／三路视频导出、示意性叶片摆动与塔架运动及现场视频分屏。公开附件与日常安装分别核对。 |
 | 项目源码 | [`main`](https://github.com/snode11/wind-farm-blender/tree/main)；包含当前实现、测试与研究工具。公开扩展的匹配源码使用 `v0.3.42.8` 标签；当前分支与公开 ZIP、日常安装载荷分别识别。 |
 | 本地日常安装 | `bl_ext.user_default.wfrl_blender`，0.3.42.8 公开 ZIP 载荷（见安装记录）；文件核对、新进程模块来源、持久启用及配置保留见[身份摘要](../README.md#当前身份与安装来源)和[安装核对](../publication/daily-installation.json)。 |
 | GW184 | [0.4.0 独立运行包](../docs/blender/GW184三相机与缺陷编辑器.md)；184 m 尺寸合成刚性模型、固定三相机和六类缺陷。模型与配置不能直接替代 NREL。 |
@@ -74,13 +74,11 @@
 
 ## 当前主要结构
 
-- `panels/home.py` 与 `home_state.py`：WFRL 主入口、只读任务摘要、播放器归属、当前结果／时刻、已应用相机与草稿／观察／采集状态，以及独立后端状态；各模块 `status_for(scene)` 与 `can_start(action, scene)` 共享前台资源冲突判断，独立文件复制不使用全局 busy 锁。主页提供 X100／研究任务跳转和手动 Down／冻结试验视频入口；复用回放、相机、手动和导出面板的现有操作器，不管理运动时钟。导航保存在 WindowManager，进入／返回独立手动场景时保留所选页面；卸载移除导航属性。
-- `manual_scene.py`、`manual_control.py`、`manual_operators.py`、`manual_rna.py`、`manual_motion.py`、`manual_pose.py` 与 `panels/manual_control.py`：独立刚性场景、墙钟积分、姿态预设、按机组当前值微调、三机概览及严格姿态 JSON。`manual_control.py` 管理场景状态、运动时钟、姿态同步与恢复回调；`manual_operators.py` 提供 Blender 命令及姿态文件操作；`manual_rna.py` 定义属性组并管理属性、操作器、定时器与处理器的注册和释放，入口为 `manual_control.register()`／`unregister()`。`manual_pose.py` 只使用标准库，定义 `wfrl.manual-pose.v1` 和角度边界；操作器先校验所选机组再写入参数、对象与时钟，导入后暂停。文件保存不暂停运行，运动相位以同一墙钟时刻采样；[操作说明](../docs/blender/风机手动控制.md)。
-- `manual_down.py`：三机独立 Down、按稳定归属复用的叶片编号和便捷 MP4／JSON 导出。独立场景副本只驱动所选机组，并清除副本时间线标记的相机绑定，保留源场景标记。每帧及提交前核对实际相机、数据归属与声明光学参数；任一帧不匹配或未覆盖全部输出帧均保留 FAILED，不能发布 MP4／JSON。非阻塞原生渲染中的 `render_post` 相机校验失败会保留首个错误，等待渲染完成或用户取消后报告 FAILED、释放副本并保留临时文件；不会自动提前取消，剩余帧仍可能消耗渲染时间。该回调没有可依赖的安全提前取消接口，不通过关闭渲染窗口或模拟按键中断作业。真实帧数、尺寸、帧率、时间戳和完整解码通过后拒绝覆盖地提交。视口渲染依赖可见窗口，最终渲染使用原生渲染作业；工作区的可见窗口导出在渲染后异步验证与提交媒体，后台同步调用返回最终结果。此入口不接管冻结试验的后台监管和母版重试。
-- `manual_geometry.py`：刚性叶片固定总览／标准／近景采样、配套叶根收口和同场景静态网格复用；构造归属、几何指纹、材质槽和消费者共同限制复用，绑定失败整体回滚。塔筒及柔性叶片不参与静态去重；用户编辑、链接、fake-user、shape-key 和跨场景资源受保护。Down 入口和视频副本使用近景，普通显示档位不影响回放与测量。
-- `blade_root_display.py`：回放外形对应的叶根展示附件事务。叶片切换失败时恢复接头，保留原材质及用户数据；不改写运动、载荷或测量资源。
-- `manual_scene_links.py`：原场景以稳定的手动归属标识查找其独立场景，手动场景以 Scene 指针保存返回目标，避免双向 Scene ID 引用形成依赖环。名称改变不影响查找；复制的原场景不能认领另一原场景的手动模型，归属不明确时不返回目标。加载和撤销恢复时规范存储关联；缺少标识的保存文件仅通过唯一返回关系恢复关联，显式解除的关联保持断开。
-- `manual_video.py`、`manual_video_job.py`、`manual_video_render.py` 与仓库 `scripts/blender/render_manual_video.py`：保存已确认试验的场景副本，独立监管后台渲染 T1 Down，复用 `wfrl.camera_video.media` 编码与检查。`scripts/blender/manage_manual_video.py` 提供持久化作业的查询、等待、取消和完整母版重试。面板提供输出路径、保持时长、进度、取消和打开视频；安装入口通过偏好的 `project_dir` 定位完整工作区；注册阶段延迟到可访问场景后恢复作业。渲染后台使用该工作区源码，监管进程显式继承该项目的模块搜索目录。依赖支持 `flock` 和 `waitid(WNOWAIT)` 的独立 Python 3.11+（macOS 上 Python 3.13 起提供 `waitid`）及 FFmpeg／FFprobe。
+- `panels/home.py` 与 `home_state.py`：WFRL 主入口、只读任务摘要、播放器归属、当前结果／时刻、已应用相机与草稿／观察／采集状态，以及独立后端状态；各模块 `status_for(scene)` 与 `can_start(action, scene)` 共享前台资源冲突判断，独立文件复制不使用全局 busy 锁。主页提供 X100／研究任务跳转和手动 Down／三路 Down 视频入口；复用回放、相机、手动和导出面板的现有操作器，不管理运动时钟。导航保存在 WindowManager，进入／返回独立手动场景时保留所选页面；卸载移除导航属性。
+- `manual_scene.py`、`manual_control.py`、`manual_motion.py`、`manual_pose.py`、`manual_down.py` 与 `panels/manual_control.py`：独立刚性场景、墙钟积分、限速变桨、姿态预设、按机组当前值微调、三机概览、严格姿态 JSON，以及手动场景的 Down 相机、叶片外形与 Down MP4 导出；`manual_dynamics.py` 提供视口实时与导出共用的示意性叶片挥舞弯曲与塔架运动。`manual_pose.py` 只使用标准库，定义 `wfrl.manual-pose.v1` 和角度边界；Blender 操作器先校验所选机组再写入参数、对象与时钟，导入后暂停。文件保存不暂停运行，运动相位以同一墙钟时刻采样；[操作说明](../docs/blender/风机手动控制.md)。
+- `manual_scene_links.py`：`Scene.wfrl_manual_scene` 是由 `bind()`／`resolve()` 实现的 Python 属性。原场景以稳定的手动归属标识（`wfrl_manual_scene_owner`）查找其独立场景，手动场景以 Scene 指针 `wfrl_manual_return_scene` 保存返回目标，避免双向 Scene ID 引用形成依赖环。名称改变不影响查找；候选手动场景须返回到该原场景，复制的原场景不能认领另一原场景的手动模型，归属不明确时不返回目标。`restore()` 在扩展 `load_post` 与手动控制的加载／撤销／重做恢复回调中规范存储关联；缺少标识的保存文件仅通过唯一返回关系恢复关联，显式解除的关联保持断开。
+- `live_stream.py` 与 `live_stream_view.py`：现场视频分屏。`live_stream.py` 校验流地址并以 FFmpeg 子进程解码为固定尺寸 RGBA 帧，只保留最新一帧，断流后按间隔重连；`live_stream_view.py` 把调用的 3D 视图拆成左侧手动场景 Down 相机与右侧图像编辑器，后者以绘制回调显示最新帧，标题栏提供关闭按钮。每个 Blender 进程一个会话；停止、关闭右侧区域、加载文件或停用扩展时结束 FFmpeg 并释放纹理。操作器为 `wfrl.live_stream_start`／`wfrl.live_stream_stop`。
+- `blade_root_display.py`：回放外形对应的叶根展示附件事务，`mesh_fingerprint()` 为叶根附件计算网格几何指纹。叶片切换失败时恢复接头，保留原材质及用户数据；不改写运动、载荷或测量资源。
 - `panels/farm_replay.py`：共享播放、单步、复位及功能页；普通三机回放提供进度定位，统一重建对照隐藏进度滑块。View 页组织观察相机，切视角保留回放时刻。
 - `split_reconstruction.py`、`split_reconstruction_timing.py`、`split_reconstruction_ui.py`：保存分屏生命周期、完整风机显示、独立视口、固定采样映射、统一入口、模式切换及左下角状态说明；底层样本步进工具保留，统一侧栏使用单帧步进。规范资源为 `assets/examples/mappo_reconstruction_split.blend`。
 - `split_mappo_texture.py` 与 `assets/blade_recon_mappo_tex/`：同源纹理同步回放，使用原两相机实验的 601 个保存状态与动态标定生成固定 RGBA 图集，共用 MAPPO 的 60 Hz 时间轴。`split_texture_settings.py` 保存同源纹理的显示选择并在失败切换时回滚状态。来源、模型等价和安装边界见[发布状态与验证范围](../docs/blender/发布状态与验证范围.md)。
@@ -95,35 +93,28 @@
 - `cameras.py`：观察相机与云台预设；Down 在各机舱底壳偏后缘侧求交定位，光心沿局部 −Z 外伸 0.2151 m，朝叶轮侧偏离正下 7.5°；采用独立 8 mm、16:9 垂直 60°光学预设，保留归属校验、失败清理与完整画框。[Down 参数与边界](../docs/blender/T1Down机舱下视.md)。
 - `nacelle_camera.py`：单路机舱相机的机械转轴安装基准、8 mm 镜头及独立 59°/40°视场；`nacelle_visibility.py`：三角面与视锥裁剪、展向覆盖及有限首命中采样。[参数与当前模型限制](../docs/blender/NREL机舱相机.md)。
 
-手动场景以 `wfrl_scene_kind=manual` 标识，使用独立命名空间的对象、网格、材质、World 与图片，复用 NREL 参考几何构造，不加载 demo 的柔性结果驱动。每台风机通过场景内对象指针绑定偏航、转子及叶片；控制前检查归属、装配层级和跨场景共享。RPM 按单调墙钟积分，改变速度保留相位；“全部”只传播正在编辑的字段，参数差异以“多值”提示，集体桨距统一覆盖三片叶片。批量设置分别变桨模式时，`_batch_update` 跳过已处于目标模式的机组；只在从关闭切换为开启时，以该机当前集体桨距初始化三片叶片。暂停时可设置叶轮角度；全部零 RPM 时禁用运行。参数和姿态随 `.blend` 保存，加载、撤销、重做、退出及失效绑定均暂停运动。首次创建与损坏重建分别形成撤销记录，重建保留返回视图。材质预览使用独立天空和轻量地形，退出恢复源场景预览设置。面板进入／返回保留源场景及播放位置，活动后端连接阻止进入；手动运动不写入后端或回放时钟，也不产生物理测量值。手动场景与三相机、缺陷编辑器的串联暂缓，不属于当前交付范围。
+手动场景以 `wfrl_scene_kind=manual` 标识，使用独立命名空间的对象、网格、材质、World 与图片，复用 NREL 参考几何构造，不加载 demo 的柔性结果驱动。每台风机通过场景内对象指针绑定偏航、转子及叶片；控制前检查归属、装配层级和跨场景共享。RPM 按单调墙钟积分，改变速度保留相位；“全部”只传播正在编辑的字段，参数差异以“多值”提示，集体桨距统一覆盖三片叶片。批量设置分别变桨模式时，`_batch_update` 跳过已处于目标模式的机组；只在从关闭切换为开启时，以该机当前集体桨距初始化三片叶片。暂停时可设置叶轮角度；全部零 RPM 时禁用运行。静止风机默认顺桨 90°；运行把开始转动的风机设为 0° 集体桨距，暂停和停转设回 90°，均按场景变桨速度（默认 5 °/s）推进，复位立即到位。参数和姿态随 `.blend` 保存，加载、撤销、重做、退出及失效绑定均暂停运动。首次创建与损坏重建分别形成撤销记录，重建保留返回视图。材质预览使用独立天空和轻量地形，退出恢复源场景预览设置。面板进入／返回保留源场景及播放位置，活动后端连接阻止进入；手动运动不写入后端或回放时钟，也不产生物理测量值。手动场景与三相机、缺陷编辑器的串联暂缓，不属于当前交付范围。
 
-手动保护错误保存在场景的 `wfrl_manual_error`、`wfrl_manual_error_turbine` 和 `wfrl_manual_recovery`；异常暂停本场景全部机组并保留最近显示的姿态、实际桨距和试验时间。普通参数编辑不能解除保护。`recheck_feedback()` 检查绑定和受控旋转，通过后清除错误且保持暂停；`wfrl_manual_status` 分别表示主动暂停、隐藏场景暂停、载入／撤销恢复及检查通过，不代替旋转与变桨的运行标志。
+限速变桨：`pitch_b{i}_deg`／`pitch_deg` 是设定桨距，每台机组另存 `pitch_actual_b{i}_deg`（叶片对象实际使用）与 `pitch_start_b{i}_deg`（本次变桨起点）。场景属性 `wfrl_manual_pitch_rate_deg_s` 为 0 时设定即到位；大于 0 时修改桨距字段只记录起点，`tick()` 按墙钟以 `manual_motion.pitch_at()` 推进实际桨距并在到位后停止唤醒。旧文件缺少实际桨距时（`pitch_state_ready` 为假）以设定值初始化。姿态预设、复位与姿态文件载入立即到位，微调遵循变桨速度；变桨速度不属于 `wfrl.manual-pose.v1`。
 
-工作区源码的手动场景默认使用 `rootkink` 叶根拐点改型，可选 NREL；`manual_scene._ensure_blade_model()` 以独立网格保留材质、UV、装配与参数，不改 demo 网格。普通手动变桨使用独立 `PitchClock`，目标、实际桨距与暂停状态分开；速度 0 立即到位，原生冲突和失效绑定停止在最近已显示的姿态。`manual_motion.PitchTrial.pose_at(t)` 从冻结起点计算累计方位及三片桨距；`interpolation` 为 `SMOOTH` 时使用起止速度为零的三次平滑插值，为 `LINEAR` 时按各片桨距差除以共同变桨时长匀速过渡，到达目标后保持。未指定该字段的配置按 `SMOOTH` 解析。`TrialClock` 是 T1 试验的唯一时钟，试验期间普通 `_CLOCKS` 不写入该 T1。`wfrl_manual_trial` 分开保存待确认输入、JSON 冻结配置、控制启用状态与已过时间；结束试验保留最近确认的冻结配置，下一次确认才替换。目标填写不应用，整体校验后按当前实际姿态确认。暂停／继续作用于旋转和变桨，复位恢复完整起点，结束试验后才能设置另一组或更改 T1 姿态与 RPM。模型身份、起点、目标、时长、变桨方式和试验时间随 `.blend` 保存，重开和撤销重做后暂停；姿态 JSON 仍只保存同刻姿态。
+`manual_down.py` 为手动场景每台风机创建 `<owner>.Turbine.<机组>.DownCamera`（`wfrl_down_camera=True`，父级为该机 YawRoot），由 `cameras.down_gimbal()` 按与回放 Down 相同的挂点射线、偏移和光学预设安装，俯仰取相机自定义属性 `wfrl_down_pitch_deg`（`manual_down_pitch()` 按叶片外形取 `MANUAL_DOWN_PITCH_DEG`：rootkink −78°，NREL 与回放相同的 −82.5°；回放 Down 无此属性，仍用 `DOWN_PITCH_DEG`）；`apply_blade_model()` 切换外形后由 `_reaim_down_cameras()` 重新对准中心相机并重算侧视相机；`cameras.is_down_camera()` 统一识别回放与手动场景的 Down 相机。`wfrl_manual_blade_model` 以 `foreach_set` 原位改写三机共享的叶片网格（NREL 与 rootkink 拓扑相同），并重新标记叶尖色带。`wfrl.manual_down_video` 暂停场景，按导出开始时的叶轮角度、RPM、起点／设定桨距与变桨速度生成逐帧计划（`_plan()`／`pose_at()`），由 `apply_frame()` 直接写入转子与叶片变换，不改动机组属性；长度为时长或帧数，分辨率取 `VIDEO_SIZES`，输出 MPEG-4 / H.264 到临时目录后移动到目标路径，并写出同名逐帧 JSON（含 `render_mode`、`encoder`、`gpu`、`blade_labels`）。渲染方式：
 
-工作区源码的冻结试验复位／结束检查点按同一单调时刻采样 T1 试验、其他机组的转子与活动变桨，包括叶轮停止但桨距仍在变化、T1 已暂停而其他机组仍运动的情况。归属校验只查询受控对象在其他 Scene 中的实际成员关系；元数据引用不等于场景共享，实际跨场景共享仍在每次控制检查时拒绝。
+- `VIEWPORT_MATERIAL`／`VIEWPORT_SOLID`：需要窗口中的 3D 视图，`_prepare_view()` 临时切换为本地 Down 相机、对应着色并关闭叠加层，导出期间同步阻塞。`ffmpeg_executable()` 找到 FFmpeg（偏好 `video_ffmpeg`，否则 PATH）时，`_draw_offscreen()` 以 `GPUOffScreen.draw_view3d()` 按 Down 相机矩阵逐帧绘制、读回 RGBA8，经后台线程写入 FFmpeg 标准输入（libx264 veryfast、CRF 18、yuv420p）；否则调用 `render.opengl(animation=True, view_context=True)` 并由 `frame_change_pre` 推进姿态。视口方式使用 Standard 视图变换、单采样、关闭抖动与合成，结束后恢复。
+- `SCENE`（EEVEE，采样数可设）与 `WORKBENCH`：`render.render`；窗口中以 `INVOKE_DEFAULT` 运行并在 `render_complete`／`render_cancel` 中恢复设置，后台同步渲染。
 
-手动 **T1 Down** 向 `cameras.ensure_gimbal()` 显式提供 T1 条目的 `yaw_object`、独立相机名与资源归属，复用 `_down_mount()`、`down_gimbal()` 和无遮罩视口适配。相机继承机舱，不随叶轮旋转或追踪叶片；切换 Down／整机保留试验时钟及状态，真实结构和自遮挡保留。这些手动试验能力包含于公开 0.3.42.8；视频后台仍需配套工作区源码，日常扩展按[安装身份](../publication/daily-installation.json)核对；手动工况的 RTSP 接入及识别算法不在实现范围。
+每帧由 `apply_motion()` 依次执行 `apply_frame()`、`manual_dynamics.apply()`（导出参数 `dynamics=True`，对话框“叶片摆动与塔架运动”，默认取场景属性 `wfrl_manual_structural_motion`）和 `apply_shake()`。相机抖动幅度为 `SHAKE_MAX_DEG`·(min(rpm, `SHAKE_RPM_REF`)/`SHAKE_RPM_REF`)²（0.9°，14 RPM）。`_start_motion()` 先调用 `manual_dynamics.live_detach()` 撤下视口实时弯曲；`manual_dynamics.start()` 为所选风机的三片叶片换用一份临时网格（`.FlapBend`，已应用倒角等原有修改器，原修改器暂时隐藏），并添加 Geometry Nodes 修改器 `WFRL.ManualFlap`（节点组 `WFRL.ManualFlapBend`）：沿叶片局部 z 按 (3s²−s³)/2 的悬臂形状，把顶点向塔筒方向（叶片局部坐标中的水平顺风方向）偏移；同时以塔基为轴倾斜该机 Root，产生塔顶前后位移。偏移量由 `sample()` 按种子生成：三片共同分量、每片独立分量与 1P 风切变分量，乘以 `load_factor(rpm, pitch)`。`min_shake_tilt()` 用 `tip_offset()` 计入弯曲后的叶尖。Blender 只有在窗口重绘时才释放被替换的 GPU 网格缓冲，阻塞的离屏循环在结构运动开启时每 15 帧调用一次 `wm.redraw_timer`，否则内存会随帧数持续增长。`_end_motion()` 移除修改器，恢复共享网格、原修改器显示状态和 Root 姿态，并删除临时网格。逐帧数值写入 JSON 的 `structural_motion`。
 
-手动面板的视频规格为 1920×1080、25 fps、H.264 MP4；变桨时长默认 8 s，目标保持默认 7 s，共 15 s、375 帧。`manual_video_render.frame_count()` 要求总时长对应整数帧。 监管解释器选择同时核对 Python 版本、`flock` 和 `waitid(WNOWAIT)` 接口；不兼容候选不会进入后台作业。每帧以 `PitchTrial.pose_at(k/fps)` 从冻结起点确定累计叶轮角和三片桨距，导出不依赖预览已过时间；后台停用墙钟，只驱动 T1，T2/T3 保持快照姿态。EEVEE 默认 16 个采样，关闭运动模糊，固定完整画幅和色彩设置，不模拟实体曝光。
+视口实时运动由 `manual_control.MOTION_HOOKS` 中的 `manual_dynamics.live_update(scene, now)` 在每次 `tick()` 的叶轮更新之后执行：每台风机的幅度以 2 s 一阶滞后趋向 `load_factor(rpm 或 0, 实际桨距)`，大于 0 时为三台风机共用一份 `.FlapBend` 网格并挂上同一修改器，回落到 0 后恢复。恢复所需的原网格名、原修改器显示状态和 Root 基准矩阵保存在对象自定义属性 `wfrl_flap_restore`／`wfrl_flap_base` 中；场景不再显示时由 `STOP_HOOKS` 中的 `live_stop()` 恢复，`save_pre` 在保存前恢复刚性模型，`load_post`／`undo_post`／`redo_post` 按自定义属性清理残留。`apply_blade_model()` 改写共享网格前同样撤下实时弯曲，下一次 tick 重新生成。叶尖偏移另含 `make_signals()` 按种子生成的每片固定偏差 `bias`（`BLADE_IMBALANCE_M`），使三片叶片经过塔筒时净空不同。
 
-`wfrl.manual-video-job.v2` 记录随机作业身份和监管凭据、场景副本、场景名、冻结试验、输出路径、画幅、帧率、保持时长及编码器路径。`<文件名>_data_<标识>/` 保留 `master_frames/`、`frames.csv`、`camera.json`、`experiment.json`、`scene.blend`、作业／状态／监管端点 JSON、运行日志和检查结果。`frames.csv` 使用连续 `frame_id`／`video_pts` 和 `time_s=k/fps`，另存同刻 RPM、累计方位、三片桨距及变桨／保持标记。固定的单叶片 20° 工况保持 rootkink、T1 Down、9 RPM、4 s 匀速变桨和 176 s 保持，共 4500 帧；B2/B3 全程 0°。
+视口相机抖动由 `manual_down.live_shake_update()` 在 `MOTION_HOOKS` 中紧随 `live_update` 执行（场景属性 `wfrl_manual_camera_shake`）：幅度以同一 2 s 滞后趋向 `shake_amplitude(rpm)`，形状取 `_shake_shape()`，俯仰同样经 `min_shake_tilt()` 限制，作用于该机全部 Down／侧视相机。静止姿态与上次写入的抖动姿态存于相机自定义属性 `wfrl_shake_base`／`wfrl_shake_pose`；当前姿态与上次写入不同（复位、重算侧视相机、视图导航）时以当前姿态为新的静止姿态。`side_camera_matrix()` 使用 `rest_matrix()`。`_start_motion()`、`save_pre`、`STOP_HOOKS` 与 `load_post`／`undo_post`／`redo_post` 恢复静止姿态。
 
-`manual_video_job` 的独立监管进程继承输出与作业锁，持有原始 `Popen` 身份；在停止进程组前用 `waitid(WNOWAIT)` 保留主进程身份，避免 PID／进程组编号复用。取消覆盖同组子进程并处理主进程先退出的情况；写入最终状态前完成进程收尾。查询和取消通过绑定作业、运行实例和随机请求的 HMAC 本机端点完成，磁盘 PID 仅用于诊断。`PREPARING`、`RENDERING`、`ENCODING`、`VERIFYING`、`PUBLISHING`、`FINALIZING`、`CANCELLING` 属于运行状态；仅带 `final=true` 的 `COMPLETE`／`FAILED`／`CANCELLED` 是最终结果。`LOST` 表示无法验证监管联系，不冒充退出或取消；输出锁仍被持有时继续拒绝重复启动。源 `.blend` 保存 `wfrl_manual_video_job` 后可在重开时恢复监管，作业路径也可独立查询。场景副本不认领源场景作业。
+导出期间场景标记 `wfrl_manual_exporting`，`tick()` 与编号监听跳过该场景；`_finish()` 无论成功与否都恢复场景、视图与进度条并删除临时目录。
 
-`manual_video.py` 在后台线程执行视频取消，同一作业的重复请求合并；主线程只提交请求、读取缓存并显示等待确认。取消响应按查询代际和作业路径匹配，不能用旧响应覆盖重载后的状态；超时或监管联系失败保留错误，有活动作业时继续跟踪；取消成功以已验证的终态为准。命令行管理入口继续等待监管结果。
+`ensure_side_cameras(scene, turbine)` 在同一 YawRoot 下创建 `<owner>.Turbine.<机组>.DownCamera.Left` 和 `DownCamera.Right`，共用中心相机的挂点位置（`_down_mount()` 返回的坐标）、同样的 pitch、roll 和 8 mm 镜头；偏航分别为 `DOWN_YAW_DEG ± TRIPLE_STEP_DEG`（TRIPLE_STEP_DEG = 47°，由用户约定的 59° 视场角减去 12° 重叠得到，与中心相机构成 153° 有效视场）。三个相机的镜头和挂点相同，因此同一叶片在左、右相机中的叶片形态与中心相机完全一致，仅背景随偏航角不同。`_draw_offscreen_multi()` 在单帧循环内为三个相机各开一条 FFmpeg 标准输入管道，每帧依次渲染三路，三路视频帧时间戳完全同步；与三次单独渲染相比，只需建一个离屏缓冲区且只走一次 `apply_frame()`，总耗时约为单路的 3 倍。`wfrl.manual_triple_down_video` 在面板同一"Down 相机"分组下提供"导出三路 Down 视频 MP4…"按钮，中心路路径由对话框选取，左、右路自动加 `_left`、`_right` 后缀写入同一目录；三路导出只支持视口方式且要求 FFmpeg。
 
-工作区源码对失败、取消或失联的非活动视频记录，在界面读取超过两秒的缓存时异步重新查询当前 attempt；已完成交付不重新轮询。取消不把可重试的旧终态当成当前作业的权威状态，后台按作业凭据核对并取消当前 attempt；旧 attempt 或旧文件代际的迟到响应不能覆盖新的作业状态。面板已从监管确认活动的 attempt 时，`manual_video_job.cancel(job, attempt_id)` 在读取端点、发送请求、核对响应、异常回查和等待终态时都使用该身份；该 attempt 结束且新的重试已接管端点时，不向新重试发送取消，返回其当前记录并标记 `cancel_target_replaced`，面板提示原尝试已结束、新重试仍在运行。缓存为旧终态、查询中或失联时不固定身份，由作业层以首次查询到的当前 attempt 为目标。
+手动场景光照：天空 HDRI 中提取的太阳（`world.use_sun_shadow`）是唯一投射阴影的光源；场景 Sun 灯 `use_shadow=False`，只作补光，避免每座塔筒出现两个方向不同的影子。`manual_scene._ensure_environment()` 进入或聚焦已有手动场景时同样校正。
 
-工作区源码的母版封存或全量校验结果只在同一 worker 的完成流程内传递，进入编码前仍检查作业与 `master.json` 身份。编码器独立读取实际 PNG 摘要并与该结果逐帧对照；独立重试入口和跨进程边界保持完整母版校验，不跨 attempt 复用校验结果。
-
-`master.json` 只在全帧完成后封存，绑定 `job.json`、快照、相机、实验来源、姿态 CSV、逐帧 SHA-256 和编码配置。`retry --job <job.json>` 在同一作业和输出锁下核对完整母版，调用 `encode_video(..., resume=True)` 恢复受输入哈希和所有权限制的编码事务，再执行严格解码、尺寸、帧数、时间戳与时长验证。已完成编码通过其保存的 `encoding_intent` 和成片哈希复用；未知成片、符号链接、缺帧、内容或来源变化均拒绝，已成功作业不改写状态。此入口不启动 Blender，不实现逐帧渲染续传。
-
-发布由 `wfrl.camera_video.publication` 在目标文件系统复制、刷新并提交完整文件。macOS `renamex_np(RENAME_EXCL)`、Linux `renameat2(RENAME_NOREPLACE)` 或可用的硬链接提交均拒绝替换已有目录项；原生接口不可用且目标不支持硬链接时，渲染前预检拒绝。跨文件系统复制使用目标侧暂存，发布凭据绑定暂存文件身份和成片哈希，支持提交完成但状态写入中断后的识别。普通失败及监管取消清理已记录的自有暂存，未知文件保留。输出侧锁名持久保留，只释放锁；按目标父目录身份和规范化文件名串行化同机作业。生成脚本默认等待最终结果，脱离运行须显式 `--detach`；命令和退出码见[手动视频操作说明](../docs/blender/手动场景研究接口.md#导出变桨视频)。
-
-监管、恢复与发布有纯 Python 子进程及非媒体占位文件回归；真实 Blender 场景重开、编码、完整视频、Linux 及实际跨文件系统集成仍需单独验证。源码修改不表示安装版或公开附件已更新。
-
-手动控制面板采用基本机组参数、姿态工具、运行／暂停／停转／复位及姿态文件入口；`panels/manual_control.py` 在 WFRL 手动页和风机控制页共用。普通静止默认桨距 90°、变桨速度 5°/s；运行命令 0°，暂停与停转命令 90°，复位立即到 90°。命令通过 `manual_operators.py` 调用 `_command_pitch()`，使用现有 `PitchClock` 保存连续实际桨距。冻结试验与 Down／视频保留独立[研究接口](../docs/blender/手动场景研究接口.md)，不在基本面板中绘制。
+叶片编号：`ensure_down_camera()` 在每个 Down 相机下创建右上角深色框 `Legend.Back` 与三个文字物体 `Legend.B1..3`（B1／B2／B3），使用自发光材质、关闭阴影可见性并标记 `wfrl_down_label`；旧版本留下的 `Label.*`、`Legend.Title` 物体在此删除。`current_blade()` 取各叶片半展长截面中心在相机坐标中与视线夹角最小的叶片，`update_labels()` 只显示其编号；可见性仅在变化时写入，以避免逐帧重建依赖关系。`manual_control.POSE_LISTENERS` 在手动姿态刷新时调用编号更新；场景属性 `wfrl_manual_blade_labels` 控制显示。
 
 ## 源码资源生命周期
 
@@ -135,15 +126,13 @@
 
 | 作业 | 中间状态与最终结果 |
 | --- | --- |
-| 冻结试验视频 | `FINALIZING` 表示渲染主进程已结束、正在收尾及确认交付；取消使用 `CANCELLING`。监管端停止所属进程组、核对媒体交付，再关闭控制端点、等待服务线程退出并释放监管／输出租约，最后写 `final=true`。`status.lock` 串行化终态发布与下一attempt，查询等待交接完成，避免误报LOST或旧终态覆盖新作业 |
 | 普通PNG动画 | worker只写 `RENDERED`（声明帧已写完）或 `FAILING`（已记录错误，进程尚待退出）。控制端等待其退出后写 `COMPLETE`／`FAILED`／`CANCELLED`；成功须正常退出、帧数齐全且进度有效。FAILING保留失败原因，不因随后取消改为成功或取消 |
 | 相机抓帧 | 请求结束后先恢复允许恢复的场景状态、释放GPU目标和UI计时器；PNG写入线程尚存活时保持 `FINALIZING` 与占用。线程实际退出后才释放写入器、写最终complete／incomplete清单及准确组数，按仍匹配的场景会话发布界面结果；done事件不能代替线程退出 |
 | X100 记录 | 结束记录后停止接收新帧；写盘线程关闭索引、原子写入含索引摘要的最终清单并删除 `INCOMPLETE` 后，记录器才进入 `COMPLETE`，此前为 `FINALIZING`。场景与面板在写盘线程退出前均显示 `FINALIZING`，退出后公布 `COMPLETE` 或 `FAILED`；清单或标记写盘失败进入 `FAILED`，保留原因和 `INCOMPLETE` |
 | 已有MP4导出／RTSP | MP4复制、私有暂存清理线程全部退出后，才公开 `SUCCEEDED`／`CANCELLED`／`FAILED` 和最终路径；提交期间为 `COMMITTING`。RTSP在 `STOPPING` 中等待自有FFmpeg／MediaMTX及停止线程收尾，再公开STOPPED或错误；若进程未退出，保留句柄与active占用，ERROR不构成清理完成证明 |
 
-普通动画恢复从场景保存的目录读取匹配job身份、帧数和状态。已有终态可恢复显示；残留RUNNING／FAILING／RENDERED若记录的进程仍存活或身份不可确认，进入 `RECOVERING` 并保留占用，只读轮询，不按保存PID认领控制或发送取消信号。进程确认退出后读取可信终态；若只剩中间状态则写FAILED，不能凭RENDERED或文件数补认成功。它不续渲染缺失帧。视频监管恢复继续使用作业凭据、attempt和租约；无可验证端点且无匹配 `final=true` 终态时为LOST，不把残留FINALIZING直接当失败、取消或成功。
+普通动画恢复从场景保存的目录读取匹配job身份、帧数和状态。已有终态可恢复显示；残留RUNNING／FAILING／RENDERED若记录的进程仍存活或身份不可确认，进入 `RECOVERING` 并保留占用，只读轮询，不按保存PID认领控制或发送取消信号。进程确认退出后读取可信终态；若只剩中间状态则写FAILED，不能凭RENDERED或文件数补认成功。它不续渲染缺失帧。
 
-`start()` 启动监管子进程失败时同样先释放监管与输出租约，再写 `FAILED / final=true`。
 
 取消、加载与卸载对MP4复制只作有界等待；线程、取消事件和私有暂存仍保留归属，退出前拒绝新复制，取消不删除已提交目标。相机抓帧和文件复制不提供跨Blender进程续作业；同进程的未退出资源仍按上述占用规则处理。视频状态变化仅请求相关UI区域重绘，稳定状态不反复请求完整视口绘制。
 
@@ -391,7 +380,7 @@ v3 净空真值定义为叶片末截面表面到同一全局高度移动塔筒�
 
 ### 5.2 统一侧栏与固定时间轴
 
-工作区的 [panels/home.py](wfrl_blender/panels/home.py) 在 **N → WFRL** 集中提供回放、相机、手动、导出和后端页面，保留 Item／MAPPO／View／风机控制入口；X100 使用独立的 **N → X100** 标签，通过 `home.busy_reason` 共用相机与录制占用判断。顶部按实际读取器与播放归属区分未加载、未就绪、加载失败、就绪和播放，单独显示采集／编辑占用、手动保护暂停及后端连接／确认状态。加载异常持续显示，成功加载清除；MAPPO 结果包预检或候选校验失败时不替换当前场景，已加载的回放与读数保持不变；数据、相机和后端错误不依赖高级区展开。`LOCAL DEMO / READY` 不作为空场景已就绪的显示依据。
+工作区的 [panels/home.py](wfrl_blender/panels/home.py) 在 **N → WFRL** 集中提供回放、相机、手动、导出和后端页面，保留 Item／MAPPO／View／风机控制入口；X100 使用独立的 **N → X100** 标签，通过 `home.busy_reason` 共用相机与录制占用判断。顶部按实际读取器与播放归属区分未加载、未就绪、加载失败、就绪和播放，单独显示采集／编辑占用、手动场景运行状态及后端连接／确认状态。加载异常持续显示，成功加载清除；MAPPO 结果包预检或候选校验失败时不替换当前场景，已加载的回放与读数保持不变；数据、相机和后端错误不依赖高级区展开。`LOCAL DEMO / READY` 不作为空场景已就绪的显示依据。
 
 已加载离线读取器时，除手动页外的各页在导航上方共用一次回放栏，内容面板不重复绘制；回放操作继续调用原操作器，占用状态同时禁用按钮和寻址条。仿真时刻与片段相对进度分别标注，切页不写入时间或相机状态。重建对照保持进度条隐藏。相机工程参数在非编辑状态默认折叠，编辑时直接展开，安装警告和参数错误在折叠区外显示。后台 `home_entry_smoke.py` 核对真实 RNA、回放入口唯一性、占用禁用、折叠／编辑状态和切页时刻保持；窗口排版与真实输入分别验证。
 
@@ -562,7 +551,7 @@ Interactive 的 **Episode steps** 对应 `episode_steps`：`0` 保持单长回�
 
 维护修改应作用于规范源；`protocol.py` 来自 `wfrl/blender_bridge/messages.py`，内置 `_vendor/lidar/` 读取器来自 `wfrl/lidar/`。不要手改生成副本或替换冻结模型及正式资产来消除校验失败。
 
-扩展源码（`_vendor/` 与 `assets/` 除外）的文件系统文本读写显式使用 `encoding='utf-8'`，包括 `Path.read_text`、`Path.write_text` 和文本模式 `open`，不依赖平台默认编码；宿主测试 `test_text_io_encoding.py` 以 AST 扫描强制该约定，二进制读写及 `os.open` 不在范围内。产品代码的 `blender_frontend/wfrl_blender/`、`wfrl/` 和 `scripts/` 另由 `test_text_encoding_guard.py::test_product_text_io_has_explicit_encoding` 扫描：文本文件、socket 文本流和启用文本模式的 subprocess 调用须显式指定编码；未指定的调用统一使用 UTF-8，既有明确格式编码保留。本地编码例外在该测试的逐调用白名单中说明原因，并拒绝失效条目；测试目录不纳入产品守卫。JSON 结果与状态文件统一通过 [atomic_json.py](wfrl_blender/atomic_json.py) 的 `write_json(path, value, *, mkdir=False)` 写入：按 UTF-8、`ensure_ascii=False`、`indent=2`、`allow_nan=False` 和末尾换行写出。已编码的姿态 JSON 等文本使用同模块的 `write_text(path, text, *, mkdir=False)`，按 UTF-8 保留原字符串，不追加或转换换行；调用方可将其导入为 `write_atomic_text`，与文件系统文本 API 区分。两个接口共用目标目录内的随机临时文件、`flush`、`fsync`、`os.replace` 与失败清理逻辑；Windows 上目标文件被其他句柄占用而 `os.replace` 抛出 `PermissionError` 时，按 0.05／0.1／0.2／0.4 s 退避最多再试 4 次，仍失败则抛出原异常并删除临时文件，POSIX 不重试；临时文件以 `os.open(..., 0o666)` 创建，新文件权限按进程 umask 确定，与普通文本写入一致，覆盖已有普通文件时保留其权限位，不修改进程 umask；需要保密的作业文件由其所在的 0700 目录限制访问；仅需要创建父目录的调用方传 `mkdir=True`。`manual_video_job.py` 与 `manual_video_render.py` 作为独立脚本运行时按同目录文件加载该模块，不导入扩展包入口。
+扩展源码（`_vendor/` 与 `assets/` 除外）的文件系统文本读写显式使用 `encoding='utf-8'`，包括 `Path.read_text`、`Path.write_text` 和文本模式 `open`，不依赖平台默认编码；宿主测试 `test_text_io_encoding.py` 以 AST 扫描强制该约定，二进制读写及 `os.open` 不在范围内。产品代码的 `blender_frontend/wfrl_blender/`、`wfrl/` 和 `scripts/` 另由 `test_text_encoding_guard.py::test_product_text_io_has_explicit_encoding` 扫描：文本文件、socket 文本流和启用文本模式的 subprocess 调用须显式指定编码；未指定的调用统一使用 UTF-8，既有明确格式编码保留。本地编码例外在该测试的逐调用白名单中说明原因，并拒绝失效条目；测试目录不纳入产品守卫。JSON 结果与状态文件统一通过 [atomic_json.py](wfrl_blender/atomic_json.py) 的 `write_json(path, value, *, mkdir=False)` 写入：按 UTF-8、`ensure_ascii=False`、`indent=2`、`allow_nan=False` 和末尾换行写出。已编码的姿态 JSON 等文本使用同模块的 `write_text(path, text, *, mkdir=False)`，按 UTF-8 保留原字符串，不追加或转换换行；调用方可将其导入为 `write_atomic_text`，与文件系统文本 API 区分。两个接口共用目标目录内的随机临时文件、`flush`、`fsync`、`os.replace` 与失败清理逻辑；Windows 上目标文件被其他句柄占用而 `os.replace` 抛出 `PermissionError` 时，按 0.05／0.1／0.2／0.4 s 退避最多再试 4 次，仍失败则抛出原异常并删除临时文件，POSIX 不重试；临时文件以 `os.open(..., 0o666)` 创建，新文件权限按进程 umask 确定，与普通文本写入一致，覆盖已有普通文件时保留其权限位，不修改进程 umask；需要保密的作业文件由其所在的 0700 目录限制访问；仅需要创建父目录的调用方传 `mkdir=True`。
 
 ```bash
 python3 scripts/blender/build_extension.py --output <新目录>
@@ -593,10 +582,8 @@ ZIP 包括 MAPPO 源、旧法和 TLS 结果层、规范示例、NREL 缺陷编�
 
 ### Windows 支持范围
 
-- 冻结试验视频的新建、重试和监管只支持具备 `flock` 和 `waitid(WNOWAIT)` 的 POSIX 环境。见 [`launch()`](wfrl_blender/manual_video.py#L344)、[`start()`](wfrl_blender/manual_video_job.py#L232)、[`supervise()`](wfrl_blender/manual_video_job.py#L319) 和 [`require_supervision()`](wfrl_blender/manual_video_job.py#L35)。
-- Down 的 MP4 与 JSON 成对发布、扩展构建产物发布均依赖硬链接及相应排他提交语义，目标卷需支持。见 [`_publish_pair()`](wfrl_blender/manual_down.py#L481) 和 [`_publish_outputs()`](../scripts/blender/build_extension.py#L55)。`test_manual_down.py`、`test_extension_output.py`、`test_extension_package.py` 中依赖该发布语义的用例在 `os.name == 'nt'` 时跳过；这不表示 Windows 发布链路已验证，其他宿主用例仍运行。
+- 扩展构建产物发布依赖硬链接及相应排他提交语义，目标卷需支持。见 [`_publish_outputs()`](../scripts/blender/build_extension.py#L55)。`test_extension_output.py`、`test_extension_package.py` 中依赖该发布语义的用例在 `os.name == 'nt'` 时跳过；这不表示 Windows 发布链路已验证，其他宿主用例仍运行。手动 Down 视频导出在临时目录完成后以 `shutil.move` 移到目标路径，再写同名 JSON，不使用排他提交。
 - `.command` 和 macOS shell 入口只适用于 macOS。见 [`.command` 入口示例](../scripts/blender/打开净空雷达演示.command#L4)、[`run_wfrl_macos.sh`](../scripts/blender/run_wfrl_macos.sh#L1) 和 [`verify_macos.sh`](../scripts/blender/verify_macos.sh#L1)。
-- 非 POSIX 平台查询已有冻结作业时不检查本地监管租约；监管端点不可达且没有匹配终态时报告 `LOST`、`active=False`，不阻挡 Down 导出，也不改写磁盘记录。
 - 已有 MP4 导出在 Windows 上按设备、inode、大小和 mtime 判定源文件身份，不比较 ctime；POSIX 另比较 ctime，以发现保留 mtime 的内容修改。
 - Launcher 在 Windows 上以 `CREATE_NEW_PROCESS_GROUP` 启动并发送 `signal.CTRL_BREAK_EVENT` 请求停止，接收进程须与发送者共享控制台。Bridge 的 `__main__` 注册 SIGBREAK 并等待后端清理确认；前后端联合验收仍以进程退出和 `EMPTY_CONFIRMED` 为准，不能仅凭信号发送成功或某个退出码判断清理完成。
 - [.gitattributes](../.gitattributes) 对 `wfrl_blender/assets/` 与 `wfrl_blender/_vendor/` 关闭换行转换，保证检出字节与完整性摘要一致。

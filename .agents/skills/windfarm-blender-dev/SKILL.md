@@ -18,7 +18,7 @@ description: Use when developing, debugging, testing, or documenting Wind Farm B
 | Down、机舱／三相机、预览采集、重建纹理或缺陷 | [相机、资源与重建](references/cameras-reconstruction.md) | 几何／状态、原生窗口和 GPU 采集分别判断 |
 | X100 安装、点云、记录回放、本地实时输入或显示性能 | [X100 来源与采集](references/measurement-backend.md#x100-来源与采集) | 安装／来源／时钟、记录终态、场景归属及相机隔离；GPU、CPU 耗时、完整播放与实机分别验证 |
 | 理想激光／双束净空、曲线、单位、尾流、Bridge 或连接恢复 | [测量、后端与协议](references/measurement-backend.md) | 生产／消费合同、场景归属、有效性及生命周期 |
-| PNG 后台动画、Down 视频、冻结试验、已有 MP4 或 RTSP | [视频与后台渲染](references/video-jobs.md) | 输出、最终状态、文件与进程归属、真实媒体及所需恢复范围 |
+| PNG 后台动画、手动 Down 视频、现场视频分屏、已有 MP4 或 RTSP | [视频与后台渲染](references/video-jobs.md) | 输出、最终状态、文件与进程归属、真实媒体及所需恢复范围 |
 | 扩展打包、文档同步或普通发布 | [普通发布](references/verification.md#普通发布) | 内容与版本一致；需要 ZIP 时构建一次；确认交付命令成功 |
 | 指定安装核对、专项回归或正式播放测量 | [维护与验证入口](references/verification.md) | 明确源码／ZIP／安装对象，按指定范围选择环境和证据 |
 

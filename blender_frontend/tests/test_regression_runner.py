@@ -60,12 +60,12 @@ def test_suite_has_unique_scripts_and_explicit_window_contracts():
         'radar_x100_estimation_window.py', 'box_surface_install_window.py', 'camera_gpu_calibration.py',
         'chart_render_cache_window.py', 'custom_camera_exit_regression.py',
         'custom_camera_preview_performance.py', 'demo_presentation_regression.py', 'farm_split_view_window.py',
-        'frontend_fixes_window.py', 'manual_down_viewport_regression.py', 'manual_playback_window.py',
-        'manual_video_window_regression.py', 'native_camera_views_regression.py', 'overlay_draw_smoke.py',
+        'frontend_fixes_window.py', 'manual_playback_window.py',
+        'native_camera_views_regression.py', 'overlay_draw_smoke.py',
         'stacked_cameras_window.py', 'three_camera_recommended_window.py', 'three_cameras_window_regression.py',
         'blade_model_window.py', 'clearance_gui_acceptance.py', 'custom_camera_capture_window.py',
         'dual_beam_window.py', 'frontend_layout_regression.py', 'manual_control_window.py',
-        'manual_pitch_trial_window.py', 'native_camera_enabled_regression.py', 'native_camera_proxy_window.py',
+        'native_camera_enabled_regression.py', 'native_camera_proxy_window.py',
         'native_camera_reopen_regression.py', 'native_camera_save_regression.py', 'nrel_defect_window_regression.py',
         'radar_x100_output_lifecycle.py', 'radar_x100_output_window.py', 'radar_x100_window.py'}
     assert dict(spec('three_camera_recommended_window').environment) == {
@@ -79,10 +79,9 @@ def test_suite_has_unique_scripts_and_explicit_window_contracts():
 
 def test_manual_control_and_home_checks_have_background_completion_contracts():
     names = ('home_entry_smoke', 'manual_control_regression', 'manual_control_state_regression',
-             'manual_rate_pitch_regression', 'manual_rotor_conflict_regression',
-             'manual_pitch_trial_regression', 'manual_pitch_trial_undo_regression',
-             'manual_pose_undo_regression', 'manual_scene_recovery_regression',
-             'manual_scene_link_compatibility_regression')
+             'manual_pose_regression', 'manual_dynamics_regression',
+             'manual_down_video_regression', 'triple_down_rig_regression',
+             'manual_pose_undo_regression', 'manual_scene_recovery_regression')
     for name in names:
         item = spec(name)
         assert item.mode == 'background'
@@ -94,8 +93,7 @@ def test_manual_control_and_home_checks_have_background_completion_contracts():
 @pytest.mark.parametrize('name', [
     'blade_model_regression', 'clearance_acceptance_regression', 'clearance_edit_mode_regression',
     'clearance_ux_regression', 'custom_camera_edit_binding_regression', 'landscape_geometry_regression',
-    'live_contracts_regression', 'manual_down_regression', 'manual_geometry_compatibility_regression',
-    'manual_model_regression', 'manual_video_lifecycle_regression', 'manual_video_render_regression',
+    'live_contracts_regression', 'live_stream_register',
     'nacelle_camera_intrinsics_regression', 'nacelle_camera_regression', 'nrel_defect_ui_state_regression',
 ])
 def test_background_execution_contract_requires_completion(name):
