@@ -256,10 +256,10 @@ def _finish(job_path, status, *, _master=None):
         raise ValueError('编码视频的尺寸或帧数不符合请求')
     status('VERIFYING', completed_frames=count, total_frames=count)
     subprocess.run([job['ffmpeg'], '-v', 'error', '-xerror', '-nostdin', '-i', str(root / 'video.mp4'),
-                    '-f', 'null', '-'], check=True, capture_output=True, text=True, **owned_process_options())
+                    '-f', 'null', '-'], check=True, capture_output=True, text=True, **owned_process_options(), encoding='utf-8')
     probe = json.loads(subprocess.run([job['ffprobe'], '-v', 'error', '-show_entries',
             'format=duration:stream=duration', '-of', 'json', str(root / 'video.mp4')],
-            check=True, capture_output=True, text=True, **owned_process_options()).stdout)
+            check=True, capture_output=True, text=True, **owned_process_options(), encoding='utf-8').stdout)
     duration = count / job['fps']
     if (abs(float(probe['format']['duration']) - duration) > 1e-5
             or abs(float(probe['streams'][0]['duration']) - duration) > 1e-5):

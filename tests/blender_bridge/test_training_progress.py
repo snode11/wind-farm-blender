@@ -1,9 +1,29 @@
 import json
+from pathlib import Path
 import time
 
 import pytest
 
 from wfrl.blender_bridge.training_progress import TrainingProgressWriter, TrainingProgressReader, resume_counts
+
+
+@pytest.mark.parametrize('locale_encoding', ['cp1252', 'cp936'])
+def test_error_sidecar_uses_utf8_with_non_ascii_paths(tmp_path, monkeypatch, locale_encoding):
+    write_text = Path.write_text
+
+    def localized_write_text(path, data, encoding=None, **kwargs):
+        return write_text(path, data, encoding=encoding or locale_encoding, **kwargs)
+
+    monkeypatch.setattr(Path, 'write_text', localized_write_text)
+    path = tmp_path / '风场🌬️.jsonl'
+    path.write_bytes(b'existing')
+    writer = TrainingProgressWriter(path, 'run')
+
+    assert writer.failed
+    error = path.with_name(path.name + '.error').read_bytes().decode('utf-8')
+    assert error.startswith('Training observability write failed: ')
+    assert str(path) in error
+    assert path.read_bytes() == b'existing'
 
 
 def test_producer_reader_numbers_and_age(tmp_path):

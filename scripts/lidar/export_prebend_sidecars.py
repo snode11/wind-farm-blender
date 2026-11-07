@@ -14,7 +14,7 @@ from wfrl_blender.turbine_geometry import geometry_data
 def supplement(output,report,manifest,times,poses,transforms):
     output=Path(output);farm=Path(report['case_dir'])/'FarmInputs'
     config=report['blade_config'];rest=Path(report['unloaded_reference'])
-    unloaded=json.loads((rest/'probe-config.json').read_text())
+    unloaded=json.loads((rest/'probe-config.json').read_text(encoding='utf-8'))
     if not unloaded['unloaded'] or unloaded['reference_curve']!=config['reference_curve']:
         raise ValueError('Missing matching unloaded reference')
     save_json(output/'blade-reference.json',reference_payload(config,config['structural_source']))
@@ -35,7 +35,7 @@ def supplement(output,report,manifest,times,poses,transforms):
     maximum=0.;by_turbine={};telemetry={};sources={}
     for k,tid in enumerate(manifest['turbine_ids']):
         path=farm/f'Case.{tid}.out';columns=read_fast_out(path)
-        lines=path.read_text().splitlines();units=dict(zip(lines[6].split(),lines[7].split()))
+        lines=path.read_text(encoding='utf-8').splitlines();units=dict(zip(lines[6].split(),lines[7].split()))
         for b in (1,2,3):
             for axis in 'xyz':
                 if units[f'B{b}TipTD{axis}r']!='(m)':raise ValueError('Unexpected BeamDyn displacement unit')

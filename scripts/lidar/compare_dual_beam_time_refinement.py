@@ -22,7 +22,7 @@ ALLOWED_FST_FIELDS = ('DT', 'DT_Out', 'VTK_fps')
 
 
 def read_json(path):
-    return json.loads(Path(path).read_text())
+    return json.loads(Path(path).read_text(encoding='utf-8'))
 
 
 def _hash_inventory(value, context):
@@ -137,10 +137,10 @@ def verify_run_inputs(coarse_run, fine_run):
         (a, ah), (b, bh) = inventories[0][identity], inventories[1][identity]
         fst = a.suffix.lower() == '.fst'
         if fst:
-            if normalize_fst(a.read_text()) != normalize_fst(b.read_text()):
+            if normalize_fst(a.read_text(encoding='utf-8')) != normalize_fst(b.read_text(encoding='utf-8')):
                 raise ValueError('FST differs beyond DT/DT_Out/VTK_fps: '+identity)
             for file,config in zip((a,b),configs):
-                fields={m.group(2):float(m.group(1)) for l in file.read_text().splitlines()
+                fields={m.group(2):float(m.group(1)) for l in file.read_text(encoding='utf-8').splitlines()
                         if (m:=re.match(r'^\s*(\S+)\s+(DT|DT_Out|VTK_fps)\b',l))}
                 for field,want in (('DT',config['dt_s']),('DT_Out',1./config['fps']),('VTK_fps',config['fps'])):
                     if not math.isclose(fields[field],want,rel_tol=0.,abs_tol=1e-12):
@@ -397,8 +397,8 @@ def main(argv=None):
         s1_events={k:{tid:deepcopy(v['events']) for tid,v in b['packages']['candidate']['overlay']['results'].items()} for k,b in zip(('coarse','fine'),bundles)},
         evidence_tool_hashes={str(Path(__file__).relative_to(ROOT)):digest(__file__)})
     out=args.output.resolve();out.mkdir(parents=True,exist_ok=False)
-    (out/'comparison.json').write_text(json.dumps(report,ensure_ascii=False,allow_nan=False,indent=2)+'\n')
-    (out/'report.md').write_text(markdown_report(report))
+    (out/'comparison.json').write_text(json.dumps(report,ensure_ascii=False,allow_nan=False,indent=2)+'\n', encoding='utf-8')
+    (out/'report.md').write_text(markdown_report(report), encoding='utf-8')
     print(out)
 
 

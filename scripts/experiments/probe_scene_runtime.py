@@ -37,7 +37,7 @@ def fastfarm_processes():
     cmd = (["tasklist"] if os.name == "nt"
            else ["pgrep", "-f", "[F]AST.Farm"])
     try:
-        return subprocess.run(cmd, capture_output=True, text=True).stdout
+        return subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8').stdout
     except FileNotFoundError:
         return ""
 

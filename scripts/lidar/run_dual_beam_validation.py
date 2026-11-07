@@ -43,7 +43,7 @@ def digest(path):
 def save_json(path, data):
     path = Path(path)
     temporary = path.with_name(path.name + '.tmp')
-    temporary.write_text(json.dumps(data, indent=2, ensure_ascii=False, allow_nan=False) + '\n')
+    temporary.write_text(json.dumps(data, indent=2, ensure_ascii=False, allow_nan=False) + '\n', encoding='utf-8')
     temporary.replace(path)
 
 
@@ -79,8 +79,8 @@ def prepare(output, *, template=DEFAULT_TEMPLATE, reference=DEFAULT_REFERENCE,
     # Validate everything before creating the task-owned directory.
     config_path = template / 'probe-config.json'
     reference_config = reference / 'probe-config.json'
-    config = json.loads(config_path.read_text())
-    rest = json.loads(reference_config.read_text())
+    config = json.loads(config_path.read_text(encoding='utf-8'))
+    rest = json.loads(reference_config.read_text(encoding='utf-8'))
     if (config.get('structural_module') != 'BeamDyn' or not rest.get('unloaded')
             or rest.get('structural_module') != 'BeamDyn'
             or config.get('reference_curve') != rest.get('reference_curve')):
@@ -325,7 +325,7 @@ def execute(run, *, poll_seconds=1., budget_bytes=1_000_000_000, budget_root=Non
         raise ValueError('Polling interval and storage budget must be positive')
     if os.name != 'posix':
         raise RuntimeError('This bounded-storage runner requires POSIX SIGSTOP/SIGCONT backpressure')
-    config = json.loads((run / 'run-config.json').read_text())
+    config = json.loads((run / 'run-config.json').read_text(encoding='utf-8'))
     if config['status'] != 'PREPARED_ONLY':
         raise ValueError('Only a fresh PREPARED_ONLY run can execute')
     root = Path(budget_root or run).resolve()
@@ -381,7 +381,7 @@ def execute(run, *, poll_seconds=1., budget_bytes=1_000_000_000, budget_root=Non
         archiver.scan()
         if process.returncode:
             raise RuntimeError(f'OpenFAST exited with code {process.returncode}; see solver.log')
-        if 'OpenFAST terminated normally.' not in (run / 'solver.log').read_text(errors='replace'):
+        if 'OpenFAST terminated normally.' not in (run / 'solver.log').read_text(errors='replace', encoding='utf-8'):
             raise ValueError('Normal solver termination was not recorded')
         audit = audit_frames(run, archiver.surfaces, config)
         archiver.write_inventory(frame_audit=audit, status='COMPLETE')

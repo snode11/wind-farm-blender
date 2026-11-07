@@ -187,7 +187,7 @@ def summarize_samples(samples, combo, dt):
 
 
 def write_json(path, value):
-    path.write_text(json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(',', ':'))+'\n')
+    path.write_text(json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(',', ':'))+'\n', encoding='utf-8')
 
 
 def run(baseline, output):

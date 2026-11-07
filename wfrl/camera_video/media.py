@@ -23,7 +23,7 @@ def owned_process_options():
 
 def _run(args):
     return subprocess.run([str(x) for x in args], check=True, capture_output=True, text=True,
-                          **owned_process_options()).stdout
+                          **owned_process_options(), encoding='utf-8').stdout
 
 
 def sha256(path):
@@ -35,7 +35,7 @@ def sha256(path):
 
 
 def read_frames(path):
-    with Path(path).open(newline='') as handle:
+    with Path(path).open(newline='', encoding='utf-8') as handle:
         rows = list(csv.DictReader(handle))
     if not rows or any(int(row['frame_id']) != i or int(row['video_pts']) != i for i, row in enumerate(rows)):
         raise ValueError('frames.csv must contain contiguous zero-based frame_id and video_pts')
@@ -76,7 +76,7 @@ def _write_json_atomic(path, value):
     path = Path(path)
     writing = None
     try:
-        with tempfile.NamedTemporaryFile(mode='w', dir=path.parent, prefix='.encoding-', delete=False) as handle:
+        with tempfile.NamedTemporaryFile(mode='w', dir=path.parent, prefix='.encoding-', delete=False, encoding='utf-8') as handle:
             writing = Path(handle.name)
             json.dump(value, handle, indent=2)
             handle.flush()
@@ -118,16 +118,16 @@ def encode_video(package_dir, fps, *, pattern='%06d.png', ffmpeg='ffmpeg', ffpro
               'encoder_source_sha256': sha256(__file__)}
     if expected_master_sha256 is not None and intent['master_sha256'] != expected_master_sha256:
         raise ValueError('PNG master identity differs from the validated source')
-    state = json.loads(pending.read_text()) if pending.exists() else None
+    state = json.loads(pending.read_text(encoding='utf-8')) if pending.exists() else None
     if state is not None and state.get('intent') != intent:
         raise ValueError('Pending encoding belongs to different masters, CSV, code or parameters; use a new package directory')
     if not os.path.lexists(output) and final_report.exists():
-        previous = json.loads(final_report.read_text())
+        previous = json.loads(final_report.read_text(encoding='utf-8'))
         if previous.get('encoding_intent') != intent:
             raise ValueError('Saved encoding report belongs to different inputs; use a new package directory')
     if os.path.lexists(output):
         report = state.get('report') if state else (
-            json.loads(final_report.read_text()) if resume and final_report.is_file() else None)
+            json.loads(final_report.read_text(encoding='utf-8')) if resume and final_report.is_file() else None)
         if report and report.get('encoding_intent') != intent:
             raise ValueError('Completed encoding belongs to different masters, CSV, code or parameters')
         if report and sha256(output) == report['video_sha256']:

@@ -52,7 +52,7 @@ def test_check_rejects_stale_summary_without_writing(identity, records):
 def test_write_and_check_share_one_summary_and_preserve_prose(identity, records):
     root, release, installed, document = records
     assert identity.synchronize(root, release, installed, document, write=True)
-    contents = document.read_text()
+    contents = document.read_text(encoding='utf-8')
     assert contents.startswith('before\n') and contents.endswith('\nafter\n')
     assert '**1.2.3**' in contents and '20 个文件' in contents
     assert '(publication/release.json)' in contents
@@ -80,7 +80,7 @@ def test_distinct_installation_is_rendered_without_claiming_release_equivalence(
     document.parent.mkdir()
     document.write_text('<!-- release-identity:start -->\n<!-- release-identity:end -->\n')
     identity.synchronize(root, release, installed, document, write=True)
-    contents = document.read_text()
+    contents = document.read_text(encoding='utf-8')
     assert '**1.2.2**' in contents and '**1.2.3**' in contents
     assert '独立载荷' in contents and '(../publication/release.json)' in contents
     assert '同一载荷' not in contents

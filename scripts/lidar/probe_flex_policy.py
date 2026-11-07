@@ -60,12 +60,12 @@ def main():
             # filename when the workspace path contains spaces.
             shutil.copyfile(args.turbulence, farm/'replay-wind.bts')
             inflow = farm/'InflowWind.dat'
-            lines = inflow.read_text().splitlines()
+            lines = inflow.read_text(encoding='utf-8').splitlines()
             matches = [i for i,l in enumerate(lines) if 'FileName_BTS' in l]
             if len(matches) != 1:
                 raise ValueError('Missing BTS input field')
             lines[matches[0]] = '"replay-wind.bts" FileName_BTS - local turbulent wind file'
-            inflow.write_text('\n'.join(lines)+'\n')
+            inflow.write_text('\n'.join(lines)+'\n', encoding='utf-8')
         report.update(case_dir=str(driver.case_dir), control_period_s=driver.dt)
         report['limits'] = dict(yaw_abs_deg=10, yaw_rate_deg_s=.3,
                                 driver_sliding_duty_fraction=.3)
@@ -85,18 +85,18 @@ def main():
                 replace(f, dict(DLL_DT=.00625))
         # Tower flexibility changes the reference frame and requires a matching exporter.
         for f in farm.glob('*ElastoDyn*.dat'):
-            if 'TwFADOF1' in f.read_text():
+            if 'TwFADOF1' in f.read_text(encoding='utf-8'):
                 value = 'True' if args.flexible_tower else 'False'
                 replace(f, dict(TwFADOF1=value, TwFADOF2=value, TwSSDOF1=value, TwSSDOF2=value))
                 if args.tower_nodes is not None:
                     replace(f, dict(TwrNodes=args.tower_nodes))
                 if args.flexible_tower:
-                    lines = f.read_text().splitlines()
+                    lines = f.read_text(encoding='utf-8').splitlines()
                     end = next(i for i, line in enumerate(lines) if line.startswith('END'))
                     channels = ['TTDspFA', 'TTDspSS', 'YawBrTDxt', 'YawBrTDyt', 'YawBrTDzt',
                                 'YawBrRDxt', 'YawBrRDyt', 'YawBrRDzt', 'BlPitch2', 'BlPitch3']
                     lines[end:end] = ['"' + c + '"' for c in channels if '"' + c + '"' not in lines]
-                    f.write_text('\n'.join(lines) + '\n')
+                    f.write_text('\n'.join(lines) + '\n', encoding='utf-8')
         if args.prebend:
             if not args.flexible_tower:
                 raise ValueError('Prebend v3 requires the validated flexible-tower path')
@@ -108,10 +108,10 @@ def main():
             for f in farm.glob('FFTest_WT*.fst'):
                 replace(f, dict(CompElast=2, **{f'BDBldFile({b})': '"../5MW_Baseline/NRELOffshrBsline5MW_BeamDyn.dat"' for b in (1,2,3)}))
             for f in farm.glob('*ElastoDyn*.dat'):
-                if 'FlapDOF1' in f.read_text():
+                if 'FlapDOF1' in f.read_text(encoding='utf-8'):
                     replace(f, dict(FlapDOF1='False', FlapDOF2='False', EdgeDOF='False'))
             report['blade_model'] = 'beamdyn-prebend'
-            report['blade_config'] = json.loads((source/'probe-config.json').read_text())
+            report['blade_config'] = json.loads((source/'probe-config.json').read_text(encoding='utf-8'))
             report['unloaded_reference'] = str((ROOT/'results/prebend-20260918/C-rest').resolve())
             report['blade_input_hashes'] = {f.name:hashlib.sha256(f.read_bytes()).hexdigest()
                 for f in baseline.glob('*BeamDyn*')}
@@ -123,7 +123,7 @@ def main():
         report['input_hashes'] = {str(f.relative_to(farm)): hashlib.sha256(f.read_bytes()).hexdigest()
                                   for f in farm.glob('*.fst')}
         # MPI abort can terminate Python before finally; preserve inputs first.
-        (args.output/'probe.json').write_text(json.dumps(report, indent=2, allow_nan=False))
+        (args.output/'probe.json').write_text(json.dumps(report, indent=2, allow_nan=False), encoding='utf-8')
         m = driver.reset() if args.turbulence else driver.reset(wind_speed=args.wind)
         for _ in range(args.warmup_steps):
             m = driver.step(np.zeros(3))
@@ -148,7 +148,7 @@ def main():
                        measured_yaw_deg=None if actual is None else np.degrees(actual).tolist(),
                        power_mw=np.asarray(m['power']).tolist())
             report['records'].append(row)
-            (args.output/'probe.json').write_text(json.dumps(report, indent=2, allow_nan=False))
+            (args.output/'probe.json').write_text(json.dumps(report, indent=2, allow_nan=False), encoding='utf-8')
             print(json.dumps(row), flush=True)
         driver.close()
         report['physical_checks'] = []
@@ -174,7 +174,7 @@ def main():
     finally:
         if driver is not None:
             driver.close()
-        (args.output/'probe.json').write_text(json.dumps(report, indent=2, allow_nan=False))
+        (args.output/'probe.json').write_text(json.dumps(report, indent=2, allow_nan=False), encoding='utf-8')
 
 
 if __name__ == '__main__':

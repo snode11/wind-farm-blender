@@ -248,7 +248,7 @@ class ReplayPackage:
     def load(cls, path):
         path = Path(path)
         try:
-            manifest = json.loads((path / 'manifest.json').read_text())
+            manifest = json.loads((path / 'manifest.json').read_text(encoding='utf-8'))
             payload = {}
             for name in FILES:
                 raw = (path / name).read_bytes()

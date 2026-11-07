@@ -17,7 +17,7 @@ def digest(path):
 
 
 def save_new(path, value):
-    with Path(path).open('x') as stream:
+    with Path(path).open('x', encoding='utf-8') as stream:
         json.dump(value, stream, indent=2, ensure_ascii=False, allow_nan=False)
         stream.write('\n')
 
@@ -138,8 +138,8 @@ def run(args):
     start = time.monotonic()
     package, source, freeze_path = Path(args.package).resolve(), Path(args.source).resolve(), Path(args.freeze).resolve()
     # The estimator-freeze must exist before this reader opens any source truth.
-    freeze = json.loads(freeze_path.read_text())
-    package_manifest = json.loads((package / 'manifest.json').read_text())
+    freeze = json.loads(freeze_path.read_text(encoding='utf-8'))
+    package_manifest = json.loads((package / 'manifest.json').read_text(encoding='utf-8'))
     if (package_manifest.get('schema') != 'nrel-dynamic-review-package.v1'
             or package_manifest.get('status') != 'REVIEW_ONLY' or package_manifest.get('target') != 'T1/B1'):
         raise ValueError('Expected frozen research package for T1/B1')
@@ -149,12 +149,12 @@ def run(args):
             raise ValueError('Package integrity or local filename mismatch')
         package_signatures[str(package / name)] = signature
     verify_estimator_freeze(freeze, package, package_manifest, package_signatures)
-    sequence = json.loads((package / 'sequence.json').read_text())
+    sequence = json.loads((package / 'sequence.json').read_text(encoding='utf-8'))
     if sequence.get('schema') != 'nrel-dynamic-review-sequence.v1' or sequence.get('frames') != [42, 43, 44, 45]:
         raise ValueError('Scoring scope changed from four registered research times')
     out = Path(args.output).resolve()
     out.mkdir(parents=True, exist_ok=False)
-    source_manifest = json.loads((source / 'manifest.json').read_text())
+    source_manifest = json.loads((source / 'manifest.json').read_text(encoding='utf-8'))
     turbine_index = source_turbine_index(source_manifest)
     required = ['geometry.npz', 'tower-motion.npz', 'deflection-t1.json', 'blade-reference.json', 'interface-audit.json']
     source_hashes = {str(source / 'manifest.json'): digest(source / 'manifest.json')}
@@ -166,8 +166,8 @@ def run(args):
                   str(Path(__file__).resolve()): digest(__file__)}
     save_new(out / 'input_freeze.json', {'schema': 'nrel-a03-post-estimate-score-inputs.v1',
               'files': signatures, 'estimates_frozen_before_truth_read': True})
-    channels = json.loads((source / 'deflection-t1.json').read_text())
-    reference = json.loads((source / 'blade-reference.json').read_text())
+    channels = json.loads((source / 'deflection-t1.json').read_text(encoding='utf-8'))
+    reference = json.loads((source / 'blade-reference.json').read_text(encoding='utf-8'))
     tip = validate_source_links(source_manifest, channels, reference)
     with np.load(source / 'geometry.npz', allow_pickle=False) as archive:
         times = archive['times'].astype(float)
@@ -191,7 +191,7 @@ def run(args):
     simulation = np.asarray(channels['simulation'], float)
     if simulation.shape != (len(times), 3, 3) or not np.isfinite(simulation).all():
         raise ValueError('Invalid BeamDyn tip displacement series')
-    audit = json.loads((source / 'interface-audit.json').read_text())
+    audit = json.loads((source / 'interface-audit.json').read_text(encoding='utf-8'))
     source_consistency = float(audit['max_component_error_m'])
     if not np.isfinite(source_consistency) or not 0. <= source_consistency <= .005:
         raise ValueError('Source structural-tip interface check exceeds declared bound')

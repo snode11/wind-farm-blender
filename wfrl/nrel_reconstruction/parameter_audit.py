@@ -276,14 +276,14 @@ def run_audit(source_dir, output_dir):
     output.mkdir(parents=True, exist_ok=True)
     paths = [source / "reconstruction" / name for name in ("model_state.json", "T1_B1.ply", "frozen_config.json")]
     paths += [source / "observations/observations.json", source / "model_freeze.json"]
-    state = json.loads(paths[0].read_text())
-    observations = json.loads(paths[3].read_text())
+    state = json.loads(paths[0].read_text(encoding='utf-8'))
+    observations = json.loads(paths[3].read_text(encoding='utf-8'))
     if len(observations) != 12 or {(x["camera_id"], x["frame_id"]) for x in observations} != {
             (c, f) for c in ("C1", "C2", "C3") for f in (42, 43, 44, 45)}:
         raise ValueError("Expected exactly the frozen twelve observations")
     paths += [_permitted(x[key]) for x in observations for key in ("labels_path", "contour_points_path", "contour_valid_path")]
     hashes = {str(path): sha256(path) for path in paths}
-    freeze = json.loads(paths[4].read_text())
+    freeze = json.loads(paths[4].read_text(encoding='utf-8'))
     if sha256(paths[1]) != freeze["sha256"]["reconstruction/T1_B1.ply"]:
         raise ValueError("Formal frozen PLY hash mismatch")
     model = restore_model(state["models"]["T1_B1"])
@@ -355,8 +355,8 @@ def run_audit(source_dir, output_dir):
                   "Cross-resolution changes mix mask resampling, scale, deadband, working-pixel robust scales, visibility probes and sampling budgets.",
                   "Raw O2C response SVD does not prove global identifiability, measurement confidence or a unique cause.",
                   "Local finite differences may cross nearest-segment, visibility, mask and sample cases."]}
-    (output / "parameter_audit.json").write_text(json.dumps(report, indent=2, allow_nan=False)+"\n")
-    (output / "observed_response_vectors.json").write_text(json.dumps(vectors, separators=(",", ":"), allow_nan=False)+"\n")
+    (output / "parameter_audit.json").write_text(json.dumps(report, indent=2, allow_nan=False)+"\n", encoding='utf-8')
+    (output / "observed_response_vectors.json").write_text(json.dumps(vectors, separators=(",", ":"), allow_nan=False)+"\n", encoding='utf-8')
     flat = []
     for i, record in enumerate(records):
         for region in record["regions"]:
@@ -365,7 +365,7 @@ def run_audit(source_dir, output_dir):
             for direction in ("c2o", "o2c"):
                 row.update({f"{direction}_{key}": value for key, value in region[direction].items()})
             flat.append(row)
-    with (output / "per_observation.csv").open("w", newline="") as handle:
+    with (output / "per_observation.csv").open("w", newline="", encoding='utf-8') as handle:
         writer = csv.DictWriter(handle, fieldnames=list(flat[0])); writer.writeheader(); writer.writerows(flat)
     return report
 
@@ -385,8 +385,8 @@ def run_combination(source_dir, output_dir):
     baseline_path = output / "parameter_audit.json"
     vectors_path = output / "observed_response_vectors.json"
     preserved = {str(path): sha256(path) for path in (baseline_path, vectors_path, output / "per_observation.csv")}
-    baseline = json.loads(baseline_path.read_text())
-    old_vectors = json.loads(vectors_path.read_text())
+    baseline = json.loads(baseline_path.read_text(encoding='utf-8'))
+    old_vectors = json.loads(vectors_path.read_text(encoding='utf-8'))
     for path, digest in baseline["input_sha256"].items():
         if sha256(path) != digest:
             raise ValueError(f"Frozen source differs from initial audit: {path}")
@@ -394,10 +394,10 @@ def run_combination(source_dir, output_dir):
                     and item["split"] == "fit" and item["region"] == "root_band")
     direction = np.array(next(item for item in response["amplitudes"]
                               if item["amplitude_m"] == .02)["weakest_right_singular_direction"])
-    state = json.loads((source / "reconstruction/model_state.json").read_text())
+    state = json.loads((source / "reconstruction/model_state.json").read_text(encoding='utf-8'))
     model = restore_model(state["models"]["T1_B1"])
     norm = normalization(model)
-    observations = json.loads((source / "observations/observations.json").read_text())
+    observations = json.loads((source / "observations/observations.json").read_text(encoding='utf-8'))
     prepared = _prepare(observations, (640, 360), "cpu", require_contours=True)
     records, vectors = [], []
     started = time.perf_counter()
@@ -484,8 +484,8 @@ def run_combination(source_dir, output_dir):
                   "The direction was generated from previously inspected fit image responses, then fixed for all forward checks.",
                   "Actual plus/minus distances can change asymmetrically; a small symmetric difference alone does not mean both models equal baseline.",
                   "The same 640 production mask/sampling/visibility cases remain active; disagreement with the linear prediction is retained."]}
-    destinations[0].write_text(json.dumps(report, indent=2, allow_nan=False)+"\n")
-    destinations[1].write_text(json.dumps(vectors, separators=(",", ":"), allow_nan=False)+"\n")
+    destinations[0].write_text(json.dumps(report, indent=2, allow_nan=False)+"\n", encoding='utf-8')
+    destinations[1].write_text(json.dumps(vectors, separators=(",", ":"), allow_nan=False)+"\n", encoding='utf-8')
     flat = []
     for i, record in enumerate(records):
         for region in record["regions"]:
@@ -494,7 +494,7 @@ def run_combination(source_dir, output_dir):
             for parameter, component in zip(PARAMETERS, record["parameter_components_m"]): row[parameter+"_m"] = component
             for d in ("c2o", "o2c"): row.update({d+"_"+key: value for key, value in region[d].items()})
             flat.append(row)
-    with destinations[2].open("w", newline="") as handle:
+    with destinations[2].open("w", newline="", encoding='utf-8') as handle:
         writer = csv.DictWriter(handle, fieldnames=list(flat[0])); writer.writeheader(); writer.writerows(flat)
     return report
 

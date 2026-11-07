@@ -145,7 +145,7 @@ def mesh_envelope_clearance(point, vertices, indices, exterior_indices, radius, 
 
 
 def rendered_installation_reference(asset):
-    data = json.loads(Path(asset).read_text())
+    data = json.loads(Path(asset).read_text(encoding='utf-8'))
     s, shell = data['scalars'], data['shell']
     center_x = shell['nacelle_x_bias'] * s['OverHang']
     center_z = s['TowerHt'] + s['Twr2Shft'] + .15
@@ -265,9 +265,9 @@ def main():
         parser.error('--hardware-radius-m must be finite and positive')
     if args.output.exists():
         parser.error('--output must be a new file; existing evidence is preserved')
-    config = json.loads(args.calibration.read_text())
+    config = json.loads(args.calibration.read_text(encoding='utf-8'))
     origins, _, _ = validate_calibration(config)
-    manifest = json.loads((args.source/'manifest.json').read_text())
+    manifest = json.loads((args.source/'manifest.json').read_text(encoding='utf-8'))
     results = []
     for tid in manifest['turbine_ids']:
         source = SourceGeometry(args.source, tid)
@@ -301,7 +301,7 @@ def main():
                   implementation_sha256=digest(Path(__file__)))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     # Exclusive creation also protects against another process writing this path.
-    with args.output.open('x') as stream:
+    with args.output.open('x', encoding='utf-8') as stream:
         json.dump(result, stream, ensure_ascii=False, allow_nan=False, indent=2)
         stream.write('\n')
     print(args.output.resolve(), flush=True)

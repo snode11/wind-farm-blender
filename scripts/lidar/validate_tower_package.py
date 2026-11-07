@@ -25,10 +25,10 @@ def validate(package,output):
             errors.append(compare(actual,ref,axes,d['simulation'][i,b-1])['error'])
     maximum=np.max(np.abs(errors),axis=0)
     if np.max(maximum)>.0002:raise ValueError('Structural deflection disagreement: '+str(maximum))
-    data=json.loads((Path(package)/'data.json').read_text())
+    data=json.loads((Path(package)/'data.json').read_text(encoding='utf-8'))
     result=dict(status='PASS',saved_tips=len(errors),max_error_m=maximum.tolist(),
         tower_station_count=len(support['heights']),statistics={tid:p['statistics'] for tid,p in data.items()})
-    Path(output).write_text(json.dumps(result,indent=2)+'\n')
+    Path(output).write_text(json.dumps(result,indent=2)+'\n', encoding='utf-8')
     print(json.dumps(result))
 
 

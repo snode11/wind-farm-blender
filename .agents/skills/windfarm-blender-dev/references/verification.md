@@ -29,7 +29,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest <选定
 <Blender可执行文件> --background --factory-startup --python-exit-code 1 --python <支持源码后台的脚本路径>
 ```
 
-源码约定守卫随宿主测试运行：`test_text_io_encoding.py` 要求扩展源码的文本读写显式 UTF-8，`test_blender_script_registry.py` 要求 `blender_frontend/tests/blender/` 下的每个原生脚本（下划线开头的共享模块除外）已登记到 `run_regressions.py`，或在本目录专题、`docs/blender/`、`wfrl/lidar/README.md` 或 `scripts/blender/` 驱动脚本中写明手动入口。修改相应源码或新增原生脚本时一并运行。`test_blender_subprocess_bytecode.py` 要求工作区源码 Blender 子进程在加载模块前设置 `sys.dont_write_bytecode = True`；`test_static_names.py` 用 pyflakes 检查未定义名称、本地导入名及安装烟测引用的面板，未安装 pyflakes 时跳过，`CI=true` 时失败。
+源码约定守卫随宿主测试运行：`test_text_io_encoding.py` 要求扩展源码的文本读写显式 UTF-8；`test_text_encoding_guard.py` 扫描 `blender_frontend/wfrl_blender/`、`wfrl/` 和 `scripts/` 的 Python 产品代码，要求文件、socket 和子进程的文本 I/O 显式指定编码，二进制接口不受约束，本地编码例外逐调用列明原因。`test_blender_script_registry.py` 要求 `blender_frontend/tests/blender/` 下的每个原生脚本（下划线开头的共享模块除外）已登记到 `run_regressions.py`，或在本目录专题、`docs/blender/`、`wfrl/lidar/README.md` 或 `scripts/blender/` 驱动脚本中写明手动入口。修改相应源码或新增原生脚本时一并运行。`test_blender_subprocess_bytecode.py` 要求工作区源码 Blender 子进程在加载模块前设置 `sys.dont_write_bytecode = True`；`test_static_names.py` 用 pyflakes 检查未定义名称、本地导入名及安装烟测引用的面板，未安装 pyflakes 时跳过，`CI=true` 时失败。
 
 宿主夹具的平台差异集中在 `blender_frontend/tests/_platform.py`：venv 解释器路径、Python 工具脚本及符号链接创建（无法创建时跳过并附原因）。Windows 分支在 macOS 上以模拟测试覆盖，Windows 实机结果以 `windows-host` 任务为准，见[自动检查](../../../../docs/development/自动检查.md#windows-前端宿主检查)。
 

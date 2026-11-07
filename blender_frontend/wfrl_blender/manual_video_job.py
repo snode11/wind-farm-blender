@@ -338,7 +338,7 @@ def _stop_group(process, *, grace=1.0):
         except PermissionError:
             # Darwin can report EPERM when a group contains only zombies.
             listing = subprocess.run(['/bin/ps', '-A', '-o', 'pgid=,stat='],
-                                     check=True, capture_output=True, text=True).stdout
+                                     check=True, capture_output=True, text=True, encoding='utf-8').stdout
             live = any(int(parts[0]) == process.pid and not parts[1].startswith('Z')
                        for line in listing.splitlines() if len(parts := line.split()) == 2)
             if not _exited(process) or live:

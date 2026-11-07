@@ -8,7 +8,7 @@ from wfrl.lidar.replay import precompute
 
 
 def save_json(path, data):
-    Path(path).write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':'), allow_nan=False))
+    Path(path).write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':'), allow_nan=False), encoding='utf-8')
 
 
 def reference_payload(config, sources):
@@ -22,7 +22,7 @@ def reference_payload(config, sources):
 
 def package(source, output):
     source, output = Path(source), Path(output)
-    m = json.loads((source/'manifest.json').read_text())
+    m = json.loads((source/'manifest.json').read_text(encoding='utf-8'))
     for name, digest in m['files'].items():
         assert hashlib.sha256((source/name).read_bytes()).hexdigest() == digest
     with np.load(source/'probe.npz', allow_pickle=False) as a:
@@ -40,7 +40,7 @@ def package(source, output):
         motion.append(dict(time_s=float(t),yaw_deg=p[0],azimuth_deg=p[1],rotor_speed_rpm=p[2],pitch_deg=p[3:].tolist(),
             nacelle_transform=n.tolist(),nacelle_position_m=(n[:,:3]@[0,0,87.6]+n[:,3]).tolist(),
             nacelle_orientation_deg=Rotation.from_matrix(n[:,:3]).as_euler('xyz',degrees=True).tolist()))
-    rows=json.loads((source/'measurements.json').read_text())
+    rows=json.loads((source/'measurements.json').read_text(encoding='utf-8'))
     rows=[r for r in rows if abs(r['angle_deg'])<=3]
     from wfrl.lidar.moving_tower import tip_surface_clearance
     for r in rows:

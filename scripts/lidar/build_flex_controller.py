@@ -15,7 +15,7 @@ def build(output, rotor_target_rpm=12.1):
     output = Path(output)
     output.mkdir(parents=True, exist_ok=False)
     source = ROOT/'wfcrl-env/wfcrl/simulators/fastfarm/src/DISCON/DISCON.F90'
-    original = source.read_text()
+    original = source.read_text(encoding='utf-8')
     original = original.replace('PC_MaxRat     =       0.01745329',
                                 'PC_MaxRat     =       0.1396263')
     if not 9 <= rotor_target_rpm <= 12.1:
@@ -44,7 +44,7 @@ def build(output, rotor_target_rpm=12.1):
                 ENDDO
             ENDIF''')
     patched = output/'DISCON.F90'
-    patched.write_text(original[:begin]+block+original[end:])
+    patched.write_text(original[:begin]+block+original[end:], encoding='utf-8')
     dll = output/'DISCON.dll'
     command = ['gfortran', '-dynamiclib', '-ffree-line-length-none',
                '-fdefault-real-8', '-fcheck=all', '-DIMPLICIT_DLLEXPORT',
@@ -56,7 +56,7 @@ def build(output, rotor_target_rpm=12.1):
                     binary_sha256=hashlib.sha256(dll.read_bytes()).hexdigest(),
                     command=command,rotor_target_rpm=rotor_target_rpm,
                     change='Restore native pitch; pitch command slew 8 deg/s; yaw command rate 0.3 deg/s; explicit rotor target')
-    (output/'build.json').write_text(json.dumps(metadata, indent=2))
+    (output/'build.json').write_text(json.dumps(metadata, indent=2), encoding='utf-8')
     return dll
 
 

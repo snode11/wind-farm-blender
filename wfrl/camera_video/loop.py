@@ -101,7 +101,7 @@ def verify_loop(directory, *, ffprobe='ffprobe'):
     report = validate_video(root / 'video.mp4', root / 'frames.csv', fps, ffprobe=ffprobe)
     duration_info = json.loads(subprocess.check_output(
         [ffprobe, '-v', 'error', '-select_streams', 'v:0', '-show_entries',
-         'stream=duration:format=duration', '-of', 'json', str(root / 'video.mp4')], text=True))
+         'stream=duration:format=duration', '-of', 'json', str(root / 'video.mp4')], text=True, encoding='utf-8'))
     durations = [float(duration_info['format']['duration']),
                  float(duration_info['streams'][0]['duration'])]
     if not all(math.isclose(value, len(rows) / fps, rel_tol=0, abs_tol=1e-6) for value in durations):
@@ -143,7 +143,7 @@ def build_loop(source_dir, output_dir, *, repeats=5, ffmpeg='ffmpeg', ffprobe='f
     rows = read_frames(stage / 'source/frames.csv')
     fps = source['fps']
     labels = list(repeated_rows(rows, repeats, fps, source['dataset_id']))
-    with (stage / 'frames.csv').open('w', newline='') as handle:
+    with (stage / 'frames.csv').open('w', newline='', encoding='utf-8') as handle:
         writer = csv.DictWriter(handle, fieldnames=list(labels[0]))
         writer.writeheader()
         writer.writerows(labels)

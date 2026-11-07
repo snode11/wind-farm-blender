@@ -176,7 +176,7 @@ def freeze(output):
     exceptions = " ".join(f"(require-not (literal {quote(path)}))" for path in allowed)
     read_rule = f"(deny file-read-data (require-all (subpath {quote(str(REPOSITORY))}) {exceptions} (require-not (subpath {quote(str(output))}))))"
     write_rule = f"(deny file-write* (require-all (subpath {quote(str(REPOSITORY))}) (require-not (subpath {quote(str(output))}))))"
-    (output / "extract_isolation.sb").write_text("(version 1)\n(allow default)\n(deny network*)\n" + read_rule + "\n" + write_rule + "\n")
+    (output / "extract_isolation.sb").write_text("(version 1)\n(allow default)\n(deny network*)\n" + read_rule + "\n" + write_rule + "\n", encoding='utf-8')
     print(json.dumps({"status": "POLICY_FROZEN_BEFORE_EXTRACTION", "policy": str(output / "extract_policy.json")}))
 
 
@@ -252,7 +252,7 @@ def extract(policy_path):
     plane["payload_sha256"] = digest(canonical(plane))
     write_new(output / "rigid_plane.json", plane)
     plane_hash = digest((output / "rigid_plane.json").read_bytes())
-    (output / "rigid_plane.json.sha256").write_text(plane_hash + "  rigid_plane.json\n")
+    (output / "rigid_plane.json.sha256").write_text(plane_hash + "  rigid_plane.json\n", encoding='utf-8')
     report = {"status": "RIGID_PLANE_EXTRACTED_VALIDATED", "checks": checks,
               "plane_sha256": plane_hash, "payload_sha256": plane["payload_sha256"],
               "extract_policy_sha256": digest(policy_bytes), "extractor_sha256": policy["script_sha256"],

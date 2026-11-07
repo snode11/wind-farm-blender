@@ -17,12 +17,12 @@ def validate_sources(name, cfg, evidence):
     configs, datasets, sources = [], [], []
     for run_name in names:
         run = ROOT/'results/lidar/raw'/run_name
-        config = json.loads((run/'run_config.json').read_text())
+        config = json.loads((run/'run_config.json').read_text(encoding='utf-8'))
         require(config.get('name') == run_name, 'run_config name mismatch')
-        status = json.loads((run/'exit_status.json').read_text())
-        require(status.get('exit_code') == 0 and 'FAST.Farm terminated normally.' in (run/'solver.log').read_text(), 'solver incomplete')
+        status = json.loads((run/'exit_status.json').read_text(encoding='utf-8'))
+        require(status.get('exit_code') == 0 and 'FAST.Farm terminated normally.' in (run/'solver.log').read_text(encoding='utf-8'), 'solver incomplete')
         configs.append(config)
-        datasets.append(json.loads((run/'processed.json').read_text()))
+        datasets.append(json.loads((run/'processed.json').read_text(encoding='utf-8')))
         sources.extend(run/p for p in ('run_config.json', 'exit_status.json', 'solver.log', 'processed.json'))
     b, space, time = configs
     # Historical base runs predate source_case; never invent a missing path.
@@ -42,23 +42,23 @@ def validate_sources(name, cfg, evidence):
     return sources
 
 def upgrade(run):
-    draft=json.loads((run/'processed.json').read_text());cal=Calibration()
+    draft=json.loads((run/'processed.json').read_text(encoding='utf-8'));cal=Calibration()
     for r in draft['measurements']:
         for name,direction in zip(('B1','B2','B3'),cal.directions()):
             b=r['beams'][name];hit=background_first_hit(cal.origin_m,direction)
             if hit and (b['slant_range_m'] is None or hit[0]<b['slant_range_m']):
                 b.update(valid=False,slant_range_m=hit[0],hit_point_m=hit[1],estimate_m=None,error_m=None,reason=hit[2])
-    lines=(run/'FarmInputs/Case.T1.out').read_text().splitlines();header=next(i for i,l in enumerate(lines) if l.startswith('Time\t'));names=lines[header].split();state=np.loadtxt(lines[header+2:]);phase=np.degrees(np.unwrap(np.radians(state[:,names.index('Azimuth')])));cfg=json.loads((run/'run_config.json').read_text())
+    lines=(run/'FarmInputs/Case.T1.out').read_text(encoding='utf-8').splitlines();header=next(i for i,l in enumerate(lines) if l.startswith('Time\t'));names=lines[header].split();state=np.loadtxt(lines[header+2:]);phase=np.degrees(np.unwrap(np.radians(state[:,names.index('Azimuth')])));cfg=json.loads((run/'run_config.json').read_text(encoding='utf-8'))
     for m in draft['motion']:m['azimuth_deg']=float(phase[round(m['time_s']*cfg['fps'])])
     draft['background_geometry']='opaque plane z=0 and rigid cone radii 3m at z0,1.935m at z87.6; first positive intersection competes with all three blades'
     # Upgrade only in memory: publication never writes into the archived raw run.
     target=run/'processed-v2.json'
-    if target.exists() and json.loads(target.read_text())!=draft:
+    if target.exists() and json.loads(target.read_text(encoding='utf-8'))!=draft:
         raise ValueError('existing processed-v2 differs; preserve it and use a new run directory')
     return draft
 
 def publish(name,segment,validation_path,destination=None):
-    run=ROOT/'results/lidar/raw'/name;cfg=json.loads((run/'run_config.json').read_text());v=json.loads(Path(validation_path).read_text())
+    run=ROOT/'results/lidar/raw'/name;cfg=json.loads((run/'run_config.json').read_text(encoding='utf-8'));v=json.loads(Path(validation_path).read_text(encoding='utf-8'))
     source_paths=validate_sources(name,cfg,v)
     d=upgrade(run)
     if not d['collision_excluded']:raise ValueError('collision exclusion unresolved')

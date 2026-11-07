@@ -71,12 +71,12 @@ def run(args):
     frozen = {'schema': 'nrel-static-tip-map-inputs.v1', 'files': signatures,
               'scope': 'Static tables, static source provenance and saved video model only',
               'flexible_truth_read': False}
-    (out / 'input_freeze.json').write_text(json.dumps(frozen, indent=2) + '\n')
-    aero = declared_table(paths['aerodyn'].read_text(), 'NumBlNds', 'BlSpn', 7)
-    beam = declared_table(paths['beamdyn'].read_text(), 'kp_total', 'kp_xr', 4)
-    reference = json.loads(paths['reference'].read_text())
-    source = json.loads(paths['source_run'].read_text())['blade_config']
-    geometry = json.loads(paths['geometry_scalars'].read_text())
+    (out / 'input_freeze.json').write_text(json.dumps(frozen, indent=2) + '\n', encoding='utf-8')
+    aero = declared_table(paths['aerodyn'].read_text(encoding='utf-8'), 'NumBlNds', 'BlSpn', 7)
+    beam = declared_table(paths['beamdyn'].read_text(encoding='utf-8'), 'kp_total', 'kp_xr', 4)
+    reference = json.loads(paths['reference'].read_text(encoding='utf-8'))
+    source = json.loads(paths['source_run'].read_text(encoding='utf-8'))['blade_config']
+    geometry = json.loads(paths['geometry_scalars'].read_text(encoding='utf-8'))
     if reference.get('schema') != 'wfrl.blade-reference.v1':
         raise ValueError('Unsupported static structural reference')
     for name in ('aerodyn', 'beamdyn'):
@@ -103,7 +103,7 @@ def run(args):
     ac_b = np.array([terminal[1], terminal[2], terminal[0]])
     delta = material_offset(ac_b, structural_b, anchor_span_m=terminal[0])
     candidate = DynamicBladeReference.from_model_state(paths['model'])
-    metadata = json.loads(paths['model'].read_text())['models']['T1_B1']
+    metadata = json.loads(paths['model'].read_text(encoding='utf-8'))['models']['T1_B1']
     template = BladeModel(candidate.span_samples, candidate.ring_samples,
                           len(metadata['control_z_m']), interpolation=metadata['interpolation'])
     model_chord = float(template.base_chord[-1]) * float(np.exp(metadata['control_chord_log_scale'][-1]))
@@ -140,8 +140,8 @@ def run(args):
         'files': signatures,
     }
     changed = [p for p, h in signatures.items() if digest(p) != h]
-    (out / 'mapping_audit.json').write_text(json.dumps(result, indent=2) + '\n')
-    (out / 'post_run_integrity.json').write_text(json.dumps({'unchanged': not changed, 'changed': changed}, indent=2) + '\n')
+    (out / 'mapping_audit.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
+    (out / 'post_run_integrity.json').write_text(json.dumps({'unchanged': not changed, 'changed': changed}, indent=2) + '\n', encoding='utf-8')
     if changed:
         raise ValueError('Static mapping audit input changed during execution')
     print(json.dumps({k: result[k] for k in ('status', 'source_ac_to_structural_offset_B_m', 'candidate_endpoint_chord_m', 'candidate_mapping')}))

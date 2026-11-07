@@ -20,7 +20,7 @@ from wfrl.lidar.moving_tower import horizontal_clearance, tip_surface_clearance
 
 
 def write_json(path, value):
-    path.write_text(json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(',', ':'))+'\n')
+    path.write_text(json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(',', ':'))+'\n', encoding='utf-8')
 
 
 def installation(output, config):
@@ -65,7 +65,7 @@ def installation(output, config):
 <text x="330" y="560">{'Simulation mount selected; see saved-pose audit.' if selected else 'Old mount retained only for diagnosis.'}</text>
 <text x="36" y="690">Equal-scale side projection; lateral offset annotated; physical installation not certified.</text>
 </g></svg>'''
-    (output/'installation.svg').write_text(svg)
+    (output/'installation.svg').write_text(svg, encoding='utf-8')
     return audit
 
 
@@ -104,7 +104,7 @@ def process(source, config):
     method = config.get('reconstruction_method', 'hub-axis.v1')
     if method not in METHOD_VERSIONS:
         raise ValueError('Unsupported dual-beam reconstruction method')
-    reference = json.loads((source.path/'blade-reference.json').read_text())
+    reference = json.loads((source.path/'blade-reference.json').read_text(encoding='utf-8'))
     tip_local = np.asarray(reference['tip_local_m'],float)
     if not np.isclose(config['effective_length_m'], np.linalg.norm(tip_local), atol=1e-9, rtol=0):
         raise ValueError('Configured length differs from fixed unloaded hub-to-tip reference')
@@ -112,7 +112,7 @@ def process(source, config):
     if config['status'] == 'SIMULATION_SELECTED':
         if config.get('installation', {}).get('region') != 'INNER_NACELLE':
             raise ValueError('Selected installation must declare INNER_NACELLE')
-        shell = json.loads((ROOT/'blender_frontend/wfrl_blender/assets/nrel5mw_geometry.json').read_text())['shell']
+        shell = json.loads((ROOT/'blender_frontend/wfrl_blender/assets/nrel5mw_geometry.json').read_text(encoding='utf-8'))['shell']
         center_x = shell['nacelle_x_bias']*source.scalars['OverHang']
         rest_hub, _ = blade_root_frame(source.scalars, [0]*6, 1, rest_nacelle)
         validate_inner_origins(origins, rest_hub, source.scalars['ShftTilt'],
@@ -198,7 +198,7 @@ def main():
     parser.add_argument('--method', choices=tuple(METHOD_VERSIONS),
                         help='Override reconstruction method; absent retains calibration or legacy default')
     args=parser.parse_args()
-    config=json.loads(args.calibration.read_text())
+    config=json.loads(args.calibration.read_text(encoding='utf-8'))
     method=args.method or config.get('reconstruction_method', 'hub-axis.v1')
     if method not in METHOD_VERSIONS:
         raise ValueError('Unsupported dual-beam reconstruction method')
@@ -211,7 +211,7 @@ def main():
     write_json(output/'calibration.json',config)
     audit=installation(output,config)
     results={}
-    source_manifest=json.loads((args.source/'manifest.json').read_text())
+    source_manifest=json.loads((args.source/'manifest.json').read_text(encoding='utf-8'))
     for tid in source_manifest['turbine_ids']:
         source=SourceGeometry(args.source,tid)
         results[tid]=process(source,config)
@@ -258,7 +258,7 @@ def main():
               ('当前安装位已按仿真源几何选定，实体安装仍待现场核验；不能用插值替代采样验收。'
                if config['status']=='SIMULATION_SELECTED' else
                '当前仅诊断标定；先确认安装布局再决定是否加密真实几何输出，不能用插值替代采样验收。')]
-    (output/'report.md').write_text('\n'.join(lines)+'\n')
+    (output/'report.md').write_text('\n'.join(lines)+'\n', encoding='utf-8')
     print(output,flush=True)
 
 

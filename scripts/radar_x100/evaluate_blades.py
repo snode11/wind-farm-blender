@@ -442,7 +442,7 @@ def main():
         scene.wfrl_x100_candidates = args.candidates
         session = runtime.start(scene)
         if args.search_report:
-            runtime.apply_mount_preset(scene, 'SEARCH', search_report=json.loads(args.search_report.read_text()))
+            runtime.apply_mount_preset(scene, 'SEARCH', search_report=json.loads(args.search_report.read_text(encoding='utf-8')))
         sampler = session.sampler
         times = np.array(list(sample_times(*sampler.interval,30)))
         phase = np.interp(times, sampler.flex.times, sampler.flex.poses[:,sampler.k,1])
@@ -508,7 +508,7 @@ def main():
             truth_boundary='saved structural tip and material triangle labels used only for evaluation after estimation',
             evaluation_scope='same-source geometry experiment; no field accuracy or safety acceptance')
         args.output.parent.mkdir(parents=True,exist_ok=True)
-        with args.output.open('x') as stream:
+        with args.output.open('x', encoding='utf-8') as stream:
             json.dump(report,stream,ensure_ascii=False,allow_nan=False,indent=2)
         print('X100_ESTIMATION_COMPLETE',args.output,flush=True)
         if unknown:

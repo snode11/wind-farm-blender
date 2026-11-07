@@ -78,7 +78,7 @@ def export_reader(reader, package, output, start, duration, wind=None):
     Path(output).parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(output, times=np.array([t for _, t in rows]),
                         transforms=np.asarray(transforms, dtype=np.float32), metadata=json.dumps(metadata))
-    Path(output).with_suffix('.json').write_text(json.dumps(metadata, indent=2))
+    Path(output).with_suffix('.json').write_text(json.dumps(metadata, indent=2), encoding='utf-8')
     print(json.dumps(metadata), flush=True)
 
 

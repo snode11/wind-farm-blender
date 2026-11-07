@@ -8,10 +8,10 @@ import time
 
 
 def main():
-    config = json.loads(open(sys.argv[1]).read())
+    config = json.loads(open(sys.argv[1], encoding='utf-8').read())
     connection = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     connection.connect(config['socket'])
-    commands_stream = connection.makefile('r')
+    commands_stream = connection.makefile('r', encoding='utf-8')
     from wfrl.scene.schema import load_scene
     from wfrl.studio.trainer import Trainer
     from .snapshot_adapter import SnapshotAdapter

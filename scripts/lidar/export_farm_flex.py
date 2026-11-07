@@ -15,9 +15,9 @@ from wfrl.lidar.replay import precompute
 
 def add_provenance(destination,wind_config,controller_build):
     destination=Path(destination)
-    manifest=json.loads((destination/'manifest.json').read_text())
-    wind=json.loads(Path(wind_config).read_text())
-    controller=json.loads(Path(controller_build).read_text())
+    manifest=json.loads((destination/'manifest.json').read_text(encoding='utf-8'))
+    wind=json.loads(Path(wind_config).read_text(encoding='utf-8'))
+    controller=json.loads(Path(controller_build).read_text(encoding='utf-8'))
     if not any(i['path'].endswith('/random-gust.bts') and i['sha256']==manifest['wind_sha256'] for i in wind['inputs']):
         raise ValueError('Wind metadata does not match the run')
     if controller['binary_sha256']!=manifest['controller_sha256']:
@@ -25,12 +25,12 @@ def add_provenance(destination,wind_config,controller_build):
     manifest['wind_profile']=wind['wind_profile']
     manifest['controller_build']=controller
     manifest['wind_config_sha256']=hashlib.sha256(Path(wind_config).read_bytes()).hexdigest()
-    (destination/'manifest.json').write_text(json.dumps(manifest,indent=2))
+    (destination/'manifest.json').write_text(json.dumps(manifest,indent=2), encoding='utf-8')
 
 
 def export(probe, destination, start=117., duration=60., diagnostic=False):
     probe, destination = Path(probe), Path(destination)
-    report = json.loads(probe.read_text())
+    report = json.loads(probe.read_text(encoding='utf-8'))
     if report['status'] != 'CONTROL_PROBE_COMPLETE' and not (
             diagnostic and report.get('physical_checks')
             and all(c['finite'] for c in report['physical_checks'])):
@@ -157,8 +157,8 @@ def export(probe, destination, start=117., duration=60., diagnostic=False):
         cumulative,statistics=precompute(measurements,motion,replay)
         data[tid]=dict(motion=motion,measurements=measurements,cumulative=cumulative,statistics=statistics)
     np.savez_compressed(destination/'geometry.npz',times=times,transforms=transforms,poses=poses)
-    (destination/'data.json').write_text(json.dumps(data,allow_nan=False,separators=(',',':')))
-    (destination/'source-surfaces.json').write_text(json.dumps(hashes,separators=(',',':')))
+    (destination/'data.json').write_text(json.dumps(data,allow_nan=False,separators=(',',':')), encoding='utf-8')
+    (destination/'source-surfaces.json').write_text(json.dumps(hashes,separators=(',',':')), encoding='utf-8')
     if flexible:
         np.savez_compressed(destination/'tower-motion.npz',times=times,heights=tower_heights,
             transforms=np.asarray(tower_transforms,np.float32).swapaxes(0,1),
@@ -185,7 +185,7 @@ def export(probe, destination, start=117., duration=60., diagnostic=False):
     if beamdyn:
         from scripts.lidar.export_prebend_sidecars import supplement
         supplement(destination, report, manifest, times, poses, transforms)
-    (destination/'manifest.json').write_text(json.dumps(manifest,indent=2))
+    (destination/'manifest.json').write_text(json.dumps(manifest,indent=2), encoding='utf-8')
     print('FARM_FLEX_EXPORTED',json.dumps(manifest),flush=True)
 
 

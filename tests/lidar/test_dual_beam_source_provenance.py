@@ -233,7 +233,7 @@ def test_cli_writes_reviewable_json_and_markdown(raw_source):
     report = json.loads((output / 'provenance.json').read_text())
     assert report['saved_samples_checked'] == 6
     assert report['evidence_tool_sha256'] == audit.digest(Path(audit.__file__))
-    text = (output / 'report.md').read_text()
+    text = (output / 'report.md').read_text(encoding='utf-8')
     assert '同源来源核验' in text and '空间与时间收敛未完成' in text
 
 

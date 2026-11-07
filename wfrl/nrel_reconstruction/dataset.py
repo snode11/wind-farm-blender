@@ -31,7 +31,7 @@ REFERENCE_KEYS = {'t_ref_sim_time_s', 'frame_id', 'selection_basis', 'fit_frame_
 def write_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False) + '\n')
+    path.write_text(json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False) + '\n', encoding='utf-8')
 
 
 def probe_video(path):
@@ -39,7 +39,7 @@ def probe_video(path):
             '-show_frames', '-show_entries',
             'stream=width,height,avg_frame_rate,time_base,codec_name:frame=pts,best_effort_timestamp_time',
             '-of', 'json', str(path)]
-    return json.loads(subprocess.run(args, check=True, capture_output=True, text=True).stdout)
+    return json.loads(subprocess.run(args, check=True, capture_output=True, text=True, encoding='utf-8').stdout)
 
 
 def iter_rgb(path, width, height):
@@ -86,7 +86,7 @@ def load_bundle(directory):
     manifest_path = root / 'dataset.json'
     if manifest_path.resolve().parent != root:
         raise ValueError('Dataset manifest resolves outside input directory')
-    data = json.loads(manifest_path.read_text())
+    data = json.loads(manifest_path.read_text(encoding='utf-8'))
     if set(data) != DATASET_KEYS or data['schema'] != 'nrel-single-blade-video.v1':
         raise ValueError('Unsupported dataset schema or unknown dataset fields')
     if data['target'] != 'T1/B1' or data['units'] != {'length': 'm', 'time': 's', 'image': 'px'}:
@@ -140,13 +140,13 @@ def load_bundle(directory):
         path = root / name
         if path.resolve().parent != root or sha256(path) != signature:
             raise ValueError(f'Input path or signature mismatch: {name}')
-    with (root / 'frame_map.csv').open() as f:
+    with (root / 'frame_map.csv').open(encoding='utf-8') as f:
         reader = csv.DictReader(f)
         if set(reader.fieldnames) != {'camera_id', 'frame_id', 'video_pts_s', 'sim_time_s', 'valid'}:
             raise ValueError('Unexpected frame map fields')
         rows = list(reader)
-    calibrations = [json.loads(s) for s in (root / 'camera_calibration.jsonl').read_text().splitlines()]
-    with (root / 'motion_observations.csv').open() as f:
+    calibrations = [json.loads(s) for s in (root / 'camera_calibration.jsonl').read_text(encoding='utf-8').splitlines()]
+    with (root / 'motion_observations.csv').open(encoding='utf-8') as f:
         motion = list(csv.DictReader(f))
     for m in motion:
         m['frame_id'] = int(m['frame_id'])
@@ -221,6 +221,6 @@ def decode_inspection(directory, output, selected_ids=None):
             x, y = j % cols * tile_w, j // cols * tile_h
             canvas.paste(im, (x, y)); draw.text((x+6, y+272), f'{camera} n={i} t={motion[i]["sim_time_s"]:.3f}s', fill='black')
         canvas.save(out / f'{camera}_contact.jpg', quality=90)
-    report['decoder'] = subprocess.run(['ffmpeg', '-version'], check=True, capture_output=True, text=True).stdout.splitlines()[0]
+    report['decoder'] = subprocess.run(['ffmpeg', '-version'], check=True, capture_output=True, text=True, encoding='utf-8').stdout.splitlines()[0]
     write_json(out / 'decode_manifest.json', report)
     return report

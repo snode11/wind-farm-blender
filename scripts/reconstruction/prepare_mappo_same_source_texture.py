@@ -374,7 +374,7 @@ diagnostics = {"frames_checked_by_texture_input_contract": 601,
     "views_by_blade": {str(b): sum(v["blade"] == b for v in views) for b in (1, 2, 3)},
     "projection_checks": checks,
     "warning_explanation": "existing sample_view rounds/casts invalid UV before masking; invalid UV are excluded and zero-weighted; warnings retained in run log"}
-Path(__file__).with_name("sampling_diagnostics.json").write_text(json.dumps(diagnostics, indent=2) + "\\n")
+Path(__file__).with_name("sampling_diagnostics.json").write_text(json.dumps(diagnostics, indent=2) + "\\n", encoding='utf-8')
 ''', encoding="utf-8")
     return runner
 

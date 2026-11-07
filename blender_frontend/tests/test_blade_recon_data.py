@@ -225,7 +225,7 @@ class ReconDataTests(unittest.TestCase):
 class BundledProvenanceTests(unittest.TestCase):
     def test_original_saved_data_and_model_hashes(self):
         assets = default_recon_path().parent
-        manifest = json.loads((assets / 'manifest.json').read_text())
+        manifest = json.loads((assets / 'manifest.json').read_text(encoding='utf-8'))
         self.assertEqual(manifest['source_classification'], 'SYNTHETIC')
         self.assertEqual(manifest['model']['sha256'], EXPECTED_MODEL_SHA256)
         self.assertEqual(MODEL_SHA256, EXPECTED_MODEL_SHA256)
@@ -256,7 +256,7 @@ class BundledProvenanceTests(unittest.TestCase):
             self.assertEqual(A.shape, (3, 40, 3))
 
     def test_geometry_equals_original_source_import(self):
-        manifest = json.loads(default_recon_path().with_name('manifest.json').read_text())
+        manifest = json.loads(default_recon_path().with_name('manifest.json').read_text(encoding='utf-8'))
         source = Path(manifest['model']['source_path'])
         if not source.is_file():
             self.skipTest('Original boss source is unavailable; portable bundle hash tested separately')

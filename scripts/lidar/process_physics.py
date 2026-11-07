@@ -8,9 +8,9 @@ from wfrl.lidar.physics import Calibration,read_surface,tip_reference,truth_clea
 def process(run,evaluation_only=False):
     run=Path(run)
     if (run/'processed.json').exists():raise FileExistsError(run/'processed.json')
-    config=json.loads((run/'run_config.json').read_text());fps=config['fps'];start=config['startup_discard_s'];end=config['duration_s'];sections=37 if config['span_refined'] else 19
-    if json.loads((run/'exit_status.json').read_text())['exit_code']!=0 or 'FAST.Farm terminated normally.' not in (run/'solver.log').read_text():raise ValueError('solver not completed')
-    farm=run/'FarmInputs';lines=(farm/'Case.T1.out').read_text().splitlines();header=next(i for i,l in enumerate(lines) if l.startswith('Time\t'))
+    config=json.loads((run/'run_config.json').read_text(encoding='utf-8'));fps=config['fps'];start=config['startup_discard_s'];end=config['duration_s'];sections=37 if config['span_refined'] else 19
+    if json.loads((run/'exit_status.json').read_text(encoding='utf-8'))['exit_code']!=0 or 'FAST.Farm terminated normally.' not in (run/'solver.log').read_text(encoding='utf-8'):raise ValueError('solver not completed')
+    farm=run/'FarmInputs';lines=(farm/'Case.T1.out').read_text(encoding='utf-8').splitlines();header=next(i for i,l in enumerate(lines) if l.startswith('Time\t'))
     names=lines[header].split();state=np.loadtxt(lines[header+2:]);col={k:i for i,k in enumerate(names)}
     # OpenFAST ASCII time uses four decimals regardless of OutFmt; index grid restores
     # the configured physical output times only after bounded rounding validation.
@@ -55,9 +55,9 @@ def process(run,evaluation_only=False):
     for fs in ([] if evaluation_only else files.values()):
         for p in fs:
             hashes.append(dict(path=str(p.relative_to(run)),sha256=hashlib.sha256(p.read_bytes()).hexdigest()))
-    if not evaluation_only:(run/'surface_hashes.json').write_text(json.dumps(hashes,separators=(',',':')))
+    if not evaluation_only:(run/'surface_hashes.json').write_text(json.dumps(hashes,separators=(',',':')), encoding='utf-8')
     output=dict(motion=motion,measurements=measurements,collision_excluded=all(collisions) if collisions else None,evaluation_only=evaluation_only,collision_certificates=len(collisions),calibration=dict(origin_m=list(calibration.origin_m),beam_directions=[d.tolist() for d in calibration.directions()],angles_deg=list(calibration.angles_deg),y_lidar_m=calibration.y_lidar_m,r_tip_m=calibration.r_tip_m,min_range_m=calibration.min_range_m,max_range_m=calibration.max_range_m),passage_mean_truth_m={p:float(np.mean(v)) for p,v in true_passages.items()},tip_reference='perimeter-coordinate centroid of outermost AeroDyn airfoil section; not global surface collision clearance')
-    target=run/'processed.json';target.write_text(json.dumps(output,indent=2,allow_nan=False));print(target,flush=True)
+    target=run/'processed.json';target.write_text(json.dumps(output,indent=2,allow_nan=False), encoding='utf-8');print(target,flush=True)
     print('B2',sum(r['beams']['B2']['valid'] for r in measurements),'/',len(measurements),'collision',all(collisions) if collisions else 'not_checked_evaluation_only',flush=True)
     return output
 if __name__=='__main__':

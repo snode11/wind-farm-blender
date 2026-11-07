@@ -25,8 +25,8 @@ from wfrl_blender.turbine_geometry import geometry_data
 
 def export(run, reference, output):
     run, reference, output = map(Path, (run, reference, output))
-    config = json.loads((run/'probe-config.json').read_text())
-    rest_config = json.loads((reference/'probe-config.json').read_text())
+    config = json.loads((run/'probe-config.json').read_text(encoding='utf-8'))
+    rest_config = json.loads((reference/'probe-config.json').read_text(encoding='utf-8'))
     if (config['structural_module'] != 'BeamDyn' or not rest_config['unloaded']
             or config['reference_curve'] != rest_config['reference_curve']):
         raise ValueError('A matching unloaded BeamDyn reference is required')
@@ -112,7 +112,7 @@ def export(run, reference, output):
         nacelles=nacelles,tower_reference=tref,tower_triangles=triangles_tower,
         tower_heights=heights,tower_rings=rings,towers=towers,
         actual_tip=actuals,rigid_tip=rigid_tips,components=deltas,solver_components=solver)
-    (output/'measurements.json').write_text(json.dumps(measurements,indent=2,allow_nan=False))
+    (output/'measurements.json').write_text(json.dumps(measurements,indent=2,allow_nan=False), encoding='utf-8')
     manifest = dict(schema='wfrl.beamdyn-interface-probe.v1',status='INTERFACE_ONLY',
         model=config['model'],structural_module='BeamDyn',turbine_ids=['T1'],
         reference='Separate zero-gravity, still-air, stationary-rotor solve; no loaded-frame reference',
@@ -124,7 +124,7 @@ def export(run, reference, output):
         mapping='Ordered AeroDyn contours fitted independently of BeamDyn nodes; structural tip transported by terminal-section transform',
         sources=hashes,files={name:hashlib.sha256((output/name).read_bytes()).hexdigest() for name in ('probe.npz','measurements.json')},
         boundary='Single turbine prescribed 9 rpm / steady 8 m/s / startup segment. No MAPPO, no production three-turbine package or field accuracy claim.')
-    (output/'manifest.json').write_text(json.dumps(manifest,indent=2))
+    (output/'manifest.json').write_text(json.dumps(manifest,indent=2), encoding='utf-8')
     print(json.dumps({k:manifest[k] for k in ('schema','max_surface_fit_error_m','max_component_error_m')}))
 
 

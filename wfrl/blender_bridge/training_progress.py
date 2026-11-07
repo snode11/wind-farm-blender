@@ -65,7 +65,7 @@ class TrainingProgressWriter:
         self.failed = True
         # Separate status file reports logging failure without parsing stdout.
         try:
-            Path(self.path + '.error').write_text('Training observability write failed: ' + str(exc))
+            Path(self.path + '.error').write_text('Training observability write failed: ' + str(exc), encoding='utf-8')
         except OSError:
             pass
         print('TRAINING_OBSERVABILITY_ERROR: ' + str(exc), flush=True)

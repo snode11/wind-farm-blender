@@ -165,7 +165,7 @@ class IsolatedTrainer:
                 return
             if self._cancelled:
                 self._send('stop')
-            with self._connection.makefile('r') as stream:
+            with self._connection.makefile('r', encoding='utf-8') as stream:
                 for line in stream:
                     self._remember_children()
                     record = json.loads(line)

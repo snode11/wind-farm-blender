@@ -113,7 +113,7 @@ def _inside_blender(output: Path, source_root: Path) -> None:
 
 def _run(command: list[str], env: dict[str, str], log: list[str], *, cwd: Path) -> None:
     completed = subprocess.run(command, cwd=cwd, env=env, text=True,
-                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8')
     log.append("$ " + " ".join(command) + "\n" + completed.stdout)
     if completed.returncode:
         raise subprocess.CalledProcessError(completed.returncode, command, completed.stdout)

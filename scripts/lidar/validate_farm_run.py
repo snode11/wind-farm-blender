@@ -10,9 +10,9 @@ from scripts.experiments.calib_blade_flex import read_fast_out
 def validate(probe,solver_log,output,start=117.,duration=60.,legacy_yaw_radians=False):
     probe,solver_log,output=Path(probe),Path(solver_log),Path(output)
     if output.exists():raise FileExistsError(output)
-    log=solver_log.read_text(errors='replace')
+    log=solver_log.read_text(errors='replace', encoding='utf-8')
     if 'FAST.Farm terminated normally.' not in log:raise ValueError('Solver did not finish')
-    report=json.loads(probe.read_text());farm=Path(report['case_dir'])/'FarmInputs'
+    report=json.loads(probe.read_text(encoding='utf-8'));farm=Path(report['case_dir'])/'FarmInputs'
     report['original_probe_sha256']=hashlib.sha256(probe.read_bytes()).hexdigest()
     report['solver_log_sha256']=hashlib.sha256(solver_log.read_bytes()).hexdigest()
     report['source_outputs']={};report['physical_checks']=[]
@@ -42,7 +42,7 @@ def validate(probe,solver_log,output,start=117.,duration=60.,legacy_yaw_radians=
     report['segment']=dict(start_s=start,end_s=start+duration)
     report['status']='CONTROL_PROBE_COMPLETE' if all(c['passed'] for c in report['physical_checks']) else 'FAILED'
     report.pop('error',None)
-    output.write_text(json.dumps(report,indent=2,allow_nan=False))
+    output.write_text(json.dumps(report,indent=2,allow_nan=False), encoding='utf-8')
     if report['status']=='FAILED':raise ValueError('Native interval audit failed')
     print(json.dumps(report['physical_checks']),flush=True)
 

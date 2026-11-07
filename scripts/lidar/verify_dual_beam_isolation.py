@@ -238,7 +238,7 @@ def validate_replay_contract(source, overlay, turbine_id):
 
 def audit_postprocess_boundary(path=ROOT / 'scripts/lidar/postprocess_dual_beam.py'):
     """Check the actual direct dependencies, hub provenance and branch order."""
-    tree = ast.parse(Path(path).read_text())
+    tree = ast.parse(Path(path).read_text(encoding='utf-8'))
     process = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == 'process')
     calls = [node for node in ast.walk(process)
              if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == 'reconstruct']
@@ -425,7 +425,7 @@ def main():
     args = parser.parse_args()
     report = verify_packages(args.package)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, ensure_ascii=False, allow_nan=False, indent=2) + '\n')
+    args.output.write_text(json.dumps(report, ensure_ascii=False, allow_nan=False, indent=2) + '\n', encoding='utf-8')
     print(report['status'], report['rows'], 'rows', args.output, flush=True)
     raise SystemExit(0 if report['status'] == 'PASS' else 1)
 

@@ -219,7 +219,7 @@ def run_audit(source_dir, output_dir):
     output.mkdir(parents=True, exist_ok=True)
     paths = [source/"reconstruction"/n for n in ("model_state.json", "T1_B1.ply", "frozen_config.json")]
     paths += [source/"observations/observations.json", source/"model_freeze.json"]
-    state, observations = json.loads(paths[0].read_text()), json.loads(paths[3].read_text())
+    state, observations = json.loads(paths[0].read_text(encoding='utf-8')), json.loads(paths[3].read_text(encoding='utf-8'))
     expected = {(c, f) for c in ("C1", "C2", "C3") for f in (42, 43, 44, 45)}
     if len(observations) != 12 or {(o["camera_id"], o["frame_id"]) for o in observations} != expected:
         raise ValueError("Expected the fixed 12 observations")
@@ -229,7 +229,7 @@ def run_audit(source_dir, output_dir):
     code_paths = [Path(__file__).resolve().parent/name for name in
                   ("center_scale_audit.py", "parameter_audit.py", "model.py", "contour.py", "optimize.py", "renderer.py", "diagnostics.py")]
     hashes = {str(p): sha256(p) for p in paths+code_paths}
-    freeze = json.loads(paths[4].read_text())
+    freeze = json.loads(paths[4].read_text(encoding='utf-8'))
     if hashes[str(paths[1])] != freeze["sha256"]["reconstruction/T1_B1.ply"]:
         raise ValueError("Frozen formal mesh signature mismatch")
     model = restore_model(state["models"]["T1_B1"])
@@ -271,9 +271,9 @@ def run_audit(source_dir, output_dir):
         geometry_checks=geometry_checks,
         predeclared_interpretation="Persistent weak response after removing center drift means the parameter convention alone is insufficient; it does not identify the unique cause or establish confidence intervals.")
     protocol_path = output/"frozen_protocol.json"
-    protocol_path.write_text(json.dumps(protocol, indent=2, allow_nan=False)+"\n")
+    protocol_path.write_text(json.dumps(protocol, indent=2, allow_nan=False)+"\n", encoding='utf-8')
     protocol_hash = sha256(protocol_path)
-    (output/"frozen_protocol.sha256").write_text(protocol_hash+"  frozen_protocol.json\n")
+    (output/"frozen_protocol.sha256").write_text(protocol_hash+"  frozen_protocol.json\n", encoding='utf-8')
     # This is saved before _prepare and before a single real image evaluation.
     np.savez_compressed(output/"geometry_variants.npz", vertices=np.stack([m().numpy() for _, _, m in variants]),
                         faces=model.faces.numpy(), mode=np.array([x[0] for x in variants]),
@@ -336,7 +336,7 @@ def run_audit(source_dir, output_dir):
             "Raw unsigned O2C derivatives/SVD are local diagnostic responses, not uncertainty or global identifiability.",
             "Fit/nonblind are always separate; 44/45 are previously viewed and cannot become blind validation.",
             "No geometric accuracy, acceptable application tolerance or unique degeneration cause is established by this forward suite."])
-    (output/"center_scale_audit.json").write_text(json.dumps(report, indent=2, allow_nan=False)+"\n")
+    (output/"center_scale_audit.json").write_text(json.dumps(report, indent=2, allow_nan=False)+"\n", encoding='utf-8')
     arrays = {}
     for i, vector in enumerate(vectors):
         for key, value in vector.items(): arrays[f"r{i:04d}_{key}"] = value
@@ -350,7 +350,7 @@ def run_audit(source_dir, output_dir):
             for direction in ("c2o", "o2c"):
                 row.update({f"{direction}_{k}": v for k, v in region[direction].items()})
             flat.append(row)
-    with (output/"per_observation.csv").open("w", newline="") as handle:
+    with (output/"per_observation.csv").open("w", newline="", encoding='utf-8') as handle:
         writer = csv.DictWriter(handle, fieldnames=list(flat[0])); writer.writeheader(); writer.writerows(flat)
     return report
 

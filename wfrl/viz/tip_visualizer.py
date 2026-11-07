@@ -369,7 +369,7 @@ def main():
                                 geom.tip_position(180),geom.e_lat,upright=True)
         if a.calibration:
             import json
-            c=json.loads(a.calibration.read_text())
+            c=json.loads(a.calibration.read_text(encoding='utf-8'))
             cam=CameraModel.from_calibration(W,H,c['K'],c['distortion'],c['position_m'],c['R_cw'])
         local_camera_position = geom.world_rotation.T @ (cam.pos-geom.hub)
         local_camera_rotation = geom.world_rotation.T @ cam.R_cw

@@ -55,7 +55,7 @@ def digest(path):
 def resolve_package(path):
     """Return verified geometry path and optional sidecar without weakening v3 checks."""
     path = Path(path).resolve()
-    manifest = json.loads((path / 'manifest.json').read_text())
+    manifest = json.loads((path / 'manifest.json').read_text(encoding='utf-8'))
     if manifest.get('schema') != SCHEMA:
         return path, None
     if manifest.get('status') == 'REJECTED':
@@ -65,7 +65,7 @@ def resolve_package(path):
     source = (path / manifest['source_package']).resolve()
     if source == path:
         raise ValueError('Dual-beam source cannot refer to itself')
-    source_manifest = json.loads((source / 'manifest.json').read_text())
+    source_manifest = json.loads((source / 'manifest.json').read_text(encoding='utf-8'))
     if source_manifest.get('schema') != 'wfrl.farm-flex-review.v3':
         raise ValueError('Dual-beam source must be v3 geometry')
     for name, expected in manifest['source_hashes'].items():
@@ -83,7 +83,7 @@ def resolve_package(path):
     for name, expected in manifest['files'].items():
         if Path(name).name != name or digest(path / name) != expected:
             raise ValueError('Dual-beam result integrity mismatch: ' + name)
-    config = json.loads((path / 'calibration.json').read_text())
+    config = json.loads((path / 'calibration.json').read_text(encoding='utf-8'))
     if str(config.get('status', '')).startswith('REJECTED'):
         raise ValueError('Rejected installation calibration')
     if config.get('schema') != 'wfrl.dual-beam-calibration.v1':
@@ -101,7 +101,7 @@ def resolve_package(path):
     angles = config['angles_deg']
     if not all(math.isfinite(a) and 0 < a < 90 for a in angles) or not angles[0] < angles[1] < angles[2]:
         raise ValueError('Invalid dual-beam directions')
-    results = json.loads((path / 'results.json').read_text())
+    results = json.loads((path / 'results.json').read_text(encoding='utf-8'))
     if set(results) != set(source_manifest['turbine_ids']):
         raise ValueError('Dual-beam turbines differ from source')
     if manifest['segment'] != source_manifest['segment']:

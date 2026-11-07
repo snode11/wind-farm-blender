@@ -33,14 +33,14 @@ def metrics(rows):
 def audit(package, output):
     package, output = Path(package), Path(output)
     output.mkdir(parents=True, exist_ok=True)
-    manifest = json.loads((package/'manifest.json').read_text())
+    manifest = json.loads((package/'manifest.json').read_text(encoding='utf-8'))
     for name, digest in manifest['files'].items():
         if hashlib.sha256((package/name).read_bytes()).hexdigest() != digest:
             raise ValueError('Hash mismatch: '+name)
-    source = json.loads((package/'source-run.json').read_text())
+    source = json.loads((package/'source-run.json').read_text(encoding='utf-8'))
     farm = Path(source['case_dir'])/'FarmInputs'
-    data = json.loads((package/'data.json').read_text())
-    hashes = json.loads((package/'source-surfaces.json').read_text())
+    data = json.loads((package/'data.json').read_text(encoding='utf-8'))
+    hashes = json.loads((package/'source-surfaces.json').read_text(encoding='utf-8'))
     table, samples = {}, []
     for k, (tid, payload) in enumerate(data.items()):
         rows = payload['measurements']
@@ -83,8 +83,8 @@ def audit(package, output):
         window='Existing +/-3 degree samples only; extended diagnostic window still required',
         scope='Discrete contour vertices at minimum recorded truth in each passage; edge-interior and cosmetic apex not yet included',
         acceptance='Diagnostic only; no automatic equivalence or compensation decision')
-    (output/'baseline-diagnostics.json').write_text(json.dumps(summary,indent=2))
-    (output/'tip-point-samples.json').write_text(json.dumps(samples,indent=2))
+    (output/'baseline-diagnostics.json').write_text(json.dumps(summary,indent=2), encoding='utf-8')
+    (output/'tip-point-samples.json').write_text(json.dumps(samples,indent=2), encoding='utf-8')
     return summary
 
 

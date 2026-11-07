@@ -275,7 +275,7 @@ def publish(package_dir, rtsp_url='rtsp://127.0.0.1:8554/windfarm/camera1', *, f
     """
     _local_url(rtsp_url, 'rtsp')
     root = Path(package_dir)
-    manifest = json.loads((root / 'manifest.json').read_text())
+    manifest = json.loads((root / 'manifest.json').read_text(encoding='utf-8'))
     for filename in ('video.mp4', 'frames.csv'):
         expected = manifest.get('files', {}).get(filename)
         if not expected or sha256(root / filename) != expected:
@@ -307,7 +307,7 @@ def publish(package_dir, rtsp_url='rtsp://127.0.0.1:8554/windfarm/camera1', *, f
         connection.request('ANNOUNCE', headers={'Content-Type': 'application/sdp'}, body=sdp)
         connection.request('SETUP', rtsp_url.rstrip('/') + '/trackID=0', {'Transport': 'RTP/AVP/TCP;unicast;interleaved=0-1;mode=record'})
         connection.request('RECORD')
-        with MappingServer(mapping_port) as mappings, log_path.open('x') as log, (root / 'video.mp4').open('rb') as video:
+        with MappingServer(mapping_port) as mappings, log_path.open('x', encoding='utf-8') as log, (root / 'video.mp4').open('rb') as video:
             started = time.monotonic()
             last_keepalive = started
             packet_count = octet_count = 0
@@ -435,7 +435,7 @@ def receive(rtsp_url, mapping_url, *, frame_count=100, output_dir=None, timeout=
                     recording.write(b'\x00\x00\x00\x01' + nal)
             deadline = time.monotonic() + timeout
         if output_dir:
-            (root / 'received.jsonl').write_text(''.join(json.dumps(r) + '\n' for r in matched))
+            (root / 'received.jsonl').write_text(''.join(json.dumps(r) + '\n' for r in matched), encoding='utf-8')
         return matched
     finally:
         if recording:
