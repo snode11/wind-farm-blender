@@ -24,7 +24,8 @@ OUT = Path(os.environ.get('WFRL_TEST_OUTPUT', '/tmp/wfrl-native-enabled'))
 OUT.mkdir(parents=True, exist_ok=True)
 state = {'phase': 'start', 'waits': 0, 'started': time.monotonic()}
 checks = {}
-addon = native = core = preview = None
+addon = importlib.import_module(MODULE)
+native = core = preview = None
 
 
 def wait_until(ready, message):
@@ -186,11 +187,10 @@ def finish(status, error=None):
 
 
 def tick():
-    global addon, native, core, preview
+    global native, core, preview
     try:
         phase = state['phase']
         if phase == 'start':
-            addon = importlib.import_module(MODULE)
             native = importlib.import_module(MODULE + '.native_camera_views')
             core = importlib.import_module(MODULE + '.custom_cameras')
             preview = importlib.import_module(MODULE + '.custom_camera_preview')

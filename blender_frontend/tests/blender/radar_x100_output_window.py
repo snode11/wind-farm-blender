@@ -1,4 +1,8 @@
-"""Visible source-window checks for the independent X100 output and raw RGB isolation."""
+"""Visible checks for the independent X100 output and raw RGB isolation.
+
+WFRL_TEST_QUIT=1 exits after the final report and marker, on success or failure;
+otherwise the review window stays open.
+"""
 from dataclasses import asdict, replace
 from pathlib import Path
 import hashlib
@@ -17,6 +21,7 @@ sys.path.append(str(Path(__file__).resolve().parent))
 import _native
 MODULE = _native.addon_module()
 addon = importlib.import_module(MODULE)
+atomic_json = importlib.import_module(MODULE+'.atomic_json')
 farm = importlib.import_module(MODULE+'.farm_flex')
 radar = importlib.import_module(MODULE+'.radar_x100.runtime')
 output = importlib.import_module(MODULE+'.radar_x100.output')
@@ -27,6 +32,14 @@ preview = importlib.import_module(MODULE+'.custom_camera_preview')
 OUT = _native.output_directory()
 STATE = dict(step=0, checks={})
 DRAW_TIMEOUT_S = 10.
+
+
+def finish(result):
+    result = dict(result, final=True)
+    atomic_json.write_json(OUT/'result.json', result)
+    print('X100_OUTPUT_WINDOW_' + result['status'], json.dumps(result), flush=True)
+    if os.environ.get('WFRL_TEST_QUIT') == '1':
+        bpy.ops.wm.quit_blender()
 
 
 def frame_state(frame):
@@ -267,8 +280,7 @@ def run():
             result = dict(status='PASS', addon_path=addon.__file__, checks=checks,
                 raw_rgba_sha256=STATE['rgb'][0], raw_state_sha256=STATE['rgb'][1],
                 source=STATE['session'].frame.source_kind, points=len(STATE['session'].frame.points))
-            (OUT/'result.json').write_text(json.dumps(result, indent=2))
-            print('X100_OUTPUT_WINDOW_PASS', json.dumps(result), flush=True)
+            finish(result)
             return None
     except Exception:
         result = dict(status='ERROR', error=traceback.format_exc(), checks=STATE['checks'])
@@ -278,8 +290,8 @@ def run():
                 log_draw('error', result['draw_state'])
             except Exception:
                 result['diagnostic_error'] = traceback.format_exc()
-        (OUT/'result.json').write_text(json.dumps(result, indent=2))
         traceback.print_exc()
+        finish(result)
         return None
 
 

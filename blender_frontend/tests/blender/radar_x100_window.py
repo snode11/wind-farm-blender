@@ -1,4 +1,8 @@
-"""Isolated installed-window X100 GPU and raw RGB pixel checks; leaves the window open."""
+"""Isolated visible X100 GPU and raw RGB pixel checks.
+
+WFRL_TEST_QUIT=1 exits after the final report and marker, on success or failure;
+otherwise the review window stays open.
+"""
 from dataclasses import replace, asdict
 from pathlib import Path
 import hashlib
@@ -15,6 +19,7 @@ sys.path.append(str(Path(__file__).resolve().parent))
 import _native
 MODULE = _native.addon_module()
 addon = importlib.import_module(MODULE)
+atomic_json = importlib.import_module(MODULE+'.atomic_json')
 farm = importlib.import_module(MODULE+'.farm_flex')
 radar = importlib.import_module(MODULE+'.radar_x100.runtime')
 api = importlib.import_module(MODULE+'.radar_x100.core')
@@ -25,6 +30,14 @@ preview = importlib.import_module(MODULE+'.custom_camera_preview')
 capture = importlib.import_module(MODULE+'.custom_camera_capture')
 OUT = _native.output_directory()
 STATE = {'step':0}
+
+
+def finish(result):
+    result = dict(result, final=True)
+    atomic_json.write_json(OUT/'result.json', result)
+    print('X100_WINDOW_' + result['status'], json.dumps(result), flush=True)
+    if os.environ.get('WFRL_TEST_QUIT') == '1':
+        bpy.ops.wm.quit_blender()
 
 
 def image_hash(context, cam):
@@ -112,15 +125,14 @@ def run():
                 simulation_points=len(session.frame.points),source=session.frame.source_kind,
                 actual_raw_capture_complete=True, installation_guard_during_capture=True,
                 raw_capture_path=str(job.path))
-            (OUT/'result.json').write_text(json.dumps(result,indent=2))
-            print('X100_WINDOW_PASS',json.dumps(result),flush=True)
             radar.start(scene)
-            # A saved validation copy gives the dedicated UI agent a distinct window title.
+            # The validation copy identifies the isolated review window.
             bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'X100-Isolated-Validation.blend'))
+        finish(result)
         return None
     except Exception:
-        (OUT/'result.json').write_text(json.dumps(dict(status='ERROR',error=traceback.format_exc()),indent=2))
         traceback.print_exc()
+        finish(dict(status='ERROR', error=traceback.format_exc()))
         return None
 
 

@@ -67,6 +67,22 @@ def test_execution_contracts_are_disjoint_and_have_no_stale_files():
     assert all(reason.strip() for reason in MANUAL_ONLY.values())
 
 
+@pytest.mark.parametrize('name', ['native_camera_enabled_regression.py', 'native_camera_proxy_window.py'])
+def test_camera_source_import_is_available_before_timer_registration(name):
+    """The source bootstrap verifies module identity before Blender runs timers."""
+    path = runner.TEST_ROOT / name
+    tree = ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
+    addon_import = next(node for node in tree.body if isinstance(node, ast.Assign)
+                        and any(isinstance(target, ast.Name) and target.id == 'addon' for target in node.targets)
+                        and isinstance(node.value, ast.Call)
+                        and ast.unparse(node.value.func) == 'importlib.import_module')
+    timer = next(node for node in tree.body if isinstance(node, ast.Expr)
+                 and isinstance(node.value, ast.Call)
+                 and ast.unparse(node.value.func) == 'bpy.app.timers.register')
+    assert addon_import.lineno < timer.lineno
+    assert ast.unparse(addon_import.value.args[0]) == 'MODULE'
+
+
 @pytest.mark.parametrize(('name', 'driver'), sorted(OTHER_RUNNERS.items()))
 def test_other_runner_names_the_script_in_executable_code(name, driver):
     path = ROOT / driver

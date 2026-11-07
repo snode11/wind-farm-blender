@@ -1,7 +1,9 @@
-"""Actual-window operator/modal regression; keeps the review window open.
+"""Actual-window operator/modal regression with an optional review window.
 
 Uses a new WFRL_TEST_OUTPUT directory and optionally WFRL_ADDON_MODULE for an
 isolated installed extension. No image rendering or backend computation.
+WFRL_TEST_QUIT=1 exits after the final report and marker, on success or failure;
+otherwise the review window stays open.
 """
 import importlib
 import json
@@ -16,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path[:0] = [str(ROOT/'blender_frontend'), str(ROOT)]
 MODULE = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')
 addon = importlib.import_module(MODULE)
+atomic_json = importlib.import_module(MODULE+'.atomic_json')
 editor = importlib.import_module(MODULE+'.nrel_defects.editor')
 schema = importlib.import_module(MODULE+'.nrel_defects.defect_schema')
 outputs = importlib.import_module(MODULE+'.nrel_defects.defect_outputs')
@@ -78,7 +81,16 @@ p.output_path = str(out/'scan')
 assert bpy.ops.wfrl.nrel_defect_scan('INVOKE_DEFAULT') == {'RUNNING_MODAL'}
 assert s.busy
 
-def finish():
+
+def finish(result):
+    result = dict(result, final=True)
+    atomic_json.write_json(out/'window-checks.json', result)
+    print('NREL_DEFECT_WINDOW_' + result['status'], json.dumps(result), flush=True)
+    if os.environ.get('WFRL_TEST_QUIT') == '1':
+        bpy.ops.wm.quit_blender()
+
+
+def observe_scan():
     if s.busy:
         return .5
     try:
@@ -100,11 +112,10 @@ def finish():
             operator_edit_preview_cancel=True, modal_scan_records=len(rows),
             render_failure_restoration=True, images_rendered=0,
             scope='Actual-window operators and modal lifecycle; no A image acceptance or performance measurement')
-        (out/'window-checks.json').write_text(json.dumps(result, indent=2))
-        print('NREL_DEFECT_WINDOW_PASS', json.dumps(result), flush=True)
+        finish(result)
     except BaseException as exc:
-        (out/'window-checks.json').write_text(json.dumps(dict(status='FAIL', error=repr(exc)), indent=2))
+        finish(dict(status='FAIL', error=repr(exc)))
         raise
     return None
 
-bpy.app.timers.register(finish, first_interval=.5)
+bpy.app.timers.register(observe_scan, first_interval=.5)

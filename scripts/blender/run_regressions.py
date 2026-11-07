@@ -5,6 +5,7 @@ Use --list for each script's window, package, output and timeout contract.
 marker and JSON evidence as well as a clean process exit. Console-only scripts
 use the bootstrap's completion JSON. Visible tests require their own final JSON;
 returning from a script that merely registers a timer is not completion.
+Review-window scripts receive WFRL_TEST_QUIT=1 to exit after final evidence.
 
 Examples::
 
@@ -61,6 +62,7 @@ class Regression:
     scope: str = 'Native background data checks; visible interaction not verified.'
     expected_exceptions: tuple[tuple[str, int], ...] = ()
     environment: tuple[tuple[str, str], ...] = ()
+    boolean_status_field: str | None = None
 
 
 REGRESSIONS = (
@@ -336,17 +338,17 @@ REGRESSIONS = (
                timeout_s=180,
                scope='Native defect RNA list identity, transactional actions and gating; no visible UI or rendering.'),
     Regression('blade_model_window.py', 'BLADE_MODEL_WINDOW_PASS', 'window-checks.json', mode='visible',
-               timeout_s=180,
-               scope='Scripted blade selection and native playback; retains review window until caller closes it.'),
+               timeout_s=180, environment=(('WFRL_TEST_QUIT', '1'),),
+               scope='Scripted blade selection and native playback; exits after final evidence.'),
     Regression('clearance_gui_acceptance.py', 'CLEARANCE_GUI_ACCEPTANCE_PASS', 'report.json', mode='visible',
-               timeout_s=180, package='delivered_lidar_normal_close',
-               scope='Visible clearance playback, gimbal and screenshots; boolean passed report needs status normalization.'),
+               timeout_s=180, package='delivered_lidar_normal_close', boolean_status_field='passed',
+               scope='Visible clearance playback, gimbal and screenshots; final result uses the boolean passed field.'),
     Regression('custom_camera_capture_window.py', 'CUSTOM_CAMERA_CAPTURE_WINDOW_PASS', 'result.json', mode='visible',
                timeout_s=300,
                scope='GPU capture pixel equality, target reuse and failure/cancellation restoration; scripted window.'),
     Regression('dual_beam_window.py', 'DUAL_BEAM_WINDOW_PASS', 'result.json', mode='visible',
                timeout_s=300, package='builtin_dual_beam',
-               scope='Dual-beam playback and S1 screenshots; requires an already registered add-on in the visible process.'),
+               scope='Dual-beam playback and S1 screenshots; the script registers the source add-on.'),
     Regression('frontend_layout_regression.py', 'FRONTEND_LAYOUT_PASS', 'result.json', mode='visible',
                timeout_s=360,
                scope='Visible STRIP/GRID/focus camera layouts, GPU capture and restoration.'),
@@ -366,16 +368,17 @@ REGRESSIONS = (
     Regression('native_camera_save_regression.py', 'NATIVE_CAMERA_SAVE_PASS', mode='visible', timeout_s=300,
                scope='Visible camera routing and save isolation with disposable scene copies.'),
     Regression('nrel_defect_window_regression.py', 'NREL_DEFECT_WINDOW_PASS', 'window-checks.json', mode='visible',
-               timeout_s=300,
-               scope='Visible defect operators and modal scan lifecycle; retains review window until caller closes it.'),
+               timeout_s=300, environment=(('WFRL_TEST_QUIT', '1'),),
+               scope='Visible defect operators and modal scan lifecycle; exits after final evidence.'),
     Regression('radar_x100_output_lifecycle.py', 'X100_OUTPUT_LIFECYCLE_PASS', 'result.json', mode='visible',
                timeout_s=300,
                scope='Visible X100 output save/reopen, undo/redo, unrelated editor preservation and GPU cache cleanup.'),
     Regression('radar_x100_output_window.py', 'X100_OUTPUT_WINDOW_PASS', 'result.json', mode='visible',
-               timeout_s=300,
-               scope='Independent X100 GPU output and raw RGB isolation; retains review window until caller closes it.'),
+               timeout_s=300, environment=(('WFRL_TEST_QUIT', '1'),),
+               scope='Independent X100 GPU output and raw RGB isolation; exits after final evidence.'),
     Regression('radar_x100_window.py', 'X100_WINDOW_PASS', 'result.json', mode='visible', timeout_s=300,
-               scope='X100 GPU overlay and raw RGB pixel checks; retains review window until caller closes it.'),
+               environment=(('WFRL_TEST_QUIT', '1'),),
+               scope='X100 GPU overlay and raw RGB pixel checks; exits after final evidence.'),
     Regression('box_surface_install_window.py', 'BOX_SURFACE_WINDOW_PASS', 'window-validation.json', mode='visible',
                scope='Scripted native-window camera box installation.'),
     Regression('camera_gpu_calibration.py', 'GPU_CALIBRATION_PASS', 'result.json', mode='visible',
@@ -567,6 +570,16 @@ def evaluate(spec, phase, returncode, timed_out, execution, report, log, source_
         failures.append('Bootstrap did not confirm the expected script execution')
     if report is not None:
         status = report.get('status')
+        if spec.boolean_status_field is not None:
+            value = report.get(spec.boolean_status_field)
+            if type(value) is not bool:
+                failures.append(f'Script JSON {spec.boolean_status_field} must be a boolean')
+            else:
+                normalized = 'PASS' if value else 'FAIL'
+                if 'status' not in report:
+                    status = normalized
+                elif status != normalized:
+                    failures.append(f'Script JSON status conflicts with {spec.boolean_status_field}: {value}')
         if status in ('SKIP', 'NOT_RUN') and not failures:
             return status, [report.get('reason', 'Script reported incomplete coverage')]
         if status != 'PASS' and not (status is None and spec.required_flags):

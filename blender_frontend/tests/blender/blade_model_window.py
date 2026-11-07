@@ -1,4 +1,8 @@
-"""Exercise model selection and native playback in a dedicated visible window."""
+"""Exercise model selection and native playback in a dedicated visible window.
+
+The review window stays open unless WFRL_TEST_QUIT=1 requests exit after the
+final report and completion marker, on success or failure.
+"""
 from pathlib import Path
 import importlib
 import json
@@ -16,6 +20,7 @@ SOURCE_MODE = MODULE == 'wfrl_blender'
 if SOURCE_MODE:
     sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
 addon = importlib.import_module(MODULE)
+atomic_json = importlib.import_module(MODULE + '.atomic_json')
 addon_dir = Path(addon.__file__).resolve().parent
 expected_dir = os.environ.get('WFRL_EXPECTED_ADDON_DIR')
 if expected_dir:
@@ -33,6 +38,14 @@ farm_flex, playback = [importlib.import_module(MODULE + '.' + name)
 OUT = Path(os.environ['WFRL_TEST_OUTPUT']).resolve()
 OUT.mkdir(parents=True, exist_ok=False)
 STATE = dict(models=set(), playback_frames=set(), vertices=set(), initialized=False)
+
+
+def finish(result):
+    result = dict(result, final=True)
+    atomic_json.write_json(OUT / 'window-checks.json', result)
+    print('BLADE_MODEL_WINDOW_' + result['status'], json.dumps(result), flush=True)
+    if os.environ.get('WFRL_TEST_QUIT') == '1':
+        bpy.ops.wm.quit_blender()
 
 
 def camera_pose(camera):
@@ -81,7 +94,7 @@ def observe():
         passed = (STATE['models'] == {'nrel5mw', 'rootkink'}
                   and len(STATE['playback_frames']) >= 3 and len(STATE['vertices']) >= 2
                   and model == 'rootkink' and not playing)
-        result = dict(status='PASS' if passed else 'RUNNING',
+        result = dict(status='PASS' if passed else 'RUNNING', final=False,
                       interaction='Blender RNA and native playback operator in visible window',
                       addon_module=MODULE, addon_file=addon.__file__, blender=bpy.app.version_string,
                       models_seen=sorted(STATE['models']), current_model=model,
@@ -89,11 +102,11 @@ def observe():
                       rootkink_playback_frames=sorted(STATE['playback_frames']),
                       distinct_deformed_vertex_positions=len(STATE['vertices']),
                       camera_preserved=True, saved_scene=STATE['blend'])
-        (OUT / 'window-checks.json').write_text(json.dumps(result, indent=2) + '\n')
         if passed:
             bpy.ops.wm.save_as_mainfile(filepath=STATE['blend'])
-            print('BLADE_MODEL_WINDOW_PASS', json.dumps(result), flush=True)
+            finish(result)
             return None
+        atomic_json.write_json(OUT / 'window-checks.json', result)
         elapsed = time.monotonic() - STATE['started']
         if STATE['action'] == 'select' and elapsed >= 1:
             scene.wfrl_blade_model = 'rootkink'
@@ -110,8 +123,7 @@ def observe():
     except Exception:
         result = dict(status='FAIL', error=traceback.format_exc(),
                       addon_module=MODULE, addon_file=addon.__file__)
-        (OUT / 'window-checks.json').write_text(json.dumps(result, indent=2) + '\n')
-        print('BLADE_MODEL_WINDOW_FAIL', json.dumps(result), flush=True)
+        finish(result)
         return None
 
 

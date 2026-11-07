@@ -1,16 +1,41 @@
-"""Visible installed-window playback, observed S1 alarm and screenshot checks."""
+"""Visible playback, observed S1 alarm and screenshot checks.
+
+Source mode registers the add-on in a factory-startup process. Installed mode
+requires an enabled extension selected by WFRL_ADDON_MODULE.
+"""
 import importlib
 import json
 import math
 import os
 from pathlib import Path
+import sys
 import time
 import traceback
 
 import bpy
 
+ROOT = Path(__file__).resolve().parents[3]
 module=os.environ.get('WFRL_ADDON_MODULE','bl_ext.user_default.wfrl_blender')
-addon=importlib.import_module(module)
+
+
+def load_addon():
+    if module == 'wfrl_blender':
+        sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
+    loaded = importlib.import_module(module)
+    actual_root = Path(loaded.__file__).resolve().parent
+    expected = os.environ.get('WFRL_EXPECTED_ADDON_ROOT')
+    if expected:
+        assert actual_root == Path(expected).resolve(), (actual_root, expected)
+    if module == 'wfrl_blender':
+        assert actual_root == ROOT / 'blender_frontend/wfrl_blender'
+        loaded.register()
+    else:
+        assert module in bpy.context.preferences.addons, 'Installed add-on must be enabled'
+    return loaded
+
+
+assert not bpy.app.background, 'This regression requires a visible window'
+addon=load_addon()
 farm=importlib.import_module(module+'.farm_flex')
 replay=importlib.import_module(module+'.clearance_replay')
 out=Path(os.environ['WFRL_TEST_OUTPUT']);out.mkdir(parents=True,exist_ok=False)

@@ -34,7 +34,8 @@ RESULT = {
     'checks': {}, 'observations': [],
 }
 STATE = {'phase': 'start', 'started': time.monotonic(), 'deadline': time.monotonic() + 180}
-addon = native = core = playback = None
+addon = importlib.import_module(MODULE)
+native = core = playback = None
 
 
 def sha256(path):
@@ -133,10 +134,9 @@ def screenshot(name):
 
 
 def run():
-    global addon, native, core, playback
+    global native, core, playback
     assert not bpy.app.background and not bpy.data.filepath
     assert len(bpy.context.window_manager.windows) == 1
-    addon = importlib.import_module(MODULE)
     native = importlib.import_module(MODULE + '.native_camera_views')
     core = importlib.import_module(MODULE + '.custom_cameras')
     playback = importlib.import_module(MODULE + '.playback')
