@@ -2,7 +2,7 @@
 import itertools
 from dataclasses import asdict, dataclass
 import numpy as np
-from .schema import digest, PROFILE
+from .schema import digest, PROFILE, UNIT_ENVELOPE
 from .sampling import AREA_ALGORITHM
 
 SCHEMA = 'x100-installation-search.v2'
@@ -165,7 +165,9 @@ def profile_metadata(roi=DEFAULT_ROI, *, policy=None):
             note='Peer 80 GHz devices require separate sourced profiles; no peer limits enter this evaluation'),
         mechanical_policy=dict(parameters={k: dict(value=v, unit='m', basis='RESEARCH_ASSUMPTION')
                 for k, v in asdict(policy).items()},
-            housing_axes='X=depth, Y=width, Z=height; approximate housing-center origin, as in radar_x100/view.py',
+            unit_envelope=dict(dimensions_whd_m=list(UNIT_ENVELOPE['dimensions_whd_m']),
+                               source=UNIT_ENVELOPE['source']),
+            housing_axes='X=depth, Y=width, Z=height of the installed unit; envelope centred on the sensor origin',
             housing_axes_basis='RESEARCH_ASSUMPTION: no manufacturer phase-center or axis drawing',
             fixing=dict(method='bolt mounting', source='CTSAI X100 datasheet CN V1.0 PDF page 5',
                         hole_spacing_m=None, cable_envelope_m=None, bracket_cad=None),
@@ -174,7 +176,8 @@ def profile_metadata(roi=DEFAULT_ROI, *, policy=None):
 
 
 def housing_half_extents():
-    h, w, d = PROFILE['dimensions_hwd_m']
+    """Half extents of the installed unit along sensor X/Y/Z, centred on the sensor origin."""
+    w, h, d = UNIT_ENVELOPE['dimensions_whd_m']
     return np.array([d, w, h]) / 2
 
 

@@ -123,7 +123,9 @@ def test_mechanical_screen_checks_full_rotated_housing_space_opening_and_bracket
     looking_in = installation.static_constraints(pose([0, -2, 0], yaw=90), SHELL, .35)
     assert looking_in['checks']['shell_exterior'] and looking_in['checks']['installation_space']
     assert not looking_in['checks']['opening_free'] and looking_in['status'] == 'REJECTED'
-    down = installation.static_constraints(pose([0, 0, -1.55], 90), SHELL, .05)
+    # The installed unit is 175.6 mm deep: looking down it needs half that plus the service gap below the shell.
+    assert installation.static_constraints(pose([0, 0, -1.55], 90), SHELL, .05)['status'] == 'REJECTED'
+    down = installation.static_constraints(pose([0, 0, -1.62], 90), SHELL, .12)
     horizontal = installation.static_constraints(pose([0, 0, -1.55]), SHELL, .05)
     assert down['status'] == 'PASS_RESEARCH'
     assert not horizontal['checks']['shell_exterior']

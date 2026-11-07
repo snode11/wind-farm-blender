@@ -40,7 +40,7 @@
 
 独立画布的辅助顶点统一使用C连续的 `float32` 数组提交GPU；拟合线和叶尖十字使用 `POLYLINE_UNIFORM_COLOR`，在原始点云之后按画布区域裁剪绘制。后台 `radar_x100_observations.py` 核对原始帧、来源绑定及推理输入边界；窗口 `radar_x100_estimation_window.py` 读回拟合线／叶尖区域像素，核对关闭、恢复及原帧和时刻保留。脚本控制不等于外部键鼠验收，实际保存证据见[研究验证](../docs/blender/发布状态与验证范围.md#x100-观测研究工作区验证)。
 
-工作区源码通过 `radar_x100/core.py` 使用规范 `schema.PROFILE` 派生外壳、视场、角域和点数上限；`schema.DISPLAY_DEFAULTS` 单独定义示意长度和画布余量。`configuration.py` 比较会话应用时的来源配置与当前编辑值，显示未应用差异；显示设置、下一新样本预算与下一次记录目录不属于待应用配置。安装快捷按钮成功后同步实际应用配置，不自动热切换编辑值。
+工作区源码通过 `radar_x100/core.py` 使用规范 `schema.PROFILE` 派生视场、角域和点数上限，`schema.UNIT_ENVELOPE` 给出安装单元包络；`radar_x100/housing_model.py` 生成显示用雷达模型（外壳、支架、接头、线缆、安装板，多材质单网格，`wfrl_x100_role=physical`），`view.frame_unit()` 与 `wfrl.x100_frame_unit` 把 3D 视口对准安装中的雷达；`schema.DISPLAY_DEFAULTS` 单独定义示意长度和画布余量。`configuration.py` 比较会话应用时的来源配置与当前编辑值，显示未应用差异；显示设置、下一新样本预算与下一次记录目录不属于待应用配置。安装快捷按钮成功后同步实际应用配置，不自动热切换编辑值。
 
 `Session.recording_health()` 委托 `session_recording.recording_health()`，把记录状态、失败原因、目录与已写帧数保存在所属场景；结束失败记录后，常规刷新保留该终态，新记录启动才清除上次错误。所属场景已删除时不写入失效 RNA，写盘线程仍须完成关闭，随后释放会话归属。`Fanout` 的追加或关闭异常停止记录并置为 `FAILED`，保留 `INCOMPLETE`；正常关闭排空已接受工作，失败后释放待处理项，写盘前重新校验帧元数据。
 

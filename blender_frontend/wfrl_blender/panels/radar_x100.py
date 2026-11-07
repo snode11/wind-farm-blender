@@ -55,6 +55,26 @@ class WFRL_OT_X100MountPreset(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class WFRL_OT_X100FrameUnit(bpy.types.Operator):
+    bl_idname = 'wfrl.x100_frame_unit'
+    bl_label = '查看雷达'
+    bl_description = '把 3D 视口对准当前安装的雷达，近距离查看外壳、支架和安装板'
+
+    @classmethod
+    def poll(cls, context):
+        from ..radar_x100.runtime import session_for
+        session = session_for(context.scene)
+        return bool(session and session.mount and session.mount.name in context.scene.objects)
+
+    def execute(self, context):
+        from ..radar_x100.runtime import session_for
+        from ..radar_x100.view import frame_unit
+        if not frame_unit(context, session_for(context.scene).mount):
+            self.report({'WARNING'}, '当前窗口没有 3D 视口')
+            return {'CANCELLED'}
+        return {'FINISHED'}
+
+
 class WFRL_OT_X100SearchApply(bpy.types.Operator):
     bl_idname = 'wfrl.x100_search_apply'
     bl_label = '应用搜索推荐安装'
@@ -257,6 +277,7 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
                                               and not (session.fanout or session.closing))
             buttons.operator('wfrl.x100_mount_preset', text='原安装位置').preset = 'ORIGINAL'
             buttons.operator('wfrl.x100_mount_preset', text='机舱侧面').preset = 'NACELLE_SIDE'
+            presets.operator('wfrl.x100_frame_unit', icon='VIEW_CAMERA')
             if session and session.fanout:
                 presets.label(text='结束记录后可切换安装位置', icon='LOCKED')
             elif session and session.mode != 'SIMULATION':
@@ -291,7 +312,7 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
             _notes(layout, 'wfrl_x100_simulation_notes', (
                 'T1 · 保存运动 · 同源几何与遮挡',
                 '安装坐标：+X 前、+Y 左、+Z 上',
-                '外壳近似；相位中心未知',
+                '雷达外形为显示模型，不参与遮挡；相位中心未知',
                 'GEOMETRY 为几何可见性；DETECTIONS 为未标定工程检测',
                 '模型 SNR 为线性比；厂家原始 RCS/SNR 未知'), context=context)
         elif scene.wfrl_x100_source == 'REPLAY':
@@ -586,5 +607,5 @@ def unregister_properties():
             delattr(bpy.types.Scene, 'wfrl_x100_' + name)
 
 
-CLASSES = (WFRL_OT_X100Apply, WFRL_OT_X100Close, WFRL_OT_X100MountPreset, WFRL_OT_X100SearchApply, WFRL_OT_X100Step, WFRL_OT_X100Play, WFRL_OT_X100Record, WFRL_OT_X100Output,
+CLASSES = (WFRL_OT_X100Apply, WFRL_OT_X100Close, WFRL_OT_X100MountPreset, WFRL_OT_X100FrameUnit, WFRL_OT_X100SearchApply, WFRL_OT_X100Step, WFRL_OT_X100Play, WFRL_OT_X100Record, WFRL_OT_X100Output,
            WFRL_PT_X100, WFRL_PT_X100Setup, WFRL_PT_X100Display, WFRL_PT_X100Blades, WFRL_PT_X100Frame, WFRL_PT_X100Record)

@@ -26,9 +26,15 @@ try:
     session = radar.start(scene)
     assert not session.pending_configuration()
     housing = next(obj for obj in scene.objects if obj.get('wfrl_x100_role') == 'physical')
+    from wfrl_blender.radar_x100 import housing_model
     xyz = np.array([v.co[:] for v in housing.data.vertices])
-    h,w,d = api.schema.PROFILE['dimensions_hwd_m']
-    np.testing.assert_allclose(np.ptp(xyz,axis=0), [d,w,h], atol=1e-8)
+    faces = [tuple(p.vertices) for p in housing.data.polygons]
+    materials = [p.material_index for p in housing.data.polygons]
+    lo, hi = housing_model.unit_bounds(xyz, faces, materials)
+    w,h,d = api.schema.UNIT_ENVELOPE['dimensions_whd_m']
+    np.testing.assert_allclose(hi - lo, [d,w,h], atol=1e-6)
+    np.testing.assert_allclose((hi + lo) / 2, 0, atol=1e-6)
+    assert [m.name for m in housing.data.materials] == [row[0] for row in housing_model.MATERIALS]
     rays = np.array([v.co[:] for v in session.fov.data.vertices])[1:]
     np.testing.assert_allclose(np.linalg.norm(rays,axis=1), api.schema.DISPLAY_DEFAULTS['fov_length_m'], atol=1e-5)
     np.testing.assert_allclose(np.max(np.abs(np.degrees(np.arctan2(rays[:,1],rays[:,0])))), api.schema.PROFILE['azimuth_deg'],atol=1e-5)
