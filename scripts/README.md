@@ -23,7 +23,7 @@
 scripts/blender/run_wfrl_macos.sh --help
 python3 scripts/blender/run_regressions.py --list
 python3 scripts/blender/run_installed_windows.py --list
-python3 scripts/ci/check_release_identity.py --release publication/blender-0.3.42.7.json
+python3 scripts/ci/check_release_identity.py --release publication/blender-0.3.42.8.json
 ```
 
 后端 checkpoint 评估通过 Blender Replay 操作，配置与模型合同见[Blender 策略评估](../docs/demos/Blender策略评估.md)。宿主测试与原生检查按[自动检查](../docs/development/自动检查.md)选择。

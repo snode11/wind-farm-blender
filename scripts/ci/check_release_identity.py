@@ -19,6 +19,9 @@ def render_summary(release, installed, release_link, installation_link):
     same = installed['same_as_public_archive']
     if not isinstance(same, bool):
         raise ValueError('同一载荷标识必须是布尔值')
+    if (installed['version'] != release['version']
+            and installed['archive_sha256'] != archive['sha256']):
+        same = False
     if same and (installed.get('status') != 'PASS' or installed.get('file_mismatches') != 0
                  or installed['version'] != release['version']
                  or installed['archive_sha256'] != archive['sha256']
