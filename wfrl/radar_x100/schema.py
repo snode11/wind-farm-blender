@@ -17,6 +17,10 @@ POINT_DTYPE = np.dtype([(n, t) for n, t in (
 PROFILE = dict(id='ctsai-x100-datasheet-v1', dimensions_hwd_m=[.120, .095, .040],
                azimuth_deg=60., elevation_deg=22., range_m=[.2, 396.], max_points=MAX_POINTS,
                source='CTSAI X100 数据手册 CN V1.0; nominal specifications, not measured')
+# Installed unit (housing with bracket) as mounted on site, user supplied; mechanical clearance
+# and the displayed model use it. PROFILE keeps the datasheet housing for the sensor itself.
+UNIT_ENVELOPE = dict(dimensions_whd_m=[.173, .2025, .1756],
+                     source='Installed radar unit with bracket, 173 W x 202.5 H x 175.6 D mm, user supplied')
 # Display extents are independent of the nominal detection limits in PROFILE.
 DISPLAY_DEFAULTS = dict(fov_length_m=60., sensor_margin_deg=(6., 4.),
                         orthographic_margin=1.15, orthographic_min_span_m=2.)

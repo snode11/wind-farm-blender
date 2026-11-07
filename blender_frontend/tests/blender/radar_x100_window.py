@@ -51,6 +51,8 @@ def image_hash(context, cam):
 
 
 def run():
+    if STATE['step'] == 2:
+        return screenshot()
     try:
         if STATE['step'] == 0:
             expected = os.environ.get('WFRL_EXPECTED_ADDON_ROOT')
@@ -125,10 +127,32 @@ def run():
                 simulation_points=len(session.frame.points),source=session.frame.source_kind,
                 actual_raw_capture_complete=True, installation_guard_during_capture=True,
                 raw_capture_path=str(job.path))
-            radar.start(scene)
+            session = radar.start(scene)
+            # "查看雷达" frames the installed unit at close range from the boresight side.
+            assert bpy.ops.wfrl.x100_frame_unit() == {'FINISHED'}
+            r3d = area.spaces.active.region_3d
+            target = session.mount.matrix_world.translation
+            assert (r3d.view_location - target).length < 1e-4 and r3d.view_distance < 2.
+            eye = r3d.view_location + r3d.view_rotation @ Vector((0, 0, r3d.view_distance))
+            assert (session.mount.matrix_world.to_3x3() @ Vector((1, 0, 0))).dot(eye - target) > 0
+            result['frame_unit_view'] = dict(distance_m=r3d.view_distance, screenshot='x100_unit_view.png')
             # The validation copy identifies the isolated review window.
             bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'X100-Isolated-Validation.blend'))
-        finish(result)
+        STATE.update(step=2, result=result)
+        return 1.
+    except Exception:
+        traceback.print_exc()
+        finish(dict(status='ERROR', error=traceback.format_exc()))
+        return None
+
+
+def screenshot():
+    # Taken after the framed view has been drawn; the image is a review artifact.
+    try:
+        area, region = STATE['area'], STATE['region']
+        with bpy.context.temp_override(window=bpy.context.window_manager.windows[0], area=area, region=region):
+            bpy.ops.screen.screenshot_area(filepath=str(OUT/'x100_unit_view.png'))
+        finish(STATE['result'])
         return None
     except Exception:
         traceback.print_exc()

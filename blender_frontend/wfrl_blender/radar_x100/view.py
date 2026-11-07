@@ -72,21 +72,20 @@ def install(scene, owner, sensor_matrix, *, show_fov=True):
     mount['wfrl_x100_owner'] = owner
     collection.objects.link(mount)
     mount.matrix_world = Matrix(sensor_matrix.tolist())
+    from . import housing_model
+    vertices, faces, materials = housing_model.build()
     mesh = bpy.data.meshes.new('WFRL.X100.Housing')
-    height, width, depth = schema.PROFILE['dimensions_hwd_m']
-    mesh.from_pydata([(x * depth/2, y * width/2, z * height/2) for x, y, z in
-                     ((-1,-1,-1),(-1,-1,1),(-1,1,-1),(-1,1,1),(1,-1,-1),(1,-1,1),(1,1,-1),(1,1,1))],
-                    [], [(0,4,6,2),(1,3,7,5),(0,1,5,4),(2,6,7,3),(0,2,3,1),(4,5,7,6)])
+    mesh.from_pydata(vertices.tolist(), [], faces)
+    for name, color, metallic, roughness in housing_model.MATERIALS:
+        mesh.materials.append(_material(name, color, metallic, roughness))
+    mesh.polygons.foreach_set('material_index', materials.astype(np.int32))
+    mesh.update()
     housing = bpy.data.objects.new('WFRL.X100.Housing', mesh)
     collection.objects.link(housing)
     housing.parent = mount
     housing['wfrl_x100_owner'] = owner
     housing['wfrl_x100_role'] = 'physical'
-    housing['geometry_source'] = (f'X100 nominal {height*1000:g}x{width*1000:g}x{depth*1000:g} mm envelope; '
-                                  'approximate axes, no manufacturer CAD')
-    material = bpy.data.materials.get('WFRL.X100.Housing') or bpy.data.materials.new('WFRL.X100.Housing')
-    material.diffuse_color = (.045, .06, .075, 1)
-    mesh.materials.append(material)
+    housing['geometry_source'] = housing_model.SOURCE
     points, edges = [(0., 0., 0.)], []
     rows = []
     azimuth_limit, elevation_limit = schema.PROFILE['azimuth_deg'], schema.PROFILE['elevation_deg']
@@ -111,6 +110,48 @@ def install(scene, owner, sensor_matrix, *, show_fov=True):
     for layer in scene.view_layers:
         fov.hide_set(not show_fov, view_layer=layer)
     return mount, fov
+
+
+def _material(name, color, metallic, roughness):
+    import bpy
+    material = bpy.data.materials.get(name) or bpy.data.materials.new(name)
+    material.diffuse_color, material.metallic, material.roughness = color, metallic, roughness
+    if material.node_tree is None and hasattr(material, 'use_nodes'):
+        material.use_nodes = True
+    bsdf = next((n for n in material.node_tree.nodes if n.type == 'BSDF_PRINCIPLED'), None) if material.node_tree else None
+    if bsdf is not None:
+        bsdf.inputs['Base Color'].default_value = color
+        bsdf.inputs['Metallic'].default_value = metallic
+        bsdf.inputs['Roughness'].default_value = roughness
+    return material
+
+
+def frame_unit(context, mount, *, distance=1.4):
+    """Point every 3D view of the window at the installed unit from the boresight side."""
+    from mathutils import Vector
+    world = mount.matrix_world
+    center = world.translation.copy()
+    axes = world.to_3x3().normalized()
+    # Eye in front of the boresight, off to the left and above in sensor axes, so radome,
+    # side bracket and mounting plate all read; a down-looking unit is seen from below.
+    offset = (axes @ Vector((.8, .55, .35))).normalized() * distance
+    rotation = (-offset).to_track_quat('-Z', 'Y')
+    framed = 0
+    for area in context.screen.areas if context.screen else ():
+        if area.type != 'VIEW_3D':
+            continue
+        space = area.spaces.active
+        for region in tuple(space.region_quadviews) or (space.region_3d,):
+            if region is None:
+                continue
+            region.view_perspective = 'PERSP'
+            region.view_location = center
+            region.view_rotation = rotation
+            region.view_distance = distance
+            framed += 1
+        space.clip_start = min(space.clip_start, .01)
+        area.tag_redraw()
+    return framed
 
 
 def batch(frame, color_by, *, color_scale='FIXED', velocity_limit=10., classification=None):
