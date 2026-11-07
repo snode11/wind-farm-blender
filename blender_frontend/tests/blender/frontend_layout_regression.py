@@ -31,6 +31,17 @@ assert not (OUT/'result.json').exists(), 'Choose a fresh output directory'
 state = {'stage': 'start', 'deadline': time.monotonic()+300, 'checks': [], 'layouts': {}}
 
 
+def complete(job, context, timeout=30.):
+    """Wait for PNG thread exit and the capture's committed terminal state."""
+    deadline = time.monotonic() + timeout
+    while not job.closed:
+        job.step(context)
+        assert time.monotonic() < deadline, 'capture did not finish'
+        if not job.closed:
+            time.sleep(.01)
+    assert not capture.active()
+
+
 def capture_checks():
     session = native._ACTIVE
     scene = state['scene']
@@ -48,7 +59,7 @@ def capture_checks():
     try:
         with bpy.context.temp_override(window=session.window,area=area,region=region):
             job=capture.Capture(bpy.context,OUT)
-            assert job.step(bpy.context)
+            complete(job,bpy.context)
     finally:
         preview.RenderTarget.get=original_get
     assert len(sampled) == 3 and session.quality_settings() == fast

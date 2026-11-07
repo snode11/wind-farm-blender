@@ -726,3 +726,164 @@ def test_capture_terminal_waits_for_png_thread_exit(clock_capture, monkeypatch, 
                             'CANCELLED' if termination == 'cancel' else 'FAILED')
     saved = json.loads((job.path / 'manifest.json').read_text(encoding='utf-8'))
     assert saved['status'] == ('complete' if termination == 'success' else 'incomplete')
+
+
+@pytest.fixture
+def capture_runtime(monkeypatch, stub_module):
+    class Scene(dict):
+        name = 'capture-owner'
+        frame_current, frame_subframe = 1, 0.
+
+        def as_pointer(self):
+            return id(self)
+
+    callbacks = {}
+
+    def register(callback, **options):
+        assert threading.current_thread() is threading.main_thread()
+        assert callback not in callbacks
+        callbacks[callback] = options
+
+    timers = NS(register=register, unregister=lambda callback: callbacks.pop(callback),
+                is_registered=lambda callback: callback in callbacks, callbacks=callbacks)
+    monkeypatch.setitem(sys.modules, 'bpy', NS(app=NS(background=True, timers=timers)))
+    camera = {'wfrl_custom_slot': 1}
+    scene = Scene()
+    scene.objects = [camera]
+    scene.display_settings = NS(display_device='sRGB')
+    window = NS(scene=scene, screen=NS(is_animation_playing=False))
+    context = NS(scene=scene, window=window, area=NS(type='VIEW_3D'),
+                 view_layer=NS(update=lambda: None), evaluated_depsgraph_get=lambda: None)
+    stub_module('wfrl_blender.panels.custom_cameras', _ACTIVE=None,
+                session_identity=lambda scene: (scene.as_pointer(),),
+                installation_block_reason=lambda scene: '')
+    stub_module('wfrl_blender.farm_flex', is_active=lambda scene: False)
+    stub_module('wfrl_blender.clearance_replay', sample=lambda scene: None,
+                reader_for=lambda scene: None)
+    from wfrl_blender import home_state
+    monkeypatch.setattr(home_state, 'foreground_tasks', lambda scene: (capture.status_for(scene),))
+    monkeypatch.setattr(core, 'enabled_cameras', lambda scene: [camera])
+    monkeypatch.setattr(core, 'parameters', lambda camera: core.CameraParameters((0., 0., 1.)))
+    monkeypatch.setattr(core, '_root', lambda scene: None)
+    monkeypatch.setattr(core, 'validate_native_state', lambda scene, **kwargs: None)
+    monkeypatch.setattr(core, 'validate_layout', lambda scene, layout: None)
+    monkeypatch.setattr(core, 'layout_dict', lambda scene: {'model_signature': 'test-mesh'})
+    monkeypatch.setattr(core, 'live_layout_hash', lambda scene, layout=None: 'native')
+    monkeypatch.setattr(preview, 'render_profile', lambda scene: {})
+    monkeypatch.setattr(capture.playback, 'is_playing', lambda scene: False)
+    monkeypatch.setattr(capture.playback, 'owner_scene', lambda: None)
+    monkeypatch.setattr(capture.Capture, '_play', lambda self, playing: None)
+    monkeypatch.setattr(capture.Capture, 'same_session', lambda self: True)
+    monkeypatch.setattr(capture, '_ACTIVE', None)
+    monkeypatch.setattr(capture, '_TERMINALS', capture.OrderedDict())
+    monkeypatch.setattr(capture, '_WRITERS', type(capture._WRITERS)())
+    return context, timers
+
+
+@pytest.mark.parametrize('termination', ['success', 'cancel', 'write_failure', 'error', 'shutdown'])
+def test_capture_terminal_releases_resources_and_allows_immediate_restart(
+        capture_runtime, tmp_path, monkeypatch, termination):
+    context, timers = capture_runtime
+    job = capture.Capture(context, tmp_path)
+    released, publications = [], []
+    job.render_target = NS(free=lambda: released.append('gpu'),
+                           usage=lambda: {'active_targets': 0})
+    job.ui_operator = NS(remove_timer=lambda: released.append('ui_timer'))
+    entered, release = threading.Event(), threading.Event()
+    original_write = capture.ImageWriter._write
+
+    def held_write(writer):
+        original_write(writer)
+        entered.set()
+        assert release.wait(WAIT_TIMEOUT), 'PNG thread exit was not released'
+
+    if termination == 'write_failure':
+        def fail_write(*args):
+            raise OSError('injected PNG failure')
+        monkeypatch.setattr(capture, 'write_png', fail_write)
+    monkeypatch.setattr(capture.ImageWriter, '_write', held_write)
+    writer = capture.ImageWriter([(job.path / 'C1/frame_000000.png', 1, 1, bytes(4))])
+    job._writer, job._pending_records, job.in_group = writer, [{'sample_index': 0}], True
+    original_json = capture.write_json
+
+    def checked_json(path, payload):
+        if path == job.path / 'manifest.json' and job._closed:
+            assert threading.current_thread() is threading.main_thread()
+            assert not writer.thread.is_alive()
+            assert released == ['gpu', 'ui_timer']
+            assert not timers.callbacks and capture._ACTIVE is None
+            publications.append(dict(payload))
+        original_json(path, payload)
+
+    monkeypatch.setattr(capture, 'write_json', checked_json)
+    deferred = termination in {'error', 'shutdown'}
+    callback = None
+    try:
+        assert entered.wait(WAIT_TIMEOUT)
+        assert writer.done.is_set() and writer.thread.is_alive()
+        if termination == 'error':
+            def fail_guard():
+                raise RuntimeError('injected capture failure')
+            monkeypatch.setattr(job, 'guard', fail_guard)
+            with pytest.raises(RuntimeError, match='injected capture failure'):
+                job.step(context)
+        elif termination == 'shutdown':
+            capture.shutdown(restore=False)
+        else:
+            if termination == 'cancel':
+                job.request_cancel()
+            assert job.step(context) is False
+        with pytest.raises(ValueError, match='相机采集中'):
+            capture.Capture(context, tmp_path)
+        assert capture._ACTIVE is job and not job._closed
+        assert not capture._TERMINALS and not publications
+        if deferred:
+            assert len(timers.callbacks) == 1
+            callback, options = next(iter(timers.callbacks.items()))
+            assert options['persistent'] is True
+            assert callback() > 0
+            job.finish(error='duplicate finish')
+            assert len(timers.callbacks) == 1 and not publications
+    finally:
+        release.set()
+        writer.thread.join(WAIT_TIMEOUT)
+        assert not writer.thread.is_alive()
+    if deferred:
+        # Drive the registered main-thread callback without a UI event or a
+        # closed/active/status read that could otherwise perform lazy cleanup.
+        assert callback() is None
+    elif termination == 'write_failure':
+        with pytest.raises(OSError, match='injected PNG failure'):
+            job.step(context)
+    else:
+        assert job.step(context)
+    assert capture._ACTIVE is None and not timers.callbacks
+    assert len(publications) == 1
+    terminal = capture._TERMINALS[context.scene.as_pointer()][1]
+    assert terminal.stage == ('SUCCEEDED' if termination == 'success' else
+                              'CANCELLED' if termination == 'cancel' else 'FAILED')
+    saved = json.loads((job.path / 'manifest.json').read_text(encoding='utf-8'))
+    assert saved['status'] == ('complete' if termination == 'success' else 'incomplete')
+    assert saved['completed_samples'] == (1 if termination in {'success', 'cancel'} else 0)
+    next_job = capture.Capture(context, tmp_path)
+    assert next_job.path != job.path and capture._ACTIVE is next_job
+    assert job.closed
+    if callback is not None:
+        assert callback() is None
+    assert capture._ACTIVE is next_job and capture.status_for(context.scene).active
+    next_job.request_cancel()
+    assert capture._ACTIVE is None
+
+
+def test_capture_status_uses_one_finalization_snapshot(capture_runtime, tmp_path):
+    context, timers = capture_runtime
+    job = capture.Capture(context, tmp_path)
+    job._writer = NS(thread=NS(is_alive=lambda: True), cancel=lambda: None)
+    job.finish(error='injected capture failure')
+    alive = iter((True, False))
+    job._writer.thread.is_alive = lambda: next(alive)
+    status = capture.status_for(context.scene)
+    assert status.active and status.stage == 'FINALIZING'
+    assert capture._ACTIVE is job and not job._closed
+    assert capture.status_for(context.scene).stage == 'FAILED'
+    assert capture._ACTIVE is None and not timers.callbacks

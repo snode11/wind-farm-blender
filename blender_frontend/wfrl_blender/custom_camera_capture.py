@@ -36,7 +36,10 @@ def active():
 def progress():
     if not active():
         return ''
-    job = _ACTIVE
+    return _progress(_ACTIVE)
+
+
+def _progress(job):
     if getattr(job, '_finish_result', None) is not None:
         return '正在结束图像写入…'
     total = len(job.times)
@@ -548,12 +551,32 @@ class Capture:
                 self.ui_operator.remove_timer()
             self.error=error
             self._finish_result = success, same, error
-            self._publish_finish()
+            interval = self._publish_finish()
+            if interval is not None:
+                try:
+                    import bpy
+                except ImportError:
+                    pass
+                else:
+                    # Finalization must survive removal of the modal timer and file
+                    # loads; the PNG thread never accesses Blender or publishes UI.
+                    callback = self._publish_finish
+                    timers = bpy.app.timers
+                    timers.register(callback, first_interval=interval, persistent=True)
+                    self._finish_timer = timers, callback
 
     def _publish_finish(self):
         global _ACTIVE
-        if self._writer is not None and self._writer.thread.is_alive():
+        if getattr(self, '_finish_result', None) is None:
             return
+        if self._writer is not None and self._writer.thread.is_alive():
+            return .03
+        timer = getattr(self, '_finish_timer', None)
+        if timer is not None:
+            timers, callback = timer
+            if timers.is_registered(callback):
+                timers.unregister(callback)
+            self._finish_timer = None
         success, same, error = self._finish_result
         self._finish_result = None
         self._writer = self._pending_records = None
@@ -606,4 +629,4 @@ def status_for(scene):
     return TaskStatus('capture', True, job.scene == scene,
                       'FINALIZING' if getattr(job, '_finish_result', None) is not None else
                       'CANCELLING' if job.cancel_requested else 'CAPTURING',
-                      job.scene.name, getattr(job, 'error', ''), progress(), str(job.path))
+                      job.scene.name, getattr(job, 'error', ''), _progress(job), str(job.path))

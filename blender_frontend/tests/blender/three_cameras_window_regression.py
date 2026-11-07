@@ -19,11 +19,14 @@ from wfrl_blender import custom_camera_capture as capture, camera_projection as 
 
 
 def complete(job, context, timeout=30.):
-    """Step a capture until its asynchronous image write commits."""
+    """Wait for PNG thread exit and the capture's committed terminal state."""
     deadline = time.monotonic() + timeout
-    while not job.step(context):
+    while not job.closed:
+        job.step(context)
         assert time.monotonic() < deadline, 'capture did not finish'
-        time.sleep(.01)
+        if not job.closed:
+            time.sleep(.01)
+    assert not capture.active()
     return True
 from wfrl_blender.panels import custom_cameras as panel
 import wfrl_blender as addon
@@ -224,7 +227,7 @@ def tick():
                 time_s=capture.current_time(scene)
                 times=[time_s,time_s+.05,time_s+.1]
                 transaction=capture.Capture(bpy.context,OUT,times)
-                while not transaction.closed:transaction.step(bpy.context)
+                assert complete(transaction,bpy.context)
                 STATE['sequence_path']=str(transaction.path)
                 rows=[json.loads(r) for r in (transaction.path/'frames.jsonl').read_text().splitlines()]
                 assert len(rows)==9
@@ -236,6 +239,7 @@ def tick():
                 assert repr(charts.history_for(bpy.context.scene).__dict__)==STATE['history']
                 assert json.dumps(clearance_replay.sample(scene)['statistics'],sort_keys=True)==STATE['statistics']
                 cancel=capture.Capture(bpy.context,OUT,times);cancel.step(bpy.context);cancel.finish(error='test cancellation')
+                assert complete(cancel,bpy.context)
                 assert json.loads((cancel.path/'manifest.json').read_text())['status']=='incomplete'
                 assert (scene.frame_current,scene.frame_subframe)==STATE['frame']
                 STATE['checks']['sequence_same_times_statistics_cancel_restore']=True
