@@ -11,7 +11,7 @@ import bpy
 ROOT = Path(__file__).resolve().parents[3]
 sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
 import wfrl_blender as addon
-from wfrl_blender import camera_video, cameras, manual_video_render
+from wfrl_blender import camera_video, cameras
 
 assert bpy.app.background
 OUT = Path(os.environ['WFRL_TEST_OUTPUT'])
@@ -60,15 +60,6 @@ side_files = {str(p.relative_to(OUT)): hashlib.sha256(p.read_bytes()).hexdigest(
               for p in (OUT / 'side-output').rglob('*') if p.is_file()}
 assert side_files, 'Control render did not exercise File Output'
 assert control[0] > .9 and control[1] < .1 and control[2] > .9, control
-settings = source.render.use_compositing, source.compositing_node_group, source.render.engine
-work = source.copy()
-manual_video_render._configure_render(work, source.camera,
-                                      dict(width=48, height=48, fps=25, samples=1))
-assert not work.render.use_compositing
-for frame in (2, 3):
-    pixel = render(work, OUT / f'manual-{frame}.png', frame)
-    assert max(abs(a-b) for a, b in zip(pixel[:3], control[:3])) > .1, pixel
-assert settings == (source.render.use_compositing, source.compositing_node_group, source.render.engine)
 assert side_files == {str(p.relative_to(OUT)): hashlib.sha256(p.read_bytes()).hexdigest()
                       for p in (OUT / 'side-output').rglob('*') if p.is_file()}
 addon.unregister()
@@ -90,7 +81,7 @@ assert side_files == {str(p.relative_to(OUT)): hashlib.sha256(p.read_bytes()).he
                       for p in (OUT / 'side-output').rglob('*') if p.is_file()}
 addon.unregister()
 result = dict(status='PASS', final=True, blender=bpy.app.version_string, addon_file=addon.__file__,
-              manual_frames=2, camera_frames=2, control_file_output_observed=True,
+              camera_frames=2, control_file_output_observed=True,
               extra_worker_outputs=False, source_bytes_preserved=True, source_settings_preserved=True,
               scope='Small native renders; complete video encoding and GPU throughput not measured')
 (OUT / 'result.json').write_text(json.dumps(result, indent=2))

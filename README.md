@@ -45,7 +45,7 @@ GitHub 默认分支为 [`main`](https://github.com/snode11/wind-farm-blender/tre
 ## 当前源码主要能力
 
 - **风机手动控制**：**N → 风机控制 → 创建 / 进入手动场景** 提供 T1/T2/T3 或全部风机的朝向、统一／分别变桨、RPM、叶轮角度与运行／暂停／停转，支持朝下／侧向／顺桨预设、相对角度微调、三机参数概览、JSON 姿态保存／选择性载入及撤销重做。批量启用分别变桨保留已启用机组的独立桨距。使用独立刚性场景和环境，保留原 demo；不产生功率、载荷、尾流或测量结果。[操作说明](docs/blender/风机手动控制.md)。
-- **手动试验与视频**：源码研究接口提供 rootkink 手动场景的 T1 恒速变桨、独立 T1 Down 和 1920×1080、25 fps H.264 视频生成；视频后台需要配套项目源码，日常扩展按其独立安装身份识别。生成命令默认等待最终结果，显式 `--detach` 可脱离运行；持久化作业支持查询、取消和完整母版校验后的编码重试，发布前预检目标文件系统并拒绝覆盖已有输出。[生成、监管、重试与验证范围](docs/blender/手动场景研究接口.md#导出变桨视频)。
+- **手动 Down 视频与现场视频**：手动场景的 **Down 相机** 分组提供 NREL／rootkink 叶片外形切换、T1/T2/T3 Down 及左右侧视相机、叶片编号，以及所选风机单路或三路（中心／左／右）Down 视频导出：H.264 MP4 与逐帧 JSON，按转速和变桨速度逐帧计算，可叠加示意性相机抖动、叶片挥舞弯曲与塔架运动。**现场视频** 分组将视图分屏为 Down 仿真与现场 RTMP／RTSP 流。[操作与限制](docs/blender/风机手动控制.md#down-相机与视频导出)。
 - **离线物理结果回放**：三台 NREL 5 MW 风机、九片叶片及柔性塔架，播放 117–177 s 的 60 秒 MAPPO 保存记录，提供偏航、功率、转矩、挠度和净空对照。离线观看无需 Python 后端、MPI、FAST.Farm 或网络。
 - **叶片外形**：MAPPO 侧栏可选择默认 NREL 或合成的 rootkink 外形；切换保留时刻、所选机组和相机设置，继续使用 NREL 保存运动与读数。[操作与使用边界](前端readme.md#3-时间回放与观察视角)。
 - **几何／同源纹理分屏**：通过 **N → MAPPO → 打开几何重建示例…** 进入两侧完整风机，在几何与同源纹理间切换。共享播放、单帧步进与暂停；人工观察点仅定位一次，播放保留手动缩放和绕转，保存重开恢复模式与视图。
@@ -85,7 +85,7 @@ GW184 使用[独立包操作说明](docs/blender/GW184三相机与缺陷编辑�
 | 用途 | 必须保留的内容 |
 | --- | --- |
 | 扩展构建与离线回放 | `blender_frontend/wfrl_blender/assets/`、`_vendor/`，以及构建使用的规范 `wfrl/` 源码 |
-| 手动 T1 Down 视频 | 完整工作区源码，以及 `blender_frontend/wfrl_blender/assets/` 内的 rootkink／NREL 几何、地形纹理与环境 HDR；[生成入口](scripts/blender/generate_manual_pitch_video.py)须指定 `--output`，不依赖已有输出。恢复既有作业及重试编码还需保留其 `job.json` 与完整作业数据目录 |
+| 手动 Down 视频 | 扩展源码或安装扩展，以及 `blender_frontend/wfrl_blender/assets/` 内的 rootkink／NREL 几何、地形纹理与环境 HDR；视口快速路径和三路导出需要 FFmpeg |
 | 独立净空演示 | [交付清单](dist/lidar-delivery.json)指定 `results/lidar/packages/normal-v1.1/`、`close-v1.1/` 两个完整结果包；[专用启动入口](scripts/blender/打开净空雷达演示.command)使用项目源码，不安装扩展或启动求解器 |
 | 后端 Replay | 兼容后端环境，以及 `results/checkpoints/mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt` |
 | GW184 项目 | `projects/gw184-single/` 的 geometry、motion、cameras 与 sources；两份 DTU 原始输入随 Git 提供，官方来源与固定摘要见[来源说明](projects/gw184-single/sources/README.md) |

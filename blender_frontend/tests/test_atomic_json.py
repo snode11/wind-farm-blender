@@ -265,22 +265,3 @@ def test_write_text_mkdir_creates_parents_and_accepts_existing_directory(tmp_pat
 
     assert target.read_bytes() == '叶片姿态'.encode('utf-8')
     assert list(target.parent.iterdir()) == [target]
-
-
-@pytest.mark.parametrize('module, name', [
-    ('manual_video_job', 'write_json'),
-    ('manual_video_render', '_write_json'),
-])
-def test_manual_video_file_entry_points_use_helper_without_blender(tmp_path, module, name):
-    source = Path(atomic_json.__file__).with_name(module + '.py')
-    target = tmp_path / 'status.json'
-    code = '''import runpy, sys
-namespace = runpy.run_path(sys.argv[1])
-namespace[sys.argv[2]](sys.argv[3], {'label': '叶片'})
-assert not {'bpy', 'numpy'} & sys.modules.keys()
-'''
-    subprocess.run([sys.executable, '-I', '-B', '-c', code, str(source), name, str(target)],
-                   check=True, capture_output=True)
-
-    assert target.read_bytes() == '{\n  "label": "叶片"\n}\n'.encode('utf-8')
-    assert list(tmp_path.iterdir()) == [target]

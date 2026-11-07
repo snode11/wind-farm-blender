@@ -7,7 +7,6 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 ENTRY_POINTS = (
-    'scripts/blender/render_manual_video.py',
     'blender_frontend/wfrl_blender/animation_render_worker.py',
     'scripts/blender/accept_frontend.py',
     'blender_frontend/tests/blender/demo_playback_benchmark.py',

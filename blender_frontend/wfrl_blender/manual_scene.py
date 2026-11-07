@@ -1,14 +1,11 @@
 """Owned rigid wind-farm scenes, separate from recorded and backend scenes."""
+from functools import partial
 import json
-import logging
 import math
 import uuid
 
-_LOG = logging.getLogger(__name__)
-
 _VIEWS = {}
 _RESUME = {}
-MANUAL_BLADE_MODEL = 'rootkink'
 
 
 def is_manual(scene):
@@ -44,7 +41,6 @@ def _remember_view(context):
         saved.append((area, space, dict(
             location=region.view_location.copy(), rotation=region.view_rotation.copy(),
             distance=region.view_distance, perspective=region.view_perspective,
-            camera_zoom=region.view_camera_zoom, camera_offset=tuple(region.view_camera_offset),
             camera=space.camera, local_camera=space.use_local_camera,
             clip_start=space.clip_start, clip_end=space.clip_end,
             shading=space.shading.type, color_type=space.shading.color_type,
@@ -87,7 +83,6 @@ def _restore_view(context, saved_scene=None):
                 saved['camera'] = context.scene.objects.get(saved['camera']) if saved['camera'] else None
                 snapshots.append((area, area.spaces.active, saved))
         except (ValueError, TypeError, KeyError):
-            _LOG.warning('Saved manual return view is invalid', exc_info=True)
             snapshots = []
     for area, space, saved in snapshots:
         try:
@@ -98,10 +93,6 @@ def _restore_view(context, saved_scene=None):
             region.view_rotation = saved['rotation']
             region.view_distance = saved['distance']
             region.view_perspective = saved['perspective']
-            if 'camera_zoom' in saved:
-                region.view_camera_zoom = saved['camera_zoom']
-            if 'camera_offset' in saved:
-                region.view_camera_offset = saved['camera_offset']
             space.camera = saved['camera']
             space.use_local_camera = saved['local_camera']
             space.clip_start, space.clip_end = saved['clip_start'], saved['clip_end']
@@ -115,7 +106,6 @@ def _restore_view(context, saved_scene=None):
             space.show_region_ui = saved['sidebar']
             area.tag_redraw()
         except (ReferenceError, RuntimeError):
-            _LOG.warning('Manual return view could not be restored', exc_info=True)
             continue
 
 
@@ -155,36 +145,6 @@ def focus(context, target=None):
         region.view_distance = 800.0 if len(chosen) > 1 else 310.0
         region.view_perspective = 'PERSP'
         area.tag_redraw()
-
-
-def down_view(context):
-    """Observe the manual T1 geometry from its own fixed nacelle camera."""
-    from . import cameras, manual_control, manual_down
-    scene = context.scene
-    valid, reason = manual_control.validate_scene(scene)
-    if not valid:
-        raise ValueError(reason)
-    entry = next(item for item in scene.wfrl_manual_turbines if item.turbine_id == 'T1')
-    manual_control._validate_native_controls((entry.yaw_object,))
-    camera = manual_down.ensure_down_camera(scene, 'T1')
-    manual_control._validate_native_controls((camera,))
-    cameras.down_gimbal(camera)
-    scene.camera = camera
-    for area in context.screen.areas:
-        if area.type != 'VIEW_3D':
-            continue
-        space = area.spaces.active
-        space.use_local_camera = False
-        space.camera = camera
-        space.clip_start, space.clip_end = .05, 30000.0
-        space.shading.type = 'MATERIAL'
-        space.shading.use_scene_world = space.shading.use_scene_lights = True
-        space.overlay.show_overlays = False
-        space.show_region_ui = True
-        space.region_3d.view_perspective = 'CAMERA'
-        cameras.fill_camera_view(area, scene)
-        area.tag_redraw()
-    return camera
 
 
 def _environment(scene, collection, prefix):
@@ -238,6 +198,7 @@ def _environment(scene, collection, prefix):
     data.energy = 1.4
     data.color = (.98, .97, .95)
     data.angle = math.radians(2)
+    _single_sun_shadow(scene, data)
     light = scene.objects.get(prefix + '.Sun')
     if light is None:
         light = bpy.data.objects.new(prefix + '.Sun', data)
@@ -252,8 +213,6 @@ def _environment(scene, collection, prefix):
         collection.objects.link(camera)
     else:
         camera.data = data
-    from .cameras import clear_camera_mask
-    clear_camera_mask(camera)
     camera.location = (-420, -850, 330)
     camera.rotation_euler = (Vector((210, 0, 80)) - camera.location).to_track_quat('-Z', 'Y').to_euler()
     data.lens = 45
@@ -263,79 +222,24 @@ def _environment(scene, collection, prefix):
     scene['wfrl_manual_environment_revision'] = 1
 
 
+def _single_sun_shadow(scene, lamp):
+    """Only the sun extracted from the sky HDRI casts shadows; the lamp is fill light.
+
+    Both cast shadows otherwise, giving every tower two shadows in different directions."""
+    lamp.use_shadow = False
+    if scene.world is not None:
+        scene.world.use_sun_shadow = True
+
+
 def _ensure_environment(scene):
     if scene.get('wfrl_manual_environment_revision', 0) >= 1:
+        light = scene.objects.get(scene['wfrl_manual_owner'] + '.Sun')
+        if light is not None and light.type == 'LIGHT' and light.data.use_shadow:
+            _single_sun_shadow(scene, light.data)
         return
     prefix = scene['wfrl_manual_owner']
     collection = scene.wfrl_manual_turbines[0].yaw_object.users_collection[0]
     _environment(scene, collection, prefix)
-
-
-def _ensure_blade_model(scene):
-    """Bind one coherent rigid display model and its matching root fittings."""
-    from .manual_geometry import ensure_model
-    ensure_model(scene)
-    _ensure_surface_roles(scene)
-
-
-def _ensure_surface_roles(scene):
-    """Give unclassified generated fittings private metal and rubber surfaces.
-
-    Materials outside generated hub/graphite slots retain their assignments.
-    Mesh data with external users is detached before material slots are written.
-    """
-    import bpy
-    import re
-    from .materials import get_material, refresh_turbine_surfaces, turbine_surface_kind
-    if scene.get('wfrl_manual_surface_roles_revision', 0) >= 1:
-        return
-    owner = scene['wfrl_manual_owner']
-    targets = [obj for obj in scene.objects if obj.type == 'MESH'
-               and obj.get('wfrl_manual_owner') == owner and obj.data.materials
-               and turbine_surface_kind(obj.name) and obj.data.materials[0]
-               and re.fullmatch(re.escape(owner) + r'\.(hub|graphite)(?:\.\d+)*',
-                                obj.data.materials[0].name)]
-    originals = {obj: obj.data for obj in targets}
-    slots = {obj.data: obj.data.materials[0] for obj in targets}
-    copies, materials = {}, {}
-    namespace = owner + '.Surfaces.' + uuid.uuid4().hex[:8]
-
-    def material(kind):
-        if kind not in materials:
-            materials[kind] = get_material(kind, namespace=namespace)
-            materials[kind]['wfrl_manual_owner'] = owner
-        return materials[kind]
-
-    try:
-        for obj in targets:
-            mesh = obj.data
-            users = [other for other in bpy.data.objects if other.type == 'MESH' and other.data == mesh]
-            if (mesh.library or mesh.use_fake_user or mesh.users != len(users)
-                    or any(set(user.users_scene) != {scene} for user in users)):
-                if mesh not in copies:
-                    copies[mesh] = mesh.copy()
-                    copies[mesh].use_fake_user = False
-                    copies[mesh]['wfrl_manual_mesh_owner'] = owner
-                    copies[mesh]['wfrl_manual_owner'] = owner
-                obj.data = copies[mesh]
-        refresh_turbine_surfaces(targets, object_prefix=owner + '.Turbine.', material_factory=material)
-        scene['wfrl_manual_surface_roles_revision'] = 1
-    except BaseException:
-        try:
-            for obj, mesh in originals.items():
-                obj.data = mesh
-            for mesh, material in slots.items():
-                if mesh.library is None:
-                    mesh.materials[0] = material
-            for mesh in copies.values():
-                if mesh.users == 0:
-                    bpy.data.meshes.remove(mesh)
-            for material in materials.values():
-                if material.users == 0:
-                    bpy.data.materials.remove(material)
-        except Exception:
-            _LOG.exception('Manual surface setup failed; rollback also failed')
-        raise
 
 
 def _discard(scene, collection, prefix):
@@ -373,10 +277,7 @@ def create(context):
     scene.use_fake_user = True
     scene.wfrl_manual_return_scene = source
     collection = None
-    def material(name):
-        result = get_material(name, namespace=prefix)
-        result['wfrl_manual_owner'] = prefix
-        return result
+    material = partial(get_material, namespace=prefix)
     try:
         context.window.scene = scene
         collection = bpy.data.collections.new(prefix + '.Scene')
@@ -399,10 +300,6 @@ def create(context):
                 setattr(entry, f'blade{blade}_object', collection.objects[name + f'.Blade{blade}'])
         for obj in collection.objects:
             obj['wfrl_manual_owner'] = prefix
-        from .manual_geometry import tag_generated_assembly, share_static_meshes
-        tag_generated_assembly(scene)
-        _ensure_blade_model(scene)
-        share_static_meshes(scene)
         _environment(scene, collection, prefix)
         source.wfrl_manual_scene = scene
         if not manual_control.apply_scene(scene):
@@ -414,27 +311,19 @@ def create(context):
         context.view_layer.update()
         return scene
     except Exception:
-        try:
-            context.window.scene = source
-        except (ReferenceError, RuntimeError):
-            _LOG.exception('Manual scene construction failed; source scene could not be restored')
-        try:
-            _discard(scene, collection, prefix)
-        except Exception:
-            _LOG.exception('Manual scene construction failed; resource cleanup also failed')
+        context.window.scene = source
+        _discard(scene, collection, prefix)
         raise
 
 
 def enter(context):
-    from . import manual_control, playback
+    from . import manual_control, playback, _cancel_playback
     reason = entry_error(context)
     if reason:
         raise ValueError(reason)
     source = context.scene
     if is_manual(source):
         if manual_control.validate_scene(source)[0]:
-            manual_control.pause_scene(source)
-            _ensure_blade_model(source)
             _ensure_environment(source)
             return source
         original = source.wfrl_manual_return_scene
@@ -448,15 +337,12 @@ def enter(context):
             focus(context)
             return scene
         except Exception:
-            try:
-                context.window.scene = source
-            except (ReferenceError, RuntimeError):
-                _LOG.exception('Manual scene recovery failed; source scene could not be restored')
+            context.window.scene = source
             raise
     _remember_view(context)
     playing = playback.is_playing(source)
     if playing:
-        playback.cancel(source)
+        _cancel_playback(source)
     try:
         scene = source.wfrl_manual_scene
         if scene is None or not is_manual(scene):
@@ -470,21 +356,16 @@ def enter(context):
                 context.window.scene = scene
                 _ensure_environment(scene)
         manual_control.pause_scene(scene)
-        _ensure_blade_model(scene)
         _RESUME[context.window.as_pointer()] = (source, playing)
         _save_return_view(context, scene)
         focus(context)
         return scene
     except Exception:
-        try:
-            _RESUME.pop(context.window.as_pointer(), None)
-            context.window.scene = source
-            _restore_view(context)
-            if playing and not playback.any_playing():
-                import bpy
-                bpy.ops.screen.animation_play()
-        except Exception:
-            _LOG.exception('Manual scene entry failed; view or playback restoration also failed')
+        context.window.scene = source
+        _restore_view(context)
+        if playing and not playback.any_playing():
+            import bpy
+            bpy.ops.screen.animation_play()
         raise
 
 

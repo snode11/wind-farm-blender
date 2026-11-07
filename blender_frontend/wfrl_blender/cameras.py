@@ -459,28 +459,16 @@ def is_down_camera(camera):
     return camera is not None and (camera.name in _DOWN_GIMBAL_NAMES or camera.get('wfrl_down_camera', False))
 
 
-def ensure_gimbal(scene, turbine, *, yaw_object=None, name=None, owner=None):
+def ensure_gimbal(scene, turbine, *, yaw_object=None, name=None):
     """Lazily add a camera to existing saved scenes without rebuilding geometry."""
     import bpy
-    if owner is not None:
-        from .manual_control import other_scene_objects
     root = yaw_object if yaw_object is not None else scene.objects.get(f'WFRL.Turbine.{turbine}.YawRoot')
     if root is None or scene.objects.get(root.name) != root:
         raise ValueError(f'{turbine} is not present in this scene')
     name = name or f'WFRL.Camera.{turbine}.Gimbal'
     camera = scene.objects.get(name)
-    if camera is None and owner is not None:
-        candidates = [obj for obj in root.children if obj.get('wfrl_down_camera')
-                      and obj.get('wfrl_manual_owner') == owner
-                      and scene.objects.get(obj.name) == obj]
-        if len(candidates) > 1:
-            raise ValueError('Multiple Down cameras belong to this turbine scene')
-        camera = next(iter(candidates), None)
     created = camera is None
-    if camera is not None and (camera.type != 'CAMERA' or (owner is not None and
-          (camera.get('wfrl_manual_owner') != owner or camera.parent != root
-           or camera.data.get('wfrl_manual_owner') != owner or camera.data.users != 1
-           or camera.as_pointer() in other_scene_objects(scene)))):
+    if camera is not None and camera.type != 'CAMERA':
         raise ValueError('Down camera does not belong to this turbine scene')
     data = None
     try:
@@ -489,9 +477,6 @@ def ensure_gimbal(scene, turbine, *, yaw_object=None, name=None, owner=None):
             camera = bpy.data.objects.new(name, data)
             root.users_collection[0].objects.link(camera)
         camera['wfrl_down_camera'] = True
-        if owner is not None:
-            camera['wfrl_manual_owner'] = owner
-            camera.data['wfrl_manual_owner'] = owner
         if camera.get('wfrl_gimbal_mount_revision', 0) < DOWN_MOUNT_REVISION:
             camera.parent = root
             camera.matrix_parent_inverse.identity()
@@ -522,7 +507,9 @@ def down_gimbal(camera):
     camera['mount'] = 'nacelle underside, behind hub, trailing-edge side / fixed Down'
     camera['gimbal_roll'] = DOWN_ROLL_DEG
     camera.data.shift_x = camera.data.shift_y = 0
-    return aim_gimbal(camera, DOWN_YAW_DEG, DOWN_PITCH_DEG, DOWN_HFOV_DEG)
+    # A camera may carry its own preset pitch (the manual scene frames the tower higher).
+    pitch = float(camera.get('wfrl_down_pitch_deg', DOWN_PITCH_DEG))
+    return aim_gimbal(camera, DOWN_YAW_DEG, pitch, DOWN_HFOV_DEG)
 
 
 def reset_gimbal(camera):

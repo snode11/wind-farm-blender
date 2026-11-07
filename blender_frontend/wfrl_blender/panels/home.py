@@ -26,7 +26,7 @@ def snapshot(context):
     manual_error = getattr(scene, 'wfrl_manual_error', '') if kind == 'manual' else ''
     running = kind == 'manual' and any(
         (entry.running and entry.rpm > 0)
-        or (manual_control.pitch_ramping(entry) and not entry.pitch_paused)
+        or manual_control.pitch_ramping(entry)
         for entry in scene.wfrl_manual_turbines)
     status = scene_status(kind=kind, ready=ready, playing=playback.is_playing(scene),
                           load_error=load_error, manual_error=manual_error,
@@ -34,7 +34,6 @@ def snapshot(context):
     issues = [('加载结果', load_error), ('后端', runtime.get_state().error),
               ('手动控制', manual_error), ('相机观察', native_camera_views.last_error(scene))]
     for key, title in (('wfrl_blade_model_error', '叶片外形'),
-                       ('wfrl_manual_geometry_error', '手动外形'),
                        ('wfrl_view_layout_error', '视图布局')):
         issues.append((title, scene.get(key, '')))
     for task in foreground_tasks(scene):
@@ -173,9 +172,7 @@ def draw_export(layout, context, *, busy=''):
         layout.operator('wfrl.manual_down_view', text='观察所选风机 Down', icon='CAMERA_DATA')
         layout.operator('wfrl.manual_down_video', text='Down 姿态序列 → MP4 + JSON…', icon='RENDER_ANIMATION')
         message(layout, '使用所选风机的姿态与转速；取消仅影响本次输出。视口渲染期间界面暂停响应。')
-        from .. import manual_video
-        manual_video.draw(layout, scene)
-        message(layout, '冻结试验配置 → 后台 MP4；取消等待监管终态，不改变已确认试验。')
+        layout.operator('wfrl.manual_triple_down_video', text='三路 Down 视频 → MP4…', icon='RENDER_ANIMATION')
         return
     if clearance_replay.reader_for(scene) is None and scene.get('wfrl_scene_kind') != 'live':
         layout.label(text='请先在“回放”页加载数据。', icon='INFO')

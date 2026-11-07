@@ -32,9 +32,12 @@ MANUAL_ONLY = {
     'launcher_mode_regression.py': (
         'Requires the installed daily extension and an idle Bridge with launcher environment; '
         'wfrl_blender_bootstrap.py does not invoke this regression.'),
-    'manual_video_installed_regression.py': (
-        'Requires an enabled installed extension, a supervisor Python and two fresh processes '
-        'sharing create/recover output; the source runner reaps descendants after each invocation.'),
+    'manual_down_video_window.py': (
+        'Visible window check of the manual Down view and live structural motion; started by hand '
+        'with WFRL_TEST_OUTPUT and closed by the operator after inspection.'),
+    'manual_repair_mouse_window.py': (
+        'Visible window check that needs real mouse input in the manual scene; '
+        'no synthetic driver reproduces it.'),
     'video_output_regression.py': (
         'Requires the installed daily extension, a prepared MP4, FFmpeg and MediaMTX for real RTSP; '
         'the source runner cannot substitute for that installed payload.'),
