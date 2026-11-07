@@ -1,22 +1,9 @@
 """Author the commercial-style root-kink AeroDyn blade definition.
 
-The planform keeps the NREL 5MW station radii, prebend, sweep and twist so the
-saved 19-station MAPPO transforms stay applicable and the existing airfoil
-polars remain valid under chord normalisation. Only chord and airfoil
-assignment change, which is what produces the visible root shoulder.
-
-Design intent, measured against the NREL 5MW baseline:
-  - only the r=1.5 m bolt circle stays a true cylinder, and it sits deep inside
-    the 2.40 m spinner; the first station that emerges (r=2.87 m) is already a
-    DU40 aerofoil, so no bare cylinder stub protrudes the way the NREL root does
-    (NREL keeps Cylinder1/Cylinder2 out to r=6.8 m)
-  - max chord moved inboard 15.85 -> 11.75 m (r/R 0.25 -> 0.19)
-  - trailing edge accelerates into the shoulder (+0.208 then +0.250 m/m) and
-    reverses to -0.065 m/m, a 0.316 slope jump against the baseline's 0.110.
-    The acceleration matters: a decelerating approach makes the monotone
-    Hermite limiter round the apex into a bulge instead of a corner.
-  - airfoil sections brought inboard one step so a real profile, not a
-    cylinder, carries the shoulder
+The planform uses the NREL 5MW station radii, prebend, sweep and twist so the
+saved 19-station MAPPO transforms can drive the display mesh. Chord and airfoil
+assignment define the visible root shoulder. The r=1.5 m root is cylindrical;
+the r=2.8667 m station uses DU40, and the 4.85 m maximum chord is at r=8.3333 m.
 
 This is a synthetic commercial-style planform, not manufacturer CAD and not a
 calibrated match to any photographed machine. Structural properties and
@@ -42,8 +29,7 @@ PLANFORM = [
     (2.900,  3),  #  2.87  emerges from the spinner already shaped as a DU40 aerofoil
     (3.700,  3),  #  5.60  still rising; held below the apex so the trailing edge
                   #        accelerates into the corner at r=8.33 (sharp kink)
-    (4.850,  4),  #  8.33  MAX CHORD - shoulder apex; kink ~6.8 m from the hub,
-                  #        between the old r=11.75 (too far) and r=5.60 (too near)
+    (4.850,  4),  #  8.33  maximum chord at the shoulder, 6.8333 m from the blade root
     (4.600,  4),  # 11.75  gentle fall begins
     (4.300,  5),  # 15.85
     (4.000,  5),  # 19.95

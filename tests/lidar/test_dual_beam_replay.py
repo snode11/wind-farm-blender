@@ -1,12 +1,11 @@
 """Stateless seeking, held groups and corruption checks for the new contract."""
 from copy import deepcopy
 from types import SimpleNamespace
-import json
 from pathlib import Path
 
 import numpy as np
 import pytest
-from wfrl.lidar.dual_beam import observe, PairLimits
+from wfrl.lidar.dual_beam import observe
 from wfrl.lidar.dual_beam_replay import DualBeamReader, METHOD_ALGORITHM_VERSIONS, precompute
 from wfrl.lidar.replay import ReplayReader
 from wfrl.camera_video.data import SourceGeometry
@@ -52,6 +51,34 @@ def test_seeking_hold_group_expiry_and_no_future_alarm():
     assert reader.at(1.)['alarm']['event_count']==0
     assert reader.beam_activity(1.)==(False,False,False)
     assert reader.beam_activity(1.025)==(True,True,True)
+
+
+def test_prefix_statistics_are_exact_and_unchanged_errors_are_not_resorted(monkeypatch):
+    from wfrl.lidar import dual_beam_replay as replay
+    _, _, overlay = make_reader()
+    template = overlay['results']['T1']['samples']
+    rows = []
+    for index, error in enumerate((None, -3., None, 0., 5., -3., None, .001, None)):
+        row = deepcopy(template[2 if index % 3 else 0])
+        row['time_s'] = float(index)
+        row['passage_id'] = None if index < 2 else 'passage-' + str(index // 2)
+        row['expected_blade_id'] = 2 if index % 2 else 1
+        row['evaluation']['clearance_error_m'] = error
+        rows.append(row)
+    original, calls = replay.error_statistics, []
+    def count(errors):
+        calls.append(len(errors))
+        return original(errors)
+    monkeypatch.setattr(replay, 'error_statistics', count)
+    cumulative, _ = replay.precompute(rows, overlay['config'])
+    errors = []
+    for row, state in zip(rows, cumulative, strict=True):
+        if row['reconstruction']['valid'] and row['evaluation']['clearance_error_m'] is not None:
+            errors.append(row['evaluation']['clearance_error_m'])
+        for key, value in original(errors).items():
+            assert state['statistics'][key] == value
+    assert len(calls) == 1 + len(errors)
+    assert replay.precompute([], overlay['config']) == ([], [])
 
 
 @pytest.mark.parametrize('mutation', ['invalid_number','mismatch_state','different_blade','future_time'])
@@ -241,3 +268,29 @@ def test_event_times_remain_exact_with_statistics_roundoff_exception():
     overlay['results']['T1']['events'][0]['hit_times_s'][0] += 1e-15
     with pytest.raises(ValueError, match='precomputed'):
         DualBeamReader(legacy, overlay, 'T1')
+
+
+@pytest.mark.parametrize(('reference', 'error'), [(19., 0.), (True, 1.), (19., False),
+    (float('nan'), None), (19., float('inf')), (None, 1.), ('19', 1.)])
+def test_source_evaluation_is_checked_even_with_matching_regenerated_prefix(reference, error):
+    _, legacy, overlay = make_reader()
+    rows = overlay['results']['T1']['samples']
+    row = next(row for row in rows if row['reconstruction']['valid'])
+    row['evaluation'].update(clearance_reference_m=reference, clearance_error_m=error)
+    # Arithmetic is independent of the saved aggregate; regenerate from the bad row.
+    from wfrl.lidar.dual_beam_replay import precompute
+    if type(error) in (int, float) and type(reference) in (int, float) and np.isfinite(error):
+        cumulative, events = precompute(rows, overlay['config'])
+        overlay['results']['T1'].update(cumulative=cumulative, events=events)
+    with pytest.raises(ValueError, match='evaluation'):
+        DualBeamReader(legacy, overlay, 'T1')
+
+
+def test_optional_evaluation_can_remain_missing():
+    _, legacy, overlay = make_reader()
+    for row in overlay['results']['T1']['samples']:
+        row['evaluation'].update(clearance_reference_m=None, clearance_error_m=None)
+    from wfrl.lidar.dual_beam_replay import precompute
+    cumulative, events = precompute(overlay['results']['T1']['samples'], overlay['config'])
+    overlay['results']['T1'].update(cumulative=cumulative, events=events)
+    assert DualBeamReader(legacy, overlay, 'T1').at(1.05)['statistics']['error_samples'] == 0

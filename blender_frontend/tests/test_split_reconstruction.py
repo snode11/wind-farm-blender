@@ -54,11 +54,11 @@ def test_loaded_mappo_offers_texture_entry_without_legacy_split_geometry():
 
 
 def test_texture_camera_owns_right_view_and_legacy_camera_is_retained():
-    from wfrl_blender import split_surface_texture
-    scene = Scene(split_texture_review=True)
+    from wfrl_blender import split_mappo_texture
+    scene = Scene(split_mappo_texture_review=True, split_texture_current_source='MAPPO')
     legacy = scene.objects['SplitRecon.Camera']
     texture = object()
-    scene.objects[split_surface_texture.CAMERA] = texture
+    scene.objects[split_mappo_texture.CAMERA] = texture
     assert split.reconstruction_camera(scene) is texture
     assert split.is_reconstruction_view(scene, NS(type='VIEW_3D', camera=texture))
     assert not split.is_reconstruction_view(scene, NS(type='VIEW_3D', camera=legacy))
@@ -93,7 +93,7 @@ def _entry_context(monkeypatch, scene):
 
 
 def test_returning_to_saved_geometry_does_not_replace_it_with_texture(monkeypatch):
-    from wfrl_blender import split_surface_texture as surface
+    from wfrl_blender import split_mappo_texture as surface
     scene = Scene(split_review_enabled=False)
     context, layouts = _entry_context(monkeypatch, scene)
     legacy_camera = scene.objects['SplitRecon.Camera']
@@ -135,7 +135,7 @@ def test_explicit_geometry_entry_deactivates_retained_same_source_and_keeps_its_
 
 
 def test_explicit_texture_entry_upgrades_geometry_and_keeps_legacy_objects(monkeypatch):
-    from wfrl_blender import split_surface_texture as surface
+    from wfrl_blender import split_mappo_texture as surface
     scene = Scene()
     context, layouts = _entry_context(monkeypatch, scene)
     legacy_camera = scene.objects['SplitRecon.Camera']
@@ -144,6 +144,7 @@ def test_explicit_texture_entry_upgrades_geometry_and_keeps_legacy_objects(monke
     def ensure_texture(target):
         restored.append(target)
         target[surface.MARKER] = True
+        target['split_texture_current_source'] = 'MAPPO'
         target.objects[surface.CAMERA] = NS(name=surface.CAMERA)
 
     monkeypatch.setattr(surface, 'ensure', ensure_texture)
@@ -155,8 +156,8 @@ def test_explicit_texture_entry_upgrades_geometry_and_keeps_legacy_objects(monke
 
 
 def test_returning_to_retained_texture_restores_its_saved_sample(monkeypatch):
-    from wfrl_blender import split_surface_texture as surface
-    scene = Scene(split_texture_review=True, split_texture_index=47,
+    from wfrl_blender import split_mappo_texture as surface
+    scene = Scene(split_mappo_texture_review=True, split_texture_current_source='MAPPO', saved_sample=47,
                   split_review_enabled=False)
     context, layouts = _entry_context(monkeypatch, scene)
     scene.objects[surface.CAMERA] = NS(name=surface.CAMERA)
@@ -164,13 +165,13 @@ def test_returning_to_retained_texture_restores_its_saved_sample(monkeypatch):
     monkeypatch.setattr(surface, 'ensure', lambda target: restored.append(target))
     assert split.enter(context)
     assert restored == [scene]
-    assert scene[surface.INDEX] == 47
+    assert scene['saved_sample'] == 47
     assert split.reconstruction_camera(scene) is scene.objects[surface.CAMERA]
     assert layouts == [('DUAL', ('WFRL.Camera.T1.FrontQuarter', surface.CAMERA))]
 
 
 def test_loaded_mappo_enters_texture_when_no_saved_geometry_exists(monkeypatch):
-    from wfrl_blender import split_surface_texture as surface
+    from wfrl_blender import split_mappo_texture as surface
     scene = Scene(wfrl_farm_flex_path='__WFRL_BUNDLED_MAPPO__')
     scene.pop('split_reconstruction_review')
     scene.objects = {'WFRL.Turbine.T1.Rotor': object()}
@@ -180,29 +181,13 @@ def test_loaded_mappo_enters_texture_when_no_saved_geometry_exists(monkeypatch):
     def ensure_texture(target):
         restored.append(target)
         target[surface.MARKER] = True
+        target['split_texture_current_source'] = 'MAPPO'
         target.objects[surface.CAMERA] = NS(name=surface.CAMERA)
 
     monkeypatch.setattr(surface, 'ensure', ensure_texture)
     assert split.enter(context)
     assert restored == [scene]
     assert layouts == [('DUAL', ('WFRL.Camera.T1.FrontQuarter', surface.CAMERA))]
-
-
-def test_texture_draw_information_never_restores_or_writes_ids(monkeypatch):
-    from wfrl_blender import split_surface_texture as surface
-    scene = NS(as_pointer=lambda: 30)
-    def forbidden(_scene):
-        raise AssertionError('draw information attempted restoration or an ID write')
-    monkeypatch.setattr(surface, 'ensure', forbidden)
-    monkeypatch.setattr(surface, 'apply', forbidden)
-    monkeypatch.setattr(surface, '_SESSIONS', {})
-    assert surface.information(scene) is None
-    sequence = NS(states=[None]*120, times=np.arange(120)/10,
-                  source_frames=np.arange(120), fps=10., source_label='SYNTHETIC')
-    surface._SESSIONS[30] = dict(sequence=sequence, index=16)
-    info = surface.information(scene)
-    assert info['index'] == 16 and info['time_s'] == 1.6 and info['samples'] == 120
-    assert info['source_frame'] == 16
 
 
 def test_pair_requires_existing_correctly_positioned_roles():
@@ -294,6 +279,201 @@ def test_resize_fit_is_debounced_and_camera_changes_do_not_trigger_repair(monkey
     monkeypatch.setattr(split, '_pair', lambda *_: None)
     split._tick()
     assert fitted == []
+
+
+def _resize_fit_window(monkeypatch, *, playing):
+    from wfrl_blender import cameras, playback
+
+    class Vector(np.ndarray):
+        @property
+        def length(self):
+            return np.linalg.norm(self)
+
+    class Matrix(np.ndarray):
+        @classmethod
+        def Translation(cls, offset):
+            matrix = np.eye(4).view(cls)
+            matrix.translation = offset
+            return matrix
+
+        @classmethod
+        def Diagonal(cls, diagonal):
+            return np.diag(diagonal).view(cls)
+
+        @property
+        def translation(self):
+            return self[:3, 3].view(Vector)
+
+        @translation.setter
+        def translation(self, value):
+            self[:3, 3] = value
+
+        def inverted(self):
+            return np.linalg.inv(self).view(Matrix)
+
+        def __matmul__(self, other):
+            if isinstance(other, Vector):
+                return (np.asarray(self)[:3, :3] @ np.asarray(other) + self.translation).view(Vector)
+            return (np.asarray(self) @ np.asarray(other)).view(Matrix)
+
+    class Objects(dict):
+        def __iter__(self):
+            return iter(self.values())
+
+    scene = Scene(split_review_status='READY')
+    scene.objects = Objects()
+    for blade in range(1, 4):
+        name = f'SplitRecon.B{blade}'
+        scene.objects[name] = NS(name=name, type='MESH', data=NS(shape_keys=None),
+            matrix_world=Matrix.Translation((0., 10000., 0.)),
+            bound_box=split._corners((-60., -2., -75.), (60., 2., 75.)))
+    for pointer, part in enumerate(('YawRoot', 'Rotor'), start=31):
+        name = 'WFRL.Turbine.T1.' + part
+        scene.objects[name] = NS(name=name, type='EMPTY', parent=None,
+            as_pointer=lambda pointer=pointer: pointer, matrix_basis=Matrix.Translation((0., 0., 90.)))
+    camera = NS(name='SplitRecon.Camera', type='CAMERA', data=NS(type='ORTHO', ortho_scale=186.),
+                matrix_world=NS(translation=np.array((200., 10020., 125.)).view(Vector),
+                                to_quaternion=lambda: np.array((1., 0., 0., 0.))))
+    scene.objects[camera.name] = camera
+    left, right = area(1, object()), area(2, camera, 404)
+    for pane in (left, right):
+        pane.regions = [NS(type='WINDOW', x=pane.x, y=0, width=pane.width, height=pane.height)]
+        pane.tag_redraw = lambda: None
+        space = pane.spaces.active
+        space.lens = 61.
+        space.show_region_ui = space.show_region_toolbar = False
+        space.region_3d = NS(view_perspective='PERSP' if pane is left else 'CAMERA',
+                             view_rotation=np.array((.5, .5, .5, .5)),
+                             view_location=np.array((3., 10004., 88.)), view_distance=23.,
+                             view_camera_zoom=104., view_camera_offset=(.23, -.11),
+                             update=lambda: None)
+    screen = NS(areas=[left, right], as_pointer=lambda: 20, is_animation_playing=playing)
+    window = NS(scene=scene, screen=screen, as_pointer=lambda: 10)
+    context = NS(scene=scene, window=window, window_manager=NS(windows=[window]),
+                 preferences=NS(system=NS(ui_scale=1., use_region_overlap=True), view=NS(smooth_view=200)),
+                 view_layer=NS(update=lambda: None), evaluated_depsgraph_get=lambda: None,
+                 temp_override=lambda **_kw: nullcontext())
+    fits = []
+
+    def view_camera():
+        right.spaces.active.region_3d.view_perspective = 'CAMERA'
+        fits.append(split._signature((left, right)))
+        return {'FINISHED'}
+
+    def project(pane, _points):
+        dx, dy = pane.spaces.active.region_3d.view_camera_offset
+        return 140. + 100 * dx, 120. + 100 * dy, 320. + 100 * dx, 480. + 100 * dy
+
+    bpy = NS(context=context, ops=NS(view3d=NS(view_camera=view_camera)),
+             app=NS(background=False, timers=NS(is_registered=lambda _callback: True)))
+    monkeypatch.setitem(sys.modules, 'bpy', bpy)
+    monkeypatch.setitem(sys.modules, 'mathutils', NS(
+        Vector=lambda values: np.asarray(values, dtype=float).view(Vector), Matrix=Matrix))
+    monkeypatch.setattr(cameras, '_LAYOUT_JOB', None)
+    monkeypatch.setattr(playback, '_OWNER_SCENE', scene)
+    monkeypatch.setattr(split, '_REGISTERED', True)
+    monkeypatch.setattr(split, '_JOBS', {})
+    monkeypatch.setattr(split, '_SESSIONS', {})
+    monkeypatch.setattr(split, '_project', project)
+    now = [1.]
+    monkeypatch.setattr(split.time, 'monotonic', lambda: now[0])
+
+    def tick(elapsed=0.):
+        now[0] += elapsed
+        assert split._tick() == split._INTERVAL
+
+    def resize_right(width):
+        right.width = right.regions[0].width = width
+        tick()
+
+    split._remember(window, (left, right))
+    return NS(context=context, left=left, right=right, fits=fits, tick=tick, resize_right=resize_right,
+              key=split._key(window), screen=screen)
+
+
+def test_playing_resize_defers_fit_without_moving_camera(monkeypatch):
+    window = _resize_fit_window(monkeypatch, playing=True)
+    right = window.right.spaces.active
+    before = split._navigation(right)
+    window.resize_right(320)
+    for _ in range(4):
+        window.tick(.5)
+
+    _assert_navigation_equal(split._navigation(right), before)
+    assert not window.fits
+    assert split._SESSIONS[window.key]['fit_deferred']
+    assert window.key not in split._JOBS
+
+
+def test_pause_fits_only_the_latest_deferred_layout(monkeypatch):
+    window = _resize_fit_window(monkeypatch, playing=False)
+    window.resize_right(360)
+    window.tick(.5)
+    window.tick(.5)
+    assert split._JOBS[window.key]['stage'] == 'refit'
+    before = split._navigation(window.right.spaces.active)
+    first_fit, = window.fits
+
+    window.screen.is_animation_playing = True
+    window.tick(.5)
+    assert window.key not in split._JOBS
+    assert split._SESSIONS[window.key]['fit_deferred']
+    window.resize_right(320)
+    window.tick(20.)
+    window.resize_right(280)
+    window.right.regions.append(NS(type='UI', x=580, width=80))
+    window.right.spaces.active.show_region_ui = True
+    window.tick(.5)
+    window.tick(.5)
+    latest = split._signature((window.left, window.right))
+    assert latest != first_fit
+    assert window.fits == [first_fit]
+    _assert_navigation_equal(split._navigation(window.right.spaces.active), before)
+    assert split._SESSIONS[window.key]['signature'] == latest
+
+    window.screen.is_animation_playing = False
+    for _ in range(5):
+        window.tick(.5)
+    assert window.fits == [first_fit, latest]
+    assert split._SESSIONS[window.key]['signature'] == latest
+    assert split._SESSIONS[window.key]['changed'] is None
+    assert window.key not in split._JOBS
+    assert window.context.scene['split_review_status'] == 'READY'
+
+
+def test_paused_resize_keeps_debounce_and_refit(monkeypatch):
+    window = _resize_fit_window(monkeypatch, playing=False)
+    left_before = split._navigation(window.left.spaces.active)
+    window.resize_right(320)
+    window.tick(.25)
+    assert not window.fits and window.key not in split._JOBS
+    window.tick(.25)
+    assert split._JOBS[window.key]['explicit'] is False
+    assert not window.fits
+    for _ in range(3):
+        window.tick(.5)
+    signature = split._signature((window.left, window.right))
+    assert window.fits == [signature, signature]
+    _assert_navigation_equal(split._navigation(window.left.spaces.active), left_before)
+    assert window.key not in split._JOBS
+    assert window.context.scene['split_review_status'] == 'READY'
+
+
+def test_explicit_fit_runs_while_playing_with_deferred_resize(monkeypatch):
+    window = _resize_fit_window(monkeypatch, playing=True)
+    window.resize_right(320)
+    window.tick(.5)
+    assert split._SESSIONS[window.key]['fit_deferred']
+
+    assert split.fit(window.context)
+    for _ in range(4):
+        window.tick(.5)
+    signature = split._signature((window.left, window.right))
+    assert window.fits == [signature, signature]
+    assert window.screen.is_animation_playing
+    assert window.key not in split._JOBS
+    assert not split._SESSIONS[window.key].get('fit_deferred')
+    assert window.context.scene['split_review_status'] == 'READY'
 
 
 def test_automatic_fit_waits_for_two_redraws_and_never_resets_left(monkeypatch):
@@ -408,6 +588,7 @@ def _mode_context(monkeypatch, perspective='PERSP'):
     scene.objects[same.CAMERA] = texture
     left, right = area(1, source), area(2, legacy, 404)
     left.spaces.active.region_3d = navigation((7., 9., 90.))
+    left.spaces.active.lens = 45.
     right.spaces.active.region_3d = navigation((3., 10004., 88.))
     right.spaces.active.lens = 61.
     screen = NS(areas=[left, right], is_animation_playing=True, as_pointer=lambda: 20)
@@ -432,7 +613,7 @@ def _mode_context(monkeypatch, perspective='PERSP'):
 def _assert_navigation_equal(actual, expected):
     for name in ('view_rotation', 'view_location', 'view_camera_offset'):
         np.testing.assert_allclose(actual[name], expected[name], atol=1e-10)
-    for name in ('view_perspective', 'view_distance', 'view_camera_zoom'):
+    for name in ('view_perspective', 'view_distance', 'view_camera_zoom', 'lens'):
         assert actual[name] == expected[name]
 
 
@@ -546,6 +727,27 @@ def test_return_after_exit_queues_saved_right_navigation_and_current_clock(monke
     assert scene['split_texture_current_source'] == 'MAPPO'
 
 
+def test_saved_return_navigation_restores_lens_on_recreated_viewport(monkeypatch):
+    import json
+    context, left, right, _legacy, _texture = _mode_context(monkeypatch, 'ORTHO')
+    before = split._navigation(right.spaces.active)
+    context.scene['split_review_return_navigation'] = json.dumps({
+        key: value if isinstance(value, (str, float, int)) else list(value)
+        for key, value in before.items()})
+    restored = split._saved_return_navigation(context.scene)
+    assert left.spaces.active.lens != right.spaces.active.lens
+    split._restore_navigation(left.spaces.active, restored)
+    _assert_navigation_equal(split._navigation(left.spaces.active), before)
+
+
+def test_legacy_return_navigation_without_lens_keeps_existing_optics(monkeypatch):
+    context, _left, right, _legacy, _texture = _mode_context(monkeypatch)
+    before = split._navigation(right.spaces.active)
+    legacy = {key: value for key, value in before.items() if key != 'lens'}
+    split._restore_navigation(right.spaces.active, legacy)
+    _assert_navigation_equal(split._navigation(right.spaces.active), before)
+
+
 def test_stable_same_source_timer_refreshes_without_reactivating_settings(monkeypatch):
     scene = Scene(split_texture_current_source='MAPPO', split_mappo_texture_review=True)
     window = NS(scene=scene, screen=NS(areas=[], as_pointer=lambda: 20), as_pointer=lambda: 10)
@@ -578,6 +780,29 @@ def test_history_boundary_clears_data_bindings_and_jobs_without_losing_view_sess
     assert not same._SESSIONS and not context._SESSIONS
 
 
+
+def test_load_and_history_clear_imported_research_texture_sessions(monkeypatch):
+    from wfrl_blender import cameras
+    cleared = []
+    research = NS(clear_runtime=lambda: cleared.append(1))
+    monkeypatch.setitem(sys.modules, split.__package__ + '.split_surface_texture', research)
+    monkeypatch.setattr(cameras, 'cancel_view_layout', lambda: None)
+    monkeypatch.setattr(split, '_ensure_timer', lambda: None)
+    split._load_pre(None)
+    split._history_post(None)
+    assert cleared == [1, 1]
+
+
+def test_load_and_history_never_import_absent_research_texture_module(monkeypatch):
+    from wfrl_blender import cameras
+    # None in sys.modules makes any import attempt raise, as in an installed package.
+    monkeypatch.setitem(sys.modules, split.__package__ + '.split_surface_texture', None)
+    monkeypatch.setattr(cameras, 'cancel_view_layout', lambda: None)
+    monkeypatch.setattr(split, '_ensure_timer', lambda: None)
+    split._load_pre(None)
+    split._history_post(None)
+
+
 if __name__ == '__main__':
     # The local scientific runtime has NumPy but no pytest. Keep ordinary test
     # discovery and also provide a dependency-free focused runner.
@@ -600,3 +825,14 @@ if __name__ == '__main__':
         with ExitStack() as stack:
             test(**{'monkeypatch': Patches(stack)} if 'monkeypatch' in inspect.signature(test).parameters else {})
     print(f'{len(tests)} split lifecycle/ownership tests passed')
+
+
+def test_independent_synthetic_saved_scene_is_not_automatically_resumed():
+    from wfrl_blender import split_mappo_texture
+    scene = Scene(split_texture_review=True, split_review_enabled=True)
+    assert not split.enabled(scene)
+    scene['split_texture_current_source'] = 'SYNTHETIC'
+    assert not split.enabled(scene)
+    assert split.texture_adapter(scene) is split_mappo_texture
+    scene['split_texture_current_source'] = 'GEOMETRY'
+    assert split.enabled(scene)

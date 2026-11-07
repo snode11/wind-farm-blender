@@ -3,15 +3,9 @@
 Button-property objects deliberately have no session ``stage`` attribute. This
 checks the full main-sidebar path without needing Blender or rendering a view.
 """
-import ast
-from pathlib import Path
-import sys
-from types import ModuleType, SimpleNamespace
+from types import SimpleNamespace
 
 import pytest
-from wfrl_blender import camera_projection as projection
-
-SOURCE = Path(__file__).parents[1] / 'wfrl_blender/panels/custom_cameras.py'
 
 
 class Layout:
@@ -41,19 +35,12 @@ class Layout:
         return button
 
 
-def draw_body():
-    tree = ast.parse(SOURCE.read_text())
-    panel = next(node for node in tree.body if isinstance(node, ast.ClassDef)
-                 and node.name == 'WFRL_PT_CustomCameras')
-    draw = next(node for node in panel.body if isinstance(node, ast.FunctionDef)
-                and node.name == 'draw')
-    return compile(ast.Module(body=[draw], type_ignores=[]), str(SOURCE), 'exec')
-
-
 @pytest.mark.parametrize('native_error', ['', '相机观察中断：injected native failure'])
 @pytest.mark.parametrize('stage', [None, 'WATCH', 'LAYOUT', 'AIM'])
 @pytest.mark.parametrize('stacked', [False, True])
-def test_main_sidebar_keeps_camera_session_distinct_from_button_properties(monkeypatch, stage, stacked, native_error):
+def test_main_sidebar_keeps_camera_session_distinct_from_button_properties(
+        frontend_module, stub_module, monkeypatch, stage, stacked, native_error):
+    sidebar = frontend_module('wfrl_blender.panels.custom_cameras')
     scene = {'wfrl_stacked_camera_rig': stacked}
     camera = {'custom_label': 'C1', 'custom_enabled': True}
     params = SimpleNamespace(location=(1., -2., 3.), yaw=0., pitch=10., roll=0.,
@@ -64,23 +51,17 @@ def test_main_sidebar_keeps_camera_session_distinct_from_button_properties(monke
     core = SimpleNamespace(SLOTS=(1, 2, 3), get_camera=lambda _scene, _slot: camera,
                            is_available=lambda _scene: True, parameters=lambda _camera: params)
     history = SimpleNamespace(HISTORY=SimpleNamespace(entries=[], notice=''))
-    for name, attributes in {
-        'wfrl_blender.panels.custom_camera_output': {'draw_output': lambda *_args: None},
-        'wfrl_blender.panels.stacked_camera_rig': {'_ACTIVE': None},
-        'wfrl_blender.custom_camera_capture': {'active': lambda: False},
-        'wfrl_blender.native_camera_views': {'last_error': lambda _scene: native_error},
-    }.items():
-        module = ModuleType(name)
-        module.__dict__.update(attributes)
-        monkeypatch.setitem(sys.modules, name, module)
-    namespace = {'__package__': 'wfrl_blender.panels', '_ACTIVE': active,
-                 '_VIEWING': {'WATCH', 'LAYOUT'}, 'core': core, 'history': history,
-                 'projection': projection, 'installation_block_reason': lambda _scene: ''}
-    exec(draw_body(), namespace)
+    stub_module('wfrl_blender.panels.custom_camera_output', draw_output=lambda *_args: None)
+    stub_module('wfrl_blender.panels.stacked_camera_rig', _ACTIVE=None)
+    stub_module('wfrl_blender.custom_camera_capture', active=lambda: False)
+    stub_module('wfrl_blender.native_camera_views', last_error=lambda _scene: native_error)
+    for name, value in {'_ACTIVE': active, 'core': core, 'history': history,
+                        'installation_block_reason': lambda _scene: ''}.items():
+        monkeypatch.setattr(sidebar, name, value)
     calls = {'buttons': [], 'labels': [], 'properties': []}
     panel = SimpleNamespace(layout=Layout(calls))
     wm = SimpleNamespace(wfrl_custom_slot=1, wfrl_custom_has_focal=False)
-    namespace['draw'](panel, SimpleNamespace(scene=scene, window_manager=wm))
+    sidebar.WFRL_PT_CustomCameras.draw(panel, SimpleNamespace(scene=scene, window_manager=wm))
     if native_error:
         assert native_error in ''.join(calls['labels'])
     else:

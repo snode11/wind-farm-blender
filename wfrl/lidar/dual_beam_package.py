@@ -19,7 +19,7 @@ def portable_copy(package, output):
     for name in overlay['manifest']['files']:
         shutil.copy2(package / name, output / name)
     manifest = dict(overlay['manifest'], source_package='source', portable=True)
-    (output / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n')
+    (output / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     if (package / 'report.md').is_file():
         shutil.copy2(package / 'report.md', output / 'report.md')
     resolve_package(output)

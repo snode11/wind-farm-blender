@@ -1,0 +1,8 @@
+/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/resource_lifecycle_contract_regression.py:24: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  world.use_nodes = True
+00:00.735  blend            | Read blend: "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/resource_lifecycle_contract_regression/artifacts/load-protection.blend"
+Info: Saved as "load-protection.blend"
+RESOURCE_LIFECYCLE_CONTRACT_PASS {"status": "PASS", "module_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py", "blender": "5.2.1 LTS", "checks": {"preset_copies_actual_shared_world_once": true, "builder_preserves_other_scene_world_nodes": true, "gw184_projection_3840_1920_320": [{"resolution": [3840, 2160], "result": "PASS: independent pinhole projection agrees with Blender within 0.005 px"}, {"resolution": [1920, 1080], "result": "PASS: independent pinhole projection agrees with Blender within 0.005 px"}, {"resolution": [320, 180], "result": "PASS: independent pinhole projection agrees with Blender within 0.005 px"}], "deleted_scene_object_curve_and_repeated_clearance_unload": true, "real_error_propagates_after_following_cleanup_and_retry": true, "native_file_load_drops_trail_references": true}}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

@@ -70,7 +70,7 @@ class SourceGeometry:
     """
     def __init__(self, path, turbine_id="T1"):
         self.path = Path(path).resolve()
-        self.manifest = json.loads((self.path / "manifest.json").read_text())
+        self.manifest = json.loads((self.path / "manifest.json").read_text(encoding='utf-8'))
         m = self.manifest
         if m.get("schema") != "wfrl.farm-flex-review.v3" or m.get("status") != "REVIEW_ONLY":
             raise ValueError("Camera data requires a v3 REVIEW_ONLY source geometry archive")
@@ -103,10 +103,10 @@ class SourceGeometry:
             self.blade_triangles = a["triangles"].copy()
             self.tower_reference = a["tower"].astype(float)
             self.tower_triangles = a["tower_triangles"].copy()
-        contents = json.loads((self.path / "data.json").read_text())[turbine_id]
+        contents = json.loads((self.path / "data.json").read_text(encoding='utf-8'))[turbine_id]
         self.motion, self.measurements = contents["motion"], contents["measurements"]
         self.rpm = np.asarray([r["rotor_speed_rpm"] for r in self.motion], float)
-        self.scalars = json.loads((self.path / "deflection-t1.json").read_text())["scalars"]
+        self.scalars = json.loads((self.path / "deflection-t1.json").read_text(encoding='utf-8'))["scalars"]
         self.layout = np.asarray(m["layout_m"][self.turbine_index], float)
         self._validate()
         # Reference surfaces have exact station heights; no display-mesh resampling.
@@ -376,7 +376,7 @@ def export_frame_data(source, output_dir, **kwargs):
     intent = {'schema': 'wfrl.camera-frame-stage.v1', 'metadata': metadata}
     if stage.exists():
         intent_path = stage / 'intent.json'
-        if not intent_path.is_file() or json.loads(intent_path.read_text()) != intent:
+        if not intent_path.is_file() or json.loads(intent_path.read_text(encoding='utf-8')) != intent:
             raise ValueError("Frame-data stage inputs differ or its intent is missing; use a new output directory")
     else:
         stage.mkdir()
@@ -397,7 +397,7 @@ def export_frame_data(source, output_dir, **kwargs):
         temporary.write_text(json.dumps(metadata, indent=2, allow_nan=False) + '\n', encoding='utf-8')
         temporary.replace(complete)
     else:
-        staged = json.loads(complete.read_text())
+        staged = json.loads(complete.read_text(encoding='utf-8'))
         if {k: v for k, v in staged.items() if k != 'files'} != metadata:
             raise ValueError("Completed frame-data stage metadata differs from requested export")
         metadata = staged

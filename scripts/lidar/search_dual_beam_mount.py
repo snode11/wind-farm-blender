@@ -115,7 +115,7 @@ def main():
                    help='Explicit diagnostic angles; changes require separate calibration decision.')
     args=p.parse_args();candidates=[(x,y,z) for x in args.x for y in args.y for z in args.z]
     source=SourceGeometry(args.source, 'T1')
-    shell=json.loads((ROOT/'blender_frontend/wfrl_blender/assets/nrel5mw_geometry.json').read_text())['shell']
+    shell=json.loads((ROOT/'blender_frontend/wfrl_blender/assets/nrel5mw_geometry.json').read_text(encoding='utf-8'))['shell']
     center_x=shell['nacelle_x_bias']*source.scalars['OverHang']
     hub,_=blade_root_frame(source.scalars,[0]*6,1,np.column_stack((np.eye(3),np.zeros(3))))
     try:
@@ -134,7 +134,7 @@ def main():
                  expected_window_half_angle_deg=15,angles_deg=args.angles,sample_kind='source',
                  scores=scores,implementation_sha256=implementation_hash)
     args.output.parent.mkdir(parents=True,exist_ok=True)
-    with args.output.open('x') as f:json.dump(payload,f,ensure_ascii=False,indent=2,allow_nan=False)
+    with args.output.open('x', encoding='utf-8') as f:json.dump(payload,f,ensure_ascii=False,indent=2,allow_nan=False)
     for s in scores[:10]:print({k:v for k,v in s.items() if k!='by_turbine'},flush=True)
 
 

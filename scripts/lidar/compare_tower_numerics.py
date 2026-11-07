@@ -22,7 +22,7 @@ def metrics(a, b):
 
 def compare_runs(first, second):
     first, second = map(Path, (first, second))
-    reports = [json.loads(p.read_text()) for p in (first, second)]
+    reports = [json.loads(p.read_text(encoding='utf-8')) for p in (first, second)]
     for report in reports:
         if report['status'] != 'CONTROL_PROBE_COMPLETE' or report['tower'] != 'flexible':
             raise ValueError('Expected completed flexible-tower probes')
@@ -91,7 +91,7 @@ def main():
                   scope='OpenFAST integration time and ElastoDyn tower modal integration quadrature only; no global convergence certificate',
                   numerical_screen_passed=all(c['passed'] for c in comparisons.values()) and
                      all(t['tower_rms_nonincreasing'] and t['blade_rms_nonincreasing'] for t in trends))
-    a.output.write_text(json.dumps(result, indent=2, allow_nan=False)+'\n')
+    a.output.write_text(json.dumps(result, indent=2, allow_nan=False)+'\n', encoding='utf-8')
     print(json.dumps({k: v for k, v in result.items() if k != 'comparisons'}, indent=2))
 
 

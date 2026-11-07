@@ -1,7 +1,9 @@
 from pathlib import Path
-import io
+from contextlib import nullcontext
+import importlib.util
 import json
 import sys
+import threading
 from types import SimpleNamespace as NS
 import pytest
 from PIL import Image
@@ -9,6 +11,15 @@ from wfrl_blender import custom_camera_capture as capture
 from wfrl_blender import custom_camera_preview as preview
 from wfrl_blender import custom_cameras as core
 from wfrl_blender.custom_camera_capture import write_png,write_json
+
+WAIT_TIMEOUT = 60
+
+
+def _flattened_data(image):
+    get_flattened_data = getattr(image, 'get_flattened_data', None)
+    if get_flattened_data is not None:
+        return get_flattened_data()
+    return image.getdata()
 
 
 def test_png_preserves_display_bytes_and_flips_only_rows(tmp_path):
@@ -19,7 +30,7 @@ def test_png_preserves_display_bytes_and_flips_only_rows(tmp_path):
     target=tmp_path/'image.png'
     write_png(target,2,2,bottom+top)
     with Image.open(target) as image:
-        assert list(image.getdata())==[(255,0,0,255),(0,255,0,255),(0,0,255,255),(17,91,143,128)]
+        assert list(_flattened_data(image))==[(255,0,0,255),(0,255,0,255),(0,0,255,255),(17,91,143,128)]
     with pytest.raises(FileExistsError):write_png(target,2,2,bottom+top)
     with pytest.raises(ValueError):write_png(tmp_path/'bad.png',3,3,bottom)
 
@@ -28,7 +39,7 @@ def test_manifest_rejects_nan_and_preserves_committed_version(tmp_path):
     target=tmp_path/'manifest.json'
     write_json(target,{'status':'incomplete'})
     with pytest.raises(ValueError):write_json(target,{'time_s':float('nan')})
-    assert json.loads(target.read_text())=={'status':'incomplete'}
+    assert json.loads(target.read_text(encoding='utf-8'))=={'status':'incomplete'}
 
 
 @pytest.mark.parametrize('sequence', [False, True])
@@ -43,6 +54,7 @@ def test_capture_step_requests_pixels_without_texture_and_exports_state(tmp_path
     image.params = core.CameraParameters((1., 2., 3.))
     image.state_hash, image.texture, image.pixels = 'geometry-state', None, pixels
     job.closed = job.in_group = job.cancel_requested = False
+    job._writer = job._pending_records = None
     job.index, job.times, job.sequence = 0, [1.25], sequence
     job.scene = NS(frame_current=76, frame_subframe=0., frame_start=1,
                    objects={core.ROOT_NAME: NS(matrix_world=matrix)}, get=lambda _key, default: default)
@@ -52,7 +64,8 @@ def test_capture_step_requests_pixels_without_texture_and_exports_state(tmp_path
     job.profile = {'color_management': {'gamma': 1}, 'image_encoding': 'RGBA8 display-transformed once; PNG sRGB'}
     job.manifest = {'active_camera_ids': ['C3'], 'status': 'incomplete'}
     context, calls, finishes, evaluations = object(), [], [], []
-    monkeypatch.setattr(job, 'guard', lambda: None)
+    guards = []
+    monkeypatch.setattr(job, 'guard', lambda: guards.append(None))
     monkeypatch.setattr(job, 'evaluate', lambda *args: evaluations.append(args))
     monkeypatch.setattr(job, 'finish', lambda **kwargs: finishes.append(kwargs))
     def render(render_context, cameras, **kwargs):
@@ -60,26 +73,37 @@ def test_capture_step_requests_pixels_without_texture_and_exports_state(tmp_path
         assert kwargs.get('create_texture') is False
         return {3: image}
     monkeypatch.setattr(preview, 'render_group', render)
-    assert job.step(context)
+    assert job.step(context) is False
+    assert len(guards) == (3 if sequence else 2)
+    writer = job._writer
+    try:
+        assert writer.done.wait(WAIT_TIMEOUT), f'PNG capture did not complete: {writer.error!r}'
+        writer.thread.join(WAIT_TIMEOUT)
+        assert not writer.thread.is_alive()
+        assert job.step(context)
+    finally:
+        writer.thread.join(WAIT_TIMEOUT)
+        assert not writer.thread.is_alive(), f'PNG worker did not exit: {writer.error!r}'
     assert calls == [(context, job.cameras, {'target': job.render_target, 'create_texture': False})]
     assert finishes == [{'success': True}] and not job.in_group
     assert evaluations == ([(76, 0., 1.25)] if sequence else [])
     assert image.texture is None and image.rgba() is None
     with Image.open(tmp_path/'C3/frame_000000.png') as png:
-        assert list(png.getdata()) == [(255, 0, 0, 255), (0, 255, 0, 255),
+        assert list(_flattened_data(png)) == [(255, 0, 0, 255), (0, 255, 0, 255),
                                        (0, 0, 255, 255), (17, 91, 143, 128)]
-    record = json.loads((tmp_path/'frames.jsonl').read_text())
+    record = json.loads((tmp_path/'frames.jsonl').read_text(encoding='utf-8'))
     assert record['simulation_state_hash'] == 'geometry-state'
     assert record['camera_id'] == 'C3' and record['time_s'] == 1.25
     assert record['T_world_from_camera_blender'] == [list(row) for row in matrix]
     assert record['color_management'] == {'gamma': 1}
-    assert json.loads((tmp_path/'manifest.json').read_text())['completed_samples'] == 1
+    assert json.loads((tmp_path/'manifest.json').read_text(encoding='utf-8'))['completed_samples'] == 1
 
 
 @pytest.mark.parametrize('termination', ['success', 'cancel', 'exception', 'invalid_session'])
 def test_capture_closes_gpu_resources_for_every_termination(tmp_path, termination, monkeypatch):
     job = capture.Capture.__new__(capture.Capture)
     job.closed = job.in_group = job.cancel_requested = False
+    job._writer = job._pending_records = None
     job.cancel_accepted_at = job.cancel_stopped_at = None
     job.index, job.times, job.error = 0, [0, 1], ''
     job.path, job.manifest = tmp_path, {'status': 'incomplete'}
@@ -93,6 +117,7 @@ def test_capture_closes_gpu_resources_for_every_termination(tmp_path, terminatio
     monkeypatch.setattr(job, 'same_session', lambda: termination != 'invalid_session')
     # The restoration mechanism is independently exercised in native tests.
     monkeypatch.setattr(job, '_play', lambda *_: None)
+    monkeypatch.setattr(job, '_clock_unchanged', lambda: True)
     job.sequence, job.original_time_property, job.scene, job.playing = False, None, {}, False
     monkeypatch.setattr(capture, '_ACTIVE', job)
     if termination == 'exception':
@@ -106,7 +131,7 @@ def test_capture_closes_gpu_resources_for_every_termination(tmp_path, terminatio
     else:
         job.finish(success=termination == 'success')
     assert job.closed and not capture.active() and freed == [True]
-    manifest = json.loads((tmp_path/'manifest.json').read_text())
+    manifest = json.loads((tmp_path/'manifest.json').read_text(encoding='utf-8'))
     assert manifest['gpu_target_usage']['active_targets'] == 0
     assert manifest['gpu_target_usage']['releases'] == 1
     assert manifest['status'] == ('complete' if termination == 'success' else 'incomplete')
@@ -119,6 +144,7 @@ def test_guard_reports_invalid_native_pose_before_layout_hashing(monkeypatch):
     job.scene = NS(frame_current=1, frame_subframe=0)
     job.window = NS(screen=NS(is_animation_playing=False))
     job.expected_frame = (1, 0)
+    job.playback_generation = capture.playback.generation()
     monkeypatch.setattr(job, 'same_session', lambda: True)
     monkeypatch.setitem(sys.modules, core.__package__+'.panels.custom_cameras',
                         NS(installation_block_reason=lambda _scene: ''))
@@ -130,3 +156,734 @@ def test_guard_reports_invalid_native_pose_before_layout_hashing(monkeypatch):
     monkeypatch.setattr(core, 'layout_dict', unexpected)
     with pytest.raises(RuntimeError, match='C1 实际姿态含非有限数值'):
         job.guard()
+
+
+@pytest.fixture
+def clock_capture(tmp_path, monkeypatch):
+    class Scene(dict):
+        frame_current = 10
+        frame_subframe = .25
+        frame_start = 1
+
+    job = capture.Capture.__new__(capture.Capture)
+    job.scene = Scene(wfrl_clearance_time_s=9.25, wfrl_clearance_timebase_fps=60.)
+    job.scene.render = NS(fps=24, fps_base=1.)
+    job.window = NS(screen=NS(is_animation_playing=False))
+    job.closed = job.in_group = job.cancel_requested = False
+    job._writer = job._pending_records = None
+    job.cancel_accepted_at = job.cancel_stopped_at = None
+    job.index, job.times = 1, [0., 1., 2.]
+    job.path, job.manifest, job.render_target = tmp_path, {'status': 'incomplete'}, None
+    job.sequence, job.playing = True, True
+    job.farm_sequence = True
+    job.time_mapping = (1, 60., 0.)
+    job.reader = NS(start_s=0.)
+    job.view_layer = NS(update=lambda: None)
+    job.frame, job.subframe, job.time = 1, .5, .5
+    job.expected_frame = (10, .25)
+    job.original_time_property = .5
+    job.playback_generation = 3
+    job.layout_hash, job.live_layout_hash, job.profile = 'saved', 'native', {}
+    calls = []
+    generation = [3]
+
+    def evaluate(frame, subframe, time_s):
+        job.scene.frame_current, job.scene.frame_subframe = frame, subframe
+        job.expected_frame = (frame, subframe)
+        job.scene['wfrl_clearance_time_s'] = time_s
+        calls.append(('evaluate', frame, subframe, time_s))
+
+    monkeypatch.setattr(job, 'same_session', lambda: True)
+    monkeypatch.setattr(job, '_play', lambda playing: calls.append(('play', playing)))
+    monkeypatch.setattr(job, 'evaluate', evaluate)
+    monkeypatch.setattr(capture.playback, 'generation', lambda: generation[0])
+    monkeypatch.setattr(capture.playback, 'owner_scene', lambda: None)
+    monkeypatch.setattr(capture, '_ACTIVE', job)
+    monkeypatch.setitem(sys.modules, core.__package__ + '.panels.custom_cameras',
+                        NS(installation_block_reason=lambda _scene: ''))
+    monkeypatch.setattr(core, 'validate_native_state', lambda _scene: None)
+    monkeypatch.setattr(core, 'layout_dict', lambda _scene: {})
+    monkeypatch.setattr(core, 'layout_hash', lambda _layout: 'saved')
+    monkeypatch.setattr(core, 'live_layout_hash', lambda _scene, layout=None: 'native')
+    monkeypatch.setattr(preview, 'render_profile', lambda _scene: {})
+    return job, calls, generation
+
+
+def test_guard_reuses_one_fresh_layout_and_detects_subsequent_mutation(clock_capture, monkeypatch):
+    job, _calls, _generation = clock_capture
+    layouts = []
+    current = {'model_signature': 'mesh-a'}
+
+    def layout_dict(_scene):
+        layout = dict(current)
+        layouts.append(layout)
+        return layout
+
+    def live_hash(_scene, layout=None):
+        assert layout is layouts[-1]
+        return 'native'
+
+    monkeypatch.setattr(core, 'layout_dict', layout_dict)
+    monkeypatch.setattr(core, 'layout_hash', lambda layout: 'saved' if layout == {'model_signature': 'mesh-a'} else 'changed')
+    monkeypatch.setattr(core, 'live_layout_hash', live_hash)
+    job.guard()
+    assert len(layouts) == 1
+    current['model_signature'] = 'mesh-b'
+    with pytest.raises(RuntimeError, match='相机布局已变化'):
+        job.guard()
+    assert len(layouts) == 2
+
+
+@pytest.mark.parametrize('restore_failure', [False, True])
+def test_user_cancel_has_its_own_terminal_state(clock_capture, monkeypatch, restore_failure):
+    job, _calls, _generation = clock_capture
+    job.scene.name = 'capture-owner'
+    job.scene.as_pointer = lambda: id(job.scene)
+    monkeypatch.setattr(capture, '_TERMINALS', capture.OrderedDict())
+    if restore_failure:
+        def fail_restore(*args):
+            raise RuntimeError('restore failed')
+        monkeypatch.setattr(job, 'evaluate', fail_restore)
+    job.request_cancel()
+    status = capture.status_for(job.scene)
+    assert job.closed and not capture.active()
+    assert status.stage == ('FAILED' if restore_failure else 'CANCELLED')
+    assert bool(status.error) == restore_failure
+    assert json.loads((job.path / 'manifest.json').read_text(encoding='utf-8'))['status'] == 'incomplete'
+
+
+@pytest.mark.parametrize('playing', [False, True])
+@pytest.mark.parametrize('intervention', ['frame', 'subframe', 'playback', 'frame_start', 'timebase',
+                                        'removed_timebase', 'invalid_timebase', 'source_start'])
+def test_external_clock_change_aborts_capture_without_restoring_over_user_state(clock_capture, intervention, playing):
+    job, calls, generation = clock_capture
+    job.playing = playing
+    job.guard()
+    if intervention == 'playback':
+        generation[0] += 2
+    elif intervention == 'frame_start':
+        job.scene.frame_start = 301
+    elif intervention in {'timebase', 'invalid_timebase'}:
+        job.scene['wfrl_clearance_timebase_fps'] = 30. if intervention == 'timebase' else 'invalid'
+    elif intervention == 'removed_timebase':
+        del job.scene['wfrl_clearance_timebase_fps']
+    elif intervention == 'source_start':
+        job.reader.start_s = 117.
+    else:
+        setattr(job.scene, 'frame_current' if intervention == 'frame' else 'frame_subframe', 20 if intervention == 'frame' else .75)
+        job.scene['wfrl_clearance_time_s'] = 19.75
+    edited = (job.scene.frame_current, job.scene.frame_subframe, dict(job.scene))
+    with pytest.raises(RuntimeError, match='采集时刻'):
+        job.guard()
+    job.finish(error='采集时刻被外部操作改变，采集未完成')
+    assert (job.scene.frame_current, job.scene.frame_subframe, dict(job.scene)) == edited
+    assert calls == []
+    assert job.closed and not capture.active()
+    assert job.manifest['status'] == 'incomplete'
+
+
+@pytest.mark.parametrize('playing', [False, True])
+@pytest.mark.parametrize('success', [False, True])
+def test_capture_restores_unchanged_clock_on_completion_or_cancel(clock_capture, success, playing):
+    job, calls, _generation = clock_capture
+    job.playing = playing
+    if success:
+        job.finish(success=True)
+    else:
+        job.request_cancel()
+    assert calls == [('play', False), ('evaluate', 1, .5, .5), ('play', playing)]
+    assert (job.scene.frame_current, job.scene.frame_subframe) == (1, .5)
+    assert job.scene['wfrl_clearance_time_s'] == .5
+    assert job.closed and not capture.active()
+    assert job.manifest['status'] == ('complete' if success else 'incomplete')
+
+
+def test_sequence_clock_guard_preserves_the_existing_static_capture_scope(clock_capture):
+    job, _calls, _generation = clock_capture
+    job.farm_sequence = False
+    job.scene.frame_start = 301
+    job.scene['wfrl_clearance_timebase_fps'] = 30.
+    assert job._clock_unchanged()
+
+
+def test_sequence_explicit_timebase_keeps_render_fps_independent(clock_capture):
+    job, _calls, _generation = clock_capture
+    job.scene.render.fps, job.scene.render.fps_base = 30, 1.001
+    job.guard()
+
+
+@pytest.mark.parametrize('field,value', [('fps', 30), ('fps_base', 1.001)])
+def test_sequence_guards_render_fps_when_it_defines_the_default_timebase(clock_capture, field, value):
+    job, calls, _generation = clock_capture
+    del job.scene['wfrl_clearance_timebase_fps']
+    job.scene.render.fps = 60
+    job.guard()
+    setattr(job.scene.render, field, value)
+    with pytest.raises(RuntimeError, match='采集时刻'):
+        job.guard()
+    job.finish(error='采集时刻被外部操作改变，采集未完成')
+    assert calls == [] and job.closed and job.manifest['status'] == 'incomplete'
+    assert getattr(job.scene.render, field) == value
+
+
+@pytest.fixture
+def layer_capture(clock_capture, monkeypatch):
+    job, calls, generation = clock_capture
+    layer = NS(name='CaptureLayer', update=lambda: None)
+    other_layer = NS(name='OtherLayer', update=lambda: None)
+    area = NS(type='VIEW_3D')
+    job.scene.view_layers = [layer, other_layer]
+    job.view_layer, job.area = layer, area
+    job.window.scene, job.window.view_layer = job.scene, layer
+    job.window.screen.areas = [area]
+    job.identity = ('capture-session',)
+    monkeypatch.setitem(sys.modules, 'bpy', NS(context=NS(window_manager=NS(windows=[job.window]))))
+    monkeypatch.setitem(sys.modules, core.__package__ + '.panels.custom_cameras',
+                        NS(installation_block_reason=lambda _scene: '',
+                           session_identity=lambda _scene: ('capture-session',)))
+    monkeypatch.setattr(job, 'same_session', capture.Capture.same_session.__get__(job))
+    context = NS(scene=job.scene, window=job.window, area=area, view_layer=layer)
+    return job, calls, generation, context, other_layer
+
+
+@pytest.mark.parametrize('intervention', ['switch_layer', 'delete_layer', 'close_window', 'switch_scene'])
+def test_sequence_render_ownership_change_keeps_completed_frames_and_user_selection(layer_capture, intervention):
+    job, calls, _generation, _context, other_layer = layer_capture
+    committed = job.path / 'frames.jsonl'
+    committed.write_text('{"sample_index": 0}\n')
+    job.manifest['completed_samples'] = 1
+    job.guard()
+    if intervention == 'switch_layer':
+        job.window.view_layer = other_layer
+    elif intervention == 'delete_layer':
+        job.scene.view_layers.remove(job.view_layer)
+    elif intervention == 'close_window':
+        sys.modules['bpy'].context.window_manager.windows.clear()
+    else:
+        job.window.scene = NS(name='OtherScene')
+    selection = (job.window.scene, job.window.view_layer, tuple(job.scene.view_layers))
+    with pytest.raises(RuntimeError, match='场景、窗口'):
+        job.guard()
+    job.finish(error='采集上下文已变化')
+    assert (job.window.scene, job.window.view_layer, tuple(job.scene.view_layers)) == selection
+    assert calls == [] and job.closed and not capture.active()
+    assert committed.read_text(encoding='utf-8') == '{"sample_index": 0}\n'
+    assert job.manifest['completed_samples'] == 1 and job.manifest['status'] == 'incomplete'
+
+
+@pytest.mark.parametrize('intervention', ['window', 'scene', 'layer', 'area'])
+def test_sequence_rejects_a_different_render_context_before_evaluation(layer_capture, monkeypatch, intervention):
+    job, calls, _generation, context, other_layer = layer_capture
+    if intervention == 'window':
+        context.window = NS(scene=job.scene, view_layer=job.view_layer)
+    elif intervention == 'scene':
+        context.scene = NS(name='OtherScene')
+    elif intervention == 'layer':
+        context.view_layer = other_layer
+    else:
+        context.area = NS(type='VIEW_3D', name='OtherArea')
+    def unexpected(*_args, **_kwargs):
+        raise AssertionError('a foreign render context reached GPU drawing')
+    monkeypatch.setattr(preview, 'render_group', unexpected)
+    with pytest.raises(RuntimeError, match='上下文'):
+        job.step(context)
+    assert calls == [] and job.closed and not capture.active()
+    assert job.manifest['status'] == 'incomplete'
+
+
+@pytest.mark.parametrize('intervention', ['window_layer', 'context_layer', 'frame_start', 'timebase'])
+def test_sequence_discards_images_when_rendering_changes_context_or_mapping(layer_capture, monkeypatch, intervention):
+    job, calls, _generation, context, other_layer = layer_capture
+    matrix = tuple(tuple(float(i == j) for j in range(4)) for i in range(4))
+    image = preview.CameraImage.__new__(preview.CameraImage)
+    image.width = image.height = 1
+    image.view = image.world = image.projection = matrix
+    image.params = core.CameraParameters((1., 2., 3.))
+    image.state_hash, image.texture, image.pixels = 'geometry-state', None, bytes(4)
+    job.cameras, job.capture_id, job.source = [{'wfrl_custom_slot': 1}], 'capture-id', {}
+    job.manifest.update(active_camera_ids=['C1'], completed_samples=1)
+    committed = job.path / 'frames.jsonl'
+    committed.write_text('{"sample_index": 0}\n')
+
+    def render(_context, _cameras, **_kwargs):
+        if intervention == 'window_layer':
+            job.window.view_layer = other_layer
+        elif intervention == 'context_layer':
+            context.view_layer = other_layer
+        elif intervention == 'frame_start':
+            job.scene.frame_start = 301
+        else:
+            job.scene['wfrl_clearance_timebase_fps'] = 30.
+        return {1: image}
+
+    monkeypatch.setattr(preview, 'render_group', render)
+    with pytest.raises(RuntimeError, match='已变化|外部操作改变'):
+        job.step(context)
+    assert calls == [('evaluate', 61, 0., 1.)]
+    assert image.rgba() is None and job._writer is None
+    assert committed.read_text(encoding='utf-8') == '{"sample_index": 0}\n'
+    assert not (job.path / 'C1/frame_000001.png').exists()
+    assert job.manifest['completed_samples'] == 1 and job.manifest['status'] == 'incomplete'
+    assert job.closed and not capture.active()
+
+
+@pytest.mark.parametrize('intervention', ['frame_start', 'timebase', 'layer'])
+def test_sequence_restoration_detects_external_edits_before_resuming(layer_capture, monkeypatch, intervention):
+    job, calls, _generation, _context, other_layer = layer_capture
+    evaluate = job.evaluate
+
+    def edited_restore(*args):
+        evaluate(*args)
+        if intervention == 'frame_start':
+            job.scene.frame_start = 301
+        elif intervention == 'timebase':
+            job.scene['wfrl_clearance_timebase_fps'] = 30.
+        else:
+            job.window.view_layer = other_layer
+        job.scene['wfrl_clearance_time_s'] = 77.
+
+    monkeypatch.setattr(job, 'evaluate', edited_restore)
+    job.finish(success=True)
+    assert calls == [('play', False), ('evaluate', 1, .5, .5)]
+    assert job.scene['wfrl_clearance_time_s'] == 77.
+    assert job.manifest['status'] == 'incomplete'
+    assert '已变化' in job.error
+    assert job.closed and not capture.active()
+
+
+def test_capture_restores_own_frame_change_when_geometry_evaluation_fails(clock_capture, monkeypatch):
+    from contextlib import nullcontext
+    job, calls, _generation = clock_capture
+    evaluations = []
+
+    def set_frame(frame, *, subframe):
+        job.scene.frame_current, job.scene.frame_subframe = frame, subframe
+
+    def update(scene, *, sim_time_s, **kwargs):
+        evaluations.append(sim_time_s)
+        if len(evaluations) == 1:
+            raise RuntimeError('injected geometry evaluation failure')
+        scene['wfrl_clearance_time_s'] = sim_time_s
+
+    job.scene.frame_set = set_frame
+    job.farm = NS(update=update)
+    monkeypatch.setattr(job, 'evaluate', capture.Capture.evaluate.__get__(job))
+    monkeypatch.setattr(capture, 'readonly_frame_handlers', nullcontext)
+    monkeypatch.setitem(sys.modules, 'bpy', NS(context=NS(view_layer=NS(update=lambda: None))))
+    monkeypatch.setattr(job, '_step_group', lambda _context: job.evaluate(20, .5, 19.5))
+    with pytest.raises(RuntimeError, match='geometry evaluation failure'):
+        job.step(None)
+    assert evaluations == [19.5, .5]
+    assert calls == [('play', False), ('play', True)]
+    assert (job.scene.frame_current, job.scene.frame_subframe) == (1, .5)
+    assert job.scene['wfrl_clearance_time_s'] == .5
+    assert job.closed and not capture.active()
+    assert job.manifest['status'] == 'incomplete'
+
+
+@pytest.mark.parametrize('during_restore', [False, True])
+@pytest.mark.parametrize('jump', [(121, 0.), (61, .75)])
+def test_frame_set_callback_change_aborts_without_overwriting_external_clock(
+        clock_capture, monkeypatch, jump, during_restore):
+    from contextlib import nullcontext
+    job, calls, _generation = clock_capture
+    job.scene.frame_set = lambda frame, *, subframe: (
+        setattr(job.scene, 'frame_current', jump[0]), setattr(job.scene, 'frame_subframe', jump[1]))
+    job.farm = NS(update=lambda *args, **kwargs: None)
+    monkeypatch.setattr(job, 'evaluate', capture.Capture.evaluate.__get__(job))
+    monkeypatch.setattr(capture, 'readonly_frame_handlers', nullcontext)
+    monkeypatch.setitem(sys.modules, 'bpy', NS(context=NS(view_layer=job.view_layer)))
+    if during_restore:
+        job.finish(success=True)
+    else:
+        monkeypatch.setattr(job, '_step_group', lambda _context: job.evaluate(61, .25, 1.))
+        with pytest.raises(RuntimeError, match='时刻'):
+            job.step(None)
+    assert job.closed and job.manifest['status'] == 'incomplete'
+    assert (job.scene.frame_current, job.scene.frame_subframe) == jump
+    assert not any(playing for operation, playing in calls if operation == 'play')
+    assert job.scene['wfrl_clearance_time_s'] == 9.25
+
+
+def test_frame_set_accepts_rna_float32_subframe_rounding(clock_capture, monkeypatch):
+    import struct
+    from contextlib import nullcontext
+    job, _calls, _generation = clock_capture
+    def frame_set(frame, *, subframe):
+        job.scene.frame_current = frame
+        job.scene.frame_subframe = struct.unpack('f', struct.pack('f', subframe))[0]
+    job.scene.frame_set = frame_set
+    job.farm = NS(update=lambda scene, **kwargs: scene.__setitem__('wfrl_clearance_time_s', kwargs['sim_time_s']))
+    monkeypatch.setattr(capture, 'readonly_frame_handlers', nullcontext)
+    monkeypatch.setitem(sys.modules, 'bpy', NS(context=NS(view_layer=job.view_layer)))
+    capture.Capture.evaluate(job, 61, 1 / 3, 1.)
+    assert job._clock_unchanged()
+    assert job.scene['wfrl_clearance_time_s'] == 1.
+
+
+@pytest.mark.parametrize('intervention', ['cancel', 'seek', 'frame_start', 'timebase', 'write_failure', 'shutdown'])
+def test_pending_png_yields_and_never_commits_an_invalid_group(clock_capture, monkeypatch, intervention):
+    job, calls, _generation = clock_capture
+    entered, release = threading.Event(), threading.Event()
+    original_write = capture.write_png
+    target = job.path / 'C1/frame_000001.png'
+
+    def blocked_write(*args):
+        assert threading.current_thread() is not threading.main_thread()
+        entered.set()
+        assert release.wait(WAIT_TIMEOUT * 2), 'PNG worker was not released'
+        if intervention == 'write_failure':
+            raise OSError('injected PNG disk failure')
+        original_write(*args)
+
+    monkeypatch.setattr(capture, 'write_png', blocked_write)
+    writer = capture.ImageWriter([(target, 1, 1, bytes([17, 91, 143, 128]))])
+    job._writer, job._pending_records = writer, [{'camera_id': 'C1', 'sample_index': 1}]
+    job.in_group = True
+    try:
+        assert entered.wait(WAIT_TIMEOUT), f'PNG worker did not enter write: {writer.error!r}'
+        assert job.step(None) is False
+        assert job.index == 1 and not (job.path / 'frames.jsonl').exists()
+        if intervention == 'cancel':
+            job.request_cancel()
+            assert not job.closed and capture.active()
+            assert job.step(None) is False
+        elif intervention in {'seek', 'frame_start', 'timebase'}:
+            if intervention == 'seek':
+                job.scene.frame_current = 20
+            elif intervention == 'frame_start':
+                job.scene.frame_start = 301
+            else:
+                job.scene['wfrl_clearance_timebase_fps'] = 30.
+            with pytest.raises(RuntimeError, match='采集时刻'):
+                job.step(None)
+            assert job.scene.frame_current == (20 if intervention == 'seek' else 10) and calls == []
+        elif intervention == 'shutdown':
+            capture.shutdown(restore=False)
+            assert not job.closed and capture.active() and writer.cancelled.is_set() and calls == []
+        release.set()
+        assert writer.done.wait(WAIT_TIMEOUT), f'PNG worker did not finish: {writer.error!r}'
+        writer.thread.join(WAIT_TIMEOUT)
+        assert not writer.thread.is_alive()
+        if intervention == 'write_failure':
+            with pytest.raises(OSError, match='PNG disk failure'):
+                job.step(None)
+        elif intervention == 'cancel':
+            assert job.step(None)
+            assert calls == [('play', False), ('evaluate', 1, .5, .5), ('play', True)]
+        assert job.closed and not capture.active()
+        manifest = json.loads((job.path / 'manifest.json').read_text(encoding='utf-8'))
+        assert manifest['status'] == 'incomplete'
+        assert job.index == (2 if intervention == 'cancel' else 1)
+        if intervention == 'cancel':
+            assert manifest['completed_samples'] == 2
+            with Image.open(target) as image:
+                assert image.getpixel((0, 0)) == (17, 91, 143, 128)
+        else:
+            assert not (job.path / 'frames.jsonl').exists()
+    finally:
+        release.set()
+        writer.thread.join(WAIT_TIMEOUT)
+        assert not writer.thread.is_alive(), f'PNG worker did not exit: {writer.error!r}'
+
+
+def test_capture_checkpoints_keep_complete_index_and_exact_terminal_count(clock_capture):
+    job, _calls, _generation = clock_capture
+    job.index = 0
+    job.times = [0., 1., 2., 3., 4.]
+    job.manifest['requested_times_s'] = job.times
+    ready = threading.Event()
+    ready.set()
+    disk_counts = []
+    for index in range(len(job.times)):
+        job._writer = NS(done=ready, error=None, cancelled=threading.Event(),
+                         thread=NS(is_alive=lambda: False))
+        job._pending_records = [{'sample_index': index}]
+        job.in_group = True
+        job.step(None)
+        disk_counts.append(json.loads((job.path / 'manifest.json').read_text(encoding='utf-8'))['completed_samples'])
+    assert disk_counts == [1, 2, 2, 4, 5]
+    assert job.manifest['status'] == 'complete'
+    assert [json.loads(line)['sample_index'] for line in
+            (job.path / 'frames.jsonl').read_text(encoding='utf-8').splitlines()] == list(range(5))
+
+
+def test_unfinished_png_cannot_be_published_as_a_complete_capture(clock_capture, monkeypatch):
+    job, _calls, _generation = clock_capture
+    entered, release = threading.Event(), threading.Event()
+
+    def blocked_write(*_args):
+        entered.set()
+        assert release.wait(WAIT_TIMEOUT * 2), 'PNG worker was not released'
+
+    monkeypatch.setattr(capture, 'write_png', blocked_write)
+    writer = capture.ImageWriter([(job.path / 'C1/frame_000001.png', 1, 1, bytes(4))])
+    job._writer, job._pending_records, job.in_group = writer, [], True
+    try:
+        assert entered.wait(WAIT_TIMEOUT), f'PNG worker did not enter write: {writer.error!r}'
+        job.finish(success=True)
+        assert job.manifest['status'] == 'incomplete'
+        assert '写入' in job.error
+    finally:
+        release.set()
+        writer.thread.join(WAIT_TIMEOUT)
+        assert not writer.thread.is_alive(), f'PNG worker did not exit: {writer.error!r}'
+
+
+@pytest.mark.parametrize('already_closed', [False, True])
+@pytest.mark.parametrize('restore_failure', [False, True])
+def test_capture_operator_reports_the_committed_transaction_result(clock_capture, monkeypatch,
+                                                                  already_closed, restore_failure):
+    job, _calls, _generation = clock_capture
+    props = NS(EnumProperty=lambda **kw: None, FloatProperty=lambda **kw: None,
+               StringProperty=lambda **kw: None)
+    monkeypatch.setitem(sys.modules, 'bpy', NS(types=NS(Operator=type('Operator', (), {}),
+                                                       Panel=type('Panel', (), {}))))
+    monkeypatch.setitem(sys.modules, 'bpy.props', props)
+    path = Path(capture.__file__).parent / 'panels/custom_camera_output.py'
+    spec = importlib.util.spec_from_file_location('wfrl_blender.panels._capture_result_test', path)
+    panel = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(panel)
+    operator = panel.WFRL_OT_CustomCapture.__new__(panel.WFRL_OT_CustomCapture)
+    operator.transaction = job
+    operator.timer = object()
+    operator.wm = NS(event_timer_remove=lambda timer: None)
+    operator.area = NS(regions=[NS(type='WINDOW')], tag_redraw=lambda: None)
+    reports = []
+    operator.report = lambda level, message: reports.append((level, message))
+    context = NS(temp_override=lambda **kw: nullcontext())
+
+    def final_group(_context):
+        job.finish(success=True)
+        return True
+
+    monkeypatch.setattr(job, '_step_group', final_group)
+    if restore_failure:
+        def fail_restore(*args):
+            raise RuntimeError('injected restore failure')
+        monkeypatch.setattr(job, 'evaluate', fail_restore)
+    if already_closed:
+        final_group(context)
+    result = operator.modal(context, NS(type='TIMER', timer=operator.timer))
+    assert result == ({'CANCELLED'} if restore_failure else {'FINISHED'})
+    assert reports and reports[-1][0] == ({'ERROR'} if restore_failure else {'INFO'})
+    assert ('injected restore failure' in reports[-1][1]) is restore_failure
+    assert json.loads((job.path / 'manifest.json').read_text(encoding='utf-8'))['status'] == (
+        'incomplete' if restore_failure else 'complete')
+
+
+@pytest.mark.parametrize('termination', ['success', 'write_failure', 'cancel', 'error', 'shutdown'])
+def test_capture_terminal_waits_for_png_thread_exit(clock_capture, monkeypatch, termination):
+    job, _calls, _generation = clock_capture
+    job.scene.name = 'capture-owner'
+    job.scene.as_pointer = lambda: id(job.scene)
+    job.index = len(job.times) - 1
+    monkeypatch.setattr(capture, '_TERMINALS', capture.OrderedDict())
+    entered, release = threading.Event(), threading.Event()
+    original_write = capture.ImageWriter._write
+
+    def held_write(writer):
+        original_write(writer)
+        entered.set()
+        assert release.wait(WAIT_TIMEOUT), 'PNG thread exit was not released'
+
+    if termination == 'write_failure':
+        def fail_write(*args):
+            raise OSError('injected PNG failure')
+        monkeypatch.setattr(capture, 'write_png', fail_write)
+    monkeypatch.setattr(capture.ImageWriter, '_write', held_write)
+    target = job.path / 'C1/frame_000002.png'
+    writer = capture.ImageWriter([(target, 1, 1, bytes(4))])
+    job._writer, job._pending_records, job.in_group = writer, [{'sample_index': 2}], True
+    try:
+        assert entered.wait(WAIT_TIMEOUT)
+        assert writer.done.is_set() and writer.thread.is_alive()
+        if termination == 'error':
+            job.finish(error='invalid capture')
+        elif termination == 'shutdown':
+            capture.shutdown(restore=False)
+        else:
+            if termination == 'cancel':
+                job.request_cancel()
+            assert job.step(None) is False
+        assert not job.closed and capture.active()
+        status = capture.status_for(job.scene)
+        assert status.active and status.stage not in {'SUCCEEDED', 'FAILED', 'CANCELLED'}
+        assert job.manifest['status'] == 'incomplete'
+    finally:
+        release.set()
+        writer.thread.join(WAIT_TIMEOUT)
+        assert not writer.thread.is_alive()
+    if termination == 'write_failure':
+        with pytest.raises(OSError, match='injected PNG failure'):
+            job.step(None)
+    elif termination in {'success', 'cancel'}:
+        assert job.step(None)
+    assert job.closed and not capture.active()
+    status = capture.status_for(job.scene)
+    assert not status.active
+    assert status.stage == ('SUCCEEDED' if termination == 'success' else
+                            'CANCELLED' if termination == 'cancel' else 'FAILED')
+    saved = json.loads((job.path / 'manifest.json').read_text(encoding='utf-8'))
+    assert saved['status'] == ('complete' if termination == 'success' else 'incomplete')
+
+
+@pytest.fixture
+def capture_runtime(monkeypatch, stub_module):
+    class Scene(dict):
+        name = 'capture-owner'
+        frame_current, frame_subframe = 1, 0.
+
+        def as_pointer(self):
+            return id(self)
+
+    callbacks = {}
+
+    def register(callback, **options):
+        assert threading.current_thread() is threading.main_thread()
+        assert callback not in callbacks
+        callbacks[callback] = options
+
+    timers = NS(register=register, unregister=lambda callback: callbacks.pop(callback),
+                is_registered=lambda callback: callback in callbacks, callbacks=callbacks)
+    monkeypatch.setitem(sys.modules, 'bpy', NS(app=NS(background=True, timers=timers)))
+    camera = {'wfrl_custom_slot': 1}
+    scene = Scene()
+    scene.objects = [camera]
+    scene.display_settings = NS(display_device='sRGB')
+    window = NS(scene=scene, screen=NS(is_animation_playing=False))
+    context = NS(scene=scene, window=window, area=NS(type='VIEW_3D'),
+                 view_layer=NS(update=lambda: None), evaluated_depsgraph_get=lambda: None)
+    stub_module('wfrl_blender.panels.custom_cameras', _ACTIVE=None,
+                session_identity=lambda scene: (scene.as_pointer(),),
+                installation_block_reason=lambda scene: '')
+    stub_module('wfrl_blender.farm_flex', is_active=lambda scene: False)
+    stub_module('wfrl_blender.clearance_replay', sample=lambda scene: None,
+                reader_for=lambda scene: None)
+    from wfrl_blender import home_state
+    monkeypatch.setattr(home_state, 'foreground_tasks', lambda scene: (capture.status_for(scene),))
+    monkeypatch.setattr(core, 'enabled_cameras', lambda scene: [camera])
+    monkeypatch.setattr(core, 'parameters', lambda camera: core.CameraParameters((0., 0., 1.)))
+    monkeypatch.setattr(core, '_root', lambda scene: None)
+    monkeypatch.setattr(core, 'validate_native_state', lambda scene, **kwargs: None)
+    monkeypatch.setattr(core, 'validate_layout', lambda scene, layout: None)
+    monkeypatch.setattr(core, 'layout_dict', lambda scene: {'model_signature': 'test-mesh'})
+    monkeypatch.setattr(core, 'live_layout_hash', lambda scene, layout=None: 'native')
+    monkeypatch.setattr(preview, 'render_profile', lambda scene: {})
+    monkeypatch.setattr(capture.playback, 'is_playing', lambda scene: False)
+    monkeypatch.setattr(capture.playback, 'owner_scene', lambda: None)
+    monkeypatch.setattr(capture.Capture, '_play', lambda self, playing: None)
+    monkeypatch.setattr(capture.Capture, 'same_session', lambda self: True)
+    monkeypatch.setattr(capture, '_ACTIVE', None)
+    monkeypatch.setattr(capture, '_TERMINALS', capture.OrderedDict())
+    monkeypatch.setattr(capture, '_WRITERS', type(capture._WRITERS)())
+    return context, timers
+
+
+@pytest.mark.parametrize('termination', ['success', 'cancel', 'write_failure', 'error', 'shutdown'])
+def test_capture_terminal_releases_resources_and_allows_immediate_restart(
+        capture_runtime, tmp_path, monkeypatch, termination):
+    context, timers = capture_runtime
+    job = capture.Capture(context, tmp_path)
+    released, publications = [], []
+    job.render_target = NS(free=lambda: released.append('gpu'),
+                           usage=lambda: {'active_targets': 0})
+    job.ui_operator = NS(remove_timer=lambda: released.append('ui_timer'))
+    entered, release = threading.Event(), threading.Event()
+    original_write = capture.ImageWriter._write
+
+    def held_write(writer):
+        original_write(writer)
+        entered.set()
+        assert release.wait(WAIT_TIMEOUT), 'PNG thread exit was not released'
+
+    if termination == 'write_failure':
+        def fail_write(*args):
+            raise OSError('injected PNG failure')
+        monkeypatch.setattr(capture, 'write_png', fail_write)
+    monkeypatch.setattr(capture.ImageWriter, '_write', held_write)
+    writer = capture.ImageWriter([(job.path / 'C1/frame_000000.png', 1, 1, bytes(4))])
+    job._writer, job._pending_records, job.in_group = writer, [{'sample_index': 0}], True
+    original_json = capture.write_json
+
+    def checked_json(path, payload):
+        if path == job.path / 'manifest.json' and job._closed:
+            assert threading.current_thread() is threading.main_thread()
+            assert not writer.thread.is_alive()
+            assert released == ['gpu', 'ui_timer']
+            assert not timers.callbacks and capture._ACTIVE is None
+            publications.append(dict(payload))
+        original_json(path, payload)
+
+    monkeypatch.setattr(capture, 'write_json', checked_json)
+    deferred = termination in {'error', 'shutdown'}
+    callback = None
+    try:
+        assert entered.wait(WAIT_TIMEOUT)
+        assert writer.done.is_set() and writer.thread.is_alive()
+        if termination == 'error':
+            def fail_guard():
+                raise RuntimeError('injected capture failure')
+            monkeypatch.setattr(job, 'guard', fail_guard)
+            with pytest.raises(RuntimeError, match='injected capture failure'):
+                job.step(context)
+        elif termination == 'shutdown':
+            capture.shutdown(restore=False)
+        else:
+            if termination == 'cancel':
+                job.request_cancel()
+            assert job.step(context) is False
+        with pytest.raises(ValueError, match='相机采集中'):
+            capture.Capture(context, tmp_path)
+        assert capture._ACTIVE is job and not job._closed
+        assert not capture._TERMINALS and not publications
+        if deferred:
+            assert len(timers.callbacks) == 1
+            callback, options = next(iter(timers.callbacks.items()))
+            assert options['persistent'] is True
+            assert callback() > 0
+            job.finish(error='duplicate finish')
+            assert len(timers.callbacks) == 1 and not publications
+    finally:
+        release.set()
+        writer.thread.join(WAIT_TIMEOUT)
+        assert not writer.thread.is_alive()
+    if deferred:
+        # Drive the registered main-thread callback without a UI event or a
+        # closed/active/status read that could otherwise perform lazy cleanup.
+        assert callback() is None
+    elif termination == 'write_failure':
+        with pytest.raises(OSError, match='injected PNG failure'):
+            job.step(context)
+    else:
+        assert job.step(context)
+    assert capture._ACTIVE is None and not timers.callbacks
+    assert len(publications) == 1
+    terminal = capture._TERMINALS[context.scene.as_pointer()][1]
+    assert terminal.stage == ('SUCCEEDED' if termination == 'success' else
+                              'CANCELLED' if termination == 'cancel' else 'FAILED')
+    saved = json.loads((job.path / 'manifest.json').read_text(encoding='utf-8'))
+    assert saved['status'] == ('complete' if termination == 'success' else 'incomplete')
+    assert saved['completed_samples'] == (1 if termination in {'success', 'cancel'} else 0)
+    next_job = capture.Capture(context, tmp_path)
+    assert next_job.path != job.path and capture._ACTIVE is next_job
+    assert job.closed
+    if callback is not None:
+        assert callback() is None
+    assert capture._ACTIVE is next_job and capture.status_for(context.scene).active
+    next_job.request_cancel()
+    assert capture._ACTIVE is None
+
+
+def test_capture_status_uses_one_finalization_snapshot(capture_runtime, tmp_path):
+    context, timers = capture_runtime
+    job = capture.Capture(context, tmp_path)
+    job._writer = NS(thread=NS(is_alive=lambda: True), cancel=lambda: None)
+    job.finish(error='injected capture failure')
+    alive = iter((True, False))
+    job._writer.thread.is_alive = lambda: next(alive)
+    status = capture.status_for(context.scene)
+    assert status.active and status.stage == 'FINALIZING'
+    assert capture._ACTIVE is job and not job._closed
+    assert capture.status_for(context.scene).stage == 'FAILED'
+    assert capture._ACTIVE is None and not timers.callbacks

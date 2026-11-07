@@ -24,7 +24,7 @@ def tick():
     try:
         if state['stage'] == 0:
             addon.register()
-            addon.load_demo_scene()
+            addon.load_demo_scene(camera_rig=False)
             state['stage'] = 1
             return 1.
         window = bpy.context.window

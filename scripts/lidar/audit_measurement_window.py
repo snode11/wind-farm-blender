@@ -12,12 +12,12 @@ from wfrl.lidar.moving_tower import horizontal_clearance, background_hit
 
 def audit(package, output):
     package, output = Path(package), Path(output)
-    m=json.loads((package/'manifest.json').read_text())
+    m=json.loads((package/'manifest.json').read_text(encoding='utf-8'))
     for name,digest in m['files'].items():
         if hashlib.sha256((package/name).read_bytes()).hexdigest()!=digest:
             raise ValueError('Package hash mismatch')
-    farm=Path(json.loads((package/'source-run.json').read_text())['case_dir'])/'FarmInputs'
-    hashes=json.loads((package/'source-surfaces.json').read_text())
+    farm=Path(json.loads((package/'source-run.json').read_text(encoding='utf-8'))['case_dir'])/'FarmInputs'
+    hashes=json.loads((package/'source-surfaces.json').read_text(encoding='utf-8'))
     with np.load(package/'geometry.npz') as a:
         times=a['times']; transforms=a['transforms'];poses=a['poses']
     with np.load(package/'tower-motion.npz') as a:
@@ -74,8 +74,8 @@ def audit(package, output):
         all_rows[tid]=rows
         print(tid, result[tid]['old_window'],result[tid]['extended_window'],flush=True)
     output.mkdir(parents=True,exist_ok=True)
-    (output/'window-summary.json').write_text(json.dumps(result,indent=2,allow_nan=False))
-    (output/'window-rows.json').write_text(json.dumps(all_rows,separators=(',',':'),allow_nan=False))
+    (output/'window-summary.json').write_text(json.dumps(result,indent=2,allow_nan=False), encoding='utf-8')
+    (output/'window-rows.json').write_text(json.dumps(all_rows,separators=(',',':'),allow_nan=False), encoding='utf-8')
     return result
 
 

@@ -1,0 +1,335 @@
+{
+  "status": "PASS",
+  "phase": "run",
+  "reasons": [],
+  "returncode": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "duration_s": 0.9792790000792593,
+  "source_changed": false,
+  "execution": {
+    "status": "PASS",
+    "final": true,
+    "script": "/project/blender_frontend/tests/blender/farm_capture_transaction_regression.py",
+    "background": true,
+    "blender": "5.2.1 LTS",
+    "startup_dirty": false,
+    "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+    "returned_normally": true,
+    "post_script_dirty": false
+  },
+  "script_result": {
+    "status": "PASS",
+    "blender": "5.2.1 LTS",
+    "module": "/project/blender_frontend/wfrl_blender/__init__.py",
+    "scope": "real RNA ownership and capture transaction; replay, image and playback adapters; no GPU proof",
+    "checks": [
+      {
+        "action": "success",
+        "original_playing": false,
+        "status": "complete",
+        "completed_samples": 2,
+        "playback_requests": [
+          false,
+          false,
+          false
+        ],
+        "evaluations": [
+          119.5,
+          120.0,
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_1c91a87ec9"
+      },
+      {
+        "action": "cancel",
+        "original_playing": false,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false,
+          false,
+          false
+        ],
+        "evaluations": [
+          119.5,
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_529c8fccb4"
+      },
+      {
+        "action": "frame_start",
+        "original_playing": false,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_f9103cbbca"
+      },
+      {
+        "action": "timebase",
+        "original_playing": false,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_9752127174"
+      },
+      {
+        "action": "removed_timebase",
+        "original_playing": false,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_44636dab34"
+      },
+      {
+        "action": "layer",
+        "original_playing": false,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_20ee050e7c"
+      },
+      {
+        "action": "delete_layer",
+        "original_playing": false,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_ca1cd9eba6"
+      },
+      {
+        "action": "scene",
+        "original_playing": false,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_b32a0eed47"
+      },
+      {
+        "action": "foreign_context",
+        "original_playing": false,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_801e5f152e"
+      },
+      {
+        "action": "render_layer",
+        "original_playing": false,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5,
+          120.0
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_bf21d008a2"
+      },
+      {
+        "action": "render_timebase",
+        "original_playing": false,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5,
+          120.0
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_1ca2ce26ec"
+      },
+      {
+        "action": "success",
+        "original_playing": true,
+        "status": "complete",
+        "completed_samples": 2,
+        "playback_requests": [
+          false,
+          false,
+          true
+        ],
+        "evaluations": [
+          119.5,
+          120.0,
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_c270eca460"
+      },
+      {
+        "action": "cancel",
+        "original_playing": true,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false,
+          false,
+          true
+        ],
+        "evaluations": [
+          119.5,
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_2d11bfb277"
+      },
+      {
+        "action": "frame_start",
+        "original_playing": true,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_f1c86fdcbc"
+      },
+      {
+        "action": "timebase",
+        "original_playing": true,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_5aa0a94e3a"
+      },
+      {
+        "action": "removed_timebase",
+        "original_playing": true,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_2dc6f2a306"
+      },
+      {
+        "action": "layer",
+        "original_playing": true,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_a159c6dc93"
+      },
+      {
+        "action": "delete_layer",
+        "original_playing": true,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_7ea0937602"
+      },
+      {
+        "action": "scene",
+        "original_playing": true,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_a0142e1f79"
+      },
+      {
+        "action": "foreign_context",
+        "original_playing": true,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_cebf9fc394"
+      },
+      {
+        "action": "render_layer",
+        "original_playing": true,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5,
+          120.0
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_8f8144044a"
+      },
+      {
+        "action": "render_timebase",
+        "original_playing": true,
+        "status": "incomplete",
+        "completed_samples": 1,
+        "playback_requests": [
+          false
+        ],
+        "evaluations": [
+          119.5,
+          120.0
+        ],
+        "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_323b757267"
+      }
+    ]
+  },
+  "log": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/run/blender.log",
+  "report": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/result.json"
+}

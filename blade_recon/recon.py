@@ -17,6 +17,7 @@ import glob
 import math
 import os
 import time
+from types import SimpleNamespace
 
 import cv2
 import numpy as np
@@ -246,6 +247,9 @@ class Fitter:
     def solve(self, obs, x0, x_pred, w_prior=1.0, max_nfev=60, active=None):
         """active：哪些参数参与优化(布尔，长 10)。不可观的参数固定在 x0(=物理先验推算值)，
         不让它们去吸收别处的残差。"""
+        if not any(o.has for o in obs):
+            return x0.copy(), np.full(len(x0), np.nan), SimpleNamespace(
+                success=False, reconstruction_valid=False, cost=0., nfev=0)
         act = np.ones(len(x0), bool) if active is None else np.asarray(active, bool)
         x0 = np.clip(x0, LB, UB)
 
@@ -257,13 +261,19 @@ class Fitter:
         res = least_squares(f, x0[act], bounds=(LB[act], UB[act]), loss='linear',
                             x_scale=xs[act], diff_step=1e-3, max_nfev=max_nfev)
         x = x0.copy(); x[act] = res.x
-        std = self.sig.copy()                          # 固定参数的不确定度 = 先验散布
+        std = np.full(len(x0), np.nan)                  # 图像不可辨识方向保持未知
         try:
-            J = res.jac
+            J = res.jac[:-2 * len(x0)]
+            _, singular, vh = np.linalg.svd(J, full_matrices=False)
+            rank = int(np.sum(singular > (singular[0] * 1e-8 if len(singular) else 0.)))
             cov = np.linalg.pinv(J.T @ J) * EDGE_PX ** 2
-            std[act] = np.sqrt(np.clip(np.diag(cov), 0, None))
+            observed_std = np.sqrt(np.clip(np.diag(cov), 0, None))
+            observed_std[np.sum(vh[rank:] ** 2, axis=0) > 1e-8] = np.nan
+            std[:] = np.nan
+            std[act] = observed_std
         except Exception:
             std[act] = np.nan
+        res.reconstruction_valid = bool(res.success and np.isfinite(x).all() and np.isfinite(std[0]))
         return x, std, res
 
     def in_frame(self, p, xi_outer=0.4):
@@ -366,6 +376,8 @@ class PhysPrior:
 
 def init_psi(fitter, obs, lo=0.0, hi=120.0, step=2.0, pitch=0.0, flap=3.0):
     """方位角网格搜索(三片叶片外形相同，搜 0~120° 即可)。"""
+    if not any(o.has for o in obs):
+        return None
     best = (1e18, lo)
     for psi in np.arange(lo, hi, step):
         p = np.array([psi] + [pitch] * 3 + [flap] * 3 + [0.0] * 3)
@@ -403,6 +415,7 @@ def main():
     writers = None
 
     frames, x_prev, omega = [], None, None
+    image_previous_k = None
     phys = PhysPrior()
     last_obs = np.array([np.nan] + [0.0] * 3 + [np.nan] * 3 + [0.0] * 3)
     last_obs[4:7] = 3.0
@@ -420,19 +433,26 @@ def main():
             obs.append(Obs(m))
 
         dt = 1.0 / fps
-        if x_prev is None:                                   # 第 1 帧：网格搜方位角
+        has_image = any(o.has for o in obs)
+        image_dt = None if image_previous_k is None else (k - image_previous_k) * dt
+        prediction = PRIOR_MU.copy() if x_prev is None else x_prev.copy()
+        if omega is not None:
+            prediction[0] += omega * image_dt
+        if not has_image:
+            x, std = prediction.copy(), np.full(10, np.nan)
+            res = SimpleNamespace(success=False, reconstruction_valid=False, cost=0., nfev=0)
+        elif x_prev is None:                                 # 首个可用图像：网格搜方位角
             psi0 = init_psi(fitter, obs)
             x0 = np.array([psi0] + [0.0] * 3 + [3.0] * 3 + [0.0] * 3)
             x, std, res = fitter.solve(obs, x0, x0, w_prior=0.0, max_nfev=150)
         elif omega is None:                                  # 第 2 帧：在 ±最大转角内搜(转向由数据决定)
-            span = args.rpm_max * 6.0 * dt
+            span = args.rpm_max * 6.0 * image_dt
             psi1 = init_psi(fitter, obs, x_prev[0] - span, x_prev[0] + span, step=max(0.5, span / 40),
                             pitch=float(np.mean(x_prev[1:4])), flap=float(np.mean(x_prev[4:7])))
             x0 = x_prev.copy(); x0[0] = psi1
             x, std, res = fitter.solve(obs, x0, x0, w_prior=0.2, max_nfev=150)
-            omega = (x[0] - x_prev[0]) / dt
         else:
-            xp = x_prev.copy(); xp[0] += omega * dt          # 转速外推
+            xp = prediction.copy()                          # 按接受图像间隔外推
             phys.apply(fitter, xp[0])
             n_all, n_out = fitter.in_frame(xp)
             active = np.ones(10, bool)
@@ -446,9 +466,17 @@ def main():
                     active[1 + b] = False
                     xp[1 + b] = fitter.mu[1 + b] if ready else last_obs[1 + b]
             x, std, res = fitter.solve(obs, xp, xp, w_prior=0.5, active=active)
-            omega = 0.8 * omega + 0.2 * (x[0] - x_prev[0]) / dt
-        seen = fitter.observed_sections(x, obs)
-        phys.update(x, seen, rotor.tpl.xi)
+        accepted = bool(has_image and res.success and res.reconstruction_valid and np.isfinite(x).all())
+        seen = np.zeros((3, fitter.S), bool)
+        if accepted:
+            if x_prev is not None:
+                observed_omega = (x[0] - x_prev[0]) / image_dt
+                omega = observed_omega if omega is None else 0.8 * omega + 0.2 * observed_omega
+            x_prev, image_previous_k = x.copy(), k
+            seen = fitter.observed_sections(x, obs)
+            phys.update(x, seen, rotor.tpl.xi)
+        else:
+            x, std = prediction.copy(), np.full(10, np.nan)
         # 记录每片叶片最近一次"真正看清"时的值，先验未就绪时用来填补
         outer = rotor.tpl.xi > 0.4
         for b in range(3):
@@ -461,13 +489,22 @@ def main():
                 blk = last_obs[g:g + 3]
                 blk[~np.isfinite(blk)] = np.nanmean(blk)
         st = fitter.full(x)
-        frames.append({
+        row = {
             'frame': k, 't': k * dt, 'state': st.tolist(),
-            'std': (np.concatenate([std, np.zeros(N_STATE - len(std))])).tolist(),
-            'rpm': abs(omega or 0.0) / 6.0, 'cost': float(res.cost), 'nfev': int(res.nfev),
+            'observation_std': [float(v) if np.isfinite(v) else None for v in std]
+                               + [None] * (N_STATE - len(std)),
+            'reconstruction_valid': accepted,
+            'reconstruction_status': 'image_estimated' if accepted else ('solver_failed' if has_image else 'no_observation'),
+            'image_initialized': x_prev is not None,
+            'rpm': abs(omega) / 6.0 if omega is not None else None,
+            'rpm_status': 'image_estimated' if omega is not None else 'not_initialized',
+            'rpm_observation_dt': image_dt if accepted else None,
+            'cost': float(res.cost), 'nfev': int(res.nfev),
             'observed_sections': seen.astype(int).tolist(),
-        })
-        x_prev = x
+        }
+        if np.isfinite(std).all():
+            row['std'] = np.concatenate([std, np.zeros(N_STATE - len(std))]).tolist()
+        frames.append(row)
 
         if args.overlay:
             if writers is None:

@@ -1,5 +1,5 @@
 """Lightweight GPU smoke: no wind farm, physics process or render job."""
-import sys, math, traceback
+import json, math, os, sys, traceback
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import bpy
@@ -11,7 +11,7 @@ from wfrl_blender.overlays import scene_overlay
 s=bpy.context.scene
 s['wfrl_power_mw']=[1.,2.,3.]
 assert 'POWER   6.00 MW' in scene_overlay(s)
-out=Path('/tmp/wfrl-overlay-review');out.mkdir(exist_ok=True)
+out=Path(os.environ.get('WFRL_TEST_OUTPUT','/tmp/wfrl-overlay-review'));out.mkdir(parents=True,exist_ok=True)
 bpy.context.preferences.view.show_splash=False
 bpy.context.workspace.name='WFRL Workspace'
 bpy.types.Scene.wfrl_selected_turbine=bpy.props.StringProperty(default='ALL')
@@ -24,7 +24,7 @@ for step in range(60):
     data=dict(mode='replay',step=step,timestamp=dict(value=step*.1,timebase='simulation_seconds'),
        scene={'backend':'fastfarm','inflow':{'speed':8}},
        turbines=[dict(turbine_id=f'T{i+1}',channels={'power':record(1+i*.3+.2*math.sin(step*.12+i))}) for i in range(3)],farm={})
-    charts.record_snapshot(dict(session_id='test',sequence=step+1,payload=data))
+    charts.record_snapshot(dict(session_id='test',sequence=step+1,payload=data), scene=bpy.context.scene)
 runtime._state=FrontendState(mode='replay',connection='CONNECTED',run_status='PAUSED',confirmed=True)
 runtime.kinematics=KinematicState();runtime.kinematics.apply_snapshot(data)
 presentation.register_overlay()
@@ -52,9 +52,9 @@ def finish():
         phase=1
         return 1.
     bpy.ops.screen.screenshot(filepath=str(out/'narrow.png'))
-    (out/'result.txt').write_text('draws='+str(set(draws))+'\n'+('\n'.join(errors) if errors else 'GPU_DRAW_PASS'))
-    assert not errors, errors
-    assert {'_draw', 'draw_plot'} <= set(draws), draws
+    status='PASS' if not errors and {'_draw', 'draw_plot'} <= set(draws) else 'FAIL'
+    (out/'result.json').write_text(json.dumps(dict(status=status,draws=sorted(set(draws)),errors=errors),indent=2))
+    print('OVERLAY_DRAW_'+status,flush=True)
     bpy.ops.wm.quit_blender()
     return None
 bpy.app.timers.register(finish,first_interval=2.)

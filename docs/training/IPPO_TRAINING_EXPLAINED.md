@@ -2,7 +2,7 @@
 
 > 本文解释 `scripts/train/train_mappo.py` 委托的 `wfrl/mappo_sb3.py` 参数共享 IPPO 数据流。当前算法入口分流见[配置指南](MAPPO_SETUP.md)。
 >
-> **命名澄清**：文件叫 `train_mappo.py`，但严格分类，当前实现是**参数共享 IPPO**——所有机组共享一套网络（参数共享 ✅），但 critic 只看单台机组的局部观测、没有全局状态（集中式 critic ❌）。仓库现已另有 `wfrl/mappo_central.py` 和 `scripts/train/train_fastfarm.py` 的集中式 critic 实现；这并未改变本文件所述 SB3 路线的 IPPO 身份。详见第 10 节。
+> **命名澄清**：文件叫 `train_mappo.py`，但严格分类，当前实现是**参数共享 IPPO**——所有机组共享一套网络（参数共享 ✅），但 critic 只看单台机组的局部观测、没有全局状态（集中式 critic ❌）。`wfrl/mappo_central.py` 和 `scripts/train/train_fastfarm.py` 提供独立的集中式 critic 路线。详见第 10 节。
 
 ---
 
@@ -22,7 +22,7 @@ MAWindFarmEnv (PettingZoo AEC, env_id = "Dec_Ablaincourt_Floris")
                  └─ PPO("MultiInputPolicy")   # 一套网络，所有机组共享参数
 ```
 
-对应源码（`wfrl/mappo_sb3.py::make_venv/build_model`）：
+新训练的核心配置如下；加载模型及归一化的完整分支见 `wfrl/mappo_sb3.py::make_venv/build_model`：
 
 ```python
 def make_venv(norm_reward=True, training=True):
@@ -32,7 +32,7 @@ def make_venv(norm_reward=True, training=True):
     return VecNormalize(venv, norm_obs=True, norm_reward=norm_reward,
                         clip_obs=10.0, gamma=0.99, training=training)
 
-def build_model(venv, resume=False):
+def build_new_model(venv):
     return PPO(
         policy="MultiInputPolicy",   # Dict 观测 → 每个 key 一个特征提取分支
         env=venv,
@@ -77,29 +77,9 @@ def __init__(self, par_env):
 
 ## 3. 一个 step：7 台同时走，不存在等待
 
-这是你问的核心——「难道要等最慢的 agent？」答案在 `step_wait`（`wfrl/mappo_sb3.py::MAParallelVecEnv.step_wait`）：
+`step_wait`（`wfrl/mappo_sb3.py::MAParallelVecEnv.step_wait`）将 `(7, 1)` 动作打包为 `{机组: {"yaw": 动作}}`，一次调用 `par_env.step()`，再按机组顺序组织观测、奖励、结束标记与信息。
 
-```python
-def step_wait(self):
-    actions = self._pending_actions               # 形状 (7, 1)：7 台的 yaw
-    agent_actions = {                              # 打包成 {机组: {"yaw": 动作}}
-        agent: {"yaw": actions[i]}
-        for i, agent in enumerate(self.agents)
-    }
-    obs_dict, rew_dict, term_dict, trunc_dict, info_dict = \
-        self.par_env.step(agent_actions)           # ★ 一次调用，7 台一起 step
-    #   └─ 底层 FLORIS 一次稳态求解 → 整场 7 台新观测同时出来
-
-    obs   = self._pack_obs(obs_dict)               # → {key: (7, ...)}
-    rews  = np.array([float(rew_dict.get(a, 0.0)) for a in self.agents])  # (7,)
-    dones = np.array([term_dict.get(a, False) or trunc_dict.get(a, False)
-                      for a in self.agents])        # (7,)
-    infos = [info_dict.get(a, {}) for a in self.agents]
-
-    if dones.all():                                # 全部 done 才自动重置
-        obs = self.reset()
-    return obs, rews, dones, infos
-```
+共用风场要求机组同步结束。自动 reset 前，包装器将每台机组的完整终点观测复制到 `infos[i]["terminal_observation"]`，包括多模态派生字段；返回的普通观测则属于新回合。`TimeLimit.truncated` 仅在时间截断且没有真正终止时为真，使 SB3 可以用终点价值自举，同时阻止 GAE 跨回合递推。终点观测和 reset 后观测不能互换。
 
 **为什么没有「等最慢的 agent」**：
 1. `par_env.step(agent_actions)` 是**一次调用**，7 台的动作一起传进去。
@@ -130,7 +110,7 @@ def _pack_obs(self, obs_dict):
 - 输出：`{"yaw": (7,1), "wind_speed": (7,1), ...}`（按 key 组织，每个 key 把 7 台**堆叠成一个批**）。
 - **为什么**：网络前向要的是「批张量」。把 7 台同一个 key 堆成 `(7, dim)`，就能一次前向同时算 7 台——批里的第 i 行就是第 i 台机组。这一步是「7 台共用一次前向」的物理形态。
 
-> 多模态版 `MMVecEnv` 只在这里多塞两个 key：`vibration (7,6)` 和 `wake_image (7,1,48,48)`，其余流程完全一致。
+多模态版 `MMVecEnv` 在此加入 `vibration (7,6)` 和可选的 `wake_image (7,1,48,48)`；`--no-image` 省略图像字段。Actor 与 critic 都读取这些本机观测，机组仍映射为 VecEnv 的各行样本。
 
 ---
 
@@ -187,7 +167,11 @@ for epoch in 1..10:
 - **回报归一化**：稳定 advantage 的尺度，让 `learning_rate` 好调。
 - `training=False` 时冻结统计量（评估/部署用训练期的均值方差，不再更新）。
 
+`--resume` 将 `mappo_ablaincourt.zip` 与 `vecnormalize_mappo.pkl` 配套恢复，保留观测／奖励统计与累计训练步数。加载检查观测／动作空间、统计量、折扣因子和文件配对标识；缺项或不匹配时明确报错。无配对标识的兼容文件仍需核对训练来源，形状匹配不能证明其归属。
+
 > 多模态版有个关键区别：`norm_obs_keys` 只归一化标量+振动，**图像不使用 VecNormalize 的逐维运行统计**；它仍由当前图像输入和特征提取路径处理。不能一般化为“图像归一化会毁掉空间结构”。
+
+多模态入口 `scripts/train/train_mappo_mm.py` 使用独立配对 `mappo_mm_ablaincourt.zip` 与 `vecnormalize_mappo_mm.pkl`。`--eval-only` 自动加载二者，冻结统计并返回原始奖励；`--resume` 恢复模型、观测／奖励统计与累计 agent transitions，`--timesteps` 为追加量，按完整 rollout 取整。图像模式须与保存模型一致；使用 `--no-image` 训练时，续训和评估也须携带该参数。缺少文件、归一化通道或模型空间不兼容时明确失败。
 
 ---
 
@@ -204,6 +188,7 @@ while not done.all():
 
 - `deterministic=True`：用策略分布的均值而非采样，评估性能时去掉探索噪声。
 - `rew[0]`：当前 `multiagent_env.py` 明确向每台机组分配同一份团队奖励，因此取一台累计是该实现的统计口径；不是由同构本身推出奖励相同。
+- `--eval-only` 必须加载已保存的模型和归一化文件，不需要额外指定 `--resume`。评估冻结统计，关闭奖励归一化；缺文件或不兼容时失败，不创建随机策略作为评估对象。
 
 ---
 

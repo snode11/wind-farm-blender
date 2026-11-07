@@ -1,0 +1,291 @@
+{
+  "base": "d4e943a4a368cc4a8e685e6715c23b8c441e6f6f",
+  "index": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/scratch/release.index",
+  "candidate_tree": "2c92fd2938eb62e8b1b0a87dafa692eb4f691008",
+  "selected_changes": [
+    {
+      "path": ".agents/skills/windfarm-blender-dev/SKILL.md",
+      "bytes": 4071,
+      "sha256": "cd8f3d75661e474407c4491df41fd562d06118f6de9fd7a4e022ecd2f367628e",
+      "new": false
+    },
+    {
+      "path": ".agents/skills/windfarm-blender-dev/evals/scenarios.json",
+      "bytes": 3909,
+      "sha256": "b9f11cbc944fcefa5cfa67161ee303923a87debca747e3931c66572b6638f85c",
+      "new": true
+    },
+    {
+      "path": ".agents/skills/windfarm-blender-dev/references/cameras-reconstruction.md",
+      "bytes": 7496,
+      "sha256": "2a4544091327777ab877ee3ebdd6b4fafb92f24efa4034a840f65bd820e06f4b",
+      "new": true
+    },
+    {
+      "path": ".agents/skills/windfarm-blender-dev/references/measurement-backend.md",
+      "bytes": 6725,
+      "sha256": "6bac87aea0bd674e4886d9e3e2ce7e293e2200a1cf316a645b11c263bf46333f",
+      "new": true
+    },
+    {
+      "path": ".agents/skills/windfarm-blender-dev/references/scene-playback.md",
+      "bytes": 7549,
+      "sha256": "7ceb7b61f951c85f96cb82ab993e628f442655df4d102acf8cdf98f1fe62589b",
+      "new": true
+    },
+    {
+      "path": ".agents/skills/windfarm-blender-dev/references/verification.md",
+      "bytes": 9325,
+      "sha256": "18ac8e41c176506b8ad10cd7f4307295948956822330aad0a89abe47d93d1159",
+      "new": false
+    },
+    {
+      "path": ".agents/skills/windfarm-blender-dev/references/video-jobs.md",
+      "bytes": 4790,
+      "sha256": "a8742d163f49584bec3bacf9cfe08e985e8450d663e8ef3719e7af55578e6408",
+      "new": true
+    },
+    {
+      "path": ".github/workflows/checks.yml",
+      "bytes": 6204,
+      "sha256": "b77e173a414981388e92c32814d4c4c150bea68d34293c040abaa3d9cb5906f4",
+      "new": false
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 2920,
+      "sha256": "b3869b398cf2e62df383c3b2022ccd6c27a66c304f2d11d3f8760ecaa728ad5a",
+      "new": false
+    },
+    {
+      "path": "README.md",
+      "bytes": 13769,
+      "sha256": "30411bdf9db248d46af8f48876938c4a93ed344c9fbfb356e9466c7d24723a1a",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/README.md",
+      "bytes": 77486,
+      "sha256": "823d5f757bd337166c496cb9558e95517c9913b2d306feb9dedae50c6555a316",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/tests/blender/farm_down_mount_regression.py",
+      "bytes": 13778,
+      "sha256": "a393524059044ba3136118bbfc0ea7637997a74dbd4a4ae329938aa5bd738a40",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/tests/blender/nacelle_camera_regression.py",
+      "bytes": 15085,
+      "sha256": "28795af461a016a124f50e07e38d99c27d81d2b637c06cb01ec23579b1bf4e92",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/tests/blender/native_camera_proxy_regression.py",
+      "bytes": 5559,
+      "sha256": "ccaf20aaa6e3ca525405ca1eb338722becbbb7f75cbbc405fe263e8fb7689913",
+      "new": true
+    },
+    {
+      "path": "blender_frontend/tests/blender/native_camera_proxy_window.py",
+      "bytes": 18667,
+      "sha256": "d1d5f465af6da77dc402e1a9bf8b0c33367f2fd755d4d08403e634952574ffb5",
+      "new": true
+    },
+    {
+      "path": "blender_frontend/tests/blender/reconstruction_workflow_window.py",
+      "bytes": 37245,
+      "sha256": "367e22c9d311dca7695b93c252b316b8d2fdd8529e2658eccc95857eca12b0f4",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/tests/blender/t1_down_mount_regression.py",
+      "bytes": 11205,
+      "sha256": "4085fba15ae9ad2fdc2610a008ebaccd7ade79bd30c04178f292bc1519daf1c0",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/tests/test_native_camera_lifecycle.py",
+      "bytes": 26777,
+      "sha256": "5bff799f4878db1feb56f2c0c8f310597f3e329ae06b0efa8659fd06204d9832",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/tests/test_presentation_controls.py",
+      "bytes": 4526,
+      "sha256": "53bbdba7c2127cdce4a84e2998932c81a6c0c0ecb28407f5c77c0e258c83fdbd",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/__init__.py",
+      "bytes": 23441,
+      "sha256": "a77d645e03e58f1ae500a1074eab28dca8a87b70bcfbb06f9103ea56d67ae09a",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/blade_recon_review.py",
+      "bytes": 38685,
+      "sha256": "7b63abb2eab50af5eef38f700b2fcb59aaf68f410711e1963bc7bb10a6fd3ba1",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/blade_recon_surface.py",
+      "bytes": 12168,
+      "sha256": "e30fda5420551a913eb92056e2e2b5ce4d8d577f8316de6b55b2ba45d73b7036",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/blender_manifest.toml",
+      "bytes": 439,
+      "sha256": "d911966a0138373123a235ac00de996991c93e0e65b0da5ff9681fb2385703a3",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/cameras.py",
+      "bytes": 38119,
+      "sha256": "34cd3ea55b3c910e4d117bab90e40a289ade990f77931512fe9db5f439d39c68",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/custom_cameras.py",
+      "bytes": 48663,
+      "sha256": "d588524898ee901124c2a5727af3aab670cee83ca4b80a2ae52fe0ad444aca4b",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/manual_scene.py",
+      "bytes": 19889,
+      "sha256": "7f5d8a9f0d0deb32abb2915963495aa51c834ae2786388dcd26f2293f32a0795",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/manual_video.py",
+      "bytes": 22167,
+      "sha256": "1e000afc7f707848b2fd4d5d0811f13548da3e9f417ec0e871bb419b60f98584",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/native_camera_views.py",
+      "bytes": 49738,
+      "sha256": "7116afe0ebfb1964e44e5a5ee4238a0824fa54ab0e33098013fe2c61e4db55f0",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/split_mappo_texture.py",
+      "bytes": 29375,
+      "sha256": "b3a20558a691f081a748f458a89764366e997c14429923121d719236d5596d36",
+      "new": false
+    },
+    {
+      "path": "blender_frontend/wfrl_blender/split_reconstruction.py",
+      "bytes": 44886,
+      "sha256": "546bc20f389175f54975bdd12cd07a9813c0c71cdfa50afeef9163697b8608e4",
+      "new": false
+    },
+    {
+      "path": "docs/PUBLICATION.md",
+      "bytes": 10589,
+      "sha256": "31d7690c73bc59b73870092f33cc4890260fa102b1958b41b7e417d7a03291a2",
+      "new": false
+    },
+    {
+      "path": "docs/README.md",
+      "bytes": 4614,
+      "sha256": "6b77cf1ff30fda4cb8a7dc62b30198aa2b86e7b683ce81e4d4fabec7c9d43823",
+      "new": false
+    },
+    {
+      "path": "docs/blender/BladeRecon可视化使用说明.md",
+      "bytes": 12996,
+      "sha256": "e0fb5a2d60767ef4d16097fa213189ff2b7d240d378bdefaa533838d9303a414",
+      "new": false
+    },
+    {
+      "path": "docs/blender/Blender前端功能总览与规划.md",
+      "bytes": 61195,
+      "sha256": "c6e6e7bac1a0eb4e86364cf4b75f66c19effd3378547c9ce941e3614be94a872",
+      "new": false
+    },
+    {
+      "path": "docs/blender/GW184三相机与缺陷编辑器.md",
+      "bytes": 4864,
+      "sha256": "952c864e1d864b6e20f6aadf871549f4b3bbe45d4400252eeb6b2e6944eccd9b",
+      "new": false
+    },
+    {
+      "path": "docs/blender/INSTALL.md",
+      "bytes": 13959,
+      "sha256": "8f4f15a3dd4d2edb7226b4c5c2e639f98851a67d65963a5df25a116b71663018",
+      "new": false
+    },
+    {
+      "path": "docs/blender/NREL缺陷编辑器.md",
+      "bytes": 6041,
+      "sha256": "22cea0450484ee0b3e38e42fc96b59d0251e9e506979b34f6b19cad578187ec4",
+      "new": false
+    },
+    {
+      "path": "docs/blender/README.md",
+      "bytes": 5518,
+      "sha256": "3d58c93f638fd261ec209f750f553f31b2f8d71a0af1077148b76e2ac4a316aa",
+      "new": false
+    },
+    {
+      "path": "docs/blender/T1Down机舱下视.md",
+      "bytes": 3576,
+      "sha256": "2c820f56859deb0efdb194cd8416cd35048c2cc20d6171fd49c8966ef097b25f",
+      "new": false
+    },
+    {
+      "path": "docs/blender/T1三相机使用说明.md",
+      "bytes": 13282,
+      "sha256": "5fe458199fadbb4f4607770cfb2c252899fc6143c92e89c8e8198c0ee4125026",
+      "new": false
+    },
+    {
+      "path": "docs/blender/发布状态与验证范围.md",
+      "bytes": 14708,
+      "sha256": "f90b02e01e9673c6bf5a02a5141ecedb4d0c9a40e572e06461395e09652c23bf",
+      "new": false
+    },
+    {
+      "path": "docs/blender/用户使用手册.md",
+      "bytes": 56628,
+      "sha256": "61b1ec60c52c269fa1d51a1b307beaf22fd2eb7f219db40cf8afbd5fcf856d75",
+      "new": false
+    },
+    {
+      "path": "docs/blender/风机手动控制.md",
+      "bytes": 20692,
+      "sha256": "e7319844eb6d7a7aa81f1554c40ef41a869345c4525aebcbd67d3672ca87b291",
+      "new": false
+    },
+    {
+      "path": "scripts/blender/run_regressions.py",
+      "bytes": 23164,
+      "sha256": "e0a8c40b048ef8b34a8d6423472514ac4deabfae65b49f83b5aae47b06ad79bf",
+      "new": false
+    },
+    {
+      "path": "前端readme.md",
+      "bytes": 45946,
+      "sha256": "08d72236aa5a62b9f0b61a571903a2c0e592d0993739ff90b796bbaa6aab427d",
+      "new": false
+    },
+    {
+      "path": "前端更新计划.md",
+      "bytes": 6375,
+      "sha256": "98a37d0f8512df6c58fafa73db109772ca49c63ea80c351c774b408b9f1da7c6",
+      "new": false
+    }
+  ],
+  "canonical_inputs": [
+    "wfrl/blender_bridge/messages.py",
+    "wfrl/lidar/replay.py",
+    "wfrl/lidar/evidence.py",
+    "wfrl/lidar/dual_beam_replay.py",
+    "wfrl/lidar/molas_cl.py"
+  ],
+  "scope": "Frontend source/tests, current operating and implementation documents, in-repository skill, CI release identity, canonical package inputs. Other remote source remains unchanged."
+}

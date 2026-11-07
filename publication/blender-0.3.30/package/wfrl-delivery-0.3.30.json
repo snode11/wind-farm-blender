@@ -1,0 +1,63 @@
+{
+  "schema": "wfrl.delivery.v1",
+  "release": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.30",
+  "extension_tag": "v0.3.30",
+  "extension_source_commit": "63741f315be6f6b1ede6fff58c258c7fa9f71af6",
+  "source_archive_commit": "6469a55a5f992a6c3de0509c40504fa568af0955",
+  "source_branch": "wind-farm-rl-all-work",
+  "synchronized_branch": "main",
+  "source_manifest": "publication/source-files.json",
+  "evidence_scope": "Selected source and installed payload checks; no actual training, solver, full manual video, cross-platform or scientific acceptance",
+  "reused_resources": "https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1",
+  "archive_status": "VERIFIED_BEFORE_UPLOAD",
+  "assets": [
+    {
+      "file": "wfrl-validation-0.3.30.inventory.json",
+      "bytes": 20027,
+      "sha256": "d90f6a0c7546f845fc68d28547f7237e240d92dee794b3fba8083ee34cc13178",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl-validation-0.3.30.inventory.json"
+    },
+    {
+      "file": "wfrl-validation-0.3.30.zip",
+      "bytes": 8317221,
+      "sha256": "25a53882a7192ffb366a0cfa4349c0700499ce204866d3ea22afd3ca27dfe228",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl-validation-0.3.30.zip"
+    },
+    {
+      "file": "wfrl-validation-0.3.30.zip.sha256",
+      "bytes": 93,
+      "sha256": "a9be30b21cfdfaadf32c9fa52e6bb06d565105fa35a547f481391110ae0a6112",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl-validation-0.3.30.zip.sha256"
+    },
+    {
+      "file": "wfrl_blender-0.3.30.inventory.json",
+      "bytes": 29836,
+      "sha256": "f7efa8dc4e4375d31789d7e720090ab278805112d90e580696110cf45e78f5b3",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl_blender-0.3.30.inventory.json"
+    },
+    {
+      "file": "wfrl_blender-0.3.30.zip",
+      "bytes": 99091527,
+      "sha256": "9f381674407c07138986eb8fc96d35f8ef50ac91e9ad58b43bd8c7f5afbac16a",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl_blender-0.3.30.zip"
+    },
+    {
+      "file": "wfrl_blender-0.3.30.zip.sha256",
+      "bytes": 90,
+      "sha256": "39b4882ad2ac0a375dea67053aa471ba7867076e231a775856fcf956af1f79c4",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl_blender-0.3.30.zip.sha256"
+    },
+    {
+      "file": "wind-farm-blender-source-0.3.30.zip",
+      "bytes": 164751072,
+      "sha256": "f3b2de4ec7d2a9a9c07fb289a4d39ab333b74e165b3ebe5b36b3d7015a560f5e",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wind-farm-blender-source-0.3.30.zip"
+    },
+    {
+      "file": "wind-farm-blender-source-0.3.30.zip.sha256",
+      "bytes": 102,
+      "sha256": "61f071a7e9f71df769f47fa799e5d1610e8216e577fc9104b65e5d38e2555cb9",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wind-farm-blender-source-0.3.30.zip.sha256"
+    }
+  ]
+}

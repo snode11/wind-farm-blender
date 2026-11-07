@@ -75,6 +75,32 @@ class ReplayTests(unittest.TestCase):
         self.assertIsNone(stats['valid_ratio']); self.assertIsNone(stats['mae_m'])
 
 class PackageTests(unittest.TestCase):
+    def test_only_derived_mae_allows_absolute_summation_roundoff(self):
+        import tempfile, json, hashlib, math
+        from pathlib import Path
+        from wfrl.lidar.replay import publish_package
+        with tempfile.TemporaryDirectory() as root:
+            m, motion, rows = self.fixture(); path = Path(root) / 'roundoff'
+            publish_package(path, m, motion, rows, 'fixture only')
+            original = {name: (path/name).read_bytes() for name in ['cumulative.json', 'statistics.json', 'manifest.json']}
+            for field, change, accepted in [
+                ('mae_m', lambda x: math.nextafter(x, math.inf), True),
+                ('mae_m', lambda x: x + 1e-7, False),
+                ('valid_samples', lambda x: x + 1, False),
+                ('valid_samples', lambda x: float(x), False),
+                ('max_abs_error_m', lambda x: math.nextafter(x, math.inf), False),
+            ]:
+                for name, raw in original.items(): (path/name).write_bytes(raw)
+                value = json.loads(original['statistics.json']); value[field] = change(value[field])
+                raw = json.dumps(value).encode(); (path/'statistics.json').write_bytes(raw)
+                manifest = json.loads(original['manifest.json'])
+                manifest['files']['statistics.json'] = hashlib.sha256(raw).hexdigest()
+                (path/'manifest.json').write_text(json.dumps(manifest))
+                with self.subTest(field=field, accepted=accepted):
+                    if accepted: ReplayPackage.load(path)
+                    else:
+                        with self.assertRaisesRegex(ValueError, 'precomputed'): ReplayPackage.load(path)
+
     def fixture(self):
         r=ReplayTests().fixture(); rows=r.package.measurements
         for row in rows:

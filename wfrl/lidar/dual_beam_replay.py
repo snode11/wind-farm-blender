@@ -55,7 +55,7 @@ def digest(path):
 def resolve_package(path):
     """Return verified geometry path and optional sidecar without weakening v3 checks."""
     path = Path(path).resolve()
-    manifest = json.loads((path / 'manifest.json').read_text())
+    manifest = json.loads((path / 'manifest.json').read_text(encoding='utf-8'))
     if manifest.get('schema') != SCHEMA:
         return path, None
     if manifest.get('status') == 'REJECTED':
@@ -65,7 +65,7 @@ def resolve_package(path):
     source = (path / manifest['source_package']).resolve()
     if source == path:
         raise ValueError('Dual-beam source cannot refer to itself')
-    source_manifest = json.loads((source / 'manifest.json').read_text())
+    source_manifest = json.loads((source / 'manifest.json').read_text(encoding='utf-8'))
     if source_manifest.get('schema') != 'wfrl.farm-flex-review.v3':
         raise ValueError('Dual-beam source must be v3 geometry')
     for name, expected in manifest['source_hashes'].items():
@@ -83,7 +83,7 @@ def resolve_package(path):
     for name, expected in manifest['files'].items():
         if Path(name).name != name or digest(path / name) != expected:
             raise ValueError('Dual-beam result integrity mismatch: ' + name)
-    config = json.loads((path / 'calibration.json').read_text())
+    config = json.loads((path / 'calibration.json').read_text(encoding='utf-8'))
     if str(config.get('status', '')).startswith('REJECTED'):
         raise ValueError('Rejected installation calibration')
     if config.get('schema') != 'wfrl.dual-beam-calibration.v1':
@@ -101,7 +101,7 @@ def resolve_package(path):
     angles = config['angles_deg']
     if not all(math.isfinite(a) and 0 < a < 90 for a in angles) or not angles[0] < angles[1] < angles[2]:
         raise ValueError('Invalid dual-beam directions')
-    results = json.loads((path / 'results.json').read_text())
+    results = json.loads((path / 'results.json').read_text(encoding='utf-8'))
     if set(results) != set(source_manifest['turbine_ids']):
         raise ValueError('Dual-beam turbines differ from source')
     if manifest['segment'] != source_manifest['segment']:
@@ -129,6 +129,7 @@ def precompute(rows, config):
     passages = {}
     previous_passage, completed, missed = None, 0, 0
     initial_partial = rows[0].get('passage_id') if rows else None
+    error_stats = error_statistics(errors)
     for row in rows:
         t = row['time_s']
         pair, evaluation = row['reconstruction'], row['evaluation']
@@ -149,6 +150,7 @@ def precompute(rows, config):
             err = evaluation.get('clearance_error_m')
             if err is not None:
                 errors.append(err)
+                error_stats = error_statistics(errors)
             held = dict(time_s=t, blade_id=pair['blade_id'], estimate_m=pair['clearance_estimate'],
                         truth_m=evaluation.get('clearance_reference_m'), error_m=err,
                         expires_at_s=t + config['measurement_hold_s'])
@@ -172,7 +174,7 @@ def precompute(rows, config):
                           valid_ratio=valid_expected/expected if expected else None,
                           passage_count=len(passages), completed_passage_count=completed,
                           missed_passage_count=missed,
-                          **error_statistics(errors))
+                          **error_stats)
         cumulative.append(dict(time_s=t, measurement=deepcopy(held), alarm=state, statistics=statistics))
     return cumulative, events
 
@@ -235,6 +237,15 @@ class DualBeamReader:
             if ((pair['valid'] and not (type(estimate) in (int, float) and math.isfinite(estimate)))
                     or (not pair['valid'] and estimate is not None)):
                 raise ValueError('Invalid dual-beam estimate/null contract')
+            evaluation = row['evaluation']
+            reference, error = (evaluation.get(key) for key in
+                                ('clearance_reference_m', 'clearance_error_m'))
+            if any(value is not None and (type(value) not in (int, float)
+                    or not math.isfinite(value)) for value in (reference, error)):
+                raise ValueError('Invalid dual-beam evaluation finite/null contract')
+            if error is not None and (not pair['valid'] or reference is None
+                    or not math.isclose(error, estimate - reference, rel_tol=0., abs_tol=1e-9)):
+                raise ValueError('Dual-beam evaluation error differs from estimate minus reference')
             for obs in row['observations'].values():
                 if obs['time_s'] != row['time_s']:
                     raise ValueError('Dual-beam observations are not simultaneous')

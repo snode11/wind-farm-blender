@@ -1,5 +1,6 @@
-"""New Part 4 main-thread integration tests; no Blender launch."""
+"""Main-thread integration tests without a Blender process."""
 import sys
+import threading
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -10,18 +11,99 @@ from test_animation_math import snapshot
 
 
 class LiveRuntimeTests(unittest.TestCase):
+    def test_stop_preemption_requires_confirmed_matching_connected_identity(self):
+        bpy = SimpleNamespace(context=SimpleNamespace(scene=None))
+        for connection, confirmed, client_session in [('DISCONNECTED', True, 's'),
+                                                     ('CONNECTED', False, 's'),
+                                                     ('CONNECTED', True, 'other')]:
+            with self.subTest(connection=connection, confirmed=confirmed, client_session=client_session):
+                ui = FrontendState(connection=connection, confirmed=confirmed,
+                                   run_status='RUNNING', session_id='s')
+                with patch.dict(sys.modules, bpy=bpy), patch.multiple(
+                        runtime, _state=ui, _client=SimpleNamespace(session_id=client_session),
+                        _pending_command='pause'):
+                    self.assertFalse(runtime.allows_command('stop'))
+
+    def test_stop_preempts_pending_pause_or_step_without_a_solver_boundary(self):
+        from wfrl.blender_bridge.backend_session import BackendSession
+        for pending, initial, delayed_pause in [('pause', 'RUNNING', False),
+                                                ('pause', 'RUNNING', True),
+                                                ('step', 'PAUSED', False)]:
+            with self.subTest(pending=pending, delayed_pause=delayed_pause):
+                session = BackendSession()
+                release = threading.Event()
+                thread = threading.Thread(target=release.wait, daemon=True)
+                def stop(timeout):
+                    release.set()
+                    thread.join(timeout)
+                session._trainer = SimpleNamespace(runtime=None, running=False, error=None, stop=stop)
+                session._thread = thread
+                thread.start()
+                self.addCleanup(release.set)
+                session.mode = 'interactive_training'
+                session.lifecycle(initial)
+                session.poll()
+                messages = []
+                sent = []
+                sequence = [10]
+                def send(message):
+                    sent.append(message)
+                    session.command(message['payload'])
+                client = SimpleNamespace(negotiated_capabilities=frozenset(), session_id=session.session_id, next_sequence=3,
+                    last_error='', status='CONNECTED', progress='Connected', send=send,
+                    poll=lambda: list(messages), close=lambda: None)
+                ui = FrontendState()
+                ui.synchronize(session.session_id, initial, session.mode, session.capabilities,
+                               state_revision=session.state_revision, cleanup_confirmed=False,
+                               worker_alive=True)
+                session.command(dict(command='run.' + pending, arguments={}))
+                if delayed_pause:
+                    session.lifecycle('PAUSED')
+                delayed = [dict(type=kind, session_id=session.session_id, sequence=9, payload=payload)
+                           for kind, payload in session.poll() if kind == 'lifecycle']
+                bpy = SimpleNamespace(context=SimpleNamespace(scene=None, window_manager=SimpleNamespace(windows=[])),
+                                      data=SimpleNamespace(objects={}))
+                with patch.dict(sys.modules, bpy=bpy), patch.multiple(
+                        runtime, _client=client, _state=ui, _pending_command=pending,
+                        _pending_step=1, _pending_lifecycle_sequence=8, _last_tick=None,
+                        _health=None, _live_scene=None, kinematics=KinematicState(),
+                        _desired_mode=session.mode, safety_events=[]):
+                    self.assertTrue(runtime.allows_command('stop'))
+                    self.assertFalse(runtime.allows_command('resume'))
+                    runtime.send_command('stop')
+                    self.assertEqual(sent[-1]['payload']['command'], 'run.stop')
+                    self.assertEqual(runtime._pending_command, 'stop')
+                    if delayed:
+                        messages[:] = delayed
+                        runtime.tick()
+                        self.assertEqual(runtime._pending_command, 'stop')
+                        self.assertFalse(runtime.allows_command('step'))
+                    session._stop_worker.join(1)
+                    self.assertFalse(session.alive())
+                    messages.clear()
+                    for kind, payload in session.poll():
+                        if kind != 'lifecycle':
+                            continue
+                        sequence[0] += 1
+                        messages.append(dict(type=kind, session_id=session.session_id,
+                                             sequence=sequence[0], payload=payload))
+                    runtime.tick()
+                    self.assertEqual(ui.run_status, 'STOPPED')
+                    self.assertIsNone(runtime._pending_command)
+                    self.assertTrue(runtime.allows_command('start'))
+
     def test_workflow_metadata_keeps_channel_rows_and_waits_for_ack(self):
         sent = []
         messages = []
-        client = SimpleNamespace(
-            session_id='s', _last_outbound=2, last_error='', status='CONNECTED',
+        client = SimpleNamespace(negotiated_capabilities=frozenset(),
+            session_id='s', last_error='', status='CONNECTED',
             progress='Connected', next_sequence=3,
             poll=lambda: list(messages), send=sent.append, close=lambda: None,
         )
         ui = FrontendState(mode='interactive_training', connection='CONNECTED',
                            run_status='STOPPED', confirmed=True, session_id='s')
         bpy = SimpleNamespace(
-            context=SimpleNamespace(window_manager=SimpleNamespace(windows=[])),
+            context=SimpleNamespace(scene=None, window_manager=SimpleNamespace(windows=[])),
             data=SimpleNamespace(objects={}),
         )
         lifecycle = {
@@ -41,7 +123,11 @@ class LiveRuntimeTests(unittest.TestCase):
             runtime.send_workflow_command('channel.set', {'topic': 'lidar', 'enabled': False})
             self.assertEqual(runtime._pending_command, 'channel.set')
             self.assertEqual(sent[0]['sequence'], 3)
-            messages.append(lifecycle)
+            messages.append(dict(type='error', session_id='s', sequence=3,
+                                 payload=dict(code='OFFLINE_DIAGNOSTIC', message='retained diagnostic', fatal=False)))
+            runtime.tick()
+            self.assertEqual(runtime._pending_command, 'channel.set')
+            messages[:] = [lifecycle]
             runtime.tick()
             self.assertEqual(runtime.channel_table,
                              [['lidar', 'lidar', 'EXPORTED', False, 'source']])
@@ -51,10 +137,10 @@ class LiveRuntimeTests(unittest.TestCase):
     def test_controls_wait_for_lifecycle_and_preserve_safety(self):
         messages = []
         sent = []
-        client = SimpleNamespace(session_id='s', _last_outbound=3, last_error='', status='CONNECTED',
+        client = SimpleNamespace(negotiated_capabilities=frozenset(), session_id='s', next_sequence=4, last_error='', status='CONNECTED',
                                  poll=lambda: list(messages), send=sent.append, close=lambda: None, progress='Connected')
         ui = FrontendState(mode='interactive_training', connection='CONNECTED', session_id='s', capabilities={'pause'})
-        bpy = SimpleNamespace(context=SimpleNamespace(window_manager=SimpleNamespace(windows=[])),
+        bpy = SimpleNamespace(context=SimpleNamespace(scene=None, window_manager=SimpleNamespace(windows=[])),
                               data=SimpleNamespace(objects={}))
         with patch.dict(sys.modules, bpy=bpy), patch.multiple(runtime, _client=client, _state=ui,
                 _pending_command=None, _last_tick=None, _health=None, kinematics=KinematicState(), safety_events=[],
@@ -88,10 +174,10 @@ class LiveRuntimeTests(unittest.TestCase):
         ack = {'type': 'hello_ack', 'session_id': 'new', 'payload': {
             'run_status': 'READY', 'mode': 'demo', 'capabilities': []}}
         sent = []
-        client = SimpleNamespace(session_id='new', _last_outbound=0, last_error='', status='CONNECTED',
+        client = SimpleNamespace(negotiated_capabilities=frozenset(), session_id='new', next_sequence=1, last_error='', status='CONNECTED',
                                  poll=lambda: [ack], send=sent.append, progress='Connected')
         ui = FrontendState(mode='formal_training', connection='DISCONNECTED')
-        bpy = SimpleNamespace(context=SimpleNamespace(window_manager=SimpleNamespace(windows=[])),
+        bpy = SimpleNamespace(context=SimpleNamespace(scene=None, window_manager=SimpleNamespace(windows=[])),
                               data=SimpleNamespace(objects={}))
         with patch.dict(sys.modules, bpy=bpy), patch.multiple(runtime, _client=client, _state=ui,
                 _pending_command=None, _last_tick=None, _health=None, kinematics=KinematicState(),
@@ -106,12 +192,12 @@ class LiveRuntimeTests(unittest.TestCase):
         lifecycle = {'type': 'lifecycle', 'session_id': 's', 'payload': {
             'run_status': 'STARTING', 'reason': None, 'mode': 'formal_training',
             'capabilities': []}, 'sequence': 2}
-        client = SimpleNamespace(session_id='s', _last_outbound=1, last_error='', status='CONNECTED',
+        client = SimpleNamespace(negotiated_capabilities=frozenset(), session_id='s', _last_outbound=1, last_error='', status='CONNECTED',
                                  poll=lambda: [lifecycle], send=lambda message: None,
                                  close=lambda: None, progress='Connected')
         ui = FrontendState(mode='demo', connection='CONNECTED', run_status='READY',
                            session_id='s', capabilities={'pause', 'single_step'})
-        bpy = SimpleNamespace(context=SimpleNamespace(window_manager=SimpleNamespace(windows=[])),
+        bpy = SimpleNamespace(context=SimpleNamespace(scene=None, window_manager=SimpleNamespace(windows=[])),
                               data=SimpleNamespace(objects={}))
         with patch.dict(sys.modules, bpy=bpy), patch.multiple(
                 runtime, _client=client, _state=ui, _pending_command='start',
@@ -125,12 +211,12 @@ class LiveRuntimeTests(unittest.TestCase):
 
     def test_step_remains_pending_until_a_new_snapshot_arrives(self):
         messages = []
-        client = SimpleNamespace(session_id='s', _last_outbound=1, last_error='', status='CONNECTED',
+        client = SimpleNamespace(negotiated_capabilities=frozenset(), session_id='s', _last_outbound=1, last_error='', status='CONNECTED',
                                  poll=lambda: list(messages), send=lambda message: None,
                                  close=lambda: None, progress='Connected')
         ui = FrontendState(mode='interactive_training', connection='CONNECTED', run_status='PAUSED',
                            session_id='s', capabilities={'pause', 'single_step'})
-        bpy = SimpleNamespace(context=SimpleNamespace(window_manager=SimpleNamespace(windows=[])),
+        bpy = SimpleNamespace(context=SimpleNamespace(scene=None, window_manager=SimpleNamespace(windows=[])),
                               data=SimpleNamespace(objects={}))
         current = snapshot()
         state = KinematicState()
@@ -163,13 +249,13 @@ class LiveRuntimeTests(unittest.TestCase):
                 'run_status': 'PAUSED', 'reason': None, 'mode': 'interactive_training',
                 'capabilities': ['pause', 'single_step']}},
         ]
-        client = SimpleNamespace(session_id='s', _last_outbound=1, last_error='', status='CONNECTED',
+        client = SimpleNamespace(negotiated_capabilities=frozenset(), session_id='s', _last_outbound=1, last_error='', status='CONNECTED',
                                  poll=lambda: list(messages), send=lambda message: None,
                                  close=lambda: None, progress='Connected')
         ui = FrontendState(mode='interactive_training', connection='CONNECTED', run_status='RUNNING',
                            session_id='s', capabilities={'pause', 'single_step'})
         state = KinematicState(); state.snapshot = current
-        bpy = SimpleNamespace(context=SimpleNamespace(window_manager=SimpleNamespace(windows=[])),
+        bpy = SimpleNamespace(context=SimpleNamespace(scene=None, window_manager=SimpleNamespace(windows=[])),
                               data=SimpleNamespace(objects={}))
         with patch.dict(sys.modules, bpy=bpy), patch.multiple(
                 runtime, _client=client, _state=ui, _pending_command='pause', _pending_step=1,
@@ -215,11 +301,11 @@ class LiveRuntimeTests(unittest.TestCase):
         ack = {'type': 'hello_ack', 'session_id': 'new', 'payload': {
             'run_status': 'READY', 'mode': 'demo', 'capabilities': []}}
         batches = [events, [ack]]
-        client = SimpleNamespace(session_id='new', _last_outbound=0, last_error='', status='CONNECTED',
+        client = SimpleNamespace(negotiated_capabilities=frozenset(), session_id='new', _last_outbound=0, last_error='', status='CONNECTED',
                                  poll=lambda: batches.pop(0), send=lambda message: None,
                                  close=lambda: None, progress='Connected')
         ui = FrontendState(mode='demo', connection='CONNECTED', session_id='old')
-        bpy = SimpleNamespace(context=SimpleNamespace(window_manager=SimpleNamespace(windows=[])),
+        bpy = SimpleNamespace(context=SimpleNamespace(scene=None, window_manager=SimpleNamespace(windows=[])),
                               data=SimpleNamespace(objects={}))
         with patch.dict(sys.modules, bpy=bpy), patch.multiple(
                 runtime, _client=client, _state=ui, _pending_command=None, _last_tick=None,
@@ -245,9 +331,11 @@ class LiveRuntimeTests(unittest.TestCase):
 
     def test_saved_live_scene_load_stays_disconnected_and_unconfirmed(self):
         import wfrl_blender
-        scene = SimpleNamespace(get={'wfrl_scene_kind': 'live'}.get,
-                                objects={})
+        properties = {'wfrl_scene_kind': 'live', 'wfrl_home_load_error': 'stale error'}
+        scene = SimpleNamespace(get=properties.get, pop=properties.pop,
+                                objects={}, library=None)
         bpy = SimpleNamespace(data=SimpleNamespace(scenes=[scene], cameras=[]))
         with patch.dict(sys.modules, bpy=bpy), patch.object(runtime, 'disconnect') as disconnect:
             wfrl_blender._on_load(None)
             disconnect.assert_called_once_with(force=True)
+            self.assertNotIn('wfrl_home_load_error', properties)

@@ -313,8 +313,8 @@ def run_audit(comparison_path: Path, output_dir: Path) -> dict:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]) if rows else ["source_triangle_id"])
         writer.writeheader()
         writer.writerows(rows)
-    (output_dir / "outside_span_pieces.json").write_text(json.dumps({"evaluation_only": True, "pieces": outside}, indent=2) + "\n")
-    (output_dir / "area_audit.json").write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
+    (output_dir / "outside_span_pieces.json").write_text(json.dumps({"evaluation_only": True, "pieces": outside}, indent=2) + "\n", encoding='utf-8')
+    (output_dir / "area_audit.json").write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding='utf-8')
     p = partition
     text = ["# 独立评分域面积对账（仅评估诊断）", "", "只复用已保存真值网格；未优化、未采集、未重评分、未改变历史门槛。", "",
             "| 域 | 原三角形严格裁剪面积（m²） | 有正面积贡献的原三角形数 |", "|---|---:|---:|"]

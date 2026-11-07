@@ -2,7 +2,7 @@
 
 必须经官方 mpiexec 启动：
     & "C:\\Program Files\\Microsoft MPI\\Bin\\mpiexec.exe" -n 1 `
-      "USER_HOME\\.conda\\envs\\wfcrl\\python.exe" `
+      "C:\\Users\\s1155\\.conda\\envs\\wfcrl\\python.exe" `
       scripts/experiments/probe_scene_runtime.py
 
 验收点：
@@ -25,7 +25,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))))
 
-from wfrl.scene import SceneRuntime, load_scene                     # noqa: E402
+from wfrl.scene import SceneRuntime                     # noqa: E402
 from wfrl.scene.schema import Scene, SensorSpec, Turbine            # noqa: E402
 
 FAILS = []
@@ -37,7 +37,7 @@ def fastfarm_processes():
     cmd = (["tasklist"] if os.name == "nt"
            else ["pgrep", "-f", "[F]AST.Farm"])
     try:
-        return subprocess.run(cmd, capture_output=True, text=True).stdout
+        return subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8').stdout
     except FileNotFoundError:
         return ""
 

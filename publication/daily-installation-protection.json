@@ -1,0 +1,404 @@
+{
+  "schema": "wfrl.daily-protection.v1",
+  "status": "PASS",
+  "profile_root": "BLENDER_USER_PROFILE",
+  "profile_files": [
+    {
+      "path": "BLENDER_USER_PROFILE/config/bookmarks.txt",
+      "bytes": 765,
+      "sha256": "f60b6fd5ba93eac273992b675f1899c1e940545c294452919306043a8353634f",
+      "status": "PASS"
+    },
+    {
+      "path": "BLENDER_USER_PROFILE/config/platform_support.txt",
+      "bytes": 39,
+      "sha256": "4dbce3526384ef82878d01e1d704b953f67248b1f3354282fc9ae6285b750426",
+      "status": "PASS"
+    },
+    {
+      "path": "BLENDER_USER_PROFILE/config/recent-files.txt",
+      "bytes": 3371,
+      "sha256": "7d929bccbc3e5ed3e078e0661a82103ea767325c62f8ea64ca2f747270a08f01",
+      "status": "PASS"
+    },
+    {
+      "path": "BLENDER_USER_PROFILE/config/recent-searches.txt",
+      "bytes": 93,
+      "sha256": "f57d26a947e656261b1cdd0d41c3782993828f18bc8d3c4063f6b1e4ed0d2057",
+      "status": "PASS"
+    },
+    {
+      "path": "BLENDER_USER_PROFILE/config/startup.blend",
+      "bytes": 512317,
+      "sha256": "064d7a57df06e1b35e543e3e85ab87df108a07969790c0aea87c9b7c2e6b1a46",
+      "status": "PASS"
+    },
+    {
+      "path": "BLENDER_USER_PROFILE/config/userpref.blend",
+      "bytes": 182219,
+      "sha256": "e06ff65baae263c0c4c7b231b78fa0265ab0eaf6e9eb3121f9410cd664beaf51",
+      "status": "PASS"
+    }
+  ],
+  "scene_files": [
+    {
+      "path": "WORKSPACE_ROOT/wfrl-model-integration-7es37mhl/manual-model.blend",
+      "bytes": 19688400,
+      "sha256": "83f1a9301e03a3fae2655b248847f4cb53bbade152434d4d5c61a0f04d0b860c",
+      "status": "PASS"
+    },
+    {
+      "path": "WORKSPACE_ROOT/wfrl_blender-0.3.32/assets/examples/mappo_reconstruction_split.blend",
+      "bytes": 50567220,
+      "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/blender_frontend/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+      "bytes": 50567220,
+      "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-defects/completion-20260930/GW184-completion-ui.blend",
+      "bytes": 4903852,
+      "sha256": "ca584c0f54d4e46e8c18a89ccf75da7e95aac84a78c881db3af5adef2e6e967e",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-defects/four-types-20260930/cli-six-prepare/GW184-defect-editor.blend",
+      "bytes": 4898459,
+      "sha256": "d7475be6d9044139c7268bc3e9447f5da6f37e8df5e1a6af87f1e0cf62315626",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-defects/four-types-20260930/cli-six-reopened-final/GW184-defect-editor.blend",
+      "bytes": 4890656,
+      "sha256": "cecef09837670490354b36ff60d07517d5ffbda766409c2f867c9bdea0c6aef6",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-integration-20261004/叶片三维重建.blend",
+      "bytes": 546615,
+      "sha256": "87d87eaaf6e4f2183d738335071f3cfb5e7cbab2d0fd7f39d32ad3699973bc08",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-mappo-two-camera-20261004-a02/MAPPO_original.blend",
+      "bytes": 12116819,
+      "sha256": "1f1ff1d5211c54bd513eb272e4c1d3d99dffe6df5d1a4e511d5cff4566cf1328",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-mappo-two-camera-20261004-a02/MAPPO_two_camera_reconstruction.blend",
+      "bytes": 15704039,
+      "sha256": "385bf669ab8ebaaeab5edaa28d52b1689646352d01a1b65ed6c7e3bd41ceb897",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-mappo-two-camera-20261004-a02/split-playback/MAPPO_demo_reconstruction_split.blend",
+      "bytes": 37769067,
+      "sha256": "068cdfb891b403913a0fc0c69929508d788ca9dccc8f8b828b923f2d057af325",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-mappo-two-camera-20261004-a02/split-playback/optimization-20261005/baseline/MAPPO_demo_reconstruction_split.blend",
+      "bytes": 37747780,
+      "sha256": "501785651adb467fdbf2ac2fd33b6ad3822bccf1a2cbb4de424e0bd7e89e3e8e",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-mappo-two-camera-20261004-a02/split-playback/optimization-20261005/baseline/current_window_before.blend",
+      "bytes": 37747451,
+      "sha256": "17ea09767e84f430f72b805886c5aabf850a582aae2483aa443cda53961e9fba",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-v02/可视化增强/blade-recon-inspection-20261007-a01/纹理细节检查.blend",
+      "bytes": 2789690,
+      "sha256": "00730b89c7d5646c6eb59d3df82cd1216bbb59f539125876e7365fb08359de2b",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-v02/阶段1-2_接入与正确性/blade-recon-v02-stage12-20261007-a01/viewer-auto-daily.blend",
+      "bytes": 7823636,
+      "sha256": "3772a7618f69d3cb05ce2ab4be396869cb31fd005b21ba65b33e1683cd8b03d0",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-v02/阶段1-2_接入与正确性/blade-recon-v02-stage12-20261007-a01/叶片纹理三维重建.blend",
+      "bytes": 2788829,
+      "sha256": "0916110a65baf2658629a51eeb497dff9b3618245766faad83ae4a0cd1cb2a12",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-v02/阶段3_性能与缺陷验收/blade-recon-v02-next-20261007-a01/actual/blender/独立纹理重建.blend",
+      "bytes": 2040587,
+      "sha256": "3d4c83cc86bff5b5b77c1bd49d66046c2d132e3524dc25f5e6decfe55cf9dec1",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-v02/阶段3_性能与缺陷验收/blade-recon-v02-next-20261007-a01/actual/evaluation/new_capture_scene.blend",
+      "bytes": 12709880,
+      "sha256": "62463b356257e9a8e0c7bfb447eaf553fe4267a89520ebcf4dd6dcdc02077b2c",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-v02/阶段3_性能与缺陷验收/blade-recon-v02-next-20261007-a01/synthetic/capture2-blender/独立纹理重建.blend",
+      "bytes": 1551508,
+      "sha256": "8b6fd1c1395a519d5d2210325f13dfb8ea57d4265cb1fb34cb3e6b06fee73a41",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-v02/阶段4_纹理辅助几何/blade-recon-v02-prereq-20261007-a01/actual/final-blender/独立纹理重建.blend",
+      "bytes": 1619231,
+      "sha256": "493c67be9c3471f0165d51218f08b1d5805815816c233412fdd80732a6948a47",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-v02/阶段4_纹理辅助几何/blade-recon-v02-prereq-20261007-a01/synthetic/final-blender/独立纹理重建.blend",
+      "bytes": 3168083,
+      "sha256": "3f51a99cac0e035e5b9bc72bfa1089c978f0fa015cf15c0f84fa961f36c54c6b",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-v02/阶段4_纹理辅助几何/blade-recon-v02-prereq-20261007-a01/synthetic/final-capture2-blender/独立纹理重建.blend",
+      "bytes": 2229186,
+      "sha256": "a22d90bd6cd09af1d25c306bed11f94417ed9e479f22cd6fb7818775e1f921d6",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-v02/阶段4_纹理辅助几何/blade-recon-v02-prereq-20261007-a01/synthetic/final-third-blender/独立纹理重建.blend",
+      "bytes": 3564380,
+      "sha256": "12698b6cbe2289a90e092581f3e3af1e136d2e4e76ce42cc2e287e5161599f85",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-v02/阶段4_纹理辅助几何/blade-recon-v02-stage4-20261007-a01/actual/baseline-native/独立纹理辅助重建.blend",
+      "bytes": 1590785,
+      "sha256": "25588d90b71999d2841e7e50d07fcc19164285cb6ab9c76913712766789da81b",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-recon-v02/阶段4_纹理辅助几何/blade-recon-v02-stage4-20261007-a01/actual/candidate-native/独立纹理辅助重建.blend",
+      "bytes": 1611948,
+      "sha256": "56d0bbfb75c58cd595b420a92f0d38b2bdca018b720e4d6780612be0b67bb344",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-surface/01_手动对应诊断/capture/formal_window/source_capture_copy.blend",
+      "bytes": 12119877,
+      "sha256": "650335e70da276e05b2d8d2adc40bed50564f71f3f8ebe8ca3068d9848247835",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-surface/01_手动对应诊断/groups/attempt02/A2/surface_review.blend",
+      "bytes": 202092,
+      "sha256": "d61878bedcd7a56b8b44abf7173e066742704e8b50932e590497ad305757192b",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-surface/01_手动对应诊断/groups/attempt02/A3_surface/surface_review.blend",
+      "bytes": 202056,
+      "sha256": "ab94c88e94688df3a6db09e08e4f5870edb881515c3bf674132a3ab5d4f231e1",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-surface/01_手动对应诊断/groups/attempt02/S1_single_frame/surface_review.blend",
+      "bytes": 200647,
+      "sha256": "ad51d54926f5453f81d6a4317b111fba2e0d480b63244e2905eb3806d4074381",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-surface/01_手动对应诊断/groups/attempt02/comparison_final/A2_A3_132s_static_comparison.blend",
+      "bytes": 348338,
+      "sha256": "8d727be048fb290174da7f634347fbf008f2b20f64986756ec138c2ac8905f7b",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-surface/01_手动对应诊断/validation/ideal_window_final/surface_review.blend",
+      "bytes": 126784,
+      "sha256": "2a79f73e5b99f024f508d93e40ea289c623fc71f2bbc54eb76770b9657c5b87a",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-surface/03_后续独立实验/local_defect/attempt02/capture/local_condition_source_copy.blend",
+      "bytes": 12121115,
+      "sha256": "eacf9778ed9b760698ef739b6cda58bf4e0e4e854cd15671c41a38408a431e21",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-surface/03_后续独立实验/private_evaluation/candidate_first_frames01/source_capture_copy.blend",
+      "bytes": 12164463,
+      "sha256": "0aa2a40f61e7e6b1996fba53d8ac5b82f605350612a6f2caf9dc29bd6fc5f6f5",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-surface/03_后续独立实验/private_evaluation/development_heldout_pair/source_capture_copy.blend",
+      "bytes": 12167914,
+      "sha256": "dce7398c2fcb612f93dcf3fa68d47a3a6f88af7406e98f7ac5310779f64a64b9",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-surface/03_后续独立实验/private_evaluation/formal_test01/source_capture_copy.blend",
+      "bytes": 12171552,
+      "sha256": "e86a3066c97e472ef48b31415c9b662ce30158a36df841cbbbeb92cbeb63a038",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-surface/03_后续独立实验/private_evaluation/formal_test02/source_capture_copy.blend",
+      "bytes": 12170117,
+      "sha256": "4c2e2b9058dfb0feefb7ef87dd9abfb80f2ce83af806f71031d68cc0bea9b3c0",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-surface/03_后续独立实验/private_evaluation/formal_test03/source_capture_copy.blend",
+      "bytes": 12166160,
+      "sha256": "89e2a69c049b21a011e619f8099e74f5111b037b556ef7a813d7b4a613b3cf77",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-surface/03_后续独立实验/validation/display/A2_window/surface_review.blend",
+      "bytes": 241966,
+      "sha256": "de069b48d9d285c8b6235d5475ceed06bb2a62ca0406a68947dfd430a4555adb",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-surface/03_后续独立实验/validation/display/A3_window/surface_review.blend",
+      "bytes": 242507,
+      "sha256": "0a4ea8fa4af06fc8674c38f39378660542eb6f6e4ec8c6a79680c9175d68c7db",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-surface/03_后续独立实验/validation/display/comparison/comparison_full_frame_v2.blend",
+      "bytes": 406625,
+      "sha256": "e7264993f6cc5e6e4ab9b17f2ab16aba1f8b576a68bae41cea663010d12d6b93",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-texture-split-fix-20261007-b01/fresh-window/texture-split-reviewed.blend",
+      "bytes": 53201027,
+      "sha256": "089e4e81821835fc3a50b7f3b03436e4194f8ab6c7894e8946ba1e1186326912",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/blade-texture-split-fix-20261007-b01/launcher-visible/texture-inspection.blend",
+      "bytes": 2816721,
+      "sha256": "1a9d5c4941aaa4efbe0e86e1ba0b4574098e7fd3496f32e8eac5e9e386f08ea8",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/down-reference-view/Rootkink_Down.blend",
+      "bytes": 12126578,
+      "sha256": "baadbb8edbbf47a4548154a88e15cafdf3a2551680301220601ff41f07e0254d",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/farm-down-nacelle-view/Farm_Down.blend",
+      "bytes": 12119383,
+      "sha256": "105c8efa81c4d7ffd6fb98ff143fc77de17c0473456b4743c00048d758f96901",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/gw184-single/audit-v1/GW184-reference.blend",
+      "bytes": 969346,
+      "sha256": "b803b4714b3538d7f5eee3fd78d5425b3b1ef6a54baaeb4334c9bb5d8965a885",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/gw184-single/audit-v2/GW184-reference.blend",
+      "bytes": 969762,
+      "sha256": "323c5bc6b3277bb7e38a7f6f6d6ff336fc8a6ed68c509be4ef82d0c87195c95c",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/gw184-single/audit-v3/GW184-reference.blend",
+      "bytes": 970908,
+      "sha256": "e01496cc5e479387a5226c324dfb41bd28cd33136ba9009d8eaf88c23978054e",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/gw184-single/preflight-20260929/check-v1/GW184-single.blend",
+      "bytes": 3001601,
+      "sha256": "5d6469dc1748d7be33a87004446d35b14c097341d2903dd65b70588c77362dd9",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/gw184-single/preflight-20260929/check-v3/GW184-single.blend",
+      "bytes": 2999710,
+      "sha256": "f26fe868c75646eda2ad7f13225069b0ee3365a7280d44ec668ef7c1a09bb22c",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/gw184-single/preflight-20260929/ready/GW184-single.blend",
+      "bytes": 2999370,
+      "sha256": "2833bd878d00e328a29755147ed12112fb4b5cdc30fd26eabe10ec4fd74a55c3",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/gw184-single/scene-v1/GW184-single.blend",
+      "bytes": 1216761,
+      "sha256": "443b806d52903a2e572f4ee3a4d6fdeecb769be8ac2f3d2f3c3b656714c0d96c",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/local-install-0.3.36-qo69g52o/backup/config/startup.blend",
+      "bytes": 512317,
+      "sha256": "064d7a57df06e1b35e543e3e85ab87df108a07969790c0aea87c9b7c2e6b1a46",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/local-install-0.3.36-qo69g52o/backup/config/userpref.blend",
+      "bytes": 182219,
+      "sha256": "e06ff65baae263c0c4c7b231b78fa0265ab0eaf6e9eb3121f9410cd664beaf51",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/local-install-0.3.36-qo69g52o/backup/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+      "bytes": 50567220,
+      "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/nrel-nacelle-camera/final-baseline/nrel-nacelle-baseline-restored.blend",
+      "bytes": 12123916,
+      "sha256": "d6d42ff56289e49f32764c57e1ea4de52599d79b8f3575616fb1cd9ca00148b5",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/nrel-nacelle-camera/final-baseline/nrel-nacelle-baseline.blend",
+      "bytes": 12132479,
+      "sha256": "39fa27625aed8c908df07c5cf10995851a40ea7eed5c7146ad64ccc9999dd69c",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/nrel-video-dynamic/runs/20261004-integrated/validation/playback/A04_window_before_A05.blend",
+      "bytes": 134706,
+      "sha256": "e78b4afeda26bdb8314812e2a6f526bfc9e299c1eb1d8c382e6402e0090aadb1",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/nrel-video-dynamic/runs/20261004-integrated/validation/playback-native/attempt02/NREL_dynamic_review_A05.blend",
+      "bytes": 135589,
+      "sha256": "5aa978492c7fc50fb68e355590d54c1f32b712da0fc4111bf716c698e273ca08",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/nrel-video-dynamic/runs/20261004-integrated/validation/playback-native/attempt02/_session-before-merge.blend",
+      "bytes": 135118,
+      "sha256": "1e79344876eecde1275b2a70522cdd1613636fdbf562c0a363bb360b77fe5fbd",
+      "status": "PASS"
+    },
+    {
+      "path": "PROJECT_ROOT/outputs/t1-down-shoulder-view/T1_Down_后缘肩部.blend",
+      "bytes": 12123062,
+      "sha256": "9d63d620861c20142fb53c4efe8b277a502f245d1ad1a199e7019215768e511b",
+      "status": "PASS"
+    }
+  ],
+  "profile_files_checked": 6,
+  "scene_files_checked": 59,
+  "startup_scene_preserved": true,
+  "preferences_bytes_preserved": true,
+  "scene_bytes_preserved": true
+}

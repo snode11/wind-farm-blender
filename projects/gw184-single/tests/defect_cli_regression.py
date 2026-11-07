@@ -36,6 +36,7 @@ def digest_value(value):
 
 def child(request_path):
     """Executed only inside one new factory-startup Blender process."""
+    sys.dont_write_bytecode = True
     import bpy
     request = json.loads(Path(request_path).read_text())
     report_path = Path(request['report'])

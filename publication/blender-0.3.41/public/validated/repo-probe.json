@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "repository": "publication/blender-0.3.41/public/validated/profile/extensions",
+  "repo_module": "wfrl_frontend",
+  "blender": "5.2.1 LTS",
+  "background": true
+}

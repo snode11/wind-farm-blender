@@ -20,7 +20,10 @@ n 个 agent）"的简洁 API，并在一轮结束后回读全场真实测量：
   - 必须在 `mpiexec -n 1 python ...` 下运行（MPI_Comm_spawn 需要进程管理器）。
 """
 import collections
+import copy
+import logging
 import os
+from numbers import Real
 
 import numpy as np
 
@@ -28,6 +31,8 @@ from wfcrl import environments as envs
 from wfcrl.rewards import StepPercentage
 
 from wfrl import paths
+
+_LOG = logging.getLogger(__name__)
 
 # wfcrl 用 CWD 相对路径解析可执行文件与工作目录（interface.py:342 的
 # "simulators/fastfarm/bin/FAST.Farm_x64_OMP_2023.exe"、420/555 行的
@@ -67,6 +72,23 @@ YAW_RATE = 0.3             # 偏航电机速率 (°/s)，与 mdp.ACTUATORS_RATE[
 
 # 一次训练里删不掉的算例目录（Windows 句柄没释放）。下一次 purge 时一并重试。
 _PENDING_PURGE = []
+
+
+def _power_scalar(value):
+    """Decode one real power reading; invalid or missing samples remain NaN."""
+    if np.ma.is_masked(value):
+        return float("nan")
+    try:
+        raw = np.asarray(value, dtype=object)
+        if raw.shape not in ((), (1,)):
+            return float("nan")
+        scalar = raw.item()
+        if isinstance(scalar, (bool, np.bool_, np.timedelta64)) or not isinstance(scalar, Real):
+            return float("nan")
+        result = float(scalar)
+        return result if np.isfinite(result) else float("nan")
+    except (TypeError, ValueError, OverflowError):
+        return float("nan")
 
 
 def check_mpi_launcher():
@@ -146,10 +168,12 @@ class FastFarmDriver:
             # 每次 envs.make() 新建一个 __simul__/fastfarm/<case> 目录（~37 MB）。
             # 按回合重启训练时这会线性增长，close(purge=True) 要用它来清理。
             from wfrl.viz import wakevtk
-            try:
-                self.case_dir = wakevtk.case_dir_of(self.env.mdp.interface)
-            except Exception:                            # noqa: BLE001
-                self.case_dir = None
+            itf = getattr(self.env.mdp, "interface", None)
+            if getattr(itf, "_simul_file", None) is not None:
+                try:
+                    self.case_dir = wakevtk.case_dir_of(itf)
+                except TypeError:
+                    _LOG.warning("无法从仿真输入路径确定算例目录", exc_info=True)
 
         # 布局坐标（来自 farm_case，画机组 / 建 FLORIS-proxy 用）
         fc = self.env.mdp.farm_case
@@ -158,24 +182,8 @@ class FastFarmDriver:
         self.dt = float(getattr(fc, "dt", 3))
         self.hub_height = HUB_HEIGHT
 
-        # 湍流盒子：报一遍实际来流与 TI，并检查回合会不会跑出盒子的时间跨度。
+        # 实际加载的风文件与统计由 reset 时的接口记录确定。
         self.bts = None
-        if wind_time_series is not None:
-            try:
-                from wfrl.inflow import bts_info
-                self.bts = bts_info(wind_time_series, z_hub=self.hub_height)
-            except Exception as e:                           # noqa: BLE001
-                print(f"[fastfarm-driver] .bts 读不了（仿真仍会跑）: {e!r}",
-                      flush=True)
-            if self.bts is not None:
-                need = self.max_steps * self.dt
-                print(f"[fastfarm-driver] 湍流来流 {wind_time_series}: "
-                      f"u_hub={self.bts.u_hub:.2f} m/s, TI={self.bts.ti:.1f}%, "
-                      f"盒子 {self.bts.t_span:.0f}s", flush=True)
-                if need > self.bts.t_span:
-                    print(f"[fastfarm-driver] 警告：回合需 {need:.0f}s 风场 > 盒子 "
-                          f"{self.bts.t_span:.0f}s，超出部分由 InflowWind 处理"
-                          f"（周期回绕或报错），长训练需重新生成 .bts", flush=True)
 
         # 每个控制量各自的连续动作边界（每步增量）。默认值见 data_cases.py:20-23：
         # yaw ±5°/步、pitch ±1°/步、torque ±1e3 N·m/步。
@@ -185,7 +193,7 @@ class FastFarmDriver:
                 float(np.ravel(aspace[c].high)[0]))
             for c in self.controls
         }
-        # 向后兼容：老调用方（rviz_app / train_fastfarm）拿的是 yaw 的标量边界
+        # train_fastfarm 使用 yaw 的标量边界，其他控制量按 act_bounds 读取。
         self.act_low, self.act_high = self.act_bounds.get(
             "yaw", (-5.0, 5.0))
 
@@ -209,27 +217,81 @@ class FastFarmDriver:
             self._uenv.mdp.ACTUATORS_RATE = rate
 
     # ------------------------------------------------------------------
-    def reset(self, wind_speed=None, wind_direction=None):
-        """wind_speed/wind_direction 给定则制死来流，否则走 benchmark 的随机采样。
+    def reset(self, wind_speed=None, wind_direction=None, *, background_bts=None,
+              bts_role="unspecified", upstream_request=None, **wind_parameters):
+        """启动工况并返回包含 ``wind_conditions`` 三层记录的测量。
 
-        默认行为(None)下 `mdp.reset` 每次都会重抽 `8*rng.weibull(8)`,而功率 ~ u^3
-        —— 一次训练只 reset 一次,等于一次抽签决定整段的功率量级。做后端对照时
-        必须显式钉住,否则比的是两次抽签而不是两种物理。
-        FAST.Farm 侧风速会被写进 InflowWind 的 HWindSpeed;风向它无法设定(忽略)。
+        FAST.Farm 仅 WindType=1 应用正有限风速；BTS 风速由算例实际引用文件决定。
+        与固定坐标一致的显式风向可用于核对，不执行旋转。其他风向、TI、剪切、
+        阵风、种子等未接入参数抛 WindRequestError，异常的
+        record 含逐项 not_applied 原因，不启动求解器。无风速请求的稳态算例保留
+        环境采样，用户请求与环境抽样分别记录。固定坐标约定见接口 WIND_COORDINATES。
+
+        bts_role 仅声明所选文件为 background / gust_superposed / unspecified；
+        background_bts 是阵风叠加前的独立证据文件，不改变求解输入。缺少来源时
+        不推断背景或阵风统计。记录保存在 results/runs/wind_conditions，算例清理
+        不删除它；wind_conditions 返回独立快照，异常也带同一记录路径。
+        upstream_request 保存上层原始配置及用途，不作为求解参数；实际求解请求
+        仍由 wind_speed、wind_direction 和 wind_parameters 逐项验证。
         """
-        # 湍流模式下来流由 .bts 决定：interface.py:608-619 会 warn 后把请求丢掉。
-        # 这里提前拦下并说明，否则调用方以为自己钉住了风速，其实钉的是别的东西。
-        if self.wind_time_series is not None and (
-                wind_speed is not None or wind_direction is not None):
-            print("[fastfarm-driver] 湍流模式（WindType=3）下来流由 .bts 决定，"
-                  "wind_speed/wind_direction 请求被忽略", flush=True)
-            wind_speed = wind_direction = None
+        from wfcrl.interface import FastFarmInterface, WindRequestError, _wind_json
+        itf = getattr(self.env.mdp, "interface", None)
+        upstream_request = _wind_json(upstream_request)
         options = {}
-        if wind_speed is not None:
-            options["wind_speed"] = float(wind_speed)
-        if wind_direction is not None:
-            options["wind_direction"] = float(wind_direction)
-        self.env.reset(options=options or None)
+        if isinstance(itf, FastFarmInterface):
+            requested = {"wind_speed": wind_speed, "wind_direction": wind_direction,
+                         "wind_time_series": self.wind_time_series, **wind_parameters}
+            itf.set_wind_request_context(
+                requested, record_dir=os.path.join(paths.RUNS, "wind_conditions"),
+                background_bts=background_bts, bts_role=bts_role, hub_height=self.hub_height,
+                episode_duration_s=self.max_steps * self.dt)
+            # 显式 None 保留固定风向，避免 MDP 自动抽样一个不可应用的风向。
+            options["wind_direction"] = wind_direction
+            if wind_speed is not None:
+                options["wind_speed"] = wind_speed
+            else:
+                from wfcrl.simul_utils import FASTInputFile, get_inflow_file_path
+                try:
+                    inflow = FASTInputFile(str(get_inflow_file_path(itf._simul_file)))
+                    wind_type = int(inflow["WindType"])
+                except (OSError, KeyError, TypeError, ValueError):
+                    # 接口负责将输入读取失败保存为结构化拒绝记录。
+                    wind_type = None
+                if wind_type != 1:
+                    options["wind_speed"] = None
+        else:
+            if wind_parameters or background_bts is not None or bts_role != "unspecified":
+                raise ValueError("未应用：此后端不支持这些风况或 BTS 来源参数")
+            for name, value in (("wind_speed", wind_speed),
+                                ("wind_direction", wind_direction)):
+                if value is None:
+                    continue
+                if isinstance(value, (bool, np.bool_)) or not isinstance(value, Real):
+                    raise ValueError(f"{name} 必须是有限数值")
+                try:
+                    value = float(value)
+                except (ValueError, OverflowError) as exc:
+                    raise ValueError(f"{name} 必须是有限数值") from exc
+                if not np.isfinite(value) or (name == "wind_speed" and value <= 0):
+                    raise ValueError(f"{name} 必须是有限数值，风速须大于 0")
+                options[name] = value
+        previous_record = getattr(itf, "wind_record", None)
+        reset_error = None
+        try:
+            self.env.reset(options=options or None)
+        except WindRequestError as exc:
+            reset_error = exc
+            raise
+        finally:
+            record = getattr(itf, "wind_record", None)
+            if (isinstance(itf, FastFarmInterface) and upstream_request is not None
+                    and record is not None and record is not previous_record):
+                record["upstream_request"] = upstream_request
+                itf._save_wind_record()
+                if reset_error is not None:
+                    reset_error.record = copy.deepcopy(record)
+        if isinstance(itf, FastFarmInterface):
+            itf.mark_wind_control_start()
         self.done = False
         self._steps = 0
         self._started = True
@@ -238,30 +300,41 @@ class FastFarmDriver:
         return self._read(reward=0.0)
 
     def _freestream(self, fallback=None):
-        """本回合实际生效的**自由来流**风速(m/s)。
+        """用于归一化的输入参考风速 (m/s)。
+
+        BTS 使用实际选定文件完整时域的轮毂层平均，不是本回合独立采样的场内来流。
 
         归一化功率 P/u^3 的分母必须用它,不能用 obs["wind_speed"] —— 后者是
         机组转子处的测量值,下游机组测到的是尾流内速度,拿它做分母会把尾流亏损
         同时算进分子和分母,把差异抹平。
         """
-        itf = self.env.mdp.interface
+        itf = getattr(self.env.mdp, "interface", None)
         fi = getattr(itf, "fi", None)                       # FLORIS
         if fi is not None:
             try:
                 return float(np.ravel(fi.floris.flow_field.wind_speeds)[0])
-            except Exception:                               # noqa: BLE001
-                pass
-        # WindType=3（湍流盒子）下 HWindSpeed **从没被写过**，读它拿到的是模板旧值。
-        # 自由来流只能从 .bts 的轮毂高度层算（见 wfrl/inflow.py）。
-        if self.wind_time_series is not None:
-            return self.bts.u_hub if self.bts is not None else float("nan")
+            except (AttributeError, IndexError, TypeError, ValueError, OverflowError):
+                _LOG.warning("FLORIS 参考风速不可用，尝试其余风速来源", exc_info=True)
+        record = getattr(itf, "wind_record", None)
+        if record is not None:
+            settings = record["loaded_inputs"]["settings"]
+            if int(settings["WindType"]) == 3:
+                mean = record["statistics"].get("loaded_bts", {}).get("mean_streamwise_speed_mps")
+                return float(mean) if mean is not None else float("nan")
+            if int(settings["WindType"]) == 1:
+                return float(settings["HWindSpeed"]) * (self.hub_height / float(settings["RefHt"])) ** float(settings["PLExp"])
         inflow = getattr(itf, "_inflow_file", None)         # FAST.Farm: HWindSpeed
         if inflow is not None:
+            from openfast_toolbox.io.file import BrokenFormatError, EmptyFileError, WrongFormatError
+            from wfcrl.simul_utils import read_inflow_info
             try:
-                from wfcrl.simul_utils import read_inflow_info
+                if os.path.getsize(inflow) == 0:
+                    raise EmptyFileError(f"Empty inflow file: {inflow}")
                 return float(read_inflow_info(inflow))
-            except Exception:                               # noqa: BLE001
-                pass
+            except (OSError, KeyError, TypeError, ValueError, OverflowError,
+                    BrokenFormatError, EmptyFileError, WrongFormatError):
+                _LOG.warning("无法读取入流文件 %s 的参考风速，使用后备值", inflow,
+                             exc_info=True)
         return float(fallback) if fallback is not None else float("nan")
 
     def _raw_measure(self, name):
@@ -270,12 +343,13 @@ class FastFarmDriver:
         被控量在 MDP 里存的是**累加的指令值**（`get_controlled_state_transition`），
         不是仿真回读值；算转速要的是真实测量，所以走这条路。测不到返回 None。
         """
-        itf = self.env.mdp.interface
+        itf = getattr(self.env.mdp, "interface", None)
         if name not in getattr(itf, "measure_map", {}):
             return None
         try:
             v = np.ravel(itf.get_measure(name)).astype(float)
-        except Exception:                                # noqa: BLE001
+        except (KeyError, IndexError, TypeError, ValueError, OverflowError):
+            _LOG.warning("原始测量 %s 不可用", name, exc_info=True)
             return None
         return v if v.size == self.n else None
 
@@ -342,8 +416,7 @@ class FastFarmDriver:
             ws[i] = float(np.ravel(obs.get("wind_speed", [np.nan]))[0])
             wd[i] = float(np.ravel(obs.get("wind_direction", [np.nan]))[0])
             pitch[i] = float(np.ravel(obs.get("pitch", [np.nan]))[0])
-            power[i] = float(np.ravel(info.get("power", [0.0]))[0]) \
-                if "power" in info else 0.0
+            power[i] = _power_scalar(info.get("power"))
             # load 是**六元组**（见下方 root_moments），reward 用的是它的 mean|·|，
             # 这里保留标量以兼容既有调用方，逐叶片值另开两个键。
             if "load" in info:
@@ -382,18 +455,37 @@ class FastFarmDriver:
             "torque": torque, "rotor_speed": self._rotor_speed(power),
             "duty": duty_arr,
             "reward": float(reward), "done": self.done, "step": self._steps,
+            "wind_conditions": copy.deepcopy(getattr(
+                getattr(self.env.mdp, "interface", None), "wind_record", None)),
         }
 
     # ------------------------------------------------------------------
     def _clip(self, name, delta):
         """把某个控制量的增量补齐成 (n,) 并裁到它自己的动作边界。"""
-        lo, hi = self.act_bounds[name]
+        try:
+            bounds = np.asarray(self.act_bounds[name], dtype=float)
+        except (KeyError, TypeError, ValueError, OverflowError) as exc:
+            raise ValueError(f"{name} 缺少有效动作边界") from exc
+        if bounds.shape != (2,) or not np.isfinite(bounds).all() or bounds[0] > bounds[1]:
+            raise ValueError(f"{name} 动作边界须为有序的有限上下界")
+        lo, hi = bounds
         if delta is None:
             return np.zeros(self.n, dtype=np.float32)
-        d = np.asarray(delta, dtype=np.float32).ravel()
+        try:
+            raw = np.asarray(delta)
+            if raw.dtype.kind not in "iuf":
+                raise ValueError(f"{name} 动作必须为数值")
+            d = np.asarray(raw, dtype=float)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise ValueError(f"{name} 动作必须为数值") from exc
+        if d.shape not in ((), (1,), (self.n,), (self.n, 1)):
+            raise ValueError(f"{name} 动作须为标量或 {self.n} 台机组的向量，收到 {d.shape}")
+        if not np.isfinite(d).all():
+            raise ValueError(f"{name} 动作必须为有限数值")
+        d = d.ravel()
         if d.size == 1:
             d = np.repeat(d, self.n)
-        return np.clip(d, lo, hi)
+        return np.clip(d, lo, hi).astype(np.float32)
 
     def step(self, yaw_delta=None, pitch_delta=None, torque_delta=None):
         """推进一个控制步，各增量按各自动作边界裁剪；未激活的控制量忽略。
@@ -442,22 +534,23 @@ class FastFarmDriver:
         return self._read(reward=reward)
 
     # ------------------------------------------------------------------
-    def close(self, drain_cap=None, purge=False):
+    def close(self, drain_cap=None, purge=False, *, strict=False):
         """排空 FAST.Farm 剩余迭代预算，让子进程干净退出（避免 MPI_RECV 孤儿）。
 
         早退时调用；用零增量把回合走完（有上限，防止极长回合把关闭卡死）。
         `purge=True` 额外删掉本次 `envs.make()` 建的算例目录 —— 按回合重启训练时
         每回合一个 ~37 MB 的目录，不清会把 `__simul__/` 撑爆（README §8 第 5 条）。
+        `strict=True` 要求排空完成、环境关闭成功且 MPI 子通信器已断开；失败后
+        禁止重复排空不确定的 AEC 状态，由拥有工作进程的调用方处理取消。
         """
-        if not self._started or self.done:
-            self._safe_close()
-            if purge:
-                self._purge_case()
-            return
-        cap = drain_cap if drain_cap is not None else self.max_steps
+        prior_error = getattr(self, "_strict_close_error", None)
+        if strict and prior_error is not None:
+            raise RuntimeError("FAST.Farm close previously failed; cleanup is unconfirmed") from prior_error
+        cap = drain_cap if drain_cap is not None else getattr(self, "max_steps", 0)
         drained = 0
+        close_error = None
         try:
-            while not self.done and drained < cap:
+            while getattr(self, "_started", False) and not self.done and drained < cap:
                 for _ in range(self.n):
                     _, _, term, trunc, _ = self.env.last()
                     if term or trunc:
@@ -469,9 +562,20 @@ class FastFarmDriver:
                 drained += 1
                 if self._steps + drained >= self.max_steps:
                     self.done = True
+            if strict and getattr(self, "_started", False) and not self.done:
+                raise RuntimeError("FAST.Farm drain budget exhausted before shutdown")
         except Exception as e:                       # noqa: BLE001
-            print(f"[fastfarm-driver] drain 出错（忽略）: {e}", flush=True)
-        self._safe_close()
+            _LOG.exception("FAST.Farm 排空失败（strict=%s）", strict)
+            if strict:
+                close_error = e
+        try:
+            self._safe_close(strict=strict)
+        except Exception as e:                       # noqa: BLE001
+            _LOG.exception("FAST.Farm 环境关闭未完成")
+            close_error = close_error or e
+        if close_error is not None:
+            self._strict_close_error = close_error
+            raise close_error
         if purge:
             self._purge_case()
 
@@ -481,11 +585,11 @@ class FastFarmDriver:
         FAST.Farm 退出与 Windows 释放 `5MW_Baseline/ServoData/DISCON_WT*.dll`
         的句柄之间有几秒延迟，close() 之后立刻删会吃到 WinError 5。所以这里
         重试几次，仍失败就挂到待删队列，下一回合（或下一次训练）再收。
-        为了清磁盘把训练搞崩不值 —— 任何一步失败都只打印，不抛。
+        文件系统错误写入日志并重试；其他异常向调用方传播。
         """
         import shutil
         import time
-        if self.case_dir:
+        if getattr(self, "case_dir", None):
             _PENDING_PURGE.append(self.case_dir)
         left = []
         for d in _PENDING_PURGE:
@@ -500,21 +604,32 @@ class FastFarmDriver:
                 try:
                     shutil.rmtree(d)
                     break
-                except Exception as e:               # noqa: BLE001
+                except OSError:
+                    _LOG.warning("算例目录清理失败（尝试 %d/3）：%s", attempt + 1, d,
+                                 exc_info=True)
                     if attempt == 2:
                         left.append(d)
-                        print(f"[fastfarm-driver] 算例目录暂时删不掉，排队重试："
-                              f"{os.path.basename(d)}（{e.__class__.__name__}）",
-                              flush=True)
                     else:
                         time.sleep(1.5)
         _PENDING_PURGE[:] = left
 
-    def _safe_close(self):
+    def _safe_close(self, *, strict=False):
         try:
-            self.env.close()
+            env = getattr(self, "env", None)
+            if env is not None:
+                env.close()
+            if strict:
+                # WFCRL 的 env.close 可以是空操作；FAST.Farm 的最后一次通信负责
+                # Disconnect。仍有效的子通信器表示不能确认旧求解器已释放。
+                from wfcrl.interface import MPI
+                mdp = getattr(getattr(self, "_uenv", env), "mdp", None)
+                comm = getattr(getattr(mdp, "interface", None), "_comm", None)
+                if MPI is not None and isinstance(comm, MPI.Intercomm) and bool(comm):
+                    raise RuntimeError("FAST.Farm MPI communicator is still connected")
         except Exception:                            # noqa: BLE001
-            pass
+            if strict:
+                raise
+            _LOG.exception("FAST.Farm 环境关闭失败")
 
 
 # ---------------------------------------------------------------------------

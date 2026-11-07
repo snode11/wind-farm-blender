@@ -1,0 +1,904 @@
+{
+  "status": "PASS",
+  "final": true,
+  "verification_layer": "SOURCE_RUNTIME",
+  "blender": "/Applications/Blender.app/Contents/MacOS/Blender",
+  "package_inputs": {
+    "builtin_mappo": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/mappo",
+      "manifest_sha256": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde"
+    },
+    "builtin_dual_beam": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/dual_beam",
+      "manifest_sha256": "9eea6aa1bb5c44d5b307a63017be7b81c8e43ea092f92cfb30822d9fc63b5645"
+    },
+    "builtin_split_example": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+      "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b"
+    }
+  },
+  "tests": [
+    {
+      "script": "farm_capture_transaction_regression.py",
+      "mode": "background",
+      "scope": "Native RNA capture ownership with replay/image/playback adapters; no GPU pixels or native playback.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 1.4478312500286847,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/farm_capture_transaction_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "blender": "5.2.1 LTS",
+            "module": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "scope": "real RNA ownership and capture transaction; replay, image and playback adapters; no GPU proof",
+            "checks": [
+              {
+                "action": "success",
+                "original_playing": false,
+                "status": "complete",
+                "completed_samples": 2,
+                "playback_requests": [
+                  false,
+                  false,
+                  false
+                ],
+                "evaluations": [
+                  119.5,
+                  120.0,
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_2643635c65"
+              },
+              {
+                "action": "cancel",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false,
+                  false,
+                  false
+                ],
+                "evaluations": [
+                  119.5,
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_af4e3e42d9"
+              },
+              {
+                "action": "frame_start",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_06da3cef29"
+              },
+              {
+                "action": "timebase",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_41d05ceb92"
+              },
+              {
+                "action": "removed_timebase",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_1a810e207a"
+              },
+              {
+                "action": "layer",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_e60efe6003"
+              },
+              {
+                "action": "delete_layer",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_418260b838"
+              },
+              {
+                "action": "scene",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_122a3b903d"
+              },
+              {
+                "action": "foreign_context",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_3bf17b512f"
+              },
+              {
+                "action": "render_layer",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5,
+                  120.0
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_d8258661bb"
+              },
+              {
+                "action": "render_timebase",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5,
+                  120.0
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_4ad856c1b6"
+              },
+              {
+                "action": "success",
+                "original_playing": true,
+                "status": "complete",
+                "completed_samples": 2,
+                "playback_requests": [
+                  false,
+                  false,
+                  true
+                ],
+                "evaluations": [
+                  119.5,
+                  120.0,
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_4d9b25b6ec"
+              },
+              {
+                "action": "cancel",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false,
+                  false,
+                  true
+                ],
+                "evaluations": [
+                  119.5,
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_c62f669abf"
+              },
+              {
+                "action": "frame_start",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_8f4673ffbb"
+              },
+              {
+                "action": "timebase",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_6b8f35ab0d"
+              },
+              {
+                "action": "removed_timebase",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_415e4eec32"
+              },
+              {
+                "action": "layer",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_b2e4fa49fb"
+              },
+              {
+                "action": "delete_layer",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_0be12563ed"
+              },
+              {
+                "action": "scene",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_a15d59bf6d"
+              },
+              {
+                "action": "foreign_context",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_63a7b41fb6"
+              },
+              {
+                "action": "render_layer",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5,
+                  120.0
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_0ae9d8f6e6"
+              },
+              {
+                "action": "render_timebase",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5,
+                  120.0
+                ],
+                "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/capture_20261031_130617_c1089c4b30"
+              },
+              {
+                "action": "native_frame_callback",
+                "during_restore": false,
+                "subframe_only": false,
+                "status": "incomplete",
+                "completed_samples": 1
+              },
+              {
+                "action": "native_frame_callback",
+                "during_restore": false,
+                "subframe_only": true,
+                "status": "incomplete",
+                "completed_samples": 1
+              },
+              {
+                "action": "native_frame_callback",
+                "during_restore": true,
+                "subframe_only": false,
+                "status": "incomplete",
+                "completed_samples": 2
+              },
+              {
+                "action": "native_frame_callback",
+                "during_restore": true,
+                "subframe_only": true,
+                "status": "incomplete",
+                "completed_samples": 2
+              }
+            ]
+          },
+          "log": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/run/blender.log",
+          "report": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_capture_transaction_regression/artifacts/result.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "farm_reopen_settings_regression.py",
+      "mode": "background",
+      "scope": "Native FarmFlex save/reopen preserves saved mapping, output settings and source identity.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 2.834553624968976,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/farm_reopen_settings_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "variant": "farm",
+            "blender": "5.2.1 LTS",
+            "scope": "Source; isolated background process; native save and reopen operators",
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "before": {
+              "fps": 24,
+              "fps_base": 1.0010000467300415,
+              "frame_start": 11,
+              "frame_end": 101,
+              "frame_step": 2,
+              "sync_mode": "NONE",
+              "use_preview_range": true,
+              "frame_preview_start": 21,
+              "frame_preview_end": 81,
+              "frame_current": 40,
+              "frame_subframe": 0.25,
+              "timebase": 90.0,
+              "has_timebase": true,
+              "turbine": "T2",
+              "sample": {
+                "time_s": 117.325,
+                "motion": {
+                  "time_s": 117.325,
+                  "azimuth_deg": 7234.728805500003,
+                  "pitch_deg": [
+                    1.62253308,
+                    1.62253308,
+                    1.62253308
+                  ],
+                  "yaw_deg": 0.000917776022,
+                  "rotor_speed_rpm": 11.2103987,
+                  "nacelle_position_m": [
+                    504.36246642719306,
+                    -0.05948200297469783,
+                    87.59897448324887
+                  ],
+                  "nacelle_orientation_deg": [
+                    0.08518774122168922,
+                    0.3899370089793358,
+                    0.0011836225085946643
+                  ],
+                  "nacelle_transform": [
+                    [
+                      0.9999768412040176,
+                      -1.0539432207184374e-05,
+                      0.006805655336223639,
+                      -0.233708980260115
+                    ],
+                    [
+                      2.0657631461678166e-05,
+                      0.999998894698974,
+                      -0.001486665427209265,
+                      0.07074988844883379
+                    ],
+                    [
+                      -0.006805632145316327,
+                      0.001486771586548004,
+                      0.9999757361463087,
+                      0.0010999968322238374
+                    ]
+                  ]
+                },
+                "measurement": null,
+                "measurement_age_s": null,
+                "status": "waiting",
+                "statistics": {
+                  "expected_samples": 0,
+                  "valid_samples": 0,
+                  "valid_ratio": null,
+                  "mae_m": null,
+                  "max_abs_error_m": null,
+                  "p95_abs_error_m": null,
+                  "max_positive_bias_m": null,
+                  "passage_count": 0,
+                  "missed_passage_count": 0
+                }
+              }
+            },
+            "after": {
+              "fps": 24,
+              "fps_base": 1.0010000467300415,
+              "frame_start": 11,
+              "frame_end": 101,
+              "frame_step": 2,
+              "sync_mode": "NONE",
+              "use_preview_range": true,
+              "frame_preview_start": 21,
+              "frame_preview_end": 81,
+              "frame_current": 40,
+              "frame_subframe": 0.25,
+              "timebase": 90.0,
+              "has_timebase": true,
+              "turbine": "T2",
+              "sample": {
+                "time_s": 117.325,
+                "motion": {
+                  "time_s": 117.325,
+                  "azimuth_deg": 7234.728805500003,
+                  "pitch_deg": [
+                    1.62253308,
+                    1.62253308,
+                    1.62253308
+                  ],
+                  "yaw_deg": 0.000917776022,
+                  "rotor_speed_rpm": 11.2103987,
+                  "nacelle_position_m": [
+                    504.36246642719306,
+                    -0.05948200297469783,
+                    87.59897448324887
+                  ],
+                  "nacelle_orientation_deg": [
+                    0.08518774122168922,
+                    0.3899370089793358,
+                    0.0011836225085946643
+                  ],
+                  "nacelle_transform": [
+                    [
+                      0.9999768412040176,
+                      -1.0539432207184374e-05,
+                      0.006805655336223639,
+                      -0.233708980260115
+                    ],
+                    [
+                      2.0657631461678166e-05,
+                      0.999998894698974,
+                      -0.001486665427209265,
+                      0.07074988844883379
+                    ],
+                    [
+                      -0.006805632145316327,
+                      0.001486771586548004,
+                      0.9999757361463087,
+                      0.0010999968322238374
+                    ]
+                  ]
+                },
+                "measurement": null,
+                "measurement_age_s": null,
+                "status": "waiting",
+                "statistics": {
+                  "expected_samples": 0,
+                  "valid_samples": 0,
+                  "valid_ratio": null,
+                  "mae_m": null,
+                  "max_abs_error_m": null,
+                  "p95_abs_error_m": null,
+                  "max_positive_bias_m": null,
+                  "passage_count": 0,
+                  "missed_passage_count": 0
+                }
+              }
+            },
+            "mismatched_identity_status": "回放数据未就绪：保存场景与结果包不匹配，不能替换模型或数据",
+            "sha256": {
+              "farm_flex.py": "89f9d93b66f1f3826937563a24647962880e5e506df7b332954e43dc10b02f26",
+              "clearance_replay.py": "2aae486ed3ceed08bd8e8e8e474bc157164faaa3af101f1abacb872eedfd4215"
+            }
+          },
+          "log": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_reopen_settings_regression/run/blender.log",
+          "report": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/farm_reopen_settings_regression/artifacts/result.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "radar_x100_regression.py",
+      "mode": "background",
+      "scope": "Native radar source, recording and shared collection lifecycle; no device or GPU proof.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 3.296855832915753,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/radar_x100_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "readonly_time_sampling": true,
+            "same_time_mount_max_error": 3.2016340725249393e-06,
+            "simulation_points": 26,
+            "alternate_mounts": true,
+            "raw_camera_hash_and_visibility": true,
+            "native_file_play_pause_restart_and_seek_operators": true,
+            "replay_forward_backward_end_origin_and_ownership": true,
+            "linked_scene_cleanup_preserves_original_collection_objects": true,
+            "save_reopen_restores_configuration_and_paused_sample": true,
+            "resource_cleanup": true,
+            "deleted_owner_no_reassignment_or_orphan_objects": true,
+            "addon_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "core_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/radar_x100/schema.py",
+            "status": "PASS"
+          },
+          "log": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/radar_x100_regression/run/blender.log",
+          "report": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/radar_x100_regression/artifacts/result.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "radar_x100_edges.py",
+      "mode": "background",
+      "scope": "Native radar capture guards, clock, visibility and shared object ownership.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 2.9348533330485225,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/radar_x100_edges.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "tests": 11,
+            "failures": 0,
+            "errors": 0,
+            "addon_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "core_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/radar_x100/schema.py"
+          },
+          "log": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/radar_x100_edges/run/blender.log",
+          "report": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/radar_x100_edges/artifacts/result.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "radar_x100_history_regression.py",
+      "mode": "background",
+      "scope": "Native undo/redo, FarmFlex rebinding and recording termination; no GPU drawing.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 4.804164292057976,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/radar_x100_history_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": true
+          },
+          "script_result": {
+            "status": "PASS",
+            "checks": [
+              {
+                "operation": "undo",
+                "scene_before": 502878805024,
+                "scene_after": 502878805024,
+                "enabled": true,
+                "frame_available": true,
+                "bound_to_current_farm": true,
+                "error": "",
+                "source": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde"
+              },
+              {
+                "operation": "redo",
+                "scene_before": 502878805024,
+                "scene_after": 502878805024,
+                "enabled": true,
+                "frame_available": true,
+                "bound_to_current_farm": true,
+                "error": "",
+                "source": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde"
+              }
+            ],
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "recording_state": "COMPLETE",
+            "user_visibility_preserved": true,
+            "native_installation_edit_preserved": true,
+            "scope": "Native background undo/redo and radar rebinding; no GPU drawing"
+          },
+          "log": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/radar_x100_history_regression/run/blender.log",
+          "report": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/radar_x100_history_regression/artifacts/result.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "scene_playback_lifecycle_regression.py",
+      "mode": "background",
+      "scope": "Native background data checks; visible interaction not verified.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 4.3958121669711545,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/scene_playback_lifecycle_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "scope": "isolated background Blender",
+            "addon_module": "wfrl_blender",
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "ready_scene": "A_MAPPO",
+            "failed_scene": "B_FULL_COPY",
+            "failed_status": "回放数据未就绪：Scene lacks required FarmFlex objects: WFRL.Turbine.T1.YawRoot, WFRL.Turbine.T1.Rotor, WFRL.Turbine.T1.Tower, WFRL.Turbine.T1.Blade1, WFRL.Turbine.T1.Blade2, WFRL.Turbine.T1.Blade3, WFRL.Turbine.T2.YawRoot, WFRL.Turbine.T2.Rotor, WFRL.Turbine.T2.Tower, WFRL.Turbine.T2.Blade1, WFRL.Turbine.T2.Blade2, WFRL.Turbine.T2.Blade3, WFRL.Turbine.T3.YawRoot, WFRL.Turbine.T3.Rotor, WFRL.Turbine.T3.Tower, WFRL.Turbine.T3.Blade1, WFRL.Turbine.T3.Blade2, WFRL.Turbine.T3.Blade3",
+            "mesh_change_max_m": 0.2769445519647368,
+            "frame": 181,
+            "time_s": 120.0,
+            "linked_scene_rejected": true
+          },
+          "log": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/scene_playback_lifecycle_regression/run/blender.log",
+          "report": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/scene_playback_lifecycle_regression/artifacts/checks.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "replay_history_regression.py",
+      "mode": "background",
+      "scope": "Native background data checks; visible interaction not verified.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 4.403087749960832,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/replay_history_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": true
+          },
+          "script_result": {
+            "scope": "Independent Blender process; native operators invoked by script",
+            "blender": "5.2.1 LTS",
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "checks": [
+              {
+                "label": "camera_undo",
+                "deltas": {
+                  "WFRL.Turbine.T1.Blade1": 4.0437948402525,
+                  "WFRL.Turbine.T1.Blade2": 3.32004755361435,
+                  "WFRL.Turbine.T1.Blade3": 0.6786137994557571,
+                  "WFRL.Turbine.T2.Blade1": 0.9641237610186122,
+                  "WFRL.Turbine.T2.Blade2": 1.4091391858089695,
+                  "WFRL.Turbine.T2.Blade3": 0.7492456383397521,
+                  "WFRL.Turbine.T3.Blade1": 1.4186494393628908,
+                  "WFRL.Turbine.T3.Blade2": 1.100670009385481,
+                  "WFRL.Turbine.T3.Blade3": 1.457107982127398
+                },
+                "time_s": 120.00416666666666,
+                "resources": {
+                  "meshes": 272,
+                  "curves": 170,
+                  "comparison_orphans": []
+                }
+              },
+              {
+                "label": "camera_redo",
+                "deltas": {
+                  "WFRL.Turbine.T1.Blade1": 4.0437948402525,
+                  "WFRL.Turbine.T1.Blade2": 3.32004755361435,
+                  "WFRL.Turbine.T1.Blade3": 0.6786137994557571,
+                  "WFRL.Turbine.T2.Blade1": 0.9641237610186122,
+                  "WFRL.Turbine.T2.Blade2": 1.4091391858089695,
+                  "WFRL.Turbine.T2.Blade3": 0.7492456383397521,
+                  "WFRL.Turbine.T3.Blade1": 1.4186494393628908,
+                  "WFRL.Turbine.T3.Blade2": 1.100670009385481,
+                  "WFRL.Turbine.T3.Blade3": 1.457107982127398
+                },
+                "time_s": 120.00416666666666,
+                "resources": {
+                  "meshes": 272,
+                  "curves": 170,
+                  "comparison_orphans": []
+                }
+              },
+              {
+                "label": "saved_package_failure_remains_unavailable",
+                "passed": true
+              },
+              {
+                "label": "missing_runtime_no_rigid_fallback",
+                "passed": true
+              },
+              {
+                "label": "reload_after_scene_delete",
+                "deltas": {
+                  "WFRL.Turbine.T1.Blade1": 1.4631023867004256,
+                  "WFRL.Turbine.T1.Blade2": 1.199114000679726,
+                  "WFRL.Turbine.T1.Blade3": 0.13869976526337968,
+                  "WFRL.Turbine.T2.Blade1": 2.014719131872856,
+                  "WFRL.Turbine.T2.Blade2": 1.3565252670839911,
+                  "WFRL.Turbine.T2.Blade3": 1.1108994432129287,
+                  "WFRL.Turbine.T3.Blade1": 1.1112765015571955,
+                  "WFRL.Turbine.T3.Blade2": 0.7632458256039997,
+                  "WFRL.Turbine.T3.Blade3": 0.6498680348787368
+                },
+                "time_s": 117.0,
+                "resources": {
+                  "meshes": 272,
+                  "curves": 170,
+                  "comparison_orphans": []
+                }
+              },
+              {
+                "label": "unregister_after_reload",
+                "passed": true
+              }
+            ],
+            "baseline_resources": {
+              "meshes": 272,
+              "curves": 170,
+              "comparison_orphans": []
+            },
+            "sha256": {
+              "farm_flex.py": "89f9d93b66f1f3826937563a24647962880e5e506df7b332954e43dc10b02f26",
+              "clearance_replay.py": "2aae486ed3ceed08bd8e8e8e474bc157164faaa3af101f1abacb872eedfd4215",
+              "split_turbine_context.py": "c1abd4f0297065ffc54f5a9079d9f6be6629bc450d5e0c8a6dc97f9c0a325602",
+              "deflection.py": "6ecbc602956a7f620b5c10628838a3695a6a904501628ffc4964d0bcea2ee123"
+            },
+            "status": "PASS"
+          },
+          "log": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/replay_history_regression/run/blender.log",
+          "report": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/native/replay_history_regression/artifacts/checks.json"
+        }
+      ],
+      "status": "PASS"
+    }
+  ],
+  "temporary_paths": [
+    "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/wfrl-regressions-qcrsc_o3"
+  ],
+  "visible_processes": "serial, independent factory-startup profiles",
+  "counts": {
+    "PASS": 7
+  }
+}

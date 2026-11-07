@@ -45,23 +45,23 @@ def prepare(destination, variant, duration=6., unloaded=False, dt=.00625):
     curve = []
     if bd:
         path = destination / '5MW_Baseline/NRELOffshrBsline5MW_BeamDyn.dat'
-        lines = path.read_text().splitlines()
+        lines = path.read_text(encoding='utf-8').splitlines()
         start = next(i for i, line in enumerate(lines) if 'kp_xr' in line) + 2
         for i in range(start, start+49):
             row = [float(v) for v in lines[i].split()[:4]]
             row[0] = -(row[2]/61.5)**2 if prebend else 0.
             curve.append(row)
             lines[i] = ' '.join(f'{v:.10E}' for v in row)
-        path.write_text('\n'.join(lines)+'\n')
+        path.write_text('\n'.join(lines)+'\n', encoding='utf-8')
     if prebend:
         path = destination / '5MW_Baseline/NRELOffshrBsline5MW_AeroDyn_blade.dat'
-        lines = path.read_text().splitlines()
+        lines = path.read_text(encoding='utf-8').splitlines()
         start = next(i for i, line in enumerate(lines) if 'BlSpn' in line) + 2
         for i in range(start, start+19):
             fields = lines[i].split()
             fields[1] = f'{float(fields[1]) - (float(fields[0])/61.5)**2:.10E}'
             lines[i] = ' '.join(fields)
-        path.write_text('\n'.join(lines)+'\n')
+        path.write_text('\n'.join(lines)+'\n', encoding='utf-8')
     inputs = {str(p.relative_to(destination)): hashlib.sha256(p.read_bytes()).hexdigest()
               for p in destination.rglob('*') if p.is_file()}
     config = dict(variant=variant, unloaded=unloaded, dt_s=dt, duration_s=duration,
@@ -71,8 +71,8 @@ def prepare(destination, variant, duration=6., unloaded=False, dt=.00625):
                   prebend_definition='x=-(z/61.5)^2 m; upwind; added to existing AeroDyn AC offsets',
                   precone_deg=-2.5, source_case=str(SOURCE), inputs=inputs,
                   scope='Single-turbine fixed rpm and steady wind interface test; not matched to MAPPO A segment',
-                  structural_source=json.loads((REFERENCE/'sources.json').read_text()))
-    (destination/'probe-config.json').write_text(json.dumps(config, indent=2))
+                  structural_source=json.loads((REFERENCE/'sources.json').read_text(encoding='utf-8')))
+    (destination/'probe-config.json').write_text(json.dumps(config, indent=2), encoding='utf-8')
     return destination
 
 

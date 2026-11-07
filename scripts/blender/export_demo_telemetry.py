@@ -9,13 +9,13 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def export(package, case):
     package, case = Path(package), Path(case)
-    manifest = json.loads((package / 'manifest.json').read_text())
+    manifest = json.loads((package / 'manifest.json').read_text(encoding='utf-8'))
     with np.load(package / 'geometry.npz') as geometry:
         times, poses = geometry['times'], geometry['poses']
     turbines, sources = {}, {}
     for k, tid in enumerate(manifest['turbine_ids']):
         path = case / 'FarmInputs' / f'Case.{tid}.out'
-        lines = path.read_text().splitlines()
+        lines = path.read_text(encoding='utf-8').splitlines()
         names, units = lines[6].split(), lines[7].split()
         raw = np.loadtxt(path, skiprows=8)
         columns = dict(zip(names, raw.T))
@@ -43,9 +43,9 @@ def export(package, case):
     payload = dict(schema='wfrl.farm-telemetry.v1', times=times.tolist(), turbines=turbines,
                    sources=sources, geometry_sha256=manifest['files']['geometry.npz'])
     target = package / 'telemetry.json'
-    target.write_text(json.dumps(payload, separators=(',', ':')) + '\n')
+    target.write_text(json.dumps(payload, separators=(',', ':')) + '\n', encoding='utf-8')
     manifest['files']['telemetry.json'] = hashlib.sha256(target.read_bytes()).hexdigest()
-    (package / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+    (package / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
 
 
 if __name__ == '__main__':

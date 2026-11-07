@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-import math
 from typing import Mapping
 
 
@@ -35,6 +34,17 @@ def get_preset(name: str) -> AtmospherePreset:
     return PRESETS[key]
 
 
+def private_world(scene):
+    """Copy a World only when another Scene actually references it."""
+    world = getattr(scene, "world", None)
+    if world is not None:
+        import bpy
+        if any(other != scene and other.world == world for other in bpy.data.scenes):
+            world = world.copy()
+            scene.world = world
+    return world
+
+
 def apply_preset(scene, name: str = "clear", *, enabled: bool = True, quality: str = "realtime",
                  image_loader=None) -> AtmospherePreset:
     """Apply a preset to Blender scene nodes when Blender is available."""
@@ -45,7 +55,7 @@ def apply_preset(scene, name: str = "clear", *, enabled: bool = True, quality: s
     scene["wfrl_atmosphere_enabled"] = bool(enabled)
     scene["wfrl_atmosphere_quality"] = quality
     scene["wfrl_atmosphere_fog_density"] = preset.fog_density if enabled else 0.0
-    world = getattr(scene, "world", None)
+    world = private_world(scene)
     if world is not None and getattr(world, "use_nodes", False):
         nodes = world.node_tree.nodes
         links = world.node_tree.links
@@ -107,85 +117,6 @@ def apply_preset(scene, name: str = "clear", *, enabled: bool = True, quality: s
 
 def set_enabled(scene, enabled: bool) -> None:
     scene["wfrl_atmosphere_enabled"] = bool(enabled)
-
-
-def is_enabled(scene) -> bool:
-    return bool(scene.get("wfrl_atmosphere_enabled", True))
-
-
-def build_sky_features(collection, *, center=(500.0, 30.0, 68.0), camera_location=None,
-                       camera_target=None, ortho_width=1089.4, aspect=16.0 / 9.0):
-    """Build reusable sun/cloud presentation geometry in a WFRL collection.
-
-    These are deliberately separate from the simulation terrain and carry
-    ``SYNTH`` metadata.  They provide a legible sky in Eevee without claiming
-    to be a meteorological cloud or solar-radiation model.
-    """
-    import bpy
-    from mathutils import Vector
-
-    existing = [obj for obj in collection.objects if obj.name.startswith("WFRL.Atmosphere.")]
-    for obj in existing:
-        bpy.data.objects.remove(obj, do_unlink=True)
-    sky_material = bpy.data.materials.get("WFRL.Sky.Cloud") or bpy.data.materials.new("WFRL.Sky.Cloud")
-    sky_material.use_nodes = True
-    cloud_shader = next((node for node in sky_material.node_tree.nodes if node.type == "BSDF_PRINCIPLED"), None)
-    if cloud_shader is not None:
-        cloud_shader.inputs["Base Color"].default_value = (0.92, 0.96, 1.0, 1.0)
-        cloud_shader.inputs["Roughness"].default_value = 0.85
-        cloud_shader.inputs["Emission Color"].default_value = (0.18, 0.22, 0.28, 1.0)
-        cloud_shader.inputs["Emission Strength"].default_value = 0.15
-    target = Vector(camera_target or center)
-    if camera_location is None:
-        camera_location = target + Vector((0.0, -1700.0, 692.0))
-    forward = (target - Vector(camera_location)).normalized()
-    right = forward.cross(Vector((0.0, 0.0, 1.0))).normalized()
-    up = right.cross(forward).normalized()
-    # The world camera is orthographic.  Place presentation elements in its
-    # screen plane so changes to turbine layout do not push them out of frame.
-    screen_height = float(ortho_width) / max(float(aspect), 0.1)
-
-    def screen_point(u: float, v: float, depth: float) -> Vector:
-        return (target - forward * float(depth)
-                + right * ((float(u) - 0.5) * float(ortho_width))
-                + up * ((float(v) - 0.5) * screen_height))
-
-    cloud_layout = (
-        (0.20, 0.86, 118.0, 44.0, 980.0),
-        (0.52, 0.91, 148.0, 50.0, 1120.0),
-        (0.80, 0.84, 122.0, 44.0, 1180.0),
-    )
-    shadow_material = bpy.data.materials.get("WFRL.Sky.CloudShadow") or bpy.data.materials.new("WFRL.Sky.CloudShadow")
-    shadow_material.use_nodes = True
-    shadow_shader = next((node for node in shadow_material.node_tree.nodes if node.type == "BSDF_PRINCIPLED"), None)
-    if shadow_shader is not None:
-        shadow_shader.inputs["Base Color"].default_value = (0.58, 0.67, 0.76, 1.0)
-        shadow_shader.inputs["Roughness"].default_value = 0.96
-        shadow_shader.inputs["Emission Color"].default_value = (0.05, 0.08, 0.12, 1.0)
-        shadow_shader.inputs["Emission Strength"].default_value = 0.05
-    for cloud_index, (u, v, width, height, depth) in enumerate(cloud_layout, start=1):
-        cloud_center = screen_point(u, v, depth)
-        for puff_index, (dx, dy, dz, sx, sy, sz) in enumerate((
-            (-0.55, 0.08, 0.00, 0.55, 0.40, 0.45),
-            (-0.20, -0.04, 0.22, 0.72, 0.52, 0.62),
-            (0.18, 0.10, 0.10, 0.85, 0.58, 0.52),
-            (0.50, -0.02, -0.02, 0.58, 0.38, 0.40),
-        )):
-            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3, radius=1.0,
-                                                   location=(cloud_center.x + dx * width,
-                                                             cloud_center.y + dy * width,
-                                                             cloud_center.z + dz * height))
-            puff = bpy.context.object
-            puff.name = f"WFRL.Atmosphere.Cloud{cloud_index:02d}.{puff_index:02d}"
-            puff.scale = (width * sx, width * sy, height * sz)
-            puff.data.materials.append(shadow_material if puff_index in {0, 3} else sky_material)
-            puff["fidelity"] = "SYNTH"
-            puff["provenance"] = "Presentation cloud bank; not weather simulation"
-            for old in list(puff.users_collection):
-                old.objects.unlink(puff)
-            collection.objects.link(puff)
-
-    return tuple(obj.name for obj in collection.objects if obj.name.startswith("WFRL.Atmosphere."))
 
 
 def set_feature_visibility(scene, enabled: bool) -> None:

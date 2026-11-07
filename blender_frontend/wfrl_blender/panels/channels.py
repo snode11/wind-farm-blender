@@ -19,7 +19,8 @@ class WFRL_PT_WorkflowChannels(bpy.types.Panel):
             layout.label(text=str(provenance))
         if not rows:
             layout.label(text='No active SceneRuntime sensor topics', icon='INFO')
-        col = layout.column(); col.enabled = bool(rows) and runtime.get_state().connection == 'CONNECTED'
+        col = layout.column()
+        col.enabled = bool(rows) and runtime.get_state().connection == 'CONNECTED'
         col.prop(context.scene.wfrl_workflow, 'topic')
         row = col.row(align=True)
         row.operator('wfrl.set_channel', text='Subscribe').enabled = True

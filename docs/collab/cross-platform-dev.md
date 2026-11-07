@@ -1,170 +1,69 @@
-# 跨平台协作开发指南
+# 跨平台协作开发
 
-本文档面向新加入的开发者，说明如何在 macOS 上搭建开发环境、基于现有功能继续开发，以及与 Windows 端协作的工作流程。
+发布版本为 **0.3.42.8**（GitHub 标签 `v0.3.42.8`，Blender manifest 为 `0.3.42+8`）。安装与公开载荷身份以 `publication/daily-installation.json` 和发布交付记录为准。
 
-## 仓库与分支约定
+## 仓库与分支
 
-- **远程仓库**：`https://github.com/snode11/wind-farm-blender`
-- **主分支**：`main`，稳定功能合并到此处
-- **开发分支**：从 `main` checkout，命名建议 `feature/<简短描述>`，例如 `feature/load-display`
-- **不直接推送 main**：通过 Pull Request 合并，双方互相 review
+仓库入口为 [snode11/wind-farm-blender](https://github.com/snode11/wind-farm-blender)，本工作区对应 remote `blender-sync`。从 `main` 创建功能分支，通过 Pull Request 评审后合并，不直接推送主分支。工作前检查实际 Git 根和未提交修改，保留已有文件。
 
 ```bash
 git clone https://github.com/snode11/wind-farm-blender.git
 cd wind-farm-blender
-git checkout -b feature/your-feature
+git switch -c feature/your-feature
 ```
 
----
+独立上传的源码分支可能没有共同祖先；整合时须按功能比较实际文件和接口，不能据分支名推定其包含当前主分支。
 
-## 环境准备（macOS）
+## 环境与构建
 
-### 1. Blender
-
-从 [blender.org](https://www.blender.org/download/) 下载并安装 **Blender 5.2.1 LTS**，与 Windows 端保持版本一致，避免 bpy API 差异。
-
-### 2. FFmpeg
+扩展兼容版本以 `blender_frontend/wfrl_blender/blender_manifest.toml` 为准；验证记录必须标明实际 Blender 版本和操作系统，不能把 macOS 的结果转记到 Windows 或 Linux。视频功能需要 FFmpeg／FFprobe，路径由扩展偏好设置和相应视频入口检查。
 
 ```bash
-brew install ffmpeg
+python3 scripts/blender/build_extension.py --output /absolute/path/new-package
 ```
 
-用于视频导出功能，路径会被 Blender 扩展自动检测。
-
-### 3. 构建扩展
-
-项目使用官方脚本打包，macOS 上直接运行（不需要 `--overwrite` 绕过硬链接问题）：
-
-```bash
-python3 scripts/blender/build_extension.py --output dist/my-build
-```
-
-构建产物在 `dist/my-build/wfrl_blender-*.zip`，在 Blender → Preferences → Extensions → Install from Disk 安装后**完全重启 Blender**。
-
-### 4. 验证安装
-
-在 Blender Python 控制台确认模块路径：
+构建目录须为新输出；构建 ZIP、源码、公开附件和已安装扩展分别识别。在 Blender 的 **Install from Disk** 中选择专用扩展 ZIP，更新后完全重启。实际加载来源可在 Blender Python 控制台核对：
 
 ```python
 import sys
 print([m.__file__ for n, m in sys.modules.items() if n.endswith('wfrl_blender')])
 ```
 
----
+完整环境、构建身份与原生检查入口见[项目技能](../../.agents/skills/windfarm-blender-dev/SKILL.md)和[验证入口](../../.agents/skills/windfarm-blender-dev/references/verification.md)。
 
-## 仓库结构
+## 模块与接口
 
-```
-blender_frontend/
-  wfrl_blender/           # Blender 扩展主体
-    __init__.py           # 注册入口
-    farm_flex.py          # FAST.Farm 结果包加载和验证（核心）
-    deflection.py         # 叶片挠度计算
-    clearance_replay.py   # 净空回放
-    manual_control.py     # 手动风机控制
-    manual_down.py        # Down 相机与视频导出
-    live_stream.py        # 现场视频流（无 bpy 依赖）
-    live_stream_view.py   # 现场视频分屏显示
-    assets/
-      mappo/              # 内置 MAPPO 演示数据包
-    panels/               # N 面板各功能页
-  tests/
-    blender/              # 需要 Blender 运行的回归测试
-    test_*.py             # 纯 Python 单元测试（可直接 pytest）
-scripts/
-  blender/
-    build_extension.py    # 扩展打包脚本
-docs/
-  blender/                # 功能说明文档（中文）
-AGENTS.md                 # 开发规则，必读
-```
+| 目录或模块 | 职责 |
+| --- | --- |
+| `blender_frontend/wfrl_blender/` | Blender 扩展及随包资源 |
+| `manual_control.py`、`manual_operators.py`、`manual_rna.py` | 手动状态、操作器及属性注册 |
+| `panels/manual_control.py` | 风机控制与 WFRL 手动页共用的基本面板 |
+| `manual_down.py`、`manual_video.py` | Down 与独立视频研究接口 |
+| `farm_flex.py` | 柔性数据包读取、身份验证与场景运行时 |
+| `wfrl/lidar/` | 规范雷达计算、数据包与读取器源码 |
+| `scripts/blender/` | 构建、检查及研究脚本 |
 
----
+构建时从规范源码生成 `protocol.py` 和 `_vendor/lidar/`；源码运行与已构建扩展的依赖路径不同。不要手工修改生成副本以绕过规范验证。
 
-## 数据包格式（FAST.Farm 对接关键）
+FAST.Farm 结果须满足[前端实现与数据合同](../../blender_frontend/README.md)和[雷达回放格式](../../wfrl/lidar/REPLAY_FORMAT.md)。按当前 `farm_flex._load_package()` 与 manifest 校验 schema、文件摘要、几何、运动及结果层来源；先验证完整内置包，再接入独立外部输出，不用单个示例字段推定完整格式。
 
-所有 FAST.Farm 结果需要打包成扩展认识的格式才能加载。核心验证逻辑在 `farm_flex.py` 的 `_load_package()` 函数，关键约束：
+## 风机控制与研究边界
 
-- `manifest.json` 的 `schema` 字段必须是 `wfrl.farm-flex-review.v1 / v2 / v3` 之一
-- `manifest.json` 的 `files` 字段列出每个文件的 SHA-256，不匹配则拒绝加载
-- `geometry.npz` 提供三机、每个时刻的变换矩阵和叶轮姿态
-- `data.json` 提供每台机的逐帧运动数据（偏航、叶轮角、转速、桨距）
+基本风机控制面板、按钮和自动顺桨行为按[手动控制说明](../blender/风机手动控制.md)维护。该栏目不绘制 Down、冻结试验、视频或显示精度控件；研究入口见[手动场景研究接口](../blender/手动场景研究接口.md)。
 
-```
-assets/mappo/
-  manifest.json           # schema、SHA-256 索引、时间段信息
-  geometry.npz            # 三机几何变换 (n_times, 3, 3, 19, 3, 4)
-  data.json               # 逐帧运动数据
-  telemetry.json          # 可选：遥测通道
-  deflection-t1.json      # 可选：BeamDyn 挠度映射
-  tower-motion.npz        # 可选：塔顶运动
-```
+## 验证
 
-**推荐做法**：先用内置 `assets/mappo/` 的数据包跑通加载，再把自己的 FAST.Farm 输出转成同样格式。
-
----
-
-## 新功能开发方向
-
-### 载荷显示（新功能）
-
-当前项目无载荷数据可视化。开发路径建议：
-
-1. 在 `data.json` 或新增 `loads.json` 里写入 FAST.Farm 的叶根力矩、塔基载荷等
-2. 在 `manifest.json` 的 `files` 里加上 SHA-256
-3. 在 `farm_flex.py` 的 `_load_package` 读取载荷数据
-4. 在 `panels/farm_replay.py` 新增可视化：箭头、颜色映射、曲线图等
-
-### 净空（已有基础）
-
-- `clearance_replay.py` 是主模块
-- `panels/clearance.py` 是面板
-- 接入新格式时，对照 `ReplayReader` 接口和 `data.json` 里已有的净空字段
-
-### 叶片挠度（已有基础）
-
-- `deflection.py` 处理 BeamDyn 映射
-- `deflection-t1.json` 是 T1 的挠度数据格式样例
-- `assets/mappo/manifest.json` 中有 `deflection-t1.json` 的 SHA-256 示例可参考
-
----
-
-## 运行测试
-
-**纯 Python 单元测试**（macOS 直接跑）：
+测试使用具备所需依赖的既有 Python 环境和独立 Blender 工厂启动进程。宿主检查示例：
 
 ```bash
-cd blender_frontend
-python -m pytest tests/test_*.py -q
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest blender_frontend/tests -q -p no:cacheprovider
 ```
 
-**需要 Blender 的回归测试**（后台模式）：
+后台原生检查使用独立配置和新的输出目录：
 
 ```bash
-WFRL_TEST_OUTPUT=/tmp/out_xxx blender --background --factory-startup \
-    --python blender_frontend/tests/blender/manual_control_state_regression.py
+WFRL_TEST_OUTPUT=/absolute/path/new-result blender --background --factory-startup \
+    --python-exit-code 1 --python blender_frontend/tests/blender/manual_control_state_regression.py
 ```
 
----
-
-## 开发规则（摘要，完整见 AGENTS.md）
-
-- 文档只描述当前有效状态，不记录修改历史和开发过程
-- 完成功能后区分"已运行通过"/"仅静态检查"/"尚未验证"三种状态
-- 不直接推送 main，用 PR
-- 安装版验证须核对实际模块路径（见上方验证步骤）
-
----
-
-## Windows ↔ macOS 协作说明
-
-| 项目 | Windows 端 | macOS 端 |
-|---|---|---|
-| Blender 版本 | 5.2.1 LTS | 5.2.1 LTS（保持一致） |
-| Python | Blender 内置（用于构建） | Blender 内置（用于构建） |
-| FFmpeg | 手动安装，路径在扩展偏好设置中指定 | `brew install ffmpeg` |
-| 构建命令 | 需要 `--overwrite`（G 盘不支持硬链接） | 直接运行，无需 `--overwrite` |
-| FAST.Farm | Windows 版 | macOS 版（各自独立） |
-| 数据格式 | 共用同一 `manifest.json` schema | 共用同一 `manifest.json` schema |
-
-行末换行符：项目使用 `.gitattributes` 控制，clone 后不需要手动配置，macOS 上不会出现 CRLF 问题。
+以正常退出、完成标记和结构化结果共同判断通过。后台软件检查、可见窗口、实际输入、完整媒体、性能和科学精度分别报告；文档只保留当前有效行为与已确认要求，完整规则见 [AGENTS.md](../../AGENTS.md)。

@@ -8,12 +8,12 @@ import math
 
 from . import camera_projection as projection
 
-FOCAL_LENGTH_MM = 4.0
-HFOV_DEG = 40.0
-VFOV_DEG = 50.0
-HUB_OFFSET_M = (0.3, 0.0, -0.8)
+FOCAL_LENGTH_MM = 8.0
+HFOV_DEG = 59.0
+VFOV_DEG = 40.0
+HUB_OFFSET_M = (1.5, 0.0, -1.5)
 YAW_DEG = 180.0
-PITCH_DEG = -75.0
+PITCH_DEG = -82.0
 ROLL_DEG = 180.0
 SENSOR_WIDTH_MM = 2 * FOCAL_LENGTH_MM * math.tan(math.radians(HFOV_DEG / 2))
 SENSOR_HEIGHT_MM = 2 * FOCAL_LENGTH_MM * math.tan(math.radians(VFOV_DEG / 2))

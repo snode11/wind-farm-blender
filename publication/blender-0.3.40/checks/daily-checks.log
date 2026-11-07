@@ -1,0 +1,8 @@
+daily-probe PASS
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/scratch/daily_checks.py", line 12, in <module>
+    row=v.run_command(['/Applications/Blender.app/Contents/MacOS/Blender','--background','--python-exit-code','1','--python',str(script)],env=env,output=out,name=name,required_markers=[marker]);rows.append(row)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/validate_frontend_package.py", line 107, in run_command
+    raise RuntimeError(f'{name} failed: exit={code}, missing_markers={missing}, error_markers={errors}; see {log}')
+RuntimeError: daily-proxy failed: exit=0, missing_markers=['NATIVE_CAMERA_PROXY_REGRESSION_PASS'], error_markers=[]; see /Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/logs/daily-proxy.log

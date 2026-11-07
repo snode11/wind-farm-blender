@@ -3,7 +3,6 @@
 WFRL_TEST_OUTPUT controls isolated evidence files. No source .blend is saved.
 """
 import json
-import math
 import os
 from pathlib import Path
 import sys
@@ -17,6 +16,18 @@ ROOT=Path(__file__).resolve().parents[3]
 sys.path[:0]=[str(ROOT/'blender_frontend'),str(ROOT)]
 from wfrl_blender import custom_cameras as core, custom_camera_preview as preview
 from wfrl_blender import custom_camera_capture as capture, camera_projection as projection
+
+
+def complete(job, context, timeout=30.):
+    """Wait for PNG thread exit and the capture's committed terminal state."""
+    deadline = time.monotonic() + timeout
+    while not job.closed:
+        job.step(context)
+        assert time.monotonic() < deadline, 'capture did not finish'
+        if not job.closed:
+            time.sleep(.01)
+    assert not capture.active()
+    return True
 from wfrl_blender.panels import custom_cameras as panel
 import wfrl_blender as addon
 OUT=Path(os.environ.get('WFRL_TEST_OUTPUT','/tmp/wfrl-three-camera-window'));OUT.mkdir(parents=True,exist_ok=True)
@@ -174,12 +185,12 @@ def tick():
                 STATE['telemetry']=farm_flex._ACTIVE.last_telemetry_frame
                 STATE['statistics']=json.dumps(clearance_replay.sample(scene)['statistics'],sort_keys=True)
                 STATE['before_layout']=core.layout_dict(scene)
-                STATE['history']=repr(charts.history.__dict__) if hasattr(charts,'history') else None
+                STATE['history']=repr(charts.history_for(bpy.context.scene).__dict__) if hasattr(charts,'history') else None
                 STATE['frame']=(scene.frame_current,scene.frame_subframe)
                 bpy.ops.screen.animation_play()
                 transaction=capture.Capture(bpy.context,OUT)
                 assert not window.screen.is_animation_playing
-                assert transaction.step(bpy.context)
+                assert complete(transaction,bpy.context)
                 assert window.screen.is_animation_playing
                 bpy.ops.screen.animation_cancel(restore_frame=False)
                 STATE['before_path']=str(transaction.path)
@@ -193,7 +204,7 @@ def tick():
                 # Alter layout, export at identical sample, then restore exact layout.
                 cam=core.get_camera(scene,1);params=core.parameters(cam)
                 core.apply_parameters(cam,replace(params,yaw=170,fov=100))
-                after=capture.Capture(bpy.context,OUT);assert after.step(bpy.context)
+                after=capture.Capture(bpy.context,OUT);assert complete(after,bpy.context)
                 STATE['after_path']=str(after.path)
                 after_rows=[json.loads(r) for r in (after.path/'frames.jsonl').read_text().splitlines()]
                 assert {max(r['image_width'],r['image_height']) for r in after_rows}=={1920}
@@ -202,7 +213,7 @@ def tick():
                 # Higher resolution is a separate export, not a changed control
                 # in the before/after layout comparison.
                 core.apply_parameters(cam,replace(core.parameters(cam),output_long_edge_px=2560))
-                high=capture.Capture(bpy.context,OUT);assert high.step(bpy.context)
+                high=capture.Capture(bpy.context,OUT);assert complete(high,bpy.context)
                 STATE['high_resolution_path']=str(high.path)
                 high_rows=[json.loads(r) for r in (high.path/'frames.jsonl').read_text().splitlines()]
                 assert max(high_rows[0]['image_width'],high_rows[0]['image_height'])==2560
@@ -216,7 +227,7 @@ def tick():
                 time_s=capture.current_time(scene)
                 times=[time_s,time_s+.05,time_s+.1]
                 transaction=capture.Capture(bpy.context,OUT,times)
-                while not transaction.closed:transaction.step(bpy.context)
+                assert complete(transaction,bpy.context)
                 STATE['sequence_path']=str(transaction.path)
                 rows=[json.loads(r) for r in (transaction.path/'frames.jsonl').read_text().splitlines()]
                 assert len(rows)==9
@@ -225,9 +236,10 @@ def tick():
                 for i in range(3):assert len({r['simulation_state_hash'] for r in rows[i*3:(i+1)*3]})==1
                 assert (scene.frame_current,scene.frame_subframe)==STATE['frame']
                 assert farm_flex._ACTIVE.last_telemetry_frame==STATE['telemetry']
-                assert repr(charts.history.__dict__)==STATE['history']
+                assert repr(charts.history_for(bpy.context.scene).__dict__)==STATE['history']
                 assert json.dumps(clearance_replay.sample(scene)['statistics'],sort_keys=True)==STATE['statistics']
                 cancel=capture.Capture(bpy.context,OUT,times);cancel.step(bpy.context);cancel.finish(error='test cancellation')
+                assert complete(cancel,bpy.context)
                 assert json.loads((cancel.path/'manifest.json').read_text())['status']=='incomplete'
                 assert (scene.frame_current,scene.frame_subframe)==STATE['frame']
                 STATE['checks']['sequence_same_times_statistics_cancel_restore']=True

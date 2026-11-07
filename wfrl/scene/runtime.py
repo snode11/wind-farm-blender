@@ -9,7 +9,7 @@
 `frame` 完成。这样同一份场景既能开窗看，也能无头训练。
 
 通道开关（`enable`/`disable`）落在这里而不是 UI 里：关掉一路通道意味着**该传感器
-不再采样**，省下的是真实计算（lidar 的视线插值、camera 的离屏渲染），不只是不画。
+不再采样**，省下的是真实计算（lidar 的合成采样、camera 的离屏渲染），不只是不画。
 """
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 
 from wfrl.channels import registry
+from wfrl.scene.power import farm_power_total
 from wfrl.scene.schema import Scene
 
 
@@ -63,7 +64,8 @@ class SceneRuntime:
                 if any(self.enabled.get(t, False) for t in s.topics)]
 
     # ---- 生命周期 --------------------------------------------------------
-    def reset(self) -> Dict[str, Any]:
+    def reset(self, *, wind_direction=None, upstream_request=None) -> Dict[str, Any]:
+        """场景风向仅用于显示；wind_direction 是独立的显式求解请求。"""
         from wfrl.fastfarm_driver import FastFarmDriver
         if self.scene.backend != "fastfarm":
             raise NotImplementedError(
@@ -73,9 +75,17 @@ class SceneRuntime:
         # 直接注入 —— 场景层的意义正在于此。
         self.driver = FastFarmDriver.__new__(FastFarmDriver)
         self._build_driver()
+        upstream_request = dict(upstream_request or {})
+        upstream_request["scene"] = {
+            "wind_speed": self.scene.wind_speed,
+            "wind_direction": self.scene.wind_direction,
+            "wind_time_series": self.scene.turbulence,
+            "wind_speed_role": "overridden_by_bts" if self.scene.turbulence else "solver_request",
+            "wind_direction_role": "display_only",
+        }
         m = self.driver.reset(
             wind_speed=None if self.scene.turbulence else self.scene.wind_speed,
-            wind_direction=None)
+            wind_direction=wind_direction, upstream_request=upstream_request)
         self.u_inf = float(getattr(self.driver, "u_inf", np.nan))
         self.done = False
         self._t = 0
@@ -163,15 +173,19 @@ class SceneRuntime:
                     frame[topic] = data
         frame["_meta"] = {"t": self._t, "u_inf": self.u_inf,
                           "reward": m.get("reward"), "done": self.done,
-                          "farm_power": float(np.nansum(m.get("power", [0.0])))}
+                          "farm_power": farm_power_total(m.get("power"), self.scene.n)}
         self._last_frame = frame
         return frame
 
-    def close(self, purge: bool = True):
+    def close(self, purge: bool = True, *, strict: bool = False):
+        """strict 模式传播关闭失败并保留 driver，供调用方阻止回合重启。"""
         if self.driver is not None:
             try:
-                self.driver.close(purge=purge)
+                options = {"strict": True} if strict else {}
+                self.driver.close(purge=purge, **options)
             except Exception as e:                          # noqa: BLE001
+                if strict:
+                    raise
                 print(f"[runtime] 关闭出错（忽略）: {e}", flush=True)
             self.driver = None
 

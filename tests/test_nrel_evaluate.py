@@ -1,6 +1,5 @@
 """Geometric regression tests: actual surfaces, source-area weights and truth boundary."""
 import json
-from pathlib import Path
 import struct
 
 import numpy as np

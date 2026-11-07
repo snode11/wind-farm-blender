@@ -41,7 +41,7 @@ def digest(path):
 
 def write_json(path, value):
     Path(path).write_text(json.dumps(value, indent=2, ensure_ascii=False,
-                                    allow_nan=False) + "\n")
+                                    allow_nan=False) + "\n", encoding='utf-8')
 
 
 def validate_pts(frames, count, fps):
@@ -124,7 +124,7 @@ def isolation_probe(output, input_dir):
 
 def load_input(input_dir):
     import numpy as np
-    data = json.loads((input_dir / "dataset.json").read_text())
+    data = json.loads((input_dir / "dataset.json").read_text(encoding='utf-8'))
     if (data.get("schema") != "nrel-single-blade-video.v1" or
             data.get("target") != "T1/B1" or data.get("model") != "NREL 5MW" or
             data.get("units") != {"length": "m", "time": "s", "image": "px"} or
@@ -140,11 +140,11 @@ def load_input(input_dir):
         path = input_dir / name
         if path.resolve().parent != input_dir or digest(path) != signature:
             raise ValueError(f"Input signature/path mismatch: {name}")
-    with (input_dir / "frame_map.csv").open() as stream:
+    with (input_dir / "frame_map.csv").open(encoding='utf-8') as stream:
         frames = list(csv.DictReader(stream))
     calibrations = [json.loads(line) for line in
-                    (input_dir / "camera_calibration.jsonl").read_text().splitlines()]
-    with (input_dir / "motion_observations.csv").open() as stream:
+                    (input_dir / "camera_calibration.jsonl").read_text(encoding='utf-8').splitlines()]
+    with (input_dir / "motion_observations.csv").open(encoding='utf-8') as stream:
         motions = list(csv.DictReader(stream))
     cal = {(c["camera_id"], int(c["frame_id"])): c for c in calibrations}
     motion = {int(m["frame_id"]): m for m in motions}
@@ -210,7 +210,7 @@ def iter_rgb(video, width, height):
 
 def worker(output):
     started = time.perf_counter()
-    freeze = json.loads((output / "launch_freeze.json").read_text())
+    freeze = json.loads((output / "launch_freeze.json").read_text(encoding='utf-8'))
     input_dir = Path(freeze["input_root"])
     isolation_probe(output, input_dir)
     for name, signature in freeze["input_sha256"].items():
@@ -228,7 +228,7 @@ def worker(output):
                 "-show_streams", "-show_frames", "-show_entries",
                 "stream=width,height,avg_frame_rate,time_base,codec_name:frame=pts,best_effort_timestamp_time",
                 "-of", "json", str(video)]
-        info = json.loads(subprocess.run(args, check=True, capture_output=True, text=True).stdout)
+        info = json.loads(subprocess.run(args, check=True, capture_output=True, text=True, encoding='utf-8').stdout)
         write_json(output / f"{camera}_ffprobe.json", info)
         stream = info["streams"][0]
         if (stream["width"], stream["height"]) != (1920, 1080):
@@ -274,7 +274,7 @@ def worker(output):
         if digest(name) != signature:
             raise ValueError(f"Frozen input changed during audit: {name}")
     write_json(output / "frames.json", rows)
-    with (output / "frames.csv").open("w", newline="") as stream:
+    with (output / "frames.csv").open("w", newline="", encoding='utf-8') as stream:
         writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
@@ -298,7 +298,7 @@ def worker(output):
 
 def launch(protocol, output):
     protocol, output = protocol.resolve(), output.resolve()
-    value = json.loads(protocol.read_text())
+    value = json.loads(protocol.read_text(encoding='utf-8'))
     if value["status"] != "FROZEN_PREFLIGHT_SCOPE" or value["run_id"] != "20261004-a01":
         raise ValueError("Expected frozen DY0 protocol")
     input_dir = Path(value["input_root"]).resolve()
@@ -316,13 +316,13 @@ def launch(protocol, output):
     write_json(output / "launch_freeze.json", freeze)
     runtime = Path(sys.executable).resolve().parents[1]
     policy = sandbox_policy(paths, output, runtime)
-    (output / "isolation.sb").write_text(policy)
+    (output / "isolation.sb").write_text(policy, encoding='utf-8')
     args = ["/usr/bin/sandbox-exec", "-f", str(output / "isolation.sb"),
             sys.executable, "-B", str(Path(__file__).resolve()), "worker", "--output", str(output)]
     write_json(output / "launch_command.json", {"argv": args, "policy_sha256": digest(output / "isolation.sb")})
     started = time.perf_counter()
     environment = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", PYTHONNOUSERSITE="1")
-    with (output / "run.log").open("w") as log:
+    with (output / "run.log").open("w", encoding='utf-8') as log:
         result = subprocess.run(args, stdout=log, stderr=subprocess.STDOUT, env=environment)
     write_json(output / "launch_result.json", {"returncode": result.returncode,
                                                "elapsed_s": time.perf_counter() - started})

@@ -10,10 +10,11 @@ import pytest
 from wfrl.camera_video.media import encode_video, h264_samples, read_sample, sha256, validate_video
 
 
-@pytest.fixture
-def encoded_package(tmp_path):
+@pytest.fixture(scope='module')
+def encoded_template(tmp_path_factory):
     if not shutil.which('ffmpeg') or not shutil.which('ffprobe'):
         pytest.skip('FFmpeg/ffprobe required')
+    tmp_path = tmp_path_factory.mktemp('encoded-template')
     master = tmp_path / 'master_frames'; master.mkdir()
     subprocess.run(['ffmpeg', '-v', 'error', '-f', 'lavfi', '-i', 'testsrc2=size=128x72:rate=20',
                     '-frames:v', '40', '-start_number', '0', str(master / '%06d.png')], check=True)
@@ -24,6 +25,13 @@ def encoded_package(tmp_path):
     encode_video(tmp_path, 20, preset='ultrafast')
     (tmp_path / 'manifest.json').write_text(json.dumps({'dataset_id': 'synthetic-test-only',
         'time_contract': {'fps': 20}, 'files': {n: sha256(tmp_path / n) for n in ('video.mp4', 'frames.csv')}}))
+    return tmp_path
+
+
+@pytest.fixture
+def encoded_package(tmp_path, encoded_template):
+    """Give each test independent writable copies of the complete encoded media."""
+    shutil.copytree(encoded_template, tmp_path, dirs_exist_ok=True)
     return tmp_path
 
 

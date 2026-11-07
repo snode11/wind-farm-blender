@@ -1,30 +1,55 @@
 # Wind Farm Blender
 
-面向风场仿真观察、相机数据制作和叶片重建研究的 Blender 工作台。项目包含两个独立产品，均要求 **Blender 5.2+**。
+发布版本为 **0.3.42.8**（GitHub 标签 `v0.3.42.8`，Blender manifest 为 `0.3.42+8`）。安装与公开载荷身份以 `publication/daily-installation.json` 和发布交付记录为准。
+
+面向风场仿真观察、相机数据制作和叶片重建研究的 Blender 工作台。公开扩展包含 [X100 几何仿真、文件回放与本机采集通道](docs/blender/X100雷达.md)，厂家设备解码与实测验收尚未完成。项目包含两个独立产品，均要求 **Blender 5.2+**。
 
 | 产品 | 公开版本 | 用途与使用方式 |
 | --- | --- | --- |
-| NREL 5MW / WFRL 前端 | **0.3.24** | 独立风机手动控制、姿态预设与 JSON、三机柔性回放、几何／同源纹理分屏、六类合成缺陷、三相机与双束／TLS；[下载扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.24/wfrl_blender-0.3.24.zip)，使用 Install from Disk 安装并重启 |
+| NREL 5MW / WFRL 公开扩展 | **0.3.42.8** | NREL／rootkink 叶片外形、T1/T2/T3 Down、独立风机手动控制、姿态预设与 JSON、三机柔性回放、几何／同源纹理分屏、六类合成缺陷、三相机与双束／TLS；[下载扩展 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.8/wfrl_blender-0.3.42%2B8.zip)，使用 Install from Disk 安装并重启 |
 | GW184 三相机与叶片缺陷 | **0.4.0** | GW184 尺寸合成刚性模型、固定三相机与六类缺陷；[下载独立运行 ZIP](https://github.com/snode11/wind-farm-blender/releases/download/v0.4.0/gw184_three_camera_defects-0.4.0.zip)，完整解压后启动 |
+
+公开扩展提供 **N → X100 → 显示 → 打开点云窗口**，独立显示最新点云，支持传感器角度、正视、俯视、侧视和机舱 XZ，以及缩放平移与属性着色；导航不改变观测、风机运动或相机 RGB。操作和限制见 [X100 雷达](docs/blender/X100雷达.md)。
+
+公开扩展与本机安装包含同帧塔筒侧壁距离诊断和可选零载荷参考；双安装位覆盖工具由配套源码提供。当前是一台 X100 切换朝下原安装位／机舱侧面两个预设。操作见[X100 分析](docs/blender/X100雷达.md#机舱局部分析工作区源码)，各载荷的检查范围见[验证范围](docs/blender/发布状态与验证范围.md#x100-工作区源码验证)。
+
+工作区源码还提供按表面积固定材料点采样、有限安装集合搜索和有拒绝条件的叶片关联／连续叶尖估计，由 0.3.42.8 扩展及配套源码提供，日常安装使用 0.3.42.7。估计使用同帧塔面、声明的根部姿态和名义叶尖半径，原始点云与模型结果分别显示；同源几何评价的叶尖位置误差仍为米级。操作、预算及限制见[X100 观测研究](docs/blender/X100观测研究.md)，保存结果见[研究验证](docs/blender/发布状态与验证范围.md#x100-观测研究工作区验证)。
 
 ## 当前身份与安装来源
 
-项目源码入口为 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)，包含当前前端、后端、重建研究、测试和配套文档。NREL 的 [v0.3.24 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.24) 提供专用扩展 ZIP；安装时使用 `wfrl_blender-0.3.24.zip`。发布源码标签 `v0.3.24` 指向 `844b1de6a04a612b72b244d42749ae5ba6ee9213`。源码提交、构建 ZIP 与本机安装分别识别，GitHub 自动 Source code 不作为扩展安装包。
+GitHub 默认分支为 [`main`](https://github.com/snode11/wind-farm-blender/tree/main)；该分支包含前端、后端、重建研究、测试和配套文档。NREL 的 [v0.3.42.8 Release](https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.42.8) 提供专用扩展 ZIP；安装使用 `wfrl_blender-0.3.42+8.zip`，发布源码使用 `v0.3.42.8` 标签。源码提交、构建 ZIP 与本机安装分别识别，GitHub 自动 Source code 用于源码查看与构建。
 
-开发机日常扩展 `bl_ext.user_default.wfrl_blender` 使用 **0.3.24**，已有安装记录中的 180 个文件与上传源 ZIP 匹配。该载荷提供常用姿态、角度微调、三机参数概览和 JSON 姿态保存／选择性载入，见[手动控制说明](docs/blender/风机手动控制.md)、[安装身份](publication/daily-installation.json)及[新进程检查](publication/daily-installation-probe.json)。公开附件身份见[交付身份](publication/blender-0.3.24.json)。项目启动器、重建求解器和构建工具使用独立项目源码，不随扩展 ZIP 安装。
+开发机日常扩展模块为 `bl_ext.user_default.wfrl_blender`。公开包、日常安装的版本与载荷分别取自下列身份记录；源码工作区的模块职责见[实现与维护](blender_frontend/README.md)。项目启动器、重建求解器和构建工具使用项目源码。
 
-| 对象 | manifest | 身份 |
+公开扩展与本机安装的 X100 入口为 **N → X100**，支持同一台雷达的原安装位／机舱侧面切换、固定动静颜色与可切换速度色标、窄窗口显示和记录终态提示。安装对象或父级的约束、动画使标定失效时撤回观测；采样优化保留相同材料点与差分定义。操作见[X100 说明](docs/blender/X100雷达.md)，本机文件身份、后台注册与配置保留范围见[安装记录](publication/daily-installation.json)。
+
+0.3.42.8 项目源码提供[停止重试与本机进程监管](blender_frontend/README.md#55-实时连接与控制生命周期)、[实验配对／价值归一化／GRU／续训](docs/training/MAPPO_SETUP.md#fastfarm-实验身份与-gru)及[同模型评分](blade_recon0.2/README.md#评分模型与样本身份)。扩展 ZIP 包含命令水位恢复、相机采集事务结果、后台视频取消和相机几何缓存；Bridge、训练、评分和启动器通过完整源码归档提供。载荷按 `build-info.json`、inventory 和[交付身份](publication/blender-0.3.42.8.json)核对。
+
+<!-- release-identity:start -->
+| 对象 | 版本 | 身份依据 |
 | --- | --- | --- |
-| 公开 NREL ZIP | `0.3.24` | 180 文件；上传源包的已有 SHA-256、源码提交及证据归属见[交付身份](publication/blender-0.3.24.json)与[发布状态](docs/blender/发布状态与验证范围.md) |
-| 当前开发机日常安装对应 ZIP | `0.3.24` | 180 个安装文件与[上传源包](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.24/wfrl_blender-0.3.24.zip)匹配；已有 SHA-256 `99351530ddb27a1a1a4896977d4472e85c7e81983cad88ddd3421706de603a25`；[安装身份](publication/daily-installation.json) |
+| NREL 公开安装包 | **0.3.42.8** | [wfrl_blender-0.3.42+8.zip](https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.8/wfrl_blender-0.3.42%2B8.zip)；249 个文件；[交付身份](publication/blender-0.3.42.8.json) |
+| 开发机日常安装 | **0.3.42.7** | 独立载荷，按安装记录核对；207 个文件、116 个新进程模块已核对；[安装身份](publication/daily-installation.json) |
+<!-- release-identity:end -->
 
 身份、[发布核对](docs/blender/发布状态与验证范围.md#软件验证的适用对象)与[当前安装核对](publication/daily-installation.json)的适用范围见[发布状态与验证范围](docs/blender/发布状态与验证范围.md)。同一版本号不证明内容相同；升级后完全重启 Blender。
 
-## 主要能力
+0.3.42.8 扩展提供三机三叶响应统计与曲线，并包含后台 PNG 完成确认、回合曲线边界、连接恢复及三相机共享资源保护；配套启动器与 Bridge 通过源码归档提供。合同与保存证据见[源码软件合同与验证](docs/blender/发布状态与验证范围.md#源码软件合同与验证)。日常安装的载荷与检查范围见[安装身份](publication/daily-installation.json)。
+
+公开扩展在 **N → WFRL** 提供回放、相机、手动、导出和后端页面，保留原页签。主入口按实际数据与播放归属显示状态，离线保存结果、独立手动刚性运动和后端运行分别说明。公开包包含主入口、录制与后台 PNG 渲染；用法见[前端操作](前端readme.md#wfrl-主入口)。工作区的源码变动不自动替换公开附件或日常安装。
+
+公开 0.3.42.8 前端按网格与数值消费者选择形变计算范围，保留隐藏 T1 的结构叶尖测量和共享塔架运动，并复用已校验遥测数组。后端的完整功率校验、断连期间的生命周期推进与进度合并、Interactive 联合动作 PPO 使用项目 Python 源码，说明见[前端与后端接口](blender_frontend/README.md#55-实时连接与控制生命周期)及[训练配置](docs/training/MAPPO_SETUP.md)。普通 Python 包的机型资源与依赖见[本地配置](docs/setup/setup_local.md#2-macos-完整-python-环境)。
+
+当前交互前端为 Blender；后端 `wfrl.studio` 提供 `Trainer` 与 `Snapshot`，通过 Bridge 运行策略与训练。checkpoint 操作见[Blender 策略评估](docs/demos/Blender策略评估.md)。
+
+## 当前源码主要能力
 
 - **风机手动控制**：**N → 风机控制 → 创建 / 进入手动场景** 提供 T1/T2/T3 或全部风机的朝向、统一／分别变桨、RPM、叶轮角度与运行／暂停／停转，支持朝下／侧向／顺桨预设、相对角度微调、三机参数概览、JSON 姿态保存／选择性载入及撤销重做。批量启用分别变桨保留已启用机组的独立桨距。使用独立刚性场景和环境，保留原 demo；不产生功率、载荷、尾流或测量结果。[操作说明](docs/blender/风机手动控制.md)。
+- **手动试验与视频**：源码研究接口提供 rootkink 手动场景的 T1 恒速变桨、独立 T1 Down 和 1920×1080、25 fps H.264 视频生成；视频后台需要配套项目源码，日常扩展按其独立安装身份识别。生成命令默认等待最终结果，显式 `--detach` 可脱离运行；持久化作业支持查询、取消和完整母版校验后的编码重试，发布前预检目标文件系统并拒绝覆盖已有输出。[生成、监管、重试与验证范围](docs/blender/手动场景研究接口.md#导出变桨视频)。
 - **离线物理结果回放**：三台 NREL 5 MW 风机、九片叶片及柔性塔架，播放 117–177 s 的 60 秒 MAPPO 保存记录，提供偏航、功率、转矩、挠度和净空对照。离线观看无需 Python 后端、MPI、FAST.Farm 或网络。
+- **叶片外形**：MAPPO 侧栏可选择默认 NREL 或合成的 rootkink 外形；切换保留时刻、所选机组和相机设置，继续使用 NREL 保存运动与读数。[操作与使用边界](前端readme.md#3-时间回放与观察视角)。
 - **几何／同源纹理分屏**：通过 **N → MAPPO → 打开几何重建示例…** 进入两侧完整风机，在几何与同源纹理间切换。共享播放、单帧步进与暂停；人工观察点仅定位一次，播放保留手动缩放和绕转，保存重开恢复模式与视图。
+- **相机观察**：观察视口不显示画幅外遮罩或额外画幅边界；姿态和采集元数据变化复用代理与手动取景，光学变化按真实 FOV 校准。关闭并完成资源释放后停止观察定时器，重新打开恢复监听。
 - **三相机与图像采集**：共盒 C1/C2/C3、整盒安装与默认复位，支持 2×2、三列、独立单路、单路放大和同刻／时间序列 PNG。第四格是静态安装示意；采集使用独立原始画质设置。
 - **合成缺陷编辑**：NREL 九片叶片上的六类缺陷支持预览、确认／取消、健康对照、撤销重做、JSON 和 `.blend` 保存；外观随保存的柔性运动，不改变结构与气动物理。
 - **雷达研究结果**：默认 `hub-axis.v1` 与显式选择的 `hub-tls.v1` 共用 40 Hz 源，S2/S3 配对和独立 S1 报警分别显示；保留旧 B2 入口与无效／过期状态。
@@ -41,27 +66,42 @@ GW184 使用[独立包操作说明](docs/blender/GW184三相机与缺陷编辑�
 
 ## 源码与运行资源
 
-当前源码、测试、研究工具与文档使用 [`wind-farm-rl-all-work`](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work) 分支。运行资源与证据分别随 Git 或 [project-resources-v1](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1) 提供，具体位置及取得方式见[分发说明](docs/PUBLICATION.md)。NREL 离线扩展构建所需正式载荷随 Git 提供；其他入口按需恢复对应资源。
+仓库按运行职责组织；脚本入口与环境要求见[脚本索引](scripts/README.md)。
+
+| 目录 | 职责 |
+| --- | --- |
+| `blender_frontend/` | Blender 扩展、正式离线资产及前端检查 |
+| `wfrl/`、`scripts/`、`tests/`、`scenes/` | 后端、训练、数据工具、合同测试与场景配置 |
+| `blade_recon/`、`blade_recon0.2/`、`research/`、`projects/` | 独立研究实现、对照基线与机型输入；按各自 README 使用 |
+| `docs/` | 当前操作、实现合同、待实施要求及按对象解释的验证说明 |
+| `publication/`、`evidence/` | 发布与安装身份、原始软件验证及来源证据 |
+| `outputs/`、`results/` | 保存输入、研究结果和本地运行产物；已跟踪资产须按引用与资源清单保留 |
+| `dist/`、`slides/` | 独立净空演示清单、包身份旁文件与演示材料 |
+
+完整项目的 Python 环境统一使用根目录 [requirements.txt](requirements.txt)，文件顶部提供 macOS 简要安装命令。使用匹配架构的 Miniforge，由 conda 安装 Python 3.11、OpenMPI 与 OpenFAST 3.5.3（含原生 FAST.Farm）；恢复 WFCRL 资源后安装 Python 依赖，动态后端还需本机编译两个控制器。下载、编译与短仿真检查见[完整环境配置](docs/setup/setup_local.md#2-macos-完整-python-环境)。
+
+当前源码、测试、研究工具与文档使用 [`main`](https://github.com/snode11/wind-farm-blender/tree/main) 分支。运行资源与证据分别随 Git 或 [project-resources-v1](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1) 提供，具体位置及取得方式见[分发说明](docs/PUBLICATION.md)。NREL 离线扩展构建所需正式载荷随 Git 提供；其他入口按需恢复对应资源。
 
 | 用途 | 必须保留的内容 |
 | --- | --- |
 | 扩展构建与离线回放 | `blender_frontend/wfrl_blender/assets/`、`_vendor/`，以及构建使用的规范 `wfrl/` 源码 |
-| 独立净空演示 | `dist/lidar-delivery.json` 与 `results/lidar/packages/normal-v1.1/`、`close-v1.1/` 的完整数据包 |
+| 手动 T1 Down 视频 | 完整工作区源码，以及 `blender_frontend/wfrl_blender/assets/` 内的 rootkink／NREL 几何、地形纹理与环境 HDR；[生成入口](scripts/blender/generate_manual_pitch_video.py)须指定 `--output`，不依赖已有输出。恢复既有作业及重试编码还需保留其 `job.json` 与完整作业数据目录 |
+| 独立净空演示 | [交付清单](dist/lidar-delivery.json)指定 `results/lidar/packages/normal-v1.1/`、`close-v1.1/` 两个完整结果包；[专用启动入口](scripts/blender/打开净空雷达演示.command)使用项目源码，不安装扩展或启动求解器 |
 | 后端 Replay | 兼容后端环境，以及 `results/checkpoints/mappo_fastfarm_Dec_Turb3_Row1_Fastfarm_mappo_s0_level_E128_none.pt` |
 | GW184 项目 | `projects/gw184-single/` 的 geometry、motion、cameras 与 sources；两份 DTU 原始输入随 Git 提供，官方来源与固定摘要见[来源说明](projects/gw184-single/sources/README.md) |
 | 验证与研究复查 | 分发清单标识的原始测量、摘要、日志和图像；每项证据只适用于其记录的输入与载荷 |
 
-公开 0.3.24 扩展包含独立风机手动控制、相机异常资源清理、同源重建稳定刷新、完整播放覆盖和循环判定、回放包单次校验复用及 PNG 采集纹理分配控制。拒绝帧与非有限重建结果的历史／先验保护、启动器停止确认及构建输出保护属于项目侧工具，按[源码使用说明](docs/blender/INSTALL.md#从项目源码构建)独立取得；源码同步与公开发布均不会替换本机日常安装。
+公开 0.3.42.8 扩展包含独立风机手动控制、相机异常资源清理、同源重建稳定刷新、完整播放覆盖和循环判定、回放包单次校验复用及 PNG 采集纹理分配控制。拒绝帧与非有限重建结果的历史／先验保护、启动器停止确认及构建输出保护属于项目侧工具，按[源码使用说明](docs/blender/INSTALL.md#从项目源码构建)独立取得；源码同步与公开发布均不会替换本机日常安装。
 
 ## 验证与限制
 
 源码检查的命令、依赖、跳过条件与记录范围见[分发说明](docs/PUBLICATION.md#证据身份与限制)及其对应源码快照；各项结果只适用于记录的源码与输入，不作为当前公开 ZIP 或日常安装的重复验收。
 
-公开 0.3.24 ZIP 的附件、上传源包与源码身份见[交付身份](publication/blender-0.3.24.json)。已有本地 0.3.24 的安装身份、姿态合同、原生后台与短时窗口证据见[安装核对](publication/daily-installation.json)及[发布状态](docs/blender/发布状态与验证范围.md#软件验证的适用对象)，仅适用于记录的载荷、环境和范围。公开交付没有新增测试、安装或窗口验收；源码重建一致性、长期运行、完整片段性能和科学精度未验收。
+公开 ZIP 的文件、源码标签、SHA-256 和下载地址见[交付身份](publication/blender-0.3.42.8.json)。本版完成一次本地构建；宿主／原生回归、隔离安装、窗口／GPU、性能及科学精度检查均未运行，范围见[发布验证记录](publication/blender-0.3.42.8/verification.json)。本机日常安装按[安装记录](publication/daily-installation.json)识别。
 
-同源纹理是 **SAME_SOURCE_SIMULATION**：601 个 10 Hz 保存样本对应 117–177 s，60 Hz 时间轴每 6 帧保持一个样本；独立 `synth_tex` 是另一来源的 120 样本、0–11.9 s。放大与增强不会补出未观测表面。两者的几何／纹理仍为 **NOT_ACCEPTED**，图集模糊、条带、接缝和叶尖错贴限制保留。
+同源纹理是 **SAME_SOURCE_SIMULATION**：601 个 10 Hz 保存样本对应 117–177 s，60 Hz 时间轴每 6 帧保持一个样本。放大与增强不会补出未观测表面。几何／纹理仍为 **NOT_ACCEPTED**，图集模糊、条带、接缝和叶尖错贴限制保留。
 
-外部材料点研究候选为 Patch **2/8**、Crack **7/8**、跨相机接受 **0/264**，仍为 **FAILED_GATE / NOT_ACCEPTED**，`same_material_error_m` 与 `primary_gains` 为 `null`；正式 601 样本和图集未替换。材料点 F/G 的原始输入、冻结脚本和完整运行产物未分发，报告不能支持完整精确复现。原 0.2 mm 叶尖精度门仍为 **FAILED_GATE**；雷达仍为 **REVIEW_ONLY / PENDING_ACCEPTANCE**。
+外部材料点研究候选为 Patch **2/8**、Crack **7/8**、跨相机接受 **0/264**，仍为 **FAILED_GATE / NOT_ACCEPTED**，`same_material_error_m` 与 `primary_gains` 为 `null`；正式 601 样本和图集未替换。材料点 F/G 的原始输入、冻结脚本和完整运行产物未分发，报告不能支持完整精确复现。叶尖显示精度按[工作区源码与安装载荷](docs/blender/发布状态与验证范围.md#研究与物理边界)分别判定；工作区保存数据对照通过 0.2 mm／5 mm 显示门槛，本地 0.3.36 安装版另有 45 帧抽样记录；发布独立复验为 NOT_RUN，抽样不代表完整时间轴或科学精度验收。雷达仍为 **REVIEW_ONLY / PENDING_ACCEPTANCE**。
 
 Windows/Linux、稳定 30／60 FPS、长期运行、实物相机标定、自动缺陷检测、现场精度及安全保护均未验收。三相机参考姿态的重叠不等于全周期无遮挡或拼接成功；合成缺陷几何可见不证明图片可辨识。
 

@@ -34,7 +34,7 @@ def pulses(times, seed, duration, increment_range=(4,6), duration_range=(2,5)):
 
 
 def execute(exe, args, cwd, log):
-    with log.open('w') as stream:
+    with log.open('w', encoding='utf-8') as stream:
         result = subprocess.run([str(exe), *args], cwd=cwd,
                                 env={**os.environ, 'OMP_NUM_THREADS': '2'},
                                 stdout=stream, stderr=subprocess.STDOUT)
@@ -93,12 +93,12 @@ def main():
                       min_mps=float(final_hub[clip].min()), max_mps=float(final_hub[clip].max()))
     replace(farm/'InflowWind.dat', dict(WindType=3, FileName_BTS='"random-gust.bts"'))
     replace(farm/'Case.fstf', dict(DT_Low=.5, Z0_Low=1))
-    lines=(farm/'Case.fstf').read_text().splitlines()
+    lines=(farm/'Case.fstf').read_text(encoding='utf-8').splitlines()
     for i,line in enumerate(lines):
         if '"FFTest_WT1.fst"' in line:
             cells=line.split(); cells[6]='1'; lines[i]='\t'.join(cells)
-    (farm/'Case.fstf').write_text('\n'.join(lines)+'\n')
-    cfg=json.loads((run/'run_config.json').read_text())
+    (farm/'Case.fstf').write_text('\n'.join(lines)+'\n', encoding='utf-8')
+    cfg=json.loads((run/'run_config.json').read_text(encoding='utf-8'))
     cfg['wind_profile']=dict(kind='TurbSim_IECKAI_plus_seeded_gusts', mean_wind_mps=mean_wind,
         target_ti=args.ti, seed=args.seed, gust_seed=args.seed+1, events=events,
         gust_increment_range_mps=[args.gust_min,args.gust_max], gust_peak_envelope_mps=[mean_wind+args.gust_min,mean_wind+args.gust_max], gust_duration_range_s=[2,5],
@@ -108,7 +108,7 @@ def main():
         clip_hub_statistics=clip_stats, grid_spacing_m=[10,10], evidence_boundary='stochastic Kaimal background plus prescribed seeded coherent pulses; no IEC certification, field measurement or MAPPO; fixed rpm and pitch; gust envelope is not instantaneous cap')
     cfg['inputs']=[dict(path=str(f.relative_to(run)),sha256=hashlib.sha256(f.read_bytes()).hexdigest())
         for f in sorted(run.rglob('*')) if f.is_file() and f.name not in ('run_config.json','turbsim.log')]
-    (run/'run_config.json').write_text(json.dumps(cfg,indent=2))
+    (run/'run_config.json').write_text(json.dumps(cfg,indent=2), encoding='utf-8')
     exe=resolve_executable()
     status=dict(status='PREPARED_ONLY',exit_code=None,executable=str(exe),sha256=hashlib.sha256(exe.read_bytes()).hexdigest())
     try:
@@ -119,7 +119,7 @@ def main():
         status.update(status='FAILED',exit_code=1,error=str(exc))
         raise
     finally:
-        (run/'exit_status.json').write_text(json.dumps(status,indent=2))
+        (run/'exit_status.json').write_text(json.dumps(status,indent=2), encoding='utf-8')
     print(json.dumps(cfg['wind_profile'],indent=2),flush=True)
 
 

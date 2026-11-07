@@ -1,5 +1,4 @@
 """Review-package safety using synthetic data, with no source or scoring truth."""
-import copy
 import importlib.util
 import json
 from pathlib import Path

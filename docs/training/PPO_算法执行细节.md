@@ -305,7 +305,7 @@ entropy_loss / approx_kl / clip_fraction / std 等（第一次梯度更新后才
 
 ### 循环 + 保存
 
-清空 buffer → 回到环境采样。100k 步 ≈ 97 轮 rollout × 80 = 约 7760 次参数更新。
+清空 buffer → 回到环境采样。默认每轮采集 1024 步、进行 80 次参数更新；请求 100000 步时完成 98 轮 rollout，实际采集 100352 步并进行 7840 次参数更新。
 
 ```python
 model.save("results/checkpoints/ppo_ablaincourt")   # 网络权重 θ
@@ -347,7 +347,9 @@ tensorboard --logdir results/logs/ppo_wf
 python scripts/analysis/eval_visualize_ppo.py
 ```
 
-模型在 `results/checkpoints/ppo_ablaincourt.zip`，归一化在 `vecnormalize.pkl`；评估图在 `results/eval_outputs/`。`--eval-only` 缺少权重时可能创建新模型，缺统计量时有回退路径，须先确认文件；训练前“baseline”是未训练策略评估，不是零偏航对照。不能仅靠 before/after 日志宣称匹配零动作收益。
+模型在 `results/checkpoints/ppo_ablaincourt.zip`，归一化在 `vecnormalize.pkl`；评估图在 `results/eval_outputs/`。`--eval-only` 与 `--resume` 都要求完整且兼容的权重／归一化配对，缺失或损坏时明确报错。最终保存写入相同配对标识；无标识的模型仍需另外核对来源。定期检查点同时保存同一步数的权重和归一化文件。
+
+`--resume` 恢复观测与奖励统计及累计步数，`--timesteps` 指追加的全场控制步数，实际按完整 rollout 向上取整。评估固定观测统计、使用原始奖励。训练前评估使用当前训练环境统计量的独立副本：新训练评估初始策略，续训评估加载的策略。该评估不构成零偏航对照，不能仅靠 before/after 日志宣称匹配零动作收益。
 
 ---
 

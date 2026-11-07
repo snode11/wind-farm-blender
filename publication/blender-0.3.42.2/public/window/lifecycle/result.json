@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "addon_path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "checks": {
+    "save_keeps_current_output_and_frame": true,
+    "windows_after_load": 2,
+    "saved_output_removed": true,
+    "unrelated_image_editor_preserved": true,
+    "source_frame_preserved": true,
+    "output_resources_released": true,
+    "reopen_draws_existing_frame_without_duplicate_window": true,
+    "unregister_releases_observer_only": true
+  }
+}

@@ -1,0 +1,1 @@
+{"expected_samples": 71, "valid_samples": 25, "valid_ratio": 0.352112676056338, "mae_m": 0.327238963013196, "max_abs_error_m": 0.4102756009662496, "p95_abs_error_m": 0.4091196291603687, "max_positive_bias_m": 0.0, "passage_count": 8, "missed_passage_count": 0}

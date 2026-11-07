@@ -17,7 +17,8 @@ class WFRL_OT_LoadDemo(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         from .. import runtime
-        return runtime.configuration_editable()
+        from ..home_state import can_start
+        return runtime.configuration_editable() and can_start('replace_scene', context.scene)[0]
 
     def execute(self, context):
         from .. import load_demo_scene
@@ -98,7 +99,8 @@ class WFRL_OT_LoadDualBeam(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         from .. import runtime
-        return runtime.configuration_editable()
+        from ..home_state import can_start
+        return runtime.configuration_editable() and can_start('replace_scene', context.scene)[0]
 
     def invoke(self, context, event):
         if self.choose_file or not (self.builtin_package() / 'manifest.json').is_file():
@@ -107,20 +109,21 @@ class WFRL_OT_LoadDualBeam(bpy.types.Operator):
         return self.execute(context)
 
     def execute(self, context):
-        from .. import load_demo_scene, farm_flex, clearance_replay
+        from .. import load_demo_scene, farm_flex
         path = Path(self.filepath).parent if self.filepath else self.builtin_package()
         try:
-            _, overlay = farm_flex.dual_beam_api().resolve_package(path)
+            package = farm_flex.preflight(path)
+            overlay = package.overlay
             if overlay is None:
                 raise ValueError('请选择双束数据包的 manifest.json')
             if not self.filepath:
                 expected = 'hub-tls.v1' if self.builtin_method == 'TLS' else 'hub-axis.v1'
                 if overlay['config'].get('reconstruction_method', 'hub-axis.v1') != expected:
                     raise ValueError('内置双束数据包的方法与入口不一致：' + expected)
-            load_demo_scene(path)
+            load_demo_scene(path, _package=package)
             context.scene.wfrl_farm_panel_page = 'RADAR'
         except (ValueError, OSError, KeyError, TypeError, ImportError) as exc:
-            clearance_replay.clear(context.scene, '双束数据未就绪：' + str(exc))
+            context.scene['wfrl_home_load_error'] = '双束候选包加载失败：' + str(exc)
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}
         return {'FINISHED'}
@@ -143,18 +146,44 @@ class WFRL_OT_RenderStill(bpy.types.Operator):
 
 class WFRL_OT_RenderAnimation(bpy.types.Operator):
     bl_idname = "wfrl.render_animation"
-    bl_label = "Render Animation"
-    bl_description = "Render the current WFRL frame range from the active camera"
+    bl_label = "后台渲染动画"
+    bl_description = "独立场景副本按当前相机与帧范围生成 PNG；提供进度与取消，不改变源场景"
     directory: bpy.props.StringProperty(subtype="DIR_PATH", default="//wfrl-animation/")
 
+    @classmethod
+    def poll(cls, context):
+        from ..animation_render import job
+        return context.scene.camera is not None and not job.active
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
     def execute(self, context):
-        scene = context.scene
-        scene.render.image_settings.file_format = "PNG"
-        scene.render.filepath = bpy.path.abspath(self.directory)
-        scene["wfrl_last_animation_render"] = scene.render.filepath
-        bpy.ops.render.render(animation=True)
+        from .. import animation_render_ui
+        try:
+            path = animation_render_ui.start(context, self.directory)
+        except (OSError, ValueError, RuntimeError) as exc:
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
+        self.report({'INFO'}, '动画正在后台渲染：' + str(path))
         return {"FINISHED"}
 
 
+class WFRL_OT_CancelRenderAnimation(bpy.types.Operator):
+    bl_idname = 'wfrl.cancel_render_animation'
+    bl_label = '取消后台动画渲染'
+
+    @classmethod
+    def poll(cls, context):
+        from ..animation_render import job
+        return job.active
+
+    def execute(self, context):
+        from ..animation_render import job
+        job.cancel()
+        return {'FINISHED'}
+
+
 CLASSES = (WFRL_OT_LoadDemo, WFRL_OT_LoadDualBeam, WFRL_OT_SelectCamera, WFRL_OT_RenderStill,
-           WFRL_OT_RenderAnimation)
+           WFRL_OT_RenderAnimation, WFRL_OT_CancelRenderAnimation)

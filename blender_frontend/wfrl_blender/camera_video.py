@@ -13,6 +13,14 @@ from pathlib import Path
 import time
 import numpy as np
 
+from .atomic_json import write_json
+
+
+def render_sample():
+    """Render one exposure subsample using the current native scene settings."""
+    import bpy
+    return bpy.ops.render.render(write_still=True)
+
 
 def sha256(path):
     digest = hashlib.sha256()
@@ -20,13 +28,6 @@ def sha256(path):
         for block in iter(lambda: handle.read(1024 * 1024), b''):
             digest.update(block)
     return digest.hexdigest()
-
-
-def write_json(path, value):
-    path = Path(path)
-    temporary = path.with_suffix(path.suffix + '.tmp')
-    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + '\n')
-    temporary.replace(path)
 
 
 def frame_times(start_s, end_s, fps, exposure_s):
@@ -171,8 +172,8 @@ def prepare_scene(args):
     else:
         addon.load_demo_scene(args.package)
         scene = bpy.context.scene
-    active = farm_flex._ACTIVE
-    if args.turbine not in active.readers:
+    active = farm_flex.active_for(scene)
+    if active is None or args.turbine not in active.readers:
         raise ValueError('Turbine absent from source package')
     camera = scene.objects.get(args.camera) if args.camera else cameras.ensure_nacelle_gimbal(scene, args.turbine)
     if camera is None or camera.type != 'CAMERA' or camera.parent != scene.objects.get(f'WFRL.Turbine.{args.turbine}.YawRoot'):
@@ -243,7 +244,7 @@ def prepare_scene(args):
     scene.render.pixel_aspect_x, scene.render.pixel_aspect_y = pixel_x, pixel_y
     scene.render.fps, scene.render.fps_base = args.fps, 1
     scene.render.film_transparent = False
-    scene.use_nodes = False
+    scene.render.use_compositing = False
     scene.render.use_sequencer = False
     scene.render.image_settings.color_mode = 'RGBA'
     scene.render.image_settings.exr_codec = args.exr_codec
@@ -353,18 +354,20 @@ def _render_package(args):
     if output == package.resolve() or package.resolve() in output.parents:
         raise ValueError('Export must not write into the source result package')
     output.mkdir(parents=True, exist_ok=True)
-    frames = output / 'master_frames'; frames.mkdir(exist_ok=True)
-    checks = output / 'checks'; checks.mkdir(exist_ok=True)
+    frames = output / 'master_frames'
+    frames.mkdir(exist_ok=True)
+    checks = output / 'checks'
+    checks.mkdir(exist_ok=True)
     render_manifest = output / 'render_manifest.json'
     if render_manifest.exists():
-        if json.loads(render_manifest.read_text())['config_sha256'] != fingerprint:
+        if json.loads(render_manifest.read_text(encoding='utf-8'))['config_sha256'] != fingerprint:
             raise ValueError('Resume configuration mismatch; use a new output directory')
     elif any(frames.iterdir()):
         raise ValueError('Existing frames without matching render manifest; refusing mixed frames')
     write_json(render_manifest, {**config, 'config_sha256': fingerprint})
     write_json(output / 'camera.json', camera_config)
     record_path = checks / 'render_frames.json'
-    records = json.loads(record_path.read_text()) if record_path.exists() else {}
+    records = json.loads(record_path.read_text(encoding='utf-8')) if record_path.exists() else {}
     for key in list(records):
         if not key.isdigit() or not 0 <= int(key) < len(centers):
             raise ValueError('Frame record outside configured range')
@@ -411,7 +414,12 @@ def _render_package(args):
             scene.render.image_settings.color_depth = '32'
             scene.render.filepath = str(temporary_exr)
             stage = time.monotonic()
-            bpy.ops.render.render(write_still=True)
+            temporary_exr.unlink(missing_ok=True)
+            result = render_sample()
+            if result != {'FINISHED'}:
+                raise RuntimeError('Exposure sample render did not finish: ' + str(result))
+            if not temporary_exr.is_file() or temporary_exr.stat().st_size == 0:
+                raise RuntimeError('Exposure sample render produced no fresh EXR')
             timings['render_write'] += time.monotonic() - stage
             stage = time.monotonic()
             linear = bpy.data.images.load(str(temporary_exr), check_existing=False)

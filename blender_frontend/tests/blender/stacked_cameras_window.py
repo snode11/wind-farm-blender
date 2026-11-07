@@ -3,15 +3,25 @@ from pathlib import Path
 import json
 import os
 import sys
+import time
 import traceback
 import bpy
-from mathutils import Vector, Matrix
+from mathutils import Vector
 ROOT = Path(__file__).resolve().parents[3]
 sys.path[:0] = [os.environ.get('WFRL_ADDON_ROOT', str(ROOT/'blender_frontend')), str(ROOT)]
 import wfrl_blender as addon
 from wfrl_blender import stacked_camera_rig as rig, custom_cameras as core
 from wfrl_blender import native_camera_views as native, custom_camera_capture as capture
 OUT = Path(os.environ['WFRL_TEST_OUTPUT']); OUT.mkdir(parents=True, exist_ok=True)
+
+
+def complete(job, context, timeout=30.):
+    """Step a capture until its asynchronous image write commits."""
+    deadline = time.monotonic() + timeout
+    while not job.step(context):
+        assert time.monotonic() < deadline, 'capture did not finish'
+        time.sleep(.01)
+    return True
 state = {'phase': 0}
 
 def tick():
@@ -45,7 +55,7 @@ def tick():
             with bpy.context.temp_override(area=state['area'], region=state['region']):
                 job = capture.Capture(bpy.context, OUT)
                 try:
-                    assert job.step(bpy.context)
+                    assert complete(job, bpy.context)
                 except Exception as exc:
                     job.finish(error=str(exc)); raise
                 assert job.manifest['status'] == 'complete', job.manifest

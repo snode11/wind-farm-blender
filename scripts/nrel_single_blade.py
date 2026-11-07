@@ -18,8 +18,8 @@ def fit_bundle(input_dir, observation_dir, output_dir, config_file):
     from PIL import Image
     root, obsroot = relocated_path(input_dir), relocated_path(observation_dir)
     data, cal, moves = load_bundle(root)
-    observations = json.loads((obsroot/'observations.json').read_text())
-    annotations = json.loads((obsroot/'annotations.json').read_text())
+    observations = json.loads((obsroot/'observations.json').read_text(encoding='utf-8'))
+    annotations = json.loads((obsroot/'annotations.json').read_text(encoding='utf-8'))
     expected_keys = {'camera_id','frame_id','sim_time_s','K','T_camera_cv_from_world','T_world_from_blade_root','labels_path','split'}
     contour_keys = {'contour_points_path','contour_valid_path','contour_uncertainty_px'}
     ref = data['reference_state']
@@ -106,7 +106,7 @@ def fit_bundle(input_dir, observation_dir, output_dir, config_file):
         if count!=data['sampling']['frame_count_per_camera']:
             raise ValueError('Formal fitting decode is incomplete')
         decode['videos'][camera]={'frames_decoded':count,'video_sha256':data['files'][f'{camera}.mp4']}
-    config=json.loads(relocated_path(config_file).read_text())
+    config=json.loads(relocated_path(config_file).read_text(encoding='utf-8'))
     result=reconstruct(observations,output_dir,ref,config)
     write_json(Path(output_dir)/'fit_decode_verification.json',decode)
     return result
@@ -134,7 +134,7 @@ def main():
         from wfrl.nrel_reconstruction.observations import create_observations
         from wfrl.nrel_reconstruction.dataset import write_json
         _,result=create_observations(a.input,a.output,a.fit_frames,a.heldout_frames,a.reference_frame,with_contours=a.with_contours)
-        p=Path(a.input)/'dataset.json';data=json.loads(p.read_text());data['reference_state']=result;write_json(p,data)
+        p=Path(a.input)/'dataset.json';data=json.loads(p.read_text(encoding='utf-8'));data['reference_state']=result;write_json(p,data)
     elif a.command=='fit':
         result=fit_bundle(a.input,a.observations,a.output,a.config)
     else:

@@ -85,7 +85,7 @@ def _ffprobe(path: Path) -> dict[str, object] | None:
             ["ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0",
              "-show_entries", "stream=width,height,nb_frames,nb_read_frames,r_frame_rate",
              "-of", "json", str(path)],
-            capture_output=True, text=True, timeout=20, check=False,
+            capture_output=True, text=True, timeout=20, check=False, encoding='utf-8',
         )
     except (OSError, subprocess.SubprocessError):
         return None

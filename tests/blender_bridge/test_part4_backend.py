@@ -14,7 +14,7 @@ from wfrl.blender_bridge.server import BridgeServer
 from wfrl.blender_bridge.messages import encode_message, FrameDecoder
 
 
-def scene(): return NS(turbines=[NS(id='A'), NS(id='B')], dt=3, backend='fastfarm')
+def scene(): return NS(turbines=[NS(id='A'), NS(id='B')], dt=3, backend='fastfarm', to_dict=lambda: None)
 def snap(step=1): return NS(step=step, ctx={}, measure=dict(yaw=np.array([1., 2.]), pitch=np.array([3., 4.]), rotor_speed=np.array([np.nan, 8.]), power=np.array([2., 3.])), farm_power=5., reward=np.float32(.5), events=[])
 def envelope(kind, payload, sid='s', seq=1): return dict(protocol_version=1,type=kind,payload=payload,session_id=sid,sequence=seq)
 
@@ -40,6 +40,10 @@ def test_adapter_preserves_missing_invalid_units_ids_fidelity():
 class FakeTrainer:
     def __init__(self, scene, on_snapshot, **kwargs):
         self.callback=on_snapshot; self.stop_event=threading.Event(); self.error=None
+        self.runtime = self._thread = None
+    @property
+    def running(self):
+        return self._thread is not None and self._thread.is_alive()
     def start(self):
         def run():
             for i in range(1000):
@@ -54,6 +58,34 @@ def wait_for(predicate, timeout=2):
     while not predicate():
         assert time.monotonic()<end
         time.sleep(.005)
+
+
+def receive_until(server, client, decoder, predicate, *, receive_bytes=65536, timeout=2):
+    deadline = time.monotonic() + timeout
+    messages = []
+    previous_timeout = client.gettimeout()
+    client.setblocking(False)
+    try:
+        while time.monotonic() < deadline:
+            server.poll()
+            try:
+                data = client.recv(receive_bytes)
+            except BlockingIOError:
+                data = None
+            if data == b'':
+                pytest.fail(f'Bridge disconnected before expected reply; received={messages!r}')
+            if data:
+                messages.extend(decoder.feed(data))
+            if predicate(messages):
+                return messages
+            if data is None:
+                time.sleep(.001)
+        kinds = [(m['type'], m['sequence']) for m in messages]
+        pytest.fail(f'Timed out waiting for Bridge reply; received={kinds!r}, '
+                    f'run_status={server.session.status}, alive={server.session.alive()}, '
+                    f'pending={[item["kind"] for item in server.pending]!r}')
+    finally:
+        client.settimeout(previous_timeout)
 
 
 def test_session_pause_step_resume_stop():
@@ -129,7 +161,7 @@ def test_failed_status_survives_repeated_stop_until_reset():
     worker.start(); worker.join()
     session.status = 'RUNNING'
     session._thread = worker
-    session._trainer = NS(error='boom')
+    session._trainer = NS(runtime=None, running=False, error='boom')
     session.poll()
     assert session.status == 'FAILED'
     session.stop()
@@ -144,34 +176,55 @@ def test_stop_after_natural_exit_emits_draining_before_stopped():
     worker.start(); worker.join()
     session.status = 'RUNNING'
     session._thread = worker
-    session._trainer = NS(error=None)
+    session._trainer = NS(runtime=None, running=False, error=None)
     session.stop()
     statuses = [payload['run_status'] for kind, payload in session.poll()
                 if kind == 'lifecycle']
     assert statuses == ['DRAINING', 'STOPPED']
 
 
-def test_loopback_handshake_command_disconnect_and_resume():
-    session=BackendSession(scene(),trainer_factory=FakeTrainer)
+@pytest.mark.parametrize('snapshot_delay, receive_bytes', [(0., 65536), (.06, 65536), (.06, 7)])
+def test_loopback_handshake_command_disconnect_and_resume(snapshot_delay, receive_bytes):
+    class DelayedTrainer(FakeTrainer):
+        def start(self):
+            original = self.callback
+            first = True
+
+            def callback(sample):
+                nonlocal first
+                if first:
+                    first = False
+                    time.sleep(snapshot_delay)
+                original(sample)
+
+            self.callback = callback
+            super().start()
+
+    session=BackendSession(scene(),trainer_factory=DelayedTrainer)
     server=BridgeServer(port=0,session=session)
     sock=socket.create_connection(('127.0.0.1',server.port)); sock.settimeout(.2)
     decoder=FrameDecoder()
-    def exchange(message):
+    def exchange(message, expected_type):
         sock.sendall(encode_message(message))
-        for _ in range(10): server.poll(); time.sleep(.002)
-        return decoder.feed(sock.recv(65536))
+        return receive_until(server, sock, decoder,
+                             lambda replies: any(m['type'] == expected_type for m in replies),
+                             receive_bytes=receive_bytes)
     try:
-        messages=exchange(envelope('hello',dict(supported_versions=[1],resume_session_id=None,capabilities=[]),'',0))
+        messages=exchange(envelope('hello',dict(supported_versions=[1],resume_session_id=None,capabilities=[]),'',0), 'hello_ack')
+        assert messages, 'No complete handshake reply received'
         sid=messages[0]['session_id']; assert messages[0]['type']=='hello_ack'
-        messages=exchange(envelope('command',dict(command='run.start',arguments=dict(mode='demo',options={})),sid,1))
+        messages=exchange(envelope('command',dict(command='run.start',arguments=dict(mode='demo',options={})),sid,1), 'snapshot')
         assert any(m['type']=='snapshot' for m in messages)
         sock.close(); wait_for(lambda:(server.poll() or server.client is None))
         assert session.status in {'RUNNING', 'PAUSED'}
         assert session.alive()
         sock=socket.create_connection(('127.0.0.1',server.port)); sock.settimeout(.2)
-        messages=exchange(envelope('hello',dict(supported_versions=[1],resume_session_id=sid,capabilities=[]),'',0))
+        decoder = FrameDecoder()
+        messages=exchange(envelope('hello',dict(supported_versions=[1],resume_session_id=sid,capabilities=[]),'',0), 'hello_ack')
         assert messages[0]['payload']['resumed']
-    finally: sock.close(); server.close()
+    finally:
+        sock.close(); server.close()
+        wait_for(lambda: not session.alive())
 
 
 def test_reject_non_loopback():
@@ -247,8 +300,8 @@ def test_server_retains_reliable_events_after_send_queue_overflow():
     try:
         sock.sendall(encode_message(envelope(
             'hello', dict(supported_versions=[1], resume_session_id=None, capabilities=[]), '', 0)))
-        for _ in range(10): server.poll(); time.sleep(.002)
-        hello = decoder.feed(sock.recv(65536))[0]
+        hello = receive_until(server, sock, decoder,
+                              lambda rows: any(row['type'] == 'hello_ack' for row in rows))[0]
         sid = hello['session_id']
         for status in ('STARTING', 'RUNNING'):
             session.lifecycle(status)
@@ -262,12 +315,8 @@ def test_server_retains_reliable_events_after_send_queue_overflow():
         sock = socket.create_connection(('127.0.0.1', server.port)); sock.settimeout(.2)
         sock.sendall(encode_message(envelope(
             'hello', dict(supported_versions=[1], resume_session_id=sid, capabilities=[]), '', 0)))
-        messages = []
-        for _ in range(40):
-            server.poll(); time.sleep(.002)
-            try: messages.extend(decoder.feed(sock.recv(65536)))
-            except socket.timeout: pass
-            if any(message['type'] == 'error' for message in messages): break
+        messages = receive_until(server, sock, FrameDecoder(),
+                                 lambda rows: any(row['type'] == 'error' for row in rows))
         assert messages[0]['type'] == 'hello_ack' and messages[0]['payload']['resumed']
         assert [message['type'] for message in messages[1:]] == ['lifecycle', 'lifecycle', 'error']
     finally:
@@ -286,8 +335,8 @@ def test_fresh_session_discards_old_reliable_backlog():
     try:
         sock.sendall(encode_message(envelope(
             'hello', dict(supported_versions=[1], resume_session_id=None, capabilities=[]), '', 0)))
-        for _ in range(10): server.poll(); time.sleep(.002)
-        messages = FrameDecoder().feed(sock.recv(65536))
+        messages = receive_until(server, sock, FrameDecoder(),
+                                 lambda rows: any(row['type'] == 'hello_ack' for row in rows))
         assert len(messages) == 1 and messages[0]['type'] == 'hello_ack'
         assert messages[0]['session_id'] != old_id
         assert not server.backlog
@@ -297,13 +346,13 @@ def test_fresh_session_discards_old_reliable_backlog():
 
 def test_fresh_client_after_handshake_gets_new_session_id():
     server = BridgeServer(port=0, session=BackendSession(scene(), trainer_factory=FakeTrainer))
-    decoder = FrameDecoder()
     def handshake():
         client = socket.create_connection(('127.0.0.1', server.port)); client.settimeout(.2)
         client.sendall(encode_message(envelope(
             'hello', dict(supported_versions=[1], resume_session_id=None, capabilities=[]), '', 0)))
-        for _ in range(10): server.poll(); time.sleep(.002)
-        return client, decoder.feed(client.recv(65536))[0]['session_id']
+        messages = receive_until(server, client, FrameDecoder(),
+                                 lambda rows: any(row['type'] == 'hello_ack' for row in rows))
+        return client, messages[0]['session_id']
     first = second = None
     try:
         first, first_id = handshake()
@@ -353,12 +402,18 @@ def test_formal_stop_timeout_force_terminates_owned_process_group():
     session.status = 'RUNNING'
     session._process = process
     try:
+        before = session.synchronization_state()
+        assert before['worker_alive'] is True and before['cleanup_confirmed'] is False
         session.stop(.05)
         wait_for(lambda: session.status == 'FAILED')
         lifecycle = [payload for kind, payload in session.poll()
                      if kind == 'lifecycle' and payload['run_status'] == 'FAILED']
         assert 'force terminated' in lifecycle[-1]['reason']
         assert not session.alive()
+        wait_for(lambda: session.synchronization_state()['cleanup_confirmed'])
+        after = session.synchronization_state()
+        assert after['worker_alive'] is False and after['run_status'] == 'FAILED'
+        assert after['state_revision'] > before['state_revision']
     finally:
         if process.poll() is None:
             os.killpg(process.pid, signal.SIGKILL)
@@ -377,11 +432,15 @@ def test_formal_launcher_exit_with_live_child_fails_and_cleans_group():
     session.status = 'RUNNING'
     session._process = process
     try:
+        before = session.synchronization_state()
+        assert before['worker_alive'] is True and before['cleanup_confirmed'] is False
         session.poll()
         assert session.status == 'FAILED'
         wait_for(lambda: not session.alive())
         session.stop()
         assert session.status == 'FAILED'
+        wait_for(lambda: session.synchronization_state()['cleanup_confirmed'])
+        assert session.synchronization_state()['worker_alive'] is False
     finally:
         try: os.killpg(process.pid, signal.SIGKILL)
         except (ProcessLookupError, PermissionError): pass
@@ -391,7 +450,7 @@ def test_completed_reader_does_not_hide_live_owned_descendants():
     session = BackendSession(scene(), trainer_factory=FakeTrainer)
     reader = threading.Thread(target=lambda: None)
     reader.start(); reader.join()
-    trainer = NS(error=None, running=True)
+    trainer = NS(runtime=None, error=None, running=True)
     trainer.stop = lambda timeout: setattr(trainer, 'running', False)
     session._trainer, session._thread = trainer, reader
     session.status = 'RUNNING'

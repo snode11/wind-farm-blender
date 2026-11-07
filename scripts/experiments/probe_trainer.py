@@ -2,7 +2,7 @@
 
 跑：
     & "C:\\Program Files\\Microsoft MPI\\Bin\\mpiexec.exe" -n 1 `
-      "USER_HOME\\.conda\\envs\\wfcrl\\python.exe" `
+      "C:\\Users\\s1155\\.conda\\envs\\wfcrl\\python.exe" `
       scripts/experiments/probe_trainer.py
 
 这是 D2 的一半：训练必须在后台线程跑，主线程能一直响应。所以判据不是"loss 降了"
@@ -14,12 +14,11 @@
   4. pause/resume 停在控制步边界，暂停期间快照不再前进
   5. stop() 能干净收尾：driver 排空、无孤儿进程、算例目录已清
   6. 训练确有推进：PPO 更新执行过，explained_var/vloss 有数
-  7. checkpoint 能被 rviz_app.make_fastfarm_policy_fn 的口径加载
+  7. checkpoint 能被 Trainer._replay_policy 的口径加载
 """
 import os
 import subprocess
 import sys
-import threading
 import time
 import traceback
 
@@ -43,7 +42,7 @@ def fastfarm_processes():
     cmd = (["tasklist"] if os.name == "nt"
            else ["pgrep", "-f", "[F]AST.Farm"])
     try:
-        return subprocess.run(cmd, capture_output=True, text=True).stdout
+        return subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8').stdout
     except FileNotFoundError:
         return ""
 
@@ -196,13 +195,13 @@ def main():
               np.isfinite(h["mean_power"]) and h["mean_power"] > 0.5,
               f"{h['mean_power']:.3f} MW")
 
-    print("\n== 7. checkpoint 与 rviz_app 的加载口径兼容 ==", flush=True)
+    print("\n== 7. checkpoint 与 Trainer._replay_policy 的加载口径兼容 ==", flush=True)
     check("checkpoint 已落盘", os.path.exists(CKPT), CKPT)
     if os.path.exists(CKPT):
         ck = torch.load(CKPT, map_location="cpu", weights_only=False)
         need = ("actor", "critic", "obs_mean", "obs_var", "obs_keys",
                 "obs_dim", "act_dim", "state_dim")
-        check("含 rviz_app.make_fastfarm_policy_fn 要的全部键",
+        check("含 Trainer._replay_policy 要的全部键",
               all(k in ck for k in need),
               f"缺 {[k for k in need if k not in ck]}")
         check("state_dim = n × obs_dim", ck["state_dim"] == sc.n * ck["obs_dim"],

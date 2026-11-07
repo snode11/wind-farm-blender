@@ -92,7 +92,7 @@ def export(template, output, shell=None, source=None):
     assert len(result["blade_stations"]) == 19 and len(airfoils) == 8
     assert all(len(af["coordinates"]) == 399 for af in airfoils)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(result, separators=(",", ":"), ensure_ascii=False) + "\n")
+    output.write_text(json.dumps(result, separators=(",", ":"), ensure_ascii=False) + "\n", encoding='utf-8')
     print(f"Exported {output}: {output.stat().st_size} bytes, {len(sources)} source hashes")
 
 

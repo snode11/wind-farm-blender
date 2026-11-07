@@ -55,6 +55,7 @@ def runtimes(monkeypatch):
             self.blades = [(scene.objects['WFRL.Turbine.T1.Blade1'],)]
             self.cache, self.comparison, self.updates = {}, None, []
             self.restored = False
+            self.frame_error = ''
             clearance_replay._READERS[scene.as_pointer()] = self.readers['T1']
 
         def update(self, scene):
@@ -73,8 +74,9 @@ def test_multiple_independent_scenes_keep_own_runtime_and_handler(runtimes):
     runtime_b = farm_flex.attach(b, 'package')
     assert farm_flex.active_for(a) is runtime_a
     assert farm_flex.active_for(b) is runtime_b
-    assert farm_flex.is_active(a) and farm_flex._ACTIVE is runtime_a
-    assert farm_flex.is_active(b) and farm_flex._ACTIVE is runtime_b
+    assert farm_flex.ready_for(a) is runtime_a and farm_flex.ready_for(b) is runtime_b
+    # Querying one scene never redirects lookups for another.
+    assert farm_flex.is_active(b) and farm_flex.ready_for(a) is runtime_a
     a.frame_set(121)
     b.frame_set(241)
     assert runtime_a.updates == [a, a]
@@ -117,6 +119,171 @@ def test_linked_scene_cannot_drive_same_objects_with_second_clock(runtimes):
     assert not farm_flex.is_active(linked)
 
 
+@pytest.mark.parametrize('part', ['Blade1', 'Tower'])
+@pytest.mark.parametrize('retention', ['external', 'fake_user', 'shape_keys', 'library', 'private'])
+@pytest.mark.parametrize('binding_fails', [False, True])
+def test_replacement_restores_private_pose_without_mutating_retained_mesh(
+        runtimes, monkeypatch, part, retention, binding_fails):
+    import numpy as np
+
+    bpy, Runtime = runtimes
+    meshes = []
+
+    class Mesh(dict):
+        __eq__ = object.__eq__
+        __hash__ = object.__hash__
+
+        def __init__(self, coordinates):
+            super().__init__(wfrl_farm_flex_owned=True)
+            self.coordinates = np.array(coordinates, dtype=float)
+            self.users = 0
+            self.removed = False
+            self.use_fake_user = False
+            self.shape_keys = self.library = None
+            self.vertices = SimpleNamespace(foreach_set=self.write)
+            meshes.append(self)
+
+        def write(self, attribute, values):
+            assert attribute == 'co'
+            self.coordinates[:] = values
+
+        def update(self):
+            pass
+
+        def get(self, key, default=None):
+            if self.removed:
+                raise ReferenceError('Removed mesh')
+            return super().get(key, default)
+
+        def copy(self):
+            mesh = Mesh(self.coordinates)
+            mesh.use_fake_user, mesh.shape_keys = self.use_fake_user, self.shape_keys
+            return mesh
+
+    class Object:
+        def __init__(self, mesh):
+            self._data = None
+            self.data = mesh
+
+        @property
+        def data(self):
+            return self._data
+
+        @data.setter
+        def data(self, mesh):
+            if self._data is not None:
+                self._data.users -= 1
+            self._data = mesh
+            mesh.users += 1
+
+        def shape_key_clear(self):
+            self.data.shape_keys = None
+
+    def remove(mesh):
+        assert mesh.users == 0
+        meshes.remove(mesh)
+        mesh.removed = True
+
+    bpy.data = SimpleNamespace(meshes=SimpleNamespace(remove=remove))
+    scene = Scene('Replacement owner')
+    posed, rest = [2., 3., 4.], np.array([0., 0., 1.])
+    original = Mesh(posed)
+    obj = Object(original)
+    external = Object(original) if retention == 'external' else None
+    original.use_fake_user = retention == 'fake_user'
+    original.shape_keys = object() if retention == 'shape_keys' else None
+    original.library = object() if retention == 'library' else None
+    scene.objects['WFRL.Turbine.T1.' + part] = obj
+    active = farm_flex.attach(scene, 'first')
+    active.blades = [(obj, rest)] if part == 'Blade1' else []
+    active.towers = [(obj, rest)] if part == 'Tower' else []
+    active.restore_support = lambda: [o.data.write('co', r) for o, r in active.towers]
+    protected = retention != 'private'
+
+    def bind(target, path, *, _package):
+        assert path == 'replacement'
+        np.testing.assert_array_equal(obj.data.coordinates, rest)
+        if protected:
+            assert obj.data is not original
+            np.testing.assert_array_equal(original.coordinates, posed)
+        if binding_fails:
+            raise ValueError('Replacement binding failed')
+        bindings = farm_flex._MeshBindings()
+        bindings.replace(obj, bindings.own(Mesh([5., 6., 7.])))
+        bindings.commit()
+        return Runtime(target, path, _package=_package)
+
+    monkeypatch.setattr(farm_flex, 'FarmFlex', bind)
+    if binding_fails:
+        with pytest.raises(ValueError, match='Replacement binding failed'):
+            farm_flex.attach(scene, 'replacement')
+        assert obj.data is original
+        assert farm_flex.active_for(scene) is None
+    else:
+        assert farm_flex.attach(scene, 'replacement').enabled
+        np.testing.assert_array_equal(obj.data.coordinates, [5., 6., 7.])
+    if protected:
+        np.testing.assert_array_equal(original.coordinates, posed)
+        assert original in meshes
+    if external is not None:
+        assert external.data is original
+    assert bool(original.shape_keys) == (retention == 'shape_keys')
+    assert all(mesh is original or mesh is obj.data for mesh in meshes)
+
+
+def test_deleted_scene_runtime_can_be_detached_by_stored_key(runtimes):
+    class RemovedScene(Scene):
+        removed = False
+
+        def as_pointer(self):
+            if self.removed:
+                raise ReferenceError('Scene has been removed')
+            return super().as_pointer()
+
+        def __setitem__(self, key, value):
+            if self.removed:
+                raise ReferenceError('Scene has been removed')
+            super().__setitem__(key, value)
+
+    scene = RemovedScene('Removed')
+    active = farm_flex.attach(scene, 'package')
+    scene.removed = True
+    assert farm_flex.active_for(scene) is None
+    assert clearance_replay.reader_for(scene) is None
+    farm_flex.detach(scene, restore=False)
+    assert not active.enabled and not farm_flex._ACTIVES
+    assert not clearance_replay._READERS
+    farm_flex.detach(restore=False)
+
+
+def test_farm_reader_requires_its_deformation_runtime(runtimes):
+    scene = Scene('Farm')
+    active = farm_flex.attach(scene, 'package')
+    scene['wfrl_farm_flex_path'] = 'package'
+    assert clearance_replay.reader_for(scene) is active.readers['T1']
+    farm_flex._ACTIVES.clear()
+    assert clearance_replay.reader_for(scene) is None
+    assert clearance_replay.sample(scene) is None
+
+
+@pytest.mark.parametrize('retained', [dict(users=1), dict(use_fake_user=True),
+                                     dict(shape_keys=object()), dict(library=object()), {}])
+def test_comparison_cleanup_preserves_retained_data(monkeypatch, retained):
+    from wfrl_blender.deflection import ComparisonView
+    class Mesh:
+        def __init__(self):
+            self.users, self.use_fake_user = 0, False
+            self.shape_keys = self.library = None
+            self.__dict__.update(retained)
+    removed = []
+    bpy = SimpleNamespace(types=SimpleNamespace(Mesh=Mesh, Curve=type('Curve', (), {})),
+                          data=SimpleNamespace(meshes=SimpleNamespace(remove=removed.append)))
+    monkeypatch.setitem(sys.modules, 'bpy', bpy)
+    mesh = Mesh()
+    ComparisonView._release_data(mesh)
+    assert removed == ([] if retained else [mesh])
+
+
 @pytest.fixture
 def native_player(monkeypatch):
     a, b = Scene('A'), Scene('B')
@@ -142,7 +309,10 @@ def native_player(monkeypatch):
         native.scene = None
 
     handlers = SimpleNamespace(animation_playback_pre=[], animation_playback_post=[], load_pre=[])
-    bpy = SimpleNamespace(app=SimpleNamespace(background=False, handlers=handlers),
+    pending = []
+    timers = SimpleNamespace(register=lambda callback, **_kw: pending.append(callback),
+                             is_registered=lambda callback: callback in pending)
+    bpy = SimpleNamespace(app=SimpleNamespace(background=False, handlers=handlers, timers=timers),
         context=SimpleNamespace(scene=a, window=windows[0], window_manager=SimpleNamespace(windows=windows),
                                 temp_override=override),
         ops=SimpleNamespace(screen=SimpleNamespace(animation_cancel=cancel)))
@@ -150,12 +320,24 @@ def native_player(monkeypatch):
     monkeypatch.setitem(sys.modules, 'bpy.app.handlers', SimpleNamespace(persistent=lambda fn: fn))
     monkeypatch.setattr(playback, '_OWNER_SCENE', None)
     monkeypatch.setattr(playback, '_OWNER_WINDOW', None)
+    monkeypatch.setattr(clearance_replay, '_END_REQUEST', None)
     def start(window):
         bpy.context.window = window
         native.scene = window.scene
         playback.animation_started(window.scene)
         native.playing = True
     return bpy, native, windows, overridden, start
+
+
+def test_tip_trail_playback_uses_native_owner_scene(native_player):
+    bpy, native, windows, overridden, start = native_player
+    start(windows[0])
+    assert all(window.screen.is_animation_playing for window in windows)
+    assert tip_tracking._is_playing(windows[0].scene)
+    assert not tip_tracking._is_playing(windows[1].scene)
+    start(windows[1])
+    assert not tip_tracking._is_playing(windows[0].scene)
+    assert tip_tracking._is_playing(windows[1].scene)
 
 
 def test_pause_cancels_single_native_owner_and_its_same_scene_views(native_player):
@@ -217,15 +399,156 @@ def test_queued_end_callback_cannot_stop_another_scene(native_player, monkeypatc
     a.frame_current = a.frame_end = 121
     b.frame_current, b.frame_end = 10, 200
     monkeypatch.setattr(clearance_replay, '_READERS', {a.as_pointer(): object()})
+    start(windows[0])
+    clearance_replay._queue_finished_playback(a)
+    wfrl_blender._cancel_playback(a)
+    overridden.clear()
     start(windows[1])
     clearance_replay._stop_finished_playback()
     assert native.playing and playback.is_playing(b) and overridden == []
     monkeypatch.setattr(clearance_replay, '_READERS', {a.as_pointer(): object(), b.as_pointer(): object()})
     b.frame_current = b.frame_end
+    clearance_replay._queue_finished_playback(b)
     clearance_replay._stop_finished_playback()
     assert not native.playing and overridden == [windows[1]]
+
+
+def test_completed_playback_callback_cannot_cancel_same_scene_restart(native_player, monkeypatch):
+    bpy, native, windows, overridden, start = native_player
+    scene = windows[0].scene
+    scene.frame_current = scene.frame_end = 121
+    monkeypatch.setattr(clearance_replay, '_READERS', {scene.as_pointer(): object()})
+    start(windows[0])
+    clearance_replay._queue_finished_playback(scene)
+    wfrl_blender._cancel_playback(scene)
+    overridden.clear()
+    start(windows[2])
+    clearance_replay._stop_finished_playback()
+    assert native.playing and playback.owner_window() is windows[2]
+    assert overridden == []
+
+
+def test_paused_terminal_evaluation_does_not_queue_future_player_stop(native_player, monkeypatch):
+    bpy, native, windows, overridden, start = native_player
+    scene = windows[0].scene
+    scene.frame_current = scene.frame_end = 121
+    monkeypatch.setattr(clearance_replay, '_READERS', {scene.as_pointer(): object()})
+    clearance_replay._queue_finished_playback(scene)
+    assert not bpy.app.timers.is_registered(clearance_replay._stop_finished_playback)
+    start(windows[0])
+    clearance_replay._stop_finished_playback()
+    assert native.playing and overridden == []
+
+
+def test_terminal_callback_rejects_replaced_reader(native_player, monkeypatch):
+    bpy, native, windows, overridden, start = native_player
+    scene = windows[0].scene
+    scene.frame_current = scene.frame_end = 121
+    monkeypatch.setattr(clearance_replay, '_READERS', {scene.as_pointer(): object()})
+    start(windows[0])
+    clearance_replay._queue_finished_playback(scene)
+    clearance_replay._READERS[scene.as_pointer()] = object()
+    clearance_replay._stop_finished_playback()
+    assert native.playing and overridden == []
 
 
 def test_pause_background_never_calls_window_operator(monkeypatch):
     monkeypatch.setitem(sys.modules, 'bpy', SimpleNamespace(app=SimpleNamespace(background=True)))
     wfrl_blender._cancel_playback()
+
+
+def test_standalone_replay_restores_saved_fractional_frame(monkeypatch):
+    class SavedScene(dict):
+        frame_current = 61
+        frame_subframe = .375
+        wfrl_clearance_normal_path = '/fixture/normal'
+
+        def frame_set(self, frame, *, subframe=0.):
+            self.frame_current, self.frame_subframe = frame, subframe
+
+    scene = SavedScene(wfrl_scene_kind='clearance_replay', wfrl_clearance_demo='normal')
+    monkeypatch.setitem(sys.modules, 'bpy', SimpleNamespace(data=SimpleNamespace(scenes=[scene]),
+                                                          path=SimpleNamespace(abspath=str)))
+    monkeypatch.setattr(clearance_replay, '_READERS', {})
+
+    def load(target, path, demo, *, restoring):
+        assert target is scene and path == '/fixture/normal' and demo == 'normal' and restoring
+        target.frame_set(1)
+
+    monkeypatch.setattr(clearance_replay, 'load', load)
+    clearance_replay.on_load(None)
+    assert (scene.frame_current, scene.frame_subframe) == (61, .375)
+
+
+@pytest.mark.parametrize('timebase,fps,base,expected', [
+    (90., 30, 1., 117.325), (60., 30, 1., 117.4875), (None, 30, 1., 117.975),
+    (90., 24, 1.001, 117.325), (60., 24, 1.001, 117.4875), (None, 24, 1.001, 118.21996875),
+])
+def test_farm_file_reopen_preserves_saved_clock_output_and_preview(
+        monkeypatch, tmp_path, timebase, fps, base, expected):
+    from wfrl_blender import runtime
+
+    class SavedScene(dict):
+        render = SimpleNamespace(fps=24, fps_base=1.001)
+        frame_start, frame_end, frame_step = 11, 101, 2
+        frame_preview_start, frame_preview_end = 21, 81
+        frame_current, frame_subframe = 40, .25
+        sync_mode, use_preview_range = 'NONE', True
+
+        def as_pointer(self):
+            return id(self)
+
+        def frame_set(self, frame, *, subframe=0.):
+            self.frame_current, self.frame_subframe = frame, subframe
+
+    scene = SavedScene(wfrl_scene_kind='clearance_replay', wfrl_clearance_demo='near_tower',
+                       wfrl_farm_flex_path=str(tmp_path),
+                       wfrl_clearance_turbine='T2')
+    scene.render = SimpleNamespace(fps=fps, fps_base=base)
+    if timebase is not None:
+        scene['wfrl_clearance_timebase_fps'] = timebase
+    readers = {tid: SimpleNamespace(start_s=117., end_s=177., at=lambda t: dict(time_s=t))
+               for tid in ('T1', 'T2', 'T3')}
+    active = SimpleNamespace(readers=readers)
+    monkeypatch.setitem(sys.modules, 'bpy', SimpleNamespace(data=SimpleNamespace(scenes=[scene])))
+    monkeypatch.setattr(runtime, 'enter_result_replay', lambda **_kw: None)
+    monkeypatch.setattr(farm_flex, 'active_for', lambda target: active if target is scene else None)
+    monkeypatch.setattr(clearance_replay, '_READERS', {scene.as_pointer(): readers['T2']})
+    assert clearance_replay.sample(scene)['time_s'] == expected
+
+    def attach(target, path):
+        assert target is scene and path == tmp_path
+        target.render.fps, target.render.fps_base = 60, 1.
+        target.frame_start, target.frame_end = 1, 3601
+        target.sync_mode, target.use_preview_range = 'FRAME_DROP', False
+        target['wfrl_clearance_timebase_fps'] = 60.
+        target['wfrl_clearance_turbine'] = 'T1'
+        return active
+
+    monkeypatch.setattr(farm_flex, 'attach', attach)
+    clearance_replay.on_load(None)
+    assert (scene.render.fps, scene.render.fps_base) == (fps, base)
+    assert (scene.frame_start, scene.frame_end, scene.frame_step) == (11, 101, 2)
+    assert (scene.frame_preview_start, scene.frame_preview_end) == (21, 81)
+    assert (scene.sync_mode, scene.use_preview_range) == ('NONE', True)
+    assert (scene.frame_current, scene.frame_subframe) == (40, .25)
+    assert scene.get('wfrl_clearance_timebase_fps') == timebase
+    assert scene['wfrl_clearance_turbine'] == 'T2'
+    assert clearance_replay.reader_for(scene) is readers['T2']
+    assert clearance_replay.sample(scene)['time_s'] == expected
+
+
+def test_bad_candidate_preserves_same_scene_runtime_reader_and_time(runtimes, monkeypatch):
+    a = Scene('A')
+    runtime = farm_flex.attach(a, 'good')
+    a['wfrl_clearance_time_s'] = 123.
+    reader = clearance_replay.reader_for(a)
+    objects = dict(a.objects)
+    def fail(path):
+        raise ValueError('candidate integrity mismatch')
+    monkeypatch.setattr(farm_flex, '_load_package', fail)
+    with pytest.raises(ValueError, match='candidate integrity'):
+        farm_flex.attach(a, 'bad')
+    assert farm_flex.active_for(a) is runtime and runtime.enabled
+    assert clearance_replay.reader_for(a) is reader
+    assert a['wfrl_clearance_time_s'] == 123. and a.objects == objects

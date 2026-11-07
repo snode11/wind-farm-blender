@@ -5,6 +5,7 @@ Legacy mode is intentionally static, with aligned numeric frame identities or
 synchronized videos. It never discovers truth or silently substitutes masks.
 """
 from dataclasses import dataclass
+from copy import deepcopy
 import json
 import math
 import hashlib
@@ -82,12 +83,13 @@ def _load_bundle(root, raw, indices, force_manifest=False):
     # allowlist uses hardlinks/copies of declared files only; original bundles
     # and neighboring truth are untouched. Validation remains the legacy loader.
     selected = dict(raw)
-    selected['frames'] = [raw['frames'][k] for k in indices]
+    selected['frames'] = [deepcopy(raw['frames'][k]) for k in indices]
     index_map = {original: selected for selected, original in enumerate(indices)}
     original_access = []
     with tempfile.TemporaryDirectory(prefix='blade-v02-input-selection-') as tmp:
         target = Path(tmp).resolve()
-        def declared(relative, role):
+        materialized = set()
+        def declared(relative, role, **identity):
             relative = str(relative)
             path = (root / relative).resolve()
             if Path(relative).is_absolute() or not path.is_relative_to(root):
@@ -98,28 +100,32 @@ def _load_bundle(root, raw, indices, force_manifest=False):
                 raise ValueError('forbidden solver input: ' + relative)
             content = path.read_bytes()
             original_access.append({'path': relative, 'role': role,
-                'sha256': hashlib.sha256(content).hexdigest(), 'bytes': len(content)})
-            dest = (target / relative).resolve()
+                'sha256': hashlib.sha256(content).hexdigest(), 'bytes': len(content), **identity})
+            canonical = path.relative_to(root).as_posix()
+            dest = target / canonical
             if not dest.is_relative_to(target):
                 raise ValueError('declared path escapes temporary input selection: ' + relative)
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            try:
-                dest.hardlink_to(path)
-            except OSError:
-                shutil.copyfile(path, dest)
-            return content
+            if canonical not in materialized:
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                try:
+                    dest.hardlink_to(path)
+                except OSError:
+                    shutil.copyfile(path, dest)
+                materialized.add(canonical)
+            return content, canonical
         for record in selected['frames']:
             for cam in record['cameras']:
-                declared(cam['rgb'], 'RGB')
-                declared(cam['mask'], 'RGB_derived_mask')
+                _, cam['rgb'] = declared(cam['rgb'], 'RGB', frame=record['frame'], camera=cam['name'])
+                _, cam['mask'] = declared(cam['mask'], 'RGB_derived_mask', frame=record['frame'], camera=cam['name'])
         if raw.get('annotations'):
-            ann = json.loads(declared(raw['annotations'], 'human_2D_annotations'))
+            content, selected['annotations'] = declared(raw['annotations'], 'human_2D_annotations')
+            ann = json.loads(content)
             # Annotations use bundle-list indices, not source frame identities.
             # Remap only selected observations into the temporary allowlist.
             ann['tracks'] = [dict(track, observations=[dict(o, frame_index=index_map[o['frame_index']])
                                   for o in track['observations'] if o['frame_index'] in index_map])
                              for track in ann['tracks']]
-            dest = target / raw['annotations']
+            dest = target / selected['annotations']
             dest.unlink()  # never write through a hardlink into the original
             dest.write_text(json.dumps(ann))
         (target / 'input_bundle.json').write_text(json.dumps(selected))

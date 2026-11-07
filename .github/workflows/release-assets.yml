@@ -1,0 +1,97 @@
+name: Release assets
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release source tag
+        required: true
+        type: string
+      source_commit:
+        description: Expected commit of the fixed release source
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-assets-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ inputs.tag }}
+      EXPECTED_SOURCE_COMMIT: ${{ inputs.source_commit }}
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ inputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.11'
+      - name: Build and verify fixed release payloads
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+
+          tag = os.environ['RELEASE_TAG']
+          expected_source = os.environ['EXPECTED_SOURCE_COMMIT']
+          assert re.fullmatch(r'v\d+\.\d+\.\d+(?:\.\d+)?', tag), tag
+          assert re.fullmatch(r'[0-9a-f]{40}', expected_source)
+          assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == expected_source
+          version = tag[1:]
+          identity = json.loads(Path(f'publication/blender-{version}.json').read_text())
+          assert identity['source']['tag'] == tag
+          out = Path(os.environ['RUNNER_TEMP']) / 'release-payloads'
+          out.mkdir()
+          subprocess.run(['python', 'scripts/blender/build_extension.py', '--output', str(out)], check=True)
+          extension = out / identity['archive']['name']
+          assert hashlib.sha256(extension.read_bytes()).hexdigest() == identity['archive']['sha256'], 'Extension bytes differ from verified payload'
+          source = out / identity['source']['archive_name']
+          subprocess.run(['git', 'archive', '--format=zip', f'--prefix=wind-farm-blender-{version}/', '-o', str(source), 'HEAD'], check=True)
+          source_digest = hashlib.sha256(source.read_bytes()).hexdigest()
+          source.with_suffix('.zip.sha256').write_text(f'{source_digest}  {source.name}\n')
+          identity['source'].update(commit=expected_source, archive_sha256=source_digest, archive_bytes=source.stat().st_size, archive_generator='GitHub Actions git archive')
+          delivery = out / f'wfrl-delivery-{version}.json'
+          delivery.write_text(json.dumps(identity, ensure_ascii=False, indent=2) + '\n')
+          print('SOURCE_ARCHIVE_IDENTITY', json.dumps(identity['source']))
+          with Path(os.environ['GITHUB_ENV']).open('a') as env:
+              env.write(f'EXTENSION_ARCHIVE={extension}\nSOURCE_ARCHIVE={source}\nDELIVERY_RECORD={delivery}\n')
+          PY
+      - name: Upload matching archives to existing draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = true
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+
+          base = ['--repo', os.environ['GITHUB_REPOSITORY']]
+          tag = os.environ['RELEASE_TAG']
+          assets = json.loads(subprocess.check_output(['gh', 'release', 'view', tag, *base, '--json', 'assets']))['assets']
+          uploaded = {item['name'] for item in assets if item['state'] == 'uploaded'}
+          extension = Path(os.environ['EXTENSION_ARCHIVE'])
+          source = Path(os.environ['SOURCE_ARCHIVE'])
+          attachments = ((extension, False), (source, False),
+                         (source.with_suffix('.zip.sha256'), True), (Path(os.environ['DELIVERY_RECORD']), True))
+          for attachment, replace in attachments:
+              if attachment.name not in uploaded:
+                  subprocess.run(['gh', 'release', 'upload', tag, str(attachment), *base,
+                                  *(['--clobber'] if replace else [])], check=True)
+          PY

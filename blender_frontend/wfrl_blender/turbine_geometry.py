@@ -1,6 +1,6 @@
-"""NREL 5MW design meshes, using only the packaged asset and Python stdlib.
+"""Selectable blade display meshes from packaged geometry and Python stdlib.
 
-The loft follows wfrl/viz/geometry.py: reference-point aligned airfoil sections,
+The loft uses reference-point aligned airfoil sections,
 structural twist, and interpolation of the 19 AeroDyn stations. Local blade
 coordinates are x axial/downstream, y chordwise, z radial. No backend imports.
 """
@@ -13,14 +13,19 @@ import math
 from pathlib import Path
 
 
-#: Selectable display models. Each entry names a packaged geometry asset
-#: exported by scripts/blender/export_geometry.py from its own FAST.Farm
-#: template, so a selected model is also a solver input, not a mesh-only edit.
+# Packaged section geometry shares the NREL station coordinates. Selecting a
+# display model does not change the saved NREL motion or run a new solver.
 MODELS = {
     'nrel5mw': ('assets/nrel5mw_geometry.json', 'NREL 5MW 预弯改型'),
     'rootkink': ('assets/rootkink_geometry.json', '商用形制叶根拐点改型'),
 }
 DEFAULT_MODEL = 'nrel5mw'
+# Display-only spanwise shear toward local -x; radial binding stays unchanged.
+ROOT_CANT_DEG = {'rootkink': 5.0}
+
+# Manual rigid scenes use one fixed sampling level for all simultaneous views.
+# Recorded flexible blades retain their independent source sampling.
+MANUAL_DISPLAY_SAMPLING = {'OVERVIEW': (4, 48), 'BALANCED': (6, 64), 'CLOSEUP': (8, 96)}
 
 
 def model_label(model=DEFAULT_MODEL):
@@ -30,7 +35,7 @@ def model_label(model=DEFAULT_MODEL):
 @lru_cache(maxsize=len(MODELS))
 def geometry_data(model=DEFAULT_MODEL):
     asset = MODELS.get(model, MODELS[DEFAULT_MODEL])[0]
-    return json.loads((Path(__file__).parent / asset).read_text())
+    return json.loads((Path(__file__).parent / asset).read_text(encoding='utf-8'))
 
 
 def hub_position():
@@ -105,8 +110,9 @@ def _hermite(a, b, da, db, width, t):
 def blade_mesh(subdiv=8, ring_points=96, model=DEFAULT_MODEL):
     """Smooth source-station loft with a presentation-only tapered tip.
 
-    Original sections remain exact through the penultimate station. The last
-    1.3666 m closes smoothly to one vertex at the original radial extent;
+    Source sections are lofted through the penultimate station. Rootkink also
+    applies a display-only upwind shear. The last 1.3666 m closes smoothly to
+    one vertex at the original radial extent;
     this tip finish is illustrative, not a replacement aerodynamic dataset.
     """
     if subdiv < 1 or ring_points < 12:
@@ -145,12 +151,16 @@ def blade_mesh(subdiv=8, ring_points=96, model=DEFAULT_MODEL):
                 vertices.append((*[tip_center[axis] + (xy[axis] - tip_center[axis])*taper
                                    for axis in range(2)], spans[i] + width*t))
     rings = len(vertices) // ring_points
-    # Replace the old flat terminal polygon with a closed triangle fan.
+    # Close the terminal ring with a triangle fan at the tip.
     faces = _ring_faces(rings, ring_points)[:-1]
     tip = len(vertices)
     vertices.append((*tip_center, spans[-1]))
     last = (rings - 1)*ring_points
     faces.extend((last + j, last + (j + 1) % ring_points, tip) for j in range(ring_points))
+    lean = math.tan(math.radians(ROOT_CANT_DEG.get(model, 0.0)))
+    if lean:
+        root = data["scalars"]["HubRad"]
+        vertices = [(x - (z - root)*lean, y, z) for x, y, z in vertices]
     # Swapping airfoil (chord, thickness) into (axial, tangent) reverses winding.
     return vertices, [tuple(reversed(face)) for face in faces]
 
@@ -161,3 +171,14 @@ def tower_mesh(ring_points=64):
                  diameter * 0.5 * math.sin(2 * math.pi * i / ring_points), elevation)
                 for elevation, diameter in stations for i in range(ring_points)]
     return vertices, _ring_faces(len(stations), ring_points)
+
+
+def tower_side_polygon_ids(mesh, ring_points=64):
+    """Match the canonical ring construction before mapping side polygons to triangles."""
+    stations = geometry_data()['tower_stations']
+    expected = _ring_faces(len(stations), ring_points)
+    actual = [tuple(p.vertices) for p in mesh.polygons]
+    if actual != expected:
+        raise ValueError('Tower has no verified construction-region mapping')
+    return frozenset(ring * ring_points + j
+                     for ring in range(len(stations)-1) for j in range(ring_points))

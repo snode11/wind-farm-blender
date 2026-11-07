@@ -1,8 +1,9 @@
-"""T1 ElastoDyn tip comparison, independent of the displayed tip taper.
+"""T1 structural tip comparison, independent of the displayed tip taper.
 
-The rigid reference uses turbine geometry and recorded rigid pose only. The
-actual point is a dedicated vertex carried by the existing surface deformation
-pipeline. Output deflections enter only the comparison, never either position.
+The BeamDyn unloaded reference follows the saved structural root boundary;
+ElastoDyn uses the recorded rigid pose. The actual point follows a dedicated
+structural vertex's bound surface deformation,
+including when its mesh is hidden. Output channels never drive either position.
 """
 import hashlib
 import json
@@ -16,16 +17,17 @@ def rotation(axis, degrees):
     # recent NumPy versions. Keep computation independent of storage dtype.
     a = np.radians(float(degrees))
     c, s = np.cos(a), np.sin(a)
-    return (np.array(((1, 0, 0), (0, c, -s), (0, s, c))),
-            np.array(((c, 0, s), (0, 1, 0), (-s, 0, c))),
-            np.array(((c, -s, 0), (s, c, 0), (0, 0, 1))))[axis]
+    return np.array((((1, 0, 0), (0, c, -s), (0, s, c)),
+                     ((c, 0, s), (0, 1, 0), (-s, 0, c)),
+                     ((c, -s, 0), (s, c, 0), (0, 0, 1)))[axis])
 
 
 def rigid_frame(scalars, pose, blade, nacelle=None):
     """World origin, unpitched coned axes (TipDxc/yc/zc), pitched axes.
 
-    Fixed tower/platform, 3 blades, zero skew/teeter. See ElastoDyn v3.5.3
-    SetCoordSy axes i1/i2/i3 and CalcOutput tip motions. Pitch leaves i3 fixed.
+    Three blades, zero skew/teeter. A supplied nacelle transform carries support
+    motion; otherwise the support is fixed. See ElastoDyn v3.5.3 SetCoordSy
+    axes i1/i2/i3 and CalcOutput tip motions. Pitch leaves i3 fixed.
     """
     yaw = rotation(2, pose[0]) if nacelle is None else np.asarray(nacelle)[:, :3]
     tilt = np.radians(scalars['ShftTilt'])
@@ -39,6 +41,37 @@ def rigid_frame(scalars, pose, blade, nacelle=None):
     return hub, axes, axes @ rotation(2, -pose[blade + 2])
 
 
+def beamdyn_root_frame(scalars, blade, transform):
+    """Transport the independent unloaded frame by the saved root contour.
+
+    The v3 first AeroDyn contour is at the constrained BeamDyn root, with
+    zero aerodynamic-center offset. Its transform contains boundary motion,
+    not elastic blade deflection. BeamDyn TipTD*r uses this pitched root frame;
+    the ElastoDyn BlPitch output need not be the coupled root's same-step pitch.
+    No displacement output or loaded tip geometry enters the reference.
+    """
+    transform = np.asarray(transform, dtype=np.float64)
+    if transform.shape != (3, 4) or not np.isfinite(transform).all():
+        raise ValueError('Invalid BeamDyn root transform')
+    r = transform[:, :3]
+    if not np.allclose(r.T @ r, np.eye(3), atol=2e-5, rtol=0) or np.linalg.det(r) < .9999:
+        raise ValueError('Invalid BeamDyn root rotation')
+    u, _, vt = np.linalg.svd(r)
+    r = u @ vt
+    hub, _, axes = rigid_frame(scalars, [0] * 6, blade)
+    return r @ hub + transform[:, 3], r @ axes
+
+
+def interpolated_beamdyn_root_frame(scalars, blade, a, b, alpha):
+    """Interpolate boundary motion about its transported hub, not world zero."""
+    from .tower_motion import interpolate_transform
+    hub0, axes0 = beamdyn_root_frame(scalars, blade, a)
+    hub1, axes1 = beamdyn_root_frame(scalars, blade, b)
+    frame = interpolate_transform(np.column_stack((axes0, hub0)),
+                                  np.column_stack((axes1, hub1)), alpha)
+    return frame[:, 3], frame[:, :3]
+
+
 def compare(actual, reference, axes, simulation):
     components = axes.T @ (np.asarray(actual) - reference)
     return dict(actual=np.asarray(actual), reference=reference, axes=axes,
@@ -48,7 +81,7 @@ def compare(actual, reference, axes, simulation):
 
 
 def read_comparison(path, manifest, times, poses, *, rigid_poses=None,
-                    tower_motion=None, blade_reference=None):
+                    tower_motion=None, blade_reference=None, _verified=None):
     """Optional sidecar: absent means unavailable; malformed must fail closed.
 
     Supplied rigid poses and support/reference data must be from a validated
@@ -57,11 +90,17 @@ def read_comparison(path, manifest, times, poses, *, rigid_poses=None,
     name = 'deflection-t1.json'
     if name not in manifest['files']:
         return None
-    path = Path(path)
-    raw = (path / name).read_bytes()
-    if hashlib.sha256(raw).hexdigest() != manifest['files'][name]:
-        raise ValueError('T1 deflection integrity mismatch')
-    data = json.loads(raw)
+    if _verified is None:
+        path = Path(path)
+        raw = (path / name).read_bytes()
+        if hashlib.sha256(raw).hexdigest() != manifest['files'][name]:
+            raise ValueError('T1 deflection integrity mismatch')
+        data = json.loads(raw)
+    else:
+        if (path is not _verified or _verified.files[name].sha256 != manifest['files'][name]):
+            raise ValueError('T1 deflection verified source mismatch')
+        path = _verified.path
+        data = _verified.files[name].data
     beamdyn = data['schema'] == 'wfrl.tip-deflection.t1.v3'
     reference = ('BeamDyn structural tip; independent unloaded prebend' if beamdyn else 'ElastoDyn structural tip; local (0,0,TipRad)')
     frame = 'BeamDyn pitched root xyz' if beamdyn else 'ElastoDyn unpitched coned xc,yc,zc'
@@ -74,17 +113,17 @@ def read_comparison(path, manifest, times, poses, *, rigid_poses=None,
             or not np.array_equal(data['times'], times)):
         raise ValueError('T1 deflection and geometry do not match')
     for key, shape in [('poses', (len(times), 6)), ('simulation', (len(times), 3, 3 if beamdyn else 2))]:
-        data[key] = np.asarray(data[key], dtype=float)
-        if data[key].shape != shape or not np.isfinite(data[key]).all():
+        samples = np.asarray(data[key], dtype=object)
+        if samples.shape != shape or any(type(value) not in (int, float) for value in samples.flat):
+            raise ValueError('Invalid T1 deflection samples: ' + key)
+        data[key] = samples.astype(float)
+        if not np.isfinite(data[key]).all():
             raise ValueError('Invalid T1 deflection samples: ' + key)
     if not np.allclose(data['poses'], poses[:, 0], atol=.002, rtol=0):
         raise ValueError('T1 deflection rigid poses differ')
     if rigid_poses is None:
-        # The NPZ and early v3 sidecars quantized unwrapped azimuth to float32.
-        # data.json retains the original rigid motion. The pose fields read here
-        # contain no tip displacement.
-        # Use that independent, hashed source for the rigid reference; do not
-        # compensate the transported mesh with the simulation channels.
+        # data.json retains rigid pose precision beyond float32 NPZ storage.
+        # These pose fields contain no structural displacement channels.
         motion_raw = (path / 'data.json').read_bytes()
         if hashlib.sha256(motion_raw).hexdigest() != manifest['files']['data.json']:
             raise ValueError('T1 rigid motion integrity mismatch')
@@ -130,6 +169,17 @@ COLORS = {'Reference': (.55, .61, .69, 1), 'Actual': (1, .27, .04, 1),
 
 
 class ComparisonView:
+    @staticmethod
+    def _release_data(data):
+        """Release only unused local comparison data without retained assets."""
+        import bpy
+        if (data is not None and data.library is None and data.users == 0
+                and not data.use_fake_user and getattr(data, 'shape_keys', None) is None):
+            if isinstance(data, bpy.types.Mesh):
+                bpy.data.meshes.remove(data)
+            elif isinstance(data, bpy.types.Curve):
+                bpy.data.curves.remove(data)
+
     def __init__(self, owner, data, vertices, faces):
         import bpy
         from .scene_builder import _mesh_object, _primitive
@@ -143,7 +193,12 @@ class ComparisonView:
         # Saved .blend files already contain the previous comparison geometry.
         for obj in list(owner.scene.objects):
             if obj.name.startswith('WFRL.Deflection.T1.'):
+                previous = obj.data
+                owned = (obj.get('wfrl_deflection_owned') or
+                         obj.get('provenance') == data['reference'] + '; true scale in metres')
                 bpy.data.objects.remove(obj, do_unlink=True)
+                if owned:
+                    self._release_data(previous)
         self.materials = {key: _material('WFRL.Deflection.' + key, color) for key, color in COLORS.items()}
         mat = _material('WFRL.Deflection.Ghost', COLORS['Reference'])
         mat.diffuse_color = (*COLORS['Reference'][:3], .38)
@@ -167,13 +222,15 @@ class ComparisonView:
             curve.bevel_depth = .055
             curve.bevel_resolution = 2
             curve.materials.append(self.materials[key])
-            spline = curve.splines.new('POLY'); spline.points.add(1)
+            spline = curve.splines.new('POLY')
+            spline.points.add(1)
             obj = bpy.data.objects.new('WFRL.Deflection.T1.' + key, curve)
             self.collection.objects.link(obj)
             self.lines[key] = obj
             self.objects.append(obj)
         for obj in self.objects:
             obj.hide_select = True
+            obj['wfrl_deflection_owned'] = True
             obj['provenance'] = data['reference'] + '; true scale in metres'
         self.handle = bpy.types.SpaceView3D.draw_handler_add(self.draw_labels, (), 'WINDOW', 'POST_PIXEL')
 
@@ -197,22 +254,29 @@ class ComparisonView:
         from mathutils import Vector
         phase_started = performance.begin()
         data = self.data
-        pose = data['poses'][i] * (1 - alpha) + data['poses'][i + 1] * alpha
         simulation = data['simulation'][i] * (1 - alpha) + data['simulation'][i + 1] * alpha
         nacelle = None
-        if 'nacelle' in data:
-            from .tower_motion import interpolate_transform
-            nacelle = interpolate_transform(data['nacelle'][i], data['nacelle'][i+1], alpha)
+        if 'tip_local_m' not in data:
+            from .farm_flex_geometry import _interpolate_poses
+            pose = _interpolate_poses(data['poses'][i], data['poses'][i + 1], alpha)
+            if 'nacelle' in data:
+                from .tower_motion import interpolate_transform
+                nacelle = interpolate_transform(data['nacelle'][i], data['nacelle'][i+1], alpha)
         for b in (1, 2, 3):
             obj = self.owner.blades[b - 1][0]
-            hub, axes, pitched = rigid_frame(data['scalars'], pose, b, nacelle)
             if 'tip_local_m' in data:
-                axes = pitched
+                hub, axes = interpolated_beamdyn_root_frame(
+                    data['scalars'], b, self.owner.transforms[i, 0, b - 1, 0],
+                    self.owner.transforms[i + 1, 0, b - 1, 0], alpha)
+                pitched = axes
                 reference = hub + pitched @ data['tip_local_m']
             else:
+                hub, axes, pitched = rigid_frame(data['scalars'], pose, b, nacelle)
                 reference = hub + axes[:, 2] * data['scalars']['TipRad']
             # -2 is the structural reference vertex, -1 remains the cosmetic apex.
-            actual = obj.matrix_world @ obj.data.vertices[-2].co
+            actual = (self.owner.world_matrix(obj) @ obj.data.vertices[-2].co
+                      if 0 in self.owner.mesh_turbines()
+                      else self.owner.structural_tip_world(b, i, alpha))
             row = compare(actual, reference, axes, simulation[b - 1])
             row.update(time=float(time), blade=b, pitched=pitched, hub=hub,
                        interpolated=bool(1e-8 < alpha < 1 - 1e-8))
@@ -274,9 +338,12 @@ class ComparisonView:
                 width = blf.dimensions(0, label)[0] + 10 * scale
                 quad = [(x-4*scale, y-4*scale), (x+width, y-4*scale),
                         (x+width, y+15*scale), (x-4*scale, y+15*scale)]
-                shader.bind(); shader.uniform_float('color', (.015, .025, .04, .82))
+                shader.bind()
+                shader.uniform_float('color', (.015, .025, .04, .82))
                 batch_for_shader(shader, 'TRIS', {'pos': quad}, indices=((0,1,2),(0,2,3))).draw(shader)
-                blf.color(0, *COLORS[key]); blf.position(0, x, y, 0); blf.draw(0, label)
+                blf.color(0, *COLORS[key])
+                blf.position(0, x, y, 0)
+                blf.draw(0, label)
         finally:
             gpu.state.blend_set('NONE')
 
@@ -285,14 +352,13 @@ class ComparisonView:
         if self.handle is not None:
             bpy.types.SpaceView3D.draw_handler_remove(self.handle, 'WINDOW')
             self.handle = None
-        self.labels = []; self.rows.clear()
+        self.labels = []
+        self.rows.clear()
         for obj in self.objects:
             try:
                 data = obj.data
                 bpy.data.objects.remove(obj, do_unlink=True)
-                if data.users == 0:
-                    if isinstance(data, bpy.types.Mesh): bpy.data.meshes.remove(data)
-                    elif isinstance(data, bpy.types.Curve): bpy.data.curves.remove(data)
+                self._release_data(data)
             except ReferenceError:
                 pass
         self.objects.clear()
@@ -317,7 +383,8 @@ def draw_panel(layout, scene):
     views = box.row(align=True)
     views.operator('wfrl.deflection_view', text='叶尖', icon='VIEWZOOM')
     op = views.operator('wfrl.farm_flex_view', text='叶轮')
-    op.turbine = 'T1'; op.angle = 'FRONT'
+    op.turbine = 'T1'
+    op.angle = 'FRONT'
     views.operator('wfrl.farm_flex_view', text='Down').turbine = 'T1'
     layers = box.row(align=True)
     layers.prop(scene, 'wfrl_deflection_visible', text='虚影 / 分量', toggle=True)
@@ -330,7 +397,8 @@ def draw_panel(layout, scene):
     grid = box.row(align=True)
     for title, values in [('方向', (['根系 x', '根系 y', '根系 z'] if len(row['simulation']) == 3 else ['面外', '面内'])), ('仿真 / m', row['simulation']),
                           ('坐标差 / m', row['components'][:len(row['simulation'])]), ('偏差 / mm', row['error'] * 1000)]:
-        column = grid.column(align=True); column.label(text=title)
+        column = grid.column(align=True)
+        column.label(text=title)
         for value in values:
             column.label(text=value if isinstance(value, str) else f'{value:+.4f}')
     box.label(text=f"总位移   {row['distance']:.4f} m")
@@ -347,4 +415,4 @@ def draw_panel(layout, scene):
         details.label(text='偏差 = 坐标差投影 − 仿真输出')
         details.label(text='参考点随塔顶平移、倾斜与叶轮姿态移动' if active.tower_motion is not None else '参考点按同刻刚性姿态独立计算')
         details.label(text='结构叶尖与彩色轨迹尖端定义不同')
-        details.label(text='轨迹：叶片 1 橙 · 叶片 2 蓝 · 叶片 3 红')
+        details.label(text='轨迹：叶片 1 红 · 叶片 2 绿 · 叶片 3 蓝')

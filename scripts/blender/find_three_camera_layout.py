@@ -1,9 +1,9 @@
 """Search supported T1 mounts using the existing recorded blade geometry."""
 from pathlib import Path
 import json
-import math
 import os
 import sys
+import tempfile
 from dataclasses import asdict
 import bpy
 import numpy as np
@@ -13,7 +13,9 @@ sys.path[:0]=[str(ROOT/'blender_frontend'),str(ROOT)]
 import wfrl_blender as addon
 from wfrl_blender import stacked_camera_rig as rig, custom_cameras as core
 from wfrl_blender import camera_projection as projection, custom_camera_preview as preview
-OUT=Path(os.environ.get('WFRL_TEST_OUTPUT','/tmp/wfrl-three-camera-search'))
+output_dir = os.environ.get('WFRL_TEST_OUTPUT')
+OUT = (Path(output_dir) if output_dir is not None
+       else Path(tempfile.gettempdir()) / 'wfrl-three-camera-search')
 OUT.mkdir(parents=True,exist_ok=True)
 INTERVALS=((0.,18.),(14.,38.),(34.,61.5))
 addon.register();addon.load_demo_scene()
@@ -87,16 +89,16 @@ with preview.without_annotations(scene,bpy.context.view_layer):
 results.sort(key=lambda r:r['score'],reverse=True)
 assert results,'no valid supported camera layout'
 (OUT/'search.json').write_text(json.dumps({'intervals':INTERVALS,'reference_frame':1,'reference_time_s':117.,
-    'results':results,'rejected':failed},ensure_ascii=False,indent=2))
+    'results':results,'rejected':failed},ensure_ascii=False,indent=2), encoding='utf-8')
 for i,row in enumerate(results[:5]):
-    (OUT/f'candidate-{i+1}.json').write_text(json.dumps(row['layout'],ensure_ascii=False,indent=2))
+    (OUT/f'candidate-{i+1}.json').write_text(json.dumps(row['layout'],ensure_ascii=False,indent=2), encoding='utf-8')
 print('BEST',[(r['index'],r['score'],r['point']) for r in results[:5]],flush=True)
 
 # Full-length overlapping sections: retain the whole selected section in frame.
 layout=results[0]['layout']
 core.restore_layout(scene,layout);bpy.context.view_layer.update()
-(OUT/'recommended.json').write_text(json.dumps(core.layout_dict(scene),ensure_ascii=False,indent=2))
+(OUT/'recommended.json').write_text(json.dumps(core.layout_dict(scene),ensure_ascii=False,indent=2), encoding='utf-8')
 (OUT/'recommended-check.json').write_text(json.dumps({'intervals':INTERVALS,'framing_scale':[1.,1.,1.],
     'cameras':results[0]['cameras'],'mount':rig.pose(scene),'layout_hash':core.layout_hash(core.layout_dict(scene)),
-    'method':'front-facing triangle-centre samples and near-ray grid; not continuous coverage'},ensure_ascii=False,indent=2))
+    'method':'front-facing triangle-centre samples and near-ray grid; not continuous coverage'},ensure_ascii=False,indent=2), encoding='utf-8')
 print('RECOMMENDED',results[0]['cameras'],flush=True)

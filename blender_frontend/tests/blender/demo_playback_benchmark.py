@@ -16,6 +16,7 @@ from pathlib import Path
 
 import bpy
 
+sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[3]
 sys.path[:0] = [os.environ.get('WFRL_ADDON_ROOT', str(ROOT/'blender_frontend')), str(ROOT)]
 MODULE = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')

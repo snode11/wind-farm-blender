@@ -2,7 +2,7 @@
 
 ## 当前双束数据与可携带包
 
-NREL / WFRL 公开安装 ZIP 为 **0.3.21**（标签 **v0.3.21**），当前项目源码使用 `wind-farm-rl-all-work` 分支；本地日常安装为 **0.3.21**，173 文件与公开 ZIP 一致。[载荷和验证范围见发布状态](../../docs/blender/发布状态与验证范围.md)。GW184 **0.4.0** 是独立刚性三相机与合成缺陷场景，不运行本页雷达后处理。
+NREL / WFRL 公开扩展为 0.3.42.8，开发机日常安装使用 0.3.42.7 载荷，项目源码入口为 `main`。版本、载荷及检查范围见[发布状态](../../docs/blender/发布状态与验证范围.md)。GW184 **0.4.0** 是独立刚性三相机与合成缺陷场景，不运行本页雷达后处理。
 
 日常观看使用 **MAPPO → 净空 → 双束净空 / S1**，或显式选择 **TLS 候选 / S1**，无需重新后处理或求解。两种结果共享原 40 Hz 源，默认方法为 `hub-axis.v1`。
 
@@ -14,6 +14,8 @@ TLS 候选使用显式 `postprocess_dual_beam.py --method hub-tls.v1`；未覆�
 
 残差与来源诊断使用 `diagnose_dual_beam_tls_residuals.py --package <TLS包> --baseline <旧法包> --output <新目录>`，对全部有效对进行评分后的方向/长度反事实分解、真实首交拓扑及表面偏移诊断，真值仅限诊断。`audit_dual_beam_observability.py --source <v3源包> --calibration <标定> --output <新目录>` 仅读取独立零载参考和固定标量，执行预声明解析 TEST 形状的首交/Jacobian/零空间探针，未验证形状先验时认证输出为 UNKNOWN。`verify_dual_beam_source_provenance.py --source <v3源包> --output <新目录>` 检查保存原始文件哈希、原始输出与侧车的一致性，缺失动态 VTP 单列证据缺口；可用 `--provenance-root <原路径结构的原始证据根目录>` 移机复核。三者均不启动求解器、不据此切换默认；[见残差与来源研究说明](../../docs/lidar/双束TLS候选实施与验证总报告.md)。
 
+父进程取消时，runner 在 `finally` 中对本次创建的子进程有界 terminate/wait，必要时 kill/wait；`KeyboardInterrupt` 继续传播，状态记为 `CANCELLED`。`cleanup_confirmed` 与退出码单独记录清理确认，未确认时保留 PID 和错误，配置标为 `*_CLEANUP_UNCONFIRMED`。该清理不操作无关进程。
+
 独立求解入口 `run_dual_beam_validation.py --output <新目录> --reference <独立零载参考>` **启动独立单机 OpenFAST 求解**，复制完整输入并保留所有动态 VTP 的无损 XZ、原字节哈希、退出状态和共享数据预算；只能在物理求解任务内使用。`export_dual_beam_validation_source.py <run> <reference> <新源目录> --start <s> --end <s>` 核对完整原始时钟和零载参考，将真实 40/80 Hz VTP 导出为源几何，保持原 2 mm / 5 mm 接口容差。它不生成旧 B2 测量，也不启动求解器。`compare_dual_beam_time_refinement.py` 严格核对两运行仅 DT/DT_Out/VTK_fps 不同，分开保留共同保存时刻、全部细网格新增时刻、未知与经过最低值；两级敏感性不等于数值收敛或性能验收。已执行的 12 m/s / 9 rpm 工程工况、[留存来源和复算入口见独立验证研究说明](../../docs/lidar/双束TLS候选实施与验证总报告.md)。独立验证工况属于研究证据；公开安装包内置原开发片段的旧法和 TLS 结果，独立验证工况不替换该内置源。
 
 当前布局为 S1/S2/S3 = 10°/12°/14°；S1 报警独立于双束有效性，旧 B2 回放仍可使用。40 Hz 保存记录不能替代设备原始采样或现场延迟验证。同一开发片段 400 对的旧法 / TLS MAE 分别为 4.268685 / 0.776096 m，两种方法仍为 REVIEW_ONLY / PENDING_ACCEPTANCE。[格式合同][(../../wfrl/lidar/REPLAY_FORMAT.md#dual-beam-review-v1)和发布范围](../../docs/blender/发布状态与验证范围.md)分别说明数据与交付状态。
@@ -24,22 +26,22 @@ TLS 候选使用显式 `postprocess_dual_beam.py --method hub-tls.v1`；未覆�
 
 以下流程适用于 `results/lidar/packages/normal-v1.1` 与 `close-v1.1` 的本地 FAST.Farm 结果包。两者来自 36 秒真实求解的 18–36 秒窗口。`report.md` 给出逐束误差、手册定义、求交与真值参考点，以及解析和独立时空细化的全部实数。
 
-使用 `PYTHON_ENVIRONMENT/bin/python`；求解器位于同环境 `bin/FAST.Farm`，版本 3.5.3。后处理需要 NumPy；设置 `OPENBLAS_NUM_THREADS=1` 避免几何小矩阵调用启动大量线程。无需策略 checkpoint 或训练。规定转速 9 rpm、变桨 0°、无 ServoDyn；这是固定转速工况，不是运行策略的性能结论。
+使用 `/opt/anaconda3/envs/wfrl-mac/bin/python`；求解器位于同环境 `bin/FAST.Farm`，版本 3.5.3。后处理需要 NumPy；设置 `OPENBLAS_NUM_THREADS=1` 避免几何小矩阵调用启动大量线程。无需策略 checkpoint 或训练。规定转速 9 rpm、变桨 0°、无 ServoDyn；这是固定转速工况，不是运行策略的性能结论。
 
-在仓库根目录执行以下命令。示例用新运行名保护已交付数据；正常工况用 8 m/s，较小净空工况用 12 m/s，其他配置一致。`--source-case` 可显式指定完整原始算例目录；默认来源见 `run_physics.py`，当前是保留的 NREL 5MW 历史算例。源目录不会修改。
+在仓库根目录执行以下命令。示例用新运行名保护已交付数据；正常工况用 8 m/s，较小净空工况用 12 m/s，其他配置一致。`--source-case` 可显式指定完整原始算例目录；默认来源见 `run_physics.py`，当前是保留的 NREL 5MW 历史算例。源目录不会修改。示例命令运行后会在 `results/lidar/raw/` 下生成新运行目录，在 `results/lidar/packages/` 下生成新结果包，这些产物不随仓库分发。
 
 ```sh
 export OPENBLAS_NUM_THREADS=1
-PYTHON_ENVIRONMENT/bin/python scripts/lidar/run_physics.py --name normal-new --wind 8 --fps 80
-PYTHON_ENVIRONMENT/bin/python scripts/lidar/run_physics.py --name normal-new-spatial --wind 8 --fps 80 --refine
-PYTHON_ENVIRONMENT/bin/python scripts/lidar/run_physics.py --name normal-new-temporal --wind 8 --fps 160 --dt 0.003125 --refine
+/opt/anaconda3/envs/wfrl-mac/bin/python scripts/lidar/run_physics.py --name normal-new --wind 8 --fps 80
+/opt/anaconda3/envs/wfrl-mac/bin/python scripts/lidar/run_physics.py --name normal-new-spatial --wind 8 --fps 80 --refine
+/opt/anaconda3/envs/wfrl-mac/bin/python scripts/lidar/run_physics.py --name normal-new-temporal --wind 8 --fps 160 --dt 0.003125 --refine
 
-PYTHON_ENVIRONMENT/bin/python scripts/lidar/process_physics.py results/lidar/raw/normal-new
-PYTHON_ENVIRONMENT/bin/python scripts/lidar/process_physics.py results/lidar/raw/normal-new-spatial --evaluation-only
-PYTHON_ENVIRONMENT/bin/python scripts/lidar/process_physics.py results/lidar/raw/normal-new-temporal --evaluation-only
+/opt/anaconda3/envs/wfrl-mac/bin/python scripts/lidar/process_physics.py results/lidar/raw/normal-new
+/opt/anaconda3/envs/wfrl-mac/bin/python scripts/lidar/process_physics.py results/lidar/raw/normal-new-spatial --evaluation-only
+/opt/anaconda3/envs/wfrl-mac/bin/python scripts/lidar/process_physics.py results/lidar/raw/normal-new-temporal --evaluation-only
 
-PYTHON_ENVIRONMENT/bin/python scripts/lidar/validate_physics.py results/lidar/raw/normal-new results/lidar/raw/normal-new-spatial results/lidar/raw/normal-new-temporal evidence/lidar-implementation/validation-normal-new.json
-PYTHON_ENVIRONMENT/bin/python scripts/lidar/publish_physics.py normal-new normal evidence/lidar-implementation/validation-normal-new.json --destination results/lidar/packages/normal-new
+/opt/anaconda3/envs/wfrl-mac/bin/python scripts/lidar/validate_physics.py results/lidar/raw/normal-new results/lidar/raw/normal-new-spatial results/lidar/raw/normal-new-temporal evidence/lidar-implementation/validation-normal-new.json
+/opt/anaconda3/envs/wfrl-mac/bin/python scripts/lidar/publish_physics.py normal-new normal evidence/lidar-implementation/validation-normal-new.json --destination results/lidar/packages/normal-new
 ```
 
 较小净空重复该链路，把名称换为 `close-new`、风速换为 `12`、publish 第二参数换为 `close`。正常/较小工况依据先定的风速选取，不按照误差挑片段。每个工况先运行 19 个展向节点、原 DT，再运行 37 节点保持原 DT，最后保持 37 节点将积分时间步与输出时间步减半。这样分别检查空间差异与时间差异。完整 80/160 Hz 掠塔网格均包含漏测；没有只对旧网格有效命中配对。
@@ -65,7 +67,7 @@ PYTHON_ENVIRONMENT/bin/python scripts/lidar/publish_physics.py normal-new normal
 
 新生成结果采用 `numerical-comparison-v2` 证据合同：包内保存数值比较证据，发布前检查解析结果、空间/时间运行链、物理配置、退出状态及完整采样网格，缺少内容不能标记 READY。`READY` 表示包完成且通过该合同检查；精度状态仍是未约定容差，不能解释为现场精度或数值收敛达标。旧版包保留供追溯和兼容读取。
 
-发布窗口及采样率来自运行配置，时长必须大于18秒启动剔除段。`dist/lidar-delivery.json`、`dist/README-lidar.md` 保留旧 normal/close 的交付入口与摘要，不是当前 NREL / WFRL 或 GW184 的完整安装清单。[当前下载以发布状态](../../docs/blender/发布状态与验证范围.md)为准。无需重跑 FAST.Farm 即可用完整既有数值证据重新封装这两个历史工况；修订不得改变原始逐样本测量。
+发布窗口及采样率来自运行配置，时长必须大于18秒启动剔除段。独立 normal/close 的专用启动入口使用[交付清单](../../dist/lidar-delivery.json)，说明见[独立净空演示数据](../../dist/README-lidar.md)；清单与两包均为正式运行输入，应一同保留。这些输入不是当前 NREL / WFRL 或 GW184 的完整安装清单，[当前下载与运行范围以发布状态](../../docs/blender/发布状态与验证范围.md)为准。无需重跑 FAST.Farm 即可用完整既有数值证据重新封装这两个工况；重新封装须保留原始逐样本测量与来源摘要。
 
 
 原手册核验已补齐：用户提供的《MolasCL 激光净空监测雷达使用手册 V3.0》SHA256 为 `1a126ba6420f47136b17986064908215d6b0d7e0d574ff56247c1255b07a0363`。PDF第9页图2-5与第34页图3-26已逐图核对；两图X/Y命名存在坐标切换，本项目按向叶轮的主轴物理偏距映射。公式、相对光束角和名义塔半径含义一致，不代表真实设备精度验收。

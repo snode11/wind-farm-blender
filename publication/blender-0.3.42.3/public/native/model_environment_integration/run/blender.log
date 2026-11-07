@@ -1,0 +1,18 @@
+CHECK replay construction
+CHECK independent manual construction
+CHECK manual detail and fittings nrel5mw
+CHECK manual detail and fittings rootkink
+CHECK independent high-detail export clone
+CHECK return to replay
+CHECK replay fitting rollback and user protection
+CHECK replay fittings rootkink
+CHECK replay fittings nrel5mw
+CHECK replay fittings rootkink
+CHECK save and reopen
+00:06.060  blend            | Read blend: "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.3/public/native/model_environment_integration/artifacts/integrated-models.blend"
+Info: Saved as "integrated-models.blend"
+MODEL_ENVIRONMENT_INTEGRATION_PASS {"status": "PASS", "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py", "blender": "5.2.1 LTS", "detail_vertices_per_blade": {"nrel5mw:OVERVIEW": 4417, "nrel5mw:BALANCED": 8065, "nrel5mw:CLOSEUP": 15361, "rootkink:OVERVIEW": 4417, "rootkink:BALANCED": 8065, "rootkink:CLOSEUP": 15361}, "independent_materials_and_meshes": true, "independent_flexible_meshes": true, "replay_root_fittings_follow_model": true, "replay_root_rollback_and_edited_shared_protection": true, "source_scene_copy_does_not_claim_manual": true, "saved_scene_link_restore": true, "down_export_clone_closeup_source_overview": true, "source_pose_cameras_environment_preserved": true, "saved_reopen": true, "formal_assets_unchanged": 68, "scope": "Background source integration; no FPS, physical input or scientific acceptance"}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 350, total unfreed memory 0.025940 MB

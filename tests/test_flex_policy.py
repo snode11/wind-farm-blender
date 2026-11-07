@@ -9,6 +9,7 @@ from wfrl.mappo_central import Actor
 def checkpoint(tmp_path, **changes):
     ck = dict(env_id='Dec_Turb3_Row1_Fastfarm', obs_dim=3, act_dim=1,
               state_dim=9, obs_keys=['yaw', 'wind_speed', 'wind_direction'],
+              recurrent=False, obs_duty=False, duty_penalty=0.,
               obs_mean=np.array([0., 8., 270.]), obs_var=np.ones(3),
               actor=Actor(3, 1).state_dict())
     ck.update(changes)
@@ -36,3 +37,13 @@ def test_normalization_and_deterministic_inference(tmp_path):
 def test_reject_incompatible_checkpoint(tmp_path,changes):
     with pytest.raises(ValueError):
         FlexPolicy(checkpoint(tmp_path,**changes))
+
+
+@pytest.mark.parametrize('changes', [
+    {'action_contract': {'version': 999}},
+    {'scene': {'backend': 'floris', 'dt': 3, 'controls': ['yaw'], 'layout': []}},
+    {'action_contract': dict(version=1, controls=['yaw'], transform='clip', low=[-2], high=[2])},
+])
+def test_probe_rejects_unknown_contract_or_saved_scene_even_when_shapes_match(tmp_path, changes):
+    with pytest.raises(ValueError):
+        FlexPolicy(checkpoint(tmp_path, **changes))

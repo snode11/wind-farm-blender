@@ -316,7 +316,7 @@ def main():
     report = {'status': 'PASS', 'addon_path': addon.__file__, 'blend': str(target),
               'patch': NAME, 'inspection_center_world_m': center, 'checks': checks,
               'scope': 'cosmetic synthetic repaint; no solver, no extension update, no rendering'}
-    (out/'validation.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')
+    (out/'validation.json').write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print('NREL_B1_REPAIR_PASS '+json.dumps(report, ensure_ascii=False))
 
 

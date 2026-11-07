@@ -1,11 +1,10 @@
 """Track an existing moving tracer in world space during random wind changes."""
 from pathlib import Path
-import sys, math
+import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import bpy
 import wfrl_blender
 from wfrl_blender import cinematic
-from mathutils import Vector
 wfrl_blender.register()
 scene=bpy.context.scene
 collection=bpy.data.collections.new('MotionRegression');scene.collection.children.link(collection)

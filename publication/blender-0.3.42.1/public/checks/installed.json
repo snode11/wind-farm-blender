@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "tests": [
+    {
+      "script": "radar_x100_regression",
+      "status": "PASS"
+    },
+    {
+      "script": "radar_x100_edges",
+      "status": "PASS"
+    },
+    {
+      "script": "radar_x100_history_regression",
+      "status": "PASS"
+    },
+    {
+      "script": "farm_capture_transaction_regression",
+      "status": "PASS"
+    }
+  ]
+}

@@ -13,6 +13,7 @@ TRAINING_STATS_CAPABILITY = 'training_stats_v1'
 TRAINING_STATS_STALE_AFTER_SECONDS = 30.0
 TRAINING_STATS_CHANNELS = frozenset(('mean_power', 'mean_reward', 'value_loss', 'explained_variance', 'episode_return', 'learning_rate'))
 SCALAR_NUMERIC_CHANNELS = frozenset(('rotor_speed', 'power', 'yaw', 'pitch', 'wind_speed', 'wind_direction', 'torque', 'reward'))
+DISPLAY_CHANNEL_UNITS = {'rotor_speed': 'rpm', 'yaw': 'deg', 'pitch': 'deg', 'power': 'MW'}
 MODES = frozenset(('demo', 'interactive_training', 'formal_training', 'replay'))
 RUN_STATUSES = frozenset(('READY', 'STARTING', 'RUNNING', 'PAUSED', 'DRAINING', 'STOPPED', 'FAILED'))
 MESSAGE_TYPES = frozenset(('hello', 'hello_ack', 'command', 'lifecycle', 'snapshot', 'safety_event', 'curve', 'wake', 'error', 'training_stats'))
@@ -114,7 +115,13 @@ def _channels(mapping):
         _channel(channel)
         if key in SCALAR_NUMERIC_CHANNELS and channel['value'] is not None:
             _require(_number(channel['value']), key + ' must be a finite scalar number')
-        if key == 'rotor_speed': _require(channel['unit'] == 'rpm', 'rotor_speed unit must be rpm')
+        _display_unit(key, channel)
+
+
+def _display_unit(name, channel):
+    expected = DISPLAY_CHANNEL_UNITS.get(name)
+    if expected is not None:
+        _require(channel['unit'] == expected, name + ' unit must be ' + expected)
 
 
 def _data_context(payload):
@@ -178,6 +185,13 @@ def _validate_message(message):
     _require(isinstance(p, dict), 'Payload must be an object')
     if kind in ('hello_ack', 'lifecycle') and 'run_id' in p:
         _require(p['run_id'] is None or _text(p['run_id']), 'Invalid run_id')
+    if kind in ('hello_ack', 'lifecycle') and 'state_revision' in p:
+        _require(type(p['state_revision']) is int and p['state_revision'] >= 0, 'Invalid state_revision')
+    if kind in ('hello_ack', 'lifecycle') and {'cleanup_confirmed', 'worker_alive'} & p.keys():
+        _require(type(p.get('cleanup_confirmed')) is bool and type(p.get('worker_alive')) is bool,
+                 'Cleanup confirmation and worker liveness must both be boolean')
+        _require(not p['cleanup_confirmed'] or (not p['worker_alive'] and
+                 p.get('run_status') in ('READY', 'STOPPED', 'FAILED')), 'Invalid cleanup confirmation')
     if kind == 'hello':
         _require(message['session_id'] == '' and message['sequence'] == 0, 'hello must use empty session and sequence zero')
         versions = p.get('supported_versions')
@@ -191,6 +205,10 @@ def _validate_message(message):
         _require(type(p.get('selected_version')) is int and p['selected_version'] == 1, 'Unsupported selected version')
         _require(p.get('run_status') in RUN_STATUSES and p.get('mode') in MODES, 'Invalid session state')
         _require(type(p.get('resumed')) is bool, 'Missing resumed flag')
+        if 'last_command_sequence' in p:
+            watermark = p['last_command_sequence']
+            _require(type(watermark) is int and -1 <= watermark <= 2**53 - 1,
+                     'Invalid command sequence watermark')
     elif kind == 'command':
         _require(p.get('command') in ('scene.load', 'run.start', 'run.pause', 'run.resume', 'run.step', 'run.stop', 'run.reset', 'session.sync', 'channel.set'), 'Unknown command')
         _require(isinstance(p.get('arguments'), dict), 'Command arguments required')
@@ -217,8 +235,7 @@ def _validate_message(message):
             _require(p.get('channel') != 'rotorspeed', 'Wire key must be canonical rotor_speed')
             _require('turbine_id' in p and (p['turbine_id'] is None or _text(p['turbine_id'])), 'Curve scope required')
             _channel(p.get('data'))
-            if p['channel'] == 'rotor_speed':
-                _require(p['data']['unit'] == 'rpm', 'rotor_speed unit must be rpm')
+            _display_unit(p['channel'], p['data'])
             _require(isinstance(p['data']['value'], list) or p['data']['value'] is None, 'Curve value must be points or null')
             for point in p['data']['value'] or []:
                 _require(isinstance(point, list) and len(point) == 2 and all(_number(x) for x in point), 'Curve points must be finite [time,value] pairs')
@@ -235,6 +252,9 @@ def _validate_message(message):
         _training_stats(p)
     elif kind == 'error':
         _require(_text(p.get('code')) and _text(p.get('message')) and type(p.get('fatal')) is bool, 'Invalid error payload')
+        if 'command_sequence' in p:
+            _require(p['code'] == 'COMMAND_REJECTED' and _integer(p['command_sequence']),
+                     'Invalid rejected command sequence')
     return message
 
 

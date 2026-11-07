@@ -31,20 +31,23 @@ class RigParameters:
 def positions(config):
     values = (*config.center, config.spacing_m, config.width_m,
               config.height_m, config.depth_m, config.housing_yaw_deg)
-    if len(config.center) != 3 or not all(math.isfinite(x) for x in values):
+    if len(config.center) != 3 or not core._finite(values):
         raise ValueError('盒体参数必须是有限的米制尺寸')
     if min(config.spacing_m, config.width_m, config.height_m, config.depth_m) <= 0:
         raise ValueError('盒体尺寸与相机间距必须为正')
     if config.spacing_m < .072 or config.height_m < 3 * config.spacing_m or config.width_m < .10 or config.depth_m < .065:
         raise ValueError('盒体不足以容纳三台 28 mm 相机模块和窗口')
-    if len(config.span_ranges_m) != 3 or any(not 0 <= lo < hi for lo, hi in config.span_ranges_m):
+    if len(config.span_ranges_m) != 3 or any(not core._finite((lo, hi)) or not 0 <= lo < hi for lo, hi in config.span_ranges_m):
         raise ValueError('须指定三个有效叶片覆盖区间')
     if any(config.span_ranges_m[i][0] >= config.span_ranges_m[i+1][0] for i in (0, 1)):
         raise ValueError('取景区间须按叶根、中段、叶尖顺序排列')
     if len(config.framing_scale) != 3 or any(not math.isfinite(v) or not 0 < v <= 1 for v in config.framing_scale):
         raise ValueError('三路取景缩放须为 0 到 1 之间的正数')
-    return [tuple(config.center[i] + ((slot-2)*config.spacing_m if i == 2 else 0)
-                  for i in range(3)) for slot in (1, 2, 3)]
+    result = [tuple(config.center[i] + ((slot-2)*config.spacing_m if i == 2 else 0)
+                    for i in range(3)) for slot in (1, 2, 3)]
+    if any(not core._finite(point) for point in result) or len(set(result)) != 3:
+        raise ValueError('盒体坐标超出可表示的相机间距范围')
+    return result
 
 
 def fit_segment(points, spans, location, interval, long_edge=1920, framing_scale=1.):
@@ -56,6 +59,12 @@ def fit_segment(points, spans, location, interval, long_edge=1920, framing_scale
         raise ValueError("取景缩放须为 0 到 1 之间的正数")
     import numpy as np
     origin = np.asarray(location)
+    points, spans = np.asarray(points), np.asarray(spans)
+    if (origin.shape != (3,) or points.ndim != 2 or points.shape[1] != 3
+            or spans.shape != (len(points),) or len(interval) != 2
+            or not core._finite(interval) or not 0 <= interval[0] < interval[1]
+            or not all(np.isfinite(value).all() for value in (origin, points, spans))):
+        raise ValueError('参考叶片、镜头中心与覆盖区间须为有限且匹配的几何数据')
     ids = np.where((spans >= interval[0] - 1e-4) & (spans <= interval[1] + 1e-4))[0]
     if len(ids) < 3:
         raise ValueError('参考叶片在目标区间没有足够网格点')
@@ -63,8 +72,13 @@ def fit_segment(points, spans, location, interval, long_edge=1920, framing_scale
     direction = target.mean(axis=0) - origin
     roll = 0.
     for _ in range(8):
-        direction /= np.linalg.norm(direction)
+        length = np.linalg.norm(direction)
+        if not math.isfinite(length) or length == 0:
+            raise ValueError('叶片区间与镜头中心无法确定有限视线')
+        direction /= length
         yaw = math.degrees(math.atan2(direction[1], direction[0])) % 360
+        if yaw == 360.:
+            yaw = 0.
         pitch = math.degrees(math.asin(direction[2]))
         base = np.asarray(projection.rotation(yaw, pitch, 0))
         ordered = np.argsort(spans[ids])
@@ -91,23 +105,27 @@ def blade_geometry(scene):
     import bpy
     import numpy as np
     from . import farm_flex
-    if not farm_flex.is_active(scene):
+    active = farm_flex.ready_for(scene)
+    if active is None:
         raise ValueError('请先加载正式 FarmFlex 叶片回放')
     bpy.context.view_layer.update()
-    obj, rest, *_ = next(row for row in farm_flex._ACTIVE.blades
+    obj, rest, *_ = next(row for row in active.blades
                         if row[0].name == 'WFRL.Turbine.T1.Blade1')
     coords = np.empty(len(obj.data.vertices)*3, dtype=np.float32)
     obj.data.vertices.foreach_get('co', coords)
     matrix = np.asarray(scene.objects[core.ROOT_NAME].matrix_world.inverted() @ obj.matrix_world)
     points = coords.reshape(-1, 3) @ matrix[:3, :3].T + matrix[:3, 3]
     spans = rest[:, 2] - 1.5
-    used = np.unique([i for face in obj.data.polygons for i in face.vertices])
+    # Every face vertex is a face corner, so the corner indices name the used vertices.
+    corners = np.empty(len(obj.data.loops), dtype=np.int32)
+    obj.data.loops.foreach_get('vertex_index', corners)
+    used = np.unique(corners)
     return obj, points, spans, used
 
 
 def _housing(scene, cameras, config):
     import bpy
-    from mathutils import Vector
+    from .scene_builder import _primitive_mesh
     root = scene.objects[core.ROOT_NAME]
     collection = root.users_collection[0]
     assembly = bpy.data.objects.new(PREFIX, None)
@@ -115,7 +133,7 @@ def _housing(scene, cameras, config):
     assembly.parent = root
     assembly.location = config.center
     assembly.rotation_euler.z = math.radians(config.housing_yaw_deg)
-    assembly['assumptions_json'] = __import__('json').dumps(asdict(config))
+    assembly['assumptions_json'] = __import__('json').dumps(asdict(config), allow_nan=False)
     assembly['physical_status'] = 'assumed dimensions; ideal open optical windows; not hardware calibrated'
     colors = {'Body': (.10, .13, .16, 1), 'Seal': (.012, .016, .02, 1),
               'Module': (.025, .032, .037, 1), 'Lens': (.015, .035, .06, 1)}
@@ -131,12 +149,9 @@ def _housing(scene, cameras, config):
         materials[name] = mat
 
     def cube(name, location, size, material='Body', rotation=None):
-        bpy.ops.mesh.primitive_cube_add(size=1)
-        obj = bpy.context.object
-        for owner in tuple(obj.users_collection):
-            owner.objects.unlink(obj)
+        data = _primitive_mesh(PREFIX+'.'+name+'.Mesh', 'cube', size=1.0)
+        obj = bpy.data.objects.new(PREFIX+'.'+name, data)
         collection.objects.link(obj)
-        obj.name = PREFIX+'.'+name
         obj.parent = assembly
         obj.location = location
         obj.scale = size
@@ -169,9 +184,14 @@ def _housing(scene, cameras, config):
         faces = []
         for a, b in ((0, n), (2*n, 3*n), (0, 2*n), (n, 3*n)):
             faces += [(a+i, a+(i+1)%n, b+(i+1)%n, b+i) for i in range(n)]
-        mesh = bpy.data.meshes.new(PREFIX+'.WindowMesh'); mesh.from_pydata(verts, [], faces); mesh.update()
-        seal = bpy.data.objects.new(PREFIX+f'.Window{slot}', mesh); collection.objects.link(seal)
-        seal.parent = assembly; seal.data.materials.append(materials['Seal']); seal['stacked_rig_physical'] = True
+        mesh = bpy.data.meshes.new(PREFIX+'.WindowMesh')
+        mesh.from_pydata(verts, [], faces)
+        mesh.update()
+        seal = bpy.data.objects.new(PREFIX+f'.Window{slot}', mesh)
+        collection.objects.link(seal)
+        seal.parent = assembly
+        seal.data.materials.append(materials['Seal'])
+        seal['stacked_rig_physical'] = True
         # Fill the front panel all the way to each aperture; only optical holes stay open.
         inner = [(x*1.10, zz*1.10) for x, zz in ring]
         outer = []
@@ -183,8 +203,10 @@ def _housing(scene, cameras, config):
                              [(i, (i+1)%n, n+(i+1)%n, n+i) for i in range(n)])
         panelmesh.update()
         panel = bpy.data.objects.new(PREFIX+f'.FrontPanel{slot}', panelmesh)
-        collection.objects.link(panel); panel.parent = assembly
-        panel.data.materials.append(materials['Body']); panel['stacked_rig_physical'] = True
+        collection.objects.link(panel)
+        panel.parent = assembly
+        panel.data.materials.append(materials['Body'])
+        panel['stacked_rig_physical'] = True
         # Body and lens backing remain behind the optical centre, including near clip.
         for name, offset, size, material in (
                 (f'Module{slot}', .029, (.028, .028, .028), 'Module'),
@@ -317,9 +339,10 @@ def pose(scene):
 def pose_rotation(value):
     from mathutils import Euler
     angles = value.get('housing_rotation_deg', (0., 0., value['housing_yaw_deg']))
-    if len(angles) != 3 or not core._finite(angles):
+    if len(angles) != 3 or not core._finite((*angles, value['housing_yaw_deg'])):
         raise ValueError('盒体方向须为三个有限角度')
-    if abs(angles[2] - value['housing_yaw_deg']) > 1e-4:
+    difference = math.remainder(math.remainder(angles[2], 360.) - math.remainder(value['housing_yaw_deg'], 360.), 360.)
+    if abs(difference) > 1e-4:
         raise ValueError('盒体整体方向与水平角不一致')
     return Euler(tuple(math.radians(v) for v in angles), 'XYZ').to_matrix()
 
@@ -336,7 +359,7 @@ def surface_transform(point, normal, depth, spin=0., mount_type='SUPPORT', aim=0
     if mount_type not in {'SUPPORT','BACK'}:raise ValueError('未知盒体安装方式')
     if mount_type == 'BACK' and abs(aim) > 1e-8:
         raise ValueError('背贴布局不支持盒体独立转向，请重新选择支架安装')
-    n = np.asarray(normal, dtype=float)
+    n = np.array(normal, dtype=float, copy=True)
     if abs(np.linalg.norm(n)-1) > 1e-4:
         raise ValueError('安装面法线须为单位向量')
     n /= np.linalg.norm(n)
@@ -447,6 +470,8 @@ def camera_angles(matrix):
     from mathutils import Vector
     forward = -matrix.col[2]
     yaw = math.degrees(math.atan2(forward.y, forward.x)) % 360
+    if yaw == 360.:
+        yaw = 0.
     pitch = math.degrees(math.atan2(forward.z, math.hypot(forward.x, forward.y)))
     base = projection.rotation(yaw, pitch, 0.)
     right = Vector(tuple(row[0] for row in base))
@@ -517,7 +542,7 @@ def apply_pose(scene, value):
     if mount is None:
         if 'surface_mount_json' in box: del box['surface_mount_json']
     else:
-        box['surface_mount_json'] = json.dumps(mount)
+        box['surface_mount_json'] = json.dumps(mount, allow_nan=False)
     data = json.loads(box['assumptions_json'])
     arm = scene.objects.get(PREFIX+'.MountArm')
     if arm:
@@ -530,7 +555,7 @@ def apply_pose(scene, value):
         arm.hide_set(hidden)
         arm.hide_render = hidden
     data.update(center=list(value['center']), housing_yaw_deg=value['housing_yaw_deg'])
-    box['assumptions_json'] = json.dumps(data)
+    box['assumptions_json'] = json.dumps(data, allow_nan=False)
 
 
 def move_box(scene, center, yaw):

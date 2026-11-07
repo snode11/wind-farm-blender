@@ -111,7 +111,7 @@ def expected_window(pose, half_angle_deg):
 
 def structural_reference_points(source):
     """The independent unloaded structural tip, not the surface centroid label."""
-    reference = json.loads((source.path/'blade-reference.json').read_text())
+    reference = json.loads((source.path/'blade-reference.json').read_text(encoding='utf-8'))
     tip_local = np.asarray(reference['tip_local_m'], float)
     rest_nacelle = np.column_stack((np.eye(3), np.zeros(3)))
     rest_tips = []
@@ -456,8 +456,8 @@ def main(argv=None):
     report['evidence_tool_hashes'] = {
         'scripts/lidar/compare_dual_beam_methods.py':digest(Path(__file__)),
         'tests/lidar/test_dual_beam_comparison.py':digest(ROOT/'tests/lidar/test_dual_beam_comparison.py')}
-    (output/'comparison.json').write_text(json.dumps(report, ensure_ascii=False, allow_nan=False, indent=2)+'\n')
-    (output/'report.md').write_text(markdown_report(report))
+    (output/'comparison.json').write_text(json.dumps(report, ensure_ascii=False, allow_nan=False, indent=2)+'\n', encoding='utf-8')
+    (output/'report.md').write_text(markdown_report(report), encoding='utf-8')
     print(output)
 
 

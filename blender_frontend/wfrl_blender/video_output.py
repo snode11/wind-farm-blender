@@ -2,10 +2,14 @@
 from __future__ import annotations
 
 import atexit
+import ctypes
+import errno
+import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -54,10 +58,18 @@ def _spawn(command, log):
 def _tail(handle):
     size = os.fstat(handle.fileno()).st_size
     # Logs are diagnostics, not permanent frame archives.
-    handle.seek(max(0, size - 8192))
-    text = handle.read().decode('utf-8', errors='replace')
+    offset = max(0, size - 8192)
+    if hasattr(os, 'pread'):
+        data = os.pread(handle.fileno(), 8192, offset)
+    else:
+        # A separate open keeps the child process's shared write offset intact.
+        with open(handle.name, 'rb') as reader:
+            reader.seek(offset)
+            data = reader.read(8192)
+    text = data.decode('utf-8', errors='replace')
     if size > 1024 * 1024:
-        handle.seek(0); handle.truncate()
+        handle.seek(0)
+        handle.truncate()
     return text
 
 
@@ -69,10 +81,30 @@ class Stream:
         self.state = 'STOPPED'
         self.message = 'RTSP 未启动'
         self.url = ''
+        self._stop_thread = None
+        self._stop_result = None
+
+    def _settle_stop(self):
+        if self._stop_result is not None and (
+                self._stop_thread is None or not self._stop_thread.is_alive()):
+            self._state, self.message = self._stop_result
+            self._stop_result = None
+
+    @property
+    def state(self):
+        self._settle_stop()
+        return self._state
+
+    @state.setter
+    def state(self, value):
+        self._state = value
 
     @property
     def active(self):
-        return self.server is not None
+        self._settle_stop()
+        return (self._state == 'STOPPING'
+                or (self._stop_thread is not None and self._stop_thread.is_alive())
+                or self.server is not None or self.publisher is not None)
 
     def start(self, video, ffmpeg='', mediamtx='', port=8554, lan=False):
         if self.active:
@@ -88,18 +120,25 @@ class Stream:
                         '-rtsp_transport', 'tcp', '-f', 'rtsp', self.url]
         self.directory = tempfile.TemporaryDirectory(prefix='wfrl-rtsp-')
         config_path = Path(self.directory.name) / 'mediamtx.yml'
-        config_path.write_text(config, encoding='utf-8')
-        self.logs = [tempfile.TemporaryFile(mode='w+b') for _ in range(2)]
         try:
+            config_path.write_text(config, encoding='utf-8')
+            for _ in range(2):
+                self.logs.append(tempfile.NamedTemporaryFile(mode='w+b', dir=self.directory.name,
+                                                             suffix='.log', delete=False))
             self.server = _spawn([mediamtx, str(config_path)], self.logs[0])
         except BaseException:
-            self.stop()
+            self._release()
             raise
         self.state, self.message = 'STARTING', '正在启动 RTSP…'
         self.deadline = time.monotonic() + 15
 
     def poll(self):
-        if not self.active:
+        if not self.active or self.state == 'STOPPING':
+            return
+        if self.state == 'ERROR':
+            if all(process is None or process.poll() is not None
+                   for process in (self.publisher, self.server)):
+                self._release()
             return
         server_log = _tail(self.logs[0])
         if self.server.poll() is not None:
@@ -120,87 +159,301 @@ class Stream:
             self.fail('RTSP 启动超时，请检查视频格式和工具路径')
 
     def fail(self, message):
-        self.stop()
-        self.state, self.message = 'ERROR', message
+        self.stop(error=message)
 
-    def stop(self):
-        for process in (self.publisher, self.server):
-            if process is not None and process.poll() is None:
-                process.terminate()
+    def stop(self, *, error=''):
+        if not self.active or self.state == 'STOPPING':
+            return
+        self.state, self.message = 'STOPPING', error or '正在停止 RTSP…'
+        self._stop_thread = threading.Thread(target=self._stop_processes, args=(error,),
+                                             name='wfrl-rtsp-stop', daemon=True)
+        self._stop_thread.start()
+
+    def _stop_processes(self, error):
+        processes = [process for process in (self.publisher, self.server)
+                     if process is not None and process.poll() is None]
+        for method in ('terminate', 'kill'):
+            for process in processes:
                 try:
-                    process.wait(timeout=2)
-                except subprocess.TimeoutExpired:
-                    process.kill(); process.wait(timeout=2)
-        self.publisher = self.server = None
+                    getattr(process, method)()
+                except OSError:
+                    pass  # A failed signal must never prevent stopping the other process.
+            deadline = time.monotonic() + 2
+            for process in processes:
+                try:
+                    process.wait(timeout=max(0., deadline - time.monotonic()))
+                except (OSError, subprocess.TimeoutExpired):
+                    pass
+            processes = [process for process in processes if process.poll() is None]
+            if not processes:
+                break
+        if processes:
+            self._stop_result = 'ERROR', error + ' RTSP 进程未退出，仍保留进程控制。'
+            return
+        try:
+            self._release()
+        except OSError as exc:
+            error = f'{error} RTSP 临时文件清理失败：{exc}'.strip()
+        self._stop_result = ('ERROR', error) if error else ('STOPPED', 'RTSP 已停止')
+
+    def _release(self):
         for log in self.logs:
             log.close()
         self.logs = []
-        if self.directory:
-            self.directory.cleanup()
+        try:
+            if self.directory:
+                self.directory.cleanup()
+        finally:
             self.directory = None
-        self.state, self.message = 'STOPPED', 'RTSP 已停止'
+            self.publisher = self.server = None
+
+    def close(self):
+        if self.state == 'STOPPING' and self._stop_thread is not None:
+            self._stop_thread.join(timeout=4.1)
+        elif self.active:
+            self._stop_processes('')
+        self._settle_stop()
+
+
+def _commit_export(source, destination):
+    """Publish complete bytes under an exclusive target name on the same filesystem."""
+    if os.name == 'nt':
+        os.rename(source, destination)
+        return
+    libc = ctypes.CDLL(None, use_errno=True)
+    function = None
+    if sys.platform == 'darwin' and hasattr(libc, 'renamex_np'):
+        function = libc.renamex_np
+        function.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint]
+        args = (os.fsencode(source), os.fsencode(destination), 0x00000004)
+    elif sys.platform.startswith('linux') and hasattr(libc, 'renameat2'):
+        function = libc.renameat2
+        function.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint]
+        args = (-100, os.fsencode(source), -100, os.fsencode(destination), 1)
+    if function is not None:
+        function.restype = ctypes.c_int
+        if function(*args) == 0:
+            return
+        code = ctypes.get_errno()
+        if code not in {errno.ENOSYS, errno.EINVAL, errno.ENOTSUP, errno.EOPNOTSUPP}:
+            raise OSError(code, os.strerror(code), str(destination))
+    os.link(source, destination, follow_symlinks=False)
 
 
 class Export:
     def __init__(self):
         self.thread = None
+        self.state = 'IDLE'
+        self._state_lock = threading.Lock()
         self.cancelled = threading.Event()
         self.done_bytes = self.total_bytes = 0
         self.message = '导出所选视频为 MP4'
         self.error = ''
+        self.source_path = self.output_path = ''
+        self._source_identity = None
+        self._staging = None
+        self._exit_janitor = None
+        self._result = None
+
+    @staticmethod
+    def _identity(stat):
+        identity = stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns
+        return identity if os.name == 'nt' else (*identity, stat.st_ctime_ns)
+
+    def _workers_active(self):
+        return any(worker is not None and worker.is_alive()
+                   for worker in (self.thread, self._exit_janitor))
+
+    def _settle(self):
+        with self._state_lock:
+            if self._result is not None and not self._workers_active():
+                self._state, self.message, self.error, self.output_path = self._result
+                self._result = None
+
+    @property
+    def state(self):
+        self._settle()
+        return self._state
+
+    @state.setter
+    def state(self, value):
+        self._state = value
 
     @property
     def active(self):
-        return self.thread is not None and self.thread.is_alive()
+        self._settle()
+        return self._workers_active()
 
     def start(self, video, output):
         if self.active:
             raise RuntimeError('已有视频正在导出')
-        source, target = video_path(video), Path(output).expanduser().resolve()
+        source, target = video_path(video), Path(os.path.abspath(Path(output).expanduser()))
         if target.suffix.lower() != '.mp4':
             raise ValueError('输出文件必须使用 .mp4 后缀')
-        if target == source or target.exists():
+        if target == source or os.path.lexists(target):
             raise FileExistsError('目标文件已存在，请另选文件名；不会覆盖源视频')
         if not target.parent.is_dir():
             raise ValueError('输出目录不存在')
+        identity = self._identity(source.stat())
         self.cancelled.clear()
-        self.done_bytes, self.total_bytes = 0, source.stat().st_size
-        self.message, self.error = '正在导出 MP4…', ''
+        self.done_bytes, self.total_bytes = 0, identity[2]
+        self.message, self.error, self.state = '正在导出 MP4…', '', 'RUNNING'
+        self.source_path, self.output_path = str(source), ''
+        self._source_identity = identity
+        self._staging = dict(owned={}, ready=threading.Event())
+        if os.name == 'posix':
+            self._exit_janitor = threading.Thread(target=self._cleanup_on_exit,
+                                                 args=(self._staging,),
+                                                 name='wfrl-export-cleanup', daemon=True)
+            self._exit_janitor.start()
         self.thread = threading.Thread(target=self._copy, args=(source, target), daemon=True)
-        self.thread.start()
+        try:
+            self.thread.start()
+        except Exception:
+            self._staging['ready'].set()
+            raise
 
     def _copy(self, source, target):
-        owned = False
+        stage = self._staging
+        directory = None
+        owned = stage['owned'] if stage is not None else {}
+        terminal, message, error, output = 'FAILED', '', '', ''
         try:
-            with source.open('rb') as incoming, target.open('xb') as outgoing:
-                owned = True
+            if self.cancelled.is_set():
+                raise InterruptedError
+            # A private directory identifies incomplete copies even after a bounded shutdown.
+            directory = Path(tempfile.mkdtemp(prefix='.wfrl-video-export-', dir=target.parent))
+            owned[directory] = directory.lstat()
+            if stage is not None:
+                stage['directory'] = directory
+            if self.cancelled.is_set():
+                raise InterruptedError
+            marker, staging = directory / 'owner.json', directory / 'video.part'
+            with marker.open('x', encoding='utf-8') as handle:
+                owned[marker] = os.fstat(handle.fileno())
+                json.dump(dict(source=str(source), destination=str(target)), handle)
+            if self.cancelled.is_set():
+                raise InterruptedError
+            with source.open('rb') as incoming, staging.open('xb') as outgoing:
+                owned[staging] = os.fstat(outgoing.fileno())
+                if (self._source_identity is not None and
+                        self._identity(os.fstat(incoming.fileno())) != self._source_identity):
+                    raise ValueError('源视频在导出期间发生变化，请等待源文件写入完成后重试')
                 while block := incoming.read(4 * 1024 * 1024):
                     if self.cancelled.is_set():
-                        raise InterruptedError('导出已取消')
+                        raise InterruptedError
                     outgoing.write(block)
                     self.done_bytes += len(block)
-            if self.cancelled.is_set():
-                raise InterruptedError('导出已取消')
-            self.message = '已导出：' + str(target)
+                if self.cancelled.is_set():
+                    raise InterruptedError
+                outgoing.flush()
+                os.fsync(outgoing.fileno())
+                if self._source_identity is not None and (
+                        self._identity(os.fstat(incoming.fileno())) != self._source_identity
+                        or self._identity(source.stat()) != self._source_identity
+                        or self.done_bytes != self.total_bytes):
+                    raise ValueError('源视频在导出期间发生变化，请等待源文件写入完成后重试')
+            with self._state_lock:
+                if self.cancelled.is_set():
+                    raise InterruptedError
+                self.state, self.message = 'COMMITTING', '正在提交 MP4…'
+            _commit_export(staging, target)
+            terminal, message, output = 'SUCCEEDED', '已导出：' + str(target), str(target)
+        except InterruptedError:
+            terminal, message = 'CANCELLED', '导出已取消'
         except Exception as exc:
-            if owned:
-                target.unlink(missing_ok=True)
-            self.error = str(exc)
-            self.message = self.error
+            message = error = str(exc)
+        finally:
+            try:
+                self._discard_staging(directory, owned)
+            except OSError as exc:
+                if terminal == 'SUCCEEDED':
+                    message += '；暂存清理失败：' + str(exc)
+                else:
+                    terminal, error = 'FAILED', f'暂存清理失败：{exc}'
+                    message = error
+            with self._state_lock:
+                self._result = terminal, message, error, output
+            if stage is not None:
+                stage['ready'].set()
 
-    def stop(self):
-        self.cancelled.set()
-        if self.thread:
-            self.thread.join()
+    @classmethod
+    def _discard_staging(cls, directory, owned):
+        if directory is None or not cls._is_owned(directory, owned):
+            return
+        for path in (directory / 'video.part', directory / 'owner.json'):
+            if cls._is_owned(path, owned):
+                path.unlink(missing_ok=True)
+        if cls._is_owned(directory, owned):
+            try:
+                directory.rmdir()
+            except FileNotFoundError:
+                pass
+
+    @classmethod
+    def _cleanup_on_exit(cls, stage):
+        stage['ready'].wait()
+        if stage.get('exit'):
+            try:
+                cls._discard_staging(stage.get('directory'), stage['owned'].copy())
+            except OSError:
+                pass  # Preserve any entries whose ownership or removal could not be established.
+
+    @staticmethod
+    def _is_owned(path, owned):
+        expected = owned.get(path)
+        if expected is None:
+            return False
+        try:
+            current = path.lstat()
+        except FileNotFoundError:
+            return False
+        return (current.st_dev, current.st_ino) == (expected.st_dev, expected.st_ino)
+
+    def stop(self, timeout=.05):
+        with self._state_lock:
+            worker = self.thread
+            if self._workers_active() and self._state == 'RUNNING':
+                self.cancelled.set()
+                self.state, self.message = 'CANCELLING', '取消已请求，等待文件 I/O 结束'
+        if worker is not None:
+            worker.join(timeout=max(0., timeout))
+        return not self.active
+
+    def close(self):
+        self.stop(timeout=0)
+        with self._state_lock:
+            if self._state != 'CANCELLING' or self._exit_janitor is None:
+                return
+            self._staging['exit'] = True
+            self._staging['ready'].set()
+            janitor = self._exit_janitor
+        janitor.join(timeout=.2)
+
+    def status(self):
+        self._settle()
+        with self._state_lock:
+            return (self._state, self._workers_active(), self.done_bytes, self.total_bytes,
+                    self.error, self.output_path, self.message)
 
 
-stream = Stream()
-export = Export()
+stream = globals().get('stream') or Stream()
+export = globals().get('export') or Export()
 
 
 def shutdown():
     stream.stop()
-    export.stop()
+    export.stop(timeout=0)
 
 
-atexit.register(shutdown)
+def _close():
+    export.close()
+    stream.close()
+
+
+atexit.register(_close)
+
+
+def status_for(scene=None):
+    """Immutable values for global file-copy and streaming consumers."""
+    return (*export.status(), stream.state, stream.active, stream.message, stream.url)

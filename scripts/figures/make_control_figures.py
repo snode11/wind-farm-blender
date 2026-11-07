@@ -28,7 +28,7 @@ A_OBS, B_OBS = 5.686, 2.337          # 日报里被当作"静态 vs 动态"的�
 
 
 def fig_null():
-    d = json.load(open(os.path.join(paths.RUNS, "null_distribution.json")))
+    d = json.load(open(os.path.join(paths.RUNS, "null_distribution.json"), encoding='utf-8'))
     P = np.array(d["power_total_MW"])
     ratio = d["observed_ratio"]
 
@@ -75,7 +75,7 @@ def fig_null():
 
 
 def fig_matched():
-    d = json.load(open(os.path.join(paths.RUNS, "matched_inflow.json")))
+    d = json.load(open(os.path.join(paths.RUNS, "matched_inflow.json"), encoding='utf-8'))
     fl = [r for r in d["rows"] if r["backend"] == "floris"]
     ff = [r for r in d["rows"] if r["backend"] == "fastfarm"]
     if not ff:
@@ -111,7 +111,7 @@ def fig_matched():
     #     横轴用 step 而非仿真时间：t_init=25 s、dt=3 s ⇒ start_iter=9，reset 内预跑
     #     10 步，序列起点已对应仿真第 30 s，标 step 可避免绝对时刻的歧义。
     try:
-        s = json.load(open(os.path.join(paths.RUNS, "settle_check.json")))
+        s = json.load(open(os.path.join(paths.RUNS, "settle_check.json"), encoding='utf-8'))
     except FileNotFoundError:
         s = None
     if s is not None:

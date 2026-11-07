@@ -1,0 +1,5 @@
+00:10.625  blend            | Read blend: "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-camera-save-6yigp6gu/saved.blend"
+Warning: 1 × Draw window and swap: 20.8133 ms, average: 20.81333310 ms
+Info: Saved as "saved.blend"
+Error: Cannot save blend file, path "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-camera-save-6yigp6gu/fail.blend" is a directory
+NATIVE_CAMERA_SAVE_PASS

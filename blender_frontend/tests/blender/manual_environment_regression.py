@@ -1,24 +1,19 @@
 """Manual daylight presentation, private assets, and return shading checks."""
 import importlib
 import json
-import os
 from pathlib import Path
 import sys
 
 import bpy
 
 ROOT = Path(__file__).resolve().parents[3]
-MODULE = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')
-if MODULE == 'wfrl_blender':
-    sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
+sys.path.append(str(Path(__file__).resolve().parent))
+import _native
+MODULE = _native.addon_module()
 addon = importlib.import_module(MODULE)
 control = importlib.import_module(MODULE + '.manual_control')
-OUT = Path(os.environ['WFRL_TEST_OUTPUT'])
-assert not OUT.exists(), 'WFRL_TEST_OUTPUT must name a new directory'
-OUT.mkdir(parents=True)
-expected_root = os.environ.get('WFRL_EXPECTED_ADDON_ROOT')
-if expected_root:
-    assert Path(addon.__file__).resolve().parent == Path(expected_root).resolve()
+OUT = _native.output_directory()
+_native.check_addon_root(addon)
 
 
 def tree_snapshot(tree):
@@ -62,7 +57,8 @@ terrain = ground.data.materials[0]
 assert terrain.name.startswith(prefix) and terrain.node_tree.nodes.get('WFRL.Terrain.Habitat')
 images = {n.image for tree in (manual.world.node_tree, terrain.node_tree)
           for n in tree.nodes if hasattr(n, 'image') and n.image}
-assert len(images) == 4
+# Sky HDR plus terrain diffuse and roughness; roughness also drives the bump.
+assert len(images) == 3
 assert all(i.name.startswith(prefix) and i.packed_file for i in images)
 assert not any(i.as_pointer() in before['images'] for i in images)
 assert source_snapshot(source) == before, 'Manual environment changed source assets'

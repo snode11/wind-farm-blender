@@ -1,0 +1,125 @@
+......................................s.................s.......................... [  5%]
+........................................................................ [  9%]
+........................................................................ [ 14%]
+........................................................................ [ 18%]
+........................................................................ [ 23%]
+........................................................................ [ 28%]
+.................................................................. [ 32%]
+....................................................FF.................. [ 36%]
+........................................................................ [ 41%]
+........................................................................ [ 45%]
+.................................................................. [ 50%]
+...................... [ 51%]
+............... [ 52%]
+................................................................... [ 56%]
+............................................................. [ 60%]
+.................................................................. [ 64%]
+........................................................................ [ 69%]
+........................................................................ [ 73%]
+........................................................................ [ 78%]
+............................................................. [ 82%]
+.......................................... [ 85%]
+..............................................s......................... [ 89%]
+........................................................................ [ 94%]
+..s..................................................................... [ 98%]
+....................                                                     [100%]
+=================================== FAILURES ===================================
+___ test_supervisor_executes_backend_in_selected_virtual_environment[False] ____
+
+tmp_path = PosixPath('/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-5/test_supervisor_executes_backe0')
+acceptance_processes = <function acceptance_processes.<locals>.run at 0x10cc21640>
+explicit_python = False
+
+    @pytest.mark.parametrize('explicit_python', [False, True])
+    def test_supervisor_executes_backend_in_selected_virtual_environment(tmp_path, acceptance_processes, explicit_python):
+        environment = tmp_path / 'venv'
+        venv.EnvBuilder(with_pip=False, system_site_packages=True, symlinks=True).create(environment)
+        python = environment / 'bin/python'
+        selected = python
+        if explicit_python:
+            selected = environment / 'bin/backend-python'
+            selected.symlink_to(python)
+        identities = tmp_path / 'identities'
+        identities.mkdir()
+        (identities / 'sitecustomize.py').write_text('''
+    import json
+    import os
+    from pathlib import Path
+    import sys
+    
+    record = dict(prefix=sys.prefix, executable=sys.executable, argv=sys.orig_argv)
+    Path(os.environ['FIXTURE_IDENTITY_DIR'], str(os.getpid()) + '.json').write_text(json.dumps(record))
+    ''')
+        result = acceptance_processes(tmp_path / 'acceptance', report={'passed': True}, python=python,
+            backend_python=selected if explicit_python else None,
+            extra_env={'PYTHONPATH': os.pathsep.join([str(identities), str(ROOT)]),
+                       'FIXTURE_IDENTITY_DIR': str(identities)})
+>       assert result.returncode == 0, result.stdout + result.stderr
+E       AssertionError: Acceptance output: /private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-5/test_supervisor_executes_backe0/acceptance/run-2ohmcnpd
+E         {'output_dir': '/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-5/test_supervisor_executes_backe0/acceptance/run-2ohmcnpd', 'elapsed_seconds': 0.10817133297678083, 'owned_launchers_exited': True}
+E         Traceback (most recent call last):
+E           File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/verify_frontend_completion.py", line 47, in <module>
+E             raise RuntimeError('Bridge exited')
+E         RuntimeError: Bridge exited
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-5/test_supervi...ontend_completion.py", line 47, in <module>\n    raise RuntimeError(\'Bridge exited\')\nRuntimeError: Bridge exited\n').returncode
+
+blender_frontend/tests/test_frontend_completion.py:157: AssertionError
+____ test_supervisor_executes_backend_in_selected_virtual_environment[True] ____
+
+tmp_path = PosixPath('/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-5/test_supervisor_executes_backe1')
+acceptance_processes = <function acceptance_processes.<locals>.run at 0x10cc197a0>
+explicit_python = True
+
+    @pytest.mark.parametrize('explicit_python', [False, True])
+    def test_supervisor_executes_backend_in_selected_virtual_environment(tmp_path, acceptance_processes, explicit_python):
+        environment = tmp_path / 'venv'
+        venv.EnvBuilder(with_pip=False, system_site_packages=True, symlinks=True).create(environment)
+        python = environment / 'bin/python'
+        selected = python
+        if explicit_python:
+            selected = environment / 'bin/backend-python'
+            selected.symlink_to(python)
+        identities = tmp_path / 'identities'
+        identities.mkdir()
+        (identities / 'sitecustomize.py').write_text('''
+    import json
+    import os
+    from pathlib import Path
+    import sys
+    
+    record = dict(prefix=sys.prefix, executable=sys.executable, argv=sys.orig_argv)
+    Path(os.environ['FIXTURE_IDENTITY_DIR'], str(os.getpid()) + '.json').write_text(json.dumps(record))
+    ''')
+        result = acceptance_processes(tmp_path / 'acceptance', report={'passed': True}, python=python,
+            backend_python=selected if explicit_python else None,
+            extra_env={'PYTHONPATH': os.pathsep.join([str(identities), str(ROOT)]),
+                       'FIXTURE_IDENTITY_DIR': str(identities)})
+>       assert result.returncode == 0, result.stdout + result.stderr
+E       AssertionError: Acceptance output: /private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-5/test_supervisor_executes_backe1/acceptance/run-w0_y_u1a
+E         {'output_dir': '/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-5/test_supervisor_executes_backe1/acceptance/run-w0_y_u1a', 'elapsed_seconds': 0.10885591700207442, 'owned_launchers_exited': True}
+E         Traceback (most recent call last):
+E           File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/verify_frontend_completion.py", line 47, in <module>
+E             raise RuntimeError('Bridge exited')
+E         RuntimeError: Bridge exited
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-5/test_supervi...ontend_completion.py", line 47, in <module>\n    raise RuntimeError(\'Bridge exited\')\nRuntimeError: Bridge exited\n').returncode
+
+blender_frontend/tests/test_frontend_completion.py:157: AssertionError
+=============================== warnings summary ===============================
+blender_frontend/tests/test_custom_camera_capture.py::test_png_preserves_display_bytes_and_flips_only_rows
+  /Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/test_custom_camera_capture.py:26: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    assert list(image.getdata())==[(255,0,0,255),(0,255,0,255),(0,0,255,255),(17,91,143,128)]
+
+blender_frontend/tests/test_custom_camera_capture.py::test_capture_step_requests_pixels_without_texture_and_exports_state[False]
+blender_frontend/tests/test_custom_camera_capture.py::test_capture_step_requests_pixels_without_texture_and_exports_state[True]
+  /Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/test_custom_camera_capture.py:78: DeprecationWarning: Image.Image.getdata is deprecated and will be removed in Pillow 14 (2027-10-15). Use get_flattened_data instead.
+    assert list(png.getdata()) == [(255, 0, 0, 255), (0, 255, 0, 255),
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED blender_frontend/tests/test_frontend_completion.py::test_supervisor_executes_backend_in_selected_virtual_environment[False]
+FAILED blender_frontend/tests/test_frontend_completion.py::test_supervisor_executes_backend_in_selected_virtual_environment[True]
+2 failed, 1571 passed, 4 skipped, 3 warnings, 4923 subtests passed in 99.48s (0:01:39)

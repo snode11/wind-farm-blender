@@ -65,7 +65,7 @@ class TrainingProgressWriter:
         self.failed = True
         # Separate status file reports logging failure without parsing stdout.
         try:
-            Path(self.path + '.error').write_text('Training observability write failed: ' + str(exc))
+            Path(self.path + '.error').write_text('Training observability write failed: ' + str(exc), encoding='utf-8')
         except OSError:
             pass
         print('TRAINING_OBSERVABILITY_ERROR: ' + str(exc), flush=True)
@@ -206,5 +206,8 @@ def interactive_progress(snapshot, run_id, turbine_count):
         iteration=snapshot.iters_done, phase=snapshot.phase if snapshot.phase != 'idle' else 'waiting',
         timestamp=dict(value=time.time(), timebase='unix_seconds'), source_age_seconds=0.,
         stale_after_seconds=30., stats=stats)
+    episode = getattr(snapshot, 'episode', None)
+    if episode is not None:
+        record['episode'] = int(episode)
     validate_training_stats_payload(record)
     return record

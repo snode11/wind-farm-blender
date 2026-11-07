@@ -36,15 +36,18 @@ recess_yaw_seal(seal, 87.6)
 np.testing.assert_array_equal(saved, [v.co[:] for v in seal.data.vertices])
 
 
-def check(frame):
-    scene.frame_set(frame)
+def check_current(turbines=None):
     active = farm_flex._ACTIVE
+    selected = set(active.readers if turbines is None else turbines)
+    frame = scene.frame_current
     t = clearance_replay.sample(scene)['time_s']
     i = int(np.clip(np.searchsorted(active.times, t, side='right') - 1, 0, len(active.times) - 2))
     a = (t - active.times[i]) / (active.times[i + 1] - active.times[i])
     support = active.tower_motion
     transforms = support['transforms'][i] * (1 - a) + support['transforms'][i + 1] * a
     for k, tid in enumerate(active.readers):
+        if tid not in selected:
+            continue
         for suffix, height in specs:
             obj = scene.objects[f'WFRL.Turbine.{tid}.{suffix}']
             z = support['heights']
@@ -61,7 +64,24 @@ def check(frame):
             checks.append(dict(frame=frame, object=obj.name, max_error_m=error))
             assert error < .0002, checks[-1]
     return {f'{tid}.{suffix}': np.array(scene.objects[f'WFRL.Turbine.{tid}.{suffix}'].matrix_world)
-            for tid in active.readers for suffix, _ in specs}
+            for tid in active.readers if tid in selected for suffix, _ in specs}
+
+
+def check(frame):
+    assert bpy.ops.wfrl.farm_flex_view(turbine='all') == {'FINISHED'}
+    scene.frame_set(frame)
+    return check_current()
+
+
+# Selecting a hidden turbine must update its fittings without advancing time.
+assert bpy.ops.wfrl.farm_flex_view(turbine='T1') == {'FINISHED'}
+scene.frame_set(1701)
+stamp = clearance_replay.sample(scene)['time_s']
+for tid in ('T2', 'T3', 'T1', 'T2'):
+    assert bpy.ops.wfrl.farm_flex_view(turbine=tid) == {'FINISHED'}
+    assert scene.frame_current == 1701
+    assert clearance_replay.sample(scene)['time_s'] == stamp
+    check_current((tid,))
 
 
 # Includes both reported screenshot times and backward/repeated seeks.
@@ -93,7 +113,8 @@ wfrl_blender.load_demo_scene(package)
 scene = bpy.context.scene
 check(2280)
 result = dict(status='PASS',checks=len(checks),max_error_m=max(row['max_error_m'] for row in checks),
-              seeks=True,repeat=True,save_reload=True,clear_restore=True,rebuild=True)
+              seeks=True,repeat=True,save_reload=True,clear_restore=True,rebuild=True,
+              all_turbines_requested=True,same_time_selection=True,threshold_m=.0002)
 Path(os.environ['WFRL_TEST_OUTPUT']).write_text(json.dumps(result, indent=2) + '\n')
 print('TOWER_FITTINGS_PASS', json.dumps(result), flush=True)
 wfrl_blender.unregister()

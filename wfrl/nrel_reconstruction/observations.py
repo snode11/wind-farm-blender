@@ -1,4 +1,4 @@
-"""Auditable RGB-only, agent-reviewed segmentation for the first blade passage.
+"""Auditable RGB-only segmentation using fixed first-passage thresholds.
 
 This deliberately small semi-automatic baseline uses visible paint contrast and
 documented exclusion boxes. It uses neither renderer IDs nor depth/truth masks.
@@ -36,7 +36,7 @@ def segment_rgb(rgb, camera_id, *, with_contours=False):
     components, count = ndimage.label(candidate)
     sizes = np.bincount(components.ravel()); sizes[0] = 0
     if count == 0 or sizes.max() < 100:
-        raise ValueError(f'No usable foreground in reviewed {camera_id} frame')
+        raise ValueError(f'No usable foreground in {camera_id} frame')
     largest = sizes.argmax()
     foreground = ndimage.binary_fill_holes(components == largest)
     labels = np.zeros((h,w), dtype=np.uint8)
@@ -49,7 +49,7 @@ def segment_rgb(rgb, camera_id, *, with_contours=False):
     labels[:3] = 2; labels[-3:] = 2; labels[:,:3] = 2; labels[:,-3:] = 2
     yy,xx = np.nonzero(labels == 1)
     center = [float(xx.mean()),float(yy.mean())]
-    annotation = {'method': 'RGB contrast + largest connected component in reviewed B1 passage',
+    annotation = {'method': 'RGB contrast + largest connected component; fixed first-passage thresholds',
                     'white_threshold': {'min_channel_gt':105, 'max_minus_min_lt':65},
                     'red_threshold': {'r_gt':120, 'r_over_g_gt':1.5, 'r_over_b_gt':1.3},
                     'excluded_boxes_normalized':boxes,
@@ -57,7 +57,8 @@ def segment_rgb(rgb, camera_id, *, with_contours=False):
                     'foreground_pixels':int(len(xx)), 'background_pixels':int((labels==0).sum()),
                     'uncertain_pixels':int((labels==2).sum()),
                     'truth_segmentation_used':False, 'human_user_prompts':0,
-                    'reviewer':'Codex visual review of actual MP4 RGB; semi-automatic validation'}
+                    'reviewer':None, 'visual_review':{'status':'NOT_REVIEWED',
+                        'rgb_sha256':hashlib.sha256(rgb.tobytes()).hexdigest()}}
     if not with_contours:
         return labels, annotation
     # Retain a separate RGB-threshold contour before adding the generic U edge
@@ -116,12 +117,13 @@ def create_observations(bundle_dir, out_dir, fit_frame_ids, heldout_frame_ids, r
     if len(entries) != len(chosen)*3:
         raise ValueError('Selected frames were not all decoded')
     reference={'t_ref_sim_time_s':motion[reference_id]['sim_time_s'],'frame_id':reference_id,
-               'selection_basis':'Actual MP4 RGB: B1 body visible in C1/C2 and painted tip contour clear in C3; identity checked with declared ideal B1 rigid pose. No truth geometry used.',
+               'selection_basis':'Caller-selected reference frame; RGB visibility and B1 identity require review.',
                'fit_frame_ids':list(fit_frame_ids),'heldout_frame_ids':list(heldout_frame_ids)}
     write_json(out/'observations.json',entries)
     write_json(out/'annotations.json',{'annotations':annotations,'reference_state':reference,
+                                      'visual_review_status':'NOT_REVIEWED',
                                       'correspondence_tracks':{'reliable_matches':0,'reason':'first silhouette baseline; no point tracker deployed'},
-                                      'identity_association':'One contiguous B1 passage selected by RGB and declared root pose; other passages excluded'})
+                                      'identity_association':'Caller-selected frames; B1 passage association requires review'})
     cols=3; rows=(len(thumbnails)+cols-1)//cols
     canvas=Image.new('RGB',(480*cols,294*rows),'white');draw=ImageDraw.Draw(canvas)
     for j,(camera,i,im) in enumerate(thumbnails):

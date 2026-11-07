@@ -78,7 +78,7 @@ def main():
         "ratio_percentiles": {str(q): float(np.percentile(R, q))
                               for q in (50, 75, 90, 95, 99)},
         "r2_windspeed": float(r2_u), "r2_winddir_of_residual": float(r2_wd),
-    }, open(os.path.join(paths.RUNS, "null_distribution.json"), "w"), indent=2)
+    }, open(os.path.join(paths.RUNS, "null_distribution.json"), "w", encoding='utf-8'), indent=2)
     print("\n-> runs/null_distribution.json")
 
 

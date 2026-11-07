@@ -6,8 +6,9 @@ from copy import deepcopy
 import bpy
 from bpy.props import EnumProperty, FloatProperty, StringProperty
 from .. import custom_cameras as core, custom_camera_capture as capture
-from .. import camera_projection as projection
+from .. import camera_projection as projection, playback
 from .. import custom_camera_history as history, custom_camera_preview as preview
+from .ui_helpers import message, diagnostic
 
 _PENDING_IMPORT = None
 _SUMMARY_CACHE = {}
@@ -44,7 +45,8 @@ class WFRL_OT_CustomLayoutExport(bpy.types.Operator):
             self.report({'INFO'},'已导出布局：'+str(target))
             return {'FINISHED'}
         except (ValueError,OSError) as exc:
-            self.report({'ERROR'},str(exc));return {'CANCELLED'}
+            self.report({'ERROR'},str(exc))
+            return {'CANCELLED'}
 
 
 def prepare_import(scene, payload):
@@ -84,7 +86,8 @@ class WFRL_OT_CustomLayoutImport(bpy.types.Operator):
             return bpy.ops.wfrl.custom_layout_confirm('INVOKE_DEFAULT')
         except (ValueError,OSError,KeyError,TypeError,RuntimeError) as exc:
             _PENDING_IMPORT=None
-            self.report({'ERROR'},str(exc));return {'CANCELLED'}
+            self.report({'ERROR'},str(exc))
+            return {'CANCELLED'}
 
 
 class WFRL_OT_CustomLayoutConfirm(bpy.types.Operator):
@@ -97,7 +100,8 @@ class WFRL_OT_CustomLayoutConfirm(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self,width=640)
 
     def draw(self,context):
-        box=self.layout.box();box.alert=True
+        box=self.layout.box()
+        box.alert=True
         box.label(text='这是完整布局替换；文件未列出的槽位会清空。')
         pose = self.pending['payload'].get('rig_pose')
         if pose:
@@ -117,7 +121,7 @@ class WFRL_OT_CustomLayoutConfirm(bpy.types.Operator):
             if row['enabled'] is not None:
                 box.label(text='备注：'+row['label']+'；'+('参与' if row['enabled'] else '不参与')+'三路预览与采集')
             for change in row['changes']:
-                for start in range(0,len(change),58):box.label(text=change[start:start+58])
+                message(box, change, context=context)
         self.layout.label(text='确认仅提交当前场景；整套变化记为一步相机撤销。')
 
     def execute(self,context):
@@ -134,7 +138,8 @@ class WFRL_OT_CustomLayoutConfirm(bpy.types.Operator):
             self.report({'INFO'},'完整布局已提交到当前场景')
             return {'FINISHED'}
         except (ValueError,RuntimeError,KeyError,TypeError) as exc:
-            self.report({'ERROR'},str(exc));return {'CANCELLED'}
+            self.report({'ERROR'},str(exc))
+            return {'CANCELLED'}
 
     def cancel(self,context):
         global _PENDING_IMPORT
@@ -153,7 +158,8 @@ class WFRL_OT_CustomCapture(bpy.types.Operator):
         try:
             capture.require_preflight(context, requested_times(context.scene))
         except (ValueError,RuntimeError) as exc:
-            self.report({'ERROR'},str(exc));return {'CANCELLED'}
+            self.report({'ERROR'},str(exc))
+            return {'CANCELLED'}
         self.area=context.area
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
@@ -185,7 +191,8 @@ class WFRL_OT_CustomCapture(bpy.types.Operator):
             if getattr(self,'transaction',None) and not self.transaction.closed:
                 self.transaction.finish(error=str(exc))
             self.remove_timer()
-            self.report({'ERROR'},str(exc));return {'CANCELLED'}
+            self.report({'ERROR'},str(exc))
+            return {'CANCELLED'}
 
     def draw_progress(self):
         if bpy.context.area == self.area and not self.transaction.closed:
@@ -196,15 +203,27 @@ class WFRL_OT_CustomCapture(bpy.types.Operator):
             bpy.types.SpaceView3D.draw_handler_remove(self.handle,'WINDOW')
             self.handle=None
         if getattr(self,'timer',None):
-            self.wm.event_timer_remove(self.timer);self.timer=None
+            self.wm.event_timer_remove(self.timer)
+            self.timer=None
+
+    def completion_result(self):
+        self.remove_timer()
+        transaction = self.transaction
+        if transaction.closed and transaction.manifest.get('status') == 'complete':
+            self.report({'INFO'}, '已导出：' + str(transaction.path))
+            return {'FINISHED'}
+        error = transaction.error or transaction.manifest.get('error') or '采集未完成'
+        self.report({'INFO'} if transaction.cancel_requested and '恢复失败' not in error else {'ERROR'}, error)
+        return {'CANCELLED'}
 
     def modal(self,context,event):
         if self.transaction.closed:
-            self.remove_timer();return {'FINISHED'}
+            return self.completion_result()
         if event.type=='ESC' and event.value=='PRESS':
-            self.transaction.request_cancel();self.remove_timer()
-            self.report({'INFO'},'取消请求已接受；已停止，保留已完成组')
-            return {'CANCELLED'}
+            self.transaction.request_cancel()
+            if self.transaction.closed:
+                return self.completion_result()
+            return {'RUNNING_MODAL'}
         if event.type=='TIMER':
             if getattr(event, 'timer', self.timer)!=self.timer:return {'PASS_THROUGH'}
             try:
@@ -214,12 +233,12 @@ class WFRL_OT_CustomCapture(bpy.types.Operator):
                     complete=self.transaction.step(context)
                 self.area.tag_redraw()
                 if complete:
-                    self.remove_timer()
-                    self.report({'INFO'},'已导出：'+str(self.transaction.path))
-                    return {'FINISHED'}
+                    return self.completion_result()
             except Exception as exc:
-                self.transaction.finish(error=str(exc));self.remove_timer()
-                self.report({'ERROR'},str(exc));return {'CANCELLED'}
+                self.transaction.finish(error=str(exc))
+                self.remove_timer()
+                self.report({'ERROR'},str(exc))
+                return {'CANCELLED'}
         # Pause/cancel buttons remain accessible; viewport/timeline keys cannot
         # change the sample between capture groups.
         if event.type in {'SPACE','LEFT_ARROW','RIGHT_ARROW','UP_ARROW','DOWN_ARROW'}:
@@ -235,11 +254,16 @@ class WFRL_OT_CustomCaptureCancel(bpy.types.Operator):
     bl_idname='wfrl.custom_capture_cancel'
     bl_label='取消图像采集'
     @classmethod
-    def poll(cls,context):return capture.active()
+    def poll(cls,context):return capture.active() and capture._ACTIVE.scene == context.scene
 
     def execute(self,context):
-        if capture.active():capture._ACTIVE.request_cancel()
-        self.report({'INFO'},'取消请求已接受；已停止，保留已完成组')
+        if not capture.active() or capture._ACTIVE.scene != context.scene:
+            self.report({'WARNING'}, '请在图像采集所属场景中取消')
+            return {'CANCELLED'}
+        transaction = capture._ACTIVE
+        transaction.request_cancel()
+        self.report({'INFO'}, '已停止，保留已完成组' if transaction.closed
+                    else '取消请求已接受；当前组完成后停止')
         return {'FINISHED'}
 
 
@@ -255,12 +279,15 @@ def summary_check(context, times):
     scene = context.scene
     cameras = tuple((slot, cam.as_pointer(), repr(core.parameters(cam)), bool(cam.get('custom_enabled',True)))
                     for slot in core.SLOTS if (cam := core.get_camera(scene,slot)) is not None)
-    key = (session_identity(scene), preview._REVISION, cameras, repr(preview.render_profile(scene)),
+    key = (session_identity(scene), cameras, repr(preview.render_profile(scene)),
            scene.wfrl_capture_mode, scene.wfrl_capture_start, scene.wfrl_capture_end,
            scene.wfrl_capture_step, capture.active(), installation_block_reason(scene),
            any(obj.get('wfrl_custom_draft') for obj in scene.objects))
-    if _SUMMARY_CACHE.get('key') != key:
-        _SUMMARY_CACHE.update(key=key, value=capture.preflight(context, times))
+    held = playback.any_playing() and _SUMMARY_CACHE.get('key') == key
+    revision = preview.revision(scene)
+    if not held and (_SUMMARY_CACHE.get('key') != key or _SUMMARY_CACHE.get('revision') != revision):
+        _SUMMARY_CACHE.update(key=key, revision=revision, value=capture.preflight(context, times))
+    _SUMMARY_CACHE['held'] = held
     return _SUMMARY_CACHE['value']
 
 
@@ -268,6 +295,8 @@ def draw_summary(layout,context):
     try:
         times=requested_times(context.scene)
         result=summary_check(context,times)
+        if _SUMMARY_CACHE.get('held'):
+            layout.label(text='播放中：预检查结果暂停刷新')
         if times:
             layout.label(text=f'实际首末：{times[0]:.4f}–{times[-1]:.4f} s；{len(times)} 个采样点')
         n,m=result['samples'],result['cameras']
@@ -278,11 +307,11 @@ def draw_summary(layout,context):
         if result['bounds']:
             layout.label(text=f'来源可求值范围：{result["bounds"][0]:.4f}–{result["bounds"][1]:.4f} s')
         for reason in result['errors']:
-            for start in range(0,len(reason),24):layout.label(text=reason[start:start+24],icon='ERROR' if start==0 else 'NONE')
+            diagnostic(layout, '相机采集预检查', reason, error=True, context=context)
         if not result['errors']:layout.label(text='预检查通过；实际开始前重新检查',icon='CHECKMARK')
         return not result['errors']
     except (ValueError,RuntimeError) as exc:
-        layout.label(text=str(exc),icon='ERROR')
+        diagnostic(layout, '相机采集预检查', str(exc), error=True, context=context)
         return False
 
 
@@ -298,7 +327,10 @@ class WFRL_PT_CustomCapture(bpy.types.Panel):
     def draw(self,context):
         layout,scene=self.layout,context.scene
         if capture.active():
-            for part in capture.progress().split('；'):layout.label(text=part)
+            if capture._ACTIVE.scene != scene:
+                message(layout, '其他场景正在采集相机图像，请在所属场景查看进度或取消。', context=context)
+                return
+            message(layout, capture.progress(), context=context)
             layout.operator('wfrl.custom_capture_cancel',text='取消采集（当前组完成后生效）')
             return
         for slot in core.SLOTS:
@@ -307,16 +339,19 @@ class WFRL_PT_CustomCapture(bpy.types.Panel):
             box.label(text=f'C{slot} · '+('未安装' if cam is None else '参与三路预览与采集' if cam.get('custom_enabled',True) else '已安装，未参与'))
             if cam:
                 try:
-                    p=core.parameters(cam);w,h=projection.resolution(p.fov,p.vfov,p.output_long_edge_px)
+                    p=core.parameters(cam)
+                    w,h=projection.resolution(p.fov,p.vfov,p.output_long_edge_px)
                     box.label(text=f'长边 {p.output_long_edge_px} px → {w} × {h} px')
-                except ValueError as exc:box.label(text=str(exc),icon='ERROR')
-                row=box.row();row.enabled=editable(context)
+                except ValueError as exc:diagnostic(box, '相机输出参数', str(exc), error=True, context=context)
+                row=box.row()
+                row.enabled=editable(context)
                 row.operator('wfrl.custom_output_edit',text=f'编辑 C{slot} 输出参数').slot=str(slot)
         layout.prop(scene,'wfrl_capture_mode',text='采集方式')
         if scene.wfrl_capture_mode=='SEQUENCE':
             for key in ('start','end','step'):layout.prop(scene,'wfrl_capture_'+key)
         valid=draw_summary(layout,context)
-        row=layout.row();row.enabled=valid
+        row=layout.row()
+        row.enabled=valid
         row.operator('wfrl.custom_capture',text='导出原图 → 选择目录')
         row=layout.row(align=True)
         row.operator('wfrl.custom_layout_export',text='导出布局 JSON')

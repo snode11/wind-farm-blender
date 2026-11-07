@@ -3,6 +3,7 @@ import socket
 import struct
 import time
 import unittest
+from unittest.mock import Mock
 from wfrl_blender.transport import TransportClient
 from wfrl_blender.protocol import encode_message
 
@@ -15,6 +16,23 @@ def wire(message):
 def ack(session='test', sequence=0, resumed=False):
     return dict(protocol_version=1, type='hello_ack', session_id=session, sequence=sequence,
                 payload=dict(selected_version=1, capabilities=[], run_status='READY', mode='demo', resumed=resumed))
+
+
+def test_accepted_lifecycle_survives_later_sequence_error():
+    stopped = dict(protocol_version=1, type='lifecycle', session_id='test', sequence=2,
+                   payload=dict(run_status='STOPPED', reason=None, mode='demo', capabilities=[]))
+    sock = Mock()
+    sock.recv.return_value = wire(stopped) * 2 + wire(dict(stopped, sequence=3))
+    client = TransportClient(5555)
+    client._socket = sock
+    client._phase, client.status, client.session_id = 'connected', 'CONNECTED', 'test'
+    client._last_inbound = 1
+    assert client.poll() == [stopped]
+    assert client._last_inbound == 2
+    assert client.last_error == 'inbound sequence must increase'
+    assert client.status == 'DISCONNECTED'
+    assert not client._incoming
+    sock.close.assert_called_once_with()
 
 
 class TransportTests(unittest.TestCase):
@@ -176,7 +194,11 @@ class TransportTests(unittest.TestCase):
     def test_connection_refused(self):
         self.server.close()
         self.client.connect()
-        self.wait_messages()
+        # Windows reports a refused loopback connect only after its SYN retries (about 1-2 s).
+        deadline = time.monotonic() + self.client.timeout_seconds + 1.
+        while not self.client.last_error and time.monotonic() < deadline:
+            self.client.poll()
+            time.sleep(.01)
         self.assertEqual(self.client.status, 'DISCONNECTED')
         self.assertTrue(self.client.last_error)
 
@@ -215,11 +237,49 @@ class TransportTests(unittest.TestCase):
         self.assertEqual(self.client.next_sequence, 8)
         self.peer.close()
         self.peer = None
+        self.client.close()
+        self.client.forget_session(confirmed=True)
         self.connect()
         self.peer.sendall(wire(ack(session='new')))
         self.wait_messages()
         self.assertEqual(self.client.session_id, 'new')
         self.assertEqual(self.client.next_sequence, 1)
+
+    def test_reconnect_cannot_silently_replace_the_claimed_session(self):
+        self.establish()
+        self.peer.close()
+        self.peer = None
+        self.connect()
+        self.peer.sendall(wire(ack(session='other')))
+        self.wait_messages()
+        self.assertEqual(self.client.session_id, 'test')
+        self.assertEqual(self.client.status, 'DISCONNECTED')
+        self.assertIn('explicit', self.client.last_error)
+
+    def test_unknown_session_rejection_is_machine_readable_and_preserves_identity(self):
+        self.establish()
+        self.peer.close()
+        self.peer = None
+        self.connect()
+        rejection = dict(protocol_version=1, type='error', session_id='replacement', sequence=1,
+                         payload=dict(code='UNKNOWN_SESSION', message='Unknown session to resume',
+                                      fatal=True, rejected_session_id='test'))
+        self.peer.sendall(wire(rejection))
+        self.assertEqual(self.wait_messages(), [rejection])
+        self.assertEqual(self.client.last_error_code, 'UNKNOWN_SESSION')
+        self.assertEqual(self.client.session_id, 'test')
+        with self.assertRaisesRegex(ValueError, 'confirmation'):
+            self.client.forget_session()
+        self.client.forget_session(confirmed=True)
+        self.assertIsNone(self.client.session_id)
+        self.assertEqual(self.client.forgotten_session_id, 'test')
+        self.assertEqual(self.client.next_sequence, 1)
+
+    def test_forget_session_requires_a_disconnected_transport(self):
+        self.establish()
+        with self.assertRaisesRegex(ValueError, 'Disconnect'):
+            self.client.forget_session(confirmed=True)
+        self.assertEqual(self.client.session_id, 'test')
 
     def test_no_dns_or_non_loopback(self):
         for host in ['localhost', 'example.com', '192.168.1.2']:

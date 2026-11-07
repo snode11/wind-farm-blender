@@ -26,7 +26,7 @@ for tid in ('T1','T2','T3'):
     saved_channels = {'yaw', 'pitch', 'rotor_speed'} | set(
         (farm_flex._ACTIVE.telemetry or {}).get('turbines', {}).get(tid, {}))
     for channel in ('yaw','pitch','rotor_speed','power','torque','load','pitch_command'):
-        point = charts.history.points(tid, channel)[-1]
+        point = charts.history_for(bpy.context.scene).points(tid, channel)[-1]
         assert point.time == stamp
         if channel in saved_channels:
             assert point.fidelity == 'FAST.Farm' and point.validity == 'valid'
@@ -34,11 +34,11 @@ for tid in ('T1','T2','T3'):
         else:
             # Missing source channels stay unavailable; v3 does not save load.
             assert (point.fidelity, point.validity, point.value) == ('UNKNOWN', 'unsupported', None)
-    assert charts.history.points(tid, 'reward')[-1].value is None
-assert abs(charts.history.points(charts.FARM, 'power')[-1].value - sum(charts.history.points(t, 'power')[-1].value for t in ('T1','T2','T3'))) < 1e-8
-before = charts.raw_history.snapshot()
+    assert charts.history_for(bpy.context.scene).points(tid, 'reward')[-1].value is None
+assert abs(charts.history_for(bpy.context.scene).points(charts.FARM, 'power')[-1].value - sum(charts.history_for(bpy.context.scene).points(t, 'power')[-1].value for t in ('T1','T2','T3'))) < 1e-8
+before = charts.raw_history_for(bpy.context.scene).snapshot()
 scene.frame_set(901)
-assert charts.raw_history.snapshot() == before
+assert charts.raw_history_for(bpy.context.scene).snapshot() == before
 bpy.ops.wfrl.farm_transport(action='STOP')
 assert scene.frame_current == 901
 bpy.ops.wfrl.farm_transport(action='STEP')
@@ -53,10 +53,10 @@ for camera in ('World','Top','Side'):
     assert scene.frame_current == 902
 bpy.ops.wfrl.farm_transport(action='RESET')
 assert scene.frame_current == 1
-assert len(charts.history.points('T1','power')) == 1
+assert len(charts.history_for(bpy.context.scene).points('T1','power')) == 1
 scene.frame_set(scene.frame_end)
 assert clearance_replay.sample(scene)['time_s'] == 177
-assert charts.history.points('T1','rotor_speed')[-1].value > 0
+assert charts.history_for(bpy.context.scene).points('T1','rotor_speed')[-1].value > 0
 bpy.ops.wfrl.farm_transport(action='STEP')
 assert scene.frame_current == scene.frame_end
 # All expanded UI sections resolve their properties/operators, with no SYNTH demo panel.
@@ -70,6 +70,8 @@ class Layout:
     def box(self): return self
     def prop(self, owner, name, **kw):
         if not name.startswith('['): assert hasattr(owner, name),name
+    def prop_enum(self, owner, name, value, **kw):
+        assert value in owner.bl_rna.properties[name].enum_items
     def operator(self, name, **kw):
         namespace,op = name.split('.')
         getattr(getattr(bpy.ops, namespace), op).get_rna_type()
@@ -97,12 +99,14 @@ with tempfile.TemporaryDirectory() as directory:
     assert scene.wfrl_farm_panel_page == 'RADAR'
     assert runtime.get_state().connection == 'OFFLINE RESULTS'
     assert bpy.ops.wfrl.farm_flex_view(turbine='T3') == {'FINISHED'}
-    # Missing packages clear the old reader and recover via the bundled demo.
+    # Preflight rejects a missing package before the current replay is touched.
+    reader = clearance_replay.reader_for(scene)
+    power = charts.history_for(bpy.context.scene).points('T1','power')
     try: wfrl_blender.load_demo_scene(Path(directory)/'missing')
     except OSError: pass
     else: raise AssertionError('Missing package was accepted')
-    assert clearance_replay.reader_for(scene) is None
-    assert charts.history.points('T1','power') == ()
+    assert reader is not None and clearance_replay.reader_for(scene) is reader
+    assert charts.history_for(bpy.context.scene).points('T1','power') == power
     assert bpy.ops.wfrl.load_demo() == {'FINISHED'}
     assert farm_flex.is_active(scene)
     assert not any(o.name.endswith('.001') and 'FarmFlexOverview' in o.name for o in scene.objects)

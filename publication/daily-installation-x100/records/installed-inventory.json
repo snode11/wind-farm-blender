@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "package_path": "/home/user/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "verified_files": 214,
+  "mismatches": [],
+  "unexpected_files": [],
+  "ignored": [
+    "__pycache__",
+    "*.pyc"
+  ]
+}

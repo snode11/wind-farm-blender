@@ -219,7 +219,7 @@ def run_checks(viewer, output):
         progress_path.write_text(json.dumps({"status": "RUNNING", "phase": state["phase"],
             "phase_name": phases[state["phase"]]["name"] if state["phase"] >= 0 else "setup",
             "elapsed_s": time.monotonic() - state["started"], "commit_count": len(state["commits"]),
-            "draw_count": len(state["draws"]), "failure_count": len(state["failures"])}, indent=2) + "\n")
+            "draw_count": len(state["draws"]), "failure_count": len(state["failures"])}, indent=2) + "\n", encoding='utf-8')
 
     def settled(frame, group="G3"):
         return (not viewer.ACTIVE["pending"] and viewer.ACTIVE["last_applied_frame"] == (frame, group)

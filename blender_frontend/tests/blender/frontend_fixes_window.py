@@ -5,18 +5,18 @@ import os
 from pathlib import Path
 import sys
 from time import monotonic
+import tomllib
 import traceback
 
 import bpy
 
 ROOT = Path(__file__).resolve().parents[3]
-MODULE = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')
-if MODULE == 'wfrl_blender':
-    sys.path[:0] = [str(ROOT/'blender_frontend'), str(ROOT)]
+sys.path.append(str(Path(__file__).resolve().parent))
+import _native
+MODULE = _native.addon_module()
 addon = importlib.import_module(MODULE)
 diagnostics = importlib.import_module(MODULE+'.frontend_diagnostics')
-OUT = Path(os.environ['WFRL_TEST_OUTPUT'])
-OUT.mkdir(parents=True, exist_ok=True)
+OUT = _native.output_directory(new=False)
 STATE = {'phase': 0}
 
 
@@ -55,8 +55,9 @@ def tick():
             if STATE['phase'] == 1:
                 info = diagnostics.snapshot(bpy.context)
                 assert info['module'] == MODULE
-                assert info['version'] == '0.3.18', info
-                assert info['packaged'] == bool(os.environ.get('WFRL_EXPECTED_ADDON_ROOT')), info
+                manifest = Path(addon.__file__).resolve().parent / 'blender_manifest.toml'
+                assert info['version'] == tomllib.loads(manifest.read_text(encoding='utf-8'))['version'], info
+                assert info['packaged'] == (MODULE != 'wfrl_blender'), info
                 assert info['source_hz'] == 40 and info['timeline_hz'] == 60, info
                 assert info['viewport_fps'] is not None and info['viewport_fps'] > 0, info
                 assert bpy.ops.wfrl.farm_transport(action='STEP') == {'FINISHED'}

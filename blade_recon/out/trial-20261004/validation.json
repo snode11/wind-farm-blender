@@ -1,0 +1,67 @@
+{
+  "frames": 200,
+  "times": [
+    0.0,
+    19.900000000000002
+  ],
+  "sequential_frame_ids": true,
+  "state_shape": [
+    200,
+    13
+  ],
+  "states_all_finite": true,
+  "std_all_finite": true,
+  "observed_shape": [
+    200,
+    3,
+    40
+  ],
+  "observed_sections_fraction_all": 0.13770833333333332,
+  "observed_sections_fraction_skip50": 0.13783333333333334,
+  "nfev_max": 33,
+  "nfev_at_60": 0,
+  "videos": {
+    "overlay_C1.mp4": {
+      "decoded_frames": 200,
+      "shape": [
+        636,
+        816,
+        3
+      ],
+      "bytes": 1238391,
+      "sha256": "9428ed69778a902d4b59b1d59dee52883651e973ce2a81df012c491fbe410453"
+    },
+    "overlay_C2.mp4": {
+      "decoded_frames": 200,
+      "shape": [
+        636,
+        816,
+        3
+      ],
+      "bytes": 1298228,
+      "sha256": "4c3c5099a1686827b2314aaf1ac21e9d70e72837033e91922cd9c526e79abe96"
+    },
+    "overlay_C3.mp4": {
+      "decoded_frames": 200,
+      "shape": [
+        636,
+        816,
+        3
+      ],
+      "bytes": 1273286,
+      "sha256": "5f0be5a6ee7d3b0d626ed6d4e3d87aec6c6b3890160383d7066434e0cc02c012"
+    },
+    "preview.mp4": {
+      "decoded_frames": 200,
+      "shape": [
+        720,
+        960,
+        3
+      ],
+      "bytes": 3001611,
+      "sha256": "5e6c78fc149836c569f0a330769c5d9d3d99b627fc0d5dec6dcc7c6b24bf28b9"
+    }
+  },
+  "delivered_sources_and_inputs_unchanged": true,
+  "reconstruction_fitting_note": "Original pipeline saves nfev/cost only; optimizer success/status unavailable."
+}

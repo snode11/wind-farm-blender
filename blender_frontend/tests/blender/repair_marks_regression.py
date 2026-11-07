@@ -1,7 +1,8 @@
 """Native default repair, rigid/flexible attachment and original load lifecycle.
 
 WFRL_ADDON_MODULE selects the installed extension; WFRL_TEST_RUNTIME selects
-explicit development source. WFRL_REPAIR_TEST_OUTPUT is an additive directory.
+explicit development source. WFRL_REPAIR_TEST_OUTPUT is an additive directory;
+without it the regression runner's WFRL_TEST_OUTPUT is used.
 No rendering or solver runs.
 """
 import importlib
@@ -25,7 +26,7 @@ flex = importlib.import_module(MODULE+'.farm_flex')
 spec = importlib.util.spec_from_file_location('repair_example_check', ROOT/'scripts/blender/add_nrel_b1_repair.py')
 check_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(check_module)
-out = Path(os.environ['WFRL_REPAIR_TEST_OUTPUT'])
+out = Path(os.environ.get('WFRL_REPAIR_TEST_OUTPUT') or os.environ['WFRL_TEST_OUTPUT'])
 out.mkdir(parents=True, exist_ok=True)
 if not hasattr(bpy.types.Scene, 'wfrl_selected_turbine'):
     addon.register()

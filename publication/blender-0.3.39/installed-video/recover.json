@@ -1,0 +1,10 @@
+{
+  "module_file": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/profile/extensions/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "scope": "Installed controller, configured project, non-media child, fresh-process recovery and cancellation",
+  "recovered_in_fresh_process": true,
+  "cancellation": "CANCELLED",
+  "final": true,
+  "cancel_call_s": 7.387495134025812e-05,
+  "status": "PASS"
+}

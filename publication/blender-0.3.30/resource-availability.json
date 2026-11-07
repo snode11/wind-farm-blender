@@ -1,0 +1,101 @@
+{
+  "schema": "wfrl.resource-availability.v1",
+  "release": "https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1",
+  "listed_records_checked": 33337,
+  "present_unique_files": 33253,
+  "changed_existing_files": [],
+  "locally_absent_existing_release_files": [
+    "outputs/blade-surface/03_后续独立实验/p2b/development/global_solver_launch.lock",
+    "outputs/frontend-reliability-20261011-a01/camera-window-retry1/focused-single-solid.png",
+    "outputs/frontend-reliability-20261011-a01/camera-window-retry1/single-solid.png",
+    "outputs/frontend-reliability-20261011-a01/camera-window-retry1/triple-c2-disabled.png",
+    "outputs/frontend-reliability-20261011-a01/camera-window-retry1/triple-high-quality-restored.png",
+    "outputs/frontend-reliability-20261011-a01/camera-window/focused-single-solid.png",
+    "outputs/frontend-reliability-20261011-a01/camera-window/single-solid.png",
+    "outputs/frontend-reliability-20261011-a01/camera-window/triple-c2-disabled.png",
+    "outputs/frontend-reliability-20261011-a01/camera-window/triple-high-quality-restored.png"
+  ],
+  "remote_assets": [
+    {
+      "name": "blade-reconstruction-01.tar.gz",
+      "state": "uploaded",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/project-resources-v1/blade-reconstruction-01.tar.gz"
+    },
+    {
+      "name": "blade-surface-01.tar.gz",
+      "state": "uploaded",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/project-resources-v1/blade-surface-01.tar.gz"
+    },
+    {
+      "name": "blade-surface-02.tar.gz",
+      "state": "uploaded",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/project-resources-v1/blade-surface-02.tar.gz"
+    },
+    {
+      "name": "blade-surface-03.tar.gz",
+      "state": "uploaded",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/project-resources-v1/blade-surface-03.tar.gz"
+    },
+    {
+      "name": "camera-video-01.tar.gz",
+      "state": "uploaded",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/project-resources-v1/camera-video-01.tar.gz"
+    },
+    {
+      "name": "frontend-evidence-01.tar.gz",
+      "state": "uploaded",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/project-resources-v1/frontend-evidence-01.tar.gz"
+    },
+    {
+      "name": "lidar-research-01.tar.gz",
+      "state": "uploaded",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/project-resources-v1/lidar-research-01.tar.gz"
+    },
+    {
+      "name": "nrel-dynamic-01.tar.gz",
+      "state": "uploaded",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/project-resources-v1/nrel-dynamic-01.tar.gz"
+    },
+    {
+      "name": "nrel-video-01.tar.gz",
+      "state": "uploaded",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/project-resources-v1/nrel-video-01.tar.gz"
+    },
+    {
+      "name": "resources.json",
+      "state": "uploaded",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/project-resources-v1/resources.json"
+    },
+    {
+      "name": "runtime-inputs-01.tar.gz",
+      "state": "uploaded",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/project-resources-v1/runtime-inputs-01.tar.gz"
+    },
+    {
+      "name": "same-source-01.tar.gz",
+      "state": "uploaded",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/project-resources-v1/same-source-01.tar.gz"
+    },
+    {
+      "name": "wfcrl-dependency-01.tar.gz",
+      "state": "uploaded",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/project-resources-v1/wfcrl-dependency-01.tar.gz"
+    },
+    {
+      "name": "WFRL_features_and_physics.pptx",
+      "state": "uploaded",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/project-resources-v1/WFRL_features_and_physics.pptx"
+    },
+    {
+      "name": "WFRL_Physical_AI_reconstruction.pptx",
+      "state": "uploaded",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/project-resources-v1/WFRL_Physical_AI_reconstruction.pptx"
+    },
+    {
+      "name": "zz-frozen-code-originals.tar.gz",
+      "state": "uploaded",
+      "url": "https://github.com/snode11/wind-farm-blender/releases/download/project-resources-v1/zz-frozen-code-originals.tar.gz"
+    }
+  ],
+  "policy": "Reuse existing uploaded resources. No remote file download or post-upload hash comparison."
+}

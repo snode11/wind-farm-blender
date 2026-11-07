@@ -1,0 +1,10 @@
+{
+  "schema": "wfrl.source-build-reproduction.v1",
+  "status": "PASS",
+  "scope": "A separately materialized public source snapshot rebuilt with the canonical builder; byte equality checked before upload.",
+  "version": "0.3.37",
+  "archive_sha256": "ca58d4aa494db5115b5cbb41db20c4de4024e1331e4f830e749311d9a0dbbda8",
+  "file_count": 193,
+  "command": "python3 scripts/blender/build_extension.py --output /path/to/new-build-directory",
+  "remote_attachment_download_verification": false
+}

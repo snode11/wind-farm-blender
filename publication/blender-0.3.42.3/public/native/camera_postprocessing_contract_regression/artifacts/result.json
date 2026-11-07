@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "module_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "checks": {
+    "Down_SCENE": "camera pixels bypass VSE/compositor; source restored",
+    "Down_WORKBENCH": "camera pixels bypass VSE/compositor; source restored",
+    "NREL_paired_PNG": "six native camera images; damaged C1 agrees with direct raw camera render",
+    "NREL_failure_restoration": true,
+    "source_bytes_and_FileOutput_files_preserved": true
+  },
+  "scope": "Native small PNG render pixels; no full video, daily installation or device capture"
+}

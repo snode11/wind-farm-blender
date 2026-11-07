@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/scratch/cleanup.py", line 16, in <module>
+    assert all(not q.is_symlink() for q in files)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

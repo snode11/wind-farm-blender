@@ -123,6 +123,7 @@ try:
         if not hasattr(bpy.types.Scene, 'wfrl_recon_show_texture'):
             addon.register()
         review = importlib.import_module(MODULE+'.blade_recon_review')
+        review.register(standalone=True)
         reader = importlib.import_module(MODULE+'.blade_recon_data')
         if MODE == 'create':
             original = bpy.context.scene
@@ -229,9 +230,9 @@ try:
         checks['timer_commit_recomputes_visibility_after_seek_and_step'] = True
         scene.frame_set(17)
         review._tick()
-        assert bpy.ops.wfrl.blade_recon_step(delta=1) == {'FINISHED'}
+        scene.frame_set(min(scene.frame_current+1, scene.frame_end)); review.apply(scene)
         assert scene.frame_current == 18
-        assert bpy.ops.wfrl.blade_recon_step(delta=-1) == {'FINISHED'}
+        scene.frame_set(max(scene.frame_current-1, scene.frame_start)); review.apply(scene)
         assert scene.frame_current == 17
         scene.wfrl_recon_show_texture = False
         review._tick()

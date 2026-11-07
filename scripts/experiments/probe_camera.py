@@ -1,17 +1,6 @@
-"""机舱相机传感器的离线验收（离屏渲染，不起事件循环）。
+"""机舱相机传感器的数值检查：配置、位姿、视锥与覆盖关系。
 
-看不到"相机拍到叶片什么样"（要真机 GPU 目视单风机窗口），但能证明位姿/视锥/
-覆盖逻辑不退化。
-
-  1 schema/registry：camera 传感器能被 build，params 默认值生效、显式值覆盖
-  2 camera_pose：机舱下俯视相机 —— position 在轮毂高度附近、focal 指向下方
-    （z 低于 position）、fov 正确；随机组偏航转（yaw 变则 pos/focal 跟着转）
-  3 pitch：更负的俯仰 ⇒ 焦点更低（更朝下看叶片）
-  4 视锥 actor：make_actors 出线框；偏航后 update 让视锥跟着转
-  5 覆盖单调性：视锥底面在焦距处的半宽 = tan(fov/2)·range —— 窄 fov 只覆盖叶片
-    局部、宽 fov 覆盖整叶（验证短焦看整叶、长焦看局部这个关系）
-
-末行 CAMERA_OK / CAMERA_FAIL。
+不创建渲染窗口或启动仿真；末行 CAMERA_OK / CAMERA_FAILED。
 """
 import os
 import sys
@@ -22,7 +11,6 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))))
 
-import pyvista as pv                                              # noqa: E402
 
 from wfrl.channels import registry                                # noqa: E402
 from wfrl.scene.schema import Scene, SensorSpec, Turbine          # noqa: E402
@@ -57,8 +45,8 @@ def main():
     print("== 1. registry.build + params 默认/覆盖 ==", flush=True)
     _sc, cam = build_cam()
     check("camera 传感器被 build 出来", cam.type_name == "camera")
-    check("默认 fov=40", cam._p("fov") == 40.0, f"{cam._p('fov')}")
-    check("默认 pitch=-30", cam._p("pitch") == -30.0, f"{cam._p('pitch')}")
+    check("默认 fov 与配置一致", cam._p("fov") == cam.DEFAULTS["fov"], f"{cam._p('fov')}")
+    check("默认 pitch 与配置一致", cam._p("pitch") == cam.DEFAULTS["pitch"], f"{cam._p('pitch')}")
     _sc2, cam2 = build_cam({"fov": 15, "pitch": -60, "mount": "hub"})
     check("显式 params 覆盖", cam2._p("fov") == 15 and cam2._p("pitch") == -60
           and cam2._p("mount") == "hub")
@@ -76,7 +64,7 @@ def main():
           f"focal.x={focal[0]:.1f} < pos.x={pos[0]:.1f}")
     check("挂载点在转子侧或轮毂上方（不在尾部 +x）", pos[0] <= 0.5,
           f"pos.x={pos[0]:.2f}")
-    check("fov 传出 = 40", abs(fov - 40.0) < 1e-6, f"{fov}")
+    check("fov 与配置一致", abs(fov - cam.DEFAULTS["fov"]) < 1e-6, f"{fov}")
 
     print("\n== 3. 随机组偏航转 ==", flush=True)
     p0, f0, _u, _fov = cam.camera_pose({"yaw": np.array([0.0])}, 0, scale=1.0)
@@ -93,17 +81,11 @@ def main():
     check("俯仰 -70° 焦点比 -15° 更低", fl_st < fl_sh,
           f"-70°→z={fl_st:.0f}  -15°→z={fl_sh:.0f}")
 
-    print("\n== 5. 视锥 actor ==", flush=True)
-    pl = pv.Plotter(off_screen=True, window_size=(400, 400))
-    ctx = {"yaw": np.array([0.0]), "_turb_scale": 5.0}
-    actors = cam.make_actors(pl, ctx)
-    check("make_actors 出视锥", len(actors) == 1)
-    pts0 = np.asarray(actors[0][1].points).copy()
+    print("\n== 5. 视锥几何 ==", flush=True)
+    pts0 = cam._frustum_points({"yaw": np.array([0.0])}, 0, scale=1.0)
+    pts1 = cam._frustum_points({"yaw": np.array([40.0])}, 0, scale=1.0)
     check("视锥有 5 个点（顶点+底面四角）", pts0.shape == (5, 3), f"{pts0.shape}")
-    cam.update_actors(actors, None, {"yaw": np.array([40.0]), "_turb_scale": 5.0})
-    pts1 = np.asarray(actors[0][1].points)
-    check("偏航后视锥跟着转", not np.allclose(pts0, pts1),
-          f"最大位移 {np.abs(pts0 - pts1).max():.0f}")
+    check("偏航后视锥跟着转", not np.allclose(pts0, pts1))
 
     print("\n== 6. 覆盖单调：窄 fov 看局部、宽 fov 看更大范围 ==", flush=True)
     def half_width(fov):

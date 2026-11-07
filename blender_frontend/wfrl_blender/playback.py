@@ -11,24 +11,33 @@ if _previous_unregister:
 
 _OWNER_SCENE = None
 _OWNER_WINDOW = None
+_GENERATION = 0
 
 
 def animation_started(scene, depsgraph=None):
     import bpy
-    global _OWNER_SCENE, _OWNER_WINDOW
+    global _OWNER_SCENE, _OWNER_WINDOW, _GENERATION
+    _GENERATION += 1
     _OWNER_SCENE = scene
     _OWNER_WINDOW = getattr(bpy.context, 'window', None)
 
 
 def animation_stopped(scene, depsgraph=None):
-    global _OWNER_SCENE, _OWNER_WINDOW
+    global _OWNER_SCENE, _OWNER_WINDOW, _GENERATION
     if _OWNER_SCENE == scene:
+        _GENERATION += 1
         _OWNER_SCENE = _OWNER_WINDOW = None
 
 
 def on_load_pre(_unused=None):
-    global _OWNER_SCENE, _OWNER_WINDOW
+    global _OWNER_SCENE, _OWNER_WINDOW, _GENERATION
+    _GENERATION += 1
     _OWNER_SCENE = _OWNER_WINDOW = None
+
+
+def generation():
+    """Identify the current start/stop state for deferred scene controls."""
+    return _GENERATION
 
 
 def owner_scene():
@@ -64,6 +73,26 @@ def owner_window():
         pass
     scene = owner_scene()
     return next((window for window in windows if window.scene == scene), None)
+
+
+def cancel(scene=None, *, all_scenes=False):
+    """Cancel the native player only when the target scene actually owns it."""
+    import bpy
+    if bpy.app.background:
+        return
+    if scene is None and not all_scenes:
+        scene = bpy.context.scene
+    if not any_playing() or (not all_scenes and not is_playing(scene)):
+        return
+    # Blender has one global native playback timer. A single cancel pauses all
+    # views of its owner scene; repeating it per window cannot identify ownership.
+    window = owner_window()
+    if window is None:
+        window = next(iter(bpy.context.window_manager.windows), None)
+    if window is not None:
+        with bpy.context.temp_override(window=window, screen=window.screen):
+            if any_playing() and (all_scenes or is_playing(scene)):
+                bpy.ops.screen.animation_cancel(restore_frame=False)
 
 
 def register():

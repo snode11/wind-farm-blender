@@ -13,7 +13,7 @@ probe_multictrl.py 已经把纯逻辑（维度派生、缩放、路由、约束�
 
 需 mpiexec：
     & "C:\\Program Files\\Microsoft MPI\\Bin\\mpiexec.exe" -n 1 `
-      "USER_HOME\\.conda\\envs\\wfcrl\\python.exe" `
+      "C:\\Users\\s1155\\.conda\\envs\\wfcrl\\python.exe" `
       scripts/experiments/probe_multictrl_ff.py
 """
 import os

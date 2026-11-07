@@ -29,6 +29,7 @@ class FlorisDemoSession:
         self.env_id, self.max_steps = env_id, int(max_steps)
         self.yaw_delta, self.frame_interval = float(yaw_delta), float(frame_interval)
         self._driver_factory = driver_factory
+        self.runtime = None
         self._thread = None
         self._stop = threading.Event()
         self._paused = threading.Event()
@@ -96,10 +97,11 @@ class FlorisDemoSession:
                 if self._stop.wait(self.frame_interval):
                     break
         except Exception as exc:
-            self.error = str(exc)
+            self.error = str(exc) or type(exc).__name__
         finally:
             if driver is not None:
                 try:
                     driver.close(drain_cap=0)
                 except Exception as exc:
-                    self.error = 'FLORIS cleanup failed: ' + str(exc)
+                    cleanup = 'FLORIS cleanup failed: ' + (str(exc) or type(exc).__name__)
+                    self.error = self.error + '; ' + cleanup if self.error else cleanup

@@ -2,21 +2,47 @@
 import math
 
 _READERS = {}
+_END_REQUEST = None
 
 
 def _stop_finished_playback():
     """A queued end callback must not stop a newly selected/restarted clip."""
-    from . import playback, _cancel_playback
-    scene = playback.owner_scene()
-    if (scene is not None and reader_for(scene) is not None
-            and scene.frame_current >= scene.frame_end and playback.is_playing(scene)):
-        _cancel_playback(scene)
+    from . import playback
+    global _END_REQUEST
+    request, _END_REQUEST = _END_REQUEST, None
+    if request is None:
+        return
+    scene, generation, reader = request
+    if (playback.generation() == generation and playback.is_playing(scene)
+            and reader_for(scene) is reader and scene.frame_current >= scene.frame_end):
+        playback.cancel(scene)
+
+
+def _queue_finished_playback(scene):
+    import bpy
+    from . import playback
+    global _END_REQUEST
+    if bpy.app.background or not playback.is_playing(scene):
+        return
+    reader = reader_for(scene)
+    if reader is None:
+        return
+    _END_REQUEST = (scene, playback.generation(), reader)
+    if not bpy.app.timers.is_registered(_stop_finished_playback):
+        bpy.app.timers.register(_stop_finished_playback, first_interval=0)
 
 
 def reader_for(scene):
-    if scene.get('wfrl_scene_kind') != 'clearance_replay':
+    try:
+        if scene.get('wfrl_scene_kind') != 'clearance_replay':
+            return None
+        if scene.get('wfrl_farm_flex_path'):
+            from . import farm_flex
+            if farm_flex.active_for(scene) is None:
+                return None
+        return _READERS.get(scene.as_pointer())
+    except ReferenceError:
         return None
-    return _READERS.get(scene.as_pointer())
 
 
 def clear(scene, reason='回放数据未就绪'):
@@ -42,13 +68,13 @@ def sample(scene):
     return reader.at(min(reader.end_s, max(reader.start_s, reader.start_s + elapsed)))
 
 
-def load(scene, path, demo):
+def load(scene, path, demo, *, restoring=False):
     if scene.get("wfrl_scene_kind") == "manual":
         raise ValueError("请先返回原场景，再加载净空回放")
-    from . import runtime, _cancel_playback
-    if not runtime.configuration_editable():
+    from . import runtime, playback
+    if not (restoring and runtime.has_backend_session()) and not runtime.configuration_editable(scene):
         raise ValueError('Stop the active backend before loading results')
-    _cancel_playback(scene)
+    playback.cancel(scene)
     clear(scene)
     try:
         from ._vendor.lidar.replay import ReplayPackage, ReplayReader
@@ -90,7 +116,7 @@ def load(scene, path, demo):
     tip_tracking.disable(scene, 'standalone_replay')
     if 'wfrl_farm_flex_path' in scene:
         del scene['wfrl_farm_flex_path']
-    runtime.enter_result_replay()
+    runtime.enter_result_replay(scene=scene, restoring=restoring)
     timebase = (scene.get('wfrl_clearance_timebase_fps')
                 if scene.get('wfrl_scene_kind') == 'clearance_replay' else None)
     if type(timebase) not in (int, float) or not math.isfinite(timebase) or timebase <= 0:
@@ -112,6 +138,10 @@ def update(scene, depsgraph=None):
     if scene.get('wfrl_scene_kind') != 'clearance_replay':
         return
     if reader_for(scene) is not None:
+        # The native player clamps dropped frames before evaluating the end.
+        # Python frame callbacks alone cannot see a terminal frame it skipped.
+        if getattr(scene, 'playback_loop_mode', None) != 'STOP_END_FRAME':
+            scene.playback_loop_mode = 'STOP_END_FRAME'
         frame = min(scene.frame_end, max(scene.frame_start, scene.frame_current))
         if frame != scene.frame_current:
             # Native timeline edits must obey the same bounds as the replay slider.
@@ -122,7 +152,8 @@ def update(scene, depsgraph=None):
         return
     from .clearance_visual import update_beams
     from .radar_feedback import beam_activity
-    tid = scene['wfrl_clearance_turbine']; motion = value['motion']
+    tid = scene['wfrl_clearance_turbine']
+    motion = value['motion']
     prefix = f'WFRL.Turbine.{tid}'
     yaw = scene.objects.get(prefix + '.YawRoot')
     rotor = scene.objects.get(prefix + '.Rotor')
@@ -140,26 +171,55 @@ def update(scene, depsgraph=None):
         for index, pitch in enumerate(motion['pitch_deg'], 1):
             blade = scene.objects.get(prefix + f'.Blade{index}')
             if blade:
-                blade.rotation_euler.z = math.radians(pitch)
+                blade.rotation_euler.z = -math.radians(pitch)
     scene['wfrl_clearance_time_s'] = value['time_s']
     if scene.frame_current >= scene.frame_end:
-        import bpy
-        if not bpy.app.background and not bpy.app.timers.is_registered(_stop_finished_playback):
-            bpy.app.timers.register(_stop_finished_playback, first_interval=0)
+        _queue_finished_playback(scene)
+
+
+def on_load_pre(_):
+    """File loads release parsed packages even when no replay is attached."""
+    from . import farm_flex
+    farm_flex.clear_package_cache()
+
+
+def _farm_timeline_state(scene):
+    """Retain the saved simulation mapping separately from output playback FPS."""
+    fields = ('frame_start', 'frame_end', 'frame_step', 'sync_mode', 'use_preview_range',
+              'frame_preview_start', 'frame_preview_end')
+    return (scene.render.fps, scene.render.fps_base,
+            'wfrl_clearance_timebase_fps' in scene,
+            scene.get('wfrl_clearance_timebase_fps'),
+            {name: getattr(scene, name) for name in fields})
+
+
+def _restore_farm_timeline(scene, saved):
+    fps, base, has_timebase, timebase, fields = saved
+    scene.render.fps, scene.render.fps_base = fps, base
+    for name, value in fields.items():
+        setattr(scene, name, value)
+    if not has_timebase:
+        if 'wfrl_clearance_timebase_fps' in scene:
+            del scene['wfrl_clearance_timebase_fps']
+    elif type(timebase) in (int, float) and math.isfinite(timebase) and timebase > 0:
+        scene['wfrl_clearance_timebase_fps'] = timebase
 
 
 def on_load(_):
+    global _END_REQUEST
+    _END_REQUEST = None
     _READERS.clear()
     import bpy
     for scene in bpy.data.scenes:
         if scene.get('wfrl_scene_kind') == 'clearance_replay':
             demo = scene.get('wfrl_clearance_demo', 'normal')
             frame = scene.frame_current
+            subframe = scene.frame_subframe
             path = getattr(scene, 'wfrl_clearance_' + demo + '_path', '')
             try:
                 if scene.get('wfrl_farm_flex_path'):
                     from . import farm_flex, runtime
-                    runtime.enter_result_replay(scene=scene)
+                    runtime.enter_result_replay(scene=scene, restoring=True)
                     candidate = farm_flex.saved_package(scene)
                     expected = scene.get('wfrl_farm_manifest_sha256')
                     if expected:
@@ -171,22 +231,70 @@ def on_load(_):
                     # observation turbine so a T2/T3 camera never shows T1's
                     # cards after reopening the file.
                     turbine = scene.get('wfrl_clearance_turbine', 'T1')
-                    preview = farm_flex.attach(scene, candidate)
+                    timeline = _farm_timeline_state(scene)
+                    try:
+                        preview = farm_flex.attach(scene, candidate)
+                    finally:
+                        _restore_farm_timeline(scene, timeline)
                     if turbine in preview.readers:
                         scene['wfrl_clearance_turbine'] = turbine
                         _READERS[scene.as_pointer()] = preview.readers[turbine]
-                    scene.frame_set(frame)
+                    scene.frame_set(frame, subframe=subframe)
                     continue
-                load(scene, bpy.path.abspath(path), demo)
-                scene.frame_set(frame)
-            except (ValueError, OSError, ImportError, KeyError, TypeError) as exc:
+                load(scene, bpy.path.abspath(path), demo, restoring=True)
+                scene.frame_set(frame, subframe=subframe)
+            except (ValueError, OSError, ImportError, KeyError, TypeError, ReferenceError) as exc:
                 clear(scene, '回放数据未就绪：' + str(exc))
+
+
+def on_history_pre(_):
+    """Release replay references before native undo/redo replaces Blender IDs."""
+    from . import farm_flex, playback, tip_tracking, native_camera_views
+    global _END_REQUEST
+    _END_REQUEST = None
+    native_camera_views.on_history_pre(_)
+    owner = playback.owner_scene()
+    if owner is not None and reader_for(owner) is not None:
+        playback.cancel(owner)
+    farm_flex.detach(restore=False)
+    tip_tracking.on_load_pre(_)
+    _READERS.clear()
+
+
+def on_history_post(_):
+    """Restore saved replay identity and clock after native undo/redo."""
+    import bpy
+    from . import farm_flex, native_camera_views
+    native_camera_views.on_history_post(_)
+    states = [(scene, scene.render.fps, scene.render.fps_base, scene.sync_mode,
+               scene.use_preview_range, scene.frame_start, scene.frame_end,
+               scene.frame_current, scene.frame_subframe,
+               {i for i, tid in enumerate(('T1', 'T2', 'T3'))
+                if (obj := scene.objects.get(f'WFRL.Turbine.{tid}.Tower')) is not None
+                and not obj.hide_render}) for scene in bpy.data.scenes
+              if scene.get('wfrl_scene_kind') == 'clearance_replay']
+    on_load(_)
+    for scene, fps, base, sync, preview, start, end, frame, subframe, visible in states:
+        scene.render.fps, scene.render.fps_base = fps, base
+        scene.sync_mode, scene.use_preview_range = sync, preview
+        scene.frame_start, scene.frame_end = start, end
+        active = farm_flex.active_for(scene)
+        if active is not None:
+            active.visible_turbines = visible
+            active.cache.clear()
+        scene.frame_set(frame, subframe=subframe)
+
+
+_HANDLERS = (('frame_change_post', update), ('load_pre', on_load_pre), ('load_post', on_load),
+             ('undo_pre', on_history_pre), ('redo_pre', on_history_pre),
+             ('undo_post', on_history_post), ('redo_post', on_history_post))
 
 
 def register():
     import bpy
     from bpy.app.handlers import persistent
-    for handlers, callback in ((bpy.app.handlers.frame_change_post, update), (bpy.app.handlers.load_post, on_load)):
+    for name, callback in _HANDLERS:
+        handlers = getattr(bpy.app.handlers, name)
         persistent(callback)
         if callback not in handlers:
             handlers.append(callback)
@@ -197,16 +305,28 @@ def register():
 def unregister():
     import bpy
     import sys
+    global _END_REQUEST
+    _END_REQUEST = None
+    errors = []
+    def attempt(callback):
+        try:
+            callback()
+        except Exception as exc:
+            errors.append(exc)
     from . import radar_feedback
-    radar_feedback.unregister()
+    attempt(radar_feedback.unregister)
     farm = sys.modules.get(__package__ + '.farm_flex')
     if farm is not None:
-        farm.detach()
+        attempt(farm.clear_package_cache)
+        attempt(farm.detach)
     from . import tip_tracking
-    tip_tracking.unregister()
+    attempt(tip_tracking.unregister)
     _READERS.clear()
     if bpy.app.timers.is_registered(_stop_finished_playback):
-        bpy.app.timers.unregister(_stop_finished_playback)
-    for handlers, callback in ((bpy.app.handlers.frame_change_post, update), (bpy.app.handlers.load_post, on_load)):
+        attempt(lambda: bpy.app.timers.unregister(_stop_finished_playback))
+    for name, callback in _HANDLERS:
+        handlers = getattr(bpy.app.handlers, name)
         if callback in handlers:
             handlers.remove(callback)
+    if errors:
+        raise RuntimeError('Clearance replay cleanup failed: ' + '; '.join(map(str, errors)))

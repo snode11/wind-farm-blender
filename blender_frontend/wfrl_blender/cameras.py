@@ -1,7 +1,11 @@
 """Meter-scale camera rig with explicit rotor-envelope framing."""
 from __future__ import annotations
 
+import math
+import logging
 from dataclasses import dataclass
+
+_LOG = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -30,15 +34,32 @@ def camera_view_names():
     return tuple(view.name for view in CAMERA_VIEWS)
 
 
+def clear_camera_mask(camera):
+    """Camera observation leaves the surrounding viewport unobscured."""
+    camera.data.show_passepartout = False
+    camera.data.passepartout_alpha = 0.0
+
+
+def clear_viewport_masks(scene):
+    """Apply the observation display to owned cameras in a saved scene."""
+    for camera in scene.objects:
+        if getattr(camera, 'type', None) == 'CAMERA' and (camera.name.startswith(
+                ('WFRL.', 'WFRLManual.', 'SplitRecon.', 'SplitTexture.', 'SplitMappoTexture.'))
+                or camera.get('wfrl_custom_camera') or camera.get('wfrl_native_camera_owner')):
+            clear_camera_mask(camera)
+
+
 def demo_view_areas(scene):
-    """Visible demo views for this scene, excluding the independent reconstruction."""
+    """Visible main views, excluding independent reconstruction and observation."""
     import bpy
-    from . import split_reconstruction
+    from . import native_camera_views, split_reconstruction
     seen = set()
     for window in bpy.context.window_manager.windows:
         if window.scene != scene:
             continue
         for area in window.screen.areas:
+            if native_camera_views.owns_view(window, area):
+                continue
             if area.type != 'VIEW_3D' or area.as_pointer() in seen:
                 continue
             seen.add(area.as_pointer())
@@ -56,7 +77,7 @@ def select_camera(scene, name: str, *, fov_deg: float | None = None, focus: str 
         if not 1.0 <= value <= 179.0:
             raise ValueError('fov_deg must be between 1 and 179')
         import math
-        sensor_width = nacelle_camera.SENSOR_WIDTH_MM if camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID else 36.0
+        sensor_width = _sensor_width(camera)
         camera.data.lens = sensor_width / (2.0 * math.tan(math.radians(value) / 2.0))
         camera['fov_deg'] = value
     if focus is not None:
@@ -163,7 +184,7 @@ def configure_camera(scene, name, fov_deg, pitch_deg, focus='farm'):
         camera.rotation_euler = (target-camera.location).to_track_quat('-Z', 'Y').to_euler()
     camera.data.type = 'PERSP'
     camera.data.sensor_fit = 'HORIZONTAL'
-    camera.data.sensor_width = nacelle_camera.SENSOR_WIDTH_MM if camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID else 36.0
+    camera.data.sensor_width = _sensor_width(camera)
     select_camera(scene, name, fov_deg=fov, focus=focus)
     camera['pitch_deg'] = pitch
     return camera
@@ -180,6 +201,21 @@ def _layout_views(screen):
 def _layout_active_views(screen):
     return [area for area in _layout_views(screen)
             if area.width > 0 and area.height > 0]
+
+
+def select_sidebar_category(area, category):
+    """Keep the current tab when Blender's UI region is not editable yet."""
+    for region in area.regions:
+        if region.type != 'UI':
+            continue
+        try:
+            if region.active_panel_category != category:
+                region.active_panel_category = category
+            return region.active_panel_category == category
+        except (AttributeError, RuntimeError):
+            area.tag_redraw()
+            return False
+    return False
 
 
 def _layout_finish(job):
@@ -205,9 +241,7 @@ def _layout_finish(job):
         if job.get('camera_names'):
             space.show_region_ui = index == count - 1
             if space.show_region_ui:
-                sidebar = next((r for r in area.regions if r.type == 'UI'), None)
-                if sidebar:
-                    sidebar.active_panel_category = 'MAPPO'
+                select_sidebar_category(area, 'MAPPO')
         fill_camera_view(area, scene)
         if job.get('camera_names') and count > 1:
             # Fit in the unobscured region. The front camera has generous
@@ -231,7 +265,7 @@ def _layout_timer():
         return None
     try:
         _layout_step()
-    except (ValueError, RuntimeError, ReferenceError) as exc:
+    except (ValueError, RuntimeError, ReferenceError, AttributeError) as exc:
         job = _LAYOUT_JOB
         _LAYOUT_JOB = None
         if job is not None:
@@ -361,74 +395,142 @@ def cancel_view_layout():
     _LAYOUT_JOB = None
     try:
         import bpy
+    except ImportError:
+        return
+    try:
         if bpy.app.timers.is_registered(_layout_timer):
             bpy.app.timers.unregister(_layout_timer)
-    except (ImportError, RuntimeError):
-        pass
+    except RuntimeError:
+        _LOG.warning('View layout timer could not be removed', exc_info=True)
 
 
-def ensure_gimbal(scene, turbine):
+_DOWN_GIMBAL_NAMES = frozenset(f'WFRL.Camera.{turbine}.Gimbal'
+                              for turbine in ('T1', 'T2', 'T3'))
+
+# Down is fixed to the nacelle underside, behind the hub on the trailing-edge
+# side. Its optical axis is 7.5 degrees from local -Z toward the rotor.
+# The 8 mm lens covers 60 degrees vertically at a 16:9 output aspect.
+DOWN_MOUNT_XY = (-3.5, -1.15)
+DOWN_MOUNT_OFFSET = (0.0, 0.0, -0.2151)
+DOWN_YAW_DEG, DOWN_PITCH_DEG, DOWN_ROLL_DEG = 181.2, -82.5, 175.9
+DOWN_VFOV_DEG = 60.0
+DOWN_ASPECT = 16 / 9
+DOWN_HFOV_DEG = math.degrees(2 * math.atan(math.tan(math.radians(DOWN_VFOV_DEG / 2)) * DOWN_ASPECT))
+DOWN_FOCAL_LENGTH_MM = 8.0
+DOWN_SENSOR_WIDTH_MM = 2 * DOWN_FOCAL_LENGTH_MM * math.tan(math.radians(DOWN_HFOV_DEG / 2))
+DOWN_MOUNT_REVISION = 5
+
+
+def _sensor_width(camera):
+    if camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID:
+        return nacelle_camera.SENSOR_WIDTH_MM
+    return DOWN_SENSOR_WIDTH_MM if is_down_camera(camera) else 36.0
+
+
+def _down_mount(camera):
+    """Locate the optical centre below the nacelle underside mount point."""
+    import bpy
+    import re
+    from mathutils import Vector
+    root = camera.parent
+    children = [obj for obj in root.children if obj.type == 'MESH'] if root else []
+    shells = [obj for obj in children if obj.get('wfrl_nacelle_shell')]
+    if not shells:
+        shells = [obj for obj in children if re.search(r'\.Nacelle(?:\.\d+)*$', obj.name)]
+    if len(shells) != 1:
+        raise ValueError('Down requires the nacelle shell to locate its installation point')
+    shell = shells[0]
+    bpy.context.view_layer.update()
+    local = shell.matrix_local.copy()
+    inverse = local.inverted()
+    hit, point, _normal, _face = shell.ray_cast(
+        inverse @ Vector((*DOWN_MOUNT_XY, -5)),
+        (inverse.to_3x3() @ Vector((0, 0, 1))).normalized())
+    if not hit:
+        raise ValueError('Down installation point does not intersect the nacelle underside')
+    anchor = local @ point
+    offset = Vector(DOWN_MOUNT_OFFSET)
+    camera['wfrl_mount_anchor'] = list(anchor)
+    camera['wfrl_mount_offset'] = list(offset)
+    return anchor + offset
+
+
+def is_down_camera(camera):
+    return camera is not None and (camera.name in _DOWN_GIMBAL_NAMES or camera.get('wfrl_down_camera', False))
+
+
+def ensure_gimbal(scene, turbine, *, yaw_object=None, name=None, owner=None):
     """Lazily add a camera to existing saved scenes without rebuilding geometry."""
     import bpy
-    root = scene.objects.get(f'WFRL.Turbine.{turbine}.YawRoot')
-    if root is None:
+    if owner is not None:
+        from .manual_control import other_scene_objects
+    root = yaw_object if yaw_object is not None else scene.objects.get(f'WFRL.Turbine.{turbine}.YawRoot')
+    if root is None or scene.objects.get(root.name) != root:
         raise ValueError(f'{turbine} is not present in this scene')
-    name = f'WFRL.Camera.{turbine}.Gimbal'
+    name = name or f'WFRL.Camera.{turbine}.Gimbal'
     camera = scene.objects.get(name)
-    if camera is None:
-        camera = bpy.data.objects.new(name, bpy.data.cameras.new(name + '.Data'))
-        root.users_collection[0].objects.link(camera)
-    if camera.get('wfrl_gimbal_mount_revision', 0) < 1:
-        from .turbine_geometry import geometry_data
-        radius = geometry_data()['scalars']['TipRad']
-        # Tower-side inspection station, lowered toward the passing blade tip.
-        # Looking from the hub along the entire span foreshortens the last
-        # metres into a few pixels and lets the near blade fill the image.
-        # A 1.2 m chordwise offset is only a slight deviation from front-on.
-        camera.parent = root
-        camera.matrix_parent_inverse.identity()
-        camera.location = (-3.5, 1.2, -radius * .60)
-        camera.data.clip_start, camera.data.clip_end = .05, 30000
-        camera.data.display_size = .5
-        camera['mount'] = 'tower-side inner blade-tip observation / illustrative SYNTH position'
-        camera['wfrl_gimbal_mount_revision'] = 1
-        reset_gimbal(camera)
-    camera.data.show_passepartout = False
-    camera.data.passepartout_alpha = 0
+    if camera is None and owner is not None:
+        candidates = [obj for obj in root.children if obj.get('wfrl_down_camera')
+                      and obj.get('wfrl_manual_owner') == owner
+                      and scene.objects.get(obj.name) == obj]
+        if len(candidates) > 1:
+            raise ValueError('Multiple Down cameras belong to this turbine scene')
+        camera = next(iter(candidates), None)
+    created = camera is None
+    if camera is not None and (camera.type != 'CAMERA' or (owner is not None and
+          (camera.get('wfrl_manual_owner') != owner or camera.parent != root
+           or camera.data.get('wfrl_manual_owner') != owner or camera.data.users != 1
+           or camera.as_pointer() in other_scene_objects(scene)))):
+        raise ValueError('Down camera does not belong to this turbine scene')
+    data = None
+    try:
+        if created:
+            data = bpy.data.cameras.new(name + '.Data')
+            camera = bpy.data.objects.new(name, data)
+            root.users_collection[0].objects.link(camera)
+        camera['wfrl_down_camera'] = True
+        if owner is not None:
+            camera['wfrl_manual_owner'] = owner
+            camera.data['wfrl_manual_owner'] = owner
+        if camera.get('wfrl_gimbal_mount_revision', 0) < DOWN_MOUNT_REVISION:
+            camera.parent = root
+            camera.matrix_parent_inverse.identity()
+            camera.data.clip_start, camera.data.clip_end = .05, 30000
+            camera.data.display_size = .5
+            reset_gimbal(camera)
+            camera['wfrl_gimbal_mount_revision'] = DOWN_MOUNT_REVISION
+    except Exception:
+        if created:
+            try:
+                if camera is not None:
+                    bpy.data.objects.remove(camera, do_unlink=True)
+                if data is not None and data.users == 0:
+                    bpy.data.cameras.remove(data)
+            except Exception:
+                _LOG.exception('Down camera initialization failed; resource cleanup also failed')
+        raise
+    clear_camera_mask(camera)
     return camera
 
 
 
 def down_gimbal(camera):
-    """Nacelle-underside aerial look: whole downward blade as a foreshortened
-    triangle, root and the trailing-edge kink visible, tip short of the centre
-    line. Matches the field down-camera reference rather than the old mid-span
-    inner-tip crop (which was eye=(-3.5,1.2,-0.60*TipRad), aim 180/-67/85).
-
-    Pose found analytically by scripts/blender/probe_down_framing.py against the
-    root-kink planform: root at frame edge (v=-1.0), tip on the root side of
-    centre (v=0.25), full blade in frame. Render to confirm and fine-tune; the
-    probe's look_at roll and aim_gimbal's roll may differ by a small offset.
-    """
+    """Restore the underside view of the passing blade, with the tower toward image top."""
     if camera.get('wfrl_nacelle_camera'):
         return reset_nacelle_gimbal(camera)
-    # Nacelle-underside down-camera, per user spec (2026-10-21): optical centre
-    # 3.9 m below the hub and 2 m downwind (behind) of it, i.e. on the nacelle
-    # floor; optical axis 8° from vertical, tilted toward the blade (upwind -X).
-    # Hub is at world (-5,0,90); camera at world (-3,0,86.1) = YawRoot-local
-    # (-3.0, 0, -1.5). aim_gimbal convention verified by map_aim_convention.py:
-    # yaw selects azimuth (0:+X 90:+Y 180:-X 270:-Y), pitch 0:horizon -90:down.
-    # View (-sin8, 0, -cos8) -> yaw=180 (toward -X), pitch=-82 (8° off vertical).
-    camera.location = (-3.0, 0.0, -1.5)
-    camera['gimbal_roll'] = 0.0
+    camera.location = _down_mount(camera)
+    camera['mount'] = 'nacelle underside, behind hub, trailing-edge side / fixed Down'
+    camera['gimbal_roll'] = DOWN_ROLL_DEG
     camera.data.shift_x = camera.data.shift_y = 0
-    return aim_gimbal(camera, 180.0, -82.0, 75)
+    return aim_gimbal(camera, DOWN_YAW_DEG, DOWN_PITCH_DEG, DOWN_HFOV_DEG)
 
 
 def reset_gimbal(camera):
-    """Return to an oblique overview of the selected turbine."""
+    """Restore a mounted Down view or another camera's oblique overview."""
     if camera.get('wfrl_nacelle_camera'):
         return reset_nacelle_gimbal(camera)
+    if is_down_camera(camera):
+        return down_gimbal(camera)
     from mathutils import Vector
     from .turbine_geometry import geometry_data
     import math
@@ -534,20 +636,62 @@ def ensure_nacelle_gimbal(scene, turbine):
     shell = scene.objects.get(f'WFRL.Turbine.{turbine}.Nacelle')
     if root is None or shell is None:
         raise ValueError(f'{turbine} nacelle shell is not present in this scene')
+    rotor = scene.objects.get(f'WFRL.Turbine.{turbine}.Rotor')
+    if rotor is None or rotor.parent != root:
+        raise ValueError('NREL nacelle camera requires the mechanical Rotor datum')
     name = f'WFRL.Camera.{turbine}.NacelleGimbal'
     camera = scene.objects.get(name)
     if camera is not None:
+        if camera.type != 'CAMERA' or camera.parent != root or not camera.get('wfrl_nacelle_camera'):
+            raise ValueError(f'{name} is occupied by an incompatible object')
+        initialized = (camera.get('wfrl_nacelle_initialized') is not False
+                       and camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID
+                       and all(key in camera for key in ('gimbal_yaw', 'gimbal_pitch', 'gimbal_roll',
+                                                        'gimbal_fov', 'mount_location_m')))
+        if not initialized:
+            if any(other != scene and other.user_of_id(camera) for other in bpy.data.scenes):
+                raise ValueError(f'{name} is shared by another scene; initialization requires an independent camera')
+            camera['wfrl_nacelle_initialized'] = False
+            reset_nacelle_gimbal(camera)
+            camera['wfrl_nacelle_initialized'] = True
+        clear_camera_mask(camera)
         return camera  # Selecting/reloading must not overwrite manual PTZ.
-    camera = bpy.data.objects.new(name, bpy.data.cameras.new(name + '.Data'))
-    collection = root.users_collection[0]
-    collection.objects.link(camera)
-    camera.parent = root
-    camera.matrix_parent_inverse.identity()
-    camera['wfrl_nacelle_camera'] = True
-    camera.data.clip_start, camera.data.clip_end = .005, 30000
-    camera.data.display_size = .18
-    camera.data.show_passepartout = False
-    reset_nacelle_gimbal(camera)
+    if bpy.data.objects.get(name) is not None:
+        raise ValueError(f'{name} belongs outside this scene; use its owning scene')
+    scene_collections = (scene.collection, *scene.collection.children_recursive)
+    collections = [collection for collection in root.users_collection
+                   if collection in scene_collections
+                   and not any(other != scene and collection in
+                               (other.collection, *other.collection.children_recursive)
+                               for other in bpy.data.scenes)]
+    if not collections:
+        raise ValueError('NREL nacelle camera requires a mount collection owned by this scene')
+    collection = collections[0]
+    data = bpy.data.cameras.new(name + '.Data')
+    camera = None
+    try:
+        camera = bpy.data.objects.new(name, data)
+        collection.objects.link(camera)
+        if scene.objects.get(camera.name) != camera:
+            raise ValueError('NREL nacelle camera was not linked to the requested scene')
+        camera.parent = root
+        camera.matrix_parent_inverse.identity()
+        camera['wfrl_nacelle_camera'] = True
+        camera['wfrl_nacelle_initialized'] = False
+        data.clip_start, data.clip_end = .005, 30000
+        data.display_size = .18
+        data.show_passepartout = False
+        reset_nacelle_gimbal(camera)
+        camera['wfrl_nacelle_initialized'] = True
+    except Exception:
+        try:
+            if camera is not None:
+                bpy.data.objects.remove(camera, do_unlink=True)
+            if data.users == 0:
+                bpy.data.cameras.remove(data)
+        except Exception:
+            _LOG.exception('Nacelle camera initialization failed; resource cleanup also failed')
+        raise
     return camera
 
 
@@ -564,7 +708,7 @@ def aim_gimbal(camera, yaw, pitch, fov):
     camera.rotation_euler = (orientation @ Quaternion((0, 0, 1), roll)).to_euler('XYZ')
     camera.data.type = 'PERSP'
     camera.data.sensor_fit = 'HORIZONTAL'
-    sensor_width = nacelle_camera.SENSOR_WIDTH_MM if camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID else 36
+    sensor_width = _sensor_width(camera)
     camera.data.sensor_width = sensor_width
     if camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID:
         camera.data.sensor_height = nacelle_camera.SENSOR_HEIGHT_MM
@@ -579,7 +723,7 @@ def apply_nacelle_output(scene, camera):
 
 
 def fill_camera_view(area, scene):
-    """Fit the calibrated nacelle gate; other demonstration views use overscan."""
+    """Frame observation views without a camera exterior mask."""
     import math
     import bpy
     space = area.spaces.active
@@ -589,9 +733,11 @@ def fill_camera_view(area, scene):
     camera = space.camera if space.use_local_camera else scene.camera
     calibrated = camera is not None and camera.get('wfrl_nacelle_intrinsics') == nacelle_camera.INTRINSICS_ID
     if camera:
-        camera.data.show_passepartout = calibrated
+        clear_camera_mask(camera)
+        if is_down_camera(camera):
+            fit_camera_view(area, scene)
+            return
         if calibrated:
-            camera.data.passepartout_alpha = 1.0
             if not bpy.app.background:
                 from .native_camera_views import frame_gate
                 frame_gate(scene, {'area': area, 'proxy': camera, 'fx': 1.0, 'fy': 1.0}, region, space)

@@ -1,0 +1,6 @@
+{
+  "BLENDER_USER_CONFIG": "/project/publication/blender-0.3.42/public/validated/profile/config",
+  "BLENDER_USER_SCRIPTS": "/project/publication/blender-0.3.42/public/validated/profile/scripts",
+  "BLENDER_USER_DATAFILES": "/project/publication/blender-0.3.42/public/validated/profile/datafiles",
+  "WFRL_ADDON_MODULE": "bl_ext.wfrl_frontend.wfrl_blender"
+}

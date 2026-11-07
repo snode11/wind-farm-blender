@@ -22,9 +22,9 @@ def analytic_evidence():
     return dict(analytic_truth_error_m=abs(distance-2),rigid_formula_error_m=abs(estimate-5),circle_polygon_convergence=errors)
 
 def compare(base,refined,kind):
-    base=Path(base);refined=Path(refined);bc=json.loads((base/'run_config.json').read_text());rc=json.loads((refined/'run_config.json').read_text())
-    measurements=json.loads((base/'processed.json').read_text())['measurements'];fs={b:sorted((refined/'FarmInputs/vtk').glob(f'Case.T1.Blade{b}Surface.*.vtp')) for b in range(1,4)}
-    differences=[];errors=[];ranges=[]
+    base=Path(base);refined=Path(refined);bc=json.loads((base/'run_config.json').read_text(encoding='utf-8'));rc=json.loads((refined/'run_config.json').read_text(encoding='utf-8'))
+    measurements=json.loads((base/'processed.json').read_text(encoding='utf-8'))['measurements'];fs={b:sorted((refined/'FarmInputs/vtk').glob(f'Case.T1.Blade{b}Surface.*.vtp')) for b in range(1,4)}
+    differences=[];ranges=[]
     for r in measurements:
         i=round(r['time_s']*rc['fps']);pts,tris=read_surface(fs[r['blade_id']][i]);tip=tip_reference(pts,37 if rc['span_refined'] else 19);truth,_=truth_clearance(tip)
         differences.append(abs(truth-r['truth_m']))
@@ -40,21 +40,21 @@ def main():
     args=parser.parse_args()
     if args.output.exists():raise FileExistsError(args.output)
     paths=[args.base,args.spatial,args.temporal]
-    configs=[json.loads((p/'run_config.json').read_text()) for p in paths]
+    configs=[json.loads((p/'run_config.json').read_text(encoding='utf-8')) for p in paths]
     for p in paths:
-        if json.loads((p/'exit_status.json').read_text())['exit_code']!=0 or 'FAST.Farm terminated normally.' not in (p/'solver.log').read_text():raise ValueError('validation solver incomplete: '+str(p))
+        if json.loads((p/'exit_status.json').read_text(encoding='utf-8'))['exit_code']!=0 or 'FAST.Farm terminated normally.' not in (p/'solver.log').read_text(encoding='utf-8'):raise ValueError('validation solver incomplete: '+str(p))
     if any(len({c[k] for c in configs})!=1 for k in ['wind_mps','duration_s','startup_discard_s']):raise ValueError('incompatible physical cases')
     b,space,time=configs
     if b['span_refined'] or not space['span_refined'] or not time['span_refined']:raise ValueError('requires 19->37 sections then same37 temporal refinement')
     if b['dt_s']!=space['dt_s'] or b['fps']!=space['fps']:raise ValueError('spatial comparison changes temporal grid')
     if time['dt_s']>=space['dt_s'] or time['fps']<=space['fps']:raise ValueError('temporal grid is not finer')
-    spatial_data=json.loads((args.spatial/'processed.json').read_text());temporal_data=json.loads((args.temporal/'processed.json').read_text())
+    spatial_data=json.loads((args.spatial/'processed.json').read_text(encoding='utf-8'));temporal_data=json.loads((args.temporal/'processed.json').read_text(encoding='utf-8'))
     evidence=dict(run_id=args.base.name,analytic=analytic_evidence(),spatial=compare(args.base,args.spatial,'span_only_19_to_37'),temporal=compare(args.spatial,args.temporal,'integration_and_output_timestep_halved'))
     evidence['sampling']=compare_grids(spatial_data,temporal_data,space['fps'],time['fps'])
     evidence['sampling'].update(base_run=str(args.spatial),refined_run=str(args.temporal))
     evidence['truth_numerical_error_m']=max(evidence['spatial']['max_truth_difference_m'],evidence['temporal']['max_truth_difference_m'],1e-5)
     evidence['interpretation']='Empirical two-level differences, not a rigorous uncertainty bound. No field accuracy or continuous-time collision claim.'
-    args.output.parent.mkdir(exist_ok=True,parents=True);args.output.write_text(json.dumps(evidence,indent=2,allow_nan=False))
+    args.output.parent.mkdir(exist_ok=True,parents=True);args.output.write_text(json.dumps(evidence,indent=2,allow_nan=False), encoding='utf-8')
     print(args.output)
 
 if __name__=='__main__':main()

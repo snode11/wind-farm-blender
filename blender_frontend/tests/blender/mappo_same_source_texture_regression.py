@@ -24,6 +24,9 @@ import bpy
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.append(str(Path(__file__).resolve().parent))
+import _native
+
 ORIGINAL = ROOT / 'outputs' / 'blade-recon-mappo-two-camera-20261004-a02'
 GEOMETRY_SHA256 = '3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b'
 
@@ -60,6 +63,25 @@ def save_path(output):
     return path
 
 
+class _AbsentResearchTexture:
+    """Installed packages exclude the research-only synthetic texture module."""
+    available = False
+
+    @staticmethod
+    def active(scene):
+        return False
+
+
+def research_texture_module(module):
+    """Import the workspace research module; installed packages must not ship it."""
+    if module.startswith('bl_ext.'):
+        _native.assert_research_texture_absent(module)
+        return _AbsentResearchTexture()
+    research = importlib.import_module(module + '.split_surface_texture')
+    research.available = True
+    return research
+
+
 class Validation:
     def __init__(self, *, restore_farm=False):
         self.module = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')
@@ -75,7 +97,7 @@ class Validation:
             assert expected, 'Installed acceptance must specify WFRL_EXPECTED_ADDON_ROOT'
         self.split = importlib.import_module(self.module + '.split_reconstruction')
         self.same = importlib.import_module(self.module + '.split_mappo_texture')
-        self.synthetic = importlib.import_module(self.module + '.split_surface_texture')
+        self.synthetic = research_texture_module(self.module)
         self.timing = importlib.import_module(self.module + '.split_reconstruction_timing')
         self.farm = importlib.import_module(self.module + '.farm_flex')
         self.clearance = importlib.import_module(self.module + '.clearance_replay')
@@ -334,14 +356,17 @@ def main():
             assert scene.frame_current == expected
             validation.frame(expected, seek=False)
         assert validation.geometry_identity() == original_identity
-        # An independent SYNTH cursor must still have its original 120 samples.
-        separate = bpy.data.scenes.new('Independent synthetic identity check')
-        synth = validation.synthetic.ensure(separate)
-        assert len(synth['sequence'].states) == 120
-        assert 'SYNTHETIC' in synth['sequence'].source_label.upper()
-        assert validation.synthetic.active(separate) and not validation.same.active(separate)
-        assert validation.same.camera(scene) != validation.synthetic.camera(separate)
-        separate_name = separate.name
+        # An independent SYNTH cursor must still have its original 120 samples. The
+        # research module exists only in workspace source; installed runs skip this.
+        separate = (bpy.data.scenes.new('Independent synthetic identity check')
+                    if validation.synthetic.available else None)
+        if separate is not None:
+            synth = validation.synthetic.ensure(separate)
+            assert len(synth['sequence'].states) == 120
+            assert 'SYNTHETIC' in synth['sequence'].source_label.upper()
+            assert validation.synthetic.active(separate) and not validation.same.active(separate)
+            assert validation.same.camera(scene) != validation.synthetic.camera(separate)
+        separate_name = separate.name if separate is not None else None
         scene.frame_set(52)
         saved = save_path(output)
         bpy.ops.wm.save_as_mainfile(filepath=str(saved))
@@ -352,9 +377,10 @@ def main():
         assert reopened.geometry_identity() == original_identity
         assert reopened.immutable_texture() == texture
         reopened.frame(52, seek=False)
-        assert len(reopened.synthetic.ensure(bpy.data.scenes[separate_name])['sequence'].states) == 120
+        if separate_name is not None:
+            assert len(reopened.synthetic.ensure(bpy.data.scenes[separate_name])['sequence'].states) == 120
         report.update(status='PASS', immutable_texture=texture, sample_steps_and_endpoint_clamps=True,
-                      original_geometry_identity_preserved=True, independent_synthetic_identity_preserved=True,
+                      original_geometry_identity_preserved=True, independent_synthetic_identity_preserved=True if separate_name else 'NOT_APPLICABLE_INSTALLED',
                       saved=str(saved), save_reopen_restored=True,
                       software_sync_acceptance_only=True, reconstruction_accuracy_accepted=False)
     except Exception:

@@ -1,0 +1,16 @@
+Collecting numpy
+  Using cached numpy-2.5.3-cp312-cp312-macosx_14_0_arm64.whl.metadata (6.6 kB)
+Collecting scipy
+  Downloading scipy-1.18.1-cp312-cp312-macosx_14_0_arm64.whl.metadata (62 kB)
+Collecting opencv-python-headless
+  Downloading opencv_python_headless-5.0.0.93-cp37-abi3-macosx_13_0_arm64.whl.metadata (19 kB)
+Using cached numpy-2.5.3-cp312-cp312-macosx_14_0_arm64.whl (5.4 MB)
+Downloading scipy-1.18.1-cp312-cp312-macosx_14_0_arm64.whl (20.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 20.5/20.5 MB 58.7 MB/s eta 0:00:00
+Downloading opencv_python_headless-5.0.0.93-cp37-abi3-macosx_13_0_arm64.whl (48.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 48.3/48.3 MB 88.2 MB/s eta 0:00:00
+Installing collected packages: numpy, scipy, opencv-python-headless
+Successfully installed numpy-2.5.3 opencv-python-headless-5.0.0.93 scipy-1.18.1
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.1
+[notice] To update, run: /Users/eason/Desktop/wfcrl/blade_recon/.venv-trial/bin/python -m pip install --upgrade pip

@@ -1,0 +1,94 @@
+{
+  "schema": "wfrl.scoped-host-verification.v1",
+  "status": "PASS",
+  "release_version": "0.3.39",
+  "frontend": {
+    "passed": 1293,
+    "skipped": 4,
+    "subtests_passed": 4923,
+    "failures": 0,
+    "errors": 0,
+    "python": "3.14",
+    "junit": "frontend.xml",
+    "log": "logs/frontend.log",
+    "junit_includes_subtests": true
+  },
+  "frontend_virtual_environment": {
+    "passed": 2,
+    "skipped": 0,
+    "subtests_passed": 0,
+    "failures": 0,
+    "errors": 0,
+    "python": "3.11",
+    "junit": "frontend-virtual-environment.xml",
+    "log": "logs/frontend-virtual-environment.log",
+    "junit_includes_subtests": true,
+    "scope": "Nested system-site-packages checks use the Conda base with NumPy; other frontend tests run with waitid-capable Python 3.14."
+  },
+  "backend": {
+    "passed": 1404,
+    "skipped": 6,
+    "subtests_passed": 56,
+    "failures": 0,
+    "errors": 0,
+    "python": "3.11",
+    "junit": "backend.xml",
+    "log": "logs/backend.log",
+    "junit_includes_subtests": true
+  },
+  "total_passed": 2699,
+  "total_skipped": 10,
+  "skipped": [
+    {
+      "suite": "frontend",
+      "test": "blender_frontend.tests.test_blade_models.BladeModelTests.test_regeneration_matches_packaged_alternate_asset",
+      "reason": "Rootkink regeneration requires projects/commercial-rootkink-reference/template"
+    },
+    {
+      "suite": "frontend",
+      "test": "blender_frontend.tests.test_blade_recon_data.BundledProvenanceTests.test_geometry_equals_original_source_import",
+      "reason": "Original boss source is unavailable; portable bundle hash tested separately"
+    },
+    {
+      "suite": "frontend",
+      "test": "blender_frontend.tests.test_tip_deflection.DeflectionTests.test_retained_vtp_independent_transport",
+      "reason": "Original VTP is not distributed with the offline release"
+    },
+    {
+      "suite": "frontend",
+      "test": "blender_frontend.tests.test_video_output.test_stream_decode_failure_cleanup_restart_and_busy_port",
+      "reason": "Set WFRL_MEDIAMTX for actual RTSP"
+    },
+    {
+      "suite": "backend",
+      "test": "tests.blender_bridge.test_tip_replay.test_recorded_geometry_matches_saved_truth_and_wire",
+      "reason": "Original FAST.Farm native VTP geometry is not installed (4323 required files missing); offline package assertions remain separate"
+    },
+    {
+      "suite": "backend",
+      "test": "tests.blender_bridge.test_tip_replay.test_bad_geometry_rejected",
+      "reason": "Original FAST.Farm native VTP geometry is not installed (4323 required files missing); offline package assertions remain separate"
+    },
+    {
+      "suite": "backend",
+      "test": "tests.blender_bridge.test_tip_replay.test_real_bridge_pause_step_and_stop",
+      "reason": "Original FAST.Farm native VTP geometry is not installed (4323 required files missing); offline package assertions remain separate"
+    },
+    {
+      "suite": "backend",
+      "test": "tests.test_blade_recon_scoring_contract.ScoringContractTests.test_synth_truth_always_carries_its_own_complete_model",
+      "reason": "synth output requires OpenCV"
+    },
+    {
+      "suite": "backend",
+      "test": "tests.test_camera_video_stream.test_rtsp_midjoin_reconnect_cycles_restart_wrap_and_decode",
+      "reason": "Set WFRL_MEDIAMTX to run the real RTSP integration"
+    },
+    {
+      "suite": "backend",
+      "test": "tests.viz.test_tip_tracking.test_camera_calibration_and_validation",
+      "reason": "could not import 'cv2': No module named 'cv2'"
+    }
+  ],
+  "scope": "Software contracts only; no simulator, physical-control, visible-window responsiveness or scientific acceptance."
+}

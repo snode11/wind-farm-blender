@@ -1,0 +1,21 @@
+{
+  "schema": "wfrl.delivery-completion.v1",
+  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.40",
+  "tag": "v0.3.40",
+  "source_commit": "a92fb58b10a284e107168c010332fcfea94c0b04",
+  "source_verification": "publication/blender-0.3.40/final-source-verification.json",
+  "upload_receipt": "publication/blender-0.3.40/upload-receipt.json",
+  "cleanup": "publication/blender-0.3.40/cleanup.json",
+  "cleanup_summary": "publication/daily-installation-cleanup.json",
+  "document_static": "publication/blender-0.3.40/checks/document-static.json",
+  "source_document_links": "publication/blender-0.3.40/checks/source-document-links.json",
+  "checkout_head_preserved": true,
+  "checkout_index_preserved": true,
+  "user_profile_files_unchanged": 6,
+  "formal_assets_unchanged": 66,
+  "post_upload_download_or_byte_verification": false,
+  "github_actions": "https://github.com/snode11/wind-farm-blender/actions/runs/40733367810",
+  "status": "COMPLETE",
+  "github_actions_status": "PASS",
+  "source_branch_checks": "PASS_BOTH_MAIN_AND_WIND_FARM_RL_ALL_WORK"
+}

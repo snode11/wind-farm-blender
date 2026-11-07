@@ -21,7 +21,7 @@ def digest(path):
 def write_new(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open('x') as f:
+    with path.open('x', encoding='utf-8') as f:
         json.dump(value, f, indent=2, ensure_ascii=False, allow_nan=False)
         f.write('\n')
 
@@ -35,8 +35,8 @@ def checked_observations(input_root, observation_root, native_root, selected):
     from wfrl.nrel_reconstruction.observations import segment_rgb
 
     data, calibration, moves = load_bundle(input_root)
-    observations = json.loads((observation_root / 'observations.json').read_text())
-    annotation_data = json.loads((observation_root / 'annotations.json').read_text())
+    observations = json.loads((observation_root / 'observations.json').read_text(encoding='utf-8'))
+    annotation_data = json.loads((observation_root / 'annotations.json').read_text(encoding='utf-8'))
     annotations = {(a['camera_id'], a['frame_id']): a for a in annotation_data['annotations']}
     expected = set(itertools.product(('C1', 'C2', 'C3'), selected))
     pairs = [(a['camera_id'], a['frame_id']) for a in observations]
@@ -129,11 +129,11 @@ def run(args):
     out = Path(args.output).resolve()
     out.mkdir(parents=True, exist_ok=False)
     protocol_path = Path(args.protocol).resolve()
-    protocol = json.loads(protocol_path.read_text())
+    protocol = json.loads(protocol_path.read_text(encoding='utf-8'))
     if protocol['status'] != 'FROZEN_BEFORE_COMPUTATION' or protocol['frames'] != [42, 43, 44, 45]:
         raise ValueError('Unregistered DY1 protocol')
     binding_path = Path(args.binding).resolve()
-    binding = json.loads(binding_path.read_text())
+    binding = json.loads(binding_path.read_text(encoding='utf-8'))
     if binding['protocol_sha256'] != digest(protocol_path):
         raise ValueError('Protocol changed after input binding')
     for name in ('input', 'observations', 'native', 'model', 'plane'):
@@ -147,7 +147,7 @@ def run(args):
     observations, data, calibration, moves, input_signatures = checked_observations(
         Path(args.input).resolve(), Path(args.observations).resolve(), Path(args.native).resolve(), selected)
     model = DynamicBladeReference.from_model_state(args.model, expected_sha256=binding['files'][str(Path(args.model).resolve())])
-    plane_payload = json.loads(Path(args.plane).read_text())
+    plane_payload = json.loads(Path(args.plane).read_text(encoding='utf-8'))
     supplied_hash = plane_payload.get('payload_sha256')
     unhashed = {k: v for k, v in plane_payload.items() if k != 'payload_sha256'}
     actual_hash = hashlib.sha256(json.dumps(unhashed, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()

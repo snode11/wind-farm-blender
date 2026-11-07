@@ -1,7 +1,6 @@
 """Frozen-observation contracts, without truth assets or expensive mesh fitting."""
 import copy
 import json
-from dataclasses import asdict
 
 import numpy as np
 import pytest

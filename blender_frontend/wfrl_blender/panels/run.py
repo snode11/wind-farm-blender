@@ -3,7 +3,7 @@ import bpy
 from .. import runtime
 
 START_LABELS = {'demo': 'Start Backend Demo', 'interactive_training': 'Start Training',
-                'formal_training': 'Submit Formal Training', 'replay': 'Start Replay'}
+                'formal_training': 'Submit Formal Training', 'replay': '开始策略评估（不更新权重）'}
 
 
 class WFRL_PT_WorkflowRun(bpy.types.Panel):
@@ -21,18 +21,22 @@ class WFRL_PT_WorkflowRun(bpy.types.Panel):
     def draw(self, context):
         layout, settings = self.layout, context.scene.wfrl_workflow
         mode = runtime.desired_mode()
-        col = layout.column(); col.enabled = runtime.configuration_editable()
+        col = layout.column()
+        col.enabled = runtime.configuration_editable()
         if mode in {'interactive_training', 'formal_training'}:
             for key in ('iters', 'n_steps', 'warmup_steps', 'seed'): col.prop(settings, key)
+        if mode == 'interactive_training':
+            col.prop(settings, 'episode_steps')
         if mode in {'formal_training', 'replay'}: col.prop(settings, 'checkpoint')
         if mode == 'replay':
             for key in ('replay_steps', 'warmup_steps', 'seed'): col.prop(settings, key)
-            layout.label(text='Deterministic policy / no PPO updates')
+            layout.label(text='后端策略评估 · 需要 checkpoint / 不更新权重')
         if mode == 'formal_training':
             layout.label(text='Existing train_fastfarm.py / process status')
             layout.label(text='Live telemetry unavailable from formal CLI', icon='INFO')
         for action in ('start', 'pause', 'resume', 'step', 'stop', 'reset'):
-            row = layout.row(); row.enabled = runtime.allows_command(action)
+            row = layout.row()
+            row.enabled = runtime.allows_command(action)
             row.operator('wfrl.backend_run', text=START_LABELS[mode] if action == 'start' else action.title()).action = action
         layout.label(text='Real yaw / pitch / torque: backend policy only')
         layout.label(text='Trainer has no manual command override API', icon='INFO')

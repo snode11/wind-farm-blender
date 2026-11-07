@@ -1,6 +1,8 @@
 # Lidar replay formats
 
-The replay 1.0 contract below describes the supported B2 / normal-close path; the dual-beam overlay uses its own contract. The public NREL / WFRL installation ZIP is **0.3.21** (tag **v0.3.21**), and the current project source is on the **wind-farm-rl-all-work** branch. The daily installation is **0.3.21**; its 173 files match the public ZIP, and fresh-process startup checks pass. See [daily installation verification](../../publication/daily-installation.json). See [release state and validation scope](../../docs/blender/发布状态与验证范围.md) for package identities. Software delivery does not establish research acceptance.
+The replay 1.0 contract below describes the supported B2 / normal-close path; the dual-beam overlay uses its own contract. Public and installed payloads have separate identities; use the [installation identity](../../publication/daily-installation.json) for the daily installation. Validation applies only to the recorded payload and scope; see [release state and validation scope](../../docs/blender/发布状态与验证范围.md). Software delivery does not establish research acceptance.
+
+Replay 1.0 的 `mae_m` 派生统计允许最多 `1e-12 m` 的绝对求和舍入差异，以支持 Python 浮点 `sum` 算法差异；该规则同时用于最终统计和各前缀统计。其他统计字段、计数、测量、告警、时刻、身份和文件 SHA 严格核对，显示值来自重算。该容差不表示物理精度。
 
 ## Dual-beam review v1
 
@@ -11,6 +13,8 @@ The replay 1.0 contract below describes the supported B2 / normal-close path; th
 New generation records the effective `reconstruction_method` and `algorithm_version` in both calibration and manifest, with `method` on every reconstruction, including rejected pairs. TLS requires explicit matching identifiers in calibration, manifest and every row; unknown identifiers and version mixtures are rejected. Historical absent identifiers map only to the original method. A row's optional `algorithm_version`, when present, must match. TLS fits the uncentered hub-relative surface points with equal orthogonal-distance weight; its fixed-length line is an unvalidated structural approximation. It does not consume the saved hit point or evaluation truth.
 
 Reader prefix validation keeps measurements, alarms, event times, counts and discrete types exact. Only flat statistics float fields allow absolute `1e-12` roundoff, accommodating the built-in summation difference between Python 3.11 and 3.13. Recomputed statistics are displayed. This exception is unrelated to physical accuracy or the separately frozen `1e-8 m` historical numeric reproduction check.
+
+The reader validates optional `evaluation.clearance_reference_m` and `clearance_error_m` as finite real numbers, excluding booleans. A non-null error requires a valid estimate and reference and must equal estimate minus reference within absolute tolerance `1e-9 m` (roundoff only). Missing evaluation remains null. Inconsistent source rows are rejected even when their regenerated prefix state matches; the reader never rewrites the package.
 
 Samples contain `observations` for S1/S2/S3, a reconstruction, evaluation fields and independent S1 observation state. S2/S3 must pair at one saved time on the same blade. S1 valid blade hits drive their own alarm regardless of pair validity. Saved samples and precomputed prefix states drive replay; interpolation of displayed geometry cannot create a missing measurement. Seeking and replaying must not double-count history or reveal future event endpoints. Invalid/expired measurements remain missing, not zero or a declaration of safety.
 

@@ -1,0 +1,10 @@
+Warning: 1 × Draw window and swap: 11.0317 ms, average: 11.03170798 ms
+Warning: 1 × Draw window and swap: 2.2236 ms, average: 2.22358294 ms
+Warning: 1 × Draw window and swap: 10.1257 ms, average: 10.12566593 ms
+Warning: 播放器由场景“NativeCamera.IndependentPlayerB”占用，请先在对应窗口暂停
+Warning: 1 × Draw window and swap: 10.1566 ms, average: 10.15662495 ms
+NATIVE_CAMERA_PLAYBACK_PASS
+00:09.282  blend            | Saved session recovery to "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/scratch/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

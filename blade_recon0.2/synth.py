@@ -254,10 +254,9 @@ def main():
     save_json(os.path.join(args.out, 'cameras.json'),
               {'turbine': cfg.to_dict(), 'fps': args.fps,
                'cameras': [c.to_dict() for c in cams_s]})
-    tr = {'note': '仅评分使用，重建器不读', 'frames': truth}
+    tr = {'note': '仅评分使用，重建器不读', 'turbine': cfg.to_dict(), 'frames': truth}
     if args.texture:
         tr['atlas'] = atlas.meta()
-        tr['turbine'] = cfg.to_dict()
         tr['defects'] = DEFECTS
         tr['defect_coords'] = 'r = 展向半径(m)；c = 从前缘量起的表面弧长(m)，正 = 吸力面/背风面；blade 为真值编号(0 起)'
         tr['exposure_ms'] = args.exposure_ms

@@ -1,0 +1,560 @@
+{
+  "schema": "nrel-release-validation.v1",
+  "baseline_commit": "1caafb9edb7593a96813b8edfddf5d70d040717f",
+  "experiment_reruns": 0,
+  "source_files_changed": [],
+  "daily_git_status_unchanged": true,
+  "tests": {
+    "command": "python -m pytest -q tests/test_nrel_*.py",
+    "passed": 209,
+    "elapsed_seconds": 4.28,
+    "platform": "macOS",
+    "python": "3.11.16"
+  },
+  "formal_input_inspection": {
+    "videos": 3,
+    "frames_per_video": 100,
+    "decoded_selected_frame_ids": [
+      42,
+      43,
+      44,
+      45
+    ],
+    "input_content_signatures_verified": true
+  },
+  "historical_launch_signatures": {
+    "total": 74,
+    "matched": 71,
+    "unavailable": 3,
+    "entries": [
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/__init__.py",
+        "sha256": "83c282017ec14cf9db2f8d4fa48ecbad1cce427e1c1a958ea3ee91552028c5ef",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/__init__.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/area_audit.py",
+        "sha256": "03865d040121824de12143395fcaf9e1bb6f6320e1e594f35ec7e3aaa04c265b",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/area_audit.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/boundary_metrics.py",
+        "sha256": "3461135548db8a0619ea08df7b3fa7412788fca3aabcf409a2199054c35a2d1e",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/boundary_metrics.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/center_scale_audit.py",
+        "sha256": "b950cb08450f6f3c07ca6cdd1131216d21c18ebbfffb01c785fcdfc30ecf7fd8",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/center_scale_audit.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/center_scale_family_audit.py",
+        "sha256": "2d4ce49c1bee1333fd7ec27a061e1488b6bbb3cbc8a710b6559fe711dcaf1d3b",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/center_scale_family_audit.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/compare_rgb.py",
+        "sha256": "066de556c0ac6559eb893440abb52a461cdd9f74d8149fe3cf5c8491ae3996e4",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/compare_rgb.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/contour.py",
+        "sha256": "275ea6e78e3d185d081d79e341d8293bc9ea2ce3583d48d1c27810455ddfbb80",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/contour.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/dataset.py",
+        "sha256": "eee0806230801b9cffe49ba153f00ea1f4f79897eca91b107f9f67e4554f66fe",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/02-second-run/baseline-code/wfrl/nrel_reconstruction/dataset.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/diagnostics.py",
+        "sha256": "1d7b36e13709458dd6e9fb3c36c6afaf4d95f04167ef5c3fcee33072964e8789",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/02-second-run/baseline-code/wfrl/nrel_reconstruction/diagnostics.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/evaluate.py",
+        "sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/evaluate.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/greville_experiment.py",
+        "sha256": "a2e4139df6b369440b84293ac8e5211a95a5a6b60ddb7d9213d88334807c2574",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/greville_experiment.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/greville_model.py",
+        "sha256": "9d2816050a0c842aa509dd1bc561dc11146d93d4006bd36324bd8934860cfe98",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/greville_model.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/model.py",
+        "sha256": "47165adb7a8f8d75f4d23a4632c1afd690370edf9d665736782fba4ac7f632ad",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/model.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/observations.py",
+        "sha256": "79259788568cd6346428305e22cf136a52ce503e341f05bb94cd72e26718cd69",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/observations.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/optimize.py",
+        "sha256": "ea601be6e8fd6c7bba90d8befd5a1135e603fde76b7dba01cb1b0d114199bd58",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/optimize.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/pack.py",
+        "sha256": "d0f13a95ebe1b7050e96a644ae6207137ec0cd75219c514b6ac40c2e6ebdaaa1",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/pack.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/parameter_audit.py",
+        "sha256": "3b2970e4c40833cbaa5bc030fa244cabeab5b828c963893abfd33138239906b1",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/parameter_audit.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/preview.py",
+        "sha256": "9604b6cf45e8087037a0a02eceb5972f5af1acab7f78370583007a34074fff19",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/preview.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/renderer.py",
+        "sha256": "d6b73643c08a71a895e0a2f78cb163ff117b6c9c24983835ae2e7279f4133e44",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/renderer.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/root_rgb_audit.py",
+        "sha256": "251873e08cc4d11c831818c7add311d00f048a21bd099b2e52092b083e0536b2",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/root_rgb_audit.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/surface_audit.py",
+        "sha256": "67e227620cdaf876a5fc527a9e956fc81b93f7b086ebee5f1c5d182ffe7d257a",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/surface_audit.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/05-p4-greville/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/nrel_single_blade.py",
+        "sha256": "863b8fda6541e63b24da945d840c43ebbe848ccf0a6edef7aa69449b0c87c4ed",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/scripts/nrel_single_blade.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/contour-ablation/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/pack.py",
+        "sha256": "d0f13a95ebe1b7050e96a644ae6207137ec0cd75219c514b6ac40c2e6ebdaaa1",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/pack.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/contour-ablation/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/optimize.py",
+        "sha256": "1b106558561eda47265a9dd3c6102ff26a85345680e7c3c7e8541dddaf8cc40b",
+        "status": "HISTORICAL_BYTES_UNAVAILABLE"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/contour-ablation/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/preview.py",
+        "sha256": "9604b6cf45e8087037a0a02eceb5972f5af1acab7f78370583007a34074fff19",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/preview.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/contour-ablation/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/compare_rgb.py",
+        "sha256": "066de556c0ac6559eb893440abb52a461cdd9f74d8149fe3cf5c8491ae3996e4",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/compare_rgb.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/contour-ablation/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/renderer.py",
+        "sha256": "d6b73643c08a71a895e0a2f78cb163ff117b6c9c24983835ae2e7279f4133e44",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/renderer.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/contour-ablation/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/diagnostics.py",
+        "sha256": "1d7b36e13709458dd6e9fb3c36c6afaf4d95f04167ef5c3fcee33072964e8789",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/02-second-run/baseline-code/wfrl/nrel_reconstruction/diagnostics.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/contour-ablation/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/observations.py",
+        "sha256": "79259788568cd6346428305e22cf136a52ce503e341f05bb94cd72e26718cd69",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/observations.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/contour-ablation/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/__init__.py",
+        "sha256": "83c282017ec14cf9db2f8d4fa48ecbad1cce427e1c1a958ea3ee91552028c5ef",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/__init__.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/contour-ablation/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/model.py",
+        "sha256": "47165adb7a8f8d75f4d23a4632c1afd690370edf9d665736782fba4ac7f632ad",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/model.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/contour-ablation/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/dataset.py",
+        "sha256": "eee0806230801b9cffe49ba153f00ea1f4f79897eca91b107f9f67e4554f66fe",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/02-second-run/baseline-code/wfrl/nrel_reconstruction/dataset.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/contour-ablation/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/evaluate.py",
+        "sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/evaluate.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/contour-ablation/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/contour.py",
+        "sha256": "275ea6e78e3d185d081d79e341d8293bc9ea2ce3583d48d1c27810455ddfbb80",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/contour.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/contour-ablation/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/boundary_metrics.py",
+        "sha256": "3cb59fb231b00c5f4ed392a1def89b10f38c89a2aa5d0565b93df6c1bbd7ebf2",
+        "status": "HISTORICAL_BYTES_UNAVAILABLE"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/contour-ablation/implementation_at_launch.json",
+        "recorded_path": "scripts/nrel_single_blade.py",
+        "sha256": "863b8fda6541e63b24da945d840c43ebbe848ccf0a6edef7aa69449b0c87c4ed",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/scripts/nrel_single_blade.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/pack.py",
+        "sha256": "d0f13a95ebe1b7050e96a644ae6207137ec0cd75219c514b6ac40c2e6ebdaaa1",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/pack.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/optimize.py",
+        "sha256": "ea601be6e8fd6c7bba90d8befd5a1135e603fde76b7dba01cb1b0d114199bd58",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/optimize.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/preview.py",
+        "sha256": "9604b6cf45e8087037a0a02eceb5972f5af1acab7f78370583007a34074fff19",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/preview.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/compare_rgb.py",
+        "sha256": "066de556c0ac6559eb893440abb52a461cdd9f74d8149fe3cf5c8491ae3996e4",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/compare_rgb.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/renderer.py",
+        "sha256": "d6b73643c08a71a895e0a2f78cb163ff117b6c9c24983835ae2e7279f4133e44",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/renderer.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/diagnostics.py",
+        "sha256": "1d7b36e13709458dd6e9fb3c36c6afaf4d95f04167ef5c3fcee33072964e8789",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/02-second-run/baseline-code/wfrl/nrel_reconstruction/diagnostics.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/observations.py",
+        "sha256": "79259788568cd6346428305e22cf136a52ce503e341f05bb94cd72e26718cd69",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/observations.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/__init__.py",
+        "sha256": "83c282017ec14cf9db2f8d4fa48ecbad1cce427e1c1a958ea3ee91552028c5ef",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/__init__.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/model.py",
+        "sha256": "47165adb7a8f8d75f4d23a4632c1afd690370edf9d665736782fba4ac7f632ad",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/model.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/dataset.py",
+        "sha256": "eee0806230801b9cffe49ba153f00ea1f4f79897eca91b107f9f67e4554f66fe",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/02-second-run/baseline-code/wfrl/nrel_reconstruction/dataset.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/evaluate.py",
+        "sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/evaluate.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/contour.py",
+        "sha256": "275ea6e78e3d185d081d79e341d8293bc9ea2ce3583d48d1c27810455ddfbb80",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/contour.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/implementation_at_launch.json",
+        "recorded_path": "wfrl/nrel_reconstruction/boundary_metrics.py",
+        "sha256": "3cb59fb231b00c5f4ed392a1def89b10f38c89a2aa5d0565b93df6c1bbd7ebf2",
+        "status": "HISTORICAL_BYTES_UNAVAILABLE"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/implementation_at_launch.json",
+        "recorded_path": "scripts/nrel_single_blade.py",
+        "sha256": "863b8fda6541e63b24da945d840c43ebbe848ccf0a6edef7aa69449b0c87c4ed",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/scripts/nrel_single_blade.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/pack.py",
+        "sha256": "d0f13a95ebe1b7050e96a644ae6207137ec0cd75219c514b6ac40c2e6ebdaaa1",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/pack.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/optimize.py",
+        "sha256": "ea601be6e8fd6c7bba90d8befd5a1135e603fde76b7dba01cb1b0d114199bd58",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/optimize.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/greville_model.py",
+        "sha256": "9d2816050a0c842aa509dd1bc561dc11146d93d4006bd36324bd8934860cfe98",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/greville_model.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/preview.py",
+        "sha256": "9604b6cf45e8087037a0a02eceb5972f5af1acab7f78370583007a34074fff19",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/preview.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/root_rgb_audit.py",
+        "sha256": "251873e08cc4d11c831818c7add311d00f048a21bd099b2e52092b083e0536b2",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/root_rgb_audit.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/center_scale_audit.py",
+        "sha256": "b950cb08450f6f3c07ca6cdd1131216d21c18ebbfffb01c785fcdfc30ecf7fd8",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/center_scale_audit.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/surface_audit.py",
+        "sha256": "67e227620cdaf876a5fc527a9e956fc81b93f7b086ebee5f1c5d182ffe7d257a",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/surface_audit.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/parameter_audit.py",
+        "sha256": "3b2970e4c40833cbaa5bc030fa244cabeab5b828c963893abfd33138239906b1",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/parameter_audit.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/center_scale_family_audit.py",
+        "sha256": "2d4ce49c1bee1333fd7ec27a061e1488b6bbb3cbc8a710b6559fe711dcaf1d3b",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/center_scale_family_audit.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/compare_rgb.py",
+        "sha256": "066de556c0ac6559eb893440abb52a461cdd9f74d8149fe3cf5c8491ae3996e4",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/compare_rgb.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/renderer.py",
+        "sha256": "d6b73643c08a71a895e0a2f78cb163ff117b6c9c24983835ae2e7279f4133e44",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/renderer.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/diagnostics.py",
+        "sha256": "1d7b36e13709458dd6e9fb3c36c6afaf4d95f04167ef5c3fcee33072964e8789",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/02-second-run/baseline-code/wfrl/nrel_reconstruction/diagnostics.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/observations.py",
+        "sha256": "79259788568cd6346428305e22cf136a52ce503e341f05bb94cd72e26718cd69",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/observations.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/__init__.py",
+        "sha256": "83c282017ec14cf9db2f8d4fa48ecbad1cce427e1c1a958ea3ee91552028c5ef",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/__init__.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/model.py",
+        "sha256": "47165adb7a8f8d75f4d23a4632c1afd690370edf9d665736782fba4ac7f632ad",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/model.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/dataset.py",
+        "sha256": "eee0806230801b9cffe49ba153f00ea1f4f79897eca91b107f9f67e4554f66fe",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/02-second-run/baseline-code/wfrl/nrel_reconstruction/dataset.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/area_audit.py",
+        "sha256": "03865d040121824de12143395fcaf9e1bb6f6320e1e594f35ec7e3aaa04c265b",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/area_audit.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/evaluate.py",
+        "sha256": "2f58eabbefb3249936dbc2e923e5021a99214e9245cb7fe1e240a8f3f84edd70",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/evaluate.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/greville_experiment.py",
+        "sha256": "a2e4139df6b369440b84293ac8e5211a95a5a6b60ddb7d9213d88334807c2574",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/wfrl/nrel_reconstruction/greville_experiment.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/contour.py",
+        "sha256": "275ea6e78e3d185d081d79e341d8293bc9ea2ce3583d48d1c27810455ddfbb80",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/contour.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/observation_experiment.py",
+        "sha256": "965509d678745484c5b67a343b9e59e7d90e0d6a9e8a8e3e24e1847cc6a69577",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/06-p5-observation/implementation/wfrl/nrel_reconstruction/observation_experiment.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/nrel_reconstruction/boundary_metrics.py",
+        "sha256": "3461135548db8a0619ea08df7b3fa7412788fca3aabcf409a2199054c35a2d1e",
+        "status": "MATCH",
+        "verified_path": "wfrl/nrel_reconstruction/boundary_metrics.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/nrel_single_blade.py",
+        "sha256": "863b8fda6541e63b24da945d840c43ebbe848ccf0a6edef7aa69449b0c87c4ed",
+        "status": "MATCH",
+        "verified_path": "outputs/nrel-video-single-blade/stages/05-p4-greville/implementation/scripts/nrel_single_blade.py"
+      },
+      {
+        "record": "outputs/nrel-video-single-blade/stages/06-p5-observation/fit/implementation_at_launch.json",
+        "recorded_path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/camera_video/media.py",
+        "sha256": "fdea4421e6fda67e211fe665313ea6a21187439fca659239bc51026f1375556b",
+        "status": "MATCH",
+        "verified_path": "wfrl/camera_video/media.py"
+      }
+    ]
+  },
+  "release_source_changes": [
+    "wfrl/nrel_reconstruction/artifact_paths.py",
+    "tests/test_nrel_artifact_paths.py"
+  ],
+  "scientific_status": "PIPELINE_COMPLETE_PARTIAL_GEOMETRY / GEOMETRY_ACCEPTANCE_PENDING",
+  "staging": {
+    "allowlist_only": true,
+    "staged_files": 1013,
+    "every_staged_blob_matches_working_bytes": true,
+    "frozen_artifact_line_endings": "preserved with -text attributes",
+    "active_source_documentation_diff_check": "PASS",
+    "historical_artifact_whitespace": "25 copied artifact files retain existing whitespace; never normalized"
+  }
+}

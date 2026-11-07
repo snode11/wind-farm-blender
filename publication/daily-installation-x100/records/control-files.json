@@ -1,0 +1,89 @@
+{
+  "status": "PASS",
+  "files": [
+    {
+      "path": "manual_geometry.py",
+      "sha256": "c6766b03f015a83e3970c36072f0b0340edb807165eb2bf21d33398b8f350ef7"
+    },
+    {
+      "path": "native_camera_views.py",
+      "sha256": "7116afe0ebfb1964e44e5a5ee4238a0824fa54ab0e33098013fe2c61e4db55f0"
+    },
+    {
+      "path": "manual_scene.py",
+      "sha256": "7f5d8a9f0d0deb32abb2915963495aa51c834ae2786388dcd26f2293f32a0795"
+    },
+    {
+      "path": "manual_rna.py",
+      "sha256": "13c9fa2766986a7bfba58d794dcbb7905642ebecbaa415fb9d4017330a1f88a5"
+    },
+    {
+      "path": "manual_motion.py",
+      "sha256": "b8d6cd05240ad881d13fd121ddffc871c792a50fc810283703e5f88c8a0d356e"
+    },
+    {
+      "path": "manual_operators.py",
+      "sha256": "d63d1aa6308afcb9258084e6657939507c57e700e9fa67d546e4e7b420480035"
+    },
+    {
+      "path": "custom_cameras.py",
+      "sha256": "ffc548ad118bd1a7329c59dcd42dff2d70e84b47d3a64042b4a2488d0836b216"
+    },
+    {
+      "path": "manual_down.py",
+      "sha256": "8eb1dfec5ddc96b411a5fb68375e1e4a77cbd921055bf3773768465cca6cb159"
+    },
+    {
+      "path": "manual_video_job.py",
+      "sha256": "d9d38affce6dc339ee8578c3bf917c250a286409ccbaf19264d875280201bcc6"
+    },
+    {
+      "path": "stacked_camera_rig.py",
+      "sha256": "3665f040c04fb20c2e2b87c4f1f57041df28f7a20f172622cc8699c92cec75b8"
+    },
+    {
+      "path": "manual_video_render.py",
+      "sha256": "ef735c3b2ede0340a2994fafa675549237f128280b115e6783ce3ebc4c31115e"
+    },
+    {
+      "path": "manual_pose.py",
+      "sha256": "ddd675d9e52c0eff62bb1d9427b75fff5c17cb49ec3243c781c9e7b127f37fb3"
+    },
+    {
+      "path": "manual_video.py",
+      "sha256": "72494e92f481434fa8ca741c3d5b127d7d105d0cecb8f336b4bb192b5a6cfb8f"
+    },
+    {
+      "path": "cameras.py",
+      "sha256": "c6d1725238d768c0d79fe61674f06832dc351526ce1f4a2b8276df56a4b76096"
+    },
+    {
+      "path": "camera_projection.py",
+      "sha256": "49591dc96cc94a544f76be8981046b89e4c1ca9866e9f6b18b712ffba205cd58"
+    },
+    {
+      "path": "manual_control.py",
+      "sha256": "92707efb7e93853c73c14fd56c6f4f8f238c18b39eeeca05c54d9b6e9993777f"
+    },
+    {
+      "path": "manual_scene_links.py",
+      "sha256": "6592167dfc694f26549be23b635e58f6464b0d23bb742287bbeeec34d1ea422c"
+    },
+    {
+      "path": "panels/custom_cameras.py",
+      "sha256": "92eb89c73b1364568af372f51877ac9cdbf30d344a7b879d7119e9c03ec09e95"
+    },
+    {
+      "path": "panels/stacked_camera_rig.py",
+      "sha256": "b68777a3766aa9ddda0a8d25a2820e8b04400a1af36428e4a3cb194d39368dd4"
+    },
+    {
+      "path": "panels/gimbal.py",
+      "sha256": "0684beeb54b7c2ddc1677a80c5bf98c2418313144f1f1c788302485468b12f3f"
+    },
+    {
+      "path": "panels/manual_control.py",
+      "sha256": "4152d673eede31a34c5ef190f9774cb0aa1d7031ecff12415a5166c82b661877"
+    }
+  ]
+}

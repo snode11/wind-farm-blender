@@ -1,0 +1,90 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+___ test_supervisor_executes_backend_in_selected_virtual_environment[False] ____
+
+tmp_path = PosixPath('/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-6/test_supervisor_executes_backe0')
+acceptance_processes = <function acceptance_processes.<locals>.run at 0x10b1a9a60>
+explicit_python = False
+
+    @pytest.mark.parametrize('explicit_python', [False, True])
+    def test_supervisor_executes_backend_in_selected_virtual_environment(tmp_path, acceptance_processes, explicit_python):
+        environment = tmp_path / 'venv'
+        venv.EnvBuilder(with_pip=False, system_site_packages=True, symlinks=True).create(environment)
+        python = environment / 'bin/python'
+        selected = python
+        if explicit_python:
+            selected = environment / 'bin/backend-python'
+            selected.symlink_to(python)
+        identities = tmp_path / 'identities'
+        identities.mkdir()
+        (identities / 'sitecustomize.py').write_text('''
+    import json
+    import os
+    from pathlib import Path
+    import sys
+    
+    record = dict(prefix=sys.prefix, executable=sys.executable, argv=sys.orig_argv)
+    Path(os.environ['FIXTURE_IDENTITY_DIR'], str(os.getpid()) + '.json').write_text(json.dumps(record))
+    ''')
+        result = acceptance_processes(tmp_path / 'acceptance', report={'passed': True}, python=python,
+            backend_python=selected if explicit_python else None,
+            extra_env={'PYTHONPATH': os.pathsep.join([str(identities), str(ROOT)]),
+                       'FIXTURE_IDENTITY_DIR': str(identities)})
+>       assert result.returncode == 0, result.stdout + result.stderr
+E       AssertionError: Acceptance output: /private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-6/test_supervisor_executes_backe0/acceptance/run-5wcbhyje
+E         {'output_dir': '/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-6/test_supervisor_executes_backe0/acceptance/run-5wcbhyje', 'elapsed_seconds': 0.10820116603281349, 'owned_launchers_exited': True}
+E         Traceback (most recent call last):
+E           File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/verify_frontend_completion.py", line 47, in <module>
+E             raise RuntimeError('Bridge exited')
+E         RuntimeError: Bridge exited
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-6/test_supervi...ontend_completion.py", line 47, in <module>\n    raise RuntimeError(\'Bridge exited\')\nRuntimeError: Bridge exited\n').returncode
+
+blender_frontend/tests/test_frontend_completion.py:157: AssertionError
+____ test_supervisor_executes_backend_in_selected_virtual_environment[True] ____
+
+tmp_path = PosixPath('/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-6/test_supervisor_executes_backe1')
+acceptance_processes = <function acceptance_processes.<locals>.run at 0x10a977690>
+explicit_python = True
+
+    @pytest.mark.parametrize('explicit_python', [False, True])
+    def test_supervisor_executes_backend_in_selected_virtual_environment(tmp_path, acceptance_processes, explicit_python):
+        environment = tmp_path / 'venv'
+        venv.EnvBuilder(with_pip=False, system_site_packages=True, symlinks=True).create(environment)
+        python = environment / 'bin/python'
+        selected = python
+        if explicit_python:
+            selected = environment / 'bin/backend-python'
+            selected.symlink_to(python)
+        identities = tmp_path / 'identities'
+        identities.mkdir()
+        (identities / 'sitecustomize.py').write_text('''
+    import json
+    import os
+    from pathlib import Path
+    import sys
+    
+    record = dict(prefix=sys.prefix, executable=sys.executable, argv=sys.orig_argv)
+    Path(os.environ['FIXTURE_IDENTITY_DIR'], str(os.getpid()) + '.json').write_text(json.dumps(record))
+    ''')
+        result = acceptance_processes(tmp_path / 'acceptance', report={'passed': True}, python=python,
+            backend_python=selected if explicit_python else None,
+            extra_env={'PYTHONPATH': os.pathsep.join([str(identities), str(ROOT)]),
+                       'FIXTURE_IDENTITY_DIR': str(identities)})
+>       assert result.returncode == 0, result.stdout + result.stderr
+E       AssertionError: Acceptance output: /private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-6/test_supervisor_executes_backe1/acceptance/run-edchjfly
+E         {'output_dir': '/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-6/test_supervisor_executes_backe1/acceptance/run-edchjfly', 'elapsed_seconds': 0.10820737504400313, 'owned_launchers_exited': True}
+E         Traceback (most recent call last):
+E           File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/blender/verify_frontend_completion.py", line 47, in <module>
+E             raise RuntimeError('Bridge exited')
+E         RuntimeError: Bridge exited
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-6/test_supervi...ontend_completion.py", line 47, in <module>\n    raise RuntimeError(\'Bridge exited\')\nRuntimeError: Bridge exited\n').returncode
+
+blender_frontend/tests/test_frontend_completion.py:157: AssertionError
+=========================== short test summary info ============================
+FAILED blender_frontend/tests/test_frontend_completion.py::test_supervisor_executes_backend_in_selected_virtual_environment[False]
+FAILED blender_frontend/tests/test_frontend_completion.py::test_supervisor_executes_backend_in_selected_virtual_environment[True]
+2 failed, 3 deselected in 0.35s

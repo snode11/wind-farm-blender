@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.user_default.wfrl_blender",
+  "source_kind": "GEOMETRY_SIMULATION",
+  "source_time_s": 117.0,
+  "valid_points": 43,
+  "fov_toggle": true,
+  "points_retained": true,
+  "screenshots_saved": false,
+  "blend_saved": false
+}

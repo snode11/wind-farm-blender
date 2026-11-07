@@ -62,8 +62,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('base', type=Path); parser.add_argument('refined', type=Path); parser.add_argument('output', type=Path)
     args = parser.parse_args()
-    datasets = [json.loads((p / 'processed.json').read_text()) for p in (args.base,args.refined)]
-    configs = [json.loads((p / 'run_config.json').read_text()) for p in (args.base,args.refined)]
+    datasets = [json.loads((p / 'processed.json').read_text(encoding='utf-8')) for p in (args.base,args.refined)]
+    configs = [json.loads((p / 'run_config.json').read_text(encoding='utf-8')) for p in (args.base,args.refined)]
     if any(configs[0].get(k) != configs[1].get(k) for k in ('wind_mps','duration_s','startup_discard_s','span_refined')):
         raise ValueError('temporal comparison requires matching wind, duration, startup and spatial grid')
     result = compare_grids(*datasets, configs[0]['fps'], configs[1]['fps'])

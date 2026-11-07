@@ -9,6 +9,8 @@ import traceback
 
 import bpy
 import addon_utils
+
+sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[2]
 OUT = Path(os.environ.get('WFRL_ACCEPT_OUTPUT', ROOT / 'evidence' / 'frontend_completion'))
 OUT.mkdir(parents=True, exist_ok=True)
@@ -45,7 +47,7 @@ def transition(name):
     stage, stage_start = name, time.monotonic()
     report['stages'].append(dict(stage=name, seconds=stage_start-started))
     print('ACCEPT_STAGE', name, round(stage_start-started, 2), flush=True)
-    (OUT / 'progress.json').write_text(json.dumps(report, indent=2, default=str))
+    (OUT / 'progress.json').write_text(json.dumps(report, indent=2, default=str), encoding='utf-8')
 
 
 def control(action):
@@ -62,7 +64,7 @@ def finish():
     report['final_status'] = runtime.get_state().run_status
     report['elapsed_seconds'] = time.monotonic() - started
     report['passed'] = not report['errors'] and stage == 'complete'
-    (OUT / 'report.json').write_text(json.dumps(report, indent=2, default=str))
+    (OUT / 'report.json').write_text(json.dumps(report, indent=2, default=str), encoding='utf-8')
     print('FRONTEND_ACCEPTANCE', report['passed'], flush=True)
     runtime.shutdown()
     bpy.ops.wm.quit_blender()
@@ -77,7 +79,7 @@ for screen in bpy.data.screens:
 
 
 def tick():
-    global last_log, last_step, pause_step, run_id, session_id, export_attempt
+    global last_log, last_step, pause_step, run_id, session_id
     try:
         now = time.monotonic()
         ui = runtime.get_state()
@@ -152,7 +154,7 @@ def tick():
             assert bpy.ops.wfrl.export_history(filepath=str(OUT/'interactive-history.json')) == {'FINISHED'}
             transition('export')
         elif stage == 'export' and charts.export_job.poll() == 'COMPLETE':
-            data = json.loads((OUT/'interactive-history.json').read_text())
+            data = json.loads((OUT/'interactive-history.json').read_text(encoding='utf-8'))
             report['checks']['history_export'] = dict(schema=data['schema_version'], bytes=(OUT/'interactive-history.json').stat().st_size)
             assert bpy.ops.wfrl.export_history(filepath='/dev/null/history.json') == {'FINISHED'}
             transition('export_failure')

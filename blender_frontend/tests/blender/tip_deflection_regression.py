@@ -38,7 +38,9 @@ assert view is not None and len(view.objects) == 7
 scene.wfrl_deflection_visible = True
 initial_apex = farm_flex._ACTIVE.blades[0][0].data.vertices[-1].co.copy()
 saved_errors, interpolated_errors, source_errors, mesh_transport_errors = [], [], [], []
-for frame in sorted(set([1, 2, 3, 4, 901, 1801, 3600, 3601] + list(range(1, 3602, 90)))):
+frames = (range(1, scene.frame_end + 1) if os.environ.get('WFRL_TIP_FULL_TIMELINE') == '1'
+          else sorted(set([1, 2, 3, 4, 901, 1801, 3600, 3601] + list(range(1, 3602, 90)))))
+for frame in frames:
     scene.frame_set(frame)
     for b, row in view.rows.items():
         obj = farm_flex._ACTIVE.blades[b - 1][0]
@@ -70,6 +72,18 @@ mesh_transport_max = np.max(np.abs(mesh_transport_errors), axis=0)
 assert max(mesh_transport_max) < .00005, mesh_transport_max
 scene.frame_set(1)
 np.testing.assert_array_equal(initial_apex, farm_flex._ACTIVE.blades[0][0].data.vertices[-1].co)
+unchanged = {b: {key: view.rows[b][key].copy() for key in ('actual', 'reference', 'components')}
+             for b in view.rows}
+original_error = {b: view.rows[b]['error'].copy() for b in view.rows}
+simulation = view.data['simulation'].copy()
+view.data['simulation'] += 100
+scene.frame_set(1)
+for b in view.rows:
+    for key, value in unchanged[b].items():
+        np.testing.assert_array_equal(view.rows[b][key], value)
+    np.testing.assert_allclose(view.rows[b]['error'], original_error[b] - 100, rtol=0, atol=1e-12)
+view.data['simulation'] = simulation
+scene.frame_set(1)
 for b in ('1', '2', '3'):
     scene.wfrl_deflection_blade = b
     np.testing.assert_allclose(view.markers['Actual'].location, view.rows[int(b)]['actual'], atol=1e-5)
@@ -120,6 +134,8 @@ report = dict(addon_module=MODULE, addon_file=ADDON_FILE,
               independent_source_max_error_m=source_max.tolist(), mesh_transport_max_error_m=mesh_transport_max.tolist(),
               saved_gate_threshold_m=.0002, interpolated_gate_threshold_m=.005,
               physical_gate='PASS' if max(saved_max) < .0002 and max(interpolated_max) < .005 else 'FAILED_GATE',
+              sampled_frames=len(frames), saved_tip_samples=len(saved_errors),
+              interpolated_tip_samples=len(interpolated_errors), channel_independence=True,
               software_checks='PASS', switching=True, seeking=True, hidden_t1=True, fixed_clock=True, reload=True)
 wfrl_blender.unregister()
 assert farm_flex._ACTIVE is None
@@ -128,5 +144,6 @@ if os.environ.get('WFRL_TEST_OUTPUT'):
     Path(os.environ['WFRL_TEST_OUTPUT']).write_text(json.dumps(report, indent=2))
 print('TIP_DEFLECTION_RESULT', json.dumps(report), flush=True)
 assert max(saved_max) < .0002, saved_max
+assert max(source_max) < .0002, source_max
 assert max(interpolated_max) < .005, interpolated_max
 print('TIP_DEFLECTION_PASS', json.dumps(report))

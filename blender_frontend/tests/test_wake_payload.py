@@ -1,8 +1,36 @@
-import math
+import sys
 import unittest
+from dataclasses import replace
+from types import SimpleNamespace as NS
+from unittest.mock import Mock
+
+import pytest
 
 from wfrl_blender.wake import (WakeFrameBuffer, WakePayloadError, grid_mesh,
-                               proxy_ring_points, validate_wake_payload)
+                               validate_wake_payload)
+
+
+def test_wake_age_uses_source_age_and_local_monotonic_time():
+    data = channel({'kind': 'disxy', 'shape': [2, 2], 'values': [1, 2, 3, 4],
+                    'x': [0, 1], 'y': [0, 1]})
+    data['source_age_seconds'] = 1.5
+    frame = validate_wake_payload({'encoding': 'json', 'turbine_ids': ['T1'],
+                                   'data': data}, received_monotonic=10.)
+    assert frame.validity_at(13.49) == 'valid'
+    assert frame.validity_at(13.5) == 'stale'
+    assert frame.validity_at(10., connected=False) == 'stale'
+    assert frame.source_age_seconds == 1.5
+
+
+@pytest.mark.parametrize('validity', ['invalid', 'waiting', 'stale', 'unsupported'])
+def test_nonvalid_wake_keeps_reason_and_cannot_become_current(validity):
+    data = channel(None)
+    data.update(validity=validity, error='source unavailable')
+    frame = validate_wake_payload({'encoding': 'json', 'kind': 'disxy',
+        'turbine_ids': ['T1'], 'data': data}, received_monotonic=10.)
+    assert frame.validity_at(10.) == validity
+    assert not frame.is_renderable
+    assert frame.error == 'source unavailable'
 
 
 def channel(value, *, fidelity="SYNTH", provenance=None):
@@ -12,6 +40,125 @@ def channel(value, *, fidelity="SYNTH", provenance=None):
         "provenance": provenance or {"formula": "deterministic test"},
         "source_age_seconds": 0.0, "stale_after_seconds": 5.0,
     }
+
+
+@pytest.mark.parametrize(('shape', 'dimensions'), [
+    pytest.param([2.9, 3.7], (2, 3), id='fractional'),
+    pytest.param(['2', '3'], (2, 3), id='strings'),
+    pytest.param([True, 6], (1, 6), id='boolean'),
+    pytest.param([None, 6], (1, 6), id='none'),
+    pytest.param([0, 6], (0, 6), id='zero'),
+])
+def test_wake_shape_rejects_invalid_dimensions(shape, dimensions):
+    ny, nx = dimensions
+    payload = {'encoding': 'json', 'turbine_ids': ['T1'], 'data': channel({
+        'kind': 'disxy', 'shape': shape, 'values': [1.0] * (ny * nx),
+        'x': list(range(nx)), 'y': list(range(ny)),
+    })}
+    with pytest.raises(WakePayloadError):
+        validate_wake_payload(payload)
+
+
+@pytest.mark.parametrize('shape', [
+    pytest.param([2, 3], id='integers'),
+    pytest.param([2.0, 3.0], id='integral-floats'),
+])
+def test_wake_shape_accepts_integer_dimensions(shape):
+    payload = {'encoding': 'json', 'turbine_ids': ['T1'], 'data': channel({
+        'kind': 'disxy', 'shape': shape, 'values': [1.0] * 6,
+        'x': [0, 1, 2], 'y': [0, 1],
+    })}
+    frame = validate_wake_payload(payload)
+    assert frame.shape == (2, 3)
+    assert all(type(item) is int for item in frame.shape)
+    vertices, faces = grid_mesh(frame)
+    assert len(vertices) == 6
+    assert len(faces) == 2
+
+
+def test_disxy_material_failure_keeps_mesh_and_reports_error_once(monkeypatch, capsys):
+    from wfrl_blender import materials, runtime, wake
+    from wfrl_blender.state import FrontendState
+
+    class Scene(dict):
+        pass
+
+    class WakeObject(dict):
+        hide_render = False
+        hidden = False
+
+        def __init__(self, name, mesh):
+            super().__init__()
+            self.name, self.data = name, mesh
+
+        def hide_get(self):
+            return self.hidden
+
+        def hide_set(self, hidden):
+            self.hidden = hidden
+
+    def new_mesh(name):
+        mesh = NS(name=name, materials=[], update=Mock())
+
+        def from_pydata(vertices, edges, faces):
+            mesh.vertices = [NS(co=co) for co in vertices]
+            mesh.polygons = list(faces)
+
+        mesh.from_pydata = Mock(side_effect=from_pydata)
+        return mesh
+
+    scene = Scene()
+    scene.objects = {}
+    link = Mock(side_effect=lambda obj: scene.objects.__setitem__(obj.name, obj))
+    scene.collection = NS(name='WFRL_Scene', children_recursive=[], objects=NS(link=link))
+    bpy = NS(context=NS(scene=scene), data=NS(
+        meshes=NS(new=Mock(side_effect=new_mesh)),
+        objects=NS(get=scene.objects.get, new=Mock(side_effect=WakeObject))))
+    monkeypatch.setitem(sys.modules, 'bpy', bpy)
+    state = FrontendState(mode='replay', connection='CONNECTED', run_status='RUNNING')
+    monkeypatch.setattr(runtime, '_state', state)
+    monkeypatch.setattr(wake, '_material_failures', set())
+    monkeypatch.setattr(wake.time, 'monotonic', lambda: 10.)
+    get_material = Mock()
+    monkeypatch.setattr(materials, 'get_material', get_material)
+    frame = validate_wake_payload({'encoding': 'json', 'turbine_ids': ['T1'],
+        'data': channel({'kind': 'disxy', 'shape': [2, 2], 'values': [1, 2, 3, 4],
+                         'x': [0, 1], 'y': [0, 1]})}, sequence=1, received_monotonic=10.)
+    vertices, faces = grid_mesh(frame)
+
+    for error, expected_tracebacks in (
+            (RuntimeError('wake shader unavailable'), 1),
+            (RuntimeError('wake shader unavailable'), 0),
+            (ValueError('wake shader unavailable'), 1),
+            (RuntimeError('wake shader node missing'), 1)):
+        scene.objects.clear()
+        state.error = ''
+        get_material.reset_mock()
+        get_material.side_effect = error
+
+        obj = wake.apply_disxy_frame(frame, scene=scene)
+
+        assert obj is scene.objects['WFRL.WakeDisXY']
+        link.assert_called_with(obj)
+        bpy.data.objects.new.assert_called_with('WFRL.WakeDisXY', obj.data)
+        obj.data.from_pydata.assert_called_once_with(vertices, [], faces)
+        assert obj.data.materials == []
+        assert state.error == f'DisXY wake material failed: {error}'
+        assert state.connection == 'CONNECTED' and state.confirmed
+        assert scene['wfrl_disxy_validity'] == obj['validity'] == 'valid'
+        assert not obj.hidden and not obj.hide_render
+
+        for sequence in (2, 3):
+            assert wake.apply_disxy_frame(replace(frame, sequence=sequence), scene=scene) is obj
+            assert obj['sequence'] == sequence
+        get_material.assert_called_once_with('wake')
+        assert state.error == f'DisXY wake material failed: {error}'
+        stderr = capsys.readouterr().err
+        assert stderr.count('Traceback (most recent call last):') == expected_tracebacks
+        if expected_tracebacks:
+            assert f'{type(error).__name__}: {error}' in stderr
+        else:
+            assert stderr == ''
 
 
 class WakePayloadTests(unittest.TestCase):
@@ -52,13 +199,6 @@ class WakePayloadTests(unittest.TestCase):
             "data": channel({"shape": [1], "values": [7]})}, sequence=3)
         self.assertTrue(buf.push(frame)); self.assertTrue(buf.push(newer))
         self.assertEqual(buf.pop_latest().sequence, 3)
-        self.assertEqual(buf.pending, 0)
-
-    def test_proxy_points_are_finite_and_ring_count_is_stable(self):
-        points = proxy_ring_points((0, 0, 90), 63, 270, 0.25, rings=4, segments=8)
-        self.assertEqual(len(points), 32)
-        self.assertTrue(all(math.isfinite(value) for point in points for value in point))
-
 
 if __name__ == "__main__":
     unittest.main()

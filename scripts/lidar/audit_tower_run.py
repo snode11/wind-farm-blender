@@ -9,10 +9,10 @@ from scripts.experiments.calib_blade_flex import read_fast_out
 
 def audit(probe, log, output):
     probe,log,output=map(Path,(probe,log,output))
-    report=json.loads(probe.read_text())
+    report=json.loads(probe.read_text(encoding='utf-8'))
     if report['status']!='CONTROL_PROBE_COMPLETE' or report.get('tower')!='flexible':
         raise ValueError('Expected completed flexible tower run')
-    if 'FAST.Farm terminated normally.' not in log.read_text():
+    if 'FAST.Farm terminated normally.' not in log.read_text(encoding='utf-8'):
         raise ValueError('Solver did not terminate normally')
     farm=Path(report['case_dir'])/'FarmInputs'
     report['tower_checks']=[];report['source_outputs']={}
@@ -32,14 +32,14 @@ def audit(probe, log, output):
         report['tower_checks'].append(record)
         report['source_outputs'][tid]=hashlib.sha256(path.read_bytes()).hexdigest()
     for f in farm.glob('*ElastoDyn*.dat'):
-        fields={words[1]:words[0] for line in f.read_text().splitlines() if len(words:=line.split())>=2}
+        fields={words[1]:words[0] for line in f.read_text(encoding='utf-8').splitlines() if len(words:=line.split())>=2}
         for key in ('TwFADOF1','TwFADOF2','TwSSDOF1','TwSSDOF2'):
             if fields[key].lower()!='true': raise ValueError('Tower mode disabled: '+key)
     report['input_hashes']={str(f.relative_to(farm)):hashlib.sha256(f.read_bytes()).hexdigest()
                             for f in farm.iterdir() if f.is_file() and f.suffix in ('.fst','.fstf','.dat','.bts')}
     report.update(original_probe_sha256=hashlib.sha256(probe.read_bytes()).hexdigest(),
         solver_log_sha256=hashlib.sha256(log.read_bytes()).hexdigest(),segment=dict(start_s=117.,end_s=177.))
-    output.write_text(json.dumps(report,indent=2)+'\n')
+    output.write_text(json.dumps(report,indent=2)+'\n', encoding='utf-8')
     print(json.dumps(report['tower_checks'],indent=2))
 
 

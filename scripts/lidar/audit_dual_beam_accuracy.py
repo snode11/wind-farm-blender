@@ -148,7 +148,7 @@ def main():
         source=SourceGeometry(path,tid)
         accuracy=accuracy_audit(source,data,overlay['config'])
         sampling=sample_audit(data,source.manifest['source_fps'])
-        payload=json.loads((path/'data.json').read_text())[tid]
+        payload=json.loads((path/'data.json').read_text(encoding='utf-8'))[tid]
         reader=DualBeamReader(ReplayReader(SimpleNamespace(manifest={**source.manifest,'turbine_id':tid},**payload)),overlay,tid)
         durations=[]
         for t in source.times[::12]:
@@ -164,7 +164,7 @@ def main():
         'reason':'A deformation perturbation proportional to s^2(s-s2)(s-s3) preserves the root displacement/slope and both measured locations but changes the tip. Surface-to-axis mapping and curvature require additional validated information.',
         'not_available':['manufacturer full inversion algorithm','unit emitter spacing and calibrated directions','synchronized raw echo timestamps and blade association','independent validation runs and physical measurements'],
         'disallowed_shortcuts':['bias subtraction fitted to this segment','truth tip or terminal transforms fed to estimator','40 Hz interpolation labeled 20 kHz','DP averages labeled simultaneous hits']}
-    (args.output/'audit.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
+    (args.output/'audit.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n', encoding='utf-8')
     print(args.output/'audit.json')
 
 

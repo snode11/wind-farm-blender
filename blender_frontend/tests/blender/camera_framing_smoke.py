@@ -5,7 +5,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import bpy
 from mathutils import Vector
 from bpy_extras.object_utils import world_to_camera_view
-import wfrl_blender
 
 from wfrl_blender.scene_model import SceneDTO
 from wfrl_blender.scene_builder import build_scene

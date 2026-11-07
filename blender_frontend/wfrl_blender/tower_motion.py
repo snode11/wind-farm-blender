@@ -18,7 +18,9 @@ def read_tower(path, manifest, times):
         raise ValueError('Tower motion integrity mismatch')
     with np.load(Path(path) / name, allow_pickle=False) as archive:
         data = {key: archive[key].copy() for key in archive.files}
-    n = len(times); turbines = len(manifest['turbine_ids']); z = data['heights']
+    n = len(times)
+    turbines = len(manifest['turbine_ids'])
+    z = data['heights']
     if (z.ndim != 1 or len(z) < 2 or np.any(np.diff(z) <= 0)
             or not np.allclose(z[[0,-1]],[0,87.6],atol=1e-6,rtol=0)
             or not np.array_equal(data['times'], times)

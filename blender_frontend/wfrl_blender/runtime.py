@@ -3,10 +3,14 @@ from .state import FrontendState
 from .animation import KinematicState
 from .training import TrainingDashboard
 from .live_scene import snapshot_scene, build_live_scene
-from .wake import WakeFrameBuffer, validate_wake_payload, apply_disxy_frame
+from .wake import WakeFrameBuffer, validate_wake_payload, apply_disxy_frame, set_disxy_validity
 from collections import deque
+import logging
 import time
+import traceback
 from . import performance
+
+_LOG = logging.getLogger(__name__)
 
 # Blender reloads submodules too. Tear down the old timer before rebinding its
 # name, while retaining the last session identity and uncertainty for reconnect.
@@ -19,12 +23,19 @@ _health = None
 kinematics = KinematicState()
 training_dashboard = TrainingDashboard()
 safety_events = deque(globals().get('safety_events', []), maxlen=256)
+backend_events = deque(globals().get('backend_events', []), maxlen=256)
+forgotten_connections = deque(globals().get('forgotten_connections', []), maxlen=16)
 _desired_mode = globals().get('_desired_mode', _state.mode)
 _live_scene = None
 _pending_step = None
 _pending_command = None
+_pending_command_sequence = None
 _pending_lifecycle_sequence = None
 _last_tick = None
+_last_async_display_state = None
+_last_display_state = None
+_backend_scene = None
+_tick_failures = set()
 health_results = globals().get('health_results', {})
 wake_buffer = globals().get('wake_buffer', WakeFrameBuffer())
 latest_wake = globals().get('latest_wake')
@@ -33,9 +44,14 @@ channel_states = {}
 channel_table = list(globals().get('channel_table', []))
 
 
+def _clear_pending_command():
+    global _pending_command, _pending_command_sequence, _pending_step, _pending_lifecycle_sequence
+    _pending_command = _pending_command_sequence = _pending_step = _pending_lifecycle_sequence = None
+
+
 def get_state():
     import bpy
-    if _state.connection == 'LOCAL DEMO' and getattr(bpy.context, 'scene', None):
+    if _state.connection == 'LOCAL DEMO' and bpy.context.scene is not None:
         _state.run_status = bpy.context.scene.get('wfrl_run_status', 'READY')
     return _state
 
@@ -43,8 +59,15 @@ def get_state():
 def manual_display_active():
     import sys
     bpy = sys.modules.get("bpy")
-    scene = getattr(getattr(bpy, "context", None), "scene", None)
-    return bool(scene is not None and hasattr(scene, "get") and scene.get("wfrl_scene_kind") == "manual")
+    if bpy is None:
+        return False
+    scene = bpy.context.scene
+    return scene is not None and scene.get("wfrl_scene_kind") == "manual"
+
+
+def has_backend_session():
+    """A claimed session retains its transport counters until synchronization."""
+    return bool(_state.session_id or (_client.session_id if _client is not None else None))
 
 
 def configuration_editable(scene=None):
@@ -53,32 +76,39 @@ def configuration_editable(scene=None):
 
 
 def select_mode(mode):
-    global _state, _client, kinematics, _pending_command, _pending_lifecycle_sequence, _desired_mode, _live_scene, latest_wake
+    global _state, _client, kinematics, _desired_mode, _live_scene, latest_wake, _backend_scene
     from .state import MODES
     if mode not in MODES or not configuration_editable():
         raise ValueError('Stop the active session before changing mode')
+    import bpy
+    from .scene_builder import validate_scene_build
+    scene = bpy.context.scene
+    collection = validate_scene_build()
+    _clear_backend_wake()
     if _client:
         _client.close()
         _client = None
     kinematics = KinematicState()
     _desired_mode = mode
     _live_scene = None
+    _backend_scene = None
     wake_buffer.pop_latest()
     latest_wake = None
-    _pending_command = None
-    _pending_lifecycle_sequence = None
+    _clear_pending_command()
     safety_events.clear()
+    backend_events.clear()
     from . import charts
-    charts.clear()
+    charts.clear(scene=scene)
     training_dashboard.reset()
     workflow_scene.clear()
     channel_states.clear()
     channel_table.clear()
     if mode != 'demo':
-        import bpy
-        from . import _cancel_playback
-        _cancel_playback(bpy.context.scene)
-        for obj in bpy.data.objects:
+        from . import playback
+        playback.cancel(scene)
+        for obj in collection.all_objects if collection is not None else ():
+            if scene.objects.get(obj.name) != obj:
+                continue
             if obj.name.startswith('WFRL.Turbine.'):
                 obj.animation_data_clear()
             if obj.name.startswith(('WFRL.WakeProxy.', 'WFRL.Fixture.')):
@@ -89,10 +119,8 @@ def select_mode(mode):
         from . import load_demo_scene
         load_demo_scene()
     else:
-        import bpy
         from . import farm_flex, clearance_replay, tip_tracking
-        farm_flex.detach()
-        scene = getattr(bpy.context, 'scene', None)
+        farm_flex.detach(scene)
         if scene is not None:
             tip_tracking.disable(scene, 'backend_mode')
             clearance_replay.clear(scene)
@@ -100,7 +128,7 @@ def select_mode(mode):
 
 
 def connect(port):
-    global _client, _state
+    global _client, _state, _backend_scene, _live_scene, kinematics, _last_tick
     if manual_display_active():
         raise ValueError("请先返回原场景，再连接后端")
     from .transport import TransportClient
@@ -117,37 +145,101 @@ def connect(port):
         _client = TransportClient(port=port)
     import bpy
     from . import backend_inflow
-    if bpy.context.scene is not None:
-        bpy.context.scene[backend_inflow.KEY] = "[]"
-        bpy.context.scene["wfrl_cinematic_inflow_valid"] = False
+    try:
+        scene = backend_scene()
+    except ValueError:
+        scene = None
+    if scene is None:
+        _backend_scene = bpy.context.scene
+        _live_scene = None
+        kinematics = KinematicState()
+        _last_tick = None
+        _clear_backend_wake()
+        scene = backend_scene()
+    if scene is not None:
+        scene[backend_inflow.KEY] = "[]"
+        scene["wfrl_cinematic_inflow_valid"] = False
     _client.connect()
 
 
 def disconnect(force=False):
+    global kinematics, _live_scene, _last_tick, latest_wake, _backend_scene
     if _client:
         _client.close()
+    _clear_backend_wake('stale')
     if force or get_state().connection != 'LOCAL DEMO':
         _state.disconnect('Disconnected; backend state is unconfirmed')
         if not force and not _state.session_id and not (_client and _client.session_id):
             _state.confirmed = True
+    if force:
+        kinematics = KinematicState()
+        _live_scene = None
+        _backend_scene = None
+        _last_tick = None
+        _clear_pending_command()
+        wake_buffer.pop_latest()
+        latest_wake = None
+
+
+def can_connect_new_backend():
+    return (not manual_display_active() and get_state().connection == 'DISCONNECTED'
+            and has_backend_session() and progress() not in {'Connecting', 'Awaiting handshake'})
+
+
+def connect_new_backend(port, *, confirmed=False):
+    """Require explicit consent to abandon local ownership of an unknown backend."""
+    global _client, _state, kinematics
+    global _live_scene, _backend_scene, latest_wake
+    if confirmed is not True:
+        raise ValueError('Explicit confirmation is required; forgetting this connection does not stop the previous backend')
+    if not can_connect_new_backend():
+        raise ValueError('Disconnect the previous backend before connecting to a new identity')
+    from .transport import TransportClient
+    replacement = TransportClient(port=port)
+    _clear_backend_wake()
+    forgotten_connections.append(dict(session_id=_state.session_id or _client.session_id,
+                                     run_id=_state.run_id, run_status=_state.run_status, confirmed=False))
+    if _client:
+        _client.close()
+        _client.forget_session(confirmed=True)
+    _client = replacement
+    _state = FrontendState(mode=_desired_mode, connection='DISCONNECTED', confirmed=False)
+    kinematics = KinematicState()
+    _clear_pending_command()
+    _live_scene = _backend_scene = None
+    wake_buffer.pop_latest()
+    latest_wake = None
+    safety_events.clear()
+    backend_events.clear()
+    training_dashboard.reset()
+    from . import charts
+    charts.clear(scene=_backend_scene)
+    workflow_scene.clear()
+    channel_states.clear()
+    channel_table.clear()
+    connect(port)
 
 
 def enter_local_demo():
-    global _client, _state, kinematics, _pending_command, _pending_lifecycle_sequence, _live_scene, _desired_mode, latest_wake
+    global _client, _state, kinematics, _live_scene, _desired_mode, latest_wake, _backend_scene
+    if has_backend_session() and not configuration_editable():
+        raise ValueError('Confirm the previous backend state before entering local Demo')
+    _clear_backend_wake()
     if _client:
         _client.close()
     _client = None
     _state = FrontendState(mode='demo', connection='LOCAL DEMO')
     _desired_mode = 'demo'
     kinematics = KinematicState()
-    _pending_command = None
-    _pending_lifecycle_sequence = None
+    _clear_pending_command()
     _live_scene = None
+    _backend_scene = None
     wake_buffer.pop_latest()
     latest_wake = None
     safety_events.clear()
+    backend_events.clear()
     from . import charts
-    charts.clear()
+    charts.clear(scene=_backend_scene)
     training_dashboard.reset()
     workflow_scene.clear()
     channel_states.clear()
@@ -162,7 +254,7 @@ def check_environment(preferences):
         _health.cancel()
     _health = HealthChecker()
     health_results.clear()
-    config = HealthConfig(**{key: getattr(preferences, key, '') for key in
+    config = HealthConfig(**{key: getattr(preferences, key) for key in
                              ('project_dir', 'backend_python', 'mpi_path', 'fastfarm_path')})
     _health.start(config, blender_version=bpy.app.version)
 
@@ -172,38 +264,42 @@ def desired_mode():
 
 
 def training_stats_negotiated():
-    return bool(_client and 'training_stats_v1' in getattr(_client, 'negotiated_capabilities', set()))
+    return bool(_client and 'training_stats_v1' in _client.negotiated_capabilities)
 
 
 def allows_command(action):
     ui = get_state()
-    if ui.connection != 'CONNECTED' or _pending_command:
+    if ui.connection != 'CONNECTED':
         return False
-    if action == 'reset':
-        return ui.confirmed and ui.run_status in {'READY', 'FAILED', 'STOPPED'}
+    if _pending_command and not (action == 'stop' and _pending_command in {'pause', 'step'}):
+        return False
+    if _pending_command and (not _client or ui.session_id != _client.session_id):
+        return False
     return ui.allows(action)
 
 
 def send_command(action, arguments=None):
-    global _pending_command, _pending_step, _pending_lifecycle_sequence
+    global _pending_command, _pending_command_sequence, _pending_step, _pending_lifecycle_sequence
     if not allows_command(action):
         raise ValueError('Control unavailable until backend state is confirmed')
     arguments = dict(arguments or {})
     if action == 'start':
         arguments['mode'] = _desired_mode
+    sequence = _client.next_sequence
     _client.send({'protocol_version': 1, 'type': 'command',
-                  'session_id': _client.session_id, 'sequence': _client._last_outbound + 1,
+                  'session_id': _client.session_id, 'sequence': sequence,
                   'payload': {'command': 'run.' + action, 'arguments': arguments or {}}})
     if _client.last_error:
         raise ValueError(_client.last_error)
     _pending_command = action
+    _pending_command_sequence = sequence
     _pending_step = kinematics.snapshot["step"] if kinematics.snapshot else -1
     _pending_lifecycle_sequence = None
 
 
 def send_workflow_command(name, arguments):
     """Enqueue configuration; only backend acknowledgements update displayed state."""
-    global _pending_command
+    global _pending_command, _pending_command_sequence
     if name not in {'scene.load', 'channel.set'}:
         raise ValueError('Unknown workflow command')
     ui = get_state()
@@ -211,147 +307,396 @@ def send_workflow_command(name, arguments):
         raise ValueError('Wait for a confirmed backend connection')
     if name == 'scene.load' and not configuration_editable():
         raise ValueError('Stop the active session before changing configuration')
+    sequence = _client.next_sequence
     _client.send({'protocol_version': 1, 'type': 'command',
-                  'session_id': _client.session_id, 'sequence': _client.next_sequence,
+                  'session_id': _client.session_id, 'sequence': sequence,
                   'payload': {'command': name, 'arguments': dict(arguments)}})
     if _client.last_error:
         raise ValueError(_client.last_error)
     _pending_command = name
+    _pending_command_sequence = sequence
 
 
 @performance.timed("runtime.tick")
 def tick():
+    """Keep the timer alive and report backend or local polling errors."""
+    try:
+        return _tick()
+    except Exception as exc:
+        error = f'Runtime polling failed: {exc}'
+        if _client is not None or _state.connection not in {'LOCAL DEMO', 'OFFLINE RESULTS'}:
+            _state.disconnect(error + '; backend state is unconfirmed')
+        else:
+            _state.error = error
+        failure = (type(exc), str(exc))
+        if failure not in _tick_failures:
+            _tick_failures.add(failure)
+            try:
+                traceback.print_exc()
+            except (OSError, ValueError) as diagnostic:
+                _state.error += f'; traceback unavailable: {diagnostic}'
+        try:
+            if _client is not None:
+                _client.close()
+        except Exception:
+            _LOG.exception('Runtime polling failure: transport cleanup failed')
+        try:
+            _clear_backend_wake('stale')
+        except Exception:
+            _LOG.exception('Runtime polling failure: wake invalidation failed')
+        try:
+            _redraw_viewports()
+        except Exception:
+            _LOG.exception('Runtime polling failure: viewport redraw failed')
+        return 0.05
+
+
+def _redraw_viewports(*, scenes=None):
+    import bpy
+    from . import viewport
+    targets = tuple(scenes) if scenes is not None else (bpy.context.scene,)
+    performance.count("runtime.redraw_requests", viewport.tag_redraw(targets))
+
+
+def _async_display_state(job, context):
+    """Track labels published by export and window-recording callbacks."""
+    scenes = (window.scene for window in context.window_manager.windows)
+    return (job.status, job.error, job.path,
+            tuple((_scene_key(scene), scene.get('wfrl_history_export_status'), scene.get('wfrl_capture_status'))
+                  for scene in scenes if scene is not None))
+
+
+def _scene_key(scene):
+    return scene.as_pointer() if hasattr(scene, 'as_pointer') else id(scene)
+
+
+def backend_scene():
+    """Return the bound live scene; a deleted owner is never replaced implicitly."""
+    import bpy
+    scene = _backend_scene
+    if scene is None:
+        return None
+    try:
+        key = _scene_key(scene)
+        scenes = getattr(getattr(bpy, 'data', None), 'scenes', None)
+        if not key or (scenes is not None and not any(_scene_key(item) == key for item in scenes)):
+            raise ValueError('Backend scene is unavailable; reconnect with an explicitly selected scene')
+    except ReferenceError as exc:
+        raise ValueError('Backend scene was removed or reloaded; data application is stopped') from exc
+    return scene
+
+
+def _set_channel_table(value):
+    """Publish complete sensor rows only after validating the whole table."""
+    rows = [] if value is None else value
+    if not isinstance(rows, (list, tuple)) or any(
+            not isinstance(row, (list, tuple)) or len(row) != 5
+            or any(not isinstance(item, str) or not item.strip() for item in row[:3])
+            or type(row[3]) is not bool for row in rows):
+        raise ValueError('Invalid backend channel table')
+    checked = [list(row) for row in rows]
+    channel_table.clear()
+    channel_table.extend(checked)
+
+
+def _build_backend_scene(dto):
+    global _backend_scene
+    import bpy
+    scene = backend_scene()
+    if scene is None:
+        scene = bpy.context.scene
+        _backend_scene = scene
+    if scene is None or scene == bpy.context.scene:
+        build_live_scene(dto)
+    else:
+        with bpy.context.temp_override(scene=scene, view_layer=scene.view_layers[0],
+                                       collection=scene.collection):
+            build_live_scene(dto)
+
+
+def _clear_backend_wake(validity='waiting'):
+    global latest_wake
+    wake_buffer.pop_latest()
+    latest_wake = None
+    try:
+        scene = backend_scene()
+    except ValueError:
+        return
+    if scene is not None:
+        scene['wfrl_wake_validity'] = validity
+        set_disxy_validity(scene, validity)
+
+
+def _display_state():
+    """Observe displayed values and expiry boundaries without continuous redraws."""
+    connected = _state.connection == 'CONNECTED' and _state.confirmed
+    snapshot = kinematics.snapshot
+    validity = []
+    if snapshot:
+        groups = [snapshot.get('farm', {})]
+        groups.extend(t['channels'] for t in snapshot.get('turbines', ()))
+        validity = [kinematics.validity(record, connected)
+                    for channels in groups for record in channels.values()]
+    training = ()
+    if training_stats_negotiated():
+        phase = training_dashboard.phase()
+        training = (training_dashboard.last_sequence, phase['validity'],
+                    int(phase['age']) if phase['age'] is not None else None,
+                    tuple((key, record['validity'], int(record['age']) if 'age' in record else None)
+                          for key in training_dashboard.metrics
+                          for record in (training_dashboard.metric(key),)))
+    return (_state.connection, _state.run_status, _state.confirmed, _state.error,
+            _state.mode, _desired_mode, _pending_command,
+            _client.progress if _client is not None else None,
+            _client.last_error if _client is not None else None,
+            id(snapshot), tuple(validity), tuple(kinematics.rotor_angles.items()),
+            training, len(safety_events),
+            (latest_wake.sequence, latest_wake.validity_at(time.monotonic(), connected=connected))
+            if latest_wake is not None else None)
+
+
+_ACTIVE_RUN_STATUSES = frozenset({'STARTING', 'RUNNING', 'PAUSED', 'DRAINING'})
+_TERMINAL_RUN_STATUSES = frozenset({'DRAINING', 'STOPPED', 'FAILED'})
+
+
+class _Batch:
+    """The latest snapshot of one poll that still belongs to the current run."""
+    __slots__ = ('snapshot',)
+
+    def __init__(self):
+        self.snapshot = None
+
+
+def _apply_messages(messages):
+    """Apply one poll in arrival order and return its snapshot for the current run."""
+    batch = _Batch()
+    for message in messages:
+        if _apply_message(message, batch):
+            break
+    return batch.snapshot
+
+
+def _apply_message(message, batch):
+    """Apply one backend message; True abandons the rest of the batch."""
+    kind, payload = message['type'], message['payload']
+    if kind == 'hello_ack' and _state.session_id != message['session_id']:
+        backend_events.clear()
+        _clear_backend_wake()
+    if kind in {'lifecycle', 'safety_event', 'error'}:
+        backend_events.append(message)
+    if kind == 'lifecycle' and not _state.lifecycle(
+            message['session_id'], payload['run_status'], payload['mode'], payload['capabilities'],
+            state_revision=payload.get('state_revision'),
+            cleanup_confirmed=payload.get('cleanup_confirmed'),
+            worker_alive=payload.get('worker_alive')):
+        return False
+    if kind in {'hello_ack', 'lifecycle'}:
+        _apply_session_metadata(payload, batch)
+    handler = _MESSAGE_HANDLERS.get(kind)
+    return bool(handler is not None and handler(message, payload, batch))
+
+
+def _apply_session_metadata(payload, batch):
+    """Run, scene and channel metadata carried by handshake and lifecycle frames."""
+    global kinematics, _live_scene
+    if 'run_id' in payload and payload['run_id'] != _state.run_id:
+        _state.run_id = payload['run_id']
+        training_dashboard.reset(_state.run_id)
+        kinematics = KinematicState()
+        _clear_backend_wake()
+        # A snapshot earlier in this batch belongs to the previous run.
+        batch.snapshot = None
+        from . import charts
+        charts.clear(_state.run_id, scene=_backend_scene)
+    if 'scene' in payload:
+        workflow_scene.clear()
+        workflow_scene.update(payload['scene'] or {})
+        # scene.load is acknowledged before the first training snapshot. Build
+        # the authored wind farm immediately so the viewport does not remain on
+        # Blender's default cube.
+        if payload.get('scene'):
+            from .scene_model import SceneDTO
+            loaded_scene = SceneDTO.from_mapping(payload['scene'])
+            if _live_scene is None or loaded_scene.geometry_key() != _live_scene.geometry_key():
+                _build_backend_scene(loaded_scene)
+            _live_scene = loaded_scene
+    if 'channel_states' in payload:
+        channel_states.clear()
+        channel_states.update(payload['channel_states'] or {})
+    if 'channel_table' in payload:
+        _set_channel_table(payload['channel_table'])
+
+
+def _belongs_to_run(payload):
+    return _state.run_id is None or payload.get('run_id', _state.run_id) == _state.run_id
+
+
+def _on_hello_ack(message, payload, batch):
+    global kinematics, _desired_mode
+    _clear_pending_command()
+    if _state.session_id != message['session_id']:
+        kinematics = KinematicState()
+        safety_events.clear()
+        from . import charts
+        charts.clear(scene=_backend_scene)
+    _state.synchronize(message['session_id'], payload['run_status'],
+                       payload['mode'], payload['capabilities'],
+                       state_revision=payload.get('state_revision'),
+                       cleanup_confirmed=payload.get('cleanup_confirmed'),
+                       worker_alive=payload.get('worker_alive'))
+    if payload['run_status'] in _ACTIVE_RUN_STATUSES:
+        _desired_mode = payload['mode']
+
+
+def _on_lifecycle(message, payload, batch):
+    global _pending_lifecycle_sequence, _desired_mode
+    status = payload['run_status']
+    if _pending_command == 'stop':
+        if status in _TERMINAL_RUN_STATUSES:
+            _clear_pending_command()
+    elif _pending_command not in {'pause', 'step'} or status in _TERMINAL_RUN_STATUSES:
+        _clear_pending_command()
+    elif status == 'PAUSED':
+        # Pause and step are confirmed by the first snapshot after this frame.
+        _pending_lifecycle_sequence = message['sequence']
+    if status in _ACTIVE_RUN_STATUSES:
+        _desired_mode = payload['mode']
+
+
+def _on_training_stats(message, payload, batch):
+    from . import charts
+    training_dashboard.ingest(message, negotiated=training_stats_negotiated())
+    charts.record_training(message, scene=_backend_scene)
+
+
+def _on_curve(message, payload, batch):
+    from . import charts
+    charts.record_curve(message, scene=_backend_scene)
+
+
+def _on_snapshot(message, payload, batch):
+    if not _belongs_to_run(payload):
+        return
+    if 'channel_table' in payload:
+        _set_channel_table(payload['channel_table'])
+    from . import charts
+    charts.record_snapshot(message, scene=_backend_scene)
+    batch.snapshot = message
+
+
+def _on_wake(message, payload, batch):
+    if _belongs_to_run(payload):
+        wake_buffer.push(validate_wake_payload(payload, sequence=message['sequence']))
+
+
+def _on_safety_event(message, payload, batch):
+    safety_events.append(message)
+
+
+def _on_error(message, payload, batch):
+    if payload.get('code') == 'COMMAND_REJECTED' and not payload.get('fatal'):
+        sequence = payload.get('command_sequence')
+        if sequence is None:
+            if not _pending_command:
+                return False
+            # A rejection naming no command cannot be matched to the pending one.
+            disconnect()
+            _state.error = 'Unmatched command rejection; reconnect to confirm backend state'
+            batch.snapshot = None
+            return True
+        if not _pending_command or sequence != _pending_command_sequence:
+            return False
+        _clear_pending_command()
+    _state.error = payload.get('message', 'Bridge error')
+    return False
+
+
+_MESSAGE_HANDLERS = {
+    'hello_ack': _on_hello_ack, 'lifecycle': _on_lifecycle, 'training_stats': _on_training_stats,
+    'curve': _on_curve, 'snapshot': _on_snapshot, 'wake': _on_wake,
+    'safety_event': _on_safety_event, 'error': _on_error,
+}
+
+
+def _apply_snapshot(message):
+    """Display the batch's latest snapshot and confirm a pause or step it proves."""
+    global _live_scene
+    payload = message['payload']
+    scene = snapshot_scene(payload)
+    if _live_scene is None or scene.geometry_key() != _live_scene.geometry_key():
+        _build_backend_scene(scene)
+    _live_scene = scene
+    kinematics.apply_snapshot(message)
+    _state.mode = payload['mode']
+    scene_obj = backend_scene()
+    if scene_obj is not None:
+        scene_data = payload.get('scene') or {}
+        scene_obj['wfrl_backend'] = scene_data.get('backend', 'backend')
+        from . import backend_inflow, cinematic
+        backend_inflow.record(scene_obj, payload)
+        cinematic.update(scene_obj, 0.0)
+        timestamp = payload.get('timestamp') or {}
+        scene_obj['wfrl_telemetry_time_s'] = timestamp.get('value')
+        power_values = []
+        fidelity = None
+        for turbine in payload.get('turbines', ()):
+            channel = (turbine.get('channels') or {}).get('power')
+            if channel and channel.get('validity') == 'valid':
+                power_values.append(channel.get('value'))
+                fidelity = fidelity or channel.get('fidelity')
+        scene_obj['wfrl_power_mw'] = power_values
+        scene_obj['wfrl_fidelity'] = fidelity or 'UNKNOWN'
+    crossed_lifecycle = (_pending_lifecycle_sequence is not None and
+                         message['sequence'] > _pending_lifecycle_sequence)
+    pause_confirmed = _pending_command == 'pause' and crossed_lifecycle
+    step_confirmed = (_pending_command == 'step' and crossed_lifecycle and
+                      payload['step'] > _pending_step)
+    if pause_confirmed or step_confirmed:
+        _clear_pending_command()
+
+
+def _apply_latest_wake():
+    global latest_wake
+    wake_frame = wake_buffer.pop_latest()
+    if wake_frame is None:
+        return
+    latest_wake = wake_frame
+    scene = backend_scene()
+    if scene is not None:
+        scene['wfrl_wake_source'] = wake_frame.source_label
+        scene['wfrl_wake_fidelity'] = wake_frame.fidelity
+        scene['wfrl_wake_sequence'] = wake_frame.sequence
+        scene['wfrl_wake_provenance'] = wake_frame.provenance
+        if wake_frame.kind == 'disxy' and wake_frame.is_renderable:
+            apply_disxy_frame(wake_frame, scene=scene)
+
+
+def _tick():
     """Timer work is bounded by transport budgets; health polls only queued results."""
-    global _pending_command, _pending_lifecycle_sequence, _last_tick, kinematics, _live_scene, _desired_mode, latest_wake
+    global _last_tick, _last_async_display_state, _last_display_state
     import bpy
     performance.count("runtime.timer_calls")
-    if _client is not None and manual_display_active():
+    if _client is not None and _backend_scene is None and manual_display_active():
         _last_tick = None
         return 0.05
     now = time.monotonic()
+    display_before = _last_display_state if _last_display_state is not None else _display_state()
+    first_backend_display = (_last_display_state is None
+                             and (_client is not None or kinematics.snapshot is not None))
     dt = 0.0 if _last_tick is None else max(0.0, now - _last_tick)
     _last_tick = now
     if _state.connection != 'LOCAL DEMO':
         kinematics.advance(dt, running=_state.run_status == 'RUNNING',
                            connected=_state.connection == 'CONNECTED' and _state.confirmed)
-    latest_snapshot = None
+    messages = []
     if _client:
-        messages = _client.poll()
         try:
-            for message in messages:
-                payload = message['payload']
-                if message['type'] in {'hello_ack', 'lifecycle'}:
-                    if 'run_id' in payload and payload['run_id'] != _state.run_id:
-                        _state.run_id = payload['run_id']
-                        training_dashboard.reset(_state.run_id)
-                        kinematics = KinematicState()
-                        latest_snapshot = None
-                        from . import charts
-                        charts.clear(_state.run_id)
-                    if 'scene' in payload:
-                        workflow_scene.clear(); workflow_scene.update(payload['scene'] or {})
-                        # scene.load is acknowledged before the first training
-                        # snapshot. Build the authored wind farm immediately so
-                        # the viewport does not remain on Blender's default cube.
-                        if payload.get('scene'):
-                            from .scene_model import SceneDTO
-                            loaded_scene = SceneDTO.from_mapping(payload['scene'])
-                            if _live_scene is None or loaded_scene.geometry_key() != _live_scene.geometry_key():
-                                build_live_scene(loaded_scene)
-                            _live_scene = loaded_scene
-                    if 'channel_states' in payload:
-                        channel_states.clear(); channel_states.update(payload['channel_states'] or {})
-                    if 'channel_table' in payload:
-                        channel_table.clear(); channel_table.extend(payload['channel_table'] or [])
-                if message['type'] == 'hello_ack':
-                    _pending_command = None
-                    _pending_lifecycle_sequence = None
-                    if _state.session_id != message['session_id']:
-                        kinematics = KinematicState()
-                        safety_events.clear()
-                        from . import charts
-                        charts.clear()
-                    _state.synchronize(message['session_id'], payload['run_status'],
-                                       payload['mode'], payload['capabilities'])
-                    if payload['run_status'] in {'STARTING', 'RUNNING', 'PAUSED', 'DRAINING'}:
-                        _desired_mode = payload['mode']
-                elif message['type'] == 'lifecycle':
-                    if (_pending_command not in {'pause', 'step'} or
-                            payload['run_status'] in {'DRAINING', 'STOPPED', 'FAILED'}):
-                        _pending_command = None
-                        _pending_lifecycle_sequence = None
-                    elif payload['run_status'] == 'PAUSED':
-                        _pending_lifecycle_sequence = message['sequence']
-                    _state.lifecycle(message['session_id'], payload['run_status'],
-                                     payload['mode'], payload['capabilities'])
-                    if payload['run_status'] in {'STARTING', 'RUNNING', 'PAUSED', 'DRAINING'}:
-                        _desired_mode = payload['mode']
-                elif message['type'] == 'training_stats':
-                    from . import charts
-                    training_dashboard.ingest(message, negotiated='training_stats_v1' in getattr(_client, 'negotiated_capabilities', set()))
-                    charts.record_training(message)
-                elif message['type'] == 'curve':
-                    from . import charts
-                    charts.record_curve(message)
-                elif message['type'] == 'snapshot':
-                    if _state.run_id is not None and payload.get('run_id', _state.run_id) != _state.run_id:
-                        continue
-                    from . import charts
-                    charts.record_snapshot(message)
-                    latest_snapshot = message
-                elif message['type'] == 'wake':
-                    wake_buffer.push(validate_wake_payload(message['payload'], sequence=message['sequence']))
-                elif message['type'] == 'safety_event':
-                    safety_events.append(message)
-                elif message['type'] == 'error':
-                    _pending_command = None
-                    _pending_lifecycle_sequence = None
-                    _state.error = payload.get('message', 'Bridge error')
+            backend_scene()
+            messages = _client.poll()
+            latest_snapshot = _apply_messages(messages)
             if latest_snapshot:
-                payload = latest_snapshot['payload']
-                scene = snapshot_scene(payload)
-                if _live_scene is None or scene.geometry_key() != _live_scene.geometry_key():
-                    build_live_scene(scene)
-                _live_scene = scene
-                kinematics.apply_snapshot(latest_snapshot)
-                _state.mode = payload['mode']
-                scene_obj = getattr(getattr(bpy, 'context', None), 'scene', None)
-                if scene_obj is not None:
-                    scene_data = payload.get('scene') or {}
-                    scene_obj['wfrl_backend'] = scene_data.get('backend', 'backend')
-                    inflow = scene_data.get('inflow') or {}
-                    from . import backend_inflow, cinematic
-                    backend_inflow.record(scene_obj, payload)
-                    cinematic.update(scene_obj, 0.0)
-                    timestamp = payload.get('timestamp') or {}
-                    scene_obj['wfrl_telemetry_time_s'] = timestamp.get('value')
-                    power_values = []
-                    fidelity = None
-                    for turbine in payload.get('turbines', ()):
-                        channel = (turbine.get('channels') or {}).get('power')
-                        if channel and channel.get('validity') == 'valid':
-                            power_values.append(channel.get('value'))
-                            fidelity = fidelity or channel.get('fidelity')
-                    scene_obj['wfrl_power_mw'] = power_values
-                    scene_obj['wfrl_fidelity'] = fidelity or 'UNKNOWN'
-                crossed_lifecycle = (_pending_lifecycle_sequence is not None and
-                                     latest_snapshot['sequence'] > _pending_lifecycle_sequence)
-                pause_confirmed = _pending_command == 'pause' and crossed_lifecycle
-                step_confirmed = (_pending_command == 'step' and crossed_lifecycle and
-                                  payload['step'] > _pending_step)
-                if pause_confirmed or step_confirmed:
-                    _pending_command = None
-                    _pending_lifecycle_sequence = None
-            wake_frame = wake_buffer.pop_latest()
-            if wake_frame is not None:
-                latest_wake = wake_frame
-                scene = bpy.context.scene
-                scene['wfrl_wake_source'] = wake_frame.source_label
-                scene['wfrl_wake_fidelity'] = wake_frame.fidelity
-                scene['wfrl_wake_sequence'] = wake_frame.sequence
-                scene['wfrl_wake_provenance'] = wake_frame.provenance
-                if wake_frame.kind == 'disxy' and wake_frame.is_renderable:
-                    apply_disxy_frame(wake_frame)
+                _apply_snapshot(latest_snapshot)
+            _apply_latest_wake()
             if _client.last_error:
                 _state.disconnect(_client.last_error)
                 if not _state.session_id and not _client.session_id:
@@ -359,38 +704,61 @@ def tick():
             elif _client.status == 'DISCONNECTED' and _state.connection == 'CONNECTED':
                 _state.disconnect('Connection lost; backend state is unconfirmed')
         except (ValueError, KeyError, TypeError, RuntimeError) as exc:
-            _client.close()
             _state.disconnect(f'Invalid backend data or scene: {exc}')
+            try:
+                _client.close()
+            except Exception:
+                _LOG.exception('Invalid backend data: transport cleanup failed')
+    display_scene = None
     if _state.connection != 'LOCAL DEMO':
         connected = _state.connection == 'CONNECTED' and _state.confirmed
-        kinematics.apply_objects(bpy.data.objects, connected=connected)
+        try:
+            scene = backend_scene()
+        except ValueError:
+            scene = None
+            connected = False
+        display_scene = scene
+        if scene is not None and latest_wake is not None:
+            validity = latest_wake.validity_at(now, connected=connected)
+            if scene.get('wfrl_wake_validity') != validity:
+                scene['wfrl_wake_validity'] = validity
+            set_disxy_validity(scene, validity if latest_wake.kind == 'disxy' or validity != 'valid' else 'waiting')
+        if first_backend_display or display_before != _display_state():
+            kinematics.apply_objects(scene.objects if scene is not None else {}, connected=connected)
         from .live_scene import animate_illustrative_wake
-        animate_illustrative_wake(getattr(bpy.context, 'scene', None), dt,
+        animate_illustrative_wake(scene, dt,
                                  running=connected and _state.run_status == 'RUNNING')
     from . import charts
-    export_status = charts.export_job.status
+    async_before = (_async_display_state(charts.export_job, bpy.context)
+                      if _last_async_display_state is None else _last_async_display_state)
     charts.export_job.poll()
+    async_state = _async_display_state(charts.export_job, bpy.context)
+    _last_async_display_state = async_state
     health_changed = False
     if _health:
         for result in _health.poll():
             health_results[result.component] = result
             health_changed = True
-    # A paused recorded scene with no new data need not redraw every viewport.
-    # Keep playing redraws (their removal showed no FPS benefit), backend
-    # validity aging, and async status changes observable.
-    if (_client is None and _state.connection in {'LOCAL DEMO', 'OFFLINE RESULTS'}
-            and not health_changed and charts.export_job.status == export_status
-            and not any(getattr(w.screen, 'is_animation_playing', False)
-                        for w in bpy.context.window_manager.windows)):
-        from . import farm_flex
-        if farm_flex.is_active(getattr(bpy.context, 'scene', None)):
-            performance.count('runtime.unchanged_redraw_skips')
-            return 0.05
+    display_state = _display_state()
+    backend_changed = first_backend_display or display_state != display_before or bool(messages)
+    _last_display_state = display_state
+    targets = []
+    current_scene = bpy.context.scene
+    if backend_changed:
+        targets.append(display_scene if display_scene is not None else current_scene)
+    if health_changed or async_state[:3] != async_before[:3]:
+        targets.append(current_scene)
+    previous_rows = {row[0]: row[1:] for row in async_before[3]}
+    changed_scenes = {row[0] for row in async_state[3]
+                      if row[1:] != previous_rows.get(row[0], row[1:])}
     for window in bpy.context.window_manager.windows:
-        for area in window.screen.areas:
-            if area.type == 'VIEW_3D':
-                performance.count("runtime.redraw_requests")
-                area.tag_redraw()
+        scene = window.scene
+        if _scene_key(scene) in changed_scenes:
+            targets.append(scene)
+    if not targets:
+        performance.count('runtime.unchanged_redraw_skips')
+        return 0.05
+    _redraw_viewports(scenes=targets)
     return 0.05
 
 
@@ -399,8 +767,12 @@ def progress():
 
 
 def shutdown():
-    global _client, _health, _last_tick
+    global _health, _last_tick, _last_async_display_state, _last_display_state, _backend_scene
     _last_tick = None
+    _last_async_display_state = None
+    _last_display_state = None
+    _clear_backend_wake('stale')
+    _backend_scene = None
     import bpy
     if bpy.app.timers.is_registered(tick):
         bpy.app.timers.unregister(tick)
@@ -426,8 +798,18 @@ def register():
         bpy.app.timers.register(tick, first_interval=0.05, persistent=True)
 
 
-def enter_result_replay(*, scene=None):
-    """Detach a stopped backend and reset transport without a synthetic demo clock."""
+def enter_result_replay(*, scene=None, restoring=False):
+    """Restore saved replay without discarding a claimed backend session.
+
+    Explicit result loading requires an editable backend. File and history
+    restoration can bind saved geometry while backend control stays unconfirmed.
+    """
+    if (restoring and scene is not None
+            and scene.get('wfrl_scene_kind') == 'clearance_replay'
+            and has_backend_session()):
+        if _state.connection != 'DISCONNECTED' or _state.confirmed:
+            disconnect(force=True)
+        return
     if not configuration_editable(scene):
         raise ValueError('Stop the active backend before loading results')
     enter_local_demo()

@@ -168,6 +168,10 @@ def test_real_reader_rejects_asynchronous_rows_before_isolation_recomputation():
     for row in data['samples']:
         row.update(sample_kind='source', expected_blade_id=1, passage_id='b1',
                    s1_observation_state='triggered')
+        pair = row['reconstruction']
+        row['evaluation']['clearance_error_m'] = (
+            pair['clearance_estimate'] - row['evaluation']['clearance_reference_m']
+            if pair['valid'] else None)
     data['cumulative'], data['events'] = precompute(data['samples'], config)
     overlay = dict(config=config,
                    manifest=dict(reconstruction_method='hub-tls.v1', algorithm_version=version),
@@ -182,8 +186,8 @@ def test_ast_checks_real_boundary_and_rejects_truth_in_hub_provenance(tmp_path):
     report = isolation.audit_postprocess_boundary()
     assert report['passed'], report['failures']
     path = tmp_path / 'postprocess.py'
-    text = (isolation.ROOT / 'scripts/lidar/postprocess_dual_beam.py').read_text()
-    path.write_text(text.replace('source.poses[index],1,nacelle', 'source.transforms[index],1,nacelle'))
+    text = (isolation.ROOT / 'scripts/lidar/postprocess_dual_beam.py').read_text(encoding='utf-8')
+    path.write_text(text.replace('source.poses[index],1,nacelle', 'source.transforms[index],1,nacelle'), encoding='utf-8')
     changed = isolation.audit_postprocess_boundary(path)
     assert not changed['passed']
     assert any('Hub reads source fields' in failure for failure in changed['failures'])

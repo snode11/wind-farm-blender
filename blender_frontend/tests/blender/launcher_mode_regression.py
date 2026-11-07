@@ -1,7 +1,7 @@
 """Installed extension: MAPPO-first launcher, explicit backend connection and return.
 
 Run against an idle Bridge with WFRL_PROJECT_DIR, WFRL_BACKEND_PYTHON,
-WFRL_SCENE, WFRL_PORT and WFRL_SESSION_FILE set, as the launcher sets them.
+WFRL_SCENE and WFRL_PORT set, as the launcher sets them.
 This exercises real transport but does not start a solver or training run.
 """
 from pathlib import Path
@@ -46,7 +46,6 @@ for mode in ('replay', 'interactive_training'):
     assert runtime.desired_mode() == mode
     assert runtime.get_state().run_status == 'READY'
     assert scene.camera.name == 'WFRL.Camera.World'
-    assert Path(os.environ['WFRL_SESSION_FILE']).read_text() == runtime.get_state().session_id
     assert bpy.ops.wfrl.connection_mode(mode='demo') == {'FINISHED'}
     assert runtime.get_state().connection == 'OFFLINE RESULTS'
     assert addon.farm_flex.is_active(scene) and scene.frame_end == 3601

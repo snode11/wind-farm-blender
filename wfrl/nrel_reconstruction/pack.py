@@ -60,12 +60,12 @@ def storage_report(root, capture, fps):
 
 def pack_capture(capture_dir, output_dir, start_s, duration_s, fps=20):
     capture, out = Path(capture_dir).resolve(), Path(output_dir).resolve()
-    manifest = json.loads((capture / 'manifest.json').read_text())
+    manifest = json.loads((capture / 'manifest.json').read_text(encoding='utf-8'))
     if manifest['status'] != 'complete':
         raise ValueError('Capture must finish its full transaction')
     times = center_schedule(start_s, duration_s, fps); n = len(times)
-    records = [json.loads(s) for s in (capture / 'frames.jsonl').read_text().splitlines()]
-    motion = [json.loads(s) for s in (capture / 'motion_internal.jsonl').read_text().splitlines()]
+    records = [json.loads(s) for s in (capture / 'frames.jsonl').read_text(encoding='utf-8').splitlines()]
+    motion = [json.loads(s) for s in (capture / 'motion_internal.jsonl').read_text(encoding='utf-8').splitlines()]
     if len(records) != n * 3 or len(motion) != n:
         raise ValueError('Missing camera or motion records')
     by_key = {(r['camera_id'], int(r['sample_index'])): r for r in records}
@@ -87,7 +87,7 @@ def pack_capture(capture_dir, output_dir, start_s, duration_s, fps=20):
         adapter = out / 'encoding-adapter' / camera
         adapter.mkdir(parents=True, exist_ok=False)
         (adapter / 'master_frames').symlink_to(capture / camera, target_is_directory=True)
-        with (adapter / 'frames.csv').open('w', newline='') as f:
+        with (adapter / 'frames.csv').open('w', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=['frame_id', 'video_pts'])
             writer.writeheader(); writer.writerows({'frame_id': i, 'video_pts': i} for i in range(n))
         report = encode_video(adapter, fps, pattern='frame_%06d.png', crf=18, preset='medium')
@@ -104,10 +104,10 @@ def pack_capture(capture_dir, output_dir, start_s, duration_s, fps=20):
                              'T_camera_cv_from_world': r['T_camera_cv_from_world'],
                              'pixel_convention': 'top-left pixel centre (0,0); boundaries -.5,W/H-.5',
                              'distortion': 'ideal undistorted pinhole'})
-    with (alg / 'frame_map.csv').open('w', newline='') as f:
+    with (alg / 'frame_map.csv').open('w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=list(frame_rows[0])); writer.writeheader(); writer.writerows(frame_rows)
-    (alg / 'camera_calibration.jsonl').write_text(''.join(json.dumps(r, allow_nan=False)+'\n' for r in cal_rows))
-    with (alg / 'motion_observations.csv').open('w', newline='') as f:
+    (alg / 'camera_calibration.jsonl').write_text(''.join(json.dumps(r, allow_nan=False)+'\n' for r in cal_rows), encoding='utf-8')
+    with (alg / 'motion_observations.csv').open('w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=['frame_id', 'sim_time_s', 'T_world_from_blade_root', 'source', 'units'])
         writer.writeheader()
         for i, t in enumerate(times):

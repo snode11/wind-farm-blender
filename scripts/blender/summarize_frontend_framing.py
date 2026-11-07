@@ -9,10 +9,10 @@ import sys
 
 def build(directory):
     out = Path(directory).resolve()
-    manifest = json.loads((out / "manifest.json").read_text())
-    candidates = json.loads((out / "candidates.json").read_text())
+    manifest = json.loads((out / "manifest.json").read_text(encoding='utf-8'))
+    candidates = json.loads((out / "candidates.json").read_text(encoding='utf-8'))
     candidate_map = {c["id"]: c for c in candidates}
-    records = [json.loads(path.read_text()) for path in sorted((out / "metrics").glob("*.json"))]
+    records = [json.loads(path.read_text(encoding='utf-8')) for path in sorted((out / "metrics").glob("*.json"))]
     rows = []
     for record in records:
         for sample in record["samples"]:
@@ -30,7 +30,7 @@ def build(directory):
                              "root_tip_counts": json.dumps(c["root_tip"]),
                              "blockers": json.dumps(c["blockers"]), "image": c["image"]})
     if rows:
-        with (out / "metrics.csv").open("w", newline="") as stream:
+        with (out / "metrics.csv").open("w", newline="", encoding='utf-8') as stream:
             writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
             writer.writeheader()
             writer.writerows(rows)

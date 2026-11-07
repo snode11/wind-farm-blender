@@ -1,0 +1,51 @@
+
+ **************************************************************************************************
+ FAST.Farm
+
+ Copyright (C) 2024 National Renewable Energy Laboratory
+ Copyright (C) 2024 Envision Energy USA LTD
+
+ This program is licensed under Apache License Version 2.0 and comes with ABSOLUTELY NO WARRANTY.
+ See the "LICENSE" file distributed with this software for details.
+ **************************************************************************************************
+
+ FAST.Farm-v3.5.3-dirty
+ Compile Info:
+  - Compiler: GCC version 12.3.0
+  - Architecture: 64 bit
+  - Precision: single
+  - OpenMP: Yes, number of threads: 2/2
+  - Date: Apr 26 2024
+  - Time: 16:41:09
+ Execution Info:
+  - Date: 09/12/2026
+  - Time: 23:04:22+0800
+
+  Heading of the FAST.Farm input file:
+    FAST.Farm     input         - file
+ Running AWAE.
+ Running InflowWind.
+ Running WakeDynamics.
+ Running FASTWrapper.
+ Running OpenFAST.
+ OpenFAST input file heading:
+     FAST          Certification - Test #26: NREL 5.0 MW Baseline Wind Turbine (Onshore)
+
+ Running ElastoDyn.
+ Nodal outputs section of ElastoDyn input file not found or improperly formatted.
+ Running AeroDyn.
+ Running InflowWind.
+
+ Farm_Initialize:Farm_ValidateInput:OutFmt produces a column width of 10 instead of 20 characters.
+ Farm_Initialize:For efficiency, NumPlanes has been reduced to the number of time steps (3).
+
+  Time: 0 of 6 seconds.
+                                                                                                   Time: 3 of 6 seconds.  Estimated final completion at 23:04:33.                                                                                                                                      Time: 6 of 6 seconds.  Estimated final completion at 23:04:33.                                                                                                                                     
+  Total Real Time:       10.6 seconds
+  Total CPU Time:        10.384 seconds
+  Simulation CPU Time:   10.191 seconds
+  Simulated Time:        6 seconds
+  Time Ratio (Sim/CPU):  0.58876
+
+  FAST.Farm terminated normally.
+

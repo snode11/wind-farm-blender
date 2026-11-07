@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "expected_root": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/profile/extensions/wfrl_blender",
+  "inventory": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/package/wfrl_blender-0.3.40.inventory.json",
+  "blender": "5.2.1 LTS",
+  "background": false,
+  "loaded_modules": {
+    "bl_ext.wfrl_frontend.wfrl_blender": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/profile/extensions/wfrl_blender/__init__.py",
+      "sha256": "a77d645e03e58f1ae500a1074eab28dca8a87b70bcfbb06f9103ea56d67ae09a"
+    },
+    "bl_ext.wfrl_frontend.wfrl_blender.native_camera_views": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/profile/extensions/wfrl_blender/native_camera_views.py",
+      "sha256": "7116afe0ebfb1964e44e5a5ee4238a0824fa54ab0e33098013fe2c61e4db55f0"
+    },
+    "bl_ext.wfrl_frontend.wfrl_blender.custom_cameras": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/profile/extensions/wfrl_blender/custom_cameras.py",
+      "sha256": "d588524898ee901124c2a5727af3aab670cee83ca4b80a2ae52fe0ad444aca4b"
+    },
+    "bl_ext.wfrl_frontend.wfrl_blender.custom_camera_preview": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/profile/extensions/wfrl_blender/custom_camera_preview.py",
+      "sha256": "08b767169022bc4eef2d0921863896fb70ee15921da483f69241e817b25b5ed9"
+    },
+    "bl_ext.wfrl_frontend.wfrl_blender.playback": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.40/validated/profile/extensions/wfrl_blender/playback.py",
+      "sha256": "c83edad2173b1b81cca0e8df8cb637f38ff6478d4589de508e9bf98168772d29"
+    }
+  },
+  "inventory_files_checked": 195,
+  "mismatches": [],
+  "archive_sha256": "0b90d4c176f816cef8ea3434deead1420e9dc9a84b00ae8a27f5e93165d15dec"
+}

@@ -1,0 +1,229 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.user_default.wfrl_blender",
+  "addon_file": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "default_poses": {
+    "T1": {
+      "name": "WFRL.Camera.T1.Gimbal",
+      "data": "WFRL.Camera.T1.Gimbal.Data",
+      "parent": "WFRL.Turbine.T1.YawRoot",
+      "location": [
+        -3.5,
+        -1.149999976158142,
+        0.4499683976173401
+      ],
+      "rotation": [
+        -0.1305684894323349,
+        -0.00933240819722414,
+        -1.6208006143569946
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "lens": 8.0,
+      "parent_inverse": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "clip_start": 0.05000000074505806,
+      "clip_end": 30000.0,
+      "passepartout": false,
+      "passepartout_alpha": 0.0,
+      "sensor_width": 16.422407150268555,
+      "sensor_height": 24.0,
+      "sensor_fit": "HORIZONTAL",
+      "type": "PERSP",
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "yaw": 181.2,
+      "pitch": -82.5,
+      "roll": 175.9,
+      "fov": 91.4928445196772
+    },
+    "T2": {
+      "name": "WFRL.Camera.T2.Gimbal",
+      "data": "WFRL.Camera.T2.Gimbal.Data",
+      "parent": "WFRL.Turbine.T2.YawRoot",
+      "location": [
+        -3.5,
+        -1.149999976158142,
+        0.4499736428260803
+      ],
+      "rotation": [
+        -0.1305684894323349,
+        -0.00933240819722414,
+        -1.6208006143569946
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "lens": 8.0,
+      "parent_inverse": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "clip_start": 0.05000000074505806,
+      "clip_end": 30000.0,
+      "passepartout": false,
+      "passepartout_alpha": 0.0,
+      "sensor_width": 16.422407150268555,
+      "sensor_height": 24.0,
+      "sensor_fit": "HORIZONTAL",
+      "type": "PERSP",
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "yaw": 181.2,
+      "pitch": -82.5,
+      "roll": 175.9,
+      "fov": 91.4928445196772
+    },
+    "T3": {
+      "name": "WFRL.Camera.T3.Gimbal",
+      "data": "WFRL.Camera.T3.Gimbal.Data",
+      "parent": "WFRL.Turbine.T3.YawRoot",
+      "location": [
+        -3.500000238418579,
+        -1.149999976158142,
+        0.44997256994247437
+      ],
+      "rotation": [
+        -0.1305684894323349,
+        -0.00933240819722414,
+        -1.6208006143569946
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "lens": 8.0,
+      "parent_inverse": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "clip_start": 0.05000000074505806,
+      "clip_end": 30000.0,
+      "passepartout": false,
+      "passepartout_alpha": 0.0,
+      "sensor_width": 16.422407150268555,
+      "sensor_height": 24.0,
+      "sensor_fit": "HORIZONTAL",
+      "type": "PERSP",
+      "shift_x": 0.0,
+      "shift_y": 0.0,
+      "yaw": 181.2,
+      "pitch": -82.5,
+      "roll": 175.9,
+      "fov": 91.4928445196772
+    }
+  },
+  "migrated_revision_one": [
+    "T2",
+    "T3"
+  ],
+  "t1_current_revision_hand_pose_preserved": true,
+  "parent_motion_error_m": {
+    "T1": 7.630325796988134e-06,
+    "T2": 3.145702538994527e-05,
+    "T3": 6.103515625e-05
+  },
+  "rotor_spin_independent": true,
+  "optical_axis_matches_parent_local_preset": true,
+  "hand_pose_and_reset_each_turbine": true,
+  "switch_preserves_replay_clock": true,
+  "save_reopen_preserves_all_hand_poses": true,
+  "independent_nacelle_and_c1_c3_unchanged": true,
+  "gate_check": "1200x700 synthetic viewport with 300px right sidebar",
+  "gate_bounds_px": {
+    "T1": [
+      15.999999999999943,
+      105.87499999999994,
+      884.0,
+      594.125
+    ],
+    "T2": [
+      15.999999999999943,
+      105.87499999999994,
+      884.0,
+      594.125
+    ],
+    "T3": [
+      15.999999999999943,
+      105.87499999999994,
+      884.0,
+      594.125
+    ]
+  },
+  "visible_window": "NOT_RUN"
+}

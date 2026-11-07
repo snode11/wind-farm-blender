@@ -1,0 +1,7 @@
+Warning: 1 × Draw window and swap: 2.1805 ms, average: 2.18045805 ms
+BENCHMARK_START single WATCH
+BENCHMARK_RESULT PASS /private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-five-fixes-07uo9tmu/visible-single/result.json
+01:12.871  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

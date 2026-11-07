@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.wfrl_frontend.wfrl_blender",
+  "checks": [
+    {
+      "name": "radar_x100_regression",
+      "status": "PASS",
+      "result": "checks/radar_x100_regression/result.json",
+      "marker": "X100_NATIVE_PASS"
+    },
+    {
+      "name": "radar_x100_edges",
+      "status": "PASS",
+      "result": "checks/radar_x100_edges/result.json",
+      "marker": "X100_EDGES_PASS"
+    },
+    {
+      "name": "radar_x100_history_regression",
+      "status": "PASS",
+      "result": "checks/radar_x100_history_regression/result.json",
+      "marker": "X100_HISTORY_PASS"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "status": "PASS",
+  "exception_formats": {
+    "normal callback": {
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "diagnostics": [
+        "RuntimeError: normal callback"
+      ],
+      "reasons": [
+        "Python exception diagnostics: actual={'RuntimeError: normal callback': 1}, expected={}"
+      ]
+    },
+    "callbacks (2 sub-exceptions)": {
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "diagnostics": [
+        "ExceptionGroup: callbacks (2 sub-exceptions)",
+        "RuntimeError: first",
+        "ValueError: second"
+      ],
+      "reasons": [
+        "Python exception diagnostics: actual={'ExceptionGroup: callbacks (2 sub-exceptions)': 1, 'RuntimeError: first': 1, 'ValueError: second': 1}, expected={}"
+      ]
+    },
+    "nested (1 sub-exception)": {
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "diagnostics": [
+        "ExceptionGroup: nested (1 sub-exception)",
+        "ExceptionGroup: inner (1 sub-exception)",
+        "TypeError: third"
+      ],
+      "reasons": [
+        "Python exception diagnostics: actual={'ExceptionGroup: nested (1 sub-exception)': 1, 'ExceptionGroup: inner (1 sub-exception)': 1, 'TypeError: third': 1}, expected={}"
+      ]
+    },
+    "base (2 sub-exceptions)": {
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "diagnostics": [
+        "BaseExceptionGroup: base (2 sub-exceptions)",
+        "KeyboardInterrupt: interrupted",
+        "RuntimeError: fourth"
+      ],
+      "reasons": [
+        "Python exception diagnostics: actual={'BaseExceptionGroup: base (2 sub-exceptions)': 1, 'KeyboardInterrupt: interrupted': 1, 'RuntimeError: fourth': 1}, expected={}"
+      ]
+    }
+  },
+  "clean_prose_and_escaped_json": "PASS"
+}

@@ -7,6 +7,15 @@ sys.path[:0]=[os.environ.get('WFRL_ADDON_ROOT',str(ROOT/'blender_frontend')),str
 import wfrl_blender as addon
 from wfrl_blender import native_camera_views as native,custom_cameras as core,custom_camera_preview as preview,custom_camera_capture as capture
 OUT=Path(os.environ['WFRL_TEST_OUTPUT']);OUT.mkdir(parents=True,exist_ok=True)
+
+
+def complete(job, context, timeout=30.):
+    """Step a capture until its asynchronous image write commits."""
+    deadline = time.monotonic() + timeout
+    while not job.step(context):
+        assert time.monotonic() < deadline, 'capture did not finish'
+        time.sleep(.01)
+    return True
 state={}
 
 def tick():
@@ -57,9 +66,9 @@ def tick():
             try:
                 with bpy.context.temp_override(window=session.window,area=area,region=region):
                     job=capture.Capture(bpy.context,OUT)
-                    assert job.step(bpy.context)
+                    assert complete(job,bpy.context)
             finally:preview.RenderTarget.get=original_get
-            assert len(sampled)==3 and session.quality_settings()==fast
+            assert len(sampled)==3 and session.quality_settings()==fast,(len(sampled),session.quality_settings(),fast)
             rows=[json.loads(line) for line in (job.path/'frames.jsonl').read_text().splitlines()]
             assert len(rows)==3 and len({r['time_s'] for r in rows})==1
             assert len({r['simulation_state_hash'] for r in rows})==1

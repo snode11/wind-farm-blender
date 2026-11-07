@@ -11,23 +11,26 @@ Without normalization the value net can't fit (explained_variance ~ 0) and PPO's
 advantages are noise. VecNormalize fixes both.
 
 Usage:
-    python train_ppo.py                       # train from scratch (100k steps)
-    python train_ppo.py --timesteps 200000    # longer run
-    python train_ppo.py --resume              # continue from last checkpoint
-    python train_ppo.py --eval-only           # just evaluate the saved model
+    python scripts/train/train_ppo.py                       # train from scratch
+    python scripts/train/train_ppo.py --timesteps 200000    # longer run
+    python scripts/train/train_ppo.py --resume              # continue training
+    python scripts/train/train_ppo.py --eval-only           # evaluate saved model
 
 Monitoring:
-    tensorboard --logdir logs/ppo_wf
+    tensorboard --logdir results/logs/ppo_wf
     (episode reward mean = ep_rew_mean; watch train/explained_variance climb > 0)
 """
 
 import argparse
+from copy import deepcopy
 import os
+from uuid import uuid4
 
 import numpy as np
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.utils import check_for_correct_spaces
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 from wfcrl import environments as envs
@@ -46,45 +49,90 @@ MAX_STEPS = 200  # steps per episode (FLORIS is fast, so we can afford long epis
 def make_single_env(max_steps: int = MAX_STEPS) -> Monitor:
     """One SB3-ready env instance (adapter + episode-stats Monitor). Raw reward."""
     raw = envs.make(ENV_ID, controls=["yaw"], max_num_steps=max_steps)
-    return Monitor(WFCRLSB3Wrapper(raw))
+    try:
+        return Monitor(WFCRLSB3Wrapper(raw))
+    except BaseException:
+        raw.close()
+        raise
 
 
-def make_train_venv(max_steps: int = MAX_STEPS) -> VecNormalize:
-    """Vectorized + normalized env for training (normalizes obs and returns)."""
-    venv = DummyVecEnv([lambda: make_single_env(max_steps)])
-    return VecNormalize(
-        venv,
-        norm_obs=True,
-        norm_reward=True,
-        clip_obs=10.0,
-        gamma=0.99,
-    )
+def _require_checkpoint_files():
+    for filename in (MODEL_PATH + ".zip", VECNORM_PATH):
+        if not os.path.isfile(filename):
+            raise FileNotFoundError(f"Required PPO checkpoint file is missing: {filename}")
 
 
-def make_eval_venv(max_steps: int = MAX_STEPS) -> VecNormalize:
-    """Eval env: reuse saved normalization stats, but report RAW reward.
+def _validate_normalization(venv):
+    keys = set(venv.observation_space.spaces)
+    if not venv.norm_obs or set(venv.norm_obs_keys or ()) != keys:
+        raise ValueError("PPO checkpoint must normalize every observation key")
+    if not isinstance(venv.obs_rms, dict) or set(venv.obs_rms) != keys:
+        raise ValueError("PPO checkpoint has incompatible observation statistics")
+    statistics = [(key, rms, venv.observation_space[key].shape)
+                  for key, rms in venv.obs_rms.items()]
+    statistics.append(("reward", venv.ret_rms, ()))
+    for key, rms, shape in statistics:
+        if (np.shape(rms.mean) != shape or np.shape(rms.var) != shape
+                or not np.isfinite(rms.mean).all() or not np.isfinite(rms.var).all()
+                or np.any(rms.var < 0) or np.shape(rms.count) != ()
+                or not np.isfinite(rms.count) or rms.count <= 0):
+            raise ValueError(f"PPO checkpoint has invalid {key} normalization statistics")
 
-    training=False freezes the running stats; norm_reward=False so the reward we
-    accumulate is the true (un-normalized) reward, comparable to the baseline.
-    """
-    venv = DummyVecEnv([lambda: make_single_env(max_steps)])
-    if os.path.exists(VECNORM_PATH):
-        venv = VecNormalize.load(VECNORM_PATH, venv)
-        venv.training = False
-        venv.norm_reward = False
-    else:
-        # No stats yet (e.g. pre-training baseline): identity-ish normalization.
-        venv = VecNormalize(
-            venv, norm_obs=True, norm_reward=False, clip_obs=10.0, gamma=0.99
-        )
-        venv.training = False
-    return venv
+
+def _validate_pair(model, venv):
+    check_for_correct_spaces(venv, model.observation_space, model.action_space)
+    _validate_normalization(venv)
+    if not np.isclose(model.gamma, venv.gamma, rtol=0, atol=1e-12):
+        raise ValueError("PPO model and normalization discount factors do not match")
+    if model.__dict__.get("_wfrl_checkpoint_id") != venv.__dict__.get("_wfrl_checkpoint_id"):
+        raise ValueError("PPO model and normalization checkpoint identities do not match")
+
+
+def _make_venv(max_steps, *, training, norm_path=None, normalization=None):
+    if norm_path is not None and not os.path.isfile(norm_path):
+        raise FileNotFoundError(f"Required PPO normalization file is missing: {norm_path}")
+    base = DummyVecEnv([lambda: make_single_env(max_steps)])
+    try:
+        if normalization is not None:
+            # VecNormalize copies statistics without copying its live environment.
+            venv = deepcopy(normalization)
+            venv.set_venv(base)
+        elif norm_path is not None:
+            venv = VecNormalize.load(norm_path, base)
+            venv._wfrl_normalization_path = os.path.abspath(norm_path)
+        else:
+            venv = VecNormalize(base, norm_obs=True, clip_obs=10.0, gamma=0.99)
+        check_for_correct_spaces(base, venv.observation_space, venv.action_space)
+        _validate_normalization(venv)
+        venv.training = training
+        venv.norm_reward = training
+        return venv
+    except BaseException:
+        base.close()
+        raise
+
+
+def make_train_venv(max_steps: int = MAX_STEPS, *, resume=False) -> VecNormalize:
+    """Normalize observations and returns; resume restores their saved statistics."""
+    return _make_venv(max_steps, training=True,
+                      norm_path=VECNORM_PATH if resume else None)
+
+
+def make_eval_venv(max_steps: int = MAX_STEPS, *, normalization=None) -> VecNormalize:
+    """Freeze saved or explicitly supplied statistics and return raw rewards."""
+    return _make_venv(max_steps, training=False, normalization=normalization,
+                      norm_path=VECNORM_PATH if normalization is None else None)
 
 
 def build_model(venv, resume: bool) -> PPO:
-    if resume and os.path.exists(MODEL_PATH + ".zip"):
+    if resume:
+        _require_checkpoint_files()
+        if venv.__dict__.get("_wfrl_normalization_path") != os.path.abspath(VECNORM_PATH):
+            raise ValueError("Restore VecNormalize before loading a PPO checkpoint")
         print(f"[train] resuming from {MODEL_PATH}.zip")
-        return PPO.load(MODEL_PATH, env=venv, tensorboard_log=LOG_DIR)
+        model = PPO.load(MODEL_PATH, env=venv, tensorboard_log=LOG_DIR)
+        _validate_pair(model, venv)
+        return model
 
     print("[train] building fresh PPO model")
     return PPO(
@@ -106,58 +154,81 @@ def build_model(venv, resume: bool) -> PPO:
     )
 
 
-def evaluate(model: PPO, n_episodes: int = 3, max_steps: int = MAX_STEPS):
-    """Roll out deterministically over a normalized eval env; report RAW reward."""
-    venv = make_eval_venv(max_steps)
-    returns = []
-    for ep in range(n_episodes):
-        obs = venv.reset()
-        ep_ret, done = 0.0, False
-        while not done:
-            action, _ = model.predict(obs, deterministic=True)
-            obs, reward, dones, _ = venv.step(action)
-            ep_ret += float(reward[0])
-            done = bool(dones[0])
-        returns.append(ep_ret)
-        print(f"[eval] episode {ep + 1}: raw return = {ep_ret:.4f}")
-    venv.close()
+def evaluate(model: PPO, n_episodes: int = 3, max_steps: int = MAX_STEPS, *,
+             venv=None, normalization=None):
+    """Evaluate frozen observations and raw rewards; close owned environments."""
+    owns_venv = venv is None
+    if owns_venv:
+        venv = make_eval_venv(max_steps, normalization=normalization)
+    try:
+        _validate_pair(model, venv)
+        if venv.training or venv.norm_reward:
+            raise ValueError("PPO evaluation requires training=False and norm_reward=False")
+        returns = []
+        for ep in range(n_episodes):
+            obs = venv.reset()
+            ep_ret, done = 0.0, False
+            while not done:
+                action, _ = model.predict(obs, deterministic=True)
+                obs, reward, dones, _ = venv.step(action)
+                ep_ret += float(reward[0])
+                done = bool(dones[0])
+            returns.append(ep_ret)
+            print(f"[eval] episode {ep + 1}: raw return = {ep_ret:.4f}")
+    finally:
+        if owns_venv:
+            venv.close()
     print(f"[eval] mean raw return over {n_episodes} eps = {np.mean(returns):.4f}")
     return float(np.mean(returns))
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--timesteps", type=int, default=100_000)
+    parser.add_argument("--timesteps", type=int, default=100_000,
+                        help="Additional control steps, rounded up to a complete rollout")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--eval-only", action="store_true")
+    parser.add_argument("--progress-bar", action="store_true",
+                        help="Show the optional progress bar (requires tqdm and rich)")
     args = parser.parse_args()
+
+    if args.resume or args.eval_only:
+        _require_checkpoint_files()
+    if args.eval_only:
+        venv = make_eval_venv()
+        try:
+            model = build_model(venv, resume=True)
+            evaluate(model, venv=venv)
+        finally:
+            venv.close()
+        return
 
     os.makedirs(LOG_DIR, exist_ok=True)
     os.makedirs(CKPT_DIR, exist_ok=True)
+    venv = make_train_venv(resume=args.resume)
+    try:
+        model = build_model(venv, resume=args.resume)
 
-    if args.eval_only:
-        venv = make_train_venv()
-        model = build_model(venv, resume=True)
-        evaluate(model)
-        return
+        print("\n[train] --- policy evaluation (before training) ---")
+        evaluate(model, n_episodes=2, normalization=venv)
 
-    venv = make_train_venv()
-    model = build_model(venv, resume=args.resume)
+        ckpt_cb = CheckpointCallback(
+            save_freq=20_000, save_path=CKPT_DIR, name_prefix="ppo_wf",
+            save_vecnormalize=True,
+        )
 
-    # Baseline: untrained policy, raw reward (no stats saved yet).
-    print("\n[train] --- baseline evaluation (before training) ---")
-    evaluate(model, n_episodes=2)
+        print(f"\n[train] --- training for {args.timesteps} timesteps ---")
+        model.learn(total_timesteps=args.timesteps, callback=ckpt_cb,
+                    progress_bar=args.progress_bar,
+                    reset_num_timesteps=not args.resume)
 
-    ckpt_cb = CheckpointCallback(
-        save_freq=20_000, save_path=CKPT_DIR, name_prefix="ppo_wf"
-    )
-
-    print(f"\n[train] --- training for {args.timesteps} timesteps ---")
-    model.learn(total_timesteps=args.timesteps, callback=ckpt_cb, progress_bar=True)
-
-    model.save(MODEL_PATH)
-    venv.save(VECNORM_PATH)  # persist normalization stats for eval/inference
-    print(f"[train] saved model to {MODEL_PATH}.zip and stats to {VECNORM_PATH}")
+        checkpoint_id = uuid4().hex
+        model._wfrl_checkpoint_id = venv._wfrl_checkpoint_id = checkpoint_id
+        model.save(MODEL_PATH)
+        venv.save(VECNORM_PATH)
+        print(f"[train] saved model to {MODEL_PATH}.zip and stats to {VECNORM_PATH}")
+    finally:
+        venv.close()
 
     print("\n[train] --- final evaluation (after training) ---")
     evaluate(model)

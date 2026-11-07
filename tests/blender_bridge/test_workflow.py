@@ -5,6 +5,42 @@ from wfrl.blender_bridge.workflow import configured_scene, validate_run_options
 from wfrl.scene.schema import load_scene
 
 
+@pytest.mark.parametrize('field', ['dt', 'x', 'y'])
+@pytest.mark.parametrize('value', [float('nan'), float('inf'), -float('inf')])
+def test_scene_loader_rejects_nonfinite_clock_and_coordinates(tmp_path, field, value):
+    import yaml
+    source = load_scene('scenes/turb3_demo.yaml')
+    data = source.to_dict()
+    if field == 'dt':
+        data['dt'] = value
+    else:
+        data['layout'][0][field] = value
+    path = tmp_path / 'nonfinite.yaml'
+    path.write_text(yaml.safe_dump(data))
+    with pytest.raises(ValueError):
+        load_scene(str(path))
+
+
+def test_scene_load_rejects_unserializable_payload_without_mutating_the_session(tmp_path):
+    import yaml
+    source = load_scene('scenes/turb3_demo.yaml')
+    data = source.to_dict()
+    data['sensors'] = [dict(type='power', params={'unused': float('nan')})]
+    path = tmp_path / 'nonfinite-sensor-parameter.yaml'
+    path.write_text(yaml.safe_dump(data))
+    session = BackendSession(source)
+    session._channel_states = {'power': True}
+    observation = ('snapshot', {'untouched': True})
+    session._latest = observation
+    with pytest.raises(ValueError):
+        session.command({'command': 'scene.load', 'arguments': {'scene': str(path)}})
+    assert session.scene is source
+    assert session.state_revision == 0
+    assert session._channel_states == {'power': True}
+    assert session._latest is observation
+    assert len(session._events) == 0
+
+
 def test_overrides_validate_without_mutating_source():
     source = load_scene('scenes/turb3_demo.yaml')
     changed = configured_scene(source, {'inflow': {'speed': 12}, 'terrain': 'gobi'})
@@ -38,7 +74,8 @@ def test_channel_subscriptions_require_real_topic_and_boolean():
     session = BackendSession()
     request = {'command': 'channel.set', 'arguments': {'topic': 'lidar', 'enabled': False}}
     with pytest.raises(ValueError): session.command(request)
-    session._trainer = SimpleNamespace(runtime=SimpleNamespace(topics=lambda: ['lidar']))
+    session._trainer = SimpleNamespace(error=None, running=False, runtime=SimpleNamespace(
+        topics=lambda: ['lidar'], channel_table=lambda: []))
     session.command(request)
     assert session._channel_states == {'lidar': False}
     request['arguments']['enabled'] = 'false'
@@ -47,7 +84,7 @@ def test_channel_subscriptions_require_real_topic_and_boolean():
 
 def test_channel_table_uses_protocol_fidelity_names():
     session = BackendSession()
-    session._trainer = SimpleNamespace(runtime=SimpleNamespace(channel_table=lambda: [
+    session._trainer = SimpleNamespace(running=False, error=None, runtime=SimpleNamespace(channel_table=lambda: [
         ('direct', 'DirectSensor', '直读', True, 'simulator'),
         ('derived', 'DerivedSensor', '导出', True, 'formula'),
         ('synth', 'SynthSensor', '合成', False, 'fixture'),

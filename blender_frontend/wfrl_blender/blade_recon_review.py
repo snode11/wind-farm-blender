@@ -1,8 +1,8 @@
-"""Blender adapter for saved Blade Recon geometry and optional v0.2 textures.
+"""Shared geometry/material helpers and explicit algorithm research imports.
 
-Each import creates an independent scene. Frame callbacks only request updates;
-mesh/color changes are committed by a main-thread timer. Embedded JSON restores
-playback on file load without trusting executable Text blocks or old file paths.
+Normal extension registration only installs display properties used by the
+complete-turbine comparison. Research scripts opt into standalone callbacks,
+which restore embedded inputs and commit mesh changes on the main thread.
 """
 import hashlib
 import json
@@ -142,12 +142,12 @@ def restore_viewports(context, snapshot):
 
 
 def return_to_original(context):
+    from . import playback
     scene = context.scene
     original = bpy.data.scenes.get(scene.get('blade_recon_return_scene', ''))
     if original is None:
         raise ValueError('原场景已不存在')
-    if context.screen and context.screen.is_animation_playing:
-        bpy.ops.screen.animation_cancel(restore_frame=False)
+    playback.cancel(scene)
     raw = scene.get(RETURN_VIEWPORTS)
     snapshot = json.loads(raw) if raw else {}
     context.window.scene = original
@@ -155,8 +155,10 @@ def return_to_original(context):
     return dict(scene=original.name, restored_views=restored)
 
 
-def _material(name, color, evidence=False):
+def _material(name, color, evidence=False, *, register=None):
     mat = bpy.data.materials.new(name)
+    if register is not None:
+        register('materials', mat)
     mat['blade_recon_owned'] = True
     mat.diffuse_color = color
     mat.use_nodes = True
@@ -170,13 +172,15 @@ def _material(name, color, evidence=False):
     return mat
 
 
-def _texture_material(name, png, atlas):
-    mat = _material(name, GREEN, evidence=True)
+def _texture_material(name, png, atlas, *, register=None):
+    mat = _material(name, GREEN, evidence=True, register=register)
     mat['blade_recon_owned'] = True
     nt = mat.node_tree
     bsdf = nt.nodes.get('Principled BSDF')
     vcol = next(n for n in nt.nodes if n.bl_idname == 'ShaderNodeVertexColor')
     image = bpy.data.images.load(str(png), check_existing=False)
+    if register is not None:
+        register('images', image)
     image['blade_recon_owned'] = True
     if tuple(image.size) != (atlas['W'], atlas['H']) or image.channels != 4:
         bpy.data.images.remove(image)
@@ -315,12 +319,16 @@ def bake_portable(scene):
     scene.frame_set(scene.frame_current)
 
 
-def _mesh(scene, name, vertices, faces, material):
+def _mesh(scene, name, vertices, faces, material, *, register=None):
     data = bpy.data.meshes.new(name)
+    if register is not None:
+        register('meshes', data)
     data.from_pydata(np.asarray(vertices).tolist(), [], [tuple(face) for face in faces])
     data.materials.append(material)
     data.update()
     obj = bpy.data.objects.new(name, data)
+    if register is not None:
+        register('objects', obj)
     scene.collection.objects.link(obj)
     obj.hide_select = True
     obj['blade_recon_owned'] = True
@@ -361,11 +369,17 @@ def _context_geometry(scene, rotor, prefix):
               rotor.cfg.hub_radius_m, rotor.cfg.hub_radius_m, mat)
 
 
-def _camera(scene, name, position, target):
+def _camera(scene, name, position, target, *, register=None):
     data = bpy.data.cameras.new(name)
+    if register is not None:
+        register('cameras', data)
     data.lens = 35
     data.clip_end = 3000
     obj = bpy.data.objects.new(name, data)
+    if register is not None:
+        register('objects', obj)
+    from .cameras import clear_camera_mask
+    clear_camera_mask(obj)
     scene.collection.objects.link(obj)
     obj.location = position
     obj.rotation_euler = (Vector(target)-obj.location).to_track_quat('-Z','Y').to_euler()
@@ -381,6 +395,8 @@ def _import_cameras(scene, sequence, prefix):
         data = bpy.data.cameras.new(prefix+'.'+d['name'])
         data.clip_start, data.clip_end, data.display_size = .05, 3000, 1.5
         obj = bpy.data.objects.new(data.name, data)
+        from .cameras import clear_camera_mask
+        clear_camera_mask(obj)
         _apply_camera(obj, d)
         scene.collection.objects.link(obj)
         obj.hide_select = True
@@ -550,8 +566,8 @@ def load(context, path=None, truth_path=None, cameras_path=None, texture_path=No
             cam['blade_recon_view'] = name
         SESSIONS[scene.as_pointer()] = dict(sequence=sequence, blades=blades, ghosts=ghosts,
                                           cameras=cameras, pending=True, index=None)
-        if context.window and context.window.screen.is_animation_playing:
-            bpy.ops.screen.animation_cancel(restore_frame=False)
+        from . import playback
+        playback.cancel(previous_scene)
         if context.window:
             context.window.scene = scene
         scene.wfrl_recon_truth_path = str(Path(truth_path).resolve()) if truth_path else ''
@@ -608,10 +624,8 @@ def apply(scene):
         obj.hide_set(not scene.wfrl_recon_show_cameras, view_layer=scene.view_layers[0])
     value.update(index=index, pending=False)
     scene['blade_recon_error'] = ''
-    for window in bpy.context.window_manager.windows:
-        if window.scene == scene:
-            for area in window.screen.areas:
-                area.tag_redraw()
+    from . import viewport
+    viewport.tag_redraw((scene,), area_types=None)
 
 
 def _toggle(scene, context):
@@ -753,7 +767,8 @@ def _hud():
         blf.draw(0,text)
 
 
-def register():
+def register(*, standalone=False):
+    """Register shared display properties; research playback is explicit."""
     global HUD_HANDLE
     definitions = {
         'wfrl_recon_truth_path': bpy.props.StringProperty(name='真值 JSON（可选）',subtype='FILE_PATH'),
@@ -780,6 +795,8 @@ def register():
     }
     for name, prop in definitions.items():
         setattr(bpy.types.Scene,name,prop)
+    if not standalone:
+        return
     for handlers, handler in ((bpy.app.handlers.frame_change_post,_frame),(bpy.app.handlers.load_post,_loaded)):
         if handler not in handlers:
             handlers.append(handler)

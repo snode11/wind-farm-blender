@@ -57,7 +57,6 @@ class Placement:
 
 
 def shutdown(restore=True):
-    global _ACTIVE
     op = _ACTIVE
     if op:
         try:
@@ -114,7 +113,8 @@ class WFRL_OT_BoxPosition(bpy.types.Operator):
 
     def invoke(self, context, event):
         state=rig.pose(context.scene)
-        self.center=state['center'];self.yaw=state['housing_yaw_deg']
+        self.center=state['center']
+        self.yaw=state['housing_yaw_deg']
         return context.window_manager.invoke_props_dialog(self, width=360)
 
     def draw(self, context):
@@ -130,7 +130,8 @@ class WFRL_OT_BoxPosition(bpy.types.Operator):
             self.report({'INFO'}, '盒体已整体移动；现在可分别调整 C1–C3 俯仰角')
             return {'FINISHED'}
         except (ValueError, RuntimeError) as exc:
-            self.report({'ERROR'}, str(exc));return {'CANCELLED'}
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
 
 
 class WFRL_OT_BoxResetDefault(bpy.types.Operator):
@@ -162,14 +163,19 @@ class WFRL_OT_BoxPick(bpy.types.Operator):
 
     def invoke(self, context, event):
         global _ACTIVE
+        from .. import playback
         from .custom_cameras import installation_block_reason
         reason=installation_block_reason(context.scene)
-        if reason:self.report({'ERROR'},reason);return {'CANCELLED'}
+        if reason:
+            self.report({'ERROR'},reason)
+            return {'CANCELLED'}
         finish_view()
-        self.area=context.area;self.scene=context.scene;self.window=context.window;self.wm=context.window_manager
+        self.area=context.area
+        self.scene=context.scene
+        self.window=context.window
+        self.wm=context.window_manager
         self.region=next(r for r in self.area.regions if r.type=='WINDOW')
-        if context.screen.is_animation_playing:
-            bpy.ops.screen.animation_cancel(restore_frame=False)
+        playback.cancel(self.scene)
         # Reuse the existing external nacelle view, then detach its controller.
         bpy.ops.wfrl.custom_camera('INVOKE_DEFAULT',mode='LAYOUT')
         from . import custom_cameras as panel
@@ -201,7 +207,8 @@ class WFRL_OT_BoxPick(bpy.types.Operator):
             except (ReferenceError,RuntimeError):pass
             self.timer=None
         try:
-            self.area.header_text_set(None);self.area.tag_redraw()
+            self.area.header_text_set(None)
+            self.area.tag_redraw()
         except (ReferenceError,RuntimeError):pass
         if _ACTIVE == self:_ACTIVE=None
 
@@ -212,17 +219,23 @@ class WFRL_OT_BoxPick(bpy.types.Operator):
         if self.transaction.closed:return {'FINISHED'}
         if (context.scene != self.scene or not self.transaction.same_session()
                 or self.area.type!='VIEW_3D'):
-            shutdown(restore=self.transaction.same_session());return {'CANCELLED'}
+            shutdown(restore=self.transaction.same_session())
+            return {'CANCELLED'}
         if event.type in {'ESC','RIGHTMOUSE'} and event.value=='PRESS':
-            shutdown();return {'CANCELLED'}
+            shutdown()
+            return {'CANCELLED'}
         if event.type in {'RET','NUMPAD_ENTER'} and event.value=='PRESS':
             if self.transaction.ready and not self.transaction.error:
-                self.transaction.finish(confirm=True);self.cleanup();return {'FINISHED'}
+                self.transaction.finish(confirm=True)
+                self.cleanup()
+                return {'FINISHED'}
             return {'RUNNING_MODAL'}
         if event.type=='TIMER':
-            if context.screen.is_animation_playing:bpy.ops.screen.animation_cancel(restore_frame=False)
+            from .. import playback
+            playback.cancel(self.scene)
             if (self.scene.frame_current,self.scene.frame_subframe)!=self.transaction.frame:
-                shutdown();return {'CANCELLED'}
+                shutdown()
+                return {'CANCELLED'}
             return {'PASS_THROUGH'}
         if event.type in {'SPACE','LEFT_ARROW','RIGHT_ARROW','UP_ARROW','DOWN_ARROW','G','R','S','X','DEL','TAB'}:
             return {'RUNNING_MODAL'}
@@ -239,7 +252,8 @@ class WFRL_OT_BoxPick(bpy.types.Operator):
             rv=self.area.spaces.active.region_3d
             hit=rig.pick_surface(self.scene,region_2d_to_origin_3d(self.region,rv,xy),region_2d_to_vector_3d(self.region,rv,xy))
             if hit is None:
-                self.report({'WARNING'},'请选择 T1 机舱外壳');return {'RUNNING_MODAL'}
+                self.report({'WARNING'},'请选择 T1 机舱外壳')
+                return {'RUNNING_MODAL'}
             self.update(hit)
             return {'RUNNING_MODAL'}
         return {'PASS_THROUGH'}
@@ -250,14 +264,21 @@ class WFRL_OT_BoxAction(bpy.types.Operator):
     bl_label='调整盒体安装'
     action:StringProperty()
 
+    @classmethod
+    def poll(cls, context):
+        return _ACTIVE is not None and _ACTIVE.scene == context.scene
+
     def execute(self,context):
         op=_ACTIVE
-        if not op:return {'CANCELLED'}
+        if not op or op.scene != context.scene:
+            self.report({'WARNING'}, '请在正在安装盒体的场景中操作')
+            return {'CANCELLED'}
         if self.action=='CANCEL':shutdown()
         elif self.action=='CONFIRM':
             try:op.transaction.finish(confirm=True)
             except ValueError as exc:
-                self.report({'ERROR'},str(exc));return {'CANCELLED'}
+                self.report({'ERROR'},str(exc))
+                return {'CANCELLED'}
             op.cleanup()
         elif self.action in {'LEFT','RIGHT'}:
             op.wm.wfrl_box_spin += -15. if self.action=='LEFT' else 15.
@@ -267,3 +288,12 @@ class WFRL_OT_BoxAction(bpy.types.Operator):
 
 
 CLASSES=(WFRL_OT_BoxPosition,WFRL_OT_BoxResetDefault,WFRL_OT_BoxPick,WFRL_OT_BoxAction)
+
+
+def status_for(scene):
+    from ..home_state import TaskStatus
+    job = _ACTIVE
+    if job is None:
+        return TaskStatus('mount')
+    return TaskStatus('mount', True, job.scene == scene, 'PLACING',
+                      job.scene.name, getattr(job.transaction, 'error', ''), '')

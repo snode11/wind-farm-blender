@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 
-import bpy
+import bpy  # noqa: F401 -- Require Blender's runtime for this native smoke test.
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import wfrl_blender

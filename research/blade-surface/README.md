@@ -1,6 +1,6 @@
 # 叶片表面、纹理与材料点研究
 
-本研究关注固定相机 RGB 中的材料身份能否支持叶片几何约束，以及保存估计表面上的纹理是否具有可追溯依据。源码、研究结果和 Blender 显示分别使用自身输入与验收条件。项目源码入口为 [wind-farm-rl-all-work](https://github.com/snode11/wind-farm-blender/tree/wind-farm-rl-all-work)；资源与证据按[分发说明](../../docs/PUBLICATION.md)及 [project-resources-v1](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1) 恢复。
+本研究关注固定相机 RGB 中的材料身份能否支持叶片几何约束，以及保存估计表面上的纹理是否具有可追溯依据。源码、研究结果和 Blender 显示分别使用自身输入与验收条件。项目源码入口为 [main](https://github.com/snode11/wind-farm-blender/tree/main)；资源与证据按[分发说明](../../docs/PUBLICATION.md)及 [project-resources-v1](https://github.com/snode11/wind-farm-blender/releases/tag/project-resources-v1) 恢复。
 
 ## 实现与输入合同
 

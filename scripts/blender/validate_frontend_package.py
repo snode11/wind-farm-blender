@@ -25,6 +25,9 @@ REPOSITORY_ID = 'wfrl_frontend'
 MODULE = 'bl_ext.wfrl_frontend.wfrl_blender'
 EXIT_MEMORY_WARNING = re.compile(r'^Error: Not freed memory blocks: (?P<blocks>\d+), total unfreed memory (?P<mb>\d+(?:\.\d+)?) MB[ \t]*$', re.MULTILINE)
 ERROR_PATTERN = re.compile(r'Traceback \(most recent call last\)|(?:^|\n)(?:Error:|ERROR[ :]|FATAL[ :])|Segmentation fault|EXCEPTION_ACCESS_VIOLATION')
+WINDOWS_DEVICE_NAMES = {'con', 'prn', 'aux', 'nul'} | {
+    f'{prefix}{number}' for prefix in ('com', 'lpt') for number in range(1, 10)
+}
 
 
 def sha256(path):
@@ -37,18 +40,23 @@ def sha256(path):
 
 def safe_relative(name):
     relative = PurePosixPath(name)
-    if relative.is_absolute() or '..' in relative.parts or not relative.parts or '\\' in name:
+    if (relative.is_absolute() or '..' in relative.parts or not relative.parts
+            or any(character in name for character in '\\<>:"|?*')):
         raise ValueError(f'Unsafe inventory path: {name}')
+    for part in name.split('/'):
+        stem = part.partition('.')[0].rstrip(' ').casefold()
+        if part.endswith((' ', '.')) or stem in WINDOWS_DEVICE_NAMES:
+            raise ValueError(f'Unsafe inventory path: {name}')
     return relative
 
 
 def verify_archive(archive, inventory):
-    data = json.loads(Path(inventory).read_text())
+    data = json.loads(Path(inventory).read_text(encoding='utf-8'))
     actual = sha256(archive)
     if actual != data['archive_sha256']:
         raise ValueError('Archive SHA-256 differs from inventory')
     expected = {row['path']: row for row in data['files']}
-    if len(expected) != len(data['files']):
+    if len({name.casefold() for name in expected}) != len(data['files']):
         raise ValueError('Duplicate inventory path')
     with ZipFile(archive) as zipped:
         if sorted(zipped.namelist()) != sorted(expected):
@@ -86,7 +94,7 @@ def run_command(command, *, env, output, name, required_markers=(), timeout=240.
     log = output/'logs'/f'{name}.log'
     log.parent.mkdir(exist_ok=True)
     try:
-        completed = subprocess.run(command, cwd=output, env=env, text=True,
+        completed = subprocess.run(command, cwd=output, env=env, text=True, encoding='utf-8', errors='replace',
                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=timeout)
         content, code = completed.stdout, completed.returncode
     except subprocess.TimeoutExpired as exc:
@@ -165,7 +173,7 @@ def validate(args):
         from build_extension import build
         built = build(output/'package', dual_package=getattr(args, 'dual_package', None))
         inventory = verify_archive(built.archive, built.inventory)
-        checksum = built.checksum.read_text().strip().split()
+        checksum = built.checksum.read_text(encoding='utf-8').strip().split()
         assert checksum == [built.sha256, built.archive.name], 'checksum sidecar mismatch'
         result['package'] = {'archive': str(built.archive), 'sha256': built.sha256,
             'checksum': str(built.checksum), 'inventory': str(built.inventory),
@@ -182,22 +190,27 @@ def validate(args):
             ('BLENDER_USER_CONFIG', 'config'), ('BLENDER_USER_SCRIPTS', 'scripts'),
             ('BLENDER_USER_DATAFILES', 'datafiles'))}
         repository = profile/'extensions'
+        installed = repository/inventory['package_id']
         for directory in (*directories.values(), repository):
             directory.mkdir(parents=True)
         env = {key: value for key, value in os.environ.items()
                if not key.startswith('BLENDER_USER_') and key not in {'PYTHONPATH', 'WFRL_ADDON_ROOT', 'WFRL_ADDON_PATH', 'WFRL_ADDON_MODULE', 'WFRL_TEST_OUTPUT'}}
         overrides = {key: str(value) for key, value in directories.items()}
+        overrides.update(BLENDER_USER_RESOURCES=str(profile), BLENDER_USER_EXTENSIONS=str(repository))
         overrides['WFRL_ADDON_MODULE'] = MODULE
+        overrides['WFRL_EXPECTED_ADDON_ROOT'] = str(installed)
         env.update(overrides)
-        (output/'environment.json').write_text(json.dumps(overrides, indent=2))
+        (output/'environment.json').write_text(json.dumps(overrides, indent=2), encoding='utf-8')
         result['environment'] = overrides
         result['repository'] = str(repository)
         def command(name, values, markers=(), test_output=None):
             child_env = dict(env)
             if test_output:
-                test_output.mkdir(parents=True)
+                test_output.parent.mkdir(parents=True, exist_ok=True)
                 child_env['WFRL_TEST_OUTPUT'] = str(test_output)
-            row = run_command([str(args.blender), *values], env=child_env, output=output,
+            row = run_command([str(args.blender), '--disable-autoexec', '--python-exit-code', '1',
+                               '--python-expr', 'import sys; sys.dont_write_bytecode=True', *values],
+                              env=child_env, output=output,
                               name=name, required_markers=markers, timeout=args.timeout)
             result['commands'].append(row)
             save()
@@ -206,7 +219,7 @@ def validate(args):
             command(f'{kind}-probe', ['--background', '--python-exit-code', '1',
                 '--python', str(Path(__file__).resolve()), '--', '--inside-probe', kind,
                 '--repository', str(repository), '--output', str(probe_path)], [marker])
-            data = json.loads(probe_path.read_text())
+            data = json.loads(probe_path.read_text(encoding='utf-8'))
             assert data['status'] == 'PASS'
             return data
         command('repo-add', ['--command', 'extension', 'repo-add', REPOSITORY_ID,
@@ -214,19 +227,20 @@ def validate(args):
         result['checks']['repository_probe'] = probe('repo', 'FRONTEND_REPOSITORY_PROBE_PASS')
         command('install-file', ['--command', 'extension', 'install-file', '-r', REPOSITORY_ID,
                 '--enable', str(built.archive)], [f'Installed "{inventory["package_id"]}"'])
-        installed = repository/inventory['package_id']
         result['checks']['installed_inventory'] = verify_installed(installed, inventory)
         result['checks']['module_probe'] = probe('module', 'FRONTEND_INSTALLED_MODULE_PROBE_PASS')
         result['addon_path'] = result['checks']['module_probe']['addon_path']
         tests = (
             ('three-camera-default', 'three_camera_default_regression.py', 'THREE_CAMERA_DEFAULT_PASS', 'default-validation.json'),
             ('native-projection', 'native_camera_projection_regression.py', 'NATIVE_PROJECTION_PASS', 'native-projection-validation.json'),
+            ('radar-x100-detection-mode', 'radar_x100_detection_mode.py', 'X100_DETECTION_MODE_PASS', 'result.json'),
+            ('radar-x100-clearance', 'radar_x100_clearance.py', 'X100_CLEARANCE_PASS', 'result.json'),
         )
         for name, filename, marker, datafile in tests:
             destination = output/'regressions'/name
             command(name, ['--background', '--python-exit-code', '1', '--python',
                 str(ROOT/'blender_frontend/tests/blender'/filename)], [marker], destination)
-            data = json.loads((destination/datafile).read_text())
+            data = json.loads((destination/datafile).read_text(encoding='utf-8'))
             assert data['status'] == 'PASS' and data['module'] == MODULE, data
             assert Path(data['addon_path']).resolve().is_relative_to(installed), data['addon_path']
             result['checks'][name] = data

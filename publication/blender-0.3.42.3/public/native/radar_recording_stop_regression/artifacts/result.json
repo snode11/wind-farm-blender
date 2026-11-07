@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "module_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "checks": [
+    {
+      "action": "stop",
+      "retained_ownership": true,
+      "retried": true,
+      "complete_after_worker_exit": true
+    },
+    {
+      "action": "load_pre",
+      "retained_ownership": true,
+      "retried": true,
+      "complete_after_worker_exit": true
+    },
+    {
+      "action": "unregister",
+      "retained_ownership": true,
+      "retried": true,
+      "complete_after_worker_exit": true
+    }
+  ]
+}

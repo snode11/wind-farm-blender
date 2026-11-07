@@ -1,0 +1,38 @@
+{
+  "schema": "wfrl.host-validation.v1",
+  "status": "PASS",
+  "scope": "Frontend source host checks; no real backend training, media encoding, viewport performance or scientific acceptance.",
+  "python": "3.13.9",
+  "numpy": "2.3.5",
+  "passed": 1196,
+  "skipped": 4,
+  "failed": 0,
+  "errors": 0,
+  "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=blender_frontend:. python -m pytest -q -p no:cacheprovider blender_frontend/tests",
+  "log": "publication/blender-0.3.37/host-tests-supported.log",
+  "junit_xml": "publication/blender-0.3.37/host-tests-supported.xml",
+  "skips": [
+    {
+      "test": "blender_frontend.tests.test_blade_models.BladeModelTests.test_regeneration_matches_packaged_alternate_asset",
+      "reason": "Rootkink regeneration requires projects/commercial-rootkink-reference/template"
+    },
+    {
+      "test": "blender_frontend.tests.test_blade_recon_data.BundledProvenanceTests.test_geometry_equals_original_source_import",
+      "reason": "Original boss source is unavailable; portable bundle hash tested separately"
+    },
+    {
+      "test": "blender_frontend.tests.test_tip_deflection.DeflectionTests.test_retained_vtp_independent_transport",
+      "reason": "Original VTP is not distributed with the offline release"
+    },
+    {
+      "test": "blender_frontend.tests.test_video_output.test_stream_decode_failure_cleanup_restart_and_busy_port",
+      "reason": "Set WFRL_MEDIAMTX for actual RTSP"
+    }
+  ],
+  "native_source_home_entry": {
+    "status": "PASS",
+    "command": "Blender --background --factory-startup --python-exit-code 1 --python blender_frontend/tests/blender/home_entry_smoke.py",
+    "log": "publication/blender-0.3.37/home-entry-smoke.log",
+    "scope": "Actual RNA and registered operators with a layout adapter; no visible UI or physical mouse input."
+  }
+}

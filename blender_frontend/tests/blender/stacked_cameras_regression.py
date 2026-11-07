@@ -3,7 +3,6 @@
 from pathlib import Path
 import json
 from dataclasses import replace
-import math
 import os
 import sys
 import bpy

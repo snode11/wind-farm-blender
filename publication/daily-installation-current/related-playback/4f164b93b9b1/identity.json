@@ -1,0 +1,5 @@
+{
+  "archive_sha256": "4f164b93b9b1986b9297f0b1c165d49276ab8075f2803708e17ed652c149c0dd",
+  "version": "0.3.39",
+  "scope": "Viewport POST_PIXEL observations apply only to the archive identified by package-inventory.json; no current daily-installation or scientific acceptance."
+}

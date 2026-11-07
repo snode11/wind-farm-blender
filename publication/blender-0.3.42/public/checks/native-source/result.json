@@ -1,0 +1,975 @@
+{
+  "status": "PASS",
+  "final": true,
+  "verification_layer": "SOURCE_RUNTIME",
+  "blender": "/Applications/Blender.app/Contents/MacOS/Blender",
+  "package_inputs": {
+    "builtin_mappo": {
+      "path": "/project/blender_frontend/wfrl_blender/assets/mappo",
+      "manifest_sha256": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde"
+    },
+    "builtin_dual_beam": {
+      "path": "/project/blender_frontend/wfrl_blender/assets/dual_beam",
+      "manifest_sha256": "9eea6aa1bb5c44d5b307a63017be7b81c8e43ea092f92cfb30822d9fc63b5645"
+    },
+    "builtin_split_example": {
+      "path": "/project/blender_frontend/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+      "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b"
+    }
+  },
+  "tests": [
+    {
+      "script": "farm_reopen_settings_regression.py",
+      "mode": "background",
+      "scope": "Native FarmFlex save/reopen preserves saved mapping, output settings and source identity.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 4.086775208939798,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/project/blender_frontend/tests/blender/farm_reopen_settings_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "variant": "farm",
+            "blender": "5.2.1 LTS",
+            "scope": "Source; isolated background process; native save and reopen operators",
+            "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+            "before": {
+              "fps": 24,
+              "fps_base": 1.0010000467300415,
+              "frame_start": 11,
+              "frame_end": 101,
+              "frame_step": 2,
+              "sync_mode": "NONE",
+              "use_preview_range": true,
+              "frame_preview_start": 21,
+              "frame_preview_end": 81,
+              "frame_current": 40,
+              "frame_subframe": 0.25,
+              "timebase": 90.0,
+              "turbine": "T2",
+              "sample": {
+                "time_s": 117.325,
+                "motion": {
+                  "time_s": 117.325,
+                  "azimuth_deg": 7234.728805500003,
+                  "pitch_deg": [
+                    1.62253308,
+                    1.62253308,
+                    1.62253308
+                  ],
+                  "yaw_deg": 0.000917776022,
+                  "rotor_speed_rpm": 11.2103987,
+                  "nacelle_position_m": [
+                    504.36246642719306,
+                    -0.05948200297469783,
+                    87.59897448324887
+                  ],
+                  "nacelle_orientation_deg": [
+                    0.08518774122168922,
+                    0.3899370089793358,
+                    0.0011836225085946643
+                  ],
+                  "nacelle_transform": [
+                    [
+                      0.9999768412040176,
+                      -1.0539432207184374e-05,
+                      0.006805655336223639,
+                      -0.233708980260115
+                    ],
+                    [
+                      2.0657631461678166e-05,
+                      0.999998894698974,
+                      -0.001486665427209265,
+                      0.07074988844883379
+                    ],
+                    [
+                      -0.006805632145316327,
+                      0.001486771586548004,
+                      0.9999757361463087,
+                      0.0010999968322238374
+                    ]
+                  ]
+                },
+                "measurement": null,
+                "measurement_age_s": null,
+                "status": "waiting",
+                "statistics": {
+                  "expected_samples": 0,
+                  "valid_samples": 0,
+                  "valid_ratio": null,
+                  "mae_m": null,
+                  "max_abs_error_m": null,
+                  "p95_abs_error_m": null,
+                  "max_positive_bias_m": null,
+                  "passage_count": 0,
+                  "missed_passage_count": 0
+                }
+              }
+            },
+            "after": {
+              "fps": 24,
+              "fps_base": 1.0010000467300415,
+              "frame_start": 11,
+              "frame_end": 101,
+              "frame_step": 2,
+              "sync_mode": "NONE",
+              "use_preview_range": true,
+              "frame_preview_start": 21,
+              "frame_preview_end": 81,
+              "frame_current": 40,
+              "frame_subframe": 0.25,
+              "timebase": 90.0,
+              "turbine": "T2",
+              "sample": {
+                "time_s": 117.325,
+                "motion": {
+                  "time_s": 117.325,
+                  "azimuth_deg": 7234.728805500003,
+                  "pitch_deg": [
+                    1.62253308,
+                    1.62253308,
+                    1.62253308
+                  ],
+                  "yaw_deg": 0.000917776022,
+                  "rotor_speed_rpm": 11.2103987,
+                  "nacelle_position_m": [
+                    504.36246642719306,
+                    -0.05948200297469783,
+                    87.59897448324887
+                  ],
+                  "nacelle_orientation_deg": [
+                    0.08518774122168922,
+                    0.3899370089793358,
+                    0.0011836225085946643
+                  ],
+                  "nacelle_transform": [
+                    [
+                      0.9999768412040176,
+                      -1.0539432207184374e-05,
+                      0.006805655336223639,
+                      -0.233708980260115
+                    ],
+                    [
+                      2.0657631461678166e-05,
+                      0.999998894698974,
+                      -0.001486665427209265,
+                      0.07074988844883379
+                    ],
+                    [
+                      -0.006805632145316327,
+                      0.001486771586548004,
+                      0.9999757361463087,
+                      0.0010999968322238374
+                    ]
+                  ]
+                },
+                "measurement": null,
+                "measurement_age_s": null,
+                "status": "waiting",
+                "statistics": {
+                  "expected_samples": 0,
+                  "valid_samples": 0,
+                  "valid_ratio": null,
+                  "mae_m": null,
+                  "max_abs_error_m": null,
+                  "p95_abs_error_m": null,
+                  "max_positive_bias_m": null,
+                  "passage_count": 0,
+                  "missed_passage_count": 0
+                }
+              }
+            },
+            "mismatched_identity_status": "回放数据未就绪：保存场景与结果包不匹配，不能替换模型或数据",
+            "sha256": {
+              "farm_flex.py": "89f9d93b66f1f3826937563a24647962880e5e506df7b332954e43dc10b02f26",
+              "clearance_replay.py": "3adedf09a85f69b16090052592f73ac0a08cacb08b76fa178b0e43b321f1a6b6"
+            }
+          },
+          "log": "/project/publication/blender-0.3.42/public/checks/native-source/farm_reopen_settings_regression/run/blender.log",
+          "report": "/project/publication/blender-0.3.42/public/checks/native-source/farm_reopen_settings_regression/artifacts/result.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "farm_capture_transaction_regression.py",
+      "mode": "background",
+      "scope": "Native RNA capture ownership with replay/image/playback adapters; no GPU pixels or native playback.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 0.9792790000792593,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/project/blender_frontend/tests/blender/farm_capture_transaction_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "blender": "5.2.1 LTS",
+            "module": "/project/blender_frontend/wfrl_blender/__init__.py",
+            "scope": "real RNA ownership and capture transaction; replay, image and playback adapters; no GPU proof",
+            "checks": [
+              {
+                "action": "success",
+                "original_playing": false,
+                "status": "complete",
+                "completed_samples": 2,
+                "playback_requests": [
+                  false,
+                  false,
+                  false
+                ],
+                "evaluations": [
+                  119.5,
+                  120.0,
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_1c91a87ec9"
+              },
+              {
+                "action": "cancel",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false,
+                  false,
+                  false
+                ],
+                "evaluations": [
+                  119.5,
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_529c8fccb4"
+              },
+              {
+                "action": "frame_start",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_f9103cbbca"
+              },
+              {
+                "action": "timebase",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_9752127174"
+              },
+              {
+                "action": "removed_timebase",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_44636dab34"
+              },
+              {
+                "action": "layer",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_20ee050e7c"
+              },
+              {
+                "action": "delete_layer",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_ca1cd9eba6"
+              },
+              {
+                "action": "scene",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_b32a0eed47"
+              },
+              {
+                "action": "foreign_context",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_801e5f152e"
+              },
+              {
+                "action": "render_layer",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5,
+                  120.0
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_bf21d008a2"
+              },
+              {
+                "action": "render_timebase",
+                "original_playing": false,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5,
+                  120.0
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_1ca2ce26ec"
+              },
+              {
+                "action": "success",
+                "original_playing": true,
+                "status": "complete",
+                "completed_samples": 2,
+                "playback_requests": [
+                  false,
+                  false,
+                  true
+                ],
+                "evaluations": [
+                  119.5,
+                  120.0,
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_c270eca460"
+              },
+              {
+                "action": "cancel",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false,
+                  false,
+                  true
+                ],
+                "evaluations": [
+                  119.5,
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_2d11bfb277"
+              },
+              {
+                "action": "frame_start",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_f1c86fdcbc"
+              },
+              {
+                "action": "timebase",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_5aa0a94e3a"
+              },
+              {
+                "action": "removed_timebase",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_2dc6f2a306"
+              },
+              {
+                "action": "layer",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_a159c6dc93"
+              },
+              {
+                "action": "delete_layer",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_7ea0937602"
+              },
+              {
+                "action": "scene",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_a0142e1f79"
+              },
+              {
+                "action": "foreign_context",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_cebf9fc394"
+              },
+              {
+                "action": "render_layer",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5,
+                  120.0
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_8f8144044a"
+              },
+              {
+                "action": "render_timebase",
+                "original_playing": true,
+                "status": "incomplete",
+                "completed_samples": 1,
+                "playback_requests": [
+                  false
+                ],
+                "evaluations": [
+                  119.5,
+                  120.0
+                ],
+                "capture_directory": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/capture_20261031_120824_323b757267"
+              }
+            ]
+          },
+          "log": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/run/blender.log",
+          "report": "/project/publication/blender-0.3.42/public/checks/native-source/farm_capture_transaction_regression/artifacts/result.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "split_mappo_texture_rollback_regression.py",
+      "mode": "background",
+      "scope": "Native same-source allocation rollback, external ownership and import retry; no rendered pixels.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 16.062813833006658,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/project/blender_frontend/tests/blender/split_mappo_texture_rollback_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "blender": "5.2.1 LTS",
+            "module": "/project/blender_frontend/wfrl_blender/split_mappo_texture.py",
+            "checks": [
+              {
+                "name": "uv_failure_after_first_mesh",
+                "status": "PASS",
+                "inventory_restored": true,
+                "metadata_restored": true
+              },
+              {
+                "name": "allocation_before_helper_return_materials",
+                "status": "PASS",
+                "inventory_restored": true,
+                "metadata_restored": true
+              },
+              {
+                "name": "allocation_before_helper_return_images",
+                "status": "PASS",
+                "inventory_restored": true,
+                "metadata_restored": true
+              },
+              {
+                "name": "allocation_before_helper_return_meshes",
+                "status": "PASS",
+                "inventory_restored": true,
+                "metadata_restored": true
+              },
+              {
+                "name": "allocation_before_helper_return_objects",
+                "status": "PASS",
+                "inventory_restored": true,
+                "metadata_restored": true
+              },
+              {
+                "name": "allocation_before_helper_return_shape_keys",
+                "status": "PASS",
+                "inventory_restored": true,
+                "metadata_restored": true
+              },
+              {
+                "name": "allocation_before_helper_return_actions",
+                "status": "PASS",
+                "inventory_restored": true,
+                "metadata_restored": true
+              },
+              {
+                "name": "allocation_before_helper_return_cameras",
+                "status": "PASS",
+                "inventory_restored": true,
+                "metadata_restored": true
+              },
+              {
+                "name": "allocation_before_helper_return_texts",
+                "status": "PASS",
+                "inventory_restored": true,
+                "metadata_restored": true
+              },
+              {
+                "name": "allocation_before_helper_return_node_groups",
+                "status": "PASS",
+                "inventory_restored": true,
+                "metadata_restored": true
+              },
+              {
+                "name": "activation_after_inspection_nodes",
+                "status": "PASS",
+                "inventory_restored": true,
+                "metadata_restored": true
+              },
+              {
+                "name": "copied_camera_data_failure_preserves_shared_source",
+                "status": "PASS",
+                "inventory_restored": true,
+                "metadata_restored": true
+              },
+              {
+                "name": "activation_preserves_existing_shared_inspection_group",
+                "status": "PASS",
+                "inventory_restored": true,
+                "metadata_restored": true
+              },
+              {
+                "name": "protect_fake_user_materials",
+                "status": "PASS",
+                "retry_reclaims_released_resource": true
+              },
+              {
+                "name": "protect_fake_user_images",
+                "status": "PASS",
+                "retry_reclaims_released_resource": true
+              },
+              {
+                "name": "protect_fake_user_meshes",
+                "status": "PASS",
+                "retry_reclaims_released_resource": true
+              },
+              {
+                "name": "protect_fake_user_objects",
+                "status": "PASS",
+                "retry_reclaims_released_resource": true
+              },
+              {
+                "name": "protect_fake_user_shape_keys",
+                "status": "PASS",
+                "retry_reclaims_released_resource": true
+              },
+              {
+                "name": "protect_fake_user_actions",
+                "status": "PASS",
+                "retry_reclaims_released_resource": true
+              },
+              {
+                "name": "protect_fake_user_cameras",
+                "status": "PASS",
+                "retry_reclaims_released_resource": true
+              },
+              {
+                "name": "protect_shared_mesh",
+                "status": "PASS"
+              },
+              {
+                "name": "protect_external_object_link",
+                "status": "PASS"
+              },
+              {
+                "name": "protect_unregistered_third_party",
+                "status": "PASS"
+              },
+              {
+                "name": "protect_external_scene_direct_camera_reference",
+                "status": "PASS"
+              },
+              {
+                "name": "protect_external_text_user",
+                "status": "PASS"
+              },
+              {
+                "name": "deleted_scene_owned_resource_cleanup",
+                "status": "PASS"
+              },
+              {
+                "name": "retry_import_commits_three_full_601_sample_blades",
+                "status": "PASS",
+                "shared_source_context_preserved": true,
+                "repeated_ensure_reuses_session": true
+              },
+              {
+                "name": "file_load_discards_pending_references_and_restores_saved_import",
+                "status": "PASS"
+              }
+            ],
+            "scope": "Native datablock rollback, external ownership and import retry; no rendered-pixel or performance acceptance"
+          },
+          "log": "/project/publication/blender-0.3.42/public/checks/native-source/split_mappo_texture_rollback_regression/run/blender.log",
+          "report": "/project/publication/blender-0.3.42/public/checks/native-source/split_mappo_texture_rollback_regression/artifacts/result.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "animation_render_regression.py",
+      "mode": "background",
+      "scope": "Native short PNG renders, cancellation and source preservation; not full-clip FPS.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 6.205953707918525,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/project/blender_frontend/tests/blender/animation_render_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "blender": "5.2.1 LTS",
+            "module": "/project/blender_frontend/wfrl_blender/__init__.py",
+            "complete_frames": 3,
+            "source_preserved": true,
+            "cancellation": true,
+            "output": "/project/publication/blender-0.3.42/public/checks/native-source/animation_render_regression/artifacts/animation-441c76d22123",
+            "cancelled": "/project/publication/blender-0.3.42/public/checks/native-source/animation_render_regression/artifacts/animation-ceefb6e6d270",
+            "mappo_output": "/project/publication/blender-0.3.42/public/checks/native-source/animation_render_regression/artifacts/animation-34d04eb585f7",
+            "recorded_motion_frames": [
+              1,
+              301,
+              601
+            ],
+            "compositor_output_guard": true,
+            "original_camera_quality_snapshot": true
+          },
+          "log": "/project/publication/blender-0.3.42/public/checks/native-source/animation_render_regression/run/blender.log",
+          "report": "/project/publication/blender-0.3.42/public/checks/native-source/animation_render_regression/artifacts/result.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "scene_playback_lifecycle_regression.py",
+      "mode": "background",
+      "scope": "Native background data checks; visible interaction not verified.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 4.482146541937254,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/project/blender_frontend/tests/blender/scene_playback_lifecycle_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "scope": "isolated background Blender",
+            "addon_module": "wfrl_blender",
+            "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+            "ready_scene": "A_MAPPO",
+            "failed_scene": "B_FULL_COPY",
+            "failed_status": "回放数据未就绪：Scene lacks required FarmFlex objects: WFRL.Turbine.T1.YawRoot, WFRL.Turbine.T1.Rotor, WFRL.Turbine.T1.Tower, WFRL.Turbine.T1.Blade1, WFRL.Turbine.T1.Blade2, WFRL.Turbine.T1.Blade3, WFRL.Turbine.T2.YawRoot, WFRL.Turbine.T2.Rotor, WFRL.Turbine.T2.Tower, WFRL.Turbine.T2.Blade1, WFRL.Turbine.T2.Blade2, WFRL.Turbine.T2.Blade3, WFRL.Turbine.T3.YawRoot, WFRL.Turbine.T3.Rotor, WFRL.Turbine.T3.Tower, WFRL.Turbine.T3.Blade1, WFRL.Turbine.T3.Blade2, WFRL.Turbine.T3.Blade3",
+            "mesh_change_max_m": 0.2769445519647368,
+            "frame": 181,
+            "time_s": 120.0,
+            "linked_scene_rejected": true
+          },
+          "log": "/project/publication/blender-0.3.42/public/checks/native-source/scene_playback_lifecycle_regression/run/blender.log",
+          "report": "/project/publication/blender-0.3.42/public/checks/native-source/scene_playback_lifecycle_regression/artifacts/checks.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "manual_control_regression.py",
+      "mode": "background",
+      "scope": "Native background data checks; visible interaction not verified.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 4.719572417088784,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/project/blender_frontend/tests/blender/manual_control_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": true
+          },
+          "script_result": {
+            "status": "PASS",
+            "scope": "Isolated background Blender software regression",
+            "addon_module": "wfrl_blender",
+            "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+            "source_scene": "Manual Control Source MAPPO",
+            "manual_scene": "风机手动控制",
+            "isolated_meshes": 56,
+            "isolated_materials": 10,
+            "yaw_pitch_axes": true,
+            "individual_pitch": true,
+            "rpm_phase_continuity": true,
+            "pause_stop_reset": true,
+            "all_targets": true,
+            "demo_writer_guards": true,
+            "demo_reload_isolation": true,
+            "linked_scene_rejected": true,
+            "save_reopen_paused": true,
+            "source_viewport_restore": true,
+            "source_viewport_count": 1,
+            "demo_mesh_change_max_m": 0.2769445776939392,
+            "unregister_timer_cleanup": true
+          },
+          "log": "/project/publication/blender-0.3.42/public/checks/native-source/manual_control_regression/run/blender.log",
+          "report": "/project/publication/blender-0.3.42/public/checks/native-source/manual_control_regression/artifacts/checks.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "manual_control_state_regression.py",
+      "mode": "background",
+      "scope": "Native background data checks; visible interaction not verified.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 1.2873406669823453,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/project/blender_frontend/tests/blender/manual_control_state_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": true
+          },
+          "script_result": {
+            "status": "PASS",
+            "scope": "Isolated background Blender native software regression",
+            "addon_module": "wfrl_blender",
+            "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+            "blender": "5.2.1 LTS",
+            "tests_run": 14,
+            "failures": [],
+            "errors": []
+          },
+          "log": "/project/publication/blender-0.3.42/public/checks/native-source/manual_control_state_regression/run/blender.log",
+          "report": "/project/publication/blender-0.3.42/public/checks/native-source/manual_control_state_regression/artifacts/checks.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "manual_rate_pitch_regression.py",
+      "mode": "background",
+      "scope": "Native background data checks; visible interaction not verified.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 1.3138546249829233,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/project/blender_frontend/tests/blender/manual_rate_pitch_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": true
+          },
+          "script_result": {
+            "status": "PASS",
+            "passed": true,
+            "tests": 9,
+            "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+            "blender": "5.2.1 LTS",
+            "failures": [],
+            "errors": []
+          },
+          "log": "/project/publication/blender-0.3.42/public/checks/native-source/manual_rate_pitch_regression/run/blender.log",
+          "report": "/project/publication/blender-0.3.42/public/checks/native-source/manual_rate_pitch_regression/artifacts/result.json"
+        }
+      ],
+      "status": "PASS"
+    }
+  ],
+  "temporary_paths": [
+    "/validation-tmp/wfrl-regressions-r_gwi0ol"
+  ],
+  "visible_processes": "serial, independent factory-startup profiles",
+  "counts": {
+    "PASS": 8
+  }
+}

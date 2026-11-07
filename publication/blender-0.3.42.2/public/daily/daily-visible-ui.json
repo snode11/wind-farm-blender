@@ -1,0 +1,24 @@
+{
+  "start": 1031408.81020925,
+  "entry_saved": true,
+  "entry_shot": [
+    "FINISHED"
+  ],
+  "status": "OBSERVED",
+  "output_shot": [
+    "FINISHED"
+  ],
+  "draw_count": 4,
+  "draw_error": "",
+  "view": "SENSOR",
+  "color": "VELOCITY",
+  "gpu_backend": "METAL",
+  "gpu_vendor": "Apple M5 Pro",
+  "scene": "Scene",
+  "source": "GEOMETRY_SIMULATION",
+  "validity": "VALID",
+  "sequence": 0,
+  "points": 170,
+  "source_time": 117.0,
+  "frame_is_session_frame": true
+}

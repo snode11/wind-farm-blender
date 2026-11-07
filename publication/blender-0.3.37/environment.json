@@ -1,0 +1,6 @@
+{
+  "BLENDER_USER_CONFIG": "/path/to/wind-farm-blender/publication/blender-0.3.37/profile/config",
+  "BLENDER_USER_SCRIPTS": "/path/to/wind-farm-blender/publication/blender-0.3.37/profile/scripts",
+  "BLENDER_USER_DATAFILES": "/path/to/wind-farm-blender/publication/blender-0.3.37/profile/datafiles",
+  "WFRL_ADDON_MODULE": "bl_ext.wfrl_frontend.wfrl_blender"
+}

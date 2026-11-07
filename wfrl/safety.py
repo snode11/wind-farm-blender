@@ -347,17 +347,10 @@ class SafetyLimiter:
                     f"基线在 {pm[i]:.2f}°，外部 {cmd_abs[i]:.2f}° 无效"))
 
     def _torque_semantics(self, v, measure, evs):
-        """转矩**完全顶替**基线（DISCON.F90:440），合法值锚定在基线 VS 曲线上。
+        """向基线 VS 包线修正转矩，受单步及累加指令边界约束。
 
-        双向包线，替换旧的单向托底。旧逻辑只防"转矩偏低→超速"，漏了另一头：
-        转矩偏高→转子减速→叶尖速比掉到 ~2、BEM 关闭、气动没了→转子失速停转
-        （下游机组 T2/T3 在尾流里正是这样被刹停的）。而且旧的把绝对转矩托到
-        `floor-base`（可能上千），会被 driver 每步 ±1e3 的裁剪挡回去，形同虚设。
-
-        新逻辑：从回读转速反算基线 VS 会下发的转矩 `t_vs`（维持最优 TSR 的值），
-        把绝对转矩限制在 `[t_vs·(1−LO), t_vs·(1+HI)]`。返回的是**增量**，且因为
-        策略侧动作已限在 ±1e3，本方法输出的增量也在 ±1e3 内 —— 不会再被 driver
-        的裁剪覆盖。每步都执行 ⇒ 绝对转矩不会跑出包线，也就不会失速/超速。
+        当前值距包线过远时只能逐步接近，不能保证一步进入包线。
+        事件和内部状态使用 Driver 可提交的 float32 增量；实际转矩仍取决于后端。
         """
         tq = np.asarray((measure or {}).get("torque",
                                             np.full(self.n, np.nan)), float)
@@ -368,18 +361,23 @@ class SafetyLimiter:
         t_lo = (1.0 - TORQUE_ENV_LO) * t_vs
         t_hi = (1.0 + TORQUE_ENV_HI) * t_vs
         target = np.clip(base + v, t_lo, t_hi)                 # 限进包线的绝对值
-        adj = target - base                                    # 对应的合法增量
-        changed = np.abs(adj - v) > 1e-6
+        lo, hi = STATE_BOUND["torque"]
+        bound = STEP_BOUND["torque"]
+        lower = np.maximum(-bound, lo - self.state["torque"])
+        upper = np.minimum(bound, hi - self.state["torque"])
+        adj = np.clip(target - base, lower, upper).astype(np.float32).astype(float)
+        changed = (np.abs(target - (base + v)) > 1e-6) | (np.abs(adj - v) > 1e-6)
         for i in np.where(changed)[0]:
             over = (base[i] + v[i]) > t_hi[i]
+            incomplete = not t_lo[i] - 1e-6 <= base[i] + adj[i] <= t_hi[i] + 1e-6
             evs.append(Event(
                 self._step, self.ids[i], "torque",
                 "转矩超运行上限（防失速）" if over else "转矩低于运行下限（防超速）",
-                float(base[i] + v[i]), float(target[i]), "block",
+                float(v[i]), float(adj[i]), "warn" if incomplete else "block",
                 f"基线 VS 在 {rpm[i]:.2f} rpm 下给 {t_vs[i]:.0f} N·m，"
-                f"合法带 [{t_lo[i]:.0f}, {t_hi[i]:.0f}]；"
-                + ("偏高转子减速会失速（TSR→2 时 BEM 关闭）"
-                   if over else "偏低转子加速会超速")))
+                f"包线 [{t_lo[i]:.0f}, {t_hi[i]:.0f}]；"
+                f"目标 {target[i]:.0f}，本步可达 {base[i] + adj[i]:.0f} N·m"
+                + ("；受单步或累加边界限制，尚未进入包线" if incomplete else "")))
         return adj
 
     # ---- 汇总 ----------------------------------------------------------

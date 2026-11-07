@@ -1,26 +1,32 @@
-"""Explicit, cancellable capture transactions. No background threads or file saves.
+"""Explicit capture with main-thread GPU access and detached PNG workers.
 
 A sequence evaluates the existing FarmFlex geometry without recording telemetry
-or comparison trails. Each sample is drawn synchronously; event loop yields only
-between complete groups. Files stay incomplete until the entire request succeeds.
+or comparison trails. One image group is encoded at a time while the event loop
+remains available. Files stay incomplete until every group and source guard pass.
 """
 from contextlib import contextmanager
+from collections import OrderedDict
 from datetime import datetime
 from pathlib import Path
-import hashlib
+from . import performance
 import json
 import math
 import struct
 import uuid
 import zlib
 import time
+import threading
+import weakref
 
 from . import custom_camera_diagnostics as diagnostics
 
 from . import camera_projection as projection, custom_cameras as core
-from . import custom_camera_preview as preview
+from . import custom_camera_preview as preview, playback
+from .atomic_json import write_json
 
 _ACTIVE = None
+_TERMINALS = OrderedDict()
+_WRITERS = globals().get('_WRITERS', weakref.WeakSet())
 
 
 def active():
@@ -30,11 +36,17 @@ def active():
 def progress():
     if not active():
         return ''
-    job = _ACTIVE
+    return _progress(_ACTIVE)
+
+
+def _progress(job):
+    if getattr(job, '_finish_result', None) is not None:
+        return '正在结束图像写入…'
     total = len(job.times)
     text = f'已完成 {job.index}/{total} 组'
     if job.in_group:
-        text += f'；正在生成第 {job.index+1}/{total} 组'
+        work = '压缩并写入' if job._writer is not None else '生成'
+        text += f'；正在{work}第 {job.index+1}/{total} 组'
     elif job.index < total:
         text += f'；下一组 {job.index+1}/{total}'
     if job.index < total:
@@ -42,13 +54,7 @@ def progress():
     return text + ('；取消请求已接受，将在当前组完成后停止' if job.cancel_requested else '；Esc / 取消将在当前组完成后生效')
 
 
-def write_json(path, payload):
-    path = Path(path)
-    temp = path.with_suffix(path.suffix + '.tmp')
-    temp.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False)+'\n', encoding='utf-8')
-    temp.replace(path)
-
-
+@performance.timed("camera.write_png")
 def write_png(path, width, height, rgba_bottom_up):
     """Display transform already applied by GPU. Only row reversal, no gamma pass."""
     if len(rgba_bottom_up) != width * height * 4:
@@ -61,6 +67,34 @@ def write_png(path, width, height, rgba_bottom_up):
                + chunk(b'sRGB',b'\0') + chunk(b'IDAT',zlib.compress(rows,6)) + chunk(b'IEND',b''))
     with Path(path).open('xb') as stream:
         stream.write(payload)
+
+
+class ImageWriter:
+    """Own only detached pixel bytes and paths; never access Blender or GPU data."""
+    def __init__(self, images):
+        self.images = tuple(images)
+        self.done = threading.Event()
+        self.cancelled = threading.Event()
+        self.error = None
+        self.thread = threading.Thread(target=self._write, name='wfrl-camera-png', daemon=True)
+        _WRITERS.add(self)
+        self.thread.start()
+
+    def _write(self):
+        try:
+            for path, width, height, pixels in self.images:
+                if self.cancelled.is_set():
+                    break
+                path.parent.mkdir(exist_ok=True)
+                write_png(path, width, height, pixels)
+        except Exception as exc:
+            self.error = exc
+        finally:
+            self.images = ()
+            self.done.set()
+
+    def cancel(self):
+        self.cancelled.set()
 
 
 def _matrix(matrix):
@@ -81,6 +115,8 @@ def preflight(context, times=None):
     errors = []
     if active():
         errors.append('已有图像采集事务')
+    elif any(writer.thread.is_alive() for writer in tuple(_WRITERS)):
+        errors.append('上一组图像正在结束写盘，请稍后重试')
     if any(obj.get('wfrl_custom_draft') for obj in scene.objects):
         errors.append('请先确认或取消相机草稿')
     reason = installation_block_reason(scene)
@@ -159,11 +195,24 @@ def readonly_frame_handlers():
 
 
 class Capture:
+    @property
+    def closed(self):
+        if getattr(self, '_finish_result', None) is not None:
+            self._publish_finish()
+        return self._closed
+
+    @closed.setter
+    def closed(self, value):
+        self._closed = value
+
     def __init__(self, context, directory, times=None):
         global _ACTIVE
-        import bpy
         from .panels.custom_cameras import session_identity, installation_block_reason, _ACTIVE as controller
         from . import farm_flex, clearance_replay
+        from .home_state import can_start
+        allowed, reason = can_start('camera_capture', context.scene)
+        if not allowed:
+            raise ValueError(reason)
         require_preflight(context, times)
         if controller and controller.stage not in {'WATCH','LAYOUT'}:
             raise ValueError('请先确认或取消相机草稿')
@@ -190,6 +239,11 @@ class Capture:
         self.reader = self.farm.readers['T1'] if self.farm else clearance_replay.reader_for(self.scene)
         self.times = [self.time] if times is None else list(times)
         self.sequence = times is not None
+        self.farm_sequence = (self.sequence and self.farm is not None
+                              and self.scene.get('wfrl_scene_kind') != 'manual')
+        self.view_layer = context.view_layer if self.farm_sequence else None
+        self.time_mapping = self._time_mapping() if self.farm_sequence else None
+        self._context_invalidated = False
         self.render_target = preview.RenderTargetPool() if self.sequence else None
         if not self.times:
             raise ValueError('时间清单为空')
@@ -199,9 +253,10 @@ class Capture:
             if any(not isinstance(t,(int,float)) or not math.isfinite(t)
                    or t < self.farm.times[0] or t > self.farm.times[-1] for t in self.times):
                 raise ValueError(f'序列时间必须位于 {self.farm.times[0]}–{self.farm.times[-1]} s')
-        self.playing = bool(self.window.screen.is_animation_playing)
+        self.playing = bool(self.window and playback.is_playing(self.scene))
         self.closed, self.index, self.error = False, 0, ''
         self.in_group, self.cancel_requested = False, False
+        self._writer = self._pending_records = None
         self.cancel_accepted_at = None
         self.cancel_stopped_at = None
         self.capture_id = uuid.uuid4().hex
@@ -209,6 +264,7 @@ class Capture:
         self.original_time_property = self.scene.get('wfrl_clearance_time_s')
         self.profile = preview.render_profile(self.scene)
         self.expected_frame = (self.frame,self.subframe)
+        self._clock_invalidated = False
         self.source = {'source_package_id': str(self.farm.path) if self.farm and hasattr(self.farm,'path') else self.scene.get('wfrl_farm_flex_path'),
             'manifest_hash': self.scene.get('wfrl_farm_manifest_sha256'),
             'geometry_signature': self.layout['model_signature'],
@@ -222,6 +278,7 @@ class Capture:
             'pixel_convention':'top-left pixel centre (0,0); boundaries -.5 and W/H-.5',
             'distortion':'ideal undistorted pinhole; not calibrated physical lens'}
         self._play(False)
+        self.playback_generation = playback.generation()
         try:
             self.path.mkdir()
             write_json(self.path/'layout.json',self.layout)
@@ -233,44 +290,97 @@ class Capture:
 
     def _play(self, playing):
         import bpy
-        if bool(self.window.screen.is_animation_playing) != playing:
-            from . import native_camera_views
-            session=native_camera_views._ACTIVE
-            override=(session.playback_context() if session and session.window==self.window
-                      and session.scene==self.scene else None)
-            override=override or {'window':self.window,'screen':self.window.screen}
-            with bpy.context.temp_override(**override):
-                if playing:bpy.ops.screen.animation_play()
-                else:bpy.ops.screen.animation_cancel(restore_frame=False)
+        if not self.window:
+            return
+        from . import native_camera_views
+        session=native_camera_views._ACTIVE
+        override=(session.playback_context() if session and session.window==self.window
+                  and session.scene==self.scene else None)
+        override=override or {'window':self.window,'screen':self.window.screen}
+        with bpy.context.temp_override(**override):
+            owner = playback.owner_scene()
+            live = playback.any_playing()
+            if (owner is not None and owner != self.scene) or (live and owner is None):
+                return
+            if playing and not live:
+                bpy.ops.screen.animation_play()
+            elif not playing and live:
+                bpy.ops.screen.animation_cancel(restore_frame=False)
 
     def same_session(self):
         from .panels.custom_cameras import session_identity
         try:
             import bpy
-            return (self.window in list(bpy.context.window_manager.windows)
+            same = (self.window in list(bpy.context.window_manager.windows)
                 and self.window.scene == self.scene and self.area in list(self.window.screen.areas)
                 and self.area.type == 'VIEW_3D' and session_identity(self.scene) == self.identity)
+            if same and getattr(self, 'farm_sequence', False):
+                same = (not getattr(self, '_context_invalidated', False)
+                        and self.view_layer in list(self.scene.view_layers)
+                        and self.window.view_layer == self.view_layer)
+            return same
         except (ReferenceError,RuntimeError):
+            return False
+
+    def _require_render_context(self, context):
+        if not getattr(self, 'farm_sequence', False):
+            return
+        try:
+            matches = (context.window == self.window and context.scene == self.scene
+                       and context.area == self.area and context.view_layer == self.view_layer)
+        except (AttributeError, ReferenceError, RuntimeError):
+            matches = False
+        if not matches:
+            self._context_invalidated = True
+            raise RuntimeError('采集绘制上下文已变化，采集未完成')
+
+    def _time_mapping(self):
+        timebase = float(self.scene['wfrl_clearance_timebase_fps']
+                         if 'wfrl_clearance_timebase_fps' in self.scene
+                         else self.scene.render.fps / self.scene.render.fps_base)
+        source_start = float(self.reader.start_s)
+        if not math.isfinite(timebase) or timebase <= 0 or not math.isfinite(source_start):
+            raise ValueError('无效的采集时间映射')
+        return self.scene.frame_start, timebase, source_start
+
+    def _time_mapping_unchanged(self):
+        if not getattr(self, 'farm_sequence', False):
+            return True
+        try:
+            return self._time_mapping() == self.time_mapping
+        except (AttributeError, ReferenceError, RuntimeError, TypeError, ValueError):
             return False
 
     def guard(self):
         from .panels.custom_cameras import installation_block_reason
         if not self.same_session():
-            raise RuntimeError('场景、窗口或回放会话已变化，采集未完成')
+            detail = '、视图层' if getattr(self, 'farm_sequence', False) else ''
+            raise RuntimeError(f'场景、窗口{detail}或回放会话已变化，采集未完成')
         reason=installation_block_reason(self.scene)
         if reason:raise RuntimeError(reason)
-        if self.window.screen.is_animation_playing or (self.scene.frame_current,self.scene.frame_subframe) != self.expected_frame:
+        if not self._clock_unchanged():
             raise RuntimeError('采集时刻被外部操作改变，采集未完成')
         try:
             core.validate_native_state(self.scene)
         except ValueError as exc:
             raise RuntimeError(f'采集期间{exc}，采集未完成') from exc
-        if core.layout_hash(core.layout_dict(self.scene)) != self.layout_hash:
+        layout = core.layout_dict(self.scene)
+        if core.layout_hash(layout) != self.layout_hash:
             raise RuntimeError('采集期间相机布局已变化，采集未完成')
-        if core.live_layout_hash(self.scene) != self.live_layout_hash:
+        if core.live_layout_hash(self.scene, layout=layout) != self.live_layout_hash:
             raise RuntimeError('采集期间原生相机姿态或镜头已变化，采集未完成')
         if preview.render_profile(self.scene) != self.profile:
             raise RuntimeError('采集期间颜色设置已变化，采集未完成')
+
+    def _clock_unchanged(self):
+        """Restore only the timeline and playback state still owned by capture."""
+        owner = playback.owner_scene()
+        playing = ((owner is None or owner == self.scene)
+                   and self.window.screen.is_animation_playing)
+        return (not getattr(self, '_clock_invalidated', False)
+                and not playing and playback.generation() == self.playback_generation
+                and self._time_mapping_unchanged()
+                and (self.scene.frame_current, self.scene.frame_subframe) == self.expected_frame)
 
     def evaluate(self, frame, subframe, sim_time):
         if self.farm is None:
@@ -278,9 +388,14 @@ class Capture:
         import bpy
         with readonly_frame_handlers():
             self.scene.frame_set(frame,subframe=subframe)
+            actual = (self.scene.frame_current, self.scene.frame_subframe)
+            if not math.isclose(sum(actual), frame + subframe, rel_tol=0., abs_tol=1e-7):
+                self._clock_invalidated = True
+                raise RuntimeError('采集求值时刻被外部回调改变，采集未完成')
+            self.expected_frame = actual
             self.farm.update(self.scene,sim_time_s=sim_time,record_telemetry=False,update_comparison=False)
-            bpy.context.view_layer.update()
-        self.expected_frame=(self.scene.frame_current,self.scene.frame_subframe)
+            layer = self.view_layer if getattr(self, 'farm_sequence', False) else bpy.context.view_layer
+            layer.update()
 
     def request_cancel(self):
         if self.closed or self.cancel_requested:
@@ -289,13 +404,15 @@ class Capture:
         self.cancel_accepted_at = time.perf_counter()
         diagnostics.record('cancel_accepted', completed=self.index, in_group=self.in_group)
         if not self.in_group:
-            self.finish(error='用户取消：已停止')
+            self.finish()
 
     def step(self, context):
         if self.closed:
             return True
-        if self.cancel_requested:
-            self.finish(error='用户取消：已停止')
+        if getattr(self, '_finish_result', None) is not None:
+            return False
+        if self.cancel_requested and not self.in_group:
+            self.finish()
             return True
         self.in_group = True
         try:
@@ -304,31 +421,41 @@ class Capture:
             self.finish(error=str(exc))
             raise
         finally:
-            self.in_group = False
-            if self.cancel_requested and not self.closed:
-                self.finish(error='用户取消：已停止')
+            if self._writer is None:
+                self.in_group = False
+                if self.cancel_requested and not self.closed:
+                    self.finish()
 
     def _step_group(self, context):
+        if self._writer is not None:
+            return self._poll_write()
+        self._require_render_context(context)
         self.guard()
         at=self.times[self.index]
         if self.sequence:
-            timebase=float(self.scene.get('wfrl_clearance_timebase_fps',60.))
-            mapped=self.scene.frame_start+(at-self.reader.start_s)*timebase
+            if getattr(self, 'farm_sequence', False):
+                start,timebase,source_start = self.time_mapping
+                mapped=start+(at-source_start)*timebase
+            else:
+                timebase=float(self.scene.get('wfrl_clearance_timebase_fps',60.))
+                mapped=self.scene.frame_start+(at-self.reader.start_s)*timebase
             self.evaluate(math.floor(mapped),mapped-math.floor(mapped),at)
-        self.guard()
+            self.guard()
+            self._require_render_context(context)
         images=preview.render_group(context,self.cameras,target=self.render_target,create_texture=False)
         try:
             self.guard()
+            self._require_render_context(context)
             records=[]
+            packets=[]
+            motion = self.reader.at(at).get('motion') if self.reader is not None and at is not None else None
             for camera in self.cameras:
-                slot=int(camera['wfrl_custom_slot']);image=images[slot];p=image.params
-                folder=self.path/f'C{slot}';folder.mkdir(exist_ok=True)
+                slot=int(camera['wfrl_custom_slot'])
+                image=images[slot]
+                p=image.params
                 relative=f'C{slot}/frame_{self.index:06d}.png'
-                write_png(self.path/relative,image.width,image.height,image.rgba())
+                packets.append((self.path/relative, image.width, image.height, bytes(image.rgba())))
                 scales=projection.pixel_scales(p.fov,p.vfov,image.width,image.height)
-                motion=None
-                if self.reader is not None and at is not None:
-                    motion=self.reader.at(at).get('motion')
                 record={'capture_id':self.capture_id,'sample_index':self.index,'time_s':at,
                     'time_missing_reason':None if at is not None else 'static scene; no simulation clock',
                     'scene_frame':self.scene.frame_current,'scene_subframe':self.scene.frame_subframe,
@@ -352,53 +479,154 @@ class Capture:
                     'image_encoding':self.profile['image_encoding'],
                     'image_relative_path':relative,'capture_status':'complete'}
                 records.append(record)
-            self.guard()
-            with (self.path/'frames.jsonl').open('a',encoding='utf-8') as stream:
-                stream.write(''.join(json.dumps(r,ensure_ascii=False,allow_nan=False)+'\n' for r in records))
-            self.index+=1
-            self.manifest['completed_samples']=self.index
-            write_json(self.path/'manifest.json',self.manifest)
+            self._pending_records = records
+            self._writer = ImageWriter(packets)
         finally:
             for image in images.values():image.free()
-        if self.index==len(self.times) and not self.cancel_requested:
+        return False
+
+    def _poll_write(self):
+        self.guard()
+        writer = self._writer
+        if writer.thread.is_alive():
+            return False
+        self._writer = None
+        records, self._pending_records = self._pending_records, None
+        if writer.error is not None:
+            raise writer.error
+        if writer.cancelled.is_set():
+            raise InterruptedError('图像写入已取消，采集未完成')
+        with (self.path/'frames.jsonl').open('a',encoding='utf-8') as stream:
+            stream.write(''.join(json.dumps(r,ensure_ascii=False,allow_nan=False)+'\n' for r in records))
+        self.index += 1
+        self.manifest['completed_samples'] = self.index
+        # The frame index tracks every group. Sparse checkpoints bound rewrites
+        # of the full schedule, and finish always writes the exact final count.
+        if (self.index & (self.index - 1)) == 0:
+            write_json(self.path/'manifest.json',self.manifest)
+        if self.cancel_requested:
+            self.finish()
+            return True
+        if self.index==len(self.times):
             self.finish(success=True)
             return True
         return False
 
     def finish(self,success=False,error='',restore=True):
-        global _ACTIVE
-        if self.closed:return
+        if self.closed or getattr(self, '_finish_result', None) is not None:return
         same=self.same_session()
         try:
-            if restore and same:
+            if success and self._writer is not None:
+                success = False
+                error = error or '图像写入尚未提交，采集未完成'
+            clock_unchanged = same and self._clock_unchanged()
+            if success and not clock_unchanged:
+                success = False
+                error = error or '场景或采集时刻已变化，采集未完成'
+            if restore and clock_unchanged:
                 self._play(False)
                 if self.sequence:
                     self.evaluate(self.frame,self.subframe,self.time)
-                if self.original_time_property is None:
-                    if 'wfrl_clearance_time_s' in self.scene:del self.scene['wfrl_clearance_time_s']
-                else:self.scene['wfrl_clearance_time_s']=self.original_time_property
-                self._play(self.playing)
+                owned = (not getattr(self, 'farm_sequence', False)
+                         or (self.same_session() and self._clock_unchanged()))
+                if owned:
+                    if self.original_time_property is None:
+                        if 'wfrl_clearance_time_s' in self.scene:del self.scene['wfrl_clearance_time_s']
+                    else:self.scene['wfrl_clearance_time_s']=self.original_time_property
+                    self._play(self.playing)
+                else:
+                    success = False
+                    error = (error + '；' if error else '') + '恢复期间场景或采集时刻已变化，采集未完成'
         except Exception as exc:
-            success=False;error=f'{error} 恢复失败：{exc}'
+            success=False
+            error=f'{error} 恢复失败：{exc}'
         finally:
+            if self._writer is not None:
+                self._writer.cancel()
+            self.in_group = False
             if self.render_target is not None:
                 self.render_target.free()
                 self.manifest['gpu_target_usage'] = self.render_target.usage()
-            self.closed=True
-            if self.cancel_requested:
-                self.cancel_stopped_at = time.perf_counter()
-                diagnostics.record('cancel_stopped', completed=self.index)
-                self.manifest['cancel_accepted_at'] = self.cancel_accepted_at
-                self.manifest['cancel_stopped_at'] = self.cancel_stopped_at
-                self.manifest['cancel_accept_to_stop_s'] = self.cancel_stopped_at - self.cancel_accepted_at
             if getattr(self,'ui_operator',None):
                 self.ui_operator.remove_timer()
-            if _ACTIVE is self:_ACTIVE=None
             self.error=error
-            self.manifest['status']='complete' if success and same else 'incomplete'
-            self.manifest['error']=error or (None if success else 'cancelled / invalid session')
-            write_json(self.path/'manifest.json',self.manifest)
+            self._finish_result = success, same, error
+            interval = self._publish_finish()
+            if interval is not None:
+                try:
+                    import bpy
+                except ImportError:
+                    pass
+                else:
+                    # Finalization must survive removal of the modal timer and file
+                    # loads; the PNG thread never accesses Blender or publishes UI.
+                    callback = self._publish_finish
+                    timers = bpy.app.timers
+                    timers.register(callback, first_interval=interval, persistent=True)
+                    self._finish_timer = timers, callback
+
+    def _publish_finish(self):
+        global _ACTIVE
+        if getattr(self, '_finish_result', None) is None:
+            return
+        if self._writer is not None and self._writer.thread.is_alive():
+            return .03
+        timer = getattr(self, '_finish_timer', None)
+        if timer is not None:
+            timers, callback = timer
+            if timers.is_registered(callback):
+                timers.unregister(callback)
+            self._finish_timer = None
+        success, same, error = self._finish_result
+        self._finish_result = None
+        self._writer = self._pending_records = None
+        self.closed = True
+        if self.cancel_requested:
+            self.cancel_stopped_at = time.perf_counter()
+            diagnostics.record('cancel_stopped', completed=self.index)
+            self.manifest['cancel_accepted_at'] = self.cancel_accepted_at
+            self.manifest['cancel_stopped_at'] = self.cancel_stopped_at
+            self.manifest['cancel_accept_to_stop_s'] = self.cancel_stopped_at - self.cancel_accepted_at
+        if _ACTIVE is self:_ACTIVE=None
+        self.error=error or ('用户取消：已停止' if self.cancel_requested else '')
+        self.manifest['status']='complete' if success and same else 'incomplete'
+        self.manifest['error']=self.error or (None if success else 'cancelled / invalid session')
+        write_json(self.path/'manifest.json',self.manifest)
+        if same and self.same_session():
+            from .home_state import TaskStatus
+            stage = 'SUCCEEDED' if success else 'CANCELLED' if self.cancel_requested and not error else 'FAILED'
+            try:
+                key, name = self.scene.as_pointer(), self.scene.name
+            except (AttributeError, ReferenceError):
+                pass
+            else:
+                _TERMINALS[key] = (self.scene, TaskStatus(
+                    'capture', False, True, stage, name, error, output=str(self.path)))
+                _TERMINALS.move_to_end(key)
+                while len(_TERMINALS) > 8:
+                    _TERMINALS.popitem(last=False)
 
 
 def shutdown(restore=True):
     if active():_ACTIVE.finish(error='场景重载 / 功能关闭',restore=restore)
+    _TERMINALS.clear()
+    for writer in tuple(_WRITERS):
+        writer.cancel()
+
+
+def status_for(scene):
+    from .home_state import TaskStatus
+    job = _ACTIVE
+    if job is None or job.closed:
+        previous = _TERMINALS.get(scene.as_pointer())
+        if previous is not None:
+            try:
+                if previous[0] == scene:
+                    return previous[1]
+            except ReferenceError:
+                _TERMINALS.pop(scene.as_pointer(), None)
+        return TaskStatus('capture')
+    return TaskStatus('capture', True, job.scene == scene,
+                      'FINALIZING' if getattr(job, '_finish_result', None) is not None else
+                      'CANCELLING' if job.cancel_requested else 'CAPTURING',
+                      job.scene.name, getattr(job, 'error', ''), _progress(job), str(job.path))

@@ -200,7 +200,7 @@ def compare(observations, output_dir, reference_state, config):
     runner = source.parents[1] / 'scripts/nrel_single_blade.py'
     signatures[str(runner.resolve())] = digest(runner)
     write_json(output / 'implementation_at_launch.json', signatures)
-    entry_signatures = json.loads((output / 'fit_entry_inputs.json').read_text())
+    entry_signatures = json.loads((output / 'fit_entry_inputs.json').read_text(encoding='utf-8'))
     verify_signatures(entry_signatures)
     initial = BladeModel(config.span_samples, config.ring_samples, config.control_stations,
                          interpolation=config.model_interpolation)
@@ -264,13 +264,13 @@ def compare(observations, output_dir, reference_state, config):
 
 def nonblind(source, output):
     source, output = relocated_path(source), relocated_path(output)
-    freeze = json.loads((output/'model_freeze.json').read_text())
+    freeze = json.loads((output/'model_freeze.json').read_text(encoding='utf-8'))
     if any(digest(output/p) != sha for p,sha in freeze['sha256'].items()):
         raise RuntimeError('Frozen fit artifacts changed')
-    verify_signatures(json.loads((output/'fit_entry_inputs.json').read_text()), historical=True)
-    verify_signatures(json.loads((output/'implementation_at_launch.json').read_text()), historical=True)
-    observations = json.loads((source/'observations/observations.json').read_text())
-    config = OptimizationConfig(**json.loads((source/'reconstruction/frozen_config.json').read_text()))
+    verify_signatures(json.loads((output/'fit_entry_inputs.json').read_text(encoding='utf-8')), historical=True)
+    verify_signatures(json.loads((output/'implementation_at_launch.json').read_text(encoding='utf-8')), historical=True)
+    observations = json.loads((source/'observations/observations.json').read_text(encoding='utf-8'))
+    config = OptimizationConfig(**json.loads((source/'reconstruction/frozen_config.json').read_text(encoding='utf-8')))
     prepared = _prepare([o for o in observations if o['frame_id'] in [44,45]], config.resolutions[-1], 'cpu', True)
     results = {}
     for name in BRANCHES:

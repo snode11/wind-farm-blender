@@ -74,7 +74,7 @@ def _path(base, value):
 def build_observation_versions(observations, annotation_path):
     """Validate the signed local review and construct the two unchanged-fit arms."""
     annotation_path = relocated_path(annotation_path)
-    annotation = json.loads(annotation_path.read_text())
+    annotation = json.loads(annotation_path.read_text(encoding='utf-8'))
     if annotation.get('schema') != ANNOTATION_SCHEMA or not annotation.get('frozen_utc'):
         raise ValueError('Expected a frozen RGB boundary annotation schema')
     override = annotation.get('override', {})
@@ -191,7 +191,7 @@ def verify_only_observation_change(original, revised):
 
 def validate_protocol(protocol_path, source, input_dir, annotation_path):
     source, input_dir, annotation_path = [relocated_path(p) for p in (source, input_dir, annotation_path)]
-    protocol = json.loads(relocated_path(protocol_path).read_text())
+    protocol = json.loads(relocated_path(protocol_path).read_text(encoding='utf-8'))
     identities = {'schema': PROTOCOL_SCHEMA, 'branches': BRANCHES,
                   'source_directory': str(source), 'input_directory': str(input_dir),
                   'annotation_path': str(annotation_path),
@@ -213,7 +213,7 @@ def validate_protocol(protocol_path, source, input_dir, annotation_path):
     if not isinstance(signatures, dict) or any(str(p.resolve()) not in signed_paths for p in required):
         raise ValueError('Protocol must sign every historical observation, input and config file')
     verify_signatures(signatures)
-    config = OptimizationConfig(**json.loads((source / 'reconstruction/frozen_config.json').read_text()))
+    config = OptimizationConfig(**json.loads((source / 'reconstruction/frozen_config.json').read_text(encoding='utf-8')))
     if _json_value(asdict(config)) != _json_value(FROZEN_CONFIG):
         raise ValueError('P5 requires the unchanged historical v2 model/loss/optimizer/100-step config')
     return protocol, config, signatures
@@ -298,7 +298,7 @@ def fit(source, input_dir, annotation_path, protocol_path, output, isolation_pat
     if output.exists() and any(output.iterdir()):
         raise FileExistsError('Refuse to overwrite an observation experiment; use a fresh output directory')
     _, config, signatures = validate_protocol(protocol_path, source, input_dir, annotation_path)
-    observations = json.loads((source / 'observations/observations.json').read_text())
+    observations = json.loads((source / 'observations/observations.json').read_text(encoding='utf-8'))
     versions, review, annotation_signatures = build_observation_versions(observations, annotation_path)
     signatures = {**signatures, **annotation_signatures,
                   str(protocol_path): digest(protocol_path), str(annotation_path): digest(annotation_path)}
@@ -328,10 +328,10 @@ def fit(source, input_dir, annotation_path, protocol_path, output, isolation_pat
         return {'status': 'SIGNED_MP4_PREFLIGHT_COMPLETE_NO_OPTIMIZATION'}
     with patch('wfrl.nrel_reconstruction.optimize.reconstruct', collect):
         fit_bundle(input_dir, source / 'observations', output, source / 'reconstruction/frozen_config.json')
-    rgb_evidence = json.loads((source / 'observations/annotations.json').read_text())
+    rgb_evidence = json.loads((source / 'observations/annotations.json').read_text(encoding='utf-8'))
     target_evidence = next(a for a in rgb_evidence['annotations'] if
                            (a['camera_id'], a['frame_id']) == ('C1', 42))
-    annotation = json.loads(annotation_path.read_text())
+    annotation = json.loads(annotation_path.read_text(encoding='utf-8'))
     if annotation['provenance'].get('decoded_rgb_pixel_sha256') != target_evidence['rgb_sha256']:
         raise ValueError('Reviewed RGB pixel signature differs from the actual MP4 decode')
     verify_signatures(signatures)
@@ -438,16 +438,16 @@ def nonblind(source, output):
     destination = output / 'nonblind_residuals.json'
     if destination.exists():
         raise FileExistsError('Refuse to overwrite nonblind diagnostics')
-    freeze = json.loads((output / 'model_freeze.json').read_text())
+    freeze = json.loads((output / 'model_freeze.json').read_text(encoding='utf-8'))
     if freeze.get('status') != 'ALL_BRANCHES_FROZEN_BEFORE_NONBLIND_AND_TRUTH_EVALUATION':
         raise ValueError('Both final models must be frozen before nonblind diagnostics')
     verify_signatures({str(output / p): sha for p, sha in freeze['sha256'].items()})
-    signatures = json.loads((output / 'fit_entry_inputs.json').read_text())
+    signatures = json.loads((output / 'fit_entry_inputs.json').read_text(encoding='utf-8'))
     verify_signatures(signatures, historical=True)
     if str(source / 'observations/observations.json') not in {str(relocated_path(p)) for p in signatures}:
         raise ValueError('Nonblind source differs from frozen historical source')
-    observations = json.loads((source / 'observations/observations.json').read_text())
-    config = OptimizationConfig(**json.loads((output / 'frozen_config.json').read_text()))
+    observations = json.loads((source / 'observations/observations.json').read_text(encoding='utf-8'))
+    config = OptimizationConfig(**json.loads((output / 'frozen_config.json').read_text(encoding='utf-8')))
     prepared = _prepare([o for o in observations if o['frame_id'] in (44, 45)],
                         config.resolutions[-1], config.device, require_contours=True)
     results = {}

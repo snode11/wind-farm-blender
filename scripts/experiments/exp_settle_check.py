@@ -49,7 +49,7 @@ def main():
     json.dump({"u_inf": U, "power_series": H.tolist(),
                "win_86_100_MW": float(w85.sum()),
                "win_end_MW": float(wend.sum()), "drift_pct": float(drift)},
-              open(os.path.join(paths.RUNS, "settle_check.json"), "w"), indent=2)
+              open(os.path.join(paths.RUNS, "settle_check.json"), "w", encoding='utf-8'), indent=2)
     print("-> runs/settle_check.json")
 
 

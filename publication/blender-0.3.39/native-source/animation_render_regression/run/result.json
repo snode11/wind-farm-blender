@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "phase": "run",
+  "reasons": [],
+  "returncode": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "duration_s": 5.738320000004023,
+  "source_changed": false,
+  "execution": {
+    "status": "PASS",
+    "final": true,
+    "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/animation_render_regression.py",
+    "background": true,
+    "blender": "5.2.1 LTS",
+    "startup_dirty": false,
+    "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+    "returned_normally": true,
+    "post_script_dirty": false
+  },
+  "script_result": {
+    "status": "PASS",
+    "blender": "5.2.1 LTS",
+    "module": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+    "complete_frames": 3,
+    "source_preserved": true,
+    "cancellation": true,
+    "output": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-385f991f29d3",
+    "cancelled": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-f09c3b0e7344",
+    "mappo_output": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-b62aaaab95f9",
+    "recorded_motion_frames": [
+      1,
+      301,
+      601
+    ],
+    "compositor_output_guard": true,
+    "original_camera_quality_snapshot": true
+  },
+  "log": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/run/blender.log",
+  "report": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/result.json"
+}

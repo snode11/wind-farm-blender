@@ -1,7 +1,6 @@
 """Build a matched REVIEW_ONLY reader and section archive from one completed run."""
 from pathlib import Path
 import argparse
-import json
 import sys
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT))

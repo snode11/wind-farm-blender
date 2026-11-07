@@ -123,7 +123,7 @@ def test_full_audit_visits_all_poses_blades_and_shared_origin_once():
 def test_rendered_spheres_cover_current_primitive_extents_and_cable_controls():
     profile = {p['component']: p for p in rendered_housing_profile()}
     source = Path(__file__).resolve().parents[2] / 'blender_frontend/wfrl_blender/clearance_visual.py'
-    tree = ast.parse(source.read_text())
+    tree = ast.parse(source.read_text(encoding='utf-8'))
     checked = set()
     for call in ast.walk(tree):
         if not (isinstance(call, ast.Call) and isinstance(call.func, ast.Name)

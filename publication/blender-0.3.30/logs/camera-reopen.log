@@ -1,0 +1,16 @@
+Warning: 1 × Draw window and swap: 5.7952 ms, average: 5.79516590 ms
+Warning: 1 × Draw window and swap: 11.1967 ms, average: 11.19674998 ms
+Warning: 1 × Draw window and swap: 6.3940 ms, average: 6.39404217 ms
+Warning: 1 × Draw window and swap: 21.8095 ms, average: 21.80954115 ms
+Warning: 1 × Draw window and swap: 12.6706 ms, average: 12.67062500 ms
+Warning: 1 × Draw window and swap: 3.1827 ms, average: 3.18266707 ms
+Warning: 1 × Draw window and swap: 19.3027 ms, average: 19.30270786 ms
+Warning: 1 × Draw window and swap: 18.3789 ms, average: 18.37891620 ms
+Warning: 1 × Draw window and swap: 6.0734 ms, average: 6.07337500 ms
+NATIVE_CAMERA_REOPEN_PASS
+02:35.515  blend            | Saved session recovery to "PROJECT_ROOT/publication/blender-0.3.30/native/camera-reopen/temporary/quit.blend"
+02:35.518  blend            | Writing user preferences: "PROJECT_ROOT/publication/blender-0.3.30/profile/config/userpref.blend" 
+02:35.519  reports          | Preferences saved
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

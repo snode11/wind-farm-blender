@@ -22,8 +22,8 @@ class WFRL_OT_ClearanceClip(bpy.types.Operator):
                 raise ValueError('请在“数据配置”中选择所选片段的数据包目录')
             clearance_replay.load(scene, bpy.path.abspath(path), self.demo)
         except (ValueError, OSError, ImportError, KeyError, TypeError) as exc:
-            from .. import _cancel_playback
-            _cancel_playback(scene)
+            from .. import playback
+            playback.cancel(scene)
             clearance_replay.clear(scene, '回放数据未就绪：' + str(exc))
             scene.wfrl_clearance_show_config = True
             self.report({'ERROR'}, str(exc))
@@ -78,11 +78,11 @@ class WFRL_OT_ClearanceRestart(bpy.types.Operator):
         return clearance_replay.reader_for(context.scene) is not None
 
     def execute(self, context):
-        from .. import _cancel_playback, playback
+        from .. import playback
         if playback.any_playing() and not playback.is_playing(context.scene):
             self.report({'WARNING'}, '另一场景正在使用 Blender 播放器，请先暂停该场景')
             return {'CANCELLED'}
-        _cancel_playback(context.scene)
+        playback.cancel(context.scene)
         from .. import tip_tracking
         tip_tracking.reset(context.scene, 'restart')
         context.scene.frame_set(context.scene.frame_start)
@@ -111,9 +111,10 @@ class WFRL_OT_ClearancePlayback(bpy.types.Operator):
 
 
 def playback_control(scene, screen):
+    from .. import playback
     if scene.frame_current >= scene.frame_end:
         return '重新播放', 'REW', '本段已结束'
-    if screen is not None and screen.is_animation_playing:
+    if screen is not None and playback.is_playing(scene):
         return '暂停', 'PAUSE', '正在播放'
     return '播放', 'PLAY', '已暂停'
 
@@ -282,7 +283,20 @@ def draw_flex_trails(layout, scene):
         layout.label(text='形变网格叶尖位置 · 非相机测量')
 
 
-def draw(layout, scene):
+def draw_playback(layout, scene, value, screen):
+    text, icon, state = playback_control(scene, screen)
+    layout.label(text=f"仿真时刻 {value['time_s']:.3f} s · {state}")
+    row = layout.row(align=True)
+    row.operator('wfrl.clearance_playback', text=text, icon=icon)
+    row.operator('wfrl.clearance_restart', text='从头重播', icon='REW')
+    reader = clearance_replay.reader_for(scene)
+    elapsed = max(0.0, value['time_s'] - reader.start_s)
+    duration = reader.end_s - reader.start_s
+    layout.label(text=f'片段进度 {elapsed:.1f} / {duration:.1f} 秒')
+    layout.prop(scene, 'wfrl_clearance_progress', text='', slider=True)
+
+
+def draw(layout, scene, *, show_playback=True):
     import sys
     farm = sys.modules.get(__package__.rsplit('.', 1)[0]+'.farm_flex')
     farm_active = farm is not None and farm.is_active(scene)
@@ -313,16 +327,8 @@ def draw(layout, scene):
         if scene.get('wfrl_clearance_demo') == 'near_tower' and not farm_active:
             box.label(text='较小净空工况 · 以数值比较')
         draw_measurement(box, scene, value)
-        text, icon, state = playback_control(scene, bpy.context.screen)
-        row = box.row(align=True)
-        row.operator('wfrl.clearance_playback', text=text, icon=icon)
-        row.operator('wfrl.clearance_restart', text='从头重播', icon='REW')
-        box.prop(scene, 'wfrl_clearance_progress', text='回放进度', slider=True)
-        reader = clearance_replay.reader_for(scene)
-        elapsed = max(0.0, value['time_s'] - reader.start_s)
-        duration = reader.end_s - reader.start_s
-        box.label(text=f'{state} · {elapsed:.2f} / {duration:.2f} s')
-        box.label(text=f"仿真时间：{value['time_s']:.2f} s")
+        if show_playback:
+            draw_playback(box, scene, value, bpy.context.screen)
         if scene.frame_current >= scene.frame_end:
             summary = box.box()
             stats = value['statistics']

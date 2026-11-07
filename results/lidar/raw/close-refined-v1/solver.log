@@ -1,0 +1,155 @@
+
+ **************************************************************************************************
+ FAST.Farm
+
+ Copyright (C) 2024 National Renewable Energy Laboratory
+ Copyright (C) 2024 Envision Energy USA LTD
+
+ This program is licensed under Apache License Version 2.0 and comes with ABSOLUTELY NO WARRANTY.
+ See the "LICENSE" file distributed with this software for details.
+ **************************************************************************************************
+
+ FAST.Farm-v3.5.3-dirty
+ Compile Info:
+  - Compiler: GCC version 12.3.0
+  - Architecture: 64 bit
+  - Precision: single
+  - OpenMP: Yes, number of threads: 2/2
+  - Date: Apr 26 2024
+  - Time: 16:41:09
+ Execution Info:
+  - Date: 09/12/2026
+  - Time: 23:13:14+0800
+
+  Heading of the FAST.Farm input file:
+    FAST.Farm     input         - file
+ Running AWAE.
+ Running InflowWind.
+ Running WakeDynamics.
+ Running FASTWrapper.
+ Running OpenFAST.
+ OpenFAST input file heading:
+     FAST          Certification - Test #26: NREL 5.0 MW Baseline Wind Turbine (Onshore)
+
+ Running ElastoDyn.
+ Nodal outputs section of ElastoDyn input file not found or improperly formatted.
+ Running AeroDyn.
+ Running InflowWind.
+
+ Farm_Initialize:Farm_ValidateInput:OutFmt produces a column width of 10 instead of 20 characters.
+ Farm_Initialize:For efficiency, NumPlanes has been reduced to the number of time steps (13).
+
+  Time: 0 of 36 seconds.
+                                                                                                   Time: 3 of 36 seconds.  Estimated final completion at 23:17:43.                                                                                                                                     Time: 6 of 36 seconds.  Estimated final completion at 23:17:22.                                                                                                                                     Time: 9 of 36 seconds.  Estimated final completion at 23:17:24.                                  
+ FARM_CalcOutput:AWAE_CalcOutput:LowResGridCalcOutput:The center of wake plane #5 for turbine #1
+ has passed the upper-most X boundary of the low-resolution domain.
+
+                                                                                                   Time: 12 of 36 seconds.  Estimated final completion at 23:17:18.                                 
+ FARM_CalcOutput:AWAE_CalcOutput:LowResGridCalcOutput:The center of wake plane #5 for turbine #1
+ has passed the upper-most X boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #6 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+
+                                                                                                   Time: 15 of 36 seconds.  Estimated final completion at 23:17:18.                                 
+ FARM_CalcOutput:AWAE_CalcOutput:LowResGridCalcOutput:The center of wake plane #5 for turbine #1
+ has passed the upper-most X boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #6 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #7 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+
+                                                                                                   Time: 18 of 36 seconds.  Estimated final completion at 23:17:13.                                 
+ FARM_CalcOutput:AWAE_CalcOutput:LowResGridCalcOutput:The center of wake plane #5 for turbine #1
+ has passed the upper-most X boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #6 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #7 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #8 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+
+                                                                                                   Time: 21 of 36 seconds.  Estimated final completion at 23:17:03.                                 
+ FARM_CalcOutput:AWAE_CalcOutput:LowResGridCalcOutput:The center of wake plane #5 for turbine #1
+ has passed the upper-most X boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #6 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #7 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #8 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #9 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+
+                                                                                                   Time: 24 of 36 seconds.  Estimated final completion at 23:17:04.                                 
+ FARM_CalcOutput:AWAE_CalcOutput:LowResGridCalcOutput:The center of wake plane #5 for turbine #1
+ has passed the upper-most X boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #6 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #7 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #8 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #9 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #10 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+
+                                                                                                   Time: 27 of 36 seconds.  Estimated final completion at 23:17:12.                                 
+ FARM_CalcOutput:AWAE_CalcOutput:LowResGridCalcOutput:The center of wake plane #5 for turbine #1
+ has passed the upper-most X boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #6 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #7 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #8 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #9 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #10 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #11 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+
+                                                                                                   Time: 30 of 36 seconds.  Estimated final completion at 23:17:12.                                 
+ FARM_CalcOutput:AWAE_CalcOutput:LowResGridCalcOutput:The center of wake plane #5 for turbine #1
+ has passed the upper-most X boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #6 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #7 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #8 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #9 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #10 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #11 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #12 for turbine #1 has pass
+
+                                                                                                   Time: 33 of 36 seconds.  Estimated final completion at 23:17:11.                                 
+ FARM_CalcOutput:AWAE_CalcOutput:LowResGridCalcOutput:The center of wake plane #5 for turbine #1
+ has passed the upper-most X boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #6 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #7 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #8 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #9 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #10 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #11 for turbine #1 has passed the upper-most X
+ boundary of the low-resolution domain.
+ LowResGridCalcOutput:The center of wake plane #12 for turbine #1 has pass
+
+                                                                                                   Time: 36 of 36 seconds.  Estimated final completion at 23:17:12.                                                                                                                                   
+  Total Real Time:       3.965 minutes
+  Total CPU Time:        3.8496 minutes
+  Simulation CPU Time:   3.8486 minutes
+  Simulated Time:        0.6 minutes
+  Time Ratio (Sim/CPU):  0.1559
+
+  FAST.Farm terminated normally.
+

@@ -1,0 +1,23 @@
+{
+  "command": [
+    "/Applications/Blender.app/Contents/MacOS/Blender",
+    "--window-geometry",
+    "0",
+    "0",
+    "1280",
+    "800",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/demo_playback_benchmark.py"
+  ],
+  "path": "triple",
+  "layout": "STRIP",
+  "profile": false,
+  "geometry": [
+    1280,
+    800
+  ],
+  "installed_profile": "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-five-fixes-07uo9tmu/verified-package-check",
+  "addon_module": "bl_ext.wfrl_frontend.wfrl_blender"
+}

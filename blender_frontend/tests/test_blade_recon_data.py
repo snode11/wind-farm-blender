@@ -1,7 +1,6 @@
 """Saved boss-model geometry, frame alignment, and invalid-input regressions."""
 from __future__ import annotations
 
-import copy
 import hashlib
 import importlib.util
 import json
@@ -38,6 +37,21 @@ def sample_camera():
 
 
 class ReconDataTests(unittest.TestCase):
+    def test_unsupported_healthy_model_identity_is_rejected_at_all_readers(self):
+        for field, value in [('healthy_template', {}), ('healthy_template_sha256', 'abc')]:
+            data = sample_data()
+            data['turbine'][field] = value
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as directory:
+                with self.assertRaisesRegex(ValueError, 'unsupported.*healthy'):
+                    ReconSequence.from_data(data)
+                path = Path(directory) / 'recon.json'
+                path.write_text(json.dumps(data))
+                for sidecar in [None, {'files': {path.name: {'sha256': 'unmatched'}}}]:
+                    if sidecar is not None:
+                        path.with_name('manifest.json').write_text(json.dumps(sidecar))
+                    with self.assertRaisesRegex(ValueError, 'unsupported.*healthy'):
+                        ReconSequence(path)
+
     def test_reading_keeps_source_times_and_boolean_observations(self):
         data = sample_data()
         sequence = ReconSequence.from_data(data)
@@ -211,7 +225,7 @@ class ReconDataTests(unittest.TestCase):
 class BundledProvenanceTests(unittest.TestCase):
     def test_original_saved_data_and_model_hashes(self):
         assets = default_recon_path().parent
-        manifest = json.loads((assets / 'manifest.json').read_text())
+        manifest = json.loads((assets / 'manifest.json').read_text(encoding='utf-8'))
         self.assertEqual(manifest['source_classification'], 'SYNTHETIC')
         self.assertEqual(manifest['model']['sha256'], EXPECTED_MODEL_SHA256)
         self.assertEqual(MODEL_SHA256, EXPECTED_MODEL_SHA256)
@@ -242,7 +256,7 @@ class BundledProvenanceTests(unittest.TestCase):
             self.assertEqual(A.shape, (3, 40, 3))
 
     def test_geometry_equals_original_source_import(self):
-        manifest = json.loads(default_recon_path().with_name('manifest.json').read_text())
+        manifest = json.loads(default_recon_path().with_name('manifest.json').read_text(encoding='utf-8'))
         source = Path(manifest['model']['source_path'])
         if not source.is_file():
             self.skipTest('Original boss source is unavailable; portable bundle hash tested separately')

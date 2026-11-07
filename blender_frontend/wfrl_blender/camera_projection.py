@@ -40,23 +40,49 @@ def resolution(hfov, vfov, long_edge=DEFAULT_LONG_EDGE, max_size=None):
     return w, h
 
 
+def preview_resolution(hfov, vfov, long_edge, max_size=None):
+    """Raise the preview long edge only as needed to preserve the full FOV."""
+    ratio = aspect(hfov, vfov)
+    if isinstance(long_edge, bool) or not isinstance(long_edge, int) or long_edge < MIN_SHORT_EDGE:
+        raise ValueError('输出长边须为至少 16 的整数像素')
+    # Match the integer rounding in resolution(), including its GPU boundary.
+    stretch = max(ratio, 1 / ratio)
+    minimum = math.ceil((MIN_SHORT_EDGE - .5) * stretch)
+    if round(minimum / stretch) < MIN_SHORT_EDGE:
+        minimum += 1
+    return resolution(hfov, vfov, max(long_edge, minimum), max_size)
+
+
 def pixel_scales(hfov, vfov, width, height):
+    _image_size(width, height)
     q = aspect(hfov, vfov) * height / width
-    return (q, 1.) if q >= 1 else (1., 1. / q)
+    scales = (q, 1.) if q >= 1 else (1., 1. / q)
+    finite(*scales)
+    return scales
+
+
+def _image_size(width, height):
+    if any(isinstance(v, bool) or not isinstance(v, int) or v <= 0 for v in (width, height)):
+        raise ValueError('图像宽高须为正整数像素')
 
 
 def projection(hfov, vfov, near=.005, far=30000):
     validate(hfov, vfov, near, far)
     x, y = 1 / math.tan(math.radians(hfov / 2)), 1 / math.tan(math.radians(vfov / 2))
+    z, offset = -(far + near) / (far - near), -2 * far * near / (far - near)
+    finite(z, offset)
     return ((x, 0., 0., 0.), (0., y, 0., 0.),
-            (0., 0., -(far + near) / (far - near), -2 * far * near / (far - near)),
+            (0., 0., z, offset),
             (0., 0., -1., 0.))
 
 
 def intrinsics(hfov, vfov, width, height):
     validate(hfov, vfov)
-    return ((width / (2 * math.tan(math.radians(hfov / 2))), 0., (width - 1) / 2),
-            (0., height / (2 * math.tan(math.radians(vfov / 2))), (height - 1) / 2), (0., 0., 1.))
+    _image_size(width, height)
+    fx, fy = width / (2 * math.tan(math.radians(hfov / 2))), height / (2 * math.tan(math.radians(vfov / 2)))
+    finite(fx, fy)
+    return ((fx, 0., (width - 1) / 2),
+            (0., fy, (height - 1) / 2), (0., 0., 1.))
 
 
 def rotation(yaw, pitch, roll):
@@ -80,6 +106,7 @@ def frustum_corners(hfov, vfov, depth):
     if depth <= 0:
         raise ValueError('视锥深度必须大于零')
     x, y = depth * math.tan(math.radians(hfov / 2)), depth * math.tan(math.radians(vfov / 2))
+    finite(x, y)
     return ((-x, -y, -depth), (x, -y, -depth), (x, y, -depth), (-x, y, -depth))
 
 

@@ -247,6 +247,7 @@ try:
     if expected_root:
         assert Path(addon.__file__).resolve().is_relative_to(Path(expected_root).resolve())
     review = importlib.import_module(MODULE + '.blade_recon_review')
+    review.register(standalone=True)
     inspection = importlib.import_module(MODULE + '.blade_recon_inspection')
     if MODE != 'create':
         scene = next(s for s in bpy.data.scenes if review.active(s))

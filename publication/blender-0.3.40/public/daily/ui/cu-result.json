@@ -1,0 +1,105 @@
+{
+  "status": "PASS",
+  "scope": "Installed extension real mouse and keyboard GUI acceptance; four requested areas passed within the stated boundaries.",
+  "identity": {
+    "self_owned_blender_pid": 56319,
+    "blender": "5.2.1 LTS",
+    "extension_version": "0.3.40",
+    "module": "bl_ext.user_default.wfrl_blender",
+    "addon_file": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+    "archive_sha256": "f7907be0bd6737f0b0d8ddde8b856c151b6ebc7392ee1c796fc9252b806f018b",
+    "evidence": "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/runtime.json"
+  },
+  "checks": [
+    {
+      "name": "WFRL sidebar and home",
+      "status": "PASS",
+      "actual_interaction": "Clicked the N sidebar WFRL tab, saw the WFRL workbench and selected its replay, camera and manual pages.",
+      "evidence": [
+        "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/replay-home-frame1.png"
+      ]
+    },
+    {
+      "name": "MAPPO offline replay, play and pause",
+      "status": "PASS",
+      "actual_interaction": "Clicked 加载 MAPPO 离线回放 and 风场全景, then clicked playback and pause. Three labeled turbines T1/T2/T3 were visible in the panorama while the sidebar was hidden. The UI showed the offline replay ready without backend; at frame 641 it displayed 127.667 s during playback, and at frame 1017 it showed 133.933 s paused. T1/T2 blade orientations visibly changed. The observer still reported frame 1017 and playing=false after a further wait. The replay was later reset to frame 1.",
+      "evidence": [
+        "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/replay-home-frame1.png",
+        "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/events.json"
+      ],
+      "screenshot_boundary": "Saved replay screenshot shows the workbench and paused frame 1; T3 is obscured by the sidebar in this particular image. The three-turbine panorama was separately viewed through CUA."
+    },
+    {
+      "name": "C1/C2/C3 comparison window and shared controls",
+      "status": "PASS",
+      "actual_interaction": "Clicked 2×2 展示; the new window showed three live labeled views and a fourth static installation illustration. At frame 1017 clicked 单步: shared display advanced from 133.93 to 133.95 s. Clicked 播放 and then 暂停; all view toolbars switched together and the display reached 152.17 s. Used the window X control to close it. Reset source replay to frame 1 / 117.00 s and reopened: C1 showed blade root, C2 showed blade midsection and end, C3 showed the red-marked tip. Closed the window using its X control.",
+      "evidence": [
+        "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/cameras-reference-frame1.png",
+        "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/events.json"
+      ],
+      "view_boundary": "At the separately sampled intermediate poses C2 and C3 showed ground, not blades. At the reference pose blades appeared in all three; no claim of continuous coverage or full-period visual validation."
+    },
+    {
+      "name": "Independent manual scene, yaw, run and pause, return",
+      "status": "PASS",
+      "actual_interaction": "Clicked 创建 / 进入手动场景. The active scene became 风机手动控制, initially paused. For T1 clicked yaw + from 0.0 to 1.0 degrees, clicked 运行 and saw the rotor and azimuth change, then clicked 暂停; UI showed T1 paused, 9 RPM and azimuth 153.7 degrees. Clicked 返回原场景 and returned to the replay scene.",
+      "observer_samples": {
+        "initial": {
+          "yaw_degrees": 0.0,
+          "azimuth_degrees": 0.0,
+          "running": false
+        },
+        "running": {
+          "yaw_degrees": 1.0,
+          "azimuth_degrees": 9.672423362731934,
+          "running": true
+        },
+        "paused": {
+          "yaw_degrees": 1.0,
+          "azimuth_degrees": 153.72959899902344,
+          "running": false
+        }
+      },
+      "evidence": [
+        "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/manual-paused.png",
+        "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/events.json"
+      ]
+    }
+  ],
+  "counts": {
+    "requested_areas_passed": 4,
+    "requested_areas_failed": 0,
+    "requested_areas_skipped": 0
+  },
+  "evidence_images_to_retain": [
+    {
+      "path": "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/replay-home-frame1.png",
+      "description": "WFRL replay page, frame 1 and paused offline state; sidebar masks T3 in this image."
+    },
+    {
+      "path": "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/cameras-reference-frame1.png",
+      "description": "Actual comparison window at 117.00 s with blade root, middle and tip and static installation illustration."
+    },
+    {
+      "path": "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/manual-paused.png",
+      "description": "Manual scene showing T1 paused, yaw 1.0 degrees and rotor angle 153.7 degrees."
+    }
+  ],
+  "evidence_method": "PNG files were written by Blender Save Screenshot through visible UI. The runtime/event files were created by the parent-provided read-only observer running in the same self-owned Blender process.",
+  "additional_evidence": [
+    "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/runtime.json",
+    "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/events.json",
+    "/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/ui/latest.json"
+  ],
+  "limitations": [
+    "UI acceptance did not test Bridge, MPI, FAST.Farm, training or network backend; no FPS, performance or scientific validity claim.",
+    "Only sampled camera poses and the stated controls were tested; no continuous view-coverage claim.",
+    "No user scene or startup file was saved, and Save Preferences was not explicitly invoked. Blender automatically saved preferences on exit; the parent restores and verifies the protected profile files."
+  ],
+  "incidental_test_state": "A click while navigating the manual page changed the temporary scene target pitch hold field from 7.00 s to 7.03 s. No export or experiment was started from that field, and the self-owned test scene was discarded on exit.",
+  "shutdown": {
+    "camera_observation_window": "Closed via its in-window X control.",
+    "main_window": "Closed via native close button, chose Don’t Save for the self-owned Untitled.blend.",
+    "pid_56319": "Absent from ps -p 56319 after closing; parent captured normal exit code 0 in its tool output."
+  }
+}

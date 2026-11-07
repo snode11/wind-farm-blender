@@ -29,7 +29,29 @@ def clear_runtime(scene=None):
     if scene is None:
         _SESSIONS.clear()
     else:
-        _SESSIONS.pop(scene.as_pointer(), None)
+        try:
+            _SESSIONS.pop(scene.as_pointer(), None)
+        except ReferenceError:
+            for key, groups in list(_SESSIONS.items()):
+                if any(group['scene'] is scene for group in groups.values()):
+                    _SESSIONS.pop(key, None)
+
+
+def rebind_meshes(scene, bindings):
+    """Include existing, provenance-checked display meshes in a farm transaction."""
+    replacements = []
+    sources = None
+    for names_key, prefix, _offset in _SAVED_GROUPS:
+        if scene.get(names_key) is None:
+            continue
+        if sources is None:
+            sources, _yaw = _sources(scene)
+        existing, _legacy = _existing(scene, prefix, names_key, sources)
+        replacements.extend((obj, sources[part].data) for part, obj in existing.items()
+                            if obj.data != sources[part].data)
+    for obj, mesh in replacements:
+        bindings.replace(obj, mesh)
+    clear_runtime(scene)
 
 
 def release(scene, names_key):
@@ -95,6 +117,18 @@ def _model_inverse(yaw, matrices):
     flip = Matrix.Diagonal((-1., -1., 1., 1.))
     flip.translation = (0., 0., -float(geometry_data()['scalars']['TowerHt']))
     return (_world_from_basis(yaw, matrices) @ flip).inverted()
+
+
+def rotor_center(scene, *, offset):
+    """Return the source rotor origin in the shared structure's display frame."""
+    from mathutils import Matrix
+    yaw = scene.objects.get(SOURCE_PREFIX + 'YawRoot')
+    rotor = scene.objects.get(SOURCE_PREFIX + 'Rotor')
+    if yaw is None or rotor is None:
+        raise ValueError('左侧 T1 叶轮或机舱坐标缺失')
+    matrices = {}
+    display_from_world = Matrix.Translation(offset) @ _model_inverse(yaw, matrices)
+    return (display_from_world @ _world_from_basis(rotor, matrices)).translation.copy()
 
 
 def _legacy_valid(obj, part, prefix):

@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__)))))
 
 from wfrl.scene.schema import load_scene                          # noqa: E402
-from wfrl.viz.field import get_floris                             # noqa: E402
+from wfrl.floris_field import get_floris                             # noqa: E402
 
 
 def farm_power(fi, yaws_deg):
@@ -37,7 +37,7 @@ def main():
     fi = get_floris(env)
     fi.reinitialize(wind_speeds=[float(sc.wind_speed)], wind_directions=[270.0])
     n = sc.n
-    xs = np.asarray(sc.xcoords); ys = np.asarray(sc.ycoords)
+    xs = np.asarray(sc.xcoords); np.asarray(sc.ycoords)
     print(f"场景 {sc.name}: n={n}, 风向 270°(尾流沿 +x)")
     for i, t in enumerate(sc.turbines):
         print(f"  {t.id}: x={t.x:.0f} y={t.y:.0f}")

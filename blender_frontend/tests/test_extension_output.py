@@ -12,6 +12,8 @@ import unittest
 from unittest.mock import patch
 from zipfile import ZipFile
 
+from blender_frontend.tests._platform import symlink_or_skip
+
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILDER_PATH = ROOT / 'scripts' / 'blender' / 'build_extension.py'
@@ -60,17 +62,19 @@ class OutputTests(unittest.TestCase):
     def test_broken_output_symlinks_are_conflicts(self):
         builder = load_builder()
         for index in range(3):
-            with self.subTest(index=index), tempfile.TemporaryDirectory() as directory:
+            with tempfile.TemporaryDirectory() as directory:
                 output = Path(directory)
                 paths = output_paths(builder, output)
-                paths[index].symlink_to('missing-target')
-                with patch.object(builder, '_payloads', side_effect=AssertionError('payload read')):
-                    with self.assertRaises(FileExistsError):
-                        builder.build(output)
-                self.assertTrue(paths[index].is_symlink())
-                self.assertFalse(paths[index].exists())
-                self.assertEqual(list(output.iterdir()), [paths[index]])
+                symlink_or_skip(paths[index], 'missing-target')
+                with self.subTest(index=index):
+                    with patch.object(builder, '_payloads', side_effect=AssertionError('payload read')):
+                        with self.assertRaises(FileExistsError):
+                            builder.build(output)
+                    self.assertTrue(paths[index].is_symlink())
+                    self.assertFalse(paths[index].exists())
+                    self.assertEqual(list(output.iterdir()), [paths[index]])
 
+    @unittest.skipIf(os.name == 'nt', 'Extension publication requires POSIX hard links')
     def test_explicit_overwrite_publishes_a_valid_package(self):
         builder = load_builder()
         with tempfile.TemporaryDirectory() as directory:
@@ -102,6 +106,7 @@ class OutputTests(unittest.TestCase):
                     builder.build(output, overwrite=True)
             self.assertTrue(paths[0].is_dir())
 
+    @unittest.skipIf(os.name == 'nt', 'Extension publication requires POSIX hard links')
     def test_overwrite_replaces_output_symlinks_without_writing_their_targets(self):
         builder = load_builder()
         with tempfile.TemporaryDirectory() as directory:
@@ -112,7 +117,7 @@ class OutputTests(unittest.TestCase):
             staging = output / '.staging'
             staging.mkdir()
             for path in paths:
-                path.symlink_to(target)
+                symlink_or_skip(path, target)
                 (staging / path.name).write_bytes(b'new output')
             builder._publish_outputs(staging, paths, overwrite=True)
             self.assertEqual(target.read_bytes(), b'keep target')
@@ -139,6 +144,7 @@ class OutputTests(unittest.TestCase):
     def test_sidecar_generation_failure_leaves_no_final_outputs(self):
         self.check_generation_failure(overwrite=False)
 
+    @unittest.skipIf(os.name == 'nt', 'Extension publication requires POSIX hard links')
     def test_publication_failure_restores_existing_output_set(self):
         builder = load_builder()
         with tempfile.TemporaryDirectory() as directory:
@@ -162,6 +168,7 @@ class OutputTests(unittest.TestCase):
             for path in paths:
                 self.assertEqual(path.read_bytes(), path.name.encode())
 
+    @unittest.skipIf(os.name == 'nt', 'Extension publication requires POSIX hard links')
     def test_new_publication_failure_removes_published_sidecars(self):
         builder = load_builder()
         with tempfile.TemporaryDirectory() as directory:
@@ -183,6 +190,7 @@ class OutputTests(unittest.TestCase):
                     builder._publish_outputs(staging, paths, overwrite=False)
             self.assertFalse(any(path.exists() for path in paths))
 
+    @unittest.skipIf(os.name == 'nt', 'Extension publication requires POSIX hard links')
     def test_default_publication_never_overwrites_a_late_conflict(self):
         builder = load_builder()
         with tempfile.TemporaryDirectory() as directory:
@@ -206,9 +214,11 @@ class OutputTests(unittest.TestCase):
             self.assertFalse(paths[0].exists())
             self.assertFalse(paths[1].exists())
 
+    @unittest.skipIf(os.name == 'nt', 'Extension publication requires POSIX hard links')
     def test_default_rollback_preserves_a_replacement_by_another_writer(self):
         self.check_rollback_conflict(overwrite=False)
 
+    @unittest.skipIf(os.name == 'nt', 'Extension publication requires POSIX hard links')
     def test_overwrite_rollback_preserves_a_replacement_by_another_writer(self):
         self.check_rollback_conflict(overwrite=True)
 

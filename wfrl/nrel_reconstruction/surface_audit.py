@@ -33,7 +33,7 @@ def sha256(path):
 
 def read_mesh(path):
     """Read the frozen ASCII triangle PLY format; reject other formats."""
-    with Path(path).open() as handle:
+    with Path(path).open(encoding='utf-8') as handle:
         if handle.readline().strip() != 'ply' or handle.readline().strip() != 'format ascii 1.0':
             raise ValueError('Frozen audit expects ASCII PLY 1.0')
         nv = nf = None
@@ -287,7 +287,7 @@ def section_summary(states, weights, indices):
 
 def dump_csv(path, rows):
     fields = list(dict.fromkeys(key for row in rows for key in row))
-    with gzip.open(path, 'wt', newline='') as handle:
+    with gzip.open(path, 'wt', newline='', encoding='utf-8') as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader(); writer.writerows(rows)
 
@@ -296,7 +296,7 @@ def run_audit(root, output):
     root, output = relocated_path(root), Path(output).resolve()
     output.mkdir(parents=True, exist_ok=True)
     observation_path = root/'observations/observations.json'
-    observations = json.loads(observation_path.read_text())
+    observations = json.loads(observation_path.read_text(encoding='utf-8'))
     expected = {(c, f) for c in ('C1', 'C2', 'C3') for f in (42, 43, 44, 45)}
     if len(observations) != 12 or {(o['camera_id'], o['frame_id']) for o in observations} != expected:
         raise ValueError('Audit requires exactly the frozen 12 reviewed observations')
@@ -305,8 +305,8 @@ def run_audit(root, output):
     model_paths = {'initial_template': 'reconstruction/initial_template.ply',
                    'trusted_contour_26': 'contour-ablation/T1_B1.ply',
                    'formal_reconstruction': 'reconstruction/T1_B1.ply'}
-    freeze = json.loads((root/'model_freeze.json').read_text())
-    scoring = json.loads((root/'scoring_config.json').read_text())
+    freeze = json.loads((root/'model_freeze.json').read_text(encoding='utf-8'))
+    scoring = json.loads((root/'scoring_config.json').read_text(encoding='utf-8'))
     input_paths = [observation_path, root/'observations/annotations.json', root/'model_freeze.json', root/'scoring_config.json']
     models = {}
     for name, relative in model_paths.items():
@@ -316,12 +316,12 @@ def run_audit(root, output):
         if sha256(metadata_path) != freeze['sha256'][str(metadata_path.relative_to(root))]:
             raise ValueError('Model metadata freeze mismatch')
         vertices, faces = read_mesh(path)
-        models[name] = (vertices, faces, json.loads(metadata_path.read_text()))
+        models[name] = (vertices, faces, json.loads(metadata_path.read_text(encoding='utf-8')))
         input_paths.extend([path, metadata_path])
     branch_history_path = root/'contour-ablation/optimization.json'
     if sha256(branch_history_path) != freeze['sha256']['contour-ablation/optimization.json']:
         raise ValueError('Trusted contour branch optimization record freeze mismatch')
-    if len(json.loads(branch_history_path.read_text())['video_history']) != 26:
+    if len(json.loads(branch_history_path.read_text(encoding='utf-8'))['video_history']) != 26:
         raise ValueError('Expected the frozen 26-iteration trusted contour branch')
     input_paths.append(branch_history_path)
     vertices0, faces0, metadata0 = models['initial_template']
@@ -475,7 +475,7 @@ def run_audit(root, output):
     dump_csv(output/'contour_edge_samples.csv.gz', edge_rows)
     dump_csv(output/'section_samples.csv.gz', section_rows)
     dump_csv(output/'model_disagreement.csv.gz', disagreement_rows)
-    (output/'surface_audit.json').write_text(json.dumps(report, indent=2, allow_nan=False)+'\n')
+    (output/'surface_audit.json').write_text(json.dumps(report, indent=2, allow_nan=False)+'\n', encoding='utf-8')
     print(json.dumps({'output': str(output), 'surface_rows': len(all_rows), 'contour_rows': len(edge_rows),
                       'section_rows': len(section_rows), 'disagreement': disagreements}, indent=2), flush=True)
     return report

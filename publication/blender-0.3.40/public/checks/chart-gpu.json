@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "error": null,
+  "blender": "5.2.1 LTS",
+  "source": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/charts.py",
+  "source_sha256": "efa982c9051362ebd40d17b29697451f9752e8dbd5c21e6c2f0de23aeff05e3c",
+  "metrics": {
+    "cold": {
+      "batch_builds": 13,
+      "vertices_built": 1824,
+      "history_reads": 3,
+      "segment_scans": 3,
+      "axis_scans": 2,
+      "draws": 1,
+      "cpu_ms": 3.189499955624342
+    },
+    "cached": {
+      "batch_builds": 0,
+      "vertices_built": 0,
+      "history_reads": 0,
+      "segment_scans": 0,
+      "axis_scans": 0,
+      "draws": 20,
+      "cpu_ms": 1.908999984152615
+    }
+  },
+  "separate_window_batches": true,
+  "closed_window_released": true,
+  "unregister_released": true,
+  "scope": "Synthetic draw callback CPU and allocations; no viewport FPS"
+}

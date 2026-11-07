@@ -1,7 +1,9 @@
 # Landscape asset sources
 
 - Rocky Terrain 02, Poly Haven: https://polyhaven.com/a/rocky_terrain_02
-  2K JPG diffuse, OpenGL normal and roughness maps.
+  2K JPG diffuse and roughness maps; roughness also drives the bump height.
+  The packaged reconstruction example retains its embedded OpenGL normal map;
+  it does not require a separate normal-map file in this directory.
 - Kloofendal 48d Partly Cloudy (Pure Sky), Poly Haven:
   https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky
   2K HDR sky.

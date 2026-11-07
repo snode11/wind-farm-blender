@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "operation": "undo",
+      "scene_before": 527689953312,
+      "scene_after": 527689953312,
+      "enabled": true,
+      "frame_available": true,
+      "bound_to_current_farm": true,
+      "error": "",
+      "source": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde"
+    },
+    {
+      "operation": "redo",
+      "scene_before": 527689953312,
+      "scene_after": 527689953312,
+      "enabled": true,
+      "frame_available": true,
+      "bound_to_current_farm": true,
+      "error": "",
+      "source": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde"
+    }
+  ],
+  "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+  "recording_state": "COMPLETE",
+  "user_visibility_preserved": true,
+  "native_installation_edit_preserved": true,
+  "scope": "Native background undo/redo and radar rebinding; no GPU drawing"
+}

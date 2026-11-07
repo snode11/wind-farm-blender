@@ -1,0 +1,33 @@
+{
+  "command": [
+    "/Applications/Blender.app/Contents/MacOS/Blender",
+    "--background",
+    "--factory-startup",
+    "--disable-autoexec",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-039-1c7_0445/native-temporary/wfrl-regressions-s8eai69w/bootstrap.py",
+    "--",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/animation_render_regression.py",
+    "background",
+    "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/run/execution.json",
+    "/Users/eason/Desktop/wfcrl/wind farm RL"
+  ],
+  "mode": "background",
+  "output": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/artifacts",
+  "report": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/result.json",
+  "environment": {
+    "TMPDIR": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-039-1c7_0445/native-temporary/wfrl-regressions-s8eai69w/animation_render_regression/run/tmp",
+    "BLENDER_USER_CONFIG": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-039-1c7_0445/native-temporary/wfrl-regressions-s8eai69w/animation_render_regression/run/config",
+    "BLENDER_USER_SCRIPTS": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-039-1c7_0445/native-temporary/wfrl-regressions-s8eai69w/animation_render_regression/run/scripts",
+    "BLENDER_USER_DATAFILES": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-039-1c7_0445/native-temporary/wfrl-regressions-s8eai69w/animation_render_regression/run/datafiles",
+    "XDG_CACHE_HOME": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-039-1c7_0445/native-temporary/wfrl-regressions-s8eai69w/animation_render_regression/run/cache",
+    "WFRL_ADDON_MODULE": "wfrl_blender",
+    "WFRL_EXPECTED_ADDON_ROOT": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender",
+    "WFRL_FARM_FLEX_PACKAGE": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/mappo",
+    "WFRL_DUAL_PACKAGE": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/dual_beam",
+    "WFRL_TEST_OUTPUT": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/artifacts",
+    "WFRL_FARM_FLEX_EVIDENCE": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/artifacts"
+  }
+}

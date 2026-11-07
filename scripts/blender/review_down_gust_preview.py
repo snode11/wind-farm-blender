@@ -32,7 +32,7 @@ for frame in (321,721,1121):
  records.append(dict(frame=frame,time_s=value['time_s'],azimuth_deg=value['motion']['azimuth_deg'],
                      tip_world_m=list(tip),tip_screen_uv=list(uv),red_pixels=int(red.sum()),
                      measurement=value['measurement'],image=path.name))
-(OUT/'same-phase.json').write_text(json.dumps(records,indent=2))
+(OUT/'same-phase.json').write_text(json.dumps(records,indent=2), encoding='utf-8')
 print('SAME_PHASE_RECORDS',json.dumps(records),flush=True)
 if os.environ.get('WFRL_GUST_VIDEO')=='1':
  folder=OUT/'frames';folder.mkdir(exist_ok=True)
@@ -69,7 +69,7 @@ assert root_error<.001,root_error
  mean_update_ms=float(np.mean(samples)*1000),p95_update_ms=float(np.percentile(samples,95)*1000),
  timing_scope='background frame update only; viewport FPS not measured',
  source_fit_error_m=preview.meta['max_surface_fit_error_m'],
- status='REVIEW_ONLY'),indent=2))
+ status='REVIEW_ONLY'),indent=2), encoding='utf-8')
 # Verify state sharing, repeated seeking and independent meshes.
 scene.frame_set(721)
 obj=scene.objects['WFRL.Turbine.T1.Blade1'];coords=np.array([v.co[:] for v in obj.data.vertices])

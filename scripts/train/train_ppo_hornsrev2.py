@@ -14,24 +14,27 @@ Differences vs the 7-turbine Ablaincourt script:
                        the bottleneck is the CPU-bound FLORIS sim, not the tiny MLP).
 
 Usage:
-    python train_ppo_hornsrev2.py                      # 1M steps, 8 parallel envs
-    python train_ppo_hornsrev2.py --n-envs 16          # more CPU workers
-    python train_ppo_hornsrev2.py --timesteps 2000000  # longer run
-    python train_ppo_hornsrev2.py --resume             # continue from checkpoint
-    python train_ppo_hornsrev2.py --eval-only          # evaluate saved model
+    python scripts/train/train_ppo_hornsrev2.py                      # 8 parallel envs
+    python scripts/train/train_ppo_hornsrev2.py --n-envs 16
+    python scripts/train/train_ppo_hornsrev2.py --timesteps 2000000
+    python scripts/train/train_ppo_hornsrev2.py --resume
+    python scripts/train/train_ppo_hornsrev2.py --eval-only
 
 Monitoring:
-    tensorboard --logdir logs/ppo_hr2
+    tensorboard --logdir results/logs/ppo_hr2
     (watch train/explained_variance climb > 0; ep_rew_mean should rise)
 """
 
 import argparse
+from copy import deepcopy
 import os
+from uuid import uuid4
 
 import numpy as np
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import CheckpointCallback
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.utils import check_for_correct_spaces
 from stable_baselines3.common.vec_env import (
     DummyVecEnv,
     SubprocVecEnv,
@@ -40,6 +43,9 @@ from stable_baselines3.common.vec_env import (
 
 from wfcrl import environments as envs
 from wfrl.sb3_wrapper import WFCRLSB3Wrapper
+from wfrl.sb3_checkpoint import (
+    require_checkpoint_files, validate_model_normalization, validate_normalization,
+)
 
 from wfrl import paths
 
@@ -54,7 +60,11 @@ MAX_STEPS = 200  # steps per episode
 def make_single_env(max_steps: int = MAX_STEPS) -> Monitor:
     """One SB3-ready env instance (adapter + episode-stats Monitor). Raw reward."""
     raw = envs.make(ENV_ID, controls=["yaw"], max_num_steps=max_steps)
-    return Monitor(WFCRLSB3Wrapper(raw))
+    try:
+        return Monitor(WFCRLSB3Wrapper(raw))
+    except BaseException:
+        raw.close()
+        raise
 
 
 def _env_factory(max_steps: int = MAX_STEPS):
@@ -62,45 +72,55 @@ def _env_factory(max_steps: int = MAX_STEPS):
     return lambda: make_single_env(max_steps)
 
 
-def make_train_venv(n_envs: int = 8, max_steps: int = MAX_STEPS) -> VecNormalize:
-    """Parallel (SubprocVecEnv) + normalized env for training.
-
-    n_envs FLORIS workers step in parallel across CPU cores. This is the right
-    lever for speed here (CPU-bound sim), not GPU. Falls back to DummyVecEnv when
-    n_envs == 1 to avoid subprocess overhead.
-    """
+def _make_venv(n_envs, max_steps, *, training, norm_path=None, normalization=None):
+    if n_envs < 1:
+        raise ValueError("n_envs must be positive")
+    if norm_path is not None and not os.path.isfile(norm_path):
+        raise FileNotFoundError(f"Required normalization file is missing: {norm_path}")
     if n_envs > 1:
-        venv = SubprocVecEnv([_env_factory(max_steps) for _ in range(n_envs)])
+        base = SubprocVecEnv([_env_factory(max_steps) for _ in range(n_envs)])
     else:
-        venv = DummyVecEnv([_env_factory(max_steps)])
-    return VecNormalize(
-        venv,
-        norm_obs=True,
-        norm_reward=True,
-        clip_obs=10.0,
-        gamma=0.99,
-    )
+        base = DummyVecEnv([_env_factory(max_steps)])
+    try:
+        if normalization is not None:
+            venv = deepcopy(normalization)
+            venv.set_venv(base)
+        elif norm_path is not None:
+            venv = VecNormalize.load(norm_path, base)
+            venv._wfrl_normalization_path = os.path.abspath(norm_path)
+        else:
+            venv = VecNormalize(base, norm_obs=True, clip_obs=10.0, gamma=0.99)
+        check_for_correct_spaces(base, venv.observation_space, venv.action_space)
+        validate_normalization(venv)
+        venv.training = training
+        venv.norm_reward = training
+        return venv
+    except BaseException:
+        base.close()
+        raise
 
 
-def make_eval_venv(max_steps: int = MAX_STEPS) -> VecNormalize:
-    """Eval env: single worker, reuse saved stats, report RAW reward."""
-    venv = DummyVecEnv([_env_factory(max_steps)])
-    if os.path.exists(VECNORM_PATH):
-        venv = VecNormalize.load(VECNORM_PATH, venv)
-        venv.training = False
-        venv.norm_reward = False
-    else:
-        venv = VecNormalize(
-            venv, norm_obs=True, norm_reward=False, clip_obs=10.0, gamma=0.99
-        )
-        venv.training = False
-    return venv
+def make_train_venv(n_envs: int = 8, max_steps: int = MAX_STEPS, *, resume=False) -> VecNormalize:
+    """Use independent farm workers and restore saved observation/reward moments."""
+    return _make_venv(n_envs, max_steps, training=True,
+                      norm_path=VECNORM_PATH if resume else None)
+
+
+def make_eval_venv(max_steps: int = MAX_STEPS, *, normalization=None) -> VecNormalize:
+    """Use one farm with frozen saved or supplied statistics and raw rewards."""
+    return _make_venv(1, max_steps, training=False, normalization=normalization,
+                      norm_path=VECNORM_PATH if normalization is None else None)
 
 
 def build_model(venv, resume: bool) -> PPO:
-    if resume and os.path.exists(MODEL_PATH + ".zip"):
+    if resume:
+        require_checkpoint_files(MODEL_PATH, VECNORM_PATH)
+        if venv.__dict__.get("_wfrl_normalization_path") != os.path.abspath(VECNORM_PATH):
+            raise ValueError("Restore VecNormalize before loading a HornsRev2 PPO checkpoint")
         print(f"[train] resuming from {MODEL_PATH}.zip")
-        return PPO.load(MODEL_PATH, env=venv, tensorboard_log=LOG_DIR)
+        model = PPO.load(MODEL_PATH, env=venv, tensorboard_log=LOG_DIR)
+        validate_model_normalization(model, venv)
+        return model
 
     print("[train] building fresh PPO model (HornsRev2, 91 turbines)")
     return PPO(
@@ -122,63 +142,86 @@ def build_model(venv, resume: bool) -> PPO:
     )
 
 
-def evaluate(model: PPO, n_episodes: int = 3, max_steps: int = MAX_STEPS):
-    """Roll out deterministically over a normalized eval env; report RAW reward."""
-    venv = make_eval_venv(max_steps)
-    returns = []
-    for ep in range(n_episodes):
-        obs = venv.reset()
-        ep_ret, done = 0.0, False
-        while not done:
-            action, _ = model.predict(obs, deterministic=True)
-            obs, reward, dones, _ = venv.step(action)
-            ep_ret += float(reward[0])
-            done = bool(dones[0])
-        returns.append(ep_ret)
-        print(f"[eval] episode {ep + 1}: raw return = {ep_ret:.4f}")
-    venv.close()
+def evaluate(model: PPO, n_episodes: int = 3, max_steps: int = MAX_STEPS, *,
+             venv=None, normalization=None):
+    """Evaluate frozen statistics and raw rewards; close owned environments."""
+    owns_venv = venv is None
+    if owns_venv:
+        venv = make_eval_venv(max_steps, normalization=normalization)
+    try:
+        validate_model_normalization(model, venv)
+        if venv.training or venv.norm_reward:
+            raise ValueError("Evaluation requires training=False and norm_reward=False")
+        returns = []
+        for ep in range(n_episodes):
+            obs = venv.reset()
+            ep_ret, done = 0.0, False
+            while not done:
+                action, _ = model.predict(obs, deterministic=True)
+                obs, reward, dones, _ = venv.step(action)
+                ep_ret += float(reward[0])
+                done = bool(dones[0])
+            returns.append(ep_ret)
+            print(f"[eval] episode {ep + 1}: raw return = {ep_ret:.4f}")
+    finally:
+        if owns_venv:
+            venv.close()
     print(f"[eval] mean raw return over {n_episodes} eps = {np.mean(returns):.4f}")
     return float(np.mean(returns))
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--timesteps", type=int, default=1_000_000)
+    parser.add_argument("--timesteps", type=int, default=1_000_000,
+                        help="Additional transitions across all farm workers, rounded up to a rollout")
     parser.add_argument("--n-envs", type=int, default=8,
                         help="parallel FLORIS workers (CPU cores). No GPU used.")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--eval-only", action="store_true")
+    parser.add_argument("--progress-bar", action="store_true",
+                        help="Show the optional progress bar (requires tqdm and rich)")
     args = parser.parse_args()
+
+    if args.resume or args.eval_only:
+        require_checkpoint_files(MODEL_PATH, VECNORM_PATH)
+    if args.eval_only:
+        venv = make_eval_venv()
+        try:
+            model = build_model(venv, resume=True)
+            evaluate(model, venv=venv)
+        finally:
+            venv.close()
+        return
 
     os.makedirs(LOG_DIR, exist_ok=True)
     os.makedirs(CKPT_DIR, exist_ok=True)
+    venv = make_train_venv(n_envs=args.n_envs, resume=args.resume)
+    try:
+        model = build_model(venv, resume=args.resume)
 
-    if args.eval_only:
-        venv = make_train_venv(n_envs=1)
-        model = build_model(venv, resume=True)
-        evaluate(model)
-        return
+        print("\n[train] --- policy evaluation (before training) ---")
+        evaluate(model, n_episodes=2, normalization=venv)
 
-    venv = make_train_venv(n_envs=args.n_envs)
-    model = build_model(venv, resume=args.resume)
+        # Each callback invocation advances every independent farm worker once.
+        ckpt_cb = CheckpointCallback(
+            save_freq=max(50_000 // args.n_envs, 1),
+            save_path=CKPT_DIR,
+            name_prefix="ppo_hr2",
+            save_vecnormalize=True,
+        )
 
-    print("\n[train] --- baseline evaluation (before training) ---")
-    evaluate(model, n_episodes=2)
+        print(f"\n[train] --- training for {args.timesteps} timesteps "
+              f"({args.n_envs} parallel envs) ---")
+        model.learn(total_timesteps=args.timesteps, callback=ckpt_cb,
+                    progress_bar=args.progress_bar, reset_num_timesteps=not args.resume)
 
-    # save_freq is PER-ENV steps; multiply by n_envs for true global cadence.
-    ckpt_cb = CheckpointCallback(
-        save_freq=max(50_000 // args.n_envs, 1),
-        save_path=CKPT_DIR,
-        name_prefix="ppo_hr2",
-    )
-
-    print(f"\n[train] --- training for {args.timesteps} timesteps "
-          f"({args.n_envs} parallel envs) ---")
-    model.learn(total_timesteps=args.timesteps, callback=ckpt_cb, progress_bar=True)
-
-    model.save(MODEL_PATH)
-    venv.save(VECNORM_PATH)
-    print(f"[train] saved model to {MODEL_PATH}.zip and stats to {VECNORM_PATH}")
+        checkpoint_id = uuid4().hex
+        model._wfrl_checkpoint_id = venv._wfrl_checkpoint_id = checkpoint_id
+        model.save(MODEL_PATH)
+        venv.save(VECNORM_PATH)
+        print(f"[train] saved model to {MODEL_PATH}.zip and stats to {VECNORM_PATH}")
+    finally:
+        venv.close()
 
     print("\n[train] --- final evaluation (after training) ---")
     evaluate(model)

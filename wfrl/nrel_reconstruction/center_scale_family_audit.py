@@ -229,7 +229,7 @@ def _hash(path):
 def run(root, output, protocol_path=None, addendum_path=None):
     root, output = Path(root).resolve(), Path(output).resolve()
     protocol_path = relocated_path(protocol_path, root=root) if protocol_path else output / "protocol.json"
-    protocol = json.loads(protocol_path.read_text())
+    protocol = json.loads(protocol_path.read_text(encoding='utf-8'))
     allowed_paths = {name: relocated_path(root / name, root=root) for name in protocol["inputs"]}
     for name, path in allowed_paths.items():
         if "truth" in path.parts or _hash(path) != protocol["inputs"][name]:
@@ -244,15 +244,15 @@ def run(root, output, protocol_path=None, addendum_path=None):
                   "output_dir": str(output)}
     if addendum_path:
         addendum_path = Path(addendum_path).resolve()
-        addendum = json.loads(addendum_path.read_text())
+        addendum = json.loads(addendum_path.read_text(encoding='utf-8'))
         if addendum["extends_protocol_sha256"] != _hash(protocol_path):
             raise ValueError("Addendum does not extend this frozen protocol")
         run_record.update({"addendum_path": str(addendum_path), "addendum_sha256": _hash(addendum_path)})
     output.mkdir(parents=True, exist_ok=True)
-    with (output / "run_record.json").open("x") as handle:
+    with (output / "run_record.json").open("x", encoding='utf-8') as handle:
         json.dump(run_record, handle, indent=2); handle.write("\n")
     state_path = root / "outputs/nrel-video-single-blade/stages/02-second-run/reconstruction/model_state.json"
-    state = json.loads(state_path.read_text())
+    state = json.loads(state_path.read_text(encoding='utf-8'))
     result, rows = audit(state["models"]["T1_B1"])
     result["protocol_sha256"] = _hash(protocol_path)
     result["run_record"] = run_record
@@ -262,8 +262,8 @@ def run(root, output, protocol_path=None, addendum_path=None):
     result["inputs_unchanged"] = result["input_hashes_before"] == result["input_hashes_after"]
     if not result["inputs_unchanged"] or not result["source_unchanged_since_run_started"]:
         raise ValueError("Frozen inputs or audit source changed during audit")
-    (output / "family_audit.json").write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n")
-    with (output / "ring_residuals.csv").open("w", newline="") as handle:
+    (output / "family_audit.json").write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding='utf-8')
+    with (output / "ring_residuals.csv").open("w", newline="", encoding='utf-8') as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader(); writer.writerows(rows)
     print(json.dumps({"output": str(output), "cases": len(result["cases"]), "ring_rows": len(rows),

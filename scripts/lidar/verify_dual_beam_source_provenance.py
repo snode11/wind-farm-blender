@@ -64,7 +64,7 @@ def read_output(path):
 
 
 def input_value(path, key):
-    for line in Path(path).read_text().splitlines():
+    for line in Path(path).read_text(encoding='utf-8').splitlines():
         words = line.split()
         if len(words) > 1 and words[1] == key:
             return words[0].strip('"')
@@ -228,7 +228,7 @@ def verify_provenance(source, repo_root=ROOT, provenance_root=None):
         return record['status'] == 'MATCH'
 
     try:
-        manifest = json.loads((source / 'manifest.json').read_text())
+        manifest = json.loads((source / 'manifest.json').read_text(encoding='utf-8'))
         if (manifest.get('schema') != 'wfrl.farm-flex-review.v3'
                 or manifest.get('status') != 'REVIEW_ONLY' or manifest.get('structural_module') != 'BeamDyn'
                 or not manifest.get('includes_rigid_motion') or manifest.get('tower_model') != 'elastodyn-flexible'):
@@ -239,10 +239,10 @@ def verify_provenance(source, repo_root=ROOT, provenance_root=None):
                 raise ValueError('Package inventory must use package-local names')
             if not check_hash('source_package', source / name, expected):
                 raise ValueError('Source package integrity is not intact: ' + name)
-        run = json.loads((source / 'source-run.json').read_text())
-        telemetry = json.loads((source / 'telemetry.json').read_text())
-        deflection = json.loads((source / 'deflection-t1.json').read_text())
-        reference = json.loads((source / 'blade-reference.json').read_text())
+        run = json.loads((source / 'source-run.json').read_text(encoding='utf-8'))
+        telemetry = json.loads((source / 'telemetry.json').read_text(encoding='utf-8'))
+        deflection = json.loads((source / 'deflection-t1.json').read_text(encoding='utf-8'))
+        reference = json.loads((source / 'blade-reference.json').read_text(encoding='utf-8'))
         case = Path(run['case_dir'])
         case = case.resolve() if case.is_absolute() else (repo_root / case).resolve()
         farm = case / 'FarmInputs'
@@ -277,7 +277,7 @@ def verify_provenance(source, repo_root=ROOT, provenance_root=None):
                 gap('originating_controller', 'ServoDyn input is missing; controller path cannot be resolved.', turbine_id=tid)
                 continue
             check_hash('originating_controller', (recorded_servo.parent / input_value(servo, 'DLL_FileName')).resolve(), run['controller_sha256'])
-        surfaces = json.loads((source / 'source-surfaces.json').read_text())
+        surfaces = json.loads((source / 'source-surfaces.json').read_text(encoding='utf-8'))
         counts, missing_examples, mismatches = Counter(), [], []
         for name, expected in surfaces.items():
             path = Path(name)
@@ -329,7 +329,7 @@ def verify_provenance(source, repo_root=ROOT, provenance_root=None):
             nacelles, tower_times = archive['nacelle'], archive['times']
         difference(tower_times, geometry['times'], TIME_TOLERANCE_S, 'tower timestamps')
         difference(telemetry['times'], geometry['times'], TIME_TOLERANCE_S, 'telemetry timestamps')
-        payload = json.loads((source / 'data.json').read_text())
+        payload = json.loads((source / 'data.json').read_text(encoding='utf-8'))
         for index, tid in enumerate(manifest['turbine_ids']):
             output = farm / f'Case.{tid}.out'
             expected = telemetry['sources'][tid]['sha256']
@@ -392,8 +392,8 @@ def main(argv=None):
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     report['evidence_tool_sha256'] = digest(Path(__file__))
-    (output / 'provenance.json').write_text(json.dumps(report, ensure_ascii=False, allow_nan=False, indent=2) + '\n')
-    (output / 'report.md').write_text(markdown_report(report))
+    (output / 'provenance.json').write_text(json.dumps(report, ensure_ascii=False, allow_nan=False, indent=2) + '\n', encoding='utf-8')
+    (output / 'report.md').write_text(markdown_report(report), encoding='utf-8')
     print(report['status'], output)
     return 0 if report['passed'] else 1
 

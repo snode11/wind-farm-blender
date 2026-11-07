@@ -1,0 +1,15 @@
+{
+  "root_collections": [
+    "Probe A collection",
+    "Probe B collection"
+  ],
+  "status": "PASS",
+  "requested_scene": "Probe B",
+  "camera_scenes": [
+    "Probe B"
+  ],
+  "camera_in_requested_scene": true,
+  "camera_initialized": true,
+  "repeat_preserves_identity_and_ptz": true,
+  "other_scene_rejected_without_allocation": true
+}

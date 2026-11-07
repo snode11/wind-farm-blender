@@ -6,12 +6,20 @@ import numpy as np
 import torch
 
 from wfrl.mappo_central import Actor
+from wfrl.policy_actions import load_action_contract
 
 
 class FlexPolicy:
     def __init__(self, checkpoint):
         path = Path(checkpoint)
         ck = torch.load(path, map_location='cpu', weights_only=False)
+        if 'scene' in ck:
+            raise ValueError('FlexPolicy probe supports only the legacy Row1 environment, without a saved scene')
+        contract = load_action_contract(ck, controls=['yaw'], n_agents=3,
+                                        env_id='Dec_Turb3_Row1_Fastfarm')
+        contract.validate_runtime(['yaw'], {'yaw': (-5., 5.)})
+        if contract.transform != 'clip':
+            raise ValueError('FlexPolicy probe requires the legacy Row1 clip action contract')
         if (ck.get('env_id') != 'Dec_Turb3_Row1_Fastfarm'
                 or ck.get('obs_dim') != 3 or ck.get('act_dim') != 1
                 or ck.get('state_dim') != 9 or ck.get('recurrent', False)

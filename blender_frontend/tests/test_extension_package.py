@@ -7,11 +7,14 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import shutil
 import sys
 import tempfile
 import unittest
 import zipfile
 import tomllib
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILDER_PATH = ROOT / "scripts" / "blender" / "build_extension.py"
@@ -24,12 +27,82 @@ def load_builder():
     spec.loader.exec_module(module)
     return module
 
+
+@pytest.fixture(scope='module')
+def default_extension(tmp_path_factory):
+    """Complete default build shared only by read-only archive consumers."""
+    return load_builder().build(tmp_path_factory.mktemp('default-extension'))
+
+
 class PackageTests(unittest.TestCase):
+    @pytest.fixture
+    def built_default_extension(self, default_extension):
+        self.default_extension = default_extension
+
+    def test_optional_texture_payload_still_rejects_partial_or_wrong_source(self):
+        builder = load_builder()
+        payloads = builder._payloads()
+        names = {name for name, _ in payloads}
+        self.assertFalse(any(name.startswith(builder.RESEARCH_ONLY_PAYLOADS) for name in names))
+        self.assertIn('assets/blade_recon_mappo_tex/manifest.json', names)
+        self.assertIn('assets/examples/mappo_reconstruction_split.blend', names)
+        prefix = 'assets/blade_recon_mappo_tex/'
+        absent = [(name, data) for name, data in payloads if not name.startswith(prefix)]
+        builder._validate_mappo_texture_payloads(absent, required=False)
+        with self.assertRaisesRegex(ValueError, 'incomplete'):
+            builder._validate_mappo_texture_payloads(absent)
+        with self.assertRaisesRegex(ValueError, 'incomplete'):
+            builder._validate_mappo_texture_payloads(absent + [(prefix + 'recon.json', b'{}')], required=False)
+        wrong_source = [(name, data + b'changed' if name == 'assets/mappo/geometry.npz' else data)
+                        for name, data in payloads]
+        with self.assertRaisesRegex(ValueError, 'another source package'):
+            builder._validate_mappo_texture_payloads(wrong_source, required=False)
+
+    @unittest.skipIf(os.name == 'nt', 'Extension publication requires POSIX hard links')
+    def test_custom_geometry_bundle_omits_unavailable_source_results(self):
+        from scripts.blender.build_farm_flex_delivery import bundle
+        from scripts.blender.validate_frontend_package import verify_archive, verify_installed
+        builder = load_builder()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            package = root / 'custom-farm'
+            shutil.copytree(builder.PACKAGE_SOURCE / 'assets/mappo', package)
+            manifest = json.loads((package / 'manifest.json').read_text())
+            manifest['source_label'] = 'Independent accepted-controller review package'
+            (package / 'manifest.json').write_text(json.dumps(manifest, sort_keys=True))
+            destination = root / 'delivery'
+            bundle(package, destination)
+            archive = next((destination / 'runtime-archive').glob('*.zip'))
+            inventory = verify_archive(archive, archive.with_suffix('.inventory.json'))
+            verify_installed(destination / 'blender_frontend/wfrl_blender', inventory)
+            with zipfile.ZipFile(archive) as zipped:
+                names = zipped.namelist()
+                self.assertEqual(zipped.read('assets/mappo/manifest.json'),
+                                 (package / 'manifest.json').read_bytes())
+                self.assertFalse(any(name.startswith(('assets/blade_recon_mappo_tex/',
+                    'assets/blade_response/', 'assets/dual_beam/', 'assets/dual_beam_tls/')) for name in names))
+                self.assertFalse(any(name.startswith(builder.RESEARCH_ONLY_PAYLOADS) for name in names))
+                self.assertEqual(zipped.read('manual_control.py'),
+                                 (builder.PACKAGE_SOURCE / 'manual_control.py').read_bytes())
+
+    @unittest.skipIf(os.name == 'nt', 'Extension publication requires POSIX hard links')
+    @pytest.mark.usefixtures('built_default_extension')
+    def test_explicit_canonical_farm_keeps_all_matching_source_results(self):
+        builder = load_builder()
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            default = self.default_extension
+            explicit = builder.build(output / 'explicit',
+                farm_package=builder.PACKAGE_SOURCE / 'assets/mappo')
+            self.assertEqual(default.archive.read_bytes(), explicit.archive.read_bytes())
+
+    @unittest.skipIf(os.name == 'nt', 'Extension publication requires POSIX hard links')
+    @pytest.mark.usefixtures('built_default_extension')
     def test_build_is_reproducible_and_manifest_matches_archive(self):
         builder = load_builder()
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)
-            first = builder.build(output / "one")
+            first = self.default_extension
             second = builder.build(output / "two")
 
             self.assertEqual(first.archive.read_bytes(), second.archive.read_bytes())
@@ -84,9 +157,11 @@ class PackageTests(unittest.TestCase):
             self.assertEqual(first.checksum.read_text(encoding="ascii"),
                              f"{first.sha256}  {first.archive.name}\n")
 
+    @unittest.skipIf(os.name == 'nt', 'Extension publication requires POSIX hard links')
+    @pytest.mark.usefixtures('built_default_extension')
     def test_isolated_zip_import_uses_bundled_stdlib_codec(self):
         with tempfile.TemporaryDirectory() as directory:
-            archive = load_builder().build(Path(directory) / 'dist').archive
+            archive = self.default_extension.archive
             package = Path(directory) / 'wfrl_blender'
             with zipfile.ZipFile(archive) as zipped:
                 zipped.extractall(package)

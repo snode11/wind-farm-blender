@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "source_kind": "TEST",
+  "core_path": "/project/outputs/radar-x100/reviewed/profile/extensions/wfrl_blender/_vendor/radar_x100",
+  "core_sha256": {
+    "simulation.py": "91e7a8fce3037ef5d6b806f5c3adbce67ae2aaa9d7d9c2ed589e68a438da08ce",
+    "recording.py": "a25ab8ec7f7cf352e8f9b85b2547bc525340a6085aa3600afd15b60c4d68fe06",
+    "channel.py": "19dd66484918be706db28aa3eca6300d4c1bcb8c31fe6fa70911b446273c4434",
+    "ply.py": "2f21efbd93c8a0912d323b4cfeeb4a949f1f44056564ace3a9c464200c1c1ba8",
+    "__init__.py": "a260f815acba23087dab7c57433057cc376cee2f17459dc255b3b66b64e83ca3",
+    "acquisition.py": "9760994f7663ea286d6d8e023aa7a7232744999bb2bcf6578e67243559cc06cf",
+    "schema.py": "3d963097be473dba5e66ddbcf65fd930fef83ae047bd0cba122e485f71a8f93e"
+  },
+  "source_rate_hz": 30,
+  "points_per_frame": 4096,
+  "sent": 120,
+  "received": 120,
+  "recorded": 120,
+  "displayed": 20,
+  "display_replacements": 100,
+  "recording_failures": 0,
+  "poll_p99_ms": 0.4037806077394635,
+  "poll_max_ms": 0.7763750618323684,
+  "scope": "4-second software input; no real-device or rendering performance claim"
+}

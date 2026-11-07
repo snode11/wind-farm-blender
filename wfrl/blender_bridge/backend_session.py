@@ -1,6 +1,8 @@
 """Own one existing Trainer or formal CLI process; never duplicate training."""
 from collections import deque
+from copy import deepcopy
 from pathlib import Path
+import math
 import os
 import signal
 import shutil
@@ -17,6 +19,7 @@ from .training_progress import TrainingProgressReader
 from .workflow import configured_scene, validate_run_options
 
 from .snapshot_adapter import SnapshotAdapter
+from .messages import encode_message
 
 
 FORMAL_VALUE_OPTIONS = {
@@ -25,34 +28,114 @@ FORMAL_VALUE_OPTIONS = {
     'seed', 'tag', 'warmup_steps', 'wind_direction', 'wind_sched', 'wind_speed',
 }
 FORMAL_FLAG_OPTIONS = {'no_purge', 'obs_duty', 'recurrent'}
+_UNSPECIFIED_REASON = object()
+
+
+def _aged_payload(payload, elapsed):
+    payload = deepcopy(payload)
+    def age(value):
+        if isinstance(value, dict):
+            if 'source_age_seconds' in value:
+                value['source_age_seconds'] += elapsed
+            for child in value.values():
+                age(child)
+        elif isinstance(value, list):
+            for child in value:
+                age(child)
+    age(payload)
+    return payload
+
+
+class _EventBuffer:
+    """Bound reliable history separately from coalescible training observations."""
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.stats_capacity = max(2, capacity)
+        self._items = deque()
+        self._lock = threading.Lock()
+        self._reliable_count = self._stats_count = 0
+
+    def put_nowait(self, event):
+        kind, payload = event
+        with self._lock:
+            if kind == 'training_stats':
+                if self._stats_count >= self.stats_capacity:
+                    # Keep the latest metrics even when newer progress has no stats.
+                    for index, (old_kind, old_payload, _) in enumerate(self._items):
+                        if old_kind == kind and old_payload['record_kind'] == payload['record_kind']:
+                            del self._items[index]
+                            self._stats_count -= 1
+                            break
+                    else:
+                        for index, (old_kind, _, _) in enumerate(self._items):
+                            if old_kind == kind:
+                                del self._items[index]
+                                self._stats_count -= 1
+                                break
+                self._stats_count += 1
+            else:
+                if self._reliable_count >= self.capacity:
+                    raise queue.Full
+                self._reliable_count += 1
+            self._items.append((kind, deepcopy(payload), time.monotonic()))
+
+    def get_nowait(self):
+        with self._lock:
+            if not self._items:
+                raise queue.Empty
+            kind, payload, queued_at = self._items.popleft()
+            if kind == 'training_stats':
+                self._stats_count -= 1
+                payload = _aged_payload(payload, max(0., time.monotonic() - queued_at))
+            else:
+                self._reliable_count -= 1
+            return kind, payload
+
+    def __len__(self):
+        with self._lock:
+            return len(self._items)
 
 
 class BackendSession:
     def __init__(self, scene=None, trainer_factory=None, scene_loader=None,
                  max_events=2048, kill_grace_seconds=5.0, mpi_launcher=None):
+        if type(max_events) is not int or max_events < 1:
+            raise ValueError('max_events must be a positive integer')
         self.session_id = uuid.uuid4().hex
+        self.state_revision = 0
         self.run_id = None
         self._progress_reader = None
         self._progress_dir = None
-        self._progress_events = queue.Queue(maxsize=max_events)
+        self._progress_events = _EventBuffer(max_events)
         self.scene = scene
+        self.fake = False
         self.mode = 'demo'
         self.status = 'READY'
+        self._lifecycle_reason = None
         self.trainer_factory = trainer_factory
         self.scene_loader = scene_loader
         self.max_events = max_events
         self.kill_grace_seconds = kill_grace_seconds
         self.mpi_launcher = mpi_launcher
         self._condition = threading.Condition(threading.RLock())
-        self._events = deque()
+        self._events = _EventBuffer(max_events)
+        self._overflowed = False
+        self._overflow_error = self._overflow_lifecycle = None
         self._latest = None
+        self._latest_at = None
+        self._last_snapshot = None
+        self._last_stats = {}
         self._trainer = self._thread = self._process = None
+        self._formal_processes = None
         self._paused = False
         self._permits = 0
         self._stopping = False
         self._stop_worker = None
         self._channel_states = {}
         self._formal_scene_dir = None
+        self._finalizing = False
+        self.cleanup_confirmed = True
+        self.worker_alive = False
 
     @property
     def capabilities(self):
@@ -60,19 +143,47 @@ class BackendSession:
 
     def emit(self, kind, payload):
         with self._condition:
-            if kind == 'snapshot': self._latest = (kind, payload)
-            else:
-                if len(self._events) >= self.max_events:
-                    self._stopping = True
-                    self._condition.notify_all()
-                    self._events.clear()
-                    self._events.append(('error', dict(code='EVENT_OVERFLOW', message='Reliable event queue overflow; event history incomplete', fatal=True)))
-                    raise RuntimeError('Reliable event queue overflow')
-                self._events.append((kind, payload))
+            if kind == 'snapshot':
+                self._latest = (kind, deepcopy(payload))
+                self._latest_at = time.monotonic()
+                self._last_snapshot = self._latest, self._latest_at
+                return
+            if kind == 'training_stats':
+                key = payload['record_kind']
+                self._last_stats.pop(key, None)
+                self._last_stats[key] = deepcopy(payload), time.monotonic()
+            if self._overflowed and kind == 'lifecycle' and payload['run_status'] == 'FAILED':
+                self._overflow_lifecycle = (kind, payload)
+                return
+            try:
+                self._events.put_nowait((kind, payload))
+            except queue.Full:
+                message = 'Reliable event queue overflow; additional event rejected'
+                self._overflowed = self._stopping = True
+                self._condition.notify_all()
+                # Reserved diagnostic/terminal slots preserve the accepted history.
+                self._overflow_error = ('error', dict(code='EVENT_OVERFLOW', message=message, fatal=True))
+                self.lifecycle('FAILED', message)
+                self.stop(0)
+                raise RuntimeError(message)
+
+    def replay_latest(self):
+        """Restore the current run's last observations for a resumed connection."""
+        with self._condition:
+            for payload, queued_at in self._last_stats.values():
+                self._events.put_nowait(('training_stats',
+                    _aged_payload(payload, max(0., time.monotonic() - queued_at))))
+            if self._last_snapshot is not None:
+                self._latest, self._latest_at = self._last_snapshot
+
+    def clear_observations(self):
+        with self._condition:
+            self._latest = self._last_snapshot = None
+            self._last_stats.clear()
 
     def channel_table(self):
-        runtime = getattr(self._trainer, "runtime", None)
-        if runtime is None or not hasattr(runtime, "channel_table"): return []
+        runtime = self._trainer.runtime if self._trainer is not None else None
+        if runtime is None: return []
         fidelity_map = {
             "DIRECT": "DIRECT", "直读": "DIRECT",
             "DERIVED": "EXPORTED", "导出": "EXPORTED",
@@ -81,13 +192,73 @@ class BackendSession:
         return [[topic, sensor, fidelity_map.get(str(fidelity), str(fidelity)), enabled, provenance]
                 for topic, sensor, fidelity, enabled, provenance in runtime.channel_table()]
 
-    def lifecycle(self, status, reason=None):
+    def lifecycle(self, status, reason=_UNSPECIFIED_REASON):
         with self._condition:
+            if reason is _UNSPECIFIED_REASON:
+                reason = self._lifecycle_reason if status == self.status else None
             self.status = status
-            self.emit('lifecycle', dict(run_status=status, reason=reason, mode=self.mode, run_id=self.run_id,
-                                        capabilities=self.capabilities,
-                                        scene=self.scene.to_dict() if hasattr(self.scene, "to_dict") else None,
-                                        channel_states=dict(self._channel_states), channel_table=self.channel_table()))
+            self._lifecycle_reason = reason
+            self._refresh_cleanup_state()
+            self.state_revision += 1
+            self.emit('lifecycle', dict(self._state_payload(), reason=self._lifecycle_reason))
+
+    def _failure_reason(self, reason):
+        message = str(reason) or type(reason).__name__
+        if self.status == 'FAILED' and self._lifecycle_reason:
+            if message in self._lifecycle_reason:
+                return self._lifecycle_reason
+            return self._lifecycle_reason + '; ' + message
+        return message
+
+    def _fail(self, reason):
+        with self._condition:
+            self.lifecycle('FAILED', self._failure_reason(reason))
+
+    def _backend_error(self):
+        error = self._trainer.error if self._trainer is not None else None
+        if self._process is not None and self._process.poll() is not None and self._process.returncode:
+            error = error or f'Formal process exited {self._process.returncode}'
+        return error
+
+    def _refresh_cleanup_state(self):
+        before = self.cleanup_confirmed, self.worker_alive, self.status, self._lifecycle_reason
+        alive = self.alive()
+        inactive = self.status in {'READY', 'STOPPED', 'FAILED'}
+        draining = self._stop_worker is not None and self._stop_worker.is_alive()
+        cleanup_ok = True
+        if inactive and not alive and not draining and not self._finalizing:
+            self._finalizing = True
+            try:
+                self._collect_progress(final=True)
+                if self._formal_scene_dir is not None:
+                    self._formal_scene_dir.cleanup()
+                    self._formal_scene_dir = None
+            except Exception as exc:
+                cleanup_ok = False
+                self._lifecycle_reason = self._failure_reason('Cleanup failed: ' + (str(exc) or type(exc).__name__))
+                self.status = 'FAILED'
+            finally:
+                self._finalizing = False
+        confirmed = (inactive and not alive and not draining and not self._finalizing and cleanup_ok
+                     and self._progress_reader is None and self._progress_dir is None
+                     and self._formal_scene_dir is None)
+        self.cleanup_confirmed, self.worker_alive = confirmed, alive
+        return before != (confirmed, alive, self.status, self._lifecycle_reason)
+
+    def _state_payload(self):
+        return dict(run_status=self.status, mode=self.mode, run_id=self.run_id,
+                    state_revision=self.state_revision, capabilities=self.capabilities,
+                    cleanup_confirmed=self.cleanup_confirmed, worker_alive=self.worker_alive,
+                    scene=self.scene.to_dict() if self.scene is not None else None,
+                    channel_states=dict(self._channel_states), channel_table=self.channel_table())
+
+    def synchronization_state(self):
+        """Capture current state and its lifecycle watermark under the same lock."""
+        with self._condition:
+            if self._refresh_cleanup_state():
+                self.state_revision += 1
+                self.emit('lifecycle', dict(self._state_payload(), reason=self._lifecycle_reason))
+            return self._state_payload()
 
     def _collect_progress(self, final=False):
         if final and self._progress_reader is not None:
@@ -108,7 +279,16 @@ class BackendSession:
             self._progress_dir.cleanup()
             self._progress_dir = None
 
-    def poll(self):
+    def tick(self):
+        """Advance backend completion and cleanup independently of event consumers."""
+        with self._condition:
+            try:
+                self._advance()
+            except RuntimeError:
+                if not self._overflowed:
+                    raise
+
+    def _advance(self):
         with self._condition:
             self._collect_progress()
             if self.status in ('RUNNING', 'PAUSED', 'STARTING'):
@@ -116,21 +296,32 @@ class BackendSession:
                 if self._process is not None:
                     finished = self._process.poll() is not None
                 if finished:
-                    self._collect_progress(final=True)
-                    error = getattr(self._trainer, 'error', None)
-                    if self._process is not None and self._process.returncode: error = f'Formal process exited {self._process.returncode}'
+                    error = self._backend_error()
                     if self.alive():
                         error = error or 'Backend controller exited while child processes remained'
-                        self.lifecycle('FAILED', error)
+                        self._fail(error)
                         self.stop(0)
                     else:
                         if not error: self.lifecycle('DRAINING')
                         self.lifecycle('FAILED' if error else 'STOPPED', error)
-            if self.status in {'STOPPED', 'FAILED'} and not self.alive() and self._formal_scene_dir is not None:
-                self._formal_scene_dir.cleanup()
-                self._formal_scene_dir = None
-            result = list(self._events); self._events.clear()
-            if self._latest is not None: result.append(self._latest); self._latest = None
+            if self._refresh_cleanup_state():
+                self.state_revision += 1
+                self.emit('lifecycle', dict(self._state_payload(), reason=self._lifecycle_reason))
+
+    def poll(self):
+        with self._condition:
+            self.tick()
+            result = []
+            while True:
+                try: result.append(self._events.get_nowait())
+                except queue.Empty: break
+            for event in (self._overflow_error, self._overflow_lifecycle):
+                if event is not None: result.append(event)
+            self._overflow_error = self._overflow_lifecycle = None
+            if self._latest is not None:
+                kind, payload = self._latest
+                result.append((kind, _aged_payload(payload, max(0., time.monotonic() - self._latest_at))))
+                self._latest = None
             return result
 
     def _load(self, path):
@@ -168,10 +359,12 @@ class BackendSession:
     def start(self, mode, options):
         with self._condition:
             if self.status not in ('READY', 'STOPPED'): raise ValueError('Session is active or failure unresolved')
-            if self._stop_worker is not None and self._stop_worker.is_alive():
+            if self.alive() or (self._stop_worker is not None and self._stop_worker.is_alive()):
+                raise ValueError('Backend cleanup is still finishing')
+            if not self.synchronization_state()['cleanup_confirmed']:
                 raise ValueError('Backend cleanup is still finishing')
             if mode not in ('demo', 'interactive_training', 'formal_training', 'replay'): raise ValueError('Unknown mode')
-            if getattr(self, 'fake', False) and mode != 'demo': raise ValueError('Fake backend supports SYNTH demo only')
+            if self.fake and mode != 'demo': raise ValueError('Fake backend supports SYNTH demo only')
             options = dict(options)
             path = options.pop('scene', options.pop('scene_path', None))
             candidate = self._load(path) if path else self.scene
@@ -184,12 +377,14 @@ class BackendSession:
             self._paused = self._stopping = False
             self._permits = 0
             self._trainer = self._thread = self._process = None
+            self._formal_processes = None
+            self.clear_observations()
             self.run_id = uuid.uuid4().hex
             self.lifecycle('STARTING')
             try:
                 if mode == 'formal_training':
                     if not path: raise ValueError('Formal training requires options.scene path')
-                    if getattr(self.scene, 'backend', None) != 'fastfarm':
+                    if self.scene.backend != 'fastfarm':
                         raise ValueError('Formal training requires FAST.Farm')
                     if overrides:
                         from wfrl.scene.schema import dump_scene
@@ -201,16 +396,13 @@ class BackendSession:
                     argv.extend(['--training-progress', str(progress_path), '--run-id', self.run_id])
                     def observability_error(message):
                         payload = dict(code='TRAINING_OBSERVABILITY_ERROR', message=message, fatal=False)
-                        try: self._progress_events.put_nowait(('error', payload))
-                        except queue.Full:
-                            # Reserve visibility by replacing one queued statistic.
-                            try: self._progress_events.get_nowait()
-                            except queue.Empty: pass
-                            self._progress_events.put_nowait(('error', payload))
+                        self._progress_events.put_nowait(('error', payload))
                     self._progress_reader = TrainingProgressReader(progress_path, self.run_id,
                         lambda record: self._progress_events.put_nowait(('training_stats', record)), observability_error)
                     from .isolated_trainer import launcher_environment
-                    self._process = subprocess.Popen(argv, cwd=root, env=launcher_environment(), start_new_session=True)
+                    from .formal_process import FormalProcesses
+                    self._formal_processes = FormalProcesses()
+                    self._process = self._formal_processes.start(argv, cwd=root, env=launcher_environment())
                     self._progress_reader.start()
                 else:
                     factory = self.trainer_factory
@@ -218,7 +410,7 @@ class BackendSession:
                         from .tip_replay import RecordedTipTrainer
                         factory = RecordedTipTrainer
                     if factory is None:
-                        if getattr(self.scene, 'backend', None) == 'floris':
+                        if self.scene.backend == 'floris':
                             if mode != 'demo': raise ValueError('FLORIS supports backend demo only; existing Trainer requires FAST.Farm')
                             from .floris_session import FlorisDemoSession
                             factory = FlorisDemoSession
@@ -238,17 +430,18 @@ class BackendSession:
                         try:
                             with self._condition:
                                 if self._stopping: return
-                                runtime = getattr(self._trainer, 'runtime', None)
+                                runtime = self._trainer.runtime
                                 if runtime is not None:
                                     for topic, enabled in self._channel_states.items():
                                         runtime.set_enabled(topic, enabled)
-                                payload = snapshot.payload if hasattr(snapshot, "wire_events") else adapter.encode(snapshot)
+                                wire_snapshot = hasattr(snapshot, 'wire_events')
+                                payload = snapshot.payload if wire_snapshot else adapter.encode(snapshot)
                                 payload['run_id'] = self.run_id
                                 payload['channel_table'] = self.channel_table()
                                 self.emit('snapshot', payload)
                                 if mode == 'interactive_training':
                                     from .training_progress import interactive_progress
-                                    progress = (snapshot.training if hasattr(snapshot, 'wire_events') else
+                                    progress = (snapshot.training if wire_snapshot else
                                                 interactive_progress(snapshot, self.run_id, len(self.scene.turbines)))
                                     if progress:
                                         progress['run_id'] = self.run_id
@@ -262,7 +455,7 @@ class BackendSession:
                                     last_control_step = payload['step']
                                 if control_boundary and self._paused and self.status == 'RUNNING':
                                     self.lifecycle('PAUSED')
-                                events = snapshot.wire_events if hasattr(snapshot, "wire_events") else adapter.safety_events(snapshot)
+                                events = snapshot.wire_events if wire_snapshot else adapter.safety_events(snapshot)
                                 for event in events: self.emit('safety_event', event)
                                 while control_boundary and self._paused and not self._stopping and self._permits == 0:
                                     self._condition.wait()
@@ -271,31 +464,37 @@ class BackendSession:
                                     for topic, enabled in self._channel_states.items():
                                         runtime.set_enabled(topic, enabled)
                         except Exception as exc:
-                            self.lifecycle('FAILED', str(exc))
+                            self._fail(exc)
                             self.stop(0)
                     self._trainer = factory(self.scene, demo=mode == 'demo', replay=mode == 'replay',
                                             on_snapshot=snapshot_callback, **options)
                     self._trainer.start()
                     self._thread = self._trainer._thread
-                self.lifecycle('RUNNING')
+                if self.status == 'STARTING' and not self._stopping:
+                    self.lifecycle('RUNNING')
             except Exception as exc:
-                self._collect_progress(final=True)
-                self.lifecycle('FAILED', str(exc))
-                if self.alive(): self.stop(0)
-                if self._formal_scene_dir is not None and not self.alive():
-                    self._formal_scene_dir.cleanup()
-                    self._formal_scene_dir = None
+                try:
+                    self._fail(exc)
+                except Exception as failure:
+                    exc.add_note('Failure reporting failed: ' + str(failure))
+                try:
+                    if self.alive(): self.stop(0)
+                except Exception as cleanup:
+                    exc.add_note('Cleanup request failed: ' + str(cleanup))
                 raise
 
     def command(self, command):
         name, args = command['command'], command.get('arguments', {})
         with self._condition:
-            if name == 'run.start': return self.start(args.get('mode', self.mode), args.get('options', {}))
             if name == 'run.stop': return self.stop(float(args.get('timeout_seconds', 120)))
             if name == 'session.sync': return self.lifecycle(self.status)
+            if (self.status == 'DRAINING' or (self._stop_worker is not None and self._stop_worker.is_alive())
+                    or (self._stopping and self.alive())):
+                raise ValueError('Backend cleanup is still finishing')
+            if name == 'run.start': return self.start(args.get('mode', self.mode), args.get('options', {}))
             if name == 'channel.set':
                 topic, enabled = args.get('topic'), args.get('enabled')
-                runtime = getattr(self._trainer, 'runtime', None)
+                runtime = self._trainer.runtime if self._trainer is not None else None
                 if type(enabled) is not bool or runtime is None or topic not in runtime.topics():
                     raise ValueError('Channel subscription requires an available SceneRuntime topic and boolean enabled')
                 self._channel_states[topic] = enabled
@@ -304,10 +503,20 @@ class BackendSession:
                 if (self.status not in ('READY', 'STOPPED', 'FAILED') or self.alive()
                         or (self._stop_worker is not None and self._stop_worker.is_alive())):
                     raise ValueError('Backend still active')
+                if not self.synchronization_state()['cleanup_confirmed']:
+                    raise ValueError('Backend cleanup is still finishing')
                 if name == 'scene.load':
                     candidate = self._load(args.get('scene', args.get('scene_path')))
-                    self.scene = configured_scene(candidate, args.get('scene_overrides', {}))
+                    candidate = configured_scene(candidate, args.get('scene_overrides', {}))
+                    payload = dict(self._state_payload(), run_status='READY', run_id=None,
+                                   state_revision=self.state_revision + 1, reason=None,
+                                   channel_states={}, scene=candidate.to_dict())
+                    encode_message(dict(protocol_version=1, type='lifecycle', session_id=self.session_id,
+                                        sequence=0, payload=payload))
+                    self.scene = candidate
                 self._channel_states.clear()
+                self.clear_observations()
+                self._overflowed = False
                 self.run_id = None
                 self.lifecycle('READY'); return
             if self.mode == 'formal_training': raise ValueError('Formal CLI does not support pause or single step')
@@ -321,8 +530,10 @@ class BackendSession:
             raise ValueError('Command not valid in current state')
 
     def alive(self):
-        if getattr(self._trainer, "running", False): return True
+        if self._trainer is not None and self._trainer.running: return True
         if self._thread is not None and self._thread.is_alive(): return True
+        if self._formal_processes is not None:
+            return self._formal_processes.alive()
         if self._process is not None:
             self._process.poll()
             try: os.killpg(self._process.pid, 0); return True
@@ -340,30 +551,48 @@ class BackendSession:
         return not self.alive()
 
     def _signal_process_group(self, signum):
+        if self._formal_processes is not None:
+            self._formal_processes.signal(signum)
+            return
         try:
             os.killpg(self._process.pid, signum)
         except (ProcessLookupError, PermissionError):
             pass
 
     def stop(self, timeout_seconds=120):
-        if timeout_seconds < 0: raise ValueError('Stop timeout must be nonnegative')
+        try:
+            valid_timeout = (type(timeout_seconds) in (int, float) and math.isfinite(timeout_seconds)
+                             and 0 <= timeout_seconds <= threading.TIMEOUT_MAX)
+        except OverflowError:
+            valid_timeout = False
+        if not valid_timeout:
+            raise ValueError('Stop timeout must be finite, nonnegative and within threading.TIMEOUT_MAX')
         with self._condition:
             if self._stop_worker is not None and self._stop_worker.is_alive(): return
+            if self.status in {'STARTING', 'RUNNING', 'PAUSED', 'DRAINING'}:
+                error = self._backend_error()
+                if error:
+                    self._fail(error)
             if not self.alive():
-                self._collect_progress(final=True)
-                if self.status == 'FAILED': return
+                if self.status == 'FAILED':
+                    self.synchronization_state()
+                    return
                 if self.status in ('STARTING', 'RUNNING', 'PAUSED'):
                     self.lifecycle('DRAINING')
                 if self.status == 'DRAINING': self.lifecycle('STOPPED')
+                else: self.synchronization_state()
                 return
             self._stopping = True
             self._condition.notify_all()
             if self.status != 'FAILED': self.lifecycle('DRAINING')
             def drain():
                 try:
-                    if self._trainer is not None: self._trainer.stop(timeout=timeout_seconds)
+                    if self._trainer is not None:
+                        self._trainer.stop(timeout=timeout_seconds)
+                        if self._trainer.error:
+                            self._fail(self._trainer.error)
                     if self._process is not None:
-                        # Signal only our isolated process group, never a global MPI process.
+                        # Formal ownership includes identified children in independent groups.
                         self._signal_process_group(signal.SIGINT)
                         graceful = self._wait_until_stopped(timeout_seconds)
                         if not graceful:
@@ -373,14 +602,12 @@ class BackendSession:
                                 self._signal_process_group(signal.SIGKILL)
                                 stopped = self._wait_until_stopped(self.kill_grace_seconds)
                             if stopped:
-                                with self._condition: self._collect_progress(final=True)
-                                self.lifecycle('FAILED', 'Stop timeout: formal backend was force terminated')
+                                self._fail('Stop timeout: formal backend was force terminated')
                                 return
                     if self.alive():
-                        self.lifecycle('FAILED', 'Stop timeout: backend cleanup unconfirmed; restart blocked')
+                        self._fail('Stop timeout: backend cleanup unconfirmed; restart blocked')
                     else:
-                        with self._condition: self._collect_progress(final=True)
-                        if self.status != 'FAILED': self.lifecycle('STOPPED')
-                except Exception as exc: self.lifecycle('FAILED', 'Cleanup failed: ' + str(exc))
+                        self.lifecycle('FAILED' if self.status == 'FAILED' else 'STOPPED')
+                except Exception as exc: self._fail('Cleanup failed: ' + (str(exc) or type(exc).__name__))
             self._stop_worker = threading.Thread(target=drain, name='wfrl-bridge-drain', daemon=True)
             self._stop_worker.start()

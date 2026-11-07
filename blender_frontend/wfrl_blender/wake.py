@@ -6,14 +6,18 @@ FLORIS proxy is marked ``SYNTH`` while a FAST.Farm DisXY export is marked
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import math
-from typing import Any, Iterable, Mapping
+import time
+import traceback
+from typing import Any, Mapping
+from .protocol import STALE_AFTER_SECONDS
 
 
 MAX_WAKE_POINTS = 250_000
 VALID_FIDELITY = frozenset(("SYNTH", "DIRECT", "EXPORTED"))
 VALID_KINDS = frozenset(("floris_proxy", "disxy"))
+_material_failures = set()
 
 
 class WakePayloadError(ValueError):
@@ -57,6 +61,16 @@ class WakeFrame:
     y: tuple[float, ...] = ()
     z: float | None = None
     vectors: tuple[float, ...] = ()
+    source_age_seconds: float = 0.
+    stale_after_seconds: float = STALE_AFTER_SECONDS['wake']
+    received_monotonic: float = field(default_factory=time.monotonic)
+    error: str | None = None
+
+    def validity_at(self, now_monotonic, *, connected=True):
+        if self.validity != 'valid':
+            return self.validity
+        age = self.source_age_seconds + max(0., now_monotonic-self.received_monotonic)
+        return 'stale' if not connected or age >= self.stale_after_seconds else 'valid'
 
     @property
     def point_count(self) -> int:
@@ -64,11 +78,11 @@ class WakeFrame:
 
     @property
     def source_label(self) -> str:
-        return "FLORIS proxy" if self.kind == "floris_proxy" else "FAST.Farm DisXY"
+        return {'floris_proxy': 'FLORIS proxy', 'disxy': 'FAST.Farm DisXY'}.get(self.kind, 'Wake unavailable')
 
     @property
     def is_renderable(self) -> bool:
-        return self.validity == "valid" and bool(self.values) and bool(self.shape)
+        return self.validity_at(time.monotonic()) == "valid" and bool(self.values) and bool(self.shape)
 
 
 def _channel_payload(payload: Mapping[str, Any]) -> Mapping[str, Any]:
@@ -80,7 +94,8 @@ def _channel_payload(payload: Mapping[str, Any]) -> Mapping[str, Any]:
     return data
 
 
-def validate_wake_payload(payload: Mapping[str, Any], *, sequence: int = 0) -> WakeFrame:
+def validate_wake_payload(payload: Mapping[str, Any], *, sequence: int = 0,
+                          received_monotonic=None) -> WakeFrame:
     """Validate the JSON wake payload frozen by the v1 wire protocol.
 
     Accepted ``data.value`` fields are ``grid``/``values`` for DisXY and
@@ -98,13 +113,21 @@ def validate_wake_payload(payload: Mapping[str, Any], *, sequence: int = 0) -> W
         raise WakePayloadError("wake turbine_ids must be unique")
     data = _channel_payload(payload)
     validity = str(data.get("validity", "valid"))
+    if validity not in {'valid', 'waiting', 'unsupported', 'invalid', 'stale'}:
+        raise WakePayloadError('Invalid wake validity')
+    timing = dict(source_age_seconds=_finite(data.get('source_age_seconds', 0.), 'wake source age'),
+                  stale_after_seconds=_finite(data.get('stale_after_seconds', STALE_AFTER_SECONDS['wake']), 'wake stale threshold'),
+                  received_monotonic=_finite(time.monotonic() if received_monotonic is None else received_monotonic, 'wake receive time'),
+                  error=data.get('error'))
+    if timing['source_age_seconds'] < 0 or timing['stale_after_seconds'] != STALE_AFTER_SECONDS['wake']:
+        raise WakePayloadError('Invalid wake age or staleness threshold')
     if validity != "valid":
         return WakeFrame(
-            kind=str(payload.get("kind", "floris_proxy")), sequence=int(sequence),
+            kind=str(payload.get("kind", data.get('kind', 'unknown'))), sequence=int(sequence),
             fidelity=str(data.get("fidelity", "SYNTH")),
             provenance=str((data.get("provenance") or {}).get("channel", "wake")),
             validity=validity, turbine_ids=tuple(ids), timestamp_s=0.0,
-            values=(), shape=(),
+            values=(), shape=(), **timing,
         )
     value = data.get("value") if isinstance(data.get("value"), Mapping) else data
     kind = str(value.get("kind", data.get("kind", payload.get("kind", "floris_proxy")))).lower()
@@ -132,10 +155,10 @@ def validate_wake_payload(payload: Mapping[str, Any], *, sequence: int = 0) -> W
             shape_value = grid.get("shape")
     if not isinstance(shape_value, (list, tuple)) or not shape_value:
         raise WakePayloadError("wake shape is required")
-    try:
-        shape = tuple(int(item) for item in shape_value)
-    except (TypeError, ValueError) as exc:
-        raise WakePayloadError("wake shape must contain positive integers") from exc
+    if any(not (type(item) is int or (type(item) is float and item.is_integer()))
+           for item in shape_value):
+        raise WakePayloadError("wake shape must contain positive integers")
+    shape = tuple(int(item) for item in shape_value)
     if any(item <= 0 for item in shape) or math.prod(shape) != len(values_tuple):
         raise WakePayloadError("wake shape does not match values")
     if len(values_tuple) > MAX_WAKE_POINTS:
@@ -152,33 +175,7 @@ def validate_wake_payload(payload: Mapping[str, Any], *, sequence: int = 0) -> W
         timestamp_value = timestamp_value.get("value", 0.0)
     timestamp = _finite(timestamp_value, "wake timestamp")
     return WakeFrame(kind, int(sequence), fidelity, provenance_text, validity,
-                     tuple(ids), timestamp, values_tuple, shape, x, y, z, vectors)
-
-
-def proxy_ring_points(hub: Iterable[float], rotor_radius: float, wind_direction_deg: float,
-                      phase: float, *, rings: int = 26, segments: int = 40,
-                      length_diameters: float = 2.5, expansion: float = 0.7) -> tuple[tuple[float, float, float], ...]:
-    """Return a deterministic expanding ring tube for a SYNTH proxy."""
-    if rings <= 0 or segments < 3:
-        raise ValueError("rings must be positive and segments must be at least 3")
-    hx, hy, hz = (_finite(v, "hub coordinate") for v in hub)
-    radius = _finite(rotor_radius, "rotor_radius")
-    if radius <= 0:
-        raise ValueError("rotor_radius must be positive")
-    angle = math.radians(float(wind_direction_deg) - 270.0)
-    dx, dy = math.cos(angle), math.sin(angle)
-    ex, ey = dy, -dx
-    length = length_diameters * 2.0 * radius
-    result = []
-    for ring in range(rings):
-        frac = (ring / rings + float(phase)) % 1.0
-        ring_radius = radius * (1.0 + expansion * frac)
-        for segment in range(segments):
-            theta = math.tau * segment / segments
-            result.append((hx + frac * length * dx + ring_radius * math.sin(theta) * ex,
-                           hy + frac * length * dy + ring_radius * math.sin(theta) * ey,
-                           hz + ring_radius * math.cos(theta)))
-    return tuple(result)
+                     tuple(ids), timestamp, values_tuple, shape, x, y, z, vectors, **timing)
 
 
 def grid_mesh(frame: WakeFrame) -> tuple[tuple[tuple[float, float, float], ...], tuple[tuple[int, ...], ...]]:
@@ -217,11 +214,6 @@ class WakeFrameBuffer:
     def pop_latest(self) -> WakeFrame | None:
         frame, self._frame = self._frame, None
         return frame
-
-    @property
-    def pending(self) -> int:
-        return int(self._frame is not None)
-
 
 PROXY_LINE_COUNT = 16
 PROXY_RING_COUNT = 22
@@ -314,16 +306,21 @@ def update_proxy_objects(scene, *, phase: float, rotor_radius: float = 63.0) -> 
     return updated
 
 
-def apply_disxy_frame(frame: WakeFrame, *, collection_name: str = "WFRL_Scene"):
+def apply_disxy_frame(frame: WakeFrame, *, scene=None, collection_name: str = "WFRL_Scene"):
     """Create or update one reusable DisXY mesh object in Blender."""
     if frame.kind != "disxy":
         raise WakePayloadError("apply_disxy_frame requires a DisXY frame")
     import bpy
-    collection = bpy.data.collections.get(collection_name)
+    scene = bpy.context.scene if scene is None else scene
+    collection = next((item for item in (scene.collection, *scene.collection.children_recursive)
+                       if item.name == collection_name), None)
     if collection is None:
         raise WakePayloadError(f"missing Blender collection: {collection_name}")
     vertices, faces = grid_mesh(frame)
-    obj = bpy.data.objects.get("WFRL.WakeDisXY")
+    shape = list(frame.shape)
+    obj = scene.objects.get("WFRL.WakeDisXY")
+    if obj is None and bpy.data.objects.get("WFRL.WakeDisXY") is not None:
+        raise WakePayloadError('DisXY object belongs to another scene')
     if obj is None:
         mesh = bpy.data.meshes.new("WFRL.WakeDisXY.Mesh")
         mesh.from_pydata(vertices, [], faces)
@@ -333,22 +330,78 @@ def apply_disxy_frame(frame: WakeFrame, *, collection_name: str = "WFRL_Scene"):
         try:
             from .materials import get_material
             obj.data.materials.append(get_material("wake"))
-        except Exception:
-            pass
+        except Exception as exc:
+            from . import runtime
+            runtime.get_state().error = f'DisXY wake material failed: {exc}'
+            failure = (type(exc), str(exc))
+            if failure not in _material_failures:
+                _material_failures.add(failure)
+                try:
+                    traceback.print_exc()
+                except Exception:
+                    pass
     else:
         mesh = obj.data
-        if len(mesh.vertices) != len(vertices) or len(mesh.polygons) != len(faces):
+        if (list(obj.get('wfrl_disxy_shape', ())) != shape
+                or len(mesh.vertices) != len(vertices) or len(mesh.polygons) != len(faces)):
             mesh.clear_geometry()
             mesh.from_pydata(vertices, [], faces)
         else:
             for vertex, coordinate in zip(mesh.vertices, vertices):
                 vertex.co = coordinate
         mesh.update()
+    obj["wfrl_disxy_shape"] = shape
     obj["fidelity"] = frame.fidelity
     obj["provenance"] = frame.provenance
     obj["wake_kind"] = "FAST.Farm DisXY"
     obj["sequence"] = frame.sequence
     obj["validity"] = frame.validity
-    obj.hide_render = frame.validity != "valid"
-    obj.hide_set(frame.validity != "valid")
+    set_disxy_validity(scene, frame.validity_at(time.monotonic()))
     return obj
+
+
+def set_disxy_validity(scene, validity, *, visible=None):
+    """Retract unavailable data while preserving user visibility on fresh samples."""
+    if scene.get('wfrl_disxy_validity') != validity:
+        scene['wfrl_disxy_validity'] = validity
+    obj = getattr(scene, 'objects', {}).get('WFRL.WakeDisXY')
+    if obj is None:
+        return
+    if obj.get('validity') != validity:
+        obj['validity'] = validity
+    layers = [layer for layer in getattr(scene, 'view_layers', ()) if obj.name in layer.objects]
+    if not hasattr(scene, 'view_layers'):
+        layers = [None]
+    hidden = {layer.name if layer else 'default': bool(obj.hide_get(view_layer=layer)
+              if layer else obj.hide_get()) for layer in layers}
+    auto_hidden = obj.get('wfrl_wake_auto_hidden', False)
+    render_hidden = bool(obj.hide_render)
+    if auto_hidden:
+        previous = obj['wfrl_wake_previous_visibility']
+        render_hidden = bool(previous['render'])
+        hidden = dict(previous['layers'].items())
+    if visible is not None:
+        render_hidden = not visible
+        hidden = {layer.name if layer else 'default': not visible for layer in layers}
+    if validity != 'valid':
+        if not auto_hidden or visible is not None:
+            obj['wfrl_wake_previous_visibility'] = dict(render=render_hidden, layers=hidden)
+            obj['wfrl_wake_auto_hidden'] = True
+        obj.hide_render = True
+        for layer in layers:
+            if layer is None:
+                obj.hide_set(True)
+            else:
+                obj.hide_set(True, view_layer=layer)
+    else:
+        if auto_hidden:
+            del obj['wfrl_wake_auto_hidden']
+            del obj['wfrl_wake_previous_visibility']
+        enabled = getattr(scene, 'wfrl_show_disxy', True)
+        obj.hide_render = render_hidden or not enabled
+        for layer in layers:
+            value = bool(hidden.get(layer.name if layer else 'default', False)) or not enabled
+            if layer is None:
+                obj.hide_set(value)
+            else:
+                obj.hide_set(value, view_layer=layer)

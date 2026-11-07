@@ -32,8 +32,19 @@ def update_beams(scene, turbine_id, activity=(False, False, False)):
 
 
 def reset_beams(scene):
+    from . import farm_flex
+    protected = []
+    for active in tuple(farm_flex._ACTIVES.values()):
+        try:
+            if active.scene != scene:
+                protected.extend((obj, obj.data) for obj in active.scene.objects
+                                 if '.ClearanceRadar.Beam' in obj.name)
+        except ReferenceError:
+            continue
     for beam in scene.objects:
         if '.ClearanceRadar.Beam' in beam.name:
+            if any(beam == obj or beam.data == data for obj, data in protected):
+                continue
             beam.data.materials.clear()
             beam.data.materials.append(beam_material(False))
             beam.data.bevel_depth = .018
@@ -113,11 +124,14 @@ def ensure_radar(scene, turbine_id, origin=None, directions=None, *, beam_origin
     cable = scene.objects.get(name)
     if cable is None:
         data = bpy.data.curves.new(name, 'CURVE')
-        data.dimensions = '3D'; data.bevel_depth = .006; data.bevel_resolution = 2
+        data.dimensions = '3D'
+        data.bevel_depth = .006
+        data.bevel_resolution = 2
         data.resolution_u = 8
         data.splines.new('BEZIER').bezier_points.add(4)
         data.materials.append(get_material('rubber'))
-        cable = bpy.data.objects.new(name, data); collection.objects.link(cable)
+        cable = bpy.data.objects.new(name, data)
+        collection.objects.link(cable)
         cable.parent = yaw
     for point, offset in zip(cable.data.splines[0].bezier_points,
                              ((-.123,0,.205), (-.17,0,.235), (-.16,0,.35), (-.13,0,.45), (-.13,0,.53))):
@@ -133,10 +147,14 @@ def ensure_radar(scene, turbine_id, origin=None, directions=None, *, beam_origin
         name = prefix + f'.Beam{index}'
         beam = scene.objects.get(name)
         if beam is None:
-            curve = bpy.data.curves.new(name, 'CURVE'); curve.dimensions = '3D'; curve.bevel_depth = .012
+            curve = bpy.data.curves.new(name, 'CURVE')
+            curve.dimensions = '3D'
+            curve.bevel_depth = .012
             curve.splines.new('POLY').points.add(1)
             curve.materials.append(material)
-            beam = bpy.data.objects.new(name, curve); collection.objects.link(beam); beam.parent = yaw
+            beam = bpy.data.objects.new(name, curve)
+            collection.objects.link(beam)
+            beam.parent = yaw
         norm = math.sqrt(sum(v*v for v in direction))
         beam.data.splines[0].points[0].co = (*beam_origin, 1)
         beam.data.splines[0].points[1].co = (*(beam_origin[i] + display_length*direction[i]/norm for i in range(3)), 1)

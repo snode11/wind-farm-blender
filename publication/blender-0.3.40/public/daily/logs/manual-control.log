@@ -1,0 +1,8 @@
+00:03.152  blend            | Read blend: "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/checks/manual-control/manual-controls.blend"
+Error: T1 控制对象与其他场景共享，请使用独立副本
+Info: Saved as "manual-controls.blend"
+MANUAL_CONTROL_REGRESSION_PASS {"status": "PASS", "scope": "Isolated background Blender software regression", "addon_module": "bl_ext.user_default.wfrl_blender", "addon_file": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/__init__.py", "source_scene": "Manual Control Source MAPPO", "manual_scene": "\u98ce\u673a\u624b\u52a8\u63a7\u5236", "isolated_meshes": 56, "isolated_materials": 10, "yaw_pitch_axes": true, "individual_pitch": true, "rpm_phase_continuity": true, "pause_stop_reset": true, "all_targets": true, "demo_writer_guards": true, "demo_reload_isolation": true, "linked_scene_rejected": true, "save_reopen_paused": true, "source_viewport_restore": true, "source_viewport_count": 1, "demo_mesh_change_max_m": 0.2769445776939392, "unregister_timer_cleanup": true}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit
+Error: Not freed memory blocks: 586, total unfreed memory 0.042572 MB

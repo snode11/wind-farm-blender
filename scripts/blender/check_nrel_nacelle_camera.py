@@ -80,7 +80,7 @@ def run(args):
         'schema': 'wfrl.nrel-nacelle-camera-check.v1',
         'module': module, 'addon_path': str(package_root),
         'blender': bpy.app.version_string, 'binary': bpy.app.binary_path,
-        'build_info': json.loads((package_root / 'build-info.json').read_text())
+        'build_info': json.loads((package_root / 'build-info.json').read_text(encoding='utf-8'))
             if (package_root / 'build-info.json').is_file() else None,
         'module_sha256': {name: digest(package_root / name) for name in
                           ('cameras.py', 'nacelle_camera.py', 'nacelle_visibility.py',
@@ -211,7 +211,7 @@ def run(args):
             raise RuntimeError(f'Render evaluation changed the audited replay state: {row}')
         row['render_sha256'] = digest(scene.render.filepath)
         audit_rows.append(row)
-        (args.output / 'check.json').write_text(json.dumps(manifest, indent=2, allow_nan=False))
+        (args.output / 'check.json').write_text(json.dumps(manifest, indent=2, allow_nan=False), encoding='utf-8')
         print('NREL_NACELLE_FRAME', index, float(delta), float(at), flush=True)
     at = float(np.interp(target, angles, active.times))
     active.update(scene, sim_time_s=at, record_telemetry=False, update_comparison=False)
@@ -229,7 +229,7 @@ def run(args):
     manifest['scene_sha256'] = digest(args.output / 'nrel-nacelle-baseline.blend')
     manifest['status'] = 'RENDERED_AND_AUDITED'
     manifest['photo_match'] = 'REQUIRES_VISUAL_REVIEW'
-    (args.output / 'check.json').write_text(json.dumps(manifest, indent=2, allow_nan=False))
+    (args.output / 'check.json').write_text(json.dumps(manifest, indent=2, allow_nan=False), encoding='utf-8')
     print('NREL_NACELLE_CHECK_COMPLETE', str(args.output), flush=True)
 
 

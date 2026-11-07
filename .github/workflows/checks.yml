@@ -1,0 +1,200 @@
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main, wind-farm-rl-all-work]
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      native:
+        description: Run isolated Blender background and package checks
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
+  PYTHONPATH: blender_frontend:.
+
+jobs:
+  host:
+    name: Python ${{ matrix.python }} contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: requirements-ci.txt
+      - name: Install contract-test dependencies
+        run: python -m pip install -r requirements-ci.txt
+      - name: Check release identity summary
+        run: python scripts/ci/check_release_identity.py --release publication/blender-0.3.42.8.json
+      - name: Frontend and release contracts
+        run: >-
+          python -m pytest blender_frontend/tests tests/test_release_identity.py
+          tests/test_release_assets_retry.py
+          tests/radar_x100 tests/test_farm_flex_package.py
+          -q -p no:cacheprovider --junitxml=ci-results/frontend.xml
+      - name: Bridge protocol and lifecycle contracts
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m pytest tests/blender_bridge
+          --ignore=tests/blender_bridge/test_episode_worker.py
+          --ignore=tests/blender_bridge/test_farm_power_validity.py
+          --ignore=tests/blender_bridge/test_training_progress.py
+          --ignore=tests/blender_bridge/test_trainer_stop.py
+          -q -p no:cacheprovider --junitxml=ci-results/bridge.xml
+      - name: Retain test results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: python-${{ matrix.python }}-contracts
+          path: ci-results/
+          if-no-files-found: error
+          retention-days: 14
+
+  numerical:
+    name: Python ${{ matrix.python }} CPU numerical contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: |
+            requirements-ci.txt
+            requirements-ci-numerical.txt
+      - name: Install CPU numerical dependencies
+        run: |
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.13.0
+          python -m pip install -r requirements-ci-numerical.txt
+      - name: Training, scoring, and action contracts without simulators
+        run: >-
+          python -m pytest tests/test_numeric_imports.py
+          tests/test_fastfarm_training_integrity.py
+          tests/test_stage3_comparison.py
+          tests/test_blade_recon_scoring_contract.py
+          tests/test_policy_action_contract.py
+          tests/test_interactive_ppo_objective.py
+          -q -p no:cacheprovider --junitxml=ci-results/numerical.xml
+      - name: Retain numerical results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: python-${{ matrix.python }}-numerical-contracts
+          path: ci-results/
+          if-no-files-found: error
+          retention-days: 14
+
+  blender:
+    name: Blender background and package contracts
+    needs: [host, numerical]
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.native) || startsWith(github.ref, 'refs/tags/v') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      BLENDER_VERSION: 5.2.1
+      BLENDER_SERIES: '5.2'
+      BLENDER_SHA256: a31f524fa99a527d3d52b7f5aaa68c34e1a19d5a1c9473f79c5cc610fd5b10e9
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.11'
+      - name: Install package-check dependencies
+        run: python -m pip install -r requirements-ci.txt
+      - name: Install Blender runtime libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libxxf86vm1 ffmpeg
+      - name: Install verified Blender archive
+        working-directory: ${{ runner.temp }}
+        run: |
+          archive="blender-${BLENDER_VERSION}-linux-x64.tar.xz"
+          curl --fail --location --retry 3 --output "$archive" \
+            "https://download.blender.org/release/Blender${BLENDER_SERIES}/${archive}"
+          printf '%s  %s\n' "$BLENDER_SHA256" "$archive" | sha256sum --check -
+          tar -xf "$archive"
+          printf '%s\n' "$RUNNER_TEMP/blender-${BLENDER_VERSION}-linux-x64" >> "$GITHUB_PATH"
+      - name: Run native source regressions
+        run: >-
+          python scripts/blender/run_regressions.py
+          --blender "$(command -v blender)"
+          --output ci-results/native --scratch-root "$RUNNER_TEMP"
+          --test-list configs/ci-native-tests.txt
+      - name: Validate isolated extension package
+        if: ${{ !cancelled() }}
+        run: >-
+          python scripts/blender/validate_frontend_package.py
+          --blender "$(command -v blender)" --output ci-results/package
+      - name: Retain native results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: blender-background-contracts
+          path: ci-results/
+          if-no-files-found: error
+          retention-days: 14
+
+  windows-host:
+    name: Windows Python 3.12 frontend contracts
+    runs-on: windows-latest
+    timeout-minutes: 25
+    continue-on-error: true
+    env:
+      PYTHONPATH: 'blender_frontend;.'
+      CI: 'true'
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Preserve repository line endings
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-ci.txt
+      - name: Install contract-test dependencies
+        run: python -m pip install -r requirements-ci.txt
+      - name: Frontend host contracts
+        run: >-
+          python -m pytest blender_frontend/tests --ignore=blender_frontend/tests/blender
+          -q -p no:cacheprovider -rs --junitxml=ci-results/windows.xml
+      - name: Retain Windows test results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: windows-python-3.12-frontend-contracts
+          path: ci-results/windows.xml
+          if-no-files-found: error
+          retention-days: 14

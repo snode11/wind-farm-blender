@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "scope": "blender_frontend/tests tests/test_release_identity.py tests/radar_x100 tests/test_farm_flex_package.py",
+  "python": "3.15.2",
+  "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+  "source_tag": "v0.3.42",
+  "counts": {
+    "collected_cases": 1551,
+    "passed": 1547,
+    "skipped": 4,
+    "failures": 0,
+    "errors": 0,
+    "passed_subtests": 4923
+  },
+  "duration_s": 89.404,
+  "skipped": [
+    {
+      "test": "blender_frontend.tests.test_blade_models.BladeModelTests::test_regeneration_matches_packaged_alternate_asset",
+      "reason": "Rootkink regeneration requires projects/commercial-rootkink-reference/template"
+    },
+    {
+      "test": "blender_frontend.tests.test_blade_recon_data.BundledProvenanceTests::test_geometry_equals_original_source_import",
+      "reason": "Original boss source is unavailable; portable bundle hash tested separately"
+    },
+    {
+      "test": "blender_frontend.tests.test_tip_deflection.DeflectionTests::test_retained_vtp_independent_transport",
+      "reason": "Original VTP is not distributed with the offline release"
+    },
+    {
+      "test": "blender_frontend.tests.test_video_output::test_stream_decode_failure_cleanup_restart_and_busy_port",
+      "reason": "Set WFRL_MEDIAMTX for actual RTSP"
+    }
+  ],
+  "counting": "Collected pytest cases and subtests are reported separately; JUnit tests includes both.",
+  "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONUSERBASE=<test-userbase> PYTHONPATH=blender_frontend:. python -m pytest blender_frontend/tests tests/test_release_identity.py tests/radar_x100 tests/test_farm_flex_package.py -q -p no:cacheprovider",
+  "environment_constraint": "Nested venv tests use the test userbase to access PyYAML; process supervision requires waitid(WNOWAIT) and local sockets."
+}

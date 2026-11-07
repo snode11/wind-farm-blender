@@ -11,15 +11,13 @@ import bpy
 from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[3]
-MODULE = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')
-if MODULE == 'wfrl_blender':
-    sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
+sys.path.append(str(Path(__file__).resolve().parent))
+import _native
+MODULE = _native.addon_module()
 addon = importlib.import_module(MODULE)
 cameras = importlib.import_module(MODULE + '.cameras')
 nominal = importlib.import_module(MODULE + '.nacelle_camera')
-expected_root = os.environ.get('WFRL_EXPECTED_ADDON_ROOT')
-if expected_root:
-    assert Path(addon.__file__).resolve().parent == Path(expected_root).resolve()
+_native.check_addon_root(addon)
 
 scene = bpy.context.scene
 scene.render.resolution_x, scene.render.resolution_y = 1920, 1080

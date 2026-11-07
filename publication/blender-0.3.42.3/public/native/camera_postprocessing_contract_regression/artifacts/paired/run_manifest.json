@@ -1,0 +1,646 @@
+{
+  "schema": "wfrl.nrel_blade_defects.run.v1",
+  "mode": "A",
+  "state": "A_IMAGES_GENERATED; NOT_REVIEWED",
+  "run_id": "paired",
+  "state_version": 0,
+  "blender_version": "5.2.1 LTS",
+  "source_hashes": {
+    "nrel_defects/defect_store.py": "268732a5296f3b66e3d9f49375da006b7d4a273933fe6ffba7133127e800b87f",
+    "nrel_defects/defect_shapes.py": "7a3ee1ce6f8900666bbc0cab5558bd1c5c76739050cd8cafa032323a9f0cd37b",
+    "nrel_defects/defect_outputs.py": "f609da4aafde522f93c47865ee5ef869f359a3dcbd49ee8a75598734fbed65fe",
+    "nrel_defects/__init__.py": "a7b65805cad40b0277be398df9930b3aa35d3264227da441480b23c04894c750",
+    "nrel_defects/defect_timeline.py": "0aae06b359ff7cd84d542f54a70ebe3e133173d81831c7c40f37203a95453c91",
+    "nrel_defects/defect_schema.py": "b25eeae56e9fc63311016327515dfab1e4e5b38eeb0c93e8b325b3de5b9f5509",
+    "nrel_defects/defect_visibility.py": "929b0de7838383c8c11810d248e33d7211811e5fe1c9d275799e094016460ac0",
+    "nrel_defects/reference_surface.py": "e8d04aa0085a7c855fa60dedf463a4611d90e960a03217e2d04bcf61099824ba",
+    "nrel_defects/editor.py": "7881a4dd53cd65b33b3be542a9a47d41300715a1c40885e7dce6dee7ee624142",
+    "nrel_defects/defect_geometry.py": "08a81154ddf13a4b08413a3ce1408d13321c590dce26a089e5926dd6d2a8634f",
+    "farm_flex.py": "89f9d93b66f1f3826937563a24647962880e5e506df7b332954e43dc10b02f26",
+    "turbine_geometry.py": "8f62c1f96873e198b978d9d3aca84c43223d5c79ce47bb59ef9e75d07940f29c",
+    "assets/nrel5mw_geometry.json": "28c0753a125a53400c45e4d59b7ba2af91fba2c296adf0ba7a5ad4923d0a26b5"
+  },
+  "defects_sha256": "fc647fe07e445e628a1eb5fe2f4273b792155c832e554dba1f6c251d0625035b",
+  "reference_surface": {
+    "reference_geometry_id": "nrel5mw-display-reference",
+    "reference_geometry_sha256": "9efd814e6f7923b8d789bf3463e3c4e36638bcad864ad40077ac159be173ad3f",
+    "parameterization_version": "nrel-display-healthy-triangles-v1",
+    "reference_span_m": 61.5,
+    "valid_domain": {
+      "s_m": [
+        10.0,
+        59.8333
+      ],
+      "u": [
+        0.05,
+        0.95
+      ]
+    },
+    "surface_registration": {
+      "suction": "packaged NREL upper airfoil branch",
+      "pressure": "packaged NREL lower airfoil branch"
+    },
+    "region_policy": "airfoil display surface only; cylindrical root, tapered tip and edge-crossing paths unsupported",
+    "hub_radius_m": 1.5,
+    "turbine_ids": [
+      "T1",
+      "T2",
+      "T3"
+    ],
+    "provenance": {
+      "turbine_ids": [
+        "T1",
+        "T2",
+        "T3"
+      ],
+      "reference_state": "NREL frontend rest loft; existing prebend retained",
+      "prebend_reference": {
+        "schema": "wfrl.blade-reference.v1",
+        "structural_module": "BeamDyn",
+        "model": "NREL 5MW upwind prebend derivative",
+        "curve": [
+          [
+            -0.0,
+            0.0,
+            0.0,
+            13.308
+          ],
+          [
+            -1.05625e-05,
+            0.0,
+            0.199875,
+            13.308
+          ],
+          [
+            -0.0003806401,
+            0.0,
+            1.199865,
+            13.308
+          ],
+          [
+            -0.0012794928999999998,
+            0.0,
+            2.199855,
+            13.308
+          ],
+          [
+            -0.0027071209,
+            0.0,
+            3.199845,
+            13.308
+          ],
+          [
+            -0.0046635241,
+            0.0,
+            4.199835,
+            13.308
+          ],
+          [
+            -0.0071487025000000004,
+            0.0,
+            5.199825,
+            13.308
+          ],
+          [
+            -0.010162656099999999,
+            0.0,
+            6.199815,
+            13.308
+          ],
+          [
+            -0.0137053849,
+            0.0,
+            7.199805,
+            13.308
+          ],
+          [
+            -0.0177822225,
+            0.0,
+            8.201025,
+            13.308
+          ],
+          [
+            -0.0223771681,
+            0.0,
+            9.199785,
+            13.308
+          ],
+          [
+            -0.027506222500000007,
+            0.0,
+            10.199775,
+            13.308
+          ],
+          [
+            -0.0331640521,
+            0.0,
+            11.199765,
+            13.181
+          ],
+          [
+            -0.039350656899999996,
+            0.0,
+            12.199755,
+            12.848
+          ],
+          [
+            -0.0460746225,
+            0.0,
+            13.200975,
+            12.192
+          ],
+          [
+            -0.05331019210000001,
+            0.0,
+            14.199735,
+            11.561
+          ],
+          [
+            -0.0610831225,
+            0.0,
+            15.199725,
+            11.072
+          ],
+          [
+            -0.06938482810000002,
+            0.0,
+            16.199715,
+            10.792
+          ],
+          [
+            -0.08758640250000002,
+            0.0,
+            18.200925,
+            10.232
+          ],
+          [
+            -0.10788597159999998,
+            0.0,
+            20.20029,
+            9.672
+          ],
+          [
+            -0.13030656040000002,
+            0.0,
+            22.20027,
+            9.11
+          ],
+          [
+            -0.15484225000000001,
+            0.0,
+            24.20025,
+            8.534
+          ],
+          [
+            -0.1814930404,
+            0.0,
+            26.20023,
+            7.932
+          ],
+          [
+            -0.21026810249999997,
+            0.0,
+            28.200825,
+            7.321
+          ],
+          [
+            -0.2411399236,
+            0.0,
+            30.20019,
+            6.711
+          ],
+          [
+            -0.27413601640000007,
+            0.0,
+            32.20017,
+            6.122
+          ],
+          [
+            -0.30924721000000005,
+            0.0,
+            34.20015,
+            5.546
+          ],
+          [
+            -0.3464735044,
+            0.0,
+            36.20013,
+            4.971
+          ],
+          [
+            -0.38582732249999996,
+            0.0,
+            38.200725,
+            4.401
+          ],
+          [
+            -0.42727139560000005,
+            0.0,
+            40.20009,
+            3.834
+          ],
+          [
+            -0.4708429923999999,
+            0.0,
+            42.20007,
+            3.332
+          ],
+          [
+            -0.51652969,
+            0.0,
+            44.20005,
+            2.89
+          ],
+          [
+            -0.5643314884,
+            0.0,
+            46.20003,
+            2.503
+          ],
+          [
+            -0.6142797376,
+            0.0,
+            48.20124,
+            2.116
+          ],
+          [
+            -0.6662803876,
+            0.0,
+            50.19999,
+            1.73
+          ],
+          [
+            -0.7204274883999999,
+            0.0,
+            52.19997,
+            1.342
+          ],
+          [
+            -0.77668969,
+            0.0,
+            54.19995,
+            0.954
+          ],
+          [
+            -0.8056139535999999,
+            0.0,
+            55.19994,
+            0.76
+          ],
+          [
+            -0.8350669924000002,
+            0.0,
+            56.19993,
+            0.574
+          ],
+          [
+            -0.8650488064,
+            0.0,
+            57.19992,
+            0.404
+          ],
+          [
+            -0.8802380041,
+            0.0,
+            57.699915,
+            0.319
+          ],
+          [
+            -0.8955972496000002,
+            0.0,
+            58.20114,
+            0.253
+          ],
+          [
+            -0.9110129809,
+            0.0,
+            58.699905,
+            0.216
+          ],
+          [
+            -0.9265987600000001,
+            0.0,
+            59.1999,
+            0.178
+          ],
+          [
+            -0.9423167329,
+            0.0,
+            59.699895,
+            0.14
+          ],
+          [
+            -0.9581668996000001,
+            0.0,
+            60.19989,
+            0.101
+          ],
+          [
+            -0.9741492601,
+            0.0,
+            60.699885,
+            0.062
+          ],
+          [
+            -0.9902638144,
+            0.0,
+            61.19988,
+            0.023
+          ],
+          [
+            -1.0,
+            0.0,
+            61.5,
+            0.0
+          ]
+        ],
+        "tip_local_m": [
+          -1.0,
+          0.0,
+          63.0
+        ],
+        "definition": "x=-(z/61.5)^2; y=0; metres; z from blade root",
+        "reference_state": "independent zero-load stationary solve",
+        "precone_deg": -2.5,
+        "source_note": "NREL 5MW derivative; Jonkman 2016 quadratic upwind prebend example; no claim of real-machine equivalence",
+        "sources": {
+          "NRELOffshrBsline5MW_BeamDyn.dat": {
+            "url": "https://raw.githubusercontent.com/OpenFAST/r-test/548bf2143633a7066f4582167fdf4180951fd7f6/glue-codes/openfast/5MW_Baseline/NRELOffshrBsline5MW_BeamDyn.dat",
+            "sha256": "ecc69eecb955afe435f4b993ca40d12335f0b99dcb833516107224660988147b"
+          },
+          "NRELOffshrBsline5MW_BeamDyn_Blade.dat": {
+            "url": "https://raw.githubusercontent.com/OpenFAST/r-test/548bf2143633a7066f4582167fdf4180951fd7f6/glue-codes/openfast/5MW_Baseline/NRELOffshrBsline5MW_BeamDyn_Blade.dat",
+            "sha256": "b6031e7e0ebc1b31d905454f0c1aa1af8edd01e2f7882c60047a19bdbdb44138"
+          },
+          "precurve-beamdyn.txt": {
+            "url": "https://forums.nlr.gov/uploads/short-url/hcFTh5WhUIV01MARfK0rFqr8V1r.txt",
+            "sha256": "2be18abb5a2860bdb9ffbf8524804ed1f04c3d52c0ae1f2d4523ec62ea7ab541"
+          },
+          "precurve-aerodyn.txt": {
+            "url": "https://forums.nlr.gov/uploads/short-url/fWfJelNOqr7VZXCoOZp5VPGMeDI.txt",
+            "sha256": "a061d11e70eb9db6fb8a48aa0ca2e0e72b654cb7280f53cb478f16181046d45d"
+          }
+        }
+      }
+    },
+    "resource_sha256": {
+      "assets/nrel5mw_geometry.json": "28c0753a125a53400c45e4d59b7ba2af91fba2c296adf0ba7a5ad4923d0a26b5"
+    },
+    "triangle_diagonal": "quad a-c",
+    "binding_tolerance_m": 1e-05,
+    "dimension_tolerance_m": 0.001
+  },
+  "replay_manifest_sha256": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde",
+  "source_motion": {
+    "start_s": 117.0,
+    "end_s": 177.0,
+    "source_sampling_hz": 39.999999999990905,
+    "timeline_hz": 60.0
+  },
+  "frame_mapping": {
+    "schema": "wfrl.blade_defects.frame_mapping.v1",
+    "start_s": 117.0,
+    "duration_s": 60.0,
+    "export_fps": 60.0,
+    "frame_count": 3600,
+    "export_index_start": 0,
+    "blender_fps": 60.0,
+    "blender_start_frame": 1,
+    "blender_start_time_s": 117.0,
+    "ordinary_interval": "[start_s,start_s+duration_s)",
+    "first_sample": {
+      "frame_index": 0,
+      "time_s": 117.0,
+      "relative_time_s": 0.0,
+      "blender_frame_coordinate": 1.0,
+      "blender_frame": 1,
+      "blender_subframe": 0.0,
+      "sample_role": "ordinary",
+      "included_in_video": true
+    },
+    "last_sample": {
+      "frame_index": 3599,
+      "time_s": 176.98333333333335,
+      "relative_time_s": 59.983333333333334,
+      "blender_frame_coordinate": 3600.0,
+      "blender_frame": 3600,
+      "blender_subframe": 0.0,
+      "sample_role": "ordinary",
+      "included_in_video": true
+    },
+    "endpoint": {
+      "frame_index": null,
+      "time_s": 177.0,
+      "relative_time_s": null,
+      "blender_frame_coordinate": 3601.0,
+      "blender_frame": 3601,
+      "blender_subframe": 0.0,
+      "sample_role": "endpoint_check",
+      "included_in_video": false
+    }
+  },
+  "cameras": [
+    {
+      "name": "WFRL.Camera.T1.Custom.1",
+      "matrix_world": [
+        [
+          0.5098153948783875,
+          0.16777555644512177,
+          0.843765139579773,
+          1.208909273147583
+        ],
+        [
+          -0.7362854480743408,
+          0.5923659801483154,
+          0.3270876407623291,
+          -2.043933153152466
+        ],
+        [
+          -0.4449404776096344,
+          -0.7880063056945801,
+          0.42552798986434937,
+          89.71842193603516
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "lens_mm": 23.450214385986328,
+      "sensor_width_mm": 36.0,
+      "sensor_height_mm": 24.0,
+      "resolution": [
+        48,
+        32
+      ]
+    },
+    {
+      "name": "WFRL.Camera.T1.Custom.2",
+      "matrix_world": [
+        [
+          0.9188307523727417,
+          0.07098034769296646,
+          0.3882163166999817,
+          1.2098476886749268
+        ],
+        [
+          -0.3424326777458191,
+          0.6324021816253662,
+          0.6948432922363281,
+          -2.043027639389038
+        ],
+        [
+          -0.19618862867355347,
+          -0.7713814377784729,
+          0.6053765416145325,
+          89.79841613769531
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "lens_mm": 63.342437744140625,
+      "sensor_width_mm": 36.0,
+      "sensor_height_mm": 24.0,
+      "resolution": [
+        48,
+        32
+      ]
+    },
+    {
+      "name": "WFRL.Camera.T1.Custom.3",
+      "matrix_world": [
+        [
+          0.9742797613143921,
+          0.0648462176322937,
+          0.21580979228019714,
+          1.210785984992981
+        ],
+        [
+          -0.20625591278076172,
+          0.6423501968383789,
+          0.7381359338760376,
+          -2.0421221256256104
+        ],
+        [
+          -0.09076013416051865,
+          -0.7636630535125732,
+          0.6392037272453308,
+          89.8783950805664
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "lens_mm": 188.83740234375,
+      "sensor_width_mm": 36.0,
+      "sensor_height_mm": 24.0,
+      "resolution": [
+        48,
+        32
+      ]
+    }
+  ],
+  "measurements": [],
+  "effects": {
+    "physics_coupled": false,
+    "sensor_noise": false,
+    "distortion": false,
+    "motion_blur": false
+  },
+  "products": {
+    "visibility": {
+      "state": "NOT_GENERATED"
+    },
+    "visible_intervals": {
+      "state": "NOT_GENERATED"
+    },
+    "camera_raw": {
+      "state": "GENERATED"
+    },
+    "healthy": {
+      "state": "GENERATED"
+    }
+  },
+  "images": [
+    {
+      "role": "damaged",
+      "camera_id": "WFRL.Camera.T1.Custom.1",
+      "time_s": 117.0,
+      "path": "damaged-WFRL_Camera_T1_Custom_1.png",
+      "sha256": "8b5c92f79a8256fd570a849dd320acf6cd21d4e5bd158bdfcdca331fe54dea47",
+      "resolution": [
+        48,
+        32
+      ]
+    },
+    {
+      "role": "damaged",
+      "camera_id": "WFRL.Camera.T1.Custom.2",
+      "time_s": 117.0,
+      "path": "damaged-WFRL_Camera_T1_Custom_2.png",
+      "sha256": "b87348e17be6852bc68c459459298c84e0c48acced01aefa947854d09f03c5bb",
+      "resolution": [
+        48,
+        32
+      ]
+    },
+    {
+      "role": "damaged",
+      "camera_id": "WFRL.Camera.T1.Custom.3",
+      "time_s": 117.0,
+      "path": "damaged-WFRL_Camera_T1_Custom_3.png",
+      "sha256": "f9114b76589aa374ba861af8ea8392d56c9bb83f994ef368992b966187b09f75",
+      "resolution": [
+        48,
+        32
+      ]
+    },
+    {
+      "role": "healthy",
+      "camera_id": "WFRL.Camera.T1.Custom.1",
+      "time_s": 117.0,
+      "path": "healthy-WFRL_Camera_T1_Custom_1.png",
+      "sha256": "a625b362adbf92e6a6ad0c6013626769dafbade13498725b379de83e5aee6512",
+      "resolution": [
+        48,
+        32
+      ]
+    },
+    {
+      "role": "healthy",
+      "camera_id": "WFRL.Camera.T1.Custom.2",
+      "time_s": 117.0,
+      "path": "healthy-WFRL_Camera_T1_Custom_2.png",
+      "sha256": "2c1fe16c5bfcf63735d5922076a6ee24824312138c3f212bc92ba149e59ef6e4",
+      "resolution": [
+        48,
+        32
+      ]
+    },
+    {
+      "role": "healthy",
+      "camera_id": "WFRL.Camera.T1.Custom.3",
+      "time_s": 117.0,
+      "path": "healthy-WFRL_Camera_T1_Custom_3.png",
+      "sha256": "deb9abbc7aa0fe453a6cb6557c9010354fa7190022c052b61cd532c08ec801c4",
+      "resolution": [
+        48,
+        32
+      ]
+    }
+  ],
+  "limitations": [
+    "Synthetic visual morphology and user dimensions, no physical damage coupling.",
+    "Existing saved radar measurements describe their original simulation geometry.",
+    "G visibility does not establish image discernibility or measured damage accuracy."
+  ]
+}

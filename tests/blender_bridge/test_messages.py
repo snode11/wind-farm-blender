@@ -1,4 +1,3 @@
-import json
 import math
 import struct
 import unittest
@@ -49,6 +48,16 @@ class CodecTests(unittest.TestCase):
             with self.assertRaises(ProtocolError):
                 FrameDecoder().feed(struct.pack('!I', length))
 
+    def test_rejected_command_sequence_is_optional_and_validated(self):
+        error = msg('error', code='COMMAND_REJECTED', message='Invalid command', fatal=False)
+        self.assertEqual(FrameDecoder().feed(encode_message(error)), [error])
+        error['payload']['command_sequence'] = 1
+        self.assertEqual(FrameDecoder().feed(encode_message(error)), [error])
+        for sequence in (True, None, '1', -1, 2**53):
+            error['payload']['command_sequence'] = sequence
+            with self.subTest(sequence=sequence), self.assertRaises(ProtocolError):
+                encode_message(error)
+
     def test_envelope(self):
         for key in ['protocol_version', 'type', 'session_id', 'sequence', 'payload']:
             bad = msg(); del bad[key]
@@ -62,6 +71,18 @@ class CodecTests(unittest.TestCase):
         encode_message(msg('hello_ack', selected_version=1, capabilities=[], run_status='READY', mode='demo', resumed=False))
         with self.assertRaises(ProtocolError): encode_message(msg('hello_ack', selected_version=2))
         with self.assertRaisesRegex(ProtocolError, 'binary'): encode_message(msg('wake_binary'))
+
+    def test_lifecycle_revision_is_an_optional_nonnegative_integer(self):
+        payloads = [
+            ('hello_ack', dict(selected_version=1, capabilities=[], run_status='READY', mode='demo', resumed=True)),
+            ('lifecycle', dict(run_status='RUNNING', reason=None, mode='demo', capabilities=[])),
+        ]
+        for kind, payload in payloads:
+            for revision in (0, 1, 100):
+                encode_message(msg(kind, **dict(payload, state_revision=revision)))
+            for revision in (-1, True, None, '1', 1.5):
+                with self.subTest(kind=kind, revision=revision), self.assertRaisesRegex(ProtocolError, 'state_revision'):
+                    encode_message(msg(kind, **dict(payload, state_revision=revision)))
 
     def test_sequence_session(self):
         guard = SessionSequenceGuard('s')
@@ -79,7 +100,7 @@ class CodecTests(unittest.TestCase):
         with self.assertRaises(ProtocolError): encode_message(bad)
         good = snapshot(); good['payload']['turbines'][0]['channels']['rotor_speed'] = channel(None, validity='waiting', error='No first frame')
         encode_message(good)
-        good['payload']['farm'] = {'power': channel(3, fidelity='EXPORTED', provenance={'file': 'run.csv', 'channel': 'power'})}
+        good['payload']['farm'] = {'power': channel(3, unit='MW', fidelity='EXPORTED', provenance={'file': 'run.csv', 'channel': 'power'})}
         encode_message(good)
 
     def test_aliases(self):
@@ -104,7 +125,7 @@ class CodecTests(unittest.TestCase):
 
     def test_data_families(self):
         context = dict(mode='replay', step=2, timestamp={'value': 2, 'timebase': 'replay_seconds'})
-        encode_message(msg('curve', **context, channel='power', turbine_id=None, data=channel([[0, 1], [1, 2]])))
+        encode_message(msg('curve', **context, channel='power', turbine_id=None, data=channel([[0, 1], [1, 2]], unit='MW')))
         encode_message(msg('wake', **context, encoding='json', turbine_ids=['T1'], data=channel([[[1.0]]], stale_after_seconds=5)))
         encode_message(msg('safety_event', **context, event_id='e1', severity='warning', message='limited', turbine_id='T1', data=channel(True, stale_after_seconds=10)))
         bad = snapshot(); bad['payload']['turbines'][0]['channels']['rotor_speed'] = channel(4, validity='stale', error='age threshold exceeded')
@@ -136,6 +157,22 @@ class CodecTests(unittest.TestCase):
         self.assertTrue(channel_is_stale(data, 100, 102))
         bad = snapshot(); bad['payload']['turbines'][0]['channels']['rotor_speed']['stale_after_seconds'] = 999
         with self.assertRaises(ProtocolError): encode_message(bad)
+
+    def test_display_channel_units_are_enforced_for_snapshots_and_curves(self):
+        context = dict(mode='replay', step=2, timestamp={'value': 2, 'timebase': 'replay_seconds'})
+        for name, correct, wrong in [('yaw', 'deg', 'rad'), ('pitch', 'deg', 'rad'),
+                                      ('power', 'MW', 'kW')]:
+            valid = snapshot()
+            valid['payload']['turbines'][0]['channels'] = {name: channel(1., unit=correct)}
+            self.assertEqual(FrameDecoder().feed(encode_message(valid)), [valid])
+            bad = snapshot()
+            bad['payload']['turbines'][0]['channels'] = {name: channel(1., unit=wrong)}
+            with self.subTest(name=name), self.assertRaisesRegex(ProtocolError, 'unit'):
+                encode_message(bad)
+            curve = msg('curve', **context, channel=name, turbine_id='T1',
+                        data=channel([[0, 1]], unit=wrong))
+            with self.subTest(curve=name), self.assertRaisesRegex(ProtocolError, 'unit'):
+                encode_message(curve)
 
     def test_scalar_numeric_channels_and_curve_units(self):
         for key in ['rotor_speed', 'power', 'yaw', 'pitch']:

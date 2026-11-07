@@ -32,18 +32,18 @@ CONTRACT = dict(
 
 
 def save(path, value):
-    path.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False))
+    path.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False), encoding='utf-8')
 
 
 def audit(package, output):
     package, output = Path(package), Path(output)
     output.mkdir(parents=True, exist_ok=False)
-    manifest = json.loads((package/'manifest.json').read_text())
+    manifest = json.loads((package/'manifest.json').read_text(encoding='utf-8'))
     for name, digest in manifest['files'].items():
         if hashlib.sha256((package/name).read_bytes()).hexdigest() != digest:
             raise ValueError('Source integrity mismatch: '+name)
     save(output/'contract.json', CONTRACT)
-    data = json.loads((package/'data.json').read_text())
+    data = json.loads((package/'data.json').read_text(encoding='utf-8'))
     with np.load(package/'geometry.npz') as g:
         times, transforms = g['times'], g['transforms']
     with np.load(package/'tower-motion.npz') as q:
@@ -54,7 +54,7 @@ def audit(package, output):
     grid = np.array([(a,b) for a in np.linspace(4,12,161) for b in np.linspace(-6,6,121)])
     a,b = np.radians(grid).T
     directions = np.column_stack((-np.sin(a)*np.cos(b), np.sin(b), -np.cos(a)*np.cos(b)))
-    budget = json.loads((ROOT/'evidence/prebend-20260918/acceptance-budget.json').read_text())
+    budget = json.loads((ROOT/'evidence/prebend-20260918/acceptance-budget.json').read_text(encoding='utf-8'))
     rows, summaries = {}, {}
     for k, tid in enumerate(manifest['turbine_ids']):
         rows[tid] = []

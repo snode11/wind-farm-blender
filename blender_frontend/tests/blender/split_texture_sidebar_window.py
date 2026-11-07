@@ -128,6 +128,10 @@ def sample():
                left_ui_width=ui_width(left), left_show_region_ui=bool(left.spaces.active.show_region_ui),
                right_area_size=[right.width, right.height],
                perspective=space.region_3d.view_perspective, detail=bool(scene.get(same.DETAIL)),
+               navigation=dict(location=list(space.region_3d.view_location),
+                   rotation=list(space.region_3d.view_rotation), distance=space.region_3d.view_distance,
+                   camera_zoom=space.region_3d.view_camera_zoom,
+                   camera_offset=list(space.region_3d.view_camera_offset), lens=space.lens),
                split_status=scene.get('split_review_status'), frame=int(scene.frame_current),
                left_frame=int(scene.frame_current), right_timeline_frame=int(scene.frame_current),
                right_sample=scene.get(same.INDEX), texture_information=info,
@@ -236,8 +240,11 @@ def end_play():
     check(last['frame'] > first['frame'] and last['right_sample'] > first['right_sample']
           and phase['left_pose_moved'] and phase['right_pose_moved'],
           phase['name'] + ': both native sides and the held sample advance', phase)
-    check(all(row['detail'] and row['perspective'] == 'ORTHO' for row in rows),
-          phase['name'] + ': surface detail tracking stays active')
+    # The manual close-up stays put during playback; surface tracking is never enabled.
+    check(all(not row['detail'] and row['perspective'] == 'ORTHO' for row in rows),
+          phase['name'] + ': stationary surface close-up is retained without tracking')
+    check(all(row['navigation'] == first['navigation'] for row in rows),
+          phase['name'] + ': playback preserves close-up location, rotation and zoom')
     animation(False)
     capture(state['stage'] + '-paused')
     state['pause_row'] = state['samples'][-1]
@@ -247,7 +254,7 @@ def end_play():
 def paused_stable(row):
     start = state['pause_row']
     check(not row['playing'] and all(row[key] == start[key]
-          for key in ('frame', 'right_sample', 'left_pose', 'right_pose')),
+          for key in ('frame', 'right_sample', 'left_pose', 'right_pose', 'navigation')),
           state['stage'] + ': native pause holds both sides')
 
 
@@ -349,6 +356,8 @@ def tick():
                 else:
                     begin_play('play-hidden-normal-context', False)
             elif stage == 'wait-manual-open':
+                check(state['samples'][-1]['navigation'] == state['before_sidebar_open'],
+                      'Opening the sidebar preserves the stationary local focus')
                 capture('manual-sidebar-open-before-play')
                 begin_play('play-manually-open-right-context', True)
             elif stage in {'wait-fit-open', 'wait-current-hidden', 'wait-focus-hidden', 'wait-fit-hidden'}:
@@ -396,6 +405,7 @@ def tick():
             elif stage == 'pause-hidden-right-context':
                 begin_play('play-resumed-hidden-right-context', False)
             elif stage == 'pause-resumed-hidden-right-context':
+                state['before_sidebar_open'] = row['navigation']
                 pair()[1].spaces.active.show_region_ui = True
                 pair()[1].tag_redraw()
                 state['stage'] = 'wait-manual-open'

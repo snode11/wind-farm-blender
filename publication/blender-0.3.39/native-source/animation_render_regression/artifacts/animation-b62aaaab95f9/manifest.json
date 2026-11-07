@@ -1,0 +1,40 @@
+{
+  "schema": "wfrl.animation-render.v1",
+  "job_id": "b62aaaab95f94a9e85e114e2a4eb1d22",
+  "state": "COMPLETE",
+  "completed_frames": 3,
+  "total_frames": 3,
+  "source": {
+    "version": "0.3.39",
+    "build": "6450ea9451727c4273c161a1a5651e7dfea5077374d3980bdf1c31bbf82c15f3",
+    "packaged": false,
+    "module": "_wfrl_animation_worker",
+    "addon_root": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender"
+  },
+  "scene_name": "Scene",
+  "camera": "WFRL.Camera.T1.Gimbal",
+  "frame_range": [
+    1,
+    601,
+    300
+  ],
+  "fps": 24,
+  "fps_base": 1.0,
+  "exposure": 1.25,
+  "last_frame": 601,
+  "frames": [
+    {
+      "frame": 1,
+      "file": "frames/frame_0001.png"
+    },
+    {
+      "frame": 301,
+      "file": "frames/frame_0301.png"
+    },
+    {
+      "frame": 601,
+      "file": "frames/frame_0601.png"
+    }
+  ],
+  "error": null
+}

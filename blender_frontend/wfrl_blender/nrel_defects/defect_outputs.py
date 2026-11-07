@@ -1,20 +1,30 @@
 """NREL defect evidence outputs; editing and G diagnostics never render."""
 import csv
 import hashlib
-import json
 from pathlib import Path
 import bpy
+from ..atomic_json import write_json as _write_json
 from .defect_timeline import FrameMapping
 
 
 def write_json(path,value):
-    path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
-    temp=path.with_suffix(path.suffix+'.tmp')
-    temp.write_text(json.dumps(value,ensure_ascii=False,indent=2,allow_nan=False)+'\n')
-    temp.replace(path)
+    _write_json(path, value, mkdir=True)
 
 
 def digest(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def camera_metadata(editor, camera):
+    from dataclasses import asdict
+    from .. import custom_cameras
+    from .defect_visibility import _camera_descriptor
+    descriptor = _camera_descriptor(camera, editor.scene, resolution=editor.camera_resolution(camera))
+    return dict(name=camera.name, slot=camera.get('wfrl_custom_slot'),
+        parameters=asdict(custom_cameras.parameters(camera)),
+        matrix_world=descriptor['matrix_world'], K=descriptor['K'], P=descriptor['P'],
+        lens_mm=camera.data.lens, sensor_width_mm=camera.data.sensor_width,
+        sensor_height_mm=camera.data.sensor_height,
+        resolution=[descriptor['width'], descriptor['height']])
 
 
 def create_run(editor,directory,*,mode='G',mapping=None):
@@ -34,16 +44,15 @@ def create_run(editor,directory,*,mode='G',mapping=None):
         defects_sha256=digest(output/'defects.json'),reference_surface=editor.surface.metadata(),
         replay_manifest_sha256=editor.scene.get('wfrl_farm_manifest_sha256'),
         source_motion=dict(start_s=start,end_s=end,source_sampling_hz=1/float(editor.flex.times[1]-editor.flex.times[0]),timeline_hz=60.),
-        frame_mapping=mapping.to_dict(),cameras=[dict(name=c.name,matrix_world=[list(r) for r in c.matrix_world],
-        lens_mm=c.data.lens,sensor_width_mm=c.data.sensor_width,sensor_height_mm=c.data.sensor_height,
-        resolution=list(editor.camera_resolution(c))) for c in editor.cameras()],
+        frame_mapping=mapping.to_dict(),cameras=[camera_metadata(editor, c) for c in editor.cameras()],
         measurements=editor.payload['measurements'],effects=dict(physics_coupled=False,sensor_noise=False,distortion=False,motion_blur=False),
         products={name:dict(state='NOT_GENERATED') for name in ('visibility','visible_intervals','camera_raw','healthy')},images=[],
         limitations=['Synthetic visual morphology and user dimensions, no physical damage coupling.',
             'Existing saved radar measurements describe their original simulation geometry.',
             'G visibility does not establish image discernibility or measured damage accuracy.'])
     run=dict(output=output,manifest=manifest,mapping=mapping)
-    update_run(run);save_review(editor,run)
+    update_run(run)
+    save_review(editor,run)
     return run
 
 
@@ -53,15 +62,19 @@ def update_run(run): write_json(run['output']/'run_manifest.json',run['manifest'
 def save_records(run,rows):
     write_json(run['output']/'visibility.json',rows)
     fields=['turbine_id','blade_id','defect_id','revision','support_id','support_kind','primary','camera_id','time_s','frame_index','status','in_frame_fraction','visible_fraction_in_frame','visible_area_px2']
-    with (run['output']/'projection_stats.csv').open('w',newline='') as stream:
-        writer=csv.DictWriter(stream,fieldnames=fields,extrasaction='ignore');writer.writeheader();writer.writerows(rows)
+    with (run['output']/'projection_stats.csv').open('w',newline='',encoding='utf-8') as stream:
+        writer=csv.DictWriter(stream,fieldnames=fields,extrasaction='ignore')
+        writer.writeheader()
+        writer.writerows(rows)
     run['manifest']['products']['visibility']=dict(state='GENERATED',records=len(rows),sha256=digest(run['output']/'visibility.json'))
 
 
 def save_analysis(editor,run):
     rows=editor.analyze(run_id=run['manifest']['run_id'])
-    save_records(run,rows);run['manifest']['state']='G_CURRENT_COMPLETE'
-    update_run(run);save_review(editor,run)
+    save_records(run,rows)
+    run['manifest']['state']='G_CURRENT_COMPLETE'
+    update_run(run)
+    save_review(editor,run)
     return rows
 
 
@@ -70,21 +83,31 @@ def save_review(editor,run):
         '状态：'+run['manifest']['state'],'','六类合成视觉形态；使用当前 NREL 健康参考面与已有柔性回放。',
         '尺寸与深度检查为静态健康参考下的生成器校验，不代表现场损伤测量。',
         'G 是理想几何投影/遮挡诊断，不能据此认定可辨识。A 图外观尚未审核。',
-        '缺陷未进入 OpenFAST 刚度、载荷或既有雷达数据；查看时保留原数据来源。','']))
+        '缺陷未进入 OpenFAST 刚度、载荷或既有雷达数据；查看时保留原数据来源。','']),encoding='utf-8')
 
 
 def capture_images(editor,directory):
     """Explicit UI/CLI action: paired instantaneous lossless PNGs at current time."""
     run=create_run(editor,directory,mode='A')
-    scene=editor.scene;render=scene.render
+    scene=editor.scene
+    render=scene.render
     saved=(scene.camera,render.filepath,render.image_settings.file_format,render.image_settings.color_mode,
         render.image_settings.color_depth,render.use_file_extension,scene.frame_current,scene.frame_subframe,
         render.resolution_x,render.resolution_y,render.resolution_percentage)
+    saved_pixels = (render.pixel_aspect_x, render.pixel_aspect_y)
+    saved_border = (render.use_border, render.use_crop_to_border)
+    saved_postprocessing = (render.use_compositing, render.use_sequencer)
     blur=hasattr(render,'use_motion_blur')
     old_blur=render.use_motion_blur if blur else None
     frame_time=float(scene['defect_time_s'])
     try:
-        render.image_settings.file_format='PNG';render.image_settings.color_mode='RGBA';render.image_settings.color_depth='8';render.use_file_extension=True
+        render.image_settings.file_format='PNG'
+        render.image_settings.color_mode='RGBA'
+        render.image_settings.color_depth='8'
+        render.use_file_extension=True
+        render.use_border = False
+        render.use_crop_to_border = False
+        render.use_compositing = render.use_sequencer = False
         if blur: render.use_motion_blur=False
         empty=editor.store.document
         for defect in empty['defects']: defect['enabled']=False
@@ -94,26 +117,43 @@ def capture_images(editor,directory):
                 editor.geometry.activate(payload)
                 editor.set_time(frame_time)
                 for camera in editor.cameras():
-                    editor.verify_cameras();scene.camera=camera
+                    editor.verify_cameras()
+                    scene.camera=camera
                     render.resolution_x,render.resolution_y = editor.camera_resolution(camera)
                     render.resolution_percentage = 100
+                    from .. import custom_cameras, camera_projection
+                    from .defect_visibility import _camera_descriptor
+                    params = custom_cameras.parameters(camera)
+                    render.pixel_aspect_x, render.pixel_aspect_y = camera_projection.pixel_scales(
+                        params.fov, params.vfov, render.resolution_x, render.resolution_y)
+                    descriptor = _camera_descriptor(camera, scene, resolution=(render.resolution_x, render.resolution_y))
                     path=run['output']/(role+'-'+camera.name.replace('.','_')+'.png')
                     render.filepath=str(path)
-                    bpy.ops.render.render(write_still=True)
+                    result = bpy.ops.render.render(write_still=True, scene=scene.name)
+                    if result != {'FINISHED'}:
+                        raise RuntimeError('Camera raw render did not finish: ' + str(result))
                     run['manifest']['images'].append(dict(role=role,camera_id=camera.name,time_s=frame_time,
-                        path=path.name,sha256=digest(path),resolution=[render.resolution_x,render.resolution_y]))
+                        path=path.name,sha256=digest(path),resolution=[render.resolution_x,render.resolution_y],
+                        K=descriptor['K'], P=descriptor['P'], matrix_world=descriptor['matrix_world'],
+                        pixel_aspect=[render.pixel_aspect_x, render.pixel_aspect_y]))
         finally:
-            editor.geometry.activate(editor.payload);editor.geometry.dispose(healthy)
+            editor.geometry.activate(editor.payload)
+            editor.geometry.dispose(healthy)
         run['manifest']['state']='A_IMAGES_GENERATED; NOT_REVIEWED'
         for key in ('camera_raw','healthy'): run['manifest']['products'][key]=dict(state='GENERATED')
-        update_run(run);save_review(editor,run)
+        update_run(run)
+        save_review(editor,run)
     except BaseException as exc:
         run['manifest']['state']='A_FAILED'
         run['manifest']['error']=str(exc)
-        update_run(run);save_review(editor,run)
+        update_run(run)
+        save_review(editor,run)
         raise
     finally:
         scene.camera,render.filepath,render.image_settings.file_format,render.image_settings.color_mode,render.image_settings.color_depth,render.use_file_extension,frame,subframe,render.resolution_x,render.resolution_y,render.resolution_percentage=saved
+        render.pixel_aspect_x, render.pixel_aspect_y = saved_pixels
+        render.use_border, render.use_crop_to_border = saved_border
+        render.use_compositing, render.use_sequencer = saved_postprocessing
         if blur: render.use_motion_blur=old_blur
         scene.frame_set(frame,subframe=subframe)
         editor.set_time(frame_time)

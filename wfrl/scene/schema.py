@@ -148,8 +148,13 @@ class Scene:
             raise SceneError(f"turbine 必须是 {TURBINES}，收到 {self.turbine!r}")
         if self.n < 1:
             raise SceneError("layout 至少要有一台机组")
-        if self.dt <= 0:
-            raise SceneError(f"dt 必须为正，收到 {self.dt}")
+        if not math.isfinite(self.dt) or self.dt <= 0:
+            raise SceneError(f"dt 必须为有限正数，收到 {self.dt}")
+        if int(self.dt) != self.dt:
+            raise SceneError(f"dt 必须为整数秒；当前 WFCRL case 不支持小数步长，收到 {self.dt}")
+        for index, turbine in enumerate(self.turbines):
+            if not (math.isfinite(turbine.x) and math.isfinite(turbine.y)):
+                raise SceneError(f"layout[{index}] 坐标必须是有限数值")
 
         ids = [t.id for t in self.turbines]
         dup = {i for i in ids if ids.count(i) > 1}
@@ -201,6 +206,7 @@ class Scene:
     def make_case(self, max_iter: int = 200):
         """生成 WFCRL 的 FarmCase。绕开 registration.py 的环境名白名单 ——
         那张表把布局钉死在预注册的常量上，正是场景层要解开的东西。"""
+        self.validate()
         from wfcrl.environments.data_cases import FastFarmCase, FlorisCase
         if self.backend == "fastfarm":
             case = FastFarmCase(
@@ -212,7 +218,7 @@ class Scene:
             return case
         case = FlorisCase(
             num_turbines=self.n, xcoords=self.xcoords, ycoords=self.ycoords,
-            dt=int(self.dt) if self.dt >= 1 else 60, buffer_window=1,
+            dt=int(self.dt), buffer_window=1,
             t_init=0, max_iter=max_iter,
         )
         return case

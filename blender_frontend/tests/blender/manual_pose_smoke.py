@@ -1,4 +1,4 @@
-"""Native smoke for the paused Local Demo display-pose contract."""
+"""Native smoke for the independent paused manual-pose contract."""
 import sys
 from pathlib import Path
 
@@ -12,26 +12,16 @@ from wfrl_blender import runtime
 def main():
     wfrl_blender.register()
     try:
-        assert bpy.ops.wfrl.load_demo() == {"FINISHED"}
-        assert bpy.ops.wfrl.demo_start() == {"FINISHED"}
-        assert bpy.ops.wfrl.demo_pause() == {"FINISHED"}
-        scene = bpy.context.scene
-        scene.wfrl_manual_enabled = True
-        scene.wfrl_manual_yaw = 12.0
-        scene.wfrl_manual_pitch = 18.0
-        assert scene['wfrl_run_status'] == 'PAUSED'
-        assert runtime.desired_mode() == 'demo'
-        assert scene.wfrl_manual_enabled
-        assert scene['wfrl_power_available'] is False
-        assert 'Manual pose' in scene['wfrl_demo_phase']
-        assert list(scene['wfrl_yaw_deg'])[0] == 12.0
-        assert list(scene['wfrl_pitch_deg'])[0] == 18.0
-        assert runtime._client is None
-        assert bpy.ops.wfrl.demo_resume() == {'FINISHED'}
-        assert not scene.wfrl_manual_enabled
-        assert scene['wfrl_power_available']
-        assert 'Manual pose' not in scene['wfrl_demo_phase']
-        assert list(scene['wfrl_yaw_deg'])[0] != 12.0
+        assert bpy.ops.wfrl.manual_enter() == {'FINISHED'}
+        from wfrl_blender import manual_control
+        scene=bpy.context.scene
+        assert manual_control.is_manual(scene)
+        entry=scene.wfrl_manual_turbines[0]
+        manual_control._apply_poses(scene, {'T1':dict(manual_control.pose_snapshot(scene)['T1'],yaw_deg=12.,pitch_deg=18.,pitch_b1_deg=18.,pitch_b2_deg=18.,pitch_b3_deg=18.)},pause=True,ramp=False)
+        manual_control.validate_pose_export(scene)
+        values=manual_control.pose_snapshot(scene)
+        assert values['T1']['yaw_deg']==12. and values['T1']['pitch_deg']==18.
+        assert not entry.running
         print('WFRL_MANUAL_POSE_SMOKE=PASS')
     finally:
         wfrl_blender.unregister()

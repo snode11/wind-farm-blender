@@ -1,0 +1,7 @@
+Warning: 1 × Draw window and swap: 11.8834 ms, average: 11.88341714 ms
+BENCHMARK_START triple TRIPLE
+BENCHMARK_RESULT PASS /private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-five-fixes-07uo9tmu/visible-triple/result.json
+01:12.669  blend            | Saved session recovery to "/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/quit.blend"
+
+Blender quit
+Error: Not freed memory blocks: 525, total unfreed memory 0.038147 MB

@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/lidar/process_physics.py", line 59, in <module>
+    p=argparse.ArgumentParser();p.add_argument('run');a=p.parse_args();process(a.run)
+                                                                       ^^^^^^^^^^^^^^
+  File "/Users/eason/Desktop/wfcrl/wind farm RL/scripts/lidar/process_physics.py", line 13, in process
+    if not np.allclose(np.diff(state[:,0]),1/fps,atol=1e-5):raise ValueError('output time grid mismatch')
+                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: output time grid mismatch

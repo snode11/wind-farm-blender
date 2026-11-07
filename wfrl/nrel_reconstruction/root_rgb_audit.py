@@ -224,7 +224,7 @@ def padded_crop_evidence(rgb, obs, vertices, faces, edges, rows, overlay):
 
 def write_csv(path, rows):
     fields = list(dict.fromkeys(key for row in rows for key in row))
-    with Path(path).open('w', newline='') as handle:
+    with Path(path).open('w', newline='', encoding='utf-8') as handle:
         writer = csv.DictWriter(handle, fieldnames=fields); writer.writeheader(); writer.writerows(rows)
 
 
@@ -236,15 +236,15 @@ def run(source, bundle, output):
     if any(part in {'evaluation-only', 'internal-capture'} for path in (source, bundle, output) for part in path.parts):
         raise ValueError('No truth or internal-capture inputs permitted')
     observation_path, annotation_path = source/'observations/observations.json', source/'observations/annotations.json'
-    observations = [o for o in json.loads(observation_path.read_text()) if o['camera_id'] in ('C1', 'C2') and o['frame_id'] in (42, 43, 44, 45)]
+    observations = [o for o in json.loads(observation_path.read_text(encoding='utf-8')) if o['camera_id'] in ('C1', 'C2') and o['frame_id'] in (42, 43, 44, 45)]
     if len(observations) != 8:
         raise ValueError('Requires exactly the eight fixed reviewed C1/C2 observations')
-    annotations = {(a['camera_id'], a['frame_id']): a for a in json.loads(annotation_path.read_text())['annotations']}
+    annotations = {(a['camera_id'], a['frame_id']): a for a in json.loads(annotation_path.read_text(encoding='utf-8'))['annotations']}
     mesh_path, meta_path = source/'reconstruction/T1_B1.ply', source/'reconstruction/T1_B1.json'
-    vertices, faces = read_mesh(mesh_path); model = restore_model(json.loads(meta_path.read_text()))
+    vertices, faces = read_mesh(mesh_path); model = restore_model(json.loads(meta_path.read_text(encoding='utf-8')))
     if np.max(np.abs(vertices-model().numpy())) > 1e-7 or not np.array_equal(faces, model.faces.numpy()):
         raise ValueError('Frozen native model restoration mismatch')
-    freeze_path = source/'model_freeze.json'; freeze = json.loads(freeze_path.read_text())['sha256']
+    freeze_path = source/'model_freeze.json'; freeze = json.loads(freeze_path.read_text(encoding='utf-8'))['sha256']
     for path in (mesh_path, meta_path):
         if freeze[str(path.relative_to(source))] != sha256(path):
             raise ValueError('Frozen formal model signature mismatch')
@@ -328,7 +328,7 @@ def run(source, bundle, output):
               'source_sha256': {str(Path(__file__).resolve()): sha256(__file__)}}
     write_csv(output/'native_root_edges.csv', all_edges); write_csv(output/'native_root_samples.csv', all_samples)
     write_csv(output/'historical_backend_root.csv', backend)
-    (output/'root_rgb_audit.json').write_text(json.dumps(report, indent=2, allow_nan=False)+'\n')
+    (output/'root_rgb_audit.json').write_text(json.dumps(report, indent=2, allow_nan=False)+'\n', encoding='utf-8')
     print(json.dumps({'frames': len(summaries), 'root_edges': len(all_edges), 'native_root_samples': len(all_samples), 'unchanged': unchanged}), flush=True)
     return report
 

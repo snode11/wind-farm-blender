@@ -6,7 +6,7 @@ import bpy
 from mathutils import Vector
 from wfrl_blender.scene_builder import _make_turbine
 from wfrl_blender.scene_model import TurbineDTO
-from wfrl_blender.turbine_geometry import hub_position, geometry_data
+from wfrl_blender.turbine_geometry import hub_position
 c=bpy.data.collections.new('WFRL_Scene');bpy.context.scene.collection.children.link(c)
 _make_turbine(c,TurbineDTO('Check',123,456))
 bpy.context.view_layer.update()
@@ -29,7 +29,6 @@ bpy.context.view_layer.update()
 world=[pedestal.matrix_world @ Vector(v) for v in pedestal.bound_box]
 assert min(v.z for v in world)<=87.6
 assert max(v.z for v in world)>=87.6+1.96256+.15-1.65
-print('HUB_MOUNT_REGRESSION=PASS')
 from wfrl_blender.scene_model import SceneDTO
 from wfrl_blender.scene_builder import _make_sensor_fixtures, _make_wake
 from wfrl_blender.cameras import build_cameras, ensure_gimbal
@@ -41,10 +40,15 @@ _make_sensor_fixtures(c,dto);_make_wake(c,dto);build_cameras(dto)
 gimbal=ensure_gimbal(bpy.context.scene,'Check')
 sensor=bpy.data.objects['WFRL.Camera.T1.Sensor']
 assert abs(sensor.location.z-(-2.4+1.96256))<1e-5
-# Gimbal is now a movable observation camera, not the old fixed roof mount.
-radius=geometry_data()['scalars']['TipRad']
-assert abs(gimbal.location.z-radius*.30)<1e-5
-assert gimbal['gimbal_fov']==62
+# Down uses the nacelle underside, an 8 mm lens and vertical 60 degree field.
+anchor=Vector(gimbal['wfrl_mount_anchor'])
+assert abs(anchor.x+3.5)<1e-5 and abs(anchor.y+1.15)<1e-5
+assert (gimbal.location-anchor-Vector((0,0,-.2151))).length<1e-5
+assert abs(gimbal.data.lens-8)<1e-5
+vfov=math.degrees(2*math.atan(math.tan(math.radians(gimbal['gimbal_fov']/2))/(16/9)))
+assert abs(vfov-60)<1e-5
+ray=gimbal.rotation_euler.to_quaternion() @ Vector((0,0,-1))
+assert abs(ray.dot(Vector((0,0,-1)))-math.cos(math.radians(7.5)))<1e-5
 for suffix in ('LidarRay1','LidarRay2','LidarRay3','SensorFrustum'):
  fixture=bpy.data.objects['WFRL.Fixture.T1.'+suffix]
  assert fixture.parent==yaw
@@ -58,3 +62,4 @@ for angle in (0,90,180,270):
  bpy.context.view_layer.update()
  assert abs(bpy.data.objects['WFRL.Cinematic.Check'].location.z-rotor.matrix_world.translation.z)<1e-4
 print('SENSOR_CAMERA_WAKE_MOUNTS=PASS')
+print('HUB_MOUNT_REGRESSION=PASS')

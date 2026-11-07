@@ -1,0 +1,6 @@
+# Frozen experiment records retain byte-identical content across checkouts.
+outputs/nrel-video-single-blade/** -text
+
+# Integrity-checked assets and vendored sources retain their original bytes.
+blender_frontend/wfrl_blender/assets/** -text
+blender_frontend/wfrl_blender/_vendor/** -text

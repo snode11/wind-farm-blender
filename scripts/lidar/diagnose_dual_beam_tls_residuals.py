@@ -347,7 +347,7 @@ def diagnose_packages(candidate, baseline=None):
     rows, source_grid_counts, valid_counts = [], {}, {}
     for turbine in manifest['turbine_ids']:
         source = candidate['sources'][turbine]
-        reference = json.loads((source.path/'blade-reference.json').read_text())
+        reference = json.loads((source.path/'blade-reference.json').read_text(encoding='utf-8'))
         tip_local = _vector(reference['tip_local_m'])
         reference_points = structural_reference_points(source)
         samples = candidate['overlay']['results'][turbine]['samples']
@@ -471,8 +471,8 @@ def main(argv=None):
         estimator_sha256_before=estimator_before, estimator_sha256_after=digest(estimator_path),
         estimator_and_packages_unchanged=True, runtime=dict(python=platform.python_version(), numpy=np.__version__))
     args.output.mkdir(parents=True, exist_ok=False)
-    (args.output/'diagnostics.json').write_text(json.dumps(report,ensure_ascii=False,indent=2,allow_nan=False)+'\n')
-    (args.output/'report.md').write_text(markdown_report(report))
+    (args.output/'diagnostics.json').write_text(json.dumps(report,ensure_ascii=False,indent=2,allow_nan=False)+'\n', encoding='utf-8')
+    (args.output/'report.md').write_text(markdown_report(report), encoding='utf-8')
     print(json.dumps(dict(output=str(args.output.resolve()), diagnosed_pairs=report['diagnosed_pairs'],
         mae_m=report['pooled']['metrics']['mae_m'], worse_pairs=report['candidate_worse_sample_count']),ensure_ascii=False))
     return report

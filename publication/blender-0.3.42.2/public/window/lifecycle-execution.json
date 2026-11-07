@@ -1,0 +1,14 @@
+{
+  "pid": 95456,
+  "returncode": 0,
+  "timed_out": false,
+  "elapsed_s": 3.29,
+  "command": [
+    "/Applications/Blender.app/Contents/MacOS/Blender",
+    "--factory-startup",
+    "--python-exit-code",
+    "1",
+    "--python",
+    "blender_frontend/tests/blender/radar_x100_output_lifecycle.py"
+  ]
+}

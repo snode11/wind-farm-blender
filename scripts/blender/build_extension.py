@@ -21,10 +21,14 @@ PACKAGE_SOURCE = ROOT / "blender_frontend" / "wfrl_blender"
 PROTOCOL_SOURCE = ROOT / "wfrl" / "blender_bridge" / "messages.py"
 LIDAR_REPLAY_SOURCE = ROOT / "wfrl" / "lidar" / "replay.py"
 LIDAR_EVIDENCE_SOURCE = ROOT / "wfrl" / "lidar" / "evidence.py"
+RADAR_SOURCE = ROOT / 'wfrl' / 'radar_x100'
+RADAR_MODULES = ('__init__.py', 'schema.py', 'ply.py', 'recording.py', 'simulation.py', 'sampling.py', 'installation.py', 'tracking.py', 'analysis.py', 'channel.py', 'acquisition.py', 'detection.py', 'clearance.py')
 DIST = ROOT / "dist"
 ZIP_TIMESTAMP = (2020, 1, 1, 0, 0, 0)
 EXCLUDED_NAMES = {".DS_Store"}
 EXCLUDED_PARTS = {"__pycache__", ".pytest_cache"}
+RESEARCH_ONLY_PAYLOADS = ('split_surface_texture.py', 'assets/blade_recon_synth20/',
+                          'assets/blade_recon_synth_tex/')
 SAME_SOURCE_MAPPO_MANIFEST_SHA256 = 'd3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde'
 
 
@@ -102,12 +106,14 @@ def _payloads() -> list[tuple[str, bytes]]:
         relative = path.relative_to(PACKAGE_SOURCE)
         if (not path.is_file() or path.name in EXCLUDED_NAMES
                 or any(part in EXCLUDED_PARTS for part in relative.parts)
-                or path.suffix == ".pyc"):
+                or path.suffix == ".pyc"
+                or relative.as_posix().startswith(RESEARCH_ONLY_PAYLOADS)):
             continue
-        if relative.as_posix() in {"protocol.py", "build-info.json"}:
+        if relative.as_posix() in {"protocol.py", "build-info.json"} or relative.parts[:2] == ('_vendor', 'radar_x100'):
             continue
         payloads.append((relative.as_posix(), path.read_bytes()))
     payloads.append(("protocol.py", PROTOCOL_SOURCE.read_bytes()))
+    payloads.extend(('_vendor/radar_x100/' + name, (RADAR_SOURCE / name).read_bytes()) for name in RADAR_MODULES)
     # The offline player must also work outside a source checkout. Bundle only
     # the dependency-free reader, never the simulator or training dependencies.
     payloads.extend([
@@ -136,6 +142,30 @@ def _validate_farm_payloads(payloads):
         if (Path(name).name != name
                 or hashlib.sha256(bundled.get('assets/mappo/' + name, b'')).hexdigest() != expected):
             raise ValueError('Farm package integrity mismatch: ' + name)
+
+
+def _validate_blade_response_payloads(payloads):
+    bundled = dict(payloads)
+    prefix = 'assets/blade_response/'
+    if prefix + 'manifest.json' not in bundled:
+        return
+    manifest = json.loads(bundled[prefix + 'manifest.json'])
+    spec = importlib.util.spec_from_file_location('blade_response_reader', PACKAGE_SOURCE / 'imbalance.py')
+    reader = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(reader)
+    if (manifest.get('schema') != 'wfrl.blade-response-package.v1'
+            or set(manifest.get('source_hashes', {})) != reader.SOURCE_FILES
+            or set(manifest.get('files', {})) != {'results.json'}):
+        raise ValueError('Invalid blade response manifest')
+    for name, expected in manifest['source_hashes'].items():
+        if hashlib.sha256(bundled.get('assets/mappo/' + name, b'')).hexdigest() != expected:
+            raise ValueError('Blade response source mismatch: ' + name)
+    for name, expected in manifest['files'].items():
+        if hashlib.sha256(bundled.get(prefix + name, b'')).hexdigest() != expected:
+            raise ValueError('Blade response integrity mismatch: ' + name)
+    reader.validate(json.loads(bundled[prefix + 'results.json']),
+                    json.loads(bundled['assets/mappo/manifest.json']),
+                    json.loads(bundled['assets/mappo/telemetry.json']))
 
 
 def _validate_blade_texture_payloads(payloads):
@@ -197,10 +227,14 @@ def _bundle_dual(payloads, package, asset_dir, expected_method):
     return payloads
 
 
-def _validate_mappo_texture_payloads(payloads):
+def _validate_mappo_texture_payloads(payloads, *, required=True):
     """Keep the same-source entry bound to its saved geometry and atlas."""
     bundled = dict(payloads)
     prefix = 'assets/blade_recon_mappo_tex/'
+    if prefix + 'manifest.json' not in bundled:
+        if not required and not any(name.startswith(prefix) for name in bundled):
+            return
+        raise ValueError('MAPPO texture package is incomplete')
     manifest = json.loads(bundled[prefix + 'manifest.json'])
     if (manifest.get('schema') != 'wfrl.blade-recon-provenance.v1'
             or manifest.get('source_classification') != 'SAME_SOURCE_SIMULATION'):
@@ -301,24 +335,30 @@ def build(output_dir: Path = DIST, *, farm_package: Path | None = None,
     _check_outputs(paths, overwrite=overwrite)
     output_dir.mkdir(parents=True, exist_ok=True)
     payloads = _payloads()
+    custom_source = False
     if farm_package is not None:
         farm_package = Path(farm_package)
-        data_manifest = json.loads((farm_package/'manifest.json').read_text())
+        manifest_raw = (farm_package/'manifest.json').read_bytes()
+        data_manifest = json.loads(manifest_raw)
         for name,digest in data_manifest['files'].items():
-            if hashlib.sha256((farm_package/name).read_bytes()).hexdigest()!=digest:
+            if Path(name).name != name or hashlib.sha256((farm_package/name).read_bytes()).hexdigest()!=digest:
                 raise ValueError('Farm package integrity mismatch: '+name)
-        payloads = [(name,data) for name,data in payloads if not name.startswith('assets/mappo/')]
+        custom_source = hashlib.sha256(manifest_raw).hexdigest() != SAME_SOURCE_MAPPO_MANIFEST_SHA256
+        excluded = ('assets/mappo/',) + (('assets/blade_response/', 'assets/blade_recon_mappo_tex/')
+                                         if custom_source else ())
+        payloads = [(name,data) for name,data in payloads
+                    if not name.startswith(excluded)]
         payloads += [('assets/mappo/'+name,(farm_package/name).read_bytes())
                      for name in sorted(set(data_manifest['files']) | {'manifest.json'})]
         payloads.sort()
     _validate_farm_payloads(payloads)
-    _validate_blade_texture_payloads(payloads)
-    _validate_mappo_texture_payloads(payloads)
+    _validate_blade_response_payloads(payloads)
+    _validate_mappo_texture_payloads(payloads, required=not custom_source)
     for package, asset_dir, method in ((dual_package, 'dual_beam', 'hub-axis.v1'),
                                       (dual_tls_package, 'dual_beam_tls', 'hub-tls.v1')):
         # A custom geometry-only delivery cannot inherit sidecars for another
         # source. The normal release always bundles both verified methods.
-        if package is None and farm_package is not None:
+        if package is None and custom_source:
             payloads = [(name, data) for name, data in payloads if not name.startswith('assets/' + asset_dir + '/')]
             continue
         package = package or PACKAGE_SOURCE / 'assets' / asset_dir
@@ -327,6 +367,7 @@ def build(output_dir: Path = DIST, *, farm_package: Path | None = None,
     identity = [{"path": name, "sha256": hashlib.sha256(data).hexdigest()}
                 for name, data in payloads]
     build_info = dict(schema='wfrl.extension-build.v1', version=version,
+        radar_core_sha256={name: hashlib.sha256((RADAR_SOURCE / name).read_bytes()).hexdigest() for name in RADAR_MODULES},
         payload_sha256=hashlib.sha256(json.dumps(identity, sort_keys=True,
             separators=(',', ':')).encode()).hexdigest(), payload_files=len(payloads))
     payloads.append(('build-info.json', (json.dumps(build_info, sort_keys=True, indent=2)+'\n').encode()))

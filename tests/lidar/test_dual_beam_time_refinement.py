@@ -1,7 +1,6 @@
 """Denominators, temporal input isolation and retained fine-grid extremes."""
 from copy import deepcopy
 import json
-from pathlib import Path
 
 import pytest
 

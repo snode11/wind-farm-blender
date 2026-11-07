@@ -3,9 +3,12 @@ from copy import deepcopy
 from dataclasses import dataclass
 import hashlib
 import json
+import logging
 import uuid
 
 from .defect_schema import new_document, validate_document
+
+_LOG = logging.getLogger(__name__)
 
 
 @dataclass
@@ -37,13 +40,20 @@ class DefectStore:
         self._prepare = prepare or (lambda document: None)
         self._activate = activate or (lambda resource, document, version: None)
         self._dispose = dispose or (lambda resource: None)
+        self._pending_disposals = []
+        self.cleanup_errors = ()
         self._owner = uuid.uuid4().hex
         self._document = validate_document(document if document is not None else new_document(surface), surface)
-        self._version = 0; self._undo = []; self._redo = []
+        self._version = 0
+        self._undo = []
+        self._redo = []
         self._resource = self._prepare(deepcopy(self._document))
         try: self._activate(self._resource, deepcopy(self._document), self._version)
         except Exception:
-            self._dispose(self._resource)
+            try:
+                self._dispose(self._resource)
+            except Exception:
+                _LOG.exception('Initial defect activation failed; resource cleanup also failed')
             raise
 
     @property
@@ -57,6 +67,24 @@ class DefectStore:
     @property
     def can_redo(self): return bool(self._redo)
 
+    @property
+    def pending_disposals(self): return tuple(self._pending_disposals)
+
+    def retry_disposals(self, *, strict=False):
+        """Release superseded resources without undoing a committed edit."""
+        pending, errors = [], []
+        for resource in self._pending_disposals:
+            try:
+                self._dispose(resource)
+            except Exception as exc:
+                pending.append(resource)
+                errors.append(str(exc))
+        self._pending_disposals = pending
+        self.cleanup_errors = tuple(errors)
+        if errors and strict:
+            raise RuntimeError('Committed defect resources await cleanup: ' + '; '.join(errors))
+        return not pending
+
     def prepare(self, candidate):
         document = validate_document(candidate, self.surface)
         old = {d['id']: d for d in self._document['defects']}
@@ -64,7 +92,8 @@ class DefectStore:
             previous = old.get(defect['id'])
             if previous is not None:
                 before, after = deepcopy(previous), deepcopy(defect)
-                before.pop('revision'); after.pop('revision')
+                before.pop('revision')
+                after.pop('revision')
                 if before != after and defect['revision'] <= previous['revision']:
                     raise ValueError('Modified defect must retain id and increase revision')
                 if defect['revision'] < previous['revision']:
@@ -93,15 +122,19 @@ class DefectStore:
             except Exception as rollback_error:
                 if hasattr(error, 'add_note'): error.add_note(f'Activation rollback also failed: {rollback_error}')
             raise
-        self._document = deepcopy(token.document); self._resource = token.resource
-        self._version += 1; token.consumed = True
-        if old_resource is not self._resource: self._dispose(old_resource)
+        self._document = deepcopy(token.document)
+        self._resource = token.resource
+        self._version += 1
+        token.consumed = True
+        if old_resource is not self._resource: self._pending_disposals.append(old_resource)
         return self._version
 
     def commit(self, token):
         previous = self.document
         result = self._replace(token)
-        self._undo.append(previous); self._redo.clear()
+        self._undo.append(previous)
+        self._redo.clear()
+        self.retry_disposals()
         return result
 
     def restore(self, document):
@@ -116,14 +149,27 @@ class DefectStore:
         token = PreparedState(candidate, resource, self._version, self._owner)
         try: return self.commit(token)
         except Exception:
-            if not token.consumed: self.cancel(token)
+            self._cancel_after_error(token)
             raise
 
     def cancel(self, token):
         # Stale candidates still own disposable resources and may be cancelled.
         if not isinstance(token, PreparedState) or token.owner != self._owner or token.consumed:
             raise ValueError('Invalid or consumed transaction')
-        self._dispose(token.resource); token.consumed = True
+        self._dispose(token.resource)
+        token.consumed = True
+
+    def _cancel_after_error(self, token):
+        """Keep failed candidate disposal retryable without replacing the primary error."""
+        if token.consumed:
+            return
+        try:
+            self.cancel(token)
+        except Exception as exc:
+            self._pending_disposals.append(token.resource)
+            self.cleanup_errors += (str(exc),)
+            token.consumed = True
+            _LOG.exception('Defect transaction failed; candidate cleanup awaits retry')
 
     def _restore(self, source, target):
         if not source: return False
@@ -133,9 +179,11 @@ class DefectStore:
         previous = self.document
         try: self._replace(token)
         except Exception:
-            if not token.consumed: self.cancel(token)
+            self._cancel_after_error(token)
             raise
-        source.pop(); target.append(previous)
+        source.pop()
+        target.append(previous)
+        self.retry_disposals()
         return True
 
     def undo(self): return self._restore(self._undo, self._redo)

@@ -63,11 +63,16 @@ class Session:
     session_id = 'session'
     status = 'READY'
     mode = 'demo'
+    run_id = None
     capabilities = ['pause', 'training_stats_v1']
     def __init__(self): self.events = []
     def poll(self):
         events, self.events = self.events, []
         return events
+    def synchronization_state(self):
+        return dict(run_status=self.status, mode=self.mode, capabilities=self.capabilities, run_id=self.run_id)
+    def tick(self): pass
+    def replay_latest(self): pass
     def alive(self): return True
     def stop(self): pass
     def command(self, payload): pass
@@ -183,12 +188,19 @@ def test_queue_age_updates_before_first_byte_without_compounding(monkeypatch):
     monkeypatch.setattr(server_module.time, 'monotonic', lambda: now[0])
     class Peer:
         blocked = True
-        chunks = []
+        def __init__(self):
+            import socket
+            self.sender, self.receiver = socket.socketpair()
+            self.chunks = []
+        def fileno(self):
+            return self.sender.fileno()
         def send(self, chunk):
             if self.blocked: raise BlockingIOError()
             self.chunks.append(chunk[:5])
             return len(chunk[:5])
-        def close(self): pass
+        def close(self):
+            self.sender.close()
+            self.receiver.close()
     server = BridgeServer(port=0, session=Session())
     peer = Peer(); server.client = peer
     server.negotiated_capabilities = frozenset({'training_stats_v1'})

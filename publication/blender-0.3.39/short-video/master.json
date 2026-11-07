@@ -1,0 +1,31 @@
+{
+  "schema": "wfrl.manual-video-master.v1",
+  "job_id": "3e65ea024d824024bf1b9eec5fc24c6e",
+  "complete": true,
+  "job_sha256": "112ad216973448f5fcd64d2efec9dcc465e4ef41069abbc77c22fc98f7625cfd",
+  "frame_count": 3,
+  "encoding": {
+    "fps": 25,
+    "pattern": "%06d.png",
+    "crf": 18,
+    "preset": "medium",
+    "ffmpeg": "/opt/homebrew/Cellar/ffmpeg/9.0.2_1/bin/ffmpeg",
+    "ffprobe": "/opt/homebrew/Cellar/ffmpeg/9.0.2_1/bin/ffprobe",
+    "encoder_source_sha256": "90223d37cd6deecd2f1be61ff2bf09bcd34fa1b49eb4284f19f0f4c18dbe37b4",
+    "executable_sha256": {
+      "ffmpeg": "7f6028378534aa10a2dfa07d807ddcc0d18c869bf5c2f64c89efcc18ee88c4ee",
+      "ffprobe": "bfe676bfc3a889bebe63af07c71a926a6167f568c7a932a79c2f1fe51ae6d5a1"
+    }
+  },
+  "files_sha256": {
+    "frames.csv": "5e99fe8e6e9b0392d89f6d2022ff141f234a4bd34b99f8b8346f52c36c5427a1",
+    "camera.json": "1848ca3dcdf9a265e00011d24a6cf7289b91955b90ec8b394b52a87228232367",
+    "experiment.json": "c5e57d55bf7be806c1982e33f29fbae7463715e773a0ad887ccb6476ba28ab7b",
+    "snapshot": "f6bf37adae5beb869bfe308c3b250a64fc34dba66eac54a4726ae499fcee0906"
+  },
+  "master_sha256": {
+    "000000.png": "281e8ec008f37f62ec953b7c8a49fb7e6a85bdc02d4939bf17c628ce53264fa0",
+    "000001.png": "66368b80a7dab767e81aeac29f315fc914a5d08b33d89aaa64f88fe4f23d3305",
+    "000002.png": "2f859237f2a289fc4622b035202f20602e5918a0f0fecf00fcf6f1addc226afc"
+  }
+}

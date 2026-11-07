@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "version": "0.3.42.2",
+  "extension_version": "0.3.42+2",
+  "installation": "PASS_216_FILES_MATCH_PUBLIC_PACKAGE",
+  "runtime": "runtime-identity.json",
+  "configuration": "configuration.json",
+  "radar_native": "radar.json",
+  "native_input": "BACKGROUND_SCRIPT",
+  "visible_ui": "PASS_UI_ENTRY_AND_ESCAPE",
+  "source_archive": "publication/blender-0.3.42.2/public/validated/package/wfrl_blender-0.3.42+2.zip",
+  "visible_identity": "daily-visible-identity.json",
+  "visible_result": "daily-visible-ui.json",
+  "user_scene_restored": true,
+  "source": "Existing geometry-simulation session restored by extension on file load; no new source or training started",
+  "cleanup": "../cleanup.json"
+}

@@ -35,7 +35,7 @@ def protected(scene, area):
     return {'frame': (scene.frame_current, scene.frame_subframe),
         'time_property': scene.get('wfrl_clearance_time_s'),
         'statistics': json.dumps(clearance_replay.sample(scene)['statistics'], sort_keys=True),
-        'charts': repr(charts.history.__dict__),
+        'charts': repr(charts.history_for(bpy.context.scene).__dict__),
         'telemetry': farm_flex.active_for(scene).last_telemetry_frame,
         'profile': preview.render_profile(scene),
         'shading': {name: getattr(area.spaces.active.shading, name) for name in
@@ -85,6 +85,16 @@ def run_capture(times, fresh=False):
     return {'path': str(job.path), 'elapsed_s': duration, 'usage': usage,
             'texture_usage': texture_usage,
             'png_hashes': hashes, 'state_hashes': [row['simulation_state_hash'] for row in rows]}
+
+
+def step_group(job):
+    index = job.index
+    deadline = time.monotonic() + 30
+    while not job.closed and job.index == index:
+        job.step(bpy.context)
+        assert time.monotonic() < deadline, 'Image group did not complete'
+        if job._writer is not None:
+            job._writer.done.wait(.001)
 
 
 def tick():
@@ -141,7 +151,7 @@ def tick():
                 return .2
             if STATE['phase'] == 3:
                 job = capture.Capture(bpy.context, OUT, STATE['times'])
-                job.step(bpy.context)
+                step_group(job)
                 job.request_cancel()
                 manifest = json.loads((job.path/'manifest.json').read_text())
                 assert job.closed and job.index == 1 and manifest['status'] == 'incomplete'
@@ -149,7 +159,7 @@ def tick():
                 assert protected(scene, area) == STATE['original']
                 STATE['checks']['cancel_releases_and_restores_frame_statistics_quality'] = True
                 job = capture.Capture(bpy.context, OUT, STATE['times'])
-                job.step(bpy.context)
+                step_group(job)
                 original_snapshot = preview.CameraImage.snapshot
                 def failure(_image, _offscreen, **_kwargs):
                     raise RuntimeError('injected GPU readback failure')
@@ -173,7 +183,7 @@ def tick():
                 # A native edit after the first group invalidates the transaction
                 # without replacing the user's edited position with saved XYZ.
                 job = capture.Capture(bpy.context, OUT, STATE['times'])
-                job.step(bpy.context)
+                step_group(job)
                 cam = core.get_camera(scene, 1)
                 params = core.parameters(cam)
                 cam.lock_location = (False, False, False)
@@ -193,6 +203,58 @@ def tick():
                 bpy.context.view_layer.update()
                 assert protected(scene, area) == STATE['original']
                 STATE['checks']['native_edit_aborts_without_overwriting_edit'] = True
+                job = capture.Capture(bpy.context, OUT, STATE['times'][1:])
+                update = job.farm.update
+                evaluations = []
+                def fail_first_evaluation(*args, **kwargs):
+                    evaluations.append(kwargs['sim_time_s'])
+                    if len(evaluations) == 1:
+                        raise RuntimeError('injected geometry evaluation failure')
+                    return update(*args, **kwargs)
+                job.farm.update = fail_first_evaluation
+                try:
+                    job.step(bpy.context)
+                except RuntimeError as exc:
+                    assert 'geometry evaluation failure' in str(exc)
+                else:
+                    raise AssertionError('geometry failure was not propagated')
+                finally:
+                    job.farm.update = update
+                assert len(evaluations) == 2
+                assert job.closed and job.manifest['status'] == 'incomplete'
+                assert protected(scene, area) == STATE['original']
+                STATE['checks']['geometry_evaluation_failure_restores_owned_frame'] = True
+                job = capture.Capture(bpy.context, OUT, STATE['times'])
+                step_group(job)
+                scene.frame_set(810, subframe=.75)
+                edited = protected(scene, area)
+                try:
+                    job.step(bpy.context)
+                except RuntimeError as exc:
+                    assert '采集时刻' in str(exc)
+                else:
+                    raise AssertionError('external timeline seek was accepted')
+                assert job.closed and job.manifest['status'] == 'incomplete'
+                assert protected(scene, area) == edited
+                STATE['checks']['external_seek_preserves_frame_readings_and_history'] = True
+
+                job = capture.Capture(bpy.context, OUT, STATE['times'])
+                step_group(job)
+                assert bpy.ops.screen.animation_play() == {'FINISHED'}
+                bpy.ops.screen.animation_cancel(restore_frame=False)
+                assert not capture.playback.any_playing()
+                assert capture.playback.generation() != job.playback_generation
+                edited = protected(scene, area)
+                try:
+                    job.step(bpy.context)
+                except RuntimeError as exc:
+                    assert '采集时刻' in str(exc)
+                else:
+                    raise AssertionError('external playback restart was accepted')
+                assert job.closed and job.manifest['status'] == 'incomplete'
+                assert protected(scene, area) == edited
+                assert not capture.playback.any_playing()
+                STATE['checks']['external_play_pause_preserves_clock_and_stopped_player'] = True
                 import gpu
                 result = {'status': 'PASS', 'module': addon.__file__, 'blender': bpy.app.version_string,
                     'gpu': gpu.platform.renderer_get(), 'checks': STATE['checks'],

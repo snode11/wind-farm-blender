@@ -1,0 +1,4 @@
+FRONTEND_SESSIONS_WINDOW_PASS {"status": "PASS", "module": "BLENDER_USER_PROFILE/extensions/user_default/wfrl_blender/__init__.py", "blender": "5.2.1 LTS", "recording_removed_scene": true, "recording_closed_window": true, "scene_playback_label": true, "unrelated_viewport_preserved": true}
+00:05.549  blend            | Saved session recovery to "/private/tmp/wfrl-daily-optimized-0.3.40-hudn6u5r/scratch/quit.blend"
+
+Blender quit

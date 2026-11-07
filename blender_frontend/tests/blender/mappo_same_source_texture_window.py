@@ -25,7 +25,6 @@ from types import SimpleNamespace
 
 import bpy
 from bpy_extras.view3d_utils import location_3d_to_region_2d
-from mathutils import Vector
 
 HERE = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location('same_source_validation_helpers',
@@ -96,15 +95,17 @@ def controls():
     layout = RecordedLayout()
     ui.draw_controls(layout, bpy.context)
     entries = [vars(entry) for entry in layout.operators]
-    restore = [entry for entry in entries if entry['text'] == '恢复布局']
+    # An active comparison offers one geometry/same-source switch; return entries appear only after exit.
+    switch = [entry for entry in entries if entry['name'] == 'wfrl.split_recon_switch_mode']
     if validation.split.enabled(validation.scene):
-        assert len(restore) == 1 and restore[0].get('mode') == 'CURRENT', restore
+        assert len(switch) == 1, entries
     return dict(labels=layout.labels, operators=entries)
 
 
 def detail_framing():
     scene = validation.scene
-    assert scene.get(validation.same.DETAIL)
+    # Inspection frames one stationary close-up at the chosen surface point; tracking stays off.
+    assert not scene.get(validation.same.DETAIL)
     area = pair()[1]
     space = area.spaces.active
     region = next(region for region in area.regions if region.type == 'WINDOW')
@@ -163,10 +164,23 @@ def right_view():
                 show_region_ui=space.show_region_ui, show_region_toolbar=space.show_region_toolbar)
 
 
+def focus_current():
+    operator('split_recon_inspect', point='CURRENT')
+    state.setdefault('explicit_focus_checks', []).append(detail_framing())
+    state['inspection_navigation'] = right_view()
+
+
+def stationary_inspection():
+    assert not validation.scene.get(validation.same.DETAIL)
+    actual = right_view()
+    assert actual == state['inspection_navigation'], (state['inspection_navigation'], actual)
+    return actual
+
+
 def capture(name, *, detail=True):
     data = dict(frame=validation.scene.frame_current, controls=controls(), right_view=right_view())
     if detail:
-        data['detail_framing'] = detail_framing()
+        data['stationary_inspection'] = stationary_inspection()
     data['screenshot'] = str(OUT / (name + '.png'))
     bpy.ops.screen.screenshot(filepath=data['screenshot'])
     (OUT / (name + '-ready.json')).write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
@@ -228,7 +242,7 @@ def tick():
             assert not scene.get(validation.same.DETAIL)
             state['default_full_rotor_framing'] = full_framing()
             state['checks'].append('The explicit same-source entry defaults to full rotor framing')
-            operator('split_recon_inspect', point='CURRENT')
+            focus_current()
             capture('same-source-detail')
             state['hold_until'] = time.monotonic() + float(os.environ.get('WFRL_HOLD_SECONDS', '0'))
         elif stage == 3:
@@ -270,7 +284,7 @@ def tick():
             operator('split_recon_step', direction=1)
             assert validation.scene.frame_current == 55
             validation.frame(55, seek=False)
-            detail_framing()
+            stationary_inspection()
             state['checks'].append('Sample step during native play first pauses both views; frame52 next actual sample is frame55')
             operator('split_recon_step', direction=-1)
             assert validation.scene.frame_current == 49
@@ -306,7 +320,7 @@ def tick():
             pair()
             state['full_rotor_framing'] = full_framing()
             capture('same-source-full-rotor', detail=False)
-            operator('split_recon_inspect', point='CURRENT')
+            focus_current()
         elif stage == 11:
             pair()
             validation.frame(52, seek=False)

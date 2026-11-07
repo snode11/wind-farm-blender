@@ -121,7 +121,7 @@ def _make_movie(root: Path, out: Path) -> Path:
         "-frames:v", str(FRAME_COUNT), "-c:v", "libx264", "-crf", "17", "-preset", "slow", "-pix_fmt", "yuv420p",
         "-movflags", "+faststart", str(temporary),
     ]
-    result = subprocess.run(command, cwd=root, capture_output=True, text=True, check=False)
+    result = subprocess.run(command, cwd=root, capture_output=True, text=True, check=False, encoding='utf-8')
     if result.returncode != 0 or not temporary.is_file() or temporary.stat().st_size == 0:
         temporary.unlink(missing_ok=True)
         detail = (result.stderr or result.stdout or "ffmpeg failed").strip()

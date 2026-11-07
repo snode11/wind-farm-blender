@@ -1,0 +1,274 @@
+{
+  "status": "PASS",
+  "final": true,
+  "verification_layer": "SOURCE_RUNTIME",
+  "blender": "/Applications/Blender.app/Contents/MacOS/Blender",
+  "package_inputs": {
+    "builtin_mappo": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/mappo",
+      "manifest_sha256": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde"
+    },
+    "builtin_dual_beam": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/dual_beam",
+      "manifest_sha256": "9eea6aa1bb5c44d5b307a63017be7b81c8e43ea092f92cfb30822d9fc63b5645"
+    },
+    "builtin_split_example": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+      "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b"
+    }
+  },
+  "tests": [
+    {
+      "script": "custom_camera_capture_regression.py",
+      "mode": "background",
+      "scope": "Native camera/configuration guards; GPU capture not verified.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 1.4779163749190047,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/custom_camera_capture_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "blender": "5.2.1 LTS",
+            "module": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "checks": {
+              "canonical_pose_accepted": true,
+              "native_position_rotation_delta_scale_parent_inverse_lens_sensor_shift_clip_rejected": true,
+              "evaluated_constraint_pose_rejected": true,
+              "evaluated_lens_driver_rejected": true,
+              "nan_delta_lens_clip_parent_pose_rejected_before_geometry_and_hashing": true,
+              "common_parent_motion_accepted": true,
+              "guard_extracts_evaluated_signature_once_without_collision_geometry": true,
+              "signature_and_collision_share_evaluated_surface_coordinates_and_faces": true,
+              "guard_detects_native_mesh_and_evaluated_modifier_changes": true,
+              "transaction_guard_detects_native_edit_with_unchanged_saved_layout": true
+            }
+          },
+          "log": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/custom_camera_capture_regression/run/blender.log",
+          "report": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/custom_camera_capture_regression/artifacts/result.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "connection_recovery_regression.py",
+      "mode": "background",
+      "scope": "Native RNA, confirmed recovery action and runtime/transport over socketpair; modal UI and real backend not verified.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 0.6272326670587063,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/connection_recovery_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "checks": {
+              "background_factory_context": true,
+              "source_module_identity": true,
+              "operator_registration": true,
+              "confirmation_rna_default_false": true,
+              "poll_rejects_no_claimed_session": true,
+              "initial_connect_operator": true,
+              "old_session_confirmed_by_real_transport": true,
+              "poll_requires_disconnection": true,
+              "connected_rejection_preserves_identity": true,
+              "disconnect_operator": true,
+              "disconnected_identity_remains_unconfirmed": true,
+              "poll_allows_disconnected_claimed_session": true,
+              "unacknowledged_action_preserves_identity": true,
+              "reconnect_operator": true,
+              "poll_rejects_pending_handshake": true,
+              "disconnect_pending_handshake": true,
+              "acknowledged_action": true,
+              "old_job_diagnostics_retained": true,
+              "new_connection_waits_for_its_own_handshake": true,
+              "old_transport_identity_forgotten_explicitly": true,
+              "replacement_identity_confirmed_separately": true,
+              "old_job_not_marked_or_stopped": true,
+              "no_backend_control_commands_sent": true,
+              "clean_unregister": true,
+              "operator_rna_removed": true,
+              "unregister_does_not_stop_old_job": true,
+              "sources_unchanged": true
+            },
+            "source_root": "/Users/eason/Desktop/wfcrl/wind farm RL",
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/connection_recovery_regression.py",
+            "blender": "5.2.1 LTS",
+            "background": true,
+            "external_tcp_connections": 0,
+            "limitations": [
+              "Modal dialog layout and real user input are not exercised."
+            ],
+            "errors": [],
+            "sources": {
+              "addon": {
+                "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+                "sha256": "1eaf357fd6b9b23120964202f2986cb351913cdf8da5eeb20b66ca2eab5b28f2"
+              },
+              "runtime": {
+                "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/runtime.py",
+                "sha256": "d6da28899465ffc2d4370c0bc0d3d412525a67f651ef4569cf87a555a06b9312"
+              },
+              "transport": {
+                "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/transport.py",
+                "sha256": "aef96a18585c275af19337aac812d570adfda28710b690e4425d7ba8492530c7"
+              },
+              "state": {
+                "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/state.py",
+                "sha256": "2618725f3332a7e88284809ba148da2e5390a0262216a4e2a6cd242f2046c974"
+              },
+              "connection_operator": {
+                "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/operators/connection.py",
+                "sha256": "a79bea3f30725f21ac9649529cd7b352484ec15b7419a2ec4d4cf060562045f9"
+              },
+              "status_panel": {
+                "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/panels/status.py",
+                "sha256": "70e5f87d8782b9cd1e18289f5d9522a327c9155ec251a2fd98a71130e7ceea94"
+              },
+              "protocol_loader": {
+                "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/protocol.py",
+                "sha256": "cf9e4bbfecd54f2e27ce04ea663345abc17da667d700fbfc0e478bb9b9e8e20c"
+              },
+              "protocol_codec": {
+                "path": "/Users/eason/Desktop/wfcrl/wind farm RL/wfrl/blender_bridge/messages.py",
+                "sha256": "a89f5f741c78533e79763f348a38a5f737b63634b8a368053447567f8728deb0"
+              },
+              "regression": {
+                "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/connection_recovery_regression.py",
+                "sha256": "230c7e9965dd95d649348ab7f79e8bc32fc344cf10190f594042525695c59aa5"
+              }
+            },
+            "connected_rejection": "Operator bpy.ops.wfrl.bridge_connect_new.poll() failed, context is incorrect",
+            "unacknowledged_rejection": "Error: Explicit confirmation is required; forgetting this connection does not stop the previous backend\n",
+            "forgotten_connection": {
+              "session_id": "native-old-session",
+              "run_id": "native-old-run",
+              "run_status": "RUNNING",
+              "confirmed": false
+            },
+            "socket_connections": [
+              {
+                "address": [
+                  "127.0.0.1",
+                  8765
+                ],
+                "session_id": "native-old-session",
+                "messages": [
+                  "hello"
+                ]
+              },
+              {
+                "address": [
+                  "127.0.0.1",
+                  8765
+                ],
+                "session_id": "native-old-session",
+                "messages": []
+              },
+              {
+                "address": [
+                  "127.0.0.1",
+                  8765
+                ],
+                "session_id": "native-new-session",
+                "messages": [
+                  "hello"
+                ]
+              }
+            ]
+          },
+          "log": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/connection_recovery_regression/run/blender.log",
+          "report": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/connection_recovery_regression/artifacts/checks.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "animation_render_regression.py",
+      "mode": "background",
+      "scope": "Native short PNG renders, cancellation and source preservation; not full-clip FPS.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 5.738320000004023,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/animation_render_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "blender": "5.2.1 LTS",
+            "module": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "complete_frames": 3,
+            "source_preserved": true,
+            "cancellation": true,
+            "output": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-385f991f29d3",
+            "cancelled": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-f09c3b0e7344",
+            "mappo_output": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-b62aaaab95f9",
+            "recorded_motion_frames": [
+              1,
+              301,
+              601
+            ],
+            "compositor_output_guard": true,
+            "original_camera_quality_snapshot": true
+          },
+          "log": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/run/blender.log",
+          "report": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/result.json"
+        }
+      ],
+      "status": "PASS"
+    }
+  ],
+  "temporary_paths": [
+    "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-039-1c7_0445/native-temporary/wfrl-regressions-s8eai69w"
+  ],
+  "visible_processes": "serial, independent factory-startup profiles",
+  "counts": {
+    "PASS": 3
+  }
+}

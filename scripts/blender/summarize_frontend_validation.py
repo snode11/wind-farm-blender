@@ -7,7 +7,7 @@ from pathlib import Path
 def summarize(root):
     runs = []
     for path in sorted(root.glob('*/result.json')):
-        data = json.loads(path.read_text())
+        data = json.loads(path.read_text(encoding='utf-8'))
         if data.get('schema_version') != 2 or 'path' not in data:
             continue
         run = {key: data.get(key) for key in ('status', 'path', 'layout', 'termination',
@@ -16,7 +16,8 @@ def summarize(root):
         run['segments'] = []
         for segment in data.get('results', []):
             item = {key: segment.get(key) for key in ('status', 'mode', 'termination', 'failures',
-                'observation_s', 'effective_progress_s', 'stopped_progress_s', 'simulation_progress_s',
+                'observation_s', 'intentional_pause_s', 'running_observation_s', 'pause_intervals',
+                'effective_progress_s', 'stopped_progress_s', 'simulation_progress_s',
                 'simulation_speed_ratio', 'same_frames_all_routes', 'window_px', 'pause_resume',
                 'profile', 'paused_profile')}
             item['routes'] = {slot: {key: row.get(key) for key in ('distinct_draws',
@@ -36,7 +37,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     result = summarize(args.directory)
     destination = args.directory/'playback-summary.json'
-    destination.write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n')
+    destination.write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     for run in result['runs']:
         print(run['directory'], run['status'], [
             {slot: round(row['full_segment_draw_fps'], 2) if row['full_segment_draw_fps'] is not None else None

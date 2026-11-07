@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "scope": "Isolated background Blender native software regression",
+  "addon_module": "wfrl_blender",
+  "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "tests_run": 14,
+  "failures": [],
+  "errors": []
+}

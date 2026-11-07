@@ -35,7 +35,7 @@ import json,sys,tomllib
 from pathlib import Path
 sys.path.insert(0,sys.argv[1])
 from wfrl_blender._vendor.lidar.replay import ReplayPackage,ReplayReader
-result={"version":tomllib.loads((Path(sys.argv[1])/"wfrl_blender/blender_manifest.toml").read_text())["version"],"packages":{}}
+result={"version":tomllib.loads((Path(sys.argv[1])/"wfrl_blender/blender_manifest.toml").read_text(encoding='utf-8'))["version"],"packages":{}}
 for label,path in zip(("normal","close"),sys.argv[2:]):
     package=ReplayPackage.load(path)
     assert package.manifest["segment"]["id"]==label
@@ -52,7 +52,7 @@ print(json.dumps(result))
         env.pop("PYTHONPATH", None)
         completed = subprocess.run(
             [sys.executable, "-I", "-B", "-c", code, directory, str(normal), str(close)],
-            cwd=directory, env=env, check=True, text=True, capture_output=True)
+            cwd=directory, env=env, check=True, text=True, capture_output=True, encoding='utf-8')
     result = json.loads(completed.stdout)
     result.update(archive=str(archive), sha256=hashlib.sha256(archive.read_bytes()).hexdigest(),
                   verification="isolated archive reader; no Blender GUI or hardware claim")
@@ -70,7 +70,7 @@ def main() -> None:
         raise FileExistsError(args.output)
     result = verify(args.archive, args.normal, args.close)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(result, indent=2) + "\n")
+    args.output.write_text(json.dumps(result, indent=2) + "\n", encoding='utf-8')
     print(json.dumps(result, indent=2))
 
 

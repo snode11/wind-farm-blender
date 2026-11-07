@@ -1,0 +1,61 @@
+{
+  "schema": "wfrl.extension-release.v1",
+  "version": "0.3.28",
+  "blender_minimum": "5.2.0",
+  "publication_status": "PUBLISHED",
+  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.28",
+  "archive": {
+    "name": "wfrl_blender-0.3.28.zip",
+    "path": "outputs/frontend-stability-fixes/validation/package/wfrl_blender-0.3.28.zip",
+    "bytes": 99065625,
+    "file_count": 181,
+    "sha256": "b15c491db68fda6a2bdfce4228d5db040fa6ae0f0a69f886935ab0af9b775fda",
+    "identity_source": "Local archive SHA-256, ZIP integrity, inventory and saved installed-package evidence",
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.28/wfrl_blender-0.3.28.zip",
+    "inventory_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.28/wfrl_blender-0.3.28.inventory.json",
+    "checksum_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.28/wfrl_blender-0.3.28.zip.sha256"
+  },
+  "source": {
+    "repository": "https://github.com/snode11/wind-farm-blender",
+    "branch": "wind-farm-rl-all-work",
+    "synchronized_branch": "main",
+    "tag": "v0.3.28",
+    "commit": "b30de0af3b29346a88c587dc07bd82518bb00f04",
+    "canonical_payload_files_checked": 180,
+    "canonical_payload_match": true,
+    "source_rebuild_verification": "NOT_RUN"
+  },
+  "validation": {
+    "evidence_basis": "Saved evidence for the archive identified above; release publication does not expand the recorded validation scope",
+    "saved_platform": "macOS",
+    "saved_blender": "5.2.1 LTS",
+    "saved_reports": [
+      "publication/daily-installation.json",
+      "outputs/frontend-stability-fixes/installed-identity.json",
+      "outputs/frontend-stability-fixes/installed-regressions.json",
+      "outputs/frontend-stability-fixes/daily-probe.json",
+      "outputs/frontend-stability-fixes/delivery-verification.json"
+    ],
+    "installed_regressions": 5,
+    "fresh_process_import": "PASS",
+    "native_window_status": "PASS_SCRIPTED_SCOPED",
+    "whole_frontend_regression": "NOT_RUN",
+    "full_clip_fps_benchmark": "NOT_RUN",
+    "long_duration_stability": "NOT_RUN",
+    "windows_linux": "NOT_RUN",
+    "scientific_acceptance": "NOT_RUN"
+  },
+  "daily_installation": {
+    "updated_by_publication": false,
+    "saved_version": "0.3.28",
+    "saved_identity": "publication/daily-installation.json"
+  },
+  "limitations": [
+    "Manual controls provide rigid illustrative motion without power, load, wake, deformation or radar computation.",
+    "Rootkink is synthetic display geometry and uses the saved NREL motion, loads and radar readings.",
+    "Geometry and texture remain NOT_ACCEPTED; lidar remains REVIEW_ONLY / PENDING_ACCEPTANCE; the 0.2 mm tip gate remains FAILED_GATE.",
+    "Existing evidence applies only to its recorded payload, environment and scope. Scripted native-window checks do not establish physical mouse interaction coverage.",
+    "Original VTP, backend services, solvers and project launchers are not installed by the extension ZIP."
+  ],
+  "remote_asset_download_verification": false
+}

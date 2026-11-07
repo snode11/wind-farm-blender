@@ -262,7 +262,7 @@ def audit_case(model, case):
 def load_independent_model(source, calibration):
     """Read a strict whitelist; geometry.npz/tower-motion.npz/data.json are unused."""
     source, calibration = Path(source).resolve(), Path(calibration).resolve()
-    manifest = json.loads((source/'manifest.json').read_text())
+    manifest = json.loads((source/'manifest.json').read_text(encoding='utf-8'))
     if (manifest.get('schema') != 'wfrl.farm-flex-review.v3'
             or manifest.get('status') != 'REVIEW_ONLY'
             or manifest.get('reference_frame') != 'independent zero-load stationary solve'):
@@ -274,8 +274,8 @@ def load_independent_model(source, calibration):
         if manifest['files'].get(name) != actual:
             raise ValueError('Independent source input hash mismatch: '+name)
         hashes[name] = actual
-    scalars = json.loads((source/'deflection-t1.json').read_text())['scalars']
-    reference = json.loads((source/'blade-reference.json').read_text())
+    scalars = json.loads((source/'deflection-t1.json').read_text(encoding='utf-8'))['scalars']
+    reference = json.loads((source/'blade-reference.json').read_text(encoding='utf-8'))
     if reference.get('reference_state') != 'independent zero-load stationary solve':
         raise ValueError('Unloaded structural tip provenance is required')
     tip = np.asarray(reference['tip_local_m'], float)
@@ -299,7 +299,7 @@ def load_independent_model(source, calibration):
                 or not np.issubdtype(topology.dtype, np.integer) or np.any(topology < 0)
                 or np.any(topology >= len(mesh))):
             raise ValueError('Invalid independent nominal surface topology')
-    config = json.loads(calibration.read_text())
+    config = json.loads(calibration.read_text(encoding='utf-8'))
     origins, directions, limits = validate_calibration(config)
     model = IndependentModel(local, weights, triangles, tower, tower_triangles, tip, scalars,
                              origins, directions, limits)
@@ -317,7 +317,7 @@ def load_independent_model(source, calibration):
 
 
 def write_json(path, value):
-    path.write_text(json.dumps(value, ensure_ascii=False, allow_nan=False, indent=2)+'\n')
+    path.write_text(json.dumps(value, ensure_ascii=False, allow_nan=False, indent=2)+'\n', encoding='utf-8')
 
 
 def run(source, calibration, output):
@@ -374,7 +374,7 @@ def run(source, calibration, output):
         o = case['observability']
         report.append(f"| {case['id']} | {case['nominal_range_pair_available']} | {o is not None} | {o['rank'] if o else '-'} | {o['maximum_null_clearance_sensitivity_m_per_m'] if o else '-'} |")
     report += ['', '详细输入 SHA-256、声明、所有成功/失效首交、每列差分、半步比较、SVD 与有限探针均保存于 declaration.json / results.json。']
-    (output/'report.md').write_text('\n'.join(report)+'\n')
+    (output/'report.md').write_text('\n'.join(report)+'\n', encoding='utf-8')
     return result
 
 

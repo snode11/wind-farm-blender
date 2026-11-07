@@ -170,7 +170,7 @@ def ambiguity_summary(rows, tolerance_px):
 
 def _bound_inputs(args, protocol_path):
     binding_path = Path(args.binding).resolve()
-    binding = json.loads(binding_path.read_text())
+    binding = json.loads(binding_path.read_text(encoding='utf-8'))
     if (binding.get("schema") != BINDING_SCHEMA
             or binding.get("status") != "FROZEN_BEFORE_COMPUTATION"
             or binding.get("protocol_sha256") != digest(protocol_path)):
@@ -267,7 +267,7 @@ def run(args):
 
     start = time.monotonic()
     protocol_path = Path(args.protocol).resolve()
-    protocol = json.loads(protocol_path.read_text())
+    protocol = json.loads(protocol_path.read_text(encoding='utf-8'))
     contract = validate_protocol(protocol)
     binding_path, binding = _bound_inputs(args, protocol_path)
     # All dependency hashes are frozen before any candidate loop or data preparation.
@@ -279,7 +279,7 @@ def run(args):
     if any(binding["files"].get(path) != signature for path, signature in checked_hashes.items()):
         raise ValueError("Binding omits or differs from a verified input/cache/native file")
     model = DynamicBladeReference.from_model_state(args.model, expected_sha256=signatures[binding["paths"]["model"]])
-    planes = checked_planes(json.loads(Path(args.plane).read_text()), data, moves)
+    planes = checked_planes(json.loads(Path(args.plane).read_text(encoding='utf-8')), data, moves)
     for frame in FRAMES:
         for camera in CAMERAS:
             cal = calibration[(camera, frame)]

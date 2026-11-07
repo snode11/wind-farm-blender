@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "source_kind": "GEOMETRY_SIMULATION",
+  "source_time_s": 117.0,
+  "valid_points": 43,
+  "recolor_preserves_cloud": true,
+  "fov_off_hides_boundary": true,
+  "fov_on_restores_boundary": true,
+  "screenshot": "ui.png",
+  "real_device_tested": false
+}

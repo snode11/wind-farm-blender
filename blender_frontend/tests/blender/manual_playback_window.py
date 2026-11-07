@@ -10,18 +10,16 @@ import traceback
 import bpy
 
 ROOT = Path(__file__).resolve().parents[3]
-MODULE = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')
-if MODULE == 'wfrl_blender':
-    sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
+sys.path.append(str(Path(__file__).resolve().parent))
+import _native
+MODULE = _native.addon_module()
 addon = importlib.import_module(MODULE)
 control = importlib.import_module(MODULE + '.manual_control')
 playback = importlib.import_module(MODULE + '.playback')
 OUT = Path(os.environ['WFRL_TEST_OUTPUT'])
 assert not OUT.exists()
 OUT.mkdir(parents=True)
-expected = os.environ.get('WFRL_EXPECTED_ADDON_ROOT')
-if expected:
-    assert Path(addon.__file__).resolve().parent == Path(expected).resolve()
+_native.check_addon_root(addon)
 STATE = dict(step='setup', deadline=0)
 
 
@@ -103,6 +101,7 @@ def capture():
                   scope='Actual native window and scripted operators; does not claim mouse input or sidebar selection')
     (OUT / 'checks.json').write_text(json.dumps(report, indent=2))
     print(json.dumps(report), flush=True)
+    print('MANUAL_PLAYBACK_WINDOW_PASS', flush=True)
     bpy.ops.wm.quit_blender()
     return None
 

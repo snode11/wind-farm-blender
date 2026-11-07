@@ -129,9 +129,9 @@ def run(args):
 
     started = time.monotonic()
     protocol_path, binding_path = Path(args.protocol).resolve(), Path(args.binding).resolve()
-    protocol = json.loads(protocol_path.read_text())
+    protocol = json.loads(protocol_path.read_text(encoding='utf-8'))
     grid = validate_protocol(protocol)
-    binding = json.loads(binding_path.read_text())
+    binding = json.loads(binding_path.read_text(encoding='utf-8'))
     names = ("model", "prior", "cache", "plane", "input")
     if (binding.get("schema") != BINDING_SCHEMA or binding.get("status") != "FROZEN_BEFORE_COMPUTATION"
             or binding.get("protocol_sha256") != digest(protocol_path) or set(binding.get("paths", {})) != set(names)):
@@ -158,16 +158,16 @@ def run(args):
     times = [moves[frame]["sim_time_s"] for frame in FRAMES]
     if not np.allclose(np.diff(times), .05, atol=1e-9, rtol=0):
         raise ValueError("Actual sampled times differ from the frozen 0.05 s interval")
-    planes = checked_planes(json.loads(Path(args.plane).read_text()), data, moves)
+    planes = checked_planes(json.loads(Path(args.plane).read_text(encoding='utf-8')), data, moves)
     model_hash = signatures[binding["paths"]["model"]]
-    baseline = json.loads(cache_freeze.read_text())
+    baseline = json.loads(cache_freeze.read_text(encoding='utf-8'))
     for relative in ("wfrl/nrel_reconstruction/dynamic_geometry.py", "wfrl/nrel_reconstruction/model.py"):
         path = str((ROOT / relative).resolve())
         if baseline.get("files", {}).get(path) != signatures[path]:
             raise ValueError("Surface-producing code differs from the A02 cache baseline")
     if baseline.get("files", {}).get(binding["paths"]["model"]) != model_hash:
         raise ValueError("Static model differs from the A02 cache baseline")
-    image, cached_rows = checked_cache(json.loads(Path(args.cache).read_text()), grid, model_hash, moves)
+    image, cached_rows = checked_cache(json.loads(Path(args.cache).read_text(encoding='utf-8')), grid, model_hash, moves)
     prior = StructuralPointPrior.from_files(args.model, args.prior, model_sha256=model_hash,
                                            prior_sha256=signatures[binding["paths"]["prior"]])
     geometries = [prior.evaluate(q) for q in grid]
@@ -240,8 +240,8 @@ def run(args):
     write_new(package / "sequence.json", sequence)
     with (package / "geometry.npz").open("xb") as stream:
         np.savez_compressed(stream, **arrays)
-    write_new(package / "model-state.json", json.loads(Path(args.model).read_text()))
-    write_new(package / "static-prior.json", json.loads(Path(args.prior).read_text()))
+    write_new(package / "model-state.json", json.loads(Path(args.model).read_text(encoding='utf-8')))
+    write_new(package / "static-prior.json", json.loads(Path(args.prior).read_text(encoding='utf-8')))
     write_new(package / "estimator-config.json", protocol)
     write_new(package / "input-provenance.json", {"paths": binding["paths"], "files": signatures,
               "surface_cache_path": binding["paths"]["cache"], "truth_read": False, "independent_score_read": False})

@@ -1,0 +1,9 @@
+00:00.011  color_management | Using OCIO=/Applications/Blender.app/Contents/Resources/5.2/datafiles/colormanagement/config.ocio
+00:00.360  blend            | Read blend: "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-385f991f29d3/scene.blend"
+00:00.893  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-385f991f29d3/frames/frame_0002.png'
+00:00.941  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-385f991f29d3/frames/frame_0004.png'
+00:00.980  render           | Saved: '/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.39/native-source/animation_render_regression/artifacts/animation-385f991f29d3/frames/frame_0006.png'
+Warning: Library file, loading empty scene
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

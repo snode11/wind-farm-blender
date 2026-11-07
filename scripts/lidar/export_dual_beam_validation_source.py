@@ -37,7 +37,7 @@ def digest(path):
 
 def save_json(path, value):
     Path(path).write_text(json.dumps(value, ensure_ascii=False, allow_nan=False,
-                                   separators=(',', ':'))+'\n')
+                                   separators=(',', ':'))+'\n', encoding='utf-8')
 
 
 def exact_output_grid(columns, fps, duration_s):
@@ -107,7 +107,7 @@ class SurfaceInventory:
     def __init__(self, run):
         self.run = Path(run).resolve()
         self.path = self.run/'compressed-surfaces.json'
-        content = json.loads(self.path.read_text())
+        content = json.loads(self.path.read_text(encoding='utf-8'))
         entries = content.get('surfaces')
         if not isinstance(entries, list):
             raise ValueError('Missing compressed surface inventory')
@@ -148,7 +148,7 @@ class SurfaceInventory:
 
 def _input_values(path):
     result = {}
-    for line in Path(path).read_text().splitlines():
+    for line in Path(path).read_text(encoding='utf-8').splitlines():
         tokens = line.split()
         if len(tokens) >= 2:
             result[tokens[1]] = tokens[0].strip('"')
@@ -156,7 +156,7 @@ def _input_values(path):
 
 
 def _beam_curve(path):
-    lines = Path(path).read_text().splitlines()
+    lines = Path(path).read_text(encoding='utf-8').splitlines()
     starts = [i+2 for i, line in enumerate(lines) if line.split()[:1] == ['kp_xr']]
     if len(starts) != 1:
         raise ValueError('Missing BeamDyn reference coordinates')
@@ -180,10 +180,10 @@ def validate_reference(run, reference, config):
     expected_inventory = config.get('reference_inventory_sha256')
     declaration_path = reference.parent/'protocol-declaration.json'
     if expected_inventory is None and declaration_path.is_file():
-        expected_inventory = json.loads(declaration_path.read_text()).get('reference_inventory_sha256')
+        expected_inventory = json.loads(declaration_path.read_text(encoding='utf-8')).get('reference_inventory_sha256')
     if not expected_inventory or digest(inventory_path) != expected_inventory:
         raise ValueError('Reference inventory differs from frozen pre-solver hash')
-    inventory = json.loads(inventory_path.read_text())
+    inventory = json.loads(inventory_path.read_text(encoding='utf-8'))
     required_reference = {'probe-config.json', 'FarmInputs/FFTest_WT1.fst',
         'FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat',
         *(f'5MW_Baseline/{name}' for name in BEAM_FILES),
@@ -195,8 +195,8 @@ def validate_reference(run, reference, config):
         path = _relative_file(reference, name)
         if digest(path) != record['sha256'] or path.stat().st_size != record['bytes']:
             raise ValueError('Frozen reference file integrity mismatch: '+name)
-    loaded = json.loads((run/'probe-config.json').read_text())
-    rest = json.loads((reference/'probe-config.json').read_text())
+    loaded = json.loads((run/'probe-config.json').read_text(encoding='utf-8'))
+    rest = json.loads((reference/'probe-config.json').read_text(encoding='utf-8'))
     if (loaded.get('structural_module') != 'BeamDyn'
             or rest.get('structural_module') != 'BeamDyn'
             or loaded.get('unloaded') or not rest.get('unloaded')):
@@ -219,7 +219,7 @@ def validate_reference(run, reference, config):
 
 
 def _load_scalars(run, reference):
-    scalars = json.loads((ROOT/'blender_frontend/wfrl_blender/assets/nrel5mw_geometry.json').read_text())['scalars']
+    scalars = json.loads((ROOT/'blender_frontend/wfrl_blender/assets/nrel5mw_geometry.json').read_text(encoding='utf-8'))['scalars']
     keys = ('TipRad', 'HubRad', 'OverHang', 'TowerHt', 'Twr2Shft', 'ShftTilt', 'PreCone(1)')
     for folder in (run, reference):
         inputs = _input_values(folder/'FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat')
@@ -233,9 +233,9 @@ def export(run, reference, output, start=None, end=None):
     run, reference, output = map(lambda p: Path(p).resolve(), (run, reference, output))
     if output.exists():
         raise ValueError('Output directory already exists')
-    config = json.loads((run/'run-config.json').read_text())
+    config = json.loads((run/'run-config.json').read_text(encoding='utf-8'))
     exit_path = run/'exit-status.json'
-    completion = json.loads(exit_path.read_text()) if exit_path.is_file() else {}
+    completion = json.loads(exit_path.read_text(encoding='utf-8')) if exit_path.is_file() else {}
     if (config.get('status') != 'SOLVER_COMPLETE' or completion.get('status') != 'COMPLETE'
             or completion.get('exit_code') != 0):
         raise ValueError('Successful complete runner execution is not proven')
@@ -248,7 +248,7 @@ def export(run, reference, output, start=None, end=None):
     columns, units = read_output(raw_path)
     complete_times, clock = exact_output_grid(columns, config['fps'], config['duration_s'])
     log_path = run/'solver.log'
-    if not log_path.is_file() or 'OpenFAST terminated normally.' not in log_path.read_text(errors='replace'):
+    if not log_path.is_file() or 'OpenFAST terminated normally.' not in log_path.read_text(errors='replace', encoding='utf-8'):
         raise ValueError('Complete solver execution is not proven')
     start = complete_times[0] if start is None else float(start)
     end = complete_times[-1] if end is None else float(end)

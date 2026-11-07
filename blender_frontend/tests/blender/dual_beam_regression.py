@@ -260,11 +260,18 @@ if (farm_flex.default_dual_package()/'manifest.json').is_file():
     assert bpy.context.scene.wfrl_farm_panel_page == 'RADAR'
     assert bpy.ops.wfrl.load_demo() == {'FINISHED'}
     assert clearance_replay.sample(bpy.context.scene).get('measurement_mode') is None
+before_missing = clearance_replay.sample(bpy.context.scene)
 try:
     wfrl_blender.load_demo_scene(package/'missing-dir', camera_rig=False)
 except OSError:
     pass
-assert clearance_replay.sample(bpy.context.scene) is None
+else:
+    raise AssertionError('A missing package must not load')
+# Preflight runs before the scene is replaced: the current replay stays and the error is shown.
+after_missing = clearance_replay.sample(bpy.context.scene)
+assert after_missing is not None and after_missing['time_s'] == before_missing['time_s']
+assert after_missing.get('measurement_mode') == before_missing.get('measurement_mode')
+assert bpy.context.scene.get('wfrl_home_load_error')
 if module != 'wfrl_blender':
     assert 'wfrl' not in sys.modules and 'wfrl_blender' not in sys.modules
 result = dict(status='PASS', source_runtime=module=='wfrl_blender', dual_package=True, calibrated_rays=True,

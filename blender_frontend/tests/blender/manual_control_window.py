@@ -13,19 +13,16 @@ import bpy
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[3]
-MODULE = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')
-if MODULE == 'wfrl_blender':
-    sys.path[:0] = [str(ROOT / 'blender_frontend'), str(ROOT)]
+sys.path.append(str(Path(__file__).resolve().parent))
+import _native
+MODULE = _native.addon_module()
 addon = importlib.import_module(MODULE)
 control = importlib.import_module(MODULE + '.manual_control')
 panel = importlib.import_module(MODULE + '.panels.manual_control')
 clearance = importlib.import_module(MODULE + '.clearance_replay')
-expected = os.environ.get('WFRL_EXPECTED_ADDON_ROOT')
-if expected:
-    assert Path(addon.__file__).resolve().parent == Path(expected).resolve()
-OUT = Path(os.environ['WFRL_TEST_OUTPUT'])
-assert not OUT.exists(), 'WFRL_TEST_OUTPUT must name a new directory'
-OUT.mkdir(parents=True)
+atomic_json = importlib.import_module(MODULE + '.atomic_json')
+_native.check_addon_root(addon)
+OUT = _native.output_directory()
 STATE = dict(step='setup', draw_count=0, manual_draw_count=0, draw_errors=[])
 original_draw = panel.WFRL_PT_ManualControl.draw
 
@@ -65,8 +62,11 @@ def source_snapshot(scene):
             mesh_digest(scene.objects['WFRL.Turbine.T1.Blade1']))
 
 
-def show_panel(area):
+def show_panel(area, *, select=True):
     area.spaces.active.show_region_ui = True
+    if select:
+        sidebar = next(region for region in area.regions if region.type == 'UI')
+        sidebar.active_panel_category = panel.WFRL_PT_ManualControl.bl_category
     area.tag_redraw()
 
 
@@ -79,7 +79,7 @@ def finish_failure():
     error = traceback.format_exc()
     report = dict(status='FAIL', addon_module=MODULE, addon_file=addon.__file__,
                   step=STATE['step'], error=error, draw_errors=STATE['draw_errors'])
-    (OUT / 'window-checks.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+    atomic_json.write_json(OUT / 'window-checks.json', report)
     print('MANUAL_CONTROL_WINDOW_FAIL ' + json.dumps(report), flush=True)
     bpy.ops.wm.quit_blender()
     return None
@@ -98,16 +98,17 @@ def observe():
             region = next(region for region in area.regions if region.type == 'WINDOW')
             source.frame_set(121)
             STATE.update(source=source, window=window, area=area, region=region)
-            show_panel(area)
+            show_panel(area, select=False)
             STATE.update(step='select_panel', deadline=time.monotonic() + 180.0)
             print('MANUAL_CONTROL_WINDOW_WAITING_FOR_PANEL 风机控制', flush=True)
             return .2
         if STATE['step'] == 'select_panel':
             window, area, region = [STATE[name] for name in ('window', 'area', 'region')]
+            show_panel(area)
             selected = any(item.type == 'UI' and
                            item.active_panel_category == panel.WFRL_PT_ManualControl.bl_category
                            for item in area.regions)
-            if not selected:
+            if not selected or not STATE['draw_count']:
                 assert time.monotonic() < STATE['deadline'], 'Timed out waiting for the 风机控制 sidebar tab'
                 return .2
             with bpy.context.temp_override(window=window, area=area, region=region):
@@ -131,11 +132,15 @@ def observe():
                              source_reader=clearance.reader_for(source))
                 manual.wfrl_manual_target = 'T1'
                 t1 = entries(manual)['T1']
+                assert manual.wfrl_manual_pitch_rate_deg_s == 5.0
+                assert control.effective_pitches(t1) == (90.0, 90.0, 90.0)
                 t1.yaw_deg, t1.pitch_deg, t1.rpm, t1.azimuth_deg = 33.0, 14.0, 6.0, 20.0
                 assert bpy.ops.wfrl.manual_focus() == {'FINISHED'}
                 show_panel(area)
                 action('START')
-                STATE.update(start_angle=t1.azimuth_deg, start_time=time.monotonic())
+                assert not t1.individual_pitch and control.target_pitches(t1) == (0.0, 0.0, 0.0)
+                STATE.update(start_angle=t1.azimuth_deg, start_time=time.monotonic(),
+                             start_pitch=control.effective_pitches(t1)[0])
                 return delay('running', 2.0)
 
             manual = STATE['manual']
@@ -148,6 +153,11 @@ def observe():
                 circular_error = abs((delta - expected_delta + 180.0) % 360.0 - 180.0)
                 assert circular_error < 12.0, (delta, expected_delta, circular_error)
                 assert abs(math.degrees(t1.rotor_object.rotation_euler.x) - t1.azimuth_deg) < .001
+                expected_pitch = max(0.0, STATE['start_pitch'] - 5.0 * elapsed)
+                for index, actual in enumerate(control.effective_pitches(t1), 1):
+                    assert actual < STATE['start_pitch']
+                    assert abs(actual - expected_pitch) < 2.0, (actual, expected_pitch, elapsed)
+                    assert abs(math.degrees(getattr(t1, f'blade{index}_object').rotation_euler.z) + actual) < .001
                 assert source_snapshot(source) == STATE['source_held']
                 assert clearance.reader_for(source) is STATE['source_reader']
                 before = t1.azimuth_deg
@@ -161,18 +171,23 @@ def observe():
                 assert (t1.azimuth_deg - STATE['faster_start']) % 360.0 > 25.0
                 action('PAUSE')
                 assert not t1.running and t1.rpm == 12.0
-                STATE['paused_angle'] = t1.azimuth_deg
+                assert not t1.individual_pitch and control.target_pitches(t1) == (90.0, 90.0, 90.0)
+                STATE.update(paused_angle=t1.azimuth_deg, paused_pitch=control.effective_pitches(t1)[0])
                 return delay('paused', .6)
 
             if STATE['step'] == 'paused':
                 assert t1.azimuth_deg == STATE['paused_angle']
                 assert source_snapshot(source) == STATE['source_held']
+                assert STATE['paused_pitch'] < control.effective_pitches(t1)[0] <= 90.0
+                manual.wfrl_manual_pitch_rate_deg_s = 0.0
+                action('START')
+                assert control.effective_pitches(t1) == (0.0, 0.0, 0.0)
                 t1.individual_pitch = True
                 t1.pitch_b1_deg, t1.pitch_b2_deg, t1.pitch_b3_deg = 3.0, 9.0, 21.0
                 for index, value in enumerate((3, 9, 21), 1):
                     actual = math.degrees(getattr(t1, f'blade{index}_object').rotation_euler.z)
                     assert abs(actual + value) < .001
-                action('START')
+                manual.wfrl_manual_pitch_rate_deg_s = 5.0
                 assert bpy.ops.wfrl.manual_leave() == {'FINISHED'}
                 assert window.scene == source
                 assert not t1.running
@@ -187,6 +202,7 @@ def observe():
                 assert bpy.ops.wfrl.manual_enter() == {'FINISHED'}
                 assert window.scene == manual
                 assert not t1.running and t1.rpm == 12.0
+                assert t1.individual_pitch and control.effective_pitches(t1) == (3.0, 9.0, 21.0)
                 assert (t1.yaw_deg, t1.pitch_b1_deg, t1.pitch_b2_deg, t1.pitch_b3_deg) == (33.0, 3.0, 9.0, 21.0)
                 manual.wfrl_manual_target = 'ALL'
                 manual.wfrl_manual_batch.rpm = 8.0
@@ -203,10 +219,17 @@ def observe():
                     assert entry.running and (entry.azimuth_deg - STATE['all_angles'][tid]) % 360.0 > 15.0
                 action('STOP')
                 assert all(entry.rpm == 0.0 and not entry.running for entry in entries(manual).values())
+                assert all(not entry.individual_pitch and control.target_pitches(entry) == (90.0, 90.0, 90.0)
+                           for entry in entries(manual).values())
                 manual.wfrl_manual_target = 'T1'
                 action('RESET')
-                assert (t1.yaw_deg, t1.pitch_deg, t1.azimuth_deg, t1.rpm, t1.running) == (0.0, 0.0, 0.0, 9.0, False)
+                assert (t1.yaw_deg, t1.pitch_deg, t1.azimuth_deg, t1.rpm, t1.running) == (0.0, 90.0, 0.0, 9.0, False)
+                assert not t1.individual_pitch and control.effective_pitches(t1) == (90.0, 90.0, 90.0)
                 t1.yaw_deg, t1.pitch_deg, t1.azimuth_deg = 28.0, 18.0, 72.0
+                t2 = entries(manual)['T2']
+                t2.individual_pitch = True
+                t2.pitch_b1_deg, t2.pitch_b2_deg, t2.pitch_b3_deg = 3.0, 9.0, 21.0
+                manual.wfrl_manual_target = 'ALL'
                 assert bpy.ops.wfrl.manual_focus() == {'FINISHED'}
                 show_panel(area)
                 return delay('capture', .6)
@@ -218,15 +241,18 @@ def observe():
             assert screenshot.is_file() and screenshot.stat().st_size > 1000
             report = dict(status='PASS', scope='Actual native window, scripted operators and real timer',
                           addon_module=MODULE, addon_file=addon.__file__,
+                          blender_version=bpy.app.version_string,
                           manual_panel_draws=STATE['manual_draw_count'],
                           real_timer_motion_deg=STATE['first_motion_deg'],
                           rpm_phase_continuity=True, pause_stop_reset=True,
+                          default_pitch_rate_and_feathering=True,
                           individual_pitch=True, all_target_motion=True,
+                          mixed_mode_summary_drawn=True,
                           source_unchanged_during_manual=True,
                           demo_pause_and_resume=True, manual_paused_on_return=True,
                           screenshot=str(screenshot),
                           boundary='Short interaction check; no full-clip performance or physics validation')
-            (OUT / 'window-checks.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+            atomic_json.write_json(OUT / 'window-checks.json', report)
             print('MANUAL_CONTROL_WINDOW_PASS ' + json.dumps(report), flush=True)
             if os.environ.get('WFRL_QUIT_AFTER_TEST', '1') == '1':
                 bpy.ops.wm.quit_blender()

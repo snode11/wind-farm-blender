@@ -1,0 +1,7 @@
+Warning: 请先设置大于 0 的转速
+Warning: 请先设置大于 0 的转速
+{"status": "PASS", "scope": "Isolated background Blender native software regression", "addon_module": "wfrl_blender", "addon_file": "/project/blender_frontend/wfrl_blender/__init__.py", "blender": "5.2.1 LTS", "tests_run": 14, "failures": [], "errors": []}
+MANUAL_CONTROL_STATE_PASS
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 01:35:57)
+
+Blender quit

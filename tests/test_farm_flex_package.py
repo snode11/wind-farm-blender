@@ -88,14 +88,146 @@ def test_reject_flexible_reference_mismatch(tmp_path):
     with pytest.raises(ValueError,match='Nacelle position'):read_package(path)
 
 
+def rewrite_data(path, data):
+    (path/'data.json').write_text(json.dumps(data))
+    manifest = json.loads((path/'manifest.json').read_text())
+    manifest['files']['data.json'] = hashlib.sha256((path/'data.json').read_bytes()).hexdigest()
+    (path/'manifest.json').write_text(json.dumps(manifest))
+
+
+def measured_fixture(tmp_path):
+    path = fixture(tmp_path)
+    data = json.loads((path/'data.json').read_text())
+    invalid = dict(valid=False, slant_range_m=None, estimate_m=None, error_m=None,
+                   reason='no_hit', hit_point_m=None)
+    row = dict(time_s=0., blade_id=1, expected=True, passage_id='b1-p0', truth_m=3.,
+               truth_tip_point_m=[3., 0., 0.], truth_wall_point_m=[0., 0., 0.],
+               beams=dict(B1=invalid.copy(), B3=invalid.copy(),
+                          B2=dict(valid=True, slant_range_m=4., estimate_m=3.25,
+                                  error_m=.25, reason='valid', hit_point_m=[0., 0., 4.])))
+    payload = data['T1']
+    payload['measurements'] = [row]
+    replay = json.loads((path/'manifest.json').read_text())['replay']
+    payload['cumulative'], payload['statistics'] = precompute([row], payload['motion'], replay)
+    rewrite_data(path, data)
+    return path, data
+
+
+def test_review_b2_keeps_held_reading_and_empty_turbine_statistics(tmp_path):
+    path, _ = measured_fixture(tmp_path)
+    *_, readers = read_package(path)
+    sample = readers['T1'].at(.0125)
+    assert sample['measurement']['estimate_m'] == 3.25
+    assert sample['measurement']['slant_range_m'] == 4.
+    assert sample['status'] == 'near_threshold'
+    assert sample['statistics'] == dict(expected_samples=1, valid_samples=1, valid_ratio=1.,
+        mae_m=.25, max_abs_error_m=.25, p95_abs_error_m=.25, max_positive_bias_m=.25,
+        passage_count=1, missed_passage_count=0)
+    for tid in ('T2', 'T3'):
+        empty = readers[tid].at(.0125)
+        assert empty['measurement'] is None and empty['status'] == 'waiting'
+        assert empty['statistics'] == dict(expected_samples=0, valid_samples=0, valid_ratio=None,
+            mae_m=None, max_abs_error_m=None, p95_abs_error_m=None, max_positive_bias_m=None,
+            passage_count=0, missed_passage_count=0)
+
+
+@pytest.mark.parametrize('corruption', [
+    'unobserved_reading', 'wrong_total', 'wrong_count_type', 'wrong_status',
+    'changed_reading', 'changed_expiry', 'future_prefix', 'nonfinite_statistics',
+    'nonfinite_audit', 'invalid_time', 'duplicate_observation', 'unordered_observations',
+    'signed_error', 'invalid_estimate', 'unexpected_valid', 'boolean_blade',
+])
+def test_reject_inconsistent_review_measurements_and_prefixes(tmp_path, corruption):
+    path, data = measured_fixture(tmp_path)
+    payload = data['T1']
+    row, state = payload['measurements'][0], payload['cumulative'][0]
+    if corruption == 'unobserved_reading':
+        payload['measurements'] = []
+    elif corruption == 'wrong_total':
+        payload['statistics']['mae_m'] += 1e-8
+    elif corruption == 'wrong_count_type':
+        state['statistics']['valid_samples'] = True
+    elif corruption == 'wrong_status':
+        state['status'] = 'above_threshold'
+    elif corruption == 'changed_reading':
+        state['measurement']['estimate_m'] += 5e-13
+    elif corruption == 'changed_expiry':
+        state['measurement']['expires_at_s'] += 5e-13
+    elif corruption == 'future_prefix':
+        state['time_s'] = .02
+    elif corruption == 'nonfinite_statistics':
+        payload['statistics']['mae_m'] = float('nan')
+    elif corruption == 'nonfinite_audit':
+        row['truth_tip_point_m'][0] = float('inf')
+    elif corruption == 'invalid_time':
+        row['time_s'] = -.001
+    elif corruption == 'duplicate_observation':
+        payload['measurements'].append(row.copy())
+    elif corruption == 'unordered_observations':
+        later = dict(row, time_s=.025)
+        payload['measurements'].insert(0, later)
+    elif corruption == 'signed_error':
+        row['beams']['B2']['error_m'] = -.25
+    elif corruption == 'invalid_estimate':
+        row['beams']['B2'].update(valid=False, reason='no_hit')
+    elif corruption == 'unexpected_valid':
+        row['expected'] = False
+    elif corruption == 'boolean_blade':
+        row['blade_id'] = True
+    if corruption in ('invalid_time', 'duplicate_observation', 'unordered_observations',
+                      'signed_error', 'invalid_estimate', 'unexpected_valid', 'boolean_blade'):
+        replay = json.loads((path/'manifest.json').read_text())['replay']
+        payload['cumulative'], payload['statistics'] = precompute(
+            payload['measurements'], payload['motion'], replay)
+    rewrite_data(path, data)
+    with pytest.raises(ValueError):
+        read_package(path)
+
+
+def test_review_statistics_allow_only_aggregate_roundoff(tmp_path):
+    path, data = measured_fixture(tmp_path)
+    data['T1']['cumulative'][0]['statistics']['mae_m'] += 5e-13
+    data['T1']['statistics']['mae_m'] += 5e-13
+    rewrite_data(path, data)
+    *_, readers = read_package(path)
+    assert readers['T1'].at(.0125)['statistics']['mae_m'] == .25
+    assert readers['T1'].package.statistics['mae_m'] == .25
+
+
+def test_review_with_no_valid_b2_keeps_missing_reading_and_null_errors(tmp_path):
+    path, data = measured_fixture(tmp_path)
+    payload = data['T1']
+    beams = payload['measurements'][0]['beams']
+    beams['B1'], beams['B2'] = beams['B2'], beams['B1']
+    settings = json.loads((path/'manifest.json').read_text())['replay']
+    payload['cumulative'], payload['statistics'] = precompute(
+        payload['measurements'], payload['motion'], settings)
+    rewrite_data(path, data)
+    *_, readers = read_package(path)
+    sample = readers['T1'].at(.0125)
+    assert sample['measurement'] is None and sample['status'] == 'waiting'
+    assert sample['statistics'] == dict(expected_samples=1, valid_samples=0, valid_ratio=0.,
+        mae_m=None, max_abs_error_m=None, p95_abs_error_m=None, max_positive_bias_m=None,
+        passage_count=1, missed_passage_count=1)
+
+
+@pytest.fixture
+def cold_package_cache():
+    from wfrl_blender import farm_flex
+
+    farm_flex.clear_package_cache()
+    yield
+    farm_flex.clear_package_cache()
+
+
 @pytest.mark.parametrize('entrypoint', ['attach', 'constructor'])
 @pytest.mark.parametrize('source', ['farm', 'dual_beam'])
-def test_runtime_reuses_one_validated_package(monkeypatch, entrypoint, source):
+def test_runtime_reuses_one_validated_package(monkeypatch, cold_package_cache, entrypoint, source):
     from wfrl_blender import clearance_replay, deflection, farm_flex, prebend, tower_motion
 
     path = (farm_flex.default_package() if source == 'farm'
             else farm_flex.default_dual_package())
-    calls = dict(archives=[], resolved=[], references=[], towers=[], comparison_paths=[])
+    calls = dict(archives=[], resolved=[], references=[], towers=[], comparison_paths=[], comparison_inputs=[])
     original_load = np.load
     original_resolve = farm_flex.dual_beam_api().resolve_package
     original_reference = prebend.read_reference
@@ -128,14 +260,20 @@ def test_runtime_reuses_one_validated_package(monkeypatch, entrypoint, source):
 
     def comparison(path, *args, **kwargs):
         calls['comparison_paths'].append(path)
-        original_comparison(path, *args, **kwargs)
+        calls['comparison_inputs'].append(kwargs)
+        return original_comparison(path, *args, **kwargs)
+
+    def create_mesh(name):
+        assert name == 'WFRL.FarmFlex.SourceLoft'
         raise BeforeMeshBinding
 
     def construct(scene, path, **kwargs):
         runtime_type.__init__(runtime, scene, path, **kwargs)
         return runtime
 
-    monkeypatch.setitem(sys.modules, 'bpy', SimpleNamespace())
+    bpy = SimpleNamespace(data=SimpleNamespace(meshes=SimpleNamespace(new=create_mesh)))
+    monkeypatch.setitem(sys.modules, 'bpy', bpy)
+    monkeypatch.setattr(farm_flex, '_update_scene_transforms', lambda scene: None)
     monkeypatch.setattr(np, 'load', load_archive)
     monkeypatch.setattr(farm_flex.dual_beam_api(), 'resolve_package', resolve)
     monkeypatch.setattr(prebend, 'read_reference', reference)
@@ -143,13 +281,16 @@ def test_runtime_reuses_one_validated_package(monkeypatch, entrypoint, source):
     monkeypatch.setattr(deflection, 'read_comparison', comparison)
     monkeypatch.setattr(farm_flex, 'FarmFlex', construct)
     monkeypatch.setattr(farm_flex, '_ACTIVES', {})
-    monkeypatch.setattr(farm_flex, 'detach', lambda scene: None)
+    monkeypatch.setattr(farm_flex, 'detach', lambda scene=None, *, restore=True: None)
     monkeypatch.setattr(clearance_replay, 'clear', lambda scene, reason: None)
 
     class Scene(dict):
-        objects = {f'WFRL.Turbine.{tid}.{suffix}': object()
+        objects = {f'WFRL.Turbine.{tid}.{suffix}': SimpleNamespace(rotation_euler=SimpleNamespace())
                    for tid in ('T1', 'T2', 'T3')
                    for suffix in ('YawRoot', 'Rotor', 'Tower', 'Blade1', 'Blade2', 'Blade3')}
+
+        def as_pointer(self):
+            return id(self)
 
     scene = Scene()
     with pytest.raises(BeforeMeshBinding):
@@ -160,8 +301,16 @@ def test_runtime_reuses_one_validated_package(monkeypatch, entrypoint, source):
     assert calls['archives'].count('geometry.npz') == 1
     assert calls['archives'].count('tower-motion.npz') == 1
     assert len(calls['resolved']) == len(calls['references']) == len(calls['towers']) == 1
-    assert runtime.reference is calls['references'][0]
-    assert runtime.tower_motion is calls['towers'][0]
+    assert runtime.reference is not calls['references'][0]
+    assert runtime.reference == calls['references'][0]
+    assert runtime.reference['curve'] is not calls['references'][0]['curve']
+    assert runtime.tower_motion is not calls['towers'][0]
+    assert runtime.tower_motion.keys() == calls['towers'][0].keys()
+    for key, values in runtime.tower_motion.items():
+        assert values is calls['towers'][0][key]
+        assert not values.flags.writeable
+    assert calls['comparison_inputs'][0]['blade_reference'] is calls['references'][0]
+    assert calls['comparison_inputs'][0]['tower_motion'] is runtime.tower_motion
     assert calls['comparison_paths'] == [calls['resolved'][0][0]]
     if entrypoint == 'attach':
         assert scene['wfrl_flex_active'] is False

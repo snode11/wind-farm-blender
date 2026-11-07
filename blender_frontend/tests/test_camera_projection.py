@@ -56,3 +56,112 @@ def test_resources_and_time_list():
     with pytest.raises(ValueError):p.projection(90,60,1,1)
     assert p.sample_times(3,3.3,.1)==pytest.approx([3,3.1,3.2,3.3])
     with pytest.raises(ValueError):p.sample_times(3,4,0)
+
+
+@pytest.mark.parametrize('size', [0, -1, True, 12.5, math.nan, math.inf])
+@pytest.mark.parametrize('dimensions', ['width', 'height'])
+def test_invalid_pixel_dimensions_cannot_produce_intrinsics_or_scales(size, dimensions):
+    width, height = (size, 480) if dimensions == 'width' else (640, size)
+    for calculate in (p.intrinsics, p.pixel_scales):
+        with pytest.raises(ValueError, match='正整数像素'):
+            calculate(90, 60, width, height)
+
+
+def test_finite_inputs_cannot_emit_nonfinite_projection_geometry():
+    with pytest.raises(ValueError, match='有限'):
+        p.projection(90, 60, far=1e308)
+    with pytest.raises(ValueError, match='有限'):
+        p.frustum_corners(170, 170, 1e308)
+    with pytest.raises(ValueError, match='有限'):
+        p.intrinsics(1, 1, 10**308, 480)
+
+
+def test_pixel_ray_roundtrip_and_homogeneous_front_plane_boundary():
+    for hfov, vfov in ((90, 60), (40, 110)):
+        width, height = p.resolution(hfov, vfov, 640)
+        inverse_k = np.linalg.inv(p.intrinsics(hfov, vfov, width, height))
+        matrix = np.array(p.projection(hfov, vfov, .005, 1000.))
+        for u, v in ((0., 0.), (width-1., height-1.), (123.25, 87.75), (-.5, height-.5)):
+            cv_ray = inverse_k @ (u, v, 1.)
+            camera_ray = cv_ray * (1., -1., -1.)
+            clip = matrix @ (*camera_ray, 1.)
+            pixel = ((clip[0]/clip[3]+1)*width/2-.5,
+                     (1-clip[1]/clip[3])*height/2-.5)
+            assert pixel == pytest.approx((u, v), abs=1e-10)
+        for z in (0., 1.):
+            clip = matrix @ (0., 0., z, 1.)
+            assert clip[3] <= 0
+            assert not (-clip[3] <= clip[2] <= clip[3])
+
+
+@pytest.mark.parametrize('hfov,vfov,scene_aspect', [
+    (0., 60., 1.), (90., math.nan, 1.), (90., 60., 0.),
+    (90., 60., -1.), (90., 60., math.inf), (90., 60., 1e-320),
+])
+def test_native_gate_rejects_invalid_or_unrepresentable_fov_and_aspect(hfov, vfov, scene_aspect):
+    from wfrl_blender.native_camera_projection import fit_gate
+    with pytest.raises(ValueError):
+        fit_gate(hfov, vfov, scene_aspect, math=math)
+
+
+@pytest.mark.parametrize('hfov,vfov,budget,expected', [
+    (90, 4, 320, (444, 16)), (4, 90, 320, (16, 444)),
+    (90, 4, 640, (640, 22)), (75, p.DEFAULT_VFOV, 320, (320, 180)),
+])
+def test_preview_budget_preserves_a_minimum_short_edge(hfov, vfov, budget, expected):
+    assert p.preview_resolution(hfov, vfov, budget, max_size=4096) == expected
+
+
+def test_preview_budget_does_not_relax_export_or_gpu_limits():
+    assert p.resolution(90, 4, 1920) == (1920, 67)
+    with pytest.raises(ValueError, match='短边'):
+        p.resolution(90, 4, 320)
+    with pytest.raises(ValueError, match='GPU'):
+        p.preview_resolution(90, 4, 320, max_size=256)
+
+
+@pytest.mark.parametrize('hfov,vfov', [(132, 1), (1, 132), (133, 1), (1, 133)])
+def test_preview_accepts_a_legal_full_resolution_at_gpu_boundary(hfov, vfov):
+    assert min(p.resolution(hfov, vfov, 4096, max_size=4096)) == 16
+    width, height = p.preview_resolution(hfov, vfov, 320, max_size=4096)
+    assert min(width, height) == 16
+    assert max(width, height) <= 4096
+
+
+def test_down_optics_preserve_independent_camera_sensors(monkeypatch):
+    from types import SimpleNamespace
+    from wfrl_blender import cameras, nacelle_camera
+
+    class Camera(dict):
+        def __init__(self, name, **tags):
+            super().__init__(tags)
+            self.name = name
+            self.type = 'CAMERA'
+            self.data = SimpleNamespace(lens=50.0)
+
+    down = Camera('Manual Down.001', wfrl_down_camera=True)
+    recorded = Camera('WFRL.Camera.T1.Gimbal')
+    nacelle = Camera('Nacelle', wfrl_nacelle_intrinsics=nacelle_camera.INTRINSICS_ID)
+    custom = Camera('C1')
+    assert cameras.is_down_camera(None) is False
+    assert not cameras.is_down_camera(custom)
+    assert cameras.DOWN_FOCAL_LENGTH_MM == 8
+    assert cameras.DOWN_VFOV_DEG == 60
+    assert cameras.DOWN_HFOV_DEG == pytest.approx(
+        math.degrees(2*math.atan(math.tan(math.radians(30))*16/9)))
+    assert cameras._sensor_width(down) == cameras._sensor_width(recorded)
+    assert cameras._sensor_width(nacelle) == nacelle_camera.SENSOR_WIDTH_MM
+    assert cameras._sensor_width(custom) == 36
+    scene = SimpleNamespace(objects={cam.name: cam for cam in (down, nacelle, custom)})
+    class Scene(dict):
+        objects = scene.objects
+    scene = Scene()
+    monkeypatch.setattr(nacelle_camera, 'select_output', lambda scene, camera: None)
+    cameras.select_camera(scene, down.name, fov_deg=cameras.DOWN_HFOV_DEG)
+    assert down.data.lens == pytest.approx(8)
+    assert nacelle.data.lens == custom.data.lens == 50
+    cameras.select_camera(scene, nacelle.name, fov_deg=60)
+    assert nacelle.data.lens == pytest.approx(nacelle_camera.SENSOR_WIDTH_MM/(2*math.tan(math.radians(30))))
+    cameras.select_camera(scene, custom.name, fov_deg=60)
+    assert custom.data.lens == pytest.approx(36/(2*math.tan(math.radians(30))))
+    assert down.data.lens == pytest.approx(8)

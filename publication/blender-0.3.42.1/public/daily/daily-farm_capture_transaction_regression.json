@@ -1,0 +1,340 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "module": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "scope": "real RNA ownership and capture transaction; replay, image and playback adapters; no GPU proof",
+  "checks": [
+    {
+      "action": "success",
+      "original_playing": false,
+      "status": "complete",
+      "completed_samples": 2,
+      "playback_requests": [
+        false,
+        false,
+        false
+      ],
+      "evaluations": [
+        119.5,
+        120.0,
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_06e5781c5b"
+    },
+    {
+      "action": "cancel",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false,
+        false,
+        false
+      ],
+      "evaluations": [
+        119.5,
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_9e54d34b0f"
+    },
+    {
+      "action": "frame_start",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_1777caa04b"
+    },
+    {
+      "action": "timebase",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_3a905fef5e"
+    },
+    {
+      "action": "removed_timebase",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_656d755f95"
+    },
+    {
+      "action": "layer",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_a737a78827"
+    },
+    {
+      "action": "delete_layer",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_6e95d95ca4"
+    },
+    {
+      "action": "scene",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_8fb1630f04"
+    },
+    {
+      "action": "foreign_context",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_fd5a5e7c49"
+    },
+    {
+      "action": "render_layer",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5,
+        120.0
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_34aec9e40b"
+    },
+    {
+      "action": "render_timebase",
+      "original_playing": false,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5,
+        120.0
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_0a2ae8e1fc"
+    },
+    {
+      "action": "success",
+      "original_playing": true,
+      "status": "complete",
+      "completed_samples": 2,
+      "playback_requests": [
+        false,
+        false,
+        true
+      ],
+      "evaluations": [
+        119.5,
+        120.0,
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_f8f76f79a1"
+    },
+    {
+      "action": "cancel",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false,
+        false,
+        true
+      ],
+      "evaluations": [
+        119.5,
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_f2212c6f98"
+    },
+    {
+      "action": "frame_start",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_e861b2ebee"
+    },
+    {
+      "action": "timebase",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_83df27614f"
+    },
+    {
+      "action": "removed_timebase",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_5e6d00fc1e"
+    },
+    {
+      "action": "layer",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_e951260477"
+    },
+    {
+      "action": "delete_layer",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_4b6beaae35"
+    },
+    {
+      "action": "scene",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_537016d07e"
+    },
+    {
+      "action": "foreign_context",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_e28dff92c3"
+    },
+    {
+      "action": "render_layer",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5,
+        120.0
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_1dfeb5f7ec"
+    },
+    {
+      "action": "render_timebase",
+      "original_playing": true,
+      "status": "incomplete",
+      "completed_samples": 1,
+      "playback_requests": [
+        false
+      ],
+      "evaluations": [
+        119.5,
+        120.0
+      ],
+      "capture_directory": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/daily-farm_capture_transaction_regression/capture_20261031_133136_bef8f21935"
+    },
+    {
+      "action": "native_frame_callback",
+      "during_restore": false,
+      "subframe_only": false,
+      "status": "incomplete",
+      "completed_samples": 1
+    },
+    {
+      "action": "native_frame_callback",
+      "during_restore": false,
+      "subframe_only": true,
+      "status": "incomplete",
+      "completed_samples": 1
+    },
+    {
+      "action": "native_frame_callback",
+      "during_restore": true,
+      "subframe_only": false,
+      "status": "incomplete",
+      "completed_samples": 2
+    },
+    {
+      "action": "native_frame_callback",
+      "during_restore": true,
+      "subframe_only": true,
+      "status": "incomplete",
+      "completed_samples": 2
+    }
+  ]
+}

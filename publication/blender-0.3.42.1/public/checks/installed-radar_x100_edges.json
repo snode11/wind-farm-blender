@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "tests": 11,
+  "failures": 0,
+  "errors": 0,
+  "addon_path": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/validated/profile/extensions/wfrl_blender/__init__.py",
+  "core_path": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-03421-3djmf1ig/validated/profile/extensions/wfrl_blender/_vendor/radar_x100/schema.py"
+}

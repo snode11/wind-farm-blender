@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "archive": "/Users/eason/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes/package-checks/package/wfrl_blender-0.3.40.zip",
+  "archive_sha256": "59cbb002d9cabf9084910251e419a028d84335f0457fe1aa57e9e41b0f45e89e",
+  "installed_root": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender",
+  "installed_files_checked": 201,
+  "changed_installed_files": [
+    "build-info.json",
+    "charts.py",
+    "clearance_replay.py",
+    "custom_camera_capture.py",
+    "custom_camera_history.py",
+    "custom_camera_preview.py",
+    "farm_flex.py",
+    "panels/custom_camera_output.py"
+  ],
+  "protected_control_files": 21,
+  "control_files_unchanged": true,
+  "profile_files_checked": 6,
+  "profile_files_unchanged": true,
+  "profile_hashes": {
+    "recent-files.txt": "7d929bccbc3e5ed3e078e0661a82103ea767325c62f8ea64ca2f747270a08f01",
+    "platform_support.txt": "4dbce3526384ef82878d01e1d704b953f67248b1f3354282fc9ae6285b750426",
+    "startup.blend": "064d7a57df06e1b35e543e3e85ab87df108a07969790c0aea87c9b7c2e6b1a46",
+    "userpref.blend": "e06ff65baae263c0c4c7b231b78fa0265ab0eaf6e9eb3121f9410cd664beaf51",
+    "bookmarks.txt": "f60b6fd5ba93eac273992b675f1899c1e940545c294452919306043a8353634f",
+    "recent-searches.txt": "f57d26a947e656261b1cdd0d41c3782993828f18bc8d3c4063f6b1e4ed0d2057"
+  },
+  "rollback_archive": "/Users/eason/.codex/visualizations/2026/10/30/01a18aa9-0657-74e0-b24d-d62eef0cff44/frontend-fixes/final-package-checks/package/wfrl_blender-0.3.40.zip",
+  "rollback_archive_sha256": "8acf5549e909288f50bfb56f534358d7b24f141160dd2ff4f1e577df858c2e88",
+  "user_windows_restarted": false,
+  "fresh_process_import": "PASS",
+  "loaded_module_files_checked": 95,
+  "home_panel_registered": true,
+  "enablement_persisted": true
+}

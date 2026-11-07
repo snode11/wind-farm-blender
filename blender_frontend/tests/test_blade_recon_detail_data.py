@@ -46,7 +46,7 @@ def display_uv(rotor):
 
 def test_detail_assets_have_exact_source_hashes_and_independent_clock():
     root = detail_recon_path().parent
-    manifest = json.loads((root / 'manifest.json').read_text())
+    manifest = json.loads((root / 'manifest.json').read_text(encoding='utf-8'))
     for name, record in manifest['files'].items():
         content = (root / name).read_bytes()
         assert hashlib.sha256(content).hexdigest() == record['sha256']
@@ -59,7 +59,7 @@ def test_detail_assets_have_exact_source_hashes_and_independent_clock():
     assert len(sequence.frames) == 120
     assert sequence.fps == 10
     np.testing.assert_array_equal(sequence.source_frames, np.arange(120))
-    saved = json.loads(detail_recon_path().read_text())
+    saved = json.loads(detail_recon_path().read_text(encoding='utf-8'))
     np.testing.assert_array_equal(sequence.times, [frame['t'] for frame in saved['frames']])
     np.testing.assert_array_equal(np.round(sequence.times * 10).astype(int), sequence.source_frames)
     assert manifest['clock']['relationship_to_mappo'].startswith('independent')

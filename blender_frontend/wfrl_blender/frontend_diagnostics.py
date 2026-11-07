@@ -100,19 +100,20 @@ def snapshot(context):
 
 
 def draw_panel(layout, context):
+    from .panels.ui_helpers import message
     info = snapshot(context)
     layout.label(text='版本：'+info['version']+' · '+('安装包' if info['packaged'] else '工作区'))
     layout.label(text='构建：'+info['build'][:12])
-    layout.label(text='模块：'+info['module'])
+    message(layout, '模块：'+info['module'], context=context)
     if info['source_path']:
-        layout.label(text='数据：'+Path(info['source_path']).name)
+        message(layout, '数据：'+Path(info['source_path']).name, context=context)
     if info['source_hz'] is not None:
         layout.label(text=f"源采样 {info['source_hz']:g} Hz · 时间轴 {info['timeline_hz']:g} Hz")
     layout.prop(context.scene, 'wfrl_diagnostics_sampling', text='采样当前视口播放帧率')
     value = info['viewport_fps']
     layout.label(text=f'当前视口：{value:.1f} FPS（近 2 秒）' if value is not None
         else '当前视口：暂停 / 未采样 / 样本不足')
-    layout.label(text='按视口绘制记录；不代表显示器刷新率')
+    message(layout, '按视口绘制记录；不代表显示器刷新率', context=context)
     layout.operator('wfrl.copy_frontend_diagnostics', text='复制完整诊断信息', icon='COPYDOWN')
 
 

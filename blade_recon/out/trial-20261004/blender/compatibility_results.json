@@ -1,0 +1,1115 @@
+{
+  "scope": "Independent background factory-startup Blender; no rendering; truth-derived compatibility fixture; original source files unchanged",
+  "blender_version": "5.2.1 LTS",
+  "fixture_original_frames": [
+    0,
+    3,
+    7,
+    13,
+    19
+  ],
+  "checks": {
+    "mesh_creation": true,
+    "geometry_matches_forward_model": true,
+    "frame_change_moves_vertices": true,
+    "colors_follow_observed_sections": true,
+    "camera_extrinsics_match_input": false,
+    "camera_native_intrinsics_match_input": false,
+    "camera_intrinsics_match_after_resolution_only": false,
+    "original_export_extrinsics_roundtrip": false,
+    "diagnostic_workaround_restores_K": true,
+    "original_export_retains_asymmetric_focal_lengths": false
+  },
+  "objects": [
+    {
+      "name": "C1",
+      "type": "CAMERA",
+      "vertices": null,
+      "faces": null
+    },
+    {
+      "name": "C2",
+      "type": "CAMERA",
+      "vertices": null,
+      "faces": null
+    },
+    {
+      "name": "C3",
+      "type": "CAMERA",
+      "vertices": null,
+      "faces": null
+    },
+    {
+      "name": "Hub",
+      "type": "MESH",
+      "vertices": 482,
+      "faces": 512
+    },
+    {
+      "name": "Nacelle",
+      "type": "MESH",
+      "vertices": 8,
+      "faces": 6
+    },
+    {
+      "name": "Recon_Blade1",
+      "type": "MESH",
+      "vertices": 1280,
+      "faces": 2526
+    },
+    {
+      "name": "Recon_Blade2",
+      "type": "MESH",
+      "vertices": 1280,
+      "faces": 2526
+    },
+    {
+      "name": "Recon_Blade3",
+      "type": "MESH",
+      "vertices": 1280,
+      "faces": 2526
+    },
+    {
+      "name": "Tower",
+      "type": "MESH",
+      "vertices": 64,
+      "faces": 34
+    },
+    {
+      "name": "Truth_Blade1",
+      "type": "MESH",
+      "vertices": 1280,
+      "faces": 2526
+    },
+    {
+      "name": "Truth_Blade2",
+      "type": "MESH",
+      "vertices": 1280,
+      "faces": 2526
+    },
+    {
+      "name": "Truth_Blade3",
+      "type": "MESH",
+      "vertices": 1280,
+      "faces": 2526
+    }
+  ],
+  "timeline": {
+    "start": 1,
+    "end": 5,
+    "fps": 10,
+    "active_camera": null
+  },
+  "geometry_frames": [
+    {
+      "scene_frame": 1,
+      "original_frame": 0,
+      "max_abs_vertex_change_from_first_m": 0.0,
+      "blades": [
+        {
+          "blade": 1,
+          "max_abs_vertex_error_m": 7.6220700293561094e-06,
+          "max_abs_truth_vertex_error_m": 7.6220700293561094e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "color_attribute_domain": "POINT",
+          "color_attribute_type": "BYTE_COLOR",
+          "green_vertices": 640,
+          "orange_vertices": 640,
+          "unique_colors": [
+            [
+              0.14995981752872467,
+              0.7529424428939819,
+              0.2501583695411682,
+              1.0
+            ],
+            [
+              1.0,
+              0.5520116090774536,
+              0.09989874064922333,
+              1.0
+            ]
+          ]
+        },
+        {
+          "blade": 2,
+          "max_abs_vertex_error_m": 3.80753689910307e-06,
+          "max_abs_truth_vertex_error_m": 3.80753689910307e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "color_attribute_domain": "POINT",
+          "color_attribute_type": "BYTE_COLOR",
+          "green_vertices": 640,
+          "orange_vertices": 640,
+          "unique_colors": [
+            [
+              0.14995981752872467,
+              0.7529424428939819,
+              0.2501583695411682,
+              1.0
+            ],
+            [
+              1.0,
+              0.5520116090774536,
+              0.09989874064922333,
+              1.0
+            ]
+          ]
+        },
+        {
+          "blade": 3,
+          "max_abs_vertex_error_m": 3.812832019889356e-06,
+          "max_abs_truth_vertex_error_m": 3.812832019889356e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "color_attribute_domain": "POINT",
+          "color_attribute_type": "BYTE_COLOR",
+          "green_vertices": 640,
+          "orange_vertices": 640,
+          "unique_colors": [
+            [
+              0.14995981752872467,
+              0.7529424428939819,
+              0.2501583695411682,
+              1.0
+            ],
+            [
+              1.0,
+              0.5520116090774536,
+              0.09989874064922333,
+              1.0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "scene_frame": 2,
+      "original_frame": 3,
+      "max_abs_vertex_change_from_first_m": 23.451602935791016,
+      "blades": [
+        {
+          "blade": 1,
+          "max_abs_vertex_error_m": 7.6249395135619125e-06,
+          "max_abs_truth_vertex_error_m": 7.6249395135619125e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "color_attribute_domain": "POINT",
+          "color_attribute_type": "BYTE_COLOR",
+          "green_vertices": 640,
+          "orange_vertices": 640,
+          "unique_colors": [
+            [
+              0.14995981752872467,
+              0.7529424428939819,
+              0.2501583695411682,
+              1.0
+            ],
+            [
+              1.0,
+              0.5520116090774536,
+              0.09989874064922333,
+              1.0
+            ]
+          ]
+        },
+        {
+          "blade": 2,
+          "max_abs_vertex_error_m": 3.802822178045062e-06,
+          "max_abs_truth_vertex_error_m": 3.802822178045062e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "color_attribute_domain": "POINT",
+          "color_attribute_type": "BYTE_COLOR",
+          "green_vertices": 640,
+          "orange_vertices": 640,
+          "unique_colors": [
+            [
+              0.14995981752872467,
+              0.7529424428939819,
+              0.2501583695411682,
+              1.0
+            ],
+            [
+              1.0,
+              0.5520116090774536,
+              0.09989874064922333,
+              1.0
+            ]
+          ]
+        },
+        {
+          "blade": 3,
+          "max_abs_vertex_error_m": 3.8144738851997317e-06,
+          "max_abs_truth_vertex_error_m": 3.8144738851997317e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "color_attribute_domain": "POINT",
+          "color_attribute_type": "BYTE_COLOR",
+          "green_vertices": 640,
+          "orange_vertices": 640,
+          "unique_colors": [
+            [
+              0.14995981752872467,
+              0.7529424428939819,
+              0.2501583695411682,
+              1.0
+            ],
+            [
+              1.0,
+              0.5520116090774536,
+              0.09989874064922333,
+              1.0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "scene_frame": 3,
+      "original_frame": 7,
+      "max_abs_vertex_change_from_first_m": 53.587493896484375,
+      "blades": [
+        {
+          "blade": 1,
+          "max_abs_vertex_error_m": 7.456285430862408e-06,
+          "max_abs_truth_vertex_error_m": 7.456285430862408e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "color_attribute_domain": "POINT",
+          "color_attribute_type": "BYTE_COLOR",
+          "green_vertices": 640,
+          "orange_vertices": 640,
+          "unique_colors": [
+            [
+              0.14995981752872467,
+              0.7529424428939819,
+              0.2501583695411682,
+              1.0
+            ],
+            [
+              1.0,
+              0.5520116090774536,
+              0.09989874064922333,
+              1.0
+            ]
+          ]
+        },
+        {
+          "blade": 2,
+          "max_abs_vertex_error_m": 3.814372519173048e-06,
+          "max_abs_truth_vertex_error_m": 3.814372519173048e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "color_attribute_domain": "POINT",
+          "color_attribute_type": "BYTE_COLOR",
+          "green_vertices": 640,
+          "orange_vertices": 640,
+          "unique_colors": [
+            [
+              0.14995981752872467,
+              0.7529424428939819,
+              0.2501583695411682,
+              1.0
+            ],
+            [
+              1.0,
+              0.5520116090774536,
+              0.09989874064922333,
+              1.0
+            ]
+          ]
+        },
+        {
+          "blade": 3,
+          "max_abs_vertex_error_m": 3.8096492716022112e-06,
+          "max_abs_truth_vertex_error_m": 3.8096492716022112e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "color_attribute_domain": "POINT",
+          "color_attribute_type": "BYTE_COLOR",
+          "green_vertices": 640,
+          "orange_vertices": 640,
+          "unique_colors": [
+            [
+              0.14995981752872467,
+              0.7529424428939819,
+              0.2501583695411682,
+              1.0
+            ],
+            [
+              1.0,
+              0.5520116090774536,
+              0.09989874064922333,
+              1.0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "scene_frame": 4,
+      "original_frame": 13,
+      "max_abs_vertex_change_from_first_m": 89.88142395019531,
+      "blades": [
+        {
+          "blade": 1,
+          "max_abs_vertex_error_m": 3.813584683598492e-06,
+          "max_abs_truth_vertex_error_m": 3.813584683598492e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "color_attribute_domain": "POINT",
+          "color_attribute_type": "BYTE_COLOR",
+          "green_vertices": 640,
+          "orange_vertices": 640,
+          "unique_colors": [
+            [
+              0.14995981752872467,
+              0.7529424428939819,
+              0.2501583695411682,
+              1.0
+            ],
+            [
+              1.0,
+              0.5520116090774536,
+              0.09989874064922333,
+              1.0
+            ]
+          ]
+        },
+        {
+          "blade": 2,
+          "max_abs_vertex_error_m": 3.792761290810631e-06,
+          "max_abs_truth_vertex_error_m": 3.792761290810631e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "color_attribute_domain": "POINT",
+          "color_attribute_type": "BYTE_COLOR",
+          "green_vertices": 640,
+          "orange_vertices": 640,
+          "unique_colors": [
+            [
+              0.14995981752872467,
+              0.7529424428939819,
+              0.2501583695411682,
+              1.0
+            ],
+            [
+              1.0,
+              0.5520116090774536,
+              0.09989874064922333,
+              1.0
+            ]
+          ]
+        },
+        {
+          "blade": 3,
+          "max_abs_vertex_error_m": 7.606423878314672e-06,
+          "max_abs_truth_vertex_error_m": 7.606423878314672e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "color_attribute_domain": "POINT",
+          "color_attribute_type": "BYTE_COLOR",
+          "green_vertices": 640,
+          "orange_vertices": 640,
+          "unique_colors": [
+            [
+              0.14995981752872467,
+              0.7529424428939819,
+              0.2501583695411682,
+              1.0
+            ],
+            [
+              1.0,
+              0.5520116090774536,
+              0.09989874064922333,
+              1.0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "scene_frame": 5,
+      "original_frame": 19,
+      "max_abs_vertex_change_from_first_m": 116.0035400390625,
+      "blades": [
+        {
+          "blade": 1,
+          "max_abs_vertex_error_m": 3.8116388907383225e-06,
+          "max_abs_truth_vertex_error_m": 3.8116388907383225e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "color_attribute_domain": "POINT",
+          "color_attribute_type": "BYTE_COLOR",
+          "green_vertices": 640,
+          "orange_vertices": 640,
+          "unique_colors": [
+            [
+              0.14995981752872467,
+              0.7529424428939819,
+              0.2501583695411682,
+              1.0
+            ],
+            [
+              1.0,
+              0.5520116090774536,
+              0.09989874064922333,
+              1.0
+            ]
+          ]
+        },
+        {
+          "blade": 2,
+          "max_abs_vertex_error_m": 3.813724703150001e-06,
+          "max_abs_truth_vertex_error_m": 3.813724703150001e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "color_attribute_domain": "POINT",
+          "color_attribute_type": "BYTE_COLOR",
+          "green_vertices": 640,
+          "orange_vertices": 640,
+          "unique_colors": [
+            [
+              0.14995981752872467,
+              0.7529424428939819,
+              0.2501583695411682,
+              1.0
+            ],
+            [
+              1.0,
+              0.5520116090774536,
+              0.09989874064922333,
+              1.0
+            ]
+          ]
+        },
+        {
+          "blade": 3,
+          "max_abs_vertex_error_m": 7.600399612783804e-06,
+          "max_abs_truth_vertex_error_m": 7.600399612783804e-06,
+          "max_abs_color_error": 0.0029424428939819336,
+          "color_attribute_domain": "POINT",
+          "color_attribute_type": "BYTE_COLOR",
+          "green_vertices": 640,
+          "orange_vertices": 640,
+          "unique_colors": [
+            [
+              0.14995981752872467,
+              0.7529424428939819,
+              0.2501583695411682,
+              1.0
+            ],
+            [
+              1.0,
+              0.5520116090774536,
+              0.09989874064922333,
+              1.0
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "camera_native_scene": [
+    {
+      "name": "C1",
+      "W": 1920,
+      "H": 1080,
+      "input_W": 816,
+      "input_H": 636,
+      "effective_K": [
+        [
+          2058.726318359375,
+          0.0,
+          959.5
+        ],
+        [
+          0.0,
+          2058.726318359375,
+          539.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "input_K": [
+        [
+          874.9588235678999,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          873.6978193865699,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 1185.0284989728052,
+      "max_abs_T_error": 65.79397689846178
+    },
+    {
+      "name": "C2",
+      "W": 1920,
+      "H": 1080,
+      "input_W": 816,
+      "input_H": 636,
+      "effective_K": [
+        [
+          2058.726318359375,
+          0.0,
+          959.5
+        ],
+        [
+          0.0,
+          2058.726318359375,
+          539.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "input_K": [
+        [
+          874.9588235678999,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          873.6978193865699,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 1185.0284989728052,
+      "max_abs_T_error": 65.79397689846178
+    },
+    {
+      "name": "C3",
+      "W": 1920,
+      "H": 1080,
+      "input_W": 816,
+      "input_H": 636,
+      "effective_K": [
+        [
+          2058.726318359375,
+          0.0,
+          959.5
+        ],
+        [
+          0.0,
+          2058.726318359375,
+          539.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "input_K": [
+        [
+          874.9588235678999,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          873.6978193865699,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 1185.0284989728052,
+      "max_abs_T_error": 65.79397689846178
+    }
+  ],
+  "original_export_native_scene": [
+    {
+      "name": "C1",
+      "W": 1920,
+      "H": 1080,
+      "K": [
+        [
+          2058.726631821573,
+          0.0,
+          959.5
+        ],
+        [
+          0.0,
+          2058.726631821573,
+          539.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 1185.0288124350031,
+      "max_abs_T_error": 65.79397689846178
+    },
+    {
+      "name": "C2",
+      "W": 1920,
+      "H": 1080,
+      "K": [
+        [
+          2058.726631821573,
+          0.0,
+          959.5
+        ],
+        [
+          0.0,
+          2058.726631821573,
+          539.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 1185.0288124350031,
+      "max_abs_T_error": 65.79397689846178
+    },
+    {
+      "name": "C3",
+      "W": 1920,
+      "H": 1080,
+      "K": [
+        [
+          2058.726631821573,
+          0.0,
+          959.5
+        ],
+        [
+          0.0,
+          2058.726631821573,
+          539.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 1185.0288124350031,
+      "max_abs_T_error": 65.79397689846178
+    }
+  ],
+  "camera_after_resolution_only": [
+    {
+      "name": "C1",
+      "W": 816,
+      "H": 636,
+      "input_W": 816,
+      "input_H": 636,
+      "effective_K": [
+        [
+          874.958740234375,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          874.9586791992188,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "input_K": [
+        [
+          874.9588235678999,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          873.6978193865699,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 1.260859812648846,
+      "max_abs_T_error": 65.79397689846178
+    },
+    {
+      "name": "C2",
+      "W": 816,
+      "H": 636,
+      "input_W": 816,
+      "input_H": 636,
+      "effective_K": [
+        [
+          874.958740234375,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          874.9586791992188,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "input_K": [
+        [
+          874.9588235678999,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          873.6978193865699,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 1.260859812648846,
+      "max_abs_T_error": 65.79397689846178
+    },
+    {
+      "name": "C3",
+      "W": 816,
+      "H": 636,
+      "input_W": 816,
+      "input_H": 636,
+      "effective_K": [
+        [
+          874.958740234375,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          874.9586791992188,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "input_K": [
+        [
+          874.9588235678999,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          873.6978193865699,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 1.260859812648846,
+      "max_abs_T_error": 65.79397689846178
+    }
+  ],
+  "original_export_resolution_only": [
+    {
+      "name": "C1",
+      "W": 816,
+      "H": 636,
+      "K": [
+        [
+          874.9588185241685,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          874.9588185241685,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 1.26099913759856,
+      "max_abs_T_error": 65.79397689846178
+    },
+    {
+      "name": "C2",
+      "W": 816,
+      "H": 636,
+      "K": [
+        [
+          874.9588185241685,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          874.9588185241685,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 1.26099913759856,
+      "max_abs_T_error": 65.79397689846178
+    },
+    {
+      "name": "C3",
+      "W": 816,
+      "H": 636,
+      "K": [
+        [
+          874.9588185241685,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          874.9588185241685,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 1.26099913759856,
+      "max_abs_T_error": 65.79397689846178
+    }
+  ],
+  "camera_diagnostic_K_workaround": [
+    {
+      "name": "C1",
+      "W": 816,
+      "H": 636,
+      "input_W": 816,
+      "input_H": 636,
+      "effective_K": [
+        [
+          874.958740234375,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          873.69775390625,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "input_K": [
+        [
+          874.9588235678999,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          873.6978193865699,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 8.333352491263213e-05,
+      "max_abs_T_error": 65.79397689846178
+    },
+    {
+      "name": "C2",
+      "W": 816,
+      "H": 636,
+      "input_W": 816,
+      "input_H": 636,
+      "effective_K": [
+        [
+          874.958740234375,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          873.69775390625,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "input_K": [
+        [
+          874.9588235678999,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          873.6978193865699,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 8.333352491263213e-05,
+      "max_abs_T_error": 65.79397689846178
+    },
+    {
+      "name": "C3",
+      "W": 816,
+      "H": 636,
+      "input_W": 816,
+      "input_H": 636,
+      "effective_K": [
+        [
+          874.958740234375,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          873.69775390625,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "input_K": [
+        [
+          874.9588235678999,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          873.6978193865699,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 8.333352491263213e-05,
+      "max_abs_T_error": 65.79397689846178
+    }
+  ],
+  "original_export_with_pixel_aspect": [
+    {
+      "name": "C1",
+      "W": 816,
+      "H": 636,
+      "K": [
+        [
+          874.9588185241685,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          874.9588185241685,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 1.26099913759856,
+      "max_abs_T_error": 65.79397689846178
+    },
+    {
+      "name": "C2",
+      "W": 816,
+      "H": 636,
+      "K": [
+        [
+          874.9588185241685,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          874.9588185241685,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 1.26099913759856,
+      "max_abs_T_error": 65.79397689846178
+    },
+    {
+      "name": "C3",
+      "W": 816,
+      "H": 636,
+      "K": [
+        [
+          874.9588185241685,
+          0.0,
+          407.5
+        ],
+        [
+          0.0,
+          874.9588185241685,
+          317.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "max_abs_K_error_px": 1.26099913759856,
+      "max_abs_T_error": 65.79397689846178
+    }
+  ]
+}

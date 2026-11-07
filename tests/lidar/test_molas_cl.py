@@ -93,7 +93,7 @@ def test_ground_is_not_blade_and_bad_units_are_rejected():
 def test_manual_angles_never_replace_user_confirmed_installation():
     root=Path(__file__).resolve().parents[2]
     original=json.loads((root/'configs/lidar/dual-beam-inner.json').read_text())
-    active=json.loads((root/'configs/lidar/dual-beam-inner-manual-contract.json').read_text())
+    active=json.loads((root/'configs/lidar/dual-beam-inner-manual-contract.json').read_text(encoding='utf-8'))
     assert active['angles_deg']==original['angles_deg']==[10.,12.,14.]
     assert active['origins_m']==original['origins_m']
     assert active['manual_profile']['manual_nominal_relative_angles_deg']==[0.,2.05,4.09]

@@ -10,7 +10,7 @@
   mappo_sb3        基于 SB3 的参数共享 MAPPO（PettingZoo -> VecEnv）
   sb3_wrapper      单智能体 PPO 用的 Gymnasium 包装
   multimodal       Dict 观测（标量 + 尾流图像）与 CNN 分支
-  viz.*            3D 流场 / RViz 风格交互界面
+  viz.*            叶尖数据、跟踪预览与 DisXY 文件读取
 """
 
 from wfrl import paths  # noqa: F401  —— import 本包即保证输出目录存在

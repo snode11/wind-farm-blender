@@ -133,7 +133,9 @@ def evaluate_playback(*, target, expected_routes, scene_rows, draws, started, en
         if high < target.end_frame-target.terminal_tolerance_frames:
             failures.append('scene: target terminal interval not covered')
     progress_times = [started]+[r[0] for r in progress]+[ended]
-    stalled = sum(max(0., b-a-target.stall_threshold_s) for a, b in zip(progress_times, progress_times[1:]))
+    stalled = sum(max(0., running_duration(a, b)-target.stall_threshold_s)
+                  for a, b in zip(progress_times, progress_times[1:]))
+    running_observation = running_duration(started, ended)
     last_progress = progress[-1][0] if progress else None
     states = {str(k): v for k, v in (route_states or {}).items()}
     draw_map = {str(k): v for k, v in draws.items()}
@@ -229,7 +231,9 @@ def evaluate_playback(*, target, expected_routes, scene_rows, draws, started, en
     return {
         'status': status, 'termination': dict(termination), 'error': error,
         'failures': list(dict.fromkeys(failures)), 'target': dict(target.__dict__),
-        'observation_s': total, 'effective_progress_s': max(0., total-stalled),
+        'observation_s': total, 'intentional_pause_s': total-running_observation,
+        'running_observation_s': running_observation,
+        'effective_progress_s': max(0., running_observation-stalled),
         'stopped_progress_s': stalled, 'stall_threshold_s': target.stall_threshold_s,
         'last_scene_progress_wall_s': last_progress,
         'last_scene_progress_age_s': ended-last_progress if last_progress is not None else total,

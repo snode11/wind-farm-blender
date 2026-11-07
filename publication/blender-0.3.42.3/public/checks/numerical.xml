@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="15.625" timestamp="2026-10-31T19:22:46.086638+08:00" hostname="EasondeMacBook-Pro.local"><testcase classname="" name="blade_recon0.2.tests.test_shared_input_files" time="0.000"><error message="collection failure">ImportError while importing test module '/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon0.2/tests/test_shared_input_files.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/anaconda3/envs/wfrl-mac/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+blade_recon0.2/tests/test_shared_input_files.py:12: in &lt;module&gt;
+    from test_input_recon import bundle
+blade_recon0.2/tests/test_input_recon.py:15: in &lt;module&gt;
+    from input_adapter import InputSequence, RGBSource
+blade_recon0.2/input_adapter.py:23: in &lt;module&gt;
+    from model import TurbineConfig, healthy_template_sha256, validate_healthy_template
+E   ImportError: cannot import name 'healthy_template_sha256' from 'model' (/Users/eason/Desktop/wfcrl/wind farm RL/blade_recon/model.py)</error></testcase></testsuite></testsuites>

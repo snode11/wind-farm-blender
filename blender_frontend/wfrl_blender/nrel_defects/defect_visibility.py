@@ -352,17 +352,37 @@ def scene_tree(rig):
     return BVHTree.FromPolygons(vertices, faces, all_triangles=True) if faces else None
 
 
-def _camera_descriptor(camera, scene):
+def _camera_descriptor(camera, scene, *, resolution=None):
     if camera.data.type != 'PERSP':
         raise ValueError('Only ideal perspective cameras are supported')
-    width = round(scene.render.resolution_x * scene.render.resolution_percentage / 100)
-    height = round(scene.render.resolution_y * scene.render.resolution_percentage / 100)
-    frame = camera.data.view_frame(scene=scene)
-    xs, ys = [v.x / -v.z for v in frame], [v.y / -v.z for v in frame]
-    fx, fy = width / (max(xs) - min(xs)), height / (max(ys) - min(ys))
-    rotation = camera.matrix_world.to_3x3()
+    import bpy
+    from .. import custom_cameras, camera_projection as projection
+    if bpy.context.scene == scene:
+        deps = bpy.context.evaluated_depsgraph_get()
+    else:
+        with bpy.context.temp_override(scene=scene, view_layer=scene.view_layers[0]):
+            deps = bpy.context.evaluated_depsgraph_get()
+    world = camera.evaluated_get(deps).matrix_world.copy()
+    if camera.get('wfrl_custom_camera'):
+        params = custom_cameras.parameters(camera)
+        width, height = resolution or projection.resolution(params.fov, params.vfov, params.output_long_edge_px)
+        K = projection.intrinsics(params.fov, params.vfov, width, height)
+        P = projection.projection(params.fov, params.vfov, params.clip_near_m, params.clip_far_m)
+        near, far = params.clip_near_m, params.clip_far_m
+    else:
+        width = round(scene.render.resolution_x * scene.render.resolution_percentage / 100)
+        height = round(scene.render.resolution_y * scene.render.resolution_percentage / 100)
+        P = tuple(tuple(row) for row in camera.calc_matrix_camera(deps, x=width, y=height,
+            scale_x=scene.render.pixel_aspect_x, scale_y=scene.render.pixel_aspect_y))
+        # NDC maps to pixel centres with borders at -.5 and size-.5.
+        # Blender looks along -Z; image Y points down, so shift signs differ.
+        K = ((P[0][0] * width / 2, 0., (1 - P[0][2]) * width / 2 - .5),
+             (0., P[1][1] * height / 2, (1 + P[1][2]) * height / 2 - .5),
+             (0., 0., 1.))
+        near, far = camera.data.clip_start, camera.data.clip_end
+    rotation = world.to_3x3()
     from mathutils import Vector
     axes = [tuple((rotation @ Vector(axis)).normalized()) for axis in ((1, 0, 0), (0, 1, 0), (0, 0, -1))]
-    return dict(origin=tuple(camera.matrix_world.translation), axes=axes, fx=fx, fy=fy,
-                cx=-0.5 - min(xs) * fx, cy=-0.5 + max(ys) * fy,
-                width=width, height=height, near=camera.data.clip_start, far=camera.data.clip_end)
+    return dict(origin=tuple(world.translation), axes=axes, fx=K[0][0], fy=K[1][1],
+                cx=K[0][2], cy=K[1][2], width=width, height=height, near=near, far=far,
+                K=K, P=P, matrix_world=[list(row) for row in world])

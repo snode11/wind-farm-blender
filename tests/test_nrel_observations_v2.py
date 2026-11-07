@@ -15,7 +15,7 @@ pytest.importorskip("torch")
 
 from wfrl.nrel_reconstruction import dataset, optimize
 from wfrl.nrel_reconstruction.observations import segment_rgb
-from test_nrel_dataset import bundle  # Reuse the signed allowlist fixture.
+from test_nrel_dataset import bundle  # noqa: F401 -- pytest discovers the signed allowlist fixture by name.
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "nrel_single_blade.py"
@@ -37,6 +37,20 @@ def test_rgb_contour_crosses_generic_uncertainty_band_without_inventing_crop_edg
     assert (np.isclose(points[:, 1], 45)).any() and (np.isclose(points[:, 1], 94)).any()
     assert annotation["trusted_contour"]["point_correspondence"] == "none; per-frame silhouette only"
     assert annotation["truth_segmentation_used"] is False
+
+
+def test_generated_reference_preserves_the_signed_bundle_schema(bundle, tmp_path, monkeypatch):
+    from wfrl.nrel_reconstruction import observations as producer
+    rgb=np.zeros((1080,1920,3),np.uint8);rgb[400:600,800:1200]=210
+    monkeypatch.setattr(producer,'iter_rgb',lambda *args:iter([rgb,rgb]))
+    output=tmp_path/'generated_observations'
+    _,reference=producer.create_observations(bundle,output,[0],[1],0)
+    data=json.loads((bundle/'dataset.json').read_text());data['reference_state']=reference
+    dataset.write_json(bundle/'dataset.json',data)
+    dataset.load_bundle(bundle)
+    annotations=json.loads((output/'annotations.json').read_text())
+    assert annotations['visual_review_status']=='NOT_REVIEWED'
+    assert all(a['visual_review']['status']=='NOT_REVIEWED' for a in annotations['annotations'])
 
 
 def test_c1_manual_occlusion_boundaries_are_excluded_but_visible_rgb_edge_remains():

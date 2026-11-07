@@ -1,6 +1,6 @@
 """Down-first real-gust prototype; new geometry and measurements share one run."""
 from pathlib import Path
-import runpy, json, os
+import runpy, os
 import bpy
 ROOT=Path(__file__).resolve().parents[2]
 runpy.run_path(str(ROOT/'scripts/blender/open_blade_flex_preview.py'))

@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "source_files": {
+    "blender_frontend/wfrl_blender/manual_geometry.py": "c6766b03f015a83e3970c36072f0b0340edb807165eb2bf21d33398b8f350ef7",
+    "blender_frontend/wfrl_blender/manual_scene.py": "7f5d8a9f0d0deb32abb2915963495aa51c834ae2786388dcd26f2293f32a0795",
+    "blender_frontend/wfrl_blender/manual_rna.py": "13c9fa2766986a7bfba58d794dcbb7905642ebecbaa415fb9d4017330a1f88a5",
+    "blender_frontend/wfrl_blender/manual_motion.py": "b8d6cd05240ad881d13fd121ddffc871c792a50fc810283703e5f88c8a0d356e",
+    "blender_frontend/wfrl_blender/manual_operators.py": "d63d1aa6308afcb9258084e6657939507c57e700e9fa67d546e4e7b420480035",
+    "blender_frontend/wfrl_blender/manual_down.py": "8eb1dfec5ddc96b411a5fb68375e1e4a77cbd921055bf3773768465cca6cb159",
+    "blender_frontend/wfrl_blender/manual_video_job.py": "d9d38affce6dc339ee8578c3bf917c250a286409ccbaf19264d875280201bcc6",
+    "blender_frontend/wfrl_blender/manual_video_render.py": "ef735c3b2ede0340a2994fafa675549237f128280b115e6783ce3ebc4c31115e",
+    "blender_frontend/wfrl_blender/manual_pose.py": "ddd675d9e52c0eff62bb1d9427b75fff5c17cb49ec3243c781c9e7b127f37fb3",
+    "blender_frontend/wfrl_blender/manual_video.py": "72494e92f481434fa8ca741c3d5b127d7d105d0cecb8f336b4bb192b5a6cfb8f",
+    "blender_frontend/wfrl_blender/manual_control.py": "92707efb7e93853c73c14fd56c6f4f8f238c18b39eeeca05c54d9b6e9993777f",
+    "blender_frontend/wfrl_blender/manual_scene_links.py": "6592167dfc694f26549be23b635e58f6464b0d23bb742287bbeeec34d1ea422c",
+    "blender_frontend/wfrl_blender/panels/manual_control.py": "4152d673eede31a34c5ef190f9774cb0aa1d7031ecff12415a5166c82b661877"
+  },
+  "checked_files": 13,
+  "changed_files": [],
+  "native_tests": [
+    "manual_control_regression.py",
+    "manual_control_state_regression.py",
+    "manual_rate_pitch_regression.py"
+  ]
+}

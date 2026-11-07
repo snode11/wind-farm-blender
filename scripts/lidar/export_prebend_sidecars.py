@@ -7,14 +7,14 @@ from scripts.lidar.package_prebend_probe import save_json,reference_payload
 from wfrl.lidar.physics import read_surface
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'blender_frontend'))
-from wfrl_blender.deflection import rigid_frame
+from wfrl_blender.deflection import rigid_frame, beamdyn_root_frame
 from wfrl_blender.turbine_geometry import geometry_data
 
 
 def supplement(output,report,manifest,times,poses,transforms):
     output=Path(output);farm=Path(report['case_dir'])/'FarmInputs'
     config=report['blade_config'];rest=Path(report['unloaded_reference'])
-    unloaded=json.loads((rest/'probe-config.json').read_text())
+    unloaded=json.loads((rest/'probe-config.json').read_text(encoding='utf-8'))
     if not unloaded['unloaded'] or unloaded['reference_curve']!=config['reference_curve']:
         raise ValueError('Missing matching unloaded reference')
     save_json(output/'blade-reference.json',reference_payload(config,config['structural_source']))
@@ -32,11 +32,10 @@ def supplement(output,report,manifest,times,poses,transforms):
     refs=[]
     for b in (1,2,3):
         hub,_,axes=rigid_frame(scalars,[0]*6,b);refs.append(hub+axes@tip)
-    with np.load(output/'tower-motion.npz') as a:nacelles=a['nacelle']
     maximum=0.;by_turbine={};telemetry={};sources={}
     for k,tid in enumerate(manifest['turbine_ids']):
         path=farm/f'Case.{tid}.out';columns=read_fast_out(path)
-        lines=path.read_text().splitlines();units=dict(zip(lines[6].split(),lines[7].split()))
+        lines=path.read_text(encoding='utf-8').splitlines();units=dict(zip(lines[6].split(),lines[7].split()))
         for b in (1,2,3):
             for axis in 'xyz':
                 if units[f'B{b}TipTD{axis}r']!='(m)':raise ValueError('Unexpected BeamDyn displacement unit')
@@ -50,13 +49,13 @@ def supplement(output,report,manifest,times,poses,transforms):
             row=[];ar=[];rr=[]
             for b in (1,2,3):
                 tr=transforms[i,k,b-1,-1];point=tr[:,:3]@refs[b-1]+tr[:,3]
-                hub,_,axes=rigid_frame(scalars,poses[i,k],b,nacelles[i,k]);ref=hub+axes@tip
+                hub,axes=beamdyn_root_frame(scalars,b,transforms[i,k,b-1,0]);ref=hub+axes@tip
                 row.append(axes.T@(point-ref));ar.append(point);rr.append(ref)
             components.append(row);actual.append(ar);rigid.append(rr)
         error=np.asarray(components)-sim
         value=float(np.max(abs(error)));maximum=max(maximum,value)
         by_turbine[tid]=dict(max_component_error_m=value,max_by_blade_m=np.max(abs(error),axis=(0,2)).tolist())
-        if value>.005:raise ValueError(f'BeamDyn component mismatch {tid}: {value}')
+        if value>.0002:raise ValueError(f'BeamDyn saved-frame component mismatch {tid}: {value}')
         if k==0:
             payload=dict(schema='wfrl.tip-deflection.t1.v3',turbine_id='T1',unit='m',
                 reference='BeamDyn structural tip; independent unloaded prebend',frame='BeamDyn pitched root xyz',

@@ -1,0 +1,61 @@
+{
+  "schema": "wfrl.extension-release.v1",
+  "version": "0.3.29",
+  "blender_minimum": "5.2.0",
+  "publication_status": "PUBLISHED",
+  "release_url": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.29",
+  "archive": {
+    "name": "wfrl_blender-0.3.29.zip",
+    "path": "publication/blender-0.3.29/package/wfrl_blender-0.3.29.zip",
+    "bytes": 99066277,
+    "file_count": 181,
+    "sha256": "c128633a21a40523a65ae0613fea286979e5317b9f3f0acdd8ead901d0d5f6fd",
+    "identity_source": "Local ZIP integrity, inventory and isolated installation validation",
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.29/wfrl_blender-0.3.29.zip",
+    "inventory_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.29/wfrl_blender-0.3.29.inventory.json",
+    "checksum_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.29/wfrl_blender-0.3.29.zip.sha256"
+  },
+  "source": {
+    "repository": "https://github.com/snode11/wind-farm-blender",
+    "branch": "wind-farm-rl-all-work",
+    "synchronized_branch": "main",
+    "tag": "v0.3.29",
+    "archive_name": "wind-farm-blender-source-0.3.29.zip",
+    "download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.29/wind-farm-blender-source-0.3.29.zip",
+    "canonical_payload_files_checked": 180,
+    "canonical_payload_match": true,
+    "source_rebuild_verification": "NOT_RUN"
+  },
+  "validation": {
+    "platform": "macOS",
+    "blender": "5.2.1 LTS",
+    "reports": [
+      "publication/blender-0.3.29/verification.json",
+      "publication/blender-0.3.29/package-validation.json"
+    ],
+    "host_passed": 247,
+    "host_skipped": 1,
+    "isolated_installation": "PASS",
+    "fresh_process_module_probe": "PASS",
+    "camera_background_regressions": 2,
+    "source_workload_background": "PASS",
+    "visible_ui": "NOT_RUN",
+    "whole_frontend_regression": "NOT_RUN",
+    "full_clip_fps_benchmark": "NOT_RUN",
+    "long_duration_stability": "NOT_RUN",
+    "windows_linux": "NOT_RUN",
+    "scientific_acceptance": "NOT_RUN"
+  },
+  "daily_installation": {
+    "updated_by_publication": false,
+    "saved_version": "0.3.28",
+    "saved_identity": "publication/daily-installation.json"
+  },
+  "limitations": [
+    "Manual controls and rootkink geometry are illustrative and do not provide independent physical simulations.",
+    "Geometry and texture remain NOT_ACCEPTED; lidar remains REVIEW_ONLY / PENDING_ACCEPTANCE; the 0.2 mm tip gate remains FAILED_GATE.",
+    "Source background workload checks do not establish viewport FPS or installed-window interaction behavior.",
+    "Backend services, solvers, original VTP and project launchers are not installed by the extension ZIP."
+  ],
+  "remote_asset_download_verification": false
+}

@@ -1,0 +1,155 @@
+{
+  "status": "PASS",
+  "blender": "5.2.1 LTS",
+  "module": "/project/blender_frontend/wfrl_blender/split_mappo_texture.py",
+  "checks": [
+    {
+      "name": "uv_failure_after_first_mesh",
+      "status": "PASS",
+      "inventory_restored": true,
+      "metadata_restored": true
+    },
+    {
+      "name": "allocation_before_helper_return_materials",
+      "status": "PASS",
+      "inventory_restored": true,
+      "metadata_restored": true
+    },
+    {
+      "name": "allocation_before_helper_return_images",
+      "status": "PASS",
+      "inventory_restored": true,
+      "metadata_restored": true
+    },
+    {
+      "name": "allocation_before_helper_return_meshes",
+      "status": "PASS",
+      "inventory_restored": true,
+      "metadata_restored": true
+    },
+    {
+      "name": "allocation_before_helper_return_objects",
+      "status": "PASS",
+      "inventory_restored": true,
+      "metadata_restored": true
+    },
+    {
+      "name": "allocation_before_helper_return_shape_keys",
+      "status": "PASS",
+      "inventory_restored": true,
+      "metadata_restored": true
+    },
+    {
+      "name": "allocation_before_helper_return_actions",
+      "status": "PASS",
+      "inventory_restored": true,
+      "metadata_restored": true
+    },
+    {
+      "name": "allocation_before_helper_return_cameras",
+      "status": "PASS",
+      "inventory_restored": true,
+      "metadata_restored": true
+    },
+    {
+      "name": "allocation_before_helper_return_texts",
+      "status": "PASS",
+      "inventory_restored": true,
+      "metadata_restored": true
+    },
+    {
+      "name": "allocation_before_helper_return_node_groups",
+      "status": "PASS",
+      "inventory_restored": true,
+      "metadata_restored": true
+    },
+    {
+      "name": "activation_after_inspection_nodes",
+      "status": "PASS",
+      "inventory_restored": true,
+      "metadata_restored": true
+    },
+    {
+      "name": "copied_camera_data_failure_preserves_shared_source",
+      "status": "PASS",
+      "inventory_restored": true,
+      "metadata_restored": true
+    },
+    {
+      "name": "activation_preserves_existing_shared_inspection_group",
+      "status": "PASS",
+      "inventory_restored": true,
+      "metadata_restored": true
+    },
+    {
+      "name": "protect_fake_user_materials",
+      "status": "PASS",
+      "retry_reclaims_released_resource": true
+    },
+    {
+      "name": "protect_fake_user_images",
+      "status": "PASS",
+      "retry_reclaims_released_resource": true
+    },
+    {
+      "name": "protect_fake_user_meshes",
+      "status": "PASS",
+      "retry_reclaims_released_resource": true
+    },
+    {
+      "name": "protect_fake_user_objects",
+      "status": "PASS",
+      "retry_reclaims_released_resource": true
+    },
+    {
+      "name": "protect_fake_user_shape_keys",
+      "status": "PASS",
+      "retry_reclaims_released_resource": true
+    },
+    {
+      "name": "protect_fake_user_actions",
+      "status": "PASS",
+      "retry_reclaims_released_resource": true
+    },
+    {
+      "name": "protect_fake_user_cameras",
+      "status": "PASS",
+      "retry_reclaims_released_resource": true
+    },
+    {
+      "name": "protect_shared_mesh",
+      "status": "PASS"
+    },
+    {
+      "name": "protect_external_object_link",
+      "status": "PASS"
+    },
+    {
+      "name": "protect_unregistered_third_party",
+      "status": "PASS"
+    },
+    {
+      "name": "protect_external_scene_direct_camera_reference",
+      "status": "PASS"
+    },
+    {
+      "name": "protect_external_text_user",
+      "status": "PASS"
+    },
+    {
+      "name": "deleted_scene_owned_resource_cleanup",
+      "status": "PASS"
+    },
+    {
+      "name": "retry_import_commits_three_full_601_sample_blades",
+      "status": "PASS",
+      "shared_source_context_preserved": true,
+      "repeated_ensure_reuses_session": true
+    },
+    {
+      "name": "file_load_discards_pending_references_and_restores_saved_import",
+      "status": "PASS"
+    }
+  ],
+  "scope": "Native datablock rollback, external ownership and import retry; no rendered-pixel or performance acceptance"
+}

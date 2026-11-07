@@ -233513,5 +233513,43 @@
       ],
       "scope": "Original NREL trial/encoding PNG inputs plus camera video frame/geometry metadata and local MediaMTX configuration; original bytes retained."
     }
+  ],
+  "supplemental_releases": [
+    {
+      "release": "https://github.com/snode11/wind-farm-blender/releases/tag/v0.3.30",
+      "scope": "Current source archive, installed-package software evidence and delivery identities. Existing large scientific resources are reused without modifying their bytes.",
+      "assets": [
+        {
+          "file": "wfrl-validation-0.3.30.inventory.json",
+          "bytes": 20027,
+          "sha256": "d90f6a0c7546f845fc68d28547f7237e240d92dee794b3fba8083ee34cc13178",
+          "url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl-validation-0.3.30.inventory.json"
+        },
+        {
+          "file": "wfrl-validation-0.3.30.zip",
+          "bytes": 8317221,
+          "sha256": "25a53882a7192ffb366a0cfa4349c0700499ce204866d3ea22afd3ca27dfe228",
+          "url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl-validation-0.3.30.zip"
+        },
+        {
+          "file": "wfrl-validation-0.3.30.zip.sha256",
+          "bytes": 93,
+          "sha256": "a9be30b21cfdfaadf32c9fa52e6bb06d565105fa35a547f481391110ae0a6112",
+          "url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wfrl-validation-0.3.30.zip.sha256"
+        },
+        {
+          "file": "wind-farm-blender-source-0.3.30.zip",
+          "bytes": 164751072,
+          "sha256": "f3b2de4ec7d2a9a9c07fb289a4d39ab333b74e165b3ebe5b36b3d7015a560f5e",
+          "url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wind-farm-blender-source-0.3.30.zip"
+        },
+        {
+          "file": "wind-farm-blender-source-0.3.30.zip.sha256",
+          "bytes": 102,
+          "sha256": "61f071a7e9f71df769f47fa799e5d1610e8216e577fc9104b65e5d38e2555cb9",
+          "url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.30/wind-farm-blender-source-0.3.30.zip.sha256"
+        }
+      ]
+    }
   ]
 }

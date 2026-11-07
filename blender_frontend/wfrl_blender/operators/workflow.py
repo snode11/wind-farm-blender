@@ -14,6 +14,9 @@ class WFRL_WorkflowSettings(bpy.types.PropertyGroup):
     controls: bpy.props.EnumProperty(name='Control channels', items=[('yaw', 'Yaw', ''), ('yaw,pitch', 'Yaw / Pitch', ''), ('yaw,pitch,torque', 'Yaw / Pitch / Torque', '')])
     iters: bpy.props.IntProperty(name='Iterations', default=8, min=1)
     n_steps: bpy.props.IntProperty(name='Rollout steps', default=64, min=1)
+    episode_steps: bpy.props.IntProperty(
+        name='Episode steps', default=0, min=0,
+        description='Training control steps per episode; 0 uses one continuous episode. Warmup is excluded')
     warmup_steps: bpy.props.IntProperty(name='Warmup steps', default=4, min=0)
     seed: bpy.props.IntProperty(name='Seed', default=0, min=0)
     checkpoint: bpy.props.StringProperty(name='Checkpoint', subtype='FILE_PATH')
@@ -39,8 +42,10 @@ def launch_options(context, mode):
     if overrides: options['scene_overrides'] = overrides
     if mode in {'interactive_training', 'formal_training'}:
         options.update({key: getattr(settings, key) for key in ('iters', 'n_steps', 'warmup_steps', 'seed')})
+    if mode == 'interactive_training':
+        options['episode_steps'] = settings.episode_steps
     if mode == 'replay':
-        if not settings.checkpoint: raise ValueError('Choose a compatible checkpoint for Replay')
+        if not settings.checkpoint: raise ValueError('Choose a compatible checkpoint for backend policy evaluation')
         options.update(ckpt_path=bpy.path.abspath(settings.checkpoint), replay_steps=settings.replay_steps,
                        warmup_steps=settings.warmup_steps, seed=settings.seed)
     elif mode == 'formal_training' and settings.checkpoint:
@@ -63,7 +68,8 @@ class WFRL_OT_LoadConfiguredScene(bpy.types.Operator):
             runtime.send_workflow_command('scene.load', {'scene': bpy.path.abspath(prefs.default_scene),
                 'scene_overrides': scene_overrides(context.scene.wfrl_workflow)})
         except ValueError as exc:
-            self.report({'ERROR'}, str(exc)); return {'CANCELLED'}
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
         return {'FINISHED'}
 
 
@@ -77,7 +83,8 @@ class WFRL_OT_SetChannel(bpy.types.Operator):
             runtime.send_workflow_command('channel.set', {'topic': context.scene.wfrl_workflow.topic,
                                                          'enabled': self.enabled})
         except ValueError as exc:
-            self.report({'ERROR'}, str(exc)); return {'CANCELLED'}
+            self.report({'ERROR'}, str(exc))
+            return {'CANCELLED'}
         return {'FINISHED'}
 
 

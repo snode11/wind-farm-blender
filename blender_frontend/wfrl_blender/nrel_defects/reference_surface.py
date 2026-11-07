@@ -44,21 +44,26 @@ def _closest_triangle(p, a, b, c):
     ab, ac, ap = _sub(b, a), _sub(c, a), _sub(p, a)
     d1, d2 = _dot(ab, ap), _dot(ac, ap)
     if d1 <= 0 and d2 <= 0: return a, (1., 0., 0.)
-    bp = _sub(p, b); d3, d4 = _dot(ab, bp), _dot(ac, bp)
+    bp = _sub(p, b)
+    d3, d4 = _dot(ab, bp), _dot(ac, bp)
     if d3 >= 0 and d4 <= d3: return b, (0., 1., 0.)
     vc = d1*d4-d3*d2
     if vc <= 0 and d1 >= 0 and d3 <= 0:
-        v = d1/(d1-d3); return _add(a, _mul(ab, v)), (1-v, v, 0.)
-    cp = _sub(p, c); d5, d6 = _dot(ab, cp), _dot(ac, cp)
+        v = d1/(d1-d3)
+        return _add(a, _mul(ab, v)), (1-v, v, 0.)
+    cp = _sub(p, c)
+    d5, d6 = _dot(ab, cp), _dot(ac, cp)
     if d6 >= 0 and d5 <= d6: return c, (0., 0., 1.)
     vb = d5*d2-d1*d6
     if vb <= 0 and d2 >= 0 and d6 <= 0:
-        w = d2/(d2-d6); return _add(a, _mul(ac, w)), (1-w, 0., w)
+        w = d2/(d2-d6)
+        return _add(a, _mul(ac, w)), (1-w, 0., w)
     va = d3*d6-d5*d4
     if va <= 0 and d4-d3 >= 0 and d5-d6 >= 0:
         w = (d4-d3)/((d4-d3)+(d5-d6))
         return _add(b, _mul(_sub(c, b), w)), (0., 1-w, w)
-    den = 1/(va+vb+vc); v, w = vb*den, vc*den
+    den = 1/(va+vb+vc)
+    v, w = vb*den, vc*den
     return _add(a, _add(_mul(ab, v), _mul(ac, w))), (1-v-w, v, w)
 
 
@@ -140,7 +145,8 @@ class ReferenceSurface:
                         if _dot(authored, canonical) < 0:
                             ordered = (ordered[0], ordered[3], ordered[2], ordered[1])
             for j in range(1, len(ordered)-1):
-                triangles.append((ordered[0], ordered[j], ordered[j+1])); parents.append(parent)
+                triangles.append((ordered[0], ordered[j], ordered[j+1]))
+                parents.append(parent)
         return tuple(triangles), tuple(parents)
 
     def metadata(self):
@@ -218,8 +224,10 @@ class ReferenceSurface:
                 knots = sorted(set([low, high]+([diag] if low < diag < high else [])))
                 for u0, u1 in zip(knots, knots[1:]):
                     anchor = dict(s_m=s, u=u0, surface_side=side, theta_deg=0.)
-                    a = self.point(anchor); b = self.point(dict(anchor, u=u1))
-                    ab = _sub(b, a); v = max(0., min(1., _dot(_sub(p, a), ab)/_dot(ab, ab)))
+                    a = self.point(anchor)
+                    b = self.point(dict(anchor, u=u1))
+                    ab = _sub(b, a)
+                    v = max(0., min(1., _dot(_sub(p, a), ab)/_dot(ab, ab)))
                     q = _add(a, _mul(ab, v))
                     if _norm(_sub(p, q)) <= tolerance_m:
                         found = dict(anchor, u=u0+v*(u1-u0))
@@ -254,7 +262,8 @@ class ReferenceSurface:
         return best[1]
 
     def _step(self, anchor, theta, distance):
-        f = self.frame(anchor); angle = math.radians(theta)
+        f = self.frame(anchor)
+        angle = math.radians(theta)
         direction = _add(_mul(f['e_s'], math.cos(angle)), _mul(f['e_t'], math.sin(angle)))
         a, b = f['dp_ds'], f['dp_du']
         aa, ab, bb = _dot(a, a), _dot(a, b), _dot(b, b)
@@ -280,8 +289,10 @@ class ReferenceSurface:
         No world-space offsets are persisted.  The returned strip is the support
         definition for both the appearance mask and geometric opening.
         """
-        anchor = deepcopy(defect['anchor']); self._anchor(anchor)
-        shape = defect['shape']; length = _finite(shape['length_m'], 'length_m')
+        anchor = deepcopy(defect['anchor'])
+        self._anchor(anchor)
+        shape = defect['shape']
+        length = _finite(shape['length_m'], 'length_m')
         width = _finite(shape['max_width_m'], 'max_width_m')
         if length <= 0 or width <= 0: raise ValueError('Shape dimensions must be positive')
         seed = shape['seed']
@@ -302,23 +313,30 @@ class ReferenceSurface:
         centerline = [self.point(a) for a in anchors]
         left, right, la, ra, normals, widths, paths, profile = [], [], [], [], [], [], [], []
         for i, a in enumerate(anchors):
-            f = self.frame(a); normals.append(f['normal'])
+            f = self.frame(a)
+            normals.append(f['normal'])
             tangent = _sub(centerline[min(i+1, len(anchors)-1)], centerline[max(0, i-1)])
             tangent = _unit(_sub(tangent, _mul(f['normal'], _dot(tangent, f['normal']))))
             transverse = _unit(_cross(f['normal'], tangent))
             theta = math.degrees(math.atan2(_dot(transverse, f['e_t']), _dot(transverse, f['e_s'])))
             factor = (patch_width_factor(defect['morphology'], 2*i/(len(anchors)-1)-1, shape)
                       if patch else .025+.975*math.sin(math.pi*i/(len(anchors)-1))**.7)
-            profile.append(factor); half_width = width*factor/2
+            profile.append(factor)
+            half_width = width*factor/2
             sides = []
             for sign in (-1, 1):
-                current = deepcopy(a); path = [centerline[i]]
+                current = deepcopy(a)
+                path = [centerline[i]]
                 for _ in range(4):
                     current = self._step(current, theta+(180 if sign < 0 else 0), half_width/4)
                     path.append(self.point(current))
                 sides.append((current, path))
-            la.append(sides[0][0]); ra.append(sides[1][0]); left.append(sides[0][1][-1]); right.append(sides[1][1][-1])
-            path = list(reversed(sides[0][1]))+sides[1][1][1:]; paths.append(path)
+            la.append(sides[0][0])
+            ra.append(sides[1][0])
+            left.append(sides[0][1][-1])
+            right.append(sides[1][1][-1])
+            path = list(reversed(sides[0][1]))+sides[1][1][1:]
+            paths.append(path)
             widths.append(sum(_norm(_sub(b, a)) for a, b in zip(path, path[1:])))
         measured = sum(_norm(_sub(b, a)) for a, b in zip(centerline, centerline[1:]))
         if abs(measured-length) > DIMENSION_TOLERANCE_M or abs(max(widths)-width) > DIMENSION_TOLERANCE_M:

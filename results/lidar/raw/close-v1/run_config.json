@@ -1,0 +1,134 @@
+{
+  "name": "close-v1",
+  "wind_mps": 12.0,
+  "duration_s": 36,
+  "fps": 80,
+  "dt_s": 0.00625,
+  "span_refined": false,
+  "controller": "prescribed constant 9 rpm; fixed pitch 0 deg; no ServoDyn; no policy checkpoint",
+  "blade_dofs": [
+    "FlapDOF1",
+    "FlapDOF2",
+    "EdgeDOF"
+  ],
+  "tower": "rigid",
+  "startup_discard_s": 18,
+  "inputs": [
+    {
+      "path": "5MW_Baseline/AD.dat",
+      "sha256": "05744e9ae621af471ac350b8f2c1d91a08066426fcdafe1ee4707885c3970738"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/Cylinder1.dat",
+      "sha256": "ebaabc1d2befd769cde8cb28a75be0d2b73585f2a27960a3dc34cfbd05f60a2c"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/Cylinder1_coords.txt",
+      "sha256": "3a3a40c1eee741786357bab6fb49ae37b925dcf47a16aec083e8712c5b3bb595"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/Cylinder2.dat",
+      "sha256": "4be751a2b80057410c15ba2bc3ed799642dcd5cf12b544345aa61bc6777a1f64"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/Cylinder2_coords.txt",
+      "sha256": "57928cf1f02057e34f45b00c71fc2468d7fc4d63605047a62907e25dee4637e0"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU21_A17.dat",
+      "sha256": "2ad661a5f04e87285b8c7f79e9e0b67765ce0f876a9597f604935eb6c47fa2f6"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU21_A17_coords.txt",
+      "sha256": "b4d6350614b0fbbd6262ec340c78ee8eb0562ddfc8cf6bdf222228e739392ca4"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU25_A17.dat",
+      "sha256": "52fcce2a8fd1159f38cdd1a8bfd365f79e3060e66ea91d5ab8fbce1f16ec20a7"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU25_A17_coords.txt",
+      "sha256": "08e7d345ef3e066f059f1fcf5f9b779e6a7e455ff2f6944931b227916d7730e7"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU30_A17.dat",
+      "sha256": "e9d0f18b62a5361c0d45e401d4d22fd5d02f34dc2243a96a7b0f5e2a4b24c163"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU30_A17_coords.txt",
+      "sha256": "fb63e89e1c53c3278cd420a5ab36402a4d609850f1869f4013848a041e7a5c93"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU35_A17.dat",
+      "sha256": "701cff83e01a187209ff788a3fc4bfb9b8592546462a5aec2f0df54701d05763"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU35_A17_coords.txt",
+      "sha256": "cdbb3d2d5735b0fd6be7a9c4b4439ba2ac6e78c3652657ef4090739c2dc0877a"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU40_A17.dat",
+      "sha256": "002e2176cf03eda520b160d5a46ce0f5f42125f892c9d0e1fd3c40424d249324"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/DU40_A17_coords.txt",
+      "sha256": "5008c9aa91ada47cad7badd9330ba36c72010bdbf0450852cf5ed81c92cf6579"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/NACA64_A17.dat",
+      "sha256": "acfbf90a0aa479f560911d89b31ec20d02284496a74ecfc9b8ad0534c5d472b9"
+    },
+    {
+      "path": "5MW_Baseline/Airfoils/NACA64_A17_coords.txt",
+      "sha256": "c91942a4843516ab7f1b17a34162d21dbc400fbb4011b60f83a83acf08c8bdec"
+    },
+    {
+      "path": "5MW_Baseline/NRELOffshrBsline5MW_AeroDyn_blade.dat",
+      "sha256": "e22829920eb2b6323f0bb3b666c7e2ed9b69b01c684d682363ba16e086fce758"
+    },
+    {
+      "path": "5MW_Baseline/NRELOffshrBsline5MW_Blade.dat",
+      "sha256": "5bbcaa305218c95fdd4581a3d765346c55c0f845f7afe078336cc455fcb6d1e3"
+    },
+    {
+      "path": "5MW_Baseline/NRELOffshrBsline5MW_Onshore_ElastoDyn_Tower.dat",
+      "sha256": "82ca67bea8bfbc85892b5f78db5e921c9aa0e69f34af4ae657c0b7e63301dc8f"
+    },
+    {
+      "path": "FarmInputs/Case.fstf",
+      "sha256": "215c1e8da6ad303fe05152813c28954756514ea2296a8725919f25be0da24b77"
+    },
+    {
+      "path": "FarmInputs/FFTest_WT1.fst",
+      "sha256": "c904fa0869791f75b93320456a2f3ea2bbee64a5ca9ed403311fa03a8f4d72cb"
+    },
+    {
+      "path": "FarmInputs/FFTest_WT2.fst",
+      "sha256": "bbcc716a40155cc6cd0c47ec6be39361aa2f0c4c99652c8db4fb774aad769c78"
+    },
+    {
+      "path": "FarmInputs/FFTest_WT3.fst",
+      "sha256": "39e1dcd07929b30f8fb1ecef7ce3b94f413949641d1fc8fe38363a33c0aa2092"
+    },
+    {
+      "path": "FarmInputs/InflowWind.dat",
+      "sha256": "85b23db026821291510f41601748e9bb45f48adb5f7c09f4962727aa26541854"
+    },
+    {
+      "path": "FarmInputs/NRELOffshrBsline5MW_Onshore_ElastoDyn_8mps.dat",
+      "sha256": "5d17d455a2140151b19862ea2277b6b1f828eea126bc6dd3eb6b1fea6b02eb1a"
+    },
+    {
+      "path": "FarmInputs/NRELOffshrBsline5MW_Onshore_ServoDyn_WT1.dat",
+      "sha256": "b512fc6976a595e853043bf68e545dc5ea6fc5d072a86a6581e313abd5253fa8"
+    },
+    {
+      "path": "FarmInputs/NRELOffshrBsline5MW_Onshore_ServoDyn_WT2.dat",
+      "sha256": "3e014fd769ddb7bad24ad214549c106334e9e08cb9e718ad82b14fa6ce8f65cd"
+    },
+    {
+      "path": "FarmInputs/NRELOffshrBsline5MW_Onshore_ServoDyn_WT3.dat",
+      "sha256": "9ac9ce9e1752ad1a4b38e01d1a4a87693fca2a233884e5e9550e8f3f996092ab"
+    }
+  ]
+}

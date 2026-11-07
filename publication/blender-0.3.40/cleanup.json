@@ -1,0 +1,35 @@
+{
+  "schema": "wfrl.recoverable-cleanup.v1",
+  "status": "PASS",
+  "scope": "Release-owned isolated profile, independent source build copies, scratch scripts, test scenes, duplicate screenshots, and regenerable cache.",
+  "trash_roots": [
+    "/Users/eason/.Trash/WFRL-release-0.3.40-38889658e6"
+  ],
+  "items_moved": 10,
+  "files_moved": 6719,
+  "bytes_moved": 1223721866,
+  "inventories": [
+    "/Users/eason/.Trash/WFRL-release-0.3.40-38889658e6/removed-items.json"
+  ],
+  "restore_tools": [
+    "/Users/eason/.Trash/WFRL-release-0.3.40-38889658e6/restore.py"
+  ],
+  "permanent_deletion": false,
+  "preserved_package": "publication/blender-0.3.40/validated/package/wfrl_blender-0.3.40.zip",
+  "preserved_source": "publication/blender-0.3.40/delivery/wind-farm-blender-source-0.3.40.zip",
+  "rollback_backup": "/Users/eason/.codex/backups/wfrl-release-0.3.40",
+  "formal_research_inputs_results_and_frozen_methods_preserved": true,
+  "raw_validation_logs_and_results_preserved": true,
+  "isolated_runtime_profiles_remaining": false,
+  "source_asset_files_checked": 66,
+  "restoration_dry_run": {
+    "status": "DRY_RUN_PASS",
+    "items": 10,
+    "overwrite_protection": true,
+    "sha256_integrity": true
+  },
+  "git_head_preserved": true,
+  "git_index_preserved": true,
+  "protected_profile_files_checked": 6,
+  "installation_and_asset_integrity": "PASS"
+}

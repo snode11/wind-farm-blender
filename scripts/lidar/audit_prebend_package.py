@@ -10,15 +10,15 @@ from scripts.lidar.package_prebend_probe import save_json
 
 def audit(package,output):
     package,output=Path(package),Path(output);output.mkdir(parents=True,exist_ok=False)
-    m=json.loads((package/'manifest.json').read_text())
+    m=json.loads((package/'manifest.json').read_text(encoding='utf-8'))
     for n,h in m['files'].items():
         if hashlib.sha256((package/n).read_bytes()).hexdigest()!=h:raise ValueError('Package integrity mismatch')
     with np.load(package/'geometry.npz') as a:times=a['times'];poses=a['poses'];transforms=a['transforms']
     with np.load(package/'tower-motion.npz') as a:towers=a['transforms'];nacelles=a['nacelle'];heights=a['heights']
     with np.load(package/'reference-surfaces.npz') as a:refs=a['blades'];tri=a['triangles'];tref=a['tower'];ttri=a['tower_triangles']
     ring=np.array([np.flatnonzero(tref[:,2]==h) for h in heights]);cal=Calibration()
-    data=json.loads((package/'data.json').read_text());allrows={};report={}
-    budget=json.loads((Path(__file__).resolve().parents[2]/'evidence/prebend-20260918/acceptance-budget.json').read_text())
+    data=json.loads((package/'data.json').read_text(encoding='utf-8'));allrows={};report={}
+    budget=json.loads((Path(__file__).resolve().parents[2]/'evidence/prebend-20260918/acceptance-budget.json').read_text(encoding='utf-8'))
     for k,tid in enumerate(m['turbine_ids']):
         recorded={(r['time_s'],r['blade_id']):r for r in data[tid]['measurements']};rows=[]
         for i,t in enumerate(times):

@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "module": "bl_ext.user_default.wfrl_blender",
+  "addon_file": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
+  "blender": "5.2.1 LTS",
+  "background": true,
+  "pose_updates": 60,
+  "proxy_replacements_during_pose_updates": 0,
+  "source_sha256": "7116afe0ebfb1964e44e5a5ee4238a0824fa54ab0e33098013fe2c61e4db55f0",
+  "checks": [
+    "60 pose/metadata changes retain one proxy/data pair and manual view",
+    "evaluated COPY_TRANSFORMS follows source pose",
+    "proxy masks remain disabled",
+    "FOV and clip changes rebuild one calibrated proxy without resource growth",
+    "pixel-aspect changes invalidate optical proxy",
+    "source replacement rebinds constraint while preserving shared camera data",
+    "proxy release removes owned object and data"
+  ],
+  "scope": "Real Blender camera data and evaluated constraints; viewport adapter, no window/GPU/FPS acceptance"
+}

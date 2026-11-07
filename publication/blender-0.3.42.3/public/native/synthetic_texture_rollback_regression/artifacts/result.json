@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "checks": [
+    "synthetic_material",
+    "synthetic_mesh",
+    "synthetic_activation",
+    "surface_pack",
+    "surface_mesh",
+    "surface_apply",
+    "cleanup_retry",
+    "surface_cleanup_retry",
+    "synthetic_retry_success"
+  ],
+  "blender": "5.2.1 LTS",
+  "module": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/split_surface_texture.py",
+  "scope": "Native datablocks and predecoded RGB helper; no rendered pixel or scientific acceptance"
+}

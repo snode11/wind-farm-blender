@@ -354,7 +354,9 @@ class GW184_OT_defect_action(bpy.types.Operator):
                 raise ValueError('扫描进行中；按 Esc 取消后操作')
             if s.healthy_payload is not None and self.action != 'HEALTHY':
                 raise ValueError('当前是健康对照，请先返回损伤状态')
-            if self.action in ('NEW', 'EDIT'):
+            if self.action == 'RETRY_CLEANUP':
+                s.store.retry_disposals(strict=True)
+            elif self.action in ('NEW', 'EDIT'):
                 d = s.begin(None if self.action == 'NEW' else p.selected, p.kind)
                 p.selected = s.draft_index
                 props_from_defect(p, d)
@@ -529,6 +531,9 @@ class GW184_PT_defects(bpy.types.Panel):
         layout.operator('gw184.defect_scan', text='逐帧 G 扫描（Esc 可取消）')
         layout.label(text='按需 A 图：命令行入口')
         layout.label(text='渲染默认关闭；保存配置不会出图')
+        if s.store.pending_disposals:
+            layout.label(text='缺陷已应用；旧资源待释放', icon='ERROR')
+            buttons([('RETRY_CLEANUP', '重试资源释放')])
         layout.label(text=p.status[:60])
 
 

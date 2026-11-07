@@ -1,0 +1,358 @@
+{
+  "status": "PASS",
+  "final": true,
+  "verification_layer": "SOURCE_RUNTIME",
+  "blender": "/Applications/Blender.app/Contents/MacOS/Blender",
+  "package_inputs": {
+    "builtin_mappo": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/mappo",
+      "manifest_sha256": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde"
+    },
+    "builtin_dual_beam": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/dual_beam",
+      "manifest_sha256": "9eea6aa1bb5c44d5b307a63017be7b81c8e43ea092f92cfb30822d9fc63b5645"
+    },
+    "builtin_split_example": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+      "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b"
+    }
+  },
+  "tests": [
+    {
+      "script": "custom_camera_capture_regression.py",
+      "mode": "background",
+      "scope": "Native camera/configuration guards; GPU capture not verified.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 0.9300370839191601,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/custom_camera_capture_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "blender": "5.2.1 LTS",
+            "module": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "checks": {
+              "canonical_pose_accepted": true,
+              "native_position_rotation_delta_scale_parent_inverse_lens_sensor_shift_clip_rejected": true,
+              "evaluated_constraint_pose_rejected": true,
+              "evaluated_lens_driver_rejected": true,
+              "nan_delta_lens_clip_parent_pose_rejected_before_geometry_and_hashing": true,
+              "common_parent_motion_accepted": true,
+              "guard_extracts_evaluated_signature_once_without_collision_geometry": true,
+              "signature_and_collision_share_evaluated_surface_coordinates_and_faces": true,
+              "guard_detects_native_mesh_and_evaluated_modifier_changes": true,
+              "transaction_guard_detects_native_edit_with_unchanged_saved_layout": true
+            }
+          },
+          "log": "/Users/eason/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes/native-checks/custom_camera_capture_regression/run/blender.log",
+          "report": "/Users/eason/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes/native-checks/custom_camera_capture_regression/artifacts/result.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "custom_camera_load_invalidation_regression.py",
+      "mode": "background",
+      "scope": "Native file loads, invalidation callbacks and refresh requests with a render adapter; GPU pixels not verified.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 0.8006023339694366,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/custom_camera_load_invalidation_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "blender": "5.2.1 LTS",
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "background": true,
+            "method": "Real open_mainfile, module reload and mesh mutation; render adapter without GPU drawing.",
+            "source_sha256": {
+              "wfrl_blender.custom_camera_preview": "06c8b6e97f81fa0908394b7b0735d5755b860f2c9a64affa8df2fc4032479214",
+              "wfrl_blender.panels.custom_cameras": "92eb89c73b1364568af372f51877ac9cdbf30d344a7b879d7119e9c03ec09e95"
+            },
+            "checks": {
+              "initial_callback_once": true,
+              "load_1_callback_once": true,
+              "load_1_native_mutation_increments_revision": true,
+              "load_1_refresh_invalidates": true,
+              "load_1_geometry_fingerprint_changes": true,
+              "load_1_migration_idempotent": true,
+              "load_2_callback_once": true,
+              "load_2_native_mutation_increments_revision": true,
+              "load_2_refresh_invalidates": true,
+              "load_2_geometry_fingerprint_changes": true,
+              "load_2_migration_idempotent": true,
+              "load_3_callback_once": true,
+              "load_3_native_mutation_increments_revision": true,
+              "load_3_refresh_invalidates": true,
+              "load_3_geometry_fingerprint_changes": true,
+              "load_3_migration_idempotent": true,
+              "reload_1_exactly_one_current_callback": true,
+              "reload_1_preserves_unrelated_callback": true,
+              "reload_1_native_mutation_increments_revision": true,
+              "reload_1_refresh_invalidates": true,
+              "reload_1_geometry_fingerprint_changes": true,
+              "reload_before_register_unregisters_all_owned_callbacks": true,
+              "reload_2_exactly_one_current_callback": true,
+              "reload_2_preserves_unrelated_callback": true,
+              "reload_2_native_mutation_increments_revision": true,
+              "reload_2_refresh_invalidates": true,
+              "reload_2_geometry_fingerprint_changes": true,
+              "unregister_removes_callback": true,
+              "unregister_preserves_unrelated_callback": true,
+              "unregister_releases_renderers": true
+            },
+            "failures": {}
+          },
+          "log": "/Users/eason/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes/native-checks/custom_camera_load_invalidation_regression/run/blender.log",
+          "report": "/Users/eason/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes/native-checks/custom_camera_load_invalidation_regression/artifacts/checks.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "scene_playback_lifecycle_regression.py",
+      "mode": "background",
+      "scope": "Native background data checks; visible interaction not verified.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 4.939021833008155,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/scene_playback_lifecycle_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "scope": "isolated background Blender",
+            "addon_module": "wfrl_blender",
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "ready_scene": "A_MAPPO",
+            "failed_scene": "B_FULL_COPY",
+            "failed_status": "回放数据未就绪：Scene lacks required FarmFlex objects: WFRL.Turbine.T1.YawRoot, WFRL.Turbine.T1.Rotor, WFRL.Turbine.T1.Tower, WFRL.Turbine.T1.Blade1, WFRL.Turbine.T1.Blade2, WFRL.Turbine.T1.Blade3, WFRL.Turbine.T2.YawRoot, WFRL.Turbine.T2.Rotor, WFRL.Turbine.T2.Tower, WFRL.Turbine.T2.Blade1, WFRL.Turbine.T2.Blade2, WFRL.Turbine.T2.Blade3, WFRL.Turbine.T3.YawRoot, WFRL.Turbine.T3.Rotor, WFRL.Turbine.T3.Tower, WFRL.Turbine.T3.Blade1, WFRL.Turbine.T3.Blade2, WFRL.Turbine.T3.Blade3",
+            "mesh_change_max_m": 0.2769445519647368,
+            "frame": 181,
+            "time_s": 120.0,
+            "linked_scene_rejected": true
+          },
+          "log": "/Users/eason/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes/native-checks/scene_playback_lifecycle_regression/run/blender.log",
+          "report": "/Users/eason/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes/native-checks/scene_playback_lifecycle_regression/artifacts/checks.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "replay_history_regression.py",
+      "mode": "background",
+      "scope": "Native background data checks; visible interaction not verified.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 5.689119457965717,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/replay_history_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": true
+          },
+          "script_result": {
+            "scope": "Independent Blender process; native operators invoked by script",
+            "blender": "5.2.1 LTS",
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "checks": [
+              {
+                "label": "camera_undo",
+                "deltas": {
+                  "WFRL.Turbine.T1.Blade1": 4.0437948402525,
+                  "WFRL.Turbine.T1.Blade2": 3.32004755361435,
+                  "WFRL.Turbine.T1.Blade3": 0.6786137994557571,
+                  "WFRL.Turbine.T2.Blade1": 0.9641237610186122,
+                  "WFRL.Turbine.T2.Blade2": 1.4091391858089695,
+                  "WFRL.Turbine.T2.Blade3": 0.7492456383397521,
+                  "WFRL.Turbine.T3.Blade1": 1.4186494393628908,
+                  "WFRL.Turbine.T3.Blade2": 1.100670009385481,
+                  "WFRL.Turbine.T3.Blade3": 1.457107982127398
+                },
+                "time_s": 120.00416666666666,
+                "resources": {
+                  "meshes": 272,
+                  "curves": 170,
+                  "comparison_orphans": []
+                }
+              },
+              {
+                "label": "camera_redo",
+                "deltas": {
+                  "WFRL.Turbine.T1.Blade1": 4.0437948402525,
+                  "WFRL.Turbine.T1.Blade2": 3.32004755361435,
+                  "WFRL.Turbine.T1.Blade3": 0.6786137994557571,
+                  "WFRL.Turbine.T2.Blade1": 0.9641237610186122,
+                  "WFRL.Turbine.T2.Blade2": 1.4091391858089695,
+                  "WFRL.Turbine.T2.Blade3": 0.7492456383397521,
+                  "WFRL.Turbine.T3.Blade1": 1.4186494393628908,
+                  "WFRL.Turbine.T3.Blade2": 1.100670009385481,
+                  "WFRL.Turbine.T3.Blade3": 1.457107982127398
+                },
+                "time_s": 120.00416666666666,
+                "resources": {
+                  "meshes": 272,
+                  "curves": 170,
+                  "comparison_orphans": []
+                }
+              },
+              {
+                "label": "saved_package_failure_remains_unavailable",
+                "passed": true
+              },
+              {
+                "label": "missing_runtime_no_rigid_fallback",
+                "passed": true
+              },
+              {
+                "label": "reload_after_scene_delete",
+                "deltas": {
+                  "WFRL.Turbine.T1.Blade1": 1.4631023867004256,
+                  "WFRL.Turbine.T1.Blade2": 1.199114000679726,
+                  "WFRL.Turbine.T1.Blade3": 0.13869976526337968,
+                  "WFRL.Turbine.T2.Blade1": 2.014719131872856,
+                  "WFRL.Turbine.T2.Blade2": 1.3565252670839911,
+                  "WFRL.Turbine.T2.Blade3": 1.1108994432129287,
+                  "WFRL.Turbine.T3.Blade1": 1.1112765015571955,
+                  "WFRL.Turbine.T3.Blade2": 0.7632458256039997,
+                  "WFRL.Turbine.T3.Blade3": 0.6498680348787368
+                },
+                "time_s": 117.0,
+                "resources": {
+                  "meshes": 272,
+                  "curves": 170,
+                  "comparison_orphans": []
+                }
+              },
+              {
+                "label": "unregister_after_reload",
+                "passed": true
+              }
+            ],
+            "baseline_resources": {
+              "meshes": 272,
+              "curves": 170,
+              "comparison_orphans": []
+            },
+            "sha256": {
+              "farm_flex.py": "76ce271a3250fc3143caa5e768245b5f714c2539ffc2f3d3d40c85c2be419ae5",
+              "clearance_replay.py": "08726df7b00010fd13d971a99546b3790f7b09d8048f031d64a06e22c493f1f2",
+              "split_turbine_context.py": "c1abd4f0297065ffc54f5a9079d9f6be6629bc450d5e0c8a6dc97f9c0a325602",
+              "deflection.py": "6ecbc602956a7f620b5c10628838a3695a6a904501628ffc4964d0bcea2ee123"
+            },
+            "status": "PASS"
+          },
+          "log": "/Users/eason/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes/native-checks/replay_history_regression/run/blender.log",
+          "report": "/Users/eason/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes/native-checks/replay_history_regression/artifacts/checks.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "farm_flex_regression.py",
+      "mode": "background",
+      "scope": "Native background data checks; visible interaction not verified.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 4.8284225419629365,
+          "source_changed": false,
+          "execution": {
+            "status": "PASS",
+            "final": true,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/farm_flex_regression.py",
+            "background": true,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "blades": 9,
+            "root_connection_max_error_m": 0.0004778028976331437,
+            "mean_update_ms": 5.357181253687789,
+            "p95_update_ms": 5.926868045935406,
+            "scope": "background frame update; not actual viewport FPS",
+            "duration_s": 60.0
+          },
+          "log": "/Users/eason/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes/native-checks/farm_flex_regression/run/blender.log",
+          "report": "/Users/eason/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes/native-checks/farm_flex_regression/artifacts/checks.json"
+        }
+      ],
+      "status": "PASS"
+    }
+  ],
+  "temporary_paths": [
+    "/Users/eason/.codex/visualizations/2026/10/30/01a18adc-09f2-7043-860a-f990737b21be/blender-frontend-fixes/native-scratch/wfrl-regressions-22x1dn4d"
+  ],
+  "visible_processes": "serial, independent factory-startup profiles",
+  "counts": {
+    "PASS": 5
+  }
+}

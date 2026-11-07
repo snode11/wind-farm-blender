@@ -108,23 +108,23 @@ def main(output):
         raise FileExistsError(report_path)
     before = snapshot(first, second)
     write_json(out / 'baseline_before.json', before)
-    checks = verify_existing(first / 'formal', json.loads((first / 'formal/manifest.json').read_text())['artifacts_sha256'])
-    checks += verify_existing(second, json.loads((second / 'model_freeze.json').read_text())['sha256'])
+    checks = verify_existing(first / 'formal', json.loads((first / 'formal/manifest.json').read_text(encoding='utf-8'))['artifacts_sha256'])
+    checks += verify_existing(second, json.loads((second / 'model_freeze.json').read_text(encoding='utf-8'))['sha256'])
     if not all(c['matches'] for c in checks):
         write_json(out / 'signature_mismatches.json', [c for c in checks if not c['matches']])
         raise RuntimeError('Existing signed evidence differs; inspect signature_mismatches.json')
-    source_checks = verify_existing(ROOT, json.loads((second / 'reconstruction/implementation_at_launch.json').read_text())['sha256'])
+    source_checks = verify_existing(ROOT, json.loads((second / 'reconstruction/implementation_at_launch.json').read_text(encoding='utf-8'))['sha256'])
     # Source may have changed after launch while the frozen outputs remained
     # intact. Report such drift rather than declaring historical source identity.
     checks += source_checks
-    final_source_checks = verify_existing(ROOT, json.loads((second / 'manifest.json').read_text())['source_sha256'])
+    final_source_checks = verify_existing(ROOT, json.loads((second / 'manifest.json').read_text(encoding='utf-8'))['source_sha256'])
     write_json(out / 'final_source_reconciliation.json', {
         'checks': final_source_checks, 'matches': sum(c['matches'] for c in final_source_checks),
         'count': len(final_source_checks),
         'interpretation': 'Launch snapshot and final delivery snapshot are different evidence times. boundary_metrics.py matches the final delivery snapshot, not the fit-launch snapshot. Existing model/optimizer/contour files and historical models remain unchanged.'})
     bundle = first / 'formal/algorithm-input'
     data, calibrations, motion = load_bundle(bundle)
-    observations = json.loads((second / 'observations/annotations.json').read_text())['annotations']
+    observations = json.loads((second / 'observations/annotations.json').read_text(encoding='utf-8'))['annotations']
     by_view = {(o['camera_id'], o['frame_id']): o for o in observations}
     vertices, _ = read_mesh_ply(second / 'reconstruction/T1_B1.ply')
     sections = {str(z): section_points(vertices, z) for z in (9.225, 30.75, 52.275)}

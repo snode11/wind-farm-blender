@@ -2,6 +2,7 @@
 import bpy
 from .. import clearance_replay, farm_flex
 from .clearance import number, playback_control, selected_installation_label, dual_method_label
+from .ui_helpers import message, diagnostic, history_status
 
 
 def unified_panel_active(scene):
@@ -12,6 +13,64 @@ def section(layout, key, title):
     header, body = layout.panel(key, default_closed=True)
     header.label(text=title)
     return body
+
+
+class _BladeResponseLayout:
+    """Use physical component labels with the shared response panel and saved enum IDs."""
+    def __init__(self, layout):
+        self.layout = layout
+
+    def __getattr__(self, name):
+        method = getattr(self.layout, name)
+        if name in {'box', 'row', 'column'}:
+            return lambda *args, **kwargs: type(self)(method(*args, **kwargs))
+        if name == 'panel':
+            return lambda *args, **kwargs: tuple(type(self)(part) if part is not None else None
+                                               for part in method(*args, **kwargs))
+        return method
+
+    def prop(self, data, name, **kwargs):
+        if name != 'wfrl_imbalance_metric':
+            return self.layout.prop(data, name, **kwargs)
+        from ..imbalance import METRICS
+        column = self.layout.column(align=True)
+        for key, (label, _unit, _factor) in METRICS.items():
+            column.prop_enum(data, name, key, text=label)
+
+
+def draw_blade_mechanics(layout, scene):
+    from ..imbalance import ROOT_FORCES, latest_turn
+    layout.label(text='弹性扭转：未提供数值', icon='INFO')
+    details = section(layout, 'wfrl_blade_mechanics', '叶根力、坐标与扭转定义')
+    if details is None:
+        return
+    for text in ('叶根载荷使用 BeamDyn B1/B2/B3RootF*r、RootM*r；INVALID 通道不作为有效零值。',
+                 'r 系固定于运动叶根，等同 IEC 叶片 b 系，随叶片刚体运动和变桨转动；z 从根指向尖。',
+                 'RootMzr 为叶根扭矩：绕 r 系展向 z 轴的力矩，不是材料应力或扭转应变。',
+                 'TipRDxr/yr/zr 为无量纲 Wiener–Milenković 旋转参数，单个分量不能乘 180/π 当作扭角。',
+                 'BeamDyn v3.5.3 的 TipRD 相对未变形截面定向，已扣除参考预扭及随叶根的刚体运动和变桨。',
+                 '预弯与变形叶片的局部展向不等同 r 系 z 轴；叶尖旋转矩阵不能唯一分离沿叶片的弹性扭转。',
+                 '当前数据未提供展向截面旋转或扭转应变；轴角投影和 Euler 角仅是定向分量，不作为弹性扭转角（°）。'):
+        message(details, text)
+    active = farm_flex.active_for(scene)
+    data = getattr(active, 'imbalance', None)
+    row = data['turbines'].get(scene.wfrl_imbalance_turbine) if data else None
+    if row is None or not all(key in row['metrics'] for key in ROOT_FORCES):
+        details.label(text='当前分析包未提供叶根力统计', icon='INFO')
+        return
+    value = clearance_replay.sample(scene)
+    turn = latest_turn(row, value['time_s']) if value else None
+    details.label(text='叶根力 · 同一三叶相位对齐统计')
+    details.label(text='全片段汇总 · 包含当前位置之后的数据', icon='INFO')
+    for key, (label, unit, factor) in ROOT_FORCES.items():
+        metric = row['metrics'][key]
+        card = details.box()
+        card.label(text=label)
+        card.label(text=f'三叶均值曲线差异：{metric["rms_spread"] * factor:.4f} {unit}')
+        for blade, (mean, offset) in enumerate(zip(metric['blade_means'], metric['blade_offsets']), 1):
+            card.label(text=f'B{blade} 均值 {mean * factor:+.4f} / 偏差 {offset * factor:+.4f} {unit}')
+        card.label(text=(f'最近完整转差异：{turn["metrics"][key]["rms_spread"] * factor:.4f} {unit}'
+                         if turn else '尚无完整三叶对齐转'))
 
 
 def draw_radar(layout, scene, value):
@@ -75,8 +134,9 @@ def draw_radar(layout, scene, value):
         details.label(text='灯色随上次有效读数保留，过期转灰')
         details.label(text=f'光束亮起保留 {PULSE_SECONDS:.1f} 仿真秒，仅为提示')
         details.label(text='误差 = 估计 − 真值；正值为高估')
-        if farm_flex.is_active(scene) and farm_flex._ACTIVE.tower_motion is not None:
-            details.label(text='真值：叶尖表面至同高度塔壁' if farm_flex._ACTIVE.reference is not None else '真值：同高度的变形塔筒截面距离')
+        flex = farm_flex.ready_for(scene)
+        if flex is not None and flex.tower_motion is not None:
+            details.label(text='真值：叶尖表面至同高度塔壁' if flex.reference is not None else '真值：同高度的变形塔筒截面距离')
             details.label(text='固定标定估计未补偿塔架弯曲')
         if value:
             stats = value['statistics']
@@ -95,15 +155,17 @@ def draw_radar(layout, scene, value):
             details.label(text='暂无有效回放数据')
 
 
-def draw_playback(layout, context, value, reader):
+def draw_playback(layout, context, value, reader, *, show_time=None):
     """One shared clock and three transport actions, above every task page."""
     from .. import split_reconstruction
     scene = context.scene
     comparison = split_reconstruction.enabled(scene)
     playback = layout.column(align=True)
     text, icon, state = playback_control(scene, context.screen)
-    if not comparison:
-        playback.label(text=(f"仿真 {value['time_s']:.3f} s · {state}" if value else '回放数据未就绪'))
+    if show_time is None:
+        show_time = not comparison
+    if show_time:
+        playback.label(text=(f"仿真时刻 {value['time_s']:.3f} s · {state}" if value else '回放数据未就绪'))
     row = playback.row(align=True)
     row.scale_y = 1.25
     row.operator('wfrl.clearance_playback', text=text, icon=icon)
@@ -112,7 +174,8 @@ def draw_playback(layout, context, value, reader):
     if not comparison:
         duration = reader.end_s - reader.start_s if reader else 0
         elapsed = max(0, value['time_s'] - reader.start_s) if value and reader else 0
-        playback.prop(scene, 'wfrl_clearance_progress', text=f'{elapsed:.1f} / {duration:.0f} 秒', slider=True)
+        playback.label(text=f'片段进度 {elapsed:.1f} / {duration:.1f} 秒')
+        playback.prop(scene, 'wfrl_clearance_progress', text='', slider=True)
 
 
 def draw_views(layout, context):
@@ -120,9 +183,11 @@ def draw_views(layout, context):
     draw_turbine_views(layout, scene)
     row = layout.row(align=True)
     op = row.operator('wfrl.farm_flex_view', text='T1 侧前方')
-    op.turbine = 'T1'; op.angle = 'FRONT'
+    op.turbine = 'T1'
+    op.angle = 'FRONT'
     op = row.operator('wfrl.farm_flex_view', text='风场全景')
-    op.turbine = 'all'; op.angle = 'DOWN'
+    op.turbine = 'all'
+    op.angle = 'DOWN'
     row = layout.row(align=True)
     row.operator('wfrl.clearance_view', text='测量区侧视').view = 'MEASUREMENT'
     row.operator('wfrl.clearance_view', text='雷达特写').view = 'RADAR'
@@ -151,13 +216,13 @@ def draw_split_views(layout, context):
     layout.operator('wfrl.farm_split_view', text='恢复单屏', icon='FULLSCREEN_ENTER').mode = 'SINGLE'
     error = context.scene.get('wfrl_view_layout_error')
     if error:
-        layout.label(text=error, icon='ERROR')
+        diagnostic(layout, '视图布局', error, error=True, context=context)
 
 
 def draw_turbine_views(layout, scene):
     """Keep Down views and two directions on the same mounted camera."""
     row = layout.row(align=True)
-    for tid in farm_flex._ACTIVE.readers:
+    for tid in farm_flex.active_for(scene).readers:
         op = row.operator('wfrl.farm_flex_view', text=tid + ' Down')
         op.turbine = tid
         op.angle = 'DOWN'
@@ -180,6 +245,7 @@ def draw_turbine_views(layout, scene):
 
 def draw_tools(layout, context):
     scene = context.scene
+    flex = farm_flex.active_for(scene)
     views = section(layout, 'wfrl_farm_tools_views', '机组、视角与云台')
     if views is not None:
         draw_views(views, context)
@@ -188,14 +254,15 @@ def draw_tools(layout, context):
     if telemetry is not None:
         telemetry.prop(scene, 'wfrl_channel_telemetry', text='采样遥测与曲线')
         from .. import charts
-        for tid in farm_flex._ACTIVE.readers:
+        chart_history = charts.history_for(scene)
+        for tid in flex.readers:
             card = telemetry.box()
             card.label(text=tid)
             for key in ('yaw', 'pitch', 'rotor_speed', 'power', 'torque', 'load'):
-                points = charts.history.points(tid, key)
+                points = chart_history.points(tid, key)
                 point = points[-1] if points else None
                 card.label(text=charts.LABELS[key] + ': ' + (f'{point.value:.2f} {point.unit}' if point and point.value is not None else '—'))
-        power = charts.history.points(charts.FARM, 'power')
+        power = chart_history.points(charts.FARM, 'power')
         telemetry.label(text='风场功率：' + (f'{power[-1].value:.2f} MW' if power and power[-1].value is not None else '—'))
         telemetry.label(text='变桨为三叶片平均；载荷为 B1 叶根弯矩')
         telemetry.label(text='奖励未记录；不填补缺失通道')
@@ -204,7 +271,7 @@ def draw_tools(layout, context):
         telemetry.prop(scene, 'wfrl_chart_channel', text='曲线通道')
         telemetry.prop(scene, 'wfrl_selected_turbine', text='曲线机组')
         telemetry.operator('wfrl.export_history', text='导出已采样历史', icon='EXPORT')
-        telemetry.label(text=scene.get('wfrl_history_export_status', '每通道最多 600 点'))
+        history_status(telemetry, scene.get('wfrl_history_export_status', '每通道最多 600 点'), context=context)
     presentation = section(layout, 'wfrl_farm_environment', '画面与环境')
     if presentation is not None:
         presentation.prop(scene, 'wfrl_show_atmosphere', text='环境显示')
@@ -224,9 +291,11 @@ def draw_tools(layout, context):
         row = presentation.row(align=True)
         row.operator('wfrl.render_still', text='渲染静帧')
         row.operator('wfrl.render_animation', text='渲染动画')
+        from .. import animation_render_ui
+        animation_render_ui.draw(presentation, context)
     data = section(layout, 'wfrl_farm_data', '数据来源与重新加载')
     if data is not None:
-        if farm_flex._ACTIVE.manifest.get('interface_only'):
+        if flex.manifest.get('interface_only'):
             data.label(text='OpenFAST · 单机接口验证 · REVIEW_ONLY')
             data.label(text='8 m/s 恒定风 · 规定 9 rpm')
         else:
@@ -236,7 +305,7 @@ def draw_tools(layout, context):
         data.label(text='轨迹为形变网格叶尖位置，非相机测量')
         data.label(text="红 / 绿 / 蓝：叶片 1 / 2 / 3")
         data.label(text="相邻两圈定格对比 2 秒后淡出")
-        if farm_flex._ACTIVE.manifest.get('measurement_mode') == 'dual_beam':
+        if flex.manifest.get('measurement_mode') == 'dual_beam':
             data.label(text=dual_method_label(clearance_replay.sample(scene)))
             data.label(text='S2/S3 同刻同叶片配对 · S1 独立报警')
         else:
@@ -246,7 +315,8 @@ def draw_tools(layout, context):
         data.operator('wfrl.load_demo', text='重新加载当前结果', icon='FILE_REFRESH').package_path = scene['wfrl_farm_flex_path']
         data.operator('wfrl.load_dual_beam', text='打开外部双束数据包', icon='FILE_FOLDER').choose_file = True
         data.operator('wfrl.clearance_restart', text='从头重播', icon='REW')
-        path = data.column(); path.enabled = False
+        path = data.column()
+        path.enabled = False
         path.prop(scene, '["wfrl_farm_flex_path"]', text='数据目录')
     diagnostics = section(layout, 'wfrl_farm_diagnostics', '版本、来源与播放诊断')
     if diagnostics is not None:
@@ -254,37 +324,56 @@ def draw_tools(layout, context):
         frontend_diagnostics.draw_panel(diagnostics, context)
 
 
-def draw(layout, context):
+def draw(layout, context, *, show_playback=True):
     scene = context.scene
     value = clearance_replay.sample(scene)
     reader = clearance_replay.reader_for(scene)
     layout.use_property_decorate = False
-    if farm_flex._ACTIVE.reference is not None:
-        from ..turbine_geometry import model_label
-        layout.label(text='单机预弯接口验证' if farm_flex._ACTIVE.manifest.get('interface_only')
-                     else model_label(getattr(farm_flex._ACTIVE, 'model', None)) + ' · BeamDyn')
-    layout.prop(scene, 'wfrl_blade_model', text='叶片机型')
-    if getattr(farm_flex._ACTIVE, 'model', None) != 'nrel5mw':
-        layout.label(text='叶片几何为合成形制；运动与载荷来自 NREL 基线求解', icon='INFO')
-    if farm_flex._ACTIVE.manifest.get('measurement_mode') == 'dual_beam':
-        layout.label(text=dual_method_label(value), icon='INFO')
+    flex = farm_flex.active_for(scene)
+    if flex.model != 'nrel5mw':
+        message(layout, '合成叶形；运动、载荷与雷达读数来自 NREL 基线', context=context)
+    if scene.get('wfrl_blade_model_error'):
+        diagnostic(layout, '叶片外形', scene['wfrl_blade_model_error'], error=True, context=context)
+    if flex.manifest.get('measurement_mode') == 'dual_beam':
+        message(layout, dual_method_label(value), context=context)
         installation_status = (value or {}).get('installation_status')
-        layout.label(text=('双束重建 · ' + selected_installation_label(getattr(reader, 'config', {}))
-                           if installation_status == 'SIMULATION_SELECTED'
-                           else '双束诊断 · 安装与性能待验收'), icon='INFO')
-    elif farm_flex._ACTIVE.manifest.get('acceptance_status', '').startswith('FAILED'):
+        message(layout, ('双束重建 · ' + selected_installation_label(getattr(reader, 'config', {}))
+                         if installation_status == 'SIMULATION_SELECTED'
+                         else '双束诊断 · 安装与性能待验收'), context=context)
+    elif flex.manifest.get('acceptance_status', '').startswith('FAILED'):
         layout.label(text='测量覆盖未达演示目标', icon='ERROR')
-    draw_playback(layout, context, value, reader)
-    draw_split_views(layout, context)
-    tabs = layout.row(align=True)
-    tabs.scale_y = 1.25
-    tabs.prop(scene, 'wfrl_farm_panel_page', expand=True)
+    if show_playback:
+        draw_playback(layout, context, value, reader)
+    from .. import split_reconstruction
+    if split_reconstruction.enabled(scene):
+        draw_split_views(layout, context)
+    else:
+        views = section(layout, 'wfrl_farm_quick_views', '观察视角与分屏')
+        if views is not None:
+            draw_split_views(views, context)
+        model = section(layout, 'wfrl_farm_model_details', '叶片外形与模型来源')
+        if model is not None:
+            if flex.reference is not None:
+                from ..turbine_geometry import model_label
+                model.label(text='单机预弯接口验证' if flex.manifest.get('interface_only')
+                            else model_label(flex.model) + ' · BeamDyn')
+            model.prop(scene, 'wfrl_blade_model', text='叶片外形')
+    tabs = layout.column(align=True)
+    for pages in (('DEFLECTION', 'RADAR', 'IMBALANCE'), ('VIDEO', 'TOOLS')):
+        row = tabs.row(align=True)
+        row.scale_y = 1.25
+        for page in pages:
+            row.prop_enum(scene, 'wfrl_farm_panel_page', page)
     if scene.wfrl_farm_panel_page == 'DEFLECTION':
         from ..deflection import draw_panel
         draw_panel(layout, scene)
     elif scene.wfrl_farm_panel_page == 'RADAR':
         draw_turbine_views(layout, scene)
         draw_radar(layout, scene, value)
+    elif scene.wfrl_farm_panel_page == 'IMBALANCE':
+        from . import imbalance
+        imbalance.draw(_BladeResponseLayout(layout), scene)
+        draw_blade_mechanics(layout, scene)
     elif scene.wfrl_farm_panel_page == 'VIDEO':
         from . import video_output
         video_output.draw(layout, context)
@@ -294,20 +383,24 @@ def draw(layout, context):
 
 def build_review_cameras(scene):
     from ..cameras import ensure_nacelle_gimbal
-    for tid in farm_flex._ACTIVE.readers:
+    for tid in farm_flex.active_for(scene).readers:
         ensure_nacelle_gimbal(scene, tid)
     from mathutils import Vector
     tip = bpy.data.objects.new('WFRL.Camera.T1.TipComparison', bpy.data.cameras.new('T1TipComparison'))
     bpy.data.collections['WFRL_Scene'].objects.link(tip)
-    tip.data.type = 'ORTHO'; tip.data.ortho_scale = 28
-    tip.data.clip_start = .1; tip.data.clip_end = 3000
+    tip.data.type = 'ORTHO'
+    tip.data.ortho_scale = 28
+    tip.data.clip_start = .1
+    tip.data.clip_end = 3000
     tip.data.show_passepartout = False
     camera=bpy.data.objects.new('WFRL.Camera.FarmFlexOverview',bpy.data.cameras.new('FarmFlexOverview'))
     bpy.data.collections['WFRL_Scene'].objects.link(camera)
     camera.location=(-450,-1250,520)
     camera.rotation_euler=(Vector((504,0,65))-camera.location).to_track_quat('-Z','Y').to_euler()
-    camera.data.type='ORTHO';camera.data.ortho_scale=1500
-    camera.data.clip_start=.1;camera.data.clip_end=30000
+    camera.data.type='ORTHO'
+    camera.data.ortho_scale=1500
+    camera.data.clip_start=.1
+    camera.data.clip_end=30000
     camera.data.show_passepartout=False
     
     
@@ -316,8 +409,10 @@ def build_review_cameras(scene):
     bpy.data.collections['WFRL_Scene'].objects.link(front_camera)
     front_camera.location=(-245,-140,125)
     front_camera.rotation_euler=(Vector((-5,0,90))-front_camera.location).to_track_quat('-Z','Y').to_euler()
-    front_camera.data.type='ORTHO';front_camera.data.ortho_scale=270
-    front_camera.data.clip_start=.1;front_camera.data.clip_end=3000
+    front_camera.data.type='ORTHO'
+    front_camera.data.ortho_scale=270
+    front_camera.data.clip_start=.1
+    front_camera.data.clip_end=3000
     front_camera.data.show_passepartout=False
     
     
@@ -326,14 +421,14 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
     bl_idname='wfrl.farm_flex_view'
     bl_label='查看机组'
     turbine:bpy.props.StringProperty(default='T1')
-    angle:bpy.props.EnumProperty(items=[('DOWN','Down 演示视角',''),('NACELLE','机舱云台',''),('NACELLE_SIDE','侧下视角','原位转向叶轮侧下方，使用同一台机舱相机'),('FRONT','侧前方','')],default='DOWN')
+    angle:bpy.props.EnumProperty(items=[('DOWN','Down 视角','从对应机组机舱底壳偏叶片后缘一侧的支架朝叶轮侧下俯视经过的叶片，随机舱与塔顶姿态运动'),('NACELLE','机舱云台',''),('NACELLE_SIDE','侧下视角','原位转向叶轮侧下方，使用同一台机舱相机'),('FRONT','侧前方','')],default='DOWN')
     @classmethod
     def poll(cls, context):
         return farm_flex.is_active(context.scene)
 
     def execute(self,context):
         scene=context.scene
-        preview=farm_flex._ACTIVE
+        preview=farm_flex.active_for(scene)
         from .. import tip_tracking
         from ..cameras import ensure_gimbal, ensure_nacelle_gimbal, down_gimbal, fill_camera_view
         from ..cameras import nacelle_side_view, restore_nacelle_view
@@ -348,8 +443,8 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
         dismiss_for_view_switch(scene)
         preview.visible_turbines=set(range(len(preview.readers))) if self.turbine=='all' else {int(self.turbine[1:])-1}
         preview.cache.clear()
-        # Hidden turbines need no mesh uploads. Switching to overview samples
-        # all nine at the current time before revealing them.
+        # Hidden blade meshes need no uploads; T1 tip measurements and shared
+        # support stay current. Overview samples all nine blades before display.
         for index,tid in enumerate(('T1','T2','T3')):
             for obj in scene.objects:
                 if obj.name.startswith(f'WFRL.Turbine.{tid}.') and '.ClearanceRadar.' not in obj.name and '.TipTrail.' not in obj.name:
@@ -374,8 +469,10 @@ class WFRL_OT_FarmFlexView(bpy.types.Operator):
                 else:
                     restore_nacelle_view(camera)
             else:
-                camera=ensure_gimbal(scene,self.turbine);down_gimbal(camera)
-        scene.camera=camera;scene['wfrl_camera']=camera.name
+                camera=ensure_gimbal(scene,self.turbine)
+                down_gimbal(camera)
+        scene.camera=camera
+        scene['wfrl_camera']=camera.name
         from ..nacelle_camera import select_output
         select_output(scene, camera)
         from ..cameras import demo_view_areas
@@ -432,21 +529,25 @@ class WFRL_OT_FarmSplitView(bpy.types.Operator):
 class WFRL_PT_FarmFlex(bpy.types.Panel):
     bl_label='三机 MAPPO 回放'
     bl_idname='WFRL_PT_FarmFlex'
-    bl_space_type='VIEW_3D';bl_region_type='UI';bl_category='MAPPO';bl_order=-300
+    bl_space_type='VIEW_3D'
+    bl_region_type='UI'
+    bl_category='MAPPO'
+    bl_order=-300
 
     @classmethod
     def poll(cls, context):
         return context.scene.get("wfrl_scene_kind") != "manual"
 
     def draw(self,context):
-        self.layout.operator('wfrl.split_recon_open_example', text='打开几何重建示例…', icon='FILE_BLEND')
+        from .home import draw_load, draw_status
+        busy = draw_status(self.layout, context)
         if farm_flex.is_active(context.scene):
-            draw(self.layout,context)
+            controls = self.layout.column()
+            controls.enabled = not busy
+            controls.operator('wfrl.split_recon_open_example', text='打开几何重建示例…', icon='FILE_BLEND')
+            draw(controls,context)
         else:
-            self.layout.operator('wfrl.load_demo', icon='FILE_REFRESH')
-            self.layout.operator('wfrl.load_dual_beam', icon='IMPORT')
-            self.layout.operator('wfrl.load_dual_beam', text='加载 TLS 候选 / S1', icon='IMPORT').builtin_method = 'TLS'
-            self.layout.label(text=context.scene.get('wfrl_clearance_status', '完整离线演示 · 无需后端'), icon='INFO')
+            draw_load(self.layout, context, busy=busy)
 
 
 
@@ -460,9 +561,9 @@ class WFRL_OT_FarmTransport(bpy.types.Operator):
         return farm_flex.is_active(context.scene)
 
     def execute(self, context):
-        from .. import _cancel_playback, tip_tracking
+        from .. import tip_tracking, playback
         scene = context.scene
-        _cancel_playback(scene)
+        playback.cancel(scene)
         if self.action == 'STEP':
             scene.frame_set(min(scene.frame_end, scene.frame_current + 1))
         elif self.action == 'RESET':
@@ -478,7 +579,8 @@ class WFRL_OT_DeflectionView(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return farm_flex.is_active(context.scene) and farm_flex._ACTIVE.comparison is not None
+        flex = farm_flex.ready_for(context.scene)
+        return flex is not None and flex.comparison is not None
 
     def execute(self, context):
         from ..cameras import fill_camera_view
@@ -487,7 +589,7 @@ class WFRL_OT_DeflectionView(bpy.types.Operator):
         scene.camera = scene.objects['WFRL.Camera.T1.TipComparison']
         scene['wfrl_camera'] = scene.camera.name
         scene.wfrl_deflection_visible = True
-        farm_flex._ACTIVE.update(scene)
+        farm_flex.active_for(scene).update(scene)
         from ..cameras import demo_view_areas
         for area in demo_view_areas(scene):
             area.spaces.active.use_local_camera = False

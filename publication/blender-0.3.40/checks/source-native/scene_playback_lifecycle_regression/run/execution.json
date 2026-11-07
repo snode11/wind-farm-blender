@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "final": true,
+  "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/scene_playback_lifecycle_regression.py",
+  "background": true,
+  "blender": "5.2.1 LTS",
+  "startup_dirty": false,
+  "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+  "returned_normally": true,
+  "post_script_dirty": false
+}

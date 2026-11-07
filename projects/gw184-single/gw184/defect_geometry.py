@@ -654,14 +654,21 @@ class DefectGeometry:
     def dispose(self, payload):
         if payload is None or payload is self._active or payload.get('_disposed', False):
             return
-        payload['_disposed'] = True
+        errors = []
+        groups = [(bpy.data.materials, payload.get('materials', [])),
+                  (bpy.data.node_groups, payload.get('node_groups', []))]
         if payload.get('owned_meshes', True):
-            for mesh in payload.get('meshes', {}).values():
-                if mesh.users == 0 and mesh not in self._healthy.values():
-                    bpy.data.meshes.remove(mesh)
-        for mat in payload.get('materials', []):
-            if mat.users == 0:
-                bpy.data.materials.remove(mat)
-        for group in payload.get('node_groups', []):
-            if group.users == 0:
-                bpy.data.node_groups.remove(group)
+            groups.insert(0, (bpy.data.meshes, [mesh for mesh in payload.get('meshes', {}).values()
+                                             if mesh not in self._healthy.values()]))
+        for collection, resources in groups:
+            for resource in resources:
+                try:
+                    if resource.users == 0:
+                        collection.remove(resource)
+                except ReferenceError:
+                    pass
+                except Exception as exc:
+                    errors.append(exc)
+        if errors:
+            raise RuntimeError('缺陷资源释放失败：' + '; '.join(map(str, errors)))
+        payload['_disposed'] = True

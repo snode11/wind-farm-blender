@@ -1,11 +1,12 @@
-"""Open the independent reconstruction tab with installed or explicit dev source.
+"""Inspect an explicitly selected algorithm result in a research scene.
 
-blender --python open_blade_recon_review.py -- [--recon path] [--truth path]
+blender --python open_blade_recon_review.py -- --recon path [--truth path]
     [--cameras path] [--texture directory] [--inspect] [--save path] [--source]
 Default imports the installed extension; --source is a development-only option.
 """
 import argparse
 import importlib
+import inspect
 import json
 import os
 from pathlib import Path
@@ -15,7 +16,7 @@ import bpy
 
 ROOT = Path(__file__).resolve().parents[2]
 parser = argparse.ArgumentParser()
-parser.add_argument('--recon')
+parser.add_argument('--recon', required=True)
 parser.add_argument('--truth')
 parser.add_argument('--cameras')
 parser.add_argument('--texture', help='v0.2 texture.py output directory; images are packed when loaded')
@@ -33,6 +34,8 @@ addon = importlib.import_module(module_name)
 if not hasattr(bpy.types.Scene,'wfrl_recon_show_truth'):
     addon.register()
 review = importlib.import_module(module_name+'.blade_recon_review')
+if 'standalone' in inspect.signature(review.register).parameters:
+    review.register(standalone=True)
 scene = review.load(bpy.context,args.recon,truth_path=args.truth,cameras_path=args.cameras,
                     texture_path=args.texture)
 if args.texture and Path(args.recon or '').resolve().parent == ROOT/'blade_recon0.2/out/synth_tex':

@@ -21,6 +21,7 @@ sys.path[:0] = [os.environ.get('WFRL_ADDON_ROOT', str(ROOT/'blender_frontend')),
 MODULE = os.environ.get('WFRL_ADDON_MODULE', 'wfrl_blender')
 addon = importlib.import_module(MODULE)
 native = importlib.import_module(MODULE+'.native_camera_views')
+projection = importlib.import_module(MODULE+'.camera_projection')
 core = importlib.import_module(MODULE+'.custom_cameras')
 preview = importlib.import_module(MODULE+'.custom_camera_preview')
 capture = importlib.import_module(MODULE+'.custom_camera_capture')
@@ -28,6 +29,17 @@ OUT = Path(os.environ['WFRL_TEST_OUTPUT'])
 OUT.mkdir(parents=True, exist_ok=True)
 assert not (OUT/'result.json').exists(), 'Choose a fresh output directory'
 state = {'stage': 'start', 'deadline': time.monotonic()+300, 'checks': [], 'layouts': {}}
+
+
+def complete(job, context, timeout=30.):
+    """Wait for PNG thread exit and the capture's committed terminal state."""
+    deadline = time.monotonic() + timeout
+    while not job.closed:
+        job.step(context)
+        assert time.monotonic() < deadline, 'capture did not finish'
+        if not job.closed:
+            time.sleep(.01)
+    assert not capture.active()
 
 
 def capture_checks():
@@ -47,7 +59,7 @@ def capture_checks():
     try:
         with bpy.context.temp_override(window=session.window,area=area,region=region):
             job=capture.Capture(bpy.context,OUT)
-            assert job.step(bpy.context)
+            complete(job,bpy.context)
     finally:
         preview.RenderTarget.get=original_get
     assert len(sampled) == 3 and session.quality_settings() == fast
@@ -105,7 +117,7 @@ def record_layout(name):
         assert x+width <= left+available_width+2, (name, entry['slot'], 'cropped right', bounds)
         assert y+height <= title_bottom+2, (name, entry['slot'], 'title overlaps image', bounds, title_bottom)
         params = core.parameters(core.get_camera(scene, entry['slot']))
-        expected = native.projection.aspect(params.fov, params.vfov)
+        expected = projection.aspect(params.fov, params.vfov)
         assert abs(width/height-expected) < 2e-4, (name, bounds, expected)
         rows.append({'slot': entry['slot'], 'area': [area.x, area.y, area.width, area.height],
                      'region': [region.width, region.height], 'gate': list(bounds),

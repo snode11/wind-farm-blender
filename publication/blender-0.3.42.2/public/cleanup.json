@@ -1,0 +1,113 @@
+{
+  "status": "PASS_MOVED_TO_TRASH",
+  "scope": "0.3.42.2 publication and daily installation intermediates",
+  "recoverable": true,
+  "trash_directory": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035",
+  "retained": {
+    "public_extension_zip": "publication/blender-0.3.42.2/public/validated/package/wfrl_blender-0.3.42+2.zip",
+    "formal_evidence": "publication/blender-0.3.42.2/public",
+    "user_recovery_scene": "/Users/eason/.codex/visualizations/2026/10/31/01a190f3-9b63-7c72-a34a-a48b6dd703a7/installation-recovery/user-scene-recovery.blend",
+    "active_runtime_temporary_directory": "/Users/eason/.codex/visualizations/2026/10/31/01a190f3-9b63-7c72-a34a-a48b6dd703a7/installation-recovery/runtime-temp",
+    "source": "Git working tree and published v0.3.42.2 source archive"
+  },
+  "items": [
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.2/public/validated/profile",
+      "reason": "isolated installation profile; matching package and evidence retained",
+      "bytes": 155036114,
+      "trash_path": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035/00-profile"
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.2/public/checks/tmp",
+      "reason": "background-test temporary directory",
+      "bytes": 0,
+      "trash_path": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035/01-tmp"
+    },
+    {
+      "path": "/Users/eason/.codex/visualizations/2026/10/31/01a190f3-9b63-7c72-a34a-a48b6dd703a7/local-source-archive",
+      "reason": "duplicate local source ZIP; canonical Git source and published source identity retained",
+      "bytes": 191469483,
+      "trash_path": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035/02-local-source-archive"
+    },
+    {
+      "path": "/Users/eason/.codex/visualizations/2026/10/31/01a190f3-9b63-7c72-a34a-a48b6dd703a7/source-window",
+      "reason": "generated window scenes, test profiles and duplicate outputs; raw JSON/log/PNG preserved",
+      "bytes": 44008580,
+      "trash_path": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035/03-source-window"
+    },
+    {
+      "path": "/private/tmp/wfrl-release-tests-03422",
+      "reason": "release-only Python test environment",
+      "bytes": 111953247,
+      "trash_path": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035/04-wfrl-release-tests-03422"
+    },
+    {
+      "path": "/private/tmp/wfrl-release-userbase-03422",
+      "reason": "release-only nested dependency view",
+      "bytes": 116,
+      "trash_path": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035/05-wfrl-release-userbase-03422"
+    },
+    {
+      "path": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/wfrl-release-source-03422-5071om45",
+      "reason": "exported build source and duplicate extension ZIP",
+      "bytes": 252778215,
+      "trash_path": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035/06-wfrl-release-source-03422-5071om45"
+    },
+    {
+      "path": "/private/tmp/wfrl-03422-selected",
+      "reason": "release command selection/status scratch file",
+      "bytes": 4611,
+      "trash_path": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035/07-wfrl-03422-selected"
+    },
+    {
+      "path": "/private/tmp/wfrl-03422-final-status",
+      "reason": "release command selection/status scratch file",
+      "bytes": 70627,
+      "trash_path": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035/08-wfrl-03422-final-status"
+    },
+    {
+      "path": "/private/tmp/wfrl-03422-docpaths",
+      "reason": "release command selection/status scratch file",
+      "bytes": 560,
+      "trash_path": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035/09-wfrl-03422-docpaths"
+    },
+    {
+      "path": "/private/tmp/wfrl-03422-initial-status",
+      "reason": "release command selection/status scratch file",
+      "bytes": 70296,
+      "trash_path": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035/10-wfrl-03422-initial-status"
+    },
+    {
+      "path": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-5",
+      "reason": "synthetic host-test fixtures; JUnit and raw logs retained",
+      "bytes": 21240786,
+      "trash_path": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035/11-pytest-5"
+    },
+    {
+      "path": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-6",
+      "reason": "synthetic host-test fixtures; JUnit and raw logs retained",
+      "bytes": 37220,
+      "trash_path": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035/12-pytest-6"
+    },
+    {
+      "path": "/private/var/folders/9w/yltr8zcx3gxb3rs6lr0kxwth0000gn/T/pytest-of-eason/pytest-7",
+      "reason": "synthetic host-test fixtures; JUnit and raw logs retained",
+      "bytes": 38025,
+      "trash_path": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035/13-pytest-7"
+    },
+    {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.2/public/checks/radar_x100_regression/x100-saved.blend",
+      "reason": "temporary saved regression scene; result and native log retained",
+      "bytes": 6232553,
+      "trash_path": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035/14-x100-saved.blend"
+    },
+    {
+      "path": "/Users/eason/.codex/visualizations/2026/10/31/01a190f3-9b63-7c72-a34a-a48b6dd703a7/install-control",
+      "reason": "installation staging, prior extension backup, test scene and temporary runtime probes; final identity/configuration/native records retained",
+      "bytes": 161161700,
+      "trash_path": "/Users/eason/.Trash/WFRL-0.3.42.2-intermediates-418f3035/15-install-control"
+    }
+  ],
+  "total_bytes": 944102133,
+  "removed_from_working_locations": 16
+}

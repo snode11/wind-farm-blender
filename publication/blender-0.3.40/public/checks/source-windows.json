@@ -1,0 +1,962 @@
+{
+  "status": "PASS",
+  "final": true,
+  "verification_layer": "SOURCE_RUNTIME",
+  "blender": "/Applications/Blender.app/Contents/MacOS/Blender",
+  "package_inputs": {
+    "builtin_mappo": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/mappo",
+      "manifest_sha256": "d3002397dadf1e5351b9c9647add83f44b921a126dc800a97e1fc92897f71bde"
+    },
+    "builtin_dual_beam": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/dual_beam",
+      "manifest_sha256": "9eea6aa1bb5c44d5b307a63017be7b81c8e43ea092f92cfb30822d9fc63b5645"
+    },
+    "builtin_split_example": {
+      "path": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/examples/mappo_reconstruction_split.blend",
+      "sha256": "3475e8e43e489076481da2365b3d7179f8667c065ee8dc580486d374c98f616b"
+    }
+  },
+  "tests": [
+    {
+      "script": "frontend_sessions_window.py",
+      "mode": "visible",
+      "scope": "Native window screenshots, recording cleanup and scene ownership; scripted controls.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 5.528087833896279,
+          "source_changed": false,
+          "execution": {
+            "status": "WAITING_FOR_CALLBACKS",
+            "final": false,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/frontend_sessions_window.py",
+            "background": false,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "module": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "blender": "5.2.1 LTS",
+            "recording_removed_scene": true,
+            "recording_closed_window": true,
+            "scene_playback_label": true,
+            "unrelated_viewport_preserved": true
+          },
+          "log": "/private/tmp/wfbl-pro-independent-kdb4_pek/native-visible/results/frontend_sessions_window/run/blender.log",
+          "report": "/private/tmp/wfbl-pro-independent-kdb4_pek/native-visible/results/frontend_sessions_window/artifacts/result.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "nrel_editor_playback_regression.py",
+      "mode": "visible",
+      "scope": "Scripted native-window playback ownership; external keyboard input not verified.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 8.013772916980088,
+          "source_changed": false,
+          "execution": {
+            "status": "WAITING_FOR_CALLBACKS",
+            "final": false,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/nrel_editor_playback_regression.py",
+            "background": false,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "module": "wfrl_blender",
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "blender": "5.2.1 LTS",
+            "method": "Scripted operators in independent native windows",
+            "checks": {
+              "isolated_visible_startup": {
+                "status": "PASS"
+              },
+              "editor_bound_to_own_runtime": {
+                "status": "PASS"
+              },
+              "independent_main_window": {
+                "status": "PASS"
+              },
+              "foreign_player_survives_begin": {
+                "status": "PASS"
+              },
+              "foreign_player_survives_cancel": {
+                "status": "PASS"
+              },
+              "own_player_paused": {
+                "status": "PASS"
+              },
+              "own_player_resumes_original_window": {
+                "status": "PASS"
+              },
+              "finish_does_not_steal_new_player": {
+                "status": "PASS"
+              },
+              "switched_owner_window_does_not_resume": {
+                "status": "PASS"
+              },
+              "closed_owner_window_does_not_resume": {
+                "status": "PASS"
+              }
+            },
+            "observations": {
+              "foreign_player_after_cancel": {
+                "owner_scene": "NrelEditor.ForeignPlayer",
+                "owner_window": 506419017176,
+                "playing": true,
+                "windows": [
+                  {
+                    "pointer": 506655839904,
+                    "scene": "Scene",
+                    "frame": 1
+                  },
+                  {
+                    "pointer": 506419017176,
+                    "scene": "NrelEditor.ForeignPlayer",
+                    "frame": 29
+                  }
+                ]
+              },
+              "own_player_resumed_from_foreign_context": {
+                "owner_scene": "Scene",
+                "owner_window": 506655839904,
+                "playing": true,
+                "windows": [
+                  {
+                    "pointer": 506655839904,
+                    "scene": "Scene",
+                    "frame": 49
+                  },
+                  {
+                    "pointer": 506419017176,
+                    "scene": "NrelEditor.ForeignPlayer",
+                    "frame": 29
+                  }
+                ]
+              },
+              "foreign_player_started_during_edit": {
+                "owner_scene": "NrelEditor.ForeignPlayer",
+                "owner_window": 506419017176,
+                "playing": true,
+                "windows": [
+                  {
+                    "pointer": 506655839904,
+                    "scene": "Scene",
+                    "frame": 68
+                  },
+                  {
+                    "pointer": 506419017176,
+                    "scene": "NrelEditor.ForeignPlayer",
+                    "frame": 38
+                  }
+                ]
+              },
+              "original_window_closed": {
+                "owner_scene": null,
+                "owner_window": null,
+                "playing": false,
+                "windows": [
+                  {
+                    "pointer": 506419017176,
+                    "scene": "NrelEditor.ForeignPlayer",
+                    "frame": 38
+                  }
+                ]
+              }
+            },
+            "source_sha256": {
+              "editor.py": "5ced1bd90370aad9581737729c96f62812d173ea9d263b1118375632c389ba2a",
+              "playback.py": "c83edad2173b1b81cca0e8df8cb637f38ff6478d4589de508e9bf98168772d29"
+            }
+          },
+          "log": "/private/tmp/wfbl-pro-independent-kdb4_pek/native-visible/results/nrel_editor_playback_regression/run/blender.log",
+          "report": "/private/tmp/wfbl-pro-independent-kdb4_pek/native-visible/results/nrel_editor_playback_regression/artifacts/checks.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "native_camera_playback_regression.py",
+      "mode": "visible",
+      "scope": "Scripted native-window camera playback; external Space events and FPS not verified.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 9.757353125023656,
+          "source_changed": false,
+          "execution": {
+            "status": "WAITING_FOR_CALLBACKS",
+            "final": false,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/native_camera_playback_regression.py",
+            "background": false,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "status": "PASS",
+            "module": "wfrl_blender",
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "blender": "5.2.1 LTS",
+            "build_hash": "9e2066aef7ef",
+            "method": "Scripted visible-window operators and a stale-execute guard check; optional external Space events recorded separately.",
+            "source_sha256": {
+              "native_camera_views.py": "7116afe0ebfb1964e44e5a5ee4238a0824fa54ab0e33098013fe2c61e4db55f0",
+              "playback.py": "c83edad2173b1b81cca0e8df8cb637f38ff6478d4589de508e9bf98168772d29"
+            },
+            "checks": {
+              "isolated_visible_factory_startup": {
+                "status": "PASS"
+              },
+              "demo_starts_paused": {
+                "status": "PASS"
+              },
+              "independent_scene_fixture": {
+                "status": "PASS"
+              },
+              "three_camera_controls_ready": {
+                "status": "PASS"
+              },
+              "source_scene_can_focus_and_set_quality": {
+                "status": "PASS"
+              },
+              "foreign_scene_cannot_focus_or_set_quality": {
+                "status": "PASS"
+              },
+              "observer_can_set_quality": {
+                "status": "PASS"
+              },
+              "observer_can_restore_quality": {
+                "status": "PASS"
+              },
+              "observer_can_focus": {
+                "status": "PASS"
+              },
+              "A_button_starts_A": {
+                "status": "PASS"
+              },
+              "A_advances": {
+                "status": "PASS",
+                "before": 121,
+                "after": 157
+              },
+              "A_button_pauses_A": {
+                "status": "PASS"
+              },
+              "A_pause_holds_frame": {
+                "status": "PASS",
+                "expected": 157,
+                "actual": 157
+              },
+              "B_advances_independently": {
+                "status": "PASS",
+                "before": 1,
+                "after": 15
+              },
+              "A_operator_handles_shortcut_for_B_owner": {
+                "status": "PASS"
+              },
+              "A_operator_rejects_B_owner": {
+                "status": "PASS",
+                "response": [
+                  "CANCELLED"
+                ]
+              },
+              "A_stale_execute_rejects_B_owner": {
+                "status": "PASS",
+                "response": [
+                  "CANCELLED"
+                ],
+                "reports": [
+                  {
+                    "level": [
+                      "WARNING"
+                    ],
+                    "text": "播放器由场景“NativeCamera.IndependentPlayerB”占用，请先在对应窗口暂停"
+                  }
+                ]
+              },
+              "A_button_keeps_B_owner": {
+                "status": "PASS"
+              },
+              "B_advances_after_A_button": {
+                "status": "PASS",
+                "before": 15,
+                "after": 29
+              },
+              "closing_A_keeps_B_owner": {
+                "status": "PASS"
+              },
+              "B_advances_after_A_close": {
+                "status": "PASS",
+                "before": 29,
+                "after": 44
+              },
+              "A_reopen_keeps_B_owner": {
+                "status": "PASS"
+              },
+              "A_child_window_owns_player": {
+                "status": "PASS"
+              },
+              "A_advances_before_resume_race": {
+                "status": "PASS"
+              },
+              "A_close_schedules_restore": {
+                "status": "PASS"
+              },
+              "deferred_A_resume_keeps_B_owner": {
+                "status": "PASS",
+                "lifecycle": [
+                  {
+                    "event": "close_before",
+                    "wall_s": 872936.673914666,
+                    "frame": 186,
+                    "windows": [
+                      [
+                        502703381728,
+                        true,
+                        186
+                      ],
+                      [
+                        502795399704,
+                        true,
+                        49
+                      ],
+                      [
+                        502774426264,
+                        true,
+                        186
+                      ]
+                    ],
+                    "preserve_playback": true,
+                    "playing": true
+                  },
+                  {
+                    "event": "cancel_before_close",
+                    "wall_s": 872936.673962125,
+                    "frame": 186,
+                    "windows": [
+                      [
+                        502703381728,
+                        false,
+                        186
+                      ],
+                      [
+                        502795399704,
+                        false,
+                        49
+                      ],
+                      [
+                        502774426264,
+                        false,
+                        186
+                      ]
+                    ],
+                    "result": [
+                      "PASS_THROUGH"
+                    ]
+                  },
+                  {
+                    "event": "window_closed",
+                    "wall_s": 872936.697784416,
+                    "frame": 186,
+                    "windows": [
+                      [
+                        502703381728,
+                        false,
+                        186
+                      ],
+                      [
+                        502795399704,
+                        false,
+                        49
+                      ]
+                    ]
+                  },
+                  {
+                    "event": "resume_event",
+                    "wall_s": 872936.770655375,
+                    "frame": 186,
+                    "windows": [
+                      [
+                        502703381728,
+                        true,
+                        186
+                      ],
+                      [
+                        502795399704,
+                        true,
+                        51
+                      ]
+                    ]
+                  },
+                  {
+                    "event": "resume_skipped",
+                    "wall_s": 872936.770661166,
+                    "frame": 186,
+                    "windows": [
+                      [
+                        502703381728,
+                        true,
+                        186
+                      ],
+                      [
+                        502795399704,
+                        true,
+                        51
+                      ]
+                    ],
+                    "reason": "another_or_live_player"
+                  }
+                ]
+              },
+              "B_advances_after_deferred_A_resume": {
+                "status": "PASS",
+                "before": 49,
+                "after": 65
+              }
+            },
+            "observations": {
+              "independent_window_groups": {
+                "owner_scene": null,
+                "owner_window": null,
+                "any_playing": false,
+                "windows": [
+                  {
+                    "pointer": 502703381728,
+                    "parent": null,
+                    "scene": "Scene",
+                    "frame": 121,
+                    "global_animation_flag": false
+                  },
+                  {
+                    "pointer": 502785130520,
+                    "parent": 502703381728,
+                    "scene": "Scene",
+                    "frame": 121,
+                    "global_animation_flag": false
+                  },
+                  {
+                    "pointer": 502795399704,
+                    "parent": null,
+                    "scene": "NativeCamera.IndependentPlayerB",
+                    "frame": 1,
+                    "global_animation_flag": false
+                  }
+                ]
+              },
+              "A_playing": {
+                "owner_scene": "Scene",
+                "owner_window": 502703381728,
+                "any_playing": true,
+                "windows": [
+                  {
+                    "pointer": 502703381728,
+                    "parent": null,
+                    "scene": "Scene",
+                    "frame": 157,
+                    "global_animation_flag": true
+                  },
+                  {
+                    "pointer": 502785130520,
+                    "parent": 502703381728,
+                    "scene": "Scene",
+                    "frame": 157,
+                    "global_animation_flag": true
+                  },
+                  {
+                    "pointer": 502795399704,
+                    "parent": null,
+                    "scene": "NativeCamera.IndependentPlayerB",
+                    "frame": 1,
+                    "global_animation_flag": true
+                  }
+                ]
+              },
+              "B_playing_before_A_button": {
+                "owner_scene": "NativeCamera.IndependentPlayerB",
+                "owner_window": 502795399704,
+                "any_playing": true,
+                "windows": [
+                  {
+                    "pointer": 502703381728,
+                    "parent": null,
+                    "scene": "Scene",
+                    "frame": 157,
+                    "global_animation_flag": true
+                  },
+                  {
+                    "pointer": 502785130520,
+                    "parent": 502703381728,
+                    "scene": "Scene",
+                    "frame": 157,
+                    "global_animation_flag": true
+                  },
+                  {
+                    "pointer": 502795399704,
+                    "parent": null,
+                    "scene": "NativeCamera.IndependentPlayerB",
+                    "frame": 15,
+                    "global_animation_flag": true
+                  }
+                ]
+              },
+              "B_after_A_button": {
+                "owner_scene": "NativeCamera.IndependentPlayerB",
+                "owner_window": 502795399704,
+                "any_playing": true,
+                "windows": [
+                  {
+                    "pointer": 502703381728,
+                    "parent": null,
+                    "scene": "Scene",
+                    "frame": 157,
+                    "global_animation_flag": true
+                  },
+                  {
+                    "pointer": 502785130520,
+                    "parent": 502703381728,
+                    "scene": "Scene",
+                    "frame": 157,
+                    "global_animation_flag": true
+                  },
+                  {
+                    "pointer": 502795399704,
+                    "parent": null,
+                    "scene": "NativeCamera.IndependentPlayerB",
+                    "frame": 29,
+                    "global_animation_flag": true
+                  }
+                ]
+              },
+              "B_after_A_close": {
+                "owner_scene": "NativeCamera.IndependentPlayerB",
+                "owner_window": 502795399704,
+                "any_playing": true,
+                "windows": [
+                  {
+                    "pointer": 502703381728,
+                    "parent": null,
+                    "scene": "Scene",
+                    "frame": 157,
+                    "global_animation_flag": true
+                  },
+                  {
+                    "pointer": 502795399704,
+                    "parent": null,
+                    "scene": "NativeCamera.IndependentPlayerB",
+                    "frame": 44,
+                    "global_animation_flag": true
+                  }
+                ]
+              },
+              "A_reopened_while_B_plays": {
+                "owner_scene": "NativeCamera.IndependentPlayerB",
+                "owner_window": 502795399704,
+                "any_playing": true,
+                "windows": [
+                  {
+                    "pointer": 502703381728,
+                    "parent": null,
+                    "scene": "Scene",
+                    "frame": 157,
+                    "global_animation_flag": true
+                  },
+                  {
+                    "pointer": 502795399704,
+                    "parent": null,
+                    "scene": "NativeCamera.IndependentPlayerB",
+                    "frame": 49,
+                    "global_animation_flag": true
+                  },
+                  {
+                    "pointer": 502774426264,
+                    "parent": 502703381728,
+                    "scene": "Scene",
+                    "frame": 157,
+                    "global_animation_flag": true
+                  }
+                ]
+              },
+              "raw_stop_NativeCamera.IndependentPlayerB": {
+                "owner_scene": null,
+                "owner_window": null,
+                "any_playing": false,
+                "windows": [
+                  {
+                    "pointer": 502703381728,
+                    "parent": null,
+                    "scene": "Scene",
+                    "frame": 186,
+                    "global_animation_flag": false
+                  },
+                  {
+                    "pointer": 502795399704,
+                    "parent": null,
+                    "scene": "NativeCamera.IndependentPlayerB",
+                    "frame": 65,
+                    "global_animation_flag": false
+                  }
+                ],
+                "operator_result": [
+                  "PASS_THROUGH"
+                ]
+              },
+              "B_after_deferred_A_resume": {
+                "owner_scene": "NativeCamera.IndependentPlayerB",
+                "owner_window": 502795399704,
+                "any_playing": true,
+                "windows": [
+                  {
+                    "pointer": 502703381728,
+                    "parent": null,
+                    "scene": "Scene",
+                    "frame": 186,
+                    "global_animation_flag": true
+                  },
+                  {
+                    "pointer": 502795399704,
+                    "parent": null,
+                    "scene": "NativeCamera.IndependentPlayerB",
+                    "frame": 65,
+                    "global_animation_flag": true
+                  }
+                ]
+              }
+            },
+            "saved_result_source": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/assets/mappo",
+            "closed_session_lifecycle": [
+              {
+                "event": "close_before",
+                "wall_s": 872936.673914666,
+                "frame": 186,
+                "windows": [
+                  [
+                    502703381728,
+                    true,
+                    186
+                  ],
+                  [
+                    502795399704,
+                    true,
+                    49
+                  ],
+                  [
+                    502774426264,
+                    true,
+                    186
+                  ]
+                ],
+                "preserve_playback": true,
+                "playing": true
+              },
+              {
+                "event": "cancel_before_close",
+                "wall_s": 872936.673962125,
+                "frame": 186,
+                "windows": [
+                  [
+                    502703381728,
+                    false,
+                    186
+                  ],
+                  [
+                    502795399704,
+                    false,
+                    49
+                  ],
+                  [
+                    502774426264,
+                    false,
+                    186
+                  ]
+                ],
+                "result": [
+                  "PASS_THROUGH"
+                ]
+              },
+              {
+                "event": "window_closed",
+                "wall_s": 872936.697784416,
+                "frame": 186,
+                "windows": [
+                  [
+                    502703381728,
+                    false,
+                    186
+                  ],
+                  [
+                    502795399704,
+                    false,
+                    49
+                  ]
+                ]
+              },
+              {
+                "event": "resume_event",
+                "wall_s": 872936.770655375,
+                "frame": 186,
+                "windows": [
+                  [
+                    502703381728,
+                    true,
+                    186
+                  ],
+                  [
+                    502795399704,
+                    true,
+                    51
+                  ]
+                ]
+              },
+              {
+                "event": "resume_skipped",
+                "wall_s": 872936.770661166,
+                "frame": 186,
+                "windows": [
+                  [
+                    502703381728,
+                    true,
+                    186
+                  ],
+                  [
+                    502795399704,
+                    true,
+                    51
+                  ]
+                ],
+                "reason": "another_or_live_player"
+              }
+            ]
+          },
+          "log": "/private/tmp/wfbl-pro-independent-kdb4_pek/native-visible/results/native_camera_playback_regression/run/blender.log",
+          "report": "/private/tmp/wfbl-pro-independent-kdb4_pek/native-visible/results/native_camera_playback_regression/artifacts/result.json"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "script": "shared_context_switch_regression.py",
+      "mode": "visible",
+      "scope": "Scripted native-window model switches, rollback and save/reopen.",
+      "invocations": [
+        {
+          "status": "PASS",
+          "phase": "run",
+          "reasons": [],
+          "returncode": 0,
+          "timed_out": false,
+          "interrupted": false,
+          "duration_s": 21.420187084004283,
+          "source_changed": false,
+          "execution": {
+            "status": "WAITING_FOR_CALLBACKS",
+            "final": false,
+            "script": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/tests/blender/shared_context_switch_regression.py",
+            "background": false,
+            "blender": "5.2.1 LTS",
+            "startup_dirty": false,
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "returned_normally": true,
+            "post_script_dirty": false
+          },
+          "script_result": {
+            "scope": "Independent visible Blender process; scripted product operators",
+            "blender": "5.2.1 LTS",
+            "addon_file": "/Users/eason/Desktop/wfcrl/wind farm RL/blender_frontend/wfrl_blender/__init__.py",
+            "rows": [
+              {
+                "label": "comparison_ready",
+                "model": "nrel5mw",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "comparison_exited",
+                "model": "nrel5mw",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_1",
+                "model": "rootkink",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_2",
+                "model": "nrel5mw",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_3",
+                "model": "rootkink",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_4",
+                "model": "nrel5mw",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_5",
+                "model": "rootkink",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_6",
+                "model": "nrel5mw",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_7",
+                "model": "rootkink",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_8",
+                "model": "nrel5mw",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_9",
+                "model": "rootkink",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_10",
+                "model": "nrel5mw",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_11",
+                "model": "rootkink",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_12",
+                "model": "nrel5mw",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_13",
+                "model": "rootkink",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_14",
+                "model": "nrel5mw",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_15",
+                "model": "rootkink",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_16",
+                "model": "nrel5mw",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_17",
+                "model": "rootkink",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_18",
+                "model": "nrel5mw",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_19",
+                "model": "rootkink",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "switch_20",
+                "model": "nrel5mw",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "shared_binding_failure_recovered",
+                "model": "nrel5mw",
+                "meshes": 288,
+                "owned_orphans": []
+              },
+              {
+                "label": "saved_reopened",
+                "model": "nrel5mw",
+                "meshes": 273,
+                "owned_orphans": []
+              }
+            ],
+            "sha256": {
+              "farm_flex.py": "9d1d70ca0ee7fab1a15061db32031115fd98b21854c7d0df6b55c39140d6543f",
+              "split_turbine_context.py": "c1abd4f0297065ffc54f5a9079d9f6be6629bc450d5e0c8a6dc97f9c0a325602"
+            },
+            "status": "PASS"
+          },
+          "log": "/private/tmp/wfbl-pro-independent-kdb4_pek/native-visible/results/shared_context_switch_regression/run/blender.log",
+          "report": "/private/tmp/wfbl-pro-independent-kdb4_pek/native-visible/results/shared_context_switch_regression/artifacts/checks.json"
+        }
+      ],
+      "status": "PASS"
+    }
+  ],
+  "temporary_paths": [
+    "/private/tmp/wfbl-pro-independent-kdb4_pek/native-visible/scratch/wfrl-regressions-uc3njphq"
+  ],
+  "visible_processes": "serial, independent factory-startup profiles",
+  "counts": {
+    "PASS": 4
+  }
+}

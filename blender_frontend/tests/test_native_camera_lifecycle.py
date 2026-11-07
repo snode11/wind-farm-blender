@@ -10,7 +10,9 @@ import sys
 from types import SimpleNamespace as NS
 
 import pytest
+from dataclasses import replace
 from wfrl_blender import playback
+from wfrl_blender.custom_cameras import CameraParameters
 
 
 class Scene(dict):
@@ -69,6 +71,10 @@ def area(pointer, shading='SOLID'):
                 studiolight_background_blur=0., use_studiolight_view_rotation=True)
     return NS(type='VIEW_3D', x=0, y=0, width=1000, height=700,
               spaces=NS(active=NS(shading=shader, camera=None,
+                                  type='VIEW_3D', use_local_camera=False,
+                                  region_3d=NS(view_perspective='PERSP', view_rotation=(1,0,0,0),
+                                               view_location=(1,2,3), view_distance=17,
+                                               view_camera_zoom=12, view_camera_offset=(.1,.2)),
                                                 overlay=NS(show_overlays=True))),
               as_pointer=lambda: pointer, tag_redraw=lambda: None)
 
@@ -146,6 +152,17 @@ def assert_restored(runtime):
     assert runtime.session.quality_settings() == ('1', 64, True, True)
     assert runtime.source_area.spaces.active.shading.type == 'MATERIAL'
     assert runtime.view not in runtime.windows
+
+
+@pytest.mark.parametrize('operator_name', ['WFRL_OT_NativeFocus', 'WFRL_OT_NativeQuality'])
+def test_camera_controls_are_scoped_to_the_observed_scene(runtime, operator_name):
+    runtime.session.slots = [1, 2, 3]
+    operator = getattr(runtime.native, operator_name)
+    assert operator.poll(runtime.bpy.context)
+    assert operator.poll(NS(window=runtime.view, scene=runtime.scene))
+    foreign = NS(window=runtime.source, scene=Scene('unrelated'))
+    assert not operator.poll(foreign)
+    assert operator().execute(foreign) == {'CANCELLED'}
 
 
 @pytest.mark.parametrize('deleted_proxy', [False, True])
@@ -386,7 +403,7 @@ def test_delayed_scene_a_resume_cannot_take_over_new_scene_b_player(runtime):
 
 def test_watch_deleted_proxy_preserves_error_until_actual_prepare_succeeds(runtime):
     runtime.bpy.data.objects.remove(runtime.proxy)
-    assert runtime.native.watch() == .25
+    assert runtime.native.watch() is None
     assert_restored(runtime)
     assert runtime.native._ACTIVE is None
     assert runtime.data.removed
@@ -420,9 +437,176 @@ def test_prepare_failure_records_reason_and_restores(runtime):
 def test_watch_deleted_camera_datablock_closes_empty_proxy_and_restores(runtime):
     runtime.bpy.data.cameras.remove(runtime.data)
     assert runtime.proxy.data is None and runtime.proxy.type == 'EMPTY'
-    assert runtime.native.watch() == .25
+    assert runtime.native.watch() is None
     assert_restored(runtime)
     assert runtime.native._ACTIVE is None
     assert runtime.proxy.removed
     assert runtime.bpy.data.cameras.removed == [runtime.data]
     assert '观察相机或镜头已被删除' in runtime.native.last_error(runtime.scene)
+
+
+def test_observation_window_is_excluded_while_preparing_and_closing(runtime):
+    from wfrl_blender import cameras
+    runtime.monkeypatch.setattr(sys.modules['wfrl_blender'], 'native_camera_views', runtime.native, raising=False)
+    runtime.monkeypatch.setattr(sys.modules['wfrl_blender'], 'split_reconstruction',
+                               NS(is_reconstruction_view=lambda *_: False), raising=False)
+    runtime.session.entries.clear()
+    runtime.session.preparing = True
+    assert list(cameras.demo_view_areas(runtime.scene)) == [runtime.source_area]
+    runtime.session.closing = True
+    assert list(cameras.demo_view_areas(runtime.scene)) == [runtime.source_area]
+
+
+def test_save_handlers_restore_live_quality_and_free_view_on_both_results(runtime):
+    ordinary = object()
+    runtime.monkeypatch.setattr(runtime.native.core, 'get_camera', lambda *_: ordinary)
+    before = runtime.native._view_state(runtime.camera_area.spaces.active)
+    other_scene = Scene('B')
+    other_quality = (other_scene.render.preview_pixel_size, other_scene.eevee.taa_samples)
+    recreated = []
+
+    def recreate():
+        entry = runtime.session.entries[0]
+        entry['proxy'] = object()
+        runtime.camera_area.spaces.active.camera = entry['proxy']
+        runtime.camera_area.spaces.active.region_3d.view_perspective = 'CAMERA'
+        recreated.append(True)
+
+    runtime.monkeypatch.setattr(runtime.session, 'sync', recreate)
+    for _result in ('save_post', 'save_post_fail'):
+        runtime.native.on_save(None)
+        assert runtime.session.quality_settings() == ('1', 64, True, True)
+        assert runtime.source_area.spaces.active.shading.type == 'MATERIAL'
+        assert runtime.camera_area.spaces.active.camera is ordinary
+        assert runtime.proxy.removed and runtime.data.removed
+        runtime.native.on_saved(None)
+        assert runtime.session.quality_settings() == ('2', 8, False, False)
+        assert runtime.source_area.spaces.active.shading.type == 'SOLID'
+        assert runtime.native._view_state(runtime.camera_area.spaces.active) == before
+        assert runtime.session.save_state is None
+        assert runtime.native._ACTIVE is runtime.session
+        # Replace the adapter with a fresh owned proxy for the next save.
+        runtime.session.entries[0].update(proxy=Proxy(CameraData()), proxy_data=None)
+    assert len(recreated) == 2
+    assert (other_scene.render.preview_pixel_size, other_scene.eevee.taa_samples) == other_quality
+
+
+def test_owned_proxy_release_preserves_shared_camera_data(runtime):
+    runtime.data.users = 1
+    assert runtime.session.release_proxy(runtime.session.entries[0]) == []
+    assert runtime.proxy.removed
+    assert not runtime.data.removed
+    assert runtime.session.entries[0]['proxy_data'] is None
+
+
+def test_save_preparation_failure_closes_and_retries_cleanup_before_writing(runtime):
+    ordinary = object()
+    runtime.monkeypatch.setattr(runtime.native.core, 'get_camera', lambda *_: ordinary)
+    runtime.bpy.data.objects.fail_once.add(runtime.proxy)
+    runtime.native.on_save(None)
+    assert runtime.native._ACTIVE is None
+    assert runtime.proxy.removed and runtime.data.removed
+    assert_restored(runtime)
+    assert '保存准备失败' in runtime.native.last_error(runtime.scene)
+
+
+def test_history_quality_restoration_matches_scene_identity(runtime):
+    runtime.scene.session_uid = 101
+    runtime.native.on_history_pre(None)
+    assert runtime.native._ACTIVE is None
+    replacement = Scene('renamed')
+    replacement.session_uid = 101
+    replacement.render.preview_pixel_size = '2'
+    replacement.eevee.taa_samples = 8
+    unrelated = Scene('A')
+    unrelated.session_uid = 102
+    unrelated.render.preview_pixel_size = '2'
+    unrelated.eevee.taa_samples = 8
+    runtime.bpy.data.scenes = [replacement, unrelated]
+    cleanup_calls = []
+    runtime.monkeypatch.setattr(runtime.native, 'on_loaded', lambda _: cleanup_calls.append(True))
+    runtime.native.on_history_post(None)
+    assert replacement.render.preview_pixel_size == '1' and replacement.eevee.taa_samples == 64
+    assert unrelated.render.preview_pixel_size == '2' and unrelated.eevee.taa_samples == 8
+    assert cleanup_calls == [True]
+    assert runtime.native._HISTORY_QUALITY is None
+
+
+@pytest.mark.parametrize('changes', [
+    dict(location=(1., 2., 3.)), dict(yaw=45.), dict(pitch=25.), dict(roll=15.),
+    dict(output_long_edge_px=2048), dict(focal_length_mm_record=50.),
+])
+def test_pose_and_capture_metadata_preserve_proxy_and_manual_view(runtime, changes):
+    params = CameraParameters(location=(0., 0., 0.))
+    camera = NS(as_pointer=lambda: 51)
+    runtime.monkeypatch.setattr(runtime.native.core, 'get_camera', lambda *_: camera)
+    runtime.monkeypatch.setattr(runtime.native.core, 'parameters', lambda _: replace(params, **changes))
+    region = NS(type='WINDOW', width=1000, height=700)
+    runtime.camera_area.regions = [region]
+    key = (51, params.fov, params.vfov, params.clip_near_m, params.clip_far_m, 1920/1080)
+    entry = runtime.session.entries[0]
+    entry.update(key=key, view_key=(key, 1000, 700))
+    space = runtime.camera_area.spaces.active
+    space.use_local_camera, space.camera = True, runtime.proxy
+    before = runtime.native._view_state(space)
+    for _ in range(200):
+        runtime.session.sync()
+    assert runtime.bpy.data.objects.removed == []
+    assert runtime.bpy.data.cameras.removed == []
+    assert entry['proxy'] is runtime.proxy and space.camera is runtime.proxy
+    assert runtime.native._view_state(space) == before
+
+
+def test_watch_stops_without_session_and_retries_pending_cleanup(runtime):
+    runtime.native._ACTIVE = None
+    assert runtime.native.watch() is None
+    runtime.native._ACTIVE = runtime.session
+    runtime.session.closing = True
+    runtime.bpy.data.objects.fail_once.add(runtime.proxy)
+    assert runtime.native.watch() == .25
+    assert runtime.native._ACTIVE is runtime.session
+    assert runtime.native.watch() is None
+    assert runtime.native._ACTIVE is None
+    assert_restored(runtime)
+
+
+@pytest.mark.parametrize('perspective', ['CAMERA', 'PERSP', 'ORTHO'])
+def test_optical_replacement_restores_only_an_existing_camera_view(runtime, perspective):
+    class Resource(dict):
+        pass
+
+    params = CameraParameters(location=(0., 0., 0.), fov=90.)
+    camera = NS(as_pointer=lambda: 51)
+    runtime.monkeypatch.setattr(runtime.native.core, 'get_camera', lambda *_: camera)
+    runtime.monkeypatch.setattr(runtime.native.core, 'parameters', lambda _: params)
+    data = Resource()
+    proxy = Resource()
+    proxy.data = data
+    proxy.constraints = NS(new=lambda _: NS())
+    runtime.bpy.data.cameras.new = lambda _: data
+    runtime.bpy.data.objects.new = lambda *_: proxy
+    runtime.scene.collection = NS(objects=NS(link=lambda _: None))
+    runtime.bpy.context.view_layer = NS(update=lambda: None)
+    region = NS(type='WINDOW', width=1000, height=700)
+    runtime.camera_area.regions = [region]
+    space = runtime.camera_area.spaces.active
+    space.region_3d.view_perspective = perspective
+    space.use_local_camera, space.camera = True, runtime.proxy
+    entry = runtime.session.entries[0]
+    entry.update(key=('old-optics',), view_key=('old-view',))
+    fits = []
+    runtime.monkeypatch.setattr(runtime.native, 'frame_gate',
+        lambda *_: fits.append(space.region_3d.view_perspective))
+
+    def release(_entry):
+        space.camera = None
+        if perspective == 'CAMERA':
+            space.region_3d.view_perspective = 'PERSP'
+        entry['proxy'] = None
+        return []
+
+    runtime.monkeypatch.setattr(runtime.session, 'release_proxy', release)
+    runtime.session.sync()
+    assert space.camera is proxy
+    assert space.region_3d.view_perspective == perspective
+    assert fits == (['CAMERA'] if perspective == 'CAMERA' else [])

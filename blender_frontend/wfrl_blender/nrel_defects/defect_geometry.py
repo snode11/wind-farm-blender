@@ -126,17 +126,20 @@ def _mask_group(support, owned_groups):
     local.vector_type = 'POINT'
     local.convert_from, local.convert_to = 'WORLD', 'OBJECT'
     links.new(geometry.outputs['Position'], local.inputs['Vector'])
-    uv = nodes.new('ShaderNodeUVMap'); uv.uv_map = REFERENCE_UV
+    uv = nodes.new('ShaderNodeUVMap')
+    uv.uv_map = REFERENCE_UV
 
     def vector(op, a, b):
-        node = nodes.new('ShaderNodeVectorMath'); node.operation = op
+        node = nodes.new('ShaderNodeVectorMath')
+        node.operation = op
         for index, value in enumerate((a, b)):
             if hasattr(value, 'node'): links.new(value, node.inputs[index])
             else: node.inputs[index].default_value = value
         return node.outputs['Value' if op == 'DOT_PRODUCT' else 'Vector']
 
     def scalar(op, a, b):
-        node = nodes.new('ShaderNodeMath'); node.operation = op
+        node = nodes.new('ShaderNodeMath')
+        node.operation = op
         for index, value in enumerate((a, b)):
             if hasattr(value, 'node'): links.new(value, node.inputs[index])
             else: node.inputs[index].default_value = value
@@ -175,8 +178,10 @@ def _mask_group(support, owned_groups):
 
 def _mask_material(base, supports, name, owned_materials, owned_groups):
     """Layer independently colored analytic masks on healthy-surface material."""
-    mat = base.copy(); owned_materials.append(mat)
-    mat.name = name; mat.use_nodes = True
+    mat = base.copy()
+    owned_materials.append(mat)
+    mat.name = name
+    mat.use_nodes = True
     nodes, links = mat.node_tree.nodes, mat.node_tree.links
     shader = nodes.get('Principled BSDF')
     if shader is None: raise ValueError('Healthy blade material has no Principled BSDF')
@@ -187,14 +192,16 @@ def _mask_material(base, supports, name, owned_materials, owned_groups):
         style = support['support_definition'].get('appearance', {})
         color = style.get('color', STYLES['fine_crack'][0])
         roughness = style.get('roughness', STYLES['fine_crack'][1])
-        mix = nodes.new('ShaderNodeMixRGB'); mix.blend_type = 'MIX'
+        mix = nodes.new('ShaderNodeMixRGB')
+        mix.blend_type = 'MIX'
         if shader.inputs['Base Color'].is_linked:
             links.new(shader.inputs['Base Color'].links[0].from_socket, mix.inputs[1])
         else: mix.inputs[1].default_value = tuple(shader.inputs['Base Color'].default_value)
         mix.inputs[2].default_value = (*color, 1.)
         links.new(mask.outputs['Mask'], mix.inputs[0])
         links.new(mix.outputs[0], shader.inputs['Base Color'])
-        rough = nodes.new('ShaderNodeMixRGB'); rough.blend_type = 'MIX'
+        rough = nodes.new('ShaderNodeMixRGB')
+        rough.blend_type = 'MIX'
         if shader.inputs['Roughness'].is_linked:
             links.new(shader.inputs['Roughness'].links[0].from_socket, rough.inputs[1])
         else:
@@ -221,6 +228,8 @@ class DefectGeometry:
         if self.turbine_id not in surface.turbine_ids or len(rig['blades']) != 3:
             raise ValueError('A NREL defect geometry manager needs one registered three-blade turbine')
         self._closed = False
+        self._active = None
+        self._healthy = {}
         self._baseline = {}
         referenced = {index for face in surface.faces for index in face}
         if len(surface.vertices)-1 not in referenced:
@@ -236,6 +245,7 @@ class DefectGeometry:
             if len(blade.data.polygons) != len(surface.faces):
                 raise ValueError('Visible NREL blade topology differs from its healthy reference')
             baseline = bpy.data.meshes.new(f'NREL.Editor.{self.turbine_id}.Baseline.Blade{i}')
+            self._baseline[i] = baseline
             baseline.from_pydata(surface.vertices, [], surface.faces)
             for material in blade.data.materials:
                 baseline.materials.append(material)
@@ -248,6 +258,7 @@ class DefectGeometry:
             baseline.update()
             self._baseline[i] = baseline
             mesh = bpy.data.meshes.new('NREL.ImmutableHealthyReference')
+            self._healthy[i] = mesh
             mesh.from_pydata(surface.vertices, [], surface.triangles)
             mesh.update()
             uv = mesh.uv_layers.new(name=REFERENCE_UV)
@@ -371,7 +382,8 @@ class DefectGeometry:
                 for piece in pieces:
                     pb = bounds(piece)
                     if pb[1] <= hb[0] or hb[1] <= pb[0] or pb[3] <= hb[2] or hb[3] <= pb[2]:
-                        remaining.append(piece); continue
+                        remaining.append(piece)
+                        continue
                     inside = piece
                     for a,b in zip(hole, hole[1:]+hole[:1]):
                         outside = halfplane(inside, a, b, -orientation)
@@ -562,7 +574,8 @@ class DefectGeometry:
                 points = [Vector(self.surface.point(anchor_at(factor*j/8))) for j in range(9)]
                 actual_sides.append(sum((b-a).length for a,b in zip(points,points[1:])))
             width = sum(actual_sides)
-            values.append(width); errors.append(abs(width-shape['widths_m'][index]))
+            values.append(width)
+            errors.append(abs(width-shape['widths_m'][index]))
         if max(errors) > SIZE_TOLERANCE_M:
             raise ValueError(f"{defect['id']}: actual mouth width exceeds frozen dimension tolerance")
         return dict(actual_mouth_widths_m=values, actual_mouth_width_indices=indices,
@@ -727,7 +740,7 @@ class DefectGeometry:
             self.rig['defect_document'] = previous['document']
             self._active = previous
             raise
-        if previous.get('document') is None:
+        if previous.get('document') is None and not getattr(self, '_defer_initial_dispose', False):
             # Initial scene-builder data belongs to this fresh rig. The store's
             # constructor has no superseded resource to dispose, so release only
             # these now-unused datablocks here. Shared data (users > 0) survives.
@@ -735,45 +748,80 @@ class DefectGeometry:
         return previous
 
     def close(self, restore=True):
-        """Release editor resources, optionally restoring the healthy rest loft.
+        """Release private resources, retaining failed releases for retry.
 
-        The caller owns replay rebind/update after this operation. This callback
-        never changes a deformation cache or applies a loaded replay pose.
+        The caller owns replay rebind/update. Shared or fake-user datablocks
+        remain owned by their other users; deleted RNA handles need no release.
         """
         if self._closed:
             return self._active
-        previous = self._active
+        errors = []
+        previous = getattr(self, '_closing_payload', self._active)
         if restore:
             for i, blade in enumerate(self.rig['blades'], 1):
-                blade.data = self._baseline[i]
-            restored = dict(document=None, supports=[], measurements=[], meshes=dict(self._baseline),
-                            materials=[], node_groups=[], bvh_by_blade={}, version=0, owned_meshes=False)
+                try:
+                    if not blade.as_pointer():
+                        continue
+                except ReferenceError:
+                    continue
+                try:
+                    blade.data = self._baseline[i]
+                except Exception as exc:
+                    errors.append(exc)
+            if errors:
+                raise RuntimeError('健康叶片恢复失败：' + '; '.join(map(str, errors)))
+            self._active = dict(document=None, supports=[], measurements=[], meshes=dict(self._baseline),
+                                materials=[], node_groups=[], bvh_by_blade={}, version=0, owned_meshes=False)
             self.rig['defect_supports'] = []
             self.rig['defect_measurements'] = []
             self.rig['defect_document'] = None
-            self._active = restored
         else:
             self._active = None
-        self._closed = True
-        self.dispose(previous)
-        for mesh in list(self._healthy.values())+list(self._baseline.values()):
-            if mesh.users == 0:
-                bpy.data.meshes.remove(mesh)
+        self._closing_payload = previous
+        try:
+            self.dispose(previous)
+        except Exception as exc:
+            errors.append(exc)
+        for meshes in (self._healthy, self._baseline):
+            for index, mesh in list(meshes.items()):
+                try:
+                    if mesh.users == 0:
+                        bpy.data.meshes.remove(mesh)
+                except ReferenceError:
+                    pass
+                except Exception as exc:
+                    errors.append(exc)
+                    continue
+                # Baseline bindings must remain available until all releases
+                # succeed, so retries can finish a partially closed manager.
+                if meshes is self._healthy:
+                    meshes.pop(index, None)
+        if errors:
+            raise RuntimeError('缺陷几何清理失败：' + '; '.join(map(str, errors)))
         self._healthy.clear()
         self._baseline.clear()
+        self._closing_payload = None
+        self._closed = True
         return self._active
 
     def dispose(self, payload):
         if payload is None or payload is self._active or payload.get('_disposed', False):
             return
-        payload['_disposed'] = True
+        errors = []
+        groups = [(bpy.data.materials, payload.get('materials', [])),
+                  (bpy.data.node_groups, payload.get('node_groups', []))]
         if payload.get('owned_meshes', True):
-            for mesh in payload.get('meshes', {}).values():
-                if mesh.users == 0 and mesh not in self._healthy.values():
-                    bpy.data.meshes.remove(mesh)
-        for mat in payload.get('materials', []):
-            if mat.users == 0:
-                bpy.data.materials.remove(mat)
-        for group in payload.get('node_groups', []):
-            if group.users == 0:
-                bpy.data.node_groups.remove(group)
+            groups.insert(0, (bpy.data.meshes, [mesh for mesh in payload.get('meshes', {}).values()
+                                             if mesh not in self._healthy.values()]))
+        for collection, resources in groups:
+            for resource in resources:
+                try:
+                    if resource.users == 0:
+                        collection.remove(resource)
+                except ReferenceError:
+                    pass
+                except Exception as exc:
+                    errors.append(exc)
+        if errors:
+            raise RuntimeError('缺陷资源释放失败：' + '; '.join(map(str, errors)))
+        payload['_disposed'] = True
