@@ -194,7 +194,11 @@ class TransportTests(unittest.TestCase):
     def test_connection_refused(self):
         self.server.close()
         self.client.connect()
-        self.wait_messages()
+        # Windows reports a refused loopback connect only after its SYN retries (about 1-2 s).
+        deadline = time.monotonic() + self.client.timeout_seconds + 1.
+        while not self.client.last_error and time.monotonic() < deadline:
+            self.client.poll()
+            time.sleep(.01)
         self.assertEqual(self.client.status, 'DISCONNECTED')
         self.assertTrue(self.client.last_error)
 

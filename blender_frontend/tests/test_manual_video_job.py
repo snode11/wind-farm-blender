@@ -174,6 +174,7 @@ class JobQueryPlatformTests(unittest.TestCase):
                 with self.subTest(retry=retry), self.assertRaisesRegex(ValueError, 'macOS / Linux'):
                     jobs.start(self.path, retry=retry)
 
+    @unittest.skipUnless(os.name == 'posix', 'Status lock probing requires POSIX flock and O_NOFOLLOW')
     def test_posix_query_preserves_lease_occupancy(self):
         for occupancies in ([True], [False, True], [False, False]):
             with self.subTest(occupancies=occupancies), self.platform('posix'), \

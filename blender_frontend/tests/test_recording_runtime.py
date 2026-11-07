@@ -50,7 +50,7 @@ def test_short_recording_has_initial_frame_and_accepts_real_timer_shape(recordin
     unrelated.write_bytes(b'unrelated file')
     clock[0] = 1.01
     assert recorder.modal(context, SimpleNamespace(type='TIMER')) == {'FINISHED'}
-    manifest = json.loads((recorder._directory / 'manifest.json').read_text())
+    manifest = json.loads((recorder._directory / 'manifest.json').read_text(encoding='utf-8'))
     assert manifest['status'] == 'COMPLETE'
     assert len(manifest['frames']) == 1
     assert scene.frame_current == 7
@@ -81,7 +81,7 @@ def test_timer_jitter_preserves_capture_grid(recording, tmp_path):
     else:
         pytest.fail('Recording did not finish at its duration')
 
-    manifest = json.loads((recorder._directory / 'manifest.json').read_text())
+    manifest = json.loads((recorder._directory / 'manifest.json').read_text(encoding='utf-8'))
     assert manifest['status'] == 'COMPLETE'
     assert len(manifest['frames']) == 20
     elapsed = [frame['elapsed_s'] for frame in manifest['frames']]
@@ -111,7 +111,7 @@ def test_late_timer_skips_missed_grid_points_without_catch_up(recording, tmp_pat
         assert screenshot.call_count == count
 
     recorder.cancel(context)
-    manifest = json.loads((recorder._directory / 'manifest.json').read_text())
+    manifest = json.loads((recorder._directory / 'manifest.json').read_text(encoding='utf-8'))
     assert [frame['elapsed_s'] for frame in manifest['frames']] == [0.0, .1, .35, .401]
     assert namespace._ACTIVE is None
 
@@ -204,7 +204,7 @@ def test_removed_source_finalizes_recording_without_scene_access(recording, tmp_
     else:
         recorder.cancel(context)
     assert namespace._ACTIVE is None
-    manifest = json.loads((recorder._directory / 'manifest.json').read_text())
+    manifest = json.loads((recorder._directory / 'manifest.json').read_text(encoding='utf-8'))
     assert manifest['status'] in {'FAILED', 'CANCELLED'}
     assert len(manifest['frames']) == 1
     recorder.cancel(context)
@@ -224,7 +224,7 @@ def test_removed_timer_does_not_prevent_manifest_or_release(recording, tmp_path)
     recorder.execute(context)
     recorder.cancel(context)
     assert namespace._ACTIVE is None
-    assert json.loads((recorder._directory / 'manifest.json').read_text())['status'] == 'CANCELLED'
+    assert json.loads((recorder._directory / 'manifest.json').read_text(encoding='utf-8'))['status'] == 'CANCELLED'
 
 
 @pytest.mark.parametrize('interruption', ['window_closed', 'scene_switched', 'file_load'])
@@ -250,7 +250,7 @@ def test_recording_lifecycle_interruptions_cancel_and_release(recording, tmp_pat
         assert namespace._watch_recording() is None
     assert namespace._ACTIVE is None
     assert screenshot.call_count == 1
-    manifest = json.loads((recorder._directory / 'manifest.json').read_text())
+    manifest = json.loads((recorder._directory / 'manifest.json').read_text(encoding='utf-8'))
     assert manifest['status'] == 'CANCELLED'
     assert len(manifest['frames']) == 1
     recorder.modal(context, SimpleNamespace(type='ESC'))
@@ -267,4 +267,4 @@ def test_recording_start_failure_releases_ownership_and_saves_failure(recording,
                               event_timer_remove=Mock(), modal_handler_add=Mock())
     assert recorder.execute(recording_context(scene, manager)) == {'CANCELLED'}
     assert namespace._ACTIVE is None
-    assert json.loads((recorder._directory / 'manifest.json').read_text())['status'] == 'FAILED'
+    assert json.loads((recorder._directory / 'manifest.json').read_text(encoding='utf-8'))['status'] == 'FAILED'
