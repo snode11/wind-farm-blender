@@ -231,3 +231,69 @@ def test_invalid_physical_parameters_are_rejected(kwargs):
 def test_derived_quantities_cannot_be_independently_overridden(name):
     with pytest.raises(TypeError):
         detection.DetectionConfig(**{name: 100.})
+
+
+def _cluster_fixture(seed):
+    rng = np.random.default_rng(seed)
+    widths = np.array([.3, .002, .003, .1])
+    centers = rng.uniform(-40, 40, (rng.integers(1, 40), 4)) * widths
+    points = centers[rng.integers(len(centers), size=600)] + rng.normal(0, .7, (600, 4)) * widths
+    # Exact width multiples, duplicates and values one ulp either side of a bin edge.
+    points[:40] = np.round(points[:40] / widths) * widths
+    points[40:60] = points[60:80]
+    edge = np.floor(points[80:100] / widths) * widths
+    points[80:90] = np.nextafter(edge[:10], -np.inf)
+    points[90:100] = edge[10:]
+    return points, widths
+
+
+@pytest.mark.parametrize('seed', range(12))
+def test_neighbor_list_clusters_equal_the_per_seed_bucket_lookup(seed):
+    coordinates, widths = _cluster_fixture(seed)
+    before = coordinates.copy()
+    labels, count = detection._resolution_clusters(coordinates, widths)
+    expected, expected_count = detection._resolution_clusters_hashed(coordinates, widths)
+    assert count == expected_count
+    np.testing.assert_array_equal(labels, expected)
+    np.testing.assert_array_equal(coordinates, before)
+
+
+def test_rounded_unit_difference_across_two_bins_stays_unresolved_as_in_bucket_lookup():
+    # 2.0 - (1 - 2**-53) rounds to 1.0, but the bins differ by two and are never adjacent.
+    normalized = np.array([[np.nextafter(1., 0.), 0., 0., 0.], [2., 0., 0., 0.]])
+    widths = np.ones(4)
+    labels, count = detection._resolution_clusters(normalized, widths)
+    expected, expected_count = detection._resolution_clusters_hashed(normalized, widths)
+    assert count == expected_count == 2
+    np.testing.assert_array_equal(labels, expected)
+
+
+@pytest.mark.parametrize('case', ['empty', 'single', 'pair_budget', 'key_range', 'non_finite'])
+def test_cluster_fallbacks_and_degenerate_frames(monkeypatch, case):
+    widths = np.ones(4)
+    coordinates = {'empty': np.empty((0, 4)), 'single': np.full((1, 4), -3.5),
+                   'pair_budget': _cluster_fixture(1)[0] / _cluster_fixture(1)[1],
+                   'key_range': np.array([[0., 0., 0., 0.], [1e16, 1e16, 1e16, 1e16], [.5, .5, .5, .5]]),
+                   'non_finite': np.array([[0., 0., 0., 0.], [np.inf, 0., 0., 0.]])}[case]
+    hashed = detection._resolution_clusters_hashed
+    calls = []
+    monkeypatch.setattr(detection, '_resolution_clusters_hashed',
+                        lambda *args: calls.append(1) or hashed(*args))
+    if case == 'pair_budget':
+        monkeypatch.setattr(detection, 'MAX_NEIGHBOR_PAIRS', 10)
+    if case == 'non_finite':
+        # Non-finite input keeps the per-seed lookup's own error unchanged.
+        with pytest.raises(ValueError), np.errstate(invalid='ignore'):
+            hashed(coordinates, widths)
+        with pytest.raises(ValueError), np.errstate(invalid='ignore'):
+            detection._resolution_clusters(coordinates, widths)
+        assert calls
+        return
+    labels, count = detection._resolution_clusters(coordinates, widths)
+    assert bool(calls) is (case in {'pair_budget', 'key_range'})
+    if len(coordinates):
+        expected, expected_count = hashed(coordinates, widths)
+        assert count == expected_count
+        np.testing.assert_array_equal(labels, expected)
+    else:
+        assert count == 0 and labels.shape == (0,) and labels.dtype == np.int64

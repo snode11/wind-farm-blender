@@ -18,6 +18,8 @@ from .schema import (MAX_POINTS, PROFILE, POINT_DTYPE, RadarFrame, ModelDiagnost
 MODEL_ID = 'x100-incoherent-detection.v2'
 # Search trials are counted analytically; no dense range/angle/Doppler cube is allocated.
 MAX_RESOLUTION_CELLS = 1_000_000_000_000
+# Neighbor-list budget for one frame's clustering; denser frames use the per-seed lookup.
+MAX_NEIGHBOR_PAIRS = 1_000_000
 BOLTZMANN_J_K = 1.380649e-23
 LIGHT_SPEED_M_S = 299_792_458.
 DATASHEET = 'CTSAI X100 data sheet CN V1.0 (2026), pp. 3-5'
@@ -229,7 +231,94 @@ def _resolution_clusters(coordinates, widths):
     bound a box of width one, so every pair in a cluster is unresolved in all
     four dimensions. Spatial hashing only accelerates neighbor lookup. Dense
     chains cannot grow a cluster past one resolution width on any axis.
+
+    Each point's candidates are those in adjacent hash bins within one width on
+    every axis; they are listed once per frame and then filtered by the current
+    assignment, so labels equal the per-seed bucket lookup in
+    ``_resolution_clusters_hashed``, which remains the path for non-finite input
+    or neighbor lists beyond ``MAX_NEIGHBOR_PAIRS``.
     """
+    normalized = coordinates / widths
+    if not len(normalized):
+        return np.full(0, -1, dtype=np.int64), 0
+    if not np.isfinite(normalized).all():
+        return _resolution_clusters_hashed(coordinates, widths)
+    bins = np.floor(normalized).astype(np.int64)
+    lists = _neighbor_lists(normalized, bins)
+    if lists is None:
+        return _resolution_clusters_hashed(coordinates, widths)
+    indptr, neighbors = lists
+    starts, ends = indptr[:-1].tolist(), indptr[1:].tolist()
+    labels = np.full(len(coordinates), -1, dtype=np.int64)
+    count = 0
+    for index in np.lexsort(normalized[:, ::-1].T).tolist():
+        if labels[index] >= 0:
+            continue
+        start, end = starts[index], ends[index]
+        if end - start > 1:
+            candidates = neighbors[start:end]
+            candidates = candidates[labels[candidates] < 0]
+            if len(candidates) > 1:
+                near = normalized[candidates]
+                labels[candidates[(near - near.min(axis=0) <= 1).all(axis=1)]] = count
+                count += 1
+                continue
+        # Only the seed itself remains unassigned within one width.
+        labels[index] = count
+        count += 1
+    return labels, count
+
+
+def _neighbor_lists(normalized, bins):
+    """CSR lists of points in adjacent bins and within one width, or None beyond budget.
+
+    Bins are encoded with one padding cell per axis, so adding an offset never
+    wraps into another bin. The velocity axis is least significant: for each
+    leading-axis offset its three adjacent bins form one key range. Half of the
+    leading offsets are searched and mirrored, since adjacency is symmetric.
+    """
+    count = len(bins)
+    low = bins.min(axis=0) - 1
+    spans = [int(span) for span in (bins.max(axis=0) - low + 2).tolist()]
+    if math.prod(spans) >= 2 ** 62:
+        return None
+    strides = (spans[1] * spans[2] * spans[3], spans[2] * spans[3], spans[3])
+    keys = (bins - low) @ np.array(strides + (1,), dtype=np.int64)
+    by_key = np.argsort(keys, kind='stable')
+    unique, first_point, sizes = np.unique(keys[by_key], return_index=True, return_counts=True)
+    bounds = np.append(first_point, count)
+    point_bin = np.repeat(np.arange(len(unique)), sizes)
+    sources, targets, pairs = [], [], 0
+    for offset in _LEADING_OFFSETS:
+        code = offset[0] * strides[0] + offset[1] * strides[1] + offset[2] * strides[2]
+        first = bounds[np.searchsorted(unique, unique + (code - 1), 'left')]
+        last = bounds[np.searchsorted(unique, unique + (code + 1), 'right')]
+        lengths = (last - first)[point_bin]
+        total = int(lengths.sum())
+        pairs += total if offset == (0, 0, 0) else 2 * total
+        if pairs > MAX_NEIGHBOR_PAIRS:
+            return None
+        if not total:
+            continue
+        source = np.repeat(by_key, lengths)
+        target = by_key[np.repeat(first[point_bin] - np.cumsum(lengths) + lengths, lengths) + np.arange(total)]
+        sources += [source] if offset == (0, 0, 0) else [source, target]
+        targets += [target] if offset == (0, 0, 0) else [target, source]
+    sources, targets = np.concatenate(sources), np.concatenate(targets)
+    # The bin test keeps rounding at a width boundary identical to the bucket lookup.
+    keep = ((np.abs(bins[targets] - bins[sources]) <= 1).all(axis=1)
+            & (np.abs(normalized[targets] - normalized[sources]) <= 1).all(axis=1))
+    sources, targets = sources[keep], targets[keep]
+    indptr = np.zeros(count + 1, dtype=np.int64)
+    np.cumsum(np.bincount(sources, minlength=count), out=indptr[1:])
+    return indptr, targets[np.argsort(sources, kind='stable')]
+
+
+_LEADING_OFFSETS = ((0, 0, 0),) + tuple(offset for offset in product((-1, 0, 1), repeat=3) if offset > (0, 0, 0))
+
+
+def _resolution_clusters_hashed(coordinates, widths):
+    """Per-seed lookup of the 81 adjacent hash buckets; same labels as ``_resolution_clusters``."""
     normalized = coordinates / widths
     bins = np.floor(normalized).astype(np.int64)
     buckets = {}
