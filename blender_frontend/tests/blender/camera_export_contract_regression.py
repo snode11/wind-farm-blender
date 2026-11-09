@@ -55,6 +55,24 @@ try:
               for path in (marked, plain)]
     assert len(pixels[0]) == 2 * 64 * 64 * 3 and pixels[0] == pixels[1]
 
+    # Markers edited while an interactive render runs: bindings follow name and frame, a moved
+    # marker keeps its camera by name, and a marker added meanwhile stays unbound.
+    for marker in markers:
+        marker.camera = extra
+    third = scene.timeline_markers.new('Camera 3', frame=3)
+    third.camera = intended
+    saved = down._snapshot(scene)
+    down._configure_video(scene, intended, 25, 2, 'WORKBENCH', str(OUT / 'edit_'), size=(64, 64), samples=1)
+    assert all(marker.camera is None for marker in scene.timeline_markers)
+    scene.timeline_markers.remove(markers[0])
+    markers[1].frame = 5
+    added = scene.timeline_markers.new('Added during render', frame=4)
+    down._restore(scene, saved)
+    bound = {marker.name: (marker.frame, marker.camera) for marker in scene.timeline_markers}
+    assert bound == {'Camera 2': (5, extra), 'Camera 3': (3, intended), 'Added during render': (4, None)}, bound
+    for marker in tuple(scene.timeline_markers):
+        scene.timeline_markers.remove(marker)
+
     layer = scene.view_layers[0]
     excluded = bpy.data.collections.new('Excluded contract annotations')
     scene.collection.children.link(excluded)

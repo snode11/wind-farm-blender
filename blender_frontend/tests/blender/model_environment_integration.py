@@ -141,13 +141,20 @@ try:
         assert mesh_digest(source.objects['WFRL.Terrain'].data) == terrain_digest
     saved = OUT / 'integrated-models.blend'
     print('CHECK save and reopen', flush=True)
+    # A copy of the source scene does not claim its manual scene; a legacy Scene pointer
+    # saved as an ID property migrates to the owner token on the next lookup.
+    duplicate = source.copy()
+    assert duplicate.wfrl_manual_scene is None
+    bpy.data.scenes.remove(duplicate)
+    source['wfrl_manual_scene'] = manual
     assert bpy.ops.wm.save_as_mainfile(filepath=str(saved)) == {'FINISHED'}
     assert bpy.ops.wm.open_mainfile(filepath=str(saved)) == {'FINISHED'}
     source = bpy.data.scenes['Integrated replay source']
     manual = bpy.data.scenes['Integrated manual model']
     check_replay_fittings(source, 'rootkink')
     assert manual_control.validate_scene(manual)[0]
-    assert manual.wfrl_manual_return_scene == source
+    assert source.wfrl_manual_scene == manual and manual.wfrl_manual_return_scene == source
+    assert 'wfrl_manual_scene' not in source
     assert not any(entry.running for entry in manual.wfrl_manual_turbines)
     assert mesh_digest(source.objects['WFRL.Terrain'].data) == terrain_digest
     assert asset_hashes == {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in asset_hashes}
@@ -155,7 +162,7 @@ try:
                   independent_materials_and_meshes=True,
                   independent_flexible_meshes=True, replay_root_fittings_follow_model=True,
                   replay_root_rollback_and_edited_shared_protection=True,
-                  saved_scene_link_restore=True,
+                  source_scene_copy_does_not_claim_manual=True, saved_scene_link_restore=True,
                   source_pose_cameras_environment_preserved=True,
                   saved_reopen=True, formal_assets_unchanged=len(asset_hashes),
                   scope='Background source integration; no FPS, physical input or scientific acceptance')

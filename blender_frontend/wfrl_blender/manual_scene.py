@@ -41,6 +41,7 @@ def _remember_view(context):
         saved.append((area, space, dict(
             location=region.view_location.copy(), rotation=region.view_rotation.copy(),
             distance=region.view_distance, perspective=region.view_perspective,
+            camera_zoom=region.view_camera_zoom, camera_offset=tuple(region.view_camera_offset),
             camera=space.camera, local_camera=space.use_local_camera,
             clip_start=space.clip_start, clip_end=space.clip_end,
             shading=space.shading.type, color_type=space.shading.color_type,
@@ -93,6 +94,11 @@ def _restore_view(context, saved_scene=None):
             region.view_rotation = saved['rotation']
             region.view_distance = saved['distance']
             region.view_perspective = saved['perspective']
+            # Camera-view framing; records saved without it keep the current framing.
+            if 'camera_zoom' in saved:
+                region.view_camera_zoom = saved['camera_zoom']
+            if 'camera_offset' in saved:
+                region.view_camera_offset = saved['camera_offset']
             space.camera = saved['camera']
             space.use_local_camera = saved['local_camera']
             space.clip_start, space.clip_end = saved['clip_start'], saved['clip_end']

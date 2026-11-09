@@ -59,7 +59,7 @@
 | --- | --- | --- |
 | WFRL 主入口与状态 | `test_home_state.py` | 后台 `home_entry_smoke.py`：真实 RNA／操作器配合布局适配器，检查页面、相机草稿取消、回放推进、手动场景往返与卸载；不代替可见窗口排版或真实鼠标操作。 |
 | 手动场景与姿态 | `test_manual_motion.py`、`test_manual_pose.py` | 后台 `manual_control_regression.py`、`manual_control_state_regression.py`、`manual_control_undo_regression.py`、`manual_pose_regression.py`、`manual_pose_undo_regression.py`、`manual_scene_recovery_regression.py`、`manual_environment_regression.py`；窗口 `manual_control_window.py`、`manual_playback_window.py`，真实鼠标 `manual_repair_mouse_window.py`（手动运行）。 |
-| 变桨速度、Down、结构运动与现场视频 | `test_manual_motion.py`、`test_live_stream.py` | 后台 `manual_down_video_regression.py`、`manual_dynamics_regression.py`、`triple_down_rig_regression.py`、`live_stream_register.py`；跨场景模型与环境隔离 `model_environment_integration.py`；窗口 `manual_down_video_window.py`（手动运行）。 |
+| 变桨速度、Down、结构运动与现场视频 | `test_manual_motion.py`、`test_live_stream.py`、`test_manual_down_publish.py` | 后台 `manual_down_video_regression.py`、`manual_dynamics_regression.py`、`triple_down_rig_regression.py`、`live_stream_register.py`；跨场景模型与环境隔离 `model_environment_integration.py`；窗口 `manual_down_video_window.py`（手动运行）。 |
 | 叶片外形 | `test_blade_models.py` | 后台 `blade_model_regression.py`；窗口 `blade_model_window.py`、`shared_context_switch_regression.py`。 |
 | 环境几何与贴地 | `test_landscape_geometry.py`、`test_landscape_distribution.py` | 后台 `landscape_geometry_regression.py`；同机位输出与多窗口背景另外核对。 |
 | 场景与播放归属 | `test_scene_mesh_lifecycle.py`、`test_scene_playback_lifecycle.py`、`test_native_camera_playback.py` | 后台 `scene_playback_lifecycle_regression.py`、`replay_history_regression.py`；窗口 `native_camera_reopen_regression.py`、`native_camera_playback_regression.py`。 |

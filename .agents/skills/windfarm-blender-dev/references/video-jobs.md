@@ -22,15 +22,15 @@
 
 - `wfrl.manual_down_video` 与 `wfrl.manual_triple_down_video` 在手动场景本身渲染：导出前暂停全部风机，按导出开始时的叶轮角度、RPM、起点／设定桨距与变桨速度生成逐帧计划，`apply_frame()` 直接写入转子与叶片变换，不改动机组属性；完成或失败后 `_finish()` 恢复场景、视图、实际桨距与输出设置并删除临时目录。
 - 视口方式（`VIEWPORT_MATERIAL`／`VIEWPORT_SOLID`）需要窗口中的 3D 视图并同步阻塞；找到 FFmpeg 时离屏绘制并经管道交给 libx264，否则走 Blender 内置编码。`SCENE`（EEVEE）与 `WORKBENCH` 使用原生渲染，窗口中可取消，后台同步渲染。三路导出只支持视口方式且要求 FFmpeg。
-- `_configure_video()` 对所有渲染方式关闭 VSE 与合成器，导出写出相机画面本身；导出期间清除时间线标记的相机绑定（先清绑定再设导出相机，因每次修改标记都会触发 Blender 的相机切换），`_restore()` 按原顺序恢复绑定与场景相机。
+- `_configure_video()` 对所有渲染方式关闭 VSE 与合成器，导出写出相机画面本身；导出期间清除时间线标记的相机绑定（先清绑定再设导出相机，因每次修改标记都会触发 Blender 的相机切换），`_restore()` 按标记名与帧号恢复绑定（帧号改变时按名称），导出期间新增的标记不绑定相机，最后恢复场景相机。
 - MP4 先渲染到临时目录；`video_output.publish_staged()` 把全部 MP4 与同名逐帧 JSON（三路导出只在中心路旁写 JSON）先暂存为目标目录中的 `.<文件名>.partial`，全部成功后再以 `os.replace` 替换目标。不做排他提交或成片解码校验，同名目标直接覆盖；暂存阶段出现 `OSError` 时删除暂存文件，原有同名文件保持不变，临时目录总被清理，操作符报告错误。替换阶段在同一目录内改名，中途失败仍可能只替换部分目标。
 - 导出参数 `seed`（对话框“固定随机种子”）同时决定相机抖动与叶片／塔架运动的相位：相同场景与设置下逐帧抖动角与运动量一致，单路与三路中心画面逐帧一致；三路侧视相机位姿每次由中心位姿重算，存在 float32 舍入级差异，个别轮廓边缘像素可能不同。未指定时每次随机，种子写入 JSON 的 `camera_shake.seed`／`structural_motion.seed`。
 - 导出结束时 `manual_control.hold_pitch_clock()` 重置进行中变桨的计时，导出期间实际桨距保持不变，结束后不按导出耗时跳变。窗口中的 EEVEE 交互渲染在完成处理器中失败时，错误写入场景的 `wfrl_manual_error`，由 Down 相机面板与主页状态显示，下一次单路导出开始时清除。
-- 导出期间场景标记 `wfrl_manual_exporting`，`tick()` 与编号监听跳过该场景；视口结构运动与相机抖动暂停，导出按自身时钟重新生成。
+- 导出期间场景标记 `wfrl_manual_exporting`，`tick()` 与编号监听跳过该场景；视口结构运动与相机抖动暂停，导出按自身时钟重新生成。导出未结束时 `wfrl.manual_down_view` 不可用；期间选择的叶片外形在导出结束后由 `_apply_pending_blade_model()` 应用。缺失的叶片编号标注对象由 `update_labels()` 重建。
 
 ## 现场视频分屏
 
-- `live_stream.py` 不导入 Blender，以 FFmpeg 子进程把流解码为固定尺寸 RGBA，只保留最新一帧，断流每 3 s 重连；`live_stream_view.py` 拆分当前 3D 视图并以绘制回调显示帧。每个进程一个会话，停止、关闭右侧区域、加载文件或停用扩展时结束 FFmpeg 并释放纹理。启动需要 3D 视图，后台模式下不执行分屏。
+- `live_stream.py` 不导入 Blender，以 FFmpeg 子进程把流解码为固定尺寸 RGBA，只保留最新一帧，断流每 3 s 重连；`live_stream_view.py` 拆分当前 3D 视图并以绘制回调显示帧。每个进程一个会话，停止、关闭右侧区域、加载文件或停用扩展时结束 FFmpeg 并释放纹理。分屏把新区域放在左侧时两区域互换类型，新的 3D 视图复制原视图的相机、取景、缩放偏移、裁剪、着色与叠加层；流区域只在有新帧或状态变化时重绘。启动需要 3D 视图，后台模式下不执行分屏。
 
 ## 已有 MP4 与 RTSP
 
@@ -46,7 +46,7 @@
 
 | 范围 | 宿主入口 | 原生入口 |
 | --- | --- | --- |
-| 手动 Down 视频与现场视频 | `test_manual_motion.py`、`test_live_stream.py` | 后台 `manual_down_video_regression.py`、`manual_dynamics_regression.py`、`triple_down_rig_regression.py`、`live_stream_register.py`；窗口 `manual_down_video_window.py`（手动运行）。分屏画面需在交互窗口中检查。 |
+| 手动 Down 视频与现场视频 | `test_manual_motion.py`、`test_live_stream.py`、`test_manual_down_publish.py`（暂存替换与失败保留） | 后台 `manual_down_video_regression.py`、`manual_dynamics_regression.py`、`triple_down_rig_regression.py`、`live_stream_register.py`；窗口 `manual_down_video_window.py`（手动运行）。分屏画面需在交互窗口中检查。 |
 | 普通后台动画渲染 | `test_animation_render.py` | 后台 `animation_render_regression.py` 验证 32 位 EXR 来源到 16 位 PNG、短动画、取消、源设置保留和 MAPPO 运动；不代替完整片段或 FPS 验收。 |
 | 已有 MP4 与 RTSP | `test_video_output.py` | 安装版 `video_output_regression.py` 核对字节一致、真实 RTSP 收流与解码、停止及文件加载。需要 `WFRL_TEST_OUTPUT`、`WFRL_VIDEO_SOURCE`、`WFRL_FFMPEG`、`WFRL_MEDIAMTX`。 |
 

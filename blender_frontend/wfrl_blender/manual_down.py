@@ -360,6 +360,9 @@ def current_blade(camera, entry):
     return best[1]
 
 
+_LABEL_PARTS = frozenset(('Legend.Back', 'Legend.B1', 'Legend.B2', 'Legend.B3'))
+
+
 def update_labels(scene, *, visible=None):
     """Show the number of the blade currently in each Down view in its top-right box.
 
@@ -373,8 +376,9 @@ def update_labels(scene, *, visible=None):
                    if obj.get('wfrl_down_label')}
         if not objects:
             continue
-        if shown and ('Legend.Title' in objects or abs(
-                camera.get('wfrl_label_aspect', 0) - scene.render.resolution_y / scene.render.resolution_x) > 1e-6):
+        # A label object deleted by hand is rebuilt rather than failing every later update.
+        if not _LABEL_PARTS <= objects.keys() or (shown and ('Legend.Title' in objects or abs(
+                camera.get('wfrl_label_aspect', 0) - scene.render.resolution_y / scene.render.resolution_x) > 1e-6)):
             _ensure_labels(scene, camera)
             objects = {obj.name[len(camera.name) + 1:]: obj for obj in camera.children_recursive
                        if obj.get('wfrl_down_label')}
@@ -436,7 +440,20 @@ def _reaim_down_cameras(scene):
             ensure_side_cameras(scene, camera['wfrl_turbine'])
 
 
+def _apply_pending_blade_model(scene):
+    """Apply a blade shape chosen while an export was rendering."""
+    try:
+        mesh = scene.wfrl_manual_turbines[0].blade1_object.data
+        if mesh.get('wfrl_blade_model', DEFAULT_MODEL) != scene.wfrl_manual_blade_model:
+            apply_blade_model(scene)
+    except (IndexError, ValueError, ReferenceError, AttributeError) as exc:
+        print('WFRL manual blade model:', exc)
+
+
 def _blade_model_update(scene, context):
+    if scene.as_pointer() in _EXPORT:
+        # The running export keeps the shape it started with; the switch applies when it ends.
+        return
     try:
         apply_blade_model(scene)
     except (ValueError, ReferenceError, AttributeError) as exc:
@@ -816,7 +833,27 @@ def _snapshot(scene):
         ffmpeg={name: getattr(render.ffmpeg, name) for name in _SAVED_FFMPEG},
         view=(scene.view_settings.view_transform, scene.view_settings.look),
         eevee=(scene.eevee.taa_samples, scene.eevee.taa_render_samples), render_aa=scene.display.render_aa,
-        marker_cameras=[marker.camera for marker in scene.timeline_markers])
+        markers=[(marker.name, marker.frame, marker.camera) for marker in scene.timeline_markers])
+
+
+def _restore_marker_cameras(scene, saved):
+    """Rebind marker cameras by marker name and frame, then by name for a moved marker.
+
+    Markers may be added, removed or moved while an interactive render runs. Each saved binding
+    goes back to at most one marker; a marker without a saved name keeps no camera."""
+    pending = list(saved)
+    markers = list(scene.timeline_markers)
+    for exact in (True, False):
+        for marker in tuple(markers):
+            for index, (name, frame, camera) in enumerate(pending):
+                if name == marker.name and (frame == marker.frame or not exact):
+                    try:
+                        marker.camera = camera
+                    except ReferenceError:
+                        pass  # The bound camera was deleted during the export.
+                    del pending[index]
+                    markers.remove(marker)
+                    break
 
 
 def _restore(scene, saved):
@@ -835,10 +872,7 @@ def _restore(scene, saved):
     scene.view_settings.view_transform, scene.view_settings.look = saved['view']
     scene.eevee.taa_samples, scene.eevee.taa_render_samples = saved['eevee']
     scene.display.render_aa = saved['render_aa']
-    markers = scene.timeline_markers
-    if len(markers) == len(saved['marker_cameras']):
-        for marker, camera in zip(markers, saved['marker_cameras']):
-            marker.camera = camera
+    _restore_marker_cameras(scene, saved['markers'])
     scene.camera = saved['camera']
     scene.frame_start, scene.frame_end = saved['frame'][:2]
     scene.frame_set(saved['frame'][2])
@@ -908,6 +942,7 @@ def _finish(scene, *, completed):
             manual_control.hold_pitch_clock(scene)
             for entry in scene.wfrl_manual_turbines:
                 manual_control._apply_entry(entry)
+            _apply_pending_blade_model(scene)
             update_labels(scene)
         if completed:
             produced = sorted(Path(job['temp']).glob('*.mp4'))
@@ -1179,6 +1214,7 @@ def export_triple_down_video(scene, turbine, filepaths, *, duration_s=10.0, fps=
         manual_control.hold_pitch_clock(scene)
         for entry in scene.wfrl_manual_turbines:
             manual_control._apply_entry(entry)
+        _apply_pending_blade_model(scene)
         update_labels(scene)
     if job.get('progress'):
         bpy.context.window_manager.progress_end()
@@ -1338,6 +1374,9 @@ class WFRL_OT_ManualDownView(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
+        if context.scene is not None and context.scene.as_pointer() in _EXPORT:
+            cls.poll_message_set('导出 Down 视频期间不能切换观察相机')
+            return False
         return manual_control.is_manual(context.scene)
 
     def execute(self, context):

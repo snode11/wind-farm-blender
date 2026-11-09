@@ -61,10 +61,11 @@ def _draw():
              'RECONNECTING': 'RECONNECTING', 'ERROR': 'ERROR'}.get(stream.state, stream.state)
     blf.position(font, 12, region.height - 24, 0)
     blf.draw(font, f'{label}   {_SESSION["label"]}')
-    if stream.state != 'LIVE' and stream.errors:
+    errors = tuple(stream.errors)  # one read: the worker clears it on reconnect
+    if stream.state != 'LIVE' and errors:
         blf.size(font, 12)
         blf.position(font, 12, region.height - 44, 0)
-        blf.draw(font, stream.errors[-1][:160])
+        blf.draw(font, errors[-1][:160])
 
 
 def _texture(frame, width, height):
@@ -83,7 +84,11 @@ def _tick():
         return None
     if not _SESSION.get('arranged'):
         _arrange(area)
-    if _SESSION['stream'].sequence != _SESSION['shown'] or _SESSION['stream'].state != 'LIVE':
+    stream = _SESSION['stream']
+    errors = tuple(stream.errors)
+    status = (stream.state, stream.message, errors[-1] if errors else '')
+    if stream.sequence != _SESSION['shown'] or status != _SESSION.get('drawn_status'):
+        _SESSION['drawn_status'] = status
         area.tag_redraw()
     return _TICK_S
 
@@ -105,10 +110,28 @@ def _arrange(area):
     _SESSION['arranged'] = True
 
 
+def _view_state(space):
+    region, shading = space.region_3d, space.shading
+    return dict(local=space.use_local_camera, camera=space.camera, perspective=region.view_perspective,
+                location=region.view_location.copy(), rotation=region.view_rotation.copy(),
+                distance=region.view_distance, camera_zoom=region.view_camera_zoom,
+                camera_offset=tuple(region.view_camera_offset), clip=(space.clip_start, space.clip_end),
+                shading=(shading.type, shading.color_type, shading.use_scene_world, shading.use_scene_lights),
+                overlays=space.overlay.show_overlays)
+
+
 def _copy_view(saved, space):
+    """Give the new 3D view the simulated view's camera, framing, shading and overlays."""
+    region, shading = space.region_3d, space.shading
     space.use_local_camera = saved['local']
     space.camera = saved['camera']
-    space.region_3d.view_perspective = saved['perspective']
+    region.view_location, region.view_rotation = saved['location'], saved['rotation']
+    region.view_distance = saved['distance']
+    region.view_perspective = saved['perspective']
+    region.view_camera_zoom, region.view_camera_offset = saved['camera_zoom'], saved['camera_offset']
+    space.clip_start, space.clip_end = saved['clip']
+    shading.type, shading.color_type, shading.use_scene_world, shading.use_scene_lights = saved['shading']
+    space.overlay.show_overlays = saved['overlays']
     space.show_region_ui = True
 
 
@@ -138,9 +161,7 @@ def start(context, url, *, turbine='T1', size='1280x720'):
         result = bpy.ops.wfrl.manual_down_view(turbine=turbine, side='CENTER')
         if 'FINISHED' not in result:
             raise ValueError(f'无法切换到 {turbine} Down 相机')
-    space = area.spaces.active
-    view = dict(local=space.use_local_camera, camera=space.camera,
-                perspective=space.region_3d.view_perspective)
+    view = _view_state(area.spaces.active)
     window, screen = context.window, context.window.screen
     before = {item.as_pointer() for item in screen.areas}
     with context.temp_override(window=window, screen=screen, area=area):

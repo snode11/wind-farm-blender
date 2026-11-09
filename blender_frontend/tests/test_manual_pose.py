@@ -155,3 +155,26 @@ class ManualPoseTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+def test_pose_export_writes_encoded_bytes_atomically(frontend_module, stub_module, monkeypatch, tmp_path):
+    from types import SimpleNamespace
+    from unittest.mock import Mock
+    stub_module('bpy_extras.io_utils', ExportHelper=type('ExportHelper', (), {}),
+                ImportHelper=type('ImportHelper', (), {}))
+    module = frontend_module('wfrl_blender.manual_control')
+    poses = {'T3': sample_pose(yaw_deg=-90.0), 'T2': sample_pose(rpm=0.0), 'T1': sample_pose()}
+    monkeypatch.setattr(module, 'validate_scene', lambda scene: (True, ''))
+    monkeypatch.setattr(module, 'pose_snapshot', lambda scene: poses)
+    monkeypatch.setattr(module, 'bpy', SimpleNamespace(path=SimpleNamespace(abspath=lambda path: path)))
+    target = tmp_path / 'poses.json'
+    target.write_bytes(b'previous content')
+    operator = module.WFRL_OT_ManualPoseExport()
+    operator.filepath = str(target)
+    operator.report = Mock()
+
+    assert operator.execute(SimpleNamespace(scene=object())) == {'FINISHED'}
+
+    assert target.read_bytes() == encode_poses(poses).encode('utf-8')
+    assert list(tmp_path.iterdir()) == [target]
+    operator.report.assert_called_once_with({'INFO'}, '三机姿态已保存')
