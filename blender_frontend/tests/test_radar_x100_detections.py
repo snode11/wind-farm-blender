@@ -39,7 +39,7 @@ def test_dispatch_keeps_detection_integration_independent_of_geometry_budget(mon
         return object()
     sampler = SimpleNamespace(interval=(0., 2.), sample=object(), visibility=object(),
         material_sample=object(), sampling_plan=plan, calibration_id='mount-calibration',
-        sampling_transaction=nullcontext)
+        sampling_transaction=nullcontext, field_of_view=(45.75, 30.))
     result = None if missing else SimpleNamespace(provenance={})
     def simulate(name):
         def call(*args, **kwargs):
@@ -60,7 +60,13 @@ def test_dispatch_keeps_detection_integration_independent_of_geometry_budget(mon
     assert plans == [configuration.DETECTION_INTEGRATION_BUDGET if mode == 'DETECTIONS' else 7]
     assert kwargs[budget_field] == plans[0]
     assert ('candidate_budget' if mode == 'DETECTIONS' else 'integration_budget') not in kwargs
-    assert 'config' not in kwargs, 'Frontend must use the engineering model defaults'
+    if mode == 'DETECTIONS':
+        # Applied detections use the measured-PLY calibration with the applied rectangular FOV.
+        assert kwargs['config'].calibration_status == 'USER_CALIBRATED'
+        assert (kwargs['config'].azimuth_limit_deg, kwargs['config'].elevation_limit_deg) == (45.75, 30.)
+        assert 'fov_deg' not in kwargs
+    else:
+        assert kwargs['fov_deg'] == (45.75, 30.) and 'config' not in kwargs
     if result is not None:
         assert result.provenance['calibration_id'] == sampler.calibration_id
 

@@ -88,7 +88,8 @@ class OutputWindow:
             id(getattr(session, 'blade_result', None)) if self.color == 'ECHO_CLASS' else None)
         if key != self.data_key:
             self.frame = frame
-            source = (frame.sensor_id, frame.session_id, frame.stream, frame.spatial['frame']) if frame else None
+            source = (frame.sensor_id, frame.session_id, frame.stream, frame.spatial['frame'],
+                      display.frame_field_of_view(frame)) if frame else None
             if source is not None and source != self.source_key:
                 self.bounds, self.zoom, self.pan = None, 1., (0., 0.)
                 if frame.spatial['frame'] != display.SENSOR_AXES:
@@ -121,7 +122,7 @@ class OutputWindow:
                         tower = analysis.local(session.context.vertices,session.context.world_from_analysis)[:,(0,2)]
                         extent = np.concatenate((extent,tower))
                     if len(extent):
-                        self.bounds = display.fit_bounds(extent,self.view)
+                        self.bounds = display.fit_bounds(extent,self.view,display.frame_field_of_view(frame))
             else:
                 self.original_indices = np.empty(0,dtype=np.int64)
                 self.xy, self.colors = np.empty((0, 2)), np.empty((0, 4))
@@ -187,7 +188,7 @@ class OutputWindow:
         sensor_axes = self._draw_frame_information(session, frame, layout, width, s, text)
         rect = layout['rectangle']
         left, bottom, pw, ph = rect
-        bounds = self.bounds or display.fit_bounds([], self.view)
+        bounds = self.bounds or display.fit_bounds([], self.view, display.frame_field_of_view(self.frame))
         def grid():
             transform, shapes, labels = display.grid_geometry(self.view, bounds, rect, self.zoom, self.pan, s)
             return transform, [shape(points, color) for points, color in shapes if len(points)], labels
@@ -280,8 +281,9 @@ class OutputWindow:
         sensor = analysis.local(analysis.transform(np.array([[0,0,0],[15,0,0]]),context.world_from_sensor),context.world_from_analysis)
         shapes.append(shape(sensor[:,(0,2)]*factor+(tx,ty),(1.,.7,.15,1)))
         rays=[]
-        for az in (-schema.PROFILE['azimuth_deg'],schema.PROFILE['azimuth_deg']):
-            for el in (-schema.PROFILE['elevation_deg'],schema.PROFILE['elevation_deg']):
+        azimuth_limit,elevation_limit=display.frame_field_of_view(session.frame)
+        for az in (-azimuth_limit,azimuth_limit):
+            for el in (-elevation_limit,elevation_limit):
                 a,e=np.radians([az,el])
                 length=schema.DISPLAY_DEFAULTS['fov_length_m']
                 end=[length*np.cos(e)*np.cos(a),length*np.cos(e)*np.sin(a),length*np.sin(e)]

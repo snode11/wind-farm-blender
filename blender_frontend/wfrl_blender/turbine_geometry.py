@@ -17,7 +17,7 @@ from pathlib import Path
 # display model does not change the saved NREL motion or run a new solver.
 MODELS = {
     'nrel5mw': ('assets/nrel5mw_geometry.json', 'NREL 5MW 预弯改型'),
-    'rootkink': ('assets/rootkink_geometry.json', '商用形制叶根拐点改型'),
+    'rootkink': ('assets/rootkink_geometry.json', '自改结构（叶根拐点改型）'),
 }
 DEFAULT_MODEL = 'nrel5mw'
 # Display-only spanwise shear toward local -x; radial binding stays unchanged.

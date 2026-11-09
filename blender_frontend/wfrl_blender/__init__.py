@@ -175,6 +175,22 @@ def _update_blade_model(scene, context=None):
      scene.sync_mode, scene.use_preview_range) = clock
     scene.frame_set(frame, subframe=subframe)
     fittings.commit()
+    _resample_x100(scene)
+
+
+def _resample_x100(scene):
+    """Re-apply an unchanged X100 simulation so it samples the new blade shape."""
+    from .radar_x100 import runtime as x100
+    session = x100.session_for(scene)
+    if session is None or session.mode != 'SIMULATION':
+        return
+    if session.fanout or session.closing or session.pending_configuration():
+        scene['wfrl_x100_error'] = '叶片外形已切换；请结束记录或应用 X100 配置后使用新外形'
+        return
+    try:
+        x100.start(scene)
+    except Exception as exc:
+        scene['wfrl_x100_error'] = '叶片外形已切换，X100 重新采样失败：' + str(exc)
 
 
 def _on_load(_unused):

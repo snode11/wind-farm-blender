@@ -24,6 +24,34 @@ def installation_matrix(location, rotation_deg):
     return matrix
 
 
+# Camera axes (-Z view, +X image right, +Y image up) to sensor axes (+X boresight, +Y left, +Z up).
+CAMERA_FROM_SENSOR = np.array(((0., -1., 0.), (0., 0., 1.), (-1., 0., 0.)))
+
+
+def down_camera_installation(scene, turbine_id='T1'):
+    """Radar at the current T1 Down camera pose, with the camera's rectangular field of view.
+
+    Returns the YawRoot-frame location, XYZ Euler rotation in degrees and (azimuth, elevation)
+    half angles: horizontal from the lens, vertical from the declared 16:9 Down image aspect.
+    """
+    from mathutils import Matrix
+    from .. import cameras
+    camera = scene.objects.get(f'WFRL.Camera.{turbine_id}.Gimbal')
+    yaw = scene.objects.get(f'WFRL.Turbine.{turbine_id}.YawRoot')
+    if camera is None and yaw is not None:
+        camera = cameras.ensure_gimbal(scene, turbine_id)
+    if (yaw is None or camera is None or camera.type != 'CAMERA'
+            or not cameras.is_down_camera(camera) or camera.parent != yaw):
+        raise ValueError(f'{turbine_id} Down 相机缺失或未安装在机舱上')
+    local = np.array(camera.matrix_parent_inverse, dtype=float) @ np.array(camera.matrix_basis, dtype=float)
+    rotation = local[:3, :3] / np.linalg.norm(local[:3, :3], axis=0)
+    matrix = Matrix((rotation @ CAMERA_FROM_SENSOR).tolist())
+    horizontal = math.degrees(camera.data.angle_x) / 2
+    vertical = math.degrees(math.atan(math.tan(math.radians(horizontal)) / cameras.DOWN_ASPECT))
+    return (tuple(float(v) for v in local[:3, 3]), tuple(math.degrees(a) for a in matrix.to_euler('XYZ')),
+            (horizontal, vertical))
+
+
 def nacelle_side_installation(sampler):
     """Place the housing outside the negative-Y nacelle wall, looking sideways."""
     from mathutils import Vector
@@ -96,13 +124,14 @@ def installation_catalog(sampler, *, policy=None, lateral_offsets=(0., 1., 2.),
 
 class SceneSampler:
     """Snapshot static bindings; arbitrary source times never change Blender clocks."""
-    def __init__(self, flex, *, turbine_id='T1', mount='NACELLE', mount_from_sensor=None):
+    def __init__(self, flex, *, turbine_id='T1', mount='NACELLE', mount_from_sensor=None, field_of_view=None):
         from ..turbine_geometry import geometry_data
         self.flex, self.turbine_id, self.mount = flex, turbine_id, mount
         self.scene = flex.scene
         self.k = list(flex.readers).index(turbine_id)
         self.interval = (float(flex.times[0]), float(flex.times[-1]))
         self.mount_from_sensor = simulation.rigid_matrix(mount_from_sensor)
+        self.field_of_view = None if field_of_view is None else tuple(float(v) for v in field_of_view)
         self.source_id = flex.scene['wfrl_farm_manifest_sha256']
         self.height = geometry_data()['scalars']['TowerHt']
         yaw = flex.scene.objects[f'WFRL.Turbine.{turbine_id}.YawRoot']

@@ -355,6 +355,10 @@ REGRESSIONS = (
     Regression('radar_x100_window.py', 'X100_WINDOW_PASS', 'result.json', mode='visible', timeout_s=300,
                environment=(('WFRL_TEST_QUIT', '1'),),
                scope='X100 GPU overlay and raw RGB pixel checks; exits after final evidence.'),
+    Regression('radar_x100_down_live_window.py', 'X100_DOWN_LIVE_PASS', 'result.json', mode='visible',
+               timeout_s=300, environment=(('WFRL_TEST_QUIT', '1'),),
+               scope='Live calibrated DETECTIONS at the T1 Down camera on the self-modified blade in the '
+                     'point-cloud window; blade switch resampling; exits after final evidence.'),
     Regression('box_surface_install_window.py', 'BOX_SURFACE_WINDOW_PASS', 'window-validation.json', mode='visible',
                scope='Scripted native-window camera box installation.'),
     Regression('camera_gpu_calibration.py', 'GPU_CALIBRATION_PASS', 'result.json', mode='visible',

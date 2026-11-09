@@ -20,6 +20,7 @@ if MODULE == 'wfrl_blender':
 _native.check_addon_root(addon)
 farm = importlib.import_module(MODULE + '.farm_flex')
 radar = importlib.import_module(MODULE + '.radar_x100.runtime')
+core = importlib.import_module(MODULE + '.radar_x100.core')
 display = importlib.import_module(MODULE + '.radar_x100.display')
 configuration = importlib.import_module(MODULE + '.radar_x100.configuration')
 atomic_json = importlib.import_module(MODULE + '.atomic_json')
@@ -40,9 +41,14 @@ def assert_detection(session):
     assert frame.source_kind == 'ENGINEERING_SIMULATION' and frame.stream == 'DETECTIONS'
     assert frame.material_ids is None and 'material_point_indices' not in frame.provenance
     assert frame.model_diagnostics is not None
-    assert 'UNCALIBRATED' in display.observation_lines(frame)[1]
+    # Applied detections use the measured-PLY calibration and the applied rectangular field of view.
+    assert display.observation_lines(frame)[1] == '标定状态：USER_CALIBRATED'
+    parameters = frame.provenance['observation_model']['parameters']
+    assert parameters['calibration_reference'] == core.calibration.REFERENCE
+    assert frame.provenance['field_of_view_deg'] == [float(v) for v in session.scene.wfrl_x100_field_of_view]
     assert len(frame.points) <= radar.schema.PROFILE['max_points']
-    assert np.isnan(frame.points['snr']).all()
+    assert np.isfinite(frame.points['snr']).all() and np.isfinite(frame.points['mag']).all()
+    assert 'vendor_field_semantics' in frame.provenance
     colors, limits, unknown = display.point_style(frame, 'MODEL_SNR')
     assert len(colors) == int(frame.finite_mask.sum()) and unknown == 0
     return frame

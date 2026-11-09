@@ -61,7 +61,42 @@ def existing_installation(scene, owner):
     return mounts[0], fields[0]
 
 
-def install(scene, owner, sensor_matrix, *, show_fov=True):
+def field_of_view(value=None):
+    """Applied rectangular half angles (azimuth, elevation) in degrees; None is the datasheet FOV."""
+    if value is None:
+        return float(schema.PROFILE['azimuth_deg']), float(schema.PROFILE['elevation_deg'])
+    return tuple(float(v) for v in value)
+
+
+def _fov_mesh(limits):
+    import bpy
+    azimuth_limit, elevation_limit = field_of_view(limits)
+    points, edges, rows = [(0., 0., 0.)], [], []
+    length = schema.DISPLAY_DEFAULTS['fov_length_m']
+    for elevation in (-elevation_limit, elevation_limit):
+        row = []
+        for azimuth in np.linspace(-azimuth_limit, azimuth_limit, 25):
+            az, el = math.radians(azimuth), math.radians(elevation)
+            row.append(len(points))
+            points.append((length * math.cos(el) * math.cos(az), length * math.cos(el) * math.sin(az), length * math.sin(el)))
+        edges.extend(zip(row, row[1:]))
+        edges.extend([(0, row[0]), (0, row[-1])])
+        rows.append(row)
+    edges.extend([(rows[0][0], rows[1][0]), (rows[0][-1], rows[1][-1])])
+    mesh = bpy.data.meshes.new('WFRL.X100.FOV')
+    mesh.from_pydata(points, edges, [])
+    mesh['wfrl_x100_field_of_view_deg'] = list(field_of_view(limits))
+    return mesh
+
+
+def set_field_of_view(fov, limits):
+    """Replace the annotation mesh; returns the previous mesh for rollback."""
+    previous = fov.data
+    fov.data = _fov_mesh(limits)
+    return previous
+
+
+def install(scene, owner, sensor_matrix, *, show_fov=True, field_of_view_deg=None):
     import bpy
     from mathutils import Matrix
     remove_objects(scene)
@@ -86,23 +121,7 @@ def install(scene, owner, sensor_matrix, *, show_fov=True):
     housing['wfrl_x100_owner'] = owner
     housing['wfrl_x100_role'] = 'physical'
     housing['geometry_source'] = housing_model.SOURCE
-    points, edges = [(0., 0., 0.)], []
-    rows = []
-    azimuth_limit, elevation_limit = schema.PROFILE['azimuth_deg'], schema.PROFILE['elevation_deg']
-    length = schema.DISPLAY_DEFAULTS['fov_length_m']
-    for elevation in (-elevation_limit, elevation_limit):
-        row = []
-        for azimuth in np.linspace(-azimuth_limit, azimuth_limit, 25):
-            az, el = math.radians(azimuth), math.radians(elevation)
-            row.append(len(points))
-            points.append((length * math.cos(el) * math.cos(az), length * math.cos(el) * math.sin(az), length * math.sin(el)))
-        edges.extend(zip(row, row[1:]))
-        edges.extend([(0, row[0]), (0, row[-1])])
-        rows.append(row)
-    edges.extend([(rows[0][0], rows[1][0]), (rows[0][-1], rows[1][-1])])
-    mesh = bpy.data.meshes.new('WFRL.X100.FOV')
-    mesh.from_pydata(points, edges, [])
-    fov = bpy.data.objects.new('WFRL.X100.FOV', mesh)
+    fov = bpy.data.objects.new('WFRL.X100.FOV', _fov_mesh(field_of_view_deg))
     collection.objects.link(fov)
     fov.parent, fov.hide_render = mount, True
     fov['wfrl_x100_owner'], fov['wfrl_x100_role'] = owner, 'annotation'

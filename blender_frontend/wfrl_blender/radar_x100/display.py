@@ -176,10 +176,19 @@ def project(xyz, view):
     raise ValueError('Unknown X100 display view: ' + str(view))
 
 
-def fit_bounds(points, view):
+def frame_field_of_view(frame):
+    """Rectangular half angles the frame was simulated with; datasheet FOV otherwise."""
+    value = frame.provenance.get('field_of_view_deg') if frame is not None else None
+    if value is None:
+        return float(schema.PROFILE['azimuth_deg']), float(schema.PROFILE['elevation_deg'])
+    return tuple(float(v) for v in value)
+
+
+def fit_bounds(points, view, field_of_view=None):
     if view == 'SENSOR':
-        azimuth = schema.PROFILE['azimuth_deg'] + schema.DISPLAY_DEFAULTS['sensor_margin_deg'][0]
-        elevation = schema.PROFILE['elevation_deg'] + schema.DISPLAY_DEFAULTS['sensor_margin_deg'][1]
+        limits = frame_field_of_view(None) if field_of_view is None else field_of_view
+        azimuth = limits[0] + schema.DISPLAY_DEFAULTS['sensor_margin_deg'][0]
+        elevation = limits[1] + schema.DISPLAY_DEFAULTS['sensor_margin_deg'][1]
         return (-azimuth, -elevation, 2*azimuth, 2*elevation)
     points = np.concatenate((np.asarray(points).reshape(-1, 2), np.zeros((1, 2))))
     lo, hi = points.min(axis=0), points.max(axis=0)

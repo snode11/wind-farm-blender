@@ -72,7 +72,7 @@ ASSUMPTIONS = (
     'Strongest total-power detections are capped before independent Gaussian measurement errors; out-of-profile estimates are discarded without replacement.',
     'Independent Gaussian measurement errors assume datasheet +/- accuracy means +/-2 sigma; confidence level is not specified by the manufacturer.',
     'model_power_w is receiver input signal power; model_observed_power_w is signal-normalized detector output; model_snr_linear uses processed noise.',
-    'ms uses abs(synthetic radial velocity) > 1e-6 m/s; vendor classification, mag, rcs, snr and label mapping are unknown.',
+    'ms uses abs(synthetic radial velocity) > ms_velocity_threshold_m_s; the vendor label mapping is unknown; mag, rcs and snr stay NaN unless a vendor field mapping is configured.',
     'Instantaneous independent frames; no hardware chirp timing, tracking, safety or device calibration claim.',
 )
 
@@ -117,6 +117,18 @@ class DetectionConfig:
     calibration_status: str = 'UNCALIBRATED'
     calibration_reference: str | None = None
     parameter_basis: str = 'Datasheet resolution/accuracy; assumed sensitivity anchor and RF/processing parameters; no measured calibration.'
+    # Rectangular azimuth/elevation half angles of the hardware gate and noise search domain.
+    azimuth_limit_deg: float = PROFILE['azimuth_deg']
+    elevation_limit_deg: float = PROFILE['elevation_deg']
+    # ms flag: abs(radial velocity) above this speed.
+    ms_velocity_threshold_m_s: float = 1e-6
+    # Vendor field mapping; None keeps mag/rcs/snr unknown (NaN). With an offset, snr is the
+    # detector output power over processed noise in dB plus the offset, rcs is the RCS implied
+    # by that power at the measured position in dBsm, and mag = slope * snr + intercept + noise.
+    vendor_snr_offset_db: float | None = None
+    vendor_mag_slope: float = 1.0
+    vendor_mag_intercept: float = 0.0
+    vendor_mag_std: float = 0.0
 
     @property
     def wavelength_m(self):
@@ -163,7 +175,12 @@ class DetectionConfig:
                     'system_loss_linear', 'azimuth_half_power_deg', 'elevation_half_power_deg',
                     'merge_range_m', 'merge_azimuth_deg', 'merge_elevation_deg', 'merge_velocity_m_s',
                     'noise_temperature_k', 'noise_bandwidth_hz', 'false_alarm_probability_per_cell')
-        for name in nonnegative + positive + ('velocity_min_m_s', 'velocity_max_m_s'):
+        nonnegative += ('ms_velocity_threshold_m_s', 'vendor_mag_std')
+        positive += ('azimuth_limit_deg', 'elevation_limit_deg')
+        finite = ('velocity_min_m_s', 'velocity_max_m_s', 'vendor_mag_slope', 'vendor_mag_intercept')
+        if self.vendor_snr_offset_db is not None:
+            finite += ('vendor_snr_offset_db',)
+        for name in nonnegative + positive + finite:
             value = getattr(self, name)
             if (isinstance(value, (bool, str)) or not isinstance(value, (int, float))
                     or not math.isfinite(value) or (name in nonnegative and value < 0)
@@ -174,6 +191,7 @@ class DetectionConfig:
                 or not 76e9 <= self.carrier_frequency_hz <= 79e9
                 or self.noise_figure_db > 100 or self.processing_gain_db > 100
                 or self.velocity_min_m_s >= self.velocity_max_m_s
+                or self.azimuth_limit_deg > 90 or self.elevation_limit_deg > 90
                 or not .01 <= self.azimuth_half_power_deg <= 180
                 or not .01 <= self.elevation_half_power_deg <= 90
                 or self.fluctuation_model not in {'SWERLING_0', 'SWERLING_1'}
@@ -209,7 +227,7 @@ def _pattern_solid_angle(pattern, azimuth_half_power_deg, elevation_half_power_d
 
 def _cell_grid(config):
     """Noise search bins in range, direction cosines and Doppler, not target clusters."""
-    angles = np.sin(np.radians([PROFILE['azimuth_deg'], PROFILE['elevation_deg']]))
+    angles = np.sin(np.radians([config.azimuth_limit_deg, config.elevation_limit_deg]))
     lower = np.array([PROFILE['range_m'][0], -angles[0], -angles[1], config.velocity_min_m_s])
     upper = np.array([PROFILE['range_m'][1], angles[0], angles[1], config.velocity_max_m_s])
     widths = np.array([config.merge_range_m, math.radians(config.merge_azimuth_deg),
@@ -496,6 +514,7 @@ def generate_detections(xyz_m, radial_velocity_m_s, effective_rcs_m2, *,
         raise ValueError('Detection template must be an empty synthetic sensor-coordinate frame')
     provenance = dict(template.provenance)
     provenance.pop('material_point_indices', None)
+    vendor_fields = config.vendor_snr_offset_db is not None
     provenance.update(observation_model=dict(id=MODEL_ID, response_kind=response_kind,
         assumptions=list(ASSUMPTIONS), parameters=asdict(config), noise_seed=seed,
         parameter_sources=dict(PARAMETER_SOURCES), derived_parameters=model_derived_parameters(config),
@@ -504,8 +523,16 @@ def generate_detections(xyz_m, radial_velocity_m_s, effective_rcs_m2, *,
         random_streams=['target_power', 'target_dropout', 'false_alarms', 'measurement_error'],
         output_point_limit=output_point_limit,
         truth_use='Evaluation only; no one-to-one material association or vendor label mapping.'),
-        unknown_attributes=['mag', 'rcs', 'snr', 'vendor_label'], label_semantics='NOT_GENERATED',
-        ms_semantics='Synthetic abs(radial_velocity_m_s) > 1e-6; not a vendor classifier')
+        unknown_attributes=['vendor_label'] if vendor_fields else ['mag', 'rcs', 'snr', 'vendor_label'],
+        label_semantics='NOT_GENERATED',
+        ms_semantics=f'Synthetic abs(radial_velocity_m_s) > {config.ms_velocity_threshold_m_s:g} m/s; not a vendor classifier',
+        field_of_view_deg=[config.azimuth_limit_deg, config.elevation_limit_deg])
+    if vendor_fields:
+        provenance['vendor_field_semantics'] = (
+            'Mapped from model quantities with the calibration in observation_model.parameters: '
+            'snr = 10*log10(detector output power / processed noise) + vendor_snr_offset_db; '
+            'rcs = RCS implied by that power at the measured position, dBsm; '
+            'mag = vendor_mag_slope * snr + vendor_mag_intercept + N(0, vendor_mag_std). Not vendor measurements.')
     empty = np.zeros(0, dtype=POINT_DTYPE)
     base = replace(template, source_kind='ENGINEERING_SIMULATION', stream='DETECTIONS',
         points=empty, radial_velocity_m_s=np.empty(0), material_ids=None,
@@ -521,7 +548,7 @@ def generate_detections(xyz_m, radial_velocity_m_s, effective_rcs_m2, *,
             or np.any(rcs < 0)):
         raise ValueError('Invalid detection scatterers')
     from .simulation import in_fov
-    geometric_inside = in_fov(xyz)
+    geometric_inside = in_fov(xyz, (config.azimuth_limit_deg, config.elevation_limit_deg))
     velocity_inside = (velocity >= config.velocity_min_m_s) & (velocity <= config.velocity_max_m_s)
     inside = geometric_inside & velocity_inside
     polar, velocity, rcs = _polar(xyz[inside]), velocity[inside], rcs[inside]
@@ -583,16 +610,27 @@ def generate_detections(xyz_m, radial_velocity_m_s, effective_rcs_m2, *,
     speeds = speeds + error_rng.normal(size=len(speeds)) * config.radial_velocity_std_m_s
     measured_xyz = _xyz(positions)
     angular_tolerance = np.degrees(1e-12)
-    angle_limits = np.array([PROFILE['azimuth_deg'], PROFILE['elevation_deg']])
+    angle_limits = np.array([config.azimuth_limit_deg, config.elevation_limit_deg])
     accepted = ((positions[:, 0] >= lower[0]) & (positions[:, 0] <= upper[0])
                 & (np.abs(positions[:, 1:]) <= angle_limits + angular_tolerance).all(axis=1)
                 & (speeds >= config.velocity_min_m_s) & (speeds <= config.velocity_max_m_s))
     points = np.zeros(int(accepted.sum()), dtype=POINT_DTYPE)
     for axis, name in enumerate(('x', 'y', 'z')):
         points[name] = measured_xyz[accepted, axis]
-    for name in ('mag', 'rcs', 'snr'):
-        points[name] = np.nan
-    points['ms'] = (np.abs(speeds[accepted]) > 1e-6).astype(np.uint8)
+    if vendor_fields:
+        observed = diagnostics['model_observed_power_w'][accepted]
+        kept = positions[accepted]
+        unit = received_power_w(kept[:, 0], np.ones(len(kept)), config=config,
+                                azimuth_deg=kept[:, 1], elevation_deg=kept[:, 2])
+        with np.errstate(divide='ignore'):
+            points['snr'] = 10 * np.log10(observed / noise) + config.vendor_snr_offset_db
+            points['rcs'] = 10 * np.log10(np.divide(observed, unit, out=np.full(len(kept), np.nan), where=unit > 0))
+        points['mag'] = (config.vendor_mag_slope * points['snr'] + config.vendor_mag_intercept
+                         + error_rng.normal(size=len(kept)) * config.vendor_mag_std)
+    else:
+        for name in ('mag', 'rcs', 'snr'):
+            points[name] = np.nan
+    points['ms'] = (np.abs(speeds[accepted]) > config.ms_velocity_threshold_m_s).astype(np.uint8)
     probability_any = float(1 - np.prod(1 - pd))
     if probability_any == 0. and np.any(pd > 0):
         probability_any = float(-np.expm1(np.log1p(-pd).sum()))

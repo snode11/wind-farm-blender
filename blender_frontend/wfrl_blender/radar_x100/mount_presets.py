@@ -24,13 +24,13 @@ def apply_mount_preset(scene, preset, *, search_report=None):
     from mathutils import Matrix
     from .. import farm_flex
     from .scene import (SceneSampler, ORIGINAL_LOCATION, ORIGINAL_ROTATION,
-                        nacelle_side_installation, installation_matrix)
+                        nacelle_side_installation, down_camera_installation, installation_matrix)
     from .runtime import (_guard_installation, _validate_mount_drivers, session_for,
                           start, _simulation_time, _simulation_frame)
     _guard_installation()
     if scene.wfrl_x100_source != 'SIMULATION':
         raise ValueError('安装位置切换仅用于仿真')
-    if preset not in {'ORIGINAL', 'NACELLE_SIDE', 'SEARCH'}:
+    if preset not in {'ORIGINAL', 'NACELLE_SIDE', 'SEARCH', 'DOWN_CAMERA'}:
         raise ValueError('未知雷达安装位置：' + str(preset))
     current = session_for(scene)
     if current is not None and (current.fanout or current.closing):
@@ -57,39 +57,51 @@ def apply_mount_preset(scene, preset, *, search_report=None):
                 pass
     if sampler is None:
         sampler = SceneSampler(flex, mount_from_sensor=np.eye(4))
+    field_of_view = view.field_of_view()
     if preset == 'SEARCH':
         from .core import installation
         location, rotation = installation.selected_installation(search_report, sampler.source_id, sampler.geometry_id)
     elif preset == 'ORIGINAL':
         location, rotation = ORIGINAL_LOCATION, ORIGINAL_ROTATION
+    elif preset == 'DOWN_CAMERA':
+        location, rotation, field_of_view = down_camera_installation(scene)
     else:
         location, rotation = nacelle_side_installation(sampler)
     location = tuple(float(np.float32(value)) for value in location)
     rotation = tuple(float(np.float32(value)) for value in rotation)
+    field_of_view = tuple(float(np.float32(value)) for value in field_of_view)
     sampler = sampler.with_installation('NACELLE', installation_matrix(location, rotation))
+    sampler.field_of_view = field_of_view
     yaw = scene.objects['WFRL.Turbine.T1.YawRoot']
     if (current is not None and current.display_valid and current.frame is not None
             and current.sampler.calibration_id == sampler.calibration_id
             and current.sampler.geometry_id == sampler.geometry_id
             and current.mount.parent == yaw
+            and view.field_of_view(current.sampler.field_of_view) == field_of_view
             and np.allclose(np.array(current.mount.matrix_parent_inverse) @ np.array(current.mount.matrix_basis),
                             sampler.mount_from_sensor, atol=1e-5, rtol=0)):
         current.update()
         scene.wfrl_x100_mount = 'NACELLE'
         scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
+        scene.wfrl_x100_field_of_view = field_of_view
         current.capture_configuration()
         return current
 
     previous = (scene.wfrl_x100_mount, tuple(scene.wfrl_x100_location),
-                tuple(scene.wfrl_x100_rotation))
+                tuple(scene.wfrl_x100_rotation), tuple(scene.wfrl_x100_field_of_view))
+
+    def restore_settings():
+        (scene.wfrl_x100_mount, scene.wfrl_x100_location, scene.wfrl_x100_rotation,
+         scene.wfrl_x100_field_of_view) = previous
     if current is None:
         # A new session samples its own first frame; only the scene settings need rollback.
         try:
             scene.wfrl_x100_mount = 'NACELLE'
             scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
+            scene.wfrl_x100_field_of_view = field_of_view
             return start(scene)
         except Exception:
-            scene.wfrl_x100_mount, scene.wfrl_x100_location, scene.wfrl_x100_rotation = previous
+            restore_settings()
             raise
     source_session = str(uuid.uuid4())
     sequence, source_t = _simulation_time(scene, sampler)
@@ -102,9 +114,13 @@ def apply_mount_preset(scene, preset, *, search_report=None):
     previous_mount = (current.mount.parent, current.mount.matrix_parent_inverse.copy(),
                       current.mount.matrix_basis.copy())
     saved_session = dict(current.__dict__)
+    previous_fov_mesh = None
     try:
         scene.wfrl_x100_mount = 'NACELLE'
         scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
+        scene.wfrl_x100_field_of_view = field_of_view
+        if view.field_of_view(current.sampler.field_of_view) != field_of_view:
+            previous_fov_mesh = view.set_field_of_view(current.fov, field_of_view)
         current.mount.parent = yaw
         current.mount.matrix_parent_inverse = Matrix.Identity(4)
         current.mount.matrix_basis = Matrix(sampler.mount_from_sensor.tolist())
@@ -119,11 +135,18 @@ def apply_mount_preset(scene, preset, *, search_report=None):
         if style[0] == 'ECHO_CLASS':
             current._display(frame, required_gpu=True, record=False)
     except Exception:
-        scene.wfrl_x100_mount, scene.wfrl_x100_location, scene.wfrl_x100_rotation = previous
+        restore_settings()
+        if previous_fov_mesh is not None:
+            discarded, current.fov.data = current.fov.data, previous_fov_mesh
+            bpy.data.meshes.remove(discarded)
         current.mount.parent, current.mount.matrix_parent_inverse, current.mount.matrix_basis = previous_mount
         current.__dict__.clear()
         current.__dict__.update(saved_session)
         raise
+    if previous_fov_mesh is not None:
+        current.fov_gpu_batch = None
+        if previous_fov_mesh.users == 0:
+            bpy.data.meshes.remove(previous_fov_mesh)
     scene['wfrl_x100_error'] = scene.get('wfrl_x100_record_error', '')
-    scene['wfrl_x100_status'] = configuration.OBSERVATION_LABELS[current.observation_mode] + ' · 30 Hz 瞬时采样假设'
+    scene['wfrl_x100_status'] = configuration.OBSERVATION_LABELS[current.observation_mode] + ' · ' + configuration.RATE_LABEL
     return current

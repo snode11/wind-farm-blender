@@ -3,14 +3,14 @@ import math
 from pathlib import Path
 import time
 import numpy as np
-from .core import simulation
+from .core import calibration, simulation
 from . import configuration, display, view
 
 
 def _simulation_time(scene, sampler):
     t = float(scene.get('wfrl_clearance_time_s', sampler.interval[0]))
-    sequence = max(0, int(math.floor((t - sampler.interval[0]) * 30 + 1e-7)))
-    return sequence, min(sampler.interval[1], sampler.interval[0] + sequence / 30)
+    sequence = max(0, int(math.floor((t - sampler.interval[0]) * configuration.SAMPLE_RATE_HZ + 1e-7)))
+    return sequence, min(sampler.interval[1], sampler.interval[0] + sequence / configuration.SAMPLE_RATE_HZ)
 
 
 def _simulation_frame(scene, sampler, source_session, sequence, source_t, *, observation_mode='GEOMETRY'):
@@ -20,12 +20,15 @@ def _simulation_frame(scene, sampler, source_session, sequence, source_t, *, obs
             visibility=sampler.visibility, material_at=sampler.material_sample)
         if observation_mode == 'DETECTIONS':
             budget = configuration.DETECTION_INTEGRATION_BUDGET
+            azimuth, elevation = view.field_of_view(sampler.field_of_view)
             frame = simulation.simulate_detections(sampler.sample, source_t, **arguments,
-                integration_budget=budget, sampling_plan=sampler.sampling_plan(budget))
+                integration_budget=budget, sampling_plan=sampler.sampling_plan(budget),
+                config=calibration.calibrated_config(azimuth_limit_deg=azimuth, elevation_limit_deg=elevation))
         elif observation_mode == 'GEOMETRY':
             budget = scene.wfrl_x100_candidates
             frame = simulation.simulate(sampler.sample, source_t, **arguments,
-                candidate_budget=budget, sampling_plan=sampler.sampling_plan(budget))
+                candidate_budget=budget, sampling_plan=sampler.sampling_plan(budget),
+                fov_deg=view.field_of_view(sampler.field_of_view))
         else:
             raise ValueError('未知 X100 观测模式：' + str(observation_mode))
     if frame is not None:
@@ -104,7 +107,7 @@ def update(self):
         if capturing:
             scene['wfrl_x100_status'] = configuration.OBSERVATION_LABELS[self.observation_mode] + ' · 相机采集期间保留采集前的观测帧'
             return
-        # Radar samples use a declared 30 Hz source grid independent of drawing cadence.
+        # Radar samples use a declared X100-rate source grid independent of drawing cadence.
         key = sequence
         if key != self.key:
             frame = _simulation_frame(scene, self.sampler, self.source_session, sequence, source_t,
@@ -112,7 +115,7 @@ def update(self):
             self._display(frame, required_gpu=self._gpu_required)
             self.key = key
         self._update_fov_visibility()
-        scene['wfrl_x100_status'] = configuration.OBSERVATION_LABELS[self.observation_mode] + ' · 30 Hz 瞬时采样假设'
+        scene['wfrl_x100_status'] = configuration.OBSERVATION_LABELS[self.observation_mode] + ' · ' + configuration.RATE_LABEL
     elif self.mode == 'REPLAY':
         import bpy
         if Path(bpy.path.abspath(scene.wfrl_x100_path)).expanduser() != self.replay_path:
