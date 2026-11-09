@@ -1013,6 +1013,78 @@ class SceneRecoveryTests(unittest.TestCase):
         self.assertEqual(final['attempt_id'], current['attempt_id'])
         self.assertEqual(jobs.query(self.path)['state'], 'CANCELLED')
 
+    def _start_failing_attempt(self):
+        gate = self.root / 'fail-now'
+        jobs.start(self.path, command=[sys.executable, '-B', '-c',
+                   'import sys,time\nfrom pathlib import Path\n'
+                   f'while not Path({str(gate)!r}).exists(): time.sleep(.02)\nsys.exit(9)\n'])
+        first = wait_condition(self.path, lambda: (lambda r: r if r.get('active') and r.get('attempt_id')
+                               and not r.get('final') else None)(jobs.query(self.path)), 'Attempt A is not active')
+        return first, gate
+
+    def _replace_with_retry(self, gate, first):
+        gate.touch()
+        wait_condition(self.path, lambda: (jobs.query(self.path).get('final')
+                                           and not jobs.lease_busy(self.root / 'supervision.lock')),
+                       'Attempt A did not fail and release supervision')
+        self.assertEqual(jobs.query(self.path)['state'], 'FAILED')
+        jobs.start(self.path, command=[sys.executable, '-B', '-c', IDLE_WORKER])
+        second = jobs.query(self.path)
+        self.assertTrue(second['active'])
+        self.assertNotEqual(second['attempt_id'], first['attempt_id'])
+        return second
+
+    def test_delayed_panel_cancel_of_a_confirmed_attempt_leaves_its_retry_running(self):
+        first, gate = self._start_failing_attempt()
+        self.ui._after_load(None)
+        queries, key = self.ui._QUERIES, str(self.path)
+        with queries._condition:
+            self.assertTrue(queries._condition.wait_for(
+                lambda: (queries.snapshot(key)[0] or {}).get('attempt_id') == first['attempt_id']
+                and (queries.snapshot(key)[0] or {}).get('state') not in {'QUERYING', 'LOST'},
+                timeout=WAIT_TIMEOUT))
+        release, original = threading.Event(), jobs.cancel
+
+        def delayed(path, attempt_id=None):
+            self.assertTrue(release.wait(WAIT_TIMEOUT))
+            return original(path, attempt_id)
+
+        with patch.object(jobs, 'cancel', delayed):
+            self.assertTrue(self.ui.cancel(self.scene)['cancel_requested'])
+            worker = queries._cancellations[key][1]
+            second = self._replace_with_retry(gate, first)
+            release.set()
+            worker.join(WAIT_TIMEOUT)
+        self.assertFalse(worker.is_alive())
+        current = jobs.query(self.path)
+        self.assertTrue(current['active'], current)
+        self.assertEqual(current['attempt_id'], second['attempt_id'])
+        shown, _obtained = queries.snapshot(key)
+        self.assertNotEqual(shown.get('state'), 'CANCELLED')
+        self.assertFalse(shown.get('cancel_error'))
+
+    def test_endpoint_switch_after_status_query_is_not_cancelled(self):
+        first, gate = self._start_failing_attempt()
+        original, switched = jobs._rpc, []
+
+        def switching(path, job, action, **options):
+            if action == 'cancel' and not switched:
+                switched.append(self._replace_with_retry(gate, first))
+            return original(path, job, action, **options)
+
+        with patch.object(jobs, '_rpc', switching):
+            result = jobs.cancel(self.path, first['attempt_id'])
+        second = switched[0]
+        self.assertTrue(result['cancel_target_replaced'])
+        self.assertEqual(result['cancel_target'], first['attempt_id'])
+        self.assertEqual(result['attempt_id'], second['attempt_id'])
+        current = jobs.query(self.path)
+        self.assertTrue(current['active'], current)
+        self.assertEqual(current['attempt_id'], second['attempt_id'])
+        self.assertTrue(jobs.wait(self.path, timeout=1, attempt=first['attempt_id'])['cancel_target_replaced'])
+        self.assertTrue(jobs.cancel(self.path, first['attempt_id'])['cancel_target_replaced'])
+        self.assertTrue(jobs.query(self.path)['active'])
+
     def test_publish_preflight_failure_precedes_snapshot_or_background_launch(self):
         from wfrl.camera_video import publication
         control = types.ModuleType(PACKAGE + '.manual_control')

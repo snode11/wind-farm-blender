@@ -148,11 +148,21 @@ def _signature(job, value):
     return hmac.new(bytes.fromhex(job['control_token']), payload, hashlib.sha256).hexdigest()
 
 
-def _rpc(path, job, action):
+class AttemptReplaced(ValueError):
+    """The endpoint now supervises a different attempt than the one addressed."""
+
+
+def _replaced(record, attempt):
+    return dict(record, cancel_target=attempt, cancel_target_replaced=True)
+
+
+def _rpc(path, job, action, *, attempt=None):
     endpoint = read_json(path.parent / 'control.json')
     if (not isinstance(endpoint, dict) or endpoint['job_id'] != job['job_id']
             or type(endpoint.get('port')) is not int or not 0 < endpoint['port'] < 65536):
         raise ValueError('监管端点作业身份不匹配')
+    if attempt is not None and endpoint.get('attempt_id') != attempt:
+        raise AttemptReplaced('监管端点已切换到新的尝试；不会把请求发给它')
     request = dict(job_id=job['job_id'], attempt_id=endpoint['attempt_id'],
                    nonce=secrets.token_hex(16), action=action)
     request['signature'] = _signature(job, request)
@@ -215,10 +225,13 @@ def _saved_status(path, job):
                 error=error)
 
 
-def wait(job_path, *, timeout=None):
+def wait(job_path, *, timeout=None, attempt=None):
+    """Wait for a terminal record; with ``attempt``, stop once another attempt is reported."""
     started = time.monotonic()
     while True:
         record = query(job_path)
+        if attempt is not None and record.get('attempt_id') not in (None, attempt):
+            return _replaced(record, attempt)
         if record.get('final') or record['state'] == 'LOST':
             return record
         if timeout is not None and time.monotonic() - started >= timeout:
@@ -226,18 +239,30 @@ def wait(job_path, *, timeout=None):
         time.sleep(.1)
 
 
-def cancel(job_path):
+def cancel(job_path, attempt_id=None):
+    """Cancel ``attempt_id``, or the attempt current at the first query when it is omitted.
+
+    Every later endpoint read, response check and wait stays on that attempt, so a
+    retry that replaces it keeps running and the result reports the changed target.
+    """
     path, job = load_job(job_path)
     record = query(path)
+    if attempt_id is not None and record.get('attempt_id') not in (None, attempt_id):
+        return _replaced(record, attempt_id)
     if record.get('final'):
         return record
+    attempt_id = attempt_id or record.get('attempt_id')
     try:
-        _rpc(path, job, 'cancel')
+        _rpc(path, job, 'cancel', attempt=attempt_id)
+    except AttemptReplaced:
+        return _replaced(query(path), attempt_id)
     except (OSError, ValueError, KeyError):
         record = query(path)
+        if attempt_id is not None and record.get('attempt_id') not in (None, attempt_id):
+            return _replaced(record, attempt_id)
         if not record.get('final'):
             raise ValueError(record.get('error', '无法联系监管进程；未取消作业'))
-    return wait(path, timeout=15)
+    return wait(path, timeout=15, attempt=attempt_id)
 
 
 def _sibling(name):

@@ -24,7 +24,8 @@
 - 冻结试验监管需完整工作区、FFmpeg／FFprobe 及支持 `flock / waitid(WNOWAIT)` 的 macOS／Linux Python 3.11+（`WFRL_VIDEO_PYTHON`）。
 - 扩展 ZIP 不含配套脚本及 `wfrl.camera_video`，安装入口通过偏好 `project_dir` 选工作区。
 - 注册容忍受限数据访问，场景可用后恢复；按身份、凭据及锁恢复，复制场景不认领原作业，取消不信任磁盘 PID。
-- `FINALIZING` 是进程结束后的收尾／交付确认，取消为CANCELLING。正常监管路径先收尾进程组、控制端点和服务线程，释放监管／输出租约，再写最终状态；status.lock串行化下一attempt与终态发布，查询等待交接。`start()` 启动监管子进程失败仍先写final失败再释放租约，顺序修正待实现，不能概括为所有分支均满足要求。
+- `FINALIZING` 是进程结束后的收尾／交付确认，取消为CANCELLING。正常监管路径先收尾进程组、控制端点和服务线程，释放监管／输出租约，再写最终状态；status.lock串行化下一attempt与终态发布，查询等待交接。`start()` 启动监管子进程失败时同样先释放监管／输出租约，再写final失败。
+- 面板只对监管确认活动的attempt固定取消目标：`cancel(job, attempt_id)` 的端点读取、请求、响应核对、异常回查和等待都绑定该身份；目标已被新重试替换时不取消新重试，返回带 `cancel_target_replaced` 的当前记录。旧终态、查询中或LOST缓存不固定身份，由作业层取首次查询到的当前attempt。
 - 仅 `final=true` 的 `COMPLETE / FAILED / CANCELLED` 是最终结果；`LOST` 不等于失败或取消，`--detach` 只确认启动。非 POSIX 平台查询时不检查本地租约，不可达且无匹配终态的作业报告 `LOST`、`active=False`。
 - `retry` 只从匹配完整母版重做编码、验证与发布，不恢复未渲染帧；保留目标预检及失败母版，只清理自有暂存，不改写成功状态。
 

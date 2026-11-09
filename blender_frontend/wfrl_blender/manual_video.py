@@ -21,6 +21,18 @@ _PENDING = dict(state='QUERYING', active=True, final=False, completed_frames=0, 
 _RETRY_REFRESH_SECONDS = 2.0
 
 
+def _confirmed_attempt(record):
+    """Only a live status from the supervisor names the attempt a cancellation targets.
+
+    Cached terminal, pending and lost records leave it to the job layer to resolve the
+    current attempt, so a retry started after a cached failure can still be cancelled.
+    """
+    if (record and record.get('active') and not record.get('final')
+            and record.get('state') not in {'QUERYING', 'LOST'}):
+        return record.get('attempt_id')
+    return None
+
+
 def _query_record(path):
     from . import manual_video_job as jobs
     try:
@@ -80,17 +92,19 @@ class _StatusQueries:
             if path not in self._cancellations:
                 token = object()
                 worker = threading.Thread(target=self._cancel,
-                                          args=(path, token, self._generation, (record or {}).get('attempt_id')),
+                                          args=(path, token, self._generation, (record or {}).get('attempt_id'),
+                                                _confirmed_attempt(record)),
                                           name='WFRL video cancellation', daemon=True)
                 self._cancellations[path] = (token, worker)
                 worker.start()
             self.track(path)
             return pending
 
-    def _cancel(self, path, token, generation, attempt):
+    def _cancel(self, path, token, generation, attempt, target):
+        """``attempt`` is the cached identity at the click; ``target`` the confirmed one to cancel."""
         from . import manual_video_job as jobs
         try:
-            record, error = jobs.cancel(path), None
+            record, error = jobs.cancel(path, target), None
         except Exception as exc:
             record, error = None, str(exc)
         with self._condition:
@@ -168,6 +182,10 @@ class _StatusQueries:
                 previous, _previous_time = self._records.get(path, ({}, None))
                 if previous.get('cancel_error') and not record.get('final'):
                     record = dict(record, cancel_error=previous['cancel_error'])
+                if (previous.get('cancel_target_replaced') and not record.get('final')
+                        and record.get('attempt_id') == previous.get('attempt_id')):
+                    record = dict(record, cancel_target_replaced=True,
+                                  cancel_target=previous.get('cancel_target'))
                 self._records[path] = (dict(record), obtained)
                 if record.get('active'):
                     self._due[path] = obtained + .5
@@ -401,7 +419,7 @@ def launch(scene, output_mp4):
 def _display_record(record):
     return tuple(record.get(key) for key in (
         'state', 'active', 'final', 'completed_frames', 'total_frames', 'error', 'output_mp4',
-        'cancel_requested', 'cancel_error'))
+        'cancel_requested', 'cancel_error', 'cancel_target_replaced'))
 
 
 def _poll():
@@ -513,6 +531,8 @@ def draw(layout, scene):
         box.label(text='无法联系监管进程；请查询作业目录', icon='ERROR')
     if record.get('cancel_error'):
         box.label(text='取消未确认：' + record['cancel_error'], icon='ERROR')
+    if record.get('cancel_target_replaced') and not record.get('final'):
+        box.label(text='取消的尝试已结束，新的重试仍在运行', icon='INFO')
 
 
 CLASSES = (WFRL_OT_ManualVideo, WFRL_OT_ManualVideoCancel)

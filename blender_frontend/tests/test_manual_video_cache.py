@@ -311,7 +311,7 @@ def test_cancel_caches_verified_result_and_discards_older_query(controller):
     worker = controller.ui._QUERIES._thread
     result = controller.ui.cancel(controller.scene)
     wait_snapshot(controller, lambda record, _time: record and record.get('state') == 'CANCELLED')
-    controller.jobs.cancel.assert_called_once_with(controller.path)
+    controller.jobs.cancel.assert_called_once_with(controller.path, None)
     assert result['cancel_requested'] and not result['final']
     final = controller.ui.status(controller.scene)
     assert final['state'] == 'CANCELLED' and final['final']
@@ -328,8 +328,8 @@ def test_cancel_rechecks_a_cached_terminal_attempt_without_blocking(controller, 
     ui = controller.ui
     ui._QUERIES.store(controller.path, dict(state=state, active=False, final=True, attempt_id='old'))
 
-    def cancel(path):
-        assert path == controller.path
+    def cancel(path, attempt_id=None):
+        assert path == controller.path and attempt_id is None
         assert threading.get_ident() != threading.main_thread().ident
         return dict(state='CANCELLED', active=False, final=True, attempt_id='new')
 
@@ -363,7 +363,8 @@ def test_old_cancellation_cannot_replace_a_different_new_attempt(controller):
     controller.releases.append(release)
     ui._QUERIES.store(controller.path, dict(controller.response, attempt_id='old'))
 
-    def cancel(_path):
+    def cancel(_path, attempt_id=None):
+        assert attempt_id == 'old'
         entered.set()
         assert release.wait(3)
         return dict(state='CANCELLED', active=False, final=True, attempt_id='old')
@@ -383,7 +384,7 @@ def test_cancel_never_waits_on_the_ui_thread_and_repeated_clicks_share_one_reque
     entered, release = threading.Event(), threading.Event()
     controller.releases.append(release)
 
-    def cancel(path):
+    def cancel(path, attempt_id=None):
         assert threading.get_ident() != threading.main_thread().ident
         entered.set()
         assert release.wait(3)
@@ -421,7 +422,7 @@ def test_cancel_reply_from_a_cleared_generation_cannot_replace_current_status(co
     entered, release = threading.Event(), threading.Event()
     controller.releases.append(release)
 
-    def cancel(_path):
+    def cancel(_path, attempt_id=None):
         entered.set()
         assert release.wait(3)
         return dict(state='CANCELLED', active=False, final=True)
