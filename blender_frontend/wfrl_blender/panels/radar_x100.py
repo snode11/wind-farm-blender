@@ -41,7 +41,8 @@ class WFRL_OT_X100MountPreset(bpy.types.Operator):
     preset: bpy.props.EnumProperty(items=(
         ('ORIGINAL', '原安装位置', '机舱侧下方，朝下观察'),
         ('NACELLE_SIDE', '机舱侧面', '机舱负 Y 侧壁，朝侧方叶片区域观察'),
-        ('DOWN_CAMERA', 'T1 Down 相机位', '与 T1 Down 相机同位同向，矩形视场与相机一致')))
+        ('DOWN_CAMERA', 'T1 Down 相机位', '与 T1 Down 相机同位同向，矩形视场与相机一致'),
+        ('REAR_HATCH', '尾部吊物口', '机舱尾部底面下方，横向偏移 2 m，视轴对准 6 点钟叶尖，规格书视场')))
 
     def execute(self, context):
         from ..radar_x100.runtime import apply_mount_preset
@@ -279,6 +280,7 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
             buttons.operator('wfrl.x100_mount_preset', text='原安装位置').preset = 'ORIGINAL'
             buttons.operator('wfrl.x100_mount_preset', text='机舱侧面').preset = 'NACELLE_SIDE'
             buttons.operator('wfrl.x100_mount_preset', text='T1 Down 相机位').preset = 'DOWN_CAMERA'
+            buttons.operator('wfrl.x100_mount_preset', text='尾部吊物口').preset = 'REAR_HATCH'
             presets.operator('wfrl.x100_frame_unit', icon='VIEW_CAMERA')
             if session and session.fanout:
                 presets.label(text='结束记录后可切换安装位置', icon='LOCKED')

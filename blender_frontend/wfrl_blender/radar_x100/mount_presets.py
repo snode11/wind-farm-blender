@@ -24,13 +24,14 @@ def apply_mount_preset(scene, preset, *, search_report=None):
     from mathutils import Matrix
     from .. import farm_flex
     from .scene import (SceneSampler, ORIGINAL_LOCATION, ORIGINAL_ROTATION,
-                        nacelle_side_installation, down_camera_installation, installation_matrix)
+                        nacelle_side_installation, down_camera_installation, rear_hatch_installation,
+                        installation_matrix)
     from .runtime import (_guard_installation, _validate_mount_drivers, session_for,
                           start, _simulation_time, _simulation_frame)
     _guard_installation()
     if scene.wfrl_x100_source != 'SIMULATION':
         raise ValueError('安装位置切换仅用于仿真')
-    if preset not in {'ORIGINAL', 'NACELLE_SIDE', 'SEARCH', 'DOWN_CAMERA'}:
+    if preset not in {'ORIGINAL', 'NACELLE_SIDE', 'SEARCH', 'DOWN_CAMERA', 'REAR_HATCH'}:
         raise ValueError('未知雷达安装位置：' + str(preset))
     current = session_for(scene)
     if current is not None and (current.fanout or current.closing):
@@ -65,6 +66,8 @@ def apply_mount_preset(scene, preset, *, search_report=None):
         location, rotation = ORIGINAL_LOCATION, ORIGINAL_ROTATION
     elif preset == 'DOWN_CAMERA':
         location, rotation, field_of_view = down_camera_installation(scene)
+    elif preset == 'REAR_HATCH':
+        location, rotation = rear_hatch_installation(sampler)
     else:
         location, rotation = nacelle_side_installation(sampler)
     location = tuple(float(np.float32(value)) for value in location)
