@@ -114,6 +114,30 @@ np.testing.assert_allclose(scene.wfrl_x100_field_of_view, (radar.schema.PROFILE[
 np.testing.assert_allclose(restored.fov.data['wfrl_x100_field_of_view_deg'], tuple(scene.wfrl_x100_field_of_view))
 assert len([m for m in bpy.data.meshes if m.name.startswith('WFRL.X100.FOV')]) == 1
 
+# The rear hoisting hatch sits below the nacelle tail, 2 m to the side, aimed at the 6 o'clock tip.
+assert bpy.ops.wfrl.x100_mount_preset(preset='REAR_HATCH') == {'FINISHED'}
+rear = radar.session_for(scene)
+rear_location, rear_rotation = scene_api.rear_hatch_installation(rear.sampler)
+np.testing.assert_allclose(scene.wfrl_x100_location, rear_location, atol=1e-4)
+np.testing.assert_allclose(scene.wfrl_x100_rotation, rear_rotation, atol=1e-4)
+shell = scene.objects['WFRL.Turbine.T1.Nacelle']
+shell_x = [(shell.matrix_parent_inverse @ shell.matrix_basis @ v.co).x for v in shell.data.vertices]
+assert abs(rear_location[0] - (min(shell_x) + max(shell_x)) / 2) > 2, 'rear hatch must be near the nacelle tail'
+assert abs(rear_location[1] - scene_api.REAR_HATCH_LATERAL_M) < 0.5
+rear_local = scene_api.installation_matrix(rear_location, rear_rotation)
+np.testing.assert_allclose(rear.sampler.mount_from_sensor, rear_local, atol=1e-5)
+# Sensor axes in the YawRoot frame: boresight down and toward the rotor, azimuth axis level.
+assert rear_local[2, 0] < -0.9, rear_local[:3, 0]
+assert abs(rear_local[2, 1]) < 1e-6, rear_local[:3, 1]
+np.testing.assert_allclose(rear.sampler.field_of_view, (radar.schema.PROFILE['azimuth_deg'],
+                                                        radar.schema.PROFILE['elevation_deg']))
+assert rear.frame.source_kind == 'GEOMETRY_SIMULATION' and len(rear.frame.points) > 0
+assert rear.mount is original_mount and rear.frame.time.source_time_s == clock[2]
+rear_points = len(rear.frame.points)
+assert bpy.ops.wfrl.x100_mount_preset(preset='ORIGINAL') == {'FINISHED'}
+restored = radar.session_for(scene)
+assert restored.frame.points.tobytes() == original_points
+
 draft = (4.0, 5.0, 6.0)
 scene.wfrl_x100_location = draft
 active_frame, active_sampler, active_source = restored.frame, restored.sampler, restored.source_session
@@ -189,6 +213,8 @@ scene.wfrl_x100_source = 'REPLAY'
 result = dict(status='PASS', addon=addon.__file__, source_time_s=clock[2],
               original_points=original_count, side_points=side_points,
               down_camera_points=down_points, down_camera_field_of_view_deg=down_fov_deg,
+              rear_hatch_points=rear_points, rear_hatch_location_m=list(rear_location),
+              rear_hatch_rotation_deg=list(rear_rotation),
               side_location_m=side_location, side_rotation_deg=side_rotation,
               single_sensor_roundtrip=True, clock_unchanged=True, recording_guard=True,
               camera_capture_guard=True, saved_side_reopens_and_switches_back=True,

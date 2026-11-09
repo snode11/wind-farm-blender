@@ -9,6 +9,8 @@ from .. import performance
 
 ORIGINAL_LOCATION = (-3.5, -1.7, -2.0)
 ORIGINAL_ROTATION = (0.0, 82.5, 180.0)
+# Rear hoisting hatch: lateral offset from the nacelle centreline (negative Y side), metres.
+REAR_HATCH_LATERAL_M = -2.0
 
 
 def _calibration_identity(mount, matrix):
@@ -72,6 +74,43 @@ def nacelle_side_installation(sampler):
     radius = np.abs(np.asarray(normal) @ axes) @ installation.housing_half_extents()
     location = point + normal * (radius + 2 * installation.MechanicalPolicy().service_clearance_m)
     return tuple(location), rotation
+
+
+def rear_hatch_installation(sampler, *, lateral_m=REAR_HATCH_LATERAL_M, policy=None):
+    """Rear hoisting hatch below the nacelle tail, aimed at the 6 o'clock blade tip with sensor +Z up.
+
+    Returns the YawRoot-frame location and XYZ Euler rotation in degrees. The tip is the saved blade
+    radius at the source start, rotated in the rotor plane to point straight down.
+    """
+    from mathutils import Matrix
+    from ..turbine_geometry import hub_position
+    policy = policy or installation.MechanicalPolicy()
+    sampler.validate()
+    vertices = sampler.shell_vertices @ sampler.shell_local[:3, :3].T + sampler.shell_local[:3, 3]
+    bounds = np.array([vertices.min(axis=0), vertices.max(axis=0)])
+    original = installation.assess_front_mount(installation_matrix(ORIGINAL_LOCATION, ORIGINAL_ROTATION),
+                                              bounds, hub_position()[0])
+    rear_x = (bounds[1, 0] - policy.rear_inset_m if original['rotor_side'] == 'NEGATIVE_X'
+              else bounds[0, 0] + policy.rear_inset_m)
+    location = np.array((rear_x, (bounds[0, 1] + bounds[1, 1]) / 2 + lateral_m,
+                         bounds[0, 2] - policy.underside_drop_m), dtype=float)
+    t = sampler.interval[0]
+    yaw_from_world = np.linalg.inv(sampler.mount_world_at(t, mount='NACELLE'))
+    blades = [sampler._part_vertices(part, t) @ yaw_from_world[:3, :3].T + yaw_from_world[:3, 3]
+              for part in range(len(sampler.blades))]
+    centre = np.mean([blade.mean(axis=0) for blade in blades], axis=0)
+    tips = [blade[np.argmax(np.linalg.norm(blade - centre, axis=1))] for blade in blades]
+    hub = np.mean(tips, axis=0)
+    normal = np.cross(tips[1] - tips[0], tips[2] - tips[0])
+    normal /= np.linalg.norm(normal)
+    down = np.array((0., 0., -1.)) - normal * -normal[2]
+    down /= np.linalg.norm(down)
+    tip = hub + down * float(np.mean([np.linalg.norm(p - hub) for p in tips]))
+    boresight = (tip - location) / np.linalg.norm(tip - location)
+    left = np.cross((0., 0., 1.), boresight)
+    left /= np.linalg.norm(left)
+    rotation = Matrix(np.column_stack((boresight, left, np.cross(boresight, left))).tolist()).to_euler('XYZ')
+    return tuple(float(v) for v in location), tuple(math.degrees(a) for a in rotation)
 
 
 def installation_catalog(sampler, *, policy=None, lateral_offsets=(0., 1., 2.),
