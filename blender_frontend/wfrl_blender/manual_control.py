@@ -186,6 +186,13 @@ def _command_pitch(entry, pitch, *, settle=False):
         _retarget_pitch(entry)
 
 
+def hold_pitch_clock(scene, now=None):
+    """Restart a running ramp's clock, so time spent exporting does not advance the pitch."""
+    key = _scene_key(scene)
+    if key in _PITCH_TIMES:
+        _PITCH_TIMES[key] = time.monotonic() if now is None else now
+
+
 def pitch_ramping(entry):
     return any(abs(target_pitch(entry, index) - getattr(entry, f'pitch_actual_b{index}_deg')) > 1e-9
                for index in range(1, 4))

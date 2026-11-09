@@ -215,6 +215,35 @@ class Stream:
         self._settle_stop()
 
 
+def _staged(path):
+    return path.with_name(f'.{path.name}.partial')
+
+
+def publish_staged(movies, sidecar_path, sidecar, label):
+    """Stage every movie and the JSON beside its target, then replace the targets.
+
+    ``movies`` holds (rendered file, target) pairs. No target changes until every file is
+    staged, so a failure keeps the previous files of those names and removes the staged
+    copies. Existing targets are overwritten; the final renames stay within each target
+    directory. Raises RuntimeError with ``label`` and the OSError as its cause."""
+    staged = []
+    try:
+        for source, target in movies:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(source), str(_staged(target)))
+            staged.append((_staged(target), target))
+        _staged(sidecar_path).write_text(json.dumps(sidecar, ensure_ascii=False, indent=1) + '\n',
+                                         encoding='utf-8')
+        staged.append((_staged(sidecar_path), sidecar_path))
+        for temporary, target in staged:
+            os.replace(temporary, target)
+    except OSError as exc:
+        for temporary, _target in staged:
+            temporary.unlink(missing_ok=True)
+        _staged(sidecar_path).unlink(missing_ok=True)
+        raise RuntimeError(f'{label}写出失败：{exc}') from exc
+
+
 def _commit_export(source, destination):
     """Publish complete bytes under an exclusive target name on the same filesystem."""
     if os.name == 'nt':

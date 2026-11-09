@@ -527,10 +527,10 @@ def apply_shake(scene, job, frame):
     job['shake'][frame] = (round(tilt, 6), round(pan, 6))
 
 
-def _start_shake(job, turbine, cameras_list):
+def _start_shake(job, turbine, cameras_list, seed=None):
     job['turbine'] = turbine
     job['rig'] = [(camera, camera.matrix_basis.copy()) for camera in cameras_list]
-    job['shake_seed'] = random.randrange(1 << 30)
+    job['shake_seed'] = random.randrange(1 << 30) if seed is None else int(seed)
     job['shake'] = {}
 
 
@@ -730,13 +730,14 @@ def _release_gpu(job, frame):
         bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
 
-def _start_motion(scene, job, turbine, cameras_list, dynamics):
+def _start_motion(scene, job, turbine, cameras_list, dynamics, seed=None):
+    """``seed`` fixes the camera shake and structural motion phases; None draws new ones."""
     # The live bend would freeze while exporting; exports start from the rigid pose.
     manual_dynamics.live_detach(scene)
     live_shake_stop(scene)
-    _start_shake(job, turbine, cameras_list)
+    _start_shake(job, turbine, cameras_list, seed)
     if dynamics:
-        manual_dynamics.start(scene, job, turbine)
+        manual_dynamics.start(scene, job, turbine, seed)
 
 
 def _end_motion(job):
@@ -814,7 +815,8 @@ def _snapshot(scene):
                render.image_settings.color_mode),
         ffmpeg={name: getattr(render.ffmpeg, name) for name in _SAVED_FFMPEG},
         view=(scene.view_settings.view_transform, scene.view_settings.look),
-        eevee=(scene.eevee.taa_samples, scene.eevee.taa_render_samples), render_aa=scene.display.render_aa)
+        eevee=(scene.eevee.taa_samples, scene.eevee.taa_render_samples), render_aa=scene.display.render_aa,
+        marker_cameras=[marker.camera for marker in scene.timeline_markers])
 
 
 def _restore(scene, saved):
@@ -833,6 +835,10 @@ def _restore(scene, saved):
     scene.view_settings.view_transform, scene.view_settings.look = saved['view']
     scene.eevee.taa_samples, scene.eevee.taa_render_samples = saved['eevee']
     scene.display.render_aa = saved['render_aa']
+    markers = scene.timeline_markers
+    if len(markers) == len(saved['marker_cameras']):
+        for marker, camera in zip(markers, saved['marker_cameras']):
+            marker.camera = camera
     scene.camera = saved['camera']
     scene.frame_start, scene.frame_end = saved['frame'][:2]
     scene.frame_set(saved['frame'][2])
@@ -840,17 +846,22 @@ def _restore(scene, saved):
 
 def _configure_video(scene, camera, fps, frames, engine, filepath, *, size=VIDEO_SIZE, samples=None):
     render = scene.render
+    # Camera-bound timeline markers must not switch the render to another camera. Each
+    # marker edit re-runs Blender's camera switch, so all bindings go before the camera is set.
+    for marker in scene.timeline_markers:
+        marker.camera = None
     scene.camera = camera
+    # Every engine writes the camera image itself, never a sequencer or compositor result.
+    render.use_compositing = render.use_sequencer = False
     if engine == 'WORKBENCH':
         render.engine = 'BLENDER_WORKBENCH'
     if engine == 'SCENE' and samples:
         scene.eevee.taa_render_samples = int(samples)
     if engine in VIEWPORT_ENGINES:
         # The viewport path is bounded by per-frame colour processing, so the
-        # export uses the plain sRGB transform without dithering or compositing.
+        # export uses the plain sRGB transform without dithering.
         scene.view_settings.view_transform, scene.view_settings.look = 'Standard', 'None'
         render.dither_intensity = 0
-        render.use_compositing = render.use_sequencer = False
         scene.eevee.taa_samples = 1
         scene.display.render_aa = 'FXAA'
     render.resolution_x, render.resolution_y = size
@@ -894,6 +905,7 @@ def _finish(scene, *, completed):
                 _restore_view(*job['view'])
         finally:
             scene['wfrl_manual_exporting'] = False
+            manual_control.hold_pitch_clock(scene)
             for entry in scene.wfrl_manual_turbines:
                 manual_control._apply_entry(entry)
             update_labels(scene)
@@ -902,19 +914,10 @@ def _finish(scene, *, completed):
             if not produced:
                 raise RuntimeError('未生成 MP4 文件')
             target = Path(job['target'])
-            sidecar_path = target.with_suffix('.json')
-            try:
-                target.parent.mkdir(parents=True, exist_ok=True)
-                shutil.move(str(produced[0]), str(target))
-                _shake_sidecar(job, job['sidecar'])
-                manual_dynamics.sidecar(job, job['sidecar'])
-                sidecar_path.write_text(
-                    json.dumps(job['sidecar'], ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
-            except OSError as exc:
-                # An MP4 without its per-frame JSON is not a usable export.
-                for path in (target, sidecar_path):
-                    path.unlink(missing_ok=True)
-                raise RuntimeError(f'Down 视频写出失败：{exc}') from exc
+            _shake_sidecar(job, job['sidecar'])
+            manual_dynamics.sidecar(job, job['sidecar'])
+            video_output.publish_staged([(produced[0], target)], target.with_suffix('.json'), job['sidecar'],
+                                        'Down 视频')
             report = str(target)
     finally:
         shutil.rmtree(job['temp'], ignore_errors=True)
@@ -1103,7 +1106,7 @@ def _draw_offscreen_multi(scene, job, view, cameras_list, ffmpeg, outputs):
 
 def export_triple_down_video(scene, turbine, filepaths, *, duration_s=10.0, fps=25, frames=None,
                              engine='VIEWPORT_MATERIAL', from_start=True, size=VIDEO_SIZE, samples=16,
-                             labels=None, dynamics=True, context=None):
+                             labels=None, dynamics=True, seed=None, context=None):
     """Render the main Down camera plus Left and Right side cameras as three time-synchronised MP4s.
 
     ``filepaths`` is a sequence of three paths: (center, left, right).  The
@@ -1152,7 +1155,7 @@ def export_triple_down_video(scene, turbine, filepaths, *, duration_s=10.0, fps=
             side_pose='center Down pose turned about the rotor shaft by the step',
             yawroot_matrix={name: [list(row) for row in cam.matrix_basis]
                             for name, cam in zip(('center', 'left', 'right'), cameras_list)})
-        _start_motion(scene, job, turbine, cameras_list, dynamics)
+        _start_motion(scene, job, turbine, cameras_list, dynamics, seed)
         ffmpeg = ffmpeg_executable(context)
         if not ffmpeg:
             raise ValueError('三路视频导出需要 FFmpeg；请在扩展偏好设置中配置 FFmpeg 路径')
@@ -1173,32 +1176,25 @@ def export_triple_down_video(scene, turbine, filepaths, *, duration_s=10.0, fps=
             _restore_view(*job['view'])
     finally:
         scene['wfrl_manual_exporting'] = False
+        manual_control.hold_pitch_clock(scene)
         for entry in scene.wfrl_manual_turbines:
             manual_control._apply_entry(entry)
         update_labels(scene)
     if job.get('progress'):
         bpy.context.window_manager.progress_end()
     _EXPORT.pop(scene.as_pointer(), None)
-    written = []
-    sidecar_path = targets[0].with_suffix('.json')
     try:
-        for src, target in zip(out_paths, targets):
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.move(src, str(target))
-            written.append(target)
         _shake_sidecar(job, sidecar)
         manual_dynamics.sidecar(job, sidecar)
-        sidecar_path.write_text(json.dumps(sidecar, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
-    except OSError as exc:
+        video_output.publish_staged([(Path(src), target) for src, target in zip(out_paths, targets)],
+                                    targets[0].with_suffix('.json'), sidecar, '三路视频')
+    except RuntimeError:
         scene['wfrl_manual_last_video'] = ''
-        # A partial rig is not a usable result: remove what this export already moved into place.
-        for path in (*written, sidecar_path):
-            path.unlink(missing_ok=True)
-        raise RuntimeError(f'三路视频写出失败：{exc}') from exc
+        raise
     finally:
         shutil.rmtree(temp, ignore_errors=True)
-    scene['wfrl_manual_last_video'] = str(written[0])
-    return tuple(str(path) for path in written)
+    scene['wfrl_manual_last_video'] = str(targets[0])
+    return tuple(str(target) for target in targets)
 
 
 def _view_area(context):
@@ -1245,7 +1241,7 @@ def _restore_view(space, saved):
 
 def export_down_video(scene, turbine, filepath, *, duration_s=10.0, fps=25, frames=None, engine='VIEWPORT_MATERIAL',
                       from_start=True, blocking=None, size=VIDEO_SIZE, samples=16, labels=None, dynamics=True,
-                      context=None):
+                      seed=None, context=None):
     """Render a turbine's Down camera to an H.264 MP4 plus a per-frame JSON sidecar.
 
     ``frames`` overrides ``duration_s``. Viewport engines draw through a 3D view
@@ -1288,7 +1284,7 @@ def export_down_video(scene, turbine, filepath, *, duration_s=10.0, fps=25, fram
                          size=size, samples=samples)
         job['sidecar'] = _sidecar(plan, turbine, camera, scene, target.name, render_mode=engine, labels=labels,
                                   dynamics=dynamics)
-        _start_motion(scene, job, turbine, [camera], dynamics)
+        _start_motion(scene, job, turbine, [camera], dynamics, seed)
         hooks = [(bpy.app.handlers.frame_change_pre, _frame_handler)]
         if not blocking:
             hooks += [(bpy.app.handlers.render_complete, _render_complete),
@@ -1402,6 +1398,11 @@ class WFRL_OT_ManualDownVideo(bpy.types.Operator, ExportHelper):
     dynamics: bpy.props.BoolProperty(
         name='叶片摆动与塔架运动', default=True,
         description='按转速与桨距叠加示意性的叶片挥舞弯曲和塔顶前后运动，各叶片净空随时间不同；不是结构求解')
+    use_seed: bpy.props.BoolProperty(
+        name='固定随机种子', default=False,
+        description='相机抖动与叶片／塔架运动使用下方种子，相同设置重复导出得到相同的抖动与运动；关闭时每次随机')
+    seed: bpy.props.IntProperty(name='种子', default=1, min=0, max=(1 << 30) - 1,
+                                description='写入 JSON 的 camera_shake.seed 与 structural_motion.seed')
 
     @classmethod
     def poll(cls, context):
@@ -1437,6 +1438,11 @@ class WFRL_OT_ManualDownVideo(bpy.types.Operator, ExportHelper):
         layout.prop(self, 'labels')
         layout.prop(self, 'from_start')
         layout.prop(self, 'dynamics')
+        row = layout.row(heading='固定随机种子')
+        row.prop(self, 'use_seed', text='')
+        sub = row.row()
+        sub.enabled = self.use_seed
+        sub.prop(self, 'seed', text='')
 
     def invoke(self, context, event):
         self.turbine = _turbine_default(context)
@@ -1451,7 +1457,8 @@ class WFRL_OT_ManualDownVideo(bpy.types.Operator, ExportHelper):
             written = export_down_video(
                 context.scene, self.turbine, self.filepath, frames=self._frames(), fps=self.fps,
                 engine=self.engine, from_start=self.from_start, size=VIDEO_SIZES[self.resolution],
-                samples=self.eevee_samples, labels=self.labels, dynamics=self.dynamics, context=context)
+                samples=self.eevee_samples, labels=self.labels, dynamics=self.dynamics,
+                seed=self.seed if self.use_seed else None, context=context)
         except (ValueError, RuntimeError, ReferenceError, AttributeError, OSError) as exc:
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}
@@ -1487,6 +1494,11 @@ class WFRL_OT_ManualTripleDownVideo(bpy.types.Operator, ExportHelper):
     dynamics: bpy.props.BoolProperty(
         name='叶片摆动与塔架运动', default=True,
         description='按转速与桨距叠加示意性的叶片挥舞弯曲和塔顶前后运动，各叶片净空随时间不同；不是结构求解')
+    use_seed: bpy.props.BoolProperty(
+        name='固定随机种子', default=False,
+        description='相机抖动与叶片／塔架运动使用下方种子，相同设置重复导出得到相同的抖动与运动；关闭时每次随机')
+    seed: bpy.props.IntProperty(name='种子', default=1, min=0, max=(1 << 30) - 1,
+                                description='写入 JSON 的 camera_shake.seed 与 structural_motion.seed')
 
     @classmethod
     def poll(cls, context):
@@ -1520,6 +1532,11 @@ class WFRL_OT_ManualTripleDownVideo(bpy.types.Operator, ExportHelper):
         layout.prop(self, 'labels')
         layout.prop(self, 'from_start')
         layout.prop(self, 'dynamics')
+        row = layout.row(heading='固定随机种子')
+        row.prop(self, 'use_seed', text='')
+        sub = row.row()
+        sub.enabled = self.use_seed
+        sub.prop(self, 'seed', text='')
 
     def invoke(self, context, event):
         self.turbine = _turbine_default(context)
@@ -1545,7 +1562,8 @@ class WFRL_OT_ManualTripleDownVideo(bpy.types.Operator, ExportHelper):
             written = export_triple_down_video(
                 context.scene, self.turbine, [center, left, right], frames=self._frames(), fps=self.fps,
                 engine=self.engine, from_start=self.from_start, size=VIDEO_SIZES[self.resolution],
-                labels=self.labels, dynamics=self.dynamics, context=context)
+                labels=self.labels, dynamics=self.dynamics, seed=self.seed if self.use_seed else None,
+                context=context)
         except (ValueError, RuntimeError, ReferenceError, AttributeError, OSError) as exc:
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}

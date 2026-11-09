@@ -4,7 +4,10 @@ import json
 import math
 import os
 from pathlib import Path
+import shutil
+import subprocess
 import sys
+import time
 
 import bpy
 import numpy as np
@@ -160,6 +163,40 @@ assert not scene.get('wfrl_manual_exporting') and scene.camera.name.endswith('.C
 assert render.image_settings.media_type == 'IMAGE'
 assert {e.turbine_id: (e.azimuth_deg, e.pitch_actual_b1_deg) for e in scene.wfrl_manual_turbines} == state
 assert abs(blade_pitch(blades[0]) - 10.0) < 1e-4
+
+# A ramp in progress holds while an export blocks the clock: the next tick must not add the
+# export duration to the ramp, so the ramp clock restarts when the export finishes.
+scene.wfrl_manual_pitch_rate_deg_s = 1.0
+t1.pitch_b1_deg = 30.0
+control.tick()
+assert control.pitch_ramping(t1)
+held = t1.pitch_actual_b1_deg
+started = time.monotonic()
+down.export_down_video(scene, 'T1', str(OUT / 'hold.mp4'), frames=3, fps=10, engine='WORKBENCH',
+                       size=(64, 64), labels=False, dynamics=False)
+assert control._PITCH_TIMES[control._scene_key(scene)] > started, 'Ramp clock kept the export time'
+assert t1.pitch_actual_b1_deg == held
+scene.wfrl_manual_pitch_rate_deg_s = 0.0
+t1.pitch_b1_deg = 10.0
+scene.wfrl_manual_pitch_rate_deg_s = 5.0
+assert abs(blade_pitch(blades[0]) - 10.0) < 1e-4
+
+# A fixed seed reproduces the shaken, bending export frame for frame; another seed differs.
+FFMPEG = shutil.which('ffmpeg') or '/opt/homebrew/bin/ffmpeg'
+
+
+def seeded(name, seed):
+    path = Path(down.export_down_video(scene, 'T1', str(OUT / f'{name}.mp4'), frames=4, fps=10,
+                                       engine='WORKBENCH', size=(96, 54), labels=False, seed=seed))
+    data = json.loads(path.with_suffix('.json').read_text(encoding='utf-8'))
+    assert data['camera_shake']['seed'] == seed and data['structural_motion']['seed'] == seed, data
+    assert any(row['camera_shake_deg'] != [0.0, 0.0] for row in data['samples'])
+    return subprocess.run([FFMPEG, '-v', 'error', '-i', str(path), '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'],
+                          capture_output=True, check=True).stdout
+
+
+first, again, other = seeded('seed7a', 7), seeded('seed7b', 7), seeded('seed8', 8)
+assert len(first) == 4 * 96 * 54 * 3 and first == again and first != other
 
 # Frame 15 (1.5 s) of the deterministic export pose: blade 1 at 7.5 deg.
 item = sidecar['turbines'][0]

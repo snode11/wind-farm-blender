@@ -85,7 +85,7 @@ REGRESSIONS = (
     Regression('nrel_editor_resource_regression.py', 'NREL_EDITOR_RESOURCE_PASS', 'checks.json',
                scope='Native helper deletion, normal editor detach and retryable resource cleanup.'),
     Regression('camera_export_contract_regression.py', 'CAMERA_EXPORT_CONTRACT_PASS', 'result.json',
-               scope='Down marker isolation, actual-camera publication gates, decoded video and excluded annotations.'),
+               scope='Down export ignores camera-bound markers and restores them; decoded frames; excluded annotations.'),
     Regression('model_environment_integration.py', 'MODEL_ENVIRONMENT_INTEGRATION_PASS', 'checks.json', timeout_s=300,
                scope='Model and World isolation across manual scenes, replay, export copies and native saved files.'),
     Regression('camera_failure_recovery_regression.py', 'CAMERA_FAILURE_RECOVERY_PASS', 'result.json',
