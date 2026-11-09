@@ -49,12 +49,13 @@ class Recorder:
         self._manifest()
         self.index = (self.path / 'frame_index.jsonl').open('xb')
 
-    def _manifest(self):
+    def _manifest(self, state=None):
+        state = state or self.state
         _atomic(self.path / 'manifest.json', json_bytes(dict(schema='x100-recording.v1',
-            state=self.state, frames=self.rows, error=self.error, description=self.description,
+            state=state, frames=self.rows, error=self.error, description=self.description,
             last_successful_identity=self.last_identity,
             index_sha256=(hashlib.sha256((self.path / 'frame_index.jsonl').read_bytes()).hexdigest()
-                          if self.state == 'COMPLETE' else None))))
+                          if state == 'COMPLETE' else None))))
 
     def append(self, frame, replay_time_s, *, original_ply=None):
         if self.state != 'RECORDING':
@@ -102,15 +103,21 @@ class Recorder:
             self._manifest()
 
     def close(self):
+        """Commit the recording; ``state`` reads COMPLETE only once it is replayable on disk.
+
+        While the index, manifest and marker are written the state is FINALIZING, so
+        readers on other threads never see COMPLETE beside a remaining INCOMPLETE marker.
+        """
         if self.state != 'RECORDING':
             return
         try:
             if not self.rows:
                 raise ValueError('Recording contains no frames')
+            self.state = 'FINALIZING'
             self.index.close()
-            self.state = 'COMPLETE'
-            self._manifest()
+            self._manifest('COMPLETE')
             (self.path / 'INCOMPLETE').unlink()
+            self.state = 'COMPLETE'
         except Exception as exc:
             self.state = 'RECORDING'
             self.fail(str(exc))

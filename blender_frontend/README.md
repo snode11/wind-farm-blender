@@ -42,7 +42,7 @@
 
 工作区源码通过 `radar_x100/core.py` 使用规范 `schema.PROFILE` 派生外壳、视场、角域和点数上限；`schema.DISPLAY_DEFAULTS` 单独定义示意长度和画布余量。`configuration.py` 比较会话应用时的来源配置与当前编辑值，显示未应用差异；显示设置、下一新样本预算与下一次记录目录不属于待应用配置。安装快捷按钮成功后同步实际应用配置，不自动热切换编辑值。
 
-`Session.recording_health()` 委托 `session_recording.recording_health()`，把记录状态、失败原因、目录与已写帧数保存在所属场景；结束失败记录后，常规刷新保留该终态，新记录启动才清除上次错误。所属场景已删除时不写入失效 RNA，写盘线程仍须完成关闭，随后释放会话归属。`Fanout` 的追加或关闭异常停止记录并置为 `FAILED`，保留 `INCOMPLETE`；正常关闭排空已接受工作，失败后释放待处理项，写盘前重新校验帧元数据。
+`Session.recording_health()` 委托 `session_recording.recording_health()`，把记录状态、失败原因、目录与已写帧数保存在所属场景；记录状态取自 `session_recording.recording_state()`，结束记录且写盘线程仍存活时为 `FINALIZING`，面板读取同一函数；结束失败记录后，常规刷新保留该终态，新记录启动才清除上次错误。所属场景已删除时不写入失效 RNA，写盘线程仍须完成关闭，随后释放会话归属。`Fanout` 的追加或关闭异常停止记录并置为 `FAILED`，保留 `INCOMPLETE`；正常关闭排空已接受工作，失败后释放待处理项，写盘前重新校验帧元数据。
 
 工作区源码的 `Session.stop_recording()`（委托 `session_recording.stop_recording()`）和 `runtime.stop()` 返回布尔完成状态；`False` 表示已停止接收记录、写盘线程仍在收尾，不等待线程或释放归属。`runtime.tick()` 自动确认终态；写盘未退出时拒绝新记录及会话替换。`Fanout.request_close()` 发出停止请求并释放待显示项，外部采集端的 `Fanout.close()` 则等待线程退出。加载／历史恢复按各自场景重绑；卸载时只保留必要的写盘收尾轮询，完成后停止计时器。
 
@@ -138,6 +138,7 @@
 | 冻结试验视频 | `FINALIZING` 表示渲染主进程已结束、正在收尾及确认交付；取消使用 `CANCELLING`。监管端停止所属进程组、核对媒体交付，再关闭控制端点、等待服务线程退出并释放监管／输出租约，最后写 `final=true`。`status.lock` 串行化终态发布与下一attempt，查询等待交接完成，避免误报LOST或旧终态覆盖新作业 |
 | 普通PNG动画 | worker只写 `RENDERED`（声明帧已写完）或 `FAILING`（已记录错误，进程尚待退出）。控制端等待其退出后写 `COMPLETE`／`FAILED`／`CANCELLED`；成功须正常退出、帧数齐全且进度有效。FAILING保留失败原因，不因随后取消改为成功或取消 |
 | 相机抓帧 | 请求结束后先恢复允许恢复的场景状态、释放GPU目标和UI计时器；PNG写入线程尚存活时保持 `FINALIZING` 与占用。线程实际退出后才释放写入器、写最终complete／incomplete清单及准确组数，按仍匹配的场景会话发布界面结果；done事件不能代替线程退出 |
+| X100 记录 | 结束记录后停止接收新帧；写盘线程关闭索引、原子写入含索引摘要的最终清单并删除 `INCOMPLETE` 后，记录器才进入 `COMPLETE`，此前为 `FINALIZING`。场景与面板在写盘线程退出前均显示 `FINALIZING`，退出后公布 `COMPLETE` 或 `FAILED`；清单或标记写盘失败进入 `FAILED`，保留原因和 `INCOMPLETE` |
 | 已有MP4导出／RTSP | MP4复制、私有暂存清理线程全部退出后，才公开 `SUCCEEDED`／`CANCELLED`／`FAILED` 和最终路径；提交期间为 `COMMITTING`。RTSP在 `STOPPING` 中等待自有FFmpeg／MediaMTX及停止线程收尾，再公开STOPPED或错误；若进程未退出，保留句柄与active占用，ERROR不构成清理完成证明 |
 
 普通动画恢复从场景保存的目录读取匹配job身份、帧数和状态。已有终态可恢复显示；残留RUNNING／FAILING／RENDERED若记录的进程仍存活或身份不可确认，进入 `RECOVERING` 并保留占用，只读轮询，不按保存PID认领控制或发送取消信号。进程确认退出后读取可信终态；若只剩中间状态则写FAILED，不能凭RENDERED或文件数补认成功。它不续渲染缺失帧。视频监管恢复继续使用作业凭据、attempt和租约；无可验证端点且无匹配 `final=true` 终态时为LOST，不把残留FINALIZING直接当失败、取消或成功。

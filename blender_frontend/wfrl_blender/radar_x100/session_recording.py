@@ -101,6 +101,16 @@ def start_recording(self, path):
     self._record_current(self.frame)
 
 
+def recording_state(self):
+    """The recording state the scene and panel show; results wait for the writer to exit."""
+    if self.fanout is None:
+        return None
+    state = self.fanout.recorder.state
+    if state != 'FAILED' and (state == 'FINALIZING' or self.recording_stopping and self.fanout.worker.is_alive()):
+        return 'FINALIZING'
+    return state
+
+
 def recording_health(self):
     if self.fanout is not None:
         try:
@@ -109,7 +119,7 @@ def recording_health(self):
         except ReferenceError:
             return
         recorder = self.fanout.recorder
-        self.scene['wfrl_x100_record_state'] = recorder.state
+        self.scene['wfrl_x100_record_state'] = recording_state(self)
         self.scene['wfrl_x100_record_directory'] = str(recorder.path)
         self.scene['wfrl_x100_record_frames'] = recorder.rows
         if recorder.state == 'FAILED':
