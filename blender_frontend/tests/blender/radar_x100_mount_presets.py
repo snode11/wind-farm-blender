@@ -101,6 +101,12 @@ down_fov = (camera.data.angle_x / 2, np.arctan(np.tan(camera.data.angle_x / 2) /
 np.testing.assert_allclose(down.sampler.field_of_view, np.degrees(down_fov), atol=1e-4)
 np.testing.assert_allclose(down.frame.provenance['field_of_view_deg'], down.sampler.field_of_view)
 np.testing.assert_allclose(down.fov.data['wfrl_x100_field_of_view_deg'], down.sampler.field_of_view)
+# The Down camera preset gates with the camera's image rectangle, not the angular box.
+assert down.sampler.field_of_view_shape == scene.wfrl_x100_field_of_view_shape == 'PROJECTIVE'
+assert down.frame.provenance['field_of_view_shape'] == 'PROJECTIVE'
+assert down.fov.data['wfrl_x100_field_of_view_shape'] == 'PROJECTIVE' and len(down.fov.data.vertices) == 5
+sensor_points = np.column_stack([down.frame.points[axis] for axis in 'xyz'])
+assert radar.simulation.fov_mask(sensor_points, down.sampler.field_of_view, 'PROJECTIVE').all()
 assert tuple(down.applied_config['field_of_view']) == tuple(scene.wfrl_x100_field_of_view)
 assert down.frame.source_kind == 'GEOMETRY_SIMULATION' and len(down.frame.points) > 0
 assert down.mount is original_mount and down.frame.time.source_time_s == clock[2]
@@ -112,6 +118,8 @@ assert restored.frame.points.tobytes() == original_points
 np.testing.assert_allclose(scene.wfrl_x100_field_of_view, (radar.schema.PROFILE['azimuth_deg'],
                                                            radar.schema.PROFILE['elevation_deg']))
 np.testing.assert_allclose(restored.fov.data['wfrl_x100_field_of_view_deg'], tuple(scene.wfrl_x100_field_of_view))
+assert restored.sampler.field_of_view_shape == scene.wfrl_x100_field_of_view_shape == 'ANGULAR'
+assert restored.fov.data['wfrl_x100_field_of_view_shape'] == 'ANGULAR'
 assert len([m for m in bpy.data.meshes if m.name.startswith('WFRL.X100.FOV')]) == 1
 
 # The rear hoisting hatch sits below the nacelle tail, 2 m to the side, aimed at the 6 o'clock tip.

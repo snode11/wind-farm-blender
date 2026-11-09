@@ -23,12 +23,13 @@ def _simulation_frame(scene, sampler, source_session, sequence, source_t, *, obs
             azimuth, elevation = view.field_of_view(sampler.field_of_view)
             frame = simulation.simulate_detections(sampler.sample, source_t, **arguments,
                 integration_budget=budget, sampling_plan=sampler.sampling_plan(budget),
-                config=calibration.calibrated_config(azimuth_limit_deg=azimuth, elevation_limit_deg=elevation))
+                config=calibration.calibrated_config(azimuth_limit_deg=azimuth, elevation_limit_deg=elevation,
+                                                     field_of_view_shape=sampler.field_of_view_shape))
         elif observation_mode == 'GEOMETRY':
             budget = scene.wfrl_x100_candidates
             frame = simulation.simulate(sampler.sample, source_t, **arguments,
                 candidate_budget=budget, sampling_plan=sampler.sampling_plan(budget),
-                fov_deg=view.field_of_view(sampler.field_of_view))
+                fov_deg=view.field_of_view(sampler.field_of_view), fov_shape=sampler.field_of_view_shape)
         else:
             raise ValueError('未知 X100 观测模式：' + str(observation_mode))
     if frame is not None:

@@ -184,6 +184,27 @@ def frame_field_of_view(frame):
     return tuple(float(v) for v in value)
 
 
+def frame_field_of_view_shape(frame):
+    """Field-of-view shape the frame was simulated with; ANGULAR for frames without one."""
+    value = frame.provenance.get('field_of_view_shape') if frame is not None else None
+    return value or 'ANGULAR'
+
+
+def fov_corners(limits, shape='ANGULAR', length=None):
+    """Sensor-frame end points of the four corner rays, ``length`` metres from the sensor."""
+    azimuth_limit, elevation_limit = (math.radians(v) for v in limits)
+    length = schema.DISPLAY_DEFAULTS['fov_length_m'] if length is None else length
+    corners = []
+    for az in (-azimuth_limit, azimuth_limit):
+        for el in (-elevation_limit, elevation_limit):
+            if shape == 'PROJECTIVE':
+                ray = np.array((1., math.tan(az), math.tan(el)))
+                corners.append(ray / np.linalg.norm(ray) * length)
+            else:
+                corners.append(np.array((math.cos(el) * math.cos(az), math.cos(el) * math.sin(az), math.sin(el))) * length)
+    return np.array(corners)
+
+
 def fit_bounds(points, view, field_of_view=None):
     if view == 'SENSOR':
         limits = frame_field_of_view(None) if field_of_view is None else field_of_view

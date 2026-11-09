@@ -75,9 +75,11 @@ def main():
             raise ValueError('Blade model switch failed: ' + str(scene.get('wfrl_blade_model_error', '')))
     location, rotation, field_of_view = scene_api.down_camera_installation(scene)
     sampler = scene_api.SceneSampler(farm.active_for(scene), mount='NACELLE',
-        mount_from_sensor=scene_api.installation_matrix(location, rotation), field_of_view=field_of_view)
+        mount_from_sensor=scene_api.installation_matrix(location, rotation), field_of_view=field_of_view,
+        field_of_view_shape='PROJECTIVE')
     config = api.calibration.calibrated_config(azimuth_limit_deg=field_of_view[0],
-                                               elevation_limit_deg=field_of_view[1])
+                                               elevation_limit_deg=field_of_view[1],
+                                               field_of_view_shape='PROJECTIVE')
     args.start = sampler.interval[0] if args.start is None else args.start
     args.end = min(sampler.interval[1], args.start + args.duration) if args.end is None else args.end
     if (not all(math.isfinite(x) for x in (args.start, args.end, args.fps))
@@ -90,6 +92,7 @@ def main():
     description = dict(source_kind='ENGINEERING_SIMULATION', source_grid_fps=args.fps,
                        interval_s=[args.start, args.end], calibration_id=sampler.calibration_id,
                        mount_preset='DOWN_CAMERA', field_of_view_deg=list(field_of_view),
+                       field_of_view_shape='PROJECTIVE',
                        blade_model=farm.active_for(scene).model)
     sink = api.recording.Recorder(args.output / 'recording', description=description)
     session, rows = str(uuid.uuid4()), []
@@ -123,6 +126,7 @@ def main():
         installation=dict(preset='DOWN_CAMERA', frame='T1 YawRoot', location_m=list(location),
                           rotation_xyz_deg=list(rotation)),
         field_of_view_half_deg=dict(azimuth=field_of_view[0], elevation=field_of_view[1]),
+        field_of_view_shape='PROJECTIVE',
         vendor_axes='+X right, +Y boresight, +Z up (x_v = -y_s, y_v = x_s, z_v = z_s)',
         max_points=api.schema.PROFILE['max_points'], blade_model=description['blade_model'],
         points_per_frame=dict(mean=float(counts.mean()), min=int(counts.min()), max=int(counts.max())),

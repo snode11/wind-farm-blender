@@ -89,14 +89,16 @@ class Session:
                 raise ValueError('仿真需要本场景已加载的风场柔性回放')
             self.sampler = SceneSampler(flex, mount=scene.wfrl_x100_mount,
                 mount_from_sensor=installation_matrix(scene.wfrl_x100_location, scene.wfrl_x100_rotation),
-                field_of_view=tuple(scene.wfrl_x100_field_of_view))
+                field_of_view=tuple(scene.wfrl_x100_field_of_view),
+                field_of_view_shape=scene.wfrl_x100_field_of_view_shape)
             t = max(self.sampler.interval[0], min(self.sampler.interval[1], float(scene.get('wfrl_clearance_time_s', 0))))
             if restoring:
                 self.mount, self.fov = view.existing_installation(scene, self.owner)
             else:
                 self.mount, self.fov = view.install(scene, self.owner,
                     self.sampler.mount_world_at(t) @ self.sampler.mount_from_sensor, show_fov=scene.wfrl_x100_fov,
-                    field_of_view_deg=self.sampler.field_of_view)
+                    field_of_view_deg=self.sampler.field_of_view,
+                    field_of_view_shape=self.sampler.field_of_view_shape)
                 from mathutils import Matrix
                 yaw = scene.objects['WFRL.Turbine.T1.YawRoot']
                 self.mount.parent = yaw if scene.wfrl_x100_mount == 'NACELLE' else (

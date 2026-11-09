@@ -33,6 +33,9 @@ CAMERA_FROM_SENSOR = np.array(((0., -1., 0.), (0., 0., 1.), (-1., 0., 0.)))
 def down_camera_installation(scene, turbine_id='T1'):
     """Radar at the current T1 Down camera pose, with the camera's rectangular field of view.
 
+    The half angles are meant for the PROJECTIVE field-of-view shape, which reproduces the
+    camera's image rectangle; the ANGULAR box with the same half angles covers more at the corners.
+
     Returns the YawRoot-frame location, XYZ Euler rotation in degrees and (azimuth, elevation)
     half angles: horizontal from the lens, vertical from the declared 16:9 Down image aspect.
     """
@@ -163,7 +166,8 @@ def installation_catalog(sampler, *, policy=None, lateral_offsets=(0., 1., 2.),
 
 class SceneSampler:
     """Snapshot static bindings; arbitrary source times never change Blender clocks."""
-    def __init__(self, flex, *, turbine_id='T1', mount='NACELLE', mount_from_sensor=None, field_of_view=None):
+    def __init__(self, flex, *, turbine_id='T1', mount='NACELLE', mount_from_sensor=None, field_of_view=None,
+                 field_of_view_shape='ANGULAR'):
         from ..turbine_geometry import geometry_data
         self.flex, self.turbine_id, self.mount = flex, turbine_id, mount
         self.scene = flex.scene
@@ -171,6 +175,8 @@ class SceneSampler:
         self.interval = (float(flex.times[0]), float(flex.times[-1]))
         self.mount_from_sensor = simulation.rigid_matrix(mount_from_sensor)
         self.field_of_view = None if field_of_view is None else tuple(float(v) for v in field_of_view)
+        simulation.field_of_view(self.field_of_view, field_of_view_shape)
+        self.field_of_view_shape = field_of_view_shape
         self.source_id = flex.scene['wfrl_farm_manifest_sha256']
         self.height = geometry_data()['scalars']['TowerHt']
         yaw = flex.scene.objects[f'WFRL.Turbine.{turbine_id}.YawRoot']

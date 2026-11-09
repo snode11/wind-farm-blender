@@ -281,14 +281,10 @@ class OutputWindow:
         sensor = analysis.local(analysis.transform(np.array([[0,0,0],[15,0,0]]),context.world_from_sensor),context.world_from_analysis)
         shapes.append(shape(sensor[:,(0,2)]*factor+(tx,ty),(1.,.7,.15,1)))
         rays=[]
-        azimuth_limit,elevation_limit=display.frame_field_of_view(session.frame)
-        for az in (-azimuth_limit,azimuth_limit):
-            for el in (-elevation_limit,elevation_limit):
-                a,e=np.radians([az,el])
-                length=schema.DISPLAY_DEFAULTS['fov_length_m']
-                end=[length*np.cos(e)*np.cos(a),length*np.cos(e)*np.sin(a),length*np.sin(e)]
-                pair=analysis.local(analysis.transform(np.array([[0,0,0],end]),context.world_from_sensor),context.world_from_analysis)
-                rays.extend(pair[:,(0,2)]*factor+(tx,ty))
+        for end in display.fov_corners(display.frame_field_of_view(session.frame),
+                                       display.frame_field_of_view_shape(session.frame)):
+            pair=analysis.local(analysis.transform(np.array([[0,0,0],end]),context.world_from_sensor),context.world_from_analysis)
+            rays.extend(pair[:,(0,2)]*factor+(tx,ty))
         shapes.append(shape(rays,(.15,.65,1,.5)))
         if self.show_reference:
             for curve in session.reference_curves:

@@ -58,7 +58,7 @@ def apply_mount_preset(scene, preset, *, search_report=None):
                 pass
     if sampler is None:
         sampler = SceneSampler(flex, mount_from_sensor=np.eye(4))
-    field_of_view = view.field_of_view()
+    field_of_view, shape = view.field_of_view(), 'ANGULAR'
     if preset == 'SEARCH':
         from .core import installation
         location, rotation = installation.selected_installation(search_report, sampler.source_id, sampler.geometry_id)
@@ -66,6 +66,7 @@ def apply_mount_preset(scene, preset, *, search_report=None):
         location, rotation = ORIGINAL_LOCATION, ORIGINAL_ROTATION
     elif preset == 'DOWN_CAMERA':
         location, rotation, field_of_view = down_camera_installation(scene)
+        shape = 'PROJECTIVE'
     elif preset == 'REAR_HATCH':
         location, rotation = rear_hatch_installation(sampler)
     else:
@@ -74,34 +75,36 @@ def apply_mount_preset(scene, preset, *, search_report=None):
     rotation = tuple(float(np.float32(value)) for value in rotation)
     field_of_view = tuple(float(np.float32(value)) for value in field_of_view)
     sampler = sampler.with_installation('NACELLE', installation_matrix(location, rotation))
-    sampler.field_of_view = field_of_view
+    sampler.field_of_view, sampler.field_of_view_shape = field_of_view, shape
     yaw = scene.objects['WFRL.Turbine.T1.YawRoot']
     if (current is not None and current.display_valid and current.frame is not None
             and current.sampler.calibration_id == sampler.calibration_id
             and current.sampler.geometry_id == sampler.geometry_id
             and current.mount.parent == yaw
             and view.field_of_view(current.sampler.field_of_view) == field_of_view
+            and current.sampler.field_of_view_shape == shape
             and np.allclose(np.array(current.mount.matrix_parent_inverse) @ np.array(current.mount.matrix_basis),
                             sampler.mount_from_sensor, atol=1e-5, rtol=0)):
         current.update()
         scene.wfrl_x100_mount = 'NACELLE'
         scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
-        scene.wfrl_x100_field_of_view = field_of_view
+        scene.wfrl_x100_field_of_view, scene.wfrl_x100_field_of_view_shape = field_of_view, shape
         current.capture_configuration()
         return current
 
     previous = (scene.wfrl_x100_mount, tuple(scene.wfrl_x100_location),
-                tuple(scene.wfrl_x100_rotation), tuple(scene.wfrl_x100_field_of_view))
+                tuple(scene.wfrl_x100_rotation), tuple(scene.wfrl_x100_field_of_view),
+                scene.wfrl_x100_field_of_view_shape)
 
     def restore_settings():
         (scene.wfrl_x100_mount, scene.wfrl_x100_location, scene.wfrl_x100_rotation,
-         scene.wfrl_x100_field_of_view) = previous
+         scene.wfrl_x100_field_of_view, scene.wfrl_x100_field_of_view_shape) = previous
     if current is None:
         # A new session samples its own first frame; only the scene settings need rollback.
         try:
             scene.wfrl_x100_mount = 'NACELLE'
             scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
-            scene.wfrl_x100_field_of_view = field_of_view
+            scene.wfrl_x100_field_of_view, scene.wfrl_x100_field_of_view_shape = field_of_view, shape
             return start(scene)
         except Exception:
             restore_settings()
@@ -121,9 +124,10 @@ def apply_mount_preset(scene, preset, *, search_report=None):
     try:
         scene.wfrl_x100_mount = 'NACELLE'
         scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
-        scene.wfrl_x100_field_of_view = field_of_view
-        if view.field_of_view(current.sampler.field_of_view) != field_of_view:
-            previous_fov_mesh = view.set_field_of_view(current.fov, field_of_view)
+        scene.wfrl_x100_field_of_view, scene.wfrl_x100_field_of_view_shape = field_of_view, shape
+        if (view.field_of_view(current.sampler.field_of_view) != field_of_view
+                or current.sampler.field_of_view_shape != shape):
+            previous_fov_mesh = view.set_field_of_view(current.fov, field_of_view, shape)
         current.mount.parent = yaw
         current.mount.matrix_parent_inverse = Matrix.Identity(4)
         current.mount.matrix_basis = Matrix(sampler.mount_from_sensor.tolist())

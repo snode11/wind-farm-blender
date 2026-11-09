@@ -9,15 +9,16 @@ SAMPLE_RATE_HZ = 33
 RATE_LABEL = f'{SAMPLE_RATE_HZ} Hz 瞬时采样假设'
 FRAME_SOURCE_LABELS = dict(GEOMETRY_SIMULATION='几何仿真', ENGINEERING_SIMULATION='工程检测仿真', MEASURED_REPLAY='实测文件',
                            MEASURED_LIVE='实测实时', TEST='测试数据')
-FIELD_LABELS = dict(source='数据源', observation_mode='观测模式', mount='挂载', location='安装位置', rotation='安装旋转', field_of_view='视场',
+FIELD_LABELS = dict(source='数据源', observation_mode='观测模式', mount='挂载', location='安装位置', rotation='安装旋转', field_of_view='视场', field_of_view_shape='视场形状',
                     path='回放路径', ply_source='单帧 PLY 来源', port='本地端口', stale_s='过期阈值')
 MOUNT_LABELS = dict(NACELLE='T1 机舱', TOWER_BASE='T1 塔基', WORLD='世界固定')
+FOV_SHAPE_LABELS = dict(ANGULAR='方位／俯仰角', PROJECTIVE='相机矩形')
 
 
 def capture(scene, *, abspath, single_ply=False):
     mode = scene.wfrl_x100_source
     values = dict(source=mode)
-    fields = dict(SIMULATION=('observation_mode', 'mount', 'location', 'rotation', 'field_of_view'),
+    fields = dict(SIMULATION=('observation_mode', 'mount', 'location', 'rotation', 'field_of_view', 'field_of_view_shape'),
                   REPLAY=('path', 'ply_source') if single_ply else ('path',),
                   LIVE=('port', 'stale_s'))[mode]
     for field in fields:
@@ -46,7 +47,8 @@ def summary(applied):
         for field, unit in (('location', 'm'), ('rotation', '°')):
             lines.append(FIELD_LABELS[field] + '：' + ' / '.join(f'{v:.4g}' for v in applied[field]) + ' ' + unit)
         if 'field_of_view' in applied:
-            lines.append('视场：方位 ±{:.4g}° / 俯仰 ±{:.4g}°'.format(*applied['field_of_view']))
+            shape = FOV_SHAPE_LABELS[applied.get('field_of_view_shape', 'ANGULAR')]
+            lines.append('视场：方位 ±{:.4g}° / 俯仰 ±{:.4g}° · {}'.format(*applied['field_of_view'], shape))
     elif mode == 'REPLAY':
         lines.append('路径：' + applied['path'])
         if 'ply_source' in applied:

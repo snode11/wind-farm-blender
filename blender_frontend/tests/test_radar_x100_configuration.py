@@ -6,7 +6,7 @@ from wfrl_blender.radar_x100 import configuration
 
 
 def scene(mode):
-    values = dict(source=mode, observation_mode='GEOMETRY', mount='NACELLE', location=(1.,2.,3.), rotation=(0.,90.,0.), field_of_view=(60.,22.),
+    values = dict(source=mode, observation_mode='GEOMETRY', mount='NACELLE', location=(1.,2.,3.), rotation=(0.,90.,0.), field_of_view=(60.,22.), field_of_view_shape='ANGULAR',
         path='//radar.ply', ply_source='TEST', port=9877, stale_s=.5, stream='NEAR',
         candidates=512, color='RANGE', color_scale='FIXED', velocity_limit=10., fov=True,
         replay_s=0., record_path='/tmp/record')
@@ -32,6 +32,7 @@ def test_immediate_and_next_sample_settings_do_not_report_pending_configuration(
     ('SIMULATION','observation_mode','DETECTIONS','观测模式'),
     ('SIMULATION','mount','WORLD','挂载'), ('SIMULATION','location',(1.,2.,4.),'安装位置'),
     ('SIMULATION','rotation',(0.,91.,0.),'安装旋转'), ('SIMULATION','field_of_view',(45.75,30.),'视场'),
+    ('SIMULATION','field_of_view_shape','PROJECTIVE','视场形状'),
     ('REPLAY','path','//other.ply','回放路径'),
     ('REPLAY','ply_source','MEASURED_REPLAY','单帧 PLY 来源'), ('LIVE','port',9878,'本地端口'),
     ('LIVE','stale_s',1.,'过期阈值')])

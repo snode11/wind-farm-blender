@@ -1,5 +1,6 @@
 """Fixed surface-material observations with geometric first-hit occlusion."""
 from dataclasses import dataclass
+import math
 import numpy as np
 from .schema import RadarFrame, FrameTime, POINT_DTYPE, PROFILE, MAX_POINTS
 from .sampling import make_plan, MaterialPlan, AREA_ALGORITHM, MAX_INTEGRATION_SAMPLES
@@ -58,24 +59,42 @@ class MaterialSample:
         object.__setattr__(self, 'world_from_sensor', matrix)
 
 
-def field_of_view(fov_deg=None):
-    """Rectangular azimuth/elevation half angles in degrees; defaults to the datasheet profile."""
+# ANGULAR: |azimuth| and |elevation| within the half angles (datasheet radar gate).
+# PROJECTIVE: a pinhole camera's rectangle, |y/x| <= tan(azimuth) and |z/x| <= tan(elevation)
+# in front of the sensor; its angular extent is bounded by the same half angles.
+FOV_SHAPES = ('ANGULAR', 'PROJECTIVE')
+
+
+def field_of_view(fov_deg=None, shape='ANGULAR'):
+    """Half angles (azimuth, elevation) in degrees; defaults to the datasheet profile."""
+    if shape not in FOV_SHAPES:
+        raise ValueError('Unknown field-of-view shape: ' + str(shape))
     if fov_deg is None:
         return float(PROFILE['azimuth_deg']), float(PROFILE['elevation_deg'])
     azimuth, elevation = (float(value) for value in fov_deg)
-    if not (0 < azimuth <= 90 and 0 < elevation <= 90):
-        raise ValueError('Field-of-view half angles must lie in (0, 90] degrees')
+    limit = 90 if shape == 'ANGULAR' else 89.9
+    if not (0 < azimuth <= limit and 0 < elevation <= limit):
+        raise ValueError(f'Field-of-view half angles must lie in (0, {limit:g}] degrees for {shape}')
     return azimuth, elevation
 
 
-def in_fov(xyz, fov_deg=None):
-    azimuth_limit, elevation_limit = field_of_view(fov_deg)
-    ranges = np.linalg.norm(xyz, axis=1)
+def fov_mask(xyz, fov_deg=None, shape='ANGULAR'):
+    """Direction test of sensor-frame points against the field of view; range is not checked."""
+    azimuth_limit, elevation_limit = field_of_view(fov_deg, shape)
+    if shape == 'PROJECTIVE':
+        x = xyz[:, 0]
+        return ((x > 0) & (np.abs(xyz[:, 1]) <= x * math.tan(math.radians(azimuth_limit)) + 1e-12)
+                & (np.abs(xyz[:, 2]) <= x * math.tan(math.radians(elevation_limit)) + 1e-12))
     azimuth = np.arctan2(xyz[:, 1], xyz[:, 0])
     elevation = np.arctan2(xyz[:, 2], np.hypot(xyz[:, 0], xyz[:, 1]))
-    return ((ranges >= PROFILE['range_m'][0]) & (ranges <= PROFILE['range_m'][1])
-            & (np.abs(azimuth) <= np.radians(azimuth_limit) + 1e-12)
+    return ((np.abs(azimuth) <= np.radians(azimuth_limit) + 1e-12)
             & (np.abs(elevation) <= np.radians(elevation_limit) + 1e-12))
+
+
+def in_fov(xyz, fov_deg=None, shape='ANGULAR'):
+    ranges = np.linalg.norm(xyz, axis=1)
+    return ((ranges >= PROFILE['range_m'][0]) & (ranges <= PROFILE['range_m'][1])
+            & fov_mask(xyz, fov_deg, shape))
 
 
 def visible_triangles(sample, targets, tolerance_m=.002):
@@ -115,8 +134,8 @@ class _Observation:
 
 def _observe(sample_at, time_s, *, interval_s,
              seed=100, candidate_budget=512, difference_s=.001, visibility=None,
-             material_at=None, sampling_plan=None, sampling_mode='AREA', fov_deg=None):
-    fov = field_of_view(fov_deg)
+             material_at=None, sampling_plan=None, sampling_mode='AREA', fov_deg=None, fov_shape='ANGULAR'):
+    fov = field_of_view(fov_deg, fov_shape)
     if (len(interval_s) != 2 or type(candidate_budget) is not int
             or not 1 <= candidate_budget <= MAX_INTEGRATION_SAMPLES or type(seed) is not int or seed < 0
             or not np.isfinite(difference_s) or difference_s <= 0
@@ -146,7 +165,7 @@ def _observe(sample_at, time_s, *, interval_s,
     world = plan.points(sample)
     transform = sample.world_from_sensor
     xyz = (world - transform[:3, 3]) @ transform[:3, :3]
-    keep = in_fov(xyz, fov)
+    keep = in_fov(xyz, fov, fov_shape)
     visible = np.zeros(len(world), dtype=bool)
     visible[keep] = (visibility or visible_triangles)(sample, world[keep])
     mask = keep & visible
@@ -174,7 +193,7 @@ def _observe(sample_at, time_s, *, interval_s,
                          - (after.world_from_sensor[:3, 3] - before.world_from_sensor[:3, 3])) / (hi - lo)
     los = world[mask] - transform[:3, 3]
     radial = np.einsum('ij,ij->i', relative_velocity, los / np.maximum(np.linalg.norm(los, axis=1)[:, None], 1e-12))
-    provenance = dict(profile=PROFILE, field_of_view_deg=list(fov), source_id=sample.source_id, geometry_id=sample.geometry_id,
+    provenance = dict(profile=PROFILE, field_of_view_deg=list(fov), field_of_view_shape=fov_shape, source_id=sample.source_id, geometry_id=sample.geometry_id,
             instantaneous=True, material_sampling=plan.method, sampling_plan_id=plan.identity,
             sampling_algorithm=AREA_ALGORITHM if plan.method == 'AREA' else 'triangle-centroid.v1',
             reference_time_s=plan.reference_time_s, seed=seed,
@@ -199,13 +218,14 @@ def _frame(observation, sensor_id, session_id, sequence, points, **kwargs):
 
 def simulate(sample_at, time_s, *, sensor_id, session_id, sequence, interval_s,
              seed=100, candidate_budget=512, difference_s=.001, visibility=None,
-             material_at=None, sampling_plan=None, sampling_mode='AREA', fov_deg=None):
+             material_at=None, sampling_plan=None, sampling_mode='AREA', fov_deg=None, fov_shape='ANGULAR'):
     """Geometric control observations; a missing source sample remains None."""
     if type(candidate_budget) is not int or not 1 <= candidate_budget <= MAX_POINTS:
         raise ValueError('Invalid geometric report budget')
     observation = _observe(sample_at, time_s, interval_s=interval_s, seed=seed,
         candidate_budget=candidate_budget, difference_s=difference_s, visibility=visibility,
-        material_at=material_at, sampling_plan=sampling_plan, sampling_mode=sampling_mode, fov_deg=fov_deg)
+        material_at=material_at, sampling_plan=sampling_plan, sampling_mode=sampling_mode, fov_deg=fov_deg,
+        fov_shape=fov_shape)
     if observation is None:
         return None
     points = np.zeros(len(observation.xyz), dtype=POINT_DTYPE)
@@ -235,7 +255,7 @@ def simulate_detections(sample_at, time_s, *, sensor_id, session_id, sequence, i
     observation = _observe(sample_at, time_s, interval_s=interval_s, seed=sampling_seed,
         candidate_budget=integration_budget, difference_s=difference_s, visibility=visibility,
         material_at=material_at, sampling_plan=sampling_plan, sampling_mode='AREA',
-        fov_deg=(config.azimuth_limit_deg, config.elevation_limit_deg))
+        fov_deg=(config.azimuth_limit_deg, config.elevation_limit_deg), fov_shape=config.field_of_view_shape)
     if observation is None:
         return None
     sample, plan, mask = observation.sample, observation.plan, observation.mask

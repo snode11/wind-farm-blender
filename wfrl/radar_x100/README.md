@@ -105,7 +105,8 @@ Blender 工作区源码核对来源 Scene、材料对象与网格身份、关键
 | `processing_gain_db`、`false_alarm_probability_per_cell`、`fluctuation_model` | 43.1220604659924 dB、1e-12、`SWERLING_0`；检测器噪声为接收机噪声除以线性处理增益 |
 | `miss_probability`、`false_alarms_enabled` | 0；`True`，门限后的附加漏检与空单元虚警开关 |
 | `range_std_m`、`azimuth_std_deg`、`elevation_std_deg`、`radial_velocity_std_m_s` | 0.025 m、0.05°、0.1°、0.025 m/s；把手册±0.05 m、±0.1°／0.2°、±0.05 m/s假设为高斯±2σ。手册未说明置信度或分布；显式设0才关闭相应误差 |
-| `azimuth_limit_deg`、`elevation_limit_deg` | 60°、22°（`schema.PROFILE`）；矩形视场半角，取值 (0, 90]，同时决定视场筛选、角度输出筛选和噪声搜索网格。`simulate(..., fov_deg=)` 为几何对照提供同一视场 |
+| `azimuth_limit_deg`、`elevation_limit_deg` | 60°、22°（`schema.PROFILE`）；矩形视场半角，取值 (0, 90]，同时决定视场筛选、角度输出筛选和噪声搜索网格。`simulate(..., fov_deg=, fov_shape=)` 为几何对照提供同一视场 |
+| `field_of_view_shape` | `ANGULAR`（默认）：方位角、俯仰角分别不超过半角；`PROJECTIVE`：针孔相机矩形，`x > 0` 且 \|y/x\| ≤ tan 方位半角、\|z/x\| ≤ tan 俯仰半角，半角须 ≤ 89.9°。噪声搜索网格仍取同样半角的外包范围，落在矩形外的检测与虚警在角度输出筛选中剔除；`simulation.fov_mask()`／`in_fov(..., shape)` 提供同一判定 |
 | `ms_velocity_threshold_m_s` | 1e-6 m/s；`ms` = |合成径向速度| 大于该值 |
 | `vendor_snr_offset_db`、`vendor_mag_slope`、`vendor_mag_intercept`、`vendor_mag_std` | `None`、1、0、0；偏置为 `None` 时不填厂家字段 |
 | `calibration_status`、`calibration_reference`、`parameter_basis` | `UNCALIBRATED`、`None`、研究假设声明；`USER_CALIBRATED` 必须提供非空引用，但软件只校验声明，不验证标定质量 |

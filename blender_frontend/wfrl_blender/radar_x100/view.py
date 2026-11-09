@@ -68,9 +68,19 @@ def field_of_view(value=None):
     return tuple(float(v) for v in value)
 
 
-def _fov_mesh(limits):
+def _fov_mesh(limits, shape='ANGULAR'):
     import bpy
     azimuth_limit, elevation_limit = field_of_view(limits)
+    mesh = bpy.data.meshes.new('WFRL.X100.FOV')
+    mesh['wfrl_x100_field_of_view_shape'] = shape
+    if shape == 'PROJECTIVE':
+        from .display import fov_corners
+        # Pinhole rectangle: straight edges at the far end, as the camera image frames it.
+        corners = fov_corners((azimuth_limit, elevation_limit), shape)
+        points = [(0., 0., 0.), *map(tuple, corners[[0, 1, 3, 2]])]
+        mesh.from_pydata(points, [(0, 1), (0, 2), (0, 3), (0, 4), (1, 2), (2, 3), (3, 4), (4, 1)], [])
+        mesh['wfrl_x100_field_of_view_deg'] = [azimuth_limit, elevation_limit]
+        return mesh
     points, edges, rows = [(0., 0., 0.)], [], []
     length = schema.DISPLAY_DEFAULTS['fov_length_m']
     for elevation in (-elevation_limit, elevation_limit):
@@ -83,20 +93,19 @@ def _fov_mesh(limits):
         edges.extend([(0, row[0]), (0, row[-1])])
         rows.append(row)
     edges.extend([(rows[0][0], rows[1][0]), (rows[0][-1], rows[1][-1])])
-    mesh = bpy.data.meshes.new('WFRL.X100.FOV')
     mesh.from_pydata(points, edges, [])
     mesh['wfrl_x100_field_of_view_deg'] = list(field_of_view(limits))
     return mesh
 
 
-def set_field_of_view(fov, limits):
+def set_field_of_view(fov, limits, shape='ANGULAR'):
     """Replace the annotation mesh; returns the previous mesh for rollback."""
     previous = fov.data
-    fov.data = _fov_mesh(limits)
+    fov.data = _fov_mesh(limits, shape)
     return previous
 
 
-def install(scene, owner, sensor_matrix, *, show_fov=True, field_of_view_deg=None):
+def install(scene, owner, sensor_matrix, *, show_fov=True, field_of_view_deg=None, field_of_view_shape='ANGULAR'):
     import bpy
     from mathutils import Matrix
     remove_objects(scene)
@@ -121,7 +130,7 @@ def install(scene, owner, sensor_matrix, *, show_fov=True, field_of_view_deg=Non
     housing['wfrl_x100_owner'] = owner
     housing['wfrl_x100_role'] = 'physical'
     housing['geometry_source'] = housing_model.SOURCE
-    fov = bpy.data.objects.new('WFRL.X100.FOV', _fov_mesh(field_of_view_deg))
+    fov = bpy.data.objects.new('WFRL.X100.FOV', _fov_mesh(field_of_view_deg, field_of_view_shape))
     collection.objects.link(fov)
     fov.parent, fov.hide_render = mount, True
     fov['wfrl_x100_owner'], fov['wfrl_x100_role'] = owner, 'annotation'

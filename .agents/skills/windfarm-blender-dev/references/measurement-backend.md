@@ -19,7 +19,7 @@
 - 工作区入口为独立侧栏 **N → X100**，通过 `panels/home.py` 的 `busy_reason` 共用相机与录制占用判断；公开包和日常安装的入口按各自载荷识别，不由源码推定。
 - 几何仿真要求所属场景已加载同源 FarmFlex；`SceneSampler.sample(t)` 只读保存运动，不推进场景或播放器。30 Hz 是声明的源采样网格，不保证 UI 记录覆盖完整网格或持续 30 Hz 绘制；完整网格导出按[几何观测入口](../../../../wfrl/radar_x100/README.md#几何观测)使用独立进程和新输出。安装或来源不匹配时撤回点云并保留用户修改，不运行求解或训练。
 
-- 同一台几何雷达的原安装位／机舱侧面／T1 Down 相机位（`DOWN_CAMERA`，取相机位姿与矩形视场）／尾部吊物口（`REAR_HATCH`，`scene.rear_hatch_installation()`，视轴对准 6 点钟叶尖）通过 `runtime.apply_mount_preset()` 切换，保留场景时刻；已应用视场 `wfrl_x100_field_of_view` 属于待应用配置；记录、相机采集与共享安装按其互斥约束拒绝切换。安装对象及父级不支持约束、动画或非对象父级关系，失效时撤回观测，不覆盖原生编辑。
+- 同一台几何雷达的原安装位／机舱侧面／T1 Down 相机位（`DOWN_CAMERA`，取相机位姿、半角与 `PROJECTIVE` 视场形状）／尾部吊物口（`REAR_HATCH`，`scene.rear_hatch_installation()`，视轴对准 6 点钟叶尖）通过 `runtime.apply_mount_preset()` 切换，保留场景时刻；已应用视场 `wfrl_x100_field_of_view` 与视场形状 `wfrl_x100_field_of_view_shape` 属于待应用配置；记录、相机采集与共享安装按其互斥约束拒绝切换。安装对象及父级不支持约束、动画或非对象父级关系，失效时撤回观测，不覆盖原生编辑。
 - `SceneSampler.material_sample(t, triangle_ids, barycentric=...)` 为面积材料差分只采样输出点，当前完整几何用于遮挡；静态拓扑与同刻遮挡树按绑定复用，来源和材料校验保持。性能结论须保留相同输入、点数组、材料身份与速度的对照；CPU 更新耗时不能换算成未经测量的播放 FPS。
 - PLY 单帧不含连续时间、速度或航迹身份；序列按[显式索引合同](../../../../wfrl/radar_x100/README.md#ply-与显式索引)导入，不按文件名补时间或补帧。`FPS_DERIVED` 不代表硬件同步；未确认的实测坐标保留 `VENDOR_RAW / UNALIGNED`，不绑定不相关的 MAPPO 动画。
 - 工作区的单帧 PLY 要求显式 `source_kind`，`source_declaration=EXPLICIT` 仅表示调用方声明；路径改变会清除界面声明，路径或声明变更后须重新应用配置。完整记录保留文件内来源。几何采样同时校验机舱静态网格、变换及归属，编辑或驱动导致绑定失效时撤回观测；使用修改后的静态外壳须重新绑定，不自动烘焙驱动。

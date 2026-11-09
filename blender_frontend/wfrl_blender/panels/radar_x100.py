@@ -295,6 +295,7 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
                 vector.label(text=scene.bl_rna.properties[name].name)
                 for index, axis in enumerate('XYZ' if name != 'wfrl_x100_field_of_view' else ('方位', '俯仰')):
                     vector.prop(scene, name, index=index, text=axis)
+            _property(layout, scene, 'wfrl_x100_field_of_view_shape', narrow=narrow)
             layout.separator()
             if scene.wfrl_x100_observation_mode == 'GEOMETRY':
                 _property(layout, scene, 'wfrl_x100_candidates', narrow=narrow)
@@ -538,7 +539,7 @@ class WFRL_PT_X100Record(_X100Panel, bpy.types.Panel):
         layout.label(text='仅记录实际采样帧；非完整 33 Hz 导出', icon='INFO')
 
 
-PROPERTIES = ('source', 'observation_mode', 'mount', 'location', 'rotation', 'candidates', 'fov', 'path', 'ply_source', 'replay_s',
+PROPERTIES = ('source', 'observation_mode', 'mount', 'location', 'rotation', 'field_of_view', 'field_of_view_shape', 'candidates', 'fov', 'path', 'ply_source', 'replay_s',
               'port', 'stream', 'stale_s', 'color', 'echo_classes', 'color_scale', 'velocity_limit', 'record_path', 'enabled', 'analysis_roi_min', 'analysis_roi_max', 'analysis_limit', 'search_path', 'blade_tracking')
 
 
@@ -573,6 +574,9 @@ def register_properties():
         field_of_view=p.FloatVectorProperty(name='视场半角 (°)', size=2, min=.1, max=90.,
             description='矩形视场的方位 / 俯仰半角；默认取规格书视场',
             default=(schema.PROFILE['azimuth_deg'], schema.PROFILE['elevation_deg'])),
+        field_of_view_shape=p.EnumProperty(name='视场形状', default='ANGULAR', items=(
+            ('ANGULAR', '方位／俯仰角', '方位角与俯仰角分别不超过半角；规格书雷达视场'),
+            ('PROJECTIVE', '相机矩形', '与针孔相机画面一致的矩形：横向与纵向正切不超过半角正切；半角须小于 90°'))),
         candidates=p.IntProperty(name='采样预算', description='下一新样本读取的材料表面候选预算；不等于输出点数', default=512, min=1, max=schema.PROFILE['max_points']),
         fov=p.BoolProperty(name='名义视场', description=f"即时显示名义视场，长度 {schema.DISPLAY_DEFAULTS['fov_length_m']:g} m，不代表探测结果或量程", default=True),
         path=p.StringProperty(name='PLY / 记录目录', subtype='FILE_PATH', update=ply_path_changed),

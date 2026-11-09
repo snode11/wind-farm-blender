@@ -39,7 +39,8 @@ def test_dispatch_keeps_detection_integration_independent_of_geometry_budget(mon
         return object()
     sampler = SimpleNamespace(interval=(0., 2.), sample=object(), visibility=object(),
         material_sample=object(), sampling_plan=plan, calibration_id='mount-calibration',
-        sampling_transaction=nullcontext, field_of_view=(45.75, 30.))
+        sampling_transaction=nullcontext, field_of_view=(45.75, 30.),
+        field_of_view_shape='PROJECTIVE')
     result = None if missing else SimpleNamespace(provenance={})
     def simulate(name):
         def call(*args, **kwargs):
