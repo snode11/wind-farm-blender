@@ -348,6 +348,8 @@ def draw(layout, context, *, show_playback=True):
     if split_reconstruction.enabled(scene):
         draw_split_views(layout, context)
     else:
+        # Blade shape stays visible so replay and X100 sampling can match the site blade.
+        layout.prop(scene, 'wfrl_blade_model', text='叶片外形')
         views = section(layout, 'wfrl_farm_quick_views', '观察视角与分屏')
         if views is not None:
             draw_split_views(views, context)
@@ -357,7 +359,7 @@ def draw(layout, context, *, show_playback=True):
                 from ..turbine_geometry import model_label
                 model.label(text='单机预弯接口验证' if flex.manifest.get('interface_only')
                             else model_label(flex.model) + ' · BeamDyn')
-            model.prop(scene, 'wfrl_blade_model', text='叶片外形')
+            model.label(text='外形切换复用同一份保存运动，不重跑 FAST.Farm')
     tabs = layout.column(align=True)
     for pages in (('DEFLECTION', 'RADAR', 'IMBALANCE'), ('VIDEO', 'TOOLS')):
         row = tabs.row(align=True)

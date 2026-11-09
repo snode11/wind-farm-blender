@@ -87,6 +87,33 @@ assert restored.sampler.calibration_id == original_calibration
 assert len([o for o in scene.objects if o.get('wfrl_x100_role') == 'physical']) == 1
 assert (scene.frame_current, scene.frame_subframe, scene.get('wfrl_clearance_time_s')) == clock
 
+# The Down camera preset co-locates the radar with the T1 Down camera and adopts its rectangular FOV.
+assert bpy.ops.wfrl.x100_mount_preset(preset='DOWN_CAMERA') == {'FINISHED'}
+down = radar.session_for(scene)
+camera = scene.objects['WFRL.Camera.T1.Gimbal']
+bpy.context.view_layer.update()
+mount_world, camera_world = np.array(down.mount.matrix_world), np.array(camera.matrix_world)
+np.testing.assert_allclose(mount_world[:3, 3], camera_world[:3, 3], atol=1e-4)
+camera_axes = camera_world[:3, :3] / np.linalg.norm(camera_world[:3, :3], axis=0)
+np.testing.assert_allclose(mount_world[:3, 0], -camera_axes[:, 2], atol=1e-4)
+np.testing.assert_allclose(mount_world[:3, 2], camera_axes[:, 1], atol=1e-4)
+down_fov = (camera.data.angle_x / 2, np.arctan(np.tan(camera.data.angle_x / 2) / (16 / 9)))
+np.testing.assert_allclose(down.sampler.field_of_view, np.degrees(down_fov), atol=1e-4)
+np.testing.assert_allclose(down.frame.provenance['field_of_view_deg'], down.sampler.field_of_view)
+np.testing.assert_allclose(down.fov.data['wfrl_x100_field_of_view_deg'], down.sampler.field_of_view)
+assert tuple(down.applied_config['field_of_view']) == tuple(scene.wfrl_x100_field_of_view)
+assert down.frame.source_kind == 'GEOMETRY_SIMULATION' and len(down.frame.points) > 0
+assert down.mount is original_mount and down.frame.time.source_time_s == clock[2]
+assert not radar.configuration.pending(scene, down.applied_config, abspath=bpy.path.abspath)
+down_points, down_fov_deg = len(down.frame.points), tuple(down.sampler.field_of_view)
+assert bpy.ops.wfrl.x100_mount_preset(preset='ORIGINAL') == {'FINISHED'}
+restored = radar.session_for(scene)
+assert restored.frame.points.tobytes() == original_points
+np.testing.assert_allclose(scene.wfrl_x100_field_of_view, (radar.schema.PROFILE['azimuth_deg'],
+                                                           radar.schema.PROFILE['elevation_deg']))
+np.testing.assert_allclose(restored.fov.data['wfrl_x100_field_of_view_deg'], tuple(scene.wfrl_x100_field_of_view))
+assert len([m for m in bpy.data.meshes if m.name.startswith('WFRL.X100.FOV')]) == 1
+
 draft = (4.0, 5.0, 6.0)
 scene.wfrl_x100_location = draft
 active_frame, active_sampler, active_source = restored.frame, restored.sampler, restored.source_session
@@ -161,6 +188,7 @@ scene.wfrl_x100_source = 'REPLAY'
 
 result = dict(status='PASS', addon=addon.__file__, source_time_s=clock[2],
               original_points=original_count, side_points=side_points,
+              down_camera_points=down_points, down_camera_field_of_view_deg=down_fov_deg,
               side_location_m=side_location, side_rotation_deg=side_rotation,
               single_sensor_roundtrip=True, clock_unchanged=True, recording_guard=True,
               camera_capture_guard=True, saved_side_reopens_and_switches_back=True,

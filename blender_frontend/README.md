@@ -20,11 +20,11 @@
 
 默认 MAPPO 为保存的预弯 v3 三机 60 秒结果，视口绘制不启动 FAST.Farm。几何／纹理 `NOT_ACCEPTED`、雷达 `REVIEW_ONLY / PENDING_ACCEPTANCE` 保持；叶尖显示门槛的源码与安装结论见[验证范围](../docs/blender/发布状态与验证范围.md#研究与物理边界)。源采样频率、显示时间轴和实际绘制帧率分别报告。
 
-0.3.42.8 的 MAPPO 侧栏提供 **叶片外形**，默认 `nrel5mw`，可选择合成商用形制 `rootkink`。公开 ZIP 包含该外形选择；运行来源按实际加载模块和[安装身份](../publication/daily-installation.json)识别。
+0.3.42.8 的 MAPPO 侧栏提供 **叶片外形**，默认 `nrel5mw`，可选择 `rootkink`（界面名“自改结构（叶根拐点改型）”）。工作区回放面板在顶层直接显示该选择；`_resample_x100()` 在外形切换成功后对无待应用修改、未记录的 X100 仿真会话重新调用 `runtime.start()`。公开 ZIP 包含该外形选择；运行来源按实际加载模块和[安装身份](../publication/daily-installation.json)识别。
 
 ## X100 雷达
 
-工作区仿真通过 `wfrl_x100_observation_mode` 选择默认GEOMETRY或DETECTIONS，编辑后应用。GEOMETRY显示确定性几何点；DETECTIONS显示经过四维聚类、噪声和门限的工程检测点，可能缺测或出现虚警，检测帧不带 `material_ids`，状态明确保留UNCALIBRATED。源码检测模式使用16384积分预算和最多4096输出点；当前构建清单包含 `detection.py` 与 `clearance.py`，隔离包验证入口覆盖检测模式和净空，实际发布／安装结论按对应载荷记录核对。模式、默认值和安装评价见[观测模式](../docs/blender/X100雷达.md#观测模式工作区源码)及[本地候选结果](../docs/blender/X100观测研究.md#当前最佳候选与本地证据)。
+工作区仿真通过 `wfrl_x100_observation_mode` 选择默认GEOMETRY或DETECTIONS，编辑后应用。GEOMETRY显示确定性几何点；DETECTIONS显示经过四维聚类、噪声和门限的工程检测点，可能缺测或出现虚警，检测帧不带 `material_ids`。工作区 DETECTIONS 使用 `calibration.calibrated_config()`（按实测无人机 PLY 拟合，`USER_CALIBRATED`）与已应用视场；状态行显示帧内实际 `calibration_status`，回放的未校准帧保持 UNCALIBRATED。源码检测模式使用16384积分预算和最多4096输出点；当前构建清单包含 `detection.py` 与 `clearance.py`，隔离包验证入口覆盖检测模式和净空，实际发布／安装结论按对应载荷记录核对。模式、默认值和安装评价见[观测模式](../docs/blender/X100雷达.md#观测模式工作区源码)及[本地候选结果](../docs/blender/X100观测研究.md#当前最佳候选与本地证据)。
 
 公开0.3.42.8扩展、工作区源码与本机安装在独立侧栏标签 **N → X100** 提供 X100 入口（`WFRL_PT_X100` 及配置、显示、帧与数据流、记录子面板）；工作区还注册 `WFRL_PT_X100Blades` 和安装报告导入操作器。几何仿真的“原安装位置／机舱侧面”按钮通过 `runtime.apply_mount_preset()` 切换同一台传感器的安装标定，使用当前量化源时刻准备新观测；重复有效预设复用原帧，预算编辑仍在下一新样本生效；侧面位置由 `scene.nacelle_side_installation()` 按静态侧壁确定。已有会话时切换预先准备观测与 GPU 数据，成功后提交对象变换、配置与会话身份；无会话时写入安装参数后直接启动会话，由其采样首帧，失败回滚参数；必需GPU准备失败或提交失败回滚，可选分析失败独立标记不可用；复用有效的几何快照和安装对象，保留对象选择与可见性，失败保留旧观测与未应用参数。X100 支持 T1 同源只读几何采样、名义视场与点云、严格 PLY 读取、显式索引记录／回放及独立本地实时通道。规范实现位于 `wfrl/radar_x100/`，构建按清单复制到 `_vendor/radar_x100/` 并保存源码摘要；Blender 适配位于 `radar_x100/` 与 `panels/radar_x100.py`。来源身份、各流时钟与完整性独立于现有理想激光／双束净空。
 
@@ -40,7 +40,7 @@
 
 独立画布的辅助顶点统一使用C连续的 `float32` 数组提交GPU；拟合线和叶尖十字使用 `POLYLINE_UNIFORM_COLOR`，在原始点云之后按画布区域裁剪绘制。后台 `radar_x100_observations.py` 核对原始帧、来源绑定及推理输入边界；窗口 `radar_x100_estimation_window.py` 读回拟合线／叶尖区域像素，核对关闭、恢复及原帧和时刻保留。脚本控制不等于外部键鼠验收，实际保存证据见[研究验证](../docs/blender/发布状态与验证范围.md#x100-观测研究工作区验证)。
 
-工作区源码通过 `radar_x100/core.py` 使用规范 `schema.PROFILE` 派生视场、角域和点数上限，`schema.UNIT_ENVELOPE` 给出安装单元包络；`radar_x100/housing_model.py` 生成显示用雷达模型（外壳、支架、接头、线缆、安装板，多材质单网格，`wfrl_x100_role=physical`），`view.frame_unit()` 与 `wfrl.x100_frame_unit` 把 3D 视口对准安装中的雷达；`schema.DISPLAY_DEFAULTS` 单独定义示意长度和画布余量。`configuration.py` 比较会话应用时的来源配置与当前编辑值，显示未应用差异；显示设置、下一新样本预算与下一次记录目录不属于待应用配置。安装快捷按钮成功后同步实际应用配置，不自动热切换编辑值。
+工作区源码通过 `radar_x100/core.py` 使用规范 `schema.PROFILE` 派生默认视场和点数上限；已应用视场 `wfrl_x100_field_of_view` 由 `SceneSampler.field_of_view` 传给 GEOMETRY／DETECTIONS，`view.install()`／`set_field_of_view()` 生成视场线，`display.frame_field_of_view()` 供点云窗口读取帧视场。`scene.down_camera_installation()` 由 T1 Down 相机位姿与视场给出 `DOWN_CAMERA` 预设；`schema.UNIT_ENVELOPE` 给出安装单元包络；`radar_x100/housing_model.py` 生成显示用雷达模型（外壳、支架、接头、线缆、安装板，多材质单网格，`wfrl_x100_role=physical`），`view.frame_unit()` 与 `wfrl.x100_frame_unit` 把 3D 视口对准安装中的雷达；`schema.DISPLAY_DEFAULTS` 单独定义示意长度和画布余量。`configuration.py` 比较会话应用时的来源配置与当前编辑值，显示未应用差异；显示设置、下一新样本预算与下一次记录目录不属于待应用配置。安装快捷按钮成功后同步实际应用配置，不自动热切换编辑值。
 
 `Session.recording_health()` 委托 `session_recording.recording_health()`，把记录状态、失败原因、目录与已写帧数保存在所属场景；结束失败记录后，常规刷新保留该终态，新记录启动才清除上次错误。所属场景已删除时不写入失效 RNA，写盘线程仍须完成关闭，随后释放会话归属。`Fanout` 的追加或关闭异常停止记录并置为 `FAILED`，保留 `INCOMPLETE`；正常关闭排空已接受工作，失败后释放待处理项，写盘前重新校验帧元数据。
 

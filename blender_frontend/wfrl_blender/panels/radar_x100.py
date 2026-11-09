@@ -40,7 +40,8 @@ class WFRL_OT_X100MountPreset(bpy.types.Operator):
     bl_description = '切换同一台雷达的位置与朝向，并重新采样当前时刻的点云'
     preset: bpy.props.EnumProperty(items=(
         ('ORIGINAL', '原安装位置', '机舱侧下方，朝下观察'),
-        ('NACELLE_SIDE', '机舱侧面', '机舱负 Y 侧壁，朝侧方叶片区域观察')))
+        ('NACELLE_SIDE', '机舱侧面', '机舱负 Y 侧壁，朝侧方叶片区域观察'),
+        ('DOWN_CAMERA', 'T1 Down 相机位', '与 T1 Down 相机同位同向，矩形视场与相机一致')))
 
     def execute(self, context):
         from ..radar_x100.runtime import apply_mount_preset
@@ -277,6 +278,7 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
                                               and not (session.fanout or session.closing))
             buttons.operator('wfrl.x100_mount_preset', text='原安装位置').preset = 'ORIGINAL'
             buttons.operator('wfrl.x100_mount_preset', text='机舱侧面').preset = 'NACELLE_SIDE'
+            buttons.operator('wfrl.x100_mount_preset', text='T1 Down 相机位').preset = 'DOWN_CAMERA'
             presets.operator('wfrl.x100_frame_unit', icon='VIEW_CAMERA')
             if session and session.fanout:
                 presets.label(text='结束记录后可切换安装位置', icon='LOCKED')
@@ -285,11 +287,11 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
             layout.separator()
             message(layout, '挂载与安装参数：应用后生效', 'INFO', context=context)
             _property(layout, scene, 'wfrl_x100_mount', narrow=narrow)
-            for name in ('wfrl_x100_location', 'wfrl_x100_rotation'):
+            for name in ('wfrl_x100_location', 'wfrl_x100_rotation', 'wfrl_x100_field_of_view'):
                 vector = layout.column(align=True)
                 vector.use_property_split = False
                 vector.label(text=scene.bl_rna.properties[name].name)
-                for index, axis in enumerate('XYZ'):
+                for index, axis in enumerate('XYZ' if name != 'wfrl_x100_field_of_view' else ('方位', '俯仰')):
                     vector.prop(scene, name, index=index, text=axis)
             layout.separator()
             if scene.wfrl_x100_observation_mode == 'GEOMETRY':
@@ -297,7 +299,7 @@ class WFRL_PT_X100Setup(_X100Panel, bpy.types.Panel):
                 message(layout, '按表面积采样；预算在下一新样本生效', 'INFO', context=context)
             else:
                 message(layout, f"面积积分 {DETECTION_INTEGRATION_BUDGET} · 输出上限 {schema.PROFILE['max_points']}", context=context)
-                message(layout, '工程检测参数未标定；不代表设备实测', 'INFO', context=context)
+                message(layout, '检测参数按无人机实测 PLY 校准；叶片表面 RCS 未标定', 'INFO', context=context)
             header, search = layout.panel('wfrl_x100_installation_search', default_closed=True)
             header.label(text='安装覆盖搜索')
             if search is not None:
@@ -531,7 +533,7 @@ class WFRL_PT_X100Record(_X100Panel, bpy.types.Panel):
             message(layout, ('记录：' if active else '上次记录：') + state, context=context)
         if scene.get('wfrl_x100_record_error'):
             message(layout, scene['wfrl_x100_record_error'], 'ERROR', context=context)
-        layout.label(text='仅记录实际采样帧；非完整 30 Hz 导出', icon='INFO')
+        layout.label(text='仅记录实际采样帧；非完整 33 Hz 导出', icon='INFO')
 
 
 PROPERTIES = ('source', 'observation_mode', 'mount', 'location', 'rotation', 'candidates', 'fov', 'path', 'ply_source', 'replay_s',
@@ -560,12 +562,15 @@ def register_properties():
             ('REPLAY','文件回放','实测或仿真文件保留原始来源'),('LIVE','实时输入','独立本地雷达通道'))),
         observation_mode=p.EnumProperty(name='观测模式', default='GEOMETRY', items=(
             ('GEOMETRY', 'GEOMETRY · 几何可见性', '材料表面采样与遮挡，不模拟工程检测链'),
-            ('DETECTIONS', 'DETECTIONS · 工程检测', '未标定工程模型：功率、噪声、漏检与虚警；应用配置后生效'))),
+            ('DETECTIONS', 'DETECTIONS · 工程检测', '按无人机实测 PLY 校准的功率、噪声、漏检与虚警；叶片表面 RCS 未标定；应用配置后生效'))),
         mount=p.EnumProperty(name='挂载', items=(('NACELLE','T1 机舱','跟随同源机舱'),
             ('TOWER_BASE','T1 塔基','相对塔基固定'),('WORLD','世界固定','世界坐标'))),
         location=p.FloatVectorProperty(name='安装位置 (m)', default=ORIGINAL_LOCATION, size=3),
         rotation=p.FloatVectorProperty(name='安装旋转 (°)', description='安装坐标系的 XYZ 欧拉角，单位为度（°）',
             default=ORIGINAL_ROTATION, size=3),
+        field_of_view=p.FloatVectorProperty(name='视场半角 (°)', size=2, min=.1, max=90.,
+            description='矩形视场的方位 / 俯仰半角；默认取规格书视场',
+            default=(schema.PROFILE['azimuth_deg'], schema.PROFILE['elevation_deg'])),
         candidates=p.IntProperty(name='采样预算', description='下一新样本读取的材料表面候选预算；不等于输出点数', default=512, min=1, max=schema.PROFILE['max_points']),
         fov=p.BoolProperty(name='名义视场', description=f"即时显示名义视场，长度 {schema.DISPLAY_DEFAULTS['fov_length_m']:g} m，不代表探测结果或量程", default=True),
         path=p.StringProperty(name='PLY / 记录目录', subtype='FILE_PATH', update=ply_path_changed),

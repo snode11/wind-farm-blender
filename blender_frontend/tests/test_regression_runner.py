@@ -67,7 +67,8 @@ def test_suite_has_unique_scripts_and_explicit_window_contracts():
         'dual_beam_window.py', 'frontend_layout_regression.py', 'manual_control_window.py',
         'native_camera_enabled_regression.py', 'native_camera_proxy_window.py',
         'native_camera_reopen_regression.py', 'native_camera_save_regression.py', 'nrel_defect_window_regression.py',
-        'radar_x100_output_lifecycle.py', 'radar_x100_output_window.py', 'radar_x100_window.py'}
+        'radar_x100_output_lifecycle.py', 'radar_x100_output_window.py', 'radar_x100_window.py',
+        'radar_x100_down_live_window.py'}
     assert dict(spec('three_camera_recommended_window').environment) == {
         'WFRL_TEST_QUIT': '1', 'WFRL_CHECK_DEFAULT_ONLY': '1'}
     assert spec('animation_render_regression').package == 'synthetic_then_builtin_mappo'

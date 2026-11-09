@@ -72,7 +72,7 @@ Blender 工作区源码核对来源 Scene、材料对象与网格身份、关键
 
 ## 工程检测模型
 
-[simulation.py](simulation.py) 的 `simulate_detections()` 在同源几何、硬件角域／量程和首交遮挡之后调用 [detection.py](detection.py) 的 `generate_detections()`，输出 `ENGINEERING_SIMULATION / DETECTIONS`。模型身份为 `x100-incoherent-detection.v2`，默认 `calibration_status=UNCALIBRATED`。Blender 工作区的 `wfrl_x100_observation_mode` 提供 `GEOMETRY`（默认）与 `DETECTIONS`，点击“应用配置”才切换生产路径。前者显示视场／遮挡筛选后的材料表面点，后者显示经过功率、噪声、分辨率聚类和门限的工程检测点；操作与显示见[观测模式](../../docs/blender/X100雷达.md#观测模式工作区源码)。两者都不是设备实测。
+[simulation.py](simulation.py) 的 `simulate_detections()` 在同源几何、硬件角域／量程和首交遮挡之后调用 [detection.py](detection.py) 的 `generate_detections()`，输出 `ENGINEERING_SIMULATION / DETECTIONS`。模型身份为 `x100-incoherent-detection.v2`，`DetectionConfig()` 默认 `calibration_status=UNCALIBRATED`；[calibration.py](calibration.py) 的 `calibrated_config()` 给出按实测无人机 PLY 拟合的 `USER_CALIBRATED` 配置，Blender 工作区的 DETECTIONS 使用该配置与已应用视场（拟合量与未拟合项见[检测校准](../../docs/blender/X100雷达.md#检测校准)）。Blender 工作区的 `wfrl_x100_observation_mode` 提供 `GEOMETRY`（默认）与 `DETECTIONS`，点击“应用配置”才切换生产路径。前者显示视场／遮挡筛选后的材料表面点，后者显示经过功率、噪声、分辨率聚类和门限的工程检测点；操作与显示见[观测模式](../../docs/blender/X100雷达.md#观测模式工作区源码)。两者都不是设备实测。
 
 **交付范围：**公开 0.3.42.8 扩展按 [扩展构建清单](../../scripts/blender/build_extension.py) 的 `RADAR_MODULES` 包含 `detection.py` 与 `clearance.py`，提供 DETECTIONS 工程检测链与净空估计。本机日常安装仍为 0.3.42.7，不包含工程检测链。隔离安装验证工具在安装后的扩展上运行 DETECTIONS 与净空检查；当前发布未运行这些检查，验证范围按[发布记录](../../publication/blender-0.3.42.8/verification.json)识别。
 
@@ -105,6 +105,9 @@ Blender 工作区源码核对来源 Scene、材料对象与网格身份、关键
 | `processing_gain_db`、`false_alarm_probability_per_cell`、`fluctuation_model` | 43.1220604659924 dB、1e-12、`SWERLING_0`；检测器噪声为接收机噪声除以线性处理增益 |
 | `miss_probability`、`false_alarms_enabled` | 0；`True`，门限后的附加漏检与空单元虚警开关 |
 | `range_std_m`、`azimuth_std_deg`、`elevation_std_deg`、`radial_velocity_std_m_s` | 0.025 m、0.05°、0.1°、0.025 m/s；把手册±0.05 m、±0.1°／0.2°、±0.05 m/s假设为高斯±2σ。手册未说明置信度或分布；显式设0才关闭相应误差 |
+| `azimuth_limit_deg`、`elevation_limit_deg` | 60°、22°（`schema.PROFILE`）；矩形视场半角，取值 (0, 90]，同时决定视场筛选、角度输出筛选和噪声搜索网格。`simulate(..., fov_deg=)` 为几何对照提供同一视场 |
+| `ms_velocity_threshold_m_s` | 1e-6 m/s；`ms` = |合成径向速度| 大于该值 |
+| `vendor_snr_offset_db`、`vendor_mag_slope`、`vendor_mag_intercept`、`vendor_mag_std` | `None`、1、0、0；偏置为 `None` 时不填厂家字段 |
 | `calibration_status`、`calibration_reference`、`parameter_basis` | `UNCALIBRATED`、`None`、研究假设声明；`USER_CALIBRATED` 必须提供非空引用，但软件只校验声明，不验证标定质量 |
 
 `simulate_detections()` 的 `integration_budget=16384` 是内部面积积分预算，允许 1～1,000,000；`output_point_limit=4096` 是独立的报告点数上限，允许 1～4096。设备最大点数不限制内部积分点数，也不意味着每帧一定输出4096点。几何对照 `simulate()` 的 `candidate_budget` 限制为1～4096。噪声搜索单元总数受1,000,000,000,000的数值预算约束，不分配稠密四维数据立方体；默认为7,257,784,600个试验单元，纯噪声期望虚警约0.00726个／帧（输出筛选前）。
@@ -113,7 +116,7 @@ Blender 工作区源码核对来源 Scene、材料对象与网格身份、关键
 
 ### 模型诊断与厂家字段
 
-工程帧的 `mag/rcs/snr` 仍为 NaN，`label` 不生成厂家分类；`ms` 仅按合成径向速度绝对值大于 `1e-6 m/s` 派生。未经映射不能把模型值填入这些厂家字段。
+`vendor_snr_offset_db` 为 `None`（默认）时工程帧的 `mag/rcs/snr` 为 NaN。设置后按显式映射填写：snr = 10·log10(模型输出功率／检测器噪声) + 偏置；rcs = 10·log10(模型输出功率／同距离同角度 1 m² 点目标接收功率)，单位 dBsm；mag = 斜率·snr + 截距 + N(0, 噪声²)。映射写入 provenance `vendor_field_semantics`，是校准仿真值，不是设备测量。`label` 不生成厂家分类（导出为 0）；`ms` 按合成径向速度绝对值大于 `ms_velocity_threshold_m_s` 派生。
 
 | `model_diagnostics` 字段 | 语义 |
 | --- | --- |

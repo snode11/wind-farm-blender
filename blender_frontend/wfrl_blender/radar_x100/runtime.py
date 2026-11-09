@@ -88,13 +88,15 @@ class Session:
             if flex is None or not farm_flex.is_active(scene):
                 raise ValueError('仿真需要本场景已加载的风场柔性回放')
             self.sampler = SceneSampler(flex, mount=scene.wfrl_x100_mount,
-                mount_from_sensor=installation_matrix(scene.wfrl_x100_location, scene.wfrl_x100_rotation))
+                mount_from_sensor=installation_matrix(scene.wfrl_x100_location, scene.wfrl_x100_rotation),
+                field_of_view=tuple(scene.wfrl_x100_field_of_view))
             t = max(self.sampler.interval[0], min(self.sampler.interval[1], float(scene.get('wfrl_clearance_time_s', 0))))
             if restoring:
                 self.mount, self.fov = view.existing_installation(scene, self.owner)
             else:
                 self.mount, self.fov = view.install(scene, self.owner,
-                    self.sampler.mount_world_at(t) @ self.sampler.mount_from_sensor, show_fov=scene.wfrl_x100_fov)
+                    self.sampler.mount_world_at(t) @ self.sampler.mount_from_sensor, show_fov=scene.wfrl_x100_fov,
+                    field_of_view_deg=self.sampler.field_of_view)
                 from mathutils import Matrix
                 yaw = scene.objects['WFRL.Turbine.T1.YawRoot']
                 self.mount.parent = yaw if scene.wfrl_x100_mount == 'NACELLE' else (
@@ -294,7 +296,7 @@ def tick():
                 if scene is None:
                     view.remove_orphans(session.owner)
     if _SHUTTING_DOWN:
-        return 1 / 30 if _SESSIONS else None
+        return 1 / configuration.SAMPLE_RATE_HZ if _SESSIONS else None
     for key, scene in alive.items():
         if key not in _SESSIONS and scene.wfrl_x100_enabled and key not in _RESTORE_ATTEMPTED:
             _RESTORE_ATTEMPTED.add(key)
@@ -325,7 +327,7 @@ def tick():
                 session.fanout.failure = 'Radar source failed: ' + str(exc)
                 session.fanout.stopping.set()
     _redraw_changed_overlays(alive)
-    return 1 / 30
+    return 1 / configuration.SAMPLE_RATE_HZ
 
 
 def _overlay_state(scene):
