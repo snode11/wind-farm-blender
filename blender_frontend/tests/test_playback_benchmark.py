@@ -1,6 +1,7 @@
 """Failure shields: incomplete or invalid viewport observations never pass."""
 import pytest
 
+from blender_frontend.tests._platform import symlink_or_skip
 from wfrl_blender.playback_benchmark import PlaybackTarget, evaluate_playback
 
 
@@ -519,7 +520,8 @@ def test_installed_profile_runner_preserves_repository_preferences(tmp_path, mon
     extensions = (profile / 'extension-repository' if stored_roots in ('explicit', 'extensions_only')
                   else resources / 'extensions')
     resources.mkdir(exist_ok=True)
-    extensions.mkdir()
+    (extensions/'wfrl_blender').mkdir(parents=True)
+    (extensions/'wfrl_blender/__init__.py').touch()
     if stored_roots in ('explicit', 'resources_only'):
         environment['BLENDER_USER_RESOURCES'] = str(resources)
     if stored_roots in ('explicit', 'extensions_only'):
@@ -539,6 +541,49 @@ def test_installed_profile_runner_preserves_repository_preferences(tmp_path, mon
     assert child['BLENDER_USER_EXTENSIONS'] == str(extensions)
     assert all(child[key] == value for key, value in environment.items() if key.startswith('BLENDER_USER_'))
     assert json.loads((profile/'environment.json').read_text()) == environment
+
+
+@pytest.mark.parametrize('recorded', ['validator', 'absent', 'wrong', 'missing_package', 'escape'])
+def test_installed_profile_runner_checks_the_installed_root(tmp_path, runner_args, recorded):
+    import json
+    from pathlib import Path
+    args = runner_args(
+        "import os,json\nfrom pathlib import Path\n"
+        "p=Path(os.environ['WFRL_TEST_OUTPUT'])\n"
+        "(p/'result.json').write_text(json.dumps({'status': 'PASS', 'termination': {'reason': 'finished'}, "
+        "'expected': os.environ.get('WFRL_EXPECTED_ADDON_ROOT')}))\n"
+        "print('BENCHMARK_RESULT PASS result.json')\n")
+    profile = tmp_path/'isolated'
+    environment = {'WFRL_ADDON_MODULE': 'bl_ext.wfrl_frontend.wfrl_blender'}
+    for name in ('CONFIG', 'SCRIPTS', 'DATAFILES'):
+        (profile/name.lower()).mkdir(parents=True)
+        environment['BLENDER_USER_'+name] = str(profile/name.lower())
+    addon = profile/'extensions/wfrl_blender'
+    if recorded == 'escape':
+        outside = tmp_path/'outside'
+        outside.mkdir()
+        (outside/'__init__.py').touch()
+        addon.parent.mkdir()
+        symlink_or_skip(addon, outside, target_is_directory=True)
+    else:
+        addon.mkdir(parents=True)
+        if recorded != 'missing_package':
+            (addon/'__init__.py').touch()
+    if recorded in ('validator', 'missing_package'):
+        environment['WFRL_EXPECTED_ADDON_ROOT'] = str(addon)
+    elif recorded == 'wrong':
+        environment['WFRL_EXPECTED_ADDON_ROOT'] = str(tmp_path/'source/wfrl_blender')
+    (profile/'environment.json').write_text(json.dumps(environment))
+    args.installed_profile = str(profile)
+    args.width = args.height = None
+    if recorded in ('wrong', 'missing_package', 'escape'):
+        with pytest.raises(ValueError, match='(?i)installed extension'):
+            _runner().run(args)
+        assert not (Path(args.output)/'launch.json').exists()
+        return
+    assert _runner().run(args) == 0
+    child = json.loads((Path(args.output)/'result.json').read_text())
+    assert child['expected'] == str(addon.resolve())
 
 
 @pytest.mark.parametrize('explicit_roots', [False, True])

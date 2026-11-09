@@ -113,8 +113,8 @@ python3 scripts/blender/run_playback_benchmark.py --blender <Blender可执行文
 ```
 
 - 构建默认拒绝覆盖 ZIP、校验和与 inventory，`--overwrite` 才替换；`--dual-package`／`--dual-tls-package` 分别选择匹配源的 `hub-axis.v1`／`hub-tls.v1` 包。
-- 隔离验证的 `--build-only` 仍构建 ZIP；禁止打包时排除该工具及 `test_extension_package.py`。其 `--dual-package` 仅指 `hub-axis.v1` 包。窗口与性能入口继承 `environment.json` 及 profile，`BLENDER_USER_RESOURCES` 指向 profile 根、`BLENDER_USER_EXTENSIONS` 指向其中的 `extensions`，旧环境文件缺少这两项时从 profile 推导；缺依赖、脚本或 profile 如实报告。
-- 性能入口的 `--installed-profile` 要求有效 `environment.json` 及仍存在的 profile，清除源码覆盖且不使用工厂启动；`--path / --layout` 取值查脚本。逐路核对初始绘制、持续推进、终段、心跳、最终状态及退出，结合错误／超时判断，寻址不算完成。
+- 隔离验证的 `--build-only` 仍构建 ZIP；禁止打包时排除该工具及 `test_extension_package.py`。其 `--dual-package` 仅指 `hub-axis.v1` 包。窗口与性能入口继承 `environment.json` 及 profile，`BLENDER_USER_RESOURCES` 指向 profile 根、`BLENDER_USER_EXTENSIONS` 指向其中的 `extensions`，旧环境文件缺少这两项时从 profile 推导；包验证器另写入可选的 `WFRL_EXPECTED_ADDON_ROOT`，两入口接受该字段，按 `BLENDER_USER_EXTENSIONS` 下的扩展目录推导安装根，记录值解析后须与之一致，安装根逃逸出扩展仓库或缺少扩展包时拒绝；缺依赖、脚本或 profile 如实报告。
+- 性能入口的 `--installed-profile` 要求有效 `environment.json` 及仍存在的 profile，清除源码覆盖且不使用工厂启动；基准脚本在 `bl_ext.*` 模式下移除工作区模块搜索路径，核对扩展及已加载子模块来自 `WFRL_EXPECTED_ADDON_ROOT`，并拒绝工作区 `wfrl` 包被加载；`--path / --layout` 取值查脚本。逐路核对初始绘制、持续推进、终段、心跳、最终状态及退出，结合错误／超时判断，寻址不算完成。
 - `native_camera_reopen_regression.py` 覆盖单路末帧→关闭→三路重开／重播及延迟恢复；安装模式须传模块与期望目录，不借其他路径推定通过。`performance.py` 只计 CPU 回调，嵌套耗时不相加；平均 FPS、缓存计数或短时诊断不替代完整片段验收。
 - 播放报告保留 `observation_s`、`intentional_pause_s`、`running_observation_s` 和暂停区间；停滞判断扣除已确认的静止主动暂停，FPS 分母仍是完整墙钟时长。峰值 RSS 按平台换算（Darwin 字节、Linux KiB），与峰值差分别报告，不把峰值差称为当前内存增长或无泄漏证明。
 

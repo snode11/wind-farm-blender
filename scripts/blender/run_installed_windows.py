@@ -117,9 +117,12 @@ def load_profile(directory):
     environment = read_object(isolated_path(directory / 'environment.json', within=directory))
     required = PROFILE_DIRS.keys() | {'WFRL_ADDON_MODULE'}
     roots = {'BLENDER_USER_RESOURCES', 'BLENDER_USER_EXTENSIONS'}
-    if not required <= environment.keys() <= required | roots or any(
+    # The package validator records the installed root it checked; ZIP preparation leaves it out.
+    optional = roots | {'WFRL_EXPECTED_ADDON_ROOT'}
+    if not required <= environment.keys() <= required | optional or any(
             not isinstance(value, str) or not value for value in environment.values()):
         raise ValueError('Invalid isolated installation environment.json')
+    recorded_root = environment.pop('WFRL_EXPECTED_ADDON_ROOT', None)
     module = environment['WFRL_ADDON_MODULE']
     namespace = module.split('.')
     if module.casefold().split('.')[:2] == ['bl_ext', 'user_default']:
@@ -145,6 +148,8 @@ def load_profile(directory):
         path = isolated_path(root / relative, within=root)
         if not path.is_file():
             raise ValueError(f'Installed profile file is missing: {path}')
+    if recorded_root is not None and Path(recorded_root).expanduser().resolve() != addon:
+        raise ValueError(f'Recorded WFRL_EXPECTED_ADDON_ROOT {recorded_root} is not the installed extension {addon}')
     return Profile(directory, environment, addon)
 
 
