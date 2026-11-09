@@ -70,8 +70,13 @@ class WFRL_OT_X100FrameUnit(bpy.types.Operator):
 
     def execute(self, context):
         from ..radar_x100.runtime import session_for
-        from ..radar_x100.view import frame_unit
-        if not frame_unit(context, session_for(context.scene).mount):
+        from ..radar_x100.view import frame_unit, housing
+        mount = session_for(context.scene).mount
+        model = housing(mount)
+        if model is not None and model.get('wfrl_x100_hidden_for_camera') is not None:
+            self.report({'INFO'}, '雷达与相机光心重合，外形已隐藏以免遮挡相机画面')
+            return {'CANCELLED'}
+        if not frame_unit(context, mount):
             self.report({'WARNING'}, '当前窗口没有 3D 视口')
             return {'CANCELLED'}
         return {'FINISHED'}

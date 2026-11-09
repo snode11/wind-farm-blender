@@ -90,6 +90,7 @@ def apply_mount_preset(scene, preset, *, search_report=None):
         scene.wfrl_x100_location, scene.wfrl_x100_rotation = location, rotation
         scene.wfrl_x100_field_of_view, scene.wfrl_x100_field_of_view_shape = field_of_view, shape
         current.capture_configuration()
+        view.sync_housing_visibility(scene, current.mount)
         return current
 
     previous = (scene.wfrl_x100_mount, tuple(scene.wfrl_x100_location),
@@ -156,4 +157,5 @@ def apply_mount_preset(scene, preset, *, search_report=None):
             bpy.data.meshes.remove(previous_fov_mesh)
     scene['wfrl_x100_error'] = scene.get('wfrl_x100_record_error', '')
     scene['wfrl_x100_status'] = configuration.OBSERVATION_LABELS[current.observation_mode] + ' · ' + configuration.RATE_LABEL
+    view.sync_housing_visibility(scene, current.mount)
     return current

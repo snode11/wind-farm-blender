@@ -105,6 +105,7 @@ class Session:
                     yaw.parent if scene.wfrl_x100_mount == 'TOWER_BASE' else None)
                 self.mount.matrix_parent_inverse = Matrix.Identity(4)
                 self.mount.matrix_basis = Matrix(self.sampler.mount_from_sensor.tolist())
+            view.sync_housing_visibility(scene, self.mount)
             self.fov_shown = scene.wfrl_x100_fov
             self.fov_hidden = ({layer.as_pointer(): (layer, False) for layer in scene.view_layers}
                                if not self.fov_shown else {})

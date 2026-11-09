@@ -175,7 +175,10 @@ class SceneSampler:
         self.interval = (float(flex.times[0]), float(flex.times[-1]))
         self.mount_from_sensor = simulation.rigid_matrix(mount_from_sensor)
         self.field_of_view = None if field_of_view is None else tuple(float(v) for v in field_of_view)
-        simulation.field_of_view(self.field_of_view, field_of_view_shape)
+        try:
+            simulation.field_of_view(self.field_of_view, field_of_view_shape)
+        except ValueError:
+            raise ValueError('视场半角须大于 0°，方位／俯仰角形状不超过 90°，相机矩形形状不超过 89.9°') from None
         self.field_of_view_shape = field_of_view_shape
         self.source_id = flex.scene['wfrl_farm_manifest_sha256']
         self.height = geometry_data()['scalars']['TowerHt']

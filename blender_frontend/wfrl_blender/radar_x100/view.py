@@ -140,6 +140,49 @@ def install(scene, owner, sensor_matrix, *, show_fov=True, field_of_view_deg=Non
     return mount, fov
 
 
+def housing(mount):
+    """The display model of the installed unit under ``mount``, or None."""
+    return next((child for child in mount.children if child.get('wfrl_x100_role') == 'physical'), None)
+
+
+def sync_housing_visibility(scene, mount):
+    """Hide the display housing while a scene camera's optical centre lies inside it.
+
+    A mount that shares a camera's optical centre (the DOWN_CAMERA preset) would otherwise put
+    the camera inside the housing, which then fills that camera's image. Only visibility this
+    function set is ever undone: the prior hide_viewport/hide_render go into _CAMERA_HIDE and
+    come back when no camera remains inside, and a user's own edits are left alone otherwise.
+    Returns True while hidden for a camera."""
+    model = housing(mount)
+    if model is None:
+        return False
+    for layer in scene.view_layers[:1]:
+        layer.update()
+    corners = np.array([tuple(corner) for corner in model.bound_box])
+    lo, hi = corners.min(axis=0), corners.max(axis=0)
+    # A hidden housing is not evaluated and keeps a stale matrix_world; derive it from the mount.
+    world = np.array(mount.matrix_world) @ np.array(model.matrix_parent_inverse) @ np.array(model.matrix_basis)
+    inverse = np.linalg.inv(world)
+    hidden = False
+    for obj in scene.objects:
+        if obj.type == 'CAMERA':
+            local = inverse @ np.append(np.array(obj.matrix_world.translation), 1.)
+            if np.all(local[:3] >= lo) and np.all(local[:3] <= hi):
+                hidden = True
+                break
+    prior = model.get(_CAMERA_HIDE)
+    if hidden and prior is None:
+        model[_CAMERA_HIDE] = [bool(model.hide_viewport), bool(model.hide_render)]
+        model.hide_viewport = model.hide_render = True
+    elif not hidden and prior is not None:
+        model.hide_viewport, model.hide_render = (bool(value) for value in prior)
+        del model[_CAMERA_HIDE]
+    return hidden
+
+
+_CAMERA_HIDE = 'wfrl_x100_hidden_for_camera'
+
+
 def _material(name, color, metallic, roughness):
     import bpy
     material = bpy.data.materials.get(name) or bpy.data.materials.new(name)

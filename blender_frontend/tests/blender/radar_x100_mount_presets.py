@@ -107,6 +107,14 @@ assert down.frame.provenance['field_of_view_shape'] == 'PROJECTIVE'
 assert down.fov.data['wfrl_x100_field_of_view_shape'] == 'PROJECTIVE' and len(down.fov.data.vertices) == 5
 sensor_points = np.column_stack([down.frame.points[axis] for axis in 'xyz'])
 assert radar.simulation.fov_mask(sensor_points, down.sampler.field_of_view, 'PROJECTIVE').all()
+# The radar shares the camera's optical centre: its display housing hides instead of filling the image.
+view_api = importlib.import_module(MODULE + '.radar_x100.view')
+assert view_api.housing(down.mount).hide_viewport and view_api.housing(down.mount).hide_render
+from mathutils import Vector
+depsgraph = bpy.context.evaluated_depsgraph_get()
+ray = (camera.matrix_world.to_3x3() @ Vector((0, 0, -1))).normalized()
+hit = scene.ray_cast(depsgraph, camera.matrix_world.translation + ray * camera.data.clip_start, ray)
+assert not hit[0] or hit[4].get('wfrl_x100_role') != 'physical', hit[4]
 assert tuple(down.applied_config['field_of_view']) == tuple(scene.wfrl_x100_field_of_view)
 assert down.frame.source_kind == 'GEOMETRY_SIMULATION' and len(down.frame.points) > 0
 assert down.mount is original_mount and down.frame.time.source_time_s == clock[2]
@@ -120,6 +128,7 @@ np.testing.assert_allclose(scene.wfrl_x100_field_of_view, (radar.schema.PROFILE[
 np.testing.assert_allclose(restored.fov.data['wfrl_x100_field_of_view_deg'], tuple(scene.wfrl_x100_field_of_view))
 assert restored.sampler.field_of_view_shape == scene.wfrl_x100_field_of_view_shape == 'ANGULAR'
 assert restored.fov.data['wfrl_x100_field_of_view_shape'] == 'ANGULAR'
+assert not view_api.housing(restored.mount).hide_viewport and not view_api.housing(restored.mount).hide_render
 assert len([m for m in bpy.data.meshes if m.name.startswith('WFRL.X100.FOV')]) == 1
 
 # The rear hoisting hatch sits below the nacelle tail, 2 m to the side, aimed at the 6 o'clock tip.
