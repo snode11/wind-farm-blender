@@ -133,6 +133,8 @@ class WFRL_PT_ManualControl(bpy.types.Panel):
             last = scene.get('wfrl_manual_last_video')
             if last:
                 body.label(text='已导出 ' + os.path.basename(last), icon='CHECKMARK')
+            if scene.get('wfrl_manual_error'):
+                body.label(text=scene['wfrl_manual_error'], icon='ERROR')
         header, body = layout.panel('wfrl_manual_live_stream', default_closed=False)
         header.label(text='现场视频')
         if body:

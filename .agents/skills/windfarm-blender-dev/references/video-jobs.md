@@ -22,7 +22,7 @@
 
 - `wfrl.manual_down_video` 与 `wfrl.manual_triple_down_video` 在手动场景本身渲染：导出前暂停全部风机，按导出开始时的叶轮角度、RPM、起点／设定桨距与变桨速度生成逐帧计划，`apply_frame()` 直接写入转子与叶片变换，不改动机组属性；完成或失败后 `_finish()` 恢复场景、视图、实际桨距与输出设置并删除临时目录。
 - 视口方式（`VIEWPORT_MATERIAL`／`VIEWPORT_SOLID`）需要窗口中的 3D 视图并同步阻塞；找到 FFmpeg 时离屏绘制并经管道交给 libx264，否则走 Blender 内置编码。`SCENE`（EEVEE）与 `WORKBENCH` 使用原生渲染，窗口中可取消，后台同步渲染。三路导出只支持视口方式且要求 FFmpeg。
-- MP4 先写入临时目录，再以 `shutil.move` 移到目标路径并写出同名逐帧 JSON（三路导出只在中心路旁写 JSON）；不做排他提交或成片解码校验。
+- MP4 先写入临时目录，再以 `shutil.move` 移到目标路径并写出同名逐帧 JSON（三路导出只在中心路旁写 JSON）；不做排他提交或成片解码校验，同名目标直接覆盖。移动或写 JSON 出现 `OSError` 时删除本次已写出的 MP4／JSON（三路导出删除整组），临时目录总被清理，操作符报告错误。窗口中的 EEVEE 交互渲染在完成处理器中失败时，错误写入场景的 `wfrl_manual_error`，由 Down 相机面板与主页状态显示，下一次单路导出开始时清除。
 - 导出期间场景标记 `wfrl_manual_exporting`，`tick()` 与编号监听跳过该场景；视口结构运动与相机抖动暂停，导出按自身时钟重新生成。
 
 ## 现场视频分屏

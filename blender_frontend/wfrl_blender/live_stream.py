@@ -111,6 +111,8 @@ class LiveStream:
                 self.state, self.message = 'ERROR', f'无法启动 FFmpeg：{exc}'
                 return
             self.process = process
+            # Errors describe this connection attempt only; a reconnect must not report an old one.
+            self.errors.clear()
             threading.Thread(target=self._drain, args=(process.stderr,), daemon=True).start()
             window = deque(maxlen=30)
             while not self.stopping.is_set():

@@ -902,12 +902,19 @@ def _finish(scene, *, completed):
             if not produced:
                 raise RuntimeError('未生成 MP4 文件')
             target = Path(job['target'])
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.move(str(produced[0]), str(target))
-            _shake_sidecar(job, job['sidecar'])
-            manual_dynamics.sidecar(job, job['sidecar'])
-            target.with_suffix('.json').write_text(
-                json.dumps(job['sidecar'], ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
+            sidecar_path = target.with_suffix('.json')
+            try:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.move(str(produced[0]), str(target))
+                _shake_sidecar(job, job['sidecar'])
+                manual_dynamics.sidecar(job, job['sidecar'])
+                sidecar_path.write_text(
+                    json.dumps(job['sidecar'], ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
+            except OSError as exc:
+                # An MP4 without its per-frame JSON is not a usable export.
+                for path in (target, sidecar_path):
+                    path.unlink(missing_ok=True)
+                raise RuntimeError(f'Down 视频写出失败：{exc}') from exc
             report = str(target)
     finally:
         shutil.rmtree(job['temp'], ignore_errors=True)
@@ -923,6 +930,8 @@ def _render_complete(scene, _unused=None):
             try:
                 _finish(scene, completed=True)
             except Exception as exc:
+                # No operator is waiting on an interactive render; the panels show this error.
+                scene['wfrl_manual_error'] = f'Down 视频导出失败：{exc}'
                 print('WFRL Down video export failed:', exc)
 
 
@@ -1171,17 +1180,25 @@ def export_triple_down_video(scene, turbine, filepaths, *, duration_s=10.0, fps=
         bpy.context.window_manager.progress_end()
     _EXPORT.pop(scene.as_pointer(), None)
     written = []
-    for src, target in zip(out_paths, targets):
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.move(src, str(target))
-        written.append(str(target))
-    _shake_sidecar(job, sidecar)
-    manual_dynamics.sidecar(job, sidecar)
-    targets[0].with_suffix('.json').write_text(json.dumps(sidecar, ensure_ascii=False, indent=1) + '\n',
-                                               encoding='utf-8')
-    shutil.rmtree(temp, ignore_errors=True)
-    scene['wfrl_manual_last_video'] = written[0]
-    return tuple(written)
+    sidecar_path = targets[0].with_suffix('.json')
+    try:
+        for src, target in zip(out_paths, targets):
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(src, str(target))
+            written.append(target)
+        _shake_sidecar(job, sidecar)
+        manual_dynamics.sidecar(job, sidecar)
+        sidecar_path.write_text(json.dumps(sidecar, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
+    except OSError as exc:
+        scene['wfrl_manual_last_video'] = ''
+        # A partial rig is not a usable result: remove what this export already moved into place.
+        for path in (*written, sidecar_path):
+            path.unlink(missing_ok=True)
+        raise RuntimeError(f'三路视频写出失败：{exc}') from exc
+    finally:
+        shutil.rmtree(temp, ignore_errors=True)
+    scene['wfrl_manual_last_video'] = str(written[0])
+    return tuple(str(path) for path in written)
 
 
 def _view_area(context):
@@ -1260,6 +1277,7 @@ def export_down_video(scene, turbine, filepath, *, duration_s=10.0, fps=25, fram
     manual_control.pause_scene(scene)
     camera = ensure_down_camera(scene, turbine)
     plan = _plan(scene, fps, frames, from_start)
+    scene['wfrl_manual_error'] = ''
     temp = tempfile.mkdtemp(prefix='wfrl_down_')
     saved = _snapshot(scene)
     job = dict(scene=scene, plan=plan, saved=saved, temp=temp, target=str(target), labels=labels, view=None)
@@ -1434,7 +1452,7 @@ class WFRL_OT_ManualDownVideo(bpy.types.Operator, ExportHelper):
                 context.scene, self.turbine, self.filepath, frames=self._frames(), fps=self.fps,
                 engine=self.engine, from_start=self.from_start, size=VIDEO_SIZES[self.resolution],
                 samples=self.eevee_samples, labels=self.labels, dynamics=self.dynamics, context=context)
-        except (ValueError, RuntimeError, ReferenceError, AttributeError) as exc:
+        except (ValueError, RuntimeError, ReferenceError, AttributeError, OSError) as exc:
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}
         self.report({'INFO'}, f'已写出 {written}' if written else '正在渲染 Down 视频，完成后写出 MP4 与 JSON')
@@ -1528,7 +1546,7 @@ class WFRL_OT_ManualTripleDownVideo(bpy.types.Operator, ExportHelper):
                 context.scene, self.turbine, [center, left, right], frames=self._frames(), fps=self.fps,
                 engine=self.engine, from_start=self.from_start, size=VIDEO_SIZES[self.resolution],
                 labels=self.labels, dynamics=self.dynamics, context=context)
-        except (ValueError, RuntimeError, ReferenceError, AttributeError) as exc:
+        except (ValueError, RuntimeError, ReferenceError, AttributeError, OSError) as exc:
             self.report({'ERROR'}, str(exc))
             return {'CANCELLED'}
         self.report({'INFO'}, f'已写出三路视频：{os.path.basename(written[0])} / {os.path.basename(written[1])} / {os.path.basename(written[2])}')
