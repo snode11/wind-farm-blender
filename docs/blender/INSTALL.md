@@ -1,12 +1,12 @@
 # NREL / WFRL Blender 安装
 
-工作区扩展 manifest 版本为 **0.5.0**；公开发布源码使用 [`v0.5.0` 标签](https://github.com/snode11/wind-farm-blender/tree/v0.5.0)，公开扩展附件为 **0.5.0**。工作区构建按实际检出提交、未提交改动与产物 inventory 识别；本机日常安装为 **0.3.42.8 公开 ZIP 载荷**，实际身份见[安装记录](../../publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
+工作区扩展 manifest 版本为 **0.5.0**；公开发布源码使用 [`v0.5.0` 标签](https://github.com/snode11/wind-farm-blender/tree/v0.5.0)，公开扩展附件为 **0.5.0**。工作区构建按实际检出提交、未提交改动与产物 inventory 识别；本机日常安装为 **0.5.0 公开 ZIP 载荷**，实际身份见[安装记录](../../publication/daily-installation.json)。本文的当前源码行为与已发布附件、已安装扩展分别识别。
 
 适用于 Blender **5.2+** 的 NREL 公开扩展 **0.5.0**，包含 NREL／rootkink 叶片外形选择、T1/T2/T3 Down、独立风机手动控制、完整风机几何／同源纹理、精细支撑结构、三相机默认复位、柔性回放、六类合成缺陷、双束／TLS。GW184 **0.4.0** 使用[独立包](GW184三相机与缺陷编辑器.md)。
 
 日常安装的版本、实际模块来源、启用状态、配置保护与验证范围以[安装记录](../../publication/daily-installation.json)为准；各载荷的 GPU、窗口、输入和性能结论分别识别。
 
-日常安装的归档摘要与文件数量按[安装身份](../../publication/daily-installation.json)核对；本地保留匹配的正式安装 ZIP、inventory 和 SHA-256，日常安装的归档摘要与 0.3.42.8 公开 ZIP 一致。必要核对记录由安装身份索引；中间场景、图片、重复构建、临时 profile 和回退副本不作为运行依赖保留。
+日常安装的归档摘要与文件数量按[安装身份](../../publication/daily-installation.json)核对；本地保留匹配的正式安装 ZIP、inventory 和 SHA-256，日常安装的归档摘要与 0.5.0 公开 ZIP 一致。必要核对记录由安装身份索引；中间场景、图片、重复构建、临时 profile 和回退副本不作为运行依赖保留。
 
 扩展通过 **N → X100** 提供四个互斥安装预设、几何与工程检测仿真、安装报告导入、点云窗口及记录。当前本机安装的版本、模块来源与配置保留按安装记录核对。操作见[X100 雷达](X100雷达.md)。
 

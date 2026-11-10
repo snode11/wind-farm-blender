@@ -1,17 +1,17 @@
 {
   "schema": "wfrl.daily-installation.v1",
   "status": "PASS",
-  "version": "0.3.42.8",
-  "extension_version": "0.3.42+8",
+  "version": "0.5.0",
+  "extension_version": "0.5.0",
   "installation_kind": "PUBLIC_RELEASE_ARCHIVE",
   "module": "bl_ext.user_default.wfrl_blender",
   "module_file": "/Users/eason/Library/Application Support/Blender/5.2/extensions/user_default/wfrl_blender/__init__.py",
   "blender": "5.2.1 LTS",
   "platform": "macOS",
-  "source_archive": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.3.42.8/package/wfrl_blender-0.3.42+8.zip",
-  "archive_sha256": "38ce78b6b46723f204c01b64aca4800a89d234a695f4331ca405adf863095641",
-  "installed_files_checked": 249,
-  "loaded_module_files_checked": 157,
+  "source_archive": "/Users/eason/Desktop/wfcrl/wind farm RL/publication/blender-0.5.0/package/wfrl_blender-0.5.0.zip",
+  "archive_sha256": "db4cf8e06bfda5e454989d411e37f47bf7e6cf1d17027a40981c3795dc12241a",
+  "installed_files_checked": 239,
+  "loaded_module_files_checked": 149,
   "file_mismatches": 0,
   "enablement_persisted": true,
   "startup_file_preserved": true,
@@ -25,12 +25,12 @@
   "native_window_status": "NOT_RUN",
   "physical_input_status": "NOT_RUN",
   "evidence": {
-    "installation": "publication/blender-0.3.42.8/installation.json"
+    "installation": "publication/blender-0.5.0/installation.json"
   },
   "backups": {
-    "previous_extension_and_config": "/Users/eason/Library/Application Support/WFRL/Backups/pre-install-0.3.42.8.u6x03ghl"
+    "previous_extension_and_config": "/Users/eason/Library/Application Support/WFRL/Backups/pre-install-0.5.0.ead88r_b"
   },
-  "limits": "The installed files match the local archive used for the 0.3.42.8 release. The installation check covers saved enablement, module origins in a fresh Blender background process, and matching SHA-256 hashes for six configuration files, including the startup file and user preferences.",
+  "limits": "The installed files match the local archive used for the 0.5.0 release. Verification covers saved enablement, module origins in a fresh Blender background process, and unchanged SHA-256 hashes for 6 configuration files, including startup and preferences.",
   "artifact_availability": {
     "final_archive": true,
     "result_records": true,
@@ -45,5 +45,5 @@
   "existing_processes_preserved": [],
   "restart_required_for_existing_processes": false,
   "local_source_archive_available": true,
-  "source_archive_download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.3.42.8/wfrl_blender-0.3.42%2B8.zip"
+  "source_archive_download_url": "https://github.com/snode11/wind-farm-blender/releases/download/v0.5.0/wfrl_blender-0.5.0.zip"
 }
