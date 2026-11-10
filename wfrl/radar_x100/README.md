@@ -2,7 +2,7 @@
 
 本包提供独立于 Blender 和训练 Bridge 的 `x100-frame.v1` 合同、严格 PLY 读取器、显式索引记录／回放、面积材料采样、几何观测、未标定工程检测模型、同帧分析数据类型／数学基准、有限安装排序、叶片拟合／因果估计和本地采集通道。依赖 Python 标准库和 NumPy。厂家 UDP 解码、SDK、航迹字段和实机标定尚未接入。
 
-本文描述工作区源码接口；面积材料采样、安装搜索与叶片估计由 0.3.42.8 扩展及配套源码提供，日常安装为同一 0.3.42.8 公开载荷。公开附件与日常安装的行为及验证范围按[载荷身份](../../docs/blender/发布状态与验证范围.md)核对。
+本文描述 X100 核心接口。0.5.0 扩展提供面积采样、几何与工程检测仿真、净空估计、安装报告导入和叶片估计。离线搜索和评价通过配套源码运行。公开包与日常安装的身份及验证范围见[发布状态](../../docs/blender/发布状态与验证范围.md)。
 
 ## 帧与来源
 
@@ -72,9 +72,9 @@ Blender 工作区源码核对来源 Scene、材料对象与网格身份、关键
 
 ## 工程检测模型
 
-[simulation.py](simulation.py) 的 `simulate_detections()` 在同源几何、硬件角域／量程和首交遮挡之后调用 [detection.py](detection.py) 的 `generate_detections()`，输出 `ENGINEERING_SIMULATION / DETECTIONS`。模型身份为 `x100-incoherent-detection.v2`，`DetectionConfig()` 默认 `calibration_status=UNCALIBRATED`；[calibration.py](calibration.py) 的 `calibrated_config()` 给出按实测无人机 PLY 拟合的 `USER_CALIBRATED` 配置，Blender 工作区的 DETECTIONS 使用该配置与已应用视场（拟合量与未拟合项见[检测校准](../../docs/blender/X100雷达.md#检测校准)）。Blender 工作区的 `wfrl_x100_observation_mode` 提供 `GEOMETRY`（默认）与 `DETECTIONS`，点击“应用配置”才切换生产路径。前者显示视场／遮挡筛选后的材料表面点，后者显示经过功率、噪声、分辨率聚类和门限的工程检测点；操作与显示见[观测模式](../../docs/blender/X100雷达.md#观测模式工作区源码)。两者都不是设备实测。
+[simulation.py](simulation.py) 的 `simulate_detections()` 在同源几何、硬件角域／量程和首交遮挡之后调用 [detection.py](detection.py) 的 `generate_detections()`，输出 `ENGINEERING_SIMULATION / DETECTIONS`。模型身份为 `x100-incoherent-detection.v2`，`DetectionConfig()` 默认 `calibration_status=UNCALIBRATED`；[calibration.py](calibration.py) 的 `calibrated_config()` 给出按实测无人机 PLY 拟合的 `USER_CALIBRATED` 配置，Blender 工作区的 DETECTIONS 使用该配置与已应用视场（拟合量与未拟合项见[检测校准](../../docs/blender/X100雷达.md#检测校准)）。Blender 工作区的 `wfrl_x100_observation_mode` 提供 `GEOMETRY`（默认）与 `DETECTIONS`，点击“应用配置”才切换生产路径。前者显示视场／遮挡筛选后的材料表面点，后者显示经过功率、噪声、分辨率聚类和门限的工程检测点；操作与显示见[观测模式](../../docs/blender/X100雷达.md#观测模式)。两者都不是设备实测。
 
-**交付范围：**公开 0.3.42.8 扩展按 [扩展构建清单](../../scripts/blender/build_extension.py) 的 `RADAR_MODULES` 包含 `detection.py` 与 `clearance.py`，提供 DETECTIONS 工程检测链与净空估计。本机日常安装为同一 0.3.42.8 公开载荷，已包含这两个模块；其安装记录只核对文件身份、新进程模块来源、持久启用与配置保留，未运行这两条功能路径。隔离安装验证工具在安装后的扩展上运行 DETECTIONS 与净空检查；当前发布未运行这些检查，验证范围按[发布记录](../../publication/blender-0.3.42.8/verification.json)识别。
+0.5.0 扩展按[构建清单](../../scripts/blender/build_extension.py)打包 `calibration.py`、`detection.py` 和 `clearance.py`，提供 DETECTIONS 工程检测与净空估计。隔离安装验证工具在目标扩展内运行这两条路径；实际发布和安装的验证状态见[发布状态](../../docs/blender/发布状态与验证范围.md#软件验证的适用对象)。
 
 模型假设如下：
 
